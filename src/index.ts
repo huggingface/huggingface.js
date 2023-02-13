@@ -1,2 +1,2 @@
-export * as HfHub from "./hub";
+export * from "./hub";
 export * from "./types/repo";

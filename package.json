@@ -1,5 +1,5 @@
 {
-	"name": "huggingface.js",
+	"name": "@huggingface/hub",
 	"version": "1.0.0",
 	"description": "",
 	"main": "src/index.ts",
