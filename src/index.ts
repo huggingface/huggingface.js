@@ -1,2 +1,2 @@
-export * from "./hub";
-export * from "./types/repo";
+export * from "./lib/commit";
+export * from "./types";

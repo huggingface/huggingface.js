@@ -1,9 +1,14 @@
 import type { JsonObject } from "type-fest";
 
-export async function createApiError(response: Response): Promise<never> {
-	const error = new ApiError(response.statusCode, response.headers.get("X-Request-Id"));
+export async function createApiError(
+	response: Response,
+	opts?: { requestId?: string; message?: string }
+): Promise<never> {
+	const error = new ApiError(response.url, response.status, response.headers.get("X-Request-Id") ?? opts?.requestId);
 
-	error.message = "Api error with status " + error.statusCode + ". Request ID: " + error.requestId;
+	error.message = `Api error with status ${error.statusCode}.${opts?.message ? ` ${opts.message}.` : ""} Request ID: ${
+		error.requestId
+	}`;
 
 	if (response.headers.get("Content-Type")?.startsWith("application/json")) {
 		const json = await response.json();
@@ -18,13 +23,15 @@ export async function createApiError(response: Response): Promise<never> {
 
 export class ApiError extends Error {
 	statusCode: number;
+	url:        string;
 	requestId?: string;
 	data?:      JsonObject;
 
-	constructor(statusCode: number, requestId?: string) {
-		super();
+	constructor(url: string, statusCode: number, requestId?: string, message?: string) {
+		super(message);
 
 		this.statusCode = statusCode;
 		this.requestId = requestId;
+		this.url = url;
 	}
 }
