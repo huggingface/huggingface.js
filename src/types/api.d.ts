@@ -169,6 +169,17 @@ export interface ApiCommitFile {
 	encoding?: "utf-8" | "base64";
 }
 
+export type ApiCommitOperation = {
+	key: "file",
+	value: ApiCommitFile
+} | {
+	key: "lfsFile",
+	value: ApiCommitLfsFile
+} | {
+	key: "deletedFile",
+	value: ApiCommitDeletedEntry
+}
+
 export type ApiCreateRepoPayload = {
 	name:                string;
 	canonical?:          boolean;

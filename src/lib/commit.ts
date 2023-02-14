@@ -9,7 +9,8 @@ import type {
 	ApiCommitHeader,
 	ApiLfsBatchRequest,
 	ApiLfsBatchResponse,
-	ApiLfsCompleteMultipartRequest
+	ApiLfsCompleteMultipartRequest,
+	ApiCommitOperation
 } from "../types/api";
 import type { Credentials, RepoId } from "../types/repo";
 import { base64FromBytes, chunk, promisesQueue, promisesQueueStreaming, sha256 } from "../utils";
@@ -23,7 +24,7 @@ export type CommitDeletedEntry = {
 	path:      string;
 };
 
-type ContentSource = ArrayBuffer; // Todo: support web streams
+type ContentSource = ArrayBuffer | Blob; // Todo: support web streams
 
 export type CommitFile = {
 	operation: "addOrUpdate";
@@ -73,6 +74,22 @@ function isFileOperation(op: CommitOperation): op is CommitFile {
 	return op.operation === "addOrUpdate";
 }
 
+async function toString(source: ContentSource) {
+	return source instanceof Blob ? await source.text() : new TextDecoder("utf-8").decode(source)
+}
+
+function byteLength(source: ContentSource) {
+	return source instanceof Blob ? source.size : source.byteLength
+}
+
+async function sample(source: ContentSource) {
+	return source instanceof Blob ? await source.slice(0, 512).arrayBuffer() : source.slice(0, 512)
+}
+
+async function toArrayBuffer(source: ContentSource): Promise<ArrayBuffer> {
+	return source instanceof Blob ? await source.arrayBuffer() : source
+}
+
 /**
  * Internal function for now, used by commit.
  *
@@ -89,12 +106,12 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 
 	for (const operations of chunk(params.operations.filter(isFileOperation), 100)) {
 		const payload: ApiPreuploadRequest = {
-			gitAttributes: gitAttributes && new TextDecoder("utf-8").decode(gitAttributes),
-			files:         operations.map((operation) => ({
+			gitAttributes: gitAttributes && await toString(gitAttributes),
+			files:         await Promise.all(operations.map(async (operation) => ({
 				path:   operation.path,
-				size:   operation.content.byteLength,
-				sample: base64FromBytes(new Uint8Array(operation.content.slice(0, 512)))
-			}))
+				size:   byteLength(operation.content),
+				sample: base64FromBytes(new Uint8Array(await sample(operation.content)))
+			})))
 		};
 
 		const res = await fetch(
@@ -134,7 +151,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 
 		const shas = await promisesQueue(
 			operations.map((op) => async () => {
-				const sha = await sha256(op.content);
+				const sha = await sha256(await toArrayBuffer(op.content));
 				lfsShas.set(op.path, sha);
 				return sha;
 			}),
@@ -151,7 +168,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 			},
 			objects: operations.map((op, i) => ({
 				oid:  shas[i],
-				size: op.content.byteLength
+				size: byteLength(op.content)
 			}))
 		};
 
@@ -203,7 +220,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 					const completionUrl = obj.actions.upload.href;
 					const parts = Object.keys(header).filter((key) => /^[0-9]+$/.test(key));
 
-					if (parts.length !== Math.ceil(content.byteLength / chunkSize)) {
+					if (parts.length !== Math.ceil(byteLength(content) / chunkSize)) {
 						throw new Error("Invalid server response to upload large LFS file, wrong number of parts");
 					}
 
@@ -299,19 +316,19 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 						parentCommit: params.parentCommit
 					} satisfies ApiCommitHeader
 				},
-				...params.operations.map((operation) =>
+				...await Promise.all(params.operations.map((operation) =>
 					isFileOperation(operation) && lfsShas.has(operation.path)
 						? {
 								key:   "lfsFile",
 								value: {
 									path: operation.path,
 									algo: "sha256",
-									size: operation.content.byteLength,
+									size: byteLength(operation.content),
 									oid:  lfsShas.get(operation.path)!
 								} satisfies ApiCommitLfsFile
 						  }
 						: convertOperationToNdJson(operation)
-				)
+				)) satisfies ApiCommitOperation[]
 			]
 				.map((x) => JSON.stringify(x))
 				.join("\n")
@@ -343,16 +360,16 @@ export async function commit(params: CommitParams): Promise<CommitOutput> {
 	return res.value;
 }
 
-function convertOperationToNdJson(
+async function convertOperationToNdJson(
 	operation: CommitOperation
-): { key: "file"; value: ApiCommitFile } | { key: "deletedFile"; value: ApiCommitDeletedEntry } {
+): Promise<ApiCommitOperation> {
 	switch (operation.operation) {
 		case "addOrUpdate": {
 			// todo: handle LFS
 			return {
 				key:   "file",
 				value: {
-					content:  base64FromBytes(new Uint8Array(operation.content)),
+					content:  base64FromBytes(new Uint8Array(await toArrayBuffer(operation.content))),
 					path:     operation.path,
 					encoding: "base64"
 				}

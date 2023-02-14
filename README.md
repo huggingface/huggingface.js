@@ -26,8 +26,9 @@ await commit({
 		{
 			operation: "addOrUpdate",
 			path: "file.txt",
-			// or new TextEncoder().encode("Hello World") on browser
-			content: Buffer.from("Hello world"),
+			// or new TextEncoder().encode("Hello World")
+			// or Buffer.from("Hello world")
+			content: new Blob(["Hello World"]),
 		},
 	],
 });
