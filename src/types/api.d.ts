@@ -1,3 +1,5 @@
+import type { RepoType, SpaceSdk, SpaceHardwareFlavor } from "./repo";
+import type { SetRequired } from "type-fest";
 export interface ApiLfsBatchRequest {
 	/// github.com/git-lfs/git-lfs/blob/master/docs/api/batch.md
 	operation:  "download" | "upload";
@@ -166,3 +168,25 @@ export interface ApiCommitFile {
 	oldPath?:  string;
 	encoding?: "utf-8" | "base64";
 }
+
+export type ApiCreateRepoPayload = {
+	name:                string;
+	canonical?:          boolean;
+	license?:            string;
+	template?:           string;
+	organization?:       string;
+	/** @default false */
+	private?:            boolean;
+	lfsmultipartthresh?: number;
+	files?:              SetRequired<ApiCommitFile, "content">[];
+} & (
+	| {
+			type: Exclude<RepoType, "space">;
+	  }
+	| {
+			type:        "space";
+			hardware?:   SpaceHardwareFlavor;
+			sdk:         SpaceSdk;
+			sdkVersion?: string;
+	  }
+);

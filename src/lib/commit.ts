@@ -1,3 +1,4 @@
+import { HUB_API_URL, HUB_URL } from "../consts";
 import { ApiError, createApiError } from "../error";
 import type {
 	ApiCommitDeletedEntry,
@@ -13,8 +14,6 @@ import type {
 import type { Credentials, RepoId } from "../types/repo";
 import { base64FromBytes, chunk, promisesQueue, promisesQueueStreaming, sha256 } from "../utils";
 
-const HUB_URL = "https://huggingface.co";
-const HUB_API_URL = `${HUB_URL}/api`;
 const CONCURRENT_SHAS = 5;
 const CONCURRENT_LFS_UPLOADS = 5;
 const MULTIPART_PARALLEL_UPLOAD = 5;
