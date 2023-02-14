@@ -7,6 +7,7 @@ module.exports = {
 		browser: true,
 		amd: true,
 		node: true,
+		extraFileExtensions: [".cjs"],
 	},
 	rules: {
 		"@typescript-eslint/no-empty-function": "off",

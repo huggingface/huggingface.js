@@ -35,6 +35,6 @@ export async function createRepo(params: {
 	});
 
 	if (!res.ok) {
-		throw createApiError(res);
+		throw await createApiError(res);
 	}
 }

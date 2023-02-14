@@ -112,7 +112,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 		);
 
 		if (!res.ok) {
-			throw createApiError(res);
+			throw await createApiError(res);
 		}
 
 		const json: ApiPreuploadResponse = await res.json();
@@ -158,7 +158,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 		const res = await fetch(
 			`${HUB_URL}/${params.repo.type === "model" ? "" : params.repo.type + "s/"}${
 				params.repo.name
-			}git/info/lfs/objects/batch`,
+			}.git/info/lfs/objects/batch`,
 			{
 				method:  "POST",
 				headers: {
@@ -171,7 +171,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 		);
 
 		if (!res.ok) {
-			throw createApiError(res);
+			throw await createApiError(res);
 		}
 
 		const json: ApiLfsBatchResponse = await res.json();
@@ -224,7 +224,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 							});
 
 							if (!res.ok) {
-								throw createApiError(res, {
+								throw await createApiError(res, {
 									requestId: batchRequestId,
 									message:   `Error while uploading part ${part} of ${
 										operations[shas.indexOf(obj.oid)].path
@@ -253,7 +253,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 					});
 
 					if (!res.ok) {
-						throw createApiError(res, {
+						throw await createApiError(res, {
 							requestId: batchRequestId,
 							message:   `Error completing multipart upload of ${operations[shas.indexOf(obj.oid)].path} to LFS storage`
 						});
@@ -268,7 +268,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 					});
 
 					if (!res.ok) {
-						throw createApiError(res, {
+						throw await createApiError(res, {
 							requestId: batchRequestId,
 							message:   `Error while uploading ${operations[shas.indexOf(obj.oid)].path} to LFS storage`
 						});
@@ -319,7 +319,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 	);
 
 	if (!res.ok) {
-		throw createApiError(res);
+		throw await createApiError(res);
 	}
 
 	const json = await res.json();

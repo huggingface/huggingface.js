@@ -8,7 +8,7 @@ export async function createApiError(
 
 	error.message = `Api error with status ${error.statusCode}.${opts?.message ? ` ${opts.message}.` : ""} Request ID: ${
 		error.requestId
-	}`;
+	}, url: ${error.url}`;
 
 	if (response.headers.get("Content-Type")?.startsWith("application/json")) {
 		const json = await response.json();

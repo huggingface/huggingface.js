@@ -19,6 +19,6 @@ export async function deleteRepo(params: { repo: RepoId; credentials: Credential
 	});
 
 	if (!res.ok) {
-		throw createApiError(res);
+		throw await createApiError(res);
 	}
 }

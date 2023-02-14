@@ -20,6 +20,9 @@ describe("commit", () => {
 			license: "mit"
 		});
 
+    const readme1 = await fetch(`${HUB_URL}/${repoName}/resolve/main/README.md`);
+    assert.strictEqual(readme1.status, 200);
+
 		try {
 			await commit({
 				repo: {
@@ -39,7 +42,7 @@ describe("commit", () => {
 					{
 						operation: "addOrUpdate",
 						content:   Buffer.from("This is a LFS file"),
-						path:      "test.lfs.text"
+						path:      "test.lfs.txt"
 					},
 					{
 						operation: "delete",
@@ -52,24 +55,23 @@ describe("commit", () => {
 			assert.strictEqual(fileContent.status, 200);
 			assert.strictEqual(await fileContent.text(), "This is me");
 
-			const lfsFileContent = await fetch(`${HUB_URL}/${repoName}/resolve/main/test.txt`);
+			const lfsFileContent = await fetch(`${HUB_URL}/${repoName}/resolve/main/test.lfs.txt`);
 			assert.strictEqual(lfsFileContent.status, 200);
 			assert.strictEqual(await lfsFileContent.text(), "This is a LFS file");
 
-			const lfsFilePointer = await fetch(`${HUB_URL}/${repoName}/raw/main/test.txt`);
+			const lfsFilePointer = await fetch(`${HUB_URL}/${repoName}/raw/main/test.lfs.txt`);
 			assert.strictEqual(lfsFilePointer.status, 200);
 			assert.strictEqual(
-				await lfsFilePointer.text(),
+				(await lfsFilePointer.text()).trim(),
 				`
 version https://git-lfs.github.com/spec/v1
-oid sha256:ea201fabe466ef7182f1f687fb5be4b62a73d3a78883f11264ff7f682cdb54bf
-size 438064459
+oid sha256:7ee757a47707069c6016b2751fdc7cbe4ed151530d9039cf99f6f6921509aa05
+size 18
         `.trim()
 			);
 
-			const readme = await fetch(`${HUB_URL}/${repoName}/resolve/main/test.txt`);
-
-			assert.strictEqual(readme.status, 404);
+			const readme2 = await fetch(`${HUB_URL}/${repoName}/resolve/main/README.md`);
+			assert.strictEqual(readme2.status, 404);
 		} finally {
 			await deleteRepo({
 				repo: {
