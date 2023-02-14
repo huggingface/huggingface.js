@@ -48,7 +48,7 @@ export interface CommitParams {
 	repo:           RepoId;
 	operations:     CommitOperation[];
 	credentials:    Credentials;
-	/** Default: "main" */
+	/** @default "main" */
 	branch?:        string;
 	/**
 	 * Parent commit. Optional
