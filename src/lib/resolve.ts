@@ -11,9 +11,9 @@ export async function resolve(params: {
 	path:         string;
 	revision?:    string;
 }): Promise<Response | null> {
-	const url = `${HUB_URL}/${params.repo.type === "model" ? "" : `${params.repo.type}s/`}resolve/${encodeURIComponent(
-		params.revision ?? "main"
-	)}/${params.path}`;
+	const url = `${HUB_URL}/${params.repo.type === "model" ? "" : `${params.repo.type}s/`}${
+		params.repo.name
+	}/resolve/${encodeURIComponent(params.revision ?? "main")}/${params.path}`;
 
 	const resp = await fetch(url, {
 		headers: params.credentials
