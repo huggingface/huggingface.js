@@ -22,16 +22,16 @@ export async function createRepo(params: {
 			...(params.repo.type === "space"
 				? {
 						type: "space",
-						sdk:  "static"
+						sdk:  "static",
 				  }
 				: {
-						type: params.repo.type
-				  })
+						type: params.repo.type,
+				  }),
 		} satisfies ApiCreateRepoPayload),
 		headers: {
 			Authorization:  `Bearer ${params.credentials.accessToken}`,
-			"Content-Type": "application/json"
-		}
+			"Content-Type": "application/json",
+		},
 	});
 
 	if (!res.ok) {

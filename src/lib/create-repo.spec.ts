@@ -9,20 +9,20 @@ describe("create-repo", () => {
 
 		await createRepo({
 			credentials: {
-				accessToken: TEST_ACCESS_TOKEN
+				accessToken: TEST_ACCESS_TOKEN,
 			},
 			repo: {
 				name: repoName,
-				type: "model"
-			}
+				type: "model",
+			},
 		});
 
 		await deleteRepo({
 			repo: {
 				name: repoName,
-				type: "model"
+				type: "model",
 			},
-			credentials: { accessToken: TEST_ACCESS_TOKEN }
+			credentials: { accessToken: TEST_ACCESS_TOKEN },
 		});
 	});
 });

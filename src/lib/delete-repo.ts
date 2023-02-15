@@ -10,12 +10,12 @@ export async function deleteRepo(params: { repo: RepoId; credentials: Credential
 		body:   JSON.stringify({
 			name:         repoName,
 			organization: namespace,
-			type:         params.repo.type
+			type:         params.repo.type,
 		}),
 		headers: {
 			Authorization:  `Bearer ${params.credentials.accessToken}`,
-			"Content-Type": "application/json"
-		}
+			"Content-Type": "application/json",
+		},
 	});
 
 	if (!res.ok) {

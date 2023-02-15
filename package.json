@@ -4,6 +4,7 @@
 	"description": "",
 	"main": "src/index.ts",
 	"scripts": {
+		"format": "prettier --write . && eslint --quiet --fix --ext .cjs,.ts .",
 		"test": "TS_NODE_COMPILER_OPTIONS={\\\"module\\\":\\\"commonjs\\\"} NODE_ENV=test mocha --recursive --exit --unhandled-rejections=strict -r ts-node/register src/lib/**/*.spec.ts --timeout 10000"
 	},
 	"keywords": [],
