@@ -1,8 +1,11 @@
 # hub.js
 
+🚧 Experimental, the module is being built, API will break! 🚧
+
 Official utilities to use the Hugging Face hub API
 
 ```
+# ⬇️ This is a lie until we release v1
 npm add @huggingface/hub
 ```
 
