@@ -1,6 +1,19 @@
-name: Node CI
+name: Hub - Test
+on:
+  push:
+    paths:
+      - ".github/workflows/hub-test.yml"
+      - "packages/hub/**"
+    branches:
+      - main
+  pull_request:
+    paths:
+      - ".github/workflows/hub-test.yml"
+      - "packages/hub/**"
 
-on: [push]
+defaults:
+  run:
+    working-directory: packages/hub
 
 jobs:
   test:

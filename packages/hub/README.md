@@ -1,11 +1,10 @@
-# hub.js
+# @huggingface/hub
 
 🚧 Experimental, the module is being built, API will break! 🚧
 
 Official utilities to use the Hugging Face hub API
 
 ```
-# ⬇️ This is a lie until we release v1
 npm add @huggingface/hub
 ```
 
@@ -35,6 +34,9 @@ await commit({
 		},
 	],
 });
+
+// No need for credentials to download public files
+await (await downloadFile({ repo, path: "README.md" })).text();
 
 await deleteRepo({ repo, credentials });
 ```
