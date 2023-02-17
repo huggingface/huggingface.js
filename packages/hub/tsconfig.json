@@ -9,7 +9,9 @@
 		"strict": true,
 		"noImplicitAny": true,
 		"strictNullChecks": true,
-		"skipLibCheck": true
+		"skipLibCheck": true,
+		"outDir": "./dist"
 	},
-	"include": ["src/**/*.ts", "index.ts"]
+	"include": ["src/**/*.ts", "index.ts"],
+	"exclude": ["dist", "src/**/*.spec.ts"]
 }

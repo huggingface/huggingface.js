@@ -1,14 +1,29 @@
 {
 	"name": "@huggingface/hub",
 	"version": "0.0.1",
-	"description": "",
-	"main": "index.ts",
+	"description": "Utilities to interact with the Hugging Face hub",
+	"repository": "https://github.com/huggingface/huggingface.js.git",
+	"publishConfig": {
+		"access": "public"
+	},
+	"main": "dist/index.js",
+	"types": "index.ts",
+	"source": "index.ts",
 	"scripts": {
 		"format": "prettier --write . && eslint --quiet --fix --ext .cjs,.ts .",
+		"prepublishOnly": "npm run build",
+		"build": "npm run clean && tsc",
+		"clean": "rm -Rf dist",
 		"test": "TS_NODE_COMPILER_OPTIONS={\\\"module\\\":\\\"commonjs\\\"} NODE_ENV=test mocha --recursive --exit --unhandled-rejections=strict -r ts-node/register src/lib/**/*.spec.ts --timeout 10000"
 	},
+	"files": [
+		"src",
+		"dist",
+		"index.ts",
+		"tsconfig.json"
+	],
 	"keywords": [],
-	"author": "",
+	"author": "Hugging Face",
 	"license": "MIT",
 	"devDependencies": {
 		"@types/mocha": "^10.0.1",
