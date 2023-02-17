@@ -29,6 +29,7 @@ jobs:
       - run: git config --global user.name machineuser
       - run: git config --global user.email tech@huggingface.co
       - run: yarn config set version-git-message "🔖 @hugginface/hub v%s"
+      - run: yarn config set version-tag-prefix "hub-v"
       - run: yarn version --${{ github.event.inputs.newversion }}
       - run: pnpm publish .
         env:
