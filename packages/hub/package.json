@@ -14,7 +14,7 @@
 		"prepublishOnly": "npm run build",
 		"build": "npm run clean && tsc",
 		"clean": "rm -Rf dist",
-		"test": "TS_NODE_COMPILER_OPTIONS={\\\"module\\\":\\\"commonjs\\\"} NODE_ENV=test mocha --recursive --exit --unhandled-rejections=strict -r ts-node/register src/lib/**/*.spec.ts --timeout 10000"
+		"test": "npm run build && cross-env NODE_ENV=test mocha --recursive --exit --unhandled-rejections=strict dist/src/lib/**/*.spec.js --timeout 10000"
 	},
 	"files": [
 		"src",
@@ -30,6 +30,7 @@
 		"@types/node": "^18.13.0",
 		"@typescript-eslint/eslint-plugin": "^5.51.0",
 		"@typescript-eslint/parser": "^5.51.0",
+		"cross-env": "^7.0.3",
 		"eslint": "^8.33.0",
 		"eslint-config-prettier": "^8.6.0",
 		"eslint-plugin-prettier": "^4.2.1",
