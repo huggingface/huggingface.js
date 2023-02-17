@@ -7,13 +7,19 @@ import type { Credentials, RepoId } from "../types";
  */
 export async function downloadFile(params: {
 	repo:         RepoId;
-	credentials?: Credentials;
 	path:         string;
+	/**
+	 * If true, will download the raw git file.
+	 *
+	 * For example, when calling on a file stored with Git LFS, the pointer file will be downloaded instead.
+	 */
+	raw?:         boolean;
 	revision?:    string;
+	credentials?: Credentials;
 }): Promise<Response | null> {
-	const url = `${HUB_URL}/${params.repo.type === "model" ? "" : `${params.repo.type}s/`}${
-		params.repo.name
-	}/resolve/${encodeURIComponent(params.revision ?? "main")}/${params.path}`;
+	const url = `${HUB_URL}/${params.repo.type === "model" ? "" : `${params.repo.type}s/`}${params.repo.name}/${
+		params.raw ? "raw" : "resolve"
+	}/${encodeURIComponent(params.revision ?? "main")}/${params.path}`;
 
 	const resp = await fetch(url, {
 		headers: params.credentials
