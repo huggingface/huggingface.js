@@ -5,7 +5,7 @@ import type { Credentials, RepoId } from "../types";
 /**
  * @returns null when the file doesn't exist
  */
-export async function resolve(params: {
+export async function downloadFile(params: {
 	repo:         RepoId;
 	credentials?: Credentials;
 	path:         string;

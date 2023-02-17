@@ -5,7 +5,7 @@ import type { RepoId } from "../types";
 import { commit } from "./commit";
 import { createRepo } from "./create-repo";
 import { deleteRepo } from "./delete-repo";
-import { resolve } from "./resolve";
+import { downloadFile } from "./download-file";
 
 describe("commit", () => {
 	it("should commit to a repo with buffers", async () => {
@@ -23,7 +23,7 @@ describe("commit", () => {
 			license: "mit",
 		});
 
-		const readme1 = await resolve({ repo, path: "README.md" });
+		const readme1 = await downloadFile({ repo, path: "README.md" });
 		assert.strictEqual(readme1?.status, 200);
 
 		try {
@@ -51,11 +51,11 @@ describe("commit", () => {
 				],
 			});
 
-			const fileContent = await resolve({ repo, path: "test.txt" });
+			const fileContent = await downloadFile({ repo, path: "test.txt" });
 			assert.strictEqual(fileContent?.status, 200);
 			assert.strictEqual(await fileContent?.text(), "This is me");
 
-			const lfsFileContent = await resolve({ repo, path: "test.lfs.txt" });
+			const lfsFileContent = await downloadFile({ repo, path: "test.lfs.txt" });
 			assert.strictEqual(lfsFileContent?.status, 200);
 			assert.strictEqual(await lfsFileContent?.text(), "This is a LFS file");
 
@@ -70,7 +70,7 @@ size 18
         `.trim()
 			);
 
-			const readme2 = await resolve({ repo, path: "README.md" });
+			const readme2 = await downloadFile({ repo, path: "README.md" });
 			assert.strictEqual(readme2, null);
 		} finally {
 			await deleteRepo({
@@ -98,7 +98,7 @@ size 18
 			license: "mit",
 		});
 
-		const readme1 = await resolve({ repo, path: "README.md" });
+		const readme1 = await downloadFile({ repo, path: "README.md" });
 		assert.strictEqual(readme1?.status, 200);
 
 		try {
@@ -126,11 +126,11 @@ size 18
 				],
 			});
 
-			const fileContent = await resolve({ repo, path: "test.txt" });
+			const fileContent = await downloadFile({ repo, path: "test.txt" });
 			assert.strictEqual(fileContent?.status, 200);
 			assert.strictEqual(await fileContent?.text(), "This is me");
 
-			const lfsFileContent = await resolve({ repo, path: "test.lfs.txt" });
+			const lfsFileContent = await downloadFile({ repo, path: "test.lfs.txt" });
 			assert.strictEqual(lfsFileContent?.status, 200);
 			assert.strictEqual(await lfsFileContent?.text(), "This is a LFS file");
 
@@ -145,7 +145,7 @@ size 18
         `.trim()
 			);
 
-			const readme2 = await resolve({ repo, path: "README.md" });
+			const readme2 = await downloadFile({ repo, path: "README.md" });
 			assert.strictEqual(readme2, null);
 		} finally {
 			await deleteRepo({
