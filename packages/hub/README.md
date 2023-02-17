@@ -22,17 +22,17 @@ const credentials: Credentials = { accessToken: "hf_..." };
 await createRepo({ repo, credentials, license: "mit" });
 
 await commit({
-	repo,
-	credentials,
-	operations: [
-		{
-			operation: "addOrUpdate",
-			path: "file.txt",
-			// or new TextEncoder().encode("Hello World")
-			// or Buffer.from("Hello world")
-			content: new Blob(["Hello World"]),
-		},
-	],
+  repo,
+  credentials,
+  operations: [
+    {
+      operation: "addOrUpdate",
+      path: "file.txt",
+      // or new TextEncoder().encode("Hello World")
+      // or Buffer.from("Hello world")
+      content: new Blob(["Hello World"]),
+    },
+  ],
 });
 
 // No need for credentials to download public files
