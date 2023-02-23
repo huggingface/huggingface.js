@@ -13,7 +13,7 @@ export interface FileDownloadInfoOutput {
 /**
  * @returns null when the file doesn't exist
  */
-export function fileDownloadInfo(params: {
+export async function fileDownloadInfo(params: {
 	repo:         RepoId;
 	path:         string;
 	revision?:    string;
@@ -28,43 +28,45 @@ export function fileDownloadInfo(params: {
 		params.repo.name
 	}/${params.raw ? "raw" : "resolve"}/${encodeURIComponent(params.revision ?? "main")}/${params.path}`;
 
-	return fileDownloadInfoInternal(url, params.credentials);
-}
-
-async function fileDownloadInfoInternal(
-	url: string,
-	credentials?: Credentials,
-	redirects = 0
-): Promise<FileDownloadInfoOutput | null> {
-	if (redirects >= 20) {
-		throw new Error("Too many redirects");
-	}
-
-	const resp = await fetch(url, {
+	let resp = await fetch(url, {
 		method:  "HEAD",
-		headers: credentials
+		headers: params.credentials
 			? {
-					Authorization: `Bearer ${credentials.accessToken}`,
+					Authorization: `Bearer ${params.credentials.accessToken}`,
 			  }
 			: {},
 		redirect: "manual",
 	});
+
+	let redirects = 0;
+	while (resp.status >= 300 && resp.status < 400 && new URL(resp.headers.get("Location")!).host === new URL(url).host) {
+		if (++redirects >= 20) {
+			throw new Error("Too many redirects");
+		}
+
+		resp = await fetch(url, {
+			method:  "HEAD",
+			headers: params.credentials
+				? {
+						Authorization: `Bearer ${params.credentials.accessToken}`,
+				  }
+				: {},
+			redirect: "manual",
+		});
+	}
 
 	if (resp.status === 404 && resp.headers.get("X-Error-Code") === "EntryNotFound") {
 		return null;
 	}
 
 	let isLfs = false;
-	if (resp.status >= 300 && resp.status < 400) {
-		if (resp.headers.get("Location")?.startsWith(HUB_URL)) {
-			// can happen on repo name change
-			return fileDownloadInfoInternal(resp.headers.get("Location")!, credentials, redirects + 1);
-		}
 
-		if (!resp.headers.has("X-Linked-Size")) {
+	if (resp.status >= 300 && resp.status < 400) {
+		if (resp.headers.has("X-Linked-Size")) {
+			isLfs = true;
+		} else {
 			throw new Error("Invalid response from server: redirect to external server should have X-Linked-Size header");
 		}
-		isLfs = true;
 	} else if (!resp.ok) {
 		throw await createApiError(resp);
 	}
