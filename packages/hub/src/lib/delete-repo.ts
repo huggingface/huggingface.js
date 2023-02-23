@@ -1,11 +1,11 @@
-import { HUB_API_URL } from "../consts";
+import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
 import type { Credentials, RepoId } from "../types";
 
-export async function deleteRepo(params: { repo: RepoId; credentials: Credentials }): Promise<void> {
+export async function deleteRepo(params: { repo: RepoId; credentials: Credentials; hubUrl?: string }): Promise<void> {
 	const [namespace, repoName] = params.repo.name.split("/");
 
-	const res = await fetch(`${HUB_API_URL}/repos/delete`, {
+	const res = await fetch(`${params.hubUrl ?? HUB_URL}/api/repos/delete`, {
 		method: "DELETE",
 		body:   JSON.stringify({
 			name:         repoName,

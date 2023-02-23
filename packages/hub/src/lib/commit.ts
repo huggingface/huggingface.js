@@ -1,8 +1,6 @@
-import { HUB_API_URL, HUB_URL } from "../consts";
+import { HUB_URL } from "../consts";
 import { ApiError, createApiError } from "../error";
 import type {
-	ApiCommitDeletedEntry,
-	ApiCommitFile,
 	ApiCommitLfsFile,
 	ApiPreuploadRequest,
 	ApiPreuploadResponse,
@@ -59,6 +57,7 @@ export interface CommitParams {
 	 */
 	parentCommit?:  string;
 	isPullRequest?: boolean;
+	hubUrl?:        string;
 }
 
 export interface CommitOutput {
@@ -117,7 +116,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 		};
 
 		const res = await fetch(
-			`${HUB_API_URL}/${params.repo.type}s/${params.repo.name}/preupload/${encodeURIComponent(
+			`${params.hubUrl ?? HUB_URL}/api/${params.repo.type}s/${params.repo.name}/preupload/${encodeURIComponent(
 				params.branch ?? "main"
 			)}` + (params.isPullRequest ? "?create_pr=1" : ""),
 			{
@@ -175,7 +174,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 		};
 
 		const res = await fetch(
-			`${HUB_URL}/${params.repo.type === "model" ? "" : params.repo.type + "s/"}${
+			`${params.hubUrl ?? HUB_URL}/${params.repo.type === "model" ? "" : params.repo.type + "s/"}${
 				params.repo.name
 			}.git/info/lfs/objects/batch`,
 			{
@@ -301,8 +300,9 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 	yield "committing";
 
 	const res = await fetch(
-		`${HUB_API_URL}/${params.repo.type}s/${params.repo.name}/commit/${encodeURIComponent(params.branch ?? "main")}` +
-			(params.isPullRequest ? "?create_pr=1" : ""),
+		`${params.hubUrl ?? HUB_URL}/api/${params.repo.type}s/${params.repo.name}/commit/${encodeURIComponent(
+			params.branch ?? "main"
+		)}` + (params.isPullRequest ? "?create_pr=1" : ""),
 		{
 			method:  "POST",
 			headers: {

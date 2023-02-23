@@ -3,7 +3,7 @@ import { TEST_ACCESS_TOKEN, TEST_USER } from "../consts";
 import { createRepo } from "./create-repo";
 import { deleteRepo } from "./delete-repo";
 
-describe("create-repo", () => {
+describe("createRepo", () => {
 	it("should create a repo", async () => {
 		const repoName = `${TEST_USER}/TEST-${randomBytes(10).toString("hex")}`;
 

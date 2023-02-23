@@ -1,4 +1,4 @@
-import { HUB_API_URL } from "../consts";
+import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
 import type { ApiCreateRepoPayload, Credentials, RepoId, SpaceSdk } from "../types";
 
@@ -9,10 +9,11 @@ export async function createRepo(params: {
 	license?:    string;
 	/** @required for when {@link repo.type} === "space" */
 	sdk?:        SpaceSdk;
+	hubUrl?:     string;
 }): Promise<void> {
 	const [namespace, repoName] = params.repo.name.split("/");
 
-	const res = await fetch(`${HUB_API_URL}/repos/create`, {
+	const res = await fetch(`${params.hubUrl ?? HUB_URL}/api/repos/create`, {
 		method: "POST",
 		body:   JSON.stringify({
 			name:         repoName,
