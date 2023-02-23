@@ -19,9 +19,9 @@ pnpm add @huggingface/inference
 ### Basic examples
 
 ```typescript
-import HuggingFace from 'huggingface'
+import { HfInference } from '@huggingface/inference'
 
-const hf = new HuggingFace('your api key')
+const hf = new HfInference('your api key')
 
 // Natural Language
 
@@ -177,7 +177,7 @@ HF_ACCESS_TOKEN="your access token" npm run test
 ## Options
 
 ```typescript
-export declare class HuggingFace {
+export declare class HfInference {
   private readonly apiKey
   private readonly defaultOptions
   constructor(apiKey: string, defaultOptions?: Options)

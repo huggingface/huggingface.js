@@ -485,7 +485,7 @@ export type AudioClassificationReturnValue = {
 
 export type AudioClassificationReturn = AudioClassificationReturnValue[];
 
-export class HuggingFace {
+export class HfInference {
 	private readonly apiKey:         string;
 	private readonly defaultOptions: Options;
 
@@ -546,7 +546,7 @@ export class HuggingFace {
 		args: TokenClassificationArgs,
 		options?: Options
 	): Promise<TokenClassificationReturn> {
-		return HuggingFace.toArray(await this.request(args, options));
+		return HfInference.toArray(await this.request(args, options));
 	}
 
 	/**
@@ -563,7 +563,7 @@ export class HuggingFace {
 		args: ZeroShotClassificationArgs,
 		options?: Options
 	): Promise<ZeroShotClassificationReturn> {
-		return HuggingFace.toArray(await this.request(args, options));
+		return HfInference.toArray(await this.request(args, options));
 	}
 
 	/**

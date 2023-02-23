@@ -1,7 +1,7 @@
 // @ts-ignore
 import { jest } from "@jest/globals"; // 3 minute
 
-import HuggingFace from "../src";
+import { HfInference} from "../src";
 import { readFileSync } from "fs";
 
 jest.setTimeout(60000 * 3);
@@ -10,9 +10,9 @@ if (!process.env.HF_ACCESS_TOKEN) {
 	throw new Error("Set HF_ACCESS_TOKEN in the env to run the tests")
 }
  
-describe("HuggingFace", () => {
+describe("HfInference", () => {
 	// Individual tests can be ran without providing an api key, however running all tests without an api key will result in rate limiting error.
-	const hf = new HuggingFace(process.env.HF_ACCESS_TOKEN);
+	const hf = new HfInference(process.env.HF_ACCESS_TOKEN);
 	it("throws error if model does not exist", () => {
 		expect(
 			hf.fillMask({
