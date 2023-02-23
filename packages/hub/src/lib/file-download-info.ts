@@ -14,19 +14,27 @@ export interface FileDownloadInfoOutput {
  * @returns null when the file doesn't exist
  */
 export async function fileDownloadInfo(params: {
-	repo:         RepoId;
-	path:         string;
-	revision?:    string;
-	credentials?: Credentials;
-	hubUrl?:      string;
+	repo:                  RepoId;
+	path:                  string;
+	revision?:             string;
+	credentials?:          Credentials;
+	hubUrl?:               string;
 	/**
 	 * To get the raw pointer file behind a LFS file
 	 */
-	raw?:         boolean;
+	raw?:                  boolean;
+	/**
+	 * To avoid the content-disposition header in the `downloadLink` for LFS files
+	 *
+	 * So that on browsers you can use the URL in an iframe for example
+	 */
+	noContentDisposition?: boolean;
 }): Promise<FileDownloadInfoOutput | null> {
-	const url = `${params.hubUrl ?? HUB_URL}/${params.repo.type === "model" ? "" : `${params.repo.type}s/`}${
-		params.repo.name
-	}/${params.raw ? "raw" : "resolve"}/${encodeURIComponent(params.revision ?? "main")}/${params.path}`;
+	const url =
+		`${params.hubUrl ?? HUB_URL}/${params.repo.type === "model" ? "" : `${params.repo.type}s/`}${params.repo.name}/${
+			params.raw ? "raw" : "resolve"
+		}/${encodeURIComponent(params.revision ?? "main")}/${params.path}` +
+		(params.noContentDisposition ? "?noContentDisposition=1" : "");
 
 	let resp = await fetch(url, {
 		method:  "HEAD",
