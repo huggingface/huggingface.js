@@ -1,0 +1,45 @@
+name: Inference - Test
+on:
+  push:
+    paths:
+      - ".github/workflows/inference-test.yml"
+      - "packages/inference/**"
+    branches:
+      - main
+  pull_request:
+    paths:
+      - ".github/workflows/inference-test.yml"
+      - "packages/inference/**"
+
+env:
+  HF_ACCESS_TOKEN: ${{ secrets.HF_ACCESS_TOKEN }}
+
+defaults:
+  run:
+    working-directory: packages/inference
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 7.1.5
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "pnpm"
+          cache-dependency-path: "packages/inference/pnpm-lock.yaml"
+      - run: pnpm install --frozen-lockfile
+      
+      - name: Check types
+        run: pnpm type-check
+
+      - name: Test
+        run: pnpm test:ci
+
+      - name: Build
+        run: pnpm build

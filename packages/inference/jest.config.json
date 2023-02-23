@@ -1,0 +1,17 @@
+{
+	"preset": "ts-jest/presets/default-esm",
+	"testEnvironment": "node",
+	"testPathIgnorePatterns": ["<rootDir>/node_modules/"],
+	"testMatch": ["**/?(*.)+(spec|test).[jt]s?(x)"],
+	"extensionsToTreatAsEsm": [".ts"],
+	"transform": {
+		"^.+\\.tsx?$": [
+			"ts-jest",
+			{
+				"isolatedModules": true,
+				"useESM": true
+			}
+		]
+	},
+	"testTimeout": 60000
+}
