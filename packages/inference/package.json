@@ -21,11 +21,11 @@
 		"ai"
 	],
 	"engines": {
-		"node": ">=14"
+		"node": ">=18"
 	},
 	"files": [
-		"./dist",
-		"./src"
+		"dist",
+		"src"
 	],
 	"source": "src/index.ts",
 	"types": "dist/index.d.ts",

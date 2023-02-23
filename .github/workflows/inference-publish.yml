@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: "18"
           cache: "pnpm"
-          cache-dependency-path: "packages/hub/pnpm-lock.yaml"
+          cache-dependency-path: "packages/inference/pnpm-lock.yaml"
           # setting a registry enables the NODE_AUTH_TOKEN env variable where we can set an npm token.  REQUIRED
           registry-url: "https://registry.npmjs.org"
       - run: pnpm install

@@ -16,6 +16,9 @@
 			"types": "./index.ts"
 		}
 	},
+	"engines": {
+		"node": ">=18"
+	},
 	"source": "index.ts",
 	"scripts": {
 		"format": "prettier --write . && eslint --quiet --fix --ext .cjs,.ts .",
