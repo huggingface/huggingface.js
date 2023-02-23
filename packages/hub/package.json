@@ -1,6 +1,6 @@
 {
 	"name": "@huggingface/hub",
-	"version": "0.0.4",
+	"version": "0.0.5",
 	"description": "Utilities to interact with the Hugging Face hub",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {
