@@ -12,7 +12,7 @@ export async function createApiError(
 
 	if (response.headers.get("Content-Type")?.startsWith("application/json")) {
 		const json = await response.json();
-		error.message = json.message;
+		error.message = json.error || json.message || error.message;
 		error.data = json;
 	} else {
 		error.data = { message: await response.text() };
