@@ -8,8 +8,6 @@ Official utilities to use the Hugging Face hub API
 npm add @huggingface/hub
 ```
 
-See also [TimMikeladze/huggingface](https://github.com/TimMikeladze/huggingface) for a non-official wrapper to use the inference API
-
 ## API
 
 ```ts
@@ -28,8 +26,6 @@ await commit({
     {
       operation: "addOrUpdate",
       path: "file.txt",
-      // or new TextEncoder().encode("Hello World")
-      // or Buffer.from("Hello world")
       content: new Blob(["Hello World"]),
     },
   ],
@@ -40,3 +36,13 @@ await (await downloadFile({ repo, path: "README.md" })).text();
 
 await deleteRepo({ repo, credentials });
 ```
+
+## Performance considerations
+
+When uploading large files, you may want to run the `commit` calls inside a worker, to offload the sha256 computations.
+
+Also, use `Blob` to avoid loading the whole files in RAM. In `Node`, it's up to you to provide a smart `Blob` wrapper around your file. Feel free to open an issue if you want *us* to provide the smart `Blob` implementation.
+
+## Dependencies
+
+- `hash-wasm` : Only used in the browser, when committing files over 10 MB. Browsers do not natively support streaming sha256 computations.

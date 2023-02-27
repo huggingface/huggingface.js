@@ -9,6 +9,7 @@ module.exports = {
 		node:    true,
 	},
 	rules: {
+		"no-constant-condition":                             "off",
 		"@typescript-eslint/no-empty-function":              "off",
 		"@typescript-eslint/explicit-module-boundary-types": "error",
 		"@typescript-eslint/consistent-type-imports":        "error",
