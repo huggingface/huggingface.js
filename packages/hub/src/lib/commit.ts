@@ -152,7 +152,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 
 		const shas = await promisesQueue(
 			operations.map((op) => async () => {
-				const sha = await sha256(await toArrayBuffer(op.content));
+				const sha = await sha256(op.content);
 				lfsShas.set(op.path, sha);
 				return sha;
 			}),
