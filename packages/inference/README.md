@@ -137,6 +137,12 @@ await hf.imageSegmentation({
   data: readFileSync('test/cats.png'),
   model: 'facebook/detr-resnet-50-panoptic'
 })
+
+await hf.textToImage({
+  inputs: 'award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]',
+  negative_prompt: 'blurry',
+  model: 'stabilityai/stable-diffusion-2',
+})
 ```
 
 ## Supported APIs
@@ -167,6 +173,7 @@ await hf.imageSegmentation({
 - [x] Image classification
 - [x] Object detection
 - [x] Image segmentation
+- [x] Text to image
 
 ## Running tests
 
@@ -296,6 +303,12 @@ export declare class HfInference {
     args: ImageSegmentationArgs,
     options?: Options
   ): Promise<ImageSegmentationReturn>
+
+  /**
+   * This task reads some text input and outputs an image.
+   * Recommended model: stabilityai/stable-diffusion-2
+   */
+  textToImage(args: TextToImageArgs, options?: Options): Promise<TextToImageReturn>;
   request(
     args: Args & {
       data?: any
@@ -752,4 +765,15 @@ export declare type AudioClassificationReturnValue = {
   score: number
 }
 export declare type AudioClassificationReturn = AudioClassificationReturnValue[]
+type TextToImageArgs = Args & {
+  /**
+   * The text to generate an image from
+   */
+  inputs: string
+  /**
+   * An optional negative prompt for the image generation
+   */
+  negative_prompt?: string
+};
+type TextToImageReturn = Buffer
 ```

@@ -1,13 +1,14 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { jest } from "@jest/globals"; // 3 minute
 
-import { HfInference} from "../src";
+import { HfInference } from "../src";
 import { readFileSync } from "fs";
 
 jest.setTimeout(60000 * 3);
 
 if (!process.env.HF_ACCESS_TOKEN) {
-	throw new Error("Set HF_ACCESS_TOKEN in the env to run the tests")
+	throw new Error("Set HF_ACCESS_TOKEN in the env to run the tests");
 }
 
 describe("HfInference", () => {
@@ -269,5 +270,16 @@ describe("HfInference", () => {
 				}),
 			])
 		);
+	});
+	it("textToImage", async () => {
+		const res = await hf.textToImage({
+			inputs:          "award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]",
+			negative_prompt: "blurry",
+			model:           "stabilityai/stable-diffusion-2",
+		});
+
+		expect(res).toBeInstanceOf(Buffer);
+
+		expect(res.toString("base64")).toBeTruthy();
 	});
 });

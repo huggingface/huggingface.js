@@ -485,6 +485,20 @@ export type AudioClassificationReturnValue = {
 
 export type AudioClassificationReturn = AudioClassificationReturnValue[];
 
+export type TextToImageArgs = Args & {
+	/**
+	 * The text to generate an image from
+	 */
+	inputs: string;
+
+	/**
+	 * An optional negative prompt for the image generation
+	 */
+	negative_prompt?: string;
+};
+
+export type TextToImageReturn = Buffer;
+
 export class HfInference {
 	private readonly apiKey:         string;
 	private readonly defaultOptions: Options;
@@ -645,10 +659,22 @@ export class HfInference {
 		});
 	}
 
+	/**
+	 * This task reads some text input and outputs an image.
+	 * Recommended model: stabilityai/stable-diffusion-2
+	 */
+	public async textToImage(args: TextToImageArgs, options?: Options): Promise<TextToImageReturn> {
+		return await this.request(args, {
+			...options,
+			blob: true,
+		});
+	}
+
 	public async request(
 		args: Args & { data?: any },
 		options?: Options & {
 			binary?: boolean;
+			blob?:   boolean;
 		}
 	): Promise<any> {
 		const mergedOptions = { ...this.defaultOptions, ...options };
@@ -680,11 +706,21 @@ export class HfInference {
 			});
 		}
 
-		const res = await response.json();
-		if (res.error) {
-			throw new Error(res.error);
+		let output;
+
+		if (options?.blob) {
+			if (!response.ok) {
+				throw new Error("An error occurred while fetching the blob");
+			}
+			return Buffer.from(await response.arrayBuffer());
+		} else {
+			output = await response.json();
+			if (output.error) {
+				throw new Error(output.error);
+			}
 		}
-		return res;
+
+		return output;
 	}
 
 	private static toArray(obj: any): any[] {
