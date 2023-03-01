@@ -46,6 +46,10 @@ export async function* listFiles(params: {
 			yield item;
 		}
 
-		url = json.nextUrl;
+		url = json.nextUrl
+			? json.nextUrl?.startsWith(params.hubUrl ?? HUB_URL)
+				? json.nextUrl
+				: `${params.hubUrl ?? HUB_URL}${json.nextUrl}`
+			: undefined;
 	}
 }
