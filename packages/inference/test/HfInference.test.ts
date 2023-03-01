@@ -9,7 +9,7 @@ jest.setTimeout(60000 * 3);
 if (!process.env.HF_ACCESS_TOKEN) {
 	throw new Error("Set HF_ACCESS_TOKEN in the env to run the tests")
 }
- 
+
 describe("HfInference", () => {
 	// Individual tests can be ran without providing an api key, however running all tests without an api key will result in rate limiting error.
 	const hf = new HfInference(process.env.HF_ACCESS_TOKEN);
@@ -254,7 +254,7 @@ describe("HfInference", () => {
 			])
 		);
 	});
-	xit("imageSegmentation", async () => {
+	it("imageSegmentation", async () => {
 		expect(
 			await hf.imageClassification({
 				data:  readFileSync("test/cats.png"),
