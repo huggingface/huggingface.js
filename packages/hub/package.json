@@ -32,7 +32,14 @@
 		"index.ts",
 		"tsconfig.json"
 	],
-	"keywords": [],
+	"keywords": [
+		"huggingface",
+		"hub",
+		"api",
+		"client",
+		"hugging",
+		"face"
+	],
 	"author": "Hugging Face",
 	"license": "MIT",
 	"devDependencies": {
