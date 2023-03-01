@@ -204,3 +204,31 @@ export type ApiCreateRepoPayload = {
 			sdkVersion?: string;
 	  }
 );
+
+export interface ApiIndexTreeEntryData {
+	type: "file" | "directory" | "unknown";
+	size: number;
+	path: string;
+	lfs?: {
+		oid:  string;
+		size: number;
+	};
+	lastCommit: {
+		author: {
+			date: string;
+		};
+		id:      string;
+		subject: string;
+	} | null;
+	security?: ApiFileState;
+}
+
+export interface ApiFileState {
+	/** namespaced by repo type (models/, datasets/, spaces/) */
+	repositoryId:      string;
+	blobId:            string;
+	name:              string;
+	safe:              boolean;
+	avScan?:           AVScan;
+	pickleImportScan?: PickleImportScan;
+}
