@@ -164,4 +164,24 @@ describe("listFiles", () => {
 			},
 		]);
 	});
+
+	it("should fetch the list of files from the repo, including subfolders", async () => {
+		const cursor = listFiles({
+			repo: {
+				name: "xsum",
+				type: "dataset",
+			},
+			revision:  "0f3ea2f2b55fcb11e71fb1e3aec6822e44ddcb0f",
+			hubUrl:    "https://huggingface.co",
+			recursive: true,
+		});
+
+		const files: ListFileEntry[] = [];
+
+		for await (const entry of cursor) {
+			files.push(entry);
+		}
+
+		assert(files.some((file) => file.path === "data/XSUM-EMNLP18-Summary-Data-Original.tar.gz"));
+	});
 });

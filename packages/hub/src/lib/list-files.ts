@@ -26,7 +26,7 @@ export async function* listFiles(params: {
 }): AsyncGenerator<ListFileEntry> {
 	let url: string | undefined = `${params.hubUrl || HUB_URL}/api/${params.repo.type}s/${params.repo.name}/tree/${
 		params.revision || "main"
-	}${params.path ? "/" + params.path : ""}`;
+	}${params.path ? "/" + params.path : ""}${params.recursive ? "?recursive=true" : ""}`;
 
 	while (url) {
 		const res = await fetch(url, {
