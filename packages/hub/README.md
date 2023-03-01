@@ -1,4 +1,4 @@
-# @huggingface/hub
+# 🤗 Hugging Face Hub API
 
 🚧 Experimental, the module is being built, API will break! 🚧
 
@@ -11,7 +11,7 @@ npm add @huggingface/hub
 ## API
 
 ```ts
-import { createRepo, createCommit, deleteRepo } from "@huggingface/hub";
+import { createRepo, createCommit, deleteRepo, listFiles } from "@huggingface/hub";
 import type { RepoId, Credentials } from "@huggingface/hub";
 
 const repo: RepoId = { type: "model", name: "myname/some-model" };
@@ -31,8 +31,11 @@ await commit({
   ],
 });
 
-// No need for credentials to download public files
 await (await downloadFile({ repo, path: "README.md" })).text();
+
+for await (const fileInfo of listFiles({repo})) {
+  console.log(fileInfo);
+}
 
 await deleteRepo({ repo, credentials });
 ```
