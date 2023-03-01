@@ -658,7 +658,7 @@ export class HfInference {
       Authorization: `Bearer ${this.apiKey}`,
     }
 
-    if (mergedOptions.wait_for_model) {
+    if (options?.binary && mergedOptions.wait_for_model) {
       headers["X-Wait-For-Model"] = "true";
     }
 
