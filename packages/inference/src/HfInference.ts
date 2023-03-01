@@ -497,7 +497,7 @@ export type TextToImageArgs = Args & {
 	negative_prompt?: string;
 };
 
-export type TextToImageReturn = Buffer;
+export type TextToImageReturn = ArrayBuffer;
 
 export class HfInference {
 	private readonly apiKey:         string;
@@ -712,7 +712,7 @@ export class HfInference {
 			if (!response.ok) {
 				throw new Error("An error occurred while fetching the blob");
 			}
-			return Buffer.from(await response.arrayBuffer());
+			return await response.arrayBuffer();
 		} else {
 			output = await response.json();
 			if (output.error) {

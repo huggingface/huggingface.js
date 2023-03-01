@@ -278,8 +278,6 @@ describe("HfInference", () => {
 			model:           "stabilityai/stable-diffusion-2",
 		});
 
-		expect(res).toBeInstanceOf(Buffer);
-
-		expect(res.toString("base64")).toBeTruthy();
+		expect(res).toBeInstanceOf(ArrayBuffer);
 	});
 });

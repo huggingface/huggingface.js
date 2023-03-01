@@ -775,5 +775,5 @@ type TextToImageArgs = Args & {
    */
   negative_prompt?: string
 };
-type TextToImageReturn = Buffer
+type TextToImageReturn = ArrayBuffer
 ```
