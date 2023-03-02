@@ -5,9 +5,6 @@ import { jest } from "@jest/globals"; // 3 minute
 import { HfInference } from "../src";
 import { readFileSync } from "fs";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-require("dotenv").config();
-
 jest.setTimeout(60000 * 3);
 
 if (!process.env.HF_ACCESS_TOKEN) {
