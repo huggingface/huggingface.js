@@ -689,10 +689,6 @@ export class HfInference {
 			headers["X-Wait-For-Model"] = "true";
 		}
 
-		if (options?.binary && mergedOptions.wait_for_model) {
-			headers["X-Wait-For-Model"] = "true";
-		}
-
 		const response = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
 			headers,
 			method: "POST",
