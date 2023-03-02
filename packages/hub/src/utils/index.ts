@@ -6,3 +6,4 @@ export { promisesQueueStreaming } from "./promisesQueueStreaming";
 export { promisesQueue } from "./promisesQueue";
 export { sha256 } from "./sha256";
 export { randomUUID } from "./randomUUID";
+export { parseLinkHeader } from "./parseLinkHeader";

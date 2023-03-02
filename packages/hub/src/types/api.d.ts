@@ -210,8 +210,10 @@ export interface ApiIndexTreeEntryData {
 	size: number;
 	path: string;
 	lfs?: {
-		oid:  string;
-		size: number;
+		oid:         string;
+		size:        number;
+		/** Size of the raw pointer file, 100~200 bytes */
+		pointerSize: number;
 	};
 	lastCommit: {
 		author: {

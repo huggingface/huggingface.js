@@ -2,6 +2,7 @@ import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
 import type { Credentials, RepoId } from "../types";
 import type { ApiIndexTreeEntryData } from "../types/api";
+import { parseLinkHeader } from "../utils";
 
 export type ListFileEntry = ApiIndexTreeEntryData;
 
@@ -29,7 +30,7 @@ export async function* listFiles(params: {
 	}${params.path ? "/" + params.path : ""}${params.recursive ? "?recursive=true" : ""}`;
 
 	while (url) {
-		const res = await fetch(url, {
+		const res: Response = await fetch(url, {
 			headers: {
 				accept: "application/json",
 				...(params.credentials ? { Authorization: `Bearer ${params.credentials.accessToken}` } : undefined),
@@ -40,16 +41,14 @@ export async function* listFiles(params: {
 			throw createApiError(res);
 		}
 
-		const json: { items: ApiIndexTreeEntryData[]; nextUrl?: string } = await res.json();
+		const items: ApiIndexTreeEntryData[] = await res.json();
 
-		for (const item of json.items) {
+		for (const item of items) {
 			yield item;
 		}
 
-		url = json.nextUrl
-			? json.nextUrl?.startsWith(params.hubUrl ?? HUB_URL)
-				? json.nextUrl
-				: `${params.hubUrl ?? HUB_URL}${json.nextUrl}`
-			: undefined;
+		const linkHeader = res.headers.get("Link");
+
+		url = linkHeader ? parseLinkHeader(linkHeader).next : undefined;
 	}
 }
