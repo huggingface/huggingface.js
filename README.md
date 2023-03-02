@@ -37,8 +37,14 @@ await commit({
 
 const inference = new HfInference(HF_ACCESS_TOKEN);
 
-await inference.fillMask({
-  model: "my-user/nlp-test",
-  inputs: "[MASK] world!"
-});
+await hf.translation({
+  model: 't5-base',
+  inputs: 'My name is Wolfgang and I live in Berlin'
+})
+
+await hf.textToImage({
+  inputs: 'award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]',
+  negative_prompt: 'blurry',
+  model: 'stabilityai/stable-diffusion-2',
+})
 ```
