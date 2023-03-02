@@ -5,6 +5,9 @@ import { jest } from "@jest/globals"; // 3 minute
 import { HfInference } from "../src";
 import { readFileSync } from "fs";
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require("dotenv").config();
+
 jest.setTimeout(60000 * 3);
 
 if (!process.env.HF_ACCESS_TOKEN) {
@@ -106,10 +109,20 @@ describe("HfInference", () => {
 			])
 		);
 	});
-	it("textGeneration", async () => {
+	it("textGeneration - gpt2", async () => {
 		expect(
 			await hf.textGeneration({
 				model:  "gpt2",
+				inputs: "The answer to the universe is",
+			})
+		).toMatchObject({
+			generated_text: expect.any(String),
+		});
+	});
+	it("textGeneration - google/flan-t5-xxl", async () => {
+		expect(
+			await hf.textGeneration({
+				model:  "google/flan-t5-xxl",
 				inputs: "The answer to the universe is",
 			})
 		).toMatchObject({
@@ -159,7 +172,7 @@ describe("HfInference", () => {
 					sequence:
 						"Hi, I recently bought a device from your company but it is not working as advertised and I would like to get reimbursed!",
 					labels: ["refund", "faq", "legal"],
-					scores: [0.877787709236145, 0.10522633045911789, 0.01698593981564045],
+					scores: [0.8777875304222107, 0.10522652417421341, 0.01698593609035015],
 				}),
 			])
 		);

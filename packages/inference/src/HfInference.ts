@@ -680,13 +680,14 @@ export class HfInference {
 		const mergedOptions = { ...this.defaultOptions, ...options };
 		const { model, ...otherArgs } = args;
 
-    const headers = {
-      Authorization: `Bearer ${this.apiKey}`,
-    }
+		const headers = {
+			Authorization:  `Bearer ${this.apiKey}`,
+			"Content-Type": "application/json",
+		};
 
-    if (options?.binary && mergedOptions.wait_for_model) {
-      headers["X-Wait-For-Model"] = "true";
-    }
+		if (options?.binary && mergedOptions.wait_for_model) {
+			headers["X-Wait-For-Model"] = "true";
+		}
 
 		const response = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
 			headers,
