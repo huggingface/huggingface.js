@@ -4,8 +4,8 @@
   "description": "Package to generate doc for other @huggingface packages",
   "private": true,
   "scripts": {
-    "doc-hub": "typedoc --tsconfig ../hub/tsconfig.json --githubPages false --plugin typedoc-plugin-markdown --out ../../docs/hub --hideBreadcrumbs --hideInPageTOC ../hub/index.ts --entryDocument index.md",
-    "doc-inference": "typedoc --tsconfig ../inference/tsconfig.json --githubPages false --plugin typedoc-plugin-markdown --out ../../docs/inference --hideBreadcrumbs --hideInPageTOC ../inference/src/index.ts --entryDocument index.md"
+    "doc-hub": "typedoc --tsconfig ../hub/tsconfig.json --githubPages false --plugin typedoc-plugin-markdown --out ../../docs/hub --hideBreadcrumbs --hideInPageTOC ../hub/index.ts",
+    "doc-inference": "typedoc --tsconfig ../inference/tsconfig.json --githubPages false --plugin typedoc-plugin-markdown --out ../../docs/inference --hideBreadcrumbs --hideInPageTOC ../inference/src/index.ts"
   },
   "license": "MIT",
   "devDependencies": {

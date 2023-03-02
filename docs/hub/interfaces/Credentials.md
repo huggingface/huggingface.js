@@ -8,4 +8,4 @@
 
 #### Defined in
 
-[src/types/repo.d.ts:11](https://github.com/huggingface/huggingface.js/blob/548425e/packages/hub/src/types/repo.d.ts#L11)
+[src/types/repo.d.ts:11](https://github.com/huggingface/huggingface.js/blob/f282646/packages/hub/src/types/repo.d.ts#L11)
