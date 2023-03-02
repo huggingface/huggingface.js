@@ -4,7 +4,25 @@ import type { Credentials, RepoId } from "../types";
 import type { ApiIndexTreeEntryData } from "../types/api";
 import { parseLinkHeader } from "../utils";
 
-export type ListFileEntry = ApiIndexTreeEntryData;
+export interface ListFileEntry {
+	type: "file" | "directory" | "unknown";
+	size: number;
+	path: string;
+	lfs?: {
+		oid:         string;
+		size:        number;
+		/** Size of the raw pointer file, 100~200 bytes */
+		pointerSize: number;
+	};
+	lastCommit: {
+		author: {
+			date: string;
+		};
+		id:      string;
+		subject: string;
+	} | null;
+	security?: unknown;
+}
 
 /**
  * List files in a folder. To list ALL files in the directory, call it

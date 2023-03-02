@@ -364,9 +364,10 @@ export type FeatureExtractionArgs = Args & {
 	/**
 	 * The inputs vary based on the model. For example when using sentence-transformers/paraphrase-xlm-r-multilingual-v1 the inputs will look like this:
 	 *
-	 *  inputs: {
+	 *  inputs: &#123;
 	 *    "source_sentence": "That is a happy person",
 	 *    "sentences": ["That is a happy dog", "That is a very happy person", "Today is a sunny day"]
+	 *  &#125;
 	 */
 	inputs: Record<string, any> | Record<string, any>[];
 };
@@ -680,13 +681,13 @@ export class HfInference {
 		const mergedOptions = { ...this.defaultOptions, ...options };
 		const { model, ...otherArgs } = args;
 
-    const headers = {
-      Authorization: `Bearer ${this.apiKey}`,
-    }
+		const headers = {
+			Authorization: `Bearer ${this.apiKey}`,
+		};
 
-    if (options?.binary && mergedOptions.wait_for_model) {
-      headers["X-Wait-For-Model"] = "true";
-    }
+		if (options?.binary && mergedOptions.wait_for_model) {
+			headers["X-Wait-For-Model"] = "true";
+		}
 
 		const response = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
 			headers,

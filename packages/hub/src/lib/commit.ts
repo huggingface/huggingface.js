@@ -17,19 +17,19 @@ const CONCURRENT_SHAS = 5;
 const CONCURRENT_LFS_UPLOADS = 5;
 const MULTIPART_PARALLEL_UPLOAD = 5;
 
-export type CommitDeletedEntry = {
+export interface CommitDeletedEntry {
 	operation: "delete";
 	path:      string;
-};
+}
 
 type ContentSource = Blob; // Todo: offer a smart Blob wrapper around (filePath + size) for Node.js
 
-export type CommitFile = {
+export interface CommitFile {
 	operation: "addOrUpdate";
 	path:      string;
 	content:   ContentSource;
 	// forceLfs?: boolean
-};
+}
 
 // TODO: find a nice way to handle LFS & non-LFS files in an uniform manner, see https://github.com/huggingface/moon-landing/issues/4370y
 // export type CommitRenameFile = {

@@ -14,5 +14,7 @@ module.exports = {
 		"@typescript-eslint/explicit-module-boundary-types": "error",
 		"@typescript-eslint/consistent-type-imports":        "error",
 		"@typescript-eslint/key-spacing":                    ["error", { align: "value" }],
+		// For doc purposes, prefer interfaces
+		"@typescript-eslint/consistent-type-definitions":    ["error", "interface"],
 	},
 };

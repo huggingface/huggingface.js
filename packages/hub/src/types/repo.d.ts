@@ -1,15 +1,15 @@
 export type RepoType = "space" | "dataset" | "model";
 
-export type RepoId = {
+export interface RepoId {
 	name: string;
 	type: RepoType;
-};
+}
 
 export type AccessToken = `hf_${string}`;
 
-export type Credentials = {
+export interface Credentials {
 	accessToken: AccessToken;
-};
+}
 
 export type SpaceHardwareFlavor =
 	| "cpu-basic"

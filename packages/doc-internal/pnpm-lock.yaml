@@ -1,0 +1,132 @@
+lockfileVersion: 5.4
+
+specifiers:
+  typedoc: ^0.23.26
+  typedoc-plugin-markdown: ^3.14.0
+  typescript: ^4.9.5
+
+devDependencies:
+  typedoc: 0.23.26_typescript@4.9.5
+  typedoc-plugin-markdown: 3.14.0_typedoc@0.23.26
+  typescript: 4.9.5
+
+packages:
+
+  /ansi-sequence-parser/1.1.0:
+    resolution: {integrity: sha512-lEm8mt52to2fT8GhciPCGeCXACSz2UwIN4X2e2LJSnZ5uAbn2/dsYdOmUXq0AtWS5cpAupysIneExOgH0Vd2TQ==}
+    dev: true
+
+  /balanced-match/1.0.2:
+    resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
+    dev: true
+
+  /brace-expansion/2.0.1:
+    resolution: {integrity: sha512-XnAIvQ8eM+kC6aULx6wuQiwVsnzsi9d3WxzV3FpWTGA19F621kwdbsAcFKXgKUHZWsy+mY6iL1sHTxWEFCytDA==}
+    dependencies:
+      balanced-match: 1.0.2
+    dev: true
+
+  /handlebars/4.7.7:
+    resolution: {integrity: sha512-aAcXm5OAfE/8IXkcZvCepKU3VzW1/39Fb5ZuqMtgI/hT8X2YgoMvBY5dLhq/cpOvw7Lk1nK/UF71aLG/ZnVYRA==}
+    engines: {node: '>=0.4.7'}
+    hasBin: true
+    dependencies:
+      minimist: 1.2.8
+      neo-async: 2.6.2
+      source-map: 0.6.1
+      wordwrap: 1.0.0
+    optionalDependencies:
+      uglify-js: 3.17.4
+    dev: true
+
+  /jsonc-parser/3.2.0:
+    resolution: {integrity: sha512-gfFQZrcTc8CnKXp6Y4/CBT3fTc0OVuDofpre4aEeEpSBPV5X5v4+Vmx+8snU7RLPrNHPKSgLxGo9YuQzz20o+w==}
+    dev: true
+
+  /lunr/2.3.9:
+    resolution: {integrity: sha512-zTU3DaZaF3Rt9rhN3uBMGQD3dD2/vFQqnvZCDv4dl5iOzq2IZQqTxu90r4E5J+nP70J3ilqVCrbho2eWaeW8Ow==}
+    dev: true
+
+  /marked/4.2.12:
+    resolution: {integrity: sha512-yr8hSKa3Fv4D3jdZmtMMPghgVt6TWbk86WQaWhDloQjRSQhMMYCAro7jP7VDJrjjdV8pxVxMssXS8B8Y5DZ5aw==}
+    engines: {node: '>= 12'}
+    hasBin: true
+    dev: true
+
+  /minimatch/7.4.2:
+    resolution: {integrity: sha512-xy4q7wou3vUoC9k1xGTXc+awNdGaGVHtFUaey8tiX4H1QRc04DZ/rmDFwNm2EBsuYEhAZ6SgMmYf3InGY6OauA==}
+    engines: {node: '>=10'}
+    dependencies:
+      brace-expansion: 2.0.1
+    dev: true
+
+  /minimist/1.2.8:
+    resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
+    dev: true
+
+  /neo-async/2.6.2:
+    resolution: {integrity: sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==}
+    dev: true
+
+  /shiki/0.14.1:
+    resolution: {integrity: sha512-+Jz4nBkCBe0mEDqo1eKRcCdjRtrCjozmcbTUjbPTX7OOJfEbTZzlUWlZtGe3Gb5oV1/jnojhG//YZc3rs9zSEw==}
+    dependencies:
+      ansi-sequence-parser: 1.1.0
+      jsonc-parser: 3.2.0
+      vscode-oniguruma: 1.7.0
+      vscode-textmate: 8.0.0
+    dev: true
+
+  /source-map/0.6.1:
+    resolution: {integrity: sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==}
+    engines: {node: '>=0.10.0'}
+    dev: true
+
+  /typedoc-plugin-markdown/3.14.0_typedoc@0.23.26:
+    resolution: {integrity: sha512-UyQLkLRkfTFhLdhSf3RRpA3nNInGn+k6sll2vRXjflaMNwQAAiB61SYbisNZTg16t4K1dt1bPQMMGLrxS0GZ0Q==}
+    peerDependencies:
+      typedoc: '>=0.23.0'
+    dependencies:
+      handlebars: 4.7.7
+      typedoc: 0.23.26_typescript@4.9.5
+    dev: true
+
+  /typedoc/0.23.26_typescript@4.9.5:
+    resolution: {integrity: sha512-5m4KwR5tOLnk0OtMaRn9IdbeRM32uPemN9kur7YK9wFqx8U0CYrvO9aVq6ysdZSV1c824BTm+BuQl2Ze/k1HtA==}
+    engines: {node: '>= 14.14'}
+    hasBin: true
+    peerDependencies:
+      typescript: 4.6.x || 4.7.x || 4.8.x || 4.9.x
+    dependencies:
+      lunr: 2.3.9
+      marked: 4.2.12
+      minimatch: 7.4.2
+      shiki: 0.14.1
+      typescript: 4.9.5
+    dev: true
+
+  /typescript/4.9.5:
+    resolution: {integrity: sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==}
+    engines: {node: '>=4.2.0'}
+    hasBin: true
+    dev: true
+
+  /uglify-js/3.17.4:
+    resolution: {integrity: sha512-T9q82TJI9e/C1TAxYvfb16xO120tMVFZrGA3f9/P4424DNu6ypK103y0GPFVa17yotwSyZW5iYXgjYHkGrJW/g==}
+    engines: {node: '>=0.8.0'}
+    hasBin: true
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  /vscode-oniguruma/1.7.0:
+    resolution: {integrity: sha512-L9WMGRfrjOhgHSdOYgCt/yRMsXzLDJSL7BPrOZt73gU0iWO4mpqzqQzOz5srxqTvMBaR0XZTSrVWo4j55Rc6cA==}
+    dev: true
+
+  /vscode-textmate/8.0.0:
+    resolution: {integrity: sha512-AFbieoL7a5LMqcnOF04ji+rpXadgOXnZsxQr//r83kLPr7biP7am3g9zbaZIaBGwBRWeSvoMD4mgPdX3e4NWBg==}
+    dev: true
+
+  /wordwrap/1.0.0:
+    resolution: {integrity: sha512-gvVzJFlPycKc5dZN4yPkP8w7Dc37BtP1yczEneOb4uq34pXZcvrtRTmWV8W+Ume+XCxKgbjM+nevkyFPMybd4Q==}
+    dev: true
