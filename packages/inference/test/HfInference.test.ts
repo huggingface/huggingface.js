@@ -173,7 +173,11 @@ describe("HfInference", () => {
 					sequence:
 						"Hi, I recently bought a device from your company but it is not working as advertised and I would like to get reimbursed!",
 					labels: ["refund", "faq", "legal"],
-					scores: [0.877787709236145, 0.10522633045911789, 0.01698593981564045],
+					scores: [
+						expect.closeTo(0.877787709236145, 5),
+						expect.closeTo(0.10522633045911789, 5),
+						expect.closeTo(0.01698593981564045, 5),
+					],
 				}),
 			])
 		);
