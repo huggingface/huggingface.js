@@ -15,7 +15,7 @@ The libraries is still very young, please help us by opening issues!
 
 ```ts
 import { createRepo, commit } from "@huggingface/hub";
-import { HfInference } from "@huggingface/inferenfe";
+import { HfInference } from "@huggingface/inference";
 
 const HF_ACCESS_TOKEN = "hf_...";
 
