@@ -14,7 +14,7 @@ jobs:
       commit_sha: ${{ github.sha }}
       package: huggingface.js
       package_name: huggingface.js
-      path_to_docs: huggingface.js/docs/
+      path_to_docs: huggingface.js/docs
       additional_args: --not_python_module
       languages: en
     secrets:
