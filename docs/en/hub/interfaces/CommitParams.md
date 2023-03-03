@@ -12,7 +12,7 @@
 
 #### Defined in
 
-[src/lib/commit.ts:51](https://github.com/huggingface/huggingface.js/blob/16bd879/packages/hub/src/lib/commit.ts#L51)
+[src/lib/commit.ts:51](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L51)
 
 ___
 
@@ -22,7 +22,7 @@ ___
 
 #### Defined in
 
-[src/lib/commit.ts:49](https://github.com/huggingface/huggingface.js/blob/16bd879/packages/hub/src/lib/commit.ts#L49)
+[src/lib/commit.ts:49](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L49)
 
 ___
 
@@ -32,7 +32,7 @@ ___
 
 #### Defined in
 
-[src/lib/commit.ts:46](https://github.com/huggingface/huggingface.js/blob/16bd879/packages/hub/src/lib/commit.ts#L46)
+[src/lib/commit.ts:46](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L46)
 
 ___
 
@@ -42,7 +42,7 @@ ___
 
 #### Defined in
 
-[src/lib/commit.ts:60](https://github.com/huggingface/huggingface.js/blob/16bd879/packages/hub/src/lib/commit.ts#L60)
+[src/lib/commit.ts:60](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L60)
 
 ___
 
@@ -52,7 +52,7 @@ ___
 
 #### Defined in
 
-[src/lib/commit.ts:59](https://github.com/huggingface/huggingface.js/blob/16bd879/packages/hub/src/lib/commit.ts#L59)
+[src/lib/commit.ts:59](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L59)
 
 ___
 
@@ -62,7 +62,7 @@ ___
 
 #### Defined in
 
-[src/lib/commit.ts:48](https://github.com/huggingface/huggingface.js/blob/16bd879/packages/hub/src/lib/commit.ts#L48)
+[src/lib/commit.ts:48](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L48)
 
 ___
 
@@ -77,7 +77,7 @@ Parent commit. Optional
 
 #### Defined in
 
-[src/lib/commit.ts:58](https://github.com/huggingface/huggingface.js/blob/16bd879/packages/hub/src/lib/commit.ts#L58)
+[src/lib/commit.ts:58](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L58)
 
 ___
 
@@ -87,7 +87,7 @@ ___
 
 #### Defined in
 
-[src/lib/commit.ts:47](https://github.com/huggingface/huggingface.js/blob/16bd879/packages/hub/src/lib/commit.ts#L47)
+[src/lib/commit.ts:47](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L47)
 
 ___
 
@@ -97,4 +97,4 @@ ___
 
 #### Defined in
 
-[src/lib/commit.ts:45](https://github.com/huggingface/huggingface.js/blob/16bd879/packages/hub/src/lib/commit.ts#L45)
+[src/lib/commit.ts:45](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L45)
