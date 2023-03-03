@@ -685,7 +685,7 @@ export class HfInference {
 			headers["Authorization"] = `Bearer ${this.apiKey}`;
 		}
     
-    if (!options?.binary) {
+		if (!options?.binary) {
 			headers["Content-Type"] = "application/json";
 		}
 
