@@ -120,10 +120,20 @@ describe("HfInference", () => {
 			])
 		);
 	});
-	it("textGeneration", async () => {
+	it("textGeneration - gpt2", async () => {
 		expect(
 			await hf.textGeneration({
 				model:  "gpt2",
+				inputs: "The answer to the universe is",
+			})
+		).toMatchObject({
+			generated_text: expect.any(String),
+		});
+	});
+	it("textGeneration - google/flan-t5-xxl", async () => {
+		expect(
+			await hf.textGeneration({
+				model:  "google/flan-t5-xxl",
 				inputs: "The answer to the universe is",
 			})
 		).toMatchObject({

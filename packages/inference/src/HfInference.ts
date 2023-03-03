@@ -684,6 +684,10 @@ export class HfInference {
 		if (this.apiKey) {
 			headers["Authorization"] = `Bearer ${this.apiKey}`;
 		}
+    
+		if (!options?.binary) {
+			headers["Content-Type"] = "application/json";
+		}
 
 		if (options?.binary && mergedOptions.wait_for_model) {
 			headers["X-Wait-For-Model"] = "true";
