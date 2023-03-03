@@ -48,3 +48,5 @@ await hf.textToImage({
   model: 'stabilityai/stable-diffusion-2',
 })
 ```
+
+There are more features of course, check each library's README!
