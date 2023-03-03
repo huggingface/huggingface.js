@@ -13,8 +13,8 @@
 
 This is a collection of JS libraries to interact with the Hugging Face API, with TS types included.
 
-- [@huggingface/hub](packages/hub/README.md): Interact with huggingface.co to create or delete repos and commit / download files
-- [@huggingface/inference](packages/inference/README.md): Use the Inference API to make calls to Machine Learning models!
+- [@huggingface/hub](hub/README): Interact with huggingface.co to create or delete repos and commit / download files
+- [@huggingface/inference](inference/README): Use the Inference API to make calls to Machine Learning models!
 
 With more to come, like `@huggingface/endpoints` to manage your HF Endpoints!
 

@@ -364,9 +364,10 @@ export type FeatureExtractionArgs = Args & {
 	/**
 	 * The inputs vary based on the model. For example when using sentence-transformers/paraphrase-xlm-r-multilingual-v1 the inputs will look like this:
 	 *
-	 *  inputs: {
+	 *  inputs: &#123;
 	 *    "source_sentence": "That is a happy person",
 	 *    "sentences": ["That is a happy dog", "That is a very happy person", "Today is a sunny day"]
+	 *  &#125;
 	 */
 	inputs: Record<string, any> | Record<string, any>[];
 };
@@ -684,7 +685,7 @@ export class HfInference {
 		if (this.apiKey) {
 			headers["Authorization"] = `Bearer ${this.apiKey}`;
 		}
-    
+
 		if (!options?.binary) {
 			headers["Content-Type"] = "application/json";
 		}
