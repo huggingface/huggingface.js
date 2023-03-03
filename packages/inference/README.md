@@ -1,5 +1,7 @@
 # 🤗 Hugging Face Inference API
 
+TEST CI
+
 A Typescript powered wrapper for the Hugging Face Inference API. Learn more about the Inference API at [Hugging Face](https://huggingface.co/docs/api-inference/index).
 
 ## Install
