@@ -4,13 +4,39 @@
   isExpanded: true
   sections:
     - local: hub/README
-      title: "Interact with the Hub"
+      title: Interact with the Hub
     - local: hub/modules
-      title: "API Reference"
+      title: API Reference
+    - title: Classes
+      sections:
+        - title: ApiError
+          local: hub/classes/ApiError
+    - title: Interfaces
+      sections:
+        - title: CommitDeletedEntry
+          local: hub/interfaces/CommitDeletedEntry
+        - title: CommitFile
+          local: hub/interfaces/CommitFile
+        - title: CommitOutput
+          local: hub/interfaces/CommitOutput
+        - title: CommitParams
+          local: hub/interfaces/CommitParams
+        - title: Credentials
+          local: hub/interfaces/Credentials
+        - title: FileDownloadInfoOutput
+          local: hub/interfaces/FileDownloadInfoOutput
+        - title: ListFileEntry
+          local: hub/interfaces/ListFileEntry
+        - title: RepoId
+          local: hub/interfaces/RepoId
 - title: "@huggingface/inference"
   isExpanded: true
   sections:
     - local: inference/README
-      title: "Use the Inference API"
+      title: Use the Inference API
     - local: inference/modules
-      title: "API Reference"
+      title: API Reference
+    - title: Classes
+      sections:
+        - title: HfInference
+          local: inference/classes/HfInference

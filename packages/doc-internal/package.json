@@ -1,17 +1,30 @@
 {
-  "name": "@huggingface/doc-internal",
-  "version": "1.0.0",
-  "description": "Package to generate doc for other @huggingface packages",
-  "private": true,
-  "scripts": {
-    "start": "npm run doc-hub && npm run doc-inference && cp ../../README.md ../../docs/index.md",
-    "doc-hub": "typedoc --tsconfig ../hub/tsconfig.json --githubPages false --plugin typedoc-plugin-markdown --out ../../docs/hub --hideBreadcrumbs --hideInPageTOC --sourceLinkTemplate https://github.com/huggingface/huggingface.js/blob/main/{path}#L{line} ../hub/index.ts",
-    "doc-inference": "typedoc --tsconfig ../inference/tsconfig.json --githubPages false --plugin typedoc-plugin-markdown --out ../../docs/inference --hideBreadcrumbs --hideInPageTOC --sourceLinkTemplate https://github.com/huggingface/huggingface.js/blob/main/{path}#L{line} ../inference/src/index.ts"
-  },
-  "license": "MIT",
-  "devDependencies": {
-    "typedoc": "^0.23.26",
-    "typedoc-plugin-markdown": "^3.14.0",
-    "typescript": "^4.9.5"
-  }
+	"name": "@huggingface/doc-internal",
+	"version": "1.0.0",
+	"description": "Package to generate doc for other @huggingface packages",
+	"private": true,
+	"scripts": {
+		"start": "npm run doc-hub && npm run doc-inference && cp ../../README.md ../../docs/index.md && npm run update-toc",
+		"doc-hub": "typedoc --tsconfig ../hub/tsconfig.json --githubPages false --plugin typedoc-plugin-markdown --out ../../docs/hub --hideBreadcrumbs --hideInPageTOC --sourceLinkTemplate https://github.com/huggingface/huggingface.js/blob/main/{path}#L{line} ../hub/index.ts",
+		"doc-inference": "typedoc --tsconfig ../inference/tsconfig.json --githubPages false --plugin typedoc-plugin-markdown --out ../../docs/inference --hideBreadcrumbs --hideInPageTOC --sourceLinkTemplate https://github.com/huggingface/huggingface.js/blob/main/{path}#L{line} ../inference/src/index.ts",
+		"update-toc": "ts-node --esm update-toc.ts"
+	},
+	"type": "module",
+	"license": "MIT",
+	"devDependencies": {
+		"@types/node": "^18.14.5",
+		"@typescript-eslint/eslint-plugin": "^5.51.0",
+		"@typescript-eslint/parser": "^5.51.0",
+		"eslint": "^8.35.0",
+		"eslint-config-prettier": "^8.6.0",
+		"eslint-plugin-prettier": "^4.2.1",
+		"prettier": "^2.8.4",
+		"ts-node": "^10.9.1",
+		"typedoc": "^0.23.26",
+		"typedoc-plugin-markdown": "^3.14.0",
+		"typescript": "^4.9.5"
+	},
+	"dependencies": {
+		"yaml": "^2.2.1"
+	}
 }
