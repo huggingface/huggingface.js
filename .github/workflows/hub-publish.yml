@@ -25,7 +25,9 @@ jobs:
         with:
           node-version: "18"
           cache: "pnpm"
-          cache-dependency-path: "packages/hub/pnpm-lock.yaml"
+          cache-dependency-path: |
+            packages/hub/pnpm-lock.yaml
+            packages/doc-internal/pnpm-lock.yaml
           # setting a registry enables the NODE_AUTH_TOKEN env variable where we can set an npm token.  REQUIRED
           registry-url: "https://registry.npmjs.org"
       - run: pnpm install
@@ -34,6 +36,8 @@ jobs:
       - run: yarn config set version-git-message "🔖 @hugginface/hub v%s"
       - run: yarn config set version-tag-prefix "hub-v"
       - run: yarn version --${{ github.event.inputs.newversion }}
+      - run: cd ../doc-internal && pnpm install && pnpm run prepublish-hub
+      - run: cd ../../ && git add . && git commit --amend --no-edit
       - run: pnpm publish .
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

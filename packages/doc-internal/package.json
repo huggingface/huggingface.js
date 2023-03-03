@@ -5,6 +5,8 @@
 	"private": true,
 	"scripts": {
 		"start": "npm run doc-hub && npm run doc-inference && cp ../../README.md ../../docs/index.md && npm run update-toc && npm run fix-md-links",
+		"prepublish-hub": "npm run doc-hub && cp ../../README.md ../../docs/index.md && npm run update-toc && npm run fix-md-links",
+		"prepublish-inference": "npm run doc-inference && cp ../../README.md ../../docs/index.md && npm run update-toc && npm run fix-md-links",
 		"doc-hub": "typedoc --tsconfig ../hub/tsconfig.json --githubPages false --plugin typedoc-plugin-markdown --out ../../docs/hub --hideBreadcrumbs --hideInPageTOC --sourceLinkTemplate https://github.com/huggingface/huggingface.js/blob/main/{path}#L{line} ../hub/index.ts",
 		"doc-inference": "typedoc --tsconfig ../inference/tsconfig.json --githubPages false --plugin typedoc-plugin-markdown --out ../../docs/inference --hideBreadcrumbs --hideInPageTOC --sourceLinkTemplate https://github.com/huggingface/huggingface.js/blob/main/{path}#L{line} ../inference/src/index.ts",
 		"update-toc": "ts-node --esm update-toc.ts",
