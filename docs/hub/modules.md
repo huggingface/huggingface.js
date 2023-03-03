@@ -1,5 +1,9 @@
 # @huggingface/hub
 
+## Classes
+
+- [ApiError](classes/ApiError.md)
+
 ## Interfaces
 
 - [CommitDeletedEntry](interfaces/CommitDeletedEntry.md)
@@ -19,7 +23,7 @@
 
 #### Defined in
 
-[src/types/repo.d.ts:8](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/repo.d.ts#L8)
+[hub/src/types/repo.d.ts:8](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/repo.d.ts#L8)
 
 ___
 
@@ -29,7 +33,7 @@ ___
 
 #### Defined in
 
-[src/lib/commit.ts:42](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L42)
+[hub/src/lib/commit.ts:42](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L42)
 
 ___
 
@@ -39,7 +43,7 @@ ___
 
 #### Defined in
 
-[src/types/repo.d.ts:1](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/repo.d.ts#L1)
+[hub/src/types/repo.d.ts:1](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/repo.d.ts#L1)
 
 ___
 
@@ -49,7 +53,7 @@ ___
 
 #### Defined in
 
-[src/types/repo.d.ts:14](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/repo.d.ts#L14)
+[hub/src/types/repo.d.ts:14](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/repo.d.ts#L14)
 
 ___
 
@@ -59,7 +63,7 @@ ___
 
 #### Defined in
 
-[src/types/repo.d.ts:23](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/repo.d.ts#L23)
+[hub/src/types/repo.d.ts:23](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/repo.d.ts#L23)
 
 ## Functions
 
@@ -79,7 +83,7 @@ ___
 
 #### Defined in
 
-[src/lib/commit.ts:342](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L342)
+[hub/src/lib/commit.ts:342](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L342)
 
 ___
 
@@ -106,7 +110,7 @@ ___
 
 #### Defined in
 
-[src/lib/create-repo.ts:6](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/create-repo.ts#L6)
+[hub/src/lib/create-repo.ts:6](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/create-repo.ts#L6)
 
 ___
 
@@ -129,7 +133,7 @@ ___
 
 #### Defined in
 
-[src/lib/delete-repo.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/delete-repo.ts#L5)
+[hub/src/lib/delete-repo.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/delete-repo.ts#L5)
 
 ___
 
@@ -157,7 +161,7 @@ null when the file doesn't exist
 
 #### Defined in
 
-[src/lib/download-file.ts:8](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/download-file.ts#L8)
+[hub/src/lib/download-file.ts:8](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/download-file.ts#L8)
 
 ___
 
@@ -186,7 +190,7 @@ null when the file doesn't exist
 
 #### Defined in
 
-[src/lib/file-download-info.ts:16](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/file-download-info.ts#L16)
+[hub/src/lib/file-download-info.ts:16](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/file-download-info.ts#L16)
 
 ___
 
@@ -215,4 +219,4 @@ with params.recursive set to `true`.
 
 #### Defined in
 
-[src/lib/list-files.ts:31](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L31)
+[hub/src/lib/list-files.ts:31](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L31)
