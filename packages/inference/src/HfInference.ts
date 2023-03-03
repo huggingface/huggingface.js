@@ -680,7 +680,7 @@ export class HfInference {
 		const mergedOptions = { ...this.defaultOptions, ...options };
 		const { model, ...otherArgs } = args;
 
-		const headers = {};
+		const headers: Record<string, string> = {};
 		if (this.apiKey) {
 			headers["Authorization"] = `Bearer ${this.apiKey}`;
 		}
