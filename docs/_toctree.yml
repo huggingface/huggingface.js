@@ -5,10 +5,10 @@
   isExpanded: true
   sections:
     - local: hub/modules
-    - title: "@huggingface/hub API Reference"
+      title: "@huggingface/hub API Reference"
 - local: inference/README
   title: "Use the Inference API"
   isExpanded: true
   sections:
     - local: inference/modules
-    - title: "@huggingface/inference API Reference"
+      title: "@huggingface/inference API Reference"
