@@ -4,9 +4,9 @@
   "description": "Package to generate doc for other @huggingface packages",
   "private": true,
   "scripts": {
-    "start": "npm run doc-hub && npm run doc-inference && cp ../../README.md ../../docs/en",
-    "doc-hub": "typedoc --tsconfig ../hub/tsconfig.json --githubPages false --plugin typedoc-plugin-markdown --out ../../docs/en/hub --hideBreadcrumbs --hideInPageTOC --sourceLinkTemplate https://github.com/huggingface/huggingface.js/blob/main/{path}#L{line} ../hub/index.ts",
-    "doc-inference": "typedoc --tsconfig ../inference/tsconfig.json --githubPages false --plugin typedoc-plugin-markdown --out ../../docs/en/inference --hideBreadcrumbs --hideInPageTOC --sourceLinkTemplate https://github.com/huggingface/huggingface.js/blob/main/{path}#L{line} ../inference/src/index.ts"
+    "start": "npm run doc-hub && npm run doc-inference && cp ../../README.md ../../docs",
+    "doc-hub": "typedoc --tsconfig ../hub/tsconfig.json --githubPages false --plugin typedoc-plugin-markdown --out ../../docs/hub --hideBreadcrumbs --hideInPageTOC --sourceLinkTemplate https://github.com/huggingface/huggingface.js/blob/main/{path}#L{line} ../hub/index.ts",
+    "doc-inference": "typedoc --tsconfig ../inference/tsconfig.json --githubPages false --plugin typedoc-plugin-markdown --out ../../docs/inference --hideBreadcrumbs --hideInPageTOC --sourceLinkTemplate https://github.com/huggingface/huggingface.js/blob/main/{path}#L{line} ../inference/src/index.ts"
   },
   "license": "MIT",
   "devDependencies": {
