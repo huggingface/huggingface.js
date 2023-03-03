@@ -9,7 +9,7 @@
   <br/>
 </p>
 
-# 🤗 HuggingFace API libraries
+# Hugging Face API libraries
 
 This is a collection of JS libraries to interact with Hugging Face, with TS types included.
 
