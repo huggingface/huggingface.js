@@ -2,7 +2,7 @@
 
 ## Classes
 
-- [HfInference](classes/HfInference.md)
+- [HfInference](classes/HfInference)
 
 ## Type Aliases
 
@@ -24,7 +24,7 @@ ___
 
 ### AudioClassificationArgs
 
-Ƭ **AudioClassificationArgs**: [`Args`](modules.md#args) & { `data`: `any`  }
+Ƭ **AudioClassificationArgs**: [`Args`](modules#args) & { `data`: `any`  }
 
 #### Defined in
 
@@ -34,7 +34,7 @@ ___
 
 ### AudioClassificationReturn
 
-Ƭ **AudioClassificationReturn**: [`AudioClassificationReturnValue`](modules.md#audioclassificationreturnvalue)[]
+Ƭ **AudioClassificationReturn**: [`AudioClassificationReturnValue`](modules#audioclassificationreturnvalue)[]
 
 #### Defined in
 
@@ -61,7 +61,7 @@ ___
 
 ### AutomaticSpeechRecognitionArgs
 
-Ƭ **AutomaticSpeechRecognitionArgs**: [`Args`](modules.md#args) & { `data`: `any`  }
+Ƭ **AutomaticSpeechRecognitionArgs**: [`Args`](modules#args) & { `data`: `any`  }
 
 #### Defined in
 
@@ -87,7 +87,7 @@ ___
 
 ### ConversationalArgs
 
-Ƭ **ConversationalArgs**: [`Args`](modules.md#args) & { `inputs`: { `generated_responses?`: `string`[] ; `past_user_inputs?`: `string`[] ; `text`: `string`  } ; `parameters?`: { `max_length?`: `number` ; `max_time?`: `number` ; `min_length?`: `number` ; `repetition_penalty?`: `number` ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number`  }  }
+Ƭ **ConversationalArgs**: [`Args`](modules#args) & { `inputs`: { `generated_responses?`: `string`[] ; `past_user_inputs?`: `string`[] ; `text`: `string`  } ; `parameters?`: { `max_length?`: `number` ; `max_time?`: `number` ; `min_length?`: `number` ; `repetition_penalty?`: `number` ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number`  }  }
 
 #### Defined in
 
@@ -117,7 +117,7 @@ ___
 
 ### FeatureExtractionArgs
 
-Ƭ **FeatureExtractionArgs**: [`Args`](modules.md#args) & { `inputs`: `Record`<`string`, `any`\> \| `Record`<`string`, `any`\>[]  }
+Ƭ **FeatureExtractionArgs**: [`Args`](modules#args) & { `inputs`: `Record`<`string`, `any`\> \| `Record`<`string`, `any`\>[]  }
 
 #### Defined in
 
@@ -139,7 +139,7 @@ ___
 
 ### FillMaskArgs
 
-Ƭ **FillMaskArgs**: [`Args`](modules.md#args) & { `inputs`: `string`  }
+Ƭ **FillMaskArgs**: [`Args`](modules#args) & { `inputs`: `string`  }
 
 #### Defined in
 
@@ -159,7 +159,7 @@ ___
 
 ### ImageClassificationArgs
 
-Ƭ **ImageClassificationArgs**: [`Args`](modules.md#args) & { `data`: `any`  }
+Ƭ **ImageClassificationArgs**: [`Args`](modules#args) & { `data`: `any`  }
 
 #### Defined in
 
@@ -169,7 +169,7 @@ ___
 
 ### ImageClassificationReturn
 
-Ƭ **ImageClassificationReturn**: [`ImageClassificationReturnValue`](modules.md#imageclassificationreturnvalue)[]
+Ƭ **ImageClassificationReturn**: [`ImageClassificationReturnValue`](modules#imageclassificationreturnvalue)[]
 
 #### Defined in
 
@@ -196,7 +196,7 @@ ___
 
 ### ImageSegmentationArgs
 
-Ƭ **ImageSegmentationArgs**: [`Args`](modules.md#args) & { `data`: `any`  }
+Ƭ **ImageSegmentationArgs**: [`Args`](modules#args) & { `data`: `any`  }
 
 #### Defined in
 
@@ -206,7 +206,7 @@ ___
 
 ### ImageSegmentationReturn
 
-Ƭ **ImageSegmentationReturn**: [`ImageSegmentationReturnValue`](modules.md#imagesegmentationreturnvalue)[]
+Ƭ **ImageSegmentationReturn**: [`ImageSegmentationReturnValue`](modules#imagesegmentationreturnvalue)[]
 
 #### Defined in
 
@@ -234,7 +234,7 @@ ___
 
 ### ObjectDetectionArgs
 
-Ƭ **ObjectDetectionArgs**: [`Args`](modules.md#args) & { `data`: `any`  }
+Ƭ **ObjectDetectionArgs**: [`Args`](modules#args) & { `data`: `any`  }
 
 #### Defined in
 
@@ -244,7 +244,7 @@ ___
 
 ### ObjectDetectionReturn
 
-Ƭ **ObjectDetectionReturn**: [`ObjectDetectionReturnValue`](modules.md#objectdetectionreturnvalue)[]
+Ƭ **ObjectDetectionReturn**: [`ObjectDetectionReturnValue`](modules#objectdetectionreturnvalue)[]
 
 #### Defined in
 
@@ -295,7 +295,7 @@ ___
 
 ### QuestionAnswerArgs
 
-Ƭ **QuestionAnswerArgs**: [`Args`](modules.md#args) & { `inputs`: { `context`: `string` ; `question`: `string`  }  }
+Ƭ **QuestionAnswerArgs**: [`Args`](modules#args) & { `inputs`: { `context`: `string` ; `question`: `string`  }  }
 
 #### Defined in
 
@@ -324,7 +324,7 @@ ___
 
 ### SummarizationArgs
 
-Ƭ **SummarizationArgs**: [`Args`](modules.md#args) & { `inputs`: `string` ; `parameters?`: { `max_length?`: `number` ; `max_time?`: `number` ; `min_length?`: `number` ; `repetition_penalty?`: `number` ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number`  }  }
+Ƭ **SummarizationArgs**: [`Args`](modules#args) & { `inputs`: `string` ; `parameters?`: { `max_length?`: `number` ; `max_time?`: `number` ; `min_length?`: `number` ; `repetition_penalty?`: `number` ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number`  }  }
 
 #### Defined in
 
@@ -350,7 +350,7 @@ ___
 
 ### TableQuestionAnswerArgs
 
-Ƭ **TableQuestionAnswerArgs**: [`Args`](modules.md#args) & { `inputs`: { `query`: `string` ; `table`: `Record`<`string`, `string`[]\>  }  }
+Ƭ **TableQuestionAnswerArgs**: [`Args`](modules#args) & { `inputs`: { `query`: `string` ; `table`: `Record`<`string`, `string`[]\>  }  }
 
 #### Defined in
 
@@ -379,7 +379,7 @@ ___
 
 ### TextClassificationArgs
 
-Ƭ **TextClassificationArgs**: [`Args`](modules.md#args) & { `inputs`: `string`  }
+Ƭ **TextClassificationArgs**: [`Args`](modules#args) & { `inputs`: `string`  }
 
 #### Defined in
 
@@ -399,7 +399,7 @@ ___
 
 ### TextGenerationArgs
 
-Ƭ **TextGenerationArgs**: [`Args`](modules.md#args) & { `inputs`: `string` ; `parameters?`: { `do_sample?`: `boolean` ; `max_new_tokens?`: `number` ; `max_time?`: `number` ; `num_return_sequences?`: `number` ; `repetition_penalty?`: `number` ; `return_full_text?`: `boolean` ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number`  }  }
+Ƭ **TextGenerationArgs**: [`Args`](modules#args) & { `inputs`: `string` ; `parameters?`: { `do_sample?`: `boolean` ; `max_new_tokens?`: `number` ; `max_time?`: `number` ; `num_return_sequences?`: `number` ; `repetition_penalty?`: `number` ; `return_full_text?`: `boolean` ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number`  }  }
 
 #### Defined in
 
@@ -425,7 +425,7 @@ ___
 
 ### TextToImageArgs
 
-Ƭ **TextToImageArgs**: [`Args`](modules.md#args) & { `inputs`: `string` ; `negative_prompt?`: `string`  }
+Ƭ **TextToImageArgs**: [`Args`](modules#args) & { `inputs`: `string` ; `negative_prompt?`: `string`  }
 
 #### Defined in
 
@@ -445,7 +445,7 @@ ___
 
 ### TokenClassificationArgs
 
-Ƭ **TokenClassificationArgs**: [`Args`](modules.md#args) & { `inputs`: `string` ; `parameters?`: { `aggregation_strategy?`: ``"none"`` \| ``"simple"`` \| ``"first"`` \| ``"average"`` \| ``"max"``  }  }
+Ƭ **TokenClassificationArgs**: [`Args`](modules#args) & { `inputs`: `string` ; `parameters?`: { `aggregation_strategy?`: ``"none"`` \| ``"simple"`` \| ``"first"`` \| ``"average"`` \| ``"max"``  }  }
 
 #### Defined in
 
@@ -455,7 +455,7 @@ ___
 
 ### TokenClassificationReturn
 
-Ƭ **TokenClassificationReturn**: [`TokenClassificationReturnValue`](modules.md#tokenclassificationreturnvalue)[]
+Ƭ **TokenClassificationReturn**: [`TokenClassificationReturnValue`](modules#tokenclassificationreturnvalue)[]
 
 #### Defined in
 
@@ -485,7 +485,7 @@ ___
 
 ### TranslationArgs
 
-Ƭ **TranslationArgs**: [`Args`](modules.md#args) & { `inputs`: `string`  }
+Ƭ **TranslationArgs**: [`Args`](modules#args) & { `inputs`: `string`  }
 
 #### Defined in
 
@@ -511,7 +511,7 @@ ___
 
 ### ZeroShotClassificationArgs
 
-Ƭ **ZeroShotClassificationArgs**: [`Args`](modules.md#args) & { `inputs`: `string` \| `string`[] ; `parameters`: { `candidate_labels`: `string`[] ; `multi_label?`: `boolean`  }  }
+Ƭ **ZeroShotClassificationArgs**: [`Args`](modules#args) & { `inputs`: `string` \| `string`[] ; `parameters`: { `candidate_labels`: `string`[] ; `multi_label?`: `boolean`  }  }
 
 #### Defined in
 
@@ -521,7 +521,7 @@ ___
 
 ### ZeroShotClassificationReturn
 
-Ƭ **ZeroShotClassificationReturn**: [`ZeroShotClassificationReturnValue`](modules.md#zeroshotclassificationreturnvalue)[]
+Ƭ **ZeroShotClassificationReturn**: [`ZeroShotClassificationReturnValue`](modules#zeroshotclassificationreturnvalue)[]
 
 #### Defined in
 

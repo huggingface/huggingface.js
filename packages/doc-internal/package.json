@@ -4,10 +4,11 @@
 	"description": "Package to generate doc for other @huggingface packages",
 	"private": true,
 	"scripts": {
-		"start": "npm run doc-hub && npm run doc-inference && cp ../../README.md ../../docs/index.md && npm run update-toc",
+		"start": "npm run doc-hub && npm run doc-inference && cp ../../README.md ../../docs/index.md && npm run update-toc && npm run fix-md-links",
 		"doc-hub": "typedoc --tsconfig ../hub/tsconfig.json --githubPages false --plugin typedoc-plugin-markdown --out ../../docs/hub --hideBreadcrumbs --hideInPageTOC --sourceLinkTemplate https://github.com/huggingface/huggingface.js/blob/main/{path}#L{line} ../hub/index.ts",
 		"doc-inference": "typedoc --tsconfig ../inference/tsconfig.json --githubPages false --plugin typedoc-plugin-markdown --out ../../docs/inference --hideBreadcrumbs --hideInPageTOC --sourceLinkTemplate https://github.com/huggingface/huggingface.js/blob/main/{path}#L{line} ../inference/src/index.ts",
-		"update-toc": "ts-node --esm update-toc.ts"
+		"update-toc": "ts-node --esm update-toc.ts",
+		"fix-md-links": "ts-node --esm fix-md-links.ts"
 	},
 	"type": "module",
 	"license": "MIT",
@@ -25,6 +26,7 @@
 		"typescript": "^4.9.5"
 	},
 	"dependencies": {
+		"glob": "^9.2.1",
 		"yaml": "^2.2.1"
 	}
 }

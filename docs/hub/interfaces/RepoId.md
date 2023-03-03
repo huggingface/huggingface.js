@@ -14,7 +14,7 @@ ___
 
 ### type
 
-• **type**: [`RepoType`](../modules.md#repotype)
+• **type**: [`RepoType`](../modules#repotype)
 
 #### Defined in
 

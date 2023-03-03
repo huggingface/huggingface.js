@@ -4,7 +4,6 @@
 
 import { readdirSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
-import { inspect } from "util";
 import { parse, stringify } from "yaml";
 
 interface Section {

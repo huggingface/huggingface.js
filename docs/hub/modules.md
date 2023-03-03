@@ -2,18 +2,18 @@
 
 ## Classes
 
-- [ApiError](classes/ApiError.md)
+- [ApiError](classes/ApiError)
 
 ## Interfaces
 
-- [CommitDeletedEntry](interfaces/CommitDeletedEntry.md)
-- [CommitFile](interfaces/CommitFile.md)
-- [CommitOutput](interfaces/CommitOutput.md)
-- [CommitParams](interfaces/CommitParams.md)
-- [Credentials](interfaces/Credentials.md)
-- [FileDownloadInfoOutput](interfaces/FileDownloadInfoOutput.md)
-- [ListFileEntry](interfaces/ListFileEntry.md)
-- [RepoId](interfaces/RepoId.md)
+- [CommitDeletedEntry](interfaces/CommitDeletedEntry)
+- [CommitFile](interfaces/CommitFile)
+- [CommitOutput](interfaces/CommitOutput)
+- [CommitParams](interfaces/CommitParams)
+- [Credentials](interfaces/Credentials)
+- [FileDownloadInfoOutput](interfaces/FileDownloadInfoOutput)
+- [ListFileEntry](interfaces/ListFileEntry)
+- [RepoId](interfaces/RepoId)
 
 ## Type Aliases
 
@@ -29,7 +29,7 @@ ___
 
 ### CommitOperation
 
-Ƭ **CommitOperation**: [`CommitDeletedEntry`](interfaces/CommitDeletedEntry.md) \| [`CommitFile`](interfaces/CommitFile.md)
+Ƭ **CommitOperation**: [`CommitDeletedEntry`](interfaces/CommitDeletedEntry) \| [`CommitFile`](interfaces/CommitFile)
 
 #### Defined in
 
@@ -69,17 +69,17 @@ ___
 
 ### commit
 
-▸ **commit**(`params`): `Promise`<[`CommitOutput`](interfaces/CommitOutput.md)\>
+▸ **commit**(`params`): `Promise`<[`CommitOutput`](interfaces/CommitOutput)\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `params` | [`CommitParams`](interfaces/CommitParams.md) |
+| `params` | [`CommitParams`](interfaces/CommitParams) |
 
 #### Returns
 
-`Promise`<[`CommitOutput`](interfaces/CommitOutput.md)\>
+`Promise`<[`CommitOutput`](interfaces/CommitOutput)\>
 
 #### Defined in
 
@@ -96,13 +96,13 @@ ___
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `params` | `Object` | - |
-| `params.credentials` | [`Credentials`](interfaces/Credentials.md) | - |
+| `params.credentials` | [`Credentials`](interfaces/Credentials) | - |
 | `params.files?` | { `content`: `ArrayBuffer` \| `Blob` ; `path`: `string`  }[] | Only a few lightweight files are supported at repo creation |
 | `params.hubUrl?` | `string` | - |
 | `params.license?` | `string` | - |
 | `params.private?` | `boolean` | - |
-| `params.repo` | [`RepoId`](interfaces/RepoId.md) | - |
-| `params.sdk?` | [`SpaceSdk`](modules.md#spacesdk) | **`Required`** for when repo.type === "space" |
+| `params.repo` | [`RepoId`](interfaces/RepoId) | - |
+| `params.sdk?` | [`SpaceSdk`](modules#spacesdk) | **`Required`** for when repo.type === "space" |
 
 #### Returns
 
@@ -123,9 +123,9 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `params` | `Object` |
-| `params.credentials` | [`Credentials`](interfaces/Credentials.md) |
+| `params.credentials` | [`Credentials`](interfaces/Credentials) |
 | `params.hubUrl?` | `string` |
-| `params.repo` | [`RepoId`](interfaces/RepoId.md) |
+| `params.repo` | [`RepoId`](interfaces/RepoId) |
 
 #### Returns
 
@@ -146,11 +146,11 @@ ___
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `params` | `Object` | - |
-| `params.credentials?` | [`Credentials`](interfaces/Credentials.md) | - |
+| `params.credentials?` | [`Credentials`](interfaces/Credentials) | - |
 | `params.hubUrl?` | `string` | - |
 | `params.path` | `string` | - |
 | `params.raw?` | `boolean` | If true, will download the raw git file. For example, when calling on a file stored with Git LFS, the pointer file will be downloaded instead. |
-| `params.repo` | [`RepoId`](interfaces/RepoId.md) | - |
+| `params.repo` | [`RepoId`](interfaces/RepoId) | - |
 | `params.revision?` | `string` | - |
 
 #### Returns
@@ -167,24 +167,24 @@ ___
 
 ### fileDownloadInfo
 
-▸ **fileDownloadInfo**(`params`): `Promise`<[`FileDownloadInfoOutput`](interfaces/FileDownloadInfoOutput.md) \| ``null``\>
+▸ **fileDownloadInfo**(`params`): `Promise`<[`FileDownloadInfoOutput`](interfaces/FileDownloadInfoOutput) \| ``null``\>
 
 #### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `params` | `Object` | - |
-| `params.credentials?` | [`Credentials`](interfaces/Credentials.md) | - |
+| `params.credentials?` | [`Credentials`](interfaces/Credentials) | - |
 | `params.hubUrl?` | `string` | - |
 | `params.noContentDisposition?` | `boolean` | To avoid the content-disposition header in the `downloadLink` for LFS files So that on browsers you can use the URL in an iframe for example |
 | `params.path` | `string` | - |
 | `params.raw?` | `boolean` | To get the raw pointer file behind a LFS file |
-| `params.repo` | [`RepoId`](interfaces/RepoId.md) | - |
+| `params.repo` | [`RepoId`](interfaces/RepoId) | - |
 | `params.revision?` | `string` | - |
 
 #### Returns
 
-`Promise`<[`FileDownloadInfoOutput`](interfaces/FileDownloadInfoOutput.md) \| ``null``\>
+`Promise`<[`FileDownloadInfoOutput`](interfaces/FileDownloadInfoOutput) \| ``null``\>
 
 null when the file doesn't exist
 
@@ -196,7 +196,7 @@ ___
 
 ### listFiles
 
-▸ **listFiles**(`params`): `AsyncGenerator`<[`ListFileEntry`](interfaces/ListFileEntry.md)\>
+▸ **listFiles**(`params`): `AsyncGenerator`<[`ListFileEntry`](interfaces/ListFileEntry)\>
 
 List files in a folder. To list ALL files in the directory, call it
 with params.recursive set to `true`.
@@ -206,16 +206,16 @@ with params.recursive set to `true`.
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `params` | `Object` | - |
-| `params.credentials?` | [`Credentials`](interfaces/Credentials.md) | - |
+| `params.credentials?` | [`Credentials`](interfaces/Credentials) | - |
 | `params.hubUrl?` | `string` | - |
 | `params.path?` | `string` | Eg 'data' for listing all files in the 'data' folder. Leave it empty to list all files in the repo. |
 | `params.recursive?` | `boolean` | Do we want to list files in subdirectories? |
-| `params.repo` | [`RepoId`](interfaces/RepoId.md) | - |
+| `params.repo` | [`RepoId`](interfaces/RepoId) | - |
 | `params.revision?` | `string` | - |
 
 #### Returns
 
-`AsyncGenerator`<[`ListFileEntry`](interfaces/ListFileEntry.md)\>
+`AsyncGenerator`<[`ListFileEntry`](interfaces/ListFileEntry)\>
 
 #### Defined in
 

@@ -18,7 +18,7 @@ ___
 
 ### credentials
 
-• **credentials**: [`Credentials`](Credentials.md)
+• **credentials**: [`Credentials`](Credentials)
 
 #### Defined in
 
@@ -58,7 +58,7 @@ ___
 
 ### operations
 
-• **operations**: [`CommitOperation`](../modules.md#commitoperation)[]
+• **operations**: [`CommitOperation`](../modules#commitoperation)[]
 
 #### Defined in
 
@@ -83,7 +83,7 @@ ___
 
 ### repo
 
-• **repo**: [`RepoId`](RepoId.md)
+• **repo**: [`RepoId`](RepoId)
 
 #### Defined in
 

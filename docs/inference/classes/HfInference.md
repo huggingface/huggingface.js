@@ -11,7 +11,7 @@
 | Name | Type | Default value |
 | :------ | :------ | :------ |
 | `apiKey` | `string` | `""` |
-| `defaultOptions` | [`Options`](../modules.md#options) | `{}` |
+| `defaultOptions` | [`Options`](../modules#options) | `{}` |
 
 #### Defined in
 
@@ -31,7 +31,7 @@ ___
 
 ### defaultOptions
 
-• `Private` `Readonly` **defaultOptions**: [`Options`](../modules.md#options)
+• `Private` `Readonly` **defaultOptions**: [`Options`](../modules#options)
 
 #### Defined in
 
@@ -41,7 +41,7 @@ ___
 
 ### audioClassification
 
-▸ **audioClassification**(`args`, `options?`): `Promise`<[`AudioClassificationReturn`](../modules.md#audioclassificationreturn)\>
+▸ **audioClassification**(`args`, `options?`): `Promise`<[`AudioClassificationReturn`](../modules#audioclassificationreturn)\>
 
 This task reads some audio input and outputs the likelihood of classes.
 Recommended model:  superb/hubert-large-superb-er
@@ -50,12 +50,12 @@ Recommended model:  superb/hubert-large-superb-er
 
 | Name | Type |
 | :------ | :------ |
-| `args` | [`AudioClassificationArgs`](../modules.md#audioclassificationargs) |
-| `options?` | [`Options`](../modules.md#options) |
+| `args` | [`AudioClassificationArgs`](../modules#audioclassificationargs) |
+| `options?` | [`Options`](../modules#options) |
 
 #### Returns
 
-`Promise`<[`AudioClassificationReturn`](../modules.md#audioclassificationreturn)\>
+`Promise`<[`AudioClassificationReturn`](../modules#audioclassificationreturn)\>
 
 #### Defined in
 
@@ -65,7 +65,7 @@ ___
 
 ### automaticSpeechRecognition
 
-▸ **automaticSpeechRecognition**(`args`, `options?`): `Promise`<[`AutomaticSpeechRecognitionReturn`](../modules.md#automaticspeechrecognitionreturn)\>
+▸ **automaticSpeechRecognition**(`args`, `options?`): `Promise`<[`AutomaticSpeechRecognitionReturn`](../modules#automaticspeechrecognitionreturn)\>
 
 This task reads some audio input and outputs the said words within the audio files.
 Recommended model (english language): facebook/wav2vec2-large-960h-lv60-self
@@ -74,12 +74,12 @@ Recommended model (english language): facebook/wav2vec2-large-960h-lv60-self
 
 | Name | Type |
 | :------ | :------ |
-| `args` | [`AutomaticSpeechRecognitionArgs`](../modules.md#automaticspeechrecognitionargs) |
-| `options?` | [`Options`](../modules.md#options) |
+| `args` | [`AutomaticSpeechRecognitionArgs`](../modules#automaticspeechrecognitionargs) |
+| `options?` | [`Options`](../modules#options) |
 
 #### Returns
 
-`Promise`<[`AutomaticSpeechRecognitionReturn`](../modules.md#automaticspeechrecognitionreturn)\>
+`Promise`<[`AutomaticSpeechRecognitionReturn`](../modules#automaticspeechrecognitionreturn)\>
 
 #### Defined in
 
@@ -89,7 +89,7 @@ ___
 
 ### conversational
 
-▸ **conversational**(`args`, `options?`): `Promise`<[`ConversationalReturn`](../modules.md#conversationalreturn)\>
+▸ **conversational**(`args`, `options?`): `Promise`<[`ConversationalReturn`](../modules#conversationalreturn)\>
 
 This task corresponds to any chatbot like structure. Models tend to have shorter max_length, so please check with caution when using a given model if you need long range dependency or not. Recommended model: microsoft/DialoGPT-large.
 
@@ -97,12 +97,12 @@ This task corresponds to any chatbot like structure. Models tend to have shorter
 
 | Name | Type |
 | :------ | :------ |
-| `args` | [`ConversationalArgs`](../modules.md#conversationalargs) |
-| `options?` | [`Options`](../modules.md#options) |
+| `args` | [`ConversationalArgs`](../modules#conversationalargs) |
+| `options?` | [`Options`](../modules#options) |
 
 #### Returns
 
-`Promise`<[`ConversationalReturn`](../modules.md#conversationalreturn)\>
+`Promise`<[`ConversationalReturn`](../modules#conversationalreturn)\>
 
 #### Defined in
 
@@ -112,7 +112,7 @@ ___
 
 ### featureExtraction
 
-▸ **featureExtraction**(`args`, `options?`): `Promise`<[`FeatureExtractionReturn`](../modules.md#featureextractionreturn)\>
+▸ **featureExtraction**(`args`, `options?`): `Promise`<[`FeatureExtractionReturn`](../modules#featureextractionreturn)\>
 
 This task reads some text and outputs raw float values, that are usually consumed as part of a semantic database/semantic search.
 
@@ -120,12 +120,12 @@ This task reads some text and outputs raw float values, that are usually consume
 
 | Name | Type |
 | :------ | :------ |
-| `args` | [`FeatureExtractionArgs`](../modules.md#featureextractionargs) |
-| `options?` | [`Options`](../modules.md#options) |
+| `args` | [`FeatureExtractionArgs`](../modules#featureextractionargs) |
+| `options?` | [`Options`](../modules#options) |
 
 #### Returns
 
-`Promise`<[`FeatureExtractionReturn`](../modules.md#featureextractionreturn)\>
+`Promise`<[`FeatureExtractionReturn`](../modules#featureextractionreturn)\>
 
 #### Defined in
 
@@ -135,7 +135,7 @@ ___
 
 ### fillMask
 
-▸ **fillMask**(`args`, `options?`): `Promise`<[`FillMaskReturn`](../modules.md#fillmaskreturn)\>
+▸ **fillMask**(`args`, `options?`): `Promise`<[`FillMaskReturn`](../modules#fillmaskreturn)\>
 
 Tries to fill in a hole with a missing word (token to be precise). That’s the base task for BERT models.
 
@@ -143,12 +143,12 @@ Tries to fill in a hole with a missing word (token to be precise). That’s the 
 
 | Name | Type |
 | :------ | :------ |
-| `args` | [`FillMaskArgs`](../modules.md#fillmaskargs) |
-| `options?` | [`Options`](../modules.md#options) |
+| `args` | [`FillMaskArgs`](../modules#fillmaskargs) |
+| `options?` | [`Options`](../modules#options) |
 
 #### Returns
 
-`Promise`<[`FillMaskReturn`](../modules.md#fillmaskreturn)\>
+`Promise`<[`FillMaskReturn`](../modules#fillmaskreturn)\>
 
 #### Defined in
 
@@ -158,7 +158,7 @@ ___
 
 ### imageClassification
 
-▸ **imageClassification**(`args`, `options?`): `Promise`<[`ImageClassificationReturn`](../modules.md#imageclassificationreturn)\>
+▸ **imageClassification**(`args`, `options?`): `Promise`<[`ImageClassificationReturn`](../modules#imageclassificationreturn)\>
 
 This task reads some image input and outputs the likelihood of classes.
 Recommended model: google/vit-base-patch16-224
@@ -167,12 +167,12 @@ Recommended model: google/vit-base-patch16-224
 
 | Name | Type |
 | :------ | :------ |
-| `args` | [`ImageClassificationArgs`](../modules.md#imageclassificationargs) |
-| `options?` | [`Options`](../modules.md#options) |
+| `args` | [`ImageClassificationArgs`](../modules#imageclassificationargs) |
+| `options?` | [`Options`](../modules#options) |
 
 #### Returns
 
-`Promise`<[`ImageClassificationReturn`](../modules.md#imageclassificationreturn)\>
+`Promise`<[`ImageClassificationReturn`](../modules#imageclassificationreturn)\>
 
 #### Defined in
 
@@ -182,7 +182,7 @@ ___
 
 ### imageSegmentation
 
-▸ **imageSegmentation**(`args`, `options?`): `Promise`<[`ImageSegmentationReturn`](../modules.md#imagesegmentationreturn)\>
+▸ **imageSegmentation**(`args`, `options?`): `Promise`<[`ImageSegmentationReturn`](../modules#imagesegmentationreturn)\>
 
 This task reads some image input and outputs the likelihood of classes & bounding boxes of detected objects.
 Recommended model: facebook/detr-resnet-50-panoptic
@@ -191,12 +191,12 @@ Recommended model: facebook/detr-resnet-50-panoptic
 
 | Name | Type |
 | :------ | :------ |
-| `args` | [`ImageSegmentationArgs`](../modules.md#imagesegmentationargs) |
-| `options?` | [`Options`](../modules.md#options) |
+| `args` | [`ImageSegmentationArgs`](../modules#imagesegmentationargs) |
+| `options?` | [`Options`](../modules#options) |
 
 #### Returns
 
-`Promise`<[`ImageSegmentationReturn`](../modules.md#imagesegmentationreturn)\>
+`Promise`<[`ImageSegmentationReturn`](../modules#imagesegmentationreturn)\>
 
 #### Defined in
 
@@ -206,7 +206,7 @@ ___
 
 ### objectDetection
 
-▸ **objectDetection**(`args`, `options?`): `Promise`<[`ObjectDetectionReturn`](../modules.md#objectdetectionreturn)\>
+▸ **objectDetection**(`args`, `options?`): `Promise`<[`ObjectDetectionReturn`](../modules#objectdetectionreturn)\>
 
 This task reads some image input and outputs the likelihood of classes & bounding boxes of detected objects.
 Recommended model: facebook/detr-resnet-50
@@ -215,12 +215,12 @@ Recommended model: facebook/detr-resnet-50
 
 | Name | Type |
 | :------ | :------ |
-| `args` | [`ObjectDetectionArgs`](../modules.md#objectdetectionargs) |
-| `options?` | [`Options`](../modules.md#options) |
+| `args` | [`ObjectDetectionArgs`](../modules#objectdetectionargs) |
+| `options?` | [`Options`](../modules#options) |
 
 #### Returns
 
-`Promise`<[`ObjectDetectionReturn`](../modules.md#objectdetectionreturn)\>
+`Promise`<[`ObjectDetectionReturn`](../modules#objectdetectionreturn)\>
 
 #### Defined in
 
@@ -230,7 +230,7 @@ ___
 
 ### questionAnswer
 
-▸ **questionAnswer**(`args`, `options?`): `Promise`<[`QuestionAnswerReturn`](../modules.md#questionanswerreturn)\>
+▸ **questionAnswer**(`args`, `options?`): `Promise`<[`QuestionAnswerReturn`](../modules#questionanswerreturn)\>
 
 Want to have a nice know-it-all bot that can answer any question?. Recommended model: deepset/roberta-base-squad2
 
@@ -238,12 +238,12 @@ Want to have a nice know-it-all bot that can answer any question?. Recommended m
 
 | Name | Type |
 | :------ | :------ |
-| `args` | [`QuestionAnswerArgs`](../modules.md#questionanswerargs) |
-| `options?` | [`Options`](../modules.md#options) |
+| `args` | [`QuestionAnswerArgs`](../modules#questionanswerargs) |
+| `options?` | [`Options`](../modules#options) |
 
 #### Returns
 
-`Promise`<[`QuestionAnswerReturn`](../modules.md#questionanswerreturn)\>
+`Promise`<[`QuestionAnswerReturn`](../modules#questionanswerreturn)\>
 
 #### Defined in
 
@@ -259,8 +259,8 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `args` | [`Args`](../modules.md#args) & { `data?`: `any`  } |
-| `options?` | [`Options`](../modules.md#options) & { `binary?`: `boolean` ; `blob?`: `boolean`  } |
+| `args` | [`Args`](../modules#args) & { `data?`: `any`  } |
+| `options?` | [`Options`](../modules#options) & { `binary?`: `boolean` ; `blob?`: `boolean`  } |
 
 #### Returns
 
@@ -274,7 +274,7 @@ ___
 
 ### summarization
 
-▸ **summarization**(`args`, `options?`): `Promise`<[`SummarizationReturn`](../modules.md#summarizationreturn)\>
+▸ **summarization**(`args`, `options?`): `Promise`<[`SummarizationReturn`](../modules#summarizationreturn)\>
 
 This task is well known to summarize longer text into shorter text. Be careful, some models have a maximum length of input. That means that the summary cannot handle full books for instance. Be careful when choosing your model.
 
@@ -282,12 +282,12 @@ This task is well known to summarize longer text into shorter text. Be careful, 
 
 | Name | Type |
 | :------ | :------ |
-| `args` | [`SummarizationArgs`](../modules.md#summarizationargs) |
-| `options?` | [`Options`](../modules.md#options) |
+| `args` | [`SummarizationArgs`](../modules#summarizationargs) |
+| `options?` | [`Options`](../modules#options) |
 
 #### Returns
 
-`Promise`<[`SummarizationReturn`](../modules.md#summarizationreturn)\>
+`Promise`<[`SummarizationReturn`](../modules#summarizationreturn)\>
 
 #### Defined in
 
@@ -297,7 +297,7 @@ ___
 
 ### tableQuestionAnswer
 
-▸ **tableQuestionAnswer**(`args`, `options?`): `Promise`<[`TableQuestionAnswerReturn`](../modules.md#tablequestionanswerreturn)\>
+▸ **tableQuestionAnswer**(`args`, `options?`): `Promise`<[`TableQuestionAnswerReturn`](../modules#tablequestionanswerreturn)\>
 
 Don’t know SQL? Don’t want to dive into a large spreadsheet? Ask questions in plain english! Recommended model: google/tapas-base-finetuned-wtq.
 
@@ -305,12 +305,12 @@ Don’t know SQL? Don’t want to dive into a large spreadsheet? Ask questions i
 
 | Name | Type |
 | :------ | :------ |
-| `args` | [`TableQuestionAnswerArgs`](../modules.md#tablequestionanswerargs) |
-| `options?` | [`Options`](../modules.md#options) |
+| `args` | [`TableQuestionAnswerArgs`](../modules#tablequestionanswerargs) |
+| `options?` | [`Options`](../modules#options) |
 
 #### Returns
 
-`Promise`<[`TableQuestionAnswerReturn`](../modules.md#tablequestionanswerreturn)\>
+`Promise`<[`TableQuestionAnswerReturn`](../modules#tablequestionanswerreturn)\>
 
 #### Defined in
 
@@ -320,7 +320,7 @@ ___
 
 ### textClassification
 
-▸ **textClassification**(`args`, `options?`): `Promise`<[`TextClassificationReturn`](../modules.md#textclassificationreturn)\>
+▸ **textClassification**(`args`, `options?`): `Promise`<[`TextClassificationReturn`](../modules#textclassificationreturn)\>
 
 Usually used for sentiment-analysis this will output the likelihood of classes of an input. Recommended model: distilbert-base-uncased-finetuned-sst-2-english
 
@@ -328,12 +328,12 @@ Usually used for sentiment-analysis this will output the likelihood of classes o
 
 | Name | Type |
 | :------ | :------ |
-| `args` | [`TextClassificationArgs`](../modules.md#textclassificationargs) |
-| `options?` | [`Options`](../modules.md#options) |
+| `args` | [`TextClassificationArgs`](../modules#textclassificationargs) |
+| `options?` | [`Options`](../modules#options) |
 
 #### Returns
 
-`Promise`<[`TextClassificationReturn`](../modules.md#textclassificationreturn)\>
+`Promise`<[`TextClassificationReturn`](../modules#textclassificationreturn)\>
 
 #### Defined in
 
@@ -343,7 +343,7 @@ ___
 
 ### textGeneration
 
-▸ **textGeneration**(`args`, `options?`): `Promise`<[`TextGenerationReturn`](../modules.md#textgenerationreturn)\>
+▸ **textGeneration**(`args`, `options?`): `Promise`<[`TextGenerationReturn`](../modules#textgenerationreturn)\>
 
 Use to continue text from a prompt. This is a very generic task. Recommended model: gpt2 (it’s a simple model, but fun to play with).
 
@@ -351,12 +351,12 @@ Use to continue text from a prompt. This is a very generic task. Recommended mod
 
 | Name | Type |
 | :------ | :------ |
-| `args` | [`TextGenerationArgs`](../modules.md#textgenerationargs) |
-| `options?` | [`Options`](../modules.md#options) |
+| `args` | [`TextGenerationArgs`](../modules#textgenerationargs) |
+| `options?` | [`Options`](../modules#options) |
 
 #### Returns
 
-`Promise`<[`TextGenerationReturn`](../modules.md#textgenerationreturn)\>
+`Promise`<[`TextGenerationReturn`](../modules#textgenerationreturn)\>
 
 #### Defined in
 
@@ -375,8 +375,8 @@ Recommended model: stabilityai/stable-diffusion-2
 
 | Name | Type |
 | :------ | :------ |
-| `args` | [`TextToImageArgs`](../modules.md#texttoimageargs) |
-| `options?` | [`Options`](../modules.md#options) |
+| `args` | [`TextToImageArgs`](../modules#texttoimageargs) |
+| `options?` | [`Options`](../modules#options) |
 
 #### Returns
 
@@ -390,7 +390,7 @@ ___
 
 ### tokenClassification
 
-▸ **tokenClassification**(`args`, `options?`): `Promise`<[`TokenClassificationReturn`](../modules.md#tokenclassificationreturn)\>
+▸ **tokenClassification**(`args`, `options?`): `Promise`<[`TokenClassificationReturn`](../modules#tokenclassificationreturn)\>
 
 Usually used for sentence parsing, either grammatical, or Named Entity Recognition (NER) to understand keywords contained within text. Recommended model: dbmdz/bert-large-cased-finetuned-conll03-english
 
@@ -398,12 +398,12 @@ Usually used for sentence parsing, either grammatical, or Named Entity Recogniti
 
 | Name | Type |
 | :------ | :------ |
-| `args` | [`TokenClassificationArgs`](../modules.md#tokenclassificationargs) |
-| `options?` | [`Options`](../modules.md#options) |
+| `args` | [`TokenClassificationArgs`](../modules#tokenclassificationargs) |
+| `options?` | [`Options`](../modules#options) |
 
 #### Returns
 
-`Promise`<[`TokenClassificationReturn`](../modules.md#tokenclassificationreturn)\>
+`Promise`<[`TokenClassificationReturn`](../modules#tokenclassificationreturn)\>
 
 #### Defined in
 
@@ -413,7 +413,7 @@ ___
 
 ### translation
 
-▸ **translation**(`args`, `options?`): `Promise`<[`TranslationReturn`](../modules.md#translationreturn)\>
+▸ **translation**(`args`, `options?`): `Promise`<[`TranslationReturn`](../modules#translationreturn)\>
 
 This task is well known to translate text from one language to another. Recommended model: Helsinki-NLP/opus-mt-ru-en.
 
@@ -421,12 +421,12 @@ This task is well known to translate text from one language to another. Recommen
 
 | Name | Type |
 | :------ | :------ |
-| `args` | [`TranslationArgs`](../modules.md#translationargs) |
-| `options?` | [`Options`](../modules.md#options) |
+| `args` | [`TranslationArgs`](../modules#translationargs) |
+| `options?` | [`Options`](../modules#options) |
 
 #### Returns
 
-`Promise`<[`TranslationReturn`](../modules.md#translationreturn)\>
+`Promise`<[`TranslationReturn`](../modules#translationreturn)\>
 
 #### Defined in
 
@@ -436,7 +436,7 @@ ___
 
 ### zeroShotClassification
 
-▸ **zeroShotClassification**(`args`, `options?`): `Promise`<[`ZeroShotClassificationReturn`](../modules.md#zeroshotclassificationreturn)\>
+▸ **zeroShotClassification**(`args`, `options?`): `Promise`<[`ZeroShotClassificationReturn`](../modules#zeroshotclassificationreturn)\>
 
 This task is super useful to try out classification with zero code, you simply pass a sentence/paragraph and the possible labels for that sentence, and you get a result. Recommended model: facebook/bart-large-mnli.
 
@@ -444,12 +444,12 @@ This task is super useful to try out classification with zero code, you simply p
 
 | Name | Type |
 | :------ | :------ |
-| `args` | [`ZeroShotClassificationArgs`](../modules.md#zeroshotclassificationargs) |
-| `options?` | [`Options`](../modules.md#options) |
+| `args` | [`ZeroShotClassificationArgs`](../modules#zeroshotclassificationargs) |
+| `options?` | [`Options`](../modules#options) |
 
 #### Returns
 
-`Promise`<[`ZeroShotClassificationReturn`](../modules.md#zeroshotclassificationreturn)\>
+`Promise`<[`ZeroShotClassificationReturn`](../modules#zeroshotclassificationreturn)\>
 
 #### Defined in
 
