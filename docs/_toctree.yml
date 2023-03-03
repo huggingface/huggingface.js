@@ -1,4 +1,4 @@
-- local: README
+- local: index
   title: 🤗 Hugging Face JS Libraries
 - local: hub/README
   title: "Interact with the Hub"
