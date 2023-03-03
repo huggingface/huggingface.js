@@ -1,12 +1,12 @@
 # 🤗 Hugging Face Hub API
 
-🚧 Experimental, the module is being built, API will break! 🚧
-
-Official utilities to use the Hugging Face hub API
+Official utilities to use the Hugging Face hub API, still very experimental.
 
 ```
 npm add @huggingface/hub
 ```
+
+Check out the [full documentation](https://huggingface.co/docs/huggingface.js/hub/README).
 
 ## API
 
