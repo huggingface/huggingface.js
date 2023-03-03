@@ -504,7 +504,7 @@ export class HfInference {
 	private readonly apiKey:         string;
 	private readonly defaultOptions: Options;
 
-	constructor(apiKey: string, defaultOptions: Options = {}) {
+	constructor(apiKey = "", defaultOptions: Options = {}) {
 		this.apiKey = apiKey;
 		this.defaultOptions = defaultOptions;
 	}
@@ -681,9 +681,14 @@ export class HfInference {
 		const mergedOptions = { ...this.defaultOptions, ...options };
 		const { model, ...otherArgs } = args;
 
-		const headers = {
-			Authorization: `Bearer ${this.apiKey}`,
-		};
+		const headers: Record<string, string> = {};
+		if (this.apiKey) {
+			headers["Authorization"] = `Bearer ${this.apiKey}`;
+		}
+
+		if (!options?.binary) {
+			headers["Content-Type"] = "application/json";
+		}
 
 		if (options?.binary && mergedOptions.wait_for_model) {
 			headers["X-Wait-For-Model"] = "true";
