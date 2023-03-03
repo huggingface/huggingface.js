@@ -1,8 +1,8 @@
 <p align="center">
   <br/>
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://huggingface.co/datasets/huggingface/documentation-images/raw/main/huggingfacejs-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="https://huggingface.co/datasets/huggingface/documentation-images/raw/main/huggingfacejs-light.svg">
+  <picture> 
+  <!-- <source media="(prefers-color-scheme: dark)" srcset="https://huggingface.co/datasets/huggingface/documentation-images/raw/main/huggingfacejs-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://huggingface.co/datasets/huggingface/documentation-images/raw/main/huggingfacejs-light.svg"> -->
     <img alt="huggingface javascript library logo" src="https://huggingface.co/datasets/huggingface/documentation-images/raw/main/huggingfacejs-light.svg" width="376" height="59" style="max-width: 100%;">
   </picture>
   <br/>
@@ -13,8 +13,8 @@
 
 This is a collection of JS libraries to interact with the Hugging Face API, with TS types included.
 
-- [@huggingface/hub](packages/hub/README): Interact with huggingface.co to create or delete repos and commit / download files
-- [@huggingface/inference](packages/inference/README): Use the Inference API to make calls to Machine Learning models!
+- [@huggingface/hub](hub/README): Interact with huggingface.co to create or delete repos and commit / download files
+- [@huggingface/inference](inference/README): Use the Inference API to make calls to Machine Learning models!
 
 With more to come, like `@huggingface/endpoints` to manage your HF Endpoints!
 

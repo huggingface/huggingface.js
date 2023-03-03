@@ -1,5 +1,7 @@
 # Class: ApiError
 
+Error thrown when an API call to the Hugging Face Hub fails.
+
 ## Hierarchy
 
 - `Error`
@@ -27,7 +29,7 @@ Error.constructor
 
 #### Defined in
 
-[hub/src/error.ts:30](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/error.ts#L30)
+[hub/src/error.ts:33](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/error.ts#L33)
 
 ## Properties
 
@@ -51,7 +53,7 @@ ___
 
 #### Defined in
 
-[hub/src/error.ts:28](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/error.ts#L28)
+[hub/src/error.ts:31](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/error.ts#L31)
 
 ___
 
@@ -89,7 +91,7 @@ ___
 
 #### Defined in
 
-[hub/src/error.ts:27](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/error.ts#L27)
+[hub/src/error.ts:30](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/error.ts#L30)
 
 ___
 
@@ -113,7 +115,7 @@ ___
 
 #### Defined in
 
-[hub/src/error.ts:25](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/error.ts#L25)
+[hub/src/error.ts:28](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/error.ts#L28)
 
 ___
 
@@ -123,7 +125,7 @@ ___
 
 #### Defined in
 
-[hub/src/error.ts:26](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/error.ts#L26)
+[hub/src/error.ts:29](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/error.ts#L29)
 
 ___
 
