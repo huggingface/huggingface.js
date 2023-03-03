@@ -7,6 +7,20 @@ import { readFileSync } from "fs";
 
 jest.setTimeout(60000 * 3);
 
+describe("HfInference without Autentication", () => {
+	// Testing rate limte without authentication
+	const hf = new HfInference();
+	it("should throw a rate limit too  many requests", async () => {
+		const model = "bert-base-uncased";
+		const input = "[MASK] world!";
+		const promises = [];
+		for (let i = 0; i < 100; i++) {
+			promises.push(hf.fillMask({ model, inputs: input }));
+		}
+		await expect(Promise.all(promises)).rejects.toThrowError("Rate limit reached. Please log in or use your apiToken");
+	});
+});
+
 if (!process.env.HF_ACCESS_TOKEN) {
 	throw new Error("Set HF_ACCESS_TOKEN in the env to run the tests");
 }
@@ -169,7 +183,11 @@ describe("HfInference", () => {
 					sequence:
 						"Hi, I recently bought a device from your company but it is not working as advertised and I would like to get reimbursed!",
 					labels: ["refund", "faq", "legal"],
-					scores: expect.arrayContaining([expect.any(Number)]),
+					scores: [
+						expect.closeTo(0.877787709236145, 5),
+						expect.closeTo(0.10522633045911789, 5),
+						expect.closeTo(0.01698593981564045, 5),
+					],
 				}),
 			])
 		);
