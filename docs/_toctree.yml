@@ -1,14 +1,16 @@
 - local: index
   title: 🤗 Hugging Face JS Libraries
-- local: hub/README
-  title: "@huggingface/hub "
+- title: "@huggingface/hub"
   isExpanded: true
   sections:
+    - local: hub/README
+      title: "Interact with the Hub"
     - local: hub/modules
       title: "API Reference"
-- local: inference/README
-  title: "@huggingface/inference"
+- title: "@huggingface/inference"
   isExpanded: true
   sections:
+    - local: inference/README
+      title: "Use the Inference API"
     - local: inference/modules
       title: "API Reference"
