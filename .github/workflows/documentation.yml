@@ -1,0 +1,21 @@
+name: Build documentation
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/**"
+
+jobs:
+  build:
+    uses: huggingface/doc-builder/.github/workflows/build_main_documentation.yml@main
+    with:
+      commit_sha: ${{ github.sha }}
+      package: huggingface.js
+      package_name: huggingface.js
+      path_to_docs: huggingface.js/docs/
+      additional_args: --not_python_module
+      languages: en
+    secrets:
+      token: ${{ secrets.HF_DOC_TOKEN }}
