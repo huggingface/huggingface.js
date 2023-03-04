@@ -48,12 +48,12 @@ await commit({
 
 const inference = new HfInference(HF_ACCESS_TOKEN);
 
-await hf.translation({
+await inference.translation({
   model: 't5-base',
   inputs: 'My name is Wolfgang and I live in Berlin'
 })
 
-await hf.textToImage({
+await inference.textToImage({
   inputs: 'award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]',
   negative_prompt: 'blurry',
   model: 'stabilityai/stable-diffusion-2',
