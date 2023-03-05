@@ -22,7 +22,6 @@
 	"source": "index.ts",
 	"scripts": {
 		"format": "prettier --write . && eslint --quiet --fix --ext .cjs,.ts .",
-		"format2": "eslint --quiet --fix --ext .cjs,.ts .",
 		"prepublishOnly": "npm run build",
 		"build": "tsup src/index.ts --format cjs,esm --clean",
 		"test": "cross-env NODE_ENV=test mocha --recursive --exit --unhandled-rejections=strict -r ts-node/register src/lib/**/*.spec.ts --timeout 10000"
