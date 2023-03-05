@@ -10,7 +10,7 @@ export interface ApiLfsBatchRequest {
 	 * We use this object for QOL and to fail early for users when they're tring to push to the wrong reference.
 	 * But it does nothing for security.
 	 */
-	ref?:       {
+	ref?: {
 		name: string;
 	} | null;
 	objects: {
@@ -55,7 +55,7 @@ export interface ApiLfsResponseObject {
 	 * How these properties are interpreted depends on which transfer adapter
 	 * the client will be using.
 	 */
-	actions?:       {
+	actions?: {
 		/**
 		 * Download operations MUST specify a download action,
 		 * or an object error if the object cannot be downloaded for some reason
@@ -112,7 +112,7 @@ export interface ApiPreuploadRequest {
 	 * will automatically edit the `.gitattributes` file to track the files passed to its `lfsFiles` param.
 	 */
 	gitAttributes?: string;
-	files:          Array<{
+	files: Array<{
 		/**
 		 * Path of the LFS file
 		 */
