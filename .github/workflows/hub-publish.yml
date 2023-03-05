@@ -42,3 +42,39 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - run: git push --follow-tags
+
+  publish-gpr:
+    name: 'Publish Package to GitHub Package Registry'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2.2.4
+        with:
+          version: 'latest'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 'lts/*'
+          cache: 'pnpm'
+          cache-dependency-path: 'packages/hub/pnpm-lock.yaml'
+          registry-url: 'https://npm.pkg.github.com'
+
+      - name: Install Dependencies
+        working-directory: packages/hub
+        run: pnpm install --frozen-lockfile
+
+      - name: Update ~/.npmrc
+        run: |
+          echo "//npm.pkg.github.com:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
+
+      - name: 'Publish'
+        working-directory: packages/hub
+        env:
+          NPM_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pnpm publish --access public --registry https://npm.pkg.github.com --no-git-checks
