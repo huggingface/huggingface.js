@@ -1,4 +1,4 @@
-export type Options = {
+export interface Options {
 	/**
 	 * (Default: true) Boolean. If a request 503s and wait_for_model is set to false, the request will be retried with the same parameters but with wait_for_model set to true.
 	 */
@@ -16,11 +16,11 @@ export type Options = {
 	 * (Default: false) Boolean. If the model is not ready, wait for it instead of receiving 503. It limits the number of requests required to get your inference done. It is advised to only set this flag to true after receiving a 503 error as it will limit hanging in your application to known places.
 	 */
 	wait_for_model?: boolean;
-};
+}
 
-export type Args = {
+export interface Args {
 	model: string;
-};
+}
 
 export type FillMaskArgs = Args & {
 	inputs: string;
@@ -82,12 +82,12 @@ export type SummarizationArgs = Args & {
 	};
 };
 
-export type SummarizationReturn = {
+export interface SummarizationReturn {
 	/**
 	 * The string after translation
 	 */
 	summary_text: string;
-};
+}
 
 export type QuestionAnswerArgs = Args & {
 	inputs: {
@@ -96,7 +96,7 @@ export type QuestionAnswerArgs = Args & {
 	};
 };
 
-export type QuestionAnswerReturn = {
+export interface QuestionAnswerReturn {
 	/**
 	 * A string that’s the answer within the text.
 	 */
@@ -113,7 +113,7 @@ export type QuestionAnswerReturn = {
 	 * The index (string wise) of the start of the answer within context.
 	 */
 	start:  number;
-};
+}
 
 export type TableQuestionAnswerArgs = Args & {
 	inputs: {
@@ -128,7 +128,7 @@ export type TableQuestionAnswerArgs = Args & {
 	};
 };
 
-export type TableQuestionAnswerReturn = {
+export interface TableQuestionAnswerReturn {
 	/**
 	 * The aggregator used to get the answer
 	 */
@@ -145,7 +145,7 @@ export type TableQuestionAnswerReturn = {
 	 * a list of coordinates of the cells referenced in the answer
 	 */
 	coordinates: number[][];
-};
+}
 
 export type TextClassificationArgs = Args & {
 	/**
@@ -210,12 +210,12 @@ export type TextGenerationArgs = Args & {
 	};
 };
 
-export type TextGenerationReturn = {
+export interface TextGenerationReturn {
 	/**
 	 * The continuated string
 	 */
 	generated_text: string;
-};
+}
 
 export type TokenClassificationArgs = Args & {
 	/**
@@ -240,7 +240,7 @@ export type TokenClassificationArgs = Args & {
 	};
 };
 
-export type TokenClassificationReturnValue = {
+export interface TokenClassificationReturnValue {
 	/**
 	 * The offset stringwise where the answer is located. Useful to disambiguate if word occurs multiple times.
 	 */
@@ -261,7 +261,7 @@ export type TokenClassificationReturnValue = {
 	 * The string that was captured
 	 */
 	word:         string;
-};
+}
 
 export type TokenClassificationReturn = TokenClassificationReturnValue[];
 
@@ -272,12 +272,12 @@ export type TranslationArgs = Args & {
 	inputs: string;
 };
 
-export type TranslationReturn = {
+export interface TranslationReturn {
 	/**
 	 * The string after translation
 	 */
 	translation_text: string;
-};
+}
 
 export type ZeroShotClassificationArgs = Args & {
 	/**
@@ -296,11 +296,11 @@ export type ZeroShotClassificationArgs = Args & {
 	};
 };
 
-export type ZeroShotClassificationReturnValue = {
+export interface ZeroShotClassificationReturnValue {
 	labels:   string[];
 	scores:   number[];
 	sequence: string;
-};
+}
 
 export type ZeroShotClassificationReturn = ZeroShotClassificationReturnValue[];
 
@@ -351,14 +351,14 @@ export type ConversationalArgs = Args & {
 	};
 };
 
-export type ConversationalReturn = {
+export interface ConversationalReturn {
 	conversation: {
 		generated_responses: string[];
 		past_user_inputs:    string[];
 	};
 	generated_text: string;
 	warnings:       string[];
-};
+}
 
 export type FeatureExtractionArgs = Args & {
 	/**
@@ -384,7 +384,7 @@ export type ImageClassificationArgs = Args & {
 	data: any;
 };
 
-export type ImageClassificationReturnValue = {
+export interface ImageClassificationReturnValue {
 	/**
 	 * A float that represents how likely it is that the image file belongs to this class.
 	 */
@@ -393,7 +393,7 @@ export type ImageClassificationReturnValue = {
 	 * The label for the class (model specific)
 	 */
 	score: number;
-};
+}
 
 export type ImageClassificationReturn = ImageClassificationReturnValue[];
 
@@ -404,7 +404,7 @@ export type ObjectDetectionArgs = Args & {
 	data: any;
 };
 
-export type ObjectDetectionReturnValue = {
+export interface ObjectDetectionReturnValue {
 	/**
 	 * A dict (with keys [xmin,ymin,xmax,ymax]) representing the bounding box of a detected object.
 	 */
@@ -423,7 +423,7 @@ export type ObjectDetectionReturnValue = {
 	 * A float that represents how likely it is that the detected object belongs to the given class.
 	 */
 	score: number;
-};
+}
 
 export type ObjectDetectionReturn = ObjectDetectionReturnValue[];
 
@@ -434,7 +434,7 @@ export type ImageSegmentationArgs = Args & {
 	data: any;
 };
 
-export type ImageSegmentationReturnValue = {
+export interface ImageSegmentationReturnValue {
 	/**
 	 * The label for the class (model specific) of a segment.
 	 */
@@ -447,7 +447,7 @@ export type ImageSegmentationReturnValue = {
 	 * A float that represents how likely it is that the detected object belongs to the given class.
 	 */
 	score: number;
-};
+}
 
 export type ImageSegmentationReturn = ImageSegmentationReturnValue[];
 
@@ -458,12 +458,12 @@ export type AutomaticSpeechRecognitionArgs = Args & {
 	data: any;
 };
 
-export type AutomaticSpeechRecognitionReturn = {
+export interface AutomaticSpeechRecognitionReturn {
 	/**
 	 * The text that was recognized from the audio
 	 */
 	text: string;
-};
+}
 
 export type AudioClassificationArgs = Args & {
 	/**
@@ -472,7 +472,7 @@ export type AudioClassificationArgs = Args & {
 	data: any;
 };
 
-export type AudioClassificationReturnValue = {
+export interface AudioClassificationReturnValue {
 	/**
 	 * The label for the class (model specific)
 	 */
@@ -482,7 +482,7 @@ export type AudioClassificationReturnValue = {
 	 * A float that represents how likely it is that the audio file belongs to this class.
 	 */
 	score: number;
-};
+}
 
 export type AudioClassificationReturn = AudioClassificationReturnValue[];
 

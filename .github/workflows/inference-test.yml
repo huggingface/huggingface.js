@@ -33,8 +33,8 @@ jobs:
           node-version: "18"
           cache: "pnpm"
           cache-dependency-path: "packages/inference/pnpm-lock.yaml"
-      - run: pnpm install --frozen-lockfile
-      
+      - run: pnpm install --frozen-lockfile --filter .
+
       - name: Check types
         run: pnpm type-check
 

@@ -61,3 +61,12 @@ await inference.textToImage({
 ```
 
 There are more features of course, check each library's README!
+
+## Formatting & testing
+
+```console
+pnpm install
+
+pnpm -r format
+pnpm -r test
+```
