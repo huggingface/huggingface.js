@@ -62,7 +62,7 @@ export interface CommitParams {
 
 export interface CommitOutput {
 	pullRequestUrl?: string;
-	commit:          {
+	commit: {
 		oid: string;
 		url: string;
 	};
