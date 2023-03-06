@@ -2,7 +2,8 @@
 
 A Typescript powered wrapper for the Hugging Face Inference API. Learn more about the Inference API at [Hugging Face](https://huggingface.co/docs/api-inference/index).
 
-Check out the [full documentation](https://huggingface.co/docs/huggingface.js/inference/README).
+Check out the [full documentation](https://huggingface.co/docs/huggingface.js/inference/README) or try out a live [interactive notebook](https://observablehq.com/@huggingface/hello-huggingface-js-inference).
+
 
 
 ## Install
@@ -17,7 +18,7 @@ pnpm add @huggingface/inference
 
 ## Usage
 
-❗**Important note:** Using an API key is optional to get started (simply provide a random string), however you will be rate limited eventually. Join [Hugging Face](https://huggingface.co/join) and then visit [access tokens](https://huggingface.co/settings/tokens) to generate your API key.
+❗**Important note:** Using an API key is optional to get started, however you will be rate limited eventually. Join [Hugging Face](https://huggingface.co/join) and then visit [access tokens](https://huggingface.co/settings/tokens) to generate your API key. Note that this API key should be kept private and used exclusively for experimental purposes on the web. If you need to protect it, we suggest setting up a proxy server since we currently do not provide an OAuth solution.
 
 ### Basic examples
 
