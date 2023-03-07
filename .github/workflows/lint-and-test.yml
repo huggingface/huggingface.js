@@ -31,7 +31,7 @@ jobs:
           pnpm install --frozen-lockfile --filter "...[$SINCE]"
       - name: "Linting"
         run: |
-          pnpm--filter "...[$SINCE]" format
+          pnpm --filter "...[$SINCE]" format
           git diff --name-only --exit-code
 
       - name: Check types
