@@ -40,3 +40,35 @@
       sections:
         - title: HfInference
           local: inference/classes/HfInference
+    - title: Interfaces
+      sections:
+        - title: Args
+          local: inference/interfaces/Args
+        - title: AudioClassificationReturnValue
+          local: inference/interfaces/AudioClassificationReturnValue
+        - title: AutomaticSpeechRecognitionReturn
+          local: inference/interfaces/AutomaticSpeechRecognitionReturn
+        - title: ConversationalReturn
+          local: inference/interfaces/ConversationalReturn
+        - title: ImageClassificationReturnValue
+          local: inference/interfaces/ImageClassificationReturnValue
+        - title: ImageSegmentationReturnValue
+          local: inference/interfaces/ImageSegmentationReturnValue
+        - title: ObjectDetectionReturnValue
+          local: inference/interfaces/ObjectDetectionReturnValue
+        - title: Options
+          local: inference/interfaces/Options
+        - title: QuestionAnswerReturn
+          local: inference/interfaces/QuestionAnswerReturn
+        - title: SummarizationReturn
+          local: inference/interfaces/SummarizationReturn
+        - title: TableQuestionAnswerReturn
+          local: inference/interfaces/TableQuestionAnswerReturn
+        - title: TextGenerationReturn
+          local: inference/interfaces/TextGenerationReturn
+        - title: TokenClassificationReturnValue
+          local: inference/interfaces/TokenClassificationReturnValue
+        - title: TranslationReturn
+          local: inference/interfaces/TranslationReturn
+        - title: ZeroShotClassificationReturnValue
+          local: inference/interfaces/ZeroShotClassificationReturnValue

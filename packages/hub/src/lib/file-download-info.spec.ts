@@ -1,4 +1,4 @@
-import * as assert from "assert";
+import { assert, it, describe } from "vitest";
 import { fileDownloadInfo } from "./file-download-info";
 
 describe("fileDownloadInfo", () => {
@@ -15,7 +15,7 @@ describe("fileDownloadInfo", () => {
 
 		assert.strictEqual(info?.size, 536063208);
 		assert.strictEqual(info?.etag, '"a7a17d6d844b5de815ccab5f42cad6d24496db3850a2a43d8258221018ce87d2"');
-		assert(info.downloadLink);
+		assert(info?.downloadLink);
 	});
 
 	it("should fetch raw LFS pointer info", async () => {
@@ -32,7 +32,7 @@ describe("fileDownloadInfo", () => {
 
 		assert.strictEqual(info?.size, 134);
 		assert.strictEqual(info?.etag, '"9eb98c817f04b051b3bcca591bcd4e03cec88018"');
-		assert(!info.downloadLink);
+		assert(!info?.downloadLink);
 	});
 
 	it("should fetch non-LFS file info", async () => {

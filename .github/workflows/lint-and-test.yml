@@ -1,0 +1,52 @@
+name: Lint and test
+on:
+  pull_request_target:
+  push:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # Could use something like rmacklin/fetch-through-merge-base@v0 instead when the repo gets bigger
+          fetch-depth: 0
+      - name: "Extracting the merge base into 'SINCE'"
+        id: since
+        run: |
+          if [ -z "$github.base_ref" ]
+          then
+            echo "SINCE=$(git merge-base origin/${{ github.base_ref }} origin/${{ github.head_ref }})" >> $GITHUB_OUTPUT
+          else
+            echo "SINCE=${{ github.sha }}^1" >> $GITHUB_OUTPUT
+          fi
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 7.1.5
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "pnpm"
+          cache-dependency-path: "**/pnpm-lock.yaml"
+      - run: |
+          pnpm install --frozen-lockfile --filter . 
+          pnpm install --frozen-lockfile --filter ...[${{ steps.since.outputs.SINCE }}]
+      - name: "Linting"
+        run: |
+          pnpm --filter ...[${{ steps.since.outputs.SINCE }}] format
+          echo "--- different files: ---"
+          git diff --name-only --exit-code
+
+      - name: Check types
+        run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] type-check
+
+      - name: Test
+        run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test:ci
+        env:
+          HF_ACCESS_TOKEN: ${{ secrets.HF_ACCESS_TOKEN }}

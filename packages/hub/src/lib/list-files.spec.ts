@@ -1,4 +1,4 @@
-import * as assert from "assert";
+import { assert, it, describe } from "vitest";
 import type { ListFileEntry } from "./list-files";
 import { listFiles } from "./list-files";
 
