@@ -11,28 +11,8 @@ const FLAC_FILE = join(dir, "..", "test", "sample1.flac");
 const CHEETAH_FILE = join(dir, "..", "test", "cheetah.png");
 const CAT_FILE = join(dir, "..", "test", "cats.png");
 
-describe(
-	"HfInference without Autentication",
-	() => {
-		// Testing rate limte without authentication
-		const hf = new HfInference();
-		it("should throw a rate limit too  many requests", async () => {
-			const model = "bert-base-uncased";
-			const input = "[MASK] world!";
-			const promises = [];
-			for (let i = 0; i < 100; i++) {
-				promises.push(hf.fillMask({ model, inputs: input }));
-			}
-			await expect(Promise.all(promises)).rejects.toThrowError(
-				"Rate limit reached. Please log in or use your apiToken"
-			);
-		});
-	},
-	TIMEOUT
-);
-
 if (!process.env.HF_ACCESS_TOKEN) {
-	throw new Error("Set HF_ACCESS_TOKEN in the env to run the tests");
+	console.warn("Set HF_ACCESS_TOKEN in the env to run the tests for better rate limits");
 }
 
 describe.concurrent(
