@@ -145,7 +145,7 @@ await hf.textToImage({
 })
 ```
 
-## Supported APIs
+## Supported Tasks
 
 ### Natural Language Processing
 
