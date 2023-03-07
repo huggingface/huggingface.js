@@ -1,6 +1,6 @@
 name: Lint and test
 on:
-  pull_request_target:
+  pull_request:
   push:
     branches:
       - main
@@ -18,9 +18,9 @@ jobs:
       - name: "Extracting the merge base into 'SINCE'"
         id: since
         run: |
-          if [ -z "$github.base_ref" ]
+          if [ -z "${{  github.event.pull_request.head.ref }}" ]
           then
-            echo "SINCE=$(git merge-base origin/${{ github.base_ref }} origin/${{ github.head_ref }})" >> $GITHUB_OUTPUT
+            echo "SINCE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} origin/${{ github.event.pull_request.head.ref }})" >> $GITHUB_OUTPUT
           else
             echo "SINCE=${{ github.sha }}^1" >> $GITHUB_OUTPUT
           fi

@@ -18,6 +18,12 @@ export async function createRepo(params: {
 }): Promise<void> {
 	const [namespace, repoName] = params.repo.name.split("/");
 
+	if (!namespace || !repoName) {
+		throw new TypeError(
+			`"${params.repo.name}" is not a fully qualified repo name. It should be of the form "{namespace}/{repoName}".`
+		);
+	}
+
 	const res = await fetch(`${params.hubUrl ?? HUB_URL}/api/repos/create`, {
 		method: "POST",
 		body:   JSON.stringify({
