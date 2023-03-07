@@ -20,7 +20,7 @@ jobs:
           then
             echo "SINCE=$(git merge-base origin/${{ github.base_ref }} origin/${{ github.head_ref }})" >> $GITHUB_OUTPUT
           else
-            echo "SINCE=${{ github.head_ref }}^1" >> $GITHUB_OUTPUT
+            echo "SINCE=${{ github.sha }}^1" >> $GITHUB_OUTPUT
           fi
 
       - uses: pnpm/action-setup@v2
