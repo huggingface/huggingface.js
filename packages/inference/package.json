@@ -36,10 +36,9 @@
 		}
 	},
 	"scripts": {
-    "prebuild": "pnpm --filter 'docs-internal' prepublish-inference",
-		"build": "tsup src/index.ts --format cjs,esm --clean --dts",
+    "build": "tsup src/index.ts --format cjs,esm --clean --dts",
 		"format": "prettier --write . && eslint --quiet --fix --ext .cjs,.ts .",
-		"prepublishOnly": "pnpm run build",
+		"prepublishOnly": "pnpm build && pnpm update-docs",
 		"test": "vitest run",
 		"test:ci": "pnpm run test -- --coverage",
 		"type-check": "tsc"

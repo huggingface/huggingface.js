@@ -4,7 +4,8 @@
   "scripts": {
     "build": "pnpm --recursive build",
     "test": "pnpm --recursive test",
-    "changeset:release": "pnpm build && changeset publish",
+    "docs:update": "pnpm --filter 'doc-internal' start",
+    "changeset:release": "pnpm build && pnpm docs:update && changeset publish",
     "changeset:version": "changeset version",
     "format": "prettier --write .eslintrc.cjs && eslint --quiet --fix --ext .cjs,.ts .eslintrc.cjs"
   },
