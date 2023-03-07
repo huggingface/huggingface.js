@@ -1,4 +1,4 @@
-import * as assert from "assert";
+import { assert, it, describe } from "vitest";
 import { fileDownloadInfo } from "./file-download-info";
 
 describe("fileDownloadInfo", () => {
@@ -8,14 +8,14 @@ describe("fileDownloadInfo", () => {
 				name: "bert-base-uncased",
 				type: "model",
 			},
-			path:     "tf_model.h5",
+			path: "tf_model.h5",
 			revision: "dd4bc8b21efa05ec961e3efc4ee5e3832a3679c7",
-			hubUrl:   "https://huggingface.co",
+			hubUrl: "https://huggingface.co",
 		});
 
 		assert.strictEqual(info?.size, 536063208);
 		assert.strictEqual(info?.etag, '"a7a17d6d844b5de815ccab5f42cad6d24496db3850a2a43d8258221018ce87d2"');
-		assert(info.downloadLink);
+		assert(info?.downloadLink);
 	});
 
 	it("should fetch raw LFS pointer info", async () => {
@@ -24,15 +24,15 @@ describe("fileDownloadInfo", () => {
 				name: "bert-base-uncased",
 				type: "model",
 			},
-			path:     "tf_model.h5",
+			path: "tf_model.h5",
 			revision: "dd4bc8b21efa05ec961e3efc4ee5e3832a3679c7",
-			hubUrl:   "https://huggingface.co",
-			raw:      true,
+			hubUrl: "https://huggingface.co",
+			raw: true,
 		});
 
 		assert.strictEqual(info?.size, 134);
 		assert.strictEqual(info?.etag, '"9eb98c817f04b051b3bcca591bcd4e03cec88018"');
-		assert(!info.downloadLink);
+		assert(!info?.downloadLink);
 	});
 
 	it("should fetch non-LFS file info", async () => {
@@ -41,9 +41,9 @@ describe("fileDownloadInfo", () => {
 				name: "bert-base-uncased",
 				type: "model",
 			},
-			path:     "tokenizer_config.json",
+			path: "tokenizer_config.json",
 			revision: "1a7dd4986e3dab699c24ca19b2afd0f5e1a80f37",
-			hubUrl:   "https://huggingface.co",
+			hubUrl: "https://huggingface.co",
 		});
 
 		assert.strictEqual(info?.size, 28);

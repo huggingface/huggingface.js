@@ -24,7 +24,7 @@
 		"format": "prettier --write . && eslint --quiet --fix --ext .cjs,.ts .",
 		"prepublishOnly": "npm run build",
 		"build": "tsup src/index.ts --format cjs,esm --clean",
-		"test": "cross-env NODE_ENV=test mocha --recursive --exit --unhandled-rejections=strict -r ts-node/register src/lib/**/*.spec.ts --timeout 10000"
+		"test": "vitest run"
 	},
 	"files": [
 		"src",
@@ -43,10 +43,8 @@
 	"author": "Hugging Face",
 	"license": "MIT",
 	"devDependencies": {
-		"@types/mocha": "^10.0.1",
 		"@types/node": "^18.13.0",
 		"cross-env": "^7.0.3",
-		"mocha": "^10.2.0",
 		"ts-node": "^10.9.1",
 		"tsup": "^6.6.3",
 		"type-fest": "^3.5.6",
