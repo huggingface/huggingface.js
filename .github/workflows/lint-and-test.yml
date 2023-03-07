@@ -33,6 +33,7 @@ jobs:
       - name: "Linting"
         run: |
           pnpm --filter ...[${{ steps.since.outputs.SINCE }}] format
+          echo "--- different files: ---"
           git diff --name-only --exit-code
 
       - name: Check types

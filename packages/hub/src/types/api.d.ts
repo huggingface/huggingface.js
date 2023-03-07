@@ -216,9 +216,9 @@ export interface ApiIndexTreeEntryData {
 		pointerSize: number;
 	};
 	lastCommit: {
-		date:    string;
-		id:      string;
-		subject: string;
+		date:  string;
+		id:    string;
+		title: string;
 	} | null;
 	security?: ApiFileState;
 }
