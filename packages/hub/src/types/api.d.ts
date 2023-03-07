@@ -209,6 +209,7 @@ export interface ApiIndexTreeEntryData {
 	type: "file" | "directory" | "unknown";
 	size: number;
 	path: string;
+	oid:  string;
 	lfs?: {
 		oid:         string;
 		size:        number;

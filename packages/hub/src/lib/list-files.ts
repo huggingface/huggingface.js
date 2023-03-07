@@ -8,6 +8,7 @@ export interface ListFileEntry {
 	type: "file" | "directory" | "unknown";
 	size: number;
 	path: string;
+	oid:  string;
 	lfs?: {
 		oid:         string;
 		size:        number;
