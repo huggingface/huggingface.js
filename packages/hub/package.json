@@ -1,6 +1,6 @@
 {
 	"name": "@o-az/hub",
-	"version": "0.2.0",
+	"version": "0.0.0",
 	"description": "Utilities to interact with the Hugging Face hub",
 	"repository": "github:o-az/huggingface.js",
 	"publishConfig": {
