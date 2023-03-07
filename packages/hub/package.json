@@ -1,58 +1,58 @@
 {
-  "name": "@huggingface/hub",
-  "version": "0.1.4",
-  "description": "Utilities to interact with the Hugging Face hub",
-  "repository": "github:huggingface/huggingface.js",
-  "publishConfig": {
-    "access": "public"
-  },
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "types": "index.ts",
-  "exports": {
-    ".": {
-      "require": "./dist/index.js",
-      "import": "./dist/index.mjs",
-      "types": "./index.ts"
-    }
-  },
-  "engines": {
-    "node": ">=18"
-  },
-  "source": "index.ts",
-  "scripts": {
-    "format": "prettier --write . && eslint --quiet --fix --ext .cjs,.ts .",
-    "prepublishOnly": "npm run build",
-    "build": "tsup src/index.ts --format cjs,esm --clean",
-    "test": "cross-env NODE_ENV=test mocha --recursive --exit --unhandled-rejections=strict -r ts-node/register src/lib/**/*.spec.ts --timeout 10000"
-  },
-  "files": [
-    "src",
-    "dist",
-    "index.ts",
-    "tsconfig.json"
-  ],
-  "keywords": [
-    "huggingface",
-    "hub",
-    "api",
-    "client",
-    "hugging",
-    "face"
-  ],
-  "author": "Hugging Face",
-  "license": "MIT",
-  "devDependencies": {
-    "@types/mocha": "^10.0.1",
-    "@types/node": "^18.13.0",
-    "cross-env": "^7.0.3",
-    "mocha": "^10.2.0",
-    "ts-node": "^10.9.1",
-    "tsup": "^6.6.3",
-    "type-fest": "^3.5.6",
-    "typescript": "^4.9.5"
-  },
-  "dependencies": {
-    "hash-wasm": "^4.9.0"
-  }
+	"name": "@huggingface/hub",
+	"version": "0.1.4",
+	"description": "Utilities to interact with the Hugging Face hub",
+	"repository": "github:huggingface/huggingface.js",
+	"publishConfig": {
+		"access": "public"
+	},
+	"main": "./dist/index.js",
+	"module": "./dist/index.mjs",
+	"types": "index.ts",
+	"exports": {
+		".": {
+			"require": "./dist/index.js",
+			"import": "./dist/index.mjs",
+			"types": "./index.ts"
+		}
+	},
+	"engines": {
+		"node": ">=18"
+	},
+	"source": "index.ts",
+	"scripts": {
+		"format": "prettier --write . && eslint --quiet --fix --ext .cjs,.ts .",
+		"prepublishOnly": "npm run build",
+		"build": "tsup src/index.ts --format cjs,esm --clean",
+		"test": "cross-env NODE_ENV=test mocha --recursive --exit --unhandled-rejections=strict -r ts-node/register src/lib/**/*.spec.ts --timeout 10000"
+	},
+	"files": [
+		"src",
+		"dist",
+		"index.ts",
+		"tsconfig.json"
+	],
+	"keywords": [
+		"huggingface",
+		"hub",
+		"api",
+		"client",
+		"hugging",
+		"face"
+	],
+	"author": "Hugging Face",
+	"license": "MIT",
+	"devDependencies": {
+		"@types/mocha": "^10.0.1",
+		"@types/node": "^18.13.0",
+		"cross-env": "^7.0.3",
+		"mocha": "^10.2.0",
+		"ts-node": "^10.9.1",
+		"tsup": "^6.6.3",
+		"type-fest": "^3.5.6",
+		"typescript": "^4.9.5"
+	},
+	"dependencies": {
+		"hash-wasm": "^4.9.0"
+	}
 }
