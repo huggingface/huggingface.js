@@ -1,6 +1,6 @@
 name: Lint and test
 on:
-  pull_request:
+  pull_request_target:
   push:
 
 jobs:
