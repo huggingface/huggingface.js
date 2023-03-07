@@ -33,10 +33,7 @@ jobs:
         with:
           node-version: "18"
           cache: "pnpm"
-          cache-dependency-path: |
-            pnpm-lock.yaml
-            packages/hub/pnpm-lock.yaml
-            packages/inference/pnpm-lock.yaml
+          cache-dependency-path: "**/pnpm-lock.yaml"
       - run: |
           pnpm install --frozen-lockfile --filter . 
           pnpm install --frozen-lockfile --filter ...[${{ steps.since.outputs.SINCE }}]
