@@ -13,7 +13,7 @@ jobs:
           fetch-depth: 0
       - name: "Extracting the merge base into 'SINCE'"
         id: since
-        run: echo "SINCE=$(git merge-base origin/${{ github.base_ref }} origin/${{ github.head_ref }}) >> $GITHUB_OUTPUT"
+        run: echo "SINCE=$(git merge-base origin/${{ github.base_ref }} origin/${{ github.head_ref }})" >> $GITHUB_OUTPUT
 
       - uses: pnpm/action-setup@v2
         with:
