@@ -4,8 +4,8 @@ interface CustomMatchers<R = unknown> {
 
 declare global {
 	namespace Vi {
-		interface Assertion extends CustomMatchers {}
-		interface AsymmetricMatchersContaining extends CustomMatchers {}
+		type Assertion = CustomMatchers
+		type AsymmetricMatchersContaining = CustomMatchers
 	}
 }
 
