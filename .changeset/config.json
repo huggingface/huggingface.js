@@ -1,6 +1,11 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@2.3.0/schema.json",
-  "changelog": ["@changesets/changelog-github", { "repo": "o-az/huggingface.js" }],
+  "changelog": [
+    "@changesets/changelog-github",
+    {
+      "repo": "huggingface/huggingface.js"
+    }
+  ],
   "commit": false,
   "fixed": [],
   "linked": [],
