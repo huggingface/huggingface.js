@@ -53,8 +53,8 @@ jobs:
         # latest version: https://github.com/changesets/action/releases/tag/v1.4.1
         uses: changesets/action@v1.4.1
         with:
-          title: 'chore: version packages'
-          commit: 'chore: version packages'
+          title: '🔖 Version packages'
+          commit: '🔖 Version packages'
           version: pnpm changeset:version
           publish: pnpm changeset:release
         env:
