@@ -22,7 +22,7 @@ jobs:
           then
             echo "SINCE=${{ github.sha }}^1" >> $GITHUB_OUTPUT
           else
-            echo "SINCE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} ${{ github.event.pull_request.head.ref }})" >> $GITHUB_OUTPUT
+            echo "SINCE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} ${{ github.sha }})" >> $GITHUB_OUTPUT
           fi
 
       - uses: pnpm/action-setup@v2
