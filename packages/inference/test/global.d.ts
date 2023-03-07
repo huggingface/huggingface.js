@@ -1,7 +1,3 @@
-/**
- * Add support for closeTo
- */
-
 declare global {
 	namespace Vi {
 		interface Assertion {
