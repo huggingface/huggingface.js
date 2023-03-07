@@ -219,4 +219,4 @@ with params.recursive set to `true`.
 
 #### Defined in
 
-[hub/src/lib/list-files.ts:31](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L31)
+[hub/src/lib/list-files.ts:30](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L30)

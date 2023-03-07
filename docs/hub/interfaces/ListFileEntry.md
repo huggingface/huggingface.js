@@ -4,11 +4,11 @@
 
 ### lastCommit
 
-• **lastCommit**: ``null`` \| { `author`: { `date`: `string`  } ; `id`: `string` ; `subject`: `string`  }
+• **lastCommit**: ``null`` \| { `date`: `string` ; `id`: `string` ; `title`: `string`  }
 
 #### Defined in
 
-[hub/src/lib/list-files.ts:17](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L17)
+[hub/src/lib/list-files.ts:18](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L18)
 
 ___
 
@@ -23,6 +23,16 @@ ___
 | `oid` | `string` | - |
 | `pointerSize` | `number` | Size of the raw pointer file, 100~200 bytes |
 | `size` | `number` | - |
+
+#### Defined in
+
+[hub/src/lib/list-files.ts:12](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L12)
+
+___
+
+### oid
+
+• **oid**: `string`
 
 #### Defined in
 
@@ -46,7 +56,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/list-files.ts:24](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L24)
+[hub/src/lib/list-files.ts:23](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L23)
 
 ___
 
