@@ -15,9 +15,7 @@ export interface ListFileEntry {
 		pointerSize: number;
 	};
 	lastCommit: {
-		author: {
-			date: string;
-		};
+		date:    string;
 		id:      string;
 		subject: string;
 	} | null;

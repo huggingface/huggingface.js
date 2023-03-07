@@ -24,7 +24,9 @@
 		"format": "prettier --write . && eslint --quiet --fix --ext .cjs,.ts .",
 		"prepublishOnly": "npm run build",
 		"build": "tsup src/index.ts --format cjs,esm --clean",
-		"test": "vitest run"
+		"test": "vitest run",
+		"test:ci": "pnpm run test -- --ci --coverage",
+		"type-check": "tsc"
 	},
 	"files": [
 		"src",
@@ -47,9 +49,7 @@
 		"ts-node": "^10.9.1",
 		"tsup": "^6.6.3",
 		"type-fest": "^3.5.6",
-		"typescript": "^4.9.5",
-		"vite": "^4.1.4",
-		"vitest": "^0.29.2"
+		"typescript": "^4.9.5"
 	},
 	"dependencies": {
 		"hash-wasm": "^4.9.0"

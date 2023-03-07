@@ -1,0 +1,42 @@
+name: Lint and test
+on:
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: rmacklin/fetch-through-merge-base@v0
+        with:
+          base_ref: ${{ github.event.pull_request.base.ref }}
+          head_ref: ${{ github.event.pull_request.head.ref }}
+      - name: "Extracting the merge base into 'SINCE'"
+        run: echo "SINCE=$(git merge-base ${{ github.base_ref }} ${{ github.head_ref }}) >> $GITHUB_ENV"
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 7.1.5
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "pnpm"
+          cache-dependency-path: |
+            - "pnpm-lock.yaml"
+            - "packages/hub/pnpm-lock.yaml"
+            - "packages/inference/pnpm-lock.yaml"
+      - run: |
+          pnpm install --frozen-lockfile --filter . 
+          pnpm install --frozen-lockfile --filter "...[$SINCE]"
+      - name: "Linting"
+        run: pnpm format --filter "...[$SINCE]" && git diff --name-only --exit-code
+
+      - name: Check types
+        run: pnpm -r type-check --filter "...[$SINCE]"
+
+      - name: Test
+        run: pnpm test:ci --filter "...[$SINCE]"
