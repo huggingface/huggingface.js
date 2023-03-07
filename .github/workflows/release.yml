@@ -10,7 +10,6 @@ permissions:
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - 'main'
@@ -64,6 +63,7 @@ jobs:
         if: steps.changesets.outputs.published == 'true'
         uses: actions/setup-node@v3
         with:
+          cache: 'pnpm'
           node-version: 18
           registry-url: 'https://npm.pkg.github.com'
 

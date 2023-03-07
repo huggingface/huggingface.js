@@ -21,6 +21,7 @@
 	},
 	"source": "index.ts",
 	"scripts": {
+    "prebuild": "pnpm --filter 'docs-internal' prepublish-hub",
 		"format": "prettier --write . && eslint --quiet --fix --ext .cjs,.ts .",
 		"prepublishOnly": "npm run build",
 		"build": "tsup src/index.ts --format cjs,esm --clean",

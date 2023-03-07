@@ -1,6 +1,6 @@
 <p align="center">
   <br/>
-  <picture> 
+  <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://huggingface.co/datasets/huggingface/documentation-images/raw/main/huggingfacejs-dark.svg">
     <source media="(prefers-color-scheme: light)" srcset="https://huggingface.co/datasets/huggingface/documentation-images/raw/main/huggingfacejs-light.svg">
     <img alt="huggingface javascript library logo" src="https://huggingface.co/datasets/huggingface/documentation-images/raw/main/huggingfacejs-light.svg" width="376" height="59" style="max-width: 100%;">
@@ -18,7 +18,7 @@ This is a collection of JS libraries to interact with the Hugging Face API, with
 
 With more to come, like `@huggingface/endpoints` to manage your HF Endpoints!
 
-We use modern features to avoid polyfills and dependencies, so the libraries will only work on modern browsers / Node.js >= 18 / Bun / Deno. 
+We use modern features to avoid polyfills and dependencies, so the libraries will only work on modern browsers / Node.js >= 18 / Bun / Deno.
 
 The libraries is still very young, please help us by opening issues!
 
@@ -68,5 +68,5 @@ There are more features of course, check each library's README!
 pnpm install
 
 pnpm -r format
-pnpm -r test
+pnpm test
 ```
