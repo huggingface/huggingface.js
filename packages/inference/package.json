@@ -1,5 +1,5 @@
 {
-	"name": "@huggingface/inference",
+	"name": "@o-az/inference",
 	"version": "0.0.0",
 	"license": "MIT",
 	"author": "Tim Mikeladze <tim.mikeladze@gmail.com>",
