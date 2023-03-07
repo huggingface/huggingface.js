@@ -25,7 +25,7 @@
 		"prepublishOnly": "npm run build",
 		"build": "tsup src/index.ts --format cjs,esm --clean",
 		"test": "vitest run",
-		"test:ci": "pnpm run test -- --ci --coverage",
+		"test:ci": "pnpm run test -- --coverage",
 		"type-check": "tsc"
 	},
 	"files": [
