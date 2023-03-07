@@ -2,7 +2,6 @@ lockfileVersion: 5.4
 
 specifiers:
   '@types/node': ^18.13.0
-  cross-env: ^7.0.3
   hash-wasm: ^4.9.0
   ts-node: ^10.9.1
   tsup: ^6.6.3
@@ -16,7 +15,6 @@ dependencies:
 
 devDependencies:
   '@types/node': 18.13.0
-  cross-env: 7.0.3
   ts-node: 10.9.1_4bewfcp2iebiwuold25d6rgcsy
   tsup: 6.6.3_6qtx7vkbdhwvdm4crzlegk4mvi
   type-fest: 3.5.6
@@ -673,14 +671,6 @@ packages:
 
   /create-require/1.1.1:
     resolution: {integrity: sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==}
-    dev: true
-
-  /cross-env/7.0.3:
-    resolution: {integrity: sha512-+/HKd6EgcQCJGh2PSjZuUitQBQynKor4wrFbRg4DtAgS1aWO+gU52xpH7M9ScGgXSYmAVS9bIJ8EzuaGw0oNAw==}
-    engines: {node: '>=10.14', npm: '>=6', yarn: '>=1'}
-    hasBin: true
-    dependencies:
-      cross-spawn: 7.0.3
     dev: true
 
   /cross-spawn/7.0.3:
