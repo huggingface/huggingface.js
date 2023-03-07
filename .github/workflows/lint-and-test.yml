@@ -12,7 +12,7 @@ jobs:
           # Could use something like rmacklin/fetch-through-merge-base@v0 instead when the repo gets bigger
           fetch-depth: 0
       - name: "Extracting the merge base into 'SINCE'"
-        run: echo "SINCE=$(git merge-base ${{ github.base_ref }} ${{ github.head_ref }}) >> $GITHUB_ENV"
+        run: echo "SINCE=$(git merge-base origin/${{ github.base_ref }} ${{ github.head_ref }}) >> $GITHUB_ENV"
 
       - uses: pnpm/action-setup@v2
         with:
