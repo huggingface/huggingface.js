@@ -33,7 +33,6 @@ jobs:
           fetch-depth: 0
 
       - name: 'Setup pnpm'
-        # latest version: https://github.com/pnpm/action-setup/releases/tag/v2.2.4
         uses: pnpm/action-setup@v2.2.4
         with:
           version: 7.1.5
@@ -50,7 +49,6 @@ jobs:
 
       - name: 'Create Release Pull Request or Publish to npm'
         id: changesets
-        # latest version: https://github.com/changesets/action/releases/tag/v1.4.1
         uses: changesets/action@v1.4.1
         with:
           title: '🔖 Version packages'
@@ -60,7 +58,6 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
         # for GitHub Packages registry
       - name: 'Setup Node.js [2]'
@@ -70,15 +67,26 @@ jobs:
           node-version: 18
           registry-url: 'https://npm.pkg.github.com'
 
+        # https://github.com/changesets/action/blob/595655c3eae7136ff5ba18200406898904362926/action.yml#L36
+      - name: 'Check if "hub"/"inference" package was published'
+        if: steps.changesets.outputs.published == 'true'
+        run: |
+            echo "HUB_PUBLISHED=$(echo ${{ steps.changesets.outputs.publishedPackages }} | jq --raw-output 'map(select(.name | contains("hub"))) | length > 0')" >> $GITHUB_ENV
+
+            echo "INFERENCE_PUBLISHED=$(echo ${{ steps.changesets.outputs.publishedPackages }} | jq --raw-output 'map(select(.name | contains("inference"))) | length > 0')" >> $GITHUB_ENV
+
       - name: 'Publish to GitHub Packages'
         if: steps.changesets.outputs.published == 'true'
         env:
           NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          pnpm publish --dir='packages/hub' --no-git-checks
+          if [ "$HUB_PUBLISHED" = "true" ]; then
+            pnpm publish --dir='packages/hub' --no-git-checks
+          fi
 
           sleep 1
 
-          pnpm publish --dir='packages/inference' --no-git-checks
+          if [ "$INFERENCE_PUBLISHED" = "true" ]; then
+            pnpm publish --dir='packages/inference' --no-git-checks
+          fi
