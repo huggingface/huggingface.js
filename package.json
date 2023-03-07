@@ -14,7 +14,7 @@
   },
   "scripts": {
     "changeset:release": "pnpm run build && changeset publish",
-    "changeset:version": "changeset version && pnpm install",
+    "changeset:version": "changeset version",
     "build": "pnpm --filter './packages/*' build",
     "test": "pnpm --filter './packages/*' test",
     "format": "prettier --write .eslintrc.cjs && eslint --quiet --fix --ext .cjs,.ts .eslintrc.cjs"
