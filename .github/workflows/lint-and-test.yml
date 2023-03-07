@@ -1,5 +1,9 @@
 name: Lint and test
-on: [pull_request, pull_request_target]
+on:
+  pull_request:
+  push:
+    branches:
+      - main
 
 jobs:
   lint:
@@ -13,7 +17,13 @@ jobs:
           fetch-depth: 0
       - name: "Extracting the merge base into 'SINCE'"
         id: since
-        run: echo "SINCE=$(git merge-base origin/${{ github.base_ref }} origin/${{ github.head_ref }})" >> $GITHUB_OUTPUT
+        run: |
+          if [ -z "$github.base_ref" ]
+          then
+            echo "SINCE=$(git merge-base origin/${{ github.base_ref }} origin/${{ github.head_ref }})" >> $GITHUB_OUTPUT
+          else
+            echo "SINCE=${{ github.head_ref }}^1" >> $GITHUB_OUTPUT
+          fi
 
       - uses: pnpm/action-setup@v2
         with:
