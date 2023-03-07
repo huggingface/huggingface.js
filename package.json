@@ -10,6 +10,8 @@
 		"typescript": "^4.9.5"
 	},
 	"scripts": {
-		"format": "prettier --write .eslintrc.cjs && eslint --quiet --fix --ext .cjs,.ts .eslintrc.cjs"
+		"format": "prettier --write .eslintrc.cjs && eslint --quiet --fix --ext .cjs,.ts .eslintrc.cjs",
+		"test:run": "vitest run",
+		"test": "pnpm -r test"
 	}
 }

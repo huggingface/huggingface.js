@@ -1,4 +1,5 @@
-import * as assert from "assert";
+import { assert, it, describe } from "vitest";
+
 import { randomBytes } from "crypto";
 import { HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from "../consts";
 import type { RepoId } from "../types";
@@ -11,8 +12,6 @@ const lfsContent = "O123456789".repeat(100_000);
 
 describe("commit", () => {
 	it("should commit to a repo with blobs", async function () {
-		this.timeout(30_000);
-
 		const repoName = `${TEST_USER}/TEST-${randomBytes(10).toString("hex")}`;
 		const repo: RepoId = {
 			name: repoName,
@@ -85,5 +84,5 @@ size ${lfsContent.length}
 				credentials: { accessToken: TEST_ACCESS_TOKEN },
 			});
 		}
-	});
+	}, 30_000);
 });
