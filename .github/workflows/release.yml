@@ -1,0 +1,81 @@
+name: 'Release'
+
+# Required permissions to: push, publish to GPR, create a PR
+permissions:
+  contents: 'write'
+  packages: 'write'
+  pull-requests: 'write'
+
+# https://github.com/changesets/action#example-workflow
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'main'
+
+defaults:
+  run:
+    shell: 'bash'
+
+jobs:
+  release:
+    name: 'Release'
+    if: ${{ github.repository_owner == 'o-az' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          # This makes Actions fetch all Git history so that Changesets can generate changelogs with the correct commits
+          fetch-depth: 0
+
+      - name: 'Setup pnpm'
+        # latest version: https://github.com/pnpm/action-setup/releases/tag/v2.2.4
+        uses: pnpm/action-setup@v2.2.4
+        with:
+          version: 7.1.5
+
+      - name: 'Setup Node.js [1]'
+        uses: actions/setup-node@v3
+        with:
+          cache: 'pnpm'
+          node-version: 18
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: 'Install dependencies'
+        run: pnpm install
+
+      - name: 'Create Release Pull Request or Publish to npm'
+        id: changesets
+        # latest version: https://github.com/changesets/action/releases/tag/v1.4.1
+        uses: changesets/action@v1.4.1
+        with:
+          title: 'chore: version packages'
+          commit: 'chore: version packages'
+          version: pnpm changeset:version
+          publish: pnpm changeset:release
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+        # for GitHub Packages registry
+      - name: 'Setup Node.js [2]'
+        if: steps.changesets.outputs.published == 'true'
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          registry-url: 'https://npm.pkg.github.com'
+
+      - name: 'Publish to GitHub Packages'
+        if: steps.changesets.outputs.published == 'true'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pnpm publish --dir='packages/hub' --no-git-checks
+
+          sleep 1
+
+          pnpm publish --dir='packages/inference' --no-git-checks
