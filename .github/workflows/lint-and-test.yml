@@ -28,14 +28,14 @@ jobs:
             packages/inference/pnpm-lock.yaml
       - run: |
           pnpm install --frozen-lockfile --filter . 
-          pnpm install --frozen-lockfile --filter "...[$SINCE]"
+          pnpm install --frozen-lockfile --filter ...[$SINCE]
       - name: "Linting"
         run: |
-          pnpm --filter "...[$SINCE]" format
+          pnpm --filter ...[$SINCE] format
           git diff --name-only --exit-code
 
       - name: Check types
-        run: pnpm --filter "...[$SINCE]" type-check
+        run: pnpm --filter ...[$SINCE] type-check
 
       - name: Test
-        run: pnpm --filter "...[$SINCE]" test:ci
+        run: pnpm --filter ...[$SINCE] test:ci
