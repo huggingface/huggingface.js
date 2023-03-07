@@ -20,9 +20,9 @@ jobs:
         run: |
           if [ -z "${{  github.event.pull_request.head.ref }}" ]
           then
-            echo "SINCE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} origin/${{ github.event.pull_request.head.ref }})" >> $GITHUB_OUTPUT
-          else
             echo "SINCE=${{ github.sha }}^1" >> $GITHUB_OUTPUT
+          else
+            echo "SINCE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} origin/${{ github.event.pull_request.head.ref }})" >> $GITHUB_OUTPUT
           fi
 
       - uses: pnpm/action-setup@v2
