@@ -1,13 +1,10 @@
 {
 	"name": "@huggingface/inference",
-	"version": "1.5.1",
+	"version": "0.0.0",
 	"license": "MIT",
 	"author": "Tim Mikeladze <tim.mikeladze@gmail.com>",
 	"description": "Typescript wrapper for the Hugging Face Inference API",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/huggingface/huggingface.js.git"
-	},
+	"repository": "github:o-az/huggingface.js",
 	"publishConfig": {
 		"access": "public"
 	},
