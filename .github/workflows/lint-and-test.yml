@@ -8,8 +8,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-
-      - uses: rmacklin/fetch-through-merge-base@v0
+        with:
+          # Could use something like rmacklin/fetch-through-merge-base@v0 instead when the repo gets bigger
+          fetch-depth: 0
       - name: "Extracting the merge base into 'SINCE'"
         run: echo "SINCE=$(git merge-base ${{ github.base_ref }} ${{ github.head_ref }}) >> $GITHUB_ENV"
 
