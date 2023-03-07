@@ -30,10 +30,12 @@ jobs:
           pnpm install --frozen-lockfile --filter . 
           pnpm install --frozen-lockfile --filter "...[$SINCE]"
       - name: "Linting"
-        run: pnpm format --filter "...[$SINCE]" && git diff --name-only --exit-code
+        run: |
+          pnpm--filter "...[$SINCE]" format
+          git diff --name-only --exit-code
 
       - name: Check types
-        run: pnpm -r type-check --filter "...[$SINCE]"
+        run: pnpm --filter "...[$SINCE]" type-check
 
       - name: Test
-        run: pnpm test:ci --filter "...[$SINCE]"
+        run: pnpm --filter "...[$SINCE]" test:ci
