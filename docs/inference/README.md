@@ -14,7 +14,7 @@ pnpm add @huggingface/inference
 
 ## Usage
 
-❗**Important note:** Using an API key is optional to get started (simply provide a random string), however you will be rate limited eventually. Join [Hugging Face](https://huggingface.co/join) and then visit [access tokens](https://huggingface.co/settings/tokens) to generate your API key.
+❗**Important note:** Using an API key is optional to get started, however you will be rate limited eventually. Join [Hugging Face](https://huggingface.co/join) and then visit [access tokens](https://huggingface.co/settings/tokens) to generate your API key. Note that this API key should be kept private and used exclusively for experimental purposes on the web. If you need to protect it, we suggest setting up a proxy server since we currently do not provide an OAuth solution.
 
 ### Basic examples
 
@@ -145,7 +145,7 @@ await hf.textToImage({
 })
 ```
 
-## Supported Tasks
+## Supported APIs
 
 ### Natural Language Processing
 
@@ -180,9 +180,3 @@ await hf.textToImage({
 ```console
 HF_ACCESS_TOKEN="your access token" npm run test
 ```
-
-## Finding appropriate models
-
-We have an informative documentation project called [Tasks](https://huggingface.co/tasks) to list available models for each task and explain how each task works in detail.
-
-It also contain demos, example outputs and other resources should you want to dig more into the ML-side of things.

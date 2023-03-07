@@ -4,27 +4,29 @@
 
 - [HfInference](classes/HfInference)
 
+## Interfaces
+
+- [Args](interfaces/Args)
+- [AudioClassificationReturnValue](interfaces/AudioClassificationReturnValue)
+- [AutomaticSpeechRecognitionReturn](interfaces/AutomaticSpeechRecognitionReturn)
+- [ConversationalReturn](interfaces/ConversationalReturn)
+- [ImageClassificationReturnValue](interfaces/ImageClassificationReturnValue)
+- [ImageSegmentationReturnValue](interfaces/ImageSegmentationReturnValue)
+- [ObjectDetectionReturnValue](interfaces/ObjectDetectionReturnValue)
+- [Options](interfaces/Options)
+- [QuestionAnswerReturn](interfaces/QuestionAnswerReturn)
+- [SummarizationReturn](interfaces/SummarizationReturn)
+- [TableQuestionAnswerReturn](interfaces/TableQuestionAnswerReturn)
+- [TextGenerationReturn](interfaces/TextGenerationReturn)
+- [TokenClassificationReturnValue](interfaces/TokenClassificationReturnValue)
+- [TranslationReturn](interfaces/TranslationReturn)
+- [ZeroShotClassificationReturnValue](interfaces/ZeroShotClassificationReturnValue)
+
 ## Type Aliases
-
-### Args
-
-Ƭ **Args**: `Object`
-
-#### Type declaration
-
-| Name | Type |
-| :------ | :------ |
-| `model` | `string` |
-
-#### Defined in
-
-[HfInference.ts:21](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L21)
-
-___
 
 ### AudioClassificationArgs
 
-Ƭ **AudioClassificationArgs**: [`Args`](modules#args) & { `data`: `any`  }
+Ƭ **AudioClassificationArgs**: [`Args`](interfaces/Args) & { `data`: `any`  }
 
 #### Defined in
 
@@ -34,7 +36,7 @@ ___
 
 ### AudioClassificationReturn
 
-Ƭ **AudioClassificationReturn**: [`AudioClassificationReturnValue`](modules#audioclassificationreturnvalue)[]
+Ƭ **AudioClassificationReturn**: [`AudioClassificationReturnValue`](interfaces/AudioClassificationReturnValue)[]
 
 #### Defined in
 
@@ -42,26 +44,9 @@ ___
 
 ___
 
-### AudioClassificationReturnValue
-
-Ƭ **AudioClassificationReturnValue**: `Object`
-
-#### Type declaration
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `label` | `string` | The label for the class (model specific) |
-| `score` | `number` | A float that represents how likely it is that the audio file belongs to this class. |
-
-#### Defined in
-
-[HfInference.ts:475](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L475)
-
-___
-
 ### AutomaticSpeechRecognitionArgs
 
-Ƭ **AutomaticSpeechRecognitionArgs**: [`Args`](modules#args) & { `data`: `any`  }
+Ƭ **AutomaticSpeechRecognitionArgs**: [`Args`](interfaces/Args) & { `data`: `any`  }
 
 #### Defined in
 
@@ -69,25 +54,9 @@ ___
 
 ___
 
-### AutomaticSpeechRecognitionReturn
-
-Ƭ **AutomaticSpeechRecognitionReturn**: `Object`
-
-#### Type declaration
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `text` | `string` | The text that was recognized from the audio |
-
-#### Defined in
-
-[HfInference.ts:461](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L461)
-
-___
-
 ### ConversationalArgs
 
-Ƭ **ConversationalArgs**: [`Args`](modules#args) & { `inputs`: { `generated_responses?`: `string`[] ; `past_user_inputs?`: `string`[] ; `text`: `string`  } ; `parameters?`: { `max_length?`: `number` ; `max_time?`: `number` ; `min_length?`: `number` ; `repetition_penalty?`: `number` ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number`  }  }
+Ƭ **ConversationalArgs**: [`Args`](interfaces/Args) & { `inputs`: { `generated_responses?`: `string`[] ; `past_user_inputs?`: `string`[] ; `text`: `string`  } ; `parameters?`: { `max_length?`: `number` ; `max_time?`: `number` ; `min_length?`: `number` ; `repetition_penalty?`: `number` ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number`  }  }
 
 #### Defined in
 
@@ -95,29 +64,9 @@ ___
 
 ___
 
-### ConversationalReturn
-
-Ƭ **ConversationalReturn**: `Object`
-
-#### Type declaration
-
-| Name | Type |
-| :------ | :------ |
-| `conversation` | { `generated_responses`: `string`[] ; `past_user_inputs`: `string`[]  } |
-| `conversation.generated_responses` | `string`[] |
-| `conversation.past_user_inputs` | `string`[] |
-| `generated_text` | `string` |
-| `warnings` | `string`[] |
-
-#### Defined in
-
-[HfInference.ts:354](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L354)
-
-___
-
 ### FeatureExtractionArgs
 
-Ƭ **FeatureExtractionArgs**: [`Args`](modules#args) & { `inputs`: `Record`<`string`, `any`\> \| `Record`<`string`, `any`\>[]  }
+Ƭ **FeatureExtractionArgs**: [`Args`](interfaces/Args) & { `inputs`: `Record`<`string`, `any`\> \| `Record`<`string`, `any`\>[]  }
 
 #### Defined in
 
@@ -139,7 +88,7 @@ ___
 
 ### FillMaskArgs
 
-Ƭ **FillMaskArgs**: [`Args`](modules#args) & { `inputs`: `string`  }
+Ƭ **FillMaskArgs**: [`Args`](interfaces/Args) & { `inputs`: `string`  }
 
 #### Defined in
 
@@ -159,7 +108,7 @@ ___
 
 ### ImageClassificationArgs
 
-Ƭ **ImageClassificationArgs**: [`Args`](modules#args) & { `data`: `any`  }
+Ƭ **ImageClassificationArgs**: [`Args`](interfaces/Args) & { `data`: `any`  }
 
 #### Defined in
 
@@ -169,7 +118,7 @@ ___
 
 ### ImageClassificationReturn
 
-Ƭ **ImageClassificationReturn**: [`ImageClassificationReturnValue`](modules#imageclassificationreturnvalue)[]
+Ƭ **ImageClassificationReturn**: [`ImageClassificationReturnValue`](interfaces/ImageClassificationReturnValue)[]
 
 #### Defined in
 
@@ -177,26 +126,9 @@ ___
 
 ___
 
-### ImageClassificationReturnValue
-
-Ƭ **ImageClassificationReturnValue**: `Object`
-
-#### Type declaration
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `label` | `string` | A float that represents how likely it is that the image file belongs to this class. |
-| `score` | `number` | The label for the class (model specific) |
-
-#### Defined in
-
-[HfInference.ts:387](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L387)
-
-___
-
 ### ImageSegmentationArgs
 
-Ƭ **ImageSegmentationArgs**: [`Args`](modules#args) & { `data`: `any`  }
+Ƭ **ImageSegmentationArgs**: [`Args`](interfaces/Args) & { `data`: `any`  }
 
 #### Defined in
 
@@ -206,7 +138,7 @@ ___
 
 ### ImageSegmentationReturn
 
-Ƭ **ImageSegmentationReturn**: [`ImageSegmentationReturnValue`](modules#imagesegmentationreturnvalue)[]
+Ƭ **ImageSegmentationReturn**: [`ImageSegmentationReturnValue`](interfaces/ImageSegmentationReturnValue)[]
 
 #### Defined in
 
@@ -214,27 +146,9 @@ ___
 
 ___
 
-### ImageSegmentationReturnValue
-
-Ƭ **ImageSegmentationReturnValue**: `Object`
-
-#### Type declaration
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `label` | `string` | The label for the class (model specific) of a segment. |
-| `mask` | `string` | A str (base64 str of a single channel black-and-white img) representing the mask of a segment. |
-| `score` | `number` | A float that represents how likely it is that the detected object belongs to the given class. |
-
-#### Defined in
-
-[HfInference.ts:437](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L437)
-
-___
-
 ### ObjectDetectionArgs
 
-Ƭ **ObjectDetectionArgs**: [`Args`](modules#args) & { `data`: `any`  }
+Ƭ **ObjectDetectionArgs**: [`Args`](interfaces/Args) & { `data`: `any`  }
 
 #### Defined in
 
@@ -244,7 +158,7 @@ ___
 
 ### ObjectDetectionReturn
 
-Ƭ **ObjectDetectionReturn**: [`ObjectDetectionReturnValue`](modules#objectdetectionreturnvalue)[]
+Ƭ **ObjectDetectionReturn**: [`ObjectDetectionReturnValue`](interfaces/ObjectDetectionReturnValue)[]
 
 #### Defined in
 
@@ -252,50 +166,9 @@ ___
 
 ___
 
-### ObjectDetectionReturnValue
-
-Ƭ **ObjectDetectionReturnValue**: `Object`
-
-#### Type declaration
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `box` | { `xmax`: `number` ; `xmin`: `number` ; `ymax`: `number` ; `ymin`: `number`  } | A dict (with keys [xmin,ymin,xmax,ymax]) representing the bounding box of a detected object. |
-| `box.xmax` | `number` | - |
-| `box.xmin` | `number` | - |
-| `box.ymax` | `number` | - |
-| `box.ymin` | `number` | - |
-| `label` | `string` | The label for the class (model specific) of a detected object. |
-| `score` | `number` | A float that represents how likely it is that the detected object belongs to the given class. |
-
-#### Defined in
-
-[HfInference.ts:407](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L407)
-
-___
-
-### Options
-
-Ƭ **Options**: `Object`
-
-#### Type declaration
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `retry_on_error?` | `boolean` | (Default: true) Boolean. If a request 503s and wait_for_model is set to false, the request will be retried with the same parameters but with wait_for_model set to true. |
-| `use_cache?` | `boolean` | (Default: true). Boolean. There is a cache layer on the inference API to speedup requests we have already seen. Most models can use those results as is as models are deterministic (meaning the results will be the same anyway). However if you use a non deterministic model, you can set this parameter to prevent the caching mechanism from being used resulting in a real new query. |
-| `use_gpu?` | `boolean` | (Default: false). Boolean to use GPU instead of CPU for inference (requires Startup plan at least). |
-| `wait_for_model?` | `boolean` | (Default: false) Boolean. If the model is not ready, wait for it instead of receiving 503. It limits the number of requests required to get your inference done. It is advised to only set this flag to true after receiving a 503 error as it will limit hanging in your application to known places. |
-
-#### Defined in
-
-[HfInference.ts:1](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L1)
-
-___
-
 ### QuestionAnswerArgs
 
-Ƭ **QuestionAnswerArgs**: [`Args`](modules#args) & { `inputs`: { `context`: `string` ; `question`: `string`  }  }
+Ƭ **QuestionAnswerArgs**: [`Args`](interfaces/Args) & { `inputs`: { `context`: `string` ; `question`: `string`  }  }
 
 #### Defined in
 
@@ -303,28 +176,9 @@ ___
 
 ___
 
-### QuestionAnswerReturn
-
-Ƭ **QuestionAnswerReturn**: `Object`
-
-#### Type declaration
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `answer` | `string` | A string that’s the answer within the text. |
-| `end` | `number` | The index (string wise) of the stop of the answer within context. |
-| `score` | `number` | A float that represents how likely that the answer is correct |
-| `start` | `number` | The index (string wise) of the start of the answer within context. |
-
-#### Defined in
-
-[HfInference.ts:99](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L99)
-
-___
-
 ### SummarizationArgs
 
-Ƭ **SummarizationArgs**: [`Args`](modules#args) & { `inputs`: `string` ; `parameters?`: { `max_length?`: `number` ; `max_time?`: `number` ; `min_length?`: `number` ; `repetition_penalty?`: `number` ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number`  }  }
+Ƭ **SummarizationArgs**: [`Args`](interfaces/Args) & { `inputs`: `string` ; `parameters?`: { `max_length?`: `number` ; `max_time?`: `number` ; `min_length?`: `number` ; `repetition_penalty?`: `number` ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number`  }  }
 
 #### Defined in
 
@@ -332,25 +186,9 @@ ___
 
 ___
 
-### SummarizationReturn
-
-Ƭ **SummarizationReturn**: `Object`
-
-#### Type declaration
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `summary_text` | `string` | The string after translation |
-
-#### Defined in
-
-[HfInference.ts:85](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L85)
-
-___
-
 ### TableQuestionAnswerArgs
 
-Ƭ **TableQuestionAnswerArgs**: [`Args`](modules#args) & { `inputs`: { `query`: `string` ; `table`: `Record`<`string`, `string`[]\>  }  }
+Ƭ **TableQuestionAnswerArgs**: [`Args`](interfaces/Args) & { `inputs`: { `query`: `string` ; `table`: `Record`<`string`, `string`[]\>  }  }
 
 #### Defined in
 
@@ -358,28 +196,9 @@ ___
 
 ___
 
-### TableQuestionAnswerReturn
-
-Ƭ **TableQuestionAnswerReturn**: `Object`
-
-#### Type declaration
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `aggregator` | `string` | The aggregator used to get the answer |
-| `answer` | `string` | The plaintext answer |
-| `cells` | `string`[] | A list of coordinates of the cells contents |
-| `coordinates` | `number`[][] | a list of coordinates of the cells referenced in the answer |
-
-#### Defined in
-
-[HfInference.ts:131](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L131)
-
-___
-
 ### TextClassificationArgs
 
-Ƭ **TextClassificationArgs**: [`Args`](modules#args) & { `inputs`: `string`  }
+Ƭ **TextClassificationArgs**: [`Args`](interfaces/Args) & { `inputs`: `string`  }
 
 #### Defined in
 
@@ -399,7 +218,7 @@ ___
 
 ### TextGenerationArgs
 
-Ƭ **TextGenerationArgs**: [`Args`](modules#args) & { `inputs`: `string` ; `parameters?`: { `do_sample?`: `boolean` ; `max_new_tokens?`: `number` ; `max_time?`: `number` ; `num_return_sequences?`: `number` ; `repetition_penalty?`: `number` ; `return_full_text?`: `boolean` ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number`  }  }
+Ƭ **TextGenerationArgs**: [`Args`](interfaces/Args) & { `inputs`: `string` ; `parameters?`: { `do_sample?`: `boolean` ; `max_new_tokens?`: `number` ; `max_time?`: `number` ; `num_return_sequences?`: `number` ; `repetition_penalty?`: `number` ; `return_full_text?`: `boolean` ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number`  }  }
 
 #### Defined in
 
@@ -407,25 +226,9 @@ ___
 
 ___
 
-### TextGenerationReturn
-
-Ƭ **TextGenerationReturn**: `Object`
-
-#### Type declaration
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `generated_text` | `string` | The continuated string |
-
-#### Defined in
-
-[HfInference.ts:213](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L213)
-
-___
-
 ### TextToImageArgs
 
-Ƭ **TextToImageArgs**: [`Args`](modules#args) & { `inputs`: `string` ; `negative_prompt?`: `string`  }
+Ƭ **TextToImageArgs**: [`Args`](interfaces/Args) & { `inputs`: `string` ; `negative_prompt?`: `string`  }
 
 #### Defined in
 
@@ -445,7 +248,7 @@ ___
 
 ### TokenClassificationArgs
 
-Ƭ **TokenClassificationArgs**: [`Args`](modules#args) & { `inputs`: `string` ; `parameters?`: { `aggregation_strategy?`: ``"none"`` \| ``"simple"`` \| ``"first"`` \| ``"average"`` \| ``"max"``  }  }
+Ƭ **TokenClassificationArgs**: [`Args`](interfaces/Args) & { `inputs`: `string` ; `parameters?`: { `aggregation_strategy?`: ``"none"`` \| ``"simple"`` \| ``"first"`` \| ``"average"`` \| ``"max"``  }  }
 
 #### Defined in
 
@@ -455,7 +258,7 @@ ___
 
 ### TokenClassificationReturn
 
-Ƭ **TokenClassificationReturn**: [`TokenClassificationReturnValue`](modules#tokenclassificationreturnvalue)[]
+Ƭ **TokenClassificationReturn**: [`TokenClassificationReturnValue`](interfaces/TokenClassificationReturnValue)[]
 
 #### Defined in
 
@@ -463,29 +266,9 @@ ___
 
 ___
 
-### TokenClassificationReturnValue
-
-Ƭ **TokenClassificationReturnValue**: `Object`
-
-#### Type declaration
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `end` | `number` | The offset stringwise where the answer is located. Useful to disambiguate if word occurs multiple times. |
-| `entity_group` | `string` | The type for the entity being recognized (model specific). |
-| `score` | `number` | How likely the entity was recognized. |
-| `start` | `number` | The offset stringwise where the answer is located. Useful to disambiguate if word occurs multiple times. |
-| `word` | `string` | The string that was captured |
-
-#### Defined in
-
-[HfInference.ts:243](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L243)
-
-___
-
 ### TranslationArgs
 
-Ƭ **TranslationArgs**: [`Args`](modules#args) & { `inputs`: `string`  }
+Ƭ **TranslationArgs**: [`Args`](interfaces/Args) & { `inputs`: `string`  }
 
 #### Defined in
 
@@ -493,25 +276,9 @@ ___
 
 ___
 
-### TranslationReturn
-
-Ƭ **TranslationReturn**: `Object`
-
-#### Type declaration
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `translation_text` | `string` | The string after translation |
-
-#### Defined in
-
-[HfInference.ts:275](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L275)
-
-___
-
 ### ZeroShotClassificationArgs
 
-Ƭ **ZeroShotClassificationArgs**: [`Args`](modules#args) & { `inputs`: `string` \| `string`[] ; `parameters`: { `candidate_labels`: `string`[] ; `multi_label?`: `boolean`  }  }
+Ƭ **ZeroShotClassificationArgs**: [`Args`](interfaces/Args) & { `inputs`: `string` \| `string`[] ; `parameters`: { `candidate_labels`: `string`[] ; `multi_label?`: `boolean`  }  }
 
 #### Defined in
 
@@ -521,26 +288,8 @@ ___
 
 ### ZeroShotClassificationReturn
 
-Ƭ **ZeroShotClassificationReturn**: [`ZeroShotClassificationReturnValue`](modules#zeroshotclassificationreturnvalue)[]
+Ƭ **ZeroShotClassificationReturn**: [`ZeroShotClassificationReturnValue`](interfaces/ZeroShotClassificationReturnValue)[]
 
 #### Defined in
 
 [HfInference.ts:305](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L305)
-
-___
-
-### ZeroShotClassificationReturnValue
-
-Ƭ **ZeroShotClassificationReturnValue**: `Object`
-
-#### Type declaration
-
-| Name | Type |
-| :------ | :------ |
-| `labels` | `string`[] |
-| `scores` | `number`[] |
-| `sequence` | `string` |
-
-#### Defined in
-
-[HfInference.ts:299](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L299)

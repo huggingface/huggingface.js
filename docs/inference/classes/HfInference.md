@@ -11,7 +11,7 @@
 | Name | Type | Default value |
 | :------ | :------ | :------ |
 | `apiKey` | `string` | `""` |
-| `defaultOptions` | [`Options`](../modules#options) | `{}` |
+| `defaultOptions` | [`Options`](../interfaces/Options) | `{}` |
 
 #### Defined in
 
@@ -31,7 +31,7 @@ ___
 
 ### defaultOptions
 
-• `Private` `Readonly` **defaultOptions**: [`Options`](../modules#options)
+• `Private` `Readonly` **defaultOptions**: [`Options`](../interfaces/Options)
 
 #### Defined in
 
@@ -51,7 +51,7 @@ Recommended model:  superb/hubert-large-superb-er
 | Name | Type |
 | :------ | :------ |
 | `args` | [`AudioClassificationArgs`](../modules#audioclassificationargs) |
-| `options?` | [`Options`](../modules#options) |
+| `options?` | [`Options`](../interfaces/Options) |
 
 #### Returns
 
@@ -65,7 +65,7 @@ ___
 
 ### automaticSpeechRecognition
 
-▸ **automaticSpeechRecognition**(`args`, `options?`): `Promise`<[`AutomaticSpeechRecognitionReturn`](../modules#automaticspeechrecognitionreturn)\>
+▸ **automaticSpeechRecognition**(`args`, `options?`): `Promise`<[`AutomaticSpeechRecognitionReturn`](../interfaces/AutomaticSpeechRecognitionReturn)\>
 
 This task reads some audio input and outputs the said words within the audio files.
 Recommended model (english language): facebook/wav2vec2-large-960h-lv60-self
@@ -75,11 +75,11 @@ Recommended model (english language): facebook/wav2vec2-large-960h-lv60-self
 | Name | Type |
 | :------ | :------ |
 | `args` | [`AutomaticSpeechRecognitionArgs`](../modules#automaticspeechrecognitionargs) |
-| `options?` | [`Options`](../modules#options) |
+| `options?` | [`Options`](../interfaces/Options) |
 
 #### Returns
 
-`Promise`<[`AutomaticSpeechRecognitionReturn`](../modules#automaticspeechrecognitionreturn)\>
+`Promise`<[`AutomaticSpeechRecognitionReturn`](../interfaces/AutomaticSpeechRecognitionReturn)\>
 
 #### Defined in
 
@@ -89,7 +89,7 @@ ___
 
 ### conversational
 
-▸ **conversational**(`args`, `options?`): `Promise`<[`ConversationalReturn`](../modules#conversationalreturn)\>
+▸ **conversational**(`args`, `options?`): `Promise`<[`ConversationalReturn`](../interfaces/ConversationalReturn)\>
 
 This task corresponds to any chatbot like structure. Models tend to have shorter max_length, so please check with caution when using a given model if you need long range dependency or not. Recommended model: microsoft/DialoGPT-large.
 
@@ -98,11 +98,11 @@ This task corresponds to any chatbot like structure. Models tend to have shorter
 | Name | Type |
 | :------ | :------ |
 | `args` | [`ConversationalArgs`](../modules#conversationalargs) |
-| `options?` | [`Options`](../modules#options) |
+| `options?` | [`Options`](../interfaces/Options) |
 
 #### Returns
 
-`Promise`<[`ConversationalReturn`](../modules#conversationalreturn)\>
+`Promise`<[`ConversationalReturn`](../interfaces/ConversationalReturn)\>
 
 #### Defined in
 
@@ -121,7 +121,7 @@ This task reads some text and outputs raw float values, that are usually consume
 | Name | Type |
 | :------ | :------ |
 | `args` | [`FeatureExtractionArgs`](../modules#featureextractionargs) |
-| `options?` | [`Options`](../modules#options) |
+| `options?` | [`Options`](../interfaces/Options) |
 
 #### Returns
 
@@ -144,7 +144,7 @@ Tries to fill in a hole with a missing word (token to be precise). That’s the 
 | Name | Type |
 | :------ | :------ |
 | `args` | [`FillMaskArgs`](../modules#fillmaskargs) |
-| `options?` | [`Options`](../modules#options) |
+| `options?` | [`Options`](../interfaces/Options) |
 
 #### Returns
 
@@ -168,7 +168,7 @@ Recommended model: google/vit-base-patch16-224
 | Name | Type |
 | :------ | :------ |
 | `args` | [`ImageClassificationArgs`](../modules#imageclassificationargs) |
-| `options?` | [`Options`](../modules#options) |
+| `options?` | [`Options`](../interfaces/Options) |
 
 #### Returns
 
@@ -192,7 +192,7 @@ Recommended model: facebook/detr-resnet-50-panoptic
 | Name | Type |
 | :------ | :------ |
 | `args` | [`ImageSegmentationArgs`](../modules#imagesegmentationargs) |
-| `options?` | [`Options`](../modules#options) |
+| `options?` | [`Options`](../interfaces/Options) |
 
 #### Returns
 
@@ -216,7 +216,7 @@ Recommended model: facebook/detr-resnet-50
 | Name | Type |
 | :------ | :------ |
 | `args` | [`ObjectDetectionArgs`](../modules#objectdetectionargs) |
-| `options?` | [`Options`](../modules#options) |
+| `options?` | [`Options`](../interfaces/Options) |
 
 #### Returns
 
@@ -230,7 +230,7 @@ ___
 
 ### questionAnswer
 
-▸ **questionAnswer**(`args`, `options?`): `Promise`<[`QuestionAnswerReturn`](../modules#questionanswerreturn)\>
+▸ **questionAnswer**(`args`, `options?`): `Promise`<[`QuestionAnswerReturn`](../interfaces/QuestionAnswerReturn)\>
 
 Want to have a nice know-it-all bot that can answer any question?. Recommended model: deepset/roberta-base-squad2
 
@@ -239,11 +239,11 @@ Want to have a nice know-it-all bot that can answer any question?. Recommended m
 | Name | Type |
 | :------ | :------ |
 | `args` | [`QuestionAnswerArgs`](../modules#questionanswerargs) |
-| `options?` | [`Options`](../modules#options) |
+| `options?` | [`Options`](../interfaces/Options) |
 
 #### Returns
 
-`Promise`<[`QuestionAnswerReturn`](../modules#questionanswerreturn)\>
+`Promise`<[`QuestionAnswerReturn`](../interfaces/QuestionAnswerReturn)\>
 
 #### Defined in
 
@@ -259,8 +259,8 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `args` | [`Args`](../modules#args) & { `data?`: `any`  } |
-| `options?` | [`Options`](../modules#options) & { `binary?`: `boolean` ; `blob?`: `boolean`  } |
+| `args` | [`Args`](../interfaces/Args) & { `data?`: `any`  } |
+| `options?` | [`Options`](../interfaces/Options) & { `binary?`: `boolean` ; `blob?`: `boolean`  } |
 
 #### Returns
 
@@ -274,7 +274,7 @@ ___
 
 ### summarization
 
-▸ **summarization**(`args`, `options?`): `Promise`<[`SummarizationReturn`](../modules#summarizationreturn)\>
+▸ **summarization**(`args`, `options?`): `Promise`<[`SummarizationReturn`](../interfaces/SummarizationReturn)\>
 
 This task is well known to summarize longer text into shorter text. Be careful, some models have a maximum length of input. That means that the summary cannot handle full books for instance. Be careful when choosing your model.
 
@@ -283,11 +283,11 @@ This task is well known to summarize longer text into shorter text. Be careful, 
 | Name | Type |
 | :------ | :------ |
 | `args` | [`SummarizationArgs`](../modules#summarizationargs) |
-| `options?` | [`Options`](../modules#options) |
+| `options?` | [`Options`](../interfaces/Options) |
 
 #### Returns
 
-`Promise`<[`SummarizationReturn`](../modules#summarizationreturn)\>
+`Promise`<[`SummarizationReturn`](../interfaces/SummarizationReturn)\>
 
 #### Defined in
 
@@ -297,7 +297,7 @@ ___
 
 ### tableQuestionAnswer
 
-▸ **tableQuestionAnswer**(`args`, `options?`): `Promise`<[`TableQuestionAnswerReturn`](../modules#tablequestionanswerreturn)\>
+▸ **tableQuestionAnswer**(`args`, `options?`): `Promise`<[`TableQuestionAnswerReturn`](../interfaces/TableQuestionAnswerReturn)\>
 
 Don’t know SQL? Don’t want to dive into a large spreadsheet? Ask questions in plain english! Recommended model: google/tapas-base-finetuned-wtq.
 
@@ -306,11 +306,11 @@ Don’t know SQL? Don’t want to dive into a large spreadsheet? Ask questions i
 | Name | Type |
 | :------ | :------ |
 | `args` | [`TableQuestionAnswerArgs`](../modules#tablequestionanswerargs) |
-| `options?` | [`Options`](../modules#options) |
+| `options?` | [`Options`](../interfaces/Options) |
 
 #### Returns
 
-`Promise`<[`TableQuestionAnswerReturn`](../modules#tablequestionanswerreturn)\>
+`Promise`<[`TableQuestionAnswerReturn`](../interfaces/TableQuestionAnswerReturn)\>
 
 #### Defined in
 
@@ -329,7 +329,7 @@ Usually used for sentiment-analysis this will output the likelihood of classes o
 | Name | Type |
 | :------ | :------ |
 | `args` | [`TextClassificationArgs`](../modules#textclassificationargs) |
-| `options?` | [`Options`](../modules#options) |
+| `options?` | [`Options`](../interfaces/Options) |
 
 #### Returns
 
@@ -343,7 +343,7 @@ ___
 
 ### textGeneration
 
-▸ **textGeneration**(`args`, `options?`): `Promise`<[`TextGenerationReturn`](../modules#textgenerationreturn)\>
+▸ **textGeneration**(`args`, `options?`): `Promise`<[`TextGenerationReturn`](../interfaces/TextGenerationReturn)\>
 
 Use to continue text from a prompt. This is a very generic task. Recommended model: gpt2 (it’s a simple model, but fun to play with).
 
@@ -352,11 +352,11 @@ Use to continue text from a prompt. This is a very generic task. Recommended mod
 | Name | Type |
 | :------ | :------ |
 | `args` | [`TextGenerationArgs`](../modules#textgenerationargs) |
-| `options?` | [`Options`](../modules#options) |
+| `options?` | [`Options`](../interfaces/Options) |
 
 #### Returns
 
-`Promise`<[`TextGenerationReturn`](../modules#textgenerationreturn)\>
+`Promise`<[`TextGenerationReturn`](../interfaces/TextGenerationReturn)\>
 
 #### Defined in
 
@@ -376,7 +376,7 @@ Recommended model: stabilityai/stable-diffusion-2
 | Name | Type |
 | :------ | :------ |
 | `args` | [`TextToImageArgs`](../modules#texttoimageargs) |
-| `options?` | [`Options`](../modules#options) |
+| `options?` | [`Options`](../interfaces/Options) |
 
 #### Returns
 
@@ -399,7 +399,7 @@ Usually used for sentence parsing, either grammatical, or Named Entity Recogniti
 | Name | Type |
 | :------ | :------ |
 | `args` | [`TokenClassificationArgs`](../modules#tokenclassificationargs) |
-| `options?` | [`Options`](../modules#options) |
+| `options?` | [`Options`](../interfaces/Options) |
 
 #### Returns
 
@@ -413,7 +413,7 @@ ___
 
 ### translation
 
-▸ **translation**(`args`, `options?`): `Promise`<[`TranslationReturn`](../modules#translationreturn)\>
+▸ **translation**(`args`, `options?`): `Promise`<[`TranslationReturn`](../interfaces/TranslationReturn)\>
 
 This task is well known to translate text from one language to another. Recommended model: Helsinki-NLP/opus-mt-ru-en.
 
@@ -422,11 +422,11 @@ This task is well known to translate text from one language to another. Recommen
 | Name | Type |
 | :------ | :------ |
 | `args` | [`TranslationArgs`](../modules#translationargs) |
-| `options?` | [`Options`](../modules#options) |
+| `options?` | [`Options`](../interfaces/Options) |
 
 #### Returns
 
-`Promise`<[`TranslationReturn`](../modules#translationreturn)\>
+`Promise`<[`TranslationReturn`](../interfaces/TranslationReturn)\>
 
 #### Defined in
 
@@ -445,7 +445,7 @@ This task is super useful to try out classification with zero code, you simply p
 | Name | Type |
 | :------ | :------ |
 | `args` | [`ZeroShotClassificationArgs`](../modules#zeroshotclassificationargs) |
-| `options?` | [`Options`](../modules#options) |
+| `options?` | [`Options`](../interfaces/Options) |
 
 #### Returns
 
