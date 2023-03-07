@@ -8,6 +8,7 @@ export interface ListFileEntry {
 	type: "file" | "directory" | "unknown";
 	size: number;
 	path: string;
+	oid:  string;
 	lfs?: {
 		oid:         string;
 		size:        number;
@@ -15,11 +16,9 @@ export interface ListFileEntry {
 		pointerSize: number;
 	};
 	lastCommit: {
-		author: {
-			date: string;
-		};
-		id:      string;
-		subject: string;
+		date:  string;
+		id:    string;
+		title: string;
 	} | null;
 	security?: unknown;
 }

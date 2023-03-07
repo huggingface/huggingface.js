@@ -209,6 +209,7 @@ export interface ApiIndexTreeEntryData {
 	type: "file" | "directory" | "unknown";
 	size: number;
 	path: string;
+	oid:  string;
 	lfs?: {
 		oid:         string;
 		size:        number;
@@ -216,11 +217,9 @@ export interface ApiIndexTreeEntryData {
 		pointerSize: number;
 	};
 	lastCommit: {
-		author: {
-			date: string;
-		};
-		id:      string;
-		subject: string;
+		date:  string;
+		id:    string;
+		title: string;
 	} | null;
 	security?: ApiFileState;
 }
