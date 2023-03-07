@@ -31,7 +31,7 @@ export interface CommitFile {
 	// forceLfs?: boolean
 }
 
-// TODO: find a nice way to handle LFS & non-LFS files in an uniform manner, see https://github.com/huggingface/moon-landing/issues/4370y
+// TODO: find a nice way to handle LFS & non-LFS files in an uniform manner, see https://github.com/huggingface/moon-landing/issues/4370
 // export type CommitRenameFile = {
 // 	operation: "rename";
 // 	path:      string;
