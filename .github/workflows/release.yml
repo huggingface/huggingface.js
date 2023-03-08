@@ -20,6 +20,10 @@ defaults:
   run:
     shell: 'bash'
 
+env:
+  # get more verbose logs from the action
+  ACTIONS_RUNNER_DEBUG: true
+
 jobs:
   release:
     name: 'Release'
