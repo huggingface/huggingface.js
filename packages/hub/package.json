@@ -1,57 +1,57 @@
 {
-	"name": "@huggingface/hub",
-	"version": "0.1.5",
-	"description": "Utilities to interact with the Hugging Face hub",
-	"repository": "github:huggingface/huggingface.js",
-	"publishConfig": {
-		"access": "public"
-	},
-	"main": "./dist/index.js",
-	"module": "./dist/index.mjs",
-	"types": "index.ts",
-	"exports": {
-		".": {
-			"require": "./dist/index.js",
-			"import": "./dist/index.mjs",
-			"types": "./index.ts"
-		}
-	},
-	"engines": {
-		"node": ">=18"
-	},
-	"source": "index.ts",
-	"scripts": {
+  "name": "@huggingface/hub",
+  "version": "0.1.5",
+  "description": "Utilities to interact with the Hugging Face hub",
+  "repository": "github:huggingface/huggingface.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "index.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs",
+      "types": "./index.ts"
+    }
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "source": "index.ts",
+  "scripts": {
     "format": "prettier --write . && eslint --quiet --fix --ext .cjs,.ts .",
-		"prepublishOnly": "pnpm build",
-		"build": "tsup src/index.ts --format cjs,esm --clean",
-		"test": "vitest run",
-		"test:ci": "pnpm run test -- --coverage",
-		"type-check": "tsc"
-	},
-	"files": [
-		"src",
-		"dist",
-		"index.ts",
-		"tsconfig.json"
-	],
-	"keywords": [
-		"huggingface",
-		"hub",
-		"api",
-		"client",
-		"hugging",
-		"face"
-	],
-	"author": "Hugging Face",
-	"license": "MIT",
-	"devDependencies": {
-		"@types/node": "^18.13.0",
-		"ts-node": "^10.9.1",
-		"tsup": "^6.6.3",
-		"type-fest": "^3.5.6",
-		"typescript": "^4.9.5"
-	},
-	"dependencies": {
-		"hash-wasm": "^4.9.0"
-	}
+    "prepublishOnly": "pnpm build",
+    "build": "tsup src/index.ts --format cjs,esm --clean",
+    "test": "vitest run",
+    "test:ci": "pnpm run test -- --coverage",
+    "type-check": "tsc"
+  },
+  "files": [
+    "src",
+    "dist",
+    "index.ts",
+    "tsconfig.json"
+  ],
+  "keywords": [
+    "huggingface",
+    "hub",
+    "api",
+    "client",
+    "hugging",
+    "face"
+  ],
+  "author": "Hugging Face",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^18.13.0",
+    "ts-node": "^10.9.1",
+    "tsup": "^6.6.3",
+    "type-fest": "^3.5.6",
+    "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "hash-wasm": "^4.9.0"
+  }
 }
