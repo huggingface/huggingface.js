@@ -8,7 +8,9 @@ npm add @huggingface/hub
 
 Check out the [full documentation](https://huggingface.co/docs/huggingface.js/hub/README).
 
-## API
+## Usage
+
+For some of the calls, you need to create an account and generate an [access token](https://huggingface.co/settings/tokens).
 
 ```ts
 import { createRepo, createCommit, deleteRepo, listFiles } from "@huggingface/hub";
@@ -45,7 +47,7 @@ await deleteRepo({ repo, credentials });
 When uploading large files, you may want to run the `commit` calls inside a worker, to offload the sha256 computations.
 
 Also, use `Blob` to avoid loading the whole files in RAM. In `Node`, it's up to you to provide a smart `Blob` wrapper around your file. Feel free to open an issue if you want *us* to provide the smart `Blob` implementation. If you use `Bun`, `Bun.File` is already a smart blob implementation and can be used directly!
-
+P
 ## Dependencies
 
 - `hash-wasm` : Only used in the browser, when committing files over 10 MB. Browsers do not natively support streaming sha256 computations.
