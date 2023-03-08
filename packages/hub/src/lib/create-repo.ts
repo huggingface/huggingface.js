@@ -15,7 +15,7 @@ export async function createRepo(params: {
 	/** @required for when {@link repo.type} === "space" */
 	sdk?:        SpaceSdk;
 	hubUrl?:     string;
-}): Promise<void> {
+}): Promise<{ repoUrl: string }> {
 	const [namespace, repoName] = params.repo.name.split("/");
 
 	if (!namespace || !repoName) {
@@ -60,4 +60,6 @@ export async function createRepo(params: {
 	if (!res.ok) {
 		throw await createApiError(res);
 	}
+	const output = await res.json();
+	return { repoUrl: output.url };
 }
