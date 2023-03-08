@@ -42,7 +42,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - run: git push --follow-tags
-      # hack - reuse actions/setup-node@v3 just to set a new registry 
+      # hack - reuse actions/setup-node@v3 just to set a new registry
       - uses: actions/setup-node@v3
         with:
           node-version: "18"
