@@ -12,7 +12,6 @@
 		"vitest": "^0.29.2"
 	},
 	"scripts": {
-		"format": "prettier --write . && eslint --quiet --fix --ext .cjs,.ts .",
-		"test": "pnpm -r test"
+		"format": "prettier --write . && eslint --quiet --fix --ext .cjs,.ts ."
 	}
 }
