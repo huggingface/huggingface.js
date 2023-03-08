@@ -15,3 +15,7 @@ Otherwise, we avoid runtime dependencies unless they're strictly needed. For exa
 Keep your changes scoped to the subject of the PR! 
 
 It's not a hard requirement, but please consider using an icon from [Gitmoji](https://gitmoji.dev/) as a prefix to your PR title.
+
+## Docs
+
+The files in `/docs` are automatically generated, do not edit them!
