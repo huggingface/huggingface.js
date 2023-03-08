@@ -1,4 +1,4 @@
-import { assert, it, describe } from "vitest";
+import { assert, it, describe, expect } from "vitest";
 
 import { randomBytes } from "crypto";
 import { TEST_ACCESS_TOKEN, TEST_USER } from "../consts";
@@ -39,5 +39,14 @@ describe("createRepo", () => {
 			},
 			credentials: { accessToken: TEST_ACCESS_TOKEN },
 		});
+	});
+
+	it("should throw a client error when trying to create a repo without a fully-qualified name", async () => {
+		const tryCreate = createRepo({
+			repo:        { name: "canonical", type: "model" },
+			credentials: { accessToken: TEST_ACCESS_TOKEN },
+		});
+
+		await expect(tryCreate).rejects.toBeInstanceOf(TypeError);
 	});
 });
