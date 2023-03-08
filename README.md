@@ -28,6 +28,7 @@ The libraries are still very young, please help us by opening issues!
 import { createRepo, commit } from "@huggingface/hub";
 import { HfInference } from "@huggingface/inference";
 
+// use an access token from your free account
 const HF_ACCESS_TOKEN = "hf_...";
 
 await createRepo({
