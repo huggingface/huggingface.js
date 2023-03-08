@@ -77,4 +77,4 @@ pnpm -r test
 pnpm -r build
 ```
 
-This will generate ESM and CJS javascript files in `packages/*/dist`, eg `packages/inference/dist/index.mjs`
+This will generate ESM and CJS javascript files in `packages/*/dist`, eg `packages/inference/dist/index.mjs`.
