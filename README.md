@@ -20,7 +20,7 @@ With more to come, like `@huggingface/endpoints` to manage your HF Endpoints!
 
 We use modern features to avoid polyfills and dependencies, so the libraries will only work on modern browsers / Node.js >= 18 / Bun / Deno. 
 
-The libraries is still very young, please help us by opening issues!
+The libraries are still very young, please help us by opening issues!
 
 ## Usage example
 
