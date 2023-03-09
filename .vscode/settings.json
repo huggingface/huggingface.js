@@ -1,12 +1,12 @@
 {
-  "editor.defaultFormatter": "rvest.vs-code-prettier-eslint",
-  "editor.formatOnPaste": false, // required for vs-code-prettier-eslint
-  "editor.formatOnSave": true, // required for vs-code-prettier-eslint
-  "editor.formatOnType": false, // required for vs-code-prettier-eslint
-  "editor.formatOnSaveMode": "file", // required to format on save for vs-code-prettier-eslint
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "npm.packageManager": "pnpm",
-  "editor.tabSize": 2,
-  "editor.detectIndentation": true,
-  "files.insertFinalNewline": true,
+	"editor.defaultFormatter": "rvest.vs-code-prettier-eslint",
+	"editor.formatOnPaste": false, // required for vs-code-prettier-eslint
+	"editor.formatOnSave": true, // required for vs-code-prettier-eslint
+	"editor.formatOnType": false, // required for vs-code-prettier-eslint
+	"editor.formatOnSaveMode": "file", // required to format on save for vs-code-prettier-eslint
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"npm.packageManager": "pnpm",
+	"editor.tabSize": 2,
+	"editor.detectIndentation": true,
+	"files.insertFinalNewline": true,
 }
