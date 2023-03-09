@@ -14,8 +14,6 @@ for (const mdFile of await glob("**/*.md", { cwd: "../../docs" })) {
 			.replaceAll(/\(packages\/[^)]+\)/g, (val) => val.replace("packages/", ""))
 			// When on HF, remove links to HF
 			.replaceAll(/.*\[full documentation\].*\n\n/g, "")
-			// fix logo sources: doc-builder wrongly sanitized `<source>`
-			.replaceAll(/ *<source [^>]+> *\n?/g, "")
 	);
 }
 

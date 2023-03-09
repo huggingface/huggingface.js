@@ -14,13 +14,13 @@
 This is a collection of JS libraries to interact with the Hugging Face API, with TS types included.
 
 - [@huggingface/hub](packages/hub/README.md): Interact with huggingface.co to create or delete repos and commit / download files
-- [@huggingface/inference](packages/inference/README.md): Use the Inference API to make calls to Machine Learning models!
+- [@huggingface/inference](packages/inference/README.md): Use the Inference API to make calls to 100,000+ Machine Learning models!
 
 With more to come, like `@huggingface/endpoints` to manage your HF Endpoints!
 
 We use modern features to avoid polyfills and dependencies, so the libraries will only work on modern browsers / Node.js >= 18 / Bun / Deno.
 
-The libraries is still very young, please help us by opening issues!
+The libraries are still very young, please help us by opening issues!
 
 ## Usage example
 
@@ -28,6 +28,7 @@ The libraries is still very young, please help us by opening issues!
 import { createRepo, commit } from "@huggingface/hub";
 import { HfInference } from "@huggingface/inference";
 
+// use an access token from your free account
 const HF_ACCESS_TOKEN = "hf_...";
 
 await createRepo({
@@ -70,3 +71,11 @@ pnpm install
 pnpm -r format
 pnpm -r test
 ```
+
+## Building
+
+```
+pnpm -r build
+```
+
+This will generate ESM and CJS javascript files in `packages/*/dist`, eg `packages/inference/dist/index.mjs`.

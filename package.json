@@ -3,10 +3,9 @@
   "repository": "github:huggingface/huggingface.js",
   "scripts": {
     "docs:update": "pnpm --filter 'doc-internal' start",
-    "changeset:release": "pnpm build && pnpm docs:update && changeset publish",
+    "changeset:release": "pnpm --recursive build && pnpm docs:update && changeset publish",
     "changeset:version": "changeset version",
-    "format": "prettier --write .eslintrc.cjs && eslint --quiet --fix --ext .cjs,.ts .eslintrc.cjs",
-    "preinstall": "npx only-allow pnpm"
+    "format": "prettier --write .eslintrc.cjs && eslint --quiet --fix --ext .cjs,.ts .eslintrc.cjs"
   },
   "dependencies": {
     "@changesets/changelog-github": "^0.4.8",
