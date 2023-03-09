@@ -5,7 +5,8 @@ export interface RepoId {
 	type: RepoType;
 }
 
-export type AccessToken = `hf_${string}`;
+/** Actually `hf_${string}`, but for convenience, using the string type */
+export type AccessToken = string;
 
 export interface Credentials {
 	accessToken: AccessToken;

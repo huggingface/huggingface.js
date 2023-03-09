@@ -3,6 +3,7 @@ import { createApiError } from "../error";
 import type { Credentials, RepoId } from "../types";
 import type { ApiIndexTreeEntryData } from "../types/api";
 import { parseLinkHeader } from "../utils";
+import { checkCredentials } from "../utils/checkCredentials";
 
 export interface ListFileEntry {
 	type: "file" | "directory" | "unknown";
@@ -42,6 +43,7 @@ export async function* listFiles(params: {
 	credentials?: Credentials;
 	hubUrl?:      string;
 }): AsyncGenerator<ListFileEntry> {
+	checkCredentials(params.credentials);
 	let url: string | undefined = `${params.hubUrl || HUB_URL}/api/${params.repo.type}s/${params.repo.name}/tree/${
 		params.revision || "main"
 	}${params.path ? "/" + params.path : ""}${params.recursive ? "?recursive=true" : ""}`;

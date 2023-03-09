@@ -1,6 +1,7 @@
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
 import type { Credentials, RepoId } from "../types";
+import { checkCredentials } from "../utils/checkCredentials";
 
 /**
  * @returns null when the file doesn't exist
@@ -18,6 +19,7 @@ export async function downloadFile(params: {
 	credentials?: Credentials;
 	hubUrl?:      string;
 }): Promise<Response | null> {
+	checkCredentials(params.credentials);
 	const url = `${params.hubUrl ?? HUB_URL}/${params.repo.type === "model" ? "" : `${params.repo.type}s/`}${
 		params.repo.name
 	}/${params.raw ? "raw" : "resolve"}/${encodeURIComponent(params.revision ?? "main")}/${params.path}`;
