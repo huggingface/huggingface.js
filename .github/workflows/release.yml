@@ -50,7 +50,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: 'Install dependencies'
-        run: pnpm install
+        run: pnpm install --filter .
 
       - name: 'Create Release Pull Request or Publish to npm'
         id: changesets
