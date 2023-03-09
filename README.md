@@ -68,5 +68,5 @@ There are more features of course, check each library's README!
 pnpm install
 
 pnpm -r format
-pnpm test
+pnpm -r test
 ```

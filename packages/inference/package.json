@@ -4,7 +4,10 @@
 	"license": "MIT",
 	"author": "Tim Mikeladze <tim.mikeladze@gmail.com>",
 	"description": "Typescript wrapper for the Hugging Face Inference API",
-	"repository": "https://github.com/huggingface/huggingface.js.git",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/huggingface/huggingface.js.git"
+	},
 	"publishConfig": {
 		"access": "public"
 	},
