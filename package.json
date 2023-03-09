@@ -2,8 +2,6 @@
   "author": "Hugging Face",
   "repository": "github:huggingface/huggingface.js",
   "scripts": {
-    "build": "pnpm --recursive build",
-    "test": "pnpm --recursive test",
     "docs:update": "pnpm --filter 'doc-internal' start",
     "changeset:release": "pnpm build && pnpm docs:update && changeset publish",
     "changeset:version": "changeset version",
