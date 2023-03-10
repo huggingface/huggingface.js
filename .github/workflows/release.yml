@@ -76,9 +76,9 @@ jobs:
       - name: 'Check if "hub"/"inference" package was published'
         if: steps.changesets.outputs.published == 'true'
         run: |
-            echo "HUB_PUBLISHED=$(echo ${{ steps.changesets.outputs.publishedPackages }} | jq --raw-output 'map(select(.name | contains("hub"))) | length > 0')" >> $GITHUB_ENV
+          echo "HUB_PUBLISHED=$(echo ${{ steps.changesets.outputs.publishedPackages }} | jq --raw-output 'map(select(.name | contains("hub"))) | length > 0')" >> $GITHUB_ENV
 
-            echo "INFERENCE_PUBLISHED=$(echo ${{ steps.changesets.outputs.publishedPackages }} | jq --raw-output 'map(select(.name | contains("inference"))) | length > 0')" >> $GITHUB_ENV
+          echo "INFERENCE_PUBLISHED=$(echo ${{ steps.changesets.outputs.publishedPackages }} | jq --raw-output 'map(select(.name | contains("inference"))) | length > 0')" >> $GITHUB_ENV
 
       - name: 'Publish to GitHub Packages'
         if: steps.changesets.outputs.published == 'true'
