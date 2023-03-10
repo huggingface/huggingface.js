@@ -19,3 +19,7 @@ It's not a hard requirement, but please consider using an icon from [Gitmoji](ht
 ## Docs
 
 The files in `/docs` are automatically generated, do not edit them!
+
+## Tests
+
+If you want to run only specific tests, you can do `pnpm test -- -t "test name"`

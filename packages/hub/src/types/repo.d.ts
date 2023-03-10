@@ -22,3 +22,7 @@ export type SpaceHardwareFlavor =
 	| "a100-large";
 
 export type SpaceSdk = "streamlit" | "gradio" | "docker" | "static";
+
+export type AccessTokenRole = "admin" | "write" | "contributor" | "read";
+
+export type AuthType = "access_token" | "app_token" | "app_token_as_user";
