@@ -1,6 +1,7 @@
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
 import type { Credentials, RepoId } from "../types";
+import { checkCredentials } from "../utils/checkCredentials";
 
 export interface FileDownloadInfoOutput {
 	size:         number;
@@ -30,6 +31,7 @@ export async function fileDownloadInfo(params: {
 	 */
 	noContentDisposition?: boolean;
 }): Promise<FileDownloadInfoOutput | null> {
+	checkCredentials(params.credentials);
 	const url =
 		`${params.hubUrl ?? HUB_URL}/${params.repo.type === "model" ? "" : `${params.repo.type}s/`}${params.repo.name}/${
 			params.raw ? "raw" : "resolve"

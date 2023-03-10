@@ -12,6 +12,7 @@ import type {
 } from "../types/api";
 import type { Credentials, RepoId } from "../types/repo";
 import { base64FromBytes, chunk, promisesQueue, promisesQueueStreaming, sha256 } from "../utils";
+import { checkCredentials } from "../utils/checkCredentials";
 
 const CONCURRENT_SHAS = 5;
 const CONCURRENT_LFS_UPLOADS = 5;
@@ -79,6 +80,7 @@ function isFileOperation(op: CommitOperation): op is CommitFile {
  * Can be exposed later to offer fine-tuned progress info
  */
 async function* commitIter(params: CommitParams): AsyncGenerator<unknown, CommitOutput> {
+	checkCredentials(params.credentials);
 	yield "preuploading";
 
 	const lfsShas = new Map<string, string | null>();

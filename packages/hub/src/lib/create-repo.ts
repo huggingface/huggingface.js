@@ -2,6 +2,7 @@ import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
 import type { ApiCreateRepoPayload, Credentials, RepoId, SpaceSdk } from "../types";
 import { base64FromBytes } from "../utils";
+import { checkCredentials } from "../utils/checkCredentials";
 
 export async function createRepo(params: {
 	repo:        RepoId;
@@ -16,6 +17,7 @@ export async function createRepo(params: {
 	sdk?:        SpaceSdk;
 	hubUrl?:     string;
 }): Promise<{ repoUrl: string }> {
+	checkCredentials(params.credentials);
 	const [namespace, repoName] = params.repo.name.split("/");
 
 	if (!namespace || !repoName) {
