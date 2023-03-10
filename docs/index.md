@@ -14,7 +14,7 @@
 This is a collection of JS libraries to interact with the Hugging Face API, with TS types included.
 
 - [@huggingface/hub](hub/README): Interact with huggingface.co to create or delete repos and commit / download files
-- [@huggingface/inference](inference/README): Use the Inference API to make calls to Machine Learning models!
+- [@huggingface/inference](inference/README): Use the Inference API to make calls to 100,000+ Machine Learning models!
 
 With more to come, like `@huggingface/endpoints` to manage your HF Endpoints!
 
@@ -22,12 +22,43 @@ We use modern features to avoid polyfills and dependencies, so the libraries wil
 
 The libraries are still very young, please help us by opening issues!
 
+## Installation
+
+### From NPM
+
+To install via NPM, you can download the libraries as needed:
+
+```bash
+npm install @huggingface/hub
+npm install @huggingface/inference
+```
+
+Then import the libraries in your code:
+
+```ts
+import { createRepo, commit, deleteRepo, listFiles } from "@huggingface/hub";
+import { HfInference } from "@huggingface/inference";
+import type { RepoId, Credentials } from "@huggingface/hub";
+```
+
+### From CDN or Static hosting
+You can run our packages with vanilla JS, without any bundler, by using a CDN or static hosting. Using [ES modules](https://hacks.mozilla.org/2018/03/es-modules-a-cartoon-deep-dive/), i.e. `<script type="module">`, you can import the libraries in your code:
+
+```html
+
+<script type="module">
+    import { HfInference } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@1/+esm';
+    import { createRepo, commit, deleteRepo, listFiles } from "https://cdn.jsdelivr.net/npm/@huggingface/hub@0/+esm";
+</script>
+```
+
 ## Usage example
 
 ```ts
 import { createRepo, commit } from "@huggingface/hub";
 import { HfInference } from "@huggingface/inference";
 
+// use an access token from your free account
 const HF_ACCESS_TOKEN = "hf_...";
 
 await createRepo({
@@ -70,3 +101,11 @@ pnpm install
 pnpm -r format
 pnpm -r test
 ```
+
+## Building
+
+```
+pnpm -r build
+```
+
+This will generate ESM and CJS javascript files in `packages/*/dist`, eg `packages/inference/dist/index.mjs`.
