@@ -1,10 +1,10 @@
-name: 'Release'
+name: "Release"
 
 # Required permissions to: push, publish to GPR, create a PR
 permissions:
-  contents: 'write'
-  packages: 'write'
-  pull-requests: 'write'
+  contents: "write"
+  packages: "write"
+  pull-requests: "write"
 
 # https://github.com/changesets/action#example-workflow
 concurrency: ${{ github.workflow }}-${{ github.ref }}
@@ -12,13 +12,13 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 on:
   push:
     branches:
-      - 'main'
+      - "main"
       # temp for testing
-      - 'test-changesets'
+      - "test-changesets"
 
 defaults:
   run:
-    shell: 'bash'
+    shell: "bash"
 
 env:
   # get more verbose logs from the action
@@ -26,38 +26,38 @@ env:
 
 jobs:
   release:
-    name: 'Release'
+    name: "Release"
     if: ${{ github.repository_owner == 'huggingface' }}
     runs-on: ubuntu-latest
     steps:
-      - name: 'Checkout'
+      - name: "Checkout"
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           # This makes Actions fetch all Git history so that Changesets can generate changelogs with the correct commits
           fetch-depth: 0
 
-      - name: 'Setup pnpm'
+      - name: "Setup pnpm"
         uses: pnpm/action-setup@v2.2.4
         with:
           version: 7.1.5
 
-      - name: 'Setup Node.js [1]'
+      - name: "Setup Node.js [1]"
         uses: actions/setup-node@v3
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version: 18
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: "https://registry.npmjs.org"
 
-      - name: 'Install dependencies'
+      - name: "Install dependencies"
         run: pnpm install --filter .
 
-      - name: 'Create Release Pull Request or Publish to npm'
+      - name: "Create Release Pull Request or Publish to npm"
         id: changesets
         uses: changesets/action@v1.4.1
         with:
-          title: '🔖 Version packages'
-          commit: '🔖 Version packages'
+          title: "🔖 Version packages"
+          commit: "🔖 Version packages"
           version: pnpm changeset:version
           publish: pnpm changeset:release
         env:
@@ -65,12 +65,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
         # for GitHub Packages registry
-      - name: 'Setup Node.js [2]'
+      - name: "Setup Node.js [2]"
         if: steps.changesets.outputs.published == 'true'
         uses: actions/setup-node@v3
         with:
           node-version: 18
-          registry-url: 'https://npm.pkg.github.com'
+          registry-url: "https://npm.pkg.github.com"
 
         # https://github.com/changesets/action/blob/595655c3eae7136ff5ba18200406898904362926/action.yml#L36
       - name: 'Check if "hub"/"inference" package was published'
@@ -80,7 +80,7 @@ jobs:
 
           echo "INFERENCE_PUBLISHED=$(echo ${{ steps.changesets.outputs.publishedPackages }} | jq --raw-output 'map(select(.name | contains("inference"))) | length > 0')" >> $GITHUB_ENV
 
-      - name: 'Publish to GitHub Packages'
+      - name: "Publish to GitHub Packages"
         if: steps.changesets.outputs.published == 'true'
         env:
           NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
