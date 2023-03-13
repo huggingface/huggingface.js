@@ -19,7 +19,11 @@ import type { RepoId, Credentials } from "@huggingface/hub";
 const repo: RepoId = { type: "model", name: "myname/some-model" };
 const credentials: Credentials = { accessToken: "hf_..." };
 
-console.log(await whoAmI({credentials}));
+const {name: username} = await whoAmI({credentials});
+
+for await (const model of listModels({search: {owner: username}, credentials})) {
+  console.log("My model:", model);
+}
 
 await createRepo({ repo, credentials, license: "mit" });
 

@@ -12,6 +12,6 @@
 		"skipLibCheck": true,
 		"outDir": "./dist"
 	},
-	"include": ["src/**/*.ts", "index.ts"],
+	"include": ["src", "index.ts"],
 	"exclude": ["dist"]
 }

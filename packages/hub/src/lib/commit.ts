@@ -1,18 +1,22 @@
 import { HUB_URL } from "../consts";
 import { ApiError, createApiError } from "../error";
 import type {
-	ApiCommitLfsFile,
-	ApiPreuploadRequest,
-	ApiPreuploadResponse,
 	ApiCommitHeader,
+	ApiCommitLfsFile,
+	ApiCommitOperation,
 	ApiLfsBatchRequest,
 	ApiLfsBatchResponse,
 	ApiLfsCompleteMultipartRequest,
-	ApiCommitOperation,
-} from "../types/api";
-import type { Credentials, RepoId } from "../types/repo";
-import { base64FromBytes, chunk, promisesQueue, promisesQueueStreaming, sha256 } from "../utils";
+	ApiPreuploadRequest,
+	ApiPreuploadResponse,
+} from "../types/api/api-commit";
+import type { Credentials, RepoId } from "../types/public";
+import { base64FromBytes } from "../utils/base64FromBytes";
 import { checkCredentials } from "../utils/checkCredentials";
+import { chunk } from "../utils/chunk";
+import { promisesQueue } from "../utils/promisesQueue";
+import { promisesQueueStreaming } from "../utils/promisesQueueStreaming";
+import { sha256 } from "../utils/sha256";
 
 const CONCURRENT_SHAS = 5;
 const CONCURRENT_LFS_UPLOADS = 5;
