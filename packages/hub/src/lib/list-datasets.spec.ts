@@ -14,8 +14,6 @@ describe("listDatasets", () => {
 			results.push(entry);
 		}
 
-		console.log(results);
-
 		expect(results).deep.equal([
 			{
 				id:        "6356b19985da6f13863228bd",

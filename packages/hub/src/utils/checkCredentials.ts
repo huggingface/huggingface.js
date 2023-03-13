@@ -1,4 +1,4 @@
-import type { Credentials } from "../types";
+import type { Credentials } from "../types/public";
 
 export function checkCredentials(credentials?: Credentials): void {
 	if (!credentials || credentials.accessToken === undefined || credentials.accessToken === null) {
