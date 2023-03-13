@@ -238,7 +238,7 @@ ___
 
 ### TextToImageReturn
 
-Ƭ **TextToImageReturn**: `ArrayBuffer`
+Ƭ **TextToImageReturn**: `Blob`
 
 #### Defined in
 

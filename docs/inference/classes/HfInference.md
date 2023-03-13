@@ -366,7 +366,7 @@ ___
 
 ### textToImage
 
-▸ **textToImage**(`args`, `options?`): `Promise`<`ArrayBuffer`\>
+▸ **textToImage**(`args`, `options?`): `Promise`<`Blob`\>
 
 This task reads some text input and outputs an image.
 Recommended model: stabilityai/stable-diffusion-2
@@ -380,7 +380,7 @@ Recommended model: stabilityai/stable-diffusion-2
 
 #### Returns
 
-`Promise`<`ArrayBuffer`\>
+`Promise`<`Blob`\>
 
 #### Defined in
 
@@ -473,4 +473,4 @@ ___
 
 #### Defined in
 
-[HfInference.ts:732](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L732)
+[HfInference.ts:729](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L729)
