@@ -2,7 +2,7 @@ import { assert, it, describe } from "vitest";
 
 import { randomBytes } from "crypto";
 import { HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from "../consts";
-import type { RepoId } from "../types";
+import type { RepoId } from "../types/public";
 import { commit } from "./commit";
 import { createRepo } from "./create-repo";
 import { deleteRepo } from "./delete-repo";

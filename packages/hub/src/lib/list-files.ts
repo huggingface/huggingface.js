@@ -1,9 +1,9 @@
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
-import type { Credentials, RepoId } from "../types";
-import type { ApiIndexTreeEntryData } from "../types/api";
-import { parseLinkHeader } from "../utils";
+import type { ApiIndexTreeEntry } from "../types/api/api-index-tree";
+import type { Credentials, RepoId } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
+import { parseLinkHeader } from "../utils/parseLinkHeader";
 
 export interface ListFileEntry {
 	type: "file" | "directory" | "unknown";
@@ -60,7 +60,7 @@ export async function* listFiles(params: {
 			throw createApiError(res);
 		}
 
-		const items: ApiIndexTreeEntryData[] = await res.json();
+		const items: ApiIndexTreeEntry[] = await res.json();
 
 		for (const item of items) {
 			yield item;

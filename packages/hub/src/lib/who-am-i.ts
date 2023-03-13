@@ -1,8 +1,7 @@
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
-import type { Credentials } from "../types";
-import type { ApiWhoAmIReponse } from "../types/api";
-import type { AccessTokenRole, AuthType } from "../types/repo";
+import type { ApiWhoAmIReponse } from "../types/api/api-who-am-i";
+import type { AccessTokenRole, AuthType, Credentials } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 
 export interface WhoAmIUser {
