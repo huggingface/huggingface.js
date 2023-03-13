@@ -334,7 +334,7 @@ describe.concurrent(
 				model:           "stabilityai/stable-diffusion-2",
 			});
 
-			expect(res).toBeInstanceOf(ArrayBuffer);
+			expect(res).toBeInstanceOf(Blob);
 		});
 	},
 	TIMEOUT
