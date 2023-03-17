@@ -3,17 +3,28 @@
 ## Classes
 
 - [ApiError](classes/ApiError)
+- [InvalidApiResponseFormatError](classes/InvalidApiResponseFormatError)
 
 ## Interfaces
 
+- [AuthInfo](interfaces/AuthInfo)
 - [CommitDeletedEntry](interfaces/CommitDeletedEntry)
 - [CommitFile](interfaces/CommitFile)
 - [CommitOutput](interfaces/CommitOutput)
 - [CommitParams](interfaces/CommitParams)
 - [Credentials](interfaces/Credentials)
+- [DatasetEntry](interfaces/DatasetEntry)
 - [FileDownloadInfoOutput](interfaces/FileDownloadInfoOutput)
 - [ListFileEntry](interfaces/ListFileEntry)
+- [ModelEntry](interfaces/ModelEntry)
 - [RepoId](interfaces/RepoId)
+- [SpaceEntry](interfaces/SpaceEntry)
+- [SpaceResourceConfig](interfaces/SpaceResourceConfig)
+- [SpaceResourceRequirement](interfaces/SpaceResourceRequirement)
+- [SpaceRuntime](interfaces/SpaceRuntime)
+- [WhoAmIApp](interfaces/WhoAmIApp)
+- [WhoAmIOrg](interfaces/WhoAmIOrg)
+- [WhoAmIUser](interfaces/WhoAmIUser)
 
 ## Type Aliases
 
@@ -25,7 +36,27 @@ Actually `hf_${string}`, but for convenience, using the string type
 
 #### Defined in
 
-[hub/src/types/repo.d.ts:9](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/repo.d.ts#L9)
+[hub/src/types/public.d.ts:9](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L9)
+
+___
+
+### AccessTokenRole
+
+Ƭ **AccessTokenRole**: ``"admin"`` \| ``"write"`` \| ``"contributor"`` \| ``"read"``
+
+#### Defined in
+
+[hub/src/types/public.d.ts:38](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L38)
+
+___
+
+### AuthType
+
+Ƭ **AuthType**: ``"access_token"`` \| ``"app_token"`` \| ``"app_token_as_user"``
+
+#### Defined in
+
+[hub/src/types/public.d.ts:40](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L40)
 
 ___
 
@@ -35,7 +66,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/commit.ts:43](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L43)
+[hub/src/lib/commit.ts:47](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L47)
 
 ___
 
@@ -45,7 +76,7 @@ ___
 
 #### Defined in
 
-[hub/src/types/repo.d.ts:1](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/repo.d.ts#L1)
+[hub/src/types/public.d.ts:1](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L1)
 
 ___
 
@@ -55,7 +86,7 @@ ___
 
 #### Defined in
 
-[hub/src/types/repo.d.ts:15](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/repo.d.ts#L15)
+[hub/src/types/public.d.ts:15](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L15)
 
 ___
 
@@ -65,7 +96,37 @@ ___
 
 #### Defined in
 
-[hub/src/types/repo.d.ts:24](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/repo.d.ts#L24)
+[hub/src/types/public.d.ts:24](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L24)
+
+___
+
+### SpaceStage
+
+Ƭ **SpaceStage**: ``"NO_APP_FILE"`` \| ``"CONFIG_ERROR"`` \| ``"BUILDING"`` \| ``"BUILD_ERROR"`` \| ``"RUNNING"`` \| ``"RUNNING_BUILDING"`` \| ``"RUNTIME_ERROR"`` \| ``"DELETING"`` \| ``"PAUSED"`` \| ``"SLEEPING"``
+
+#### Defined in
+
+[hub/src/types/public.d.ts:26](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L26)
+
+___
+
+### Task
+
+Ƭ **Task**: ``"text-classification"`` \| ``"token-classification"`` \| ``"table-question-answering"`` \| ``"question-answering"`` \| ``"zero-shot-classification"`` \| ``"translation"`` \| ``"summarization"`` \| ``"conversational"`` \| ``"feature-extraction"`` \| ``"text-generation"`` \| ``"text2text-generation"`` \| ``"fill-mask"`` \| ``"sentence-similarity"`` \| ``"text-to-speech"`` \| ``"automatic-speech-recognition"`` \| ``"audio-to-audio"`` \| ``"audio-classification"`` \| ``"voice-activity-detection"`` \| ``"depth-estimation"`` \| ``"image-classification"`` \| ``"object-detection"`` \| ``"image-segmentation"`` \| ``"text-to-image"`` \| ``"image-to-text"`` \| ``"image-to-image"`` \| ``"unconditional-image-generation"`` \| ``"video-classification"`` \| ``"reinforcement-learning"`` \| ``"robotics"`` \| ``"tabular-classification"`` \| ``"tabular-regression"`` \| ``"tabular-to-text"`` \| ``"table-to-text"`` \| ``"multiple-choice"`` \| ``"text-retrieval"`` \| ``"time-series-forecasting"`` \| ``"visual-question-answering"`` \| ``"document-question-answering"`` \| ``"zero-shot-image-classification"`` \| ``"graph-ml"`` \| ``"other"``
+
+#### Defined in
+
+[hub/src/types/public.d.ts:42](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L42)
+
+___
+
+### WhoAmI
+
+Ƭ **WhoAmI**: [`WhoAmIApp`](interfaces/WhoAmIApp) \| [`WhoAmIOrg`](interfaces/WhoAmIOrg) \| [`WhoAmIUser`](interfaces/WhoAmIUser)
+
+#### Defined in
+
+[hub/src/lib/who-am-i.ts:58](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/who-am-i.ts#L58)
 
 ## Functions
 
@@ -85,7 +146,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/commit.ts:344](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L344)
+[hub/src/lib/commit.ts:357](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L357)
 
 ___
 
@@ -112,7 +173,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/create-repo.ts:7](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/create-repo.ts#L7)
+[hub/src/lib/create-repo.ts:8](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/create-repo.ts#L8)
 
 ___
 
@@ -196,6 +257,30 @@ null when the file doesn't exist
 
 ___
 
+### listDatasets
+
+▸ **listDatasets**(`params?`): `AsyncGenerator`<[`DatasetEntry`](interfaces/DatasetEntry)\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `params?` | `Object` |
+| `params.credentials?` | [`Credentials`](interfaces/Credentials) |
+| `params.hubUrl?` | `string` |
+| `params.search?` | `Object` |
+| `params.search.owner?` | `string` |
+
+#### Returns
+
+`AsyncGenerator`<[`DatasetEntry`](interfaces/DatasetEntry)\>
+
+#### Defined in
+
+[hub/src/lib/list-datasets.ts:21](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-datasets.ts#L21)
+
+___
+
 ### listFiles
 
 ▸ **listFiles**(`params`): `AsyncGenerator`<[`ListFileEntry`](interfaces/ListFileEntry)\>
@@ -222,3 +307,74 @@ with params.recursive set to `true`.
 #### Defined in
 
 [hub/src/lib/list-files.ts:31](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L31)
+
+___
+
+### listModels
+
+▸ **listModels**(`params?`): `AsyncGenerator`<[`ModelEntry`](interfaces/ModelEntry)\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `params?` | `Object` |
+| `params.credentials?` | [`Credentials`](interfaces/Credentials) |
+| `params.hubUrl?` | `string` |
+| `params.search?` | `Object` |
+| `params.search.owner?` | `string` |
+| `params.search.task?` | [`Task`](modules#task) |
+
+#### Returns
+
+`AsyncGenerator`<[`ModelEntry`](interfaces/ModelEntry)\>
+
+#### Defined in
+
+[hub/src/lib/list-models.ts:22](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-models.ts#L22)
+
+___
+
+### listSpaces
+
+▸ **listSpaces**(`params?`): `AsyncGenerator`<[`SpaceEntry`](interfaces/SpaceEntry)\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `params?` | `Object` |
+| `params.credentials?` | [`Credentials`](interfaces/Credentials) |
+| `params.hubUrl?` | `string` |
+| `params.search?` | `Object` |
+| `params.search.owner?` | `string` |
+
+#### Returns
+
+`AsyncGenerator`<[`SpaceEntry`](interfaces/SpaceEntry)\>
+
+#### Defined in
+
+[hub/src/lib/list-spaces.ts:20](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-spaces.ts#L20)
+
+___
+
+### whoAmI
+
+▸ **whoAmI**(`params`): `Promise`<[`WhoAmI`](modules#whoami) & { `auth`: [`AuthInfo`](interfaces/AuthInfo)  }\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `params` | `Object` |
+| `params.credentials` | [`Credentials`](interfaces/Credentials) |
+| `params.hubUrl?` | `string` |
+
+#### Returns
+
+`Promise`<[`WhoAmI`](modules#whoami) & { `auth`: [`AuthInfo`](interfaces/AuthInfo)  }\>
+
+#### Defined in
+
+[hub/src/lib/who-am-i.ts:68](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/who-am-i.ts#L68)
