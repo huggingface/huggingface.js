@@ -77,7 +77,7 @@ export class LazyBlob {
 	}
 
 	stream(): ReadableStream {
-		const stream = createReadStream(this.path);
+		return Readable.toWeb(createReadStream(this.path));
 
 		return stream as unknown as ReadableStream;
 	}
