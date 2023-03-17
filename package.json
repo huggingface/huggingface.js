@@ -12,6 +12,9 @@
 		"vitest": "^0.29.2"
 	},
 	"scripts": {
-		"format": "prettier --write . && eslint --quiet --fix --ext .cjs,.ts ."
+		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
+		"lint:check": "eslint --ext .cjs,.ts .",
+		"format": "prettier --write .",
+		"format:check": "prettier --check ."
 	}
 }

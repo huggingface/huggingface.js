@@ -1,7 +1,6 @@
 {
-	"editor.defaultFormatter": "rvest.vs-code-prettier-eslint",
-	"editor.formatOnPaste": false, // required for vs-code-prettier-eslint
-	"editor.formatOnSave": true, // required for vs-code-prettier-eslint
-	"editor.formatOnType": false, // required for vs-code-prettier-eslint
-	"editor.formatOnSaveMode": "file" // required to format on save for vs-code-prettier-eslint
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"editor.codeActionsOnSave": {
+		"source.fixAll": true
+	},
 }
