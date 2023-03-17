@@ -12,9 +12,9 @@
 		"vitest": "^0.29.2"
 	},
 	"scripts": {
-		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
-		"lint:check": "eslint --ext .cjs,.ts .",
-		"format": "prettier --write .",
-		"format:check": "prettier --check ."
+		"lint": "eslint --quiet --fix --ext .cjs,.ts .eslintrc.cjs",
+		"lint:check": "eslint --ext .cjs,.ts .eslintrc.cjs",
+		"format": "prettier --write .prettierrc .vscode .eslintrc.cjs .github *.md",
+		"format:check": "prettier --check package.json .prettierrc .vscode .eslintrc.cjs .github *.md"
 	}
 }
