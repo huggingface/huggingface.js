@@ -1,4 +1,4 @@
-import { LazyBlob } from "../lib/LazyBlob";
+import type { LazyBlob } from "../lib/LazyBlob";
 import { hexFromBytes } from "./hexFromBytes";
 
 /**
@@ -9,10 +9,7 @@ export async function sha256(buffer: Blob | LazyBlob): Promise<string> {
 	if (buffer.size < 10_000_000 && globalThis.crypto?.subtle) {
 		return hexFromBytes(
 			new Uint8Array(
-				await globalThis.crypto.subtle.digest(
-					"SHA-256",
-					buffer instanceof Blob || buffer instanceof LazyBlob ? await buffer.arrayBuffer() : buffer
-				)
+				await globalThis.crypto.subtle.digest("SHA-256", buffer instanceof Blob ? await buffer.arrayBuffer() : buffer)
 			)
 		);
 	}
@@ -48,8 +45,8 @@ export async function sha256(buffer: Blob | LazyBlob): Promise<string> {
 	if (!cryptoModule) {
 		cryptoModule = await import("./sha256-node");
 	}
-	const clearText = buffer instanceof Blob || buffer instanceof LazyBlob ? await buffer.arrayBuffer() : buffer;
-	return cryptoModule.sha256Node(clearText);
+
+	return cryptoModule.sha256Node(buffer instanceof Blob ? await buffer.arrayBuffer() : buffer);
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports

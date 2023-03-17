@@ -28,7 +28,7 @@ export interface CommitDeletedEntry {
 	path: string;
 }
 
-type ContentSource = Blob | LazyBlob;
+type ContentSource = Blob;
 
 export interface CommitFile {
 	operation: "addOrUpdate";
