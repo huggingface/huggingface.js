@@ -6,11 +6,11 @@ export interface Options {
 	/**
 	 * (Default: true). Boolean. There is a cache layer on the inference API to speedup requests we have already seen. Most models can use those results as is as models are deterministic (meaning the results will be the same anyway). However if you use a non deterministic model, you can set this parameter to prevent the caching mechanism from being used resulting in a real new query.
 	 */
-	use_cache?:      boolean;
+	use_cache?: boolean;
 	/**
 	 * (Default: false). Boolean to use GPU instead of CPU for inference (requires Startup plan at least).
 	 */
-	use_gpu?:        boolean;
+	use_gpu?: boolean;
 
 	/**
 	 * (Default: false) Boolean. If the model is not ready, wait for it instead of receiving 503. It limits the number of requests required to get your inference done. It is advised to only set this flag to true after receiving a 503 error as it will limit hanging in your application to known places.
@@ -30,15 +30,15 @@ export type FillMaskReturn = {
 	/**
 	 * The probability for this token.
 	 */
-	score:     number;
+	score: number;
 	/**
 	 * The actual sequence of tokens that ran against the model (may contain special tokens)
 	 */
-	sequence:  string;
+	sequence: string;
 	/**
 	 * The id of the token
 	 */
-	token:     number;
+	token: number;
 	/**
 	 * The string representation of the token
 	 */
@@ -49,20 +49,20 @@ export type SummarizationArgs = Args & {
 	/**
 	 * A string to be summarized
 	 */
-	inputs:      string;
+	inputs: string;
 	parameters?: {
 		/**
 		 * (Default: None). Integer to define the maximum length in tokens of the output summary.
 		 */
-		max_length?:         number;
+		max_length?: number;
 		/**
 		 * (Default: None). Float (0-120.0). The amount of time in seconds that the query should take maximum. Network can cause some overhead so it will be a soft limit.
 		 */
-		max_time?:           number;
+		max_time?: number;
 		/**
 		 * (Default: None). Integer to define the minimum length in tokens of the output summary.
 		 */
-		min_length?:         number;
+		min_length?: number;
 		/**
 		 * (Default: None). Float (0.0-100.0). The more a token is used within generation the more it is penalized to not be picked in successive generation passes.
 		 */
@@ -70,15 +70,15 @@ export type SummarizationArgs = Args & {
 		/**
 		 * (Default: 1.0). Float (0.0-100.0). The temperature of the sampling operation. 1 means regular sampling, 0 means always take the highest score, 100.0 is getting closer to uniform probability.
 		 */
-		temperature?:        number;
+		temperature?: number;
 		/**
 		 * (Default: None). Integer to define the top tokens considered within the sample operation to create new text.
 		 */
-		top_k?:              number;
+		top_k?: number;
 		/**
 		 * (Default: None). Float to define the tokens that are within the sample operation of text generation. Add tokens in the sample for more probable to least probable until the sum of the probabilities is greater than top_p.
 		 */
-		top_p?:              number;
+		top_p?: number;
 	};
 };
 
@@ -91,7 +91,7 @@ export interface SummarizationReturn {
 
 export type QuestionAnswerArgs = Args & {
 	inputs: {
-		context:  string;
+		context: string;
 		question: string;
 	};
 };
@@ -104,15 +104,15 @@ export interface QuestionAnswerReturn {
 	/**
 	 * The index (string wise) of the stop of the answer within context.
 	 */
-	end:    number;
+	end: number;
 	/**
 	 * A float that represents how likely that the answer is correct
 	 */
-	score:  number;
+	score: number;
 	/**
 	 * The index (string wise) of the start of the answer within context.
 	 */
-	start:  number;
+	start: number;
 }
 
 export type TableQuestionAnswerArgs = Args & {
@@ -132,15 +132,15 @@ export interface TableQuestionAnswerReturn {
 	/**
 	 * The aggregator used to get the answer
 	 */
-	aggregator:  string;
+	aggregator: string;
 	/**
 	 * The plaintext answer
 	 */
-	answer:      string;
+	answer: string;
 	/**
 	 * A list of coordinates of the cells contents
 	 */
-	cells:       string[];
+	cells: string[];
 	/**
 	 * a list of coordinates of the cells referenced in the answer
 	 */
@@ -169,20 +169,20 @@ export type TextGenerationArgs = Args & {
 	/**
 	 * A string to be generated from
 	 */
-	inputs:      string;
+	inputs: string;
 	parameters?: {
 		/**
 		 * (Optional: True). Bool. Whether or not to use sampling, use greedy decoding otherwise.
 		 */
-		do_sample?:            boolean;
+		do_sample?: boolean;
 		/**
 		 * (Default: None). Int (0-250). The amount of new tokens to be generated, this does not include the input length it is a estimate of the size of generated text you want. Each new tokens slows down the request, so look for balance between response times and length of text generated.
 		 */
-		max_new_tokens?:       number;
+		max_new_tokens?: number;
 		/**
 		 * (Default: None). Float (0-120.0). The amount of time in seconds that the query should take maximum. Network can cause some overhead so it will be a soft limit. Use that in combination with max_new_tokens for best results.
 		 */
-		max_time?:             number;
+		max_time?: number;
 		/**
 		 * (Default: 1). Integer. The number of proposition you want to be returned.
 		 */
@@ -190,23 +190,23 @@ export type TextGenerationArgs = Args & {
 		/**
 		 * (Default: None). Float (0.0-100.0). The more a token is used within generation the more it is penalized to not be picked in successive generation passes.
 		 */
-		repetition_penalty?:   number;
+		repetition_penalty?: number;
 		/**
 		 * (Default: True). Bool. If set to False, the return results will not contain the original query making it easier for prompting.
 		 */
-		return_full_text?:     boolean;
+		return_full_text?: boolean;
 		/**
 		 * (Default: 1.0). Float (0.0-100.0). The temperature of the sampling operation. 1 means regular sampling, 0 means always take the highest score, 100.0 is getting closer to uniform probability.
 		 */
-		temperature?:          number;
+		temperature?: number;
 		/**
 		 * (Default: None). Integer to define the top tokens considered within the sample operation to create new text.
 		 */
-		top_k?:                number;
+		top_k?: number;
 		/**
 		 * (Default: None). Float to define the tokens that are within the sample operation of text generation. Add tokens in the sample for more probable to least probable until the sum of the probabilities is greater than top_p.
 		 */
-		top_p?:                number;
+		top_p?: number;
 	};
 };
 
@@ -221,7 +221,7 @@ export type TokenClassificationArgs = Args & {
 	/**
 	 * A string to be classified
 	 */
-	inputs:      string;
+	inputs: string;
 	parameters?: {
 		/**
 		 * (Default: simple). There are several aggregation strategies:
@@ -244,7 +244,7 @@ export interface TokenClassificationReturnValue {
 	/**
 	 * The offset stringwise where the answer is located. Useful to disambiguate if word occurs multiple times.
 	 */
-	end:          number;
+	end: number;
 	/**
 	 * The type for the entity being recognized (model specific).
 	 */
@@ -252,15 +252,15 @@ export interface TokenClassificationReturnValue {
 	/**
 	 * How likely the entity was recognized.
 	 */
-	score:        number;
+	score: number;
 	/**
 	 * The offset stringwise where the answer is located. Useful to disambiguate if word occurs multiple times.
 	 */
-	start:        number;
+	start: number;
 	/**
 	 * The string that was captured
 	 */
-	word:         string;
+	word: string;
 }
 
 export type TokenClassificationReturn = TokenClassificationReturnValue[];
@@ -283,7 +283,7 @@ export type ZeroShotClassificationArgs = Args & {
 	/**
 	 * a string or list of strings
 	 */
-	inputs:     string | string[];
+	inputs: string | string[];
 	parameters: {
 		/**
 		 * a list of strings that are potential classes for inputs. (max 10 candidate_labels, for more, simply run multiple requests, results are going to be misleading if using too many candidate_labels anyway. If you want to keep the exact same, you can simply run multi_label=True and do the scaling on your end.
@@ -292,13 +292,13 @@ export type ZeroShotClassificationArgs = Args & {
 		/**
 		 * (Default: false) Boolean that is set to True if classes can overlap
 		 */
-		multi_label?:     boolean;
+		multi_label?: boolean;
 	};
 };
 
 export interface ZeroShotClassificationReturnValue {
-	labels:   string[];
-	scores:   number[];
+	labels: string[];
+	scores: number[];
 	sequence: string;
 }
 
@@ -313,25 +313,25 @@ export type ConversationalArgs = Args & {
 		/**
 		 * A list of strings corresponding to the earlier replies from the user. Should be of the same length of generated_responses.
 		 */
-		past_user_inputs?:    string[];
+		past_user_inputs?: string[];
 		/**
 		 * The last input from the user in the conversation.
 		 */
-		text:                 string;
+		text: string;
 	};
 	parameters?: {
 		/**
 		 * (Default: None). Integer to define the maximum length in tokens of the output summary.
 		 */
-		max_length?:         number;
+		max_length?: number;
 		/**
 		 * (Default: None). Float (0-120.0). The amount of time in seconds that the query should take maximum. Network can cause some overhead so it will be a soft limit.
 		 */
-		max_time?:           number;
+		max_time?: number;
 		/**
 		 * (Default: None). Integer to define the minimum length in tokens of the output summary.
 		 */
-		min_length?:         number;
+		min_length?: number;
 		/**
 		 * (Default: None). Float (0.0-100.0). The more a token is used within generation the more it is penalized to not be picked in successive generation passes.
 		 */
@@ -339,25 +339,25 @@ export type ConversationalArgs = Args & {
 		/**
 		 * (Default: 1.0). Float (0.0-100.0). The temperature of the sampling operation. 1 means regular sampling, 0 means always take the highest score, 100.0 is getting closer to uniform probability.
 		 */
-		temperature?:        number;
+		temperature?: number;
 		/**
 		 * (Default: None). Integer to define the top tokens considered within the sample operation to create new text.
 		 */
-		top_k?:              number;
+		top_k?: number;
 		/**
 		 * (Default: None). Float to define the tokens that are within the sample operation of text generation. Add tokens in the sample for more probable to least probable until the sum of the probabilities is greater than top_p.
 		 */
-		top_p?:              number;
+		top_p?: number;
 	};
 };
 
 export interface ConversationalReturn {
 	conversation: {
 		generated_responses: string[];
-		past_user_inputs:    string[];
+		past_user_inputs: string[];
 	};
 	generated_text: string;
-	warnings:       string[];
+	warnings: string[];
 }
 
 export type FeatureExtractionArgs = Args & {
@@ -442,7 +442,7 @@ export interface ImageSegmentationReturnValue {
 	/**
 	 * A str (base64 str of a single channel black-and-white img) representing the mask of a segment.
 	 */
-	mask:  string;
+	mask: string;
 	/**
 	 * A float that represents how likely it is that the detected object belongs to the given class.
 	 */
@@ -501,7 +501,7 @@ export type TextToImageArgs = Args & {
 export type TextToImageReturn = Blob;
 
 export class HfInference {
-	private readonly apiKey:         string;
+	private readonly apiKey: string;
 	private readonly defaultOptions: Options;
 
 	constructor(apiKey = "", defaultOptions: Options = {}) {
@@ -675,7 +675,7 @@ export class HfInference {
 		args: Args & { data?: any },
 		options?: Options & {
 			binary?: boolean;
-			blob?:   boolean;
+			blob?: boolean;
 		}
 	): Promise<any> {
 		const mergedOptions = { ...this.defaultOptions, ...options };
@@ -697,7 +697,7 @@ export class HfInference {
 		const response = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
 			headers,
 			method: "POST",
-			body:   options?.binary
+			body: options?.binary
 				? args.data
 				: JSON.stringify({
 						...otherArgs,

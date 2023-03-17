@@ -32,24 +32,24 @@ describe("commit", () => {
 		try {
 			await commit({
 				repo,
-				title:       "Some commit",
+				title: "Some commit",
 				credentials: {
 					accessToken: TEST_ACCESS_TOKEN,
 				},
 				operations: [
 					{
 						operation: "addOrUpdate",
-						content:   new Blob(["This is me"]),
-						path:      "test.txt",
+						content: new Blob(["This is me"]),
+						path: "test.txt",
 					},
 					{
 						operation: "addOrUpdate",
-						content:   new Blob([lfsContent]),
-						path:      "test.lfs.txt",
+						content: new Blob([lfsContent]),
+						path: "test.lfs.txt",
 					},
 					{
 						operation: "delete",
-						path:      "README.md",
+						path: "README.md",
 					},
 				],
 			});

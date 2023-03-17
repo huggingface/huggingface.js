@@ -2,19 +2,19 @@ import type { AccessTokenRole, AuthType } from "../public";
 
 interface ApiWhoAmIBase {
 	/** Unique ID persistent across renames */
-	id:   string;
+	id: string;
 	type: "user" | "org" | "app";
 	name: string;
 }
 
 interface ApiWhoAmIEntityBase extends ApiWhoAmIBase {
-	fullname:  string;
-	email:     string | null;
-	canPay:    boolean;
+	fullname: string;
+	email: string | null;
+	canPay: boolean;
 	/**
 	 * @deprecated
 	 */
-	plan?:     unknown;
+	plan?: unknown;
 	avatarUrl: string;
 	/**
 	 * Unix timestamp in seconds
@@ -27,29 +27,29 @@ interface ApiWhoAmIOrg extends ApiWhoAmIEntityBase {
 }
 
 interface ApiWhoAmIUser extends ApiWhoAmIEntityBase {
-	type:          "user";
-	email:         string;
+	type: "user";
+	email: string;
 	emailVerified: boolean;
-	isPro:         boolean;
-	orgs:          WhoAmIOrg[];
+	isPro: boolean;
+	orgs: WhoAmIOrg[];
 }
 
 interface ApiWhoAmIApp extends ApiWhoAmIBase {
-	type:   "app";
-	name:   string;
+	type: "app";
+	name: string;
 	scope?: {
 		entities: string[];
-		role:     AccessTokenRole;
+		role: AccessTokenRole;
 	};
 }
 
 export type ApiWhoAmIReponse = ApiWhoAmIUser | ApiWhoAmIOrg | ApiWhoAmIApp;
 
 export interface ApiWhoAmIAuthInfo {
-	type:         AuthType;
+	type: AuthType;
 	accessToken?: {
 		displayName: string;
 		expiration?: string;
-		role:        AccessTokenRole;
+		role: AccessTokenRole;
 	};
 }

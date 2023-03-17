@@ -1,6 +1,6 @@
 export interface ApiLfsBatchRequest {
 	/// github.com/git-lfs/git-lfs/blob/master/docs/api/batch.md
-	operation:  "download" | "upload";
+	operation: "download" | "upload";
 	transfers?: string[];
 	/**
 	 * Optional object describing the server ref that the objects belong to. Note: Added in v2.4.
@@ -12,7 +12,7 @@ export interface ApiLfsBatchRequest {
 		name: string;
 	} | null;
 	objects: {
-		oid:  string;
+		oid: string;
 		/**
 		 * Integer byte size of the LFS object. Must be at least zero.
 		 */
@@ -26,13 +26,13 @@ export interface ApiLfsBatchRequest {
 
 export interface ApiLfsBatchResponse {
 	transfer?: ApiLfsResponseTransfer;
-	objects:   ApiLfsResponseObject[];
+	objects: ApiLfsResponseObject[];
 }
 
 export type ApiLfsResponseTransfer = "basic" | "multipart";
 
 export interface ApiLfsCompleteMultipartRequest {
-	oid:   string;
+	oid: string;
 	parts: { etag: string; partNumber: number }[];
 }
 
@@ -43,11 +43,11 @@ export interface ApiLfsResponseObject {
 	 * If omitted or false, Git LFS will attempt to find credentials for this URL.
 	 */
 	authenticated?: boolean;
-	oid:            string;
+	oid: string;
 	/**
 	 * Integer byte size of the LFS object. Must be at least zero.
 	 */
-	size:           number;
+	size: number;
 	/**
 	 * Applicable actions depend on which `operation` is specified in the request.
 	 * How these properties are interpreted depends on which transfer adapter
@@ -63,29 +63,29 @@ export interface ApiLfsResponseObject {
 		 * Upload operations can specify an upload and a verify action.
 		 * The upload action describes how to upload the object.
 		 */
-		upload?:   ApiLfsAction;
+		upload?: ApiLfsAction;
 		/**
 		 * The LFS client will hit this URL after a successful upload.
 		 * Servers can use this for extra verification, if needed.
 		 */
-		verify?:   ApiLfsAction;
+		verify?: ApiLfsAction;
 	};
 	/**
 	 * If there are problems accessing individual objects, servers should continue
 	 * to return a 200 status code, and provide per-object errors
 	 */
 	error?: {
-		code:    number;
+		code: number;
 		message: string;
 	};
 }
 
 export interface ApiLfsAction {
-	href:        string;
+	href: string;
 	/**
 	 * Optional hash of String HTTP header key/value pairs to apply to the request
 	 */
-	header?:     { [key: string]: string } & { chunk_size?: string };
+	header?: { [key: string]: string } & { chunk_size?: string };
 	/**
 	 * Whole number of seconds after local client time when transfer will expire.
 	 * Preferred over `expires_at` if both are provided.
@@ -114,11 +114,11 @@ export interface ApiPreuploadRequest {
 		/**
 		 * Path of the LFS file
 		 */
-		path:   string;
+		path: string;
 		/**
 		 * Full size of the LFS file
 		 */
-		size:   number;
+		size: number;
 		/**
 		 * Base64-encoded sample of the first 512 bytes of the file
 		 */
@@ -128,14 +128,14 @@ export interface ApiPreuploadRequest {
 
 export interface ApiPreuploadResponse {
 	files: Array<{
-		path:       string;
+		path: string;
 		uploadMode: "lfs" | "regular";
 	}>;
 }
 
 export interface ApiCommitHeader {
-	summary:       string;
-	description?:  string;
+	summary: string;
+	description?: string;
 	/**
 	 * Parent commit. Optional
 	 *
@@ -150,33 +150,33 @@ export interface ApiCommitDeletedEntry {
 }
 
 interface ApiCommitLfsFile {
-	path:     string;
+	path: string;
 	oldPath?: string;
 	/** Required if {@link oldPath} is not set */
-	algo?:    "sha256";
+	algo?: "sha256";
 	/** Required if {@link oldPath} is not set */
-	oid?:     string;
-	size?:    number;
+	oid?: string;
+	size?: number;
 }
 
 export interface ApiCommitFile {
 	/** Required if {@link oldPath} is not set */
-	content?:  string;
-	path:      string;
-	oldPath?:  string;
+	content?: string;
+	path: string;
+	oldPath?: string;
 	encoding?: "utf-8" | "base64";
 }
 
 export type ApiCommitOperation =
 	| {
-			key:   "file";
+			key: "file";
 			value: ApiCommitFile;
 	  }
 	| {
-			key:   "lfsFile";
+			key: "lfsFile";
 			value: ApiCommitLfsFile;
 	  }
 	| {
-			key:   "deletedFile";
+			key: "deletedFile";
 			value: ApiCommitDeletedEntry;
 	  };

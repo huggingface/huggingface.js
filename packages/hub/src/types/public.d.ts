@@ -83,14 +83,14 @@ export type Task =
 	| "other";
 
 export interface SpaceRuntime {
-	stage:         SpaceStage;
-	sdk?:          SpaceSdk;
-	sdkVersion?:   string;
+	stage: SpaceStage;
+	sdk?: SpaceSdk;
+	sdkVersion?: string;
 	errorMessage?: string;
 	hardware?: {
-		current:              SpaceHardwareFlavor | null;
-		currentPrettyName?:   string;
-		requested:            SpaceHardwareFlavor | null;
+		current: SpaceHardwareFlavor | null;
+		currentPrettyName?: string;
+		requested: SpaceHardwareFlavor | null;
 		requestedPrettyName?: string;
 	};
 	/** when calling /spaces, those props are only fetched if ?full=true */
@@ -100,17 +100,17 @@ export interface SpaceRuntime {
 }
 
 export interface SpaceResourceRequirement {
-	cpu?:       string;
-	memory?:    string;
-	gpu?:       string;
-	gpuModel?:  string;
+	cpu?: string;
+	memory?: string;
+	gpu?: string;
+	gpuModel?: string;
 	ephemeral?: string;
 }
 
 export interface SpaceResourceConfig {
-	requests:   SpaceResourceRequirement;
-	limits:     SpaceResourceRequirement;
-	replicas?:  number;
+	requests: SpaceResourceRequirement;
+	limits: SpaceResourceRequirement;
+	replicas?: number;
 	throttled?: boolean;
 	is_custom?: boolean;
 }

@@ -6,38 +6,38 @@ import { checkCredentials } from "../utils/checkCredentials";
 
 export interface WhoAmIUser {
 	/** Unique ID persistent across renames */
-	id:            string;
-	type:          "user";
-	email:         string;
+	id: string;
+	type: "user";
+	email: string;
 	emailVerified: boolean;
-	isPro:         boolean;
-	orgs:          WhoAmIOrg[];
-	name:          string;
-	fullname:      string;
-	canPay:        boolean;
+	isPro: boolean;
+	orgs: WhoAmIOrg[];
+	name: string;
+	fullname: string;
+	canPay: boolean;
 	/**
 	 * @deprecated
 	 */
-	plan?:         unknown;
-	avatarUrl:     string;
+	plan?: unknown;
+	avatarUrl: string;
 	/**
 	 * Unix timestamp in seconds
 	 */
-	periodEnd:     number | null;
+	periodEnd: number | null;
 }
 
 export interface WhoAmIOrg {
 	/** Unique ID persistent across renames */
-	id:        string;
-	type:      "org";
-	name:      string;
-	fullname:  string;
-	email:     string | null;
-	canPay:    boolean;
+	id: string;
+	type: "org";
+	name: string;
+	fullname: string;
+	email: string | null;
+	canPay: boolean;
 	/**
 	 * @deprecated
 	 */
-	plan?:     unknown;
+	plan?: unknown;
 	avatarUrl: string;
 	/**
 	 * Unix timestamp in seconds
@@ -46,28 +46,28 @@ export interface WhoAmIOrg {
 }
 
 export interface WhoAmIApp {
-	id:     string;
-	type:   "app";
-	name:   string;
+	id: string;
+	type: "app";
+	name: string;
 	scope?: {
 		entities: string[];
-		role:     "admin" | "write" | "contributor" | "read";
+		role: "admin" | "write" | "contributor" | "read";
 	};
 }
 
 export type WhoAmI = WhoAmIApp | WhoAmIOrg | WhoAmIUser;
 export interface AuthInfo {
-	type:         AuthType;
+	type: AuthType;
 	accessToken?: {
 		displayName: string;
 		expiration?: Date;
-		role:        AccessTokenRole;
+		role: AccessTokenRole;
 	};
 }
 
 export async function whoAmI(params: {
 	credentials: Credentials;
-	hubUrl?:     string;
+	hubUrl?: string;
 }): Promise<WhoAmI & { auth: AuthInfo }> {
 	checkCredentials(params.credentials);
 
@@ -83,11 +83,11 @@ export async function whoAmI(params: {
 
 	const response: ApiWhoAmIReponse & {
 		auth: {
-			type:         AuthType;
+			type: AuthType;
 			accessToken?: {
 				displayName: string;
 				expiration?: Date; // actually string but we fix it below
-				role:        AccessTokenRole;
+				role: AccessTokenRole;
 			};
 		};
 	} = await res.json();

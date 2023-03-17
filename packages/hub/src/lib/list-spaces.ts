@@ -7,9 +7,9 @@ import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
 
 export interface SpaceEntry {
-	id:    string;
-	name:  string;
-	sdk?:  SpaceSdk;
+	id: string;
+	name: string;
+	sdk?: SpaceSdk;
 	likes: number;
 }
 
@@ -18,7 +18,7 @@ export async function* listSpaces(params?: {
 		owner?: string;
 	};
 	credentials?: Credentials;
-	hubUrl?:      string;
+	hubUrl?: string;
 }): AsyncGenerator<SpaceEntry> {
 	checkCredentials(params?.credentials);
 	const search = new URLSearchParams({
@@ -42,9 +42,9 @@ export async function* listSpaces(params?: {
 
 		for (const item of items) {
 			yield {
-				id:    item._id,
-				name:  item.id,
-				sdk:   item.sdk,
+				id: item._id,
+				name: item.id,
+				sdk: item.sdk,
 				likes: item.likes,
 			};
 		}

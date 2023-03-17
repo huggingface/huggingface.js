@@ -7,9 +7,9 @@ import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
 
 export interface DatasetEntry {
-	id:        string;
-	name:      string;
-	private:   boolean;
+	id: string;
+	name: string;
+	private: boolean;
 	downloads: number;
 }
 
@@ -18,7 +18,7 @@ export async function* listDatasets(params?: {
 		owner?: string;
 	};
 	credentials?: Credentials;
-	hubUrl?:      string;
+	hubUrl?: string;
 }): AsyncGenerator<DatasetEntry> {
 	checkCredentials(params?.credentials);
 	const search = new URLSearchParams({
@@ -42,9 +42,9 @@ export async function* listDatasets(params?: {
 
 		for (const item of items) {
 			yield {
-				id:        item._id,
-				name:      item.id,
-				private:   item.private,
+				id: item._id,
+				name: item.id,
+				private: item.private,
 				downloads: item.downloads,
 			};
 		}

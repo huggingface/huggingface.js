@@ -4,8 +4,8 @@ import type { Credentials, RepoId } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 
 export interface FileDownloadInfoOutput {
-	size:         number;
-	etag:         string;
+	size: number;
+	etag: string;
 	/**
 	 * In case of LFS file, link to download directly from cloud provider
 	 */
@@ -15,15 +15,15 @@ export interface FileDownloadInfoOutput {
  * @returns null when the file doesn't exist
  */
 export async function fileDownloadInfo(params: {
-	repo:                  RepoId;
-	path:                  string;
-	revision?:             string;
-	credentials?:          Credentials;
-	hubUrl?:               string;
+	repo: RepoId;
+	path: string;
+	revision?: string;
+	credentials?: Credentials;
+	hubUrl?: string;
 	/**
 	 * To get the raw pointer file behind a LFS file
 	 */
-	raw?:                  boolean;
+	raw?: boolean;
 	/**
 	 * To avoid the content-disposition header in the `downloadLink` for LFS files
 	 *
@@ -39,7 +39,7 @@ export async function fileDownloadInfo(params: {
 		(params.noContentDisposition ? "?noContentDisposition=1" : "");
 
 	let resp = await fetch(url, {
-		method:  "HEAD",
+		method: "HEAD",
 		headers: params.credentials
 			? {
 					Authorization: `Bearer ${params.credentials.accessToken}`,
@@ -55,7 +55,7 @@ export async function fileDownloadInfo(params: {
 		}
 
 		resp = await fetch(url, {
-			method:  "HEAD",
+			method: "HEAD",
 			headers: params.credentials
 				? {
 						Authorization: `Bearer ${params.credentials.accessToken}`,
@@ -82,8 +82,8 @@ export async function fileDownloadInfo(params: {
 	}
 
 	return {
-		etag:         isLfs ? resp.headers.get("X-Linked-ETag")! : resp.headers.get("ETag")!,
-		size:         isLfs ? parseInt(resp.headers.get("X-Linked-Size")!) : parseInt(resp.headers.get("Content-Length")!),
+		etag: isLfs ? resp.headers.get("X-Linked-ETag")! : resp.headers.get("ETag")!,
+		size: isLfs ? parseInt(resp.headers.get("X-Linked-Size")!) : parseInt(resp.headers.get("Content-Length")!),
 		downloadLink: isLfs ? resp.headers.get("Location") : null,
 	};
 }

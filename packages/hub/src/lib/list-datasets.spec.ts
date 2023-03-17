@@ -16,15 +16,15 @@ describe("listDatasets", () => {
 
 		expect(results).deep.equal([
 			{
-				id:        "6356b19985da6f13863228bd",
-				name:      "hf-doc-build/doc-build",
-				private:   false,
+				id: "6356b19985da6f13863228bd",
+				name: "hf-doc-build/doc-build",
+				private: false,
 				downloads: 0,
 			},
 			{
-				id:        "636a1b69f2f9ec4289c4c19e",
-				name:      "hf-doc-build/doc-build-dev",
-				private:   false,
+				id: "636a1b69f2f9ec4289c4c19e",
+				name: "hf-doc-build/doc-build-dev",
+				private: false,
 				downloads: 0,
 			},
 		]);

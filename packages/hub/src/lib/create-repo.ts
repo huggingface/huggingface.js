@@ -6,17 +6,17 @@ import { base64FromBytes } from "../utils/base64FromBytes";
 import { checkCredentials } from "../utils/checkCredentials";
 
 export async function createRepo(params: {
-	repo:        RepoId;
+	repo: RepoId;
 	credentials: Credentials;
-	private?:    boolean;
-	license?:    string;
+	private?: boolean;
+	license?: string;
 	/**
 	 * Only a few lightweight files are supported at repo creation
 	 */
-	files?:      Array<{ content: ArrayBuffer | Blob; path: string }>;
+	files?: Array<{ content: ArrayBuffer | Blob; path: string }>;
 	/** @required for when {@link repo.type} === "space" */
-	sdk?:        SpaceSdk;
-	hubUrl?:     string;
+	sdk?: SpaceSdk;
+	hubUrl?: string;
 }): Promise<{ repoUrl: string }> {
 	checkCredentials(params.credentials);
 	const [namespace, repoName] = params.repo.name.split("/");
@@ -29,15 +29,15 @@ export async function createRepo(params: {
 
 	const res = await fetch(`${params.hubUrl ?? HUB_URL}/api/repos/create`, {
 		method: "POST",
-		body:   JSON.stringify({
-			name:         repoName,
-			private:      params.private,
+		body: JSON.stringify({
+			name: repoName,
+			private: params.private,
 			organization: namespace,
-			license:      params.license,
+			license: params.license,
 			...(params.repo.type === "space"
 				? {
 						type: "space",
-						sdk:  "static",
+						sdk: "static",
 				  }
 				: {
 						type: params.repo.type,
@@ -46,8 +46,8 @@ export async function createRepo(params: {
 				? await Promise.all(
 						params.files.map(async (file) => ({
 							encoding: "base64",
-							path:     file.path,
-							content:  base64FromBytes(
+							path: file.path,
+							content: base64FromBytes(
 								new Uint8Array(file.content instanceof Blob ? await file.content.arrayBuffer() : file.content)
 							),
 						}))
@@ -55,7 +55,7 @@ export async function createRepo(params: {
 				: undefined,
 		} satisfies ApiCreateRepoPayload),
 		headers: {
-			Authorization:  `Bearer ${params.credentials.accessToken}`,
+			Authorization: `Bearer ${params.credentials.accessToken}`,
 			"Content-Type": "application/json",
 		},
 	});

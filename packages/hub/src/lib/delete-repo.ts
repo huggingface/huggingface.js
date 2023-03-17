@@ -9,13 +9,13 @@ export async function deleteRepo(params: { repo: RepoId; credentials: Credential
 
 	const res = await fetch(`${params.hubUrl ?? HUB_URL}/api/repos/delete`, {
 		method: "DELETE",
-		body:   JSON.stringify({
-			name:         repoName,
+		body: JSON.stringify({
+			name: repoName,
 			organization: namespace,
-			type:         params.repo.type,
+			type: params.repo.type,
 		}),
 		headers: {
-			Authorization:  `Bearer ${params.credentials.accessToken}`,
+			Authorization: `Bearer ${params.credentials.accessToken}`,
 			"Content-Type": "application/json",
 		},
 	});

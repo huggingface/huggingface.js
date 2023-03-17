@@ -7,10 +7,10 @@ import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
 
 export interface ModelEntry {
-	id:      string;
-	name:    string;
+	id: string;
+	name: string;
 	private: boolean;
-	task?:   Task;
+	task?: Task;
 }
 
 export async function* listModels(params?: {
@@ -18,7 +18,7 @@ export async function* listModels(params?: {
 		owner?: string;
 	};
 	credentials?: Credentials;
-	hubUrl?:      string;
+	hubUrl?: string;
 }): AsyncGenerator<ModelEntry> {
 	checkCredentials(params?.credentials);
 	const search = new URLSearchParams({
@@ -42,10 +42,10 @@ export async function* listModels(params?: {
 
 		for (const item of items) {
 			yield {
-				id:      item._id,
-				name:    item.id,
+				id: item._id,
+				name: item.id,
 				private: item.private,
-				task:    item.pipeline_tag,
+				task: item.pipeline_tag,
 			};
 		}
 

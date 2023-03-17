@@ -7,8 +7,8 @@ import { join } from "path";
 import { parse, stringify } from "yaml";
 
 interface Section {
-	title:     string;
-	local?:    string;
+	title: string;
+	local?: string;
 	sections?: Section[];
 }
 

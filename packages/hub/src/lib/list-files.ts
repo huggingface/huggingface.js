@@ -9,16 +9,16 @@ export interface ListFileEntry {
 	type: "file" | "directory" | "unknown";
 	size: number;
 	path: string;
-	oid:  string;
+	oid: string;
 	lfs?: {
-		oid:         string;
-		size:        number;
+		oid: string;
+		size: number;
 		/** Size of the raw pointer file, 100~200 bytes */
 		pointerSize: number;
 	};
 	lastCommit: {
-		date:  string;
-		id:    string;
+		date: string;
+		id: string;
 		title: string;
 	} | null;
 	security?: unknown;
@@ -29,19 +29,19 @@ export interface ListFileEntry {
  * with {@link params.recursive} set to `true`.
  */
 export async function* listFiles(params: {
-	repo:         RepoId;
+	repo: RepoId;
 	/**
 	 * Do we want to list files in subdirectories?
 	 */
-	recursive?:   boolean;
+	recursive?: boolean;
 	/**
 	 * Eg 'data' for listing all files in the 'data' folder. Leave it empty to list all
 	 * files in the repo.
 	 */
-	path?:        string;
-	revision?:    string;
+	path?: string;
+	revision?: string;
 	credentials?: Credentials;
-	hubUrl?:      string;
+	hubUrl?: string;
 }): AsyncGenerator<ListFileEntry> {
 	checkCredentials(params.credentials);
 	let url: string | undefined = `${params.hubUrl || HUB_URL}/api/${params.repo.type}s/${params.repo.name}/tree/${
