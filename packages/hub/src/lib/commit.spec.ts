@@ -89,6 +89,7 @@ size ${lfsContent.length}
 			const readme2 = await downloadFile({ repo, path: "README.md" });
 			assert.strictEqual(readme2, null);
 		} finally {
+			await lazyBlob.dispose();
 			await deleteRepo({
 				repo: {
 					name: repoName,
