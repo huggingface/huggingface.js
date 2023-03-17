@@ -6,25 +6,37 @@ import type { Credentials, Task } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
 
+const EXPAND_KEYS = ["pipeline_tag", "private", "gated", "downloads", "likes"] satisfies (keyof ApiModelInfo)[];
+
 export interface ModelEntry {
 	id: string;
 	name: string;
 	private: boolean;
+	gated: false | "auto" | "manual";
 	task?: Task;
+	likes: number;
+	downloads: number;
+	updatedAt: Date;
 }
 
 export async function* listModels(params?: {
 	search?: {
 		owner?: string;
+		task?: Task;
 	};
 	credentials?: Credentials;
 	hubUrl?: string;
 }): AsyncGenerator<ModelEntry> {
 	checkCredentials(params?.credentials);
-	const search = new URLSearchParams({
-		...(params?.search?.owner ? { author: params.search.owner } : undefined),
-	}).toString();
-	let url: string | undefined = `${params?.hubUrl || HUB_URL}/api/models` + (search ? "?" + search : "");
+	const search = new URLSearchParams([
+		...Object.entries({
+			limit: "500",
+			...(params?.search?.owner ? { author: params.search.owner } : undefined),
+			...(params?.search?.task ? { pipeline_tag: params.search.task } : undefined),
+		}),
+		...EXPAND_KEYS.map((val) => ["expand", val] satisfies [string, string]),
+	]).toString();
+	let url: string | undefined = `${params?.hubUrl || HUB_URL}/api/models?${search}`;
 
 	while (url) {
 		const res: Response = await fetch(url, {
@@ -46,6 +58,10 @@ export async function* listModels(params?: {
 				name: item.id,
 				private: item.private,
 				task: item.pipeline_tag,
+				downloads: item.downloads,
+				gated: item.gated,
+				likes: item.likes,
+				updatedAt: new Date(item.lastModified),
 			};
 		}
 
