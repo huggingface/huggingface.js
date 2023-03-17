@@ -1,6 +1,6 @@
 import { createReadStream } from "fs";
-import { open, FileHandle } from "fs/promises";
-import { Readable } from "stream";
+import { open } from "fs/promises";
+import type { FileHandle } from "fs/promises";
 
 export class LazyBlob {
 	private path: string;
@@ -14,26 +14,26 @@ export class LazyBlob {
 		this.totalSize = 0;
 	}
 
-	get size(): any {
+	get size(): number {
 		return this.totalSize;
 	}
 
-	get lentgh() {
+	get lentgh(): number {
 		return this.size;
 	}
 
-	get type() {
+	get type(): string {
 		return "";
 	}
 
-	async init() {
+	async init(): Promise<void> {
 		this.file = await open(this.path, "r");
 
 		const { size } = await this.file.stat();
 		this.totalSize = size;
 	}
 
-	async dispose() {
+	async dispose(): Promise<void> {
 		if (this.file === null) {
 			return;
 		}
