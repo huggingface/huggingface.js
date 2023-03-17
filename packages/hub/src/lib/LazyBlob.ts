@@ -4,7 +4,7 @@ import type { FileHandle } from "node:fs/promises";
 import { Readable } from "node:stream";
 
 export class LazyBlob extends Blob {
-	static async create(path: string, start: number, end: number): Promise<LazyBlob> {
+	static async create(path: string): Promise<LazyBlob> {
 		const { size } = await stat(path);
 
 		const lazyBlob = new LazyBlob(path, 0, size);
