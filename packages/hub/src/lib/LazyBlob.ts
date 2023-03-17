@@ -1,6 +1,6 @@
-import { createReadStream } from "fs";
-import { open } from "fs/promises";
-import type { FileHandle } from "fs/promises";
+import { createReadStream } from "node:fs";
+import { open } from "node:fs/promises";
+import type { FileHandle } from "node:fs/promises";
 
 export class LazyBlob {
 	private path: string;
