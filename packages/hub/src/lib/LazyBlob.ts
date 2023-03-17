@@ -1,13 +1,22 @@
 import { createReadStream } from "node:fs";
 import { open } from "node:fs/promises";
 import type { FileHandle } from "node:fs/promises";
+import { Readable } from "node:stream";
 
 export class LazyBlob {
+	static async create(path: string) {
+		const lazyBlob = new LazyBlob(path);
+
+		await lazyBlob.init();
+
+		return lazyBlob;
+	}
+
 	private path: string;
 	private file: FileHandle | null;
 	private totalSize: number;
 
-	constructor(path: string) {
+	private constructor(path: string) {
 		this.path = path;
 
 		this.file = null;
@@ -26,13 +35,6 @@ export class LazyBlob {
 		return "";
 	}
 
-	async init(): Promise<void> {
-		this.file = await open(this.path, "r");
-
-		const { size } = await this.file.stat();
-		this.totalSize = size;
-	}
-
 	async dispose(): Promise<void> {
 		if (this.file === null) {
 			return;
@@ -41,12 +43,13 @@ export class LazyBlob {
 		await this.file.close();
 	}
 
-	async slice(start: number, end: number): Promise<Blob> {
+	async slice(start = 0, end = this.size): Promise<Blob> {
 		if (this.file === null) {
 			throw new Error("LazyBlob has not been initialized");
 		}
 
-		const size = end - start;
+		const size = Math.abs(end - start) > this.size ? this.size : Math.abs(end - start);
+
 		const slice = await this.file.read(Buffer.alloc(size), 0, size, start);
 
 		return new Blob([slice.buffer]);
@@ -78,7 +81,12 @@ export class LazyBlob {
 
 	stream(): ReadableStream {
 		return Readable.toWeb(createReadStream(this.path));
+	}
 
-		return stream as unknown as ReadableStream;
+	private async init(): Promise<void> {
+		this.file = await open(this.path, "r");
+
+		const { size } = await this.file.stat();
+		this.totalSize = size;
 	}
 }

@@ -30,8 +30,7 @@ describe("commit", () => {
 		const readme1 = await downloadFile({ repo, path: "README.md" });
 		assert.strictEqual(readme1?.status, 200);
 
-		const lazyBlob = new LazyBlob("./package.json");
-		await lazyBlob.init();
+		const lazyBlob = await LazyBlob.create("./package.json");
 
 		try {
 			await commit({
