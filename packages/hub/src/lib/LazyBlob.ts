@@ -66,7 +66,7 @@ export class LazyBlob extends Blob {
 	}
 
 	stream(): ReadableStream {
-		return Readable.toWeb(createReadStream(this.path));
+		return Readable.toWeb(createReadStream(this.path)) as ReadableStream;
 	}
 
 	private async init(): Promise<void> {
