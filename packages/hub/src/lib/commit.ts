@@ -17,6 +17,7 @@ import { chunk } from "../utils/chunk";
 import { promisesQueue } from "../utils/promisesQueue";
 import { promisesQueueStreaming } from "../utils/promisesQueueStreaming";
 import { sha256 } from "../utils/sha256";
+import { LazyBlob } from "./LazyBlob";
 
 const CONCURRENT_SHAS = 5;
 const CONCURRENT_LFS_UPLOADS = 5;
@@ -27,7 +28,7 @@ export interface CommitDeletedEntry {
 	path: string;
 }
 
-type ContentSource = Blob; // Todo: offer a smart Blob wrapper around (filePath + size) for Node.js
+type ContentSource = Blob | LazyBlob;
 
 export interface CommitFile {
 	operation: "addOrUpdate";
@@ -100,7 +101,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 				operations.map(async (operation) => ({
 					path: operation.path,
 					size: operation.content.size,
-					sample: base64FromBytes(new Uint8Array(await operation.content.slice(0, 512).arrayBuffer())),
+					sample: base64FromBytes(new Uint8Array(await (await operation.content.slice(0, 512)).arrayBuffer())),
 				}))
 			),
 		};
@@ -215,7 +216,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 					const completionUrl = obj.actions.upload.href;
 					const parts = Object.keys(header).filter((key) => /^[0-9]+$/.test(key));
 
-					if (parts.length !== Math.ceil(content.length / chunkSize)) {
+					if (parts.length !== Math.ceil(content.size / chunkSize)) {
 						throw new Error("Invalid server response to upload large LFS file, wrong number of parts");
 					}
 
@@ -232,7 +233,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 							const index = parseInt(part) - 1;
 							const res = await fetch(header[part], {
 								method: "PUT",
-								body: content.slice(index * chunkSize, (index + 1) * chunkSize),
+								body: await content.slice(index * chunkSize, (index + 1) * chunkSize),
 							});
 
 							if (!res.ok) {
@@ -271,12 +272,14 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 						});
 					}
 				} else {
+					const body = content instanceof LazyBlob ? await content.blob() : content;
+
 					const res = await fetch(obj.actions.upload.href, {
 						method: "PUT",
 						headers: {
 							...(batchRequestId ? { "X-Request-Id": batchRequestId } : undefined),
 						},
-						body: content,
+						body,
 					});
 
 					if (!res.ok) {
@@ -322,7 +325,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 									value: {
 										path: operation.path,
 										algo: "sha256",
-										size: operation.content.length,
+										size: operation.content.size,
 										oid: sha,
 									} satisfies ApiCommitLfsFile,
 								};
