@@ -1,5 +1,5 @@
 import { HUB_URL } from "../consts";
-import { createApiError } from "../error";
+import { createApiError, InvalidApiResponseFormatError } from "../error";
 import type { Credentials, RepoId } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 
@@ -49,7 +49,11 @@ export async function fileDownloadInfo(params: {
 	});
 
 	let redirects = 0;
-	while (resp.status >= 300 && resp.status < 400 && new URL(resp.headers.get("Location")!).host === new URL(url).host) {
+	while (
+		resp.status >= 300 &&
+		resp.status < 400 &&
+		new URL(resp.headers.get("Location") ?? "http://example.com").host === new URL(url).host
+	) {
 		if (++redirects >= 20) {
 			throw new Error("Too many redirects");
 		}
@@ -81,9 +85,27 @@ export async function fileDownloadInfo(params: {
 		throw await createApiError(resp);
 	}
 
+	const etag = isLfs ? resp.headers.get("X-Linked-ETag") : resp.headers.get("ETag");
+
+	if (!etag) {
+		throw new InvalidApiResponseFormatError("Expected ETag");
+	}
+
+	const sizeHeader = isLfs ? resp.headers.get("X-Linked-Size") : resp.headers.get("Content-Length");
+
+	if (!sizeHeader) {
+		throw new InvalidApiResponseFormatError("Expected size information");
+	}
+
+	const size = parseInt(sizeHeader);
+
+	if (isNaN(size)) {
+		throw new InvalidApiResponseFormatError("Invalid file size received");
+	}
+
 	return {
-		etag: isLfs ? resp.headers.get("X-Linked-ETag")! : resp.headers.get("ETag")!,
-		size: isLfs ? parseInt(resp.headers.get("X-Linked-Size")!) : parseInt(resp.headers.get("Content-Length")!),
+		etag,
+		size,
 		downloadLink: isLfs ? resp.headers.get("Location") : null,
 	};
 }

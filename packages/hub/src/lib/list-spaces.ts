@@ -2,7 +2,7 @@ import { URLSearchParams } from "url";
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
 import type { ApiSpaceInfo } from "../types/api/api-space";
-import type { Credentials, SpaceSdk, Task } from "../types/public";
+import type { Credentials, SpaceSdk } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
 

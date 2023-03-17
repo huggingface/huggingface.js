@@ -13,6 +13,9 @@ module.exports = {
 		"@typescript-eslint/no-empty-function": "off",
 		"@typescript-eslint/explicit-module-boundary-types": "error",
 		"@typescript-eslint/consistent-type-imports": "error",
+		"@typescript-eslint/no-unused-vars": "error",
+		"@typescript-eslint/no-non-null-assertion": "error",
+		"@typescript-eslint/no-explicit-any": "error",
 		// For doc purposes, prefer interfaces
 		"@typescript-eslint/consistent-type-definitions": ["error", "interface"],
 	},

@@ -1,5 +1,5 @@
 import { HUB_URL } from "../consts";
-import { ApiError, createApiError } from "../error";
+import { ApiError, createApiError, InvalidApiResponseFormatError } from "../error";
 import type {
 	ApiCommitHeader,
 	ApiCommitLfsFile,
@@ -183,18 +183,22 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 		}
 
 		const json: ApiLfsBatchResponse = await res.json();
-		const batchRequestId = res.headers.get("X-Request-Id")!;
+		const batchRequestId = res.headers.get("X-Request-Id") || undefined;
 
 		const shaToOperation = new Map(operations.map((op, i) => [shas[i], op]));
 
 		await promisesQueueStreaming(
 			json.objects.map((obj) => async () => {
-				const op = shaToOperation.get(obj.oid)!;
+				const op = shaToOperation.get(obj.oid);
+
+				if (!op) {
+					throw new InvalidApiResponseFormatError("Unrequested object ID in response");
+				}
 
 				if (obj.error) {
 					const errorMessage = `Error while doing LFS batch call for ${operations[shas.indexOf(obj.oid)].path}: ${
 						obj.error.message
-					} - Request ID: ${batchRequestId}`;
+					}${batchRequestId ? ` - Request ID: ${batchRequestId}` : ""}`;
 					throw new ApiError(res.url, obj.error.code, batchRequestId, errorMessage);
 				}
 				if (!obj.actions?.upload) {
@@ -270,7 +274,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 					const res = await fetch(obj.actions.upload.href, {
 						method: "PUT",
 						headers: {
-							"X-Request-Id": batchRequestId,
+							...(batchRequestId ? { "X-Request-Id": batchRequestId } : undefined),
 						},
 						body: content,
 					});
@@ -309,19 +313,24 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 					} satisfies ApiCommitHeader,
 				},
 				...((await Promise.all(
-					params.operations.map((operation) =>
-						isFileOperation(operation) && lfsShas.has(operation.path)
-							? {
+					params.operations.map((operation) => {
+						if (isFileOperation(operation)) {
+							const sha = lfsShas.get(operation.path);
+							if (sha) {
+								return {
 									key: "lfsFile",
 									value: {
 										path: operation.path,
 										algo: "sha256",
 										size: operation.content.length,
-										oid: lfsShas.get(operation.path)!,
+										oid: sha,
 									} satisfies ApiCommitLfsFile,
-							  }
-							: convertOperationToNdJson(operation)
-					)
+								};
+							}
+						}
+
+						return convertOperationToNdJson(operation);
+					})
 				)) satisfies ApiCommitOperation[]),
 			]
 				.map((x) => JSON.stringify(x))
@@ -387,6 +396,6 @@ async function convertOperationToNdJson(operation: CommitOperation): Promise<Api
 			};
 		}
 		default:
-			throw new TypeError("Unknown operation: " + (operation as any).operation);
+			throw new TypeError("Unknown operation: " + (operation as { operation: string }).operation);
 	}
 }

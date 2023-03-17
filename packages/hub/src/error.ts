@@ -38,3 +38,5 @@ export class ApiError extends Error {
 		this.url = url;
 	}
 }
+
+export class InvalidApiResponseFormatError extends Error {}

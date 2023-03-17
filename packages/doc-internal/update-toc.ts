@@ -21,29 +21,28 @@ const dirs = readdirSync("../../docs", { withFileTypes: true }).filter((dir) => 
 for (const dir of dirs) {
 	const section = TOC.find((section) => section.sections?.some((file) => file.local?.startsWith(dir.name + "/")));
 
-	if (!section) {
+	if (!section || !section.sections) {
 		throw new Error("Missing folder in TOC: " + dir.name);
 	}
 
 	// Remove folders under dir
-	section.sections = section.sections!.filter((section) => !section.sections);
+	section.sections = section.sections.filter((section) => !section.sections);
 
 	const subdirs = readdirSync(join("../../docs", dir.name), { withFileTypes: true }).filter((dir) => dir.isDirectory());
 
 	for (const subdir of subdirs) {
-		const newSection: Section = { title: subdir.name[0].toUpperCase() + subdir.name.slice(1), sections: [] };
-		section.sections.push(newSection);
-
 		const files = readdirSync(join("../../docs", dir.name, subdir.name), { withFileTypes: true }).filter((dir) =>
 			dir.isFile()
 		);
 
-		for (const file of files) {
-			newSection.sections!.push({
+		const newSection: Section = {
+			title: subdir.name[0].toUpperCase() + subdir.name.slice(1),
+			sections: files.map((file) => ({
 				title: file.name.slice(0, -".md".length),
 				local: `${dir.name}/${subdir.name}/${file.name.slice(0, -".md".length)}`,
-			});
-		}
+			})),
+		};
+		section.sections.push(newSection);
 	}
 }
 

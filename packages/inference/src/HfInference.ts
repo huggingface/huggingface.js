@@ -369,7 +369,7 @@ export type FeatureExtractionArgs = Args & {
 	 *    "sentences": ["That is a happy dog", "That is a very happy person", "Today is a sunny day"]
 	 *  &#125;
 	 */
-	inputs: Record<string, any> | Record<string, any>[];
+	inputs: Record<string, unknown> | Record<string, unknown>[];
 };
 
 /**
@@ -381,7 +381,7 @@ export type ImageClassificationArgs = Args & {
 	/**
 	 * Binary image data
 	 */
-	data: any;
+	data: Blob | ArrayBuffer;
 };
 
 export interface ImageClassificationReturnValue {
@@ -401,7 +401,7 @@ export type ObjectDetectionArgs = Args & {
 	/**
 	 * Binary image data
 	 */
-	data: any;
+	data: Blob | ArrayBuffer;
 };
 
 export interface ObjectDetectionReturnValue {
@@ -431,7 +431,7 @@ export type ImageSegmentationArgs = Args & {
 	/**
 	 * Binary image data
 	 */
-	data: any;
+	data: Blob | ArrayBuffer;
 };
 
 export interface ImageSegmentationReturnValue {
@@ -455,7 +455,7 @@ export type AutomaticSpeechRecognitionArgs = Args & {
 	/**
 	 * Binary audio data
 	 */
-	data: any;
+	data: Blob | ArrayBuffer;
 };
 
 export interface AutomaticSpeechRecognitionReturn {
@@ -469,7 +469,7 @@ export type AudioClassificationArgs = Args & {
 	/**
 	 * Binary audio data
 	 */
-	data: any;
+	data: Blob | ArrayBuffer;
 };
 
 export interface AudioClassificationReturnValue {
@@ -578,7 +578,9 @@ export class HfInference {
 		args: ZeroShotClassificationArgs,
 		options?: Options
 	): Promise<ZeroShotClassificationReturn> {
-		return HfInference.toArray(await this.request(args, options));
+		return HfInference.toArray(
+			await this.request<ZeroShotClassificationReturnValue | ZeroShotClassificationReturnValue[]>(args, options)
+		);
 	}
 
 	/**
@@ -671,13 +673,13 @@ export class HfInference {
 		});
 	}
 
-	public async request(
-		args: Args & { data?: any },
+	public async request<T>(
+		args: Args & { data?: Blob | ArrayBuffer },
 		options?: Options & {
 			binary?: boolean;
 			blob?: boolean;
 		}
-	): Promise<any> {
+	): Promise<T> {
 		const mergedOptions = { ...this.defaultOptions, ...options };
 		const { model, ...otherArgs } = args;
 
@@ -716,7 +718,7 @@ export class HfInference {
 			if (!response.ok) {
 				throw new Error("An error occurred while fetching the blob");
 			}
-			return await response.blob();
+			return (await response.blob()) as T;
 		}
 
 		const output = await response.json();
@@ -726,10 +728,10 @@ export class HfInference {
 		return output;
 	}
 
-	private static toArray(obj: any): any[] {
+	private static toArray<T>(obj: T): T extends unknown[] ? T : T[] {
 		if (Array.isArray(obj)) {
-			return obj;
+			return obj as T extends unknown[] ? T : T[];
 		}
-		return [obj];
+		return [obj] as T extends unknown[] ? T : T[];
 	}
 }

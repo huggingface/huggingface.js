@@ -1,10 +1,11 @@
 import { Readable } from "node:stream";
+import type { ReadableStream } from "node:stream/web";
 import { createHash } from "node:crypto";
 
 export async function sha256Node(buffer: ArrayBuffer | Blob): Promise<string> {
 	const sha256Stream = createHash("sha256");
 	const transform256 = (
-		buffer instanceof Blob ? Readable.fromWeb(buffer.stream() as any) : Readable.from(Buffer.from(buffer))
+		buffer instanceof Blob ? Readable.fromWeb(buffer.stream() as ReadableStream) : Readable.from(Buffer.from(buffer))
 	)
 		.pipe(sha256Stream)
 		.setEncoding("hex");
