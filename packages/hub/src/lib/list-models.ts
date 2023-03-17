@@ -6,7 +6,7 @@ import type { Credentials, Task } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
 
-const EXPAND_KEYS = ["gated", "pipeline_tag", "private", "gated", "downloads"] satisfies (keyof ApiModelInfo)[];
+const EXPAND_KEYS = ["pipeline_tag", "private", "gated", "downloads", "likes"] satisfies (keyof ApiModelInfo)[];
 
 export interface ModelEntry {
 	id: string;
@@ -22,6 +22,7 @@ export interface ModelEntry {
 export async function* listModels(params?: {
 	search?: {
 		owner?: string;
+		task?: Task;
 	};
 	credentials?: Credentials;
 	hubUrl?: string;
@@ -31,6 +32,7 @@ export async function* listModels(params?: {
 		...Object.entries({
 			limit: "500",
 			...(params?.search?.owner ? { author: params.search.owner } : undefined),
+			...(params?.search?.task ? { pipeline_tag: params.search.task } : undefined),
 		}),
 		...EXPAND_KEYS.map((val) => ["expand", val] satisfies [string, string]),
 	]).toString();
