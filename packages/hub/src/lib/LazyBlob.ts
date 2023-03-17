@@ -49,10 +49,6 @@ export class LazyBlob extends Blob {
 		return slice;
 	}
 
-	async blob(): Promise<Blob> {
-		return this.slice(0, this.size);
-	}
-
 	async arrayBuffer(): Promise<ArrayBuffer> {
 		const start = this.start || 0;
 		const end = this.end || this.size;

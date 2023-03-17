@@ -17,7 +17,6 @@ import { chunk } from "../utils/chunk";
 import { promisesQueue } from "../utils/promisesQueue";
 import { promisesQueueStreaming } from "../utils/promisesQueueStreaming";
 import { sha256 } from "../utils/sha256";
-import { LazyBlob } from "./LazyBlob";
 
 const CONCURRENT_SHAS = 5;
 const CONCURRENT_LFS_UPLOADS = 5;
@@ -101,7 +100,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 				operations.map(async (operation) => ({
 					path: operation.path,
 					size: operation.content.size,
-					sample: base64FromBytes(new Uint8Array(await (await operation.content.slice(0, 512)).arrayBuffer())),
+					sample: base64FromBytes(new Uint8Array(await operation.content.slice(0, 512).arrayBuffer())),
 				}))
 			),
 		};
@@ -233,7 +232,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 							const index = parseInt(part) - 1;
 							const res = await fetch(header[part], {
 								method: "PUT",
-								body: await content.slice(index * chunkSize, (index + 1) * chunkSize),
+								body: content.slice(index * chunkSize, (index + 1) * chunkSize),
 							});
 
 							if (!res.ok) {
@@ -272,14 +271,12 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 						});
 					}
 				} else {
-					const body = content instanceof LazyBlob ? await content.blob() : content;
-
 					const res = await fetch(obj.actions.upload.href, {
 						method: "PUT",
 						headers: {
 							...(batchRequestId ? { "X-Request-Id": batchRequestId } : undefined),
 						},
-						body,
+						body: content,
 					});
 
 					if (!res.ok) {
