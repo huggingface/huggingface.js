@@ -1,9 +1,27 @@
 import { createReadStream } from "node:fs";
 import { open, stat } from "node:fs/promises";
-import type { FileHandle } from "node:fs/promises";
 import { Readable } from "node:stream";
+import type { FileHandle } from "node:fs/promises";
 
+/**
+ * A LazyBlob is a replacement for the Blob class that allows to partially read files
+ * in order to preserve memory.
+ *
+ * It is a drop-in replacement for the Blob class, so you can use it as a Blob.
+ *
+ * The main difference is the instantiation, which is done asynchronously using the `LazyBlob.create` method.
+ *
+ * @example
+ * const lazyBlob = await LazyBlob.create("path/to/package.json");
+ *
+ * await fetch("https://aschen.tech", { method: "POST", body: lazyBlob });
+ */
 export class LazyBlob extends Blob {
+	/**
+	 * Creates a new LazyBlob on the provided file.
+	 *
+	 * @param path Path to the file to be lazy readed
+	 */
 	static async create(path: string): Promise<LazyBlob> {
 		const { size } = await stat(path);
 
@@ -15,7 +33,6 @@ export class LazyBlob extends Blob {
 	private path: string;
 	private start: number;
 	private end: number;
-	private totalSize: number;
 
 	private constructor(path: string, start: number, end: number) {
 		super();
@@ -23,26 +40,33 @@ export class LazyBlob extends Blob {
 		this.path = path;
 		this.start = start;
 		this.end = end;
-
-		this.totalSize = 0;
 	}
 
+	/**
+	 * Returns the size of the blob.
+	 */
 	get size(): number {
-		if (this.start !== null) {
-			if (this.end !== null) {
-				return Math.abs(this.end - this.start);
-			}
-
-			return this.totalSize - this.start;
-		}
-
-		return this.totalSize;
+		return this.end - this.start;
 	}
 
+	/**
+	 * Returns an empty string.
+	 * (This is a required property of the Blob class)
+	 */
 	get type(): string {
 		return "";
 	}
 
+	/**
+	 * Returns a new instance of LazyBlob that is a slice of the current one.
+	 *
+	 * The slice is inclusive of the start and exclusive of the end.
+	 *
+	 * The slice method does not supports negative start/end.
+	 *
+	 * @param start beginning of the slice
+	 * @param end end of the slice
+	 */
 	slice(start = 0, end = this.size): LazyBlob {
 		if (start < 0 || end < 0) {
 			new TypeError("Unsupported negative start/end on LazyBlob.slice");
@@ -53,28 +77,38 @@ export class LazyBlob extends Blob {
 		return slice;
 	}
 
+	/**
+	 * Read the part of the file delimited by the LazyBlob and returns it as an ArrayBuffer.
+	 */
 	async arrayBuffer(): Promise<ArrayBuffer> {
 		const slice = await this.execute((file) => file.read(Buffer.alloc(this.size), 0, this.size, this.start));
 
 		return slice.buffer;
 	}
 
+	/**
+	 * Read the part of the file delimited by the LazyBlob and returns it as a string.
+	 */
 	async text(): Promise<string> {
 		const buffer = (await this.arrayBuffer()) as Buffer;
 
 		return buffer.toString("utf8");
 	}
 
-	stream(): ReadableStream {
-		return Readable.toWeb(createReadStream(this.path)) as ReadableStream;
+	/**
+	 * Returns a stream around the part of the file delimited by the LazyBlob.
+	 */
+	stream(): ReturnType<Blob["stream"]> {
+		return Readable.toWeb(createReadStream(this.path, { start: this.start, end: this.end - 1 })) as ReturnType<
+			Blob["stream"]
+		>;
 	}
 
-	private async init(): Promise<void> {
-		const { size } = await this.execute((file) => file.stat());
-
-		this.totalSize = size;
-	}
-
+	/**
+	 * We are opening and closing the file for each action to prevent file descriptor leaks.
+	 *
+	 * It is an intended choice of developer experience over performances.
+	 */
 	private async execute<T>(action: (file: FileHandle) => Promise<T>) {
 		const file = await open(this.path, "r");
 
