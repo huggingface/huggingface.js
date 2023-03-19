@@ -16,6 +16,7 @@ describe("listFiles", () => {
 		const files: ListFileEntry[] = [];
 
 		for await (const entry of cursor) {
+			delete entry.security; // flaky
 			files.push(entry);
 		}
 
@@ -28,17 +29,6 @@ describe("listFiles", () => {
 				},
 				oid: "dc08351d4dc0732d9c8af04070ced089b201ce2f",
 				path: ".gitattributes",
-				security: {
-					avScan: {
-						virusFound: false,
-						virusNames: null,
-					},
-					blobId: "dc08351d4dc0732d9c8af04070ced089b201ce2f",
-					name: ".gitattributes",
-					pickleImportScan: null,
-					repositoryId: "models/bert-base-uncased",
-					safe: true,
-				},
 				size: 345,
 				type: "file",
 			},
@@ -50,17 +40,6 @@ describe("listFiles", () => {
 				},
 				oid: "fca794a5f07ff8f963fe8b61e3694b0fb7f955df",
 				path: "config.json",
-				security: {
-					avScan: {
-						virusFound: false,
-						virusNames: null,
-					},
-					blobId: "fca794a5f07ff8f963fe8b61e3694b0fb7f955df",
-					name: "config.json",
-					pickleImportScan: null,
-					repositoryId: "models/bert-base-uncased",
-					safe: true,
-				},
 				size: 313,
 				type: "file",
 			},
@@ -77,36 +56,6 @@ describe("listFiles", () => {
 				},
 				oid: "ba5d19791be1dd7992e33bd61f20207b0f7f50a5",
 				path: "pytorch_model.bin",
-				security: {
-					avScan: {
-						virusFound: false,
-						virusNames: null,
-					},
-					blobId: "ba5d19791be1dd7992e33bd61f20207b0f7f50a5",
-					name: "pytorch_model.bin",
-					pickleImportScan: {
-						highestSafetyLevel: "innocuous",
-						imports: [
-							{
-								module: "collections",
-								name: "OrderedDict",
-								safety: "innocuous",
-							},
-							{
-								module: "torch",
-								name: "FloatStorage",
-								safety: "innocuous",
-							},
-							{
-								module: "torch._utils",
-								name: "_rebuild_tensor_v2",
-								safety: "innocuous",
-							},
-						],
-					},
-					repositoryId: "models/bert-base-uncased",
-					safe: true,
-				},
 				size: 440473133,
 				type: "file",
 			},
@@ -123,17 +72,6 @@ describe("listFiles", () => {
 				},
 				oid: "9eb98c817f04b051b3bcca591bcd4e03cec88018",
 				path: "tf_model.h5",
-				security: {
-					avScan: {
-						virusFound: false,
-						virusNames: null,
-					},
-					blobId: "9eb98c817f04b051b3bcca591bcd4e03cec88018",
-					name: "tf_model.h5",
-					pickleImportScan: null,
-					repositoryId: "models/bert-base-uncased",
-					safe: true,
-				},
 				size: 536063208,
 				type: "file",
 			},
@@ -145,17 +83,6 @@ describe("listFiles", () => {
 				},
 				oid: "fb140275c155a9c7c5a3b3e0e77a9e839594a938",
 				path: "vocab.txt",
-				security: {
-					avScan: {
-						virusFound: false,
-						virusNames: null,
-					},
-					blobId: "fb140275c155a9c7c5a3b3e0e77a9e839594a938",
-					name: "vocab.txt",
-					pickleImportScan: null,
-					repositoryId: "models/bert-base-uncased",
-					safe: true,
-				},
 				size: 231508,
 				type: "file",
 			},

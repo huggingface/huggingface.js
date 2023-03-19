@@ -8,7 +8,7 @@
 
 #### Defined in
 
-[hub/src/types/repo.d.ts:4](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/repo.d.ts#L4)
+[hub/src/types/public.d.ts:4](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L4)
 
 ___
 
@@ -18,4 +18,4 @@ ___
 
 #### Defined in
 
-[hub/src/types/repo.d.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/repo.d.ts#L5)
+[hub/src/types/public.d.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L5)
