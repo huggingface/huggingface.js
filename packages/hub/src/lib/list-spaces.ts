@@ -1,4 +1,3 @@
-import { URLSearchParams } from "url";
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
 import type { ApiSpaceInfo } from "../types/api/api-space";

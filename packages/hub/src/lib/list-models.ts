@@ -1,4 +1,3 @@
-import { URLSearchParams } from "url";
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
 import type { ApiModelInfo } from "../types/api/api-model";
