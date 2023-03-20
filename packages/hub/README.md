@@ -57,3 +57,4 @@ Also, use `Blob` to avoid loading the whole files in RAM. In `Node`, it's up to 
 ## Dependencies
 
 - `hash-wasm` : Only used in the browser, when committing files over 10 MB. Browsers do not natively support streaming sha256 computations.
+- `type-fest` : Typings only
