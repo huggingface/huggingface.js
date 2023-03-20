@@ -37,6 +37,8 @@ export interface CommitFile {
 	// forceLfs?: boolean
 }
 
+type CommitBlob = Omit<CommitFile, "content"> & { content: Blob };
+
 // TODO: find a nice way to handle LFS & non-LFS files in an uniform manner, see https://github.com/huggingface/moon-landing/issues/4370
 // export type CommitRenameFile = {
 // 	operation: "rename";
@@ -46,6 +48,7 @@ export interface CommitFile {
 // };
 
 export type CommitOperation = CommitDeletedEntry | CommitFile /* | CommitRenameFile */;
+type CommitBlobOperation = Exclude<CommitOperation, CommitFile> | CommitBlob;
 
 export interface CommitParams {
 	title: string;
@@ -75,7 +78,7 @@ export interface CommitOutput {
 	hookOutput: string;
 }
 
-function isFileOperation(op: CommitOperation): op is Omit<CommitFile, "content"> & { content: Blob } {
+function isFileOperation(op: CommitOperation): op is CommitBlob {
 	const ret = op.operation === "addOrUpdate";
 
 	if (ret && !(op.content instanceof Blob)) {
@@ -98,24 +101,29 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 
 	const allOperations = await Promise.all(
 		params.operations.map(async (operation) => {
-			if (isFileOperation(operation) && operation.content instanceof URL) {
-				if (operation.content.protocol !== "file:") {
-					throw new TypeError('Only "file://" protocol is supported for now');
+			if (operation.operation === "addOrUpdate") {
+				if (operation.content instanceof URL) {
+					if (operation.content.protocol !== "file:") {
+						throw new TypeError('Only "file://" protocol is supported for now');
+					}
+
+					if (!isBackend) {
+						throw new TypeError("File URLs are not supported in browsers");
+					}
+
+					const { LazyBlob } = await import("../utils/LazyBlob");
+
+					// Ignore the "file://" at the beginning and the trailing slash
+					const lazyBlob = await LazyBlob.create(operation.content);
+
+					return {
+						...operation,
+						content: lazyBlob,
+					};
 				}
 
-				if (!isBackend) {
-					throw new TypeError("File URLs are not supported in browsers");
-				}
-
-				const { LazyBlob } = await import("../utils/LazyBlob");
-
-				// Ignore the "file://" at the beginning and the trailing slash
-				const lazyBlob = await LazyBlob.create(operation.content.href.slice(7, operation.content.href.length - 1));
-
-				return {
-					...operation,
-					content: lazyBlob,
-				};
+				/** Destructuring needed for TS to infer precise type */
+				return { ...operation, content: operation.content };
 			}
 
 			return operation;
@@ -394,7 +402,7 @@ export async function commit(params: CommitParams): Promise<CommitOutput> {
 	return res.value;
 }
 
-async function convertOperationToNdJson(operation: CommitOperation): Promise<ApiCommitOperation> {
+async function convertOperationToNdJson(operation: CommitBlobOperation): Promise<ApiCommitOperation> {
 	switch (operation.operation) {
 		case "addOrUpdate": {
 			// todo: handle LFS

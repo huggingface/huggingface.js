@@ -24,7 +24,7 @@ export class LazyBlob extends Blob {
 	 *
 	 * @param path Path to the file to be lazy readed
 	 */
-	static async create(path: string): Promise<LazyBlob> {
+	static async create(path: URL): Promise<LazyBlob> {
 		const { size } = await stat(path);
 
 		const lazyBlob = new LazyBlob(path, 0, size);
@@ -32,11 +32,11 @@ export class LazyBlob extends Blob {
 		return lazyBlob;
 	}
 
-	private path: string;
+	private path: URL;
 	private start: number;
 	private end: number;
 
-	private constructor(path: string, start: number, end: number) {
+	private constructor(path: URL, start: number, end: number) {
 		super();
 
 		this.path = path;
