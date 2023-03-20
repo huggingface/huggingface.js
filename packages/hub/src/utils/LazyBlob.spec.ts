@@ -1,6 +1,7 @@
 import { open, stat } from "node:fs/promises";
 import { TextDecoder } from "node:util";
 import { describe, expect, it } from "vitest";
+import { pathToFileURL } from "url";
 import { LazyBlob } from "./LazyBlob";
 
 describe("LazyBlob", () => {
@@ -8,7 +9,7 @@ describe("LazyBlob", () => {
 		const file = await open("package.json", "r");
 		const { size } = await stat("package.json");
 
-		const lazyBlob = await LazyBlob.create("package.json");
+		const lazyBlob = await LazyBlob.create(pathToFileURL("package.json"));
 
 		expect(lazyBlob).toMatchObject({
 			path: "package.json",
@@ -26,7 +27,7 @@ describe("LazyBlob", () => {
 
 	it("should create a slice on the file", async () => {
 		const file = await open("package.json", "r");
-		const lazyBlob = await LazyBlob.create("package.json");
+		const lazyBlob = await LazyBlob.create(pathToFileURL("package.json"));
 
 		const slice = lazyBlob.slice(10, 20);
 

@@ -1,6 +1,7 @@
 import { assert, it, describe } from "vitest";
 
 import { readFileSync } from "fs";
+import { pathToFileURL } from "url";
 import { randomBytes } from "crypto";
 import { HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from "../consts";
 import type { RepoId } from "../types/public";
@@ -31,7 +32,7 @@ describe("commit", () => {
 		const readme1 = await downloadFile({ repo, path: "README.md" });
 		assert.strictEqual(readme1?.status, 200);
 
-		const lazyBlob = await LazyBlob.create("./package.json");
+		const lazyBlob = await LazyBlob.create(pathToFileURL("./package.json"));
 
 		try {
 			await commit({
