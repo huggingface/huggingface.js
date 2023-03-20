@@ -14,7 +14,6 @@ import type { Credentials, RepoId } from "../types/public";
 import { base64FromBytes } from "../utils/base64FromBytes";
 import { checkCredentials } from "../utils/checkCredentials";
 import { chunk } from "../utils/chunk";
-import { LazyBlob } from "../utils/LazyBlob";
 import { promisesQueue } from "../utils/promisesQueue";
 import { promisesQueueStreaming } from "../utils/promisesQueueStreaming";
 import { sha256 } from "../utils/sha256";
@@ -78,12 +77,26 @@ export interface CommitOutput {
 function isFileOperation(op: CommitOperation): op is CommitFile {
 	return op.operation === "addOrUpdate";
 }
+
+const isBrowser = typeof window !== "undefined" && typeof window.document !== "undefined";
+
+/**
+ * Fake class to avoid importing LazyBlob in the browser
+ */
+class FakeLazyBlob extends Blob {
+	static async create(path: string) {
+		return new Blob([path]);
+	}
+}
+
 /**
  * Necessary extend of the Map class to overload `get` method signature and avoid
  * many useless casts (because `get` original return type is `Blob | undefined`)
  */
 class FileBlobs extends Map<ContentSource, Blob> {
 	static async createBlobMap(operations: CommitFile[]) {
+		const { LazyBlob } = isBrowser ? { LazyBlob: FakeLazyBlob } : await import("../utils/LazyBlob");
+
 		const blobMap = new FileBlobs();
 
 		for (const operation of operations) {
@@ -127,7 +140,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 
 	for (const operations of chunk(params.operations.filter(isFileOperation), 100)) {
 		const payload: ApiPreuploadRequest = {
-			gitAttributes: gitAttributes && (await gitAttributes.text()),
+			gitAttributes: gitAttributes && (await blobs.get(gitAttributes).text()),
 			files: await Promise.all(
 				operations.map(async (operation) => ({
 					path: operation.path,
@@ -191,7 +204,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 			},
 			objects: operations.map((op, i) => ({
 				oid: shas[i],
-				size: op.content.size,
+				size: blobs.get(op.content).size,
 			})),
 		};
 
@@ -308,7 +321,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 						headers: {
 							...(batchRequestId ? { "X-Request-Id": batchRequestId } : undefined),
 						},
-						body: content,
+						body: blobs.get(content),
 					});
 
 					if (!res.ok) {
