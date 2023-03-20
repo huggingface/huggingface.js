@@ -7,6 +7,7 @@ import { commit } from "./commit";
 import { createRepo } from "./create-repo";
 import { deleteRepo } from "./delete-repo";
 import { downloadFile } from "./download-file";
+import { LazyBlob } from "../utils/LazyBlob";
 
 const lfsContent = "O123456789".repeat(100_000);
 
@@ -29,6 +30,8 @@ describe("commit", () => {
 		const readme1 = await downloadFile({ repo, path: "README.md" });
 		assert.strictEqual(readme1?.status, 200);
 
+		const lazyBlob = await LazyBlob.create("./package.json");
+
 		try {
 			await commit({
 				repo,
@@ -48,6 +51,11 @@ describe("commit", () => {
 						path: "test.lfs.txt",
 					},
 					{
+						operation: "addOrUpdate",
+						content: lazyBlob,
+						path: "package.json",
+					},
+					{
 						operation: "delete",
 						path: "README.md",
 					},
@@ -61,6 +69,10 @@ describe("commit", () => {
 			const lfsFileContent = await downloadFile({ repo, path: "test.lfs.txt" });
 			assert.strictEqual(lfsFileContent?.status, 200);
 			assert.strictEqual(await lfsFileContent?.text(), lfsContent);
+
+			const packageJsonContent = await downloadFile({ repo, path: "package.json" });
+			assert.strictEqual(packageJsonContent?.status, 200);
+			assert.strictEqual(await packageJsonContent?.text(), await lazyBlob.text());
 
 			const lfsFilePointer = await fetch(`${HUB_URL}/${repoName}/raw/main/test.lfs.txt`);
 			assert.strictEqual(lfsFilePointer.status, 200);

@@ -44,6 +44,7 @@ export async function sha256(buffer: Blob): Promise<string> {
 	if (!cryptoModule) {
 		cryptoModule = await import("./sha256-node");
 	}
+
 	return cryptoModule.sha256Node(buffer);
 }
 

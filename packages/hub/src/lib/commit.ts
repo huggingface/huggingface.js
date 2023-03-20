@@ -27,7 +27,7 @@ export interface CommitDeletedEntry {
 	path: string;
 }
 
-type ContentSource = Blob; // Todo: offer a smart Blob wrapper around (filePath + size) for Node.js
+type ContentSource = Blob;
 
 export interface CommitFile {
 	operation: "addOrUpdate";
