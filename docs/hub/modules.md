@@ -277,7 +277,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/list-datasets.ts:21](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-datasets.ts#L21)
+[hub/src/lib/list-datasets.ts:20](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-datasets.ts#L20)
 
 ___
 
@@ -331,7 +331,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/list-models.ts:22](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-models.ts#L22)
+[hub/src/lib/list-models.ts:21](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-models.ts#L21)
 
 ___
 
@@ -355,7 +355,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/list-spaces.ts:20](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-spaces.ts#L20)
+[hub/src/lib/list-spaces.ts:19](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-spaces.ts#L19)
 
 ___
 
