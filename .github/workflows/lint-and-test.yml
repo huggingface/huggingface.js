@@ -35,7 +35,7 @@ jobs:
           cache: "pnpm"
           cache-dependency-path: "**/pnpm-lock.yaml"
       - run: |
-          pnpm install --frozen-lockfile --filter . 
+          pnpm install --frozen-lockfile --filter .
           pnpm install --frozen-lockfile --filter ...[${{ steps.since.outputs.SINCE }}]
       - name: "Checking lint errors"
         run: |
@@ -49,6 +49,6 @@ jobs:
         run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] type-check
 
       - name: Test
-        run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test:ci
+        run: VCR_MODE=playback pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test:ci
         env:
           HF_ACCESS_TOKEN: ${{ secrets.HF_ACCESS_TOKEN }}
