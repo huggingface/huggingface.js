@@ -105,7 +105,11 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 		params.operations.map(async (operation) => {
 			if (isFileOperation(operation) && operation.content instanceof URL) {
 				if (operation.content.protocol !== "file:") {
-					throw TypeError('Only "file://" protocol is supported for now');
+					throw new TypeError('Only "file://" protocol is supported for now');
+				}
+
+				if (!isNode) {
+					throw new Error("URls pointing to local files can only be loaded with Node.js");
 				}
 
 				// Ignore the "file://" at the beginning and the trailing slash
