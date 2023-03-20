@@ -101,26 +101,35 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 
 	const { LazyBlob } = isNode ? await import("../utils/LazyBlob") : { LazyBlob: FakeLazyBlob };
 
-	for (const operation of params.operations) {
-		if (isFileOperation(operation) && operation.content instanceof URL) {
-			if (operation.content.protocol !== "file:") {
-				throw TypeError('Only "file://" protocol is supported for now');
+	const operations = await Promise.all(
+		params.operations.map(async (operation) => {
+			if (isFileOperation(operation) && operation.content instanceof URL) {
+				if (operation.content.protocol !== "file:") {
+					throw TypeError('Only "file://" protocol is supported for now');
+				}
+
+				// Ignore the "file://" at the beginning and the trailing slash
+				const lazyBlob = await LazyBlob.create(operation.content.href.slice(7, operation.content.href.length - 1));
+
+				return {
+					...operation,
+					content: lazyBlob,
+				};
 			}
 
-			// Ignore the "file://" at the beginning and the trailing slash
-			const lazyBlob = await LazyBlob.create(operation.content.href.slice(7, operation.content.href.length - 1));
-		}
-	}
+			return operation;
+		})
+	);
 
 	const gitAttributes = (
-		params.operations.find((op) => isFileOperation(op) && op.path === ".gitattributes") as CommitFile | undefined
+		operations.find((op) => isFileOperation(op) && op.path === ".gitattributes") as CommitFile | undefined
 	)?.content;
 
-	for (const operations of chunk(params.operations.filter(isFileOperation), 100)) {
+	for (const operationsChunk of chunk(operations.filter(isFileOperation), 100)) {
 		const payload: ApiPreuploadRequest = {
 			gitAttributes: gitAttributes && (await (gitAttributes as Blob).text()),
 			files: await Promise.all(
-				operations.map(async (operation) => ({
+				operationsChunk.map(async (operation) => ({
 					path: operation.path,
 					size: (operation.content as Blob).size,
 					sample: base64FromBytes(new Uint8Array(await (operation.content as Blob).slice(0, 512).arrayBuffer())),
