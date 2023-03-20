@@ -11,8 +11,12 @@
       sections:
         - title: ApiError
           local: hub/classes/ApiError
+        - title: InvalidApiResponseFormatError
+          local: hub/classes/InvalidApiResponseFormatError
     - title: Interfaces
       sections:
+        - title: AuthInfo
+          local: hub/interfaces/AuthInfo
         - title: CommitDeletedEntry
           local: hub/interfaces/CommitDeletedEntry
         - title: CommitFile
@@ -23,12 +27,30 @@
           local: hub/interfaces/CommitParams
         - title: Credentials
           local: hub/interfaces/Credentials
+        - title: DatasetEntry
+          local: hub/interfaces/DatasetEntry
         - title: FileDownloadInfoOutput
           local: hub/interfaces/FileDownloadInfoOutput
         - title: ListFileEntry
           local: hub/interfaces/ListFileEntry
+        - title: ModelEntry
+          local: hub/interfaces/ModelEntry
         - title: RepoId
           local: hub/interfaces/RepoId
+        - title: SpaceEntry
+          local: hub/interfaces/SpaceEntry
+        - title: SpaceResourceConfig
+          local: hub/interfaces/SpaceResourceConfig
+        - title: SpaceResourceRequirement
+          local: hub/interfaces/SpaceResourceRequirement
+        - title: SpaceRuntime
+          local: hub/interfaces/SpaceRuntime
+        - title: WhoAmIApp
+          local: hub/interfaces/WhoAmIApp
+        - title: WhoAmIOrg
+          local: hub/interfaces/WhoAmIOrg
+        - title: WhoAmIUser
+          local: hub/interfaces/WhoAmIUser
 - title: "@huggingface/inference"
   isExpanded: true
   sections:

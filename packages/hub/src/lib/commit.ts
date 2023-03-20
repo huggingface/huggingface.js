@@ -27,7 +27,7 @@ export interface CommitDeletedEntry {
 	path: string;
 }
 
-type ContentSource = Blob; // Todo: offer a smart Blob wrapper around (filePath + size) for Node.js
+type ContentSource = Blob;
 
 export interface CommitFile {
 	operation: "addOrUpdate";
@@ -215,7 +215,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 					const completionUrl = obj.actions.upload.href;
 					const parts = Object.keys(header).filter((key) => /^[0-9]+$/.test(key));
 
-					if (parts.length !== Math.ceil(content.length / chunkSize)) {
+					if (parts.length !== Math.ceil(content.size / chunkSize)) {
 						throw new Error("Invalid server response to upload large LFS file, wrong number of parts");
 					}
 
@@ -322,7 +322,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 									value: {
 										path: operation.path,
 										algo: "sha256",
-										size: operation.content.length,
+										size: operation.content.size,
 										oid: sha,
 									} satisfies ApiCommitLfsFile,
 								};
