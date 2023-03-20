@@ -1,0 +1,15 @@
+{
+  "url": "https://api-inference.huggingface.co/models/google/tapas-base-finetuned-wtq",
+  "init": {
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "method": "POST",
+    "body": "{\"inputs\":{\"query\":\"How many stars does the transformers repository have?\",\"table\":{\"Repository\":[\"Transformers\",\"Datasets\",\"Tokenizers\"],\"Stars\":[\"36542\",\"4512\",\"3934\"],\"Contributors\":[\"651\",\"77\",\"34\"],\"Programming language\":[\"Python\",\"Python\",\"Rust, Python and NodeJS\"]}},\"options\":{}}"
+  },
+  "response": {
+    "body": "eyJhbnN3ZXIiOiJBVkVSQUdFID4gMzY1NDIiLCJjb29yZGluYXRlcyI6W1swLDFdXSwiY2VsbHMiOlsiMzY1NDIiXSwiYWdncmVnYXRvciI6IkFWRVJBR0UifQ==",
+    "status": 200,
+    "statusText": "OK"
+  }
+}

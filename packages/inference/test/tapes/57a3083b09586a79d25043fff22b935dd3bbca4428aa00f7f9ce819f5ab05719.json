@@ -1,0 +1,15 @@
+{
+  "url": "https://api-inference.huggingface.co/models/bert-base-uncased",
+  "init": {
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "method": "POST",
+    "body": "{\"inputs\":\"[MASK] world!\",\"options\":{}}"
+  },
+  "response": {
+    "body": "W3sic2NvcmUiOjAuMjkxMDkwNTE4MjM2MTYwMywidG9rZW4iOjE5OTYsInRva2VuX3N0ciI6InRoZSIsInNlcXVlbmNlIjoidGhlIHdvcmxkISJ9LHsic2NvcmUiOjAuMTgwOTExNzM0NzAwMjAyOTQsInRva2VuIjoyMDI2LCJ0b2tlbl9zdHIiOiJteSIsInNlcXVlbmNlIjoibXkgd29ybGQhIn0seyJzY29yZSI6MC4wNTIzOTczNDA1MzYxMTc1NTQsInRva2VuIjo3NTkyLCJ0b2tlbl9zdHIiOiJoZWxsbyIsInNlcXVlbmNlIjoiaGVsbG8gd29ybGQhIn0seyJzY29yZSI6MC4wNDI0Njk1NDI0NzM1NTQ2MSwidG9rZW4iOjY5MTksInRva2VuX3N0ciI6IndvbmRlcmZ1bCIsInNlcXVlbmNlIjoid29uZGVyZnVsIHdvcmxkISJ9LHsic2NvcmUiOjAuMDE1OTEyMTExODQ4NTkyNzU4LCJ0b2tlbiI6MTAzNywidG9rZW5fc3RyIjoiYSIsInNlcXVlbmNlIjoiYSB3b3JsZCEifV0=",
+    "status": 200,
+    "statusText": "OK"
+  }
+}

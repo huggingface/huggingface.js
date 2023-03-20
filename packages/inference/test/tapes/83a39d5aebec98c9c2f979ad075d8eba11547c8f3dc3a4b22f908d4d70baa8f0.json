@@ -1,0 +1,15 @@
+{
+  "url": "https://api-inference.huggingface.co/models/google/flan-t5-xxl",
+  "init": {
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "method": "POST",
+    "body": "{\"inputs\":\"The answer to the universe is\",\"options\":{}}"
+  },
+  "response": {
+    "body": "W3siZ2VuZXJhdGVkX3RleHQiOiJhIn1d",
+    "status": 200,
+    "statusText": "OK"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "url": "https://api-inference.huggingface.co/models/t5-base",
+  "init": {
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "method": "POST",
+    "body": "{\"inputs\":\"My name is Wolfgang and I live in Berlin\",\"options\":{}}"
+  },
+  "response": {
+    "body": "W3sidHJhbnNsYXRpb25fdGV4dCI6Ik1laW4gTmFtZSBpc3QgV29sZmdhbmcgdW5kIGljaCBsZWJlIGluIEJlcmxpbiJ9XQ==",
+    "status": 200,
+    "statusText": "OK"
+  }
+}

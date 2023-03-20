@@ -1,0 +1,15 @@
+{
+  "url": "https://api-inference.huggingface.co/models/distilbert-base-uncased-finetuned-sst-2-english",
+  "init": {
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "method": "POST",
+    "body": "{\"inputs\":\"I like you. I love you.\",\"options\":{}}"
+  },
+  "response": {
+    "body": "W1t7ImxhYmVsIjoiUE9TSVRJVkUiLCJzY29yZSI6MC45OTk4NzYzNzk5NjY3MzU4fSx7ImxhYmVsIjoiTkVHQVRJVkUiLCJzY29yZSI6MC4wMDAxMjM2NTQwODQ3NDU3OTQ1M31dXQ==",
+    "status": 200,
+    "statusText": "OK"
+  }
+}
