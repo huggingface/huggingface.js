@@ -41,21 +41,21 @@ describe("commit", () => {
 					accessToken: TEST_ACCESS_TOKEN,
 				},
 				operations: [
-					// {
-					// 	operation: "addOrUpdate",
-					// 	content: new Blob(["This is me"]),
-					// 	path: "test.txt",
-					// },
-					// {
-					// 	operation: "addOrUpdate",
-					// 	content: new Blob([lfsContent]),
-					// 	path: "test.lfs.txt",
-					// },
-					// {
-					// 	operation: "addOrUpdate",
-					// 	content: lazyBlob,
-					// 	path: "package.json",
-					// },
+					{
+						operation: "addOrUpdate",
+						content: new Blob(["This is me"]),
+						path: "test.txt",
+					},
+					{
+						operation: "addOrUpdate",
+						content: new Blob([lfsContent]),
+						path: "test.lfs.txt",
+					},
+					{
+						operation: "addOrUpdate",
+						content: lazyBlob,
+						path: "package.json",
+					},
 					{
 						operation: "addOrUpdate",
 						content: new URL("file://tsconfig.json"),
