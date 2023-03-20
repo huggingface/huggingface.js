@@ -2,6 +2,7 @@
   "url": "https://api-inference.huggingface.co/models/t5-base",
   "init": {
     "headers": {
+      "Authorization": "Bearer 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",
       "Content-Type": "application/json"
     },
     "method": "POST",

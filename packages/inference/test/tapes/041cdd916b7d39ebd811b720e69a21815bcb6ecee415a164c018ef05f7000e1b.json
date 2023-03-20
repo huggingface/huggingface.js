@@ -1,0 +1,16 @@
+{
+  "url": "https://api-inference.huggingface.co/models/deepset/roberta-base-squad2",
+  "init": {
+    "headers": {
+      "Authorization": "Bearer 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",
+      "Content-Type": "application/json"
+    },
+    "method": "POST",
+    "body": "{\"inputs\":{\"question\":\"What is the capital of France?\",\"context\":\"The capital of France is Paris.\"},\"options\":{}}"
+  },
+  "response": {
+    "body": "eyJzY29yZSI6MC45NzAzNDMxNzI1NTAyMDE0LCJzdGFydCI6MjUsImVuZCI6MzAsImFuc3dlciI6IlBhcmlzIn0=",
+    "status": 200,
+    "statusText": "OK"
+  }
+}

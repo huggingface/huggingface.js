@@ -1,0 +1,16 @@
+{
+  "url": "https://api-inference.huggingface.co/models/microsoft/DialoGPT-large",
+  "init": {
+    "headers": {
+      "Authorization": "Bearer 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",
+      "Content-Type": "application/json"
+    },
+    "method": "POST",
+    "body": "{\"inputs\":{\"past_user_inputs\":[\"Which movie is the best ?\"],\"generated_responses\":[\"It is Die Hard for sure.\"],\"text\":\"Can you explain why ?\"},\"options\":{}}"
+  },
+  "response": {
+    "body": "eyJnZW5lcmF0ZWRfdGV4dCI6Ikl0J3MgdGhlIGJlc3QgbW92aWUgZXZlci4iLCJjb252ZXJzYXRpb24iOnsiZ2VuZXJhdGVkX3Jlc3BvbnNlcyI6WyJJdCBpcyBEaWUgSGFyZCBmb3Igc3VyZS4iLCJJdCdzIHRoZSBiZXN0IG1vdmllIGV2ZXIuIl0sInBhc3RfdXNlcl9pbnB1dHMiOlsiV2hpY2ggbW92aWUgaXMgdGhlIGJlc3QgPyIsIkNhbiB5b3UgZXhwbGFpbiB3aHkgPyJdfSwid2FybmluZ3MiOlsiU2V0dGluZyBgcGFkX3Rva2VuX2lkYCB0byBgZW9zX3Rva2VuX2lkYDo1MDI1NiBmb3Igb3Blbi1lbmQgZ2VuZXJhdGlvbi4iXX0=",
+    "status": 200,
+    "statusText": "OK"
+  }
+}

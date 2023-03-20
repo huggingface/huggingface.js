@@ -1,0 +1,16 @@
+{
+  "url": "https://api-inference.huggingface.co/models/this-model-does-not-exist-123",
+  "init": {
+    "headers": {
+      "Authorization": "Bearer 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",
+      "Content-Type": "application/json"
+    },
+    "method": "POST",
+    "body": "{\"inputs\":\"[MASK] world!\",\"options\":{}}"
+  },
+  "response": {
+    "body": "eyJlcnJvciI6Ik1vZGVsIHRoaXMtbW9kZWwtZG9lcy1ub3QtZXhpc3QtMTIzIGRvZXMgbm90IGV4aXN0In0=",
+    "status": 404,
+    "statusText": "Not Found"
+  }
+}

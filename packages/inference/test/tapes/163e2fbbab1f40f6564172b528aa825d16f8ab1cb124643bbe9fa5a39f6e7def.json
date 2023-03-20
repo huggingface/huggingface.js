@@ -1,0 +1,16 @@
+{
+  "url": "https://api-inference.huggingface.co/models/sentence-transformers/paraphrase-xlm-r-multilingual-v1",
+  "init": {
+    "headers": {
+      "Authorization": "Bearer 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",
+      "Content-Type": "application/json"
+    },
+    "method": "POST",
+    "body": "{\"inputs\":{\"source_sentence\":\"That is a happy person\",\"sentences\":[\"That is a happy dog\",\"That is a very happy person\",\"Today is a sunny day\"]},\"options\":{}}"
+  },
+  "response": {
+    "body": "WzAuNjYyMzQ5OTM5MzQ2MzEzNSwwLjkzODIzNDMyOTIyMzYzMjgsMC4yMjk2MzMzNjExMDExNTA1XQ==",
+    "status": 200,
+    "statusText": "OK"
+  }
+}

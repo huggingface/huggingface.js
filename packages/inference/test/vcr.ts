@@ -9,7 +9,7 @@ if (VCR_MODE) {
 		return vcr(originalFetch, args[0], args[1]);
 	};
 }
-const tapesDirectory = "tests/tapes";
+const tapesDirectory = "test/tapes";
 
 mkdirSync(tapesDirectory, { recursive: true });
 

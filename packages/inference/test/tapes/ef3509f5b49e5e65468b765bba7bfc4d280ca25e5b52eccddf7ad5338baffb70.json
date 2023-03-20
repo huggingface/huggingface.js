@@ -1,0 +1,16 @@
+{
+  "url": "https://api-inference.huggingface.co/models/dbmdz/bert-large-cased-finetuned-conll03-english",
+  "init": {
+    "headers": {
+      "Authorization": "Bearer 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",
+      "Content-Type": "application/json"
+    },
+    "method": "POST",
+    "body": "{\"inputs\":\"My name is Sarah Jessica Parker but you can call me Jessica\",\"options\":{}}"
+  },
+  "response": {
+    "body": "W3siZW50aXR5X2dyb3VwIjoiUEVSIiwic2NvcmUiOjAuOTk5MTMzNTg2ODgzNTQ0OSwid29yZCI6IlNhcmFoIEplc3NpY2EgUGFya2VyIiwic3RhcnQiOjExLCJlbmQiOjMxfSx7ImVudGl0eV9ncm91cCI6IlBFUiIsInNjb3JlIjowLjk5Nzk5MTMyMzQ3MTA2OTMsIndvcmQiOiJKZXNzaWNhIiwic3RhcnQiOjUyLCJlbmQiOjU5fV0=",
+    "status": 200,
+    "statusText": "OK"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "url": "https://api-inference.huggingface.co/models/gpt2",
+  "init": {
+    "headers": {
+      "Authorization": "Bearer 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",
+      "Content-Type": "application/json"
+    },
+    "method": "POST",
+    "body": "{\"inputs\":\"The answer to the universe is\",\"options\":{}}"
+  },
+  "response": {
+    "body": "W3siZ2VuZXJhdGVkX3RleHQiOiJUaGUgYW5zd2VyIHRvIHRoZSB1bml2ZXJzZSBpcyB0aGUgdW5pdmVyc2UsIGFuZCBpdCBoYXMgYWxyZWFkeSBiZWVuIGRldGVybWluZWQgdGhhdCB0aGUgdW5pdmVyc2UgY2FuIGJlIGRlc2NyaWJlZCBieSBhIGRlZmluaXRpb24gb2YgYSBzaW5nbGUgc2V0IG9mIGNvbnN0YW50cy4gSG93ZXZlciwgZ2l2ZW4gdGhlIGNvbXBsZXhpdHkgb2YgdGhlIHVuaXZlcnNlLCB0aGUgZGVzY3JpcHRpb24gb2YgdGhlIHVuaXZlcnNlIGlzIGhpZ2hseSBsaW1pdGVkLCBhbmQifV0=",
+    "status": 200,
+    "statusText": "OK"
+  }
+}
