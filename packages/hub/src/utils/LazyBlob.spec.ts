@@ -1,7 +1,7 @@
-import { describe, expect, it } from "vitest";
 import { open, stat } from "node:fs/promises";
-import { LazyBlob } from "./LazyBlob";
 import { TextDecoder } from "node:util";
+import { describe, expect, it } from "vitest";
+import { LazyBlob } from "./LazyBlob";
 
 describe("LazyBlob", () => {
 	it("should create a LazyBlob with a slice on the entire file", async () => {

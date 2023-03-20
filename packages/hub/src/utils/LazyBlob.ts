@@ -4,6 +4,8 @@ import { Readable } from "node:stream";
 import type { FileHandle } from "node:fs/promises";
 
 /**
+ * @internal
+ *
  * A LazyBlob is a replacement for the Blob class that allows to lazy read files
  * in order to preserve memory.
  *

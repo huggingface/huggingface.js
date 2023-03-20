@@ -8,4 +8,3 @@ export * from "./list-models";
 export * from "./list-spaces";
 export * from "./list-files";
 export * from "./who-am-i";
-export * from "./LazyBlob";

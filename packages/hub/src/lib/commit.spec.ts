@@ -7,7 +7,7 @@ import { commit } from "./commit";
 import { createRepo } from "./create-repo";
 import { deleteRepo } from "./delete-repo";
 import { downloadFile } from "./download-file";
-import { LazyBlob } from "./LazyBlob";
+import { LazyBlob } from "../utils/LazyBlob";
 
 const lfsContent = "O123456789".repeat(100_000);
 
