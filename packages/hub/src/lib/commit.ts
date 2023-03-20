@@ -14,6 +14,7 @@ import type { Credentials, RepoId } from "../types/public";
 import { base64FromBytes } from "../utils/base64FromBytes";
 import { checkCredentials } from "../utils/checkCredentials";
 import { chunk } from "../utils/chunk";
+import { LazyBlob } from "../utils/LazyBlob";
 import { promisesQueue } from "../utils/promisesQueue";
 import { promisesQueueStreaming } from "../utils/promisesQueueStreaming";
 import { sha256 } from "../utils/sha256";
@@ -27,7 +28,7 @@ export interface CommitDeletedEntry {
 	path: string;
 }
 
-type ContentSource = Blob;
+type ContentSource = Blob | URL;
 
 export interface CommitFile {
 	operation: "addOrUpdate";
@@ -77,6 +78,35 @@ export interface CommitOutput {
 function isFileOperation(op: CommitOperation): op is CommitFile {
 	return op.operation === "addOrUpdate";
 }
+/**
+ * Necessary extend of the Map class to overload `get` method signature and avoid
+ * many useless casts (because `get` original return type is `Blob | undefined`)
+ */
+class FileBlobs extends Map<ContentSource, Blob> {
+	static async createBlobMap(operations: CommitFile[]) {
+		const blobMap = new FileBlobs();
+
+		for (const operation of operations) {
+			if (operation.content instanceof Blob) {
+				blobMap.set(operation.content, operation.content);
+			} else {
+				if (operation.content.protocol !== "file:") {
+					throw TypeError('Only "file://" protocol is supported for now');
+				}
+
+				// Ignore the "file://" beginning and trailing slash
+				const lazyBlob = await LazyBlob.create(operation.content.href.slice(7, operation.content.href.length - 1));
+				blobMap.set(operation.content, lazyBlob);
+			}
+		}
+
+		return blobMap;
+	}
+
+	get(content: ContentSource): Blob {
+		return super.get(content) as Blob;
+	}
+}
 
 /**
  * Internal function for now, used by commit.
@@ -89,6 +119,8 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 
 	const lfsShas = new Map<string, string | null>();
 
+	const blobs = await FileBlobs.createBlobMap(params.operations.filter(isFileOperation));
+
 	const gitAttributes = (
 		params.operations.find((op) => isFileOperation(op) && op.path === ".gitattributes") as CommitFile | undefined
 	)?.content;
@@ -99,8 +131,8 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 			files: await Promise.all(
 				operations.map(async (operation) => ({
 					path: operation.path,
-					size: operation.content.size,
-					sample: base64FromBytes(new Uint8Array(await operation.content.slice(0, 512).arrayBuffer())),
+					size: blobs.get(operation.content).size,
+					sample: base64FromBytes(new Uint8Array(await blobs.get(operation.content).slice(0, 512).arrayBuffer())),
 				}))
 			),
 		};
@@ -142,7 +174,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 
 		const shas = await promisesQueue(
 			operations.map((op) => async () => {
-				const sha = await sha256(op.content);
+				const sha = await sha256(blobs.get(op.content));
 				lfsShas.set(op.path, sha);
 				return sha;
 			}),
@@ -196,9 +228,9 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 				}
 
 				if (obj.error) {
-					const errorMessage = `Error while doing LFS batch call for ${operations[shas.indexOf(obj.oid)].path}: ${
-						obj.error.message
-					}${batchRequestId ? ` - Request ID: ${batchRequestId}` : ""}`;
+					const errorMessage = `ErAsyncGeneratorror while doing LFS batch call for ${
+						operations[shas.indexOf(obj.oid)].path
+					}: ${obj.error.message}${batchRequestId ? ` - Request ID: ${batchRequestId}` : ""}`;
 					throw new ApiError(res.url, obj.error.code, batchRequestId, errorMessage);
 				}
 				if (!obj.actions?.upload) {
@@ -215,7 +247,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 					const completionUrl = obj.actions.upload.href;
 					const parts = Object.keys(header).filter((key) => /^[0-9]+$/.test(key));
 
-					if (parts.length !== Math.ceil(content.size / chunkSize)) {
+					if (parts.length !== Math.ceil(blobs.get(content).size / chunkSize)) {
 						throw new Error("Invalid server response to upload large LFS file, wrong number of parts");
 					}
 
@@ -232,7 +264,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 							const index = parseInt(part) - 1;
 							const res = await fetch(header[part], {
 								method: "PUT",
-								body: content.slice(index * chunkSize, (index + 1) * chunkSize),
+								body: blobs.get(content).slice(index * chunkSize, (index + 1) * chunkSize),
 							});
 
 							if (!res.ok) {
@@ -322,14 +354,14 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 									value: {
 										path: operation.path,
 										algo: "sha256",
-										size: operation.content.size,
+										size: blobs.get(operation.content).size,
 										oid: sha,
 									} satisfies ApiCommitLfsFile,
 								};
 							}
 						}
 
-						return convertOperationToNdJson(operation);
+						return convertOperationToNdJson(blobs, operation);
 					})
 				)) satisfies ApiCommitOperation[]),
 			]
@@ -363,14 +395,14 @@ export async function commit(params: CommitParams): Promise<CommitOutput> {
 	return res.value;
 }
 
-async function convertOperationToNdJson(operation: CommitOperation): Promise<ApiCommitOperation> {
+async function convertOperationToNdJson(blobs: FileBlobs, operation: CommitOperation): Promise<ApiCommitOperation> {
 	switch (operation.operation) {
 		case "addOrUpdate": {
 			// todo: handle LFS
 			return {
 				key: "file",
 				value: {
-					content: base64FromBytes(new Uint8Array(await operation.content.arrayBuffer())),
+					content: base64FromBytes(new Uint8Array(await blobs.get(operation.content).arrayBuffer())),
 					path: operation.path,
 					encoding: "base64",
 				},
