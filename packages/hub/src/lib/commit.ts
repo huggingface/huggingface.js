@@ -104,7 +104,7 @@ class FileBlobs extends Map<ContentSource, Blob> {
 				blobMap.set(operation.content, operation.content);
 			} else {
 				if (operation.content.protocol !== "file:") {
-					throw TypeError('Only "file://" protocol is supported for now');
+					throw TypeError('Only "file://" protocol is supported for URLs');
 				}
 
 				// Ignore the "file://" beginning and trailing slash
