@@ -98,7 +98,8 @@ There are more features of course, check each library's README!
 ```console
 pnpm install
 
-pnpm -r format
+pnpm -r format:check
+pnpm -r lint:check
 pnpm -r test
 ```
 

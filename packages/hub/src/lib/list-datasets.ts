@@ -6,11 +6,16 @@ import type { Credentials } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
 
+const EXPAND_KEYS = ["private", "downloads", "gated", "likes", "lastModified"] satisfies (keyof ApiDatasetInfo)[];
+
 export interface DatasetEntry {
 	id: string;
 	name: string;
 	private: boolean;
 	downloads: number;
+	gated: false | "auto" | "manual";
+	likes: number;
+	updatedAt: Date;
 }
 
 export async function* listDatasets(params?: {
@@ -21,9 +26,13 @@ export async function* listDatasets(params?: {
 	hubUrl?: string;
 }): AsyncGenerator<DatasetEntry> {
 	checkCredentials(params?.credentials);
-	const search = new URLSearchParams({
-		...(params?.search?.owner ? { author: params.search.owner } : undefined),
-	}).toString();
+	const search = new URLSearchParams([
+		...Object.entries({
+			limit: "500",
+			...(params?.search?.owner ? { author: params.search.owner } : undefined),
+		}),
+		...EXPAND_KEYS.map((val) => ["expand", val] satisfies [string, string]),
+	]).toString();
 	let url: string | undefined = `${params?.hubUrl || HUB_URL}/api/datasets` + (search ? "?" + search : "");
 
 	while (url) {
@@ -46,6 +55,9 @@ export async function* listDatasets(params?: {
 				name: item.id,
 				private: item.private,
 				downloads: item.downloads,
+				likes: item.likes,
+				gated: item.gated,
+				updatedAt: new Date(item.lastModified),
 			};
 		}
 
