@@ -1,4 +1,4 @@
-import { isBrowser, isWebWorker } from "./env-predicates";
+import { isFrontend } from "./env-predicates";
 import { hexFromBytes } from "./hexFromBytes";
 
 /**
@@ -14,7 +14,7 @@ export async function sha256(buffer: Blob): Promise<string> {
 		);
 	}
 
-	if (isBrowser || isWebWorker) {
+	if (isFrontend) {
 		if (!wasmModule) {
 			wasmModule = await import("hash-wasm");
 		}
