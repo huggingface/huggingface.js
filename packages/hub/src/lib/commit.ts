@@ -103,10 +103,6 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 					throw new TypeError('Only "file://" protocol is supported for now');
 				}
 
-				if (!isNode) {
-					throw new Error("URls pointing to local files can only be loaded with Node.js");
-				}
-
 				if (!isBackend) {
 					throw new TypeError("File URLs are not supported in browsers");
 				}
