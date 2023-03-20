@@ -1,3 +1,4 @@
+import { isBrowser, isWebWorker } from "./env-predicates";
 import { hexFromBytes } from "./hexFromBytes";
 
 /**
@@ -12,11 +13,6 @@ export async function sha256(buffer: Blob): Promise<string> {
 			)
 		);
 	}
-
-	const isBrowser = typeof window !== "undefined" && typeof window.document !== "undefined";
-
-	const isWebWorker =
-		typeof self === "object" && self.constructor && self.constructor.name === "DedicatedWorkerGlobalScope";
 
 	if (isBrowser || isWebWorker) {
 		if (!wasmModule) {

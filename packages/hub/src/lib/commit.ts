@@ -14,6 +14,7 @@ import type { Credentials, RepoId } from "../types/public";
 import { base64FromBytes } from "../utils/base64FromBytes";
 import { checkCredentials } from "../utils/checkCredentials";
 import { chunk } from "../utils/chunk";
+import { isNode } from "../utils/env-predicates";
 import { promisesQueue } from "../utils/promisesQueue";
 import { promisesQueueStreaming } from "../utils/promisesQueueStreaming";
 import { sha256 } from "../utils/sha256";
@@ -78,46 +79,12 @@ function isFileOperation(op: CommitOperation): op is CommitFile {
 	return op.operation === "addOrUpdate";
 }
 
-const isBrowser = typeof window !== "undefined" && typeof window.document !== "undefined";
-
 /**
  * Fake class to avoid importing LazyBlob in the browser
  */
 class FakeLazyBlob extends Blob {
 	static async create(path: string) {
 		return new Blob([path]);
-	}
-}
-
-/**
- * Necessary extend of the Map class to overload `get` method signature and avoid
- * many useless casts (because `get` original return type is `Blob | undefined`)
- */
-class FileBlobs extends Map<ContentSource, Blob> {
-	static async createBlobMap(operations: CommitFile[]) {
-		const { LazyBlob } = isBrowser ? { LazyBlob: FakeLazyBlob } : await import("../utils/LazyBlob");
-
-		const blobMap = new FileBlobs();
-
-		for (const operation of operations) {
-			if (operation.content instanceof Blob) {
-				blobMap.set(operation.content, operation.content);
-			} else {
-				if (operation.content.protocol !== "file:") {
-					throw TypeError('Only "file://" protocol is supported for now');
-				}
-
-				// Ignore the "file://" beginning and trailing slash
-				const lazyBlob = await LazyBlob.create(operation.content.href.slice(7, operation.content.href.length - 1));
-				blobMap.set(operation.content, lazyBlob);
-			}
-		}
-
-		return blobMap;
-	}
-
-	get(content: ContentSource): Blob {
-		return super.get(content) as Blob;
 	}
 }
 
@@ -132,7 +99,18 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 
 	const lfsShas = new Map<string, string | null>();
 
-	const blobs = await FileBlobs.createBlobMap(params.operations.filter(isFileOperation));
+	const { LazyBlob } = isNode ? await import("../utils/LazyBlob") : { LazyBlob: FakeLazyBlob };
+
+	for (const operation of params.operations) {
+		if (isFileOperation(operation) && operation.content instanceof URL) {
+			if (operation.content.protocol !== "file:") {
+				throw TypeError('Only "file://" protocol is supported for now');
+			}
+
+			// Ignore the "file://" at the beginning and the trailing slash
+			const lazyBlob = await LazyBlob.create(operation.content.href.slice(7, operation.content.href.length - 1));
+		}
+	}
 
 	const gitAttributes = (
 		params.operations.find((op) => isFileOperation(op) && op.path === ".gitattributes") as CommitFile | undefined
@@ -140,12 +118,12 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 
 	for (const operations of chunk(params.operations.filter(isFileOperation), 100)) {
 		const payload: ApiPreuploadRequest = {
-			gitAttributes: gitAttributes && (await blobs.get(gitAttributes).text()),
+			gitAttributes: gitAttributes && (await (gitAttributes as Blob).text()),
 			files: await Promise.all(
 				operations.map(async (operation) => ({
 					path: operation.path,
-					size: blobs.get(operation.content).size,
-					sample: base64FromBytes(new Uint8Array(await blobs.get(operation.content).slice(0, 512).arrayBuffer())),
+					size: (operation.content as Blob).size,
+					sample: base64FromBytes(new Uint8Array(await (operation.content as Blob).slice(0, 512).arrayBuffer())),
 				}))
 			),
 		};
@@ -187,7 +165,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 
 		const shas = await promisesQueue(
 			operations.map((op) => async () => {
-				const sha = await sha256(blobs.get(op.content));
+				const sha = await sha256(op.content as Blob);
 				lfsShas.set(op.path, sha);
 				return sha;
 			}),
@@ -204,7 +182,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 			},
 			objects: operations.map((op, i) => ({
 				oid: shas[i],
-				size: blobs.get(op.content).size,
+				size: (op.content as Blob).size,
 			})),
 		};
 
@@ -260,7 +238,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 					const completionUrl = obj.actions.upload.href;
 					const parts = Object.keys(header).filter((key) => /^[0-9]+$/.test(key));
 
-					if (parts.length !== Math.ceil(blobs.get(content).size / chunkSize)) {
+					if (parts.length !== Math.ceil((content as Blob).size / chunkSize)) {
 						throw new Error("Invalid server response to upload large LFS file, wrong number of parts");
 					}
 
@@ -277,7 +255,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 							const index = parseInt(part) - 1;
 							const res = await fetch(header[part], {
 								method: "PUT",
-								body: blobs.get(content).slice(index * chunkSize, (index + 1) * chunkSize),
+								body: (content as Blob).slice(index * chunkSize, (index + 1) * chunkSize),
 							});
 
 							if (!res.ok) {
@@ -321,7 +299,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 						headers: {
 							...(batchRequestId ? { "X-Request-Id": batchRequestId } : undefined),
 						},
-						body: blobs.get(content),
+						body: content as Blob,
 					});
 
 					if (!res.ok) {
@@ -367,14 +345,14 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 									value: {
 										path: operation.path,
 										algo: "sha256",
-										size: blobs.get(operation.content).size,
+										size: (operation.content as Blob).size,
 										oid: sha,
 									} satisfies ApiCommitLfsFile,
 								};
 							}
 						}
 
-						return convertOperationToNdJson(blobs, operation);
+						return convertOperationToNdJson(operation);
 					})
 				)) satisfies ApiCommitOperation[]),
 			]
@@ -408,14 +386,14 @@ export async function commit(params: CommitParams): Promise<CommitOutput> {
 	return res.value;
 }
 
-async function convertOperationToNdJson(blobs: FileBlobs, operation: CommitOperation): Promise<ApiCommitOperation> {
+async function convertOperationToNdJson(operation: CommitOperation): Promise<ApiCommitOperation> {
 	switch (operation.operation) {
 		case "addOrUpdate": {
 			// todo: handle LFS
 			return {
 				key: "file",
 				value: {
-					content: base64FromBytes(new Uint8Array(await blobs.get(operation.content).arrayBuffer())),
+					content: base64FromBytes(new Uint8Array(await (operation.content as Blob).arrayBuffer())),
 					path: operation.path,
 					encoding: "base64",
 				},
