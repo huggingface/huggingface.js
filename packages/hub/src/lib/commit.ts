@@ -166,14 +166,14 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 
 	yield "uploading to LFS";
 
-	for (const operations of chunk(
-		params.operations.filter(isFileOperation).filter((op) => lfsShas.has(op.path)),
+	for (const operationsChunk of chunk(
+		operations.filter(isFileOperation).filter((op) => lfsShas.has(op.path)),
 		100
 	)) {
-		yield `hashing ${operations.length} files`;
+		yield `hashing ${operationsChunk.length} files`;
 
 		const shas = await promisesQueue(
-			operations.map((op) => async () => {
+			operationsChunk.map((op) => async () => {
 				const sha = await sha256(op.content as Blob);
 				lfsShas.set(op.path, sha);
 				return sha;
@@ -189,7 +189,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 			ref: {
 				name: params.branch ?? "main",
 			},
-			objects: operations.map((op, i) => ({
+			objects: operationsChunk.map((op, i) => ({
 				oid: shas[i],
 				size: (op.content as Blob).size,
 			})),
@@ -217,7 +217,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 		const json: ApiLfsBatchResponse = await res.json();
 		const batchRequestId = res.headers.get("X-Request-Id") || undefined;
 
-		const shaToOperation = new Map(operations.map((op, i) => [shas[i], op]));
+		const shaToOperation = new Map(operationsChunk.map((op, i) => [shas[i], op]));
 
 		await promisesQueueStreaming(
 			json.objects.map((obj) => async () => {
@@ -228,8 +228,8 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 				}
 
 				if (obj.error) {
-					const errorMessage = `ErAsyncGeneratorror while doing LFS batch call for ${
-						operations[shas.indexOf(obj.oid)].path
+					const errorMessage = `Error AsyncGeneratorError while doing LFS batch call for ${
+						operationsChunk[shas.indexOf(obj.oid)].path
 					}: ${obj.error.message}${batchRequestId ? ` - Request ID: ${batchRequestId}` : ""}`;
 					throw new ApiError(res.url, obj.error.code, batchRequestId, errorMessage);
 				}
@@ -271,7 +271,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 								throw await createApiError(res, {
 									requestId: batchRequestId,
 									message: `Error while uploading part ${part} of ${
-										operations[shas.indexOf(obj.oid)].path
+										operationsChunk[shas.indexOf(obj.oid)].path
 									} to LFS storage`,
 								});
 							}
@@ -299,7 +299,9 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 					if (!res.ok) {
 						throw await createApiError(res, {
 							requestId: batchRequestId,
-							message: `Error completing multipart upload of ${operations[shas.indexOf(obj.oid)].path} to LFS storage`,
+							message: `Error completing multipart upload of ${
+								operationsChunk[shas.indexOf(obj.oid)].path
+							} to LFS storage`,
 						});
 					}
 				} else {
@@ -314,7 +316,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 					if (!res.ok) {
 						throw await createApiError(res, {
 							requestId: batchRequestId,
-							message: `Error while uploading ${operations[shas.indexOf(obj.oid)].path} to LFS storage`,
+							message: `Error while uploading ${operationsChunk[shas.indexOf(obj.oid)].path} to LFS storage`,
 						});
 					}
 				}
@@ -345,7 +347,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 					} satisfies ApiCommitHeader,
 				},
 				...((await Promise.all(
-					params.operations.map((operation) => {
+					operations.map((operation) => {
 						if (isFileOperation(operation)) {
 							const sha = lfsShas.get(operation.path);
 							if (sha) {
