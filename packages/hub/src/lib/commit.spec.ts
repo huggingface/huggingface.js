@@ -1,5 +1,7 @@
 import { assert, it, describe } from "vitest";
 
+import { readFileSync } from "fs";
+import { pathToFileURL } from "url";
 import { randomBytes } from "crypto";
 import { HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from "../consts";
 import type { RepoId } from "../types/public";
@@ -56,6 +58,11 @@ describe("commit", () => {
 						path: "package.json",
 					},
 					{
+						operation: "addOrUpdate",
+						content: pathToFileURL("./tsconfig.json"),
+						path: "tsconfig.json",
+					},
+					{
 						operation: "delete",
 						path: "README.md",
 					},
@@ -70,9 +77,13 @@ describe("commit", () => {
 			assert.strictEqual(lfsFileContent?.status, 200);
 			assert.strictEqual(await lfsFileContent?.text(), lfsContent);
 
-			const packageJsonContent = await downloadFile({ repo, path: "package.json" });
-			assert.strictEqual(packageJsonContent?.status, 200);
-			assert.strictEqual(await packageJsonContent?.text(), await lazyBlob.text());
+			const lazyBlobContent = await downloadFile({ repo, path: "package.json" });
+			assert.strictEqual(lazyBlobContent?.status, 200);
+			assert.strictEqual(await lazyBlobContent?.text(), await lazyBlob.text());
+
+			const fileUrlContent = await downloadFile({ repo, path: "tsconfig.json" });
+			assert.strictEqual(fileUrlContent?.status, 200);
+			assert.strictEqual(await fileUrlContent?.text(), readFileSync("./tsconfig.json", "utf-8"));
 
 			const lfsFilePointer = await fetch(`${HUB_URL}/${repoName}/raw/main/test.lfs.txt`);
 			assert.strictEqual(lfsFilePointer.status, 200);

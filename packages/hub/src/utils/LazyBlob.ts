@@ -2,6 +2,7 @@ import { createReadStream } from "node:fs";
 import { open, stat } from "node:fs/promises";
 import { Readable } from "node:stream";
 import type { FileHandle } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 
 /**
  * @internal
@@ -24,7 +25,9 @@ export class LazyBlob extends Blob {
 	 *
 	 * @param path Path to the file to be lazy readed
 	 */
-	static async create(path: string): Promise<LazyBlob> {
+	static async create(path: string | URL): Promise<LazyBlob> {
+		path = path instanceof URL ? fileURLToPath(path) : path;
+
 		const { size } = await stat(path);
 
 		const lazyBlob = new LazyBlob(path, 0, size);
@@ -49,14 +52,6 @@ export class LazyBlob extends Blob {
 	 */
 	get size(): number {
 		return this.end - this.start;
-	}
-
-	/**
-	 * Returns an empty string.
-	 * (This is a required property of the Blob class)
-	 */
-	get type(): string {
-		return "";
 	}
 
 	/**

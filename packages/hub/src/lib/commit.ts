@@ -14,6 +14,7 @@ import type { Credentials, RepoId } from "../types/public";
 import { base64FromBytes } from "../utils/base64FromBytes";
 import { checkCredentials } from "../utils/checkCredentials";
 import { chunk } from "../utils/chunk";
+import { isBackend } from "../utils/env-predicates";
 import { promisesQueue } from "../utils/promisesQueue";
 import { promisesQueueStreaming } from "../utils/promisesQueueStreaming";
 import { sha256 } from "../utils/sha256";
@@ -27,7 +28,7 @@ export interface CommitDeletedEntry {
 	path: string;
 }
 
-type ContentSource = Blob;
+type ContentSource = Blob | URL;
 
 export interface CommitFile {
 	operation: "addOrUpdate";
@@ -35,6 +36,8 @@ export interface CommitFile {
 	content: ContentSource;
 	// forceLfs?: boolean
 }
+
+type CommitBlob = Omit<CommitFile, "content"> & { content: Blob };
 
 // TODO: find a nice way to handle LFS & non-LFS files in an uniform manner, see https://github.com/huggingface/moon-landing/issues/4370
 // export type CommitRenameFile = {
@@ -45,6 +48,7 @@ export interface CommitFile {
 // };
 
 export type CommitOperation = CommitDeletedEntry | CommitFile /* | CommitRenameFile */;
+type CommitBlobOperation = Exclude<CommitOperation, CommitFile> | CommitBlob;
 
 export interface CommitParams {
 	title: string;
@@ -74,8 +78,14 @@ export interface CommitOutput {
 	hookOutput: string;
 }
 
-function isFileOperation(op: CommitOperation): op is CommitFile {
-	return op.operation === "addOrUpdate";
+function isFileOperation(op: CommitOperation): op is CommitBlob {
+	const ret = op.operation === "addOrUpdate";
+
+	if (ret && !(op.content instanceof Blob)) {
+		throw new TypeError("Precondition failed: op.content should be a Blob");
+	}
+
+	return ret;
 }
 
 /**
@@ -89,11 +99,39 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 
 	const lfsShas = new Map<string, string | null>();
 
-	const gitAttributes = (
-		params.operations.find((op) => isFileOperation(op) && op.path === ".gitattributes") as CommitFile | undefined
-	)?.content;
+	const allOperations = await Promise.all(
+		params.operations.map(async (operation) => {
+			if (operation.operation !== "addOrUpdate") {
+				return operation;
+			}
 
-	for (const operations of chunk(params.operations.filter(isFileOperation), 100)) {
+			if (!(operation.content instanceof URL)) {
+				/** TS trick to enforce `content` to be a `Blob` */
+				return { ...operation, content: operation.content };
+			}
+
+			if (operation.content.protocol !== "file:") {
+				throw new TypeError('Only "file://" protocol is supported for now');
+			}
+
+			if (!isBackend) {
+				throw new TypeError("File URLs are not supported in browsers");
+			}
+
+			const { LazyBlob } = await import("../utils/LazyBlob");
+
+			const lazyBlob = await LazyBlob.create(operation.content);
+
+			return {
+				...operation,
+				content: lazyBlob,
+			};
+		})
+	);
+
+	const gitAttributes = allOperations.filter(isFileOperation).find((op) => op.path === ".gitattributes")?.content;
+
+	for (const operations of chunk(allOperations.filter(isFileOperation), 100)) {
 		const payload: ApiPreuploadRequest = {
 			gitAttributes: gitAttributes && (await gitAttributes.text()),
 			files: await Promise.all(
@@ -135,7 +173,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 	yield "uploading to LFS";
 
 	for (const operations of chunk(
-		params.operations.filter(isFileOperation).filter((op) => lfsShas.has(op.path)),
+		allOperations.filter(isFileOperation).filter((op) => lfsShas.has(op.path)),
 		100
 	)) {
 		yield `hashing ${operations.length} files`;
@@ -313,7 +351,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 					} satisfies ApiCommitHeader,
 				},
 				...((await Promise.all(
-					params.operations.map((operation) => {
+					allOperations.map((operation) => {
 						if (isFileOperation(operation)) {
 							const sha = lfsShas.get(operation.path);
 							if (sha) {
@@ -363,7 +401,7 @@ export async function commit(params: CommitParams): Promise<CommitOutput> {
 	return res.value;
 }
 
-async function convertOperationToNdJson(operation: CommitOperation): Promise<ApiCommitOperation> {
+async function convertOperationToNdJson(operation: CommitBlobOperation): Promise<ApiCommitOperation> {
 	switch (operation.operation) {
 		case "addOrUpdate": {
 			// todo: handle LFS
