@@ -3,6 +3,7 @@ import { TextDecoder } from "node:util";
 import { describe, expect, it } from "vitest";
 import { pathToFileURL } from "url";
 import { LazyBlob } from "./LazyBlob";
+import { resolve } from "node:path";
 
 describe("LazyBlob", () => {
 	it("should create a LazyBlob with a slice on the entire file", async () => {
@@ -10,6 +11,12 @@ describe("LazyBlob", () => {
 		const { size } = await stat("package.json");
 
 		const lazyBlob = await LazyBlob.create(pathToFileURL("package.json"));
+
+		expect(lazyBlob).toMatchObject({
+			path: resolve("package.json"),
+			start: 0,
+			end: size,
+		});
 
 		expect(lazyBlob.size).toBe(size);
 		expect(lazyBlob.type).toBe("");
@@ -25,6 +32,12 @@ describe("LazyBlob", () => {
 		const lazyBlob = await LazyBlob.create(pathToFileURL("package.json"));
 
 		const slice = lazyBlob.slice(10, 20);
+
+		expect(slice).toMatchObject({
+			path: resolve("package.json"),
+			start: 10,
+			end: 20,
+		});
 
 		expect(slice.size).toBe(10);
 		const sliceText = await slice.text();
