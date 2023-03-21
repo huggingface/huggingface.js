@@ -134,12 +134,12 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 
 	for (const operations of chunk(allOperations.filter(isFileOperation), 100)) {
 		const payload: ApiPreuploadRequest = {
-			gitAttributes: gitAttributes && (await (gitAttributes as Blob).text()),
+			gitAttributes: gitAttributes && (await gitAttributes.text()),
 			files: await Promise.all(
 				operations.map(async (operation) => ({
 					path: operation.path,
-					size: (operation.content as Blob).size,
-					sample: base64FromBytes(new Uint8Array(await (operation.content as Blob).slice(0, 512).arrayBuffer())),
+					size: operation.content.size,
+					sample: base64FromBytes(new Uint8Array(await operation.content.slice(0, 512).arrayBuffer())),
 				}))
 			),
 		};
