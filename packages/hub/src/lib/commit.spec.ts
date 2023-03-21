@@ -32,7 +32,7 @@ describe("commit", () => {
 		const readme1 = await downloadFile({ repo, path: "README.md" });
 		assert.strictEqual(readme1?.status, 200);
 
-		const lazyBlob = await LazyBlob.create(pathToFileURL("./package.json"));
+		const lazyBlob = await LazyBlob.create("./package.json");
 
 		try {
 			await commit({
@@ -59,7 +59,7 @@ describe("commit", () => {
 					},
 					{
 						operation: "addOrUpdate",
-						content: new URL("file://tsconfig.json"),
+						content: pathToFileURL("./tsconfig.json"),
 						path: "tsconfig.json",
 					},
 					{

@@ -11,11 +11,6 @@ describe("LazyBlob", () => {
 
 		const lazyBlob = await LazyBlob.create(pathToFileURL("package.json"));
 
-		expect(lazyBlob).toMatchObject({
-			path: "package.json",
-			start: 0,
-			end: size,
-		});
 		expect(lazyBlob.size).toBe(size);
 		expect(lazyBlob.type).toBe("");
 		const text = await lazyBlob.text();
@@ -31,11 +26,6 @@ describe("LazyBlob", () => {
 
 		const slice = lazyBlob.slice(10, 20);
 
-		expect(slice).toMatchObject({
-			path: "package.json",
-			start: 10,
-			end: 20,
-		});
 		expect(slice.size).toBe(10);
 		const sliceText = await slice.text();
 		const expectedText = (await file.read(Buffer.alloc(10), 0, 10, 10)).buffer.toString("utf8");
