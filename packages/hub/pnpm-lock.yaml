@@ -10,12 +10,12 @@ specifiers:
 
 dependencies:
   hash-wasm: 4.9.0
+  type-fest: 3.5.6
 
 devDependencies:
   '@types/node': 18.13.0
   ts-node: 10.9.1_4bewfcp2iebiwuold25d6rgcsy
   tsup: 6.6.3_6qtx7vkbdhwvdm4crzlegk4mvi
-  type-fest: 3.5.6
   typescript: 4.9.5
 
 packages:
@@ -917,7 +917,7 @@ packages:
   /type-fest/3.5.6:
     resolution: {integrity: sha512-6bd2bflx8ed7c99tc6zSTIzHr1/QG29bQoK4Qh8MYGnlPbODUzGxklLShjwc/xWQQFHgIci+y5Arv7Rbb0LjXw==}
     engines: {node: '>=14.16'}
-    dev: true
+    dev: false
 
   /typescript/4.9.5:
     resolution: {integrity: sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==}

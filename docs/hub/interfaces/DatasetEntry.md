@@ -8,7 +8,7 @@
 
 #### Defined in
 
-[hub/src/lib/list-datasets.ts:15](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-datasets.ts#L15)
+[hub/src/lib/list-datasets.ts:14](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-datasets.ts#L14)
 
 ___
 
@@ -18,7 +18,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/list-datasets.ts:16](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-datasets.ts#L16)
+[hub/src/lib/list-datasets.ts:15](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-datasets.ts#L15)
 
 ___
 
@@ -28,7 +28,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/list-datasets.ts:12](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-datasets.ts#L12)
+[hub/src/lib/list-datasets.ts:11](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-datasets.ts#L11)
 
 ___
 
@@ -38,7 +38,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/list-datasets.ts:17](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-datasets.ts#L17)
+[hub/src/lib/list-datasets.ts:16](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-datasets.ts#L16)
 
 ___
 
@@ -48,7 +48,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/list-datasets.ts:13](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-datasets.ts#L13)
+[hub/src/lib/list-datasets.ts:12](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-datasets.ts#L12)
 
 ___
 
@@ -58,7 +58,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/list-datasets.ts:14](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-datasets.ts#L14)
+[hub/src/lib/list-datasets.ts:13](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-datasets.ts#L13)
 
 ___
 
@@ -68,4 +68,4 @@ ___
 
 #### Defined in
 
-[hub/src/lib/list-datasets.ts:18](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-datasets.ts#L18)
+[hub/src/lib/list-datasets.ts:17](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-datasets.ts#L17)
