@@ -101,32 +101,31 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 
 	const allOperations = await Promise.all(
 		params.operations.map(async (operation) => {
-			if (operation.operation === "addOrUpdate") {
-				if (operation.content instanceof URL) {
-					if (operation.content.protocol !== "file:") {
-						throw new TypeError('Only "file://" protocol is supported for now');
-					}
+			if (operation.operation !== "addOrUpdate") {
+				return operation;
+			}
 
-					if (!isBackend) {
-						throw new TypeError("File URLs are not supported in browsers");
-					}
-
-					const { LazyBlob } = await import("../utils/LazyBlob");
-
-					// Ignore the "file://" at the beginning and the trailing slash
-					const lazyBlob = await LazyBlob.create(operation.content);
-
-					return {
-						...operation,
-						content: lazyBlob,
-					};
-				}
-
-				/** Destructuring needed for TS to infer precise type */
+			if (!(operation.content instanceof URL)) {
+				/** TS trick to enforce `content` to be a `Blob` */
 				return { ...operation, content: operation.content };
 			}
 
-			return operation;
+			if (operation.content.protocol !== "file:") {
+				throw new TypeError('Only "file://" protocol is supported for now');
+			}
+
+			if (!isBackend) {
+				throw new TypeError("File URLs are not supported in browsers");
+			}
+
+			const { LazyBlob } = await import("../utils/LazyBlob");
+
+			const lazyBlob = await LazyBlob.create(operation.content);
+
+			return {
+				...operation,
+				content: lazyBlob,
+			};
 		})
 	);
 
@@ -235,9 +234,9 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 				}
 
 				if (obj.error) {
-					const errorMessage = `Error AsyncGeneratorError while doing LFS batch call for ${
-						operations[shas.indexOf(obj.oid)].path
-					}: ${obj.error.message}${batchRequestId ? ` - Request ID: ${batchRequestId}` : ""}`;
+					const errorMessage = `Error while doing LFS batch call for ${operations[shas.indexOf(obj.oid)].path}: ${
+						obj.error.message
+					}${batchRequestId ? ` - Request ID: ${batchRequestId}` : ""}`;
 					throw new ApiError(res.url, obj.error.code, batchRequestId, errorMessage);
 				}
 				if (!obj.actions?.upload) {
