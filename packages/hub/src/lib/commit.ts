@@ -132,11 +132,11 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 
 	const gitAttributes = allOperations.filter(isFileOperation).find((op) => op.path === ".gitattributes")?.content;
 
-	for (const operationsChunk of chunk(allOperations.filter(isFileOperation), 100)) {
+	for (const operations of chunk(allOperations.filter(isFileOperation), 100)) {
 		const payload: ApiPreuploadRequest = {
 			gitAttributes: gitAttributes && (await (gitAttributes as Blob).text()),
 			files: await Promise.all(
-				operationsChunk.map(async (operation) => ({
+				operations.map(async (operation) => ({
 					path: operation.path,
 					size: (operation.content as Blob).size,
 					sample: base64FromBytes(new Uint8Array(await (operation.content as Blob).slice(0, 512).arrayBuffer())),
