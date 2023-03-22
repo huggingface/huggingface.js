@@ -109,10 +109,10 @@ export class LazyBlob extends Blob {
 	private async execute<T>(action: (file: FileHandle) => Promise<T>) {
 		const file = await open(this.path, "r");
 
-		const ret = await action(file);
-
-		await file.close();
-
-		return ret;
+		try {
+			return await action(file);
+		} finally {
+			await file.close();
+		}
 	}
 }
