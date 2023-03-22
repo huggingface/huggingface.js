@@ -49,15 +49,11 @@ jobs:
         run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] type-check
 
       - name: Test
-        run: |
-          [ -z "$HF_ACCESS_TOKEN" ] && export VCR_MODE="playback" || export VCR_MODE="disabled"
-          pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test:ci
+        run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test:ci
         env:
           HF_ACCESS_TOKEN: ${{ secrets.HF_ACCESS_TOKEN }}
 
       - name: Test in browser
-        run: |
-          [ -z "$HF_ACCESS_TOKEN" ] && export VCR_MODE="playback" || export VCR_MODE="disabled"
-          pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test:browser
+        run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test:browser
         env:
           HF_ACCESS_TOKEN: ${{ secrets.HF_ACCESS_TOKEN }}

@@ -1,14 +1,24 @@
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 
-const VCR_MODE = process.env.VCR_MODE;
-if (VCR_MODE) {
-	const originalFetch = global.fetch;
+let VCR_MODE;
 
-	global.fetch = (...args) => {
-		return vcr(originalFetch, args[0], args[1]);
-	};
+/**
+ * Allows to record tapes with a token to avoid rate limite.
+ *
+ * If VCR_MODE is not set and a token is present then disable it.
+ */
+if (process.env.VCR_MODE) {
+	VCR_MODE = process.env.VCR_MODE;
+} else {
+	VCR_MODE = process.env.HF_ACCESS_TOKEN ? "disabled" : "playback";
 }
+
+const originalFetch = global.fetch;
+
+global.fetch = (...args) => {
+	return vcr(originalFetch, args[0], args[1]);
+};
 const tapesDirectory = "test/tapes";
 
 mkdirSync(tapesDirectory, { recursive: true });
