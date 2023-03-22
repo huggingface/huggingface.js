@@ -1,8 +1,9 @@
 import { assert, it, describe } from "vitest";
 
-import { readFileSync } from "fs";
-import { pathToFileURL } from "url";
-import { randomBytes } from "crypto";
+import { readFileSync } from "node:fs";
+import { pathToFileURL } from "node:url";
+import { randomBytes } from "node:crypto";
+
 import { HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from "../consts";
 import type { RepoId } from "../types/public";
 import { commit } from "./commit";
