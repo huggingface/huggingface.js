@@ -1,6 +1,6 @@
 {
 	"name": "@huggingface/hub",
-	"version": "0.2.0",
+	"version": "0.2.2",
 	"description": "Utilities to interact with the Hugging Face hub",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {
@@ -28,7 +28,7 @@
 		"prepublishOnly": "npm run build",
 		"build": "tsup src/index.ts --format cjs,esm --clean",
 		"test": "vitest run",
-		"test:ci": "pnpm run test -- --coverage",
+		"test:browser": "vitest run --browser.name=chrome --browser.headless --config ./vitest-browser.config.ts",
 		"type-check": "tsc"
 	},
 	"files": [
@@ -51,10 +51,10 @@
 		"@types/node": "^18.13.0",
 		"ts-node": "^10.9.1",
 		"tsup": "^6.6.3",
-		"type-fest": "^3.5.6",
 		"typescript": "^4.9.5"
 	},
 	"dependencies": {
-		"hash-wasm": "^4.9.0"
+		"hash-wasm": "^4.9.0",
+		"type-fest": "^3.5.6"
 	}
 }
