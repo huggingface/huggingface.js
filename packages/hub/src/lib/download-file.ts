@@ -24,38 +24,13 @@ export async function downloadFile(params: {
 		params.repo.name
 	}/${params.raw ? "raw" : "resolve"}/${encodeURIComponent(params.revision ?? "main")}/${params.path}`;
 
-	let resp = await fetch(url, {
+	const resp = await fetch(url, {
 		headers: params.credentials
 			? {
 					Authorization: `Bearer ${params.credentials.accessToken}`,
 			  }
 			: {},
 	});
-
-	// On browser we need to do the redirects ourselves
-	let redirects = 0;
-	while (resp.status >= 300 && resp.status < 400) {
-		if (++redirects >= 20) {
-			throw new Error("Too many redirects");
-		}
-
-		const newUrl = resp.headers.get("Location");
-
-		if (!newUrl) {
-			throw new Error("Being redirected without specifying URL");
-		}
-
-		const useCredentials = new URL(newUrl).host === new URL(url).host;
-
-		resp = await fetch(newUrl, {
-			headers:
-				useCredentials && params.credentials
-					? {
-							Authorization: `Bearer ${params.credentials.accessToken}`,
-					  }
-					: {},
-		});
-	}
 
 	if (resp.status === 404 && resp.headers.get("X-Error-Code") === "EntryNotFound") {
 		return null;
