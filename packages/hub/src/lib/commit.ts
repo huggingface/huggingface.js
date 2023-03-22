@@ -118,13 +118,13 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 				throw new TypeError("File URLs are not supported in browsers");
 			}
 
-			const { LazyBlob } = await import("../utils/LazyBlob");
+			const { FileBlob } = await import("../utils/FileBlob");
 
-			const lazyBlob = await LazyBlob.create(operation.content);
+			const fileBlob = await FileBlob.create(operation.content);
 
 			return {
 				...operation,
-				content: lazyBlob,
+				content: fileBlob,
 			};
 		})
 	);
