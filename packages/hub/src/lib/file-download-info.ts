@@ -32,66 +32,38 @@ export async function fileDownloadInfo(params: {
 	noContentDisposition?: boolean;
 }): Promise<FileDownloadInfoOutput | null> {
 	checkCredentials(params.credentials);
+
+	const hubUrl = params.hubUrl ?? HUB_URL;
 	const url =
-		`${params.hubUrl ?? HUB_URL}/${params.repo.type === "model" ? "" : `${params.repo.type}s/`}${params.repo.name}/${
+		`${hubUrl}/${params.repo.type === "model" ? "" : `${params.repo.type}s/`}${params.repo.name}/${
 			params.raw ? "raw" : "resolve"
 		}/${encodeURIComponent(params.revision ?? "main")}/${params.path}` +
 		(params.noContentDisposition ? "?noContentDisposition=1" : "");
 
-	let resp = await fetch(url, {
+	const resp = await fetch(url, {
 		method: "HEAD",
 		headers: params.credentials
 			? {
 					Authorization: `Bearer ${params.credentials.accessToken}`,
 			  }
 			: {},
-		redirect: "manual",
 	});
-
-	let redirects = 0;
-	while (
-		resp.status >= 300 &&
-		resp.status < 400 &&
-		new URL(resp.headers.get("Location") ?? "http://example.com").host === new URL(url).host
-	) {
-		if (++redirects >= 20) {
-			throw new Error("Too many redirects");
-		}
-
-		resp = await fetch(url, {
-			method: "HEAD",
-			headers: params.credentials
-				? {
-						Authorization: `Bearer ${params.credentials.accessToken}`,
-				  }
-				: {},
-			redirect: "manual",
-		});
-	}
 
 	if (resp.status === 404 && resp.headers.get("X-Error-Code") === "EntryNotFound") {
 		return null;
 	}
 
-	let isLfs = false;
-
-	if (resp.status >= 300 && resp.status < 400) {
-		if (resp.headers.has("X-Linked-Size")) {
-			isLfs = true;
-		} else {
-			throw new Error("Invalid response from server: redirect to external server should have X-Linked-Size header");
-		}
-	} else if (!resp.ok) {
+	if (!resp.ok) {
 		throw await createApiError(resp);
 	}
 
-	const etag = isLfs ? resp.headers.get("X-Linked-ETag") : resp.headers.get("ETag");
+	const etag = resp.headers.get("ETag");
 
 	if (!etag) {
 		throw new InvalidApiResponseFormatError("Expected ETag");
 	}
 
-	const sizeHeader = isLfs ? resp.headers.get("X-Linked-Size") : resp.headers.get("Content-Length");
+	const sizeHeader = resp.headers.get("Content-Length");
 
 	if (!sizeHeader) {
 		throw new InvalidApiResponseFormatError("Expected size information");
@@ -106,6 +78,6 @@ export async function fileDownloadInfo(params: {
 	return {
 		etag,
 		size,
-		downloadLink: isLfs ? resp.headers.get("Location") : null,
+		downloadLink: new URL(resp.url).hostname !== new URL(hubUrl).hostname ? resp.url : null,
 	};
 }

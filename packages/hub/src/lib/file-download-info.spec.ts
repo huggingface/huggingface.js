@@ -14,7 +14,7 @@ describe("fileDownloadInfo", () => {
 		});
 
 		assert.strictEqual(info?.size, 536063208);
-		assert.strictEqual(info?.etag, '"a7a17d6d844b5de815ccab5f42cad6d24496db3850a2a43d8258221018ce87d2"');
+		assert.strictEqual(info?.etag, '"41a0e56472bad33498744818c8b1ef2c-64"');
 		assert(info?.downloadLink);
 	});
 
