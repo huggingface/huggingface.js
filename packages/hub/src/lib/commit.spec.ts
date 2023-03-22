@@ -1,22 +1,20 @@
 import { assert, it, describe } from "vitest";
 
-import { readFileSync } from "node:fs";
-import { pathToFileURL } from "node:url";
-import { randomBytes } from "node:crypto";
-
 import { HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from "../consts";
 import type { RepoId } from "../types/public";
+import type { CommitFile } from "./commit";
 import { commit } from "./commit";
 import { createRepo } from "./create-repo";
 import { deleteRepo } from "./delete-repo";
 import { downloadFile } from "./download-file";
-import { LazyBlob } from "../utils/LazyBlob";
+import { isFrontend } from "../utils/env-predicates";
+import { insecureRandomString } from "../utils/insecureRandomString";
 
 const lfsContent = "O123456789".repeat(100_000);
 
 describe("commit", () => {
 	it("should commit to a repo with blobs", async function () {
-		const repoName = `${TEST_USER}/TEST-${randomBytes(10).toString("hex")}`;
+		const repoName = `${TEST_USER}/TEST-${insecureRandomString()}`;
 		const repo: RepoId = {
 			name: repoName,
 			type: "model",
@@ -33,7 +31,15 @@ describe("commit", () => {
 		const readme1 = await downloadFile({ repo, path: "README.md" });
 		assert.strictEqual(readme1?.status, 200);
 
-		const lazyBlob = await LazyBlob.create("./package.json");
+		const nodeOperation: CommitFile[] = isFrontend
+			? []
+			: [
+					{
+						operation: "addOrUpdate",
+						path: "tsconfig.json",
+						content: (await import("node:url")).pathToFileURL("./tsconfig.json"),
+					},
+			  ];
 
 		try {
 			await commit({
@@ -53,16 +59,7 @@ describe("commit", () => {
 						content: new Blob([lfsContent]),
 						path: "test.lfs.txt",
 					},
-					{
-						operation: "addOrUpdate",
-						content: lazyBlob,
-						path: "package.json",
-					},
-					{
-						operation: "addOrUpdate",
-						content: pathToFileURL("./tsconfig.json"),
-						path: "tsconfig.json",
-					},
+					...nodeOperation,
 					{
 						operation: "delete",
 						path: "README.md",
@@ -78,13 +75,14 @@ describe("commit", () => {
 			assert.strictEqual(lfsFileContent?.status, 200);
 			assert.strictEqual(await lfsFileContent?.text(), lfsContent);
 
-			const lazyBlobContent = await downloadFile({ repo, path: "package.json" });
-			assert.strictEqual(lazyBlobContent?.status, 200);
-			assert.strictEqual(await lazyBlobContent?.text(), await lazyBlob.text());
-
-			const fileUrlContent = await downloadFile({ repo, path: "tsconfig.json" });
-			assert.strictEqual(fileUrlContent?.status, 200);
-			assert.strictEqual(await fileUrlContent?.text(), readFileSync("./tsconfig.json", "utf-8"));
+			if (!isFrontend) {
+				const fileUrlContent = await downloadFile({ repo, path: "tsconfig.json" });
+				assert.strictEqual(fileUrlContent?.status, 200);
+				assert.strictEqual(
+					await fileUrlContent?.text(),
+					(await import("node:fs")).readFileSync("./tsconfig.json", "utf-8")
+				);
+			}
 
 			const lfsFilePointer = await fetch(`${HUB_URL}/${repoName}/raw/main/test.lfs.txt`);
 			assert.strictEqual(lfsFilePointer.status, 200);
