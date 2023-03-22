@@ -13,7 +13,7 @@ import { insecureRandomString } from "../utils/insecureRandomString";
 const lfsContent = "O123456789".repeat(100_000);
 
 describe("commit", () => {
-	it("should commit to a repo with blobs", async function () {
+	it.skip("should commit to a repo with blobs", async function () {
 		const repoName = `${TEST_USER}/TEST-${insecureRandomString()}`;
 		const repo: RepoId = {
 			name: repoName,

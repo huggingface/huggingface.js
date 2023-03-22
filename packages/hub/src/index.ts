@@ -16,3 +16,4 @@ export type {
 	Task,
 } from "./types/public";
 export { ApiError, InvalidApiResponseFormatError } from "./error";
+export * from "./utils/WebBlob";

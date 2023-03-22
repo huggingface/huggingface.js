@@ -19,7 +19,7 @@ export async function createRepo(params: {
 	hubUrl?: string;
 }): Promise<{ repoUrl: string }> {
 	checkCredentials(params.credentials);
-	const [namespace, repoName] = params.repo.name.split("/");
+	const [namespace, repoName] = params.repo.name.split.skip("/");
 
 	if (!namespace || !repoName) {
 		throw new TypeError(

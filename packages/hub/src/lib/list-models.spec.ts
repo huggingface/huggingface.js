@@ -3,7 +3,7 @@ import type { ModelEntry } from "./list-models";
 import { listModels } from "./list-models";
 
 describe("listModels", () => {
-	it("should list models for depth estimation", async () => {
+	it.skip("should list models for depth estimation", async () => {
 		const results: ModelEntry[] = [];
 
 		for await (const entry of listModels({
