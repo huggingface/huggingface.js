@@ -14,6 +14,8 @@ if (process.env.VCR_MODE) {
 	VCR_MODE = process.env.HF_ACCESS_TOKEN ? "disabled" : "playback";
 }
 
+console.log(`VCR_MODE: ${VCR_MODE}`);
+
 const originalFetch = global.fetch;
 
 global.fetch = (...args) => {
