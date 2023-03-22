@@ -4,6 +4,8 @@ import { HfInference } from "../src";
 import { readFileSync } from "fs";
 import { join } from "path";
 import { fileURLToPath } from "url";
+import "./vcr";
+
 const dir = fileURLToPath(new URL(".", import.meta.url));
 const TIMEOUT = 60000 * 3;
 
