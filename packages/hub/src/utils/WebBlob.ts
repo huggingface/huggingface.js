@@ -69,9 +69,3 @@ export class WebBlob {
 		});
 	}
 }
-
-fetch(new URL("https://huggingface.co/spaces/aschen/push-model-from-web/raw/main/mobilenet/model.json"), {
-	method: "HEAD",
-}).then((response) => {
-	console.log(response.headers.get("accept-ranges"));
-});
