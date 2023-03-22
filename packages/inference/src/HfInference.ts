@@ -1,3 +1,5 @@
+import { toArray } from "./utils";
+
 export interface Options {
 	/**
 	 * (Default: true) Boolean. If a request 503s and wait_for_model is set to false, the request will be retried with the same parameters but with wait_for_model set to true.
@@ -561,7 +563,7 @@ export class HfInference {
 		args: TokenClassificationArgs,
 		options?: Options
 	): Promise<TokenClassificationReturn> {
-		return HfInference.toArray(await this.request(args, options));
+		return toArray(await this.request(args, options));
 	}
 
 	/**
@@ -578,7 +580,7 @@ export class HfInference {
 		args: ZeroShotClassificationArgs,
 		options?: Options
 	): Promise<ZeroShotClassificationReturn> {
-		return HfInference.toArray(
+		return toArray(
 			await this.request<ZeroShotClassificationReturnValue | ZeroShotClassificationReturnValue[]>(args, options)
 		);
 	}
@@ -726,12 +728,5 @@ export class HfInference {
 			throw new Error(output.error);
 		}
 		return output;
-	}
-
-	private static toArray<T>(obj: T): T extends unknown[] ? T : T[] {
-		if (Array.isArray(obj)) {
-			return obj as T extends unknown[] ? T : T[];
-		}
-		return [obj] as T extends unknown[] ? T : T[];
 	}
 }
