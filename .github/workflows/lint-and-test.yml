@@ -52,3 +52,8 @@ jobs:
         run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test:ci
         env:
           HF_ACCESS_TOKEN: ${{ secrets.HF_ACCESS_TOKEN }}
+
+      - name: Test in browser
+        run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test:ci -- --browser.name=chrome --browser.headless
+        env:
+          HF_ACCESS_TOKEN: ${{ secrets.HF_ACCESS_TOKEN }}
