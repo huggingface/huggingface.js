@@ -52,7 +52,25 @@ await deleteRepo({ repo, credentials });
 
 When uploading large files, you may want to run the `commit` calls inside a worker, to offload the sha256 computations.
 
-Also, use `Blob` to avoid loading the whole files in RAM. In `Node`, it's up to you to provide a smart `Blob` wrapper around your file. Feel free to open an issue if you want *us* to provide the smart `Blob` implementation. If you use `Bun`, `Bun.File` is already a smart blob implementation and can be used directly!
+Also, use `Blob` to avoid loading the whole files in RAM. In `Node`, you can use a local `URL` for loading large files: 
+
+```ts
+import { pathToFileURL } from "node:url";
+
+await commit({
+  repo,
+  credentials,
+  operations: [
+    {
+      operation: "addOrUpdate",
+      path: 'large-file.bin',
+      content: pathToFileURL("./large-file.bin"),
+    },
+  ],
+});
+```
+
+Under the hood, `@huggingface/hub` uses a lazy blob implementation to load the file.
 
 ## Dependencies
 
