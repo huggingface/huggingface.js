@@ -8,12 +8,12 @@
 	},
 	"main": "./dist/index.js",
 	"module": "./dist/index.mjs",
-	"types": "index.ts",
+	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
 			"require": "./dist/index.js",
 			"import": "./dist/index.mjs",
-			"types": "./index.ts"
+			"types": "./dist/index.d.ts"
 		}
 	},
 	"engines": {
@@ -26,7 +26,7 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"prepublishOnly": "npm run build",
-		"build": "tsup src/index.ts --format cjs,esm --clean",
+		"build": "tsup src/index.ts --format cjs,esm --clean --dts-resolve",
 		"test": "vitest run",
 		"test:browser": "vitest run --browser.name=chrome --browser.headless --config ./vitest-browser.config.ts",
 		"type-check": "tsc"
