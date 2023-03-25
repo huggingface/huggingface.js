@@ -1,15 +1,15 @@
-import { writeFileSync } from "fs";
 import { describe, expect, it } from "vitest";
 import { WebBlob } from "./WebBlob";
 
-describe("WebBlob", () => {
+describe("WebBlob", async () => {
 	const resourceUrl = new URL("https://huggingface.co/spaces/aschen/push-model-from-web/raw/main/mobilenet/model.json");
 
-	it.only("should create a WebBlob with a slice on the entire resource", async () => {
-		const response = await fetch(resourceUrl, { method: "HEAD" });
-		const size = Number(response.headers.get("content-length"));
-		const contentType = response.headers.get("content-type") || "";
+	const response = await fetch(resourceUrl, { method: "HEAD" });
+	const size = Number(response.headers.get("content-length"));
+	const contentType = response.headers.get("content-type") || "";
+	const fullText = await (await fetch(resourceUrl)).text();
 
+	it("should create a WebBlob with a slice on the entire resource", async () => {
 		const webBlob = await WebBlob.create(resourceUrl);
 
 		expect(webBlob).toMatchObject({
@@ -18,33 +18,34 @@ describe("WebBlob", () => {
 			end: size,
 			contentType,
 		});
-		// expect(webBlob.size).toBe(size);
-		// expect(webBlob.type).toBe(contentType);
+		expect(webBlob.size).toBe(size);
+		expect(webBlob.type).toBe(contentType);
 
-		// const text = await webBlob.text();
-		// const expectedText = await (await fetch(resourceUrl)).text();
-		// expect(text).toBe(expectedText);
+		const text = await webBlob.text();
+		expect(text).toBe(fullText);
 
-		// const result = await (await webBlob.stream()).getReader().read();
-		// expect(new TextDecoder().decode(result.value)).toBe(expectedText);
+		const streamText = await new Response(webBlob.stream()).text();
+		expect(streamText).toBe(fullText);
 	}, 20000);
 
-	it.skip("should create a slice on the file", async () => {
-		const file = await open("package.json", "r");
-		const webBlob = await WebBlob.create("package.json");
+	it("should create a slice on the file", async () => {
+		const expectedText = fullText.slice(10, 20);
 
-		const slice = webBlob.slice(10, 20);
+		const slice = (await WebBlob.create(resourceUrl)).slice(10, 20);
 
 		expect(slice).toMatchObject({
-			path: "package.json",
+			url: resourceUrl,
 			start: 10,
 			end: 20,
+			contentType,
 		});
 		expect(slice.size).toBe(10);
+		expect(slice.type).toBe(contentType);
+
 		const sliceText = await slice.text();
-		const expectedText = (await file.read(Buffer.alloc(10), 0, 10, 10)).buffer.toString("utf8");
 		expect(sliceText).toBe(expectedText);
-		const result = await slice.stream().getReader().read();
-		expect(new TextDecoder().decode(result.value)).toBe(expectedText);
+
+		const streamText = await new Response(slice.stream()).text();
+		expect(streamText).toBe(expectedText);
 	});
 });

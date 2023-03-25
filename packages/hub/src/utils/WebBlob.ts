@@ -1,4 +1,4 @@
-export class WebBlob {
+export class WebBlob extends Blob {
 	static async create(url: URL) {
 		const response = await fetch(url, { method: "HEAD" });
 
@@ -19,6 +19,8 @@ export class WebBlob {
 	private contentType: string;
 
 	constructor(url: URL, start: number, end: number, contentType: string) {
+		super([]);
+
 		this.url = url;
 		this.start = start;
 		this.end = end;
@@ -55,10 +57,14 @@ export class WebBlob {
 		return result.text();
 	}
 
-	async stream(): Promise<ReturnType<Blob["stream"]>> {
-		const response = await this.fetchRange();
+	stream(): ReturnType<Blob["stream"]> {
+		const stream = new TransformStream();
 
-		return response.body as ReturnType<Blob["stream"]>;
+		this.fetchRange()
+			.then((response) => response.body?.pipeThrough(stream))
+			.catch((error) => stream.writable.abort(error.message));
+
+		return stream.readable;
 	}
 
 	private fetchRange(): Promise<Response> {
