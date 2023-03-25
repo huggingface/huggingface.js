@@ -69,12 +69,6 @@ await commit({
     },
     {
       operation: "addOrUpdate",
-      path: "cuesta-viento.json",
-      // Commit file from local path (Backend)
-      content: await createBlob("file://cuesta-viento.json"),
-    },
-    {
-      operation: "addOrUpdate",
       path: "lamaral.json",
       // Commit file from relative path (Backend & Frontend)
       content: await createBlob("./lamaral.json"),

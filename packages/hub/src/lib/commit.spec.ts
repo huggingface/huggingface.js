@@ -1,14 +1,16 @@
-import { assert, it, describe } from "vitest";
+import { assert, it, describe, expect } from "vitest";
 
 import { HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from "../consts";
 import type { RepoId } from "../types/public";
-import { CommitFile, createBlob } from "./commit";
+import { createBlob } from "./commit";
 import { commit } from "./commit";
 import { createRepo } from "./create-repo";
 import { deleteRepo } from "./delete-repo";
 import { downloadFile } from "./download-file";
-import { isFrontend } from "../utils/env-predicates";
 import { insecureRandomString } from "../utils/insecureRandomString";
+import { isBackend, isFrontend } from "../utils/env-predicates";
+import { WebBlob } from "../utils/WebBlob";
+import { FileBlob } from "../utils/FileBlob";
 
 const lfsContent = "O123456789".repeat(100_000);
 
@@ -31,16 +33,6 @@ describe("commit", () => {
 		const readme1 = await downloadFile({ repo, path: "README.md" });
 		assert.strictEqual(readme1?.status, 200);
 
-		const nodeOperation: CommitFile[] = isFrontend
-			? []
-			: [
-					{
-						operation: "addOrUpdate",
-						path: "tsconfig.json",
-						content: (await import("node:url")).pathToFileURL("./tsconfig.json"),
-					},
-			  ];
-
 		try {
 			await commit({
 				repo,
@@ -49,26 +41,26 @@ describe("commit", () => {
 					accessToken: TEST_ACCESS_TOKEN,
 				},
 				operations: [
-					// {
-					// 	operation: "addOrUpdate",
-					// 	content: new Blob(["This is me"]),
-					// 	path: "test.txt",
-					// },
 					{
 						operation: "addOrUpdate",
+						content: new Blob(["This is me"]),
+						path: "test.txt",
+					},
+					{
+						operation: "addOrUpdate",
+						// This will use a WebBlob in frontend and FileBlob in the backend
 						content: await createBlob("./tsconfig.json"),
 						path: "tsconfig.json",
 					},
-					// {
-					// 	operation: "addOrUpdate",
-					// 	content: new Blob([lfsContent]),
-					// 	path: "test.lfs.txt",
-					// },
-					// ...nodeOperation,
-					// {
-					// 	operation: "delete",
-					// 	path: "README.md",
-					// },
+					{
+						operation: "addOrUpdate",
+						content: new Blob([lfsContent]),
+						path: "test.lfs.txt",
+					},
+					{
+						operation: "delete",
+						path: "README.md",
+					},
 				],
 			});
 
@@ -107,4 +99,28 @@ describe("commit", () => {
 			});
 		}
 	}, 30_000);
+
+	it("should return the correct type of Blob with 'createBlob'", async () => {
+		if (isFrontend) {
+			await expect(createBlob("file://cuesta-viento.json")).rejects.toMatchObject(
+				"File URLs are not supported in browsers"
+			);
+
+			await expect(
+				createBlob("https://huggingface.co/spaces/aschen/push-model-from-web/raw/main/mobilenet/model.json")
+			).resolves.toBeInstanceOf(WebBlob);
+		}
+
+		if (isBackend) {
+			await expect(createBlob("file://package.json")).resolves.toBeInstanceOf(FileBlob);
+
+			await expect(createBlob("./package.json")).resolves.toBeInstanceOf(FileBlob);
+
+			await expect(
+				createBlob("https://huggingface.co/spaces/aschen/push-model-from-web/raw/main/mobilenet/model.json")
+			).resolves.toBeInstanceOf(WebBlob);
+
+			await expect(createBlob("ftp://aschen.ovh/lamaral.json")).rejects.toThrowError("Unsupported URL protocol");
+		}
+	});
 });

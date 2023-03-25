@@ -121,12 +121,6 @@ function isFileOperation(op: CommitOperation): op is CommitBlob {
  *     },
  *     {
  *       operation: "addOrUpdate",
- *       path: "cuesta-viento.json",
- *       // Commit file from local path (Backend)
- *       content: await createBlob("file://cuesta-viento.json"),
- *     },
- *     {
- *       operation: "addOrUpdate",
  *       path: "lamaral.json",
  *       // Commit file from relative path (Backend & Frontend)
  *       content: await createBlob("./lamaral.json"),
@@ -144,15 +138,19 @@ export function createBlob(url: string): Promise<Blob> {
 		return WebBlob.create(new URL(url));
 	}
 
-	if (url.startsWith("file://")) {
-		return FileBlob.create(url);
-	}
-
 	if (url.startsWith("http")) {
 		return WebBlob.create(new URL(url));
 	}
 
-	throw new TypeError(`Unsupported URL protocol: ${url}`);
+	if (url.startsWith("file://")) {
+		return FileBlob.create(new URL(url));
+	}
+
+	if (url.includes("://")) {
+		throw new TypeError(`Unsupported URL protocol`);
+	}
+
+	return FileBlob.create(url);
 }
 
 /**
