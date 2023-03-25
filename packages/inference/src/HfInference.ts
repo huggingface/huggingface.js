@@ -1,4 +1,4 @@
-import { toArray } from "./utils";
+import { toArray } from "./utils/to-array";
 
 export interface Options {
 	/**
