@@ -3,7 +3,7 @@ import type { SpaceEntry } from "./list-spaces";
 import { listSpaces } from "./list-spaces";
 
 describe("listSpaces", () => {
-	it.skip("should list spaces for Microsoft", async () => {
+	it("should list spaces for Microsoft", async () => {
 		const results: SpaceEntry[] = [];
 
 		for await (const entry of listSpaces({

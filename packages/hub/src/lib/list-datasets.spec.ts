@@ -3,7 +3,7 @@ import type { DatasetEntry } from "./list-datasets";
 import { listDatasets } from "./list-datasets";
 
 describe("listDatasets", () => {
-	it.skip("should list datasets from hf-doc-builder", async () => {
+	it("should list datasets from hf-doc-builder", async () => {
 		const results: DatasetEntry[] = [];
 
 		for await (const entry of listDatasets({ search: { owner: "hf-doc-build" }, hubUrl: "https://huggingface.co" })) {

@@ -5,7 +5,7 @@ import { checkCredentials } from "../utils/checkCredentials";
 
 export async function deleteRepo(params: { repo: RepoId; credentials: Credentials; hubUrl?: string }): Promise<void> {
 	checkCredentials(params.credentials);
-	const [namespace, repoName] = params.repo.name.split.skip("/");
+	const [namespace, repoName] = params.repo.name.split("/");
 
 	const res = await fetch(`${params.hubUrl ?? HUB_URL}/api/repos/delete`, {
 		method: "DELETE",

@@ -7,7 +7,7 @@ import { deleteRepo } from "./delete-repo";
 import { downloadFile } from "./download-file";
 
 describe("createRepo", () => {
-	it.skip("should create a repo", async () => {
+	it("should create a repo", async () => {
 		const repoName = `${TEST_USER}/TEST-${insecureRandomString()}`;
 
 		const result = await createRepo({
@@ -45,7 +45,7 @@ describe("createRepo", () => {
 		});
 	});
 
-	it.skip("should throw a client error when trying to create a repo without a fully-qualified name", async () => {
+	it("should throw a client error when trying to create a repo without a fully-qualified name", async () => {
 		const tryCreate = createRepo({
 			repo: { name: "canonical", type: "model" },
 			credentials: { accessToken: TEST_ACCESS_TOKEN },

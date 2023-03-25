@@ -52,7 +52,36 @@ await deleteRepo({ repo, credentials });
 
 When uploading large files, you may want to run the `commit` calls inside a worker, to offload the sha256 computations.
 
-Also, use `Blob` to avoid loading the whole files in RAM. In `Node`, it's up to you to provide a smart `Blob` wrapper around your file. Feel free to open an issue if you want *us* to provide the smart `Blob` implementation. If you use `Bun`, `Bun.File` is already a smart blob implementation and can be used directly!
+An helper `createBlob` method allows to retrieve custom `Blob` object who will try to reduce RAM consumption by lazy loading slices of the resource.
+
+```js
+import { createBlob } from "@huggingface/hub"
+
+await commit({
+  repo,
+  credentials,
+  operations: [
+    {
+      operation: "addOrUpdate",
+      path: "rodeo.json",
+      // Commit file from remote HTTP resource (Backend & Frontend)
+      content: await createBlob("https://huggingface.co/spaces/aschen/push-model-from-web/raw/main/mobilenet/model.json"),
+    },
+    {
+      operation: "addOrUpdate",
+      path: "cuesta-viento.json",
+      // Commit file from local path (Backend)
+      content: await createBlob("file://cuesta-viento.json"),
+    },
+    {
+      operation: "addOrUpdate",
+      path: "lamaral.json",
+      // Commit file from relative path (Backend & Frontend)
+      content: await createBlob("./lamaral.json"),
+    },
+  ],
+});
+```
 
 ## Dependencies
 
