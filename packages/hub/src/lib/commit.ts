@@ -1,3 +1,4 @@
+import { URL } from "url";
 import { HUB_URL } from "../consts";
 import { ApiError, createApiError, InvalidApiResponseFormatError } from "../error";
 import type {
@@ -14,8 +15,7 @@ import type { Credentials, RepoId } from "../types/public";
 import { base64FromBytes } from "../utils/base64FromBytes";
 import { checkCredentials } from "../utils/checkCredentials";
 import { chunk } from "../utils/chunk";
-import { isBackend, isFrontend } from "../utils/env-predicates";
-import { FileBlob } from "../utils/FileBlob";
+import { isFrontend } from "../utils/env-predicates";
 import { promisesQueue } from "../utils/promisesQueue";
 import { promisesQueueStreaming } from "../utils/promisesQueueStreaming";
 import { sha256 } from "../utils/sha256";
@@ -91,9 +91,7 @@ function isFileOperation(op: CommitOperation): op is CommitBlob {
 }
 
 /**
- * This function allow to retrieve a custom Blob compatible object from a URL.
- *
- * This custom Blob will try to reduce RAM consumption with lazy loading.
+ * This function allow to retrieve either a FileBlob or a WebBlob from a URL.
  *
  * From the backend:
  *   - support local files
@@ -101,56 +99,27 @@ function isFileOperation(op: CommitOperation): op is CommitBlob {
  *
  * From the frontend:
  *   - support http resources with absolute or relative URLs
- *
- * HTTP resources will be lazy loaded if the server support "Accept-Range=bytes" header
- *
- * @example
- *
- * ```js
- * import { createBlob } from "@huggingface/hub"
- *
- * await commit({
- *   repo,
- *   credentials,
- *   operations: [
- *     {
- *       operation: "addOrUpdate",
- *       path: "rodeo.json",
- *       // Commit file from remote HTTP resource (Backend & Frontend)
- *       content: await createBlob("https://huggingface.co/spaces/aschen/push-model-from-web/raw/main/mobilenet/model.json"),
- *     },
- *     {
- *       operation: "addOrUpdate",
- *       path: "lamaral.json",
- *       // Commit file from relative path (Backend & Frontend)
- *       content: await createBlob("./lamaral.json"),
- *     },
- *   ],
- * });
- * ```
  */
-export function createBlob(url: string): Promise<Blob> {
+async function createBlob(url: URL): Promise<Blob> {
 	if (isFrontend) {
-		if (url.startsWith("file://")) {
+		if (url.protocol === "file:") {
 			throw new TypeError("File URLs are not supported in browsers");
 		}
 
-		return WebBlob.create(new URL(url));
+		return WebBlob.create(url);
 	}
 
-	if (url.startsWith("http")) {
-		return WebBlob.create(new URL(url));
+	if (url.protocol.startsWith("http")) {
+		return WebBlob.create(url);
 	}
 
-	if (url.startsWith("file://")) {
-		return FileBlob.create(new URL(url));
+	if (url.protocol === "file:") {
+		const { FileBlob } = await import("../utils/FileBlob");
+
+		return FileBlob.create(url);
 	}
 
-	if (url.includes("://")) {
-		throw new TypeError(`Unsupported URL protocol`);
-	}
-
-	return FileBlob.create(url);
+	throw new TypeError(`Unsupported URL protocol "${url.protocol}"`);
 }
 
 /**
@@ -175,21 +144,11 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 				return { ...operation, content: operation.content };
 			}
 
-			if (operation.content.protocol !== "file:") {
-				throw new TypeError('Only "file://" protocol is supported for now');
-			}
-
-			if (!isBackend) {
-				throw new TypeError("File URLs are not supported in browsers");
-			}
-
-			const { FileBlob } = await import("../utils/FileBlob");
-
-			const fileBlob = await FileBlob.create(operation.content);
+			const lazyBlob = await createBlob(operation.content);
 
 			return {
 				...operation,
-				content: fileBlob,
+				content: lazyBlob,
 			};
 		})
 	);

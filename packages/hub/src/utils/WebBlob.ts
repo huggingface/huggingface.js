@@ -1,5 +1,8 @@
+/**
+ * WebBlob is a Blob implementation for web resources that supports range requests.
+ */
 export class WebBlob extends Blob {
-	static async create(url: URL) {
+	static async create(url: URL): Promise<Blob> {
 		const response = await fetch(url, { method: "HEAD" });
 
 		const size = Number(response.headers.get("content-length"));

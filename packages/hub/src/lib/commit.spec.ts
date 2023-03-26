@@ -1,16 +1,14 @@
-import { assert, it, describe, expect } from "vitest";
+import { assert, it, describe } from "vitest";
 
 import { HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from "../consts";
 import type { RepoId } from "../types/public";
-import { createBlob } from "./commit";
+import type { CommitFile } from "./commit";
 import { commit } from "./commit";
 import { createRepo } from "./create-repo";
 import { deleteRepo } from "./delete-repo";
 import { downloadFile } from "./download-file";
 import { insecureRandomString } from "../utils/insecureRandomString";
-import { isBackend, isFrontend } from "../utils/env-predicates";
-import { WebBlob } from "../utils/WebBlob";
-import { FileBlob } from "../utils/FileBlob";
+import { isFrontend } from "../utils/env-predicates";
 
 const lfsContent = "O123456789".repeat(100_000);
 
@@ -33,6 +31,16 @@ describe("commit", () => {
 		const readme1 = await downloadFile({ repo, path: "README.md" });
 		assert.strictEqual(readme1?.status, 200);
 
+		const nodeOperation: CommitFile[] = isFrontend
+			? []
+			: [
+					{
+						operation: "addOrUpdate",
+						path: "tsconfig.json",
+						content: (await import("node:url")).pathToFileURL("./tsconfig.json"),
+					},
+			  ];
+
 		try {
 			await commit({
 				repo,
@@ -48,14 +56,14 @@ describe("commit", () => {
 					},
 					{
 						operation: "addOrUpdate",
-						// This will use a WebBlob in frontend and FileBlob in the backend
-						content: await createBlob("./tsconfig.json"),
-						path: "tsconfig.json",
-					},
-					{
-						operation: "addOrUpdate",
 						content: new Blob([lfsContent]),
 						path: "test.lfs.txt",
+					},
+					...nodeOperation,
+					{
+						operation: "addOrUpdate",
+						content: new URL("https://huggingface.co/spaces/aschen/push-model-from-web/raw/main/mobilenet/model.json"),
+						path: "lamaral.json",
 					},
 					{
 						operation: "delete",
@@ -72,19 +80,33 @@ describe("commit", () => {
 			assert.strictEqual(lfsFileContent?.status, 200);
 			assert.strictEqual(await lfsFileContent?.text(), lfsContent);
 
-			const fileUrlContent = await downloadFile({ repo, path: "tsconfig.json" });
-			assert.strictEqual(fileUrlContent?.status, 200);
-			assert.strictEqual(await fileUrlContent?.text(), await (await createBlob("./tsconfig.json")).text());
-
 			const lfsFilePointer = await fetch(`${HUB_URL}/${repoName}/raw/main/test.lfs.txt`);
 			assert.strictEqual(lfsFilePointer.status, 200);
 			assert.strictEqual(
 				(await lfsFilePointer.text()).trim(),
 				`
-			version https://git-lfs.github.com/spec/v1
-			oid sha256:a3bbce7ee1df7233d85b5f4d60faa3755f93f537804f8b540c72b0739239ddf8
-			size ${lfsContent.length}
-			        `.trim()
+version https://git-lfs.github.com/spec/v1
+oid sha256:a3bbce7ee1df7233d85b5f4d60faa3755f93f537804f8b540c72b0739239ddf8
+size ${lfsContent.length}
+				`.trim()
+			);
+
+			if (!isFrontend) {
+				const fileUrlContent = await downloadFile({ repo, path: "tsconfig.json" });
+				assert.strictEqual(fileUrlContent?.status, 200);
+				assert.strictEqual(
+					await fileUrlContent?.text(),
+					(await import("node:fs")).readFileSync("./tsconfig.json", "utf-8")
+				);
+			}
+
+			const webResourceContent = await downloadFile({ repo, path: "lamaral.json" });
+			assert.strictEqual(webResourceContent?.status, 200);
+			assert.strictEqual(
+				await webResourceContent?.text(),
+				await (
+					await fetch("https://huggingface.co/spaces/aschen/push-model-from-web/raw/main/mobilenet/model.json")
+				).text()
 			);
 
 			const readme2 = await downloadFile({ repo, path: "README.md" });
@@ -99,28 +121,4 @@ describe("commit", () => {
 			});
 		}
 	}, 30_000);
-
-	it("should return the correct type of Blob with 'createBlob'", async () => {
-		if (isFrontend) {
-			await expect(createBlob("file://cuesta-viento.json")).rejects.toMatchObject(
-				"File URLs are not supported in browsers"
-			);
-
-			await expect(
-				createBlob("https://huggingface.co/spaces/aschen/push-model-from-web/raw/main/mobilenet/model.json")
-			).resolves.toBeInstanceOf(WebBlob);
-		}
-
-		if (isBackend) {
-			await expect(createBlob("file://package.json")).resolves.toBeInstanceOf(FileBlob);
-
-			await expect(createBlob("./package.json")).resolves.toBeInstanceOf(FileBlob);
-
-			await expect(
-				createBlob("https://huggingface.co/spaces/aschen/push-model-from-web/raw/main/mobilenet/model.json")
-			).resolves.toBeInstanceOf(WebBlob);
-
-			await expect(createBlob("ftp://aschen.ovh/lamaral.json")).rejects.toThrowError("Unsupported URL protocol");
-		}
-	});
 });
