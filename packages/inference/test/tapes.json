@@ -3,7 +3,6 @@
 		"url": "https://api-inference.huggingface.co/models/bert-base-uncased",
 		"init": {
 			"headers": {
-				"Authorization": "Bearer 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",
 				"Content-Type": "application/json"
 			},
 			"method": "POST"
@@ -18,7 +17,6 @@
 		"url": "https://api-inference.huggingface.co/models/deepset/roberta-base-squad2",
 		"init": {
 			"headers": {
-				"Authorization": "Bearer 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",
 				"Content-Type": "application/json"
 			},
 			"method": "POST"
@@ -33,7 +31,6 @@
 		"url": "https://api-inference.huggingface.co/models/deepset/roberta-base-squad2",
 		"init": {
 			"headers": {
-				"Authorization": "Bearer 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",
 				"Content-Type": "application/json"
 			},
 			"method": "POST"
@@ -48,7 +45,6 @@
 		"url": "https://api-inference.huggingface.co/models/distilbert-base-uncased-finetuned-sst-2-english",
 		"init": {
 			"headers": {
-				"Authorization": "Bearer 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",
 				"Content-Type": "application/json"
 			},
 			"method": "POST"
@@ -63,7 +59,6 @@
 		"url": "https://api-inference.huggingface.co/models/this-model-does-not-exist-123",
 		"init": {
 			"headers": {
-				"Authorization": "Bearer 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",
 				"Content-Type": "application/json"
 			},
 			"method": "POST"
@@ -78,7 +73,6 @@
 		"url": "https://api-inference.huggingface.co/models/facebook/bart-large-cnn",
 		"init": {
 			"headers": {
-				"Authorization": "Bearer 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",
 				"Content-Type": "application/json"
 			},
 			"method": "POST"
@@ -93,7 +87,6 @@
 		"url": "https://api-inference.huggingface.co/models/gpt2",
 		"init": {
 			"headers": {
-				"Authorization": "Bearer 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",
 				"Content-Type": "application/json"
 			},
 			"method": "POST"
@@ -108,7 +101,6 @@
 		"url": "https://api-inference.huggingface.co/models/google/tapas-base-finetuned-wtq",
 		"init": {
 			"headers": {
-				"Authorization": "Bearer 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",
 				"Content-Type": "application/json"
 			},
 			"method": "POST"
@@ -123,7 +115,6 @@
 		"url": "https://api-inference.huggingface.co/models/google/flan-t5-xxl",
 		"init": {
 			"headers": {
-				"Authorization": "Bearer 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",
 				"Content-Type": "application/json"
 			},
 			"method": "POST"
@@ -138,7 +129,6 @@
 		"url": "https://api-inference.huggingface.co/models/dbmdz/bert-large-cased-finetuned-conll03-english",
 		"init": {
 			"headers": {
-				"Authorization": "Bearer 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",
 				"Content-Type": "application/json"
 			},
 			"method": "POST"
@@ -153,7 +143,6 @@
 		"url": "https://api-inference.huggingface.co/models/facebook/bart-large-mnli",
 		"init": {
 			"headers": {
-				"Authorization": "Bearer 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",
 				"Content-Type": "application/json"
 			},
 			"method": "POST"
@@ -168,7 +157,6 @@
 		"url": "https://api-inference.huggingface.co/models/t5-base",
 		"init": {
 			"headers": {
-				"Authorization": "Bearer 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",
 				"Content-Type": "application/json"
 			},
 			"method": "POST"
@@ -183,7 +171,6 @@
 		"url": "https://api-inference.huggingface.co/models/microsoft/DialoGPT-large",
 		"init": {
 			"headers": {
-				"Authorization": "Bearer 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",
 				"Content-Type": "application/json"
 			},
 			"method": "POST"
@@ -198,7 +185,6 @@
 		"url": "https://api-inference.huggingface.co/models/sentence-transformers/paraphrase-xlm-r-multilingual-v1",
 		"init": {
 			"headers": {
-				"Authorization": "Bearer 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",
 				"Content-Type": "application/json"
 			},
 			"method": "POST"
@@ -241,7 +227,6 @@
 		"url": "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2",
 		"init": {
 			"headers": {
-				"Authorization": "Bearer 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",
 				"Content-Type": "application/json"
 			},
 			"method": "POST"
