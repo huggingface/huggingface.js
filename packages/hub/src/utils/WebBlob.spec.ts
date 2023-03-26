@@ -26,7 +26,7 @@ describe("WebBlob", async () => {
 
 		const streamText = await new Response(webBlob.stream()).text();
 		expect(streamText).toBe(fullText);
-	}, 20000);
+	});
 
 	it("should create a slice on the file", async () => {
 		const expectedText = fullText.slice(10, 20);
