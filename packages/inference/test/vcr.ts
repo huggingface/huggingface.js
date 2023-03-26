@@ -53,11 +53,14 @@ interface Tape {
 }
 
 function tapeToResponse(tape: Tape) {
-	return new Response(Buffer.from(tape.response.body, "base64"), {
-		status: tape.response.status,
-		statusText: tape.response.statusText,
-		headers: tape.response.headers,
-	});
+	return new Response(
+		Uint8Array.from(atob(tape.response.body), (c) => c.charCodeAt(0)),
+		{
+			status: tape.response.status,
+			statusText: tape.response.statusText,
+			headers: tape.response.headers,
+		}
+	);
 }
 
 /**
@@ -72,7 +75,7 @@ async function hashRequest(url: string, init: RequestInit): Promise<string> {
 		body: init.body,
 	};
 
-	const inputBuffer = Buffer.from(JSON.stringify(hashObject));
+	const inputBuffer = new TextEncoder().encode(JSON.stringify(hashObject));
 
 	let hashed: ArrayBuffer;
 	if (isBackend) {
@@ -82,7 +85,9 @@ async function hashRequest(url: string, init: RequestInit): Promise<string> {
 		hashed = await crypto.subtle.digest("SHA-256", inputBuffer);
 	}
 
-	return Buffer.from(hashed).toString("hex");
+	return Array.from(new Uint8Array(hashed))
+		.map((b) => b.toString(16).padStart(2, "0"))
+		.join("");
 }
 
 /**
@@ -106,6 +111,7 @@ async function vcr(
 	}
 
 	const hash = await hashRequest(url, init);
+	console.log(hash);
 	const { default: tapes } = await import(TAPES_FILE);
 
 	if (VCR_MODE === "playback") {
