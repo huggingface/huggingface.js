@@ -111,7 +111,7 @@ async function vcr(
 	}
 
 	const hash = await hashRequest(url, init);
-	console.log(hash);
+
 	const { default: tapes } = await import(TAPES_FILE);
 
 	if (VCR_MODE === "playback") {
