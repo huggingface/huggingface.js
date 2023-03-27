@@ -680,6 +680,8 @@ export class HfInference {
 		options?: Options & {
 			binary?: boolean;
 			blob?: boolean;
+			/** For internal HF use, which is why it's not exposed in {@link Options} */
+			includeCredentials?: boolean;
 		}
 	): Promise<T> {
 		const mergedOptions = { ...this.defaultOptions, ...options };
@@ -707,6 +709,7 @@ export class HfInference {
 						...otherArgs,
 						options: mergedOptions,
 				  }),
+			credentials: options?.includeCredentials ? "include" : "same-origin",
 		});
 
 		if (mergedOptions.retry_on_error !== false && response.status === 503 && !mergedOptions.wait_for_model) {
