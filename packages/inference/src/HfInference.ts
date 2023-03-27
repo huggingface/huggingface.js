@@ -10,6 +10,10 @@ export interface Options {
 	 */
 	use_cache?: boolean;
 	/**
+	 * (Default: false). Boolean. Do not load the model if it's not already available.
+	 */
+	dont_load_model?: boolean;
+	/**
 	 * (Default: false). Boolean to use GPU instead of CPU for inference (requires Startup plan at least).
 	 */
 	use_gpu?: boolean;
@@ -680,6 +684,8 @@ export class HfInference {
 		options?: Options & {
 			binary?: boolean;
 			blob?: boolean;
+			/** For internal HF use, which is why it's not exposed in {@link Options} */
+			includeCredentials?: boolean;
 		}
 	): Promise<T> {
 		const mergedOptions = { ...this.defaultOptions, ...options };
@@ -694,8 +700,16 @@ export class HfInference {
 			headers["Content-Type"] = "application/json";
 		}
 
-		if (options?.binary && mergedOptions.wait_for_model) {
-			headers["X-Wait-For-Model"] = "true";
+		if (options?.binary) {
+			if (mergedOptions.wait_for_model) {
+				headers["X-Wait-For-Model"] = "true";
+			}
+			if (mergedOptions.use_cache === false) {
+				headers["X-Use-Cache"] = "false";
+			}
+			if (mergedOptions.dont_load_model) {
+				headers["X-Load-Model"] = "0";
+			}
 		}
 
 		const response = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
@@ -707,6 +721,7 @@ export class HfInference {
 						...otherArgs,
 						options: mergedOptions,
 				  }),
+			credentials: options?.includeCredentials ? "include" : "same-origin",
 		});
 
 		if (mergedOptions.retry_on_error !== false && response.status === 503 && !mergedOptions.wait_for_model) {

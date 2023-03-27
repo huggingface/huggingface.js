@@ -10,4 +10,4 @@ The continuated string
 
 #### Defined in
 
-[HfInference.ts:217](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L217)
+[HfInference.ts:223](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L223)

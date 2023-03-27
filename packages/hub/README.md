@@ -66,6 +66,8 @@ When uploading large files, you may want to run the `commit` calls inside a work
 
 Web resources and local files should be passed as `URL` whenever it's possible so they will be lazy loaded in chunks to reduce RAM usage.
 
+Under the hood, `@huggingface/hub` uses a lazy blob implementation to load the file.
+
 ## Dependencies
 
 - `hash-wasm` : Only used in the browser, when committing files over 10 MB. Browsers do not natively support streaming sha256 computations.
