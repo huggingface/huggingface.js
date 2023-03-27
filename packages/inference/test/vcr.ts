@@ -2,7 +2,14 @@ import { isBackend, isFrontend } from "../src/utils/env-predicates";
 
 const TAPES_FILE = "./tapes.json";
 
-let VCR_MODE;
+enum MODE {
+	RECORD = "record",
+	PLAYBACK = "playback",
+	CACHE = "cache",
+	DISABLED = "disabled",
+}
+
+let VCR_MODE: MODE;
 
 /**
  * Allows to record tapes with a token to avoid rate limit.
@@ -10,13 +17,13 @@ let VCR_MODE;
  * If VCR_MODE is not set and a token is present then disable it.
  */
 if (process.env.VCR_MODE) {
-	if ((process.env.VCR_MODE === "record" || process.env.VCR_MODE === "cache") && isFrontend) {
+	if ((process.env.VCR_MODE === MODE.RECORD || process.env.VCR_MODE === MODE.CACHE) && isFrontend) {
 		throw new Error("VCR_MODE=record is not supported in the browser");
 	}
 
-	VCR_MODE = process.env.VCR_MODE;
+	VCR_MODE = process.env.VCR_MODE as MODE;
 } else {
-	VCR_MODE = process.env.HF_ACCESS_TOKEN ? "disabled" : "playback";
+	VCR_MODE = process.env.HF_ACCESS_TOKEN ? MODE.DISABLED : MODE.PLAYBACK;
 }
 
 if (isFrontend) {
@@ -114,7 +121,7 @@ async function vcr(
 
 	const { default: tapes } = await import(TAPES_FILE);
 
-	if (VCR_MODE === "playback") {
+	if (VCR_MODE === MODE.PLAYBACK) {
 		if (!tapes[hash]) {
 			throw new Error(`Tape not found: ${hash} (${url})`);
 		}
@@ -132,7 +139,7 @@ async function vcr(
 
 	const response = await originalFetch(input, init);
 
-	if (VCR_MODE === "record" || VCR_MODE === "cache") {
+	if (VCR_MODE === MODE.RECORD || VCR_MODE === MODE.CACHE) {
 		const arrayBuffer = await response.arrayBuffer();
 		const headers: Record<string, string> = {};
 		response.headers.forEach((value, key) => (headers[key] = value));
