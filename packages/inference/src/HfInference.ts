@@ -680,6 +680,7 @@ export class HfInference {
 		options?: Options & {
 			binary?: boolean;
 			blob?: boolean;
+			/** For internal HF use, which is why it's not exposed in {@link Options} */
 			includeCredentials?: boolean;
 		}
 	): Promise<T> {
