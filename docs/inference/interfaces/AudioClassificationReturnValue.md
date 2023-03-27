@@ -10,7 +10,7 @@ The label for the class (model specific)
 
 #### Defined in
 
-[HfInference.ts:479](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L479)
+[HfInference.ts:485](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L485)
 
 ___
 
@@ -22,4 +22,4 @@ A float that represents how likely it is that the audio file belongs to this cla
 
 #### Defined in
 
-[HfInference.ts:484](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L484)
+[HfInference.ts:490](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L490)

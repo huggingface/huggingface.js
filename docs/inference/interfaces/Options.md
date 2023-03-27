@@ -2,6 +2,18 @@
 
 ## Properties
 
+### dont\_load\_model
+
+• `Optional` **dont\_load\_model**: `boolean`
+
+(Default: false). Boolean. Do not load the model if it's not already available.
+
+#### Defined in
+
+[HfInference.ts:15](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L15)
+
+___
+
 ### retry\_on\_error
 
 • `Optional` **retry\_on\_error**: `boolean`
@@ -10,7 +22,7 @@
 
 #### Defined in
 
-[HfInference.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L5)
+[HfInference.ts:7](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L7)
 
 ___
 
@@ -22,7 +34,7 @@ ___
 
 #### Defined in
 
-[HfInference.ts:9](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L9)
+[HfInference.ts:11](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L11)
 
 ___
 
@@ -34,7 +46,7 @@ ___
 
 #### Defined in
 
-[HfInference.ts:13](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L13)
+[HfInference.ts:19](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L19)
 
 ___
 
@@ -46,4 +58,4 @@ ___
 
 #### Defined in
 
-[HfInference.ts:18](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L18)
+[HfInference.ts:24](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L24)
