@@ -701,7 +701,7 @@ export class HfInference {
 		}
 
 		if (options?.binary) {
-			if (mergedOptions.wait_for_model){
+			if (mergedOptions.wait_for_model) {
 				headers["X-Wait-For-Model"] = "true";
 			}
 			if (mergedOptions.use_cache === false) {
