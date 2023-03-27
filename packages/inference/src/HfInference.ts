@@ -698,14 +698,16 @@ export class HfInference {
 			headers["Content-Type"] = "application/json";
 		}
 
-		if (options?.binary && mergedOptions.wait_for_model) {
-			headers["X-Wait-For-Model"] = "true";
-		}
-		if (options?.binary && mergedOptions.use_cache === false) {
-			headers["X-Use-Cache"] = "false";
-		}
-		if (options?.binary && mergedOptions.dont_load_model) {
-			headers["X-Load-Model"] = "0";
+		if (options?.binary) {
+			if (mergedOptions.wait_for_model){
+				headers["X-Wait-For-Model"] = "true";
+			}
+			if (mergedOptions.use_cache === false) {
+				headers["X-Use-Cache"] = "false";
+			}
+			if (mergedOptions.dont_load_model) {
+				headers["X-Load-Model"] = "0";
+			}
 		}
 
 		const response = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
