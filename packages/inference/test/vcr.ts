@@ -26,19 +26,11 @@ if (process.env.VCR_MODE) {
 	VCR_MODE = process.env.HF_ACCESS_TOKEN ? MODE.DISABLED : MODE.PLAYBACK;
 }
 
-if (isFrontend) {
-	const originalFetch = window.fetch;
+const originalFetch = globalThis.fetch;
 
-	window.fetch = (...args) => {
-		return vcr(originalFetch, args[0], args[1]);
-	};
-} else {
-	const originalFetch = global.fetch;
-
-	global.fetch = (...args) => {
-		return vcr(originalFetch, args[0], args[1]);
-	};
-}
+globalThis.fetch = (...args) => {
+	return vcr(originalFetch, args[0], args[1]);
+};
 
 /**
  * Represents a recorded HTTP request
@@ -108,7 +100,8 @@ async function vcr(
 	input: RequestInfo | URL,
 	init: RequestInit = {}
 ): Promise<Response> {
-	let url;
+	let url: string;
+
 	if (typeof input === "string") {
 		url = input;
 	} else if (input instanceof URL) {
@@ -152,7 +145,7 @@ async function vcr(
 			},
 			response: {
 				// Truncating the body to 30KB to avoid having huge files
-				body: Buffer.from(arrayBuffer.slice(0, 30 * 1024)).toString("base64"),
+				body: arrayBuffer.byteLength > 30_000 ? "" : Buffer.from(arrayBuffer).toString("base64"),
 				status: response.status,
 				statusText: response.statusText,
 			},
