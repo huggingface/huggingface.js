@@ -38,14 +38,15 @@ await commit({
     },
     {
       operation: "addOrUpdate",
-      path: "cuesta-viento.json",
+      path: "pytorch-model.bin",
       // Only supported from the backend
-      content: pathToFileURL("./cuesta-viento.json"),
+      content: pathToFileURL("./pytorch-model.bin"),
     },
     {
       operation: "addOrUpdate",
-      path: "lamaral.json",
-      content: new URL("https://aschen.ovh/lamaral.json"),
+      path: "tokenizer.json",
+      // Copy xml-roberta-base's tokenizer.json directly from HF
+      content: new URL("https://huggingface.co/xlm-roberta-base/raw/main/tokenizer.json"),
     },
   ],
 });
