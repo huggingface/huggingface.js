@@ -102,18 +102,18 @@ function isFileOperation(op: CommitOperation): op is CommitBlob {
  */
 async function createBlob(url: URL): Promise<Blob> {
 	if (isFrontend) {
-		if (url.protocol === "file:") {
-			throw new TypeError("File URLs are not supported in browsers");
+		if (url.protocol.startsWith("http")) {
+			return WebBlob.create(url);
 		}
 
-		return WebBlob.create(url);
+		throw new TypeError(`Unsupported URL protocol "${url.protocol}"`);
 	}
 
 	if (url.protocol.startsWith("http")) {
 		return WebBlob.create(url);
 	}
 
-	if (url.protocol === "file:") {
+	if (url.protocol.startsWith("file:")) {
 		const { FileBlob } = await import("../utils/FileBlob");
 
 		return FileBlob.create(url);

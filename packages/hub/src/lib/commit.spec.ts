@@ -14,6 +14,9 @@ const lfsContent = "O123456789".repeat(100_000);
 
 describe("commit", () => {
 	it("should commit to a repo with blobs", async function () {
+		const tokenizerJsonUrl = new URL(
+			"https://huggingface.co/spaces/aschen/push-model-from-web/raw/main/mobilenet/model.json"
+		);
 		const repoName = `${TEST_USER}/TEST-${insecureRandomString()}`;
 		const repo: RepoId = {
 			name: repoName,
@@ -62,7 +65,7 @@ describe("commit", () => {
 					...nodeOperation,
 					{
 						operation: "addOrUpdate",
-						content: new URL("https://huggingface.co/spaces/aschen/push-model-from-web/raw/main/mobilenet/model.json"),
+						content: tokenizerJsonUrl,
 						path: "lamaral.json",
 					},
 					{
@@ -102,12 +105,7 @@ size ${lfsContent.length}
 
 			const webResourceContent = await downloadFile({ repo, path: "lamaral.json" });
 			assert.strictEqual(webResourceContent?.status, 200);
-			assert.strictEqual(
-				await webResourceContent?.text(),
-				await (
-					await fetch("https://huggingface.co/spaces/aschen/push-model-from-web/raw/main/mobilenet/model.json")
-				).text()
-			);
+			assert.strictEqual(await webResourceContent?.text(), await (await fetch(tokenizerJsonUrl)).text());
 
 			const readme2 = await downloadFile({ repo, path: "README.md" });
 			assert.strictEqual(readme2, null);
