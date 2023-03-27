@@ -10,6 +10,10 @@ export interface Options {
 	 */
 	use_cache?: boolean;
 	/**
+	 * (Default: false). Boolean. Do not load the model if it's not already available.
+	 */
+	dont_load_model?: boolean;
+	/**
 	 * (Default: false). Boolean to use GPU instead of CPU for inference (requires Startup plan at least).
 	 */
 	use_gpu?: boolean;
@@ -696,6 +700,12 @@ export class HfInference {
 
 		if (options?.binary && mergedOptions.wait_for_model) {
 			headers["X-Wait-For-Model"] = "true";
+		}
+		if (options?.binary && mergedOptions.use_cache === false) {
+			headers["X-Use-Cache"] = "false";
+		}
+		if (options?.binary && mergedOptions.dont_load_model) {
+			headers["X-Load-Model"] = "0";
 		}
 
 		const response = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
