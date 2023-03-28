@@ -1,4 +1,3 @@
-import { URL } from "url";
 import { HUB_URL } from "../consts";
 import { ApiError, createApiError, InvalidApiResponseFormatError } from "../error";
 import type {
