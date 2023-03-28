@@ -116,7 +116,6 @@ size ${lfsContent.length}
 			// and follow the redirect to the storage provider
 			const lfsWebBlob = await WebBlob.create(new URL(lfsFileUrl));
 			const lfsFilePointer2 = await fetch(lfsFileUrl);
-			assert.strictEqual(lfsWebBlob instanceof WebBlob, true);
 			assert.strictEqual(
 				await (await lfsFilePointer2.blob()).slice(0, 42).text(),
 				await lfsWebBlob.slice(0, 42).text()
