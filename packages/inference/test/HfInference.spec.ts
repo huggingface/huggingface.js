@@ -1,15 +1,10 @@
 import { expect, it, describe } from "vitest";
 
 import { HfInference } from "../src";
-import { readFileSync } from "fs";
-import { join } from "path";
-import { fileURLToPath } from "url";
-const dir = fileURLToPath(new URL(".", import.meta.url));
-const TIMEOUT = 60000 * 3;
+import "./vcr";
+import { isBackend } from "../src/utils/env-predicates";
 
-const FLAC_FILE = join(dir, "..", "test", "sample1.flac");
-const CHEETAH_FILE = join(dir, "..", "test", "cheetah.png");
-const CAT_FILE = join(dir, "..", "test", "cats.png");
+const TIMEOUT = 60000 * 3;
 
 if (!process.env.HF_ACCESS_TOKEN) {
 	console.warn("Set HF_ACCESS_TOKEN in the env to run the tests for better rate limits");
@@ -251,81 +246,121 @@ describe.concurrent(
 			).toEqual([expect.any(Number), expect.any(Number), expect.any(Number)]);
 		});
 		it("automaticSpeechRecognition", async () => {
-			expect(
-				await hf.automaticSpeechRecognition({
-					model: "facebook/wav2vec2-large-960h-lv60-self",
-					data: readFileSync(FLAC_FILE),
-				})
-			).toMatchObject({
-				text: "GOING ALONG SLUSHY COUNTRY ROADS AND SPEAKING TO DAMP AUDIENCES IN DRAUGHTY SCHOOLROOMS DAY AFTER DAY FOR A FORTNIGHT HE'LL HAVE TO PUT IN AN APPEARANCE AT SOME PLACE OF WORSHIP ON SUNDAY MORNING AND HE CAN COME TO US IMMEDIATELY AFTERWARDS",
-			});
+			// Run only in backend until we support load from URL
+			if (isBackend) {
+				const { readFileSync } = await import("node:fs");
+				const { join } = await import("node:path");
+
+				const FLAC_FILE = join(__dirname, "sample1.flac");
+
+				expect(
+					await hf.automaticSpeechRecognition({
+						model: "facebook/wav2vec2-large-960h-lv60-self",
+						data: readFileSync(FLAC_FILE),
+					})
+				).toMatchObject({
+					text: "GOING ALONG SLUSHY COUNTRY ROADS AND SPEAKING TO DAMP AUDIENCES IN DRAUGHTY SCHOOLROOMS DAY AFTER DAY FOR A FORTNIGHT HE'LL HAVE TO PUT IN AN APPEARANCE AT SOME PLACE OF WORSHIP ON SUNDAY MORNING AND HE CAN COME TO US IMMEDIATELY AFTERWARDS",
+				});
+			}
 		});
 		it("audioClassification", async () => {
-			expect(
-				await hf.audioClassification({
-					model: "superb/hubert-large-superb-er",
-					data: readFileSync(FLAC_FILE),
-				})
-			).toEqual(
-				expect.arrayContaining([
-					expect.objectContaining({
-						score: expect.any(Number),
-						label: expect.any(String),
-					}),
-				])
-			);
+			// Run only in backend until we support load from URL
+			if (isBackend) {
+				const { readFileSync } = await import("node:fs");
+				const { join } = await import("node:path");
+
+				const FLAC_FILE = join(__dirname, "sample1.flac");
+
+				expect(
+					await hf.audioClassification({
+						model: "superb/hubert-large-superb-er",
+						data: readFileSync(FLAC_FILE),
+					})
+				).toEqual(
+					expect.arrayContaining([
+						expect.objectContaining({
+							score: expect.any(Number),
+							label: expect.any(String),
+						}),
+					])
+				);
+			}
 		});
 		it("imageClassification", async () => {
-			expect(
-				await hf.imageClassification({
-					data: readFileSync(CHEETAH_FILE),
-					model: "google/vit-base-patch16-224",
-				})
-			).toEqual(
-				expect.arrayContaining([
-					expect.objectContaining({
-						score: expect.any(Number),
-						label: expect.any(String),
-					}),
-				])
-			);
+			// Run only in backend until we support load from URL
+			if (isBackend) {
+				const { readFileSync } = await import("node:fs");
+				const { join } = await import("node:path");
+
+				const CHEETAH_FILE = join(__dirname, "cheetah.png");
+
+				expect(
+					await hf.imageClassification({
+						data: readFileSync(CHEETAH_FILE),
+						model: "google/vit-base-patch16-224",
+					})
+				).toEqual(
+					expect.arrayContaining([
+						expect.objectContaining({
+							score: expect.any(Number),
+							label: expect.any(String),
+						}),
+					])
+				);
+			}
 		});
 		it("objectDetection", async () => {
-			expect(
-				await hf.imageClassification({
-					data: readFileSync(CAT_FILE),
-					model: "facebook/detr-resnet-50",
-				})
-			).toEqual(
-				expect.arrayContaining([
-					expect.objectContaining({
-						score: expect.any(Number),
-						label: expect.any(String),
-						box: expect.objectContaining({
-							xmin: expect.any(Number),
-							ymin: expect.any(Number),
-							xmax: expect.any(Number),
-							ymax: expect.any(Number),
+			// Run only in backend until we support load from URL
+			if (isBackend) {
+				const { readFileSync } = await import("node:fs");
+				const { join } = await import("node:path");
+
+				const CAT_FILE = join(__dirname, "cats.png");
+
+				expect(
+					await hf.imageClassification({
+						data: readFileSync(CAT_FILE),
+						model: "facebook/detr-resnet-50",
+					})
+				).toEqual(
+					expect.arrayContaining([
+						expect.objectContaining({
+							score: expect.any(Number),
+							label: expect.any(String),
+							box: expect.objectContaining({
+								xmin: expect.any(Number),
+								ymin: expect.any(Number),
+								xmax: expect.any(Number),
+								ymax: expect.any(Number),
+							}),
 						}),
-					}),
-				])
-			);
+					])
+				);
+			}
 		});
 		it("imageSegmentation", async () => {
-			expect(
-				await hf.imageClassification({
-					data: readFileSync(CAT_FILE),
-					model: "facebook/detr-resnet-50-panoptic",
-				})
-			).toEqual(
-				expect.arrayContaining([
-					expect.objectContaining({
-						score: expect.any(Number),
-						label: expect.any(String),
-						mask: expect.any(String),
-					}),
-				])
-			);
+			// Run only in backend until we support load from URL
+			if (isBackend) {
+				const { readFileSync } = await import("node:fs");
+				const { join } = await import("node:path");
+
+				const CAT_FILE = join(__dirname, "cats.png");
+
+				expect(
+					await hf.imageClassification({
+						data: readFileSync(CAT_FILE),
+						model: "facebook/detr-resnet-50-panoptic",
+					})
+				).toEqual(
+					expect.arrayContaining([
+						expect.objectContaining({
+							score: expect.any(Number),
+							label: expect.any(String),
+							mask: expect.any(String),
+						}),
+					])
+				);
+			}
 		});
 		it("textToImage", async () => {
 			const res = await hf.textToImage({

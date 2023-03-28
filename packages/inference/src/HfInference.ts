@@ -1,4 +1,4 @@
-import { toArray } from "./utils";
+import { toArray } from "./utils/to-array";
 
 export interface Options {
 	/**
@@ -526,7 +526,7 @@ export class HfInference {
 	 * This task is well known to summarize longer text into shorter text. Be careful, some models have a maximum length of input. That means that the summary cannot handle full books for instance. Be careful when choosing your model.
 	 */
 	public async summarization(args: SummarizationArgs, options?: Options): Promise<SummarizationReturn> {
-		return (await this.request(args, options))?.[0];
+		return (await this.request<SummarizationReturn[]>(args, options))?.[0];
 	}
 
 	/**
@@ -550,14 +550,14 @@ export class HfInference {
 	 * Usually used for sentiment-analysis this will output the likelihood of classes of an input. Recommended model: distilbert-base-uncased-finetuned-sst-2-english
 	 */
 	public async textClassification(args: TextClassificationArgs, options?: Options): Promise<TextClassificationReturn> {
-		return (await this.request(args, options))?.[0];
+		return (await this.request<TextClassificationReturn[]>(args, options))?.[0];
 	}
 
 	/**
 	 * Use to continue text from a prompt. This is a very generic task. Recommended model: gpt2 (it’s a simple model, but fun to play with).
 	 */
 	public async textGeneration(args: TextGenerationArgs, options?: Options): Promise<TextGenerationReturn> {
-		return (await this.request(args, options))?.[0];
+		return (await this.request<TextGenerationReturn[]>(args, options))?.[0];
 	}
 
 	/**
@@ -574,7 +574,7 @@ export class HfInference {
 	 * This task is well known to translate text from one language to another. Recommended model: Helsinki-NLP/opus-mt-ru-en.
 	 */
 	public async translation(args: TranslationArgs, options?: Options): Promise<TranslationReturn> {
-		return (await this.request(args, options))?.[0];
+		return (await this.request<TranslationReturn[]>(args, options))?.[0];
 	}
 
 	/**
