@@ -9,6 +9,7 @@ import { deleteRepo } from "./delete-repo";
 import { downloadFile } from "./download-file";
 import { insecureRandomString } from "../utils/insecureRandomString";
 import { isFrontend } from "../utils/env-predicates";
+import { WebBlob } from "../utils/WebBlob";
 
 const lfsContent = "O123456789".repeat(100_000);
 
@@ -83,7 +84,8 @@ describe("commit", () => {
 			assert.strictEqual(lfsFileContent?.status, 200);
 			assert.strictEqual(await lfsFileContent?.text(), lfsContent);
 
-			const lfsFilePointer = await fetch(`${HUB_URL}/${repoName}/raw/main/test.lfs.txt`);
+			const lfsFileUrl = `${HUB_URL}/${repoName}/raw/main/test.lfs.txt`;
+			const lfsFilePointer = await fetch(lfsFileUrl);
 			assert.strictEqual(lfsFilePointer.status, 200);
 			assert.strictEqual(
 				(await lfsFilePointer.text()).trim(),
@@ -109,6 +111,16 @@ size ${lfsContent.length}
 
 			const readme2 = await downloadFile({ repo, path: "README.md" });
 			assert.strictEqual(readme2, null);
+
+			// Ensure that we are able to create a WebBlob from the LFS file url
+			// and follow the redirect to the storage provider
+			const lfsWebBlob = await WebBlob.create(new URL(lfsFileUrl));
+			const lfsFilePointer2 = await fetch(lfsFileUrl);
+			assert.strictEqual(lfsWebBlob instanceof WebBlob, true);
+			assert.strictEqual(
+				await (await lfsFilePointer2.blob()).slice(0, 42).text(),
+				await lfsWebBlob.slice(0, 42).text()
+			);
 		} finally {
 			await deleteRepo({
 				repo: {
