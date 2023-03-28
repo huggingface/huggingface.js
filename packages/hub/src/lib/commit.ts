@@ -109,11 +109,11 @@ async function createBlob(url: URL): Promise<Blob> {
 		throw new TypeError(`Unsupported URL protocol "${url.protocol}"`);
 	}
 
-	if (url.protocol.startsWith("http")) {
+	if (url.protocol === "http:" || url.protocol === "https:") {
 		return WebBlob.create(url);
 	}
 
-	if (url.protocol.startsWith("file:")) {
+	if (url.protocol === "file:") {
 		const { FileBlob } = await import("../utils/FileBlob");
 
 		return FileBlob.create(url);

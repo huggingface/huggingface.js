@@ -64,7 +64,7 @@ await deleteRepo({ repo, credentials });
 
 When uploading large files, you may want to run the `commit` calls inside a worker, to offload the sha256 computations.
 
-Web resources and local files should be passed as `URL` whenever it's possible so they will be lazy loaded in chunks to reduce RAM usage.
+Remote resources and local files should be passed as `URL` whenever it's possible so they can be lazy loaded in chunks to reduce RAM usage. Passing a `File` inside the browser's context is fine, because it natively behaves as a `Blob`.
 
 Under the hood, `@huggingface/hub` uses a lazy blob implementation to load the file.
 
