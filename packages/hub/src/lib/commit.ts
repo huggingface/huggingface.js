@@ -102,7 +102,7 @@ function isFileOperation(op: CommitOperation): op is CommitBlob {
  */
 async function createBlob(url: URL): Promise<Blob> {
 	if (isFrontend) {
-		if (url.protocol.startsWith("http")) {
+		if (url.protocol === "http:" || url.protocol === "https:") {
 			return WebBlob.create(url);
 		}
 
