@@ -9,7 +9,6 @@ import { deleteRepo } from "./delete-repo";
 import { downloadFile } from "./download-file";
 import { insecureRandomString } from "../utils/insecureRandomString";
 import { isFrontend } from "../utils/env-predicates";
-import { WebBlob } from "../utils/WebBlob";
 
 const lfsContent = "O123456789".repeat(100_000);
 
