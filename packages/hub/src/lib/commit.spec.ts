@@ -7,13 +7,16 @@ import { commit } from "./commit";
 import { createRepo } from "./create-repo";
 import { deleteRepo } from "./delete-repo";
 import { downloadFile } from "./download-file";
-import { isFrontend } from "../utils/env-predicates";
 import { insecureRandomString } from "../utils/insecureRandomString";
+import { isFrontend } from "../utils/env-predicates";
 
 const lfsContent = "O123456789".repeat(100_000);
 
 describe("commit", () => {
 	it("should commit to a repo with blobs", async function () {
+		const tokenizerJsonUrl = new URL(
+			"https://huggingface.co/spaces/aschen/push-model-from-web/raw/main/mobilenet/model.json"
+		);
 		const repoName = `${TEST_USER}/TEST-${insecureRandomString()}`;
 		const repo: RepoId = {
 			name: repoName,
@@ -61,6 +64,11 @@ describe("commit", () => {
 					},
 					...nodeOperation,
 					{
+						operation: "addOrUpdate",
+						content: tokenizerJsonUrl,
+						path: "lamaral.json",
+					},
+					{
 						operation: "delete",
 						path: "README.md",
 					},
@@ -75,6 +83,18 @@ describe("commit", () => {
 			assert.strictEqual(lfsFileContent?.status, 200);
 			assert.strictEqual(await lfsFileContent?.text(), lfsContent);
 
+			const lfsFileUrl = `${HUB_URL}/${repoName}/raw/main/test.lfs.txt`;
+			const lfsFilePointer = await fetch(lfsFileUrl);
+			assert.strictEqual(lfsFilePointer.status, 200);
+			assert.strictEqual(
+				(await lfsFilePointer.text()).trim(),
+				`
+version https://git-lfs.github.com/spec/v1
+oid sha256:a3bbce7ee1df7233d85b5f4d60faa3755f93f537804f8b540c72b0739239ddf8
+size ${lfsContent.length}
+				`.trim()
+			);
+
 			if (!isFrontend) {
 				const fileUrlContent = await downloadFile({ repo, path: "tsconfig.json" });
 				assert.strictEqual(fileUrlContent?.status, 200);
@@ -84,16 +104,9 @@ describe("commit", () => {
 				);
 			}
 
-			const lfsFilePointer = await fetch(`${HUB_URL}/${repoName}/raw/main/test.lfs.txt`);
-			assert.strictEqual(lfsFilePointer.status, 200);
-			assert.strictEqual(
-				(await lfsFilePointer.text()).trim(),
-				`
-version https://git-lfs.github.com/spec/v1
-oid sha256:a3bbce7ee1df7233d85b5f4d60faa3755f93f537804f8b540c72b0739239ddf8
-size ${lfsContent.length}
-        `.trim()
-			);
+			const webResourceContent = await downloadFile({ repo, path: "lamaral.json" });
+			assert.strictEqual(webResourceContent?.status, 200);
+			assert.strictEqual(await webResourceContent?.text(), await (await fetch(tokenizerJsonUrl)).text());
 
 			const readme2 = await downloadFile({ repo, path: "README.md" });
 			assert.strictEqual(readme2, null);
