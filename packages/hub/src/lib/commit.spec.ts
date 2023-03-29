@@ -7,6 +7,7 @@ import { commit } from "./commit";
 import { createRepo } from "./create-repo";
 import { deleteRepo } from "./delete-repo";
 import { downloadFile } from "./download-file";
+import { fileDownloadInfo } from "./file-download-info";
 import { insecureRandomString } from "../utils/insecureRandomString";
 import { isFrontend } from "../utils/env-predicates";
 
@@ -31,20 +32,20 @@ describe("commit", () => {
 			license: "mit",
 		});
 
-		const readme1 = await downloadFile({ repo, path: "README.md" });
-		assert.strictEqual(readme1?.status, 200);
-
-		const nodeOperation: CommitFile[] = isFrontend
-			? []
-			: [
-					{
-						operation: "addOrUpdate",
-						path: "tsconfig.json",
-						content: (await import("node:url")).pathToFileURL("./tsconfig.json"),
-					},
-			  ];
-
 		try {
+			const readme1 = await downloadFile({ repo, path: "README.md" });
+			assert.strictEqual(readme1?.status, 200);
+
+			const nodeOperation: CommitFile[] = isFrontend
+				? []
+				: [
+						{
+							operation: "addOrUpdate",
+							path: "tsconfig.json",
+							content: (await import("node:url")).pathToFileURL("./tsconfig.json"),
+						},
+				  ];
+
 			await commit({
 				repo,
 				title: "Some commit",
@@ -120,4 +121,68 @@ size ${lfsContent.length}
 			});
 		}
 	}, 30_000);
+
+	it("should commit a full repo from HF with web urls", async function () {
+		const repoName = `${TEST_USER}/TEST-${insecureRandomString()}`;
+		const repo: RepoId = {
+			name: repoName,
+			type: "model",
+		};
+
+		console.log(
+			await createRepo({
+				credentials: {
+					accessToken: TEST_ACCESS_TOKEN,
+				},
+				repo,
+			})
+		);
+
+		try {
+			const FILES_TO_UPLOAD = [
+				`https://huggingface.co/spaces/huggingfacejs/push-model-from-web/resolve/main/mobilenet/model.json`,
+				`https://huggingface.co/spaces/huggingfacejs/push-model-from-web/resolve/main/mobilenet/group1-shard1of2`,
+				`https://huggingface.co/spaces/huggingfacejs/push-model-from-web/resolve/main/mobilenet/group1-shard2of2`,
+				`https://huggingface.co/spaces/huggingfacejs/push-model-from-web/resolve/main/mobilenet/coffee.jpg`,
+				`https://huggingface.co/spaces/huggingfacejs/push-model-from-web/resolve/main/mobilenet/README.md`,
+			];
+
+			const operations: CommitFile[] = await Promise.all(
+				FILES_TO_UPLOAD.map(async (file) => {
+					return {
+						operation: "addOrUpdate",
+						path: file.slice(file.indexOf("main/") + "main/".length),
+						// upload remote file
+						content: new URL(file),
+					};
+				})
+			);
+			const commitOutput = await commit({
+				repo,
+				credentials: {
+					accessToken: TEST_ACCESS_TOKEN,
+				},
+				title: "upload model",
+				operations,
+			});
+
+			console.log(commitOutput);
+			console.log(repo);
+
+			const LFSSize = (await fileDownloadInfo({ repo, path: "mobilenet/group1-shard1of2" }))?.size;
+
+			assert.strictEqual(LFSSize, 4_194_304);
+		} finally {
+			if (!Math.random()) {
+				await deleteRepo({
+					repo: {
+						name: repoName,
+						type: "model",
+					},
+					credentials: { accessToken: TEST_ACCESS_TOKEN },
+				});
+			}
+		}
+		// https://huggingfacejs-push-model-from-web.hf.space/
+	}, 60_000);
 });
