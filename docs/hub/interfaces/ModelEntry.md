@@ -14,7 +14,7 @@ ___
 
 ### gated
 
-• **gated**: ``false`` \| ``"manual"`` \| ``"auto"``
+• **gated**: ``false`` \| ``"auto"`` \| ``"manual"``
 
 #### Defined in
 
