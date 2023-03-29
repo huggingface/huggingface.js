@@ -100,16 +100,12 @@ function isFileOperation(op: CommitOperation): op is CommitBlob {
  *   - support http resources with absolute or relative URLs
  */
 async function createBlob(url: URL): Promise<Blob> {
-	if (isFrontend) {
-		if (url.protocol === "http:" || url.protocol === "https:") {
-			return WebBlob.create(url);
-		}
-
-		throw new TypeError(`Unsupported URL protocol "${url.protocol}"`);
-	}
-
 	if (url.protocol === "http:" || url.protocol === "https:") {
 		return WebBlob.create(url);
+	}
+	
+	if (isFrontend) {
+		throw new TypeError(`Unsupported URL protocol "${url.protocol}"`);
 	}
 
 	if (url.protocol === "file:") {
