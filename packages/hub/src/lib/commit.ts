@@ -103,7 +103,7 @@ async function createBlob(url: URL): Promise<Blob> {
 	if (url.protocol === "http:" || url.protocol === "https:") {
 		return WebBlob.create(url);
 	}
-	
+
 	if (isFrontend) {
 		throw new TypeError(`Unsupported URL protocol "${url.protocol}"`);
 	}
