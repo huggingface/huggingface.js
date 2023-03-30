@@ -34,6 +34,18 @@ await commit({
       path: "file.txt",
       content: new Blob(["Hello World"]),
     },
+    {
+      operation: "addOrUpdate",
+      path: "pytorch-model.bin",
+      // Only supported from the backend
+      content: pathToFileURL("./pytorch-model.bin"),
+    },
+    {
+      operation: "addOrUpdate",
+      path: "tokenizer.json",
+      // Copy xml-roberta-base's tokenizer.json directly from HF
+      content: new URL("https://huggingface.co/xlm-roberta-base/raw/main/tokenizer.json"),
+    },
   ],
 });
 
@@ -50,7 +62,9 @@ await deleteRepo({ repo, credentials });
 
 When uploading large files, you may want to run the `commit` calls inside a worker, to offload the sha256 computations.
 
-Also, use `Blob` to avoid loading the whole files in RAM. In `Node`, it's up to you to provide a smart `Blob` wrapper around your file. Feel free to open an issue if you want *us* to provide the smart `Blob` implementation. If you use `Bun`, `Bun.File` is already a smart blob implementation and can be used directly!
+Remote resources and local files should be passed as `URL` whenever it's possible so they can be lazy loaded in chunks to reduce RAM usage. Passing a `File` inside the browser's context is fine, because it natively behaves as a `Blob`.
+
+Under the hood, `@huggingface/hub` uses a lazy blob implementation to load the file.
 
 ## Dependencies
 

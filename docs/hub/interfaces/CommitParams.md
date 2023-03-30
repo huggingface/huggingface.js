@@ -12,7 +12,7 @@
 
 #### Defined in
 
-[hub/src/lib/commit.ts:56](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L56)
+[hub/src/lib/commit.ts:61](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L61)
 
 ___
 
@@ -22,7 +22,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/commit.ts:54](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L54)
+[hub/src/lib/commit.ts:59](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L59)
 
 ___
 
@@ -32,7 +32,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/commit.ts:51](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L51)
+[hub/src/lib/commit.ts:56](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L56)
 
 ___
 
@@ -42,7 +42,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/commit.ts:65](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L65)
+[hub/src/lib/commit.ts:70](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L70)
 
 ___
 
@@ -52,7 +52,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/commit.ts:64](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L64)
+[hub/src/lib/commit.ts:69](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L69)
 
 ___
 
@@ -62,7 +62,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/commit.ts:53](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L53)
+[hub/src/lib/commit.ts:58](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L58)
 
 ___
 
@@ -77,7 +77,7 @@ Parent commit. Optional
 
 #### Defined in
 
-[hub/src/lib/commit.ts:63](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L63)
+[hub/src/lib/commit.ts:68](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L68)
 
 ___
 
@@ -87,7 +87,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/commit.ts:52](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L52)
+[hub/src/lib/commit.ts:57](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L57)
 
 ___
 
@@ -97,4 +97,4 @@ ___
 
 #### Defined in
 
-[hub/src/lib/commit.ts:50](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L50)
+[hub/src/lib/commit.ts:55](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L55)

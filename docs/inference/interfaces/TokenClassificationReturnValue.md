@@ -10,7 +10,7 @@ The offset stringwise where the answer is located. Useful to disambiguate if wor
 
 #### Defined in
 
-[HfInference.ts:247](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L247)
+[HfInference.ts:253](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L253)
 
 ___
 
@@ -22,7 +22,7 @@ The type for the entity being recognized (model specific).
 
 #### Defined in
 
-[HfInference.ts:251](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L251)
+[HfInference.ts:257](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L257)
 
 ___
 
@@ -34,7 +34,7 @@ How likely the entity was recognized.
 
 #### Defined in
 
-[HfInference.ts:255](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L255)
+[HfInference.ts:261](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L261)
 
 ___
 
@@ -46,7 +46,7 @@ The offset stringwise where the answer is located. Useful to disambiguate if wor
 
 #### Defined in
 
-[HfInference.ts:259](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L259)
+[HfInference.ts:265](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L265)
 
 ___
 
@@ -58,4 +58,4 @@ The string that was captured
 
 #### Defined in
 
-[HfInference.ts:263](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L263)
+[HfInference.ts:269](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L269)

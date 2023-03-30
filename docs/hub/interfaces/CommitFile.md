@@ -4,11 +4,11 @@
 
 ### content
 
-• **content**: `Blob`
+• **content**: `ContentSource`
 
 #### Defined in
 
-[hub/src/lib/commit.ts:35](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L35)
+[hub/src/lib/commit.ts:37](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L37)
 
 ___
 
@@ -18,7 +18,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/commit.ts:33](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L33)
+[hub/src/lib/commit.ts:35](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L35)
 
 ___
 
@@ -28,4 +28,4 @@ ___
 
 #### Defined in
 
-[hub/src/lib/commit.ts:34](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L34)
+[hub/src/lib/commit.ts:36](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L36)

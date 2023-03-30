@@ -10,7 +10,7 @@ The label for the class (model specific) of a segment.
 
 #### Defined in
 
-[HfInference.ts:441](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L441)
+[HfInference.ts:447](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L447)
 
 ___
 
@@ -22,7 +22,7 @@ A str (base64 str of a single channel black-and-white img) representing the mask
 
 #### Defined in
 
-[HfInference.ts:445](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L445)
+[HfInference.ts:451](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L451)
 
 ___
 
@@ -34,4 +34,4 @@ A float that represents how likely it is that the detected object belongs to the
 
 #### Defined in
 
-[HfInference.ts:449](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L449)
+[HfInference.ts:455](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L455)

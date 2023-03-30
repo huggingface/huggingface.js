@@ -1,4 +1,4 @@
-import { toArray } from "./utils";
+import { toArray } from "./utils/to-array";
 
 export interface Options {
 	/**
@@ -9,6 +9,10 @@ export interface Options {
 	 * (Default: true). Boolean. There is a cache layer on the inference API to speedup requests we have already seen. Most models can use those results as is as models are deterministic (meaning the results will be the same anyway). However if you use a non deterministic model, you can set this parameter to prevent the caching mechanism from being used resulting in a real new query.
 	 */
 	use_cache?: boolean;
+	/**
+	 * (Default: false). Boolean. Do not load the model if it's not already available.
+	 */
+	dont_load_model?: boolean;
 	/**
 	 * (Default: false). Boolean to use GPU instead of CPU for inference (requires Startup plan at least).
 	 */
@@ -522,7 +526,7 @@ export class HfInference {
 	 * This task is well known to summarize longer text into shorter text. Be careful, some models have a maximum length of input. That means that the summary cannot handle full books for instance. Be careful when choosing your model.
 	 */
 	public async summarization(args: SummarizationArgs, options?: Options): Promise<SummarizationReturn> {
-		return (await this.request(args, options))?.[0];
+		return (await this.request<SummarizationReturn[]>(args, options))?.[0];
 	}
 
 	/**
@@ -546,14 +550,14 @@ export class HfInference {
 	 * Usually used for sentiment-analysis this will output the likelihood of classes of an input. Recommended model: distilbert-base-uncased-finetuned-sst-2-english
 	 */
 	public async textClassification(args: TextClassificationArgs, options?: Options): Promise<TextClassificationReturn> {
-		return (await this.request(args, options))?.[0];
+		return (await this.request<TextClassificationReturn[]>(args, options))?.[0];
 	}
 
 	/**
 	 * Use to continue text from a prompt. This is a very generic task. Recommended model: gpt2 (it’s a simple model, but fun to play with).
 	 */
 	public async textGeneration(args: TextGenerationArgs, options?: Options): Promise<TextGenerationReturn> {
-		return (await this.request(args, options))?.[0];
+		return (await this.request<TextGenerationReturn[]>(args, options))?.[0];
 	}
 
 	/**
@@ -570,7 +574,7 @@ export class HfInference {
 	 * This task is well known to translate text from one language to another. Recommended model: Helsinki-NLP/opus-mt-ru-en.
 	 */
 	public async translation(args: TranslationArgs, options?: Options): Promise<TranslationReturn> {
-		return (await this.request(args, options))?.[0];
+		return (await this.request<TranslationReturn[]>(args, options))?.[0];
 	}
 
 	/**
@@ -680,6 +684,8 @@ export class HfInference {
 		options?: Options & {
 			binary?: boolean;
 			blob?: boolean;
+			/** For internal HF use, which is why it's not exposed in {@link Options} */
+			includeCredentials?: boolean;
 		}
 	): Promise<T> {
 		const mergedOptions = { ...this.defaultOptions, ...options };
@@ -694,8 +700,16 @@ export class HfInference {
 			headers["Content-Type"] = "application/json";
 		}
 
-		if (options?.binary && mergedOptions.wait_for_model) {
-			headers["X-Wait-For-Model"] = "true";
+		if (options?.binary) {
+			if (mergedOptions.wait_for_model) {
+				headers["X-Wait-For-Model"] = "true";
+			}
+			if (mergedOptions.use_cache === false) {
+				headers["X-Use-Cache"] = "false";
+			}
+			if (mergedOptions.dont_load_model) {
+				headers["X-Load-Model"] = "0";
+			}
 		}
 
 		const response = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
@@ -707,6 +721,7 @@ export class HfInference {
 						...otherArgs,
 						options: mergedOptions,
 				  }),
+			credentials: options?.includeCredentials ? "include" : "same-origin",
 		});
 
 		if (mergedOptions.retry_on_error !== false && response.status === 503 && !mergedOptions.wait_for_model) {

@@ -26,11 +26,11 @@
 
 ### AudioClassificationArgs
 
-Ƭ **AudioClassificationArgs**: [`Args`](interfaces/Args) & { `data`: `any`  }
+Ƭ **AudioClassificationArgs**: [`Args`](interfaces/Args) & { `data`: `Blob` \| `ArrayBuffer`  }
 
 #### Defined in
 
-[HfInference.ts:468](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L468)
+[HfInference.ts:474](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L474)
 
 ___
 
@@ -40,17 +40,17 @@ ___
 
 #### Defined in
 
-[HfInference.ts:487](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L487)
+[HfInference.ts:493](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L493)
 
 ___
 
 ### AutomaticSpeechRecognitionArgs
 
-Ƭ **AutomaticSpeechRecognitionArgs**: [`Args`](interfaces/Args) & { `data`: `any`  }
+Ƭ **AutomaticSpeechRecognitionArgs**: [`Args`](interfaces/Args) & { `data`: `Blob` \| `ArrayBuffer`  }
 
 #### Defined in
 
-[HfInference.ts:454](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L454)
+[HfInference.ts:460](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L460)
 
 ___
 
@@ -60,17 +60,17 @@ ___
 
 #### Defined in
 
-[HfInference.ts:307](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L307)
+[HfInference.ts:313](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L313)
 
 ___
 
 ### FeatureExtractionArgs
 
-Ƭ **FeatureExtractionArgs**: [`Args`](interfaces/Args) & { `inputs`: `Record`<`string`, `any`\> \| `Record`<`string`, `any`\>[]  }
+Ƭ **FeatureExtractionArgs**: [`Args`](interfaces/Args) & { `inputs`: `Record`<`string`, `unknown`\> \| `Record`<`string`, `unknown`\>[]  }
 
 #### Defined in
 
-[HfInference.ts:363](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L363)
+[HfInference.ts:369](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L369)
 
 ___
 
@@ -82,7 +82,7 @@ Returned values are a list of floats, or a list of list of floats (depending on 
 
 #### Defined in
 
-[HfInference.ts:378](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L378)
+[HfInference.ts:384](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L384)
 
 ___
 
@@ -92,7 +92,7 @@ ___
 
 #### Defined in
 
-[HfInference.ts:25](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L25)
+[HfInference.ts:31](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L31)
 
 ___
 
@@ -102,17 +102,17 @@ ___
 
 #### Defined in
 
-[HfInference.ts:29](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L29)
+[HfInference.ts:35](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L35)
 
 ___
 
 ### ImageClassificationArgs
 
-Ƭ **ImageClassificationArgs**: [`Args`](interfaces/Args) & { `data`: `any`  }
+Ƭ **ImageClassificationArgs**: [`Args`](interfaces/Args) & { `data`: `Blob` \| `ArrayBuffer`  }
 
 #### Defined in
 
-[HfInference.ts:380](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L380)
+[HfInference.ts:386](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L386)
 
 ___
 
@@ -122,17 +122,17 @@ ___
 
 #### Defined in
 
-[HfInference.ts:398](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L398)
+[HfInference.ts:404](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L404)
 
 ___
 
 ### ImageSegmentationArgs
 
-Ƭ **ImageSegmentationArgs**: [`Args`](interfaces/Args) & { `data`: `any`  }
+Ƭ **ImageSegmentationArgs**: [`Args`](interfaces/Args) & { `data`: `Blob` \| `ArrayBuffer`  }
 
 #### Defined in
 
-[HfInference.ts:430](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L430)
+[HfInference.ts:436](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L436)
 
 ___
 
@@ -142,17 +142,17 @@ ___
 
 #### Defined in
 
-[HfInference.ts:452](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L452)
+[HfInference.ts:458](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L458)
 
 ___
 
 ### ObjectDetectionArgs
 
-Ƭ **ObjectDetectionArgs**: [`Args`](interfaces/Args) & { `data`: `any`  }
+Ƭ **ObjectDetectionArgs**: [`Args`](interfaces/Args) & { `data`: `Blob` \| `ArrayBuffer`  }
 
 #### Defined in
 
-[HfInference.ts:400](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L400)
+[HfInference.ts:406](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L406)
 
 ___
 
@@ -162,7 +162,7 @@ ___
 
 #### Defined in
 
-[HfInference.ts:428](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L428)
+[HfInference.ts:434](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L434)
 
 ___
 
@@ -172,7 +172,7 @@ ___
 
 #### Defined in
 
-[HfInference.ts:92](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L92)
+[HfInference.ts:98](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L98)
 
 ___
 
@@ -182,7 +182,7 @@ ___
 
 #### Defined in
 
-[HfInference.ts:48](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L48)
+[HfInference.ts:54](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L54)
 
 ___
 
@@ -192,7 +192,7 @@ ___
 
 #### Defined in
 
-[HfInference.ts:118](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L118)
+[HfInference.ts:124](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L124)
 
 ___
 
@@ -202,7 +202,7 @@ ___
 
 #### Defined in
 
-[HfInference.ts:150](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L150)
+[HfInference.ts:156](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L156)
 
 ___
 
@@ -212,7 +212,7 @@ ___
 
 #### Defined in
 
-[HfInference.ts:157](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L157)
+[HfInference.ts:163](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L163)
 
 ___
 
@@ -222,7 +222,7 @@ ___
 
 #### Defined in
 
-[HfInference.ts:168](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L168)
+[HfInference.ts:174](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L174)
 
 ___
 
@@ -232,7 +232,7 @@ ___
 
 #### Defined in
 
-[HfInference.ts:489](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L489)
+[HfInference.ts:495](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L495)
 
 ___
 
@@ -242,7 +242,7 @@ ___
 
 #### Defined in
 
-[HfInference.ts:501](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L501)
+[HfInference.ts:507](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L507)
 
 ___
 
@@ -252,7 +252,7 @@ ___
 
 #### Defined in
 
-[HfInference.ts:220](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L220)
+[HfInference.ts:226](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L226)
 
 ___
 
@@ -262,7 +262,7 @@ ___
 
 #### Defined in
 
-[HfInference.ts:266](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L266)
+[HfInference.ts:272](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L272)
 
 ___
 
@@ -272,7 +272,7 @@ ___
 
 #### Defined in
 
-[HfInference.ts:268](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L268)
+[HfInference.ts:274](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L274)
 
 ___
 
@@ -282,7 +282,7 @@ ___
 
 #### Defined in
 
-[HfInference.ts:282](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L282)
+[HfInference.ts:288](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L288)
 
 ___
 
@@ -292,4 +292,4 @@ ___
 
 #### Defined in
 
-[HfInference.ts:305](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L305)
+[HfInference.ts:311](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L311)

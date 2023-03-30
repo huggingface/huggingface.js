@@ -10,7 +10,7 @@ A string that’s the answer within the text.
 
 #### Defined in
 
-[HfInference.ts:103](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L103)
+[HfInference.ts:109](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L109)
 
 ___
 
@@ -22,7 +22,7 @@ The index (string wise) of the stop of the answer within context.
 
 #### Defined in
 
-[HfInference.ts:107](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L107)
+[HfInference.ts:113](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L113)
 
 ___
 
@@ -34,7 +34,7 @@ A float that represents how likely that the answer is correct
 
 #### Defined in
 
-[HfInference.ts:111](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L111)
+[HfInference.ts:117](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L117)
 
 ___
 
@@ -46,4 +46,4 @@ The index (string wise) of the start of the answer within context.
 
 #### Defined in
 
-[HfInference.ts:115](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L115)
+[HfInference.ts:121](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L121)

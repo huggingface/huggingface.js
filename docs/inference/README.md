@@ -187,4 +187,4 @@ HF_ACCESS_TOKEN="your access token" npm run test
 
 We have an informative documentation project called [Tasks](https://huggingface.co/tasks) to list available models for each task and explain how each task works in detail.
 
-It also contain demos, example outputs and other resources should you want to dig more into the ML-side of things.
+It also contains demos, example outputs, and other resources should you want to dig deeper into the ML side of things.

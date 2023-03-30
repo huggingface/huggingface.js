@@ -8,4 +8,4 @@
 
 #### Defined in
 
-[HfInference.ts:22](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L22)
+[HfInference.ts:28](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L28)
