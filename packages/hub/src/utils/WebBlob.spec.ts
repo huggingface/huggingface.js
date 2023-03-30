@@ -11,7 +11,7 @@ describe("WebBlob", async () => {
 	const fullText = await (await fetch(resourceUrl)).text();
 
 	it("should create a WebBlob with a slice on the entire resource", async () => {
-		const webBlob = await WebBlob.create(resourceUrl);
+		const webBlob = await WebBlob.create(resourceUrl, { cacheBelow: 0 });
 
 		expect(webBlob).toMatchObject({
 			url: resourceUrl,
@@ -19,8 +19,23 @@ describe("WebBlob", async () => {
 			end: size,
 			contentType,
 		});
+		expect(webBlob).toBeInstanceOf(WebBlob);
 		expect(webBlob.size).toBe(size);
 		expect(webBlob.type).toBe(contentType);
+
+		const text = await webBlob.text();
+		expect(text).toBe(fullText);
+
+		const streamText = await new Response(webBlob.stream()).text();
+		expect(streamText).toBe(fullText);
+	});
+
+	it("should create a WebBlob with a slice on the entire resource, cached", async () => {
+		const webBlob = await WebBlob.create(resourceUrl, { cacheBelow: 1_000_000 });
+
+		expect(webBlob).not.toBeInstanceOf(WebBlob);
+		expect(webBlob.size).toBe(size);
+		expect(webBlob.type).toBe(contentType.replace("; ", ";"));
 
 		const text = await webBlob.text();
 		expect(text).toBe(fullText);
@@ -45,7 +60,7 @@ describe("WebBlob", async () => {
 	it("should create a slice on the file", async () => {
 		const expectedText = fullText.slice(10, 20);
 
-		const slice = (await WebBlob.create(resourceUrl)).slice(10, 20);
+		const slice = (await WebBlob.create(resourceUrl, { cacheBelow: 0 })).slice(10, 20);
 
 		expect(slice).toMatchObject({
 			url: resourceUrl,

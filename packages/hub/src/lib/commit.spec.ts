@@ -129,14 +129,12 @@ size ${lfsContent.length}
 			type: "model",
 		};
 
-		console.log(
-			await createRepo({
-				credentials: {
-					accessToken: TEST_ACCESS_TOKEN,
-				},
-				repo,
-			})
-		);
+		await createRepo({
+			credentials: {
+				accessToken: TEST_ACCESS_TOKEN,
+			},
+			repo,
+		});
 
 		try {
 			const FILES_TO_UPLOAD = [
@@ -157,7 +155,7 @@ size ${lfsContent.length}
 					};
 				})
 			);
-			const commitOutput = await commit({
+			await commit({
 				repo,
 				credentials: {
 					accessToken: TEST_ACCESS_TOKEN,
@@ -165,9 +163,6 @@ size ${lfsContent.length}
 				title: "upload model",
 				operations,
 			});
-
-			console.log(commitOutput);
-			console.log(repo);
 
 			const LFSSize = (await fileDownloadInfo({ repo, path: "mobilenet/group1-shard1of2" }))?.size;
 

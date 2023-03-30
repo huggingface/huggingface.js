@@ -1,15 +1,26 @@
 /**
  * WebBlob is a Blob implementation for web resources that supports range requests.
  */
+
+interface WebBlobCreateOptions {
+	/**
+	 * Default: 1_000_000
+	 *
+	 * Objects below that size will immediately be fetched and put in RAM, rather
+	 * than streamed ad-hoc
+	 */
+	cacheBelow: number;
+}
+
 export class WebBlob extends Blob {
-	static async create(url: URL): Promise<Blob> {
+	static async create(url: URL, opts: WebBlobCreateOptions = { cacheBelow: 1_000_000 }): Promise<Blob> {
 		const response = await fetch(url, { method: "HEAD" });
 
 		const size = Number(response.headers.get("content-length"));
 		const contentType = response.headers.get("content-type") || "";
 		const supportRange = response.headers.get("accept-ranges") === "bytes";
 
-		if (!supportRange || size < 1_000_000) {
+		if (!supportRange || size < opts.cacheBelow) {
 			return await (await fetch(url)).blob();
 		}
 
