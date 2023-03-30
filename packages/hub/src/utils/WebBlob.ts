@@ -9,7 +9,7 @@ export class WebBlob extends Blob {
 		const contentType = response.headers.get("content-type") || "";
 		const supportRange = response.headers.get("accept-ranges") === "bytes";
 
-		if (!supportRange) {
+		if (!supportRange || size < 1_000_000) {
 			return await (await fetch(url)).blob();
 		}
 
