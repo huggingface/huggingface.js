@@ -1,0 +1,17 @@
+{
+	"compilerOptions": {
+		"allowSyntheticDefaultImports": true,
+		"lib": ["ES2022", "DOM"],
+		"module": "CommonJS",
+		"moduleResolution": "node",
+		"target": "ES2022",
+		"forceConsistentCasingInFileNames": true,
+		"strict": true,
+		"noImplicitAny": true,
+		"strictNullChecks": true,
+		"skipLibCheck": true,
+		"outDir": "./dist"
+	},
+	"include": ["src", "index.ts"],
+	"exclude": ["dist"]
+}

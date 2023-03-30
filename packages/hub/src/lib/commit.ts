@@ -14,10 +14,10 @@ import type { Credentials, RepoId } from "../types/public";
 import { base64FromBytes } from "../utils/base64FromBytes";
 import { checkCredentials } from "../utils/checkCredentials";
 import { chunk } from "../utils/chunk";
-import { isBackend } from "../utils/env-predicates";
 import { promisesQueue } from "../utils/promisesQueue";
 import { promisesQueueStreaming } from "../utils/promisesQueueStreaming";
 import { sha256 } from "../utils/sha256";
+import { createBlob } from "../../../shared/";
 
 const CONCURRENT_SHAS = 5;
 const CONCURRENT_LFS_UPLOADS = 5;
@@ -110,17 +110,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 				return { ...operation, content: operation.content };
 			}
 
-			if (operation.content.protocol !== "file:") {
-				throw new TypeError('Only "file://" protocol is supported for now');
-			}
-
-			if (!isBackend) {
-				throw new TypeError("File URLs are not supported in browsers");
-			}
-
-			const { LazyBlob } = await import("../utils/LazyBlob");
-
-			const lazyBlob = await LazyBlob.create(operation.content);
+			const lazyBlob = await createBlob(operation.content);
 
 			return {
 				...operation,
