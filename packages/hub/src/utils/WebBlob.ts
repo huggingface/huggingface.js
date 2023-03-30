@@ -13,21 +13,23 @@ export class WebBlob extends Blob {
 			return await (await fetch(url)).blob();
 		}
 
-		return new WebBlob(url, 0, size, contentType);
+		return new WebBlob(url, 0, size, contentType, true);
 	}
 
 	private url: URL;
 	private start: number;
 	private end: number;
 	private contentType: string;
+	private full: boolean;
 
-	constructor(url: URL, start: number, end: number, contentType: string) {
+	constructor(url: URL, start: number, end: number, contentType: string, full: boolean) {
 		super([]);
 
 		this.url = url;
 		this.start = start;
 		this.end = end;
 		this.contentType = contentType;
+		this.full = full;
 	}
 
 	get size(): number {
@@ -43,7 +45,13 @@ export class WebBlob extends Blob {
 			new TypeError("Unsupported negative start/end on FileBlob.slice");
 		}
 
-		const slice = new WebBlob(this.url, this.start + start, Math.min(this.start + end, this.end), this.contentType);
+		const slice = new WebBlob(
+			this.url,
+			this.start + start,
+			Math.min(this.start + end, this.end),
+			this.contentType,
+			start === 0 && end === this.size ? this.full : false
+		);
 
 		return slice;
 	}
@@ -71,6 +79,9 @@ export class WebBlob extends Blob {
 	}
 
 	private fetchRange(): Promise<Response> {
+		if (this.full) {
+			return fetch(this.url);
+		}
 		return fetch(this.url, {
 			headers: {
 				Range: `bytes=${this.start}-${this.end - 1}`,
