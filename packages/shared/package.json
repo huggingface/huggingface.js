@@ -2,6 +2,16 @@
 	"name": "@huggingface/shared",
 	"version": "0.0.1",
 	"description": "Shared utilities for Hugging Face's JavaScript libraries",
+	"main": "./dist/index.js",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"require": "./dist/index.js",
+			"import": "./dist/index.mjs",
+			"types": "./dist/index.d.ts"
+		}
+	},
 	"engines": {
 		"node": ">=18"
 	},
@@ -11,8 +21,9 @@
 		"lint:check": "eslint --ext .cjs,.ts .",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
+		"build": "tsup index.ts --format cjs,esm --clean --dts-resolve",
 		"test": "vitest run",
-		"test:browser": "vitest run --browser.name=chrome --browser.headless --config ./vitest-browser.config.ts",
+		"test:browser": "vitest run --browser.name=chrome --browser.headless",
 		"type-check": "tsc"
 	},
 	"files": [
@@ -25,8 +36,7 @@
 	"devDependencies": {
 		"@types/node": "^18.13.0",
 		"ts-node": "^10.9.1",
-		"tsup": "^6.6.3",
+		"tsup": "^6.7.0",
 		"typescript": "^4.9.5"
-	},
-	"dependencies": {}
+	}
 }
