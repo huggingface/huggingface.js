@@ -284,12 +284,15 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 						})),
 					};
 
-					await promisesQueue(
+					await promisesQueueStreaming(
 						parts.map((part) => async () => {
 							const index = parseInt(part) - 1;
+							const slice = content.slice(index * chunkSize, (index + 1) * chunkSize);
+
 							const res = await fetch(header[part], {
 								method: "PUT",
-								body: content.slice(index * chunkSize, (index + 1) * chunkSize),
+								/** Unfortunately, browsers don't support our inherited version of Blob in fetch calls */
+								body: slice instanceof WebBlob && isFrontend ? await slice.arrayBuffer() : slice,
 							});
 
 							if (!res.ok) {
@@ -333,7 +336,8 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 						headers: {
 							...(batchRequestId ? { "X-Request-Id": batchRequestId } : undefined),
 						},
-						body: content,
+						/** Unfortunately, browsers don't support our inherited version of Blob in fetch calls */
+						body: content instanceof WebBlob && isFrontend ? await content.arrayBuffer() : content,
 					});
 
 					if (!res.ok) {

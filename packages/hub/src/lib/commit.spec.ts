@@ -167,16 +167,26 @@ size ${lfsContent.length}
 			const LFSSize = (await fileDownloadInfo({ repo, path: "mobilenet/group1-shard1of2" }))?.size;
 
 			assert.strictEqual(LFSSize, 4_194_304);
+
+			const pointerFile = await downloadFile({ repo, path: "mobilenet/group1-shard1of2", raw: true });
+
+			// Make sure SHA is computed properly as well
+			assert.strictEqual(
+				(await pointerFile?.text())?.trim(),
+				`
+version https://git-lfs.github.com/spec/v1
+oid sha256:3fb621eb9b37478239504ee083042d5b18699e8b8618e569478b03b119a85a69
+size 4194304			
+			`.trim()
+			);
 		} finally {
-			if (!Math.random()) {
-				await deleteRepo({
-					repo: {
-						name: repoName,
-						type: "model",
-					},
-					credentials: { accessToken: TEST_ACCESS_TOKEN },
-				});
-			}
+			await deleteRepo({
+				repo: {
+					name: repoName,
+					type: "model",
+				},
+				credentials: { accessToken: TEST_ACCESS_TOKEN },
+			});
 		}
 		// https://huggingfacejs-push-model-from-web.hf.space/
 	}, 60_000);
