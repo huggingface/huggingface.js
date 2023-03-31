@@ -146,7 +146,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/commit.ts:414](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L414)
+[hub/src/lib/commit.ts:418](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L418)
 
 ___
 
