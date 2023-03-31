@@ -11,7 +11,7 @@ import type {
 	ApiPreuploadResponse,
 } from "../types/api/api-commit";
 import type { Credentials, RepoId } from "../types/public";
-import { base64FromBytes } from "../utils/base64FromBytes";
+import { base64FromBytes } from "../../../shared";
 import { checkCredentials } from "../utils/checkCredentials";
 import { chunk } from "../utils/chunk";
 import { promisesQueue } from "../utils/promisesQueue";
