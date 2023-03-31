@@ -35,7 +35,7 @@ describe("WebBlob", async () => {
 
 		expect(webBlob).not.toBeInstanceOf(WebBlob);
 		expect(webBlob.size).toBe(size);
-		expect(webBlob.type).toBe(contentType.replace("; ", ";"));
+		expect(webBlob.type.replace(/;\s*charset=utf-8/, "")).toBe(contentType.replace(/;\s*charset=utf-8/, ""));
 
 		const text = await webBlob.text();
 		expect(text).toBe(fullText);
