@@ -670,7 +670,7 @@ export class HfInference {
 					Array.isArray(x.labels) &&
 					x.labels.every((_label) => typeof _label === "string") &&
 					Array.isArray(x.scores) &&
-					x.labels.every((_score) => typeof _score === "number") &&
+					x.scores.every((_score) => typeof _score === "number") &&
 					typeof x.sequence === "string"
 			);
 		if (!isValidOutput) {
