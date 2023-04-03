@@ -519,7 +519,7 @@ export class HfInference {
 	 * Tries to fill in a hole with a missing word (token to be precise). That’s the base task for BERT models.
 	 */
 	public async fillMask(args: FillMaskArgs, options?: Options): Promise<FillMaskReturn> {
-		return this.request(args, options);
+		return await this.request(args, options);
 	}
 
 	/**
