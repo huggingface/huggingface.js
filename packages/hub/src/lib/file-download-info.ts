@@ -1,7 +1,8 @@
 import { HUB_URL } from "../consts";
 import { createApiError, InvalidApiResponseFormatError } from "../error";
-import type { Credentials, RepoId } from "../types/public";
+import type { Credentials, RepoDesignation } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
+import { toRepoId } from "../utils/toRepoId";
 
 export interface FileDownloadInfoOutput {
 	size: number;
@@ -15,7 +16,7 @@ export interface FileDownloadInfoOutput {
  * @returns null when the file doesn't exist
  */
 export async function fileDownloadInfo(params: {
-	repo: RepoId;
+	repo: RepoDesignation;
 	path: string;
 	revision?: string;
 	credentials?: Credentials;
@@ -32,10 +33,11 @@ export async function fileDownloadInfo(params: {
 	noContentDisposition?: boolean;
 }): Promise<FileDownloadInfoOutput | null> {
 	checkCredentials(params.credentials);
+	const repoId = toRepoId(params.repo);
 
 	const hubUrl = params.hubUrl ?? HUB_URL;
 	const url =
-		`${hubUrl}/${params.repo.type === "model" ? "" : `${params.repo.type}s/`}${params.repo.name}/${
+		`${hubUrl}/${repoId.type === "model" ? "" : `${repoId.type}s/`}${repoId.name}/${
 			params.raw ? "raw" : "resolve"
 		}/${encodeURIComponent(params.revision ?? "main")}/${params.path}` +
 		(params.noContentDisposition ? "?noContentDisposition=1" : "");

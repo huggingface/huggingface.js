@@ -1,10 +1,10 @@
-import type { Credentials, RepoId } from "../types/public";
+import type { Credentials } from "../types/public";
 import type { CommitOutput, CommitParams } from "./commit";
 import { commit } from "./commit";
 
 export function deleteFile(params: {
 	credentials: Credentials;
-	repo: RepoId;
+	repo: CommitParams["repo"];
 	path: string;
 	commitTitle?: CommitParams["title"];
 	commitDescription?: CommitParams["description"];

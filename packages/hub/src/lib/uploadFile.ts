@@ -1,10 +1,10 @@
-import type { Credentials, RepoId } from "../types/public";
+import type { Credentials } from "../types/public";
 import type { CommitOutput, CommitParams, ContentSource } from "./commit";
 import { commit } from "./commit";
 
 export function uploadFile(params: {
 	credentials: Credentials;
-	repo: RepoId;
+	repo: CommitParams["repo"];
 	file: URL | File | { path: string; content: ContentSource };
 	commitTitle?: CommitParams["title"];
 	commitDescription?: CommitParams["description"];

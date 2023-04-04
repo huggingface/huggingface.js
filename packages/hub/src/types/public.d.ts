@@ -5,6 +5,10 @@ export interface RepoId {
 	type: RepoType;
 }
 
+export type RepoFullName = string | `spaces/${string}` | `datasets/${string}`;
+
+export type RepoDesignation = RepoId | RepoFullName;
+
 /** Actually `hf_${string}`, but for convenience, using the string type */
 export type AccessToken = string;
 

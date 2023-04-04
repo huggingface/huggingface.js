@@ -1,12 +1,13 @@
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
 import type { ApiCreateRepoPayload } from "../types/api/api-create-repo";
-import type { Credentials, RepoId, SpaceSdk } from "../types/public";
+import type { Credentials, RepoDesignation, SpaceSdk } from "../types/public";
 import { base64FromBytes } from "../utils/base64FromBytes";
 import { checkCredentials } from "../utils/checkCredentials";
+import { toRepoId } from "../utils/toRepoId";
 
 export async function createRepo(params: {
-	repo: RepoId;
+	repo: RepoDesignation;
 	credentials: Credentials;
 	private?: boolean;
 	license?: string;
@@ -19,11 +20,12 @@ export async function createRepo(params: {
 	hubUrl?: string;
 }): Promise<{ repoUrl: string }> {
 	checkCredentials(params.credentials);
-	const [namespace, repoName] = params.repo.name.split("/");
+	const repoId = toRepoId(params.repo);
+	const [namespace, repoName] = repoId.name.split("/");
 
 	if (!namespace || !repoName) {
 		throw new TypeError(
-			`"${params.repo.name}" is not a fully qualified repo name. It should be of the form "{namespace}/{repoName}".`
+			`"${repoId.name}" is not a fully qualified repo name. It should be of the form "{namespace}/{repoName}".`
 		);
 	}
 
@@ -34,13 +36,13 @@ export async function createRepo(params: {
 			private: params.private,
 			organization: namespace,
 			license: params.license,
-			...(params.repo.type === "space"
+			...(repoId.type === "space"
 				? {
 						type: "space",
 						sdk: "static",
 				  }
 				: {
-						type: params.repo.type,
+						type: repoId.type,
 				  }),
 			files: params.files
 				? await Promise.all(

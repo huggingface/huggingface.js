@@ -10,7 +10,7 @@ import type {
 	ApiPreuploadRequest,
 	ApiPreuploadResponse,
 } from "../types/api/api-commit";
-import type { Credentials, RepoId } from "../types/public";
+import type { Credentials, RepoDesignation } from "../types/public";
 import { base64FromBytes } from "../utils/base64FromBytes";
 import { checkCredentials } from "../utils/checkCredentials";
 import { chunk } from "../utils/chunk";
@@ -18,6 +18,7 @@ import { isFrontend } from "../utils/env-predicates";
 import { promisesQueue } from "../utils/promisesQueue";
 import { promisesQueueStreaming } from "../utils/promisesQueueStreaming";
 import { sha256 } from "../utils/sha256";
+import { toRepoId } from "../utils/toRepoId";
 import { WebBlob } from "../utils/WebBlob";
 
 const CONCURRENT_SHAS = 5;
@@ -54,7 +55,7 @@ type CommitBlobOperation = Exclude<CommitOperation, CommitFile> | CommitBlob;
 export interface CommitParams {
 	title: string;
 	description?: string;
-	repo: RepoId;
+	repo: RepoDesignation;
 	operations: CommitOperation[];
 	credentials: Credentials;
 	/** @default "main" */
@@ -124,6 +125,7 @@ async function createBlob(url: URL): Promise<Blob> {
  */
 async function* commitIter(params: CommitParams): AsyncGenerator<unknown, CommitOutput> {
 	checkCredentials(params.credentials);
+	const repoId = toRepoId(params.repo);
 	yield "preuploading";
 
 	const lfsShas = new Map<string, string | null>();
@@ -163,7 +165,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 		};
 
 		const res = await fetch(
-			`${params.hubUrl ?? HUB_URL}/api/${params.repo.type}s/${params.repo.name}/preupload/${encodeURIComponent(
+			`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/preupload/${encodeURIComponent(
 				params.branch ?? "main"
 			)}` + (params.isPullRequest ? "?create_pr=1" : ""),
 			{
@@ -221,8 +223,8 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 		};
 
 		const res = await fetch(
-			`${params.hubUrl ?? HUB_URL}/${params.repo.type === "model" ? "" : params.repo.type + "s/"}${
-				params.repo.name
+			`${params.hubUrl ?? HUB_URL}/${repoId.type === "model" ? "" : repoId.type + "s/"}${
+				repoId.name
 			}.git/info/lfs/objects/batch`,
 			{
 				method: "POST",
@@ -355,7 +357,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 	yield "committing";
 
 	const res = await fetch(
-		`${params.hubUrl ?? HUB_URL}/api/${params.repo.type}s/${params.repo.name}/commit/${encodeURIComponent(
+		`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/commit/${encodeURIComponent(
 			params.branch ?? "main"
 		)}` + (params.isPullRequest ? "?create_pr=1" : ""),
 		{
