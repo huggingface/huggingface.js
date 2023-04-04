@@ -42,6 +42,7 @@ import type { RepoId, Credentials } from "@huggingface/hub";
 ```
 
 ### From CDN or Static hosting
+
 You can run our packages with vanilla JS, without any bundler, by using a CDN or static hosting. Using [ES modules](https://hacks.mozilla.org/2018/03/es-modules-a-cartoon-deep-dive/), i.e. `<script type="module">`, you can import the libraries in your code:
 
 ```html
