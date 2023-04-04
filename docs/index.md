@@ -55,7 +55,7 @@ You can run our packages with vanilla JS, without any bundler, by using a CDN or
 ## Usage example
 
 ```ts
-import { createRepo, commit } from "@huggingface/hub";
+import { createRepo, uploadFile } from "@huggingface/hub";
 import { HfInference } from "@huggingface/inference";
 
 // use an access token from your free account
@@ -66,15 +66,14 @@ await createRepo({
   credentials: {accessToken: HF_ACCESS_TOKEN}
 });
 
-await commit({
+await uploadFile({
   repo: {type: "model", name: "my-user/nlp-test"},
   credentials: {accessToken: HF_ACCESS_TOKEN},
-  title: "Add model file",
-  operations: [{
-    operation: "addOrUpdate",
+  // Can work with native File in browsers
+  file: {
     path: "pytorch_model.bin",
-    content: new Blob(...) // Can work with native File in browsers
-  }]
+    content: new Blob(...) 
+  }
 });
 
 const inference = new HfInference(HF_ACCESS_TOKEN);

@@ -59,7 +59,7 @@ Recommended model:  superb/hubert-large-superb-er
 
 #### Defined in
 
-[HfInference.ts:625](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L625)
+[HfInference.ts:737](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L737)
 
 ___
 
@@ -83,7 +83,7 @@ Recommended model (english language): facebook/wav2vec2-large-960h-lv60-self
 
 #### Defined in
 
-[HfInference.ts:611](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L611)
+[HfInference.ts:718](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L718)
 
 ___
 
@@ -106,7 +106,7 @@ This task corresponds to any chatbot like structure. Models tend to have shorter
 
 #### Defined in
 
-[HfInference.ts:596](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L596)
+[HfInference.ts:688](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L688)
 
 ___
 
@@ -129,7 +129,7 @@ This task reads some text and outputs raw float values, that are usually consume
 
 #### Defined in
 
-[HfInference.ts:603](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L603)
+[HfInference.ts:709](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L709)
 
 ___
 
@@ -176,7 +176,7 @@ Recommended model: google/vit-base-patch16-224
 
 #### Defined in
 
-[HfInference.ts:639](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L639)
+[HfInference.ts:757](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L757)
 
 ___
 
@@ -200,7 +200,7 @@ Recommended model: facebook/detr-resnet-50-panoptic
 
 #### Defined in
 
-[HfInference.ts:664](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L664)
+[HfInference.ts:805](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L805)
 
 ___
 
@@ -224,7 +224,7 @@ Recommended model: facebook/detr-resnet-50
 
 #### Defined in
 
-[HfInference.ts:653](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L653)
+[HfInference.ts:777](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L777)
 
 ___
 
@@ -247,7 +247,7 @@ Want to have a nice know-it-all bot that can answer any question?. Recommended m
 
 #### Defined in
 
-[HfInference.ts:535](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L535)
+[HfInference.ts:555](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L555)
 
 ___
 
@@ -274,7 +274,7 @@ ___
 
 #### Defined in
 
-[HfInference.ts:682](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L682)
+[HfInference.ts:837](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L837)
 
 ___
 
@@ -297,7 +297,7 @@ This task is well known to summarize longer text into shorter text. Be careful, 
 
 #### Defined in
 
-[HfInference.ts:528](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L528)
+[HfInference.ts:543](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L543)
 
 ___
 
@@ -320,7 +320,7 @@ Don’t know SQL? Don’t want to dive into a large spreadsheet? Ask questions i
 
 #### Defined in
 
-[HfInference.ts:542](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L542)
+[HfInference.ts:573](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L573)
 
 ___
 
@@ -343,7 +343,7 @@ Usually used for sentiment-analysis this will output the likelihood of classes o
 
 #### Defined in
 
-[HfInference.ts:552](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L552)
+[HfInference.ts:596](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L596)
 
 ___
 
@@ -366,7 +366,7 @@ Use to continue text from a prompt. This is a very generic task. Recommended mod
 
 #### Defined in
 
-[HfInference.ts:559](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L559)
+[HfInference.ts:609](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L609)
 
 ___
 
@@ -390,7 +390,7 @@ Recommended model: stabilityai/stable-diffusion-2
 
 #### Defined in
 
-[HfInference.ts:675](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L675)
+[HfInference.ts:825](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L825)
 
 ___
 
@@ -413,7 +413,7 @@ Usually used for sentence parsing, either grammatical, or Named Entity Recogniti
 
 #### Defined in
 
-[HfInference.ts:566](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L566)
+[HfInference.ts:621](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L621)
 
 ___
 
@@ -436,7 +436,7 @@ This task is well known to translate text from one language to another. Recommen
 
 #### Defined in
 
-[HfInference.ts:576](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L576)
+[HfInference.ts:647](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L647)
 
 ___
 
@@ -459,4 +459,4 @@ This task is super useful to try out classification with zero code, you simply p
 
 #### Defined in
 
-[HfInference.ts:583](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L583)
+[HfInference.ts:659](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L659)
