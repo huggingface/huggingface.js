@@ -24,7 +24,7 @@ npm run prepublish-inference
 If you want to see the final HTML docs, there are a few steps:
 
 - Generate the docs with `npm run start`
-- Clone https://github.com/huggingface/doc-builder and put it in the same repo as huggingface.js
+- Clone https://github.com/huggingface/doc-builder and put it in the same folder as huggingface.js
 - Follow the instructions to install it from source
 - Go in its `kit` folder and run `npm install`
 
