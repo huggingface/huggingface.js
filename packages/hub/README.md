@@ -14,9 +14,9 @@ For some of the calls, you need to create an account and generate an [access tok
 
 ```ts
 import { createRepo, uploadFiles, deleteFile, deleteRepo, listFiles, whoAmI } from "@huggingface/hub";
-import type { RepoId, Credentials } from "@huggingface/hub";
+import type { RepoDesignation, Credentials } from "@huggingface/hub";
 
-const repo: RepoId = { type: "model", name: "myname/some-model" };
+const repo: RepoDesignation = { type: "model", name: "myname/some-model" };
 const credentials: Credentials = { accessToken: "hf_..." };
 
 const {name: username} = await whoAmI({credentials});

@@ -1,18 +1,24 @@
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
-import type { Credentials, RepoId } from "../types/public";
+import type { Credentials, RepoDesignation } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
+import { toRepoId } from "../utils/toRepoId";
 
-export async function deleteRepo(params: { repo: RepoId; credentials: Credentials; hubUrl?: string }): Promise<void> {
+export async function deleteRepo(params: {
+	repo: RepoDesignation;
+	credentials: Credentials;
+	hubUrl?: string;
+}): Promise<void> {
 	checkCredentials(params.credentials);
-	const [namespace, repoName] = params.repo.name.split("/");
+	const repoId = toRepoId(params.repo);
+	const [namespace, repoName] = repoId.name.split("/");
 
 	const res = await fetch(`${params.hubUrl ?? HUB_URL}/api/repos/delete`, {
 		method: "DELETE",
 		body: JSON.stringify({
 			name: repoName,
 			organization: namespace,
-			type: params.repo.type,
+			type: repoId.type,
 		}),
 		headers: {
 			Authorization: `Bearer ${params.credentials.accessToken}`,
