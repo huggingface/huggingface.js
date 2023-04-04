@@ -36,7 +36,7 @@ Actually `hf_${string}`, but for convenience, using the string type
 
 #### Defined in
 
-[hub/src/types/public.d.ts:9](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L9)
+[hub/src/types/public.d.ts:13](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L13)
 
 ___
 
@@ -46,7 +46,7 @@ ___
 
 #### Defined in
 
-[hub/src/types/public.d.ts:38](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L38)
+[hub/src/types/public.d.ts:42](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L42)
 
 ___
 
@@ -56,7 +56,7 @@ ___
 
 #### Defined in
 
-[hub/src/types/public.d.ts:40](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L40)
+[hub/src/types/public.d.ts:44](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L44)
 
 ___
 
@@ -66,7 +66,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/commit.ts:51](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L51)
+[hub/src/lib/commit.ts:52](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L52)
 
 ___
 
@@ -76,7 +76,27 @@ ___
 
 #### Defined in
 
-[hub/src/lib/commit.ts:32](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L32)
+[hub/src/lib/commit.ts:33](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L33)
+
+___
+
+### RepoDesignation
+
+Ƭ **RepoDesignation**: [`RepoId`](interfaces/RepoId) \| [`RepoFullName`](modules#repofullname)
+
+#### Defined in
+
+[hub/src/types/public.d.ts:10](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L10)
+
+___
+
+### RepoFullName
+
+Ƭ **RepoFullName**: `string` \| \`spaces/${string}\` \| \`datasets/${string}\`
+
+#### Defined in
+
+[hub/src/types/public.d.ts:8](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L8)
 
 ___
 
@@ -96,7 +116,7 @@ ___
 
 #### Defined in
 
-[hub/src/types/public.d.ts:15](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L15)
+[hub/src/types/public.d.ts:19](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L19)
 
 ___
 
@@ -106,7 +126,7 @@ ___
 
 #### Defined in
 
-[hub/src/types/public.d.ts:24](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L24)
+[hub/src/types/public.d.ts:28](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L28)
 
 ___
 
@@ -116,7 +136,7 @@ ___
 
 #### Defined in
 
-[hub/src/types/public.d.ts:26](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L26)
+[hub/src/types/public.d.ts:30](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L30)
 
 ___
 
@@ -126,7 +146,7 @@ ___
 
 #### Defined in
 
-[hub/src/types/public.d.ts:42](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L42)
+[hub/src/types/public.d.ts:46](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L46)
 
 ___
 
@@ -156,7 +176,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/commit.ts:418](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L418)
+[hub/src/lib/commit.ts:420](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L420)
 
 ___
 
@@ -174,7 +194,7 @@ ___
 | `params.hubUrl?` | `string` | - |
 | `params.license?` | `string` | - |
 | `params.private?` | `boolean` | - |
-| `params.repo` | [`RepoId`](interfaces/RepoId) | - |
+| `params.repo` | [`RepoDesignation`](modules#repodesignation) | - |
 | `params.sdk?` | [`SpaceSdk`](modules#spacesdk) | **`Required`** for when repo.type === "space" |
 
 #### Returns
@@ -183,7 +203,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/create-repo.ts:8](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/create-repo.ts#L8)
+[hub/src/lib/create-repo.ts:9](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/create-repo.ts#L9)
 
 ___
 
@@ -198,7 +218,7 @@ ___
 | `params` | `Object` |
 | `params.credentials` | [`Credentials`](interfaces/Credentials) |
 | `params.hubUrl?` | `string` |
-| `params.repo` | [`RepoId`](interfaces/RepoId) |
+| `params.repo` | [`RepoDesignation`](modules#repodesignation) |
 
 #### Returns
 
@@ -206,7 +226,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/delete-repo.ts:6](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/delete-repo.ts#L6)
+[hub/src/lib/delete-repo.ts:7](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/delete-repo.ts#L7)
 
 ___
 
@@ -223,7 +243,7 @@ ___
 | `params.hubUrl?` | `string` | - |
 | `params.path` | `string` | - |
 | `params.raw?` | `boolean` | If true, will download the raw git file. For example, when calling on a file stored with Git LFS, the pointer file will be downloaded instead. |
-| `params.repo` | [`RepoId`](interfaces/RepoId) | - |
+| `params.repo` | [`RepoDesignation`](modules#repodesignation) | - |
 | `params.revision?` | `string` | - |
 
 #### Returns
@@ -234,7 +254,7 @@ null when the file doesn't exist
 
 #### Defined in
 
-[hub/src/lib/download-file.ts:9](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/download-file.ts#L9)
+[hub/src/lib/download-file.ts:10](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/download-file.ts#L10)
 
 ___
 
@@ -252,7 +272,7 @@ ___
 | `params.noContentDisposition?` | `boolean` | To avoid the content-disposition header in the `downloadLink` for LFS files So that on browsers you can use the URL in an iframe for example |
 | `params.path` | `string` | - |
 | `params.raw?` | `boolean` | To get the raw pointer file behind a LFS file |
-| `params.repo` | [`RepoId`](interfaces/RepoId) | - |
+| `params.repo` | [`RepoDesignation`](modules#repodesignation) | - |
 | `params.revision?` | `string` | - |
 
 #### Returns
@@ -263,7 +283,7 @@ null when the file doesn't exist
 
 #### Defined in
 
-[hub/src/lib/file-download-info.ts:17](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/file-download-info.ts#L17)
+[hub/src/lib/file-download-info.ts:18](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/file-download-info.ts#L18)
 
 ___
 
@@ -307,7 +327,7 @@ with params.recursive set to `true`.
 | `params.hubUrl?` | `string` | - |
 | `params.path?` | `string` | Eg 'data' for listing all files in the 'data' folder. Leave it empty to list all files in the repo. |
 | `params.recursive?` | `boolean` | Do we want to list files in subdirectories? |
-| `params.repo` | [`RepoId`](interfaces/RepoId) | - |
+| `params.repo` | [`RepoDesignation`](modules#repodesignation) | - |
 | `params.revision?` | `string` | - |
 
 #### Returns
@@ -316,7 +336,7 @@ with params.recursive set to `true`.
 
 #### Defined in
 
-[hub/src/lib/list-files.ts:31](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L31)
+[hub/src/lib/list-files.ts:32](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L32)
 
 ___
 

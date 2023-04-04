@@ -8,7 +8,7 @@
 
 #### Defined in
 
-[hub/src/lib/commit.ts:37](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L37)
+[hub/src/lib/commit.ts:38](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L38)
 
 ___
 
@@ -18,7 +18,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/commit.ts:35](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L35)
+[hub/src/lib/commit.ts:36](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L36)
 
 ___
 
@@ -28,4 +28,4 @@ ___
 
 #### Defined in
 
-[hub/src/lib/commit.ts:36](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L36)
+[hub/src/lib/commit.ts:37](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L37)
