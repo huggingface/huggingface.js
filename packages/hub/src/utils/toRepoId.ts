@@ -19,7 +19,7 @@ export function toRepoId(repo: RepoDesignation): RepoId {
 		throw new TypeError("Datasets should start with 'dataset/', plural, not 'dataset/'");
 	}
 
-	const slashes = repo.split("/").length;
+	const slashes = repo.split("/").length - 1;
 
 	if (repo.startsWith("spaces/")) {
 		if (slashes !== 2) {
