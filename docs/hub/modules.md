@@ -70,6 +70,16 @@ ___
 
 ___
 
+### ContentSource
+
+Ƭ **ContentSource**: `Blob` \| `URL`
+
+#### Defined in
+
+[hub/src/lib/commit.ts:32](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L32)
+
+___
+
 ### RepoType
 
 Ƭ **RepoType**: ``"space"`` \| ``"dataset"`` \| ``"model"``

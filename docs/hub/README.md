@@ -11,7 +11,7 @@ npm add @huggingface/hub
 For some of the calls, you need to create an account and generate an [access token](https://huggingface.co/settings/tokens).
 
 ```ts
-import { createRepo, commit, deleteRepo, listFiles, whoAmI } from "@huggingface/hub";
+import { createRepo, uploadFiles, deleteFile, deleteRepo, listFiles, whoAmI } from "@huggingface/hub";
 import type { RepoId, Credentials } from "@huggingface/hub";
 
 const repo: RepoId = { type: "model", name: "myname/some-model" };
@@ -25,29 +25,29 @@ for await (const model of listModels({search: {owner: username}, credentials})) 
 
 await createRepo({ repo, credentials, license: "mit" });
 
-await commit({
+await uploadFiles({
   repo,
   credentials,
-  operations: [
+  files: [
+    // path + blob content
     {
-      operation: "addOrUpdate",
       path: "file.txt",
       content: new Blob(["Hello World"]),
     },
+    // Local file URL
+    pathToFileURL("./pytorch-model.bin"),
+    // Web URL
+    new URL("https://huggingface.co/xlm-roberta-base/resolve/main/tokenizer.json"),
+    // Path + Web URL
     {
-      operation: "addOrUpdate",
-      path: "pytorch-model.bin",
-      // Only supported from the backend
-      content: pathToFileURL("./pytorch-model.bin"),
-    },
-    {
-      operation: "addOrUpdate",
-      path: "tokenizer.json",
-      // Copy xml-roberta-base's tokenizer.json directly from HF
-      content: new URL("https://huggingface.co/xlm-roberta-base/raw/main/tokenizer.json"),
-    },
+      path: "myfile.bin",
+      content: new URL("https://huggingface.co/bert-base-uncased/resolve/main/pytorch_model.bin")
+    }
+    // Can also work with native File in browsers
   ],
 });
+
+await deleteFile({repo, credentials, path: "myfile.bin"});
 
 await (await downloadFile({ repo, path: "README.md" })).text();
 

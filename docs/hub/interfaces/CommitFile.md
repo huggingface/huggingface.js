@@ -4,7 +4,7 @@
 
 ### content
 
-• **content**: `ContentSource`
+• **content**: [`ContentSource`](../modules#contentsource)
 
 #### Defined in
 
