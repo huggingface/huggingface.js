@@ -29,7 +29,7 @@ export interface CommitDeletedEntry {
 	path: string;
 }
 
-type ContentSource = Blob | URL;
+export type ContentSource = Blob | URL;
 
 export interface CommitFile {
 	operation: "addOrUpdate";
