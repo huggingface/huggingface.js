@@ -1,6 +1,6 @@
 import { toArray } from "./utils/to-array";
-import type {ServerSentEvent} from "./utils/Uint8ToSseStream";
-import { Uint8ToSseStream} from "./utils/Uint8ToSseStream";
+import type { ServerSentEvent } from "./utils/Uint8ToSseStream";
+import { Uint8ToSseStream } from "./utils/Uint8ToSseStream";
 
 const HF_INFERENCE_ENDPOINT_BASE_URL = "https://api-inference.huggingface.co/models/";
 
@@ -227,7 +227,6 @@ export interface TextGenerationReturn {
 	generated_text: string;
 }
 
-
 export interface TextGenerationStreamToken {
 	/** Token ID from the model tokenizer */
 	id: number;
@@ -290,7 +289,7 @@ export interface TextGenerationStreamDetails {
 	/** */
 	tokens: TextGenerationStreamToken[];
 	/** Additional sequences when using the `best_of` parameter */
-	best_of_sequences?: TextGenerationStreamBestOfSequence[]
+	best_of_sequences?: TextGenerationStreamBestOfSequence[];
 }
 
 export interface TextGenerationStreamReturn {
@@ -703,7 +702,10 @@ export class HfInference {
 	/**
 	 * Use to continue text from a prompt. Same as `textGeneration` but returns stream that can be read one token at a time
 	 */
-	public async textGenerationStream(args: TextGenerationArgs, options?: Options): Promise<ReadableStream<TextGenerationStreamReturn>> {
+	public async textGenerationStream(
+		args: TextGenerationArgs,
+		options?: Options
+	): Promise<ReadableStream<TextGenerationStreamReturn>> {
 		return await this.streamingRequest<TextGenerationStreamReturn>(args, options);
 	}
 
@@ -1004,12 +1006,12 @@ export class HfInference {
 			includeCredentials?: boolean;
 		}
 	): Promise<ReadableStream<T>> {
-		const mergedOptions = { ...this.defaultOptions, ...options};
+		const mergedOptions = { ...this.defaultOptions, ...options };
 		const { model, ...otherArgs } = args;
 
 		const headers: Record<string, string> = {};
 
-		headers['Accept'] = 'text/event-stream';
+		headers["Accept"] = "text/event-stream";
 
 		if (this.apiKey) {
 			headers["Authorization"] = `Bearer ${this.apiKey}`;
@@ -1031,16 +1033,16 @@ export class HfInference {
 			}
 		}
 
-		const response= await fetch(`${HF_INFERENCE_ENDPOINT_BASE_URL}${model}`, {
+		const response = await fetch(`${HF_INFERENCE_ENDPOINT_BASE_URL}${model}`, {
 			headers,
 			method: "POST",
 			body: options?.binary
 				? args.data
 				: JSON.stringify({
-					...otherArgs,
-					stream: true,
-					options: mergedOptions,
-				}),
+						...otherArgs,
+						stream: true,
+						options: mergedOptions,
+				  }),
 			credentials: options?.includeCredentials ? "include" : "same-origin",
 		});
 
@@ -1053,13 +1055,13 @@ export class HfInference {
 		if (!response.ok) {
 			throw new Error(`Server response contains error: ${response.status}`);
 		}
-		if (response.headers.get('content-type') !== 'text/event-stream') {
+		if (response.headers.get("content-type") !== "text/event-stream") {
 			throw new Error(`Server does not support event stream content type`);
 		}
 
 		// transform from `ServerSentEvent` to return type
 		const sseToObjTransform: TransformStream<ServerSentEvent, T> = new TransformStream({
-			async start(){},
+			async start() {},
 			async transform(chunk: ServerSentEvent, controller: TransformStreamDefaultController) {
 				chunk = await chunk;
 				try {
@@ -1070,10 +1072,9 @@ export class HfInference {
 				} catch (e) {
 					controller.error(e);
 				}
-			}
+			},
 		});
 
 		return response.body.pipeThrough(new Uint8ToSseStream()).pipeThrough(sseToObjTransform);
 	}
-
 }
