@@ -15,7 +15,7 @@ export interface ServerSentEvent {
 /**
  * Parses Uint8Array chunks into `ServerSentEvent`
  */
-class Uint8ToSseParser {
+export class Uint8ToSseParser {
 	private buffer: Uint8Array = new Uint8Array();
 	private decoder: TextDecoder = new TextDecoder();
 	private searchOffset = 0;
@@ -31,7 +31,7 @@ class Uint8ToSseParser {
 	/**
 	 * Process chunk
 	 */
-	public addChunk(chunk: Uint8Array) {
+	public addChunk(chunk: Uint8Array): void {
 		this.appendToBuffer(chunk);
 		while (this.parseNextLine()) {
 			// parse all lines in buffer
@@ -177,39 +177,5 @@ class Uint8ToSseParser {
 		res.set(this.buffer);
 		res.set(chunk, this.buffer.length);
 		this.buffer = res;
-	}
-}
-
-const transformContext = {
-	parser: Uint8ToSseParser,
-
-	start(controller: TransformStreamDefaultController) {
-		this.parser = new Uint8ToSseParser();
-		this.parser.onEvent = (event: ServerSentEvent) => {
-			controller.enqueue(event);
-		};
-	},
-
-	async transform(chunk: Uint8Array, controller: TransformStreamDefaultController) {
-		chunk = await chunk;
-		if (chunk === null) {
-			controller.terminate();
-		} else if (ArrayBuffer.isView(chunk)) {
-			this.parser.addChunk(new Uint8Array(chunk.buffer, chunk.byteOffset, chunk.byteLength));
-		}
-	},
-
-	flush() {
-		// destructor
-		this.parser = undefined;
-	},
-};
-
-/**
- * Transforms `Uint8Array` to `ServerSentEvent` by parsing stream of bytes
- */
-export class Uint8ToSseStream extends TransformStream {
-	constructor() {
-		super(transformContext);
 	}
 }

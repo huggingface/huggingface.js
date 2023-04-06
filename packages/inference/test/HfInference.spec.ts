@@ -139,29 +139,32 @@ describe.concurrent(
 
 		it("textGenerationStream - google/flan-t5-xxl", async () => {
 			const phrase = "one two three four";
-			const stream = await hf.textGenerationStream({
+			const response = hf.textGenerationStream({
 				model: "google/flan-t5-xxl",
 				inputs: `repeat "${phrase}"`,
 			});
-			const reader = stream.getReader();
-			const expected: TextGenerationStreamReturn = {
-				details: null,
-				token: { id: expect.any(Number), logprob: expect.any(Number), text: "", special: false },
-				generated_text: null,
+
+			const makeExpectedReturn = (tokenText: string, fullPhrase: string): TextGenerationStreamReturn => {
+				const eot = tokenText === "</s>";
+				return {
+					details: null,
+					token: {
+						id: expect.any(Number),
+						logprob: expect.any(Number),
+						text: eot ? tokenText : " " + tokenText,
+						special: eot,
+					},
+					generated_text: eot ? fullPhrase : null,
+				};
 			};
+
 			const expectedTokens = phrase.split(" ");
 			// eot token
 			expectedTokens.push("</s>");
 
-			for (const expectedToken of expectedTokens) {
-				const { value } = await reader.read();
-				expected.token.text = " " + expectedToken;
-				if (expectedToken === "</s>") {
-					expected.token.text = expectedToken;
-					expected.token.special = true;
-					expected.generated_text = phrase;
-				}
-				expect(value).toMatchObject(expected);
+			for await (const ret of response) {
+				const expectedToken = expectedTokens.shift();
+				expect(ret).toMatchObject(makeExpectedReturn(expectedToken, phrase));
 			}
 		});
 

@@ -1,6 +1,6 @@
 import { toArray } from "./utils/to-array";
-import type { ServerSentEvent } from "./utils/Uint8ToSseStream";
-import { Uint8ToSseStream } from "./utils/Uint8ToSseStream";
+import type { ServerSentEvent } from "./utils/Uint8ToSseParser";
+import { Uint8ToSseParser } from "./utils/Uint8ToSseParser";
 
 const HF_INFERENCE_ENDPOINT_BASE_URL = "https://api-inference.huggingface.co/models/";
 
@@ -700,13 +700,13 @@ export class HfInference {
 	}
 
 	/**
-	 * Use to continue text from a prompt. Same as `textGeneration` but returns stream that can be read one token at a time
+	 * Use to continue text from a prompt. Same as `textGeneration` but returns generator that can be read one token at a time
 	 */
-	public async textGenerationStream(
+	public async *textGenerationStream(
 		args: TextGenerationArgs,
 		options?: Options
-	): Promise<ReadableStream<TextGenerationStreamReturn>> {
-		return await this.streamingRequest<TextGenerationStreamReturn>(args, options);
+	): AsyncGenerator<TextGenerationStreamReturn> {
+		yield* this.streamingRequest<TextGenerationStreamReturn>(args, options);
 	}
 
 	/**
@@ -928,15 +928,21 @@ export class HfInference {
 		return res;
 	}
 
-	public async request<T>(
-		args: Args & { data?: Blob | ArrayBuffer },
+	/**
+	 * Helper that prepares request arguments
+	 */
+	private makeRequestOptions(
+		args: Args & {
+			data?: Blob | ArrayBuffer;
+			stream?: boolean;
+		},
 		options?: Options & {
 			binary?: boolean;
 			blob?: boolean;
 			/** For internal HF use, which is why it's not exposed in {@link Options} */
 			includeCredentials?: boolean;
 		}
-	): Promise<T> {
+	) {
 		const mergedOptions = { ...this.defaultOptions, ...options };
 		const { model, ...otherArgs } = args;
 
@@ -961,7 +967,8 @@ export class HfInference {
 			}
 		}
 
-		const response = await fetch(`${HF_INFERENCE_ENDPOINT_BASE_URL}${model}`, {
+		const url = `${HF_INFERENCE_ENDPOINT_BASE_URL}${model}`;
+		const info: RequestInit = {
 			headers,
 			method: "POST",
 			body: options?.binary
@@ -971,7 +978,22 @@ export class HfInference {
 						options: mergedOptions,
 				  }),
 			credentials: options?.includeCredentials ? "include" : "same-origin",
-		});
+		};
+
+		return { url, info, mergedOptions };
+	}
+
+	public async request<T>(
+		args: Args & { data?: Blob | ArrayBuffer },
+		options?: Options & {
+			binary?: boolean;
+			blob?: boolean;
+			/** For internal HF use, which is why it's not exposed in {@link Options} */
+			includeCredentials?: boolean;
+		}
+	): Promise<T> {
+		const { url, info, mergedOptions } = this.makeRequestOptions(args, options);
+		const response = await fetch(url, info);
 
 		if (mergedOptions.retry_on_error !== false && response.status === 503 && !mergedOptions.wait_for_model) {
 			return this.request(args, {
@@ -995,9 +1017,9 @@ export class HfInference {
 	}
 
 	/**
-	 * Make request that uses server-sent events and returns response as a stream
+	 * Make request that uses server-sent events and returns response as a generator
 	 */
-	public async streamingRequest<T>(
+	public async *streamingRequest<T>(
 		args: Args & { data?: Blob | ArrayBuffer },
 		options?: Options & {
 			binary?: boolean;
@@ -1005,49 +1027,12 @@ export class HfInference {
 			/** For internal HF use, which is why it's not exposed in {@link Options} */
 			includeCredentials?: boolean;
 		}
-	): Promise<ReadableStream<T>> {
-		const mergedOptions = { ...this.defaultOptions, ...options };
-		const { model, ...otherArgs } = args;
-
-		const headers: Record<string, string> = {};
-
-		headers["Accept"] = "text/event-stream";
-
-		if (this.apiKey) {
-			headers["Authorization"] = `Bearer ${this.apiKey}`;
-		}
-
-		if (!options?.binary) {
-			headers["Content-Type"] = "application/json";
-		}
-
-		if (options?.binary) {
-			if (mergedOptions.wait_for_model) {
-				headers["X-Wait-For-Model"] = "true";
-			}
-			if (mergedOptions.use_cache === false) {
-				headers["X-Use-Cache"] = "false";
-			}
-			if (mergedOptions.dont_load_model) {
-				headers["X-Load-Model"] = "0";
-			}
-		}
-
-		const response = await fetch(`${HF_INFERENCE_ENDPOINT_BASE_URL}${model}`, {
-			headers,
-			method: "POST",
-			body: options?.binary
-				? args.data
-				: JSON.stringify({
-						...otherArgs,
-						stream: true,
-						options: mergedOptions,
-				  }),
-			credentials: options?.includeCredentials ? "include" : "same-origin",
-		});
+	): AsyncGenerator<T> {
+		const { url, info, mergedOptions } = this.makeRequestOptions({ ...args, stream: true }, options);
+		const response = await fetch(url, info);
 
 		if (mergedOptions.retry_on_error !== false && response.status === 503 && !mergedOptions.wait_for_model) {
-			return this.request(args, {
+			return this.streamingRequest(args, {
 				...mergedOptions,
 				wait_for_model: true,
 			});
@@ -1059,22 +1044,31 @@ export class HfInference {
 			throw new Error(`Server does not support event stream content type`);
 		}
 
-		// transform from `ServerSentEvent` to return type
-		const sseToObjTransform: TransformStream<ServerSentEvent, T> = new TransformStream({
-			async start() {},
-			async transform(chunk: ServerSentEvent, controller: TransformStreamDefaultController) {
-				chunk = await chunk;
-				try {
-					if (chunk.data) {
-						const json = JSON.parse(chunk.data) as T;
-						controller.enqueue(json);
-					}
-				} catch (e) {
-					controller.error(e);
-				}
-			},
-		});
+		const reader = response.body.getReader();
+		const sseParser = new Uint8ToSseParser();
+		const events: ServerSentEvent[] = [];
 
-		return response.body.pipeThrough(new Uint8ToSseStream()).pipeThrough(sseToObjTransform);
+		sseParser.onEvent = (event: ServerSentEvent) => {
+			// accumulate events in array
+			events.push(event);
+		};
+
+		try {
+			while (true) {
+				const { done, value } = await reader.read();
+				if (done) return;
+				sseParser.addChunk(value);
+				while (events.length > 0) {
+					const event = events.shift();
+					if (event.data.length > 0) {
+						yield JSON.parse(event.data) as T;
+					}
+				}
+			}
+		} finally {
+			reader.releaseLock();
+		}
+
+		return;
 	}
 }
