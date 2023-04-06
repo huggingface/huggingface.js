@@ -1,6 +1,6 @@
 import { toArray } from "./utils/to-array";
-import type { ServerSentEvent } from "./utils/Uint8ToSseParser";
-import { Uint8ToSseParser } from "./utils/Uint8ToSseParser";
+import type { EventSourceMessage } from "./vendor/fetch-event-source/parse";
+import { getLines, getMessages } from "./vendor/fetch-event-source/parse";
 
 const HF_INFERENCE_API_BASE_URL = "https://api-inference.huggingface.co/models/";
 
@@ -1045,19 +1045,26 @@ export class HfInference {
 		}
 
 		const reader = response.body.getReader();
-		const sseParser = new Uint8ToSseParser();
-		const events: ServerSentEvent[] = [];
+		const events: EventSourceMessage[] = [];
 
-		sseParser.onEvent = (event: ServerSentEvent) => {
+		const onEvent = (event: EventSourceMessage) => {
 			// accumulate events in array
 			events.push(event);
 		};
+
+		const onChunk = getLines(
+			getMessages(
+				() => {},
+				() => {},
+				onEvent
+			)
+		);
 
 		try {
 			while (true) {
 				const { done, value } = await reader.read();
 				if (done) return;
-				sseParser.addChunk(value);
+				onChunk(value);
 				while (events.length > 0) {
 					const event = events.shift();
 					if (event.data.length > 0) {
