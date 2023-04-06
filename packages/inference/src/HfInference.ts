@@ -1075,7 +1075,5 @@ export class HfInference {
 		} finally {
 			reader.releaseLock();
 		}
-
-		return;
 	}
 }
