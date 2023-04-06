@@ -1,4 +1,5 @@
 import { expect, it, describe } from "vitest";
+const fail = (msg: string) => { throw new Error(msg) };
 
 /**
  This file is a part of fetch-event-source package (as of v2.0.1)
