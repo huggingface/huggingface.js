@@ -1,6 +1,6 @@
-const LF = 10;
-const CR = 13;
-const COLON = 58;
+const LF = "\n".charCodeAt(0);
+const CR = "\r".charCodeAt(0);
+const COLON = ":".charCodeAt(0);
 
 /**
  * Represents server-sent event

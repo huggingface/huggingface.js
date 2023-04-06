@@ -2,7 +2,7 @@ import { toArray } from "./utils/to-array";
 import type { ServerSentEvent } from "./utils/Uint8ToSseParser";
 import { Uint8ToSseParser } from "./utils/Uint8ToSseParser";
 
-const HF_INFERENCE_ENDPOINT_BASE_URL = "https://api-inference.huggingface.co/models/";
+const HF_INFERENCE_API_BASE_URL = "https://api-inference.huggingface.co/models/";
 
 export interface Options {
 	/**
@@ -967,7 +967,7 @@ export class HfInference {
 			}
 		}
 
-		const url = `${HF_INFERENCE_ENDPOINT_BASE_URL}${model}`;
+		const url = `${HF_INFERENCE_API_BASE_URL}${model}`;
 		const info: RequestInit = {
 			headers,
 			method: "POST",
