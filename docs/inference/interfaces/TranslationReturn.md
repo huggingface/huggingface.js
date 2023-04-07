@@ -10,4 +10,4 @@ The string after translation
 
 #### Defined in
 
-[HfInference.ts:285](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L285)
+[HfInference.ts:369](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L369)
