@@ -78,7 +78,8 @@ await hf.textGeneration({
 
 for await (const output of hf.textGenerationStream({
   model: "google/flan-t5-xxl",
-  inputs: 'repeat "one two three four"'
+  inputs: 'repeat "one two three four"',
+  parameters: { max_new_tokens: 250 }
 })) {
   console.log(output.token.text, output.generated_text);
 }
