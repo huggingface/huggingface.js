@@ -76,7 +76,7 @@ await hf.textGeneration({
   inputs: 'The answer to the universe is'
 })
 
-for await const (output of hf.textGenerationStream({
+for await (const output of hf.textGenerationStream({
   model: "google/flan-t5-xxl",
   inputs: 'repeat "one two three four"'
 })) {
