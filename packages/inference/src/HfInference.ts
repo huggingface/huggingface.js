@@ -1038,6 +1038,13 @@ export class HfInference {
 			});
 		}
 		if (!response.ok) {
+			if (response.headers.get("Content-Type")?.startsWith("application/json")) {
+				const output = await response.json();
+				if (output.error) {
+					throw new Error(output.error);
+				}
+			}
+
 			throw new Error(`Server response contains error: ${response.status}`);
 		}
 		if (response.headers.get("content-type") !== "text/event-stream") {
