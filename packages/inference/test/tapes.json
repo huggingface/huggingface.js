@@ -278,5 +278,24 @@
       "status": 200,
       "statusText": "OK"
     }
+  },
+  "3694ddcced223eadefa057b24fdff06b3e19e6ff24bfd546513f5b70c056bea2": {
+    "url": "https://api-inference.huggingface.co/models/google/flan-t5-xxl",
+    "init": {
+      "headers": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer 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",
+        "Content-Type": "application/json"
+      },
+      "method": "POST"
+    },
+    "response": {
+      "headers": {
+        "Content-Type": "text/event-stream"
+      },
+      "body": "ZGF0YTp7InRva2VuIjp7ImlkIjo4MCwidGV4dCI6IiBvbmUiLCJsb2dwcm9iIjotMC43NTM5MDYyNSwic3BlY2lhbCI6ZmFsc2V9LCJnZW5lcmF0ZWRfdGV4dCI6bnVsbCwiZGV0YWlscyI6bnVsbH0KCmRhdGE6eyJ0b2tlbiI6eyJpZCI6MTkyLCJ0ZXh0IjoiIHR3byIsImxvZ3Byb2IiOi0wLjAxOTQwOTE4LCJzcGVjaWFsIjpmYWxzZX0sImdlbmVyYXRlZF90ZXh0IjpudWxsLCJkZXRhaWxzIjpudWxsfQoKZGF0YTp7InRva2VuIjp7ImlkIjozODYsInRleHQiOiIgdGhyZWUiLCJsb2dwcm9iIjotMC4wMTUxOTc3NTQsInNwZWNpYWwiOmZhbHNlfSwiZ2VuZXJhdGVkX3RleHQiOm51bGwsImRldGFpbHMiOm51bGx9CgpkYXRhOnsidG9rZW4iOnsiaWQiOjY2MiwidGV4dCI6IiBmb3VyIiwibG9ncHJvYiI6LTAuMDE5NDA5MTgsInNwZWNpYWwiOmZhbHNlfSwiZ2VuZXJhdGVkX3RleHQiOm51bGwsImRldGFpbHMiOm51bGx9CgpkYXRhOnsidG9rZW4iOnsiaWQiOjEsInRleHQiOiI8L3M+IiwibG9ncHJvYiI6LTAuMDMwODgzNzg5LCJzcGVjaWFsIjp0cnVlfSwiZ2VuZXJhdGVkX3RleHQiOiJvbmUgdHdvIHRocmVlIGZvdXIiLCJkZXRhaWxzIjpudWxsfQoK",
+      "status": 200,
+      "statusText": "OK"
+    }
   }
 }

@@ -1,5 +1,6 @@
 import { expect, it, describe } from "vitest";
 
+import type { TextGenerationStreamReturn } from "../src";
 import { HfInference } from "../src";
 import "./vcr";
 import { isBackend } from "../src/utils/env-predicates";
@@ -134,6 +135,37 @@ describe.concurrent(
 			).toMatchObject({
 				generated_text: expect.any(String),
 			});
+		});
+
+		it("textGenerationStream - google/flan-t5-xxl", async () => {
+			const phrase = "one two three four";
+			const response = hf.textGenerationStream({
+				model: "google/flan-t5-xxl",
+				inputs: `repeat "${phrase}"`,
+			});
+
+			const makeExpectedReturn = (tokenText: string, fullPhrase: string): TextGenerationStreamReturn => {
+				const eot = tokenText === "</s>";
+				return {
+					details: null,
+					token: {
+						id: expect.any(Number),
+						logprob: expect.any(Number),
+						text: eot ? tokenText : " " + tokenText,
+						special: eot,
+					},
+					generated_text: eot ? fullPhrase : null,
+				};
+			};
+
+			const expectedTokens = phrase.split(" ");
+			// eot token
+			expectedTokens.push("</s>");
+
+			for await (const ret of response) {
+				const expectedToken = expectedTokens.shift();
+				expect(ret).toMatchObject(makeExpectedReturn(expectedToken, phrase));
+			}
 		});
 
 		it("tokenClassification", async () => {
