@@ -72,6 +72,14 @@ await hf.textGeneration({
   inputs: 'The answer to the universe is'
 })
 
+for await (const output of hf.textGenerationStream({
+  model: "google/flan-t5-xxl",
+  inputs: 'repeat "one two three four"',
+  parameters: { max_new_tokens: 250 }
+})) {
+  console.log(output.token.text, output.generated_text);
+}
+
 await hf.tokenClassification({
   model: 'dbmdz/bert-large-cased-finetuned-conll03-english',
   inputs: 'My name is Sarah Jessica Parker but you can call me Jessica'

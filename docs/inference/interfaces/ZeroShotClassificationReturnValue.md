@@ -8,7 +8,7 @@
 
 #### Defined in
 
-[HfInference.ts:306](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L306)
+[HfInference.ts:390](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L390)
 
 ___
 
@@ -18,7 +18,7 @@ ___
 
 #### Defined in
 
-[HfInference.ts:307](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L307)
+[HfInference.ts:391](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L391)
 
 ___
 
@@ -28,4 +28,4 @@ ___
 
 #### Defined in
 
-[HfInference.ts:308](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L308)
+[HfInference.ts:392](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L392)

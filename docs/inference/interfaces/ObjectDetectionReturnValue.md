@@ -19,7 +19,7 @@ A dict (with keys [xmin,ymin,xmax,ymax]) representing the bounding box of a dete
 
 #### Defined in
 
-[HfInference.ts:417](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L417)
+[HfInference.ts:501](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L501)
 
 ___
 
@@ -31,7 +31,7 @@ The label for the class (model specific) of a detected object.
 
 #### Defined in
 
-[HfInference.ts:426](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L426)
+[HfInference.ts:510](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L510)
 
 ___
 
@@ -43,4 +43,4 @@ A float that represents how likely it is that the detected object belongs to the
 
 #### Defined in
 
-[HfInference.ts:431](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L431)
+[HfInference.ts:515](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L515)

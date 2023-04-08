@@ -1,4 +1,8 @@
 import { toArray } from "./utils/to-array";
+import type { EventSourceMessage } from "./vendor/fetch-event-source/parse";
+import { getLines, getMessages } from "./vendor/fetch-event-source/parse";
+
+const HF_INFERENCE_API_BASE_URL = "https://api-inference.huggingface.co/models/";
 
 export interface Options {
 	/**
@@ -221,6 +225,86 @@ export interface TextGenerationReturn {
 	 * The continuated string
 	 */
 	generated_text: string;
+}
+
+export interface TextGenerationStreamToken {
+	/** Token ID from the model tokenizer */
+	id: number;
+	/** Token text */
+	text: string;
+	/** Logprob */
+	logprob: number;
+	/**
+	 * Is the token a special token
+	 * Can be used to ignore tokens when concatenating
+	 */
+	special: boolean;
+}
+
+export interface TextGenerationStreamPrefillToken {
+	/** Token ID from the model tokenizer */
+	id: number;
+	/** Token text */
+	text: string;
+	/**
+	 * Logprob
+	 * Optional since the logprob of the first token cannot be computed
+	 */
+	logprob?: number;
+}
+
+export interface TextGenerationStreamBestOfSequence {
+	/** Generated text */
+	generated_text: string;
+	/** Generation finish reason */
+	finish_reason: TextGenerationStreamFinishReason;
+	/** Number of generated tokens */
+	generated_tokens: number;
+	/** Sampling seed if sampling was activated */
+	seed?: number;
+	/** Prompt tokens */
+	prefill: TextGenerationStreamPrefillToken[];
+	/** Generated tokens */
+	tokens: TextGenerationStreamToken[];
+}
+
+export enum TextGenerationStreamFinishReason {
+	/** number of generated tokens == `max_new_tokens` */
+	Length = "length",
+	/** the model generated its end of sequence token */
+	EndOfSequenceToken = "eos_token",
+	/** the model generated a text included in `stop_sequences` */
+	StopSequence = "stop_sequence",
+}
+
+export interface TextGenerationStreamDetails {
+	/** Generation finish reason */
+	finish_reason: TextGenerationStreamFinishReason;
+	/** Number of generated tokens */
+	generated_tokens: number;
+	/** Sampling seed if sampling was activated */
+	seed?: number;
+	/** Prompt tokens */
+	prefill: TextGenerationStreamPrefillToken[];
+	/** */
+	tokens: TextGenerationStreamToken[];
+	/** Additional sequences when using the `best_of` parameter */
+	best_of_sequences?: TextGenerationStreamBestOfSequence[];
+}
+
+export interface TextGenerationStreamReturn {
+	/** Generated token, one at a time */
+	token: TextGenerationStreamToken;
+	/**
+	 * Complete generated text
+	 * Only available when the generation is finished
+	 */
+	generated_text?: string;
+	/**
+	 * Generation details
+	 * Only available when the generation is finished
+	 */
+	details?: TextGenerationStreamDetails;
 }
 
 export type TokenClassificationArgs = Args & {
@@ -616,6 +700,16 @@ export class HfInference {
 	}
 
 	/**
+	 * Use to continue text from a prompt. Same as `textGeneration` but returns generator that can be read one token at a time
+	 */
+	public async *textGenerationStream(
+		args: TextGenerationArgs,
+		options?: Options
+	): AsyncGenerator<TextGenerationStreamReturn> {
+		yield* this.streamingRequest<TextGenerationStreamReturn>(args, options);
+	}
+
+	/**
 	 * Usually used for sentence parsing, either grammatical, or Named Entity Recognition (NER) to understand keywords contained within text. Recommended model: dbmdz/bert-large-cased-finetuned-conll03-english
 	 */
 	public async tokenClassification(
@@ -834,15 +928,21 @@ export class HfInference {
 		return res;
 	}
 
-	public async request<T>(
-		args: Args & { data?: Blob | ArrayBuffer },
+	/**
+	 * Helper that prepares request arguments
+	 */
+	private makeRequestOptions(
+		args: Args & {
+			data?: Blob | ArrayBuffer;
+			stream?: boolean;
+		},
 		options?: Options & {
 			binary?: boolean;
 			blob?: boolean;
 			/** For internal HF use, which is why it's not exposed in {@link Options} */
 			includeCredentials?: boolean;
 		}
-	): Promise<T> {
+	) {
 		const mergedOptions = { ...this.defaultOptions, ...options };
 		const { model, ...otherArgs } = args;
 
@@ -867,7 +967,8 @@ export class HfInference {
 			}
 		}
 
-		const response = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
+		const url = `${HF_INFERENCE_API_BASE_URL}${model}`;
+		const info: RequestInit = {
 			headers,
 			method: "POST",
 			body: options?.binary
@@ -877,7 +978,22 @@ export class HfInference {
 						options: mergedOptions,
 				  }),
 			credentials: options?.includeCredentials ? "include" : "same-origin",
-		});
+		};
+
+		return { url, info, mergedOptions };
+	}
+
+	public async request<T>(
+		args: Args & { data?: Blob | ArrayBuffer },
+		options?: Options & {
+			binary?: boolean;
+			blob?: boolean;
+			/** For internal HF use, which is why it's not exposed in {@link Options} */
+			includeCredentials?: boolean;
+		}
+	): Promise<T> {
+		const { url, info, mergedOptions } = this.makeRequestOptions(args, options);
+		const response = await fetch(url, info);
 
 		if (mergedOptions.retry_on_error !== false && response.status === 503 && !mergedOptions.wait_for_model) {
 			return this.request(args, {
@@ -898,5 +1014,73 @@ export class HfInference {
 			throw new Error(output.error);
 		}
 		return output;
+	}
+
+	/**
+	 * Make request that uses server-sent events and returns response as a generator
+	 */
+	public async *streamingRequest<T>(
+		args: Args & { data?: Blob | ArrayBuffer },
+		options?: Options & {
+			binary?: boolean;
+			blob?: boolean;
+			/** For internal HF use, which is why it's not exposed in {@link Options} */
+			includeCredentials?: boolean;
+		}
+	): AsyncGenerator<T> {
+		const { url, info, mergedOptions } = this.makeRequestOptions({ ...args, stream: true }, options);
+		const response = await fetch(url, info);
+
+		if (mergedOptions.retry_on_error !== false && response.status === 503 && !mergedOptions.wait_for_model) {
+			return this.streamingRequest(args, {
+				...mergedOptions,
+				wait_for_model: true,
+			});
+		}
+		if (!response.ok) {
+			if (response.headers.get("Content-Type")?.startsWith("application/json")) {
+				const output = await response.json();
+				if (output.error) {
+					throw new Error(output.error);
+				}
+			}
+
+			throw new Error(`Server response contains error: ${response.status}`);
+		}
+		if (response.headers.get("content-type") !== "text/event-stream") {
+			throw new Error(`Server does not support event stream content type`);
+		}
+
+		const reader = response.body.getReader();
+		const events: EventSourceMessage[] = [];
+
+		const onEvent = (event: EventSourceMessage) => {
+			// accumulate events in array
+			events.push(event);
+		};
+
+		const onChunk = getLines(
+			getMessages(
+				() => {},
+				() => {},
+				onEvent
+			)
+		);
+
+		try {
+			while (true) {
+				const { done, value } = await reader.read();
+				if (done) return;
+				onChunk(value);
+				while (events.length > 0) {
+					const event = events.shift();
+					if (event.data.length > 0) {
+						yield JSON.parse(event.data) as T;
+					}
+				}
+			}
+		} finally {
+			reader.releaseLock();
+		}
 	}
 }
