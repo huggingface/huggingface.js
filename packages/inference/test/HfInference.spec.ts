@@ -4,6 +4,7 @@ import type { TextGenerationStreamReturn } from "../src";
 import { HfInference } from "../src";
 import "./vcr";
 import { isBackend } from "../src/utils/env-predicates";
+import { readTestFile } from "./test-files";
 
 const TIMEOUT = 60000 * 3;
 
@@ -402,6 +403,17 @@ describe.concurrent(
 			});
 
 			expect(res).toBeInstanceOf(Blob);
+		});
+		it("imageToText", async () => {
+			const img = new Blob([readTestFile("cheetah.png")], { type: "image/png" });
+			expect(
+				await hf.imageToText({
+					data: img,
+					model: "nlpconnect/vit-gpt2-image-captioning",
+				})
+			).toEqual({
+				generated_text: "a large brown and white giraffe standing in a field ",
+			});
 		});
 	},
 	TIMEOUT

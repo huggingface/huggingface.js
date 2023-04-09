@@ -7,6 +7,8 @@ declare global {
 			closeTo(expected: number, precision: number): Assertion;
 		}
 	}
+
+	const __TEST_FILES__: Record<string, string>;
 }
 
 export {};

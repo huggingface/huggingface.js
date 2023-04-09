@@ -45,8 +45,8 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"prepublishOnly": "pnpm run build",
-		"test": "vitest run",
-		"test:browser": "vitest run --browser.name=chrome --browser.headless",
+		"test": "vitest run --config vitest.config.ts",
+		"test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest.config.ts",
 		"type-check": "tsc"
 	},
 	"devDependencies": {
