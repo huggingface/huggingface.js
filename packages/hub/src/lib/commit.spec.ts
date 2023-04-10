@@ -39,7 +39,7 @@ afterAll(async () => {
 });
 
 describe("commit", () => {
-	it.skip("should remove a file with commit", async () => {
+	it("should remove a file with commit", async () => {
 		const readme1 = await downloadFile({ repo, path: "README.md" });
 		assert.strictEqual(readme1?.status, 200);
 
@@ -61,7 +61,7 @@ describe("commit", () => {
 		assert.strictEqual(readme2, null);
 	});
 
-	it.skip("should commit a file from Blob", async () => {
+	it("should commit a file from Blob", async () => {
 		await commit({
 			repo,
 			title: "Some commit",
@@ -82,7 +82,7 @@ describe("commit", () => {
 		assert.strictEqual(await fileContent?.text(), "This is me");
 	});
 
-	it.skip("should commit a LFS file from Blob", async () => {
+	it("should commit a LFS file from Blob", async () => {
 		await commit({
 			repo,
 			title: "Some commit",
@@ -116,7 +116,7 @@ size ${lfsContent.length}
 	}, 20_000);
 
 	if (isBackend) {
-		it.skip("should commit a local file from an URL", async () => {
+		it("should commit a local file from an URL", async () => {
 			await commit({
 				repo,
 				title: "Some commit",
@@ -141,7 +141,7 @@ size ${lfsContent.length}
 		});
 	}
 
-	it.skip("should commit a web resource from an URL ", async () => {
+	it("should commit a web resource from an URL ", async () => {
 		const tokenizerJsonUrl = new URL(
 			"https://huggingface.co/spaces/aschen/push-model-from-web/raw/main/mobilenet/model.json"
 		);

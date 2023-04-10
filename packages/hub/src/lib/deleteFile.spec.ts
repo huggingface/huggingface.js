@@ -9,7 +9,7 @@ import { deleteFile } from "./deleteFile";
 import { downloadFile } from "./download-file";
 
 describe("deleteFile", () => {
-	it.skip("should delete a file", async () => {
+	it("should delete a file", async () => {
 		const repoName = `${TEST_USER}/TEST-${insecureRandomString()}`;
 		const repo = { type: "model", name: repoName } satisfies RepoId;
 		const credentials = {

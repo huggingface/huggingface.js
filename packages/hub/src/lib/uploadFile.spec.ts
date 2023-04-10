@@ -9,7 +9,7 @@ import { downloadFile } from "./download-file";
 import { uploadFile } from "./uploadFile";
 
 describe("uploadFile", () => {
-	it.skip("should upload a file", async () => {
+	it("should upload a file", async () => {
 		const repoName = `${TEST_USER}/TEST-${insecureRandomString()}`;
 		const repo = { type: "model", name: repoName } satisfies RepoId;
 		const credentials = {

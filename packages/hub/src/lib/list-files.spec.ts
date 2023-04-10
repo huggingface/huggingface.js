@@ -3,7 +3,7 @@ import type { ListFileEntry } from "./list-files";
 import { listFiles } from "./list-files";
 
 describe("listFiles", () => {
-	it.skip("should fetch the list of files from the repo", async () => {
+	it("should fetch the list of files from the repo", async () => {
 		const cursor = listFiles({
 			repo: {
 				name: "bert-base-uncased",
@@ -89,7 +89,7 @@ describe("listFiles", () => {
 		]);
 	});
 
-	it.skip("should fetch the list of files from the repo, including subfolders", async () => {
+	it("should fetch the list of files from the repo, including subfolders", async () => {
 		const cursor = listFiles({
 			repo: {
 				name: "xsum",

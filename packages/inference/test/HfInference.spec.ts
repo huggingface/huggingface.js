@@ -17,7 +17,7 @@ describe.concurrent(
 		// Individual tests can be ran without providing an api key, however running all tests without an api key will result in rate limiting error.
 		const hf = new HfInference(process.env.HF_ACCESS_TOKEN);
 
-		it.skip("throws error if model does not exist", () => {
+		it("throws error if model does not exist", () => {
 			expect(
 				hf.fillMask({
 					model: "this-model-does-not-exist-123",
@@ -26,7 +26,7 @@ describe.concurrent(
 			).rejects.toThrowError("Model this-model-does-not-exist-123 does not exist");
 		});
 
-		it.skip("fillMask", async () => {
+		it("fillMask", async () => {
 			expect(
 				await hf.fillMask({
 					model: "bert-base-uncased",
@@ -44,7 +44,7 @@ describe.concurrent(
 			);
 		});
 
-		it.skip("summarization", async () => {
+		it("summarization", async () => {
 			expect(
 				await hf.summarization({
 					model: "facebook/bart-large-cnn",
@@ -60,7 +60,7 @@ describe.concurrent(
 			});
 		});
 
-		it.skip("questionAnswer", async () => {
+		it("questionAnswer", async () => {
 			expect(
 				await hf.questionAnswer({
 					model: "deepset/roberta-base-squad2",
@@ -77,7 +77,7 @@ describe.concurrent(
 			});
 		});
 
-		it.skip("table question answer", async () => {
+		it("table question answer", async () => {
 			expect(
 				await hf.tableQuestionAnswer({
 					model: "google/tapas-base-finetuned-wtq",
@@ -99,7 +99,7 @@ describe.concurrent(
 			});
 		});
 
-		it.skip("textClassification", async () => {
+		it("textClassification", async () => {
 			expect(
 				await hf.textClassification({
 					model: "distilbert-base-uncased-finetuned-sst-2-english",
@@ -115,7 +115,7 @@ describe.concurrent(
 			);
 		});
 
-		it.skip("textGeneration - gpt2", async () => {
+		it("textGeneration - gpt2", async () => {
 			expect(
 				await hf.textGeneration({
 					model: "gpt2",
@@ -126,7 +126,7 @@ describe.concurrent(
 			});
 		});
 
-		it.skip("textGeneration - google/flan-t5-xxl", async () => {
+		it("textGeneration - google/flan-t5-xxl", async () => {
 			expect(
 				await hf.textGeneration({
 					model: "google/flan-t5-xxl",
@@ -137,7 +137,7 @@ describe.concurrent(
 			});
 		});
 
-		it.skip("textGenerationStream - google/flan-t5-xxl", async () => {
+		it("textGenerationStream - google/flan-t5-xxl", async () => {
 			const phrase = "one two three four";
 			const response = hf.textGenerationStream({
 				model: "google/flan-t5-xxl",
@@ -168,7 +168,7 @@ describe.concurrent(
 			}
 		});
 
-		it.skip("tokenClassification", async () => {
+		it("tokenClassification", async () => {
 			expect(
 				await hf.tokenClassification({
 					model: "dbmdz/bert-large-cased-finetuned-conll03-english",
@@ -187,7 +187,7 @@ describe.concurrent(
 			);
 		});
 
-		it.skip("translation", async () => {
+		it("translation", async () => {
 			expect(
 				await hf.translation({
 					model: "t5-base",
@@ -197,7 +197,7 @@ describe.concurrent(
 				translation_text: "Mein Name ist Wolfgang und ich lebe in Berlin",
 			});
 		});
-		it.skip("zeroShotClassification", async () => {
+		it("zeroShotClassification", async () => {
 			expect.extend({
 				closeTo(received, expected, precision) {
 					const { isNot } = this;
@@ -247,7 +247,7 @@ describe.concurrent(
 				])
 			);
 		});
-		it.skip("conversational", async () => {
+		it("conversational", async () => {
 			expect(
 				await hf.conversational({
 					model: "microsoft/DialoGPT-large",
@@ -266,7 +266,7 @@ describe.concurrent(
 				warnings: ["Setting `pad_token_id` to `eos_token_id`:50256 for open-end generation."],
 			});
 		});
-		it.skip("featureExtraction", async () => {
+		it("featureExtraction", async () => {
 			expect(
 				await hf.featureExtraction({
 					model: "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
@@ -277,7 +277,7 @@ describe.concurrent(
 				})
 			).toEqual([expect.any(Number), expect.any(Number), expect.any(Number)]);
 		});
-		it.skip("automaticSpeechRecognition", async () => {
+		it("automaticSpeechRecognition", async () => {
 			// Run only in backend until we support load from URL
 			if (isBackend) {
 				const { readFileSync } = await import("node:fs");
@@ -295,7 +295,7 @@ describe.concurrent(
 				});
 			}
 		});
-		it.skip("audioClassification", async () => {
+		it("audioClassification", async () => {
 			// Run only in backend until we support load from URL
 			if (isBackend) {
 				const { readFileSync } = await import("node:fs");
@@ -318,7 +318,7 @@ describe.concurrent(
 				);
 			}
 		});
-		it.skip("imageClassification", async () => {
+		it("imageClassification", async () => {
 			// Run only in backend until we support load from URL
 			if (isBackend) {
 				const { readFileSync } = await import("node:fs");
@@ -341,7 +341,7 @@ describe.concurrent(
 				);
 			}
 		});
-		it.skip("objectDetection", async () => {
+		it("objectDetection", async () => {
 			// Run only in backend until we support load from URL
 			if (isBackend) {
 				const { readFileSync } = await import("node:fs");
@@ -370,7 +370,7 @@ describe.concurrent(
 				);
 			}
 		});
-		it.skip("imageSegmentation", async () => {
+		it("imageSegmentation", async () => {
 			// Run only in backend until we support load from URL
 			if (isBackend) {
 				const { readFileSync } = await import("node:fs");
@@ -394,7 +394,7 @@ describe.concurrent(
 				);
 			}
 		});
-		it.skip("textToImage", async () => {
+		it("textToImage", async () => {
 			const res = await hf.textToImage({
 				inputs: "award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]",
 				negative_prompt: "blurry",
