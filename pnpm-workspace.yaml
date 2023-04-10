@@ -2,4 +2,3 @@ packages:
   - "packages/hub"
   - "packages/inference"
   - "packages/doc-internal"
-  - "packages/shared"
