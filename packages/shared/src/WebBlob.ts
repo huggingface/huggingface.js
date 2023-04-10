@@ -53,7 +53,7 @@ export class WebBlob extends Blob {
 
 	slice(start = 0, end = this.size): WebBlob {
 		if (start < 0 || end < 0) {
-			new TypeError("Unsupported negative start/end on FileBlob.slice");
+			new TypeError("Unsupported negative start/end on WebBlob.slice");
 		}
 
 		const slice = new WebBlob(

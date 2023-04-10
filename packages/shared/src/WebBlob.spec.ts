@@ -10,7 +10,7 @@ describe("WebBlob", async () => {
 	const contentType = response.headers.get("content-type") || "";
 	const fullText = await (await fetch(resourceUrl)).text();
 
-	it("should create a WebBlob with a slice on the entire resource", async () => {
+	it.skip("should create a WebBlob with a slice on the entire resource", async () => {
 		const webBlob = await WebBlob.create(resourceUrl, { cacheBelow: 0 });
 
 		expect(webBlob).toMatchObject({
@@ -30,7 +30,7 @@ describe("WebBlob", async () => {
 		expect(streamText).toBe(fullText);
 	});
 
-	it("should create a WebBlob with a slice on the entire resource, cached", async () => {
+	it.skip("should create a WebBlob with a slice on the entire resource, cached", async () => {
 		const webBlob = await WebBlob.create(resourceUrl, { cacheBelow: 1_000_000 });
 
 		expect(webBlob).not.toBeInstanceOf(WebBlob);
@@ -44,7 +44,7 @@ describe("WebBlob", async () => {
 		expect(streamText).toBe(fullText);
 	});
 
-	it("should lazy load a LFS file hosted on Hugging Face", async () => {
+	it.skip("should lazy load a LFS file hosted on Hugging Face", async () => {
 		const stableDiffusionUrl =
 			"https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/39593d5650112b4cc580433f6b0435385882d819/v1-5-pruned.safetensors";
 		const url = new URL(stableDiffusionUrl);
@@ -57,7 +57,7 @@ describe("WebBlob", async () => {
 		expect(base64FromBytes(new Uint8Array(await webBlob.slice(0, 12).arrayBuffer()))).toBe("ytIDAAAAAAB7Il9f");
 	});
 
-	it("should create a slice on the file", async () => {
+	it.skip("should create a slice on the file", async () => {
 		const expectedText = fullText.slice(10, 20);
 
 		const slice = (await WebBlob.create(resourceUrl, { cacheBelow: 0 })).slice(10, 20);

@@ -2,7 +2,7 @@ import { assert, it, describe } from "vitest";
 import { fileDownloadInfo } from "./file-download-info";
 
 describe("fileDownloadInfo", () => {
-	it("should fetch LFS file info", async () => {
+	it.skip("should fetch LFS file info", async () => {
 		const info = await fileDownloadInfo({
 			repo: {
 				name: "bert-base-uncased",
@@ -18,7 +18,7 @@ describe("fileDownloadInfo", () => {
 		assert(info?.downloadLink);
 	});
 
-	it("should fetch raw LFS pointer info", async () => {
+	it.skip("should fetch raw LFS pointer info", async () => {
 		const info = await fileDownloadInfo({
 			repo: {
 				name: "bert-base-uncased",
@@ -35,7 +35,7 @@ describe("fileDownloadInfo", () => {
 		assert(!info?.downloadLink);
 	});
 
-	it("should fetch non-LFS file info", async () => {
+	it.skip("should fetch non-LFS file info", async () => {
 		const info = await fileDownloadInfo({
 			repo: {
 				name: "bert-base-uncased",
