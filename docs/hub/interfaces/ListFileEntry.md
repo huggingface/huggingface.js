@@ -8,7 +8,7 @@
 
 #### Defined in
 
-[hub/src/lib/list-files.ts:19](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L19)
+[hub/src/lib/list-files.ts:20](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L20)
 
 ___
 
@@ -26,7 +26,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/list-files.ts:13](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L13)
+[hub/src/lib/list-files.ts:14](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L14)
 
 ___
 
@@ -36,7 +36,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/list-files.ts:12](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L12)
+[hub/src/lib/list-files.ts:13](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L13)
 
 ___
 
@@ -46,7 +46,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/list-files.ts:11](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L11)
+[hub/src/lib/list-files.ts:12](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L12)
 
 ___
 
@@ -56,7 +56,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/list-files.ts:24](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L24)
+[hub/src/lib/list-files.ts:25](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L25)
 
 ___
 
@@ -66,7 +66,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/list-files.ts:10](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L10)
+[hub/src/lib/list-files.ts:11](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L11)
 
 ___
 
@@ -76,4 +76,4 @@ ___
 
 #### Defined in
 
-[hub/src/lib/list-files.ts:9](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L9)
+[hub/src/lib/list-files.ts:10](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L10)

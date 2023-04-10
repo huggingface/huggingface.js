@@ -10,14 +10,14 @@ import type {
 	ApiPreuploadRequest,
 	ApiPreuploadResponse,
 } from "../types/api/api-commit";
-import type { Credentials, RepoId } from "../types/public";
-import { base64FromBytes } from "../../../shared";
+import type { Credentials, RepoDesignation } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { chunk } from "../utils/chunk";
 import { promisesQueue } from "../utils/promisesQueue";
 import { promisesQueueStreaming } from "../utils/promisesQueueStreaming";
 import { sha256 } from "../utils/sha256";
-import { createBlob } from "../../../shared/";
+import { toRepoId } from "../utils/toRepoId";
+import { createBlob, base64FromBytes, isSupportedByFetch } from "../../../shared/";
 
 const CONCURRENT_SHAS = 5;
 const CONCURRENT_LFS_UPLOADS = 5;
@@ -28,7 +28,7 @@ export interface CommitDeletedEntry {
 	path: string;
 }
 
-type ContentSource = Blob | URL;
+export type ContentSource = Blob | URL;
 
 export interface CommitFile {
 	operation: "addOrUpdate";
@@ -53,7 +53,7 @@ type CommitBlobOperation = Exclude<CommitOperation, CommitFile> | CommitBlob;
 export interface CommitParams {
 	title: string;
 	description?: string;
-	repo: RepoId;
+	repo: RepoDesignation;
 	operations: CommitOperation[];
 	credentials: Credentials;
 	/** @default "main" */
@@ -95,6 +95,7 @@ function isFileOperation(op: CommitOperation): op is CommitBlob {
  */
 async function* commitIter(params: CommitParams): AsyncGenerator<unknown, CommitOutput> {
 	checkCredentials(params.credentials);
+	const repoId = toRepoId(params.repo);
 	yield "preuploading";
 
 	const lfsShas = new Map<string, string | null>();
@@ -134,7 +135,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 		};
 
 		const res = await fetch(
-			`${params.hubUrl ?? HUB_URL}/api/${params.repo.type}s/${params.repo.name}/preupload/${encodeURIComponent(
+			`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/preupload/${encodeURIComponent(
 				params.branch ?? "main"
 			)}` + (params.isPullRequest ? "?create_pr=1" : ""),
 			{
@@ -192,8 +193,8 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 		};
 
 		const res = await fetch(
-			`${params.hubUrl ?? HUB_URL}/${params.repo.type === "model" ? "" : params.repo.type + "s/"}${
-				params.repo.name
+			`${params.hubUrl ?? HUB_URL}/${repoId.type === "model" ? "" : repoId.type + "s/"}${
+				repoId.name
 			}.git/info/lfs/objects/batch`,
 			{
 				method: "POST",
@@ -255,12 +256,15 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 						})),
 					};
 
-					await promisesQueue(
+					await promisesQueueStreaming(
 						parts.map((part) => async () => {
 							const index = parseInt(part) - 1;
+							const slice = content.slice(index * chunkSize, (index + 1) * chunkSize);
+
 							const res = await fetch(header[part], {
 								method: "PUT",
-								body: content.slice(index * chunkSize, (index + 1) * chunkSize),
+								/** Unfortunately, browsers don't support our inherited version of Blob in fetch calls */
+								body: isSupportedByFetch(slice) ? slice : await slice.arrayBuffer(),
 							});
 
 							if (!res.ok) {
@@ -304,7 +308,8 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 						headers: {
 							...(batchRequestId ? { "X-Request-Id": batchRequestId } : undefined),
 						},
-						body: content,
+						/** Unfortunately, browsers don't support our inherited version of Blob in fetch calls */
+						body: isSupportedByFetch(content) ? content : await content.arrayBuffer(),
 					});
 
 					if (!res.ok) {
@@ -322,7 +327,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 	yield "committing";
 
 	const res = await fetch(
-		`${params.hubUrl ?? HUB_URL}/api/${params.repo.type}s/${params.repo.name}/commit/${encodeURIComponent(
+		`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/commit/${encodeURIComponent(
 			params.branch ?? "main"
 		)}` + (params.isPullRequest ? "?create_pr=1" : ""),
 		{

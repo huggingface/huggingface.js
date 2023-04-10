@@ -62,6 +62,10 @@
       sections:
         - title: HfInference
           local: inference/classes/HfInference
+    - title: Enums
+      sections:
+        - title: TextGenerationStreamFinishReason
+          local: inference/enums/TextGenerationStreamFinishReason
     - title: Interfaces
       sections:
         - title: Args
@@ -88,6 +92,16 @@
           local: inference/interfaces/TableQuestionAnswerReturn
         - title: TextGenerationReturn
           local: inference/interfaces/TextGenerationReturn
+        - title: TextGenerationStreamBestOfSequence
+          local: inference/interfaces/TextGenerationStreamBestOfSequence
+        - title: TextGenerationStreamDetails
+          local: inference/interfaces/TextGenerationStreamDetails
+        - title: TextGenerationStreamPrefillToken
+          local: inference/interfaces/TextGenerationStreamPrefillToken
+        - title: TextGenerationStreamReturn
+          local: inference/interfaces/TextGenerationStreamReturn
+        - title: TextGenerationStreamToken
+          local: inference/interfaces/TextGenerationStreamToken
         - title: TokenClassificationReturnValue
           local: inference/interfaces/TokenClassificationReturnValue
         - title: TranslationReturn

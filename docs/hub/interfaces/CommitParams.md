@@ -12,7 +12,7 @@
 
 #### Defined in
 
-[hub/src/lib/commit.ts:61](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L61)
+[hub/src/lib/commit.ts:62](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L62)
 
 ___
 
@@ -22,7 +22,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/commit.ts:59](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L59)
+[hub/src/lib/commit.ts:60](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L60)
 
 ___
 
@@ -32,7 +32,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/commit.ts:56](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L56)
+[hub/src/lib/commit.ts:57](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L57)
 
 ___
 
@@ -42,7 +42,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/commit.ts:70](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L70)
+[hub/src/lib/commit.ts:71](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L71)
 
 ___
 
@@ -52,7 +52,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/commit.ts:69](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L69)
+[hub/src/lib/commit.ts:70](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L70)
 
 ___
 
@@ -62,7 +62,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/commit.ts:58](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L58)
+[hub/src/lib/commit.ts:59](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L59)
 
 ___
 
@@ -77,17 +77,17 @@ Parent commit. Optional
 
 #### Defined in
 
-[hub/src/lib/commit.ts:68](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L68)
+[hub/src/lib/commit.ts:69](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L69)
 
 ___
 
 ### repo
 
-• **repo**: [`RepoId`](RepoId)
+• **repo**: [`RepoDesignation`](../modules#repodesignation)
 
 #### Defined in
 
-[hub/src/lib/commit.ts:57](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L57)
+[hub/src/lib/commit.ts:58](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L58)
 
 ___
 
@@ -97,4 +97,4 @@ ___
 
 #### Defined in
 
-[hub/src/lib/commit.ts:55](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L55)
+[hub/src/lib/commit.ts:56](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/commit.ts#L56)

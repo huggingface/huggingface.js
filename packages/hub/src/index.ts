@@ -5,6 +5,8 @@ export type {
 	AccessTokenRole,
 	AuthType,
 	Credentials,
+	RepoDesignation,
+	RepoFullName,
 	RepoId,
 	RepoType,
 	SpaceHardwareFlavor,

@@ -8,7 +8,7 @@
 
 #### Defined in
 
-[hub/src/types/public.d.ts:115](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L115)
+[hub/src/types/public.d.ts:119](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L119)
 
 ___
 
@@ -18,7 +18,7 @@ ___
 
 #### Defined in
 
-[hub/src/types/public.d.ts:112](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L112)
+[hub/src/types/public.d.ts:116](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L116)
 
 ___
 
@@ -28,7 +28,7 @@ ___
 
 #### Defined in
 
-[hub/src/types/public.d.ts:113](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L113)
+[hub/src/types/public.d.ts:117](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L117)
 
 ___
 
@@ -38,7 +38,7 @@ ___
 
 #### Defined in
 
-[hub/src/types/public.d.ts:111](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L111)
+[hub/src/types/public.d.ts:115](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L115)
 
 ___
 
@@ -48,4 +48,4 @@ ___
 
 #### Defined in
 
-[hub/src/types/public.d.ts:114](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L114)
+[hub/src/types/public.d.ts:118](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L118)

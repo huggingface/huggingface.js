@@ -10,7 +10,7 @@ The aggregator used to get the answer
 
 #### Defined in
 
-[HfInference.ts:141](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L141)
+[HfInference.ts:145](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L145)
 
 ___
 
@@ -22,7 +22,7 @@ The plaintext answer
 
 #### Defined in
 
-[HfInference.ts:145](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L145)
+[HfInference.ts:149](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L149)
 
 ___
 
@@ -34,7 +34,7 @@ A list of coordinates of the cells contents
 
 #### Defined in
 
-[HfInference.ts:149](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L149)
+[HfInference.ts:153](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L153)
 
 ___
 
@@ -46,4 +46,4 @@ a list of coordinates of the cells referenced in the answer
 
 #### Defined in
 
-[HfInference.ts:153](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L153)
+[HfInference.ts:157](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L157)

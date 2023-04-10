@@ -42,39 +42,45 @@ import type { RepoId, Credentials } from "@huggingface/hub";
 ```
 
 ### From CDN or Static hosting
+
 You can run our packages with vanilla JS, without any bundler, by using a CDN or static hosting. Using [ES modules](https://hacks.mozilla.org/2018/03/es-modules-a-cartoon-deep-dive/), i.e. `<script type="module">`, you can import the libraries in your code:
 
 ```html
 
 <script type="module">
-    import { HfInference } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@1/+esm';
-    import { createRepo, commit, deleteRepo, listFiles } from "https://cdn.jsdelivr.net/npm/@huggingface/hub@0/+esm";
+    import { HfInference } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@1.7.1/+esm';
+    import { createRepo, commit, deleteRepo, listFiles } from "https://cdn.jsdelivr.net/npm/@huggingface/hub@0.5.0/+esm";
 </script>
 ```
 
 ## Usage example
 
 ```ts
-import { createRepo, commit } from "@huggingface/hub";
+import { createRepo, uploadFile, deleteFiles } from "@huggingface/hub";
 import { HfInference } from "@huggingface/inference";
 
 // use an access token from your free account
 const HF_ACCESS_TOKEN = "hf_...";
 
 await createRepo({
-  repo: {type: "model", name: "my-user/nlp-test"},
+  repo: "my-user/nlp-model", // or {type: "model", name: "my-user/nlp-test"},
   credentials: {accessToken: HF_ACCESS_TOKEN}
 });
 
-await commit({
-  repo: {type: "model", name: "my-user/nlp-test"},
+await uploadFile({
+  repo: "my-user/nlp-model",
   credentials: {accessToken: HF_ACCESS_TOKEN},
-  title: "Add model file",
-  operations: [{
-    operation: "addOrUpdate",
+  // Can work with native File in browsers
+  file: {
     path: "pytorch_model.bin",
-    content: new Blob(...) // Can work with native File in browsers
-  }]
+    content: new Blob(...) 
+  }
+});
+
+await deleteFiles({
+  repo: {type: "space", name: "my-user/my-space"}, // or "spaces/my-user/my-space"
+  credentials: {accessToken: HF_ACCESS_TOKEN},
+  paths: ["README.md", ".gitattributes"]
 });
 
 const inference = new HfInference(HF_ACCESS_TOKEN);

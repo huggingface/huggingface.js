@@ -3,3 +3,4 @@ pnpm-lock.yaml
 README.md
 dist
 tapes.json
+src/vendor

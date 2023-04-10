@@ -8,7 +8,7 @@
 
 #### Defined in
 
-[hub/src/types/public.d.ts:89](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L89)
+[hub/src/types/public.d.ts:93](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L93)
 
 ___
 
@@ -20,7 +20,7 @@ in seconds
 
 #### Defined in
 
-[hub/src/types/public.d.ts:99](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L99)
+[hub/src/types/public.d.ts:103](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L103)
 
 ___
 
@@ -39,7 +39,7 @@ ___
 
 #### Defined in
 
-[hub/src/types/public.d.ts:90](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L90)
+[hub/src/types/public.d.ts:94](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L94)
 
 ___
 
@@ -51,7 +51,7 @@ when calling /spaces, those props are only fetched if ?full=true
 
 #### Defined in
 
-[hub/src/types/public.d.ts:97](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L97)
+[hub/src/types/public.d.ts:101](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L101)
 
 ___
 
@@ -61,7 +61,7 @@ ___
 
 #### Defined in
 
-[hub/src/types/public.d.ts:87](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L87)
+[hub/src/types/public.d.ts:91](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L91)
 
 ___
 
@@ -71,7 +71,7 @@ ___
 
 #### Defined in
 
-[hub/src/types/public.d.ts:88](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L88)
+[hub/src/types/public.d.ts:92](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L92)
 
 ___
 
@@ -81,4 +81,4 @@ ___
 
 #### Defined in
 
-[hub/src/types/public.d.ts:86](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L86)
+[hub/src/types/public.d.ts:90](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/types/public.d.ts#L90)

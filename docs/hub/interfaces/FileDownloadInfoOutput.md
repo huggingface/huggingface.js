@@ -10,7 +10,7 @@ In case of LFS file, link to download directly from cloud provider
 
 #### Defined in
 
-[hub/src/lib/file-download-info.ts:12](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/file-download-info.ts#L12)
+[hub/src/lib/file-download-info.ts:13](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/file-download-info.ts#L13)
 
 ___
 
@@ -20,7 +20,7 @@ ___
 
 #### Defined in
 
-[hub/src/lib/file-download-info.ts:8](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/file-download-info.ts#L8)
+[hub/src/lib/file-download-info.ts:9](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/file-download-info.ts#L9)
 
 ___
 
@@ -30,4 +30,4 @@ ___
 
 #### Defined in
 
-[hub/src/lib/file-download-info.ts:7](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/file-download-info.ts#L7)
+[hub/src/lib/file-download-info.ts:8](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/file-download-info.ts#L8)

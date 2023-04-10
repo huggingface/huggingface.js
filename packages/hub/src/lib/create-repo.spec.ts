@@ -53,4 +53,49 @@ describe("createRepo", () => {
 
 		await expect(tryCreate).rejects.toBeInstanceOf(TypeError);
 	});
+
+	it("should create a model with a string as name", async () => {
+		const repoName = `${TEST_USER}/TEST-${insecureRandomString()}`;
+
+		const result = await createRepo({
+			credentials: {
+				accessToken: TEST_ACCESS_TOKEN,
+			},
+			repo: repoName,
+			files: [{ path: ".gitattributes", content: new Blob(["*.html filter=lfs diff=lfs merge=lfs -text"]) }],
+		});
+
+		assert.deepStrictEqual(result, {
+			repoUrl: `${HUB_URL}/${repoName}`,
+		});
+
+		await deleteRepo({
+			repo: {
+				name: repoName,
+				type: "model",
+			},
+			credentials: { accessToken: TEST_ACCESS_TOKEN },
+		});
+	});
+
+	it("should create a dataset with a string as name", async () => {
+		const repoName = `datasets/${TEST_USER}/TEST-${insecureRandomString()}`;
+
+		const result = await createRepo({
+			credentials: {
+				accessToken: TEST_ACCESS_TOKEN,
+			},
+			repo: repoName,
+			files: [{ path: ".gitattributes", content: new Blob(["*.html filter=lfs diff=lfs merge=lfs -text"]) }],
+		});
+
+		assert.deepStrictEqual(result, {
+			repoUrl: `${HUB_URL}/${repoName}`,
+		});
+
+		await deleteRepo({
+			repo: repoName,
+			credentials: { accessToken: TEST_ACCESS_TOKEN },
+		});
+	});
 });

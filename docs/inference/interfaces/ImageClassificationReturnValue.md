@@ -10,7 +10,7 @@ A float that represents how likely it is that the image file belongs to this cla
 
 #### Defined in
 
-[HfInference.ts:397](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L397)
+[HfInference.ts:481](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L481)
 
 ___
 
@@ -22,4 +22,4 @@ The label for the class (model specific)
 
 #### Defined in
 
-[HfInference.ts:401](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L401)
+[HfInference.ts:485](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L485)
