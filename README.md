@@ -92,8 +92,10 @@ await inference.translation({
 
 await inference.textToImage({
   inputs: 'award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]',
-  negative_prompt: 'blurry',
   model: 'stabilityai/stable-diffusion-2',
+  parameters: {
+    negative_prompt: 'blurry',
+  }
 })
 ```
 
