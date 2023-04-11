@@ -159,8 +159,8 @@ await hf.textToImage({
 })
 
 await hf.imageToText({
-    data: readFileSync('test/cats.png'),
-    model: 'nlpconnect/vit-gpt2-image-captioning'
+  data: readFileSync('test/cats.png'),
+  model: 'nlpconnect/vit-gpt2-image-captioning'
 })
 ```
 

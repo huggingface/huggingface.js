@@ -95,6 +95,11 @@ await inference.textToImage({
   negative_prompt: 'blurry',
   model: 'stabilityai/stable-diffusion-2',
 })
+
+await inference.imageToText({
+  data: await (await fetch('https://picsum.photos/300/300')).blob(),
+  model: 'nlpconnect/vit-gpt2-image-captioning',  
+})
 ```
 
 There are more features of course, check each library's README!
