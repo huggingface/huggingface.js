@@ -1,6 +1,8 @@
 import { isBackend, isFrontend } from "../src/utils/env-predicates";
+import { omit } from "../src/utils/omit";
 
 const TAPES_FILE = "./tapes.json";
+const BASE64_PREFIX = "data:application/octet-stream;base64,";
 
 enum MODE {
 	RECORD = "record",
@@ -28,9 +30,7 @@ if (process.env.VCR_MODE) {
 
 const originalFetch = globalThis.fetch;
 
-globalThis.fetch = (...args) => {
-	return vcr(originalFetch, args[0], args[1]);
-};
+globalThis.fetch = (...args) => vcr(originalFetch, args[0], args[1]);
 
 /**
  * Represents a recorded HTTP request
@@ -51,9 +51,9 @@ interface Tape {
 	};
 }
 
-function tapeToResponse(tape: Tape) {
+async function tapeToResponse(tape: Tape) {
 	return new Response(
-		Uint8Array.from(atob(tape.response.body), (c) => c.charCodeAt(0)),
+		tape.response.body?.startsWith(BASE64_PREFIX) ? (await originalFetch(tape.response.body)).body : tape.response.body,
 		{
 			status: tape.response.status,
 			statusText: tape.response.statusText,
@@ -133,21 +133,32 @@ async function vcr(
 	const response = await originalFetch(input, init);
 
 	if (VCR_MODE === MODE.RECORD || VCR_MODE === MODE.CACHE) {
+		const isText =
+			response.headers.get("Content-Type")?.includes("json") || response.headers.get("Content-Type")?.includes("text");
 		const arrayBuffer = await response.arrayBuffer();
-		const headers: Record<string, string> = {};
-		response.headers.forEach((value, key) => (headers[key] = value));
 
 		const tape: Tape = {
 			url,
 			init: {
-				headers: init.headers,
+				headers: omit(init.headers as Record<string, string>, "Authorization"),
 				method: init.method,
 			},
 			response: {
-				// Truncating the body to 30KB to avoid having huge files
-				body: arrayBuffer.byteLength > 30_000 ? "" : Buffer.from(arrayBuffer).toString("base64"),
+				body: isText ? new TextDecoder().decode(arrayBuffer) : "",
+				// // Alternative to also save binary data:
+				// arrayBuffer.byteLength > 30_000
+				// 	? ""
+				// 	: isText
+				// 	? new TextDecoder().decode(arrayBuffer)
+				// 	: BASE64_PREFIX + base64FromBytes(new Uint8Array(arrayBuffer)),
 				status: response.status,
 				statusText: response.statusText,
+				headers: Object.fromEntries(
+					// Remove varying headers as much as possible
+					[...response.headers.entries()].filter(
+						([key]) => key !== "date" && key !== "content-length" && !key.startsWith("x-")
+					)
+				),
 			},
 		};
 		tapes[hash] = tape;
