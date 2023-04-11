@@ -147,14 +147,14 @@ describe.concurrent(
 			const makeExpectedReturn = (tokenText: string, fullPhrase: string): TextGenerationStreamReturn => {
 				const eot = tokenText === "</s>";
 				return {
-					details: undefined,
+					details: null,
 					token: {
 						id: expect.any(Number),
 						logprob: expect.any(Number),
 						text: eot ? tokenText : " " + tokenText,
 						special: eot,
 					},
-					generated_text: eot ? fullPhrase : undefined,
+					generated_text: eot ? fullPhrase : null,
 				};
 			};
 
