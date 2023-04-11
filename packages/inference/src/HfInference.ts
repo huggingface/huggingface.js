@@ -1048,7 +1048,9 @@ export class HfInference {
 			throw new Error(`Server response contains error: ${response.status}`);
 		}
 		if (response.headers.get("content-type") !== "text/event-stream") {
-			throw new Error(`Server does not support event stream content type`);
+			throw new Error(
+				`Server does not support event stream content type, it returned ` + response.headers.get("content-type")
+			);
 		}
 
 		const reader = response.body.getReader();
