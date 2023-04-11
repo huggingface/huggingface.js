@@ -5,7 +5,7 @@ import { isFrontend } from "./env-predicates";
  * https://bugzilla.mozilla.org/show_bug.cgi?id=1826243
  * https://bugs.chromium.org/p/chromium/issues/detail?id=1430298
  */
-export function isBlobSupportedByFetch(blob: Blob) {
+export function isBlobSupportedByFetch(blob: Blob): boolean {
 	return !(blob instanceof WebBlob && isFrontend);
 }
 
