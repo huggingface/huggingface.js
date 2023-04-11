@@ -3,6 +3,7 @@ import { omit } from "../src/utils/omit";
 
 const TAPES_FILE = "./tapes.json";
 const BASE64_PREFIX = "data:application/octet-stream;base64,";
+const TAPED_ENDPOINT = "https://api-inference.huggingface.co";
 
 enum MODE {
 	RECORD = "record",
@@ -108,6 +109,10 @@ async function vcr(
 		url = input.href;
 	} else {
 		url = input.url;
+	}
+
+	if (!url.startsWith(TAPED_ENDPOINT)) {
+		return originalFetch(input, init);
 	}
 
 	const hash = await hashRequest(url, init);
