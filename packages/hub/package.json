@@ -28,7 +28,7 @@
 		"prepublishOnly": "npm run build",
 		"build": "tsup src/index.ts --format cjs,esm --clean --dts-resolve",
 		"test": "vitest run",
-		"test:browser": "vitest run --browser.name=chrome --browser.headless --config ./vitest-browser.config.ts",
+		"test:browser": "vitest run --browser.name=chrome --browser.headless",
 		"type-check": "tsc"
 	},
 	"files": [
