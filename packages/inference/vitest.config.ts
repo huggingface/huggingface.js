@@ -13,7 +13,7 @@ export default defineConfig({
 	define: {
 		__TEST_FILES__: JSON.stringify(testFilesContents),
 		// make sure browser receives env vars
-		"process.env.HF_ACCESS_TOKEN": JSON.stringify(process.env.HF_ACCESS_TOKEN),
-		"process.env.VCR_MODE": JSON.stringify(process.env.VCR_MODE),
+		"process.env.HF_ACCESS_TOKEN": JSON.stringify(process.env.HF_ACCESS_TOKEN || ""),
+		"process.env.VCR_MODE": JSON.stringify(process.env.VCR_MODE || ""),
 	},
 });
