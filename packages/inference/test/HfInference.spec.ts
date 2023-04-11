@@ -341,6 +341,24 @@ describe.concurrent(
 				);
 			}
 		});
+		it("imageClassification from URL", async () => {
+			const remoteCheetah = new URL("https://huggingface.co/spaces/aschen/push-model-from-web/raw/main/cheetah.png");
+
+			expect(
+				await hf.imageClassification({
+					data: remoteCheetah,
+					model: "google/vit-base-patch16-224",
+				})
+			).toEqual(
+				expect.arrayContaining([
+					expect.objectContaining({
+						score: expect.any(Number),
+						label: expect.any(String),
+					}),
+				])
+			);
+		});
+
 		it("objectDetection", async () => {
 			// Run only in backend until we support load from URL
 			if (isBackend) {

@@ -1,3 +1,14 @@
+import { isFrontend } from "./env-predicates";
+
+/**
+ * Browsers does not support WebBlob in fetch
+ * https://bugzilla.mozilla.org/show_bug.cgi?id=1826243
+ * https://bugs.chromium.org/p/chromium/issues/detail?id=1430298
+ */
+export function blobSupportedByFetch(blob: Blob) {
+	return !(blob instanceof WebBlob && isFrontend);
+}
+
 /**
  * WebBlob is a Blob implementation for web resources that supports range requests.
  */

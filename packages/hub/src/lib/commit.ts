@@ -17,7 +17,7 @@ import { promisesQueue } from "../utils/promisesQueue";
 import { promisesQueueStreaming } from "../utils/promisesQueueStreaming";
 import { sha256 } from "../utils/sha256";
 import { toRepoId } from "../utils/toRepoId";
-import { createBlob, base64FromBytes, isSupportedByFetch } from "../../../shared/";
+import { createBlob, base64FromBytes, blobSupportedByFetch } from "../../../shared/";
 
 const CONCURRENT_SHAS = 5;
 const CONCURRENT_LFS_UPLOADS = 5;
@@ -264,7 +264,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 							const res = await fetch(header[part], {
 								method: "PUT",
 								/** Unfortunately, browsers don't support our inherited version of Blob in fetch calls */
-								body: isSupportedByFetch(slice) ? slice : await slice.arrayBuffer(),
+								body: blobSupportedByFetch(slice) ? slice : await slice.arrayBuffer(),
 							});
 
 							if (!res.ok) {
@@ -309,7 +309,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 							...(batchRequestId ? { "X-Request-Id": batchRequestId } : undefined),
 						},
 						/** Unfortunately, browsers don't support our inherited version of Blob in fetch calls */
-						body: isSupportedByFetch(content) ? content : await content.arrayBuffer(),
+						body: blobSupportedByFetch(content) ? content : await content.arrayBuffer(),
 					});
 
 					if (!res.ok) {

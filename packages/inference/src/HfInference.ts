@@ -1,6 +1,7 @@
 import { toArray } from "./utils/to-array";
 import type { EventSourceMessage } from "./vendor/fetch-event-source/parse";
 import { getLines, getMessages } from "./vendor/fetch-event-source/parse";
+import { createBlob, blobSupportedByFetch } from "../../shared";
 
 const HF_INFERENCE_API_BASE_URL = "https://api-inference.huggingface.co/models/";
 
@@ -471,7 +472,7 @@ export type ImageClassificationArgs = Args & {
 	/**
 	 * Binary image data
 	 */
-	data: Blob | ArrayBuffer;
+	data: Blob | ArrayBuffer | URL;
 };
 
 export interface ImageClassificationReturnValue {
@@ -931,9 +932,9 @@ export class HfInference {
 	/**
 	 * Helper that prepares request arguments
 	 */
-	private makeRequestOptions(
+	private async makeRequestOptions(
 		args: Args & {
-			data?: Blob | ArrayBuffer;
+			data?: Blob | ArrayBuffer | URL;
 			stream?: boolean;
 		},
 		options?: Options & {
@@ -968,23 +969,40 @@ export class HfInference {
 		}
 
 		const url = `${HF_INFERENCE_API_BASE_URL}${model}`;
+
+		const body = options?.binary
+			? await this.getBlob(args.data)
+			: JSON.stringify({
+					...otherArgs,
+					options: mergedOptions,
+			  });
+
 		const info: RequestInit = {
 			headers,
 			method: "POST",
-			body: options?.binary
-				? args.data
-				: JSON.stringify({
-						...otherArgs,
-						options: mergedOptions,
-				  }),
+			body,
 			credentials: options?.includeCredentials ? "include" : "same-origin",
 		};
 
 		return { url, info, mergedOptions };
 	}
 
+	private async getBlob(data: Blob | ArrayBuffer | URL): Promise<Blob | ArrayBuffer> {
+		if (!(data instanceof URL)) {
+			return data;
+		}
+
+		const blob = await createBlob(data);
+
+		if (!blobSupportedByFetch(blob)) {
+			return blob.arrayBuffer();
+		}
+
+		return blob;
+	}
+
 	public async request<T>(
-		args: Args & { data?: Blob | ArrayBuffer },
+		args: Args & { data?: Blob | ArrayBuffer | URL },
 		options?: Options & {
 			binary?: boolean;
 			blob?: boolean;
@@ -992,7 +1010,7 @@ export class HfInference {
 			includeCredentials?: boolean;
 		}
 	): Promise<T> {
-		const { url, info, mergedOptions } = this.makeRequestOptions(args, options);
+		const { url, info, mergedOptions } = await this.makeRequestOptions(args, options);
 		const response = await fetch(url, info);
 
 		if (mergedOptions.retry_on_error !== false && response.status === 503 && !mergedOptions.wait_for_model) {
@@ -1028,7 +1046,7 @@ export class HfInference {
 			includeCredentials?: boolean;
 		}
 	): AsyncGenerator<T> {
-		const { url, info, mergedOptions } = this.makeRequestOptions({ ...args, stream: true }, options);
+		const { url, info, mergedOptions } = await this.makeRequestOptions({ ...args, stream: true }, options);
 		const response = await fetch(url, info);
 
 		if (mergedOptions.retry_on_error !== false && response.status === 503 && !mergedOptions.wait_for_model) {
