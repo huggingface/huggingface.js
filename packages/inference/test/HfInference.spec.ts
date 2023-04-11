@@ -1,9 +1,9 @@
-import { expect, it, describe } from "vitest";
+import { expect, it, describe, assert } from "vitest";
 
 import type { TextGenerationStreamReturn } from "../src";
 import { HfInference } from "../src";
 import "./vcr";
-import { isBackend } from "../src/utils/env-predicates";
+import { isBackend } from "../../shared/src/isBackend";
 
 const TIMEOUT = 60000 * 3;
 
@@ -164,6 +164,7 @@ describe.concurrent(
 
 			for await (const ret of response) {
 				const expectedToken = expectedTokens.shift();
+				assert(expectedToken);
 				expect(ret).toMatchObject(makeExpectedReturn(expectedToken, phrase));
 			}
 		});

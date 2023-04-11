@@ -1,4 +1,4 @@
-import { isFrontend } from "./env-predicates";
+import { isFrontend } from "../../../shared/src/isFrontend";
 import { hexFromBytes } from "./hexFromBytes";
 
 /**

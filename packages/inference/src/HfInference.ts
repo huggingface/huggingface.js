@@ -1,4 +1,4 @@
-import { toArray } from "./utils/to-array";
+import { toArray } from "./utils/toArray";
 import type { EventSourceMessage } from "./vendor/fetch-event-source/parse";
 import { getLines, getMessages } from "./vendor/fetch-event-source/parse";
 
@@ -299,12 +299,12 @@ export interface TextGenerationStreamReturn {
 	 * Complete generated text
 	 * Only available when the generation is finished
 	 */
-	generated_text?: string;
+	generated_text: string | null;
 	/**
 	 * Generation details
 	 * Only available when the generation is finished
 	 */
-	details?: TextGenerationStreamDetails;
+	details: TextGenerationStreamDetails | null;
 }
 
 export type TokenClassificationArgs = Args & {
@@ -1071,8 +1071,12 @@ export class HfInference {
 			);
 		}
 
+		if (!response.body) {
+			return;
+		}
+
 		const reader = response.body.getReader();
-		const events: EventSourceMessage[] = [];
+		let events: EventSourceMessage[] = [];
 
 		const onEvent = (event: EventSourceMessage) => {
 			// accumulate events in array
@@ -1092,12 +1096,12 @@ export class HfInference {
 				const { done, value } = await reader.read();
 				if (done) return;
 				onChunk(value);
-				while (events.length > 0) {
-					const event = events.shift();
+				for (const event of events) {
 					if (event.data.length > 0) {
 						yield JSON.parse(event.data) as T;
 					}
 				}
+				events = [];
 			}
 		} finally {
 			reader.releaseLock();
