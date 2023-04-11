@@ -167,7 +167,7 @@ async function vcr(
 		writeFileSync(`./test/${TAPES_FILE}`, JSON.stringify(tapes, null, 2));
 
 		// Return a new response with an unconsummed body
-		return tapeToResponse(tape);
+		return new Response(arrayBuffer, tape.init);
 	}
 
 	return response;

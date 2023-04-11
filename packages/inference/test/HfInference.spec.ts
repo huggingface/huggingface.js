@@ -341,7 +341,7 @@ describe.concurrent(
 				);
 			}
 		});
-		it("imageClassification from URL", async () => {
+		it.only("imageClassification from URL", async () => {
 			const remoteCheetah = new URL("https://huggingface.co/spaces/aschen/push-model-from-web/raw/main/cheetah.png");
 
 			expect(

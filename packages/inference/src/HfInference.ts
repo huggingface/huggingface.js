@@ -1026,7 +1026,6 @@ export class HfInference {
 			}
 			return (await response.blob()) as T;
 		}
-
 		const output = await response.json();
 		if (output.error) {
 			throw new Error(output.error);

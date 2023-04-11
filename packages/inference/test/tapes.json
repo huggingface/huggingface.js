@@ -388,5 +388,71 @@
         "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
+  },
+  "d94898a9de559fd0aefb60bf157129b5df03e7dcda641f5be3bd966b5da0d734": {
+    "url": "https://huggingface.co/spaces/aschen/push-model-from-web/raw/main/cheetah.png",
+    "init": {
+      "method": "HEAD"
+    },
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "https://huggingface.co",
+        "access-control-expose-headers": "X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,ETag,Link,Accept-Ranges,Content-Range",
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "connection": "close",
+        "content-security-policy": "default-src none; sandbox",
+        "content-type": "image/png",
+        "etag": "\"6a6262641f05cb63ecb2851d5d5b73eabb99d328\"",
+        "server": "nginx",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "vary": "Origin",
+        "via": "1.1 042fd4ca41bdb9d4d6e284c22463e308.cloudfront.net (CloudFront)"
+      }
+    }
+  },
+  "45d0b01267b465f464cb9e208b877ee1c7d9986fa4594e03b8b918dc04568d2c": {
+    "url": "https://api-inference.huggingface.co/models/google/vit-base-patch16-224",
+    "init": {
+      "headers": {},
+      "method": "POST"
+    },
+    "response": {
+      "body": "[{\"score\":0.9981812238693237,\"label\":\"cheetah, chetah, Acinonyx jubatus\"},{\"score\":0.000663304585032165,\"label\":\"leopard, Panthera pardus\"},{\"score\":0.0005421049427241087,\"label\":\"jaguar, panther, Panthera onca, Felis onca\"},{\"score\":0.00010748126805992797,\"label\":\"lion, king of beasts, Panthera leo\"},{\"score\":5.714610961149447e-05,\"label\":\"tiger, Panthera tigris\"}]",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "6eaa9d498631f29b53640e7add9633dde7941e1f12c207b06b20adc5eb6ea73d": {
+    "url": "https://huggingface.co/spaces/aschen/push-model-from-web/raw/main/cheetah.png",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "https://huggingface.co",
+        "access-control-expose-headers": "X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,ETag,Link,Accept-Ranges,Content-Range",
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "connection": "keep-alive",
+        "content-security-policy": "default-src none; sandbox",
+        "content-type": "image/png",
+        "etag": "\"6a6262641f05cb63ecb2851d5d5b73eabb99d328\"",
+        "server": "nginx",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "vary": "Origin",
+        "via": "1.1 1de7ecec44e546a1e71d662ee3f2ba42.cloudfront.net (CloudFront)"
+      }
+    }
   }
 }
