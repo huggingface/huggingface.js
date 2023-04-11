@@ -388,5 +388,45 @@
         "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
+  },
+  "5d075f1b72a1944d61597a7bc7c3251c3d6b7f3b4deadce4fb6de54964bfeb74": {
+    "url": "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST"
+    },
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "connection": "keep-alive",
+        "content-type": "image/jpeg",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "9f9b1e0f1931cca2a77f4f39284fd1ca2e598b393d0c7ed36f05e66897cb762d": {
+    "url": "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST"
+    },
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "connection": "keep-alive",
+        "content-type": "image/jpeg",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
   }
 }
