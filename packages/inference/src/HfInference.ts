@@ -1,7 +1,7 @@
 import { toArray } from "./utils/to-array";
 import type { EventSourceMessage } from "./vendor/fetch-event-source/parse";
 import { getLines, getMessages } from "./vendor/fetch-event-source/parse";
-import { createBlob, blobSupportedByFetch } from "../../shared";
+import { createBlob, isBlobSupportedByFetch } from "../../shared";
 
 const HF_INFERENCE_API_BASE_URL = "https://api-inference.huggingface.co/models/";
 
@@ -1012,7 +1012,7 @@ export class HfInference {
 
 		const blob = await createBlob(data);
 
-		if (!blobSupportedByFetch(blob)) {
+		if (!isBlobSupportedByFetch(blob)) {
 			return blob.arrayBuffer();
 		}
 
