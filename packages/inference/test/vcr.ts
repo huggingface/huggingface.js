@@ -1,4 +1,3 @@
-import { base64FromBytes } from "../src/utils/base64FromBytes";
 import { isBackend, isFrontend } from "../src/utils/env-predicates";
 import { omit } from "../src/utils/omit";
 
@@ -145,13 +144,13 @@ async function vcr(
 				method: init.method,
 			},
 			response: {
-				// Truncating the body to 30KB to avoid having huge files
-				body:
-					arrayBuffer.byteLength > 30_000
-						? ""
-						: isText
-						? new TextDecoder().decode(arrayBuffer)
-						: BASE64_PREFIX + base64FromBytes(new Uint8Array(arrayBuffer)),
+				body: isText ? new TextDecoder().decode(arrayBuffer) : "",
+				// // Alternative to also save binary data:
+				// arrayBuffer.byteLength > 30_000
+				// 	? ""
+				// 	: isText
+				// 	? new TextDecoder().decode(arrayBuffer)
+				// 	: BASE64_PREFIX + base64FromBytes(new Uint8Array(arrayBuffer)),
 				status: response.status,
 				statusText: response.statusText,
 				headers: Object.fromEntries(
