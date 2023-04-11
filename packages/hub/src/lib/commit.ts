@@ -1,3 +1,4 @@
+import { isFrontend } from "../../../shared/src/isFrontend";
 import { HUB_URL } from "../consts";
 import { ApiError, createApiError, InvalidApiResponseFormatError } from "../error";
 import type {
@@ -14,7 +15,6 @@ import type { Credentials, RepoDesignation } from "../types/public";
 import { base64FromBytes } from "../utils/base64FromBytes";
 import { checkCredentials } from "../utils/checkCredentials";
 import { chunk } from "../utils/chunk";
-import { isFrontend } from "../utils/env-predicates";
 import { promisesQueue } from "../utils/promisesQueue";
 import { promisesQueueStreaming } from "../utils/promisesQueueStreaming";
 import { sha256 } from "../utils/sha256";

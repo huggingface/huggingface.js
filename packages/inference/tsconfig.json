@@ -5,6 +5,11 @@
 		"module": "ESNext",
 		"target": "ESNext",
 		"moduleResolution": "Node",
-		"noImplicitAny": true
-	}
+		"noImplicitAny": true,
+		"strict": true,
+		"strictNullChecks": true,
+		"skipLibCheck": true
+	},
+	"include": ["src", "index.ts", "../shared/src"],
+	"exclude": ["dist"]
 }

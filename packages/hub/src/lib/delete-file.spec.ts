@@ -5,7 +5,7 @@ import type { RepoId } from "../types/public";
 import { insecureRandomString } from "../utils/insecureRandomString";
 import { createRepo } from "./create-repo";
 import { deleteRepo } from "./delete-repo";
-import { deleteFile } from "./deleteFile";
+import { deleteFile } from "./delete-file";
 import { downloadFile } from "./download-file";
 
 describe("deleteFile", () => {

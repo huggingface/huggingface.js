@@ -1,4 +1,4 @@
-import { toArray } from "./utils/to-array";
+import { toArray } from "./utils/toArray";
 import type { EventSourceMessage } from "./vendor/fetch-event-source/parse";
 import { getLines, getMessages } from "./vendor/fetch-event-source/parse";
 

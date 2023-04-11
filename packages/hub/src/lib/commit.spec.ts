@@ -9,7 +9,7 @@ import { deleteRepo } from "./delete-repo";
 import { downloadFile } from "./download-file";
 import { fileDownloadInfo } from "./file-download-info";
 import { insecureRandomString } from "../utils/insecureRandomString";
-import { isFrontend } from "../utils/env-predicates";
+import { isFrontend } from "../../../shared/src/isFrontend";
 
 const lfsContent = "O123456789".repeat(100_000);
 

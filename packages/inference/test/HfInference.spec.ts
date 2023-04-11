@@ -1,9 +1,9 @@
-import { expect, it, describe } from "vitest";
+import { expect, it, describe, assert } from "vitest";
 
 import type { TextGenerationStreamReturn } from "../src";
 import { HfInference } from "../src";
 import "./vcr";
-import { isBackend } from "../src/utils/env-predicates";
+import { isBackend } from "../../shared/src/isBackend";
 
 const TIMEOUT = 60000 * 3;
 
@@ -147,14 +147,14 @@ describe.concurrent(
 			const makeExpectedReturn = (tokenText: string, fullPhrase: string): TextGenerationStreamReturn => {
 				const eot = tokenText === "</s>";
 				return {
-					details: null,
+					details: undefined,
 					token: {
 						id: expect.any(Number),
 						logprob: expect.any(Number),
 						text: eot ? tokenText : " " + tokenText,
 						special: eot,
 					},
-					generated_text: eot ? fullPhrase : null,
+					generated_text: eot ? fullPhrase : undefined,
 				};
 			};
 
@@ -164,6 +164,7 @@ describe.concurrent(
 
 			for await (const ret of response) {
 				const expectedToken = expectedTokens.shift();
+				assert(expectedToken);
 				expect(ret).toMatchObject(makeExpectedReturn(expectedToken, phrase));
 			}
 		});

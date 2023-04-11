@@ -1,5 +1,6 @@
-import { isBackend, isFrontend } from "../src/utils/env-predicates";
 import { omit } from "../src/utils/omit";
+import { isFrontend } from "../../shared/src/isFrontend";
+import { isBackend } from "../../shared/src/isBackend";
 
 const TAPES_FILE = "./tapes.json";
 const BASE64_PREFIX = "data:application/octet-stream;base64,";
