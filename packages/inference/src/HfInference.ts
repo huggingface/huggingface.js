@@ -965,7 +965,7 @@ export class HfInference {
 	 */
 	public async imageToText(args: ImageToTextArgs, options?: Options): Promise<ImageToTextReturn> {
 		return (
-			await this.request<ImageToTextReturn[]>(args, {
+			await this.request<[ImageToTextReturn]>(args, {
 				...options,
 				binary: true,
 			})
