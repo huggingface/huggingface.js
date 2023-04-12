@@ -157,6 +157,11 @@ await hf.textToImage({
     negative_prompt: 'blurry',
   }
 })
+
+await hf.imageToText({
+  data: readFileSync('test/cats.png'),
+  model: 'nlpconnect/vit-gpt2-image-captioning'
+})
 ```
 
 ## Supported Tasks
@@ -188,6 +193,7 @@ await hf.textToImage({
 - [x] Object detection
 - [x] Image segmentation
 - [x] Text to image
+- [x] Image to text
 
 ## Running tests
 
