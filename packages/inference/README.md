@@ -4,8 +4,6 @@ A Typescript powered wrapper for the Hugging Face Inference API. Learn more abou
 
 Check out the [full documentation](https://huggingface.co/docs/huggingface.js/inference/README) or try out a live [interactive notebook](https://observablehq.com/@huggingface/hello-huggingface-js-inference).
 
-
-
 ## Install
 
 ```console
@@ -18,7 +16,7 @@ pnpm add @huggingface/inference
 
 ## Usage
 
-❗**Important note:** Using an API key is optional to get started, however you will be rate limited eventually. Join [Hugging Face](https://huggingface.co/join) and then visit [access tokens](https://huggingface.co/settings/tokens) to generate your API key for **free**. 
+❗**Important note:** Using an API key is optional to get started, however you will be rate limited eventually. Join [Hugging Face](https://huggingface.co/join) and then visit [access tokens](https://huggingface.co/settings/tokens) to generate your API key for **free**.
 
 Your API key should be kept private. If you need to protect it in front-end applications, we suggest setting up a proxy server that stores the API key.
 
@@ -154,8 +152,10 @@ await hf.imageSegmentation({
 
 await hf.textToImage({
   inputs: 'award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]',
-  negative_prompt: 'blurry',
   model: 'stabilityai/stable-diffusion-2',
+  parameters: {
+    negative_prompt: 'blurry',
+  }
 })
 
 await hf.imageToText({

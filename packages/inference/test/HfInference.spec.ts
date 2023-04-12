@@ -1,4 +1,4 @@
-import { expect, it, describe } from "vitest";
+import { expect, it, describe, assert } from "vitest";
 
 import type { TextGenerationStreamReturn } from "../src";
 import { HfInference } from "../src";
@@ -164,6 +164,7 @@ describe.concurrent(
 
 			for await (const ret of response) {
 				const expectedToken = expectedTokens.shift();
+				assert(expectedToken);
 				expect(ret).toMatchObject(makeExpectedReturn(expectedToken, phrase));
 			}
 		});
@@ -357,10 +358,26 @@ describe.concurrent(
 		it("textToImage", async () => {
 			const res = await hf.textToImage({
 				inputs: "award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]",
-				negative_prompt: "blurry",
 				model: "stabilityai/stable-diffusion-2",
 			});
+			expect(res).toBeInstanceOf(Blob);
+		});
 
+		it("textToImage with parameters", async () => {
+			const width = 512;
+			const height = 128;
+			const num_inference_steps = 10;
+
+			const res = await hf.textToImage({
+				inputs: "award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]",
+				model: "stabilityai/stable-diffusion-2",
+				parameters: {
+					negative_prompt: "blurry",
+					width,
+					height,
+					num_inference_steps,
+				},
+			});
 			expect(res).toBeInstanceOf(Blob);
 		});
 		it("imageToText", async () => {
