@@ -6,10 +6,10 @@ import { insecureRandomString } from "../utils/insecureRandomString";
 import { createRepo } from "./create-repo";
 import { deleteRepo } from "./delete-repo";
 import { downloadFile } from "./download-file";
-import { uploadFile } from "./uploadFile";
+import { uploadFiles } from "./upload-files";
 
-describe("uploadFile", () => {
-	it("should upload a file", async () => {
+describe("uploadFiles", () => {
+	it("should upload files", async () => {
 		const repoName = `${TEST_USER}/TEST-${insecureRandomString()}`;
 		const repo = { type: "model", name: repoName } satisfies RepoId;
 		const credentials = {
@@ -26,8 +26,14 @@ describe("uploadFile", () => {
 				repoUrl: `${HUB_URL}/${repoName}`,
 			});
 
-			await uploadFile({ credentials, repo, file: { content: new Blob(["file1"]), path: "file1" } });
-			await uploadFile({ credentials, repo, file: new URL("https://huggingface.co/gpt2/raw/main/config.json") });
+			await uploadFiles({
+				credentials,
+				repo,
+				files: [
+					{ content: new Blob(["file1"]), path: "file1" },
+					new URL("https://huggingface.co/gpt2/raw/main/config.json"),
+				],
+			});
 
 			let content = await downloadFile({
 				repo,
