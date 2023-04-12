@@ -432,15 +432,19 @@
   "789205591192088e182cb48dfef4b7a95c6c7193478b15236dee4733361b8dc1": {
     "url": "https://api-inference.huggingface.co/models/nlpconnect/vit-gpt2-image-captioning",
     "init": {
-      "headers": {
-        "Authorization": "Bearer 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"
-      },
+      "headers": {},
       "method": "POST"
     },
     "response": {
-      "body": "W3siZ2VuZXJhdGVkX3RleHQiOiJhIGxhcmdlIGJyb3duIGFuZCB3aGl0ZSBnaXJhZmZlIHN0YW5kaW5nIGluIGEgZmllbGQgIn1d",
+      "body": "[{\"generated_text\":\"a large brown and white giraffe standing in a field \"}]",
       "status": 200,
-      "statusText": "OK"
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
     }
   }
 }
