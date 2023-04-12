@@ -157,6 +157,12 @@ await hf.textToImage({
     negative_prompt: 'blurry',
   }
 })
+
+// Using endpoints
+
+const gpt2 = hf.endpoint('https://xyz.eu-west-1.aws.endpoints.huggingface.cloud/gpt2');
+const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the universe is'});
+
 ```
 
 ## Supported Tasks
