@@ -239,7 +239,7 @@
       }
     }
   },
-  "ea3752fcae68367386fad4918964a5de0c4eb2a46aa4854ef2ab41de13429c6b": {
+  "45d0b01267b465f464cb9e208b877ee1c7d9986fa4594e03b8b918dc04568d2c": {
     "url": "https://api-inference.huggingface.co/models/google/vit-base-patch16-224",
     "init": {
       "headers": {},
@@ -257,7 +257,7 @@
       }
     }
   },
-  "4fd5fd4c75f75f3d46ab5d539323ef8d4b31a6ddedce94aded13ca74ba62a8db": {
+  "e4f68d60d76c3d45ce42d10399be7d13a7a1a9a7eea5cd0aed5212337864e862": {
     "url": "https://api-inference.huggingface.co/models/facebook/wav2vec2-large-960h-lv60-self",
     "init": {
       "headers": {},
@@ -275,7 +275,7 @@
       }
     }
   },
-  "ca042a4ac6a4f262adf83890752b75c22bab477f8ed65e469a87dbe8dcb4941a": {
+  "741f4bc66664a45c59af4ca4251b0604c297cd8927ea66d7fa138d5f6799c61e": {
     "url": "https://api-inference.huggingface.co/models/superb/hubert-large-superb-er",
     "init": {
       "headers": {},
@@ -313,7 +313,7 @@
       }
     }
   },
-  "2d643a033a829f6763eb17ed8866cda32f2ad2222c2311d73db8d8134ee1d323": {
+  "a729f3dac6bea9d866bf4064cc7cb773d20646e685dbff6010b7470d2920d35d": {
     "url": "https://api-inference.huggingface.co/models/facebook/detr-resnet-50",
     "init": {
       "headers": {},
@@ -351,7 +351,7 @@
       }
     }
   },
-  "9b882dc2b26efad0d97d3b27c3b31857d0c7713393be8d64f14f8b90003cc575": {
+  "53221439c8337814ef5345c16337b323f9e0b3a86e9d9636e8617606f8a9edf3": {
     "url": "https://api-inference.huggingface.co/models/facebook/detr-resnet-50-panoptic",
     "init": {
       "headers": {},
@@ -425,6 +425,24 @@
         "access-control-allow-credentials": "true",
         "connection": "keep-alive",
         "content-type": "image/jpeg",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "789205591192088e182cb48dfef4b7a95c6c7193478b15236dee4733361b8dc1": {
+    "url": "https://api-inference.huggingface.co/models/nlpconnect/vit-gpt2-image-captioning",
+    "init": {
+      "headers": {},
+      "method": "POST"
+    },
+    "response": {
+      "body": "[{\"generated_text\":\"a large brown and white giraffe standing in a field \"}]",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "connection": "keep-alive",
+        "content-type": "application/json",
         "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }

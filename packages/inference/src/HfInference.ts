@@ -611,6 +611,20 @@ export type TextToImageArgs = Args & {
 
 export type TextToImageReturn = Blob;
 
+export type ImageToTextArgs = Args & {
+	/**
+	 * Binary image data
+	 */
+	data: Blob | ArrayBuffer;
+};
+
+export interface ImageToTextReturn {
+	/**
+	 * The generated caption
+	 */
+	generated_text: string;
+}
+
 export class HfInference {
 	private readonly apiKey: string;
 	private readonly defaultOptions: Options;
@@ -956,6 +970,18 @@ export class HfInference {
 			throw new TypeError("Invalid inference output: output must be of type object & of instance Blob");
 		}
 		return res;
+	}
+
+	/**
+	 * This task reads some image input and outputs the text caption.
+	 */
+	public async imageToText(args: ImageToTextArgs, options?: Options): Promise<ImageToTextReturn> {
+		return (
+			await this.request<[ImageToTextReturn]>(args, {
+				...options,
+				binary: true,
+			})
+		)?.[0];
 	}
 
 	/**

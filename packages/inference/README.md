@@ -158,6 +158,11 @@ await hf.textToImage({
   }
 })
 
+await hf.imageToText({
+  data: readFileSync('test/cats.png'),
+  model: 'nlpconnect/vit-gpt2-image-captioning'
+})
+
 // Using endpoints
 
 const gpt2 = hf.endpoint('https://xyz.eu-west-1.aws.endpoints.huggingface.cloud/gpt2');
@@ -194,6 +199,7 @@ const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the
 - [x] Object detection
 - [x] Image segmentation
 - [x] Text to image
+- [x] Image to text
 
 ## Running tests
 

@@ -45,15 +45,15 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"prepublishOnly": "pnpm run build",
-		"test": "vitest run",
-		"test:browser": "vitest run --browser.name=chrome --browser.headless",
+		"test": "vitest run --config vitest.config.ts",
+		"test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest.config.ts",
 		"type-check": "tsc"
 	},
 	"devDependencies": {
 		"@types/node": "18.13.0",
 		"typescript": "4.9.5",
 		"vite": "^4.1.4",
-		"vitest": "^0.29.2"
+		"vitest": "^0.29.8"
 	},
 	"resolutions": {}
 }
