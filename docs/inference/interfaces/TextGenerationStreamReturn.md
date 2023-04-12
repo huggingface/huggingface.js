@@ -4,7 +4,7 @@
 
 ### details
 
-• `Optional` **details**: [`TextGenerationStreamDetails`](TextGenerationStreamDetails)
+• **details**: ``null`` \| [`TextGenerationStreamDetails`](TextGenerationStreamDetails)
 
 Generation details
 Only available when the generation is finished
@@ -17,7 +17,7 @@ ___
 
 ### generated\_text
 
-• `Optional` **generated\_text**: `string`
+• **generated\_text**: ``null`` \| `string`
 
 Complete generated text
 Only available when the generation is finished
