@@ -16,6 +16,7 @@
 - [ConversationalReturn](interfaces/ConversationalReturn)
 - [ImageClassificationReturnValue](interfaces/ImageClassificationReturnValue)
 - [ImageSegmentationReturnValue](interfaces/ImageSegmentationReturnValue)
+- [ImageToTextReturn](interfaces/ImageToTextReturn)
 - [ObjectDetectionReturnValue](interfaces/ObjectDetectionReturnValue)
 - [Options](interfaces/Options)
 - [QuestionAnswerReturn](interfaces/QuestionAnswerReturn)
@@ -155,6 +156,16 @@ ___
 
 ___
 
+### ImageToTextArgs
+
+Ƭ **ImageToTextArgs**: [`Args`](interfaces/Args) & { `data`: `Blob` \| `ArrayBuffer`  }
+
+#### Defined in
+
+[HfInference.ts:611](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L611)
+
+___
+
 ### ObjectDetectionArgs
 
 Ƭ **ObjectDetectionArgs**: [`Args`](interfaces/Args) & { `data`: `Blob` \| `ArrayBuffer`  }
@@ -237,7 +248,7 @@ ___
 
 ### TextToImageArgs
 
-Ƭ **TextToImageArgs**: [`Args`](interfaces/Args) & { `inputs`: `string` ; `negative_prompt?`: `string`  }
+Ƭ **TextToImageArgs**: [`Args`](interfaces/Args) & { `inputs`: `string` ; `parameters?`: { `guidance_scale?`: `number` ; `height?`: `number` ; `negative_prompt?`: `string` ; `num_inference_steps?`: `number` ; `width?`: `number`  }  }
 
 #### Defined in
 
@@ -251,7 +262,7 @@ ___
 
 #### Defined in
 
-[HfInference.ts:591](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L591)
+[HfInference.ts:609](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L609)
 
 ___
 

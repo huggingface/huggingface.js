@@ -14,7 +14,7 @@ pnpm add @huggingface/inference
 
 ## Usage
 
-❗**Important note:** Using an API key is optional to get started, however you will be rate limited eventually. Join [Hugging Face](https://huggingface.co/join) and then visit [access tokens](https://huggingface.co/settings/tokens) to generate your API key for **free**. 
+❗**Important note:** Using an API key is optional to get started, however you will be rate limited eventually. Join [Hugging Face](https://huggingface.co/join) and then visit [access tokens](https://huggingface.co/settings/tokens) to generate your API key for **free**.
 
 Your API key should be kept private. If you need to protect it in front-end applications, we suggest setting up a proxy server that stores the API key.
 
@@ -150,8 +150,15 @@ await hf.imageSegmentation({
 
 await hf.textToImage({
   inputs: 'award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]',
-  negative_prompt: 'blurry',
   model: 'stabilityai/stable-diffusion-2',
+  parameters: {
+    negative_prompt: 'blurry',
+  }
+})
+
+await hf.imageToText({
+  data: readFileSync('test/cats.png'),
+  model: 'nlpconnect/vit-gpt2-image-captioning'
 })
 ```
 
@@ -184,6 +191,7 @@ await hf.textToImage({
 - [x] Object detection
 - [x] Image segmentation
 - [x] Text to image
+- [x] Image to text
 
 ## Running tests
 

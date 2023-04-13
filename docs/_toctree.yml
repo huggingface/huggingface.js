@@ -80,6 +80,8 @@
           local: inference/interfaces/ImageClassificationReturnValue
         - title: ImageSegmentationReturnValue
           local: inference/interfaces/ImageSegmentationReturnValue
+        - title: ImageToTextReturn
+          local: inference/interfaces/ImageToTextReturn
         - title: ObjectDetectionReturnValue
           local: inference/interfaces/ObjectDetectionReturnValue
         - title: Options
