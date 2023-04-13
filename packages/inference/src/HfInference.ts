@@ -848,6 +848,28 @@ export class HfInference {
 	 */
 	public async featureExtraction(args: FeatureExtractionArgs, options?: Options): Promise<FeatureExtractionReturn> {
 		const res = await this.request<FeatureExtractionReturn>(args, options);
+		let isValidOutput = true;
+		// Check if output is an array
+		if (Array.isArray(res)) {
+			for (const e of res) {
+				// Check if output is an array of arrays or numbers
+				if (Array.isArray(e)) {
+					// if all elements are numbers, continue
+					isValidOutput = e.every((x) => typeof x === "number");
+					if (!isValidOutput) {
+						break;
+					}
+				} else if (typeof e !== "number") {
+					isValidOutput = false;
+					break;
+				}
+			}
+		} else {
+			isValidOutput = false;
+		}
+		if (!isValidOutput) {
+			throw new TypeError("Invalid inference output: output must be of type Array<Array<number> | number>");
+		}
 		return res;
 	}
 
@@ -859,6 +881,11 @@ export class HfInference {
 		options?: Options
 	): Promise<SentenceSimiliarityReturn> {
 		const res = await this.request<SentenceSimiliarityReturn>(args, options);
+
+		const isValidOutput = Array.isArray(res) && res.every((x) => typeof x === "number");
+		if (!isValidOutput) {
+			throw new TypeError("Invalid inference output: output must be of type Array<number>");
+		}
 		return res;
 	}
 
