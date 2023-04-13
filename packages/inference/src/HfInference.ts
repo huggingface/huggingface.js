@@ -451,12 +451,12 @@ export interface ConversationalReturn {
 }
 export type FeatureExtractionArgs = Args & {
 	/**
-	 *  The input is string sentence
+	 *  The inputs is a string or a list of strings to get the features from.
 	 *
 	 *  inputs: "That is a happy person",
 	 *
 	 */
-	inputs: string;
+	inputs: string | string[];
 };
 
 /**
@@ -852,7 +852,7 @@ export class HfInference {
 	}
 
 	/**
-	 * This task reads some text and outputs raw float values, that are usually consumed as part of a semantic database/semantic search.
+	 * Calculate the semantic similarity between one text and a list of other sentences by comparing their embeddings.
 	 */
 	public async sentenceSimiliarity(
 		args: SentenceSimiliarityArgs,

@@ -282,7 +282,7 @@ describe.concurrent(
 			const response = await hf.featureExtraction({
 				model: "sentence-transformers/distilbert-base-nli-mean-tokens",
 				inputs: "That is a happy person",
-			})
+			});
 			expect(response).toHaveLength(768);
 			expect(response).toEqual(expect.arrayContaining([expect.any(Number)]));
 		});
