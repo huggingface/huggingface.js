@@ -1048,6 +1048,12 @@ export class HfInference {
 
 		if (options?.blob) {
 			if (!response.ok) {
+				if (response.headers.get("Content-Type")?.startsWith("application/json")) {
+					const output = await response.json();
+					if (output.error) {
+						throw new Error(output.error);
+					}
+				}
 				throw new Error("An error occurred while fetching the blob");
 			}
 			return (await response.blob()) as T;
