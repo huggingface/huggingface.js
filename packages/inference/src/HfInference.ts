@@ -1070,9 +1070,9 @@ export class HfInference {
 			body: options?.binary
 				? args.data
 				: JSON.stringify({
-					...otherArgs,
-					options: mergedOptions,
-				}),
+						...otherArgs,
+						options: mergedOptions,
+				  }),
 			credentials: options?.includeCredentials ? "include" : "same-origin",
 		};
 
@@ -1163,8 +1163,8 @@ export class HfInference {
 
 		const onChunk = getLines(
 			getMessages(
-				() => { },
-				() => { },
+				() => {},
+				() => {},
 				onEvent
 			)
 		);
