@@ -267,9 +267,9 @@ describe.concurrent(
 				warnings: ["Setting `pad_token_id` to `eos_token_id`:50256 for open-end generation."],
 			});
 		});
-		it("featureExtraction", async () => {
+		it("SentenceSimiliarity", async () => {
 			expect(
-				await hf.featureExtraction({
+				await hf.sentenceSimiliarity({
 					model: "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
 					inputs: {
 						source_sentence: "That is a happy person",
@@ -277,6 +277,14 @@ describe.concurrent(
 					},
 				})
 			).toEqual([expect.any(Number), expect.any(Number), expect.any(Number)]);
+		});
+		it("FeatureExtraction", async () => {
+			const response = await hf.featureExtraction({
+				model: "sentence-transformers/distilbert-base-nli-mean-tokens",
+				inputs: "That is a happy person",
+			})
+			expect(response).toHaveLength(768);
+			expect(response).toEqual(expect.arrayContaining([expect.any(Number)]));
 		});
 		it("automaticSpeechRecognition", async () => {
 			expect(

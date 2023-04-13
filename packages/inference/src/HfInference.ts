@@ -449,8 +449,22 @@ export interface ConversationalReturn {
 	generated_text: string;
 	warnings: string[];
 }
-
 export type FeatureExtractionArgs = Args & {
+	/**
+	 *  The input is string sentence
+	 *
+	 *  inputs: "That is a happy person",
+	 *
+	 */
+	inputs: string;
+};
+
+/**
+ * Returned values are a list of floats
+ */
+export type FeatureExtractionReturn = number[] | number[][];
+
+export type SentenceSimiliarityArgs = Args & {
 	/**
 	 * The inputs vary based on the model. For example when using sentence-transformers/paraphrase-xlm-r-multilingual-v1 the inputs will look like this:
 	 *
@@ -465,7 +479,7 @@ export type FeatureExtractionArgs = Args & {
 /**
  * Returned values are a list of floats, or a list of list of floats (depending on if you sent a string or a list of string, and if the automatic reduction, usually mean_pooling for instance was applied for you or not. This should be explained on the model's README.
  */
-export type FeatureExtractionReturn = (number | number[])[];
+export type SentenceSimiliarityReturn = (number | number[])[];
 
 export type ImageClassificationArgs = Args & {
 	/**
@@ -838,6 +852,17 @@ export class HfInference {
 	}
 
 	/**
+	 * This task reads some text and outputs raw float values, that are usually consumed as part of a semantic database/semantic search.
+	 */
+	public async sentenceSimiliarity(
+		args: SentenceSimiliarityArgs,
+		options?: Options
+	): Promise<SentenceSimiliarityReturn> {
+		const res = await this.request<SentenceSimiliarityReturn>(args, options);
+		return res;
+	}
+
+	/**
 	 * This task reads some audio input and outputs the said words within the audio files.
 	 * Recommended model (english language): facebook/wav2vec2-large-960h-lv60-self
 	 */
@@ -1018,9 +1043,9 @@ export class HfInference {
 			body: options?.binary
 				? args.data
 				: JSON.stringify({
-						...otherArgs,
-						options: mergedOptions,
-				  }),
+					...otherArgs,
+					options: mergedOptions,
+				}),
 			credentials: options?.includeCredentials ? "include" : "same-origin",
 		};
 
@@ -1111,8 +1136,8 @@ export class HfInference {
 
 		const onChunk = getLines(
 			getMessages(
-				() => {},
-				() => {},
+				() => { },
+				() => { },
 				onEvent
 			)
 		);
