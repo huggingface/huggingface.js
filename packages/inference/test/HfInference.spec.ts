@@ -151,7 +151,7 @@ describe.concurrent(
 					token: {
 						id: expect.any(Number),
 						logprob: expect.any(Number),
-						text: eot ? tokenText : " " + tokenText,
+						text: expect.stringContaining(tokenText),
 						special: eot,
 					},
 					generated_text: eot ? fullPhrase : null,

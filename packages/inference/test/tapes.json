@@ -68,7 +68,7 @@
       "method": "POST"
     },
     "response": {
-      "body": "[{\"generated_text\":\"The answer to the universe is this: it is all of history.\\n\\nIt's time to reclaim our right to see it as we see it. It's time to take back the right to think and to make our opinions heard in the process\"}]",
+      "body": "[{\"generated_text\":\"The answer to the universe is the fundamental property of space, but we're dealing only with the simplest possible set of answers, which is why we need to talk about how we come to know and understand what sets matter.\\n\\nLet's take a\"}]",
       "status": 200,
       "statusText": "OK",
       "headers": {
@@ -378,7 +378,7 @@
       "method": "POST"
     },
     "response": {
-      "body": "data:{\"token\":{\"id\":80,\"text\":\" one\",\"logprob\":-0.75390625,\"special\":false},\"generated_text\":null,\"details\":null}\n\ndata:{\"token\":{\"id\":192,\"text\":\" two\",\"logprob\":-0.01940918,\"special\":false},\"generated_text\":null,\"details\":null}\n\ndata:{\"token\":{\"id\":386,\"text\":\" three\",\"logprob\":-0.015197754,\"special\":false},\"generated_text\":null,\"details\":null}\n\ndata:{\"token\":{\"id\":662,\"text\":\" four\",\"logprob\":-0.01940918,\"special\":false},\"generated_text\":null,\"details\":null}\n\ndata:{\"token\":{\"id\":1,\"text\":\"</s>\",\"logprob\":-0.030883789,\"special\":true},\"generated_text\":\"one two three four\",\"details\":null}\n\n",
+      "body": "data:{\"token\":{\"id\":80,\"text\":\"one\",\"logprob\":-0.75390625,\"special\":false},\"generated_text\":null,\"details\":null}\n\ndata:{\"token\":{\"id\":192,\"text\":\" two\",\"logprob\":-0.01940918,\"special\":false},\"generated_text\":null,\"details\":null}\n\ndata:{\"token\":{\"id\":386,\"text\":\" three\",\"logprob\":-0.015197754,\"special\":false},\"generated_text\":null,\"details\":null}\n\ndata:{\"token\":{\"id\":662,\"text\":\" four\",\"logprob\":-0.01940918,\"special\":false},\"generated_text\":null,\"details\":null}\n\ndata:{\"token\":{\"id\":1,\"text\":\"</s>\",\"logprob\":-0.030883789,\"special\":true},\"generated_text\":\"one two three four\",\"details\":null}\n\n",
       "status": 200,
       "statusText": "OK",
       "headers": {
