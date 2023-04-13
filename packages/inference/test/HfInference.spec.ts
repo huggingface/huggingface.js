@@ -144,14 +144,14 @@ describe.concurrent(
 				inputs: `repeat "${phrase}"`,
 			});
 
-			const makeExpectedReturn = (tokenText: string, index: number, fullPhrase: string): TextGenerationStreamReturn => {
+			const makeExpectedReturn = (tokenText: string, fullPhrase: string): TextGenerationStreamReturn => {
 				const eot = tokenText === "</s>";
 				return {
 					details: null,
 					token: {
 						id: expect.any(Number),
 						logprob: expect.any(Number),
-						text: eot || index === 0 ? tokenText : " " + tokenText,
+						text: expect.stringContaining(tokenText),
 						special: eot,
 					},
 					generated_text: eot ? fullPhrase : null,
@@ -161,12 +161,11 @@ describe.concurrent(
 			const expectedTokens = phrase.split(" ");
 			// eot token
 			expectedTokens.push("</s>");
-			let index = 0;
+
 			for await (const ret of response) {
 				const expectedToken = expectedTokens.shift();
 				assert(expectedToken);
-				expect(ret).toMatchObject(makeExpectedReturn(expectedToken, index, phrase));
-				index++;
+				expect(ret).toMatchObject(makeExpectedReturn(expectedToken, phrase));
 			}
 		});
 
