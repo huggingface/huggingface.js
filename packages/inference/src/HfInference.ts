@@ -460,9 +460,9 @@ export type FeatureExtractionArgs = Args & {
 };
 
 /**
- * Returned values are a list of floats
+ * Returned values are a list of floats, or a list of list of floats (depending on if you sent a string or a list of string, and if the automatic reduction, usually mean_pooling for instance was applied for you or not. This should be explained on the model's README.
  */
-export type FeatureExtractionReturn = number[] | number[][];
+export type FeatureExtractionReturn = (number | number[])[];
 
 export type SentenceSimiliarityArgs = Args & {
 	/**
@@ -477,9 +477,9 @@ export type SentenceSimiliarityArgs = Args & {
 };
 
 /**
- * Returned values are a list of floats, or a list of list of floats (depending on if you sent a string or a list of string, and if the automatic reduction, usually mean_pooling for instance was applied for you or not. This should be explained on the model's README.
+ * Returned values are a list of floats
  */
-export type SentenceSimiliarityReturn = (number | number[])[];
+export type SentenceSimiliarityReturn = number[];
 
 export type ImageClassificationArgs = Args & {
 	/**
