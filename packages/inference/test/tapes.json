@@ -466,5 +466,45 @@
         "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
+  },
+  "c4745d72b1178be30244fda4673b4e4cbcefee29ad8f5f0f439acfdaeeeaaa01": {
+    "url": "https://api-inference.huggingface.co/models/impira/layoutlm-document-qa",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST"
+    },
+    "response": {
+      "body": "[{\"score\":0.6035408973693848,\"answer\":\"us-001\",\"start\":16,\"end\":16}]",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "30b6ce7465d396930170cc734393bf189ed87249347543743995e8cc351406d9": {
+    "url": "https://api-inference.huggingface.co/models/dandelin/vilt-b32-finetuned-vqa",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST"
+    },
+    "response": {
+      "body": "[{\"score\":0.5166969895362854,\"answer\":\"2\"},{\"score\":0.35002416372299194,\"answer\":\"3\"},{\"score\":0.20439691841602325,\"answer\":\"1\"},{\"score\":0.1671825498342514,\"answer\":\"4\"},{\"score\":0.057514239102602005,\"answer\":\"5\"}]",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
   }
 }

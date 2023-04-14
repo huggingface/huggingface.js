@@ -106,6 +106,16 @@ export type QuestionAnswerArgs = Args & {
 	};
 };
 
+export type ImageQuestionAnswerArgs = Args & {
+	inputs: {
+		question: string;
+		/**
+		 * Base64 of the image
+		 */
+		image: string;
+	};
+};
+
 export interface QuestionAnswerReturn {
 	/**
 	 * A string that’s the answer within the text.
@@ -114,7 +124,7 @@ export interface QuestionAnswerReturn {
 	/**
 	 * The index (string wise) of the stop of the answer within context.
 	 */
-	end: number;
+	end?: number;
 	/**
 	 * A float that represents how likely that the answer is correct
 	 */
@@ -122,7 +132,7 @@ export interface QuestionAnswerReturn {
 	/**
 	 * The index (string wise) of the start of the answer within context.
 	 */
-	start: number;
+	start?: number;
 }
 
 export type TableQuestionAnswerArgs = Args & {
@@ -718,6 +728,20 @@ export class HfInference {
 			);
 		}
 		return res;
+	}
+
+	/**
+	 * Answers a question on a document image. Recommended model: impira/layoutlm-document-qa.
+	 */
+	public async documentQuestionAnswer(args: ImageQuestionAnswerArgs, options?: Options): Promise<QuestionAnswerReturn> {
+		return (await this.request<[QuestionAnswerReturn]>(args, options))?.[0];
+	}
+
+	/**
+	 * Answers a question on an image. Recommended model: dandelin/vilt-b32-finetuned-vqa.
+	 */
+	public async visualQuestionAnswer(args: ImageQuestionAnswerArgs, options?: Options): Promise<QuestionAnswerReturn> {
+		return (await this.request<QuestionAnswerReturn[]>(args, options))?.[0];
 	}
 
 	/**

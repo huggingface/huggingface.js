@@ -122,8 +122,8 @@ await hf.sentenceSimilarity({
 })
 
 await hf.featureExtraction({
-    model: "sentence-transformers/distilbert-base-nli-mean-tokens",
-    inputs: "That is a happy person",
+  model: "sentence-transformers/distilbert-base-nli-mean-tokens",
+  inputs: "That is a happy person",
 });
 
 // Audio
@@ -166,6 +166,24 @@ await hf.textToImage({
 await hf.imageToText({
   data: readFileSync('test/cats.png'),
   model: 'nlpconnect/vit-gpt2-image-captioning'
+})
+
+// Multimodal
+
+await hf.visualQuestionAnswer({
+  model: 'dandelin/vilt-b32-finetuned-vqa',
+  inputs: {
+    question: 'How many cats are lying down?',
+    image: readFileSync('test/cats.png').toString('base64')
+  }
+})
+
+await hf.documentQuestionAnswer({
+  model: 'impira/layoutlm-document-qa',
+  inputs: {
+    question: 'Invoice number?',
+    image: readFileSync('test/invoice.png').toString('base64'),
+  }
 })
 ```
 

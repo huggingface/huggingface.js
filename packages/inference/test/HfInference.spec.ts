@@ -99,6 +99,39 @@ describe.concurrent(
 			});
 		});
 
+		it("documentQuestionAnswer", async () => {
+			expect(
+				await hf.documentQuestionAnswer({
+					model: "impira/layoutlm-document-qa",
+					inputs: {
+						question: "Invoice number?",
+						image: readTestFile("invoice.png", true) as string,
+					},
+				})
+			).toMatchObject({
+				answer: "us-001",
+				score: expect.any(Number),
+				// not sure what start/end refers to in this case
+				start: expect.any(Number),
+				end: expect.any(Number),
+			});
+		});
+
+		it("visualQuestionAnswer", async () => {
+			expect(
+				await hf.visualQuestionAnswer({
+					model: "dandelin/vilt-b32-finetuned-vqa",
+					inputs: {
+						question: "How many cats are lying down?",
+						image: readTestFile("cats.png", true) as string,
+					},
+				})
+			).toMatchObject({
+				answer: "2",
+				score: expect.any(Number),
+			});
+		});
+
 		it("textClassification", async () => {
 			expect(
 				await hf.textClassification({
