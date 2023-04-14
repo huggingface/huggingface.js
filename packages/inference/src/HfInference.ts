@@ -29,7 +29,10 @@ export interface Options {
 }
 
 export interface Args {
-	model: string;
+	/**
+	 * The model to use. Optional for endpoints.
+	 */
+	model?: string;
 }
 
 export type FillMaskArgs = Args & {
@@ -639,10 +642,19 @@ export interface ImageToTextReturn {
 export class HfInference {
 	private readonly apiKey: string;
 	private readonly defaultOptions: Options;
+	private readonly endpointUrl?: string;
 
-	constructor(apiKey = "", defaultOptions: Options = {}) {
+	constructor(apiKey = "", defaultOptions: Options = {}, endpointUrl?: string) {
 		this.apiKey = apiKey;
 		this.defaultOptions = defaultOptions;
+		this.endpointUrl = endpointUrl;
+	}
+
+	/**
+	 * Returns copy of HfInference tied to a specified endpoint.
+	 */
+	public endpoint(endpointUrl: string): HfInference {
+		return new HfInference(this.apiKey, this.defaultOptions, endpointUrl);
 	}
 
 	/**
@@ -1063,7 +1075,10 @@ export class HfInference {
 			}
 		}
 
-		const url = `${HF_INFERENCE_API_BASE_URL}${model}`;
+		if (!model && !this.endpointUrl) {
+			throw new Error("Model is required for Inference API");
+		}
+		const url = this.endpointUrl ? this.endpointUrl : `${HF_INFERENCE_API_BASE_URL}${model}`;
 		const info: RequestInit = {
 			headers,
 			method: "POST",
