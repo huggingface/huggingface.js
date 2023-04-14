@@ -1,8 +1,10 @@
 # 🤗 Hugging Face Inference API
 
-A Typescript powered wrapper for the Hugging Face Inference API. Learn more about the Inference API at [Hugging Face](https://huggingface.co/docs/api-inference/index).
+A Typescript powered wrapper for the Hugging Face Inference API. Learn more about the Inference API at [Hugging Face](https://huggingface.co/docs/api-inference/index). It also works with [Inference Endpoints](https://huggingface.co/docs/inference-endpoints/index).
 
-Check out the [full documentation](https://huggingface.co/docs/huggingface.js/inference/README) or try out a live [interactive notebook](https://observablehq.com/@huggingface/hello-huggingface-js-inference).
+Check out the [full documentation](https://huggingface.co/docs/huggingface.js/inference/README).
+
+You can also try out a live [interactive notebook](https://observablehq.com/@huggingface/hello-huggingface-js-inference) or see some demos on [hf.co/huggingfacejs](https://huggingface.co/huggingfacejs).
 
 ## Install
 
@@ -16,16 +18,16 @@ pnpm add @huggingface/inference
 
 ## Usage
 
-❗**Important note:** Using an API key is optional to get started, however you will be rate limited eventually. Join [Hugging Face](https://huggingface.co/join) and then visit [access tokens](https://huggingface.co/settings/tokens) to generate your API key for **free**.
+❗**Important note:** Using an access token is optional to get started, however you will be rate limited eventually. Join [Hugging Face](https://huggingface.co/join) and then visit [access tokens](https://huggingface.co/settings/tokens) to generate your access token for **free**.
 
-Your API key should be kept private. If you need to protect it in front-end applications, we suggest setting up a proxy server that stores the API key.
+Your access token should be kept private. If you need to protect it in front-end applications, we suggest setting up a proxy server that stores the access token.
 
 ### Basic examples
 
 ```typescript
 import { HfInference } from '@huggingface/inference'
 
-const hf = new HfInference('your api key')
+const hf = new HfInference('your access token')
 
 // Natural Language
 
@@ -167,6 +169,10 @@ await hf.imageToText({
   data: readFileSync('test/cats.png'),
   model: 'nlpconnect/vit-gpt2-image-captioning'
 })
+
+// Using your own inference endpoint: https://hf.co/docs/inference-endpoints/
+const gpt2 = hf.endpoint('https://xyz.eu-west-1.aws.endpoints.huggingface.cloud/gpt2');
+const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the universe is'});
 ```
 
 ## Supported Tasks

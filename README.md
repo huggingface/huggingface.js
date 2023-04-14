@@ -28,7 +28,7 @@ await inference.textToImage({
 
 This is a collection of JS libraries to interact with the Hugging Face API, with TS types included.
 
-- [@huggingface/inference](packages/inference/README.md): Use the Inference API to make calls to 100,000+ Machine Learning models!
+- [@huggingface/inference](packages/inference/README.md): Use the Inference API to make calls to 100,000+ Machine Learning models, or your own [inference endpoints](https://hf.co/docs/inference-endpoints/)!
 - [@huggingface/hub](packages/hub/README.md): Interact with huggingface.co to create or delete repos and commit / download files
 
 
@@ -99,6 +99,11 @@ await inference.imageToText({
   data: await (await fetch('https://picsum.photos/300/300')).blob(),
   model: 'nlpconnect/vit-gpt2-image-captioning',  
 })
+
+
+// Using your own inference endpoint: https://hf.co/docs/inference-endpoints/
+const gpt2 = inference.endpoint('https://xyz.eu-west-1.aws.endpoints.huggingface.cloud/gpt2');
+const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the universe is'});
 ```
 
 ### @huggingface/hub examples

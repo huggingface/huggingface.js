@@ -397,6 +397,20 @@ describe.concurrent(
 				generated_text: "a large brown and white giraffe standing in a field ",
 			});
 		});
+		it("endpoint - makes request to specified endpoint", async () => {
+			const ep = hf.endpoint("https://api-inference.huggingface.co/models/google/flan-t5-xxl");
+			const { generated_text } = await ep.textGeneration({
+				inputs: "one plus two equals",
+			});
+			expect(generated_text).toEqual("three");
+		});
+		it("error when the model is not set", () => {
+			expect(
+				hf.textGeneration({
+					inputs: "one plus two equals",
+				})
+			).rejects.toThrowError("Model is required for Inference API");
+		});
 	},
 	TIMEOUT
 );
