@@ -449,8 +449,22 @@ export interface ConversationalReturn {
 	generated_text: string;
 	warnings: string[];
 }
-
 export type FeatureExtractionArgs = Args & {
+	/**
+	 *  The inputs is a string or a list of strings to get the features from.
+	 *
+	 *  inputs: "That is a happy person",
+	 *
+	 */
+	inputs: string | string[];
+};
+
+/**
+ * Returned values are a list of floats, or a list of list of floats (depending on if you sent a string or a list of string, and if the automatic reduction, usually mean_pooling for instance was applied for you or not. This should be explained on the model's README.
+ */
+export type FeatureExtractionReturn = (number | number[])[];
+
+export type SentenceSimiliarityArgs = Args & {
 	/**
 	 * The inputs vary based on the model. For example when using sentence-transformers/paraphrase-xlm-r-multilingual-v1 the inputs will look like this:
 	 *
@@ -463,9 +477,9 @@ export type FeatureExtractionArgs = Args & {
 };
 
 /**
- * Returned values are a list of floats, or a list of list of floats (depending on if you sent a string or a list of string, and if the automatic reduction, usually mean_pooling for instance was applied for you or not. This should be explained on the model's README.
+ * Returned values are a list of floats
  */
-export type FeatureExtractionReturn = (number | number[])[];
+export type SentenceSimiliarityReturn = number[];
 
 export type ImageClassificationArgs = Args & {
 	/**
@@ -834,6 +848,44 @@ export class HfInference {
 	 */
 	public async featureExtraction(args: FeatureExtractionArgs, options?: Options): Promise<FeatureExtractionReturn> {
 		const res = await this.request<FeatureExtractionReturn>(args, options);
+		let isValidOutput = true;
+		// Check if output is an array
+		if (Array.isArray(res)) {
+			for (const e of res) {
+				// Check if output is an array of arrays or numbers
+				if (Array.isArray(e)) {
+					// if all elements are numbers, continue
+					isValidOutput = e.every((x) => typeof x === "number");
+					if (!isValidOutput) {
+						break;
+					}
+				} else if (typeof e !== "number") {
+					isValidOutput = false;
+					break;
+				}
+			}
+		} else {
+			isValidOutput = false;
+		}
+		if (!isValidOutput) {
+			throw new TypeError("Invalid inference output: output must be of type Array<Array<number> | number>");
+		}
+		return res;
+	}
+
+	/**
+	 * Calculate the semantic similarity between one text and a list of other sentences by comparing their embeddings.
+	 */
+	public async sentenceSimiliarity(
+		args: SentenceSimiliarityArgs,
+		options?: Options
+	): Promise<SentenceSimiliarityReturn> {
+		const res = await this.request<SentenceSimiliarityReturn>(args, options);
+
+		const isValidOutput = Array.isArray(res) && res.every((x) => typeof x === "number");
+		if (!isValidOutput) {
+			throw new TypeError("Invalid inference output: output must be of type Array<number>");
+		}
 		return res;
 	}
 
@@ -1048,6 +1100,12 @@ export class HfInference {
 
 		if (options?.blob) {
 			if (!response.ok) {
+				if (response.headers.get("Content-Type")?.startsWith("application/json")) {
+					const output = await response.json();
+					if (output.error) {
+						throw new Error(output.error);
+					}
+				}
 				throw new Error("An error occurred while fetching the blob");
 			}
 			return (await response.blob()) as T;
