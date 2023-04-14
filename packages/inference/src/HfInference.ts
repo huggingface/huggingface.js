@@ -1072,6 +1072,9 @@ export class HfInference {
 		return { url, info, mergedOptions };
 	}
 
+	/**
+	 * Primitive to make custom calls to the inference API
+	 */
 	public async request<T>(
 		args: RequestArgs,
 		options?: Options & {
@@ -1107,7 +1110,7 @@ export class HfInference {
 	}
 
 	/**
-	 * Make request that uses server-sent events and returns response as a generator
+	 * Primitive to make custom inference calls that expect server-sent events, and returns the response through a generator
 	 */
 	public async *streamingRequest<T>(
 		args: RequestArgs,
