@@ -9,12 +9,28 @@
   <br/>
 </p>
 
+```ts
+await inference.translation({
+  model: 't5-base',
+  inputs: 'My name is Wolfgang and I live in Berlin'
+})
+
+await inference.textToImage({
+  inputs: 'award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]',
+  model: 'stabilityai/stable-diffusion-2',
+  parameters: {
+    negative_prompt: 'blurry',
+  }
+})
+```
+
 # Hugging Face JS libraries
 
 This is a collection of JS libraries to interact with the Hugging Face API, with TS types included.
 
-- [@huggingface/hub](packages/hub/README.md): Interact with huggingface.co to create or delete repos and commit / download files
 - [@huggingface/inference](packages/inference/README.md): Use the Inference API to make calls to 100,000+ Machine Learning models!
+- [@huggingface/hub](packages/hub/README.md): Interact with huggingface.co to create or delete repos and commit / download files
+
 
 With more to come, like `@huggingface/endpoints` to manage your HF Endpoints!
 
@@ -29,15 +45,15 @@ The libraries are still very young, please help us by opening issues!
 To install via NPM, you can download the libraries as needed:
 
 ```bash
-npm install @huggingface/hub
 npm install @huggingface/inference
+npm install @huggingface/hub
 ```
 
 Then import the libraries in your code:
 
 ```ts
-import { createRepo, commit, deleteRepo, listFiles } from "@huggingface/hub";
 import { HfInference } from "@huggingface/inference";
+import { createRepo, commit, deleteRepo, listFiles } from "@huggingface/hub";
 import type { RepoId, Credentials } from "@huggingface/hub";
 ```
 
@@ -53,13 +69,43 @@ You can run our packages with vanilla JS, without any bundler, by using a CDN or
 </script>
 ```
 
-## Usage example
+## Usage examples
+
+Get your HF access token in your [account settings](https://huggingface.co/settings/tokens).
+
+### @huggingface/inference examples
+
+```ts
+import { HfInference } from "@huggingface/inference";
+
+const HF_ACCESS_TOKEN = "hf_...";
+
+const inference = new HfInference(HF_ACCESS_TOKEN);
+
+await inference.translation({
+  model: 't5-base',
+  inputs: 'My name is Wolfgang and I live in Berlin'
+})
+
+await inference.textToImage({
+  inputs: 'award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]',
+  model: 'stabilityai/stable-diffusion-2',
+  parameters: {
+    negative_prompt: 'blurry',
+  }
+})
+
+await inference.imageToText({
+  data: await (await fetch('https://picsum.photos/300/300')).blob(),
+  model: 'nlpconnect/vit-gpt2-image-captioning',  
+})
+```
+
+### @huggingface/hub examples
 
 ```ts
 import { createRepo, uploadFile, deleteFiles } from "@huggingface/hub";
-import { HfInference } from "@huggingface/inference";
 
-// use an access token from your free account
 const HF_ACCESS_TOKEN = "hf_...";
 
 await createRepo({
@@ -82,26 +128,6 @@ await deleteFiles({
   credentials: {accessToken: HF_ACCESS_TOKEN},
   paths: ["README.md", ".gitattributes"]
 });
-
-const inference = new HfInference(HF_ACCESS_TOKEN);
-
-await inference.translation({
-  model: 't5-base',
-  inputs: 'My name is Wolfgang and I live in Berlin'
-})
-
-await inference.textToImage({
-  inputs: 'award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]',
-  model: 'stabilityai/stable-diffusion-2',
-  parameters: {
-    negative_prompt: 'blurry',
-  }
-})
-
-await inference.imageToText({
-  data: await (await fetch('https://picsum.photos/300/300')).blob(),
-  model: 'nlpconnect/vit-gpt2-image-captioning',  
-})
 ```
 
 There are more features of course, check each library's README!
