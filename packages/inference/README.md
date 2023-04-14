@@ -111,7 +111,7 @@ await hf.conversational({
   }
 })
 
-await hf.featureExtraction({
+await hf.sentenceSimilarity({
   model: 'sentence-transformers/paraphrase-xlm-r-multilingual-v1',
   inputs: {
     source_sentence: 'That is a happy person',
@@ -122,6 +122,11 @@ await hf.featureExtraction({
     ]
   }
 })
+
+await hf.featureExtraction({
+    model: "sentence-transformers/distilbert-base-nli-mean-tokens",
+    inputs: "That is a happy person",
+});
 
 // Audio
 
