@@ -447,6 +447,26 @@
       }
     }
   },
+  "e64d5b8d2371f0706f29b4e27cac68b3f1e9fe3b10013a7f008ddbe005d7eb8f": {
+    "url": "https://api-inference.huggingface.co/models/google/flan-t5-xxl",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST"
+    },
+    "response": {
+     "body": "[{\"generated_text\":\"three\"}]",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
   "7364916c1dcc1aaf643027e0c86abcf22e3b963dd5876fce23ffa7604465899e": {
     "url": "https://api-inference.huggingface.co/models/sentence-transformers/distilbert-base-nli-mean-tokens",
     "init": {
