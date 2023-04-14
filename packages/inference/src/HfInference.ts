@@ -1112,7 +1112,6 @@ export class HfInference {
 	public async *streamingRequest<T>(
 		args: RequestArgs,
 		options?: Options & {
-			blob?: boolean;
 			/** For internal HF use, which is why it's not exposed in {@link Options} */
 			includeCredentials?: boolean;
 		}
