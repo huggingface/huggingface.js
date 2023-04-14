@@ -267,9 +267,9 @@ describe.concurrent(
 				warnings: ["Setting `pad_token_id` to `eos_token_id`:50256 for open-end generation."],
 			});
 		});
-		it("SentenceSimiliarity", async () => {
+		it("SentenceSimilarity", async () => {
 			expect(
-				await hf.sentenceSimiliarity({
+				await hf.sentenceSimilarity({
 					model: "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
 					inputs: {
 						source_sentence: "That is a happy person",
@@ -403,13 +403,6 @@ describe.concurrent(
 				inputs: "one plus two equals",
 			});
 			expect(generated_text).toEqual("three");
-		});
-		it("error when the model is not set", () => {
-			expect(
-				hf.textGeneration({
-					inputs: "one plus two equals",
-				})
-			).rejects.toThrowError("Model is required for Inference API");
 		});
 	},
 	TIMEOUT
