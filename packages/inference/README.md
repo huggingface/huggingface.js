@@ -170,6 +170,26 @@ await hf.imageToText({
   model: 'nlpconnect/vit-gpt2-image-captioning'
 })
 
+// Custom call, for models with custom parameters / outputs
+await inference.request({
+  model: 'my-custom-model',
+  inputs: 'hello world',
+  parameters: {
+    custom_param: 'some magic',
+  }
+})
+
+// Custom streaming call, for models with custom parameters / outputs
+for await (const output of inference.streamingRequest({
+  model: 'my-custom-model',
+  inputs: 'hello world',
+  parameters: {
+    custom_param: 'some magic',
+  }
+})) {
+  ...
+}
+
 // Using your own inference endpoint: https://hf.co/docs/inference-endpoints/
 const gpt2 = hf.endpoint('https://xyz.eu-west-1.aws.endpoints.huggingface.cloud/gpt2');
 const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the universe is'});
