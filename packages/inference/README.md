@@ -45,7 +45,7 @@ await hf.summarization({
   }
 })
 
-await hf.questionAnswer({
+await hf.questionAnswering({
   model: 'deepset/roberta-base-squad2',
   inputs: {
     question: 'What is the capital of France?',
@@ -53,7 +53,7 @@ await hf.questionAnswer({
   }
 })
 
-await hf.tableQuestionAnswer({
+await hf.tableQuestionAnswering({
   model: 'google/tapas-base-finetuned-wtq',
   inputs: {
     query: 'How many stars does the transformers repository have?',

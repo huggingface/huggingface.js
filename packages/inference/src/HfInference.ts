@@ -102,14 +102,14 @@ export interface SummarizationReturn {
 	summary_text: string;
 }
 
-export type QuestionAnswerArgs = Args & {
+export type QuestionAnsweringArgs = Args & {
 	inputs: {
 		context: string;
 		question: string;
 	};
 };
 
-export interface QuestionAnswerReturn {
+export interface QuestionAnsweringReturn {
 	/**
 	 * A string that’s the answer within the text.
 	 */
@@ -128,7 +128,7 @@ export interface QuestionAnswerReturn {
 	start: number;
 }
 
-export type TableQuestionAnswerArgs = Args & {
+export type TableQuestionAnsweringArgs = Args & {
 	inputs: {
 		/**
 		 * The query in plain text that you want to ask the table
@@ -141,7 +141,7 @@ export type TableQuestionAnswerArgs = Args & {
 	};
 };
 
-export interface TableQuestionAnswerReturn {
+export interface TableQuestionAnsweringReturn {
 	/**
 	 * The aggregator used to get the answer
 	 */
@@ -694,8 +694,8 @@ export class HfInference {
 	/**
 	 * Want to have a nice know-it-all bot that can answer any question?. Recommended model: deepset/roberta-base-squad2
 	 */
-	public async questionAnswer(args: QuestionAnswerArgs, options?: Options): Promise<QuestionAnswerReturn> {
-		const res = await this.request<QuestionAnswerReturn>(args, options);
+	public async questionAnswering(args: QuestionAnsweringArgs, options?: Options): Promise<QuestionAnsweringReturn> {
+		const res = await this.request<QuestionAnsweringReturn>(args, options);
 		const isValidOutput =
 			typeof res.answer === "string" &&
 			typeof res.end === "number" &&
@@ -712,11 +712,11 @@ export class HfInference {
 	/**
 	 * Don’t know SQL? Don’t want to dive into a large spreadsheet? Ask questions in plain english! Recommended model: google/tapas-base-finetuned-wtq.
 	 */
-	public async tableQuestionAnswer(
-		args: TableQuestionAnswerArgs,
+	public async tableQuestionAnswering(
+		args: TableQuestionAnsweringArgs,
 		options?: Options
-	): Promise<TableQuestionAnswerReturn> {
-		const res = await this.request<TableQuestionAnswerReturn>(args, options);
+	): Promise<TableQuestionAnsweringReturn> {
+		const res = await this.request<TableQuestionAnsweringReturn>(args, options);
 		const isValidOutput =
 			typeof res.aggregator === "string" &&
 			typeof res.answer === "string" &&
