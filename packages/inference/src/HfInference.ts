@@ -30,7 +30,7 @@ export class HfInference {
 				enumerable: false,
 				value: (params: RequestArgs, options: Options) =>
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					fn({ accessToken, ...params } as any, { ...defaultOptions, ...options }),
+					fn({ ...params, accessToken } as any, { ...defaultOptions, ...options }),
 			});
 		}
 	}
@@ -53,7 +53,7 @@ export class HfInferenceEndpoint {
 				enumerable: false,
 				value: (params: Omit<RequestArgs, "model">, options: Options) =>
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					fn({ accessToken, model: endpointUrl, ...params } as any, { ...defaultOptions, ...options }),
+					fn({ ...params, accessToken, model: endpointUrl } as any, { ...defaultOptions, ...options }),
 			});
 		}
 	}
