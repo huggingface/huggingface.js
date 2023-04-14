@@ -35,6 +35,9 @@ export interface Args {
 	model?: string;
 }
 
+export type RequestArgs = Args &
+	({ data?: Blob | ArrayBuffer } | { inputs: unknown }) & { parameters?: Record<string, unknown> };
+
 export type FillMaskArgs = Args & {
 	inputs: string;
 };
@@ -909,10 +912,7 @@ export class HfInference {
 		args: AutomaticSpeechRecognitionArgs,
 		options?: Options
 	): Promise<AutomaticSpeechRecognitionReturn> {
-		const res = await this.request<AutomaticSpeechRecognitionReturn>(args, {
-			...options,
-			binary: true,
-		});
+		const res = await this.request<AutomaticSpeechRecognitionReturn>(args, options);
 		const isValidOutput = typeof res.text === "string";
 		if (!isValidOutput) {
 			throw new TypeError("Invalid inference output: output must be of type <text: string>");
@@ -928,10 +928,7 @@ export class HfInference {
 		args: AudioClassificationArgs,
 		options?: Options
 	): Promise<AudioClassificationReturn> {
-		const res = await this.request<AudioClassificationReturn>(args, {
-			...options,
-			binary: true,
-		});
+		const res = await this.request<AudioClassificationReturn>(args, options);
 		const isValidOutput =
 			Array.isArray(res) && res.every((x) => typeof x.label === "string" && typeof x.score === "number");
 		if (!isValidOutput) {
@@ -948,10 +945,7 @@ export class HfInference {
 		args: ImageClassificationArgs,
 		options?: Options
 	): Promise<ImageClassificationReturn> {
-		const res = await this.request<ImageClassificationReturn>(args, {
-			...options,
-			binary: true,
-		});
+		const res = await this.request<ImageClassificationReturn>(args, options);
 		const isValidOutput =
 			Array.isArray(res) && res.every((x) => typeof x.label === "string" && typeof x.score === "number");
 		if (!isValidOutput) {
@@ -965,10 +959,7 @@ export class HfInference {
 	 * Recommended model: facebook/detr-resnet-50
 	 */
 	public async objectDetection(args: ObjectDetectionArgs, options?: Options): Promise<ObjectDetectionReturn> {
-		const res = await this.request<ObjectDetectionReturn>(args, {
-			...options,
-			binary: true,
-		});
+		const res = await this.request<ObjectDetectionReturn>(args, options);
 		const isValidOutput =
 			Array.isArray(res) &&
 			res.every(
@@ -993,10 +984,7 @@ export class HfInference {
 	 * Recommended model: facebook/detr-resnet-50-panoptic
 	 */
 	public async imageSegmentation(args: ImageSegmentationArgs, options?: Options): Promise<ImageSegmentationReturn> {
-		const res = await this.request<ImageSegmentationReturn>(args, {
-			...options,
-			binary: true,
-		});
+		const res = await this.request<ImageSegmentationReturn>(args, options);
 		const isValidOutput =
 			Array.isArray(res) &&
 			res.every((x) => typeof x.label === "string" && typeof x.mask === "string" && typeof x.score === "number");
@@ -1013,10 +1001,7 @@ export class HfInference {
 	 * Recommended model: stabilityai/stable-diffusion-2
 	 */
 	public async textToImage(args: TextToImageArgs, options?: Options): Promise<TextToImageReturn> {
-		const res = await this.request<TextToImageReturn>(args, {
-			...options,
-			blob: true,
-		});
+		const res = await this.request<TextToImageReturn>(args, options);
 		const isValidOutput = res && res instanceof Blob;
 		if (!isValidOutput) {
 			throw new TypeError("Invalid inference output: output must be of type object & of instance Blob");
@@ -1028,25 +1013,18 @@ export class HfInference {
 	 * This task reads some image input and outputs the text caption.
 	 */
 	public async imageToText(args: ImageToTextArgs, options?: Options): Promise<ImageToTextReturn> {
-		return (
-			await this.request<[ImageToTextReturn]>(args, {
-				...options,
-				binary: true,
-			})
-		)?.[0];
+		return (await this.request<[ImageToTextReturn]>(args, options))?.[0];
 	}
 
 	/**
 	 * Helper that prepares request arguments
 	 */
 	private makeRequestOptions(
-		args: Args & {
+		args: RequestArgs & {
 			data?: Blob | ArrayBuffer;
 			stream?: boolean;
 		},
 		options?: Options & {
-			binary?: boolean;
-			blob?: boolean;
 			/** For internal HF use, which is why it's not exposed in {@link Options} */
 			includeCredentials?: boolean;
 		}
@@ -1059,11 +1037,11 @@ export class HfInference {
 			headers["Authorization"] = `Bearer ${this.apiKey}`;
 		}
 
-		if (!options?.binary) {
-			headers["Content-Type"] = "application/json";
-		}
+		const binary = "data" in args && !!args.data;
 
-		if (options?.binary) {
+		if (!binary) {
+			headers["Content-Type"] = "application/json";
+		} else {
 			if (mergedOptions.wait_for_model) {
 				headers["X-Wait-For-Model"] = "true";
 			}
@@ -1082,7 +1060,7 @@ export class HfInference {
 		const info: RequestInit = {
 			headers,
 			method: "POST",
-			body: options?.binary
+			body: binary
 				? args.data
 				: JSON.stringify({
 						...otherArgs,
@@ -1095,10 +1073,8 @@ export class HfInference {
 	}
 
 	public async request<T>(
-		args: Args & { data?: Blob | ArrayBuffer },
+		args: RequestArgs,
 		options?: Options & {
-			binary?: boolean;
-			blob?: boolean;
 			/** For internal HF use, which is why it's not exposed in {@link Options} */
 			includeCredentials?: boolean;
 		}
@@ -1113,33 +1089,29 @@ export class HfInference {
 			});
 		}
 
-		if (options?.blob) {
-			if (!response.ok) {
-				if (response.headers.get("Content-Type")?.startsWith("application/json")) {
-					const output = await response.json();
-					if (output.error) {
-						throw new Error(output.error);
-					}
+		if (!response.ok) {
+			if (response.headers.get("Content-Type")?.startsWith("application/json")) {
+				const output = await response.json();
+				if (output.error) {
+					throw new Error(output.error);
 				}
-				throw new Error("An error occurred while fetching the blob");
 			}
-			return (await response.blob()) as T;
+			throw new Error("An error occurred while fetching the blob");
 		}
 
-		const output = await response.json();
-		if (output.error) {
-			throw new Error(output.error);
+		if (response.headers.get("Content-Type")?.startsWith("application/json")) {
+			return await response.json();
 		}
-		return output;
+
+		return (await response.blob()) as T;
 	}
 
 	/**
 	 * Make request that uses server-sent events and returns response as a generator
 	 */
 	public async *streamingRequest<T>(
-		args: Args & { data?: Blob | ArrayBuffer },
+		args: RequestArgs,
 		options?: Options & {
-			binary?: boolean;
 			blob?: boolean;
 			/** For internal HF use, which is why it's not exposed in {@link Options} */
 			includeCredentials?: boolean;
