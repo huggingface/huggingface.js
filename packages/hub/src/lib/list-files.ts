@@ -17,11 +17,11 @@ export interface ListFileEntry {
 		/** Size of the raw pointer file, 100~200 bytes */
 		pointerSize: number;
 	};
-	lastCommit: {
+	lastCommit?: {
 		date: string;
 		id: string;
 		title: string;
-	} | null;
+	};
 	security?: unknown;
 }
 
@@ -40,6 +40,10 @@ export async function* listFiles(params: {
 	 * files in the repo.
 	 */
 	path?: string;
+	/**
+	 * Fetch `lastCommit` and `securityStatus` for each file.
+	 */
+	expand?: boolean;
 	revision?: string;
 	credentials?: Credentials;
 	hubUrl?: string;
@@ -48,7 +52,7 @@ export async function* listFiles(params: {
 	const repoId = toRepoId(params.repo);
 	let url: string | undefined = `${params.hubUrl || HUB_URL}/api/${repoId.type}s/${repoId.name}/tree/${
 		params.revision || "main"
-	}${params.path ? "/" + params.path : ""}${params.recursive ? "?recursive=true" : ""}`;
+	}${params.path ? "/" + params.path : ""}?recursive=${!!params.recursive}&expand=${!!params.expand}`;
 
 	while (url) {
 		const res: Response = await fetch(url, {
