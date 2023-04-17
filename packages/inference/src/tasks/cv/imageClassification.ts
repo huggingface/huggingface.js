@@ -1,3 +1,4 @@
+import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
@@ -33,7 +34,7 @@ export async function imageClassification(
 	const isValidOutput =
 		Array.isArray(res) && res.every((x) => typeof x.label === "string" && typeof x.score === "number");
 	if (!isValidOutput) {
-		throw new TypeError("Invalid inference output: output must be of type Array<label: string, score: number>");
+		throw new InferenceOutputError("Expected Array<{label: string, score: number}>");
 	}
 	return res;
 }

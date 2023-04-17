@@ -1,3 +1,4 @@
+import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
@@ -58,9 +59,9 @@ export interface TextGenerationOutput {
  */
 export async function textGeneration(args: TextGenerationArgs, options?: Options): Promise<TextGenerationOutput> {
 	const res = await request<TextGenerationOutput[]>(args, options);
-	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x.generated_text === "string");
+	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x?.generated_text === "string");
 	if (!isValidOutput) {
-		throw new TypeError("Invalid inference output: output must be of type Array<generated_text: string>");
+		throw new InferenceOutputError("Expected Array<{generated_text: string}>");
 	}
 	return res?.[0];
 }

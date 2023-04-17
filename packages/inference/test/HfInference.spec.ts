@@ -1,6 +1,6 @@
 import { expect, it, describe, assert } from "vitest";
 
-import type { TextGenerationStreamReturn } from "../src";
+import type { TextGenerationStreamOutput } from "../src";
 import { HfInference } from "../src";
 import "./vcr";
 import { readTestFile } from "./test-files";
@@ -144,7 +144,7 @@ describe.concurrent(
 				inputs: `repeat "${phrase}"`,
 			});
 
-			const makeExpectedReturn = (tokenText: string, fullPhrase: string): TextGenerationStreamReturn => {
+			const makeExpectedReturn = (tokenText: string, fullPhrase: string): TextGenerationStreamOutput => {
 				const eot = tokenText === "</s>";
 				return {
 					details: null,

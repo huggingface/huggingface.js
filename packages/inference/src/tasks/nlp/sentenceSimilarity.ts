@@ -1,3 +1,4 @@
+import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
@@ -29,7 +30,7 @@ export async function sentenceSimilarity(
 
 	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x === "number");
 	if (!isValidOutput) {
-		throw new TypeError("Invalid inference output: output must be of type Array<number>");
+		throw new InferenceOutputError("Expected number[]");
 	}
 	return res;
 }

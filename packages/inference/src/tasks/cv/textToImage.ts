@@ -1,3 +1,4 @@
+import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
@@ -41,7 +42,7 @@ export async function textToImage(args: TextToImageArgs, options?: Options): Pro
 	const res = await request<TextToImageOutput>(args, options);
 	const isValidOutput = res && res instanceof Blob;
 	if (!isValidOutput) {
-		throw new TypeError("Invalid inference output: output must be of type object & of instance Blob");
+		throw new InferenceOutputError("Expected Blob");
 	}
 	return res;
 }

@@ -1,3 +1,4 @@
+import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
@@ -50,9 +51,9 @@ export interface SummarizationOutput {
  */
 export async function summarization(args: SummarizationArgs, options?: Options): Promise<SummarizationOutput> {
 	const res = await request<SummarizationOutput[]>(args, options);
-	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x.summary_text === "string");
+	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x?.summary_text === "string");
 	if (!isValidOutput) {
-		throw new TypeError("Invalid inference output: output must be of type Array<summary_text: string>");
+		throw new InferenceOutputError("Expected Array<{summary_text: string}>");
 	}
 	return res?.[0];
 }

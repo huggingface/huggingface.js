@@ -1,3 +1,4 @@
+import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
@@ -36,14 +37,12 @@ export async function questionAnswering(
 ): Promise<QuestionAnsweringOutput> {
 	const res = await request<QuestionAnsweringOutput>(args, options);
 	const isValidOutput =
-		typeof res.answer === "string" &&
+		typeof res?.answer === "string" &&
 		typeof res.end === "number" &&
 		typeof res.score === "number" &&
 		typeof res.start === "number";
 	if (!isValidOutput) {
-		throw new TypeError(
-			"Invalid inference output: output must be of type <answer: string, end: number, score: number, start: number>"
-		);
+		throw new InferenceOutputError("Expected {answer: string, end: number, score: number, start: number}");
 	}
 	return res;
 }

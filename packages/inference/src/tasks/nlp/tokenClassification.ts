@@ -1,3 +1,4 @@
+import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { toArray } from "../../utils/toArray";
 import { request } from "../custom/request";
@@ -69,8 +70,8 @@ export async function tokenClassification(
 				typeof x.word === "string"
 		);
 	if (!isValidOutput) {
-		throw new TypeError(
-			"Invalid inference output: output must be of type Array<end: number, entity_group: string, score: number, start: number, word: string>"
+		throw new InferenceOutputError(
+			"Expected Array<{end: number, entity_group: string, score: number, start: number, word: string}>"
 		);
 	}
 	return res;

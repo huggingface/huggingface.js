@@ -1,3 +1,4 @@
+import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
@@ -44,7 +45,7 @@ export async function featureExtraction(
 		isValidOutput = false;
 	}
 	if (!isValidOutput) {
-		throw new TypeError("Invalid inference output: output must be of type Array<Array<number> | number>");
+		throw new InferenceOutputError("Expected Array<number[] | number>");
 	}
 	return res;
 }

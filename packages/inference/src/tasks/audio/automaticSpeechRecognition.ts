@@ -1,3 +1,4 @@
+import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
@@ -24,9 +25,9 @@ export async function automaticSpeechRecognition(
 	options?: Options
 ): Promise<AutomaticSpeechRecognitionOutput> {
 	const res = await request<AutomaticSpeechRecognitionOutput>(args, options);
-	const isValidOutput = typeof res.text === "string";
+	const isValidOutput = typeof res?.text === "string";
 	if (!isValidOutput) {
-		throw new TypeError("Invalid inference output: output must be of type <text: string>");
+		throw new InferenceOutputError("Expected {text: string}");
 	}
 	return res;
 }

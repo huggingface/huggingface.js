@@ -1,3 +1,4 @@
+import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
@@ -42,15 +43,15 @@ export async function tableQuestionAnswering(
 ): Promise<TableQuestionAnsweringOutput> {
 	const res = await request<TableQuestionAnsweringOutput>(args, options);
 	const isValidOutput =
-		typeof res.aggregator === "string" &&
+		typeof res?.aggregator === "string" &&
 		typeof res.answer === "string" &&
 		Array.isArray(res.cells) &&
 		res.cells.every((x) => typeof x === "string") &&
 		Array.isArray(res.coordinates) &&
 		res.coordinates.every((coord) => Array.isArray(coord) && coord.every((x) => typeof x === "number"));
 	if (!isValidOutput) {
-		throw new TypeError(
-			"Invalid inference output: output must be of type <aggregator: string, answer: string, cells: string[], coordinates: number[][]>"
+		throw new InferenceOutputError(
+			"Expected {aggregator: string, answer: string, cells: string[], coordinates: number[][]}"
 		);
 	}
 	return res;

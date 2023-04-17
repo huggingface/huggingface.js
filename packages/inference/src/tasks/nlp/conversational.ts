@@ -1,3 +1,4 @@
+import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
@@ -72,8 +73,8 @@ export async function conversational(args: ConversationalArgs, options?: Options
 		Array.isArray(res.warnings) &&
 		res.warnings.every((x) => typeof x === "string");
 	if (!isValidOutput) {
-		throw new TypeError(
-			"Invalid inference output: output must be of type <conversation: {generated_responses: string[], past_user_inputs: string[]}, generated_text: string, warnings: string[]>"
+		throw new InferenceOutputError(
+			"Expected {conversation: {generated_responses: string[], past_user_inputs: string[]}, generated_text: string, warnings: string[]}"
 		);
 	}
 	return res;

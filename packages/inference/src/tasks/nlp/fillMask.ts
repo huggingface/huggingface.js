@@ -1,3 +1,4 @@
+import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
@@ -39,8 +40,8 @@ export async function fillMask(args: FillMaskArgs, options?: Options): Promise<F
 				typeof x.token_str === "string"
 		);
 	if (!isValidOutput) {
-		throw new TypeError(
-			"Invalid inference output: output must be of type Array<score: number, sequence:string, token:number, token_str:string>"
+		throw new InferenceOutputError(
+			"Expected Array<{score: number, sequence: string, token: number, token_str: string}>"
 		);
 	}
 	return res;

@@ -1,5 +1,6 @@
 import { request } from "../custom/request";
 import type { BaseArgs, Options } from "../../types";
+import { InferenceOutputError } from "../../lib/InferenceOutputError";
 
 export type ObjectDetectionArgs = BaseArgs & {
 	/**
@@ -49,8 +50,8 @@ export async function objectDetection(args: ObjectDetectionArgs, options?: Optio
 				typeof x.box.ymax === "number"
 		);
 	if (!isValidOutput) {
-		throw new TypeError(
-			"Invalid inference output: output must be of type Array<{label:string; score:number; box:{xmin:number; ymin:number; xmax:number; ymax:number}}>"
+		throw new InferenceOutputError(
+			"Expected Array<{label:string; score:number; box:{xmin:number; ymin:number; xmax:number; ymax:number}}>"
 		);
 	}
 	return res;

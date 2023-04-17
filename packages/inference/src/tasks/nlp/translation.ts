@@ -1,3 +1,4 @@
+import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
@@ -20,9 +21,9 @@ export interface TranslationOutput {
  */
 export async function translation(args: TranslationArgs, options?: Options): Promise<TranslationOutput> {
 	const res = await request<TranslationOutput[]>(args, options);
-	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x.translation_text === "string");
+	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x?.translation_text === "string");
 	if (!isValidOutput) {
-		throw new TypeError("Invalid inference output: output must be of type Array<translation_text: string>");
+		throw new InferenceOutputError("Expected type Array<{translation_text: string}>");
 	}
 	return res?.[0];
 }

@@ -1,3 +1,4 @@
+import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { toArray } from "../../utils/toArray";
 import { request } from "../custom/request";
@@ -48,9 +49,7 @@ export async function zeroShotClassification(
 				typeof x.sequence === "string"
 		);
 	if (!isValidOutput) {
-		throw new TypeError(
-			"Invalid inference output: output must be of type Array<labels: string[], scores: number[], sequence: string>"
-		);
+		throw new InferenceOutputError("Expected Array<{labels: string[], scores: number[], sequence: string}>");
 	}
 	return res;
 }
