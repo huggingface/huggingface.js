@@ -43,14 +43,13 @@ export interface TextGenerationStreamBestOfSequence {
 	tokens: TextGenerationStreamToken[];
 }
 
-export enum TextGenerationStreamFinishReason {
+export type TextGenerationStreamFinishReason =
 	/** number of generated tokens == `max_new_tokens` */
-	Length = "length",
+	| "length"
 	/** the model generated its end of sequence token */
-	EndOfSequenceToken = "eos_token",
+	| "eos_token"
 	/** the model generated a text included in `stop_sequences` */
-	StopSequence = "stop_sequence",
-}
+	| "stop_sequence";
 
 export interface TextGenerationStreamDetails {
 	/** Generation finish reason */
