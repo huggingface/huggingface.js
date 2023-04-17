@@ -1,20 +1,20 @@
-import * as lib from "./lib";
+import * as tasks from "./tasks";
 import type { Options, RequestArgs } from "./types";
 
-type Lib = typeof lib;
+type Task = typeof tasks;
 
-type LibWithNoAccessToken = {
-	[key in keyof Lib]: (
-		args: Omit<Parameters<Lib[key]>[0], "accessToken">,
-		options?: Parameters<Lib[key]>[1]
-	) => ReturnType<Lib[key]>;
+type TaskWithNoAccessToken = {
+	[key in keyof Task]: (
+		args: Omit<Parameters<Task[key]>[0], "accessToken">,
+		options?: Parameters<Task[key]>[1]
+	) => ReturnType<Task[key]>;
 };
 
-type LibWithNoAccessTokenNoModel = {
-	[key in keyof Lib]: (
-		args: Omit<Parameters<Lib[key]>[0], "accessToken" | "model">,
-		options?: Parameters<Lib[key]>[1]
-	) => ReturnType<Lib[key]>;
+type TaskWithNoAccessTokenNoModel = {
+	[key in keyof Task]: (
+		args: Omit<Parameters<Task[key]>[0], "accessToken" | "model">,
+		options?: Parameters<Task[key]>[1]
+	) => ReturnType<Task[key]>;
 };
 
 export class HfInference {
@@ -25,7 +25,7 @@ export class HfInference {
 		this.accessToken = accessToken;
 		this.defaultOptions = defaultOptions;
 
-		for (const [name, fn] of Object.entries(lib)) {
+		for (const [name, fn] of Object.entries(tasks)) {
 			Object.defineProperty(this, name, {
 				enumerable: false,
 				value: (params: RequestArgs, options: Options) =>
@@ -48,7 +48,7 @@ export class HfInferenceEndpoint {
 		accessToken;
 		defaultOptions;
 
-		for (const [name, fn] of Object.entries(lib)) {
+		for (const [name, fn] of Object.entries(tasks)) {
 			Object.defineProperty(this, name, {
 				enumerable: false,
 				value: (params: Omit<RequestArgs, "model">, options: Options) =>
@@ -60,7 +60,7 @@ export class HfInferenceEndpoint {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface HfInference extends LibWithNoAccessToken {}
+export interface HfInference extends TaskWithNoAccessToken {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface HfInferenceEndpoint extends LibWithNoAccessTokenNoModel {}
+export interface HfInferenceEndpoint extends TaskWithNoAccessTokenNoModel {}

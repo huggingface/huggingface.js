@@ -1,5 +1,5 @@
 import type { Options, RequestArgs } from "../types";
-import { makeRequestOptions } from "../utils/makeRequestOptions";
+import { makeRequestOptions } from "../lib/makeRequestOptions";
 import type { EventSourceMessage } from "../vendor/fetch-event-source/parse";
 import { getLines, getMessages } from "../vendor/fetch-event-source/parse";
 

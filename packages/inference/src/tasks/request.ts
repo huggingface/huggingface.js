@@ -1,5 +1,5 @@
 import type { Options, RequestArgs } from "../types";
-import { makeRequestOptions } from "../utils/makeRequestOptions";
+import { makeRequestOptions } from "../lib/makeRequestOptions";
 
 /**
  * Primitive to make custom calls to the inference API
