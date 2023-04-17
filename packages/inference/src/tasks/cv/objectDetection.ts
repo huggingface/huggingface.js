@@ -1,5 +1,5 @@
-import { request } from "./request";
-import type { ObjectDetectionArgs, ObjectDetectionReturn, Options } from "../types";
+import { request } from "../custom/request";
+import type { ObjectDetectionArgs, ObjectDetectionReturn, Options } from "../../types";
 
 /**
  * This task reads some image input and outputs the likelihood of classes & bounding boxes of detected objects.

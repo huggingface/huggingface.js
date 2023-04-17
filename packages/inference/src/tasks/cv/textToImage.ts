@@ -1,5 +1,5 @@
-import type { Options, TextToImageArgs, TextToImageReturn } from "../types";
-import { request } from "./request";
+import type { Options, TextToImageArgs, TextToImageReturn } from "../../types";
+import { request } from "../custom/request";
 
 /**
  * This task reads some text input and outputs an image.

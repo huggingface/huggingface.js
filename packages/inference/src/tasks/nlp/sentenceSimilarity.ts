@@ -1,5 +1,5 @@
-import type { Options, SentenceSimilarityArgs, SentenceSimilarityReturn } from "../types";
-import { request } from "./request";
+import type { Options, SentenceSimilarityArgs, SentenceSimilarityReturn } from "../../types";
+import { request } from "../custom/request";
 
 /**
  * Calculate the semantic similarity between one text and a list of other sentences by comparing their embeddings.

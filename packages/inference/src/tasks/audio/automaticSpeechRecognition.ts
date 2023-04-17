@@ -1,5 +1,5 @@
-import type { AutomaticSpeechRecognitionArgs, AutomaticSpeechRecognitionReturn, Options } from "../types";
-import { request } from "./request";
+import type { AutomaticSpeechRecognitionArgs, AutomaticSpeechRecognitionReturn, Options } from "../../types";
+import { request } from "../custom/request";
 
 /**
  * This task reads some audio input and outputs the said words within the audio files.

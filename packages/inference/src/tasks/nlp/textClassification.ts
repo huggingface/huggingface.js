@@ -1,5 +1,5 @@
-import type { Options, TextClassificationArgs, TextClassificationReturn } from "../types";
-import { request } from "./request";
+import type { Options, TextClassificationArgs, TextClassificationReturn } from "../../types";
+import { request } from "../custom/request";
 
 /**
  * Usually used for sentiment-analysis this will output the likelihood of classes of an input. Recommended model: distilbert-base-uncased-finetuned-sst-2-english

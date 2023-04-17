@@ -1,7 +1,7 @@
-import type { Options, RequestArgs } from "../types";
-import { makeRequestOptions } from "../lib/makeRequestOptions";
-import type { EventSourceMessage } from "../vendor/fetch-event-source/parse";
-import { getLines, getMessages } from "../vendor/fetch-event-source/parse";
+import type { Options, RequestArgs } from "../../types";
+import { makeRequestOptions } from "../../lib/makeRequestOptions";
+import type { EventSourceMessage } from "../../vendor/fetch-event-source/parse";
+import { getLines, getMessages } from "../../vendor/fetch-event-source/parse";
 
 /**
  * Primitive to make custom inference calls that expect server-sent events, and returns the response through a generator

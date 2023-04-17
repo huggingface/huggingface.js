@@ -1,5 +1,5 @@
-import type { AudioClassificationArgs, AudioClassificationReturn, Options } from "../types";
-import { request } from "./request";
+import type { AudioClassificationArgs, AudioClassificationReturn, Options } from "../../types";
+import { request } from "../custom/request";
 
 /**
  * This task reads some audio input and outputs the likelihood of classes.

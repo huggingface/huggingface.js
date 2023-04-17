@@ -1,5 +1,5 @@
-import type { Options, QuestionAnsweringArgs, QuestionAnsweringReturn } from "../types";
-import { request } from "./request";
+import type { Options, QuestionAnsweringArgs, QuestionAnsweringReturn } from "../../types";
+import { request } from "../custom/request";
 
 /**
  * Want to have a nice know-it-all bot that can answer any question?. Recommended model: deepset/roberta-base-squad2

@@ -1,5 +1,5 @@
-import type { Options, TextGenerationArgs, TextGenerationStreamReturn } from "../types";
-import { streamingRequest } from "./streamingRequest";
+import type { Options, TextGenerationArgs, TextGenerationStreamReturn } from "../../types";
+import { streamingRequest } from "../custom/streamingRequest";
 
 /**
  * Use to continue text from a prompt. Same as `textGeneration` but returns generator that can be read one token at a time

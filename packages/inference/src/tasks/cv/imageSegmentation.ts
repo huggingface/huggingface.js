@@ -1,5 +1,5 @@
-import type { ImageSegmentationArgs, ImageSegmentationReturn, Options } from "../types";
-import { request } from "./request";
+import type { ImageSegmentationArgs, ImageSegmentationReturn, Options } from "../../types";
+import { request } from "../custom/request";
 
 /**
  * This task reads some image input and outputs the likelihood of classes & bounding boxes of detected objects.

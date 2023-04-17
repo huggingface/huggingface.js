@@ -1,5 +1,5 @@
-import type { Options, TranslationArgs, TranslationReturn } from "../types";
-import { request } from "./request";
+import type { Options, TranslationArgs, TranslationReturn } from "../../types";
+import { request } from "../custom/request";
 
 /**
  * This task is well known to translate text from one language to another. Recommended model: Helsinki-NLP/opus-mt-ru-en.

@@ -1,5 +1,5 @@
-import type { Options, TableQuestionAnsweringArgs, TableQuestionAnsweringReturn } from "../types";
-import { request } from "./request";
+import type { Options, TableQuestionAnsweringArgs, TableQuestionAnsweringReturn } from "../../types";
+import { request } from "../custom/request";
 
 /**
  * Don’t know SQL? Don’t want to dive into a large spreadsheet? Ask questions in plain english! Recommended model: google/tapas-base-finetuned-wtq.

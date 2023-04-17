@@ -1,5 +1,5 @@
-import type { FillMaskArgs, FillMaskReturn, Options } from "../types";
-import { request } from "./request";
+import type { FillMaskArgs, FillMaskReturn, Options } from "../../types";
+import { request } from "../custom/request";
 
 /**
  * Tries to fill in a hole with a missing word (token to be precise). That’s the base task for BERT models.

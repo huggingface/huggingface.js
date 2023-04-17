@@ -1,5 +1,5 @@
-import type { Options, TextGenerationArgs, TextGenerationReturn } from "../types";
-import { request } from "./request";
+import type { Options, TextGenerationArgs, TextGenerationReturn } from "../../types";
+import { request } from "../custom/request";
 
 /**
  * Use to continue text from a prompt. This is a very generic task. Recommended model: gpt2 (it’s a simple model, but fun to play with).

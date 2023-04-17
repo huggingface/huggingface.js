@@ -1,5 +1,5 @@
-import type { ImageToTextArgs, ImageToTextReturn, Options } from "../types";
-import { request } from "./request";
+import type { ImageToTextArgs, ImageToTextReturn, Options } from "../../types";
+import { request } from "../custom/request";
 
 /**
  * This task reads some image input and outputs the text caption.

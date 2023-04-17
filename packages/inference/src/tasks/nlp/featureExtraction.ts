@@ -1,5 +1,5 @@
-import type { FeatureExtractionArgs, FeatureExtractionReturn, Options } from "../types";
-import { request } from "./request";
+import type { FeatureExtractionArgs, FeatureExtractionReturn, Options } from "../../types";
+import { request } from "../custom/request";
 
 /**
  * This task reads some text and outputs raw float values, that are usually consumed as part of a semantic database/semantic search.

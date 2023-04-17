@@ -1,5 +1,5 @@
-import type { ConversationalArgs, ConversationalReturn, Options } from "../types";
-import { request } from "./request";
+import type { ConversationalArgs, ConversationalReturn, Options } from "../../types";
+import { request } from "../custom/request";
 
 /**
  * This task corresponds to any chatbot like structure. Models tend to have shorter max_length, so please check with caution when using a given model if you need long range dependency or not. Recommended model: microsoft/DialoGPT-large.

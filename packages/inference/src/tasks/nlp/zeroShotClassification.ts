@@ -3,9 +3,9 @@ import type {
 	ZeroShotClassificationArgs,
 	ZeroShotClassificationReturn,
 	ZeroShotClassificationReturnValue,
-} from "../types";
-import { toArray } from "../utils/toArray";
-import { request } from "./request";
+} from "../../types";
+import { toArray } from "../../utils/toArray";
+import { request } from "../custom/request";
 
 /**
  * This task is super useful to try out classification with zero code, you simply pass a sentence/paragraph and the possible labels for that sentence, and you get a result. Recommended model: facebook/bart-large-mnli.

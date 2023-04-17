@@ -3,9 +3,9 @@ import type {
 	TokenClassificationArgs,
 	TokenClassificationReturn,
 	TokenClassificationReturnValue,
-} from "../types";
-import { toArray } from "../utils/toArray";
-import { request } from "./request";
+} from "../../types";
+import { toArray } from "../../utils/toArray";
+import { request } from "../custom/request";
 
 /**
  * Usually used for sentence parsing, either grammatical, or Named Entity Recognition (NER) to understand keywords contained within text. Recommended model: dbmdz/bert-large-cased-finetuned-conll03-english
