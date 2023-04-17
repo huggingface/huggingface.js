@@ -212,6 +212,7 @@ const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the
 - [x] Zero-shot classification
 - [x] Conversational
 - [x] Feature extraction
+- [x] Sentence Similarity
 
 ### Audio
 
@@ -225,6 +226,23 @@ const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the
 - [x] Image segmentation
 - [x] Text to image
 - [x] Image to text
+
+## Tree-shaking
+
+You can import the functions you need directly from the module, rather than using the `HfInference` class:
+
+```ts
+import {textGeneration} from "@huggingface/inference";
+
+await textGeneration({
+  accessToken: "hf_...",
+  model: "model_or_endpoint",
+  inputs: ...,
+  parameters: ...
+})
+```
+
+This will enable tree-shaking by your bundler.
 
 ## Running tests
 
