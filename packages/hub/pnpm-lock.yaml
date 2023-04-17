@@ -3,12 +3,10 @@ lockfileVersion: 5.4
 specifiers:
   '@types/node': ^18.13.0
   hash-wasm: ^4.9.0
-  type-fest: ^3.5.6
   typescript: ^5.0.4
 
 dependencies:
   hash-wasm: 4.9.0
-  type-fest: 3.5.6
 
 devDependencies:
   '@types/node': 18.13.0
@@ -22,11 +20,6 @@ packages:
 
   /hash-wasm/4.9.0:
     resolution: {integrity: sha512-7SW7ejyfnRxuOc7ptQHSf4LDoZaWOivfzqw+5rpcQku0nHfmicPKE51ra9BiRLAmT8+gGLestr1XroUkqdjL6w==}
-    dev: false
-
-  /type-fest/3.5.6:
-    resolution: {integrity: sha512-6bd2bflx8ed7c99tc6zSTIzHr1/QG29bQoK4Qh8MYGnlPbODUzGxklLShjwc/xWQQFHgIci+y5Arv7Rbb0LjXw==}
-    engines: {node: '>=14.16'}
     dev: false
 
   /typescript/5.0.4:
