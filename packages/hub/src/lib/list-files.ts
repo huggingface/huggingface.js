@@ -17,11 +17,17 @@ export interface ListFileEntry {
 		/** Size of the raw pointer file, 100~200 bytes */
 		pointerSize: number;
 	};
+	/**
+	 * Only fetched if `expand` is set to `true` in the `listFiles` call.
+	 */
 	lastCommit?: {
 		date: string;
 		id: string;
 		title: string;
 	};
+	/**
+	 * Only fetched if `expand` is set to `true` in the `listFiles` call.
+	 */
 	security?: unknown;
 }
 
