@@ -19,13 +19,13 @@ export type ZeroShotClassificationArgs = BaseArgs & {
 	};
 };
 
-export interface ZeroShotClassificationReturnValue {
+export interface ZeroShotClassificationOutputValue {
 	labels: string[];
 	scores: number[];
 	sequence: string;
 }
 
-export type ZeroShotClassificationReturn = ZeroShotClassificationReturnValue[];
+export type ZeroShotClassificationOutput = ZeroShotClassificationOutputValue[];
 
 /**
  * This task is super useful to try out classification with zero code, you simply pass a sentence/paragraph and the possible labels for that sentence, and you get a result. Recommended model: facebook/bart-large-mnli.
@@ -33,9 +33,9 @@ export type ZeroShotClassificationReturn = ZeroShotClassificationReturnValue[];
 export async function zeroShotClassification(
 	args: ZeroShotClassificationArgs,
 	options?: Options
-): Promise<ZeroShotClassificationReturn> {
+): Promise<ZeroShotClassificationOutput> {
 	const res = toArray(
-		await request<ZeroShotClassificationReturn[number] | ZeroShotClassificationReturn>(args, options)
+		await request<ZeroShotClassificationOutput[number] | ZeroShotClassificationOutput>(args, options)
 	);
 	const isValidOutput =
 		Array.isArray(res) &&

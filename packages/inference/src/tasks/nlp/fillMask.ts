@@ -5,7 +5,7 @@ export type FillMaskArgs = BaseArgs & {
 	inputs: string;
 };
 
-export type FillMaskReturn = {
+export type FillMaskOutput = {
 	/**
 	 * The probability for this token.
 	 */
@@ -27,8 +27,8 @@ export type FillMaskReturn = {
 /**
  * Tries to fill in a hole with a missing word (token to be precise). That’s the base task for BERT models.
  */
-export async function fillMask(args: FillMaskArgs, options?: Options): Promise<FillMaskReturn> {
-	const res = await request<FillMaskReturn>(args, options);
+export async function fillMask(args: FillMaskArgs, options?: Options): Promise<FillMaskOutput> {
+	const res = await request<FillMaskOutput>(args, options);
 	const isValidOutput =
 		Array.isArray(res) &&
 		res.every(

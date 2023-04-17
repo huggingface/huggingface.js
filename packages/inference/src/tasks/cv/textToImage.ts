@@ -31,14 +31,14 @@ export type TextToImageArgs = BaseArgs & {
 	};
 };
 
-export type TextToImageReturn = Blob;
+export type TextToImageOutput = Blob;
 
 /**
  * This task reads some text input and outputs an image.
  * Recommended model: stabilityai/stable-diffusion-2
  */
-export async function textToImage(args: TextToImageArgs, options?: Options): Promise<TextToImageReturn> {
-	const res = await request<TextToImageReturn>(args, options);
+export async function textToImage(args: TextToImageArgs, options?: Options): Promise<TextToImageOutput> {
+	const res = await request<TextToImageOutput>(args, options);
 	const isValidOutput = res && res instanceof Blob;
 	if (!isValidOutput) {
 		throw new TypeError("Invalid inference output: output must be of type object & of instance Blob");

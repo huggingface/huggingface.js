@@ -67,7 +67,7 @@ export interface TextGenerationStreamDetails {
 	best_of_sequences?: TextGenerationStreamBestOfSequence[];
 }
 
-export interface TextGenerationStreamReturn {
+export interface TextGenerationStreamOutput {
 	/** Generated token, one at a time */
 	token: TextGenerationStreamToken;
 	/**
@@ -88,6 +88,6 @@ export interface TextGenerationStreamReturn {
 export async function* textGenerationStream(
 	args: TextGenerationArgs,
 	options?: Options
-): AsyncGenerator<TextGenerationStreamReturn> {
-	yield* streamingRequest<TextGenerationStreamReturn>(args, options);
+): AsyncGenerator<TextGenerationStreamOutput> {
+	yield* streamingRequest<TextGenerationStreamOutput>(args, options);
 }

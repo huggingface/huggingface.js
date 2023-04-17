@@ -14,7 +14,7 @@ export type FeatureExtractionArgs = BaseArgs & {
 /**
  * Returned values are a list of floats, or a list of list of floats (depending on if you sent a string or a list of string, and if the automatic reduction, usually mean_pooling for instance was applied for you or not. This should be explained on the model's README.
  */
-export type FeatureExtractionReturn = (number | number[])[];
+export type FeatureExtractionOutput = (number | number[])[];
 
 /**
  * This task reads some text and outputs raw float values, that are usually consumed as part of a semantic database/semantic search.
@@ -22,8 +22,8 @@ export type FeatureExtractionReturn = (number | number[])[];
 export async function featureExtraction(
 	args: FeatureExtractionArgs,
 	options?: Options
-): Promise<FeatureExtractionReturn> {
-	const res = await request<FeatureExtractionReturn>(args, options);
+): Promise<FeatureExtractionOutput> {
+	const res = await request<FeatureExtractionOutput>(args, options);
 	let isValidOutput = true;
 	// Check if output is an array
 	if (Array.isArray(res)) {

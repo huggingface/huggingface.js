@@ -8,7 +8,7 @@ export type ObjectDetectionArgs = BaseArgs & {
 	data: Blob | ArrayBuffer;
 };
 
-export interface ObjectDetectionReturnValue {
+export interface ObjectDetectionOutputValue {
 	/**
 	 * A dict (with keys [xmin,ymin,xmax,ymax]) representing the bounding box of a detected object.
 	 */
@@ -29,14 +29,14 @@ export interface ObjectDetectionReturnValue {
 	score: number;
 }
 
-export type ObjectDetectionReturn = ObjectDetectionReturnValue[];
+export type ObjectDetectionOutput = ObjectDetectionOutputValue[];
 
 /**
  * This task reads some image input and outputs the likelihood of classes & bounding boxes of detected objects.
  * Recommended model: facebook/detr-resnet-50
  */
-export async function objectDetection(args: ObjectDetectionArgs, options?: Options): Promise<ObjectDetectionReturn> {
-	const res = await request<ObjectDetectionReturn>(args, options);
+export async function objectDetection(args: ObjectDetectionArgs, options?: Options): Promise<ObjectDetectionOutput> {
+	const res = await request<ObjectDetectionOutput>(args, options);
 	const isValidOutput =
 		Array.isArray(res) &&
 		res.every(

@@ -14,7 +14,7 @@ export type TableQuestionAnsweringArgs = BaseArgs & {
 	};
 };
 
-export interface TableQuestionAnsweringReturn {
+export interface TableQuestionAnsweringOutput {
 	/**
 	 * The aggregator used to get the answer
 	 */
@@ -39,8 +39,8 @@ export interface TableQuestionAnsweringReturn {
 export async function tableQuestionAnswering(
 	args: TableQuestionAnsweringArgs,
 	options?: Options
-): Promise<TableQuestionAnsweringReturn> {
-	const res = await request<TableQuestionAnsweringReturn>(args, options);
+): Promise<TableQuestionAnsweringOutput> {
+	const res = await request<TableQuestionAnsweringOutput>(args, options);
 	const isValidOutput =
 		typeof res.aggregator === "string" &&
 		typeof res.answer === "string" &&

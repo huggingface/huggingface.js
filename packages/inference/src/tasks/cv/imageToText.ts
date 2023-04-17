@@ -8,7 +8,7 @@ export type ImageToTextArgs = BaseArgs & {
 	data: Blob | ArrayBuffer;
 };
 
-export interface ImageToTextReturn {
+export interface ImageToTextOutput {
 	/**
 	 * The generated caption
 	 */
@@ -18,6 +18,6 @@ export interface ImageToTextReturn {
 /**
  * This task reads some image input and outputs the text caption.
  */
-export async function imageToText(args: ImageToTextArgs, options?: Options): Promise<ImageToTextReturn> {
-	return (await request<[ImageToTextReturn]>(args, options))?.[0];
+export async function imageToText(args: ImageToTextArgs, options?: Options): Promise<ImageToTextOutput> {
+	return (await request<[ImageToTextOutput]>(args, options))?.[0];
 }

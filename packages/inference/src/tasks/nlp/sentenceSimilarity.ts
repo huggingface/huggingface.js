@@ -16,7 +16,7 @@ export type SentenceSimilarityArgs = BaseArgs & {
 /**
  * Returned values are a list of floats
  */
-export type SentenceSimilarityReturn = number[];
+export type SentenceSimilarityOutput = number[];
 
 /**
  * Calculate the semantic similarity between one text and a list of other sentences by comparing their embeddings.
@@ -24,8 +24,8 @@ export type SentenceSimilarityReturn = number[];
 export async function sentenceSimilarity(
 	args: SentenceSimilarityArgs,
 	options?: Options
-): Promise<SentenceSimilarityReturn> {
-	const res = await request<SentenceSimilarityReturn>(args, options);
+): Promise<SentenceSimilarityOutput> {
+	const res = await request<SentenceSimilarityOutput>(args, options);
 
 	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x === "number");
 	if (!isValidOutput) {

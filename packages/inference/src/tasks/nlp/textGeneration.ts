@@ -46,7 +46,7 @@ export type TextGenerationArgs = BaseArgs & {
 	};
 };
 
-export interface TextGenerationReturn {
+export interface TextGenerationOutput {
 	/**
 	 * The continuated string
 	 */
@@ -56,8 +56,8 @@ export interface TextGenerationReturn {
 /**
  * Use to continue text from a prompt. This is a very generic task. Recommended model: gpt2 (it’s a simple model, but fun to play with).
  */
-export async function textGeneration(args: TextGenerationArgs, options?: Options): Promise<TextGenerationReturn> {
-	const res = await request<TextGenerationReturn[]>(args, options);
+export async function textGeneration(args: TextGenerationArgs, options?: Options): Promise<TextGenerationOutput> {
+	const res = await request<TextGenerationOutput[]>(args, options);
 	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x.generated_text === "string");
 	if (!isValidOutput) {
 		throw new TypeError("Invalid inference output: output must be of type Array<generated_text: string>");

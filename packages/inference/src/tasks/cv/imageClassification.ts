@@ -8,7 +8,7 @@ export type ImageClassificationArgs = BaseArgs & {
 	data: Blob | ArrayBuffer;
 };
 
-export interface ImageClassificationReturnValue {
+export interface ImageClassificationOutputValue {
 	/**
 	 * A float that represents how likely it is that the image file belongs to this class.
 	 */
@@ -19,7 +19,7 @@ export interface ImageClassificationReturnValue {
 	score: number;
 }
 
-export type ImageClassificationReturn = ImageClassificationReturnValue[];
+export type ImageClassificationOutput = ImageClassificationOutputValue[];
 
 /**
  * This task reads some image input and outputs the likelihood of classes.
@@ -28,8 +28,8 @@ export type ImageClassificationReturn = ImageClassificationReturnValue[];
 export async function imageClassification(
 	args: ImageClassificationArgs,
 	options?: Options
-): Promise<ImageClassificationReturn> {
-	const res = await request<ImageClassificationReturn>(args, options);
+): Promise<ImageClassificationOutput> {
+	const res = await request<ImageClassificationOutput>(args, options);
 	const isValidOutput =
 		Array.isArray(res) && res.every((x) => typeof x.label === "string" && typeof x.score === "number");
 	if (!isValidOutput) {

@@ -25,7 +25,7 @@ export type TokenClassificationArgs = BaseArgs & {
 	};
 };
 
-export interface TokenClassificationReturnValue {
+export interface TokenClassificationOutputValue {
 	/**
 	 * The offset stringwise where the answer is located. Useful to disambiguate if word occurs multiple times.
 	 */
@@ -48,7 +48,7 @@ export interface TokenClassificationReturnValue {
 	word: string;
 }
 
-export type TokenClassificationReturn = TokenClassificationReturnValue[];
+export type TokenClassificationOutput = TokenClassificationOutputValue[];
 
 /**
  * Usually used for sentence parsing, either grammatical, or Named Entity Recognition (NER) to understand keywords contained within text. Recommended model: dbmdz/bert-large-cased-finetuned-conll03-english
@@ -56,8 +56,8 @@ export type TokenClassificationReturn = TokenClassificationReturnValue[];
 export async function tokenClassification(
 	args: TokenClassificationArgs,
 	options?: Options
-): Promise<TokenClassificationReturn> {
-	const res = toArray(await request<TokenClassificationReturn[number] | TokenClassificationReturn>(args, options));
+): Promise<TokenClassificationOutput> {
+	const res = toArray(await request<TokenClassificationOutput[number] | TokenClassificationOutput>(args, options));
 	const isValidOutput =
 		Array.isArray(res) &&
 		res.every(

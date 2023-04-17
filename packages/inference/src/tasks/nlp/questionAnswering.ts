@@ -8,7 +8,7 @@ export type QuestionAnsweringArgs = BaseArgs & {
 	};
 };
 
-export interface QuestionAnsweringReturn {
+export interface QuestionAnsweringOutput {
 	/**
 	 * A string that’s the answer within the text.
 	 */
@@ -33,8 +33,8 @@ export interface QuestionAnsweringReturn {
 export async function questionAnswering(
 	args: QuestionAnsweringArgs,
 	options?: Options
-): Promise<QuestionAnsweringReturn> {
-	const res = await request<QuestionAnsweringReturn>(args, options);
+): Promise<QuestionAnsweringOutput> {
+	const res = await request<QuestionAnsweringOutput>(args, options);
 	const isValidOutput =
 		typeof res.answer === "string" &&
 		typeof res.end === "number" &&

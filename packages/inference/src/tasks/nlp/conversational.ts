@@ -48,7 +48,7 @@ export type ConversationalArgs = BaseArgs & {
 	};
 };
 
-export interface ConversationalReturn {
+export interface ConversationalOutput {
 	conversation: {
 		generated_responses: string[];
 		past_user_inputs: string[];
@@ -61,8 +61,8 @@ export interface ConversationalReturn {
  * This task corresponds to any chatbot like structure. Models tend to have shorter max_length, so please check with caution when using a given model if you need long range dependency or not. Recommended model: microsoft/DialoGPT-large.
  *
  */
-export async function conversational(args: ConversationalArgs, options?: Options): Promise<ConversationalReturn> {
-	const res = await request<ConversationalReturn>(args, options);
+export async function conversational(args: ConversationalArgs, options?: Options): Promise<ConversationalOutput> {
+	const res = await request<ConversationalOutput>(args, options);
 	const isValidOutput =
 		Array.isArray(res.conversation.generated_responses) &&
 		res.conversation.generated_responses.every((x) => typeof x === "string") &&

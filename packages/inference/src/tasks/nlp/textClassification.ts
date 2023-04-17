@@ -8,7 +8,7 @@ export type TextClassificationArgs = BaseArgs & {
 	inputs: string;
 };
 
-export type TextClassificationReturn = {
+export type TextClassificationOutput = {
 	/**
 	 * The label for the class (model specific)
 	 */
@@ -25,8 +25,8 @@ export type TextClassificationReturn = {
 export async function textClassification(
 	args: TextClassificationArgs,
 	options?: Options
-): Promise<TextClassificationReturn> {
-	const res = (await request<TextClassificationReturn[]>(args, options))?.[0];
+): Promise<TextClassificationOutput> {
+	const res = (await request<TextClassificationOutput[]>(args, options))?.[0];
 	const isValidOutput =
 		Array.isArray(res) && res.every((x) => typeof x.label === "string" && typeof x.score === "number");
 	if (!isValidOutput) {

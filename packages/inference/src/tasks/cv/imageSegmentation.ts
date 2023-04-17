@@ -8,7 +8,7 @@ export type ImageSegmentationArgs = BaseArgs & {
 	data: Blob | ArrayBuffer;
 };
 
-export interface ImageSegmentationReturnValue {
+export interface ImageSegmentationOutputValue {
 	/**
 	 * The label for the class (model specific) of a segment.
 	 */
@@ -23,7 +23,7 @@ export interface ImageSegmentationReturnValue {
 	score: number;
 }
 
-export type ImageSegmentationReturn = ImageSegmentationReturnValue[];
+export type ImageSegmentationOutput = ImageSegmentationOutputValue[];
 
 /**
  * This task reads some image input and outputs the likelihood of classes & bounding boxes of detected objects.
@@ -32,8 +32,8 @@ export type ImageSegmentationReturn = ImageSegmentationReturnValue[];
 export async function imageSegmentation(
 	args: ImageSegmentationArgs,
 	options?: Options
-): Promise<ImageSegmentationReturn> {
-	const res = await request<ImageSegmentationReturn>(args, options);
+): Promise<ImageSegmentationOutput> {
+	const res = await request<ImageSegmentationOutput>(args, options);
 	const isValidOutput =
 		Array.isArray(res) &&
 		res.every((x) => typeof x.label === "string" && typeof x.mask === "string" && typeof x.score === "number");

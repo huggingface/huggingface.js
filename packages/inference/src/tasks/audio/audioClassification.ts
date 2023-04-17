@@ -8,7 +8,7 @@ export type AudioClassificationArgs = BaseArgs & {
 	data: Blob | ArrayBuffer;
 };
 
-export interface AudioClassificationReturnValue {
+export interface AudioClassificationOutputValue {
 	/**
 	 * The label for the class (model specific)
 	 */
@@ -20,7 +20,7 @@ export interface AudioClassificationReturnValue {
 	score: number;
 }
 
-export type AudioClassificationReturn = AudioClassificationReturnValue[];
+export type AudioClassificationReturn = AudioClassificationOutputValue[];
 
 /**
  * This task reads some audio input and outputs the likelihood of classes.

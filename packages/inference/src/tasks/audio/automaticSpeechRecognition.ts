@@ -8,7 +8,7 @@ export type AutomaticSpeechRecognitionArgs = BaseArgs & {
 	data: Blob | ArrayBuffer;
 };
 
-export interface AutomaticSpeechRecognitionReturn {
+export interface AutomaticSpeechRecognitionOutput {
 	/**
 	 * The text that was recognized from the audio
 	 */
@@ -22,8 +22,8 @@ export interface AutomaticSpeechRecognitionReturn {
 export async function automaticSpeechRecognition(
 	args: AutomaticSpeechRecognitionArgs,
 	options?: Options
-): Promise<AutomaticSpeechRecognitionReturn> {
-	const res = await request<AutomaticSpeechRecognitionReturn>(args, options);
+): Promise<AutomaticSpeechRecognitionOutput> {
+	const res = await request<AutomaticSpeechRecognitionOutput>(args, options);
 	const isValidOutput = typeof res.text === "string";
 	if (!isValidOutput) {
 		throw new TypeError("Invalid inference output: output must be of type <text: string>");
