@@ -1,22 +1,29 @@
-export { audioClassification } from "./audio/audioClassification";
-export { automaticSpeechRecognition } from "./audio/automaticSpeechRecognition";
-export { conversational } from "./nlp/conversational";
-export { featureExtraction } from "./nlp/featureExtraction";
-export { fillMask } from "./nlp/fillMask";
-export { imageClassification } from "./cv/imageClassification";
-export { imageSegmentation } from "./cv/imageSegmentation";
-export { imageToText } from "./cv/imageToText";
-export { objectDetection } from "./cv/objectDetection";
-export { questionAnswering } from "./nlp/questionAnswering";
-export { request } from "./custom/request";
-export { sentenceSimilarity } from "./nlp/sentenceSimilarity";
-export { streamingRequest } from "./custom/streamingRequest";
-export { summarization } from "./nlp/summarization";
-export { tableQuestionAnswering } from "./nlp/tableQuestionAnswering";
-export { textClassification } from "./nlp/textClassification";
-export { textGeneration } from "./nlp/textGeneration";
-export { textGenerationStream } from "./nlp/textGenerationStream";
-export { textToImage } from "./cv/textToImage";
-export { tokenClassification } from "./nlp/tokenClassification";
-export { translation } from "./nlp/translation";
-export { zeroShotClassification } from "./nlp/zeroShotClassification";
+// Custom tasks with arbitrary inputs and outputs
+export * from "./custom/request";
+export * from "./custom/streamingRequest";
+
+// Audio tasks
+export * from "./audio/audioClassification";
+export * from "./audio/automaticSpeechRecognition";
+
+// Commputer Vision tasks
+export * from "./cv/imageClassification";
+export * from "./cv/imageSegmentation";
+export * from "./cv/imageToText";
+export * from "./cv/objectDetection";
+export * from "./cv/textToImage";
+
+// Natural Language Processing tasks
+export * from "./nlp/conversational";
+export * from "./nlp/featureExtraction";
+export * from "./nlp/fillMask";
+export * from "./nlp/questionAnswering";
+export * from "./nlp/sentenceSimilarity";
+export * from "./nlp/summarization";
+export * from "./nlp/tableQuestionAnswering";
+export * from "./nlp/textClassification";
+export * from "./nlp/textGeneration";
+export * from "./nlp/textGenerationStream";
+export * from "./nlp/tokenClassification";
+export * from "./nlp/translation";
+export * from "./nlp/zeroShotClassification";

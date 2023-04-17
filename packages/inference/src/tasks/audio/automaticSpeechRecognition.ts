@@ -1,5 +1,19 @@
-import type { AutomaticSpeechRecognitionArgs, AutomaticSpeechRecognitionReturn, Options } from "../../types";
+import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
+
+export type AutomaticSpeechRecognitionArgs = BaseArgs & {
+	/**
+	 * Binary audio data
+	 */
+	data: Blob | ArrayBuffer;
+};
+
+export interface AutomaticSpeechRecognitionReturn {
+	/**
+	 * The text that was recognized from the audio
+	 */
+	text: string;
+}
 
 /**
  * This task reads some audio input and outputs the said words within the audio files.

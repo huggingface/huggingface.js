@@ -1,5 +1,19 @@
-import type { Options, TranslationArgs, TranslationReturn } from "../../types";
+import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
+
+export type TranslationArgs = BaseArgs & {
+	/**
+	 * A string to be translated
+	 */
+	inputs: string;
+};
+
+export interface TranslationReturn {
+	/**
+	 * The string after translation
+	 */
+	translation_text: string;
+}
 
 /**
  * This task is well known to translate text from one language to another. Recommended model: Helsinki-NLP/opus-mt-ru-en.

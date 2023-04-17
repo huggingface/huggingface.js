@@ -1,5 +1,28 @@
-import type { FillMaskArgs, FillMaskReturn, Options } from "../../types";
+import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
+
+export type FillMaskArgs = BaseArgs & {
+	inputs: string;
+};
+
+export type FillMaskReturn = {
+	/**
+	 * The probability for this token.
+	 */
+	score: number;
+	/**
+	 * The actual sequence of tokens that ran against the model (may contain special tokens)
+	 */
+	sequence: string;
+	/**
+	 * The id of the token
+	 */
+	token: number;
+	/**
+	 * The string representation of the token
+	 */
+	token_str: string;
+}[];
 
 /**
  * Tries to fill in a hole with a missing word (token to be precise). That’s the base task for BERT models.

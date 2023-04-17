@@ -1,5 +1,25 @@
-import type { ImageClassificationArgs, ImageClassificationReturn, Options } from "../../types";
+import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
+
+export type ImageClassificationArgs = BaseArgs & {
+	/**
+	 * Binary image data
+	 */
+	data: Blob | ArrayBuffer;
+};
+
+export interface ImageClassificationReturnValue {
+	/**
+	 * A float that represents how likely it is that the image file belongs to this class.
+	 */
+	label: string;
+	/**
+	 * The label for the class (model specific)
+	 */
+	score: number;
+}
+
+export type ImageClassificationReturn = ImageClassificationReturnValue[];
 
 /**
  * This task reads some image input and outputs the likelihood of classes.
