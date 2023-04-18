@@ -171,7 +171,7 @@ await hf.imageToText({
 })
 
 // Custom call, for models with custom parameters / outputs
-await inference.request({
+await hf.request({
   model: 'my-custom-model',
   inputs: 'hello world',
   parameters: {
@@ -180,7 +180,7 @@ await inference.request({
 })
 
 // Custom streaming call, for models with custom parameters / outputs
-for await (const output of inference.streamingRequest({
+for await (const output of hf.streamingRequest({
   model: 'my-custom-model',
   inputs: 'hello world',
   parameters: {
