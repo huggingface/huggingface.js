@@ -397,6 +397,18 @@ describe.concurrent(
 				generated_text: "a large brown and white giraffe standing in a field ",
 			});
 		});
+		it("request - google/flan-t5-xxl", async () => {
+			expect(
+				await hf.request({
+					model: "google/flan-t5-xxl",
+					inputs: "one plus two equals",
+				})
+			).toMatchObject([
+				{
+					generated_text: expect.any(String),
+				},
+			]);
+		});
 		it("endpoint - makes request to specified endpoint", async () => {
 			const ep = hf.endpoint("https://api-inference.huggingface.co/models/google/flan-t5-xxl");
 			const { generated_text } = await ep.textGeneration({

@@ -1,18 +1,19 @@
 import * as tasks from "./tasks";
 import type { Options, RequestArgs } from "./types";
+import type { DistributiveOmit } from "./utils/distributive-omit";
 
 type Task = typeof tasks;
 
 type TaskWithNoAccessToken = {
 	[key in keyof Task]: (
-		args: Omit<Parameters<Task[key]>[0], "accessToken">,
+		args: DistributiveOmit<Parameters<Task[key]>[0], "accessToken">,
 		options?: Parameters<Task[key]>[1]
 	) => ReturnType<Task[key]>;
 };
 
 type TaskWithNoAccessTokenNoModel = {
 	[key in keyof Task]: (
-		args: Omit<Parameters<Task[key]>[0], "accessToken" | "model">,
+		args: DistributiveOmit<Parameters<Task[key]>[0], "accessToken" | "model">,
 		options?: Parameters<Task[key]>[1]
 	) => ReturnType<Task[key]>;
 };
@@ -51,7 +52,7 @@ export class HfInferenceEndpoint {
 		for (const [name, fn] of Object.entries(tasks)) {
 			Object.defineProperty(this, name, {
 				enumerable: false,
-				value: (params: Omit<RequestArgs, "model">, options: Options) =>
+				value: (params: RequestArgs, options: Options) =>
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					fn({ ...params, accessToken, model: endpointUrl } as any, { ...defaultOptions, ...options }),
 			});
