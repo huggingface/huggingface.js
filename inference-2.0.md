@@ -67,9 +67,9 @@ For streaming responses, use `streamingRequest` rather than `request`.
 All existing tasks can use `request` or `streamingRequest` instead :exploding_head: 
 
 ```ts
-await inference.textGeneration({model: "gpt2", inputs: "The answer to the universe is"});
-// is equivalent to
-await inference.request({model: "gpt2", inputs: "The answer to the universe is"});
+const {generated_text} = await inference.textGeneration({model: "gpt2", inputs: "The answer to the universe is"});
+// small output change for .textGeneration to .request: the raw response is actually an array
+const [{generated_text}] = await inference.request({model: "gpt2", inputs: "The answer to the universe is"});
 
 for await (const output of inference.textGenerationStream({
   model: "google/flan-t5-xxl", 
