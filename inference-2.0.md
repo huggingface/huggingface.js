@@ -88,7 +88,7 @@ Of course, `request` and `streamingRequest` can also be used with Inference Endp
 
 You don't like the current API, you don't like classes, and want the strict minimum in your bundle? No need to say more, I know which frontend framework (or should I say library ;)) you use.
 
-Worry not, you can import individual functions, this release of `@hugginface/inference` is all about choice and flexibility:
+Don't worry, you can import individual functions - this release of `@hugginface/inference` is all about choice and flexibility:
 
 ```ts
 import { textGeneration } from "@huggingface/inference";
@@ -109,4 +109,4 @@ await textGeneration({
 
 - `textGenerationStream` to generate streaming content by returning an `AsyncIterable`. Yay for `for await`! Credits to @vvmnnnkv. [Demo](https://huggingface.co/spaces/huggingfacejs/streaming-text-generation)
 - `imageToText` to caption images among other things. Credits to @vvmnnnkv. [Demo](https://huggingface.co/spaces/huggingfacejs/image-to-text)
-- Validation of outputs. Use `request` or `streamingRequest` to skip this validation. Credits to @mishig25 
+- Validation of outputs: Use `request` or `streamingRequest` to skip this validation. Credits to @mishig25 
