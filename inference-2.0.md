@@ -50,7 +50,7 @@ await inference.textGeneration({
 
 `@huggingface/inference` supports tasks from https://huggingface.co/tasks, and is typed accordingly. But what if your model has additional inputs, or even custom inputs or outputs?
 
-You can use `.request` and `.streamingRequest` now!
+You can now use `.request` and `.streamingRequest`!
 
 ```ts
 const output = await inference.request({
