@@ -19,7 +19,7 @@ The different tiers for inference are:
 - Inference API - PRO account: better rate limits
 - Inference Endpoints: Unlimited API calls, possibility to deploy on the cloud provider / VPC / infra of your choice, scaling
 
-And here's how you can call an inference endpoint:
+Here's how you can call an inference endpoint:
 
 ```ts
 const inference = new HfInference("hf_...");
@@ -48,7 +48,7 @@ await inference.textGeneration({
 
 ## Custom requests
 
-`@huggingface/inference` supports tasks from https://huggingface.co/tasks, and is typed accordingly. But what if your model as additional inputs, or even custom inputs or outputs?
+`@huggingface/inference` supports tasks from https://huggingface.co/tasks, and is typed accordingly. But what if your model has additional inputs, or even custom inputs or outputs?
 
 You can use `.request` and `.streamingRequest` now!
 
@@ -64,7 +64,7 @@ const output = await inference.request({
 
 For streaming responses, use `streamingRequest` rather than `request`.
 
-And all existing tasks can use `request` or `streamingRequest` instead :exploding_head: 
+All existing tasks can use `request` or `streamingRequest` instead :exploding_head: 
 
 ```ts
 await inference.textGeneration({model: "gpt2", inputs: "The answer to the universe is"});
@@ -82,13 +82,13 @@ for await (const output of inference.streamingRequest({
 })) {}
 ```
 
-And of course, `request` and `streamingRequest` can be used with Inference Endpoints! Actually, if you make your own custom models and inputs / outputs for your business use case, it'll be what you use.
+Of course, `request` and `streamingRequest` can also be used with Inference Endpoints! Actually, if you make your own custom models and inputs / outputs for your business use case, it'll probably be what you use.
 
 ## Individual imports & tree-shakability
 
 You don't like the current API, you don't like classes, and want the strict minimum in your bundle? No need to say more, I know which frontend framework (or should I say library ;)) you use.
 
-And you can import individual functions, this release of `@hugginface/inference` is all about choice and flexibility:
+Worry not, you can import individual functions, this release of `@hugginface/inference` is all about choice and flexibility:
 
 ```ts
 import { textGeneration } from "@huggingface/inference";
