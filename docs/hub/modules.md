@@ -2,7 +2,7 @@
 
 ## Classes
 
-- [ApiError](classes/ApiError)
+- [HubApiError](classes/HubApiError)
 - [InvalidApiResponseFormatError](classes/InvalidApiResponseFormatError)
 
 ## Interfaces
