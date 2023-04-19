@@ -2,20 +2,21 @@ import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
-export type QuestionAnsweringArgs = BaseArgs & {
+export type DocumentQuestionAnsweringArgs = BaseArgs & {
 	inputs: {
-		context: string;
+		/** Base64 of document image **/
+		image: string;
 		question: string;
 	};
 };
 
-export interface QuestionAnsweringOutput {
+export interface DocumentQuestionAnsweringOutput {
 	/**
-	 * A string that’s the answer within the text.
+	 * A string that’s the answer within the document.
 	 */
 	answer: string;
 	/**
-	 * The index (string wise) of the stop of the answer within context.
+	 * ?
 	 */
 	end: number;
 	/**
@@ -23,19 +24,16 @@ export interface QuestionAnsweringOutput {
 	 */
 	score: number;
 	/**
-	 * The index (string wise) of the start of the answer within context.
+	 * ?
 	 */
 	start: number;
 }
 
 /**
- * Want to have a nice know-it-all bot that can answer any question?. Recommended model: deepset/roberta-base-squad2
+ * Answers a question on a document image. Recommended model: impira/layoutlm-document-qa.
  */
-export async function questionAnswering(
-	args: QuestionAnsweringArgs,
-	options?: Options
-): Promise<QuestionAnsweringOutput> {
-	const res = await request<QuestionAnsweringOutput>(args, options);
+export async function documentQuestionAnswering(args: DocumentQuestionAnsweringArgs, options?: Options): Promise<DocumentQuestionAnsweringOutput> {
+	const res = (await request<[DocumentQuestionAnsweringOutput]>(args, options))?.[0];
 	const isValidOutput =
 		typeof res?.answer === "string" &&
 		typeof res.end === "number" &&

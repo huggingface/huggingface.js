@@ -245,6 +245,10 @@ const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the
 - [x] Text to image
 - [x] Image to text
 
+### Multimodal
+- [x] Document question answering
+- [x] Visual question answering
+
 ## Tree-shaking
 
 You can import the functions you need directly from the module, rather than using the `HfInference` class:

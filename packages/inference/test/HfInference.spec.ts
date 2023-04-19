@@ -101,7 +101,7 @@ describe.concurrent(
 
 		it("documentQuestionAnswer", async () => {
 			expect(
-				await hf.documentQuestionAnswer({
+				await hf.documentQuestionAnswering({
 					model: "impira/layoutlm-document-qa",
 					inputs: {
 						question: "Invoice number?",
@@ -119,7 +119,7 @@ describe.concurrent(
 
 		it("visualQuestionAnswer", async () => {
 			expect(
-				await hf.visualQuestionAnswer({
+				await hf.visualQuestionAnswering({
 					model: "dandelin/vilt-b32-finetuned-vqa",
 					inputs: {
 						question: "How many cats are lying down?",

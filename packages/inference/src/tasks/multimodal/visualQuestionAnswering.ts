@@ -2,44 +2,35 @@ import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
-export type DocumentQuestionAnsweringArgs = BaseArgs & {
+export type VisualQuestionAnsweringArgs = BaseArgs & {
 	inputs: {
-		context: string;
+		/** Base64 of image **/
+		image: string;
 		question: string;
 	};
 };
 
-export interface DocumentQuestionAnsweringOutput {
+export interface VisualQuestionAnsweringOutput {
 	/**
-	 * A string that’s the answer within the text.
+	 * A string that’s the answer to a visual question.
 	 */
 	answer: string;
 	/**
-	 * The index (string wise) of the stop of the answer within context.
-	 */
-	end: number;
-	/**
-	 * A float that represents how likely that the answer is correct
+	 * Answer correctness score.
 	 */
 	score: number;
-	/**
-	 * The index (string wise) of the start of the answer within context.
-	 */
-	start: number;
 }
 
 /**
- * Answers a question on a document image. Recommended model: impira/layoutlm-document-qa.
+ * Answers a question on an image. Recommended model: dandelin/vilt-b32-finetuned-vqa.
  */
-export async function documentQuestionAnswering(args: DocumentQuestionAnsweringArgs, options?: Options): Promise<DocumentQuestionAnsweringOutput> {
-	const res = (await request<[DocumentQuestionAnsweringOutput]>(args, options))?.[0];
+export async function visualQuestionAnswering(args: VisualQuestionAnsweringArgs, options?: Options): Promise<VisualQuestionAnsweringOutput> {
+	const res = (await request<[VisualQuestionAnsweringOutput]>(args, options))?.[0];
 	const isValidOutput =
 		typeof res?.answer === "string" &&
-		typeof res.end === "number" &&
-		typeof res.score === "number" &&
-		typeof res.start === "number";
+		typeof res.score === "number";
 	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected {answer: string, end: number, score: number, start: number}");
+		throw new InferenceOutputError("Expected {answer: string, score: number}");
 	}
 	return res;
 }
