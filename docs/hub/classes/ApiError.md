@@ -1,4 +1,4 @@
-# Class: HubApiError
+# Class: ApiError
 
 Error thrown when an API call to the Hugging Face Hub fails.
 
@@ -6,13 +6,13 @@ Error thrown when an API call to the Hugging Face Hub fails.
 
 - `Error`
 
-  ↳ **`HubApiError`**
+  ↳ **`ApiError`**
 
 ## Constructors
 
 ### constructor
 
-• **new HubApiError**(`url`, `statusCode`, `requestId?`, `message?`)
+• **new ApiError**(`url`, `statusCode`, `requestId?`, `message?`)
 
 #### Parameters
 
