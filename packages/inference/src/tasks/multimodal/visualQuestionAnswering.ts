@@ -31,7 +31,7 @@ export async function visualQuestionAnswering(
 	const res = (await request<[VisualQuestionAnsweringOutput]>(args, options))?.[0];
 	const isValidOutput = typeof res?.answer === "string" && typeof res.score === "number";
 	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected {answer: string, score: number}");
+		throw new InferenceOutputError("Expected Array<{answer: string, score: number}>");
 	}
 	return res;
 }

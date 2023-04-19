@@ -43,7 +43,7 @@ export async function documentQuestionAnswering(
 		typeof res.score === "number" &&
 		typeof res.start === "number";
 	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected {answer: string, end: number, score: number, start: number}");
+		throw new InferenceOutputError("Expected Array<{answer: string, end: number, score: number, start: number}>");
 	}
 	return res;
 }

@@ -99,7 +99,7 @@ describe.concurrent(
 			});
 		});
 
-		it("documentQuestionAnswer", async () => {
+		it("documentQuestionAnswering", async () => {
 			expect(
 				await hf.documentQuestionAnswering({
 					model: "impira/layoutlm-document-qa",
@@ -117,7 +117,7 @@ describe.concurrent(
 			});
 		});
 
-		it("visualQuestionAnswer", async () => {
+		it("visualQuestionAnswering", async () => {
 			expect(
 				await hf.visualQuestionAnswering({
 					model: "dandelin/vilt-b32-finetuned-vqa",
