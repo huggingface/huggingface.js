@@ -45,7 +45,7 @@ await hf.summarization({
   }
 })
 
-await hf.questionAnswer({
+await hf.questionAnswering({
   model: 'deepset/roberta-base-squad2',
   inputs: {
     question: 'What is the capital of France?',
@@ -53,7 +53,7 @@ await hf.questionAnswer({
   }
 })
 
-await hf.tableQuestionAnswer({
+await hf.tableQuestionAnswering({
   model: 'google/tapas-base-finetuned-wtq',
   inputs: {
     query: 'How many stars does the transformers repository have?',
@@ -172,7 +172,7 @@ await hf.imageToText({
 
 // Multimodal
 
-await hf.visualQuestionAnswer({
+await hf.visualQuestionAnswering({
   model: 'dandelin/vilt-b32-finetuned-vqa',
   inputs: {
     question: 'How many cats are lying down?',
@@ -180,13 +180,33 @@ await hf.visualQuestionAnswer({
   }
 })
 
-await hf.documentQuestionAnswer({
+await hf.documentQuestionAnswering({
   model: 'impira/layoutlm-document-qa',
   inputs: {
     question: 'Invoice number?',
     image: readFileSync('test/invoice.png').toString('base64'),
   }
 })
+
+// Custom call, for models with custom parameters / outputs
+await hf.request({
+  model: 'my-custom-model',
+  inputs: 'hello world',
+  parameters: {
+    custom_param: 'some magic',
+  }
+})
+
+// Custom streaming call, for models with custom parameters / outputs
+for await (const output of hf.streamingRequest({
+  model: 'my-custom-model',
+  inputs: 'hello world',
+  parameters: {
+    custom_param: 'some magic',
+  }
+})) {
+  ...
+}
 
 // Using your own inference endpoint: https://hf.co/docs/inference-endpoints/
 const gpt2 = hf.endpoint('https://xyz.eu-west-1.aws.endpoints.huggingface.cloud/gpt2');
@@ -210,6 +230,7 @@ const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the
 - [x] Zero-shot classification
 - [x] Conversational
 - [x] Feature extraction
+- [x] Sentence Similarity
 
 ### Audio
 
@@ -223,6 +244,23 @@ const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the
 - [x] Image segmentation
 - [x] Text to image
 - [x] Image to text
+
+## Tree-shaking
+
+You can import the functions you need directly from the module, rather than using the `HfInference` class:
+
+```ts
+import {textGeneration} from "@huggingface/inference";
+
+await textGeneration({
+  accessToken: "hf_...",
+  model: "model_or_endpoint",
+  inputs: ...,
+  parameters: ...
+})
+```
+
+This will enable tree-shaking by your bundler.
 
 ## Running tests
 

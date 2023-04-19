@@ -143,6 +143,7 @@ async function vcr(
 			init: {
 				headers: omit(init.headers as Record<string, string>, "Authorization"),
 				method: init.method,
+				body: typeof init.body === "string" && init.body.length < 1_000 ? init.body : undefined,
 			},
 			response: {
 				body: isText ? new TextDecoder().decode(arrayBuffer) : "",
