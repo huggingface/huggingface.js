@@ -33,7 +33,7 @@ You can even use the free inference API backend with this syntax:
 ```ts
 const endpoint = inference.endpoint("https://api-inference.huggingface.co/models/google/flan-t5-xxl");
 const { generated_text } = await endpoint.textGeneration({
-	inputs: "one plus two equals",
+  inputs: "one plus two equals",
 });
 ```
 
@@ -73,12 +73,12 @@ const [{generated_text}] = await inference.request({model: "gpt2", inputs: "The 
 
 for await (const output of inference.textGenerationStream({
   model: "google/flan-t5-xxl", 
- inputs: "Repeat 'one two three four'"
+  inputs: "Repeat 'one two three four'"
 })) {}
 // is equivalent to
 for await (const output of inference.streamingRequest({
   model: "google/flan-t5-xxl", 
- inputs: "Repeat 'one two three four'"
+  inputs: "Repeat 'one two three four'"
 })) {}
 ```
 
