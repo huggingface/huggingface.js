@@ -62,51 +62,49 @@
       sections:
         - title: HfInference
           local: inference/classes/HfInference
-    - title: Enums
-      sections:
-        - title: TextGenerationStreamFinishReason
-          local: inference/enums/TextGenerationStreamFinishReason
+        - title: HfInferenceEndpoint
+          local: inference/classes/HfInferenceEndpoint
     - title: Interfaces
       sections:
-        - title: Args
-          local: inference/interfaces/Args
-        - title: AudioClassificationReturnValue
-          local: inference/interfaces/AudioClassificationReturnValue
-        - title: AutomaticSpeechRecognitionReturn
-          local: inference/interfaces/AutomaticSpeechRecognitionReturn
-        - title: ConversationalReturn
-          local: inference/interfaces/ConversationalReturn
-        - title: ImageClassificationReturnValue
-          local: inference/interfaces/ImageClassificationReturnValue
-        - title: ImageSegmentationReturnValue
-          local: inference/interfaces/ImageSegmentationReturnValue
-        - title: ImageToTextReturn
-          local: inference/interfaces/ImageToTextReturn
-        - title: ObjectDetectionReturnValue
-          local: inference/interfaces/ObjectDetectionReturnValue
+        - title: AudioClassificationOutputValue
+          local: inference/interfaces/AudioClassificationOutputValue
+        - title: AutomaticSpeechRecognitionOutput
+          local: inference/interfaces/AutomaticSpeechRecognitionOutput
+        - title: BaseArgs
+          local: inference/interfaces/BaseArgs
+        - title: ConversationalOutput
+          local: inference/interfaces/ConversationalOutput
+        - title: ImageClassificationOutputValue
+          local: inference/interfaces/ImageClassificationOutputValue
+        - title: ImageSegmentationOutputValue
+          local: inference/interfaces/ImageSegmentationOutputValue
+        - title: ImageToTextOutput
+          local: inference/interfaces/ImageToTextOutput
+        - title: ObjectDetectionOutputValue
+          local: inference/interfaces/ObjectDetectionOutputValue
         - title: Options
           local: inference/interfaces/Options
-        - title: QuestionAnswerReturn
-          local: inference/interfaces/QuestionAnswerReturn
-        - title: SummarizationReturn
-          local: inference/interfaces/SummarizationReturn
-        - title: TableQuestionAnswerReturn
-          local: inference/interfaces/TableQuestionAnswerReturn
-        - title: TextGenerationReturn
-          local: inference/interfaces/TextGenerationReturn
+        - title: QuestionAnsweringOutput
+          local: inference/interfaces/QuestionAnsweringOutput
+        - title: SummarizationOutput
+          local: inference/interfaces/SummarizationOutput
+        - title: TableQuestionAnsweringOutput
+          local: inference/interfaces/TableQuestionAnsweringOutput
+        - title: TextGenerationOutput
+          local: inference/interfaces/TextGenerationOutput
         - title: TextGenerationStreamBestOfSequence
           local: inference/interfaces/TextGenerationStreamBestOfSequence
         - title: TextGenerationStreamDetails
           local: inference/interfaces/TextGenerationStreamDetails
+        - title: TextGenerationStreamOutput
+          local: inference/interfaces/TextGenerationStreamOutput
         - title: TextGenerationStreamPrefillToken
           local: inference/interfaces/TextGenerationStreamPrefillToken
-        - title: TextGenerationStreamReturn
-          local: inference/interfaces/TextGenerationStreamReturn
         - title: TextGenerationStreamToken
           local: inference/interfaces/TextGenerationStreamToken
-        - title: TokenClassificationReturnValue
-          local: inference/interfaces/TokenClassificationReturnValue
-        - title: TranslationReturn
-          local: inference/interfaces/TranslationReturn
-        - title: ZeroShotClassificationReturnValue
-          local: inference/interfaces/ZeroShotClassificationReturnValue
+        - title: TokenClassificationOutputValue
+          local: inference/interfaces/TokenClassificationOutputValue
+        - title: TranslationOutput
+          local: inference/interfaces/TranslationOutput
+        - title: ZeroShotClassificationOutputValue
+          local: inference/interfaces/ZeroShotClassificationOutputValue
