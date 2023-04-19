@@ -9,8 +9,8 @@
       title: API Reference
     - title: Classes
       sections:
-        - title: HubApiError
-          local: hub/classes/HubApiError
+        - title: ApiError
+          local: hub/classes/ApiError
         - title: InvalidApiResponseFormatError
           local: hub/classes/InvalidApiResponseFormatError
     - title: Interfaces
