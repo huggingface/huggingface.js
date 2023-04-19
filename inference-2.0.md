@@ -10,7 +10,7 @@ The other changes for recent versions are detailed at the end (including `textGe
 
 ## Support for Inference Endpoints
 
-[Inference endpoints](https://huggingface.co/docs/inference-endpoints/index) are the next step for using Inference API in production.
+[Inference endpoints](https://huggingface.co/docs/inference-endpoints/index) are the next step for using Inference API for a specific model in production.
 
 The different tiers for inference are:
 
