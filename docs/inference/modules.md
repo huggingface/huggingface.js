@@ -221,7 +221,7 @@ Returned values are a list of floats
 
 #### Defined in
 
-[tasks/nlp/sentenceSimilarity.ts:20](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/sentenceSimilarity.ts#L20)
+[tasks/nlp/sentenceSimilarity.ts:18](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/sentenceSimilarity.ts#L18)
 
 ___
 
@@ -638,7 +638,7 @@ Calculate the semantic similarity between one text and a list of other sentences
 
 #### Defined in
 
-[tasks/nlp/sentenceSimilarity.ts:25](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/sentenceSimilarity.ts#L25)
+[tasks/nlp/sentenceSimilarity.ts:23](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/sentenceSimilarity.ts#L23)
 
 ___
 

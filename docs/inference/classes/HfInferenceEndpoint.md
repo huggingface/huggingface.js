@@ -337,7 +337,7 @@ ___
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `args` | `Object` | - |
-| `args.inputs` | `Record`<`string`, `unknown`\> \| `Record`<`string`, `unknown`\>[] | The inputs vary based on the model. For example when using sentence-transformers/paraphrase-xlm-r-multilingual-v1 the inputs will look like this: inputs: &#123; "source_sentence": "That is a happy person", "sentences": ["That is a happy dog", "That is a very happy person", "Today is a sunny day"] &#125; |
+| `args.inputs` | `Record`<`string`, `unknown`\> \| `Record`<`string`, `unknown`\>[] | The inputs vary based on the model. For example when using sentence-transformers/paraphrase-xlm-r-multilingual-v1 the inputs will have a `source_sentence` string and a `sentences` array of strings |
 | `options?` | [`Options`](../interfaces/Options) | - |
 
 ##### Returns
@@ -346,7 +346,7 @@ ___
 
 #### Defined in
 
-[tasks/nlp/sentenceSimilarity.ts:25](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/sentenceSimilarity.ts#L25)
+[tasks/nlp/sentenceSimilarity.ts:23](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/sentenceSimilarity.ts#L23)
 
 ___
 
