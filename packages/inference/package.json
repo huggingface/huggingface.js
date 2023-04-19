@@ -1,6 +1,6 @@
 {
 	"name": "@huggingface/inference",
-	"version": "1.8.0",
+	"version": "2.0.0",
 	"license": "MIT",
 	"author": "Tim Mikeladze <tim.mikeladze@gmail.com>",
 	"description": "Typescript wrapper for the Hugging Face Inference API",
@@ -28,18 +28,16 @@
 		"src"
 	],
 	"source": "src/index.ts",
-	"types": "dist/index.d.ts",
+	"types": "src/index.ts",
 	"main": "./dist/index.js",
 	"module": "./dist/index.mjs",
 	"exports": {
-		".": {
-			"require": "./dist/index.js",
-			"import": "./dist/index.mjs",
-			"types": "./dist/index.d.ts"
-		}
+		"types": "./src/index.ts",
+		"require": "./dist/index.js",
+		"import": "./dist/index.mjs"
 	},
 	"scripts": {
-		"build": "tsup src/index.ts --format cjs,esm --clean --dts",
+		"build": "tsup src/index.ts --format cjs,esm --clean",
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
 		"format": "prettier --write .",
@@ -51,7 +49,7 @@
 	},
 	"devDependencies": {
 		"@types/node": "18.13.0",
-		"typescript": "4.9.5",
+		"typescript": "^5.0.4",
 		"vite": "^4.1.4",
 		"vitest": "^0.29.8"
 	},

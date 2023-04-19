@@ -171,7 +171,7 @@ await hf.imageToText({
 })
 
 // Custom call, for models with custom parameters / outputs
-await inference.request({
+await hf.request({
   model: 'my-custom-model',
   inputs: 'hello world',
   parameters: {
@@ -180,7 +180,7 @@ await inference.request({
 })
 
 // Custom streaming call, for models with custom parameters / outputs
-for await (const output of inference.streamingRequest({
+for await (const output of hf.streamingRequest({
   model: 'my-custom-model',
   inputs: 'hello world',
   parameters: {
@@ -212,6 +212,7 @@ const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the
 - [x] Zero-shot classification
 - [x] Conversational
 - [x] Feature extraction
+- [x] Sentence Similarity
 
 ### Audio
 
@@ -225,6 +226,23 @@ const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the
 - [x] Image segmentation
 - [x] Text to image
 - [x] Image to text
+
+## Tree-shaking
+
+You can import the functions you need directly from the module, rather than using the `HfInference` class:
+
+```ts
+import {textGeneration} from "@huggingface/inference";
+
+await textGeneration({
+  accessToken: "hf_...",
+  model: "model_or_endpoint",
+  inputs: ...,
+  parameters: ...
+})
+```
+
+This will enable tree-shaking by your bundler.
 
 ## Running tests
 

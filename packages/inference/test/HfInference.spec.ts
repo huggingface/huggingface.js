@@ -1,6 +1,6 @@
 import { expect, it, describe, assert } from "vitest";
 
-import type { TextGenerationStreamReturn } from "../src";
+import type { TextGenerationStreamOutput } from "../src";
 import { HfInference } from "../src";
 import "./vcr";
 import { readTestFile } from "./test-files";
@@ -144,7 +144,7 @@ describe.concurrent(
 				inputs: `repeat "${phrase}"`,
 			});
 
-			const makeExpectedReturn = (tokenText: string, fullPhrase: string): TextGenerationStreamReturn => {
+			const makeExpectedReturn = (tokenText: string, fullPhrase: string): TextGenerationStreamOutput => {
 				const eot = tokenText === "</s>";
 				return {
 					details: null,
@@ -267,9 +267,9 @@ describe.concurrent(
 				warnings: ["Setting `pad_token_id` to `eos_token_id`:50256 for open-end generation."],
 			});
 		});
-		it("SentenceSimiliarity", async () => {
+		it("SentenceSimilarity", async () => {
 			expect(
-				await hf.sentenceSimiliarity({
+				await hf.sentenceSimilarity({
 					model: "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
 					inputs: {
 						source_sentence: "That is a happy person",
@@ -397,19 +397,24 @@ describe.concurrent(
 				generated_text: "a large brown and white giraffe standing in a field ",
 			});
 		});
+		it("request - google/flan-t5-xxl", async () => {
+			expect(
+				await hf.request({
+					model: "google/flan-t5-xxl",
+					inputs: "one plus two equals",
+				})
+			).toMatchObject([
+				{
+					generated_text: expect.any(String),
+				},
+			]);
+		});
 		it("endpoint - makes request to specified endpoint", async () => {
 			const ep = hf.endpoint("https://api-inference.huggingface.co/models/google/flan-t5-xxl");
 			const { generated_text } = await ep.textGeneration({
 				inputs: "one plus two equals",
 			});
 			expect(generated_text).toEqual("three");
-		});
-		it("error when the model is not set", () => {
-			expect(
-				hf.textGeneration({
-					inputs: "one plus two equals",
-				})
-			).rejects.toThrowError("Model is required for Inference API");
 		});
 	},
 	TIMEOUT

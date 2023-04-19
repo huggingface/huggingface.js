@@ -1,31 +1,129 @@
 # Class: HfInference
 
+## Hierarchy
+
+- `TaskWithNoAccessToken`
+
+  ↳ **`HfInference`**
+
 ## Constructors
 
 ### constructor
 
-• **new HfInference**(`apiKey?`, `defaultOptions?`)
+• **new HfInference**(`accessToken?`, `defaultOptions?`)
 
 #### Parameters
 
 | Name | Type | Default value |
 | :------ | :------ | :------ |
-| `apiKey` | `string` | `""` |
+| `accessToken` | `string` | `""` |
 | `defaultOptions` | [`Options`](../interfaces/Options) | `{}` |
 
 #### Defined in
 
-[HfInference.ts:629](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L629)
+[HfInference.ts:25](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L25)
 
 ## Properties
 
-### apiKey
+### accessToken
 
-• `Private` `Readonly` **apiKey**: `string`
+• `Private` `Readonly` **accessToken**: `string`
 
 #### Defined in
 
-[HfInference.ts:626](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L626)
+[HfInference.ts:22](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L22)
+
+___
+
+### audioClassification
+
+• **audioClassification**: (`args`: { `data`: `Blob` \| `ArrayBuffer` ; `model`: `string`  }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`AudioClassificationReturn`](../modules#audioclassificationreturn)\>
+
+#### Type declaration
+
+▸ (`args`, `options?`): `Promise`<[`AudioClassificationReturn`](../modules#audioclassificationreturn)\>
+
+##### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `args` | `Object` | - |
+| `args.data` | `Blob` \| `ArrayBuffer` | Binary audio data |
+| `args.model` | `string` | The model to use. Can be a full URL for HF inference endpoints. |
+| `options?` | [`Options`](../interfaces/Options) | - |
+
+##### Returns
+
+`Promise`<[`AudioClassificationReturn`](../modules#audioclassificationreturn)\>
+
+#### Defined in
+
+[tasks/audio/audioClassification.ts:30](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/audio/audioClassification.ts#L30)
+
+___
+
+### automaticSpeechRecognition
+
+• **automaticSpeechRecognition**: (`args`: { `data`: `Blob` \| `ArrayBuffer` ; `model`: `string`  }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`AutomaticSpeechRecognitionOutput`](../interfaces/AutomaticSpeechRecognitionOutput)\>
+
+#### Type declaration
+
+▸ (`args`, `options?`): `Promise`<[`AutomaticSpeechRecognitionOutput`](../interfaces/AutomaticSpeechRecognitionOutput)\>
+
+##### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `args` | `Object` | - |
+| `args.data` | `Blob` \| `ArrayBuffer` | Binary audio data |
+| `args.model` | `string` | The model to use. Can be a full URL for HF inference endpoints. |
+| `options?` | [`Options`](../interfaces/Options) | - |
+
+##### Returns
+
+`Promise`<[`AutomaticSpeechRecognitionOutput`](../interfaces/AutomaticSpeechRecognitionOutput)\>
+
+#### Defined in
+
+[tasks/audio/automaticSpeechRecognition.ts:23](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/audio/automaticSpeechRecognition.ts#L23)
+
+___
+
+### conversational
+
+• **conversational**: (`args`: { `inputs`: { `generated_responses?`: `string`[] ; `past_user_inputs?`: `string`[] ; `text`: `string`  } ; `model`: `string` ; `parameters?`: { `max_length?`: `number` ; `max_time?`: `number` ; `min_length?`: `number` ; `repetition_penalty?`: `number` ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number`  }  }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`ConversationalOutput`](../interfaces/ConversationalOutput)\>
+
+#### Type declaration
+
+▸ (`args`, `options?`): `Promise`<[`ConversationalOutput`](../interfaces/ConversationalOutput)\>
+
+##### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `args` | `Object` | - |
+| `args.inputs` | `Object` | - |
+| `args.inputs.generated_responses?` | `string`[] | A list of strings corresponding to the earlier replies from the model. |
+| `args.inputs.past_user_inputs?` | `string`[] | A list of strings corresponding to the earlier replies from the user. Should be of the same length of generated_responses. |
+| `args.inputs.text` | `string` | The last input from the user in the conversation. |
+| `args.model` | `string` | The model to use. Can be a full URL for HF inference endpoints. |
+| `args.parameters?` | `Object` | - |
+| `args.parameters.max_length?` | `number` | (Default: None). Integer to define the maximum length in tokens of the output summary. |
+| `args.parameters.max_time?` | `number` | (Default: None). Float (0-120.0). The amount of time in seconds that the query should take maximum. Network can cause some overhead so it will be a soft limit. |
+| `args.parameters.min_length?` | `number` | (Default: None). Integer to define the minimum length in tokens of the output summary. |
+| `args.parameters.repetition_penalty?` | `number` | (Default: None). Float (0.0-100.0). The more a token is used within generation the more it is penalized to not be picked in successive generation passes. |
+| `args.parameters.temperature?` | `number` | (Default: 1.0). Float (0.0-100.0). The temperature of the sampling operation. 1 means regular sampling, 0 means always take the highest score, 100.0 is getting closer to uniform probability. |
+| `args.parameters.top_k?` | `number` | (Default: None). Integer to define the top tokens considered within the sample operation to create new text. |
+| `args.parameters.top_p?` | `number` | (Default: None). Float to define the tokens that are within the sample operation of text generation. Add tokens in the sample for more probable to least probable until the sum of the probabilities is greater than top_p. |
+| `options?` | [`Options`](../interfaces/Options) | - |
+
+##### Returns
+
+`Promise`<[`ConversationalOutput`](../interfaces/ConversationalOutput)\>
+
+#### Defined in
+
+[tasks/nlp/conversational.ts:65](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/conversational.ts#L65)
 
 ___
 
@@ -35,540 +133,578 @@ ___
 
 #### Defined in
 
-[HfInference.ts:627](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L627)
-
-## Methods
-
-### audioClassification
-
-▸ **audioClassification**(`args`, `options?`): `Promise`<[`AudioClassificationReturn`](../modules#audioclassificationreturn)\>
-
-This task reads some audio input and outputs the likelihood of classes.
-Recommended model:  superb/hubert-large-superb-er
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `args` | [`AudioClassificationArgs`](../modules#audioclassificationargs) |
-| `options?` | [`Options`](../interfaces/Options) |
-
-#### Returns
-
-`Promise`<[`AudioClassificationReturn`](../modules#audioclassificationreturn)\>
-
-#### Defined in
-
-[HfInference.ts:863](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L863)
-
-___
-
-### automaticSpeechRecognition
-
-▸ **automaticSpeechRecognition**(`args`, `options?`): `Promise`<[`AutomaticSpeechRecognitionReturn`](../interfaces/AutomaticSpeechRecognitionReturn)\>
-
-This task reads some audio input and outputs the said words within the audio files.
-Recommended model (english language): facebook/wav2vec2-large-960h-lv60-self
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `args` | [`AutomaticSpeechRecognitionArgs`](../modules#automaticspeechrecognitionargs) |
-| `options?` | [`Options`](../interfaces/Options) |
-
-#### Returns
-
-`Promise`<[`AutomaticSpeechRecognitionReturn`](../interfaces/AutomaticSpeechRecognitionReturn)\>
-
-#### Defined in
-
-[HfInference.ts:844](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L844)
-
-___
-
-### conversational
-
-▸ **conversational**(`args`, `options?`): `Promise`<[`ConversationalReturn`](../interfaces/ConversationalReturn)\>
-
-This task corresponds to any chatbot like structure. Models tend to have shorter max_length, so please check with caution when using a given model if you need long range dependency or not. Recommended model: microsoft/DialoGPT-large.
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `args` | [`ConversationalArgs`](../modules#conversationalargs) |
-| `options?` | [`Options`](../interfaces/Options) |
-
-#### Returns
-
-`Promise`<[`ConversationalReturn`](../interfaces/ConversationalReturn)\>
-
-#### Defined in
-
-[HfInference.ts:814](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L814)
+[HfInference.ts:23](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L23)
 
 ___
 
 ### featureExtraction
 
-▸ **featureExtraction**(`args`, `options?`): `Promise`<[`FeatureExtractionReturn`](../modules#featureextractionreturn)\>
+• **featureExtraction**: (`args`: { `inputs`: `string` \| `string`[] ; `model`: `string`  }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`FeatureExtractionOutput`](../modules#featureextractionoutput)\>
 
-This task reads some text and outputs raw float values, that are usually consumed as part of a semantic database/semantic search.
+#### Type declaration
 
-#### Parameters
+▸ (`args`, `options?`): `Promise`<[`FeatureExtractionOutput`](../modules#featureextractionoutput)\>
 
-| Name | Type |
-| :------ | :------ |
-| `args` | [`FeatureExtractionArgs`](../modules#featureextractionargs) |
-| `options?` | [`Options`](../interfaces/Options) |
+##### Parameters
 
-#### Returns
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `args` | `Object` | - |
+| `args.inputs` | `string` \| `string`[] | The inputs is a string or a list of strings to get the features from. inputs: "That is a happy person", |
+| `args.model` | `string` | The model to use. Can be a full URL for HF inference endpoints. |
+| `options?` | [`Options`](../interfaces/Options) | - |
 
-`Promise`<[`FeatureExtractionReturn`](../modules#featureextractionreturn)\>
+##### Returns
+
+`Promise`<[`FeatureExtractionOutput`](../modules#featureextractionoutput)\>
 
 #### Defined in
 
-[HfInference.ts:835](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L835)
+[tasks/nlp/featureExtraction.ts:23](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/featureExtraction.ts#L23)
 
 ___
 
 ### fillMask
 
-▸ **fillMask**(`args`, `options?`): `Promise`<[`FillMaskReturn`](../modules#fillmaskreturn)\>
+• **fillMask**: (`args`: { `inputs`: `string` ; `model`: `string`  }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`FillMaskOutput`](../modules#fillmaskoutput)\>
 
-Tries to fill in a hole with a missing word (token to be precise). That’s the base task for BERT models.
+#### Type declaration
 
-#### Parameters
+▸ (`args`, `options?`): `Promise`<[`FillMaskOutput`](../modules#fillmaskoutput)\>
 
-| Name | Type |
-| :------ | :------ |
-| `args` | [`FillMaskArgs`](../modules#fillmaskargs) |
-| `options?` | [`Options`](../interfaces/Options) |
+##### Parameters
 
-#### Returns
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `args` | `Object` | - |
+| `args.inputs` | `string` | - |
+| `args.model` | `string` | The model to use. Can be a full URL for HF inference endpoints. |
+| `options?` | [`Options`](../interfaces/Options) | - |
 
-`Promise`<[`FillMaskReturn`](../modules#fillmaskreturn)\>
+##### Returns
+
+`Promise`<[`FillMaskOutput`](../modules#fillmaskoutput)\>
 
 #### Defined in
 
-[HfInference.ts:637](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L637)
+[tasks/nlp/fillMask.ts:31](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/fillMask.ts#L31)
 
 ___
 
 ### imageClassification
 
-▸ **imageClassification**(`args`, `options?`): `Promise`<[`ImageClassificationReturn`](../modules#imageclassificationreturn)\>
+• **imageClassification**: (`args`: { `data`: `Blob` \| `ArrayBuffer` ; `model`: `string`  }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`ImageClassificationOutput`](../modules#imageclassificationoutput)\>
 
-This task reads some image input and outputs the likelihood of classes.
-Recommended model: google/vit-base-patch16-224
+#### Type declaration
 
-#### Parameters
+▸ (`args`, `options?`): `Promise`<[`ImageClassificationOutput`](../modules#imageclassificationoutput)\>
 
-| Name | Type |
-| :------ | :------ |
-| `args` | [`ImageClassificationArgs`](../modules#imageclassificationargs) |
-| `options?` | [`Options`](../interfaces/Options) |
+##### Parameters
 
-#### Returns
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `args` | `Object` | - |
+| `args.data` | `Blob` \| `ArrayBuffer` | Binary image data |
+| `args.model` | `string` | The model to use. Can be a full URL for HF inference endpoints. |
+| `options?` | [`Options`](../interfaces/Options) | - |
 
-`Promise`<[`ImageClassificationReturn`](../modules#imageclassificationreturn)\>
+##### Returns
+
+`Promise`<[`ImageClassificationOutput`](../modules#imageclassificationoutput)\>
 
 #### Defined in
 
-[HfInference.ts:883](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L883)
+[tasks/cv/imageClassification.ts:29](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageClassification.ts#L29)
 
 ___
 
 ### imageSegmentation
 
-▸ **imageSegmentation**(`args`, `options?`): `Promise`<[`ImageSegmentationReturn`](../modules#imagesegmentationreturn)\>
+• **imageSegmentation**: (`args`: { `data`: `Blob` \| `ArrayBuffer` ; `model`: `string`  }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`ImageSegmentationOutput`](../modules#imagesegmentationoutput)\>
 
-This task reads some image input and outputs the likelihood of classes & bounding boxes of detected objects.
-Recommended model: facebook/detr-resnet-50-panoptic
+#### Type declaration
 
-#### Parameters
+▸ (`args`, `options?`): `Promise`<[`ImageSegmentationOutput`](../modules#imagesegmentationoutput)\>
 
-| Name | Type |
-| :------ | :------ |
-| `args` | [`ImageSegmentationArgs`](../modules#imagesegmentationargs) |
-| `options?` | [`Options`](../interfaces/Options) |
+##### Parameters
 
-#### Returns
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `args` | `Object` | - |
+| `args.data` | `Blob` \| `ArrayBuffer` | Binary image data |
+| `args.model` | `string` | The model to use. Can be a full URL for HF inference endpoints. |
+| `options?` | [`Options`](../interfaces/Options) | - |
 
-`Promise`<[`ImageSegmentationReturn`](../modules#imagesegmentationreturn)\>
+##### Returns
+
+`Promise`<[`ImageSegmentationOutput`](../modules#imagesegmentationoutput)\>
 
 #### Defined in
 
-[HfInference.ts:931](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L931)
+[tasks/cv/imageSegmentation.ts:33](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageSegmentation.ts#L33)
 
 ___
 
 ### imageToText
 
-▸ **imageToText**(`args`, `options?`): `Promise`<[`ImageToTextReturn`](../interfaces/ImageToTextReturn)\>
+• **imageToText**: (`args`: { `data`: `Blob` \| `ArrayBuffer` ; `model`: `string`  }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`ImageToTextOutput`](../interfaces/ImageToTextOutput)\>
 
-This task reads some image input and outputs the text caption.
+#### Type declaration
 
-#### Parameters
+▸ (`args`, `options?`): `Promise`<[`ImageToTextOutput`](../interfaces/ImageToTextOutput)\>
 
-| Name | Type |
-| :------ | :------ |
-| `args` | [`ImageToTextArgs`](../modules#imagetotextargs) |
-| `options?` | [`Options`](../interfaces/Options) |
+##### Parameters
 
-#### Returns
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `args` | `Object` | - |
+| `args.data` | `Blob` \| `ArrayBuffer` | Binary image data |
+| `args.model` | `string` | The model to use. Can be a full URL for HF inference endpoints. |
+| `options?` | [`Options`](../interfaces/Options) | - |
 
-`Promise`<[`ImageToTextReturn`](../interfaces/ImageToTextReturn)\>
+##### Returns
 
-#### Defined in
-
-[HfInference.ts:966](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L966)
-
-___
-
-### makeRequestOptions
-
-▸ `Private` **makeRequestOptions**(`args`, `options?`): `Object`
-
-Helper that prepares request arguments
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `args` | [`Args`](../interfaces/Args) & { `data?`: `ArrayBuffer` \| `Blob` ; `stream?`: `boolean`  } |
-| `options?` | [`Options`](../interfaces/Options) & { `binary?`: `boolean` ; `blob?`: `boolean` ; `includeCredentials?`: `boolean`  } |
-
-#### Returns
-
-`Object`
-
-| Name | Type |
-| :------ | :------ |
-| `info` | `RequestInit` |
-| `mergedOptions` | { `binary?`: `boolean` ; `blob?`: `boolean` ; `dont_load_model?`: `boolean` ; `includeCredentials?`: `boolean` ; `retry_on_error?`: `boolean` ; `use_cache?`: `boolean` ; `use_gpu?`: `boolean` ; `wait_for_model?`: `boolean`  } |
-| `mergedOptions.binary?` | `boolean` |
-| `mergedOptions.blob?` | `boolean` |
-| `mergedOptions.dont_load_model?` | `boolean` |
-| `mergedOptions.includeCredentials?` | `boolean` |
-| `mergedOptions.retry_on_error?` | `boolean` |
-| `mergedOptions.use_cache?` | `boolean` |
-| `mergedOptions.use_gpu?` | `boolean` |
-| `mergedOptions.wait_for_model?` | `boolean` |
-| `url` | `string` |
+`Promise`<[`ImageToTextOutput`](../interfaces/ImageToTextOutput)\>
 
 #### Defined in
 
-[HfInference.ts:978](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L978)
+[tasks/cv/imageToText.ts:22](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageToText.ts#L22)
 
 ___
 
 ### objectDetection
 
-▸ **objectDetection**(`args`, `options?`): `Promise`<[`ObjectDetectionReturn`](../modules#objectdetectionreturn)\>
+• **objectDetection**: (`args`: { `data`: `Blob` \| `ArrayBuffer` ; `model`: `string`  }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`ObjectDetectionOutput`](../modules#objectdetectionoutput)\>
 
-This task reads some image input and outputs the likelihood of classes & bounding boxes of detected objects.
-Recommended model: facebook/detr-resnet-50
+#### Type declaration
 
-#### Parameters
+▸ (`args`, `options?`): `Promise`<[`ObjectDetectionOutput`](../modules#objectdetectionoutput)\>
 
-| Name | Type |
-| :------ | :------ |
-| `args` | [`ObjectDetectionArgs`](../modules#objectdetectionargs) |
-| `options?` | [`Options`](../interfaces/Options) |
+##### Parameters
 
-#### Returns
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `args` | `Object` | - |
+| `args.data` | `Blob` \| `ArrayBuffer` | Binary image data |
+| `args.model` | `string` | The model to use. Can be a full URL for HF inference endpoints. |
+| `options?` | [`Options`](../interfaces/Options) | - |
 
-`Promise`<[`ObjectDetectionReturn`](../modules#objectdetectionreturn)\>
+##### Returns
+
+`Promise`<[`ObjectDetectionOutput`](../modules#objectdetectionoutput)\>
 
 #### Defined in
 
-[HfInference.ts:903](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L903)
+[tasks/cv/objectDetection.ts:39](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/objectDetection.ts#L39)
 
 ___
 
-### questionAnswer
+### questionAnswering
 
-▸ **questionAnswer**(`args`, `options?`): `Promise`<[`QuestionAnswerReturn`](../interfaces/QuestionAnswerReturn)\>
+• **questionAnswering**: (`args`: { `inputs`: { `context`: `string` ; `question`: `string`  } ; `model`: `string`  }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`QuestionAnsweringOutput`](../interfaces/QuestionAnsweringOutput)\>
 
-Want to have a nice know-it-all bot that can answer any question?. Recommended model: deepset/roberta-base-squad2
+#### Type declaration
 
-#### Parameters
+▸ (`args`, `options?`): `Promise`<[`QuestionAnsweringOutput`](../interfaces/QuestionAnsweringOutput)\>
 
-| Name | Type |
-| :------ | :------ |
-| `args` | [`QuestionAnswerArgs`](../modules#questionanswerargs) |
-| `options?` | [`Options`](../interfaces/Options) |
+##### Parameters
 
-#### Returns
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `args` | `Object` | - |
+| `args.inputs` | `Object` | - |
+| `args.inputs.context` | `string` | - |
+| `args.inputs.question` | `string` | - |
+| `args.model` | `string` | The model to use. Can be a full URL for HF inference endpoints. |
+| `options?` | [`Options`](../interfaces/Options) | - |
 
-`Promise`<[`QuestionAnswerReturn`](../interfaces/QuestionAnswerReturn)\>
+##### Returns
+
+`Promise`<[`QuestionAnsweringOutput`](../interfaces/QuestionAnsweringOutput)\>
 
 #### Defined in
 
-[HfInference.ts:671](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L671)
+[tasks/nlp/questionAnswering.ts:34](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/questionAnswering.ts#L34)
 
 ___
 
 ### request
 
-▸ **request**<`T`\>(`args`, `options?`): `Promise`<`T`\>
+• **request**: (`args`: { `data`: `Blob` \| `ArrayBuffer` ; `model`: `string` ; `parameters?`: `Record`<`string`, `unknown`\>  } \| { `inputs`: `unknown` ; `model`: `string` ; `parameters?`: `Record`<`string`, `unknown`\>  }, `options?`: [`Options`](../interfaces/Options) & { `includeCredentials?`: `boolean`  }) => `Promise`<`unknown`\>
 
-#### Type parameters
+#### Type declaration
 
-| Name |
-| :------ |
-| `T` |
+▸ (`args`, `options?`): `Promise`<`unknown`\>
 
-#### Parameters
+##### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `args` | [`Args`](../interfaces/Args) & { `data?`: `ArrayBuffer` \| `Blob`  } |
-| `options?` | [`Options`](../interfaces/Options) & { `binary?`: `boolean` ; `blob?`: `boolean` ; `includeCredentials?`: `boolean`  } |
+| `args` | { `data`: `Blob` \| `ArrayBuffer` ; `model`: `string` ; `parameters?`: `Record`<`string`, `unknown`\>  } \| { `inputs`: `unknown` ; `model`: `string` ; `parameters?`: `Record`<`string`, `unknown`\>  } |
+| `options?` | [`Options`](../interfaces/Options) & { `includeCredentials?`: `boolean`  } |
 
-#### Returns
+##### Returns
 
-`Promise`<`T`\>
+`Promise`<`unknown`\>
 
 #### Defined in
 
-[HfInference.ts:1030](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L1030)
+[tasks/custom/request.ts:7](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/custom/request.ts#L7)
+
+___
+
+### sentenceSimilarity
+
+• **sentenceSimilarity**: (`args`: { `inputs`: `Record`<`string`, `unknown`\> \| `Record`<`string`, `unknown`\>[] ; `model`: `string`  }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`SentenceSimilarityOutput`](../modules#sentencesimilarityoutput)\>
+
+#### Type declaration
+
+▸ (`args`, `options?`): `Promise`<[`SentenceSimilarityOutput`](../modules#sentencesimilarityoutput)\>
+
+##### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `args` | `Object` | - |
+| `args.inputs` | `Record`<`string`, `unknown`\> \| `Record`<`string`, `unknown`\>[] | The inputs vary based on the model. For example when using sentence-transformers/paraphrase-xlm-r-multilingual-v1 the inputs will have a `source_sentence` string and a `sentences` array of strings |
+| `args.model` | `string` | The model to use. Can be a full URL for HF inference endpoints. |
+| `options?` | [`Options`](../interfaces/Options) | - |
+
+##### Returns
+
+`Promise`<[`SentenceSimilarityOutput`](../modules#sentencesimilarityoutput)\>
+
+#### Defined in
+
+[tasks/nlp/sentenceSimilarity.ts:23](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/sentenceSimilarity.ts#L23)
 
 ___
 
 ### streamingRequest
 
-▸ **streamingRequest**<`T`\>(`args`, `options?`): `AsyncGenerator`<`T`, `any`, `unknown`\>
+• **streamingRequest**: (`args`: { `data`: `Blob` \| `ArrayBuffer` ; `model`: `string` ; `parameters?`: `Record`<`string`, `unknown`\>  } \| { `inputs`: `unknown` ; `model`: `string` ; `parameters?`: `Record`<`string`, `unknown`\>  }, `options?`: [`Options`](../interfaces/Options) & { `includeCredentials?`: `boolean`  }) => `AsyncGenerator`<`unknown`, `any`, `unknown`\>
 
-Make request that uses server-sent events and returns response as a generator
+#### Type declaration
 
-#### Type parameters
+▸ (`args`, `options?`): `AsyncGenerator`<`unknown`, `any`, `unknown`\>
 
-| Name |
-| :------ |
-| `T` |
-
-#### Parameters
+##### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `args` | [`Args`](../interfaces/Args) & { `data?`: `ArrayBuffer` \| `Blob`  } |
-| `options?` | [`Options`](../interfaces/Options) & { `binary?`: `boolean` ; `blob?`: `boolean` ; `includeCredentials?`: `boolean`  } |
+| `args` | { `data`: `Blob` \| `ArrayBuffer` ; `model`: `string` ; `parameters?`: `Record`<`string`, `unknown`\>  } \| { `inputs`: `unknown` ; `model`: `string` ; `parameters?`: `Record`<`string`, `unknown`\>  } |
+| `options?` | [`Options`](../interfaces/Options) & { `includeCredentials?`: `boolean`  } |
 
-#### Returns
+##### Returns
 
-`AsyncGenerator`<`T`, `any`, `unknown`\>
+`AsyncGenerator`<`unknown`, `any`, `unknown`\>
 
 #### Defined in
 
-[HfInference.ts:1066](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L1066)
+[tasks/custom/streamingRequest.ts:9](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/custom/streamingRequest.ts#L9)
 
 ___
 
 ### summarization
 
-▸ **summarization**(`args`, `options?`): `Promise`<[`SummarizationReturn`](../interfaces/SummarizationReturn)\>
+• **summarization**: (`args`: { `inputs`: `string` ; `model`: `string` ; `parameters?`: { `max_length?`: `number` ; `max_time?`: `number` ; `min_length?`: `number` ; `repetition_penalty?`: `number` ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number`  }  }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`SummarizationOutput`](../interfaces/SummarizationOutput)\>
 
-This task is well known to summarize longer text into shorter text. Be careful, some models have a maximum length of input. That means that the summary cannot handle full books for instance. Be careful when choosing your model.
+#### Type declaration
 
-#### Parameters
+▸ (`args`, `options?`): `Promise`<[`SummarizationOutput`](../interfaces/SummarizationOutput)\>
 
-| Name | Type |
-| :------ | :------ |
-| `args` | [`SummarizationArgs`](../modules#summarizationargs) |
-| `options?` | [`Options`](../interfaces/Options) |
+##### Parameters
 
-#### Returns
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `args` | `Object` | - |
+| `args.inputs` | `string` | A string to be summarized |
+| `args.model` | `string` | The model to use. Can be a full URL for HF inference endpoints. |
+| `args.parameters?` | `Object` | - |
+| `args.parameters.max_length?` | `number` | (Default: None). Integer to define the maximum length in tokens of the output summary. |
+| `args.parameters.max_time?` | `number` | (Default: None). Float (0-120.0). The amount of time in seconds that the query should take maximum. Network can cause some overhead so it will be a soft limit. |
+| `args.parameters.min_length?` | `number` | (Default: None). Integer to define the minimum length in tokens of the output summary. |
+| `args.parameters.repetition_penalty?` | `number` | (Default: None). Float (0.0-100.0). The more a token is used within generation the more it is penalized to not be picked in successive generation passes. |
+| `args.parameters.temperature?` | `number` | (Default: 1.0). Float (0.0-100.0). The temperature of the sampling operation. 1 means regular sampling, 0 means always take the highest score, 100.0 is getting closer to uniform probability. |
+| `args.parameters.top_k?` | `number` | (Default: None). Integer to define the top tokens considered within the sample operation to create new text. |
+| `args.parameters.top_p?` | `number` | (Default: None). Float to define the tokens that are within the sample operation of text generation. Add tokens in the sample for more probable to least probable until the sum of the probabilities is greater than top_p. |
+| `options?` | [`Options`](../interfaces/Options) | - |
 
-`Promise`<[`SummarizationReturn`](../interfaces/SummarizationReturn)\>
+##### Returns
+
+`Promise`<[`SummarizationOutput`](../interfaces/SummarizationOutput)\>
 
 #### Defined in
 
-[HfInference.ts:659](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L659)
+[tasks/nlp/summarization.ts:52](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/summarization.ts#L52)
 
 ___
 
-### tableQuestionAnswer
+### tableQuestionAnswering
 
-▸ **tableQuestionAnswer**(`args`, `options?`): `Promise`<[`TableQuestionAnswerReturn`](../interfaces/TableQuestionAnswerReturn)\>
+• **tableQuestionAnswering**: (`args`: { `inputs`: { `query`: `string` ; `table`: `Record`<`string`, `string`[]\>  } ; `model`: `string`  }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`TableQuestionAnsweringOutput`](../interfaces/TableQuestionAnsweringOutput)\>
 
-Don’t know SQL? Don’t want to dive into a large spreadsheet? Ask questions in plain english! Recommended model: google/tapas-base-finetuned-wtq.
+#### Type declaration
 
-#### Parameters
+▸ (`args`, `options?`): `Promise`<[`TableQuestionAnsweringOutput`](../interfaces/TableQuestionAnsweringOutput)\>
 
-| Name | Type |
-| :------ | :------ |
-| `args` | [`TableQuestionAnswerArgs`](../modules#tablequestionanswerargs) |
-| `options?` | [`Options`](../interfaces/Options) |
+##### Parameters
 
-#### Returns
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `args` | `Object` | - |
+| `args.inputs` | `Object` | - |
+| `args.inputs.query` | `string` | The query in plain text that you want to ask the table |
+| `args.inputs.table` | `Record`<`string`, `string`[]\> | A table of data represented as a dict of list where entries are headers and the lists are all the values, all lists must have the same size. |
+| `args.model` | `string` | The model to use. Can be a full URL for HF inference endpoints. |
+| `options?` | [`Options`](../interfaces/Options) | - |
 
-`Promise`<[`TableQuestionAnswerReturn`](../interfaces/TableQuestionAnswerReturn)\>
+##### Returns
+
+`Promise`<[`TableQuestionAnsweringOutput`](../interfaces/TableQuestionAnsweringOutput)\>
 
 #### Defined in
 
-[HfInference.ts:689](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L689)
+[tasks/nlp/tableQuestionAnswering.ts:40](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/tableQuestionAnswering.ts#L40)
 
 ___
 
 ### textClassification
 
-▸ **textClassification**(`args`, `options?`): `Promise`<[`TextClassificationReturn`](../modules#textclassificationreturn)\>
+• **textClassification**: (`args`: { `inputs`: `string` ; `model`: `string`  }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`TextClassificationOutput`](../modules#textclassificationoutput)\>
 
-Usually used for sentiment-analysis this will output the likelihood of classes of an input. Recommended model: distilbert-base-uncased-finetuned-sst-2-english
+#### Type declaration
 
-#### Parameters
+▸ (`args`, `options?`): `Promise`<[`TextClassificationOutput`](../modules#textclassificationoutput)\>
 
-| Name | Type |
-| :------ | :------ |
-| `args` | [`TextClassificationArgs`](../modules#textclassificationargs) |
-| `options?` | [`Options`](../interfaces/Options) |
+##### Parameters
 
-#### Returns
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `args` | `Object` | - |
+| `args.inputs` | `string` | A string to be classified |
+| `args.model` | `string` | The model to use. Can be a full URL for HF inference endpoints. |
+| `options?` | [`Options`](../interfaces/Options) | - |
 
-`Promise`<[`TextClassificationReturn`](../modules#textclassificationreturn)\>
+##### Returns
+
+`Promise`<[`TextClassificationOutput`](../modules#textclassificationoutput)\>
 
 #### Defined in
 
-[HfInference.ts:712](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L712)
+[tasks/nlp/textClassification.ts:26](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textClassification.ts#L26)
 
 ___
 
 ### textGeneration
 
-▸ **textGeneration**(`args`, `options?`): `Promise`<[`TextGenerationReturn`](../interfaces/TextGenerationReturn)\>
+• **textGeneration**: (`args`: { `inputs`: `string` ; `model`: `string` ; `parameters?`: { `do_sample?`: `boolean` ; `max_new_tokens?`: `number` ; `max_time?`: `number` ; `num_return_sequences?`: `number` ; `repetition_penalty?`: `number` ; `return_full_text?`: `boolean` ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number`  }  }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`TextGenerationOutput`](../interfaces/TextGenerationOutput)\>
 
-Use to continue text from a prompt. This is a very generic task. Recommended model: gpt2 (it’s a simple model, but fun to play with).
+#### Type declaration
 
-#### Parameters
+▸ (`args`, `options?`): `Promise`<[`TextGenerationOutput`](../interfaces/TextGenerationOutput)\>
 
-| Name | Type |
-| :------ | :------ |
-| `args` | [`TextGenerationArgs`](../modules#textgenerationargs) |
-| `options?` | [`Options`](../interfaces/Options) |
+##### Parameters
 
-#### Returns
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `args` | `Object` | - |
+| `args.inputs` | `string` | A string to be generated from |
+| `args.model` | `string` | The model to use. Can be a full URL for HF inference endpoints. |
+| `args.parameters?` | `Object` | - |
+| `args.parameters.do_sample?` | `boolean` | (Optional: True). Bool. Whether or not to use sampling, use greedy decoding otherwise. |
+| `args.parameters.max_new_tokens?` | `number` | (Default: None). Int (0-250). The amount of new tokens to be generated, this does not include the input length it is a estimate of the size of generated text you want. Each new tokens slows down the request, so look for balance between response times and length of text generated. |
+| `args.parameters.max_time?` | `number` | (Default: None). Float (0-120.0). The amount of time in seconds that the query should take maximum. Network can cause some overhead so it will be a soft limit. Use that in combination with max_new_tokens for best results. |
+| `args.parameters.num_return_sequences?` | `number` | (Default: 1). Integer. The number of proposition you want to be returned. |
+| `args.parameters.repetition_penalty?` | `number` | (Default: None). Float (0.0-100.0). The more a token is used within generation the more it is penalized to not be picked in successive generation passes. |
+| `args.parameters.return_full_text?` | `boolean` | (Default: True). Bool. If set to False, the return results will not contain the original query making it easier for prompting. |
+| `args.parameters.temperature?` | `number` | (Default: 1.0). Float (0.0-100.0). The temperature of the sampling operation. 1 means regular sampling, 0 means always take the highest score, 100.0 is getting closer to uniform probability. |
+| `args.parameters.top_k?` | `number` | (Default: None). Integer to define the top tokens considered within the sample operation to create new text. |
+| `args.parameters.top_p?` | `number` | (Default: None). Float to define the tokens that are within the sample operation of text generation. Add tokens in the sample for more probable to least probable until the sum of the probabilities is greater than top_p. |
+| `options?` | [`Options`](../interfaces/Options) | - |
 
-`Promise`<[`TextGenerationReturn`](../interfaces/TextGenerationReturn)\>
+##### Returns
+
+`Promise`<[`TextGenerationOutput`](../interfaces/TextGenerationOutput)\>
 
 #### Defined in
 
-[HfInference.ts:725](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L725)
+[tasks/nlp/textGeneration.ts:60](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGeneration.ts#L60)
 
 ___
 
 ### textGenerationStream
 
-▸ **textGenerationStream**(`args`, `options?`): `AsyncGenerator`<[`TextGenerationStreamReturn`](../interfaces/TextGenerationStreamReturn), `any`, `unknown`\>
+• **textGenerationStream**: (`args`: { `inputs`: `string` ; `model`: `string` ; `parameters?`: { `do_sample?`: `boolean` ; `max_new_tokens?`: `number` ; `max_time?`: `number` ; `num_return_sequences?`: `number` ; `repetition_penalty?`: `number` ; `return_full_text?`: `boolean` ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number`  }  }, `options?`: [`Options`](../interfaces/Options)) => `AsyncGenerator`<[`TextGenerationStreamOutput`](../interfaces/TextGenerationStreamOutput), `any`, `unknown`\>
 
-Use to continue text from a prompt. Same as `textGeneration` but returns generator that can be read one token at a time
+#### Type declaration
 
-#### Parameters
+▸ (`args`, `options?`): `AsyncGenerator`<[`TextGenerationStreamOutput`](../interfaces/TextGenerationStreamOutput), `any`, `unknown`\>
 
-| Name | Type |
-| :------ | :------ |
-| `args` | [`TextGenerationArgs`](../modules#textgenerationargs) |
-| `options?` | [`Options`](../interfaces/Options) |
+##### Parameters
 
-#### Returns
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `args` | `Object` | - |
+| `args.inputs` | `string` | A string to be generated from |
+| `args.model` | `string` | The model to use. Can be a full URL for HF inference endpoints. |
+| `args.parameters?` | `Object` | - |
+| `args.parameters.do_sample?` | `boolean` | (Optional: True). Bool. Whether or not to use sampling, use greedy decoding otherwise. |
+| `args.parameters.max_new_tokens?` | `number` | (Default: None). Int (0-250). The amount of new tokens to be generated, this does not include the input length it is a estimate of the size of generated text you want. Each new tokens slows down the request, so look for balance between response times and length of text generated. |
+| `args.parameters.max_time?` | `number` | (Default: None). Float (0-120.0). The amount of time in seconds that the query should take maximum. Network can cause some overhead so it will be a soft limit. Use that in combination with max_new_tokens for best results. |
+| `args.parameters.num_return_sequences?` | `number` | (Default: 1). Integer. The number of proposition you want to be returned. |
+| `args.parameters.repetition_penalty?` | `number` | (Default: None). Float (0.0-100.0). The more a token is used within generation the more it is penalized to not be picked in successive generation passes. |
+| `args.parameters.return_full_text?` | `boolean` | (Default: True). Bool. If set to False, the return results will not contain the original query making it easier for prompting. |
+| `args.parameters.temperature?` | `number` | (Default: 1.0). Float (0.0-100.0). The temperature of the sampling operation. 1 means regular sampling, 0 means always take the highest score, 100.0 is getting closer to uniform probability. |
+| `args.parameters.top_k?` | `number` | (Default: None). Integer to define the top tokens considered within the sample operation to create new text. |
+| `args.parameters.top_p?` | `number` | (Default: None). Float to define the tokens that are within the sample operation of text generation. Add tokens in the sample for more probable to least probable until the sum of the probabilities is greater than top_p. |
+| `options?` | [`Options`](../interfaces/Options) | - |
 
-`AsyncGenerator`<[`TextGenerationStreamReturn`](../interfaces/TextGenerationStreamReturn), `any`, `unknown`\>
+##### Returns
+
+`AsyncGenerator`<[`TextGenerationStreamOutput`](../interfaces/TextGenerationStreamOutput), `any`, `unknown`\>
 
 #### Defined in
 
-[HfInference.ts:737](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L737)
+[tasks/nlp/textGenerationStream.ts:87](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L87)
 
 ___
 
 ### textToImage
 
-▸ **textToImage**(`args`, `options?`): `Promise`<`Blob`\>
+• **textToImage**: (`args`: { `inputs`: `string` ; `model`: `string` ; `parameters?`: { `guidance_scale?`: `number` ; `height?`: `number` ; `negative_prompt?`: `string` ; `num_inference_steps?`: `number` ; `width?`: `number`  }  }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<`Blob`\>
 
-This task reads some text input and outputs an image.
-Recommended model: stabilityai/stable-diffusion-2
+#### Type declaration
 
-#### Parameters
+▸ (`args`, `options?`): `Promise`<`Blob`\>
 
-| Name | Type |
-| :------ | :------ |
-| `args` | [`TextToImageArgs`](../modules#texttoimageargs) |
-| `options?` | [`Options`](../interfaces/Options) |
+##### Parameters
 
-#### Returns
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `args` | `Object` | - |
+| `args.inputs` | `string` | The text to generate an image from |
+| `args.model` | `string` | The model to use. Can be a full URL for HF inference endpoints. |
+| `args.parameters?` | `Object` | - |
+| `args.parameters.guidance_scale?` | `number` | Guidance scale: Higher guidance scale encourages to generate images that are closely linked to the text `prompt`, usually at the expense of lower image quality. |
+| `args.parameters.height?` | `number` | The height in pixels of the generated image |
+| `args.parameters.negative_prompt?` | `string` | An optional negative prompt for the image generation |
+| `args.parameters.num_inference_steps?` | `number` | The number of denoising steps. More denoising steps usually lead to a higher quality image at the expense of slower inference. |
+| `args.parameters.width?` | `number` | The width in pixels of the generated image |
+| `options?` | [`Options`](../interfaces/Options) | - |
+
+##### Returns
 
 `Promise`<`Blob`\>
 
 #### Defined in
 
-[HfInference.ts:951](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L951)
+[tasks/cv/textToImage.ts:41](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/textToImage.ts#L41)
 
 ___
 
 ### tokenClassification
 
-▸ **tokenClassification**(`args`, `options?`): `Promise`<[`TokenClassificationReturn`](../modules#tokenclassificationreturn)\>
+• **tokenClassification**: (`args`: { `inputs`: `string` ; `model`: `string` ; `parameters?`: { `aggregation_strategy?`: ``"none"`` \| ``"simple"`` \| ``"first"`` \| ``"average"`` \| ``"max"``  }  }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`TokenClassificationOutput`](../modules#tokenclassificationoutput)\>
 
-Usually used for sentence parsing, either grammatical, or Named Entity Recognition (NER) to understand keywords contained within text. Recommended model: dbmdz/bert-large-cased-finetuned-conll03-english
+#### Type declaration
 
-#### Parameters
+▸ (`args`, `options?`): `Promise`<[`TokenClassificationOutput`](../modules#tokenclassificationoutput)\>
 
-| Name | Type |
-| :------ | :------ |
-| `args` | [`TokenClassificationArgs`](../modules#tokenclassificationargs) |
-| `options?` | [`Options`](../interfaces/Options) |
+##### Parameters
 
-#### Returns
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `args` | `Object` | - |
+| `args.inputs` | `string` | A string to be classified |
+| `args.model` | `string` | The model to use. Can be a full URL for HF inference endpoints. |
+| `args.parameters?` | `Object` | - |
+| `args.parameters.aggregation_strategy?` | ``"none"`` \| ``"simple"`` \| ``"first"`` \| ``"average"`` \| ``"max"`` | (Default: simple). There are several aggregation strategies: none: Every token gets classified without further aggregation. simple: Entities are grouped according to the default schema (B-, I- tags get merged when the tag is similar). first: Same as the simple strategy except words cannot end up with different tags. Words will use the tag of the first token when there is ambiguity. average: Same as the simple strategy except words cannot end up with different tags. Scores are averaged across tokens and then the maximum label is applied. max: Same as the simple strategy except words cannot end up with different tags. Word entity will be the token with the maximum score. |
+| `options?` | [`Options`](../interfaces/Options) | - |
 
-`Promise`<[`TokenClassificationReturn`](../modules#tokenclassificationreturn)\>
+##### Returns
+
+`Promise`<[`TokenClassificationOutput`](../modules#tokenclassificationoutput)\>
 
 #### Defined in
 
-[HfInference.ts:747](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L747)
+[tasks/nlp/tokenClassification.ts:57](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/tokenClassification.ts#L57)
 
 ___
 
 ### translation
 
-▸ **translation**(`args`, `options?`): `Promise`<[`TranslationReturn`](../interfaces/TranslationReturn)\>
+• **translation**: (`args`: { `inputs`: `string` ; `model`: `string`  }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`TranslationOutput`](../interfaces/TranslationOutput)\>
 
-This task is well known to translate text from one language to another. Recommended model: Helsinki-NLP/opus-mt-ru-en.
+#### Type declaration
 
-#### Parameters
+▸ (`args`, `options?`): `Promise`<[`TranslationOutput`](../interfaces/TranslationOutput)\>
 
-| Name | Type |
-| :------ | :------ |
-| `args` | [`TranslationArgs`](../modules#translationargs) |
-| `options?` | [`Options`](../interfaces/Options) |
+##### Parameters
 
-#### Returns
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `args` | `Object` | - |
+| `args.inputs` | `string` | A string to be translated |
+| `args.model` | `string` | The model to use. Can be a full URL for HF inference endpoints. |
+| `options?` | [`Options`](../interfaces/Options) | - |
 
-`Promise`<[`TranslationReturn`](../interfaces/TranslationReturn)\>
+##### Returns
+
+`Promise`<[`TranslationOutput`](../interfaces/TranslationOutput)\>
 
 #### Defined in
 
-[HfInference.ts:773](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L773)
+[tasks/nlp/translation.ts:22](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/translation.ts#L22)
 
 ___
 
 ### zeroShotClassification
 
-▸ **zeroShotClassification**(`args`, `options?`): `Promise`<[`ZeroShotClassificationReturn`](../modules#zeroshotclassificationreturn)\>
+• **zeroShotClassification**: (`args`: { `inputs`: `string` \| `string`[] ; `model`: `string` ; `parameters`: { `candidate_labels`: `string`[] ; `multi_label?`: `boolean`  }  }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`ZeroShotClassificationOutput`](../modules#zeroshotclassificationoutput)\>
 
-This task is super useful to try out classification with zero code, you simply pass a sentence/paragraph and the possible labels for that sentence, and you get a result. Recommended model: facebook/bart-large-mnli.
+#### Type declaration
+
+▸ (`args`, `options?`): `Promise`<[`ZeroShotClassificationOutput`](../modules#zeroshotclassificationoutput)\>
+
+##### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `args` | `Object` | - |
+| `args.inputs` | `string` \| `string`[] | a string or list of strings |
+| `args.model` | `string` | The model to use. Can be a full URL for HF inference endpoints. |
+| `args.parameters` | `Object` | - |
+| `args.parameters.candidate_labels` | `string`[] | a list of strings that are potential classes for inputs. (max 10 candidate_labels, for more, simply run multiple requests, results are going to be misleading if using too many candidate_labels anyway. If you want to keep the exact same, you can simply run multi_label=True and do the scaling on your end. |
+| `args.parameters.multi_label?` | `boolean` | (Default: false) Boolean that is set to True if classes can overlap |
+| `options?` | [`Options`](../interfaces/Options) | - |
+
+##### Returns
+
+`Promise`<[`ZeroShotClassificationOutput`](../modules#zeroshotclassificationoutput)\>
+
+#### Defined in
+
+[tasks/nlp/zeroShotClassification.ts:34](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/zeroShotClassification.ts#L34)
+
+## Methods
+
+### endpoint
+
+▸ **endpoint**(`endpointUrl`): [`HfInferenceEndpoint`](HfInferenceEndpoint)
+
+Returns copy of HfInference tied to a specified endpoint.
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `args` | [`ZeroShotClassificationArgs`](../modules#zeroshotclassificationargs) |
-| `options?` | [`Options`](../interfaces/Options) |
+| `endpointUrl` | `string` |
 
 #### Returns
 
-`Promise`<[`ZeroShotClassificationReturn`](../modules#zeroshotclassificationreturn)\>
+[`HfInferenceEndpoint`](HfInferenceEndpoint)
 
 #### Defined in
 
-[HfInference.ts:785](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L785)
+[HfInference.ts:42](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L42)

@@ -17,4 +17,4 @@ export type {
 	SpaceStage,
 	Task,
 } from "./types/public";
-export { ApiError, InvalidApiResponseFormatError } from "./error";
+export { HubApiError, InvalidApiResponseFormatError } from "./error";
