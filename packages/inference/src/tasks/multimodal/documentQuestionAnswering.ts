@@ -32,7 +32,10 @@ export interface DocumentQuestionAnsweringOutput {
 /**
  * Answers a question on a document image. Recommended model: impira/layoutlm-document-qa.
  */
-export async function documentQuestionAnswering(args: DocumentQuestionAnsweringArgs, options?: Options): Promise<DocumentQuestionAnsweringOutput> {
+export async function documentQuestionAnswering(
+	args: DocumentQuestionAnsweringArgs,
+	options?: Options
+): Promise<DocumentQuestionAnsweringOutput> {
 	const res = (await request<[DocumentQuestionAnsweringOutput]>(args, options))?.[0];
 	const isValidOutput =
 		typeof res?.answer === "string" &&

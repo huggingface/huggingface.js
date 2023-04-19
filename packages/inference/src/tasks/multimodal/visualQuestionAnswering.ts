@@ -24,15 +24,14 @@ export interface VisualQuestionAnsweringOutput {
 /**
  * Answers a question on an image. Recommended model: dandelin/vilt-b32-finetuned-vqa.
  */
-export async function visualQuestionAnswering(args: VisualQuestionAnsweringArgs, options?: Options): Promise<VisualQuestionAnsweringOutput> {
+export async function visualQuestionAnswering(
+	args: VisualQuestionAnsweringArgs,
+	options?: Options
+): Promise<VisualQuestionAnsweringOutput> {
 	const res = (await request<[VisualQuestionAnsweringOutput]>(args, options))?.[0];
-	const isValidOutput =
-		typeof res?.answer === "string" &&
-		typeof res.score === "number";
+	const isValidOutput = typeof res?.answer === "string" && typeof res.score === "number";
 	if (!isValidOutput) {
 		throw new InferenceOutputError("Expected {answer: string, score: number}");
 	}
 	return res;
 }
-
-
