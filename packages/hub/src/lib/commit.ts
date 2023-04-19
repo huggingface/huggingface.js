@@ -1,6 +1,6 @@
 import { isFrontend } from "../../../shared/src/isFrontend";
 import { HUB_URL } from "../consts";
-import { ApiError, createApiError, InvalidApiResponseFormatError } from "../error";
+import { HubApiError, createApiError, InvalidApiResponseFormatError } from "../error";
 import type {
 	ApiCommitHeader,
 	ApiCommitLfsFile,
@@ -258,7 +258,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 					const errorMessage = `Error while doing LFS batch call for ${operations[shas.indexOf(obj.oid)].path}: ${
 						obj.error.message
 					}${batchRequestId ? ` - Request ID: ${batchRequestId}` : ""}`;
-					throw new ApiError(res.url, obj.error.code, batchRequestId, errorMessage);
+					throw new HubApiError(res.url, obj.error.code, batchRequestId, errorMessage);
 				}
 				if (!obj.actions?.upload) {
 					return;
