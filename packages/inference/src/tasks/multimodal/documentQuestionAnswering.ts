@@ -4,8 +4,12 @@ import { request } from "../custom/request";
 
 export type DocumentQuestionAnsweringArgs = BaseArgs & {
 	inputs: {
-		/** Base64 of document image **/
-		image: string;
+		/** 
+		 * Raw image
+		 * 
+		 * You can use native `File` in browsers, or `new Blob([buffer])` in node, or for a base64 image `new Blob([btoa(base64String)])`, or even `await (await fetch('...)).blob()`
+		 **/
+		image: Blob;
 		question: string;
 	};
 };
