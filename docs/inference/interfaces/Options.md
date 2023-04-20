@@ -10,7 +10,7 @@
 
 #### Defined in
 
-[HfInference.ts:19](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L19)
+[types.ts:13](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/types.ts#L13)
 
 ___
 
@@ -22,7 +22,7 @@ ___
 
 #### Defined in
 
-[HfInference.ts:11](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L11)
+[types.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/types.ts#L5)
 
 ___
 
@@ -34,7 +34,7 @@ ___
 
 #### Defined in
 
-[HfInference.ts:15](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L15)
+[types.ts:9](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/types.ts#L9)
 
 ___
 
@@ -46,7 +46,7 @@ ___
 
 #### Defined in
 
-[HfInference.ts:23](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L23)
+[types.ts:17](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/types.ts#L17)
 
 ___
 
@@ -58,4 +58,4 @@ ___
 
 #### Defined in
 
-[HfInference.ts:28](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L28)
+[types.ts:22](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/types.ts#L22)

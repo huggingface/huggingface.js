@@ -10,7 +10,7 @@ Token ID from the model tokenizer
 
 #### Defined in
 
-[HfInference.ts:246](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L246)
+[tasks/nlp/textGenerationStream.ts:21](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L21)
 
 ___
 
@@ -23,7 +23,7 @@ Optional since the logprob of the first token cannot be computed
 
 #### Defined in
 
-[HfInference.ts:253](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L253)
+[tasks/nlp/textGenerationStream.ts:28](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L28)
 
 ___
 
@@ -35,4 +35,4 @@ Token text
 
 #### Defined in
 
-[HfInference.ts:248](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L248)
+[tasks/nlp/textGenerationStream.ts:23](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L23)

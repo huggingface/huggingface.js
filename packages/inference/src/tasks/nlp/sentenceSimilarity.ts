@@ -4,12 +4,10 @@ import { request } from "../custom/request";
 
 export type SentenceSimilarityArgs = BaseArgs & {
 	/**
-	 * The inputs vary based on the model. For example when using sentence-transformers/paraphrase-xlm-r-multilingual-v1 the inputs will look like this:
+	 * The inputs vary based on the model.
 	 *
-	 *  inputs: &#123;
-	 *    "source_sentence": "That is a happy person",
-	 *    "sentences": ["That is a happy dog", "That is a very happy person", "Today is a sunny day"]
-	 *  &#125;
+	 * For example when using sentence-transformers/paraphrase-xlm-r-multilingual-v1 the inputs will have a `source_sentence` string and
+	 * a `sentences` array of strings
 	 */
 	inputs: Record<string, unknown> | Record<string, unknown>[];
 };
