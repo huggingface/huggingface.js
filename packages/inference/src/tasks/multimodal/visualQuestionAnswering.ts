@@ -34,10 +34,11 @@ export async function visualQuestionAnswering(
 	options?: Options
 ): Promise<VisualQuestionAnsweringOutput> {
 	const reqArgs: RequestArgs = {
+		...args,
 		inputs: {
+			question: args.inputs.question,
 			// convert Blob to base64
 			image: base64FromBytes(new Uint8Array(await args.inputs.image.arrayBuffer())),
-			question: args.inputs.question,
 		},
 	} as RequestArgs;
 	const res = (await request<[VisualQuestionAnsweringOutput]>(reqArgs, options))?.[0];
