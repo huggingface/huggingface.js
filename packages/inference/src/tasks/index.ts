@@ -27,3 +27,7 @@ export * from "./nlp/textGenerationStream";
 export * from "./nlp/tokenClassification";
 export * from "./nlp/translation";
 export * from "./nlp/zeroShotClassification";
+
+// Multimodal tasks
+export * from "./multimodal/documentQuestionAnswering";
+export * from "./multimodal/visualQuestionAnswering";

@@ -124,8 +124,8 @@ await hf.sentenceSimilarity({
 })
 
 await hf.featureExtraction({
-    model: "sentence-transformers/distilbert-base-nli-mean-tokens",
-    inputs: "That is a happy person",
+  model: "sentence-transformers/distilbert-base-nli-mean-tokens",
+  inputs: "That is a happy person",
 });
 
 // Audio
@@ -168,6 +168,24 @@ await hf.textToImage({
 await hf.imageToText({
   data: readFileSync('test/cats.png'),
   model: 'nlpconnect/vit-gpt2-image-captioning'
+})
+
+// Multimodal
+
+await hf.visualQuestionAnswering({
+  model: 'dandelin/vilt-b32-finetuned-vqa',
+  inputs: {
+    question: 'How many cats are lying down?',
+    image: await (await fetch('https://placekitten.com/300/300')).blob()
+  }
+})
+
+await hf.documentQuestionAnswering({
+  model: 'impira/layoutlm-document-qa',
+  inputs: {
+    question: 'Invoice number?',
+    image: await (await fetch('https://huggingface.co/spaces/impira/docquery/resolve/2359223c1837a7587402bda0f2643382a6eefeab/invoice.png')).blob(),
+  }
 })
 
 // Custom call, for models with custom parameters / outputs
@@ -226,6 +244,10 @@ const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the
 - [x] Image segmentation
 - [x] Text to image
 - [x] Image to text
+
+### Multimodal
+- [x] Document question answering
+- [x] Visual question answering
 
 ## Tree-shaking
 
