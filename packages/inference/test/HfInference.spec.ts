@@ -105,7 +105,7 @@ describe.concurrent(
 					model: "impira/layoutlm-document-qa",
 					inputs: {
 						question: "Invoice number?",
-						image: readTestFile("invoice.png", true) as string,
+						image: new Blob([readTestFile("invoice.png")], { type: "image/png" }),
 					},
 				})
 			).toMatchObject({
@@ -123,7 +123,7 @@ describe.concurrent(
 					model: "dandelin/vilt-b32-finetuned-vqa",
 					inputs: {
 						question: "How many cats are lying down?",
-						image: readTestFile("cats.png", true) as string,
+						image: new Blob([readTestFile("cats.png")], { type: "image/png" }),
 					},
 				})
 			).toMatchObject({

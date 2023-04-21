@@ -1,12 +1,14 @@
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
+import type { RequestArgs } from "../../types";
+import { base64FromBytes } from "../../../../shared/src/base64FromBytes";
 
 export type DocumentQuestionAnsweringArgs = BaseArgs & {
 	inputs: {
-		/** 
+		/**
 		 * Raw image
-		 * 
+		 *
 		 * You can use native `File` in browsers, or `new Blob([buffer])` in node, or for a base64 image `new Blob([btoa(base64String)])`, or even `await (await fetch('...)).blob()`
 		 **/
 		image: Blob;
@@ -40,7 +42,14 @@ export async function documentQuestionAnswering(
 	args: DocumentQuestionAnsweringArgs,
 	options?: Options
 ): Promise<DocumentQuestionAnsweringOutput> {
-	const res = (await request<[DocumentQuestionAnsweringOutput]>(args, options))?.[0];
+	const reqArgs: RequestArgs = {
+		inputs: {
+			// convert Blob to base64
+			image: base64FromBytes(new Uint8Array(await args.inputs.image.arrayBuffer())),
+			question: args.inputs.question,
+		},
+	} as RequestArgs;
+	const res = (await request<[DocumentQuestionAnsweringOutput]>(reqArgs, options))?.[0];
 	const isValidOutput =
 		typeof res?.answer === "string" &&
 		typeof res.end === "number" &&
