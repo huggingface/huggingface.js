@@ -74,6 +74,8 @@
           local: inference/interfaces/BaseArgs
         - title: ConversationalOutput
           local: inference/interfaces/ConversationalOutput
+        - title: DocumentQuestionAnsweringOutput
+          local: inference/interfaces/DocumentQuestionAnsweringOutput
         - title: ImageClassificationOutputValue
           local: inference/interfaces/ImageClassificationOutputValue
         - title: ImageSegmentationOutputValue
@@ -106,5 +108,7 @@
           local: inference/interfaces/TokenClassificationOutputValue
         - title: TranslationOutput
           local: inference/interfaces/TranslationOutput
+        - title: VisualQuestionAnsweringOutput
+          local: inference/interfaces/VisualQuestionAnsweringOutput
         - title: ZeroShotClassificationOutputValue
           local: inference/interfaces/ZeroShotClassificationOutputValue

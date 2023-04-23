@@ -137,6 +137,35 @@ ___
 
 ___
 
+### documentQuestionAnswering
+
+• **documentQuestionAnswering**: (`args`: { `inputs`: { `image`: `Blob` ; `question`: `string`  } ; `model`: `string`  }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`DocumentQuestionAnsweringOutput`](../interfaces/DocumentQuestionAnsweringOutput)\>
+
+#### Type declaration
+
+▸ (`args`, `options?`): `Promise`<[`DocumentQuestionAnsweringOutput`](../interfaces/DocumentQuestionAnsweringOutput)\>
+
+##### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `args` | `Object` | - |
+| `args.inputs` | `Object` | - |
+| `args.inputs.image` | `Blob` | Raw image You can use native `File` in browsers, or `new Blob([buffer])` in node, or for a base64 image `new Blob([btoa(base64String)])`, or even `await (await fetch('...)).blob()` |
+| `args.inputs.question` | `string` | - |
+| `args.model` | `string` | The model to use. Can be a full URL for HF inference endpoints. |
+| `options?` | [`Options`](../interfaces/Options) | - |
+
+##### Returns
+
+`Promise`<[`DocumentQuestionAnsweringOutput`](../interfaces/DocumentQuestionAnsweringOutput)\>
+
+#### Defined in
+
+[tasks/multimodal/documentQuestionAnswering.ts:41](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/multimodal/documentQuestionAnswering.ts#L41)
+
+___
+
 ### featureExtraction
 
 • **featureExtraction**: (`args`: { `inputs`: `string` \| `string`[] ; `model`: `string`  }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`FeatureExtractionOutput`](../modules#featureextractionoutput)\>
@@ -656,6 +685,35 @@ ___
 #### Defined in
 
 [tasks/nlp/translation.ts:22](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/translation.ts#L22)
+
+___
+
+### visualQuestionAnswering
+
+• **visualQuestionAnswering**: (`args`: { `inputs`: { `image`: `Blob` ; `question`: `string`  } ; `model`: `string`  }, `options?`: [`Options`](../interfaces/Options)) => `Promise`<[`VisualQuestionAnsweringOutput`](../interfaces/VisualQuestionAnsweringOutput)\>
+
+#### Type declaration
+
+▸ (`args`, `options?`): `Promise`<[`VisualQuestionAnsweringOutput`](../interfaces/VisualQuestionAnsweringOutput)\>
+
+##### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `args` | `Object` | - |
+| `args.inputs` | `Object` | - |
+| `args.inputs.image` | `Blob` | Raw image You can use native `File` in browsers, or `new Blob([buffer])` in node, or for a base64 image `new Blob([btoa(base64String)])`, or even `await (await fetch('...)).blob()` |
+| `args.inputs.question` | `string` | - |
+| `args.model` | `string` | The model to use. Can be a full URL for HF inference endpoints. |
+| `options?` | [`Options`](../interfaces/Options) | - |
+
+##### Returns
+
+`Promise`<[`VisualQuestionAnsweringOutput`](../interfaces/VisualQuestionAnsweringOutput)\>
+
+#### Defined in
+
+[tasks/multimodal/visualQuestionAnswering.ts:32](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/multimodal/visualQuestionAnswering.ts#L32)
 
 ___
 

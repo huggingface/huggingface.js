@@ -11,6 +11,7 @@
 - [AutomaticSpeechRecognitionOutput](interfaces/AutomaticSpeechRecognitionOutput)
 - [BaseArgs](interfaces/BaseArgs)
 - [ConversationalOutput](interfaces/ConversationalOutput)
+- [DocumentQuestionAnsweringOutput](interfaces/DocumentQuestionAnsweringOutput)
 - [ImageClassificationOutputValue](interfaces/ImageClassificationOutputValue)
 - [ImageSegmentationOutputValue](interfaces/ImageSegmentationOutputValue)
 - [ImageToTextOutput](interfaces/ImageToTextOutput)
@@ -27,6 +28,7 @@
 - [TextGenerationStreamToken](interfaces/TextGenerationStreamToken)
 - [TokenClassificationOutputValue](interfaces/TokenClassificationOutputValue)
 - [TranslationOutput](interfaces/TranslationOutput)
+- [VisualQuestionAnsweringOutput](interfaces/VisualQuestionAnsweringOutput)
 - [ZeroShotClassificationOutputValue](interfaces/ZeroShotClassificationOutputValue)
 
 ## Type Aliases
@@ -68,6 +70,16 @@ ___
 #### Defined in
 
 [tasks/nlp/conversational.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/conversational.ts#L5)
+
+___
+
+### DocumentQuestionAnsweringArgs
+
+Ƭ **DocumentQuestionAnsweringArgs**: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: { `image`: `Blob` ; `question`: `string`  }  }
+
+#### Defined in
+
+[tasks/multimodal/documentQuestionAnswering.ts:7](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/multimodal/documentQuestionAnswering.ts#L7)
 
 ___
 
@@ -335,6 +347,16 @@ ___
 
 ___
 
+### VisualQuestionAnsweringArgs
+
+Ƭ **VisualQuestionAnsweringArgs**: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: { `image`: `Blob` ; `question`: `string`  }  }
+
+#### Defined in
+
+[tasks/multimodal/visualQuestionAnswering.ts:6](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/multimodal/visualQuestionAnswering.ts#L6)
+
+___
+
 ### ZeroShotClassificationArgs
 
 Ƭ **ZeroShotClassificationArgs**: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: `string` \| `string`[] ; `parameters`: { `candidate_labels`: `string`[] ; `multi_label?`: `boolean`  }  }
@@ -423,6 +445,29 @@ This task corresponds to any chatbot like structure. Models tend to have shorter
 #### Defined in
 
 [tasks/nlp/conversational.ts:65](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/conversational.ts#L65)
+
+___
+
+### documentQuestionAnswering
+
+▸ **documentQuestionAnswering**(`args`, `options?`): `Promise`<[`DocumentQuestionAnsweringOutput`](interfaces/DocumentQuestionAnsweringOutput)\>
+
+Answers a question on a document image. Recommended model: impira/layoutlm-document-qa.
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `args` | [`DocumentQuestionAnsweringArgs`](modules#documentquestionansweringargs) |
+| `options?` | [`Options`](interfaces/Options) |
+
+#### Returns
+
+`Promise`<[`DocumentQuestionAnsweringOutput`](interfaces/DocumentQuestionAnsweringOutput)\>
+
+#### Defined in
+
+[tasks/multimodal/documentQuestionAnswering.ts:41](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/multimodal/documentQuestionAnswering.ts#L41)
 
 ___
 
@@ -853,6 +898,29 @@ This task is well known to translate text from one language to another. Recommen
 #### Defined in
 
 [tasks/nlp/translation.ts:22](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/translation.ts#L22)
+
+___
+
+### visualQuestionAnswering
+
+▸ **visualQuestionAnswering**(`args`, `options?`): `Promise`<[`VisualQuestionAnsweringOutput`](interfaces/VisualQuestionAnsweringOutput)\>
+
+Answers a question on an image. Recommended model: dandelin/vilt-b32-finetuned-vqa.
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `args` | [`VisualQuestionAnsweringArgs`](modules#visualquestionansweringargs) |
+| `options?` | [`Options`](interfaces/Options) |
+
+#### Returns
+
+`Promise`<[`VisualQuestionAnsweringOutput`](interfaces/VisualQuestionAnsweringOutput)\>
+
+#### Defined in
+
+[tasks/multimodal/visualQuestionAnswering.ts:32](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/multimodal/visualQuestionAnswering.ts#L32)
 
 ___
 
