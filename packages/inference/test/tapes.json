@@ -72,7 +72,7 @@
       "body": "{\"inputs\":\"The answer to the universe is\",\"options\":{}}"
     },
     "response": {
-      "body": "[{\"generated_text\":\"The answer to the universe is that it could be done by anyone.\\n\\nAll of that aside, what it tells me is that there can only be two universes, and when you make the choice to try to answer a question such as, \\\"\"}]",
+      "body": "[{\"generated_text\":\"The answer to the universe is to get to the surface, and we need to find the first two steps of the right sequence. \\\"In the first step there is only one particle. The universe takes three particles and moves them into the next one so\"}]",
       "status": 200,
       "statusText": "OK",
       "headers": {
@@ -294,7 +294,7 @@
       "method": "POST"
     },
     "response": {
-      "body": "[{\"score\":0.5927600264549255,\"label\":\"neu\"},{\"score\":0.2002566158771515,\"label\":\"hap\"},{\"score\":0.12795871496200562,\"label\":\"ang\"},{\"score\":0.07902464270591736,\"label\":\"sad\"}]",
+      "body": "[{\"score\":0.5927601456642151,\"label\":\"neu\"},{\"score\":0.20025669038295746,\"label\":\"hap\"},{\"score\":0.12795865535736084,\"label\":\"ang\"},{\"score\":0.07902450859546661,\"label\":\"sad\"}]",
       "status": 200,
       "statusText": "OK",
       "headers": {
@@ -518,12 +518,9 @@
       "statusText": "OK",
       "headers": {
         "access-control-allow-credentials": "true",
-        "access-control-expose-headers": "x-compute-type, x-compute-time",
         "connection": "keep-alive",
         "content-type": "image/jpeg",
-        "server": "uvicorn",
-        "transfer-encoding": "chunked",
-        "vary": "Accept-Encoding, Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
   },
@@ -577,7 +574,27 @@
       "method": "POST"
     },
     "response": {
-      "body": "[{\"score\":0.5166975855827332,\"answer\":\"2\"},{\"score\":0.3500240445137024,\"answer\":\"3\"},{\"score\":0.20439738035202026,\"answer\":\"1\"},{\"score\":0.16718222200870514,\"answer\":\"4\"},{\"score\":0.057514067739248276,\"answer\":\"5\"}]",
+      "body": "[{\"score\":0.5166967511177063,\"answer\":\"2\"},{\"score\":0.35002437233924866,\"answer\":\"3\"},{\"score\":0.20439617335796356,\"answer\":\"1\"},{\"score\":0.16718299686908722,\"answer\":\"4\"},{\"score\":0.05751442164182663,\"answer\":\"5\"}]",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "7cb3c977ef2fc3e8b8ac2c56796f635bb3f4cff839cef4d3d5b83a9c59ae642a": {
+    "url": "https://api-inference.huggingface.co/models/naver-clova-ix/donut-base-finetuned-docvqa",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST"
+    },
+    "response": {
+      "body": "[{\"answer\":\"us-001\"}]",
       "status": 200,
       "statusText": "OK",
       "headers": {

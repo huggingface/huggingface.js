@@ -3,6 +3,7 @@ import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 import type { RequestArgs } from "../../types";
 import { base64FromBytes } from "../../../../shared/src/base64FromBytes";
+import { toArray } from "../../utils/toArray";
 
 export type DocumentQuestionAnsweringArgs = BaseArgs & {
 	inputs: {
@@ -24,15 +25,15 @@ export interface DocumentQuestionAnsweringOutput {
 	/**
 	 * ?
 	 */
-	end: number;
+	end?: number;
 	/**
 	 * A float that represents how likely that the answer is correct
 	 */
-	score: number;
+	score?: number;
 	/**
 	 * ?
 	 */
-	start: number;
+	start?: number;
 }
 
 /**
@@ -50,14 +51,16 @@ export async function documentQuestionAnswering(
 			image: base64FromBytes(new Uint8Array(await args.inputs.image.arrayBuffer())),
 		},
 	} as RequestArgs;
-	const res = (await request<[DocumentQuestionAnsweringOutput]>(reqArgs, options))?.[0];
+	const res = toArray(
+		await request<[DocumentQuestionAnsweringOutput] | DocumentQuestionAnsweringOutput>(reqArgs, options)
+	)?.[0];
 	const isValidOutput =
 		typeof res?.answer === "string" &&
-		typeof res.end === "number" &&
-		typeof res.score === "number" &&
-		typeof res.start === "number";
+		(typeof res.end === "number" || typeof res.end === "undefined") &&
+		(typeof res.score === "number" || typeof res.score === "undefined") &&
+		(typeof res.start === "number" || typeof res.start === "undefined");
 	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<{answer: string, end: number, score: number, start: number}>");
+		throw new InferenceOutputError("Expected Array<{answer: string, end?: number, score?: number, start?: number}>");
 	}
 	return res;
 }

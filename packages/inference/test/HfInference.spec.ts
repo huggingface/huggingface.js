@@ -117,6 +117,20 @@ describe.concurrent(
 			});
 		});
 
+		it("documentQuestionAnswering with non-array output", async () => {
+			expect(
+				await hf.documentQuestionAnswering({
+					model: "naver-clova-ix/donut-base-finetuned-docvqa",
+					inputs: {
+						question: "Invoice number?",
+						image: new Blob([readTestFile("invoice.png")], { type: "image/png" }),
+					},
+				})
+			).toMatchObject({
+				answer: "us-001",
+			});
+		});
+
 		it("visualQuestionAnswering", async () => {
 			expect(
 				await hf.visualQuestionAnswering({
