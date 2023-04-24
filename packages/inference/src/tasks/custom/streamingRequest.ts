@@ -14,7 +14,7 @@ export async function* streamingRequest<T>(
 	}
 ): AsyncGenerator<T> {
 	const { url, info } = makeRequestOptions({ ...args, stream: true }, options);
-	const response = await fetch(url, info);
+	const response = await (options?.custom_fetch ?? fetch)(url, info);
 
 	if (options?.retry_on_error !== false && response.status === 503 && !options?.wait_for_model) {
 		return streamingRequest(args, {
