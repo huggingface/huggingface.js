@@ -37,7 +37,9 @@ export async function questionAnswering(
 ): Promise<QuestionAnsweringOutput> {
 	const res = await request<QuestionAnsweringOutput>(args, options);
 	const isValidOutput =
-		typeof res?.answer === "string" &&
+		typeof res === "object" &&
+		!!res &&
+		typeof res.answer === "string" &&
 		typeof res.end === "number" &&
 		typeof res.score === "number" &&
 		typeof res.start === "number";
