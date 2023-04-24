@@ -15,7 +15,7 @@
 
 #### Defined in
 
-[tasks/nlp/conversational.ts:53](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/conversational.ts#L53)
+[inference/src/tasks/nlp/conversational.ts:53](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/conversational.ts#L53)
 
 ___
 
@@ -25,7 +25,7 @@ ___
 
 #### Defined in
 
-[tasks/nlp/conversational.ts:57](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/conversational.ts#L57)
+[inference/src/tasks/nlp/conversational.ts:57](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/conversational.ts#L57)
 
 ___
 
@@ -35,4 +35,4 @@ ___
 
 #### Defined in
 
-[tasks/nlp/conversational.ts:58](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/conversational.ts#L58)
+[inference/src/tasks/nlp/conversational.ts:58](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/conversational.ts#L58)

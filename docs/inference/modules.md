@@ -39,7 +39,7 @@
 
 #### Defined in
 
-[tasks/audio/audioClassification.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/audio/audioClassification.ts#L5)
+[inference/src/tasks/audio/audioClassification.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/audio/audioClassification.ts#L5)
 
 ___
 
@@ -49,7 +49,7 @@ ___
 
 #### Defined in
 
-[tasks/audio/audioClassification.ts:24](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/audio/audioClassification.ts#L24)
+[inference/src/tasks/audio/audioClassification.ts:24](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/audio/audioClassification.ts#L24)
 
 ___
 
@@ -59,7 +59,7 @@ ___
 
 #### Defined in
 
-[tasks/audio/automaticSpeechRecognition.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/audio/automaticSpeechRecognition.ts#L5)
+[inference/src/tasks/audio/automaticSpeechRecognition.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/audio/automaticSpeechRecognition.ts#L5)
 
 ___
 
@@ -69,7 +69,7 @@ ___
 
 #### Defined in
 
-[tasks/nlp/conversational.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/conversational.ts#L5)
+[inference/src/tasks/nlp/conversational.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/conversational.ts#L5)
 
 ___
 
@@ -79,7 +79,7 @@ ___
 
 #### Defined in
 
-[tasks/multimodal/documentQuestionAnswering.ts:7](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/multimodal/documentQuestionAnswering.ts#L7)
+[inference/src/tasks/multimodal/documentQuestionAnswering.ts:8](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/multimodal/documentQuestionAnswering.ts#L8)
 
 ___
 
@@ -89,7 +89,7 @@ ___
 
 #### Defined in
 
-[tasks/nlp/featureExtraction.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/featureExtraction.ts#L5)
+[inference/src/tasks/nlp/featureExtraction.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/featureExtraction.ts#L5)
 
 ___
 
@@ -101,7 +101,7 @@ Returned values are a list of floats, or a list of list of floats (depending on 
 
 #### Defined in
 
-[tasks/nlp/featureExtraction.ts:18](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/featureExtraction.ts#L18)
+[inference/src/tasks/nlp/featureExtraction.ts:18](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/featureExtraction.ts#L18)
 
 ___
 
@@ -111,7 +111,7 @@ ___
 
 #### Defined in
 
-[tasks/nlp/fillMask.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/fillMask.ts#L5)
+[inference/src/tasks/nlp/fillMask.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/fillMask.ts#L5)
 
 ___
 
@@ -121,7 +121,7 @@ ___
 
 #### Defined in
 
-[tasks/nlp/fillMask.ts:9](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/fillMask.ts#L9)
+[inference/src/tasks/nlp/fillMask.ts:9](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/fillMask.ts#L9)
 
 ___
 
@@ -131,7 +131,7 @@ ___
 
 #### Defined in
 
-[tasks/cv/imageClassification.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageClassification.ts#L5)
+[inference/src/tasks/cv/imageClassification.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageClassification.ts#L5)
 
 ___
 
@@ -141,7 +141,7 @@ ___
 
 #### Defined in
 
-[tasks/cv/imageClassification.ts:23](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageClassification.ts#L23)
+[inference/src/tasks/cv/imageClassification.ts:23](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageClassification.ts#L23)
 
 ___
 
@@ -151,7 +151,7 @@ ___
 
 #### Defined in
 
-[tasks/cv/imageSegmentation.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageSegmentation.ts#L5)
+[inference/src/tasks/cv/imageSegmentation.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageSegmentation.ts#L5)
 
 ___
 
@@ -161,7 +161,7 @@ ___
 
 #### Defined in
 
-[tasks/cv/imageSegmentation.ts:27](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageSegmentation.ts#L27)
+[inference/src/tasks/cv/imageSegmentation.ts:27](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageSegmentation.ts#L27)
 
 ___
 
@@ -171,7 +171,7 @@ ___
 
 #### Defined in
 
-[tasks/cv/imageToText.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageToText.ts#L5)
+[inference/src/tasks/cv/imageToText.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageToText.ts#L5)
 
 ___
 
@@ -181,7 +181,7 @@ ___
 
 #### Defined in
 
-[tasks/cv/objectDetection.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/objectDetection.ts#L5)
+[inference/src/tasks/cv/objectDetection.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/objectDetection.ts#L5)
 
 ___
 
@@ -191,7 +191,7 @@ ___
 
 #### Defined in
 
-[tasks/cv/objectDetection.ts:33](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/objectDetection.ts#L33)
+[inference/src/tasks/cv/objectDetection.ts:33](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/objectDetection.ts#L33)
 
 ___
 
@@ -201,7 +201,7 @@ ___
 
 #### Defined in
 
-[tasks/nlp/questionAnswering.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/questionAnswering.ts#L5)
+[inference/src/tasks/nlp/questionAnswering.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/questionAnswering.ts#L5)
 
 ___
 
@@ -211,7 +211,7 @@ ___
 
 #### Defined in
 
-[types.ts:38](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/types.ts#L38)
+[inference/src/types.ts:42](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/types.ts#L42)
 
 ___
 
@@ -221,7 +221,7 @@ ___
 
 #### Defined in
 
-[tasks/nlp/sentenceSimilarity.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/sentenceSimilarity.ts#L5)
+[inference/src/tasks/nlp/sentenceSimilarity.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/sentenceSimilarity.ts#L5)
 
 ___
 
@@ -233,7 +233,7 @@ Returned values are a list of floats
 
 #### Defined in
 
-[tasks/nlp/sentenceSimilarity.ts:18](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/sentenceSimilarity.ts#L18)
+[inference/src/tasks/nlp/sentenceSimilarity.ts:18](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/sentenceSimilarity.ts#L18)
 
 ___
 
@@ -243,7 +243,7 @@ ___
 
 #### Defined in
 
-[tasks/nlp/summarization.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/summarization.ts#L5)
+[inference/src/tasks/nlp/summarization.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/summarization.ts#L5)
 
 ___
 
@@ -253,7 +253,7 @@ ___
 
 #### Defined in
 
-[tasks/nlp/tableQuestionAnswering.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/tableQuestionAnswering.ts#L5)
+[inference/src/tasks/nlp/tableQuestionAnswering.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/tableQuestionAnswering.ts#L5)
 
 ___
 
@@ -263,7 +263,7 @@ ___
 
 #### Defined in
 
-[tasks/nlp/textClassification.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textClassification.ts#L5)
+[inference/src/tasks/nlp/textClassification.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textClassification.ts#L5)
 
 ___
 
@@ -273,7 +273,7 @@ ___
 
 #### Defined in
 
-[tasks/nlp/textClassification.ts:12](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textClassification.ts#L12)
+[inference/src/tasks/nlp/textClassification.ts:12](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textClassification.ts#L12)
 
 ___
 
@@ -283,7 +283,7 @@ ___
 
 #### Defined in
 
-[tasks/nlp/textGeneration.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGeneration.ts#L5)
+[inference/src/tasks/nlp/textGeneration.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGeneration.ts#L5)
 
 ___
 
@@ -293,7 +293,7 @@ ___
 
 #### Defined in
 
-[tasks/nlp/textGenerationStream.ts:46](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L46)
+[inference/src/tasks/nlp/textGenerationStream.ts:46](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L46)
 
 ___
 
@@ -303,7 +303,7 @@ ___
 
 #### Defined in
 
-[tasks/cv/textToImage.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/textToImage.ts#L5)
+[inference/src/tasks/cv/textToImage.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/textToImage.ts#L5)
 
 ___
 
@@ -313,7 +313,7 @@ ___
 
 #### Defined in
 
-[tasks/cv/textToImage.ts:35](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/textToImage.ts#L35)
+[inference/src/tasks/cv/textToImage.ts:35](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/textToImage.ts#L35)
 
 ___
 
@@ -323,7 +323,7 @@ ___
 
 #### Defined in
 
-[tasks/nlp/tokenClassification.ts:6](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/tokenClassification.ts#L6)
+[inference/src/tasks/nlp/tokenClassification.ts:6](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/tokenClassification.ts#L6)
 
 ___
 
@@ -333,7 +333,7 @@ ___
 
 #### Defined in
 
-[tasks/nlp/tokenClassification.ts:52](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/tokenClassification.ts#L52)
+[inference/src/tasks/nlp/tokenClassification.ts:52](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/tokenClassification.ts#L52)
 
 ___
 
@@ -343,7 +343,7 @@ ___
 
 #### Defined in
 
-[tasks/nlp/translation.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/translation.ts#L5)
+[inference/src/tasks/nlp/translation.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/translation.ts#L5)
 
 ___
 
@@ -353,7 +353,7 @@ ___
 
 #### Defined in
 
-[tasks/multimodal/visualQuestionAnswering.ts:6](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/multimodal/visualQuestionAnswering.ts#L6)
+[inference/src/tasks/multimodal/visualQuestionAnswering.ts:6](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/multimodal/visualQuestionAnswering.ts#L6)
 
 ___
 
@@ -363,7 +363,7 @@ ___
 
 #### Defined in
 
-[tasks/nlp/zeroShotClassification.ts:6](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/zeroShotClassification.ts#L6)
+[inference/src/tasks/nlp/zeroShotClassification.ts:6](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/zeroShotClassification.ts#L6)
 
 ___
 
@@ -373,7 +373,7 @@ ___
 
 #### Defined in
 
-[tasks/nlp/zeroShotClassification.ts:29](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/zeroShotClassification.ts#L29)
+[inference/src/tasks/nlp/zeroShotClassification.ts:29](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/zeroShotClassification.ts#L29)
 
 ## Functions
 
@@ -397,7 +397,7 @@ Recommended model:  superb/hubert-large-superb-er
 
 #### Defined in
 
-[tasks/audio/audioClassification.ts:30](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/audio/audioClassification.ts#L30)
+[inference/src/tasks/audio/audioClassification.ts:30](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/audio/audioClassification.ts#L30)
 
 ___
 
@@ -421,7 +421,7 @@ Recommended model (english language): facebook/wav2vec2-large-960h-lv60-self
 
 #### Defined in
 
-[tasks/audio/automaticSpeechRecognition.ts:23](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/audio/automaticSpeechRecognition.ts#L23)
+[inference/src/tasks/audio/automaticSpeechRecognition.ts:23](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/audio/automaticSpeechRecognition.ts#L23)
 
 ___
 
@@ -444,7 +444,7 @@ This task corresponds to any chatbot like structure. Models tend to have shorter
 
 #### Defined in
 
-[tasks/nlp/conversational.ts:65](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/conversational.ts#L65)
+[inference/src/tasks/nlp/conversational.ts:65](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/conversational.ts#L65)
 
 ___
 
@@ -467,7 +467,7 @@ Answers a question on a document image. Recommended model: impira/layoutlm-docum
 
 #### Defined in
 
-[tasks/multimodal/documentQuestionAnswering.ts:41](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/multimodal/documentQuestionAnswering.ts#L41)
+[inference/src/tasks/multimodal/documentQuestionAnswering.ts:42](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/multimodal/documentQuestionAnswering.ts#L42)
 
 ___
 
@@ -490,7 +490,7 @@ This task reads some text and outputs raw float values, that are usually consume
 
 #### Defined in
 
-[tasks/nlp/featureExtraction.ts:23](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/featureExtraction.ts#L23)
+[inference/src/tasks/nlp/featureExtraction.ts:23](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/featureExtraction.ts#L23)
 
 ___
 
@@ -513,7 +513,7 @@ Tries to fill in a hole with a missing word (token to be precise). That’s the 
 
 #### Defined in
 
-[tasks/nlp/fillMask.ts:31](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/fillMask.ts#L31)
+[inference/src/tasks/nlp/fillMask.ts:31](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/fillMask.ts#L31)
 
 ___
 
@@ -537,7 +537,7 @@ Recommended model: google/vit-base-patch16-224
 
 #### Defined in
 
-[tasks/cv/imageClassification.ts:29](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageClassification.ts#L29)
+[inference/src/tasks/cv/imageClassification.ts:29](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageClassification.ts#L29)
 
 ___
 
@@ -561,7 +561,7 @@ Recommended model: facebook/detr-resnet-50-panoptic
 
 #### Defined in
 
-[tasks/cv/imageSegmentation.ts:33](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageSegmentation.ts#L33)
+[inference/src/tasks/cv/imageSegmentation.ts:33](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageSegmentation.ts#L33)
 
 ___
 
@@ -584,7 +584,7 @@ This task reads some image input and outputs the text caption.
 
 #### Defined in
 
-[tasks/cv/imageToText.ts:22](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageToText.ts#L22)
+[inference/src/tasks/cv/imageToText.ts:22](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageToText.ts#L22)
 
 ___
 
@@ -608,7 +608,7 @@ Recommended model: facebook/detr-resnet-50
 
 #### Defined in
 
-[tasks/cv/objectDetection.ts:39](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/objectDetection.ts#L39)
+[inference/src/tasks/cv/objectDetection.ts:39](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/objectDetection.ts#L39)
 
 ___
 
@@ -631,7 +631,7 @@ Want to have a nice know-it-all bot that can answer any question?. Recommended m
 
 #### Defined in
 
-[tasks/nlp/questionAnswering.ts:34](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/questionAnswering.ts#L34)
+[inference/src/tasks/nlp/questionAnswering.ts:34](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/questionAnswering.ts#L34)
 
 ___
 
@@ -660,7 +660,7 @@ Primitive to make custom calls to the inference API
 
 #### Defined in
 
-[tasks/custom/request.ts:7](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/custom/request.ts#L7)
+[inference/src/tasks/custom/request.ts:7](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/custom/request.ts#L7)
 
 ___
 
@@ -683,7 +683,7 @@ Calculate the semantic similarity between one text and a list of other sentences
 
 #### Defined in
 
-[tasks/nlp/sentenceSimilarity.ts:23](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/sentenceSimilarity.ts#L23)
+[inference/src/tasks/nlp/sentenceSimilarity.ts:23](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/sentenceSimilarity.ts#L23)
 
 ___
 
@@ -712,7 +712,7 @@ Primitive to make custom inference calls that expect server-sent events, and ret
 
 #### Defined in
 
-[tasks/custom/streamingRequest.ts:9](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/custom/streamingRequest.ts#L9)
+[inference/src/tasks/custom/streamingRequest.ts:9](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/custom/streamingRequest.ts#L9)
 
 ___
 
@@ -735,7 +735,7 @@ This task is well known to summarize longer text into shorter text. Be careful, 
 
 #### Defined in
 
-[tasks/nlp/summarization.ts:52](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/summarization.ts#L52)
+[inference/src/tasks/nlp/summarization.ts:52](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/summarization.ts#L52)
 
 ___
 
@@ -758,7 +758,7 @@ Don’t know SQL? Don’t want to dive into a large spreadsheet? Ask questions i
 
 #### Defined in
 
-[tasks/nlp/tableQuestionAnswering.ts:40](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/tableQuestionAnswering.ts#L40)
+[inference/src/tasks/nlp/tableQuestionAnswering.ts:40](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/tableQuestionAnswering.ts#L40)
 
 ___
 
@@ -781,7 +781,7 @@ Usually used for sentiment-analysis this will output the likelihood of classes o
 
 #### Defined in
 
-[tasks/nlp/textClassification.ts:26](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textClassification.ts#L26)
+[inference/src/tasks/nlp/textClassification.ts:26](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textClassification.ts#L26)
 
 ___
 
@@ -804,7 +804,7 @@ Use to continue text from a prompt. This is a very generic task. Recommended mod
 
 #### Defined in
 
-[tasks/nlp/textGeneration.ts:60](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGeneration.ts#L60)
+[inference/src/tasks/nlp/textGeneration.ts:60](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGeneration.ts#L60)
 
 ___
 
@@ -827,7 +827,7 @@ Use to continue text from a prompt. Same as `textGeneration` but returns generat
 
 #### Defined in
 
-[tasks/nlp/textGenerationStream.ts:87](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L87)
+[inference/src/tasks/nlp/textGenerationStream.ts:87](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L87)
 
 ___
 
@@ -851,7 +851,7 @@ Recommended model: stabilityai/stable-diffusion-2
 
 #### Defined in
 
-[tasks/cv/textToImage.ts:41](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/textToImage.ts#L41)
+[inference/src/tasks/cv/textToImage.ts:41](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/textToImage.ts#L41)
 
 ___
 
@@ -874,7 +874,7 @@ Usually used for sentence parsing, either grammatical, or Named Entity Recogniti
 
 #### Defined in
 
-[tasks/nlp/tokenClassification.ts:57](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/tokenClassification.ts#L57)
+[inference/src/tasks/nlp/tokenClassification.ts:57](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/tokenClassification.ts#L57)
 
 ___
 
@@ -897,7 +897,7 @@ This task is well known to translate text from one language to another. Recommen
 
 #### Defined in
 
-[tasks/nlp/translation.ts:22](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/translation.ts#L22)
+[inference/src/tasks/nlp/translation.ts:22](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/translation.ts#L22)
 
 ___
 
@@ -920,7 +920,7 @@ Answers a question on an image. Recommended model: dandelin/vilt-b32-finetuned-v
 
 #### Defined in
 
-[tasks/multimodal/visualQuestionAnswering.ts:32](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/multimodal/visualQuestionAnswering.ts#L32)
+[inference/src/tasks/multimodal/visualQuestionAnswering.ts:32](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/multimodal/visualQuestionAnswering.ts#L32)
 
 ___
 
@@ -943,4 +943,4 @@ This task is super useful to try out classification with zero code, you simply p
 
 #### Defined in
 
-[tasks/nlp/zeroShotClassification.ts:34](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/zeroShotClassification.ts#L34)
+[inference/src/tasks/nlp/zeroShotClassification.ts:34](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/zeroShotClassification.ts#L34)

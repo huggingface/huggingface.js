@@ -10,7 +10,7 @@ The label for the class (model specific) of a segment.
 
 #### Defined in
 
-[tasks/cv/imageSegmentation.ts:16](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageSegmentation.ts#L16)
+[inference/src/tasks/cv/imageSegmentation.ts:16](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageSegmentation.ts#L16)
 
 ___
 
@@ -22,7 +22,7 @@ A str (base64 str of a single channel black-and-white img) representing the mask
 
 #### Defined in
 
-[tasks/cv/imageSegmentation.ts:20](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageSegmentation.ts#L20)
+[inference/src/tasks/cv/imageSegmentation.ts:20](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageSegmentation.ts#L20)
 
 ___
 
@@ -34,4 +34,4 @@ A float that represents how likely it is that the detected object belongs to the
 
 #### Defined in
 
-[tasks/cv/imageSegmentation.ts:24](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageSegmentation.ts#L24)
+[inference/src/tasks/cv/imageSegmentation.ts:24](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageSegmentation.ts#L24)

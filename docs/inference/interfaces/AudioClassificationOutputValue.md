@@ -10,7 +10,7 @@ The label for the class (model specific)
 
 #### Defined in
 
-[tasks/audio/audioClassification.ts:16](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/audio/audioClassification.ts#L16)
+[inference/src/tasks/audio/audioClassification.ts:16](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/audio/audioClassification.ts#L16)
 
 ___
 
@@ -22,4 +22,4 @@ A float that represents how likely it is that the audio file belongs to this cla
 
 #### Defined in
 
-[tasks/audio/audioClassification.ts:21](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/audio/audioClassification.ts#L21)
+[inference/src/tasks/audio/audioClassification.ts:21](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/audio/audioClassification.ts#L21)

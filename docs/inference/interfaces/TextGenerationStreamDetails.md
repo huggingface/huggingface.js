@@ -10,7 +10,7 @@ Additional sequences when using the `best_of` parameter
 
 #### Defined in
 
-[tasks/nlp/textGenerationStream.ts:66](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L66)
+[inference/src/tasks/nlp/textGenerationStream.ts:66](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L66)
 
 ___
 
@@ -22,7 +22,7 @@ Generation finish reason
 
 #### Defined in
 
-[tasks/nlp/textGenerationStream.ts:56](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L56)
+[inference/src/tasks/nlp/textGenerationStream.ts:56](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L56)
 
 ___
 
@@ -34,7 +34,7 @@ Number of generated tokens
 
 #### Defined in
 
-[tasks/nlp/textGenerationStream.ts:58](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L58)
+[inference/src/tasks/nlp/textGenerationStream.ts:58](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L58)
 
 ___
 
@@ -46,7 +46,7 @@ Prompt tokens
 
 #### Defined in
 
-[tasks/nlp/textGenerationStream.ts:62](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L62)
+[inference/src/tasks/nlp/textGenerationStream.ts:62](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L62)
 
 ___
 
@@ -58,7 +58,7 @@ Sampling seed if sampling was activated
 
 #### Defined in
 
-[tasks/nlp/textGenerationStream.ts:60](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L60)
+[inference/src/tasks/nlp/textGenerationStream.ts:60](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L60)
 
 ___
 
@@ -68,4 +68,4 @@ ___
 
 #### Defined in
 
-[tasks/nlp/textGenerationStream.ts:64](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L64)
+[inference/src/tasks/nlp/textGenerationStream.ts:64](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L64)

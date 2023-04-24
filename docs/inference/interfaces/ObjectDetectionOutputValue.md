@@ -19,7 +19,7 @@ A dict (with keys [xmin,ymin,xmax,ymax]) representing the bounding box of a dete
 
 #### Defined in
 
-[tasks/cv/objectDetection.ts:16](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/objectDetection.ts#L16)
+[inference/src/tasks/cv/objectDetection.ts:16](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/objectDetection.ts#L16)
 
 ___
 
@@ -31,7 +31,7 @@ The label for the class (model specific) of a detected object.
 
 #### Defined in
 
-[tasks/cv/objectDetection.ts:25](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/objectDetection.ts#L25)
+[inference/src/tasks/cv/objectDetection.ts:25](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/objectDetection.ts#L25)
 
 ___
 
@@ -43,4 +43,4 @@ A float that represents how likely it is that the detected object belongs to the
 
 #### Defined in
 
-[tasks/cv/objectDetection.ts:30](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/objectDetection.ts#L30)
+[inference/src/tasks/cv/objectDetection.ts:30](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/objectDetection.ts#L30)

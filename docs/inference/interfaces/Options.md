@@ -2,6 +2,33 @@
 
 ## Properties
 
+### custom\_fetch
+
+• `Optional` **custom\_fetch**: (`input`: `RequestInfo` \| `URL`, `init?`: `RequestInit`) => `Promise`<`Response`\>
+
+#### Type declaration
+
+▸ (`input`, `init?`): `Promise`<`Response`\>
+
+Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+
+##### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `input` | `RequestInfo` \| `URL` |
+| `init?` | `RequestInit` |
+
+##### Returns
+
+`Promise`<`Response`\>
+
+#### Defined in
+
+[inference/src/types.ts:26](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/types.ts#L26)
+
+___
+
 ### dont\_load\_model
 
 • `Optional` **dont\_load\_model**: `boolean`
@@ -10,7 +37,7 @@
 
 #### Defined in
 
-[types.ts:13](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/types.ts#L13)
+[inference/src/types.ts:13](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/types.ts#L13)
 
 ___
 
@@ -22,7 +49,7 @@ ___
 
 #### Defined in
 
-[types.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/types.ts#L5)
+[inference/src/types.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/types.ts#L5)
 
 ___
 
@@ -34,7 +61,7 @@ ___
 
 #### Defined in
 
-[types.ts:9](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/types.ts#L9)
+[inference/src/types.ts:9](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/types.ts#L9)
 
 ___
 
@@ -46,7 +73,7 @@ ___
 
 #### Defined in
 
-[types.ts:17](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/types.ts#L17)
+[inference/src/types.ts:17](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/types.ts#L17)
 
 ___
 
@@ -58,4 +85,4 @@ ___
 
 #### Defined in
 
-[types.ts:22](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/types.ts#L22)
+[inference/src/types.ts:22](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/types.ts#L22)

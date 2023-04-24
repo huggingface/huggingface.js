@@ -10,40 +10,40 @@ A string that’s the answer within the document.
 
 #### Defined in
 
-[tasks/multimodal/documentQuestionAnswering.ts:23](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/multimodal/documentQuestionAnswering.ts#L23)
+[inference/src/tasks/multimodal/documentQuestionAnswering.ts:24](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/multimodal/documentQuestionAnswering.ts#L24)
 
 ___
 
 ### end
 
-• **end**: `number`
+• `Optional` **end**: `number`
 
 ?
 
 #### Defined in
 
-[tasks/multimodal/documentQuestionAnswering.ts:27](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/multimodal/documentQuestionAnswering.ts#L27)
+[inference/src/tasks/multimodal/documentQuestionAnswering.ts:28](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/multimodal/documentQuestionAnswering.ts#L28)
 
 ___
 
 ### score
 
-• **score**: `number`
+• `Optional` **score**: `number`
 
 A float that represents how likely that the answer is correct
 
 #### Defined in
 
-[tasks/multimodal/documentQuestionAnswering.ts:31](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/multimodal/documentQuestionAnswering.ts#L31)
+[inference/src/tasks/multimodal/documentQuestionAnswering.ts:32](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/multimodal/documentQuestionAnswering.ts#L32)
 
 ___
 
 ### start
 
-• **start**: `number`
+• `Optional` **start**: `number`
 
 ?
 
 #### Defined in
 
-[tasks/multimodal/documentQuestionAnswering.ts:35](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/multimodal/documentQuestionAnswering.ts#L35)
+[inference/src/tasks/multimodal/documentQuestionAnswering.ts:36](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/multimodal/documentQuestionAnswering.ts#L36)

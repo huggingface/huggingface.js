@@ -10,7 +10,7 @@ Generation finish reason
 
 #### Defined in
 
-[tasks/nlp/textGenerationStream.ts:35](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L35)
+[inference/src/tasks/nlp/textGenerationStream.ts:35](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L35)
 
 ___
 
@@ -22,7 +22,7 @@ Generated text
 
 #### Defined in
 
-[tasks/nlp/textGenerationStream.ts:33](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L33)
+[inference/src/tasks/nlp/textGenerationStream.ts:33](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L33)
 
 ___
 
@@ -34,7 +34,7 @@ Number of generated tokens
 
 #### Defined in
 
-[tasks/nlp/textGenerationStream.ts:37](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L37)
+[inference/src/tasks/nlp/textGenerationStream.ts:37](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L37)
 
 ___
 
@@ -46,7 +46,7 @@ Prompt tokens
 
 #### Defined in
 
-[tasks/nlp/textGenerationStream.ts:41](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L41)
+[inference/src/tasks/nlp/textGenerationStream.ts:41](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L41)
 
 ___
 
@@ -58,7 +58,7 @@ Sampling seed if sampling was activated
 
 #### Defined in
 
-[tasks/nlp/textGenerationStream.ts:39](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L39)
+[inference/src/tasks/nlp/textGenerationStream.ts:39](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L39)
 
 ___
 
@@ -70,4 +70,4 @@ Generated tokens
 
 #### Defined in
 
-[tasks/nlp/textGenerationStream.ts:43](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L43)
+[inference/src/tasks/nlp/textGenerationStream.ts:43](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L43)

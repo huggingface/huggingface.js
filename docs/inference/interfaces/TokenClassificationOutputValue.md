@@ -10,7 +10,7 @@ The offset stringwise where the answer is located. Useful to disambiguate if wor
 
 #### Defined in
 
-[tasks/nlp/tokenClassification.ts:33](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/tokenClassification.ts#L33)
+[inference/src/tasks/nlp/tokenClassification.ts:33](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/tokenClassification.ts#L33)
 
 ___
 
@@ -22,7 +22,7 @@ The type for the entity being recognized (model specific).
 
 #### Defined in
 
-[tasks/nlp/tokenClassification.ts:37](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/tokenClassification.ts#L37)
+[inference/src/tasks/nlp/tokenClassification.ts:37](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/tokenClassification.ts#L37)
 
 ___
 
@@ -34,7 +34,7 @@ How likely the entity was recognized.
 
 #### Defined in
 
-[tasks/nlp/tokenClassification.ts:41](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/tokenClassification.ts#L41)
+[inference/src/tasks/nlp/tokenClassification.ts:41](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/tokenClassification.ts#L41)
 
 ___
 
@@ -46,7 +46,7 @@ The offset stringwise where the answer is located. Useful to disambiguate if wor
 
 #### Defined in
 
-[tasks/nlp/tokenClassification.ts:45](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/tokenClassification.ts#L45)
+[inference/src/tasks/nlp/tokenClassification.ts:45](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/tokenClassification.ts#L45)
 
 ___
 
@@ -58,4 +58,4 @@ The string that was captured
 
 #### Defined in
 
-[tasks/nlp/tokenClassification.ts:49](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/tokenClassification.ts#L49)
+[inference/src/tasks/nlp/tokenClassification.ts:49](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/tokenClassification.ts#L49)

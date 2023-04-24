@@ -11,7 +11,7 @@ Only available when the generation is finished
 
 #### Defined in
 
-[tasks/nlp/textGenerationStream.ts:81](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L81)
+[inference/src/tasks/nlp/textGenerationStream.ts:81](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L81)
 
 ___
 
@@ -24,7 +24,7 @@ Only available when the generation is finished
 
 #### Defined in
 
-[tasks/nlp/textGenerationStream.ts:76](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L76)
+[inference/src/tasks/nlp/textGenerationStream.ts:76](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L76)
 
 ___
 
@@ -36,4 +36,4 @@ Generated token, one at a time
 
 #### Defined in
 
-[tasks/nlp/textGenerationStream.ts:71](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L71)
+[inference/src/tasks/nlp/textGenerationStream.ts:71](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L71)

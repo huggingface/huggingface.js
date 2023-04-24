@@ -10,4 +10,4 @@ The continuated string
 
 #### Defined in
 
-[tasks/nlp/textGeneration.ts:54](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGeneration.ts#L54)
+[inference/src/tasks/nlp/textGeneration.ts:54](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGeneration.ts#L54)

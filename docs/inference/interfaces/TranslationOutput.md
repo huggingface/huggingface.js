@@ -10,4 +10,4 @@ The string after translation
 
 #### Defined in
 
-[tasks/nlp/translation.ts:16](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/translation.ts#L16)
+[inference/src/tasks/nlp/translation.ts:16](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/translation.ts#L16)
