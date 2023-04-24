@@ -23,7 +23,7 @@ export interface Options {
 	/**
 	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 	 */
-	custom_fetch?: typeof fetch;
+	fetch?: typeof fetch;
 }
 
 export interface BaseArgs {
