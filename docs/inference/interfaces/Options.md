@@ -2,9 +2,21 @@
 
 ## Properties
 
-### custom\_fetch
+### dont\_load\_model
 
-• `Optional` **custom\_fetch**: (`input`: `RequestInfo` \| `URL`, `init?`: `RequestInit`) => `Promise`<`Response`\>
+• `Optional` **dont\_load\_model**: `boolean`
+
+(Default: false). Boolean. Do not load the model if it's not already available.
+
+#### Defined in
+
+[inference/src/types.ts:13](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/types.ts#L13)
+
+___
+
+### fetch
+
+• `Optional` **fetch**: (`input`: `RequestInfo` \| `URL`, `init?`: `RequestInit`) => `Promise`<`Response`\>
 
 #### Type declaration
 
@@ -26,18 +38,6 @@ Custom fetch function to use instead of the default one, for example to use a pr
 #### Defined in
 
 [inference/src/types.ts:26](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/types.ts#L26)
-
-___
-
-### dont\_load\_model
-
-• `Optional` **dont\_load\_model**: `boolean`
-
-(Default: false). Boolean. Do not load the model if it's not already available.
-
-#### Defined in
-
-[inference/src/types.ts:13](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/types.ts#L13)
 
 ___
 
