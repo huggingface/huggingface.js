@@ -1,7 +1,7 @@
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options, RequestArgs } from "../../types";
 import { request } from "../custom/request";
-import { base64FromBytes } from "../../../../shared/src/base64FromBytes";
+import { base64FromBytes } from "../../utils/base64FromBytes";
 
 export type VisualQuestionAnsweringArgs = BaseArgs & {
 	inputs: {
