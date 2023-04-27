@@ -1,6 +1,6 @@
 import { omit } from "../src/utils/omit";
-import { isFrontend } from "../../shared/src/isFrontend";
-import { isBackend } from "../../shared/src/isBackend";
+import { isFrontend } from "../src/utils/isFrontend";
+import { isBackend } from "../src/utils/isBackend";
 
 const TAPES_FILE = "./tapes.json";
 const BASE64_PREFIX = "data:application/octet-stream;base64,";
@@ -143,6 +143,7 @@ async function vcr(
 			init: {
 				headers: omit(init.headers as Record<string, string>, "Authorization"),
 				method: init.method,
+				body: typeof init.body === "string" && init.body.length < 1_000 ? init.body : undefined,
 			},
 			response: {
 				body: isText ? new TextDecoder().decode(arrayBuffer) : "",

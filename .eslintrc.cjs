@@ -16,6 +16,7 @@ module.exports = {
 		"@typescript-eslint/no-unused-vars": "error",
 		"@typescript-eslint/no-non-null-assertion": "error",
 		"@typescript-eslint/no-explicit-any": "error",
+		"@typescript-eslint/no-empty-interfaces": "off",
 		// For doc purposes, prefer interfaces
 		"@typescript-eslint/consistent-type-definitions": ["error", "interface"],
 	},

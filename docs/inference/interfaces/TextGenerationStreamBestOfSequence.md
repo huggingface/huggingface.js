@@ -4,13 +4,13 @@
 
 ### finish\_reason
 
-• **finish\_reason**: [`TextGenerationStreamFinishReason`](../enums/TextGenerationStreamFinishReason)
+• **finish\_reason**: [`TextGenerationStreamFinishReason`](../modules#textgenerationstreamfinishreason)
 
 Generation finish reason
 
 #### Defined in
 
-[HfInference.ts:260](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L260)
+[inference/src/tasks/nlp/textGenerationStream.ts:35](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L35)
 
 ___
 
@@ -22,7 +22,7 @@ Generated text
 
 #### Defined in
 
-[HfInference.ts:258](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L258)
+[inference/src/tasks/nlp/textGenerationStream.ts:33](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L33)
 
 ___
 
@@ -34,7 +34,7 @@ Number of generated tokens
 
 #### Defined in
 
-[HfInference.ts:262](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L262)
+[inference/src/tasks/nlp/textGenerationStream.ts:37](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L37)
 
 ___
 
@@ -46,7 +46,7 @@ Prompt tokens
 
 #### Defined in
 
-[HfInference.ts:266](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L266)
+[inference/src/tasks/nlp/textGenerationStream.ts:41](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L41)
 
 ___
 
@@ -58,7 +58,7 @@ Sampling seed if sampling was activated
 
 #### Defined in
 
-[HfInference.ts:264](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L264)
+[inference/src/tasks/nlp/textGenerationStream.ts:39](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L39)
 
 ___
 
@@ -70,4 +70,4 @@ Generated tokens
 
 #### Defined in
 
-[HfInference.ts:268](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L268)
+[inference/src/tasks/nlp/textGenerationStream.ts:43](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L43)

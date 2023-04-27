@@ -1,6 +1,6 @@
 import { expect, it, describe, assert } from "vitest";
 
-import type { TextGenerationStreamReturn } from "../src";
+import type { TextGenerationStreamOutput } from "../src";
 import { HfInference } from "../src";
 import "./vcr";
 import { readTestFile } from "./test-files";
@@ -60,9 +60,9 @@ describe.concurrent(
 			});
 		});
 
-		it("questionAnswer", async () => {
+		it("questionAnswering", async () => {
 			expect(
-				await hf.questionAnswer({
+				await hf.questionAnswering({
 					model: "deepset/roberta-base-squad2",
 					inputs: {
 						question: "What is the capital of France?",
@@ -77,9 +77,9 @@ describe.concurrent(
 			});
 		});
 
-		it("table question answer", async () => {
+		it("tableQuestionAnswering", async () => {
 			expect(
-				await hf.tableQuestionAnswer({
+				await hf.tableQuestionAnswering({
 					model: "google/tapas-base-finetuned-wtq",
 					inputs: {
 						query: "How many stars does the transformers repository have?",
@@ -96,6 +96,53 @@ describe.concurrent(
 				coordinates: [[0, 1]],
 				cells: ["36542"],
 				aggregator: "AVERAGE",
+			});
+		});
+
+		it("documentQuestionAnswering", async () => {
+			expect(
+				await hf.documentQuestionAnswering({
+					model: "impira/layoutlm-document-qa",
+					inputs: {
+						question: "Invoice number?",
+						image: new Blob([readTestFile("invoice.png")], { type: "image/png" }),
+					},
+				})
+			).toMatchObject({
+				answer: "us-001",
+				score: expect.any(Number),
+				// not sure what start/end refers to in this case
+				start: expect.any(Number),
+				end: expect.any(Number),
+			});
+		});
+
+		it("documentQuestionAnswering with non-array output", async () => {
+			expect(
+				await hf.documentQuestionAnswering({
+					model: "naver-clova-ix/donut-base-finetuned-docvqa",
+					inputs: {
+						question: "Invoice number?",
+						image: new Blob([readTestFile("invoice.png")], { type: "image/png" }),
+					},
+				})
+			).toMatchObject({
+				answer: "us-001",
+			});
+		});
+
+		it("visualQuestionAnswering", async () => {
+			expect(
+				await hf.visualQuestionAnswering({
+					model: "dandelin/vilt-b32-finetuned-vqa",
+					inputs: {
+						question: "How many cats are lying down?",
+						image: new Blob([readTestFile("cats.png")], { type: "image/png" }),
+					},
+				})
+			).toMatchObject({
+				answer: "2",
+				score: expect.any(Number),
 			});
 		});
 
@@ -144,7 +191,7 @@ describe.concurrent(
 				inputs: `repeat "${phrase}"`,
 			});
 
-			const makeExpectedReturn = (tokenText: string, fullPhrase: string): TextGenerationStreamReturn => {
+			const makeExpectedReturn = (tokenText: string, fullPhrase: string): TextGenerationStreamOutput => {
 				const eot = tokenText === "</s>";
 				return {
 					details: null,
@@ -267,9 +314,9 @@ describe.concurrent(
 				warnings: ["Setting `pad_token_id` to `eos_token_id`:50256 for open-end generation."],
 			});
 		});
-		it("SentenceSimiliarity", async () => {
+		it("SentenceSimilarity", async () => {
 			expect(
-				await hf.sentenceSimiliarity({
+				await hf.sentenceSimilarity({
 					model: "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
 					inputs: {
 						source_sentence: "That is a happy person",
@@ -396,6 +443,25 @@ describe.concurrent(
 			).toEqual({
 				generated_text: "a large brown and white giraffe standing in a field ",
 			});
+		});
+		it("request - google/flan-t5-xxl", async () => {
+			expect(
+				await hf.request({
+					model: "google/flan-t5-xxl",
+					inputs: "one plus two equals",
+				})
+			).toMatchObject([
+				{
+					generated_text: expect.any(String),
+				},
+			]);
+		});
+		it("endpoint - makes request to specified endpoint", async () => {
+			const ep = hf.endpoint("https://api-inference.huggingface.co/models/google/flan-t5-xxl");
+			const { generated_text } = await ep.textGeneration({
+				inputs: "one plus two equals",
+			});
+			expect(generated_text).toEqual("three");
 		});
 	},
 	TIMEOUT

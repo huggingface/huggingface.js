@@ -9,12 +9,28 @@
   <br/>
 </p>
 
+```ts
+await inference.translation({
+  model: 't5-base',
+  inputs: 'My name is Wolfgang and I live in Berlin'
+})
+
+await inference.textToImage({
+  model: 'stabilityai/stable-diffusion-2',
+  inputs: 'award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]',
+  parameters: {
+    negative_prompt: 'blurry',
+  }
+})
+```
+
 # Hugging Face JS libraries
 
 This is a collection of JS libraries to interact with the Hugging Face API, with TS types included.
 
+- [@huggingface/inference](inference/README): Use the Inference API to make calls to 100,000+ Machine Learning models, or your own [inference endpoints](https://hf.co/docs/inference-endpoints/)!
 - [@huggingface/hub](hub/README): Interact with huggingface.co to create or delete repos and commit / download files
-- [@huggingface/inference](inference/README): Use the Inference API to make calls to 100,000+ Machine Learning models!
+
 
 With more to come, like `@huggingface/endpoints` to manage your HF Endpoints!
 
@@ -29,15 +45,15 @@ The libraries are still very young, please help us by opening issues!
 To install via NPM, you can download the libraries as needed:
 
 ```bash
-npm install @huggingface/hub
 npm install @huggingface/inference
+npm install @huggingface/hub
 ```
 
 Then import the libraries in your code:
 
 ```ts
-import { createRepo, commit, deleteRepo, listFiles } from "@huggingface/hub";
 import { HfInference } from "@huggingface/inference";
+import { createRepo, commit, deleteRepo, listFiles } from "@huggingface/hub";
 import type { RepoId, Credentials } from "@huggingface/hub";
 ```
 
@@ -48,18 +64,52 @@ You can run our packages with vanilla JS, without any bundler, by using a CDN or
 ```html
 
 <script type="module">
-    import { HfInference } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@1.8.0/+esm';
+    import { HfInference } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@2.1.3/+esm';
     import { createRepo, commit, deleteRepo, listFiles } from "https://cdn.jsdelivr.net/npm/@huggingface/hub@0.5.0/+esm";
 </script>
 ```
 
-## Usage example
+## Usage examples
+
+Get your HF access token in your [account settings](https://huggingface.co/settings/tokens).
+
+### @huggingface/inference examples
+
+```ts
+import { HfInference } from "@huggingface/inference";
+
+const HF_ACCESS_TOKEN = "hf_...";
+
+const inference = new HfInference(HF_ACCESS_TOKEN);
+
+await inference.translation({
+  model: 't5-base',
+  inputs: 'My name is Wolfgang and I live in Berlin'
+})
+
+await inference.textToImage({
+  model: 'stabilityai/stable-diffusion-2',
+  inputs: 'award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]',
+  parameters: {
+    negative_prompt: 'blurry',
+  }
+})
+
+await inference.imageToText({
+  data: await (await fetch('https://picsum.photos/300/300')).blob(),
+  model: 'nlpconnect/vit-gpt2-image-captioning',  
+})
+
+// Using your own inference endpoint: https://hf.co/docs/inference-endpoints/
+const gpt2 = inference.endpoint('https://xyz.eu-west-1.aws.endpoints.huggingface.cloud/gpt2');
+const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the universe is'});
+```
+
+### @huggingface/hub examples
 
 ```ts
 import { createRepo, uploadFile, deleteFiles } from "@huggingface/hub";
-import { HfInference } from "@huggingface/inference";
 
-// use an access token from your free account
 const HF_ACCESS_TOKEN = "hf_...";
 
 await createRepo({
@@ -82,26 +132,6 @@ await deleteFiles({
   credentials: {accessToken: HF_ACCESS_TOKEN},
   paths: ["README.md", ".gitattributes"]
 });
-
-const inference = new HfInference(HF_ACCESS_TOKEN);
-
-await inference.translation({
-  model: 't5-base',
-  inputs: 'My name is Wolfgang and I live in Berlin'
-})
-
-await inference.textToImage({
-  inputs: 'award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]',
-  model: 'stabilityai/stable-diffusion-2',
-  parameters: {
-    negative_prompt: 'blurry',
-  }
-})
-
-await inference.imageToText({
-  data: await (await fetch('https://picsum.photos/300/300')).blob(),
-  model: 'nlpconnect/vit-gpt2-image-captioning',  
-})
 ```
 
 There are more features of course, check each library's README!

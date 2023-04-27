@@ -1,10 +1,10 @@
-import type { JsonObject } from "type-fest";
+import type { JsonObject } from "./vendor/type-fest";
 
 export async function createApiError(
 	response: Response,
 	opts?: { requestId?: string; message?: string }
 ): Promise<never> {
-	const error = new ApiError(response.url, response.status, response.headers.get("X-Request-Id") ?? opts?.requestId);
+	const error = new HubApiError(response.url, response.status, response.headers.get("X-Request-Id") ?? opts?.requestId);
 
 	error.message = `Api error with status ${error.statusCode}.${opts?.message ? ` ${opts.message}.` : ""} Request ID: ${
 		error.requestId
@@ -24,7 +24,7 @@ export async function createApiError(
 /**
  * Error thrown when an API call to the Hugging Face Hub fails.
  */
-export class ApiError extends Error {
+export class HubApiError extends Error {
 	statusCode: number;
 	url: string;
 	requestId?: string;

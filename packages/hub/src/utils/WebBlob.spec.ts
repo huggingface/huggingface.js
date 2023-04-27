@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { base64FromBytes } from "./base64FromBytes";
+import { base64FromBytes } from "../utils/base64FromBytes";
 import { WebBlob } from "./WebBlob";
 
 describe("WebBlob", async () => {

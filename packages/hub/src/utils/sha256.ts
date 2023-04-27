@@ -1,4 +1,4 @@
-import { isFrontend } from "../../../shared/src/isFrontend";
+import { isFrontend } from "../utils/isFrontend";
 import { hexFromBytes } from "./hexFromBytes";
 
 /**

@@ -1,315 +1,946 @@
 # @huggingface/inference
 
-## Enumerations
-
-- [TextGenerationStreamFinishReason](enums/TextGenerationStreamFinishReason)
-
 ## Classes
 
 - [HfInference](classes/HfInference)
+- [HfInferenceEndpoint](classes/HfInferenceEndpoint)
 
 ## Interfaces
 
-- [Args](interfaces/Args)
-- [AudioClassificationReturnValue](interfaces/AudioClassificationReturnValue)
-- [AutomaticSpeechRecognitionReturn](interfaces/AutomaticSpeechRecognitionReturn)
-- [ConversationalReturn](interfaces/ConversationalReturn)
-- [ImageClassificationReturnValue](interfaces/ImageClassificationReturnValue)
-- [ImageSegmentationReturnValue](interfaces/ImageSegmentationReturnValue)
-- [ImageToTextReturn](interfaces/ImageToTextReturn)
-- [ObjectDetectionReturnValue](interfaces/ObjectDetectionReturnValue)
+- [AudioClassificationOutputValue](interfaces/AudioClassificationOutputValue)
+- [AutomaticSpeechRecognitionOutput](interfaces/AutomaticSpeechRecognitionOutput)
+- [BaseArgs](interfaces/BaseArgs)
+- [ConversationalOutput](interfaces/ConversationalOutput)
+- [DocumentQuestionAnsweringOutput](interfaces/DocumentQuestionAnsweringOutput)
+- [ImageClassificationOutputValue](interfaces/ImageClassificationOutputValue)
+- [ImageSegmentationOutputValue](interfaces/ImageSegmentationOutputValue)
+- [ImageToTextOutput](interfaces/ImageToTextOutput)
+- [ObjectDetectionOutputValue](interfaces/ObjectDetectionOutputValue)
 - [Options](interfaces/Options)
-- [QuestionAnswerReturn](interfaces/QuestionAnswerReturn)
-- [SummarizationReturn](interfaces/SummarizationReturn)
-- [TableQuestionAnswerReturn](interfaces/TableQuestionAnswerReturn)
-- [TextGenerationReturn](interfaces/TextGenerationReturn)
+- [QuestionAnsweringOutput](interfaces/QuestionAnsweringOutput)
+- [SummarizationOutput](interfaces/SummarizationOutput)
+- [TableQuestionAnsweringOutput](interfaces/TableQuestionAnsweringOutput)
+- [TextGenerationOutput](interfaces/TextGenerationOutput)
 - [TextGenerationStreamBestOfSequence](interfaces/TextGenerationStreamBestOfSequence)
 - [TextGenerationStreamDetails](interfaces/TextGenerationStreamDetails)
+- [TextGenerationStreamOutput](interfaces/TextGenerationStreamOutput)
 - [TextGenerationStreamPrefillToken](interfaces/TextGenerationStreamPrefillToken)
-- [TextGenerationStreamReturn](interfaces/TextGenerationStreamReturn)
 - [TextGenerationStreamToken](interfaces/TextGenerationStreamToken)
-- [TokenClassificationReturnValue](interfaces/TokenClassificationReturnValue)
-- [TranslationReturn](interfaces/TranslationReturn)
-- [ZeroShotClassificationReturnValue](interfaces/ZeroShotClassificationReturnValue)
+- [TokenClassificationOutputValue](interfaces/TokenClassificationOutputValue)
+- [TranslationOutput](interfaces/TranslationOutput)
+- [VisualQuestionAnsweringOutput](interfaces/VisualQuestionAnsweringOutput)
+- [ZeroShotClassificationOutputValue](interfaces/ZeroShotClassificationOutputValue)
 
 ## Type Aliases
 
 ### AudioClassificationArgs
 
-Ƭ **AudioClassificationArgs**: [`Args`](interfaces/Args) & { `data`: `Blob` \| `ArrayBuffer`  }
+Ƭ **AudioClassificationArgs**: [`BaseArgs`](interfaces/BaseArgs) & { `data`: `Blob` \| `ArrayBuffer`  }
 
 #### Defined in
 
-[HfInference.ts:558](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L558)
+[inference/src/tasks/audio/audioClassification.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/audio/audioClassification.ts#L5)
 
 ___
 
 ### AudioClassificationReturn
 
-Ƭ **AudioClassificationReturn**: [`AudioClassificationReturnValue`](interfaces/AudioClassificationReturnValue)[]
+Ƭ **AudioClassificationReturn**: [`AudioClassificationOutputValue`](interfaces/AudioClassificationOutputValue)[]
 
 #### Defined in
 
-[HfInference.ts:577](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L577)
+[inference/src/tasks/audio/audioClassification.ts:24](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/audio/audioClassification.ts#L24)
 
 ___
 
 ### AutomaticSpeechRecognitionArgs
 
-Ƭ **AutomaticSpeechRecognitionArgs**: [`Args`](interfaces/Args) & { `data`: `Blob` \| `ArrayBuffer`  }
+Ƭ **AutomaticSpeechRecognitionArgs**: [`BaseArgs`](interfaces/BaseArgs) & { `data`: `Blob` \| `ArrayBuffer`  }
 
 #### Defined in
 
-[HfInference.ts:544](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L544)
+[inference/src/tasks/audio/automaticSpeechRecognition.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/audio/automaticSpeechRecognition.ts#L5)
 
 ___
 
 ### ConversationalArgs
 
-Ƭ **ConversationalArgs**: [`Args`](interfaces/Args) & { `inputs`: { `generated_responses?`: `string`[] ; `past_user_inputs?`: `string`[] ; `text`: `string`  } ; `parameters?`: { `max_length?`: `number` ; `max_time?`: `number` ; `min_length?`: `number` ; `repetition_penalty?`: `number` ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number`  }  }
+Ƭ **ConversationalArgs**: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: { `generated_responses?`: `string`[] ; `past_user_inputs?`: `string`[] ; `text`: `string`  } ; `parameters?`: { `max_length?`: `number` ; `max_time?`: `number` ; `min_length?`: `number` ; `repetition_penalty?`: `number` ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number`  }  }
 
 #### Defined in
 
-[HfInference.ts:397](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L397)
+[inference/src/tasks/nlp/conversational.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/conversational.ts#L5)
+
+___
+
+### DocumentQuestionAnsweringArgs
+
+Ƭ **DocumentQuestionAnsweringArgs**: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: { `image`: `Blob` ; `question`: `string`  }  }
+
+#### Defined in
+
+[inference/src/tasks/multimodal/documentQuestionAnswering.ts:8](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/multimodal/documentQuestionAnswering.ts#L8)
 
 ___
 
 ### FeatureExtractionArgs
 
-Ƭ **FeatureExtractionArgs**: [`Args`](interfaces/Args) & { `inputs`: `Record`<`string`, `unknown`\> \| `Record`<`string`, `unknown`\>[]  }
+Ƭ **FeatureExtractionArgs**: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: `string` \| `string`[]  }
 
 #### Defined in
 
-[HfInference.ts:453](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L453)
+[inference/src/tasks/nlp/featureExtraction.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/featureExtraction.ts#L5)
 
 ___
 
-### FeatureExtractionReturn
+### FeatureExtractionOutput
 
-Ƭ **FeatureExtractionReturn**: (`number` \| `number`[])[]
+Ƭ **FeatureExtractionOutput**: (`number` \| `number`[])[]
 
 Returned values are a list of floats, or a list of list of floats (depending on if you sent a string or a list of string, and if the automatic reduction, usually mean_pooling for instance was applied for you or not. This should be explained on the model's README.
 
 #### Defined in
 
-[HfInference.ts:468](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L468)
+[inference/src/tasks/nlp/featureExtraction.ts:18](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/featureExtraction.ts#L18)
 
 ___
 
 ### FillMaskArgs
 
-Ƭ **FillMaskArgs**: [`Args`](interfaces/Args) & { `inputs`: `string`  }
+Ƭ **FillMaskArgs**: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: `string`  }
 
 #### Defined in
 
-[HfInference.ts:35](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L35)
+[inference/src/tasks/nlp/fillMask.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/fillMask.ts#L5)
 
 ___
 
-### FillMaskReturn
+### FillMaskOutput
 
-Ƭ **FillMaskReturn**: { `score`: `number` ; `sequence`: `string` ; `token`: `number` ; `token_str`: `string`  }[]
+Ƭ **FillMaskOutput**: { `score`: `number` ; `sequence`: `string` ; `token`: `number` ; `token_str`: `string`  }[]
 
 #### Defined in
 
-[HfInference.ts:39](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L39)
+[inference/src/tasks/nlp/fillMask.ts:9](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/fillMask.ts#L9)
 
 ___
 
 ### ImageClassificationArgs
 
-Ƭ **ImageClassificationArgs**: [`Args`](interfaces/Args) & { `data`: `Blob` \| `ArrayBuffer`  }
+Ƭ **ImageClassificationArgs**: [`BaseArgs`](interfaces/BaseArgs) & { `data`: `Blob` \| `ArrayBuffer`  }
 
 #### Defined in
 
-[HfInference.ts:470](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L470)
+[inference/src/tasks/cv/imageClassification.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageClassification.ts#L5)
 
 ___
 
-### ImageClassificationReturn
+### ImageClassificationOutput
 
-Ƭ **ImageClassificationReturn**: [`ImageClassificationReturnValue`](interfaces/ImageClassificationReturnValue)[]
+Ƭ **ImageClassificationOutput**: [`ImageClassificationOutputValue`](interfaces/ImageClassificationOutputValue)[]
 
 #### Defined in
 
-[HfInference.ts:488](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L488)
+[inference/src/tasks/cv/imageClassification.ts:23](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageClassification.ts#L23)
 
 ___
 
 ### ImageSegmentationArgs
 
-Ƭ **ImageSegmentationArgs**: [`Args`](interfaces/Args) & { `data`: `Blob` \| `ArrayBuffer`  }
+Ƭ **ImageSegmentationArgs**: [`BaseArgs`](interfaces/BaseArgs) & { `data`: `Blob` \| `ArrayBuffer`  }
 
 #### Defined in
 
-[HfInference.ts:520](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L520)
+[inference/src/tasks/cv/imageSegmentation.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageSegmentation.ts#L5)
 
 ___
 
-### ImageSegmentationReturn
+### ImageSegmentationOutput
 
-Ƭ **ImageSegmentationReturn**: [`ImageSegmentationReturnValue`](interfaces/ImageSegmentationReturnValue)[]
+Ƭ **ImageSegmentationOutput**: [`ImageSegmentationOutputValue`](interfaces/ImageSegmentationOutputValue)[]
 
 #### Defined in
 
-[HfInference.ts:542](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L542)
+[inference/src/tasks/cv/imageSegmentation.ts:27](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageSegmentation.ts#L27)
 
 ___
 
 ### ImageToTextArgs
 
-Ƭ **ImageToTextArgs**: [`Args`](interfaces/Args) & { `data`: `Blob` \| `ArrayBuffer`  }
+Ƭ **ImageToTextArgs**: [`BaseArgs`](interfaces/BaseArgs) & { `data`: `Blob` \| `ArrayBuffer`  }
 
 #### Defined in
 
-[HfInference.ts:611](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L611)
+[inference/src/tasks/cv/imageToText.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageToText.ts#L5)
 
 ___
 
 ### ObjectDetectionArgs
 
-Ƭ **ObjectDetectionArgs**: [`Args`](interfaces/Args) & { `data`: `Blob` \| `ArrayBuffer`  }
+Ƭ **ObjectDetectionArgs**: [`BaseArgs`](interfaces/BaseArgs) & { `data`: `Blob` \| `ArrayBuffer`  }
 
 #### Defined in
 
-[HfInference.ts:490](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L490)
+[inference/src/tasks/cv/objectDetection.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/objectDetection.ts#L5)
 
 ___
 
-### ObjectDetectionReturn
+### ObjectDetectionOutput
 
-Ƭ **ObjectDetectionReturn**: [`ObjectDetectionReturnValue`](interfaces/ObjectDetectionReturnValue)[]
+Ƭ **ObjectDetectionOutput**: [`ObjectDetectionOutputValue`](interfaces/ObjectDetectionOutputValue)[]
 
 #### Defined in
 
-[HfInference.ts:518](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L518)
+[inference/src/tasks/cv/objectDetection.ts:33](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/objectDetection.ts#L33)
 
 ___
 
-### QuestionAnswerArgs
+### QuestionAnsweringArgs
 
-Ƭ **QuestionAnswerArgs**: [`Args`](interfaces/Args) & { `inputs`: { `context`: `string` ; `question`: `string`  }  }
+Ƭ **QuestionAnsweringArgs**: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: { `context`: `string` ; `question`: `string`  }  }
 
 #### Defined in
 
-[HfInference.ts:102](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L102)
+[inference/src/tasks/nlp/questionAnswering.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/questionAnswering.ts#L5)
+
+___
+
+### RequestArgs
+
+Ƭ **RequestArgs**: [`BaseArgs`](interfaces/BaseArgs) & { `data`: `Blob` \| `ArrayBuffer`  } \| { `inputs`: `unknown`  } & { `accessToken?`: `string` ; `parameters?`: `Record`<`string`, `unknown`\>  }
+
+#### Defined in
+
+[inference/src/types.ts:42](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/types.ts#L42)
+
+___
+
+### SentenceSimilarityArgs
+
+Ƭ **SentenceSimilarityArgs**: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: `Record`<`string`, `unknown`\> \| `Record`<`string`, `unknown`\>[]  }
+
+#### Defined in
+
+[inference/src/tasks/nlp/sentenceSimilarity.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/sentenceSimilarity.ts#L5)
+
+___
+
+### SentenceSimilarityOutput
+
+Ƭ **SentenceSimilarityOutput**: `number`[]
+
+Returned values are a list of floats
+
+#### Defined in
+
+[inference/src/tasks/nlp/sentenceSimilarity.ts:18](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/sentenceSimilarity.ts#L18)
 
 ___
 
 ### SummarizationArgs
 
-Ƭ **SummarizationArgs**: [`Args`](interfaces/Args) & { `inputs`: `string` ; `parameters?`: { `max_length?`: `number` ; `max_time?`: `number` ; `min_length?`: `number` ; `repetition_penalty?`: `number` ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number`  }  }
+Ƭ **SummarizationArgs**: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: `string` ; `parameters?`: { `max_length?`: `number` ; `max_time?`: `number` ; `min_length?`: `number` ; `repetition_penalty?`: `number` ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number`  }  }
 
 #### Defined in
 
-[HfInference.ts:58](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L58)
+[inference/src/tasks/nlp/summarization.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/summarization.ts#L5)
 
 ___
 
-### TableQuestionAnswerArgs
+### TableQuestionAnsweringArgs
 
-Ƭ **TableQuestionAnswerArgs**: [`Args`](interfaces/Args) & { `inputs`: { `query`: `string` ; `table`: `Record`<`string`, `string`[]\>  }  }
+Ƭ **TableQuestionAnsweringArgs**: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: { `query`: `string` ; `table`: `Record`<`string`, `string`[]\>  }  }
 
 #### Defined in
 
-[HfInference.ts:128](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L128)
+[inference/src/tasks/nlp/tableQuestionAnswering.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/tableQuestionAnswering.ts#L5)
 
 ___
 
 ### TextClassificationArgs
 
-Ƭ **TextClassificationArgs**: [`Args`](interfaces/Args) & { `inputs`: `string`  }
+Ƭ **TextClassificationArgs**: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: `string`  }
 
 #### Defined in
 
-[HfInference.ts:160](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L160)
+[inference/src/tasks/nlp/textClassification.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textClassification.ts#L5)
 
 ___
 
-### TextClassificationReturn
+### TextClassificationOutput
 
-Ƭ **TextClassificationReturn**: { `label`: `string` ; `score`: `number`  }[]
+Ƭ **TextClassificationOutput**: { `label`: `string` ; `score`: `number`  }[]
 
 #### Defined in
 
-[HfInference.ts:167](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L167)
+[inference/src/tasks/nlp/textClassification.ts:12](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textClassification.ts#L12)
 
 ___
 
 ### TextGenerationArgs
 
-Ƭ **TextGenerationArgs**: [`Args`](interfaces/Args) & { `inputs`: `string` ; `parameters?`: { `do_sample?`: `boolean` ; `max_new_tokens?`: `number` ; `max_time?`: `number` ; `num_return_sequences?`: `number` ; `repetition_penalty?`: `number` ; `return_full_text?`: `boolean` ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number`  }  }
+Ƭ **TextGenerationArgs**: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: `string` ; `parameters?`: { `do_sample?`: `boolean` ; `max_new_tokens?`: `number` ; `max_time?`: `number` ; `num_return_sequences?`: `number` ; `repetition_penalty?`: `number` ; `return_full_text?`: `boolean` ; `temperature?`: `number` ; `top_k?`: `number` ; `top_p?`: `number`  }  }
 
 #### Defined in
 
-[HfInference.ts:178](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L178)
+[inference/src/tasks/nlp/textGeneration.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGeneration.ts#L5)
+
+___
+
+### TextGenerationStreamFinishReason
+
+Ƭ **TextGenerationStreamFinishReason**: ``"length"`` \| ``"eos_token"`` \| ``"stop_sequence"``
+
+#### Defined in
+
+[inference/src/tasks/nlp/textGenerationStream.ts:46](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L46)
 
 ___
 
 ### TextToImageArgs
 
-Ƭ **TextToImageArgs**: [`Args`](interfaces/Args) & { `inputs`: `string` ; `parameters?`: { `guidance_scale?`: `number` ; `height?`: `number` ; `negative_prompt?`: `string` ; `num_inference_steps?`: `number` ; `width?`: `number`  }  }
+Ƭ **TextToImageArgs**: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: `string` ; `parameters?`: { `guidance_scale?`: `number` ; `height?`: `number` ; `negative_prompt?`: `string` ; `num_inference_steps?`: `number` ; `width?`: `number`  }  }
 
 #### Defined in
 
-[HfInference.ts:579](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L579)
+[inference/src/tasks/cv/textToImage.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/textToImage.ts#L5)
 
 ___
 
-### TextToImageReturn
+### TextToImageOutput
 
-Ƭ **TextToImageReturn**: `Blob`
+Ƭ **TextToImageOutput**: `Blob`
 
 #### Defined in
 
-[HfInference.ts:609](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L609)
+[inference/src/tasks/cv/textToImage.ts:35](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/textToImage.ts#L35)
 
 ___
 
 ### TokenClassificationArgs
 
-Ƭ **TokenClassificationArgs**: [`Args`](interfaces/Args) & { `inputs`: `string` ; `parameters?`: { `aggregation_strategy?`: ``"none"`` \| ``"simple"`` \| ``"first"`` \| ``"average"`` \| ``"max"``  }  }
+Ƭ **TokenClassificationArgs**: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: `string` ; `parameters?`: { `aggregation_strategy?`: ``"none"`` \| ``"simple"`` \| ``"first"`` \| ``"average"`` \| ``"max"``  }  }
 
 #### Defined in
 
-[HfInference.ts:310](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L310)
+[inference/src/tasks/nlp/tokenClassification.ts:6](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/tokenClassification.ts#L6)
 
 ___
 
-### TokenClassificationReturn
+### TokenClassificationOutput
 
-Ƭ **TokenClassificationReturn**: [`TokenClassificationReturnValue`](interfaces/TokenClassificationReturnValue)[]
+Ƭ **TokenClassificationOutput**: [`TokenClassificationOutputValue`](interfaces/TokenClassificationOutputValue)[]
 
 #### Defined in
 
-[HfInference.ts:356](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L356)
+[inference/src/tasks/nlp/tokenClassification.ts:52](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/tokenClassification.ts#L52)
 
 ___
 
 ### TranslationArgs
 
-Ƭ **TranslationArgs**: [`Args`](interfaces/Args) & { `inputs`: `string`  }
+Ƭ **TranslationArgs**: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: `string`  }
 
 #### Defined in
 
-[HfInference.ts:358](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L358)
+[inference/src/tasks/nlp/translation.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/translation.ts#L5)
+
+___
+
+### VisualQuestionAnsweringArgs
+
+Ƭ **VisualQuestionAnsweringArgs**: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: { `image`: `Blob` ; `question`: `string`  }  }
+
+#### Defined in
+
+[inference/src/tasks/multimodal/visualQuestionAnswering.ts:6](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/multimodal/visualQuestionAnswering.ts#L6)
 
 ___
 
 ### ZeroShotClassificationArgs
 
-Ƭ **ZeroShotClassificationArgs**: [`Args`](interfaces/Args) & { `inputs`: `string` \| `string`[] ; `parameters`: { `candidate_labels`: `string`[] ; `multi_label?`: `boolean`  }  }
+Ƭ **ZeroShotClassificationArgs**: [`BaseArgs`](interfaces/BaseArgs) & { `inputs`: `string` \| `string`[] ; `parameters`: { `candidate_labels`: `string`[] ; `multi_label?`: `boolean`  }  }
 
 #### Defined in
 
-[HfInference.ts:372](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L372)
+[inference/src/tasks/nlp/zeroShotClassification.ts:6](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/zeroShotClassification.ts#L6)
 
 ___
 
-### ZeroShotClassificationReturn
+### ZeroShotClassificationOutput
 
-Ƭ **ZeroShotClassificationReturn**: [`ZeroShotClassificationReturnValue`](interfaces/ZeroShotClassificationReturnValue)[]
+Ƭ **ZeroShotClassificationOutput**: [`ZeroShotClassificationOutputValue`](interfaces/ZeroShotClassificationOutputValue)[]
 
 #### Defined in
 
-[HfInference.ts:395](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/HfInference.ts#L395)
+[inference/src/tasks/nlp/zeroShotClassification.ts:29](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/zeroShotClassification.ts#L29)
+
+## Functions
+
+### audioClassification
+
+▸ **audioClassification**(`args`, `options?`): `Promise`<[`AudioClassificationReturn`](modules#audioclassificationreturn)\>
+
+This task reads some audio input and outputs the likelihood of classes.
+Recommended model:  superb/hubert-large-superb-er
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `args` | [`AudioClassificationArgs`](modules#audioclassificationargs) |
+| `options?` | [`Options`](interfaces/Options) |
+
+#### Returns
+
+`Promise`<[`AudioClassificationReturn`](modules#audioclassificationreturn)\>
+
+#### Defined in
+
+[inference/src/tasks/audio/audioClassification.ts:30](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/audio/audioClassification.ts#L30)
+
+___
+
+### automaticSpeechRecognition
+
+▸ **automaticSpeechRecognition**(`args`, `options?`): `Promise`<[`AutomaticSpeechRecognitionOutput`](interfaces/AutomaticSpeechRecognitionOutput)\>
+
+This task reads some audio input and outputs the said words within the audio files.
+Recommended model (english language): facebook/wav2vec2-large-960h-lv60-self
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `args` | [`AutomaticSpeechRecognitionArgs`](modules#automaticspeechrecognitionargs) |
+| `options?` | [`Options`](interfaces/Options) |
+
+#### Returns
+
+`Promise`<[`AutomaticSpeechRecognitionOutput`](interfaces/AutomaticSpeechRecognitionOutput)\>
+
+#### Defined in
+
+[inference/src/tasks/audio/automaticSpeechRecognition.ts:23](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/audio/automaticSpeechRecognition.ts#L23)
+
+___
+
+### conversational
+
+▸ **conversational**(`args`, `options?`): `Promise`<[`ConversationalOutput`](interfaces/ConversationalOutput)\>
+
+This task corresponds to any chatbot like structure. Models tend to have shorter max_length, so please check with caution when using a given model if you need long range dependency or not. Recommended model: microsoft/DialoGPT-large.
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `args` | [`ConversationalArgs`](modules#conversationalargs) |
+| `options?` | [`Options`](interfaces/Options) |
+
+#### Returns
+
+`Promise`<[`ConversationalOutput`](interfaces/ConversationalOutput)\>
+
+#### Defined in
+
+[inference/src/tasks/nlp/conversational.ts:65](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/conversational.ts#L65)
+
+___
+
+### documentQuestionAnswering
+
+▸ **documentQuestionAnswering**(`args`, `options?`): `Promise`<[`DocumentQuestionAnsweringOutput`](interfaces/DocumentQuestionAnsweringOutput)\>
+
+Answers a question on a document image. Recommended model: impira/layoutlm-document-qa.
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `args` | [`DocumentQuestionAnsweringArgs`](modules#documentquestionansweringargs) |
+| `options?` | [`Options`](interfaces/Options) |
+
+#### Returns
+
+`Promise`<[`DocumentQuestionAnsweringOutput`](interfaces/DocumentQuestionAnsweringOutput)\>
+
+#### Defined in
+
+[inference/src/tasks/multimodal/documentQuestionAnswering.ts:42](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/multimodal/documentQuestionAnswering.ts#L42)
+
+___
+
+### featureExtraction
+
+▸ **featureExtraction**(`args`, `options?`): `Promise`<[`FeatureExtractionOutput`](modules#featureextractionoutput)\>
+
+This task reads some text and outputs raw float values, that are usually consumed as part of a semantic database/semantic search.
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `args` | [`FeatureExtractionArgs`](modules#featureextractionargs) |
+| `options?` | [`Options`](interfaces/Options) |
+
+#### Returns
+
+`Promise`<[`FeatureExtractionOutput`](modules#featureextractionoutput)\>
+
+#### Defined in
+
+[inference/src/tasks/nlp/featureExtraction.ts:23](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/featureExtraction.ts#L23)
+
+___
+
+### fillMask
+
+▸ **fillMask**(`args`, `options?`): `Promise`<[`FillMaskOutput`](modules#fillmaskoutput)\>
+
+Tries to fill in a hole with a missing word (token to be precise). That’s the base task for BERT models.
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `args` | [`FillMaskArgs`](modules#fillmaskargs) |
+| `options?` | [`Options`](interfaces/Options) |
+
+#### Returns
+
+`Promise`<[`FillMaskOutput`](modules#fillmaskoutput)\>
+
+#### Defined in
+
+[inference/src/tasks/nlp/fillMask.ts:31](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/fillMask.ts#L31)
+
+___
+
+### imageClassification
+
+▸ **imageClassification**(`args`, `options?`): `Promise`<[`ImageClassificationOutput`](modules#imageclassificationoutput)\>
+
+This task reads some image input and outputs the likelihood of classes.
+Recommended model: google/vit-base-patch16-224
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `args` | [`ImageClassificationArgs`](modules#imageclassificationargs) |
+| `options?` | [`Options`](interfaces/Options) |
+
+#### Returns
+
+`Promise`<[`ImageClassificationOutput`](modules#imageclassificationoutput)\>
+
+#### Defined in
+
+[inference/src/tasks/cv/imageClassification.ts:29](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageClassification.ts#L29)
+
+___
+
+### imageSegmentation
+
+▸ **imageSegmentation**(`args`, `options?`): `Promise`<[`ImageSegmentationOutput`](modules#imagesegmentationoutput)\>
+
+This task reads some image input and outputs the likelihood of classes & bounding boxes of detected objects.
+Recommended model: facebook/detr-resnet-50-panoptic
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `args` | [`ImageSegmentationArgs`](modules#imagesegmentationargs) |
+| `options?` | [`Options`](interfaces/Options) |
+
+#### Returns
+
+`Promise`<[`ImageSegmentationOutput`](modules#imagesegmentationoutput)\>
+
+#### Defined in
+
+[inference/src/tasks/cv/imageSegmentation.ts:33](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageSegmentation.ts#L33)
+
+___
+
+### imageToText
+
+▸ **imageToText**(`args`, `options?`): `Promise`<[`ImageToTextOutput`](interfaces/ImageToTextOutput)\>
+
+This task reads some image input and outputs the text caption.
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `args` | [`ImageToTextArgs`](modules#imagetotextargs) |
+| `options?` | [`Options`](interfaces/Options) |
+
+#### Returns
+
+`Promise`<[`ImageToTextOutput`](interfaces/ImageToTextOutput)\>
+
+#### Defined in
+
+[inference/src/tasks/cv/imageToText.ts:22](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/imageToText.ts#L22)
+
+___
+
+### objectDetection
+
+▸ **objectDetection**(`args`, `options?`): `Promise`<[`ObjectDetectionOutput`](modules#objectdetectionoutput)\>
+
+This task reads some image input and outputs the likelihood of classes & bounding boxes of detected objects.
+Recommended model: facebook/detr-resnet-50
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `args` | [`ObjectDetectionArgs`](modules#objectdetectionargs) |
+| `options?` | [`Options`](interfaces/Options) |
+
+#### Returns
+
+`Promise`<[`ObjectDetectionOutput`](modules#objectdetectionoutput)\>
+
+#### Defined in
+
+[inference/src/tasks/cv/objectDetection.ts:39](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/objectDetection.ts#L39)
+
+___
+
+### questionAnswering
+
+▸ **questionAnswering**(`args`, `options?`): `Promise`<[`QuestionAnsweringOutput`](interfaces/QuestionAnsweringOutput)\>
+
+Want to have a nice know-it-all bot that can answer any question?. Recommended model: deepset/roberta-base-squad2
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `args` | [`QuestionAnsweringArgs`](modules#questionansweringargs) |
+| `options?` | [`Options`](interfaces/Options) |
+
+#### Returns
+
+`Promise`<[`QuestionAnsweringOutput`](interfaces/QuestionAnsweringOutput)\>
+
+#### Defined in
+
+[inference/src/tasks/nlp/questionAnswering.ts:34](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/questionAnswering.ts#L34)
+
+___
+
+### request
+
+▸ **request**<`T`\>(`args`, `options?`): `Promise`<`T`\>
+
+Primitive to make custom calls to the inference API
+
+#### Type parameters
+
+| Name |
+| :------ |
+| `T` |
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `args` | [`RequestArgs`](modules#requestargs) |
+| `options?` | [`Options`](interfaces/Options) & { `includeCredentials?`: `boolean`  } |
+
+#### Returns
+
+`Promise`<`T`\>
+
+#### Defined in
+
+[inference/src/tasks/custom/request.ts:7](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/custom/request.ts#L7)
+
+___
+
+### sentenceSimilarity
+
+▸ **sentenceSimilarity**(`args`, `options?`): `Promise`<[`SentenceSimilarityOutput`](modules#sentencesimilarityoutput)\>
+
+Calculate the semantic similarity between one text and a list of other sentences by comparing their embeddings.
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `args` | [`SentenceSimilarityArgs`](modules#sentencesimilarityargs) |
+| `options?` | [`Options`](interfaces/Options) |
+
+#### Returns
+
+`Promise`<[`SentenceSimilarityOutput`](modules#sentencesimilarityoutput)\>
+
+#### Defined in
+
+[inference/src/tasks/nlp/sentenceSimilarity.ts:23](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/sentenceSimilarity.ts#L23)
+
+___
+
+### streamingRequest
+
+▸ **streamingRequest**<`T`\>(`args`, `options?`): `AsyncGenerator`<`T`\>
+
+Primitive to make custom inference calls that expect server-sent events, and returns the response through a generator
+
+#### Type parameters
+
+| Name |
+| :------ |
+| `T` |
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `args` | [`RequestArgs`](modules#requestargs) |
+| `options?` | [`Options`](interfaces/Options) & { `includeCredentials?`: `boolean`  } |
+
+#### Returns
+
+`AsyncGenerator`<`T`\>
+
+#### Defined in
+
+[inference/src/tasks/custom/streamingRequest.ts:9](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/custom/streamingRequest.ts#L9)
+
+___
+
+### summarization
+
+▸ **summarization**(`args`, `options?`): `Promise`<[`SummarizationOutput`](interfaces/SummarizationOutput)\>
+
+This task is well known to summarize longer text into shorter text. Be careful, some models have a maximum length of input. That means that the summary cannot handle full books for instance. Be careful when choosing your model.
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `args` | [`SummarizationArgs`](modules#summarizationargs) |
+| `options?` | [`Options`](interfaces/Options) |
+
+#### Returns
+
+`Promise`<[`SummarizationOutput`](interfaces/SummarizationOutput)\>
+
+#### Defined in
+
+[inference/src/tasks/nlp/summarization.ts:52](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/summarization.ts#L52)
+
+___
+
+### tableQuestionAnswering
+
+▸ **tableQuestionAnswering**(`args`, `options?`): `Promise`<[`TableQuestionAnsweringOutput`](interfaces/TableQuestionAnsweringOutput)\>
+
+Don’t know SQL? Don’t want to dive into a large spreadsheet? Ask questions in plain english! Recommended model: google/tapas-base-finetuned-wtq.
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `args` | [`TableQuestionAnsweringArgs`](modules#tablequestionansweringargs) |
+| `options?` | [`Options`](interfaces/Options) |
+
+#### Returns
+
+`Promise`<[`TableQuestionAnsweringOutput`](interfaces/TableQuestionAnsweringOutput)\>
+
+#### Defined in
+
+[inference/src/tasks/nlp/tableQuestionAnswering.ts:40](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/tableQuestionAnswering.ts#L40)
+
+___
+
+### textClassification
+
+▸ **textClassification**(`args`, `options?`): `Promise`<[`TextClassificationOutput`](modules#textclassificationoutput)\>
+
+Usually used for sentiment-analysis this will output the likelihood of classes of an input. Recommended model: distilbert-base-uncased-finetuned-sst-2-english
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `args` | [`TextClassificationArgs`](modules#textclassificationargs) |
+| `options?` | [`Options`](interfaces/Options) |
+
+#### Returns
+
+`Promise`<[`TextClassificationOutput`](modules#textclassificationoutput)\>
+
+#### Defined in
+
+[inference/src/tasks/nlp/textClassification.ts:26](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textClassification.ts#L26)
+
+___
+
+### textGeneration
+
+▸ **textGeneration**(`args`, `options?`): `Promise`<[`TextGenerationOutput`](interfaces/TextGenerationOutput)\>
+
+Use to continue text from a prompt. This is a very generic task. Recommended model: gpt2 (it’s a simple model, but fun to play with).
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `args` | [`TextGenerationArgs`](modules#textgenerationargs) |
+| `options?` | [`Options`](interfaces/Options) |
+
+#### Returns
+
+`Promise`<[`TextGenerationOutput`](interfaces/TextGenerationOutput)\>
+
+#### Defined in
+
+[inference/src/tasks/nlp/textGeneration.ts:60](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGeneration.ts#L60)
+
+___
+
+### textGenerationStream
+
+▸ **textGenerationStream**(`args`, `options?`): `AsyncGenerator`<[`TextGenerationStreamOutput`](interfaces/TextGenerationStreamOutput)\>
+
+Use to continue text from a prompt. Same as `textGeneration` but returns generator that can be read one token at a time
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `args` | [`TextGenerationArgs`](modules#textgenerationargs) |
+| `options?` | [`Options`](interfaces/Options) |
+
+#### Returns
+
+`AsyncGenerator`<[`TextGenerationStreamOutput`](interfaces/TextGenerationStreamOutput)\>
+
+#### Defined in
+
+[inference/src/tasks/nlp/textGenerationStream.ts:87](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/textGenerationStream.ts#L87)
+
+___
+
+### textToImage
+
+▸ **textToImage**(`args`, `options?`): `Promise`<[`TextToImageOutput`](modules#texttoimageoutput)\>
+
+This task reads some text input and outputs an image.
+Recommended model: stabilityai/stable-diffusion-2
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `args` | [`TextToImageArgs`](modules#texttoimageargs) |
+| `options?` | [`Options`](interfaces/Options) |
+
+#### Returns
+
+`Promise`<[`TextToImageOutput`](modules#texttoimageoutput)\>
+
+#### Defined in
+
+[inference/src/tasks/cv/textToImage.ts:41](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/cv/textToImage.ts#L41)
+
+___
+
+### tokenClassification
+
+▸ **tokenClassification**(`args`, `options?`): `Promise`<[`TokenClassificationOutput`](modules#tokenclassificationoutput)\>
+
+Usually used for sentence parsing, either grammatical, or Named Entity Recognition (NER) to understand keywords contained within text. Recommended model: dbmdz/bert-large-cased-finetuned-conll03-english
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `args` | [`TokenClassificationArgs`](modules#tokenclassificationargs) |
+| `options?` | [`Options`](interfaces/Options) |
+
+#### Returns
+
+`Promise`<[`TokenClassificationOutput`](modules#tokenclassificationoutput)\>
+
+#### Defined in
+
+[inference/src/tasks/nlp/tokenClassification.ts:57](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/tokenClassification.ts#L57)
+
+___
+
+### translation
+
+▸ **translation**(`args`, `options?`): `Promise`<[`TranslationOutput`](interfaces/TranslationOutput)\>
+
+This task is well known to translate text from one language to another. Recommended model: Helsinki-NLP/opus-mt-ru-en.
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `args` | [`TranslationArgs`](modules#translationargs) |
+| `options?` | [`Options`](interfaces/Options) |
+
+#### Returns
+
+`Promise`<[`TranslationOutput`](interfaces/TranslationOutput)\>
+
+#### Defined in
+
+[inference/src/tasks/nlp/translation.ts:22](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/translation.ts#L22)
+
+___
+
+### visualQuestionAnswering
+
+▸ **visualQuestionAnswering**(`args`, `options?`): `Promise`<[`VisualQuestionAnsweringOutput`](interfaces/VisualQuestionAnsweringOutput)\>
+
+Answers a question on an image. Recommended model: dandelin/vilt-b32-finetuned-vqa.
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `args` | [`VisualQuestionAnsweringArgs`](modules#visualquestionansweringargs) |
+| `options?` | [`Options`](interfaces/Options) |
+
+#### Returns
+
+`Promise`<[`VisualQuestionAnsweringOutput`](interfaces/VisualQuestionAnsweringOutput)\>
+
+#### Defined in
+
+[inference/src/tasks/multimodal/visualQuestionAnswering.ts:32](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/multimodal/visualQuestionAnswering.ts#L32)
+
+___
+
+### zeroShotClassification
+
+▸ **zeroShotClassification**(`args`, `options?`): `Promise`<[`ZeroShotClassificationOutput`](modules#zeroshotclassificationoutput)\>
+
+This task is super useful to try out classification with zero code, you simply pass a sentence/paragraph and the possible labels for that sentence, and you get a result. Recommended model: facebook/bart-large-mnli.
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `args` | [`ZeroShotClassificationArgs`](modules#zeroshotclassificationargs) |
+| `options?` | [`Options`](interfaces/Options) |
+
+#### Returns
+
+`Promise`<[`ZeroShotClassificationOutput`](modules#zeroshotclassificationoutput)\>
+
+#### Defined in
+
+[inference/src/tasks/nlp/zeroShotClassification.ts:34](https://github.com/huggingface/huggingface.js/blob/main/packages/inference/src/tasks/nlp/zeroShotClassification.ts#L34)

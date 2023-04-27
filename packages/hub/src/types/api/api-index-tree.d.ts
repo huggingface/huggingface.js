@@ -9,11 +9,11 @@ export interface ApiIndexTreeEntry {
 		/** Size of the raw pointer file, 100~200 bytes */
 		pointerSize: number;
 	};
-	lastCommit: {
+	lastCommit?: {
 		date: string;
 		id: string;
 		title: string;
-	} | null;
+	};
 	security?: ApiFileScanResult;
 }
 
