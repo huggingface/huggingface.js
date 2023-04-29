@@ -14,7 +14,6 @@ jobs:
       pr_number: ${{ github.event.number }}
       package: huggingface.js
       path_to_docs: huggingface.js/docs
-      pre_command: test
       additional_args: --not_python_module
     secrets:
       token: ${{ secrets.HF_DOC_TOKEN }}
