@@ -9,19 +9,11 @@ concurrency:
 
 jobs:
   build:
-    - uses: pnpm/action-setup@v2
-    with:
-      version: 7.1.5
-
-    - uses: actions/setup-node@v3
-      with:
-        node-version: "18"
-
-    - uses: huggingface/doc-builder/.github/workflows/build_pr_documentation.yml@pre-command
+    uses: huggingface/doc-builder/.github/workflows/build_pr_documentation.yml@pre-command
     with:
       commit_sha: ${{ github.event.pull_request.head.sha }}
       pr_number: ${{ github.event.number }}
       package: huggingface.js
       path_to_docs: huggingface.js/docs
-      pre_command: "cd huggingface.js && pnpm install && pnpm --filter doc-internal start"
+      pre_command: "npm install -g n && n 18 && npm install -g pnpm && cd huggingface.js && pnpm install && pnpm --filter doc-internal start"
       additional_args: --not_python_module
