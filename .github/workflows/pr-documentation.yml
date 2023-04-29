@@ -23,5 +23,3 @@ jobs:
       path_to_docs: huggingface.js/docs
       pre_command: npm install -g pnpm@7 && cd huggingface.js && pnpm install && pnpm --filter doc-internal start
       additional_args: --not_python_module
-    secrets:
-      token: ${{ secrets.HF_DOC_TOKEN }}
