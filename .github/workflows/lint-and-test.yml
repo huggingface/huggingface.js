@@ -1,59 +1,19 @@
-name: Lint and test
+name: Build PR Documentation
+
 on:
   pull_request:
-  push:
-    branches:
-      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          # Could use something like rmacklin/fetch-through-merge-base@v0 instead when the repo gets bigger
-          fetch-depth: 0
-      - name: "Extracting the merge base into 'SINCE'"
-        id: since
-        run: |
-          if [ -z "${{  github.event.pull_request.head.ref }}" ]
-          then
-            echo "SINCE=${{ github.sha }}^1" >> $GITHUB_OUTPUT
-          else
-            echo "SINCE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} ${{ github.sha }})" >> $GITHUB_OUTPUT
-          fi
-
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 7.1.5
-
-      - uses: actions/setup-node@v3
-        with:
-          node-version: "18"
-          cache: "pnpm"
-          cache-dependency-path: "**/pnpm-lock.yaml"
-      - run: |
-          pnpm install --frozen-lockfile --filter .
-          pnpm install --frozen-lockfile --filter ...[${{ steps.since.outputs.SINCE }}]
-      - name: "Checking lint errors"
-        run: |
-          pnpm --filter ...[${{ steps.since.outputs.SINCE }}] lint:check
-
-      - name: "Checking format errors"
-        run: |
-          pnpm --filter ...[${{ steps.since.outputs.SINCE }}] format:check
-
-      - name: Check types
-        run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] type-check
-
-      - name: Test
-        run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test
-        env:
-          HF_ACCESS_TOKEN: ${{ secrets.HF_ACCESS_TOKEN }}
-
-      - name: Test in browser
-        run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test:browser
-        env:
-          HF_ACCESS_TOKEN: ${{ secrets.HF_ACCESS_TOKEN }}
+  build:
+    uses: huggingface/doc-builder/.github/workflows/build_pr_documentation.yml@pre-command
+    with:
+      commit_sha: ${{ github.event.pull_request.head.sha }}
+      pr_number: ${{ github.event.number }}
+      package: huggingface.js
+      path_to_docs: huggingface.js/docs
+      pre_command: "npm install -g n && n 18 && npm install -g pnpm && cd huggingface.js && pnpm install && pnpm --filter doc-internal start"
+      additional_args: --not_python_module
