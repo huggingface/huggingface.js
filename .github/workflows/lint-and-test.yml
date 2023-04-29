@@ -61,6 +61,7 @@ jobs:
       - name: E2E test
         working-directory: e2e/ts
         run: |
+          pnpm --filter inference build
           pnpm i -g pnpm@8
           pnpm i --ignore-workspace --node-linker=hoisted
           pnpm start
