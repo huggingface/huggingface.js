@@ -1,0 +1,12 @@
+- local: index
+  title: 🤗 Hugging Face JS Libraries
+- title: "@huggingface/hub"
+  isExpanded: true
+  sections:
+    - local: hub/README
+      title: Interact with the Hub
+- title: "@huggingface/inference"
+  isExpanded: true
+  sections:
+    - local: inference/README
+      title: Use the Inference API
