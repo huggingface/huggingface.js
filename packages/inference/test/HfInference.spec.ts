@@ -357,6 +357,14 @@ describe.concurrent(
 				])
 			);
 		});
+		it("textToSpeech", async () => {
+			expect(
+				await hf.textToSpeech({
+					model: "espnet/kan-bayashi_ljspeech_vits",
+					inputs: "hello there!",
+				})
+			).toBeInstanceOf(Blob);
+		});
 		it("imageClassification", async () => {
 			expect(
 				await hf.imageClassification({
