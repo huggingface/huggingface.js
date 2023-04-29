@@ -13,8 +13,7 @@ jobs:
       commit_sha: ${{ github.sha }}
       pr_number: ${{ github.event.number }}
       package: huggingface.js
-      path_to_docs: huggingface.js/docs
-      pre_command: 'npm install -g n && n 18 && npm install -g pnpm && cd huggingface.js && pnpm install && pnpm --filter doc-internal start'
+      path_to_docs: 'npm install -g n && n 18 && npm install -g pnpm && cd huggingface.js && pnpm install && pnpm --filter doc-internal start'
       additional_args: --not_python_module
     secrets:
       token: ${{ secrets.HF_DOC_TOKEN }}
