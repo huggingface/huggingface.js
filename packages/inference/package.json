@@ -54,8 +54,8 @@
 		"vitest": "^0.29.8",
 		"@huggingface/shared": "workspace:*"
 	},
-    "bundledDependencies": [
-        "@huggingface/shared"
-    ],
+	"bundledDependencies": [
+		"@huggingface/shared"
+	],
 	"resolutions": {}
 }
