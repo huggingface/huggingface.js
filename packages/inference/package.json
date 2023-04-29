@@ -51,7 +51,11 @@
 		"@types/node": "18.13.0",
 		"typescript": "^5.0.4",
 		"vite": "^4.1.4",
-		"vitest": "^0.29.8"
+		"vitest": "^0.29.8",
+		"@huggingface/shared": "workspace:*"
 	},
+    "bundledDependencies": [
+        "@huggingface/shared"
+    ],
 	"resolutions": {}
 }

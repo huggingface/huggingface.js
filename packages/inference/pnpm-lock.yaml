@@ -1,12 +1,14 @@
 lockfileVersion: 5.4
 
 specifiers:
+  '@huggingface/shared': workspace:*
   '@types/node': 18.13.0
   typescript: ^5.0.4
   vite: ^4.1.4
   vitest: ^0.29.8
 
 devDependencies:
+  '@huggingface/shared': link:../shared
   '@types/node': 18.13.0
   typescript: 5.0.4
   vite: 4.1.4_@types+node@18.13.0

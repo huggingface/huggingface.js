@@ -57,3 +57,12 @@ jobs:
         run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test:browser
         env:
           HF_ACCESS_TOKEN: ${{ secrets.HF_ACCESS_TOKEN }}
+
+      - name: E2E test
+        working-directory: e2e/ts
+        run: |
+          pnpm i -g pnpm@8
+          pnpm i --ignore-workspace --node-linker=hoisted
+          pnpm start
+        env:
+          token: ${{ secrets.HF_ACCESS_TOKEN }}

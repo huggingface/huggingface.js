@@ -1,6 +1,5 @@
 import { omit } from "../src/utils/omit";
-import { isFrontend } from "../src/utils/isFrontend";
-import { isBackend } from "../src/utils/isBackend";
+import { isBackend, isFrontend } from "@huggingface/shared";
 
 const TAPES_FILE = "./tapes.json";
 const BASE64_PREFIX = "data:application/octet-stream;base64,";
