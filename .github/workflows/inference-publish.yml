@@ -36,8 +36,6 @@ jobs:
       - run: yarn config set version-git-message "🔖 @hugginface/inference v%s"
       - run: yarn config set version-tag-prefix "inference-v"
       - run: yarn version --${{ github.event.inputs.newversion }}
-      - run: cd ../doc-internal && pnpm install && pnpm run prepublish-inference
-      - run: cd ../../ && git add . && git commit --amend --no-edit
       - run: pnpm publish .
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

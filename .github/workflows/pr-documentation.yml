@@ -1,6 +1,13 @@
 name: Build PR Documentation
 
-on: push
+on:
+  pull_request:
+    paths:
+      - "README.md"
+      - "hub/README.md"
+      - "hub/package.json"
+      - "inference/README.md"
+      - "hub/inference.json"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
