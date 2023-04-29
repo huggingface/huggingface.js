@@ -38,6 +38,8 @@ We use modern features to avoid polyfills and dependencies, so the libraries wil
 
 The libraries are still very young, please help us by opening issues!
 
+TEST COMMAND
+
 ## Installation
 
 ### From NPM
