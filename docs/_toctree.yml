@@ -5,8 +5,12 @@
   sections:
     - local: hub/README
       title: Interact with the Hub
+    - local: hub/modules
+      title: API Reference
 - title: "@huggingface/inference"
   isExpanded: true
   sections:
     - local: inference/README
       title: Use the Inference API
+    - local: inference/modules
+      title: API Reference
