@@ -5,6 +5,7 @@ export * from "./custom/streamingRequest";
 // Audio tasks
 export * from "./audio/audioClassification";
 export * from "./audio/automaticSpeechRecognition";
+export * from "./audio/textToSpeech";
 
 // Commputer Vision tasks
 export * from "./cv/imageClassification";
