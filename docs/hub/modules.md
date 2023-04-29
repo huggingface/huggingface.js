@@ -2,7 +2,7 @@
 
 ## Classes
 
-- [ApiError](classes/ApiError)
+- [HubApiError](classes/HubApiError)
 - [InvalidApiResponseFormatError](classes/InvalidApiResponseFormatError)
 
 ## Interfaces
@@ -207,6 +207,64 @@ ___
 
 ___
 
+### deleteFile
+
+▸ **deleteFile**(`params`): `Promise`<[`CommitOutput`](interfaces/CommitOutput)\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `params` | `Object` |
+| `params.branch?` | `string` |
+| `params.commitDescription?` | `string` |
+| `params.commitTitle?` | `string` |
+| `params.credentials` | [`Credentials`](interfaces/Credentials) |
+| `params.hubUrl?` | `string` |
+| `params.isPullRequest?` | `boolean` |
+| `params.parentCommit?` | `string` |
+| `params.path` | `string` |
+| `params.repo` | [`RepoDesignation`](modules#repodesignation) |
+
+#### Returns
+
+`Promise`<[`CommitOutput`](interfaces/CommitOutput)\>
+
+#### Defined in
+
+[hub/src/lib/delete-file.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/delete-file.ts#L5)
+
+___
+
+### deleteFiles
+
+▸ **deleteFiles**(`params`): `Promise`<[`CommitOutput`](interfaces/CommitOutput)\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `params` | `Object` |
+| `params.branch?` | `string` |
+| `params.commitDescription?` | `string` |
+| `params.commitTitle?` | `string` |
+| `params.credentials` | [`Credentials`](interfaces/Credentials) |
+| `params.hubUrl?` | `string` |
+| `params.isPullRequest?` | `boolean` |
+| `params.parentCommit?` | `string` |
+| `params.paths` | `string`[] |
+| `params.repo` | [`RepoDesignation`](modules#repodesignation) |
+
+#### Returns
+
+`Promise`<[`CommitOutput`](interfaces/CommitOutput)\>
+
+#### Defined in
+
+[hub/src/lib/delete-files.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/delete-files.ts#L5)
+
+___
+
 ### deleteRepo
 
 ▸ **deleteRepo**(`params`): `Promise`<`void`\>
@@ -324,6 +382,7 @@ with params.recursive set to `true`.
 | :------ | :------ | :------ |
 | `params` | `Object` | - |
 | `params.credentials?` | [`Credentials`](interfaces/Credentials) | - |
+| `params.expand?` | `boolean` | Fetch `lastCommit` and `securityStatus` for each file. |
 | `params.hubUrl?` | `string` | - |
 | `params.path?` | `string` | Eg 'data' for listing all files in the 'data' folder. Leave it empty to list all files in the repo. |
 | `params.recursive?` | `boolean` | Do we want to list files in subdirectories? |
@@ -336,7 +395,7 @@ with params.recursive set to `true`.
 
 #### Defined in
 
-[hub/src/lib/list-files.ts:32](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L32)
+[hub/src/lib/list-files.ts:38](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L38)
 
 ___
 
@@ -386,6 +445,64 @@ ___
 #### Defined in
 
 [hub/src/lib/list-spaces.ts:19](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-spaces.ts#L19)
+
+___
+
+### uploadFile
+
+▸ **uploadFile**(`params`): `Promise`<[`CommitOutput`](interfaces/CommitOutput)\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `params` | `Object` |
+| `params.branch?` | `string` |
+| `params.commitDescription?` | `string` |
+| `params.commitTitle?` | `string` |
+| `params.credentials` | [`Credentials`](interfaces/Credentials) |
+| `params.file` | `URL` \| `File` \| { `content`: [`ContentSource`](modules#contentsource) ; `path`: `string`  } |
+| `params.hubUrl?` | `string` |
+| `params.isPullRequest?` | `boolean` |
+| `params.parentCommit?` | `string` |
+| `params.repo` | [`RepoDesignation`](modules#repodesignation) |
+
+#### Returns
+
+`Promise`<[`CommitOutput`](interfaces/CommitOutput)\>
+
+#### Defined in
+
+[hub/src/lib/upload-file.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/upload-file.ts#L5)
+
+___
+
+### uploadFiles
+
+▸ **uploadFiles**(`params`): `Promise`<[`CommitOutput`](interfaces/CommitOutput)\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `params` | `Object` |
+| `params.branch?` | `string` |
+| `params.commitDescription?` | `string` |
+| `params.commitTitle?` | `string` |
+| `params.credentials` | [`Credentials`](interfaces/Credentials) |
+| `params.files` | (`URL` \| `File` \| { `content`: [`ContentSource`](modules#contentsource) ; `path`: `string`  })[] |
+| `params.hubUrl?` | `string` |
+| `params.isPullRequest?` | `boolean` |
+| `params.parentCommit?` | `string` |
+| `params.repo` | [`RepoDesignation`](modules#repodesignation) |
+
+#### Returns
+
+`Promise`<[`CommitOutput`](interfaces/CommitOutput)\>
+
+#### Defined in
+
+[hub/src/lib/upload-files.ts:5](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/upload-files.ts#L5)
 
 ___
 

@@ -4,11 +4,21 @@
 
 ### lastCommit
 
-• **lastCommit**: ``null`` \| { `date`: `string` ; `id`: `string` ; `title`: `string`  }
+• `Optional` **lastCommit**: `Object`
+
+Only fetched if `expand` is set to `true` in the `listFiles` call.
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `date` | `string` |
+| `id` | `string` |
+| `title` | `string` |
 
 #### Defined in
 
-[hub/src/lib/list-files.ts:20](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L20)
+[hub/src/lib/list-files.ts:23](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L23)
 
 ___
 
@@ -54,9 +64,11 @@ ___
 
 • `Optional` **security**: `unknown`
 
+Only fetched if `expand` is set to `true` in the `listFiles` call.
+
 #### Defined in
 
-[hub/src/lib/list-files.ts:25](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L25)
+[hub/src/lib/list-files.ts:31](https://github.com/huggingface/huggingface.js/blob/main/packages/hub/src/lib/list-files.ts#L31)
 
 ___
 
