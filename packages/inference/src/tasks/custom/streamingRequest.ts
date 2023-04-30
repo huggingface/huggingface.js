@@ -65,7 +65,11 @@ export async function* streamingRequest<T>(
 			onChunk(value);
 			for (const event of events) {
 				if (event.data.length > 0) {
-					yield JSON.parse(event.data) as T;
+					const data = JSON.parse(event.data);
+					if (typeof data === "object" && data !== null && "error" in data) {
+						throw new Error(data.error);
+					}
+					yield data as T;
 				}
 			}
 			events = [];
