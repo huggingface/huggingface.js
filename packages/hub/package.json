@@ -50,12 +50,14 @@
 	"devDependencies": {
 		"@huggingface/shared": "workspace:*",
 		"@types/node": "^18.13.0",
+		"type-fest": "^3.9.0",
 		"typescript": "^5.0.4"
 	},
 	"dependencies": {
 		"hash-wasm": "^4.9.0"
 	},
 	"bundledDependencies": [
-		"@huggingface/shared"
+		"@huggingface/shared",
+		"type-fest"
 	]
 }

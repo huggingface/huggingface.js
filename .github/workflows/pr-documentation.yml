@@ -5,9 +5,7 @@ on:
     paths:
       - "README.md"
       - "hub/README.md"
-      - "hub/package.json"
       - "inference/README.md"
-      - "hub/inference.json"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -21,5 +19,5 @@ jobs:
       pr_number: ${{ github.event.number }}
       package: huggingface.js
       path_to_docs: huggingface.js/docs
-      pre_command: npm install -g pnpm@7 && cd huggingface.js && pnpm install && pnpm --filter doc-internal start
+      pre_command: npm install -g pnpm@8.3.1 && cd huggingface.js && pnpm install && pnpm --filter doc-internal start
       additional_args: --not_python_module
