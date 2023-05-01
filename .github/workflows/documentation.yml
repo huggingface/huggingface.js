@@ -1,13 +1,15 @@
 name: Build documentation
 
 on:
+  manual:
   push:
     branches:
       - main
     paths:
       - "README.md"
-      - "hub/package.json"
-      - "inference/package.json"
+      - "docs/**"
+      - "packages/hub/package.json"
+      - "packages/inference/package.json"
 
 jobs:
   build:
