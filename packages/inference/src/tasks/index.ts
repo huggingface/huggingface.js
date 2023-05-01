@@ -13,6 +13,7 @@ export * from "./cv/imageSegmentation";
 export * from "./cv/imageToText";
 export * from "./cv/objectDetection";
 export * from "./cv/textToImage";
+export * from "./cv/imageToImage";
 
 // Natural Language Processing tasks
 export * from "./nlp/conversational";

@@ -40,7 +40,7 @@ export interface BaseArgs {
 }
 
 export type RequestArgs = BaseArgs &
-	({ data: Blob | ArrayBuffer } | { inputs: unknown }) & {
+	({ data: Blob | ArrayBuffer } | { inputs: unknown } | { image: string }) & {
 		parameters?: Record<string, unknown>;
 		accessToken?: string;
 	};

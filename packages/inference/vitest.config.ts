@@ -3,7 +3,14 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 // make local test files available in browser by preloading their contents
-const testFilesToPreload = ["cheetah.png", "cats.png", "sample1.flac", "invoice.png"];
+const testFilesToPreload = [
+	"cheetah.png",
+	"cats.png",
+	"sample1.flac",
+	"invoice.png",
+	"stormtrooper_depth.png",
+	"bird_canny.png",
+];
 const testFilesContents: Record<string, string> = {};
 for (const filename of testFilesToPreload) {
 	testFilesContents[filename] = readFileSync(join(__dirname, "test", filename)).toString("base64");
