@@ -604,5 +604,50 @@
         "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
+  },
+  "fedb289665ec1890b722566764b838adcb7516d1bd5b18c0d777b8ed21e16034": {
+    "url": "https://api-inference.huggingface.co/models/espnet/kan-bayashi_ljspeech_vits",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":\"hello there!\",\"options\":{}}"
+    },
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-expose-headers": "x-compute-type, x-compute-time",
+        "connection": "keep-alive",
+        "content-type": "audio/flac",
+        "server": "uvicorn",
+        "transfer-encoding": "chunked",
+        "vary": "Accept-Encoding, Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "1841a1a3806a917b0b01a7e066c425d4bd8f2da39168ed144061299c9a277b34": {
+    "url": "https://api-inference.huggingface.co/models/OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":\"Write a short story about a robot that becomes sentient and takes over the world.\",\"parameters\":{\"truncate\":1024},\"stream\":true,\"options\":{}}"
+    },
+    "response": {
+      "body": "data:{\"error\":\"Input validation error: `truncate` must be strictly positive and less than 1000. Given: 1024\",\"error_type\":\"validation\"}\n\n",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "connection": "keep-alive",
+        "content-type": "text/event-stream",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
   }
 }

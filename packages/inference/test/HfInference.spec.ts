@@ -216,6 +216,20 @@ describe.concurrent(
 			}
 		});
 
+		it("textGenerationStream - catch error", async () => {
+			const response = hf.textGenerationStream({
+				model: "OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5",
+				inputs: "Write a short story about a robot that becomes sentient and takes over the world.",
+				parameters: {
+					truncate: 1024,
+				},
+			});
+
+			await expect(response.next()).rejects.toThrow(
+				"Input validation error: `truncate` must be strictly positive and less than 1000. Given: 1024"
+			);
+		});
+
 		it("tokenClassification", async () => {
 			expect(
 				await hf.tokenClassification({
@@ -356,6 +370,14 @@ describe.concurrent(
 					}),
 				])
 			);
+		});
+		it("textToSpeech", async () => {
+			expect(
+				await hf.textToSpeech({
+					model: "espnet/kan-bayashi_ljspeech_vits",
+					inputs: "hello there!",
+				})
+			).toBeInstanceOf(Blob);
 		});
 		it("imageClassification", async () => {
 			expect(

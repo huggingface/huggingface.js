@@ -5,7 +5,11 @@ on:
     branches:
       - main
     paths:
-      - "docs/**"
+      - "README.md"
+      - "hub/README.md"
+      - "hub/package.json"
+      - "inference/README.md"
+      - "hub/inference.json"
 
 jobs:
   build:
@@ -15,5 +19,4 @@ jobs:
       package: huggingface.js
       path_to_docs: huggingface.js/docs
       additional_args: --not_python_module
-    secrets:
-      token: ${{ secrets.HF_DOC_TOKEN }}
+      pre_command: npm install -g pnpm@7 && cd huggingface.js && pnpm install && pnpm --filter doc-internal start
