@@ -11,12 +11,10 @@ export type TabularRegressionArgs = BaseArgs & {
 	};
 };
 
-export interface TabularRegressionOutput {
-	/**
-	 * a list of predicted values for each row
-	 */
-	coordinates: number[];
-}
+/**
+ * a list of predicted values for each row
+ */
+export type TabularRegressionOutput = number[];
 
 /**
  * Predicts target value for a given set of features in tabular form.

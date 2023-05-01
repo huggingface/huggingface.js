@@ -34,4 +34,4 @@ export * from "./multimodal/documentQuestionAnswering";
 export * from "./multimodal/visualQuestionAnswering";
 
 // Tabular tasks
-export * from "./tabluar/tabularRegression";
+export * from "./tabular/tabularRegression";
