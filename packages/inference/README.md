@@ -188,6 +188,22 @@ await hf.documentQuestionAnswering({
   }
 })
 
+// Tabular
+
+await hf.tabularRegression({
+  model: "scikit-learn/Fish-Weight",
+  inputs: {
+    data: {
+      "Height":["11.52", "12.48", "12.3778"],
+      "Length1":["23.2", "24", "23.9"],
+      "Length2":["25.4", "26.3", "26.5"],
+      "Length3":["30", "31.2", "31.1"],
+      "Species":["Bream", "Bream", "Bream"],
+      "Width":["4.02", "4.3056", "4.6961"]
+    },
+  },
+})
+
 // Custom call, for models with custom parameters / outputs
 await hf.request({
   model: 'my-custom-model',
@@ -248,6 +264,9 @@ const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the
 ### Multimodal
 - [x] Document question answering
 - [x] Visual question answering
+
+### Tabular
+- [x] Tabular regression
 
 ## Tree-shaking
 
