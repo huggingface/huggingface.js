@@ -238,7 +238,7 @@ const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the
 - [x] Question answering
 - [x] Table question answering
 - [x] Text classification
-- [x] Text generation
+- [x] Text generation - [demo](https://huggingface.co/spaces/huggingfacejs/streaming-text-generation)
 - [x] Text2Text generation
 - [x] Token classification
 - [x] Named entity recognition
@@ -259,11 +259,11 @@ const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the
 - [x] Object detection
 - [x] Image segmentation
 - [x] Text to image
-- [x] Image to text
+- [x] Image to text - [demo](https://huggingface.co/spaces/huggingfacejs/image-to-text)
 
 ### Multimodal
-- [x] Document question answering
-- [x] Visual question answering
+- [x] Document question answering - [demo](https://huggingface.co/spaces/huggingfacejs/doc-vis-qa)
+- [x] Visual question answering - [demo](https://huggingface.co/spaces/huggingfacejs/doc-vis-qa)
 
 ### Tabular
 - [x] Tabular regression
