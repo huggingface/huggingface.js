@@ -1,10 +1,15 @@
 import { HfInference } from "@huggingface/inference";
+import { whoAmI } from "@huggingface/hub";
 
 const hfToken = process.env.token;
 
 const hf = new HfInference(hfToken);
 
 (async () => {
+
+    const info = await whoAmI({credentials: {accessToken: "hf_hub.js"}, hubUrl: "https://hub-ci.huggingface.co"});
+    console.log(info);
+
     const sum = await hf.summarization({
         model: "facebook/bart-large-cnn",
         inputs:
