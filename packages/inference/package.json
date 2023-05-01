@@ -1,6 +1,6 @@
 {
 	"name": "@huggingface/inference",
-	"version": "2.1.3",
+	"version": "2.2.0",
 	"license": "MIT",
 	"author": "Tim Mikeladze <tim.mikeladze@gmail.com>",
 	"description": "Typescript wrapper for the Hugging Face Inference API",
@@ -51,7 +51,11 @@
 		"@types/node": "18.13.0",
 		"typescript": "^5.0.4",
 		"vite": "^4.1.4",
-		"vitest": "^0.29.8"
+		"vitest": "^0.29.8",
+		"@huggingface/shared": "workspace:*"
 	},
+	"bundledDependencies": [
+		"@huggingface/shared"
+	],
 	"resolutions": {}
 }

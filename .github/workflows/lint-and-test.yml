@@ -27,7 +27,7 @@ jobs:
 
       - uses: pnpm/action-setup@v2
         with:
-          version: 7.1.5
+          version: 8.3.1
 
       - uses: actions/setup-node@v3
         with:
@@ -57,3 +57,12 @@ jobs:
         run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test:browser
         env:
           HF_ACCESS_TOKEN: ${{ secrets.HF_ACCESS_TOKEN }}
+
+      - name: E2E test
+        working-directory: e2e/ts
+        run: |
+          pnpm --filter inference --filter hub build
+          pnpm i --ignore-workspace --node-linker=hoisted
+          pnpm start
+        env:
+          token: ${{ secrets.HF_ACCESS_TOKEN }}

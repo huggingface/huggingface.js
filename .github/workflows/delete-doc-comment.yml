@@ -3,7 +3,9 @@ name: Delete dev documentation
 on:
   pull_request:
     paths:
-      - "docs/**"
+      - "README.md"
+      - "hub/README.md"
+      - "inference/README.md"
     types: [closed]
 
 jobs:
