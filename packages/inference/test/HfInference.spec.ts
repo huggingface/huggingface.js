@@ -478,6 +478,25 @@ describe.concurrent(
 				},
 			]);
 		});
+
+		it("tabularRegression", async () => {
+			expect(
+				await hf.tabularRegression({
+					model: "scikit-learn/Fish-Weight",
+					inputs: {
+						data: {
+							Height: ["11.52", "12.48", "12.3778"],
+							Length1: ["23.2", "24", "23.9"],
+							Length2: ["25.4", "26.3", "26.5"],
+							Length3: ["30", "31.2", "31.1"],
+							Species: ["Bream", "Bream", "Bream"],
+							Width: ["4.02", "4.3056", "4.6961"],
+						},
+					},
+				})
+			).toMatchObject([270.5473526976245, 313.6843425638086, 328.3727133404402]);
+		});
+
 		it("endpoint - makes request to specified endpoint", async () => {
 			const ep = hf.endpoint("https://api-inference.huggingface.co/models/google/flan-t5-xxl");
 			const { generated_text } = await ep.textGeneration({

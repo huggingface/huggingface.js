@@ -7,7 +7,7 @@ export * from "./audio/audioClassification";
 export * from "./audio/automaticSpeechRecognition";
 export * from "./audio/textToSpeech";
 
-// Commputer Vision tasks
+// Computer Vision tasks
 export * from "./cv/imageClassification";
 export * from "./cv/imageSegmentation";
 export * from "./cv/imageToText";
@@ -32,3 +32,6 @@ export * from "./nlp/zeroShotClassification";
 // Multimodal tasks
 export * from "./multimodal/documentQuestionAnswering";
 export * from "./multimodal/visualQuestionAnswering";
+
+// Tabular tasks
+export * from "./tabular/tabularRegression";

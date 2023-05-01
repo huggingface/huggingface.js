@@ -649,5 +649,26 @@
         "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
+  },
+  "c858038f8450c4651519e2de6a475393c6919bd944727400c836ff70ae9a77c0": {
+    "url": "https://api-inference.huggingface.co/models/scikit-learn/Fish-Weight",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":{\"data\":{\"Height\":[\"11.52\",\"12.48\",\"12.3778\"],\"Length1\":[\"23.2\",\"24\",\"23.9\"],\"Length2\":[\"25.4\",\"26.3\",\"26.5\"],\"Length3\":[\"30\",\"31.2\",\"31.1\"],\"Species\":[\"Bream\",\"Bream\",\"Bream\"],\"Width\":[\"4.02\",\"4.3056\",\"4.6961\"]}},\"options\":{}}"
+    },
+    "response": {
+      "body": "[270.5473526976245,313.6843425638086,328.3727133404402]",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
   }
 }
