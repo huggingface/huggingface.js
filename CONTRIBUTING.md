@@ -16,10 +16,6 @@ Keep your changes scoped to the subject of the PR!
 
 It's not a hard requirement, but please consider using an icon from [Gitmoji](https://gitmoji.dev/) as a prefix to your PR title.
 
-## Docs
-
-The files in `/docs` are automatically generated, do not edit them!
-
 ## Tests
 
 If you want to run only specific tests, you can do `pnpm test -- -t "test name"`
