@@ -10,7 +10,7 @@ export type VisualQuestionAnsweringArgs = BaseArgs & {
 		 *
 		 * You can use native `File` in browsers, or `new Blob([buffer])` in node, or for a base64 image `new Blob([btoa(base64String)])`, or even `await (await fetch('...)).blob()`
 		 **/
-		image: Blob;
+		image: Blob | ArrayBuffer;
 		question: string;
 	};
 };
@@ -37,8 +37,12 @@ export async function visualQuestionAnswering(
 		...args,
 		inputs: {
 			question: args.inputs.question,
-			// convert Blob to base64
-			image: base64FromBytes(new Uint8Array(await args.inputs.image.arrayBuffer())),
+			// convert Blob or ArrayBuffer to base64
+			image: base64FromBytes(
+				new Uint8Array(
+					args.inputs.image instanceof ArrayBuffer ? args.inputs.image : await args.inputs.image.arrayBuffer()
+				)
+			),
 		},
 	} as RequestArgs;
 	const res = (await request<[VisualQuestionAnsweringOutput]>(reqArgs, options))?.[0];
