@@ -3,7 +3,10 @@ import { computeNumOfParamsByDtype, parseSafetensorsFromModelRepo } from "./pars
 
 describe("parseSafetensorsFromModelRepo", () => {
 	it("fetch info for single-file", async () => {
-		const parse = await parseSafetensorsFromModelRepo("bert-base-uncased");
+		const parse = await parseSafetensorsFromModelRepo({
+			modelId: "bert-base-uncased",
+			hubUrl: "https://huggingface.co",
+		});
 
 		assert(!parse.sharded);
 		assert.deepStrictEqual(parse.header.__metadata__, { format: "pt" });
@@ -23,7 +26,10 @@ describe("parseSafetensorsFromModelRepo", () => {
 	});
 
 	it("fetch info for sharded", async () => {
-		const parse = await parseSafetensorsFromModelRepo("bigscience/bloom");
+		const parse = await parseSafetensorsFromModelRepo({
+			modelId: "bigscience/bloom",
+			hubUrl: "https://huggingface.co",
+		});
 
 		assert(parse.sharded);
 

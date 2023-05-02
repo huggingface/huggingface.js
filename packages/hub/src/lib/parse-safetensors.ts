@@ -1,3 +1,4 @@
+import { HUB_URL } from "../consts";
 import { Counter } from "../utils/Counter";
 
 const SINGLE_FILE = "model.safetensors";
@@ -84,9 +85,14 @@ async function doesFileExistOnHub(url: URL): Promise<boolean> {
 	return res.status >= 200 && res.status < 400;
 }
 
-export async function parseSafetensorsFromModelRepo(id: string): Promise<ParseFromRepo> {
-	const singleUrl = new URL(`https://huggingface.co/${id}/resolve/main/${SINGLE_FILE}`);
-	const indexUrl = new URL(`https://huggingface.co/${id}/resolve/main/${INDEX_FILE}`);
+export async function parseSafetensorsFromModelRepo(params: {
+	modelId: string;
+	hubUrl?: string;
+}): Promise<ParseFromRepo> {
+	const hubUrl = params.hubUrl ?? HUB_URL;
+
+	const singleUrl = new URL(`${hubUrl}/${params.modelId}/resolve/main/${SINGLE_FILE}`);
+	const indexUrl = new URL(`${hubUrl}/${params.modelId}/resolve/main/${INDEX_FILE}`);
 	if (await doesFileExistOnHub(singleUrl)) {
 		return {
 			sharded: false,
