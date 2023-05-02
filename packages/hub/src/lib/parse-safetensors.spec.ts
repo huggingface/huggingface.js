@@ -4,7 +4,7 @@ import { computeNumOfParamsByDtype, parseSafetensorsFromModelRepo } from "./pars
 describe("parseSafetensorsFromModelRepo", () => {
 	it("fetch info for single-file", async () => {
 		const parse = await parseSafetensorsFromModelRepo({
-			modelId: "bert-base-uncased",
+			repo: "bert-base-uncased",
 			hubUrl: "https://huggingface.co",
 		});
 
@@ -27,7 +27,7 @@ describe("parseSafetensorsFromModelRepo", () => {
 
 	it("fetch info for sharded", async () => {
 		const parse = await parseSafetensorsFromModelRepo({
-			modelId: "bigscience/bloom",
+			repo: "bigscience/bloom",
 			hubUrl: "https://huggingface.co",
 		});
 

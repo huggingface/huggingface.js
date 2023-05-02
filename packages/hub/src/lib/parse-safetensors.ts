@@ -1,5 +1,8 @@
 import { HUB_URL } from "../consts";
+import type { Credentials, RepoDesignation } from "../types/public";
 import { Counter } from "../utils/Counter";
+import { checkCredentials } from "../utils/checkCredentials";
+import { toRepoId } from "../utils/toRepoId";
 
 const SINGLE_FILE = "model.safetensors";
 const INDEX_FILE = "model.safetensors.index.json";
@@ -40,11 +43,21 @@ type ParseFromRepo =
 			headers: ShardedHeaders;
 	  };
 
-async function parseSingleFile(url: URL): Promise<FileHeader> {
+async function parseSingleFile(
+	url: URL,
+	params: {
+		credentials?: Credentials;
+	} = {}
+): Promise<FileHeader> {
 	const bufLengthOfHeaderLE = await (
 		await fetch(url, {
 			headers: {
 				Range: "bytes=0-7",
+				...(params.credentials
+					? {
+							Authorization: `Bearer ${params.credentials.accessToken}`,
+					  }
+					: {}),
 			},
 		})
 	).arrayBuffer();
@@ -54,6 +67,11 @@ async function parseSingleFile(url: URL): Promise<FileHeader> {
 		await fetch(url, {
 			headers: {
 				Range: `bytes=8-${7 + Number(lengthOfHeader)}`,
+				...(params.credentials
+					? {
+							Authorization: `Bearer ${params.credentials.accessToken}`,
+					  }
+					: {}),
 			},
 		})
 	).json();
@@ -61,8 +79,21 @@ async function parseSingleFile(url: URL): Promise<FileHeader> {
 	return header;
 }
 
-async function parseShardedIndex(url: URL): Promise<{ index: IndexJson; headers: ShardedHeaders }> {
-	const index: IndexJson = await (await fetch(url)).json();
+async function parseShardedIndex(
+	url: URL,
+	params: {
+		credentials?: Credentials;
+	} = {}
+): Promise<{ index: IndexJson; headers: ShardedHeaders }> {
+	const index: IndexJson = await (
+		await fetch(url, {
+			headers: params.credentials
+				? {
+						Authorization: `Bearer ${params.credentials.accessToken}`,
+				  }
+				: {},
+		})
+	).json();
 	/// no validation for now, we assume it's a valid IndexJson.
 
 	const shardedMap: ShardedHeaders = {};
@@ -70,39 +101,59 @@ async function parseShardedIndex(url: URL): Promise<{ index: IndexJson; headers:
 	await Promise.all(
 		filenames.map(async (filename) => {
 			const singleUrl = new URL(url.toString().replace(INDEX_FILE, filename));
-			shardedMap[filename] = await parseSingleFile(singleUrl);
+			shardedMap[filename] = await parseSingleFile(singleUrl, params);
 		})
 	);
 	return { index, headers: shardedMap };
 }
 
-async function doesFileExistOnHub(url: URL): Promise<boolean> {
+async function doesFileExistOnHub(
+	url: URL,
+	params: {
+		credentials?: Credentials;
+	} = {}
+): Promise<boolean> {
 	const res = await fetch(url, {
 		method: "HEAD",
 		redirect: "manual",
 		/// ^do not follow redirects to save some time
+		headers: params.credentials
+			? {
+					Authorization: `Bearer ${params.credentials.accessToken}`,
+			  }
+			: {},
 	});
 	/// Caution: in the browser, when redirect: "manual", res.status == 0
 	return res.type === "opaqueredirect" || (res.status >= 200 && res.status < 400);
 }
 
 export async function parseSafetensorsFromModelRepo(params: {
-	modelId: string;
+	repo: RepoDesignation;
 	hubUrl?: string;
+	credentials?: Credentials;
+	revision?: string;
 }): Promise<ParseFromRepo> {
+	const repoId = toRepoId(params.repo);
+
+	if (repoId.type !== "model") {
+		throw new TypeError("Only model repos should contain safetensors files.");
+	}
+
+	checkCredentials(params.credentials);
+
 	const hubUrl = params.hubUrl ?? HUB_URL;
 
-	const singleUrl = new URL(`${hubUrl}/${params.modelId}/resolve/main/${SINGLE_FILE}`);
-	const indexUrl = new URL(`${hubUrl}/${params.modelId}/resolve/main/${INDEX_FILE}`);
-	if (await doesFileExistOnHub(singleUrl)) {
+	const singleUrl = new URL(`${hubUrl}/${repoId.name}/resolve/${params.revision ?? "main"}/${SINGLE_FILE}`);
+	const indexUrl = new URL(`${hubUrl}/${repoId.name}/resolve/${params.revision ?? "main"}/${INDEX_FILE}`);
+	if (await doesFileExistOnHub(singleUrl, { credentials: params.credentials })) {
 		return {
 			sharded: false,
-			header: await parseSingleFile(singleUrl),
+			header: await parseSingleFile(singleUrl, { credentials: params.credentials }),
 		};
-	} else if (await doesFileExistOnHub(indexUrl)) {
+	} else if (await doesFileExistOnHub(indexUrl, { credentials: params.credentials })) {
 		return {
 			sharded: true,
-			...(await parseShardedIndex(indexUrl)),
+			...(await parseShardedIndex(indexUrl, { credentials: params.credentials })),
 		};
 	} else {
 		throw new Error("model id does not seem to contain safetensors weights");
