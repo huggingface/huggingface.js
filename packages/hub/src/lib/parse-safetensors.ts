@@ -1,4 +1,3 @@
-import type { Entries } from "type-fest";
 import { HUB_URL } from "../consts";
 import type { Credentials, RepoDesignation } from "../types/public";
 import { Counter } from "../utils/Counter";
