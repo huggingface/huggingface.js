@@ -171,9 +171,9 @@ await hf.imageToText({
 })
 
 await hf.imageToImage({
-  image: readFileSync("test/stormtrooper_depth.png"),
+  inputs: readFileSync("test/stormtrooper_depth.png"),
   parameters: {
-    inputs: "elmo's lecture",
+    prompt: "elmo's lecture",
   },
   model: "lllyasviel/sd-controlnet-depth",
 });
