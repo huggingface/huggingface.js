@@ -1,4 +1,3 @@
-import { HUB_URL } from "../consts";
 import type { Credentials, RepoDesignation } from "../types/public";
 import { Counter } from "../utils/Counter";
 import { checkCredentials } from "../utils/checkCredentials";
