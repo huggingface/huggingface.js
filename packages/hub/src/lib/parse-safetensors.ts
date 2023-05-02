@@ -82,7 +82,8 @@ async function doesFileExistOnHub(url: URL): Promise<boolean> {
 		redirect: "manual",
 		/// ^do not follow redirects to save some time
 	});
-	return res.status >= 200 && res.status < 400;
+	/// Caution: in the browser, when redirect: "manual", res.status == 0
+	return res.type === "opaqueredirect" || (res.status >= 200 && res.status < 400);
 }
 
 export async function parseSafetensorsFromModelRepo(params: {
