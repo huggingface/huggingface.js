@@ -1,5 +1,6 @@
 import { assert, it, describe } from "vitest";
 import { computeNumOfParamsByDtype, parseSafetensorsFromModelRepo } from "./parse-safetensors";
+import { sum } from "../utils/sum";
 
 describe("parseSafetensorsFromModelRepo", () => {
 	it("fetch info for single-file", async () => {
@@ -20,8 +21,8 @@ describe("parseSafetensorsFromModelRepo", () => {
 		});
 
 		const counter = computeNumOfParamsByDtype(parse);
-		assert.deepStrictEqual(counter.dict(), { F32: 110106428 });
-		assert.deepStrictEqual(counter.total(), 110_106_428);
+		assert.deepStrictEqual(counter, { F32: 110106428 });
+		assert.deepStrictEqual(sum(Object.values(counter)), 110_106_428);
 		/// total params = 110m
 	});
 
@@ -45,8 +46,8 @@ describe("parseSafetensorsFromModelRepo", () => {
 		});
 
 		const counter = computeNumOfParamsByDtype(parse);
-		assert.deepStrictEqual(counter.dict(), { BF16: 176247271424 });
-		assert.deepStrictEqual(counter.total(), 176_247_271_424);
+		assert.deepStrictEqual(counter, { BF16: 176247271424 });
+		assert.deepStrictEqual(sum(Object.values(counter)), 176_247_271_424);
 		/// total params = 176B
 	});
 });

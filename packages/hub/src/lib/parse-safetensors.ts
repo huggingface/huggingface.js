@@ -1,5 +1,4 @@
 import type { Credentials, RepoDesignation } from "../types/public";
-import { Counter } from "../utils/Counter";
 import { checkCredentials } from "../utils/checkCredentials";
 import { omit } from "../utils/omit";
 import { toRepoId } from "../utils/toRepoId";
@@ -128,31 +127,30 @@ export async function parseSafetensorsFromModelRepo(params: {
 	}
 }
 
-function computeNumOfParamsByDtypeSingleFile(header: FileHeader): Counter<Dtype> {
-	const n = new Counter<Dtype>();
+function computeNumOfParamsByDtypeSingleFile(header: FileHeader): Partial<Record<Dtype, number>> {
+	const counter: Partial<Record<Dtype, number>> = {};
 	const tensors = omit(header, "__metadata__");
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	for (const [k, v] of typedEntries(tensors)) {
 		if (v.shape.length === 0) {
 			continue;
 		}
-		n.incr(
-			v.dtype,
-			v.shape.reduce((a, b) => a * b)
-		);
+		counter[v.dtype] = (counter[v.dtype] ?? 0) + v.shape.reduce((a, b) => a * b);
 	}
-	return n;
+	return counter;
 }
 
-function computeNumOfParamsByDtypeSharded(shardedMap: ShardedHeaders): Counter<Dtype> {
-	const n = new Counter<Dtype>();
-	for (const v of Object.values(shardedMap)) {
-		n.add(computeNumOfParamsByDtypeSingleFile(v));
+function computeNumOfParamsByDtypeSharded(shardedMap: ShardedHeaders): Partial<Record<Dtype, number>> {
+	const counter: Partial<Record<Dtype, number>> = {};
+	for (const header of Object.values(shardedMap)) {
+		for (const [k, v] of typedEntries(computeNumOfParamsByDtypeSingleFile(header))) {
+			counter[k] = (counter[k] ?? 0) + (v ?? 0);
+		}
 	}
-	return n;
+	return counter;
 }
 
-export function computeNumOfParamsByDtype(parse: ParseFromRepo): Counter<Dtype> {
+export function computeNumOfParamsByDtype(parse: ParseFromRepo): Partial<Record<Dtype, number>> {
 	if (parse.sharded) {
 		return computeNumOfParamsByDtypeSharded(parse.headers);
 	} else {
