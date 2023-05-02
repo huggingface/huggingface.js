@@ -50,4 +50,18 @@ describe("parseSafetensorsFromModelRepo", () => {
 		assert.deepStrictEqual(sum(Object.values(counter)), 176_247_271_424);
 		/// total params = 176B
 	});
+
+	it("fetch info for single-file with multiple dtypes", async () => {
+		const parse = await parseSafetensorsFromModelRepo({
+			repo: "roberta-base",
+			hubUrl: "https://huggingface.co",
+		});
+
+		assert(!parse.sharded);
+
+		const counter = computeNumOfParamsByDtype(parse);
+		assert.deepStrictEqual(counter, { F32: 124697433, I64: 514 });
+		assert.deepStrictEqual(sum(Object.values(counter)), 124_697_947);
+		/// total params = 124m
+	});
 });
