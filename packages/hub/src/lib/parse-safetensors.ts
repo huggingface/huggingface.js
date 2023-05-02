@@ -20,11 +20,11 @@ interface TensorInfo {
 	data_offsets: [number, number];
 }
 
-type FileHeader = Record<TensorName, TensorInfo> & {
+type SafetensorsFileHeader = Record<TensorName, TensorInfo> & {
 	__metadata__: Record<string, string>;
 };
 
-interface IndexJson {
+interface SafetensorsIndexJson {
 	dtype?: string;
 	/// ^there's sometimes a dtype but it looks inconsistent.
 	metadata?: Record<string, string>;
@@ -32,17 +32,17 @@ interface IndexJson {
 	weight_map: Record<TensorName, FileName>;
 }
 
-type ShardedHeaders = Record<FileName, FileHeader>;
+type SafetensorsShardedHeaders = Record<FileName, SafetensorsFileHeader>;
 
-type ParseFromRepo =
+type SafetensorsParseFromRepo =
 	| {
 			sharded: false;
-			header: FileHeader;
+			header: SafetensorsFileHeader;
 	  }
 	| {
 			sharded: true;
-			index: IndexJson;
-			headers: ShardedHeaders;
+			index: SafetensorsIndexJson;
+			headers: SafetensorsShardedHeaders;
 	  };
 
 async function parseSingleFile(
@@ -53,7 +53,7 @@ async function parseSingleFile(
 		credentials?: Credentials;
 		hubUrl?: string;
 	}
-): Promise<FileHeader> {
+): Promise<SafetensorsFileHeader> {
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const firstResp = (await downloadFile({
 		...params,
@@ -66,7 +66,7 @@ async function parseSingleFile(
 
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const secondResp = (await downloadFile({ ...params, path, range: [8, 7 + Number(lengthOfHeader)] }))!;
-	const header: FileHeader = await secondResp.json();
+	const header: SafetensorsFileHeader = await secondResp.json();
 	/// no validation for now, we assume it's a valid FileHeader.
 	return header;
 }
@@ -79,16 +79,16 @@ async function parseShardedIndex(
 		credentials?: Credentials;
 		hubUrl?: string;
 	}
-): Promise<{ index: IndexJson; headers: ShardedHeaders }> {
+): Promise<{ index: SafetensorsIndexJson; headers: SafetensorsShardedHeaders }> {
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const indexResp = (await downloadFile({
 		...params,
 		path,
 	}))!;
-	const index: IndexJson = await indexResp.json();
+	const index: SafetensorsIndexJson = await indexResp.json();
 	/// no validation for now, we assume it's a valid IndexJson.
 
-	const shardedMap: ShardedHeaders = {};
+	const shardedMap: SafetensorsShardedHeaders = {};
 	const filenames = [...new Set(Object.values(index.weight_map))];
 	await Promise.all(
 		filenames.map(async (filename) => {
@@ -104,7 +104,7 @@ export async function parseSafetensorsFromModelRepo(params: {
 	hubUrl?: string;
 	credentials?: Credentials;
 	revision?: string;
-}): Promise<ParseFromRepo> {
+}): Promise<SafetensorsParseFromRepo> {
 	checkCredentials(params.credentials);
 	const repoId = toRepoId(params.repo);
 
@@ -127,7 +127,7 @@ export async function parseSafetensorsFromModelRepo(params: {
 	}
 }
 
-function computeNumOfParamsByDtypeSingleFile(header: FileHeader): Partial<Record<Dtype, number>> {
+function computeNumOfParamsByDtypeSingleFile(header: SafetensorsFileHeader): Partial<Record<Dtype, number>> {
 	const counter: Partial<Record<Dtype, number>> = {};
 	const tensors = omit(header, "__metadata__");
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -140,7 +140,7 @@ function computeNumOfParamsByDtypeSingleFile(header: FileHeader): Partial<Record
 	return counter;
 }
 
-function computeNumOfParamsByDtypeSharded(shardedMap: ShardedHeaders): Partial<Record<Dtype, number>> {
+function computeNumOfParamsByDtypeSharded(shardedMap: SafetensorsShardedHeaders): Partial<Record<Dtype, number>> {
 	const counter: Partial<Record<Dtype, number>> = {};
 	for (const header of Object.values(shardedMap)) {
 		for (const [k, v] of typedEntries(computeNumOfParamsByDtypeSingleFile(header))) {
@@ -150,7 +150,7 @@ function computeNumOfParamsByDtypeSharded(shardedMap: ShardedHeaders): Partial<R
 	return counter;
 }
 
-export function computeNumOfParamsByDtype(parse: ParseFromRepo): Partial<Record<Dtype, number>> {
+export function computeNumOfParamsByDtype(parse: SafetensorsParseFromRepo): Partial<Record<Dtype, number>> {
 	if (parse.sharded) {
 		return computeNumOfParamsByDtypeSharded(parse.headers);
 	} else {
