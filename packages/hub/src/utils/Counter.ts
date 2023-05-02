@@ -9,20 +9,6 @@ export class Counter<T> extends Map<T, number> {
 	}
 
 	/**
-	 * Return elements in decreasing count order.
-	 * see Python's most_common(n)
-	 */
-	sorted(): [T, number][] {
-		return Array.from(this).sort((a, b) => b[1] - a[1]);
-	}
-	/**
-	 * Returns a new map, sorted.
-	 */
-	get sortedMap(): Map<T, number> {
-		return new Map(this.sorted());
-	}
-
-	/**
 	 * Initialize from an array.
 	 */
 	static from<T>(arr: T[]): Counter<T> {
