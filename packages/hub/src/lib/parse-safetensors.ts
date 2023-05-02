@@ -121,7 +121,7 @@ function computeNumOfParamsByDtypeSingleFile(header: FileHeader): Counter<Dtype>
 
 function computeNumOfParamsByDtypeSharded(shardedMap: ShardedHeaders): Counter<Dtype> {
 	const n = new Counter<Dtype>();
-	for (const [k, v] of Object.entries(shardedMap)) {
+	for (const v of Object.values(shardedMap)) {
 		n.add(computeNumOfParamsByDtypeSingleFile(v));
 	}
 	return n;
