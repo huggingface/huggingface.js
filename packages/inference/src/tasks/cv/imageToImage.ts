@@ -8,13 +8,13 @@ export type ImageToImageArgs = BaseArgs & {
 	 * The initial image condition
 	 *
 	 **/
-	image: Blob | ArrayBuffer;
+	inputs: Blob | ArrayBuffer;
 
 	parameters?: {
 		/**
 		 * The text prompt to guide the image generation.
 		 */
-		inputs?: string;
+		prompt?: string;
 		/**
 		 * strengh param only works for SD img2img and alt diffusion img2img models
 		 * Conceptually, indicates how much to transform the reference `image`. Must be between 0 and 1. `image`
@@ -64,13 +64,13 @@ export async function imageToImage(args: ImageToImageArgs, options?: Options): P
 		reqArgs = {
 			accessToken: args.accessToken,
 			model: args.model,
-			data: args.image,
+			data: args.inputs,
 		};
 	} else {
 		reqArgs = {
 			...args,
-			image: base64FromBytes(
-				new Uint8Array(args.image instanceof ArrayBuffer ? args.image : await args.image.arrayBuffer())
+			inputs: base64FromBytes(
+				new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await args.inputs.arrayBuffer())
 			),
 		};
 	}

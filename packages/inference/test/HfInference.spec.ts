@@ -435,9 +435,9 @@ describe.concurrent(
 			const num_inference_steps = 25;
 
 			const res = await hf.imageToImage({
-				image: new Blob([readTestFile("stormtrooper_depth.png")], { type: "image / png" }),
+				inputs: new Blob([readTestFile("stormtrooper_depth.png")], { type: "image / png" }),
 				parameters: {
-					inputs: "elmo's lecture",
+					prompt: "elmo's lecture",
 					num_inference_steps,
 				},
 				model: "lllyasviel/sd-controlnet-depth",
@@ -446,7 +446,7 @@ describe.concurrent(
 		});
 		it("imageToImage blob data", async () => {
 			const res = await hf.imageToImage({
-				image: new Blob([readTestFile("bird_canny.png")], { type: "image / png" }),
+				inputs: new Blob([readTestFile("bird_canny.png")], { type: "image / png" }),
 				model: "lllyasviel/sd-controlnet-canny",
 			});
 			expect(res).toBeInstanceOf(Blob);
