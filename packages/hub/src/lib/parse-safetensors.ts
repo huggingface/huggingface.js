@@ -1,7 +1,7 @@
 import type { Credentials, RepoDesignation } from "../types/public";
 import { Counter } from "../utils/Counter";
 import { checkCredentials } from "../utils/checkCredentials";
-import { omit } from "../utils/pick";
+import { omit } from "../utils/omit";
 import { toRepoId } from "../utils/toRepoId";
 import { typedEntries } from "../utils/typedEntries";
 import { downloadFile } from "./download-file";
