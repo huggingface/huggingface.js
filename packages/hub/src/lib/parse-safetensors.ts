@@ -1,8 +1,11 @@
+import type { Entries } from "type-fest";
 import { HUB_URL } from "../consts";
 import type { Credentials, RepoDesignation } from "../types/public";
 import { Counter } from "../utils/Counter";
 import { checkCredentials } from "../utils/checkCredentials";
+import { omit } from "../utils/pick";
 import { toRepoId } from "../utils/toRepoId";
+import { typedEntries } from "../utils/typedEntries";
 
 const SINGLE_FILE = "model.safetensors";
 const INDEX_FILE = "model.safetensors.index.json";
@@ -162,16 +165,15 @@ export async function parseSafetensorsFromModelRepo(params: {
 
 function computeNumOfParamsByDtypeSingleFile(header: FileHeader): Counter<Dtype> {
 	const n = new Counter<Dtype>();
-	for (const [k, v] of Object.entries(header)) {
-		if (k === "__metadata__") {
-			continue;
-		}
-		if ((v as TensorInfo).shape.length === 0) {
+	const tensors = omit(header, "__metadata__");
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	for (const [k, v] of typedEntries(tensors)) {
+		if (v.shape.length === 0) {
 			continue;
 		}
 		n.incr(
-			(v as TensorInfo).dtype,
-			(v as TensorInfo).shape.reduce((a, b) => a * b)
+			v.dtype,
+			v.shape.reduce((a, b) => a * b)
 		);
 	}
 	return n;
