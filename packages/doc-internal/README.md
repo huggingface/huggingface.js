@@ -10,20 +10,20 @@ We run a few scripts in between, [fix-md-links](./fix-md-links.ts) and [update-t
 
 ```console
 # Generate all docs
-npm run start
+pnpm run start
 
 # Generate docs for @huggingface/hub
-npm run prepublish-hub
+pnpm run prepublish-hub
 
 # Generate docs for @huggingface/inference
-npm run prepublish-inference
+pnpm run prepublish-inference
 ```
 
 ## HTML docs
 
 If you want to see the final HTML docs, there are a few steps:
 
-- Generate the docs with `npm run start`
+- Generate the docs with `pnpm run start`
 - Clone https://github.com/huggingface/doc-builder and put it in the same folder as huggingface.js
 - Follow the instructions to install it from source
 - Go in its `kit` folder and run `npm install`
