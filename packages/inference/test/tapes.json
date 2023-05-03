@@ -670,5 +670,23 @@
         "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
+  },
+  "7b7c5e8c4271b8d18b231153b16949ffae6efe591e00caba3c1f28d994fb97bd": {
+    "url": "https://api-inference.huggingface.co/models/lllyasviel/sd-controlnet-canny",
+    "init": {
+      "headers": {},
+      "method": "POST"
+    },
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "connection": "keep-alive",
+        "content-type": "image/jpeg",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
   }
 }
