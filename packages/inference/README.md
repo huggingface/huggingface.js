@@ -299,7 +299,7 @@ This will enable tree-shaking by your bundler.
 ## Running tests
 
 ```console
-HF_ACCESS_TOKEN="your access token" npm run test
+HF_ACCESS_TOKEN="your access token" pnpm run test
 ```
 
 ## Finding appropriate models
