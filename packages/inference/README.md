@@ -170,6 +170,14 @@ await hf.imageToText({
   model: 'nlpconnect/vit-gpt2-image-captioning'
 })
 
+await hf.imageToImage({
+  inputs: readFileSync("test/stormtrooper_depth.png"),
+  parameters: {
+    prompt: "elmo's lecture",
+  },
+  model: "lllyasviel/sd-controlnet-depth",
+});
+
 // Multimodal
 
 await hf.visualQuestionAnswering({
@@ -260,12 +268,15 @@ const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the
 - [x] Image segmentation
 - [x] Text to image
 - [x] Image to text - [demo](https://huggingface.co/spaces/huggingfacejs/image-to-text)
+- [x] Image to Image
 
 ### Multimodal
+
 - [x] Document question answering - [demo](https://huggingface.co/spaces/huggingfacejs/doc-vis-qa)
 - [x] Visual question answering - [demo](https://huggingface.co/spaces/huggingfacejs/doc-vis-qa)
 
 ### Tabular
+
 - [x] Tabular regression
 
 ## Tree-shaking

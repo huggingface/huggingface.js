@@ -431,6 +431,26 @@ describe.concurrent(
 				])
 			);
 		});
+		it("imageToImage", async () => {
+			const num_inference_steps = 25;
+
+			const res = await hf.imageToImage({
+				inputs: new Blob([readTestFile("stormtrooper_depth.png")], { type: "image / png" }),
+				parameters: {
+					prompt: "elmo's lecture",
+					num_inference_steps,
+				},
+				model: "lllyasviel/sd-controlnet-depth",
+			});
+			expect(res).toBeInstanceOf(Blob);
+		});
+		it("imageToImage blob data", async () => {
+			const res = await hf.imageToImage({
+				inputs: new Blob([readTestFile("bird_canny.png")], { type: "image / png" }),
+				model: "lllyasviel/sd-controlnet-canny",
+			});
+			expect(res).toBeInstanceOf(Blob);
+		});
 		it("textToImage", async () => {
 			const res = await hf.textToImage({
 				inputs: "award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]",
