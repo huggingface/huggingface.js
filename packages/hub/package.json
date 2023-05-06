@@ -17,6 +17,12 @@
 			"import": "./dist/index.mjs"
 		}
 	},
+	"browser": {
+		"./src/utils/sha256-node.ts": false,
+		"./src/utils/FileBlob.ts": false,
+		"./dist/index.js": "./dist/browser/index.js",
+		"./dist/index.mjs": "./dist/browser/index.mjs"
+	},
 	"engines": {
 		"node": ">=18"
 	},
@@ -28,7 +34,7 @@
 		"format:check": "prettier --check .",
 		"preversion": "pnpm --filter doc-internal run fix-cdn-versions && git add ../../README.md",
 		"prepublishOnly": "pnpm run build",
-		"build": "tsup src/index.ts --format cjs,esm --clean --dts-resolve",
+		"build": "tsup",
 		"test": "vitest run",
 		"test:browser": "vitest run --browser.name=chrome --browser.headless --config ./vitest-browser.config.ts",
 		"type-check": "tsc"
@@ -52,6 +58,7 @@
 	"devDependencies": {
 		"@huggingface/shared": "workspace:*",
 		"@types/node": "^18.13.0",
+		"esbuild-plugin-ignore": "^1.1.1",
 		"type-fest": "^3.9.0",
 		"typescript": "^5.0.4"
 	},
