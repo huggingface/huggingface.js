@@ -58,7 +58,6 @@
 	"devDependencies": {
 		"@huggingface/shared": "workspace:*",
 		"@types/node": "^18.13.0",
-		"esbuild-plugin-ignore": "^1.1.1",
 		"type-fest": "^3.9.0",
 		"typescript": "^5.0.4"
 	},
