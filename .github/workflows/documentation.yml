@@ -19,4 +19,4 @@ jobs:
       package: huggingface.js
       path_to_docs: huggingface.js/docs
       additional_args: --not_python_module
-      pre_command: npm install -g pnpm@8.3.1 && cd huggingface.js && pnpm install && pnpm --filter doc-internal start
+      pre_command: corepack enable && cd huggingface.js && pnpm install && pnpm --filter doc-internal start

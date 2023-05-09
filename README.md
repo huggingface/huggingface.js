@@ -139,6 +139,7 @@ There are more features of course, check each library's README!
 ## Formatting & testing
 
 ```console
+sudo corepack enable
 pnpm install
 
 pnpm -r format:check
