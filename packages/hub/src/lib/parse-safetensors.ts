@@ -74,9 +74,9 @@ async function parseSingleFile(
 		throw new Error("Failed to download file: " + path);
 	}
 
+	// no validation for now, we assume it's a valid FileHeader.
 	const header: SafetensorsFileHeader = await secondResp.json();
 
-	// no validation for now, we assume it's a valid FileHeader.
 	return header;
 }
 
@@ -98,16 +98,17 @@ async function parseShardedIndex(
 		throw new Error("Failed to download file: " + path);
 	}
 
+	// no validation for now, we assume it's a valid IndexJson.
 	const index: SafetensorsIndexJson = await indexResp.json();
-	/// no validation for now, we assume it's a valid IndexJson.
 
-	const shardedMap: SafetensorsShardedHeaders = {};
 	const filenames = [...new Set(Object.values(index.weight_map))];
-	await Promise.all(
-		filenames.map(async (filename) => {
-			shardedMap[filename] = await parseSingleFile(filename, params);
-			/// Note(insertion order is not deterministic)
-		})
+	const shardedMap: SafetensorsShardedHeaders = Object.fromEntries(
+		await Promise.all(
+			filenames.map(
+				async (filename) =>
+					[filename, await parseSingleFile(filename, params)] satisfies [string, SafetensorsFileHeader]
+			)
+		)
 	);
 	return { index, headers: shardedMap };
 }
