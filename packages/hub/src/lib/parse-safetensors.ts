@@ -99,7 +99,12 @@ async function parseShardedIndex(
 	return { index, headers: shardedMap };
 }
 
-export async function parseSafetensorsFromModelRepo(params: {
+/**
+ * Analyze model.safetensors.index.json or model.safetensors from a model hosted
+ * on Hugging Face using smart range requests to extract its metadata.
+ */
+export async function parseSafetensorsMetadata(params: {
+	/** Only models are supported */
 	repo: RepoDesignation;
 	hubUrl?: string;
 	credentials?: Credentials;

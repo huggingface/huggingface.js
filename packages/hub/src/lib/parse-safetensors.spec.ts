@@ -1,10 +1,10 @@
 import { assert, it, describe } from "vitest";
-import { computeNumOfParamsByDtype, parseSafetensorsFromModelRepo } from "./parse-safetensors";
+import { computeNumOfParamsByDtype, parseSafetensorsMetadata } from "./parse-safetensors";
 import { sum } from "../utils/sum";
 
 describe("parseSafetensorsFromModelRepo", () => {
 	it("fetch info for single-file", async () => {
-		const parse = await parseSafetensorsFromModelRepo({
+		const parse = await parseSafetensorsMetadata({
 			repo: "bert-base-uncased",
 			hubUrl: "https://huggingface.co",
 		});
@@ -27,7 +27,7 @@ describe("parseSafetensorsFromModelRepo", () => {
 	});
 
 	it("fetch info for sharded", async () => {
-		const parse = await parseSafetensorsFromModelRepo({
+		const parse = await parseSafetensorsMetadata({
 			repo: "bigscience/bloom",
 			hubUrl: "https://huggingface.co",
 		});
@@ -52,7 +52,7 @@ describe("parseSafetensorsFromModelRepo", () => {
 	});
 
 	it("fetch info for single-file with multiple dtypes", async () => {
-		const parse = await parseSafetensorsFromModelRepo({
+		const parse = await parseSafetensorsMetadata({
 			repo: "roberta-base",
 			hubUrl: "https://huggingface.co",
 		});
