@@ -54,20 +54,29 @@ async function parseSingleFile(
 		hubUrl?: string;
 	}
 ): Promise<SafetensorsFileHeader> {
-	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-	const firstResp = (await downloadFile({
+	const firstResp = await downloadFile({
 		...params,
 		path,
 		range: [0, 7],
-	}))!;
+	});
+
+	if (!firstResp) {
+		throw new Error("Failed to download file: " + path);
+	}
+
 	const bufLengthOfHeaderLE = await firstResp.arrayBuffer();
 	const lengthOfHeader = new DataView(bufLengthOfHeaderLE).getBigUint64(0, true);
-	/// ^little-endian
+	// ^little-endian
 
-	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-	const secondResp = (await downloadFile({ ...params, path, range: [8, 7 + Number(lengthOfHeader)] }))!;
+	const secondResp = await downloadFile({ ...params, path, range: [8, 7 + Number(lengthOfHeader)] });
+
+	if (!secondResp) {
+		throw new Error("Failed to download file: " + path);
+	}
+
 	const header: SafetensorsFileHeader = await secondResp.json();
-	/// no validation for now, we assume it's a valid FileHeader.
+
+	// no validation for now, we assume it's a valid FileHeader.
 	return header;
 }
 
@@ -80,11 +89,15 @@ async function parseShardedIndex(
 		hubUrl?: string;
 	}
 ): Promise<{ index: SafetensorsIndexJson; headers: SafetensorsShardedHeaders }> {
-	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-	const indexResp = (await downloadFile({
+	const indexResp = await downloadFile({
 		...params,
 		path,
-	}))!;
+	});
+
+	if (!indexResp) {
+		throw new Error("Failed to download file: " + path);
+	}
+
 	const index: SafetensorsIndexJson = await indexResp.json();
 	/// no validation for now, we assume it's a valid IndexJson.
 
@@ -135,8 +148,8 @@ export async function parseSafetensorsMetadata(params: {
 function computeNumOfParamsByDtypeSingleFile(header: SafetensorsFileHeader): Partial<Record<Dtype, number>> {
 	const counter: Partial<Record<Dtype, number>> = {};
 	const tensors = omit(header, "__metadata__");
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	for (const [k, v] of typedEntries(tensors)) {
+
+	for (const [, v] of typedEntries(tensors)) {
 		if (v.shape.length === 0) {
 			continue;
 		}
