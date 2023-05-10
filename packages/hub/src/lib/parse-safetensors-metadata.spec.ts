@@ -7,6 +7,7 @@ describe("parseSafetensorsFromModelRepo", () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "bert-base-uncased",
 			hubUrl: "https://huggingface.co",
+			computeParametersCount: true,
 		});
 
 		assert(!parse.sharded);
@@ -29,6 +30,7 @@ describe("parseSafetensorsFromModelRepo", () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "bigscience/bloom",
 			hubUrl: "https://huggingface.co",
+			computeParametersCount: true,
 		});
 
 		assert(parse.sharded);
@@ -53,6 +55,7 @@ describe("parseSafetensorsFromModelRepo", () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "roberta-base",
 			hubUrl: "https://huggingface.co",
+			computeParametersCount: true,
 		});
 
 		assert(!parse.sharded);

@@ -1,3 +1,4 @@
+import type { SetRequired } from "type-fest";
 import type { Credentials, RepoDesignation } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { omit } from "../utils/omit";
@@ -38,13 +39,13 @@ type SafetensorsParseFromRepo =
 	| {
 			sharded: false;
 			header: SafetensorsFileHeader;
-			parameterCount: Partial<Record<Dtype, number>>;
+			parameterCount?: Partial<Record<Dtype, number>>;
 	  }
 	| {
 			sharded: true;
 			index: SafetensorsIndexJson;
 			headers: SafetensorsShardedHeaders;
-			parameterCount: Partial<Record<Dtype, number>>;
+			parameterCount?: Partial<Record<Dtype, number>>;
 	  };
 
 async function parseSingleFile(
@@ -122,6 +123,32 @@ async function parseShardedIndex(
 export async function parseSafetensorsMetadata(params: {
 	/** Only models are supported */
 	repo: RepoDesignation;
+	/**
+	 * Will include SafetensorsParseFromRepo["parameterCount"], an object containing the number of parameters for each DType
+	 *
+	 * @default false
+	 */
+	computeParametersCount: true;
+	hubUrl?: string;
+	credentials?: Credentials;
+	revision?: string;
+}): Promise<SetRequired<SafetensorsParseFromRepo, "parameterCount">>;
+export async function parseSafetensorsMetadata(params: {
+	/** Only models are supported */
+	repo: RepoDesignation;
+	/**
+	 * Will include SafetensorsParseFromRepo["parameterCount"], an object containing the number of parameters for each DType
+	 *
+	 * @default false
+	 */
+	computeParametersCount?: boolean;
+	hubUrl?: string;
+	credentials?: Credentials;
+	revision?: string;
+}): Promise<SafetensorsParseFromRepo>;
+export async function parseSafetensorsMetadata(params: {
+	repo: RepoDesignation;
+	computeParametersCount?: boolean;
 	hubUrl?: string;
 	credentials?: Credentials;
 	revision?: string;
@@ -138,7 +165,9 @@ export async function parseSafetensorsMetadata(params: {
 		return {
 			sharded: false,
 			header,
-			parameterCount: computeNumOfParamsByDtypeSingleFile(header),
+			...(params.computeParametersCount && {
+				parameterCount: computeNumOfParamsByDtypeSingleFile(header),
+			}),
 		};
 	} else if (await fileExists({ ...params, path: INDEX_FILE })) {
 		const { index, headers } = await parseShardedIndex(INDEX_FILE, params);
@@ -146,7 +175,9 @@ export async function parseSafetensorsMetadata(params: {
 			sharded: true,
 			index,
 			headers,
-			parameterCount: computeNumOfParamsByDtypeSharded(headers),
+			...(params.computeParametersCount && {
+				parameterCount: computeNumOfParamsByDtypeSharded(headers),
+			}),
 		};
 	} else {
 		throw new Error("model id does not seem to contain safetensors weights");
