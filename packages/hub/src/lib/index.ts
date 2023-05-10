@@ -10,7 +10,7 @@ export * from "./list-datasets";
 export * from "./list-files";
 export * from "./list-models";
 export * from "./list-spaces";
-export * from "./parse-safetensors";
+export * from "./parse-safetensors-metadata";
 export * from "./upload-file";
 export * from "./upload-files";
 export * from "./who-am-i";
