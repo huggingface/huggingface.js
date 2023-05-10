@@ -4,7 +4,7 @@ import { omit } from "../utils/omit";
 import { toRepoId } from "../utils/toRepoId";
 import { typedEntries } from "../utils/typedEntries";
 import { downloadFile } from "./download-file";
-import { fileExists } from "./file-download-info";
+import { fileExists } from "./file-exists";
 
 const SINGLE_FILE = "model.safetensors";
 const INDEX_FILE = "model.safetensors.index.json";
