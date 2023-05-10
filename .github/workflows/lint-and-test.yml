@@ -25,9 +25,7 @@ jobs:
             echo "SINCE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} ${{ github.sha }})" >> $GITHUB_OUTPUT
           fi
 
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 8.3.1
+      - run: corepack enable
 
       - uses: actions/setup-node@v3
         with:
