@@ -38,11 +38,13 @@ type SafetensorsParseFromRepo =
 	| {
 			sharded: false;
 			header: SafetensorsFileHeader;
+			parameterCount: Partial<Record<Dtype, number>>;
 	  }
 	| {
 			sharded: true;
 			index: SafetensorsIndexJson;
 			headers: SafetensorsShardedHeaders;
+			parameterCount: Partial<Record<Dtype, number>>;
 	  };
 
 async function parseSingleFile(
@@ -132,14 +134,19 @@ export async function parseSafetensorsMetadata(params: {
 	}
 
 	if (await fileExists({ ...params, path: SINGLE_FILE })) {
+		const header = await parseSingleFile(SINGLE_FILE, params);
 		return {
 			sharded: false,
-			header: await parseSingleFile(SINGLE_FILE, params),
+			header,
+			parameterCount: computeNumOfParamsByDtypeSingleFile(header),
 		};
 	} else if (await fileExists({ ...params, path: INDEX_FILE })) {
+		const { index, headers } = await parseShardedIndex(INDEX_FILE, params);
 		return {
 			sharded: true,
-			...(await parseShardedIndex(INDEX_FILE, params)),
+			index,
+			headers,
+			parameterCount: computeNumOfParamsByDtypeSharded(headers),
 		};
 	} else {
 		throw new Error("model id does not seem to contain safetensors weights");
@@ -167,12 +174,4 @@ function computeNumOfParamsByDtypeSharded(shardedMap: SafetensorsShardedHeaders)
 		}
 	}
 	return counter;
-}
-
-export function computeNumOfParamsByDtype(parse: SafetensorsParseFromRepo): Partial<Record<Dtype, number>> {
-	if (parse.sharded) {
-		return computeNumOfParamsByDtypeSharded(parse.headers);
-	} else {
-		return computeNumOfParamsByDtypeSingleFile(parse.header);
-	}
 }
