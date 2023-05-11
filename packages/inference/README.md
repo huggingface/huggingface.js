@@ -11,10 +11,10 @@ You can also try out a live [interactive notebook](https://observablehq.com/@hug
 ```console
 npm install @huggingface/inference
 
-yarn add @huggingface/inference
-
 pnpm add @huggingface/inference
 ```
+
+`yarn` doesn't work because it tries to get dev dependencies, one of which is private.
 
 ### Deno
 

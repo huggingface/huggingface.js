@@ -71,7 +71,7 @@ You can run our packages with vanilla JS, without any bundler, by using a CDN or
 ### Deno
 
 ```ts
-// This should automatically load the types located at https://www.unpkg.com/@huggingface/inference@2.3.2/dist/index.d.ts
+// @deno-types="https://www.unpkg.com/@huggingface/inference@2.3.2/dist/index.d.ts"
 import { HfInference } from "https://www.unpkg.com/@huggingface/inference@2.3.2/dist/index.mjs"
 ```
 

@@ -40,8 +40,6 @@ jobs:
           git add ../..
           git commit -m "🔖 @hugginface/inference $BUMPED_VERSION"
           git tag "inference-v$BUMPED_VERSION"
-          # Remove dev dependencies from package.json, because yarn tries to download them
-          node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./package.json')); delete package.devDependencies['@huggingface/shared']; fs.writeFileSync('./package.json', JSON.stringify(package, null, '\t') + '\n');"
       - run: pnpm publish --no-git-checks .
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
