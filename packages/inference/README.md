@@ -16,6 +16,13 @@ yarn add @huggingface/inference
 pnpm add @huggingface/inference
 ```
 
+### Deno
+
+```
+// This should automatically load the types located at https://www.unpkg.com/@huggingface/inference@2.3.1/dist/index.d.ts
+import { HfInference } from "https://www.unpkg.com/@huggingface/inference@2.3.1/dist/index.mjs"
+```
+
 ## Usage
 
 ❗**Important note:** Using an access token is optional to get started, however you will be rate limited eventually. Join [Hugging Face](https://huggingface.co/join) and then visit [access tokens](https://huggingface.co/settings/tokens) to generate your access token for **free**.
