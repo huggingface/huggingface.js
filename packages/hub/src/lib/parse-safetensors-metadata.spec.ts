@@ -2,7 +2,7 @@ import { assert, it, describe } from "vitest";
 import { parseSafetensorsMetadata } from "./parse-safetensors-metadata";
 import { sum } from "../utils/sum";
 
-describe("parseSafetensorsFromModelRepo", () => {
+describe("parseSafetensorsMetadata", () => {
 	it("fetch info for single-file", async () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "bert-base-uncased",
