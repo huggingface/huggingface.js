@@ -32,7 +32,6 @@
 		"lint:check": "eslint --ext .cjs,.ts .",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
-		"preversion": "pnpm --filter doc-internal run fix-cdn-versions && git add ../../README.md",
 		"prepublishOnly": "pnpm run build",
 		"build": "tsup",
 		"test": "vitest run",

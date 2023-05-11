@@ -44,7 +44,6 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"prepublishOnly": "pnpm run build",
-		"preversion": "pnpm --filter doc-internal run fix-cdn-versions && git add ../../README.md",
 		"test": "vitest run --config vitest.config.ts",
 		"test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest.config.ts",
 		"type-check": "tsc"
