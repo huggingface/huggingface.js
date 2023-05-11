@@ -17,6 +17,10 @@ export async function downloadFile(params: {
 	 */
 	raw?: boolean;
 	revision?: string;
+	/**
+	 * Fetch only a specific part of the file
+	 */
+	range?: [number, number];
 	credentials?: Credentials;
 	hubUrl?: string;
 }): Promise<Response | null> {
@@ -27,11 +31,18 @@ export async function downloadFile(params: {
 	}/${encodeURIComponent(params.revision ?? "main")}/${params.path}`;
 
 	const resp = await fetch(url, {
-		headers: params.credentials
-			? {
-					Authorization: `Bearer ${params.credentials.accessToken}`,
-			  }
-			: {},
+		headers: {
+			...(params.credentials
+				? {
+						Authorization: `Bearer ${params.credentials.accessToken}`,
+				  }
+				: {}),
+			...(params.range
+				? {
+						Range: `bytes=${params.range[0]}-${params.range[1]}`,
+				  }
+				: {}),
+		},
 	});
 
 	if (resp.status === 404 && resp.headers.get("X-Error-Code") === "EntryNotFound") {
