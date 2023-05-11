@@ -688,5 +688,25 @@
         "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
+  },
+  "a7453227017f6bfb69905e66f6820293dbf88c2a56baa9be7f31b63ce9783c05": {
+    "url": "https://api-inference.huggingface.co/models/lllyasviel/sd-controlnet-depth",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST"
+    },
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "connection": "keep-alive",
+        "content-type": "image/jpeg",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
   }
 }
