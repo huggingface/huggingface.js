@@ -157,3 +157,9 @@ function* extractAsyncFunctions(fileContent: string): Iterable<string> {
 		index = typeEnd;
 	}
 }
+
+writeFileSync("./dist/index.js", '/// <reference path="./index.d.ts" />\n' + readFileSync("./dist/index.js", "utf-8"));
+writeFileSync(
+	"./dist/index.mjs",
+	'/// <reference path="./index.d.ts" />\n' + readFileSync("./dist/index.mjs", "utf-8")
+);
