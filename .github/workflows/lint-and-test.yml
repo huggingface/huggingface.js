@@ -47,12 +47,12 @@ jobs:
         run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] type-check
 
       - name: Test
-        run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test
+        run: VCR_MODE=playback pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test
         env:
           HF_ACCESS_TOKEN: ${{ secrets.HF_ACCESS_TOKEN }}
 
       - name: Test in browser
-        run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test:browser
+        run: VCR_MODE=playback pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test:browser
         env:
           HF_ACCESS_TOKEN: ${{ secrets.HF_ACCESS_TOKEN }}
 
