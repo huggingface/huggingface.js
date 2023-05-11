@@ -19,6 +19,7 @@
 	},
 	"devDependencies": {
 		"@vitest/browser": "^0.29.7",
+		"semver": "^7.5.0",
 		"tsup": "^6.7.0",
 		"vitest": "^0.29.4",
 		"webdriverio": "^8.6.7"
