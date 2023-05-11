@@ -7,6 +7,7 @@ appendFileSync("./dist/index.d.ts", "export class InferenceOutputError extends T
 
 const dirs = readdirSync("./src/tasks");
 
+const fns: string[] = [];
 for (const dir of dirs) {
 	if (dir.endsWith(".ts")) {
 		continue;
@@ -23,19 +24,52 @@ for (const dir of dirs) {
 			appendFileSync("./dist/index.d.ts", type + "\n");
 		}
 
-		const fns: string[] = [];
 		for (const fn of extractAsyncFunctions(fileContent)) {
 			appendFileSync("./dist/index.d.ts", fn + "\n");
 			fns.push(fn);
 		}
-
-		for (const fn of fns) {
-			// ...
-		}
-
-		// appendFileSync("./dist/index.d.ts", readFileSync(`./src/tasks/${dir}/${file}`, "utf-8"));
 	}
 }
+
+appendFileSync(
+	"./dist/index.d.ts",
+	`export class HfInference {
+\tconstructor(accessToken?: string, defaultOptions?: Options);
+\t/**
+\t * Returns copy of HfInference tied to a specified endpoint.
+\t */
+\tendpoint(endpointUrl: string): HfInferenceEndpoint;
+` +
+		fns
+			.map(
+				(fn) =>
+					`${fn
+						.replace(/args: [a-zA-Z]+/, (args) => `args: Omit<${args.slice("args: ".length)}, 'accessToken'>`)
+						.replace("export function ", "")
+						.split("\n")
+						.map((line) => "\t" + line)
+						.join("\n")}`
+			)
+			.join("\n") +
+		"\n}\n"
+);
+
+appendFileSync(
+	"./dist/index.d.ts",
+	`export class HfInferenceEndpoint {\n\tconstructor(endpointUrl: string, accessToken?: string, defaultOptions?: Options);\n` +
+		fns
+			.map(
+				(fn) =>
+					`${fn
+						.replace(/args: [a-zA-Z]+/, (args) => `args: Omit<${args.slice("args: ".length)}, 'accessToken' | 'model'>`)
+						.replace("export function ", "")
+						.split("\n")
+						.map((line) => "\t" + line)
+						.join("\n")}`
+			)
+			.join("\n") +
+		"\n}\n"
+);
 
 function* extractTypesAndInterfaces(fileContent: string): Iterable<string> {
 	let index = 0;
