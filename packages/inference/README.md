@@ -19,8 +19,7 @@ pnpm add @huggingface/inference
 ### Deno
 
 ```ts
-// @deno-types="https://www.unpkg.com/@huggingface/inference@2.3.2/dist/index.d.ts"
-import { HfInference } from "https://www.unpkg.com/@huggingface/inference@2.3.2/dist/index.mjs"
+import { HfInference } from "https://esm.sh/@huggingface/inference@2.3.2"
 ```
 
 ## Usage

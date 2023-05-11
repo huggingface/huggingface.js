@@ -71,8 +71,7 @@ You can run our packages with vanilla JS, without any bundler, by using a CDN or
 ### Deno
 
 ```ts
-// @deno-types="https://www.unpkg.com/@huggingface/inference@2.3.2/dist/index.d.ts"
-import { HfInference } from "https://www.unpkg.com/@huggingface/inference@2.3.2/dist/index.mjs"
+import { HfInference } from "https://esm.sh/@huggingface/inference@2.3.2"
 ```
 
 This is not yet supported for `@huggingface/hub`, open an issue if you need it!

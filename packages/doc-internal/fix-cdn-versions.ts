@@ -11,12 +11,8 @@ content = content
 		`https://cdn.jsdelivr.net/npm/@huggingface/inference@${inferencePackage.version}/+esm`
 	)
 	.replace(
-		/https:[/][/]www[.]unpkg[.]com[/]@huggingface[/]inference@\d([.]\d)?([.]\d)?[/]dist[/]index[.]d[.]ts/,
-		`https://www.unpkg.com/@huggingface/inference@${inferencePackage.version}/dist/index.d.ts`
-	)
-	.replace(
-		/https:[/][/]www[.]unpkg[.]com[/]@huggingface[/]inference@\d([.]\d)?([.]\d)?[/]dist[/]index[.]mjs/,
-		`https://www.unpkg.com/@huggingface/inference@${inferencePackage.version}/dist/index.mjs`
+		/https:[/][/]esm[.]sh[/]@huggingface[/]inference@\d([.]\d)?([.]\d)?/,
+		`https://esm.sh/@huggingface/inference@${inferencePackage.version}`
 	)
 	.replace(
 		/https:[/][/]cdn[.]jsdelivr[.]net[/]npm[/]@huggingface[/]hub@\d([.]\d)?([.]\d)?[/][+]esm/,
@@ -27,14 +23,9 @@ writeFileSync("../../README.md", Buffer.from(content));
 
 content = readFileSync("../inference/README.md").toString();
 
-content = content
-	.replace(
-		/https:[/][/]www[.]unpkg[.]com[/]@huggingface[/]inference@\d([.]\d)?([.]\d)?[/]dist[/]index[.]d[.]ts/,
-		`https://www.unpkg.com/@huggingface/inference@${inferencePackage.version}/dist/index.d.ts`
-	)
-	.replace(
-		/https:[/][/]www[.]unpkg[.]com[/]@huggingface[/]inference@\d([.]\d)?([.]\d)?[/]dist[/]index[.]mjs/,
-		`https://www.unpkg.com/@huggingface/inference@${inferencePackage.version}/dist/index.mjs`
-	);
+content = content.replace(
+	/https:[/][/]esm[.]sh[/]@huggingface[/]inference@\d([.]\d)?([.]\d)?/,
+	`https://esm.sh/@huggingface/inference@${inferencePackage.version}`
+);
 
 writeFileSync("../inference/README.md", Buffer.from(content));
