@@ -63,7 +63,7 @@ You can run our packages with vanilla JS, without any bundler, by using a CDN or
 
 ```html
 <script type="module">
-    import { HfInference } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@2.3.1/+esm';
+    import { HfInference } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@2.3.2/+esm';
     import { createRepo, commit, deleteRepo, listFiles } from "https://cdn.jsdelivr.net/npm/@huggingface/hub@0.7.0/+esm";
 </script>
 ```
@@ -71,8 +71,8 @@ You can run our packages with vanilla JS, without any bundler, by using a CDN or
 ### Deno
 
 ```ts
-// This should automatically load the types located at https://www.unpkg.com/@huggingface/inference@2.3.1/dist/index.d.ts
-import { HfInference } from "https://www.unpkg.com/@huggingface/inference@2.3.1/dist/index.mjs"
+// This should automatically load the types located at https://www.unpkg.com/@huggingface/inference@2.3.2/dist/index.d.ts
+import { HfInference } from "https://www.unpkg.com/@huggingface/inference@2.3.2/dist/index.mjs"
 ```
 
 This is not yet supported for `@huggingface/hub`, open an issue if you need it!
