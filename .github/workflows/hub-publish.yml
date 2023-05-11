@@ -40,7 +40,9 @@ jobs:
           git add ../..
           git commit -m "🔖 @hugginface/hub $BUMPED_VERSION"
           git tag "hub-v$BUMPED_VERSION"
-      - run: pnpm publish .
+          # Remove dev dependencies from package.json, because yarn tries to download them
+          node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./package.json')); delete package.devDependencies['@huggingface/shared']; fs.writeFileSync('./package.json', JSON.stringify(package, null, '\t') + '\n');"
+      - run: pnpm publish --no-git-checks .
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - run: git push --follow-tags
@@ -49,6 +51,6 @@ jobs:
         with:
           node-version: "18"
           registry-url: "https://npm.pkg.github.com"
-      - run: pnpm publish .
+      - run: pnpm publish --no-git-checks .
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

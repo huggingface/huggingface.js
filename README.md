@@ -62,12 +62,20 @@ import type { RepoId, Credentials } from "@huggingface/hub";
 You can run our packages with vanilla JS, without any bundler, by using a CDN or static hosting. Using [ES modules](https://hacks.mozilla.org/2018/03/es-modules-a-cartoon-deep-dive/), i.e. `<script type="module">`, you can import the libraries in your code:
 
 ```html
-
 <script type="module">
     import { HfInference } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@2.3.1/+esm';
     import { createRepo, commit, deleteRepo, listFiles } from "https://cdn.jsdelivr.net/npm/@huggingface/hub@0.7.0/+esm";
 </script>
 ```
+
+### Deno
+
+```ts
+// This should automatically load the types located at https://www.unpkg.com/@huggingface/inference@2.3.1/dist/index.d.ts
+import { HfInference } from "https://www.unpkg.com/@huggingface/inference@2.3.1/dist/index.mjs"
+```
+
+This is not yet supported for `@huggingface/hub`, open an issue if you need it!
 
 ## Usage examples
 
