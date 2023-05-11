@@ -39,6 +39,7 @@
 	},
 	"scripts": {
 		"build": "tsup src/index.ts --format cjs,esm --clean",
+		"dts": "ts-node scripts/generate-dts.ts",
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
 		"format": "prettier --write .",
@@ -52,6 +53,7 @@
 	"devDependencies": {
 		"@huggingface/shared": "workspace:*",
 		"@types/node": "18.13.0",
+		"ts-node": "^10.9.1",
 		"typescript": "^5.0.4",
 		"vite": "^4.1.4",
 		"vitest": "^0.29.8"
