@@ -43,15 +43,15 @@ export class WebBlob extends Blob {
 		this.full = full;
 	}
 
-	get size(): number {
+	override get size(): number {
 		return this.end - this.start;
 	}
 
-	get type(): string {
+	override get type(): string {
 		return this.contentType;
 	}
 
-	slice(start = 0, end = this.size): WebBlob {
+	override slice(start = 0, end = this.size): WebBlob {
 		if (start < 0 || end < 0) {
 			new TypeError("Unsupported negative start/end on FileBlob.slice");
 		}
@@ -67,19 +67,19 @@ export class WebBlob extends Blob {
 		return slice;
 	}
 
-	async arrayBuffer(): Promise<ArrayBuffer> {
+	override async arrayBuffer(): Promise<ArrayBuffer> {
 		const result = await this.fetchRange();
 
 		return result.arrayBuffer();
 	}
 
-	async text(): Promise<string> {
+	override async text(): Promise<string> {
 		const result = await this.fetchRange();
 
 		return result.text();
 	}
 
-	stream(): ReturnType<Blob["stream"]> {
+	override stream(): ReturnType<Blob["stream"]> {
 		const stream = new TransformStream();
 
 		this.fetchRange()

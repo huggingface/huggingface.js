@@ -8,7 +8,8 @@
 		"noImplicitAny": true,
 		"strict": true,
 		"strictNullChecks": true,
-		"skipLibCheck": true
+		"skipLibCheck": true,
+		"noImplicitOverride": true
 	},
 	"ts-node": {
 		"compilerOptions": {

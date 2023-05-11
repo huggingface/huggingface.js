@@ -50,7 +50,7 @@ export class FileBlob extends Blob {
 	/**
 	 * Returns the size of the blob.
 	 */
-	get size(): number {
+	override get size(): number {
 		return this.end - this.start;
 	}
 
@@ -64,7 +64,7 @@ export class FileBlob extends Blob {
 	 * @param start beginning of the slice
 	 * @param end end of the slice
 	 */
-	slice(start = 0, end = this.size): FileBlob {
+	override slice(start = 0, end = this.size): FileBlob {
 		if (start < 0 || end < 0) {
 			new TypeError("Unsupported negative start/end on FileBlob.slice");
 		}
@@ -77,7 +77,7 @@ export class FileBlob extends Blob {
 	/**
 	 * Read the part of the file delimited by the FileBlob and returns it as an ArrayBuffer.
 	 */
-	async arrayBuffer(): Promise<ArrayBuffer> {
+	override async arrayBuffer(): Promise<ArrayBuffer> {
 		const slice = await this.execute((file) => file.read(Buffer.alloc(this.size), 0, this.size, this.start));
 
 		return slice.buffer;
@@ -86,7 +86,7 @@ export class FileBlob extends Blob {
 	/**
 	 * Read the part of the file delimited by the FileBlob and returns it as a string.
 	 */
-	async text(): Promise<string> {
+	override async text(): Promise<string> {
 		const buffer = (await this.arrayBuffer()) as Buffer;
 
 		return buffer.toString("utf8");
@@ -95,7 +95,7 @@ export class FileBlob extends Blob {
 	/**
 	 * Returns a stream around the part of the file delimited by the FileBlob.
 	 */
-	stream(): ReturnType<Blob["stream"]> {
+	override stream(): ReturnType<Blob["stream"]> {
 		return Readable.toWeb(createReadStream(this.path, { start: this.start, end: this.end - 1 })) as ReturnType<
 			Blob["stream"]
 		>;
