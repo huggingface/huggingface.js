@@ -10,6 +10,7 @@
 		"noImplicitAny": true,
 		"strictNullChecks": true,
 		"skipLibCheck": true,
+		"noImplicitOverride": true,
 		"outDir": "./dist"
 	},
 	"include": ["src", "index.ts", "../shared/src"],
