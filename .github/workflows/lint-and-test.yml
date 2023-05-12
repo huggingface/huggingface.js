@@ -33,7 +33,6 @@ jobs:
           cache: "pnpm"
           cache-dependency-path: "**/pnpm-lock.yaml"
       - run: |
-          pnpm setup
           pnpm install --frozen-lockfile --filter .
           pnpm install --frozen-lockfile --filter ...[${{ steps.since.outputs.SINCE }}]
       - name: "Checking lint errors"
@@ -60,8 +59,8 @@ jobs:
       - name: E2E - start mock npm registry
         working-directory: e2e
         run: |
-          pnpm i -g verdaccio verdaccio-memory verdaccio-auth-memory
-          pnpm exec verdaccio --config e2e/mock-registry-config.yaml &
+          npm i -g verdaccio verdaccio-memory verdaccio-auth-memory
+          npx verdaccio --config e2e/mock-registry-config.yaml &
 
       - name: E2E test - publish packages to mock repo
         working-directory: e2e
