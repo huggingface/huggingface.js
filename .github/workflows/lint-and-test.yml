@@ -57,10 +57,10 @@ jobs:
           HF_ACCESS_TOKEN: ${{ secrets.HF_ACCESS_TOKEN }}
 
       - name: E2E - start mock npm registry
-        working-directory: e2e
         run: |
           npm i -g verdaccio verdaccio-memory verdaccio-auth-memory
-          npx verdaccio --listen 4874 --config mock-registry-config.yaml &
+          echo "//localhost:4874/:_authToken=1FlYaQkIdHsIztXCHmqu9g==" >> .npmrc
+          npx verdaccio --listen 4874 --config e2e/mock-registry-config.yaml &
 
       - name: E2E test - publish packages to mock repo
         working-directory: e2e
