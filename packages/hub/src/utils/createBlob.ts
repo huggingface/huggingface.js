@@ -1,4 +1,4 @@
-import { isFrontend } from "@huggingface/shared";
+import { isFrontend } from "../../../shared";
 import { WebBlob } from "./WebBlob";
 
 /**

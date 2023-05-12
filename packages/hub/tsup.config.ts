@@ -5,7 +5,9 @@ const baseConfig: Options = {
 	format: ["cjs", "esm"],
 	outDir: "dist",
 	clean: true,
-	dts: false,
+	dts: {
+		resolve: true
+	},
 };
 
 const nodeConfig: Options = {

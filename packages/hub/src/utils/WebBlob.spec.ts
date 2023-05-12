@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { base64FromBytes } from "@huggingface/shared";
+import { base64FromBytes } from "../../../shared";
 import { WebBlob } from "./WebBlob";
 
 describe("WebBlob", async () => {

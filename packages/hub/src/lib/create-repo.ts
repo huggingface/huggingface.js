@@ -2,7 +2,7 @@ import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
 import type { ApiCreateRepoPayload } from "../types/api/api-create-repo";
 import type { Credentials, RepoDesignation, SpaceSdk } from "../types/public";
-import { base64FromBytes } from "@huggingface/shared";
+import { base64FromBytes } from "../../../shared";
 import { checkCredentials } from "../utils/checkCredentials";
 import { toRepoId } from "../utils/toRepoId";
 

@@ -6,9 +6,6 @@ dependencies:
     version: 4.9.0
 
 devDependencies:
-  '@huggingface/shared':
-    specifier: workspace:*
-    version: link:../shared
   '@types/node':
     specifier: ^18.13.0
     version: 18.13.0

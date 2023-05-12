@@ -14,7 +14,7 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
-    "@huggingface/inference": "file://../../packages/inference",
-    "@huggingface/hub": "file://../../packages/hub"
+    "@huggingface/inference": "*",
+    "@huggingface/hub": "*"
   }
 }
