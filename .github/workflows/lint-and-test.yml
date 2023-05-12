@@ -91,8 +91,8 @@ jobs:
       - uses: denoland/setup-deno@v1
         with:
           deno-version: vx.x.x
-      - name: E2E - deno import from npm
+      - name: E2E test - deno import from npm
         working-directory: e2e/deno
         run: deno run --allow-net index.ts
         env:
-          NPM_CONFIG_REGISTRY=http://localhost:4873/
+          NPM_CONFIG_REGISTRY: http://localhost:4873/
