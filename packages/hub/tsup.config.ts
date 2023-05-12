@@ -6,7 +6,7 @@ const baseConfig: Options = {
 	outDir: "dist",
 	clean: true,
 	dts: {
-		resolve: true
+		resolve: true,
 	},
 };
 
