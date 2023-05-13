@@ -79,6 +79,11 @@ import { HfInference } from "npm:@huggingface/inference"
 import { createRepo, commit, deleteRepo, listFiles } from "npm:@huggingface/hub"
 ```
 
+### This is test
+
+```jsx
+let worker = new Worker(new URL('./worker.js', import.meta.url));
+```
 
 ## Usage examples
 
