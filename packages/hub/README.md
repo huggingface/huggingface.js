@@ -2,8 +2,23 @@
 
 Official utilities to use the Hugging Face hub API, still very experimental.
 
-```
+## Install
+
+```console
+pnpm add @huggingface/hub
+
 npm add @huggingface/hub
+
+yarn add @huggingface/hub
+```
+
+### Deno
+
+```ts
+// esm.sh
+import { HfInference } from "https://esm.sh/@huggingface/hub"
+// or npm:
+import { HfInference } from "npm:@huggingface/hub"
 ```
 
 Check out the [full documentation](https://huggingface.co/docs/huggingface.js/hub/README).

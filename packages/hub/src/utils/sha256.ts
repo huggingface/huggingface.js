@@ -1,4 +1,4 @@
-import { isFrontend } from "@huggingface/shared";
+import { isFrontend } from "../../../shared";
 import { hexFromBytes } from "./hexFromBytes";
 
 /**

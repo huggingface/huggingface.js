@@ -12,14 +12,17 @@ You can also try out a live [interactive notebook](https://observablehq.com/@hug
 npm install @huggingface/inference
 
 pnpm add @huggingface/inference
-```
 
-`yarn` doesn't work because it tries to get dev dependencies, one of which is private.
+yarn add @huggingface/inference
+```
 
 ### Deno
 
 ```ts
-import { HfInference } from "https://esm.sh/@huggingface/inference@2.3.2"
+// esm.sh
+import { HfInference } from "https://esm.sh/@huggingface/inference"
+// or npm:
+import { HfInference } from "npm:@huggingface/inference"
 ```
 
 ## Usage

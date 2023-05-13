@@ -20,7 +20,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@huggingface/hub": "file:../../packages/hub",
-		"@huggingface/inference": "file:../../packages/inference"
+		"@huggingface/inference": "*",
+		"@huggingface/hub": "*"
 	}
 }

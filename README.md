@@ -71,10 +71,14 @@ You can run our packages with vanilla JS, without any bundler, by using a CDN or
 ### Deno
 
 ```ts
-import { HfInference } from "https://esm.sh/@huggingface/inference@2.3.2"
+// esm.sh
+import { HfInference } from "https://esm.sh/@huggingface/inference"
+import { createRepo, commit, deleteRepo, listFiles } from "https://esm.sh/@huggingface/hub"
+// or npm:
+import { HfInference } from "npm:@huggingface/inference"
+import { createRepo, commit, deleteRepo, listFiles } from "npm:@huggingface/hub"
 ```
 
-This is not yet supported for `@huggingface/hub`, open an issue if you need it!
 
 ## Usage examples
 

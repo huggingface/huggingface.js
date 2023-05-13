@@ -1,4 +1,4 @@
-import { isFrontend, base64FromBytes } from "@huggingface/shared";
+import { isFrontend, base64FromBytes } from "../../../shared";
 import { HUB_URL } from "../consts";
 import { HubApiError, createApiError, InvalidApiResponseFormatError } from "../error";
 import type {
