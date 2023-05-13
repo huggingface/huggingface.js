@@ -59,6 +59,7 @@ jobs:
       - name: E2E - start mock npm registry
         run: |
           npm i -g verdaccio verdaccio-memory verdaccio-auth-memory
+          echo >> .npmrc
           echo "//localhost:4874/:_authToken=1FlYaQkIdHsIztXCHmqu9g==" >> .npmrc
           npx verdaccio --listen 4874 --config e2e/mock-registry-config.yaml &
 
