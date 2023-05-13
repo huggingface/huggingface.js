@@ -73,6 +73,7 @@ jobs:
       - name: E2E test - test yarn install
         working-directory: e2e/ts
         run: |
+          npm i -g yarn --force
           yarn install --registry http://localhost:4874/
 
       - name: E2E test - typescript node project
