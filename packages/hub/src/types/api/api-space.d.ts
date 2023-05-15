@@ -1,5 +1,7 @@
 import type { SpaceRuntime, SpaceSdk } from "../public";
 
+type Color = "red" | "yellow" | "green" | "blue" | "indigo" | "purple" | "pink" | "gray";
+
 export interface ApiSpaceInfo {
 	_id: string;
 	id: string;
