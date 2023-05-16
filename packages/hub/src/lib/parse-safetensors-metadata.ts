@@ -12,20 +12,20 @@ const INDEX_FILE = "model.safetensors.index.json";
 
 type FileName = string;
 
-type TensorName = string;
-type Dtype = "F64" | "F32" | "F16" | "BF16" | "I64" | "I32" | "I16" | "I8" | "U8" | "BOOL";
+export type TensorName = string;
+export type Dtype = "F64" | "F32" | "F16" | "BF16" | "I64" | "I32" | "I16" | "I8" | "U8" | "BOOL";
 
-interface TensorInfo {
+export interface TensorInfo {
 	dtype: Dtype;
 	shape: number[];
 	data_offsets: [number, number];
 }
 
-type SafetensorsFileHeader = Record<TensorName, TensorInfo> & {
+export type SafetensorsFileHeader = Record<TensorName, TensorInfo> & {
 	__metadata__: Record<string, string>;
 };
 
-interface SafetensorsIndexJson {
+export interface SafetensorsIndexJson {
 	dtype?: string;
 	/// ^there's sometimes a dtype but it looks inconsistent.
 	metadata?: Record<string, string>;
@@ -33,9 +33,9 @@ interface SafetensorsIndexJson {
 	weight_map: Record<TensorName, FileName>;
 }
 
-type SafetensorsShardedHeaders = Record<FileName, SafetensorsFileHeader>;
+export type SafetensorsShardedHeaders = Record<FileName, SafetensorsFileHeader>;
 
-type SafetensorsParseFromRepo =
+export type SafetensorsParseFromRepo =
 	| {
 			sharded: false;
 			header: SafetensorsFileHeader;
