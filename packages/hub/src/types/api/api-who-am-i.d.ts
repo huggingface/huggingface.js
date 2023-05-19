@@ -31,7 +31,7 @@ interface ApiWhoAmIUser extends ApiWhoAmIEntityBase {
 	email: string;
 	emailVerified: boolean;
 	isPro: boolean;
-	orgs: WhoAmIOrg[];
+	orgs: ApiWhoAmIOrg[];
 }
 
 interface ApiWhoAmIApp extends ApiWhoAmIBase {

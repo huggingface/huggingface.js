@@ -730,6 +730,27 @@
       }
     }
   },
+  "c6cc0728596096c42dd973d663209341763a3a47c2a03b99a817c39ff0c43bbe": {
+    "url": "https://api-inference.huggingface.co/models/vvmnnnkv/wine-quality",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":{\"data\":{\"fixed_acidity\":[\"7.4\",\"7.8\",\"10.3\"],\"volatile_acidity\":[\"0.7\",\"0.88\",\"0.32\"],\"citric_acid\":[\"0\",\"0\",\"0.45\"],\"residual_sugar\":[\"1.9\",\"2.6\",\"6.4\"],\"chlorides\":[\"0.076\",\"0.098\",\"0.073\"],\"free_sulfur_dioxide\":[\"11\",\"25\",\"5\"],\"total_sulfur_dioxide\":[\"34\",\"67\",\"13\"],\"density\":[\"0.9978\",\"0.9968\",\"0.9976\"],\"pH\":[\"3.51\",\"3.2\",\"3.23\"],\"sulphates\":[\"0.56\",\"0.68\",\"0.82\"],\"alcohol\":[\"9.4\",\"9.8\",\"12.6\"]}},\"options\":{}}"
+    },
+    "response": {
+      "body": "[5,5,7]",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
   "5dfb672429f62697191179e5adc0834524425b203f791920564f1426c6b11f84": {
     "url": "https://api-inference.huggingface.co/models/facebook/bart-base",
     "init": {
