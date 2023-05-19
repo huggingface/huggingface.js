@@ -517,6 +517,29 @@ describe.concurrent(
 			).toMatchObject([270.5473526976245, 313.6843425638086, 328.3727133404402]);
 		});
 
+		it("tabularClassification", async () => {
+			expect(
+				await hf.tabularClassification({
+					model: "vvmnnnkv/wine-quality",
+					inputs: {
+						data: {
+							fixed_acidity: ["7.4", "7.8", "10.3"],
+							volatile_acidity: ["0.7", "0.88", "0.32"],
+							citric_acid: ["0", "0", "0.45"],
+							residual_sugar: ["1.9", "2.6", "6.4"],
+							chlorides: ["0.076", "0.098", "0.073"],
+							free_sulfur_dioxide: ["11", "25", "5"],
+							total_sulfur_dioxide: ["34", "67", "13"],
+							density: ["0.9978", "0.9968", "0.9976"],
+							pH: ["3.51", "3.2", "3.23"],
+							sulphates: ["0.56", "0.68", "0.82"],
+							alcohol: ["9.4", "9.8", "12.6"],
+						},
+					},
+				})
+			).toMatchObject([5, 5, 7]);
+		});
+
 		it("endpoint - makes request to specified endpoint", async () => {
 			const ep = hf.endpoint("https://api-inference.huggingface.co/models/google/flan-t5-xxl");
 			const { generated_text } = await ep.textGeneration({
