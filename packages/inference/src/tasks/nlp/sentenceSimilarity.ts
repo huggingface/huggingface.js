@@ -1,6 +1,9 @@
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { getPipelineURL } from "../../lib/makeRequestOptions";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
+
+const HF_INFERENCE_API_PIPELINE_SENTENCE_SIMILARITY = "sentence-similarity";
 
 export type SentenceSimilarityArgs = BaseArgs & {
 	/**
@@ -24,6 +27,7 @@ export async function sentenceSimilarity(
 	args: SentenceSimilarityArgs,
 	options?: Options
 ): Promise<SentenceSimilarityOutput> {
+	args.model = getPipelineURL(args.model, HF_INFERENCE_API_PIPELINE_SENTENCE_SIMILARITY);
 	const res = await request<SentenceSimilarityOutput>(args, options);
 
 	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x === "number");

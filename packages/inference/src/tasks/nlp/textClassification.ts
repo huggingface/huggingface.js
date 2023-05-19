@@ -1,6 +1,9 @@
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { getPipelineURL } from "../../lib/makeRequestOptions";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
+
+const HF_INFERENCE_API_PIPELINE_TEXT_CLASSIFICATION = "text-classification";
 
 export type TextClassificationArgs = BaseArgs & {
 	/**
@@ -27,6 +30,7 @@ export async function textClassification(
 	args: TextClassificationArgs,
 	options?: Options
 ): Promise<TextClassificationOutput> {
+	args.model = getPipelineURL(args.model, HF_INFERENCE_API_PIPELINE_TEXT_CLASSIFICATION);
 	const res = (await request<TextClassificationOutput[]>(args, options))?.[0];
 	const isValidOutput =
 		Array.isArray(res) && res.every((x) => typeof x?.label === "string" && typeof x.score === "number");

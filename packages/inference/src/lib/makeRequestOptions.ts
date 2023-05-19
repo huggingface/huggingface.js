@@ -1,6 +1,16 @@
 import type { Options, RequestArgs } from "../types";
 
-const HF_INFERENCE_API_BASE_URL = "https://api-inference.huggingface.co/models/";
+export const HF_INFERENCE_API_BASE_URL = "https://api-inference.huggingface.co/";
+export const HF_INFERENCE_API_PIPELINE_BASE_URL = `${HF_INFERENCE_API_BASE_URL}pipeline/`;
+export const HF_INFERENCE_API_MODEL_BASE_URL = `${HF_INFERENCE_API_BASE_URL}models/`;
+
+export function isModelTypeURL(model: string): boolean {
+	return /^http(s?):/.test(model) || model.startsWith("/");
+}
+
+export function getPipelineURL(model: string, pipeline: string): string {
+	return isModelTypeURL(model) ? model : `${HF_INFERENCE_API_PIPELINE_BASE_URL}${pipeline}/${model}`;
+}
 
 /**
  * Helper that prepares request arguments
@@ -38,7 +48,7 @@ export function makeRequestOptions(
 		}
 	}
 
-	const url = /^http(s?):/.test(model) || model.startsWith("/") ? model : `${HF_INFERENCE_API_BASE_URL}${model}`;
+	const url = isModelTypeURL(model) ? model : `${HF_INFERENCE_API_MODEL_BASE_URL}${model}`;
 	const info: RequestInit = {
 		headers,
 		method: "POST",
