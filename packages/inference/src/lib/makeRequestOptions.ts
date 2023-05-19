@@ -1,11 +1,10 @@
 import type { Options, RequestArgs } from "../types";
-import { getPipelineURL } from "./makeRequestOptions";
 
-export const HF_INFERENCE_API_BASE_URL = "https://api-inference.huggingface.co/";
-export const HF_INFERENCE_API_PIPELINE_BASE_URL = `${HF_INFERENCE_API_BASE_URL}pipeline/`;
-export const HF_INFERENCE_API_MODEL_BASE_URL = `${HF_INFERENCE_API_BASE_URL}models/`;
+const HF_INFERENCE_API_BASE_URL = "https://api-inference.huggingface.co/";
+const HF_INFERENCE_API_PIPELINE_BASE_URL = `${HF_INFERENCE_API_BASE_URL}pipeline/`;
+const HF_INFERENCE_API_MODEL_BASE_URL = `${HF_INFERENCE_API_BASE_URL}models/`;
 
-export function isModelTypeURL(model: string): boolean {
+function isModelTypeURL(model: string): boolean {
 	return /^http(s?):/.test(model) || model.startsWith("/");
 }
 
