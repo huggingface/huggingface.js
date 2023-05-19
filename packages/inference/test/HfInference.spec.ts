@@ -346,6 +346,24 @@ describe.concurrent(
 			});
 			expect(response).toEqual(expect.arrayContaining([expect.any(Number)]));
 		});
+		it("FeatureExtraction - facebook/bart-base", async () => {
+			const response = await hf.featureExtraction({
+				model: "facebook/bart-base",
+				inputs: "That is a happy person",
+			});
+			// 1x7x768
+			expect(response).toEqual([
+				[
+					expect.arrayContaining([expect.any(Number)]),
+					expect.arrayContaining([expect.any(Number)]),
+					expect.arrayContaining([expect.any(Number)]),
+					expect.arrayContaining([expect.any(Number)]),
+					expect.arrayContaining([expect.any(Number)]),
+					expect.arrayContaining([expect.any(Number)]),
+					expect.arrayContaining([expect.any(Number)]),
+				],
+			]);
+		});
 		it("automaticSpeechRecognition", async () => {
 			expect(
 				await hf.automaticSpeechRecognition({
