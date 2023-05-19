@@ -63,7 +63,7 @@ You can run our packages with vanilla JS, without any bundler, by using a CDN or
 
 ```html
 <script type="module">
-    import { HfInference } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@2.3.3/+esm';
+    import { HfInference } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@2.4.0/+esm';
     import { createRepo, commit, deleteRepo, listFiles } from "https://cdn.jsdelivr.net/npm/@huggingface/hub@0.7.4/+esm";
 </script>
 ```
