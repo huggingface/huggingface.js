@@ -9,6 +9,7 @@ export async function request<T>(
 	options?: Options & {
 		/** For internal HF use, which is why it's not exposed in {@link Options} */
 		includeCredentials?: boolean;
+		pipeline?: string;
 	}
 ): Promise<T> {
 	const { url, info } = makeRequestOptions(args, options);

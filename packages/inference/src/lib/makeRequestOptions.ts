@@ -1,4 +1,5 @@
 import type { Options, RequestArgs } from "../types";
+import { getPipelineURL } from "./makeRequestOptions";
 
 export const HF_INFERENCE_API_BASE_URL = "https://api-inference.huggingface.co/";
 export const HF_INFERENCE_API_PIPELINE_BASE_URL = `${HF_INFERENCE_API_BASE_URL}pipeline/`;
@@ -8,8 +9,12 @@ export function isModelTypeURL(model: string): boolean {
 	return /^http(s?):/.test(model) || model.startsWith("/");
 }
 
-export function getPipelineURL(model: string, pipeline: string): string {
-	return isModelTypeURL(model) ? model : `${HF_INFERENCE_API_PIPELINE_BASE_URL}${pipeline}/${model}`;
+function getPipelineURL(model: string, pipeline: string): string {
+	return `${HF_INFERENCE_API_PIPELINE_BASE_URL}${pipeline}/${model}`;
+}
+
+function getDefaultModelTaskURL(model: string) {
+	return `${HF_INFERENCE_API_MODEL_BASE_URL}${model}`;
 }
 
 /**
@@ -23,6 +28,7 @@ export function makeRequestOptions(
 	options?: Options & {
 		/** For internal HF use, which is why it's not exposed in {@link Options} */
 		includeCredentials?: boolean;
+		pipeline?: string;
 	}
 ): { url: string; info: RequestInit } {
 	const { model, accessToken, ...otherArgs } = args;
@@ -48,7 +54,12 @@ export function makeRequestOptions(
 		}
 	}
 
-	const url = isModelTypeURL(model) ? model : `${HF_INFERENCE_API_MODEL_BASE_URL}${model}`;
+	const url = isModelTypeURL(model)
+		? model
+		: options?.pipeline
+		? getPipelineURL(model, options.pipeline)
+		: getDefaultModelTaskURL(model);
+
 	const info: RequestInit = {
 		headers,
 		method: "POST",
