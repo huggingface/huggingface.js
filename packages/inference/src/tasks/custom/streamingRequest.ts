@@ -15,7 +15,7 @@ export async function* streamingRequest<T>(
 		task?: string | InferenceTask;
 	}
 ): AsyncGenerator<T> {
-	const { url, info } = makeRequestOptions({ ...args, stream: true }, options);
+	const { url, info } = await makeRequestOptions({ ...args, stream: true }, options);
 	const response = await (options?.fetch ?? fetch)(url, info);
 
 	if (options?.retry_on_error !== false && response.status === 503 && !options?.wait_for_model) {
