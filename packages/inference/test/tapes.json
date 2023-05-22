@@ -14,8 +14,11 @@
       "statusText": "OK",
       "headers": {
         "access-control-allow-credentials": "true",
+        "access-control-expose-headers": "x-compute-type, x-compute-time",
         "connection": "keep-alive",
         "content-type": "application/json",
+        "server": "uvicorn",
+        "transfer-encoding": "chunked",
         "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
@@ -245,8 +248,11 @@
       "statusText": "OK",
       "headers": {
         "access-control-allow-credentials": "true",
+        "access-control-expose-headers": "x-compute-type, x-compute-time",
         "connection": "keep-alive",
         "content-type": "application/json",
+        "server": "uvicorn",
+        "transfer-encoding": "chunked",
         "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
@@ -703,8 +709,11 @@
       "statusText": "OK",
       "headers": {
         "access-control-allow-credentials": "true",
+        "access-control-expose-headers": "x-compute-type, x-compute-time",
         "connection": "keep-alive",
         "content-type": "application/json",
+        "server": "uvicorn",
+        "transfer-encoding": "chunked",
         "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
@@ -775,6 +784,94 @@
         "content-type": "text/event-stream",
         "transfer-encoding": "chunked",
         "vary": "origin, Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "0b2e221339b7d5acd76fcbb402bbc2268a91639e24c3f5f8c5ca2262ca45335c": {
+    "url": "https://huggingface.co/api/models/facebook/bart-base?expand[]=pipeline_tag",
+    "init": {
+      "headers": {}
+    },
+    "response": {
+      "body": "{\"_id\":\"621ffdc136468d709f17adb5\",\"id\":\"facebook/bart-base\",\"pipeline_tag\":\"feature-extraction\"}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-origin": "https://huggingface.co",
+        "access-control-expose-headers": "X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,ETag,Link,Accept-Ranges,Content-Range",
+        "connection": "keep-alive",
+        "content-type": "application/json; charset=utf-8",
+        "etag": "W/\"60-b79jF3Y7hQZdPGA1Gw60FX6fmHc\"",
+        "server": "nginx",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "vary": "Origin",
+        "via": "1.1 5bcd40a2316c5562d7412ab736bca3a2.cloudfront.net (CloudFront)"
+      }
+    }
+  },
+  "8e5cb634d08771bb0956299d31d2888f474aa8b13cf7db7fc35dce65a61d2d97": {
+    "url": "https://huggingface.co/api/models/sentence-transformers/paraphrase-xlm-r-multilingual-v1?expand[]=pipeline_tag",
+    "init": {
+      "headers": {}
+    },
+    "response": {
+      "body": "{\"_id\":\"621ffdc136468d709f1802ee\",\"id\":\"sentence-transformers/paraphrase-xlm-r-multilingual-v1\",\"pipeline_tag\":\"sentence-similarity\"}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-origin": "https://huggingface.co",
+        "access-control-expose-headers": "X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,ETag,Link,Accept-Ranges,Content-Range",
+        "connection": "keep-alive",
+        "content-type": "application/json; charset=utf-8",
+        "etag": "W/\"85-ohxRTAllr1IUkB/uZr2Ru1QYiZw\"",
+        "server": "nginx",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "vary": "Origin",
+        "via": "1.1 95b26b715ee81beaff56d7e9f185da2e.cloudfront.net (CloudFront)"
+      }
+    }
+  },
+  "434ba515f86f69c025a0a5f11de02fc0f70640dc00f274e632400a7cf668ecf9": {
+    "url": "https://huggingface.co/api/models/sentence-transformers/distilbert-base-nli-mean-tokens?expand[]=pipeline_tag",
+    "init": {
+      "headers": {}
+    },
+    "response": {
+      "body": "{\"_id\":\"621ffdc136468d709f1802aa\",\"id\":\"sentence-transformers/distilbert-base-nli-mean-tokens\",\"pipeline_tag\":\"feature-extraction\"}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-origin": "https://huggingface.co",
+        "access-control-expose-headers": "X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,ETag,Link,Accept-Ranges,Content-Range",
+        "connection": "keep-alive",
+        "content-type": "application/json; charset=utf-8",
+        "etag": "W/\"83-yRCZHVlQwsb+CMxweS2MvsuCu4A\"",
+        "server": "nginx",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "vary": "Origin",
+        "via": "1.1 1d01c9eafefacaa6322fccd6199f781c.cloudfront.net (CloudFront)"
+      }
+    }
+  },
+  "f980bfcaf35583f2e260906e6c80297daf3e8b64477824859b0e6a488e1a4d0b": {
+    "url": "https://huggingface.co/api/models/distilbert-base-uncased-finetuned-sst-2-english?expand[]=pipeline_tag",
+    "init": {
+      "headers": {}
+    },
+    "response": {
+      "body": "{\"_id\":\"621ffdc036468d709f174346\",\"id\":\"distilbert-base-uncased-finetuned-sst-2-english\",\"pipeline_tag\":\"text-classification\"}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-origin": "https://huggingface.co",
+        "access-control-expose-headers": "X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,ETag,Link,Accept-Ranges,Content-Range",
+        "connection": "keep-alive",
+        "content-type": "application/json; charset=utf-8",
+        "etag": "W/\"7e-ndCnbtbD7wqOUxIeC+SVurkMG0E\"",
+        "server": "nginx",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "vary": "Origin",
+        "via": "1.1 f5d0d7ef1ae798041bd732fc0f8e6dae.cloudfront.net (CloudFront)"
       }
     }
   }

@@ -92,7 +92,7 @@ export async function makeRequestOptions(
 			? args.data
 			: JSON.stringify({
 					...otherArgs,
-					...otherOptions,
+					options: options && otherOptions,
 			  }),
 		credentials: includeCredentials ? "include" : "same-origin",
 	};
