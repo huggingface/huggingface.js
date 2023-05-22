@@ -216,7 +216,7 @@ describe.concurrent(
 			}
 		});
 
-		it.only("textGenerationStream - catch error", async () => {
+		it("textGenerationStream - catch error", async () => {
 			const response = hf.textGenerationStream({
 				model: "OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5",
 				inputs: "Write a short story about a robot that becomes sentient and takes over the world.",
