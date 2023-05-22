@@ -248,11 +248,8 @@
       "statusText": "OK",
       "headers": {
         "access-control-allow-credentials": "true",
-        "access-control-expose-headers": "x-compute-type, x-compute-time",
         "connection": "keep-alive",
         "content-type": "application/json",
-        "server": "uvicorn",
-        "transfer-encoding": "chunked",
         "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
@@ -709,11 +706,8 @@
       "statusText": "OK",
       "headers": {
         "access-control-allow-credentials": "true",
-        "access-control-expose-headers": "x-compute-type, x-compute-time",
         "connection": "keep-alive",
         "content-type": "application/json",
-        "server": "uvicorn",
-        "transfer-encoding": "chunked",
         "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
@@ -850,27 +844,6 @@
       }
     }
   },
-  "f980bfcaf35583f2e260906e6c80297daf3e8b64477824859b0e6a488e1a4d0b": {
-    "url": "https://huggingface.co/api/models/distilbert-base-uncased-finetuned-sst-2-english?expand[]=pipeline_tag",
-    "init": {
-      "headers": {}
-    },
-    "response": {
-      "body": "{\"_id\":\"621ffdc036468d709f174346\",\"id\":\"distilbert-base-uncased-finetuned-sst-2-english\",\"pipeline_tag\":\"text-classification\"}",
-      "status": 200,
-      "statusText": "OK",
-      "headers": {
-        "access-control-allow-origin": "https://huggingface.co",
-        "access-control-expose-headers": "X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,ETag,Link,Accept-Ranges,Content-Range",
-        "connection": "keep-alive",
-        "content-type": "application/json; charset=utf-8",
-        "etag": "W/\"7e-ndCnbtbD7wqOUxIeC+SVurkMG0E\"",
-        "server": "nginx",
-        "strict-transport-security": "max-age=31536000; includeSubDomains",
-        "vary": "Origin"
-      }
-    }
-  },
   "48fb6da438c1ef813e41e8c2dfbea842f497e9d122cfa5f4d5603e89d6a5589b": {
     "url": "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/paraphrase-xlm-r-multilingual-v1",
     "init": {
@@ -886,12 +859,9 @@
       "statusText": "OK",
       "headers": {
         "access-control-allow-credentials": "true",
-        "access-control-expose-headers": "x-compute-type, x-compute-time",
         "connection": "keep-alive",
         "content-type": "application/json",
-        "server": "uvicorn",
-        "transfer-encoding": "chunked",
-        "vary": "Accept-Encoding, Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
   }
