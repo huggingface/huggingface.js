@@ -3,6 +3,11 @@ import type { InferenceTask, Options, RequestArgs } from "../types";
 const HF_INFERENCE_API_BASE_URL = "https://api-inference.huggingface.co";
 const HF_HUB_URL = "https://huggingface.co";
 
+/**
+ * We want to make calls to the huggingface hub the least possible, eg if
+ * someone is calling the inference API 1000 times per second, we don't want
+ * to make 1000 calls to the hub to get the task name.
+ */
 const taskCache = new Map<string, { task: string | null; date: Date }>();
 const CACHE_DURATION = 10 * 60 * 1000;
 const MAX_CACHE_ITEMS = 1000;
@@ -77,6 +82,11 @@ export async function makeRequestOptions(
 				}
 			}
 
+			/*
+			 * We only want to use the pipeline endpoint if the task is different, because
+			 * the pipeline endpoint is does not have benefits like failing early or with
+			 * a more explicit error message when the model does not match the task.
+			 */
 			if (cachedTask.task !== task) {
 				return `${HF_INFERENCE_API_BASE_URL}/pipeline/${task}/${model}`;
 			}
