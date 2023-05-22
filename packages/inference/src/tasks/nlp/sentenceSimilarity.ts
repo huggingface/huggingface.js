@@ -1,4 +1,5 @@
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { getDefaultTask } from "../../lib/getDefaultTask";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
@@ -24,10 +25,16 @@ export async function sentenceSimilarity(
 	args: SentenceSimilarityArgs,
 	options?: Options
 ): Promise<SentenceSimilarityOutput> {
-	const res = await request<SentenceSimilarityOutput>(args, {
-		...options,
-		task: "sentence-similarity",
-	});
+	const defaultTask = await getDefaultTask(args.model, args.accessToken);
+	const res = await request<SentenceSimilarityOutput>(
+		args,
+		defaultTask === "feature-extraction"
+			? {
+					...options,
+					task: "sentence-similarity",
+			  }
+			: options
+	);
 
 	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x === "number");
 	if (!isValidOutput) {
