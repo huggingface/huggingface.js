@@ -346,7 +346,7 @@ describe.concurrent(
 			});
 			expect(response).toEqual(expect.arrayContaining([expect.any(Number)]));
 		});
-		it.only("FeatureExtraction - same model as sentence similarity", async () => {
+		it("FeatureExtraction - same model as sentence similarity", async () => {
 			const response = await hf.featureExtraction({
 				model: "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
 				inputs: "That is a happy person",
