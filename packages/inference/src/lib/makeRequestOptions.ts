@@ -1,7 +1,7 @@
 import type { InferenceTask, Options, RequestArgs } from "../types";
 
-const HF_INFERENCE_API_BASE_URL = "https://api-inference.huggingface.co/";
-const HF_HUB_URL = "https://huggingface.co/";
+const HF_INFERENCE_API_BASE_URL = "https://api-inference.huggingface.co";
+const HF_HUB_URL = "https://huggingface.co";
 
 const taskCache = new Map<string, { task: string | null; date: Date }>();
 const CACHE_DURATION = 10 * 60 * 1000;
@@ -77,11 +77,11 @@ export async function makeRequestOptions(
 			}
 
 			if (cachedTask.task !== options.task) {
-				return `${HF_INFERENCE_API_BASE_URL}pipeline/${options.task}/${model}`;
+				return `${HF_INFERENCE_API_BASE_URL}/pipeline/${options.task}/${model}`;
 			}
 		}
 
-		return `${HF_INFERENCE_API_BASE_URL}models/${model}`;
+		return `${HF_INFERENCE_API_BASE_URL}/models/${model}`;
 	})();
 
 	const info: RequestInit = {
