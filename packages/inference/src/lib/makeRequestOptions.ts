@@ -23,6 +23,7 @@ export async function makeRequestOptions(
 	}
 ): Promise<{ url: string; info: RequestInit }> {
 	const { model, accessToken, ...otherArgs } = args;
+	const { task, includeCredentials, ...otherOptions } = options ?? {};
 
 	const headers: Record<string, string> = {};
 	if (accessToken) {
@@ -51,7 +52,7 @@ export async function makeRequestOptions(
 			return model;
 		}
 
-		if (options?.task) {
+		if (task) {
 			const key = `${model}:${accessToken}`;
 			let cachedTask = taskCache.get(key);
 
@@ -61,23 +62,23 @@ export async function makeRequestOptions(
 			}
 
 			if (cachedTask === undefined) {
-				const task = await fetch(`${HF_HUB_URL}/api/models/${model}?expand[]=pipeline_tag`, {
+				const modelTask = await fetch(`${HF_HUB_URL}/api/models/${model}?expand[]=pipeline_tag`, {
 					headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
 				})
 					.then((resp) => resp.json())
 					.then((json) => json.pipeline_tag)
 					.catch(() => null);
 
-				cachedTask = { task, date: new Date() };
-				taskCache.set(key, { task, date: new Date() });
+				cachedTask = { task: modelTask, date: new Date() };
+				taskCache.set(key, { task: modelTask, date: new Date() });
 
 				if (taskCache.size > MAX_CACHE_ITEMS) {
 					taskCache.delete(taskCache.keys().next().value);
 				}
 			}
 
-			if (cachedTask.task !== options.task) {
-				return `${HF_INFERENCE_API_BASE_URL}/pipeline/${options.task}/${model}`;
+			if (cachedTask.task !== task) {
+				return `${HF_INFERENCE_API_BASE_URL}/pipeline/${task}/${model}`;
 			}
 		}
 
@@ -91,9 +92,9 @@ export async function makeRequestOptions(
 			? args.data
 			: JSON.stringify({
 					...otherArgs,
-					options,
+					...otherOptions,
 			  }),
-		credentials: options?.includeCredentials ? "include" : "same-origin",
+		credentials: includeCredentials ? "include" : "same-origin",
 	};
 
 	return { url, info };
