@@ -13,7 +13,7 @@ export async function request<T>(
 		task?: string | InferenceTask;
 	}
 ): Promise<T> {
-	const { url, info } = await makeRequestOptions(args, options);
+	const { url, info } = makeRequestOptions(args, options);
 	const response = await (options?.fetch ?? fetch)(url, info);
 
 	if (options?.retry_on_error !== false && response.status === 503 && !options?.wait_for_model) {
