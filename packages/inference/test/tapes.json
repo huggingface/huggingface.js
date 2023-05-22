@@ -804,8 +804,7 @@
         "etag": "W/\"60-b79jF3Y7hQZdPGA1Gw60FX6fmHc\"",
         "server": "nginx",
         "strict-transport-security": "max-age=31536000; includeSubDomains",
-        "vary": "Origin",
-        "via": "1.1 5bcd40a2316c5562d7412ab736bca3a2.cloudfront.net (CloudFront)"
+        "vary": "Origin"
       }
     }
   },
@@ -826,8 +825,7 @@
         "etag": "W/\"85-ohxRTAllr1IUkB/uZr2Ru1QYiZw\"",
         "server": "nginx",
         "strict-transport-security": "max-age=31536000; includeSubDomains",
-        "vary": "Origin",
-        "via": "1.1 95b26b715ee81beaff56d7e9f185da2e.cloudfront.net (CloudFront)"
+        "vary": "Origin"
       }
     }
   },
@@ -848,8 +846,7 @@
         "etag": "W/\"83-yRCZHVlQwsb+CMxweS2MvsuCu4A\"",
         "server": "nginx",
         "strict-transport-security": "max-age=31536000; includeSubDomains",
-        "vary": "Origin",
-        "via": "1.1 1d01c9eafefacaa6322fccd6199f781c.cloudfront.net (CloudFront)"
+        "vary": "Origin"
       }
     }
   },
@@ -870,8 +867,7 @@
         "etag": "W/\"7e-ndCnbtbD7wqOUxIeC+SVurkMG0E\"",
         "server": "nginx",
         "strict-transport-security": "max-age=31536000; includeSubDomains",
-        "vary": "Origin",
-        "via": "1.1 f5d0d7ef1ae798041bd732fc0f8e6dae.cloudfront.net (CloudFront)"
+        "vary": "Origin"
       }
     }
   }
