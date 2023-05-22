@@ -1,20 +1,6 @@
 import type { Options, RequestArgs } from "../types";
 
 const HF_INFERENCE_API_BASE_URL = "https://api-inference.huggingface.co/";
-const HF_INFERENCE_API_PIPELINE_BASE_URL = `${HF_INFERENCE_API_BASE_URL}pipeline/`;
-const HF_INFERENCE_API_MODEL_BASE_URL = `${HF_INFERENCE_API_BASE_URL}models/`;
-
-function isModelTypeURL(model: string): boolean {
-	return /^http(s?):/.test(model) || model.startsWith("/");
-}
-
-function getPipelineURL(model: string, pipeline: string): string {
-	return `${HF_INFERENCE_API_PIPELINE_BASE_URL}${pipeline}/${model}`;
-}
-
-function getDefaultModelTaskURL(model: string) {
-	return `${HF_INFERENCE_API_MODEL_BASE_URL}${model}`;
-}
 
 /**
  * Helper that prepares request arguments
@@ -53,11 +39,18 @@ export function makeRequestOptions(
 		}
 	}
 
-	const url = isModelTypeURL(model)
-		? model
-		: options?.pipeline
-		? getPipelineURL(model, options.pipeline)
-		: getDefaultModelTaskURL(model);
+	const url = (() => {
+		// If model is an URL, do not change it
+		if (/^http(s?):/.test(model) || model.startsWith("/")) {
+			return model;
+		}
+
+		if (options?.pipeline) {
+			return `${HF_INFERENCE_API_BASE_URL}pipeline/${options.pipeline}/${model}`;
+		}
+
+		return `${HF_INFERENCE_API_BASE_URL}models/${model}`;
+	})();
 
 	const info: RequestInit = {
 		headers,
