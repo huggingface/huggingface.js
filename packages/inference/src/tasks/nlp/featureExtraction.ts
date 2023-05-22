@@ -2,8 +2,6 @@ import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
-const HF_INFERENCE_API_PIPELINE_FEATURE_EXTRACTION = "feature-extraction";
-
 export type FeatureExtractionArgs = BaseArgs & {
 	/**
 	 *  The inputs is a string or a list of strings to get the features from.
@@ -28,7 +26,7 @@ export async function featureExtraction(
 ): Promise<FeatureExtractionOutput> {
 	const res = await request<FeatureExtractionOutput>(args, {
 		...options,
-		pipeline: HF_INFERENCE_API_PIPELINE_FEATURE_EXTRACTION,
+		task: "feature-extraction",
 	});
 	let isValidOutput = true;
 

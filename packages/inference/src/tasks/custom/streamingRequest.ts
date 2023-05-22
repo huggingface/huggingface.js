@@ -1,4 +1,4 @@
-import type { Options, RequestArgs } from "../../types";
+import type { InferenceTask, Options, RequestArgs } from "../../types";
 import { makeRequestOptions } from "../../lib/makeRequestOptions";
 import type { EventSourceMessage } from "../../vendor/fetch-event-source/parse";
 import { getLines, getMessages } from "../../vendor/fetch-event-source/parse";
@@ -11,6 +11,8 @@ export async function* streamingRequest<T>(
 	options?: Options & {
 		/** For internal HF use, which is why it's not exposed in {@link Options} */
 		includeCredentials?: boolean;
+		/** When a model can be used for multiple tasks, and we want to run a non-default task */
+		task?: string | InferenceTask;
 	}
 ): AsyncGenerator<T> {
 	const { url, info } = makeRequestOptions({ ...args, stream: true }, options);

@@ -1,4 +1,4 @@
-import type { Options, RequestArgs } from "../../types";
+import type { InferenceTask, Options, RequestArgs } from "../../types";
 import { makeRequestOptions } from "../../lib/makeRequestOptions";
 
 /**
@@ -9,7 +9,8 @@ export async function request<T>(
 	options?: Options & {
 		/** For internal HF use, which is why it's not exposed in {@link Options} */
 		includeCredentials?: boolean;
-		pipeline?: string;
+		/** When a model can be used for multiple tasks, and we want to run a non-default task */
+		task?: string | InferenceTask;
 	}
 ): Promise<T> {
 	const { url, info } = makeRequestOptions(args, options);

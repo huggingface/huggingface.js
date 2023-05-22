@@ -1,4 +1,4 @@
-import type { Options, RequestArgs } from "../types";
+import type { InferenceTask, Options, RequestArgs } from "../types";
 
 const HF_INFERENCE_API_BASE_URL = "https://api-inference.huggingface.co/";
 
@@ -13,7 +13,7 @@ export function makeRequestOptions(
 	options?: Options & {
 		/** For internal HF use, which is why it's not exposed in {@link Options} */
 		includeCredentials?: boolean;
-		pipeline?: string;
+		task?: string | InferenceTask;
 	}
 ): { url: string; info: RequestInit } {
 	const { model, accessToken, ...otherArgs } = args;
@@ -45,8 +45,8 @@ export function makeRequestOptions(
 			return model;
 		}
 
-		if (options?.pipeline) {
-			return `${HF_INFERENCE_API_BASE_URL}pipeline/${options.pipeline}/${model}`;
+		if (options?.task) {
+			return `${HF_INFERENCE_API_BASE_URL}pipeline/${options.task}/${model}`;
 		}
 
 		return `${HF_INFERENCE_API_BASE_URL}models/${model}`;

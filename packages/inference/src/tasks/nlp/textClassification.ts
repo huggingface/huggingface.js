@@ -2,8 +2,6 @@ import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
-const HF_INFERENCE_API_PIPELINE_TEXT_CLASSIFICATION = "text-classification";
-
 export type TextClassificationArgs = BaseArgs & {
 	/**
 	 * A string to be classified
@@ -32,7 +30,7 @@ export async function textClassification(
 	const res = (
 		await request<TextClassificationOutput[]>(args, {
 			...options,
-			pipeline: HF_INFERENCE_API_PIPELINE_TEXT_CLASSIFICATION,
+			task: "text-classification",
 		})
 	)?.[0];
 	const isValidOutput =

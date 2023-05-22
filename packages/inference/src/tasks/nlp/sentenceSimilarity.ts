@@ -2,8 +2,6 @@ import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
-const HF_INFERENCE_API_PIPELINE_SENTENCE_SIMILARITY = "sentence-similarity";
-
 export type SentenceSimilarityArgs = BaseArgs & {
 	/**
 	 * The inputs vary based on the model.
@@ -28,7 +26,7 @@ export async function sentenceSimilarity(
 ): Promise<SentenceSimilarityOutput> {
 	const res = await request<SentenceSimilarityOutput>(args, {
 		...options,
-		pipeline: HF_INFERENCE_API_PIPELINE_SENTENCE_SIMILARITY,
+		task: "sentence-similarity",
 	});
 
 	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x === "number");
