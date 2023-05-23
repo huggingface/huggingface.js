@@ -149,6 +149,16 @@ await hf.audioClassification({
   data: readFileSync('test/sample1.flac')
 })
 
+await hf.textToSpeech({
+  model: 'espnet/kan-bayashi_ljspeech_vits',
+  inputs: 'Hello world!'
+})
+
+await hf.audioToAudio({
+  model: 'speechbrain/sepformer-wham',
+  data: readFileSync('test/sample1.flac')
+})
+
 // Computer Vision
 
 await hf.imageClassification({
@@ -288,6 +298,8 @@ const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the
 
 - [x] Automatic speech recognition
 - [x] Audio classification
+- [x] Text to speech
+- [x] Audio to audio
 
 ### Computer Vision
 

@@ -135,7 +135,39 @@ async function vcr(
 	if (VCR_MODE === MODE.RECORD || VCR_MODE === MODE.CACHE) {
 		const isText =
 			response.headers.get("Content-Type")?.includes("json") || response.headers.get("Content-Type")?.includes("text");
+		const isJson = response.headers.get("Content-Type")?.includes("json");
 		const arrayBuffer = await response.arrayBuffer();
+
+		let body = "";
+		if (isText || isJson) {
+			body = new TextDecoder().decode(arrayBuffer);
+			if (isJson) {
+				// check for base64 strings and truncate them
+				body = JSON.stringify(
+					JSON.parse(body, (key: unknown, value: unknown): unknown => {
+						if (
+							typeof value === "string" &&
+							value.length > 1_000 &&
+							// base64 heuristic
+							value.length % 4 === 0 &&
+							value.match(/^[a-zA-Z0-9+/]+={0,2}$/)
+						) {
+							return value.slice(0, 1_000);
+						} else {
+							return value;
+						}
+					})
+				);
+			}
+		} else {
+			// // Alternative to also save binary data:
+			// arrayBuffer.byteLength > 30_000
+			// 	? ""
+			// 	: isText
+			// 	? new TextDecoder().decode(arrayBuffer)
+			// 	: BASE64_PREFIX + base64FromBytes(new Uint8Array(arrayBuffer)),
+			body = "";
+		}
 
 		const tape: Tape = {
 			url,
@@ -145,13 +177,7 @@ async function vcr(
 				body: typeof init.body === "string" && init.body.length < 1_000 ? init.body : undefined,
 			},
 			response: {
-				body: isText ? new TextDecoder().decode(arrayBuffer) : "",
-				// // Alternative to also save binary data:
-				// arrayBuffer.byteLength > 30_000
-				// 	? ""
-				// 	: isText
-				// 	? new TextDecoder().decode(arrayBuffer)
-				// 	: BASE64_PREFIX + base64FromBytes(new Uint8Array(arrayBuffer)),
+				body,
 				status: response.status,
 				statusText: response.statusText,
 				headers: Object.fromEntries(

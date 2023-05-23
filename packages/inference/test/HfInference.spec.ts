@@ -389,6 +389,24 @@ describe.concurrent(
 				])
 			);
 		});
+
+		it("audioToAudio", async () => {
+			expect(
+				await hf.audioToAudio({
+					model: "speechbrain/sepformer-wham",
+					data: new Blob([readTestFile("sample1.flac")], { type: "audio/flac" }),
+				})
+			).toEqual(
+				expect.arrayContaining([
+					expect.objectContaining({
+						label: expect.any(String),
+						blob: expect.any(String),
+						"content-type": expect.any(String),
+					}),
+				])
+			);
+		});
+
 		it("textToSpeech", async () => {
 			expect(
 				await hf.textToSpeech({
