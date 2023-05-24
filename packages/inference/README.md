@@ -197,6 +197,16 @@ await hf.imageToImage({
   model: "lllyasviel/sd-controlnet-depth",
 });
 
+await hf.zeroShotImageClassification({
+  model: 'openai/clip-vit-large-patch14-336',
+  inputs: {
+    image: await (await fetch('https://placekitten.com/300/300')).blob()
+  },  
+  parameters: {
+    candidate_labels: ['cat', 'dog']
+  }
+})
+
 // Multimodal
 
 await hf.visualQuestionAnswering({
@@ -309,6 +319,7 @@ const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the
 - [x] Text to image
 - [x] Image to text - [demo](https://huggingface.co/spaces/huggingfacejs/image-to-text)
 - [x] Image to Image
+- [x] Zero-shot image classification
 
 ### Multimodal
 

@@ -798,5 +798,25 @@
         "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
+  },
+  "bcf4dc29668a4b71e7eb0144f7886ef52e251d911740084557a85b952d0ec0cd": {
+    "url": "https://api-inference.huggingface.co/models/openai/clip-vit-large-patch14-336",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST"
+    },
+    "response": {
+      "body": "[{\"score\":0.9644635915756226,\"label\":\"animal\"},{\"score\":0.02661651372909546,\"label\":\"car\"},{\"score\":0.008919973857700825,\"label\":\"toy\"}]",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
   }
 }

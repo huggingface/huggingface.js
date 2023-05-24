@@ -15,6 +15,7 @@ export * from "./cv/imageToText";
 export * from "./cv/objectDetection";
 export * from "./cv/textToImage";
 export * from "./cv/imageToImage";
+export * from "./cv/zeroShotImageClassification";
 
 // Natural Language Processing tasks
 export * from "./nlp/conversational";
