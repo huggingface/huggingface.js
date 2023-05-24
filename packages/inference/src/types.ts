@@ -26,6 +26,8 @@ export interface Options {
 	fetch?: typeof fetch;
 }
 
+export type InferenceTask = "text-classification" | "feature-extraction" | "sentence-similarity";
+
 export interface BaseArgs {
 	/**
 	 * The access token to use. Without it, you'll get rate-limited quickly.

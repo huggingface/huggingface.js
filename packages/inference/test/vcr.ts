@@ -183,7 +183,7 @@ async function vcr(
 				headers: Object.fromEntries(
 					// Remove varying headers as much as possible
 					[...response.headers.entries()].filter(
-						([key]) => key !== "date" && key !== "content-length" && !key.startsWith("x-")
+						([key]) => key !== "date" && key !== "content-length" && !key.startsWith("x-") && key !== "via"
 					)
 				),
 			},
