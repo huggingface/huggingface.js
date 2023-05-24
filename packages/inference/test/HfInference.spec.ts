@@ -398,6 +398,24 @@ describe.concurrent(
 				])
 			);
 		});
+
+		it("audioToAudio", async () => {
+			expect(
+				await hf.audioToAudio({
+					model: "speechbrain/sepformer-wham",
+					data: new Blob([readTestFile("sample1.flac")], { type: "audio/flac" }),
+				})
+			).toEqual(
+				expect.arrayContaining([
+					expect.objectContaining({
+						label: expect.any(String),
+						blob: expect.any(String),
+						"content-type": expect.any(String),
+					}),
+				])
+			);
+		});
+
 		it("textToSpeech", async () => {
 			expect(
 				await hf.textToSpeech({
@@ -406,6 +424,7 @@ describe.concurrent(
 				})
 			).toBeInstanceOf(Blob);
 		});
+
 		it("imageClassification", async () => {
 			expect(
 				await hf.imageClassification({
@@ -421,6 +440,32 @@ describe.concurrent(
 				])
 			);
 		});
+
+		it("zeroShotImageClassification", async () => {
+			expect(
+				await hf.zeroShotImageClassification({
+					inputs: { image: new Blob([readTestFile("cheetah.png")], { type: "image/png" }) },
+					model: "openai/clip-vit-large-patch14-336",
+					parameters: {
+						candidate_labels: ["animal", "toy", "car"],
+					},
+				})
+			).toEqual([
+				{
+					label: "animal",
+					score: expect.any(Number),
+				},
+				{
+					label: "car",
+					score: expect.any(Number),
+				},
+				{
+					label: "toy",
+					score: expect.any(Number),
+				},
+			]);
+		});
+
 		it("objectDetection", async () => {
 			expect(
 				await hf.imageClassification({

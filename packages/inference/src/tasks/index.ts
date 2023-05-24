@@ -6,6 +6,7 @@ export * from "./custom/streamingRequest";
 export * from "./audio/audioClassification";
 export * from "./audio/automaticSpeechRecognition";
 export * from "./audio/textToSpeech";
+export * from "./audio/audioToAudio";
 
 // Computer Vision tasks
 export * from "./cv/imageClassification";
@@ -14,6 +15,7 @@ export * from "./cv/imageToText";
 export * from "./cv/objectDetection";
 export * from "./cv/textToImage";
 export * from "./cv/imageToImage";
+export * from "./cv/zeroShotImageClassification";
 
 // Natural Language Processing tasks
 export * from "./nlp/conversational";

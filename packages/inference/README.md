@@ -149,6 +149,16 @@ await hf.audioClassification({
   data: readFileSync('test/sample1.flac')
 })
 
+await hf.textToSpeech({
+  model: 'espnet/kan-bayashi_ljspeech_vits',
+  inputs: 'Hello world!'
+})
+
+await hf.audioToAudio({
+  model: 'speechbrain/sepformer-wham',
+  data: readFileSync('test/sample1.flac')
+})
+
 // Computer Vision
 
 await hf.imageClassification({
@@ -186,6 +196,16 @@ await hf.imageToImage({
   },
   model: "lllyasviel/sd-controlnet-depth",
 });
+
+await hf.zeroShotImageClassification({
+  model: 'openai/clip-vit-large-patch14-336',
+  inputs: {
+    image: await (await fetch('https://placekitten.com/300/300')).blob()
+  },  
+  parameters: {
+    candidate_labels: ['cat', 'dog']
+  }
+})
 
 // Multimodal
 
@@ -288,6 +308,8 @@ const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the
 
 - [x] Automatic speech recognition
 - [x] Audio classification
+- [x] Text to speech
+- [x] Audio to audio
 
 ### Computer Vision
 
@@ -297,6 +319,7 @@ const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the
 - [x] Text to image
 - [x] Image to text - [demo](https://huggingface.co/spaces/huggingfacejs/image-to-text)
 - [x] Image to Image
+- [x] Zero-shot image classification
 
 ### Multimodal
 
