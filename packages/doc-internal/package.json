@@ -5,18 +5,19 @@
 	"description": "Package to generate doc for other @huggingface packages",
 	"private": true,
 	"scripts": {
-		"start": "pnpm run fix-cdn-versions && pnpm run doc-hub && pnpm run doc-inference && cp ../../README.md ../../docs/index.md && pnpm run update-toc && pnpm run fix-md-links",
+		"start": "pnpm run fix-cdn-versions && pnpm run doc-hub && pnpm run doc-inference && cp ../../README.md ../../docs/index.md && pnpm run update-toc && pnpm run fix-md-links && pnpm run fix-md-headinghashlinks",
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
-		"prepublish-hub": "pnpm run fix-cdn-versions && pnpm run doc-hub && cp ../../README.md ../../docs/index.md && pnpm run update-toc && pnpm run fix-md-links",
-		"prepublish-inference": "pnpm run fix-cdn-versions && pnpm run doc-inference && cp ../../README.md ../../docs/index.md && pnpm run update-toc && pnpm run fix-md-links",
+		"prepublish-hub": "pnpm run fix-cdn-versions && pnpm run doc-hub && cp ../../README.md ../../docs/index.md && pnpm run update-toc && pnpm run fix-md-links && pnpm run fix-md-headinghashlinks",
+		"prepublish-inference": "pnpm run fix-cdn-versions && pnpm run doc-inference && cp ../../README.md ../../docs/index.md && pnpm run update-toc && pnpm run fix-md-links && pnpm run fix-md-headinghashlinks",
 		"doc-hub": "typedoc --tsconfig ../hub/tsconfig.json --githubPages false --plugin typedoc-plugin-markdown --out ../../docs/hub --hideBreadcrumbs --hideInPageTOC --sourceLinkTemplate https://github.com/huggingface/huggingface.js/blob/main/{path}#L{line} ../hub/index.ts",
 		"doc-inference": "typedoc --tsconfig ../inference/tsconfig.json --githubPages false --plugin typedoc-plugin-markdown --out ../../docs/inference --hideBreadcrumbs --hideInPageTOC --sourceLinkTemplate https://github.com/huggingface/huggingface.js/blob/main/{path}#L{line} ../inference/src/index.ts",
 		"update-toc": "ts-node --esm update-toc.ts",
 		"fix-cdn-versions": "ts-node --esm fix-cdn-versions.ts",
-		"fix-md-links": "ts-node --esm fix-md-links.ts"
+		"fix-md-links": "ts-node --esm fix-md-links.ts",
+		"fix-md-headinghashlinks": "ts-node --esm fix-md-headinghashlinks"
 	},
 	"type": "module",
 	"license": "MIT",
