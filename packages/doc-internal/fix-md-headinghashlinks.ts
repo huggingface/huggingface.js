@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync } from "fs";
 import glob from "glob";
 import { join } from "path";
 
-const regex = /^(#+)\s+(.*)/gm;
+const RE_MD_HEADING = /^(#+)\s+(.*)/gm;
 const LEVEL_3 = 3 as const;
 const LEVEL_4 = 4 as const;
 const NON_UNIQUE_HEADINGS = new Set([
@@ -34,7 +34,7 @@ for (const mdFile of await glob("**/*.md", { cwd: "../../docs" })) {
 	let offset = 0;
 	let match;
 	let current_level_3: string | undefined = undefined;
-	while ((match = regex.exec(content)) !== null) {
+	while ((match = RE_MD_HEADING.exec(content)) !== null) {
 		const headingLevel = match[1].length;
 		const headingText = match[2];
 		if (headingLevel === LEVEL_3) {
