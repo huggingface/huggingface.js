@@ -17,7 +17,7 @@
 		"update-toc": "ts-node --esm update-toc.ts",
 		"fix-cdn-versions": "ts-node --esm fix-cdn-versions.ts",
 		"fix-md-links": "ts-node --esm fix-md-links.ts",
-		"fix-md-headinghashlinks": "ts-node --esm fix-md-headinghashlinks"
+		"fix-md-headinghashlinks": "ts-node --esm fix-md-headinghashlinks.ts"
 	},
 	"type": "module",
 	"license": "MIT",
