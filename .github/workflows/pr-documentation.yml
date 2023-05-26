@@ -6,6 +6,7 @@ on:
       - "README.md"
       - "docs/**"
       - "packages/hub/README.md"
+      - "packages/doc-internal/**"
       - "packages/inference/README.md"
 
 concurrency:
