@@ -36,7 +36,8 @@ for (const mdFile of await glob("**/*.md", { cwd: "../../docs" })) {
 		const headingLevel = match[1].length;
 		const headingText = match[2];
 		headings[headingLevel] = headingText;
-		const parentHeading = headings[headingLevel - 1];
+		const parentHeading =
+			headings[headingLevel - 1] !== "Type declaration" ? headings[headingLevel - 1] : headings[headingLevel - 2];
 		if (NON_UNIQUE_HEADINGS.has(headingText) && parentHeading) {
 			const matchText = match[0];
 			const matchIndex = match.index + offset;
