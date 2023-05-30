@@ -3,8 +3,6 @@ import glob from "glob";
 import { join } from "path";
 
 const RE_MD_HEADING = /^(#+)\s+(.*)/gm;
-const LEVEL_3 = 3 as const;
-const LEVEL_4 = 4 as const;
 const NON_UNIQUE_HEADINGS = new Set([
 	"Defined in",
 	"Parameters",
@@ -33,16 +31,16 @@ for (const mdFile of await glob("**/*.md", { cwd: "../../docs" })) {
 	let modifiedMarkdown = content;
 	let offset = 0;
 	let match;
-	let current_level_3: string | undefined = undefined;
+	const headings: Record<number, string> = {};
 	while ((match = RE_MD_HEADING.exec(content)) !== null) {
 		const headingLevel = match[1].length;
 		const headingText = match[2];
-		if (headingLevel === LEVEL_3) {
-			current_level_3 = headingText;
-		} else if (headingLevel === LEVEL_4 && NON_UNIQUE_HEADINGS.has(headingText) && current_level_3) {
+		headings[headingLevel] = headingText;
+		const parentHeading = headings[headingLevel - 1];
+		if (NON_UNIQUE_HEADINGS.has(headingText) && parentHeading) {
 			const matchText = match[0];
 			const matchIndex = match.index + offset;
-			const replacement = matchText + `[[${createHtmlId(current_level_3)}.${createHtmlId(headingText)}]]`;
+			const replacement = matchText + `[[${createHtmlId(parentHeading)}.${createHtmlId(headingText)}]]`;
 			modifiedMarkdown =
 				modifiedMarkdown.slice(0, matchIndex) + replacement + modifiedMarkdown.slice(matchIndex + matchText.length);
 			offset += replacement.length - matchText.length;
