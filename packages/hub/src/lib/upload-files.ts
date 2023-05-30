@@ -12,6 +12,7 @@ export function uploadFiles(params: {
 	branch?: CommitParams["branch"];
 	isPullRequest?: CommitParams["isPullRequest"];
 	parentCommit?: CommitParams["parentCommit"];
+	fetch?: CommitParams["fetch"];
 }): Promise<CommitOutput> {
 	return commit({
 		credentials: params.credentials,
@@ -27,5 +28,6 @@ export function uploadFiles(params: {
 		branch: params.branch,
 		isPullRequest: params.isPullRequest,
 		parentCommit: params.parentCommit,
+		fetch: params.fetch,
 	});
 }

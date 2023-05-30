@@ -11,9 +11,9 @@ import { WebBlob } from "./WebBlob";
  * From the frontend:
  *   - support http resources with absolute or relative URLs
  */
-export async function createBlob(url: URL): Promise<Blob> {
+export async function createBlob(url: URL, opts?: { fetch?: typeof fetch }): Promise<Blob> {
 	if (url.protocol === "http:" || url.protocol === "https:") {
-		return WebBlob.create(url);
+		return WebBlob.create(url, { fetch: opts?.fetch });
 	}
 
 	if (isFrontend) {

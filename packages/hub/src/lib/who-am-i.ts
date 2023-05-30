@@ -68,10 +68,14 @@ export interface AuthInfo {
 export async function whoAmI(params: {
 	credentials: Credentials;
 	hubUrl?: string;
+	/**
+	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+	 */
+	fetch?: typeof fetch;
 }): Promise<WhoAmI & { auth: AuthInfo }> {
 	checkCredentials(params.credentials);
 
-	const res = await fetch(`${params.hubUrl ?? HUB_URL}/api/whoami-v2`, {
+	const res = await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/whoami-v2`, {
 		headers: {
 			Authorization: `Bearer ${params.credentials.accessToken}`,
 		},

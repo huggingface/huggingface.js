@@ -4,27 +4,32 @@
 
 interface WebBlobCreateOptions {
 	/**
-	 * Default: 1_000_000
+	 * @default 1_000_000
 	 *
 	 * Objects below that size will immediately be fetched and put in RAM, rather
 	 * than streamed ad-hoc
 	 */
-	cacheBelow: number;
+	cacheBelow?: number;
+	/**
+	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+	 */
+	fetch?: typeof fetch;
 }
 
 export class WebBlob extends Blob {
-	static async create(url: URL, opts: WebBlobCreateOptions = { cacheBelow: 1_000_000 }): Promise<Blob> {
-		const response = await fetch(url, { method: "HEAD" });
+	static async create(url: URL, opts?: WebBlobCreateOptions): Promise<Blob> {
+		const customFetch = opts?.fetch ?? fetch;
+		const response = await customFetch(url, { method: "HEAD" });
 
 		const size = Number(response.headers.get("content-length"));
 		const contentType = response.headers.get("content-type") || "";
 		const supportRange = response.headers.get("accept-ranges") === "bytes";
 
-		if (!supportRange || size < opts.cacheBelow) {
-			return await (await fetch(url)).blob();
+		if (!supportRange || size < (opts?.cacheBelow ?? 1_000_000)) {
+			return await (await customFetch(url)).blob();
 		}
 
-		return new WebBlob(url, 0, size, contentType, true);
+		return new WebBlob(url, 0, size, contentType, true, customFetch);
 	}
 
 	private url: URL;
@@ -32,8 +37,9 @@ export class WebBlob extends Blob {
 	private end: number;
 	private contentType: string;
 	private full: boolean;
+	private fetch: typeof fetch;
 
-	constructor(url: URL, start: number, end: number, contentType: string, full: boolean) {
+	constructor(url: URL, start: number, end: number, contentType: string, full: boolean, customFetch: typeof fetch) {
 		super([]);
 
 		this.url = url;
@@ -41,6 +47,7 @@ export class WebBlob extends Blob {
 		this.end = end;
 		this.contentType = contentType;
 		this.full = full;
+		this.fetch = customFetch;
 	}
 
 	override get size(): number {
@@ -61,7 +68,8 @@ export class WebBlob extends Blob {
 			this.start + start,
 			Math.min(this.start + end, this.end),
 			this.contentType,
-			start === 0 && end === this.size ? this.full : false
+			start === 0 && end === this.size ? this.full : false,
+			this.fetch
 		);
 
 		return slice;
@@ -90,6 +98,7 @@ export class WebBlob extends Blob {
 	}
 
 	private fetchRange(): Promise<Response> {
+		const fetch = this.fetch; // to avoid this.fetch() which is bound to the instance instead of globalThis
 		if (this.full) {
 			return fetch(this.url);
 		}

@@ -18,6 +18,10 @@ export async function createRepo(params: {
 	/** @required for when {@link repo.type} === "space" */
 	sdk?: SpaceSdk;
 	hubUrl?: string;
+	/**
+	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+	 */
+	fetch?: typeof fetch;
 }): Promise<{ repoUrl: string }> {
 	checkCredentials(params.credentials);
 	const repoId = toRepoId(params.repo);
@@ -29,7 +33,7 @@ export async function createRepo(params: {
 		);
 	}
 
-	const res = await fetch(`${params.hubUrl ?? HUB_URL}/api/repos/create`, {
+	const res = await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/repos/create`, {
 		method: "POST",
 		body: JSON.stringify({
 			name: repoName,

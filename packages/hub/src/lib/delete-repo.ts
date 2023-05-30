@@ -8,12 +8,16 @@ export async function deleteRepo(params: {
 	repo: RepoDesignation;
 	credentials: Credentials;
 	hubUrl?: string;
+	/**
+	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+	 */
+	fetch?: typeof fetch;
 }): Promise<void> {
 	checkCredentials(params.credentials);
 	const repoId = toRepoId(params.repo);
 	const [namespace, repoName] = repoId.name.split("/");
 
-	const res = await fetch(`${params.hubUrl ?? HUB_URL}/api/repos/delete`, {
+	const res = await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/repos/delete`, {
 		method: "DELETE",
 		body: JSON.stringify({
 			name: repoName,

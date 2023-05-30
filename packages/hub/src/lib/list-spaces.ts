@@ -22,6 +22,10 @@ export async function* listSpaces(params?: {
 	};
 	credentials?: Credentials;
 	hubUrl?: string;
+	/**
+	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+	 */
+	fetch?: typeof fetch;
 }): AsyncGenerator<SpaceEntry> {
 	checkCredentials(params?.credentials);
 	const search = new URLSearchParams([
@@ -31,7 +35,7 @@ export async function* listSpaces(params?: {
 	let url: string | undefined = `${params?.hubUrl || HUB_URL}/api/spaces?${search}`;
 
 	while (url) {
-		const res: Response = await fetch(url, {
+		const res: Response = await (params?.fetch ?? fetch)(url, {
 			headers: {
 				accept: "application/json",
 				...(params?.credentials ? { Authorization: `Bearer ${params.credentials.accessToken}` } : undefined),
