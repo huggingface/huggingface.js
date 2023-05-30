@@ -98,10 +98,11 @@ export class WebBlob extends Blob {
 	}
 
 	private fetchRange(): Promise<Response> {
+		const fetch = this.fetch; // to avoid this.fetch() which is bound to the instance instead of globalThis
 		if (this.full) {
-			return this.fetch(this.url);
+			return fetch(this.url);
 		}
-		return this.fetch(this.url, {
+		return fetch(this.url, {
 			headers: {
 				Range: `bytes=${this.start}-${this.end - 1}`,
 			},
