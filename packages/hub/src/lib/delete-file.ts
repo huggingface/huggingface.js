@@ -9,6 +9,7 @@ export function deleteFile(params: {
 	commitTitle?: CommitParams["title"];
 	commitDescription?: CommitParams["description"];
 	hubUrl?: CommitParams["hubUrl"];
+	fetch?: CommitParams["fetch"];
 	branch?: CommitParams["branch"];
 	isPullRequest?: CommitParams["isPullRequest"];
 	parentCommit?: CommitParams["parentCommit"];
@@ -28,5 +29,6 @@ export function deleteFile(params: {
 		branch: params.branch,
 		isPullRequest: params.isPullRequest,
 		parentCommit: params.parentCommit,
+		fetch: params.fetch,
 	});
 }

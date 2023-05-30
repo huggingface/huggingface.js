@@ -55,6 +55,10 @@ async function parseSingleFile(
 		revision?: string;
 		credentials?: Credentials;
 		hubUrl?: string;
+		/**
+		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+		 */
+		fetch?: typeof fetch;
 	}
 ): Promise<SafetensorsFileHeader> {
 	const firstResp = await downloadFile({
@@ -90,6 +94,10 @@ async function parseShardedIndex(
 		revision?: string;
 		credentials?: Credentials;
 		hubUrl?: string;
+		/**
+		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+		 */
+		fetch?: typeof fetch;
 	}
 ): Promise<{ index: SafetensorsIndexJson; headers: SafetensorsShardedHeaders }> {
 	const indexResp = await downloadFile({
@@ -152,6 +160,10 @@ export async function parseSafetensorsMetadata(params: {
 	hubUrl?: string;
 	credentials?: Credentials;
 	revision?: string;
+	/**
+	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+	 */
+	fetch?: typeof fetch;
 }): Promise<SafetensorsParseFromRepo> {
 	checkCredentials(params.credentials);
 	const repoId = toRepoId(params.repo);

@@ -69,6 +69,10 @@ export interface CommitParams {
 	parentCommit?: string;
 	isPullRequest?: boolean;
 	hubUrl?: string;
+	/**
+	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+	 */
+	fetch?: typeof fetch;
 }
 
 export interface CommitOutput {
@@ -113,7 +117,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 				return { ...operation, content: operation.content };
 			}
 
-			const lazyBlob = await createBlob(operation.content);
+			const lazyBlob = await createBlob(operation.content, { fetch: params.fetch });
 
 			return {
 				...operation,
@@ -136,7 +140,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 			),
 		};
 
-		const res = await fetch(
+		const res = await (params.fetch ?? fetch)(
 			`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/preupload/${encodeURIComponent(
 				params.branch ?? "main"
 			)}` + (params.isPullRequest ? "?create_pr=1" : ""),
@@ -194,7 +198,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 			})),
 		};
 
-		const res = await fetch(
+		const res = await (params.fetch ?? fetch)(
 			`${params.hubUrl ?? HUB_URL}/${repoId.type === "model" ? "" : repoId.type + "s/"}${
 				repoId.name
 			}.git/info/lfs/objects/batch`,
@@ -263,7 +267,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 							const index = parseInt(part) - 1;
 							const slice = content.slice(index * chunkSize, (index + 1) * chunkSize);
 
-							const res = await fetch(header[part], {
+							const res = await (params.fetch ?? fetch)(header[part], {
 								method: "PUT",
 								/** Unfortunately, browsers don't support our inherited version of Blob in fetch calls */
 								body: slice instanceof WebBlob && isFrontend ? await slice.arrayBuffer() : slice,
@@ -289,7 +293,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 						MULTIPART_PARALLEL_UPLOAD
 					);
 
-					const res = await fetch(completionUrl, {
+					const res = await (params.fetch ?? fetch)(completionUrl, {
 						method: "POST",
 						body: JSON.stringify(completeReq),
 						headers: {
@@ -305,7 +309,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 						});
 					}
 				} else {
-					const res = await fetch(obj.actions.upload.href, {
+					const res = await (params.fetch ?? fetch)(obj.actions.upload.href, {
 						method: "PUT",
 						headers: {
 							...(batchRequestId ? { "X-Request-Id": batchRequestId } : undefined),
@@ -328,7 +332,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 
 	yield "committing";
 
-	const res = await fetch(
+	const res = await (params.fetch ?? fetch)(
 		`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/commit/${encodeURIComponent(
 			params.branch ?? "main"
 		)}` + (params.isPullRequest ? "?create_pr=1" : ""),
