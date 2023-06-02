@@ -6,9 +6,11 @@ import { toRepoId } from "../utils/toRepoId";
 import { typedEntries } from "../utils/typedEntries";
 import { downloadFile } from "./download-file";
 import { fileExists } from "./file-exists";
+import { promisesQueue } from "../utils/promisesQueue";
 
 const SINGLE_FILE = "model.safetensors";
 const INDEX_FILE = "model.safetensors.index.json";
+const PARALLEL_DOWNLOADS = 5;
 
 type FileName = string;
 
@@ -114,11 +116,12 @@ async function parseShardedIndex(
 
 	const filenames = [...new Set(Object.values(index.weight_map))];
 	const shardedMap: SafetensorsShardedHeaders = Object.fromEntries(
-		await Promise.all(
+		await promisesQueue(
 			filenames.map(
-				async (filename) =>
+				(filename) => async () =>
 					[filename, await parseSingleFile(filename, params)] satisfies [string, SafetensorsFileHeader]
-			)
+			),
+			PARALLEL_DOWNLOADS
 		)
 	);
 	return { index, headers: shardedMap };
