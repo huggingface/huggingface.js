@@ -11,11 +11,11 @@ export type ImageClassificationArgs = BaseArgs & {
 
 export interface ImageClassificationOutputValue {
 	/**
-	 * A float that represents how likely it is that the image file belongs to this class.
+	 * The label for the class (model specific) 
 	 */
 	label: string;
 	/**
-	 * The label for the class (model specific)
+	 * A float that represents how likely it is that the image file belongs to this class.
 	 */
 	score: number;
 }
