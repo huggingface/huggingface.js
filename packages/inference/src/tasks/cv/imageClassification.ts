@@ -11,7 +11,7 @@ export type ImageClassificationArgs = BaseArgs & {
 
 export interface ImageClassificationOutputValue {
 	/**
-	 * The label for the class (model specific)
+	 * The label for the class (model specific) 
 	 */
 	label: string;
 	/**
