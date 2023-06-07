@@ -49,7 +49,7 @@ describe("parseSafetensorsMetadata", () => {
 		assert.deepStrictEqual(parse.parameterCount, { BF16: 176_247_271_424 });
 		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 176_247_271_424);
 		// total params = 176B
-	}, 10_000);
+	}, 30_000);
 
 	it("fetch info for single-file with multiple dtypes", async () => {
 		const parse = await parseSafetensorsMetadata({
