@@ -22,7 +22,7 @@ describe("whoAmI", () => {
 			auth: {
 				type: "access_token",
 				accessToken: {
-					displayName: "ci-huggingface-hub.js",
+					displayName: "ci-hub.js",
 					role: "write",
 				},
 			},

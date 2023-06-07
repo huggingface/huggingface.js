@@ -143,6 +143,10 @@ export async function parseSafetensorsMetadata(params: {
 	hubUrl?: string;
 	credentials?: Credentials;
 	revision?: string;
+	/**
+	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+	 */
+	fetch?: typeof fetch;
 }): Promise<SetRequired<SafetensorsParseFromRepo, "parameterCount">>;
 export async function parseSafetensorsMetadata(params: {
 	/** Only models are supported */
@@ -156,6 +160,10 @@ export async function parseSafetensorsMetadata(params: {
 	hubUrl?: string;
 	credentials?: Credentials;
 	revision?: string;
+	/**
+	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+	 */
+	fetch?: typeof fetch;
 }): Promise<SafetensorsParseFromRepo>;
 export async function parseSafetensorsMetadata(params: {
 	repo: RepoDesignation;
