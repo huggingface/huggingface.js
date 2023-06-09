@@ -4,12 +4,13 @@
  * Inspired by github.com/rxaviers/async-pool
  */
 export async function promisesQueue<T>(factories: (() => Promise<T>)[], concurrency: number): Promise<T[]> {
-	const promises: Promise<T>[] = [];
+	const results: T[] = [];
 	const executing: Promise<void>[] = [];
+	let index = 0;
 	for (const factory of factories) {
-		const p = factory();
-		promises.push(p);
-		const e = p.then(() => {
+		const closureIndex = index++;
+		const e = factory().then((r) => {
+			results[closureIndex] = r;
 			executing.splice(executing.indexOf(e), 1);
 		});
 		executing.push(e);
@@ -17,5 +18,6 @@ export async function promisesQueue<T>(factories: (() => Promise<T>)[], concurre
 			await Promise.race(executing);
 		}
 	}
-	return Promise.all(promises);
+	await Promise.all(executing);
+	return results;
 }
