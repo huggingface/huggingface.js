@@ -373,6 +373,33 @@ describe.concurrent(
 				],
 			]);
 		});
+		it("FeatureExtraction - facebook/bart-base, list input", async () => {
+			const response = await hf.featureExtraction({
+				model: "facebook/bart-base",
+				inputs: ["hello", "That is a happy person"],
+			});
+			// Nx1xTx768
+			expect(response).toEqual([
+				[
+					[
+						expect.arrayContaining([expect.any(Number)]),
+						expect.arrayContaining([expect.any(Number)]),
+						expect.arrayContaining([expect.any(Number)]),
+					],
+				],
+				[
+					[
+						expect.arrayContaining([expect.any(Number)]),
+						expect.arrayContaining([expect.any(Number)]),
+						expect.arrayContaining([expect.any(Number)]),
+						expect.arrayContaining([expect.any(Number)]),
+						expect.arrayContaining([expect.any(Number)]),
+						expect.arrayContaining([expect.any(Number)]),
+						expect.arrayContaining([expect.any(Number)]),
+					],
+				],
+			]);
+		});
 		it("automaticSpeechRecognition", async () => {
 			expect(
 				await hf.automaticSpeechRecognition({
