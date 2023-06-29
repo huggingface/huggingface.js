@@ -27,7 +27,6 @@ export async function featureExtraction(
 ): Promise<FeatureExtractionOutput> {
 	const defaultTask = args.model ? await getDefaultTask(args.model, args.accessToken) : undefined;
 
-	console.log("defaultTask", defaultTask);
 	const res = await request<FeatureExtractionOutput>(args, {
 		...options,
 		taskHint: "feature-extraction",
