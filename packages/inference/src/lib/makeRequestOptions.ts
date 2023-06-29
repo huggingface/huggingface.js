@@ -26,7 +26,8 @@ export async function makeRequestOptions(
 		taskHint?: InferenceTask;
 	}
 ): Promise<{ url: string; info: RequestInit }> {
-	const { accessToken, ...otherArgs } = args;
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const { accessToken, model: _model, ...otherArgs } = args;
 	let { model } = args;
 	const { forceTask: task, includeCredentials, taskHint, ...otherOptions } = options ?? {};
 
