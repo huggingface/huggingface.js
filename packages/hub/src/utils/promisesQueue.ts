@@ -5,16 +5,16 @@
  */
 export async function promisesQueue<T>(factories: (() => Promise<T>)[], concurrency: number): Promise<T[]> {
 	const results: T[] = [];
-	const executing: Promise<void>[] = [];
+	const executing: Set<Promise<void>> = new Set();
 	let index = 0;
 	for (const factory of factories) {
 		const closureIndex = index++;
 		const e = factory().then((r) => {
 			results[closureIndex] = r;
-			executing.splice(executing.indexOf(e), 1);
+			executing.delete(e);
 		});
-		executing.push(e);
-		if (executing.length >= concurrency) {
+		executing.add(e);
+		if (executing.size >= concurrency) {
 			await Promise.race(executing);
 		}
 	}
