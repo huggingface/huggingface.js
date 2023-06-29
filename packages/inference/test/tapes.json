@@ -921,5 +921,26 @@
         "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
+  },
+  "c9f0ebc2c17239e04cdc21cc0aced65924f490001d909dfc5cedc18ba82ea529": {
+    "url": "https://api-inference.huggingface.co/models/distilbert-base-uncased",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":\"[MASK] world!\",\"options\":{}}"
+    },
+    "response": {
+      "body": "[{\"score\":0.279823899269104,\"token\":7592,\"token_str\":\"hello\",\"sequence\":\"hello world!\"},{\"score\":0.17721028625965118,\"token\":6919,\"token_str\":\"wonderful\",\"sequence\":\"wonderful world!\"},{\"score\":0.01261180266737938,\"token\":2204,\"token_str\":\"good\",\"sequence\":\"good world!\"},{\"score\":0.012600388377904892,\"token\":3376,\"token_str\":\"beautiful\",\"sequence\":\"beautiful world!\"},{\"score\":0.011976493522524834,\"token\":2023,\"token_str\":\"this\",\"sequence\":\"this world!\"}]",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
   }
 }

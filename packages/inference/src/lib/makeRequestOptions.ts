@@ -7,7 +7,7 @@ const HF_INFERENCE_API_BASE_URL = "https://api-inference.huggingface.co";
 /**
  * Loaded from huggingface.co/api/tasks if needed
  */
-let tasks: Record<string, { models: string[] }> | null = null;
+let tasks: Record<string, { models: { id: string }[] }> | null = null;
 
 /**
  * Helper that prepares request arguments
@@ -47,7 +47,7 @@ export async function makeRequestOptions(
 	if (!model && tasks && taskHint) {
 		const taskInfo = tasks[taskHint];
 		if (taskInfo) {
-			model = taskInfo.models[0];
+			model = taskInfo.models[0].id;
 		}
 	}
 
