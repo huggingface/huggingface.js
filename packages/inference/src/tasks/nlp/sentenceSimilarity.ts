@@ -29,7 +29,7 @@ export async function sentenceSimilarity(
 	const res = await request<SentenceSimilarityOutput>(args, {
 		...options,
 		taskHint: "sentence-similarity",
-		...(defaultTask === "feature-extraction" && { task: "sentence-similarity" }),
+		...(defaultTask === "feature-extraction" && { forceTask: "sentence-similarity" }),
 	});
 
 	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x === "number");

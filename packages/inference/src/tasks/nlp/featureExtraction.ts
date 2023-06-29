@@ -31,7 +31,7 @@ export async function featureExtraction(
 	const res = await request<FeatureExtractionOutput>(args, {
 		...options,
 		taskHint: "feature-extraction",
-		...(defaultTask === "sentence-similarity" && { task: "feature-extraction" }),
+		...(defaultTask === "sentence-similarity" && { forceTask: "feature-extraction" }),
 	});
 	let isValidOutput = true;
 
