@@ -11,9 +11,11 @@ export async function request<T>(
 		includeCredentials?: boolean;
 		/** When a model can be used for multiple tasks, and we want to run a non-default task */
 		task?: string | InferenceTask;
+		/** To load default model if needed */
+		taskHint?: InferenceTask;
 	}
 ): Promise<T> {
-	const { url, info } = makeRequestOptions(args, options);
+	const { url, info } = await makeRequestOptions(args, options);
 	const response = await (options?.fetch ?? fetch)(url, info);
 
 	if (options?.retry_on_error !== false && response.status === 503 && !options?.wait_for_model) {

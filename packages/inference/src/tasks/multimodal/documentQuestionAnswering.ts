@@ -56,7 +56,10 @@ export async function documentQuestionAnswering(
 		},
 	} as RequestArgs;
 	const res = toArray(
-		await request<[DocumentQuestionAnsweringOutput] | DocumentQuestionAnsweringOutput>(reqArgs, options)
+		await request<[DocumentQuestionAnsweringOutput] | DocumentQuestionAnsweringOutput>(reqArgs, {
+			...options,
+			taskHint: "document-question-answering",
+		})
 	)?.[0];
 	const isValidOutput =
 		typeof res?.answer === "string" &&

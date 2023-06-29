@@ -25,7 +25,10 @@ export async function tabularClassification(
 	args: TabularClassificationArgs,
 	options?: Options
 ): Promise<TabularClassificationOutput> {
-	const res = await request<TabularClassificationOutput>(args, options);
+	const res = await request<TabularClassificationOutput>(args, {
+		...options,
+		taskHint: "tabular-classification",
+	});
 	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x === "number");
 	if (!isValidOutput) {
 		throw new InferenceOutputError("Expected number[]");

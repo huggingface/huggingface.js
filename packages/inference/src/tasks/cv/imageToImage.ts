@@ -74,7 +74,10 @@ export async function imageToImage(args: ImageToImageArgs, options?: Options): P
 			),
 		};
 	}
-	const res = await request<ImageToImageOutput>(reqArgs, options);
+	const res = await request<ImageToImageOutput>(reqArgs, {
+		...options,
+		taskHint: "image-to-image",
+	});
 	const isValidOutput = res && res instanceof Blob;
 	if (!isValidOutput) {
 		throw new InferenceOutputError("Expected Blob");

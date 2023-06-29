@@ -30,7 +30,10 @@ export async function imageClassification(
 	args: ImageClassificationArgs,
 	options?: Options
 ): Promise<ImageClassificationOutput> {
-	const res = await request<ImageClassificationOutput>(args, options);
+	const res = await request<ImageClassificationOutput>(args, {
+		...options,
+		taskHint: "image-classification",
+	});
 	const isValidOutput =
 		Array.isArray(res) && res.every((x) => typeof x.label === "string" && typeof x.score === "number");
 	if (!isValidOutput) {

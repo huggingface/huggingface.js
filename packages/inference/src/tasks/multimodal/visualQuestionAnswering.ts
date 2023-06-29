@@ -45,7 +45,12 @@ export async function visualQuestionAnswering(
 			),
 		},
 	} as RequestArgs;
-	const res = (await request<[VisualQuestionAnsweringOutput]>(reqArgs, options))?.[0];
+	const res = (
+		await request<[VisualQuestionAnsweringOutput]>(reqArgs, {
+			...options,
+			taskHint: "visual-question-answering",
+		})
+	)?.[0];
 	const isValidOutput = typeof res?.answer === "string" && typeof res.score === "number";
 	if (!isValidOutput) {
 		throw new InferenceOutputError("Expected Array<{answer: string, score: number}>");

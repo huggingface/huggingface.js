@@ -41,7 +41,10 @@ export async function tableQuestionAnswering(
 	args: TableQuestionAnsweringArgs,
 	options?: Options
 ): Promise<TableQuestionAnsweringOutput> {
-	const res = await request<TableQuestionAnsweringOutput>(args, options);
+	const res = await request<TableQuestionAnsweringOutput>(args, {
+		...options,
+		taskHint: "table-question-answering",
+	});
 	const isValidOutput =
 		typeof res?.aggregator === "string" &&
 		typeof res.answer === "string" &&

@@ -8,7 +8,7 @@ import { isUrl } from "./isUrl";
 const taskCache = new Map<string, { task: string; date: Date }>();
 const CACHE_DURATION = 10 * 60 * 1000;
 const MAX_CACHE_ITEMS = 1000;
-const HF_HUB_URL = "https://huggingface.co";
+export const HF_HUB_URL = "https://huggingface.co";
 
 /**
  * Get the default task. Use a LRU cache of 1000 items with 10 minutes expiration

@@ -25,16 +25,12 @@ export async function sentenceSimilarity(
 	args: SentenceSimilarityArgs,
 	options?: Options
 ): Promise<SentenceSimilarityOutput> {
-	const defaultTask = await getDefaultTask(args.model, args.accessToken);
-	const res = await request<SentenceSimilarityOutput>(
-		args,
-		defaultTask === "feature-extraction"
-			? {
-					...options,
-					task: "sentence-similarity",
-			  }
-			: options
-	);
+	const defaultTask = args.model ? await getDefaultTask(args.model, args.accessToken) : undefined;
+	const res = await request<SentenceSimilarityOutput>(args, {
+		...options,
+		taskHint: "sentence-similarity",
+		...(defaultTask === "feature-extraction" && { task: "sentence-similarity" }),
+	});
 
 	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x === "number");
 	if (!isValidOutput) {

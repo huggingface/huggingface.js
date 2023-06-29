@@ -27,7 +27,12 @@ export async function textClassification(
 	args: TextClassificationArgs,
 	options?: Options
 ): Promise<TextClassificationOutput> {
-	const res = (await request<TextClassificationOutput[]>(args, options))?.[0];
+	const res = (
+		await request<TextClassificationOutput[]>(args, {
+			...options,
+			taskHint: "text-classification",
+		})
+	)?.[0];
 	const isValidOutput =
 		Array.isArray(res) && res.every((x) => typeof x?.label === "string" && typeof x.score === "number");
 	if (!isValidOutput) {

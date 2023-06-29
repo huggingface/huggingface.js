@@ -39,7 +39,10 @@ export type TextToImageOutput = Blob;
  * Recommended model: stabilityai/stable-diffusion-2
  */
 export async function textToImage(args: TextToImageArgs, options?: Options): Promise<TextToImageOutput> {
-	const res = await request<TextToImageOutput>(args, options);
+	const res = await request<TextToImageOutput>(args, {
+		...options,
+		taskHint: "text-to-image",
+	});
 	const isValidOutput = res && res instanceof Blob;
 	if (!isValidOutput) {
 		throw new InferenceOutputError("Expected Blob");

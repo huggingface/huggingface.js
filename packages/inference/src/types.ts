@@ -26,7 +26,39 @@ export interface Options {
 	fetch?: typeof fetch;
 }
 
-export type InferenceTask = "text-classification" | "feature-extraction" | "sentence-similarity";
+export type InferenceTask =
+	| "audio-classification"
+	| "audio-to-audio"
+	| "automatic-speech-recognition"
+	| "conversational"
+	| "depth-estimation"
+	| "document-question-answering"
+	| "feature-extraction"
+	| "fill-mask"
+	| "image-classification"
+	| "image-segmentation"
+	| "image-to-image"
+	| "image-to-text"
+	| "object-detection"
+	| "video-classification"
+	| "question-answering"
+	| "reinforcement-learning"
+	| "sentence-similarity"
+	| "summarization"
+	| "table-question-answering"
+	| "tabular-classification"
+	| "tabular-regression"
+	| "text-classification"
+	| "text-generation"
+	| "text-to-image"
+	| "text-to-speech"
+	| "text-to-video"
+	| "token-classification"
+	| "translation"
+	| "unconditional-image-generation"
+	| "visual-question-answering"
+	| "zero-shot-classification"
+	| "zero-shot-image-classification";
 
 export interface BaseArgs {
 	/**
@@ -37,8 +69,10 @@ export interface BaseArgs {
 	accessToken?: string;
 	/**
 	 * The model to use. Can be a full URL for HF inference endpoints.
+	 *
+	 * If not specified, will call huggingface.co/api/tasks to get the default model for the task.
 	 */
-	model: string;
+	model?: string;
 }
 
 export type RequestArgs = BaseArgs &

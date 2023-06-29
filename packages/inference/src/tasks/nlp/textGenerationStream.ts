@@ -88,5 +88,8 @@ export async function* textGenerationStream(
 	args: TextGenerationArgs,
 	options?: Options
 ): AsyncGenerator<TextGenerationStreamOutput> {
-	yield* streamingRequest<TextGenerationStreamOutput>(args, options);
+	yield* streamingRequest<TextGenerationStreamOutput>(args, {
+		...options,
+		taskHint: "text-generation",
+	});
 }

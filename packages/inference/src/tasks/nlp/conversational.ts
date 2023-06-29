@@ -63,7 +63,7 @@ export interface ConversationalOutput {
  *
  */
 export async function conversational(args: ConversationalArgs, options?: Options): Promise<ConversationalOutput> {
-	const res = await request<ConversationalOutput>(args, options);
+	const res = await request<ConversationalOutput>(args, { ...options, taskHint: "conversational" });
 	const isValidOutput =
 		Array.isArray(res.conversation.generated_responses) &&
 		res.conversation.generated_responses.every((x) => typeof x === "string") &&
