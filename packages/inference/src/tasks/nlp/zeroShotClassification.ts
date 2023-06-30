@@ -36,7 +36,10 @@ export async function zeroShotClassification(
 	options?: Options
 ): Promise<ZeroShotClassificationOutput> {
 	const res = toArray(
-		await request<ZeroShotClassificationOutput[number] | ZeroShotClassificationOutput>(args, options)
+		await request<ZeroShotClassificationOutput[number] | ZeroShotClassificationOutput>(args, {
+			...options,
+			taskHint: "zero-shot-classification",
+		})
 	);
 	const isValidOutput =
 		Array.isArray(res) &&

@@ -37,7 +37,10 @@ export type ObjectDetectionOutput = ObjectDetectionOutputValue[];
  * Recommended model: facebook/detr-resnet-50
  */
 export async function objectDetection(args: ObjectDetectionArgs, options?: Options): Promise<ObjectDetectionOutput> {
-	const res = await request<ObjectDetectionOutput>(args, options);
+	const res = await request<ObjectDetectionOutput>(args, {
+		...options,
+		taskHint: "object-detection",
+	});
 	const isValidOutput =
 		Array.isArray(res) &&
 		res.every(

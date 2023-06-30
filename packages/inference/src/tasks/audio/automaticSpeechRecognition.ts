@@ -24,7 +24,10 @@ export async function automaticSpeechRecognition(
 	args: AutomaticSpeechRecognitionArgs,
 	options?: Options
 ): Promise<AutomaticSpeechRecognitionOutput> {
-	const res = await request<AutomaticSpeechRecognitionOutput>(args, options);
+	const res = await request<AutomaticSpeechRecognitionOutput>(args, {
+		...options,
+		taskHint: "automatic-speech-recognition",
+	});
 	const isValidOutput = typeof res?.text === "string";
 	if (!isValidOutput) {
 		throw new InferenceOutputError("Expected {text: string}");

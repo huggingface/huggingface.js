@@ -25,16 +25,13 @@ export async function featureExtraction(
 	args: FeatureExtractionArgs,
 	options?: Options
 ): Promise<FeatureExtractionOutput> {
-	const defaultTask = await getDefaultTask(args.model, args.accessToken);
-	const res = await request<FeatureExtractionOutput>(
-		args,
-		defaultTask === "sentence-similarity"
-			? {
-					...options,
-					task: "feature-extraction",
-			  }
-			: options
-	);
+	const defaultTask = args.model ? await getDefaultTask(args.model, args.accessToken) : undefined;
+
+	const res = await request<FeatureExtractionOutput>(args, {
+		...options,
+		taskHint: "feature-extraction",
+		...(defaultTask === "sentence-similarity" && { forceTask: "feature-extraction" }),
+	});
 	let isValidOutput = true;
 
 	const isNumArrayRec = (arr: unknown[], maxDepth: number, curDepth = 0): boolean => {

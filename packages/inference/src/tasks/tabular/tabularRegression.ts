@@ -25,7 +25,10 @@ export async function tabularRegression(
 	args: TabularRegressionArgs,
 	options?: Options
 ): Promise<TabularRegressionOutput> {
-	const res = await request<TabularRegressionOutput>(args, options);
+	const res = await request<TabularRegressionOutput>(args, {
+		...options,
+		taskHint: "tabular-regression",
+	});
 	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x === "number");
 	if (!isValidOutput) {
 		throw new InferenceOutputError("Expected number[]");

@@ -33,7 +33,10 @@ export type AudioToAudioReturn = AudioToAudioOutputValue[];
  * Example model: speechbrain/sepformer-wham does audio source separation.
  */
 export async function audioToAudio(args: AudioToAudioArgs, options?: Options): Promise<AudioToAudioReturn> {
-	const res = await request<AudioToAudioReturn>(args, options);
+	const res = await request<AudioToAudioReturn>(args, {
+		...options,
+		taskHint: "audio-to-audio",
+	});
 	const isValidOutput =
 		Array.isArray(res) &&
 		res.every(

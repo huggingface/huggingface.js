@@ -44,6 +44,23 @@ describe.concurrent(
 			);
 		});
 
+		it("works without model", async () => {
+			expect(
+				await hf.fillMask({
+					inputs: "[MASK] world!",
+				})
+			).toEqual(
+				expect.arrayContaining([
+					expect.objectContaining({
+						score: expect.any(Number),
+						token: expect.any(Number),
+						token_str: expect.any(String),
+						sequence: expect.any(String),
+					}),
+				])
+			);
+		});
+
 		it("summarization", async () => {
 			expect(
 				await hf.summarization({

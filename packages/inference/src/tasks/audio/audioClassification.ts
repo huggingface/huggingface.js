@@ -31,7 +31,10 @@ export async function audioClassification(
 	args: AudioClassificationArgs,
 	options?: Options
 ): Promise<AudioClassificationReturn> {
-	const res = await request<AudioClassificationReturn>(args, options);
+	const res = await request<AudioClassificationReturn>(args, {
+		...options,
+		taskHint: "audio-classification",
+	});
 	const isValidOutput =
 		Array.isArray(res) && res.every((x) => typeof x.label === "string" && typeof x.score === "number");
 	if (!isValidOutput) {

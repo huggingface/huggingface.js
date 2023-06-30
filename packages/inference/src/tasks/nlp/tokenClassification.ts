@@ -58,7 +58,12 @@ export async function tokenClassification(
 	args: TokenClassificationArgs,
 	options?: Options
 ): Promise<TokenClassificationOutput> {
-	const res = toArray(await request<TokenClassificationOutput[number] | TokenClassificationOutput>(args, options));
+	const res = toArray(
+		await request<TokenClassificationOutput[number] | TokenClassificationOutput>(args, {
+			...options,
+			taskHint: "token-classification",
+		})
+	);
 	const isValidOutput =
 		Array.isArray(res) &&
 		res.every(

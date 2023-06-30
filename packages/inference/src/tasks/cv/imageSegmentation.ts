@@ -34,7 +34,10 @@ export async function imageSegmentation(
 	args: ImageSegmentationArgs,
 	options?: Options
 ): Promise<ImageSegmentationOutput> {
-	const res = await request<ImageSegmentationOutput>(args, options);
+	const res = await request<ImageSegmentationOutput>(args, {
+		...options,
+		taskHint: "image-segmentation",
+	});
 	const isValidOutput =
 		Array.isArray(res) &&
 		res.every((x) => typeof x.label === "string" && typeof x.mask === "string" && typeof x.score === "number");

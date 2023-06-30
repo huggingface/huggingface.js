@@ -16,7 +16,10 @@ export type TextToSpeechOutput = Blob;
  * Recommended model: espnet/kan-bayashi_ljspeech_vits
  */
 export async function textToSpeech(args: TextToSpeechArgs, options?: Options): Promise<TextToSpeechOutput> {
-	const res = await request<TextToSpeechOutput>(args, options);
+	const res = await request<TextToSpeechOutput>(args, {
+		...options,
+		taskHint: "text-to-speech",
+	});
 	const isValidOutput = res && res instanceof Blob;
 	if (!isValidOutput) {
 		throw new InferenceOutputError("Expected Blob");
