@@ -70,8 +70,8 @@ export async function conversational(args: ConversationalArgs, options?: Options
 		Array.isArray(res.conversation.past_user_inputs) &&
 		res.conversation.past_user_inputs.every((x) => typeof x === "string") &&
 		typeof res.generated_text === "string" &&
-		Array.isArray(res.warnings) &&
-		res.warnings.every((x) => typeof x === "string");
+		(typeof res.warnings === "undefined" ||
+			(Array.isArray(res.warnings) && res.warnings.every((x) => typeof x === "string")));
 	if (!isValidOutput) {
 		throw new InferenceOutputError(
 			"Expected {conversation: {generated_responses: string[], past_user_inputs: string[]}, generated_text: string, warnings: string[]}"
