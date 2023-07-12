@@ -14,3 +14,10 @@
       title: Interact with the Hub
     - local: hub/modules
       title: API Reference
+- title: "@huggingface/agent"
+  isExpanded: true
+  sections:
+    - local: agents/README
+      title: Use Agents to run multi-modal workflows
+    - local: hub/modules
+      title: API Reference
