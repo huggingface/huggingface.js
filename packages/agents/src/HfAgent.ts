@@ -1,5 +1,6 @@
-import type { TextGenerationOutput } from "@huggingface/inference";
-import { HfInference } from "@huggingface/inference";
+import { HfInference } from "../../inference/src";
+import type { TextGenerationOutput } from "../../inference/src";
+
 import { evalBuilder } from "./lib/evalBuilder";
 import { generateCode } from "./lib/generateCode";
 import { defaultTools } from "./tools";

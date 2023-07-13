@@ -1,4 +1,4 @@
-import type { HfInference } from "@huggingface/inference";
+import type { HfInference } from "../../../inference/src";
 
 export type Data = string | Blob | ArrayBuffer;
 
