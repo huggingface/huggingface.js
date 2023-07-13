@@ -3,7 +3,7 @@ import { HfInference } from "@huggingface/inference";
 import { evalBuilder } from "./lib/evalBuilder";
 import { generateCode } from "./lib/generateCode";
 import { defaultTools } from "./tools";
-import type { Data, Tool, Update } from "./types/public";
+import type { Tool, Update } from "./types/public";
 
 export interface LLMFromHub {
 	model: string;
@@ -20,9 +20,9 @@ function isLLMFromHub(settings: LLMSettings): settings is LLMFromHub {
 export class HfAgent {
 	private readonly accessToken: string;
 	private readonly settings: LLMSettings;
-	private readonly tools: Tool<unknown, unknown>[];
+	private readonly tools: Tool[];
 
-	constructor(accessToken = "", settings: LLMSettings | undefined, tools?: Tool<unknown, unknown>[]) {
+	constructor(accessToken = "", settings: LLMSettings | undefined, tools?: Tool[]) {
 		this.accessToken = accessToken;
 		this.settings = settings ?? ({ model: "OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5" } satisfies LLMSettings);
 		this.tools = tools ?? defaultTools;

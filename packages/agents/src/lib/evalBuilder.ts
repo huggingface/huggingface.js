@@ -3,7 +3,7 @@ import type { Tool } from "../types/public";
 // this function passes the tools & files to the context before calling eval
 export async function evalBuilder(
 	code: string,
-	tools: Tool<unknown, unknown>[],
+	tools: Tool[],
 	files: FileList | undefined,
 	updateCallback: (message: string, data: undefined | string | Blob) => void
 ): Promise<() => Promise<void>> {

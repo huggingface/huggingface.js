@@ -1,6 +1,6 @@
 import type { Tool } from "../types/public";
 
-export const messageTool: Tool<unknown, unknown> = {
+export const messageTool: Tool = {
 	name: "message",
 	description: "Send data back to the user.",
 	examples: [
@@ -21,7 +21,4 @@ export const messageTool: Tool<unknown, unknown> = {
 			tools: ["message"],
 		},
 	],
-	call: async () => {
-		return;
-	},
 };

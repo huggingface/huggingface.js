@@ -1,7 +1,7 @@
 import type { Tool } from "../types/public";
 import examples from "./examples";
 
-function toolDescription(tool: Tool<unknown, unknown>) {
+function toolDescription(tool: Tool) {
 	let prompt = `name: ${tool.name} \ndescription: ${tool.description}`;
 
 	const examples = tool.examples.slice(0, 1).map((example) => {
@@ -13,12 +13,7 @@ function toolDescription(tool: Tool<unknown, unknown>) {
 	return prompt;
 }
 
-export function generatePrompt(
-	prompt: string,
-	tools: Tool<unknown, unknown>[],
-	image?: boolean,
-	audio?: boolean
-): string {
+export function generatePrompt(prompt: string, tools: Tool[], image?: boolean, audio?: boolean): string {
 	if (tools.length === 0) {
 		throw new Error("no tools selected");
 	}

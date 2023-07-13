@@ -5,7 +5,7 @@ import { messageTool } from "../tools/message";
 
 export async function generateCode(
 	prompt: string,
-	tools: Tool<unknown, unknown>[],
+	tools: Tool[],
 	files: FileList | undefined,
 	llm: (input: string) => Promise<string>
 ): Promise<string> {

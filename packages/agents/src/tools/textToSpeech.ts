@@ -1,7 +1,6 @@
-import type { TextToSpeechArgs, TextToSpeechOutput } from "@huggingface/inference";
 import type { Tool } from "../types/public";
 
-export const textToSpeechTool: Tool<TextToSpeechArgs["inputs"], TextToSpeechOutput> = {
+export const textToSpeechTool: Tool = {
 	name: "textToSpeech",
 	description: "This tool takes a text input and turns it into an audio file.",
 	examples: [
@@ -16,12 +15,16 @@ export const textToSpeechTool: Tool<TextToSpeechArgs["inputs"], TextToSpeechOutp
 			tools: ["textToSpeech"],
 		},
 	],
-	call: async (input, inference) =>
-		inference.textToSpeech(
+	call: async (input, inference) => {
+		const data = await input;
+		if (typeof data !== "string") throw "Input must be a string.";
+
+		return inference.textToSpeech(
 			{
-				inputs: await input,
+				inputs: data,
 				model: "espnet/kan-bayashi_ljspeech_vits",
 			},
 			{ wait_for_model: true }
-		),
+		);
+	},
 };

@@ -1,7 +1,6 @@
-import type { ImageToTextArgs, ImageToTextOutput } from "@huggingface/inference";
 import type { Tool } from "../types/public";
 
-export const imageToTextTool: Tool<ImageToTextArgs["data"], ImageToTextOutput["generated_text"]> = {
+export const imageToTextTool: Tool = {
 	name: "imageToText",
 	description: "Caption an image.",
 	examples: [
@@ -12,10 +11,13 @@ export const imageToTextTool: Tool<ImageToTextArgs["data"], ImageToTextOutput["g
 		},
 	],
 	call: async (input, inference) => {
+		const data = await input;
+		if (typeof data === "string") throw "Input must be a blob.";
+
 		return (
 			await inference.imageToText(
 				{
-					data: await input,
+					data,
 					model: "nlpconnect/vit-gpt2-image-captioning",
 				},
 				{ wait_for_model: true }

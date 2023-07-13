@@ -4,12 +4,7 @@ import { textToSpeechTool } from "./textToSpeech";
 import { speechToTextTool } from "./speechToText";
 import type { Tool } from "../types/public";
 
-export const defaultTools: Array<Tool<unknown, unknown>> = [
-	textToImageTool,
-	imageToTextTool,
-	textToSpeechTool,
-	speechToTextTool,
-];
+export const defaultTools: Array<Tool> = [textToImageTool, imageToTextTool, textToSpeechTool, speechToTextTool];
 
 export { textToImageTool } from "./textToImage";
 export { imageToTextTool } from "./imageToText";

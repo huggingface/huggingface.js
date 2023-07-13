@@ -1,7 +1,6 @@
-import type { TextToImageArgs, TextToImageOutput } from "@huggingface/inference";
 import type { Tool } from "../types/public";
 
-export const textToImageTool: Tool<TextToImageArgs["inputs"], TextToImageOutput> = {
+export const textToImageTool: Tool = {
 	name: "textToImage",
 	description: "Generate an image from a text prompt.",
 	examples: [
@@ -17,9 +16,12 @@ export const textToImageTool: Tool<TextToImageArgs["inputs"], TextToImageOutput>
 		},
 	],
 	call: async (input, inference) => {
+		const data = await input;
+		if (typeof data !== "string") throw "Input must be a string.";
+
 		return await inference.textToImage(
 			{
-				inputs: await input,
+				inputs: data,
 				model: "stabilityai/stable-diffusion-2",
 			},
 			{ wait_for_model: true }
