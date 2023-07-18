@@ -8,6 +8,8 @@ on:
       - "packages/hub/README.md"
       - "packages/doc-internal/**"
       - "packages/inference/README.md"
+      - "packages/agents/README.md"
+
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
