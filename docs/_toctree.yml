@@ -19,5 +19,5 @@
   sections:
     - local: agents/README
       title: Use Agents to run multi-modal workflows
-    - local: hub/modules
+    - local: agents/modules
       title: API Reference
