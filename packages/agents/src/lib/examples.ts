@@ -1,4 +1,4 @@
-import type { Example } from "../types/public";
+import type { Example } from "../types";
 
 const examples: Example[] = [
 	{

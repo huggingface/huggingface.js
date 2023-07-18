@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { HfAgent, defaultTools, type Tool } from "../src";
+import { HfAgent, defaultTools } from "../src";
+
 if (!process.env.HF_ACCESS_TOKEN) {
 	console.warn("Set HF_ACCESS_TOKEN in the env to run the tests for better rate limits");
 }
@@ -18,7 +19,7 @@ describe("HfAgent", () => {
 	});
 
 	it("You can use a custom tool in your agent", async () => {
-		const uppercaseTool: Tool = {
+		const uppercaseTool = {
 			name: "uppercase",
 			description: "uppercase the input",
 			examples: [

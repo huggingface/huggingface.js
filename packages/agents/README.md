@@ -79,10 +79,10 @@ By default, agents ship with 4 tools:
 But you can expand the list of tools easily by creating new tools and passing them at initialization.
 
 ```ts
-import { HfAgent, defaultTools, type Tool } from "@huggingface/agents";
+import { HfAgent, defaultTools } from "@huggingface/agents";
 
 // define the tool
-const uppercaseTool: Tool = {
+const uppercaseTool = {
     name: "uppercase",
     description: "uppercase the input string and returns it ",
     examples: [
@@ -101,6 +101,7 @@ const uppercaseTool: Tool = {
     },
 };
 
+// pass it in the agent
 const agent = new HfAgent(process.env.HF_ACCESS_TOKEN, 
                 {model: "OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5" },
                 [uppercaseTool, ...defaultTools]);

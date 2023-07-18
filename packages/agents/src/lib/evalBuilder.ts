@@ -1,4 +1,4 @@
-import type { Tool } from "../types/public";
+import type { Tool } from "../types";
 
 // this function passes the tools & files to the context before calling eval
 export async function evalBuilder(

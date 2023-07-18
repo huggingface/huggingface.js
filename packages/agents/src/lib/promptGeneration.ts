@@ -1,4 +1,4 @@
-import type { Inputs, Tool } from "../types/public";
+import type { Inputs, Tool } from "../types";
 import examples from "./examples";
 
 function toolDescription(tool: Tool) {

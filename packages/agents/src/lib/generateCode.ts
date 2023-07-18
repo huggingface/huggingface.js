@@ -1,4 +1,4 @@
-import type { Tool } from "../types/public";
+import type { Tool } from "../types";
 
 import { generatePrompt } from "./promptGeneration";
 import { messageTool } from "../tools/message";

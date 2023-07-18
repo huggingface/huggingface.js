@@ -1,4 +1,4 @@
-import type { HfInference } from "../../../inference/src";
+import type { HfInference } from "../../inference/src";
 
 export type Data = string | Blob | ArrayBuffer;
 

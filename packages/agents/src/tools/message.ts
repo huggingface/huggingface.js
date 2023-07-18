@@ -1,4 +1,4 @@
-import type { Tool } from "../types/public";
+import type { Tool } from "../types";
 
 export const messageTool: Tool = {
 	name: "message",

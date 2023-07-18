@@ -4,7 +4,7 @@ import type { TextGenerationOutput } from "../../inference/src";
 import { evalBuilder } from "./lib/evalBuilder";
 import { generateCode } from "./lib/generateCode";
 import { defaultTools } from "./tools";
-import type { Tool, Update } from "./types/public";
+import type { Tool, Update } from "./types";
 
 export interface LLMFromHub {
 	model: string;
@@ -81,9 +81,7 @@ export class HfAgent {
 
 	public async run(prompt: string, files?: FileList): Promise<Update[]> {
 		const code = await this.generateCode(prompt, files);
-		console.log(code);
 		const updates = await this.evaluateCode(code, files);
-		console.log(updates);
 		return updates;
 	}
 }

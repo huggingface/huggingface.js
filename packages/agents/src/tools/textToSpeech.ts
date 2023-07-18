@@ -1,4 +1,4 @@
-import type { Tool } from "../types/public";
+import type { Tool } from "../types";
 
 export const textToSpeechTool: Tool = {
 	name: "textToSpeech",
