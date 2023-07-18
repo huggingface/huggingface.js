@@ -17,6 +17,10 @@ pnpm run prepublish-hub
 
 # Generate docs for @huggingface/inference
 pnpm run prepublish-inference
+
+# Generate docs for @huggingface/agents
+pnpm run prepublish-agents
+
 ```
 
 ## HTML docs
