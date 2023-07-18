@@ -13,10 +13,12 @@ export interface Example {
 	prompt: string;
 	code: string;
 	tools: string[];
-	input?: "audio" | "image" | "document";
+	inputs?: Inputs;
 }
 
 export interface Update {
 	message: string;
 	data: undefined | string | Blob;
 }
+
+export type Inputs = Partial<Record<"audio" | "image" | "document", boolean>>;

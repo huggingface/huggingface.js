@@ -11,7 +11,7 @@ const examples: Example[] = [
     return output;
 }`,
 		tools: ["imageToText", "textToSpeech"],
-		input: "image",
+		inputs: { image: true },
 	},
 	{
 		prompt: "Display an image of a yellow dog wearing a top hat",
@@ -37,7 +37,7 @@ if (output.includes("dog")) {
     return null;
 }};`,
 		tools: ["speechToText", "textToImage"],
-		input: "audio",
+		inputs: { audio: true },
 	},
 	{
 		prompt: "Caption the image and generate an image based on the caption, but in a medieval fantasy style.",
@@ -49,7 +49,7 @@ if (output.includes("dog")) {
     return output;
 }`,
 		tools: ["imageToText", "textToImage"],
-		input: "image",
+		inputs: { image: true },
 	},
 ];
 

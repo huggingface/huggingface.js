@@ -19,13 +19,13 @@ function isLLMFromHub(settings: LLMSettings): settings is LLMFromHub {
 }
 
 export class HfAgent {
-	private readonly accessToken: string;
-	private readonly settings: LLMSettings;
-	private readonly tools: Tool[];
+	private accessToken: string;
+	private settings: LLMSettings;
+	private tools: Tool[];
 
-	constructor(accessToken = "", settings: LLMSettings | undefined, tools?: Tool[]) {
+	constructor(accessToken = "", settings?: LLMSettings, tools?: Tool[]) {
 		this.accessToken = accessToken;
-		this.settings = settings ?? ({ model: "OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5" } satisfies LLMSettings);
+		this.settings = settings ?? { model: "OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5" };
 		this.tools = tools ?? defaultTools;
 	}
 
@@ -33,20 +33,19 @@ export class HfAgent {
 		const formattedPrompt = "<|user|>" + prompt + "<|end|><|assistant|>";
 
 		let output: TextGenerationOutput;
-
 		if (isLLMFromHub(this.settings)) {
 			output = await new HfInference(this.accessToken).textGeneration({
 				inputs: formattedPrompt,
 				model: this.settings.model,
 				parameters: {
-					max_new_tokens: 900,
+					max_new_tokens: 512,
 				},
 			});
 		} else {
 			output = await new HfInference(this.accessToken).endpoint(this.settings.endpoint).textGeneration({
 				inputs: formattedPrompt,
 				parameters: {
-					max_new_tokens: 900,
+					max_new_tokens: 512,
 				},
 			});
 		}
@@ -55,8 +54,9 @@ export class HfAgent {
 
 		return text;
 	}
+
 	public async generateCode(prompt: string, files?: FileList): Promise<string> {
-		return await generateCode(prompt, this.tools, files, this.LLM);
+		return await generateCode(prompt, this.tools, files, this.LLM.bind(this));
 	}
 
 	public async evaluateCode(code: string, files?: FileList): Promise<Update[]> {
@@ -81,7 +81,9 @@ export class HfAgent {
 
 	public async run(prompt: string, files?: FileList): Promise<Update[]> {
 		const code = await this.generateCode(prompt, files);
+		console.log(code);
 		const updates = await this.evaluateCode(code, files);
+		console.log(updates);
 		return updates;
 	}
 }

@@ -9,12 +9,10 @@ export async function generateCode(
 	files: FileList | undefined,
 	llm: (input: string) => Promise<string>
 ): Promise<string> {
-	const fullprompt = generatePrompt(
-		prompt,
-		[...tools, messageTool],
-		!!files && files[0].type.startsWith("image"),
-		!!files && files[0].type.startsWith("audio")
-	);
+	const fullprompt = generatePrompt(prompt, [...tools, messageTool], {
+		image: !!files && files[0].type.startsWith("image"),
+		audio: !!files && files[0].type.startsWith("audio"),
+	});
 
 	const textAnswer = await llm(fullprompt);
 

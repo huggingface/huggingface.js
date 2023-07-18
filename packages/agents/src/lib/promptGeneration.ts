@@ -1,4 +1,4 @@
-import type { Tool } from "../types/public";
+import type { Inputs, Tool } from "../types/public";
 import examples from "./examples";
 
 function toolDescription(tool: Tool) {
@@ -13,17 +13,17 @@ function toolDescription(tool: Tool) {
 	return prompt;
 }
 
-export function generatePrompt(prompt: string, tools: Tool[], image?: boolean, audio?: boolean): string {
+export function generatePrompt(prompt: string, tools: Tool[], inputs: Inputs): string {
 	if (tools.length === 0) {
 		throw new Error("no tools selected");
 	}
 
 	let params = "";
 
-	if (image) {
+	if (inputs.image) {
 		params += `image`;
 	}
-	if (audio) {
+	if (inputs.audio) {
 		params += params ? "," : "";
 		params += `audio`;
 	}

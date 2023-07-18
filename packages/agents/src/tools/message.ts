@@ -8,7 +8,7 @@ export const messageTool: Tool = {
 			prompt: "Display the created image",
 			code: 'message("we display the image", image)',
 			tools: ["message"],
-			input: "image",
+			inputs: { image: true },
 		},
 		{
 			prompt: "Display the generated text",
