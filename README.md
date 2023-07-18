@@ -30,6 +30,7 @@ This is a collection of JS libraries to interact with the Hugging Face API, with
 
 - [@huggingface/inference](packages/inference/README.md): Use the Inference API to make calls to 100,000+ Machine Learning models, or your own [inference endpoints](https://hf.co/docs/inference-endpoints/)!
 - [@huggingface/hub](packages/hub/README.md): Interact with huggingface.co to create or delete repos and commit / download files
+- [@huggingface/agents](packages/agents/README.md): Interact with models through a natural language interface
 
 
 With more to come, like `@huggingface/endpoints` to manage your HF Endpoints!
@@ -47,6 +48,7 @@ To install via NPM, you can download the libraries as needed:
 ```bash
 npm install @huggingface/inference
 npm install @huggingface/hub
+npm install @huggingface/agents
 ```
 
 Then import the libraries in your code:

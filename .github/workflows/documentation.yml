@@ -10,6 +10,7 @@ on:
       - "docs/**"
       - "packages/hub/package.json"
       - "packages/inference/package.json"
+      - "packages/agents/package.json"
 
 jobs:
   build:
