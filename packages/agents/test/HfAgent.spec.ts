@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { HfAgent } from "../src/HfAgent";
-import { messageTool } from "../src/tools/message";
-import type { Tool } from "../src/types/public";
-
+import { HfAgent, defaultTools, type Tool } from "../src";
 if (!process.env.HF_ACCESS_TOKEN) {
 	console.warn("Set HF_ACCESS_TOKEN in the env to run the tests for better rate limits");
 }
@@ -40,7 +37,7 @@ describe("HfAgent", () => {
 			},
 		};
 
-		const agent = new HfAgent(process.env.HF_ACCESS_TOKEN, undefined, [uppercaseTool, messageTool]);
+		const agent = new HfAgent(process.env.HF_ACCESS_TOKEN, undefined, [uppercaseTool, ...defaultTools]);
 		const code = `
 async function generate() {
 	const output = uppercase("hello friends");
