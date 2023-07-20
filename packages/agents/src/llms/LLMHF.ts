@@ -1,5 +1,5 @@
 import type { LLM } from "../types";
-import { HfInference } from "../../../inference";
+import { HfInference } from "@huggingface/inference";
 
 export function LLMFromHub(accessToken?: string, model?: string): LLM {
 	const inference = new HfInference(accessToken);
