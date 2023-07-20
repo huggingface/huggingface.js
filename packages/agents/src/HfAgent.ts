@@ -1,62 +1,22 @@
-import { HfInference } from "../../inference/src";
-import type { TextGenerationOutput } from "../../inference/src";
-
 import { evalBuilder } from "./lib/evalBuilder";
 import { generateCode } from "./lib/generateCode";
 import { defaultTools } from "./tools";
-import type { Tool, Update } from "./types";
-
-export interface LLMFromHub {
-	model: string;
-}
-export interface LLMFromEndpoint {
-	endpoint: string;
-}
-export type LLMSettings = LLMFromEndpoint | LLMFromHub;
-
-function isLLMFromHub(settings: LLMSettings): settings is LLMFromHub {
-	return (settings as LLMFromHub).model !== undefined;
-}
+import type { LLM, Tool, Update } from "./types";
+import { LLMFromHub } from "./llms/LLMHF";
 
 export class HfAgent {
 	private accessToken: string;
-	private settings: LLMSettings;
+	private llm: LLM;
 	private tools: Tool[];
 
-	constructor(accessToken = "", settings?: LLMSettings, tools?: Tool[]) {
+	constructor(accessToken = "", LLM?: LLM, tools?: Tool[]) {
 		this.accessToken = accessToken;
-		this.settings = settings ?? { model: "OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5" };
+		this.llm = LLM ?? LLMFromHub(accessToken);
 		this.tools = tools ?? defaultTools;
 	}
 
-	public async LLM(prompt: string): Promise<string> {
-		const formattedPrompt = "<|user|>" + prompt + "<|end|><|assistant|>";
-
-		let output: TextGenerationOutput;
-		if (isLLMFromHub(this.settings)) {
-			output = await new HfInference(this.accessToken).textGeneration({
-				inputs: formattedPrompt,
-				model: this.settings.model,
-				parameters: {
-					max_new_tokens: 512,
-				},
-			});
-		} else {
-			output = await new HfInference(this.accessToken).endpoint(this.settings.endpoint).textGeneration({
-				inputs: formattedPrompt,
-				parameters: {
-					max_new_tokens: 512,
-				},
-			});
-		}
-
-		const text = output.generated_text.slice(formattedPrompt.length);
-
-		return text;
-	}
-
 	public async generateCode(prompt: string, files?: FileList): Promise<string> {
-		return await generateCode(prompt, this.tools, files, this.LLM.bind(this));
+		return await generateCode(prompt, this.tools, files, this.llm.bind(this));
 	}
 
 	public async evaluateCode(code: string, files?: FileList): Promise<Update[]> {
@@ -66,7 +26,7 @@ export class HfAgent {
 			updates.push({ message, data });
 		};
 
-		const wrapperEval = await evalBuilder(code, this.tools, files, callback);
+		const wrapperEval = await evalBuilder(code, this.tools, files, callback, this.accessToken);
 
 		try {
 			await wrapperEval();

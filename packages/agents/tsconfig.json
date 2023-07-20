@@ -11,7 +11,8 @@
 		"strictNullChecks": true,
 		"skipLibCheck": true,
 		"noImplicitOverride": true,
-		"outDir": "./dist"
+		"outDir": "./dist",
+		"declaration": true
 	},
 	"include": ["src", "index.ts", "../shared/src"],
 	"exclude": ["dist"]

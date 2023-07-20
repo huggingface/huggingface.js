@@ -1,20 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { HfAgent, defaultTools } from "../src";
+import { HfAgent, defaultTools, LLMFromHub, LLMFromEndpoint } from "../src";
 
 if (!process.env.HF_ACCESS_TOKEN) {
 	console.warn("Set HF_ACCESS_TOKEN in the env to run the tests for better rate limits");
 }
 
 describe("HfAgent", () => {
-	it("You can create an agent based on model name", async () => {
-		const agent = new HfAgent(process.env.HF_ACCESS_TOKEN, { model: "OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5" });
+	it("You can create an agent from the hub", async () => {
+		const llm = LLMFromHub(process.env.HF_ACCESS_TOKEN, "OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5");
+		const agent = new HfAgent(process.env.HF_ACCESS_TOKEN, llm);
 		expect(agent).toBeDefined();
 	});
 
-	it("You can create an agent based on an endpoint", async () => {
-		const agent = new HfAgent(process.env.HF_ACCESS_TOKEN, {
-			endpoint: "https://api-inference.huggingface.co/models/OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5",
-		});
+	it("You can create an agent from an endpoint", async () => {
+		const llm = LLMFromEndpoint(process.env.HF_ACCESS_TOKEN ?? "", "endpoint");
+		const agent = new HfAgent(process.env.HF_ACCESS_TOKEN, llm);
 		expect(agent).toBeDefined();
 	});
 

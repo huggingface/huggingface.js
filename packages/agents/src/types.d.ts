@@ -1,4 +1,4 @@
-import type { HfInference } from "../../inference/src";
+import type { HfInference } from "@huggingface/inference";
 
 export type Data = string | Blob | ArrayBuffer;
 
@@ -22,3 +22,5 @@ export interface Update {
 }
 
 export type Inputs = Partial<Record<"audio" | "image" | "document", boolean>>;
+
+export type LLM = (prompt: string) => Promise<string>;
