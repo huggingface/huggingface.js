@@ -60,7 +60,6 @@
 		"typescript": "^5.0.4"
 	},
 	"dependencies": {
-		"hash-wasm": "^4.9.0",
 		"@huggingface/inference": "^2.6.1"
 	}
 }
