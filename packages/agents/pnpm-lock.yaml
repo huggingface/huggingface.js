@@ -6,7 +6,7 @@ settings:
 
 dependencies:
   '@huggingface/inference':
-    specifier: ^2.6.1
+    specifier: workspace:^
     version: link:../inference
 
 devDependencies:
