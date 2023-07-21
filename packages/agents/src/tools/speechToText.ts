@@ -2,7 +2,7 @@ import type { Tool } from "../types";
 
 export const speechToTextTool: Tool = {
 	name: "speechToText",
-	description: "Caption an audio file and returns its text content.",
+	description: "Transcribe an audio file and returns its text content.",
 	examples: [
 		{
 			prompt: "Transcribe the sound file",
