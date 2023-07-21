@@ -58,7 +58,7 @@ const agent = new HfAgent("hf_...", {
 
 
 #### From your own endpoints
-You can also specify your own endpoint, as long as it implements the same API, for exemple using [text generation inference](https://github.com/huggingface/text-generation-inference).
+You can also specify your own endpoint, as long as it implements the same API, for exemple using [text generation inference](https://github.com/huggingface/text-generation-inference) and [Inference Endpoints](https://huggingface.co/inference-endpoints).
 
 ```ts
 import { HfAgent } from "@huggingface/agents";
