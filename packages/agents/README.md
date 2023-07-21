@@ -1,6 +1,6 @@
 # 🤗 Hugging Face Agents
 
-A way to call Hugging Face inference APIs using an LLM.
+A way to call Hugging Face models and inference APIs from natural language, using an LLM.
 
 ## Install
 
