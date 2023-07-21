@@ -40,7 +40,7 @@ jobs:
           git add ../..
           git commit -m "🔖 @hugginface/agents $BUMPED_VERSION"
           git tag "agents-v$BUMPED_VERSION"
-      - run: pnpm publish --no-git-checks .
+      - run: pnpm install && pnpm publish --no-git-checks .
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - run: git push --follow-tags
