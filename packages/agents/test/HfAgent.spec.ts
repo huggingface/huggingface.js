@@ -47,7 +47,6 @@ async function generate() {
 		await agent.evaluateCode(code).then((output) => {
 			expect(output.length).toBeGreaterThan(0);
 			expect(output[0].message).toBe("HELLO FRIENDS");
-			("HELLO FRIENDS");
 		});
 	});
 
