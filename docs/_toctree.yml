@@ -7,6 +7,13 @@
       title: Use the Inference API
     - local: inference/modules
       title: API Reference
+- title: "@huggingface/agent"
+  isExpanded: true
+  sections:
+    - local: agents/README
+      title: Use Agents to run multi-modal workflows from a natural language API
+    - local: agents/modules
+      title: API Reference
 - title: "@huggingface/hub"
   isExpanded: true
   sections:

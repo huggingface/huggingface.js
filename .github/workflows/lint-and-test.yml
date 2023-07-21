@@ -34,7 +34,8 @@ jobs:
           cache-dependency-path: "**/pnpm-lock.yaml"
       - run: |
           pnpm install --frozen-lockfile --filter .
-          pnpm install --frozen-lockfile --filter ...[${{ steps.since.outputs.SINCE }}]
+          pnpm install --frozen-lockfile --filter ...[${{ steps.since.outputs.SINCE }}]...
+          pnpm --filter [${{ steps.since.outputs.SINCE }}]... build
       - name: "Checking lint errors"
         run: |
           pnpm --filter ...[${{ steps.since.outputs.SINCE }}] lint:check

@@ -29,6 +29,7 @@ await inference.textToImage({
 This is a collection of JS libraries to interact with the Hugging Face API, with TS types included.
 
 - [@huggingface/inference](packages/inference/README.md): Use the Inference API to make calls to 100,000+ Machine Learning models, or your own [inference endpoints](https://hf.co/docs/inference-endpoints/)!
+- [@huggingface/agents](packages/agents/README.md): Interact with HF models through a natural language interface
 - [@huggingface/hub](packages/hub/README.md): Interact with huggingface.co to create or delete repos and commit / download files
 
 
@@ -47,12 +48,14 @@ To install via NPM, you can download the libraries as needed:
 ```bash
 npm install @huggingface/inference
 npm install @huggingface/hub
+npm install @huggingface/agents
 ```
 
 Then import the libraries in your code:
 
 ```ts
 import { HfInference } from "@huggingface/inference";
+import { HfAgent } from "@huggingface/agents";
 import { createRepo, commit, deleteRepo, listFiles } from "@huggingface/hub";
 import type { RepoId, Credentials } from "@huggingface/hub";
 ```
@@ -73,9 +76,13 @@ You can run our packages with vanilla JS, without any bundler, by using a CDN or
 ```ts
 // esm.sh
 import { HfInference } from "https://esm.sh/@huggingface/inference"
+import { HfAgent } from "https://esm.sh/@huggingface/agents";
+
 import { createRepo, commit, deleteRepo, listFiles } from "https://esm.sh/@huggingface/hub"
 // or npm:
 import { HfInference } from "npm:@huggingface/inference"
+import { HfAgent } from "npm:@huggingface/agents";
+
 import { createRepo, commit, deleteRepo, listFiles } from "npm:@huggingface/hub"
 ```
 
@@ -116,6 +123,30 @@ await inference.imageToText({
 const gpt2 = inference.endpoint('https://xyz.eu-west-1.aws.endpoints.huggingface.cloud/gpt2');
 const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the universe is'});
 ```
+### @huggingface/agents example
+
+```ts
+import {HfAgent, LLMFromHub, defaultTools} from '@huggingface/agents';
+
+const HF_ACCESS_TOKEN = "hf_...";
+
+const agent = new HfAgent(
+  HF_ACCESS_TOKEN,
+  LLMFromHub(HF_ACCESS_TOKEN),
+  [...defaultTools]
+);
+
+
+// you can generate the code, inspect it and then run it
+const code = await agent.generateCode("Draw a picture of a cat wearing a top hat. Then caption the picture and read it out loud.");
+console.log(code);
+const messages = await agent.evaluateCode(code)
+console.log(messages); // contains the data
+
+// or you can run the code directly, however you can't check that the code is safe to execute this way, use at your own risk.
+const messages = await agent.run("Draw a picture of a cat wearing a top hat. Then caption the picture and read it out loud.")
+console.log(messages); 
+```
 
 ### @huggingface/hub examples
 
@@ -145,6 +176,7 @@ await deleteFiles({
   paths: ["README.md", ".gitattributes"]
 });
 ```
+
 
 There are more features of course, check each library's README!
 

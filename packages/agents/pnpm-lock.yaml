@@ -1,0 +1,34 @@
+lockfileVersion: '6.0'
+
+dependencies:
+  '@huggingface/inference':
+    specifier: ^2.6.1
+    version: link:../inference
+
+devDependencies:
+  '@types/node':
+    specifier: ^18.13.0
+    version: 18.13.0
+  type-fest:
+    specifier: ^3.9.0
+    version: 3.9.0
+  typescript:
+    specifier: ^5.0.4
+    version: 5.0.4
+
+packages:
+
+  /@types/node@18.13.0:
+    resolution: {integrity: sha512-gC3TazRzGoOnoKAhUx+Q0t8S9Tzs74z7m0ipwGpSqQrleP14hKxP4/JUeEQcD3W1/aIpnWl8pHowI7WokuZpXg==}
+    dev: true
+
+  /type-fest@3.9.0:
+    resolution: {integrity: sha512-hR8JP2e8UiH7SME5JZjsobBlEiatFoxpzCP+R3ZeCo7kAaG1jXQE5X/buLzogM6GJu8le9Y4OcfNuIQX0rZskA==}
+    engines: {node: '>=14.16'}
+    dev: true
+
+  /typescript@5.0.4:
+    resolution: {integrity: sha512-cW9T5W9xY37cc+jfEnaUvX91foxtHkza3Nw3wkoF4sSlKn0MONdkdEndig/qPBWXNkmplh3NzayQzCiHM4/hqw==}
+    engines: {node: '>=12.20'}
+    hasBin: true
+    dev: true
