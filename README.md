@@ -148,6 +148,29 @@ await deleteFiles({
 });
 ```
 
+### @huggingface/agents example
+
+```ts
+import {HfAgent, LLMFromHub, defaultTools} from '@huggingface/agents';
+
+const HF_ACCESS_TOKEN = "hf_...";
+
+const agent = new HfAgent(
+  HF_ACCESS_TOKEN,
+  LLMFromHub(HF_ACCESS_TOKEN),
+  [...defaultTools]
+);
+
+const code = await agent.generateCode("Draw a picture of a cat wearing a top hat. Then caption the picture and read it out loud.");
+console.log(code);
+const messages = await agent.evaluateCode(code)
+console.log(messages); // contains the data
+
+// or you can run things directly, however you can't check that the code is safe to execute this way, use at your own risk.
+const messages = await agent.run("Draw a picture of a cat wearing a top hat. Then caption the picture and read it out loud.")
+console.log(messages); 
+```
+
 There are more features of course, check each library's README!
 
 ## Formatting & testing

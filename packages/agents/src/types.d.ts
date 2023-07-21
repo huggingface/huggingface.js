@@ -21,6 +21,6 @@ export interface Update {
 	data: undefined | string | Blob;
 }
 
-export type Inputs = Partial<Record<"audio" | "image" | "document", boolean>>;
+export type Inputs = Partial<Record<"audio" | "image" | "text", boolean>>;
 
 export type LLM = (prompt: string) => Promise<string>;
