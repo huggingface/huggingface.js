@@ -3,6 +3,8 @@ import { generateCode } from "./lib/generateCode";
 import { defaultTools } from "./tools";
 import type { LLM, Tool, Update } from "./types";
 import { LLMFromHub } from "./llms/LLMHF";
+import { generatePrompt } from "./lib/promptGeneration";
+import { messageTool } from "./tools/message";
 
 export class HfAgent {
 	private accessToken: string;
@@ -13,6 +15,13 @@ export class HfAgent {
 		this.accessToken = accessToken;
 		this.llm = LLM ?? LLMFromHub(accessToken);
 		this.tools = tools ?? defaultTools;
+	}
+
+	public generatePrompt(prompt: string, files?: FileList): string {
+		return generatePrompt(prompt, [...this.tools, messageTool], {
+			image: !!files && files[0].type.startsWith("image"),
+			audio: !!files && files[0].type.startsWith("audio"),
+		});
 	}
 
 	public async generateCode(prompt: string, files?: FileList): Promise<string> {

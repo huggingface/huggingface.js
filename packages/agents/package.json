@@ -58,6 +58,6 @@
 		"typescript": "^5.0.4"
 	},
 	"dependencies": {
-		"@huggingface/inference": "workspace:^"
+		"@huggingface/inference": "^2.6.1"
 	}
 }
