@@ -18,6 +18,6 @@
   isExpanded: true
   sections:
     - local: agents/README
-      title: Use Agents to run multi-modal workflows
+      title: Use Agents to run multi-modal workflows from a natural language API
     - local: agents/modules
       title: API Reference
