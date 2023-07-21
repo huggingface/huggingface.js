@@ -1,4 +1,4 @@
-# 🤗 Hugging Face Agents
+# 🤗 Hugging Face Agents.js
 
 A way to call Hugging Face models and inference APIs from natural language, using an LLM.
 
