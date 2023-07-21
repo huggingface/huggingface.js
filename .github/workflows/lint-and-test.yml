@@ -35,6 +35,7 @@ jobs:
       - run: |
           pnpm install --frozen-lockfile --filter .
           pnpm install --frozen-lockfile --filter ...[${{ steps.since.outputs.SINCE }}]
+          pnpm build --frozen-lockfile --filter [${{ steps.since.outputs.SINCE }}]...
       - name: "Checking lint errors"
         run: |
           pnpm --filter ...[${{ steps.since.outputs.SINCE }}] lint:check
