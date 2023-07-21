@@ -20,6 +20,6 @@ jobs:
       package: huggingface.js
       path_to_docs: huggingface.js/docs
       additional_args: --not_python_module
-      pre_command: corepack enable && cd huggingface.js && pnpm install && pnpm --filter doc-internal start
+      pre_command: corepack enable && cd huggingface.js && pnpm install && pnpm -r build && pnpm --filter doc-internal start
     secrets:
       hf_token: ${{ secrets.HF_DOC_BUILD_PUSH }}
