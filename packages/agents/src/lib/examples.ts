@@ -51,6 +51,30 @@ if (output.includes("dog")) {
 		tools: ["imageToText", "textToImage"],
 		inputs: { image: true },
 	},
+	{
+		prompt: "Who Was Napoléon Bonaparte?",
+		code: `async function generate() {
+	message("Napoléon Bonaparte was a French military and political leader.");
+}`,
+		tools: ["message"],
+	},
+	{
+		prompt: "What is 5+5?",
+		code: `async function generate() {
+	message(\`5+5 is equal to ${5 + 5}\`);
+}`,
+		tools: ["message"],
+	},
+
+	{
+		prompt: "Can you draw the current president of France?",
+		code: `async function generate() {
+	const output = await textToImage("Emmanuel Macron");
+	message("The current president of France", output);
+	return output
+}`,
+		tools: ["textToImage", "message"],
+	},
 ];
 
 export default examples;
