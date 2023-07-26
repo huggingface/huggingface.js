@@ -62,6 +62,8 @@ async function generate(${params}) {
 // your code here
 return output;
 };
+
+If you are not sure how to do it, try anyway and give it your best shot, as the user can always correct you later. Wrap your code answer in triple backticks (\`\`\`).
 \`\`\``;
 
 	return fullPrompt;
