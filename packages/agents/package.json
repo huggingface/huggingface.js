@@ -1,7 +1,7 @@
 {
 	"name": "@huggingface/agents",
 	"packageManager": "pnpm@8.3.1",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"description": "Multi-modal agents using Hugging Face's models",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {
