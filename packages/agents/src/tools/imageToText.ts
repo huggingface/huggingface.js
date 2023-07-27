@@ -18,7 +18,6 @@ export const imageToTextTool: Tool = {
 			await inference.imageToText(
 				{
 					data,
-					model: "nlpconnect/vit-gpt2-image-captioning",
 				},
 				{ wait_for_model: true }
 			)
