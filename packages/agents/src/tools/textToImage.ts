@@ -22,7 +22,6 @@ export const textToImageTool: Tool = {
 		return await inference.textToImage(
 			{
 				inputs: data,
-				model: "stabilityai/stable-diffusion-2",
 			},
 			{ wait_for_model: true }
 		);
