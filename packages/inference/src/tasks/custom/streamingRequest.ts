@@ -36,7 +36,7 @@ export async function* streamingRequest<T>(
 
 		throw new Error(`Server response contains error: ${response.status}`);
 	}
-	if (response.headers.get("content-type") !== "text/event-stream") {
+	if (!response.headers.get("content-type")?.startsWith("text/event-stream")) {
 		throw new Error(
 			`Server does not support event stream content type, it returned ` + response.headers.get("content-type")
 		);
