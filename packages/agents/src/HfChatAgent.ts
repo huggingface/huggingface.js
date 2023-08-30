@@ -19,7 +19,7 @@ export interface HfAgentConfig {
 export class HfChatAgent {
 	private accessToken: string;
 	private llm: LLM;
-	private chatHistory: Message[];
+	public chatHistory: Message[];
 	private tools: Tool[];
 	private chatFormat: (inputs: { messages: Chat }, options?: unknown) => string;
 	private maxTry = 3;
@@ -177,6 +177,7 @@ export class HfChatAgent {
 		return finalAnswer;
 	}
 	public async chat(prompt: string, files?: FileList): Promise<Message> {
+		console.log(prompt);
 		this.chatHistory.push({
 			from: "user",
 			content: prompt,
@@ -239,8 +240,13 @@ export class HfChatAgent {
 			// no tools, push prompt directly and get response
 			this.chatHistory.push({ from: "user", content: prompt });
 			const response = await this.llm(this.formattedChat);
+			console.log(response);
 			this.chatHistory.push({ from: "assistant", content: response });
 		}
 		return this.chatHistory[this.chatHistory.length - 1];
+	}
+
+	public resetChat(): void {
+		this.chatHistory = [];
 	}
 }
