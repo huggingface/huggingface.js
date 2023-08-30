@@ -219,8 +219,9 @@ export class HfChatAgent {
 					throw new Error("The tool name is not valid.");
 				}
 
-				const toolResult = this.callTool(this.chatHistory[this.chatHistory.length - 1], tool, toolInput["input"]);
-				console.log(toolResult);
+				// if the input is [[input]] we sub the actual embedded file
+				const input = toolInput["input"] === "[[input]]" && files ? files[0] : toolInput["input"];
+				const toolResult = await this.callTool(this.chatHistory[this.chatHistory.length - 1], tool, input);
 			}
 
 			const finalAnswer = await this.getFinalAnswer(this.chatHistory[this.chatHistory.length - 1]);
