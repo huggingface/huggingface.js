@@ -24,7 +24,7 @@ For example if you want to draw a picture of a cat wearing a top hat, you might 
 }
 \`\`\`
 
-{{#if (image)}}
+{{#if image}}
 You can access embedded files like so: 
 
 \`\`\`json
@@ -45,7 +45,7 @@ For example to caption an incoming image:
 \`\`\`
 {{/if}}
 
-{{#if (audio)}}
+{{#if audio}}
 You can access embedded files like so: 
 
 \`\`\`json
@@ -82,4 +82,8 @@ If you do not need another tool, you can return the following, to give your fina
 	"input" : "your final answer based on your knowledge of the world and prior tools used"
 }
 \`\`\`
+
+If you are done with your plan, consider using \`finalAnswer\` tool to give your final answer based on your knowledge of the world and prior tools used.
+
+ONLY express ONE step at a time. Only the first JSON will be accepted.
 `);

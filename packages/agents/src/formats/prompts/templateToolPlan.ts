@@ -22,4 +22,4 @@ You have access to the following tools:
 
 The prompt is: {{prompt}}
 
-What is your plan for using tools in this situation?`);
+What is your plan for using tools in this situation? Be concise, use the LEAST amount of tools, write your steps as bullet points, and mention ONLY the name of the tools you want to use wrapped in backticks. For example, \`tool name\` is a tool I want to use.`);
