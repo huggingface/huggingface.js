@@ -186,16 +186,19 @@ export class HfChatAgent {
 		});
 
 		const useTools = await this.shouldUseTool(this.chatHistory[this.chatHistory.length - 1]);
+		console.log("useTools", useTools);
 
 		if (useTools) {
 			const plan = await this.planAndExecute(this.chatHistory[this.chatHistory.length - 1]); // something with tools
-
+			console.log("plan", plan);
 			const toolsUsed = this.tools.filter((tool) => plan.includes(tool.name));
 
 			let tries = 0;
 
 			while (tries < this.maxTry) {
 				const toolInput = await this.getToolInput(this.chatHistory[this.chatHistory.length - 1], toolsUsed);
+				console.log("toolInput", toolInput);
+
 				tries += 1;
 
 				// if the tool is finalAnswer, we know we're done
@@ -209,6 +212,7 @@ export class HfChatAgent {
 					} else {
 						this.chatHistory = [...this.chatHistory, { from: "assistant", content: toolInput["input"] }];
 					}
+					console.log("final answer", this.chatHistory[this.chatHistory.length - 1]);
 					return this.chatHistory[this.chatHistory.length - 1];
 				}
 
@@ -221,11 +225,15 @@ export class HfChatAgent {
 
 				// if the input is [[input]] we sub the actual embedded file
 				const input = toolInput["input"] === "[[input]]" && files ? files[0] : toolInput["input"];
+
+				console.log(input);
+
 				const toolResult = await this.callTool(this.chatHistory[this.chatHistory.length - 1], tool, input);
+				console.log("toolResult", toolResult);
 			}
 
 			const finalAnswer = await this.getFinalAnswer(this.chatHistory[this.chatHistory.length - 1]);
-			console.log(finalAnswer);
+			console.log(finalAnswer, this.chatHistory[this.chatHistory.length - 1]);
 			this.chatHistory = [...this.chatHistory, { from: "assistant", content: finalAnswer }];
 		} else {
 			// no tools, push prompt directly and get response
