@@ -1,25 +1,11 @@
 export function extractJSON(str: string): string {
-	let firstOpen, firstClose, candidate;
-	firstOpen = str.indexOf("{", (firstOpen ?? 0) + 1);
-	do {
-		firstClose = str.lastIndexOf("}");
-		console.log("firstOpen: " + firstOpen, "firstClose: " + firstClose);
-		if (firstClose <= firstOpen) {
-			throw new Error("No JSON found in the answer.");
-		}
-		do {
-			candidate = str.substring(firstOpen, firstClose + 1);
-			console.log("candidate: " + candidate);
-			try {
-				const res = JSON.parse(candidate);
-				return JSON.stringify(res);
-			} catch (e) {
-				console.log("...failed");
-			}
-			firstClose = str.substr(0, firstClose).lastIndexOf("}");
-		} while (firstClose > firstOpen);
-		firstOpen = str.indexOf("{", firstOpen + 1);
-	} while (firstOpen != -1);
+	const regex = /\{\s*"tool"\s*:\s*"[^"]*"\s*,\s*"input"\s*:\s*"[^"]*"\s*\}/;
 
-	throw new Error("No JSON found in the answer.");
+	const match = regex.exec(str);
+
+	if (match) {
+		return match[0];
+	} else {
+		throw new Error("No JSON found in the answer.");
+	}
 }
