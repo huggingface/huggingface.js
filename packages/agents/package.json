@@ -34,7 +34,8 @@
 		"build": "tsup",
 		"test": "vitest run",
 		"test:browser": "vitest run --browser.name=chrome --browser.headless --config ./vitest-browser.config.ts",
-		"type-check": "tsc"
+		"type-check": "tsc",
+		"watch": "watch 'npm run build' ./src"
 	},
 	"files": [
 		"src",
@@ -55,9 +56,11 @@
 	"devDependencies": {
 		"@types/node": "^18.13.0",
 		"type-fest": "^3.9.0",
-		"typescript": "^5.0.4"
+		"typescript": "^5.0.4",
+		"watch": "^1.0.2"
 	},
 	"dependencies": {
-		"@huggingface/inference": "^2.6.1"
+		"@huggingface/inference": "^2.6.1",
+		"handlebars": "^4.7.8"
 	}
 }
