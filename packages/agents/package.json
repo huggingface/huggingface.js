@@ -60,7 +60,7 @@
 		"watch": "^1.0.2"
 	},
 	"dependencies": {
-		"@huggingface/inference": "^2.6.1",
+		"@huggingface/inference": "workspace:^",
 		"handlebars": "^4.7.8"
 	}
 }
