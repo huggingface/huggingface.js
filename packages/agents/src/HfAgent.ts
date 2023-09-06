@@ -1,7 +1,7 @@
 import { evalBuilder } from "./lib/evalBuilder";
 import { generateCode } from "./lib/generateCode";
 import { defaultTools } from "./tools";
-import type { LLM, Tool, Update } from "./types";
+import type { Data, LLM, Tool } from "./types";
 import { LLMFromHub } from "./llms/LLMHF";
 import { generatePrompt } from "./lib/promptGeneration";
 import { messageTool } from "./tools/message";
@@ -28,8 +28,8 @@ export class HfAgent {
 		return await generateCode(prompt, this.tools, files, this.llm.bind(this));
 	}
 
-	public async evaluateCode(code: string, files?: FileList): Promise<Update[]> {
-		const updates: Update[] = [];
+	public async evaluateCode(code: string, files?: FileList): Promise<{ message: string; data?: Data }[]> {
+		const updates: { message: string; data?: Data }[] = [];
 
 		const callback = (message: string, data: undefined | string | Blob) => {
 			updates.push({ message, data });
@@ -48,7 +48,7 @@ export class HfAgent {
 		return updates;
 	}
 
-	public async run(prompt: string, files?: FileList): Promise<Update[]> {
+	public async run(prompt: string, files?: FileList): Promise<{ message: string; data?: Data }[]> {
 		const code = await this.generateCode(prompt, files);
 		const updates = await this.evaluateCode(code, files);
 		return updates;

@@ -2,16 +2,17 @@ import type { Tool } from "../types";
 
 export const textToSpeechTool: Tool = {
 	name: "textToSpeech",
-	description: "This tool takes a text input and turns it into an audio file.",
+	description:
+		"This tool takes a text input and turns it into an audio file. Keywords: Text to speech, TTS, Speak out loud, Say out loud",
 	examples: [
 		{
 			prompt: 'Say the following out loud:"Hello world!"',
-			code: "textToSpeech('Hello world!')",
+			code: '{"tool" : "textToSpeech", "input" : "Hello world!"}',
 			tools: ["textToSpeech"],
 		},
 		{
-			prompt: "Say the content of the string txt out loud",
-			code: "textToSpeech(txt)",
+			prompt: "Read the name of the irish president out loud",
+			code: '{"tool" : "textToSpeech", "input" : "Michael D. Higgins"}',
 			tools: ["textToSpeech"],
 		},
 	],

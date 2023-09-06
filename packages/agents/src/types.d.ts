@@ -1,4 +1,5 @@
 import type { HfInference } from "@huggingface/inference";
+import type { AgentScratchpad } from "./AgentScratchpad";
 
 export type Data = string | Blob;
 
@@ -16,9 +17,10 @@ export interface Example {
 	inputs?: Inputs;
 }
 
+export type StepType = "toolCheck" | "plan" | "toolInput" | "finalAnswer";
 export interface Update {
-	message: string;
-	data: undefined | string | Blob;
+	type: StepType;
+	body: boolean | Data;
 }
 
 export type Inputs = Partial<Record<"audio" | "image" | "text", boolean>>;
@@ -28,11 +30,11 @@ export type LLM = (prompt: string) => Promise<string>;
 export interface Message {
 	from: "user" | "assistant";
 	content: string;
-	scratchpad?: Message[];
-	image?: Blob;
-	audio?: Blob;
+	scratchpad?: AgentScratchpad;
 }
 
 export type Chat = Message[];
 
 export type Template<T> = (inputs: T, options?: RuntimeOptions) => string;
+
+export type Files = Record<string, Data>;
