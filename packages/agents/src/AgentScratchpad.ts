@@ -62,7 +62,6 @@ export class AgentScratchpad {
 	private async askTemplate<T>(template: (inputs: T) => string, inputs: T): Promise<string> {
 		const templatePrompt = template(inputs);
 		this.appendScratchpad({ from: "user", content: templatePrompt });
-		console.log(this.formattedScratchpad);
 		const answer = await this.agent.llm(this.formattedScratchpad);
 		this.appendScratchpad({ from: "assistant", content: answer });
 		return answer;
