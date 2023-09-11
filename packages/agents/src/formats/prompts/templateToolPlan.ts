@@ -7,18 +7,15 @@ export const templateToolPlan = compileTemplate<{
 	tools: Tool[];
 }>(`I am prompting you with the following message: "{{prompt}}"
 
-{{#each files}}
-{{#if @first}}
-You have access to the following files. Having a file means you can embed it in your answer by wrapping it in double brackets like so : [[input]]
-{{/if}}
-\` - [[{{@key}}]]\` {{#unless @last}}\n{{/unless}}
-{{/each}}
+What is your plan for using tools in this situation? Be concise, use the LEAST amount of tools. It is okay to use only one tool if necessary. Write your steps as bullet points, and mention ONLY the name of the tools you want to use wrapped in backticks. For example, \`tool name\` is a tool I want to use.
 
-You have access to the following tools: 
-{{#each tools}}
-\`{{name}}\` - {{description}}{{#unless @last}}\n{{/unless}}
-{{/each}}
+For example if the query is: "Describe the content of this image" then you can have the following plan:
+1. Use the tool \`imageToText\` to describe the [[input]] image.
 
-The prompt is: {{prompt}}
+Or if the query is "Read out loud the name of the current president of Ireland" then you could have the following plan:
+1. Use the tool \`webSearch\` to find the name of the current president of Ireland.
+2. Use the tool \`textToSpeech\` to read out loud the name of the president.
 
-What is your plan for using tools in this situation? Be concise, use the LEAST amount of tools. It is okay to use only one tool if necessary. Write your steps as bullet points, and mention ONLY the name of the tools you want to use wrapped in backticks. For example, \`tool name\` is a tool I want to use.`);
+If the query is "Generate a picture of a cat" then you could have the following plan:
+1. Use the tool \`textToImage\` to generate a picture of a cat.
+`);

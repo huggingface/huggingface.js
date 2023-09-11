@@ -37,4 +37,8 @@ export type Chat = Message[];
 
 export type Template<T> = (inputs: T, options?: RuntimeOptions) => string;
 
-export type Files = Record<string, Data>;
+export interface File {
+	file: Data;
+	description: string;
+}
+export type Files = Record<string, File>;

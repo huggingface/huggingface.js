@@ -9,7 +9,7 @@ export interface HfAgentConfig {
 	llm: LLM;
 	accessToken?: string;
 	chatHistory?: Chat;
-	chatFormat(inputs: { messages: Chat }, options?: unknown): string;
+	chatFormat(inputs: { messages: Chat; preprompt?: string }, options?: unknown): string;
 	tools?: Tool[];
 	updateCallback?: (history: Chat) => void;
 }
@@ -19,7 +19,7 @@ export class HfChatAgent {
 	public llm: LLM;
 	public chatHistory: Chat;
 	public tools: Tool[];
-	public chatFormat: (inputs: { messages: Chat }, options?: unknown) => string;
+	public chatFormat: (inputs: { messages: Chat; preprompt?: string }, options?: unknown) => string;
 	public updateCallback: (history: Chat) => void;
 
 	constructor({ accessToken, llm, tools, chatHistory, chatFormat, updateCallback }: HfAgentConfig) {
@@ -45,12 +45,7 @@ export class HfChatAgent {
 
 		this.appendMessage({ from: "user", content: prompt, scratchpad: scratchpad });
 
-		let text = prompt;
-		if (files?.[0] !== undefined) {
-			text += "[[input]]";
-		}
-
-		const answer = await scratchpad.run(text);
+		const answer = await scratchpad.run(prompt);
 
 		this.appendMessage({
 			from: "assistant",

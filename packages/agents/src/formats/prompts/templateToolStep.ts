@@ -10,26 +10,9 @@ export const templateToolStep = compileTemplate<{
 \`\`\`json
 {
 	"tool": "tool name",
-	"input" : "tool input"
+	"input": "tool input"
 }
 \`\`\`
-
-You have access to the following tools:
-{{#each tools}}
-\`{{name}}\` - {{description}}
- - Examples: 
- {{#each examples}}\n{{prompt}} - \`{{code}}\` {{/each}}
-{{#unless @last}}\n{{/unless}}
-{{/each}}
-
-{{#each files}}
-{{#if @first}}
-You have access to the following files. Having a file means you can embed it in your answer by wrapping it in double brackets like so : [[input]]
-{{/if}}
-\` - [[{{@key}}]]\` {{#unless @last}}\n{{/unless}}
-{{/each}}
-
-
 
 The prompt is: {{prompt}}
 
@@ -38,7 +21,7 @@ If you do not need another tool, you can return the following format to give you
 \`\`\`json
 {
 	"tool": "finalAnswer",
-	"input" : "your final answer based on your knowledge of the world and prior tools used"
+	"input": "your final answer based on your knowledge of the world and prior tools used"
 }
 \`\`\`
 
