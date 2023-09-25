@@ -1,17 +1,26 @@
 import { templateOpenAssistant } from "./formats";
 import { LLMFromHub } from "./llms";
 import { defaultTools } from "./tools";
-import type { Chat, Message, Tool } from "./types";
+import type { Chat, Message, Tool, Update } from "./types";
 import type { LLM } from "./types";
 import { AgentScratchpad } from "./AgentScratchpad";
+import type { TextGenerationStreamOutput } from "@huggingface/inference";
 
+export interface Callbacks {
+	onMessage?: (message: Message) => void;
+	onUpdate?: (update: Update) => void;
+	onScratch?: (scratch: Message) => void;
+	onFile?: (file: Blob, tool?: Tool) => void;
+	onStream?: (output: TextGenerationStreamOutput) => void;
+	onFinalAnswer?: (output: string) => void;
+}
 export interface HfAgentConfig {
 	llm: LLM;
 	accessToken?: string;
 	chatHistory?: Chat;
 	chatFormat(inputs: { messages: Chat }, options?: unknown): string;
 	tools?: Tool[];
-	updateCallback?: (history: Chat) => void;
+	callbacks?: Callbacks;
 }
 
 export class HfChatAgent {
@@ -20,15 +29,41 @@ export class HfChatAgent {
 	public chatHistory: Chat;
 	public tools: Tool[];
 	public chatFormat: (inputs: { messages: Chat }, options?: unknown) => string;
-	public updateCallback: (history: Chat) => void;
+	public callbacks?: Callbacks;
 
-	constructor({ accessToken, llm, tools, chatHistory, chatFormat, updateCallback }: HfAgentConfig) {
+	constructor({ accessToken, llm, tools, chatHistory, chatFormat, callbacks }: HfAgentConfig) {
 		this.accessToken = accessToken ?? "";
 		this.llm = llm ?? LLMFromHub(accessToken);
 		this.tools = tools ?? defaultTools;
 		this.chatHistory = chatHistory ?? [];
 		this.chatFormat = chatFormat ?? templateOpenAssistant;
-		this.updateCallback = updateCallback ?? (() => {});
+		this.callbacks = callbacks ?? {};
+	}
+
+	get LLMNoStream(): (text: string) => Promise<string> {
+		return async (text: string): Promise<string> => {
+			const response = await this.llm(text);
+			for await (const output of response) {
+				// if not generated_text is here it means the generation is not done
+				if (output.generated_text) {
+					return output.generated_text;
+				}
+			}
+			throw new Error("No generated text");
+		};
+	}
+
+	get LLMStream(): (text: string) => Promise<string> {
+		return async (text: string): Promise<string> => {
+			const response = await this.llm(text);
+			for await (const output of response) {
+				this.callbacks?.onStream?.(output);
+				if (output.generated_text) {
+					return output.generated_text;
+				}
+			}
+			throw new Error("No generated text");
+		};
 	}
 
 	get formattedChat(): string {
@@ -37,7 +72,7 @@ export class HfChatAgent {
 
 	public appendMessage(message: Message): void {
 		this.chatHistory = [...this.chatHistory, message];
-		this.updateCallback(this.chatHistory);
+		this.callbacks?.onMessage?.(message);
 	}
 
 	public async chat(prompt: string, files?: FileList): Promise<Message> {

@@ -44,18 +44,20 @@ export class AgentScratchpad {
 
 	private pushUpdate(update: Update): void {
 		this.updates = [...this.updates, update];
-		this.agent.updateCallback(this.agent.chatHistory);
+		this.agent.callbacks?.onUpdate?.(update);
 	}
 
 	private appendScratchpad(message: Message): void {
 		this.scratch = [...this.scratch, message];
-		this.agent.updateCallback(this.agent.chatHistory);
+		this.agent.callbacks?.onScratch?.(message);
 	}
 
-	private async askTemplate<T>(template: (inputs: T) => string, inputs: T): Promise<string> {
+	private async askTemplate<T>(template: (inputs: T) => string, inputs: T, stream?: boolean): Promise<string> {
+		const llm = stream ? this.agent.LLMStream : this.agent.LLMNoStream;
+
 		const templatePrompt = template(inputs);
 		this.appendScratchpad({ from: "user", content: templatePrompt });
-		const answer = await this.agent.llm(this.formattedScratchpad);
+		const answer = await llm(this.formattedScratchpad);
 		this.appendScratchpad({ from: "assistant", content: answer });
 		return answer;
 	}
@@ -64,6 +66,7 @@ export class AgentScratchpad {
 		template: (inputs: TemplateParams) => string,
 		inputs: TemplateParams,
 		validator: (answer: string) => ValidatorOutput,
+		stream?: boolean,
 		retryTemplate?: (inputs: RetryParams) => string,
 		retryInputs?: RetryParams
 	) {
@@ -71,15 +74,16 @@ export class AgentScratchpad {
 
 		while (tries < this.maxTry) {
 			try {
-				const answer = await this.askTemplate(template, inputs);
+				const answer = await this.askTemplate(template, inputs, stream);
 				const validation = validator(answer);
 				return validation;
 			} catch (e) {
+				console.log(e);
 				tries += 1;
 				if (retryTemplate === undefined || retryInputs === undefined) {
 					continue;
 				}
-				await this.askTemplate(retryTemplate, retryInputs);
+				await this.askTemplate(retryTemplate, retryInputs, stream);
 			}
 		}
 
@@ -90,9 +94,11 @@ export class AgentScratchpad {
 		let files = this.files;
 
 		let useTool = false;
-		this.pushUpdate({ type: "toolCheck", body: "Checking for tool use" });
+		this.pushUpdate({ stepType: "toolCheck", body: "Checking for tool use" });
 		if (files.input) {
 			useTool = true; // if the user input a file, they always want a tool
+		} else if (this.tools.length === 0) {
+			useTool = false;
 		} else {
 			const toolCheckValidator = (answer: string) => {
 				if (answer.toLowerCase().trim().startsWith("yes")) {
@@ -116,8 +122,8 @@ export class AgentScratchpad {
 		}
 
 		if (useTool) {
-			this.pushUpdate({ type: "toolCheck", body: "A tool is required." });
-			this.pushUpdate({ type: "plan", body: "Asking for plan." });
+			this.pushUpdate({ stepType: "toolCheck", body: "A tool is required." });
+			this.pushUpdate({ stepType: "plan", body: "Asking for plan." });
 
 			const plan = await this.askTemplate(templateToolPlan, {
 				prompt,
@@ -128,7 +134,7 @@ export class AgentScratchpad {
 			const toolsUsed = this.tools.filter((tool) => plan.includes(tool.name));
 
 			this.pushUpdate({
-				type: "plan",
+				stepType: "plan",
 				body: "Using the following tools: " + toolsUsed.map((tool) => tool.name).join(", "),
 			});
 
@@ -161,15 +167,12 @@ export class AgentScratchpad {
 						files,
 						tools: toolsUsed,
 					},
-					toolValidator
+					toolValidator,
+					true
 				);
 
 				if (toolInput["tool"] === "finalAnswer") {
-					this.pushUpdate({
-						type: "finalAnswer",
-						body: "Final answer: " + toolInput["input"],
-					});
-
+					this.agent.callbacks?.onFinalAnswer?.(toolInput["input"]);
 					return toolInput["input"];
 				} else {
 					const tool = this.tools.find((tool) => tool.name === toolInput["tool"]);
@@ -190,7 +193,7 @@ export class AgentScratchpad {
 					}
 
 					this.pushUpdate({
-						type: "toolInput",
+						stepType: "toolInput",
 						body: `Calling tool ${tool.name} with input: "${toolInput["input"]}"`,
 					});
 
@@ -206,11 +209,13 @@ export class AgentScratchpad {
 					}
 
 					this.pushUpdate({
-						type: "toolInput",
+						stepType: "toolInput",
 						body: toolOutput,
 					});
 
 					if (isBlob(toolOutput)) {
+						this?.agent?.callbacks?.onFile?.(toolOutput, tool);
+
 						this.files["tool-" + tools] = toolOutput;
 						files = this.files;
 
@@ -225,6 +230,7 @@ export class AgentScratchpad {
 				}
 			}
 
+			// final answer
 			const finalAnswerValidator = (answer: string) => {
 				const json = JSON.parse(extractJSON(answer));
 
@@ -236,7 +242,7 @@ export class AgentScratchpad {
 			};
 
 			this.pushUpdate({
-				type: "finalAnswer",
+				stepType: "finalAnswer",
 				body: `Maximum tools reached, asking for final answer.`,
 			});
 
@@ -247,30 +253,25 @@ export class AgentScratchpad {
 					prompt,
 					files,
 				},
-				finalAnswerValidator
+				finalAnswerValidator,
+				true
 			);
 
-			this.pushUpdate({
-				type: "finalAnswer",
-				body: `Final answer: ${finalAnswer}`,
-			});
+			this.agent.callbacks?.onFinalAnswer?.(finalAnswer);
 
 			return finalAnswer;
 		} else {
-			this.pushUpdate({ type: "toolCheck", body: "A tool is not required." });
+			this.pushUpdate({ stepType: "toolCheck", body: "A tool is not required." });
 			this.appendScratchpad({ from: "user", content: prompt });
 			this.pushUpdate({
-				type: "finalAnswer",
+				stepType: "finalAnswer",
 				body: `Asking for final answer.`,
 			});
 
-			const answer = await this.agent.llm(this.formattedScratchpad);
+			const answer = await this.agent.LLMStream(this.formattedScratchpad);
 			this.appendScratchpad({ from: "assistant", content: answer });
-			this.pushUpdate({
-				type: "finalAnswer",
-				body: "Final answer: " + answer,
-			});
 
+			this.agent.callbacks?.onFinalAnswer?.(answer);
 			return answer;
 		}
 	}

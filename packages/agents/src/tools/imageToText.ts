@@ -2,8 +2,10 @@ import type { Tool } from "../types";
 
 export const imageToTextTool: Tool = {
 	name: "imageToText",
+	mime: "text/plain",
 	description:
 		"Caption an image. Useful when the user wants a text description out of an image. Keywords: Image to text, Image captioning, Describe image",
+
 	examples: [
 		{
 			prompt: "Describe the image",

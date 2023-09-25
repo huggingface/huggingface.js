@@ -1,4 +1,4 @@
-import type { HfInference } from "@huggingface/inference";
+import type { HfInference, TextGenerationStreamOutput } from "@huggingface/inference";
 import type { AgentScratchpad } from "./AgentScratchpad";
 
 export type Data = string | Blob;
@@ -7,6 +7,8 @@ export interface Tool {
 	name: string;
 	description: string;
 	examples: Array<Example>;
+	model?: string;
+	mime?: string;
 	call?: (input: Promise<Data> | Data, inference: HfInference) => Promise<Data>;
 }
 
@@ -19,13 +21,13 @@ export interface Example {
 
 export type StepType = "toolCheck" | "plan" | "toolInput" | "finalAnswer";
 export interface Update {
-	type: StepType;
+	stepType: StepType;
 	body: boolean | Data;
 }
 
 export type Inputs = Partial<Record<"audio" | "image" | "text", boolean>>;
 
-export type LLM = (prompt: string) => Promise<string>;
+export type LLM = (prompt: string) => AsyncGenerator<TextGenerationStreamOutput>;
 
 export interface Message {
 	from: "user" | "assistant";
