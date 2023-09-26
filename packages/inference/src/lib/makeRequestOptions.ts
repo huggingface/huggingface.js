@@ -18,8 +18,6 @@ export async function makeRequestOptions(
 		stream?: boolean;
 	},
 	options?: Options & {
-		/** For internal HF use, which is why it's not exposed in {@link Options} */
-		includeCredentials?: boolean;
 		/** When a model can be used for multiple tasks, and we want to run a non-default task */
 		forceTask?: string | InferenceTask;
 		/** To load default model if needed */
@@ -83,6 +81,21 @@ export async function makeRequestOptions(
 		return `${HF_INFERENCE_API_BASE_URL}/models/${model}`;
 	})();
 
+	// Let users configure credentials, or disable them all together (or keep default behavior).
+	// ---
+	// This used to be an internal property only and never exposed to users. This means that most usages will never define this value
+	// So in order to make this backwards compatible, if it's undefined we go to "same-origin" (default behaviour before).
+	// If it's a boolean and set to true then set to "include". If false, don't define credentials at all (useful for edge runtimes)
+	// Then finally, if it's a string, use it as-is.
+	let credentials: RequestCredentials | undefined;
+	if (typeof includeCredentials === "string") {
+		credentials = includeCredentials as RequestCredentials;
+	} else if (typeof includeCredentials === "boolean") {
+		credentials = includeCredentials ? "include" : undefined;
+	} else if (includeCredentials === undefined) {
+		credentials = "same-origin";
+	}
+
 	const info: RequestInit = {
 		headers,
 		method: "POST",
@@ -92,7 +105,7 @@ export async function makeRequestOptions(
 					...otherArgs,
 					options: options && otherOptions,
 			  }),
-		credentials: includeCredentials ? "include" : "same-origin",
+		credentials,
 	};
 
 	return { url, info };
