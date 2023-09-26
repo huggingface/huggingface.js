@@ -22,7 +22,7 @@ export interface Example {
 export type StepType = "toolCheck" | "plan" | "toolInput" | "finalAnswer";
 export interface Update {
 	stepType: StepType;
-	body: boolean | Data;
+	message: boolean | Data;
 }
 
 export type Inputs = Partial<Record<"audio" | "image" | "text", boolean>>;

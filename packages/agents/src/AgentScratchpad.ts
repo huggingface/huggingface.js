@@ -94,7 +94,7 @@ export class AgentScratchpad {
 		let files = this.files;
 
 		let useTool = false;
-		this.pushUpdate({ stepType: "toolCheck", body: "Checking for tool use" });
+		this.pushUpdate({ stepType: "toolCheck", message: "Checking for tool use" });
 		if (files.input) {
 			useTool = true; // if the user input a file, they always want a tool
 		} else if (this.tools.length === 0) {
@@ -122,8 +122,8 @@ export class AgentScratchpad {
 		}
 
 		if (useTool) {
-			this.pushUpdate({ stepType: "toolCheck", body: "A tool is required." });
-			this.pushUpdate({ stepType: "plan", body: "Asking for plan." });
+			this.pushUpdate({ stepType: "toolCheck", message: "A tool is required." });
+			this.pushUpdate({ stepType: "plan", message: "Asking for plan." });
 
 			const plan = await this.askTemplate(templateToolPlan, {
 				prompt,
@@ -135,7 +135,7 @@ export class AgentScratchpad {
 
 			this.pushUpdate({
 				stepType: "plan",
-				body: "Using the following tools: " + toolsUsed.map((tool) => tool.name).join(", "),
+				message: "Using the following tools: " + toolsUsed.map((tool) => tool.name).join(", "),
 			});
 
 			const toolValidator = (answer: string) => {
@@ -194,7 +194,7 @@ export class AgentScratchpad {
 
 					this.pushUpdate({
 						stepType: "toolInput",
-						body: `Calling tool ${tool.name} with input: "${toolInput["input"]}"`,
+						message: `Calling tool ${tool.name} with input: "${toolInput["input"]}"`,
 					});
 
 					let toolOutput = undefined;
@@ -208,10 +208,10 @@ export class AgentScratchpad {
 						}
 					}
 
-					this.pushUpdate({
-						stepType: "toolInput",
-						body: toolOutput,
-					});
+					// this.pushUpdate({
+					// 	stepType: "toolInput",
+					// 	message: toolOutput,
+					// });
 
 					if (isBlob(toolOutput)) {
 						this?.agent?.callbacks?.onFile?.(toolOutput, tool);
@@ -243,7 +243,7 @@ export class AgentScratchpad {
 
 			this.pushUpdate({
 				stepType: "finalAnswer",
-				body: `Maximum tools reached, asking for final answer.`,
+				message: `Maximum tools reached, asking for final answer.`,
 			});
 
 			// ask for final answer here
@@ -261,11 +261,11 @@ export class AgentScratchpad {
 
 			return finalAnswer;
 		} else {
-			this.pushUpdate({ stepType: "toolCheck", body: "A tool is not required." });
+			this.pushUpdate({ stepType: "toolCheck", message: "A tool is not required." });
 			this.appendScratchpad({ from: "user", content: prompt });
 			this.pushUpdate({
 				stepType: "finalAnswer",
-				body: `Asking for final answer.`,
+				message: `Asking for final answer.`,
 			});
 
 			const answer = await this.agent.LLMStream(this.formattedScratchpad);
