@@ -167,8 +167,7 @@ export class AgentScratchpad {
 						files,
 						tools: toolsUsed,
 					},
-					toolValidator,
-					true
+					toolValidator
 				);
 
 				if (toolInput["tool"] === "finalAnswer") {
