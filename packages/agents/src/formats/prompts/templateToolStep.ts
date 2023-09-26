@@ -29,22 +29,7 @@ You have access to the following files. Having a file means you can embed it in 
 \` - [[{{@key}}]]\` {{#unless @last}}\n{{/unless}}
 {{/each}}
 
-
-
 The prompt is: {{prompt}}
-
-If you do not need another tool, you can return the following format to give your final answer:
-
-\`\`\`json
-{
-	"tool": "finalAnswer",
-	"input" : "your final answer based on your knowledge of the world and prior tools used"
-}
-\`\`\`
-
-Only this format will be accepted as a final answer.
-
-If you are done with your plan, consider using \`finalAnswer\` tool to give your final answer based on your knowledge of the world and prior tools used.
 
 ONLY answer with ONE step at a time. Only the first JSON will be accepted.
 `);
