@@ -12,7 +12,7 @@ export class AgentScratchpad {
 	files: Files;
 	tools: Tool[];
 	maxTry = 3;
-	maxTools = 3;
+	maxTools = 1;
 
 	constructor({ agent, tools, inputFile }: { agent: HfChatAgent; tools: Tool[]; inputFile?: Data }) {
 		this.agent = agent;
@@ -59,6 +59,7 @@ export class AgentScratchpad {
 		this.appendScratchpad({ from: "user", content: templatePrompt });
 		const answer = await llm(this.formattedScratchpad);
 		this.appendScratchpad({ from: "assistant", content: answer });
+
 		return answer;
 	}
 
@@ -78,7 +79,7 @@ export class AgentScratchpad {
 				const validation = validator(answer);
 				return validation;
 			} catch (e) {
-				console.log(e);
+				console.error(e);
 				tries += 1;
 				if (retryTemplate === undefined || retryInputs === undefined) {
 					continue;
@@ -94,12 +95,12 @@ export class AgentScratchpad {
 		let files = this.files;
 
 		let useTool = false;
-		this.pushUpdate({ stepType: "toolCheck", message: "Checking for tool use" });
 		if (files.input) {
 			useTool = true; // if the user input a file, they always want a tool
 		} else if (this.tools.length === 0) {
 			useTool = false;
 		} else {
+			this.pushUpdate({ stepType: "toolCheck", message: "Checking for tool use" });
 			const toolCheckValidator = (answer: string) => {
 				if (answer.toLowerCase().trim().startsWith("yes")) {
 					return true;
@@ -123,20 +124,19 @@ export class AgentScratchpad {
 
 		if (useTool) {
 			this.pushUpdate({ stepType: "toolCheck", message: "A tool is required." });
-			this.pushUpdate({ stepType: "plan", message: "Asking for plan." });
 
-			const plan = await this.askTemplate(templateToolPlan, {
-				prompt,
-				files,
-				tools: this.tools,
-			});
+			// const plan = await this.askTemplate(templateToolPlan, {
+			// 	prompt,
+			// 	files,
+			// 	tools: this.tools,
+			// });
 
-			const toolsUsed = this.tools.filter((tool) => plan.includes(tool.name));
+			// const toolsUsed = this.tools.filter((tool) => plan.includes(tool.name));
 
-			this.pushUpdate({
-				stepType: "plan",
-				message: "Using the following tools: " + toolsUsed.map((tool) => tool.name).join(", "),
-			});
+			// this.pushUpdate({
+			// 	stepType: "plan",
+			// 	message: "Using the following tools: " + toolsUsed.map((tool) => tool.name).join(", "),
+			// });
 
 			const toolValidator = (answer: string) => {
 				const json = JSON.parse(extractJSON(answer));
@@ -165,7 +165,7 @@ export class AgentScratchpad {
 					{
 						prompt,
 						files,
-						tools: toolsUsed,
+						tools: this.tools,
 					},
 					toolValidator
 				);
@@ -207,11 +207,6 @@ export class AgentScratchpad {
 						}
 					}
 
-					// this.pushUpdate({
-					// 	stepType: "toolInput",
-					// 	message: toolOutput,
-					// });
-
 					if (isBlob(toolOutput)) {
 						this?.agent?.callbacks?.onFile?.(toolOutput, tool);
 
@@ -226,6 +221,10 @@ export class AgentScratchpad {
 						this.appendScratchpad({ from: "user", content: "The tool has returned the following: " + toolOutput });
 					}
 					tools += 1;
+					if (tool.name === "webSearch") {
+						// can only call websearch once
+						this.tools = this.tools.filter((tool) => tool.name !== "webSearch");
+					}
 				}
 			}
 
@@ -246,13 +245,12 @@ export class AgentScratchpad {
 			});
 
 			// ask for final answer here
-			const finalAnswer = await this.askTemplateWithRetry(
+			const finalAnswer = await this.askTemplate(
 				templateFinalAnswer,
 				{
 					prompt,
 					files,
 				},
-				finalAnswerValidator,
 				true
 			);
 
@@ -260,12 +258,7 @@ export class AgentScratchpad {
 
 			return finalAnswer;
 		} else {
-			this.pushUpdate({ stepType: "toolCheck", message: "A tool is not required." });
 			this.appendScratchpad({ from: "user", content: prompt });
-			this.pushUpdate({
-				stepType: "finalAnswer",
-				message: `Asking for final answer.`,
-			});
 
 			const answer = await this.agent.LLMStream(this.formattedScratchpad);
 			this.appendScratchpad({ from: "assistant", content: answer });

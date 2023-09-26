@@ -2,7 +2,7 @@ import type { Tool } from "../types";
 
 export const textToSpeechTool: Tool = {
 	name: "textToSpeech",
-	mime: "audio/wav",
+	mime: "audio/flac",
 	model: "espnet/kan-bayashi_ljspeech_vits",
 	description:
 		"This tool takes a text input and turns it into an audio file. Keywords: Text to speech, TTS, Speak out loud, Say out loud",

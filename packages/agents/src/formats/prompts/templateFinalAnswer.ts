@@ -8,23 +8,10 @@ export const templateFinalAnswer = compileTemplate<{
 
 {{#each files}}
 {{#if @first}}
-You have access to the following files. Having a file means you can embed it in your answer by wrapping it in double brackets like so : [[input]]
+The following files will be shown to the user. You don't have to do anything to display them to the user.
 {{/if}}
 \` - [[{{@key}}]]\` {{#unless @last}}\n{{/unless}}
 {{/each}}
 
-You can embed a file in your answer by wrapping it in double brackets like so : [[input]]
-
 Answer your best guess to the initial question: {{prompt}} 
-
-Use this format for your final answer:
-
-\`\`\`json
-{
-	"tool": "finalAnswer",
-	"input" : "your final answer based on your knowledge of the world and prior tools used"
-}
-\`\`\`
-
-Only this format will be accepted as a final answer.
 `);
