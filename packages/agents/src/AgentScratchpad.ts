@@ -1,5 +1,5 @@
 import { HfInference } from "@huggingface/inference";
-import { templateFinalAnswer, templateToolCheck, templateToolPlan, templateToolStep } from "./formats";
+import { templateFinalAnswer, templateToolCheck, templateToolStep } from "./formats";
 import type { HfChatAgent } from "./HfChatAgent";
 import type { Data, Files, Message, Tool, Update } from "./types";
 import { isBlob } from "./utils/files";
@@ -229,20 +229,20 @@ export class AgentScratchpad {
 			}
 
 			// final answer
-			const finalAnswerValidator = (answer: string) => {
-				const json = JSON.parse(extractJSON(answer));
+			// const finalAnswerValidator = (answer: string) => {
+			// 	const json = JSON.parse(extractJSON(answer));
 
-				if (json["tool"] !== "finalAnswer") {
-					throw new Error("The tool response must contain the tool name and input.");
-				}
+			// 	if (json["tool"] !== "finalAnswer") {
+			// 		throw new Error("The tool response must contain the tool name and input.");
+			// 	}
 
-				return json["input"];
-			};
+			// 	return json["input"];
+			// };
 
-			this.pushUpdate({
-				stepType: "finalAnswer",
-				message: `Maximum tools reached, asking for final answer.`,
-			});
+			// this.pushUpdate({
+			// 	stepType: "finalAnswer",
+			// 	message: `Maximum tools reached, asking for final answer.`,
+			// });
 
 			// ask for final answer here
 			const finalAnswer = await this.askTemplate(
