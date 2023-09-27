@@ -201,6 +201,7 @@ export class AgentScratchpad {
 						toolOutput = await tool.call(input, new HfInference(this.agent.accessToken ?? ""));
 					} catch (e: unknown) {
 						if (e instanceof Error) {
+							this?.agent?.callbacks?.onError?.(e);
 							toolOutput = "ERROR: " + e.message;
 						} else {
 							toolOutput = "Unknown error while calling the tool.";

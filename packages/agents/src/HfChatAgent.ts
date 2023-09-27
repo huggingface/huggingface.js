@@ -13,6 +13,7 @@ export interface Callbacks {
 	onFile?: (file: Blob, tool?: Tool) => void;
 	onStream?: (output: TextGenerationStreamOutput) => void;
 	onFinalAnswer?: (output: string) => void;
+	onError?: (error: Error) => void;
 }
 export interface HfAgentConfig {
 	llm: LLM;
