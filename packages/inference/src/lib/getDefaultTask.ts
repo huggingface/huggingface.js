@@ -11,7 +11,7 @@ const MAX_CACHE_ITEMS = 1000;
 export const HF_HUB_URL = "https://huggingface.co";
 
 export interface DefaultTaskOptions {
-	fetch?: typeof fetch
+	fetch?: typeof fetch;
 }
 
 /**
@@ -20,7 +20,11 @@ export interface DefaultTaskOptions {
  *
  * @returns The default task for the model, or `null` if it was impossible to get it
  */
-export async function getDefaultTask(model: string, accessToken: string | undefined, options?: DefaultTaskOptions): Promise<string | null> {
+export async function getDefaultTask(
+	model: string,
+	accessToken: string | undefined,
+	options?: DefaultTaskOptions
+): Promise<string | null> {
 	if (isUrl(model)) {
 		return null;
 	}
