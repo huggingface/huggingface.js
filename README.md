@@ -15,6 +15,15 @@ await inference.translation({
   inputs: 'My name is Wolfgang and I live in Berlin'
 })
 
+await hf.translation({
+  model: "facebook/nllb-200-distilled-600M",
+  inputs: "how is the weather like in Gaborone",
+  parameters : {
+    src_lang: "eng_Latn",
+    tgt_lang: "sot_Latn"
+  }
+})
+
 await inference.textToImage({
   model: 'stabilityai/stable-diffusion-2',
   inputs: 'award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]',
@@ -66,7 +75,7 @@ You can run our packages with vanilla JS, without any bundler, by using a CDN or
 
 ```html
 <script type="module">
-    import { HfInference } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@2.6.1/+esm';
+    import { HfInference } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@2.6.2/+esm';
     import { createRepo, commit, deleteRepo, listFiles } from "https://cdn.jsdelivr.net/npm/@huggingface/hub@0.8.4/+esm";
 </script>
 ```

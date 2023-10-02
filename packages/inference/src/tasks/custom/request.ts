@@ -7,8 +7,6 @@ import { makeRequestOptions } from "../../lib/makeRequestOptions";
 export async function request<T>(
 	args: RequestArgs,
 	options?: Options & {
-		/** For internal HF use, which is why it's not exposed in {@link Options} */
-		includeCredentials?: boolean;
 		/** When a model can be used for multiple tasks, and we want to run a non-default task */
 		task?: string | InferenceTask;
 		/** To load default model if needed */
