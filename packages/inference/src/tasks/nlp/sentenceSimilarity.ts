@@ -25,7 +25,7 @@ export async function sentenceSimilarity(
 	args: SentenceSimilarityArgs,
 	options?: Options
 ): Promise<SentenceSimilarityOutput> {
-	const defaultTask = args.model ? await getDefaultTask(args.model, args.accessToken) : undefined;
+	const defaultTask = args.model ? await getDefaultTask(args.model, args.accessToken, options) : undefined;
 	const res = await request<SentenceSimilarityOutput>(args, {
 		...options,
 		taskHint: "sentence-similarity",

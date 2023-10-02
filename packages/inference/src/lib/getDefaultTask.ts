@@ -10,13 +10,21 @@ const CACHE_DURATION = 10 * 60 * 1000;
 const MAX_CACHE_ITEMS = 1000;
 export const HF_HUB_URL = "https://huggingface.co";
 
+export interface DefaultTaskOptions {
+	fetch?: typeof fetch;
+}
+
 /**
  * Get the default task. Use a LRU cache of 1000 items with 10 minutes expiration
  * to avoid making too many calls to the HF hub.
  *
  * @returns The default task for the model, or `null` if it was impossible to get it
  */
-export async function getDefaultTask(model: string, accessToken: string | undefined): Promise<string | null> {
+export async function getDefaultTask(
+	model: string,
+	accessToken: string | undefined,
+	options?: DefaultTaskOptions
+): Promise<string | null> {
 	if (isUrl(model)) {
 		return null;
 	}
@@ -30,7 +38,7 @@ export async function getDefaultTask(model: string, accessToken: string | undefi
 	}
 
 	if (cachedTask === undefined) {
-		const modelTask = await fetch(`${HF_HUB_URL}/api/models/${model}?expand[]=pipeline_tag`, {
+		const modelTask = await (options?.fetch ?? fetch)(`${HF_HUB_URL}/api/models/${model}?expand[]=pipeline_tag`, {
 			headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
 		})
 			.then((resp) => resp.json())
