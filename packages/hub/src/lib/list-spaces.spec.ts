@@ -9,6 +9,7 @@ describe("listSpaces", () => {
 		for await (const entry of listSpaces({
 			search: { owner: "microsoft" },
 			hubUrl: "https://huggingface.co",
+			additionalFields: ["subdomain"],
 		})) {
 			if (entry.name !== "microsoft/visual_chatgpt") {
 				continue;
@@ -32,6 +33,7 @@ describe("listSpaces", () => {
 				private: false,
 				likes: 0,
 				sdk: "gradio",
+				subdomain: "microsoft-visual-chatgpt",
 				updatedAt: new Date(0),
 			},
 		]);
