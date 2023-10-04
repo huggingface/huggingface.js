@@ -29,7 +29,7 @@ export interface ApiSpaceInfo {
 	colorFrom: Color;
 	colorTo: Color;
 	pinned: boolean;
-	files: string[];
+	siblings: Array<{ rfilename: string }>;
 	sdk?: SpaceSdk;
 	runtime?: SpaceRuntime;
 	models?: string[];
