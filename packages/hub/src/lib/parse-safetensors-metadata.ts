@@ -97,7 +97,7 @@ async function parseSingleFile(
 		const header: SafetensorsFileHeader = await secondResp.json();
 		return header;
 	} catch (err) {
-		throw new SafetensorParseError(`FFailed to parse file ${path}: safetensors header is not valid JSON.`)
+		throw new SafetensorParseError(`Failed to parse file ${path}: safetensors header is not valid JSON.`)
 	}
 
 }
