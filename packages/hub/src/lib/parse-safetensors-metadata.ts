@@ -13,7 +13,7 @@ const INDEX_FILE = "model.safetensors.index.json";
 const PARALLEL_DOWNLOADS = 5;
 const MAX_HEADER_LENGTH = BigInt(25_000_000);
 
-class SafetensorParseError extends Error { }
+class SafetensorParseError extends Error {}
 
 type FileName = string;
 
@@ -83,7 +83,9 @@ async function parseSingleFile(
 		throw new SafetensorParseError(`Failed to parse file ${path}: safetensors header is malformed.`);
 	}
 	if (lengthOfHeader > MAX_HEADER_LENGTH) {
-		throw new SafetensorParseError(`Failed to parse file ${path}: safetensor header is too big. Maximum supported size is ${MAX_HEADER_LENGTH} bytes.`)
+		throw new SafetensorParseError(
+			`Failed to parse file ${path}: safetensor header is too big. Maximum supported size is ${MAX_HEADER_LENGTH} bytes.`
+		);
 	}
 
 	const secondResp = await downloadFile({ ...params, path, range: [8, 7 + Number(lengthOfHeader)] });
@@ -97,9 +99,8 @@ async function parseSingleFile(
 		const header: SafetensorsFileHeader = await secondResp.json();
 		return header;
 	} catch (err) {
-		throw new SafetensorParseError(`Failed to parse file ${path}: safetensors header is not valid JSON.`)
+		throw new SafetensorParseError(`Failed to parse file ${path}: safetensors header is not valid JSON.`);
 	}
-
 }
 
 async function parseShardedIndex(
