@@ -11,7 +11,7 @@ import { promisesQueue } from "../utils/promisesQueue";
 const SINGLE_FILE = "model.safetensors";
 const INDEX_FILE = "model.safetensors.index.json";
 const PARALLEL_DOWNLOADS = 5;
-const MAX_HEADER_LENGTH = BigInt(25_000_000);
+const MAX_HEADER_LENGTH = 25_000_000;
 
 class SafetensorParseError extends Error {}
 
@@ -79,7 +79,7 @@ async function parseSingleFile(
 	const bufLengthOfHeaderLE = await firstResp.arrayBuffer();
 	const lengthOfHeader = new DataView(bufLengthOfHeaderLE).getBigUint64(0, true);
 	// ^little-endian
-	if (lengthOfHeader <= BigInt(0)) {
+	if (lengthOfHeader <= 0) {
 		throw new SafetensorParseError(`Failed to parse file ${path}: safetensors header is malformed.`);
 	}
 	if (lengthOfHeader > MAX_HEADER_LENGTH) {
