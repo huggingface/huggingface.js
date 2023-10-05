@@ -11,6 +11,9 @@ import { promisesQueue } from "../utils/promisesQueue";
 const SINGLE_FILE = "model.safetensors";
 const INDEX_FILE = "model.safetensors.index.json";
 const PARALLEL_DOWNLOADS = 5;
+const MAX_HEADER_LENGTH = 25_000_000;
+
+class SafetensorParseError extends Error { }
 
 type FileName = string;
 
@@ -70,23 +73,33 @@ async function parseSingleFile(
 	});
 
 	if (!firstResp) {
-		throw new Error("Failed to download file: " + path);
+		throw new SafetensorParseError(`Failed to parse file ${path}: failed to fetch safetensors header length.`);
 	}
 
 	const bufLengthOfHeaderLE = await firstResp.arrayBuffer();
 	const lengthOfHeader = new DataView(bufLengthOfHeaderLE).getBigUint64(0, true);
 	// ^little-endian
+	if (lengthOfHeader <= 0) {
+		throw new SafetensorParseError(`Failed to parse file ${path}: safetensors header is malformed.`);
+	}
+	if (lengthOfHeader > MAX_HEADER_LENGTH) {
+		throw new SafetensorParseError(`Failed to parse file ${path}: safetensor header is too big. Maximum supported size is ${MAX_HEADER_LENGTH} bytes.`)
+	}
 
 	const secondResp = await downloadFile({ ...params, path, range: [8, 7 + Number(lengthOfHeader)] });
 
 	if (!secondResp) {
-		throw new Error("Failed to download file: " + path);
+		throw new SafetensorParseError(`Failed to parse file ${path}: failed to fetch safetensors header.`);
 	}
 
-	// no validation for now, we assume it's a valid FileHeader.
-	const header: SafetensorsFileHeader = await secondResp.json();
+	try {
+		// no validation for now, we assume it's a valid FileHeader.
+		const header: SafetensorsFileHeader = await secondResp.json();
+		return header;
+	} catch (err) {
+		throw new SafetensorParseError(`FFailed to parse file ${path}: safetensors header is not valid JSON.`)
+	}
 
-	return header;
 }
 
 async function parseShardedIndex(
@@ -108,7 +121,7 @@ async function parseShardedIndex(
 	});
 
 	if (!indexResp) {
-		throw new Error("Failed to download file: " + path);
+		throw new SafetensorParseError(`Failed to parse file ${path}: failed to fetch safetensors index.`);
 	}
 
 	// no validation for now, we assume it's a valid IndexJson.
