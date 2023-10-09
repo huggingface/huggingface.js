@@ -3,7 +3,7 @@ import type { CommitOutput, CommitParams, ContentSource } from "./commit";
 import { commit } from "./commit";
 
 export function uploadFile(params: {
-	credentials: Credentials;
+	credentials?: Credentials;
 	repo: CommitParams["repo"];
 	file: URL | File | { path: string; content: ContentSource };
 	commitTitle?: CommitParams["title"];
