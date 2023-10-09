@@ -57,7 +57,7 @@ export interface CommitParams {
 	description?: string;
 	repo: RepoDesignation;
 	operations: CommitOperation[];
-	credentials: Credentials;
+	credentials?: Credentials;
 	/** @default "main" */
 	branch?: string;
 	/**
@@ -147,7 +147,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 			{
 				method: "POST",
 				headers: {
-					Authorization: `Bearer ${params.credentials.accessToken}`,
+					...(params.credentials && { Authorization: `Bearer ${params.credentials.accessToken}` }),
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify(payload),
@@ -205,7 +205,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 			{
 				method: "POST",
 				headers: {
-					Authorization: `Bearer ${params.credentials.accessToken}`,
+					...(params.credentials && { Authorization: `Bearer ${params.credentials.accessToken}` }),
 					Accept: "application/vnd.git-lfs+json",
 					"Content-Type": "application/vnd.git-lfs+json",
 				},
@@ -339,7 +339,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 		{
 			method: "POST",
 			headers: {
-				Authorization: `Bearer ${params.credentials.accessToken}`,
+				...(params.credentials && { Authorization: `Bearer ${params.credentials.accessToken}` }),
 				"Content-Type": "application/x-ndjson",
 			},
 			body: [
