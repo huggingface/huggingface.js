@@ -11,7 +11,7 @@ export interface ApiDatasetInfo {
 	discussionsDisabled: boolean;
 	gated: false | "auto" | "manual";
 	gitalyUid: string;
-	lastAuthor: { email: string; user?: AuthorId };
+	lastAuthor: { email: string; user?: string };
 	lastModified: string; // date
 	likes: number;
 	likesRecent: number;
