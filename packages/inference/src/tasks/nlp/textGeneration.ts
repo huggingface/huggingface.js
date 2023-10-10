@@ -48,6 +48,10 @@ export type TextGenerationArgs = BaseArgs & {
 		 * (Default: None). Integer. The maximum number of tokens from the input.
 		 */
 		truncate?: number;
+		/**
+		 * (Default: []) List of strings. The model will stop generating text when one of the strings in the list is generated.
+		 * **/
+		stop_sequences?: string[];
 	};
 };
 
