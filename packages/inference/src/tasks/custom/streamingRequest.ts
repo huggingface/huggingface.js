@@ -66,6 +66,9 @@ export async function* streamingRequest<T>(
 			if (done) return;
 			onChunk(value);
 			for (const event of events) {
+				if (options?.signal?.aborted) {
+					throw new Error("Request aborted");
+				}
 				if (event.data.length > 0) {
 					const data = JSON.parse(event.data);
 					if (typeof data === "object" && data !== null && "error" in data) {

@@ -243,8 +243,26 @@ describe.concurrent(
 			});
 
 			await expect(response.next()).rejects.toThrow(
-				"Input validation error: `inputs` tokens + `max_new_tokens` must be <= 4096. Given: 17 `inputs` tokens and 10000 `max_new_tokens`"
+				"Input validation error: `inputs` tokens + `max_new_tokens` must be <= 2048. Given: 17 `inputs` tokens and 10000 `max_new_tokens`"
 			);
+		});
+
+		it("textGenerationStream - Abort", async () => {
+			const controller = new AbortController();
+			const response = hf.textGenerationStream(
+				{
+					model: "OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5",
+					inputs: "Write a short story about a robot that becomes sentient and takes over the world.",
+					parameters: {
+						max_new_tokens: 1000,
+					},
+				},
+				{ signal: controller.signal }
+			);
+			await expect(response.next()).resolves.toBeDefined();
+			await expect(response.next()).resolves.toBeDefined();
+			controller.abort();
+			await expect(response.next()).rejects.toThrow("Request aborted");
 		});
 
 		it("tokenClassification", async () => {

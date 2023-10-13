@@ -24,6 +24,10 @@ export interface Options {
 	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 	 */
 	fetch?: typeof fetch;
+	/**
+	 * Abort Controller signal to use for request interruption.
+	 */
+	signal?: AbortSignal;
 
 	/**
 	 * (Default: "same-origin"). String | Boolean. Credentials to use for the request. If this is a string, it will be passed straight on. If it's a boolean, true will be "include" and false will not send credentials at all.
