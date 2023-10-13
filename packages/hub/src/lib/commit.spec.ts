@@ -74,6 +74,8 @@ describe("commit", () => {
 						path: "README.md",
 					},
 				],
+				// To test web workers in the front-end
+				useWebWorkers: { minSize: 5_000 },
 			});
 
 			const fileContent = await downloadFile({ repo, path: "test.txt" });
@@ -120,7 +122,7 @@ size ${lfsContent.length}
 				credentials: { accessToken: TEST_ACCESS_TOKEN },
 			});
 		}
-	}, 30_000);
+	}, 60_000);
 
 	it("should commit a full repo from HF with web urls", async function () {
 		const repoName = `${TEST_USER}/TEST-${insecureRandomString()}`;

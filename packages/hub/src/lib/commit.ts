@@ -70,6 +70,12 @@ export interface CommitParams {
 	isPullRequest?: boolean;
 	hubUrl?: string;
 	/**
+	 * Whether to use web workers to compute SHA256 hashes.
+	 *
+	 * We load hash-wasm from a CDN inside the web worker. Not sure how to do otherwise and still have a "clean" bundle.
+	 */
+	useWebWorkers?: boolean | { minSize: number };
+	/**
 	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 	 */
 	fetch?: typeof fetch;
@@ -177,7 +183,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 
 		const shas = await promisesQueue(
 			operations.map((op) => async () => {
-				const sha = await sha256(op.content);
+				const sha = await sha256(op.content, { useWebWorker: params.useWebWorkers });
 				lfsShas.set(op.path, sha);
 				return sha;
 			}),

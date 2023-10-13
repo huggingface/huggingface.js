@@ -12,6 +12,7 @@ export function uploadFiles(params: {
 	isPullRequest?: CommitParams["isPullRequest"];
 	parentCommit?: CommitParams["parentCommit"];
 	fetch?: CommitParams["fetch"];
+	useWebWorkers?: CommitParams["useWebWorkers"];
 }): Promise<CommitOutput> {
 	return commit({
 		credentials: params.credentials,
@@ -28,5 +29,6 @@ export function uploadFiles(params: {
 		isPullRequest: params.isPullRequest,
 		parentCommit: params.parentCommit,
 		fetch: params.fetch,
+		useWebWorkers: params.useWebWorkers,
 	});
 }
