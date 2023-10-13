@@ -74,6 +74,8 @@ describe("commit", () => {
 						path: "README.md",
 					},
 				],
+				// To test web workers in the front-end
+				useWebWorkers: { minSize: 5_000 },
 			});
 
 			const fileContent = await downloadFile({ repo, path: "test.txt" });

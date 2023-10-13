@@ -30,8 +30,12 @@ self.addEventListener('message', async (event) => {
 /**
  * @returns hex-encoded sha
  */
-export async function sha256(buffer: Blob, opts?: { useWebWorker?: boolean }): Promise<string> {
-	if (buffer.size < 10_000_000 && globalThis.crypto?.subtle) {
+export async function sha256(buffer: Blob, opts?: { useWebWorker?: boolean | { minSize: number } }): Promise<string> {
+	const maxCryptoSize =
+		typeof opts?.useWebWorker === "object" && opts?.useWebWorker.minSize !== undefined && isFrontend
+			? opts.useWebWorker.minSize
+			: 10_000_000;
+	if (buffer.size < maxCryptoSize && globalThis.crypto?.subtle) {
 		return hexFromBytes(
 			new Uint8Array(
 				await globalThis.crypto.subtle.digest("SHA-256", buffer instanceof Blob ? await buffer.arrayBuffer() : buffer)
