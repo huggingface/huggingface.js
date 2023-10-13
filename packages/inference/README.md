@@ -190,7 +190,7 @@ await hf.imageToText({
 })
 
 await hf.imageToImage({
-  inputs: readFileSync("test/stormtrooper_depth.png"),
+  inputs: new Blob([readFileSync("test/stormtrooper_depth.png")]),
   parameters: {
     prompt: "elmo's lecture",
   },
