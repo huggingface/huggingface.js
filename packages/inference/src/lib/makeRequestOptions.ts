@@ -106,6 +106,7 @@ export async function makeRequestOptions(
 					options: options && otherOptions,
 			  }),
 		credentials,
+		signal: options?.signal,
 	};
 
 	return { url, info };

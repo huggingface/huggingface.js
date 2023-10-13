@@ -257,12 +257,12 @@ describe.concurrent(
 						max_new_tokens: 1000,
 					},
 				},
-				{ signal: controller.signal }
+				{ signal: controller.signal, use_cache: false }
 			);
 			await expect(response.next()).resolves.toBeDefined();
 			await expect(response.next()).resolves.toBeDefined();
 			controller.abort();
-			await expect(response.next()).rejects.toThrow("Request aborted");
+			await expect(response.next()).rejects.toThrow("The operation was aborted");
 		});
 
 		it("tokenClassification", async () => {
