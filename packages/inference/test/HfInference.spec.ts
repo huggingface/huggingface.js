@@ -252,12 +252,12 @@ describe.concurrent(
 			const response = hf.textGenerationStream(
 				{
 					model: "OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5",
-					inputs: "Write a short story about a robot that becomes sentient and takes over the world.",
+					inputs: "Write an essay about Sartre's philosophy.",
 					parameters: {
-						max_new_tokens: 1000,
+						max_new_tokens: 100,
 					},
 				},
-				{ signal: controller.signal, use_cache: false }
+				{ signal: controller.signal }
 			);
 			await expect(response.next()).resolves.toBeDefined();
 			await expect(response.next()).resolves.toBeDefined();
