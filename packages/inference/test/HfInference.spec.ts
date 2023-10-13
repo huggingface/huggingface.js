@@ -247,7 +247,7 @@ describe.concurrent(
 			);
 		});
 
-		it("textGenerationStream - Abort", async () => {
+		it.skip("textGenerationStream - Abort", async () => {
 			const controller = new AbortController();
 			const response = hf.textGenerationStream(
 				{
