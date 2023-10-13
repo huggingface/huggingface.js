@@ -247,6 +247,24 @@ describe.concurrent(
 			);
 		});
 
+		it.skip("textGenerationStream - Abort", async () => {
+			const controller = new AbortController();
+			const response = hf.textGenerationStream(
+				{
+					model: "OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5",
+					inputs: "Write an essay about Sartre's philosophy.",
+					parameters: {
+						max_new_tokens: 100,
+					},
+				},
+				{ signal: controller.signal }
+			);
+			await expect(response.next()).resolves.toBeDefined();
+			await expect(response.next()).resolves.toBeDefined();
+			controller.abort();
+			await expect(response.next()).rejects.toThrow("The operation was aborted");
+		});
+
 		it("tokenClassification", async () => {
 			expect(
 				await hf.tokenClassification({
