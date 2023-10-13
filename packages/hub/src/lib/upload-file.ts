@@ -13,6 +13,7 @@ export function uploadFile(params: {
 	isPullRequest?: CommitParams["isPullRequest"];
 	parentCommit?: CommitParams["parentCommit"];
 	fetch?: CommitParams["fetch"];
+	useWebWorkers?: CommitParams["useWebWorkers"];
 }): Promise<CommitOutput> {
 	const path =
 		params.file instanceof URL
@@ -38,5 +39,6 @@ export function uploadFile(params: {
 		isPullRequest: params.isPullRequest,
 		parentCommit: params.parentCommit,
 		fetch: params.fetch,
+		useWebWorkers: params.useWebWorkers,
 	});
 }
