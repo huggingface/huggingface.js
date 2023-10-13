@@ -243,7 +243,7 @@ describe.concurrent(
 			});
 
 			await expect(response.next()).rejects.toThrow(
-				"Input validation error: `inputs` tokens + `max_new_tokens` must be <= 2048. Given: 17 `inputs` tokens and 10000 `max_new_tokens`"
+				"Input validation error: `inputs` tokens + `max_new_tokens` must be <= 4096. Given: 17 `inputs` tokens and 10000 `max_new_tokens`"
 			);
 		});
 
