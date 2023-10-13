@@ -51,12 +51,18 @@ export async function sha256(buffer: Blob, opts?: { useWebWorker?: boolean | { m
 					const worker = new Worker(URL.createObjectURL(new Blob([webWorkerCode])));
 					worker.addEventListener("message", (event) => {
 						if (event.data.sha256) {
-							resolve(event.data.sha256);
+							return resolve(event.data.sha256);
 						}
+						if (event.data.progress) {
+							// console.log("Progress", event.data.progress);
+							return;
+						}
+						reject(event);
 					});
 					worker.addEventListener("error", (event) => {
 						reject(event.error);
 					});
+					worker.postMessage({ file: buffer });
 				});
 			} catch (err) {
 				console.warn("Failed to use web worker for sha256", err);
