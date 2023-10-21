@@ -16,9 +16,9 @@ yarn add @huggingface/hub
 
 ```ts
 // esm.sh
-import { HfInference } from "https://esm.sh/@huggingface/hub"
+import { HfHub } from "https://esm.sh/@huggingface/hub"
 // or npm:
-import { HfInference } from "npm:@huggingface/hub"
+import { HfHub } from "npm:@huggingface/hub"
 ```
 
 Check out the [full documentation](https://huggingface.co/docs/huggingface.js/hub/README).
