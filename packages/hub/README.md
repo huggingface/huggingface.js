@@ -16,9 +16,9 @@ yarn add @huggingface/hub
 
 ```ts
 // esm.sh
-import { HfHub } from "https://esm.sh/@huggingface/hub"
+import { uploadFiles, listModels } from "https://esm.sh/@huggingface/hub"
 // or npm:
-import { HfHub } from "npm:@huggingface/hub"
+import { uploadFiles, listModels } from "npm:@huggingface/hub"
 ```
 
 Check out the [full documentation](https://huggingface.co/docs/huggingface.js/hub/README).
