@@ -12,30 +12,34 @@ export async function* eventToGenerator<YieldType, ReturnType>(
 		reject = rej;
 	});
 
-	const res = cb(
-		(y) => {
-			const res = resolve;
-			p = new Promise<{ done: true; value: ReturnType } | { done: false; value: YieldType }>((res2, rej2) => {
-				resolve = res2;
-				reject = rej2;
-			});
-			res({ done: false, value: y });
-		},
-		(r) => {
-			const res = resolve;
-			p = new Promise<{ done: true; value: ReturnType } | { done: false; value: YieldType }>((res2, rej2) => {
-				resolve = res2;
-				reject = rej2;
-			});
-			res({ done: true, value: r });
-		},
-		(err) => reject(err)
-	);
+	const callbackRes = Promise.resolve()
+		.then(() =>
+			cb(
+				(y) => {
+					const res = resolve;
+					p = new Promise<{ done: true; value: ReturnType } | { done: false; value: YieldType }>((res2, rej2) => {
+						resolve = res2;
+						reject = rej2;
+					});
+					res({ done: false, value: y });
+				},
+				(r) => {
+					const res = resolve;
+					p = new Promise<{ done: true; value: ReturnType } | { done: false; value: YieldType }>((res2, rej2) => {
+						resolve = res2;
+						reject = rej2;
+					});
+					res({ done: true, value: r });
+				},
+				(err) => reject(err)
+			)
+		)
+		.catch((err) => reject(err));
 
 	while (1) {
 		const result = await p;
 		if (result.done) {
-			await res; // Clean up, may be removed in the future
+			await callbackRes; // Clean up, may be removed in the future
 			return result.value;
 		}
 		yield result.value;
