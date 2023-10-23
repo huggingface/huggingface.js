@@ -102,7 +102,7 @@ function isFileOperation(op: CommitOperation): op is CommitBlob {
 
 type CommitProgressEvent =
 	| {
-			event: "phaseChange";
+			event: "phase";
 			phase: "preuploading" | "uploadingLargeFiles" | "committing";
 	  }
 	| {
@@ -124,7 +124,7 @@ type CommitProgressEvent =
 async function* commitIter(params: CommitParams): AsyncGenerator<CommitProgressEvent, CommitOutput> {
 	checkCredentials(params.credentials);
 	const repoId = toRepoId(params.repo);
-	yield { event: "phaseChange", phase: "preuploading" };
+	yield { event: "phase", phase: "preuploading" };
 
 	const lfsShas = new Map<string, string | null>();
 
@@ -189,7 +189,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<CommitProgressE
 		}
 	}
 
-	yield { event: "phaseChange", phase: "uploadingLargeFiles" };
+	yield { event: "phase", phase: "uploadingLargeFiles" };
 
 	for (const operations of chunk(
 		allOperations.filter(isFileOperation).filter((op) => lfsShas.has(op.path)),
@@ -197,8 +197,13 @@ async function* commitIter(params: CommitParams): AsyncGenerator<CommitProgressE
 	)) {
 		const shas = await promisesQueue(
 			operations.map((op) => async () => {
-				const sha = await sha256(op.content, { useWebWorker: params.useWebWorkers });
-				lfsShas.set(op.path, sha);
+				const iterator = sha256(op.content, { useWebWorker: params.useWebWorkers });
+				let res = await iterator.next();
+				while (!res.done) {
+					res = await iterator.next();
+				}
+				const sha = res.value;
+				lfsShas.set(op.path, res.value);
 				return sha;
 			}),
 			CONCURRENT_SHAS
@@ -350,7 +355,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<CommitProgressE
 		);
 	}
 
-	yield { event: "phaseChange", phase: "committing" };
+	yield { event: "phase", phase: "committing" };
 
 	const res = await (params.fetch ?? fetch)(
 		`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/commit/${encodeURIComponent(

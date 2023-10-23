@@ -29,8 +29,12 @@ self.addEventListener('message', async (event) => {
 
 /**
  * @returns hex-encoded sha
+ * @yields progress (0-1)
  */
-export async function sha256(buffer: Blob, opts?: { useWebWorker?: boolean | { minSize: number } }): Promise<string> {
+export async function* sha256(
+	buffer: Blob,
+	opts?: { useWebWorker?: boolean | { minSize: number } }
+): AsyncGenerator<number, string> {
 	const maxCryptoSize =
 		typeof opts?.useWebWorker === "object" && opts?.useWebWorker.minSize !== undefined && isFrontend
 			? opts.useWebWorker.minSize
@@ -46,24 +50,41 @@ export async function sha256(buffer: Blob, opts?: { useWebWorker?: boolean | { m
 	if (isFrontend) {
 		if (opts?.useWebWorker) {
 			try {
-				return new Promise((resolve, reject) => {
-					// Todo: Maybe pool workers
-					const worker = new Worker(URL.createObjectURL(new Blob([webWorkerCode])));
-					worker.addEventListener("message", (event) => {
-						if (event.data.sha256) {
-							return resolve(event.data.sha256);
-						}
-						if (event.data.progress) {
-							// console.log("Progress", event.data.progress);
-							return;
-						}
-						reject(event);
-					});
-					worker.addEventListener("error", (event) => {
-						reject(event.error);
-					});
-					worker.postMessage({ file: buffer });
+				let resolve: (value: string | number | PromiseLike<string | number>) => void;
+				let reject: (reason?: unknown) => void;
+				let p = new Promise<string | number>((res, rej) => {
+					resolve = res;
+					reject = rej;
 				});
+				// Todo: Maybe pool workers
+				const worker = new Worker(URL.createObjectURL(new Blob([webWorkerCode])));
+				worker.addEventListener("message", (event) => {
+					const res = resolve;
+					const rej = reject;
+					p = new Promise<string | number>((res2, rej2) => {
+						resolve = res2;
+						reject = rej2;
+					});
+					if (event.data.sha256) {
+						return res(event.data.sha256);
+					}
+					if (event.data.progress) {
+						// console.log("Progress", event.data.progress);
+						return res(event.data.progress);
+					}
+					rej(event);
+				});
+				worker.addEventListener("error", (event) => {
+					reject(event.error);
+				});
+				worker.postMessage({ file: buffer });
+				while (1) {
+					const result = await p;
+					if (typeof result === "string") {
+						return result;
+					}
+					yield result;
+				}
 			} catch (err) {
 				console.warn("Failed to use web worker for sha256", err);
 			}
