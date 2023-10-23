@@ -195,19 +195,55 @@ async function* commitIter(params: CommitParams): AsyncGenerator<CommitProgressE
 		allOperations.filter(isFileOperation).filter((op) => lfsShas.has(op.path)),
 		100
 	)) {
-		const shas = await promisesQueue(
+		let resolve: (
+			value: { type: "fileProgress"; path: string; progress: number } | { type: "end"; shas: string[] }
+		) => void;
+		let shas: string[] = [];
+		let reject: (reason?: unknown) => void;
+		let p = new Promise<{ type: "fileProgress"; path: string; progress: number } | { type: "end"; shas: string[] }>(
+			(res, rej) => {
+				resolve = res;
+				reject = rej;
+			}
+		);
+
+		promisesQueue(
 			operations.map((op) => async () => {
 				const iterator = sha256(op.content, { useWebWorker: params.useWebWorkers });
-				let res = await iterator.next();
-				while (!res.done) {
+				let res: IteratorResult<number, string>;
+				do {
 					res = await iterator.next();
-				}
+					const progress = res.done ? 1 : res.value;
+					resolve({ type: "fileProgress", path: op.path, progress });
+					p = new Promise<{ type: "fileProgress"; path: string; progress: number } | { type: "end"; shas: string[] }>(
+						(res2, rej2) => {
+							resolve = res2;
+							reject = rej2;
+						}
+					);
+				} while (!res.done);
 				const sha = res.value;
 				lfsShas.set(op.path, res.value);
 				return sha;
 			}),
 			CONCURRENT_SHAS
+		).then(
+			(_shas) => (shas = _shas),
+			(err) => reject(err)
 		);
+
+		while (1) {
+			const result = await p;
+			if (result.type === "end") {
+				break;
+			}
+			yield {
+				event: "fileProgress",
+				path: result.path,
+				progress: result.progress,
+				type: "hashing",
+			};
+		}
 
 		const payload: ApiLfsBatchRequest = {
 			operation: "upload",
