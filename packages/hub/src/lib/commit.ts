@@ -196,7 +196,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<CommitProgressE
 		allOperations.filter(isFileOperation).filter((op) => lfsShas.has(op.path)),
 		100
 	)) {
-		const iterator = eventToGenerator<
+		const shas = yield* eventToGenerator<
 			{ event: "fileProgress"; type: "hashing"; path: string; progress: number },
 			string[]
 		>((yieldCallback, returnCallback, rejectCallack) => {
@@ -216,8 +216,6 @@ async function* commitIter(params: CommitParams): AsyncGenerator<CommitProgressE
 				CONCURRENT_SHAS
 			).then(returnCallback, rejectCallack);
 		});
-
-		const shas = yield* iterator;
 
 		const payload: ApiLfsBatchRequest = {
 			operation: "upload",
