@@ -101,7 +101,7 @@ function isFileOperation(op: CommitOperation): op is CommitBlob {
 	return ret;
 }
 
-type CommitProgressEvent =
+export type CommitProgressEvent =
 	| {
 			event: "phase";
 			phase: "preuploading" | "uploadingLargeFiles" | "committing";
@@ -122,7 +122,7 @@ type CommitProgressEvent =
  *
  * Can be exposed later to offer fine-tuned progress info
  */
-async function* commitIter(params: CommitParams): AsyncGenerator<CommitProgressEvent, CommitOutput> {
+export async function* commitIter(params: CommitParams): AsyncGenerator<CommitProgressEvent, CommitOutput> {
 	checkCredentials(params.credentials);
 	const repoId = toRepoId(params.repo);
 	yield { event: "phase", phase: "preuploading" };
