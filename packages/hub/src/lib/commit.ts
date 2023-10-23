@@ -318,8 +318,16 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 									method: "PUT",
 									/** Unfortunately, browsers don't support our inherited version of Blob in fetch calls */
 									body: slice instanceof WebBlob && isFrontend ? await slice.arrayBuffer() : slice,
-									// eslint-disable-next-line @typescript-eslint/no-explicit-any
-									...({ progressHint: { file: op.path, part: index, numParts: parts.length } } as any),
+									...({
+										progressHint: {
+											path: op.path,
+											part: index,
+											numParts: parts.length,
+											progressCallback: (progress: number) =>
+												yieldCallback({ event: "fileProgress", path: op.path, progress, type: "uploading" }),
+										},
+										// eslint-disable-next-line @typescript-eslint/no-explicit-any
+									} as any),
 								});
 
 								if (!res.ok) {
@@ -374,8 +382,19 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 							},
 							/** Unfortunately, browsers don't support our inherited version of Blob in fetch calls */
 							body: content instanceof WebBlob && isFrontend ? await content.arrayBuffer() : content,
-							// eslint-disable-next-line @typescript-eslint/no-explicit-any
-							...({ progressHint: { file: op.path } } as any),
+							...({
+								progressHint: {
+									path: op.path,
+									progressCallback: (progress: number) =>
+										yieldCallback({
+											event: "fileProgress",
+											path: op.path,
+											progress,
+											type: "uploading",
+										}),
+								},
+								// eslint-disable-next-line @typescript-eslint/no-explicit-any
+							} as any),
 						});
 
 						if (!res.ok) {
