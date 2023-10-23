@@ -100,15 +100,31 @@ function isFileOperation(op: CommitOperation): op is CommitBlob {
 	return ret;
 }
 
+type CommitProgressEvent =
+	| {
+			event: "phaseChange";
+			phase: "preuploading" | "uploadingLargeFiles" | "committing";
+	  }
+	| {
+			event: "progress";
+			progress: number;
+	  }
+	| {
+			event: "fileProgress";
+			path: string;
+			progress: number;
+			type: "hashing" | "uploading";
+	  };
+
 /**
  * Internal function for now, used by commit.
  *
  * Can be exposed later to offer fine-tuned progress info
  */
-async function* commitIter(params: CommitParams): AsyncGenerator<unknown, CommitOutput> {
+async function* commitIter(params: CommitParams): AsyncGenerator<CommitProgressEvent, CommitOutput> {
 	checkCredentials(params.credentials);
 	const repoId = toRepoId(params.repo);
-	yield "preuploading";
+	yield { event: "phaseChange", phase: "preuploading" };
 
 	const lfsShas = new Map<string, string | null>();
 
@@ -173,14 +189,12 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 		}
 	}
 
-	yield "uploading to LFS";
+	yield { event: "phaseChange", phase: "uploadingLargeFiles" };
 
 	for (const operations of chunk(
 		allOperations.filter(isFileOperation).filter((op) => lfsShas.has(op.path)),
 		100
 	)) {
-		yield `hashing ${operations.length} files`;
-
 		const shas = await promisesQueue(
 			operations.map((op) => async () => {
 				const sha = await sha256(op.content, { useWebWorker: params.useWebWorkers });
@@ -336,7 +350,7 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 		);
 	}
 
-	yield "committing";
+	yield { event: "phaseChange", phase: "committing" };
 
 	const res = await (params.fetch ?? fetch)(
 		`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/commit/${encodeURIComponent(
