@@ -1,4 +1,5 @@
 import { isFrontend } from "../../../shared";
+import { eventToGenerator } from "./eventToGenerator";
 import { hexFromBytes } from "./hexFromBytes";
 
 const webWorkerCode = `
@@ -51,41 +52,23 @@ export async function* sha256(
 	if (isFrontend) {
 		if (opts?.useWebWorker) {
 			try {
-				let resolve: (value: string | number | PromiseLike<string | number>) => void;
-				let reject: (reason?: unknown) => void;
-				let p = new Promise<string | number>((res, rej) => {
-					resolve = res;
-					reject = rej;
-				});
-				// Todo: Maybe pool workers
-				const worker = new Worker(URL.createObjectURL(new Blob([webWorkerCode])));
-				worker.addEventListener("message", (event) => {
-					const res = resolve;
-					const rej = reject;
-					p = new Promise<string | number>((res2, rej2) => {
-						resolve = res2;
-						reject = rej2;
+				return yield* eventToGenerator<number, string>((yieldCallback, returnCallback, rejectCallack) => {
+					// Todo: Maybe pool workers
+					const worker = new Worker(URL.createObjectURL(new Blob([webWorkerCode])));
+					worker.addEventListener("message", (event) => {
+						if (event.data.sha256) {
+							returnCallback(event.data.sha256);
+						} else if (event.data.progress) {
+							yieldCallback(event.data.progress);
+						} else {
+							rejectCallack(event);
+						}
 					});
-					if (event.data.sha256) {
-						return res(event.data.sha256);
-					}
-					if (event.data.progress) {
-						// console.log("Progress", event.data.progress);
-						return res(event.data.progress);
-					}
-					rej(event);
+					worker.addEventListener("error", (event) => {
+						rejectCallack(event.error);
+					});
+					worker.postMessage({ file: buffer });
 				});
-				worker.addEventListener("error", (event) => {
-					reject(event.error);
-				});
-				worker.postMessage({ file: buffer });
-				while (1) {
-					const result = await p;
-					if (typeof result === "string") {
-						return result;
-					}
-					yield result;
-				}
 			} catch (err) {
 				console.warn("Failed to use web worker for sha256", err);
 			}
@@ -116,17 +99,7 @@ export async function* sha256(
 		cryptoModule = await import("./sha256-node");
 	}
 
-	const iterator = cryptoModule.sha256Node(buffer);
-
-	while (true) {
-		const { done, value } = await iterator.next();
-
-		if (done) {
-			return value;
-		}
-
-		yield value;
-	}
+	return yield* cryptoModule.sha256Node(buffer);
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
