@@ -14,6 +14,7 @@ self.addEventListener('message', async (event) => {
 	const reader = file.stream().getReader();
 	const total = file.size;
 	let bytesDone = 0;
+	postMessage({ progress: 0 });
 	while (true) {
 		const { done, value } = await reader.read();
 		if (done) {
@@ -115,7 +116,17 @@ export async function* sha256(
 		cryptoModule = await import("./sha256-node");
 	}
 
-	return cryptoModule.sha256Node(buffer);
+	const iterator = cryptoModule.sha256Node(buffer);
+
+	while (true) {
+		const { done, value } = await iterator.next();
+
+		if (done) {
+			return value;
+		}
+
+		yield value;
+	}
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
