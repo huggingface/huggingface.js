@@ -4,13 +4,8 @@ import { commitIter } from "./commit";
 const multipartUploadTracking = new WeakMap<
 	(progress: number) => void,
 	{
-		paths: Record<
-			string,
-			{
-				numParts: number;
-				partsProgress: Record<number, number>;
-			}
-		>;
+		numParts: number;
+		partsProgress: Record<number, number>;
 	}
 >();
 
@@ -67,7 +62,6 @@ export async function* uploadFilesWithProgress(params: {
 			}
 
 			const progressHint = init.progressHint as {
-				path: string;
 				progressCallback: (progress: number) => void;
 			} & (Record<string, never> | { part: number; numParts: number });
 			const progressCallback = init.progressCallback as (progress: number) => void;
@@ -79,20 +73,15 @@ export async function* uploadFilesWithProgress(params: {
 					if (progressHint.part !== undefined) {
 						let tracking = multipartUploadTracking.get(progressCallback);
 						if (!tracking) {
-							tracking = { paths: {} };
+							tracking = { numParts: progressHint.numParts, partsProgress: {} };
 							multipartUploadTracking.set(progressCallback, tracking);
 						}
-						const path = progressHint.path;
-						if (!tracking.paths[path]) {
-							tracking.paths[path] = { numParts: progressHint.numParts, partsProgress: {} };
-						}
-						const pathTracking = tracking.paths[path];
-						pathTracking.partsProgress[progressHint.part] = event.loaded / event.total;
+						tracking.partsProgress[progressHint.part] = event.loaded / event.total;
 						let totalProgress = 0;
-						for (const partProgress of Object.values(pathTracking.partsProgress)) {
+						for (const partProgress of Object.values(tracking.partsProgress)) {
 							totalProgress += partProgress;
 						}
-						progressCallback(totalProgress / pathTracking.numParts);
+						progressCallback(totalProgress / tracking.numParts);
 					} else {
 						progressCallback(event.loaded / event.total);
 					}
