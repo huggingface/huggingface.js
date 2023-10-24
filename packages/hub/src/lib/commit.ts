@@ -423,65 +423,87 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 	yield { event: "phase", phase: "committing" };
 
-	const res = await (params.fetch ?? fetch)(
-		`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/commit/${encodeURIComponent(
-			params.branch ?? "main"
-		)}` + (params.isPullRequest ? "?create_pr=1" : ""),
-		{
-			method: "POST",
-			headers: {
-				...(params.credentials && { Authorization: `Bearer ${params.credentials.accessToken}` }),
-				"Content-Type": "application/x-ndjson",
-			},
-			body: [
+	return yield* eventToGenerator<CommitProgressEvent, CommitOutput>(
+		async (yieldCallback, returnCallback, rejectCallback) =>
+			(params.fetch ?? fetch)(
+				`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/commit/${encodeURIComponent(
+					params.branch ?? "main"
+				)}` + (params.isPullRequest ? "?create_pr=1" : ""),
 				{
-					key: "header",
-					value: {
-						summary: params.title,
-						description: params.description,
-						parentCommit: params.parentCommit,
-					} satisfies ApiCommitHeader,
-				},
-				...((await Promise.all(
-					allOperations.map((operation) => {
-						if (isFileOperation(operation)) {
-							const sha = lfsShas.get(operation.path);
-							if (sha) {
-								return {
-									key: "lfsFile",
-									value: {
-										path: operation.path,
-										algo: "sha256",
-										size: operation.content.size,
-										oid: sha,
-									} satisfies ApiCommitLfsFile,
-								};
-							}
-						}
+					method: "POST",
+					headers: {
+						...(params.credentials && { Authorization: `Bearer ${params.credentials.accessToken}` }),
+						"Content-Type": "application/x-ndjson",
+					},
+					body: [
+						{
+							key: "header",
+							value: {
+								summary: params.title,
+								description: params.description,
+								parentCommit: params.parentCommit,
+							} satisfies ApiCommitHeader,
+						},
+						...((await Promise.all(
+							allOperations.map((operation) => {
+								if (isFileOperation(operation)) {
+									const sha = lfsShas.get(operation.path);
+									if (sha) {
+										return {
+											key: "lfsFile",
+											value: {
+												path: operation.path,
+												algo: "sha256",
+												size: operation.content.size,
+												oid: sha,
+											} satisfies ApiCommitLfsFile,
+										};
+									}
+								}
 
-						return convertOperationToNdJson(operation);
-					})
-				)) satisfies ApiCommitOperation[]),
-			]
-				.map((x) => JSON.stringify(x))
-				.join("\n"),
-		}
+								return convertOperationToNdJson(operation);
+							})
+						)) satisfies ApiCommitOperation[]),
+					]
+						.map((x) => JSON.stringify(x))
+						.join("\n"),
+					...({
+						progressHint: {
+							progressCallback: (progress: number) => {
+								for (const op of allOperations) {
+									if (isFileOperation(op) && !lfsShas.has(op.path)) {
+										yieldCallback({
+											event: "fileProgress",
+											path: op.path,
+											progress,
+											type: "uploading",
+										});
+									}
+								}
+							},
+						},
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					} as any),
+				}
+			)
+				.then(async (res) => {
+					if (!res.ok) {
+						throw await createApiError(res);
+					}
+
+					const json = await res.json();
+
+					returnCallback({
+						pullRequestUrl: json.pullRequestUrl,
+						commit: {
+							oid: json.commitOid,
+							url: json.commitUrl,
+						},
+						hookOutput: json.hookOutput,
+					});
+				})
+				.catch(rejectCallback)
 	);
-
-	if (!res.ok) {
-		throw await createApiError(res);
-	}
-
-	const json = await res.json();
-
-	return {
-		pullRequestUrl: json.pullRequestUrl,
-		commit: {
-			oid: json.commitOid,
-			url: json.commitUrl,
-		},
-		hookOutput: json.hookOutput,
-	};
 }
 
 export async function commit(params: CommitParams): Promise<CommitOutput> {
