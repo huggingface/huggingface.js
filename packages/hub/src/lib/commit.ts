@@ -309,6 +309,10 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 							})),
 						};
 
+						// Defined here so that it's not redefined at each iteration (and the caller can tell it's for the same file)
+						const progressCallback = (progress: number) =>
+							yieldCallback({ event: "fileProgress", path: op.path, progress, type: "uploading" });
+
 						await promisesQueueStreaming(
 							parts.map((part) => async () => {
 								const index = parseInt(part) - 1;
@@ -323,8 +327,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 											path: op.path,
 											part: index,
 											numParts: parts.length,
-											progressCallback: (progress: number) =>
-												yieldCallback({ event: "fileProgress", path: op.path, progress, type: "uploading" }),
+											progressCallback,
 										},
 										// eslint-disable-next-line @typescript-eslint/no-explicit-any
 									} as any),
