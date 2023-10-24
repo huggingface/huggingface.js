@@ -15,7 +15,6 @@ self.addEventListener('message', async (event) => {
 	const reader = file.stream().getReader();
 	const total = file.size;
 	let bytesDone = 0;
-	postMessage({ progress: 0 });
 	while (true) {
 		const { done, value } = await reader.read();
 		if (done) {
@@ -37,16 +36,22 @@ export async function* sha256(
 	buffer: Blob,
 	opts?: { useWebWorker?: boolean | { minSize: number } }
 ): AsyncGenerator<number, string> {
+	yield 0;
+
 	const maxCryptoSize =
-		typeof opts?.useWebWorker === "object" && opts?.useWebWorker.minSize !== undefined && isFrontend
+		typeof opts?.useWebWorker === "object" && opts?.useWebWorker.minSize !== undefined
 			? opts.useWebWorker.minSize
 			: 10_000_000;
 	if (buffer.size < maxCryptoSize && globalThis.crypto?.subtle) {
-		return hexFromBytes(
+		const res = hexFromBytes(
 			new Uint8Array(
 				await globalThis.crypto.subtle.digest("SHA-256", buffer instanceof Blob ? await buffer.arrayBuffer() : buffer)
 			)
 		);
+
+		yield 1;
+
+		return res;
 	}
 
 	if (isFrontend) {
@@ -81,6 +86,8 @@ export async function* sha256(
 		sha256.init();
 
 		const reader = buffer.stream().getReader();
+		const total = buffer.size;
+		let bytesDone = 0;
 
 		while (true) {
 			const { done, value } = await reader.read();
@@ -90,6 +97,8 @@ export async function* sha256(
 			}
 
 			sha256.update(value);
+			bytesDone += value.length;
+			yield bytesDone / total;
 		}
 
 		return sha256.digest("hex");

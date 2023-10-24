@@ -9,8 +9,6 @@ export async function* sha256Node(buffer: ArrayBuffer | Blob): AsyncGenerator<nu
 	const readable =
 		buffer instanceof Blob ? Readable.fromWeb(buffer.stream() as ReadableStream) : Readable.from(Buffer.from(buffer));
 
-	yield 0;
-
 	for await (const buffer of readable) {
 		sha256Stream.update(buffer);
 		done += buffer.length;

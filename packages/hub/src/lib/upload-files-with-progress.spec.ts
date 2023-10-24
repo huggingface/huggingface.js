@@ -40,6 +40,9 @@ describe("uploadFilesWithProgress", () => {
 						path: "test.lfs.txt",
 					},
 				],
+				useWebWorkers: {
+					minSize: 1_000,
+				},
 			});
 
 			let res: IteratorResult<CommitProgressEvent, CommitOutput>;
@@ -60,6 +63,30 @@ describe("uploadFilesWithProgress", () => {
 				{
 					event: "phase",
 					phase: "uploadingLargeFiles",
+				},
+				{
+					event: "fileProgress",
+					path: "test.lfs.txt",
+					progress: 0,
+					type: "hashing",
+				},
+				{
+					event: "fileProgress",
+					path: "test.lfs.txt",
+					progress: 1,
+					type: "hashing",
+				},
+				{
+					event: "fileProgress",
+					path: "test.lfs.txt",
+					progress: 0,
+					type: "uploading",
+				},
+				{
+					event: "fileProgress",
+					path: "test.lfs.txt",
+					progress: 1,
+					type: "uploading",
 				},
 				{
 					event: "phase",
