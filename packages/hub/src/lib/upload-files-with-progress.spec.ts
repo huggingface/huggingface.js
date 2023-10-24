@@ -36,10 +36,29 @@ describe("uploadFilesWithProgress", () => {
 			});
 
 			let res: IteratorResult<CommitProgressEvent, CommitOutput>;
+			const progressEvents: CommitProgressEvent[] = [];
 
 			do {
 				res = await it.next();
+				if (!res.done) {
+					progressEvents.push(res.value);
+				}
 			} while (!res.done);
+
+			assert.deepStrictEqual(progressEvents, [
+				{
+					event: "phase",
+					phase: "preuploading",
+				},
+				{
+					event: "phase",
+					phase: "uploadingLargeFiles",
+				},
+				{
+					event: "phase",
+					phase: "committing",
+				},
+			]);
 
 			let content = await downloadFile({
 				repo,
