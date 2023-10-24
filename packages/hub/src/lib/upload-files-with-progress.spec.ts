@@ -7,6 +7,7 @@ import { createRepo } from "./create-repo";
 import { deleteRepo } from "./delete-repo";
 import { downloadFile } from "./download-file";
 import { uploadFilesWithProgress } from "./upload-files-with-progress";
+import type { CommitOutput, CommitProgressEvent } from "./commit";
 
 describe("uploadFilesWithProgress", () => {
 	it("should upload files", async () => {
@@ -15,6 +16,7 @@ describe("uploadFilesWithProgress", () => {
 		const credentials = {
 			accessToken: TEST_ACCESS_TOKEN,
 		};
+		const lfsContent = "O123456789".repeat(100_000);
 
 		try {
 			const result = await createRepo({
@@ -32,6 +34,11 @@ describe("uploadFilesWithProgress", () => {
 				files: [
 					{ content: new Blob(["file1"]), path: "file1" },
 					new URL("https://huggingface.co/gpt2/raw/main/config.json"),
+					// Large file
+					{
+						content: new Blob([lfsContent]),
+						path: "test.lfs.txt",
+					},
 				],
 			});
 
@@ -114,5 +121,5 @@ describe("uploadFilesWithProgress", () => {
 				credentials,
 			});
 		}
-	});
+	}, 60_000);
 });
