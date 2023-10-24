@@ -1,6 +1,6 @@
 import { assert, it, describe } from "vitest";
 
-import { HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from "../consts";
+import { HUB_URL, TEST_ACCESS_TOKEN, TEST_HUB_URL, TEST_USER } from "../consts";
 import type { RepoId } from "../types/public";
 import { insecureRandomString } from "../utils/insecureRandomString";
 import { createRepo } from "./create-repo";
@@ -87,6 +87,7 @@ describe("uploadFiles", () => {
 			await deleteRepo({
 				repo,
 				credentials,
+				hubUrl: TEST_HUB_URL,
 			});
 		}
 	});

@@ -39,7 +39,7 @@ describe("deleteFile", () => {
 
 			assert.strictEqual(await content?.text(), "file1");
 
-			await deleteFile({ path: "file1", repo, credentials });
+			await deleteFile({ path: "file1", repo, credentials, hubUrl: TEST_HUB_URL });
 
 			content = await downloadFile({
 				repo,
