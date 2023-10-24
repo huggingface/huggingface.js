@@ -8,6 +8,7 @@ import { deleteRepo } from "./delete-repo";
 import { downloadFile } from "./download-file";
 import { uploadFilesWithProgress } from "./upload-files-with-progress";
 import type { CommitOutput, CommitProgressEvent } from "./commit";
+import { isFrontend } from "../../../shared/src";
 
 describe("uploadFilesWithProgress", () => {
 	it("should upload files", async () => {
@@ -46,7 +47,7 @@ describe("uploadFilesWithProgress", () => {
 			});
 
 			let res: IteratorResult<CommitProgressEvent, CommitOutput>;
-			const progressEvents: CommitProgressEvent[] = [];
+			let progressEvents: CommitProgressEvent[] = [];
 
 			do {
 				res = await it.next();
@@ -54,6 +55,20 @@ describe("uploadFilesWithProgress", () => {
 					progressEvents.push(res.value);
 				}
 			} while (!res.done);
+
+			const intermediateHashingEvents = progressEvents.filter(
+				(e) => e.event === "fileProgress" && e.type === "hashing" && e.progress !== 0 && e.progress !== 1
+			);
+			if (isFrontend) {
+				assert(intermediateHashingEvents.length > 0);
+			}
+			const intermediateUploadEvents = progressEvents.filter(
+				(e) => e.event === "fileProgress" && e.type === "uploading" && e.progress !== 0 && e.progress !== 1
+			);
+			if (isFrontend) {
+				assert(intermediateUploadEvents.length > 0);
+			}
+			progressEvents = progressEvents.filter((e) => e.event !== "fileProgress" || e.progress === 0 || e.progress === 1);
 
 			assert.deepStrictEqual(progressEvents, [
 				{
