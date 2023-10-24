@@ -22,6 +22,6 @@
 		"semver": "^7.5.0",
 		"tsup": "^6.7.0",
 		"vitest": "^0.34.6",
-		"webdriverio": "^8.20.0"
+		"webdriverio": "8.6.7"
 	}
 }
