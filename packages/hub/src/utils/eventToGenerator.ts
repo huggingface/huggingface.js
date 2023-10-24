@@ -5,41 +5,55 @@ export async function* eventToGenerator<YieldType, ReturnType>(
 		rejectCallack: (reason: unknown) => void
 	) => unknown
 ): AsyncGenerator<YieldType, ReturnType> {
-	let resolve: (value: { done: true; value: ReturnType } | { done: false; value: YieldType }) => void;
-	let reject: (reason?: unknown) => void;
-	let p = new Promise<{ done: true; value: ReturnType } | { done: false; value: YieldType }>((res, rej) => {
-		resolve = res;
-		reject = rej;
-	});
+	const promises: Array<{
+		p: Promise<{ done: true; value: ReturnType } | { done: false; value: YieldType }>;
+		resolve: (value: { done: true; value: ReturnType } | { done: false; value: YieldType }) => void;
+		reject: (reason?: unknown) => void;
+	}> = [];
+
+	function addPromise() {
+		let resolve: (value: { done: true; value: ReturnType } | { done: false; value: YieldType }) => void;
+		let reject: (reason?: unknown) => void;
+		const p = new Promise<{ done: true; value: ReturnType } | { done: false; value: YieldType }>((res, rej) => {
+			resolve = res;
+			reject = rej;
+		});
+		// @ts-expect-error TS doesn't know that promise callback is executed immediately
+		promises.push({ p, resolve, reject });
+	}
+
+	addPromise();
 
 	const callbackRes = Promise.resolve()
 		.then(() =>
 			cb(
 				(y) => {
-					const res = resolve;
-					p = new Promise<{ done: true; value: ReturnType } | { done: false; value: YieldType }>((res2, rej2) => {
-						resolve = res2;
-						reject = rej2;
-					});
-					res({ done: false, value: y });
+					addPromise();
+					promises.at(-2)?.resolve({ done: false, value: y });
 				},
 				(r) => {
-					const res = resolve;
-					p = new Promise<{ done: true; value: ReturnType } | { done: false; value: YieldType }>((res2, rej2) => {
-						resolve = res2;
-						reject = rej2;
-					});
-					res({ done: true, value: r });
+					addPromise();
+					promises.at(-2)?.resolve({ done: true, value: r });
 				},
-				(err) => reject(err)
+				(err) => promises.shift()?.reject(err)
 			)
 		)
-		.catch((err) => reject(err));
+		.catch((err) => promises.shift()?.reject(err));
 
 	while (1) {
-		const result = await p;
+		const p = promises[0];
+		if (!p) {
+			throw new Error("Logic error in eventGenerator, promises should never be empty");
+		}
+		const result = await p.p;
+		promises.shift();
 		if (result.done) {
 			await callbackRes; // Clean up, may be removed in the future
+			// // Cleanup promises - shouldn't be needed due to above await
+			// for (const promise of promises) {
+			// 	promise.resolve(result);
+			// 	await promise.p;
+			// }
 			return result.value;
 		}
 		yield result.value;
