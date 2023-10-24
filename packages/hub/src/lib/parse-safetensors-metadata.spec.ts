@@ -6,7 +6,6 @@ describe("parseSafetensorsMetadata", () => {
 	it("fetch info for single-file", async () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "bert-base-uncased",
-			hubUrl: "https://huggingface.co",
 			computeParametersCount: true,
 		});
 
@@ -29,7 +28,6 @@ describe("parseSafetensorsMetadata", () => {
 	it("fetch info for sharded", async () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "bigscience/bloom",
-			hubUrl: "https://huggingface.co",
 			computeParametersCount: true,
 		});
 
@@ -54,7 +52,6 @@ describe("parseSafetensorsMetadata", () => {
 	it("fetch info for single-file with multiple dtypes", async () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "roberta-base",
-			hubUrl: "https://huggingface.co",
 			computeParametersCount: true,
 		});
 

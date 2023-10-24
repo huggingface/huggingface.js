@@ -6,7 +6,7 @@ describe("listDatasets", () => {
 	it("should list datasets from hf-doc-builder", async () => {
 		const results: DatasetEntry[] = [];
 
-		for await (const entry of listDatasets({ search: { owner: "hf-doc-build" }, hubUrl: "https://huggingface.co" })) {
+		for await (const entry of listDatasets({ search: { owner: "hf-doc-build" } })) {
 			if (typeof entry.downloads === "number") {
 				entry.downloads = 0;
 			}

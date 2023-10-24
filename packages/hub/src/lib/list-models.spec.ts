@@ -8,7 +8,6 @@ describe("listModels", () => {
 
 		for await (const entry of listModels({
 			search: { owner: "Intel", task: "depth-estimation" },
-			hubUrl: "https://huggingface.co",
 		})) {
 			if (typeof entry.downloads === "number") {
 				entry.downloads = 0;

@@ -1,6 +1,6 @@
 import { assert, it, describe } from "vitest";
 
-import { HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from "../consts";
+import { TEST_HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from "../consts";
 import type { RepoId } from "../types/public";
 import type { CommitFile } from "./commit";
 import { commit } from "./commit";
@@ -28,12 +28,13 @@ describe("commit", () => {
 			credentials: {
 				accessToken: TEST_ACCESS_TOKEN,
 			},
+			hubUrl: TEST_HUB_URL,
 			repo,
 			license: "mit",
 		});
 
 		try {
-			const readme1 = await downloadFile({ repo, path: "README.md" });
+			const readme1 = await downloadFile({ repo, path: "README.md", hubUrl: TEST_HUB_URL });
 			assert.strictEqual(readme1?.status, 200);
 
 			const nodeOperation: CommitFile[] = isFrontend
@@ -52,6 +53,7 @@ describe("commit", () => {
 				credentials: {
 					accessToken: TEST_ACCESS_TOKEN,
 				},
+				hubUrl: TEST_HUB_URL,
 				operations: [
 					{
 						operation: "addOrUpdate",
@@ -78,15 +80,15 @@ describe("commit", () => {
 				useWebWorkers: { minSize: 5_000 },
 			});
 
-			const fileContent = await downloadFile({ repo, path: "test.txt" });
+			const fileContent = await downloadFile({ repo, path: "test.txt", hubUrl: TEST_HUB_URL });
 			assert.strictEqual(fileContent?.status, 200);
 			assert.strictEqual(await fileContent?.text(), "This is me");
 
-			const lfsFileContent = await downloadFile({ repo, path: "test.lfs.txt" });
+			const lfsFileContent = await downloadFile({ repo, path: "test.lfs.txt", hubUrl: TEST_HUB_URL });
 			assert.strictEqual(lfsFileContent?.status, 200);
 			assert.strictEqual(await lfsFileContent?.text(), lfsContent);
 
-			const lfsFileUrl = `${HUB_URL}/${repoName}/raw/main/test.lfs.txt`;
+			const lfsFileUrl = `${TEST_HUB_URL}/${repoName}/raw/main/test.lfs.txt`;
 			const lfsFilePointer = await fetch(lfsFileUrl);
 			assert.strictEqual(lfsFilePointer.status, 200);
 			assert.strictEqual(
@@ -99,7 +101,7 @@ size ${lfsContent.length}
 			);
 
 			if (!isFrontend) {
-				const fileUrlContent = await downloadFile({ repo, path: "tsconfig.json" });
+				const fileUrlContent = await downloadFile({ repo, path: "tsconfig.json", hubUrl: TEST_HUB_URL });
 				assert.strictEqual(fileUrlContent?.status, 200);
 				assert.strictEqual(
 					await fileUrlContent?.text(),
@@ -107,11 +109,11 @@ size ${lfsContent.length}
 				);
 			}
 
-			const webResourceContent = await downloadFile({ repo, path: "lamaral.json" });
+			const webResourceContent = await downloadFile({ repo, path: "lamaral.json", hubUrl: TEST_HUB_URL });
 			assert.strictEqual(webResourceContent?.status, 200);
 			assert.strictEqual(await webResourceContent?.text(), await (await fetch(tokenizerJsonUrl)).text());
 
-			const readme2 = await downloadFile({ repo, path: "README.md" });
+			const readme2 = await downloadFile({ repo, path: "README.md", hubUrl: TEST_HUB_URL });
 			assert.strictEqual(readme2, null);
 		} finally {
 			await deleteRepo({
@@ -119,6 +121,7 @@ size ${lfsContent.length}
 					name: repoName,
 					type: "model",
 				},
+				hubUrl: TEST_HUB_URL,
 				credentials: { accessToken: TEST_ACCESS_TOKEN },
 			});
 		}
@@ -136,6 +139,7 @@ size ${lfsContent.length}
 				accessToken: TEST_ACCESS_TOKEN,
 			},
 			repo,
+			hubUrl: TEST_HUB_URL,
 		});
 
 		try {
@@ -162,15 +166,22 @@ size ${lfsContent.length}
 				credentials: {
 					accessToken: TEST_ACCESS_TOKEN,
 				},
+				hubUrl: TEST_HUB_URL,
 				title: "upload model",
 				operations,
 			});
 
-			const LFSSize = (await fileDownloadInfo({ repo, path: "mobilenet/group1-shard1of2" }))?.size;
+			const LFSSize = (await fileDownloadInfo({ repo, path: "mobilenet/group1-shard1of2", hubUrl: TEST_HUB_URL }))
+				?.size;
 
 			assert.strictEqual(LFSSize, 4_194_304);
 
-			const pointerFile = await downloadFile({ repo, path: "mobilenet/group1-shard1of2", raw: true });
+			const pointerFile = await downloadFile({
+				repo,
+				path: "mobilenet/group1-shard1of2",
+				raw: true,
+				hubUrl: TEST_HUB_URL,
+			});
 
 			// Make sure SHA is computed properly as well
 			assert.strictEqual(
@@ -187,6 +198,7 @@ size 4194304
 					name: repoName,
 					type: "model",
 				},
+				hubUrl: TEST_HUB_URL,
 				credentials: { accessToken: TEST_ACCESS_TOKEN },
 			});
 		}
