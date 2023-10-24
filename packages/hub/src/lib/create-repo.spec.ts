@@ -1,6 +1,6 @@
 import { assert, it, describe, expect } from "vitest";
 
-import { HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from "../consts";
+import { TEST_HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from "../consts";
 import { insecureRandomString } from "../utils/insecureRandomString";
 import { createRepo } from "./create-repo";
 import { deleteRepo } from "./delete-repo";
@@ -18,11 +18,12 @@ describe("createRepo", () => {
 				name: repoName,
 				type: "model",
 			},
+			hubUrl: TEST_HUB_URL,
 			files: [{ path: ".gitattributes", content: new Blob(["*.html filter=lfs diff=lfs merge=lfs -text"]) }],
 		});
 
 		assert.deepStrictEqual(result, {
-			repoUrl: `${HUB_URL}/${repoName}`,
+			repoUrl: `${TEST_HUB_URL}/${repoName}`,
 		});
 
 		const content = await downloadFile({
@@ -31,6 +32,7 @@ describe("createRepo", () => {
 				type: "model",
 			},
 			path: ".gitattributes",
+			hubUrl: TEST_HUB_URL,
 		});
 
 		assert(content);
@@ -42,6 +44,7 @@ describe("createRepo", () => {
 				type: "model",
 			},
 			credentials: { accessToken: TEST_ACCESS_TOKEN },
+			hubUrl: TEST_HUB_URL,
 		});
 	});
 
@@ -49,6 +52,7 @@ describe("createRepo", () => {
 		const tryCreate = createRepo({
 			repo: { name: "canonical", type: "model" },
 			credentials: { accessToken: TEST_ACCESS_TOKEN },
+			hubUrl: TEST_HUB_URL,
 		});
 
 		await expect(tryCreate).rejects.toBeInstanceOf(TypeError);
@@ -61,12 +65,13 @@ describe("createRepo", () => {
 			credentials: {
 				accessToken: TEST_ACCESS_TOKEN,
 			},
+			hubUrl: TEST_HUB_URL,
 			repo: repoName,
 			files: [{ path: ".gitattributes", content: new Blob(["*.html filter=lfs diff=lfs merge=lfs -text"]) }],
 		});
 
 		assert.deepStrictEqual(result, {
-			repoUrl: `${HUB_URL}/${repoName}`,
+			repoUrl: `${TEST_HUB_URL}/${repoName}`,
 		});
 
 		await deleteRepo({
@@ -74,6 +79,7 @@ describe("createRepo", () => {
 				name: repoName,
 				type: "model",
 			},
+			hubUrl: TEST_HUB_URL,
 			credentials: { accessToken: TEST_ACCESS_TOKEN },
 		});
 	});
@@ -85,16 +91,18 @@ describe("createRepo", () => {
 			credentials: {
 				accessToken: TEST_ACCESS_TOKEN,
 			},
+			hubUrl: TEST_HUB_URL,
 			repo: repoName,
 			files: [{ path: ".gitattributes", content: new Blob(["*.html filter=lfs diff=lfs merge=lfs -text"]) }],
 		});
 
 		assert.deepStrictEqual(result, {
-			repoUrl: `${HUB_URL}/${repoName}`,
+			repoUrl: `${TEST_HUB_URL}/${repoName}`,
 		});
 
 		await deleteRepo({
 			repo: repoName,
+			hubUrl: TEST_HUB_URL,
 			credentials: { accessToken: TEST_ACCESS_TOKEN },
 		});
 	});

@@ -10,7 +10,6 @@ describe("listFiles", () => {
 				type: "model",
 			},
 			revision: "dd4bc8b21efa05ec961e3efc4ee5e3832a3679c7",
-			hubUrl: "https://huggingface.co",
 		});
 
 		const files: ListFileEntry[] = [];
@@ -71,7 +70,6 @@ describe("listFiles", () => {
 			},
 			revision: "dd4bc8b21efa05ec961e3efc4ee5e3832a3679c7",
 			expand: true,
-			hubUrl: "https://huggingface.co",
 		});
 
 		const files: ListFileEntry[] = [];
@@ -157,7 +155,6 @@ describe("listFiles", () => {
 				type: "dataset",
 			},
 			revision: "0f3ea2f2b55fcb11e71fb1e3aec6822e44ddcb0f",
-			hubUrl: "https://huggingface.co",
 			recursive: true,
 		});
 

@@ -1,6 +1,6 @@
 import { assert, it, describe } from "vitest";
 
-import { HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from "../consts";
+import { TEST_HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from "../consts";
 import type { RepoId } from "../types/public";
 import { insecureRandomString } from "../utils/insecureRandomString";
 import { createRepo } from "./create-repo";
@@ -23,10 +23,11 @@ describe("uploadFilesWithProgress", () => {
 			const result = await createRepo({
 				credentials,
 				repo,
+				hubUrl: TEST_HUB_URL,
 			});
 
 			assert.deepStrictEqual(result, {
-				repoUrl: `${HUB_URL}/${repoName}`,
+				repoUrl: `${TEST_HUB_URL}/${repoName}`,
 			});
 
 			const it = uploadFilesWithProgress({
@@ -44,6 +45,7 @@ describe("uploadFilesWithProgress", () => {
 				useWebWorkers: {
 					minSize: 1_000,
 				},
+				hubUrl: TEST_HUB_URL,
 			});
 
 			let res: IteratorResult<CommitProgressEvent, CommitOutput>;
@@ -112,6 +114,7 @@ describe("uploadFilesWithProgress", () => {
 			let content = await downloadFile({
 				repo,
 				path: "file1",
+				hubUrl: TEST_HUB_URL,
 			});
 
 			assert.strictEqual(await content?.text(), "file1");
@@ -119,6 +122,7 @@ describe("uploadFilesWithProgress", () => {
 			content = await downloadFile({
 				repo,
 				path: "config.json",
+				hubUrl: TEST_HUB_URL,
 			});
 
 			assert.strictEqual(
@@ -161,6 +165,7 @@ describe("uploadFilesWithProgress", () => {
 			await deleteRepo({
 				repo,
 				credentials,
+				hubUrl: TEST_HUB_URL,
 			});
 		}
 	}, 60_000);

@@ -1,6 +1,6 @@
 import { assert, it, describe } from "vitest";
 
-import { HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from "../consts";
+import { TEST_ACCESS_TOKEN, TEST_HUB_URL, TEST_USER } from "../consts";
 import type { RepoId } from "../types/public";
 import { insecureRandomString } from "../utils/insecureRandomString";
 import { createRepo } from "./create-repo";
@@ -20,18 +20,30 @@ describe("uploadFile", () => {
 			const result = await createRepo({
 				credentials,
 				repo,
+				hubUrl: TEST_HUB_URL,
 			});
 
 			assert.deepStrictEqual(result, {
-				repoUrl: `${HUB_URL}/${repoName}`,
+				repoUrl: `${TEST_HUB_URL}/${repoName}`,
 			});
 
-			await uploadFile({ credentials, repo, file: { content: new Blob(["file1"]), path: "file1" } });
-			await uploadFile({ credentials, repo, file: new URL("https://huggingface.co/gpt2/raw/main/config.json") });
+			await uploadFile({
+				credentials,
+				repo,
+				file: { content: new Blob(["file1"]), path: "file1" },
+				hubUrl: TEST_HUB_URL,
+			});
+			await uploadFile({
+				credentials,
+				repo,
+				file: new URL("https://huggingface.co/gpt2/raw/main/config.json"),
+				hubUrl: TEST_HUB_URL,
+			});
 
 			let content = await downloadFile({
 				repo,
 				path: "file1",
+				hubUrl: TEST_HUB_URL,
 			});
 
 			assert.strictEqual(await content?.text(), "file1");
@@ -39,6 +51,7 @@ describe("uploadFile", () => {
 			content = await downloadFile({
 				repo,
 				path: "config.json",
+				hubUrl: TEST_HUB_URL,
 			});
 
 			assert.strictEqual(
@@ -81,6 +94,7 @@ describe("uploadFile", () => {
 			await deleteRepo({
 				repo,
 				credentials,
+				hubUrl: TEST_HUB_URL,
 			});
 		}
 	});
