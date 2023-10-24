@@ -202,6 +202,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 		>((yieldCallback, returnCallback, rejectCallack) => {
 			return promisesQueue(
 				operations.map((op) => async () => {
+					yieldCallback({ event: "fileProgress", path: op.path, progress: 0, type: "hashing" });
 					const iterator = sha256(op.content, { useWebWorker: params.useWebWorkers });
 					let res: IteratorResult<number, string>;
 					do {
