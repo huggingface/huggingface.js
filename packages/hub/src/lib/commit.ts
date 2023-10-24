@@ -470,6 +470,8 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 					...({
 						progressHint: {
 							progressCallback: (progress: number) => {
+								// For now, we display equal progress for all files
+								// We could compute the progress based on the size of `convertOperationToNdJson` for each of the files instead
 								for (const op of allOperations) {
 									if (isFileOperation(op) && !lfsShas.has(op.path)) {
 										yieldCallback({
