@@ -53,7 +53,7 @@ export async function* uploadFilesWithProgress(params: {
 			if (
 				init.method !== "PUT" ||
 				!("progressHint" in init) ||
-				!("progressCallback" in init) ||
+				!init.progressHint ||
 				typeof XMLHttpRequest === "undefined" ||
 				typeof input !== "string" ||
 				(!(init.body instanceof ArrayBuffer) && !(init.body instanceof Blob) && !(init.body instanceof File))
@@ -64,7 +64,7 @@ export async function* uploadFilesWithProgress(params: {
 			const progressHint = init.progressHint as {
 				progressCallback: (progress: number) => void;
 			} & (Record<string, never> | { part: number; numParts: number });
-			const progressCallback = init.progressCallback as (progress: number) => void;
+			const progressCallback = progressHint.progressCallback;
 
 			const xhr = new XMLHttpRequest();
 
@@ -81,9 +81,17 @@ export async function* uploadFilesWithProgress(params: {
 						for (const partProgress of Object.values(tracking.partsProgress)) {
 							totalProgress += partProgress;
 						}
-						progressCallback(totalProgress / tracking.numParts);
+						if (totalProgress === tracking.numParts) {
+							// Already handled in `commitIter`
+						} else {
+							progressCallback(totalProgress / tracking.numParts);
+						}
 					} else {
-						progressCallback(event.loaded / event.total);
+						if (event.loaded === event.total) {
+							// Already handled in `commitIter`
+						} else {
+							progressCallback(event.loaded / event.total);
+						}
 					}
 				}
 			});
