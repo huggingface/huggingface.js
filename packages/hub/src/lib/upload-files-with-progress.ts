@@ -81,9 +81,13 @@ export async function* uploadFilesWithProgress(params: {
 						for (const partProgress of Object.values(tracking.partsProgress)) {
 							totalProgress += partProgress;
 						}
-						progressCallback(totalProgress / tracking.numParts);
+						if (totalProgress !== tracking.numParts) {
+							progressCallback(totalProgress / tracking.numParts);
+						}
 					} else {
-						progressCallback(event.loaded / event.total);
+						if (event.loaded !== event.total) {
+							progressCallback(event.loaded / event.total);
+						}
 					}
 				}
 			});
