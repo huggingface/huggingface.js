@@ -109,7 +109,19 @@ export async function* uploadFilesWithProgress(params: {
 
 			return new Promise((resolve, reject) => {
 				xhr.addEventListener("load", () => {
-					resolve(new Response(xhr.responseText, { status: xhr.status, statusText: xhr.statusText }));
+					resolve(
+						new Response(xhr.responseText, {
+							status: xhr.status,
+							statusText: xhr.statusText,
+							headers: Object.fromEntries(
+								xhr
+									.getAllResponseHeaders()
+									.trim()
+									.split("\n")
+									.map((header) => [header.slice(0, header.indexOf(":")), header.slice(header.indexOf(":") + 1).trim()])
+							),
+						})
+					);
 				});
 				xhr.addEventListener("error", () => {
 					reject(new Error(xhr.statusText));
