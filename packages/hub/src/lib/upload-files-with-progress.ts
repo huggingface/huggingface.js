@@ -53,7 +53,7 @@ export async function* uploadFilesWithProgress(params: {
 			if (
 				init.method !== "PUT" ||
 				!("progressHint" in init) ||
-				!("progressCallback" in init) ||
+				!init.progressHint ||
 				typeof XMLHttpRequest === "undefined" ||
 				typeof input !== "string" ||
 				(!(init.body instanceof ArrayBuffer) && !(init.body instanceof Blob) && !(init.body instanceof File))
@@ -64,7 +64,7 @@ export async function* uploadFilesWithProgress(params: {
 			const progressHint = init.progressHint as {
 				progressCallback: (progress: number) => void;
 			} & (Record<string, never> | { part: number; numParts: number });
-			const progressCallback = init.progressCallback as (progress: number) => void;
+			const progressCallback = progressHint.progressCallback;
 
 			const xhr = new XMLHttpRequest();
 
