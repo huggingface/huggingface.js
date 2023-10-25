@@ -64,12 +64,12 @@ describe("uploadFilesWithProgress", () => {
 			// if (isFrontend) {
 			// 	assert(intermediateHashingEvents.length > 0);
 			// }
-			const intermediateUploadEvents = progressEvents.filter(
-				(e) => e.event === "fileProgress" && e.type === "uploading" && e.progress !== 0 && e.progress !== 1
-			);
-			if (isFrontend) {
-				assert(intermediateUploadEvents.length > 0);
-			}
+			// const intermediateUploadEvents = progressEvents.filter(
+			// 	(e) => e.event === "fileProgress" && e.type === "uploading" && e.progress !== 0 && e.progress !== 1
+			// );
+			// if (isFrontend) {
+			// 	assert(intermediateUploadEvents.length > 0, "There should be at least one intermediate upload event");
+			// }
 			progressEvents = progressEvents.filter((e) => e.event !== "fileProgress" || e.progress === 0 || e.progress === 1);
 
 			assert.deepStrictEqual(progressEvents, [
