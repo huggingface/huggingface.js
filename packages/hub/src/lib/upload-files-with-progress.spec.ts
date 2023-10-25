@@ -8,7 +8,6 @@ import { deleteRepo } from "./delete-repo";
 import { downloadFile } from "./download-file";
 import { uploadFilesWithProgress } from "./upload-files-with-progress";
 import type { CommitOutput, CommitProgressEvent } from "./commit";
-import { isFrontend } from "../../../shared/src";
 
 describe("uploadFilesWithProgress", () => {
 	it("should upload files", async () => {
