@@ -306,15 +306,15 @@ const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the
 
 ### Audio
 
-- [x] Automatic speech recognition
-- [x] Audio classification
+- [x] Automatic speech recognition - [demo](https://huggingface.co/spaces/huggingfacejs/speech-recognition-vue)
+- [x] Audio classification - [demo](https://huggingface.co/spaces/huggingfacejs/audio-classification-vue)
 - [x] Text to speech
 - [x] Audio to audio
 
 ### Computer Vision
 
-- [x] Image classification
-- [x] Object detection
+- [x] Image classification - [demo](https://huggingface.co/spaces/huggingfacejs/image-classification-vue)
+- [x] Object detection - [demo](https://huggingface.co/spaces/huggingfacejs/object-detection-vue)
 - [x] Image segmentation
 - [x] Text to image
 - [x] Image to text - [demo](https://huggingface.co/spaces/huggingfacejs/image-to-text)
