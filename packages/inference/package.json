@@ -53,8 +53,7 @@
 		"@types/node": "18.13.0",
 		"ts-node": "^10.9.1",
 		"typescript": "^5.0.4",
-		"vite": "^4.1.4",
-		"vitest": "^0.29.8"
+		"vite": "^4.1.4"
 	},
 	"resolutions": {}
 }

@@ -20,6 +20,7 @@ import { sha256 } from "../utils/sha256";
 import { toRepoId } from "../utils/toRepoId";
 import { WebBlob } from "../utils/WebBlob";
 import { createBlob } from "../utils/createBlob";
+import { eventToGenerator } from "../utils/eventToGenerator";
 
 const CONCURRENT_SHAS = 5;
 const CONCURRENT_LFS_UPLOADS = 5;
@@ -100,15 +101,31 @@ function isFileOperation(op: CommitOperation): op is CommitBlob {
 	return ret;
 }
 
+export type CommitProgressEvent =
+	| {
+			event: "phase";
+			phase: "preuploading" | "uploadingLargeFiles" | "committing";
+	  }
+	| {
+			event: "progress";
+			progress: number;
+	  }
+	| {
+			event: "fileProgress";
+			path: string;
+			progress: number;
+			type: "hashing" | "uploading";
+	  };
+
 /**
  * Internal function for now, used by commit.
  *
  * Can be exposed later to offer fine-tuned progress info
  */
-async function* commitIter(params: CommitParams): AsyncGenerator<unknown, CommitOutput> {
+export async function* commitIter(params: CommitParams): AsyncGenerator<CommitProgressEvent, CommitOutput> {
 	checkCredentials(params.credentials);
 	const repoId = toRepoId(params.repo);
-	yield "preuploading";
+	yield { event: "phase", phase: "preuploading" };
 
 	const lfsShas = new Map<string, string | null>();
 
@@ -173,22 +190,33 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 		}
 	}
 
-	yield "uploading to LFS";
+	yield { event: "phase", phase: "uploadingLargeFiles" };
 
 	for (const operations of chunk(
 		allOperations.filter(isFileOperation).filter((op) => lfsShas.has(op.path)),
 		100
 	)) {
-		yield `hashing ${operations.length} files`;
-
-		const shas = await promisesQueue(
-			operations.map((op) => async () => {
-				const sha = await sha256(op.content, { useWebWorker: params.useWebWorkers });
-				lfsShas.set(op.path, sha);
-				return sha;
-			}),
-			CONCURRENT_SHAS
-		);
+		const shas = yield* eventToGenerator<
+			{ event: "fileProgress"; type: "hashing"; path: string; progress: number },
+			string[]
+		>((yieldCallback, returnCallback, rejectCallack) => {
+			return promisesQueue(
+				operations.map((op) => async () => {
+					const iterator = sha256(op.content, { useWebWorker: params.useWebWorkers });
+					let res: IteratorResult<number, string>;
+					do {
+						res = await iterator.next();
+						if (!res.done) {
+							yieldCallback({ event: "fileProgress", path: op.path, progress: res.value, type: "hashing" });
+						}
+					} while (!res.done);
+					const sha = res.value;
+					lfsShas.set(op.path, res.value);
+					return sha;
+				}),
+				CONCURRENT_SHAS
+			).then(returnCallback, rejectCallack);
+		});
 
 		const payload: ApiLfsBatchRequest = {
 			operation: "upload",
@@ -228,175 +256,256 @@ async function* commitIter(params: CommitParams): AsyncGenerator<unknown, Commit
 
 		const shaToOperation = new Map(operations.map((op, i) => [shas[i], op]));
 
-		await promisesQueueStreaming(
-			json.objects.map((obj) => async () => {
-				const op = shaToOperation.get(obj.oid);
+		yield* eventToGenerator<CommitProgressEvent, void>((yieldCallback, returnCallback, rejectCallback) => {
+			return promisesQueueStreaming(
+				json.objects.map((obj) => async () => {
+					const op = shaToOperation.get(obj.oid);
 
-				if (!op) {
-					throw new InvalidApiResponseFormatError("Unrequested object ID in response");
-				}
-
-				if (obj.error) {
-					const errorMessage = `Error while doing LFS batch call for ${operations[shas.indexOf(obj.oid)].path}: ${
-						obj.error.message
-					}${batchRequestId ? ` - Request ID: ${batchRequestId}` : ""}`;
-					throw new HubApiError(res.url, obj.error.code, batchRequestId, errorMessage);
-				}
-				if (!obj.actions?.upload) {
-					return;
-				}
-				const content = op.content;
-				const header = obj.actions.upload.header;
-				if (header?.chunk_size) {
-					const chunkSize = parseInt(header.chunk_size);
-
-					// multipart upload
-					// parts are in upload.header['00001'] to upload.header['99999']
-
-					const completionUrl = obj.actions.upload.href;
-					const parts = Object.keys(header).filter((key) => /^[0-9]+$/.test(key));
-
-					if (parts.length !== Math.ceil(content.size / chunkSize)) {
-						throw new Error("Invalid server response to upload large LFS file, wrong number of parts");
+					if (!op) {
+						throw new InvalidApiResponseFormatError("Unrequested object ID in response");
 					}
 
-					const completeReq: ApiLfsCompleteMultipartRequest = {
-						oid: obj.oid,
-						parts: parts.map((part) => ({
-							partNumber: +part,
-							etag: "",
-						})),
-					};
-
-					await promisesQueueStreaming(
-						parts.map((part) => async () => {
-							const index = parseInt(part) - 1;
-							const slice = content.slice(index * chunkSize, (index + 1) * chunkSize);
-
-							const res = await (params.fetch ?? fetch)(header[part], {
-								method: "PUT",
-								/** Unfortunately, browsers don't support our inherited version of Blob in fetch calls */
-								body: slice instanceof WebBlob && isFrontend ? await slice.arrayBuffer() : slice,
-							});
-
-							if (!res.ok) {
-								throw await createApiError(res, {
-									requestId: batchRequestId,
-									message: `Error while uploading part ${part} of ${
-										operations[shas.indexOf(obj.oid)].path
-									} to LFS storage`,
-								});
-							}
-
-							const eTag = res.headers.get("ETag");
-
-							if (!eTag) {
-								throw new Error("Cannot get ETag of part during multipart upload");
-							}
-
-							completeReq.parts[Number(part) - 1].etag = eTag;
-						}),
-						MULTIPART_PARALLEL_UPLOAD
-					);
-
-					const res = await (params.fetch ?? fetch)(completionUrl, {
-						method: "POST",
-						body: JSON.stringify(completeReq),
-						headers: {
-							Accept: "application/vnd.git-lfs+json",
-							"Content-Type": "application/vnd.git-lfs+json",
-						},
-					});
-
-					if (!res.ok) {
-						throw await createApiError(res, {
-							requestId: batchRequestId,
-							message: `Error completing multipart upload of ${operations[shas.indexOf(obj.oid)].path} to LFS storage`,
+					if (obj.error) {
+						const errorMessage = `Error while doing LFS batch call for ${operations[shas.indexOf(obj.oid)].path}: ${
+							obj.error.message
+						}${batchRequestId ? ` - Request ID: ${batchRequestId}` : ""}`;
+						throw new HubApiError(res.url, obj.error.code, batchRequestId, errorMessage);
+					}
+					if (!obj.actions?.upload) {
+						// Already uploaded
+						yieldCallback({
+							event: "fileProgress",
+							path: op.path,
+							progress: 1,
+							type: "uploading",
 						});
+						return;
 					}
-				} else {
-					const res = await (params.fetch ?? fetch)(obj.actions.upload.href, {
-						method: "PUT",
-						headers: {
-							...(batchRequestId ? { "X-Request-Id": batchRequestId } : undefined),
-						},
-						/** Unfortunately, browsers don't support our inherited version of Blob in fetch calls */
-						body: content instanceof WebBlob && isFrontend ? await content.arrayBuffer() : content,
+					yieldCallback({
+						event: "fileProgress",
+						path: op.path,
+						progress: 0,
+						type: "uploading",
 					});
+					const content = op.content;
+					const header = obj.actions.upload.header;
+					if (header?.chunk_size) {
+						const chunkSize = parseInt(header.chunk_size);
 
-					if (!res.ok) {
-						throw await createApiError(res, {
-							requestId: batchRequestId,
-							message: `Error while uploading ${operations[shas.indexOf(obj.oid)].path} to LFS storage`,
-						});
-					}
-				}
-			}),
-			CONCURRENT_LFS_UPLOADS
-		);
-	}
+						// multipart upload
+						// parts are in upload.header['00001'] to upload.header['99999']
 
-	yield "committing";
+						const completionUrl = obj.actions.upload.href;
+						const parts = Object.keys(header).filter((key) => /^[0-9]+$/.test(key));
 
-	const res = await (params.fetch ?? fetch)(
-		`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/commit/${encodeURIComponent(
-			params.branch ?? "main"
-		)}` + (params.isPullRequest ? "?create_pr=1" : ""),
-		{
-			method: "POST",
-			headers: {
-				...(params.credentials && { Authorization: `Bearer ${params.credentials.accessToken}` }),
-				"Content-Type": "application/x-ndjson",
-			},
-			body: [
-				{
-					key: "header",
-					value: {
-						summary: params.title,
-						description: params.description,
-						parentCommit: params.parentCommit,
-					} satisfies ApiCommitHeader,
-				},
-				...((await Promise.all(
-					allOperations.map((operation) => {
-						if (isFileOperation(operation)) {
-							const sha = lfsShas.get(operation.path);
-							if (sha) {
-								return {
-									key: "lfsFile",
-									value: {
-										path: operation.path,
-										algo: "sha256",
-										size: operation.content.size,
-										oid: sha,
-									} satisfies ApiCommitLfsFile,
-								};
-							}
+						if (parts.length !== Math.ceil(content.size / chunkSize)) {
+							throw new Error("Invalid server response to upload large LFS file, wrong number of parts");
 						}
 
-						return convertOperationToNdJson(operation);
-					})
-				)) satisfies ApiCommitOperation[]),
-			]
-				.map((x) => JSON.stringify(x))
-				.join("\n"),
-		}
-	);
+						const completeReq: ApiLfsCompleteMultipartRequest = {
+							oid: obj.oid,
+							parts: parts.map((part) => ({
+								partNumber: +part,
+								etag: "",
+							})),
+						};
 
-	if (!res.ok) {
-		throw await createApiError(res);
+						// Defined here so that it's not redefined at each iteration (and the caller can tell it's for the same file)
+						const progressCallback = (progress: number) =>
+							yieldCallback({ event: "fileProgress", path: op.path, progress, type: "uploading" });
+
+						await promisesQueueStreaming(
+							parts.map((part) => async () => {
+								const index = parseInt(part) - 1;
+								const slice = content.slice(index * chunkSize, (index + 1) * chunkSize);
+
+								const res = await (params.fetch ?? fetch)(header[part], {
+									method: "PUT",
+									/** Unfortunately, browsers don't support our inherited version of Blob in fetch calls */
+									body: slice instanceof WebBlob && isFrontend ? await slice.arrayBuffer() : slice,
+									...({
+										progressHint: {
+											path: op.path,
+											part: index,
+											numParts: parts.length,
+											progressCallback,
+										},
+										// eslint-disable-next-line @typescript-eslint/no-explicit-any
+									} as any),
+								});
+
+								if (!res.ok) {
+									throw await createApiError(res, {
+										requestId: batchRequestId,
+										message: `Error while uploading part ${part} of ${
+											operations[shas.indexOf(obj.oid)].path
+										} to LFS storage`,
+									});
+								}
+
+								const eTag = res.headers.get("ETag");
+
+								if (!eTag) {
+									throw new Error("Cannot get ETag of part during multipart upload");
+								}
+
+								completeReq.parts[Number(part) - 1].etag = eTag;
+							}),
+							MULTIPART_PARALLEL_UPLOAD
+						);
+
+						const res = await (params.fetch ?? fetch)(completionUrl, {
+							method: "POST",
+							body: JSON.stringify(completeReq),
+							headers: {
+								Accept: "application/vnd.git-lfs+json",
+								"Content-Type": "application/vnd.git-lfs+json",
+							},
+						});
+
+						if (!res.ok) {
+							throw await createApiError(res, {
+								requestId: batchRequestId,
+								message: `Error completing multipart upload of ${
+									operations[shas.indexOf(obj.oid)].path
+								} to LFS storage`,
+							});
+						}
+
+						yieldCallback({
+							event: "fileProgress",
+							path: op.path,
+							progress: 1,
+							type: "uploading",
+						});
+					} else {
+						const res = await (params.fetch ?? fetch)(obj.actions.upload.href, {
+							method: "PUT",
+							headers: {
+								...(batchRequestId ? { "X-Request-Id": batchRequestId } : undefined),
+							},
+							/** Unfortunately, browsers don't support our inherited version of Blob in fetch calls */
+							body: content instanceof WebBlob && isFrontend ? await content.arrayBuffer() : content,
+							...({
+								progressHint: {
+									path: op.path,
+									progressCallback: (progress: number) =>
+										yieldCallback({
+											event: "fileProgress",
+											path: op.path,
+											progress,
+											type: "uploading",
+										}),
+								},
+								// eslint-disable-next-line @typescript-eslint/no-explicit-any
+							} as any),
+						});
+
+						if (!res.ok) {
+							throw await createApiError(res, {
+								requestId: batchRequestId,
+								message: `Error while uploading ${operations[shas.indexOf(obj.oid)].path} to LFS storage`,
+							});
+						}
+
+						yieldCallback({
+							event: "fileProgress",
+							path: op.path,
+							progress: 1,
+							type: "uploading",
+						});
+					}
+				}),
+				CONCURRENT_LFS_UPLOADS
+			).then(returnCallback, rejectCallback);
+		});
 	}
 
-	const json = await res.json();
+	yield { event: "phase", phase: "committing" };
 
-	return {
-		pullRequestUrl: json.pullRequestUrl,
-		commit: {
-			oid: json.commitOid,
-			url: json.commitUrl,
-		},
-		hookOutput: json.hookOutput,
-	};
+	return yield* eventToGenerator<CommitProgressEvent, CommitOutput>(
+		async (yieldCallback, returnCallback, rejectCallback) =>
+			(params.fetch ?? fetch)(
+				`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/commit/${encodeURIComponent(
+					params.branch ?? "main"
+				)}` + (params.isPullRequest ? "?create_pr=1" : ""),
+				{
+					method: "POST",
+					headers: {
+						...(params.credentials && { Authorization: `Bearer ${params.credentials.accessToken}` }),
+						"Content-Type": "application/x-ndjson",
+					},
+					body: [
+						{
+							key: "header",
+							value: {
+								summary: params.title,
+								description: params.description,
+								parentCommit: params.parentCommit,
+							} satisfies ApiCommitHeader,
+						},
+						...((await Promise.all(
+							allOperations.map((operation) => {
+								if (isFileOperation(operation)) {
+									const sha = lfsShas.get(operation.path);
+									if (sha) {
+										return {
+											key: "lfsFile",
+											value: {
+												path: operation.path,
+												algo: "sha256",
+												size: operation.content.size,
+												oid: sha,
+											} satisfies ApiCommitLfsFile,
+										};
+									}
+								}
+
+								return convertOperationToNdJson(operation);
+							})
+						)) satisfies ApiCommitOperation[]),
+					]
+						.map((x) => JSON.stringify(x))
+						.join("\n"),
+					...({
+						progressHint: {
+							progressCallback: (progress: number) => {
+								// For now, we display equal progress for all files
+								// We could compute the progress based on the size of `convertOperationToNdJson` for each of the files instead
+								for (const op of allOperations) {
+									if (isFileOperation(op) && !lfsShas.has(op.path)) {
+										yieldCallback({
+											event: "fileProgress",
+											path: op.path,
+											progress,
+											type: "uploading",
+										});
+									}
+								}
+							},
+						},
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					} as any),
+				}
+			)
+				.then(async (res) => {
+					if (!res.ok) {
+						throw await createApiError(res);
+					}
+
+					const json = await res.json();
+
+					returnCallback({
+						pullRequestUrl: json.pullRequestUrl,
+						commit: {
+							oid: json.commitOid,
+							url: json.commitUrl,
+						},
+						hookOutput: json.hookOutput,
+					});
+				})
+				.catch(rejectCallback)
+	);
 }
 
 export async function commit(params: CommitParams): Promise<CommitOutput> {

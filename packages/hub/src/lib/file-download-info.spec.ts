@@ -10,7 +10,6 @@ describe("fileDownloadInfo", () => {
 			},
 			path: "tf_model.h5",
 			revision: "dd4bc8b21efa05ec961e3efc4ee5e3832a3679c7",
-			hubUrl: "https://huggingface.co",
 		});
 
 		assert.strictEqual(info?.size, 536063208);
@@ -26,7 +25,6 @@ describe("fileDownloadInfo", () => {
 			},
 			path: "tf_model.h5",
 			revision: "dd4bc8b21efa05ec961e3efc4ee5e3832a3679c7",
-			hubUrl: "https://huggingface.co",
 			raw: true,
 		});
 
@@ -43,7 +41,6 @@ describe("fileDownloadInfo", () => {
 			},
 			path: "tokenizer_config.json",
 			revision: "1a7dd4986e3dab699c24ca19b2afd0f5e1a80f37",
-			hubUrl: "https://huggingface.co",
 		});
 
 		assert.strictEqual(info?.size, 28);

@@ -8,7 +8,6 @@ describe("listSpaces", () => {
 
 		for await (const entry of listSpaces({
 			search: { owner: "microsoft" },
-			hubUrl: "https://huggingface.co",
 			additionalFields: ["subdomain"],
 		})) {
 			if (entry.name !== "microsoft/visual_chatgpt") {

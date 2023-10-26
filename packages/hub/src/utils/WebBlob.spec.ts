@@ -1,14 +1,19 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, beforeAll } from "vitest";
 import { base64FromBytes } from "../../../shared";
 import { WebBlob } from "./WebBlob";
 
-describe("WebBlob", async () => {
+describe("WebBlob", () => {
 	const resourceUrl = new URL("https://huggingface.co/spaces/aschen/push-model-from-web/raw/main/mobilenet/model.json");
+	let fullText: string;
+	let size: number;
+	let contentType: string;
 
-	const response = await fetch(resourceUrl, { method: "HEAD" });
-	const size = Number(response.headers.get("content-length"));
-	const contentType = response.headers.get("content-type") || "";
-	const fullText = await (await fetch(resourceUrl)).text();
+	beforeAll(async () => {
+		const response = await fetch(resourceUrl, { method: "HEAD" });
+		size = Number(response.headers.get("content-length"));
+		contentType = response.headers.get("content-type") || "";
+		fullText = await (await fetch(resourceUrl)).text();
+	});
 
 	it("should create a WebBlob with a slice on the entire resource", async () => {
 		const webBlob = await WebBlob.create(resourceUrl, { cacheBelow: 0 });

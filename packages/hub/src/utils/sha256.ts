@@ -1,4 +1,5 @@
 import { isFrontend } from "../../../shared";
+import { eventToGenerator } from "./eventToGenerator";
 import { hexFromBytes } from "./hexFromBytes";
 
 const webWorkerCode = `
@@ -29,38 +30,47 @@ self.addEventListener('message', async (event) => {
 
 /**
  * @returns hex-encoded sha
+ * @yields progress (0-1)
  */
-export async function sha256(buffer: Blob, opts?: { useWebWorker?: boolean | { minSize: number } }): Promise<string> {
+export async function* sha256(
+	buffer: Blob,
+	opts?: { useWebWorker?: boolean | { minSize: number } }
+): AsyncGenerator<number, string> {
+	yield 0;
+
 	const maxCryptoSize =
-		typeof opts?.useWebWorker === "object" && opts?.useWebWorker.minSize !== undefined && isFrontend
+		typeof opts?.useWebWorker === "object" && opts?.useWebWorker.minSize !== undefined
 			? opts.useWebWorker.minSize
 			: 10_000_000;
 	if (buffer.size < maxCryptoSize && globalThis.crypto?.subtle) {
-		return hexFromBytes(
+		const res = hexFromBytes(
 			new Uint8Array(
 				await globalThis.crypto.subtle.digest("SHA-256", buffer instanceof Blob ? await buffer.arrayBuffer() : buffer)
 			)
 		);
+
+		yield 1;
+
+		return res;
 	}
 
 	if (isFrontend) {
 		if (opts?.useWebWorker) {
 			try {
-				return new Promise((resolve, reject) => {
+				return yield* eventToGenerator<number, string>((yieldCallback, returnCallback, rejectCallack) => {
 					// Todo: Maybe pool workers
 					const worker = new Worker(URL.createObjectURL(new Blob([webWorkerCode])));
 					worker.addEventListener("message", (event) => {
 						if (event.data.sha256) {
-							return resolve(event.data.sha256);
+							returnCallback(event.data.sha256);
+						} else if (event.data.progress) {
+							yieldCallback(event.data.progress);
+						} else {
+							rejectCallack(event);
 						}
-						if (event.data.progress) {
-							// console.log("Progress", event.data.progress);
-							return;
-						}
-						reject(event);
 					});
 					worker.addEventListener("error", (event) => {
-						reject(event.error);
+						rejectCallack(event.error);
 					});
 					worker.postMessage({ file: buffer });
 				});
@@ -76,6 +86,8 @@ export async function sha256(buffer: Blob, opts?: { useWebWorker?: boolean | { m
 		sha256.init();
 
 		const reader = buffer.stream().getReader();
+		const total = buffer.size;
+		let bytesDone = 0;
 
 		while (true) {
 			const { done, value } = await reader.read();
@@ -85,6 +97,8 @@ export async function sha256(buffer: Blob, opts?: { useWebWorker?: boolean | { m
 			}
 
 			sha256.update(value);
+			bytesDone += value.length;
+			yield bytesDone / total;
 		}
 
 		return sha256.digest("hex");
@@ -94,7 +108,7 @@ export async function sha256(buffer: Blob, opts?: { useWebWorker?: boolean | { m
 		cryptoModule = await import("./sha256-node");
 	}
 
-	return cryptoModule.sha256Node(buffer);
+	return yield* cryptoModule.sha256Node(buffer);
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports

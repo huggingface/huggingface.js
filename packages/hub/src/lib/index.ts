@@ -13,4 +13,5 @@ export * from "./list-spaces";
 export * from "./parse-safetensors-metadata";
 export * from "./upload-file";
 export * from "./upload-files";
+export * from "./upload-files-with-progress";
 export * from "./who-am-i";

@@ -12,10 +12,10 @@ for (const readme of [
 	let content = readFileSync(readme, "utf-8");
 
 	content = content.replace(
-		/@huggingface[/]inference@\d([.]\d)?([.]\d)?/g,
+		/@huggingface[/]inference@\d+([.]\d+)?([.]\d+)?/g,
 		`@huggingface/inference@${inferencePackage.version}`
 	);
-	content = content.replace(/@huggingface[/]hub@\d([.]\d)?([.]\d)?/g, `@huggingface/hub@${hubPackage.version}`);
+	content = content.replace(/@huggingface[/]hub@\d+([.]\d+)?([.]\d+)?/g, `@huggingface/hub@${hubPackage.version}`);
 
 	writeFileSync(readme, Buffer.from(content));
 }
