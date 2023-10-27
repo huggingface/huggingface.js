@@ -293,6 +293,20 @@ describe.concurrent(
 			).toMatchObject({
 				translation_text: "Mein Name ist Wolfgang und ich lebe in Berlin",
 			});
+			// input is a list
+			expect(
+				await hf.translation({
+					model: "t5-base",
+					inputs: ["My name is Wolfgang and I live in Berlin", "I work as programmer"],
+				})
+			).toMatchObject([
+				{
+					translation_text: "Mein Name ist Wolfgang und ich lebe in Berlin",
+				},
+				{
+					translation_text: "Ich arbeite als Programmierer",
+				},
+			]);
 		});
 		it("zeroShotClassification", async () => {
 			expect.extend({
