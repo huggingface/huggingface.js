@@ -1,6 +1,6 @@
 import { assert, it, describe, expect } from "vitest";
 
-import { TEST_HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from "../consts";
+import { TEST_HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from "../test/consts";
 import { insecureRandomString } from "../utils/insecureRandomString";
 import { createRepo } from "./create-repo";
 import { deleteRepo } from "./delete-repo";

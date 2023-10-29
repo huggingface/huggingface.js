@@ -1,6 +1,6 @@
 import { assert, it, describe } from "vitest";
 
-import { TEST_HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from "../consts";
+import { TEST_HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from "../test/consts";
 import type { RepoId } from "../types/public";
 import type { CommitFile } from "./commit";
 import { commit } from "./commit";
