@@ -942,5 +942,26 @@
         "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
+  },
+  "f7b0286fa03058c95425a91aa758f949ce7772fbe7bd52f2b777e636251a2b8e": {
+    "url": "https://api-inference.huggingface.co/models/t5-base",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":[\"My name is Wolfgang and I live in Berlin\",\"I work as programmer\"],\"options\":{}}"
+    },
+    "response": {
+      "body": "[{\"translation_text\":\"Mein Name ist Wolfgang und ich lebe in Berlin\"},{\"translation_text\":\"Ich arbeite als Programmierer\"}]",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
   }
 }
