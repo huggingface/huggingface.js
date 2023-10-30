@@ -1,5 +1,5 @@
 import { assert, it, describe } from "vitest";
-import { TEST_ACCESS_TOKEN, TEST_HUB_URL } from "../consts";
+import { TEST_ACCESS_TOKEN, TEST_HUB_URL } from "../test/consts";
 import { whoAmI } from "./who-am-i";
 
 describe("whoAmI", () => {
