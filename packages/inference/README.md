@@ -6,7 +6,11 @@ Check out the [full documentation](https://huggingface.co/docs/huggingface.js/in
 
 You can also try out a live [interactive notebook](https://observablehq.com/@huggingface/hello-huggingface-js-inference) or see some demos on [hf.co/huggingfacejs](https://huggingface.co/huggingfacejs).
 
-## Install
+## Getting Started
+
+### Install
+
+#### Node
 
 ```console
 npm install @huggingface/inference
@@ -16,7 +20,7 @@ pnpm add @huggingface/inference
 yarn add @huggingface/inference
 ```
 
-### Deno
+#### Deno
 
 ```ts
 // esm.sh
@@ -25,19 +29,20 @@ import { HfInference } from "https://esm.sh/@huggingface/inference"
 import { HfInference } from "npm:@huggingface/inference"
 ```
 
-## Usage
 
-❗**Important note:** Using an access token is optional to get started, however you will be rate limited eventually. Join [Hugging Face](https://huggingface.co/join) and then visit [access tokens](https://huggingface.co/settings/tokens) to generate your access token for **free**.
-
-Your access token should be kept private. If you need to protect it in front-end applications, we suggest setting up a proxy server that stores the access token.
-
-### Getting started
+### Initialize
 
 ```typescript
 import { HfInference } from '@huggingface/inference'
 
 const hf = new HfInference('your access token')
 ```
+
+❗**Important note:** Using an access token is optional to get started, however you will be rate limited eventually. Join [Hugging Face](https://huggingface.co/join) and then visit [access tokens](https://huggingface.co/settings/tokens) to generate your access token for **free**.
+
+Your access token should be kept private. If you need to protect it in front-end applications, we suggest setting up a proxy server that stores the access token.
+
+## Natural Language Processing
 
 ### Fill Mask
 
@@ -110,6 +115,8 @@ await hf.textClassification({
 ### Text Generation
 
 Generates text from an input prompt.
+
+[Demo](https://huggingface.co/spaces/huggingfacejs/streaming-text-generation)
 
 ```typescript
 await hf.textGeneration({
@@ -202,20 +209,13 @@ await hf.sentenceSimilarity({
 })
 ```
 
-### Feature Extraction
-
-This task reads some text and outputs raw float values, that are usually consumed as part of a semantic database/semantic search.
-
-```typescript
-await hf.featureExtraction({
-  model: "sentence-transformers/distilbert-base-nli-mean-tokens",
-  inputs: "That is a happy person",
-});
-```
+## Audio
 
 ### Automatic Speech Recognition
 
 Transcribes speech from an audio file.
+
+[Demo](https://huggingface.co/spaces/huggingfacejs/speech-recognition-vue)
 
 ```typescript
 await hf.automaticSpeechRecognition({
@@ -228,6 +228,8 @@ await hf.automaticSpeechRecognition({
 
 Assigns labels to the given audio along with a probability score of that label.
 
+[Demo](https://huggingface.co/spaces/huggingfacejs/audio-classification-vue)
+
 ```typescript
 await hf.audioClassification({
   model: 'superb/hubert-large-superb-er',
@@ -236,6 +238,8 @@ await hf.audioClassification({
 ```
 
 ### Text To Speech
+
+Generates natural-sounding speech from text input.
 
 ```typescript
 await hf.textToSpeech({
@@ -246,6 +250,8 @@ await hf.textToSpeech({
 
 ### Audio To Audio
 
+Outputs one or multiple generated audios from an input audio, commonly used for speech enhancement and source separation.
+
 ```typescript
 await hf.audioToAudio({
   model: 'speechbrain/sepformer-wham',
@@ -253,10 +259,13 @@ await hf.audioToAudio({
 })
 ```
 
+## Computer Vision
+
 ### Image Classification
 
 Assigns labels to a given image along with a probability score of that label.
 
+[Demo](https://huggingface.co/spaces/huggingfacejs/image-classification-vue)
 
 ```typescript
 await hf.imageClassification({
@@ -268,6 +277,8 @@ await hf.imageClassification({
 ### Object Detection
 
 Detects objects within an image and returns labels with corresponding bounding boxes and probability scores.
+
+[Demo](https://huggingface.co/spaces/huggingfacejs/object-detection-vue)
 
 ```typescript
 await hf.objectDetection({
@@ -287,23 +298,9 @@ await hf.imageSegmentation({
 })
 ```
 
-### Text To Image
-
-Creates an image from a text prompt.
-
-```typescript
-await hf.textToImage({
-  inputs: 'award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]',
-  model: 'stabilityai/stable-diffusion-2',
-  parameters: {
-    negative_prompt: 'blurry',
-  }
-})
-```
-
 ### Image To Text
 
-Captions a given image.
+Outputs text from a given image, commonly used for captioning or optical character recognition.
 
 ```typescript
 await hf.imageToText({
@@ -313,6 +310,8 @@ await hf.imageToText({
 ```
 
 ### Image To Image
+
+Image-to-image is the task of transforming a source image to match the characteristics of a target image or a target image domain.
 
 ```typescript
 await hf.imageToImage({
@@ -340,7 +339,40 @@ await hf.zeroShotImageClassification({
 })
 ```
 
+## Multimodal
+
+### Text To Image
+
+Creates an image from a text prompt.
+
+[Demo](https://huggingface.co/spaces/huggingfacejs/image-to-text)
+
+```typescript
+await hf.textToImage({
+  inputs: 'award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]',
+  model: 'stabilityai/stable-diffusion-2',
+  parameters: {
+    negative_prompt: 'blurry',
+  }
+})
+```
+
+### Feature Extraction
+
+This task reads some text and outputs raw float values, that are usually consumed as part of a semantic database/semantic search.
+
+```typescript
+await hf.featureExtraction({
+  model: "sentence-transformers/distilbert-base-nli-mean-tokens",
+  inputs: "That is a happy person",
+});
+```
+
 ### Visual Question Answering
+
+Visual Question Answering is the task of answering open-ended questions based on an image. They output natural language responses to natural language questions.
+
+[Demo](https://huggingface.co/spaces/huggingfacejs/doc-vis-qa)
 
 ```typescript
 await hf.visualQuestionAnswering({
@@ -354,6 +386,10 @@ await hf.visualQuestionAnswering({
 
 ### Document Question Answering
 
+Document question answering models take a (document, question) pair as input and return an answer in natural language.
+
+[Demo](https://huggingface.co/spaces/huggingfacejs/doc-vis-qa)
+
 ```typescript
 await hf.documentQuestionAnswering({
   model: 'impira/layoutlm-document-qa',
@@ -364,7 +400,11 @@ await hf.documentQuestionAnswering({
 })
 ```
 
+## Tabular
+
 ### Tabular Regression
+
+Tabular regression is the task of predicting a numerical value given a set of attributes.
 
 ```typescript
 await hf.tabularRegression({
@@ -383,6 +423,8 @@ await hf.tabularRegression({
 ```
 
 ### Tabular Classification
+
+Tabular classification is the task of classifying a target category (a group) based on set of attributes.
 
 ```typescript
 await hf.tabularClassification({
@@ -405,7 +447,7 @@ await hf.tabularClassification({
 })
 ```
 
-### Custom Call
+## Custom Call
 
 For models with custom parameters / outputs.
 
@@ -430,7 +472,7 @@ for await (const output of hf.streamingRequest({
 }
 ```
 
-### Custom Inference Endpoints
+## Custom Inference Endpoints
 
 Learn more about using your own inference endpoints [here](https://hf.co/docs/inference-endpoints/)
 
@@ -438,52 +480,6 @@ Learn more about using your own inference endpoints [here](https://hf.co/docs/in
 const gpt2 = hf.endpoint('https://xyz.eu-west-1.aws.endpoints.huggingface.cloud/gpt2');
 const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the universe is'});
 ```
-
-## Supported Tasks
-
-### Natural Language Processing
-
-- [x] Fill mask
-- [x] Summarization
-- [x] Question answering
-- [x] Table question answering
-- [x] Text classification
-- [x] Text generation - [demo](https://huggingface.co/spaces/huggingfacejs/streaming-text-generation)
-- [x] Text2Text generation
-- [x] Token classification
-- [x] Named entity recognition
-- [x] Translation
-- [x] Zero-shot classification
-- [x] Conversational
-- [x] Feature extraction
-- [x] Sentence Similarity
-
-### Audio
-
-- [x] Automatic speech recognition - [demo](https://huggingface.co/spaces/huggingfacejs/speech-recognition-vue)
-- [x] Audio classification - [demo](https://huggingface.co/spaces/huggingfacejs/audio-classification-vue)
-- [x] Text to speech
-- [x] Audio to audio
-
-### Computer Vision
-
-- [x] Image classification - [demo](https://huggingface.co/spaces/huggingfacejs/image-classification-vue)
-- [x] Object detection - [demo](https://huggingface.co/spaces/huggingfacejs/object-detection-vue)
-- [x] Image segmentation
-- [x] Text to image
-- [x] Image to text - [demo](https://huggingface.co/spaces/huggingfacejs/image-to-text)
-- [x] Image to Image
-- [x] Zero-shot image classification
-
-### Multimodal
-
-- [x] Document question answering - [demo](https://huggingface.co/spaces/huggingfacejs/doc-vis-qa)
-- [x] Visual question answering - [demo](https://huggingface.co/spaces/huggingfacejs/doc-vis-qa)
-
-### Tabular
-
-- [x] Tabular regression
-- [x] Tabular classification
 
 ## Tree-shaking
 
