@@ -4,7 +4,7 @@ A Typescript powered wrapper for the Hugging Face Inference API. Learn more abou
 
 Check out the [full documentation](https://huggingface.co/docs/huggingface.js/inference/README).
 
-You can also try out a live [interactive notebook](https://observablehq.com/@huggingface/hello-huggingface-js-inference) or see some demos on [hf.co/huggingfacejs](https://huggingface.co/huggingfacejs).
+You can also try out a live [interactive notebook](https://observablehq.com/@huggingface/hello-huggingface-js-inference), see some demos on [hf.co/huggingfacejs](https://huggingface.co/huggingfacejs), or watch a [Scrimba tutorial that explains how the Inference API works](https://scrimba.com/scrim/co6314c19af51b0ca01b03a0b). 
 
 ## Getting Started
 
