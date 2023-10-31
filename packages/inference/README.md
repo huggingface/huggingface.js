@@ -328,6 +328,22 @@ await hf.imageToText({
 })
 ```
 
+### Text To Image
+
+Creates an image from a text prompt.
+
+[Demo](https://huggingface.co/spaces/huggingfacejs/image-to-text)
+
+```typescript
+await hf.textToImage({
+  inputs: 'award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]',
+  model: 'stabilityai/stable-diffusion-2',
+  parameters: {
+    negative_prompt: 'blurry',
+  }
+})
+```
+
 ### Image To Image
 
 Image-to-image is the task of transforming a source image to match the characteristics of a target image or a target image domain.
@@ -359,22 +375,6 @@ await hf.zeroShotImageClassification({
 ```
 
 ## Multimodal
-
-### Text To Image
-
-Creates an image from a text prompt.
-
-[Demo](https://huggingface.co/spaces/huggingfacejs/image-to-text)
-
-```typescript
-await hf.textToImage({
-  inputs: 'award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]',
-  model: 'stabilityai/stable-diffusion-2',
-  parameters: {
-    negative_prompt: 'blurry',
-  }
-})
-```
 
 ### Feature Extraction
 
