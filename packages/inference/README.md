@@ -38,6 +38,23 @@ import { HfInference } from '@huggingface/inference'
 const hf = new HfInference('your access token')
 ```
 
+#### Tree-shaking
+
+You can import the functions you need directly from the module instead of using the `HfInference` class.
+
+```ts
+import { textGeneration } from "@huggingface/inference";
+
+await textGeneration({
+  accessToken: "hf_...",
+  model: "model_or_endpoint",
+  inputs: ...,
+  parameters: ...
+})
+```
+
+This will enable tree-shaking by your bundler.
+
 ❗**Important note:** Using an access token is optional to get started, however you will be rate limited eventually. Join [Hugging Face](https://huggingface.co/join) and then visit [access tokens](https://huggingface.co/settings/tokens) to generate your access token for **free**.
 
 Your access token should be kept private. If you need to protect it in front-end applications, we suggest setting up a proxy server that stores the access token.
@@ -145,6 +162,8 @@ await hf.tokenClassification({
 ```
 
 ### Translation
+
+Converts text from one language to another.
 
 ```typescript
 await hf.translation({
@@ -447,7 +466,7 @@ await hf.tabularClassification({
 })
 ```
 
-## Custom Call
+## Custom Calls
 
 For models with custom parameters / outputs.
 
@@ -480,23 +499,6 @@ Learn more about using your own inference endpoints [here](https://hf.co/docs/in
 const gpt2 = hf.endpoint('https://xyz.eu-west-1.aws.endpoints.huggingface.cloud/gpt2');
 const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the universe is'});
 ```
-
-## Tree-shaking
-
-You can import the functions you need directly from the module, rather than using the `HfInference` class:
-
-```ts
-import {textGeneration} from "@huggingface/inference";
-
-await textGeneration({
-  accessToken: "hf_...",
-  model: "model_or_endpoint",
-  inputs: ...,
-  parameters: ...
-})
-```
-
-This will enable tree-shaking by your bundler.
 
 ## Running tests
 
