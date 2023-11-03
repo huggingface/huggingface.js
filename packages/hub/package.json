@@ -12,7 +12,7 @@
 	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
-			"types": "./index.ts",
+			"types": "./dist/index.d.ts",
 			"require": "./dist/index.js",
 			"import": "./dist/index.mjs"
 		}
