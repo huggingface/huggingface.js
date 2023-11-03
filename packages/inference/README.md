@@ -38,6 +38,11 @@ import { HfInference } from '@huggingface/inference'
 const hf = new HfInference('your access token')
 ```
 
+❗**Important note:** Using an access token is optional to get started, however you will be rate limited eventually. Join [Hugging Face](https://huggingface.co/join) and then visit [access tokens](https://huggingface.co/settings/tokens) to generate your access token for **free**.
+
+Your access token should be kept private. If you need to protect it in front-end applications, we suggest setting up a proxy server that stores the access token.
+
+
 #### Tree-shaking
 
 You can import the functions you need directly from the module instead of using the `HfInference` class.
@@ -54,10 +59,6 @@ await textGeneration({
 ```
 
 This will enable tree-shaking by your bundler.
-
-❗**Important note:** Using an access token is optional to get started, however you will be rate limited eventually. Join [Hugging Face](https://huggingface.co/join) and then visit [access tokens](https://huggingface.co/settings/tokens) to generate your access token for **free**.
-
-Your access token should be kept private. If you need to protect it in front-end applications, we suggest setting up a proxy server that stores the access token.
 
 ## Natural Language Processing
 
