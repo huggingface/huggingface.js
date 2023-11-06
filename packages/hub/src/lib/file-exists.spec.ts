@@ -12,7 +12,7 @@ describe("fileExists", () => {
 			revision: "dd4bc8b21efa05ec961e3efc4ee5e3832a3679c7",
 		});
 
-		assert(info);
+		assert(info, "file should exist");
 	});
 
 	it("should return false for file that does not exist", async () => {
@@ -25,6 +25,6 @@ describe("fileExists", () => {
 			revision: "dd4bc8b21efa05ec961e3efc4ee5e3832a3679c7",
 		});
 
-		assert(info);
+		assert(!info, "file should not exist");
 	});
 });
