@@ -1,3 +1,4 @@
+import { typedInclude } from "../utils/typedInclude";
 import type { CommitOutput, CommitParams, CommitProgressEvent, ContentSource } from "./commit";
 import { commitIter } from "./commit";
 
@@ -53,10 +54,15 @@ export async function* uploadFilesWithProgress(params: {
 			}
 
 			if (
+				!typedInclude(["PUT", "POST"], init.method) ||
 				!("progressHint" in init) ||
 				!init.progressHint ||
 				typeof XMLHttpRequest === "undefined" ||
-				typeof input !== "string"
+				typeof input !== "string" ||
+				(!(init.body instanceof ArrayBuffer) &&
+					!(init.body instanceof Blob) &&
+					!(init.body instanceof File) &&
+					typeof init.body !== "string")
 			) {
 				return fetch(input, init);
 			}
