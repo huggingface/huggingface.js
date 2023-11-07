@@ -25,6 +25,7 @@ export async function* uploadFilesWithProgress(params: {
 	branch?: CommitParams["branch"];
 	isPullRequest?: CommitParams["isPullRequest"];
 	parentCommit?: CommitParams["parentCommit"];
+	abortSignal?: CommitParams["abortSignal"];
 	/**
 	 * Set this to true in order to have progress events for hashing
 	 */
@@ -45,6 +46,7 @@ export async function* uploadFilesWithProgress(params: {
 		isPullRequest: params.isPullRequest,
 		parentCommit: params.parentCommit,
 		useWebWorkers: params.useWebWorkers,
+		abortSignal: params.abortSignal,
 		fetch: async (input, init) => {
 			if (!init) {
 				return fetch(input);
@@ -105,6 +107,7 @@ export async function* uploadFilesWithProgress(params: {
 				});
 			}
 
+			init.signal?.throwIfAborted();
 			xhr.send(init.body);
 
 			return new Promise((resolve, reject) => {
@@ -126,6 +129,18 @@ export async function* uploadFilesWithProgress(params: {
 				xhr.addEventListener("error", () => {
 					reject(new Error(xhr.statusText));
 				});
+
+				if (init.signal) {
+					init.signal.addEventListener("abort", () => {
+						xhr.abort();
+
+						try {
+							init.signal?.throwIfAborted();
+						} catch (err) {
+							reject(err);
+						}
+					});
+				}
 			});
 		},
 	});
