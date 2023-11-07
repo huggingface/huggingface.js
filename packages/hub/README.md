@@ -64,6 +64,18 @@ await uploadFiles({
   ],
 });
 
+// or
+
+for await (const progressEvent of await uploadFiles({
+  repo,
+  credentials,
+  files: [
+    ...
+  ],
+})) {
+  console.log(progressEvent);
+}
+
 await deleteFile({repo, credentials, path: "myfile.bin"});
 
 await (await downloadFile({ repo, path: "README.md" })).text();
