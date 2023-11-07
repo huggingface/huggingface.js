@@ -80,6 +80,7 @@ export interface CommitParams {
 	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 	 */
 	fetch?: typeof fetch;
+	abortSignal?: AbortSignal;
 }
 
 export interface CommitOutput {
@@ -142,6 +143,8 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 			const lazyBlob = await createBlob(operation.content, { fetch: params.fetch });
 
+			params.abortSignal?.throwIfAborted();
+
 			return {
 				...operation,
 				content: lazyBlob,
@@ -163,6 +166,8 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 			),
 		};
 
+		params.abortSignal?.throwIfAborted();
+
 		const res = await (params.fetch ?? fetch)(
 			`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/preupload/${encodeURIComponent(
 				params.branch ?? "main"
@@ -174,6 +179,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify(payload),
+				signal: params.abortSignal,
 			}
 		);
 
@@ -202,7 +208,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 		>((yieldCallback, returnCallback, rejectCallack) => {
 			return promisesQueue(
 				operations.map((op) => async () => {
-					const iterator = sha256(op.content, { useWebWorker: params.useWebWorkers });
+					const iterator = sha256(op.content, { useWebWorker: params.useWebWorkers, abortSignal: params.abortSignal });
 					let res: IteratorResult<number, string>;
 					do {
 						res = await iterator.next();
@@ -217,6 +223,8 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 				CONCURRENT_SHAS
 			).then(returnCallback, rejectCallack);
 		});
+
+		params.abortSignal?.throwIfAborted();
 
 		const payload: ApiLfsBatchRequest = {
 			operation: "upload",
@@ -244,6 +252,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 					"Content-Type": "application/vnd.git-lfs+json",
 				},
 				body: JSON.stringify(payload),
+				signal: params.abortSignal,
 			}
 		);
 
@@ -264,6 +273,8 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 					if (!op) {
 						throw new InvalidApiResponseFormatError("Unrequested object ID in response");
 					}
+
+					params.abortSignal?.throwIfAborted();
 
 					if (obj.error) {
 						const errorMessage = `Error while doing LFS batch call for ${operations[shas.indexOf(obj.oid)].path}: ${
@@ -316,6 +327,8 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 						await promisesQueueStreaming(
 							parts.map((part) => async () => {
+								params.abortSignal?.throwIfAborted();
+
 								const index = parseInt(part) - 1;
 								const slice = content.slice(index * chunkSize, (index + 1) * chunkSize);
 
@@ -323,6 +336,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 									method: "PUT",
 									/** Unfortunately, browsers don't support our inherited version of Blob in fetch calls */
 									body: slice instanceof WebBlob && isFrontend ? await slice.arrayBuffer() : slice,
+									signal: params.abortSignal,
 									...({
 										progressHint: {
 											path: op.path,
@@ -354,6 +368,8 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 							MULTIPART_PARALLEL_UPLOAD
 						);
 
+						params.abortSignal?.throwIfAborted();
+
 						const res = await (params.fetch ?? fetch)(completionUrl, {
 							method: "POST",
 							body: JSON.stringify(completeReq),
@@ -361,6 +377,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 								Accept: "application/vnd.git-lfs+json",
 								"Content-Type": "application/vnd.git-lfs+json",
 							},
+							signal: params.abortSignal,
 						});
 
 						if (!res.ok) {
@@ -386,6 +403,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 							},
 							/** Unfortunately, browsers don't support our inherited version of Blob in fetch calls */
 							body: content instanceof WebBlob && isFrontend ? await content.arrayBuffer() : content,
+							signal: params.abortSignal,
 							...({
 								progressHint: {
 									path: op.path,
@@ -420,6 +438,8 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 			).then(returnCallback, rejectCallback);
 		});
 	}
+
+	params.abortSignal?.throwIfAborted();
 
 	yield { event: "phase", phase: "committing" };
 
@@ -467,6 +487,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 					]
 						.map((x) => JSON.stringify(x))
 						.join("\n"),
+					signal: params.abortSignal,
 					...({
 						progressHint: {
 							progressCallback: (progress: number) => {

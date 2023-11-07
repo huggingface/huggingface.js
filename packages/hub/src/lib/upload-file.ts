@@ -14,6 +14,7 @@ export function uploadFile(params: {
 	parentCommit?: CommitParams["parentCommit"];
 	fetch?: CommitParams["fetch"];
 	useWebWorkers?: CommitParams["useWebWorkers"];
+	abortSignal?: CommitParams["abortSignal"];
 }): Promise<CommitOutput> {
 	const path =
 		params.file instanceof URL
@@ -40,5 +41,6 @@ export function uploadFile(params: {
 		parentCommit: params.parentCommit,
 		fetch: params.fetch,
 		useWebWorkers: params.useWebWorkers,
+		abortSignal: params.abortSignal,
 	});
 }

@@ -13,6 +13,7 @@ export function uploadFiles(params: {
 	parentCommit?: CommitParams["parentCommit"];
 	fetch?: CommitParams["fetch"];
 	useWebWorkers?: CommitParams["useWebWorkers"];
+	abortSignal?: CommitParams["abortSignal"];
 }): Promise<CommitOutput> {
 	return commit({
 		credentials: params.credentials,
@@ -30,5 +31,6 @@ export function uploadFiles(params: {
 		parentCommit: params.parentCommit,
 		fetch: params.fetch,
 		useWebWorkers: params.useWebWorkers,
+		abortSignal: params.abortSignal,
 	});
 }

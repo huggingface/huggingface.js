@@ -92,7 +92,7 @@ function destroyWorker(worker: Worker): void {
  */
 export async function* sha256(
 	buffer: Blob,
-	opts?: { useWebWorker?: boolean | { minSize: number; poolSize?: number } }
+	opts?: { useWebWorker?: boolean | { minSize: number; poolSize?: number }; abortSignal?: AbortSignal }
 ): AsyncGenerator<number, string> {
 	yield 0;
 
@@ -124,6 +124,13 @@ export async function* sha256(
 							returnCallback(event.data.sha256);
 						} else if (event.data.progress) {
 							yieldCallback(event.data.progress);
+
+							try {
+								opts.abortSignal?.throwIfAborted();
+							} catch (err) {
+								destroyWorker(worker);
+								rejectCallack(err);
+							}
 						} else {
 							destroyWorker(worker);
 							rejectCallack(event);
@@ -160,6 +167,8 @@ export async function* sha256(
 			sha256.update(value);
 			bytesDone += value.length;
 			yield bytesDone / total;
+
+			opts?.abortSignal?.throwIfAborted();
 		}
 
 		return sha256.digest("hex");
@@ -169,7 +178,7 @@ export async function* sha256(
 		cryptoModule = await import("./sha256-node");
 	}
 
-	return yield* cryptoModule.sha256Node(buffer);
+	return yield* cryptoModule.sha256Node(buffer, { abortSignal: opts?.abortSignal });
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
