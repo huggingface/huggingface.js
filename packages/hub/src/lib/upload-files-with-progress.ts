@@ -88,13 +88,13 @@ export async function* uploadFilesWithProgress(params: {
 							totalProgress += partProgress;
 						}
 						if (totalProgress === tracking.numParts) {
-							// Already handled in `commitIter`
+							progressCallback(0.9999999999);
 						} else {
 							progressCallback(totalProgress / tracking.numParts);
 						}
 					} else {
 						if (event.loaded === event.total) {
-							// Already handled in `commitIter`
+							progressCallback(0.9999999999);
 						} else {
 							progressCallback(event.loaded / event.total);
 						}
