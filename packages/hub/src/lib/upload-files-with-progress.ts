@@ -53,12 +53,10 @@ export async function* uploadFilesWithProgress(params: {
 			}
 
 			if (
-				init.method !== "PUT" ||
 				!("progressHint" in init) ||
 				!init.progressHint ||
 				typeof XMLHttpRequest === "undefined" ||
-				typeof input !== "string" ||
-				(!(init.body instanceof ArrayBuffer) && !(init.body instanceof Blob) && !(init.body instanceof File))
+				typeof input !== "string"
 			) {
 				return fetch(input, init);
 			}
