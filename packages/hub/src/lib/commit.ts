@@ -108,14 +108,10 @@ export type CommitProgressEvent =
 			phase: "preuploading" | "uploadingLargeFiles" | "committing";
 	  }
 	| {
-			event: "progress";
-			progress: number;
-	  }
-	| {
 			event: "fileProgress";
 			path: string;
 			progress: number;
-			type: "hashing" | "uploading";
+			state: "hashing" | "uploading";
 	  };
 
 /**
@@ -211,7 +207,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 			100
 		)) {
 			const shas = yield* eventToGenerator<
-				{ event: "fileProgress"; type: "hashing"; path: string; progress: number },
+				{ event: "fileProgress"; state: "hashing"; path: string; progress: number },
 				string[]
 			>((yieldCallback, returnCallback, rejectCallack) => {
 				return promisesQueue(
@@ -221,7 +217,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 						do {
 							res = await iterator.next();
 							if (!res.done) {
-								yieldCallback({ event: "fileProgress", path: op.path, progress: res.value, type: "hashing" });
+								yieldCallback({ event: "fileProgress", path: op.path, progress: res.value, state: "hashing" });
 							}
 						} while (!res.done);
 						const sha = res.value;
@@ -296,7 +292,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 								event: "fileProgress",
 								path: op.path,
 								progress: 1,
-								type: "uploading",
+								state: "uploading",
 							});
 							return;
 						}
@@ -304,7 +300,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 							event: "fileProgress",
 							path: op.path,
 							progress: 0,
-							type: "uploading",
+							state: "uploading",
 						});
 						const content = op.content;
 						const header = obj.actions.upload.header;
@@ -331,7 +327,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 							// Defined here so that it's not redefined at each iteration (and the caller can tell it's for the same file)
 							const progressCallback = (progress: number) =>
-								yieldCallback({ event: "fileProgress", path: op.path, progress, type: "uploading" });
+								yieldCallback({ event: "fileProgress", path: op.path, progress, state: "uploading" });
 
 							await promisesQueueStreaming(
 								parts.map((part) => async () => {
@@ -401,7 +397,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 								event: "fileProgress",
 								path: op.path,
 								progress: 1,
-								type: "uploading",
+								state: "uploading",
 							});
 						} else {
 							const res = await (params.fetch ?? fetch)(obj.actions.upload.href, {
@@ -420,7 +416,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 												event: "fileProgress",
 												path: op.path,
 												progress,
-												type: "uploading",
+												state: "uploading",
 											}),
 									},
 									// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -438,7 +434,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 								event: "fileProgress",
 								path: op.path,
 								progress: 1,
-								type: "uploading",
+								state: "uploading",
 							});
 						}
 					}),
@@ -507,7 +503,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 												event: "fileProgress",
 												path: op.path,
 												progress,
-												type: "uploading",
+												state: "uploading",
 											});
 										}
 									}

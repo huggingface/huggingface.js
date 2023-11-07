@@ -1,3 +1,4 @@
+import { typedInclude } from "../utils/typedInclude";
 import type { CommitOutput, CommitParams, CommitProgressEvent, ContentSource } from "./commit";
 import { commitIter } from "./commit";
 
@@ -53,12 +54,15 @@ export async function* uploadFilesWithProgress(params: {
 			}
 
 			if (
-				init.method !== "PUT" ||
+				!typedInclude(["PUT", "POST"], init.method) ||
 				!("progressHint" in init) ||
 				!init.progressHint ||
 				typeof XMLHttpRequest === "undefined" ||
 				typeof input !== "string" ||
-				(!(init.body instanceof ArrayBuffer) && !(init.body instanceof Blob) && !(init.body instanceof File))
+				(!(init.body instanceof ArrayBuffer) &&
+					!(init.body instanceof Blob) &&
+					!(init.body instanceof File) &&
+					typeof init.body !== "string")
 			) {
 				return fetch(input, init);
 			}
@@ -84,13 +88,13 @@ export async function* uploadFilesWithProgress(params: {
 							totalProgress += partProgress;
 						}
 						if (totalProgress === tracking.numParts) {
-							// Already handled in `commitIter`
+							progressCallback(0.9999999999);
 						} else {
 							progressCallback(totalProgress / tracking.numParts);
 						}
 					} else {
 						if (event.loaded === event.total) {
-							// Already handled in `commitIter`
+							progressCallback(0.9999999999);
 						} else {
 							progressCallback(event.loaded / event.total);
 						}
