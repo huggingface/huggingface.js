@@ -92,7 +92,7 @@ function destroyWorker(worker: Worker): void {
  */
 export async function* sha256(
 	buffer: Blob,
-	opts?: { useWebWorker?: boolean | { minSize: number; poolSize?: number }; abortSignal?: AbortSignal }
+	opts?: { useWebWorker?: boolean | { minSize?: number; poolSize?: number }; abortSignal?: AbortSignal }
 ): AsyncGenerator<number, string> {
 	yield 0;
 

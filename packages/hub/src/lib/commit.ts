@@ -75,7 +75,7 @@ export interface CommitParams {
 	 *
 	 * We load hash-wasm from a CDN inside the web worker. Not sure how to do otherwise and still have a "clean" bundle.
 	 */
-	useWebWorkers?: boolean | { minSize: number; poolSize?: number };
+	useWebWorkers?: boolean | { minSize?: number; poolSize?: number };
 	/**
 	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 	 */
