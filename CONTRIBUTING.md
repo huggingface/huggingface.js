@@ -19,3 +19,13 @@ It's not a hard requirement, but please consider using an icon from [Gitmoji](ht
 ## Tests
 
 If you want to run only specific tests, you can do `pnpm test -- -t "test name"`
+
+## Adding a package
+
+- Add the package name in [`pnpm-workspace.yaml`](pnpm-workspace.yaml)
+- Add a `package.json` inspired from the other packages ([`packages/hub/package.json`](packages/hub/package.json) / [`packages/agents/package.json`](packages/agents/package.json)) in `packages/<package name>/package.json`
+- Run `pnpm install` at the root
+- Edit [`packages/doc-internal/package.json`](packages/doc-internal/package.json) and add the two commands in the `scripts` section:
+  - `prepublish-<package name>`
+  - `doc-<package name>`
+- Add the `<package-name>-publish.yml` file in the `.github/workflows` folder, inspired from the other packages
