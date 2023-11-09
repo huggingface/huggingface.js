@@ -28,7 +28,7 @@ Check out the [full documentation](https://huggingface.co/docs/huggingface.js/hu
 For some of the calls, you need to create an account and generate an [access token](https://huggingface.co/settings/tokens).
 
 ```ts
-import { createRepo, uploadFiles, deleteFile, deleteRepo, listFiles, whoAmI } from "@huggingface/hub";
+import { createRepo, uploadFiles, uploadFilesWithProgress, deleteFile, deleteRepo, listFiles, whoAmI } from "@huggingface/hub";
 import type { RepoDesignation, Credentials } from "@huggingface/hub";
 
 const repo: RepoDesignation = { type: "model", name: "myname/some-model" };
@@ -63,6 +63,18 @@ await uploadFiles({
     // Can also work with native File in browsers
   ],
 });
+
+// or
+
+for await (const progressEvent of await uploadFilesWithProgress({
+  repo,
+  credentials,
+  files: [
+    ...
+  ],
+})) {
+  console.log(progressEvent);
+}
 
 await deleteFile({repo, credentials, path: "myfile.bin"});
 
