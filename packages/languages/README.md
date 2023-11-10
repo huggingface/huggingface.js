@@ -16,9 +16,9 @@ yarn add @huggingface/languages
 
 ```ts
 // esm.sh
-import { LANGUAGES_ISO_639_1, wikiLink, type Language } from "https://esm.sh/@huggingface/languages"
+import { language, wikiLink, type Language } from "https://esm.sh/@huggingface/languages"
 // or npm:
-import { LANGUAGES_ISO_639_1, wikiLink, type Language } from "npm:@huggingface/languages"
+import { language, wikiLink, type Language } from "npm:@huggingface/languages"
 ```
 
 Check out the [full documentation](https://huggingface.co/docs/huggingface.js/languages/README).
