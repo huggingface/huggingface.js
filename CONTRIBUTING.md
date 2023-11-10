@@ -29,3 +29,7 @@ If you want to run only specific tests, you can do `pnpm test -- -t "test name"`
   - `prepublish-<package name>`
   - `doc-<package name>`
 - Add the `<package-name>-publish.yml` file in the `.github/workflows` folder, inspired from the other packages
+- Add the package in the main README.md
+- Add a `tsup.config.ts` file in the package folder, inspired from the other packages, or just use `tsup src/index.ts --format cjs,esm --clean --dts` as the build command
+- Copy `.prettierignore` from another package
+- Add a `tsconfig.json`

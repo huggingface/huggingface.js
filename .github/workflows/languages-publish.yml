@@ -1,4 +1,4 @@
-name: Inference - Version and Release
+name: Languages - Version and Release
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ on:
 
 defaults:
   run:
-    working-directory: packages/inference
+    working-directory: packages/languages
 
 jobs:
   version_and_release:
@@ -24,7 +24,7 @@ jobs:
           node-version: "18"
           cache: "pnpm"
           cache-dependency-path: |
-            packages/inference/pnpm-lock.yaml
+            packages/languages/pnpm-lock.yaml
             packages/doc-internal/pnpm-lock.yaml
           # setting a registry enables the NODE_AUTH_TOKEN env variable where we can set an npm token.  REQUIRED
           registry-url: "https://registry.npmjs.org"
@@ -38,8 +38,8 @@ jobs:
           node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./package.json')); package.version = '$BUMPED_VERSION'; fs.writeFileSync('./package.json', JSON.stringify(package, null, '\t') + '\n');"
           pnpm --filter doc-internal run fix-cdn-versions
           git add ../..
-          git commit -m "🔖 @hugginface/inference $BUMPED_VERSION"
-          git tag "inference-v$BUMPED_VERSION"
+          git commit -m "🔖 @hugginface/languages $BUMPED_VERSION"
+          git tag "languages-v$BUMPED_VERSION"
       - run: pnpm publish --no-git-checks .
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
