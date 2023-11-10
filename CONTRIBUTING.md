@@ -29,3 +29,4 @@ If you want to run only specific tests, you can do `pnpm test -- -t "test name"`
   - `prepublish-<package name>`
   - `doc-<package name>`
 - Add the `<package-name>-publish.yml` file in the `.github/workflows` folder, inspired from the other packages
+- Add the package in the main README.md
