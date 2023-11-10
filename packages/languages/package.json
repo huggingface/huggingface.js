@@ -1,0 +1,45 @@
+{
+	"name": "@huggingface/languages",
+	"packageManager": "pnpm@8.3.1",
+	"version": "0.1.0",
+	"description": "List of ISO-639 languages used in the Hub",
+	"repository": "https://github.com/huggingface/huggingface.js.git",
+	"publishConfig": {
+		"access": "public"
+	},
+	"main": "./dist/index.js",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"require": "./dist/index.js",
+			"import": "./dist/index.mjs"
+		}
+	},
+	"source": "index.ts",
+	"scripts": {
+		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
+		"lint:check": "eslint --ext .cjs,.ts .",
+		"format": "prettier --write .",
+		"format:check": "prettier --check .",
+		"prepublishOnly": "pnpm run build",
+		"build": "tsup",
+		"type-check": "tsc"
+	},
+	"files": [
+		"dist",
+		"index.ts",
+		"tsconfig.json"
+	],
+	"keywords": [
+		"huggingface",
+		"hub",
+		"languages"
+	],
+	"author": "Hugging Face",
+	"license": "MIT",
+	"devDependencies": {
+		"typescript": "^5.0.4"
+	}
+}

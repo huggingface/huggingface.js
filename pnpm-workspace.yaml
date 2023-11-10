@@ -4,3 +4,4 @@ packages:
   - "packages/doc-internal"
   - "packages/shared"
   - "packages/agents"
+  - "packages/languages"
