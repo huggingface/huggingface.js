@@ -1,8 +1,5 @@
 import type { Language } from "./types";
 
-/**
- * mostly from https://github.com/meikidd/iso-639-1
- */
 export const LANGUAGES_ISO_639_1 = {
 	aa: {
 		code: "aa",
