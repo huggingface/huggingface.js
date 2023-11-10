@@ -32612,3 +32612,5 @@ export const LANGUAGES_ISO_639_3: Record<string, Language> = {
 		name: "Zuojiang Zhuang",
 	},
 };
+
+export const LANGUAGES = { ...LANGUAGES_ISO_639_1, ...LANGUAGES_ISO_639_3 };
