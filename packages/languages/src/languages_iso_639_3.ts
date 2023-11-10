@@ -1,6 +1,8 @@
 import type { Language } from "./types";
 
 /**
+ * Kudos github.com/lbourdois for the discussions
+ *
  * Only codes in ISO_639_2 that were covered before and not anymore:
  * ber
  * cel
