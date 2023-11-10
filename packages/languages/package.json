@@ -25,6 +25,7 @@
 		"format:check": "prettier --check .",
 		"prepublishOnly": "pnpm run build",
 		"build": "tsup",
+		"test": "vitest run",
 		"type-check": "tsc"
 	},
 	"files": [

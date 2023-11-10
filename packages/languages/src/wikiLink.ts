@@ -1,5 +1,6 @@
-import type { Language } from "./types";
-
-export function wikiLink(l: Language): string {
-	return `https://en.wikipedia.org/wiki/ISO_639:${l.code}`;
+/**
+ * @param languageCode 2 or 3 letter language code
+ */
+export function wikiLink(languageCode: string): string {
+	return `https://en.wikipedia.org/wiki/ISO_639:${languageCode}`;
 }
