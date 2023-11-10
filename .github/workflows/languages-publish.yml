@@ -30,7 +30,7 @@ jobs:
           registry-url: "https://registry.npmjs.org"
       - run: pnpm install
       - run: git config --global user.name machineuser
-      - run: git config --global user.email tech@huggingface.co
+      - run: git config --global user.email infra+machineuser@huggingface.co
       - run: |
           PACKAGE_VERSION=$(node -p "require('./package.json').version")
           BUMPED_VERSION=$(node -p "require('semver').inc('$PACKAGE_VERSION', '${{ github.event.inputs.newversion }}')")
