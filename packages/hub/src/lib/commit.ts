@@ -235,9 +235,11 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 				// multipart is a custom protocol for HF
 				transfers: ["basic", "multipart"],
 				hash_algo: "sha_256",
-				ref: {
-					name: params.branch ?? "main",
-				},
+				...(!params.isPullRequest && {
+					ref: {
+						name: params.branch ?? "main",
+					},
+				}),
 				objects: operations.map((op, i) => ({
 					oid: shas[i],
 					size: op.content.size,
