@@ -129,6 +129,15 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 	const abortController = new AbortController();
 	const abortSignal = abortController.signal;
 
+	// Polyfill see https://discuss.huggingface.co/t/why-cant-i-upload-a-parquet-file-to-my-dataset-error-o-throwifaborted-is-not-a-function/62245
+	if (!abortSignal.throwIfAborted) {
+		abortSignal.throwIfAborted = () => {
+			if (abortSignal.aborted) {
+				throw new DOMException("Aborted", "AbortError");
+			}
+		};
+	}
+
 	if (params.abortSignal) {
 		params.abortSignal.addEventListener("abort", () => abortController.abort());
 	}
