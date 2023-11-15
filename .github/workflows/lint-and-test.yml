@@ -75,8 +75,10 @@ jobs:
         working-directory: e2e/ts
         run: |
           npm i -g yarn --force
-          cat package.json
+          # yarn now looks at root package.json for the package manager...
+          mv ../../package.json ../../package.json.bk
           yarn install --registry http://localhost:4874/
+          mv ../../package.json.bk ../../package.json
 
       - name: E2E test - typescript node project
         working-directory: e2e/ts
