@@ -12,7 +12,7 @@
 ```ts
 await inference.translation({
   model: 't5-base',
-  inputs: 'My name is Wolfgang and I live in London'
+  inputs: 'My name is Wolfgang and I live in London!'
 })
 
 await hf.translation({
