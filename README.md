@@ -113,7 +113,7 @@ const inference = new HfInference(HF_ACCESS_TOKEN);
 // You can also omit "model" to use the recommended model for the task
 await inference.translation({
   model: 't5-base',
-  inputs: 'My name is Wolfgang and I live in Berlin'
+  inputs: 'My name is Wolfgang and I live in Amsterdam'
 })
 
 await inference.textToImage({
