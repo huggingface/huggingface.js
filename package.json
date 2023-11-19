@@ -8,8 +8,8 @@
 		"eslint-config-prettier": "^8.6.0",
 		"eslint-plugin-prettier": "^4.2.1",
 		"prettier": "^2.8.4",
-		"typescript": "^4.9.5",
-		"vite": "^4.1.4"
+		"typescript": "^5.0.0",
+		"vite": "^4.4.2"
 	},
 	"scripts": {
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .eslintrc.cjs",
