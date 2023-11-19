@@ -35,7 +35,7 @@ jobs:
           BUMPED_VERSION=$(node -p "require('semver').inc('$PACKAGE_VERSION', '${{ github.event.inputs.newversion }}')")
           # Update package.json with the new version
           node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./package.json')); package.version = '$BUMPED_VERSION'; fs.writeFileSync('./package.json', JSON.stringify(package, null, '\t') + '\n');"
-          git commit -m "🔖 @hugginface/languages $BUMPED_VERSION"
+          git commit . -m "🔖 @hugginface/languages $BUMPED_VERSION"
           git tag "languages-v$BUMPED_VERSION"
       - run: pnpm publish --no-git-checks .
         env:
