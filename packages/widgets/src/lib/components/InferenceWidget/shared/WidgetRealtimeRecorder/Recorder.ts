@@ -2,7 +2,7 @@ export default class Recorder {
 	// see developers.google.com/web/updates/2016/01/mediarecorder
 	type: "audio" | "video" = "audio";
 	private apiToken: string | undefined;
-	private audioContext: AudioContext;
+	private audioContext: AudioContext | undefined;
 	private isLoggedIn = false;
 	private isModelLoaded = false;
 	private isEmptyBuffer = false;
@@ -11,8 +11,8 @@ export default class Recorder {
 	private updateModelLoading: (isLoading: boolean, estimatedTime?: number) => void;
 	private renderText: (txt: string) => void;
 	private renderWarning: (warning: string) => void;
-	private socket: WebSocket;
-	private stream: MediaStream;
+	private socket: WebSocket | undefined;
+	private stream: MediaStream | undefined;
 
 	constructor(
 		modelId: string,
@@ -36,12 +36,12 @@ export default class Recorder {
 
 		this.socket = new WebSocket(`wss://api-inference.huggingface.co/asr/live/cpu/${this.modelId}`);
 
-		this.socket.onerror = (_) => {
+		this.socket.onerror = () => {
 			this.onError("Webscoket connection error");
 		};
 
-		this.socket.onopen = (_) => {
-			this.socket.send(`Bearer ${this.apiToken}`);
+		this.socket.onopen = () => {
+			this.socket?.send(`Bearer ${this.apiToken}`);
 		};
 
 		this.updateModelLoading(true);
@@ -82,7 +82,7 @@ export default class Recorder {
 			};
 			if (this.isLoggedIn) {
 				try {
-					this.socket.send(JSON.stringify(message));
+					this.socket?.send(JSON.stringify(message));
 				} catch (e) {
 					this.onError(`Error sending data to websocket: ${e}`);
 				}

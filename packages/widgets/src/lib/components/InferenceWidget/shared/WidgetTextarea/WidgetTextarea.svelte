@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { tick } from "svelte";
 
-	import { delay } from "../../../../utils/ViewUtils";
+	import { delay } from "../../../../utils/ViewUtils.js";
 	import WidgetLabel from "../WidgetLabel/WidgetLabel.svelte";
 
 	export let label: string = "";

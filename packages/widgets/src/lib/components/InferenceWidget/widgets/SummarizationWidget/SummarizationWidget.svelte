@@ -1,13 +1,17 @@
 <script lang="ts">
-	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "../../shared/types";
-	import type { WidgetExampleTextInput } from "../../shared/WidgetExample";
+	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "$lib/components/InferenceWidget/shared/types.js";
+	import type { WidgetExampleTextInput } from "$lib/components/InferenceWidget/shared/WidgetExample.js";
 
 	import WidgetOutputText from "../../shared/WidgetOutputText/WidgetOutputText.svelte";
 	import WidgetSubmitBtn from "../../shared/WidgetSubmitBtn/WidgetSubmitBtn.svelte";
 	import WidgetTextarea from "../../shared/WidgetTextarea/WidgetTextarea.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
-	import { addInferenceParameters, callInferenceApi, updateUrl } from "../../shared/helpers";
-	import { isTextInput } from "../../shared/inputValidation";
+	import {
+		addInferenceParameters,
+		callInferenceApi,
+		updateUrl,
+	} from "$lib/components/InferenceWidget/shared/helpers.js";
+	import { isTextInput } from "$lib/components/InferenceWidget/shared/inputValidation.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -16,7 +20,6 @@
 	export let noTitle: WidgetProps["noTitle"];
 	export let shouldUpdateUrl: WidgetProps["shouldUpdateUrl"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
-	let isDisabled = false;
 
 	let computeTime = "";
 	let error: string = "";

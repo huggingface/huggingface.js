@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "../../shared/types";
-	import type { WidgetExampleZeroShotTextInput } from "../../shared/WidgetExample";
+	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "$lib/components/InferenceWidget/shared/types.js";
+	import type { WidgetExampleZeroShotTextInput } from "$lib/components/InferenceWidget/shared/WidgetExample.js";
 
 	import WidgetCheckbox from "../../shared/WidgetCheckbox/WidgetCheckbox.svelte";
 	import WidgetOutputChart from "../../shared/WidgetOutputChart/WidgetOutputChart.svelte";
@@ -8,8 +8,12 @@
 	import WidgetTextarea from "../../shared/WidgetTextarea/WidgetTextarea.svelte";
 	import WidgetTextInput from "../../shared/WidgetTextInput/WidgetTextInput.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
-	import { addInferenceParameters, callInferenceApi, updateUrl } from "../../shared/helpers";
-	import { isZeroShotTextInput } from "../../shared/inputValidation";
+	import {
+		addInferenceParameters,
+		callInferenceApi,
+		updateUrl,
+	} from "$lib/components/InferenceWidget/shared/helpers.js";
+	import { isZeroShotTextInput } from "$lib/components/InferenceWidget/shared/inputValidation.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -115,12 +119,20 @@
 	}
 
 	function parseOutput(body: unknown): Array<{ label: string; score: number }> {
-		if (body && typeof body === "object" && Array.isArray(body["labels"]) && Array.isArray(body["scores"])) {
+		if (
+			body &&
+			typeof body === "object" &&
+			"labels" in body &&
+			Array.isArray(body["labels"]) &&
+			"scores" in body &&
+			Array.isArray(body["scores"])
+		) {
+			const scores = body["scores"];
 			return body["labels"]
-				.filter((_, i) => body["scores"][i] !== null || body["scores"][i] !== undefined)
+				.filter((_, i) => scores[i] !== null || scores[i] !== undefined)
 				.map((x, i) => ({
 					label: x ?? "",
-					score: body["scores"][i] ?? 0,
+					score: scores[i] ?? 0,
 				}));
 		}
 		throw new TypeError("Invalid output: output must be of type <labels:Array; scores:Array>");

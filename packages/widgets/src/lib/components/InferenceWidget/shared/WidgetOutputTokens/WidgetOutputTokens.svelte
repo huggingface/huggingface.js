@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { escape, mod, sum } from "../../../../utils/ViewUtils";
+	import { escape, mod, sum } from "../../../../utils/ViewUtils.js";
 
 	interface Span {
 		end: number;
@@ -45,7 +45,7 @@
 		let offset = 0;
 
 		const indexes = Object.keys(tags)
-			.map(k => parseInt(k, 10))
+			.map((k) => parseInt(k, 10))
 			.sort((a, b) => a - b); /// CAUTION
 		for (const i of indexes) {
 			const spanTags = tags[i];
@@ -56,7 +56,7 @@
 			offset = i;
 
 			for (const spanTag of spanTags) {
-				const hash = mod(sum(Array.from(spanTag.span.type).map(x => x.charCodeAt(0))), COLORS.length);
+				const hash = mod(sum(Array.from(spanTag.span.type).map((x) => x.charCodeAt(0))), COLORS.length);
 				const color = COLORS[hash];
 				if (spanTag.tag === "start") {
 					out += `<span

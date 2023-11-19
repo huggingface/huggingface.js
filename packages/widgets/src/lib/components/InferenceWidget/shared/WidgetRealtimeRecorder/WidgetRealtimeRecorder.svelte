@@ -1,11 +1,8 @@
 <script lang="ts">
-	import type { WidgetProps } from "../../shared/types";
-
+	import type { WidgetProps } from "$lib/components/InferenceWidget/shared/types.js";
 	import { onDestroy, onMount } from "svelte";
-
-	import IconMagicWand from "../../../Icons/IconMagicWand.svelte";
-
-	import Recorder from "./Recorder";
+	import IconMagicWand from "$lib/components/Icons/IconMagicWand.svelte";
+	import Recorder from "./Recorder.js";
 
 	export let apiToken: WidgetProps["apiUrl"] | undefined = undefined;
 	export let classNames = "";
@@ -36,19 +33,23 @@
 			isRecording = false;
 			onRecordStop();
 			updateModelLoading(false);
-			switch (e.name) {
-				case "NotAllowedError": {
-					onError("Please allow access to your microphone & refresh the page");
-					break;
+			if (e instanceof Error) {
+				switch (e.name) {
+					case "NotAllowedError": {
+						onError("Please allow access to your microphone & refresh the page");
+						break;
+					}
+					case "NotFoundError": {
+						onError("No microphone found on your device");
+						break;
+					}
+					default: {
+						onError(`${e.name}: ${e.message}`);
+						break;
+					}
 				}
-				case "NotFoundError": {
-					onError("No microphone found on your device");
-					break;
-				}
-				default: {
-					onError(`${e.name}: ${e.message}`);
-					break;
-				}
+			} else {
+				onError(String(e));
 			}
 		}
 	}

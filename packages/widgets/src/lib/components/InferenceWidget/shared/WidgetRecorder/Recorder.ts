@@ -1,10 +1,10 @@
-import { delay } from "../../../../utils/ViewUtils";
+import { delay } from "$lib/utils/ViewUtils.js";
 
 export default class Recorder {
 	// see developers.google.com/web/updates/2016/01/mediarecorder
 	type: "audio" | "video" = "audio";
-	private stream: MediaStream;
-	private mediaRecorder: MediaRecorder;
+	private stream?: MediaStream;
+	private mediaRecorder?: MediaRecorder;
 	private recordedBlobs: Blob[] = [];
 	public outputBlob?: Blob;
 
@@ -12,6 +12,9 @@ export default class Recorder {
 		return this.type === "video" ? "video/webm" : "audio/webm";
 	}
 	get mimeType(): string {
+		if (!this.mediaRecorder) {
+			throw new Error("MediaRecorder not initialized");
+		}
 		return this.mediaRecorder.mimeType;
 	}
 	async start(): Promise<void> {
@@ -22,6 +25,9 @@ export default class Recorder {
 		this.startRecording();
 	}
 	private startRecording() {
+		if (!this.stream) {
+			throw new Error("Stream not initialized");
+		}
 		this.outputBlob = undefined;
 		this.mediaRecorder = new MediaRecorder(this.stream, {
 			mimeType: this.desiredMimeType,

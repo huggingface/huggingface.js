@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onDestroy, onMount } from "svelte";
 
-	import IconMicrophone from "../../../Icons/IconMicrophone.svelte";
+	import IconMicrophone from "$lib/components/Icons/IconMicrophone.svelte";
 
-	import Recorder from "./Recorder";
+	import Recorder from "./Recorder.js";
 
 	export let classNames = "";
 	export let onRecordStart: () => void = () => null;
@@ -35,19 +35,23 @@
 			}
 		} catch (e) {
 			isRecording = false;
-			switch (e.name) {
-				case "NotAllowedError": {
-					onError("Please allow access to your microphone & refresh the page");
-					break;
+			if (e instanceof Error) {
+				switch (e.name) {
+					case "NotAllowedError": {
+						onError("Please allow access to your microphone & refresh the page");
+						break;
+					}
+					case "NotFoundError": {
+						onError("No microphone found on your device");
+						break;
+					}
+					default: {
+						onError(`Encountered error "${e.name}: ${e.message}"`);
+						break;
+					}
 				}
-				case "NotFoundError": {
-					onError("No microphone found on your device");
-					break;
-				}
-				default: {
-					onError(`Encountered error "${e.name}: ${e.message}"`);
-					break;
-				}
+			} else {
+				onError(String(e));
 			}
 		}
 	}

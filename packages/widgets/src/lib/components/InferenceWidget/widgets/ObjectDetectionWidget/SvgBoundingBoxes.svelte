@@ -10,7 +10,7 @@ text-cyan-400
 text-lime-400
  -->
 <script lang="ts">
-	import type { DetectedObject } from "../../shared/types";
+	import type { DetectedObject } from "$lib/components/InferenceWidget/shared/types.js";
 
 	import { afterUpdate } from "svelte";
 

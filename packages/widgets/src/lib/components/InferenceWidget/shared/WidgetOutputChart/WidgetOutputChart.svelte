@@ -22,7 +22,15 @@ from-yellow-400 to-yellow-200 dark:from-yellow-400 dark:to-yellow-600
 	export let mouseover: (index: number) => void = () => {};
 	export let mouseout: () => void = () => {};
 
-	$: scoreMax = output.reduce((acc, entry) => (entry.score > acc ? entry.score : acc), 0);
+	$: scoreMax = Math.max(0, ...output.map((x) => x.score));
+
+	function text(outputItem: (typeof output)[0]) {
+		if (labelField in outputItem) {
+			return outputItem[labelField as keyof typeof outputItem];
+		} else {
+			return "";
+		}
+	}
 </script>
 
 {#if output.length}
@@ -48,7 +56,7 @@ from-yellow-400 to-yellow-200 dark:from-yellow-400 dark:to-yellow-600
 							dark:to-{color ?? defaultBarColor}-600"
 						style={`width: ${Math.ceil((score / scoreMax) * 100 * 0.8)}%;`}
 					/>
-					<span class="leading-snug">{output[index][labelField]}</span>
+					<span class="leading-snug">{text(output[index])}</span>
 				</div>
 				<span class="pl-2">{score.toFixed(3)}</span>
 			</div>

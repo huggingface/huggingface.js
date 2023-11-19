@@ -1,17 +1,22 @@
 <script lang="ts">
-	import type { WidgetProps, ImageSegment, ExampleRunOpts, InferenceRunOpts } from "../../shared/types";
-	import type { WidgetExampleAssetInput } from "../../shared/WidgetExample";
+	import type {
+		WidgetProps,
+		ImageSegment,
+		ExampleRunOpts,
+		InferenceRunOpts,
+	} from "$lib/components/InferenceWidget/shared/types.js";
+	import type { WidgetExampleAssetInput } from "$lib/components/InferenceWidget/shared/WidgetExample.js";
 
 	import { onMount } from "svelte";
 
-	import { COLORS } from "../../shared/consts";
-	import { clamp, mod, hexToRgb } from "../../../../utils/ViewUtils";
-	import { callInferenceApi, getBlobFromUrl } from "../../shared/helpers";
+	import { COLORS } from "$lib/components/InferenceWidget/shared/consts.js";
+	import { clamp, mod, hexToRgb } from "$lib/utils/ViewUtils.js";
+	import { callInferenceApi, getBlobFromUrl } from "$lib/components/InferenceWidget/shared/helpers.js";
 	import WidgetFileInput from "../../shared/WidgetFileInput/WidgetFileInput.svelte";
 	import WidgetDropzone from "../../shared/WidgetDropzone/WidgetDropzone.svelte";
 	import WidgetOutputChart from "../../shared/WidgetOutputChart/WidgetOutputChart.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
-	import { isAssetInput } from "../../shared/inputValidation";
+	import { isAssetInput } from "$lib/components/InferenceWidget/shared/inputValidation.js";
 
 	import Canvas from "./Canvas.svelte";
 
@@ -21,14 +26,14 @@
 	export let model: WidgetProps["model"];
 	export let noTitle: WidgetProps["noTitle"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
-	let isDisabled = false;
 
 	const maskOpacity = Math.floor(255 * 0.6);
-	const colorToRgb = COLORS.reduce((acc, clr) => {
-		const [r, g, b]: number[] = hexToRgb(clr.hex);
-		const clrWithRgb = { ...clr, r, g, b };
-		return { ...acc, [clr.color]: clrWithRgb };
-	}, {});
+	const colorToRgb = Object.fromEntries(
+		COLORS.map((color) => {
+			const [r, g, b]: number[] = hexToRgb(color.hex);
+			return [color.color, { r, g, b }];
+		})
+	);
 
 	let computeTime = "";
 	let error: string = "";
@@ -94,8 +99,8 @@
 				imgH = imgEl.naturalHeight;
 				isLoading = true;
 				output = (
-					await Promise.all(output_.map((o, idx) => addOutputColor(o, idx)).map(o => addOutputCanvasData(o)))
-				).filter(o => o !== undefined) as ImageSegment[];
+					await Promise.all(output_.map((o, idx) => addOutputColor(o, idx)).map((o) => addOutputCanvasData(o)))
+				).filter((o) => o !== undefined) as ImageSegment[];
 				isLoading = false;
 			}
 			outputJson = res.outputJson;
@@ -113,7 +118,7 @@
 	function isValidOutput(arg: any): arg is ImageSegment[] {
 		return (
 			Array.isArray(arg) &&
-			arg.every(x => typeof x.label === "string" && typeof x.score === "number" && typeof x.mask === "string")
+			arg.every((x) => typeof x.label === "string" && typeof x.score === "number" && typeof x.mask === "string")
 		);
 	}
 	function parseOutput(body: unknown): ImageSegment[] {
@@ -251,7 +256,7 @@
 				{isDisabled}
 				{imgSrc}
 				{onSelectFile}
-				onError={e => (error = e)}
+				onError={(e) => (error = e)}
 			>
 				{#if imgSrc}
 					<Canvas {imgSrc} {highlightIndex} {mousemove} {mouseout} {output} />

@@ -1,14 +1,14 @@
 <script lang="ts">
-	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "../../shared/types";
-	import type { WidgetExampleSentenceSimilarityInput } from "../../shared/WidgetExample";
+	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "$lib/components/InferenceWidget/shared/types.js";
+	import type { WidgetExampleSentenceSimilarityInput } from "$lib/components/InferenceWidget/shared/WidgetExample.js";
 
 	import WidgetOutputChart from "../../shared/WidgetOutputChart/WidgetOutputChart.svelte";
 	import WidgetSubmitBtn from "../../shared/WidgetSubmitBtn/WidgetSubmitBtn.svelte";
 	import WidgetAddSentenceBtn from "../../shared/WidgetAddSentenceBtn/WidgetAddSentenceBtn.svelte";
 	import WidgetTextInput from "../../shared/WidgetTextInput/WidgetTextInput.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
-	import { addInferenceParameters, callInferenceApi } from "../../shared/helpers";
-	import { isSentenceSimilarityInput } from "../../shared/inputValidation";
+	import { addInferenceParameters, callInferenceApi } from "$lib/components/InferenceWidget/shared/helpers.js";
+	import { isSentenceSimilarityInput } from "$lib/components/InferenceWidget/shared/inputValidation.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -16,7 +16,6 @@
 	export let model: WidgetProps["model"];
 	export let noTitle: WidgetProps["noTitle"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
-	let isDisabled = false;
 
 	let sourceSentence = "";
 	let comparisonSentences: Array<string> = [];

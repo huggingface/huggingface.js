@@ -1,8 +1,8 @@
-import type { ModelData } from "$lib/interfaces/Types";
-import { randomItem, parseJSON } from "../../../utils/ViewUtils";
-import type { WidgetExample, WidgetExampleAttribute } from "./WidgetExample";
-import type { ModelLoadInfo, TableData } from "./types";
-import { LoadState } from "./types";
+import type { ModelData } from "$lib/interfaces/Types.js";
+import { randomItem, parseJSON } from "../../../utils/ViewUtils.js";
+import type { WidgetExample, WidgetExampleAttribute } from "./WidgetExample.js";
+import type { ModelLoadInfo, TableData } from "./types.js";
+import { LoadState } from "./types.js";
 
 const KEYS_TEXT: WidgetExampleAttribute[] = ["text", "context", "candidate_labels"];
 const KEYS_TABLE: WidgetExampleAttribute[] = ["table", "structured_data"];
@@ -168,11 +168,14 @@ export async function callInferenceApi<T>(
 			body["estimated_time"] !== undefined
 		) {
 			// Model needs loading
-			return { error: body["error"], estimatedTime: body["estimated_time"], status: "loading-model" };
+			return { error: String(body["error"]), estimatedTime: +body["estimated_time"], status: "loading-model" };
 		} else {
 			// Other errors
 			const { status, statusText } = response;
-			return { error: body["error"] ?? body["traceback"] ?? `${status} ${statusText}`, status: "error" };
+			return {
+				error: String(body["error"]) || String(body["traceback"]) || `${status} ${statusText}`,
+				status: "error",
+			};
 		}
 	}
 }

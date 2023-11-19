@@ -1,13 +1,18 @@
 <script lang="ts">
-	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "../../shared/types";
-	import type { WidgetExampleTextInput } from "../../shared/WidgetExample";
+	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "$lib/components/InferenceWidget/shared/types.js";
+	import type { WidgetExampleTextInput } from "$lib/components/InferenceWidget/shared/WidgetExample.js";
 
 	import WidgetOuputTokens from "../../shared/WidgetOutputTokens/WidgetOutputTokens.svelte";
 	import WidgetTextarea from "../../shared/WidgetTextarea/WidgetTextarea.svelte";
 	import WidgetSubmitBtn from "../../shared/WidgetSubmitBtn/WidgetSubmitBtn.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
-	import { addInferenceParameters, callInferenceApi, updateUrl } from "../../shared/helpers";
-	import { isTextInput } from "../../shared/inputValidation";
+	import {
+		addInferenceParameters,
+		callInferenceApi,
+		updateUrl,
+	} from "$lib/components/InferenceWidget/shared/helpers.js";
+	import { isTextInput } from "$lib/components/InferenceWidget/shared/inputValidation.js";
+	import { uniqBy } from "$lib/utils/ViewUtils.js";
 
 	interface EntityGroup {
 		entity_group: string;
@@ -112,7 +117,7 @@
 	function isValidOutput(arg: any): arg is EntityGroup[] {
 		return (
 			Array.isArray(arg) &&
-			arg.every(x => {
+			arg.every((x) => {
 				return typeof x.word === "string" && typeof x.entity_group === "string" && typeof x.score === "number";
 			})
 		);
@@ -121,15 +126,15 @@
 	function parseOutput(body: unknown): Span[] {
 		if (isValidOutput(body)) {
 			// Filter out duplicates
-			const filteredEntries = body.reduce<EntityGroup[]>((acc, entry) => {
-				const exists = acc.some(accEntry => Object.keys(entry).every(k => entry[k] === accEntry[k]));
-				return exists ? acc : [...acc, entry];
-			}, []);
+			const filteredEntries = uniqBy(body, (val) => JSON.stringify(val));
 
-			const spans = filteredEntries.reduce<Span[]>((acc, entry) => {
-				const span = getSpanData(entry, acc, text);
-				return span ? [...acc, span] : acc;
-			}, []);
+			const spans: Span[] = [];
+			for (const entry of filteredEntries) {
+				const span = getSpanData(entry, spans, text);
+				if (span) {
+					spans.push(span);
+				}
+			}
 
 			spans.sort((a, b) => {
 				/// `a` should come first when the result is < 0
@@ -162,7 +167,7 @@
 				start: entityGroup.start,
 				end: entityGroup.end,
 			};
-			return !spans.some(x => equals(x, span)) ? span : null;
+			return !spans.some((x) => equals(x, span)) ? span : null;
 		}
 
 		// This is a fallback when the API doesn't return
@@ -181,7 +186,7 @@
 				start: idx,
 				end: idx + needle.length,
 			};
-			if (!spans.some(x => equals(x, span))) {
+			if (!spans.some((x) => equals(x, span))) {
 				return span;
 			}
 			idx++;
@@ -202,7 +207,7 @@
 				start: idx,
 				end: idx + needle.length,
 			};
-			if (!spans.some(x => equals(x, span))) {
+			if (!spans.some((x) => equals(x, span))) {
 				return span;
 			}
 		}

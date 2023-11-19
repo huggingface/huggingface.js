@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ImageSegment } from "../../shared/types";
+	import type { ImageSegment } from "$lib/components/InferenceWidget/shared/types.js";
 
 	import { afterUpdate } from "svelte";
 
@@ -68,7 +68,7 @@
 			{width}
 			{height}
 			bind:this={canvas}
-			on:mousemove={e => mousemove(e, width, height)}
+			on:mousemove={(e) => mousemove(e, width, height)}
 			on:mouseout={mouseout}
 		/>
 	{/if}

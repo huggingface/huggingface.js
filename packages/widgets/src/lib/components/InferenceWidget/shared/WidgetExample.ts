@@ -109,6 +109,6 @@ export type WidgetExample<TOutput = WidgetExampleOutput> =
 	| WidgetExampleZeroShotTextInput<TOutput>
 	| WidgetExampleSentenceSimilarityInput<TOutput>;
 
-type KeysOfUnion<T> = T extends any ? keyof T : never;
+type KeysOfUnion<T> = T extends unknown ? keyof T : never;
 
 export type WidgetExampleAttribute = KeysOfUnion<WidgetExample>;

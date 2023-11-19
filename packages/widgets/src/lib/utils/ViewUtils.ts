@@ -1,4 +1,4 @@
-import type { PipelineType } from "../interfaces/Types";
+import type { PipelineType } from "../interfaces/Types.js";
 
 const ESCAPED = {
 	'"': "&quot;",
@@ -16,10 +16,27 @@ export function clamp(x: number, min: number, max: number): number {
 }
 
 /**
+ * Similar to lodash's uniqBy. In case of multiple items with the same key,
+ * only the first one is kept.
+ */
+export function uniqBy<T, K>(items: T[], itemToKey: (item: T) => K): T[] {
+	const keys = new Set(items.map((item) => itemToKey(item)));
+
+	return items.filter((item) => {
+		// Will return true if was in set - e.g. was the first item with its key.
+		return keys.delete(itemToKey(item));
+	});
+}
+
+export function typedKeys<K extends string, V>(obj: { [k in K]: V }): K[] {
+	return Object.keys(obj) as K[];
+}
+
+/**
  * HTML escapes the passed string
  */
 export function escape(html: unknown): string {
-	return String(html).replace(/["'&<>]/g, (match) => ESCAPED[match]);
+	return String(html).replace(/["'&<>]/g, (match) => ESCAPED[match as keyof typeof ESCAPED]);
 }
 
 /**
@@ -65,21 +82,23 @@ export function parseJSON<T>(x: unknown): T | undefined {
 	} catch (e) {
 		if (e instanceof SyntaxError) {
 			console.error(e.name);
-		} else {
+		} else if (e instanceof Error) {
 			console.error(e.message);
+		} else {
+			console.error(e);
 		}
 		return undefined;
 	}
 }
 
-/*
+/**
  * Return true if an HTML element is scrolled all the way
  */
 export function isFullyScrolled(elt: HTMLElement): boolean {
 	return elt.scrollHeight - Math.abs(elt.scrollTop) === elt.clientHeight;
 }
 
-/*
+/**
  * Smoothly scroll an element all the way
  */
 export function scrollToMax(elt: HTMLElement, axis: "x" | "y" = "y"): void {
@@ -90,7 +109,7 @@ export function scrollToMax(elt: HTMLElement, axis: "x" | "y" = "y"): void {
 	});
 }
 
-/*
+/**
  * Converts hex string to rgb array (i.e. [r,g,b])
  * original from https://stackoverflow.com/a/39077686/6558628
  */
@@ -109,7 +128,7 @@ export function getPipelineTask(modelPipeline: PipelineType): string {
 	return modelPipeline === "text2text-generation" ? "text-generation" : modelPipeline;
 }
 
-/*
+/**
 * For Tailwind:
 bg-blue-100 border-blue-100 dark:bg-blue-800 dark:border-blue-800
 bg-green-100 border-green-100 dark:bg-green-800 dark:border-green-800

@@ -1,13 +1,17 @@
 <script lang="ts">
-	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "../../shared/types";
-	import type { WidgetExampleTextInput } from "../../shared/WidgetExample";
+	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "$lib/components/InferenceWidget/shared/types.js";
+	import type { WidgetExampleTextInput } from "$lib/components/InferenceWidget/shared/WidgetExample.js";
 
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
-	import { addInferenceParameters, callInferenceApi, updateUrl } from "../../shared/helpers";
-	import { isTextInput } from "../../shared/inputValidation";
+	import {
+		addInferenceParameters,
+		callInferenceApi,
+		updateUrl,
+	} from "$lib/components/InferenceWidget/shared/helpers.js";
+	import { isTextInput } from "$lib/components/InferenceWidget/shared/inputValidation.js";
 
-	import { DataTable } from "./DataTable";
+	import { DataTable } from "./DataTable.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];

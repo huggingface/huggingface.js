@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { type WidgetProps, type ModelLoadInfo, LoadState, ComputeType } from "../types";
-	import IconAzureML from "../../../Icons/IconAzureML.svelte";
-	import { InferenceDisplayability } from "../../../../interfaces/InferenceDisplayability";
-	import IconInfo from "../../../Icons/IconInfo.svelte";
+	import { type WidgetProps, type ModelLoadInfo, LoadState, ComputeType } from "../types.js";
+	import IconAzureML from "$lib/components/Icons/IconAzureML.svelte";
+	import { InferenceDisplayability } from "../../../../interfaces/InferenceDisplayability.js";
+	import IconInfo from "$lib/components/Icons/IconInfo.svelte";
 
 	export let model: WidgetProps["model"];
 	export let computeTime: string;

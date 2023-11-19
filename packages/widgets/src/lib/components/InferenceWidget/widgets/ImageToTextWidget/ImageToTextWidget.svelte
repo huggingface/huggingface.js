@@ -1,13 +1,13 @@
 <script lang="ts">
-	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "../../shared/types";
-	import type { WidgetExampleAssetInput } from "../../shared/WidgetExample";
+	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "$lib/components/InferenceWidget/shared/types.js";
+	import type { WidgetExampleAssetInput } from "$lib/components/InferenceWidget/shared/WidgetExample.js";
 
 	import WidgetFileInput from "../../shared/WidgetFileInput/WidgetFileInput.svelte";
 	import WidgetDropzone from "../../shared/WidgetDropzone/WidgetDropzone.svelte";
 	import WidgetOutputText from "../../shared/WidgetOutputText/WidgetOutputText.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
-	import { callInferenceApi, getBlobFromUrl } from "../../shared/helpers";
-	import { isAssetInput } from "../../shared/inputValidation";
+	import { callInferenceApi, getBlobFromUrl } from "$lib/components/InferenceWidget/shared/helpers.js";
+	import { isAssetInput } from "$lib/components/InferenceWidget/shared/inputValidation.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -15,7 +15,6 @@
 	export let model: WidgetProps["model"];
 	export let noTitle: WidgetProps["noTitle"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
-	let isDisabled = false;
 
 	let computeTime = "";
 	let error: string = "";
@@ -127,7 +126,7 @@
 				{isDisabled}
 				{imgSrc}
 				{onSelectFile}
-				onError={e => (error = e)}
+				onError={(e) => (error = e)}
 			>
 				{#if imgSrc}
 					<img src={imgSrc} class="pointer-events-none mx-auto max-h-44 shadow" alt="" />

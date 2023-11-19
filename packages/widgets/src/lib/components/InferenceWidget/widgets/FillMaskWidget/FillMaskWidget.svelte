@@ -1,14 +1,22 @@
 <script lang="ts">
-	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "../../shared/types";
-	import type { WidgetExampleTextInput, WidgetExampleOutputLabels, WidgetExample } from "../../shared/WidgetExample";
+	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "$lib/components/InferenceWidget/shared/types.js";
+	import type {
+		WidgetExampleTextInput,
+		WidgetExampleOutputLabels,
+		WidgetExample,
+	} from "$lib/components/InferenceWidget/shared/WidgetExample.js";
 
 	import WidgetOutputChart from "../../shared/WidgetOutputChart/WidgetOutputChart.svelte";
 	import WidgetTextarea from "../../shared/WidgetTextarea/WidgetTextarea.svelte";
 	import WidgetSubmitBtn from "../../shared/WidgetSubmitBtn/WidgetSubmitBtn.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
-	import { addInferenceParameters, callInferenceApi, updateUrl } from "../../shared/helpers";
-	import { isValidOutputLabels } from "../../shared/outputValidation";
-	import { isTextInput } from "../../shared/inputValidation";
+	import {
+		addInferenceParameters,
+		callInferenceApi,
+		updateUrl,
+	} from "$lib/components/InferenceWidget/shared/helpers.js";
+	import { isValidOutputLabels } from "$lib/components/InferenceWidget/shared/outputValidation.js";
+	import { isTextInput } from "$lib/components/InferenceWidget/shared/inputValidation.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -17,7 +25,6 @@
 	export let noTitle: WidgetProps["noTitle"];
 	export let shouldUpdateUrl: WidgetProps["shouldUpdateUrl"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
-	let isDisabled = false;
 
 	let computeTime = "";
 	let error: string = "";
@@ -103,8 +110,8 @@
 				unknown
 			>[];
 			return entries
-				.filter(x => !!x)
-				.map(x => ({
+				.filter((x) => !!x)
+				.map((x) => ({
 					// label = x.label -> text-classificartion
 					label: x.label ? String(x.label) : String(x.token_str),
 					score: x.score ? Number(x.score) : 0,

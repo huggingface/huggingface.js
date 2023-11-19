@@ -1,6 +1,6 @@
 <script lang="ts">
-	import IconSpin from "../../../Icons/IconSpin.svelte";
-	import IconFile from "../../../Icons/IconFile.svelte";
+	import IconSpin from "$lib/components/Icons/IconSpin.svelte";
+	import IconFile from "$lib/components/Icons/IconFile.svelte";
 
 	export let accept: string | undefined;
 	export let classNames = "";
@@ -30,7 +30,7 @@
 		on:dragleave={() => {
 			isDragging = false;
 		}}
-		on:drop|preventDefault={e => {
+		on:drop|preventDefault={(e) => {
 			isDragging = false;
 			fileInput.files = e.dataTransfer?.files ?? null;
 			onChange();

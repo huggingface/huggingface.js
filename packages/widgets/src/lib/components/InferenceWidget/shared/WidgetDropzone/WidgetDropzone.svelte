@@ -1,6 +1,6 @@
 <script lang="ts">
-	import IconSpin from "../../../Icons/IconSpin.svelte";
-	import { getBlobFromUrl } from "../../shared/helpers";
+	import IconSpin from "$lib/components/Icons/IconSpin.svelte";
+	import { getBlobFromUrl } from "../../shared/helpers.js";
 
 	export let accept = "image/*";
 	export let classNames = "";
@@ -28,10 +28,10 @@
 			return;
 		}
 		const items = Array.from(itemList);
-		const uriItem = items.find(x => x.kind === "string" && x.type === "text/uri-list");
-		const fileItem = items.find(x => x.kind === "file");
+		const uriItem = items.find((x) => x.kind === "string" && x.type === "text/uri-list");
+		const fileItem = items.find((x) => x.kind === "file");
 		if (uriItem) {
-			const url = await new Promise<string>(resolve => uriItem.getAsString(s => resolve(s)));
+			const url = await new Promise<string>((resolve) => uriItem.getAsString((s) => resolve(s)));
 			const file = await getBlobFromUrl(url);
 
 			onSelectFile(file);

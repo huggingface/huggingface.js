@@ -1,7 +1,11 @@
 <script lang="ts">
-	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "../../shared/types";
-	import type { PipelineType } from "../../../../interfaces/Types";
-	import type { WidgetExampleTextInput, WidgetExampleOutputText, WidgetExample } from "../../shared/WidgetExample";
+	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "$lib/components/InferenceWidget/shared/types.js";
+	import type { PipelineType } from "$lib/interfaces/Types.js";
+	import type {
+		WidgetExampleTextInput,
+		WidgetExampleOutputText,
+		WidgetExample,
+	} from "$lib/components/InferenceWidget/shared/WidgetExample.js";
 
 	import WidgetSubmitBtn from "../../shared/WidgetSubmitBtn/WidgetSubmitBtn.svelte";
 	import WidgetShortcutRunLabel from "../../shared/WidgetShortcutRunLabel/WidgetShortcutRunLabel.svelte";
@@ -10,9 +14,13 @@
 	import WidgetTimer from "../../shared/WidgetTimer/WidgetTimer.svelte";
 	import WidgetOutputText from "../../shared/WidgetOutputText/WidgetOutputText.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
-	import { addInferenceParameters, callInferenceApi, updateUrl } from "../../shared/helpers";
-	import { isValidOutputText } from "../../shared/outputValidation";
-	import { isTextInput } from "../../shared/inputValidation";
+	import {
+		addInferenceParameters,
+		callInferenceApi,
+		updateUrl,
+	} from "$lib/components/InferenceWidget/shared/helpers.js";
+	import { isValidOutputText } from "$lib/components/InferenceWidget/shared/outputValidation.js";
+	import { isTextInput } from "$lib/components/InferenceWidget/shared/inputValidation.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -22,7 +30,6 @@
 	export let shouldUpdateUrl: WidgetProps["shouldUpdateUrl"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
 	export let isLoggedIn: WidgetProps["includeCredentials"];
-	let isDisabled = false;
 
 	const isBloomLoginRequired = isLoggedIn === false && model.id === "bigscience/bloom";
 
@@ -78,7 +85,7 @@
 			updateUrl({ text: trimmedValue });
 		}
 
-		const requestBody = { inputs: trimmedValue };
+		const requestBody = { inputs: trimmedValue, parameters: {} as unknown };
 		addInferenceParameters(requestBody, model);
 
 		if (model.id === "bigscience/bloom") {
@@ -88,13 +95,11 @@
 				early_stopping: false,
 				length_penalty: 0.0,
 				max_new_tokens: 20,
+				...(decodingStrategy === "sampling" && {
+					top_p: 0.9,
+				}),
+				do_sample: decodingStrategy === "sampling",
 			};
-			if (decodingStrategy === "sampling") {
-				parameters["do_sample"] = true;
-				parameters["top_p"] = 0.9;
-			} else {
-				parameters["do_sample"] = false;
-			}
 			requestBody["parameters"] = parameters;
 		}
 

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { SvelteComponent } from "svelte";
-	import type { WidgetProps } from "./shared/types.ts";
+	import type { WidgetProps } from "./shared/types.js";
 
 	import AudioClassificationWidget from "./widgets/AudioClassificationWidget/AudioClassificationWidget.svelte";
 	import AudioToAudioWidget from "./widgets/AudioToAudioWidget/AudioToAudioWidget.svelte";
@@ -78,7 +78,7 @@
 	};
 
 	$: widgetComponent =
-		model.pipeline_tag in WIDGET_COMPONENTS
+		model.pipeline_tag && model.pipeline_tag in WIDGET_COMPONENTS
 			? WIDGET_COMPONENTS[model.pipeline_tag as keyof typeof WIDGET_COMPONENTS]
 			: undefined;
 

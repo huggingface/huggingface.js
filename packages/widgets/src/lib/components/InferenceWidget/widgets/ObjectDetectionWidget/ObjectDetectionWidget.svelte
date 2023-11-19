@@ -1,15 +1,20 @@
 <script lang="ts">
-	import type { WidgetProps, DetectedObject, ExampleRunOpts, InferenceRunOpts } from "../../shared/types";
-	import type { WidgetExampleAssetInput } from "../../shared/WidgetExample";
+	import type {
+		WidgetProps,
+		DetectedObject,
+		ExampleRunOpts,
+		InferenceRunOpts,
+	} from "$lib/components/InferenceWidget/shared/types.js";
+	import type { WidgetExampleAssetInput } from "$lib/components/InferenceWidget/shared/WidgetExample.js";
 
-	import { mod } from "../../../../utils/ViewUtils";
-	import { COLORS } from "../../shared/consts";
+	import { mod } from "$lib/utils/ViewUtils.js";
+	import { COLORS } from "$lib/components/InferenceWidget/shared/consts.js";
 	import WidgetFileInput from "../../shared/WidgetFileInput/WidgetFileInput.svelte";
 	import WidgetDropzone from "../../shared/WidgetDropzone/WidgetDropzone.svelte";
 	import WidgetOutputChart from "../../shared/WidgetOutputChart/WidgetOutputChart.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
-	import { callInferenceApi, getBlobFromUrl } from "../../shared/helpers";
-	import { isAssetInput } from "../../shared/inputValidation";
+	import { callInferenceApi, getBlobFromUrl } from "$lib/components/InferenceWidget/shared/helpers.js";
+	import { isAssetInput } from "$lib/components/InferenceWidget/shared/inputValidation.js";
 
 	import BoundingBoxes from "./SvgBoundingBoxes.svelte";
 
@@ -19,7 +24,6 @@
 	export let model: WidgetProps["model"];
 	export let noTitle: WidgetProps["noTitle"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
-	let isDisabled = false;
 
 	let computeTime = "";
 	let error: string = "";
@@ -101,7 +105,7 @@
 		return (
 			Array.isArray(arg) &&
 			arg.every(
-				x =>
+				(x) =>
 					typeof x.label === "string" &&
 					typeof x.score === "number" &&
 					typeof x.box.xmin === "number" &&
@@ -164,7 +168,7 @@
 				{isDisabled}
 				{imgSrc}
 				{onSelectFile}
-				onError={e => (error = e)}
+				onError={(e) => (error = e)}
 			>
 				{#if imgSrc}
 					<BoundingBoxes {imgSrc} {mouseover} {mouseout} {output} {highlightIndex} />

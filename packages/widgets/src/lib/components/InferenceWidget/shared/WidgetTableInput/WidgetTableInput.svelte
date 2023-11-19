@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { HighlightCoordinates } from "../types";
+	import type { HighlightCoordinates } from "../types.js";
 
 	import { onMount, tick } from "svelte";
 
-	import { scrollToMax } from "../../../../utils/ViewUtils";
-	import IconRow from "../../../Icons/IconRow.svelte";
+	import { scrollToMax } from "../../../../utils/ViewUtils.js";
+	import IconRow from "$lib/components/Icons/IconRow.svelte";
 
 	export let onChange: (table: (string | number)[][]) => void;
 	export let highlighted: HighlightCoordinates;
@@ -18,7 +18,7 @@
 	let tableContainerEl: HTMLElement;
 
 	onMount(() => {
-		initialTable = table.map(row => row.map(cell => cell));
+		initialTable = table.map((row) => row.map((cell) => cell));
 	});
 
 	async function addCol() {
@@ -37,7 +37,7 @@
 		onChange(updatedTable);
 	}
 
-	function editCell(e: Event, [x, y]) {
+	function editCell(e: Event, [x, y]: [number, number]) {
 		const value = (e.target as HTMLElement)?.innerText;
 
 		const updatedTable = table.map((row, rowIndex) =>
@@ -68,7 +68,7 @@
 							contenteditable={canAddCol && !isLoading && !isDisabled}
 							class="h-6 border-2 border-gray-100"
 							on:keydown={onKeyDown}
-							on:input={e => editCell(e, [x, 0])}
+							on:input={(e) => editCell(e, [x, 0])}
 						>
 							{header}
 						</th>
@@ -83,7 +83,7 @@
 								class={(highlighted[`${y}-${x}`] ?? "border-gray-100") + " h-6 border-2"}
 								contenteditable={!isLoading && !isDisabled}
 								on:keydown={onKeyDown}
-								on:input={e => editCell(e, [x, y + 1])}>{cell}</td
+								on:input={(e) => editCell(e, [x, y + 1])}>{cell}</td
 							>
 						{/each}
 					</tr>

@@ -1,6 +1,6 @@
-import type { ModelData } from "../interfaces/Types";
-import type { PipelineType } from "../interfaces/Types";
-import { getModelInputSnippet } from "./inputs";
+import type { ModelData } from "../interfaces/Types.js";
+import type { PipelineType } from "../interfaces/Types.js";
+import { getModelInputSnippet } from "./inputs.js";
 
 export const snippetZeroShotClassification = (model: ModelData): string =>
 	`def query(payload):

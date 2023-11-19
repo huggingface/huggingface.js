@@ -1,5 +1,5 @@
-import type { WidgetExample } from "../components/InferenceWidget/shared/WidgetExample";
-import type { InferenceDisplayability } from "./InferenceDisplayability";
+import type { WidgetExample } from "../components/InferenceWidget/shared/WidgetExample.js";
+import type { InferenceDisplayability } from "./InferenceDisplayability.js";
 
 // Warning: order of modalities here determine how they are listed on the /tasks page
 export const MODALITIES = ["cv", "nlp", "audio", "tabular", "multimodal", "rl", "other"] as const;
@@ -679,7 +679,21 @@ export interface ModelData {
 	/**
 	 * this dictionary has useful information about the model configuration
 	 */
-	config?: Record<string, any>;
+	config?: Record<string, unknown> & {
+		adapter_transformers?: { model_class?: string; model_name?: string };
+		architectures?: string[];
+		sklearn?: {
+			filename?: string;
+			model_format?: string;
+		};
+		speechbrain?: {
+			interface?: string;
+		};
+		peft?: {
+			base_model_name?: string;
+			task_type?: string;
+		};
+	};
 	/**
 	 * all the model tags
 	 */
@@ -717,7 +731,7 @@ export interface ModelData {
 		inference?:
 			| boolean
 			| {
-					parameters?: Record<string, any>;
+					parameters?: Record<string, unknown>;
 			  };
 		base_model?: string;
 	};

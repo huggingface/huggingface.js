@@ -1,21 +1,25 @@
 <script lang="ts">
-	import type { WidgetProps, ModelLoadInfo, ExampleRunOpts } from "../types";
-	import type { WidgetExample, WidgetExampleAttribute } from "../WidgetExample";
+	import type { WidgetProps, ModelLoadInfo, ExampleRunOpts } from "../types.js";
+	import type { WidgetExample, WidgetExampleAttribute } from "../WidgetExample.js";
 
 	type TWidgetExample = $$Generic<WidgetExample>;
 
 	import { onMount } from "svelte";
 
-	import IconCross from "../../../Icons/IconCross.svelte";
+	import IconCross from "$lib/components/Icons/IconCross.svelte";
 	import WidgetInputSamples from "../WidgetInputSamples/WidgetInputSamples.svelte";
 	import WidgetInputSamplesGroup from "../WidgetInputSamplesGroup/WidgetInputSamplesGroup.svelte";
 	import WidgetFooter from "../WidgetFooter/WidgetFooter.svelte";
 	import WidgetHeader from "../WidgetHeader/WidgetHeader.svelte";
 	import WidgetInfo from "../WidgetInfo/WidgetInfo.svelte";
 	import WidgetModelLoading from "../WidgetModelLoading/WidgetModelLoading.svelte";
-	import { getModelLoadInfo, getQueryParamVal, getWidgetExample } from "../../shared/helpers";
-	import { modelLoadStates } from "../../stores";
-	import { InferenceDisplayability } from "../../../../interfaces/InferenceDisplayability";
+	import {
+		getModelLoadInfo,
+		getQueryParamVal,
+		getWidgetExample,
+	} from "$lib/components/InferenceWidget/shared/helpers.js";
+	import { modelLoadStates } from "../../stores.js";
+	import { InferenceDisplayability } from "../../../../interfaces/InferenceDisplayability.js";
 
 	export let apiUrl: string;
 	export let callApiOnMount: WidgetProps["callApiOnMount"];
@@ -53,7 +57,7 @@
 			group: "Group 1",
 			...sample,
 		}));
-	let inputSamples = !isDisabled ? allInputSamples : allInputSamples.filter(sample => sample.output !== undefined);
+	let inputSamples = !isDisabled ? allInputSamples : allInputSamples.filter((sample) => sample.output !== undefined);
 	let inputGroups = getExamplesGroups();
 
 	$: selectedInputSamples =
@@ -80,7 +84,7 @@
 			if (modelTooBig) {
 				// disable the widget
 				isDisabled = true;
-				inputSamples = allInputSamples.filter(sample => sample.output !== undefined);
+				inputSamples = allInputSamples.filter((sample) => sample.output !== undefined);
 				inputGroups = getExamplesGroups();
 			}
 
@@ -88,6 +92,7 @@
 			for (const key of exampleQueryParams) {
 				const val = getQueryParamVal(key);
 				if (val) {
+					// @ts-expect-error complicated type
 					exampleFromQueryParams[key] = val;
 				}
 			}

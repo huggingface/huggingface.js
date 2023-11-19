@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "../../shared/types";
-	import type { WidgetExampleAssetAndZeroShotInput } from "../../shared/WidgetExample";
+	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "$lib/components/InferenceWidget/shared/types.js";
+	import type { WidgetExampleAssetAndZeroShotInput } from "$lib/components/InferenceWidget/shared/WidgetExample.js";
 
 	import { onMount } from "svelte";
 
@@ -10,8 +10,12 @@
 	import WidgetSubmitBtn from "../../shared/WidgetSubmitBtn/WidgetSubmitBtn.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
 	import WidgetOutputChart from "../../shared/WidgetOutputChart/WidgetOutputChart.svelte";
-	import { addInferenceParameters, callInferenceApi, getWidgetExample } from "../../shared/helpers";
-	import { isAssetAndZeroShotInput } from "../../shared/inputValidation";
+	import {
+		addInferenceParameters,
+		callInferenceApi,
+		getWidgetExample,
+	} from "$lib/components/InferenceWidget/shared/helpers.js";
+	import { isAssetAndZeroShotInput } from "$lib/components/InferenceWidget/shared/inputValidation.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -52,14 +56,14 @@
 					reject(err);
 				}
 			};
-			fileReader.onerror = e => reject(e);
+			fileReader.onerror = (e) => reject(e);
 			isLoading = true;
 			fileReader.readAsDataURL(file);
 		});
 	}
 
 	function isValidOutput(arg: any): arg is { label: string; score: number }[] {
-		return Array.isArray(arg) && arg.every(x => typeof x.label === "string" && typeof x.score === "number");
+		return Array.isArray(arg) && arg.every((x) => typeof x.label === "string" && typeof x.score === "number");
 	}
 
 	function parseOutput(body: unknown): Array<{ label: string; score: number }> {
@@ -179,7 +183,7 @@
 				{isDisabled}
 				{imgSrc}
 				{onSelectFile}
-				onError={e => (error = e)}
+				onError={(e) => (error = e)}
 			>
 				{#if imgSrc}
 					<img src={imgSrc} class="pointer-events-none mx-auto max-h-44 shadow" alt="" />

@@ -1,6 +1,11 @@
 <script lang="ts">
-	import type { WidgetProps, HighlightCoordinates, ExampleRunOpts, InferenceRunOpts } from "../../shared/types";
-	import type { WidgetExampleTextAndTableInput } from "../../shared/WidgetExample";
+	import type {
+		WidgetProps,
+		HighlightCoordinates,
+		ExampleRunOpts,
+		InferenceRunOpts,
+	} from "$lib/components/InferenceWidget/shared/types.js";
+	import type { WidgetExampleTextAndTableInput } from "$lib/components/InferenceWidget/shared/WidgetExample.js";
 
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
 	import WidgetOutputTableQA from "../../shared/WidgetOutputTableQA/WidgetOutputTableQA.svelte";
@@ -12,8 +17,8 @@
 		convertTableToData,
 		callInferenceApi,
 		updateUrl,
-	} from "../../shared/helpers";
-	import { isTextAndTableInput } from "../../shared/inputValidation";
+	} from "$lib/components/InferenceWidget/shared/helpers.js";
+	import { isTextAndTableInput } from "$lib/components/InferenceWidget/shared/inputValidation.js";
 	interface Output {
 		aggregator?: string;
 		answer: string;
@@ -28,7 +33,6 @@
 	export let noTitle: WidgetProps["noTitle"];
 	export let shouldUpdateUrl: WidgetProps["shouldUpdateUrl"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
-	let isDisabled = false;
 
 	let computeTime = "";
 	let error: string = "";
@@ -44,12 +48,12 @@
 	let isAnswerOnlyOutput = false;
 
 	let highlighted: HighlightCoordinates = {};
-	$: highlighted =
-		output?.coordinates?.reduce((acc, [yCor, xCor]) => {
-			acc[`${yCor}`] = "bg-green-50 dark:bg-green-900";
-			acc[`${yCor}-${xCor}`] = "bg-green-100 border-green-100 dark:bg-green-700 dark:border-green-700";
-			return acc;
-		}, {}) ?? {};
+	$: highlighted = Object.fromEntries(
+		output?.coordinates.flatMap(([yCor, xCor]) => [
+			[`${yCor}`, "bg-green-50 dark:bg-green-900"],
+			[`${yCor}-${xCor}`, "bg-green-100 border-green-100 dark:bg-green-700 dark:border-green-700"],
+		]) ?? []
+	);
 
 	function onChangeTable(updatedTable: (string | number)[][]) {
 		table = updatedTable;

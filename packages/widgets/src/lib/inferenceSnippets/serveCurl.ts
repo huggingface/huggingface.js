@@ -1,5 +1,5 @@
-import type { PipelineType, ModelData } from "../interfaces/Types";
-import { getModelInputSnippet } from "./inputs";
+import type { PipelineType, ModelData } from "../interfaces/Types.js";
+import { getModelInputSnippet } from "./inputs.js";
 
 export const snippetBasic = (model: ModelData, accessToken: string): string =>
 	`curl https://api-inference.huggingface.co/models/${model.id} \\

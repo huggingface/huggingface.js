@@ -1,12 +1,12 @@
 <script lang="ts">
-	import type { ExampleRunOpts } from "../types";
-	import type { WidgetExample } from "../WidgetExample";
+	import type { ExampleRunOpts } from "../types.js";
+	import type { WidgetExample } from "../WidgetExample.js";
 
 	type TWidgetExample = $$Generic<WidgetExample>;
 
 	import { slide } from "svelte/transition";
 
-	import IconCaretDownV2 from "../../../Icons/IconCaretDownV2.svelte";
+	import IconCaretDownV2 from "$lib/components/Icons/IconCaretDownV2.svelte";
 
 	export let classNames = "";
 	export let isLoading = false;

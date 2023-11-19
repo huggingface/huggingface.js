@@ -22,6 +22,7 @@
 	},
 	"files": [
 		"dist",
+		"src",
 		"!dist/**/*.test.*",
 		"!dist/**/*.spec.*"
 	],

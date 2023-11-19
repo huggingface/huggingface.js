@@ -1,19 +1,27 @@
 <script lang="ts">
-	import type { WidgetProps, HighlightCoordinates, InferenceRunOpts, ExampleRunOpts } from "../../shared/types";
-	import type { WidgetExampleStructuredDataInput, WidgetExampleOutputLabels } from "../../shared/WidgetExample";
+	import type {
+		WidgetProps,
+		HighlightCoordinates,
+		InferenceRunOpts,
+		ExampleRunOpts,
+	} from "$lib/components/InferenceWidget/shared/types.js";
+	import type {
+		WidgetExampleStructuredDataInput,
+		WidgetExampleOutputLabels,
+	} from "$lib/components/InferenceWidget/shared/WidgetExample.js";
 
 	import WidgetTableInput from "../../shared/WidgetTableInput/WidgetTableInput.svelte";
 	import WidgetSubmitBtn from "../../shared/WidgetSubmitBtn/WidgetSubmitBtn.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
-	import { mod } from "../../../../utils/ViewUtils";
+	import { mod } from "$lib/utils/ViewUtils.js";
 	import {
 		addInferenceParameters,
 		convertDataToTable,
 		convertTableToData,
 		callInferenceApi,
 		updateUrl,
-	} from "../../shared/helpers";
-	import { isStructuredDataInput } from "../../shared/inputValidation";
+	} from "$lib/components/InferenceWidget/shared/helpers.js";
+	import { isStructuredDataInput } from "$lib/components/InferenceWidget/shared/inputValidation.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -22,7 +30,6 @@
 	export let noTitle: WidgetProps["noTitle"];
 	export let shouldUpdateUrl: WidgetProps["shouldUpdateUrl"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
-	let isDisabled = false;
 
 	const widgetData = model?.widgetData?.[0] as WidgetExampleStructuredDataInput<WidgetExampleOutputLabels> | undefined;
 	const columns: string[] = Object.keys(widgetData?.structured_data ?? {});
@@ -142,7 +149,7 @@
 	}
 
 	function isValidOutput(arg: any): arg is (string | number)[] {
-		return Array.isArray(arg) && arg.every(x => typeof x === "string" || typeof x === "number");
+		return Array.isArray(arg) && arg.every((x) => typeof x === "string" || typeof x === "number");
 	}
 
 	function parseOutput(body: unknown): (string | number)[] {
@@ -154,18 +161,18 @@
 
 	function highlightOutput(output: (string | number)[], colIndex: number): HighlightCoordinates {
 		const set: Set<string | number> = new Set(output);
-		let classes: Record<string, number> = {};
-		if (set.size < COLORS.length) {
-			classes = [...set].reduce((acc, cls, i) => ({ ...acc, [cls]: i }), {});
-		}
-		return output.reduce((acc, row, rowIndex) => {
-			const colorIndex = classes[row] ?? mod(rowIndex, COLORS.length);
-			const color = COLORS[colorIndex];
-			acc[
-				`${rowIndex}-${colIndex}`
-			] = `bg-${color}-100 border-${color}-100 dark:bg-${color}-800 dark:border-${color}-800`;
-			return acc;
-		}, {});
+		const classes = set.size < COLORS.length ? Object.fromEntries([...set].map((cls, i) => [cls, i])) : {};
+
+		return Object.fromEntries(
+			output.map((row, rowIndex) => {
+				const colorIndex = classes[row] ?? mod(rowIndex, COLORS.length);
+				const color = COLORS[colorIndex];
+				return [
+					`${rowIndex}-${colIndex}`,
+					`bg-${color}-100 border-${color}-100 dark:bg-${color}-800 dark:border-${color}-800`,
+				];
+			})
+		);
 	}
 
 	function applyInputSample(sample: WidgetExampleStructuredDataInput, opts: ExampleRunOpts = {}) {

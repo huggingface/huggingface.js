@@ -11,7 +11,7 @@ import type {
 	WidgetExampleTextAndTableInput,
 	WidgetExampleTextInput,
 	WidgetExampleZeroShotTextInput,
-} from "./WidgetExample";
+} from "./WidgetExample.js";
 
 export function isTextInput<TOutput>(sample: WidgetExample<TOutput>): sample is WidgetExampleTextInput<TOutput> {
 	return "text" in sample;

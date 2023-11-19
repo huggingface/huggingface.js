@@ -1,14 +1,14 @@
 <script lang="ts">
-	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "../../shared/types";
-	import type { WidgetExampleAssetAndTextInput } from "../../shared/WidgetExample";
+	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "$lib/components/InferenceWidget/shared/types.js";
+	import type { WidgetExampleAssetAndTextInput } from "$lib/components/InferenceWidget/shared/WidgetExample.js";
 
 	import WidgetFileInput from "../../shared/WidgetFileInput/WidgetFileInput.svelte";
 	import WidgetDropzone from "../../shared/WidgetDropzone/WidgetDropzone.svelte";
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
 	import WidgetOutputChart from "../../shared/WidgetOutputChart/WidgetOutputChart.svelte";
-	import { addInferenceParameters, callInferenceApi } from "../../shared/helpers";
-	import { isAssetAndTextInput } from "../../shared/inputValidation";
+	import { addInferenceParameters, callInferenceApi } from "$lib/components/InferenceWidget/shared/helpers.js";
+	import { isAssetAndTextInput } from "$lib/components/InferenceWidget/shared/inputValidation.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -49,14 +49,14 @@
 					reject(err);
 				}
 			};
-			fileReader.onerror = e => reject(e);
+			fileReader.onerror = (e) => reject(e);
 			isLoading = true;
 			fileReader.readAsDataURL(file);
 		});
 	}
 
 	function isValidOutput(arg: any): arg is { answer: string; score: number }[] {
-		return Array.isArray(arg) && arg.every(x => typeof x.answer === "string" && typeof x.score === "number");
+		return Array.isArray(arg) && arg.every((x) => typeof x.answer === "string" && typeof x.score === "number");
 	}
 
 	function parseOutput(body: unknown): Array<{ answer: string; score: number }> {
@@ -164,7 +164,7 @@
 				{isDisabled}
 				{imgSrc}
 				{onSelectFile}
-				onError={e => (error = e)}
+				onError={(e) => (error = e)}
 			>
 				{#if imgSrc}
 					<img src={imgSrc} class="pointer-events-none mx-auto max-h-44 shadow" alt="" />

@@ -1,5 +1,5 @@
-import type { WidgetExample } from "../components/InferenceWidget/shared/WidgetExample";
-import type { PipelineType } from "./Types";
+import type { WidgetExample } from "../components/InferenceWidget/shared/WidgetExample.js";
+import type { PipelineType } from "./Types.js";
 
 type LanguageCode = string;
 

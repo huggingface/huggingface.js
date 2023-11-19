@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import type { ModelData } from "./Types";
+import type { ModelData } from "./Types.js";
 
 /**
  * Add your new library here.
@@ -380,6 +380,9 @@ const sklearn = (model: ModelData) => {
 	if (model.tags?.includes("skops")) {
 		const skopsmodelFile = model.config?.sklearn?.filename;
 		const skopssaveFormat = model.config?.sklearn?.model_format;
+		if (!skopsmodelFile) {
+			return [`# ⚠️ Model filename not specified in config.json`];
+		}
 		if (skopssaveFormat === "pickle") {
 			return skopsPickle(model, skopsmodelFile);
 		} else {
