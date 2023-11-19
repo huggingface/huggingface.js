@@ -67,7 +67,7 @@ Below images show some of the examples shared in the paper that can be obtained 
 
 ![Examples](https://huggingface.co/datasets/huggingfacejs/tasks/resolve/main/image-to-image/pix2pix_examples.jpg)
 
-## Useful Resources
+## Useful Resources
 
 - [Train your ControlNet with diffusers 🧨](https://huggingface.co/blog/train-your-controlnet)
 - [Ultra fast ControlNet with 🧨 Diffusers](https://huggingface.co/blog/controlnet)
