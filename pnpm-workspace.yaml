@@ -5,3 +5,4 @@ packages:
   - "packages/shared"
   - "packages/agents"
   - "packages/languages"
+  - "packages/tasks"
