@@ -6,3 +6,5 @@ packages:
   - "packages/agents"
   - "packages/languages"
   - "packages/tasks"
+  - "packages/widgets"
+  - "apps/widgets-demo"

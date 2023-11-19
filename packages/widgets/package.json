@@ -1,8 +1,8 @@
 {
-	"name": "@huggingface/tasks",
+	"name": "@huggingface/widgets",
 	"packageManager": "pnpm@8.3.1",
 	"version": "0.0.4",
-	"description": "List of ML tasks for huggingface.co/tasks",
+	"description": "Inference Widget",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {
 		"access": "public"
