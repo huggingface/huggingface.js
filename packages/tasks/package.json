@@ -1,6 +1,6 @@
 {
 	"name": "@huggingface/tasks",
-	"packageManager": "pnpm@8.3.1",
+	"packageManager": "pnpm@8.10.5",
 	"version": "0.0.4",
 	"description": "List of ML tasks for huggingface.co/tasks",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
@@ -25,7 +25,8 @@
 		"format:check": "prettier --check .",
 		"prepublishOnly": "pnpm run build",
 		"build": "tsup src/index.ts --format cjs,esm --clean --dts",
-		"type-check": "tsc"
+		"prepare": "pnpm run build",
+		"check": "tsc"
 	},
 	"files": [
 		"dist",

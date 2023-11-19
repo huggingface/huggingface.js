@@ -1,6 +1,6 @@
 {
 	"name": "@huggingface/hub",
-	"packageManager": "pnpm@8.3.1",
+	"packageManager": "pnpm@8.10.5",
 	"version": "0.12.2",
 	"description": "Utilities to interact with the Hugging Face hub",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
@@ -36,7 +36,7 @@
 		"build": "tsup",
 		"test": "vitest run",
 		"test:browser": "vitest run --browser.name=chrome --browser.headless --config ./vitest-browser.config.ts",
-		"type-check": "tsc"
+		"check": "tsc"
 	},
 	"files": [
 		"src",

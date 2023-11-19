@@ -124,7 +124,7 @@ export function hexToRgb(hex: string): number[] {
 }
 
 // Get the Task id corresponding to the modelPipeline (should be === in 99% cases)
-export function getPipelineTask(modelPipeline: PipelineType): string {
+export function getPipelineTask(modelPipeline: PipelineType): PipelineType {
 	return modelPipeline === "text2text-generation" ? "text-generation" : modelPipeline;
 }
 

@@ -1,6 +1,6 @@
 {
 	"license": "MIT",
-	"packageManager": "pnpm@8.3.1",
+	"packageManager": "pnpm@8.10.5",
 	"dependencies": {
 		"@typescript-eslint/eslint-plugin": "^5.51.0",
 		"@typescript-eslint/parser": "^5.51.0",
