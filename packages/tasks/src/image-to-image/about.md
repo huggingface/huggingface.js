@@ -65,7 +65,7 @@ Pix2Pix is a popular model used for image to image translation tasks. It is base
 
 Below images show some of the examples shared in the paper that can be obtained using Pix2Pix. There are various cases this model can be applied on. It is capable of relatively simpler things, e.g. converting a grayscale image to its colored version. But more importantly, it can generate realistic pictures from rough sketches (can be seen in the purse example) or from painting-like images (can be seen in the street and facade examples below).
 
-<img src="/tasks/assets/image-to-image/pix2pix_examples.jpg" alt="Alt text" title="Optional title">
+![Examples](https://huggingface.co/datasets/huggingfacejs/tasks/resolve/main/image-to-image/pix2pix_examples.jpg)
 
 ## Useful Resources
 
