@@ -2,6 +2,9 @@
 	"name": "@huggingface/widgets",
 	"packageManager": "pnpm@8.10.5",
 	"version": "0.0.1",
+	"publishConfig": {
+		"access": "public"
+	},
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build && npm run package",
