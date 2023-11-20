@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { TASKS_DATA } from "@huggingface/tasks";
+	import { TASKS_DATA, type PipelineType } from "@huggingface/tasks";
 	import { getPipelineTask } from "../../../../utils/ViewUtils.js";
 	import IconInfo from "$lib/components/Icons/IconInfo.svelte";
 	import IconLightning from "$lib/components/Icons/IconLightning.svelte";
 	import PipelineTag from "../../../PipelineTag/PipelineTag.svelte";
-	import type { PipelineType } from "$lib/interfaces/Types.js";
 
 	export let noTitle = false;
 	export let title: string | null = null;

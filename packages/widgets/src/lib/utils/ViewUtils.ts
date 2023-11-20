@@ -1,4 +1,4 @@
-import type { PipelineType } from "../interfaces/Types.js";
+import type { PipelineType } from "@huggingface/tasks";
 
 const ESCAPED = {
 	'"': "&quot;",

@@ -1,4 +1,5 @@
-import type { PipelineType, ModelData } from "../interfaces/Types.js";
+import type { PipelineType } from "@huggingface/tasks";
+import type { ModelData } from "../interfaces/Types.js";
 import { getModelInputSnippet } from "./inputs.js";
 
 export const snippetBasic = (model: ModelData, accessToken: string): string =>

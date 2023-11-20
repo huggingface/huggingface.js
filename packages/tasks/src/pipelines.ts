@@ -2,6 +2,17 @@ export const MODALITIES = ["cv", "nlp", "audio", "tabular", "multimodal", "rl", 
 
 export type Modality = (typeof MODALITIES)[number];
 
+export const MODALITY_LABELS = {
+	multimodal: "Multimodal",
+	nlp: "Natural Language Processing",
+	audio: "Audio",
+	cv: "Computer Vision",
+	rl: "Reinforcement Learning",
+	tabular: "Tabular",
+	other: "Other",
+} satisfies Record<Modality, string>;
+
+
 /**
  * Public interface for a sub task.
  *

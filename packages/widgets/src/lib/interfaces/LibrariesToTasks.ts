@@ -1,5 +1,4 @@
-import type { ModelLibraryKey } from "./Libraries.js";
-import type { PipelineType } from "./Types.js";
+import type { ModelLibraryKey, PipelineType } from "@huggingface/tasks";
 
 /**
  * Mapping from library name (excluding Transformers) to its supported tasks.

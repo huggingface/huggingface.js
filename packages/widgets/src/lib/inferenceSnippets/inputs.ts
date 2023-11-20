@@ -1,4 +1,5 @@
-import type { PipelineType, ModelData } from "../interfaces/Types.js";
+import type { PipelineType } from "@huggingface/tasks";
+import type { ModelData } from "../interfaces/Types.js";
 
 const inputsZeroShotClassification = () =>
 	`"Hi, I recently bought a device from your company but it is not working as advertised and I would like to get reimbursed!"`;

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { SvelteComponent } from "svelte";
-	import type { PipelineType } from "../../interfaces/Types.js";
 
 	import IconAudioClassification from "../Icons/IconAudioClassification.svelte";
 	import IconAudioToAudio from "../Icons/IconAudioToAudio.svelte";
@@ -36,6 +35,7 @@
 	import IconUnconditionalImageGeneration from "../Icons/IconUnconditionalImageGeneration.svelte";
 	import IconDocumentQuestionAnswering from "../Icons/IconDocumentQuestionAnswering.svelte";
 	import IconGraphML from "../Icons/IconGraphML.svelte";
+	import type { PipelineType } from "@huggingface/tasks";
 
 	export let classNames = "";
 	export let pipeline = "";

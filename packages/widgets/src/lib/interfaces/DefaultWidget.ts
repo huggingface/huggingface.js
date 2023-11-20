@@ -1,5 +1,5 @@
+import type { PipelineType } from "@huggingface/tasks";
 import type { WidgetExample } from "../components/InferenceWidget/shared/WidgetExample.js";
-import type { PipelineType } from "./Types.js";
 
 type LanguageCode = string;
 
