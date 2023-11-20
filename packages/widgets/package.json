@@ -28,7 +28,8 @@
 		"dist",
 		"src",
 		"!dist/**/*.test.*",
-		"!dist/**/*.spec.*"
+		"!dist/**/*.spec.*",
+		"static/audioProcessor.js"
 	],
 	"dependencies": {
 		"@huggingface/tasks": "workspace:^"

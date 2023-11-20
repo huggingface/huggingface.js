@@ -617,3 +617,4 @@ export const PIPELINE_DATA = {
 } satisfies Record<string, PipelineData>;
 
 export type PipelineType = keyof typeof PIPELINE_DATA;
+export const PIPELINE_TYPES = Object.keys(PIPELINE_DATA) as PipelineType[];
