@@ -4,6 +4,20 @@
 	import InferenceWidget from "$lib/components/InferenceWidget/InferenceWidget.svelte";
 	import ModeSwitcher from "$lib/components/DemoThemeSwitcher/DemoThemeSwitcher.svelte";
 	import { InferenceDisplayability } from "$lib/interfaces/InferenceDisplayability.js";
+	import { onMount } from "svelte";
+
+	let apiToken = "";
+
+	function storeHFToken() {
+		window.localStorage.setItem("hf_token", apiToken);
+	}
+
+	onMount(() => {
+		const token = window.localStorage.getItem("hf_token");
+		if (token) {
+			apiToken = token;
+		}
+	});
 
 	const models: ModelData[] = [
 		{
@@ -509,42 +523,15 @@
 	];
 </script>
 
-<div class="flex flex-col gap-6 py-12">
+<div class="flex flex-col gap-6 py-12 px-4">
 	<ModeSwitcher />
 
-	<div class="mx-4">
-		<h1 class="mb-8 text-4xl font-semibold">Showcase of all types of disabled inference</h1>
-		<div class="grid gap-4 w-full" style="grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));">
-			{#each modelsDisabled as model}
-				<div>
-					<a class="mb-3 block text-xs text-gray-300" href="/{model.id}">
-						<code>{model.id}</code>
-					</a>
-					<div class="max-w-md rounded-xl bg-white p-5 shadow-sm">
-						<InferenceWidget {model} />
-					</div>
-				</div>
-			{/each}
-		</div>
-	</div>
+	<label>
+		First, Enter HF token
+		<input class="form-input" type="text" bind:value={apiToken} placeholder="hf_..." on:change={storeHFToken} />
+	</label>
 
-	<div class="mx-4">
-		<h1 class="mb-8 text-4xl font-semibold">Showcase of all types of disabled inference with example outputs</h1>
-		<div class="grid gap-4 w-full" style="grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));">
-			{#each modelsDisabledWithExamples as model}
-				<div>
-					<a class="mb-3 block text-xs text-gray-300" href="/{model.id}">
-						<code>{model.id}</code>
-					</a>
-					<div class="max-w-md rounded-xl bg-white p-5 shadow-sm">
-						<InferenceWidget {model} />
-					</div>
-				</div>
-			{/each}
-		</div>
-	</div>
-
-	<div class="mx-4">
+	<div>
 		<h1 class="mb-8 text-4xl font-semibold">Showcase of all types of inference widgets running</h1>
 		<div class="grid gap-4 w-full" style="grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));">
 			{#each models as model}
@@ -553,7 +540,39 @@
 						<code>{model.id}</code>
 					</a>
 					<div class="rounded-xl bg-white p-5 shadow-sm">
-						<InferenceWidget {model} />
+						<InferenceWidget {apiToken} {model} />
+					</div>
+				</div>
+			{/each}
+		</div>
+	</div>
+
+	<div>
+		<h1 class="mb-8 text-4xl font-semibold">Showcase of all types of disabled inference</h1>
+		<div class="grid gap-4 w-full" style="grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));">
+			{#each modelsDisabled as model}
+				<div>
+					<a class="mb-3 block text-xs text-gray-300" href="/{model.id}">
+						<code>{model.id}</code>
+					</a>
+					<div class="max-w-md rounded-xl bg-white p-5 shadow-sm">
+						<InferenceWidget {apiToken} {model} />
+					</div>
+				</div>
+			{/each}
+		</div>
+	</div>
+
+	<div>
+		<h1 class="mb-8 text-4xl font-semibold">Showcase of all types of disabled inference with example outputs</h1>
+		<div class="grid gap-4 w-full" style="grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));">
+			{#each modelsDisabledWithExamples as model}
+				<div>
+					<a class="mb-3 block text-xs text-gray-300" href="/{model.id}">
+						<code>{model.id}</code>
+					</a>
+					<div class="max-w-md rounded-xl bg-white p-5 shadow-sm">
+						<InferenceWidget {apiToken} {model} />
 					</div>
 				</div>
 			{/each}
