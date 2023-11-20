@@ -509,12 +509,12 @@
 	];
 </script>
 
-<div class="space-y-12 py-24">
+<div class="flex flex-col gap-6 py-12">
 	<ModeSwitcher />
 
 	<div class="mx-4">
 		<h1 class="mb-8 text-4xl font-semibold">Showcase of all types of disabled inference</h1>
-		<div class="space-y-4 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0 xl:grid-cols-3">
+		<div class="grid gap-4 w-full" style="grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));">
 			{#each modelsDisabled as model}
 				<div>
 					<a class="mb-3 block text-xs text-gray-300" href="/{model.id}">
@@ -530,7 +530,7 @@
 
 	<div class="mx-4">
 		<h1 class="mb-8 text-4xl font-semibold">Showcase of all types of disabled inference with example outputs</h1>
-		<div class="space-y-4 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0 xl:grid-cols-3">
+		<div class="grid gap-4 w-full" style="grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));">
 			{#each modelsDisabledWithExamples as model}
 				<div>
 					<a class="mb-3 block text-xs text-gray-300" href="/{model.id}">
@@ -546,13 +546,13 @@
 
 	<div class="mx-4">
 		<h1 class="mb-8 text-4xl font-semibold">Showcase of all types of inference widgets running</h1>
-		<div class="space-y-4 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0 xl:grid-cols-3">
+		<div class="grid gap-4 w-full" style="grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));">
 			{#each models as model}
 				<div>
 					<a class="mb-3 block text-xs text-gray-300" href="/{model.id}">
 						<code>{model.id}</code>
 					</a>
-					<div class="max-w-md rounded-xl bg-white p-5 shadow-sm">
+					<div class="rounded-xl bg-white p-5 shadow-sm">
 						<InferenceWidget {model} />
 					</div>
 				</div>
