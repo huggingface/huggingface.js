@@ -2,6 +2,16 @@ export const MODALITIES = ["cv", "nlp", "audio", "tabular", "multimodal", "rl", 
 
 export type Modality = (typeof MODALITIES)[number];
 
+export const MODALITY_LABELS = {
+	multimodal: "Multimodal",
+	nlp: "Natural Language Processing",
+	audio: "Audio",
+	cv: "Computer Vision",
+	rl: "Reinforcement Learning",
+	tabular: "Tabular",
+	other: "Other",
+} satisfies Record<Modality, string>;
+
 /**
  * Public interface for a sub task.
  *
@@ -606,3 +616,4 @@ export const PIPELINE_DATA = {
 } satisfies Record<string, PipelineData>;
 
 export type PipelineType = keyof typeof PIPELINE_DATA;
+export const PIPELINE_TYPES = Object.keys(PIPELINE_DATA) as PipelineType[];

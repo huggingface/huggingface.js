@@ -1,7 +1,7 @@
 {
 	"name": "@huggingface/inference",
 	"version": "2.6.4",
-	"packageManager": "pnpm@8.3.1",
+	"packageManager": "pnpm@8.10.5",
 	"license": "MIT",
 	"author": "Tim Mikeladze <tim.mikeladze@gmail.com>",
 	"description": "Typescript wrapper for the Hugging Face Inference API",
@@ -44,10 +44,11 @@
 		"lint:check": "eslint --ext .cjs,.ts .",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
+		"prepare": "pnpm run build",
 		"prepublishOnly": "pnpm run build",
 		"test": "vitest run --config vitest.config.ts",
 		"test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest.config.ts",
-		"type-check": "tsc"
+		"check": "tsc"
 	},
 	"devDependencies": {
 		"@types/node": "18.13.0",

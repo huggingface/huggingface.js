@@ -1,6 +1,6 @@
 {
 	"name": "@huggingface/languages",
-	"packageManager": "pnpm@8.3.1",
+	"packageManager": "pnpm@8.10.5",
 	"version": "1.0.0",
 	"description": "List of ISO-639 languages used in the Hub",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
@@ -26,7 +26,7 @@
 		"prepublishOnly": "pnpm run build",
 		"build": "tsup src/index.ts --format cjs,esm --clean --dts",
 		"test": "vitest run",
-		"type-check": "tsc"
+		"check": "tsc"
 	},
 	"files": [
 		"dist",

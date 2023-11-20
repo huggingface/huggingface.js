@@ -1,0 +1,59 @@
+{
+	"name": "@huggingface/widgets",
+	"packageManager": "pnpm@8.10.5",
+	"version": "0.0.4",
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build && npm run package",
+		"preview": "vite preview",
+		"package": "svelte-kit sync && svelte-package && publint",
+		"prepublishOnly": "npm run package",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
+		"lint:check": "eslint --ext .cjs,.ts .",
+		"format": "prettier --write .",
+		"format:check": "prettier --check ."
+	},
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"svelte": "./dist/index.js"
+		}
+	},
+	"files": [
+		"dist",
+		"src",
+		"!dist/**/*.test.*",
+		"!dist/**/*.spec.*",
+		"static/audioProcessor.js"
+	],
+	"dependencies": {
+		"@huggingface/tasks": "workspace:^"
+	},
+	"peerDependencies": {
+		"svelte": "^3.59.2"
+	},
+	"devDependencies": {
+		"@sveltejs/adapter-auto": "^2.0.0",
+		"@sveltejs/kit": "^1.27.4",
+		"@sveltejs/package": "^2.0.0",
+		"@tailwindcss/forms": "^0.5.7",
+		"autoprefixer": "^10.4.16",
+		"eslint": "^8.28.0",
+		"postcss": "^8.4.31",
+		"publint": "^0.1.9",
+		"svelte": "^3.59.2",
+		"svelte-check": "^3.6.0",
+		"tailwindcss": "^3.3.5",
+		"tslib": "^2.4.1",
+		"typescript": "^5.0.0",
+		"vite": "^4.0.0"
+	},
+	"svelte": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"type": "module"
+}
