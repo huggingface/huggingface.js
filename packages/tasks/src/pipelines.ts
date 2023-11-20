@@ -12,7 +12,6 @@ export const MODALITY_LABELS = {
 	other: "Other",
 } satisfies Record<Modality, string>;
 
-
 /**
  * Public interface for a sub task.
  *
