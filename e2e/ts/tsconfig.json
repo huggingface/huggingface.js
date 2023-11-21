@@ -1,13 +1,13 @@
 {
-  "compilerOptions": {
-    "target": "ES2015",
-    "module": "commonjs",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "outDir": "dist"
-  },
-  "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "Recommended"
+	"compilerOptions": {
+		"target": "ES2015",
+		"module": "commonjs",
+		"strict": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"outDir": "dist"
+	},
+	"$schema": "https://json.schemastore.org/tsconfig",
+	"display": "Recommended"
 }
