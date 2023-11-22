@@ -33,10 +33,9 @@ jobs:
       - name: "Copy demo files"
         run: |
           rm -rf inference-widgets/packages
-          mkdir -p inference-widgets/packages/widgets
-          mkdir -p inference-widgets/packages/tasks
-          cp -r local-demo/packages/widgets inference-widgets/packages/widgets
-          cp -r local-demo/packages/tasks inference-widgets/packages/tasks
+          mkdir -p inference-widgets/packages
+          cp -r local-demo/packages/widgets inference-widgets/packages
+          cp -r local-demo/packages/tasks inference-widgets/packages
           cp local-demo/package.json inference-widgets/package.json
           cp local-demo/pnpm-lock.yaml inference-widgets/pnpm-lock.yaml
 
