@@ -55,5 +55,5 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	"visual-question-answering": ["transformers"],
 	"voice-activity-detection": [],
 	"zero-shot-classification": ["transformers", "transformers.js"],
-	"zero-shot-image-classification": ["transformers.js"],
+	"zero-shot-image-classification": ["transformers", "transformers.js"],
 };
