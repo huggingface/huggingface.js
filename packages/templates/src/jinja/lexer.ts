@@ -21,12 +21,10 @@ export const TOKEN_TYPES = Object.freeze({
 	Dot: "Dot",
 
 	CallOperator: "CallOperator", // ()
-
 	AdditiveBinaryOperator: "AdditiveBinaryOperator",
 	MultiplicativeBinaryOperator: "MultiplicativeBinaryOperator",
 	ComparisonBinaryOperator: "ComparisonBinaryOperator",
 	UnaryOperator: "UnaryOperator", // not
-
 	Set: "Set",
 	If: "If",
 	For: "For",
@@ -35,17 +33,11 @@ export const TOKEN_TYPES = Object.freeze({
 	EndIf: "EndIf",
 	ElseIf: "ElseIf",
 	EndFor: "EndFor",
-
-	// Logical operators
-	And: "And",
+	And: "And", // Logical operators
 	Or: "Or",
-
-	// TODO Add unary operators
 });
 
-/**
- * @typedef {keyof typeof TOKEN_TYPES} TokenType
- */
+export type TokenType = keyof typeof TOKEN_TYPES;
 
 /**
  * Constant lookup for keywords and known identifiers + symbols.
@@ -59,11 +51,9 @@ const KEYWORDS = Object.freeze({
 	endif: TOKEN_TYPES.EndIf,
 	elif: TOKEN_TYPES.ElseIf,
 	endfor: TOKEN_TYPES.EndFor,
-
 	and: TOKEN_TYPES.And,
 	or: TOKEN_TYPES.Or,
 	not: TOKEN_TYPES.UnaryOperator,
-
 	// Literals
 	true: TOKEN_TYPES.BooleanLiteral,
 	false: TOKEN_TYPES.BooleanLiteral,
@@ -78,17 +68,14 @@ export class Token {
 	 * @param {string} value The raw value as seen inside the source code.
 	 * @param {TokenType} type The type of token.
 	 */
-	constructor(value, type) {
-		this.value = value;
-		this.type = type;
-	}
+	constructor(public value: string, public type: TokenType) { }
 }
 
-function isWord(char) {
+function isWord(char: string): boolean {
 	return /\w/.test(char);
 }
 
-function isInteger(char) {
+function isInteger(char: string): boolean {
 	return /[0-9]/.test(char);
 }
 
@@ -101,7 +88,6 @@ const ORDERED_LOOKUP_TABLE = Object.freeze({
 	"%}": TOKEN_TYPES.CloseStatement,
 	"{{": TOKEN_TYPES.OpenExpression,
 	"}}": TOKEN_TYPES.CloseExpression,
-
 	// Single character tokens
 	"(": TOKEN_TYPES.OpenParen,
 	")": TOKEN_TYPES.CloseParen,
@@ -109,23 +95,19 @@ const ORDERED_LOOKUP_TABLE = Object.freeze({
 	"]": TOKEN_TYPES.CloseSquareBracket,
 	",": TOKEN_TYPES.Comma,
 	".": TOKEN_TYPES.Dot,
-
 	// Comparison operators
 	"<=": TOKEN_TYPES.ComparisonBinaryOperator,
 	">=": TOKEN_TYPES.ComparisonBinaryOperator,
 	"==": TOKEN_TYPES.ComparisonBinaryOperator,
 	"!=": TOKEN_TYPES.ComparisonBinaryOperator,
-
 	"<": TOKEN_TYPES.ComparisonBinaryOperator,
 	">": TOKEN_TYPES.ComparisonBinaryOperator,
-
 	// Arithmetic operators
 	"+": TOKEN_TYPES.AdditiveBinaryOperator,
 	"-": TOKEN_TYPES.AdditiveBinaryOperator,
 	"*": TOKEN_TYPES.MultiplicativeBinaryOperator,
 	"/": TOKEN_TYPES.MultiplicativeBinaryOperator,
 	"%": TOKEN_TYPES.MultiplicativeBinaryOperator,
-
 	// Assignment operator
 	"=": TOKEN_TYPES.Equals,
 });
@@ -135,10 +117,10 @@ const ORDERED_LOOKUP_TABLE = Object.freeze({
  * @param {string} source
  * @returns {Token[]}
  */
-export function tokenize(source) {
+export function tokenize(source: string): Token[] {
 	/** @type {Token[]} */
-	const tokens = [];
-	const src = source;
+	const tokens: Token[] = [];
+	const src: string = source;
 
 	let cursorPosition = 0;
 
@@ -147,7 +129,7 @@ export function tokenize(source) {
 	 * @param {function (string): boolean} predicate
 	 * @returns
 	 */
-	const consumeWhile = (predicate) => {
+	const consumeWhile = (predicate: (char: string) => boolean): string => {
 		let str = "";
 		while (predicate(src[cursorPosition])) {
 			str += src[cursorPosition++];
@@ -195,7 +177,7 @@ export function tokenize(source) {
 		}
 
 		// Handle multi-character tokens
-		let char = src[cursorPosition];
+		const char = src[cursorPosition];
 
 		if (char === "'") {
 			++cursorPosition; // Skip the opening quote
@@ -212,7 +194,7 @@ export function tokenize(source) {
 		}
 
 		if (isWord(char)) {
-			let word = consumeWhile(isWord);
+			const word = consumeWhile(isWord);
 
 			// Check for special/reserved keywords
 			const type = Object.hasOwn(KEYWORDS, word) ? KEYWORDS[word] : TOKEN_TYPES.Identifier;
