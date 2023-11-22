@@ -34,6 +34,6 @@ module.exports = {
 			},
 		},
 	],
-	// Disable eslint for JS files
-	ignorePatterns: ["*.js"],
+	// Disable eslint for JS files (and TS declaration files, generated with JSDoc)
+	ignorePatterns: ["packages/templates/src/*.js", "packages/templates/types/*.d.ts"],
 };
