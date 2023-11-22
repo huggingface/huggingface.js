@@ -27,6 +27,7 @@
 	import ZeroShotClassificationWidget from "./widgets/ZeroShowClassificationWidget/ZeroShotClassificationWidget.svelte";
 	import ZeroShotImageClassificationWidget from "./widgets/ZeroShotImageClassificationWidget/ZeroShotImageClassificationWidget.svelte";
 	import type { PipelineType } from "@huggingface/tasks";
+	import WidgetInfo from "./shared/WidgetInfo/WidgetInfo.svelte";
 
 	export let apiToken: WidgetProps["apiToken"] = undefined;
 	export let callApiOnMount = false;
@@ -97,4 +98,6 @@
 
 {#if widgetComponent}
 	<svelte:component this={widgetComponent} {...widgetProps} />
+{:else}
+	<WidgetInfo {model} />
 {/if}
