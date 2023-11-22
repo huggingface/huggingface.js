@@ -53,7 +53,7 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "XTTS is a Voice generation model that lets you clone voices into different languages.",
-			id: "coqui/XTTS-v2",
+			id: "coqui/xtts",
 		},
 		{
 			description: "An application that synthesizes speech for various speaker types.",
