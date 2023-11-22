@@ -1,0 +1,35 @@
+{
+  "name": "@huggingface/templates",
+  "version": "0.0.1",
+  "description": "A minimalistic JavaScript implementation of the Jinja templating engine, specifically designed for parsing ML chat templates.",
+  "main": "index.js",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/huggingface/huggingface.js.git"
+  },
+  "keywords": [
+    "jinja",
+    "templates",
+    "templating",
+    "machine learning"
+  ],
+  "author": "Xenova",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/huggingface/huggingface.js/issues"
+  },
+  "homepage": "https://github.com/huggingface/huggingface.js#readme",
+  "scripts": {
+    "typegen": "tsc ./src/index.js --allowJs --declaration --emitDeclarationOnly --declarationMap --outDir types",
+    "build": "vite build && npm run typegen",
+    "test": "vitest run --config vitest.config.ts",
+    "test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest.config.ts"
+  },
+  "devDependencies": {
+    "@huggingface/hub": "^0.12.2",
+    "@xenova/transformers": "^2.9.0",
+    "typescript": "^5.3.2",
+    "vitest": "^0.34.6"
+  }
+}

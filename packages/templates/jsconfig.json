@@ -1,0 +1,9 @@
+{
+    "include": [
+        "src/**/*"
+    ],
+    "compilerOptions": {
+        "checkJs": true,
+        "target": "esnext",
+    },
+}
