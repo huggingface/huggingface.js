@@ -607,14 +607,14 @@ export const PIPELINE_DATA = {
 		color: "green",
 	},
 	"mask-generation": {
-		name:     "Mask Generation",
+		name: "Mask Generation",
 		modality: "cv",
-		color:    "indigo",
+		color: "indigo",
 	},
 	"zero-shot-object-detection": {
-		name:     "Zero-Shot Object Detection",
+		name: "Zero-Shot Object Detection",
 		modality: "cv",
-		color:    "yellow",
+		color: "yellow",
 	},
 	other: {
 		name: "Other",
