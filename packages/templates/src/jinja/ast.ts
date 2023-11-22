@@ -1,4 +1,4 @@
-import { Token } from "./lexer";
+import type { Token } from "./lexer";
 
 /**
  * Statements do not result in a value at runtime. They contain one or more expressions internally.
@@ -17,9 +17,8 @@ export class Program extends Statement {
 	 *
 	 * @param {Statement[]} body
 	 */
-	constructor(body) {
+	constructor(public body: Statement[]) {
 		super();
-		this.body = body;
 	}
 }
 
@@ -32,11 +31,8 @@ export class If extends Statement {
 	 * @param {Statement[]} body
 	 * @param {Statement[]} alternate
 	 */
-	constructor(test, body, alternate) {
+	constructor(public test: Expression, public body: Statement[], public alternate: Statement[]) {
 		super();
-		this.test = test;
-		this.body = body;
-		this.alternate = alternate;
 	}
 }
 
@@ -49,11 +45,8 @@ export class For extends Statement {
 	 * @param {Expression} iterable
 	 * @param {Statement[]} body
 	 */
-	constructor(loopvar, iterable, body) {
+	constructor(public loopvar: Identifier, public iterable: Expression, public body: Statement[]) {
 		super();
-		this.loopvar = loopvar;
-		this.iterable = iterable;
-		this.body = body;
 	}
 }
 
@@ -65,10 +58,8 @@ export class SetStatement extends Statement {
 	 * @param {Expression} assignee
 	 * @param {Expression} value
 	 */
-	constructor(assignee, value) {
+	constructor(public assignee: Expression, public value: Expression) {
 		super();
-		this.assignee = assignee;
-		this.value = value;
 	}
 }
 
@@ -88,11 +79,8 @@ export class MemberExpression extends Expression {
 	 * @param {Expression} property
 	 * @param {boolean} computed
 	 */
-	constructor(object, property, computed) {
+	constructor(public object: Expression, public property: Expression, public computed: boolean) {
 		super();
-		this.object = object;
-		this.property = property;
-		this.computed = computed; // true: object[property], false: object.property
 	}
 }
 
@@ -104,10 +92,8 @@ export class CallExpression extends Expression {
 	 * @param {Expression} callee
 	 * @param {Expression[]} args
 	 */
-	constructor(callee, args) {
+	constructor(public callee: Expression, public args: Expression[]) {
 		super();
-		this.callee = callee;
-		this.args = args;
 	}
 }
 
@@ -121,9 +107,8 @@ export class Identifier extends Expression {
 	 *
 	 * @param {string} value The name of the identifier
 	 */
-	constructor(value) {
+	constructor(public value: string) {
 		super();
-		this.value = value;
 	}
 }
 
@@ -134,16 +119,15 @@ export class Identifier extends Expression {
  * @abstract
  * @template T
  */
-class Literal extends Expression {
+class Literal<T> extends Expression {
 	type = "Literal";
 
 	/**
 	 *
 	 * @param {T} value
 	 */
-	constructor(value) {
+	constructor(public value: T) {
 		super();
-		this.value = value;
 	}
 }
 
@@ -151,7 +135,7 @@ class Literal extends Expression {
  * Represents a numeric constant in the template.
  * @extends {Literal<number>}
  */
-export class NumericLiteral extends Literal {
+export class NumericLiteral extends Literal<number> {
 	type = "NumericLiteral";
 }
 
@@ -159,13 +143,13 @@ export class NumericLiteral extends Literal {
  * Represents a text constant in the template.
  * @extends {Literal<string>}
  */
-export class StringLiteral extends Literal {
+export class StringLiteral extends Literal<string> {
 	type = "StringLiteral";
 	/**
 	 *
 	 * @param {string} value
 	 */
-	constructor(value) {
+	constructor(value: string) {
 		super(value);
 	}
 }
@@ -174,28 +158,12 @@ export class StringLiteral extends Literal {
  * Represents a boolean constant in the template.
  * @extends {Literal<boolean>}
  */
-export class BooleanLiteral extends Literal {
+export class BooleanLiteral extends Literal<boolean> {
 	type = "BooleanLiteral";
 }
 
-// TODO use
-// export class CallExpressionNode extends Expression {
-//     type = 'CallExpression';
-
-//     /**
-//      *
-//      * @param {string} identifier
-//      * @param {Statement} argument
-//      */
-//     constructor(identifier, argument) {
-//         super();
-//         this.identifier = identifier;
-//         this.argument = argument;
-//     }
-// }
-
 /**
- * An operation with two sides, seperated by a operator.
+ * An operation with two sides, separated by an operator.
  * Note: Either side can be a Complex Expression, with order
  * of operations being determined by the operator.
  */
@@ -208,11 +176,8 @@ export class BinaryExpression extends Expression {
 	 * @param {Expression} left
 	 * @param {Expression} right
 	 */
-	constructor(operator, left, right) {
+	constructor(public operator: Token, public left: Expression, public right: Expression) {
 		super();
-		this.operator = operator;
-		this.left = left;
-		this.right = right;
 	}
 }
 
@@ -227,9 +192,7 @@ export class UnaryExpression extends Expression {
 	 * @param {Token} operator
 	 * @param {Expression} argument
 	 */
-	constructor(operator, argument) {
+	constructor(public operator: Token, public argument: Expression) {
 		super();
-		this.operator = operator;
-		this.argument = argument;
 	}
 }
