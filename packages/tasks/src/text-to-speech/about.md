@@ -25,7 +25,7 @@ def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response
 
-output = query({"text_inputs": "This is a test"})
+output = query({"text_inputs": "Max is the best doggo."})
 ```
 
 You can also use libraries such as [espnet](https://huggingface.co/models?library=espnet&pipeline_tag=text-to-speech&sort=downloads) or [transformers](https://huggingface.co/models?pipeline_tag=text-to-speech&library=transformers&sort=trending) if you want to handle the Inference directly.
@@ -56,6 +56,7 @@ await inference.textToSpeech({
 
 ## Useful Resources
 
+- [Hugging Face Audio Course](https://huggingface.co/learn/audio-course/chapter6/introduction)
 - [ML for Audio Study Group - Text to Speech Deep Dive](https://www.youtube.com/watch?v=aLBedWj-5CQ)
 - [An introduction to SpeechT5, a multi-purpose speech recognition and synthesis model](https://huggingface.co/blog/speecht5).
 - [A guide on Fine-tuning Whisper For Multilingual ASR with 🤗Transformers](https://huggingface.co/blog/fine-tune-whisper)

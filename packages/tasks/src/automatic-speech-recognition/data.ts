@@ -44,7 +44,7 @@ const taskData: TaskDataCustom = {
 	models: [
 		{
 			description: "A powerful ASR model by OpenAI.",
-			id: "openai/whisper-large-v2",
+			id: "openai/whisper-large-v3",
 		},
 		{
 			description: "A good generic ASR model by MetaAI.",
@@ -58,20 +58,20 @@ const taskData: TaskDataCustom = {
 	spaces: [
 		{
 			description: "A powerful general-purpose speech recognition application.",
-			id: "openai/whisper",
+			id: "hf-audio/whisper-large-v3",
 		},
 		{
 			description: "Fastest speech recognition application.",
 			id: "sanchit-gandhi/whisper-jax",
 		},
 		{
-			description: "An application that transcribes speeches in YouTube videos.",
-			id: "jeffistyping/Youtube-Whisperer",
+			description: "A high quality speech and text translation model by Meta.",
+			id: "facebook/seamless_m4t",
 		},
 	],
 	summary:
 		"Automatic Speech Recognition (ASR), also known as Speech to Text (STT), is the task of transcribing a given audio to text. It has many applications, such as voice user interfaces.",
-	widgetModels: ["openai/whisper-large-v2"],
+	widgetModels: ["openai/whisper-large-v3"],
 	youtubeId: "TksaY_FDgnk",
 };
 
