@@ -99,5 +99,6 @@
 {#if widgetComponent}
 	<svelte:component this={widgetComponent} {...widgetProps} />
 {:else}
+	<!-- Still show widget error (such as "pipeline not support", etc.) when there is no widget for a task -->
 	<WidgetInfo {model} />
 {/if}
