@@ -33,5 +33,10 @@ module.exports = {
 				parser: "@typescript-eslint/parser",
 			},
 		},
+
+		// Disable eslint for JS files
+		{
+			excludedFiles: ['*.js'],
+		}
 	],
 };
