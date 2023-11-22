@@ -1,14 +1,13 @@
 name: Sync Widgets Demo
 on:
-  #pull_request:
   push:
-    # branches:
-    #   - main
-    # paths:
-    #   - "packages/widgets/**"
-    #   - "packages/tasks/**"
-    #   - "package.json"
-    #   - "pnpm-lock.yaml"
+    branches:
+      - main
+    paths:
+      - "packages/widgets/**"
+      - "packages/tasks/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
 
 jobs:
   sync:
