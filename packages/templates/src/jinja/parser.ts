@@ -1,25 +1,21 @@
-import { Token, TOKEN_TYPES } from "./lexer.js";
+import type { Token, TokenType } from "./lexer";
+import { TOKEN_TYPES } from "./lexer";
+import type { Statement } from "./ast";
 import {
-	Statement,
 	Program,
 	If,
 	For,
 	SetStatement,
-	// Expression,
 	MemberExpression,
 	CallExpression,
 	Identifier,
 	NumericLiteral,
 	StringLiteral,
 	BooleanLiteral,
-	// CallExpressionNode,
 	BinaryExpression,
 	UnaryExpression,
-} from "./ast.js";
+} from "./ast";
 
-/**
- * @typedef {keyof typeof TOKEN_TYPES} TokenType
- */
 
 /**
  * Generate the Abstract Syntax Tree (AST) from a list of tokens.
@@ -27,7 +23,7 @@ import {
  * @param {Token[]} tokens
  * @returns {Program}
  */
-export function parse(tokens) {
+export function parse(tokens: Token[]): Program {
 	const program = new Program([]);
 	let current = 0;
 
@@ -36,7 +32,7 @@ export function parse(tokens) {
 	 * @param {string} type
 	 * @param {string} error
 	 */
-	function expect(type, error) {
+	function expect(type: string, error: string): Token {
 		const prev = tokens[current++];
 		if (!prev || prev.type !== type) {
 			throw new Error(`Parser Error: ${error}. ${prev.type} !== ${type}.`);
@@ -44,7 +40,7 @@ export function parse(tokens) {
 		return prev;
 	}
 
-	function parseAny() {
+	function parseAny(): Statement {
 		switch (tokens[current].type) {
 			case TOKEN_TYPES.Text:
 				return parseText();
@@ -61,36 +57,42 @@ export function parse(tokens) {
 	 *
 	 * @param {TokenType[]} types
 	 */
-	function not(...types) {
-		return current + types.length <= tokens.length && types.some((type, i) => type !== tokens[current + i].type);
+	function not(...types: TokenType[]): boolean {
+		return (
+			current + types.length <= tokens.length &&
+			types.some((type, i) => type !== tokens[current + i].type)
+		);
 	}
 
 	/**
 	 *
 	 * @param {TokenType[]} types
 	 */
-	function is(...types) {
-		return current + types.length <= tokens.length && types.every((type, i) => type === tokens[current + i].type);
+	function is(...types: TokenType[]): boolean {
+		return (
+			current + types.length <= tokens.length &&
+			types.every((type, i) => type === tokens[current + i].type)
+		);
 	}
 
 	/**
 	 *
 	 * @returns {Statement[]}
 	 */
-	function parseBlock() {
+	function parseBlock(): Statement[] {
 		// Could be a statement or an expression
-		const body = [];
+		const body: Statement[] = [];
 		while (not(TOKEN_TYPES.OpenStatement)) {
 			body.push(parseAny());
 		}
 		return body;
 	}
 
-	function parseText() {
+	function parseText(): StringLiteral {
 		return new StringLiteral(expect(TOKEN_TYPES.Text, "Expected text token").value);
 	}
 
-	function parseJinjaStatement() {
+	function parseJinjaStatement(): Statement {
 		// Consume {% %} tokens
 		expect(TOKEN_TYPES.OpenStatement, "Expected opening statement token");
 
@@ -124,18 +126,18 @@ export function parse(tokens) {
 		return result;
 	}
 
-	function parseJinjaExpression() {
+	function parseJinjaExpression(): Statement {
 		// Consume {{ }} tokens
 		expect(TOKEN_TYPES.OpenExpression, "Expected opening expression token");
 
-		let result = parseExpression();
+		const result = parseExpression();
 
 		expect(TOKEN_TYPES.CloseExpression, "Expected closing expression token");
 		return result;
 	}
 
 	// NOTE: `set` acts as both declaration statement and assignment expression
-	function parseSetStatement() {
+	function parseSetStatement(): Statement {
 		const left = parseExpression();
 
 		if (is(TOKEN_TYPES.Equals)) {
@@ -147,13 +149,13 @@ export function parse(tokens) {
 		return left;
 	}
 
-	function parseIfStatement() {
+	function parseIfStatement(): If {
 		const test = parseExpression();
 
 		expect(TOKEN_TYPES.CloseStatement, "Expected closing statement token");
 
 		/** @type {Statement[]} */
-		let alternate = [];
+		let alternate: Statement[] = [];
 
 		const body = parseBlock();
 
@@ -177,7 +179,7 @@ export function parse(tokens) {
 		return new If(test, body, alternate);
 	}
 
-	function parseForStatement() {
+	function parseForStatement(): For {
 		// e.g., `message` in `for message in messages`
 		const loopVariable = parsePrimaryExpression(); // should be an identifier
 		if (loopVariable.type !== "Identifier") {
@@ -192,7 +194,7 @@ export function parse(tokens) {
 		expect(TOKEN_TYPES.CloseStatement, "Expected closing statement token");
 
 		// Body of for loop
-		const body = [];
+		const body: Statement[] = [];
 
 		// Keep going until we hit {% endfor
 		while (not(TOKEN_TYPES.OpenStatement, TOKEN_TYPES.EndFor)) {
@@ -202,11 +204,11 @@ export function parse(tokens) {
 		return new For(loopVariable, iterable, body);
 	}
 
-	function parseExpression() {
+	function parseExpression(): Statement {
 		// Choose parse function with lowest precedence
 		return parseLogicalOrExpression();
 	}
-	function parseLogicalOrExpression() {
+	function parseLogicalOrExpression(): Statement {
 		let left = parseLogicalAndExpression();
 		while (is(TOKEN_TYPES.Or)) {
 			const operator = tokens[current];
@@ -217,7 +219,7 @@ export function parse(tokens) {
 		return left;
 	}
 
-	function parseLogicalAndExpression() {
+	function parseLogicalAndExpression(): Statement {
 		let left = parseComparisonExpression();
 		while (is(TOKEN_TYPES.And)) {
 			const operator = tokens[current];
@@ -228,7 +230,7 @@ export function parse(tokens) {
 		return left;
 	}
 
-	function parseComparisonExpression() {
+	function parseComparisonExpression(): Statement {
 		let left = parseAdditiveExpression();
 		while (is(TOKEN_TYPES.ComparisonBinaryOperator)) {
 			const operator = tokens[current];
@@ -238,7 +240,7 @@ export function parse(tokens) {
 		}
 		return left;
 	}
-	function parseAdditiveExpression() {
+	function parseAdditiveExpression(): Statement {
 		let left = parseMultiplicativeExpression();
 		while (is(TOKEN_TYPES.AdditiveBinaryOperator)) {
 			const operator = tokens[current];
@@ -249,7 +251,7 @@ export function parse(tokens) {
 		return left;
 	}
 
-	function parseCallMemberExpression() {
+	function parseCallMemberExpression(): Statement {
 		// Handle member expressions recursively
 
 		const member = parseMemberExpression(); // foo.x
@@ -261,7 +263,7 @@ export function parse(tokens) {
 		return member;
 	}
 
-	function parseCallExpression(callee) {
+	function parseCallExpression(callee: Statement): CallExpression {
 		let callExpression = new CallExpression(callee, parseArgs());
 
 		if (is(TOKEN_TYPES.OpenParen)) {
@@ -272,7 +274,7 @@ export function parse(tokens) {
 		return callExpression;
 	}
 
-	function parseArgs() {
+	function parseArgs(): Statement[] {
 		// add (x + 5, foo())
 		expect(TOKEN_TYPES.OpenParen, "Expected opening parenthesis for arguments list");
 
@@ -281,7 +283,7 @@ export function parse(tokens) {
 		expect(TOKEN_TYPES.CloseParen, "Expected closing parenthesis for arguments list");
 		return args;
 	}
-	function parseArgumentsList() {
+	function parseArgumentsList(): Statement[] {
 		// comma-separated arguments list
 		const args = [parseExpression()]; // Update when we allow assignment expressions
 
@@ -291,14 +293,14 @@ export function parse(tokens) {
 		}
 		return args;
 	}
-	function parseMemberExpression() {
+	function parseMemberExpression(): Statement {
 		let object = parsePrimaryExpression();
 
 		while (is(TOKEN_TYPES.Dot) || is(TOKEN_TYPES.OpenSquareBracket)) {
 			const operator = tokens[current]; // . or [
 			++current;
-			let property;
-			let computed = operator.type !== TOKEN_TYPES.Dot;
+			let property: Statement;
+			const computed = operator.type !== TOKEN_TYPES.Dot;
 			if (computed) {
 				// computed (i.e., bracket notation: obj[expr])
 				property = parseExpression();
@@ -315,7 +317,7 @@ export function parse(tokens) {
 		return object;
 	}
 
-	function parseMultiplicativeExpression() {
+	function parseMultiplicativeExpression(): Statement {
 		let left = parseLogicalNegationExpression();
 
 		while (is(TOKEN_TYPES.MultiplicativeBinaryOperator)) {
@@ -327,8 +329,8 @@ export function parse(tokens) {
 		return left;
 	}
 
-	function parseLogicalNegationExpression() {
-		let right;
+	function parseLogicalNegationExpression(): Statement {
+		let right: UnaryExpression | undefined;
 
 		// Try parse unary operators
 		while (is(TOKEN_TYPES.UnaryOperator)) {
@@ -342,7 +344,7 @@ export function parse(tokens) {
 		return right ?? parseCallMemberExpression();
 	}
 
-	function parsePrimaryExpression() {
+	function parsePrimaryExpression(): Statement {
 		// Primary expression: number, string, identifier, function call, parenthesized expression
 		const token = tokens[current];
 		switch (token.type) {
