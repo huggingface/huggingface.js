@@ -28,7 +28,7 @@ jobs:
           git config --global user.name machineuser
           git config --global user.email infra+machineuser@huggingface.co
 
-          echo "machine huggingface.co login hf password ${{ secrets.HF_PUSH_TOKEN }}" >> ~/.netrc
+          echo "machine huggingface.co login hf password ${{ secrets.HF_DEMO_TOKEN }}" >> ~/.netrc
 
       - name: "Copy demo files"
         run: |
