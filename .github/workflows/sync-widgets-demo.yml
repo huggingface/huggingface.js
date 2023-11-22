@@ -1,0 +1,46 @@
+name: Sync Widgets Demo
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "packages/widgets/**"
+      - "packages/tasks/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+        name: "Clone"
+        with:
+          path: "local-demo"
+
+      - name: "Clone remote demo"
+        run: |
+          git clone https://huggingface.co/spaces/huggingfacejs/inference-widgets
+          # Set huggingface token in git credentials
+          git config --global user.name machineuser
+          git config --global user.email infra+machineuser@huggingface.co
+
+          echo "machine huggingface.co login hf password ${{ secrets.HF_DEMO_TOKEN }}" >> ~/.netrc
+
+      - name: "Copy demo files"
+        run: |
+          rm -rf inference-widgets/packages
+          mkdir -p inference-widgets/packages
+          cp -r local-demo/packages/widgets inference-widgets/packages
+          cp -r local-demo/packages/tasks inference-widgets/packages
+          cp local-demo/package.json inference-widgets/package.json
+          cp local-demo/pnpm-lock.yaml inference-widgets/pnpm-lock.yaml
+
+      - name: "Commit and push"
+        run: |
+          cd inference-widgets
+          git add .
+          git commit -m "Sync widgets demo"
+          git push
