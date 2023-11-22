@@ -16,7 +16,6 @@ import {
 	UnaryExpression,
 } from "./ast";
 
-
 /**
  * Generate the Abstract Syntax Tree (AST) from a list of tokens.
  * Operator precedence can be found here: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_precedence#table
@@ -58,10 +57,7 @@ export function parse(tokens: Token[]): Program {
 	 * @param {TokenType[]} types
 	 */
 	function not(...types: TokenType[]): boolean {
-		return (
-			current + types.length <= tokens.length &&
-			types.some((type, i) => type !== tokens[current + i].type)
-		);
+		return current + types.length <= tokens.length && types.some((type, i) => type !== tokens[current + i].type);
 	}
 
 	/**
@@ -69,10 +65,7 @@ export function parse(tokens: Token[]): Program {
 	 * @param {TokenType[]} types
 	 */
 	function is(...types: TokenType[]): boolean {
-		return (
-			current + types.length <= tokens.length &&
-			types.every((type, i) => type === tokens[current + i].type)
-		);
+		return current + types.length <= tokens.length && types.every((type, i) => type === tokens[current + i].type);
 	}
 
 	/**

@@ -68,7 +68,10 @@ export class Token {
 	 * @param {string} value The raw value as seen inside the source code.
 	 * @param {TokenType} type The type of token.
 	 */
-	constructor(public value: string, public type: TokenType) { }
+	constructor(
+		public value: string,
+		public type: TokenType
+	) {}
 }
 
 function isWord(char: string): boolean {

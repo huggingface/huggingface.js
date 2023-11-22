@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { tokenize } from "../src/jinja/lexer.js";
-import { parse } from "../src/jinja/parser.js";
+import { tokenize } from "../src/jinja/lexer";
+import { parse } from "../src/jinja/parser";
 import { Environment, Interpreter } from "../src/jinja/runtime.js";
 
 const TEST_STRINGS = {

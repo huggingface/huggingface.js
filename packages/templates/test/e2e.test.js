@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { Template } from "../src/index.js";
+import { Template } from "../src/index";
 
 import { downloadFile } from "../../hub";
 

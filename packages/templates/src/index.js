@@ -11,8 +11,8 @@
  * @module index
  */
 
-import { tokenize } from "./jinja/lexer.js";
-import { parse } from "./jinja/parser.js";
+import { tokenize } from "./jinja/lexer";
+import { parse } from "./jinja/parser";
 import { Environment, Interpreter } from "./jinja/runtime.js";
 
 export class Template {
