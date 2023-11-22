@@ -23,6 +23,7 @@
 	import IconTextGeneration from "../Icons/IconTextGeneration.svelte";
 	import IconTextToImage from "../Icons/IconTextToImage.svelte";
 	import IconImageToText from "../Icons/IconImageToText.svelte";
+	import IconImageToVideo from "../Icons/IconImageToVideo.svelte";
 	import IconTextToSpeech from "../Icons/IconTextToSpeech.svelte";
 	import IconTextToVideo from "../Icons/IconTextToVideo.svelte";
 	import IconTokenClassification from "../Icons/IconTokenClassification.svelte";
@@ -72,6 +73,7 @@
 		"text-to-image": IconTextToImage,
 		"image-to-text": IconImageToText,
 		"image-to-image": IconImageToImage,
+		"image-to-video": IconImageToVideo,
 		"unconditional-image-generation": IconUnconditionalImageGeneration,
 		"reinforcement-learning": IconReinforcementLearning,
 		robotics: IconRobotics,
