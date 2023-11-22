@@ -15,7 +15,7 @@ export const LIBRARY_TASK_MAPPING_EXCLUDING_TRANSFORMERS: Partial<Record<ModelLi
 		"audio-to-audio",
 	],
 	bertopic: ["text-classification"],
-	diffusers: ["image-to-image", "text-to-image", "image-to-video"],
+	diffusers: ["image-to-image", "text-to-image"],
 	doctr: ["object-detection"],
 	espnet: ["text-to-speech", "automatic-speech-recognition"],
 	fairseq: ["text-to-speech", "audio-to-audio"],
