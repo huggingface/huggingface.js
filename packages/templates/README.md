@@ -26,12 +26,16 @@ const config = await (await downloadFile({
 const template = new Template(config.chat_template);
 
 const chat = [
-   {"role": "user", "content": "Hello, how are you?"},
-   {"role": "assistant", "content": "I'm doing great. How can I help you today?"},
-   {"role": "user", "content": "I'd like to show off how chat templating works!"},
+    { "role": "user", "content": "Hello, how are you?" },
+    { "role": "assistant", "content": "I'm doing great. How can I help you today?" },
+    { "role": "user", "content": "I'd like to show off how chat templating works!" },
 ];
-const result = template.render(chat);
-// "<s>[INST] Hello, how are you? [/INST]I'm doing great. How can I help you today?</s> [INST] I'd like to show off how chat templating works! [/INST]"
+const result = template.render({
+    messages: chat,
+    bos_token: config.bos_token,
+    eos_token: config.eos_token,
+});
+console.log(result);
 ```
 
 ### Transformers.js (coming soon)
