@@ -35,7 +35,7 @@ const result = template.render({
     bos_token: config.bos_token,
     eos_token: config.eos_token,
 });
-console.log(result);
+// "<s>[INST] Hello, how are you? [/INST]I'm doing great. How can I help you today?</s> [INST] I'd like to show off how chat templating works! [/INST]"
 ```
 
 ### Transformers.js (coming soon)
