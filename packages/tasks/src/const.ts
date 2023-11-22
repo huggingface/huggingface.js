@@ -51,7 +51,7 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 		"transformers.js",
 	],
 	translation: ["transformers", "transformers.js"],
-	"unconditional-image-generation": [],
+	"unconditional-image-generation": ["diffusers"],
 	"visual-question-answering": ["transformers"],
 	"voice-activity-detection": [],
 	"zero-shot-classification": ["transformers", "transformers.js"],
