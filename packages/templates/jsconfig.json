@@ -1,9 +1,7 @@
 {
-    "include": [
-        "src/**/*"
-    ],
-    "compilerOptions": {
-        "checkJs": true,
-        "target": "esnext",
-    },
+	"include": ["src/**/*"],
+	"compilerOptions": {
+		"checkJs": true,
+		"target": "esnext"
+	}
 }
