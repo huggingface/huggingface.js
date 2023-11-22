@@ -36,6 +36,7 @@ module.exports = {
 
 		// Disable eslint for JS files
 		{
+			files: [],
 			excludedFiles: ['*.js'],
 		}
 	],
