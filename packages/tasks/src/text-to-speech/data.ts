@@ -52,8 +52,8 @@ const taskData: TaskDataCustom = {
 			id: "suno/bark",
 		},
 		{
-			description: "An application that contains multiple speech synthesis models for various languages and accents.",
-			id: "coqui/CoquiTTS",
+			description: "XTTS is a Voice generation model that lets you clone voices into different languages.",
+			id: "coqui/XTTS-v2",
 		},
 		{
 			description: "An application that synthesizes speech for various speaker types.",
@@ -62,7 +62,7 @@ const taskData: TaskDataCustom = {
 	],
 	summary:
 		"Text-to-Speech (TTS) is the task of generating natural sounding speech given text input. TTS models can be extended to have a single model that generates speech for multiple speakers and multiple languages.",
-	widgetModels: ["microsoft/speecht5_tts"],
+	widgetModels: ["suno/bark"],
 	youtubeId: "NW62DpzJ274",
 };
 
