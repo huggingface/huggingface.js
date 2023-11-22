@@ -63,6 +63,10 @@ const KEYWORDS = Object.freeze({
 	and: TOKEN_TYPES.And,
 	or: TOKEN_TYPES.Or,
 	not: TOKEN_TYPES.UnaryOperator,
+
+	// Literals
+	true: TOKEN_TYPES.BooleanLiteral,
+	false: TOKEN_TYPES.BooleanLiteral,
 });
 
 /**
@@ -89,6 +93,44 @@ function isInteger(char) {
 }
 
 /**
+ * A data structure which contains a list of rules to test
+ */
+const ORDERED_LOOKUP_TABLE = Object.freeze({
+	// Control sequences
+	"{%": TOKEN_TYPES.OpenStatement,
+	"%}": TOKEN_TYPES.CloseStatement,
+	"{{": TOKEN_TYPES.OpenExpression,
+	"}}": TOKEN_TYPES.CloseExpression,
+
+	// Single character tokens
+	"(": TOKEN_TYPES.OpenParen,
+	")": TOKEN_TYPES.CloseParen,
+	"[": TOKEN_TYPES.OpenSquareBracket,
+	"]": TOKEN_TYPES.CloseSquareBracket,
+	",": TOKEN_TYPES.Comma,
+	".": TOKEN_TYPES.Dot,
+
+	// Comparison operators
+	"<=": TOKEN_TYPES.ComparisonBinaryOperator,
+	">=": TOKEN_TYPES.ComparisonBinaryOperator,
+	"==": TOKEN_TYPES.ComparisonBinaryOperator,
+	"!=": TOKEN_TYPES.ComparisonBinaryOperator,
+
+	"<": TOKEN_TYPES.ComparisonBinaryOperator,
+	">": TOKEN_TYPES.ComparisonBinaryOperator,
+
+	// Arithmetic operators
+	"+": TOKEN_TYPES.AdditiveBinaryOperator,
+	"-": TOKEN_TYPES.AdditiveBinaryOperator,
+	"*": TOKEN_TYPES.MultiplicativeBinaryOperator,
+	"/": TOKEN_TYPES.MultiplicativeBinaryOperator,
+	"%": TOKEN_TYPES.MultiplicativeBinaryOperator,
+
+	// Assignment operator
+	"=": TOKEN_TYPES.Equals,
+});
+
+/**
  * Generate a list of tokens from a source string.
  * @param {string} source
  * @returns {Token[]}
@@ -96,12 +138,26 @@ function isInteger(char) {
 export function tokenize(source) {
 	/** @type {Token[]} */
 	const tokens = [];
-	const src = Array.from(source);
+	const src = source;
 
 	let cursorPosition = 0;
 
+	/**
+	 *
+	 * @param {function (string): boolean} predicate
+	 * @returns
+	 */
+	const consumeWhile = (predicate) => {
+		let str = "";
+		while (predicate(src[cursorPosition])) {
+			str += src[cursorPosition++];
+			if (cursorPosition >= src.length) throw new SyntaxError("Unexpected end of input");
+		}
+		return str;
+	};
+
 	// Build each token until end of input
-	while (cursorPosition < src.length) {
+	main: while (cursorPosition < src.length) {
 		// First, consume all text that is outside of a Jinja statement or expression
 		const lastTokenType = tokens.at(-1)?.type;
 		if (
@@ -126,154 +182,41 @@ export function tokenize(source) {
 			}
 		}
 
-		let char = src[cursorPosition];
+		// Consume (and ignore) all whitespace inside Jinja statements or expressions
+		consumeWhile((char) => /\s/.test(char));
 
-		// NOTE: Whitespace is only ignored if inside Jinja statements or expressions: {% %} or {{ }}
-		if (/\s/.test(char)) {
-			// Ignore whitespace
-			++cursorPosition;
-			continue;
-		}
-
-		////////////////////////////////////////
-		// Handle control sequences
-		if (char === "{" && src[cursorPosition + 1] === "%") {
-			tokens.push(new Token("{%", TOKEN_TYPES.OpenStatement));
-			cursorPosition += 2;
-			continue;
-		}
-		if (char === "%" && src[cursorPosition + 1] === "}") {
-			tokens.push(new Token("%}", TOKEN_TYPES.CloseStatement));
-			cursorPosition += 2;
-			continue;
-		}
-		if (char === "{" && src[cursorPosition + 1] === "{") {
-			tokens.push(new Token("{{", TOKEN_TYPES.OpenExpression));
-			cursorPosition += 2;
-			continue;
-		}
-		if (char === "}" && src[cursorPosition + 1] === "}") {
-			tokens.push(new Token("}}", TOKEN_TYPES.CloseExpression));
-			cursorPosition += 2;
-			continue;
-		}
-		////////////////////////////////////////
-
-		if (char === "(") {
-			tokens.push(new Token(char, TOKEN_TYPES.OpenParen));
-			++cursorPosition;
-			continue;
-		}
-
-		if (char === ")") {
-			tokens.push(new Token(char, TOKEN_TYPES.CloseParen));
-			++cursorPosition;
-			continue;
-		}
-
-		if (char === "[") {
-			tokens.push(new Token(char, TOKEN_TYPES.OpenSquareBracket));
-			++cursorPosition;
-			continue;
-		}
-
-		if (char === "]") {
-			tokens.push(new Token(char, TOKEN_TYPES.CloseSquareBracket));
-			++cursorPosition;
-			continue;
-		}
-
-		if (char === ",") {
-			tokens.push(new Token(char, TOKEN_TYPES.Comma));
-			++cursorPosition;
-			continue;
-		}
-
-		if (char === ".") {
-			tokens.push(new Token(char, TOKEN_TYPES.Dot));
-			++cursorPosition;
-			continue;
-		}
-
-		// Conditional operators
-		if (["<", ">", "=", "!"].includes(char) && src[cursorPosition + 1] === "=") {
-			// >= or <= or == or !=
-			tokens.push(new Token(char + src[cursorPosition + 1], TOKEN_TYPES.ComparisonBinaryOperator));
-			cursorPosition += 2;
-			continue;
-		}
-		if (["<", ">"].includes(char)) {
-			tokens.push(new Token(char, TOKEN_TYPES.ComparisonBinaryOperator));
-			++cursorPosition;
-			continue;
-		}
-
-		// Arithmetic operators
-		if (["+", "-"].includes(char)) {
-			tokens.push(new Token(char, TOKEN_TYPES.AdditiveBinaryOperator));
-			++cursorPosition;
-			continue;
-		}
-		if (["*", "/", "%"].includes(char)) {
-			tokens.push(new Token(char, TOKEN_TYPES.MultiplicativeBinaryOperator));
-			++cursorPosition;
-			continue;
-		}
-
-		// Assignment operator
-		if (char === "=") {
-			tokens.push(new Token(char, TOKEN_TYPES.Equals));
-			++cursorPosition;
-			continue;
-		}
-
-		if (char === "'") {
-			let str = "";
-			char = src[++cursorPosition];
-			while (char !== "'") {
-				if (char === undefined) {
-					throw new SyntaxError("Unterminated string literal");
-				}
-				str += char;
-				char = src[++cursorPosition];
+		for (const [char, token] of Object.entries(ORDERED_LOOKUP_TABLE)) {
+			const slice = src.slice(cursorPosition, cursorPosition + char.length);
+			if (slice === char) {
+				tokens.push(new Token(char, token));
+				cursorPosition += char.length;
+				continue main;
 			}
-
-			tokens.push(new Token(str, TOKEN_TYPES.StringLiteral));
-			++cursorPosition;
-			continue;
 		}
 
 		// Handle multi-character tokens
+		let char = src[cursorPosition];
+
+		if (char === "'") {
+			++cursorPosition; // Skip the opening quote
+			const str = consumeWhile((char) => char !== "'");
+			tokens.push(new Token(str, TOKEN_TYPES.StringLiteral));
+			++cursorPosition; // Skip the closing quote
+			continue;
+		}
 
 		if (isInteger(char)) {
-			let num = "";
-			while (true) {
-				num += char;
-				char = src[++cursorPosition];
-				if (!isInteger(char)) {
-					break;
-				}
-			}
+			const num = consumeWhile(isInteger);
 			tokens.push(new Token(num, TOKEN_TYPES.NumericLiteral));
 			continue;
 		}
 
 		if (isWord(char)) {
-			let word = "";
-			while (true) {
-				word += char;
-				char = src[++cursorPosition];
-				if (!isWord(char)) {
-					break;
-				}
-			}
-			if (word === "true" || word === "false") {
-				tokens.push(new Token(word, TOKEN_TYPES.BooleanLiteral));
-				continue;
-			}
+			let word = consumeWhile(isWord);
 
-			// Check for reserved keywords
-			tokens.push(new Token(word, Object.hasOwn(KEYWORDS, word) ? KEYWORDS[word] : TOKEN_TYPES.Identifier));
+			// Check for special/reserved keywords
+			const type = Object.hasOwn(KEYWORDS, word) ? KEYWORDS[word] : TOKEN_TYPES.Identifier;
+			tokens.push(new Token(word, type));
 			continue;
 		}
 
