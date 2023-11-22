@@ -5,8 +5,8 @@
 	import IconInfo from "$lib/components/Icons/IconInfo.svelte";
 
 	export let model: WidgetProps["model"];
-	export let computeTime: string;
-	export let error: string;
+	export let computeTime: string = "";
+	export let error: string = "";
 	export let modelLoadInfo: ModelLoadInfo | undefined = undefined;
 	export let modelTooBig = false;
 
