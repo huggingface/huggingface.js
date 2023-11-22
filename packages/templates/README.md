@@ -23,13 +23,13 @@ const config = await (await downloadFile({
     path: "tokenizer_config.json"
 })).json();
 
-const template = new Template(config.chat_template);
-
 const chat = [
     { "role": "user", "content": "Hello, how are you?" },
     { "role": "assistant", "content": "I'm doing great. How can I help you today?" },
     { "role": "user", "content": "I'd like to show off how chat templating works!" },
 ];
+
+const template = new Template(config.chat_template);
 const result = template.render({
     messages: chat,
     bos_token: config.bos_token,
