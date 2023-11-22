@@ -1,9 +1,8 @@
-import { assert, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { Template } from '../src/index.js';
 
-import { downloadFile } from '@huggingface/hub';
-
+import { downloadFile } from '../../hub';
 
 const EXAMPLE_CHAT = [
     { "role": "user", "content": "Hello, how are you?" },
