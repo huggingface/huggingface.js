@@ -2,7 +2,7 @@
 
 ### Style transfer
 
-One of the most popular use cases of image-to-image is style transfer. Style transfer models can convert regular photography into a painting in the style of a famous painter.
+One of the most popular use cases of image-to-image is style transfer. Style transfer models can convert a normal photography into a painting in the style of a famous painter.
 
 ## Task Variants
 
@@ -13,7 +13,7 @@ dust.
 
 ### Image colorization
 
-Old, black, and white images can be brought up to life using an image colorization model.
+Old or black and white images can be brought up to life using an image colorization model.
 
 ### Super Resolution
 
@@ -55,7 +55,7 @@ await inference.imageToImage({
 
 ## ControlNet
 
-Controlling the outputs of diffusion models only with a text prompt is a challenging problem. ControlNet is a neural network type that provides an image-based control to diffusion models. These controls can be edges or landmarks in an image.
+Controlling the outputs of diffusion models only with a text prompt is a challenging problem. ControlNet is a neural network model that provides image-based control to diffusion models. Control images can be edges or other landmarks extracted from a source image.
 
 Many ControlNet models were trained in our community event, JAX Diffusers sprint. You can see the full list of the ControlNet models available [here](https://huggingface.co/spaces/jax-diffusers-event/leaderboard).
 
@@ -63,7 +63,7 @@ Many ControlNet models were trained in our community event, JAX Diffusers sprint
 
 Pix2Pix is a popular model used for image-to-image translation tasks. It is based on a conditional-GAN (generative adversarial network) where instead of a noise vector a 2D image is given as input. More information about Pix2Pix can be retrieved from this [link](https://phillipi.github.io/pix2pix/) where the associated paper and the GitHub repository can be found.
 
-The below images show some of the examples shared in the paper that can be obtained using Pix2Pix. There are various cases this model can be applied on. It is capable of relatively simpler things, e.g., converting a grayscale image to its colored version. But more importantly, it can generate realistic pictures from rough sketches (can be seen in the purse example) or from painting-like images (can be seen in the street and facade examples below).
+The images below show some examples extracted from the Pix2Pix paper. This model can be applied to various use cases. It is capable of relatively simpler things, e.g., converting a grayscale image to its colored version. But more importantly, it can generate realistic pictures from rough sketches (can be seen in the purse example) or from painting-like images (can be seen in the street and facade examples below).
 
 ![Examples](https://huggingface.co/datasets/huggingfacejs/tasks/resolve/main/image-to-image/pix2pix_examples.jpg)
 
