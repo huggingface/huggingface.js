@@ -10,18 +10,20 @@
  *
  * @module index
  */
-
+import type { Program } from "./jinja/ast";
 import { tokenize } from "./jinja/lexer";
 import { parse } from "./jinja/parser";
+import type { StringValue } from "./jinja/runtime";
 import { Environment, Interpreter } from "./jinja/runtime";
 
 export class Template {
-	// trim_blocks=True, lstrip_blocks=True
+	parsed: Program;
+
 	/**
 	 *
 	 * @param {string} template The template string
 	 */
-	constructor(template) {
+	constructor(template: string) {
 		const tokens = tokenize(template);
 		this.parsed = parse(tokens);
 	}
@@ -32,14 +34,14 @@ export class Template {
 	 *
 	 * @returns {string}
 	 */
-	render(items) {
+	render(items: Record<string, unknown>): string {
 		// Create a new environment for this template
 		const env = new Environment();
 
 		// Declare global variables
 		env.set("false", false);
 		env.set("true", true);
-		env.set("raise_exception", (args, scope) => {
+		env.set("raise_exception", (args: string) => {
 			throw new Error(args);
 		});
 
@@ -50,7 +52,7 @@ export class Template {
 
 		const interpreter = new Interpreter(env);
 
-		const result = interpreter.run(this.parsed);
+		const result = interpreter.run(this.parsed) as StringValue;
 		return result.value;
 	}
 }
