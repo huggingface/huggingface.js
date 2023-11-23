@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { Template } from "../src/index";
 
-import { downloadFile } from "../../hub";
+import { downloadFile } from "../../hub/index";
 
 const EXAMPLE_CHAT = [
 	{ role: "user", content: "Hello, how are you?" },
