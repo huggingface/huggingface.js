@@ -31,7 +31,11 @@ export class If extends Statement {
 	 * @param {Statement[]} body
 	 * @param {Statement[]} alternate
 	 */
-	constructor(public test: Expression, public body: Statement[], public alternate: Statement[]) {
+	constructor(
+		public test: Expression,
+		public body: Statement[],
+		public alternate: Statement[]
+	) {
 		super();
 	}
 }
@@ -45,7 +49,11 @@ export class For extends Statement {
 	 * @param {Expression} iterable
 	 * @param {Statement[]} body
 	 */
-	constructor(public loopvar: Identifier, public iterable: Expression, public body: Statement[]) {
+	constructor(
+		public loopvar: Identifier,
+		public iterable: Expression,
+		public body: Statement[]
+	) {
 		super();
 	}
 }
@@ -58,7 +66,10 @@ export class SetStatement extends Statement {
 	 * @param {Expression} assignee
 	 * @param {Expression} value
 	 */
-	constructor(public assignee: Expression, public value: Expression) {
+	constructor(
+		public assignee: Expression,
+		public value: Expression
+	) {
 		super();
 	}
 }
@@ -79,7 +90,11 @@ export class MemberExpression extends Expression {
 	 * @param {Expression} property
 	 * @param {boolean} computed
 	 */
-	constructor(public object: Expression, public property: Expression, public computed: boolean) {
+	constructor(
+		public object: Expression,
+		public property: Expression,
+		public computed: boolean
+	) {
 		super();
 	}
 }
@@ -92,7 +107,10 @@ export class CallExpression extends Expression {
 	 * @param {Expression} callee
 	 * @param {Expression[]} args
 	 */
-	constructor(public callee: Expression, public args: Expression[]) {
+	constructor(
+		public callee: Expression,
+		public args: Expression[]
+	) {
 		super();
 	}
 }
@@ -176,7 +194,11 @@ export class BinaryExpression extends Expression {
 	 * @param {Expression} left
 	 * @param {Expression} right
 	 */
-	constructor(public operator: Token, public left: Expression, public right: Expression) {
+	constructor(
+		public operator: Token,
+		public left: Expression,
+		public right: Expression
+	) {
 		super();
 	}
 }
@@ -192,7 +214,10 @@ export class UnaryExpression extends Expression {
 	 * @param {Token} operator
 	 * @param {Expression} argument
 	 */
-	constructor(public operator: Token, public argument: Expression) {
+	constructor(
+		public operator: Token,
+		public argument: Expression
+	) {
 		super();
 	}
 }

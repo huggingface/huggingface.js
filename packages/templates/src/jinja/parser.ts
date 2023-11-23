@@ -175,7 +175,7 @@ export function parse(tokens: Token[]): Program {
 	function parseForStatement(): For {
 		// e.g., `message` in `for message in messages`
 		const loopVariable = parsePrimaryExpression(); // should be an identifier
-		if (loopVariable.type !== "Identifier") {
+		if (!(loopVariable instanceof Identifier)) {
 			throw new SyntaxError(`Expected identifier for the loop variable`);
 		}
 
@@ -353,7 +353,7 @@ export function parse(tokens: Token[]): Program {
 			case TOKEN_TYPES.Identifier:
 				++current;
 				return new Identifier(token.value);
-			case TOKEN_TYPES.OpenParen:
+			case TOKEN_TYPES.OpenParen: {
 				++current; // consume opening parenthesis
 				const expression = parseExpression();
 				if (tokens[current].type !== TOKEN_TYPES.CloseParen) {
@@ -361,6 +361,7 @@ export function parse(tokens: Token[]): Program {
 				}
 				++current; // consume closing parenthesis
 				return expression;
+			}
 			default:
 				throw new SyntaxError(`Unexpected token: ${token.type}`);
 		}

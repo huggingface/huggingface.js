@@ -10,37 +10,35 @@ import type {
 	BinaryExpression,
 	UnaryExpression,
 } from "./ast";
-import { NumericLiteral, StringLiteral, BooleanLiteral } from "./ast";
+import type { NumericLiteral, StringLiteral, BooleanLiteral } from "./ast";
+
+type AnyRuntimeValue = NumericValue | StringValue | BooleanValue | ObjectValue | ArrayValue | FunctionValue | NullValue;
 
 /**
  * Abstract base class for all Runtime values.
  * Should not be instantiated directly.
  *
  * @abstract
- * @template T
  */
-class RuntimeValue<T = any> {
+class RuntimeValue<T> {
 	type = "RuntimeValue";
 	value: T;
 
 	/**
 	 * A collection of built-in functions for this type.
-	 * @type {Map<string, RuntimeValue>}
 	 */
-	builtins = new Map<string, RuntimeValue>();
+	builtins = new Map<string, AnyRuntimeValue>();
 
 	/**
 	 * Creates a new RuntimeValue.
-	 * @param {T} value
 	 */
-	constructor(value: T = undefined as any) {
+	constructor(value: T = undefined) {
 		this.value = value;
 	}
 }
 
 /**
  * Represents a numeric value at runtime.
- * @extends {RuntimeValue<number>}
  */
 class NumericValue extends RuntimeValue<number> {
 	type = "NumericValue";
@@ -48,12 +46,11 @@ class NumericValue extends RuntimeValue<number> {
 
 /**
  * Represents a string value at runtime.
- * @extends {RuntimeValue<string>}
  */
 class StringValue extends RuntimeValue<string> {
 	type = "StringValue";
 
-	builtins = new Map<string, RuntimeValue>([
+	builtins = new Map<string, AnyRuntimeValue>([
 		[
 			"upper",
 			new FunctionValue(() => {
@@ -78,7 +75,6 @@ class StringValue extends RuntimeValue<string> {
 
 /**
  * Represents a boolean value at runtime.
- * @extends {RuntimeValue<boolean>}
  */
 class BooleanValue extends RuntimeValue<boolean> {
 	type = "BooleanValue";
@@ -86,31 +82,27 @@ class BooleanValue extends RuntimeValue<boolean> {
 
 /**
  * Represents an Object value at runtime.
- * @extends {RuntimeValue<Map<string, RuntimeValue>>}
  */
-class ObjectValue extends RuntimeValue<Map<string, RuntimeValue>> {
+class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 	type = "ObjectValue";
 }
 
 /**
  * Represents an Array value at runtime.
- * @extends {RuntimeValue<RuntimeValue[]>}
  */
-class ArrayValue extends RuntimeValue<RuntimeValue[]> {
+class ArrayValue extends RuntimeValue<AnyRuntimeValue[]> {
 	type = "ArrayValue";
 }
 
 /**
  * Represents a Function value at runtime.
- * @extends {RuntimeValue<(...args: RuntimeValue[]) => RuntimeValue>}
  */
-class FunctionValue extends RuntimeValue<(...args: RuntimeValue[]) => RuntimeValue> {
+class FunctionValue extends RuntimeValue<(args: AnyRuntimeValue[], scope: Environment) => AnyRuntimeValue> {
 	type = "FunctionValue";
 }
 
 /**
  * Represents a Null value at runtime.
- * @extends {RuntimeValue<null>}
  */
 class NullValue extends RuntimeValue<null> {
 	type = "NullValue";
@@ -120,41 +112,22 @@ class NullValue extends RuntimeValue<null> {
  * Represents the current environment (scope) at runtime.
  */
 export class Environment {
-	parent?: Environment;
-	variables: Map<string, RuntimeValue>;
-
 	/**
-	 *
-	 * @param {Environment?} parent
+	 * The variables declared in this environment.
 	 */
-	constructor(parent?: Environment) {
-		this.parent = parent;
+	variables: Map<string, AnyRuntimeValue> = new Map();
 
-		/**
-		 * @property The variables declared in this environment.
-		 * @type {Map<string, RuntimeValue>}
-		 */
-		this.variables = new Map();
-	}
+	constructor(public parent?: Environment) {}
 
 	/**
 	 * Set the value of a variable in the current environment.
-	 * @param {string} name The name of the variable.
-	 * @param {any} value The value to set.
-	 * @returns {RuntimeValue}
 	 */
-	set(name: string, value: any): RuntimeValue {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
+	set(name: string, value: any): AnyRuntimeValue {
 		return this.declareVariable(name, convertToRuntimeValues(value));
 	}
 
-	/**
-	 *
-	 * @param {string} name
-	 * @param {RuntimeValue} value
-	 * @returns {RuntimeValue}
-	 * @private
-	 */
-	private declareVariable(name: string, value: RuntimeValue): RuntimeValue {
+	private declareVariable(name: string, value: AnyRuntimeValue): AnyRuntimeValue {
 		if (this.variables.has(name)) {
 			throw new SyntaxError(`Variable already declared: ${name}`);
 		}
@@ -169,7 +142,7 @@ export class Environment {
 	 * @returns {RuntimeValue}
 	 * @private
 	 */
-	private assignVariable(name: string, value: RuntimeValue): RuntimeValue {
+	private assignVariable(name: string, value: AnyRuntimeValue): AnyRuntimeValue {
 		const env = this.resolve(name);
 		env.variables.set(name, value);
 		return value;
@@ -177,16 +150,15 @@ export class Environment {
 
 	/**
 	 * Declare if doesn't exist, assign otherwise.
-	 * @param {string} name
-	 * @param {RuntimeValue} value
-	 * @returns {RuntimeValue}
 	 */
-	setVariable(name: string, value: RuntimeValue): RuntimeValue {
-		let env: Environment = this;
+	setVariable(name: string, value: AnyRuntimeValue): AnyRuntimeValue {
+		let env: Environment;
 		try {
 			env = this.resolve(name);
-		} catch {}
-		env.variables.set(name, value);
+		} catch {
+			/* empty */
+		}
+		(env ?? this).variables.set(name, value);
 		return value;
 	}
 
@@ -194,7 +166,6 @@ export class Environment {
 	 * Resolve the environment in which the variable is declared.
 	 * @param {string} name The name of the variable.
 	 * @returns {Environment} The environment in which the variable is declared.
-	 * @private
 	 */
 	private resolve(name: string): Environment {
 		if (this.variables.has(name)) {
@@ -209,12 +180,7 @@ export class Environment {
 		throw new Error(`Unknown variable: ${name}`);
 	}
 
-	/**
-	 *
-	 * @param {string} name
-	 * @returns {RuntimeValue}
-	 */
-	lookupVariable(name: string): RuntimeValue {
+	lookupVariable(name: string): AnyRuntimeValue {
 		return this.resolve(name).variables.get(name);
 	}
 }
@@ -232,10 +198,8 @@ export class Interpreter {
 
 	/**
 	 * Run the program.
-	 * @param {Program} program
-	 * @returns {RuntimeValue}
 	 */
-	run(program: Program): RuntimeValue {
+	run(program: Program): AnyRuntimeValue {
 		return this.evaluate(program, this.global);
 	}
 
@@ -246,7 +210,7 @@ export class Interpreter {
 	 * @returns {RuntimeValue}
 	 * @private
 	 */
-	private evaluateBinaryExpression(node: BinaryExpression, environment: Environment): RuntimeValue {
+	private evaluateBinaryExpression(node: BinaryExpression, environment: Environment): AnyRuntimeValue {
 		const left = this.evaluate(node.left, environment);
 		const right = this.evaluate(node.right, environment);
 
@@ -297,7 +261,7 @@ export class Interpreter {
 		} else {
 			switch (node.operator.value) {
 				case "+":
-					return new StringValue(left.value + right.value);
+					return new StringValue(left.value.toString() + right.value.toString());
 				case "==":
 					return new BooleanValue(left.value == right.value);
 				case "!=":
@@ -310,12 +274,8 @@ export class Interpreter {
 
 	/**
 	 * Evaulates expressions following the unary operation type.
-	 * @param {UnaryExpression} node
-	 * @param {Environment} environment
-	 * @returns {RuntimeValue}
-	 * @private
 	 */
-	private evaluateUnaryExpression(node: UnaryExpression, environment: Environment): RuntimeValue {
+	private evaluateUnaryExpression(node: UnaryExpression, environment: Environment): AnyRuntimeValue {
 		const argument = this.evaluate(node.argument, environment);
 
 		switch (node.operator.value) {
@@ -326,24 +286,10 @@ export class Interpreter {
 		}
 	}
 
-	/**
-	 *
-	 * @param {Program} program
-	 * @param {Environment} environment
-	 * @returns {RuntimeValue}
-	 * @private
-	 */
-	private evalProgram(program: Program, environment: Environment): RuntimeValue {
+	private evalProgram(program: Program, environment: Environment): AnyRuntimeValue {
 		return this.evaluateBlock(program.body, environment);
 	}
 
-	/**
-	 *
-	 * @param {Statement[]} statements
-	 * @param {Environment} environment
-	 * @returns {StringValue}
-	 * @private
-	 */
 	private evaluateBlock(statements: Statement[], environment: Environment): StringValue {
 		// Jinja templates always evaluate to a String,
 		// so we accumulate the result of each statement into a final string
@@ -360,26 +306,12 @@ export class Interpreter {
 		return new StringValue(result);
 	}
 
-	/**
-	 *
-	 * @param {Identifier} node
-	 * @param {Environment} environment
-	 * @returns {RuntimeValue}
-	 * @private
-	 */
-	private evaluateIdentifier(node: Identifier, environment: Environment): RuntimeValue {
+	private evaluateIdentifier(node: Identifier, environment: Environment): AnyRuntimeValue {
 		return environment.lookupVariable(node.value);
 	}
 
-	/**
-	 *
-	 * @param {CallExpression} expr
-	 * @param {Environment} environment
-	 * @returns {RuntimeValue}
-	 * @private
-	 */
-	private evaluateCallExpression(expr: CallExpression, environment: Environment): RuntimeValue {
-		const args = expr.args.map((arg) => this.evaluate(arg, environment));
+	private evaluateCallExpression(expr: CallExpression, environment: Environment): AnyRuntimeValue {
+		const args = expr.args.map((arg) => this.evaluate(arg, environment) as AnyRuntimeValue);
 		const fn = this.evaluate(expr.callee, environment);
 		if (fn.type !== "FunctionValue") {
 			throw new Error(`Cannot call something that is not a function: got ${fn.type}`);
@@ -393,10 +325,12 @@ export class Interpreter {
 	 * @param {Environment} environment
 	 * @private
 	 */
-	private evaluateMemberExpression(expr: MemberExpression, environment: Environment): RuntimeValue {
-		const property = expr.computed ? this.evaluate(expr.property, environment) : new StringValue(expr.property.value);
+	private evaluateMemberExpression(expr: MemberExpression, environment: Environment): AnyRuntimeValue {
+		const property = expr.computed
+			? this.evaluate(expr.property, environment)
+			: new StringValue((expr.property as Identifier).value);
 
-		if (property.type !== "StringValue") {
+		if (!(property instanceof StringValue)) {
 			// TODO integer indexing for arrays
 			throw new Error(`Cannot access property with non-string: got ${property.type}`);
 		}
@@ -414,13 +348,6 @@ export class Interpreter {
 		return value;
 	}
 
-	/**
-	 *
-	 * @param {SetStatement} node
-	 * @param {Environment} environment
-	 * @returns {NullValue}
-	 * @private
-	 */
 	private evaluateSet(node: SetStatement, environment: Environment): NullValue {
 		if (node.assignee.type !== "Identifier") {
 			throw new Error(`Invalid LHS inside assignment expression: ${JSON.stringify(node.assignee)}`);
@@ -431,14 +358,7 @@ export class Interpreter {
 		return new NullValue();
 	}
 
-	/**
-	 *
-	 * @param {If} node
-	 * @param {Environment} environment
-	 * @returns {RuntimeValue}
-	 * @private
-	 */
-	private evaluateIf(node: If, environment: Environment): RuntimeValue {
+	private evaluateIf(node: If, environment: Environment): StringValue {
 		const test = this.evaluate(node.test, environment);
 		if (!["BooleanValue", "BooleanLiteral"].includes(test.type)) {
 			throw new Error(`Expected boolean expression in if statement: got ${test.type}`);
@@ -446,19 +366,12 @@ export class Interpreter {
 		return this.evaluateBlock(test.value ? node.body : node.alternate, environment);
 	}
 
-	/**
-	 *
-	 * @param {For} node
-	 * @param {Environment} environment
-	 * @returns {RuntimeValue}
-	 * @private
-	 */
-	private evaluateFor(node: For, environment: Environment): RuntimeValue {
+	private evaluateFor(node: For, environment: Environment): StringValue {
 		// Scope for the for loop
 		const scope = new Environment(environment);
 
 		const iterable = this.evaluate(node.iterable, scope);
-		if (iterable.type !== "ArrayValue") {
+		if (!(iterable instanceof ArrayValue)) {
 			throw new Error(`Expected object in for loop: got ${iterable.type}`);
 		}
 
@@ -478,7 +391,7 @@ export class Interpreter {
 								["first", new BooleanValue(i === 0)],
 								["last", new BooleanValue(i === iterable.value.length - 1)],
 								["length", new NumericValue(iterable.value.length)],
-							] as [string, RuntimeValue][]
+							] as [string, AnyRuntimeValue][]
 						).map(([key, value]) => [key, value])
 					)
 				)
@@ -494,45 +407,39 @@ export class Interpreter {
 
 		return new StringValue(result);
 	}
-	/**
-	 *
-	 * @param {Statement} statement
-	 * @param {Environment} environment
-	 * @returns {RuntimeValue}
-	 * @private
-	 */
-	evaluate(statement: Statement, environment: Environment): RuntimeValue {
+
+	evaluate(statement: Statement, environment: Environment): AnyRuntimeValue {
 		switch (statement.type) {
 			// Program
 			case "Program":
-				return this.evalProgram(/** @type {Program} */ statement, environment);
+				return this.evalProgram(statement as Program, environment);
 
 			// Statements
 			case "Set":
-				return this.evaluateSet(/** @type {SetStatement} */ statement, environment);
+				return this.evaluateSet(statement as SetStatement, environment);
 			case "If":
-				return this.evaluateIf(/** @type {If} */ statement, environment);
+				return this.evaluateIf(statement as If, environment);
 			case "For":
-				return this.evaluateFor(/** @type {For} */ statement, environment);
+				return this.evaluateFor(statement as For, environment);
 
 			// Expressions
 			case "NumericLiteral":
-				return new NumericValue(Number(/** @type {NumericLiteral} */ statement.value));
+				return new NumericValue(Number((statement as NumericLiteral).value));
 			case "StringLiteral":
-				return new StringValue(/** @type {StringLiteral} */ statement.value);
+				return new StringValue((statement as StringLiteral).value);
 			case "BooleanLiteral":
-				return new BooleanValue(/** @type {BooleanLiteral} */ statement.value);
+				return new BooleanValue((statement as BooleanLiteral).value);
 			case "Identifier":
-				return this.evaluateIdentifier(/** @type {Identifier} */ statement, environment);
+				return this.evaluateIdentifier(statement as Identifier, environment);
 			case "CallExpression":
-				return this.evaluateCallExpression(/** @type {CallExpression} */ statement, environment);
+				return this.evaluateCallExpression(statement as CallExpression, environment);
 			case "MemberExpression":
-				return this.evaluateMemberExpression(/** @type {MemberExpression} */ statement, environment);
+				return this.evaluateMemberExpression(statement as MemberExpression, environment);
 
 			case "UnaryExpression":
-				return this.evaluateUnaryExpression(/** @type {UnaryExpression} */ statement, environment);
+				return this.evaluateUnaryExpression(statement as UnaryExpression, environment);
 			case "BinaryExpression":
-				return this.evaluateBinaryExpression(/** @type {BinaryExpression} */ statement, environment);
+				return this.evaluateBinaryExpression(statement as BinaryExpression, environment);
 
 			default:
 				throw new SyntaxError(`Unknown node type: ${statement.type}`);
@@ -542,10 +449,8 @@ export class Interpreter {
 
 /**
  * Helper function to convert JavaScript values to runtime values.
- * @param {any} input
- * @returns {RuntimeValue}
  */
-function convertToRuntimeValues(input: any): RuntimeValue {
+function convertToRuntimeValues(input: unknown): AnyRuntimeValue {
 	switch (typeof input) {
 		case "number":
 			return new NumericValue(input);
@@ -565,6 +470,7 @@ function convertToRuntimeValues(input: any): RuntimeValue {
 			}
 		case "function":
 			// Wrap the user's function in a runtime function
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			return new FunctionValue((args, scope) => {
 				// NOTE: `scope` is not used since it's in the global scope
 				const result = input(...args.map((x) => x.value)) ?? null; // map undefined -> null

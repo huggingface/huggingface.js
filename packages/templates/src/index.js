@@ -13,7 +13,7 @@
 
 import { tokenize } from "./jinja/lexer";
 import { parse } from "./jinja/parser";
-import { Environment, Interpreter } from "./jinja/runtime.js";
+import { Environment, Interpreter } from "./jinja/runtime";
 
 export class Template {
 	// trim_blocks=True, lstrip_blocks=True
