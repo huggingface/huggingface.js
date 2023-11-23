@@ -36,7 +36,7 @@ These models are trained to learn the mapping between a pair of texts (e.g. tran
 
 When it comes to text generation, the underlying language model can come in several types:
 
-- **Base models:** this refers plain language models like [Mistral 7B](mistralai/Mistral-7B-v0.1) and [Llama-2-70b](https://huggingface.co/meta-llama/Llama-2-70b-hf). These models are good for fine-tuning and few-shot prompting.
+- **Base models:** refers to plain language models like [Mistral 7B](mistralai/Mistral-7B-v0.1) and [Llama-2-70b](https://huggingface.co/meta-llama/Llama-2-70b-hf). These models are good for fine-tuning and few-shot prompting.
 
 - **Instruction-trained models:** these models are trained in a multi-task manner to follow a broad range of instructions like "Write me a recipe for chocolate cake". Models like [Flan-T5](https://huggingface.co/google/flan-t5-xl), [Mistral-7B-Instruct-v0.1](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.1), and [falcon-40b-instruct](https://huggingface.co/tiiuae/falcon-40b-instruct) are examples of instruction-trained models. In general, instruction-trained models will produce better responses to instructions than base models.
 
