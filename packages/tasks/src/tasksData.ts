@@ -55,6 +55,7 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"image-to-image": getData("image-to-image", imageToImage),
 	"image-to-text": getData("image-to-text", imageToText),
 	"image-to-video": undefined,
+	"mask-generation": getData("mask-generation", placeholder),
 	"multiple-choice": undefined,
 	"object-detection": getData("object-detection", objectDetection),
 	"video-classification": getData("video-classification", videoClassification),
@@ -85,6 +86,7 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"voice-activity-detection": undefined,
 	"zero-shot-classification": getData("zero-shot-classification", zeroShotClassification),
 	"zero-shot-image-classification": getData("zero-shot-image-classification", zeroShotImageClassification),
+	"zero-shot-object-detection": getData("zero-shot-object-detection", placeholder),
 } as const;
 
 /**

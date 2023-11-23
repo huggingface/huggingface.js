@@ -29,12 +29,7 @@ const taskData: TaskDataCustom = {
 			},
 		],
 	},
-	metrics: [
-		{
-			description: "",
-			id: "",
-		},
-	],
+	metrics: [],
 	models: [
 		{
 			description: "A powerful feature extraction model for natural language processing tasks.",

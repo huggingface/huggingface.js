@@ -611,6 +611,16 @@ export const PIPELINE_DATA = {
 		modality: "multimodal",
 		color: "green",
 	},
+	"mask-generation": {
+		name: "Mask Generation",
+		modality: "cv",
+		color: "indigo",
+	},
+	"zero-shot-object-detection": {
+		name: "Zero-Shot Object Detection",
+		modality: "cv",
+		color: "yellow",
+	},
 	other: {
 		name: "Other",
 		modality: "other",
@@ -621,4 +631,11 @@ export const PIPELINE_DATA = {
 } satisfies Record<string, PipelineData>;
 
 export type PipelineType = keyof typeof PIPELINE_DATA;
+
 export const PIPELINE_TYPES = Object.keys(PIPELINE_DATA) as PipelineType[];
+
+export const SUBTASK_TYPES = Object.values(PIPELINE_DATA)
+	.flatMap((data) => ("subtasks" in data ? data.subtasks : []))
+	.map((s) => s.type);
+
+export const PIPELINE_TYPES_SET = new Set(PIPELINE_TYPES);

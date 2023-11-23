@@ -442,8 +442,8 @@
 	const modelsDisabled: ModelData[] = [
 		{
 			id: "gpt2",
-			pipeline_tag: "text-generation",
-			inference: InferenceDisplayability.CustomCode,
+			pipeline_tag: undefined,
+			inference: InferenceDisplayability.PipelineNotDetected,
 		},
 		{
 			id: "gpt2",

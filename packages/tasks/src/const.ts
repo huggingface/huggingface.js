@@ -20,6 +20,7 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	"image-to-text": ["transformers.js"],
 	"image-to-video": ["diffusers"],
 	"video-classification": [],
+	"mask-generation": ["transformers"],
 	"multiple-choice": ["transformers"],
 	"object-detection": ["transformers", "transformers.js"],
 	other: [],
@@ -57,4 +58,5 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	"voice-activity-detection": [],
 	"zero-shot-classification": ["transformers", "transformers.js"],
 	"zero-shot-image-classification": ["transformers.js"],
+	"zero-shot-object-detection": ["transformers"],
 };
