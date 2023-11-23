@@ -117,21 +117,13 @@ const ORDERED_LOOKUP_TABLE = Object.freeze({
 
 /**
  * Generate a list of tokens from a source string.
- * @param {string} source
- * @returns {Token[]}
  */
 export function tokenize(source: string): Token[] {
-	/** @type {Token[]} */
 	const tokens: Token[] = [];
 	const src: string = source;
 
 	let cursorPosition = 0;
 
-	/**
-	 *
-	 * @param {function (string): boolean} predicate
-	 * @returns
-	 */
 	const consumeWhile = (predicate: (char: string) => boolean): string => {
 		let str = "";
 		while (predicate(src[cursorPosition])) {

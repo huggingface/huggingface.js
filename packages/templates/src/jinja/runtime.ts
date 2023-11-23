@@ -24,10 +24,8 @@ export type AnyRuntimeValue =
 /**
  * Abstract base class for all Runtime values.
  * Should not be instantiated directly.
- *
- * @abstract
  */
-class RuntimeValue<T> {
+abstract class RuntimeValue<T> {
 	type = "RuntimeValue";
 	value: T;
 
@@ -142,18 +140,11 @@ export class Environment {
 		return value;
 	}
 
-	/**
-	 *
-	 * @param {string} name
-	 * @param {RuntimeValue} value
-	 * @returns {RuntimeValue}
-	 * @private
-	 */
-	private assignVariable(name: string, value: AnyRuntimeValue): AnyRuntimeValue {
-		const env = this.resolve(name);
-		env.variables.set(name, value);
-		return value;
-	}
+	// private assignVariable(name: string, value: AnyRuntimeValue): AnyRuntimeValue {
+	// 	const env = this.resolve(name);
+	// 	env.variables.set(name, value);
+	// 	return value;
+	// }
 
 	/**
 	 * Declare if doesn't exist, assign otherwise.
@@ -195,10 +186,6 @@ export class Environment {
 export class Interpreter {
 	global: Environment;
 
-	/**
-	 *
-	 * @param {Environment?} env
-	 */
 	constructor(env?: Environment) {
 		this.global = env ?? new Environment();
 	}
@@ -212,10 +199,6 @@ export class Interpreter {
 
 	/**
 	 * Evaulates expressions following the binary operation type.
-	 * @param {BinaryExpression} node
-	 * @param {Environment} environment
-	 * @returns {RuntimeValue}
-	 * @private
 	 */
 	private evaluateBinaryExpression(node: BinaryExpression, environment: Environment): AnyRuntimeValue {
 		const left = this.evaluate(node.left, environment);
@@ -326,12 +309,6 @@ export class Interpreter {
 		return (fn as FunctionValue).value(args, environment);
 	}
 
-	/**
-	 *
-	 * @param {MemberExpression} expr
-	 * @param {Environment} environment
-	 * @private
-	 */
 	private evaluateMemberExpression(expr: MemberExpression, environment: Environment): AnyRuntimeValue {
 		const property = expr.computed
 			? this.evaluate(expr.property, environment)

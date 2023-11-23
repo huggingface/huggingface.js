@@ -20,7 +20,6 @@ export class Template {
 	parsed: Program;
 
 	/**
-	 *
 	 * @param {string} template The template string
 	 */
 	constructor(template: string) {
@@ -28,12 +27,6 @@ export class Template {
 		this.parsed = parse(tokens);
 	}
 
-	/**
-	 *
-	 * @param {Object} items
-	 *
-	 * @returns {string}
-	 */
 	render(items: Record<string, unknown>): string {
 		// Create a new environment for this template
 		const env = new Environment();

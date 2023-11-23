@@ -19,18 +19,11 @@ import {
 /**
  * Generate the Abstract Syntax Tree (AST) from a list of tokens.
  * Operator precedence can be found here: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_precedence#table
- * @param {Token[]} tokens
- * @returns {Program}
  */
 export function parse(tokens: Token[]): Program {
 	const program = new Program([]);
 	let current = 0;
 
-	/**
-	 *
-	 * @param {string} type
-	 * @param {string} error
-	 */
 	function expect(type: string, error: string): Token {
 		const prev = tokens[current++];
 		if (!prev || prev.type !== type) {
@@ -52,26 +45,14 @@ export function parse(tokens: Token[]): Program {
 		}
 	}
 
-	/**
-	 *
-	 * @param {TokenType[]} types
-	 */
 	function not(...types: TokenType[]): boolean {
 		return current + types.length <= tokens.length && types.some((type, i) => type !== tokens[current + i].type);
 	}
 
-	/**
-	 *
-	 * @param {TokenType[]} types
-	 */
 	function is(...types: TokenType[]): boolean {
 		return current + types.length <= tokens.length && types.every((type, i) => type === tokens[current + i].type);
 	}
 
-	/**
-	 *
-	 * @returns {Statement[]}
-	 */
 	function parseBlock(): Statement[] {
 		// Could be a statement or an expression
 		const body: Statement[] = [];
@@ -147,7 +128,6 @@ export function parse(tokens: Token[]): Program {
 
 		expect(TOKEN_TYPES.CloseStatement, "Expected closing statement token");
 
-		/** @type {Statement[]} */
 		let alternate: Statement[] = [];
 
 		const body = parseBlock();
