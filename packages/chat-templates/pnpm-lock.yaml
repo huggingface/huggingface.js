@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 devDependencies:
+  "@huggingface/hub":
+    specifier: workspace:^
+    version: link:../hub
   "@xenova/transformers":
     specifier: ^2.9.0
     version: 2.9.0

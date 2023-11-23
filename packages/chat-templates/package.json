@@ -42,7 +42,8 @@
 	"author": "Hugging Face",
 	"license": "MIT",
 	"devDependencies": {
-		"@xenova/transformers": "^2.9.0",
-		"typescript": "^5.3.2"
+		"typescript": "^5.3.2",
+		"@huggingface/hub": "workspace:^",
+		"@xenova/transformers": "^2.9.0"
 	}
 }
