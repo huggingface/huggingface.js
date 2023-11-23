@@ -11,7 +11,7 @@ export class Statement {
  * Defines a block which contains many statements. Each chat template corresponds to one Program.
  */
 export class Program extends Statement {
-	type = "Program";
+	override type = "Program";
 
 	constructor(public body: Statement[]) {
 		super();
@@ -19,7 +19,7 @@ export class Program extends Statement {
 }
 
 export class If extends Statement {
-	type = "If";
+	override type = "If";
 
 	constructor(
 		public test: Expression,
@@ -31,7 +31,7 @@ export class If extends Statement {
 }
 
 export class For extends Statement {
-	type = "For";
+	override type = "For";
 
 	constructor(
 		public loopvar: Identifier,
@@ -43,7 +43,7 @@ export class For extends Statement {
 }
 
 export class SetStatement extends Statement {
-	type = "Set";
+	override type = "Set";
 	constructor(
 		public assignee: Expression,
 		public value: Expression
@@ -56,11 +56,11 @@ export class SetStatement extends Statement {
  * Expressions will result in a value at runtime (unlike statements).
  */
 export class Expression extends Statement {
-	type = "Expression";
+	override type = "Expression";
 }
 
 export class MemberExpression extends Expression {
-	type = "MemberExpression";
+	override type = "MemberExpression";
 
 	constructor(
 		public object: Expression,
@@ -72,7 +72,7 @@ export class MemberExpression extends Expression {
 }
 
 export class CallExpression extends Expression {
-	type = "CallExpression";
+	override type = "CallExpression";
 
 	constructor(
 		public callee: Expression,
@@ -86,7 +86,7 @@ export class CallExpression extends Expression {
  * Represents a user-defined variable or symbol in the template.
  */
 export class Identifier extends Expression {
-	type = "Identifier";
+	override type = "Identifier";
 
 	/**
 	 * @param {string} value The name of the identifier
@@ -101,7 +101,7 @@ export class Identifier extends Expression {
  * Should not be instantiated directly.
  */
 abstract class Literal<T> extends Expression {
-	type = "Literal";
+	override type = "Literal";
 
 	constructor(public value: T) {
 		super();
@@ -112,14 +112,14 @@ abstract class Literal<T> extends Expression {
  * Represents a numeric constant in the template.
  */
 export class NumericLiteral extends Literal<number> {
-	type = "NumericLiteral";
+	override type = "NumericLiteral";
 }
 
 /**
  * Represents a text constant in the template.
  */
 export class StringLiteral extends Literal<string> {
-	type = "StringLiteral";
+	override type = "StringLiteral";
 
 	constructor(value: string) {
 		super(value);
@@ -130,7 +130,7 @@ export class StringLiteral extends Literal<string> {
  * Represents a boolean constant in the template.
  */
 export class BooleanLiteral extends Literal<boolean> {
-	type = "BooleanLiteral";
+	override type = "BooleanLiteral";
 }
 
 /**
@@ -139,7 +139,7 @@ export class BooleanLiteral extends Literal<boolean> {
  * of operations being determined by the operator.
  */
 export class BinaryExpression extends Expression {
-	type = "BinaryExpression";
+	override type = "BinaryExpression";
 
 	constructor(
 		public operator: Token,
@@ -154,7 +154,7 @@ export class BinaryExpression extends Expression {
  * An operation with one side (operator on the left).
  */
 export class UnaryExpression extends Expression {
-	type = "UnaryExpression";
+	override type = "UnaryExpression";
 
 	constructor(
 		public operator: Token,

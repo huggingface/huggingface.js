@@ -10,7 +10,7 @@
 	"main": "index.ts",
 	"type": "module",
 	"browser": {
-		"./dist/index.js": "./dist/browser/index.js"
+		"./dist/index.js": "./dist/index.js"
 	},
 	"engines": {
 		"node": ">=18"

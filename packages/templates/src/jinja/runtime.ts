@@ -37,7 +37,7 @@ abstract class RuntimeValue<T> {
 	/**
 	 * Creates a new RuntimeValue.
 	 */
-	constructor(value: T = undefined) {
+	constructor(value: T = undefined as unknown as T) {
 		this.value = value;
 	}
 }
@@ -46,16 +46,16 @@ abstract class RuntimeValue<T> {
  * Represents a numeric value at runtime.
  */
 export class NumericValue extends RuntimeValue<number> {
-	type = "NumericValue";
+	override type = "NumericValue";
 }
 
 /**
  * Represents a string value at runtime.
  */
 export class StringValue extends RuntimeValue<string> {
-	type = "StringValue";
+	override type = "StringValue";
 
-	builtins = new Map<string, AnyRuntimeValue>([
+	override builtins = new Map<string, AnyRuntimeValue>([
 		[
 			"upper",
 			new FunctionValue(() => {
@@ -82,35 +82,35 @@ export class StringValue extends RuntimeValue<string> {
  * Represents a boolean value at runtime.
  */
 export class BooleanValue extends RuntimeValue<boolean> {
-	type = "BooleanValue";
+	override type = "BooleanValue";
 }
 
 /**
  * Represents an Object value at runtime.
  */
 export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
-	type = "ObjectValue";
+	override type = "ObjectValue";
 }
 
 /**
  * Represents an Array value at runtime.
  */
 export class ArrayValue extends RuntimeValue<AnyRuntimeValue[]> {
-	type = "ArrayValue";
+	override type = "ArrayValue";
 }
 
 /**
  * Represents a Function value at runtime.
  */
 export class FunctionValue extends RuntimeValue<(args: AnyRuntimeValue[], scope: Environment) => AnyRuntimeValue> {
-	type = "FunctionValue";
+	override type = "FunctionValue";
 }
 
 /**
  * Represents a Null value at runtime.
  */
 export class NullValue extends RuntimeValue<null> {
-	type = "NullValue";
+	override type = "NullValue";
 }
 
 /**
@@ -150,7 +150,7 @@ export class Environment {
 	 * Declare if doesn't exist, assign otherwise.
 	 */
 	setVariable(name: string, value: AnyRuntimeValue): AnyRuntimeValue {
-		let env: Environment;
+		let env: Environment | undefined;
 		try {
 			env = this.resolve(name);
 		} catch {
@@ -179,7 +179,7 @@ export class Environment {
 	}
 
 	lookupVariable(name: string): AnyRuntimeValue {
-		return this.resolve(name).variables.get(name);
+		return this.resolve(name).variables.get(name) ?? new NullValue();
 	}
 }
 
@@ -203,8 +203,9 @@ export class Interpreter {
 	private evaluateBinaryExpression(node: BinaryExpression, environment: Environment): AnyRuntimeValue {
 		const left = this.evaluate(node.left, environment);
 		const right = this.evaluate(node.right, environment);
-
-		if (left instanceof NumericValue && right instanceof NumericValue) {
+		if (left instanceof NullValue || right instanceof NullValue) {
+			throw new Error("Cannot perform operation on null value");
+		} else if (left instanceof NumericValue && right instanceof NumericValue) {
 			// Evaulate pure numeric operations with binary operators.
 			switch (node.operator.value) {
 				// Arithmetic operators

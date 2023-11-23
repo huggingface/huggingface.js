@@ -192,7 +192,8 @@ export function tokenize(source: string): Token[] {
 			const word = consumeWhile(isWord);
 
 			// Check for special/reserved keywords
-			const type = Object.hasOwn(KEYWORDS, word) ? KEYWORDS[word] : TOKEN_TYPES.Identifier;
+			// NOTE: We use Object.hasOwn() to avoid matching `.toString()` and other Object methods
+			const type = Object.hasOwn(KEYWORDS, word) ? KEYWORDS[word as keyof typeof KEYWORDS] : TOKEN_TYPES.Identifier;
 			tokens.push(new Token(word, type));
 			continue;
 		}
