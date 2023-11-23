@@ -18,6 +18,7 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	"image-segmentation": ["transformers", "transformers.js"],
 	"image-to-image": ["diffusers"],
 	"image-to-text": ["transformers.js"],
+	"image-to-video": ["diffusers"],
 	"video-classification": ["transformers"],
 	"mask-generation": ["transformers"],
 	"multiple-choice": ["transformers"],
