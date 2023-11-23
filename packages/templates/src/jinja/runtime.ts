@@ -12,7 +12,14 @@ import type {
 } from "./ast";
 import type { NumericLiteral, StringLiteral, BooleanLiteral } from "./ast";
 
-type AnyRuntimeValue = NumericValue | StringValue | BooleanValue | ObjectValue | ArrayValue | FunctionValue | NullValue;
+export type AnyRuntimeValue =
+	| NumericValue
+	| StringValue
+	| BooleanValue
+	| ObjectValue
+	| ArrayValue
+	| FunctionValue
+	| NullValue;
 
 /**
  * Abstract base class for all Runtime values.
@@ -40,14 +47,14 @@ class RuntimeValue<T> {
 /**
  * Represents a numeric value at runtime.
  */
-class NumericValue extends RuntimeValue<number> {
+export class NumericValue extends RuntimeValue<number> {
 	type = "NumericValue";
 }
 
 /**
  * Represents a string value at runtime.
  */
-class StringValue extends RuntimeValue<string> {
+export class StringValue extends RuntimeValue<string> {
 	type = "StringValue";
 
 	builtins = new Map<string, AnyRuntimeValue>([
@@ -76,35 +83,35 @@ class StringValue extends RuntimeValue<string> {
 /**
  * Represents a boolean value at runtime.
  */
-class BooleanValue extends RuntimeValue<boolean> {
+export class BooleanValue extends RuntimeValue<boolean> {
 	type = "BooleanValue";
 }
 
 /**
  * Represents an Object value at runtime.
  */
-class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
+export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 	type = "ObjectValue";
 }
 
 /**
  * Represents an Array value at runtime.
  */
-class ArrayValue extends RuntimeValue<AnyRuntimeValue[]> {
+export class ArrayValue extends RuntimeValue<AnyRuntimeValue[]> {
 	type = "ArrayValue";
 }
 
 /**
  * Represents a Function value at runtime.
  */
-class FunctionValue extends RuntimeValue<(args: AnyRuntimeValue[], scope: Environment) => AnyRuntimeValue> {
+export class FunctionValue extends RuntimeValue<(args: AnyRuntimeValue[], scope: Environment) => AnyRuntimeValue> {
 	type = "FunctionValue";
 }
 
 /**
  * Represents a Null value at runtime.
  */
-class NullValue extends RuntimeValue<null> {
+export class NullValue extends RuntimeValue<null> {
 	type = "NullValue";
 }
 

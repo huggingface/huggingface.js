@@ -10,13 +10,13 @@ const EXAMPLE_CHAT = [
 	{ role: "user", content: "I'd like to show off how chat templating works!" },
 ];
 
-const EXAMPLE_CHAT_WITH_SYTEM = [
-	{
-		role: "system",
-		content: "You are a friendly chatbot who always responds in the style of a pirate",
-	},
-	...EXAMPLE_CHAT,
-];
+// const EXAMPLE_CHAT_WITH_SYTEM = [
+// 	{
+// 		role: "system",
+// 		content: "You are a friendly chatbot who always responds in the style of a pirate",
+// 	},
+// 	...EXAMPLE_CHAT,
+// ];
 
 /**
  * Defined in https://github.com/huggingface/transformers
