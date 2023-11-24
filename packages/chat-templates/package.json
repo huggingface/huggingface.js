@@ -7,22 +7,28 @@
 	"publishConfig": {
 		"access": "public"
 	},
-	"main": "index.ts",
 	"type": "module",
-	"browser": {
-		"./dist/index.js": "./dist/index.js"
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"require": "./dist/index.cjs",
+			"import": "./dist/index.js"
+		}
 	},
 	"engines": {
 		"node": ">=18"
 	},
-	"source": "index.ts",
+	"source": "src/index.ts",
 	"scripts": {
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"prepublishOnly": "pnpm run build",
-		"build": "tsup",
+		"build": "tsup src/index.ts --format cjs,esm --clean --dts",
 		"test": "vitest run",
 		"test:browser": "vitest run --browser.name=chrome --browser.headless",
 		"check": "tsc"
@@ -30,7 +36,8 @@
 	"files": [
 		"src",
 		"dist",
-		"index.ts"
+		"README.md",
+		"tsconfig.json"
 	],
 	"keywords": [
 		"huggingface",
