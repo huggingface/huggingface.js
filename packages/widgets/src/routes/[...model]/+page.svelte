@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ModeSwitcher from "$lib/components/DemoThemeSwitcher/DemoThemeSwitcher.svelte";
-	import InferenceWidget from "../../InferenceWidget.svelte";
+	import InferenceWidget from "$lib/components/InferenceWidget/InferenceWidget.svelte";
 
 	export let data;
 </script>
