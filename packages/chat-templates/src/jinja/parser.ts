@@ -297,29 +297,37 @@ export function parse(tokens: Token[]): Program {
 		// e.g., ['test'], [0], [:2], [1:], [1:2], [1:2:3]
 
 		const slices: (Statement | undefined)[] = [];
+		let isSlice = false;
 		while (!is(TOKEN_TYPES.CloseSquareBracket)) {
 			if (is(TOKEN_TYPES.Colon)) {
 				// A case where a default is used
 				// e.g., [:2] will be parsed as [undefined, 2]
 				slices.push(undefined);
 				++current; // consume colon
+				isSlice = true;
 			} else {
 				slices.push(parseExpression());
 				if (is(TOKEN_TYPES.Colon)) {
 					++current; // consume colon after expression, if it exists
+					isSlice = true;
 				}
 			}
 		}
 		if (slices.length === 0) {
 			// []
 			throw new SyntaxError(`Expected at least one argument for member/slice expression`);
-		} else if (slices.length === 1 && slices[0] !== undefined) {
-			return slices[0] as Statement; // normal member expression
-		} else if (slices.length > 3) {
-			throw new SyntaxError(`Expected 1-3 arguments for member/slice expression`);
 		}
-		return new SliceExpression(...slices);
+
+		if (isSlice) {
+			if (slices.length > 3) {
+				throw new SyntaxError(`Expected 0-3 arguments for slice expression`);
+			}
+			return new SliceExpression(...slices);
+		}
+
+		return slices[0] as Statement; // normal member expression
 	}
+
 	function parseMemberExpression(): Statement {
 		let object = parsePrimaryExpression();
 
