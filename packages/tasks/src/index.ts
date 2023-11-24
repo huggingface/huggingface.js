@@ -16,15 +16,15 @@ export {
 } from "./pipelines";
 export { ModelLibrary, ALL_DISPLAY_MODEL_LIBRARY_KEYS } from "./model-libraries";
 export type { ModelLibraryKey } from "./model-libraries";
-export type {
+export {
 	ModelData,
 	TransformersInfo,
-	InferenceDisplayability,
 	WidgetExample,
 	WidgetExampleOutput,
 	WidgetExampleOutputUrl,
 	WidgetExampleTextInput,
 } from "./model-data";
+export { InferenceDisplayability } from "./model-data";
 
 export { TAG_NFAA_CONTENT, OTHER_TAGS_SUGGESTIONS, TAG_TEXT_GENERATION_INFERENCE, TAG_CUSTOM_CODE } from "./tags";
 
