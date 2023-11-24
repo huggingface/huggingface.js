@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { WidgetProps, ModelLoadInfo, ExampleRunOpts } from "../types.js";
-	import type { WidgetExample, WidgetExampleAttribute } from "../WidgetExample.js";
+	import { InferenceDisplayability, WidgetExample, WidgetExampleAttribute } from "@huggingface/tasks";
 
 	type TWidgetExample = $$Generic<WidgetExample>;
 
@@ -19,7 +19,6 @@
 		getWidgetExample,
 	} from "$lib/components/InferenceWidget/shared/helpers.js";
 	import { modelLoadStates } from "../../stores.js";
-	import { InferenceDisplayability } from "../../../../interfaces/InferenceDisplayability.js";
 
 	export let apiUrl: string;
 	export let callApiOnMount: WidgetProps["callApiOnMount"];

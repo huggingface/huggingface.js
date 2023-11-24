@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { InferenceDisplayability } from "@huggingface/tasks";
 	import { type WidgetProps, type ModelLoadInfo, LoadState, ComputeType } from "../types.js";
 	import IconAzureML from "$lib/components/Icons/IconAzureML.svelte";
-	import { InferenceDisplayability } from "../../../../interfaces/InferenceDisplayability.js";
 	import IconInfo from "$lib/components/Icons/IconInfo.svelte";
 
 	export let model: WidgetProps["model"];
