@@ -215,8 +215,10 @@ export class Interpreter {
 	private evaluateBinaryExpression(node: BinaryExpression, environment: Environment): AnyRuntimeValue {
 		const left = this.evaluate(node.left, environment);
 		const right = this.evaluate(node.right, environment);
-		if (left instanceof NullValue || right instanceof NullValue) {
-			throw new Error("Cannot perform operation on null value");
+		if (left instanceof UndefinedValue || right instanceof UndefinedValue) {
+			throw new Error("Cannot perform operation on undefined values");
+		} else if (left instanceof NullValue || right instanceof NullValue) {
+			throw new Error("Cannot perform operation on null values");
 		} else if (left instanceof NumericValue && right instanceof NumericValue) {
 			// Evaulate pure numeric operations with binary operators.
 			switch (node.operator.value) {
