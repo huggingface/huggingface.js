@@ -13,11 +13,11 @@ export interface CollectionItem{
     note?: string;
     authorData?: ApiWhoAmIAuthInfo;
     downloads: number;
-    gated: boolean;
+    gated: false | "auto" | "manual";
     lastModified: string; //convert to date
     likes: number;
     pipeline_tag: Task;
-    private:false | "auto" | "manual";
+    private:boolean;
     isLikedByUser: boolean;
 }
 export interface Collection{
