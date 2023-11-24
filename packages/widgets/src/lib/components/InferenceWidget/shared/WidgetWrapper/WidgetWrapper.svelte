@@ -1,25 +1,21 @@
 <script lang="ts">
+	import { InferenceDisplayability } from "@huggingface/tasks";
+	import type { WidgetExample, WidgetExampleAttribute } from "@huggingface/tasks";
 	import type { WidgetProps, ModelLoadInfo, ExampleRunOpts } from "../types.js";
-	import type { WidgetExample, WidgetExampleAttribute } from "../WidgetExample.js";
 
 	type TWidgetExample = $$Generic<WidgetExample>;
 
 	import { onMount } from "svelte";
 
-	import IconCross from "$lib/components/Icons/IconCross.svelte";
+	import IconCross from "../../..//Icons/IconCross.svelte";
 	import WidgetInputSamples from "../WidgetInputSamples/WidgetInputSamples.svelte";
 	import WidgetInputSamplesGroup from "../WidgetInputSamplesGroup/WidgetInputSamplesGroup.svelte";
 	import WidgetFooter from "../WidgetFooter/WidgetFooter.svelte";
 	import WidgetHeader from "../WidgetHeader/WidgetHeader.svelte";
 	import WidgetInfo from "../WidgetInfo/WidgetInfo.svelte";
 	import WidgetModelLoading from "../WidgetModelLoading/WidgetModelLoading.svelte";
-	import {
-		getModelLoadInfo,
-		getQueryParamVal,
-		getWidgetExample,
-	} from "$lib/components/InferenceWidget/shared/helpers.js";
+	import { getModelLoadInfo, getQueryParamVal, getWidgetExample } from "../../..//InferenceWidget/shared/helpers.js";
 	import { modelLoadStates } from "../../stores.js";
-	import { InferenceDisplayability } from "../../../../interfaces/InferenceDisplayability.js";
 
 	export let apiUrl: string;
 	export let callApiOnMount: WidgetProps["callApiOnMount"];

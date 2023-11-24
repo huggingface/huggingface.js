@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { ModelData } from "$lib/interfaces/Types.js";
+	import type { ModelData } from "@huggingface/tasks";
+	import { InferenceDisplayability } from "@huggingface/tasks";
 
 	import InferenceWidget from "$lib/components/InferenceWidget/InferenceWidget.svelte";
 	import ModeSwitcher from "$lib/components/DemoThemeSwitcher/DemoThemeSwitcher.svelte";
-	import { InferenceDisplayability } from "$lib/interfaces/InferenceDisplayability.js";
 	import { onMount } from "svelte";
 
 	let apiToken = "";

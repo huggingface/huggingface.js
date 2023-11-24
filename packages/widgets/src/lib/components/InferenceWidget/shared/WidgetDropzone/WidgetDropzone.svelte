@@ -1,5 +1,5 @@
 <script lang="ts">
-	import IconSpin from "$lib/components/Icons/IconSpin.svelte";
+	import IconSpin from "../../../Icons/IconSpin.svelte";
 	import { getBlobFromUrl } from "../../shared/helpers.js";
 
 	export let accept = "image/*";
