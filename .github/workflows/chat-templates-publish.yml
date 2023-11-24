@@ -1,0 +1,51 @@
+name: Chat-templates - Version and Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      newversion:
+        description: "Semantic Version Bump Type (major minor patch)"
+        default: patch
+
+defaults:
+  run:
+    working-directory: packages/chat-templates
+
+jobs:
+  version_and_release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.BOT_ACCESS_TOKEN }}
+      - run: corepack enable
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "pnpm"
+          cache-dependency-path: |
+            packages/chat-templates/pnpm-lock.yaml
+          # setting a registry enables the NODE_AUTH_TOKEN env variable where we can set an npm token.  REQUIRED
+          registry-url: "https://registry.npmjs.org"
+      - run: pnpm install
+      - run: git config --global user.name machineuser
+      - run: git config --global user.email infra+machineuser@huggingface.co
+      - run: |
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          BUMPED_VERSION=$(node -p "require('semver').inc('$PACKAGE_VERSION', '${{ github.event.inputs.newversion }}')")
+          # Update package.json with the new version
+          node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./package.json')); package.version = '$BUMPED_VERSION'; fs.writeFileSync('./package.json', JSON.stringify(package, null, '\t') + '\n');"
+          git commit . -m "🔖 @hugginface/chat-templates $BUMPED_VERSION"
+          git tag "chat-templates-v$BUMPED_VERSION"
+      - run: pnpm publish --no-git-checks .
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: git push --follow-tags
+      # hack - reuse actions/setup-node@v3 just to set a new registry
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          registry-url: "https://npm.pkg.github.com"
+      - run: pnpm publish --no-git-checks .
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
