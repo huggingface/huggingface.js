@@ -435,6 +435,20 @@ export const PIPELINE_DATA = {
 	},
 	"image-to-image": {
 		name: "Image-to-Image",
+		subtasks: [
+			{
+				type: "image-inpainting",
+				name: "Image Inpainting",
+			},
+			{
+				type: "image-colorization",
+				name: "Image Colorization",
+			},
+			{
+				type: "super-resolution",
+				name: "Super Resolution",
+			},
+		],
 		modality: "cv",
 		color: "indigo",
 	},
