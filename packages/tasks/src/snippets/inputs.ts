@@ -79,6 +79,8 @@ const inputsTextToAudio = () => `"liquid drum and bass, atmospheric synths, airy
 
 const inputsAutomaticSpeechRecognition = () => `"sample1.flac"`;
 
+const inputsZeroShotImageClassification = () => `"cats.jpg"`;
+
 const modelInputSnippets: {
 	[key in PipelineType]?: (model: ModelData) => string;
 } = {
@@ -105,6 +107,7 @@ const modelInputSnippets: {
 	"token-classification": inputsTokenClassification,
 	translation: inputsTranslation,
 	"zero-shot-classification": inputsZeroShotClassification,
+	"zero-shot-image-classification": inputsZeroShotImageClassification,
 };
 
 // Use noWrap to put the whole snippet on a single line (removing new lines and tabulations)
