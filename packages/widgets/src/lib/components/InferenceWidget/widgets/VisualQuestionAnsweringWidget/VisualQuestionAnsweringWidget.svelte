@@ -56,7 +56,10 @@
 	}
 
 	function isValidOutput(arg: any): arg is { answer: string; score?: number }[] {
-    	return Array.isArray(arg) && arg.every((x) => typeof x.answer === "string" && (typeof x.score === "number" || x.score === undefined));
+		return (
+			Array.isArray(arg) &&
+			arg.every((x) => typeof x.answer === "string" && (typeof x.score === "number" || x.score === undefined))
+		);
 	}
 
 	function parseOutput(body: unknown): Array<{ answer: string; score?: number }> {
