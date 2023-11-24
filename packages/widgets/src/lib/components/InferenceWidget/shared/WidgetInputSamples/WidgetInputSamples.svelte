@@ -6,7 +6,7 @@
 
 	import { slide } from "svelte/transition";
 
-	import IconCaretDownV2 from "$lib/components/Icons/IconCaretDownV2.svelte";
+	import IconCaretDownV2 from "../../..//Icons/IconCaretDownV2.svelte";
 
 	export let classNames = "";
 	export let isLoading = false;

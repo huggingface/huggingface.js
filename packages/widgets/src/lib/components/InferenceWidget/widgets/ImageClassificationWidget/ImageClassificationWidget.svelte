@@ -1,14 +1,14 @@
 <script lang="ts">
-	import type { WidgetProps, InferenceRunOpts, ExampleRunOpts } from "$lib/components/InferenceWidget/shared/types.js";
+	import type { WidgetProps, InferenceRunOpts, ExampleRunOpts } from "../../shared/types.js";
 	import type { WidgetExample, WidgetExampleAssetInput, WidgetExampleOutputLabels } from "@huggingface/tasks";
 
 	import WidgetFileInput from "../../shared/WidgetFileInput/WidgetFileInput.svelte";
 	import WidgetDropzone from "../../shared/WidgetDropzone/WidgetDropzone.svelte";
 	import WidgetOutputChart from "../../shared/WidgetOutputChart/WidgetOutputChart.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
-	import { callInferenceApi, getBlobFromUrl } from "$lib/components/InferenceWidget/shared/helpers.js";
-	import { isValidOutputLabels } from "$lib/components/InferenceWidget/shared/outputValidation.js";
-	import { isTextInput } from "$lib/components/InferenceWidget/shared/inputValidation.js";
+	import { callInferenceApi, getBlobFromUrl } from "../../shared/helpers.js";
+	import { isValidOutputLabels } from "../../shared/outputValidation.js";
+	import { isTextInput } from "../../shared/inputValidation.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];

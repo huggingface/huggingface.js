@@ -1,20 +1,15 @@
 <script lang="ts">
-	import type {
-		WidgetProps,
-		DetectedObject,
-		ExampleRunOpts,
-		InferenceRunOpts,
-	} from "$lib/components/InferenceWidget/shared/types.js";
+	import type { WidgetProps, DetectedObject, ExampleRunOpts, InferenceRunOpts } from "../../shared/types.js";
 	import type { WidgetExampleAssetInput } from "@huggingface/tasks";
 
-	import { mod } from "$lib/utils/ViewUtils.js";
-	import { COLORS } from "$lib/components/InferenceWidget/shared/consts.js";
+	import { mod } from "../../../../utils/ViewUtils.js";
+	import { COLORS } from "../../shared/consts.js";
 	import WidgetFileInput from "../../shared/WidgetFileInput/WidgetFileInput.svelte";
 	import WidgetDropzone from "../../shared/WidgetDropzone/WidgetDropzone.svelte";
 	import WidgetOutputChart from "../../shared/WidgetOutputChart/WidgetOutputChart.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
-	import { callInferenceApi, getBlobFromUrl } from "$lib/components/InferenceWidget/shared/helpers.js";
-	import { isAssetInput } from "$lib/components/InferenceWidget/shared/inputValidation.js";
+	import { callInferenceApi, getBlobFromUrl } from "../../shared/helpers.js";
+	import { isAssetInput } from "../../shared/inputValidation.js";
 
 	import BoundingBoxes from "./SvgBoundingBoxes.svelte";
 

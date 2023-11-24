@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "$lib/components/InferenceWidget/shared/types.js";
+	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "../../shared/types.js";
 	import type { WidgetExampleAssetAndZeroShotInput } from "@huggingface/tasks";
 
 	import { onMount } from "svelte";
@@ -10,12 +10,8 @@
 	import WidgetSubmitBtn from "../../shared/WidgetSubmitBtn/WidgetSubmitBtn.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
 	import WidgetOutputChart from "../../shared/WidgetOutputChart/WidgetOutputChart.svelte";
-	import {
-		addInferenceParameters,
-		callInferenceApi,
-		getWidgetExample,
-	} from "$lib/components/InferenceWidget/shared/helpers.js";
-	import { isAssetAndZeroShotInput } from "$lib/components/InferenceWidget/shared/inputValidation.js";
+	import { addInferenceParameters, callInferenceApi, getWidgetExample } from "../../shared/helpers.js";
+	import { isAssetAndZeroShotInput } from "../../shared/inputValidation.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];

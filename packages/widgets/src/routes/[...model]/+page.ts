@@ -1,4 +1,4 @@
-import type { WidgetProps } from "$lib/components/InferenceWidget/shared/types.js";
+import type { WidgetProps } from "../../shared/types.js";
 import type { Load } from "@sveltejs/kit";
 
 export const load: Load = async ({ params, fetch }): Promise<{ model?: WidgetProps["model"]; message?: string }> => {

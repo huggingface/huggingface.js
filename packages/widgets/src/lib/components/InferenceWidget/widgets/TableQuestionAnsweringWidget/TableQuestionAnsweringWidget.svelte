@@ -1,10 +1,5 @@
 <script lang="ts">
-	import type {
-		WidgetProps,
-		HighlightCoordinates,
-		ExampleRunOpts,
-		InferenceRunOpts,
-	} from "$lib/components/InferenceWidget/shared/types.js";
+	import type { WidgetProps, HighlightCoordinates, ExampleRunOpts, InferenceRunOpts } from "../../shared/types.js";
 	import type { WidgetExampleTextAndTableInput } from "@huggingface/tasks";
 
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
@@ -17,8 +12,8 @@
 		convertTableToData,
 		callInferenceApi,
 		updateUrl,
-	} from "$lib/components/InferenceWidget/shared/helpers.js";
-	import { isTextAndTableInput } from "$lib/components/InferenceWidget/shared/inputValidation.js";
+	} from "../../shared/helpers.js";
+	import { isTextAndTableInput } from "../../shared/inputValidation.js";
 	interface Output {
 		aggregator?: string;
 		answer: string;

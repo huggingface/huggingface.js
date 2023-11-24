@@ -2,7 +2,7 @@
 	import type { ModelData } from "@huggingface/tasks";
 	import { InferenceDisplayability } from "@huggingface/tasks";
 
-	import InferenceWidget from "$lib/components/InferenceWidget/InferenceWidget.svelte";
+	import InferenceWidget from "../../InferenceWidget.svelte";
 	import ModeSwitcher from "$lib/components/DemoThemeSwitcher/DemoThemeSwitcher.svelte";
 	import { onMount } from "svelte";
 
