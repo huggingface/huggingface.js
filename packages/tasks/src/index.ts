@@ -1,8 +1,8 @@
 export { LIBRARY_TASK_MAPPING_EXCLUDING_TRANSFORMERS } from "./library-to-tasks";
 export { MODEL_LIBRARIES_UI_ELEMENTS } from "./library-ui-elements";
-export { MAPPING_DEFAULT_WIDGET } from "./default-widget-params";
-export type { TaskData, TaskDemo, TaskDemoEntry, ExampleRepo } from "./Types";
-export { TASKS_DATA } from "./tasksData";
+export { MAPPING_DEFAULT_WIDGET } from "./default-widget-inputs";
+export type { TaskData, TaskDemo, TaskDemoEntry, ExampleRepo } from "./tasks";
+export * from "./tasks";
 export {
 	PIPELINE_DATA,
 	PIPELINE_TYPES,
