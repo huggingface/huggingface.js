@@ -54,15 +54,6 @@ export function parse(tokens: Token[]): Program {
 		return current + types.length <= tokens.length && types.every((type, i) => type === tokens[current + i].type);
 	}
 
-	function parseBlock(): Statement[] {
-		// Could be a statement or an expression
-		const body: Statement[] = [];
-		while (not(TOKEN_TYPES.OpenStatement)) {
-			body.push(parseAny());
-		}
-		return body;
-	}
-
 	function parseText(): StringLiteral {
 		return new StringLiteral(expect(TOKEN_TYPES.Text, "Expected text token").value);
 	}
@@ -129,11 +120,22 @@ export function parse(tokens: Token[]): Program {
 
 		expect(TOKEN_TYPES.CloseStatement, "Expected closing statement token");
 
-		let alternate: Statement[] = [];
 
-		const body = parseBlock();
+		const body: Statement[] = [];
+		const alternate: Statement[] = [];
 
-		// Check for {% elif %} or {% else %}
+		// Keep parsing if body until we reach the first {% elif %} or {% else %} or {% endif %}
+		while (!(
+			tokens[current]?.type === TOKEN_TYPES.OpenStatement && (
+				tokens[current + 1]?.type === TOKEN_TYPES.ElseIf
+				|| tokens[current + 1]?.type === TOKEN_TYPES.Else
+				|| tokens[current + 1]?.type === TOKEN_TYPES.EndIf
+			)
+		)) {
+			body.push(parseAny());
+		}
+
+		// Alternate branch: Check for {% elif %} or {% else %}
 		if (
 			tokens[current]?.type === TOKEN_TYPES.OpenStatement &&
 			tokens[current + 1]?.type !== TOKEN_TYPES.EndIf // There is some body
@@ -141,12 +143,19 @@ export function parse(tokens: Token[]): Program {
 			++current; // eat {% token
 			if (is(TOKEN_TYPES.ElseIf)) {
 				expect(TOKEN_TYPES.ElseIf, "Expected elseif token");
-				alternate = [parseIfStatement()];
+				alternate.push(parseIfStatement());
 			} else {
-				//  if (tokens[current]?.type === TokenType.Else)
+				// tokens[current]?.type === TokenType.Else
 				expect(TOKEN_TYPES.Else, "Expected else token");
 				expect(TOKEN_TYPES.CloseStatement, "Expected closing statement token");
-				alternate = parseBlock(); // parse else block
+
+				// keep going until we hit {% endif %}
+				while (!(
+					tokens[current]?.type === TOKEN_TYPES.OpenStatement
+					&& tokens[current + 1]?.type === TOKEN_TYPES.EndIf
+				)) {
+					alternate.push(parseAny());
+				}
 			}
 		}
 
