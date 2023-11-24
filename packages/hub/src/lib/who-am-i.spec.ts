@@ -25,6 +25,7 @@ describe("whoAmI", () => {
 					displayName: "ci-hub.js",
 					role: "write",
 				},
+				permissions: ["inference-api"],
 			},
 		});
 	});

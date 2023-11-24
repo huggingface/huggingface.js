@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { WidgetProps } from "$lib/components/InferenceWidget/shared/types.js";
+	import type { WidgetProps } from "../../shared/types.js";
 
 	import { onMount } from "svelte";
 
-	import IconSpin from "$lib/components/Icons/IconSpin.svelte";
-	import IconCross from "$lib/components/Icons/IconCross.svelte";
+	import IconSpin from "../../../Icons/IconSpin.svelte";
+	import IconCross from "../../../Icons/IconCross.svelte";
 	import WidgetHeader from "../../shared/WidgetHeader/WidgetHeader.svelte";
 
 	export let apiToken: WidgetProps["apiToken"];

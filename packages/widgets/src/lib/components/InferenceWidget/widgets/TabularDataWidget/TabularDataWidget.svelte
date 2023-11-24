@@ -1,27 +1,19 @@
 <script lang="ts">
-	import type {
-		WidgetProps,
-		HighlightCoordinates,
-		InferenceRunOpts,
-		ExampleRunOpts,
-	} from "$lib/components/InferenceWidget/shared/types.js";
-	import type {
-		WidgetExampleStructuredDataInput,
-		WidgetExampleOutputLabels,
-	} from "$lib/components/InferenceWidget/shared/WidgetExample.js";
+	import type { WidgetProps, HighlightCoordinates, InferenceRunOpts, ExampleRunOpts } from "../../shared/types.js";
+	import type { WidgetExampleStructuredDataInput, WidgetExampleOutputLabels } from "@huggingface/tasks";
 
 	import WidgetTableInput from "../../shared/WidgetTableInput/WidgetTableInput.svelte";
 	import WidgetSubmitBtn from "../../shared/WidgetSubmitBtn/WidgetSubmitBtn.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
-	import { mod } from "$lib/utils/ViewUtils.js";
+	import { mod } from "../../../../utils/ViewUtils.js";
 	import {
 		addInferenceParameters,
 		convertDataToTable,
 		convertTableToData,
 		callInferenceApi,
 		updateUrl,
-	} from "$lib/components/InferenceWidget/shared/helpers.js";
-	import { isStructuredDataInput } from "$lib/components/InferenceWidget/shared/inputValidation.js";
+	} from "../../shared/helpers.js";
+	import { isStructuredDataInput } from "../../shared/inputValidation.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
