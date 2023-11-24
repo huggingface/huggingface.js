@@ -16,13 +16,13 @@ from-yellow-400 to-yellow-200 dark:from-yellow-400 dark:to-yellow-600
 	type LabelField = "label" | "answer";
 	export let labelField: LabelField = "label";
 	export let output: Array<
-		{ label: string; score: number; color?: string } | { answer: string; score: number; color?: string }
+    	{ label: string; score?: number; color?: string } | { answer: string; score?: number; color?: string }
 	> = [];
 	export let highlightIndex = -1;
 	export let mouseover: (index: number) => void = () => {};
 	export let mouseout: () => void = () => {};
 
-	$: scoreMax = Math.max(0, ...output.map((x) => x.score));
+	$: scoreMax = Math.max(0, ...output.map((x) => x.score ?? 0));
 
 	function text(outputItem: (typeof output)[0]) {
 		if (labelField in outputItem) {
@@ -54,11 +54,13 @@ from-yellow-400 to-yellow-200 dark:from-yellow-400 dark:to-yellow-600
 							to-{color ?? defaultBarColor}-200
 							dark:from-{color ?? defaultBarColor}-400
 							dark:to-{color ?? defaultBarColor}-600"
-						style={`width: ${Math.ceil((score / scoreMax) * 100 * 0.8)}%;`}
+							style={`width: ${score ? Math.ceil((score / scoreMax) * 100 * 0.8) : 0}%;`}
 					/>
 					<span class="leading-snug">{text(output[index])}</span>
 				</div>
-				<span class="pl-2">{score.toFixed(3)}</span>
+				{#if typeof score === 'number'}
+					<span class="pl-2">{score.toFixed(3)}</span>
+				{/if}
 			</div>
 		{/each}
 	</div>

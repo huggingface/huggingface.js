@@ -25,7 +25,7 @@
 		isLoading: false,
 		estimatedTime: 0,
 	};
-	let output: Array<{ answer: string; score: number }> | null = [];
+	let output: Array<{ answer: string; score?: number }> | null = [];
 	let outputJson: string;
 	let question = "";
 	let imgSrc = "";
@@ -55,15 +55,15 @@
 		});
 	}
 
-	function isValidOutput(arg: any): arg is { answer: string; score: number }[] {
-		return Array.isArray(arg) && arg.every((x) => typeof x.answer === "string" && typeof x.score === "number");
+	function isValidOutput(arg: any): arg is { answer: string; score?: number }[] {
+    	return Array.isArray(arg) && arg.every((x) => typeof x.answer === "string" && (typeof x.score === "number" || x.score === undefined));
 	}
 
-	function parseOutput(body: unknown): Array<{ answer: string; score: number }> {
+	function parseOutput(body: unknown): Array<{ answer: string; score?: number }> {
 		if (isValidOutput(body)) {
 			return body;
 		}
-		throw new TypeError("Invalid output: output must be of type Array<answer: string, score:number>");
+		throw new TypeError("Invalid output: output must be of type Array<{ answer: string, score?: number }>");
 	}
 
 	async function applyInputSample(sample: WidgetExampleAssetAndTextInput, opts: ExampleRunOpts = {}) {
