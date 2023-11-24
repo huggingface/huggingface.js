@@ -39,9 +39,6 @@ import type { ModelLibraryKey } from "../model-libraries";
 /**
  * Model libraries compatible with each ML task
  */
-/**
- * Model libraries compatible with each ML task
- */
 export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	"audio-classification": ["speechbrain", "transformers", "transformers.js"],
 	"audio-to-audio": ["asteroid", "speechbrain"],
