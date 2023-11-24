@@ -41,3 +41,7 @@ export enum ModelLibrary {
 }
 
 export type ModelLibraryKey = keyof typeof ModelLibrary;
+
+export const ALL_DISPLAY_MODEL_LIBRARY_KEYS = Object.keys(ModelLibrary).filter(
+	(k) => !["doctr", "k2", "mindspore", "tensorflowtts"].includes(k)
+);

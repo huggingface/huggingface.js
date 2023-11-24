@@ -69,6 +69,7 @@ export type Task =
 	| "text-to-image"
 	| "image-to-text"
 	| "image-to-image"
+	| "image-to-video"
 	| "unconditional-image-generation"
 	| "video-classification"
 	| "reinforcement-learning"
