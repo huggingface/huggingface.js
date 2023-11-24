@@ -164,6 +164,17 @@ export class UnaryExpression extends Expression {
 	}
 }
 
+/**
+ * Logical negation of an expression.
+ */
+export class LogicalNegationExpression extends Expression {
+	override type = "LogicalNegationExpression";
+
+	constructor(public argument: Expression) {
+		super();
+	}
+}
+
 export class SliceExpression extends Expression {
 	override type = "SliceExpression";
 

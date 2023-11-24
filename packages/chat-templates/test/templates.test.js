@@ -58,6 +58,8 @@ const TEST_STRINGS = {
 
 	// Membership operators
 	MEMBERSHIP: `|{{ 0 in arr }}|{{ 1 in arr }}|{{ true in arr }}|{{ false in arr }}|{{ 'a' in arr }}|{{ 'b' in arr }}|`,
+	MEMBERSHIP_NEGATION_1: `|{{ not 0 in arr }}|{{ not 1 in arr }}|{{ not true in arr }}|{{ not false in arr }}|{{ not 'a' in arr }}|{{ not 'b' in arr }}|`,
+	MEMBERSHIP_NEGATION_2: `|{{ 0 not in arr }}|{{ 1 not in arr }}|{{ true not in arr }}|{{ false not in arr }}|{{ 'a' not in arr }}|{{ 'b' not in arr }}|`,
 };
 
 const TEST_PARSED = {
@@ -933,6 +935,90 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 	],
+	MEMBERSHIP_NEGATION_1: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "not", type: "UnaryOperator" },
+		{ value: "0", type: "NumericLiteral" },
+		{ value: "in", type: "In" },
+		{ value: "arr", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "not", type: "UnaryOperator" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: "in", type: "In" },
+		{ value: "arr", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "not", type: "UnaryOperator" },
+		{ value: "true", type: "BooleanLiteral" },
+		{ value: "in", type: "In" },
+		{ value: "arr", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "not", type: "UnaryOperator" },
+		{ value: "false", type: "BooleanLiteral" },
+		{ value: "in", type: "In" },
+		{ value: "arr", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "not", type: "UnaryOperator" },
+		{ value: "a", type: "StringLiteral" },
+		{ value: "in", type: "In" },
+		{ value: "arr", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "not", type: "UnaryOperator" },
+		{ value: "b", type: "StringLiteral" },
+		{ value: "in", type: "In" },
+		{ value: "arr", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
+	MEMBERSHIP_NEGATION_2: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "0", type: "NumericLiteral" },
+		{ value: "not in", type: "NotIn" },
+		{ value: "arr", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: "not in", type: "NotIn" },
+		{ value: "arr", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "true", type: "BooleanLiteral" },
+		{ value: "not in", type: "NotIn" },
+		{ value: "arr", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "false", type: "BooleanLiteral" },
+		{ value: "not in", type: "NotIn" },
+		{ value: "arr", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "a", type: "StringLiteral" },
+		{ value: "not in", type: "NotIn" },
+		{ value: "arr", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "b", type: "StringLiteral" },
+		{ value: "not in", type: "NotIn" },
+		{ value: "arr", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
 };
 
 const TEST_CONTEXT = {
@@ -1023,6 +1109,12 @@ const TEST_CONTEXT = {
 	MEMBERSHIP: {
 		arr: [0, true, "a"],
 	},
+	MEMBERSHIP_NEGATION_1: {
+		arr: [0, true, "a"],
+	},
+	MEMBERSHIP_NEGATION_2: {
+		arr: [0, true, "a"],
+	},
 };
 
 const EXPECTED_OUTPUTS = {
@@ -1079,6 +1171,8 @@ const EXPECTED_OUTPUTS = {
 
 	// Membership operators
 	MEMBERSHIP: "|true|false|true|false|true|false|",
+	MEMBERSHIP_NEGATION_1: "|false|true|false|true|false|true|",
+	MEMBERSHIP_NEGATION_2: "|false|true|false|true|false|true|",
 };
 
 describe("Templates", () => {

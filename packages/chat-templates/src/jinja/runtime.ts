@@ -1,4 +1,3 @@
-import { SliceExpression } from "./ast";
 import type {
 	NumericLiteral,
 	StringLiteral,
@@ -13,6 +12,7 @@ import type {
 	Identifier,
 	BinaryExpression,
 	UnaryExpression,
+	SliceExpression,
 } from "./ast";
 import { slice } from "../utils";
 
@@ -134,7 +134,7 @@ export class Environment {
 	 */
 	variables: Map<string, AnyRuntimeValue> = new Map();
 
-	constructor(public parent?: Environment) {}
+	constructor(public parent?: Environment) { }
 
 	/**
 	 * Set the value of a variable in the current environment.
@@ -255,13 +255,18 @@ export class Interpreter {
 					return new BooleanValue(left.value && right.value);
 				case "or":
 					return new BooleanValue(left.value || right.value);
+				case "==":
+					return new BooleanValue(left.value == right.value);
 				case "!=":
 					return new BooleanValue(left.value != right.value);
 			}
 		} else if (right instanceof ArrayValue) {
+			const member = right.value.find((x) => x.value === left.value) !== undefined;
 			switch (node.operator.value) {
 				case "in":
-					return new BooleanValue(right.value.find((x) => x.value === left.value) !== undefined);
+					return new BooleanValue(member);
+				case "not in":
+					return new BooleanValue(!member);
 			}
 		} else {
 			switch (node.operator.value) {
@@ -359,8 +364,8 @@ export class Interpreter {
 
 		let property;
 		if (expr.computed) {
-			if (expr.property instanceof SliceExpression) {
-				return this.evaluateSliceExpression(object, expr.property, environment);
+			if (expr.property.type === "SliceExpression") {
+				return this.evaluateSliceExpression(object, expr.property as SliceExpression, environment);
 			} else {
 				property = this.evaluate(expr.property, environment);
 			}
@@ -421,7 +426,7 @@ export class Interpreter {
 
 		const iterable = this.evaluate(node.iterable, scope);
 		if (!(iterable instanceof ArrayValue)) {
-			throw new Error(`Expected object in for loop: got ${iterable.type}`);
+			throw new Error(`Expected iterable type in for loop: got ${iterable.type}`);
 		}
 
 		let result = "";

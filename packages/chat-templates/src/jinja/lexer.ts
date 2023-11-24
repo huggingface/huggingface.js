@@ -25,19 +25,21 @@ export const TOKEN_TYPES = Object.freeze({
 	AdditiveBinaryOperator: "AdditiveBinaryOperator", // + -
 	MultiplicativeBinaryOperator: "MultiplicativeBinaryOperator", // * / %
 	ComparisonBinaryOperator: "ComparisonBinaryOperator", // < > <= >= == !=
-	UnaryOperator: "UnaryOperator", // not
+	UnaryOperator: "UnaryOperator", // ! - +
 
 	// Keywords
 	Set: "Set",
 	If: "If",
 	For: "For",
 	In: "In",
+	NotIn: "NotIn",
 	Else: "Else",
 	EndIf: "EndIf",
 	ElseIf: "ElseIf",
 	EndFor: "EndFor",
 	And: "And",
 	Or: "Or",
+	Not: "UnaryOperator",
 });
 
 export type TokenType = keyof typeof TOKEN_TYPES;
@@ -56,7 +58,8 @@ const KEYWORDS = Object.freeze({
 	endfor: TOKEN_TYPES.EndFor,
 	and: TOKEN_TYPES.And,
 	or: TOKEN_TYPES.Or,
-	not: TOKEN_TYPES.UnaryOperator,
+	not: TOKEN_TYPES.Not,
+	"not in": TOKEN_TYPES.NotIn,
 
 	// Literals
 	true: TOKEN_TYPES.BooleanLiteral,
@@ -232,7 +235,17 @@ export function tokenize(source: string): Token[] {
 			// Check for special/reserved keywords
 			// NOTE: We use Object.hasOwn() to avoid matching `.toString()` and other Object methods
 			const type = Object.hasOwn(KEYWORDS, word) ? KEYWORDS[word as keyof typeof KEYWORDS] : TOKEN_TYPES.Identifier;
-			tokens.push(new Token(word, type));
+
+			// Special case of not in:
+			// If the previous token was a "not", and this token is "in"
+			// then we want to combine them into a single token
+			if (type === TOKEN_TYPES.In && tokens.at(-1)?.type === TOKEN_TYPES.Not) {
+				tokens.pop();
+				tokens.push(new Token("not in", TOKEN_TYPES.NotIn));
+			} else {
+				tokens.push(new Token(word, type));
+			}
+
 			continue;
 		}
 

@@ -202,21 +202,36 @@ export function parse(tokens: Token[]): Program {
 	}
 
 	function parseLogicalAndExpression(): Statement {
-		let left = parseComparisonExpression();
+		let left = parseLogicalNegationExpression();
 		while (is(TOKEN_TYPES.And)) {
 			const operator = tokens[current];
 			++current;
-			const right = parseComparisonExpression();
+			const right = parseLogicalNegationExpression();
 			left = new BinaryExpression(operator, left, right);
 		}
 		return left;
+	}
+
+	function parseLogicalNegationExpression(): Statement {
+		let right: UnaryExpression | undefined;
+
+		// Try parse unary operators
+		while (is(TOKEN_TYPES.Not)) {
+			// not not ...
+			const operator = tokens[current];
+			++current;
+			const arg = parseLogicalNegationExpression(); // not test.x === not (test.x)
+			right = new UnaryExpression(operator, arg);
+		}
+
+		return right ?? parseComparisonExpression();
 	}
 
 	function parseComparisonExpression(): Statement {
 		// NOTE: membership has same precedence as comparison
 		// e.g., ('a' in 'apple' == 'b' in 'banana') evaluates as ('a' in ('apple' == ('b' in 'banana')))
 		let left = parseAdditiveExpression();
-		while (is(TOKEN_TYPES.ComparisonBinaryOperator) || is(TOKEN_TYPES.In)) {
+		while (is(TOKEN_TYPES.ComparisonBinaryOperator) || is(TOKEN_TYPES.In) || is(TOKEN_TYPES.NotIn)) {
 			const operator = tokens[current];
 			++current;
 			const right = parseAdditiveExpression();
@@ -330,30 +345,15 @@ export function parse(tokens: Token[]): Program {
 	}
 
 	function parseMultiplicativeExpression(): Statement {
-		let left = parseLogicalNegationExpression();
+		let left = parseCallMemberExpression();
 
 		while (is(TOKEN_TYPES.MultiplicativeBinaryOperator)) {
 			const operator = tokens[current];
 			++current;
-			const right = parseLogicalNegationExpression();
+			const right = parseCallMemberExpression();
 			left = new BinaryExpression(operator, left, right);
 		}
 		return left;
-	}
-
-	function parseLogicalNegationExpression(): Statement {
-		let right: UnaryExpression | undefined;
-
-		// Try parse unary operators
-		while (is(TOKEN_TYPES.UnaryOperator)) {
-			// not not ...
-			const operator = tokens[current];
-			++current;
-			const arg = parseLogicalNegationExpression(); // not test.x === not (test.x)
-			right = new UnaryExpression(operator, arg);
-		}
-
-		return right ?? parseCallMemberExpression();
 	}
 
 	function parsePrimaryExpression(): Statement {
