@@ -527,7 +527,7 @@
 	<ModeSwitcher />
 
 	<label>
-		First, Enter HF token
+		<div class="text-xl font-semibold">First, Enter HF token</div>
 		<input class="form-input" type="text" bind:value={apiToken} placeholder="hf_..." on:change={storeHFToken} />
 	</label>
 
