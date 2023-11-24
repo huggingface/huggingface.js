@@ -38,6 +38,7 @@ export enum ModelLibrary {
 	"ml-agents" = "ML-Agents",
 	"pythae" = "Pythae",
 	"mindspore" = "MindSpore",
+	"gguf" = "GGUF"
 }
 
 export type ModelLibraryKey = keyof typeof ModelLibrary;
