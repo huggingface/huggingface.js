@@ -49,3 +49,5 @@ export class Template {
 		return result.value;
 	}
 }
+
+export { Environment, Interpreter, tokenize, parse };
