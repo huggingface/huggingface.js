@@ -1,5 +1,5 @@
 /**
- * @file Templates for Chat Models
+ * @file Jinja templating engine
  *
  * A minimalistic JavaScript reimplementation of the [Jinja](https://github.com/pallets/jinja) templating engine,
  * to support the chat templates. Special thanks to [Tyler Laceby](https://github.com/tlaceby) for his amazing
@@ -10,11 +10,11 @@
  *
  * @module index
  */
-import type { Program } from "./jinja/ast";
-import { tokenize } from "./jinja/lexer";
-import { parse } from "./jinja/parser";
-import type { StringValue } from "./jinja/runtime";
-import { Environment, Interpreter } from "./jinja/runtime";
+import type { Program } from "./ast";
+import { tokenize } from "./lexer";
+import { parse } from "./parser";
+import type { StringValue } from "./runtime";
+import { Environment, Interpreter } from "./runtime";
 
 export class Template {
 	parsed: Program;

@@ -1,6 +1,6 @@
-# Templates
+# Jinja
 
-A minimalistic JavaScript implementation of the Jinja templating engine, specifically designed for parsing ML chat templates.
+A minimalistic JavaScript implementation of the Jinja templating engine, specifically designed for parsing and rendering ML chat templates.
 
 ## Usage
 

@@ -1,4 +1,4 @@
-name: Chat-templates - Version and Release
+name: Jinja - Version and Release
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ on:
 
 defaults:
   run:
-    working-directory: packages/chat-templates
+    working-directory: packages/jinja
 
 jobs:
   version_and_release:
@@ -24,7 +24,7 @@ jobs:
           node-version: "18"
           cache: "pnpm"
           cache-dependency-path: |
-            packages/chat-templates/pnpm-lock.yaml
+            packages/jinja/pnpm-lock.yaml
           # setting a registry enables the NODE_AUTH_TOKEN env variable where we can set an npm token.  REQUIRED
           registry-url: "https://registry.npmjs.org"
       - run: pnpm install
@@ -35,8 +35,8 @@ jobs:
           BUMPED_VERSION=$(node -p "require('semver').inc('$PACKAGE_VERSION', '${{ github.event.inputs.newversion }}')")
           # Update package.json with the new version
           node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./package.json')); package.version = '$BUMPED_VERSION'; fs.writeFileSync('./package.json', JSON.stringify(package, null, '\t') + '\n');"
-          git commit . -m "🔖 @hugginface/chat-templates $BUMPED_VERSION"
-          git tag "chat-templates-v$BUMPED_VERSION"
+          git commit . -m "🔖 @hugginface/jinja $BUMPED_VERSION"
+          git tag "jinja-v$BUMPED_VERSION"
       - run: pnpm publish --no-git-checks .
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

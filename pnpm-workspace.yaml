@@ -7,4 +7,4 @@ packages:
   - "packages/languages"
   - "packages/tasks"
   - "packages/widgets"
-  - "packages/chat-templates"
+  - "packages/jinja"

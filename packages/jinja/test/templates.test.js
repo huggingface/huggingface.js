@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { tokenize } from "../src/jinja/lexer";
-import { parse } from "../src/jinja/parser";
-import { Environment, Interpreter } from "../src/jinja/runtime";
+import { tokenize } from "../src/lexer";
+import { parse } from "../src/parser";
+import { Environment, Interpreter } from "../src/runtime";
 
 const TEST_STRINGS = {
 	// Text nodes
