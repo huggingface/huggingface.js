@@ -120,18 +120,18 @@ export function parse(tokens: Token[]): Program {
 
 		expect(TOKEN_TYPES.CloseStatement, "Expected closing statement token");
 
-
 		const body: Statement[] = [];
 		const alternate: Statement[] = [];
 
 		// Keep parsing if body until we reach the first {% elif %} or {% else %} or {% endif %}
-		while (!(
-			tokens[current]?.type === TOKEN_TYPES.OpenStatement && (
-				tokens[current + 1]?.type === TOKEN_TYPES.ElseIf
-				|| tokens[current + 1]?.type === TOKEN_TYPES.Else
-				|| tokens[current + 1]?.type === TOKEN_TYPES.EndIf
+		while (
+			!(
+				tokens[current]?.type === TOKEN_TYPES.OpenStatement &&
+				(tokens[current + 1]?.type === TOKEN_TYPES.ElseIf ||
+					tokens[current + 1]?.type === TOKEN_TYPES.Else ||
+					tokens[current + 1]?.type === TOKEN_TYPES.EndIf)
 			)
-		)) {
+		) {
 			body.push(parseAny());
 		}
 
@@ -150,10 +150,9 @@ export function parse(tokens: Token[]): Program {
 				expect(TOKEN_TYPES.CloseStatement, "Expected closing statement token");
 
 				// keep going until we hit {% endif %}
-				while (!(
-					tokens[current]?.type === TOKEN_TYPES.OpenStatement
-					&& tokens[current + 1]?.type === TOKEN_TYPES.EndIf
-				)) {
+				while (
+					!(tokens[current]?.type === TOKEN_TYPES.OpenStatement && tokens[current + 1]?.type === TOKEN_TYPES.EndIf)
+				) {
 					alternate.push(parseAny());
 				}
 			}
@@ -214,8 +213,10 @@ export function parse(tokens: Token[]): Program {
 	}
 
 	function parseComparisonExpression(): Statement {
+		// NOTE: membership has same precedence as comparison
+		// e.g., ('a' in 'apple' == 'b' in 'banana') evaluates as ('a' in ('apple' == ('b' in 'banana')))
 		let left = parseAdditiveExpression();
-		while (is(TOKEN_TYPES.ComparisonBinaryOperator)) {
+		while (is(TOKEN_TYPES.ComparisonBinaryOperator) || is(TOKEN_TYPES.In)) {
 			const operator = tokens[current];
 			++current;
 			const right = parseAdditiveExpression();

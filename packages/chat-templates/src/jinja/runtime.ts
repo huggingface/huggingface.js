@@ -247,9 +247,6 @@ export class Interpreter {
 					return new BooleanValue(left.value == right.value);
 				case "!=":
 					return new BooleanValue(left.value != right.value);
-
-				default:
-					throw new SyntaxError(`Unknown operator: ${node.operator.value}`);
 			}
 		} else if (left instanceof BooleanValue && right instanceof BooleanValue) {
 			// Logical operators
@@ -260,8 +257,11 @@ export class Interpreter {
 					return new BooleanValue(left.value || right.value);
 				case "!=":
 					return new BooleanValue(left.value != right.value);
-				default:
-					throw new SyntaxError(`Unknown operator: ${node.operator.value}`);
+			}
+		} else if (right instanceof ArrayValue) {
+			switch (node.operator.value) {
+				case "in":
+					return new BooleanValue(right.value.find((x) => x.value === left.value) !== undefined);
 			}
 		} else {
 			switch (node.operator.value) {
@@ -271,10 +271,9 @@ export class Interpreter {
 					return new BooleanValue(left.value == right.value);
 				case "!=":
 					return new BooleanValue(left.value != right.value);
-				default:
-					throw new SyntaxError(`Unknown operator: ${node.operator.value}`);
 			}
 		}
+		throw new SyntaxError(`Unknown operator "${node.operator.value}" between ${left.type} and ${right.type}`);
 	}
 
 	/**
