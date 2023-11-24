@@ -1,6 +1,5 @@
-import type { ModelData } from "$lib/interfaces/Types.js";
+import type { ModelData, WidgetExample, WidgetExampleAttribute } from "@huggingface/tasks";
 import { randomItem, parseJSON } from "../../../utils/ViewUtils.js";
-import type { WidgetExample, WidgetExampleAttribute } from "./WidgetExample.js";
 import type { ModelLoadInfo, TableData } from "./types.js";
 import { LoadState } from "./types.js";
 

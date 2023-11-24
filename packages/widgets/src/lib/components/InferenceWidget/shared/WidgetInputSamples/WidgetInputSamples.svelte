@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { ExampleRunOpts } from "../types.js";
-	import type { WidgetExample } from "../WidgetExample.js";
+	import type { WidgetExample } from "@huggingface/tasks";
 
 	type TWidgetExample = $$Generic<WidgetExample>;
 
