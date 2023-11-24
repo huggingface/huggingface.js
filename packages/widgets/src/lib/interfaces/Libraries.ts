@@ -1,6 +1,4 @@
-import type { ModelLibraryKey } from "@huggingface/tasks";
-/* eslint-disable @typescript-eslint/naming-convention */
-import type { ModelData } from "./Types.js";
+import type { ModelLibraryKey, ModelData } from "@huggingface/tasks";
 
 /**
  * Elements configurable by a model library.
@@ -433,8 +431,8 @@ const transformers = (model: ModelData) => {
 			info.processor === "AutoTokenizer"
 				? "tokenizer"
 				: info.processor === "AutoFeatureExtractor"
-				  ? "extractor"
-				  : "processor";
+				? "extractor"
+				: "processor";
 		autoSnippet = [
 			"# Load model directly",
 			`from transformers import ${info.processor}, ${info.auto_model}`,
