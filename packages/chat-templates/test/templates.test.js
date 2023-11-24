@@ -30,6 +30,9 @@ const TEST_STRINGS = {
 	// Set variables
 	VARIABLES: `{% set x = 'Hello' %}{% set y = 'World' %}{{ x + ' ' + y }}`,
 
+	// Numbers
+	NUMBERS: `|{{ 5 }}|{{ -5 }}|{{ add(3, -1) }}|{{ (3 - 1) + (a - 5) - (a + 5)}}|`,
+
 	// Binary expressions
 	BINOP_EXPR: `{{ 1 % 2 }}{{ 1 < 2 }}{{ 1 > 2 }}{{ 1 >= 2 }}{{ 2 <= 2 }}{{ 2 == 2 }}{{ 2 != 3 }}{{ 2 + 3 }}`,
 
@@ -386,6 +389,48 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 	],
 
+	// Numbers
+	NUMBERS: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "5", type: "NumericLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "-5", type: "NumericLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "add", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "-1", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: "-", type: "AdditiveBinaryOperator" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "+", type: "AdditiveBinaryOperator" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "a", type: "Identifier" },
+		{ value: "-", type: "AdditiveBinaryOperator" },
+		{ value: "5", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "-", type: "AdditiveBinaryOperator" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "a", type: "Identifier" },
+		{ value: "+", type: "AdditiveBinaryOperator" },
+		{ value: "5", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
+
 	// Binary expressions
 	BINOP_EXPR: [
 		{ value: "{{", type: "OpenExpression" },
@@ -530,6 +575,7 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 	],
 
+	// String methods
 	STRING_METHODS: [
 		{ value: "{{", type: "OpenExpression" },
 		{ value: "  A  ", type: "StringLiteral" },
@@ -606,6 +652,12 @@ const TEST_CONTEXT = {
 	// Set variables
 	VARIABLES: {},
 
+	// Numbers
+	NUMBERS: {
+		a: 0,
+		add: (x, y) => x + y,
+	},
+
 	// Binary expressions
 	BINOP_EXPR: {},
 
@@ -637,6 +689,8 @@ const TEST_CONTEXT = {
 			},
 		},
 	},
+
+	// String methods
 	STRING_METHODS: {},
 };
 
@@ -665,6 +719,9 @@ const EXPECTED_OUTPUTS = {
 
 	// Set variables
 	VARIABLES: "Hello World",
+
+	// Numbers
+	NUMBERS: "|5|-5|2|-8|",
 
 	// Binary expressions
 	BINOP_EXPR: "1truefalsefalsetruetruetrue5",
@@ -696,8 +753,8 @@ describe("Templates", () => {
 				if (tokens.length !== TEST_PARSED[name].length) {
 					console.log(tokens);
 				}
+				// console.log(tokens);
 				expect(tokens).toMatchObject(TEST_PARSED[name]);
-				// compare(tokens, TEST_PARSED[name]);
 			}
 		});
 

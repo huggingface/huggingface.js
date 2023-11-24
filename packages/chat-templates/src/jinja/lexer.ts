@@ -4,27 +4,30 @@
 export const TOKEN_TYPES = Object.freeze({
 	Text: "Text", // The text between Jinja statements or expressions
 
-	NumericLiteral: "NumericLiteral",
-	BooleanLiteral: "BooleanLiteral",
-	StringLiteral: "StringLiteral",
-	Identifier: "Identifier",
-	Equals: "Equals",
-	OpenParen: "OpenParen",
-	CloseParen: "CloseParen",
+	NumericLiteral: "NumericLiteral", // e.g., 123
+	BooleanLiteral: "BooleanLiteral", // true or false
+	StringLiteral: "StringLiteral", // 'string'
+	Identifier: "Identifier", // Variables, functions, etc.
+	Equals: "Equals", // =
+	OpenParen: "OpenParen", // (
+	CloseParen: "CloseParen", // )
 	OpenStatement: "OpenStatement", // {%
 	CloseStatement: "CloseStatement", // %}
 	OpenExpression: "OpenExpression", // {{
 	CloseExpression: "CloseExpression", // }}
 	OpenSquareBracket: "OpenSquareBracket", // [
 	CloseSquareBracket: "CloseSquareBracket", // ]
-	Comma: "Comma",
-	Dot: "Dot",
+	Comma: "Comma", // ,
+	Dot: "Dot", // .
+	Colon: "Colon", // :
 
 	CallOperator: "CallOperator", // ()
-	AdditiveBinaryOperator: "AdditiveBinaryOperator",
-	MultiplicativeBinaryOperator: "MultiplicativeBinaryOperator",
-	ComparisonBinaryOperator: "ComparisonBinaryOperator",
+	AdditiveBinaryOperator: "AdditiveBinaryOperator", // + -
+	MultiplicativeBinaryOperator: "MultiplicativeBinaryOperator", // * / %
+	ComparisonBinaryOperator: "ComparisonBinaryOperator", // < > <= >= == !=
 	UnaryOperator: "UnaryOperator", // not
+
+	// Keywords
 	Set: "Set",
 	If: "If",
 	For: "For",
@@ -33,7 +36,7 @@ export const TOKEN_TYPES = Object.freeze({
 	EndIf: "EndIf",
 	ElseIf: "ElseIf",
 	EndFor: "EndFor",
-	And: "And", // Logical operators
+	And: "And",
 	Or: "Or",
 });
 
@@ -54,6 +57,7 @@ const KEYWORDS = Object.freeze({
 	and: TOKEN_TYPES.And,
 	or: TOKEN_TYPES.Or,
 	not: TOKEN_TYPES.UnaryOperator,
+
 	// Literals
 	true: TOKEN_TYPES.BooleanLiteral,
 	false: TOKEN_TYPES.BooleanLiteral,
@@ -85,35 +89,36 @@ function isInteger(char: string): boolean {
 /**
  * A data structure which contains a list of rules to test
  */
-const ORDERED_LOOKUP_TABLE = Object.freeze({
+const ORDERED_MAPPING_TABLE: [string, TokenType][] = [
 	// Control sequences
-	"{%": TOKEN_TYPES.OpenStatement,
-	"%}": TOKEN_TYPES.CloseStatement,
-	"{{": TOKEN_TYPES.OpenExpression,
-	"}}": TOKEN_TYPES.CloseExpression,
+	["{%", TOKEN_TYPES.OpenStatement],
+	["%}", TOKEN_TYPES.CloseStatement],
+	["{{", TOKEN_TYPES.OpenExpression],
+	["}}", TOKEN_TYPES.CloseExpression],
 	// Single character tokens
-	"(": TOKEN_TYPES.OpenParen,
-	")": TOKEN_TYPES.CloseParen,
-	"[": TOKEN_TYPES.OpenSquareBracket,
-	"]": TOKEN_TYPES.CloseSquareBracket,
-	",": TOKEN_TYPES.Comma,
-	".": TOKEN_TYPES.Dot,
+	["(", TOKEN_TYPES.OpenParen],
+	[")", TOKEN_TYPES.CloseParen],
+	["[", TOKEN_TYPES.OpenSquareBracket],
+	["]", TOKEN_TYPES.CloseSquareBracket],
+	[",", TOKEN_TYPES.Comma],
+	[".", TOKEN_TYPES.Dot],
+	[":", TOKEN_TYPES.Colon],
 	// Comparison operators
-	"<=": TOKEN_TYPES.ComparisonBinaryOperator,
-	">=": TOKEN_TYPES.ComparisonBinaryOperator,
-	"==": TOKEN_TYPES.ComparisonBinaryOperator,
-	"!=": TOKEN_TYPES.ComparisonBinaryOperator,
-	"<": TOKEN_TYPES.ComparisonBinaryOperator,
-	">": TOKEN_TYPES.ComparisonBinaryOperator,
+	["<=", TOKEN_TYPES.ComparisonBinaryOperator],
+	[">=", TOKEN_TYPES.ComparisonBinaryOperator],
+	["==", TOKEN_TYPES.ComparisonBinaryOperator],
+	["!=", TOKEN_TYPES.ComparisonBinaryOperator],
+	["<", TOKEN_TYPES.ComparisonBinaryOperator],
+	[">", TOKEN_TYPES.ComparisonBinaryOperator],
 	// Arithmetic operators
-	"+": TOKEN_TYPES.AdditiveBinaryOperator,
-	"-": TOKEN_TYPES.AdditiveBinaryOperator,
-	"*": TOKEN_TYPES.MultiplicativeBinaryOperator,
-	"/": TOKEN_TYPES.MultiplicativeBinaryOperator,
-	"%": TOKEN_TYPES.MultiplicativeBinaryOperator,
+	["+", TOKEN_TYPES.AdditiveBinaryOperator],
+	["-", TOKEN_TYPES.AdditiveBinaryOperator],
+	["*", TOKEN_TYPES.MultiplicativeBinaryOperator],
+	["/", TOKEN_TYPES.MultiplicativeBinaryOperator],
+	["%", TOKEN_TYPES.MultiplicativeBinaryOperator],
 	// Assignment operator
-	"=": TOKEN_TYPES.Equals,
-});
+	["=", TOKEN_TYPES.Equals],
+];
 
 /**
  * Generate a list of tokens from a source string.
@@ -162,7 +167,44 @@ export function tokenize(source: string): Token[] {
 		// Consume (and ignore) all whitespace inside Jinja statements or expressions
 		consumeWhile((char) => /\s/.test(char));
 
-		for (const [char, token] of Object.entries(ORDERED_LOOKUP_TABLE)) {
+		// Handle multi-character tokens
+		const char = src[cursorPosition];
+
+		// Check for unary operators
+		if (char === "-" || char === "+") {
+			const lastTokenType = tokens.at(-1)?.type;
+			if (lastTokenType === TOKEN_TYPES.Text || lastTokenType === undefined) {
+				throw new SyntaxError(`Unexpected character: ${char}`);
+			}
+			switch (lastTokenType) {
+				case TOKEN_TYPES.Identifier:
+				case TOKEN_TYPES.NumericLiteral:
+				case TOKEN_TYPES.BooleanLiteral:
+				case TOKEN_TYPES.StringLiteral:
+				case TOKEN_TYPES.CloseParen:
+				case TOKEN_TYPES.CloseSquareBracket:
+					// Part of a binary operator
+					// a - 1, 1 - 1, true - 1, "apple" - 1, (1) - 1, a[1] - 1
+					// Continue parsing normally
+					break;
+
+				default: {
+					// Is part of a unary operator
+					// (-1), [-1], (1 + -1), not -1, -apple
+					++cursorPosition; // consume the unary operator
+
+					// Check for numbers following the unary operator
+					const num = consumeWhile(isInteger);
+					tokens.push(
+						new Token(`${char}${num}`, num.length > 0 ? TOKEN_TYPES.NumericLiteral : TOKEN_TYPES.UnaryOperator)
+					);
+					continue;
+				}
+			}
+		}
+
+		// Try to match one of the tokens in the mapping table
+		for (const [char, token] of ORDERED_MAPPING_TABLE) {
 			const slice = src.slice(cursorPosition, cursorPosition + char.length);
 			if (slice === char) {
 				tokens.push(new Token(char, token));
@@ -170,9 +212,6 @@ export function tokenize(source: string): Token[] {
 				continue main;
 			}
 		}
-
-		// Handle multi-character tokens
-		const char = src[cursorPosition];
 
 		if (char === "'") {
 			++cursorPosition; // Skip the opening quote
@@ -187,7 +226,6 @@ export function tokenize(source: string): Token[] {
 			tokens.push(new Token(num, TOKEN_TYPES.NumericLiteral));
 			continue;
 		}
-
 		if (isWord(char)) {
 			const word = consumeWhile(isWord);
 
