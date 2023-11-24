@@ -135,7 +135,7 @@ export class Environment {
 	 */
 	variables: Map<string, AnyRuntimeValue> = new Map();
 
-	constructor(public parent?: Environment) { }
+	constructor(public parent?: Environment) {}
 
 	/**
 	 * Set the value of a variable in the current environment.
