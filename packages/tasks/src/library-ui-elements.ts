@@ -1,4 +1,5 @@
-import type { ModelLibraryKey, ModelData } from "@huggingface/tasks";
+import type { ModelData } from "./model-data";
+import type { ModelLibraryKey } from "./model-libraries";
 
 /**
  * Elements configurable by a model library.

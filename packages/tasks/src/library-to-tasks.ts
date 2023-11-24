@@ -1,4 +1,5 @@
-import type { ModelLibraryKey, PipelineType } from "@huggingface/tasks";
+import type { ModelLibraryKey } from "./model-libraries";
+import type { PipelineType } from "./pipelines";
 
 /**
  * Mapping from library name (excluding Transformers) to its supported tasks.

@@ -1,5 +1,4 @@
-import type { ModelData } from "../../../interfaces/Types.js";
-import type { WidgetExampleOutput } from "./WidgetExample.js";
+import type { ModelData, WidgetExampleOutput } from "@huggingface/tasks";
 
 export interface WidgetProps {
 	apiToken?: string;

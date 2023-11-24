@@ -1,4 +1,4 @@
-import type { ModelLibraryKey } from "./modelLibraries";
+import type { ModelLibraryKey } from "./model-libraries";
 import type { PipelineType } from "./pipelines";
 
 export interface ExampleRepo {
