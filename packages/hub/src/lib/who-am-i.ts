@@ -63,6 +63,8 @@ export interface AuthInfo {
 		expiration?: Date;
 		role: AccessTokenRole;
 	};
+	permissions: string[];
+	expiresAt?: Date;
 }
 
 export async function whoAmI(params: {
