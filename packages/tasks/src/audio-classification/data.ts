@@ -64,8 +64,8 @@ const taskData: TaskDataCustom = {
 	],
 	spaces: [
 		{
-			description: "An application that can predict the language spoken in a given audio.",
-			id: "akhaliq/Speechbrain-audio-classification",
+			description: "An application that can classify music into different genre.",
+			id: "kurianbenoy/audioclassification",
 		},
 	],
 	summary:

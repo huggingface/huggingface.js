@@ -438,6 +438,11 @@ export const PIPELINE_DATA = {
 		modality: "cv",
 		color: "indigo",
 	},
+	"image-to-video": {
+		name: "Image-to-Video",
+		modality: "multimodal",
+		color: "indigo",
+	},
 	"unconditional-image-generation": {
 		name: "Unconditional Image Generation",
 		modality: "cv",

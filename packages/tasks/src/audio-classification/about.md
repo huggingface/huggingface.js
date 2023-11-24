@@ -66,7 +66,7 @@ Speaker Identification is classifying the audio of the person speaking. Speakers
 
 ## Solving audio classification for your own data
 
-We have some great news! You can do fine-tuning (transfer learning) to train a well-performing model without requiring as much data. Pretrained models such as Wav2Vec2 and HuBERT exist. [Facebook's Wav2Vec2 XLS-R model](https://ai.facebook.com/blog/wav2vec-20-learning-the-structure-of-speech-from-raw-audio/) is a large multilingual model trained on 128 languages and with 436K hours of speech.
+We have some great news! You can do fine-tuning (transfer learning) to train a well-performing model without requiring as much data. Pretrained models such as Wav2Vec2 and HuBERT exist. [Facebook's Wav2Vec2 XLS-R model](https://huggingface.co/docs/transformers/model_doc/xlsr_wav2vec2) is a large multilingual model trained on 128 languages and with 436K hours of speech. Similarly, you can also use [OpenAI's Whisper](https://huggingface.co/docs/transformers/model_doc/whisper) trained on up to 4 Million hours of multilingual speech data for this task too!
 
 ## Useful Resources
 
@@ -82,4 +82,5 @@ Would you like to learn more about the topic? Awesome! Here you can find some cu
 
 ### Documentation
 
+- [Hugging Face Audio Course](https://huggingface.co/learn/audio-course/chapter4/introduction)
 - [Audio classification task guide](https://huggingface.co/docs/transformers/tasks/audio_classification)
