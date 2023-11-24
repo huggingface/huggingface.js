@@ -10,13 +10,13 @@ const EXAMPLE_CHAT = [
 	{ role: "user", content: "I'd like to show off how chat templating works!" },
 ];
 
-// const EXAMPLE_CHAT_WITH_SYTEM = [
-// 	{
-// 		role: "system",
-// 		content: "You are a friendly chatbot who always responds in the style of a pirate",
-// 	},
-// 	...EXAMPLE_CHAT,
-// ];
+const EXAMPLE_CHAT_WITH_SYTEM = [
+	{
+		role: "system",
+		content: "You are a friendly chatbot who always responds in the style of a pirate",
+	},
+	...EXAMPLE_CHAT,
+];
 
 /**
  * Defined in https://github.com/huggingface/transformers
@@ -76,16 +76,17 @@ const TEST_DEFAULT_TEMPLATES = Object.freeze({
 		chat_template: `{% for message in messages %}{{ message.content }}{{ eos_token }}{% endfor %}`,
 		target: `Hello, how are you?<|endoftext|>I'm doing great. How can I help you today?<|endoftext|>I'd like to show off how chat templating works!<|endoftext|>`,
 	},
-	// llama: { // hf-internal-testing/llama-tokenizer
-	//     data: {
-	//         messages: EXAMPLE_CHAT_WITH_SYTEM,
-	//         bos_token: "<s>",
-	//         eos_token: "</s>",
-	//         USE_DEFAULT_PROMPT: true,
-	//     },
-	//     chat_template: `{% if messages[0]['role'] == 'system' %}{% set loop_messages = messages[1:] %}{% set system_message = messages[0]['content'] %}{% elif USE_DEFAULT_PROMPT == true and not '<<SYS>>' in messages[0]['content'] %}{% set loop_messages = messages %}{% set system_message = 'DEFAULT_SYSTEM_MESSAGE' %}{% else %}{% set loop_messages = messages %}{% set system_message = false %}{% endif %}{% for message in loop_messages %}{% if (message['role'] == 'user') != (loop.index0 % 2 == 0) %}{{ raise_exception('Conversation roles must alternate user/assistant/user/assistant/...') }}{% endif %}{% if loop.index0 == 0 and system_message != false %}{% set content = '<<SYS>>\\n' + system_message + '\\n<</SYS>>\\n\\n' + message['content'] %}{% else %}{% set content = message['content'] %}{% endif %}{% if message['role'] == 'user' %}{{ bos_token + '[INST] ' + content.strip() + ' [/INST]' }}{% elif message['role'] == 'system' %}{{ '<<SYS>>\\n' + content.strip() + '\\n<</SYS>>\\n\\n' }}{% elif message['role'] == 'assistant' %}{{ ' ' + content.strip() + ' ' + eos_token }}{% endif %}{% endfor %}`,
-	//     target: `<s>[INST] <<SYS>>\nYou are a friendly chatbot who always responds in the style of a pirate\n<</SYS>>\n\nHello, how are you? [/INST] I'm doing great. How can I help you today? </s><s>[INST] I'd like to show off how chat templating works! [/INST]`,
-	// },
+	llama: {
+		// hf-internal-testing/llama-tokenizer
+		data: {
+			messages: EXAMPLE_CHAT_WITH_SYTEM,
+			bos_token: "<s>",
+			eos_token: "</s>",
+			USE_DEFAULT_PROMPT: true,
+		},
+		chat_template: `{% if messages[0]['role'] == 'system' %}{% set loop_messages = messages[1:] %}{% set system_message = messages[0]['content'] %}{% elif USE_DEFAULT_PROMPT == true and not '<<SYS>>' in messages[0]['content'] %}{% set loop_messages = messages %}{% set system_message = 'DEFAULT_SYSTEM_MESSAGE' %}{% else %}{% set loop_messages = messages %}{% set system_message = false %}{% endif %}{% for message in loop_messages %}{% if (message['role'] == 'user') != (loop.index0 % 2 == 0) %}{{ raise_exception('Conversation roles must alternate user/assistant/user/assistant/...') }}{% endif %}{% if loop.index0 == 0 and system_message != false %}{% set content = '<<SYS>>\\n' + system_message + '\\n<</SYS>>\\n\\n' + message['content'] %}{% else %}{% set content = message['content'] %}{% endif %}{% if message['role'] == 'user' %}{{ bos_token + '[INST] ' + content.strip() + ' [/INST]' }}{% elif message['role'] == 'system' %}{{ '<<SYS>>\\n' + content.strip() + '\\n<</SYS>>\\n\\n' }}{% elif message['role'] == 'assistant' %}{{ ' ' + content.strip() + ' ' + eos_token }}{% endif %}{% endfor %}`,
+		target: `<s>[INST] <<SYS>>\nYou are a friendly chatbot who always responds in the style of a pirate\n<</SYS>>\n\nHello, how are you? [/INST] I'm doing great. How can I help you today? </s><s>[INST] I'd like to show off how chat templating works! [/INST]`,
+	},
 	whisper: {
 		// openai/whisper-large-v3
 		data: {
