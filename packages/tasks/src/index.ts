@@ -28,4 +28,7 @@ export type {
 
 export { TAG_NFAA_CONTENT, OTHER_TAGS_SUGGESTIONS, TAG_TEXT_GENERATION_INFERENCE, TAG_CUSTOM_CODE } from "./tags";
 
+import * as snippets from "./snippets";
+export { snippets };
+
 export type { LibraryUiElement } from "./library-ui-elements";
