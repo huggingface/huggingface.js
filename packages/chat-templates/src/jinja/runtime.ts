@@ -102,6 +102,7 @@ export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
  */
 export class ArrayValue extends RuntimeValue<AnyRuntimeValue[]> {
 	override type = "ArrayValue";
+	override builtins = new Map<string, AnyRuntimeValue>([["length", new NumericValue(this.value.length)]]);
 }
 
 /**
