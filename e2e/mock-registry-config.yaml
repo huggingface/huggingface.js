@@ -11,11 +11,11 @@ uplinks:
   npmjs:
     url: https://registry.npmjs.org/
 packages:
-  '@huggingface/*':
+  "@huggingface/*":
     access: $all
     publish: $all
-  '**':
+  "**":
     access: $all
     proxy: npmjs
 log:
- - {type: stdout, format: pretty, level: trace}
+  - { type: stdout, format: pretty, level: trace }

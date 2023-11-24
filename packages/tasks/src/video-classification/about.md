@@ -15,34 +15,14 @@ Models trained in video classification can improve user experience by organizing
 Below you can find code for inferring with a pre-trained video classification model.
 
 ```python
-from transformers import VideoMAEFeatureExtractor, VideoMAEForVideoClassification
-from pytorchvideo.transforms import UniformTemporalSubsample
-from pytorchvideo.data.encoded_video import EncodedVideo
+from transformers import pipeline
 
+pipe = pipeline(task = "video-classification", model="nateraw/videomae-base-finetuned-ucf101-subset")
+pipe("https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/transformers/basketball.avi?download=true")
 
-# Load the video.
-video = EncodedVideo.from_path("path_to_video.mp4")
-video_data = video.get_clip(start_sec=0, end_sec=4.0)["video"]
-
-# Sub-sample a fixed set of frames and convert them to a NumPy array.
-num_frames = 16
-subsampler = UniformTemporalSubsample(num_frames)
-subsampled_frames = subsampler(video_data)
-video_data_np = subsampled_frames.numpy().transpose(1, 2, 3, 0)
-
-# Preprocess the video frames.
-inputs = feature_extractor(list(video_data_np), return_tensors="pt")
-
-# Run inference
-with torch.no_grad():
-    outputs = model(**inputs)
-    logits = outputs.logits
-
-# Model predicts one of the 400 Kinetics 400 classes
-predicted_label = logits.argmax(-1).item()
-print(model.config.id2label[predicted_label])
-# `eating spaghetti` (if you chose this video:
-# https://hf.co/datasets/nielsr/video-demo/resolve/main/eating_spaghetti.mp4)
+#[{'score': 0.90, 'label': 'BasketballDunk'},
+# {'score': 0.02, 'label': 'BalanceBeam'},
+# ... ]
 ```
 
 ## Useful Resources

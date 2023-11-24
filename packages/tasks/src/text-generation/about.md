@@ -26,11 +26,11 @@ A popular variant of Text Generation models predicts the next word given a bunch
 - Continue a story given the first sentences.
 - Provided a code description, generate the code.
 
-The most popular models for this task are GPT-based models or [Llama series](https://huggingface.co/meta-llama/Llama-2-7b-chat-hf). These models are trained on data that has no labels, so you just need plain text to train your own model. You can train text generation models to generate a wide variety of documents, from code to stories.
+The most popular models for this task are GPT-based models, [Mistral](mistralai/Mistral-7B-v0.1) or [Llama series](https://huggingface.co/meta-llama/Llama-2-7b-chat-hf). These models are trained on data that has no labels, so you just need plain text to train your own model. You can train text generation models to generate a wide variety of documents, from code to stories.
 
 ### Text-to-Text Generation Models
 
-These models are trained to learn the mapping between a pair of texts (e.g. translation from one language to another). The most popular variants of these models are [FLAN-T5](https://huggingface.co/google/flan-t5-xxl), and [BART](https://huggingface.co/docs/transformers/model_doc/bart). Text-to-Text models are trained with multi-tasking capabilities, they can accomplish a wide range of tasks, including summarization, translation, and text classification.
+These models are trained to learn the mapping between a pair of texts (e.g. translation from one language to another). The most popular variants of these models are [NLLB](facebook/nllb-200-distilled-600M), [FLAN-T5](https://huggingface.co/google/flan-t5-xxl), and [BART](https://huggingface.co/docs/transformers/model_doc/bart). Text-to-Text models are trained with multi-tasking capabilities, they can accomplish a wide range of tasks, including summarization, translation, and text classification.
 
 ## Inference
 
@@ -38,7 +38,7 @@ You can use the 🤗 Transformers library `text-generation` pipeline to do infer
 
 ```python
 from transformers import pipeline
-generator = pipeline('text-generation', model = 'gpt2')
+generator = pipeline('text-generation', model = 'HuggingFaceH4/zephyr-7b-beta')
 generator("Hello, I'm a language model", max_length = 30, num_return_sequences=3)
 ## [{'generated_text': "Hello, I'm a language modeler. So while writing this, when I went out to meet my wife or come home she told me that my"},
 ##  {'generated_text': "Hello, I'm a language modeler. I write and maintain software in Python. I love to code, and that includes coding things that require writing"}, ...

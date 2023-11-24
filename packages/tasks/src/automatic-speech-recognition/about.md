@@ -25,7 +25,7 @@ import json
 import requests
 
 headers = {"Authorization": f"Bearer {API_TOKEN}"}
-API_URL = "https://api-inference.huggingface.co/models/openai/whisper-large-v2"
+API_URL = "https://api-inference.huggingface.co/models/openai/whisper-large-v3"
 
 def query(filename):
     with open(filename, "rb") as f:
@@ -63,7 +63,7 @@ await inference.automaticSpeechRecognition({
 
 ## Solving ASR for your own data
 
-We have some great news! You can fine-tune (transfer learning) a foundational speech model on a specific language without tonnes of data. Pretrained models such as Whisper, Wav2Vec2-MMS and HuBERT exist. [OpenAI's Whisper model](https://huggingface.co/openai/whisper-large-v2) is a large multilingual model trained on 100+ languages and with 680K hours of speech.
+We have some great news! You can fine-tune (transfer learning) a foundational speech model on a specific language without tonnes of data. Pretrained models such as Whisper, Wav2Vec2-MMS and HuBERT exist. [OpenAI's Whisper model](https://huggingface.co/openai/whisper-large-v3) is a large multilingual model trained on 100+ languages and with 4 Million hours of speech.
 
 The following detailed [blog post](https://huggingface.co/blog/fine-tune-whisper) shows how to fine-tune a pre-trained Whisper checkpoint on labeled data for ASR. With the right data and strategy you can fine-tune a high-performant model on a free Google Colab instance too. We suggest to read the blog post for more info!
 
@@ -75,6 +75,7 @@ These events help democratize ASR for all languages, including low-resource lang
 
 ## Useful Resources
 
+- [Hugging Face Audio Course](https://huggingface.co/learn/audio-course/chapter5/introduction)
 - [Fine-tuning MetaAI's MMS Adapter Models for Multi-Lingual ASR](https://huggingface.co/blog/mms_adapters)
 - [Making automatic speech recognition work on large files with Wav2Vec2 in 🤗 Transformers](https://huggingface.co/blog/asr-chunking)
 - [Boosting Wav2Vec2 with n-grams in 🤗 Transformers](https://huggingface.co/blog/wav2vec2-with-ngram)
