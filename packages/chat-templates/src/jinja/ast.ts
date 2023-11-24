@@ -163,3 +163,15 @@ export class UnaryExpression extends Expression {
 		super();
 	}
 }
+
+export class SliceExpression extends Expression {
+	override type = "SliceExpression";
+
+	constructor(
+		public start: Expression | undefined = undefined,
+		public stop: Expression | undefined = undefined,
+		public step: Expression | undefined = undefined
+	) {
+		super();
+	}
+}

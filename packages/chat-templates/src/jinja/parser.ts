@@ -14,6 +14,7 @@ import {
 	BooleanLiteral,
 	BinaryExpression,
 	UnaryExpression,
+	SliceExpression,
 } from "./ast";
 
 /**
@@ -266,6 +267,34 @@ export function parse(tokens: Token[]): Program {
 		}
 		return args;
 	}
+	function parseMemberExpressionArgumentsList(): Statement {
+		// NOTE: This also handles slice expressions colon-separated arguments list
+		// e.g., ['test'], [0], [:2], [1:], [1:2], [1:2:3]
+
+		const slices: (Statement | undefined)[] = [];
+		while (!is(TOKEN_TYPES.CloseSquareBracket)) {
+			if (is(TOKEN_TYPES.Colon)) {
+				// A case where a default is used
+				// e.g., [:2] will be parsed as [undefined, 2]
+				slices.push(undefined);
+				++current; // consume colon
+			} else {
+				slices.push(parseExpression());
+				if (is(TOKEN_TYPES.Colon)) {
+					++current; // consume colon after expression, if it exists
+				}
+			}
+		}
+		if (slices.length === 0) {
+			// []
+			throw new SyntaxError(`Expected at least one argument for member/slice expression`);
+		} else if (slices.length === 1 && slices[0] !== undefined) {
+			return slices[0] as Statement; // normal member expression
+		} else if (slices.length > 3) {
+			throw new SyntaxError(`Expected 1-3 arguments for member/slice expression`);
+		}
+		return new SliceExpression(...slices);
+	}
 	function parseMemberExpression(): Statement {
 		let object = parsePrimaryExpression();
 
@@ -276,7 +305,7 @@ export function parse(tokens: Token[]): Program {
 			const computed = operator.type !== TOKEN_TYPES.Dot;
 			if (computed) {
 				// computed (i.e., bracket notation: obj[expr])
-				property = parseExpression();
+				property = parseMemberExpressionArgumentsList();
 				expect(TOKEN_TYPES.CloseSquareBracket, "Expected closing square bracket");
 			} else {
 				// non-computed (i.e., dot notation: obj.expr)

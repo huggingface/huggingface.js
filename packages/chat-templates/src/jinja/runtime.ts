@@ -1,4 +1,8 @@
+import { SliceExpression } from "./ast";
 import type {
+	NumericLiteral,
+	StringLiteral,
+	BooleanLiteral,
 	Statement,
 	Program,
 	If,
@@ -10,7 +14,7 @@ import type {
 	BinaryExpression,
 	UnaryExpression,
 } from "./ast";
-import type { NumericLiteral, StringLiteral, BooleanLiteral } from "./ast";
+import { slice } from "../utils";
 
 export type AnyRuntimeValue =
 	| NumericValue
@@ -19,7 +23,8 @@ export type AnyRuntimeValue =
 	| ObjectValue
 	| ArrayValue
 	| FunctionValue
-	| NullValue;
+	| NullValue
+	| UndefinedValue;
 
 /**
  * Abstract base class for all Runtime values.
@@ -111,6 +116,13 @@ export class FunctionValue extends RuntimeValue<(args: AnyRuntimeValue[], scope:
  */
 export class NullValue extends RuntimeValue<null> {
 	override type = "NullValue";
+}
+
+/**
+ * Represents an Undefined value at runtime.
+ */
+export class UndefinedValue extends RuntimeValue<undefined> {
+	override type = "UndefinedValue";
 }
 
 /**
@@ -310,23 +322,74 @@ export class Interpreter {
 		return (fn as FunctionValue).value(args, environment);
 	}
 
-	private evaluateMemberExpression(expr: MemberExpression, environment: Environment): AnyRuntimeValue {
-		const property = expr.computed
-			? this.evaluate(expr.property, environment)
-			: new StringValue((expr.property as Identifier).value);
-
-		if (!(property instanceof StringValue)) {
-			// TODO integer indexing for arrays
-			throw new Error(`Cannot access property with non-string: got ${property.type}`);
+	private evaluateSliceExpression(
+		object: AnyRuntimeValue,
+		expr: SliceExpression,
+		environment: Environment
+	): ArrayValue | StringValue {
+		if (!(object instanceof ArrayValue || object instanceof StringValue)) {
+			throw new Error("Slice object must be an array or string");
 		}
 
+		const start = this.evaluate(expr.start, environment);
+		const stop = this.evaluate(expr.stop, environment);
+		const step = this.evaluate(expr.step, environment);
+
+		// Validate arguments
+		if (!(start instanceof NumericValue || start instanceof UndefinedValue)) {
+			throw new Error("Slice start must be numeric or undefined");
+		}
+		if (!(stop instanceof NumericValue || stop instanceof UndefinedValue)) {
+			throw new Error("Slice stop must be numeric or undefined");
+		}
+		if (!(step instanceof NumericValue || step instanceof UndefinedValue)) {
+			throw new Error("Slice step must be numeric or undefined");
+		}
+
+		if (object instanceof ArrayValue) {
+			return new ArrayValue(slice(object.value, start.value, stop.value, step.value));
+		} else {
+			return new StringValue(slice(Array.from(object.value), start.value, stop.value, step.value).join(""));
+		}
+	}
+
+	private evaluateMemberExpression(expr: MemberExpression, environment: Environment): AnyRuntimeValue {
 		const object = this.evaluate(expr.object, environment);
 
-		const value =
-			object instanceof ObjectValue
-				? object.value.get(property.value) ?? object.builtins.get(property.value)
-				: object.builtins.get(property.value);
+		let property;
+		if (expr.computed) {
+			if (expr.property instanceof SliceExpression) {
+				return this.evaluateSliceExpression(object, expr.property, environment);
+			} else {
+				property = this.evaluate(expr.property, environment);
+			}
+		} else {
+			property = new StringValue((expr.property as Identifier).value);
+		}
 
+		let value;
+		if (object instanceof ObjectValue) {
+			if (!(property instanceof StringValue)) {
+				throw new Error(`Cannot access property with non-string: got ${property.type}`);
+			}
+			value = object.value.get(property.value) ?? object.builtins.get(property.value);
+		} else if (object instanceof ArrayValue || object instanceof StringValue) {
+			if (property instanceof NumericValue) {
+				value = object.value.at(property.value);
+				if (object instanceof StringValue) {
+					value = new StringValue(object.value.at(property.value));
+				}
+			} else if (property instanceof StringValue) {
+				value = object.builtins.get(property.value);
+			} else {
+				throw new Error(`Cannot access property with non-string/non-number: got ${property.type}`);
+			}
+		} else {
+			if (!(property instanceof StringValue)) {
+				throw new Error(`Cannot access property with non-string: got ${property.type}`);
+			}
+			value = object.builtins.get(property.value);
+		}
 		if (!(value instanceof RuntimeValue)) {
 			throw new Error(`${object.type} has no property '${property.value}'`);
 		}
@@ -393,7 +456,9 @@ export class Interpreter {
 		return new StringValue(result);
 	}
 
-	evaluate(statement: Statement, environment: Environment): AnyRuntimeValue {
+	evaluate(statement: Statement | undefined, environment: Environment): AnyRuntimeValue {
+		if (statement === undefined) return new UndefinedValue();
+
 		switch (statement.type) {
 			// Program
 			case "Program":
