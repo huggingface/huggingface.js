@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "$lib/components/InferenceWidget/shared/types.js";
-	import type { WidgetExampleAssetAndTextInput } from "$lib/components/InferenceWidget/shared/WidgetExample.js";
+	import type { WidgetExampleAssetAndTextInput } from "@huggingface/tasks";
 
 	import WidgetFileInput from "../../shared/WidgetFileInput/WidgetFileInput.svelte";
 	import WidgetDropzone from "../../shared/WidgetDropzone/WidgetDropzone.svelte";

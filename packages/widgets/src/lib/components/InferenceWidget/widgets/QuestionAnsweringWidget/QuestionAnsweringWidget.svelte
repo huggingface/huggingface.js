@@ -4,7 +4,7 @@
 		WidgetExample,
 		WidgetExampleOutputAnswerScore,
 		WidgetExampleTextAndContextInput,
-	} from "$lib/components/InferenceWidget/shared/WidgetExample.js";
+	} from "@huggingface/tasks";
 
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
 	import WidgetTextarea from "../../shared/WidgetTextarea/WidgetTextarea.svelte";

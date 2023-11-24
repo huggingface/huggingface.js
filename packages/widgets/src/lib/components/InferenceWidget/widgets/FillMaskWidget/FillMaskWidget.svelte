@@ -1,10 +1,6 @@
 <script lang="ts">
 	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "$lib/components/InferenceWidget/shared/types.js";
-	import type {
-		WidgetExampleTextInput,
-		WidgetExampleOutputLabels,
-		WidgetExample,
-	} from "$lib/components/InferenceWidget/shared/WidgetExample.js";
+	import type { WidgetExampleTextInput, WidgetExampleOutputLabels, WidgetExample } from "@huggingface/tasks";
 
 	import WidgetOutputChart from "../../shared/WidgetOutputChart/WidgetOutputChart.svelte";
 	import WidgetTextarea from "../../shared/WidgetTextarea/WidgetTextarea.svelte";

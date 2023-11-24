@@ -5,10 +5,7 @@
 		InferenceRunOpts,
 		ExampleRunOpts,
 	} from "$lib/components/InferenceWidget/shared/types.js";
-	import type {
-		WidgetExampleStructuredDataInput,
-		WidgetExampleOutputLabels,
-	} from "$lib/components/InferenceWidget/shared/WidgetExample.js";
+	import type { WidgetExampleStructuredDataInput, WidgetExampleOutputLabels } from "@huggingface/tasks";
 
 	import WidgetTableInput from "../../shared/WidgetTableInput/WidgetTableInput.svelte";
 	import WidgetSubmitBtn from "../../shared/WidgetSubmitBtn/WidgetSubmitBtn.svelte";

@@ -5,7 +5,7 @@
 		ExampleRunOpts,
 		InferenceRunOpts,
 	} from "$lib/components/InferenceWidget/shared/types.js";
-	import type { WidgetExampleTextAndTableInput } from "$lib/components/InferenceWidget/shared/WidgetExample.js";
+	import type { WidgetExampleTextAndTableInput } from "@huggingface/tasks";
 
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
 	import WidgetOutputTableQA from "../../shared/WidgetOutputTableQA/WidgetOutputTableQA.svelte";
