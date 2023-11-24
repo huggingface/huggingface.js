@@ -20,8 +20,8 @@ export function uploadFile(params: {
 		params.file instanceof URL
 			? params.file.pathname.split("/").at(-1) ?? "file"
 			: "path" in params.file
-			? params.file.path
-			: params.file.name;
+			  ? params.file.path
+			  : params.file.name;
 
 	return commit({
 		credentials: params.credentials,

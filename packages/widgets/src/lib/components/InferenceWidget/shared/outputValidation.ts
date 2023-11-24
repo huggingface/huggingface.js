@@ -3,7 +3,7 @@ import type {
 	WidgetExampleOutputAnswerScore,
 	WidgetExampleOutputText,
 	WidgetExampleOutputUrl,
-} from "./WidgetExample.js";
+} from "@huggingface/tasks";
 
 export function isValidOutputLabels(arg: unknown): arg is WidgetExampleOutputLabels {
 	return Array.isArray(arg) && arg.every((x) => typeof x.label === "string" && typeof x.score === "number");
