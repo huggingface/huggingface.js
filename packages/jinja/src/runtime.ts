@@ -313,6 +313,9 @@ export class Interpreter {
 			}
 		}
 
+		// Since `trim_blocks` is enabled, we remove the first newline after the template tag
+		result = result.replace(/^\n/, "");
+
 		return new StringValue(result);
 	}
 
