@@ -23,6 +23,10 @@ export class Template {
 	 * @param {string} template The template string
 	 */
 	constructor(template: string) {
+		// Since `lstrip_blocks` is enabled, we strip tabs and spaces from the beginning of a line to the start of a block.
+		// We can achieve the same effect by replacing all instances of `%}\s+{%` with `%}{%` (as a pre-processing step).
+		template = template.replace(/%}\s+{%/g, "%}{%");
+
 		const tokens = tokenize(template);
 		this.parsed = parse(tokens);
 	}
