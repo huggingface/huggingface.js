@@ -1,0 +1,16 @@
+# This is a comment.
+
+# Ownership for the Inference Package
+/packages/inference/ @huggingface/hf-js-inference
+
+# Ownership for the Tasks Package
+/packages/tasks/ @huggingface/hf-js-tasks
+
+# Ownership for the Widgets Package
+/packages/widgets/ @huggingface/hf-js-widgets
+
+# Ownership for the Hub Package
+/packages/hub/ @huggingface/hf-js-hub
+
+# Ownership for the Agents Package
+/packages/agents/ @huggingface/hf-js-agents
