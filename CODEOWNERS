@@ -1,7 +1,7 @@
 # This is a comment.
 
 # Ownership for the Inference Package
-packages/inference @huggingface/hf-js-inference
+/packages/inference/ @huggingface/hf-js-inference
 
 # Ownership for the Tasks Package
 /packages/tasks/ @huggingface/hf-js-tasks
