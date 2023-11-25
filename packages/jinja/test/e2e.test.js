@@ -103,15 +103,15 @@ const TEST_DEFAULT_TEMPLATES = Object.freeze({
  * Keys are repo ids on the Hugging Face Hub (https://hf.co/models)
  */
 const TEST_CUSTOM_TEMPLATES = Object.freeze({
-	// 'HuggingFaceH4/zephyr-7b-beta': {
-	//     data: {
-	//         messages: EXAMPLE_CHAT_WITH_SYTEM,
-	//         eos_token: "</s>",
-	//         add_generation_prompt: false,
-	//     },
-	//     chat_template: `{% for message in messages %}\n{% if message['role'] == 'user' %}\n{{ '<|user|>\n' + message['content'] + eos_token }}\n{% elif message['role'] == 'system' %}\n{{ '<|system|>\n' + message['content'] + eos_token }}\n{% elif message['role'] == 'assistant' %}\n{{ '<|assistant|>\n'  + message['content'] + eos_token }}\n{% endif %}\n{% if loop.last and add_generation_prompt %}\n{{ '<|assistant|>' }}\n{% endif %}\n{% endfor %}`,
-	//     target: `<|system|>\nYou are a friendly chatbot who always responds in the style of a pirate</s>\n<|user|>\nHello, how are you?</s>\n<|assistant|>\nI'm doing great. How can I help you today?</s>\n<|user|>\nI'd like to show off how chat templating works!</s>\n`,
-	// },
+	"HuggingFaceH4/zephyr-7b-beta": {
+		data: {
+			messages: EXAMPLE_CHAT_WITH_SYTEM,
+			eos_token: "</s>",
+			add_generation_prompt: false,
+		},
+		chat_template: `{% for message in messages %}\n{% if message['role'] == 'user' %}\n{{ '<|user|>\n' + message['content'] + eos_token }}\n{% elif message['role'] == 'system' %}\n{{ '<|system|>\n' + message['content'] + eos_token }}\n{% elif message['role'] == 'assistant' %}\n{{ '<|assistant|>\n'  + message['content'] + eos_token }}\n{% endif %}\n{% if loop.last and add_generation_prompt %}\n{{ '<|assistant|>' }}\n{% endif %}\n{% endfor %}`,
+		target: `<|system|>\nYou are a friendly chatbot who always responds in the style of a pirate</s>\n<|user|>\nHello, how are you?</s>\n<|assistant|>\nI'm doing great. How can I help you today?</s>\n<|user|>\nI'd like to show off how chat templating works!</s>\n`,
+	},
 	"mistralai/Mistral-7B-Instruct-v0.1": {
 		data: {
 			messages: EXAMPLE_CHAT,
