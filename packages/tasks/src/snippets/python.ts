@@ -79,7 +79,7 @@ export const snippetDocumentQuestionAnswering = (model: ModelData): string =>
 output = query({
     "inputs": ${getModelInputSnippet(model)},
 })`;
-	
+
 export const pythonSnippets: Partial<Record<PipelineType, (model: ModelData) => string>> = {
 	// Same order as in js/src/lib/interfaces/Types.ts
 	"text-classification": snippetBasic,
