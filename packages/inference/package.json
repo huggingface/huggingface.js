@@ -51,8 +51,7 @@
 		"check": "tsc"
 	},
 	"devDependencies": {
-		"@types/node": "18.13.0",
-		"typescript": "^5.0.4"
+		"@types/node": "18.13.0"
 	},
 	"resolutions": {}
 }

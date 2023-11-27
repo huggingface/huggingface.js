@@ -20,7 +20,7 @@
 		"semver": "^7.5.0",
 		"ts-node": "^10.9.1",
 		"tsup": "^6.7.0",
-		"typescript": "^5.0.2",
+		"typescript": "^5.0.4",
 		"vite": "^5.0.2",
 		"vitest": "^0.34.6",
 		"webdriverio": "^8.6.7"

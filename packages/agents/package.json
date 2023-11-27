@@ -54,8 +54,7 @@
 	"license": "MIT",
 	"devDependencies": {
 		"@types/node": "^18.13.0",
-		"type-fest": "^3.9.0",
-		"typescript": "^5.0.4"
+		"type-fest": "^3.9.0"
 	},
 	"dependencies": {
 		"@huggingface/inference": "^2.6.1"

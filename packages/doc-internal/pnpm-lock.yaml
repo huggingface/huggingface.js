@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 dependencies:
   glob:
     specifier: ^9.2.1
@@ -18,9 +22,6 @@ devDependencies:
   typedoc-plugin-markdown:
     specifier: ^3.14.0
     version: 3.14.0(typedoc@0.23.26)
-  typescript:
-    specifier: ^4.9.5
-    version: 4.9.5
 
 packages:
 
