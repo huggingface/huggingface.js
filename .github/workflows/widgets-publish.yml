@@ -35,8 +35,37 @@ jobs:
           BUMPED_VERSION=$(node -p "require('semver').inc('$PACKAGE_VERSION', '${{ github.event.inputs.newversion }}')")
           # Update package.json with the new version
           node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./package.json')); package.version = '$BUMPED_VERSION'; fs.writeFileSync('./package.json', JSON.stringify(package, null, '\t') + '\n');"
-          git commit . -m "🔖 @hugginface/widgets $BUMPED_VERSION"
+          git commit . -m "🔖 @huggingface/widgets $BUMPED_VERSION"
           git tag "widgets-v$BUMPED_VERSION"
+      - run: |
+          # Calculate the SHA-256 checksum of the local @huggingface/tasks package
+          echo "Calculating checksum of local @huggingface/tasks package..."
+          LOCAL_CHECKSUM=$(cd ../tasks && tar -cf - . | sha256sum | cut -d' ' -f1)
+          echo "Local package checksum: $LOCAL_CHECKSUM"
+
+          # Fetch the latest published version of @huggingface/tasks from npm
+          echo "Fetching latest published version of @huggingface/tasks..."
+          LATEST_PUBLISHED_VERSION=$(npm view @huggingface/tasks version)
+          if [ -z "$LATEST_PUBLISHED_VERSION" ]; then
+            echo "Error: Unable to fetch the latest version of @huggingface/tasks"
+            exit 1
+          fi
+
+          # Download the package tarball from npm and calculate its checksum
+          npm pack @huggingface/tasks@$LATEST_PUBLISHED_VERSION
+          if [ ! -f "huggingface-tasks-$LATEST_PUBLISHED_VERSION.tgz" ]; then
+            echo "Error: Failed to download @huggingface/tasks@$LATEST_PUBLISHED_VERSION"
+            exit 1
+          fi
+          REMOTE_CHECKSUM=$(tar -xf huggingface-tasks-$LATEST_PUBLISHED_VERSION.tgz -C /tmp && tar -cf - /tmp/package | sha256sum | cut -d' ' -f1)
+          echo "Remote package checksum: $REMOTE_CHECKSUM"
+
+          if [ "$LOCAL_CHECKSUM" != "$REMOTE_CHECKSUM" ]; then
+            echo "Checksum Verification Failed: The local @huggingface/tasks package differs from the remote version. Release halted. Local Checksum: $LOCAL_CHECKSUM, Remote Checksum: $REMOTE_CHECKSUM"
+            exit 1
+          fi
+          echo "Checksum Verification Successful: The local and remote @huggingface/tasks packages are consistent. Proceeding with the @huggingface/widgets package release. Local Checksum: $LOCAL_CHECKSUM, Remote Checksum: $REMOTE_CHECKSUM."
+
       - run: pnpm publish --no-git-checks .
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
