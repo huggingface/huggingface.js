@@ -37,19 +37,23 @@ jobs:
           node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./package.json')); package.version = '$BUMPED_VERSION'; fs.writeFileSync('./package.json', JSON.stringify(package, null, '\t') + '\n');"
           git commit . -m "🔖 @huggingface/widgets $BUMPED_VERSION"
           git tag "widgets-v$BUMPED_VERSION"
-      # Validate Task Package Integrity
-      - name: Validate Task Package Integrity
-        run: |
+      - run: |
           echo "Calculating checksum of local @huggingface/tasks package..."
-          LOCAL_CHECKSUM=$(tar -cf - packages/tasks | sha256sum | cut -d' ' -f1)
-          echo "Fetching remote @huggingface/tasks package..."
-          npm pack @huggingface/tasks@$BUMPED_VERSION
-          REMOTE_CHECKSUM=$(tar -xf huggingface-tasks-$BUMPED_VERSION.tgz -C /tmp && tar -cf - /tmp/package | sha256sum | cut -d' ' -f1)
+          LOCAL_CHECKSUM=$(cd ../tasks && tar -cf - . | sha256sum | cut -d' ' -f1)
+          echo "Local package checksum: $LOCAL_CHECKSUM"
+
+          echo "Fetching latest published version of @huggingface/tasks..."
+          LATEST_PUBLISHED_VERSION=$(npm view @huggingface/tasks version)
+          npm pack @huggingface/tasks@$LATEST_PUBLISHED_VERSION
+          REMOTE_CHECKSUM=$(tar -xf huggingface-tasks-$LATEST_PUBLISHED_VERSION.tgz -C /tmp && tar -cf - /tmp/package | sha256sum | cut -d' ' -f1)
+          echo "Remote package checksum: $REMOTE_CHECKSUM"
+
           if [ "$LOCAL_CHECKSUM" != "$REMOTE_CHECKSUM" ]; then
-            echo "Checksums do not match! Local: $LOCAL_CHECKSUM, Remote: $REMOTE_CHECKSUM"
+            echo "Error: Checksums do not match! Local: $LOCAL_CHECKSUM, Remote: $REMOTE_CHECKSUM"
             exit 1
           fi
-          echo "Checksums match. Proceeding with the release."
+          echo "Checksums match. Proceeding with the release. Local: $LOCAL_CHECKSUM, Remote: $REMOTE_CHECKSUM"
+
       - run: pnpm publish --no-git-checks .
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
