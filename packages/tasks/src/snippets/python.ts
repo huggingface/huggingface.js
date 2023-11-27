@@ -15,12 +15,12 @@ output = query({
 export const snippetZeroShotImageClassification = (model: ModelData): string =>
 	`def query(data):
 	with open(data["image_path"], "rb") as f:
-		data = f.read()
+		img = f.read()
 	payload={
 		"parameters": data["parameters"],
-		"inputs": base64.b64encode(data).decode("utf-8")
+		"inputs": base64.b64encode(img).decode("utf-8")
 	}
-	response = requests.post(API_URL, headers=headers,json=payload)
+	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.json()
 
 output = query({
