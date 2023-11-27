@@ -1,16 +1,19 @@
 # This is a comment.
 
 # Ownership for the Inference Package
-/packages/inference/ @huggingface/hf-js-inference
+/packages/inference/ @vvmnnnkv @radames
 
 # Ownership for the Tasks Package
-/packages/tasks/ @huggingface/hf-js-tasks
+/packages/tasks/ @osanseviero @merveenoyan @pcuenca
 
 # Ownership for the Widgets Package
-/packages/widgets/ @huggingface/hf-js-widgets
+/packages/widgets/ @mishig25
 
 # Ownership for the Hub Package
-/packages/hub/ @huggingface/hf-js-hub
+/packages/hub/ @coyotte508
 
 # Ownership for the Agents Package
-/packages/agents/ @huggingface/hf-js-agents
+/packages/agents/ @nsarrazin
+
+# Ownership for the Jinja Package
+/packages/jinja/ @xenova
