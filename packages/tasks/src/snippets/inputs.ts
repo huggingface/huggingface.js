@@ -31,6 +31,12 @@ const inputsTableQuestionAnswering = () =>
 		}
 	}`;
 
+const inputsDocumentQuestionAnswering = () =>
+	`{
+		"image": "document-question-answering-input.png",
+		"question": "What is the idea behind the consumer relations efficiency team?"
+	}`;
+
 const inputsQuestionAnswering = () =>
 	`{
 		"question": "What is my name?",
@@ -86,6 +92,7 @@ const modelInputSnippets: {
 	"audio-classification": inputsAudioClassification,
 	"automatic-speech-recognition": inputsAutomaticSpeechRecognition,
 	conversational: inputsConversational,
+	"document-question-answering": inputsDocumentQuestionAnswering,
 	"feature-extraction": inputsFeatureExtraction,
 	"fill-mask": inputsFillMask,
 	"image-classification": inputsImageClassification,

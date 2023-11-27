@@ -70,6 +70,16 @@ from IPython.display import Audio
 Audio(audio, rate=sampling_rate)`;
 	}
 };
+
+export const snippetDocumentQuestionAnswering = (model: ModelData): string =>
+	`def query(payload):
+	response = requests.post(API_URL, headers=headers, json=payload)
+	return response.json()
+
+output = query({
+    "inputs": ${getModelInputSnippet(model)},
+})`;
+	
 export const pythonSnippets: Partial<Record<PipelineType, (model: ModelData) => string>> = {
 	// Same order as in js/src/lib/interfaces/Types.ts
 	"text-classification": snippetBasic,
@@ -95,6 +105,7 @@ export const pythonSnippets: Partial<Record<PipelineType, (model: ModelData) => 
 	"image-to-text": snippetFile,
 	"object-detection": snippetFile,
 	"image-segmentation": snippetFile,
+	"document-question-answering": snippetDocumentQuestionAnswering,
 };
 
 export function getPythonInferenceSnippet(model: ModelData, accessToken: string): string {
