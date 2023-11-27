@@ -35,8 +35,21 @@ jobs:
           BUMPED_VERSION=$(node -p "require('semver').inc('$PACKAGE_VERSION', '${{ github.event.inputs.newversion }}')")
           # Update package.json with the new version
           node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./package.json')); package.version = '$BUMPED_VERSION'; fs.writeFileSync('./package.json', JSON.stringify(package, null, '\t') + '\n');"
-          git commit . -m "🔖 @hugginface/widgets $BUMPED_VERSION"
+          git commit . -m "🔖 @huggingface/widgets $BUMPED_VERSION"
           git tag "widgets-v$BUMPED_VERSION"
+      # Validate Task Package Integrity
+      - name: Validate Task Package Integrity
+        run: |
+          echo "Calculating checksum of local @huggingface/tasks package..."
+          LOCAL_CHECKSUM=$(tar -cf - packages/tasks | sha256sum | cut -d' ' -f1)
+          echo "Fetching remote @huggingface/tasks package..."
+          npm pack @huggingface/tasks@$BUMPED_VERSION
+          REMOTE_CHECKSUM=$(tar -xf huggingface-tasks-$BUMPED_VERSION.tgz -C /tmp && tar -cf - /tmp/package | sha256sum | cut -d' ' -f1)
+          if [ "$LOCAL_CHECKSUM" != "$REMOTE_CHECKSUM" ]; then
+            echo "Checksums do not match! Local: $LOCAL_CHECKSUM, Remote: $REMOTE_CHECKSUM"
+            exit 1
+          fi
+          echo "Checksums match. Proceeding with the release."
       - run: pnpm publish --no-git-checks .
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
