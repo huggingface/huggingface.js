@@ -40,6 +40,5 @@
 	],
 	"author": "Hugging Face",
 	"license": "MIT",
-	"devDependencies": {
-	}
+	"devDependencies": {}
 }
