@@ -92,7 +92,7 @@ const modelInputSnippets: {
 	"audio-classification": inputsAudioClassification,
 	"automatic-speech-recognition": inputsAutomaticSpeechRecognition,
 	conversational: inputsConversational,
-	"document-question-answering": inputsDocumentQuestionAnswering,
+	"document-question-answering": inputsVisualQuestionAnswering,
 	"feature-extraction": inputsFeatureExtraction,
 	"fill-mask": inputsFillMask,
 	"image-classification": inputsImageClassification,
