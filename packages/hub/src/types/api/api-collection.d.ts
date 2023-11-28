@@ -3,6 +3,13 @@ import type { ApiSpaceInfo } from "../types/api/api-space";
 import type { ApiDatasetInfo } from "../types/api/api-dataset";
 import type { ApiModelInfo } from "../types/api/api-model";
 
+export interface CreateCollectionPayload {
+	title: string;
+	namespace?: string;
+	private: boolean;
+	description?: string;
+	exists_ok: boolean;
+}
 export interface Collection {
 	_id: string;
 	id: string;
@@ -21,4 +28,6 @@ export interface Collection {
 	shareUrl: string;
 	subdomain: string;
 	isUpvotedByUser: boolean;
+	namespace?: string;
+	exists_ok: boolean;
 }
