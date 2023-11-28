@@ -261,6 +261,8 @@ await hf.audioClassification({
 
 Generates natural-sounding speech from text input.
 
+Check out an [inetractive tutorial](https://scrimba.com/scrim/co8da4d23b49b648f77f4848a?pl=pkVnrP7uP)
+
 ```typescript
 await hf.textToSpeech({
   model: 'espnet/kan-bayashi_ljspeech_vits',
@@ -348,6 +350,8 @@ await hf.textToImage({
 ### Image To Image
 
 Image-to-image is the task of transforming a source image to match the characteristics of a target image or a target image domain.
+
+Check out an [inetractive tutorial](https://scrimba.com/scrim/co4834bf9a91cc81cfab07969?pl=pkVnrP7uP)
 
 ```typescript
 await hf.imageToImage({
