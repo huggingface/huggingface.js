@@ -42,6 +42,14 @@ import io
 from PIL import Image
 image = Image.open(io.BytesIO(image_bytes))`;
 
+export const snippetTabular = (model: ModelData): string =>
+	`def query(payload):
+	response = requests.post(API_URL, headers=headers, json=payload)
+	return response.content
+response = query({
+	"inputs": {"data": ${getModelInputSnippet(model)}},
+})`;
+
 export const snippetTextToAudio = (model: ModelData): string => {
 	// Transformers TTS pipeline and api-inference-community (AIC) pipeline outputs are diverged
 	// with the latest update to inference-api (IA).
@@ -93,6 +101,8 @@ export const pythonSnippets: Partial<Record<PipelineType, (model: ModelData) => 
 	"audio-classification": snippetFile,
 	"image-classification": snippetFile,
 	"image-to-text": snippetFile,
+	"tabular-regression": snippetTabular,
+	"tabular-classification": snippetTabular,
 	"object-detection": snippetFile,
 	"image-segmentation": snippetFile,
 };
