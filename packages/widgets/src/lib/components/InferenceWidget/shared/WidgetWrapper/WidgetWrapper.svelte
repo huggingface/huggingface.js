@@ -104,10 +104,6 @@
 			}
 		})();
 	});
-
-	function onClickMaximizeBtn() {
-		isMaximized = !isMaximized;
-	}
 </script>
 
 {#if isDisabled && !inputSamples.length}
@@ -120,7 +116,7 @@
 		 {!modelLoadInfo ? 'hidden' : ''}"
 	>
 		{#if isMaximized}
-			<button class="absolute right-12 top-6" on:click={onClickMaximizeBtn}>
+			<button class="absolute right-12 top-6" on:click={() => (isMaximized = !isMaximized)}>
 				<IconCross classNames="text-xl text-gray-500 hover:text-black" />
 			</button>
 		{/if}
@@ -150,6 +146,6 @@
 			<WidgetModelLoading estimatedTime={modelLoading.estimatedTime} />
 		{/if}
 		<slot name="bottom" />
-		<WidgetFooter {onClickMaximizeBtn} {outputJson} {isDisabled} />
+		<WidgetFooter bind:isMaximized {outputJson} {isDisabled} />
 	</div>
 {/if}

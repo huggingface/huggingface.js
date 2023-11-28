@@ -16,6 +16,6 @@
 			"module": "commonjs"
 		}
 	},
-	"include": ["src", "index.ts", "../shared/src"],
+	"include": ["src", "test", "index.ts", "../shared/src"],
 	"exclude": ["dist"]
 }

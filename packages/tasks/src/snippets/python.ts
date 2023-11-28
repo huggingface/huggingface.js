@@ -12,6 +12,22 @@ output = query({
     "parameters": {"candidate_labels": ["refund", "legal", "faq"]},
 })`;
 
+export const snippetZeroShotImageClassification = (model: ModelData): string =>
+	`def query(data):
+	with open(data["image_path"], "rb") as f:
+		img = f.read()
+	payload={
+		"parameters": data["parameters"],
+		"inputs": base64.b64encode(img).decode("utf-8")
+	}
+	response = requests.post(API_URL, headers=headers, json=payload)
+	return response.json()
+
+output = query({
+    "image_path": ${getModelInputSnippet(model)},
+    "parameters": {"candidate_labels": ["cat", "dog", "llama"]},
+})`;
+
 export const snippetBasic = (model: ModelData): string =>
 	`def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
@@ -84,7 +100,7 @@ output = query({
 })`;
 
 export const pythonSnippets: Partial<Record<PipelineType, (model: ModelData) => string>> = {
-	// Same order as in js/src/lib/interfaces/Types.ts
+	// Same order as in tasks/src/pipelines.ts
 	"text-classification": snippetBasic,
 	"token-classification": snippetBasic,
 	"table-question-answering": snippetBasic,
@@ -105,10 +121,11 @@ export const pythonSnippets: Partial<Record<PipelineType, (model: ModelData) => 
 	"audio-to-audio": snippetFile,
 	"audio-classification": snippetFile,
 	"image-classification": snippetFile,
-	"image-to-text": snippetFile,
 	"object-detection": snippetFile,
 	"image-segmentation": snippetFile,
 	"document-question-answering": snippetDocumentQuestionAnswering,
+	"image-to-text": snippetFile,
+	"zero-shot-image-classification": snippetZeroShotImageClassification,
 };
 
 export function getPythonInferenceSnippet(model: ModelData, accessToken: string): string {

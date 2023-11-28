@@ -40,7 +40,5 @@
 	],
 	"author": "Hugging Face",
 	"license": "MIT",
-	"devDependencies": {
-		"typescript": "^5.0.4"
-	}
+	"devDependencies": {}
 }

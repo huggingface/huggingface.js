@@ -6,8 +6,9 @@ import "./vcr";
 import { readTestFile } from "./test-files";
 
 const TIMEOUT = 60000 * 3;
+const env = import.meta.env;
 
-if (!process.env.HF_ACCESS_TOKEN) {
+if (!env.HF_ACCESS_TOKEN) {
 	console.warn("Set HF_ACCESS_TOKEN in the env to run the tests for better rate limits");
 }
 
@@ -15,7 +16,7 @@ describe.concurrent(
 	"HfInference",
 	() => {
 		// Individual tests can be ran without providing an api key, however running all tests without an api key will result in rate limiting error.
-		const hf = new HfInference(process.env.HF_ACCESS_TOKEN);
+		const hf = new HfInference(env.HF_ACCESS_TOKEN);
 
 		it("throws error if model does not exist", () => {
 			expect(
@@ -309,32 +310,6 @@ describe.concurrent(
 			]);
 		});
 		it("zeroShotClassification", async () => {
-			expect.extend({
-				closeTo(received, expected, precision) {
-					const { isNot } = this;
-					let pass = false;
-					let expectedDiff = 0;
-					let receivedDiff = 0;
-
-					if (received === Infinity && expected === Infinity) {
-						pass = true;
-					} else if (received === -Infinity && expected === -Infinity) {
-						pass = true;
-					} else {
-						expectedDiff = 10 ** -precision / 2;
-						receivedDiff = Math.abs(expected - received);
-						pass = receivedDiff < expectedDiff;
-					}
-
-					return {
-						pass,
-						message: () =>
-							isNot
-								? `expected ${received} to not be close to ${expected}, received difference is ${receivedDiff}, but expected ${expectedDiff}`
-								: `expected ${received} to be close to ${expected}, received difference is ${receivedDiff}, but expected ${expectedDiff}`,
-					};
-				},
-			});
 			expect(
 				await hf.zeroShotClassification({
 					model: "facebook/bart-large-mnli",
