@@ -158,67 +158,72 @@
 </script>
 
 <WidgetWrapper
-	{callApiOnMount}
 	{apiUrl}
 	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
 	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	validateExample={isAssetAndZeroShotInput}
+	let:isDisabled
+	let:modelLoadInfo
+	let:WidgetInfo
+	let:WidgetHeader
+	let:WidgetFooter
 >
-	<svelte:fragment slot="top" let:isDisabled>
-		<form class="space-y-2">
-			<WidgetDropzone
-				classNames="hidden md:block"
-				{isLoading}
-				{isDisabled}
-				{imgSrc}
-				{onSelectFile}
-				onError={(e) => (error = e)}
-			>
-				{#if imgSrc}
-					<img src={imgSrc} class="pointer-events-none mx-auto max-h-44 shadow" alt="" />
-				{/if}
-			</WidgetDropzone>
-			<!-- Better UX for mobile/table through CSS breakpoints -->
+	<WidgetHeader
+		{noTitle}
+		{model}
+		{isLoading}
+		{isDisabled}
+		{callApiOnMount}
+		{applyInputSample}
+		validateExample={isAssetAndZeroShotInput}
+	/>
+	<form class="space-y-2">
+		<WidgetDropzone
+			classNames="hidden md:block"
+			{isLoading}
+			{isDisabled}
+			{imgSrc}
+			{onSelectFile}
+			onError={(e) => (error = e)}
+		>
 			{#if imgSrc}
-				{#if imgSrc}
-					<div class="mb-2 flex justify-center bg-gray-50 dark:bg-gray-900 md:hidden">
-						<img src={imgSrc} class="pointer-events-none max-h-44" alt="" />
-					</div>
-				{/if}
+				<img src={imgSrc} class="pointer-events-none mx-auto max-h-44 shadow" alt="" />
 			{/if}
-			<WidgetFileInput
-				accept="image/*"
-				classNames="mr-2 md:hidden"
-				{isLoading}
-				{isDisabled}
-				label="Browse for image"
-				{onSelectFile}
-			/>
-			<WidgetTextInput
-				bind:value={candidateLabels}
-				{isDisabled}
-				label="Possible class names (comma-separated)"
-				placeholder="Possible class names..."
-			/>
-			<WidgetSubmitBtn
-				{isLoading}
-				{isDisabled}
-				onClick={() => {
-					getOutput();
-				}}
-			/>
-		</form>
-	</svelte:fragment>
-	<svelte:fragment slot="bottom">
-		{#if output.length}
-			<WidgetOutputChart classNames="pt-4" {output} />
+		</WidgetDropzone>
+		<!-- Better UX for mobile/table through CSS breakpoints -->
+		{#if imgSrc}
+			{#if imgSrc}
+				<div class="mb-2 flex justify-center bg-gray-50 dark:bg-gray-900 md:hidden">
+					<img src={imgSrc} class="pointer-events-none max-h-44" alt="" />
+				</div>
+			{/if}
 		{/if}
-	</svelte:fragment>
+		<WidgetFileInput
+			accept="image/*"
+			classNames="mr-2 md:hidden"
+			{isLoading}
+			{isDisabled}
+			label="Browse for image"
+			{onSelectFile}
+		/>
+		<WidgetTextInput
+			bind:value={candidateLabels}
+			{isDisabled}
+			label="Possible class names (comma-separated)"
+			placeholder="Possible class names..."
+		/>
+		<WidgetSubmitBtn
+			{isLoading}
+			{isDisabled}
+			onClick={() => {
+				getOutput();
+			}}
+		/>
+	</form>
+	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
+
+	{#if output.length}
+		<WidgetOutputChart classNames="pt-4" {output} />
+	{/if}
+
+	<WidgetFooter {isDisabled} {outputJson} />
 </WidgetWrapper>

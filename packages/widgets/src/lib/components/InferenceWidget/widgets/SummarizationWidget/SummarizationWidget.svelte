@@ -104,33 +104,37 @@
 </script>
 
 <WidgetWrapper
-	{callApiOnMount}
 	{apiUrl}
 	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
 	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	validateExample={isTextInput}
-	exampleQueryParams={["text"]}
+	let:isDisabled
+	let:modelLoadInfo
+	let:WidgetInfo
+	let:WidgetHeader
+	let:WidgetFooter
 >
-	<svelte:fragment slot="top" let:isDisabled>
-		<form class="space-y-2">
-			<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} />
-			<WidgetSubmitBtn
-				{isLoading}
-				{isDisabled}
-				onClick={() => {
-					getOutput();
-				}}
-			/>
-		</form>
-	</svelte:fragment>
-	<svelte:fragment slot="bottom">
-		<WidgetOutputText classNames="mt-4" {output} />
-	</svelte:fragment>
+	<WidgetHeader
+		{noTitle}
+		{model}
+		{isLoading}
+		{isDisabled}
+		{callApiOnMount}
+		{applyInputSample}
+		validateExample={isTextInput}
+	/>
+	<form class="space-y-2">
+		<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} />
+		<WidgetSubmitBtn
+			{isLoading}
+			{isDisabled}
+			onClick={() => {
+				getOutput();
+			}}
+		/>
+	</form>
+	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
+
+	<WidgetOutputText classNames="mt-4" {output} />
+
+	<WidgetFooter {isDisabled} {outputJson} />
 </WidgetWrapper>

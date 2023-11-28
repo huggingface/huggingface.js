@@ -147,45 +147,50 @@
 </script>
 
 <WidgetWrapper
-	{callApiOnMount}
 	{apiUrl}
 	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
 	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	validateExample={isAssetInput}
+	let:isDisabled
+	let:modelLoadInfo
+	let:WidgetInfo
+	let:WidgetHeader
+	let:WidgetFooter
 >
-	<svelte:fragment slot="top" let:isDisabled>
-		<form>
-			<div class="flex flex-wrap items-center {isDisabled ? 'pointer-events-none hidden opacity-50' : ''}">
-				<WidgetFileInput accept="audio/*" classNames="mt-1.5 mr-2" {onSelectFile} />
-				<span class="mr-2 mt-1.5">or</span>
-				<WidgetRecorder classNames="mt-1.5" {onRecordStart} onRecordStop={onSelectFile} onError={onRecordError} />
-			</div>
-			{#if fileUrl}
-				<WidgetAudioTrack classNames="mt-3" label={filename} src={fileUrl} />
-			{/if}
-			<WidgetSubmitBtn
-				classNames="mt-2"
-				isDisabled={isRecording || isDisabled}
-				{isLoading}
-				onClick={() => {
-					getOutput();
-				}}
-			/>
-		</form>
-	</svelte:fragment>
-	<svelte:fragment slot="bottom">
-		{#each output as item}
-			<div class="mt-2 flex items-center">
-				<span class="mr-2">{item.label}:</span>
-				<WidgetAudioTrack classNames="" src={item.src} />
-			</div>
-		{/each}
-	</svelte:fragment>
+	<WidgetHeader
+		{noTitle}
+		{model}
+		{isLoading}
+		{isDisabled}
+		{callApiOnMount}
+		{applyInputSample}
+		validateExample={isAssetInput}
+	/>
+	<form>
+		<div class="flex flex-wrap items-center {isDisabled ? 'pointer-events-none hidden opacity-50' : ''}">
+			<WidgetFileInput accept="audio/*" classNames="mt-1.5 mr-2" {onSelectFile} />
+			<span class="mr-2 mt-1.5">or</span>
+			<WidgetRecorder classNames="mt-1.5" {onRecordStart} onRecordStop={onSelectFile} onError={onRecordError} />
+		</div>
+		{#if fileUrl}
+			<WidgetAudioTrack classNames="mt-3" label={filename} src={fileUrl} />
+		{/if}
+		<WidgetSubmitBtn
+			classNames="mt-2"
+			isDisabled={isRecording || isDisabled}
+			{isLoading}
+			onClick={() => {
+				getOutput();
+			}}
+		/>
+	</form>
+	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
+
+	{#each output as item}
+		<div class="mt-2 flex items-center">
+			<span class="mr-2">{item.label}:</span>
+			<WidgetAudioTrack classNames="" src={item.src} />
+		</div>
+	{/each}
+
+	<WidgetFooter {isDisabled} {outputJson} />
 </WidgetWrapper>

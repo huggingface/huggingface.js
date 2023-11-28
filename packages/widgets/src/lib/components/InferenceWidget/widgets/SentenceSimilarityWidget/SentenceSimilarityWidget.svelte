@@ -134,54 +134,59 @@
 </script>
 
 <WidgetWrapper
-	{callApiOnMount}
 	{apiUrl}
 	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
 	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	validateExample={isSentenceSimilarityInput}
+	let:isDisabled
+	let:modelLoadInfo
+	let:WidgetInfo
+	let:WidgetHeader
+	let:WidgetFooter
 >
-	<svelte:fragment slot="top" let:isDisabled>
-		<form class="flex flex-col space-y-2">
-			<WidgetTextInput
-				bind:value={sourceSentence}
-				{isDisabled}
-				label="Source Sentence"
-				placeholder={isDisabled ? "" : "Your sentence here..."}
-			/>
-			<WidgetTextInput
-				bind:value={comparisonSentences[0]}
-				{isDisabled}
-				label="Sentences to compare to"
-				placeholder={isDisabled ? "" : "Your sentence here..."}
-			/>
-			{#each Array(nComparisonSentences - 1) as _, idx}
-				<WidgetTextInput bind:value={comparisonSentences[idx + 1]} {isDisabled} placeholder="Your sentence here..." />
-			{/each}
-			<WidgetAddSentenceBtn
-				isDisabled={nComparisonSentences === maxComparisonSentences || isDisabled}
-				onClick={() => {
-					nComparisonSentences++;
-				}}
-			/>
-			<WidgetSubmitBtn
-				{isLoading}
-				{isDisabled}
-				onClick={() => {
-					getOutput();
-				}}
-			/>
-		</form>
-	</svelte:fragment>
-	<svelte:fragment slot="bottom">
-		{#if output.length}
-			<WidgetOutputChart classNames="pt-4" {output} />
-		{/if}
-	</svelte:fragment>
+	<WidgetHeader
+		{noTitle}
+		{model}
+		{isLoading}
+		{isDisabled}
+		{callApiOnMount}
+		{applyInputSample}
+		validateExample={isSentenceSimilarityInput}
+	/>
+	<form class="flex flex-col space-y-2">
+		<WidgetTextInput
+			bind:value={sourceSentence}
+			{isDisabled}
+			label="Source Sentence"
+			placeholder={isDisabled ? "" : "Your sentence here..."}
+		/>
+		<WidgetTextInput
+			bind:value={comparisonSentences[0]}
+			{isDisabled}
+			label="Sentences to compare to"
+			placeholder={isDisabled ? "" : "Your sentence here..."}
+		/>
+		{#each Array(nComparisonSentences - 1) as _, idx}
+			<WidgetTextInput bind:value={comparisonSentences[idx + 1]} {isDisabled} placeholder="Your sentence here..." />
+		{/each}
+		<WidgetAddSentenceBtn
+			isDisabled={nComparisonSentences === maxComparisonSentences || isDisabled}
+			onClick={() => {
+				nComparisonSentences++;
+			}}
+		/>
+		<WidgetSubmitBtn
+			{isLoading}
+			{isDisabled}
+			onClick={() => {
+				getOutput();
+			}}
+		/>
+	</form>
+	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
+
+	{#if output.length}
+		<WidgetOutputChart classNames="pt-4" {output} />
+	{/if}
+
+	<WidgetFooter {isDisabled} {outputJson} />
 </WidgetWrapper>

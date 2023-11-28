@@ -132,39 +132,35 @@
 </script>
 
 <WidgetWrapper
-	{callApiOnMount}
 	{apiUrl}
 	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
 	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	{validateExample}
-	exampleQueryParams={["text"]}
+	let:isDisabled
+	let:modelLoadInfo
+	let:WidgetInfo
+	let:WidgetHeader
+	let:WidgetFooter
 >
-	<svelte:fragment slot="top" let:isDisabled>
-		<form>
-			{#if model.pipeline_tag === "fill-mask"}
-				<div class="mb-1.5 text-sm text-gray-500">
-					Mask token: <code>{model.mask_token}</code>
-				</div>
-			{/if}
-			<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} />
-			<WidgetSubmitBtn
-				classNames="mt-2"
-				{isLoading}
-				{isDisabled}
-				onClick={() => {
-					getOutput();
-				}}
-			/>
-		</form>
-	</svelte:fragment>
-	<svelte:fragment slot="bottom">
-		<WidgetOutputChart classNames="pt-4" {output} />
-	</svelte:fragment>
+	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyInputSample} {validateExample} />
+	<form>
+		{#if model.pipeline_tag === "fill-mask"}
+			<div class="mb-1.5 text-sm text-gray-500">
+				Mask token: <code>{model.mask_token}</code>
+			</div>
+		{/if}
+		<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} />
+		<WidgetSubmitBtn
+			classNames="mt-2"
+			{isLoading}
+			{isDisabled}
+			onClick={() => {
+				getOutput();
+			}}
+		/>
+	</form>
+	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
+
+	<WidgetOutputChart classNames="pt-4" {output} />
+
+	<WidgetFooter {isDisabled} {outputJson} />
 </WidgetWrapper>

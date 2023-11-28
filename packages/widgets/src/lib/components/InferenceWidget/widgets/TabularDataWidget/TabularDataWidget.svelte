@@ -178,43 +178,46 @@
 </script>
 
 <WidgetWrapper
-	{callApiOnMount}
 	{apiUrl}
 	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
 	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	validateExample={isStructuredDataInput}
-	exampleQueryParams={["structured_data"]}
+	let:isDisabled
+	let:modelLoadInfo
+	let:WidgetInfo
+	let:WidgetHeader
+	let:WidgetFooter
 >
-	<svelte:fragment slot="top" let:isDisabled>
-		<form>
-			<div class="mt-4">
-				{#if table.length > 1 || table[1]?.length > 1}
-					<WidgetTableInput
-						{highlighted}
-						{isLoading}
-						{isDisabled}
-						onChange={onChangeTable}
-						table={tableWithOutput}
-						canAddCol={false}
-						bind:scrollTableToRight
-					/>
-				{/if}
-			</div>
-			<WidgetSubmitBtn
-				{isLoading}
-				{isDisabled}
-				onClick={() => {
-					getOutput();
-				}}
-			/>
-		</form>
-	</svelte:fragment>
-	<svelte:fragment slot="bottom" />
+	<WidgetHeader
+		{noTitle}
+		{model}
+		{isLoading}
+		{isDisabled}
+		{callApiOnMount}
+		{applyInputSample}
+		validateExample={isStructuredDataInput}
+	/>
+	<form>
+		<div class="mt-4">
+			{#if table.length > 1 || table[1]?.length > 1}
+				<WidgetTableInput
+					{highlighted}
+					{isLoading}
+					{isDisabled}
+					onChange={onChangeTable}
+					table={tableWithOutput}
+					canAddCol={false}
+					bind:scrollTableToRight
+				/>
+			{/if}
+		</div>
+		<WidgetSubmitBtn
+			{isLoading}
+			{isDisabled}
+			onClick={() => {
+				getOutput();
+			}}
+		/>
+	</form>
+	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
+	<WidgetFooter {isDisabled} {outputJson} />
 </WidgetWrapper>

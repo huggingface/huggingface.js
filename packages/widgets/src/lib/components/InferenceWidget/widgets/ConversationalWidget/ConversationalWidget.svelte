@@ -154,33 +154,38 @@
 </script>
 
 <WidgetWrapper
-	{callApiOnMount}
 	{apiUrl}
 	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
 	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	validateExample={isTextInput}
-	exampleQueryParams={["text"]}
+	let:isDisabled
+	let:modelLoadInfo
+	let:WidgetInfo
+	let:WidgetHeader
+	let:WidgetFooter
 >
-	<svelte:fragment slot="top" let:isDisabled>
-		<WidgetOutputConvo modelId={model.id} {output} />
-		<form>
-			<WidgetQuickInput
-				bind:value={text}
-				flatTop={true}
-				{isLoading}
-				{isDisabled}
-				onClickSubmitBtn={() => {
-					getOutput();
-				}}
-				submitButtonLabel="Send"
-			/>
-		</form>
-	</svelte:fragment>
+	<WidgetHeader
+		{noTitle}
+		{model}
+		{isLoading}
+		{isDisabled}
+		{callApiOnMount}
+		{applyInputSample}
+		validateExample={isTextInput}
+	/>
+	<WidgetOutputConvo modelId={model.id} {output} />
+	<form>
+		<WidgetQuickInput
+			bind:value={text}
+			flatTop={true}
+			{isLoading}
+			{isDisabled}
+			onClickSubmitBtn={() => {
+				getOutput();
+			}}
+			submitButtonLabel="Send"
+		/>
+	</form>
+	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
+
+	<WidgetFooter {isDisabled} {outputJson} />
 </WidgetWrapper>

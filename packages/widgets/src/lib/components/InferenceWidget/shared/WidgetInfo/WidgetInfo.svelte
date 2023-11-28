@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { InferenceDisplayability } from "@huggingface/tasks";
 	import { type WidgetProps, type ModelLoadInfo, LoadState, ComputeType } from "../types.js";
+	import WidgetModelLoading from "../WidgetModelLoading/WidgetModelLoading.svelte";
 	import IconAzureML from "../../..//Icons/IconAzureML.svelte";
 	import IconInfo from "../../..//Icons/IconInfo.svelte";
 
@@ -8,7 +9,12 @@
 	export let computeTime: string = "";
 	export let error: string = "";
 	export let modelLoadInfo: ModelLoadInfo | undefined = undefined;
-	export let modelTooBig = false;
+	export let modelLoading = {
+		isLoading: false,
+		estimatedTime: 0,
+	};
+
+	$: modelTooBig = modelLoadInfo?.state === "TooBig";
 
 	const state = {
 		[LoadState.Loadable]: "This model can be loaded on the Inference API on-demand.",
@@ -97,5 +103,8 @@
 	</div>
 	{#if error}
 		<div class="alert alert-error mt-3">{error}</div>
+	{/if}
+	{#if modelLoading.isLoading}
+		<WidgetModelLoading estimatedTime={modelLoading.estimatedTime} />
 	{/if}
 </div>

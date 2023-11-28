@@ -129,45 +129,41 @@
 </script>
 
 <WidgetWrapper
-	{callApiOnMount}
 	{apiUrl}
 	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
 	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	{validateExample}
-	exampleQueryParams={["context", "text"]}
+	let:isDisabled
+	let:modelLoadInfo
+	let:WidgetInfo
+	let:WidgetHeader
+	let:WidgetFooter
 >
-	<svelte:fragment slot="top" let:isDisabled>
-		<form class="space-y-2">
-			<WidgetQuickInput
-				bind:value={question}
-				{isLoading}
-				{isDisabled}
-				onClickSubmitBtn={() => {
-					getOutput();
-				}}
-			/>
-			<WidgetTextarea
-				bind:value={context}
-				bind:setValue={setTextAreaValue}
-				{isDisabled}
-				placeholder="Please input some context..."
-				label="Context"
-			/>
-		</form>
-	</svelte:fragment>
-	<svelte:fragment slot="bottom">
-		{#if output}
-			<div class="alert alert-success mt-4 flex items-baseline">
-				<span>{output.answer}</span>
-				<span class="ml-auto font-mono text-xs">{output.score.toFixed(3)}</span>
-			</div>
-		{/if}
-	</svelte:fragment>
+	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyInputSample} {validateExample} />
+	<form class="space-y-2">
+		<WidgetQuickInput
+			bind:value={question}
+			{isLoading}
+			{isDisabled}
+			onClickSubmitBtn={() => {
+				getOutput();
+			}}
+		/>
+		<WidgetTextarea
+			bind:value={context}
+			bind:setValue={setTextAreaValue}
+			{isDisabled}
+			placeholder="Please input some context..."
+			label="Context"
+		/>
+	</form>
+	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
+
+	{#if output}
+		<div class="alert alert-success mt-4 flex items-baseline">
+			<span>{output.answer}</span>
+			<span class="ml-auto font-mono text-xs">{output.score.toFixed(3)}</span>
+		</div>
+	{/if}
+
+	<WidgetFooter {isDisabled} {outputJson} />
 </WidgetWrapper>

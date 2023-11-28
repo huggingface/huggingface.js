@@ -1,8 +1,6 @@
 <script lang="ts">
 	import IconCode from "../../..//Icons/IconCode.svelte";
-	import IconMaximize from "../../..//Icons/IconMaximize.svelte";
 
-	export let isMaximized = false;
 	export let outputJson: string;
 	export let isDisabled = false;
 
@@ -22,14 +20,6 @@
 			JSON Output
 		</button>
 	{/if}
-	<button class="ml-auto flex items-center" on:click|preventDefault={() => (isMaximized = !isMaximized)}>
-		<IconMaximize classNames="mr-1" />
-		{#if !isMaximized}
-			Maximize
-		{:else}
-			Minimize
-		{/if}
-	</button>
 </div>
 {#if outputJson && isOutputJsonVisible}
 	<pre

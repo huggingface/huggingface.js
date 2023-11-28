@@ -1,16 +1,46 @@
 <script lang="ts">
-	import { TASKS_DATA, type PipelineType } from "@huggingface/tasks";
+	import { getContext } from "svelte";
+	import { TASKS_DATA } from "@huggingface/tasks";
+	import type { WidgetExample, WidgetExampleAttribute } from "@huggingface/tasks";
+	import type { WidgetProps, ExampleRunOpts } from "../types.js";
 	import { getPipelineTask } from "../../../../utils/ViewUtils.js";
 	import IconInfo from "../../..//Icons/IconInfo.svelte";
 	import IconLightning from "../../..//Icons/IconLightning.svelte";
 	import PipelineTag from "../../../PipelineTag/PipelineTag.svelte";
+	import WidgetExamples from "../WidgetExamples/WidgetExamples.svelte";
 
+	type TWidgetExample = $$Generic<WidgetExample>;
+
+	export let model: WidgetProps["model"];
 	export let noTitle = false;
 	export let title: string | null = null;
-	export let pipeline: PipelineType | undefined;
+	export let isLoading = false;
 	export let isDisabled = false;
+	export let applyInputSample: (sample: TWidgetExample, opts?: ExampleRunOpts) => void = () => {};
+	export let validateExample: (sample: WidgetExample) => sample is TWidgetExample = (
+		sample
+	): sample is TWidgetExample => true;
+	export let callApiOnMount: WidgetProps["callApiOnMount"] = false;
+	export let exampleQueryParams: WidgetExampleAttribute[] = [];
+
+	const pipeline = model?.pipeline_tag;
 
 	$: task = pipeline ? getPipelineTask(pipeline) : undefined;
+
+	$: examplesAll = getExamples(isDisabled);
+
+	function getExamples(isDisabled: boolean): TWidgetExample[] {
+		const examples = ((model?.widgetData ?? []) as TWidgetExample[])
+			.filter((sample) => validateExample(sample) && (!isDisabled || sample.output !== undefined))
+			.sort((sample1, sample2) => (sample2.example_title ? 1 : 0) - (sample1.example_title ? 1 : 0));
+
+		if (isDisabled && !examples.length) {
+			const makeWidgetUndisplayable = getContext<() => void>("makeWidgetUndisplayable");
+			makeWidgetUndisplayable();
+		}
+
+		return examples;
+	}
 </script>
 
 <div class="mb-2 flex items-center font-semibold">
@@ -45,5 +75,15 @@
 			<PipelineTag classNames="mr-2 mb-1.5" {pipeline} />
 		</a>
 	{/if}
-	<slot />
+	{#if examplesAll.length}
+		<WidgetExamples
+			{examplesAll}
+			{isLoading}
+			{applyInputSample}
+			{validateExample}
+			{model}
+			{callApiOnMount}
+			{exampleQueryParams}
+		/>
+	{/if}
 </div>

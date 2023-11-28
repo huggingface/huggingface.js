@@ -154,38 +154,43 @@
 </script>
 
 <WidgetWrapper
-	{callApiOnMount}
 	{apiUrl}
 	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
 	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	validateExample={isTextAndTableInput}
-	exampleQueryParams={["text", "table"]}
+	let:isDisabled
+	let:modelLoadInfo
+	let:WidgetInfo
+	let:WidgetHeader
+	let:WidgetFooter
 >
-	<svelte:fragment slot="top" let:isDisabled>
-		<form>
-			<WidgetQuickInput
-				bind:value={query}
-				{isLoading}
-				{isDisabled}
-				onClickSubmitBtn={() => {
-					getOutput();
-				}}
-			/>
-		</form>
-		<div class="mt-4">
-			{#if output}
-				<WidgetOutputTableQA {output} {isAnswerOnlyOutput} />
-			{/if}
-			{#if table.length > 1 || table[0].length > 1}
-				<WidgetTableInput {highlighted} onChange={onChangeTable} {table} {isDisabled} />
-			{/if}
-		</div>
-	</svelte:fragment>
+	<WidgetHeader
+		{noTitle}
+		{model}
+		{isLoading}
+		{isDisabled}
+		{callApiOnMount}
+		{applyInputSample}
+		validateExample={isTextAndTableInput}
+	/>
+	<form>
+		<WidgetQuickInput
+			bind:value={query}
+			{isLoading}
+			{isDisabled}
+			onClickSubmitBtn={() => {
+				getOutput();
+			}}
+		/>
+	</form>
+	<div class="mt-4">
+		{#if output}
+			<WidgetOutputTableQA {output} {isAnswerOnlyOutput} />
+		{/if}
+		{#if table.length > 1 || table[0].length > 1}
+			<WidgetTableInput {highlighted} onChange={onChangeTable} {table} {isDisabled} />
+		{/if}
+	</div>
+	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
+
+	<WidgetFooter {isDisabled} {outputJson} />
 </WidgetWrapper>

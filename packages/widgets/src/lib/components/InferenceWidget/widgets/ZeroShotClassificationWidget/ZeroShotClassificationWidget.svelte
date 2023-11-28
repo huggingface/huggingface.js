@@ -147,50 +147,49 @@
 </script>
 
 <WidgetWrapper
-	{callApiOnMount}
 	{apiUrl}
 	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
 	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	validateExample={isZeroShotTextInput}
-	exampleQueryParams={["candidate_labels", "multi_class", "text"]}
+	let:isDisabled
+	let:modelLoadInfo
+	let:WidgetInfo
+	let:WidgetHeader
+	let:WidgetFooter
 >
-	<svelte:fragment slot="top" let:isDisabled>
-		<form class="flex flex-col space-y-2">
-			<WidgetTextarea
-				bind:value={text}
-				bind:setValue={setTextAreaValue}
-				{isDisabled}
-				placeholder="Text to classify..."
-			/>
-			<WidgetTextInput
-				bind:value={candidateLabels}
-				{isDisabled}
-				label="Possible class names (comma-separated)"
-				placeholder="Possible class names..."
-			/>
-			<WidgetCheckbox bind:checked={multiClass} label="Allow multiple true classes" />
-			<WidgetSubmitBtn
-				{isLoading}
-				{isDisabled}
-				onClick={() => {
-					getOutput();
-				}}
-			/>
-			{#if warning}
-				<div class="alert alert-warning mt-2">{warning}</div>
-			{/if}
-		</form>
-	</svelte:fragment>
-	<svelte:fragment slot="bottom">
-		{#if output.length}
-			<WidgetOutputChart classNames="pt-4" {output} />
+	<WidgetHeader
+		{noTitle}
+		{model}
+		{isLoading}
+		{isDisabled}
+		{callApiOnMount}
+		{applyInputSample}
+		validateExample={isZeroShotTextInput}
+	/>
+	<form class="flex flex-col space-y-2">
+		<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} placeholder="Text to classify..." />
+		<WidgetTextInput
+			bind:value={candidateLabels}
+			{isDisabled}
+			label="Possible class names (comma-separated)"
+			placeholder="Possible class names..."
+		/>
+		<WidgetCheckbox bind:checked={multiClass} label="Allow multiple true classes" />
+		<WidgetSubmitBtn
+			{isLoading}
+			{isDisabled}
+			onClick={() => {
+				getOutput();
+			}}
+		/>
+		{#if warning}
+			<div class="alert alert-warning mt-2">{warning}</div>
 		{/if}
-	</svelte:fragment>
+	</form>
+	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
+
+	{#if output.length}
+		<WidgetOutputChart classNames="pt-4" {output} />
+	{/if}
+
+	<WidgetFooter {isDisabled} {outputJson} />
 </WidgetWrapper>

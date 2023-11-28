@@ -162,61 +162,58 @@
 </script>
 
 <WidgetWrapper
-	{callApiOnMount}
 	{apiUrl}
 	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
 	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	{validateExample}
+	let:isDisabled
+	let:modelLoadInfo
+	let:WidgetInfo
+	let:WidgetHeader
+	let:WidgetFooter
 >
-	<svelte:fragment slot="top" let:isDisabled>
-		<form>
-			<div class="flex flex-wrap items-center {isDisabled ? 'pointer-events-none hidden opacity-50' : ''}">
-				{#if !isRealtimeRecording}
-					<WidgetFileInput accept="audio/*" classNames="mt-1.5" {onSelectFile} />
-					<span class="mx-2 mt-1.5">or</span>
-					<WidgetRecorder classNames="mt-1.5" {onRecordStart} onRecordStop={onSelectFile} onError={onRecordError} />
-				{/if}
-				{#if model?.library_name === "transformers"}
-					{#if !isRealtimeRecording}
-						<span class="mx-2 mt-1.5">or</span>
-					{/if}
-					<WidgetRealtimeRecorder
-						classNames="mt-1.5"
-						{apiToken}
-						{model}
-						{updateModelLoading}
-						onRecordStart={() => (isRealtimeRecording = true)}
-						onRecordStop={() => (isRealtimeRecording = false)}
-						onError={onRecordError}
-					/>
-				{/if}
-			</div>
+	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyInputSample} {validateExample} />
+	<form>
+		<div class="flex flex-wrap items-center {isDisabled ? 'pointer-events-none hidden opacity-50' : ''}">
 			{#if !isRealtimeRecording}
-				{#if fileUrl}
-					<WidgetAudioTrack classNames="mt-3" label={filename} src={fileUrl} />
-				{/if}
-				<WidgetSubmitBtn
-					classNames="mt-2"
-					isDisabled={isRecording || isDisabled}
-					{isLoading}
-					onClick={() => {
-						getOutput();
-					}}
-				/>
-				{#if warning}
-					<div class="alert alert-warning mt-2">{warning}</div>
-				{/if}
+				<WidgetFileInput accept="audio/*" classNames="mt-1.5" {onSelectFile} />
+				<span class="mx-2 mt-1.5">or</span>
+				<WidgetRecorder classNames="mt-1.5" {onRecordStart} onRecordStop={onSelectFile} onError={onRecordError} />
 			{/if}
-		</form>
-	</svelte:fragment>
-	<svelte:fragment slot="bottom">
-		<WidgetOutputText classNames="mt-4" {output} />
-	</svelte:fragment>
+			{#if model?.library_name === "transformers"}
+				{#if !isRealtimeRecording}
+					<span class="mx-2 mt-1.5">or</span>
+				{/if}
+				<WidgetRealtimeRecorder
+					classNames="mt-1.5"
+					{apiToken}
+					{model}
+					{updateModelLoading}
+					onRecordStart={() => (isRealtimeRecording = true)}
+					onRecordStop={() => (isRealtimeRecording = false)}
+					onError={onRecordError}
+				/>
+			{/if}
+		</div>
+		{#if !isRealtimeRecording}
+			{#if fileUrl}
+				<WidgetAudioTrack classNames="mt-3" label={filename} src={fileUrl} />
+			{/if}
+			<WidgetSubmitBtn
+				classNames="mt-2"
+				isDisabled={isRecording || isDisabled}
+				{isLoading}
+				onClick={() => {
+					getOutput();
+				}}
+			/>
+			{#if warning}
+				<div class="alert alert-warning mt-2">{warning}</div>
+			{/if}
+		{/if}
+	</form>
+	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
+
+	<WidgetOutputText classNames="mt-4" {output} />
+
+	<WidgetFooter {isDisabled} {outputJson} />
 </WidgetWrapper>

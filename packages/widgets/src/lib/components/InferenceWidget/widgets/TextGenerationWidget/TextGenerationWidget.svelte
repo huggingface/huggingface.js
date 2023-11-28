@@ -196,65 +196,61 @@
 </script>
 
 <WidgetWrapper
-	{callApiOnMount}
 	{apiUrl}
 	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
 	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	{validateExample}
-	exampleQueryParams={["text"]}
+	let:isDisabled
+	let:modelLoadInfo
+	let:WidgetInfo
+	let:WidgetHeader
+	let:WidgetFooter
 >
-	<svelte:fragment slot="top" let:isDisabled>
-		<form class="space-y-2">
-			<WidgetTextarea
-				bind:value={text}
-				bind:setValue={setTextAreaValue}
+	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyInputSample} {validateExample} />
+	<form class="space-y-2">
+		<WidgetTextarea
+			bind:value={text}
+			bind:setValue={setTextAreaValue}
+			{isLoading}
+			{isDisabled}
+			size="big"
+			bind:renderTypingEffect
+		/>
+		{#if model.id === "bigscience/bloom"}
+			<WidgetBloomDecoding bind:decodingStrategy />
+		{/if}
+		<div class="flex items-center gap-x-2 {isBloomLoginRequired ? 'pointer-events-none opacity-50' : ''}">
+			<WidgetSubmitBtn
 				{isLoading}
 				{isDisabled}
-				size="big"
-				bind:renderTypingEffect
+				onClick={() => {
+					getOutput({ useCache });
+				}}
 			/>
-			{#if model.id === "bigscience/bloom"}
-				<WidgetBloomDecoding bind:decodingStrategy />
-			{/if}
-			<div class="flex items-center gap-x-2 {isBloomLoginRequired ? 'pointer-events-none opacity-50' : ''}">
-				<WidgetSubmitBtn
-					{isLoading}
-					{isDisabled}
-					onClick={() => {
-						getOutput({ useCache });
-					}}
-				/>
-				<WidgetShortcutRunLabel {isLoading} {isDisabled} />
-				<div class="ml-auto self-start">
-					<WidgetTimer bind:this={inferenceTimer} {isDisabled} />
-				</div>
+			<WidgetShortcutRunLabel {isLoading} {isDisabled} />
+			<div class="ml-auto self-start">
+				<WidgetTimer bind:this={inferenceTimer} {isDisabled} />
 			</div>
-			{#if warning}
-				<div class="alert alert-warning mt-2">{warning}</div>
-			{/if}
-			{#if isBloomLoginRequired}
-				<div class="alert alert-warning mt-2">
-					<!-- svelte-ignore a11y-click-events-have-key-events -->
-					Please
-					<span class="cursor-pointer underline" on:click={redirectLogin}>login</span>
-					or
-					<!-- svelte-ignore a11y-click-events-have-key-events -->
-					<span class="cursor-pointer underline" on:click={redirectJoin}>register</span> to try BLOOM 🌸
-				</div>
-			{/if}
-		</form>
-	</svelte:fragment>
-	<svelte:fragment slot="bottom">
-		{#if model?.pipeline_tag !== "text-generation"}
-			<!-- for pipelines: text2text-generation & translation -->
-			<WidgetOutputText classNames="mt-4" {output} />
+		</div>
+		{#if warning}
+			<div class="alert alert-warning mt-2">{warning}</div>
 		{/if}
-	</svelte:fragment>
+		{#if isBloomLoginRequired}
+			<div class="alert alert-warning mt-2">
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				Please
+				<span class="cursor-pointer underline" on:click={redirectLogin}>login</span>
+				or
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				<span class="cursor-pointer underline" on:click={redirectJoin}>register</span> to try BLOOM 🌸
+			</div>
+		{/if}
+	</form>
+	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
+
+	{#if model?.pipeline_tag !== "text-generation"}
+		<!-- for pipelines: text2text-generation & translation -->
+		<WidgetOutputText classNames="mt-4" {output} />
+	{/if}
+
+	<WidgetFooter {isDisabled} {outputJson} />
 </WidgetWrapper>

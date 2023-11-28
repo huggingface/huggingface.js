@@ -1,6 +1,6 @@
 import type { ModelData, WidgetExample, WidgetExampleAttribute } from "@huggingface/tasks";
 import { randomItem, parseJSON } from "../../../utils/ViewUtils.js";
-import type { ModelLoadInfo, TableData } from "./types.js";
+import type { ExampleRunOpts, ModelLoadInfo, TableData } from "./types.js";
 import { LoadState } from "./types.js";
 
 const KEYS_TEXT: WidgetExampleAttribute[] = ["text", "context", "candidate_labels"];
@@ -25,7 +25,7 @@ export function getWidgetExample<TWidgetExample extends WidgetExample>(
 	model: ModelData,
 	validateExample: (sample: WidgetExample) => sample is TWidgetExample
 ): TWidgetExample | undefined {
-	const validExamples = model.widgetData?.filter(
+	const validExamples = model?.widgetData?.filter(
 		(sample): sample is TWidgetExample => sample && validateExample(sample)
 	);
 	return validExamples?.length ? randomItem(validExamples) : undefined;
@@ -63,6 +63,10 @@ export async function getBlobFromUrl(url: string): Promise<Blob> {
 	const blob = await res.blob();
 	return blob;
 }
+
+export type ApplyExampleFunc = (sample: WidgetExample, opts?: ExampleRunOpts) => Promise<void>;
+
+export type ValidateExampleFunc = (sample: WidgetExample) => sample is WidgetExample;
 
 interface Success<T> {
 	computeTime: string;

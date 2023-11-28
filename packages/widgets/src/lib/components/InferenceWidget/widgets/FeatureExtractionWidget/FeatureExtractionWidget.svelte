@@ -122,75 +122,79 @@
 </script>
 
 <WidgetWrapper
-	{callApiOnMount}
 	{apiUrl}
 	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
 	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	validateExample={isTextInput}
-	exampleQueryParams={["text"]}
+	let:isDisabled
+	let:modelLoadInfo
+	let:WidgetInfo
+	let:WidgetHeader
+	let:WidgetFooter
 >
-	<svelte:fragment slot="top" let:isDisabled>
-		<form>
-			<WidgetQuickInput
-				bind:value={text}
-				{isLoading}
-				{isDisabled}
-				onClickSubmitBtn={() => {
-					getOutput();
-				}}
-			/>
-		</form>
-	</svelte:fragment>
-	<svelte:fragment slot="bottom">
-		{#if output}
-			{#if output.isArrLevel0}
-				<div class="mt-3 h-96 overflow-auto">
-					<table class="w-full table-auto border text-right font-mono text-xs">
-						{#each range(numOfRows(output.oneDim.length)) as i}
-							<tr>
-								{#each range(SINGLE_DIM_COLS) as j}
-									{#if j * numOfRows(output.oneDim.length) + i < output.oneDim.length}
-										<td class="bg-gray-100 px-1 text-gray-400 dark:bg-gray-900">
-											{j * numOfRows(output.oneDim.length) + i}
-										</td>
-										<td class="px-1 py-0.5 {output.bg(output.oneDim[j * numOfRows(output.oneDim.length) + i])}">
-											{output.oneDim[j * numOfRows(output.oneDim.length) + i].toFixed(3)}
-										</td>
-									{/if}
-								{/each}
-							</tr>
-						{/each}
-					</table>
-				</div>
-			{:else}
-				<div class="mt-3 overflow-auto">
-					<table class="border text-right font-mono text-xs">
+	<WidgetHeader
+		{noTitle}
+		{model}
+		{isLoading}
+		{isDisabled}
+		{callApiOnMount}
+		{applyInputSample}
+		validateExample={isTextInput}
+	/>
+	<form>
+		<WidgetQuickInput
+			bind:value={text}
+			{isLoading}
+			{isDisabled}
+			onClickSubmitBtn={() => {
+				getOutput();
+			}}
+		/>
+	</form>
+	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
+
+	{#if output}
+		{#if output.isArrLevel0}
+			<div class="mt-3 h-96 overflow-auto">
+				<table class="w-full table-auto border text-right font-mono text-xs">
+					{#each range(numOfRows(output.oneDim.length)) as i}
 						<tr>
-							<td class="bg-gray-100 dark:bg-gray-900" />
-							{#each range(output.twoDim[0].length) as j}
-								<td class="bg-gray-100 px-1 pt-1 text-gray-400 dark:bg-gray-900">{j}</td>
+							{#each range(SINGLE_DIM_COLS) as j}
+								{#if j * numOfRows(output.oneDim.length) + i < output.oneDim.length}
+									<td class="bg-gray-100 px-1 text-gray-400 dark:bg-gray-900">
+										{j * numOfRows(output.oneDim.length) + i}
+									</td>
+									<td class="px-1 py-0.5 {output.bg(output.oneDim[j * numOfRows(output.oneDim.length) + i])}">
+										{output.oneDim[j * numOfRows(output.oneDim.length) + i].toFixed(3)}
+									</td>
+								{/if}
 							{/each}
 						</tr>
-						{#each output.twoDim as column, i}
-							<tr>
-								<td class="bg-gray-100 pl-4 pr-1 text-gray-400 dark:bg-gray-900">{i}</td>
-								{#each column as x}
-									<td class="px-1 py-1 {output.bg(x)}">
-										{x.toFixed(3)}
-									</td>
-								{/each}
-							</tr>
+					{/each}
+				</table>
+			</div>
+		{:else}
+			<div class="mt-3 overflow-auto">
+				<table class="border text-right font-mono text-xs">
+					<tr>
+						<td class="bg-gray-100 dark:bg-gray-900" />
+						{#each range(output.twoDim[0].length) as j}
+							<td class="bg-gray-100 px-1 pt-1 text-gray-400 dark:bg-gray-900">{j}</td>
 						{/each}
-					</table>
-				</div>
-			{/if}
+					</tr>
+					{#each output.twoDim as column, i}
+						<tr>
+							<td class="bg-gray-100 pl-4 pr-1 text-gray-400 dark:bg-gray-900">{i}</td>
+							{#each column as x}
+								<td class="px-1 py-1 {output.bg(x)}">
+									{x.toFixed(3)}
+								</td>
+							{/each}
+						</tr>
+					{/each}
+				</table>
+			</div>
 		{/if}
-	</svelte:fragment>
+	{/if}
+
+	<WidgetFooter {isDisabled} {outputJson} />
 </WidgetWrapper>
