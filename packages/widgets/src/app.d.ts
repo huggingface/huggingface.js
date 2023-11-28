@@ -7,6 +7,16 @@ declare global {
 		// interface PageData {}
 		// interface Platform {}
 	}
+
+	export interface Session {
+		access_token?: string;
+	}
+}
+
+declare module "@auth/core/types" {
+	export interface Session {
+		access_token?: string;
+	}
 }
 
 export {};
