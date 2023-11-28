@@ -79,7 +79,7 @@ const inputsTextToAudio = () => `"liquid drum and bass, atmospheric synths, airy
 
 const inputsAutomaticSpeechRecognition = () => `"sample1.flac"`;
 
-const inputsTabularPrediction = () => `'{"Height":[11.52,12.48,12.3778],"Length1":[23.2,24.0,23.9],"Length2":[25.4,26.3,26.5],"Length3": [30.0,31.2,31.1],"Species": ["Bream","Bream","Bream"],"Width":[4.02,4.3056,4.6961]}'`
+const inputsTabularPrediction = () => `'{"Height":[11.52,12.48],"Length1":[23.2,24.0],"Length2":[25.4,26.3],"Species": ["Bream","Bream"]}'`
 
 
 const modelInputSnippets: {
