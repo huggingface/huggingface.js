@@ -38,14 +38,12 @@ jobs:
           git commit . -m "🔖 @huggingface/widgets $BUMPED_VERSION"
           git tag "widgets-v$BUMPED_VERSION"
       - run: |
-
           # Clean up the workspace
           rm -rf ../tasks/node_modules ../tasks/dist
 
           # Calculate checksum of the cleaned package
           echo "Calculating checksum of local @huggingface/tasks package..."
           LOCAL_CHECKSUM=$(cd ../tasks && tar --mtime='1970-01-01' --mode=755 -cf - . | sha256sum | cut -d' ' -f1)
-
           echo "Local package checksum: $LOCAL_CHECKSUM"
 
           # Fetch the latest published version of @huggingface/tasks from npm
@@ -63,15 +61,12 @@ jobs:
             exit 1
           fi
 
-
           # Extract and remove dist and node_modules directories before checksum calculation
           mkdir -p /tmp/tasks
           tar -xf huggingface-tasks-$LATEST_PUBLISHED_VERSION.tgz -C /tmp/tasks
           rm -rf /tmp/tasks/dist /tmp/tasks/node_modules
 
           REMOTE_CHECKSUM=$(cd /tmp/tasks && tar --mtime='1970-01-01' --mode=755 -cf - . | sha256sum | cut -d' ' -f1)
-
-
           echo "Remote package checksum: $REMOTE_CHECKSUM"
 
           if [ "$LOCAL_CHECKSUM" != "$REMOTE_CHECKSUM" ]; then
