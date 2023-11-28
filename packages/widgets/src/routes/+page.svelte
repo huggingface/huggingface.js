@@ -14,6 +14,10 @@
 		window.localStorage.setItem("hf_token", apiToken);
 	}
 
+	/**
+	 * If we are in an iframe, we need to open the auth page in a new tab
+	 * to avoid issues with third-party cookies in a space
+	 */
 	const isIframe = browser && window.self !== window.parent;
 
 	onMount(() => {
