@@ -31,10 +31,10 @@ const inputsTableQuestionAnswering = () =>
 		}
 	}`;
 
-const inputsDocumentQuestionAnswering = () =>
+const inputsVisualQuestionAnswering = () =>
 	`{
-		"image": "document-question-answering-input.png",
-		"question": "What is the idea behind the consumer relations efficiency team?"
+		"image": "cat.png",
+		"question": "What is in this image?"
 	}`;
 
 const inputsQuestionAnswering = () =>

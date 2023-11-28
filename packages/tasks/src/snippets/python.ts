@@ -75,10 +75,7 @@ export const snippetDocumentQuestionAnswering = (model: ModelData): string =>
 	`def query(payload):
  	with open(payload["image"], "rb") as f:
   		img = f.read()
-	payload={
- 		"question": payload["question"],
-   		"image": base64.b64encode(img).decode("utf-8")
-	}
+		payload["image"] = base64.b64encode(img).decode("utf-8")  
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.json()
 
