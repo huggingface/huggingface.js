@@ -79,8 +79,8 @@ const inputsTextToAudio = () => `"liquid drum and bass, atmospheric synths, airy
 
 const inputsAutomaticSpeechRecognition = () => `"sample1.flac"`;
 
-const inputsTabularPrediction = () => `'{"Height":[11.52,12.48],"Length1":[23.2,24.0],"Length2":[25.4,26.3],"Species": ["Bream","Bream"]}'`
-
+const inputsTabularPrediction = () =>
+	`'{"Height":[11.52,12.48],"Length1":[23.2,24.0],"Length2":[25.4,26.3],"Species": ["Bream","Bream"]}'`;
 
 const modelInputSnippets: {
 	[key in PipelineType]?: (model: ModelData) => string;
