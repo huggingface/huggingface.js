@@ -24,7 +24,7 @@ export const snippetZeroShotImageClassification = (model: ModelData): string =>
 	return response.json()
 
 output = query({
-    "inputs": ${getModelInputSnippet(model)},
+    "image_path": ${getModelInputSnippet(model)},
     "parameters": {"candidate_labels": ["cat", "dog", "llama"]},
 })`;
 
