@@ -85,6 +85,8 @@ export type Task =
 	| "document-question-answering"
 	| "zero-shot-image-classification"
 	| "graph-ml"
+	| "text-to-3d"
+	| "image-to-3d"
 	| "other";
 
 export interface SpaceRuntime {
