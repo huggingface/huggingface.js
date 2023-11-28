@@ -1,11 +1,11 @@
 <script lang="ts">
 	import type { ModelData } from "@huggingface/tasks";
 	import { InferenceDisplayability } from "@huggingface/tasks";
-	import { signIn } from "@auth/sveltekit/client";
 
 	import InferenceWidget from "$lib/components/InferenceWidget/InferenceWidget.svelte";
 	import ModeSwitcher from "$lib/components/DemoThemeSwitcher/DemoThemeSwitcher.svelte";
 	import { onMount } from "svelte";
+	import { browser } from "$app/environment";
 
 	export let data;
 	let apiToken = data.access_token || "";
@@ -13,6 +13,8 @@
 	function storeHFToken() {
 		window.localStorage.setItem("hf_token", apiToken);
 	}
+
+	const isIframe = browser && window.self !== window.parent;
 
 	onMount(() => {
 		if (!data.supportsOAuth) {
@@ -532,13 +534,15 @@
 
 	{#if data.supportsOAuth}
 		{#if !data.access_token}
-			<button on:click={() => signIn("huggingface")}>
-				<img
-					src="https://huggingface.co/datasets/huggingface/badges/resolve/main/sign-in-with-huggingface-xl-dark.svg"
-					alt="Sign in with Hugging Face"
-					class="h-12 w-auto"
-				/>
-			</button>
+			<form class="contents" method="post" action="/auth/signin/huggingface" target={isIframe ? "_blank" : ""}>
+				<button type="submit" title="Sign in with Hugging Face">
+					<img
+						src="https://huggingface.co/datasets/huggingface/badges/resolve/main/sign-in-with-huggingface-xl-dark.svg"
+						alt="Sign in with Hugging Face"
+						class="h-12 w-auto"
+					/>
+				</button>
+			</form>
 		{/if}
 	{:else}
 		<label>

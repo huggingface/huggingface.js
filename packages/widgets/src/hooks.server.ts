@@ -1,4 +1,5 @@
 import { env } from "$env/dynamic/private";
+import { skipCSRFCheck } from "@auth/core";
 import { SvelteKitAuth } from "@auth/sveltekit";
 import type { Handle } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
@@ -8,6 +9,10 @@ const handleSSO =
 		? SvelteKitAuth({
 				// Should be fine as long as your reverse proxy is configured to only accept traffic with the correct host header
 				trustHost: true,
+				/**
+				 * SvelteKit has built-in CSRF protection, so we can skip the check
+				 */
+				skipCSRFCheck: skipCSRFCheck,
 				providers: [
 					{
 						name: "Hugging Face",
