@@ -17,11 +17,15 @@ const handleSSO =
 						clientSecret: env.OAUTH_CLIENT_SECRET,
 						issuer: "https://huggingface.co",
 						wellKnown: "https://huggingface.co/.well-known/openid-configuration",
+						/** Add "inference-api" scope and remove "email" scope */
 						authorization: { params: { scope: "openid profile inference-api" } },
 						checks: ["state" as never, "pkce" as never],
 					},
 				],
 				secret: env.OAUTH_CLIENT_SECRET,
+				/**
+				 * Get the access_token without an account in DB, to make calls to the inference API
+				 */
 				callbacks: {
 					async jwt({ token, account }) {
 						if (account) {
