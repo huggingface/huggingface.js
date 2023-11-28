@@ -150,6 +150,6 @@
 			<WidgetModelLoading estimatedTime={modelLoading.estimatedTime} />
 		{/if}
 		<slot name="bottom" />
-		<WidgetFooter {onClickMaximizeBtn} {outputJson} {isDisabled} />
+		<WidgetFooter {onClickMaximizeBtn} {isMaximized} {outputJson} {isDisabled} />
 	</div>
 {/if}
