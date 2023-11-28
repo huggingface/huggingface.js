@@ -17,9 +17,11 @@ for (const filename of testFilesToPreload) {
 }
 
 export default defineConfig({
+	test: {
+		setupFiles: ["./test/expect-closeto.ts"],
+	},
+	envPrefix: ["HF_", "VCR_"],
 	define: {
 		__TEST_FILES__: JSON.stringify(testFilesContents),
-		// make sure browser receives env vars
-		"process.env": JSON.stringify(process.env || {}),
 	},
 });
