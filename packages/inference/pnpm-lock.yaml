@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 devDependencies:
+  '@huggingface/tasks':
+    specifier: workspace:^
+    version: link:../tasks
   '@types/node':
     specifier: 18.13.0
     version: 18.13.0
