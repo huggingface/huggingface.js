@@ -45,7 +45,7 @@ export type AccessTokenRole = "admin" | "write" | "contributor" | "read";
 
 export type AuthType = "access_token" | "app_token" | "app_token_as_user";
 
-export type Task = PipelineType;
+export type { PipelineType };
 
 export interface SpaceRuntime {
 	stage: SpaceStage;
