@@ -116,7 +116,6 @@ export const pythonSnippets: Partial<Record<PipelineType, (model: ModelData) => 
 	"audio-to-audio": snippetFile,
 	"audio-classification": snippetFile,
 	"image-classification": snippetFile,
-	"image-to-text": snippetFile,
 	"tabular-regression": snippetTabular,
 	"tabular-classification": snippetTabular,
 	"object-detection": snippetFile,
