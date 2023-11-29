@@ -11,6 +11,13 @@ export interface AddCollectionItemPayload {
 	note?: string;
 	exists_ok: boolean;
 }
+export interface UpdateCollectionPayload {
+	title?: string;
+	description?: string;
+	position?: number;
+	private?: boolean;
+	theme?: string;
+}
 export interface CreateCollectionPayload {
 	title: string;
 	namespace: string;
