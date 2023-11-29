@@ -13,6 +13,18 @@ const handleSSO =
 				 * SvelteKit has built-in CSRF protection, so we can skip the check
 				 */
 				skipCSRFCheck: skipCSRFCheck,
+				cookies: {
+					sessionToken: {
+						name: "session_token",
+						options: {
+							httpOnly: true,
+							sameSite: "lax",
+							secure: true,
+							path: "/",
+							maxAge: 3600, // The OAuth token's lifetime is 3600 seconds
+						},
+					},
+				},
 				providers: [
 					{
 						name: "Hugging Face",
@@ -32,19 +44,24 @@ const handleSSO =
 				 * Get the access_token without an account in DB, to make calls to the inference API
 				 */
 				callbacks: {
-					async jwt({ token, account }) {
-						if (account) {
-							return {
-								...token,
-								access_token: account.access_token,
-							};
-						}
-						return token;
+					jwt({ token, account, profile }) {
+						return {
+							...token,
+							/**
+							 * account & profile are undefined beyond the first login, in those
+							 * cases `token.access_token` and `token.username` are defined
+							 */
+							...(account && { access_token: account.access_token }),
+							...(profile && { username: profile.preferred_username }),
+						};
 					},
-					async session({ session, token }) {
+					session({ session, token }) {
 						return {
 							...session,
 							access_token: token.access_token,
+							user: Object.assign({}, session.user, {
+								username: token.username,
+							}),
 						};
 					},
 				},
