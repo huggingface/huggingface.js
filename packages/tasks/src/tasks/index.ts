@@ -94,6 +94,8 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	"zero-shot-classification": ["transformers", "transformers.js"],
 	"zero-shot-image-classification": ["transformers", "transformers.js"],
 	"zero-shot-object-detection": ["transformers", "transformers.js"],
+	"text-to-3d": [],
+	"image-to-3d": [],
 };
 
 /**
@@ -161,6 +163,8 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"zero-shot-classification": getData("zero-shot-classification", zeroShotClassification),
 	"zero-shot-image-classification": getData("zero-shot-image-classification", zeroShotImageClassification),
 	"zero-shot-object-detection": getData("zero-shot-object-detection", placeholder),
+	"text-to-3d": getData("text-to-3d", placeholder),
+	"image-to-3d": getData("image-to-3d", placeholder),
 } as const;
 
 export interface ExampleRepo {
