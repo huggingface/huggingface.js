@@ -38,6 +38,8 @@
 		"svelte": "^3.59.2"
 	},
 	"devDependencies": {
+		"@auth/core": "^0.18.3",
+		"@auth/sveltekit": "^0.3.14",
 		"@fontsource/ibm-plex-mono": "^5.0.8",
 		"@fontsource/source-sans-pro": "^5.0.8",
 		"@sveltejs/adapter-node": "^1.3.1",
