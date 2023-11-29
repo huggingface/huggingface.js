@@ -3,10 +3,11 @@ import { createApiError } from "../error";
 import type { Collection, CreateCollectionPayload } from "../types/api/api-collection";
 import type { Credentials } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
+// import type { WhoAmI } from "./who-am-i";
 
 export async function createCollection(params: {
 	title: string;
-	namespace?: string;
+	namespace: string;
 	description?: string;
 	private: boolean;
 	exists_ok: boolean;
@@ -18,10 +19,7 @@ export async function createCollection(params: {
 	fetch?: typeof fetch;
 }): Promise<Collection> {
 	checkCredentials(params.credentials);
-	/*// const userInfo = await whoAmI({
-		credentials: { accessToken: params.credentials?.accessToken ?? TEST_ACCESS_TOKEN },
-		hubUrl: params.hubUrl ?? HUB_URL,
-	});*/
+
 	if (params.namespace == null) {
 		// params.namespace = userInfo.name;
 	}
@@ -40,13 +38,11 @@ export async function createCollection(params: {
 			"Content-Type": "application/json",
 		},
 	});
-	console.log(res.status);
 	if (!res.ok) {
 		throw await createApiError(res);
 	}
 
 	const collection = await res.json();
-	console.log(collection);
 	return collection;
 }
 

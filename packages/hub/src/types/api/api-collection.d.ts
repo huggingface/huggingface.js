@@ -2,10 +2,18 @@ import type { ApiWhoAmIAuthInfo } from "./api-who-am-i";
 import type { ApiSpaceInfo } from "../types/api/api-space";
 import type { ApiDatasetInfo } from "../types/api/api-dataset";
 import type { ApiModelInfo } from "../types/api/api-model";
+// import type { WhoAmIOrg, WhoAmIUser } from "./who-am-i";
+// import type { WhoAmI } from "../../lib";
 
+export type CollectionItemType = "space" | "dataset" | "model" | "paper";
+export interface AddCollectionItemPayload {
+	item: { id: string; type: CollectionItemType };
+	note?: string;
+	exists_ok: boolean;
+}
 export interface CreateCollectionPayload {
 	title: string;
-	namespace?: string;
+	namespace: string;
 	private: boolean;
 	description?: string;
 	exists_ok: boolean;
