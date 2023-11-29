@@ -8,7 +8,7 @@
 	import { browser } from "$app/environment";
 
 	export let data;
-	let apiToken = data.access_token || "";
+	let apiToken = data.session?.access_token || "";
 
 	function storeHFToken() {
 		window.localStorage.setItem("hf_token", apiToken);
@@ -537,7 +537,7 @@
 	<ModeSwitcher />
 
 	{#if data.supportsOAuth}
-		{#if !data.access_token}
+		{#if !data.session}
 			<form class="contents" method="post" action="/auth/signin/huggingface" target={isIframe ? "_blank" : ""}>
 				<button type="submit" title="Sign in with Hugging Face">
 					<img
@@ -547,6 +547,14 @@
 					/>
 				</button>
 			</form>
+		{:else}
+			<div class="flex items-center gap-2">
+				logged in as {data.session.user?.username}
+				<img src={data.session?.user?.image} alt="" class="w-6 h-6 rounded-full" />
+				<form method="post" action="/auth/signout">
+					<button type="submit" class="underline">Sign out</button>
+				</form>
+			</div>
 		{/if}
 	{:else}
 		<label>

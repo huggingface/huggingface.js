@@ -19,7 +19,7 @@ pnpm install
 pnpm dev
 ```
 
-If you want to try the "Sign-in with HF" feature locally, you will need to https://huggingface.co/settings/applications/new an OAuth application with `"openid"` and `"inference-api"` scopes and `http://localhost:5173/auth/callback/huggingface` as the redirect URL.
+If you want to try the "Sign-in with HF" feature locally, you will need to https://huggingface.co/settings/applications/new an OAuth application with `"openid"`, `"profile"` and `"inference-api"` scopes and `http://localhost:5173/auth/callback/huggingface` as the redirect URL.
 
 Then you can create a `.env.local` file with the following content:
 

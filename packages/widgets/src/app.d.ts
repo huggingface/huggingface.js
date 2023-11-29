@@ -17,6 +17,10 @@ declare module "@auth/core/types" {
 	export interface Session {
 		access_token?: string;
 	}
+
+	export interface User {
+		username: string;
+	}
 }
 
 export {};
