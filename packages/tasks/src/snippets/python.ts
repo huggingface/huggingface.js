@@ -94,6 +94,19 @@ from IPython.display import Audio
 Audio(audio, rate=sampling_rate)`;
 	}
 };
+
+export const snippetDocumentQuestionAnswering = (model: ModelData): string =>
+	`def query(payload):
+ 	with open(payload["image"], "rb") as f:
+  		img = f.read()
+		payload["image"] = base64.b64encode(img).decode("utf-8")  
+	response = requests.post(API_URL, headers=headers, json=payload)
+	return response.json()
+
+output = query({
+    "inputs": ${getModelInputSnippet(model)},
+})`;
+
 export const pythonSnippets: Partial<Record<PipelineType, (model: ModelData) => string>> = {
 	// Same order as in tasks/src/pipelines.ts
 	"text-classification": snippetBasic,
@@ -120,6 +133,7 @@ export const pythonSnippets: Partial<Record<PipelineType, (model: ModelData) => 
 	"tabular-classification": snippetTabular,
 	"object-detection": snippetFile,
 	"image-segmentation": snippetFile,
+	"document-question-answering": snippetDocumentQuestionAnswering,
 	"image-to-text": snippetFile,
 	"zero-shot-image-classification": snippetZeroShotImageClassification,
 };

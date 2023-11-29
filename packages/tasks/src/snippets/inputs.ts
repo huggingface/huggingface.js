@@ -31,6 +31,12 @@ const inputsTableQuestionAnswering = () =>
 		}
 	}`;
 
+const inputsVisualQuestionAnswering = () =>
+	`{
+		"image": "cat.png",
+		"question": "What is in this image?"
+	}`;
+
 const inputsQuestionAnswering = () =>
 	`{
 		"question": "What is my name?",
@@ -91,6 +97,7 @@ const modelInputSnippets: {
 	"audio-classification": inputsAudioClassification,
 	"automatic-speech-recognition": inputsAutomaticSpeechRecognition,
 	conversational: inputsConversational,
+	"document-question-answering": inputsVisualQuestionAnswering,
 	"feature-extraction": inputsFeatureExtraction,
 	"fill-mask": inputsFillMask,
 	"image-classification": inputsImageClassification,
