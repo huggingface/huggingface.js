@@ -38,7 +38,7 @@
 		"import": "./dist/index.mjs"
 	},
 	"scripts": {
-		"build": "tsup src/index.ts --format cjs,esm --clean --dts && pnpm run dts",
+		"build": "tsup src/index.ts --format cjs,esm --clean && pnpm run dts",
 		"dts": "ts-node scripts/generate-dts.ts",
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
