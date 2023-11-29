@@ -32,6 +32,16 @@ The most popular models for this task are GPT-based models, [Mistral](mistralai/
 
 These models are trained to learn the mapping between a pair of texts (e.g. translation from one language to another). The most popular variants of these models are [NLLB](facebook/nllb-200-distilled-600M), [FLAN-T5](https://huggingface.co/google/flan-t5-xxl), and [BART](https://huggingface.co/docs/transformers/model_doc/bart). Text-to-Text models are trained with multi-tasking capabilities, they can accomplish a wide range of tasks, including summarization, translation, and text classification.
 
+## Language Model Variants
+
+When it comes to text generation, the underlying language model can come in several types:
+
+- **Base models:** refers to plain language models like [Mistral 7B](mistralai/Mistral-7B-v0.1) and [Llama-2-70b](https://huggingface.co/meta-llama/Llama-2-70b-hf). These models are good for fine-tuning and few-shot prompting.
+
+- **Instruction-trained models:** these models are trained in a multi-task manner to follow a broad range of instructions like "Write me a recipe for chocolate cake". Models like [Flan-T5](https://huggingface.co/google/flan-t5-xl), [Mistral-7B-Instruct-v0.1](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.1), and [falcon-40b-instruct](https://huggingface.co/tiiuae/falcon-40b-instruct) are examples of instruction-trained models. In general, instruction-trained models will produce better responses to instructions than base models.
+
+- **Human feedback models:** these models extend base and instruction-trained models by incorporating human feedback that rates the quality of the generated text according to criteria like [helpfulness, honesty, and harmlessness](https://arxiv.org/abs/2112.00861). The human feedback is then combined with an optimization technique like reinforcement learning to align the original model to be closer with human preferences. The overall methodology is often called [Reinforcement Learning from Human Feedback](https://huggingface.co/blog/rlhf), or RLHF for short. [Llama2-Chat](https://huggingface.co/meta-llama/Llama-2-7b-chat-hf) is an open-source model aligned through human feedback.
+
 ## Inference
 
 You can use the 🤗 Transformers library `text-generation` pipeline to do inference with Text Generation models. It takes an incomplete text and returns multiple outputs with which the text can be completed.

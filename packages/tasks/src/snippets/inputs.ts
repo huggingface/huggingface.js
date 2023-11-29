@@ -82,6 +82,8 @@ const inputsAutomaticSpeechRecognition = () => `"sample1.flac"`;
 const inputsTabularPrediction = () =>
 	`'{"Height":[11.52,12.48],"Length1":[23.2,24.0],"Length2":[25.4,26.3],"Species": ["Bream","Bream"]}'`;
 
+const inputsZeroShotImageClassification = () => `"cats.jpg"`;
+
 const modelInputSnippets: {
 	[key in PipelineType]?: (model: ModelData) => string;
 } = {
@@ -110,6 +112,7 @@ const modelInputSnippets: {
 	"token-classification": inputsTokenClassification,
 	translation: inputsTranslation,
 	"zero-shot-classification": inputsZeroShotClassification,
+	"zero-shot-image-classification": inputsZeroShotImageClassification,
 };
 
 // Use noWrap to put the whole snippet on a single line (removing new lines and tabulations)

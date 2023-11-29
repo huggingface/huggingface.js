@@ -19,14 +19,15 @@ let VCR_MODE: MODE;
  *
  * If VCR_MODE is not set and a token is present then disable it.
  */
-if (process.env.VCR_MODE) {
-	if ((process.env.VCR_MODE === MODE.RECORD || process.env.VCR_MODE === MODE.CACHE) && isFrontend) {
+const env = import.meta.env;
+if (env.VCR_MODE) {
+	if ((env.VCR_MODE === MODE.RECORD || env.VCR_MODE === MODE.CACHE) && isFrontend) {
 		throw new Error("VCR_MODE=record is not supported in the browser");
 	}
 
-	VCR_MODE = process.env.VCR_MODE as MODE;
+	VCR_MODE = env.VCR_MODE as MODE;
 } else {
-	VCR_MODE = process.env.HF_ACCESS_TOKEN ? MODE.DISABLED : MODE.PLAYBACK;
+	VCR_MODE = env.HF_ACCESS_TOKEN ? MODE.DISABLED : MODE.PLAYBACK;
 }
 
 const originalFetch = globalThis.fetch;

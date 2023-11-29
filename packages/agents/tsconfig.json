@@ -2,7 +2,7 @@
 	"compilerOptions": {
 		"allowSyntheticDefaultImports": true,
 		"lib": ["ES2022", "DOM"],
-		"module": "CommonJS",
+		"module": "ESNext",
 		"moduleResolution": "node",
 		"target": "ES2022",
 		"forceConsistentCasingInFileNames": true,
@@ -14,6 +14,6 @@
 		"outDir": "./dist",
 		"declaration": true
 	},
-	"include": ["src", "index.ts", "../shared/src"],
+	"include": ["src", "test", "index.ts", "../shared/src"],
 	"exclude": ["dist"]
 }

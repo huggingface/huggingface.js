@@ -5,17 +5,27 @@
 	import InferenceWidget from "$lib/components/InferenceWidget/InferenceWidget.svelte";
 	import ModeSwitcher from "$lib/components/DemoThemeSwitcher/DemoThemeSwitcher.svelte";
 	import { onMount } from "svelte";
+	import { browser } from "$app/environment";
 
-	let apiToken = "";
+	export let data;
+	let apiToken = data.access_token || "";
 
 	function storeHFToken() {
 		window.localStorage.setItem("hf_token", apiToken);
 	}
 
+	/**
+	 * If we are in an iframe, we need to open the auth page in a new tab
+	 * to avoid issues with third-party cookies in a space
+	 */
+	const isIframe = browser && window.self !== window.parent;
+
 	onMount(() => {
-		const token = window.localStorage.getItem("hf_token");
-		if (token) {
-			apiToken = token;
+		if (!data.supportsOAuth) {
+			const token = window.localStorage.getItem("hf_token");
+			if (token) {
+				apiToken = token;
+			}
 		}
 	});
 
@@ -526,10 +536,24 @@
 <div class="flex flex-col gap-6 py-12 px-4">
 	<ModeSwitcher />
 
-	<label>
-		<div class="text-xl font-semibold">First, Enter HF token</div>
-		<input class="form-input" type="text" bind:value={apiToken} placeholder="hf_..." on:change={storeHFToken} />
-	</label>
+	{#if data.supportsOAuth}
+		{#if !data.access_token}
+			<form class="contents" method="post" action="/auth/signin/huggingface" target={isIframe ? "_blank" : ""}>
+				<button type="submit" title="Sign in with Hugging Face">
+					<img
+						src="https://huggingface.co/datasets/huggingface/badges/resolve/main/sign-in-with-huggingface-xl-dark.svg"
+						alt="Sign in with Hugging Face"
+						class="h-12 w-auto"
+					/>
+				</button>
+			</form>
+		{/if}
+	{:else}
+		<label>
+			<div class="text-xl font-semibold">First, Enter HF token</div>
+			<input class="form-input" type="text" bind:value={apiToken} placeholder="hf_..." on:change={storeHFToken} />
+		</label>
+	{/if}
 
 	<div>
 		<h1 class="mb-8 text-4xl font-semibold">Showcase of all types of inference widgets running</h1>
