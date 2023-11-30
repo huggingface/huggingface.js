@@ -60,7 +60,7 @@ export async function documentQuestionAnswering(
 			...options,
 			taskHint: "document-question-answering",
 		})
-	)?.[0];
+	);
 
 	return validateOutput(
 		res,
