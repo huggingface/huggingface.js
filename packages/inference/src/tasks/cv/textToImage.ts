@@ -1,4 +1,4 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { validateOutput, z } from "../../lib/validateOutput";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
@@ -43,9 +43,5 @@ export async function textToImage(args: TextToImageArgs, options?: Options): Pro
 		...options,
 		taskHint: "text-to-image",
 	});
-	const isValidOutput = res && res instanceof Blob;
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Blob");
-	}
-	return res;
+	return validateOutput(res, z.blob());
 }

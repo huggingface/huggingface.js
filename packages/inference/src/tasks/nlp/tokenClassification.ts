@@ -1,4 +1,4 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { validateOutput, z } from "../../lib/validateOutput";
 import type { BaseArgs, Options } from "../../types";
 import { toArray } from "../../utils/toArray";
 import { request } from "../custom/request";
@@ -64,20 +64,10 @@ export async function tokenClassification(
 			taskHint: "token-classification",
 		})
 	);
-	const isValidOutput =
-		Array.isArray(res) &&
-		res.every(
-			(x) =>
-				typeof x.end === "number" &&
-				typeof x.entity_group === "string" &&
-				typeof x.score === "number" &&
-				typeof x.start === "number" &&
-				typeof x.word === "string"
-		);
-	if (!isValidOutput) {
-		throw new InferenceOutputError(
-			"Expected Array<{end: number, entity_group: string, score: number, start: number, word: string}>"
-		);
-	}
-	return res;
+	return validateOutput(
+		res,
+		z.array(
+			z.object({ end: z.number(), entity_group: z.string(), score: z.number(), start: z.number(), word: z.string() })
+		)
+	);
 }

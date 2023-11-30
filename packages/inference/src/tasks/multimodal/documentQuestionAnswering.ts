@@ -1,9 +1,9 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 import type { RequestArgs } from "../../types";
 import { base64FromBytes } from "../../../../shared";
 import { toArray } from "../../utils/toArray";
+import { validateOutput, z } from "../../lib/validateOutput";
 
 export type DocumentQuestionAnsweringArgs = BaseArgs & {
 	inputs: {
@@ -61,13 +61,16 @@ export async function documentQuestionAnswering(
 			taskHint: "document-question-answering",
 		})
 	)?.[0];
-	const isValidOutput =
-		typeof res?.answer === "string" &&
-		(typeof res.end === "number" || typeof res.end === "undefined") &&
-		(typeof res.score === "number" || typeof res.score === "undefined") &&
-		(typeof res.start === "number" || typeof res.start === "undefined");
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<{answer: string, end?: number, score?: number, start?: number}>");
-	}
-	return res;
+
+	return validateOutput(
+		res,
+		z.first(
+			z.object({
+				answer: z.string(),
+				end: z.optional(z.number()),
+				score: z.optional(z.number()),
+				start: z.optional(z.number()),
+			})
+		)
+	);
 }

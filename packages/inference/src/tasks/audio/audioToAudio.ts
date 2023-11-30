@@ -1,4 +1,4 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { validateOutput, z } from "../../lib/validateOutput";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
@@ -37,13 +37,14 @@ export async function audioToAudio(args: AudioToAudioArgs, options?: Options): P
 		...options,
 		taskHint: "audio-to-audio",
 	});
-	const isValidOutput =
-		Array.isArray(res) &&
-		res.every(
-			(x) => typeof x.label === "string" && typeof x.blob === "string" && typeof x["content-type"] === "string"
-		);
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<{label: string, blob: string, content-type: string}>");
-	}
-	return res;
+	return validateOutput(
+		res,
+		z.array(
+			z.object({
+				label: z.string(),
+				blob: z.string(),
+				"content-type": z.string(),
+			})
+		)
+	);
 }

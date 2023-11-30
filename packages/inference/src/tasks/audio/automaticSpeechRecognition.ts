@@ -1,4 +1,4 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { validateOutput, z } from "../../lib/validateOutput";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
@@ -28,9 +28,5 @@ export async function automaticSpeechRecognition(
 		...options,
 		taskHint: "automatic-speech-recognition",
 	});
-	const isValidOutput = typeof res?.text === "string";
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected {text: string}");
-	}
-	return res;
+	return validateOutput(res, z.object({ text: z.string() }));
 }

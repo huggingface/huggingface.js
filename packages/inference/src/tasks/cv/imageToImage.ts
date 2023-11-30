@@ -1,7 +1,7 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options, RequestArgs } from "../../types";
 import { request } from "../custom/request";
 import { base64FromBytes } from "../../../../shared";
+import { validateOutput, z } from "../../lib/validateOutput";
 
 export type ImageToImageArgs = BaseArgs & {
 	/**
@@ -78,9 +78,5 @@ export async function imageToImage(args: ImageToImageArgs, options?: Options): P
 		...options,
 		taskHint: "image-to-image",
 	});
-	const isValidOutput = res && res instanceof Blob;
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Blob");
-	}
-	return res;
+	return validateOutput(res, z.blob());
 }

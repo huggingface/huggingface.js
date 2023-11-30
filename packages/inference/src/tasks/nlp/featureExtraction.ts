@@ -1,5 +1,5 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import { getDefaultTask } from "../../lib/getDefaultTask";
+import { validateOutput, z } from "../../lib/validateOutput";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
@@ -32,21 +32,5 @@ export async function featureExtraction(
 		taskHint: "feature-extraction",
 		...(defaultTask === "sentence-similarity" && { forceTask: "feature-extraction" }),
 	});
-	let isValidOutput = true;
-
-	const isNumArrayRec = (arr: unknown[], maxDepth: number, curDepth = 0): boolean => {
-		if (curDepth > maxDepth) return false;
-		if (arr.every((x) => Array.isArray(x))) {
-			return arr.every((x) => isNumArrayRec(x as unknown[], maxDepth, curDepth + 1));
-		} else {
-			return arr.every((x) => typeof x === "number");
-		}
-	};
-
-	isValidOutput = Array.isArray(res) && isNumArrayRec(res, 3, 0);
-
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<number[][][] | number[][] | number[] | number>");
-	}
-	return res;
+	return validateOutput(res, z.array(z.or(z.number(), z.array(z.number()), z.array(z.array(z.number())))));
 }
