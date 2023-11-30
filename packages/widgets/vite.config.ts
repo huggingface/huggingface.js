@@ -1,5 +1,4 @@
 import type { OutputOptions } from 'rollup';
-import type { UserConfig } from 'vite';
 import { sveltekit } from "@sveltejs/kit/vite";
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import sveltePreprocess from 'svelte-preprocess';
