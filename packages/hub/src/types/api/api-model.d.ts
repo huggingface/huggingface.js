@@ -1,4 +1,4 @@
-import type { Task } from "../public";
+import type { PipelineType } from "../public";
 
 export interface ApiModelInfo {
 	_id: string;
@@ -26,6 +26,6 @@ export interface ApiModelInfo {
 	sha: string;
 	spaces: string[];
 	updatedAt: string; // convert to date
-	pipeline_tag: Task;
+	pipeline_tag: PipelineType;
 	"model-index": unknown;
 }
