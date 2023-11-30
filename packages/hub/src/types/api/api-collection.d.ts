@@ -6,6 +6,11 @@ import type { ApiModelInfo } from "../types/api/api-model";
 // import type { WhoAmI } from "../../lib";
 
 export type CollectionItemType = "space" | "dataset" | "model" | "paper";
+
+export interface UpdateCollectionItemPayload {
+	note?: string;
+	position?: number;
+}
 export interface AddCollectionItemPayload {
 	item: { id: string; type: CollectionItemType };
 	note?: string;
