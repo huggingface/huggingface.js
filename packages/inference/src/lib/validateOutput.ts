@@ -14,12 +14,12 @@ export const z = {
 		return {
 			parse: (value: unknown) => {
 				if (!Array.isArray(value)) {
-					throw new Error("Expected " + this.toString());
+					throw new Error("Expected " + z.array(items).toString());
 				}
 				try {
 					return value.map((val) => items.parse(val));
 				} catch (err) {
-					throw new Error("Expected " + this.toString(), { cause: err });
+					throw new Error("Expected " + z.array(items).toString(), { cause: err });
 				}
 			},
 			toString(): string {
@@ -33,12 +33,12 @@ export const z = {
 		return {
 			parse: (value: unknown) => {
 				if (!Array.isArray(value) || value.length === 0) {
-					throw new Error("Expected " + this.toString());
+					throw new Error("Expected " + z.first(items).toString());
 				}
 				try {
 					return items.parse(value[0]);
 				} catch (err) {
-					throw new Error("Expected " + this.toString(), { cause: err });
+					throw new Error("Expected " + z.first(items).toString(), { cause: err });
 				}
 			},
 			toString(): string {
@@ -58,7 +58,7 @@ export const z = {
 					errors.push(err as Error);
 				}
 			}
-			throw new Error("Expected " + items.map((item) => item.toString()).join(" | "), { cause: errors });
+			throw new Error("Expected " + z.or(...items).toString(), { cause: errors });
 		},
 		toString(): string {
 			return items.map((item) => item.toString()).join(" | ");
@@ -70,16 +70,22 @@ export const z = {
 		return {
 			parse: (value: unknown) => {
 				if (typeof value !== "object" || value === null || Array.isArray(value)) {
-					throw new Error("Expected " + this.toString());
+					throw new Error("Expected " + z.object(item).toString());
 				}
-				return Object.fromEntries(Object.entries(item).map(([key, val]) => [key, val.parse((value as any)[key])])) as {
-					[key in keyof T]: ReturnType<T[key]["parse"]>;
-				};
+				try {
+					return Object.fromEntries(
+						Object.entries(item).map(([key, val]) => [key, val.parse((value as any)[key])])
+					) as {
+						[key in keyof T]: ReturnType<T[key]["parse"]>;
+					};
+				} catch (err) {
+					throw new Error("Expected " + z.object(item).toString(), { cause: err });
+				}
 			},
 			toString(): string {
-				return `{${Object.entries(item)
+				return `{ ${Object.entries(item)
 					.map(([key, val]) => `${key}: ${val.toString()}`)
-					.join(", ")}}`;
+					.join(", ")} }`;
 			},
 		};
 	},
@@ -87,7 +93,7 @@ export const z = {
 		return {
 			parse: (value: unknown): string => {
 				if (typeof value !== "string") {
-					throw new Error("Expected " + this.toString());
+					throw new Error("Expected " + z.string().toString());
 				}
 				return value;
 			},
@@ -100,7 +106,7 @@ export const z = {
 		return {
 			parse: (value: unknown): number => {
 				if (typeof value !== "number") {
-					throw new Error("Expected " + this.toString());
+					throw new Error("Expected " + z.number().toString());
 				}
 				return value;
 			},
@@ -113,7 +119,7 @@ export const z = {
 		return {
 			parse: (value: unknown): Blob => {
 				if (!(value instanceof Blob)) {
-					throw new Error("Expected " + this.toString());
+					throw new Error("Expected " + z.blob().toString());
 				}
 				return value;
 			},
@@ -133,7 +139,7 @@ export const z = {
 				try {
 					return item.parse(value);
 				} catch (err) {
-					throw new Error("Expected " + this.toString(), { cause: err });
+					throw new Error("Expected " + z.optional(item).toString(), { cause: err });
 				}
 			},
 			toString(): string {
