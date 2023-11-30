@@ -96,19 +96,6 @@ export const z = {
 			},
 		};
 	},
-	boolean(): { parse: (value: any) => boolean; toString: () => string } {
-		return {
-			parse: (value: unknown): boolean => {
-				if (typeof value !== "boolean") {
-					throw new Error("Expected " + this.toString());
-				}
-				return value;
-			},
-			toString(): string {
-				return "boolean";
-			},
-		};
-	},
 	number(): { parse: (value: any) => number; toString: () => string } {
 		return {
 			parse: (value: unknown): number => {
