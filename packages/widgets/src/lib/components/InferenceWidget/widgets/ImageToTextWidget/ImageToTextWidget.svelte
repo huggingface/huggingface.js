@@ -92,7 +92,7 @@
 		throw new TypeError("Invalid output: output must be of type Array & non-empty");
 	}
 
-	async function applyInputSample(sample: WidgetExampleAssetInput, opts: ExampleRunOpts = {}) {
+	async function applyWidgetExample(sample: WidgetExampleAssetInput, opts: ExampleRunOpts = {}) {
 		imgSrc = sample.src;
 		if (opts.isPreview) {
 			output = "";
@@ -120,7 +120,7 @@
 		{isLoading}
 		{isDisabled}
 		{callApiOnMount}
-		{applyInputSample}
+		{applyWidgetExample}
 		validateExample={isAssetInput}
 	/>
 	<form>

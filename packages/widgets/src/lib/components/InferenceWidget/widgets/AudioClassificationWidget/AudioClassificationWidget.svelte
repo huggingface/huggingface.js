@@ -130,7 +130,7 @@
 		throw new TypeError("Invalid output: output must be of type Array<label: string, score:number>");
 	}
 
-	function applyInputSample(sample: WidgetExampleAssetInput<WidgetExampleOutputLabels>, opts: ExampleRunOpts = {}) {
+	function applyWidgetExample(sample: WidgetExampleAssetInput<WidgetExampleOutputLabels>, opts: ExampleRunOpts = {}) {
 		filename = sample.example_title!;
 		fileUrl = sample.src;
 
@@ -165,7 +165,7 @@
 	let:WidgetHeader
 	let:WidgetFooter
 >
-	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyInputSample} {validateExample} />
+	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyWidgetExample} {validateExample} />
 	<form>
 		<div class="flex flex-wrap items-center {isDisabled ? 'pointer-events-none hidden opacity-50' : ''}">
 			<WidgetFileInput accept="audio/*" classNames="mt-1.5 mr-2" {onSelectFile} />

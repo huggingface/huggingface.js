@@ -108,7 +108,7 @@
 		throw new TypeError("Invalid output: output must be of type <answer:string; score:number>");
 	}
 
-	function applyInputSample(
+	function applyWidgetExample(
 		sample: WidgetExampleTextAndContextInput<WidgetExampleOutputAnswerScore>,
 		opts: ExampleRunOpts = {}
 	) {
@@ -138,7 +138,7 @@
 	let:WidgetHeader
 	let:WidgetFooter
 >
-	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyInputSample} {validateExample} />
+	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyWidgetExample} {validateExample} />
 	<form class="space-y-2">
 		<WidgetQuickInput
 			bind:value={question}

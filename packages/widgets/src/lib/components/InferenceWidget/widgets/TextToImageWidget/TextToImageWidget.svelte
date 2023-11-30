@@ -98,7 +98,7 @@
 		throw new TypeError("Invalid output: output must be of type object & of instance Blob");
 	}
 
-	function applyInputSample(sample: WidgetExampleTextInput<WidgetExampleOutputUrl>, opts: ExampleRunOpts = {}) {
+	function applyWidgetExample(sample: WidgetExampleTextInput<WidgetExampleOutputUrl>, opts: ExampleRunOpts = {}) {
 		text = sample.text;
 		if (opts.isPreview) {
 			if (sample.output) {
@@ -127,7 +127,7 @@
 	let:WidgetHeader
 	let:WidgetFooter
 >
-	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyInputSample} {validateExample} />
+	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyWidgetExample} {validateExample} />
 	<form>
 		<WidgetQuickInput bind:value={text} {isLoading} {isDisabled} onClickSubmitBtn={() => getOutput()} />
 	</form>

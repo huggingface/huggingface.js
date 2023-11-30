@@ -133,7 +133,7 @@
 		throw new TypeError("Invalid output: output must be of type <text:string>");
 	}
 
-	function applyInputSample(sample: WidgetExampleAssetInput<WidgetExampleOutputText>, opts: ExampleRunOpts = {}) {
+	function applyWidgetExample(sample: WidgetExampleAssetInput<WidgetExampleOutputText>, opts: ExampleRunOpts = {}) {
 		filename = sample.example_title!;
 		fileUrl = sample.src;
 		if (opts.isPreview) {
@@ -171,7 +171,7 @@
 	let:WidgetHeader
 	let:WidgetFooter
 >
-	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyInputSample} {validateExample} />
+	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyWidgetExample} {validateExample} />
 	<form>
 		<div class="flex flex-wrap items-center {isDisabled ? 'pointer-events-none hidden opacity-50' : ''}">
 			{#if !isRealtimeRecording}

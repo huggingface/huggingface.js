@@ -142,7 +142,7 @@
 		);
 	}
 
-	function applyInputSample(sample: WidgetExampleTextAndTableInput, opts: ExampleRunOpts = {}) {
+	function applyWidgetExample(sample: WidgetExampleTextAndTableInput, opts: ExampleRunOpts = {}) {
 		query = sample.text;
 		table = convertDataToTable(sample.table);
 		if (opts.isPreview) {
@@ -169,7 +169,7 @@
 		{isLoading}
 		{isDisabled}
 		{callApiOnMount}
-		{applyInputSample}
+		{applyWidgetExample}
 		validateExample={isTextAndTableInput}
 	/>
 	<form>

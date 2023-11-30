@@ -15,7 +15,7 @@
 	export let model: WidgetProps["model"];
 	export let callApiOnMount: WidgetProps["callApiOnMount"];
 	export let exampleQueryParams: WidgetExampleAttribute[] = [];
-	export let applyInputSample: (sample: TWidgetExample, opts?: ExampleRunOpts) => void;
+	export let applyWidgetExample: (sample: TWidgetExample, opts?: ExampleRunOpts) => void;
 	export let validateExample: (sample: WidgetExample) => sample is TWidgetExample;
 
 	export let examplesAll: TWidgetExample[];
@@ -50,16 +50,16 @@
 		return examplesGroups;
 	}
 
-	function _applyInputSample(idx: number) {
+	function _applyWidgetExample(idx: number) {
 		hideOptions();
 		const sample = examples[idx];
 		title = sample.example_title as string;
-		applyInputSample(sample);
+		applyWidgetExample(sample);
 	}
 
 	function _previewInputSample(idx: number) {
 		const sample = examples[idx];
-		applyInputSample(sample, { isPreview: true });
+		applyWidgetExample(sample, { isPreview: true });
 	}
 
 	function toggleOptionsVisibility() {
@@ -106,12 +106,12 @@
 			}
 			if (Object.keys(exampleFromQueryParams).length) {
 				// run widget example from query params
-				applyInputSample(exampleFromQueryParams);
+				applyWidgetExample(exampleFromQueryParams);
 			} else {
 				// run random widget example
 				const example = getWidgetExample<TWidgetExample>(model, validateExample);
 				if (callApiOnMount && example) {
-					applyInputSample(example, { inferenceOpts: { isOnLoadCall: true } });
+					applyWidgetExample(example, { inferenceOpts: { isOnLoadCall: true } });
 				}
 			}
 		})();
@@ -160,7 +160,7 @@
 							<div
 								class="cursor-pointer truncate px-4 py-2 text-sm hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-gray-200"
 								on:mouseover={() => _previewInputSample(i)}
-								on:click={() => _applyInputSample(i)}
+								on:click={() => _applyWidgetExample(i)}
 							>
 								{example_title}
 							</div>

@@ -69,7 +69,7 @@
 		throw new TypeError("Invalid output: output must be of type <labels:Array; scores:Array>");
 	}
 
-	async function applyInputSample(sample: WidgetExampleAssetAndZeroShotInput, opts: ExampleRunOpts = {}) {
+	async function applyWidgetExample(sample: WidgetExampleAssetAndZeroShotInput, opts: ExampleRunOpts = {}) {
 		candidateLabels = sample.candidate_labels;
 		imgSrc = sample.src;
 		if (opts.isPreview) {
@@ -151,7 +151,7 @@
 		(async () => {
 			const example = getWidgetExample<WidgetExampleAssetAndZeroShotInput>(model, isAssetAndZeroShotInput);
 			if (callApiOnMount && example) {
-				await applyInputSample(example, { inferenceOpts: { isOnLoadCall: true } });
+				await applyWidgetExample(example, { inferenceOpts: { isOnLoadCall: true } });
 			}
 		})();
 	});
@@ -173,7 +173,7 @@
 		{isLoading}
 		{isDisabled}
 		{callApiOnMount}
-		{applyInputSample}
+		{applyWidgetExample}
 		validateExample={isAssetAndZeroShotInput}
 	/>
 	<form class="space-y-2">

@@ -112,7 +112,7 @@
 		throw new TypeError("Invalid output: output must be of type Array");
 	}
 
-	function applyInputSample(sample: WidgetExampleTextInput<WidgetExampleOutputLabels>, opts: ExampleRunOpts = {}) {
+	function applyWidgetExample(sample: WidgetExampleTextInput<WidgetExampleOutputLabels>, opts: ExampleRunOpts = {}) {
 		setTextAreaValue(sample.text);
 		if (opts.isPreview) {
 			if (sample.output) {
@@ -141,7 +141,7 @@
 	let:WidgetHeader
 	let:WidgetFooter
 >
-	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyInputSample} {validateExample} />
+	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyWidgetExample} {validateExample} />
 	<form>
 		{#if model.pipeline_tag === "fill-mask"}
 			<div class="mb-1.5 text-sm text-gray-500">

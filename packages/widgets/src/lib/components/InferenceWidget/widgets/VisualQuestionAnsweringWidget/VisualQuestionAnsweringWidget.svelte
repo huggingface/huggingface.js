@@ -69,7 +69,7 @@
 		throw new TypeError("Invalid output: output must be of type Array<{ answer: string, score?: number }>");
 	}
 
-	async function applyInputSample(sample: WidgetExampleAssetAndTextInput, opts: ExampleRunOpts = {}) {
+	async function applyWidgetExample(sample: WidgetExampleAssetAndTextInput, opts: ExampleRunOpts = {}) {
 		question = sample.text;
 		imgSrc = sample.src;
 		if (opts.isPreview) {
@@ -161,7 +161,7 @@
 		{isLoading}
 		{isDisabled}
 		{callApiOnMount}
-		{applyInputSample}
+		{applyWidgetExample}
 		validateExample={isAssetAndTextInput}
 	/>
 	<form class="space-y-2">

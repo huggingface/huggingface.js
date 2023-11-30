@@ -131,7 +131,7 @@
 		throw new TypeError("Invalid output: output must be of type Array<blob:string, label:string, content-type:string>");
 	}
 
-	function applyInputSample(sample: WidgetExampleAssetInput, opts: ExampleRunOpts = {}) {
+	function applyWidgetExample(sample: WidgetExampleAssetInput, opts: ExampleRunOpts = {}) {
 		filename = sample.example_title ?? "";
 		fileUrl = sample.src;
 		if (opts.isPreview) {
@@ -162,7 +162,7 @@
 		{isLoading}
 		{isDisabled}
 		{callApiOnMount}
-		{applyInputSample}
+		{applyWidgetExample}
 		validateExample={isAssetInput}
 	/>
 	<form>

@@ -214,7 +214,7 @@
 		return a.type === b.type && a.start === b.start && a.end === b.end;
 	}
 
-	function applyInputSample(sample: WidgetExampleTextInput, opts: ExampleRunOpts = {}) {
+	function applyWidgetExample(sample: WidgetExampleTextInput, opts: ExampleRunOpts = {}) {
 		setTextAreaValue(sample.text);
 		if (opts.isPreview) {
 			return;
@@ -240,7 +240,7 @@
 		{isLoading}
 		{isDisabled}
 		{callApiOnMount}
-		{applyInputSample}
+		{applyWidgetExample}
 		validateExample={isTextInput}
 	/>
 	<form>

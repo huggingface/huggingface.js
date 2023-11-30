@@ -61,7 +61,7 @@
 		throw new TypeError("Invalid output: output must be of type object & of instance Blob");
 	}
 
-	async function applyInputSample(sample: WidgetExampleAssetAndPromptInput, opts: ExampleRunOpts = {}) {
+	async function applyWidgetExample(sample: WidgetExampleAssetAndPromptInput, opts: ExampleRunOpts = {}) {
 		prompt = sample.prompt;
 		imgSrc = sample.src;
 		if (opts.isPreview) {
@@ -149,7 +149,7 @@
 		{isLoading}
 		{isDisabled}
 		{callApiOnMount}
-		{applyInputSample}
+		{applyWidgetExample}
 		validateExample={isAssetAndPromptInput}
 	/>
 	<form class="space-y-2">

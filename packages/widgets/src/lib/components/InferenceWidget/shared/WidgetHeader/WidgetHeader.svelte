@@ -16,7 +16,7 @@
 	export let title: string | null = null;
 	export let isLoading = false;
 	export let isDisabled = false;
-	export let applyInputSample: (sample: TWidgetExample, opts?: ExampleRunOpts) => void = () => {};
+	export let applyWidgetExample: (sample: TWidgetExample, opts?: ExampleRunOpts) => void = () => {};
 	export let validateExample: (sample: WidgetExample) => sample is TWidgetExample = (
 		sample
 	): sample is TWidgetExample => true;
@@ -79,7 +79,7 @@
 		<WidgetExamples
 			{examplesAll}
 			{isLoading}
-			{applyInputSample}
+			{applyWidgetExample}
 			{validateExample}
 			{model}
 			{callApiOnMount}

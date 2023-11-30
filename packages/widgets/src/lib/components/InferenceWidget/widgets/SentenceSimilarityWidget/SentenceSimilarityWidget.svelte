@@ -121,7 +121,7 @@
 		throw new TypeError("Invalid output: output must be of type Array");
 	}
 
-	function applyInputSample(sample: WidgetExampleSentenceSimilarityInput, opts: ExampleRunOpts = {}) {
+	function applyWidgetExample(sample: WidgetExampleSentenceSimilarityInput, opts: ExampleRunOpts = {}) {
 		sourceSentence = sample.source_sentence;
 		comparisonSentences = sample.sentences;
 		nComparisonSentences = comparisonSentences.length;
@@ -149,7 +149,7 @@
 		{isLoading}
 		{isDisabled}
 		{callApiOnMount}
-		{applyInputSample}
+		{applyWidgetExample}
 		validateExample={isSentenceSimilarityInput}
 	/>
 	<form class="flex flex-col space-y-2">

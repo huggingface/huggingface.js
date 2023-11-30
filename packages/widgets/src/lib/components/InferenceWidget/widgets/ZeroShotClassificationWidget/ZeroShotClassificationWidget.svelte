@@ -134,7 +134,7 @@
 		throw new TypeError("Invalid output: output must be of type <labels:Array; scores:Array>");
 	}
 
-	function applyInputSample(sample: WidgetExampleZeroShotTextInput, opts: ExampleRunOpts = {}) {
+	function applyWidgetExample(sample: WidgetExampleZeroShotTextInput, opts: ExampleRunOpts = {}) {
 		candidateLabels = sample.candidate_labels;
 		multiClass = sample.multi_class;
 		setTextAreaValue(sample.text);
@@ -162,7 +162,7 @@
 		{isLoading}
 		{isDisabled}
 		{callApiOnMount}
-		{applyInputSample}
+		{applyWidgetExample}
 		validateExample={isZeroShotTextInput}
 	/>
 	<form class="flex flex-col space-y-2">

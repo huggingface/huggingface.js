@@ -93,7 +93,7 @@
 		throw new TypeError("Invalid output: output must be of type Array & non-empty");
 	}
 
-	function applyInputSample(sample: WidgetExampleTextInput, opts: ExampleRunOpts = {}) {
+	function applyWidgetExample(sample: WidgetExampleTextInput, opts: ExampleRunOpts = {}) {
 		setTextAreaValue(sample.text);
 		if (opts.isPreview) {
 			return;
@@ -119,7 +119,7 @@
 		{isLoading}
 		{isDisabled}
 		{callApiOnMount}
-		{applyInputSample}
+		{applyWidgetExample}
 		validateExample={isTextInput}
 	/>
 	<form class="space-y-2">

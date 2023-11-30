@@ -92,7 +92,7 @@
 		throw new TypeError("Invalid output: output must be of type Array<label: string, score:number>");
 	}
 
-	async function applyInputSample(
+	async function applyWidgetExample(
 		sample: WidgetExampleAssetInput<WidgetExampleOutputLabels>,
 		opts: ExampleRunOpts = {}
 	) {
@@ -127,7 +127,7 @@
 	let:WidgetHeader
 	let:WidgetFooter
 >
-	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyInputSample} {validateExample} />
+	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyWidgetExample} {validateExample} />
 	<form>
 		<WidgetDropzone
 			classNames="no-hover:hidden"

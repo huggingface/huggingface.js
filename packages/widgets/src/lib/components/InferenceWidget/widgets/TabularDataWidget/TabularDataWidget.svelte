@@ -167,7 +167,7 @@
 		);
 	}
 
-	function applyInputSample(sample: WidgetExampleStructuredDataInput, opts: ExampleRunOpts = {}) {
+	function applyWidgetExample(sample: WidgetExampleStructuredDataInput, opts: ExampleRunOpts = {}) {
 		table = convertDataToTable(sample.structured_data);
 		if (opts.isPreview) {
 			return;
@@ -193,7 +193,7 @@
 		{isLoading}
 		{isDisabled}
 		{callApiOnMount}
-		{applyInputSample}
+		{applyWidgetExample}
 		validateExample={isStructuredDataInput}
 	/>
 	<form>
