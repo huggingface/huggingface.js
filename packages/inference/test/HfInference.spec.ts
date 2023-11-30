@@ -519,7 +519,7 @@ describe.concurrent(
 
 		it("objectDetection", async () => {
 			expect(
-				await hf.imageClassification({
+				await hf.objectDetection({
 					data: new Blob([readTestFile("cats.png")], { type: "image/png" }),
 					model: "facebook/detr-resnet-50",
 				})
@@ -540,7 +540,7 @@ describe.concurrent(
 		});
 		it("imageSegmentation", async () => {
 			expect(
-				await hf.imageClassification({
+				await hf.imageSegmentation({
 					data: new Blob([readTestFile("cats.png")], { type: "image/png" }),
 					model: "facebook/detr-resnet-50-panoptic",
 				})
