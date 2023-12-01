@@ -42,7 +42,7 @@ describe("validateOutput", () => {
 	});
 	it("validates unions", () => {
 		expect(z.or(z.string(), z.number()).parse("foo")).toBe("foo");
-		expect(z.or(z.string(), z.number()).parse(42)).toBe(42);
+		expect(z.or(z.blob(), z.string(), z.number()).parse(42)).toBe(42);
 	});
 	it("errors on unions", () => {
 		expect(() => z.or(z.string(), z.number()).parse(new Blob())).toThrow(/Expected string | number/);
