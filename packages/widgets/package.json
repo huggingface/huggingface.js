@@ -1,7 +1,7 @@
 {
 	"name": "@huggingface/widgets",
 	"packageManager": "pnpm@8.10.5",
-	"version": "0.0.15",
+	"version": "0.1.0",
 	"publishConfig": {
 		"access": "public"
 	},
