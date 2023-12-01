@@ -1,7 +1,7 @@
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
 import type { ApiModelInfo } from "../types/api/api-model";
-import type { Credentials, Task } from "../types/public";
+import type { Credentials, PipelineType } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
 
@@ -12,7 +12,7 @@ export interface ModelEntry {
 	name: string;
 	private: boolean;
 	gated: false | "auto" | "manual";
-	task?: Task;
+	task?: PipelineType;
 	likes: number;
 	downloads: number;
 	updatedAt: Date;
@@ -21,7 +21,7 @@ export interface ModelEntry {
 export async function* listModels(params?: {
 	search?: {
 		owner?: string;
-		task?: Task;
+		task?: PipelineType;
 	};
 	credentials?: Credentials;
 	hubUrl?: string;

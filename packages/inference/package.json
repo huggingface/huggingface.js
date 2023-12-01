@@ -51,6 +51,7 @@
 		"check": "tsc"
 	},
 	"devDependencies": {
+		"@huggingface/tasks": "workspace:^",
 		"@types/node": "18.13.0"
 	},
 	"resolutions": {}

@@ -5,6 +5,7 @@ export type {
 	AccessTokenRole,
 	AuthType,
 	Credentials,
+	PipelineType,
 	RepoDesignation,
 	RepoFullName,
 	RepoId,
@@ -15,6 +16,5 @@ export type {
 	SpaceRuntime,
 	SpaceSdk,
 	SpaceStage,
-	Task,
 } from "./types/public";
 export { HubApiError, InvalidApiResponseFormatError } from "./error";
