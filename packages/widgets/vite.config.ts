@@ -3,8 +3,8 @@ import { svelte } from "@sveltejs/vite-plugin-svelte";
 import sveltePreprocess from "svelte-preprocess";
 import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { dirname } from "path";
+import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const isSSR = process.argv.includes("--ssr");
