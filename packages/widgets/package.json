@@ -10,7 +10,7 @@
 		"build": "vite build --mode app && vite build --mode lib && vite build --mode lib --ssr && npm run package",
 		"preview": "vite preview --mode app",
 		"package": "publint",
-		"prepublishOnly": "npm run package",
+		"prepublishOnly": "npm run build",
 		"check": "svelte-check --tsconfig ./tsconfig.json src,static",
 		"check:watch": "svelte-check --tsconfig ./tsconfig.json --watch src,static",
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
