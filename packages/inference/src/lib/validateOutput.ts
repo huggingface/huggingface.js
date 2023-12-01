@@ -7,10 +7,15 @@
 
 import { InferenceOutputError } from "./InferenceOutputError";
 
+interface Parser<T = any> {
+	parse: (value: any) => T;
+	toString: () => string;
+}
+
+export type Infer<T extends Parser> = ReturnType<T["parse"]>;
+
 export const z = {
-	array<T extends { parse: (value: any) => any }>(
-		items: T
-	): { parse: (value: any) => ReturnType<T["parse"]>[]; toString: () => string } {
+	array<T extends Parser>(items: T): Parser<Infer<T>[]> {
 		return {
 			parse: (value: unknown) => {
 				if (!Array.isArray(value)) {
@@ -27,9 +32,7 @@ export const z = {
 			},
 		};
 	},
-	first<T extends { parse: (value: any) => any }>(
-		items: T
-	): { parse: (value: any) => ReturnType<T["parse"]>; toString: () => string } {
+	first<T extends Parser>(items: T): Parser<Infer<T>> {
 		return {
 			parse: (value: unknown) => {
 				if (!Array.isArray(value) || value.length === 0) {
@@ -46,9 +49,7 @@ export const z = {
 			},
 		};
 	},
-	or: <T extends { parse: (value: any) => any }[]>(
-		...items: T
-	): { parse: (value: any) => ReturnType<T[number]["parse"]>; toString(): string } => ({
+	or: <T extends Parser[]>(...items: T): Parser<Infer<T[number]>> => ({
 		parse: (value: unknown): ReturnType<T[number]["parse"]> => {
 			const errors: Error[] = [];
 			for (const item of items) {
@@ -64,9 +65,7 @@ export const z = {
 			return items.map((item) => item.toString()).join(" | ");
 		},
 	}),
-	object<T extends Record<string, { parse: (value: any) => any }>>(
-		item: T
-	): { parse: (value: any) => { [key in keyof T]: ReturnType<T[key]["parse"]> }; toString: () => string } {
+	object<T extends Record<string, Parser>>(item: T): Parser<{ [key in keyof T]: Infer<T[key]> }> {
 		return {
 			parse: (value: unknown) => {
 				if (typeof value !== "object" || value === null || Array.isArray(value)) {
@@ -76,7 +75,7 @@ export const z = {
 					return Object.fromEntries(
 						Object.entries(item).map(([key, val]) => [key, val.parse((value as any)[key])])
 					) as {
-						[key in keyof T]: ReturnType<T[key]["parse"]>;
+						[key in keyof T]: Infer<T[key]>;
 					};
 				} catch (err) {
 					throw new Error("Expected " + z.object(item).toString(), { cause: err });
@@ -89,7 +88,7 @@ export const z = {
 			},
 		};
 	},
-	string(): { parse: (value: any) => string; toString: () => string } {
+	string(): Parser<string> {
 		return {
 			parse: (value: unknown): string => {
 				if (typeof value !== "string") {
@@ -102,7 +101,7 @@ export const z = {
 			},
 		};
 	},
-	number(): { parse: (value: any) => number; toString: () => string } {
+	number(): Parser<number> {
 		return {
 			parse: (value: unknown): number => {
 				if (typeof value !== "number") {
@@ -115,7 +114,7 @@ export const z = {
 			},
 		};
 	},
-	blob(): { parse: (value: any) => Blob; toString: () => string } {
+	blob(): Parser<Blob> {
 		return {
 			parse: (value: unknown): Blob => {
 				if (!(value instanceof Blob)) {
@@ -128,9 +127,7 @@ export const z = {
 			},
 		};
 	},
-	optional<T extends { parse: (value: any) => any }>(
-		item: T
-	): { parse: (value: any) => ReturnType<T["parse"]> | undefined; toString: () => string } {
+	optional<T extends Parser>(item: T): Parser<Infer<T> | undefined> {
 		return {
 			parse: (value: unknown): ReturnType<T["parse"]> | undefined => {
 				if (value === undefined) {
