@@ -1,11 +1,8 @@
-
 import { sveltekit } from "@sveltejs/kit/vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import sveltePreprocess from "svelte-preprocess";
 import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
-
-
 
 const isSSR = process.argv.includes("--ssr");
 
@@ -16,8 +13,8 @@ export default defineConfig(({ mode }) => {
 				svelte({
 					configFile: false,
 					extensions: [".svelte"],
-					
-					// eslint-disable-next-line 
+
+					// eslint-disable-next-line
 					// @ts-ignore see https://github.com/sveltejs/svelte-preprocess/issues/591
 					preprocess: sveltePreprocess({
 						typescript: { tsconfigFile: `${__dirname}/tsconfig.json` },
@@ -36,17 +33,20 @@ export default defineConfig(({ mode }) => {
 						index: "src/lib/index.ts",
 					},
 					preserveEntrySignatures: "strict",
-					output: [{
-						preserveModules: true,
-						
-						format: "cjs",
-						entryFileNames: "[name].cjs",
-					}, {
-						preserveModules: true,
-						preserveEntrySignatures: true,
-						format: "es",
-						entryFileNames: "[name].js",
-					}],
+					output: [
+						{
+							preserveModules: true,
+
+							format: "cjs",
+							entryFileNames: "[name].cjs",
+						},
+						{
+							preserveModules: true,
+							preserveEntrySignatures: true,
+							format: "es",
+							entryFileNames: "[name].js",
+						},
+					],
 					external: ["svelte", /svelte\/(.*)/, "@huggingface/tasks"],
 				},
 			},
