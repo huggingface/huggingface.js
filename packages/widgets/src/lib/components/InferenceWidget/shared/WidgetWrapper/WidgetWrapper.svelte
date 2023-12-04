@@ -73,11 +73,11 @@
 
 	onMount(() => {
 		(async () => {
-			if(model.inference === InferenceDisplayability.Yes){
+			if (model.inference === InferenceDisplayability.Yes) {
 				modelLoadInfo = await getModelLoadInfo(apiUrl, model.id, includeCredentials);
 				$modelLoadStates[model.id] = modelLoadInfo;
 				modelTooBig = modelLoadInfo?.state === "TooBig";
-	
+
 				if (modelTooBig) {
 					// disable the widget
 					isDisabled = true;
