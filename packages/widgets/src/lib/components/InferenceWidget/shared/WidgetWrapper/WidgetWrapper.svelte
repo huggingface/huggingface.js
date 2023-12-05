@@ -5,13 +5,13 @@
 
 	type TWidgetExample = $$Generic<WidgetExample>;
 
-	import { onMount, setContext } from "svelte";
+	import { onMount } from "svelte";
 
 	import WidgetFooter from "../WidgetFooter/WidgetFooter.svelte";
 	import WidgetHeader from "../WidgetHeader/WidgetHeader.svelte";
 	import WidgetInfo from "../WidgetInfo/WidgetInfo.svelte";
 	import { getModelLoadInfo } from "../../..//InferenceWidget/shared/helpers.js";
-	import { modelLoadStates } from "../../stores.js";
+	import { modelLoadStates, widgetNoInference } from "../../stores.js";
 
 	export let apiUrl: string;
 	export let model: WidgetProps["model"];
@@ -19,13 +19,6 @@
 
 	let isDisabled = model.inference !== InferenceDisplayability.Yes && model.pipeline_tag !== "reinforcement-learning";
 	let modelLoadInfo: ModelLoadInfo | undefined = undefined;
-	let widgetUndisplayable = false;
-
-	// if WidgetHeader determines that there are no examples with outputs AND model.inference !== InferenceDisplayability.Yes
-	// then WidgetHeader will call this function to show InferenceDisplayability error to the user without showing anything else
-	setContext("makeWidgetUndisplayable", () => {
-		widgetUndisplayable = true;
-	});
 
 	onMount(() => {
 		(async () => {
@@ -43,7 +36,7 @@
 	});
 </script>
 
-{#if widgetUndisplayable}
+{#if $widgetNoInference?.[model.id]}
 	<WidgetHeader {model} noTitle={true} />
 	<WidgetInfo {model} {modelLoadInfo} />
 {:else if modelLoadInfo || model.inference !== InferenceDisplayability.Yes}

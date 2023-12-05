@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getContext } from "svelte";
+	import { widgetNoInference } from "../../stores.js";
 	import { TASKS_DATA } from "@huggingface/tasks";
 	import type { WidgetExample, WidgetExampleAttribute } from "@huggingface/tasks";
 	import type { WidgetProps, ExampleRunOpts } from "../types.js";
@@ -34,9 +34,10 @@
 			.filter((sample) => validateExample(sample) && (!isDisabled || sample.output !== undefined))
 			.sort((sample1, sample2) => (sample2.example_title ? 1 : 0) - (sample1.example_title ? 1 : 0));
 
+		// if there are no examples with outputs AND model.inference !== InferenceDisplayability.Yes
+		// then widget will show InferenceDisplayability error to the user without showing anything else
 		if (isDisabled && !examples.length) {
-			const makeWidgetUndisplayable = getContext<() => void>("makeWidgetUndisplayable");
-			makeWidgetUndisplayable();
+			$widgetNoInference[model.id] = true;
 		}
 
 		return examples;
