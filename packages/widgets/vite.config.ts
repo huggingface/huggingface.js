@@ -23,6 +23,10 @@ export default defineConfig(({ mode }) => {
 						typescript: { tsconfigFile: `${__dirname}/tsconfig.json` },
 					}),
 					emitCss: false,
+					compilerOptions: {
+						hydratable: true,
+						generate: isSSR ? "ssr" : "dom",
+					},
 				}),
 				dts({
 					entryRoot: "src/lib",
@@ -39,13 +43,11 @@ export default defineConfig(({ mode }) => {
 					output: [
 						{
 							preserveModules: true,
-
 							format: "cjs",
 							entryFileNames: "[name].cjs",
 						},
 						{
 							preserveModules: true,
-							preserveEntrySignatures: true,
 							format: "es",
 							entryFileNames: "[name].js",
 						},

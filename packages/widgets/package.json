@@ -19,7 +19,6 @@
 		"format:check": "prettier --check ."
 	},
 	"type": "module",
-	"svelte": "./dist/client/index.js",
 	"module": "./dist/server/index.js",
 	"main": "./dist/server/index.cjs",
 	"types": "./dist/client/index.d.ts",
@@ -27,9 +26,15 @@
 	"exports": {
 		".": {
 			"types": "./dist/client/index.d.ts",
-			"require": "./dist/server/index.cjs",
-			"import": "./dist/server/index.js",
-			"svelte": "./dist/client/index.js"
+			"node": {
+				"require": "./dist/server/index.cjs",
+				"import": "./dist/server/index.js"
+			},
+			"browser": {
+				"import": "./dist/client/index.js",
+				"require": "./dist/client/index.cjs"
+			},
+			"svelte": "./src/lib/index.ts"
 		}
 	},
 	"files": [
