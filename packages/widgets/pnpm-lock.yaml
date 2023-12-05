@@ -8,6 +8,9 @@ dependencies:
   '@huggingface/tasks':
     specifier: workspace:^
     version: link:../tasks
+  svelte:
+    specifier: ^3.59.2
+    version: 3.59.2
 
 devDependencies:
   '@auth/core':
@@ -52,9 +55,6 @@ devDependencies:
   publint:
     specifier: ^0.1.9
     version: 0.1.9
-  svelte:
-    specifier: ^3.59.2
-    version: 3.59.2
   svelte-check:
     specifier: ^3.6.0
     version: 3.6.0(postcss@8.4.31)(svelte@3.59.2)
@@ -2264,7 +2264,6 @@ packages:
   /svelte@3.59.2:
     resolution: {integrity: sha512-vzSyuGr3eEoAtT/A6bmajosJZIUWySzY2CzB3w2pgPvnkUjGqlDnsNnA0PMO+mMAhuyMul6C2uuZzY6ELSkzyA==}
     engines: {node: '>= 8'}
-    dev: true
 
   /tailwindcss@3.3.5:
     resolution: {integrity: sha512-5SEZU4J7pxZgSkv7FP1zY8i2TIAOooNZ1e/OGtxIEv6GltpoiXUqWvLy89+a10qYTB1N5Ifkuw9lqQkN9sscvA==}
