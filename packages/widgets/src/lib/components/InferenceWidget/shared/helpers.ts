@@ -63,11 +63,6 @@ export async function getBlobFromUrl(url: string): Promise<Blob> {
 	const blob = await res.blob();
 	return blob;
 }
-
-export type ApplyExampleFunc = (sample: WidgetExample, opts?: ExampleRunOpts) => Promise<void>;
-
-export type ValidateExampleFunc = (sample: WidgetExample) => sample is WidgetExample;
-
 interface Success<T> {
 	computeTime: string;
 	output: T;
