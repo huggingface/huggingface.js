@@ -165,7 +165,7 @@
 		{applyWidgetExample}
 		validateExample={isZeroShotTextInput}
 	/>
-	<form class="flex flex-col space-y-2">
+	<div class="flex flex-col space-y-2">
 		<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} placeholder="Text to classify..." />
 		<WidgetTextInput
 			bind:value={candidateLabels}
@@ -184,7 +184,7 @@
 		{#if warning}
 			<div class="alert alert-warning mt-2">{warning}</div>
 		{/if}
-	</form>
+	</div>
 	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
 
 	{#if output.length}

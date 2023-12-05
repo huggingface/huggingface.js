@@ -176,7 +176,7 @@
 		{applyWidgetExample}
 		validateExample={isAssetAndZeroShotInput}
 	/>
-	<form class="space-y-2">
+	<div class="space-y-2">
 		<WidgetDropzone
 			classNames="hidden md:block"
 			{isLoading}
@@ -218,7 +218,7 @@
 				getOutput();
 			}}
 		/>
-	</form>
+	</div>
 	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
 
 	{#if output.length}

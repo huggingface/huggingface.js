@@ -196,28 +196,28 @@
 		{applyWidgetExample}
 		validateExample={isStructuredDataInput}
 	/>
-	<form>
-		<div class="mt-4">
-			{#if table.length > 1 || table[1]?.length > 1}
-				<WidgetTableInput
-					{highlighted}
-					{isLoading}
-					{isDisabled}
-					onChange={onChangeTable}
-					table={tableWithOutput}
-					canAddCol={false}
-					bind:scrollTableToRight
-				/>
-			{/if}
-		</div>
-		<WidgetSubmitBtn
-			{isLoading}
-			{isDisabled}
-			onClick={() => {
-				getOutput();
-			}}
-		/>
-	</form>
+
+	<div class="mt-4">
+		{#if table.length > 1 || table[1]?.length > 1}
+			<WidgetTableInput
+				{highlighted}
+				{isLoading}
+				{isDisabled}
+				onChange={onChangeTable}
+				table={tableWithOutput}
+				canAddCol={false}
+				bind:scrollTableToRight
+			/>
+		{/if}
+	</div>
+	<WidgetSubmitBtn
+		{isLoading}
+		{isDisabled}
+		onClick={() => {
+			getOutput();
+		}}
+	/>
+
 	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
 	<WidgetFooter {isDisabled} {outputJson} />
 </WidgetWrapper>

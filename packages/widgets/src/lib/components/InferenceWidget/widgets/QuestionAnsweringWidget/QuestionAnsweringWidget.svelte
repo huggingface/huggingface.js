@@ -139,7 +139,7 @@
 	let:WidgetFooter
 >
 	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyWidgetExample} {validateExample} />
-	<form class="space-y-2">
+	<div class="space-y-2">
 		<WidgetQuickInput
 			bind:value={question}
 			{isLoading}
@@ -155,7 +155,7 @@
 			placeholder="Please input some context..."
 			label="Context"
 		/>
-	</form>
+	</div>
 	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
 
 	{#if output}

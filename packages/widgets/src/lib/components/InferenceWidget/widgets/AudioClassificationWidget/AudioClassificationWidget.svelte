@@ -166,27 +166,27 @@
 	let:WidgetFooter
 >
 	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyWidgetExample} {validateExample} />
-	<form>
-		<div class="flex flex-wrap items-center {isDisabled ? 'pointer-events-none hidden opacity-50' : ''}">
-			<WidgetFileInput accept="audio/*" classNames="mt-1.5 mr-2" {onSelectFile} />
-			<span class="mr-2 mt-1.5">or</span>
-			<WidgetRecorder classNames="mt-1.5" {onRecordStart} onRecordStop={onSelectFile} onError={onRecordError} />
-		</div>
-		{#if fileUrl}
-			<WidgetAudioTrack classNames="mt-3" label={filename} src={fileUrl} />
-		{/if}
-		<WidgetSubmitBtn
-			classNames="mt-2"
-			isDisabled={isRecording || isDisabled}
-			{isLoading}
-			onClick={() => {
-				getOutput();
-			}}
-		/>
-		{#if warning}
-			<div class="alert alert-warning mt-2">{warning}</div>
-		{/if}
-	</form>
+
+	<div class="flex flex-wrap items-center {isDisabled ? 'pointer-events-none hidden opacity-50' : ''}">
+		<WidgetFileInput accept="audio/*" classNames="mt-1.5 mr-2" {onSelectFile} />
+		<span class="mr-2 mt-1.5">or</span>
+		<WidgetRecorder classNames="mt-1.5" {onRecordStart} onRecordStop={onSelectFile} onError={onRecordError} />
+	</div>
+	{#if fileUrl}
+		<WidgetAudioTrack classNames="mt-3" label={filename} src={fileUrl} />
+	{/if}
+	<WidgetSubmitBtn
+		classNames="mt-2"
+		isDisabled={isRecording || isDisabled}
+		{isLoading}
+		onClick={() => {
+			getOutput();
+		}}
+	/>
+	{#if warning}
+		<div class="alert alert-warning mt-2">{warning}</div>
+	{/if}
+
 	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
 
 	<WidgetOutputChart classNames="pt-4" {output} />

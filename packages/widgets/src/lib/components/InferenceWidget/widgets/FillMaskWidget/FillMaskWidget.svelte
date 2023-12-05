@@ -142,22 +142,22 @@
 	let:WidgetFooter
 >
 	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyWidgetExample} {validateExample} />
-	<form>
-		{#if model.pipeline_tag === "fill-mask"}
-			<div class="mb-1.5 text-sm text-gray-500">
-				Mask token: <code>{model.mask_token}</code>
-			</div>
-		{/if}
-		<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} />
-		<WidgetSubmitBtn
-			classNames="mt-2"
-			{isLoading}
-			{isDisabled}
-			onClick={() => {
-				getOutput();
-			}}
-		/>
-	</form>
+
+	{#if model.pipeline_tag === "fill-mask"}
+		<div class="mb-1.5 text-sm text-gray-500">
+			Mask token: <code>{model.mask_token}</code>
+		</div>
+	{/if}
+	<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} />
+	<WidgetSubmitBtn
+		classNames="mt-2"
+		{isLoading}
+		{isDisabled}
+		onClick={() => {
+			getOutput();
+		}}
+	/>
+
 	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
 
 	<WidgetOutputChart classNames="pt-4" {output} />

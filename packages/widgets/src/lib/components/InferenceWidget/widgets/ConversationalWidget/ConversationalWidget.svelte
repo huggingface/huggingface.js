@@ -173,18 +173,18 @@
 		validateExample={isTextInput}
 	/>
 	<WidgetOutputConvo modelId={model.id} {output} />
-	<form>
-		<WidgetQuickInput
-			bind:value={text}
-			flatTop={true}
-			{isLoading}
-			{isDisabled}
-			onClickSubmitBtn={() => {
-				getOutput();
-			}}
-			submitButtonLabel="Send"
-		/>
-	</form>
+
+	<WidgetQuickInput
+		bind:value={text}
+		flatTop={true}
+		{isLoading}
+		{isDisabled}
+		onClickSubmitBtn={() => {
+			getOutput();
+		}}
+		submitButtonLabel="Send"
+	/>
+
 	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
 
 	<WidgetFooter {isDisabled} {outputJson} />

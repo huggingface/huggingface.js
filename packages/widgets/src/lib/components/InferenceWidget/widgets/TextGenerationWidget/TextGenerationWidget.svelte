@@ -206,7 +206,7 @@
 	let:WidgetFooter
 >
 	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyWidgetExample} {validateExample} />
-	<form class="space-y-2">
+	<div class="space-y-2">
 		<WidgetTextarea
 			bind:value={text}
 			bind:setValue={setTextAreaValue}
@@ -244,7 +244,7 @@
 				<span class="cursor-pointer underline" on:click={redirectJoin}>register</span> to try BLOOM 🌸
 			</div>
 		{/if}
-	</form>
+	</div>
 	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
 
 	{#if model?.pipeline_tag !== "text-generation"}

@@ -128,9 +128,9 @@
 	let:WidgetFooter
 >
 	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyWidgetExample} {validateExample} />
-	<form>
-		<WidgetQuickInput bind:value={text} {isLoading} {isDisabled} onClickSubmitBtn={() => getOutput()} />
-	</form>
+
+	<WidgetQuickInput bind:value={text} {isLoading} {isDisabled} onClickSubmitBtn={() => getOutput()} />
+
 	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
 
 	{#if output.length}

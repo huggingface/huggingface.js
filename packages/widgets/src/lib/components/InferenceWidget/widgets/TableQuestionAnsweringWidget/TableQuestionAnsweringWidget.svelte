@@ -172,16 +172,16 @@
 		{applyWidgetExample}
 		validateExample={isTextAndTableInput}
 	/>
-	<form>
-		<WidgetQuickInput
-			bind:value={query}
-			{isLoading}
-			{isDisabled}
-			onClickSubmitBtn={() => {
-				getOutput();
-			}}
-		/>
-	</form>
+
+	<WidgetQuickInput
+		bind:value={query}
+		{isLoading}
+		{isDisabled}
+		onClickSubmitBtn={() => {
+			getOutput();
+		}}
+	/>
+
 	<div class="mt-4">
 		{#if output}
 			<WidgetOutputTableQA {output} {isAnswerOnlyOutput} />

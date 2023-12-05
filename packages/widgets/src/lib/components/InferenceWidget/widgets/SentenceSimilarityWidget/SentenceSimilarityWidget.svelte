@@ -152,7 +152,7 @@
 		{applyWidgetExample}
 		validateExample={isSentenceSimilarityInput}
 	/>
-	<form class="flex flex-col space-y-2">
+	<div class="flex flex-col space-y-2">
 		<WidgetTextInput
 			bind:value={sourceSentence}
 			{isDisabled}
@@ -181,7 +181,7 @@
 				getOutput();
 			}}
 		/>
-	</form>
+	</div>
 	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
 
 	{#if output.length}

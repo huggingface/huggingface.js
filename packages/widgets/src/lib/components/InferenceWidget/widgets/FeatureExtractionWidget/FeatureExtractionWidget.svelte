@@ -140,16 +140,16 @@
 		{applyWidgetExample}
 		validateExample={isTextInput}
 	/>
-	<form>
-		<WidgetQuickInput
-			bind:value={text}
-			{isLoading}
-			{isDisabled}
-			onClickSubmitBtn={() => {
-				getOutput();
-			}}
-		/>
-	</form>
+
+	<WidgetQuickInput
+		bind:value={text}
+		{isLoading}
+		{isDisabled}
+		onClickSubmitBtn={() => {
+			getOutput();
+		}}
+	/>
+
 	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
 
 	{#if output}

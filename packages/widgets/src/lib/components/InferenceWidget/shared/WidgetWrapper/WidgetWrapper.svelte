@@ -32,7 +32,7 @@
 			if (model.inference !== InferenceDisplayability.Yes){
 				return;
 			}
-			
+
 			modelLoadInfo = await getModelLoadInfo(apiUrl, model.id, includeCredentials);
 			$modelLoadStates[model.id] = modelLoadInfo;
 
@@ -47,7 +47,7 @@
 	<WidgetHeader {model} noTitle={true} />
 	<WidgetInfo {model} {modelLoadInfo} />
 {:else if modelLoadInfo || model.inference !== InferenceDisplayability.Yes}
-	<div class="flex w-full max-w-full flex-col">
+	<form class="flex w-full max-w-full flex-col">
 		<slot {isDisabled} {modelLoadInfo} {WidgetInfo} {WidgetHeader} {WidgetFooter} />
-	</div>
+	</form>
 {/if}

@@ -243,20 +243,20 @@
 		{applyWidgetExample}
 		validateExample={isTextInput}
 	/>
-	<form>
-		<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} />
-		<WidgetSubmitBtn
-			classNames="mt-2"
-			{isLoading}
-			{isDisabled}
-			onClick={() => {
-				getOutput();
-			}}
-		/>
-		{#if warning}
-			<div class="alert alert-warning mt-2">{warning}</div>
-		{/if}
-	</form>
+
+	<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} />
+	<WidgetSubmitBtn
+		classNames="mt-2"
+		{isLoading}
+		{isDisabled}
+		onClick={() => {
+			getOutput();
+		}}
+	/>
+	{#if warning}
+		<div class="alert alert-warning mt-2">{warning}</div>
+	{/if}
+
 	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
 
 	<WidgetOuputTokens classNames="mt-2" {output} text={outputText} />

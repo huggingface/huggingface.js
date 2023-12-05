@@ -123,39 +123,39 @@
 		{applyWidgetExample}
 		validateExample={isAssetInput}
 	/>
-	<form>
-		<WidgetDropzone
-			classNames="hidden md:block"
-			{isLoading}
-			{isDisabled}
-			{imgSrc}
-			{onSelectFile}
-			onError={(e) => (error = e)}
-		>
-			{#if imgSrc}
-				<img src={imgSrc} class="pointer-events-none mx-auto max-h-44 shadow" alt="" />
-			{/if}
-		</WidgetDropzone>
-		<!-- Better UX for mobile/table through CSS breakpoints -->
+
+	<WidgetDropzone
+		classNames="hidden md:block"
+		{isLoading}
+		{isDisabled}
+		{imgSrc}
+		{onSelectFile}
+		onError={(e) => (error = e)}
+	>
 		{#if imgSrc}
-			{#if imgSrc}
-				<div class="mb-2 flex justify-center bg-gray-50 dark:bg-gray-900 md:hidden">
-					<img src={imgSrc} class="pointer-events-none max-h-44" alt="" />
-				</div>
-			{/if}
+			<img src={imgSrc} class="pointer-events-none mx-auto max-h-44 shadow" alt="" />
 		{/if}
-		<WidgetFileInput
-			accept="image/*"
-			classNames="mr-2 md:hidden"
-			{isLoading}
-			{isDisabled}
-			label="Browse for image"
-			{onSelectFile}
-		/>
-		{#if warning}
-			<div class="alert alert-warning mt-2">{warning}</div>
+	</WidgetDropzone>
+	<!-- Better UX for mobile/table through CSS breakpoints -->
+	{#if imgSrc}
+		{#if imgSrc}
+			<div class="mb-2 flex justify-center bg-gray-50 dark:bg-gray-900 md:hidden">
+				<img src={imgSrc} class="pointer-events-none max-h-44" alt="" />
+			</div>
 		{/if}
-	</form>
+	{/if}
+	<WidgetFileInput
+		accept="image/*"
+		classNames="mr-2 md:hidden"
+		{isLoading}
+		{isDisabled}
+		label="Browse for image"
+		{onSelectFile}
+	/>
+	{#if warning}
+		<div class="alert alert-warning mt-2">{warning}</div>
+	{/if}
+
 	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
 
 	{#if model?.pipeline_tag !== "text-generation"}

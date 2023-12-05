@@ -122,7 +122,7 @@
 		{applyWidgetExample}
 		validateExample={isTextInput}
 	/>
-	<form class="space-y-2">
+	<div class="space-y-2">
 		<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} />
 		<WidgetSubmitBtn
 			{isLoading}
@@ -131,7 +131,7 @@
 				getOutput();
 			}}
 		/>
-	</form>
+	</div>
 	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
 
 	<WidgetOutputText classNames="mt-4" {output} />

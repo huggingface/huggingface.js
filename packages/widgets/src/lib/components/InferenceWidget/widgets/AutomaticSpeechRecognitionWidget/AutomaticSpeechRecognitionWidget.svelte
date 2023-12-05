@@ -172,45 +172,45 @@
 	let:WidgetFooter
 >
 	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyWidgetExample} {validateExample} />
-	<form>
-		<div class="flex flex-wrap items-center {isDisabled ? 'pointer-events-none hidden opacity-50' : ''}">
-			{#if !isRealtimeRecording}
-				<WidgetFileInput accept="audio/*" classNames="mt-1.5" {onSelectFile} />
-				<span class="mx-2 mt-1.5">or</span>
-				<WidgetRecorder classNames="mt-1.5" {onRecordStart} onRecordStop={onSelectFile} onError={onRecordError} />
-			{/if}
-			{#if model?.library_name === "transformers"}
-				{#if !isRealtimeRecording}
-					<span class="mx-2 mt-1.5">or</span>
-				{/if}
-				<WidgetRealtimeRecorder
-					classNames="mt-1.5"
-					{apiToken}
-					{model}
-					{updateModelLoading}
-					onRecordStart={() => (isRealtimeRecording = true)}
-					onRecordStop={() => (isRealtimeRecording = false)}
-					onError={onRecordError}
-				/>
-			{/if}
-		</div>
+
+	<div class="flex flex-wrap items-center {isDisabled ? 'pointer-events-none hidden opacity-50' : ''}">
 		{#if !isRealtimeRecording}
-			{#if fileUrl}
-				<WidgetAudioTrack classNames="mt-3" label={filename} src={fileUrl} />
-			{/if}
-			<WidgetSubmitBtn
-				classNames="mt-2"
-				isDisabled={isRecording || isDisabled}
-				{isLoading}
-				onClick={() => {
-					getOutput();
-				}}
-			/>
-			{#if warning}
-				<div class="alert alert-warning mt-2">{warning}</div>
-			{/if}
+			<WidgetFileInput accept="audio/*" classNames="mt-1.5" {onSelectFile} />
+			<span class="mx-2 mt-1.5">or</span>
+			<WidgetRecorder classNames="mt-1.5" {onRecordStart} onRecordStop={onSelectFile} onError={onRecordError} />
 		{/if}
-	</form>
+		{#if model?.library_name === "transformers"}
+			{#if !isRealtimeRecording}
+				<span class="mx-2 mt-1.5">or</span>
+			{/if}
+			<WidgetRealtimeRecorder
+				classNames="mt-1.5"
+				{apiToken}
+				{model}
+				{updateModelLoading}
+				onRecordStart={() => (isRealtimeRecording = true)}
+				onRecordStop={() => (isRealtimeRecording = false)}
+				onError={onRecordError}
+			/>
+		{/if}
+	</div>
+	{#if !isRealtimeRecording}
+		{#if fileUrl}
+			<WidgetAudioTrack classNames="mt-3" label={filename} src={fileUrl} />
+		{/if}
+		<WidgetSubmitBtn
+			classNames="mt-2"
+			isDisabled={isRecording || isDisabled}
+			{isLoading}
+			onClick={() => {
+				getOutput();
+			}}
+		/>
+		{#if warning}
+			<div class="alert alert-warning mt-2">{warning}</div>
+		{/if}
+	{/if}
+
 	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
 
 	<WidgetOutputText classNames="mt-4" {output} />

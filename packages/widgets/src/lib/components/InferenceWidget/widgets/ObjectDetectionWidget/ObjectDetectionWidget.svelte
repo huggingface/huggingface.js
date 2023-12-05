@@ -160,35 +160,35 @@
 		{applyWidgetExample}
 		validateExample={isAssetInput}
 	/>
-	<form>
-		<WidgetDropzone
-			classNames="hidden md:block"
-			{isLoading}
-			{isDisabled}
-			{imgSrc}
-			{onSelectFile}
-			onError={(e) => (error = e)}
-		>
-			{#if imgSrc}
-				<BoundingBoxes {imgSrc} {mouseover} {mouseout} {output} {highlightIndex} />
-			{/if}
-		</WidgetDropzone>
-		<!-- Better UX for mobile/table through CSS breakpoints -->
+
+	<WidgetDropzone
+		classNames="hidden md:block"
+		{isLoading}
+		{isDisabled}
+		{imgSrc}
+		{onSelectFile}
+		onError={(e) => (error = e)}
+	>
 		{#if imgSrc}
-			<BoundingBoxes classNames="mb-2 md:hidden" {imgSrc} {mouseover} {mouseout} {output} {highlightIndex} />
+			<BoundingBoxes {imgSrc} {mouseover} {mouseout} {output} {highlightIndex} />
 		{/if}
-		<WidgetFileInput
-			accept="image/*"
-			classNames="mr-2 md:hidden"
-			{isLoading}
-			{isDisabled}
-			label="Browse for image"
-			{onSelectFile}
-		/>
-		{#if warning}
-			<div class="alert alert-warning mt-2">{warning}</div>
-		{/if}
-	</form>
+	</WidgetDropzone>
+	<!-- Better UX for mobile/table through CSS breakpoints -->
+	{#if imgSrc}
+		<BoundingBoxes classNames="mb-2 md:hidden" {imgSrc} {mouseover} {mouseout} {output} {highlightIndex} />
+	{/if}
+	<WidgetFileInput
+		accept="image/*"
+		classNames="mr-2 md:hidden"
+		{isLoading}
+		{isDisabled}
+		label="Browse for image"
+		{onSelectFile}
+	/>
+	{#if warning}
+		<div class="alert alert-warning mt-2">{warning}</div>
+	{/if}
+
 	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
 
 	<WidgetOutputChart classNames="pt-4" {output} {highlightIndex} {mouseover} {mouseout} />

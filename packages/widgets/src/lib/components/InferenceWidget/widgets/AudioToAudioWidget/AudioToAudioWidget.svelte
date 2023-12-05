@@ -165,24 +165,24 @@
 		{applyWidgetExample}
 		validateExample={isAssetInput}
 	/>
-	<form>
-		<div class="flex flex-wrap items-center {isDisabled ? 'pointer-events-none hidden opacity-50' : ''}">
-			<WidgetFileInput accept="audio/*" classNames="mt-1.5 mr-2" {onSelectFile} />
-			<span class="mr-2 mt-1.5">or</span>
-			<WidgetRecorder classNames="mt-1.5" {onRecordStart} onRecordStop={onSelectFile} onError={onRecordError} />
-		</div>
-		{#if fileUrl}
-			<WidgetAudioTrack classNames="mt-3" label={filename} src={fileUrl} />
-		{/if}
-		<WidgetSubmitBtn
-			classNames="mt-2"
-			isDisabled={isRecording || isDisabled}
-			{isLoading}
-			onClick={() => {
-				getOutput();
-			}}
-		/>
-	</form>
+
+	<div class="flex flex-wrap items-center {isDisabled ? 'pointer-events-none hidden opacity-50' : ''}">
+		<WidgetFileInput accept="audio/*" classNames="mt-1.5 mr-2" {onSelectFile} />
+		<span class="mr-2 mt-1.5">or</span>
+		<WidgetRecorder classNames="mt-1.5" {onRecordStart} onRecordStop={onSelectFile} onError={onRecordError} />
+	</div>
+	{#if fileUrl}
+		<WidgetAudioTrack classNames="mt-3" label={filename} src={fileUrl} />
+	{/if}
+	<WidgetSubmitBtn
+		classNames="mt-2"
+		isDisabled={isRecording || isDisabled}
+		{isLoading}
+		onClick={() => {
+			getOutput();
+		}}
+	/>
+
 	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
 
 	{#each output as item}

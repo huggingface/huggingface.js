@@ -122,17 +122,17 @@
 		{applyWidgetExample}
 		validateExample={isTextInput}
 	/>
-	<form>
-		<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} />
-		<WidgetSubmitBtn
-			classNames="mt-2"
-			{isLoading}
-			{isDisabled}
-			onClick={() => {
-				getOutput();
-			}}
-		/>
-	</form>
+
+	<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} />
+	<WidgetSubmitBtn
+		classNames="mt-2"
+		{isLoading}
+		{isDisabled}
+		onClick={() => {
+			getOutput();
+		}}
+	/>
+
 	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
 
 	{#if output.length}
