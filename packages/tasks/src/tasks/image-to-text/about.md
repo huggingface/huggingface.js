@@ -48,7 +48,7 @@ You can use [huggingface.js](https://github.com/huggingface/huggingface.js) to i
 ```javascript
 import { HfInference } from "@huggingface/inference";
 
-const inference = new HfInference(HF_ACCESS_TOKEN);
+const inference = new HfInference(HF_TOKEN);
 await inference.imageToText({
 	data: await (await fetch("https://picsum.photos/300/300")).blob(),
 	model: "Salesforce/blip-image-captioning-base",

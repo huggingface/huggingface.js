@@ -27,7 +27,7 @@ if (env.VCR_MODE) {
 
 	VCR_MODE = env.VCR_MODE as MODE;
 } else {
-	VCR_MODE = env.HF_ACCESS_TOKEN ? MODE.DISABLED : MODE.PLAYBACK;
+	VCR_MODE = env.HF_TOKEN ? MODE.DISABLED : MODE.PLAYBACK;
 }
 
 const originalFetch = globalThis.fetch;
