@@ -32,7 +32,8 @@
 	function getExamples(isDisabled: boolean): TWidgetExample[] {
 		const examples = ((model?.widgetData ?? []) as TWidgetExample[])
 			.filter((sample) => validateExample(sample) && (!isDisabled || sample.output !== undefined))
-			.sort((sample1, sample2) => (sample2.example_title ? 1 : 0) - (sample1.example_title ? 1 : 0));
+		const examples = (model?.widgetData ?? [])
+			.filter((sample): sample is TWidgetExample => validateExample(sample) && (!isDisabled || sample.output !== undefined))
 
 		// if there are no examples with outputs AND model.inference !== InferenceDisplayability.Yes
 		// then widget will show InferenceDisplayability error to the user without showing anything else
