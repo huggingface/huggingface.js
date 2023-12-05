@@ -73,15 +73,17 @@
 
 	onMount(() => {
 		(async () => {
-			modelLoadInfo = await getModelLoadInfo(apiUrl, model.id, includeCredentials);
-			$modelLoadStates[model.id] = modelLoadInfo;
-			modelTooBig = modelLoadInfo?.state === "TooBig";
+			if (model.inference === InferenceDisplayability.Yes) {
+				modelLoadInfo = await getModelLoadInfo(apiUrl, model.id, includeCredentials);
+				$modelLoadStates[model.id] = modelLoadInfo;
+				modelTooBig = modelLoadInfo?.state === "TooBig";
 
-			if (modelTooBig) {
-				// disable the widget
-				isDisabled = true;
-				inputSamples = allInputSamples.filter((sample) => sample.output !== undefined);
-				inputGroups = getExamplesGroups();
+				if (modelTooBig) {
+					// disable the widget
+					isDisabled = true;
+					inputSamples = allInputSamples.filter((sample) => sample.output !== undefined);
+					inputGroups = getExamplesGroups();
+				}
 			}
 
 			const exampleFromQueryParams = {} as TWidgetExample;
@@ -110,42 +112,44 @@
 	<WidgetHeader pipeline={model.pipeline_tag} noTitle={true} />
 	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelTooBig} />
 {:else}
-	<div
-		class="flex w-full max-w-full flex-col
-		 {isMaximized ? 'fixed inset-0 z-20 bg-white p-12' : ''}
-		 {!modelLoadInfo ? 'hidden' : ''}"
-	>
-		{#if isMaximized}
-			<button class="absolute right-12 top-6" on:click={() => (isMaximized = !isMaximized)}>
-				<IconCross classNames="text-xl text-gray-500 hover:text-black" />
-			</button>
-		{/if}
-		<WidgetHeader {noTitle} pipeline={model.pipeline_tag} {isDisabled}>
-			{#if !!inputGroups.length}
-				<div class="ml-auto flex gap-x-1">
-					<!-- Show samples selector when there are more than one sample -->
-					{#if inputGroups.length > 1}
-						<WidgetInputSamplesGroup
-							bind:selectedInputGroup
-							{isLoading}
-							inputGroups={inputGroups.map(({ group }) => group)}
-						/>
-					{/if}
-					<WidgetInputSamples
-						classNames={!selectedInputSamples ? "opacity-50 pointer-events-none" : ""}
-						{isLoading}
-						inputSamples={selectedInputSamples?.inputSamples ?? []}
-						{applyInputSample}
-					/>
-				</div>
+	<!-- require that we have `modelLoadInfo` for InferenceDisplayability.Yes models -->
+	{#if modelLoadInfo || model.inference !== InferenceDisplayability.Yes}
+		<div
+			class="flex w-full max-w-full flex-col
+			 {isMaximized ? 'fixed inset-0 z-20 bg-white p-12' : ''}"
+		>
+			{#if isMaximized}
+				<button class="absolute right-12 top-6" on:click={() => (isMaximized = !isMaximized)}>
+					<IconCross classNames="text-xl text-gray-500 hover:text-black" />
+				</button>
 			{/if}
-		</WidgetHeader>
-		<slot name="top" {isDisabled} />
-		<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelTooBig} />
-		{#if modelLoading.isLoading}
-			<WidgetModelLoading estimatedTime={modelLoading.estimatedTime} />
-		{/if}
-		<slot name="bottom" />
-		<WidgetFooter bind:isMaximized {outputJson} {isDisabled} />
-	</div>
+			<WidgetHeader {noTitle} pipeline={model.pipeline_tag} {isDisabled}>
+				{#if !!inputGroups.length}
+					<div class="ml-auto flex gap-x-1">
+						<!-- Show samples selector when there are more than one sample -->
+						{#if inputGroups.length > 1}
+							<WidgetInputSamplesGroup
+								bind:selectedInputGroup
+								{isLoading}
+								inputGroups={inputGroups.map(({ group }) => group)}
+							/>
+						{/if}
+						<WidgetInputSamples
+							classNames={!selectedInputSamples ? "opacity-50 pointer-events-none" : ""}
+							{isLoading}
+							inputSamples={selectedInputSamples?.inputSamples ?? []}
+							{applyInputSample}
+						/>
+					</div>
+				{/if}
+			</WidgetHeader>
+			<slot name="top" {isDisabled} />
+			<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelTooBig} />
+			{#if modelLoading.isLoading}
+				<WidgetModelLoading estimatedTime={modelLoading.estimatedTime} />
+			{/if}
+			<slot name="bottom" />
+			<WidgetFooter bind:isMaximized {outputJson} {isDisabled} />
+		</div>
+	{/if}
 {/if}
