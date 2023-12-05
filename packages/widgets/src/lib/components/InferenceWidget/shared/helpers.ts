@@ -1,6 +1,6 @@
 import type { ModelData, WidgetExample, WidgetExampleAttribute } from "@huggingface/tasks";
 import { randomItem, parseJSON } from "../../../utils/ViewUtils.js";
-import type { ExampleRunOpts, ModelLoadInfo, TableData } from "./types.js";
+import type { ModelLoadInfo, TableData } from "./types.js";
 import { LoadState } from "./types.js";
 
 const KEYS_TEXT: WidgetExampleAttribute[] = ["text", "context", "candidate_labels"];
