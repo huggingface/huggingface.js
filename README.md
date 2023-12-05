@@ -105,9 +105,9 @@ Get your HF access token in your [account settings](https://huggingface.co/setti
 ```ts
 import { HfInference } from "@huggingface/inference";
 
-const HF_ACCESS_TOKEN = "hf_...";
+const HF_TOKEN = "hf_...";
 
-const inference = new HfInference(HF_ACCESS_TOKEN);
+const inference = new HfInference(HF_TOKEN);
 
 // You can also omit "model" to use the recommended model for the task
 await inference.translation({
@@ -137,11 +137,11 @@ const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the
 ```ts
 import {HfAgent, LLMFromHub, defaultTools} from '@huggingface/agents';
 
-const HF_ACCESS_TOKEN = "hf_...";
+const HF_TOKEN = "hf_...";
 
 const agent = new HfAgent(
-  HF_ACCESS_TOKEN,
-  LLMFromHub(HF_ACCESS_TOKEN),
+  HF_TOKEN,
+  LLMFromHub(HF_TOKEN),
   [...defaultTools]
 );
 
@@ -162,16 +162,16 @@ console.log(messages);
 ```ts
 import { createRepo, uploadFile, deleteFiles } from "@huggingface/hub";
 
-const HF_ACCESS_TOKEN = "hf_...";
+const HF_TOKEN = "hf_...";
 
 await createRepo({
   repo: "my-user/nlp-model", // or {type: "model", name: "my-user/nlp-test"},
-  credentials: {accessToken: HF_ACCESS_TOKEN}
+  credentials: {accessToken: HF_TOKEN}
 });
 
 await uploadFile({
   repo: "my-user/nlp-model",
-  credentials: {accessToken: HF_ACCESS_TOKEN},
+  credentials: {accessToken: HF_TOKEN},
   // Can work with native File in browsers
   file: {
     path: "pytorch_model.bin",
@@ -181,7 +181,7 @@ await uploadFile({
 
 await deleteFiles({
   repo: {type: "space", name: "my-user/my-space"}, // or "spaces/my-user/my-space"
-  credentials: {accessToken: HF_ACCESS_TOKEN},
+  credentials: {accessToken: HF_TOKEN},
   paths: ["README.md", ".gitattributes"]
 });
 ```

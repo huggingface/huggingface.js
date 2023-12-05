@@ -117,7 +117,7 @@ You can use [huggingface.js](https://github.com/huggingface/huggingface.js) to i
 ```javascript
 import { HfInference } from "@huggingface/inference";
 
-const inference = new HfInference(HF_ACCESS_TOKEN);
+const inference = new HfInference(HF_TOKEN);
 await inference.conversational({
 	model: "distilbert-base-uncased-finetuned-sst-2-english",
 	inputs: "I love this movie!",

@@ -8,15 +8,15 @@ import { readTestFile } from "./test-files";
 const TIMEOUT = 60000 * 3;
 const env = import.meta.env;
 
-if (!env.HF_ACCESS_TOKEN) {
-	console.warn("Set HF_ACCESS_TOKEN in the env to run the tests for better rate limits");
+if (!env.HF_TOKEN) {
+	console.warn("Set HF_TOKEN in the env to run the tests for better rate limits");
 }
 
 describe.concurrent(
 	"HfInference",
 	() => {
 		// Individual tests can be ran without providing an api key, however running all tests without an api key will result in rate limiting error.
-		const hf = new HfInference(env.HF_ACCESS_TOKEN);
+		const hf = new HfInference(env.HF_TOKEN);
 
 		it("throws error if model does not exist", () => {
 			expect(

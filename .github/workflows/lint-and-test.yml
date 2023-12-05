@@ -50,12 +50,12 @@ jobs:
       - name: Test
         run: VCR_MODE=playback pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test
         env:
-          HF_ACCESS_TOKEN: ${{ secrets.HF_ACCESS_TOKEN }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       - name: Test in browser
         run: VCR_MODE=playback pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test:browser
         env:
-          HF_ACCESS_TOKEN: ${{ secrets.HF_ACCESS_TOKEN }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       - name: E2E - start mock npm registry
         run: |
@@ -86,7 +86,7 @@ jobs:
           pnpm i --ignore-workspace --registry http://localhost:4874/
           pnpm start
         env:
-          token: ${{ secrets.HF_ACCESS_TOKEN }}
+          token: ${{ secrets.HF_TOKEN }}
 
       - name: E2E test - svelte app build
         working-directory: e2e/svelte
