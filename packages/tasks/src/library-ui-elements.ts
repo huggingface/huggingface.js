@@ -187,12 +187,8 @@ const paddlenlp = (model: ModelData) => {
 			[
 				`from paddlenlp.transformers import AutoTokenizer, ${architecture}`,
 				"",
-				`tokenizer = AutoTokenizer.from_pretrained("${model.id}"${
-					model.private ? ", use_auth_token=True" : ""
-				}, from_hf_hub=True)`,
-				`model = ${architecture}.from_pretrained("${model.id}"${
-					model.private ? ", use_auth_token=True" : ""
-				}, from_hf_hub=True)`,
+				`tokenizer = AutoTokenizer.from_pretrained("${model.id}, from_hf_hub=True)`,
+				`model = ${architecture}.from_pretrained("${model.id}, from_hf_hub=True)`,
 			].join("\n"),
 		];
 	} else {
@@ -201,12 +197,8 @@ const paddlenlp = (model: ModelData) => {
 				`# ⚠️ Type of model unknown`,
 				`from paddlenlp.transformers import AutoTokenizer, AutoModel`,
 				"",
-				`tokenizer = AutoTokenizer.from_pretrained("${model.id}"${
-					model.private ? ", use_auth_token=True" : ""
-				}, from_hf_hub=True)`,
-				`model = AutoModel.from_pretrained("${model.id}"${
-					model.private ? ", use_auth_token=True" : ""
-				}, from_hf_hub=True)`,
+				`tokenizer = AutoTokenizer.from_pretrained("${model.id}, from_hf_hub=True)`,
+				`model = AutoModel.from_pretrained("${model.id}, from_hf_hub=True)`,
 			].join("\n"),
 		];
 	}
