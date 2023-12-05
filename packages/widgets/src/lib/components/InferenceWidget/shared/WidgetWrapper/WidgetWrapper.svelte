@@ -22,7 +22,7 @@
 
 	onMount(() => {
 		(async () => {
-			if (model.inference !== InferenceDisplayability.Yes){
+			if (model.inference !== InferenceDisplayability.Yes) {
 				return;
 			}
 
