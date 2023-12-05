@@ -15,10 +15,6 @@ export interface WhoAmIUser {
 	name: string;
 	fullname: string;
 	canPay: boolean;
-	/**
-	 * @deprecated
-	 */
-	plan?: unknown;
 	avatarUrl: string;
 	/**
 	 * Unix timestamp in seconds
@@ -34,10 +30,6 @@ export interface WhoAmIOrg {
 	fullname: string;
 	email: string | null;
 	canPay: boolean;
-	/**
-	 * @deprecated
-	 */
-	plan?: unknown;
 	avatarUrl: string;
 	/**
 	 * Unix timestamp in seconds
@@ -63,7 +55,6 @@ export interface AuthInfo {
 		expiration?: Date;
 		role: AccessTokenRole;
 	};
-	permissions: string[];
 	expiresAt?: Date;
 }
 
