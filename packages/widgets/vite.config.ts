@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => {
 					emitCss: false,
 					compilerOptions: {
 						hydratable: true,
-						generate:   isSSR ? "ssr" : "dom",
+						generate: isSSR ? "ssr" : "dom",
 					},
 				}),
 				dts({
