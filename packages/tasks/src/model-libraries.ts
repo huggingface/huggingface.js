@@ -23,6 +23,7 @@ export enum ModelLibrary {
 	"pyannote-audio" = "pyannote.audio",
 	"sample-factory" = "Sample Factory",
 	"sentence-transformers" = "Sentence Transformers",
+	"setfit" = "SetFit",
 	"sklearn" = "Scikit-learn",
 	"spacy" = "spaCy",
 	"span-marker" = "SpanMarker",

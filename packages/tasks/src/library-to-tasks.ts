@@ -31,6 +31,7 @@ export const LIBRARY_TASK_MAPPING_EXCLUDING_TRANSFORMERS: Partial<Record<ModelLi
 	peft: ["text-generation"],
 	"pyannote-audio": ["automatic-speech-recognition"],
 	"sentence-transformers": ["feature-extraction", "sentence-similarity"],
+	setfit: ["text-classification"],
 	sklearn: ["tabular-classification", "tabular-regression", "text-classification"],
 	spacy: ["token-classification", "text-classification", "sentence-similarity"],
 	"span-marker": ["token-classification"],

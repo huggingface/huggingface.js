@@ -350,6 +350,12 @@ const sentenceTransformers = (model: ModelData) => [
 model = SentenceTransformer("${model.id}")`,
 ];
 
+const setfit = (model: ModelData) => [
+	`from setfit import SetFitModel
+
+model = SetFitModel.from_pretrained("${model.id}")`,
+];
+
 const spacy = (model: ModelData) => [
 	`!pip install https://huggingface.co/${model.id}/resolve/main/${nameWithoutNamespace(model.id)}-any-py3-none-any.whl
 
@@ -652,6 +658,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS: Partial<Record<ModelLibraryKey, Librar
 		repoUrl: "https://github.com/UKPLab/sentence-transformers",
 		docsUrl: "https://huggingface.co/docs/hub/sentence-transformers",
 		snippets: sentenceTransformers,
+	},
+	setfit: {
+		btnLabel: "setfit",
+		repoName: "setfit",
+		repoUrl: "https://github.com/huggingface/setfit",
+		docsUrl: "https://huggingface.co/docs/hub/setfit",
+		snippets: setfit,
 	},
 	sklearn: {
 		btnLabel: "Scikit-learn",
