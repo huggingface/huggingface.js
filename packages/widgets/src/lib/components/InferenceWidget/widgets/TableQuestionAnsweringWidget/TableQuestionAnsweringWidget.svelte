@@ -186,5 +186,5 @@
 	</div>
 	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
 
-	<WidgetFooter {isDisabled} {outputJson} />
+	<WidgetFooter {model} {isDisabled} {outputJson} />
 </WidgetWrapper>

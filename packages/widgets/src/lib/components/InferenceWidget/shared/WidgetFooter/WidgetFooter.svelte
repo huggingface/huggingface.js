@@ -1,8 +1,15 @@
 <script lang="ts">
+	import type { WidgetProps } from "../types.js";
+	import { identity } from "svelte/internal";
+	import { widgetStates, updateWidgetState } from "../../stores.js";
 	import IconCode from "../../..//Icons/IconCode.svelte";
+	import IconMaximize from "../../..//Icons/IconMaximize.svelte";
 
+	export let model: WidgetProps["model"];
 	export let outputJson: string;
 	export let isDisabled = false;
+
+	$: isMaximized = $widgetStates?.[model.id]?.isMaximized;
 
 	let isOutputJsonVisible = false;
 </script>
@@ -20,6 +27,17 @@
 			JSON Output
 		</button>
 	{/if}
+	<button
+		class="ml-auto flex items-center"
+		on:click|preventDefault={() => updateWidgetState(model.id, "isMaximized", true)}
+	>
+		<IconMaximize classNames="mr-1" />
+		{#if !isMaximized}
+			Maximize
+		{:else}
+			Minimize
+		{/if}
+	</button>
 </div>
 {#if outputJson && isOutputJsonVisible}
 	<pre

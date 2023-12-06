@@ -254,5 +254,5 @@
 
 	<WidgetOuputTokens classNames="mt-2" {output} text={outputText} />
 
-	<WidgetFooter {isDisabled} {outputJson} />
+	<WidgetFooter {model} {isDisabled} {outputJson} />
 </WidgetWrapper>

@@ -130,5 +130,5 @@
 
 	<WidgetOutputText classNames="mt-4" {output} />
 
-	<WidgetFooter {isDisabled} {outputJson} />
+	<WidgetFooter {model} {isDisabled} {outputJson} />
 </WidgetWrapper>

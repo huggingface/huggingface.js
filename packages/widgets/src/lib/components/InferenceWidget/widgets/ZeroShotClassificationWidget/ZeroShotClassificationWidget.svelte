@@ -184,5 +184,5 @@
 		<WidgetOutputChart classNames="pt-4" {output} />
 	{/if}
 
-	<WidgetFooter {isDisabled} {outputJson} />
+	<WidgetFooter {model} {isDisabled} {outputJson} />
 </WidgetWrapper>

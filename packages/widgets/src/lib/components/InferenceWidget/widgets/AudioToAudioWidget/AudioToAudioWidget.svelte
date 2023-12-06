@@ -185,5 +185,5 @@
 		</div>
 	{/each}
 
-	<WidgetFooter {isDisabled} {outputJson} />
+	<WidgetFooter {model} {isDisabled} {outputJson} />
 </WidgetWrapper>

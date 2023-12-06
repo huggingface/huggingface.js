@@ -43,6 +43,7 @@ export interface ModelLoadInfo {
 export interface WidgetState {
 	isDisabled?: boolean;
 	noInference?: boolean;
+	isMaximized?: boolean;
 }
 
 export type TableData = Record<string, (string | number)[]>;

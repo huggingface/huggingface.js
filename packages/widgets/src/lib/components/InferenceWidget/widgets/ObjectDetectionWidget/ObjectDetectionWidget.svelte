@@ -187,5 +187,5 @@
 
 	<WidgetOutputChart classNames="pt-4" {output} {highlightIndex} {mouseover} {mouseout} />
 
-	<WidgetFooter {isDisabled} {outputJson} />
+	<WidgetFooter {model} {isDisabled} {outputJson} />
 </WidgetWrapper>

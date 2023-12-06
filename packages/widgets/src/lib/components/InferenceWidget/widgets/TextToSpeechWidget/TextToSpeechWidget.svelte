@@ -132,5 +132,5 @@
 		<WidgetAudioTrack classNames="mt-4" src={output} />
 	{/if}
 
-	<WidgetFooter {isDisabled} {outputJson} />
+	<WidgetFooter {model} {isDisabled} {outputJson} />
 </WidgetWrapper>
