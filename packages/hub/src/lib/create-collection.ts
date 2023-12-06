@@ -3,7 +3,8 @@ import { createApiError } from "../error";
 import type { Collection, CreateCollectionPayload } from "../types/api/api-collection";
 import type { Credentials } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
-// import type { WhoAmI } from "./who-am-i";
+import { getCollections } from "./get-collections";
+import type { CollectionEntry } from "./get-collections";
 
 export async function createCollection(params: {
 	title: string;
@@ -20,10 +21,12 @@ export async function createCollection(params: {
 }): Promise<Collection> {
 	checkCredentials(params.credentials);
 
-	if (params.namespace == null) {
-		// params.namespace = userInfo.name;
+	if (!params.namespace) {
+		throw new Error(`Namespace was not provided`);
 	}
-	console.log(params.description);
+	if (!params.title) {
+		throw new Error(`Title was not provided`);
+	}
 	const res = await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/collections`, {
 		method: "POST",
 		body: JSON.stringify({
@@ -39,11 +42,24 @@ export async function createCollection(params: {
 		},
 	});
 	if (!res.ok) {
-		throw await createApiError(res);
+		if (params.exists_ok == true && res.status == 409) {
+			// # Collection already exists and `exists_ok=True`
+			const collection = await res.json();
+			const results: CollectionEntry[] = [];
+			for await (const entry of getCollections({
+				slug: collection["slug"],
+				credentials: params.credentials,
+				hubUrl: params.hubUrl,
+			})) {
+				results.push(entry);
+			}
+			const collectionResult = results as unknown as Collection;
+			return collectionResult;
+		} else {
+			throw await createApiError(res);
+		}
 	}
 
 	const collection = await res.json();
 	return collection;
 }
-
-//
