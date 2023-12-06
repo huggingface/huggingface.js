@@ -1,4 +1,4 @@
-import type { WidgetExample } from "./model-data";
+import type { WidgetExample } from "./widget-example";
 import type { PipelineType } from "./pipelines";
 
 type LanguageCode = string;
