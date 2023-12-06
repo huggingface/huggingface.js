@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { randomItem } from "$lib/utils/ViewUtils.js";
-
 	import type { ExampleRunOpts, WidgetProps } from "../types.js";
 	import type { WidgetExample, WidgetExampleAttribute } from "@huggingface/tasks";
 
@@ -9,6 +7,7 @@
 	import { onMount } from "svelte";
 	import { slide } from "svelte/transition";
 
+	import { randomItem } from "../../../../utils/ViewUtils.js";
 	import IconCaretDownV2 from "../../..//Icons/IconCaretDownV2.svelte";
 	import WidgetExamplesGroup from "./WidgetExamplesGroup.svelte";
 	import { getQueryParamVal } from "../../..//InferenceWidget/shared/helpers.js";
