@@ -16,10 +16,8 @@
 	export let title: string | null = null;
 	export let isLoading = false;
 	export let isDisabled = false;
-	export let applyWidgetExample: (sample: TWidgetExample, opts?: ExampleRunOpts) => void = () => {};
-	export let validateExample: (sample: WidgetExample) => sample is TWidgetExample = (
-		sample
-	): sample is TWidgetExample => true;
+	export let applyWidgetExample: ((sample: TWidgetExample, opts?: ExampleRunOpts) => void) | undefined = undefined;
+	export let validateExample: ((sample: WidgetExample) => sample is TWidgetExample) | undefined = undefined;
 	export let callApiOnMount: WidgetProps["callApiOnMount"] = false;
 	export let exampleQueryParams: WidgetExampleAttribute[] = [];
 
@@ -27,11 +25,12 @@
 
 	$: task = pipeline ? getPipelineTask(pipeline) : undefined;
 
-	$: examplesAll = getExamples(isDisabled);
+	$: validExamples = getValidExamples(isDisabled);
 
-	function getExamples(isDisabled: boolean): TWidgetExample[] {
+	function getValidExamples(isDisabled: boolean): TWidgetExample[] {
 		const examples = (model?.widgetData ?? []).filter(
-			(sample): sample is TWidgetExample => validateExample(sample) && (!isDisabled || sample.output !== undefined)
+			(sample): sample is TWidgetExample =>
+				(validateExample?.(sample) ?? false) && (!isDisabled || sample.output !== undefined)
 		);
 
 		// if there are no examples with outputs AND model.inference !== InferenceDisplayability.Yes
@@ -76,15 +75,7 @@
 			<PipelineTag classNames="mr-2 mb-1.5" {pipeline} />
 		</a>
 	{/if}
-	{#if examplesAll.length}
-		<WidgetExamples
-			{examplesAll}
-			{isLoading}
-			{applyWidgetExample}
-			{validateExample}
-			{model}
-			{callApiOnMount}
-			{exampleQueryParams}
-		/>
+	{#if validExamples.length && applyWidgetExample}
+		<WidgetExamples {validExamples} {isLoading} {applyWidgetExample} {callApiOnMount} {exampleQueryParams} />
 	{/if}
 </div>

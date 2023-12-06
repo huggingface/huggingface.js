@@ -2,15 +2,13 @@
 	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "../../shared/types.js";
 	import type { WidgetExampleAssetAndZeroShotInput } from "@huggingface/tasks";
 
-	import { onMount } from "svelte";
-
 	import WidgetFileInput from "../../shared/WidgetFileInput/WidgetFileInput.svelte";
 	import WidgetDropzone from "../../shared/WidgetDropzone/WidgetDropzone.svelte";
 	import WidgetTextInput from "../../shared/WidgetTextInput/WidgetTextInput.svelte";
 	import WidgetSubmitBtn from "../../shared/WidgetSubmitBtn/WidgetSubmitBtn.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
 	import WidgetOutputChart from "../../shared/WidgetOutputChart/WidgetOutputChart.svelte";
-	import { addInferenceParameters, callInferenceApi, getWidgetExample } from "../../shared/helpers.js";
+	import { addInferenceParameters, callInferenceApi } from "../../shared/helpers.js";
 	import { isAssetAndZeroShotInput } from "../../shared/inputValidation.js";
 	import { widgetStates } from "../../stores.js";
 
@@ -148,15 +146,6 @@
 			error = res.error;
 		}
 	}
-
-	onMount(() => {
-		(async () => {
-			const example = getWidgetExample<WidgetExampleAssetAndZeroShotInput>(model, isAssetAndZeroShotInput);
-			if (callApiOnMount && example) {
-				await applyWidgetExample(example, { inferenceOpts: { isOnLoadCall: true } });
-			}
-		})();
-	});
 </script>
 
 <WidgetWrapper {apiUrl} {includeCredentials} {model} let:WidgetInfo let:WidgetHeader let:WidgetFooter>

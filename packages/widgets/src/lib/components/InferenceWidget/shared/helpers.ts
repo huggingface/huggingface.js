@@ -21,16 +21,6 @@ export function getQueryParamVal(key: WidgetExampleAttribute): QueryParamVal {
 	return value;
 }
 
-export function getWidgetExample<TWidgetExample extends WidgetExample>(
-	model: ModelData,
-	validateExample: (sample: WidgetExample) => sample is TWidgetExample
-): TWidgetExample | undefined {
-	const validExamples = model?.widgetData?.filter(
-		(sample): sample is TWidgetExample => sample && validateExample(sample)
-	);
-	return validExamples?.length ? randomItem(validExamples) : undefined;
-}
-
 // Update current url search params, keeping existing keys intact.
 export function updateUrl(obj: Partial<Record<WidgetExampleAttribute, string | undefined>>): void {
 	if (!window) {
