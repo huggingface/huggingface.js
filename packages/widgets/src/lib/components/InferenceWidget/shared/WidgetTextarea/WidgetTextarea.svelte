@@ -18,7 +18,7 @@
 
 	export async function renderTextOutput(outputTxt: string, typingEffect = true): Promise<void> {
 		const spanEl = document.createElement("span");
-		spanEl.contentEditable = "true";
+		spanEl.contentEditable = isDisabled ? "false" : "true";
 		spanEl.className = classNamesOutput;
 		containerSpanEl?.appendChild(spanEl);
 		await tick();
