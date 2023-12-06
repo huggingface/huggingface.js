@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { InferenceDisplayability } from "@huggingface/tasks";
 	import type { WidgetExample } from "@huggingface/tasks";
-	import type { WidgetProps, ModelLoadInfo } from "../types.js";
+	import type { WidgetProps } from "../types.js";
 
 	type TWidgetExample = $$Generic<WidgetExample>;
 
