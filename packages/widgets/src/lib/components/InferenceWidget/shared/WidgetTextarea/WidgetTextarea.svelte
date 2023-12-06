@@ -16,7 +16,7 @@
 	const classNamesInput = "whitespace-pre-wrap inline font-normal text-black dark:text-white";
 	const classNamesOutput = "whitespace-pre-wrap inline text-blue-600 dark:text-blue-400";
 
-	export async function renderTypingEffect(outputTxt: string): Promise<void> {
+	export async function renderTextOutput(outputTxt: string, typingEffect = true): Promise<void> {
 		const spanEl = document.createElement("span");
 		spanEl.contentEditable = "true";
 		spanEl.className = classNamesOutput;
@@ -29,10 +29,14 @@
 		}
 		await tick();
 		// split on whitespace or any other character to correctly render newlines \n
-		for (const char of outputTxt.split(/(\s|.)/g)) {
-			await delay(typingEffectSpeedMs);
-			spanEl.textContent += char;
-			moveCaretToEnd();
+		if (typingEffect) {
+			for (const char of outputTxt.split(/(\s|.)/g)) {
+				await delay(typingEffectSpeedMs);
+				spanEl.textContent += char;
+				moveCaretToEnd();
+			}
+		} else {
+			spanEl.textContent = outputTxt;
 		}
 		updateInnerTextValue();
 	}
