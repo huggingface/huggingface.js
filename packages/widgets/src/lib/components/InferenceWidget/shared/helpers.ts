@@ -1,5 +1,5 @@
-import type { ModelData, WidgetExample, WidgetExampleAttribute } from "@huggingface/tasks";
-import { randomItem, parseJSON } from "../../../utils/ViewUtils.js";
+import type { ModelData, WidgetExampleAttribute } from "@huggingface/tasks";
+import { parseJSON } from "../../../utils/ViewUtils.js";
 import type { ModelLoadInfo, TableData } from "./types.js";
 import { LoadState } from "./types.js";
 
