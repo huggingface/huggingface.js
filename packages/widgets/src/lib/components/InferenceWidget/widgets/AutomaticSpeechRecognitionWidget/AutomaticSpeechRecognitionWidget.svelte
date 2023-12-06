@@ -12,6 +12,7 @@
 	import { callInferenceApi, getBlobFromUrl } from "../../shared/helpers.js";
 	import { isValidOutputText } from "../../shared/outputValidation.js";
 	import { isAssetInput } from "../../shared/inputValidation.js";
+	import { widgetStates } from "../../stores.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -19,7 +20,8 @@
 	export let model: WidgetProps["model"];
 	export let noTitle: WidgetProps["noTitle"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
-	let isDisabled = false;
+
+	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
 	let computeTime = "";
 	let error: string = "";
@@ -161,16 +163,7 @@
 	}
 </script>
 
-<WidgetWrapper
-	{apiUrl}
-	{includeCredentials}
-	{model}
-	let:isDisabled
-	let:modelLoadInfo
-	let:WidgetInfo
-	let:WidgetHeader
-	let:WidgetFooter
->
+<WidgetWrapper {apiUrl} {includeCredentials} {model} let:WidgetInfo let:WidgetHeader let:WidgetFooter>
 	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyWidgetExample} {validateExample} />
 
 	<div class="flex flex-wrap items-center {isDisabled ? 'pointer-events-none hidden opacity-50' : ''}">
@@ -211,7 +204,7 @@
 		{/if}
 	{/if}
 
-	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
+	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
 
 	<WidgetOutputText classNames="mt-4" {output} />
 

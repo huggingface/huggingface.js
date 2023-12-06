@@ -11,14 +11,14 @@
 	import WidgetHeader from "../WidgetHeader/WidgetHeader.svelte";
 	import WidgetInfo from "../WidgetInfo/WidgetInfo.svelte";
 	import { getModelLoadInfo } from "../../..//InferenceWidget/shared/helpers.js";
-	import { modelLoadStates, widgetNoInference } from "../../stores.js";
+	import { modelLoadStates, widgetStates, updateWidgetState } from "../../stores.js";
 
 	export let apiUrl: string;
 	export let model: WidgetProps["model"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
 
-	let isDisabled = model.inference !== InferenceDisplayability.Yes && model.pipeline_tag !== "reinforcement-learning";
-	let modelLoadInfo: ModelLoadInfo | undefined = undefined;
+	const isDisabled = model.inference !== InferenceDisplayability.Yes && model.pipeline_tag !== "reinforcement-learning";
+	updateWidgetState(model.id, "isDisabled", isDisabled);
 
 	onMount(() => {
 		(async () => {
@@ -26,21 +26,21 @@
 				return;
 			}
 
-			modelLoadInfo = await getModelLoadInfo(apiUrl, model.id, includeCredentials);
+			const modelLoadInfo = await getModelLoadInfo(apiUrl, model.id, includeCredentials);
 			$modelLoadStates[model.id] = modelLoadInfo;
 
 			if (modelLoadInfo?.state === "TooBig") {
-				isDisabled = true;
+				updateWidgetState(model.id, "isDisabled", true);
 			}
 		})();
 	});
 </script>
 
-{#if $widgetNoInference?.[model.id]}
+{#if $widgetStates?.[model.id]?.noInference}
 	<WidgetHeader {model} noTitle={true} />
-	<WidgetInfo {model} {modelLoadInfo} />
-{:else if modelLoadInfo || model.inference !== InferenceDisplayability.Yes}
+	<WidgetInfo {model} />
+{:else if $modelLoadStates[model.id] || model.inference !== InferenceDisplayability.Yes}
 	<form class="flex w-full max-w-full flex-col">
-		<slot {isDisabled} {modelLoadInfo} {WidgetInfo} {WidgetHeader} {WidgetFooter} />
+		<slot {isDisabled} {WidgetInfo} {WidgetHeader} {WidgetFooter} />
 	</form>
 {/if}

@@ -14,6 +14,7 @@
 		updateUrl,
 	} from "../../shared/helpers.js";
 	import { isTextAndTableInput } from "../../shared/inputValidation.js";
+	import { widgetStates } from "../../stores.js";
 	interface Output {
 		aggregator?: string;
 		answer: string;
@@ -28,6 +29,8 @@
 	export let noTitle: WidgetProps["noTitle"];
 	export let shouldUpdateUrl: WidgetProps["shouldUpdateUrl"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
+
+	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
 	let computeTime = "";
 	let error: string = "";
@@ -153,16 +156,7 @@
 	}
 </script>
 
-<WidgetWrapper
-	{apiUrl}
-	{includeCredentials}
-	{model}
-	let:isDisabled
-	let:modelLoadInfo
-	let:WidgetInfo
-	let:WidgetHeader
-	let:WidgetFooter
->
+<WidgetWrapper {apiUrl} {includeCredentials} {model} let:WidgetInfo let:WidgetHeader let:WidgetFooter>
 	<WidgetHeader
 		{noTitle}
 		{model}
@@ -190,7 +184,7 @@
 			<WidgetTableInput {highlighted} onChange={onChangeTable} {table} {isDisabled} />
 		{/if}
 	</div>
-	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
+	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
 
 	<WidgetFooter {isDisabled} {outputJson} />
 </WidgetWrapper>

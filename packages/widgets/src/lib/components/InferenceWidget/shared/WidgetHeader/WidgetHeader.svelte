@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { widgetNoInference } from "../../stores.js";
+	import { updateWidgetState } from "../../stores.js";
 	import { TASKS_DATA } from "@huggingface/tasks";
 	import type { WidgetExample, WidgetExampleAttribute } from "@huggingface/tasks";
 	import type { WidgetProps, ExampleRunOpts } from "../types.js";
@@ -37,7 +37,7 @@
 		// if there are no examples with outputs AND model.inference !== InferenceDisplayability.Yes
 		// then widget will show InferenceDisplayability error to the user without showing anything else
 		if (isDisabled && !examples.length) {
-			$widgetNoInference[model.id] = true;
+			updateWidgetState(model.id, "noInference", true);
 		}
 
 		return examples;

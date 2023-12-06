@@ -9,6 +9,7 @@
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
 	import { callInferenceApi, getBlobFromUrl } from "../../shared/helpers.js";
 	import { isAssetInput } from "../../shared/inputValidation.js";
+	import { widgetStates } from "../../stores.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -16,7 +17,8 @@
 	export let model: WidgetProps["model"];
 	export let noTitle: WidgetProps["noTitle"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
-	let isDisabled = false;
+
+	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
 	let computeTime = "";
 	let error: string = "";
@@ -146,16 +148,7 @@
 	}
 </script>
 
-<WidgetWrapper
-	{apiUrl}
-	{includeCredentials}
-	{model}
-	let:isDisabled
-	let:modelLoadInfo
-	let:WidgetInfo
-	let:WidgetHeader
-	let:WidgetFooter
->
+<WidgetWrapper {apiUrl} {includeCredentials} {model} let:WidgetInfo let:WidgetHeader let:WidgetFooter>
 	<WidgetHeader
 		{noTitle}
 		{model}
@@ -183,7 +176,7 @@
 		}}
 	/>
 
-	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
+	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
 
 	{#each output as item}
 		<div class="mt-2 flex items-center">

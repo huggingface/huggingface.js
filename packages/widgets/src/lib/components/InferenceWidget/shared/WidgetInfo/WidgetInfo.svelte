@@ -4,17 +4,17 @@
 	import WidgetModelLoading from "../WidgetModelLoading/WidgetModelLoading.svelte";
 	import IconAzureML from "../../..//Icons/IconAzureML.svelte";
 	import IconInfo from "../../..//Icons/IconInfo.svelte";
+	import { modelLoadStates } from "../../stores.js";
 
 	export let model: WidgetProps["model"];
 	export let computeTime: string = "";
 	export let error: string = "";
-	export let modelLoadInfo: ModelLoadInfo | undefined = undefined;
 	export let modelLoading = {
 		isLoading: false,
 		estimatedTime: 0,
 	};
 
-	$: modelTooBig = modelLoadInfo?.state === "TooBig";
+	$: modelTooBig = $modelLoadStates[model.id]?.state === "TooBig";
 
 	const state = {
 		[LoadState.Loadable]: "This model can be loaded on the Inference API on-demand.",
@@ -32,11 +32,11 @@
 		[LoadState.Error]: "⚠️ This model could not be loaded.",
 	} as const;
 
-	function getStatusReport(modelLoadInfo: ModelLoadInfo | undefined, statuses: Record<LoadState, string>): string {
-		if (!modelLoadInfo) {
+	function getStatusReport(modelLoadStates: ModelLoadInfo | undefined, statuses: Record<LoadState, string>): string {
+		if (!modelLoadStates) {
 			return "Model state unknown";
 		}
-		return statuses[modelLoadInfo.state];
+		return statuses[modelLoadStates.state];
 	}
 </script>
 
@@ -54,13 +54,13 @@
 				</div>
 				<div class="border-dotter mx-2 flex flex-1 -translate-y-px border-b border-gray-100" />
 				<div>
-					{@html getStatusReport(modelLoadInfo, azureState)}
+					{@html getStatusReport($modelLoadStates[model.id], azureState)}
 				</div>
 			</div>
 		{:else if computeTime}
-			Computation time on {modelLoadInfo?.compute_type ?? ComputeType.CPU}: {computeTime}
+			Computation time on {$modelLoadStates[model.id]?.compute_type ?? ComputeType.CPU}: {computeTime}
 		{:else if (model.inference === InferenceDisplayability.Yes || model.pipeline_tag === "reinforcement-learning") && !modelTooBig}
-			{@html getStatusReport(modelLoadInfo, state)}
+			{@html getStatusReport($modelLoadStates[model.id], state)}
 		{:else if model.inference === InferenceDisplayability.ExplicitOptOut}
 			<span class="text-sm text-gray-500">Inference API has been turned off for this model.</span>
 		{:else if model.inference === InferenceDisplayability.CustomCode}

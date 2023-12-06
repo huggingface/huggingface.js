@@ -9,6 +9,7 @@
 	import { callInferenceApi, getBlobFromUrl } from "../../shared/helpers.js";
 	import { isValidOutputLabels } from "../../shared/outputValidation.js";
 	import { isTextInput } from "../../shared/inputValidation.js";
+	import { widgetStates } from "../../stores.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -16,6 +17,8 @@
 	export let model: WidgetProps["model"];
 	export let noTitle: WidgetProps["noTitle"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
+
+	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
 	let computeTime = "";
 	let error: string = "";
@@ -117,16 +120,7 @@
 	}
 </script>
 
-<WidgetWrapper
-	{apiUrl}
-	{includeCredentials}
-	{model}
-	let:isDisabled
-	let:modelLoadInfo
-	let:WidgetInfo
-	let:WidgetHeader
-	let:WidgetFooter
->
+<WidgetWrapper {apiUrl} {includeCredentials} {model} let:WidgetInfo let:WidgetHeader let:WidgetFooter>
 	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyWidgetExample} {validateExample} />
 
 	<WidgetDropzone
@@ -161,7 +155,7 @@
 		<div class="alert alert-warning mt-2">{warning}</div>
 	{/if}
 
-	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
+	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
 
 	<WidgetOutputChart classNames="pt-4" {output} />
 

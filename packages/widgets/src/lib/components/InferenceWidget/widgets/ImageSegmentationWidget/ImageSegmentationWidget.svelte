@@ -14,6 +14,7 @@
 	import { isAssetInput } from "../../shared/inputValidation.js";
 
 	import Canvas from "./Canvas.svelte";
+	import { widgetStates } from "../../stores.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -21,6 +22,8 @@
 	export let model: WidgetProps["model"];
 	export let noTitle: WidgetProps["noTitle"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
+
+	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
 	const maskOpacity = Math.floor(255 * 0.6);
 	const colorToRgb = Object.fromEntries(
@@ -229,16 +232,7 @@
 	});
 </script>
 
-<WidgetWrapper
-	{apiUrl}
-	{includeCredentials}
-	{model}
-	let:isDisabled
-	let:modelLoadInfo
-	let:WidgetInfo
-	let:WidgetHeader
-	let:WidgetFooter
->
+<WidgetWrapper {apiUrl} {includeCredentials} {model} let:WidgetInfo let:WidgetHeader let:WidgetFooter>
 	<WidgetHeader
 		{noTitle}
 		{model}
@@ -278,7 +272,7 @@
 	{/if}
 	<img alt="" bind:this={imgEl} class="hidden" src={imgSrc} />
 
-	<WidgetInfo {model} {computeTime} {error} {modelLoadInfo} {modelLoading} />
+	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
 
 	<WidgetOutputChart classNames="pt-4" {output} {highlightIndex} {mouseover} {mouseout} />
 
