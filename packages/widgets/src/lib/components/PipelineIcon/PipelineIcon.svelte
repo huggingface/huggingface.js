@@ -40,6 +40,7 @@
 	import IconMaskGeneration from "../Icons/IconMaskGeneration.svelte";
 	import IconTextTo3D from "../Icons/IconTextTo3D.svelte";
 	import IconImageTo3D from "../Icons/IconImageTo3D.svelte";
+	import IconImageFeatureExtraction from "../Icons/IconImageFeatureExtraction.svelte";
 	import type { PipelineType } from "@huggingface/tasks";
 
 	export let classNames = "";
@@ -90,6 +91,7 @@
 		"zero-shot-object-detection": IconZeroShotObjectDetection,
 		"text-to-3d": IconTextTo3D,
 		"image-to-3d": IconImageTo3D,
+		"image-feature-extraction": IconImageFeatureExtraction,
 	};
 
 	$: iconComponent =
