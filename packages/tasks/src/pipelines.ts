@@ -635,6 +635,16 @@ export const PIPELINE_DATA = {
 		modality: "cv",
 		color: "yellow",
 	},
+	"text-to-3d": {
+		name: "Text-to-3D",
+		modality: "multimodal",
+		color: "yellow",
+	},
+	"image-to-3d": {
+		name: "Image-to-3D",
+		modality: "multimodal",
+		color: "green",
+	},
 	other: {
 		name: "Other",
 		modality: "other",

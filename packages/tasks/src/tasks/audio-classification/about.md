@@ -53,7 +53,7 @@ You can use [huggingface.js](https://github.com/huggingface/huggingface.js) to i
 ```javascript
 import { HfInference } from "@huggingface/inference";
 
-const inference = new HfInference(HF_ACCESS_TOKEN);
+const inference = new HfInference(HF_TOKEN);
 await inference.audioClassification({
 	data: await (await fetch("sample.flac")).blob(),
 	model: "facebook/mms-lid-126",

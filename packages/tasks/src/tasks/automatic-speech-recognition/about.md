@@ -54,7 +54,7 @@ You can use [huggingface.js](https://github.com/huggingface/huggingface.js) to t
 ```javascript
 import { HfInference } from "@huggingface/inference";
 
-const inference = new HfInference(HF_ACCESS_TOKEN);
+const inference = new HfInference(HF_TOKEN);
 await inference.automaticSpeechRecognition({
 	data: await (await fetch("sample.flac")).blob(),
 	model: "openai/whisper-large-v2",

@@ -106,4 +106,4 @@ describe("createRepo", () => {
 			credentials: { accessToken: TEST_ACCESS_TOKEN },
 		});
 	});
-});
+}, 10_000);

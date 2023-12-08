@@ -12,6 +12,22 @@ output = query({
     "parameters": {"candidate_labels": ["refund", "legal", "faq"]},
 })`;
 
+export const snippetZeroShotImageClassification = (model: ModelData): string =>
+	`def query(data):
+	with open(data["image_path"], "rb") as f:
+		img = f.read()
+	payload={
+		"parameters": data["parameters"],
+		"inputs": base64.b64encode(img).decode("utf-8")
+	}
+	response = requests.post(API_URL, headers=headers, json=payload)
+	return response.json()
+
+output = query({
+    "image_path": ${getModelInputSnippet(model)},
+    "parameters": {"candidate_labels": ["cat", "dog", "llama"]},
+})`;
+
 export const snippetBasic = (model: ModelData): string =>
 	`def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
@@ -42,6 +58,14 @@ import io
 from PIL import Image
 image = Image.open(io.BytesIO(image_bytes))`;
 
+export const snippetTabular = (model: ModelData): string =>
+	`def query(payload):
+	response = requests.post(API_URL, headers=headers, json=payload)
+	return response.content
+response = query({
+	"inputs": {"data": ${getModelInputSnippet(model)}},
+})`;
+
 export const snippetTextToAudio = (model: ModelData): string => {
 	// Transformers TTS pipeline and api-inference-community (AIC) pipeline outputs are diverged
 	// with the latest update to inference-api (IA).
@@ -70,8 +94,21 @@ from IPython.display import Audio
 Audio(audio, rate=sampling_rate)`;
 	}
 };
+
+export const snippetDocumentQuestionAnswering = (model: ModelData): string =>
+	`def query(payload):
+ 	with open(payload["image"], "rb") as f:
+  		img = f.read()
+		payload["image"] = base64.b64encode(img).decode("utf-8")  
+	response = requests.post(API_URL, headers=headers, json=payload)
+	return response.json()
+
+output = query({
+    "inputs": ${getModelInputSnippet(model)},
+})`;
+
 export const pythonSnippets: Partial<Record<PipelineType, (model: ModelData) => string>> = {
-	// Same order as in js/src/lib/interfaces/Types.ts
+	// Same order as in tasks/src/pipelines.ts
 	"text-classification": snippetBasic,
 	"token-classification": snippetBasic,
 	"table-question-answering": snippetBasic,
@@ -92,9 +129,13 @@ export const pythonSnippets: Partial<Record<PipelineType, (model: ModelData) => 
 	"audio-to-audio": snippetFile,
 	"audio-classification": snippetFile,
 	"image-classification": snippetFile,
-	"image-to-text": snippetFile,
+	"tabular-regression": snippetTabular,
+	"tabular-classification": snippetTabular,
 	"object-detection": snippetFile,
 	"image-segmentation": snippetFile,
+	"document-question-answering": snippetDocumentQuestionAnswering,
+	"image-to-text": snippetFile,
+	"zero-shot-image-classification": snippetZeroShotImageClassification,
 };
 
 export function getPythonInferenceSnippet(model: ModelData, accessToken: string): string {

@@ -187,12 +187,8 @@ const paddlenlp = (model: ModelData) => {
 			[
 				`from paddlenlp.transformers import AutoTokenizer, ${architecture}`,
 				"",
-				`tokenizer = AutoTokenizer.from_pretrained("${model.id}"${
-					model.private ? ", use_auth_token=True" : ""
-				}, from_hf_hub=True)`,
-				`model = ${architecture}.from_pretrained("${model.id}"${
-					model.private ? ", use_auth_token=True" : ""
-				}, from_hf_hub=True)`,
+				`tokenizer = AutoTokenizer.from_pretrained("${model.id}", from_hf_hub=True)`,
+				`model = ${architecture}.from_pretrained("${model.id}", from_hf_hub=True)`,
 			].join("\n"),
 		];
 	} else {
@@ -201,12 +197,8 @@ const paddlenlp = (model: ModelData) => {
 				`# ⚠️ Type of model unknown`,
 				`from paddlenlp.transformers import AutoTokenizer, AutoModel`,
 				"",
-				`tokenizer = AutoTokenizer.from_pretrained("${model.id}"${
-					model.private ? ", use_auth_token=True" : ""
-				}, from_hf_hub=True)`,
-				`model = AutoModel.from_pretrained("${model.id}"${
-					model.private ? ", use_auth_token=True" : ""
-				}, from_hf_hub=True)`,
+				`tokenizer = AutoTokenizer.from_pretrained("${model.id}", from_hf_hub=True)`,
+				`model = AutoModel.from_pretrained("${model.id}", from_hf_hub=True)`,
 			].join("\n"),
 		];
 	}
@@ -356,6 +348,12 @@ const sentenceTransformers = (model: ModelData) => [
 	`from sentence_transformers import SentenceTransformer
 
 model = SentenceTransformer("${model.id}")`,
+];
+
+const setfit = (model: ModelData) => [
+	`from setfit import SetFitModel
+
+model = SetFitModel.from_pretrained("${model.id}")`,
 ];
 
 const spacy = (model: ModelData) => [
@@ -660,6 +658,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS: Partial<Record<ModelLibraryKey, Librar
 		repoUrl: "https://github.com/UKPLab/sentence-transformers",
 		docsUrl: "https://huggingface.co/docs/hub/sentence-transformers",
 		snippets: sentenceTransformers,
+	},
+	setfit: {
+		btnLabel: "setfit",
+		repoName: "setfit",
+		repoUrl: "https://github.com/huggingface/setfit",
+		docsUrl: "https://huggingface.co/docs/hub/setfit",
+		snippets: setfit,
 	},
 	sklearn: {
 		btnLabel: "Scikit-learn",

@@ -1,7 +1,7 @@
 {
 	"name": "@huggingface/hub",
 	"packageManager": "pnpm@8.10.5",
-	"version": "0.12.2",
+	"version": "0.12.3",
 	"description": "Utilities to interact with the Hugging Face hub",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {
@@ -35,7 +35,7 @@
 		"prepublishOnly": "pnpm run build",
 		"build": "tsup",
 		"test": "vitest run",
-		"test:browser": "vitest run --browser.name=chrome --browser.headless --config ./vitest-browser.config.ts",
+		"test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest-browser.config.mts",
 		"check": "tsc"
 	},
 	"files": [
@@ -55,9 +55,9 @@
 	"author": "Hugging Face",
 	"license": "MIT",
 	"devDependencies": {
+		"@huggingface/tasks": "workspace:^",
 		"@types/node": "^18.13.0",
-		"type-fest": "^3.9.0",
-		"typescript": "^5.0.4"
+		"type-fest": "^3.9.0"
 	},
 	"dependencies": {
 		"hash-wasm": "^4.9.0"

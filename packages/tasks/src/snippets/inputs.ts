@@ -31,6 +31,12 @@ const inputsTableQuestionAnswering = () =>
 		}
 	}`;
 
+const inputsVisualQuestionAnswering = () =>
+	`{
+		"image": "cat.png",
+		"question": "What is in this image?"
+	}`;
+
 const inputsQuestionAnswering = () =>
 	`{
 		"question": "What is my name?",
@@ -79,6 +85,11 @@ const inputsTextToAudio = () => `"liquid drum and bass, atmospheric synths, airy
 
 const inputsAutomaticSpeechRecognition = () => `"sample1.flac"`;
 
+const inputsTabularPrediction = () =>
+	`'{"Height":[11.52,12.48],"Length1":[23.2,24.0],"Length2":[25.4,26.3],"Species": ["Bream","Bream"]}'`;
+
+const inputsZeroShotImageClassification = () => `"cats.jpg"`;
+
 const modelInputSnippets: {
 	[key in PipelineType]?: (model: ModelData) => string;
 } = {
@@ -86,6 +97,7 @@ const modelInputSnippets: {
 	"audio-classification": inputsAudioClassification,
 	"automatic-speech-recognition": inputsAutomaticSpeechRecognition,
 	conversational: inputsConversational,
+	"document-question-answering": inputsVisualQuestionAnswering,
 	"feature-extraction": inputsFeatureExtraction,
 	"fill-mask": inputsFillMask,
 	"image-classification": inputsImageClassification,
@@ -96,6 +108,8 @@ const modelInputSnippets: {
 	"sentence-similarity": inputsSentenceSimilarity,
 	summarization: inputsSummarization,
 	"table-question-answering": inputsTableQuestionAnswering,
+	"tabular-regression": inputsTabularPrediction,
+	"tabular-classification": inputsTabularPrediction,
 	"text-classification": inputsTextClassification,
 	"text-generation": inputsTextGeneration,
 	"text-to-image": inputsTextToImage,
@@ -105,6 +119,7 @@ const modelInputSnippets: {
 	"token-classification": inputsTokenClassification,
 	translation: inputsTranslation,
 	"zero-shot-classification": inputsZeroShotClassification,
+	"zero-shot-image-classification": inputsZeroShotImageClassification,
 };
 
 // Use noWrap to put the whole snippet on a single line (removing new lines and tabulations)

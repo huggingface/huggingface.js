@@ -101,11 +101,7 @@ export async function callInferenceApi<T>(
 	useCache = true
 ): Promise<Result<T>> {
 	const contentType =
-		"file" in requestBody &&
-		requestBody["file"] &&
-		typeof requestBody["file"] === "object" &&
-		"type" in requestBody["file"] &&
-		typeof requestBody["file"]["type"] === "string"
+		"file" in requestBody && requestBody["file"] && requestBody["file"] instanceof Blob && requestBody["file"].type
 			? requestBody["file"]["type"]
 			: "application/json";
 
@@ -124,8 +120,9 @@ export async function callInferenceApi<T>(
 		headers.set("X-Load-Model", "0");
 	}
 
-	const reqBody: File | string =
-		"file" in requestBody && requestBody["file"] instanceof File ? requestBody.file : JSON.stringify(requestBody);
+	// `File` is a subtype of `Blob`: therefore, checking for instanceof `Blob` also checks for instanceof `File`
+	const reqBody: Blob | string =
+		"file" in requestBody && requestBody["file"] instanceof Blob ? requestBody.file : JSON.stringify(requestBody);
 
 	const response = await fetch(`${url}/models/${repoId}`, {
 		method: "POST",

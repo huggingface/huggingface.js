@@ -1,27 +1,40 @@
 {
 	"name": "@huggingface/widgets",
 	"packageManager": "pnpm@8.10.5",
-	"version": "0.0.15",
+	"version": "0.1.2",
 	"publishConfig": {
 		"access": "public"
 	},
 	"scripts": {
-		"dev": "vite dev",
-		"build": "vite build && npm run package",
-		"preview": "vite preview",
-		"package": "svelte-kit sync && svelte-package && publint",
-		"prepublishOnly": "npm run package",
-		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"dev": "vite dev --mode app",
+		"build": "vite build --mode app && vite build --mode lib && vite build --mode lib --ssr && npm run package",
+		"preview": "vite preview --mode app",
+		"package": "publint",
+		"prepublishOnly": "npm run build",
+		"check": "svelte-check --tsconfig ./tsconfig.json src,static",
+		"check:watch": "svelte-check --tsconfig ./tsconfig.json --watch src,static",
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
 		"format": "prettier --write .",
 		"format:check": "prettier --check ."
 	},
+	"type": "module",
+	"module": "./dist/server/index.js",
+	"main": "./dist/server/index.cjs",
+	"types": "./dist/client/index.d.ts",
+	"source": "src/lib/index.ts",
 	"exports": {
 		".": {
-			"types": "./dist/index.d.ts",
-			"svelte": "./dist/index.js"
+			"types": "./dist/client/index.d.ts",
+			"node": {
+				"require": "./dist/server/index.cjs",
+				"import": "./dist/server/index.js"
+			},
+			"browser": {
+				"import": "./dist/client/index.js",
+				"require": "./dist/client/index.cjs"
+			},
+			"svelte": "./src/lib/index.ts"
 		}
 	},
 	"files": [
@@ -38,24 +51,26 @@
 		"svelte": "^3.59.2"
 	},
 	"devDependencies": {
+		"@auth/core": "^0.18.3",
+		"@auth/sveltekit": "^0.3.14",
 		"@fontsource/ibm-plex-mono": "^5.0.8",
 		"@fontsource/source-sans-pro": "^5.0.8",
 		"@sveltejs/adapter-node": "^1.3.1",
 		"@sveltejs/kit": "^1.27.4",
 		"@sveltejs/package": "^2.0.0",
+		"@sveltejs/vite-plugin-svelte": "2.5.3",
 		"@tailwindcss/forms": "^0.5.7",
+		"@types/node": "20",
 		"autoprefixer": "^10.4.16",
 		"eslint": "^8.28.0",
 		"postcss": "^8.4.31",
 		"publint": "^0.1.9",
 		"svelte": "^3.59.2",
 		"svelte-check": "^3.6.0",
+		"svelte-preprocess": "^5.1.1",
 		"tailwindcss": "^3.3.5",
 		"tslib": "^2.4.1",
-		"typescript": "^5.0.0",
-		"vite": "^4.0.0"
-	},
-	"svelte": "./dist/index.js",
-	"types": "./dist/index.d.ts",
-	"type": "module"
+		"vite": "^4.5.0",
+		"vite-plugin-dts": "^3.6.4"
+	}
 }
