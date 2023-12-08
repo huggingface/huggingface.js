@@ -42,7 +42,6 @@
 	}
 
 	function moveCaretToEnd() {
-		containerSpanEl?.focus();
 		if (containerSpanEl) {
 			const range = document.createRange();
 			range.selectNodeContents(containerSpanEl);
