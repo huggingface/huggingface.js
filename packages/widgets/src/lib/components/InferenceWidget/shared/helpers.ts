@@ -120,6 +120,7 @@ export async function callInferenceApi<T>(
 		headers.set("X-Load-Model", "0");
 	}
 
+	// `File` is a subtype of `Blob`: therefore, checking for instanceof `Blob` also checks for instanceof `File`
 	const reqBody: Blob | string =
 		"file" in requestBody && requestBody["file"] instanceof Blob ? requestBody.file : JSON.stringify(requestBody);
 
