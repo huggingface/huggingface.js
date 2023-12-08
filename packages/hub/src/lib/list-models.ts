@@ -5,7 +5,14 @@ import type { Credentials, PipelineType } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
 
-const EXPAND_KEYS = ["pipeline_tag", "private", "gated", "downloads", "likes"] satisfies (keyof ApiModelInfo)[];
+const EXPAND_KEYS = [
+	"pipeline_tag",
+	"private",
+	"gated",
+	"downloads",
+	"likes",
+	"lastModified",
+] satisfies (keyof ApiModelInfo)[];
 
 export interface ModelEntry {
 	id: string;
