@@ -45,8 +45,7 @@ const taskData: TaskDataCustom = {
 	],
 	models: [
 		{
-			description:
-				"One of the most powerful image generation models that can generate realistic outputs.",
+			description: "One of the most powerful image generation models that can generate realistic outputs.",
 			id: "stabilityai/stable-diffusion-xl-base-1.0",
 		},
 		{
@@ -55,8 +54,7 @@ const taskData: TaskDataCustom = {
 			id: "dalle-mini/dalle-mega",
 		},
 		{
-			description:
-				"A powerful yet fast image generation model.",
+			description: "A powerful yet fast image generation model.",
 			id: "latent-consistency/lcm-lora-sdxl",
 		},
 		{
