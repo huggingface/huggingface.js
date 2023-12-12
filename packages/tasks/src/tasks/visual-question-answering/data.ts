@@ -72,6 +72,10 @@ const taskData: TaskDataCustom = {
 	],
 	spaces: [
 		{
+			description: "An application that compares visual question answering models across different tasks.",
+			id: "merve/pix2struct",
+		},
+		{
 			description: "An application that can answer questions based on images.",
 			id: "nielsr/vilt-vqa",
 		},
