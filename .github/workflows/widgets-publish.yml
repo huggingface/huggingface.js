@@ -11,6 +11,9 @@ defaults:
   run:
     working-directory: packages/widgets
 
+concurrency:
+  group: "push-to-main"
+
 jobs:
   version_and_release:
     runs-on: ubuntu-latest
