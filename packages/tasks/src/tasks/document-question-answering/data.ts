@@ -50,6 +50,10 @@ const taskData: TaskDataCustom = {
 			description: "A special model for OCR-free Document QA task. Donut model fine-tuned on DocVQA.",
 			id: "naver-clova-ix/donut-base-finetuned-docvqa",
 		},
+		{
+			description: "A powerful model for document question answering.",
+			id: "google/pix2struct-docvqa-large",
+		},
 	],
 	spaces: [
 		{
@@ -59,6 +63,10 @@ const taskData: TaskDataCustom = {
 		{
 			description: "An application that can answer questions from invoices.",
 			id: "impira/invoices",
+		},
+		{
+			description: "An application to compare different document question answering models.",
+			id: "merve/compare_docvqa_models",
 		},
 	],
 	summary:
