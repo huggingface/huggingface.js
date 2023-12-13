@@ -536,8 +536,8 @@ function convertToRuntimeValues(input: unknown): AnyRuntimeValue {
 		case "function":
 			// Wrap the user's function in a runtime function
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			return new FunctionValue((args, scope) => {
-				// NOTE: `scope` is not used since it's in the global scope
+			return new FunctionValue((args, _scope) => {
+				// NOTE: `_scope` is not used since it's in the global scope
 				const result = input(...args.map((x) => x.value)) ?? null; // map undefined -> null
 				return convertToRuntimeValues(result);
 			});
