@@ -212,7 +212,7 @@
 			],
 		},
 		{
-			id: "gpt2",
+			id: "mistralai/Mistral-7B-v0.1",
 			pipeline_tag: "text-generation",
 			inference: InferenceDisplayability.Yes,
 			widgetData: [
