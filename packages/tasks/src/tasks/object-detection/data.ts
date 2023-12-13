@@ -50,7 +50,7 @@ const taskData: TaskDataCustom = {
 	],
 	spaces: [
 		{
-			description: "Leaderboard to compare various object detection models by means of performance.",
+			description: "Leaderboard to compare various object detection models across several metrics.",
 			id: "hf-vision/object_detection_leaderboard",
 		},
 		{
