@@ -68,7 +68,7 @@ const taskData: TaskDataCustom = {
 	models: [
 		{
 			description: "A strong model for video generation.",
-			id: "PAIR/text2video-zero-controlnet-canny-arcane",
+			id: "Vchitect/LaVie",
 		},
 		{
 			description: "A robust model for text-to-video generation.",
@@ -76,7 +76,7 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "A text-to-video generation model with high quality and smooth outputs.",
-			id: "cerspense/zeroscope_v2_576w",
+			id: "hotshotco/Hotshot-XL",
 		},
 	],
 	spaces: [
@@ -86,7 +86,7 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "An application that generates video from image and text.",
-			id: "TempoFunk/makeavid-sd-jax",
+			id: "Vchitect/LaVie",
 		},
 		{
 			description: "An application that generates videos from text and provides multi-model support.",

@@ -24,14 +24,16 @@ const taskData: TaskDataCustom = {
 	metrics: [],
 	models: [
 		{
-			// TO DO: write description
 			description: "Strong Depth Estimation model trained on 1.4 million images.",
 			id: "Intel/dpt-large",
 		},
 		{
-			// TO DO: write description
 			description: "Strong Depth Estimation model trained on the KITTI dataset.",
-			id: "vinvino02/glpn-kitti",
+			id: "facebook/dpt-dinov2-large-kitti",
+		},
+		{
+			description: "A strong monocular depth estimation model.",
+			id: "Bingxin/Marigold",
 		},
 	],
 	spaces: [

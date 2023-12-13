@@ -32,30 +32,22 @@ const taskData: TaskDataCustom = {
 	models: [
 		{
 			description: "A robust image captioning model.",
-			id: "Salesforce/blip-image-captioning-large",
+			id: "Salesforce/blip2-opt-2.7b",
 		},
 		{
-			description: "A strong image captioning model.",
-			id: "nlpconnect/vit-gpt2-image-captioning",
+			description: "A powerful and accurate image-to-text model that can also localize concepts in images.",
+			id: "microsoft/kosmos-2-patch14-224",
 		},
 		{
 			description: "A strong optical character recognition model.",
-			id: "microsoft/trocr-base-printed",
-		},
-		{
-			description: "A strong visual question answering model for scientific diagrams.",
-			id: "google/pix2struct-ai2d-base",
-		},
-		{
-			description: "A strong captioning model for UI components.",
-			id: "google/pix2struct-widget-captioning-base",
-		},
-		{
-			description: "A captioning model for images that contain text.",
-			id: "google/pix2struct-textcaps-base",
+			id: "facebook/nougat-base",
 		},
 	],
 	spaces: [
+		{
+			description: "An application that compares various image captioning models.",
+			id: "nielsr/comparing-captioning-models",
+		},
 		{
 			description: "A robust image captioning application.",
 			id: "flax-community/image-captioning",
