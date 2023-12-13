@@ -84,7 +84,7 @@ const taskData: TaskDataCustom = {
 			id: "latent-consistency/lcm-lora-for-sdxl",
 		},
 		{
-			description: "A powerful text-to-image application that can generates 3D representations.",
+			description: "A powerful text-to-image application that can generate 3D representations.",
 			id: "hysts/Shap-E",
 		},
 		{
