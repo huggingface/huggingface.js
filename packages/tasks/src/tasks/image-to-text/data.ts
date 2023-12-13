@@ -45,7 +45,7 @@ const taskData: TaskDataCustom = {
 	],
 	spaces: [
 		{
-			description: "An application that compares a variation of image captioning models.",
+			description: "An application that compares various image captioning models.",
 			id: "nielsr/comparing-captioning-models",
 		},
 		{
