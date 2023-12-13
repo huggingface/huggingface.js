@@ -1230,3 +1230,123 @@ describe("Templates", () => {
 		});
 	});
 });
+
+describe("Error checking", () => {
+	describe("Lexing errors", () => {
+		it("Missing closing curly brace", () => {
+			const text = "{{ variable";
+			expect(() => tokenize(text)).toThrowError();
+		});
+		it("Unclosed string literal", () => {
+			const text = `{{ 'unclosed string }}`;
+			expect(() => tokenize(text)).toThrowError();
+		});
+
+		it("Unexpected character", () => {
+			const text = "{{ invalid ! invalid }}";
+			expect(() => tokenize(text)).toThrowError();
+		});
+	});
+
+	describe("Parsing errors", () => {
+		it("Unclosed statement", () => {
+			const text = "{{ variable }}{{";
+			const tokens = tokenize(text);
+			expect(() => parse(tokens)).toThrowError();
+		});
+
+		it("Unclosed expression", () => {
+			const text = "{% if condition %}\n    Content";
+			const tokens = tokenize(text);
+			expect(() => parse(tokens)).toThrowError();
+		});
+
+		it("Unmatched control structure", () => {
+			const text = "{% if condition %}\n    Content\n{% endif %}\n{% endfor %}";
+			const tokens = tokenize(text);
+			expect(() => parse(tokens)).toThrowError();
+		});
+
+		it("Missing variable in for loop", () => {
+			const text = "{% for %}\n    Content\n{% endfor %}";
+			const tokens = tokenize(text);
+			expect(() => parse(tokens)).toThrowError();
+		});
+
+		it("Unclosed parentheses in expression", () => {
+			const text = "{{ (variable + 1 }}";
+			const tokens = tokenize(text);
+			expect(() => parse(tokens)).toThrowError();
+		});
+
+		it("Invalid variable name", () => {
+			const text = "{{ 1variable }}";
+			const tokens = tokenize(text);
+			expect(() => parse(tokens)).toThrowError();
+		});
+	});
+
+	describe("Runtime errors", () => {
+		it("Undefined variable", () => {
+			const env = new Environment();
+			const interpreter = new Interpreter(env);
+			const tokens = tokenize("{{ undefined_variable }}");
+			const ast = parse(tokens);
+			expect(() => interpreter.run(ast)).toThrowError();
+		});
+
+		it("Undefined attribute access", () => {
+			const env = new Environment();
+			const interpreter = new Interpreter(env);
+			const tokens = tokenize("{{ object.undefined_attribute }}");
+			const ast = parse(tokens);
+			expect(() => interpreter.run(ast)).toThrowError();
+		});
+
+		it("Undefined function call", () => {
+			const env = new Environment();
+			const interpreter = new Interpreter(env);
+			const tokens = tokenize("{{ undefined_function() }}");
+			const ast = parse(tokens);
+			expect(() => interpreter.run(ast)).toThrowError();
+		});
+
+		it("Incorrect function call", () => {
+			const env = new Environment();
+			env.set("true", true);
+
+			const interpreter = new Interpreter(env);
+			const tokens = tokenize("{{ true() }}");
+			const ast = parse(tokens);
+			expect(() => interpreter.run(ast)).toThrowError();
+		});
+
+		it("Looping over non-iterable", () => {
+			const env = new Environment();
+			const interpreter = new Interpreter(env);
+			env.set("non_iterable", 10);
+
+			const tokens = tokenize("{% for item in non_iterable %}{{ item }}{% endfor %}");
+			const ast = parse(tokens);
+			expect(() => interpreter.run(ast)).toThrowError();
+		});
+
+		it("Invalid control structure usage", () => {
+			const env = new Environment();
+			const interpreter = new Interpreter(env);
+
+			const tokens = tokenize("{% if 42 %}Content{% endif %}");
+			const ast = parse(tokens);
+			expect(() => interpreter.run(ast)).toThrowError();
+		});
+
+		it("Invalid variable assignment", () => {
+			const env = new Environment();
+			const interpreter = new Interpreter(env);
+
+			const tokens = tokenize("{% set 42 = variable %}");
+			const ast = parse(tokens);
+			expect(() => interpreter.run(ast)).toThrowError();
+		});
+	});
+});
