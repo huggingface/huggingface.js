@@ -49,11 +49,6 @@ const taskData: TaskDataCustom = {
 			id: "stabilityai/stable-diffusion-xl-base-1.0",
 		},
 		{
-			description:
-				"A model that can be used to generate images based on text prompts. The DALL·E Mega model is the largest version of DALLE Mini.",
-			id: "dalle-mini/dalle-mega",
-		},
-		{
 			description: "A powerful yet fast image generation model.",
 			id: "latent-consistency/lcm-lora-sdxl",
 		},
