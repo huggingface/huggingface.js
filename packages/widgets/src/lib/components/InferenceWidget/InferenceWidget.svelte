@@ -24,7 +24,7 @@
 	import TextToSpeechWidget from "./widgets/TextToSpeechWidget/TextToSpeechWidget.svelte";
 	import TokenClassificationWidget from "./widgets/TokenClassificationWidget/TokenClassificationWidget.svelte";
 	import VisualQuestionAnsweringWidget from "./widgets/VisualQuestionAnsweringWidget/VisualQuestionAnsweringWidget.svelte";
-	import ZeroShotClassificationWidget from "./widgets/ZeroShowClassificationWidget/ZeroShotClassificationWidget.svelte";
+	import ZeroShotClassificationWidget from "./widgets/ZeroShotClassificationWidget/ZeroShotClassificationWidget.svelte";
 	import ZeroShotImageClassificationWidget from "./widgets/ZeroShotImageClassificationWidget/ZeroShotImageClassificationWidget.svelte";
 	import type { PipelineType } from "@huggingface/tasks";
 	import WidgetInfo from "./shared/WidgetInfo/WidgetInfo.svelte";

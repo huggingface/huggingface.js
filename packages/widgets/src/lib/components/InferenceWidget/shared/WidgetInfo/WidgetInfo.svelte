@@ -1,8 +1,8 @@
 <script lang="ts">
+	import { InferenceDisplayability } from "@huggingface/tasks";
 	import { type WidgetProps, type ModelLoadInfo, LoadState, ComputeType } from "../types.js";
-	import IconAzureML from "$lib/components/Icons/IconAzureML.svelte";
-	import { InferenceDisplayability } from "../../../../interfaces/InferenceDisplayability.js";
-	import IconInfo from "$lib/components/Icons/IconInfo.svelte";
+	import IconAzureML from "../../..//Icons/IconAzureML.svelte";
+	import IconInfo from "../../..//Icons/IconInfo.svelte";
 
 	export let model: WidgetProps["model"];
 	export let computeTime: string = "";
@@ -26,26 +26,11 @@
 		[LoadState.Error]: "⚠️ This model could not be loaded.",
 	} as const;
 
-	function getStatusReport(
-		modelLoadInfo: ModelLoadInfo | undefined,
-		statuses: Record<LoadState, string>,
-		isAzure = false
-	): string {
+	function getStatusReport(modelLoadInfo: ModelLoadInfo | undefined, statuses: Record<LoadState, string>): string {
 		if (!modelLoadInfo) {
 			return "Model state unknown";
 		}
-		if (modelLoadInfo.compute_type === ComputeType.CPU && modelLoadInfo.state === LoadState.Loaded && !isAzure) {
-			return `The model is loaded and running on <a class="hover:underline" href="https://huggingface.co/intel" target="_blank">Intel Xeon 3rd Gen Scalable CPU</a>`;
-		}
 		return statuses[modelLoadInfo.state];
-	}
-
-	function getComputeTypeMsg(): string {
-		const computeType = modelLoadInfo?.compute_type ?? ComputeType.CPU;
-		if (computeType === ComputeType.CPU) {
-			return "Intel Xeon 3rd Gen Scalable cpu";
-		}
-		return computeType;
 	}
 </script>
 
@@ -63,11 +48,11 @@
 				</div>
 				<div class="border-dotter mx-2 flex flex-1 -translate-y-px border-b border-gray-100" />
 				<div>
-					{@html getStatusReport(modelLoadInfo, azureState, true)}
+					{@html getStatusReport(modelLoadInfo, azureState)}
 				</div>
 			</div>
 		{:else if computeTime}
-			Computation time on {getComputeTypeMsg()}: {computeTime}
+			Computation time on {modelLoadInfo?.compute_type ?? ComputeType.CPU}: {computeTime}
 		{:else if (model.inference === InferenceDisplayability.Yes || model.pipeline_tag === "reinforcement-learning") && !modelTooBig}
 			{@html getStatusReport(modelLoadInfo, state)}
 		{:else if model.inference === InferenceDisplayability.ExplicitOptOut}

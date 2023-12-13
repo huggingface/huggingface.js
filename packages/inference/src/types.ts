@@ -1,3 +1,5 @@
+import type { PipelineType } from "@huggingface/tasks";
+
 export interface Options {
 	/**
 	 * (Default: true) Boolean. If a request 503s and wait_for_model is set to false, the request will be retried with the same parameters but with wait_for_model set to true.
@@ -35,39 +37,7 @@ export interface Options {
 	includeCredentials?: string | boolean;
 }
 
-export type InferenceTask =
-	| "audio-classification"
-	| "audio-to-audio"
-	| "automatic-speech-recognition"
-	| "conversational"
-	| "depth-estimation"
-	| "document-question-answering"
-	| "feature-extraction"
-	| "fill-mask"
-	| "image-classification"
-	| "image-segmentation"
-	| "image-to-image"
-	| "image-to-text"
-	| "object-detection"
-	| "video-classification"
-	| "question-answering"
-	| "reinforcement-learning"
-	| "sentence-similarity"
-	| "summarization"
-	| "table-question-answering"
-	| "tabular-classification"
-	| "tabular-regression"
-	| "text-classification"
-	| "text-generation"
-	| "text-to-image"
-	| "text-to-speech"
-	| "text-to-video"
-	| "token-classification"
-	| "translation"
-	| "unconditional-image-generation"
-	| "visual-question-answering"
-	| "zero-shot-classification"
-	| "zero-shot-image-classification";
+export type InferenceTask = Exclude<PipelineType, "other">;
 
 export interface BaseArgs {
 	/**

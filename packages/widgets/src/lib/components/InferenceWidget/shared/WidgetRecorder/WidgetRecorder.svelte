@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onDestroy, onMount } from "svelte";
 
-	import IconMicrophone from "$lib/components/Icons/IconMicrophone.svelte";
+	import IconMicrophone from "../../..//Icons/IconMicrophone.svelte";
 
 	import Recorder from "./Recorder.js";
 

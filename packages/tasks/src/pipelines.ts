@@ -435,6 +435,20 @@ export const PIPELINE_DATA = {
 	},
 	"image-to-image": {
 		name: "Image-to-Image",
+		subtasks: [
+			{
+				type: "image-inpainting",
+				name: "Image Inpainting",
+			},
+			{
+				type: "image-colorization",
+				name: "Image Colorization",
+			},
+			{
+				type: "super-resolution",
+				name: "Super Resolution",
+			},
+		],
 		modality: "cv",
 		color: "indigo",
 	},
@@ -620,6 +634,16 @@ export const PIPELINE_DATA = {
 		name: "Zero-Shot Object Detection",
 		modality: "cv",
 		color: "yellow",
+	},
+	"text-to-3d": {
+		name: "Text-to-3D",
+		modality: "multimodal",
+		color: "yellow",
+	},
+	"image-to-3d": {
+		name: "Image-to-3D",
+		modality: "multimodal",
+		color: "green",
 	},
 	other: {
 		name: "Other",

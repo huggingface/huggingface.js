@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { TASKS_DATA, type PipelineType } from "@huggingface/tasks";
 	import { getPipelineTask } from "../../../../utils/ViewUtils.js";
-	import IconInfo from "$lib/components/Icons/IconInfo.svelte";
-	import IconLightning from "$lib/components/Icons/IconLightning.svelte";
+	import IconInfo from "../../..//Icons/IconInfo.svelte";
+	import IconLightning from "../../..//Icons/IconLightning.svelte";
 	import PipelineTag from "../../../PipelineTag/PipelineTag.svelte";
 
 	export let noTitle = false;

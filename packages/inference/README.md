@@ -504,7 +504,7 @@ const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the
 ## Running tests
 
 ```console
-HF_ACCESS_TOKEN="your access token" pnpm run test
+HF_TOKEN="your access token" pnpm run test
 ```
 
 ## Finding appropriate models
