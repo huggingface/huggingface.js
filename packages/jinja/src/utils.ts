@@ -1,3 +1,11 @@
+/**
+ * Function that mimics Python's array slicing.
+ * @param array The array to slice.
+ * @param start The start index of the slice. Defaults to 0.
+ * @param stop The last index of the slice. Defaults to `array.length`.
+ * @param step The step value of the slice. Defaults to 1.
+ * @returns The sliced array.
+ */
 export function slice<T>(array: T[], start?: number, stop?: number, step = 1): T[] {
 	const direction = Math.sign(step);
 
