@@ -123,6 +123,19 @@ const ORDERED_MAPPING_TABLE: [string, TokenType][] = [
 	["=", TOKEN_TYPES.Equals],
 ];
 
+
+const ESCAPE_CHARACTERS =new Map([
+	["n", "\n"], // New line
+	["t", "\t"], // Horizontal tab
+	["r", "\r"], // Carriage return
+	["b", "\b"], // Backspace
+	["f", "\f"], // Form feed
+	["v", "\v"], // Vertical tab
+	["'", "'"], // Single quote
+	['"', '"'], // Double quote
+	["\\", "\\"], // Backslash
+]);
+
 /**
  * Generate a list of tokens from a source string.
  */
@@ -135,6 +148,23 @@ export function tokenize(source: string): Token[] {
 	const consumeWhile = (predicate: (char: string) => boolean): string => {
 		let str = "";
 		while (predicate(src[cursorPosition])) {
+			// Check for escaped characters
+			if (src[cursorPosition] === "\\") {
+				// Consume the backslash
+				++cursorPosition;
+				// Check for end of input
+				if (cursorPosition >= src.length) throw new SyntaxError("Unexpected end of input");
+				
+				// Add the escaped character
+				const escaped = src[cursorPosition++];
+				const unescaped = ESCAPE_CHARACTERS.get(escaped);
+				if(unescaped === undefined) {
+					throw new SyntaxError(`Unexpected escaped character: ${escaped}`);
+				}
+				str += unescaped;
+				continue;
+			}
+
 			str += src[cursorPosition++];
 			if (cursorPosition >= src.length) throw new SyntaxError("Unexpected end of input");
 		}
