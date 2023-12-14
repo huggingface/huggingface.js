@@ -123,8 +123,7 @@ const ORDERED_MAPPING_TABLE: [string, TokenType][] = [
 	["=", TOKEN_TYPES.Equals],
 ];
 
-
-const ESCAPE_CHARACTERS =new Map([
+const ESCAPE_CHARACTERS = new Map([
 	["n", "\n"], // New line
 	["t", "\t"], // Horizontal tab
 	["r", "\r"], // Carriage return
@@ -154,11 +153,11 @@ export function tokenize(source: string): Token[] {
 				++cursorPosition;
 				// Check for end of input
 				if (cursorPosition >= src.length) throw new SyntaxError("Unexpected end of input");
-				
+
 				// Add the escaped character
 				const escaped = src[cursorPosition++];
 				const unescaped = ESCAPE_CHARACTERS.get(escaped);
-				if(unescaped === undefined) {
+				if (unescaped === undefined) {
 					throw new SyntaxError(`Unexpected escaped character: ${escaped}`);
 				}
 				str += unescaped;
