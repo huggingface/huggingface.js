@@ -216,6 +216,15 @@ export class Interpreter {
 	private evaluateBinaryExpression(node: BinaryExpression, environment: Environment): AnyRuntimeValue {
 		const left = this.evaluate(node.left, environment);
 		const right = this.evaluate(node.right, environment);
+
+		// Arbitrary equality comparison
+		switch (node.operator.value) {
+			case "==":
+				return new BooleanValue(left.value == right.value);
+			case "!=":
+				return new BooleanValue(left.value != right.value);
+		}
+
 		if (left instanceof UndefinedValue || right instanceof UndefinedValue) {
 			throw new Error("Cannot perform operation on undefined values");
 		} else if (left instanceof NullValue || right instanceof NullValue) {
@@ -244,10 +253,6 @@ export class Interpreter {
 					return new BooleanValue(left.value >= right.value);
 				case "<=":
 					return new BooleanValue(left.value <= right.value);
-				case "==":
-					return new BooleanValue(left.value == right.value);
-				case "!=":
-					return new BooleanValue(left.value != right.value);
 			}
 		} else if (left instanceof BooleanValue && right instanceof BooleanValue) {
 			// Logical operators
@@ -256,10 +261,6 @@ export class Interpreter {
 					return new BooleanValue(left.value && right.value);
 				case "or":
 					return new BooleanValue(left.value || right.value);
-				case "==":
-					return new BooleanValue(left.value == right.value);
-				case "!=":
-					return new BooleanValue(left.value != right.value);
 			}
 		} else if (right instanceof ArrayValue) {
 			const member = right.value.find((x) => x.value === left.value) !== undefined;
@@ -269,16 +270,25 @@ export class Interpreter {
 				case "not in":
 					return new BooleanValue(!member);
 			}
-		} else {
+		}
+
+		if (left instanceof StringValue || right instanceof StringValue) {
+			// Support string concatenation as long as at least one operand is a string
 			switch (node.operator.value) {
 				case "+":
 					return new StringValue(left.value.toString() + right.value.toString());
-				case "==":
-					return new BooleanValue(left.value == right.value);
-				case "!=":
-					return new BooleanValue(left.value != right.value);
 			}
 		}
+
+		if (left instanceof StringValue && right instanceof StringValue) {
+			switch (node.operator.value) {
+				case "in":
+					return new BooleanValue(right.value.includes(left.value));
+				case "not in":
+					return new BooleanValue(!right.value.includes(left.value));
+			}
+		}
+
 		throw new SyntaxError(`Unknown operator "${node.operator.value}" between ${left.type} and ${right.type}`);
 	}
 
