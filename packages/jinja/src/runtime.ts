@@ -486,12 +486,7 @@ export class Interpreter {
 			case "NumericLiteral":
 				return new NumericValue(Number((statement as NumericLiteral).value));
 			case "StringLiteral":
-				return new StringValue(
-					(statement as StringLiteral).value
-						// Unescape special characters
-						.replaceAll("\\n", "\n")
-						.replaceAll("\\t", "\t")
-				);
+				return new StringValue((statement as StringLiteral).value);
 			case "BooleanLiteral":
 				return new BooleanValue((statement as BooleanLiteral).value);
 			case "Identifier":

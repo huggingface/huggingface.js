@@ -60,6 +60,9 @@ const TEST_STRINGS = {
 	MEMBERSHIP: `|{{ 0 in arr }}|{{ 1 in arr }}|{{ true in arr }}|{{ false in arr }}|{{ 'a' in arr }}|{{ 'b' in arr }}|`,
 	MEMBERSHIP_NEGATION_1: `|{{ not 0 in arr }}|{{ not 1 in arr }}|{{ not true in arr }}|{{ not false in arr }}|{{ not 'a' in arr }}|{{ not 'b' in arr }}|`,
 	MEMBERSHIP_NEGATION_2: `|{{ 0 not in arr }}|{{ 1 not in arr }}|{{ true not in arr }}|{{ false not in arr }}|{{ 'a' not in arr }}|{{ 'b' not in arr }}|`,
+
+	// Escaped characters
+	ESCAPED_CHARS: `{{ '\\n' }}{{ '\\t' }}{{ '\\'' }}{{ '\\"' }}{{ '\\\\' }}{{ '|\\n|\\t|\\'|\\"|\\\\|' }}`,
 };
 
 const TEST_PARSED = {
@@ -1019,6 +1022,28 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 	],
+
+	// Escaped characters
+	ESCAPED_CHARS: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "\n", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "\t", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "'", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: '"', type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "\\", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: `|\n|\t|'|"|\\|`, type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+	],
 };
 
 const TEST_CONTEXT = {
@@ -1115,6 +1140,9 @@ const TEST_CONTEXT = {
 	MEMBERSHIP_NEGATION_2: {
 		arr: [0, true, "a"],
 	},
+
+	// Escaped characters
+	ESCAPED_CHARS: {},
 };
 
 const EXPECTED_OUTPUTS = {
@@ -1173,6 +1201,11 @@ const EXPECTED_OUTPUTS = {
 	MEMBERSHIP: "|true|false|true|false|true|false|",
 	MEMBERSHIP_NEGATION_1: "|false|true|false|true|false|true|",
 	MEMBERSHIP_NEGATION_2: "|false|true|false|true|false|true|",
+
+	// Escaped characters
+	// NOTE: Since `trim_blocks` is enabled, we remove the first newline after the template tag,
+	// meaning the first newline in the output is not present
+	ESCAPED_CHARS: `\t'"\\|\n|\t|'|"|\\|`,
 };
 
 describe("Templates", () => {
