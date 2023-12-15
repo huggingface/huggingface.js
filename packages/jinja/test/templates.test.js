@@ -63,6 +63,9 @@ const TEST_STRINGS = {
 
 	// Escaped characters
 	ESCAPED_CHARS: `{{ '\\n' }}{{ '\\t' }}{{ '\\'' }}{{ '\\"' }}{{ '\\\\' }}{{ '|\\n|\\t|\\'|\\"|\\\\|' }}`,
+
+	// Substring inclusion
+	SUBSTRING_INCLUSION: `|{{ '' in 'abc' }}|{{ 'a' in 'abc' }}|{{ 'd' in 'abc' }}|{{ 'ab' in 'abc' }}|{{ 'ac' in 'abc' }}|{{ 'abc' in 'abc' }}|{{ 'abcd' in 'abc' }}|`,
 };
 
 const TEST_PARSED = {
@@ -1044,6 +1047,53 @@ const TEST_PARSED = {
 		{ value: `|\n|\t|'|"|\\|`, type: "StringLiteral" },
 		{ value: "}}", type: "CloseExpression" },
 	],
+
+	// Substring inclusion
+	SUBSTRING_INCLUSION: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "", type: "StringLiteral" },
+		{ value: "in", type: "In" },
+		{ value: "abc", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "a", type: "StringLiteral" },
+		{ value: "in", type: "In" },
+		{ value: "abc", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "d", type: "StringLiteral" },
+		{ value: "in", type: "In" },
+		{ value: "abc", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "ab", type: "StringLiteral" },
+		{ value: "in", type: "In" },
+		{ value: "abc", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "ac", type: "StringLiteral" },
+		{ value: "in", type: "In" },
+		{ value: "abc", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "abc", type: "StringLiteral" },
+		{ value: "in", type: "In" },
+		{ value: "abc", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "abcd", type: "StringLiteral" },
+		{ value: "in", type: "In" },
+		{ value: "abc", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
 };
 
 const TEST_CONTEXT = {
@@ -1143,6 +1193,9 @@ const TEST_CONTEXT = {
 
 	// Escaped characters
 	ESCAPED_CHARS: {},
+
+	// Substring inclusion
+	SUBSTRING_INCLUSION: {},
 };
 
 const EXPECTED_OUTPUTS = {
@@ -1206,6 +1259,9 @@ const EXPECTED_OUTPUTS = {
 	// NOTE: Since `trim_blocks` is enabled, we remove the first newline after the template tag,
 	// meaning the first newline in the output is not present
 	ESCAPED_CHARS: `\t'"\\|\n|\t|'|"|\\|`,
+
+	// Substring inclusion
+	SUBSTRING_INCLUSION: `|true|true|false|true|false|true|false|`,
 };
 
 describe("Templates", () => {
