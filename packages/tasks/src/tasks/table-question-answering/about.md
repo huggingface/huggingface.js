@@ -31,7 +31,7 @@ tqa = pipeline(task="table-question-answering", model="google/tapas-large-finetu
 
 # result
 
-print(tqa(table=table, query=query)['cells'][0])
+print(tqa(table=table, query=question)['cells'][0])
 #53
 
 ```
