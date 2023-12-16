@@ -20,6 +20,7 @@ export const TOKEN_TYPES = Object.freeze({
 	Comma: "Comma", // ,
 	Dot: "Dot", // .
 	Colon: "Colon", // :
+	Pipe: "Pipe", // |
 
 	CallOperator: "CallOperator", // ()
 	AdditiveBinaryOperator: "AdditiveBinaryOperator", // + -
@@ -106,6 +107,7 @@ const ORDERED_MAPPING_TABLE: [string, TokenType][] = [
 	[",", TOKEN_TYPES.Comma],
 	[".", TOKEN_TYPES.Dot],
 	[":", TOKEN_TYPES.Colon],
+	["|", TOKEN_TYPES.Pipe],
 	// Comparison operators
 	["<=", TOKEN_TYPES.ComparisonBinaryOperator],
 	[">=", TOKEN_TYPES.ComparisonBinaryOperator],
