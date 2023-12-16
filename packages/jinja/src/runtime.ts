@@ -46,6 +46,15 @@ abstract class RuntimeValue<T> {
 	constructor(value: T = undefined as unknown as T) {
 		this.value = value;
 	}
+
+	/**
+	 * Determines truthiness or falsiness of the runtime value.
+	 * This function should be overridden by subclasses if it has custom truthiness criteria.
+	 * @returns {BooleanValue} BooleanValue(true) if the value is truthy, BooleanValue(false) otherwise.
+	 */
+	__bool__(): BooleanValue {
+		return new BooleanValue(!!this.value);
+	}
 }
 
 /**
@@ -96,6 +105,18 @@ export class BooleanValue extends RuntimeValue<boolean> {
  */
 export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 	override type = "ObjectValue";
+
+	/**
+	 * NOTE: necessary to override since all JavaScript arrays are considered truthy,
+	 * while only non-empty Python arrays are consider truthy.
+	 *
+	 * e.g.,
+	 *  - JavaScript:  {} && 5 -> 5
+	 *  - Python:      {} and 5 -> {}
+	 */
+	override __bool__(): BooleanValue {
+		return new BooleanValue(this.value.size > 0);
+	}
 }
 
 /**
@@ -104,6 +125,18 @@ export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 export class ArrayValue extends RuntimeValue<AnyRuntimeValue[]> {
 	override type = "ArrayValue";
 	override builtins = new Map<string, AnyRuntimeValue>([["length", new NumericValue(this.value.length)]]);
+
+	/**
+	 * NOTE: necessary to override since all JavaScript arrays are considered truthy,
+	 * while only non-empty Python arrays are consider truthy.
+	 *
+	 * e.g.,
+	 *  - JavaScript:  [] && 5 -> 5
+	 *  - Python:      [] and 5 -> []
+	 */
+	override __bool__(): BooleanValue {
+		return new BooleanValue(this.value.length > 0);
+	}
 }
 
 /**
@@ -218,12 +251,19 @@ export class Interpreter {
 		const left = this.evaluate(node.left, environment);
 		const right = this.evaluate(node.right, environment);
 
-		// Arbitrary equality comparison
+		// Arbitrary operands
 		switch (node.operator.value) {
+			// Equality operators
 			case "==":
 				return new BooleanValue(left.value == right.value);
 			case "!=":
 				return new BooleanValue(left.value != right.value);
+
+			// Logical operators
+			case "and":
+				return left.__bool__().value ? right : left;
+			case "or":
+				return left.__bool__().value ? left : right;
 		}
 
 		if (left instanceof UndefinedValue || right instanceof UndefinedValue) {
@@ -254,14 +294,6 @@ export class Interpreter {
 					return new BooleanValue(left.value >= right.value);
 				case "<=":
 					return new BooleanValue(left.value <= right.value);
-			}
-		} else if (left instanceof BooleanValue && right instanceof BooleanValue) {
-			// Logical operators
-			switch (node.operator.value) {
-				case "and":
-					return new BooleanValue(left.value && right.value);
-				case "or":
-					return new BooleanValue(left.value || right.value);
 			}
 		} else if (right instanceof ArrayValue) {
 			const member = right.value.find((x) => x.value === left.value) !== undefined;
@@ -480,10 +512,7 @@ export class Interpreter {
 
 	private evaluateIf(node: If, environment: Environment): StringValue {
 		const test = this.evaluate(node.test, environment);
-		if (!["BooleanValue", "BooleanLiteral"].includes(test.type)) {
-			throw new Error(`Expected boolean expression in if statement: got ${test.type}`);
-		}
-		return this.evaluateBlock(test.value ? node.body : node.alternate, environment);
+		return this.evaluateBlock(test.__bool__().value ? node.body : node.alternate, environment);
 	}
 
 	private evaluateFor(node: For, environment: Environment): StringValue {
