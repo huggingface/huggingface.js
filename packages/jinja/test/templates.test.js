@@ -66,6 +66,9 @@ const TEST_STRINGS = {
 
 	// Substring inclusion
 	SUBSTRING_INCLUSION: `|{{ '' in 'abc' }}|{{ 'a' in 'abc' }}|{{ 'd' in 'abc' }}|{{ 'ab' in 'abc' }}|{{ 'ac' in 'abc' }}|{{ 'abc' in 'abc' }}|{{ 'abcd' in 'abc' }}|`,
+
+	// Filter operator
+	FILTER_OPERATOR: `{{ arr | length }}{{ 1 + arr | length }}{{ 2 + arr | sort | length }}{{ (arr | sort)[0] }}`,
 };
 
 const TEST_PARSED = {
@@ -1094,6 +1097,41 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 	],
+
+	// Filter operator
+	FILTER_OPERATOR: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "arr", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "length", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: "+", type: "AdditiveBinaryOperator" },
+		{ value: "arr", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "length", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "+", type: "AdditiveBinaryOperator" },
+		{ value: "arr", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "sort", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "length", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "arr", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "sort", type: "Identifier" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "0", type: "NumericLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "}}", type: "CloseExpression" },
+	],
 };
 
 const TEST_CONTEXT = {
@@ -1196,6 +1234,11 @@ const TEST_CONTEXT = {
 
 	// Substring inclusion
 	SUBSTRING_INCLUSION: {},
+
+	// Filter operator
+	FILTER_OPERATOR: {
+		arr: [3, 2, 1],
+	},
 };
 
 const EXPECTED_OUTPUTS = {
@@ -1262,6 +1305,9 @@ const EXPECTED_OUTPUTS = {
 
 	// Substring inclusion
 	SUBSTRING_INCLUSION: `|true|true|false|true|false|true|false|`,
+
+	// Filter operator
+	FILTER_OPERATOR: `3451`,
 };
 
 describe("Templates", () => {

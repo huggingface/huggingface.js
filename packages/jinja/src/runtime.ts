@@ -11,6 +11,7 @@ import type {
 	CallExpression,
 	Identifier,
 	BinaryExpression,
+	FilterExpression,
 	UnaryExpression,
 	SliceExpression,
 } from "./ast";
@@ -293,6 +294,57 @@ export class Interpreter {
 	}
 
 	/**
+	 * Evaulates expressions following the filter operation type.
+	 */
+	private evaluateFilterExpression(node: FilterExpression, environment: Environment): AnyRuntimeValue {
+		const operand = this.evaluate(node.operand, environment);
+
+		// For now, we only support the built-in filters
+		// TODO: Add support for non-identifier filters
+		//   e.g., functions which return filters: {{ numbers | select("odd") }}
+		// TODO: Add support for user-defined filters
+		//   const filter = environment.lookupVariable(node.filter.value);
+		//   if (!(filter instanceof FunctionValue)) {
+		//     throw new Error(`Filter must be a function: got ${filter.type}`);
+		//   }
+		//   return filter.value([operand], environment);
+
+		if (operand instanceof ArrayValue) {
+			switch (node.filter.value) {
+				case "first":
+					return operand.value[0];
+				case "last":
+					return operand.value[operand.value.length - 1];
+				case "length":
+					return new NumericValue(operand.value.length);
+				case "reverse":
+					return new ArrayValue(operand.value.reverse());
+				case "sort":
+					return new ArrayValue(
+						operand.value.sort((a, b) => {
+							if (a.type !== b.type) {
+								throw new Error(`Cannot compare different types: ${a.type} and ${b.type}`);
+							}
+							switch (a.type) {
+								case "NumericValue":
+									return (a as NumericValue).value - (b as NumericValue).value;
+								case "StringValue":
+									return (a as StringValue).value.localeCompare((b as StringValue).value);
+								default:
+									throw new Error(`Cannot compare type: ${a.type}`);
+							}
+						})
+					);
+				default:
+					throw new Error(`Unknown filter: ${node.filter.value}`);
+			}
+		}
+
+		// TODO add support for StringValue operand
+		throw new Error(`Cannot apply filter to type: ${operand.type}`);
+	}
+
+	/**
 	 * Evaulates expressions following the unary operation type.
 	 */
 	private evaluateUnaryExpression(node: UnaryExpression, environment: Environment): AnyRuntimeValue {
@@ -510,6 +562,8 @@ export class Interpreter {
 				return this.evaluateUnaryExpression(statement as UnaryExpression, environment);
 			case "BinaryExpression":
 				return this.evaluateBinaryExpression(statement as BinaryExpression, environment);
+			case "FilterExpression":
+				return this.evaluateFilterExpression(statement as FilterExpression, environment);
 
 			default:
 				throw new SyntaxError(`Unknown node type: ${statement.type}`);

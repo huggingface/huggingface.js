@@ -13,6 +13,7 @@ import {
 	StringLiteral,
 	BooleanLiteral,
 	BinaryExpression,
+	FilterExpression,
 	UnaryExpression,
 	SliceExpression,
 } from "./ast";
@@ -353,15 +354,30 @@ export function parse(tokens: Token[]): Program {
 	}
 
 	function parseMultiplicativeExpression(): Statement {
-		let left = parseCallMemberExpression();
+		let left = parseFilterExpression();
 
 		while (is(TOKEN_TYPES.MultiplicativeBinaryOperator)) {
 			const operator = tokens[current];
 			++current;
-			const right = parseCallMemberExpression();
+			const right = parseFilterExpression();
 			left = new BinaryExpression(operator, left, right);
 		}
 		return left;
+	}
+
+	function parseFilterExpression(): Statement {
+		let operand = parseCallMemberExpression();
+
+		while (is(TOKEN_TYPES.Pipe)) {
+			// Support chaining filters
+			++current; // consume pipe
+			const filter = parsePrimaryExpression(); // should be an identifier
+			if (!(filter instanceof Identifier)) {
+				throw new SyntaxError(`Expected identifier for the filter`);
+			}
+			operand = new FilterExpression(operand, filter);
+		}
+		return operand;
 	}
 
 	function parsePrimaryExpression(): Statement {

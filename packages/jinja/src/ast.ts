@@ -151,6 +151,21 @@ export class BinaryExpression extends Expression {
 }
 
 /**
+ * An operation with two sides, separated by the | operator.
+ * Operator precedence: https://github.com/pallets/jinja/issues/379#issuecomment-168076202
+ */
+export class FilterExpression extends Expression {
+	override type = "FilterExpression";
+
+	constructor(
+		public operand: Expression,
+		public filter: Identifier // TODO: Add support for non-identifier filters
+	) {
+		super();
+	}
+}
+
+/**
  * An operation with one side (operator on the left).
  */
 export class UnaryExpression extends Expression {
