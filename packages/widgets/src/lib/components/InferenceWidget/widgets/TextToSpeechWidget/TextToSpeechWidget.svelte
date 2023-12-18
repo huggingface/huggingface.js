@@ -8,6 +8,7 @@
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
 	import { addInferenceParameters, callInferenceApi, updateUrl } from "../../shared/helpers.js";
 	import { isTextInput } from "../../shared/inputValidation.js";
+	import { widgetStates } from "../../stores.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -16,7 +17,8 @@
 	export let noTitle: WidgetProps["noTitle"];
 	export let shouldUpdateUrl: WidgetProps["shouldUpdateUrl"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
-	let isDisabled = false;
+
+	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
 	let computeTime = "";
 	let error: string = "";
@@ -93,7 +95,7 @@
 		throw new TypeError("Invalid output: output must be of type object & instance of Blob");
 	}
 
-	function applyInputSample(sample: WidgetExampleTextInput, opts: ExampleRunOpts = {}) {
+	function applyWidgetExample(sample: WidgetExampleTextInput, opts: ExampleRunOpts = {}) {
 		setTextAreaValue(sample.text);
 		if (opts.isPreview) {
 			return;
@@ -103,37 +105,32 @@
 	}
 </script>
 
-<WidgetWrapper
-	{callApiOnMount}
-	{apiUrl}
-	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
-	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	validateExample={isTextInput}
-	exampleQueryParams={["text"]}
->
-	<svelte:fragment slot="top" let:isDisabled>
-		<form>
-			<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} />
-			<WidgetSubmitBtn
-				classNames="mt-2"
-				{isLoading}
-				{isDisabled}
-				onClick={() => {
-					getOutput();
-				}}
-			/>
-		</form>
-	</svelte:fragment>
-	<svelte:fragment slot="bottom">
-		{#if output.length}
-			<WidgetAudioTrack classNames="mt-4" src={output} />
-		{/if}
-	</svelte:fragment>
+<WidgetWrapper {apiUrl} {includeCredentials} {model} let:WidgetInfo let:WidgetHeader let:WidgetFooter>
+	<WidgetHeader
+		{noTitle}
+		{model}
+		{isLoading}
+		{isDisabled}
+		{callApiOnMount}
+		{applyWidgetExample}
+		validateExample={isTextInput}
+	/>
+
+	<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} />
+	<WidgetSubmitBtn
+		classNames="mt-2"
+		{isLoading}
+		{isDisabled}
+		onClick={() => {
+			getOutput();
+		}}
+	/>
+
+	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
+
+	{#if output.length}
+		<WidgetAudioTrack classNames="mt-4" src={output} />
+	{/if}
+
+	<WidgetFooter {model} {isDisabled} {outputJson} />
 </WidgetWrapper>

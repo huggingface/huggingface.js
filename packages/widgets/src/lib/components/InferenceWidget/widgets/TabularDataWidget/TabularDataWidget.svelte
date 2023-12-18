@@ -14,6 +14,7 @@
 		updateUrl,
 	} from "../../shared/helpers.js";
 	import { isStructuredDataInput } from "../../shared/inputValidation.js";
+	import { widgetStates } from "../../stores.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -22,6 +23,8 @@
 	export let noTitle: WidgetProps["noTitle"];
 	export let shouldUpdateUrl: WidgetProps["shouldUpdateUrl"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
+
+	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
 	const widgetData = model?.widgetData?.[0] as WidgetExampleStructuredDataInput<WidgetExampleOutputLabels> | undefined;
 	const columns: string[] = Object.keys(widgetData?.structured_data ?? {});
@@ -167,7 +170,7 @@
 		);
 	}
 
-	function applyInputSample(sample: WidgetExampleStructuredDataInput, opts: ExampleRunOpts = {}) {
+	function applyWidgetExample(sample: WidgetExampleStructuredDataInput, opts: ExampleRunOpts = {}) {
 		table = convertDataToTable(sample.structured_data);
 		if (opts.isPreview) {
 			return;
@@ -177,44 +180,38 @@
 	}
 </script>
 
-<WidgetWrapper
-	{callApiOnMount}
-	{apiUrl}
-	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
-	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	validateExample={isStructuredDataInput}
-	exampleQueryParams={["structured_data"]}
->
-	<svelte:fragment slot="top" let:isDisabled>
-		<form>
-			<div class="mt-4">
-				{#if table.length > 1 || table[1]?.length > 1}
-					<WidgetTableInput
-						{highlighted}
-						{isLoading}
-						{isDisabled}
-						onChange={onChangeTable}
-						table={tableWithOutput}
-						canAddCol={false}
-						bind:scrollTableToRight
-					/>
-				{/if}
-			</div>
-			<WidgetSubmitBtn
+<WidgetWrapper {apiUrl} {includeCredentials} {model} let:WidgetInfo let:WidgetHeader let:WidgetFooter>
+	<WidgetHeader
+		{noTitle}
+		{model}
+		{isLoading}
+		{isDisabled}
+		{callApiOnMount}
+		{applyWidgetExample}
+		validateExample={isStructuredDataInput}
+	/>
+
+	<div class="mt-4">
+		{#if table.length > 1 || table[1]?.length > 1}
+			<WidgetTableInput
+				{highlighted}
 				{isLoading}
 				{isDisabled}
-				onClick={() => {
-					getOutput();
-				}}
+				onChange={onChangeTable}
+				table={tableWithOutput}
+				canAddCol={false}
+				bind:scrollTableToRight
 			/>
-		</form>
-	</svelte:fragment>
-	<svelte:fragment slot="bottom" />
+		{/if}
+	</div>
+	<WidgetSubmitBtn
+		{isLoading}
+		{isDisabled}
+		onClick={() => {
+			getOutput();
+		}}
+	/>
+
+	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
+	<WidgetFooter {model} {isDisabled} {outputJson} />
 </WidgetWrapper>

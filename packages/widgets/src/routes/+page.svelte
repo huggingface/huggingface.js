@@ -212,7 +212,7 @@
 			],
 		},
 		{
-			id: "gpt2",
+			id: "mistralai/Mistral-7B-v0.1",
 			pipeline_tag: "text-generation",
 			inference: InferenceDisplayability.Yes,
 			widgetData: [
@@ -228,11 +228,11 @@
 			pipeline_tag: "text-generation",
 			inference: InferenceDisplayability.Yes,
 			widgetData: [
-				{ text: "My name is Julien and I like to" },
-				{ text: "My name is Thomas and my main" },
-				{ text: "My name is Mariama, my favorite" },
-				{ text: "My name is Clara and I am" },
-				{ text: "Once upon a time," },
+				{ text: "My name is Julien and I like to", group: "English" },
+				{ text: "My name is Thomas and my main", group: "English" },
+				{ text: "My name is Mariama, my favorite", group: "French" },
+				{ text: "My name is Clara and I am", group: "French" },
+				{ text: "Once upon a time,", group: "French" },
 			],
 		},
 		{

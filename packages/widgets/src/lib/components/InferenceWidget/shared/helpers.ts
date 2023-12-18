@@ -1,5 +1,5 @@
-import type { ModelData, WidgetExample, WidgetExampleAttribute } from "@huggingface/tasks";
-import { randomItem, parseJSON } from "../../../utils/ViewUtils.js";
+import type { ModelData, WidgetExampleAttribute } from "@huggingface/tasks";
+import { parseJSON } from "../../../utils/ViewUtils.js";
 import type { ModelLoadInfo, TableData } from "./types.js";
 import { LoadState } from "./types.js";
 
@@ -19,16 +19,6 @@ export function getQueryParamVal(key: WidgetExampleAttribute): QueryParamVal {
 		return value === "true";
 	}
 	return value;
-}
-
-export function getWidgetExample<TWidgetExample extends WidgetExample>(
-	model: ModelData,
-	validateExample: (sample: WidgetExample) => sample is TWidgetExample
-): TWidgetExample | undefined {
-	const validExamples = model.widgetData?.filter(
-		(sample): sample is TWidgetExample => sample && validateExample(sample)
-	);
-	return validExamples?.length ? randomItem(validExamples) : undefined;
 }
 
 // Update current url search params, keeping existing keys intact.
@@ -63,7 +53,6 @@ export async function getBlobFromUrl(url: string): Promise<Blob> {
 	const blob = await res.blob();
 	return blob;
 }
-
 interface Success<T> {
 	computeTime: string;
 	output: T;

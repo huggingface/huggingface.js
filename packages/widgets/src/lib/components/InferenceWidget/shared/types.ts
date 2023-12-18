@@ -40,6 +40,12 @@ export interface ModelLoadInfo {
 	compute_type?: ComputeType;
 }
 
+export interface WidgetState {
+	isDisabled?: boolean;
+	noInference?: boolean;
+	isMaximized?: boolean;
+}
+
 export type TableData = Record<string, (string | number)[]>;
 
 export type HighlightCoordinates = Record<string, string>;
