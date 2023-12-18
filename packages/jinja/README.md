@@ -6,17 +6,17 @@ A minimalistic JavaScript implementation of the Jinja templating engine, specifi
 
 ### Load template from a model on the Hugging Face Hub
 
-First, install the templates and hub packages:
+First, install the jinja and hub packages:
 
 ```sh
-npm i @huggingface/templates
+npm i @huggingface/jinja
 npm i @huggingface/hub
 ```
 
 You can then load a tokenizer from the Hugging Face Hub and render a list of chat messages, as follows:
 
 ```js
-import { Template } from "@huggingface/templates";
+import { Template } from "@huggingface/jinja";
 import { downloadFile } from "@huggingface/hub";
 
 const config = await (
@@ -43,10 +43,10 @@ const result = template.render({
 
 ### Transformers.js
 
-First, install the `@huggingface/templates` and `@xenova/transformers` packages:
+First, install the `@huggingface/jinja` and `@xenova/transformers` packages:
 
 ```sh
-npm i @huggingface/templates
+npm i @huggingface/jinja
 npm i @xenova/transformers
 ```
 
