@@ -72,7 +72,7 @@ model = BaseModel.from_pretrained("${model.id}")`,
 ];
 
 function get_base_diffusers_model(model: ModelData): string {
-	return model.cardData?.base_model ?? "fill-in-base-model";
+	return model.cardData?.base_model?.toString() ?? "fill-in-base-model";
 }
 
 const bertopic = (model: ModelData) => [
