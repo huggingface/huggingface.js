@@ -27,6 +27,19 @@ captioner("https://huggingface.co/datasets/Narsil/image_dummy/resolve/main/parro
 ## [{'generated_text': 'two birds are standing next to each other '}]
 ```
 
+### Conversation about the Image
+
+Some text generation models also take image inputs. These are called vision language models. You can use `image-to-text` pipeline to use these models like below.
+
+```python
+from transformers import pipeline
+
+mm_pipeline = pipeline("image-to-text",model="llava-hf/llava-1.5-7b-hf")
+mm_pipeline("https://huggingface.co/spaces/llava-hf/llava-4bit/resolve/main/examples/baklava.png", "How to make this pastry?")
+
+## [{'generated_text': 'To create these pastries, you will need a few key ingredients and tools. Firstly, gather the dough by combining flour with water in your mixing bowl until it forms into an elastic ball that can be easily rolled out on top of another surface or table without breaking apart (like pizza).'}]
+```
+
 ### OCR
 
 This code snippet uses Microsoft’s TrOCR, an encoder-decoder model consisting of an image Transformer encoder and a text Transformer decoder for state-of-the-art optical character recognition (OCR) on single-text line images.
