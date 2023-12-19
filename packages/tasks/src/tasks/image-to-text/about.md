@@ -27,7 +27,7 @@ captioner("https://huggingface.co/datasets/Narsil/image_dummy/resolve/main/parro
 ## [{'generated_text': 'two birds are standing next to each other '}]
 ```
 
-### Conversation with the Image
+### Conversation about the Image
 
 Some text generation models also take image inputs. These are called multimodal language models. You can use `image-to-text` pipeline to use these models like below.
 
