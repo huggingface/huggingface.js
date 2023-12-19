@@ -1,6 +1,6 @@
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
-import type { Collection, UpdateCollectionPayload } from "../types/api/api-collection";
+import type { ApiCollectionInfo, UpdateCollectionPayload } from "../types/api/api-collection";
 import type { Credentials } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 // import type { WhoAmI } from "./who-am-i";
@@ -18,13 +18,13 @@ export async function updateCollection(params: {
 	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 	 */
 	fetch?: typeof fetch;
-}): Promise<Collection> {
+}): Promise<ApiCollectionInfo> {
 	checkCredentials(params.credentials);
 
 	// if (params.namespace == null) {
 	// 	// params.namespace = userInfo.name;
 	// }
-	console.log(params.description);
+
 	const res = await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/collections/${params.slug}`, {
 		method: "PATCH",
 		body: JSON.stringify({

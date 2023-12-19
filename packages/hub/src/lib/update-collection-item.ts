@@ -1,6 +1,6 @@
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
-import type { Collection, UpdateCollectionItemPayload } from "../types/api/api-collection";
+import type { ApiCollectionInfo, UpdateCollectionItemPayload } from "../types/api/api-collection";
 import type { Credentials } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 
@@ -15,7 +15,7 @@ export async function updateCollectionItem(params: {
 	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 	 */
 	fetch?: typeof fetch;
-}): Promise<Collection> {
+}): Promise<ApiCollectionInfo> {
 	checkCredentials(params.credentials);
 
 	const res = await (params.fetch ?? fetch)(

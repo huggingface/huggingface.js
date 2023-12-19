@@ -1,10 +1,10 @@
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
-import type { Collection, CreateCollectionPayload } from "../types/api/api-collection";
 import type { Credentials } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
-import { getCollections } from "./get-collections";
-import type { CollectionEntry } from "./get-collections";
+import { getCollection } from "./get-collection";
+import type { CollectionEntry } from "./get-collection";
+import { CreateCollectionPayload } from "../types/api/api-collection";
 
 export async function createCollection(params: {
 	title: string;
@@ -18,7 +18,7 @@ export async function createCollection(params: {
 	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 	 */
 	fetch?: typeof fetch;
-}): Promise<Collection> {
+}): Promise<CollectionEntry> {
 	checkCredentials(params.credentials);
 
 	if (!params.namespace) {
@@ -42,19 +42,14 @@ export async function createCollection(params: {
 		},
 	});
 	if (!res.ok) {
-		if (params.exists_ok == true && res.status == 409) {
+		if (params.exists_ok && res.status == 409) {
 			// # Collection already exists and `exists_ok=True`
-			const collection = await res.json();
-			const results: CollectionEntry[] = [];
-			for await (const entry of getCollections({
-				slug: collection["slug"],
+			const response = await res.json();
+			return await getCollection({
+				slug: response["slug"],
 				credentials: params.credentials,
 				hubUrl: params.hubUrl,
-			})) {
-				results.push(entry);
-			}
-			const collectionResult = results as unknown as Collection;
-			return collectionResult;
+			});
 		} else {
 			throw await createApiError(res);
 		}

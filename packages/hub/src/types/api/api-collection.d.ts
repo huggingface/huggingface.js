@@ -30,7 +30,7 @@ export interface CreateCollectionPayload {
 	description?: string;
 	exists_ok: boolean;
 }
-export interface Collection {
+export interface ApiCollectionInfo {
 	_id: string;
 	id: string;
 	arxivIds: string[];

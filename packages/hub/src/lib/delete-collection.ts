@@ -1,6 +1,6 @@
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
-import type { Collection } from "../types/api/api-collection";
+import type { ApiCollectionInfo } from "../types/api/api-collection";
 import type { Credentials } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 // import type { WhoAmI } from "./who-am-i";
@@ -14,13 +14,17 @@ export async function deleteCollection(params: {
 	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 	 */
 	fetch?: typeof fetch;
-}): Promise<Collection> {
+}): Promise<ApiCollectionInfo> {
 	checkCredentials(params.credentials);
 
 	// if (params.namespace == null) {
 	// 	// params.namespace = userInfo.name;
 	// }
-	const res = await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/collections/${params.slug}`, {
+
+	const url = `${params.hubUrl ?? HUB_URL}/api/collections/${params.slug}`;
+	console.log(url);
+
+	const res = await (params.fetch ?? fetch)(url, {
 		method: "DELETE",
 		headers: {
 			Authorization: `Bearer ${params.credentials?.accessToken}`,

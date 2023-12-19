@@ -1,37 +1,93 @@
-import { it, describe } from "vitest";
-import { TEST_ACCESS_TOKEN, TEST_HUB_URL } from "../test/consts";
+import { it, describe, beforeAll, afterAll, expect } from "vitest";
+import { TEST_ACCESS_TOKEN, TEST_HUB_URL, TEST_USER } from "../test/consts";
 import { createCollection } from "./create-collection";
-import { type WhoAmI, whoAmI } from "./who-am-i";
+import { deleteCollection } from "./delete-collection";
+import { getCollection } from "./get-collection";
+import { listCollections } from "./list-collections";
+import { insecureRandomString } from "../utils/insecureRandomString";
 
 describe("createCollection", () => {
+	const credentials = {
+		accessToken: TEST_ACCESS_TOKEN,
+	};
+	const title = "This is a new test collection " + insecureRandomString();
+	const description = "Test collection";
+
+	const cleanUp = async () => {
+		const list = listCollections({
+			search: {
+				q: title,
+			},
+			credentials,
+			hubUrl: TEST_HUB_URL,
+		});
+		for await (const item of list) {
+			await deleteCollection({
+				slug: item.slug,
+				missing_ok: true,
+				credentials,
+				hubUrl: TEST_HUB_URL,
+			});
+		}
+	};
+
+	beforeAll(cleanUp);
+	afterAll(cleanUp);
+
 	it("should create a new collection", async () => {
-		const info: WhoAmI = await whoAmI({ credentials: { accessToken: TEST_ACCESS_TOKEN }, hubUrl: TEST_HUB_URL });
-		// Replace collections parameters with new values
 		const result = await createCollection({
-			title: "This is Sixth collection",
-			namespace: info.name,
-			description: "Sixth  Description",
+			title,
+			namespace: TEST_USER,
+			description,
 			private: false,
 			exists_ok: false,
-			credentials: { accessToken: TEST_ACCESS_TOKEN },
+			credentials,
 			hubUrl: TEST_HUB_URL,
 		});
 
-		console.log(result);
-	}, 25000);
-	it("should get an existing collection", async () => {
-		const info: WhoAmI = await whoAmI({ credentials: { accessToken: TEST_ACCESS_TOKEN }, hubUrl: TEST_HUB_URL });
-		// Make Exist ok as true and give existing values for title and dscription
-		const result = await createCollection({
-			title: "This is Fifth collection",
-			namespace: info.name,
-			description: "fifth Description",
+		const col = await getCollection({
+			slug: result.slug,
+			credentials,
+			hubUrl: TEST_HUB_URL,
+		});
+
+		expect(col).toMatchObject({
+			title,
+			description,
+			owner: { name: TEST_USER },
+			private: false,
+		});
+	});
+
+	it("should return existing collection when exists_ok is true", async () => {
+		const otherTitle = title + ": test exists_ok";
+
+		const createResult = await createCollection({
+			title: otherTitle,
+			namespace: TEST_USER,
+			description,
+			private: false,
+			exists_ok: false,
+			credentials,
+			hubUrl: TEST_HUB_URL,
+		});
+
+		const getResult = await getCollection({
+			slug: createResult.slug,
+			credentials,
+			hubUrl: TEST_HUB_URL,
+		});
+
+		const createResult2 = await createCollection({
+			title: otherTitle,
+			namespace: TEST_USER,
+			description,
 			private: false,
 			exists_ok: true,
-			credentials: { accessToken: TEST_ACCESS_TOKEN },
+			credentials,
 			hubUrl: TEST_HUB_URL,
 		});
 
-		console.log(result);
-	}, 25000);
+		expect(createResult2).deep.equal(getResult);
+	});
 });

@@ -1,21 +1,18 @@
-import { it, describe, expect, beforeAll, afterAll } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { TEST_ACCESS_TOKEN, TEST_HUB_URL, TEST_USER } from "../test/consts";
-import { addCollectionItem } from "./add-collection-item";
+import { getCollection } from "./get-collection";
 import { insecureRandomString } from "../utils/insecureRandomString";
 import { listCollections } from "./list-collections";
 import { deleteCollection } from "./delete-collection";
 import { createCollection } from "./create-collection";
-import { getCollection } from "./get-collection";
-import type { CollectionItemType } from "../types/api/api-collection";
+//
 
-describe("addCollectionItem", () => {
+describe("getCollection", () => {
 	const credentials = {
 		accessToken: TEST_ACCESS_TOKEN,
 	};
-	const hubUrl = TEST_HUB_URL;
 	const title = "This is a new test collection " + insecureRandomString();
 	const description = "Test collection";
-	const namespace = TEST_USER;
 
 	const cleanUp = async () => {
 		const list = listCollections({
@@ -23,14 +20,14 @@ describe("addCollectionItem", () => {
 				q: title,
 			},
 			credentials,
-			hubUrl,
+			hubUrl: TEST_HUB_URL,
 		});
 		for await (const item of list) {
 			await deleteCollection({
 				slug: item.slug,
 				missing_ok: true,
 				credentials,
-				hubUrl,
+				hubUrl: TEST_HUB_URL,
 			});
 		}
 	};
@@ -38,37 +35,37 @@ describe("addCollectionItem", () => {
 	beforeAll(cleanUp);
 	afterAll(cleanUp);
 
-	it("should add a collection item", async () => {
-		const col = await createCollection({
+	it("should get existing collection", async () => {
+		const res = await createCollection({
 			title,
 			description,
-			namespace,
 			private: false,
 			exists_ok: false,
+			namespace: TEST_USER,
 			credentials,
-			hubUrl,
+			hubUrl: TEST_HUB_URL,
 		});
 
-		const item = { id: "hub.js/TEST-fa82dodtqee", type: "model" as CollectionItemType };
-
-		await addCollectionItem({
-			collection_slug: col.slug,
-			item: item,
-			note: "note added",
-			exists_ok: false,
+		const col = await getCollection({
+			slug: res.slug,
 			credentials,
-			hubUrl,
+			hubUrl: TEST_HUB_URL,
 		});
 
-		const updCol = await getCollection({
-			slug: col.slug,
-			credentials,
-			hubUrl,
+		expect(col).toMatchObject({
+			title,
+			description,
+			private: false,
 		});
+	});
 
-		expect(updCol.items?.[0]).toMatchObject({
-			...item,
-			note: { text: "note added" },
-		});
+	it("should return error for non-existing collection", async () => {
+		await expect(
+			getCollection({
+				slug: "blah",
+				credentials,
+				hubUrl: TEST_HUB_URL,
+			})
+		).rejects.toThrowError("Sorry, we can't find the page you are looking for.");
 	});
 });
