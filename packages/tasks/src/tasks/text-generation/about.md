@@ -44,7 +44,7 @@ When it comes to text generation, the underlying language model can come in seve
 
 ## Text Generation from Image and Text
 
-There are language models that can input both text and image and output text, called multimodal language models. [LLaVA](https://huggingface.co/llava-hf/llava-1.5-7b-hf) and [BLIP-2](https://huggingface.co/Salesforce/blip2-opt-2.7b) are good examples. Although they work just like other language models by means of input parameters for generation, since they also take input images, you can use them with `image-to-text` pipeline. You can find information about the pipeline in [image-to-text](https://huggingface.co/tasks/image-to-text) task page.
+There are language models that can input both text and image and output text, called vision language models. [LLaVA](https://huggingface.co/llava-hf/llava-1.5-7b-hf) and [BLIP-2](https://huggingface.co/Salesforce/blip2-opt-2.7b) are good examples. Although they work just like other language models by means of input parameters for generation, since they also take input images, you can use them with `image-to-text` pipeline. You can find information about the pipeline in [image-to-text](https://huggingface.co/tasks/image-to-text) task page.
 
 ## Inference
 
