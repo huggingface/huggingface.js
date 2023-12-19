@@ -4,7 +4,7 @@ import type { Credentials } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { getCollection } from "./get-collection";
 import type { CollectionEntry } from "./get-collection";
-import { CreateCollectionPayload } from "../types/api/api-collection";
+import type { CreateCollectionPayload } from "../types/api/api-collection";
 
 export async function createCollection(params: {
 	title: string;
