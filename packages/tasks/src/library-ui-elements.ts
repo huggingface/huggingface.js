@@ -541,6 +541,11 @@ transcriptions = asr_model.transcribe(["file.wav"])`,
 
 const mlAgents = (model: ModelData) => [`mlagents-load-from-hf --repo-id="${model.id}" --local-dir="./downloads"`];
 
+
+const mlx = (model: ModelData) => {
+	return ["A code snippet will be here soon :) stay tuned!"];
+};
+
 const nemo = (model: ModelData) => {
 	let command: string[] | undefined = undefined;
 	// Resolve the tag to a nemo domain/sub-domain
@@ -620,6 +625,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS: Partial<Record<ModelLibraryKey, Librar
 		repoUrl: "https://github.com/keras-team/keras",
 		docsUrl: "https://huggingface.co/docs/hub/keras",
 		snippets: keras,
+	},
+	mlx: {
+		btnLabel: "NeMo",
+		repoName: "MLX",
+		repoUrl: "https://github.com/ml-explore/mlx-examples/tree/main",
+		snippets: mlx,
 	},
 	nemo: {
 		btnLabel: "NeMo",
