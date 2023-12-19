@@ -42,6 +42,10 @@ When it comes to text generation, the underlying language model can come in seve
 
 - **Human feedback models:** these models extend base and instruction-trained models by incorporating human feedback that rates the quality of the generated text according to criteria like [helpfulness, honesty, and harmlessness](https://arxiv.org/abs/2112.00861). The human feedback is then combined with an optimization technique like reinforcement learning to align the original model to be closer with human preferences. The overall methodology is often called [Reinforcement Learning from Human Feedback](https://huggingface.co/blog/rlhf), or RLHF for short. [Llama2-Chat](https://huggingface.co/meta-llama/Llama-2-7b-chat-hf) is an open-source model aligned through human feedback.
 
+## Text Generation from Image and Text
+
+There are language models that can input both text and image and output text, called multimodal language models. [LLaVA](https://huggingface.co/llava-hf/llava-1.5-7b-hf) and [BLIP-2](https://huggingface.co/Salesforce/blip2-opt-2.7b) are good examples. Although they work just like other language models by means of input parameters for generation, since they also take input images, you can use them with `image-to-text` pipeline. You can find information about the pipeline in [image-to-text](https://huggingface.co/tasks/image-to-text) task page. 
+
 ## Inference
 
 You can use the 🤗 Transformers library `text-generation` pipeline to do inference with Text Generation models. It takes an incomplete text and returns multiple outputs with which the text can be completed.
