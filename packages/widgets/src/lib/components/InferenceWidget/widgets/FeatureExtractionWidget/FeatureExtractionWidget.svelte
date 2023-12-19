@@ -1,17 +1,14 @@
 <script lang="ts">
-	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "$lib/components/InferenceWidget/shared/types.js";
-	import type { WidgetExampleTextInput } from "$lib/components/InferenceWidget/shared/WidgetExample.js";
+	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "../../shared/types.js";
+	import type { WidgetExampleTextInput } from "@huggingface/tasks";
 
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
-	import {
-		addInferenceParameters,
-		callInferenceApi,
-		updateUrl,
-	} from "$lib/components/InferenceWidget/shared/helpers.js";
-	import { isTextInput } from "$lib/components/InferenceWidget/shared/inputValidation.js";
+	import { addInferenceParameters, callInferenceApi, updateUrl } from "../../shared/helpers.js";
+	import { isTextInput } from "../../shared/inputValidation.js";
 
 	import { DataTable } from "./DataTable.js";
+	import { widgetStates } from "../../stores.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -20,7 +17,8 @@
 	export let noTitle: WidgetProps["noTitle"];
 	export let shouldUpdateUrl: WidgetProps["shouldUpdateUrl"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
-	let isDisabled = false;
+
+	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
 	let computeTime = "";
 	let error: string = "";
@@ -115,7 +113,7 @@
 		return Math.ceil(total_elems / SINGLE_DIM_COLS);
 	};
 
-	function applyInputSample(sample: WidgetExampleTextInput, opts: ExampleRunOpts = {}) {
+	function applyWidgetExample(sample: WidgetExampleTextInput, opts: ExampleRunOpts = {}) {
 		text = sample.text;
 		if (opts.isPreview) {
 			return;
@@ -125,76 +123,71 @@
 	}
 </script>
 
-<WidgetWrapper
-	{callApiOnMount}
-	{apiUrl}
-	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
-	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	validateExample={isTextInput}
-	exampleQueryParams={["text"]}
->
-	<svelte:fragment slot="top" let:isDisabled>
-		<form>
-			<WidgetQuickInput
-				bind:value={text}
-				{isLoading}
-				{isDisabled}
-				onClickSubmitBtn={() => {
-					getOutput();
-				}}
-			/>
-		</form>
-	</svelte:fragment>
-	<svelte:fragment slot="bottom">
-		{#if output}
-			{#if output.isArrLevel0}
-				<div class="mt-3 h-96 overflow-auto">
-					<table class="w-full table-auto border text-right font-mono text-xs">
-						{#each range(numOfRows(output.oneDim.length)) as i}
-							<tr>
-								{#each range(SINGLE_DIM_COLS) as j}
-									{#if j * numOfRows(output.oneDim.length) + i < output.oneDim.length}
-										<td class="bg-gray-100 px-1 text-gray-400 dark:bg-gray-900">
-											{j * numOfRows(output.oneDim.length) + i}
-										</td>
-										<td class="px-1 py-0.5 {output.bg(output.oneDim[j * numOfRows(output.oneDim.length) + i])}">
-											{output.oneDim[j * numOfRows(output.oneDim.length) + i].toFixed(3)}
-										</td>
-									{/if}
-								{/each}
-							</tr>
-						{/each}
-					</table>
-				</div>
-			{:else}
-				<div class="mt-3 overflow-auto">
-					<table class="border text-right font-mono text-xs">
+<WidgetWrapper {apiUrl} {includeCredentials} {model} let:WidgetInfo let:WidgetHeader let:WidgetFooter>
+	<WidgetHeader
+		{noTitle}
+		{model}
+		{isLoading}
+		{isDisabled}
+		{callApiOnMount}
+		{applyWidgetExample}
+		validateExample={isTextInput}
+	/>
+
+	<WidgetQuickInput
+		bind:value={text}
+		{isLoading}
+		{isDisabled}
+		onClickSubmitBtn={() => {
+			getOutput();
+		}}
+	/>
+
+	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
+
+	{#if output}
+		{#if output.isArrLevel0}
+			<div class="mt-3 h-96 overflow-auto">
+				<table class="w-full table-auto border text-right font-mono text-xs">
+					{#each range(numOfRows(output.oneDim.length)) as i}
 						<tr>
-							<td class="bg-gray-100 dark:bg-gray-900" />
-							{#each range(output.twoDim[0].length) as j}
-								<td class="bg-gray-100 px-1 pt-1 text-gray-400 dark:bg-gray-900">{j}</td>
+							{#each range(SINGLE_DIM_COLS) as j}
+								{#if j * numOfRows(output.oneDim.length) + i < output.oneDim.length}
+									<td class="bg-gray-100 px-1 text-gray-400 dark:bg-gray-900">
+										{j * numOfRows(output.oneDim.length) + i}
+									</td>
+									<td class="px-1 py-0.5 {output.bg(output.oneDim[j * numOfRows(output.oneDim.length) + i])}">
+										{output.oneDim[j * numOfRows(output.oneDim.length) + i].toFixed(3)}
+									</td>
+								{/if}
 							{/each}
 						</tr>
-						{#each output.twoDim as column, i}
-							<tr>
-								<td class="bg-gray-100 pl-4 pr-1 text-gray-400 dark:bg-gray-900">{i}</td>
-								{#each column as x}
-									<td class="px-1 py-1 {output.bg(x)}">
-										{x.toFixed(3)}
-									</td>
-								{/each}
-							</tr>
+					{/each}
+				</table>
+			</div>
+		{:else}
+			<div class="mt-3 overflow-auto">
+				<table class="border text-right font-mono text-xs">
+					<tr>
+						<td class="bg-gray-100 dark:bg-gray-900" />
+						{#each range(output.twoDim[0].length) as j}
+							<td class="bg-gray-100 px-1 pt-1 text-gray-400 dark:bg-gray-900">{j}</td>
 						{/each}
-					</table>
-				</div>
-			{/if}
+					</tr>
+					{#each output.twoDim as column, i}
+						<tr>
+							<td class="bg-gray-100 pl-4 pr-1 text-gray-400 dark:bg-gray-900">{i}</td>
+							{#each column as x}
+								<td class="px-1 py-1 {output.bg(x)}">
+									{x.toFixed(3)}
+								</td>
+							{/each}
+						</tr>
+					{/each}
+				</table>
+			</div>
 		{/if}
-	</svelte:fragment>
+	{/if}
+
+	<WidgetFooter {model} {isDisabled} {outputJson} />
 </WidgetWrapper>

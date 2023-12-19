@@ -1,14 +1,20 @@
 <script lang="ts">
+	import { InferenceDisplayability } from "@huggingface/tasks";
 	import { type WidgetProps, type ModelLoadInfo, LoadState, ComputeType } from "../types.js";
-	import IconAzureML from "$lib/components/Icons/IconAzureML.svelte";
-	import { InferenceDisplayability } from "../../../../interfaces/InferenceDisplayability.js";
-	import IconInfo from "$lib/components/Icons/IconInfo.svelte";
+	import WidgetModelLoading from "../WidgetModelLoading/WidgetModelLoading.svelte";
+	import IconAzureML from "../../..//Icons/IconAzureML.svelte";
+	import IconInfo from "../../..//Icons/IconInfo.svelte";
+	import { modelLoadStates } from "../../stores.js";
 
 	export let model: WidgetProps["model"];
 	export let computeTime: string = "";
 	export let error: string = "";
-	export let modelLoadInfo: ModelLoadInfo | undefined = undefined;
-	export let modelTooBig = false;
+	export let modelLoading = {
+		isLoading: false,
+		estimatedTime: 0,
+	};
+
+	$: modelTooBig = $modelLoadStates[model.id]?.state === "TooBig";
 
 	const state = {
 		[LoadState.Loadable]: "This model can be loaded on the Inference API on-demand.",
@@ -26,26 +32,11 @@
 		[LoadState.Error]: "⚠️ This model could not be loaded.",
 	} as const;
 
-	function getStatusReport(
-		modelLoadInfo: ModelLoadInfo | undefined,
-		statuses: Record<LoadState, string>,
-		isAzure = false
-	): string {
-		if (!modelLoadInfo) {
+	function getStatusReport(modelLoadStates: ModelLoadInfo | undefined, statuses: Record<LoadState, string>): string {
+		if (!modelLoadStates) {
 			return "Model state unknown";
 		}
-		if (modelLoadInfo.compute_type === ComputeType.CPU && modelLoadInfo.state === LoadState.Loaded && !isAzure) {
-			return `The model is loaded and running on <a class="hover:underline" href="https://huggingface.co/intel" target="_blank">Intel Xeon 3rd Gen Scalable CPU</a>`;
-		}
-		return statuses[modelLoadInfo.state];
-	}
-
-	function getComputeTypeMsg(): string {
-		const computeType = modelLoadInfo?.compute_type ?? ComputeType.CPU;
-		if (computeType === ComputeType.CPU) {
-			return "Intel Xeon 3rd Gen Scalable cpu";
-		}
-		return computeType;
+		return statuses[modelLoadStates.state];
 	}
 </script>
 
@@ -63,13 +54,13 @@
 				</div>
 				<div class="border-dotter mx-2 flex flex-1 -translate-y-px border-b border-gray-100" />
 				<div>
-					{@html getStatusReport(modelLoadInfo, azureState, true)}
+					{@html getStatusReport($modelLoadStates[model.id], azureState)}
 				</div>
 			</div>
 		{:else if computeTime}
-			Computation time on {getComputeTypeMsg()}: {computeTime}
+			Computation time on {$modelLoadStates[model.id]?.compute_type ?? ComputeType.CPU}: {computeTime}
 		{:else if (model.inference === InferenceDisplayability.Yes || model.pipeline_tag === "reinforcement-learning") && !modelTooBig}
-			{@html getStatusReport(modelLoadInfo, state)}
+			{@html getStatusReport($modelLoadStates[model.id], state)}
 		{:else if model.inference === InferenceDisplayability.ExplicitOptOut}
 			<span class="text-sm text-gray-500">Inference API has been turned off for this model.</span>
 		{:else if model.inference === InferenceDisplayability.CustomCode}
@@ -112,5 +103,8 @@
 	</div>
 	{#if error}
 		<div class="alert alert-error mt-3">{error}</div>
+	{/if}
+	{#if modelLoading.isLoading}
+		<WidgetModelLoading estimatedTime={modelLoading.estimatedTime} />
 	{/if}
 </div>

@@ -11,10 +11,6 @@ interface ApiWhoAmIEntityBase extends ApiWhoAmIBase {
 	fullname: string;
 	email: string | null;
 	canPay: boolean;
-	/**
-	 * @deprecated
-	 */
-	plan?: unknown;
 	avatarUrl: string;
 	/**
 	 * Unix timestamp in seconds

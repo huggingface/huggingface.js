@@ -1,21 +1,31 @@
 <script lang="ts">
-	import type { ModelData } from "$lib/interfaces/Types.js";
+	import type { ModelData } from "@huggingface/tasks";
+	import { InferenceDisplayability } from "@huggingface/tasks";
 
 	import InferenceWidget from "$lib/components/InferenceWidget/InferenceWidget.svelte";
 	import ModeSwitcher from "$lib/components/DemoThemeSwitcher/DemoThemeSwitcher.svelte";
-	import { InferenceDisplayability } from "$lib/interfaces/InferenceDisplayability.js";
 	import { onMount } from "svelte";
+	import { browser } from "$app/environment";
 
-	let apiToken = "";
+	export let data;
+	let apiToken = data.session?.access_token || "";
 
 	function storeHFToken() {
 		window.localStorage.setItem("hf_token", apiToken);
 	}
 
+	/**
+	 * If we are in an iframe, we need to open the auth page in a new tab
+	 * to avoid issues with third-party cookies in a space
+	 */
+	const isIframe = browser && window.self !== window.parent;
+
 	onMount(() => {
-		const token = window.localStorage.getItem("hf_token");
-		if (token) {
-			apiToken = token;
+		if (!data.supportsOAuth) {
+			const token = window.localStorage.getItem("hf_token");
+			if (token) {
+				apiToken = token;
+			}
 		}
 	});
 
@@ -202,7 +212,7 @@
 			],
 		},
 		{
-			id: "gpt2",
+			id: "mistralai/Mistral-7B-v0.1",
 			pipeline_tag: "text-generation",
 			inference: InferenceDisplayability.Yes,
 			widgetData: [
@@ -218,11 +228,11 @@
 			pipeline_tag: "text-generation",
 			inference: InferenceDisplayability.Yes,
 			widgetData: [
-				{ text: "My name is Julien and I like to" },
-				{ text: "My name is Thomas and my main" },
-				{ text: "My name is Mariama, my favorite" },
-				{ text: "My name is Clara and I am" },
-				{ text: "Once upon a time," },
+				{ text: "My name is Julien and I like to", group: "English" },
+				{ text: "My name is Thomas and my main", group: "English" },
+				{ text: "My name is Mariama, my favorite", group: "French" },
+				{ text: "My name is Clara and I am", group: "French" },
+				{ text: "Once upon a time,", group: "French" },
 			],
 		},
 		{
@@ -526,10 +536,32 @@
 <div class="flex flex-col gap-6 py-12 px-4">
 	<ModeSwitcher />
 
-	<label>
-		First, Enter HF token
-		<input class="form-input" type="text" bind:value={apiToken} placeholder="hf_..." on:change={storeHFToken} />
-	</label>
+	{#if data.supportsOAuth}
+		{#if !data.session}
+			<form class="contents" method="post" action="/auth/signin/huggingface" target={isIframe ? "_blank" : ""}>
+				<button type="submit" title="Sign in with Hugging Face">
+					<img
+						src="https://huggingface.co/datasets/huggingface/badges/resolve/main/sign-in-with-huggingface-xl-dark.svg"
+						alt="Sign in with Hugging Face"
+						class="h-12 w-auto"
+					/>
+				</button>
+			</form>
+		{:else}
+			<div class="flex items-center gap-2">
+				logged in as {data.session.user?.username}
+				<img src={data.session?.user?.image} alt="" class="w-6 h-6 rounded-full" />
+				<form method="post" action="/auth/signout">
+					<button type="submit" class="underline">Sign out</button>
+				</form>
+			</div>
+		{/if}
+	{:else}
+		<label>
+			<div class="text-xl font-semibold">First, Enter HF token</div>
+			<input class="form-input" type="text" bind:value={apiToken} placeholder="hf_..." on:change={storeHFToken} />
+		</label>
+	{/if}
 
 	<div>
 		<h1 class="mb-8 text-4xl font-semibold">Showcase of all types of inference widgets running</h1>

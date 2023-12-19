@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { WidgetProps } from "$lib/components/InferenceWidget/shared/types.js";
+	import type { WidgetProps } from "../../shared/types.js";
 
 	import { onMount } from "svelte";
 
-	import IconSpin from "$lib/components/Icons/IconSpin.svelte";
-	import IconCross from "$lib/components/Icons/IconCross.svelte";
+	import IconSpin from "../../../Icons/IconSpin.svelte";
+	import IconCross from "../../../Icons/IconCross.svelte";
 	import WidgetHeader from "../../shared/WidgetHeader/WidgetHeader.svelte";
 
 	export let apiToken: WidgetProps["apiToken"];
@@ -38,7 +38,7 @@
 	does NOT use InferenceAPI (unlike other pipelines widgets)
 -->
 <div class="flex w-full max-w-full flex-col">
-	<WidgetHeader title="Video Preview" pipeline="reinforcement-learning" />
+	<WidgetHeader title="Video Preview" {model} />
 	<div class="w-full overflow-hidden rounded-lg">
 		{#if replay === Replay.Available}
 			<!-- svelte-ignore a11y-media-has-caption -->

@@ -1,5 +1,4 @@
-import type { ModelData } from "../../../interfaces/Types.js";
-import type { WidgetExampleOutput } from "./WidgetExample.js";
+import type { ModelData, WidgetExampleOutput } from "@huggingface/tasks";
 
 export interface WidgetProps {
 	apiToken?: string;
@@ -39,6 +38,12 @@ export enum ComputeType {
 export interface ModelLoadInfo {
 	state: LoadState;
 	compute_type?: ComputeType;
+}
+
+export interface WidgetState {
+	isDisabled?: boolean;
+	noInference?: boolean;
+	isMaximized?: boolean;
 }
 
 export type TableData = Record<string, (string | number)[]>;

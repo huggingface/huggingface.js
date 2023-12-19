@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { WidgetProps } from "$lib/components/InferenceWidget/shared/types.js";
+	import type { WidgetProps } from "../../..//InferenceWidget/shared/types.js";
 	import { onDestroy, onMount } from "svelte";
-	import IconMagicWand from "$lib/components/Icons/IconMagicWand.svelte";
+	import IconMagicWand from "../../..//Icons/IconMagicWand.svelte";
 	import Recorder from "./Recorder.js";
 
 	export let apiToken: WidgetProps["apiUrl"] | undefined = undefined;

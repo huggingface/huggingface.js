@@ -1,24 +1,20 @@
 <script lang="ts">
-	import type {
-		WidgetProps,
-		ImageSegment,
-		ExampleRunOpts,
-		InferenceRunOpts,
-	} from "$lib/components/InferenceWidget/shared/types.js";
-	import type { WidgetExampleAssetInput } from "$lib/components/InferenceWidget/shared/WidgetExample.js";
+	import type { WidgetProps, ImageSegment, ExampleRunOpts, InferenceRunOpts } from "../../shared/types.js";
+	import type { WidgetExampleAssetInput } from "@huggingface/tasks";
 
 	import { onMount } from "svelte";
 
-	import { COLORS } from "$lib/components/InferenceWidget/shared/consts.js";
-	import { clamp, mod, hexToRgb } from "$lib/utils/ViewUtils.js";
-	import { callInferenceApi, getBlobFromUrl } from "$lib/components/InferenceWidget/shared/helpers.js";
+	import { COLORS } from "../../shared/consts.js";
+	import { clamp, mod, hexToRgb } from "../../../../utils/ViewUtils.js";
+	import { callInferenceApi, getBlobFromUrl } from "../../shared/helpers.js";
 	import WidgetFileInput from "../../shared/WidgetFileInput/WidgetFileInput.svelte";
 	import WidgetDropzone from "../../shared/WidgetDropzone/WidgetDropzone.svelte";
 	import WidgetOutputChart from "../../shared/WidgetOutputChart/WidgetOutputChart.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
-	import { isAssetInput } from "$lib/components/InferenceWidget/shared/inputValidation.js";
+	import { isAssetInput } from "../../shared/inputValidation.js";
 
 	import Canvas from "./Canvas.svelte";
+	import { widgetStates } from "../../stores.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -26,6 +22,8 @@
 	export let model: WidgetProps["model"];
 	export let noTitle: WidgetProps["noTitle"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
+
+	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
 	const maskOpacity = Math.floor(255 * 0.6);
 	const colorToRgb = Object.fromEntries(
@@ -215,7 +213,7 @@
 		};
 	}
 
-	async function applyInputSample(sample: WidgetExampleAssetInput, opts: ExampleRunOpts = {}) {
+	async function applyWidgetExample(sample: WidgetExampleAssetInput, opts: ExampleRunOpts = {}) {
 		imgSrc = sample.src;
 		if (opts.isPreview) {
 			output = [];
@@ -234,53 +232,49 @@
 	});
 </script>
 
-<WidgetWrapper
-	{callApiOnMount}
-	{apiUrl}
-	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
-	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	validateExample={isAssetInput}
->
-	<svelte:fragment slot="top" let:isDisabled>
-		<form>
-			<WidgetDropzone
-				classNames="hidden md:block"
-				{isLoading}
-				{isDisabled}
-				{imgSrc}
-				{onSelectFile}
-				onError={(e) => (error = e)}
-			>
-				{#if imgSrc}
-					<Canvas {imgSrc} {highlightIndex} {mousemove} {mouseout} {output} />
-				{/if}
-			</WidgetDropzone>
-			<!-- Better UX for mobile/table through CSS breakpoints -->
-			{#if imgSrc}
-				<Canvas classNames="mr-2 md:hidden" {imgSrc} {highlightIndex} {mousemove} {mouseout} {output} />
-			{/if}
-			<WidgetFileInput
-				accept="image/*"
-				classNames="mr-2 md:hidden"
-				{isLoading}
-				{isDisabled}
-				label="Browse for image"
-				{onSelectFile}
-			/>
-			{#if warning}
-				<div class="alert alert-warning mt-2">{warning}</div>
-			{/if}
-			<img alt="" bind:this={imgEl} class="hidden" src={imgSrc} />
-		</form>
-	</svelte:fragment>
-	<svelte:fragment slot="bottom">
-		<WidgetOutputChart classNames="pt-4" {output} {highlightIndex} {mouseover} {mouseout} />
-	</svelte:fragment>
+<WidgetWrapper {apiUrl} {includeCredentials} {model} let:WidgetInfo let:WidgetHeader let:WidgetFooter>
+	<WidgetHeader
+		{noTitle}
+		{model}
+		{isLoading}
+		{isDisabled}
+		{callApiOnMount}
+		{applyWidgetExample}
+		validateExample={isAssetInput}
+	/>
+
+	<WidgetDropzone
+		classNames="hidden md:block"
+		{isLoading}
+		{isDisabled}
+		{imgSrc}
+		{onSelectFile}
+		onError={(e) => (error = e)}
+	>
+		{#if imgSrc}
+			<Canvas {imgSrc} {highlightIndex} {mousemove} {mouseout} {output} />
+		{/if}
+	</WidgetDropzone>
+	<!-- Better UX for mobile/table through CSS breakpoints -->
+	{#if imgSrc}
+		<Canvas classNames="mr-2 md:hidden" {imgSrc} {highlightIndex} {mousemove} {mouseout} {output} />
+	{/if}
+	<WidgetFileInput
+		accept="image/*"
+		classNames="mr-2 md:hidden"
+		{isLoading}
+		{isDisabled}
+		label="Browse for image"
+		{onSelectFile}
+	/>
+	{#if warning}
+		<div class="alert alert-warning mt-2">{warning}</div>
+	{/if}
+	<img alt="" bind:this={imgEl} class="hidden" src={imgSrc} />
+
+	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
+
+	<WidgetOutputChart classNames="pt-4" {output} {highlightIndex} {mouseover} {mouseout} />
+
+	<WidgetFooter {model} {isDisabled} {outputJson} />
 </WidgetWrapper>

@@ -38,6 +38,8 @@
 	import IconGraphML from "../Icons/IconGraphML.svelte";
 	import IconZeroShotObjectDetection from "../Icons/IconZeroShotClassification.svelte";
 	import IconMaskGeneration from "../Icons/IconMaskGeneration.svelte";
+	import IconTextTo3D from "../Icons/IconTextTo3D.svelte";
+	import IconImageTo3D from "../Icons/IconImageTo3D.svelte";
 	import type { PipelineType } from "@huggingface/tasks";
 
 	export let classNames = "";
@@ -86,6 +88,8 @@
 		"document-question-answering": IconDocumentQuestionAnswering,
 		"mask-generation": IconMaskGeneration,
 		"zero-shot-object-detection": IconZeroShotObjectDetection,
+		"text-to-3d": IconTextTo3D,
+		"image-to-3d": IconImageTo3D,
 	};
 
 	$: iconComponent =

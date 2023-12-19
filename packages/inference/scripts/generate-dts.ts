@@ -1,8 +1,24 @@
 /** Dirty script to generate pretty .d.ts */
 
 import { readFileSync, writeFileSync, appendFileSync, readdirSync } from "node:fs";
+import { TASKS_DATA } from "@huggingface/tasks";
 
-writeFileSync("./dist/index.d.ts", readFileSync("./src/types.ts", "utf-8") + "\n");
+const tasks = Object.keys(TASKS_DATA)
+	.sort()
+	.filter((task) => task !== "other");
+
+let types = readFileSync("./src/types.ts", "utf-8");
+
+types = types.replace(/import.* "@huggingface\/tasks";\n/g, "");
+types = types.replace(' Exclude<PipelineType, "other">', ["", ...tasks.map((task) => `"${task}"`)].join("\n\t| "));
+
+if (types.includes("PipelineType") || types.includes("@huggingface/tasks")) {
+	console.log(types);
+	console.error("Failed to parse types.ts");
+	process.exit(1);
+}
+
+writeFileSync("./dist/index.d.ts", types + "\n");
 appendFileSync("./dist/index.d.ts", "export class InferenceOutputError extends TypeError {}" + "\n");
 
 const dirs = readdirSync("./src/tasks");

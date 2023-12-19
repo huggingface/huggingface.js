@@ -1,5 +1,3 @@
-import { delay } from "$lib/utils/ViewUtils.js";
-
 export default class Recorder {
 	// see developers.google.com/web/updates/2016/01/mediarecorder
 	type: "audio" | "video" = "audio";
@@ -57,7 +55,7 @@ export default class Recorder {
 			return new Blob(this.recordedBlobs);
 		}
 
-		await delay(30);
+		await new Promise((resolve) => setTimeout(resolve, 30));
 		// Wait for the last blob in handleDataAvailable.
 		// Alternative: hook into `onstop` event.
 		const superBuffer = new Blob(this.recordedBlobs, {

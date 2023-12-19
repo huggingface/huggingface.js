@@ -1,6 +1,6 @@
 <script lang="ts">
-	import IconSpin from "$lib/components/Icons/IconSpin.svelte";
-	import IconFile from "$lib/components/Icons/IconFile.svelte";
+	import IconSpin from "../../../Icons/IconSpin.svelte";
+	import IconFile from "../../../Icons/IconFile.svelte";
 
 	export let accept: string | undefined;
 	export let classNames = "";

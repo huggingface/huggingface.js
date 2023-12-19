@@ -1,10 +1,6 @@
 <script lang="ts">
-	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "$lib/components/InferenceWidget/shared/types.js";
-	import type {
-		WidgetExample,
-		WidgetExampleAssetInput,
-		WidgetExampleOutputText,
-	} from "$lib/components/InferenceWidget/shared/WidgetExample.js";
+	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "../../shared/types.js";
+	import type { WidgetExample, WidgetExampleAssetInput, WidgetExampleOutputText } from "@huggingface/tasks";
 
 	import WidgetAudioTrack from "../../shared/WidgetAudioTrack/WidgetAudioTrack.svelte";
 	import WidgetFileInput from "../../shared/WidgetFileInput/WidgetFileInput.svelte";
@@ -13,9 +9,10 @@
 	import WidgetRealtimeRecorder from "../../shared/WidgetRealtimeRecorder/WidgetRealtimeRecorder.svelte";
 	import WidgetSubmitBtn from "../../shared/WidgetSubmitBtn/WidgetSubmitBtn.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
-	import { callInferenceApi, getBlobFromUrl } from "$lib/components/InferenceWidget/shared/helpers.js";
-	import { isValidOutputText } from "$lib/components/InferenceWidget/shared/outputValidation.js";
-	import { isAssetInput } from "$lib/components/InferenceWidget/shared/inputValidation.js";
+	import { callInferenceApi, getBlobFromUrl } from "../../shared/helpers.js";
+	import { isValidOutputText } from "../../shared/outputValidation.js";
+	import { isAssetInput } from "../../shared/inputValidation.js";
+	import { widgetStates } from "../../stores.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -23,7 +20,8 @@
 	export let model: WidgetProps["model"];
 	export let noTitle: WidgetProps["noTitle"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
-	let isDisabled = false;
+
+	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
 	let computeTime = "";
 	let error: string = "";
@@ -137,7 +135,7 @@
 		throw new TypeError("Invalid output: output must be of type <text:string>");
 	}
 
-	function applyInputSample(sample: WidgetExampleAssetInput<WidgetExampleOutputText>, opts: ExampleRunOpts = {}) {
+	function applyWidgetExample(sample: WidgetExampleAssetInput<WidgetExampleOutputText>, opts: ExampleRunOpts = {}) {
 		filename = sample.example_title!;
 		fileUrl = sample.src;
 		if (opts.isPreview) {
@@ -165,62 +163,50 @@
 	}
 </script>
 
-<WidgetWrapper
-	{callApiOnMount}
-	{apiUrl}
-	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
-	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	{validateExample}
->
-	<svelte:fragment slot="top" let:isDisabled>
-		<form>
-			<div class="flex flex-wrap items-center {isDisabled ? 'pointer-events-none hidden opacity-50' : ''}">
-				{#if !isRealtimeRecording}
-					<WidgetFileInput accept="audio/*" classNames="mt-1.5" {onSelectFile} />
-					<span class="mx-2 mt-1.5">or</span>
-					<WidgetRecorder classNames="mt-1.5" {onRecordStart} onRecordStop={onSelectFile} onError={onRecordError} />
-				{/if}
-				{#if model?.library_name === "transformers"}
-					{#if !isRealtimeRecording}
-						<span class="mx-2 mt-1.5">or</span>
-					{/if}
-					<WidgetRealtimeRecorder
-						classNames="mt-1.5"
-						{apiToken}
-						{model}
-						{updateModelLoading}
-						onRecordStart={() => (isRealtimeRecording = true)}
-						onRecordStop={() => (isRealtimeRecording = false)}
-						onError={onRecordError}
-					/>
-				{/if}
-			</div>
+<WidgetWrapper {apiUrl} {includeCredentials} {model} let:WidgetInfo let:WidgetHeader let:WidgetFooter>
+	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyWidgetExample} {validateExample} />
+
+	<div class="flex flex-wrap items-center {isDisabled ? 'pointer-events-none hidden opacity-50' : ''}">
+		{#if !isRealtimeRecording}
+			<WidgetFileInput accept="audio/*" classNames="mt-1.5" {onSelectFile} />
+			<span class="mx-2 mt-1.5">or</span>
+			<WidgetRecorder classNames="mt-1.5" {onRecordStart} onRecordStop={onSelectFile} onError={onRecordError} />
+		{/if}
+		{#if model?.library_name === "transformers"}
 			{#if !isRealtimeRecording}
-				{#if fileUrl}
-					<WidgetAudioTrack classNames="mt-3" label={filename} src={fileUrl} />
-				{/if}
-				<WidgetSubmitBtn
-					classNames="mt-2"
-					isDisabled={isRecording || isDisabled}
-					{isLoading}
-					onClick={() => {
-						getOutput();
-					}}
-				/>
-				{#if warning}
-					<div class="alert alert-warning mt-2">{warning}</div>
-				{/if}
+				<span class="mx-2 mt-1.5">or</span>
 			{/if}
-		</form>
-	</svelte:fragment>
-	<svelte:fragment slot="bottom">
-		<WidgetOutputText classNames="mt-4" {output} />
-	</svelte:fragment>
+			<WidgetRealtimeRecorder
+				classNames="mt-1.5"
+				{apiToken}
+				{model}
+				{updateModelLoading}
+				onRecordStart={() => (isRealtimeRecording = true)}
+				onRecordStop={() => (isRealtimeRecording = false)}
+				onError={onRecordError}
+			/>
+		{/if}
+	</div>
+	{#if !isRealtimeRecording}
+		{#if fileUrl}
+			<WidgetAudioTrack classNames="mt-3" label={filename} src={fileUrl} />
+		{/if}
+		<WidgetSubmitBtn
+			classNames="mt-2"
+			isDisabled={isRecording || isDisabled}
+			{isLoading}
+			onClick={() => {
+				getOutput();
+			}}
+		/>
+		{#if warning}
+			<div class="alert alert-warning mt-2">{warning}</div>
+		{/if}
+	{/if}
+
+	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
+
+	<WidgetOutputText classNames="mt-4" {output} />
+
+	<WidgetFooter {model} {isDisabled} {outputJson} />
 </WidgetWrapper>

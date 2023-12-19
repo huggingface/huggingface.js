@@ -15,10 +15,6 @@ export interface WhoAmIUser {
 	name: string;
 	fullname: string;
 	canPay: boolean;
-	/**
-	 * @deprecated
-	 */
-	plan?: unknown;
 	avatarUrl: string;
 	/**
 	 * Unix timestamp in seconds
@@ -34,10 +30,6 @@ export interface WhoAmIOrg {
 	fullname: string;
 	email: string | null;
 	canPay: boolean;
-	/**
-	 * @deprecated
-	 */
-	plan?: unknown;
 	avatarUrl: string;
 	/**
 	 * Unix timestamp in seconds
@@ -63,6 +55,7 @@ export interface AuthInfo {
 		expiration?: Date;
 		role: AccessTokenRole;
 	};
+	expiresAt?: Date;
 }
 
 export async function whoAmI(params: {
@@ -86,8 +79,7 @@ export async function whoAmI(params: {
 	}
 
 	const response: ApiWhoAmIReponse & {
-		auth: {
-			type: AuthType;
+		auth: Omit<AuthInfo, "accessToken"> & {
 			accessToken?: {
 				displayName: string;
 				expiration?: Date; // actually string but we fix it below

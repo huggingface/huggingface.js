@@ -1,6 +1,5 @@
-import type { ModelData } from "$lib/interfaces/Types.js";
-import { randomItem, parseJSON } from "../../../utils/ViewUtils.js";
-import type { WidgetExample, WidgetExampleAttribute } from "./WidgetExample.js";
+import type { ModelData, WidgetExampleAttribute } from "@huggingface/tasks";
+import { parseJSON } from "../../../utils/ViewUtils.js";
 import type { ModelLoadInfo, TableData } from "./types.js";
 import { LoadState } from "./types.js";
 
@@ -20,16 +19,6 @@ export function getQueryParamVal(key: WidgetExampleAttribute): QueryParamVal {
 		return value === "true";
 	}
 	return value;
-}
-
-export function getWidgetExample<TWidgetExample extends WidgetExample>(
-	model: ModelData,
-	validateExample: (sample: WidgetExample) => sample is TWidgetExample
-): TWidgetExample | undefined {
-	const validExamples = model.widgetData?.filter(
-		(sample): sample is TWidgetExample => sample && validateExample(sample)
-	);
-	return validExamples?.length ? randomItem(validExamples) : undefined;
 }
 
 // Update current url search params, keeping existing keys intact.
@@ -64,7 +53,6 @@ export async function getBlobFromUrl(url: string): Promise<Blob> {
 	const blob = await res.blob();
 	return blob;
 }
-
 interface Success<T> {
 	computeTime: string;
 	output: T;
@@ -102,11 +90,7 @@ export async function callInferenceApi<T>(
 	useCache = true
 ): Promise<Result<T>> {
 	const contentType =
-		"file" in requestBody &&
-		requestBody["file"] &&
-		typeof requestBody["file"] === "object" &&
-		"type" in requestBody["file"] &&
-		typeof requestBody["file"]["type"] === "string"
+		"file" in requestBody && requestBody["file"] && requestBody["file"] instanceof Blob && requestBody["file"].type
 			? requestBody["file"]["type"]
 			: "application/json";
 
@@ -125,8 +109,9 @@ export async function callInferenceApi<T>(
 		headers.set("X-Load-Model", "0");
 	}
 
-	const reqBody: File | string =
-		"file" in requestBody && requestBody["file"] instanceof File ? requestBody.file : JSON.stringify(requestBody);
+	// `File` is a subtype of `Blob`: therefore, checking for instanceof `Blob` also checks for instanceof `File`
+	const reqBody: Blob | string =
+		"file" in requestBody && requestBody["file"] instanceof Blob ? requestBody.file : JSON.stringify(requestBody);
 
 	const response = await fetch(`${url}/models/${repoId}`, {
 		method: "POST",

@@ -1,0 +1,23 @@
+# Ownership for the Inference Package
+
+/packages/inference/ @vvmnnnkv @radames
+
+# Ownership for the Tasks Package
+
+/packages/tasks/ @osanseviero @SBrandeis @gary149 @Wauplin
+
+# Ownership for the Widgets Package
+
+/packages/widgets/ @mishig25 @SBrandeis
+
+# Ownership for the Hub Package
+
+/packages/hub/ @coyotte508
+
+# Ownership for the Agents Package
+
+/packages/agents/ @nsarrazin
+
+# Ownership for the Jinja Package
+
+/packages/jinja/ @xenova

@@ -13,7 +13,6 @@ describe("whoAmI", () => {
 			fullname: "@huggingface/hub CI bot",
 			email: "eliott@huggingface.co",
 			emailVerified: true,
-			plan: "NO_PLAN",
 			canPay: false,
 			isPro: false,
 			periodEnd: null,

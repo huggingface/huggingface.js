@@ -1,20 +1,13 @@
 <script lang="ts">
-	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "$lib/components/InferenceWidget/shared/types.js";
-	import type {
-		WidgetExampleTextInput,
-		WidgetExampleOutputUrl,
-		WidgetExample,
-	} from "$lib/components/InferenceWidget/shared/WidgetExample.js";
+	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "../../shared/types.js";
+	import type { WidgetExampleTextInput, WidgetExampleOutputUrl, WidgetExample } from "@huggingface/tasks";
 
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
-	import {
-		addInferenceParameters,
-		callInferenceApi,
-		updateUrl,
-	} from "$lib/components/InferenceWidget/shared/helpers.js";
-	import { isValidOutputUrl } from "$lib/components/InferenceWidget/shared/outputValidation.js";
-	import { isTextInput } from "$lib/components/InferenceWidget/shared/inputValidation.js";
+	import { addInferenceParameters, callInferenceApi, updateUrl } from "../../shared/helpers.js";
+	import { isValidOutputUrl } from "../../shared/outputValidation.js";
+	import { isTextInput } from "../../shared/inputValidation.js";
+	import { widgetStates } from "../../stores.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -23,7 +16,8 @@
 	export let noTitle: WidgetProps["noTitle"];
 	export let shouldUpdateUrl: WidgetProps["shouldUpdateUrl"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
-	let isDisabled = false;
+
+	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
 	let computeTime = "";
 	let error: string = "";
@@ -106,7 +100,7 @@
 		throw new TypeError("Invalid output: output must be of type object & of instance Blob");
 	}
 
-	function applyInputSample(sample: WidgetExampleTextInput<WidgetExampleOutputUrl>, opts: ExampleRunOpts = {}) {
+	function applyWidgetExample(sample: WidgetExampleTextInput<WidgetExampleOutputUrl>, opts: ExampleRunOpts = {}) {
 		text = sample.text;
 		if (opts.isPreview) {
 			if (sample.output) {
@@ -125,31 +119,18 @@
 	}
 </script>
 
-<WidgetWrapper
-	{callApiOnMount}
-	{apiUrl}
-	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
-	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	{validateExample}
-	exampleQueryParams={["text"]}
->
-	<svelte:fragment slot="top" let:isDisabled>
-		<form>
-			<WidgetQuickInput bind:value={text} {isLoading} {isDisabled} onClickSubmitBtn={() => getOutput()} />
-		</form>
-	</svelte:fragment>
-	<svelte:fragment slot="bottom">
-		{#if output.length}
-			<div class="mt-4 flex justify-center bg-gray-50 dark:bg-gray-925">
-				<img class="max-w-sm object-contain" src={output} alt="" />
-			</div>
-		{/if}
-	</svelte:fragment>
+<WidgetWrapper {apiUrl} {includeCredentials} {model} let:WidgetInfo let:WidgetHeader let:WidgetFooter>
+	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyWidgetExample} {validateExample} />
+
+	<WidgetQuickInput bind:value={text} {isLoading} {isDisabled} onClickSubmitBtn={() => getOutput()} />
+
+	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
+
+	{#if output.length}
+		<div class="mt-4 flex justify-center bg-gray-50 dark:bg-gray-925">
+			<img class="max-w-sm object-contain" src={output} alt="" />
+		</div>
+	{/if}
+
+	<WidgetFooter {model} {isDisabled} {outputJson} />
 </WidgetWrapper>

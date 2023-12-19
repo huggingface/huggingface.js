@@ -1,8 +1,6 @@
 <script lang="ts">
-	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "$lib/components/InferenceWidget/shared/types.js";
-	import type { WidgetExampleAssetAndZeroShotInput } from "$lib/components/InferenceWidget/shared/WidgetExample.js";
-
-	import { onMount } from "svelte";
+	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "../../shared/types.js";
+	import type { WidgetExampleAssetAndZeroShotInput } from "@huggingface/tasks";
 
 	import WidgetFileInput from "../../shared/WidgetFileInput/WidgetFileInput.svelte";
 	import WidgetDropzone from "../../shared/WidgetDropzone/WidgetDropzone.svelte";
@@ -10,12 +8,9 @@
 	import WidgetSubmitBtn from "../../shared/WidgetSubmitBtn/WidgetSubmitBtn.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
 	import WidgetOutputChart from "../../shared/WidgetOutputChart/WidgetOutputChart.svelte";
-	import {
-		addInferenceParameters,
-		callInferenceApi,
-		getWidgetExample,
-	} from "$lib/components/InferenceWidget/shared/helpers.js";
-	import { isAssetAndZeroShotInput } from "$lib/components/InferenceWidget/shared/inputValidation.js";
+	import { addInferenceParameters, callInferenceApi } from "../../shared/helpers.js";
+	import { isAssetAndZeroShotInput } from "../../shared/inputValidation.js";
+	import { widgetStates } from "../../stores.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -23,7 +18,8 @@
 	export let model: WidgetProps["model"];
 	export let noTitle: WidgetProps["noTitle"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
-	let isDisabled = false;
+
+	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
 	let candidateLabels = "";
 	let computeTime = "";
@@ -73,7 +69,7 @@
 		throw new TypeError("Invalid output: output must be of type <labels:Array; scores:Array>");
 	}
 
-	async function applyInputSample(sample: WidgetExampleAssetAndZeroShotInput, opts: ExampleRunOpts = {}) {
+	async function applyWidgetExample(sample: WidgetExampleAssetAndZeroShotInput, opts: ExampleRunOpts = {}) {
 		candidateLabels = sample.candidate_labels;
 		imgSrc = sample.src;
 		if (opts.isPreview) {
@@ -150,79 +146,66 @@
 			error = res.error;
 		}
 	}
-
-	onMount(() => {
-		(async () => {
-			const example = getWidgetExample<WidgetExampleAssetAndZeroShotInput>(model, isAssetAndZeroShotInput);
-			if (callApiOnMount && example) {
-				await applyInputSample(example, { inferenceOpts: { isOnLoadCall: true } });
-			}
-		})();
-	});
 </script>
 
-<WidgetWrapper
-	{callApiOnMount}
-	{apiUrl}
-	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
-	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	validateExample={isAssetAndZeroShotInput}
->
-	<svelte:fragment slot="top" let:isDisabled>
-		<form class="space-y-2">
-			<WidgetDropzone
-				classNames="hidden md:block"
-				{isLoading}
-				{isDisabled}
-				{imgSrc}
-				{onSelectFile}
-				onError={(e) => (error = e)}
-			>
-				{#if imgSrc}
-					<img src={imgSrc} class="pointer-events-none mx-auto max-h-44 shadow" alt="" />
-				{/if}
-			</WidgetDropzone>
-			<!-- Better UX for mobile/table through CSS breakpoints -->
+<WidgetWrapper {apiUrl} {includeCredentials} {model} let:WidgetInfo let:WidgetHeader let:WidgetFooter>
+	<WidgetHeader
+		{noTitle}
+		{model}
+		{isLoading}
+		{isDisabled}
+		{callApiOnMount}
+		{applyWidgetExample}
+		validateExample={isAssetAndZeroShotInput}
+	/>
+	<div class="space-y-2">
+		<WidgetDropzone
+			classNames="hidden md:block"
+			{isLoading}
+			{isDisabled}
+			{imgSrc}
+			{onSelectFile}
+			onError={(e) => (error = e)}
+		>
 			{#if imgSrc}
-				{#if imgSrc}
-					<div class="mb-2 flex justify-center bg-gray-50 dark:bg-gray-900 md:hidden">
-						<img src={imgSrc} class="pointer-events-none max-h-44" alt="" />
-					</div>
-				{/if}
+				<img src={imgSrc} class="pointer-events-none mx-auto max-h-44 shadow" alt="" />
 			{/if}
-			<WidgetFileInput
-				accept="image/*"
-				classNames="mr-2 md:hidden"
-				{isLoading}
-				{isDisabled}
-				label="Browse for image"
-				{onSelectFile}
-			/>
-			<WidgetTextInput
-				bind:value={candidateLabels}
-				{isDisabled}
-				label="Possible class names (comma-separated)"
-				placeholder="Possible class names..."
-			/>
-			<WidgetSubmitBtn
-				{isLoading}
-				{isDisabled}
-				onClick={() => {
-					getOutput();
-				}}
-			/>
-		</form>
-	</svelte:fragment>
-	<svelte:fragment slot="bottom">
-		{#if output.length}
-			<WidgetOutputChart classNames="pt-4" {output} />
+		</WidgetDropzone>
+		<!-- Better UX for mobile/table through CSS breakpoints -->
+		{#if imgSrc}
+			{#if imgSrc}
+				<div class="mb-2 flex justify-center bg-gray-50 dark:bg-gray-900 md:hidden">
+					<img src={imgSrc} class="pointer-events-none max-h-44" alt="" />
+				</div>
+			{/if}
 		{/if}
-	</svelte:fragment>
+		<WidgetFileInput
+			accept="image/*"
+			classNames="mr-2 md:hidden"
+			{isLoading}
+			{isDisabled}
+			label="Browse for image"
+			{onSelectFile}
+		/>
+		<WidgetTextInput
+			bind:value={candidateLabels}
+			{isDisabled}
+			label="Possible class names (comma-separated)"
+			placeholder="Possible class names..."
+		/>
+		<WidgetSubmitBtn
+			{isLoading}
+			{isDisabled}
+			onClick={() => {
+				getOutput();
+			}}
+		/>
+	</div>
+	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
+
+	{#if output.length}
+		<WidgetOutputChart classNames="pt-4" {output} />
+	{/if}
+
+	<WidgetFooter {model} {isDisabled} {outputJson} />
 </WidgetWrapper>

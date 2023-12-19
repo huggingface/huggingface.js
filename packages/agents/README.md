@@ -131,7 +131,7 @@ const uppercaseTool: Tool = {
 };
 
 // pass it in the agent
-const agent = new HfAgent(process.env.HF_ACCESS_TOKEN, 
+const agent = new HfAgent(process.env.HF_TOKEN,
                 LLMFromHub("hf_...", "OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5"),
                 [uppercaseTool, ...defaultTools]);
 ```
