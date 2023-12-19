@@ -29,7 +29,7 @@ captioner("https://huggingface.co/datasets/Narsil/image_dummy/resolve/main/parro
 
 ### Conversation about the Image
 
-Some text generation models also take image inputs. These are called multimodal language models. You can use `image-to-text` pipeline to use these models like below.
+Some text generation models also take image inputs. These are called vision language models. You can use `image-to-text` pipeline to use these models like below.
 
 ```python
 from transformers import pipeline
