@@ -542,9 +542,12 @@ transcriptions = asr_model.transcribe(["file.wav"])`,
 const mlAgents = (model: ModelData) => [`mlagents-load-from-hf --repo-id="${model.id}" --local-dir="./downloads"`];
 
 
-const mlx = (model: ModelData) => {
-	return ["A code snippet will be here soon :) stay tuned!"];
-};
+const mlx = (model: ModelData) => [
+	`pip install huggingface_hub hf_transfer
+
+export HF_HUB_ENABLE_HF_TRANSFER=1
+huggingface-cli download --local-dir ${nameWithoutNamespace(model.id)} ${model.id}`,
+];
 
 const nemo = (model: ModelData) => {
 	let command: string[] | undefined = undefined;
