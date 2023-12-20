@@ -630,7 +630,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS: Partial<Record<ModelLibraryKey, Librar
 		snippets: keras,
 	},
 	mlx: {
-		btnLabel: "NeMo",
+		btnLabel: "MLX",
 		repoName: "MLX",
 		repoUrl: "https://github.com/ml-explore/mlx-examples/tree/main",
 		snippets: mlx,
