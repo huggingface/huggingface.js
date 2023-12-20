@@ -12,6 +12,7 @@
 	export let size: "small" | "big" = "small";
 
 	let containerSpanEl: HTMLSpanElement;
+	let isOnFocus = false;
 	const typingEffectSpeedMs = 12;
 	const classNamesInput = "whitespace-pre-wrap inline font-normal text-black dark:text-white";
 	const classNamesOutput = "whitespace-pre-wrap inline text-blue-600 dark:text-blue-400";
@@ -33,7 +34,9 @@
 			for (const char of outputTxt.split(/(\s|.)/g)) {
 				await delay(typingEffectSpeedMs);
 				spanEl.textContent += char;
-				moveCaretToEnd();
+				if(isOnFocus){
+					moveCaretToEnd();
+				}
 			}
 		} else {
 			spanEl.textContent = outputTxt;
@@ -76,6 +79,11 @@
 		value = containerSpanEl?.textContent ?? "";
 	}
 
+	function onFocus(){
+		isOnFocus = true;
+		moveCaretToEnd();
+	}
+
 	export function setValue(text: string): void {
 		containerSpanEl.textContent = text;
 		updateInnerTextValue();
@@ -90,13 +98,16 @@
 				? 'min-h-[42px]'
 				: 'min-h-[144px]'} inline-block max-h-[500px] whitespace-pre-wrap rounded-lg border border-gray-200 shadow-inner outline-none focus:shadow-inner focus:ring focus:ring-blue-200 dark:bg-gray-925"
 			role="textbox"
-			contenteditable={!isLoading && !isDisabled}
 			style="--placeholder: '{isDisabled ? '' : placeholder}'"
 			spellcheck="false"
 			dir="auto"
+			contenteditable
+			class:pointer-events-none={isLoading || isDisabled}
 			bind:this={containerSpanEl}
 			on:paste|preventDefault={handlePaste}
 			on:input={updateInnerTextValue}
+			on:focus={onFocus}
+			on:blur={() => (isOnFocus = false)}
 		/>
 	</svelte:fragment>
 </WidgetLabel>
