@@ -34,7 +34,7 @@
 			for (const char of outputTxt.split(/(\s|.)/g)) {
 				await delay(typingEffectSpeedMs);
 				spanEl.textContent += char;
-				if(isOnFocus){
+				if (isOnFocus) {
 					moveCaretToEnd();
 				}
 			}
@@ -79,7 +79,7 @@
 		value = containerSpanEl?.textContent ?? "";
 	}
 
-	function onFocus(){
+	function onFocus() {
 		isOnFocus = true;
 		moveCaretToEnd();
 	}
