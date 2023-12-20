@@ -39,7 +39,7 @@
 	let outputJson: string;
 	let text = "";
 	let warning: string = "";
-	let renderTypingEffect: (outputTxt: string) => Promise<void>;
+	let renderTextOutput: (outputTxt: string, typingEffect?: boolean) => Promise<void>;
 	let inferenceTimer: any;
 	let setTextAreaValue: (text: string) => void;
 	let decodingStrategy: "sampling" | "greedy" = "sampling";
@@ -80,7 +80,12 @@
 			updateUrl({ text: trimmedValue });
 		}
 
-		const requestBody = { inputs: trimmedValue, parameters: {} as unknown };
+		const parameters = {} as any;
+		if (model?.pipeline_tag === "text-generation") {
+			// todo: until streaming is supported https://github.com/huggingface/huggingface.js/issues/410
+			parameters["max_new_tokens"] = 20;
+		}
+		const requestBody = { inputs: trimmedValue, parameters };
 		addInferenceParameters(requestBody, model);
 
 		if (model.id === "bigscience/bloom") {
@@ -133,7 +138,7 @@
 				if (outputWithoutInput.length === 0) {
 					warning = "No text was generated";
 				} else {
-					await renderTypingEffect(outputWithoutInput);
+					await renderTextOutput(outputWithoutInput);
 				}
 			}
 		} else if (res.status === "loading-model") {
@@ -165,7 +170,7 @@
 	function renderExampleOutput(output: string) {
 		// if output doesn't start with space, add space in front of output
 		const prefix = /^\s/.test(output) ? "" : " ";
-		renderTypingEffect(prefix + output);
+		renderTextOutput(prefix + output, false);
 	}
 
 	function applyWidgetExample(sample: WidgetExampleTextInput<WidgetExampleOutputText>, opts: ExampleRunOpts = {}) {
@@ -207,7 +212,7 @@
 			{isLoading}
 			{isDisabled}
 			size="big"
-			bind:renderTypingEffect
+			bind:renderTextOutput
 		/>
 		{#if model.id === "bigscience/bloom"}
 			<WidgetBloomDecoding bind:decodingStrategy />
