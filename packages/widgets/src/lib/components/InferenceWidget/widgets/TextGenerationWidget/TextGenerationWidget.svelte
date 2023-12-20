@@ -80,7 +80,12 @@
 			updateUrl({ text: trimmedValue });
 		}
 
-		const requestBody = { inputs: trimmedValue, parameters: {} as unknown };
+		const parameters = {} as any;
+		if (model?.pipeline_tag === "text-generation") {
+			// todo: until streaming is supported https://github.com/huggingface/huggingface.js/issues/410
+			parameters["max_new_tokens"] = 20;
+		}
+		const requestBody = { inputs: trimmedValue, parameters };
 		addInferenceParameters(requestBody, model);
 
 		if (model.id === "bigscience/bloom") {
