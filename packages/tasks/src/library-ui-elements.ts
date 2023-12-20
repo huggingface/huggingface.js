@@ -541,7 +541,6 @@ transcriptions = asr_model.transcribe(["file.wav"])`,
 
 const mlAgents = (model: ModelData) => [`mlagents-load-from-hf --repo-id="${model.id}" --local-dir="./downloads"`];
 
-
 const mlx = (model: ModelData) => [
 	`pip install huggingface_hub hf_transfer
 
