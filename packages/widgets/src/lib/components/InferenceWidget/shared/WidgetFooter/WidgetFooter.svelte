@@ -30,6 +30,7 @@
 	{/if}
 	<button
 		class="ml-auto flex items-center"
+		type="button"
 		on:click|preventDefault={() => updateWidgetState(model.id, "isMaximized", !isMaximized)}
 	>
 		<IconMaximize classNames="mr-1" />
