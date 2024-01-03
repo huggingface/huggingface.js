@@ -19,6 +19,7 @@
 		<button
 			class="flex items-center {outputJson ? '' : 'cursor-not-allowed text-gray-300'}"
 			disabled={!outputJson}
+			type="button"
 			on:click={() => {
 				isOutputJsonVisible = !isOutputJsonVisible;
 			}}
@@ -29,7 +30,7 @@
 	{/if}
 	<button
 		class="ml-auto flex items-center"
-		on:click|preventDefault={() => updateWidgetState(model.id, "isMaximized", true)}
+		on:click|preventDefault={() => updateWidgetState(model.id, "isMaximized", !isMaximized)}
 	>
 		<IconMaximize classNames="mr-1" />
 		{#if !isMaximized}
