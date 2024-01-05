@@ -7,6 +7,9 @@ describe("listDatasets", () => {
 		const results: DatasetEntry[] = [];
 
 		for await (const entry of listDatasets({ search: { owner: "hf-doc-build" } })) {
+			if (entry.name === "hf-doc-build/doc-build-dev-test") {
+				continue;
+			}
 			if (typeof entry.downloads === "number") {
 				entry.downloads = 0;
 			}
