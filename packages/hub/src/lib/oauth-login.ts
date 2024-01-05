@@ -102,7 +102,7 @@ export async function oauthLogin(opts?: {
 	});
 
 	if (!openidConfigRes.ok) {
-		throw createApiError(openidConfigRes);
+		throw await createApiError(openidConfigRes);
 	}
 
 	const opendidConfig: {
@@ -160,7 +160,7 @@ export async function oauthLogin(opts?: {
 		localStorage.removeItem("huggingface.co:oauth:nonce");
 
 		if (!tokenRes.ok) {
-			throw createApiError(tokenRes);
+			throw await createApiError(tokenRes);
 		}
 
 		const token: {
@@ -181,7 +181,7 @@ export async function oauthLogin(opts?: {
 		});
 
 		if (!userInfoRes.ok) {
-			throw createApiError(userInfoRes);
+			throw await createApiError(userInfoRes);
 		}
 
 		const userInfo: {
