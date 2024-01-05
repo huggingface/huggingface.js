@@ -87,7 +87,7 @@ export async function oauthLogin(opts?: {
 	/**
 	 * Granted scope
 	 */
-	scope?: string;
+	scope: string;
 }> {
 	if (typeof window === "undefined") {
 		throw new Error("oauthLogin is only available in the browser");
