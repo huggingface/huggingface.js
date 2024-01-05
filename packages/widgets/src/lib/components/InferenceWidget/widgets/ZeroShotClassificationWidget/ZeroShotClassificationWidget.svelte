@@ -10,6 +10,7 @@
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
 	import { addInferenceParameters, callInferenceApi, updateUrl } from "../../shared/helpers.js";
 	import { isZeroShotTextInput } from "../../shared/inputValidation.js";
+	import { widgetStates } from "../../stores.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -18,7 +19,8 @@
 	export let noTitle: WidgetProps["noTitle"];
 	export let shouldUpdateUrl: WidgetProps["shouldUpdateUrl"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
-	let isDisabled = false;
+
+	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
 	let candidateLabels = "";
 	let computeTime = "";
@@ -134,7 +136,7 @@
 		throw new TypeError("Invalid output: output must be of type <labels:Array; scores:Array>");
 	}
 
-	function applyInputSample(sample: WidgetExampleZeroShotTextInput, opts: ExampleRunOpts = {}) {
+	function applyWidgetExample(sample: WidgetExampleZeroShotTextInput, opts: ExampleRunOpts = {}) {
 		candidateLabels = sample.candidate_labels;
 		multiClass = sample.multi_class;
 		setTextAreaValue(sample.text);
@@ -146,51 +148,41 @@
 	}
 </script>
 
-<WidgetWrapper
-	{callApiOnMount}
-	{apiUrl}
-	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
-	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	validateExample={isZeroShotTextInput}
-	exampleQueryParams={["candidate_labels", "multi_class", "text"]}
->
-	<svelte:fragment slot="top" let:isDisabled>
-		<form class="flex flex-col space-y-2">
-			<WidgetTextarea
-				bind:value={text}
-				bind:setValue={setTextAreaValue}
-				{isDisabled}
-				placeholder="Text to classify..."
-			/>
-			<WidgetTextInput
-				bind:value={candidateLabels}
-				{isDisabled}
-				label="Possible class names (comma-separated)"
-				placeholder="Possible class names..."
-			/>
-			<WidgetCheckbox bind:checked={multiClass} label="Allow multiple true classes" />
-			<WidgetSubmitBtn
-				{isLoading}
-				{isDisabled}
-				onClick={() => {
-					getOutput();
-				}}
-			/>
-			{#if warning}
-				<div class="alert alert-warning mt-2">{warning}</div>
-			{/if}
-		</form>
-	</svelte:fragment>
-	<svelte:fragment slot="bottom">
-		{#if output.length}
-			<WidgetOutputChart classNames="pt-4" {output} />
+<WidgetWrapper {apiUrl} {includeCredentials} {model} let:WidgetInfo let:WidgetHeader let:WidgetFooter>
+	<WidgetHeader
+		{noTitle}
+		{model}
+		{isLoading}
+		{isDisabled}
+		{callApiOnMount}
+		{applyWidgetExample}
+		validateExample={isZeroShotTextInput}
+	/>
+	<div class="flex flex-col space-y-2">
+		<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} placeholder="Text to classify..." />
+		<WidgetTextInput
+			bind:value={candidateLabels}
+			{isDisabled}
+			label="Possible class names (comma-separated)"
+			placeholder="Possible class names..."
+		/>
+		<WidgetCheckbox bind:checked={multiClass} label="Allow multiple true classes" />
+		<WidgetSubmitBtn
+			{isLoading}
+			{isDisabled}
+			onClick={() => {
+				getOutput();
+			}}
+		/>
+		{#if warning}
+			<div class="alert alert-warning mt-2">{warning}</div>
 		{/if}
-	</svelte:fragment>
+	</div>
+	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
+
+	{#if output.length}
+		<WidgetOutputChart classNames="pt-4" {output} />
+	{/if}
+
+	<WidgetFooter {model} {isDisabled} {outputJson} />
 </WidgetWrapper>

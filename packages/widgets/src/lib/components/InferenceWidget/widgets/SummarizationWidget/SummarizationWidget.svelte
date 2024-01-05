@@ -8,6 +8,7 @@
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
 	import { addInferenceParameters, callInferenceApi, updateUrl } from "../../shared/helpers.js";
 	import { isTextInput } from "../../shared/inputValidation.js";
+	import { widgetStates } from "../../stores.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -16,6 +17,8 @@
 	export let noTitle: WidgetProps["noTitle"];
 	export let shouldUpdateUrl: WidgetProps["shouldUpdateUrl"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
+
+	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
 	let computeTime = "";
 	let error: string = "";
@@ -93,7 +96,7 @@
 		throw new TypeError("Invalid output: output must be of type Array & non-empty");
 	}
 
-	function applyInputSample(sample: WidgetExampleTextInput, opts: ExampleRunOpts = {}) {
+	function applyWidgetExample(sample: WidgetExampleTextInput, opts: ExampleRunOpts = {}) {
 		setTextAreaValue(sample.text);
 		if (opts.isPreview) {
 			return;
@@ -103,34 +106,29 @@
 	}
 </script>
 
-<WidgetWrapper
-	{callApiOnMount}
-	{apiUrl}
-	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
-	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	validateExample={isTextInput}
-	exampleQueryParams={["text"]}
->
-	<svelte:fragment slot="top" let:isDisabled>
-		<form class="space-y-2">
-			<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} />
-			<WidgetSubmitBtn
-				{isLoading}
-				{isDisabled}
-				onClick={() => {
-					getOutput();
-				}}
-			/>
-		</form>
-	</svelte:fragment>
-	<svelte:fragment slot="bottom">
-		<WidgetOutputText classNames="mt-4" {output} />
-	</svelte:fragment>
+<WidgetWrapper {apiUrl} {includeCredentials} {model} let:WidgetInfo let:WidgetHeader let:WidgetFooter>
+	<WidgetHeader
+		{noTitle}
+		{model}
+		{isLoading}
+		{isDisabled}
+		{callApiOnMount}
+		{applyWidgetExample}
+		validateExample={isTextInput}
+	/>
+	<div class="space-y-2">
+		<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} />
+		<WidgetSubmitBtn
+			{isLoading}
+			{isDisabled}
+			onClick={() => {
+				getOutput();
+			}}
+		/>
+	</div>
+	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
+
+	<WidgetOutputText classNames="mt-4" {output} />
+
+	<WidgetFooter {model} {isDisabled} {outputJson} />
 </WidgetWrapper>

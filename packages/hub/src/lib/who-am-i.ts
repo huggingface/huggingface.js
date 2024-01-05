@@ -30,10 +30,6 @@ export interface WhoAmIOrg {
 	fullname: string;
 	email: string | null;
 	canPay: boolean;
-	/**
-	 * @deprecated
-	 */
-	plan?: unknown;
 	avatarUrl: string;
 	/**
 	 * Unix timestamp in seconds

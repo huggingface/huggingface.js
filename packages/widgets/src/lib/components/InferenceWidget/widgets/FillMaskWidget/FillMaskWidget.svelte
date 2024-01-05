@@ -9,6 +9,7 @@
 	import { addInferenceParameters, callInferenceApi, updateUrl } from "../../shared/helpers.js";
 	import { isValidOutputLabels } from "../../shared/outputValidation.js";
 	import { isTextInput } from "../../shared/inputValidation.js";
+	import { widgetStates } from "../../stores.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -17,6 +18,8 @@
 	export let noTitle: WidgetProps["noTitle"];
 	export let shouldUpdateUrl: WidgetProps["shouldUpdateUrl"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
+
+	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
 	let computeTime = "";
 	let error: string = "";
@@ -112,7 +115,7 @@
 		throw new TypeError("Invalid output: output must be of type Array");
 	}
 
-	function applyInputSample(sample: WidgetExampleTextInput<WidgetExampleOutputLabels>, opts: ExampleRunOpts = {}) {
+	function applyWidgetExample(sample: WidgetExampleTextInput<WidgetExampleOutputLabels>, opts: ExampleRunOpts = {}) {
 		setTextAreaValue(sample.text);
 		if (opts.isPreview) {
 			if (sample.output) {
@@ -131,40 +134,27 @@
 	}
 </script>
 
-<WidgetWrapper
-	{callApiOnMount}
-	{apiUrl}
-	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
-	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	{validateExample}
-	exampleQueryParams={["text"]}
->
-	<svelte:fragment slot="top" let:isDisabled>
-		<form>
-			{#if model.pipeline_tag === "fill-mask"}
-				<div class="mb-1.5 text-sm text-gray-500">
-					Mask token: <code>{model.mask_token}</code>
-				</div>
-			{/if}
-			<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} />
-			<WidgetSubmitBtn
-				classNames="mt-2"
-				{isLoading}
-				{isDisabled}
-				onClick={() => {
-					getOutput();
-				}}
-			/>
-		</form>
-	</svelte:fragment>
-	<svelte:fragment slot="bottom">
-		<WidgetOutputChart classNames="pt-4" {output} />
-	</svelte:fragment>
+<WidgetWrapper {apiUrl} {includeCredentials} {model} let:WidgetInfo let:WidgetHeader let:WidgetFooter>
+	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyWidgetExample} {validateExample} />
+
+	{#if model.pipeline_tag === "fill-mask"}
+		<div class="mb-1.5 text-sm text-gray-500">
+			Mask token: <code>{model.mask_token}</code>
+		</div>
+	{/if}
+	<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} />
+	<WidgetSubmitBtn
+		classNames="mt-2"
+		{isLoading}
+		{isDisabled}
+		onClick={() => {
+			getOutput();
+		}}
+	/>
+
+	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
+
+	<WidgetOutputChart classNames="pt-4" {output} />
+
+	<WidgetFooter {model} {isDisabled} {outputJson} />
 </WidgetWrapper>

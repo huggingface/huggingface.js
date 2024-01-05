@@ -1,16 +1,46 @@
 <script lang="ts">
-	import { TASKS_DATA, type PipelineType } from "@huggingface/tasks";
+	import { updateWidgetState } from "../../stores.js";
+	import { TASKS_DATA } from "@huggingface/tasks";
+	import type { WidgetExample, WidgetExampleAttribute } from "@huggingface/tasks";
+	import type { WidgetProps, ExampleRunOpts } from "../types.js";
 	import { getPipelineTask } from "../../../../utils/ViewUtils.js";
 	import IconInfo from "../../..//Icons/IconInfo.svelte";
 	import IconLightning from "../../..//Icons/IconLightning.svelte";
 	import PipelineTag from "../../../PipelineTag/PipelineTag.svelte";
+	import WidgetExamples from "../WidgetExamples/WidgetExamples.svelte";
 
+	type TWidgetExample = $$Generic<WidgetExample>;
+
+	export let model: WidgetProps["model"];
 	export let noTitle = false;
 	export let title: string | null = null;
-	export let pipeline: PipelineType | undefined;
+	export let isLoading = false;
 	export let isDisabled = false;
+	export let applyWidgetExample: ((sample: TWidgetExample, opts?: ExampleRunOpts) => void) | undefined = undefined;
+	export let validateExample: ((sample: WidgetExample) => sample is TWidgetExample) | undefined = undefined;
+	export let callApiOnMount: WidgetProps["callApiOnMount"] = false;
+	export let exampleQueryParams: WidgetExampleAttribute[] = [];
+
+	const pipeline = model?.pipeline_tag;
 
 	$: task = pipeline ? getPipelineTask(pipeline) : undefined;
+
+	$: validExamples = getValidExamples(isDisabled);
+
+	function getValidExamples(isDisabled: boolean): TWidgetExample[] {
+		const examples = (model?.widgetData ?? []).filter(
+			(sample): sample is TWidgetExample =>
+				(validateExample?.(sample) ?? false) && (!isDisabled || sample.output !== undefined)
+		);
+
+		// if there are no examples with outputs AND model.inference !== InferenceDisplayability.Yes
+		// then widget will show InferenceDisplayability error to the user without showing anything else
+		if (isDisabled && !examples.length) {
+			updateWidgetState(model.id, "noInference", true);
+		}
+
+		return examples;
+	}
 </script>
 
 <div class="mb-2 flex items-center font-semibold">
@@ -45,5 +75,7 @@
 			<PipelineTag classNames="mr-2 mb-1.5" {pipeline} />
 		</a>
 	{/if}
-	<slot />
+	{#if validExamples.length && applyWidgetExample}
+		<WidgetExamples {validExamples} {isLoading} {applyWidgetExample} {callApiOnMount} {exampleQueryParams} />
+	{/if}
 </div>

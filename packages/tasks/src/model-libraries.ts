@@ -16,6 +16,7 @@ export enum ModelLibrary {
 	"flair" = "Flair",
 	"keras" = "Keras",
 	"k2" = "K2",
+	"mlx" = "MLX",
 	"nemo" = "NeMo",
 	"open_clip" = "OpenCLIP",
 	"paddlenlp" = "PaddleNLP",

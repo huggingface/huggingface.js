@@ -12,6 +12,7 @@
 	import { isAssetInput } from "../../shared/inputValidation.js";
 
 	import BoundingBoxes from "./SvgBoundingBoxes.svelte";
+	import { widgetStates } from "../../stores.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -19,6 +20,8 @@
 	export let model: WidgetProps["model"];
 	export let noTitle: WidgetProps["noTitle"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
+
+	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
 	let computeTime = "";
 	let error: string = "";
@@ -128,7 +131,7 @@
 		highlightIndex = index;
 	}
 
-	async function applyInputSample(sample: WidgetExampleAssetInput, opts: ExampleRunOpts = {}) {
+	async function applyWidgetExample(sample: WidgetExampleAssetInput, opts: ExampleRunOpts = {}) {
 		imgSrc = sample.src;
 		if (opts.isPreview) {
 			output = [];
@@ -141,52 +144,48 @@
 	}
 </script>
 
-<WidgetWrapper
-	{callApiOnMount}
-	{apiUrl}
-	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
-	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	validateExample={isAssetInput}
->
-	<svelte:fragment slot="top" let:isDisabled>
-		<form>
-			<WidgetDropzone
-				classNames="hidden md:block"
-				{isLoading}
-				{isDisabled}
-				{imgSrc}
-				{onSelectFile}
-				onError={(e) => (error = e)}
-			>
-				{#if imgSrc}
-					<BoundingBoxes {imgSrc} {mouseover} {mouseout} {output} {highlightIndex} />
-				{/if}
-			</WidgetDropzone>
-			<!-- Better UX for mobile/table through CSS breakpoints -->
-			{#if imgSrc}
-				<BoundingBoxes classNames="mb-2 md:hidden" {imgSrc} {mouseover} {mouseout} {output} {highlightIndex} />
-			{/if}
-			<WidgetFileInput
-				accept="image/*"
-				classNames="mr-2 md:hidden"
-				{isLoading}
-				{isDisabled}
-				label="Browse for image"
-				{onSelectFile}
-			/>
-			{#if warning}
-				<div class="alert alert-warning mt-2">{warning}</div>
-			{/if}
-		</form>
-	</svelte:fragment>
-	<svelte:fragment slot="bottom">
-		<WidgetOutputChart classNames="pt-4" {output} {highlightIndex} {mouseover} {mouseout} />
-	</svelte:fragment>
+<WidgetWrapper {apiUrl} {includeCredentials} {model} let:WidgetInfo let:WidgetHeader let:WidgetFooter>
+	<WidgetHeader
+		{noTitle}
+		{model}
+		{isLoading}
+		{isDisabled}
+		{callApiOnMount}
+		{applyWidgetExample}
+		validateExample={isAssetInput}
+	/>
+
+	<WidgetDropzone
+		classNames="hidden md:block"
+		{isLoading}
+		{isDisabled}
+		{imgSrc}
+		{onSelectFile}
+		onError={(e) => (error = e)}
+	>
+		{#if imgSrc}
+			<BoundingBoxes {imgSrc} {mouseover} {mouseout} {output} {highlightIndex} />
+		{/if}
+	</WidgetDropzone>
+	<!-- Better UX for mobile/table through CSS breakpoints -->
+	{#if imgSrc}
+		<BoundingBoxes classNames="mb-2 md:hidden" {imgSrc} {mouseover} {mouseout} {output} {highlightIndex} />
+	{/if}
+	<WidgetFileInput
+		accept="image/*"
+		classNames="mr-2 md:hidden"
+		{isLoading}
+		{isDisabled}
+		label="Browse for image"
+		{onSelectFile}
+	/>
+	{#if warning}
+		<div class="alert alert-warning mt-2">{warning}</div>
+	{/if}
+
+	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
+
+	<WidgetOutputChart classNames="pt-4" {output} {highlightIndex} {mouseover} {mouseout} />
+
+	<WidgetFooter {model} {isDisabled} {outputJson} />
 </WidgetWrapper>
