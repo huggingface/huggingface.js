@@ -1,0 +1,36 @@
+## About the task
+
+Zero-shot object detection is a computer vision task to detect objects and its class in images, without any prior training or knowledge of the classes.
+
+## Use Cases
+
+### Object Search
+
+Zero-shot Object Detection models are used in image search. Smartphones use Object Detection models to detect entities (such as specific places or objects) and allow the user to search for the entity on the Internet.
+
+### Object Counting
+
+Zero-shot Object Detection models are used to count instances of objects in a given image, this can include counting the objects in warehouses or stores, or counting the number of visitors in a store. They are also used to manage crowds at events to prevent disasters.
+
+## Inference
+
+You can infer with Zero-shot Object Detection models through the `zero-shot-object-detection` pipeline. When calling the pipeline you just need to specify a path or http link to an image and the candidate labels.
+
+```python
+model = pipeline(model=checkpoint, task="zero-shot-object-detection")
+
+predictions = detector(
+    image,
+    candidate_labels=["a photo of a cat", "a photo of a dog"],
+)
+
+# [{'score': 0.95,
+#   'label': 'a photo of a cat',
+#   'box': {'xmin': 180, 'ymin': 71, 'xmax': 271, 'ymax': 178}},
+#   ...
+# ]
+```
+
+# Useful Resources
+
+- [Zero-shot Object detection task guide](https://huggingface.co/tasks/zero-shot-object-detection)
