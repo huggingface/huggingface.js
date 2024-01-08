@@ -36,3 +36,5 @@ predictions = detector(
 # Useful Resources
 
 - [Zero-shot object detection task guide](https://huggingface.co/tasks/zero-shot-object-detection)
+
+This page was made possible thanks to the efforts of [Victor Guichard](https://huggingface.co/VictorGuichard)
