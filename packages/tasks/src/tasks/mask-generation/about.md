@@ -1,7 +1,11 @@
-## About the Task
-
-Mask Generation task involves generating masks/segments for objects in a given image. It could be zero shot or based on training data.
-
 ## Use Cases
 
-Mask Generation has promising use cases in Medical Imaging, Autonomous Vehicles, Robotics, etc.
+### Medical Imaging
+
+Mask Generation is used in medical imaging in aiding in the segmentation and analysis of specific regions.
+
+### Autonomous Vehicles
+
+Mask Generation is used to create segments and masks for obstacles and other objects in view.
+
+This page was written by [Raj Aryan](https://huggingface.co/thatrajaryan)
