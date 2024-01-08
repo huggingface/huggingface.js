@@ -8,15 +8,15 @@ Zero shot object detection works by transferring knowledge learnt during trainin
 
 ### Object Search
 
-Zero-shot Object Detection models are used in image search. Smartphones use Object Detection models to detect entities (such as specific places or objects) and allow the user to search for the entity on the Internet.
+Zero-shot object detection models can be used in image search. Smartphones use zero-shot object detection models to detect entities (such as specific places or objects) and allow the user to search for the entity on the internet.
 
 ### Object Counting
 
-Zero-shot Object Detection models are used to count instances of objects in a given image, this can include counting the objects in warehouses or stores, or counting the number of visitors in a store. They are also used to manage crowds at events to prevent disasters.
+Zero-shot object detection models are used to count instances of objects in a given image. This can include counting the objects in warehouses or stores or the number of visitors in a store. They are also used to manage crowds at events to prevent disasters.
 
 ## Inference
 
-You can infer with Zero-shot Object Detection models through the `zero-shot-object-detection` pipeline. When calling the pipeline you just need to specify a path or http link to an image and the candidate labels.
+You can infer with zero-shot object detection models through the `zero-shot-object-detection` pipeline. When calling the pipeline, you just need to specify a path or HTTP link to an image and the candidate labels.
 
 ```python
 detector = pipeline(model="google/owlvit-base-patch32", task="zero-shot-object-detection")
@@ -35,4 +35,4 @@ predictions = detector(
 
 # Useful Resources
 
-- [Zero-shot Object detection task guide](https://huggingface.co/tasks/zero-shot-object-detection)
+- [Zero-shot object detection task guide](https://huggingface.co/tasks/zero-shot-object-detection)
