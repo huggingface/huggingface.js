@@ -38,5 +38,3 @@ pipe("I have a problem with my iphone that needs to be resolved asap!",
 
 - [Zero Shot Learning](https://joeddav.github.io/blog/2020/05/29/ZSL.html)
 - [Hugging Face on Transfer Learning](https://huggingface.co/course/en/chapter1/4?fw=pt#transfer-learning)
-
-This page was made possible thanks to the efforts of [Victor Guichard](https://huggingface.co/VictorGuichard)
