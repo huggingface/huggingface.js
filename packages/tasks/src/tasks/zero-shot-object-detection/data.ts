@@ -44,6 +44,10 @@ const taskData: TaskDataCustom = {
 			description: "Solid zero-shot object detection model that uses CLIP as backbone.",
 			id: "google/owlvit-base-patch32",
 		},
+		{
+			description: "The improved version of the owlvit model.",
+			id: "google/owlv2-base-patch16-ensemble",
+		},
 	],
 	spaces: [
 		
