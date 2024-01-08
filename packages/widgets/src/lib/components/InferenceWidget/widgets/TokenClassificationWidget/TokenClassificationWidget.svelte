@@ -9,6 +9,7 @@
 	import { addInferenceParameters, callInferenceApi, updateUrl } from "../../shared/helpers.js";
 	import { isTextInput } from "../../shared/inputValidation.js";
 	import { uniqBy } from "../../../../utils/ViewUtils.js";
+	import { widgetStates } from "../../stores.js";
 
 	interface EntityGroup {
 		entity_group: string;
@@ -32,7 +33,8 @@
 	export let noTitle: WidgetProps["noTitle"];
 	export let shouldUpdateUrl: WidgetProps["shouldUpdateUrl"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
-	let isDisabled = false;
+
+	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
 	let computeTime = "";
 	let error: string = "";
@@ -214,7 +216,7 @@
 		return a.type === b.type && a.start === b.start && a.end === b.end;
 	}
 
-	function applyInputSample(sample: WidgetExampleTextInput, opts: ExampleRunOpts = {}) {
+	function applyWidgetExample(sample: WidgetExampleTextInput, opts: ExampleRunOpts = {}) {
 		setTextAreaValue(sample.text);
 		if (opts.isPreview) {
 			return;
@@ -224,38 +226,33 @@
 	}
 </script>
 
-<WidgetWrapper
-	{callApiOnMount}
-	{apiUrl}
-	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
-	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	validateExample={isTextInput}
-	exampleQueryParams={["text"]}
->
-	<svelte:fragment slot="top" let:isDisabled>
-		<form>
-			<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} />
-			<WidgetSubmitBtn
-				classNames="mt-2"
-				{isLoading}
-				{isDisabled}
-				onClick={() => {
-					getOutput();
-				}}
-			/>
-			{#if warning}
-				<div class="alert alert-warning mt-2">{warning}</div>
-			{/if}
-		</form>
-	</svelte:fragment>
-	<svelte:fragment slot="bottom">
-		<WidgetOuputTokens classNames="mt-2" {output} text={outputText} />
-	</svelte:fragment>
+<WidgetWrapper {apiUrl} {includeCredentials} {model} let:WidgetInfo let:WidgetHeader let:WidgetFooter>
+	<WidgetHeader
+		{noTitle}
+		{model}
+		{isLoading}
+		{isDisabled}
+		{callApiOnMount}
+		{applyWidgetExample}
+		validateExample={isTextInput}
+	/>
+
+	<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} />
+	<WidgetSubmitBtn
+		classNames="mt-2"
+		{isLoading}
+		{isDisabled}
+		onClick={() => {
+			getOutput();
+		}}
+	/>
+	{#if warning}
+		<div class="alert alert-warning mt-2">{warning}</div>
+	{/if}
+
+	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
+
+	<WidgetOuputTokens classNames="mt-2" {output} text={outputText} />
+
+	<WidgetFooter {model} {isDisabled} {outputJson} />
 </WidgetWrapper>

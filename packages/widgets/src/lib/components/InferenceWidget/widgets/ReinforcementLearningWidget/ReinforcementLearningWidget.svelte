@@ -38,7 +38,7 @@
 	does NOT use InferenceAPI (unlike other pipelines widgets)
 -->
 <div class="flex w-full max-w-full flex-col">
-	<WidgetHeader title="Video Preview" pipeline="reinforcement-learning" />
+	<WidgetHeader title="Video Preview" {model} />
 	<div class="w-full overflow-hidden rounded-lg">
 		{#if replay === Replay.Available}
 			<!-- svelte-ignore a11y-media-has-caption -->

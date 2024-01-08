@@ -9,6 +9,7 @@
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
 	import { callInferenceApi, getBlobFromUrl } from "../../shared/helpers.js";
 	import { isAssetInput } from "../../shared/inputValidation.js";
+	import { widgetStates } from "../../stores.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -16,7 +17,8 @@
 	export let model: WidgetProps["model"];
 	export let noTitle: WidgetProps["noTitle"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
-	let isDisabled = false;
+
+	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
 	let computeTime = "";
 	let error: string = "";
@@ -131,7 +133,7 @@
 		throw new TypeError("Invalid output: output must be of type Array<blob:string, label:string, content-type:string>");
 	}
 
-	function applyInputSample(sample: WidgetExampleAssetInput, opts: ExampleRunOpts = {}) {
+	function applyWidgetExample(sample: WidgetExampleAssetInput, opts: ExampleRunOpts = {}) {
 		filename = sample.example_title ?? "";
 		fileUrl = sample.src;
 		if (opts.isPreview) {
@@ -146,46 +148,42 @@
 	}
 </script>
 
-<WidgetWrapper
-	{callApiOnMount}
-	{apiUrl}
-	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
-	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	validateExample={isAssetInput}
->
-	<svelte:fragment slot="top" let:isDisabled>
-		<form>
-			<div class="flex flex-wrap items-center {isDisabled ? 'pointer-events-none hidden opacity-50' : ''}">
-				<WidgetFileInput accept="audio/*" classNames="mt-1.5 mr-2" {onSelectFile} />
-				<span class="mr-2 mt-1.5">or</span>
-				<WidgetRecorder classNames="mt-1.5" {onRecordStart} onRecordStop={onSelectFile} onError={onRecordError} />
-			</div>
-			{#if fileUrl}
-				<WidgetAudioTrack classNames="mt-3" label={filename} src={fileUrl} />
-			{/if}
-			<WidgetSubmitBtn
-				classNames="mt-2"
-				isDisabled={isRecording || isDisabled}
-				{isLoading}
-				onClick={() => {
-					getOutput();
-				}}
-			/>
-		</form>
-	</svelte:fragment>
-	<svelte:fragment slot="bottom">
-		{#each output as item}
-			<div class="mt-2 flex items-center">
-				<span class="mr-2">{item.label}:</span>
-				<WidgetAudioTrack classNames="" src={item.src} />
-			</div>
-		{/each}
-	</svelte:fragment>
+<WidgetWrapper {apiUrl} {includeCredentials} {model} let:WidgetInfo let:WidgetHeader let:WidgetFooter>
+	<WidgetHeader
+		{noTitle}
+		{model}
+		{isLoading}
+		{isDisabled}
+		{callApiOnMount}
+		{applyWidgetExample}
+		validateExample={isAssetInput}
+	/>
+
+	<div class="flex flex-wrap items-center {isDisabled ? 'pointer-events-none hidden opacity-50' : ''}">
+		<WidgetFileInput accept="audio/*" classNames="mt-1.5 mr-2" {onSelectFile} />
+		<span class="mr-2 mt-1.5">or</span>
+		<WidgetRecorder classNames="mt-1.5" {onRecordStart} onRecordStop={onSelectFile} onError={onRecordError} />
+	</div>
+	{#if fileUrl}
+		<WidgetAudioTrack classNames="mt-3" label={filename} src={fileUrl} />
+	{/if}
+	<WidgetSubmitBtn
+		classNames="mt-2"
+		isDisabled={isRecording || isDisabled}
+		{isLoading}
+		onClick={() => {
+			getOutput();
+		}}
+	/>
+
+	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
+
+	{#each output as item}
+		<div class="mt-2 flex items-center">
+			<span class="mr-2">{item.label}:</span>
+			<WidgetAudioTrack classNames="" src={item.src} />
+		</div>
+	{/each}
+
+	<WidgetFooter {model} {isDisabled} {outputJson} />
 </WidgetWrapper>

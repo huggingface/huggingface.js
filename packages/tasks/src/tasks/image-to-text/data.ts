@@ -42,6 +42,10 @@ const taskData: TaskDataCustom = {
 			description: "A strong optical character recognition model.",
 			id: "facebook/nougat-base",
 		},
+		{
+			description: "A powerful model that lets you have a conversation with the image.",
+			id: "llava-hf/llava-1.5-7b-hf",
+		},
 	],
 	spaces: [
 		{

@@ -13,6 +13,7 @@
 	import { isValidOutputText } from "../../shared/outputValidation.js";
 	import { isTextInput } from "../../shared/inputValidation.js";
 	import type { PipelineType } from "@huggingface/tasks";
+	import { widgetStates } from "../../stores.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -22,6 +23,8 @@
 	export let shouldUpdateUrl: WidgetProps["shouldUpdateUrl"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
 	export let isLoggedIn: WidgetProps["includeCredentials"];
+
+	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
 	const isBloomLoginRequired = isLoggedIn === false && model.id === "bigscience/bloom";
 
@@ -36,7 +39,7 @@
 	let outputJson: string;
 	let text = "";
 	let warning: string = "";
-	let renderTypingEffect: (outputTxt: string) => Promise<void>;
+	let renderTextOutput: (outputTxt: string, typingEffect?: boolean) => Promise<void>;
 	let inferenceTimer: any;
 	let setTextAreaValue: (text: string) => void;
 	let decodingStrategy: "sampling" | "greedy" = "sampling";
@@ -77,7 +80,12 @@
 			updateUrl({ text: trimmedValue });
 		}
 
-		const requestBody = { inputs: trimmedValue, parameters: {} as unknown };
+		const parameters = {} as any;
+		if (model?.pipeline_tag === "text-generation") {
+			// todo: until streaming is supported https://github.com/huggingface/huggingface.js/issues/410
+			parameters["max_new_tokens"] = 20;
+		}
+		const requestBody = { inputs: trimmedValue, parameters };
 		addInferenceParameters(requestBody, model);
 
 		if (model.id === "bigscience/bloom") {
@@ -130,7 +138,7 @@
 				if (outputWithoutInput.length === 0) {
 					warning = "No text was generated";
 				} else {
-					await renderTypingEffect(outputWithoutInput);
+					await renderTextOutput(outputWithoutInput);
 				}
 			}
 		} else if (res.status === "loading-model") {
@@ -162,10 +170,10 @@
 	function renderExampleOutput(output: string) {
 		// if output doesn't start with space, add space in front of output
 		const prefix = /^\s/.test(output) ? "" : " ";
-		renderTypingEffect(prefix + output);
+		renderTextOutput(prefix + output, false);
 	}
 
-	function applyInputSample(sample: WidgetExampleTextInput<WidgetExampleOutputText>, opts: ExampleRunOpts = {}) {
+	function applyWidgetExample(sample: WidgetExampleTextInput<WidgetExampleOutputText>, opts: ExampleRunOpts = {}) {
 		setTextAreaValue(sample.text);
 		if (opts.isPreview) {
 			if (sample.output) {
@@ -195,66 +203,53 @@
 	}
 </script>
 
-<WidgetWrapper
-	{callApiOnMount}
-	{apiUrl}
-	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
-	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	{validateExample}
-	exampleQueryParams={["text"]}
->
-	<svelte:fragment slot="top" let:isDisabled>
-		<form class="space-y-2">
-			<WidgetTextarea
-				bind:value={text}
-				bind:setValue={setTextAreaValue}
+<WidgetWrapper {apiUrl} {includeCredentials} {model} let:WidgetInfo let:WidgetHeader let:WidgetFooter>
+	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyWidgetExample} {validateExample} />
+	<div class="space-y-2">
+		<WidgetTextarea
+			bind:value={text}
+			bind:setValue={setTextAreaValue}
+			{isLoading}
+			{isDisabled}
+			size="big"
+			bind:renderTextOutput
+		/>
+		{#if model.id === "bigscience/bloom"}
+			<WidgetBloomDecoding bind:decodingStrategy />
+		{/if}
+		<div class="flex items-center gap-x-2 {isBloomLoginRequired ? 'pointer-events-none opacity-50' : ''}">
+			<WidgetSubmitBtn
 				{isLoading}
 				{isDisabled}
-				size="big"
-				bind:renderTypingEffect
+				onClick={() => {
+					getOutput({ useCache });
+				}}
 			/>
-			{#if model.id === "bigscience/bloom"}
-				<WidgetBloomDecoding bind:decodingStrategy />
-			{/if}
-			<div class="flex items-center gap-x-2 {isBloomLoginRequired ? 'pointer-events-none opacity-50' : ''}">
-				<WidgetSubmitBtn
-					{isLoading}
-					{isDisabled}
-					onClick={() => {
-						getOutput({ useCache });
-					}}
-				/>
-				<WidgetShortcutRunLabel {isLoading} {isDisabled} />
-				<div class="ml-auto self-start">
-					<WidgetTimer bind:this={inferenceTimer} {isDisabled} />
-				</div>
+			<WidgetShortcutRunLabel {isLoading} {isDisabled} />
+			<div class="ml-auto self-start">
+				<WidgetTimer bind:this={inferenceTimer} {isDisabled} />
 			</div>
-			{#if warning}
-				<div class="alert alert-warning mt-2">{warning}</div>
-			{/if}
-			{#if isBloomLoginRequired}
-				<div class="alert alert-warning mt-2">
-					<!-- svelte-ignore a11y-click-events-have-key-events -->
-					Please
-					<span class="cursor-pointer underline" on:click={redirectLogin}>login</span>
-					or
-					<!-- svelte-ignore a11y-click-events-have-key-events -->
-					<span class="cursor-pointer underline" on:click={redirectJoin}>register</span> to try BLOOM 🌸
-				</div>
-			{/if}
-		</form>
-	</svelte:fragment>
-	<svelte:fragment slot="bottom">
-		{#if model?.pipeline_tag !== "text-generation"}
-			<!-- for pipelines: text2text-generation & translation -->
-			<WidgetOutputText classNames="mt-4" {output} />
+		</div>
+		{#if warning}
+			<div class="alert alert-warning mt-2">{warning}</div>
 		{/if}
-	</svelte:fragment>
+		{#if isBloomLoginRequired}
+			<div class="alert alert-warning mt-2">
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				Please
+				<span class="cursor-pointer underline" on:click={redirectLogin}>login</span>
+				or
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				<span class="cursor-pointer underline" on:click={redirectJoin}>register</span> to try BLOOM 🌸
+			</div>
+		{/if}
+	</div>
+	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
+
+	{#if model?.pipeline_tag !== "text-generation"}
+		<!-- for pipelines: text2text-generation & translation -->
+		<WidgetOutputText classNames="mt-4" {output} />
+	{/if}
+
+	<WidgetFooter {model} {isDisabled} {outputJson} />
 </WidgetWrapper>

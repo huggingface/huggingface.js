@@ -27,6 +27,8 @@ Check out the [full documentation](https://huggingface.co/docs/huggingface.js/hu
 
 For some of the calls, you need to create an account and generate an [access token](https://huggingface.co/settings/tokens).
 
+Learn how to find free models using the hub package in this [interactive tutorial](https://scrimba.com/scrim/c7BbVPcd?pl=pkVnrP7uP).
+
 ```ts
 import { createRepo, uploadFiles, uploadFilesWithProgress, deleteFile, deleteRepo, listFiles, whoAmI } from "@huggingface/hub";
 import type { RepoDesignation, Credentials } from "@huggingface/hub";

@@ -14,6 +14,7 @@
 		updateUrl,
 	} from "../../shared/helpers.js";
 	import { isTextAndTableInput } from "../../shared/inputValidation.js";
+	import { widgetStates } from "../../stores.js";
 	interface Output {
 		aggregator?: string;
 		answer: string;
@@ -28,6 +29,8 @@
 	export let noTitle: WidgetProps["noTitle"];
 	export let shouldUpdateUrl: WidgetProps["shouldUpdateUrl"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
+
+	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
 	let computeTime = "";
 	let error: string = "";
@@ -142,7 +145,7 @@
 		);
 	}
 
-	function applyInputSample(sample: WidgetExampleTextAndTableInput, opts: ExampleRunOpts = {}) {
+	function applyWidgetExample(sample: WidgetExampleTextAndTableInput, opts: ExampleRunOpts = {}) {
 		query = sample.text;
 		table = convertDataToTable(sample.table);
 		if (opts.isPreview) {
@@ -153,39 +156,35 @@
 	}
 </script>
 
-<WidgetWrapper
-	{callApiOnMount}
-	{apiUrl}
-	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
-	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	validateExample={isTextAndTableInput}
-	exampleQueryParams={["text", "table"]}
->
-	<svelte:fragment slot="top" let:isDisabled>
-		<form>
-			<WidgetQuickInput
-				bind:value={query}
-				{isLoading}
-				{isDisabled}
-				onClickSubmitBtn={() => {
-					getOutput();
-				}}
-			/>
-		</form>
-		<div class="mt-4">
-			{#if output}
-				<WidgetOutputTableQA {output} {isAnswerOnlyOutput} />
-			{/if}
-			{#if table.length > 1 || table[0].length > 1}
-				<WidgetTableInput {highlighted} onChange={onChangeTable} {table} {isDisabled} />
-			{/if}
-		</div>
-	</svelte:fragment>
+<WidgetWrapper {apiUrl} {includeCredentials} {model} let:WidgetInfo let:WidgetHeader let:WidgetFooter>
+	<WidgetHeader
+		{noTitle}
+		{model}
+		{isLoading}
+		{isDisabled}
+		{callApiOnMount}
+		{applyWidgetExample}
+		validateExample={isTextAndTableInput}
+	/>
+
+	<WidgetQuickInput
+		bind:value={query}
+		{isLoading}
+		{isDisabled}
+		onClickSubmitBtn={() => {
+			getOutput();
+		}}
+	/>
+
+	<div class="mt-4">
+		{#if output}
+			<WidgetOutputTableQA {output} {isAnswerOnlyOutput} />
+		{/if}
+		{#if table.length > 1 || table[0].length > 1}
+			<WidgetTableInput {highlighted} onChange={onChangeTable} {table} {isDisabled} />
+		{/if}
+	</div>
+	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
+
+	<WidgetFooter {model} {isDisabled} {outputJson} />
 </WidgetWrapper>

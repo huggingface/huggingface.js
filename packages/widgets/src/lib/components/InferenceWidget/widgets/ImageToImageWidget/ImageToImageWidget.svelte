@@ -9,6 +9,7 @@
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
 	import { addInferenceParameters, callInferenceApi } from "../../shared/helpers.js";
 	import { isAssetAndPromptInput } from "../../shared/inputValidation.js";
+	import { widgetStates } from "../../stores.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -16,6 +17,8 @@
 	export let model: WidgetProps["model"];
 	export let noTitle: WidgetProps["noTitle"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
+
+	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
 	let computeTime = "";
 	let error: string = "";
@@ -61,7 +64,7 @@
 		throw new TypeError("Invalid output: output must be of type object & of instance Blob");
 	}
 
-	async function applyInputSample(sample: WidgetExampleAssetAndPromptInput, opts: ExampleRunOpts = {}) {
+	async function applyWidgetExample(sample: WidgetExampleAssetAndPromptInput, opts: ExampleRunOpts = {}) {
 		prompt = sample.prompt;
 		imgSrc = sample.src;
 		if (opts.isPreview) {
@@ -133,70 +136,66 @@
 	}
 </script>
 
-<WidgetWrapper
-	{callApiOnMount}
-	{apiUrl}
-	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
-	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	validateExample={isAssetAndPromptInput}
->
-	<svelte:fragment slot="top" let:isDisabled>
-		<form class="space-y-2">
-			<WidgetDropzone
-				classNames="hidden md:block"
-				{isLoading}
-				{isDisabled}
-				{imgSrc}
-				{onSelectFile}
-				onError={(e) => (error = e)}
-			>
-				{#if imgSrc}
-					<img src={imgSrc} class="pointer-events-none mx-auto max-h-44 shadow" alt="" />
-				{/if}
-			</WidgetDropzone>
-			<!-- Better UX for mobile/table through CSS breakpoints -->
+<WidgetWrapper {apiUrl} {includeCredentials} {model} let:WidgetInfo let:WidgetHeader let:WidgetFooter>
+	<WidgetHeader
+		{noTitle}
+		{model}
+		{isLoading}
+		{isDisabled}
+		{callApiOnMount}
+		{applyWidgetExample}
+		validateExample={isAssetAndPromptInput}
+	/>
+	<div class="space-y-2">
+		<WidgetDropzone
+			classNames="hidden md:block"
+			{isLoading}
+			{isDisabled}
+			{imgSrc}
+			{onSelectFile}
+			onError={(e) => (error = e)}
+		>
 			{#if imgSrc}
-				{#if imgSrc}
-					<div class="mb-2 flex justify-center bg-gray-50 dark:bg-gray-900 md:hidden">
-						<img src={imgSrc} class="pointer-events-none max-h-44" alt="" />
-					</div>
-				{/if}
+				<img src={imgSrc} class="pointer-events-none mx-auto max-h-44 shadow" alt="" />
 			{/if}
-			<WidgetFileInput
-				accept="image/*"
-				classNames="mr-2 md:hidden"
-				{isLoading}
-				{isDisabled}
-				label="Browse for image"
-				{onSelectFile}
-			/>
-			<WidgetTextInput
-				bind:value={prompt}
-				{isDisabled}
-				label="(Optional) Text-guidance if the model has support for it"
-				placeholder="Your prompt here..."
-			/>
-			<WidgetSubmitBtn
-				{isLoading}
-				{isDisabled}
-				onClick={() => {
-					getOutput();
-				}}
-			/>
-		</form>
-	</svelte:fragment>
-	<svelte:fragment slot="bottom">
-		{#if output.length}
-			<div class="mt-4 flex justify-center bg-gray-50 dark:bg-gray-925">
-				<img class="max-w-sm object-contain" src={output} alt="" />
-			</div>
+		</WidgetDropzone>
+		<!-- Better UX for mobile/table through CSS breakpoints -->
+		{#if imgSrc}
+			{#if imgSrc}
+				<div class="mb-2 flex justify-center bg-gray-50 dark:bg-gray-900 md:hidden">
+					<img src={imgSrc} class="pointer-events-none max-h-44" alt="" />
+				</div>
+			{/if}
 		{/if}
-	</svelte:fragment>
+		<WidgetFileInput
+			accept="image/*"
+			classNames="mr-2 md:hidden"
+			{isLoading}
+			{isDisabled}
+			label="Browse for image"
+			{onSelectFile}
+		/>
+		<WidgetTextInput
+			bind:value={prompt}
+			{isDisabled}
+			label="(Optional) Text-guidance if the model has support for it"
+			placeholder="Your prompt here..."
+		/>
+		<WidgetSubmitBtn
+			{isLoading}
+			{isDisabled}
+			onClick={() => {
+				getOutput();
+			}}
+		/>
+	</div>
+	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
+
+	{#if output.length}
+		<div class="mt-4 flex justify-center bg-gray-50 dark:bg-gray-925">
+			<img class="max-w-sm object-contain" src={output} alt="" />
+		</div>
+	{/if}
+
+	<WidgetFooter {model} {isDisabled} {outputJson} />
 </WidgetWrapper>
