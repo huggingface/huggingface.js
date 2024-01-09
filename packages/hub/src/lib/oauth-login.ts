@@ -130,9 +130,15 @@ export async function oauthLogin(opts?: {
 			throw new Error("Missing oauth state from query parameters in redirected URL");
 		}
 
-		const [stateNonce, stateRedirectUri, stateVal] = state.split(":");
+		let parsedState: { nonce: string; redirectUri: string; state?: string };
 
-		if (stateNonce !== nonce) {
+		try {
+			parsedState = JSON.parse(state);
+		} catch {
+			throw new Error("Invalid oauth state in redirected URL, unable to parse JSON: " + state);
+		}
+
+		if (parsedState.nonce !== nonce) {
 			throw new Error("Invalid oauth state in redirected URL");
 		}
 
@@ -144,7 +150,7 @@ export async function oauthLogin(opts?: {
 			body: new URLSearchParams({
 				grant_type: "authorization_code",
 				code,
-				redirect_uri: stateRedirectUri,
+				redirect_uri: parsedState.redirectUri,
 				code_verifier: codeVerifier,
 			}).toString(),
 		});
@@ -206,7 +212,7 @@ export async function oauthLogin(opts?: {
 				isPro: userInfo.isPro,
 				orgs: userInfo.orgs || [],
 			},
-			state: stateVal,
+			state: parsedState.state,
 			scope: token.scope,
 		};
 	}
@@ -219,7 +225,11 @@ export async function oauthLogin(opts?: {
 	localStorage.setItem("huggingface.co:oauth:code_verifier", newCodeVerifier);
 
 	const redirectUri = opts?.redirectUri || window.location.href;
-	const state = `${newNonce}:${redirectUri}:${opts?.state || ""}`;
+	const state = JSON.stringify({
+		nonce: newNonce,
+		redirectUri,
+		state: opts?.state,
+	});
 
 	// @ts-expect-error window.huggingface is defined inside static Spaces.
 	const variables: Record<string, string> | null = window?.huggingface?.variables ?? null;
