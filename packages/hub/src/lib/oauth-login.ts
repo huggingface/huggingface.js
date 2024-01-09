@@ -51,15 +51,6 @@ export async function oauthLogin(opts?: {
 	 */
 	redirectUri?: string;
 	/**
-	 * Whether to open a new window instead of redirecting the current window.
-	 *
-	 * If called inside an iframe, it will open a new window instead of redirecting the iframe, by default.
-	 * Otherwise, it will redirect the current window, by default.
-	 *
-	 * Use this to override the default behavior.
-	 */
-	newWindow?: boolean;
-	/**
 	 * State to pass to the OAuth provider, which will be returned in the call to `oauthLogin` after the redirect.
 	 */
 	state?: string;
@@ -139,7 +130,9 @@ export async function oauthLogin(opts?: {
 			throw new Error("Missing oauth state from query parameters in redirected URL");
 		}
 
-		if (!state.startsWith(nonce + ":")) {
+		const [stateNonce, stateRedirectUri, stateVal] = state.split(":");
+
+		if (stateNonce !== nonce) {
 			throw new Error("Invalid oauth state in redirected URL");
 		}
 
@@ -151,7 +144,7 @@ export async function oauthLogin(opts?: {
 			body: new URLSearchParams({
 				grant_type: "authorization_code",
 				code,
-				redirect_uri: opts?.redirectUri || window.location.href,
+				redirect_uri: stateRedirectUri,
 				code_verifier: codeVerifier,
 			}).toString(),
 		});
@@ -213,12 +206,10 @@ export async function oauthLogin(opts?: {
 				isPro: userInfo.isPro,
 				orgs: userInfo.orgs || [],
 			},
-			state: state.split(":")[1],
+			state: stateVal,
 			scope: token.scope,
 		};
 	}
-
-	const opensInNewWindow = opts?.newWindow ?? (window.self !== window.top && window.self !== window.parent);
 
 	const newNonce = crypto.randomUUID();
 	// Two random UUIDs concatenated together, because min length is 43 and max length is 128
@@ -227,9 +218,8 @@ export async function oauthLogin(opts?: {
 	localStorage.setItem("huggingface.co:oauth:nonce", newNonce);
 	localStorage.setItem("huggingface.co:oauth:code_verifier", newCodeVerifier);
 
-	const state = `${newNonce}:${opts?.state || ""}`;
-
 	const redirectUri = opts?.redirectUri || window.location.href;
+	const state = `${newNonce}:${redirectUri}:${opts?.state || ""}`;
 
 	// @ts-expect-error window.huggingface is defined inside static Spaces.
 	const variables: Record<string, string> | null = window?.huggingface?.variables ?? null;
@@ -247,30 +237,14 @@ export async function oauthLogin(opts?: {
 		new Uint8Array(await globalThis.crypto.subtle.digest("SHA-256", new TextEncoder().encode(newCodeVerifier)))
 	);
 
-	if (opensInNewWindow) {
-		window.open(
-			`${opendidConfig.authorization_endpoint}?${new URLSearchParams({
-				client_id: clientId,
-				scope: opts?.scopes || "openid profile",
-				response_type: "code",
-				redirect_uri: redirectUri,
-				state,
-				code_challenge: challenge,
-				code_challenge_method: "S256",
-			}).toString()}`,
-			"_blank"
-		);
-		throw new Error("Opened in new window");
-	} else {
-		window.location.href = `${opendidConfig.authorization_endpoint}?${new URLSearchParams({
-			client_id: clientId,
-			scope: opts?.scopes || "openid profile",
-			response_type: "code",
-			redirect_uri: redirectUri,
-			state,
-			code_challenge: challenge,
-			code_challenge_method: "S256",
-		}).toString()}`;
-		throw new Error("Redirected");
-	}
+	window.location.href = `${opendidConfig.authorization_endpoint}?${new URLSearchParams({
+		client_id: clientId,
+		scope: opts?.scopes || "openid profile",
+		response_type: "code",
+		redirect_uri: redirectUri,
+		state,
+		code_challenge: challenge,
+		code_challenge_method: "S256",
+	}).toString()}`;
+	throw new Error("Redirected");
 }
