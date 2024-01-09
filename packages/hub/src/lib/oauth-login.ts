@@ -5,13 +5,10 @@ import { createApiError } from "../error";
 /**
  * Use "Sign in with Hub" to authenticate a user, and get oauth user info / access token.
  *
- * When called the first time, it will redirect the user to the Hub login page, which then redirects
- * to the current URL (or custom URL set).
+ * - First, call `oauthLogin` to trigger the redirect to huggingface.co
+ * - Then, after the redirect, call `oauthHandleRedirect` to get the oauth user info / access token
  *
- * When called the second time, after the redirect, it will check the query parameters and return
- * the oauth user info / access token.
- *
- * If called inside an iframe, it will open a new window instead of redirecting the iframe, by default.
+ * There is also `oauthHandleRedirectIfPresent`, which will call `oauthHandleRedirect` if the URL contains an oauth code.
  *
  * When called from inside a static Space with OAuth enabled, it will load the config from the space.
  *
@@ -54,32 +51,7 @@ export async function oauthLogin(opts?: {
 	 * State to pass to the OAuth provider, which will be returned in the call to `oauthLogin` after the redirect.
 	 */
 	state?: string;
-}): Promise<{
-	accessToken: string;
-	accessTokenExpiresAt: Date;
-	userInfo: {
-		id: string;
-		name: string;
-		fullname: string;
-		email?: string;
-		emailVerified?: boolean;
-		avatarUrl: string;
-		websiteUrl?: string;
-		isPro: boolean;
-		orgs: Array<{
-			name: string;
-			isEnterprise: boolean;
-		}>;
-	};
-	/**
-	 * State passed to the OAuth provider in the original request to the OAuth provider.
-	 */
-	state?: string;
-	/**
-	 * Granted scope
-	 */
-	scope: string;
-}> {
+}): Promise<void> {
 	if (typeof window === "undefined") {
 		throw new Error("oauthLogin is only available in the browser");
 	}
@@ -101,121 +73,6 @@ export async function oauthLogin(opts?: {
 		token_endpoint: string;
 		userinfo_endpoint: string;
 	} = await openidConfigRes.json();
-
-	const searchParams = new URLSearchParams(window.location.search);
-
-	const [error, errorDescription] = [searchParams.get("error"), searchParams.get("error_description")];
-
-	if (error) {
-		throw new Error(`${error}: ${errorDescription}`);
-	}
-
-	const code = searchParams.get("code");
-	const nonce = localStorage.getItem("huggingface.co:oauth:nonce");
-
-	if (code && !nonce) {
-		console.warn("Missing oauth nonce from localStorage");
-	}
-
-	if (code && nonce) {
-		const codeVerifier = localStorage.getItem("huggingface.co:oauth:code_verifier");
-
-		if (!codeVerifier) {
-			throw new Error("Missing oauth code_verifier from localStorage");
-		}
-
-		const state = searchParams.get("state");
-
-		if (!state) {
-			throw new Error("Missing oauth state from query parameters in redirected URL");
-		}
-
-		let parsedState: { nonce: string; redirectUri: string; state?: string };
-
-		try {
-			parsedState = JSON.parse(state);
-		} catch {
-			throw new Error("Invalid oauth state in redirected URL, unable to parse JSON: " + state);
-		}
-
-		if (parsedState.nonce !== nonce) {
-			throw new Error("Invalid oauth state in redirected URL");
-		}
-
-		const tokenRes = await fetch(opendidConfig.token_endpoint, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/x-www-form-urlencoded",
-			},
-			body: new URLSearchParams({
-				grant_type: "authorization_code",
-				code,
-				redirect_uri: parsedState.redirectUri,
-				code_verifier: codeVerifier,
-			}).toString(),
-		});
-
-		localStorage.removeItem("huggingface.co:oauth:code_verifier");
-		localStorage.removeItem("huggingface.co:oauth:nonce");
-
-		if (!tokenRes.ok) {
-			throw await createApiError(tokenRes);
-		}
-
-		const token: {
-			access_token: string;
-			expires_in: number;
-			id_token: string;
-			// refresh_token: string;
-			scope: string;
-			token_type: string;
-		} = await tokenRes.json();
-
-		const accessTokenExpiresAt = new Date(Date.now() + token.expires_in * 1000);
-
-		const userInfoRes = await fetch(opendidConfig.userinfo_endpoint, {
-			headers: {
-				Authorization: `Bearer ${token.access_token}`,
-			},
-		});
-
-		if (!userInfoRes.ok) {
-			throw await createApiError(userInfoRes);
-		}
-
-		const userInfo: {
-			sub: string;
-			name: string;
-			preferred_username: string;
-			email_verified?: boolean;
-			email?: string;
-			picture: string;
-			website?: string;
-			isPro: boolean;
-			orgs?: Array<{
-				name: string;
-				isEnterprise: boolean;
-			}>;
-		} = await userInfoRes.json();
-
-		return {
-			accessToken: token.access_token,
-			accessTokenExpiresAt,
-			userInfo: {
-				id: userInfo.sub,
-				name: userInfo.name,
-				fullname: userInfo.preferred_username,
-				email: userInfo.email,
-				emailVerified: userInfo.email_verified,
-				avatarUrl: userInfo.picture,
-				websiteUrl: userInfo.website,
-				isPro: userInfo.isPro,
-				orgs: userInfo.orgs || [],
-			},
-			state: parsedState.state,
-			scope: token.scope,
-		};
-	}
 
 	const newNonce = crypto.randomUUID();
 	// Two random UUIDs concatenated together, because min length is 43 and max length is 128
@@ -259,5 +116,4 @@ export async function oauthLogin(opts?: {
 		code_challenge: challenge,
 		code_challenge_method: "S256",
 	}).toString()}`;
-	throw new Error("Redirected");
 }
