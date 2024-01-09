@@ -1,6 +1,6 @@
+import { base64FromBytes } from "../../../shared/src";
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
-import { hexFromBytes } from "../utils/hexFromBytes";
 
 /**
  * Use "Sign in with Hub" to authenticate a user, and get oauth user info / access token.
@@ -243,9 +243,12 @@ export async function oauthLogin(opts?: {
 		throw new Error("Missing clientId");
 	}
 
-	const challenge = hexFromBytes(
+	const challenge = base64FromBytes(
 		new Uint8Array(await globalThis.crypto.subtle.digest("SHA-256", new TextEncoder().encode(newCodeVerifier)))
-	);
+	)
+		.replace(/[+]/g, "-")
+		.replace(/[/]/g, "_")
+		.replace(/=/g, "");
 
 	window.location.href = `${opendidConfig.authorization_endpoint}?${new URLSearchParams({
 		client_id: clientId,
