@@ -1,7 +1,7 @@
 import type { TaskDataCustom } from "..";
 
 const taskData: TaskDataCustom = {
-	datasets: [
+	datasets: [],
 	],
 	demo: {
 		inputs: [],
