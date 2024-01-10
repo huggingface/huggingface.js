@@ -12,7 +12,7 @@ const taskData: TaskDataCustom = {
 	models: [
 		
 	],
-	spaces: [
+	spaces: [],
 		
 	],
 	summary:
