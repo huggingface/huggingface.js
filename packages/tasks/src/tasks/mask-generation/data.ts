@@ -12,12 +12,8 @@ const taskData: TaskDataCustom = {
         }
 	],
 	demo: {
-		inputs: [
-			
-		],
-		outputs: [
-			
-		],
+		inputs: [],
+		outputs: [],
 	},
 	metrics: [
 		{
@@ -26,11 +22,8 @@ const taskData: TaskDataCustom = {
 			id: "Intersection over Union (IoU)",
 		}
 	],
-	models: [
-	],
-	spaces: [
-		
-	],
+	models: [],
+	spaces: [],
 	summary:"Mask generation task involves generating masks for meaningful segments in a given image. It could be zero-shot or based on training data.",
     widgetModels: [],
     youtubeId: "",
