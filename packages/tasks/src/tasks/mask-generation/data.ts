@@ -5,7 +5,6 @@ const taskData: TaskDataCustom = {
 	demo: {
 		inputs: [],
 		outputs: [],
-		],
 	},
 	metrics: [],
 	models: [
