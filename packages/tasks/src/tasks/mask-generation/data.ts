@@ -4,7 +4,6 @@ const taskData: TaskDataCustom = {
 	datasets: [],
 	demo: {
 		inputs: [],
-			
 		],
 		outputs: [
 			
