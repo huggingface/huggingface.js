@@ -93,7 +93,7 @@ await deleteRepo({ repo, credentials });
 
 It's possible to login using OAuth (["Sign in with HF"](https://huggingface.co/docs/hub/oauth)).
 
-This will allow you get an access token to use some of the API, depending of the scopes set inside the Space or the OAuth App.
+This will allow you get an access token to use some of the API, depending on the scopes set inside the Space or the OAuth App.
 
 ```ts
 import { oauthLogin, oauthHandleRedirectIfPresent } from "@huggingface/hub";
