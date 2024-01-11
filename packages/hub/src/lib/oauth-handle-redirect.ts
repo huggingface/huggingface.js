@@ -30,6 +30,9 @@ export interface OAuthResult {
 
 /**
  * To call after the OAuth provider redirects back to the app.
+ *
+ * There is also a helper function {@link oauthHandleRedirectIfPresent}, which will call `oauthHandleRedirect` if the URL contains an oauth code
+ * in the query parameters and return `false` otherwise.
  */
 export async function oauthHandleRedirect(opts?: { hubUrl?: string }): Promise<OAuthResult> {
 	if (typeof window === "undefined") {
@@ -177,6 +180,14 @@ export async function oauthHandleRedirect(opts?: { hubUrl?: string }): Promise<O
 //   console.warn("Missing oauth nonce from localStorage");
 // }
 
+/**
+ * To call after the OAuth provider redirects back to the app.
+ *
+ * It returns false if the URL does not contain an oauth code in the query parameters, otherwise
+ * it calls {@link oauthHandleRedirect}.
+ *
+ * Depending on your app, you may want to call {@link oauthHandleRedirect} directly instead.
+ */
 export async function oauthHandleRedirectIfPresent(opts?: { hubUrl?: string }): Promise<OAuthResult | false> {
 	if (typeof window === "undefined") {
 		throw new Error("oauthHandleRedirect is only available in the browser");
