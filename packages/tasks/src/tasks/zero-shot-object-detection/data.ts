@@ -50,10 +50,10 @@ const taskData: TaskDataCustom = {
 		},
 	],
 	spaces: [
-		
+
 	],
 	summary:
-		"Zero-shot object detection models allow users to identify objects without predefined classes. Zero-shot object detection models receive an image as input, as well as a list of candidate classes, and output the bounding boxes and labels where the objects have been detected.",
+		"Zero-shot object detection models allow users to identify objects without predefined classes. Zero-shot object detection models receive an image as input, as well as a list of candidate classes, and output the bounding boxes and labels where the objects have been detected. Zero-shot object detection is a computer vision task to detect objects and its class in images, without any prior training or knowledge of the classes. Zero shot object detection works by transferring knowledge learnt during training of one model, to classify novel classes that was not present in the training data.",
 	widgetModels: [],
 	youtubeId: "",
 };
