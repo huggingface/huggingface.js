@@ -1,9 +1,3 @@
-## About the task
-
-Zero-shot object detection is a computer vision task to detect objects and its class in images, without any prior training or knowledge of the classes.
-
-Zero shot object detection works by transferring knowledge learnt during training of one model, to classify novel classes that was not present in the training data.
-
 ## Use Cases
 
 ### Object Search
