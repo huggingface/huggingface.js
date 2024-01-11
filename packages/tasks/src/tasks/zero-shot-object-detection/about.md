@@ -8,7 +8,7 @@ Zero shot object detection works by transferring knowledge learnt during trainin
 
 ### Object Search
 
-Zero-shot object detection models can be used in image search. Smartphones use zero-shot object detection models to detect entities (such as specific places or objects) and allow the user to search for the entity on the internet.
+Zero-shot object detection models can be used in image search. Smartphones, for example, use zero-shot object detection models to detect entities (such as specific places or objects) and allow the user to search for the entity on the internet.
 
 ### Object Counting
 
@@ -35,6 +35,6 @@ predictions = detector(
 
 # Useful Resources
 
-- [Zero-shot object detection task guide](https://huggingface.co/tasks/zero-shot-object-detection)
+- [Zero-shot object detection task guide](https://huggingface.co/docs/transformers/tasks/zero_shot_object_detection)
 
 This page was made possible thanks to the efforts of [Victor Guichard](https://huggingface.co/VictorGuichard)

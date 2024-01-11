@@ -53,7 +53,7 @@ const taskData: TaskDataCustom = {
 		
 	],
 	summary:
-		"Zero-shot object detection models allow users to identify objects of certain without predefined classes. Object detection models receive an image as input as well as a list of classes and output the images with bounding boxes and labels on detected objects.",
+		"Zero-shot object detection models allow users to identify objects without predefined classes. Zero-shot object detection models receive an image as input, as well as a list of candidate classes, and output the bounding boxes and labels where the objects have been detected.",
 	widgetModels: [],
 	youtubeId: "",
 };
