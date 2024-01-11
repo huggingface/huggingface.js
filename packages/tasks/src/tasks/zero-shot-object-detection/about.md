@@ -13,6 +13,11 @@ Zero-shot object detection models are used to count instances of objects in a gi
 You can infer with zero-shot object detection models through the `zero-shot-object-detection` pipeline. When calling the pipeline, you just need to specify a path or HTTP link to an image and the candidate labels.
 
 ```python
+from transformers import pipeline
+from PIL import Image
+
+image = Image.open("my-image.png").convert("RGB")
+
 detector = pipeline(model="google/owlvit-base-patch32", task="zero-shot-object-detection")
 
 predictions = detector(
