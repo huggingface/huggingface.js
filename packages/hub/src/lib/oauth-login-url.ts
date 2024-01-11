@@ -5,17 +5,30 @@ import { createApiError } from "../error";
 /**
  * Use "Sign in with Hub" to authenticate a user, and get oauth user info / access token.
  *
- * - First, call `oauthLogin` to trigger the redirect to huggingface.co
- * - Then, after the redirect, call `oauthHandleRedirect` to get the oauth user info / access token
+ * Returns an url to redirect to. After the user is redirected back to your app, call `oauthHandleRedirect` to get the oauth user info / access token.
  *
- * There is also `oauthHandleRedirectIfPresent`, which will call `oauthHandleRedirect` if the URL contains an oauth code.
+ * When called from inside a static Space with OAuth enabled, it will load the config from the space, otherwise you need to at least specify
+ * the client ID of your OAuth App.
  *
- * When called from inside a static Space with OAuth enabled, it will load the config from the space.
+ * @example
+ * ```ts
+ * import { oauthLoginUrl, oauthHandleRedirectIfPresent } from "@huggingface/hub";
+ *
+ * const oauthResult = await oauthHandleRedirectIfPresent();
+ *
+ * if (!oauthResult) {
+ *   // If the user is not logged in, redirect to the login page
+ *   window.location.href = await oauthLoginUrl();
+ * }
+ *
+ * // You can use oauthResult.accessToken, oauthResult.accessTokenExpiresAt and oauthResult.userInfo
+ * console.log(oauthResult);
+ * ```
  *
  * (Theoretically, this function could be used to authenticate a user for any OAuth provider supporting PKCE and OpenID Connect by changing `hubUrl`,
  * but it is currently only tested with the Hugging Face Hub.)
  */
-export async function oauthLogin(opts?: {
+export async function oauthLoginUrl(opts?: {
 	/**
 	 * OAuth client ID.
 	 *
@@ -46,12 +59,12 @@ export async function oauthLogin(opts?: {
 	 *
 	 * For Developer Applications, you can add any URL you want to the list of allowed redirect URIs at https://huggingface.co/settings/connected-applications.
 	 */
-	redirectUri?: string;
+	redirectUrl?: string;
 	/**
 	 * State to pass to the OAuth provider, which will be returned in the call to `oauthLogin` after the redirect.
 	 */
 	state?: string;
-}): Promise<void> {
+}): Promise<string> {
 	if (typeof window === "undefined") {
 		throw new Error("oauthLogin is only available in the browser");
 	}
@@ -81,7 +94,7 @@ export async function oauthLogin(opts?: {
 	localStorage.setItem("huggingface.co:oauth:nonce", newNonce);
 	localStorage.setItem("huggingface.co:oauth:code_verifier", newCodeVerifier);
 
-	const redirectUri = opts?.redirectUri || window.location.href;
+	const redirectUri = opts?.redirectUrl || window.location.href;
 	const state = JSON.stringify({
 		nonce: newNonce,
 		redirectUri,
@@ -107,7 +120,7 @@ export async function oauthLogin(opts?: {
 		.replace(/[/]/g, "_")
 		.replace(/=/g, "");
 
-	window.location.href = `${opendidConfig.authorization_endpoint}?${new URLSearchParams({
+	return `${opendidConfig.authorization_endpoint}?${new URLSearchParams({
 		client_id: clientId,
 		scope: opts?.scopes || "openid profile",
 		response_type: "code",

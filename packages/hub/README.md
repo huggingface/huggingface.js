@@ -96,16 +96,16 @@ It's possible to login using OAuth (["Sign in with HF"](https://huggingface.co/d
 This will allow you get an access token to use some of the API, depending on the scopes set inside the Space or the OAuth App.
 
 ```ts
-import { oauthLogin, oauthHandleRedirectIfPresent } from "@huggingface/hub";
+import { oauthLoginUrl, oauthHandleRedirectIfPresent } from "@huggingface/hub";
 
 const oauthResult = await oauthHandleRedirectIfPresent();
 
 if (!oauthResult) {
   // If the user is not logged in, redirect to the login page
-  oauthLogin();
+  window.location.href = await oauthLoginUrl();
 }
 
-// You can use oauthResult.accessToken and oauthResult.userInfo
+// You can use oauthResult.accessToken, oauthResult.accessTokenExpiresAt and oauthResult.userInfo
 console.log(oauthResult);
 ```
 
