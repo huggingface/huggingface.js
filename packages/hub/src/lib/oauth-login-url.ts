@@ -87,9 +87,9 @@ export async function oauthLoginUrl(opts?: {
 		userinfo_endpoint: string;
 	} = await openidConfigRes.json();
 
-	const newNonce = crypto.randomUUID();
+	const newNonce = globalThis.crypto.randomUUID();
 	// Two random UUIDs concatenated together, because min length is 43 and max length is 128
-	const newCodeVerifier = crypto.randomUUID() + crypto.randomUUID();
+	const newCodeVerifier = globalThis.crypto.randomUUID() + globalThis.crypto.randomUUID();
 
 	localStorage.setItem("huggingface.co:oauth:nonce", newNonce);
 	localStorage.setItem("huggingface.co:oauth:code_verifier", newCodeVerifier);
