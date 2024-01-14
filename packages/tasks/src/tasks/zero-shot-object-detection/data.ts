@@ -7,7 +7,7 @@ const taskData: TaskDataCustom = {
 	demo: {
 		inputs: [
 			{
-				filename: "object-detection-input.jpg",
+				filename: "zero-shot-object-detection-input.jpg",
 				type: "img",
 			},
             {
@@ -18,7 +18,7 @@ const taskData: TaskDataCustom = {
 		],
 		outputs: [
 			{
-				filename: "object-detection-output.jpg",
+				filename: "zero-shot-object-detection-output.jpg",
 				type: "img",
 			},
 		],
