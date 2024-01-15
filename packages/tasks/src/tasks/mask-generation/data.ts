@@ -10,7 +10,7 @@ const taskData: TaskDataCustom = {
 	metrics: [],
 	models: [],
 	spaces: [],
-	summary: "Mask identify a region in an image. They are a way of querying or filtering an image easily.",
+	summary: "Mask generation involves creating a way to remove irrelevant image parts. They are similar to image segmentation but usually involve simpler models. The most common task variants are binary and non-binary mask.",
 	widgetModels: [],
 	youtubeId: undefined,
 };
