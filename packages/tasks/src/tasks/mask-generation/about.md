@@ -40,4 +40,4 @@ This section should have useful information about how to pull a model from Huggi
 
 Would you like to learn more about mask generation? Great! Here you can find some curated resources that you may find helpful!
 
-- [Scikit-learn examples with thresholding](https://scikit-image.org/docs/stable/auto_examples/segmentation/plot_thresholding.html)
+- [Simple mask generation using thresholding in Scikit-learn](https://scikit-image.org/docs/stable/auto_examples/segmentation/plot_thresholding.html)
