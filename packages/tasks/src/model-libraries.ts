@@ -37,7 +37,7 @@ export enum ModelLibrary {
 	"stanza" = "Stanza",
 	"fasttext" = "fastText",
 	"stable-baselines3" = "Stable-Baselines3",
-	"unity-ml-agents" = "Unity ML-Agents",
+	"ml-agents" = "Unity ML-Agents",
 	"pythae" = "Pythae",
 	"mindspore" = "MindSpore",
 }
