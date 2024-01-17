@@ -542,8 +542,10 @@ transcriptions = asr_model.transcribe(["file.wav"])`,
 const mlAgents = (model: ModelData) => [`mlagents-load-from-hf --repo-id="${model.id}" --local-dir="./downloads"`];
 
 const sentis = (model: ModelData) => [
-	`Model model = ModelLoader.Load(Application.streamingAssetsPath + "/${model.id}");
+	`string modelName = "[Your model name here].sentis";
+	Model model = ModelLoader.Load(Application.streamingAssetsPath + "/" + modelName);
 IWorker engine = WorkerFactory.CreateWorker(BackendType.GPUCompute, model);
+// Please see provided C# file for more details
 `
 ];
 
