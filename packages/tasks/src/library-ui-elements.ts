@@ -541,6 +541,12 @@ transcriptions = asr_model.transcribe(["file.wav"])`,
 
 const mlAgents = (model: ModelData) => [`mlagents-load-from-hf --repo-id="${model.id}" --local-dir="./downloads"`];
 
+const sentis = (model: ModelData) => [
+	`Model model = ModelLoader.Load(Application.streamingAssetsPath + "/${model.id}");
+IWorker engine = WorkerFactory.CreateWorker(BackendType.GPUCompute, model);
+`
+];
+
 const mlx = (model: ModelData) => [
 	`pip install huggingface_hub hf_transfer
 
