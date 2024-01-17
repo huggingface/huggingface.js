@@ -774,6 +774,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS: Partial<Record<ModelLibraryKey, Librar
 		docsUrl: "https://huggingface.co/docs/hub/ml-agents",
 		snippets: mlAgents,
 	},
+	"unity-sentis": {
+		btnLabel: "unity sentis",
+		repoName: "unity-sentis",
+		repoUrl: "https://github.com/huggingface/unity-sentis",
+		snippets: sentis,
+	},
 	pythae: {
 		btnLabel: "pythae",
 		repoName: "pythae",
