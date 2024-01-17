@@ -767,7 +767,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS: Partial<Record<ModelLibraryKey, Librar
 		docsUrl: "https://huggingface.co/docs/hub/stable-baselines3",
 		snippets: stableBaselines3,
 	},
-	"unity-ml-agents": {
+	"ml-agents": {
 		btnLabel: "unity-ml-agents",
 		repoName: "ml-agents",
 		repoUrl: "https://github.com/Unity-Technologies/ml-agents",
