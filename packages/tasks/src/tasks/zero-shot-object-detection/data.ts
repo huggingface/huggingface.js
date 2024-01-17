@@ -1,16 +1,14 @@
 import type { TaskDataCustom } from "..";
 
 const taskData: TaskDataCustom = {
-	datasets: [
-		
-	],
+	datasets: [],
 	demo: {
 		inputs: [
 			{
 				filename: "zero-shot-object-detection-input.jpg",
 				type: "img",
 			},
-            {
+			{
 				label: "Classes",
 				content: "cat, dog, bird",
 				type: "text",
@@ -49,9 +47,7 @@ const taskData: TaskDataCustom = {
 			id: "google/owlv2-base-patch16-ensemble",
 		},
 	],
-	spaces: [
-
-	],
+	spaces: [],
 	summary:
 		"Zero-shot object detection is a computer vision task to detect objects and their classes in images, without any prior training or knowledge of the classes. Zero-shot object detection models receive an image as input, as well as a list of candidate classes, and output the bounding boxes and labels where the objects have been detected.",
 	widgetModels: [],
