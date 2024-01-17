@@ -770,7 +770,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS: Partial<Record<ModelLibraryKey, Librar
 	"unity-ml-agents": {
 		btnLabel: "unity-ml-agents",
 		repoName: "ml-agents",
-		repoUrl: "https://github.com/huggingface/ml-agents",
+		repoUrl: "https://github.com/Unity-Technologies/ml-agents",
 		docsUrl: "https://huggingface.co/docs/hub/ml-agents",
 		snippets: mlAgents,
 	},
