@@ -109,6 +109,8 @@ if (!oauthResult) {
 console.log(oauthResult);
 ```
 
+Checkout the demo: https://huggingface.co/spaces/huggingfacejs/client-side-oauth
+
 ## Performance considerations
 
 When uploading large files, you may want to run the `commit` calls inside a worker, to offload the sha256 computations.
