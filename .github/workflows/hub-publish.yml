@@ -55,3 +55,7 @@ jobs:
       - run: pnpm publish --no-git-checks .
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: "Update Doc"
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          event-type: doc-build
