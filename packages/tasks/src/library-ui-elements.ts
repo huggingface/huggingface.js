@@ -543,7 +543,7 @@ const mlAgents = (model: ModelData) => [`mlagents-load-from-hf --repo-id="${mode
 
 const sentis = (model: ModelData) => [
 	`string modelName = "[Your model name here].sentis";
-	Model model = ModelLoader.Load(Application.streamingAssetsPath + "/" + modelName);
+Model model = ModelLoader.Load(Application.streamingAssetsPath + "/" + modelName);
 IWorker engine = WorkerFactory.CreateWorker(BackendType.GPUCompute, model);
 // Please see provided C# file for more details
 `
