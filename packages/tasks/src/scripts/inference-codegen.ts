@@ -71,7 +71,7 @@ async function main() {
 
 	for (const { task, dirPath } of allTasks) {
 		const taskSpecDir = path.join(dirPath, "spec");
-		if (!pathExists(taskSpecDir)) {
+		if (!(pathExists(path.join(taskSpecDir, "input.json")) && pathExists(path.join(taskSpecDir, "output.json")))) {
 			console.debug(`No spec found for task ${task} - skipping`);
 			continue;
 		}
