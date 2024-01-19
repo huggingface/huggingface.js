@@ -1,0 +1,58 @@
+{
+	"id": "http://huggingface.co/inference/schemas/feature-extraction/output.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Outputs of inference for the Feature Extraction task",
+	"type": "array",
+	"items": {
+		"description": "The features computed by the mode, as a nested list of floats",
+		"$ref": "#/definitions/FeatureDimension"
+	},
+	"definitions": {
+		"FeatureDimension": {
+			"type": "array",
+			"items": {
+				"anyOf": [
+					{
+						"type": "number"
+					},
+					{
+						"type": "array",
+						"items": {
+							"anyOf": [
+								{
+									"type": "number"
+								},
+								{
+									"type": "array",
+									"items": {
+										"anyOf": [
+											{
+												"type": "number"
+											},
+											{
+												"type": "array",
+												"items": {
+													"anyOf": [
+														{
+															"type": "number"
+														},
+														{
+															"type": "array",
+															"items": {
+																"type": "number"
+															}
+														}
+													]
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			}
+		}
+	}
+}

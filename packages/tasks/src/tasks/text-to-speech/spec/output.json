@@ -1,0 +1,19 @@
+{
+	"id": "http://huggingface.co/inference/schemas/text-to-audio/output.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Outputs of inference for the Text To Audio task",
+	"type": "array",
+	"items": {
+		"type": "object",
+		"properties": {
+			"audio": {
+				"description": "The generated audio waveform."
+			},
+			"samplingRate": {
+				"type": "number",
+				"description": "The sampling rate of the generated audio waveform."
+			}
+		},
+		"required": ["audio", "samplingRate"]
+	}
+}

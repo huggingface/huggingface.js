@@ -1,0 +1,51 @@
+{
+	"id": "http://huggingface.co/inference/schemas/image-segmentation/input.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Inputs for Image Segmentation inference",
+	"type": "object",
+	"properties": {
+		"inputs": {
+			"description": "One or several image files to perform segmentation on"
+		},
+		"parameters": {
+			"description": "Additional inference parameters",
+			"$ref": "#/definitions/ImageSegmentationParameters"
+		}
+	},
+	"definitions": {
+		"ImageSegmentationParameters": {
+			"description": "Additional inference parameters for Image Segmentation",
+			"type": "object",
+			"properties": {
+				"maskThreshold": {
+					"type": "number",
+					"description": "Threshold to use when turning the predicted masks into binary values."
+				},
+				"overlapMaskAreaThreshold": {
+					"type": "number",
+					"description": "Mask overlap threshold to eliminate small, disconnected segments."
+				},
+				"subtask": {
+					"type": "string",
+					"description": "Segmentation task to be performed, depending on model capabilities.",
+					"oneOf": [
+						{
+							"const": "instance"
+						},
+						{
+							"const": "panoptic"
+						},
+						{
+							"const": "semantic"
+						}
+					]
+				},
+				"threshold": {
+					"type": "number",
+					"description": "Probability threshold to filter out predicted masks."
+				}
+			}
+		}
+	},
+	"required": ["inputs"]
+}

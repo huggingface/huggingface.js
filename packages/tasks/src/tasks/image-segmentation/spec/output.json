@@ -1,0 +1,20 @@
+{
+	"id": "http://huggingface.co/inference/schemas/image-segmentation/output.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Outputs of inference for the Image Segmentation task",
+	"type": "array",
+	"items": {
+		"description": "A predicted mask / segment",
+		"type": "object",
+		"properties": {
+			"label": {
+				"type": "string",
+				"description": "The label of the predicted segment"
+			},
+			"mask": {
+				"description": "The corresponding mask as a black-and-white image"
+			}
+		},
+		"required": ["label", "mask"]
+	}
+}

@@ -1,0 +1,36 @@
+{
+	"id": "http://huggingface.co/inference/schemas/video-classification/input.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Inputs for Video Classification inference",
+	"type": "object",
+	"properties": {
+		"inputs": {
+			"description": "One or several videos to be classified"
+		},
+		"parameters": {
+			"description": "Additional inference parameters",
+			"$ref": "#/definitions/VideoClassificationParameters"
+		}
+	},
+	"definitions": {
+		"VideoClassificationParameters": {
+			"description": "Additional inference parameters for Video Classification",
+			"type": "object",
+			"properties": {
+				"numFrames": {
+					"type": "integer",
+					"description": "The number of sampled frames to consider for classification."
+				},
+				"frameSamplingRate": {
+					"type": "integer",
+					"description": "The sampling rate used to select frames from the video."
+				},
+				"topK": {
+					"type": "integer",
+					"description": "When specified, limits the output to the top K most probable classes."
+				}
+			}
+		}
+	},
+	"required": ["inputs"]
+}

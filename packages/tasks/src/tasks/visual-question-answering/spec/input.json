@@ -1,0 +1,51 @@
+{
+	"id": "http://huggingface.co/inference/schemas/visual-question-answering/input.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Inputs for Visual Question Answering inference",
+	"type": "object",
+	"properties": {
+		"inputs": {
+			"description": "One or more image-question pairs",
+			"anyOf": [
+				{
+					"$ref": "#/definitions/VisualQuestionAnsweringInput"
+				},
+				{
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/VisualQuestionAnsweringInput"
+					}
+				}
+			]
+		},
+		"parameters": {
+			"description": "Additional inference parameters",
+			"$ref": "#/definitions/VisualQuestionAnsweringParameters"
+		}
+	},
+	"definitions": {
+		"VisualQuestionAnsweringInput": {
+			"type": "object",
+			"properties": {
+				"image": {
+					"description": "The image."
+				},
+				"question": {
+					"description": "The question to answer based on the image."
+				}
+			},
+			"required": ["question", "image"]
+		},
+		"VisualQuestionAnsweringParameters": {
+			"description": "Additional inference parameters for Visual Question Answering",
+			"type": "object",
+			"properties": {
+				"topK": {
+					"type": "integer",
+					"description": "The number of answers to return (will be chosen by order of likelihood). Note that we return less than topk answers if there are not enough options available within the context."
+				}
+			}
+		}
+	},
+	"required": ["inputs"]
+}

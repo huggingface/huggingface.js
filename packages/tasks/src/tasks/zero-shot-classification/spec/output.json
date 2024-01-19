@@ -1,0 +1,20 @@
+{
+	"id": "http://huggingface.co/inference/schemas/zero-shot-classification/output.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Outputs of inference for the Zero Shot Classification task",
+	"type": "array",
+	"items": {
+		"type": "object",
+		"properties": {
+			"label": {
+				"type": "string",
+				"description": "A candidate label"
+			},
+			"score": {
+				"type": "number",
+				"description": "The associated score / probability"
+			}
+		},
+		"required": ["label", "score"]
+	}
+}

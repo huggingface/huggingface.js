@@ -1,0 +1,16 @@
+{
+	"id": "http://huggingface.co/inference/schemas/image-to-text/output.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Outputs of inference for the Image To Text task",
+	"type": "array",
+	"items": {
+		"type": "object",
+		"properties": {
+			"generatedText": {
+				"type": "string",
+				"description": "The generated text."
+			}
+		},
+		"required": ["generatedText"]
+	}
+}

@@ -1,0 +1,44 @@
+{
+	"id": "http://huggingface.co/inference/schemas/table-question-answering/input.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Inputs for Table Question Answering inference",
+	"type": "object",
+	"properties": {
+		"inputs": {
+			"description": "One or several questions about a table",
+			"type": "object",
+			"properties": {
+				"table": {
+					"description": "The table to serve as context for the questions",
+					"type": "object"
+				},
+				"question": {
+					"description": "One or several questions to be answered about the table",
+					"anyOf": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						}
+					]
+				}
+			}
+		},
+		"parameters": {
+			"description": "Additional inference parameters",
+			"$ref": "#/definitions/TableQuestionAnsweringParameters"
+		}
+	},
+	"definitions": {
+		"TableQuestionAnsweringParameters": {
+			"description": "Additional inference parameters for Table Question Answering",
+			"type": "object",
+			"properties": {}
+		}
+	},
+	"required": ["inputs"]
+}

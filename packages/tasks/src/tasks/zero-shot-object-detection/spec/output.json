@@ -1,0 +1,44 @@
+{
+	"id": "http://huggingface.co/inference/schemas/zero-shot-object-detection/output.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Outputs of inference for the Zero Shot Object Detection task",
+	"type": "array",
+	"items": {
+		"type": "object",
+		"properties": {
+			"label": {
+				"type": "string",
+				"description": "A candidate label"
+			},
+			"score": {
+				"type": "number",
+				"description": "The associated score / probability"
+			},
+			"box": {
+				"$ref": "#/definitions/BoundingBox",
+				"description": "The predicted bounding box. Coordinates are relative to the top left corner of the input image."
+			}
+		},
+		"required": ["box", "label", "score"]
+	},
+	"definitions": {
+		"BoundingBox": {
+			"type": "object",
+			"properties": {
+				"xmin": {
+					"type": "integer"
+				},
+				"xmax": {
+					"type": "integer"
+				},
+				"ymin": {
+					"type": "integer"
+				},
+				"ymax": {
+					"type": "integer"
+				}
+			},
+			"required": ["xmin", "xmax", "ymin", "ymax"]
+		}
+	}
+}

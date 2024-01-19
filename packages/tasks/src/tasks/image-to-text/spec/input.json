@@ -1,0 +1,28 @@
+{
+	"id": "http://huggingface.co/inference/schemas/image-to-text/input.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Inputs for Image To Text inference",
+	"type": "object",
+	"properties": {
+		"inputs": {
+			"description": "One or several images to generated text for"
+		},
+		"parameters": {
+			"description": "Additional inference parameters",
+			"$ref": "#/definitions/ImageToTextParameters"
+		}
+	},
+	"definitions": {
+		"ImageToTextParameters": {
+			"description": "Additional inference parameters for Image To Text",
+			"type": "object",
+			"properties": {
+				"maxNewTokens": {
+					"type": "integer",
+					"description": "The amount of maximum tokens to generate."
+				}
+			}
+		}
+	},
+	"required": ["inputs"]
+}

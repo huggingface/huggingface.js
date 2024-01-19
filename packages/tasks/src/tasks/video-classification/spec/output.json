@@ -1,0 +1,20 @@
+{
+	"id": "http://huggingface.co/inference/schemas/video-classification/output.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Outputs of inference for the Video Classification task",
+	"type": "array",
+	"items": {
+		"type": "object",
+		"properties": {
+			"label": {
+				"type": "string",
+				"description": "The predicted class label (model specific)."
+			},
+			"score": {
+				"type": "number",
+				"description": "The corresponding probability."
+			}
+		},
+		"required": ["label", "score"]
+	}
+}

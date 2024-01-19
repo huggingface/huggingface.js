@@ -1,0 +1,21 @@
+{
+	"id": "http://huggingface.co/inference/schemas/image-to-image/input.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Inputs for Image To Image inference",
+	"type": "object",
+	"properties": {
+		"inputs": {
+			"description": "One or more images to generate images from"
+		},
+		"parameters": {
+			"description": "Additional inference parameters",
+			"$ref": "#/definitions/ImageToImageParameters"
+		}
+	},
+	"definitions": {
+		"ImageToImageParameters": {
+			"description": "Additional inference parameters for Image To Image"
+		}
+	},
+	"required": ["inputs"]
+}

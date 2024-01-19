@@ -1,0 +1,23 @@
+{
+	"id": "http://huggingface.co/inference/schemas/automatic-speech-recognition/input.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Inputs for Automatic Speech Recognition inference",
+	"type": "object",
+	"properties": {
+		"inputs": {
+			"description": "The input audio data"
+		},
+		"parameters": {
+			"description": "Additional inference parameters",
+			"$ref": "#/definitions/AutomaticSpeechRecognitionParameters"
+		}
+	},
+	"definitions": {
+		"AutomaticSpeechRecognitionParameters": {
+			"description": "Additional inference parameters for Automatic Speech Recognition",
+			"type": "object",
+			"properties": {}
+		}
+	},
+	"required": ["inputs"]
+}

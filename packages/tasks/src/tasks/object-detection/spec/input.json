@@ -1,0 +1,28 @@
+{
+	"id": "http://huggingface.co/inference/schemas/object-detection/input.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Inputs for Object Detection inference",
+	"type": "object",
+	"properties": {
+		"inputs": {
+			"description": "One or several input images to perform object detection on"
+		},
+		"parameters": {
+			"description": "Additional inference parameters",
+			"$ref": "#/definitions/ObjectDetectionParameters"
+		}
+	},
+	"definitions": {
+		"ObjectDetectionParameters": {
+			"description": "Additional inference parameters for Object Detection",
+			"type": "object",
+			"properties": {
+				"threshold": {
+					"type": "number",
+					"description": "The probability necessary to make a prediction."
+				}
+			}
+		}
+	},
+	"required": ["inputs"]
+}

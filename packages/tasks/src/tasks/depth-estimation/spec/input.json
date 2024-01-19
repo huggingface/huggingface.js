@@ -1,0 +1,28 @@
+{
+	"id": "http://huggingface.co/inference/schemas/depth-estimation/input.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Inputs for Depth Estimation inference",
+	"type": "object",
+	"properties": {
+		"inputs": {
+			"description": "The input image data"
+		},
+		"parameters": {
+			"description": "Additional inference parameters",
+			"$ref": "#/definitions/DepthEstimationParameters"
+		}
+	},
+	"definitions": {
+		"DepthEstimationParameters": {
+			"description": "Additional inference parameters for Depth Estimation",
+			"type": "object",
+			"properties": {
+				"topK": {
+					"type": "integer",
+					"description": "When specified, limits the output to the top K most probable classes."
+				}
+			}
+		}
+	},
+	"required": ["inputs"]
+}

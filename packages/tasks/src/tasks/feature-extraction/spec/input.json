@@ -1,0 +1,34 @@
+{
+	"id": "http://huggingface.co/inference/schemas/feature-extraction/input.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Inputs for Feature Extraction inference",
+	"type": "object",
+	"properties": {
+		"inputs": {
+			"description": "One or several texts to get the features of",
+			"anyOf": [
+				{
+					"type": "string"
+				},
+				{
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			]
+		},
+		"parameters": {
+			"description": "Additional inference parameters",
+			"$ref": "#/definitions/FeatureExtractionParameters"
+		}
+	},
+	"definitions": {
+		"FeatureExtractionParameters": {
+			"description": "Additional inference parameters for Feature Extraction",
+			"type": "object",
+			"properties": {}
+		}
+	},
+	"required": ["inputs"]
+}

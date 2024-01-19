@@ -1,0 +1,55 @@
+{
+	"id": "http://huggingface.co/inference/schemas/zero-shot-image-classification/input.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Inputs for Zero Shot Image Classification inference",
+	"type": "object",
+	"properties": {
+		"inputs": {
+			"description": "One or several images to classify",
+			"anyOf": [
+				{
+					"$ref": "#/definitions/ZeroShotImageClassificationInput"
+				},
+				{
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/ZeroShotImageClassificationInput"
+					}
+				}
+			]
+		},
+		"parameters": {
+			"description": "Additional inference parameters",
+			"$ref": "#/definitions/ZeroShotImageClassificationParameters"
+		}
+	},
+	"definitions": {
+		"ZeroShotImageClassificationInput": {
+			"type": "object",
+			"properties": {
+				"image": {
+					"description": "The image data to classify"
+				},
+				"candidateLabels": {
+					"description": "The candidate labels for this image",
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": ["image", "candidateLabels"]
+		},
+		"ZeroShotImageClassificationParameters": {
+			"description": "Additional inference parameters for Zero Shot Image Classification",
+			"type": "object",
+			"properties": {
+				"hypothesisTemplate": {
+					"type": "string",
+					"description": "The sentence used in conjunction with candidateLabels to attempt the text classification by replacing the placeholder with the candidate labels."
+				}
+			}
+		}
+	},
+	"required": ["inputs"]
+}
