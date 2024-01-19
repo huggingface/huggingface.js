@@ -1,5 +1,5 @@
 {
-	"id": "http://huggingface.co/inference/schemas/zero-shot-image-classification/output.json",
+	"$id": "/inference/schemas/zero-shot-image-classification/output.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Outputs of inference for the Zero Shot Image Classification task",
 	"type": "array",

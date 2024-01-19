@@ -11,7 +11,7 @@ export interface ZeroShotImageClassificationInput {
 	/**
 	 * One or several images to classify
 	 */
-	inputs: ZeroShotImageClassificationInputElement[] | ZeroShotImageClassificationInputElement;
+	inputs: ZeroShotImageClassificationInputSingle[] | ZeroShotImageClassificationInputSingle;
 	/**
 	 * Additional inference parameters
 	 */
@@ -19,7 +19,7 @@ export interface ZeroShotImageClassificationInput {
 	[property: string]: any;
 }
 
-export interface ZeroShotImageClassificationInputElement {
+export interface ZeroShotImageClassificationInputSingle {
 	/**
 	 * The candidate labels for this image
 	 */

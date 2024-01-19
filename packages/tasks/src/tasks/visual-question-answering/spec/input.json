@@ -1,5 +1,5 @@
 {
-	"id": "http://huggingface.co/inference/schemas/visual-question-answering/input.json",
+	"$id": "/inference/schemas/visual-question-answering/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Inputs for Visual Question Answering inference",
 	"type": "object",
@@ -8,24 +8,25 @@
 			"description": "One or more image-question pairs",
 			"anyOf": [
 				{
-					"$ref": "#/definitions/VisualQuestionAnsweringInput"
+					"$ref": "#/$defs/VisualQuestionAnsweringInputSingle"
 				},
 				{
 					"type": "array",
 					"items": {
-						"$ref": "#/definitions/VisualQuestionAnsweringInput"
+						"$ref": "#/$defs/VisualQuestionAnsweringInputSingle"
 					}
 				}
 			]
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
-			"$ref": "#/definitions/VisualQuestionAnsweringParameters"
+			"$ref": "#/$defs/VisualQuestionAnsweringParameters"
 		}
 	},
-	"definitions": {
-		"VisualQuestionAnsweringInput": {
+	"$defs": {
+		"VisualQuestionAnsweringInputSingle": {
 			"type": "object",
+			"title": "VisualQuestionAnsweringInputSingle",
 			"properties": {
 				"image": {
 					"description": "The image."
@@ -37,6 +38,7 @@
 			"required": ["question", "image"]
 		},
 		"VisualQuestionAnsweringParameters": {
+			"title": "VisualQuestionAnsweringParameters",
 			"description": "Additional inference parameters for Visual Question Answering",
 			"type": "object",
 			"properties": {

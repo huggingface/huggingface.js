@@ -11,7 +11,7 @@ export interface ZeroShotObjectDetectionInput {
 	/**
 	 * One or several images to perform object detection on
 	 */
-	inputs: ZeroShotObjectDetectionInputs[] | ZeroShotObjectDetectionInputs;
+	inputs: ZeroShotObjectDetectionInputSingle[] | ZeroShotObjectDetectionInputSingle;
 	/**
 	 * Additional inference parameters
 	 */
@@ -19,7 +19,7 @@ export interface ZeroShotObjectDetectionInput {
 	[property: string]: any;
 }
 
-export interface ZeroShotObjectDetectionInputs {
+export interface ZeroShotObjectDetectionInputSingle {
 	/**
 	 * The candidate labels for this image
 	 */
@@ -39,7 +39,7 @@ export interface ZeroShotObjectDetectionOutput {
 	 * The predicted bounding box. Coordinates are relative to the top left corner of the input
 	 * image.
 	 */
-	box: BoundingBox;
+	box: Box;
 	/**
 	 * A candidate label
 	 */
@@ -55,7 +55,7 @@ export interface ZeroShotObjectDetectionOutput {
  * The predicted bounding box. Coordinates are relative to the top left corner of the input
  * image.
  */
-export interface BoundingBox {
+export interface Box {
 	xmax: number;
 	xmin: number;
 	ymax: number;

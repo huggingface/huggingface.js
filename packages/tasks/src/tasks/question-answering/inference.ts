@@ -11,7 +11,7 @@ export interface QuestionAnsweringInput {
 	/**
 	 * One or several question+context pairs to answer
 	 */
-	inputs: QuestionAnsweringInputElement[] | QuestionAnsweringInputElement;
+	inputs: SquadExample[] | SquadExample;
 	/**
 	 * Additional inference parameters
 	 */
@@ -19,7 +19,7 @@ export interface QuestionAnsweringInput {
 	[property: string]: any;
 }
 
-export interface QuestionAnsweringInputElement {
+export interface SquadExample {
 	/**
 	 * The context to be used for answering the question
 	 */

@@ -1,5 +1,5 @@
 {
-	"id": "http://huggingface.co/inference/schemas/audio-classification/output.json",
+	"$id": "/inference/schemas/audio-classification/output.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"title": "AudioClassificationOutput",
 	"description": "Outputs for Audio Classification inference",

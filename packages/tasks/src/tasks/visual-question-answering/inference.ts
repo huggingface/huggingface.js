@@ -11,7 +11,7 @@ export interface VisualQuestionAnsweringInput {
 	/**
 	 * One or more image-question pairs
 	 */
-	inputs: VisualQuestionAnsweringInputElement[] | VisualQuestionAnsweringInputElement;
+	inputs: VisualQuestionAnsweringInputSingle[] | VisualQuestionAnsweringInputSingle;
 	/**
 	 * Additional inference parameters
 	 */
@@ -19,7 +19,7 @@ export interface VisualQuestionAnsweringInput {
 	[property: string]: any;
 }
 
-export interface VisualQuestionAnsweringInputElement {
+export interface VisualQuestionAnsweringInputSingle {
 	/**
 	 * The image.
 	 */

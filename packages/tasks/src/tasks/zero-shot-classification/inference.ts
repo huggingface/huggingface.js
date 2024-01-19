@@ -11,7 +11,7 @@ export interface ZeroShotClassificationInput {
 	/**
 	 * One or several text + candidate labels pairs to classify
 	 */
-	inputs: ZeroShotClassificationInputElement[] | ZeroShotClassificationInputElement;
+	inputs: ZeroShotClassificationInputSingle[] | ZeroShotClassificationInputSingle;
 	/**
 	 * Additional inference parameters
 	 */
@@ -19,7 +19,7 @@ export interface ZeroShotClassificationInput {
 	[property: string]: any;
 }
 
-export interface ZeroShotClassificationInputElement {
+export interface ZeroShotClassificationInputSingle {
 	/**
 	 * The set of possible class labels to classify the text into.
 	 */

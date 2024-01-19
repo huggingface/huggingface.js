@@ -1,5 +1,5 @@
 {
-	"id": "http://huggingface.co/inference/schemas/zero-shot-object-detection/input.json",
+	"$id": "/inference/schemas/zero-shot-object-detection/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Inputs for Zero Shot Object Detection inference",
 	"type": "object",
@@ -8,24 +8,25 @@
 			"description": "One or several images to perform object detection on",
 			"anyOf": [
 				{
-					"$ref": "#/definitions/ZeroShotObjectDetectionInputs"
+					"$ref": "#/$defs/ZeroShotObjectDetectionInputSingle"
 				},
 				{
 					"type": "array",
 					"items": {
-						"$ref": "#/definitions/ZeroShotObjectDetectionInputs"
+						"$ref": "#/$defs/ZeroShotObjectDetectionInputSingle"
 					}
 				}
 			]
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
-			"$ref": "#/definitions/ZeroShotObjectDetectionParameters"
+			"$ref": "#/$defs/ZeroShotObjectDetectionParameters"
 		}
 	},
-	"definitions": {
-		"ZeroShotObjectDetectionInputs": {
+	"$defs": {
+		"ZeroShotObjectDetectionInputSingle": {
 			"type": "object",
+			"title": "ZeroShotObjectDetectionInputSingle",
 			"properties": {
 				"image": {
 					"description": "The image data to generate bounding boxes from"
@@ -41,6 +42,7 @@
 			"required": ["image", "candidateLabels"]
 		},
 		"ZeroShotObjectDetectionParameters": {
+			"title": "ZeroShotObjectDetectionParameters",
 			"description": "Additional inference parameters for Zero Shot Object Detection",
 			"type": "object",
 			"properties": {}

@@ -25,6 +25,7 @@
 	},
 	"$defs": {
 		"Text2textGenerationParameters": {
+			"title": "Text2textGenerationParameters",
 			"description": "Additional inference parameters for Text2text Generation",
 			"type": "object",
 			"properties": {
@@ -50,7 +51,8 @@
 						}
 					]
 				},
-				"generateParameters": {
+				"Parameters": {
+					"title": "generateParameters",
 					"type": "object",
 					"description": "Additional parametrization of the text generation algorithm"
 				}

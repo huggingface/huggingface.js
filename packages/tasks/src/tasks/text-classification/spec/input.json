@@ -1,5 +1,5 @@
 {
-	"id": "http://huggingface.co/inference/schemas/text-classification/input.json",
+	"$id": "/inference/schemas/text-classification/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Inputs for Text Classification inference",
 	"type": "object",
@@ -20,11 +20,12 @@
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
-			"$ref": "#/definitions/TextClassificationParameters"
+			"$ref": "#/$defs/TextClassificationParameters"
 		}
 	},
-	"definitions": {
+	"$defs": {
 		"TextClassificationParameters": {
+			"title": "TextClassificationParameters",
 			"description": "Additional inference parameters for Text Classification",
 			"type": "object",
 			"properties": {

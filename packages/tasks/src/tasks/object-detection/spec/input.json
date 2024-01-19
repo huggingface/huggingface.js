@@ -1,5 +1,5 @@
 {
-	"id": "http://huggingface.co/inference/schemas/object-detection/input.json",
+	"$id": "/inference/schemas/object-detection/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Inputs for Object Detection inference",
 	"type": "object",
@@ -9,11 +9,12 @@
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
-			"$ref": "#/definitions/ObjectDetectionParameters"
+			"$ref": "#/$defs/ObjectDetectionParameters"
 		}
 	},
-	"definitions": {
+	"$defs": {
 		"ObjectDetectionParameters": {
+			"title": "ObjectDetectionParameters",
 			"description": "Additional inference parameters for Object Detection",
 			"type": "object",
 			"properties": {

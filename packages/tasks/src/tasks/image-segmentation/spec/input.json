@@ -1,5 +1,5 @@
 {
-	"id": "http://huggingface.co/inference/schemas/image-segmentation/input.json",
+	"$id": "/inference/schemas/image-segmentation/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Inputs for Image Segmentation inference",
 	"type": "object",
@@ -9,11 +9,12 @@
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
-			"$ref": "#/definitions/ImageSegmentationParameters"
+			"$ref": "#/$defs/ImageSegmentationParameters"
 		}
 	},
-	"definitions": {
+	"$defs": {
 		"ImageSegmentationParameters": {
+			"title": "ImageSegmentationParameters",
 			"description": "Additional inference parameters for Image Segmentation",
 			"type": "object",
 			"properties": {

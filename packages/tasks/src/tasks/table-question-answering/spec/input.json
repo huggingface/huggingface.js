@@ -1,5 +1,5 @@
 {
-	"id": "http://huggingface.co/inference/schemas/table-question-answering/input.json",
+	"$id": "/inference/schemas/table-question-answering/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Inputs for Table Question Answering inference",
 	"type": "object",
@@ -30,11 +30,12 @@
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
-			"$ref": "#/definitions/TableQuestionAnsweringParameters"
+			"$ref": "#/$defs/TableQuestionAnsweringParameters"
 		}
 	},
-	"definitions": {
+	"$defs": {
 		"TableQuestionAnsweringParameters": {
+			"title": "TableQuestionAnsweringParameters",
 			"description": "Additional inference parameters for Table Question Answering",
 			"type": "object",
 			"properties": {}

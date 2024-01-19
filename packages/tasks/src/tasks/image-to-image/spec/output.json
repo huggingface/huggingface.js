@@ -1,5 +1,5 @@
 {
-	"id": "http://huggingface.co/inference/schemas/image-to-image/output.json",
+	"$id": "/inference/schemas/image-to-image/output.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Outputs of inference for the Image To Image task",
 	"type": "array",

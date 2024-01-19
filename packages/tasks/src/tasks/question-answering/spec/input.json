@@ -1,5 +1,5 @@
 {
-	"id": "http://huggingface.co/inference/schemas/question-answering/input.json",
+	"$id": "/inference/schemas/question-answering/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Inputs for Question Answering inference",
 	"type": "object",
@@ -8,23 +8,24 @@
 			"description": "One or several question+context pairs to answer",
 			"anyOf": [
 				{
-					"$ref": "#/definitions/QuestionAnsweringInput"
+					"$ref": "#/$defs/SquadExample"
 				},
 				{
 					"type": "array",
 					"items": {
-						"$ref": "#/definitions/QuestionAnsweringInput"
+						"$ref": "#/$defs/SquadExample"
 					}
 				}
 			]
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
-			"$ref": "#/definitions/QuestionAnsweringParameters"
+			"$ref": "#/$defs/QuestionAnsweringParameters"
 		}
 	},
-	"definitions": {
-		"QuestionAnsweringInput": {
+	"$defs": {
+		"SquadExample": {
+			"title": "SquadExample",
 			"type": "object",
 			"properties": {
 				"question": {
@@ -39,6 +40,7 @@
 			"required": ["question", "context"]
 		},
 		"QuestionAnsweringParameters": {
+			"title": "QuestionAnsweringParameters",
 			"description": "Additional inference parameters for Question Answering",
 			"type": "object",
 			"properties": {

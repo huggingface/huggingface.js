@@ -1,5 +1,5 @@
 {
-	"id": "http://huggingface.co/inference/schemas/image-to-image/input.json",
+	"$id": "/inference/schemas/image-to-image/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Inputs for Image To Image inference",
 	"type": "object",
@@ -9,11 +9,12 @@
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
-			"$ref": "#/definitions/ImageToImageParameters"
+			"$ref": "#/$defs/ImageToImageParameters"
 		}
 	},
-	"definitions": {
+	"$defs": {
 		"ImageToImageParameters": {
+			"title": "ImageToImageParameters",
 			"description": "Additional inference parameters for Image To Image"
 		}
 	},

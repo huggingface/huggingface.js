@@ -1,5 +1,5 @@
 {
-	"id": "http://huggingface.co/inference/schemas/depth-estimation/output.json",
+	"$id": "/inference/schemas/depth-estimation/output.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Outputs of inference for the Depth Estimation task",
 	"type": "array",

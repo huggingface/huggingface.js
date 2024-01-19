@@ -1,5 +1,5 @@
 {
-	"id": "http://huggingface.co/inference/schemas/zero-shot-classification/input.json",
+	"$id": "/inference/schemas/zero-shot-classification/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Inputs for Zero Shot Classification inference",
 	"type": "object",
@@ -8,24 +8,25 @@
 			"description": "One or several text + candidate labels pairs to classify",
 			"anyOf": [
 				{
-					"$ref": "#/definitions/ZeroShotClassificationInput"
+					"$ref": "#/$defs/ZeroShotClassificationInputSingle"
 				},
 				{
 					"type": "array",
 					"items": {
-						"$ref": "#/definitions/ZeroShotClassificationInput"
+						"$ref": "#/$defs/ZeroShotClassificationInputSingle"
 					}
 				}
 			]
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
-			"$ref": "#/definitions/ZeroShotClassificationParameters"
+			"$ref": "#/$defs/ZeroShotClassificationParameters"
 		}
 	},
-	"definitions": {
-		"ZeroShotClassificationInput": {
+	"$defs": {
+		"ZeroShotClassificationInputSingle": {
 			"type": "object",
+			"title": "ZeroShotClassificationInputSingle",
 			"properties": {
 				"text": {
 					"type": "string",
@@ -42,6 +43,7 @@
 			"required": ["text", "candidateLabels"]
 		},
 		"ZeroShotClassificationParameters": {
+			"title": "ZeroShotClassificationParameters",
 			"description": "Additional inference parameters for Zero Shot Classification",
 			"type": "object",
 			"properties": {

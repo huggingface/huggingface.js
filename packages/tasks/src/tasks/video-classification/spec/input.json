@@ -1,5 +1,5 @@
 {
-	"id": "http://huggingface.co/inference/schemas/video-classification/input.json",
+	"$id": "/inference/schemas/video-classification/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Inputs for Video Classification inference",
 	"type": "object",
@@ -9,11 +9,12 @@
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
-			"$ref": "#/definitions/VideoClassificationParameters"
+			"$ref": "#/$defs/VideoClassificationParameters"
 		}
 	},
-	"definitions": {
+	"$defs": {
 		"VideoClassificationParameters": {
+			"title": "VideoClassificationParameters",
 			"description": "Additional inference parameters for Video Classification",
 			"type": "object",
 			"properties": {

@@ -15,7 +15,7 @@ export interface Text2TextGenerationInput {
 	/**
 	 * Additional inference parameters
 	 */
-	parameters?: Parameters;
+	parameters?: Text2TextGenerationParameters;
 	[property: string]: any;
 }
 
@@ -24,7 +24,7 @@ export interface Text2TextGenerationInput {
  *
  * Additional inference parameters for Text2text Generation
  */
-export interface Parameters {
+export interface Text2TextGenerationParameters {
 	/**
 	 * Whether to clean up the potential extra spaces in the text output.
 	 */
@@ -32,7 +32,7 @@ export interface Parameters {
 	/**
 	 * Additional parametrization of the text generation algorithm
 	 */
-	generateParameters?: { [key: string]: any };
+	parameters?: { [key: string]: any };
 	/**
 	 * The truncation strategy to use
 	 */

@@ -1,5 +1,5 @@
 {
-	"id": "http://huggingface.co/inference/schemas/document-question-answering/input.json",
+	"$id": "/inference/schemas/document-question-answering/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Inputs for Document Question Answering inference",
 	"type": "object",
@@ -8,23 +8,24 @@
 			"description": "The ",
 			"anyOf": [
 				{
-					"$ref": "#/definitions/DocumentAndQuestion"
+					"$ref": "#/$defs/DocumentAndQuestion"
 				},
 				{
 					"type": "array",
 					"items": {
-						"$ref": "#/definitions/DocumentAndQuestion"
+						"$ref": "#/$defs/DocumentAndQuestion"
 					}
 				}
 			]
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
-			"$ref": "#/definitions/DocumentQuestionAnsweringParameters"
+			"$ref": "#/$defs/DocumentQuestionAnsweringParameters"
 		}
 	},
-	"definitions": {
+	"$defs": {
 		"DocumentQuestionAnsweringParameters": {
+			"title": "DocumentQuestionAnsweringParameters",
 			"description": "Additional inference parameters for Document Question Answering",
 			"type": "object",
 			"properties": {

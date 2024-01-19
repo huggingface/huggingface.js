@@ -1,5 +1,5 @@
 {
-	"id": "http://huggingface.co/inference/schemas/depth-estimation/input.json",
+	"$id": "/inference/schemas/depth-estimation/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Inputs for Depth Estimation inference",
 	"type": "object",
@@ -9,11 +9,12 @@
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
-			"$ref": "#/definitions/DepthEstimationParameters"
+			"$ref": "#/$defs/DepthEstimationParameters"
 		}
 	},
-	"definitions": {
+	"$defs": {
 		"DepthEstimationParameters": {
+			"title": "DepthEstimationParameters",
 			"description": "Additional inference parameters for Depth Estimation",
 			"type": "object",
 			"properties": {
