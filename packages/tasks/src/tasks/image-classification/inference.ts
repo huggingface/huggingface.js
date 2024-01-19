@@ -5,26 +5,26 @@
  */
 
 /**
- * Inputs for Audio Classification inference
+ * Inputs for Image Classification inference
  */
-export interface AudioClassificationInput {
+export interface ImageClassificationInput {
 	/**
-	 * On or several audio files to classify
+	 * On or several image files to classify
 	 */
 	inputs: any;
 	/**
 	 * Additional inference parameters
 	 */
-	parameters?: AudioClassificationParameters;
+	parameters?: ImageClassificationParameters;
 	[property: string]: any;
 }
 
 /**
  * Additional inference parameters
  *
- * Additional inference parameters for Audio Classification
+ * Additional inference parameters for Image Classification
  */
-export interface AudioClassificationParameters {
+export interface ImageClassificationParameters {
 	/**
 	 * When specified, limits the output to the top K most probable classes.
 	 */
@@ -33,9 +33,9 @@ export interface AudioClassificationParameters {
 }
 
 /**
- * Outputs for Audio Classification inference
+ * Outputs of inference for the Image Classification task
  */
-export interface AudioClassificationOutput {
+export interface ImageClassificationOutput {
 	/**
 	 * The predicted class label (model specific).
 	 */
