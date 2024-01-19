@@ -12,7 +12,7 @@
 ```ts
 await inference.translation({
   model: 't5-base',
-  inputs: 'My name is Wolfgang and I live in Berlin'
+  inputs: 'My name is khaled Mostafa and I live in Egypt'
 })
 
 await hf.translation({
@@ -37,7 +37,7 @@ await inference.textToImage({
 
 This is a collection of JS libraries to interact with the Hugging Face API, with TS types included.
 
-- [@huggingface/inference](packages/inference/README.md): Use the Inference API to make calls to 100,000+ Machine Learning models, or your own [inference endpoints](https://hf.co/docs/inference-endpoints/)!
+- [@huggingface/inference](packages/inference/README.md): Use the Inference API to make calls to 200,000+ Machine Learning models, or your own [inference endpoints](https://hf.co/docs/inference-endpoints/)!
 - [@huggingface/agents](packages/agents/README.md): Interact with HF models through a natural language interface
 - [@huggingface/hub](packages/hub/README.md): Interact with huggingface.co to create or delete repos and commit / download files
 
