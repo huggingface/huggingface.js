@@ -541,6 +541,14 @@ transcriptions = asr_model.transcribe(["file.wav"])`,
 
 const mlAgents = (model: ModelData) => [`mlagents-load-from-hf --repo-id="${model.id}" --local-dir="./downloads"`];
 
+const sentis = (model: ModelData) => [
+	`string modelName = "[Your model name here].sentis";
+Model model = ModelLoader.Load(Application.streamingAssetsPath + "/" + modelName);
+IWorker engine = WorkerFactory.CreateWorker(BackendType.GPUCompute, model);
+// Please see provided C# file for more details
+`
+];
+
 const mlx = (model: ModelData) => [
 	`pip install huggingface_hub hf_transfer
 
@@ -773,6 +781,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS: Partial<Record<ModelLibraryKey, Librar
 		repoUrl: "https://github.com/Unity-Technologies/ml-agents",
 		docsUrl: "https://huggingface.co/docs/hub/ml-agents",
 		snippets: mlAgents,
+	},
+	"unity-sentis": {
+		btnLabel: "unity-sentis",
+		repoName: "unity-sentis",
+		repoUrl: "https://github.com/Unity-Technologies/sentis-samples",
+		snippets: sentis,
 	},
 	pythae: {
 		btnLabel: "pythae",
