@@ -40,6 +40,7 @@ export enum ModelLibrary {
 	"ml-agents" = "Unity ML-Agents",
 	"pythae" = "Pythae",
 	"mindspore" = "MindSpore",
+	"unity-sentis" = "Unity Sentis",
 }
 
 export type ModelLibraryKey = keyof typeof ModelLibrary;
