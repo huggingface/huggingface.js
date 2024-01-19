@@ -1,0 +1,18 @@
+{
+    "id": "http://huggingface.co/inference/schemas/text-generation/output.json",
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "description": "Outputs for Text Generation inference",
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "generatedText": {
+                "type": "string",
+                "description": "The generated text"
+            }
+        },
+        "required": [
+            "generatedText"
+        ]
+    }
+}
