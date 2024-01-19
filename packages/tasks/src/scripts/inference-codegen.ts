@@ -8,7 +8,7 @@ const TYPESCRIPT_HEADER_FILE = `
 /**
  * Inference code generated from the JSON schema spec in ./spec
  * 
- * Generated on ${new Date().toISOString()}
+ * Using src/scripts/inference-codegen
  */
 
 `;
@@ -30,8 +30,14 @@ const rootDirFinder = function (): string {
 	return "";
 };
 
-async function buildInputData(taskId: string, taskSpecDir: string): Promise<InputData> {
-	const schema = new JSONSchemaInput(new FetchingJSONSchemaStore());
+/**
+ *
+ * @param taskId The ID of the task for which we are generating code
+ * @param taskSpecDir The path to the directory where the input.json & output.json files are
+ * @param allSpecFiles An array of paths to all the tasks specs. Allows resolving cross-file references ($ref).
+ */
+async function buildInputData(taskId: string, taskSpecDir: string, allSpecFiles: string[]): Promise<InputData> {
+	const schema = new JSONSchemaInput(new FetchingJSONSchemaStore(), [], allSpecFiles);
 	await schema.addSource({
 		name: `${taskId}-input`,
 		schema: await fs.readFile(`${taskSpecDir}/input.json`, { encoding: "utf-8" }),
@@ -68,6 +74,9 @@ async function main() {
 			.filter((entry) => entry.name !== "placeholder")
 			.map(async (entry) => ({ task: entry.name, dirPath: path.join(entry.path, entry.name) }))
 	);
+	const allSpecFiles = allTasks
+		.flatMap(({ dirPath }) => [path.join(dirPath, "spec", "input.json"), path.join(dirPath, "spec", "output.json")])
+		.filter((filepath) => pathExists(filepath));
 
 	for (const { task, dirPath } of allTasks) {
 		const taskSpecDir = path.join(dirPath, "spec");
@@ -78,7 +87,7 @@ async function main() {
 		console.debug(`✨ Generating types for task`, task);
 
 		console.debug("   📦 Building input data");
-		const inputData = await buildInputData(task, taskSpecDir);
+		const inputData = await buildInputData(task, taskSpecDir, allSpecFiles);
 
 		console.debug("   🏭 Generating typescript code");
 		{
