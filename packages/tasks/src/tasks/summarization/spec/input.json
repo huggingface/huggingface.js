@@ -1,0 +1,6 @@
+{
+	"$ref": "/inference/schemas/text2text-generation/input.json",
+	"$id": "/inference/schemas/summarization/input.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Inputs for Summarization inference"
+}
