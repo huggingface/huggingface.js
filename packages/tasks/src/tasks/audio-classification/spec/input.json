@@ -1,0 +1,30 @@
+{
+    "id": "http://huggingface.co/inference/schemas/audio-classification/input.json",
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "description": "Inputs for Audio Classification inference",
+    "type": "object",
+    "properties": {
+        "inputs": {
+            "description": "On or several audio files to classify"
+        },
+        "parameters": {
+            "description": "Additional inference parameters",
+            "$ref": "#/definitions/AudioClassificationParameters"
+        }
+    },
+    "definitions": {
+        "AudioClassificationParameters": {
+            "description": "Additional inference parameters for Audio Classification",
+            "type": "object",
+            "properties": {
+                "topK": {
+                    "type": "integer",
+                    "description": "When specified, limits the output to the top K most probable classes."
+                }
+            }
+        }
+    },
+    "required": [
+        "inputs"
+    ]
+}
