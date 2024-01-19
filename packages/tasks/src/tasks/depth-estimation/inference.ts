@@ -1,7 +1,7 @@
 /**
  * Inference code generated from the JSON schema spec in ./spec
  *
- * Generated on 2024-01-19T16:16:01.752Z
+ * Using src/scripts/inference-codegen
  */
 
 /**
