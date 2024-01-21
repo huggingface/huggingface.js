@@ -34,4 +34,3 @@ outputs = generator(image_url, points_per_batch = 256)
 Would you like to learn more about mask generation? Great! Here you can find some curated resources that you may find helpful!
 
 - [Segment anything model](https://huggingface.co/docs/transformers/main/model_doc/sam)
-- [Simple mask generation using thresholding in Scikit-learn](https://scikit-image.org/docs/stable/auto_examples/segmentation/plot_thresholding.html)
