@@ -11,16 +11,6 @@ We run a few scripts in between, [fix-md-links](./fix-md-links.ts) and [update-t
 ```console
 # Generate all docs
 pnpm run start
-
-# Generate docs for @huggingface/hub
-pnpm run prepublish-hub
-
-# Generate docs for @huggingface/inference
-pnpm run prepublish-inference
-
-# Generate docs for @huggingface/agents
-pnpm run prepublish-agents
-
 ```
 
 ## HTML docs

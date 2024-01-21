@@ -2,15 +2,17 @@ name: Build documentation
 
 on:
   workflow_dispatch:
+  repository_dispatch:
+    types: [doc-build]
   push:
     branches:
       - main
     paths:
       - "README.md"
-      - "docs/**"
-      - "packages/hub/package.json"
-      - "packages/inference/package.json"
-      - "packages/agents/package.json"
+      - "packages/hub/README.md"
+      - "packages/inference/README.md"
+      - "packages/agents/README.md"
+      - ".github/workflows/documentation.yml"
 
 jobs:
   build:

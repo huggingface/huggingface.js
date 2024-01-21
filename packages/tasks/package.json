@@ -1,7 +1,7 @@
 {
 	"name": "@huggingface/tasks",
 	"packageManager": "pnpm@8.10.5",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"description": "List of ML tasks for huggingface.co/tasks",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {
