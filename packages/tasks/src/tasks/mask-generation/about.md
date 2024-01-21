@@ -4,7 +4,7 @@
 
 When filtering for an image, the generated masks might serve as an initial filter to eliminate irrelevant information. For instance, when monitoring vegetation in satellite imaging, mask generation models identify green spots, highlighting the relevant region of the image.
 
-### Training 
+### Masked Image Modelling 
 
 Generating masks can be done to facilitate learning, especially in semi- or unsupervised learning. For example, the [BEiT](https://huggingface.co/docs/transformers/model_doc/beit) use image masked patches in the pre-training.
 
