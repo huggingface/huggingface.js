@@ -38,8 +38,8 @@ await inference.textToImage({
 This is a collection of JS libraries to interact with the Hugging Face API, with TS types included.
 
 - [@huggingface/inference](packages/inference/README.md): Use the Inference API to make calls to 100,000+ Machine Learning models, or your own [inference endpoints](https://hf.co/docs/inference-endpoints/)!
-- [@huggingface/agents](packages/agents/README.md): Interact with HF models through a natural language interface
 - [@huggingface/hub](packages/hub/README.md): Interact with huggingface.co to create or delete repos and commit / download files
+- [@huggingface/agents](packages/agents/README.md): Interact with HF models through a natural language interface
 
 
 With more to come, like `@huggingface/endpoints` to manage your HF Endpoints!
