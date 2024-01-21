@@ -2,7 +2,7 @@
 
 ### Filtering an Image
 
-The mask might serve as an initial filter to eliminate irrelevant information. For instance, when monitoring vegetation in satellite imaging, a mask can be created to identify green spots, highlighting the relevant region of the image.
+When filtering for an image, the generated masks might serve as an initial filter to eliminate irrelevant information. For instance, when monitoring vegetation in satellite imaging, mask generation models identify green spots, highlighting the relevant region of the image.
 
 ### Pre-processing
 
