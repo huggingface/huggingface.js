@@ -1,19 +1,6 @@
 {
-	"$id": "/inference/schemas/text-to-audio/output.json",
+	"$ref": "/inference/schemas/text-to-audio/output.json",
+	"$id": "/inference/schemas/text-to-speech/output.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
-	"description": "Outputs of inference for the Text To Audio task",
-	"type": "array",
-	"items": {
-		"type": "object",
-		"properties": {
-			"audio": {
-				"description": "The generated audio waveform."
-			},
-			"samplingRate": {
-				"type": "number",
-				"description": "The sampling rate of the generated audio waveform."
-			}
-		},
-		"required": ["audio", "samplingRate"]
-	}
+	"description": "Outputs for Text to Speech inference"
 }
