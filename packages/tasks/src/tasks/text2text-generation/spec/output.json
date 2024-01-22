@@ -11,6 +11,8 @@
 				"description": "The generated text."
 			}
 		},
-		"required": ["generatedTex"]
+		"required": [
+			"generatedText"
+		]
 	}
 }
