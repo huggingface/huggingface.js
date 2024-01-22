@@ -50,10 +50,9 @@ export type Truncation = "do_not_truncate" | "longest_first" | "only_first" | "o
  * Outputs of inference for the Text2text Generation task
  */
 export interface TranslationOutput {
-	generatedTex: any;
 	/**
 	 * The generated text.
 	 */
-	generatedText?: string;
+	generatedText: string;
 	[property: string]: any;
 }
