@@ -5,11 +5,9 @@
  */
 
 /**
- * Inputs for Text to Speech inference
- *
  * Inputs for Text To Audio inference
  */
-export interface TextToSpeechInput {
+export interface TextToAudioInput {
 	/**
 	 * One or several texts to generate audio for
 	 */
@@ -22,11 +20,9 @@ export interface TextToSpeechInput {
 }
 
 /**
- * Outputs for Text to Speech inference
- *
  * Outputs of inference for the Text To Audio task
  */
-export interface TextToSpeechOutput {
+export interface TextToAudioOutput {
 	/**
 	 * The generated audio waveform.
 	 */

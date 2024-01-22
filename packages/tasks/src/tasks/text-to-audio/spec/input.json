@@ -1,37 +1,35 @@
 {
-    "$id": "/inference/schemas/text-to-audio/input.json",
-    "$schema": "http://json-schema.org/draft-06/schema#",
-    "description": "Inputs for Text To Audio inference",
-    "type": "object",
-    "properties": {
-        "inputs": {
-            "description": "One or several texts to generate audio for",
-            "anyOf": [
-                {
-                    "type": "string"
-                },
-                {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            ]
-        },
-        "parameters": {
-            "description": "Additional inference parameters",
-            "$ref": "#/$defs/TextToAudioParameters"
-        }
-    },
-    "$defs": {
-        "TextToAudioParameters": {
-            "title": "TextToAudioParameters",
-            "description": "Additional inference parameters for Text To Audio",
-            "type": "object",
-            "properties": {}
-        }
-    },
-    "required": [
-        "inputs"
-    ]
+	"$id": "/inference/schemas/text-to-audio/input.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Inputs for Text To Audio inference",
+	"type": "object",
+	"properties": {
+		"inputs": {
+			"description": "One or several texts to generate audio for",
+			"anyOf": [
+				{
+					"type": "string"
+				},
+				{
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			]
+		},
+		"parameters": {
+			"description": "Additional inference parameters",
+			"$ref": "#/$defs/TextToAudioParameters"
+		}
+	},
+	"$defs": {
+		"TextToAudioParameters": {
+			"title": "TextToAudioParameters",
+			"description": "Additional inference parameters for Text To Audio",
+			"type": "object",
+			"properties": {}
+		}
+	},
+	"required": ["inputs"]
 }
