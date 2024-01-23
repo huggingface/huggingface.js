@@ -41,6 +41,7 @@
 					"description": "The number of overlapping tokens between chunks when splitting the input text."
 				},
 				"aggregationStrategy": {
+					"title": "TokenClassificationAggregationStrategy",
 					"type": "string",
 					"description": "The strategy used to fuse tokens based on model predictions",
 					"oneOf": [

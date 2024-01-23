@@ -28,7 +28,7 @@ export interface TokenClassificationParameters {
 	/**
 	 * The strategy used to fuse tokens based on model predictions
 	 */
-	aggregationStrategy?: AggregationStrategy;
+	aggregationStrategy?: TokenClassificationAggregationStrategy;
 	/**
 	 * A list of labels to ignore
 	 */
@@ -54,7 +54,7 @@ export interface TokenClassificationParameters {
  * Similar to "simple", also preserves word integrity (uses the label with the highest score
  * across the word's tokens).
  */
-export type AggregationStrategy = "none" | "simple" | "first" | "average" | "max";
+export type TokenClassificationAggregationStrategy = "none" | "simple" | "first" | "average" | "max";
 
 /**
  * Outputs of inference for the Token Classification task

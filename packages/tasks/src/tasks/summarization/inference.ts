@@ -38,11 +38,11 @@ export interface Text2TextGenerationParameters {
 	/**
 	 * The truncation strategy to use
 	 */
-	truncation?: Truncation;
+	truncation?: Text2TextGenerationTruncationStrategy;
 	[property: string]: unknown;
 }
 
-export type Truncation = "do_not_truncate" | "longest_first" | "only_first" | "only_second";
+export type Text2TextGenerationTruncationStrategy = "do_not_truncate" | "longest_first" | "only_first" | "only_second";
 
 /**
  * Outputs for Summarization inference

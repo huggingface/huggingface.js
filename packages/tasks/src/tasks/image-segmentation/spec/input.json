@@ -27,6 +27,7 @@
 					"description": "Mask overlap threshold to eliminate small, disconnected segments."
 				},
 				"subtask": {
+					"title": "ImageSegmentationSubtask",
 					"type": "string",
 					"description": "Segmentation task to be performed, depending on model capabilities.",
 					"oneOf": [

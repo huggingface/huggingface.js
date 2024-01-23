@@ -34,6 +34,7 @@
 					"description": "Whether to clean up the potential extra spaces in the text output."
 				},
 				"truncation": {
+					"title": "Text2textGenerationTruncationStrategy",
 					"type": "string",
 					"description": "The truncation strategy to use",
 					"oneOf": [

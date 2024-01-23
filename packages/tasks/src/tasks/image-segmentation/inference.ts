@@ -36,7 +36,7 @@ export interface ImageSegmentationParameters {
 	/**
 	 * Segmentation task to be performed, depending on model capabilities.
 	 */
-	subtask?: Subtask;
+	subtask?: ImageSegmentationSubtask;
 	/**
 	 * Probability threshold to filter out predicted masks.
 	 */
@@ -44,7 +44,7 @@ export interface ImageSegmentationParameters {
 	[property: string]: unknown;
 }
 
-export type Subtask = "instance" | "panoptic" | "semantic";
+export type ImageSegmentationSubtask = "instance" | "panoptic" | "semantic";
 
 /**
  * Outputs of inference for the Image Segmentation task
