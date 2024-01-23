@@ -1,10 +1,8 @@
-
 /**
  * Inference code generated from the JSON schema spec in ./spec
- * 
+ *
  * Using src/scripts/inference-codegen
  */
-
 
 export type DepthEstimationOutput = unknown[];
 
@@ -12,15 +10,15 @@ export type DepthEstimationOutput = unknown[];
  * Inputs for Depth Estimation inference
  */
 export interface DepthEstimationInput {
-    /**
-     * The input image data
-     */
-    inputs: unknown;
-    /**
-     * Additional inference parameters
-     */
-    parameters?: DepthEstimationParameters;
-    [property: string]: unknown;
+	/**
+	 * The input image data
+	 */
+	inputs: unknown;
+	/**
+	 * Additional inference parameters
+	 */
+	parameters?: DepthEstimationParameters;
+	[property: string]: unknown;
 }
 
 /**
@@ -29,9 +27,9 @@ export interface DepthEstimationInput {
  * Additional inference parameters for Depth Estimation
  */
 export interface DepthEstimationParameters {
-    /**
-     * When specified, limits the output to the top K most probable classes.
-     */
-    topK?: number;
-    [property: string]: unknown;
+	/**
+	 * When specified, limits the output to the top K most probable classes.
+	 */
+	topK?: number;
+	[property: string]: unknown;
 }
