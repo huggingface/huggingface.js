@@ -23,11 +23,11 @@ export interface DocumentQuestionAnsweringInpu {
 	/**
 	 * The image on which the question is asked
 	 */
-	image?: unknown;
+	image: unknown;
 	/**
 	 * A question to ask of the document
 	 */
-	question?: string;
+	question: string;
 	[property: string]: unknown;
 }
 

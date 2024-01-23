@@ -88,7 +88,8 @@
 					"type": "string",
 					"description": "A question to ask of the document"
 				}
-			}
+			},
+			"required": ["image", "question"]
 		}
 	},
 	"required": ["inputs"]
