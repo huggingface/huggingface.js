@@ -1,0 +1,44 @@
+{
+	"$id": "/inference/schemas/<TASK_ID>/input.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Inputs for <TASK_ID> inference",
+	"type": "object",
+	"properties": {
+		"inputs": {
+			"description": "TODO: describe the input here. This must be model & framework agnostic.",
+			"anyOf": [
+				{
+					"type": "string"
+				},
+				{
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			]
+		},
+		"parameters": {
+			"description": "Additional inference parameters",
+			"$ref": "#/$defs/<TASK_ID>Parameters"
+		}
+	},
+	"$defs": {
+		"<TASK_ID>Parameters": {
+			"title": "<TASK_ID>Parameters",
+			"description": "TODO: describe additional parameters here.",
+			"type": "object",
+			"properties": {
+				"dummyParameterName": {
+					"type": "boolean",
+					"description": "TODO: describe the parameter here"
+				},
+				"dummyParameterName2": {
+					"type": "integer",
+					"description": "TODO: describe the parameter here"
+				}
+			}
+		}
+	},
+	"required": ["inputs"]
+}
