@@ -3,57 +3,49 @@
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Outputs of inference for the Feature Extraction task",
 	"type": "array",
+	"title": "FeatureExtractionOutput",
 	"items": {
 		"description": "The features computed by the mode, as a nested list of floats",
-		"$ref": "#/$defs/FeatureTensor"
-	},
-	"$defs": {
-		"FeatureTensor": {
-			"title": "FeatureTensor",
-			"type": "array",
-			"items": {
-				"anyOf": [
-					{
-						"type": "number"
-					},
-					{
-						"type": "array",
-						"items": {
-							"anyOf": [
-								{
-									"type": "number"
-								},
-								{
-									"type": "array",
-									"items": {
-										"anyOf": [
-											{
-												"type": "number"
-											},
-											{
-												"type": "array",
-												"items": {
-													"anyOf": [
-														{
-															"type": "number"
-														},
-														{
-															"type": "array",
-															"items": {
-																"type": "number"
-															}
-														}
-													]
+		"anyOf": [
+			{
+				"type": "number"
+			},
+			{
+				"type": "array",
+				"items": {
+					"anyOf": [
+						{
+							"type": "number"
+						},
+						{
+							"type": "array",
+							"items": {
+								"anyOf": [
+									{
+										"type": "number"
+									},
+									{
+										"type": "array",
+										"items": {
+											"anyOf": [
+												{
+													"type": "number"
+												},
+												{
+													"type": "array",
+													"items": {
+														"type": "number"
+													}
 												}
-											}
-										]
+											]
+										}
 									}
-								}
-							]
+								]
+							}
 						}
-					}
-				]
+					]
+				}
 			}
-		}
+		]
 	}
 }
