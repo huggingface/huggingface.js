@@ -216,6 +216,7 @@ export interface TaskData {
 	datasets: ExampleRepo[];
 	demo: TaskDemo;
 	id: PipelineType;
+	canonicalId?: PipelineType;
 	isPlaceholder?: boolean;
 	label: string;
 	libraries: ModelLibraryKey[];
