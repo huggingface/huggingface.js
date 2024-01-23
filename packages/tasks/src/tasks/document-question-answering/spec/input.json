@@ -5,7 +5,7 @@
 	"type": "object",
 	"properties": {
 		"inputs": {
-			"description": "The ",
+			"description": "One or several document+question pairs to answer",
 			"anyOf": [
 				{
 					"$ref": "#/$defs/DocumentAndQuestion"

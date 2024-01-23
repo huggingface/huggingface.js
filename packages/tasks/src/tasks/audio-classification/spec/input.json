@@ -5,7 +5,7 @@
 	"type": "object",
 	"properties": {
 		"inputs": {
-			"description": "On or several audio files to classify"
+			"description": "One or several audio files to classify"
 		},
 		"parameters": {
 			"description": "Additional inference parameters",

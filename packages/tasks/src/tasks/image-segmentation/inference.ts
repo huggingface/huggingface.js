@@ -60,5 +60,9 @@ export interface ImageSegmentationOutput {
 	 * The corresponding mask as a black-and-white image
 	 */
 	mask: unknown;
+	/**
+	 * The score or confidence degreee the model has
+	 */
+	score?: number;
 	[property: string]: unknown;
 }

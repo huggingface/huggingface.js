@@ -9,7 +9,7 @@
  */
 export interface AudioClassificationInput {
 	/**
-	 * On or several audio files to classify
+	 * One or several audio files to classify
 	 */
 	inputs: unknown;
 	/**

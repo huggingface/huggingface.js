@@ -13,6 +13,10 @@
 			},
 			"mask": {
 				"description": "The corresponding mask as a black-and-white image"
+			},
+			"score": {
+				"type": "number",
+				"description": "The score or confidence degreee the model has"
 			}
 		},
 		"required": ["label", "mask"]

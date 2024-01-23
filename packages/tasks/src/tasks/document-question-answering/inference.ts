@@ -9,7 +9,7 @@
  */
 export interface DocumentQuestionAnsweringInput {
 	/**
-	 * The
+	 * One or several document+question pairs to answer
 	 */
 	inputs: DocumentQuestionAnsweringInpu[] | DocumentQuestionAnsweringInpu;
 	/**
