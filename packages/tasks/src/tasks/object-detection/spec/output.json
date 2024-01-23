@@ -24,6 +24,7 @@
 	"$defs": {
 		"BoundingBox": {
 			"type": "object",
+			"title": "BoundingBox",
 			"properties": {
 				"xmin": {
 					"type": "integer"

@@ -40,7 +40,7 @@ export interface ObjectDetectionOutput {
 	 * The predicted bounding box. Coordinates are relative to the top left corner of the input
 	 * image.
 	 */
-	box: Box;
+	box: BoundingBox;
 	/**
 	 * The predicted label for the bounding box
 	 */
@@ -56,7 +56,7 @@ export interface ObjectDetectionOutput {
  * The predicted bounding box. Coordinates are relative to the top left corner of the input
  * image.
  */
-export interface Box {
+export interface BoundingBox {
 	xmax: number;
 	xmin: number;
 	ymax: number;

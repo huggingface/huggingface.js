@@ -39,7 +39,7 @@ export interface ZeroShotObjectDetectionOutput {
 	 * The predicted bounding box. Coordinates are relative to the top left corner of the input
 	 * image.
 	 */
-	box: Box;
+	box: BoundingBox;
 	/**
 	 * A candidate label
 	 */
@@ -55,7 +55,7 @@ export interface ZeroShotObjectDetectionOutput {
  * The predicted bounding box. Coordinates are relative to the top left corner of the input
  * image.
  */
-export interface Box {
+export interface BoundingBox {
 	xmax: number;
 	xmin: number;
 	ymax: number;
