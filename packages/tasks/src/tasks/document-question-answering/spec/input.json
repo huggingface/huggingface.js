@@ -8,12 +8,12 @@
 			"description": "One or several document+question pairs to answer",
 			"anyOf": [
 				{
-					"$ref": "#/$defs/DocumentAndQuestion"
+					"$ref": "#/$defs/DocumentQuestionAnsweringInputSingle"
 				},
 				{
 					"type": "array",
 					"items": {
-						"$ref": "#/$defs/DocumentAndQuestion"
+						"$ref": "#/$defs/DocumentQuestionAnsweringInputSingle"
 					}
 				}
 			]
@@ -78,8 +78,9 @@
 				}
 			}
 		},
-		"DocumentAndQuestion": {
+		"DocumentQuestionAnsweringInputSingle": {
 			"type": "object",
+			"title": "DocumentQuestionAnsweringInputSingle",
 			"properties": {
 				"image": {
 					"description": "The image on which the question is asked"

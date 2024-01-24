@@ -11,7 +11,7 @@ export interface DocumentQuestionAnsweringInput {
 	/**
 	 * One or several document+question pairs to answer
 	 */
-	inputs: DocumentQuestionAnsweringInpu[] | DocumentQuestionAnsweringInpu;
+	inputs: DocumentQuestionAnsweringInputSingle[] | DocumentQuestionAnsweringInputSingle;
 	/**
 	 * Additional inference parameters
 	 */
@@ -19,7 +19,7 @@ export interface DocumentQuestionAnsweringInput {
 	[property: string]: unknown;
 }
 
-export interface DocumentQuestionAnsweringInpu {
+export interface DocumentQuestionAnsweringInputSingle {
 	/**
 	 * The image on which the question is asked
 	 */
