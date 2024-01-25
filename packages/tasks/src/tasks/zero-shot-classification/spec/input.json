@@ -4,10 +4,10 @@
 	"description": "Inputs for Zero Shot Classification inference",
 	"type": "object",
 	"properties": {
-		"input": {
+		"data": {
 			"description": "The input text data, with candidate labels",
 			"type": "object",
-			"title": "ZeroShotClassificationInput",
+			"title": "ZeroShotClassificationInputData",
 			"properties": {
 				"text": {
 					"type": "string",
@@ -45,5 +45,5 @@
 			}
 		}
 	},
-	"required": ["input"]
+	"required": ["data"]
 }

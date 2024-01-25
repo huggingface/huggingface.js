@@ -4,7 +4,8 @@
 	"description": "Inputs for Question Answering inference",
 	"type": "object",
 	"properties": {
-		"input": {
+		"data": {
+			"title": "QuestionAnsweringInputData",
 			"description": "One (context, question) pair to answer",
 			"type": "object",
 			"properties": {
@@ -61,5 +62,5 @@
 			}
 		}
 	},
-	"required": ["input"]
+	"required": ["data"]
 }

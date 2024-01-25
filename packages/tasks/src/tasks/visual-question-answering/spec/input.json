@@ -4,10 +4,10 @@
 	"description": "Inputs for Visual Question Answering inference",
 	"type": "object",
 	"properties": {
-		"input": {
+		"data": {
 			"description": "One (image, question) pair to answer",
 			"type": "object",
-			"title": "VisualQuestionAnsweringInputSingle",
+			"title": "VisualQuestionAnsweringInputData",
 			"properties": {
 				"image": {
 					"description": "The image."
@@ -36,5 +36,5 @@
 			}
 		}
 	},
-	"required": ["input"]
+	"required": ["data"]
 }

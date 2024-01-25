@@ -4,7 +4,7 @@
 	"description": "Inputs for Text2text Generation inference",
 	"type": "object",
 	"properties": {
-		"input": {
+		"data": {
 			"description": "The input text data",
 			"type": "string"
 		},
@@ -50,5 +50,5 @@
 			}
 		}
 	},
-	"required": ["input"]
+	"required": ["data"]
 }

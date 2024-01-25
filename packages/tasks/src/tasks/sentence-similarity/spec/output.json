@@ -6,6 +6,7 @@
 	"type": "array",
 	"items": {
 		"description": "The associated similarity score for each of the given sentences",
-		"type": "number"
+		"type": "number",
+		"title": "SentenceSimilarityScore"
 	}
 }

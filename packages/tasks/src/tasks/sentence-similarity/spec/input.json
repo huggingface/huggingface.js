@@ -4,8 +4,8 @@
 	"description": "Inputs for Sentence similarity inference",
 	"type": "object",
 	"properties": {
-		"input": {
-			"title": "SentenceSimilarityInput",
+		"data": {
+			"title": "SentenceSimilarityInputData",
 			"type": "object",
 			"properties": {
 				"sourceSentence": {
@@ -35,5 +35,5 @@
 			"properties": {}
 		}
 	},
-	"required": ["input"]
+	"required": ["data"]
 }

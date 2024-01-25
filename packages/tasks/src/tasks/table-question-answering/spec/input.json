@@ -4,8 +4,9 @@
 	"description": "Inputs for Table Question Answering inference",
 	"type": "object",
 	"properties": {
-		"input": {
+		"data": {
 			"description": "One (table, question) pair to answer",
+			"title": "TableQuestionAnsweringInputData",
 			"type": "object",
 			"properties": {
 				"table": {
@@ -32,5 +33,5 @@
 			"properties": {}
 		}
 	},
-	"required": ["input"]
+	"required": ["data"]
 }

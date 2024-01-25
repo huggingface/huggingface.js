@@ -4,7 +4,7 @@
 	"description": "Inputs for Audio Classification inference",
 	"type": "object",
 	"properties": {
-		"input": {
+		"data": {
 			"description": "The input audio data"
 		},
 		"parameters": {
@@ -41,5 +41,5 @@
 			}
 		}
 	},
-	"required": ["input"]
+	"required": ["data"]
 }

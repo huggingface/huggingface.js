@@ -4,7 +4,7 @@
 	"description": "Inputs for Text Generation inference",
 	"type": "object",
 	"properties": {
-		"input": {
+		"data": {
 			"description": "The text to initialize generation with",
 			"type": "string"
 		},
@@ -69,5 +69,5 @@
 			}
 		}
 	},
-	"required": ["input"]
+	"required": ["data"]
 }

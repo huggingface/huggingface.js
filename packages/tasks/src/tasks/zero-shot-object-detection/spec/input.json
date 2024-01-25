@@ -4,10 +4,10 @@
 	"description": "Inputs for Zero Shot Object Detection inference",
 	"type": "object",
 	"properties": {
-		"input": {
+		"data": {
 			"description": "The input image data, with candidate labels",
 			"type": "object",
-			"title": "ZeroShotObjectDetectionInputSingle",
+			"title": "ZeroShotObjectDetectionInputData",
 			"properties": {
 				"image": {
 					"description": "The image data to generate bounding boxes from"
@@ -35,5 +35,5 @@
 			"properties": {}
 		}
 	},
-	"required": ["input"]
+	"required": ["data"]
 }

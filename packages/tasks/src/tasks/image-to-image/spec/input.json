@@ -4,7 +4,7 @@
 	"description": "Inputs for Image To Image inference",
 	"type": "object",
 	"properties": {
-		"input": {
+		"data": {
 			"description": "The input image data"
 		},
 		"parameters": {
@@ -18,5 +18,5 @@
 			"description": "Additional inference parameters for Image To Image"
 		}
 	},
-	"required": ["input"]
+	"required": ["data"]
 }

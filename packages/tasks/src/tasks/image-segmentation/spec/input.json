@@ -4,7 +4,7 @@
 	"description": "Inputs for Image Segmentation inference",
 	"type": "object",
 	"properties": {
-		"input": {
+		"data": {
 			"description": "The input image data"
 		},
 		"parameters": {
@@ -49,5 +49,5 @@
 			}
 		}
 	},
-	"required": ["input"]
+	"required": ["data"]
 }

@@ -4,7 +4,7 @@
 	"description": "Inputs for Fill Mask inference",
 	"type": "object",
 	"properties": {
-		"input": {
+		"data": {
 			"description": "The text with masked tokens",
 			"type": "string"
 		},
@@ -33,5 +33,5 @@
 			}
 		}
 	},
-	"required": ["input"]
+	"required": ["data"]
 }

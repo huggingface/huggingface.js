@@ -4,10 +4,10 @@
 	"description": "Inputs for Zero Shot Image Classification inference",
 	"type": "object",
 	"properties": {
-		"input": {
+		"data": {
 			"description": "The input image data, with candidate labels",
 			"type": "object",
-			"title": "ZeroShotImageClassificationInputSingle",
+			"title": "ZeroShotImageClassificationInputData",
 			"properties": {
 				"image": {
 					"description": "The image data to classify"
@@ -40,5 +40,5 @@
 			}
 		}
 	},
-	"required": ["input"]
+	"required": ["data"]
 }

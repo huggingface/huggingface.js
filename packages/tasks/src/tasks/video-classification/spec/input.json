@@ -4,8 +4,8 @@
 	"description": "Inputs for Video Classification inference",
 	"type": "object",
 	"properties": {
-		"input": {
-			"description": "One or several videos to be classified"
+		"data": {
+			"description": "The input video data"
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
@@ -49,5 +49,5 @@
 			}
 		}
 	},
-	"required": ["input"]
+	"required": ["data"]
 }

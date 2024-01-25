@@ -4,9 +4,20 @@
 	"description": "Inputs for Document Question Answering inference",
 	"type": "object",
 	"properties": {
-		"input": {
+		"data": {
 			"description": "One (document, question) pair to answer",
-			"$ref": "#/$defs/DocumentQuestionAnsweringInputSingle"
+			"type": "object",
+			"title": "DocumentQuestionAnsweringInputData",
+			"properties": {
+				"image": {
+					"description": "The image on which the question is asked"
+				},
+				"question": {
+					"type": "string",
+					"description": "A question to ask of the document"
+				}
+			},
+			"required": ["image", "question"]
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
@@ -67,21 +78,7 @@
 					}
 				}
 			}
-		},
-		"DocumentQuestionAnsweringInputSingle": {
-			"type": "object",
-			"title": "DocumentQuestionAnsweringInputSingle",
-			"properties": {
-				"image": {
-					"description": "The image on which the question is asked"
-				},
-				"question": {
-					"type": "string",
-					"description": "A question to ask of the document"
-				}
-			},
-			"required": ["image", "question"]
 		}
 	},
-	"required": ["input"]
+	"required": ["data"]
 }

@@ -4,7 +4,7 @@
 	"description": "Inputs for Text Classification inference",
 	"type": "object",
 	"properties": {
-		"input": {
+		"data": {
 			"description": "The text to classify",
 			"type": "string"
 		},
@@ -42,5 +42,5 @@
 			}
 		}
 	},
-	"required": ["input"]
+	"required": ["data"]
 }

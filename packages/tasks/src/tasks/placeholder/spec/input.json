@@ -4,19 +4,9 @@
 	"description": "Inputs for <TASK_ID> inference",
 	"type": "object",
 	"properties": {
-		"input": {
+		"data": {
 			"description": "TODO: describe the input here. This must be model & framework agnostic.",
-			"anyOf": [
-				{
-					"type": "string"
-				},
-				{
-					"type": "array",
-					"items": {
-						"type": "string"
-					}
-				}
-			]
+			"type": "string"
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
@@ -40,5 +30,5 @@
 			}
 		}
 	},
-	"required": ["input"]
+	"required": ["data"]
 }
