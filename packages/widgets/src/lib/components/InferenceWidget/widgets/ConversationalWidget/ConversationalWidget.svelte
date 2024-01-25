@@ -10,7 +10,7 @@
 	import { isTextInput } from "../../shared/inputValidation.js";
 	import { widgetStates } from "../../stores.js";
 
-	export let apiToken: WidgetProps["apiToken"];
+	export let apiToken: WidgetProps["apiToken"] = undefined;
 	export let apiUrl: WidgetProps["apiUrl"];
 	export let callApiOnMount: WidgetProps["callApiOnMount"];
 	export let model: WidgetProps["model"];
@@ -20,6 +20,12 @@
 
 	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
+	interface Message {
+		role: string;
+		content: string;
+	}
+
+	// TODO: replace with ChatML
 	interface Conversation {
 		generated_responses: string[];
 		past_user_inputs: string[];
@@ -72,6 +78,7 @@
 		// 	{ role: "assistant", content: "I'm doing great. How can I help you today?" },
 		// 	{ role: "user", content: "I'd like to show off how chat templating works!" },
 		// ];
+		const chat: Message[] = []; // TODO
 		const chatTemplate = model.config?.tokenizer?.chat_template;
 		if (chatTemplate === undefined) {
 			outputJson = "";
