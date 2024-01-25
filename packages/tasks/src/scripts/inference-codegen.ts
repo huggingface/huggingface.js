@@ -62,7 +62,7 @@ async function generateTypescript(inputData: InputData): Promise<SerializedRende
 			"prefer-unions": true,
 			"prefer-const-values": true,
 			"prefer-unknown": true,
-			// "explicit-unions": true,
+			"explicit-unions": true,
 		},
 	});
 }
