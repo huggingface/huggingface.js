@@ -5,7 +5,7 @@
  * File formats live in an enum inside the internal codebase.
  */
 export enum ModelLibrary {
-	"adapter-transformers" = "Adapter Transformers",
+	"adapter-transformers" = "Adapters",
 	"allennlp" = "allenNLP",
 	"asteroid" = "Asteroid",
 	"bertopic" = "BERTopic",

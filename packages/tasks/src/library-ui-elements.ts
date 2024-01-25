@@ -35,11 +35,11 @@ function nameWithoutNamespace(modelId: string): string {
 
 //#region snippets
 
-const adapter_transformers = (model: ModelData) => [
-	`from transformers import ${model.config?.adapter_transformers?.model_class}
+const adapters = (model: ModelData) => [
+	`from adapters import AutoAdapterModel
 
-model = ${model.config?.adapter_transformers?.model_class}.from_pretrained("${model.config?.adapter_transformers?.model_name}")
-model.load_adapter("${model.id}", source="hf")`,
+model = AutoAdapterModel.from_pretrained("${model.config?.adapter_transformers?.model_name}")
+model.load_adapter("${model.id}", set_active=True)`,
 ];
 
 const allennlpUnknown = (model: ModelData) => [
@@ -576,11 +576,11 @@ model = AutoModel.load_from_hf_hub("${model.id}")`,
 
 export const MODEL_LIBRARIES_UI_ELEMENTS: Partial<Record<ModelLibraryKey, LibraryUiElement>> = {
 	"adapter-transformers": {
-		btnLabel: "Adapter Transformers",
-		repoName: "adapter-transformers",
-		repoUrl: "https://github.com/Adapter-Hub/adapter-transformers",
-		docsUrl: "https://huggingface.co/docs/hub/adapter-transformers",
-		snippets: adapter_transformers,
+		btnLabel: "Adapters",
+		repoName: "adapters",
+		repoUrl: "https://github.com/Adapter-Hub/adapters",
+		docsUrl: "https://huggingface.co/docs/hub/adapters",
+		snippets: adapters,
 	},
 	allennlp: {
 		btnLabel: "AllenNLP",
