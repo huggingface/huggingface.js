@@ -4,29 +4,10 @@
 	"description": "Inputs for Zero Shot Classification inference",
 	"type": "object",
 	"properties": {
-		"inputs": {
-			"description": "One or several text + candidate labels pairs to classify",
-			"anyOf": [
-				{
-					"$ref": "#/$defs/ZeroShotClassificationInputSingle"
-				},
-				{
-					"type": "array",
-					"items": {
-						"$ref": "#/$defs/ZeroShotClassificationInputSingle"
-					}
-				}
-			]
-		},
-		"parameters": {
-			"description": "Additional inference parameters",
-			"$ref": "#/$defs/ZeroShotClassificationParameters"
-		}
-	},
-	"$defs": {
-		"ZeroShotClassificationInputSingle": {
+		"input": {
+			"description": "The input text data, with candidate labels",
 			"type": "object",
-			"title": "ZeroShotClassificationInputSingle",
+			"title": "ZeroShotClassificationInput",
 			"properties": {
 				"text": {
 					"type": "string",
@@ -42,6 +23,12 @@
 			},
 			"required": ["text", "candidateLabels"]
 		},
+		"parameters": {
+			"description": "Additional inference parameters",
+			"$ref": "#/$defs/ZeroShotClassificationParameters"
+		}
+	},
+	"$defs": {
 		"ZeroShotClassificationParameters": {
 			"title": "ZeroShotClassificationParameters",
 			"description": "Additional inference parameters for Zero Shot Classification",
@@ -58,5 +45,5 @@
 			}
 		}
 	},
-	"required": ["inputs"]
+	"required": ["input"]
 }

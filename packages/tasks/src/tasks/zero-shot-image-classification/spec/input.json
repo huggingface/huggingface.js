@@ -4,27 +4,8 @@
 	"description": "Inputs for Zero Shot Image Classification inference",
 	"type": "object",
 	"properties": {
-		"inputs": {
-			"description": "One or several images to classify",
-			"anyOf": [
-				{
-					"$ref": "#/$defs/ZeroShotImageClassificationInputSingle"
-				},
-				{
-					"type": "array",
-					"items": {
-						"$ref": "#/$defs/ZeroShotImageClassificationInputSingle"
-					}
-				}
-			]
-		},
-		"parameters": {
-			"description": "Additional inference parameters",
-			"$ref": "#/$defs/ZeroShotImageClassificationParameters"
-		}
-	},
-	"$defs": {
-		"ZeroShotImageClassificationInputSingle": {
+		"input": {
+			"description": "The input image data, with candidate labels",
 			"type": "object",
 			"title": "ZeroShotImageClassificationInputSingle",
 			"properties": {
@@ -41,6 +22,12 @@
 			},
 			"required": ["image", "candidateLabels"]
 		},
+		"parameters": {
+			"description": "Additional inference parameters",
+			"$ref": "#/$defs/ZeroShotImageClassificationParameters"
+		}
+	},
+	"$defs": {
 		"ZeroShotImageClassificationParameters": {
 			"title": "ZeroShotImageClassificationParameters",
 			"description": "Additional inference parameters for Zero Shot Image Classification",
@@ -53,5 +40,5 @@
 			}
 		}
 	},
-	"required": ["inputs"]
+	"required": ["input"]
 }

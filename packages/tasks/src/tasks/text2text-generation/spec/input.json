@@ -4,19 +4,9 @@
 	"description": "Inputs for Text2text Generation inference",
 	"type": "object",
 	"properties": {
-		"inputs": {
-			"description": "One or more texts to use for text2text generation",
-			"anyOf": [
-				{
-					"type": "string"
-				},
-				{
-					"type": "array",
-					"items": {
-						"type": "string"
-					}
-				}
-			]
+		"input": {
+			"description": "The input text data",
+			"type": "string"
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
@@ -52,7 +42,7 @@
 						}
 					]
 				},
-				"Parameters": {
+				"generateParameters": {
 					"title": "generateParameters",
 					"type": "object",
 					"description": "Additional parametrization of the text generation algorithm"
@@ -60,5 +50,5 @@
 			}
 		}
 	},
-	"required": ["inputs"]
+	"required": ["input"]
 }

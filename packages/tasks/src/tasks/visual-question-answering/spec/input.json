@@ -4,27 +4,8 @@
 	"description": "Inputs for Visual Question Answering inference",
 	"type": "object",
 	"properties": {
-		"inputs": {
-			"description": "One or more image-question pairs",
-			"anyOf": [
-				{
-					"$ref": "#/$defs/VisualQuestionAnsweringInputSingle"
-				},
-				{
-					"type": "array",
-					"items": {
-						"$ref": "#/$defs/VisualQuestionAnsweringInputSingle"
-					}
-				}
-			]
-		},
-		"parameters": {
-			"description": "Additional inference parameters",
-			"$ref": "#/$defs/VisualQuestionAnsweringParameters"
-		}
-	},
-	"$defs": {
-		"VisualQuestionAnsweringInputSingle": {
+		"input": {
+			"description": "One (image, question) pair to answer",
 			"type": "object",
 			"title": "VisualQuestionAnsweringInputSingle",
 			"properties": {
@@ -37,6 +18,12 @@
 			},
 			"required": ["question", "image"]
 		},
+		"parameters": {
+			"description": "Additional inference parameters",
+			"$ref": "#/$defs/VisualQuestionAnsweringParameters"
+		}
+	},
+	"$defs": {
 		"VisualQuestionAnsweringParameters": {
 			"title": "VisualQuestionAnsweringParameters",
 			"description": "Additional inference parameters for Visual Question Answering",
@@ -49,5 +36,5 @@
 			}
 		}
 	},
-	"required": ["inputs"]
+	"required": ["input"]
 }

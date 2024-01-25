@@ -4,8 +4,8 @@
 	"description": "Inputs for Table Question Answering inference",
 	"type": "object",
 	"properties": {
-		"inputs": {
-			"description": "One or several questions about a table",
+		"input": {
+			"description": "One (table, question) pair to answer",
 			"type": "object",
 			"properties": {
 				"table": {
@@ -13,20 +13,11 @@
 					"type": "object"
 				},
 				"question": {
-					"description": "One or several questions to be answered about the table",
-					"anyOf": [
-						{
-							"type": "string"
-						},
-						{
-							"type": "array",
-							"items": {
-								"type": "string"
-							}
-						}
-					]
+					"description": "The question to be answered about the table",
+					"type": "string"
 				}
-			}
+			},
+			"required": ["table", "question"]
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
@@ -41,5 +32,5 @@
 			"properties": {}
 		}
 	},
-	"required": ["inputs"]
+	"required": ["input"]
 }

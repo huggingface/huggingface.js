@@ -4,7 +4,7 @@
 	"description": "Inputs for Depth Estimation inference",
 	"type": "object",
 	"properties": {
-		"inputs": {
+		"input": {
 			"description": "The input image data"
 		},
 		"parameters": {
@@ -25,5 +25,5 @@
 			}
 		}
 	},
-	"required": ["inputs"]
+	"required": ["input"]
 }

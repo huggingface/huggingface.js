@@ -4,8 +4,8 @@
 	"description": "Inputs for Image Classification inference",
 	"type": "object",
 	"properties": {
-		"inputs": {
-			"description": "On or several image files to classify"
+		"input": {
+			"description": "The input image data"
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
@@ -41,5 +41,5 @@
 			}
 		}
 	},
-	"required": ["inputs"]
+	"required": ["input"]
 }

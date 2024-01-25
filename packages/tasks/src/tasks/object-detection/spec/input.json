@@ -4,8 +4,8 @@
 	"description": "Inputs for Object Detection inference",
 	"type": "object",
 	"properties": {
-		"inputs": {
-			"description": "One or several input images to perform object detection on"
+		"input": {
+			"description": "The input image data"
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
@@ -25,5 +25,5 @@
 			}
 		}
 	},
-	"required": ["inputs"]
+	"required": ["input"]
 }

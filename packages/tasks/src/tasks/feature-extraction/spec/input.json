@@ -1,22 +1,12 @@
 {
-	"$id": "/inference/schemas/feature-extraction/input.json",
+	"$id": "/inference/schemas/text-embedding/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
-	"description": "Inputs for Feature Extraction inference",
+	"description": "Inputs for Text Embedding inference",
 	"type": "object",
 	"properties": {
-		"inputs": {
-			"description": "One or several texts to get the features of",
-			"anyOf": [
-				{
-					"type": "string"
-				},
-				{
-					"type": "array",
-					"items": {
-						"type": "string"
-					}
-				}
-			]
+		"input": {
+			"description": "The text to get the embeddings of",
+			"type": "string"
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
@@ -31,5 +21,5 @@
 			"properties": {}
 		}
 	},
-	"required": ["inputs"]
+	"required": ["input"]
 }

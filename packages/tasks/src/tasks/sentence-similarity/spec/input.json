@@ -4,27 +4,8 @@
 	"description": "Inputs for Sentence similarity inference",
 	"type": "object",
 	"properties": {
-		"inputs": {
-			"anyOf": [
-				{
-					"$ref": "#/$defs/SentenceSimilarityInputSingle"
-				},
-				{
-					"type": "array",
-					"items": {
-						"$ref": "#/$defs/SentenceSimilarityInputSingle"
-					}
-				}
-			]
-		},
-		"parameters": {
-			"description": "Additional inference parameters",
-			"$ref": "#/$defs/SentenceSimilarityParameters"
-		}
-	},
-	"$defs": {
-		"SentenceSimilarityInputSingle": {
-			"title": "SentenceSimilarityInputSingle",
+		"input": {
+			"title": "SentenceSimilarityInput",
 			"type": "object",
 			"properties": {
 				"sourceSentence": {
@@ -41,6 +22,12 @@
 			},
 			"required": ["sourceSentence", "sentences"]
 		},
+		"parameters": {
+			"description": "Additional inference parameters",
+			"$ref": "#/$defs/SentenceSimilarityParameters"
+		}
+	},
+	"$defs": {
 		"SentenceSimilarityParameters": {
 			"title": "SentenceSimilarityParameters",
 			"description": "Additional inference parameters for Sentence Similarity",
@@ -48,5 +35,5 @@
 			"properties": {}
 		}
 	},
-	"required": ["inputs"]
+	"required": ["input"]
 }

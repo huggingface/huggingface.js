@@ -4,19 +4,9 @@
 	"description": "Inputs for Text Classification inference",
 	"type": "object",
 	"properties": {
-		"inputs": {
-			"description": "One or several texts to classify",
-			"anyOf": [
-				{
-					"type": "string"
-				},
-				{
-					"type": "array",
-					"items": {
-						"type": "string"
-					}
-				}
-			]
+		"input": {
+			"description": "The text to classify",
+			"type": "string"
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
@@ -52,5 +42,5 @@
 			}
 		}
 	},
-	"required": ["inputs"]
+	"required": ["input"]
 }

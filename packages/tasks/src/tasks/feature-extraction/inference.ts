@@ -1,20 +1,22 @@
+
 /**
  * Inference code generated from the JSON schema spec in ./spec
- *
+ * 
  * Using src/scripts/inference-codegen
  */
 
+
 /**
- * Inputs for Feature Extraction inference
+ * Inputs for Text Embedding inference
  */
 export interface FeatureExtractionInput {
-	/**
-	 * One or several texts to get the features of
-	 */
-	inputs: string[] | string;
-	/**
-	 * Additional inference parameters
-	 */
-	parameters?: { [key: string]: unknown };
-	[property: string]: unknown;
+    /**
+     * The text to get the embeddings of
+     */
+    input: string;
+    /**
+     * Additional inference parameters
+     */
+    parameters?: { [key: string]: unknown };
+    [property: string]: unknown;
 }

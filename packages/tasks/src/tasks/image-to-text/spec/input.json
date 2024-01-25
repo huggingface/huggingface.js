@@ -4,8 +4,8 @@
 	"description": "Inputs for Image To Text inference",
 	"type": "object",
 	"properties": {
-		"inputs": {
-			"description": "One or several images to generated text for"
+		"input": {
+			"description": "The input image data"
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
@@ -25,5 +25,5 @@
 			}
 		}
 	},
-	"required": ["inputs"]
+	"required": ["input"]
 }

@@ -4,27 +4,8 @@
 	"description": "Inputs for Zero Shot Object Detection inference",
 	"type": "object",
 	"properties": {
-		"inputs": {
-			"description": "One or several images to perform object detection on",
-			"anyOf": [
-				{
-					"$ref": "#/$defs/ZeroShotObjectDetectionInputSingle"
-				},
-				{
-					"type": "array",
-					"items": {
-						"$ref": "#/$defs/ZeroShotObjectDetectionInputSingle"
-					}
-				}
-			]
-		},
-		"parameters": {
-			"description": "Additional inference parameters",
-			"$ref": "#/$defs/ZeroShotObjectDetectionParameters"
-		}
-	},
-	"$defs": {
-		"ZeroShotObjectDetectionInputSingle": {
+		"input": {
+			"description": "The input image data, with candidate labels",
 			"type": "object",
 			"title": "ZeroShotObjectDetectionInputSingle",
 			"properties": {
@@ -41,6 +22,12 @@
 			},
 			"required": ["image", "candidateLabels"]
 		},
+		"parameters": {
+			"description": "Additional inference parameters",
+			"$ref": "#/$defs/ZeroShotObjectDetectionParameters"
+		}
+	},
+	"$defs": {
 		"ZeroShotObjectDetectionParameters": {
 			"title": "ZeroShotObjectDetectionParameters",
 			"description": "Additional inference parameters for Zero Shot Object Detection",
@@ -48,5 +35,5 @@
 			"properties": {}
 		}
 	},
-	"required": ["inputs"]
+	"required": ["input"]
 }

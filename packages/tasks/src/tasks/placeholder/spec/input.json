@@ -4,7 +4,7 @@
 	"description": "Inputs for <TASK_ID> inference",
 	"type": "object",
 	"properties": {
-		"inputs": {
+		"input": {
 			"description": "TODO: describe the input here. This must be model & framework agnostic.",
 			"anyOf": [
 				{
@@ -40,5 +40,5 @@
 			}
 		}
 	},
-	"required": ["inputs"]
+	"required": ["input"]
 }

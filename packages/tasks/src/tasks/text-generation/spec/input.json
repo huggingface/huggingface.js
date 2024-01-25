@@ -4,19 +4,9 @@
 	"description": "Inputs for Text Generation inference",
 	"type": "object",
 	"properties": {
-		"inputs": {
+		"input": {
 			"description": "The text to initialize generation with",
-			"anyOf": [
-				{
-					"type": "string"
-				},
-				{
-					"type": "array",
-					"items": {
-						"type": "string"
-					}
-				}
-			]
+			"type": "string"
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
@@ -79,5 +69,5 @@
 			}
 		}
 	},
-	"required": ["inputs"]
+	"required": ["input"]
 }

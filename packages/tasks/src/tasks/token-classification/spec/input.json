@@ -4,19 +4,9 @@
 	"description": "Inputs for Token Classification inference",
 	"type": "object",
 	"properties": {
-		"inputs": {
-			"description": "One or several texts which tokens are to be classified",
-			"anyOf": [
-				{
-					"type": "string"
-				},
-				{
-					"type": "array",
-					"items": {
-						"type": "string"
-					}
-				}
-			]
+		"input": {
+			"description": "The input text data",
+			"type": "string"
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
@@ -70,5 +60,5 @@
 			}
 		}
 	},
-	"required": ["inputs"]
+	"required": ["input"]
 }

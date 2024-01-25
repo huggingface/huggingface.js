@@ -4,19 +4,9 @@
 	"description": "Inputs for Text To Audio inference",
 	"type": "object",
 	"properties": {
-		"inputs": {
-			"description": "One or several texts to generate audio for",
-			"anyOf": [
-				{
-					"type": "string"
-				},
-				{
-					"type": "array",
-					"items": {
-						"type": "string"
-					}
-				}
-			]
+		"input": {
+			"description": "The input text data",
+			"type": "string"
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
@@ -31,5 +21,5 @@
 			"properties": {}
 		}
 	},
-	"required": ["inputs"]
+	"required": ["input"]
 }

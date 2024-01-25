@@ -4,19 +4,20 @@
 	"description": "Inputs for Question Answering inference",
 	"type": "object",
 	"properties": {
-		"inputs": {
-			"description": "One or several question+context pairs to answer",
-			"anyOf": [
-				{
-					"$ref": "#/$defs/SquadExample"
+		"input": {
+			"description": "One (context, question) pair to answer",
+			"type": "object",
+			"properties": {
+				"context": {
+					"type": "string",
+					"description": "The context to be used for answering the question"
 				},
-				{
-					"type": "array",
-					"items": {
-						"$ref": "#/$defs/SquadExample"
-					}
+				"question": {
+					"type": "string",
+					"description": "The question to be answered"
 				}
-			]
+			},
+			"required": ["question", "context"]
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
@@ -24,21 +25,6 @@
 		}
 	},
 	"$defs": {
-		"SquadExample": {
-			"title": "SquadExample",
-			"type": "object",
-			"properties": {
-				"question": {
-					"type": "string",
-					"description": "The question to be answered"
-				},
-				"context": {
-					"type": "string",
-					"description": "The context to be used for answering the question"
-				}
-			},
-			"required": ["question", "context"]
-		},
 		"QuestionAnsweringParameters": {
 			"title": "QuestionAnsweringParameters",
 			"description": "Additional inference parameters for Question Answering",
@@ -75,5 +61,5 @@
 			}
 		}
 	},
-	"required": ["inputs"]
+	"required": ["input"]
 }
