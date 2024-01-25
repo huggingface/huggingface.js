@@ -67,11 +67,11 @@
 			updateUrl({ text: trimmedText });
 		}
 
-		const chat = [
-			{ role: "user", content: "Hello, how are you?" },
-			{ role: "assistant", content: "I'm doing great. How can I help you today?" },
-			{ role: "user", content: "I'd like to show off how chat templating works!" },
-		];
+		// const chat = [
+		// 	{ role: "user", content: "Hello, how are you?" },
+		// 	{ role: "assistant", content: "I'm doing great. How can I help you today?" },
+		// 	{ role: "user", content: "I'd like to show off how chat templating works!" },
+		// ];
 		const chatTemplate = model.config?.tokenizer?.chat_template;
 		if (chatTemplate === undefined) {
 			outputJson = "";
