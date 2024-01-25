@@ -1,6 +1,6 @@
 # 🤗 Hugging Face Agents.js
 
-A way to call Hugging Face models and inference APIs from natural language, using an LLM.
+A way to call Hugging Face models and inference Endpoints from natural language, using an LLM.
 
 ## Install
 
@@ -25,7 +25,7 @@ Check out the [full documentation](https://huggingface.co/docs/huggingface.js/ag
 
 ## Usage
 
-Agents.js leverages LLMs hosted as Inference APIs on HF, so you need to create an account and generate an [access token](https://huggingface.co/settings/tokens).
+Agents.js leverages LLMs hosted as Inference Endpoints on HF, so you need to create an account and generate an [access token](https://huggingface.co/settings/tokens).
 
 ```ts
 import { HfAgent } from "@huggingface/agents";

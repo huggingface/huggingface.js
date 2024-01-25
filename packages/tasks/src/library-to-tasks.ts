@@ -3,7 +3,7 @@ import type { PipelineType } from "./pipelines";
 
 /**
  * Mapping from library name (excluding Transformers) to its supported tasks.
- * Inference API should be disabled for all other (library, task) pairs beyond this mapping.
+ * Serverless Inference Endpoints should be disabled for all other (library, task) pairs beyond this mapping.
  * As an exception, we assume Transformers supports all inference tasks.
  * This mapping is generated automatically by "python-api-export-tasks" action in huggingface/api-inference-community repo upon merge.
  * Ref: https://github.com/huggingface/api-inference-community/pull/158

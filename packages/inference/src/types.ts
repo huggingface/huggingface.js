@@ -6,7 +6,7 @@ export interface Options {
 	 */
 	retry_on_error?: boolean;
 	/**
-	 * (Default: true). Boolean. There is a cache layer on the inference API to speedup requests we have already seen. Most models can use those results as is as models are deterministic (meaning the results will be the same anyway). However if you use a non deterministic model, you can set this parameter to prevent the caching mechanism from being used resulting in a real new query.
+	 * (Default: true). Boolean. There is a cache layer on Serverless Inference Endpoints to speedup requests we have already seen. Most models can use those results as is as models are deterministic (meaning the results will be the same anyway). However if you use a non deterministic model, you can set this parameter to prevent the caching mechanism from being used resulting in a real new query.
 	 */
 	use_cache?: boolean;
 	/**
@@ -47,7 +47,7 @@ export interface BaseArgs {
 	 */
 	accessToken?: string;
 	/**
-	 * The model to use. Can be a full URL for HF inference endpoints.
+	 * The model to use. Can be a full URL for a dedicated inference endpoint.
 	 *
 	 * If not specified, will call huggingface.co/api/tasks to get the default model for the task.
 	 */
