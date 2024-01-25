@@ -80,10 +80,10 @@
 
 	$: widgetComponent =
 		model.tags && "conversational" in model.tags
-		    ? ConversationalWidget
-		    : model.pipeline_tag && model.pipeline_tag in WIDGET_COMPONENTS
-			    ? WIDGET_COMPONENTS[model.pipeline_tag as keyof typeof WIDGET_COMPONENTS]
-			    : undefined;
+			? ConversationalWidget
+			: model.pipeline_tag && model.pipeline_tag in WIDGET_COMPONENTS
+			  ? WIDGET_COMPONENTS[model.pipeline_tag as keyof typeof WIDGET_COMPONENTS]
+			  : undefined;
 
 	// prettier-ignore
 	$: widgetProps = ({
