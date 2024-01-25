@@ -57,7 +57,7 @@ export interface ModelData {
 			bos_token?: string;
 			chat_template?: string;
 			eos_token?: string;
-		}
+		};
 	};
 	/**
 	 * all the model tags
