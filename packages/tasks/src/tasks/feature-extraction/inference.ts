@@ -4,6 +4,8 @@
  * Using src/scripts/inference-codegen
  */
 
+export type FeatureExtractionOutput = unknown[];
+
 /**
  * Inputs for Text Embedding inference
  */

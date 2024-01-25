@@ -1,51 +1,7 @@
 {
 	"$id": "/inference/schemas/feature-extraction/output.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
-	"description": "Outputs of inference for the Feature Extraction task",
+	"description": "The embedding for the input text, as a nested list (tensor) of floats",
 	"type": "array",
-	"title": "FeatureExtractionOutput",
-	"items": {
-		"description": "The features computed by the mode, as a nested list of floats",
-		"anyOf": [
-			{
-				"type": "number"
-			},
-			{
-				"type": "array",
-				"items": {
-					"anyOf": [
-						{
-							"type": "number"
-						},
-						{
-							"type": "array",
-							"items": {
-								"anyOf": [
-									{
-										"type": "number"
-									},
-									{
-										"type": "array",
-										"items": {
-											"anyOf": [
-												{
-													"type": "number"
-												},
-												{
-													"type": "array",
-													"items": {
-														"type": "number"
-													}
-												}
-											]
-										}
-									}
-								]
-							}
-						}
-					]
-				}
-			}
-		]
-	}
+	"title": "FeatureExtractionOutput"
 }

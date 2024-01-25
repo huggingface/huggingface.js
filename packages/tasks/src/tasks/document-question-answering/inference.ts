@@ -78,9 +78,11 @@ export interface DocumentQuestionAnsweringParameters {
 	 * A list of words and bounding boxes (normalized 0->1000). If provided, the inference will
 	 * skip the OCR step and use the provided bounding boxes instead.
 	 */
-	wordBoxes?: Array<number[] | string>;
+	wordBoxes?: WordBox[];
 	[property: string]: unknown;
 }
+
+export type WordBox = number[] | string;
 
 /**
  * Outputs of inference for the Document Question Answering task
