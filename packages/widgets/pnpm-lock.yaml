@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@huggingface/jinja':
+    specifier: workspace:^
+    version: link:../jinja
   '@huggingface/tasks':
     specifier: workspace:^
     version: link:../tasks
