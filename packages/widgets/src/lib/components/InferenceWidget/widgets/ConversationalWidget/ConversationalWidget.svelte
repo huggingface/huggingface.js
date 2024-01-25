@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "../../shared/types.js";
+	import { Template } from "@huggingface/jinja";
 	import type { WidgetExampleTextInput } from "@huggingface/tasks";
 
 	import WidgetOutputConvo from "../../shared/WidgetOutputConvo/WidgetOutputConvo.svelte";
@@ -66,13 +67,27 @@
 			updateUrl({ text: trimmedText });
 		}
 
-		const requestBody = {
-			inputs: {
-				generated_responses: conversation.generated_responses,
-				past_user_inputs: conversation.past_user_inputs,
-				text: trimmedText,
-			},
-		};
+		const chat = [
+			{ role: "user", content: "Hello, how are you?" },
+			{ role: "assistant", content: "I'm doing great. How can I help you today?" },
+			{ role: "user", content: "I'd like to show off how chat templating works!" },
+		];
+		const chatTemplate = model.config?.tokenizer?.chat_template;
+		if (chatTemplate === undefined) {
+			outputJson = "";
+			output = [];
+			error = "No chat template found in tokenizer config";
+			return;
+		}
+
+		const template = new Template(chatTemplate);
+		const chatText = template.render({
+			messages: chat,
+			bos_token: model.config?.tokenizer?.bos_token,
+			eos_token: model.config?.tokenizer?.eos_token,
+		});
+
+		const requestBody = { inputs: chatText };
 		addInferenceParameters(requestBody, model);
 
 		isLoading = true;

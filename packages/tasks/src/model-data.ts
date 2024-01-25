@@ -53,6 +53,11 @@ export interface ModelData {
 			base_model_name?: string;
 			task_type?: string;
 		};
+		tokenizer?: {
+			bos_token?: string;
+			chat_template?: string;
+			eos_token?: string;
+		}
 	};
 	/**
 	 * all the model tags
