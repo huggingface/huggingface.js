@@ -2,6 +2,7 @@
 	"$id": "/inference/schemas/sentence-similarity/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Inputs for Sentence similarity inference",
+	"title": "SentenceSimilarityInput",
 	"type": "object",
 	"properties": {
 		"data": {

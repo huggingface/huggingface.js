@@ -2,6 +2,7 @@
 	"$id": "/inference/schemas/fill-mask/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Inputs for Fill Mask inference",
+	"title": "FillMaskInput",
 	"type": "object",
 	"properties": {
 		"data": {

@@ -2,6 +2,7 @@
 	"$id": "/inference/schemas/feature-extraction/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Inputs for Text Embedding inference",
+	"title": "FeatureExtractionInput",
 	"type": "object",
 	"properties": {
 		"data": {

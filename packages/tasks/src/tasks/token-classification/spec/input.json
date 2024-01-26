@@ -2,6 +2,7 @@
 	"$id": "/inference/schemas/token-classification/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Inputs for Token Classification inference",
+	"title": "TokenClassificationInput",
 	"type": "object",
 	"properties": {
 		"data": {

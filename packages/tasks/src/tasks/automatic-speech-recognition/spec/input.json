@@ -2,6 +2,7 @@
 	"$id": "/inference/schemas/automatic-speech-recognition/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Inputs for Automatic Speech Recognition inference",
+	"title": "AutomaticSpeechRecognitionInput",
 	"type": "object",
 	"properties": {
 		"data": {

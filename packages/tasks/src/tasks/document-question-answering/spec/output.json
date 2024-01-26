@@ -2,6 +2,7 @@
 	"$id": "/inference/schemas/document-question-answering/output.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Outputs of inference for the Document Question Answering task",
+	"title": "DocumentQuestionAnsweringOutput",
 	"type": "array",
 	"items": {
 		"type": "object",

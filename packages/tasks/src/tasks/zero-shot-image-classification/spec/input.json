@@ -2,6 +2,7 @@
 	"$id": "/inference/schemas/zero-shot-image-classification/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Inputs for Zero Shot Image Classification inference",
+	"title": "ZeroShotImageClassificationInput",
 	"type": "object",
 	"properties": {
 		"data": {

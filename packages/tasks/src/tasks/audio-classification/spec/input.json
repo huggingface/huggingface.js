@@ -2,6 +2,7 @@
 	"$id": "/inference/schemas/audio-classification/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Inputs for Audio Classification inference",
+	"title": "AudioClassificationInput",
 	"type": "object",
 	"properties": {
 		"data": {

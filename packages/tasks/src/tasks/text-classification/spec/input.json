@@ -2,6 +2,7 @@
 	"$id": "/inference/schemas/text-classification/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Inputs for Text Classification inference",
+	"title": "TextClassificationInput",
 	"type": "object",
 	"properties": {
 		"data": {

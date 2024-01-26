@@ -2,6 +2,7 @@
 	"$id": "/inference/schemas/text2text-generation/output.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Outputs of inference for the Text2text Generation task",
+	"title": "Text2TextGenerationOutput",
 	"type": "array",
 	"items": {
 		"type": "object",

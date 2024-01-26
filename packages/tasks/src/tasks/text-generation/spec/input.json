@@ -2,6 +2,7 @@
 	"$id": "/inference/schemas/text-generation/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Inputs for Text Generation inference",
+	"title": "TextGenerationInput",
 	"type": "object",
 	"properties": {
 		"data": {

@@ -2,6 +2,7 @@
 	"$id": "/inference/schemas/table-question-answering/output.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Outputs of inference for the Table Question Answering task",
+	"title": "TableQuestionAnsweringOutput",
 	"type": "array",
 	"items": {
 		"type": "object",

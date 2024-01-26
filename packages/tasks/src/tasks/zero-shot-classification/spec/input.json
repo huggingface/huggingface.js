@@ -2,6 +2,7 @@
 	"$id": "/inference/schemas/zero-shot-classification/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Inputs for Zero Shot Classification inference",
+	"title": "ZeroShotClassificationInput",
 	"type": "object",
 	"properties": {
 		"data": {

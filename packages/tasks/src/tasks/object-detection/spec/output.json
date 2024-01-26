@@ -2,6 +2,7 @@
 	"$id": "/inference/schemas/object-detection/output.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Outputs of inference for the Object Detection task",
+	"title": "ObjectDetectionOutput",
 	"type": "array",
 	"items": {
 		"type": "object",

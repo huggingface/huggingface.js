@@ -2,6 +2,7 @@
 	"$id": "/inference/schemas/image-to-text/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Inputs for Image To Text inference",
+	"title": "ImageToTextInput",
 	"type": "object",
 	"properties": {
 		"data": {

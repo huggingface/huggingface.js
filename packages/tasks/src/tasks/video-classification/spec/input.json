@@ -2,6 +2,7 @@
 	"$id": "/inference/schemas/video-classification/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Inputs for Video Classification inference",
+	"title": "VideoClassificationInput",
 	"type": "object",
 	"properties": {
 		"data": {

@@ -2,6 +2,7 @@
 	"$id": "/inference/schemas/<TASK_ID>/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Inputs for <TASK_ID> inference",
+	"title": "PlaceholderInput",
 	"type": "object",
 	"properties": {
 		"data": {

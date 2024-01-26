@@ -2,6 +2,7 @@
 	"$id": "/inference/schemas/image-segmentation/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Inputs for Image Segmentation inference",
+	"title": "ImageSegmentationInput",
 	"type": "object",
 	"properties": {
 		"data": {

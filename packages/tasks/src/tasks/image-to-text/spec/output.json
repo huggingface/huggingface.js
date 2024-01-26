@@ -2,6 +2,7 @@
 	"$id": "/inference/schemas/image-to-text/output.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Outputs of inference for the Image To Text task",
+	"title": "ImageToTextOutput",
 	"type": "array",
 	"items": {
 		"type": "object",

@@ -2,6 +2,7 @@
 	"$id": "/inference/schemas/text-classification/output.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Outputs of inference for the Text Classification task",
+	"title": "TextClassificationOutput",
 	"type": "array",
 	"items": {
 		"type": "object",

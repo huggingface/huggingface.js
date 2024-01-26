@@ -2,6 +2,7 @@
 	"$id": "/inference/schemas/zero-shot-object-detection/output.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Outputs of inference for the Zero Shot Object Detection task",
+	"title": "ZeroShotObjectDetectionOutput",
 	"type": "array",
 	"items": {
 		"type": "object",

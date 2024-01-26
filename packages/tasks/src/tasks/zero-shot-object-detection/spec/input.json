@@ -2,6 +2,7 @@
 	"$id": "/inference/schemas/zero-shot-object-detection/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Inputs for Zero Shot Object Detection inference",
+	"title": "ZeroShotObjectDetectionInput",
 	"type": "object",
 	"properties": {
 		"data": {

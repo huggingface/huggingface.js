@@ -2,6 +2,7 @@
 	"$id": "/inference/schemas/token-classification/output.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Outputs of inference for the Token Classification task",
+	"title": "TokenClassificationOutput",
 	"type": "array",
 	"items": {
 		"type": "object",

@@ -2,6 +2,7 @@
 	"$id": "/inference/schemas/table-question-answering/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Inputs for Table Question Answering inference",
+	"title": "TableQuestionAnsweringInput",
 	"type": "object",
 	"properties": {
 		"data": {
