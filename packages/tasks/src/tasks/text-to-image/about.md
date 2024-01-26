@@ -62,6 +62,8 @@ await inference.textToImage({
 - [A guide on Vector Quantized Diffusion](https://huggingface.co/blog/vq-diffusion)
 - [🧨 Stable Diffusion in JAX/Flax](https://huggingface.co/blog/stable_diffusion_jax)
 - [Running IF with 🧨 diffusers on a Free Tier Google Colab](https://huggingface.co/blog/if)
+- [Introducing Würstchen: Fast Diffusion for Image Generation](https://huggingface.co/blog/wuerstchen)
+- [Efficient Controllable Generation for SDXL with T2I-Adapters](https://huggingface.co/blog/t2i-sdxl-adapters)
 
 ### Model Fine-tuning
 - [Finetune Stable Diffusion Models with DDPO via TRL](https://huggingface.co/blog/pref-tuning)
