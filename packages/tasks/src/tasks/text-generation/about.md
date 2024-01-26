@@ -110,25 +110,39 @@ Would you like to learn more about the topic? Awesome! Here you can find some cu
 - [ChatUI Docker Spaces](https://huggingface.co/docs/hub/spaces-sdks-docker-chatui)
 - [Causal language modeling task guide](https://huggingface.co/docs/transformers/tasks/language_modeling)
 - [Text generation strategies](https://huggingface.co/docs/transformers/generation_strategies)
-
-### Course and Blogs
-
 - [Course Chapter on Training a causal language model from scratch](https://huggingface.co/course/chapter7/6?fw=pt)
-- [TO Discussion with Victor Sanh](https://www.youtube.com/watch?v=Oy49SCW_Xpw&ab_channel=HuggingFace)
-- [Hugging Face Course Workshops: Pretraining Language Models & CodeParrot](https://www.youtube.com/watch?v=ExUR7w6xe94&ab_channel=HuggingFace)
-- [Training CodeParrot 🦜 from Scratch](https://huggingface.co/blog/codeparrot)
-- [How to generate text: using different decoding methods for language generation with Transformers](https://huggingface.co/blog/how-to-generate)
+
+
+### Model Inference & Deployment
+- [Optimizing your LLM in production](https://huggingface.co/blog/optimize-llm)
+- [Open-Source Text Generation & LLM Ecosystem at Hugging Face](https://huggingface.co/blog/os-llms)
+- [Introducing RWKV - An RNN with the advantages of a transformer](https://huggingface.co/blog/rwkv)
+- [Llama 2 is at Hugging Face](https://huggingface.co/blog/llama2)
 - [Guiding Text Generation with Constrained Beam Search in 🤗 Transformers](https://huggingface.co/blog/constrained-beam-search)
 - [Code generation with Hugging Face](https://huggingface.co/spaces/codeparrot/code-generation-models)
+- [Assisted Generation: a new direction toward low-latency text generation](https://huggingface.co/blog/assisted-generation)
+- [How to generate text: using different decoding methods for language generation with Transformers](https://huggingface.co/blog/how-to-generate)
+- [Faster Text Generation with TensorFlow and XLA](https://huggingface.co/blog/tf-xla-generate)
+
+### Model Fine-tuning/Training
+- [Non-engineers guide: Train a LLaMA 2 chatbot](https://huggingface.co/blog/Llama2-for-non-engineers)
+- [Training CodeParrot 🦜 from Scratch](https://huggingface.co/blog/codeparrot)
+- [Creating a Coding Assistant with StarCoder](https://huggingface.co/blog/starchat-alpha)
+
+### Advanced Concepts Explained Simply
+- [Mixture of Experts Explained](https://huggingface.co/blog/moe)
+
+### Advanced Fine-tuning/Training Recipes
+- [Fine-tuning Llama 2 70B using PyTorch FSDP](https://huggingface.co/blog/ram-efficient-pytorch-fsdp)
+- [The N Implementation Details of RLHF with PPO](https://huggingface.co/blog/the_n_implementation_details_of_rlhf_with_ppo)
+- [Preference Tuning LLMs with Direct Preference Optimization Methods](https://huggingface.co/blog/pref-tuning)
+- [Fine-tune Llama 2 with DPO](https://huggingface.co/blog/dpo-trl)
+
+### Hugging Face Model Releases
+- [Introducing IDEFICS: An Open Reproduction of State-of-the-Art Visual Language Model](https://huggingface.co/blog/idefics)
+- [StarCoder: A State-of-the-Art LLM for Code](https://huggingface.co/blog/starcoder)
 - [🌸 Introducing The World's Largest Open Multilingual Language Model: BLOOM 🌸](https://huggingface.co/blog/bloom)
 - [The Technology Behind BLOOM Training](https://huggingface.co/blog/bloom-megatron-deepspeed)
-- [Faster Text Generation with TensorFlow and XLA](https://huggingface.co/blog/tf-xla-generate)
-- [Assisted Generation: a new direction toward low-latency text generation](https://huggingface.co/blog/assisted-generation)
-- [Introducing RWKV - An RNN with the advantages of a transformer](https://huggingface.co/blog/rwkv)
-- [Creating a Coding Assistant with StarCoder](https://huggingface.co/blog/starchat-alpha)
-- [StarCoder: A State-of-the-Art LLM for Code](https://huggingface.co/blog/starcoder)
-- [Open-Source Text Generation & LLM Ecosystem at Hugging Face](https://huggingface.co/blog/os-llms)
-- [Llama 2 is at Hugging Face](https://huggingface.co/blog/llama2)
 
 ### Notebooks
 
