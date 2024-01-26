@@ -1,0 +1,7 @@
+{
+	"$id": "/inference/schemas/feature-extraction/output.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "The embedding for the input text, as a nested list (tensor) of floats",
+	"type": "array",
+	"title": "FeatureExtractionOutput"
+}
