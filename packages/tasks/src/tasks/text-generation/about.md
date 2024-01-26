@@ -125,6 +125,7 @@ Would you like to learn more about the topic? Awesome! Here you can find some cu
 - [Faster Text Generation with TensorFlow and XLA](https://huggingface.co/blog/tf-xla-generate)
 
 ### Model Fine-tuning/Training
+
 - [Non-engineers guide: Train a LLaMA 2 chatbot](https://huggingface.co/blog/Llama2-for-non-engineers)
 - [Training CodeParrot 🦜 from Scratch](https://huggingface.co/blog/codeparrot)
 - [Creating a Coding Assistant with StarCoder](https://huggingface.co/blog/starchat-alpha)
@@ -133,16 +134,11 @@ Would you like to learn more about the topic? Awesome! Here you can find some cu
 - [Mixture of Experts Explained](https://huggingface.co/blog/moe)
 
 ### Advanced Fine-tuning/Training Recipes
+
 - [Fine-tuning Llama 2 70B using PyTorch FSDP](https://huggingface.co/blog/ram-efficient-pytorch-fsdp)
 - [The N Implementation Details of RLHF with PPO](https://huggingface.co/blog/the_n_implementation_details_of_rlhf_with_ppo)
 - [Preference Tuning LLMs with Direct Preference Optimization Methods](https://huggingface.co/blog/pref-tuning)
 - [Fine-tune Llama 2 with DPO](https://huggingface.co/blog/dpo-trl)
-
-### Hugging Face Model Releases
-- [Introducing IDEFICS: An Open Reproduction of State-of-the-Art Visual Language Model](https://huggingface.co/blog/idefics)
-- [StarCoder: A State-of-the-Art LLM for Code](https://huggingface.co/blog/starcoder)
-- [🌸 Introducing The World's Largest Open Multilingual Language Model: BLOOM 🌸](https://huggingface.co/blog/bloom)
-- [The Technology Behind BLOOM Training](https://huggingface.co/blog/bloom-megatron-deepspeed)
 
 ### Notebooks
 
