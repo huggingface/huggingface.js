@@ -86,3 +86,5 @@ These events help democratize ASR for all languages, including low-resource lang
 - [A guide on Fine-tuning Whisper For Multilingual ASR with 🤗Transformers](https://huggingface.co/blog/fine-tune-whisper)
 - [Automatic speech recognition task guide](https://huggingface.co/docs/transformers/tasks/asr)
 - [Speech Synthesis, Recognition, and More With SpeechT5](https://huggingface.co/blog/speecht5)
+- [Fine-Tune W2V2-Bert for low-resource ASR with 🤗 Transformers](https://huggingface.co/blog/fine-tune-w2v2-bert)
+- [Speculative Decoding for 2x Faster Whisper Inference](https://huggingface.co/blog/whisper-speculative-decoding)
