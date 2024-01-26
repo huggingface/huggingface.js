@@ -65,7 +65,7 @@ await inference.textToImage({
 - [Introducing Würstchen: Fast Diffusion for Image Generation](https://huggingface.co/blog/wuerstchen)
 - [Efficient Controllable Generation for SDXL with T2I-Adapters](https://huggingface.co/blog/t2i-sdxl-adapters)
 
-### Model Fine-tuning
+### Model Fine-tuning
 - [Finetune Stable Diffusion Models with DDPO via TRL](https://huggingface.co/blog/pref-tuning)
 - [LoRA training scripts of the world, unite!](https://huggingface.co/blog/sdxl_lora_advanced_script)
 - [Using LoRA for Efficient Stable Diffusion Fine-Tuning](https://huggingface.co/blog/lora)
