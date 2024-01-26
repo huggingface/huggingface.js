@@ -79,12 +79,16 @@ const taskData: TaskDataCustom = {
 			id: "latent-consistency/lcm-lora-for-sdxl",
 		},
 		{
-			description: "A powerful text-to-image application that can generate 3D representations.",
-			id: "hysts/Shap-E",
+			description: "A gallery to explore various text-to-image models.",
+			id: "multimodalart/LoraTheExplorer",
 		},
 		{
 			description: "An application for `text-to-image`, `image-to-image` and image inpainting.",
 			id: "ArtGAN/Stable-Diffusion-ControlNet-WebUI",
+		},
+		{
+			description: "An application to generate realistic images given photos of a person and a prompt.",
+			id: "InstantX/InstantID",
 		},
 	],
 	summary:
