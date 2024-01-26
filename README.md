@@ -37,12 +37,10 @@ await inference.textToImage({
 
 This is a collection of JS libraries to interact with the Hugging Face API, with TS types included.
 
-- [@huggingface/inference](packages/inference/README.md): Use the Inference API to make calls to 100,000+ Machine Learning models, or your own [inference endpoints](https://hf.co/docs/inference-endpoints/)!
+- [@huggingface/inference](packages/inference/README.md): Use Inference Endpoints (serverless) to make calls to 100,000+ Machine Learning models
 - [@huggingface/hub](packages/hub/README.md): Interact with huggingface.co to create or delete repos and commit / download files
 - [@huggingface/agents](packages/agents/README.md): Interact with HF models through a natural language interface
 
-
-With more to come, like `@huggingface/endpoints` to manage your HF Endpoints!
 
 We use modern features to avoid polyfills and dependencies, so the libraries will only work on modern browsers / Node.js >= 18 / Bun / Deno. 
 
@@ -128,7 +126,7 @@ await inference.imageToText({
   model: 'nlpconnect/vit-gpt2-image-captioning',  
 })
 
-// Using your own inference endpoint: https://hf.co/docs/inference-endpoints/
+// Using your own dedicated inference endpoint: https://hf.co/docs/inference-endpoints/
 const gpt2 = inference.endpoint('https://xyz.eu-west-1.aws.endpoints.huggingface.cloud/gpt2');
 const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the universe is'});
 ```

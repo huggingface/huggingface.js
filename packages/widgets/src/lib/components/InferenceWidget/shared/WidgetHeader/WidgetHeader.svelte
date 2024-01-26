@@ -53,7 +53,7 @@
 			<div class="flex items-center text-lg">
 				{#if !isDisabled}
 					<IconLightning classNames="-ml-1 mr-1 text-yellow-500" />
-					Inference API
+					Inference Endpoints (serverless)
 				{:else}
 					Inference Examples
 				{/if}

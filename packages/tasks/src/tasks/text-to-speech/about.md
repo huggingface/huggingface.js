@@ -10,9 +10,9 @@ TTS models are used to create voice assistants on smart devices. These models ar
 
 TTS models are widely used in airport and public transportation announcement systems to convert the announcement of a given text into speech.
 
-## Inference API
+## Inference Endpoints
 
-The Hub contains over [1500 TTS models](https://huggingface.co/models?pipeline_tag=text-to-speech&sort=downloads) that you can use right away by trying out the widgets directly in the browser or calling the models as a service using the Inference API. Here is a simple code snippet to get you started:
+The Hub contains over [1500 TTS models](https://huggingface.co/models?pipeline_tag=text-to-speech&sort=downloads) that you can use right away by trying out the widgets directly in the browser or calling the models as a service using Inference Endpoints. Here is a simple code snippet to get you started:
 
 ```python
 import json

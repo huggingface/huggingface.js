@@ -18,7 +18,7 @@ The use of Multilingual ASR has become popular, the idea of maintaining just a s
 
 ## Inference
 
-The Hub contains over [~9,000 ASR models](https://huggingface.co/models?pipeline_tag=automatic-speech-recognition&sort=downloads) that you can use right away by trying out the widgets directly in the browser or calling the models as a service using the Inference API. Here is a simple code snippet to do exactly this:
+The Hub contains over [~9,000 ASR models](https://huggingface.co/models?pipeline_tag=automatic-speech-recognition&sort=downloads) that you can use right away by trying out the widgets directly in the browser or calling the models as a service using Inference Endpoints. Here is a simple code snippet to do exactly this:
 
 ```python
 import json
