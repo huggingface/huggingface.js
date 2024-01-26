@@ -31,7 +31,7 @@ export interface TableQuestionAnsweringInputData {
 	 * The table to serve as context for the questions
 	 */
 	table: {
-		[key: string]: unknown;
+		[key: string]: string[];
 	};
 	[property: string]: unknown;
 }

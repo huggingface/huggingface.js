@@ -12,7 +12,8 @@
 			"properties": {
 				"table": {
 					"description": "The table to serve as context for the questions",
-					"type": "object"
+					"type": "object",
+					"additionalProperties": { "type": "array", "items": { "type": "string" } }
 				},
 				"question": {
 					"description": "The question to be answered about the table",
