@@ -18,7 +18,16 @@
 			"title": "AutomaticSpeechRecognitionParameters",
 			"description": "Additional inference parameters for Automatic Speech Recognition",
 			"type": "object",
-			"properties": {}
+			"properties": {
+				"returnTimestamps": {
+					"type": "boolean",
+					"description": "Whether to output corresponding timestamps with the generated text"
+				},
+				"generate": {
+					"description": "Parametrization of the text generation process",
+					"$ref": "/inference/schemas/schema-utils.json#/definitions/GenerationParameters"
+				}
+			}
 		}
 	},
 	"required": ["data"]

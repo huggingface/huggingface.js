@@ -74,7 +74,6 @@ async function generateTypescript(inputData: InputData): Promise<SerializedRende
  * And writes that to the `inference.ts` file
  *
  */
-
 async function postProcessOutput(path2generated: string, outputSpec: Record<string, unknown>): Promise<void> {
 	const source = ts.createSourceFile(
 		path.basename(path2generated),
@@ -149,9 +148,12 @@ async function main() {
 			.filter((entry) => entry.name !== "placeholder")
 			.map(async (entry) => ({ task: entry.name, dirPath: path.join(entry.path, entry.name) }))
 	);
-	const allSpecFiles = allTasks
-		.flatMap(({ dirPath }) => [path.join(dirPath, "spec", "input.json"), path.join(dirPath, "spec", "output.json")])
-		.filter((filepath) => pathExists(filepath));
+	const allSpecFiles = [
+		path.join(tasksDir, "schema-utils.json"),
+		...allTasks
+			.flatMap(({ dirPath }) => [path.join(dirPath, "spec", "input.json"), path.join(dirPath, "spec", "output.json")])
+			.filter((filepath) => pathExists(filepath)),
+	];
 
 	for (const { task, dirPath } of allTasks) {
 		const taskSpecDir = path.join(dirPath, "spec");

@@ -24,9 +24,25 @@ export interface ImageToTextInput {
  */
 export interface ImageToTextParameters {
 	/**
+	 * Parametrization of the text generation process
+	 */
+	generate?: GenerationParameters;
+	/**
 	 * The amount of maximum tokens to generate.
 	 */
 	maxNewTokens?: number;
+	[property: string]: unknown;
+}
+/**
+ * Parametrization of the text generation process
+ *
+ * Ad-hoc parametrization of the text generation process
+ */
+export interface GenerationParameters {
+	/**
+	 * I can be the papa you'd be the mama
+	 */
+	temperature?: number;
 	[property: string]: unknown;
 }
 export type ImageToTextOutput = ImageToTextOutputElement[];

@@ -14,9 +14,35 @@ export interface AutomaticSpeechRecognitionInput {
 	/**
 	 * Additional inference parameters
 	 */
-	parameters?: {
-		[key: string]: unknown;
-	};
+	parameters?: AutomaticSpeechRecognitionParameters;
+	[property: string]: unknown;
+}
+/**
+ * Additional inference parameters
+ *
+ * Additional inference parameters for Automatic Speech Recognition
+ */
+export interface AutomaticSpeechRecognitionParameters {
+	/**
+	 * Parametrization of the text generation process
+	 */
+	generate?: GenerationParameters;
+	/**
+	 * Whether to output corresponding timestamps with the generated text
+	 */
+	returnTimestamps?: boolean;
+	[property: string]: unknown;
+}
+/**
+ * Parametrization of the text generation process
+ *
+ * Ad-hoc parametrization of the text generation process
+ */
+export interface GenerationParameters {
+	/**
+	 * I can be the papa you'd be the mama
+	 */
+	temperature?: number;
 	[property: string]: unknown;
 }
 export type AutomaticSpeechRecognitionOutput = AutomaticSpeechRecognitionOutputElement[];

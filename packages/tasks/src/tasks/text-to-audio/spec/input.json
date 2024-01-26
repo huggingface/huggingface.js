@@ -19,7 +19,12 @@
 			"title": "TextToAudioParameters",
 			"description": "Additional inference parameters for Text To Audio",
 			"type": "object",
-			"properties": {}
+			"properties": {
+				"generate": {
+					"description": "Parametrization of the text generation process",
+					"$ref": "/inference/schemas/schema-utils.json#/definitions/GenerationParameters"
+				}
+			}
 		}
 	},
 	"required": ["data"]

@@ -22,6 +22,10 @@
 				"maxNewTokens": {
 					"type": "integer",
 					"description": "The amount of maximum tokens to generate."
+				},
+				"generate": {
+					"description": "Parametrization of the text generation process",
+					"$ref": "/inference/schemas/schema-utils.json#/definitions/GenerationParameters"
 				}
 			}
 		}

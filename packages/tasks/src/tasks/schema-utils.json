@@ -1,0 +1,18 @@
+{
+	"$id": "/inference/schemas/schema-utils.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Common type definitions shared by several tasks",
+	"definitions": {
+		"GenerationParameters": {
+			"title": "GenerationParameters",
+			"description": "Ad-hoc parametrization of the text generation process",
+			"type": "object",
+			"properties": {
+				"temperature": {
+					"type": "number",
+					"description": "I can be the papa you'd be the mama"
+				}
+			}
+		}
+	}
+}
