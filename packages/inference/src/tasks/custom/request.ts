@@ -2,7 +2,7 @@ import type { InferenceTask, Options, RequestArgs } from "../../types";
 import { makeRequestOptions } from "../../lib/makeRequestOptions";
 
 /**
- * Primitive to make custom calls to the inference API
+ * Primitive to make custom calls to Inference Endpoints
  */
 export async function request<T>(
 	args: RequestArgs,

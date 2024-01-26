@@ -26,7 +26,7 @@ Datasets such as VoxLingua107 allow anyone to train language identification mode
 
 ### Emotion recognition
 
-Emotion recognition is self explanatory. In addition to trying the widgets, you can use the Inference API to perform audio classification. Here is a simple example that uses a [HuBERT](https://huggingface.co/superb/hubert-large-superb-er) model fine-tuned for this task.
+Emotion recognition is self explanatory. In addition to trying the widgets, you can use Inference Endpoints to perform audio classification. Here is a simple example that uses a [HuBERT](https://huggingface.co/superb/hubert-large-superb-er) model fine-tuned for this task.
 
 ```python
 import json

@@ -4,9 +4,9 @@
   isExpanded: true
   sections:
     - local: inference/README
-      title: Use the Inference API
+      title: Use Inference Endpoints
     - local: inference/modules
-      title: API Reference
+      title: API reference
 - title: "@huggingface/hub"
   isExpanded: true
   sections:
