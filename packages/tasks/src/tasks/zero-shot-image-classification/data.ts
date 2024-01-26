@@ -53,8 +53,8 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description:
-				"Robust image classification model trained on publicly available image-caption data trained on additional high pixel data for better performance.",
-			id: "openai/clip-vit-large-patch14-336",
+				"Strong zero-shot image classification model.",
+			id: "google/siglip-base-patch16-224",
 		},
 		{
 			description: "Strong image classification model for biomedical domain.",
@@ -64,12 +64,17 @@ const taskData: TaskDataCustom = {
 	spaces: [
 		{
 			description:
-				"An application that leverages zero shot image classification to find best captions to generate an image. ",
+				"An application that leverages zero-shot image classification to find best captions to generate an image. ",
 			id: "pharma/CLIP-Interrogator",
+		},
+		{
+			description:
+				"An application to compare different zero-shot image classification models. ",
+			id: "merve/compare_clip_siglip",
 		},
 	],
 	summary:
-		"Zero shot image classification is the task of classifying previously unseen classes during training of a model.",
+		"Zero-shot image classification is the task of classifying previously unseen classes during training of a model.",
 	widgetModels: ["openai/clip-vit-large-patch14-336"],
 	youtubeId: "",
 };
