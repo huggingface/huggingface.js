@@ -46,7 +46,7 @@ const taskData: TaskDataCustom = {
 		},
 	],
 	summary:
-		"Mask generation is the task of generating masks that identifies a specific object or region of interest in a given image. Masks are often used in segmentation tasks, where they provide a precise way to isolate the object of interest for further processing or analysis.",
+		"Mask generation is the task of generating masks that identify a specific object or region of interest in a given image. Masks are often used in segmentation tasks, where they provide a precise way to isolate the object of interest for further processing or analysis.",
 	widgetModels: [],
 	youtubeId: "",
 };
