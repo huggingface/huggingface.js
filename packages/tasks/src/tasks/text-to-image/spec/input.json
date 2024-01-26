@@ -45,6 +45,10 @@
 						}
 					},
 					"required": ["width", "height"]
+				},
+				"scheduler": {
+					"type": "string",
+					"description": "For diffusion models. Override the scheduler with a compatible one"
 				}
 			}
 		}
