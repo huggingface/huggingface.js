@@ -3,6 +3,37 @@
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "(Incomplete!) Common type definitions shared by several tasks",
 	"definitions": {
+		"ClassificationOutputTransform": {
+			"title": "ClassificationOutputTransform",
+			"type": "string",
+			"description": "The function to apply to the model outputs in order to retrieve the scores.",
+			"oneOf": [
+				{
+					"const": "sigmoid"
+				},
+				{
+					"const": "softmax"
+				},
+				{
+					"const": "none"
+				}
+			]
+		},
+		"ClassificationOutput": {
+			"title": "ClassificationOutput",
+			"type": "object",
+			"properties": {
+				"label": {
+					"type": "string",
+					"description": "The predicted class label."
+				},
+				"score": {
+					"type": "number",
+					"description": "The corresponding probability."
+				}
+			},
+			"required": ["label", "score"]
+		},
 		"GenerationParameters": {
 			"title": "GenerationParameters",
 			"description": "Ad-hoc parametrization of the text generation process",

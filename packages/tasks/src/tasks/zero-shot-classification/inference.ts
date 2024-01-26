@@ -56,11 +56,11 @@ export type ZeroShotClassificationOutput = ZeroShotClassificationOutputElement[]
  */
 export interface ZeroShotClassificationOutputElement {
 	/**
-	 * A candidate label
+	 * The predicted class label.
 	 */
 	label: string;
 	/**
-	 * The associated score / probability
+	 * The corresponding probability.
 	 */
 	score: number;
 	[property: string]: unknown;

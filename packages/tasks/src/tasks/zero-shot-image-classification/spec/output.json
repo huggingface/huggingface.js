@@ -5,17 +5,6 @@
 	"title": "ZeroShotImageClassificationOutput",
 	"type": "array",
 	"items": {
-		"type": "object",
-		"properties": {
-			"label": {
-				"type": "string",
-				"description": "A candidate label"
-			},
-			"score": {
-				"type": "number",
-				"description": "The associated score / probability"
-			}
-		},
-		"required": ["label", "score"]
+		"$ref": "/inference/schemas/schema-utils.json#/definitions/ClassificationOutput"
 	}
 }

@@ -27,10 +27,7 @@ export interface VideoClassificationParameters {
 	 * The sampling rate used to select frames from the video.
 	 */
 	frameSamplingRate?: number;
-	/**
-	 * The function to apply to the model outputs in order to retrieve the scores.
-	 */
-	functionToApply?: TextClassificationOutputTransform;
+	functionToApply?: ClassificationOutputTransform;
 	/**
 	 * The number of sampled frames to consider for classification.
 	 */
@@ -41,14 +38,17 @@ export interface VideoClassificationParameters {
 	topK?: number;
 	[property: string]: unknown;
 }
-export type TextClassificationOutputTransform = "sigmoid" | "softmax" | "none";
+/**
+ * The function to apply to the model outputs in order to retrieve the scores.
+ */
+export type ClassificationOutputTransform = "sigmoid" | "softmax" | "none";
 export type VideoClassificationOutput = VideoClassificationOutputElement[];
 /**
  * Outputs of inference for the Video Classification task
  */
 export interface VideoClassificationOutputElement {
 	/**
-	 * The predicted class label (model specific).
+	 * The predicted class label.
 	 */
 	label: string;
 	/**

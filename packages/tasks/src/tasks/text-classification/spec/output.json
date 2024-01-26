@@ -5,17 +5,6 @@
 	"title": "TextClassificationOutput",
 	"type": "array",
 	"items": {
-		"type": "object",
-		"properties": {
-			"label": {
-				"type": "string",
-				"description": "The predicted class label (model specific)."
-			},
-			"score": {
-				"type": "number",
-				"description": "The corresponding probability."
-			}
-		},
-		"required": ["label", "score"]
+		"$ref": "/inference/schemas/schema-utils.json#/definitions/ClassificationOutput"
 	}
 }
