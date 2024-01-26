@@ -47,7 +47,12 @@ const taskData: TaskDataCustom = {
 			id: "google/owlv2-base-patch16-ensemble",
 		},
 	],
-	spaces: [],
+	spaces: [
+		{
+			description: "A demo to try the state-of-the-art zero-shot object detection model, OWLv2.",
+			id: "merve/owlv2",
+		},
+	],
 	summary:
 		"Zero-shot object detection is a computer vision task to detect objects and their classes in images, without any prior training or knowledge of the classes. Zero-shot object detection models receive an image as input, as well as a list of candidate classes, and output the bounding boxes and labels where the objects have been detected.",
 	widgetModels: [],
