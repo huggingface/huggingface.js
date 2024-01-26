@@ -3,8 +3,18 @@ import type { TaskDataCustom } from "..";
 const taskData: TaskDataCustom = {
 	datasets: [],
 	demo: {
-		inputs: [],
-		outputs: [],
+		inputs: [
+			{
+				filename: "mask-generation-input.png",
+				type: "img",
+			},
+		],
+		outputs: [
+			{
+				filename: "mask-generation-outnput.png",
+				type: "img",
+			},
+		],
 	},
 	metrics: [],
 	models: [
