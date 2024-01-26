@@ -11,7 +11,7 @@ const taskData: TaskDataCustom = {
 		],
 		outputs: [
 			{
-				filename: "mask-generation-outnput.png",
+				filename: "mask-generation-output.png",
 				type: "img",
 			},
 		],
@@ -29,7 +29,8 @@ const taskData: TaskDataCustom = {
 	],
 	spaces: [
 		{
-			description: "An application that combines a mask generation model with an image embedding model for open-vocabulary image segmentation.",
+			description:
+				"An application that combines a mask generation model with an image embedding model for open-vocabulary image segmentation.",
 			id: "SkalskiP/SAM_and_MetaCLIP",
 		},
 		{

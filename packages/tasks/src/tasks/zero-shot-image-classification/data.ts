@@ -52,8 +52,7 @@ const taskData: TaskDataCustom = {
 			id: "openai/clip-vit-base-patch16",
 		},
 		{
-			description:
-				"Strong zero-shot image classification model.",
+			description: "Strong zero-shot image classification model.",
 			id: "google/siglip-base-patch16-224",
 		},
 		{
@@ -68,8 +67,7 @@ const taskData: TaskDataCustom = {
 			id: "pharma/CLIP-Interrogator",
 		},
 		{
-			description:
-				"An application to compare different zero-shot image classification models. ",
+			description: "An application to compare different zero-shot image classification models. ",
 			id: "merve/compare_clip_siglip",
 		},
 	],
