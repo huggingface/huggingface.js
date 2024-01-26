@@ -21,7 +21,7 @@
 			"properties": {
 				"functionToApply": {
 					"title": "ImageClassificationOutputTransform",
-					"$ref": "/inference/schemas/schema-utils.json#/definitions/ClassificationOutputTransform"
+					"$ref": "/inference/schemas/common-definitions.json#/definitions/ClassificationOutputTransform"
 				},
 				"topK": {
 					"type": "integer",

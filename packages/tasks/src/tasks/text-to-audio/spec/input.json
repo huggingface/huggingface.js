@@ -22,7 +22,7 @@
 			"properties": {
 				"generate": {
 					"description": "Parametrization of the text generation process",
-					"$ref": "/inference/schemas/schema-utils.json#/definitions/GenerationParameters"
+					"$ref": "/inference/schemas/common-definitions.json#/definitions/GenerationParameters"
 				}
 			}
 		}

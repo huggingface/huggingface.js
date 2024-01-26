@@ -149,7 +149,7 @@ async function main() {
 			.map(async (entry) => ({ task: entry.name, dirPath: path.join(entry.path, entry.name) }))
 	);
 	const allSpecFiles = [
-		path.join(tasksDir, "schema-utils.json"),
+		path.join(tasksDir, "common-definitions.json"),
 		...allTasks
 			.flatMap(({ dirPath }) => [path.join(dirPath, "spec", "input.json"), path.join(dirPath, "spec", "output.json")])
 			.filter((filepath) => pathExists(filepath)),

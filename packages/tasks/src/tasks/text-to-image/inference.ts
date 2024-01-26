@@ -40,6 +40,10 @@ export interface TextToImageParameters {
 	 */
 	numInferenceSteps?: number;
 	/**
+	 * For diffusion models. Override the scheduler with a compatible one
+	 */
+	scheduler?: string;
+	/**
 	 * The size in pixel of the output image
 	 */
 	targetSize?: TargetSize;
