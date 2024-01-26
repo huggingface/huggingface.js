@@ -19,11 +19,8 @@ const rootDirFinder = function (): string {
 	while (level > 0) {
 		const currentPath = parts.slice(0, level).join("/");
 		console.debug(currentPath);
-		try {
-			require(`${currentPath}/package.json`);
+		if (pathExists(`${currentPath}/package.json`)) {
 			return path.normalize(currentPath);
-		} catch (err) {
-			/// noop
 		}
 		level--;
 	}
