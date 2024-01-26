@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Inputs for Text To Audio inference
  */
@@ -15,14 +14,16 @@ export interface TextToAudioInput {
 	/**
 	 * Additional inference parameters
 	 */
-	parameters?: { [key: string]: unknown };
+	parameters?: {
+		[key: string]: unknown;
+	};
 	[property: string]: unknown;
 }
-
+export type TextToAudioOutput = TextToAudioOutputElement[];
 /**
  * Outputs of inference for the Text To Audio task
  */
-export interface TextToAudioOutput {
+export interface TextToAudioOutputElement {
 	/**
 	 * The generated audio waveform.
 	 */

@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Inputs for Automatic Speech Recognition inference
  */
@@ -15,14 +14,16 @@ export interface AutomaticSpeechRecognitionInput {
 	/**
 	 * Additional inference parameters
 	 */
-	parameters?: { [key: string]: unknown };
+	parameters?: {
+		[key: string]: unknown;
+	};
 	[property: string]: unknown;
 }
-
+export type AutomaticSpeechRecognitionOutput = AutomaticSpeechRecognitionOutputElement[];
 /**
  * Outputs of inference for the Automatic Speech Recognition task
  */
-export interface AutomaticSpeechRecognitionOutput {
+export interface AutomaticSpeechRecognitionOutputElement {
 	/**
 	 * The recognized text.
 	 */

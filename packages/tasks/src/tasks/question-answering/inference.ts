@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Inputs for Question Answering inference
  */
@@ -18,7 +17,6 @@ export interface QuestionAnsweringInput {
 	parameters?: QuestionAnsweringParameters;
 	[property: string]: unknown;
 }
-
 /**
  * One (context, question) pair to answer
  */
@@ -33,7 +31,6 @@ export interface QuestionAnsweringInputData {
 	question: string;
 	[property: string]: unknown;
 }
-
 /**
  * Additional inference parameters
  *
@@ -77,11 +74,11 @@ export interface QuestionAnsweringParameters {
 	topK?: number;
 	[property: string]: unknown;
 }
-
+export type QuestionAnsweringOutput = QuestionAnsweringOutputElement[];
 /**
  * Outputs of inference for the Question Answering task
  */
-export interface QuestionAnsweringOutput {
+export interface QuestionAnsweringOutputElement {
 	/**
 	 * The answer to the question.
 	 */

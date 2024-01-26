@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Inputs for Document Question Answering inference
  */
@@ -18,7 +17,6 @@ export interface DocumentQuestionAnsweringInput {
 	parameters?: DocumentQuestionAnsweringParameters;
 	[property: string]: unknown;
 }
-
 /**
  * One (document, question) pair to answer
  */
@@ -33,7 +31,6 @@ export interface DocumentQuestionAnsweringInputData {
 	question: string;
 	[property: string]: unknown;
 }
-
 /**
  * Additional inference parameters
  *
@@ -81,13 +78,12 @@ export interface DocumentQuestionAnsweringParameters {
 	wordBoxes?: WordBox[];
 	[property: string]: unknown;
 }
-
 export type WordBox = number[] | string;
-
+export type DocumentQuestionAnsweringOutput = DocumentQuestionAnsweringOutputElement[];
 /**
  * Outputs of inference for the Document Question Answering task
  */
-export interface DocumentQuestionAnsweringOutput {
+export interface DocumentQuestionAnsweringOutputElement {
 	/**
 	 * The answer to the question.
 	 */

@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Inputs for Text2text Generation inference
  */
@@ -18,7 +17,6 @@ export interface Text2TextGenerationInput {
 	parameters?: Text2TextGenerationParameters;
 	[property: string]: unknown;
 }
-
 /**
  * Additional inference parameters
  *
@@ -32,20 +30,21 @@ export interface Text2TextGenerationParameters {
 	/**
 	 * Additional parametrization of the text generation algorithm
 	 */
-	generateParameters?: { [key: string]: unknown };
+	generateParameters?: {
+		[key: string]: unknown;
+	};
 	/**
 	 * The truncation strategy to use
 	 */
 	truncation?: Text2TextGenerationTruncationStrategy;
 	[property: string]: unknown;
 }
-
 export type Text2TextGenerationTruncationStrategy = "do_not_truncate" | "longest_first" | "only_first" | "only_second";
-
+export type Text2TextGenerationOutput = Text2TextGenerationOutputElement[];
 /**
  * Outputs of inference for the Text2text Generation task
  */
-export interface Text2TextGenerationOutput {
+export interface Text2TextGenerationOutputElement {
 	/**
 	 * The generated text.
 	 */

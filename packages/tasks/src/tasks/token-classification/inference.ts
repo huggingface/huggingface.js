@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Inputs for Token Classification inference
  */
@@ -18,7 +17,6 @@ export interface TokenClassificationInput {
 	parameters?: TokenClassificationParameters;
 	[property: string]: unknown;
 }
-
 /**
  * Additional inference parameters
  *
@@ -39,7 +37,6 @@ export interface TokenClassificationParameters {
 	stride?: number;
 	[property: string]: unknown;
 }
-
 /**
  * Do not aggregate tokens
  *
@@ -55,11 +52,11 @@ export interface TokenClassificationParameters {
  * across the word's tokens).
  */
 export type TokenClassificationAggregationStrategy = "none" | "simple" | "first" | "average" | "max";
-
+export type TokenClassificationOutput = TokenClassificationOutputElement[];
 /**
  * Outputs of inference for the Token Classification task
  */
-export interface TokenClassificationOutput {
+export interface TokenClassificationOutputElement {
 	/**
 	 * The character position in the input where this group ends.
 	 */

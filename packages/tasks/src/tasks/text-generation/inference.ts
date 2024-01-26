@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Inputs for Text Generation inference
  */
@@ -18,7 +17,6 @@ export interface TextGenerationInput {
 	parameters?: TextGenerationParameters;
 	[property: string]: unknown;
 }
-
 /**
  * Additional inference parameters
  *
@@ -74,11 +72,11 @@ export interface TextGenerationParameters {
 	watermark?: boolean;
 	[property: string]: unknown;
 }
-
+export type TextGenerationOutput = TextGenerationOutputElement[];
 /**
  * Outputs for Text Generation inference
  */
-export interface TextGenerationOutput {
+export interface TextGenerationOutputElement {
 	/**
 	 * The generated text
 	 */

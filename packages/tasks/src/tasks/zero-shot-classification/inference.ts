@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Inputs for Zero Shot Classification inference
  */
@@ -18,7 +17,6 @@ export interface ZeroShotClassificationInput {
 	parameters?: ZeroShotClassificationParameters;
 	[property: string]: unknown;
 }
-
 /**
  * The input text data, with candidate labels
  */
@@ -33,7 +31,6 @@ export interface ZeroShotClassificationInputData {
 	text: string;
 	[property: string]: unknown;
 }
-
 /**
  * Additional inference parameters
  *
@@ -53,11 +50,11 @@ export interface ZeroShotClassificationParameters {
 	multiLabel?: boolean;
 	[property: string]: unknown;
 }
-
+export type ZeroShotClassificationOutput = ZeroShotClassificationOutputElement[];
 /**
  * Outputs of inference for the Zero Shot Classification task
  */
-export interface ZeroShotClassificationOutput {
+export interface ZeroShotClassificationOutputElement {
 	/**
 	 * A candidate label
 	 */

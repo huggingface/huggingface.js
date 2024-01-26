@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Inputs for Video Classification inference
  */
@@ -18,7 +17,6 @@ export interface VideoClassificationInput {
 	parameters?: VideoClassificationParameters;
 	[property: string]: unknown;
 }
-
 /**
  * Additional inference parameters
  *
@@ -43,13 +41,12 @@ export interface VideoClassificationParameters {
 	topK?: number;
 	[property: string]: unknown;
 }
-
 export type TextClassificationOutputTransform = "sigmoid" | "softmax" | "none";
-
+export type VideoClassificationOutput = VideoClassificationOutputElement[];
 /**
  * Outputs of inference for the Video Classification task
  */
-export interface VideoClassificationOutput {
+export interface VideoClassificationOutputElement {
 	/**
 	 * The predicted class label (model specific).
 	 */

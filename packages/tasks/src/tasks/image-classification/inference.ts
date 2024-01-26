@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Inputs for Image Classification inference
  */
@@ -18,7 +17,6 @@ export interface ImageClassificationInput {
 	parameters?: ImageClassificationParameters;
 	[property: string]: unknown;
 }
-
 /**
  * Additional inference parameters
  *
@@ -35,13 +33,12 @@ export interface ImageClassificationParameters {
 	topK?: number;
 	[property: string]: unknown;
 }
-
 export type ImageClassificationOutputTransform = "sigmoid" | "softmax" | "none";
-
+export type ImageClassificationOutput = ImageClassificationOutputElement[];
 /**
  * Outputs of inference for the Image Classification task
  */
-export interface ImageClassificationOutput {
+export interface ImageClassificationOutputElement {
 	/**
 	 * The predicted class label (model specific).
 	 */

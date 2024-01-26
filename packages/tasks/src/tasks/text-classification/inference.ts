@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Inputs for Text Classification inference
  */
@@ -18,7 +17,6 @@ export interface TextClassificationInput {
 	parameters?: TextClassificationParameters;
 	[property: string]: unknown;
 }
-
 /**
  * Additional inference parameters
  *
@@ -35,13 +33,12 @@ export interface TextClassificationParameters {
 	topK?: number;
 	[property: string]: unknown;
 }
-
 export type TextClassificationOutputTransform = "sigmoid" | "softmax" | "none";
-
+export type TextClassificationOutput = TextClassificationOutputElement[];
 /**
  * Outputs of inference for the Text Classification task
  */
-export interface TextClassificationOutput {
+export interface TextClassificationOutputElement {
 	/**
 	 * The predicted class label (model specific).
 	 */

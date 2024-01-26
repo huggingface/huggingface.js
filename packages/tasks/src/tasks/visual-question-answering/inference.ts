@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Inputs for Visual Question Answering inference
  */
@@ -18,7 +17,6 @@ export interface VisualQuestionAnsweringInput {
 	parameters?: VisualQuestionAnsweringParameters;
 	[property: string]: unknown;
 }
-
 /**
  * One (image, question) pair to answer
  */
@@ -33,7 +31,6 @@ export interface VisualQuestionAnsweringInputData {
 	question: unknown;
 	[property: string]: unknown;
 }
-
 /**
  * Additional inference parameters
  *
@@ -48,11 +45,11 @@ export interface VisualQuestionAnsweringParameters {
 	topK?: number;
 	[property: string]: unknown;
 }
-
+export type VisualQuestionAnsweringOutput = VisualQuestionAnsweringOutputElement[];
 /**
  * Outputs of inference for the Visual Question Answering task
  */
-export interface VisualQuestionAnsweringOutput {
+export interface VisualQuestionAnsweringOutputElement {
 	/**
 	 * The answer to the question
 	 */

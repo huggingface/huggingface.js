@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Inputs for Image To Text inference
  */
@@ -18,7 +17,6 @@ export interface ImageToTextInput {
 	parameters?: ImageToTextParameters;
 	[property: string]: unknown;
 }
-
 /**
  * Additional inference parameters
  *
@@ -31,11 +29,11 @@ export interface ImageToTextParameters {
 	maxNewTokens?: number;
 	[property: string]: unknown;
 }
-
+export type ImageToTextOutput = ImageToTextOutputElement[];
 /**
  * Outputs of inference for the Image To Text task
  */
-export interface ImageToTextOutput {
+export interface ImageToTextOutputElement {
 	/**
 	 * The generated text.
 	 */

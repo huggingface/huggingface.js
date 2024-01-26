@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Inputs for Table Question Answering inference
  */
@@ -15,10 +14,11 @@ export interface TableQuestionAnsweringInput {
 	/**
 	 * Additional inference parameters
 	 */
-	parameters?: { [key: string]: unknown };
+	parameters?: {
+		[key: string]: unknown;
+	};
 	[property: string]: unknown;
 }
-
 /**
  * One (table, question) pair to answer
  */
@@ -30,14 +30,16 @@ export interface TableQuestionAnsweringInputData {
 	/**
 	 * The table to serve as context for the questions
 	 */
-	table: { [key: string]: unknown };
+	table: {
+		[key: string]: unknown;
+	};
 	[property: string]: unknown;
 }
-
+export type TableQuestionAnsweringOutput = TableQuestionAnsweringOutputElement[];
 /**
  * Outputs of inference for the Table Question Answering task
  */
-export interface TableQuestionAnsweringOutput {
+export interface TableQuestionAnsweringOutputElement {
 	/**
 	 * If the model has an aggregator, this returns the aggregator.
 	 */

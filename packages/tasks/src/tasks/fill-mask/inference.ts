@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Inputs for Fill Mask inference
  */
@@ -18,7 +17,6 @@ export interface FillMaskInput {
 	parameters?: FillMaskParameters;
 	[property: string]: unknown;
 }
-
 /**
  * Additional inference parameters
  *
@@ -38,11 +36,11 @@ export interface FillMaskParameters {
 	topK?: number;
 	[property: string]: unknown;
 }
-
+export type FillMaskOutput = FillMaskOutputElement[];
 /**
  * Outputs of inference for the Fill Mask task
  */
-export interface FillMaskOutput {
+export interface FillMaskOutputElement {
 	/**
 	 * The corresponding probability
 	 */

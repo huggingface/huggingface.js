@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Inputs for Image Segmentation inference
  */
@@ -18,7 +17,6 @@ export interface ImageSegmentationInput {
 	parameters?: ImageSegmentationParameters;
 	[property: string]: unknown;
 }
-
 /**
  * Additional inference parameters
  *
@@ -43,15 +41,14 @@ export interface ImageSegmentationParameters {
 	threshold?: number;
 	[property: string]: unknown;
 }
-
 export type ImageSegmentationSubtask = "instance" | "panoptic" | "semantic";
-
+export type ImageSegmentationOutput = ImageSegmentationOutputElement[];
 /**
  * Outputs of inference for the Image Segmentation task
  *
  * A predicted mask / segment
  */
-export interface ImageSegmentationOutput {
+export interface ImageSegmentationOutputElement {
 	/**
 	 * The label of the predicted segment
 	 */

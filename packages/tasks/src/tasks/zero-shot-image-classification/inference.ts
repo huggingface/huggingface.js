@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Inputs for Zero Shot Image Classification inference
  */
@@ -18,7 +17,6 @@ export interface ZeroShotImageClassificationInput {
 	parameters?: ZeroShotImageClassificationParameters;
 	[property: string]: unknown;
 }
-
 /**
  * The input image data, with candidate labels
  */
@@ -33,7 +31,6 @@ export interface ZeroShotImageClassificationInputData {
 	image: unknown;
 	[property: string]: unknown;
 }
-
 /**
  * Additional inference parameters
  *
@@ -47,11 +44,11 @@ export interface ZeroShotImageClassificationParameters {
 	hypothesisTemplate?: string;
 	[property: string]: unknown;
 }
-
+export type ZeroShotImageClassificationOutput = ZeroShotImageClassificationOutputElement[];
 /**
  * Outputs of inference for the Zero Shot Image Classification task
  */
-export interface ZeroShotImageClassificationOutput {
+export interface ZeroShotImageClassificationOutputElement {
 	/**
 	 * A candidate label
 	 */

@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Inputs for Audio Classification inference
  */
@@ -18,7 +17,6 @@ export interface AudioClassificationInput {
 	parameters?: AudioClassificationParameters;
 	[property: string]: unknown;
 }
-
 /**
  * Additional inference parameters
  *
@@ -35,13 +33,12 @@ export interface AudioClassificationParameters {
 	topK?: number;
 	[property: string]: unknown;
 }
-
 export type AudioClassificationOutputTransform = "sigmoid" | "softmax" | "none";
-
+export type AudioClassificationOutput = AudioClassificationOutputElement[];
 /**
  * Outputs for Audio Classification inference
  */
-export interface AudioClassificationOutput {
+export interface AudioClassificationOutputElement {
 	/**
 	 * The predicted class label (model specific).
 	 */
