@@ -131,7 +131,7 @@ async function postProcessOutput(path2generated: string, outputSpec: Record<stri
 		updatedInterface,
 	]);
 
-	fs.writeFile(path2generated, printer.printList(ts.ListFormat.MultiLine, newNodes, source), {
+	await fs.writeFile(path2generated, printer.printList(ts.ListFormat.MultiLine, newNodes, source), {
 		flag: "w+",
 		encoding: "utf-8",
 	});
