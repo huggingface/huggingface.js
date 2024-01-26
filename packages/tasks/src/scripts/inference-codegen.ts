@@ -3,6 +3,7 @@ import { quicktype, InputData, JSONSchemaInput, FetchingJSONSchemaStore } from "
 import * as fs from "fs/promises";
 import { existsSync as pathExists } from "fs";
 import * as path from "path";
+import * as ts from "typescript";
 
 const TYPESCRIPT_HEADER_FILE = `
 /**
@@ -18,7 +19,6 @@ const rootDirFinder = function (): string {
 	let level = parts.length - 1;
 	while (level > 0) {
 		const currentPath = parts.slice(0, level).join("/");
-		console.debug(currentPath);
 		if (pathExists(`${currentPath}/package.json`)) {
 			return path.normalize(currentPath);
 		}
@@ -64,6 +64,71 @@ async function generateTypescript(inputData: InputData): Promise<SerializedRende
 	});
 }
 
+async function postProcessOutput(path2generated: string, outputSpec: Record<string, unknown>): Promise<void> {
+	const source = ts.createSourceFile(
+		path.basename(path2generated),
+		await fs.readFile(path2generated, { encoding: "utf-8" }),
+		ts.ScriptTarget.ES2022
+	);
+	const exportedName = outputSpec.title;
+	if (outputSpec.type !== "array" || typeof exportedName !== "string") {
+		console.log("      Nothing to do");
+		return;
+	}
+	const topLevelNodes = source.getChildAt(0).getChildren();
+	const hasTypeAlias = topLevelNodes.some(
+		(node) =>
+			node.kind === ts.SyntaxKind.TypeAliasDeclaration &&
+			(node as ts.TypeAliasDeclaration).name.escapedText === exportedName
+	);
+	if (hasTypeAlias) {
+		return;
+	}
+
+	const interfaceDeclaration = topLevelNodes.find((node): node is ts.InterfaceDeclaration => {
+		if (node.kind === ts.SyntaxKind.InterfaceDeclaration) {
+			return (node as ts.InterfaceDeclaration).name.getText(source) === exportedName;
+		}
+		return false;
+	});
+	if (!interfaceDeclaration) {
+		console.log("      Nothing to do");
+		return;
+	}
+
+	console.log("      Inserting top-level array type alias...");
+
+	const updatedInterface = ts.factory.updateInterfaceDeclaration(
+		interfaceDeclaration,
+		interfaceDeclaration.modifiers,
+		ts.factory.createIdentifier(interfaceDeclaration.name.getText(source) + "Element"),
+		interfaceDeclaration.typeParameters,
+		interfaceDeclaration.heritageClauses,
+		interfaceDeclaration.members
+	);
+	const arrayDeclaration = ts.factory.createTypeAliasDeclaration(
+		[ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)],
+		exportedName,
+		undefined,
+		ts.factory.createArrayTypeNode(ts.factory.createTypeReferenceNode(updatedInterface.name))
+	);
+
+	const printer = ts.createPrinter();
+
+	const newNodes = ts.factory.createNodeArray([
+		...topLevelNodes.filter((node) => node !== interfaceDeclaration),
+		arrayDeclaration,
+		updatedInterface,
+	]);
+
+	fs.writeFile(path2generated, printer.printList(ts.ListFormat.MultiLine, newNodes, source), {
+		flag: "w+",
+		encoding: "utf-8",
+	});
+
+	return;
+}
+
 async function main() {
 	const rootDir = rootDirFinder();
 	const tasksDir = path.join(rootDir, "src", "tasks");
@@ -96,6 +161,11 @@ async function main() {
 				encoding: "utf-8",
 			});
 		}
+
+		const outputSpec = JSON.parse(await fs.readFile(`${taskSpecDir}/output.json`, { encoding: "utf-8" }));
+
+		console.log("   🩹 Post-processing the generated code");
+		await postProcessOutput(`${dirPath}/inference.ts`, outputSpec);
 	}
 	console.debug("✅ All done!");
 }
