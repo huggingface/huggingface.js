@@ -45,11 +45,27 @@ export interface GenerationParameters {
 	temperature?: number;
 	[property: string]: unknown;
 }
+export interface AutomaticSpeechRecognitionOutputChunk {
+	/**
+	 * A chunk of text identified by the model
+	 */
+	text: string;
+	/**
+	 * The start and end timestamps corresponding with the text
+	 */
+	timestamps: number[];
+	[property: string]: unknown;
+}
 export type AutomaticSpeechRecognitionOutput = AutomaticSpeechRecognitionOutputElement[];
 /**
  * Outputs of inference for the Automatic Speech Recognition task
  */
 export interface AutomaticSpeechRecognitionOutputElement {
+	/**
+	 * When returnTimestamps is enabled, chunks contains a list of audio chunks identified by
+	 * the model.
+	 */
+	chunks?: AutomaticSpeechRecognitionOutputChunk[];
 	/**
 	 * The recognized text.
 	 */
