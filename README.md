@@ -42,8 +42,6 @@ This is a collection of JS libraries to interact with the Hugging Face API, with
 - [@huggingface/agents](packages/agents/README.md): Interact with HF models through a natural language interface
 
 
-With more to come, like `@huggingface/endpoints` to manage your dedicated Inference Endpoints!
-
 We use modern features to avoid polyfills and dependencies, so the libraries will only work on modern browsers / Node.js >= 18 / Bun / Deno. 
 
 The libraries are still very young, please help us by opening issues!

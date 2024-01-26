@@ -1,6 +1,6 @@
 # 🤗 Hugging Face Agents.js
 
-A way to call Hugging Face models and inference Endpoints from natural language, using an LLM.
+A way to call Hugging Face models and Inference Endpoints from natural language, using an LLM.
 
 ## Install
 
