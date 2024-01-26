@@ -6,7 +6,7 @@ When filtering for an image, the generated masks might serve as an initial filte
 
 ### Masked Image Modelling
 
-Generating masks can be done to facilitate learning, especially in semi- or unsupervised learning. For example, the [BEiT](https://huggingface.co/docs/transformers/model_doc/beit) use image masked patches in the pre-training.
+Generating masks can be done to facilitate learning, especially in semi- or unsupervised learning. For example, the [BEiT model](https://huggingface.co/docs/transformers/model_doc/beit) uses image-masked patches in the pre-training.
 
 ### Human-in-the-loop
 
@@ -25,7 +25,6 @@ from transformers import pipeline
 generator =  pipeline("mask-generation", device = 0, points_per_batch = 256)
 image_url = "https://huggingface.co/ybelkada/segment-anything/resolve/main/assets/car.png"
 outputs = generator(image_url, points_per_batch = 256)
-
 ```
 
 ## Useful Resources
