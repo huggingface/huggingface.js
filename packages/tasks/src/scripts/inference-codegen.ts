@@ -70,9 +70,9 @@ async function generateTypescript(inputData: InputData): Promise<SerializedRende
  *   - looks for the generated interface for output types
  *   - renames it with a `Element` suffix
  *   - generates  type alias in the form `export type <OutputType> = <OutputType>Element[];
- * 
+ *
  * And writes that to the `inference.ts` file
- *   
+ *
  */
 
 async function postProcessOutput(path2generated: string, outputSpec: Record<string, unknown>): Promise<void> {
