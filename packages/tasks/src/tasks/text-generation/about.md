@@ -132,7 +132,7 @@ Would you like to learn more about the topic? Awesome! Here you can find some cu
 ### Advanced Concepts Explained Simply
 - [Mixture of Experts Explained](https://huggingface.co/blog/moe)
 
-### Advanced Fine-tuning/Training Recipes
+### Advanced Fine-tuning/Training Recipes
 - [Fine-tuning Llama 2 70B using PyTorch FSDP](https://huggingface.co/blog/ram-efficient-pytorch-fsdp)
 - [The N Implementation Details of RLHF with PPO](https://huggingface.co/blog/the_n_implementation_details_of_rlhf_with_ppo)
 - [Preference Tuning LLMs with Direct Preference Optimization Methods](https://huggingface.co/blog/pref-tuning)
