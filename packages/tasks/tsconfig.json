@@ -2,7 +2,7 @@
 	"compilerOptions": {
 		"allowSyntheticDefaultImports": true,
 		"lib": ["ES2022", "DOM"],
-		"module": "CommonJS",
+		"module": "ESNext",
 		"moduleResolution": "node",
 		"target": "ES2022",
 		"forceConsistentCasingInFileNames": true,
@@ -13,6 +13,6 @@
 		"noImplicitOverride": true,
 		"outDir": "./dist"
 	},
-	"include": ["src"],
+	"include": ["src", "scripts"],
 	"exclude": ["dist"]
 }
