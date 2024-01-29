@@ -40,7 +40,7 @@
 	"type": "module",
 	"scripts": {
 		"build": "tsup src/index.ts --format cjs,esm --clean && pnpm run dts",
-		"dts": "node  --import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"ts-node/esm\", pathToFileURL(\"./\"));' scripts/generate-dts.ts",
+		"dts": "tsx scripts/generate-dts.ts",
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
 		"format": "prettier --write .",

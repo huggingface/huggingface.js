@@ -27,7 +27,7 @@
 		"build": "tsup src/index.ts --format cjs,esm --clean --dts && pnpm run inference-codegen",
 		"prepare": "pnpm run build",
 		"check": "tsc",
-		"inference-codegen": "node --import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"ts-node/esm\", pathToFileURL(\"./\"));' scripts/inference-codegen.ts && prettier --write src/tasks/*/inference.ts"
+		"inference-codegen": "tsx scripts/inference-codegen.ts && prettier --write src/tasks/*/inference.ts"
 	},
 	"type": "module",
 	"files": [
