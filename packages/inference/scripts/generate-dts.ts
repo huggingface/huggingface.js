@@ -174,8 +174,6 @@ function* extractAsyncFunctions(fileContent: string): Iterable<string> {
 	}
 }
 
-writeFileSync("./dist/index.js", '/// <reference path="./index.d.ts" />\n' + readFileSync("./dist/index.js", "utf-8"));
-writeFileSync(
-	"./dist/index.mjs",
-	'/// <reference path="./index.d.ts" />\n' + readFileSync("./dist/index.mjs", "utf-8")
-);
+for (const distPath of ["./dist/index.js", "./dist/index.cjs"]) {
+	writeFileSync(distPath, '/// <reference path="./index.d.ts" />\n' + readFileSync(distPath, "utf-8"));
+}
