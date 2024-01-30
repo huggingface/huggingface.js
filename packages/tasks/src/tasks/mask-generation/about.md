@@ -54,7 +54,7 @@ raw_image = Image.open(requests.get(image_url, stream=True).raw).convert("RGB")
 input_points = [[[450, 600]]]
 inputs = processor(raw_image, input_points=input_points, return_tensors="pt").to("cuda")
 outputs = model(**inputs)
-masks = processor.image_processor.post_process_masks(outputs.pred_masks.cpu(), inputs["original_sizes"].cpu(), inputs["reshaped_input_sizes"].cpu())
+masks = processor.post_process_masks(outputs.pred_masks.cpu(), inputs["original_sizes"].cpu(), inputs["reshaped_input_sizes"].cpu())
 scores = outputs.iou_scores
 ```
 
