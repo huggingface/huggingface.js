@@ -110,7 +110,7 @@ Would you like to learn more about the topic? Awesome! Here you can find some cu
 - [ChatUI Docker Spaces](https://huggingface.co/docs/hub/spaces-sdks-docker-chatui)
 - [Causal language modeling task guide](https://huggingface.co/docs/transformers/tasks/language_modeling)
 - [Text generation strategies](https://huggingface.co/docs/transformers/generation_strategies)
-- [Course Chapter on Training a causal language model from scratch](https://huggingface.co/course/chapter7/6?fw=pt)
+- [Course chapter on training a causal language model from scratch](https://huggingface.co/course/chapter7/6?fw=pt)
 
 
 ### Model Inference & Deployment
