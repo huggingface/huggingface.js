@@ -26,7 +26,7 @@ The example below works in segment-everything-mode, where many masks will be ret
 ```python
 from transformers import pipeline
 
-generator =  pipeline("mask-generation", model = "Zigeng/SlimSAM-uniform-50", points_per_batch = 64, device = "cuda")
+generator = pipeline("mask-generation", model="Zigeng/SlimSAM-uniform-50", points_per_batch=64, device="cuda")
 image_url = "https://huggingface.co/ybelkada/segment-anything/resolve/main/assets/car.png"
 outputs = generator(image_url, points_per_batch = 64)
 outputs["masks"]
