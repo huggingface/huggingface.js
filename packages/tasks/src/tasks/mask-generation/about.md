@@ -34,7 +34,7 @@ outputs["masks"]
 ```
 
 Prompt mode takes in three types of prompts:
-- **Point prompt:** The user can leave a point on the image, and a meaningful segment around the point will be returned.
+- **Point prompt:** The user can select a point on the image, and a meaningful segment around the point will be returned.
 - **Box prompt:** The user can draw a box on the image, and a meaningful segment within the box will be returned.
 - **Text prompt:** The user can input a text, and the objects of that type will be segmented. Note that this capability has not yet been released and has only been explored in research.
 
