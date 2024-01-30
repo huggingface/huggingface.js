@@ -56,7 +56,6 @@ await inference.textToImage({
 ### Model Inference
 
 - [Hugging Face Diffusion Models Course](https://github.com/huggingface/diffusion-models-class)
-- [Welcome aMUSEd: Efficient Text-to-Image Generation](https://huggingface.co/blog/amused)
 - [Getting Started with Diffusers](https://huggingface.co/docs/diffusers/index)
 - [Text-to-Image Generation](https://huggingface.co/docs/diffusers/using-diffusers/conditional_image_generation)
 - [Using Stable Diffusion with Core ML on Apple Silicon](https://huggingface.co/blog/diffusers-coreml)
@@ -65,6 +64,7 @@ await inference.textToImage({
 - [Running IF with 🧨 diffusers on a Free Tier Google Colab](https://huggingface.co/blog/if)
 - [Introducing Würstchen: Fast Diffusion for Image Generation](https://huggingface.co/blog/wuerstchen)
 - [Efficient Controllable Generation for SDXL with T2I-Adapters](https://huggingface.co/blog/t2i-sdxl-adapters)
+- [Welcome aMUSEd: Efficient Text-to-Image Generation](https://huggingface.co/blog/amused)
 
 ### Model Fine-tuning
 
