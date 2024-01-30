@@ -112,8 +112,8 @@ Would you like to learn more about the topic? Awesome! Here you can find some cu
 - [Text generation strategies](https://huggingface.co/docs/transformers/generation_strategies)
 - [Course chapter on training a causal language model from scratch](https://huggingface.co/course/chapter7/6?fw=pt)
 
-
 ### Model Inference & Deployment
+
 - [Optimizing your LLM in production](https://huggingface.co/blog/optimize-llm)
 - [Open-Source Text Generation & LLM Ecosystem at Hugging Face](https://huggingface.co/blog/os-llms)
 - [Introducing RWKV - An RNN with the advantages of a transformer](https://huggingface.co/blog/rwkv)
@@ -131,6 +131,7 @@ Would you like to learn more about the topic? Awesome! Here you can find some cu
 - [Creating a Coding Assistant with StarCoder](https://huggingface.co/blog/starchat-alpha)
 
 ### Advanced Concepts Explained Simply
+
 - [Mixture of Experts Explained](https://huggingface.co/blog/moe)
 
 ### Advanced Fine-tuning/Training Recipes

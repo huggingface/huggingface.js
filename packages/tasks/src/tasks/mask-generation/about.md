@@ -20,35 +20,37 @@ Image Segmentation divides an image into segments where each pixel is mapped to 
 
 ## Inference
 
-Mask generation models often work in two modes: segment everything or prompt mode. 
-The example below works in segment-everything-mode, where many masks will be returned. 
+Mask generation models often work in two modes: segment everything or prompt mode.
+The example below works in segment-everything-mode, where many masks will be returned.
 
 ```python
 from transformers import pipeline
 
 generator = pipeline("mask-generation", model="Zigeng/SlimSAM-uniform-50", points_per_batch=64, device="cuda")
 image_url = "https://huggingface.co/ybelkada/segment-anything/resolve/main/assets/car.png"
-outputs = generator(image_url, points_per_batch = 64)
+outputs = generator(image_url)
 outputs["masks"]
 # array of multiple binary masks returned for each generated mask
 ```
 
 Prompt mode takes in three types of prompts:
+
 - **Point prompt:** The user can select a point on the image, and a meaningful segment around the point will be returned.
 - **Box prompt:** The user can draw a box on the image, and a meaningful segment within the box will be returned.
 - **Text prompt:** The user can input a text, and the objects of that type will be segmented. Note that this capability has not yet been released and has only been explored in research.
 
-Below you can see how to use an input-point prompt. It also demonstrates direct model inference without the `pipeline` abstraction.
+Below you can see how to use an input-point prompt. It also demonstrates direct model inference without the `pipeline` abstraction. The input prompt here is a list of lists where outermost list is number of batches, inner one is number of points and innermost one is the actual location of the point.
 
 ```python
 from transformers import SamModel, SamProcessor
 from PIL import Image
-import requests 
+import requests
 
 model = SamModel.from_pretrained("Zigeng/SlimSAM-uniform-50").to("cuda")
 processor = SamProcessor.from_pretrained("Zigeng/SlimSAM-uniform-50")
 
 raw_image = Image.open(requests.get(image_url, stream=True).raw).convert("RGB")
+# pointing to the car window
 input_points = [[[450, 600]]]
 inputs = processor(raw_image, input_points=input_points, return_tensors="pt").to("cuda")
 outputs = model(**inputs)
