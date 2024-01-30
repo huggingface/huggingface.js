@@ -21,7 +21,7 @@ Image Segmentation divides an image into segments where each pixel is mapped to 
 ## Inference
 
 Mask generation models often work in two modes: segment everything or prompt mode. 
-Below, you can see segment everything mode where many masks will be returned. 
+The example below works in segment-everything-mode, where many masks will be returned. 
 
 ```python
 from transformers import pipeline
