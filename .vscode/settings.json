@@ -6,5 +6,10 @@
 	},
 	"[svelte]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"prettier.configPath": ".prettierrc",
+	"json.format.enable": false,
+	"[json]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	}
 }

@@ -24,9 +24,10 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"prepublishOnly": "pnpm run build",
-		"build": "tsup src/index.ts --format cjs,esm --clean --dts",
+		"build": "tsup src/index.ts src/scripts/**.ts --format cjs,esm --clean --dts",
 		"prepare": "pnpm run build",
-		"check": "tsc"
+		"check": "tsc",
+		"inference-codegen": "pnpm run build && node dist/scripts/inference-codegen.js"
 	},
 	"files": [
 		"dist",
@@ -40,5 +41,8 @@
 	],
 	"author": "Hugging Face",
 	"license": "MIT",
-	"devDependencies": {}
+	"devDependencies": {
+		"@types/node": "^20.11.5",
+		"quicktype-core": "https://github.com/huggingface/quicktype/raw/pack-18.0.15/packages/quicktype-core/quicktype-core-18.0.15.tgz"
+	}
 }

@@ -84,7 +84,7 @@ export async function callInferenceApi<T>(
 	requestBody: Record<string, unknown>,
 	apiToken = "",
 	outputParsingFn: (x: unknown) => T,
-	waitForModel = false, // If true, the server will only respond once the model has been loaded on the inference API,
+	waitForModel = false, // If true, the server will only respond once the model has been loaded on Inference Endpoints (serverless)
 	includeCredentials = false,
 	isOnLoadCall = false, // If true, the server will try to answer from cache and not do anything if not
 	useCache = true
@@ -184,7 +184,7 @@ export async function getModelLoadInfo(
 	}
 }
 
-// Extend Inference API requestBody with user supplied Inference API parameters
+// Extend requestBody with user supplied parameters for Inference Endpoints (serverless)
 export function addInferenceParameters(requestBody: Record<string, unknown>, model: ModelData): void {
 	const inference = model?.cardData?.inference;
 	if (typeof inference === "object") {

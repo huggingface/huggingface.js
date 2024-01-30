@@ -28,8 +28,8 @@ const taskData: TaskDataCustom = {
 			id: "Intel/dpt-large",
 		},
 		{
-			description: "Strong Depth Estimation model trained on the KITTI dataset.",
-			id: "facebook/dpt-dinov2-large-kitti",
+			description: "Strong Depth Estimation model trained on a big compilation of datasets.",
+			id: "LiheYoung/depth-anything-large-hf",
 		},
 		{
 			description: "A strong monocular depth estimation model.",
@@ -42,8 +42,12 @@ const taskData: TaskDataCustom = {
 			id: "radames/dpt-depth-estimation-3d-voxels",
 		},
 		{
-			description: "An application that can estimate the depth in a given image.",
-			id: "keras-io/Monocular-Depth-Estimation",
+			description: "An application to compare the outputs of different depth estimation models.",
+			id: "LiheYoung/Depth-Anything",
+		},
+		{
+			description: "An application to try state-of-the-art depth estimation.",
+			id: "merve/compare_depth_models",
 		},
 	],
 	summary: "Depth estimation is the task of predicting depth of the objects present in an image.",

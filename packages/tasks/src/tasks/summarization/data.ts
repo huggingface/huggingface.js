@@ -1,6 +1,7 @@
 import type { TaskDataCustom } from "..";
 
 const taskData: TaskDataCustom = {
+	canonicalId: "text2text-generation",
 	datasets: [
 		{
 			description:

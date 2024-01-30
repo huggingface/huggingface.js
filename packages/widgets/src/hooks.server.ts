@@ -41,7 +41,7 @@ const handleSSO =
 				],
 				secret: env.OAUTH_CLIENT_SECRET,
 				/**
-				 * Get the access_token without an account in DB, to make calls to the inference API
+				 * Get the access_token without an account in DB, to make calls to Inference Endpoints
 				 */
 				callbacks: {
 					jwt({ token, account, profile }) {
