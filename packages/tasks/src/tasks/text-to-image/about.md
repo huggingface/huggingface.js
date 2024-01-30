@@ -54,6 +54,7 @@ await inference.textToImage({
 ## Useful Resources
 
 ### Model Inference
+
 - [Hugging Face Diffusion Models Course](https://github.com/huggingface/diffusion-models-class)
 - [Welcome aMUSEd: Efficient Text-to-Image Generation](https://huggingface.co/blog/amused)
 - [Getting Started with Diffusers](https://huggingface.co/docs/diffusers/index)
