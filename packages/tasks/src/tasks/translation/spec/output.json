@@ -1,0 +1,7 @@
+{
+	"$ref": "/inference/schemas/text2text-generation/output.json",
+	"$id": "/inference/schemas/translation/output.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"title": "TranslationOutput",
+	"description": "Outputs for Translation inference"
+}

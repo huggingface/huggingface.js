@@ -1,0 +1,17 @@
+{
+	"$id": "/inference/schemas/text-generation/output.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Outputs for Text Generation inference",
+	"title": "TextGenerationOutput",
+	"type": "array",
+	"items": {
+		"type": "object",
+		"properties": {
+			"generatedText": {
+				"type": "string",
+				"description": "The generated text"
+			}
+		},
+		"required": ["generatedText"]
+	}
+}

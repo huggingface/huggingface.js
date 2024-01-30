@@ -1,6 +1,7 @@
 import type { TaskDataCustom } from "..";
 
 const taskData: TaskDataCustom = {
+	canonicalId: "text-to-audio",
 	datasets: [
 		{
 			description: "Thousands of short audio clips of a single speaker.",
