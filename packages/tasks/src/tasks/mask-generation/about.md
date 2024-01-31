@@ -39,7 +39,7 @@ Prompt mode takes in three types of prompts:
 - **Box prompt:** The user can draw a box on the image, and a meaningful segment within the box will be returned.
 - **Text prompt:** The user can input a text, and the objects of that type will be segmented. Note that this capability has not yet been released and has only been explored in research.
 
-Below you can see how to use an input-point prompt. It also demonstrates direct model inference without the `pipeline` abstraction. The input prompt here is a list of lists where outermost list is number of batches, inner one is number of points and innermost one is the actual location of the point.
+Below you can see how to use an input-point prompt. It also demonstrates direct model inference without the `pipeline` abstraction. The input prompt here is a nested list where the outermost list is the batch size (`1`), then the number of points (also `1` in this example), and the innermost list contains the actual coordinates of the point (`[450, 600]`).
 
 ```python
 from transformers import SamModel, SamProcessor
