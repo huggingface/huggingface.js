@@ -11,6 +11,7 @@ import imageClassification from "./image-classification/data";
 import imageToImage from "./image-to-image/data";
 import imageToText from "./image-to-text/data";
 import imageSegmentation from "./image-segmentation/data";
+import maskGeneration from "./mask-generation/data";
 import objectDetection from "./object-detection/data";
 import depthEstimation from "./depth-estimation/data";
 import placeholder from "./placeholder/data";
@@ -33,6 +34,7 @@ import videoClassification from "./video-classification/data";
 import visualQuestionAnswering from "./visual-question-answering/data";
 import zeroShotClassification from "./zero-shot-classification/data";
 import zeroShotImageClassification from "./zero-shot-image-classification/data";
+import zeroShotObjectDetection from "./zero-shot-object-detection/data";
 
 import type { ModelLibraryKey } from "../model-libraries";
 
@@ -131,7 +133,7 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"image-to-image": getData("image-to-image", imageToImage),
 	"image-to-text": getData("image-to-text", imageToText),
 	"image-to-video": undefined,
-	"mask-generation": getData("mask-generation", placeholder),
+	"mask-generation": getData("mask-generation", maskGeneration),
 	"multiple-choice": undefined,
 	"object-detection": getData("object-detection", objectDetection),
 	"video-classification": getData("video-classification", videoClassification),
@@ -162,7 +164,7 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"voice-activity-detection": undefined,
 	"zero-shot-classification": getData("zero-shot-classification", zeroShotClassification),
 	"zero-shot-image-classification": getData("zero-shot-image-classification", zeroShotImageClassification),
-	"zero-shot-object-detection": getData("zero-shot-object-detection", placeholder),
+	"zero-shot-object-detection": getData("zero-shot-object-detection", zeroShotObjectDetection),
 	"text-to-3d": getData("text-to-3d", placeholder),
 	"image-to-3d": getData("image-to-3d", placeholder),
 } as const;
