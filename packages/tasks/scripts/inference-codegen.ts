@@ -1,9 +1,9 @@
 import type { SerializedRenderResult } from "quicktype-core";
 import { quicktype, InputData, JSONSchemaInput, FetchingJSONSchemaStore } from "quicktype-core";
-import * as fs from "fs/promises";
-import { existsSync as pathExists } from "fs";
-import * as path from "path";
-import * as ts from "typescript";
+import * as fs from "node:fs/promises";
+import { existsSync as pathExists } from "node:fs";
+import * as path from "node:path/posix";
+import ts from "typescript";
 
 const TYPESCRIPT_HEADER_FILE = `
 /**
@@ -15,16 +15,17 @@ const TYPESCRIPT_HEADER_FILE = `
 `;
 
 const rootDirFinder = function (): string {
-	const parts = __dirname.split("/");
-	let level = parts.length - 1;
-	while (level > 0) {
-		const currentPath = parts.slice(0, level).join("/");
-		if (pathExists(`${currentPath}/package.json`)) {
-			return path.normalize(currentPath);
+	let currentPath = path.normalize(import.meta.url);
+
+	while (currentPath !== "/") {
+		if (pathExists(path.join(currentPath, "package.json"))) {
+			return currentPath;
 		}
-		level--;
+
+		currentPath = path.normalize(path.join(currentPath, ".."));
 	}
-	return "";
+
+	return "/";
 };
 
 /**
@@ -53,6 +54,7 @@ async function generateTypescript(inputData: InputData): Promise<SerializedRende
 		inputData,
 		lang: "typescript",
 		alphabetizeProperties: true,
+		indentation: "\t",
 		rendererOptions: {
 			"just-types": true,
 			"nice-property-names": true,
@@ -139,54 +141,44 @@ async function postProcessOutput(path2generated: string, outputSpec: Record<stri
 	return;
 }
 
-async function main() {
-	const rootDir = rootDirFinder();
-	const tasksDir = path.join(rootDir, "src", "tasks");
-	const allTasks = await Promise.all(
-		(await fs.readdir(tasksDir, { withFileTypes: true }))
-			.filter((entry) => entry.isDirectory())
-			.filter((entry) => entry.name !== "placeholder")
-			.map(async (entry) => ({ task: entry.name, dirPath: path.join(entry.path, entry.name) }))
-	);
-	const allSpecFiles = [
-		path.join(tasksDir, "common-definitions.json"),
-		...allTasks
-			.flatMap(({ dirPath }) => [path.join(dirPath, "spec", "input.json"), path.join(dirPath, "spec", "output.json")])
-			.filter((filepath) => pathExists(filepath)),
-	];
+const rootDir = rootDirFinder();
+const tasksDir = path.join(rootDir, "src", "tasks");
+const allTasks = await Promise.all(
+	(await fs.readdir(tasksDir, { withFileTypes: true }))
+		.filter((entry) => entry.isDirectory())
+		.filter((entry) => entry.name !== "placeholder")
+		.map(async (entry) => ({ task: entry.name, dirPath: path.join(entry.path, entry.name) }))
+);
+const allSpecFiles = [
+	path.join(tasksDir, "common-definitions.json"),
+	...allTasks
+		.flatMap(({ dirPath }) => [path.join(dirPath, "spec", "input.json"), path.join(dirPath, "spec", "output.json")])
+		.filter((filepath) => pathExists(filepath)),
+];
 
-	for (const { task, dirPath } of allTasks) {
-		const taskSpecDir = path.join(dirPath, "spec");
-		if (!(pathExists(path.join(taskSpecDir, "input.json")) && pathExists(path.join(taskSpecDir, "output.json")))) {
-			console.debug(`No spec found for task ${task} - skipping`);
-			continue;
-		}
-		console.debug(`✨ Generating types for task`, task);
-
-		console.debug("   📦 Building input data");
-		const inputData = await buildInputData(task, taskSpecDir, allSpecFiles);
-
-		console.debug("   🏭 Generating typescript code");
-		{
-			const { lines } = await generateTypescript(inputData);
-			await fs.writeFile(`${dirPath}/inference.ts`, [TYPESCRIPT_HEADER_FILE, ...lines].join(`\n`), {
-				flag: "w+",
-				encoding: "utf-8",
-			});
-		}
-
-		const outputSpec = JSON.parse(await fs.readFile(`${taskSpecDir}/output.json`, { encoding: "utf-8" }));
-
-		console.log("   🩹 Post-processing the generated code");
-		await postProcessOutput(`${dirPath}/inference.ts`, outputSpec);
+for (const { task, dirPath } of allTasks) {
+	const taskSpecDir = path.join(dirPath, "spec");
+	if (!(pathExists(path.join(taskSpecDir, "input.json")) && pathExists(path.join(taskSpecDir, "output.json")))) {
+		console.debug(`No spec found for task ${task} - skipping`);
+		continue;
 	}
-	console.debug("✅ All done!");
-}
+	console.debug(`✨ Generating types for task`, task);
 
-let exit = 0;
-main()
-	.catch((err) => {
-		console.error("Failure", err);
-		exit = 1;
-	})
-	.finally(() => process.exit(exit));
+	console.debug("   📦 Building input data");
+	const inputData = await buildInputData(task, taskSpecDir, allSpecFiles);
+
+	console.debug("   🏭 Generating typescript code");
+	{
+		const { lines } = await generateTypescript(inputData);
+		await fs.writeFile(`${dirPath}/inference.ts`, [TYPESCRIPT_HEADER_FILE, ...lines].join(`\n`), {
+			flag: "w+",
+			encoding: "utf-8",
+		});
+	}
+
+	const outputSpec = JSON.parse(await fs.readFile(`${taskSpecDir}/output.json`, { encoding: "utf-8" }));
+
+	console.log("   🩹 Post-processing the generated code");
+	await postProcessOutput(`${dirPath}/inference.ts`, outputSpec);
+}
+console.debug("✅ All done!");
