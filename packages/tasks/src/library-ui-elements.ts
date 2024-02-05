@@ -422,7 +422,7 @@ const transformers = (model: ModelData) => {
 	if (!info) {
 		return [`# ⚠️ Type of model unknown`];
 	}
-	const remote_code_snippet = model.config?.auto_map ? ", trust_remote_code=True" : "";
+	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
 
 	let autoSnippet: string;
 	if (info.processor) {
