@@ -21,9 +21,9 @@ Object Detection models are used to count instances of objects in a given image,
 You can infer with Object Detection models through the `object-detection` pipeline. When calling the pipeline you just need to specify a path or http link to an image.
 
 ```python
-model = pipeline("object-detection")
-
-model("path_to_cat_image")
+model = pipeline(task="object-detection", model="facebook/detr-resnet-50", device=0)
+result = model("path_to_cat_image")
+result
 
 # [{'label': 'blanket',
 #  'mask': mask_string,
