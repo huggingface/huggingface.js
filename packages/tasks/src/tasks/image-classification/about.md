@@ -17,7 +17,7 @@ With the `transformers` library, you can use the `image-classification` pipeline
 ```python
 from transformers import pipeline
 image_classifier = pipeline(task="image-classification", model="microsoft/resnet-50", device=0)
-result = image_classifier("IMAGE_PATH")
+result = image_classifier(IMAGE_PATH)
 result
 
 # [{'label': 'Egyptian cat', 'score': 0.7005051970481873},

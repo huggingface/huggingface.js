@@ -22,7 +22,7 @@ You can infer with Object Detection models through the `object-detection` pipeli
 
 ```python
 model = pipeline(task="object-detection", model="facebook/detr-resnet-50", device=0)
-result = model("path_to_cat_image")
+result = model(IMAGE_PATH)
 result
 
 # [{'label': 'blanket',

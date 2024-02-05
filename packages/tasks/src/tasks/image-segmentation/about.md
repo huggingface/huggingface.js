@@ -33,7 +33,7 @@ You can infer with Image Segmentation models using the `image-segmentation` pipe
 ```python
 !pip install timm
 model = pipeline(task="image-segmentation", model="CIDAS/clipseg-rd64-refined, device=0)
-result = model("cat.png")
+result = model(IMAGE_PATH)
 result
 
 #[{'label': 'cat',
