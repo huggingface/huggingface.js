@@ -15,7 +15,7 @@ With the `transformers` library, you can use the `depth-estimation` pipeline to 
 ```python
 from transformers import pipeline
 
-estimator = pipeline(task="depth-estimation", model="Intel/dpt-large")
+estimator = pipeline(task="depth-estimation", model="Intel/dpt-large", device=0)
 result = estimator(images="http://images.cocodataset.org/val2017/000000039769.jpg")
 result
 

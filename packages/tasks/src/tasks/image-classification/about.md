@@ -16,11 +16,12 @@ With the `transformers` library, you can use the `image-classification` pipeline
 
 ```python
 from transformers import pipeline
-image_classifier = pipeline(task="image-classification", model="microsoft/resnet-50")
-image_classifier("IMAGE_PATH")
+image_classifier = pipeline(task="image-classification", model="microsoft/resnet-50", device=0)
+result = image_classifier("IMAGE_PATH")
+result
 
-[{'label': 'Egyptian cat', 'score': 0.7005051970481873},
- {'label': 'tabby, tabby cat', 'score': 0.16163259744644165}]
+# [{'label': 'Egyptian cat', 'score': 0.7005051970481873},
+# {'label': 'tabby, tabby cat', 'score': 0.16163259744644165}]
 ```
 
 You can use [huggingface.js](https://github.com/huggingface/huggingface.js) to classify images using models on Hugging Face Hub.
