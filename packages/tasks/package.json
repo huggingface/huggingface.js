@@ -7,14 +7,14 @@
 	"publishConfig": {
 		"access": "public"
 	},
-	"main": "./dist/index.js",
-	"module": "./dist/index.mjs",
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.js",
 	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
-			"require": "./dist/index.js",
-			"import": "./dist/index.mjs"
+			"require": "./dist/index.cjs",
+			"import": "./dist/index.js"
 		}
 	},
 	"source": "src/index.ts",
@@ -24,11 +24,12 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"prepublishOnly": "pnpm run build",
-		"build": "tsup src/index.ts src/scripts/**.ts --format cjs,esm --clean --dts",
+		"build": "tsup src/index.ts --format cjs,esm --clean --dts && pnpm run inference-codegen",
 		"prepare": "pnpm run build",
 		"check": "tsc",
-		"inference-codegen": "pnpm run build && node dist/scripts/inference-codegen.js"
+		"inference-codegen": "tsx scripts/inference-codegen.ts && prettier --write src/tasks/*/inference.ts"
 	},
+	"type": "module",
 	"files": [
 		"dist",
 		"src",
