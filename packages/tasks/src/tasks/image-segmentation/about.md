@@ -32,8 +32,10 @@ You can infer with Image Segmentation models using the `image-segmentation` pipe
 
 ```python
 !pip install timm
-model = pipeline("image-segmentation")
-model("cat.png")
+model = pipeline(task="image-segmentation", model="CIDAS/clipseg-rd64-refined, device=0)
+result = model("cat.png")
+result
+
 #[{'label': 'cat',
 #  'mask': mask_code,
 #  'score': 0.999}
