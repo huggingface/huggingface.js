@@ -32,7 +32,10 @@ You can infer with Image Segmentation models using the `image-segmentation` pipe
 
 ```python
 !pip install timm
-model = pipeline(task="image-segmentation", model="CIDAS/clipseg-rd64-refined, device=0)
+
+from transformers import pipeline
+
+model = pipeline(task="image-segmentation", model="facebook/detr-resnet-50-panoptic", device=0)
 result = model(IMAGE_PATH)
 result
 
