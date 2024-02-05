@@ -32,7 +32,8 @@ The model can be loaded with the zero-shot-image-classification pipeline like so
 from transformers import pipeline
 # More models in the model hub.
 model_name = "openai/clip-vit-large-patch14-336"
-classifier = pipeline("zero-shot-image-classification", model = model_name)
+device_name = 0
+classifier = pipeline("zero-shot-image-classification", model = model_name, device = device_name)
 ```
 
 You can then use this pipeline to classify images into any of the class names you specify. You can specify more than two class labels too.
