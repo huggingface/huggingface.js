@@ -1,0 +1,35 @@
+{
+	"$id": "/inference/schemas/Conversational/input.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Inputs for Conversational inference",
+	"title": "ConversationalInput",
+	"type": "object",
+	"properties": {
+		"data": {
+			"description": "The previous messages in the conversation",
+			"type": "array",
+			"items": {
+				"type": "object",
+				"title": "ConversationalMessages",
+				"properties": {
+					"content": { "type": "string", "description": "The content of the message" },
+					"role": { "type": "string", "description": "The role of the associated entity (eg, \"user\" or \"bot\")" }
+				},
+				"required": ["content", "role"]
+			}
+		},
+		"parameters": {
+			"description": "Additional inference parameters",
+			"$ref": "#/$defs/ConversationalParameters"
+		}
+	},
+	"$defs": {
+		"ConversationalParameters": {
+			"title": "ConversationalParameters",
+			"description": "Additional parameters",
+			"type": "object",
+			"properties": {}
+		}
+	},
+	"required": ["data"]
+}
