@@ -1,6 +1,8 @@
 import type { ModelData } from "./model-data";
 import type { ModelLibraryKey } from "./model-libraries";
 
+const TAG_CUSTOM_CODE = "custom_code";
+
 /**
  * Elements configurable by a model library.
  */
@@ -422,7 +424,7 @@ const transformers = (model: ModelData) => {
 	if (!info) {
 		return [`# ⚠️ Type of model unknown`];
 	}
-	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
+	const remote_code_snippet = model.tags?.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
 
 	let autoSnippet: string;
 	if (info.processor) {
