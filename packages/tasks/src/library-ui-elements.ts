@@ -35,11 +35,11 @@ function nameWithoutNamespace(modelId: string): string {
 
 //#region snippets
 
-const adapter_transformers = (model: ModelData) => [
-	`from transformers import ${model.config?.adapter_transformers?.model_class}
+const adapters = (model: ModelData) => [
+	`from adapters import AutoAdapterModel
 
-model = ${model.config?.adapter_transformers?.model_class}.from_pretrained("${model.config?.adapter_transformers?.model_name}")
-model.load_adapter("${model.id}", source="hf")`,
+model = AutoAdapterModel.from_pretrained("${model.config?.adapter_transformers?.model_name}")
+model.load_adapter("${model.id}", set_active=True)`,
 ];
 
 const allennlpUnknown = (model: ModelData) => [
@@ -72,7 +72,7 @@ model = BaseModel.from_pretrained("${model.id}")`,
 ];
 
 function get_base_diffusers_model(model: ModelData): string {
-	return model.cardData?.base_model ?? "fill-in-base-model";
+	return model.cardData?.base_model?.toString() ?? "fill-in-base-model";
 }
 
 const bertopic = (model: ModelData) => [
@@ -541,6 +541,21 @@ transcriptions = asr_model.transcribe(["file.wav"])`,
 
 const mlAgents = (model: ModelData) => [`mlagents-load-from-hf --repo-id="${model.id}" --local-dir="./downloads"`];
 
+const sentis = (/* model: ModelData */) => [
+	`string modelName = "[Your model name here].sentis";
+Model model = ModelLoader.Load(Application.streamingAssetsPath + "/" + modelName);
+IWorker engine = WorkerFactory.CreateWorker(BackendType.GPUCompute, model);
+// Please see provided C# file for more details
+`,
+];
+
+const mlx = (model: ModelData) => [
+	`pip install huggingface_hub hf_transfer
+
+export HF_HUB_ENABLE_HF_TRANSFER=1
+huggingface-cli download --local-dir ${nameWithoutNamespace(model.id)} ${model.id}`,
+];
+
 const nemo = (model: ModelData) => {
 	let command: string[] | undefined = undefined;
 	// Resolve the tag to a nemo domain/sub-domain
@@ -561,11 +576,11 @@ model = AutoModel.load_from_hf_hub("${model.id}")`,
 
 export const MODEL_LIBRARIES_UI_ELEMENTS: Partial<Record<ModelLibraryKey, LibraryUiElement>> = {
 	"adapter-transformers": {
-		btnLabel: "Adapter Transformers",
-		repoName: "adapter-transformers",
-		repoUrl: "https://github.com/Adapter-Hub/adapter-transformers",
-		docsUrl: "https://huggingface.co/docs/hub/adapter-transformers",
-		snippets: adapter_transformers,
+		btnLabel: "Adapters",
+		repoName: "adapters",
+		repoUrl: "https://github.com/Adapter-Hub/adapters",
+		docsUrl: "https://huggingface.co/docs/hub/adapters",
+		snippets: adapters,
 	},
 	allennlp: {
 		btnLabel: "AllenNLP",
@@ -620,6 +635,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS: Partial<Record<ModelLibraryKey, Librar
 		repoUrl: "https://github.com/keras-team/keras",
 		docsUrl: "https://huggingface.co/docs/hub/keras",
 		snippets: keras,
+	},
+	mlx: {
+		btnLabel: "MLX",
+		repoName: "MLX",
+		repoUrl: "https://github.com/ml-explore/mlx-examples/tree/main",
+		snippets: mlx,
 	},
 	nemo: {
 		btnLabel: "NeMo",
@@ -757,9 +778,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS: Partial<Record<ModelLibraryKey, Librar
 	"ml-agents": {
 		btnLabel: "ml-agents",
 		repoName: "ml-agents",
-		repoUrl: "https://github.com/huggingface/ml-agents",
+		repoUrl: "https://github.com/Unity-Technologies/ml-agents",
 		docsUrl: "https://huggingface.co/docs/hub/ml-agents",
 		snippets: mlAgents,
+	},
+	"unity-sentis": {
+		btnLabel: "unity-sentis",
+		repoName: "unity-sentis",
+		repoUrl: "https://github.com/Unity-Technologies/sentis-samples",
+		snippets: sentis,
 	},
 	pythae: {
 		btnLabel: "pythae",

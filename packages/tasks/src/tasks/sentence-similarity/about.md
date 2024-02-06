@@ -8,7 +8,7 @@ You can extract information from documents using Sentence Similarity models. The
 
 The [Sentence Transformers](https://www.sbert.net/) library is very powerful for calculating embeddings of sentences, paragraphs, and entire documents. An embedding is just a vector representation of a text and is useful for finding how similar two texts are.
 
-You can find and use [hundreds of Sentence Transformers](https://huggingface.co/models?library=sentence-transformers&sort=downloads) models from the Hub by directly using the library, playing with the widgets in the browser or using the Inference API.
+You can find and use [hundreds of Sentence Transformers](https://huggingface.co/models?library=sentence-transformers&sort=downloads) models from the Hub by directly using the library, playing with the widgets in the browser or using Inference Endpoints.
 
 ## Task Variants
 
@@ -16,7 +16,7 @@ You can find and use [hundreds of Sentence Transformers](https://huggingface.co/
 
 Passage Ranking is the task of ranking documents based on their relevance to a given query. The task is evaluated on Mean Reciprocal Rank. These models take one query and multiple documents and return ranked documents according to the relevancy to the query. 📄
 
-You can infer with Passage Ranking models using the [Inference API](https://huggingface.co/inference-api). The Passage Ranking model inputs are a query for which we look for relevancy in the documents and the documents we want to search. The model will return scores according to the relevancy of these documents for the query.
+You can infer with Passage Ranking models using [Inference Endpoints](https://huggingface.co/inference-endpoints). The Passage Ranking model inputs are a query for which we look for relevancy in the documents and the documents we want to search. The model will return scores according to the relevancy of these documents for the query.
 
 ```python
 import json

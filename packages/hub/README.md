@@ -27,6 +27,8 @@ Check out the [full documentation](https://huggingface.co/docs/huggingface.js/hu
 
 For some of the calls, you need to create an account and generate an [access token](https://huggingface.co/settings/tokens).
 
+Learn how to find free models using the hub package in this [interactive tutorial](https://scrimba.com/scrim/c7BbVPcd?pl=pkVnrP7uP).
+
 ```ts
 import { createRepo, uploadFiles, uploadFilesWithProgress, deleteFile, deleteRepo, listFiles, whoAmI } from "@huggingface/hub";
 import type { RepoDesignation, Credentials } from "@huggingface/hub";
@@ -86,6 +88,28 @@ for await (const fileInfo of listFiles({repo})) {
 
 await deleteRepo({ repo, credentials });
 ```
+
+## OAuth Login
+
+It's possible to login using OAuth (["Sign in with HF"](https://huggingface.co/docs/hub/oauth)).
+
+This will allow you get an access token to use some of the API, depending on the scopes set inside the Space or the OAuth App.
+
+```ts
+import { oauthLoginUrl, oauthHandleRedirectIfPresent } from "@huggingface/hub";
+
+const oauthResult = await oauthHandleRedirectIfPresent();
+
+if (!oauthResult) {
+  // If the user is not logged in, redirect to the login page
+  window.location.href = await oauthLoginUrl();
+}
+
+// You can use oauthResult.accessToken, oauthResult.accessTokenExpiresAt and oauthResult.userInfo
+console.log(oauthResult);
+```
+
+Checkout the demo: https://huggingface.co/spaces/huggingfacejs/client-side-oauth
 
 ## Performance considerations
 

@@ -25,9 +25,8 @@ If you want to run only specific tests, you can do `pnpm test -- -t "test name"`
 - Add the package name in [`pnpm-workspace.yaml`](pnpm-workspace.yaml)
 - Add a `package.json` inspired from the other packages ([`packages/hub/package.json`](packages/hub/package.json) / [`packages/agents/package.json`](packages/agents/package.json)) in `packages/<package name>/package.json`
 - Run `pnpm install` at the root
-- Edit [`packages/doc-internal/package.json`](packages/doc-internal/package.json) and add the two commands in the `scripts` section:
-  - `prepublish-<package name>`
-  - `doc-<package name>`
+- Edit [`packages/doc-internal/package.json`](packages/doc-internal/package.json) and add the command in the `scripts` section:
+  - `doc-<package name>` (don't forget to edit the `start` command too)
 - Add the `<package-name>-publish.yml` file in the `.github/workflows` folder, inspired from the other packages
 - Add the package in the main README.md
 - Add a `tsup.config.ts` file in the package folder, inspired from the other packages, or just use `tsup src/index.ts --format cjs,esm --clean --dts` as the build command

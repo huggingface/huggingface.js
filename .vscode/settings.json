@@ -2,9 +2,14 @@
 	"editor.defaultFormatter": "esbenp.prettier-vscode",
 	"editor.formatOnSave": true,
 	"editor.codeActionsOnSave": {
-		"source.fixAll": true
+		"source.fixAll": "explicit"
 	},
 	"[svelte]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"prettier.configPath": ".prettierrc",
+	"json.format.enable": false,
+	"[json]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	}
 }

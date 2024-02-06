@@ -8,6 +8,7 @@
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
 	import { callInferenceApi, getBlobFromUrl } from "../../shared/helpers.js";
 	import { isAssetInput } from "../../shared/inputValidation.js";
+	import { widgetStates } from "../../stores.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -15,6 +16,8 @@
 	export let model: WidgetProps["model"];
 	export let noTitle: WidgetProps["noTitle"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
+
+	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
 	let computeTime = "";
 	let error: string = "";
@@ -92,7 +95,7 @@
 		throw new TypeError("Invalid output: output must be of type Array & non-empty");
 	}
 
-	async function applyInputSample(sample: WidgetExampleAssetInput, opts: ExampleRunOpts = {}) {
+	async function applyWidgetExample(sample: WidgetExampleAssetInput, opts: ExampleRunOpts = {}) {
 		imgSrc = sample.src;
 		if (opts.isPreview) {
 			output = "";
@@ -104,58 +107,54 @@
 	}
 </script>
 
-<WidgetWrapper
-	{callApiOnMount}
-	{apiUrl}
-	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
-	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	validateExample={isAssetInput}
->
-	<svelte:fragment slot="top" let:isDisabled>
-		<form>
-			<WidgetDropzone
-				classNames="hidden md:block"
-				{isLoading}
-				{isDisabled}
-				{imgSrc}
-				{onSelectFile}
-				onError={(e) => (error = e)}
-			>
-				{#if imgSrc}
-					<img src={imgSrc} class="pointer-events-none mx-auto max-h-44 shadow" alt="" />
-				{/if}
-			</WidgetDropzone>
-			<!-- Better UX for mobile/table through CSS breakpoints -->
-			{#if imgSrc}
-				{#if imgSrc}
-					<div class="mb-2 flex justify-center bg-gray-50 dark:bg-gray-900 md:hidden">
-						<img src={imgSrc} class="pointer-events-none max-h-44" alt="" />
-					</div>
-				{/if}
-			{/if}
-			<WidgetFileInput
-				accept="image/*"
-				classNames="mr-2 md:hidden"
-				{isLoading}
-				{isDisabled}
-				label="Browse for image"
-				{onSelectFile}
-			/>
-			{#if warning}
-				<div class="alert alert-warning mt-2">{warning}</div>
-			{/if}
-		</form>
-	</svelte:fragment>
-	<svelte:fragment slot="bottom">
-		{#if model?.pipeline_tag !== "text-generation"}
-			<WidgetOutputText classNames="mt-4" {output} />
+<WidgetWrapper {apiUrl} {includeCredentials} {model} let:WidgetInfo let:WidgetHeader let:WidgetFooter>
+	<WidgetHeader
+		{noTitle}
+		{model}
+		{isLoading}
+		{isDisabled}
+		{callApiOnMount}
+		{applyWidgetExample}
+		validateExample={isAssetInput}
+	/>
+
+	<WidgetDropzone
+		classNames="hidden md:block"
+		{isLoading}
+		{isDisabled}
+		{imgSrc}
+		{onSelectFile}
+		onError={(e) => (error = e)}
+	>
+		{#if imgSrc}
+			<img src={imgSrc} class="pointer-events-none mx-auto max-h-44 shadow" alt="" />
 		{/if}
-	</svelte:fragment>
+	</WidgetDropzone>
+	<!-- Better UX for mobile/table through CSS breakpoints -->
+	{#if imgSrc}
+		{#if imgSrc}
+			<div class="mb-2 flex justify-center bg-gray-50 dark:bg-gray-900 md:hidden">
+				<img src={imgSrc} class="pointer-events-none max-h-44" alt="" />
+			</div>
+		{/if}
+	{/if}
+	<WidgetFileInput
+		accept="image/*"
+		classNames="mr-2 md:hidden"
+		{isLoading}
+		{isDisabled}
+		label="Browse for image"
+		{onSelectFile}
+	/>
+	{#if warning}
+		<div class="alert alert-warning mt-2">{warning}</div>
+	{/if}
+
+	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
+
+	{#if model?.pipeline_tag !== "text-generation"}
+		<WidgetOutputText classNames="mt-4" {output} />
+	{/if}
+
+	<WidgetFooter {model} {isDisabled} {outputJson} />
 </WidgetWrapper>

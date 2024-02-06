@@ -39,8 +39,6 @@ export type {
 } from "./widget-example";
 export { InferenceDisplayability } from "./model-data";
 
-export { TAG_NFAA_CONTENT, OTHER_TAGS_SUGGESTIONS, TAG_TEXT_GENERATION_INFERENCE, TAG_CUSTOM_CODE } from "./tags";
-
 import * as snippets from "./snippets";
 export { snippets };
 

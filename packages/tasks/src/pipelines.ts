@@ -62,7 +62,7 @@ export interface PipelineData {
 /// This type is used in multiple places in the Hugging Face
 /// ecosystem:
 ///  - To determine which widget to show.
-///  - To determine which endpoint of Inference API to use.
+///  - To determine which endpoint of Inference Endpoints to use.
 ///  - As filters at the left of models and datasets page.
 ///
 /// Note that this is sensitive to order.

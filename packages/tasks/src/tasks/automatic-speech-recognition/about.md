@@ -18,7 +18,7 @@ The use of Multilingual ASR has become popular, the idea of maintaining just a s
 
 ## Inference
 
-The Hub contains over [~9,000 ASR models](https://huggingface.co/models?pipeline_tag=automatic-speech-recognition&sort=downloads) that you can use right away by trying out the widgets directly in the browser or calling the models as a service using the Inference API. Here is a simple code snippet to do exactly this:
+The Hub contains over [~9,000 ASR models](https://huggingface.co/models?pipeline_tag=automatic-speech-recognition&sort=downloads) that you can use right away by trying out the widgets directly in the browser or calling the models as a service using Inference Endpoints. Here is a simple code snippet to do exactly this:
 
 ```python
 import json
@@ -83,6 +83,8 @@ These events help democratize ASR for all languages, including low-resource lang
 - [Massively Multilingual ASR: 50 Languages, 1 Model, 1 Billion Parameters](https://arxiv.org/pdf/2007.03001.pdf)
 - An ASR toolkit made by [NVIDIA: NeMo](https://github.com/NVIDIA/NeMo) with code and pretrained models useful for new ASR models. Watch the [introductory video](https://www.youtube.com/embed/wBgpMf_KQVw) for an overview.
 - [An introduction to SpeechT5, a multi-purpose speech recognition and synthesis model](https://huggingface.co/blog/speecht5)
-- [A guide on Fine-tuning Whisper For Multilingual ASR with 🤗Transformers](https://huggingface.co/blog/fine-tune-whisper)
+- [Fine-tune Whisper For Multilingual ASR with 🤗Transformers](https://huggingface.co/blog/fine-tune-whisper)
 - [Automatic speech recognition task guide](https://huggingface.co/docs/transformers/tasks/asr)
 - [Speech Synthesis, Recognition, and More With SpeechT5](https://huggingface.co/blog/speecht5)
+- [Fine-Tune W2V2-Bert for low-resource ASR with 🤗 Transformers](https://huggingface.co/blog/fine-tune-w2v2-bert)
+- [Speculative Decoding for 2x Faster Whisper Inference](https://huggingface.co/blog/whisper-speculative-decoding)

@@ -1,0 +1,48 @@
+name: Lint
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # Could use something like rmacklin/fetch-through-merge-base@v0 instead when the repo gets bigger
+          fetch-depth: 0
+      - name: "Extracting the merge base into 'SINCE'"
+        id: since
+        run: |
+          if [ -z "${{  github.event.pull_request.head.ref }}" ]
+          then
+            echo "SINCE=${{ github.sha }}^1" >> $GITHUB_OUTPUT
+          else
+            echo "SINCE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} ${{ github.sha }})" >> $GITHUB_OUTPUT
+          fi
+
+      - run: corepack enable
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "pnpm"
+          cache-dependency-path: "**/pnpm-lock.yaml"
+      - run: |
+          pnpm install --frozen-lockfile --filter .
+          pnpm install --frozen-lockfile --filter ...[${{ steps.since.outputs.SINCE }}]...
+          pnpm --filter ...[${{ steps.since.outputs.SINCE }}]... build
+      - name: "Checking lint errors"
+        run: |
+          pnpm --filter ...[${{ steps.since.outputs.SINCE }}] lint:check
+
+      - name: "Checking format errors"
+        run: |
+          pnpm --filter ...[${{ steps.since.outputs.SINCE }}] format:check
+
+      - name: Check types
+        run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] check

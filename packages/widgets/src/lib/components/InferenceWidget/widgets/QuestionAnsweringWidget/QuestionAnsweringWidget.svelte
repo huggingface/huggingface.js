@@ -12,6 +12,7 @@
 	import { addInferenceParameters, callInferenceApi, updateUrl } from "../../shared/helpers.js";
 	import { isValidOutputAnswerScore } from "../../shared/outputValidation.js";
 	import { isTextAndContextInput } from "../../shared/inputValidation.js";
+	import { widgetStates } from "../../stores.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -20,6 +21,8 @@
 	export let noTitle: WidgetProps["noTitle"];
 	export let shouldUpdateUrl: WidgetProps["shouldUpdateUrl"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
+
+	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
 	let context = "";
 	let computeTime = "";
@@ -108,7 +111,7 @@
 		throw new TypeError("Invalid output: output must be of type <answer:string; score:number>");
 	}
 
-	function applyInputSample(
+	function applyWidgetExample(
 		sample: WidgetExampleTextAndContextInput<WidgetExampleOutputAnswerScore>,
 		opts: ExampleRunOpts = {}
 	) {
@@ -128,46 +131,33 @@
 	}
 </script>
 
-<WidgetWrapper
-	{callApiOnMount}
-	{apiUrl}
-	{includeCredentials}
-	{applyInputSample}
-	{computeTime}
-	{error}
-	{isLoading}
-	{model}
-	{modelLoading}
-	{noTitle}
-	{outputJson}
-	{validateExample}
-	exampleQueryParams={["context", "text"]}
->
-	<svelte:fragment slot="top" let:isDisabled>
-		<form class="space-y-2">
-			<WidgetQuickInput
-				bind:value={question}
-				{isLoading}
-				{isDisabled}
-				onClickSubmitBtn={() => {
-					getOutput();
-				}}
-			/>
-			<WidgetTextarea
-				bind:value={context}
-				bind:setValue={setTextAreaValue}
-				{isDisabled}
-				placeholder="Please input some context..."
-				label="Context"
-			/>
-		</form>
-	</svelte:fragment>
-	<svelte:fragment slot="bottom">
-		{#if output}
-			<div class="alert alert-success mt-4 flex items-baseline">
-				<span>{output.answer}</span>
-				<span class="ml-auto font-mono text-xs">{output.score.toFixed(3)}</span>
-			</div>
-		{/if}
-	</svelte:fragment>
+<WidgetWrapper {apiUrl} {includeCredentials} {model} let:WidgetInfo let:WidgetHeader let:WidgetFooter>
+	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyWidgetExample} {validateExample} />
+	<div class="space-y-2">
+		<WidgetQuickInput
+			bind:value={question}
+			{isLoading}
+			{isDisabled}
+			onClickSubmitBtn={() => {
+				getOutput();
+			}}
+		/>
+		<WidgetTextarea
+			bind:value={context}
+			bind:setValue={setTextAreaValue}
+			{isDisabled}
+			placeholder="Please input some context..."
+			label="Context"
+		/>
+	</div>
+	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
+
+	{#if output}
+		<div class="alert alert-success mt-4 flex items-baseline">
+			<span>{output.answer}</span>
+			<span class="ml-auto font-mono text-xs">{output.score.toFixed(3)}</span>
+		</div>
+	{/if}
+
+	<WidgetFooter {model} {isDisabled} {outputJson} />
 </WidgetWrapper>

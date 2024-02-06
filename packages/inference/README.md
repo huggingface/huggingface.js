@@ -1,10 +1,11 @@
-# 🤗 Hugging Face Inference API
+# 🤗 Hugging Face Inference Endpoints
 
-A Typescript powered wrapper for the Hugging Face Inference API. Learn more about the Inference API at [Hugging Face](https://huggingface.co/docs/api-inference/index). It also works with [Inference Endpoints](https://huggingface.co/docs/inference-endpoints/index).
+A Typescript powered wrapper for the Hugging Face Inference Endpoints API. Learn more about Inference Endpoints at [Hugging Face](https://huggingface.co/inference-endpoints).
+It works with both [serverless](https://huggingface.co/docs/api-inference/index) and [dedicated](https://huggingface.co/docs/inference-endpoints/index) Endpoints.
 
 Check out the [full documentation](https://huggingface.co/docs/huggingface.js/inference/README).
 
-You can also try out a live [interactive notebook](https://observablehq.com/@huggingface/hello-huggingface-js-inference), see some demos on [hf.co/huggingfacejs](https://huggingface.co/huggingfacejs), or watch a [Scrimba tutorial that explains how the Inference API works](https://scrimba.com/scrim/cod8248f5adfd6e129582c523). 
+You can also try out a live [interactive notebook](https://observablehq.com/@huggingface/hello-huggingface-js-inference), see some demos on [hf.co/huggingfacejs](https://huggingface.co/huggingfacejs), or watch a [Scrimba tutorial that explains how Inference Endpoints works](https://scrimba.com/scrim/cod8248f5adfd6e129582c523). 
 
 ## Getting Started
 
@@ -261,6 +262,8 @@ await hf.audioClassification({
 
 Generates natural-sounding speech from text input.
 
+[Interactive tutorial](https://scrimba.com/scrim/co8da4d23b49b648f77f4848a?pl=pkVnrP7uP)
+
 ```typescript
 await hf.textToSpeech({
   model: 'espnet/kan-bayashi_ljspeech_vits',
@@ -348,6 +351,8 @@ await hf.textToImage({
 ### Image To Image
 
 Image-to-image is the task of transforming a source image to match the characteristics of a target image or a target image domain.
+
+[Interactive tutorial](https://scrimba.com/scrim/co4834bf9a91cc81cfab07969?pl=pkVnrP7uP)
 
 ```typescript
 await hf.imageToImage({

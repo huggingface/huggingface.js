@@ -40,7 +40,6 @@ const taskData: TaskDataCustom = {
 	],
 	models: [
 		{
-			// TO DO: write description
 			description: "Solid object detection model trained on the benchmark dataset COCO 2017.",
 			id: "facebook/detr-resnet-50",
 		},
@@ -51,8 +50,12 @@ const taskData: TaskDataCustom = {
 	],
 	spaces: [
 		{
+			description: "Leaderboard to compare various object detection models across several metrics.",
+			id: "hf-vision/object_detection_leaderboard",
+		},
+		{
 			description: "An object detection application that can detect unseen objects out of the box.",
-			id: "adirik/OWL-ViT",
+			id: "merve/owlv2",
 		},
 		{
 			description: "An application that contains various object detection models to try from.",

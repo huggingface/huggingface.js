@@ -11,11 +11,6 @@
 		"skipLibCheck": true,
 		"noImplicitOverride": true
 	},
-	"ts-node": {
-		"compilerOptions": {
-			"module": "commonjs"
-		}
-	},
 	"include": ["src", "test", "index.ts", "../shared/src"],
 	"exclude": ["dist"]
 }

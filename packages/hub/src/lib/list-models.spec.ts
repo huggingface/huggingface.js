@@ -15,7 +15,7 @@ describe("listModels", () => {
 			if (typeof entry.likes === "number") {
 				entry.likes = 0;
 			}
-			if (entry.updatedAt instanceof Date) {
+			if (entry.updatedAt instanceof Date && !isNaN(entry.updatedAt.getTime())) {
 				entry.updatedAt = new Date(0);
 			}
 

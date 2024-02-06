@@ -45,14 +45,12 @@ const taskData: TaskDataCustom = {
 	],
 	models: [
 		{
-			description:
-				"A latent text-to-image diffusion model capable of generating photo-realistic images given any text input.",
-			id: "CompVis/stable-diffusion-v1-4",
+			description: "One of the most powerful image generation models that can generate realistic outputs.",
+			id: "stabilityai/stable-diffusion-xl-base-1.0",
 		},
 		{
-			description:
-				"A model that can be used to generate images based on text prompts. The DALL·E Mega model is the largest version of DALLE Mini.",
-			id: "dalle-mini/dalle-mega",
+			description: "A powerful yet fast image generation model.",
+			id: "latent-consistency/lcm-lora-sdxl",
 		},
 		{
 			description: "A text-to-image model that can generate coherent text inside image.",
@@ -69,20 +67,28 @@ const taskData: TaskDataCustom = {
 			id: "stabilityai/stable-diffusion",
 		},
 		{
-			description: "An text-to-image application that can generate coherent text inside the image.",
+			description: "A text-to-image application to generate comics.",
+			id: "jbilcke-hf/ai-comic-factory",
+		},
+		{
+			description: "A text-to-image application that can generate coherent text inside the image.",
 			id: "DeepFloyd/IF",
 		},
 		{
-			description: "An powerful text-to-image application that can generate images.",
-			id: "kakaobrain/karlo",
+			description: "A powerful yet very fast image generation application.",
+			id: "latent-consistency/lcm-lora-for-sdxl",
 		},
 		{
-			description: "An powerful text-to-image application that can generates 3D representations.",
-			id: "hysts/Shap-E",
+			description: "A gallery to explore various text-to-image models.",
+			id: "multimodalart/LoraTheExplorer",
 		},
 		{
-			description: "A strong application for `text-to-image`, `image-to-image` and image inpainting.",
+			description: "An application for `text-to-image`, `image-to-image` and image inpainting.",
 			id: "ArtGAN/Stable-Diffusion-ControlNet-WebUI",
+		},
+		{
+			description: "An application to generate realistic images given photos of a person and a prompt.",
+			id: "InstantX/InstantID",
 		},
 	],
 	summary:

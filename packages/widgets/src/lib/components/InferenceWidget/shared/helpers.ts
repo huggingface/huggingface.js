@@ -1,5 +1,5 @@
-import type { ModelData, WidgetExample, WidgetExampleAttribute } from "@huggingface/tasks";
-import { randomItem, parseJSON } from "../../../utils/ViewUtils.js";
+import type { ModelData, WidgetExampleAttribute } from "@huggingface/tasks";
+import { parseJSON } from "../../../utils/ViewUtils.js";
 import type { ModelLoadInfo, TableData } from "./types.js";
 import { LoadState } from "./types.js";
 
@@ -19,16 +19,6 @@ export function getQueryParamVal(key: WidgetExampleAttribute): QueryParamVal {
 		return value === "true";
 	}
 	return value;
-}
-
-export function getWidgetExample<TWidgetExample extends WidgetExample>(
-	model: ModelData,
-	validateExample: (sample: WidgetExample) => sample is TWidgetExample
-): TWidgetExample | undefined {
-	const validExamples = model.widgetData?.filter(
-		(sample): sample is TWidgetExample => sample && validateExample(sample)
-	);
-	return validExamples?.length ? randomItem(validExamples) : undefined;
 }
 
 // Update current url search params, keeping existing keys intact.
@@ -63,7 +53,6 @@ export async function getBlobFromUrl(url: string): Promise<Blob> {
 	const blob = await res.blob();
 	return blob;
 }
-
 interface Success<T> {
 	computeTime: string;
 	output: T;
@@ -95,17 +84,13 @@ export async function callInferenceApi<T>(
 	requestBody: Record<string, unknown>,
 	apiToken = "",
 	outputParsingFn: (x: unknown) => T,
-	waitForModel = false, // If true, the server will only respond once the model has been loaded on the inference API,
+	waitForModel = false, // If true, the server will only respond once the model has been loaded on Inference Endpoints (serverless)
 	includeCredentials = false,
 	isOnLoadCall = false, // If true, the server will try to answer from cache and not do anything if not
 	useCache = true
 ): Promise<Result<T>> {
 	const contentType =
-		"file" in requestBody &&
-		requestBody["file"] &&
-		typeof requestBody["file"] === "object" &&
-		"type" in requestBody["file"] &&
-		typeof requestBody["file"]["type"] === "string"
+		"file" in requestBody && requestBody["file"] && requestBody["file"] instanceof Blob && requestBody["file"].type
 			? requestBody["file"]["type"]
 			: "application/json";
 
@@ -124,8 +109,9 @@ export async function callInferenceApi<T>(
 		headers.set("X-Load-Model", "0");
 	}
 
-	const reqBody: File | string =
-		"file" in requestBody && requestBody["file"] instanceof File ? requestBody.file : JSON.stringify(requestBody);
+	// `File` is a subtype of `Blob`: therefore, checking for instanceof `Blob` also checks for instanceof `File`
+	const reqBody: Blob | string =
+		"file" in requestBody && requestBody["file"] instanceof Blob ? requestBody.file : JSON.stringify(requestBody);
 
 	const response = await fetch(`${url}/models/${repoId}`, {
 		method: "POST",
@@ -198,7 +184,7 @@ export async function getModelLoadInfo(
 	}
 }
 
-// Extend Inference API requestBody with user supplied Inference API parameters
+// Extend requestBody with user supplied parameters for Inference Endpoints (serverless)
 export function addInferenceParameters(requestBody: Record<string, unknown>, model: ModelData): void {
 	const inference = model?.cardData?.inference;
 	if (typeof inference === "object") {
