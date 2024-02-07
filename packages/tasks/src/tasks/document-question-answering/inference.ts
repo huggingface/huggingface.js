@@ -10,7 +10,7 @@ export interface DocumentQuestionAnsweringInput {
 	/**
 	 * One (document, question) pair to answer
 	 */
-	data: DocumentQuestionAnsweringInputData;
+	inputs: DocumentQuestionAnsweringInputData;
 	/**
 	 * Additional inference parameters
 	 */

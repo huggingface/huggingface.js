@@ -10,7 +10,7 @@ export interface ImageToTextInput {
 	/**
 	 * The input image data
 	 */
-	data: unknown;
+	inputs: unknown;
 	/**
 	 * Additional inference parameters
 	 */

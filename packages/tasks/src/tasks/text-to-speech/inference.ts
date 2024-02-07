@@ -13,7 +13,7 @@ export interface TextToSpeechInput {
 	/**
 	 * The input text data
 	 */
-	data: string;
+	inputs: string;
 	/**
 	 * Additional inference parameters
 	 */

@@ -13,7 +13,7 @@ export interface DepthEstimationInput {
 	/**
 	 * The input image data
 	 */
-	data: unknown;
+	inputs: unknown;
 	/**
 	 * Additional inference parameters
 	 */

@@ -10,7 +10,7 @@ export interface TextClassificationInput {
 	/**
 	 * The text to classify
 	 */
-	data: string;
+	inputs: string;
 	/**
 	 * Additional inference parameters
 	 */

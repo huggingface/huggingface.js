@@ -10,7 +10,7 @@ export interface QuestionAnsweringInput {
 	/**
 	 * One (context, question) pair to answer
 	 */
-	data: QuestionAnsweringInputData;
+	inputs: QuestionAnsweringInputData;
 	/**
 	 * Additional inference parameters
 	 */

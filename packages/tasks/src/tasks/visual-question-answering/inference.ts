@@ -10,7 +10,7 @@ export interface VisualQuestionAnsweringInput {
 	/**
 	 * One (image, question) pair to answer
 	 */
-	data: VisualQuestionAnsweringInputData;
+	inputs: VisualQuestionAnsweringInputData;
 	/**
 	 * Additional inference parameters
 	 */
