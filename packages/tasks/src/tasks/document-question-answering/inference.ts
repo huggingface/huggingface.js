@@ -88,11 +88,19 @@ export interface DocumentQuestionAnsweringOutputElement {
 	 * The answer to the question.
 	 */
 	answer: string;
+	/**
+	 * The end word index of the answer (in the OCR’d version of the input or provided word
+	 * boxes).
+	 */
 	end: number;
 	/**
 	 * The probability associated to the answer.
 	 */
 	score: number;
+	/**
+	 * The start word index of the answer (in the OCR’d version of the input or provided word
+	 * boxes).
+	 */
 	start: number;
 	/**
 	 * The index of each word/box pair that is in the answer

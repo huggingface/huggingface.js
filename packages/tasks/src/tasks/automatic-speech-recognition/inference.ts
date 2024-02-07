@@ -3,6 +3,7 @@
  *
  * Using src/scripts/inference-codegen
  */
+
 /**
  * Inputs for Automatic Speech Recognition inference
  */
@@ -17,6 +18,7 @@ export interface AutomaticSpeechRecognitionInput {
 	parameters?: AutomaticSpeechRecognitionParameters;
 	[property: string]: unknown;
 }
+
 /**
  * Additional inference parameters
  *
@@ -33,6 +35,7 @@ export interface AutomaticSpeechRecognitionParameters {
 	returnTimestamps?: boolean;
 	[property: string]: unknown;
 }
+
 /**
  * Parametrization of the text generation process
  *
@@ -121,26 +124,16 @@ export interface GenerationParameters {
 	useCache?: boolean;
 	[property: string]: unknown;
 }
+
 /**
  * Controls the stopping condition for beam-based methods.
  */
 export type EarlyStoppingUnion = boolean | "never";
-export interface AutomaticSpeechRecognitionOutputChunk {
-	/**
-	 * A chunk of text identified by the model
-	 */
-	text: string;
-	/**
-	 * The start and end timestamps corresponding with the text
-	 */
-	timestamps: number[];
-	[property: string]: unknown;
-}
-export type AutomaticSpeechRecognitionOutput = AutomaticSpeechRecognitionOutputElement[];
+
 /**
  * Outputs of inference for the Automatic Speech Recognition task
  */
-export interface AutomaticSpeechRecognitionOutputElement {
+export interface AutomaticSpeechRecognitionOutput {
 	/**
 	 * When returnTimestamps is enabled, chunks contains a list of audio chunks identified by
 	 * the model.
@@ -150,5 +143,17 @@ export interface AutomaticSpeechRecognitionOutputElement {
 	 * The recognized text.
 	 */
 	text: string;
+	[property: string]: unknown;
+}
+
+export interface AutomaticSpeechRecognitionOutputChunk {
+	/**
+	 * A chunk of text identified by the model
+	 */
+	text: string;
+	/**
+	 * The start and end timestamps corresponding with the text
+	 */
+	timestamps: number[];
 	[property: string]: unknown;
 }

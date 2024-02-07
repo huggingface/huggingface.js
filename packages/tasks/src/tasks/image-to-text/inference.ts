@@ -3,6 +3,7 @@
  *
  * Using src/scripts/inference-codegen
  */
+
 /**
  * Inputs for Image To Text inference
  */
@@ -17,6 +18,7 @@ export interface ImageToTextInput {
 	parameters?: ImageToTextParameters;
 	[property: string]: unknown;
 }
+
 /**
  * Additional inference parameters
  *
@@ -33,6 +35,7 @@ export interface ImageToTextParameters {
 	maxNewTokens?: number;
 	[property: string]: unknown;
 }
+
 /**
  * Parametrization of the text generation process
  *
@@ -121,18 +124,20 @@ export interface GenerationParameters {
 	useCache?: boolean;
 	[property: string]: unknown;
 }
+
 /**
  * Controls the stopping condition for beam-based methods.
  */
 export type EarlyStoppingUnion = boolean | "never";
-export type ImageToTextOutput = ImageToTextOutputElement[];
+
 /**
  * Outputs of inference for the Image To Text task
  */
-export interface ImageToTextOutputElement {
+export interface ImageToTextOutput {
+	generatedText: unknown;
 	/**
 	 * The generated text.
 	 */
-	generatedText: string;
+	imageToTextOutputGeneratedText?: string;
 	[property: string]: unknown;
 }

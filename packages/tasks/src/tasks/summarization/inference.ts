@@ -50,9 +50,10 @@ export type Text2TextGenerationTruncationStrategy = "do_not_truncate" | "longest
  * Outputs of inference for the Text2text Generation task
  */
 export interface SummarizationOutput {
+	generatedText: unknown;
 	/**
 	 * The generated text.
 	 */
-	generatedText: string;
+	summarizationOutputGeneratedText?: string;
 	[property: string]: unknown;
 }

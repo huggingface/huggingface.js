@@ -8,7 +8,7 @@
 		"audio": {
 			"description": "The generated audio waveform."
 		},
-		"samplingRate": {
+		"sampling_rate": {
 			"type": "number",
 			"description": "The sampling rate of the generated audio waveform."
 		}

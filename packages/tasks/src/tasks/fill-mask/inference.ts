@@ -42,6 +42,10 @@ export type FillMaskOutput = FillMaskOutputElement[];
  */
 export interface FillMaskOutputElement {
 	/**
+	 * The predicted token (to replace the masked one).
+	 */
+	fillMaskOutputTokenStr?: string;
+	/**
 	 * The corresponding probability
 	 */
 	score: number;
@@ -53,9 +57,6 @@ export interface FillMaskOutputElement {
 	 * The predicted token id (to replace the masked one).
 	 */
 	token: number;
-	/**
-	 * The predicted token (to replace the masked one).
-	 */
-	tokenStr: string;
+	tokenStr: unknown;
 	[property: string]: unknown;
 }

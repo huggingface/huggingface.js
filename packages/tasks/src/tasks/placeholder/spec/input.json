@@ -20,11 +20,11 @@
 			"description": "TODO: describe additional parameters here.",
 			"type": "object",
 			"properties": {
-				"dummyParameterName": {
+				"dummy_parameter_name": {
 					"type": "boolean",
 					"description": "TODO: describe the parameter here"
 				},
-				"dummyParameterName2": {
+				"dummy_parameter_name2": {
 					"type": "integer",
 					"description": "TODO: describe the parameter here"
 				}

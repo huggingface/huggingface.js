@@ -62,9 +62,7 @@ export interface TargetSize {
 /**
  * Outputs of inference for the Text To Image task
  */
-export type TextToImageOutput = unknown[] | boolean | number | number | null | TextToImageOutputObject | string;
-
-export interface TextToImageOutputObject {
+export interface TextToImageOutput {
 	/**
 	 * The generated image
 	 */

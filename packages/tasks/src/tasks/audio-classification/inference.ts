@@ -40,7 +40,7 @@ export type AudioClassificationOutput = AudioClassificationOutputElement[];
  */
 export interface AudioClassificationOutputElement {
 	/**
-	 * The predicted class label (model specific).
+	 * The predicted class label.
 	 */
 	label: string;
 	/**

@@ -3,6 +3,7 @@
  *
  * Using src/scripts/inference-codegen
  */
+
 /**
  * Inputs for Text To Audio inference
  */
@@ -17,6 +18,7 @@ export interface TextToAudioInput {
 	parameters?: TextToAudioParameters;
 	[property: string]: unknown;
 }
+
 /**
  * Additional inference parameters
  *
@@ -29,6 +31,7 @@ export interface TextToAudioParameters {
 	generate?: GenerationParameters;
 	[property: string]: unknown;
 }
+
 /**
  * Parametrization of the text generation process
  *
@@ -117,22 +120,24 @@ export interface GenerationParameters {
 	useCache?: boolean;
 	[property: string]: unknown;
 }
+
 /**
  * Controls the stopping condition for beam-based methods.
  */
 export type EarlyStoppingUnion = boolean | "never";
-export type TextToAudioOutput = TextToAudioOutputElement[];
+
 /**
  * Outputs of inference for the Text To Audio task
  */
-export interface TextToAudioOutputElement {
+export interface TextToAudioOutput {
 	/**
 	 * The generated audio waveform.
 	 */
 	audio: unknown;
+	samplingRate: unknown;
 	/**
 	 * The sampling rate of the generated audio waveform.
 	 */
-	samplingRate: number;
+	textToAudioOutputSamplingRate?: number;
 	[property: string]: unknown;
 }

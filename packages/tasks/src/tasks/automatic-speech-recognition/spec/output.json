@@ -16,11 +16,16 @@
 				"type": "object",
 				"title": "AutomaticSpeechRecognitionOutputChunk",
 				"properties": {
-					"text": { "type": "string", "description": "A chunk of text identified by the model" },
+					"text": {
+						"type": "string",
+						"description": "A chunk of text identified by the model"
+					},
 					"timestamps": {
 						"type": "array",
 						"description": "The start and end timestamps corresponding with the text",
-						"items": { "type": "number" },
+						"items": {
+							"type": "number"
+						},
 						"minLength": 2,
 						"maxLength": 2
 					}

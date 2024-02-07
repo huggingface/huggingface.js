@@ -138,9 +138,10 @@ export interface TextToSpeechOutput {
 	 * The generated audio waveform.
 	 */
 	audio: unknown;
+	samplingRate: unknown;
 	/**
 	 * The sampling rate of the generated audio waveform.
 	 */
-	samplingRate: number;
+	textToSpeechOutputSamplingRate?: number;
 	[property: string]: unknown;
 }

@@ -20,7 +20,7 @@
 			"description": "Additional inference parameters for Text2text Generation",
 			"type": "object",
 			"properties": {
-				"cleanUpTokenizationSpaces": {
+				"clean_up_tokenization_spaces": {
 					"type": "boolean",
 					"description": "Whether to clean up the potential extra spaces in the text output."
 				},
@@ -43,7 +43,7 @@
 						}
 					]
 				},
-				"generateParameters": {
+				"generate_parameters": {
 					"title": "generateParameters",
 					"type": "object",
 					"description": "Additional parametrization of the text generation algorithm"
