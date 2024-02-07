@@ -8,6 +8,7 @@ export enum ModelLibrary {
 	"adapter-transformers" = "Adapters",
 	"allennlp" = "allenNLP",
 	"asteroid" = "Asteroid",
+	"audiocraft" = "Audiocraft",
 	"bertopic" = "BERTopic",
 	"diffusers" = "Diffusers",
 	"doctr" = "docTR",

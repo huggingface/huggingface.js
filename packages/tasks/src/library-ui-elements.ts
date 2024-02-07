@@ -73,6 +73,14 @@ const asteroid = (model: ModelData) => [
 model = BaseModel.from_pretrained("${model.id}")`,
 ];
 
+const audiocraft = (model: ModelData) => [
+	`from audiocraft.models import MusicGen
+	
+model = MusicGen.get_pretrained("${model.id}")
+descriptions = ['happy rock', 'energetic EDM', 'sad jazz']
+wav = model.generate(descriptions)  # generates 3 samples.`,
+];
+
 function get_base_diffusers_model(model: ModelData): string {
 	return model.cardData?.base_model?.toString() ?? "fill-in-base-model";
 }
@@ -597,6 +605,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS: Partial<Record<ModelLibraryKey, Librar
 		repoUrl: "https://github.com/asteroid-team/asteroid",
 		docsUrl: "https://huggingface.co/docs/hub/asteroid",
 		snippets: asteroid,
+	},
+	audiocraft: {
+		btnLabel: "Audiocraft",
+		repoName: "Audiocraft",
+		repoUrl: "https://github.com/facebookresearch/audiocraft",
+		snippets: audiocraft,
 	},
 	bertopic: {
 		btnLabel: "BERTopic",
