@@ -22,7 +22,7 @@
 			"properties": {
 				"best_of": {
 					"type": "integer",
-					"description": "Best of"
+					"description": "The number of sampling queries to run. Only the best one (in terms of total logprob) will be returned."
 				},
 				"decoder_input_details": {
 					"type": "boolean",
