@@ -24,7 +24,8 @@ export interface TextGenerationInput {
  */
 export interface TextGenerationParameters {
 	/**
-	 * Best of
+	 * The number of sampling queries to run. Only the best one (in terms of total logprob) will
+	 * be returned.
 	 */
 	best_of?: number;
 	/**
