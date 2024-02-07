@@ -32,10 +32,7 @@
 					"description": "The corresponding probability."
 				}
 			},
-			"required": [
-				"label",
-				"score"
-			]
+			"required": ["label", "score"]
 		},
 		"GenerationParameters": {
 			"title": "GenerationParameters",
