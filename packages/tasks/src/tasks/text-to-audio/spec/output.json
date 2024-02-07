@@ -3,18 +3,15 @@
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Outputs of inference for the Text To Audio task",
 	"title": "TextToAudioOutput",
-	"type": "array",
-	"items": {
-		"type": "object",
-		"properties": {
-			"audio": {
-				"description": "The generated audio waveform."
-			},
-			"samplingRate": {
-				"type": "number",
-				"description": "The sampling rate of the generated audio waveform."
-			}
+	"type": "object",
+	"properties": {
+		"audio": {
+			"description": "The generated audio waveform."
 		},
-		"required": ["audio", "samplingRate"]
-	}
+		"samplingRate": {
+			"type": "number",
+			"description": "The sampling rate of the generated audio waveform."
+		}
+	},
+	"required": ["audio", "samplingRate"]
 }
