@@ -5,7 +5,7 @@
 	"title": "ZeroShotImageClassificationInput",
 	"type": "object",
 	"properties": {
-		"data": {
+		"inputs": {
 			"description": "The input image data, with candidate labels",
 			"type": "object",
 			"title": "ZeroShotImageClassificationInputData",
@@ -41,5 +41,5 @@
 			}
 		}
 	},
-	"required": ["data"]
+	"required": ["inputs"]
 }

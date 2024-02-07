@@ -5,7 +5,7 @@
 	"title": "VisualQuestionAnsweringInput",
 	"type": "object",
 	"properties": {
-		"data": {
+		"inputs": {
 			"description": "One (image, question) pair to answer",
 			"type": "object",
 			"title": "VisualQuestionAnsweringInputData",
@@ -37,5 +37,5 @@
 			}
 		}
 	},
-	"required": ["data"]
+	"required": ["inputs"]
 }

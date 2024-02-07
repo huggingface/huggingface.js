@@ -5,7 +5,7 @@
 	"title": "TextClassificationInput",
 	"type": "object",
 	"properties": {
-		"data": {
+		"inputs": {
 			"description": "The text to classify",
 			"type": "string"
 		},
@@ -31,5 +31,5 @@
 			}
 		}
 	},
-	"required": ["data"]
+	"required": ["inputs"]
 }

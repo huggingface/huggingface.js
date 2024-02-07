@@ -5,7 +5,7 @@
 	"title": "FeatureExtractionInput",
 	"type": "object",
 	"properties": {
-		"data": {
+		"inputs": {
 			"description": "The text to get the embeddings of",
 			"type": "string"
 		},
@@ -22,5 +22,5 @@
 			"properties": {}
 		}
 	},
-	"required": ["data"]
+	"required": ["inputs"]
 }

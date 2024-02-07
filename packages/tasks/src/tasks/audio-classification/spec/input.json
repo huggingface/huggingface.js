@@ -5,7 +5,7 @@
 	"title": "AudioClassificationInput",
 	"type": "object",
 	"properties": {
-		"data": {
+		"inputs": {
 			"description": "The input audio data"
 		},
 		"parameters": {
@@ -30,5 +30,5 @@
 			}
 		}
 	},
-	"required": ["data"]
+	"required": ["inputs"]
 }

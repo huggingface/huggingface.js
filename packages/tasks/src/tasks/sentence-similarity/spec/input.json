@@ -5,7 +5,7 @@
 	"title": "SentenceSimilarityInput",
 	"type": "object",
 	"properties": {
-		"data": {
+		"inputs": {
 			"title": "SentenceSimilarityInputData",
 			"type": "object",
 			"properties": {
@@ -36,5 +36,5 @@
 			"properties": {}
 		}
 	},
-	"required": ["data"]
+	"required": ["inputs"]
 }

@@ -5,7 +5,7 @@
 	"title": "VideoClassificationInput",
 	"type": "object",
 	"properties": {
-		"data": {
+		"inputs": {
 			"description": "The input video data"
 		},
 		"parameters": {
@@ -38,5 +38,5 @@
 			}
 		}
 	},
-	"required": ["data"]
+	"required": ["inputs"]
 }

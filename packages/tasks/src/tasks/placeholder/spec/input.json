@@ -5,7 +5,7 @@
 	"title": "PlaceholderInput",
 	"type": "object",
 	"properties": {
-		"data": {
+		"inputs": {
 			"description": "TODO: describe the input here. This must be model & framework agnostic.",
 			"type": "string"
 		},
@@ -31,5 +31,5 @@
 			}
 		}
 	},
-	"required": ["data"]
+	"required": ["inputs"]
 }
