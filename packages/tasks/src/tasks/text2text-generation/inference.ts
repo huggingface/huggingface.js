@@ -10,7 +10,7 @@ export interface Text2TextGenerationInput {
 	/**
 	 * The input text data
 	 */
-	data: string;
+	inputs: string;
 	/**
 	 * Additional inference parameters
 	 */

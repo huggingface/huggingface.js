@@ -5,7 +5,7 @@
 	"title": "TextToAudioInput",
 	"type": "object",
 	"properties": {
-		"data": {
+		"inputs": {
 			"description": "The input text data",
 			"type": "string"
 		},
@@ -27,5 +27,5 @@
 			}
 		}
 	},
-	"required": ["data"]
+	"required": ["inputs"]
 }

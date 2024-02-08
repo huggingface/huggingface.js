@@ -11,7 +11,7 @@ export interface TextToImageInput {
 	/**
 	 * The input text data (sometimes called "prompt"
 	 */
-	data: string;
+	inputs: string;
 	/**
 	 * Additional inference parameters
 	 */

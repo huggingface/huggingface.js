@@ -10,7 +10,7 @@ export interface FillMaskInput {
 	/**
 	 * The text with masked tokens
 	 */
-	data: string;
+	inputs: string;
 	/**
 	 * Additional inference parameters
 	 */

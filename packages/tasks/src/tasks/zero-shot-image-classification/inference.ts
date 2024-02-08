@@ -10,7 +10,7 @@ export interface ZeroShotImageClassificationInput {
 	/**
 	 * The input image data, with candidate labels
 	 */
-	data: ZeroShotImageClassificationInputData;
+	inputs: ZeroShotImageClassificationInputData;
 	/**
 	 * Additional inference parameters
 	 */

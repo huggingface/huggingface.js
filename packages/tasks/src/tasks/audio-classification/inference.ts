@@ -10,7 +10,7 @@ export interface AudioClassificationInput {
 	/**
 	 * The input audio data
 	 */
-	data: unknown;
+	inputs: unknown;
 	/**
 	 * Additional inference parameters
 	 */

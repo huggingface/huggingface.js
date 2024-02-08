@@ -10,7 +10,7 @@ export interface TextGenerationInput {
 	/**
 	 * The text to initialize generation with
 	 */
-	data: string;
+	inputs: string;
 	/**
 	 * Additional inference parameters
 	 */

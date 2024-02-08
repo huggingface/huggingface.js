@@ -10,7 +10,7 @@ export interface ZeroShotObjectDetectionInput {
 	/**
 	 * The input image data, with candidate labels
 	 */
-	data: ZeroShotObjectDetectionInputData;
+	inputs: ZeroShotObjectDetectionInputData;
 	/**
 	 * Additional inference parameters
 	 */

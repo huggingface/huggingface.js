@@ -5,7 +5,7 @@
 	"title": "QuestionAnsweringInput",
 	"type": "object",
 	"properties": {
-		"data": {
+		"inputs": {
 			"title": "QuestionAnsweringInputData",
 			"description": "One (context, question) pair to answer",
 			"type": "object",
@@ -63,5 +63,5 @@
 			}
 		}
 	},
-	"required": ["data"]
+	"required": ["inputs"]
 }

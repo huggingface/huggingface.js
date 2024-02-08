@@ -5,7 +5,7 @@
 	"title": "TextToImageInput",
 	"type": "object",
 	"properties": {
-		"data": {
+		"inputs": {
 			"description": "The input text data (sometimes called \"prompt\"",
 			"type": "string"
 		},
@@ -26,7 +26,9 @@
 				},
 				"negativePrompt": {
 					"type": "array",
-					"items": { "type": "string" },
+					"items": {
+						"type": "string"
+					},
 					"description": "One or several prompt to guide what NOT to include in image generation."
 				},
 				"numInferenceSteps": {
@@ -53,5 +55,5 @@
 			}
 		}
 	},
-	"required": ["data"]
+	"required": ["inputs"]
 }

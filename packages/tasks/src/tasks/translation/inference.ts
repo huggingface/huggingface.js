@@ -13,7 +13,7 @@ export interface TranslationInput {
 	/**
 	 * The input text data
 	 */
-	data: string;
+	inputs: string;
 	/**
 	 * Additional inference parameters
 	 */

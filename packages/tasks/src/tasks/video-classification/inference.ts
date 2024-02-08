@@ -10,7 +10,7 @@ export interface VideoClassificationInput {
 	/**
 	 * The input video data
 	 */
-	data: unknown;
+	inputs: unknown;
 	/**
 	 * Additional inference parameters
 	 */

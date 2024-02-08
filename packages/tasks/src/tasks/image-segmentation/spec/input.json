@@ -5,7 +5,7 @@
 	"title": "ImageSegmentationInput",
 	"type": "object",
 	"properties": {
-		"data": {
+		"inputs": {
 			"description": "The input image data"
 		},
 		"parameters": {
@@ -50,5 +50,5 @@
 			}
 		}
 	},
-	"required": ["data"]
+	"required": ["inputs"]
 }

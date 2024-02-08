@@ -5,7 +5,7 @@
 	"title": "DepthEstimationInput",
 	"type": "object",
 	"properties": {
-		"data": {
+		"inputs": {
 			"description": "The input image data"
 		},
 		"parameters": {
@@ -21,5 +21,5 @@
 			"properties": {}
 		}
 	},
-	"required": ["data"]
+	"required": ["inputs"]
 }
