@@ -75,6 +75,7 @@
 		"video-classification": IconVideoClassification,
 		"image-segmentation": IconImageSegmentation,
 		"text-to-image": IconTextToImage,
+		"image-text-to-text": IconTextToImage,
 		"image-to-text": IconImageToText,
 		"image-to-image": IconImageToImage,
 		"image-to-video": IconImageToVideo,
