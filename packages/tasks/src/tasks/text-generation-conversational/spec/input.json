@@ -1,0 +1,46 @@
+{
+	"$id": "/inference/schemas/text-generation-conversational/input.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Inputs for Text Generation inference when using the messages API. Compatible with Open AI chat API.",
+	"title": "TextGenerationConversationalInput",
+	"type": "object",
+	"properties": {
+		"frequency_penalty": {
+			"type": "number",
+			"description": "Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in the text so far, decreasing the model's likelihood to repeat the same line verbatim."
+		},
+		"logprobs": {
+			"type": "boolean",
+			"description": "Whether to return log probabilities of the output tokens or not. If true, returns the log probabilities of each output token returned in the content of message."
+		},
+		"max_tokens": {
+			"type": "integer",
+			"description": "The maximum number of tokens that can be generated in the chat completion."
+		},
+		"messages": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"description": "A list of messages comprising the conversation so far.",
+				"properties": {
+					"content": { "type": "string" },
+					"role": { "type": "string" }
+				},
+				"required": ["content", "role"]
+			}
+		},
+		"seed": {
+			"type": "integer",
+			"description": "The random sampling seed to use."
+		},
+		"temperature": {
+			"type": "number",
+			"description": "What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. We generally recommend altering this or top_p but not both."
+		},
+		"top_p": {
+			"type": "number",
+			"description": "An alternative to sampling with temperature, called nucleus sampling, where the model considers the results of the tokens with top_p probability mass. So 0.1 means only the tokens comprising the top 10% probability mass are considered."
+		}
+	},
+	"required": ["messages"]
+}

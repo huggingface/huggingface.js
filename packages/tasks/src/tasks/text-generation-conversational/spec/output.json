@@ -1,0 +1,37 @@
+{
+	"$id": "/inference/schemas/text-generation-conversational/output.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"type": "object",
+	"title": "TextGenerationConversationalOutput",
+	"description": "Outputs for Text Generation inference when using the messages API. Compatible with Open AI chat API.",
+	"properties": {
+		"choices": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"delta": {
+						"type": "object",
+						"properties": {
+							"content": { "type": "string" },
+							"role": { "type": "string" }
+						}
+					},
+					"finish_reason": { "$ref": "/inference/schemas/text-generation/output.json#/$defs/FinishReason" },
+					"index": { "type": "integer" },
+					"logprobs": { "type": "number" }
+				},
+				"required": ["delta", "index"]
+			}
+		},
+		"created": {
+			"type": "integer",
+			"description": "The creation date as a UNIX timestamp."
+		},
+		"id": { "type": "string" },
+		"model": { "type": "string", "description": "The name of the model used for this generation." },
+		"object": { "type": "string" },
+		"system_fingerprint": { "type": "string" }
+	},
+	"required": ["choices", "created", "id", "model", "object", "system_fingerprint"]
+}
