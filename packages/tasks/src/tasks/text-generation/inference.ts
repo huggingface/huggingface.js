@@ -3,6 +3,7 @@
  *
  * Using src/scripts/inference-codegen
  */
+
 /**
  * Inputs for Text Generation inference
  */
@@ -17,6 +18,7 @@ export interface TextGenerationInput {
 	parameters?: TextGenerationParameters;
 	[property: string]: unknown;
 }
+
 /**
  * Additional inference parameters
  *
@@ -41,9 +43,22 @@ export interface TextGenerationParameters {
 	 */
 	do_sample?: boolean;
 	/**
+	 * The maximum number of tokens to generate.
+	 */
+	max_new_tokens?: number;
+	/**
+	 * The parameter for repetition penalty. A value of 1.0 means no penalty. See [this
+	 * paper](https://hf.co/papers/1909.05858) for more details.
+	 */
+	repetition_penalty?: number;
+	/**
 	 * Whether to prepend the prompt to the generated text.
 	 */
 	return_full_text?: boolean;
+	/**
+	 * The random sampling seed.
+	 */
+	seed?: number;
 	/**
 	 * Stop generating tokens if a member of `stop_sequences` is generated.
 	 */
@@ -76,10 +91,30 @@ export interface TextGenerationParameters {
 	watermark?: boolean;
 	[property: string]: unknown;
 }
+
+/**
+ * Outputs for Text Generation inference
+ */
+export interface TextGenerationOutput {
+	/**
+	 * When enabled, details about the generation
+	 */
+	details?: TextGenerationOutputDetails;
+	/**
+	 * The generated text
+	 */
+	generated_text: string;
+	[property: string]: unknown;
+}
+
 /**
  * When enabled, details about the generation
  */
 export interface TextGenerationOutputDetails {
+	/**
+	 * Details about additional sequences when best_of is provided
+	 */
+	best_of_sequences?: TextGenerationSequenceDetails[];
 	/**
 	 * The reason why the generation was stopped.
 	 */
@@ -99,6 +134,32 @@ export interface TextGenerationOutputDetails {
 	tokens: Token[];
 	[property: string]: unknown;
 }
+
+export interface TextGenerationSequenceDetails {
+	/**
+	 * The reason why the generation was stopped.
+	 */
+	finish_reason: FinishReason;
+	/**
+	 * The generated text
+	 */
+	generated_text: number;
+	/**
+	 * The number of generated tokens
+	 */
+	generated_tokens: number;
+	prefill: PrefillToken[];
+	/**
+	 * The random seed used for generation
+	 */
+	seed?: number;
+	/**
+	 * The generated tokens and associated details
+	 */
+	tokens: Token[];
+	[property: string]: unknown;
+}
+
 /**
  * The generated sequence reached the maximum allowed length
  *
@@ -107,6 +168,7 @@ export interface TextGenerationOutputDetails {
  * One of the sequence in stop_sequences was generated
  */
 export type FinishReason = "length" | "eos_token" | "stop_sequence";
+
 export interface PrefillToken {
 	id: number;
 	logprob: number;
@@ -116,6 +178,7 @@ export interface PrefillToken {
 	text: string;
 	[property: string]: unknown;
 }
+
 export interface Token {
 	id: number;
 	logprob: number;
@@ -127,20 +190,5 @@ export interface Token {
 	 * The text associated with that token
 	 */
 	text: string;
-	[property: string]: unknown;
-}
-export type TextGenerationOutput = TextGenerationOutputElement[];
-/**
- * Outputs for Text Generation inference
- */
-export interface TextGenerationOutputElement {
-	/**
-	 * When enabled, details about the generation
-	 */
-	details?: TextGenerationOutputDetails;
-	/**
-	 * The generated text
-	 */
-	generated_text: string;
 	[property: string]: unknown;
 }
