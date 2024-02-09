@@ -13,6 +13,7 @@
 			"description": "When enabled, details about the generation",
 			"title": "TextGenerationOutputDetails",
 			"allOf": [
+				{ "$ref": "#/$defs/SequenceDetails" },
 				{
 					"type": "object",
 					"properties": {
@@ -36,8 +37,7 @@
 							}
 						}
 					}
-				},
-				{ "$ref": "#/$defs/SequenceDetails" }
+				}
 			]
 		}
 	},
