@@ -23,11 +23,11 @@ export interface TextClassificationInput {
  * Additional inference parameters for Text Classification
  */
 export interface TextClassificationParameters {
-	functionToApply?: ClassificationOutputTransform;
+	function_to_apply?: ClassificationOutputTransform;
 	/**
 	 * When specified, limits the output to the top K most probable classes.
 	 */
-	topK?: number;
+	top_k?: number;
 	[property: string]: unknown;
 }
 /**

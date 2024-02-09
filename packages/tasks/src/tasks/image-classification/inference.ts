@@ -23,11 +23,11 @@ export interface ImageClassificationInput {
  * Additional inference parameters for Image Classification
  */
 export interface ImageClassificationParameters {
-	functionToApply?: ClassificationOutputTransform;
+	function_to_apply?: ClassificationOutputTransform;
 	/**
 	 * When specified, limits the output to the top K most probable classes.
 	 */
-	topK?: number;
+	top_k?: number;
 	[property: string]: unknown;
 }
 /**

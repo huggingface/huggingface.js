@@ -26,11 +26,11 @@ export interface TokenClassificationParameters {
 	/**
 	 * The strategy used to fuse tokens based on model predictions
 	 */
-	aggregationStrategy?: TokenClassificationAggregationStrategy;
+	aggregation_strategy?: TokenClassificationAggregationStrategy;
 	/**
 	 * A list of labels to ignore
 	 */
-	ignoreLabels?: string[];
+	ignore_labels?: string[];
 	/**
 	 * The number of overlapping tokens between chunks when splitting the input text.
 	 */
@@ -64,7 +64,7 @@ export interface TokenClassificationOutputElement {
 	/**
 	 * The predicted label for that group of tokens
 	 */
-	entityGroup?: string;
+	entity_group?: string;
 	label: unknown;
 	/**
 	 * The associated score / probability

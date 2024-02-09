@@ -41,18 +41,18 @@ export interface GenerationParameters {
 	/**
 	 * Whether to use sampling instead of greedy decoding when generating new tokens.
 	 */
-	doSample?: boolean;
+	do_sample?: boolean;
 	/**
 	 * Controls the stopping condition for beam-based methods.
 	 */
-	earlyStopping?: EarlyStoppingUnion;
+	early_stopping?: EarlyStoppingUnion;
 	/**
 	 * If set to float strictly between 0 and 1, only tokens with a conditional probability
 	 * greater than epsilon_cutoff will be sampled. In the paper, suggested values range from
 	 * 3e-4 to 9e-4, depending on the size of the model. See [Truncation Sampling as Language
 	 * Model Desmoothing](https://hf.co/papers/2210.15191) for more details.
 	 */
-	epsilonCutoff?: number;
+	epsilon_cutoff?: number;
 	/**
 	 * Eta sampling is a hybrid of locally typical sampling and epsilon sampling. If set to
 	 * float strictly between 0 and 1, a token is only considered if it is greater than either
@@ -62,37 +62,37 @@ export interface GenerationParameters {
 	 * See [Truncation Sampling as Language Model Desmoothing](https://hf.co/papers/2210.15191)
 	 * for more details.
 	 */
-	etaCutoff?: number;
+	eta_cutoff?: number;
 	/**
 	 * The maximum length (in tokens) of the generated text, including the input.
 	 */
-	maxLength?: number;
+	max_length?: number;
 	/**
 	 * The maximum number of tokens to generate. Takes precedence over maxLength.
 	 */
-	maxNewTokens?: number;
+	max_new_tokens?: number;
 	/**
 	 * The minimum length (in tokens) of the generated text, including the input.
 	 */
-	minLength?: number;
+	min_length?: number;
 	/**
 	 * The minimum number of tokens to generate. Takes precedence over maxLength.
 	 */
-	minNewTokens?: number;
+	min_new_tokens?: number;
 	/**
 	 * Number of groups to divide num_beams into in order to ensure diversity among different
 	 * groups of beams. See [this paper](https://hf.co/papers/1610.02424) for more details.
 	 */
-	numBeamGroups?: number;
+	num_beam_groups?: number;
 	/**
 	 * Number of beams to use for beam search.
 	 */
-	numBeams?: number;
+	num_beams?: number;
 	/**
 	 * The value balances the model confidence and the degeneration penalty in contrastive
 	 * search decoding.
 	 */
-	penaltyAlpha?: number;
+	penalty_alpha?: number;
 	/**
 	 * The value used to modulate the next token probabilities.
 	 */
@@ -100,12 +100,12 @@ export interface GenerationParameters {
 	/**
 	 * The number of highest probability vocabulary tokens to keep for top-k-filtering.
 	 */
-	topK?: number;
+	top_k?: number;
 	/**
 	 * If set to float < 1, only the smallest set of most probable tokens with probabilities
 	 * that add up to top_p or higher are kept for generation.
 	 */
-	topP?: number;
+	top_p?: number;
 	/**
 	 * Local typicality measures how similar the conditional probability of predicting a target
 	 * token next is to the expected conditional probability of predicting a random token next,
@@ -113,11 +113,11 @@ export interface GenerationParameters {
 	 * most locally typical tokens with probabilities that add up to typical_p or higher are
 	 * kept for generation. See [this paper](https://hf.co/papers/2202.00666) for more details.
 	 */
-	typicalP?: number;
+	typical_p?: number;
 	/**
 	 * Whether the model should use the past last key/values attentions to speed up decoding
 	 */
-	useCache?: boolean;
+	use_cache?: boolean;
 	[property: string]: unknown;
 }
 
@@ -138,6 +138,6 @@ export interface TextToAudioOutput {
 	/**
 	 * The sampling rate of the generated audio waveform.
 	 */
-	textToAudioOutputSamplingRate?: number;
+	sampling_rate?: number;
 	[property: string]: unknown;
 }

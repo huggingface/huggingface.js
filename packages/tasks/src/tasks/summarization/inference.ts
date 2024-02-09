@@ -30,11 +30,11 @@ export interface Text2TextGenerationParameters {
 	/**
 	 * Whether to clean up the potential extra spaces in the text output.
 	 */
-	cleanUpTokenizationSpaces?: boolean;
+	clean_up_tokenization_spaces?: boolean;
 	/**
 	 * Additional parametrization of the text generation algorithm
 	 */
-	generateParameters?: { [key: string]: unknown };
+	generate_parameters?: { [key: string]: unknown };
 	/**
 	 * The truncation strategy to use
 	 */
@@ -54,6 +54,6 @@ export interface SummarizationOutput {
 	/**
 	 * The generated text.
 	 */
-	summarizationOutputGeneratedText?: string;
+	generated_text?: string;
 	[property: string]: unknown;
 }

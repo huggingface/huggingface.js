@@ -33,7 +33,7 @@ export interface FillMaskParameters {
 	/**
 	 * When passed, overrides the number of predictions to return.
 	 */
-	topK?: number;
+	top_k?: number;
 	[property: string]: unknown;
 }
 export type FillMaskOutput = FillMaskOutputElement[];
@@ -41,10 +41,6 @@ export type FillMaskOutput = FillMaskOutputElement[];
  * Outputs of inference for the Fill Mask task
  */
 export interface FillMaskOutputElement {
-	/**
-	 * The predicted token (to replace the masked one).
-	 */
-	fillMaskOutputTokenStr?: string;
 	/**
 	 * The corresponding probability
 	 */
@@ -58,5 +54,9 @@ export interface FillMaskOutputElement {
 	 */
 	token: number;
 	tokenStr: unknown;
+	/**
+	 * The predicted token (to replace the masked one).
+	 */
+	token_str?: string;
 	[property: string]: unknown;
 }
