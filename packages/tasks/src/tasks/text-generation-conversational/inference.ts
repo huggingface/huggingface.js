@@ -24,6 +24,9 @@ export interface TextGenerationConversationalInput {
 	 * The maximum number of tokens that can be generated in the chat completion.
 	 */
 	max_tokens?: number;
+	/**
+	 * A list of messages comprising the conversation so far.
+	 */
 	messages: Message[];
 	/**
 	 * The random sampling seed to use.
@@ -44,9 +47,6 @@ export interface TextGenerationConversationalInput {
 	[property: string]: unknown;
 }
 
-/**
- * A list of messages comprising the conversation so far.
- */
 export interface Message {
 	content: string;
 	role: string;
@@ -75,6 +75,9 @@ export interface TextGenerationConversationalOutput {
 
 export interface Choice {
 	delta: Delta;
+	/**
+	 * The reason why the generation was stopped.
+	 */
 	finish_reason?: FinishReason;
 	index: number;
 	logprobs?: number;
@@ -88,8 +91,6 @@ export interface Delta {
 }
 
 /**
- * The reason why the generation was stopped.
- *
  * The generated sequence reached the maximum allowed length
  *
  * The model generated an end-of-sentence (EOS) token

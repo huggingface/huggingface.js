@@ -18,10 +18,10 @@
 			"description": "The maximum number of tokens that can be generated in the chat completion."
 		},
 		"messages": {
+			"description": "A list of messages comprising the conversation so far.",
 			"type": "array",
 			"items": {
 				"type": "object",
-				"description": "A list of messages comprising the conversation so far.",
 				"properties": {
 					"content": { "type": "string" },
 					"role": { "type": "string" }
