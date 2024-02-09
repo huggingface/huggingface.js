@@ -30,6 +30,6 @@ export interface DepthEstimationOutput {
 	/**
 	 * The predicted depth as a tensor
 	 */
-	predictedDepth?: unknown;
+	predicted_depth?: unknown;
 	[property: string]: unknown;
 }

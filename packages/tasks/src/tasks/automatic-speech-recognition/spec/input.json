@@ -19,7 +19,7 @@
 			"description": "Additional inference parameters for Automatic Speech Recognition",
 			"type": "object",
 			"properties": {
-				"returnTimestamps": {
+				"return_timestamps": {
 					"type": "boolean",
 					"description": "Whether to output corresponding timestamps with the generated text"
 				},

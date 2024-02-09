@@ -7,7 +7,7 @@
 	"items": {
 		"type": "object",
 		"properties": {
-			"meaningfulOutputName": {
+			"meaningful_output_name": {
 				"type": "string",
 				"description": "TODO: Describe what is outputed by the inference here"
 			}

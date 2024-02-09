@@ -3,6 +3,7 @@
  *
  * Using src/scripts/inference-codegen
  */
+
 /**
  * Inputs for Text Generation inference
  */
@@ -17,6 +18,7 @@ export interface TextGenerationInput {
 	parameters?: TextGenerationParameters;
 	[property: string]: unknown;
 }
+
 /**
  * Additional inference parameters
  *
@@ -26,24 +28,24 @@ export interface TextGenerationParameters {
 	/**
 	 * Whether to use logit sampling (true) or greedy search (false).
 	 */
-	doSample?: boolean;
+	do_sample?: boolean;
 	/**
 	 * Maximum number of generated tokens.
 	 */
-	maxNewTokens?: number;
+	max_new_tokens?: number;
 	/**
 	 * The parameter for repetition penalty. A value of 1.0 means no penalty. See [this
 	 * paper](https://hf.co/papers/1909.05858) for more details.
 	 */
-	repetitionPenalty?: number;
+	repetition_penalty?: number;
 	/**
 	 * Whether to prepend the prompt to the generated text.
 	 */
-	returnFullText?: boolean;
+	return_full_text?: boolean;
 	/**
 	 * Stop generating tokens if a member of `stop_sequences` is generated.
 	 */
-	stopSequences?: string[];
+	stop_sequences?: string[];
 	/**
 	 * The value used to modulate the logits distribution.
 	 */
@@ -51,12 +53,12 @@ export interface TextGenerationParameters {
 	/**
 	 * The number of highest probability vocabulary tokens to keep for top-k-filtering.
 	 */
-	topK?: number;
+	top_k?: number;
 	/**
 	 * If set to < 1, only the smallest set of most probable tokens with probabilities that add
 	 * up to `top_p` or higher are kept for generation.
 	 */
-	topP?: number;
+	top_p?: number;
 	/**
 	 * Truncate input tokens to the given size.
 	 */
@@ -65,21 +67,22 @@ export interface TextGenerationParameters {
 	 * Typical Decoding mass. See [Typical Decoding for Natural Language
 	 * Generation](https://hf.co/papers/2202.00666) for more information
 	 */
-	typicalP?: number;
+	typical_p?: number;
 	/**
 	 * Watermarking with [A Watermark for Large Language Models](https://hf.co/papers/2301.10226)
 	 */
 	watermark?: boolean;
 	[property: string]: unknown;
 }
-export type TextGenerationOutput = TextGenerationOutputElement[];
+
 /**
  * Outputs for Text Generation inference
  */
-export interface TextGenerationOutputElement {
+export interface TextGenerationOutput {
+	generatedText: unknown;
 	/**
 	 * The generated text
 	 */
-	generatedText: string;
+	generated_text?: string;
 	[property: string]: unknown;
 }

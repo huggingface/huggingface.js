@@ -26,16 +26,16 @@ export interface VideoClassificationParameters {
 	/**
 	 * The sampling rate used to select frames from the video.
 	 */
-	frameSamplingRate?: number;
-	functionToApply?: ClassificationOutputTransform;
+	frame_sampling_rate?: number;
+	function_to_apply?: ClassificationOutputTransform;
 	/**
 	 * The number of sampled frames to consider for classification.
 	 */
-	numFrames?: number;
+	num_frames?: number;
 	/**
 	 * When specified, limits the output to the top K most probable classes.
 	 */
-	topK?: number;
+	top_k?: number;
 	[property: string]: unknown;
 }
 /**

@@ -30,7 +30,7 @@
 			"description": "Additional inference parameters for Visual Question Answering",
 			"type": "object",
 			"properties": {
-				"topK": {
+				"top_k": {
 					"type": "integer",
 					"description": "The number of answers to return (will be chosen by order of likelihood). Note that we return less than topk answers if there are not enough options available within the context."
 				}
