@@ -18,7 +18,7 @@ from PIL import Image
 
 image = Image.open("my-image.png").convert("RGB")
 
-detector = pipeline(model="google/owlvit-base-patch32", task="zero-shot-object-detection")
+detector = pipeline(task="zero-shot-object-detection", model="google/owlvit-base-patch32")
 
 predictions = detector(
     image,
