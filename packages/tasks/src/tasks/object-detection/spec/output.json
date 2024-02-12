@@ -1,0 +1,46 @@
+{
+	"$id": "/inference/schemas/object-detection/output.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Outputs of inference for the Object Detection task",
+	"title": "ObjectDetectionOutput",
+	"type": "array",
+	"items": {
+		"type": "object",
+		"properties": {
+			"label": {
+				"type": "string",
+				"description": "The predicted label for the bounding box"
+			},
+			"score": {
+				"type": "number",
+				"description": "The associated score / probability"
+			},
+			"box": {
+				"$ref": "#/$defs/BoundingBox",
+				"description": "The predicted bounding box. Coordinates are relative to the top left corner of the input image."
+			}
+		},
+		"required": ["box", "label", "score"]
+	},
+	"$defs": {
+		"BoundingBox": {
+			"type": "object",
+			"title": "BoundingBox",
+			"properties": {
+				"xmin": {
+					"type": "integer"
+				},
+				"xmax": {
+					"type": "integer"
+				},
+				"ymin": {
+					"type": "integer"
+				},
+				"ymax": {
+					"type": "integer"
+				}
+			},
+			"required": ["xmin", "xmax", "ymin", "ymax"]
+		}
+	}
+}

@@ -12,12 +12,12 @@ const taskData: TaskDataCustom = {
 			id: "the_pile",
 		},
 		{
-			description: "A crowd-sourced instruction dataset to develop an AI assistant.",
-			id: "OpenAssistant/oasst1",
+			description: "Truly open-source, curated and cleaned dialogue dataset.",
+			id: "HuggingFaceH4/ultrachat_200k",
 		},
 		{
-			description: "A crowd-sourced instruction dataset created by Databricks employees.",
-			id: "databricks/databricks-dolly-15k",
+			description: "An instruction dataset with preference ratings on responses.",
+			id: "openbmb/UltraFeedback",
 		},
 	],
 	demo: {
@@ -59,66 +59,50 @@ const taskData: TaskDataCustom = {
 			id: "bigcode/starcoder",
 		},
 		{
-			description: "A model trained to follow instructions, uses Pythia-12b as base model.",
-			id: "databricks/dolly-v2-12b",
+			description: "A very powerful text generation model.",
+			id: "mistralai/Mixtral-8x7B-Instruct-v0.1",
 		},
 		{
-			description: "A model trained to follow instructions curated by community, uses Pythia-12b as base model.",
-			id: "OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5",
+			description: "Small yet powerful text generation model.",
+			id: "microsoft/phi-2",
 		},
 		{
-			description: "A large language model trained to generate text in English.",
-			id: "stabilityai/stablelm-tuned-alpha-7b",
+			description: "A very powerful model that can chat, do mathematical reasoning and write code.",
+			id: "openchat/openchat-3.5-0106",
 		},
 		{
-			description: "A model trained to follow instructions, based on mosaicml/mpt-7b.",
-			id: "mosaicml/mpt-7b-instruct",
+			description: "Very strong yet small assistant model.",
+			id: "HuggingFaceH4/zephyr-7b-beta",
 		},
 		{
-			description: "A large language model trained to generate text in English.",
-			id: "EleutherAI/pythia-12b",
-		},
-		{
-			description: "A large text-to-text model trained to follow instructions.",
-			id: "google/flan-ul2",
-		},
-		{
-			description: "A large and powerful text generation model.",
-			id: "tiiuae/falcon-40b",
-		},
-		{
-			description: "State-of-the-art open-source large language model.",
+			description: "Very strong open-source large language model.",
 			id: "meta-llama/Llama-2-70b-hf",
 		},
 	],
 	spaces: [
 		{
-			description: "A robust text generation model that can perform various tasks through natural language prompting.",
-			id: "huggingface/bloom_demo",
+			description: "A leaderboard to compare different open-source text generation models based on various benchmarks.",
+			id: "HuggingFaceH4/open_llm_leaderboard",
 		},
 		{
-			description: "An text generation based application that can write code for 80+ languages.",
-			id: "bigcode/bigcode-playground",
+			description: "An text generation based application based on a very powerful LLaMA2 model.",
+			id: "ysharma/Explore_llamav2_with_TGI",
 		},
 		{
-			description: "An text generation based application for conversations.",
-			id: "h2oai/h2ogpt-chatbot",
+			description: "An text generation based application to converse with Zephyr model.",
+			id: "HuggingFaceH4/zephyr-chat",
 		},
 		{
 			description: "An text generation application that combines OpenAI and Hugging Face models.",
 			id: "microsoft/HuggingGPT",
 		},
 		{
-			description: "An text generation application that uses StableLM-tuned-alpha-7b.",
-			id: "stabilityai/stablelm-tuned-alpha-chat",
-		},
-		{
-			description: "An UI that uses StableLM-tuned-alpha-7b.",
-			id: "togethercomputer/OpenChatKit",
+			description: "An chatbot to converse with a very powerful text generation model.",
+			id: "mlabonne/phixtral-chat",
 		},
 	],
 	summary:
-		"Generating text is the task of producing new text. These models can, for example, fill in incomplete text or paraphrase.",
+		"Generating text is the task of generating new text given another text. These models can, for example, fill in incomplete text or paraphrase.",
 	widgetModels: ["HuggingFaceH4/zephyr-7b-beta"],
 	youtubeId: "Vpjb1lu0MDk",
 };

@@ -1,20 +1,20 @@
 {
 	"name": "@huggingface/tasks",
 	"packageManager": "pnpm@8.10.5",
-	"version": "0.2.1",
+	"version": "0.2.2",
 	"description": "List of ML tasks for huggingface.co/tasks",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {
 		"access": "public"
 	},
-	"main": "./dist/index.js",
-	"module": "./dist/index.mjs",
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.js",
 	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
-			"require": "./dist/index.js",
-			"import": "./dist/index.mjs"
+			"require": "./dist/index.cjs",
+			"import": "./dist/index.js"
 		}
 	},
 	"source": "src/index.ts",
@@ -24,10 +24,12 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"prepublishOnly": "pnpm run build",
-		"build": "tsup src/index.ts --format cjs,esm --clean --dts",
+		"build": "tsup src/index.ts --format cjs,esm --clean --dts && pnpm run inference-codegen",
 		"prepare": "pnpm run build",
-		"check": "tsc"
+		"check": "tsc",
+		"inference-codegen": "tsx scripts/inference-codegen.ts && prettier --write src/tasks/*/inference.ts"
 	},
+	"type": "module",
 	"files": [
 		"dist",
 		"src",
@@ -40,5 +42,8 @@
 	],
 	"author": "Hugging Face",
 	"license": "MIT",
-	"devDependencies": {}
+	"devDependencies": {
+		"@types/node": "^20.11.5",
+		"quicktype-core": "https://github.com/huggingface/quicktype/raw/pack-18.0.15/packages/quicktype-core/quicktype-core-18.0.15.tgz"
+	}
 }

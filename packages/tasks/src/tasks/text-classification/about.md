@@ -150,6 +150,7 @@ classifier("I will walk to home when I went through the bus.")
 
 Would you like to learn more about the topic? Awesome! Here you can find some curated resources that you may find helpful!
 
+- [SetFitABSA: Few-Shot Aspect Based Sentiment Analysis using SetFit](https://huggingface.co/blog/setfit-absa)
 - [Course Chapter on Fine-tuning a Text Classification Model](https://huggingface.co/course/chapter3/1?fw=pt)
 - [Getting Started with Sentiment Analysis using Python](https://huggingface.co/blog/sentiment-analysis-python)
 - [Sentiment Analysis on Encrypted Data with Homomorphic Encryption](https://huggingface.co/blog/sentiment-analysis-fhe)

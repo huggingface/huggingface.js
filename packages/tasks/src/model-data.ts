@@ -83,7 +83,7 @@ export interface ModelData {
 	 */
 	widgetData?: WidgetExample[] | undefined;
 	/**
-	 * Parameters that will be used by the widget when calling Inference API
+	 * Parameters that will be used by the widget when calling Inference Endpoints (serverless)
 	 * https://huggingface.co/docs/api-inference/detailed_parameters
 	 *
 	 * can be set in the model card metadata (under `inference/parameters`)

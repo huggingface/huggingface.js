@@ -1,0 +1,54 @@
+{
+	"$id": "/inference/schemas/image-segmentation/input.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Inputs for Image Segmentation inference",
+	"title": "ImageSegmentationInput",
+	"type": "object",
+	"properties": {
+		"inputs": {
+			"description": "The input image data"
+		},
+		"parameters": {
+			"description": "Additional inference parameters",
+			"$ref": "#/$defs/ImageSegmentationParameters"
+		}
+	},
+	"$defs": {
+		"ImageSegmentationParameters": {
+			"title": "ImageSegmentationParameters",
+			"description": "Additional inference parameters for Image Segmentation",
+			"type": "object",
+			"properties": {
+				"mask_threshold": {
+					"type": "number",
+					"description": "Threshold to use when turning the predicted masks into binary values."
+				},
+				"overlap_mask_area_threshold": {
+					"type": "number",
+					"description": "Mask overlap threshold to eliminate small, disconnected segments."
+				},
+				"subtask": {
+					"title": "ImageSegmentationSubtask",
+					"type": "string",
+					"description": "Segmentation task to be performed, depending on model capabilities.",
+					"oneOf": [
+						{
+							"const": "instance"
+						},
+						{
+							"const": "panoptic"
+						},
+						{
+							"const": "semantic"
+						}
+					]
+				},
+				"threshold": {
+					"type": "number",
+					"description": "Probability threshold to filter out predicted masks."
+				}
+			}
+		}
+	},
+	"required": ["inputs"]
+}

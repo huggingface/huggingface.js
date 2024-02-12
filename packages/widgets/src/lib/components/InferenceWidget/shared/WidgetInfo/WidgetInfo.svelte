@@ -17,18 +17,18 @@
 	$: modelTooBig = $modelLoadStates[model.id]?.state === "TooBig";
 
 	const state = {
-		[LoadState.Loadable]: "This model can be loaded on the Inference API on-demand.",
-		[LoadState.Loaded]: "This model is currently loaded and running on the Inference API.",
+		[LoadState.Loadable]: "This model can be loaded on Inference Endpoints (serverless).",
+		[LoadState.Loaded]: "This model is currently loaded and running on Inference Endpoints (serverless).",
 		[LoadState.TooBig]:
-			"Model is too large to load onto the free Inference API. To try the model, launch it on Inference Endpoints instead.",
-		[LoadState.Error]: "⚠️ This model could not be loaded by the inference API. ⚠️",
+			"Model is too large to load onto on Inference Endpoints (serverless). To try the model, launch it on Inference Endpoints (dedicated) instead.",
+		[LoadState.Error]: "⚠️ This model could not be loaded on Inference Endpoints (serverless). ⚠️",
 	} as const;
 
 	const azureState = {
 		[LoadState.Loadable]: "This model can be loaded loaded on AzureML Managed Endpoint",
 		[LoadState.Loaded]: "This model is loaded and running on AzureML Managed Endpoint",
 		[LoadState.TooBig]:
-			"Model is too large to load onto the free Inference API. To try the model, launch it on Inference Endpoints instead.",
+			"Model is too large to load onto on Inference Endpoints (serverless). To try the model, launch it on Inference Endpoints (dedicated) instead.",
 		[LoadState.Error]: "⚠️ This model could not be loaded.",
 	} as const;
 
@@ -62,9 +62,10 @@
 		{:else if (model.inference === InferenceDisplayability.Yes || model.pipeline_tag === "reinforcement-learning") && !modelTooBig}
 			{@html getStatusReport($modelLoadStates[model.id], state)}
 		{:else if model.inference === InferenceDisplayability.ExplicitOptOut}
-			<span class="text-sm text-gray-500">Inference API has been turned off for this model.</span>
+			<span class="text-sm text-gray-500">Inference Endpoints (serverless) has been turned off for this model.</span>
 		{:else if model.inference === InferenceDisplayability.CustomCode}
-			<span class="text-sm text-gray-500">Inference API does not yet support model repos that contain custom code.</span
+			<span class="text-sm text-gray-500"
+				>Inference Endpoints (serverless) does not yet support model repos that contain custom code.</span
 			>
 		{:else if model.inference === InferenceDisplayability.LibraryNotDetected}
 			<span class="text-sm text-gray-500">
@@ -82,21 +83,21 @@
 			</span>
 		{:else if model.inference === InferenceDisplayability.PipelineLibraryPairNotSupported}
 			<span class="text-sm text-gray-500">
-				Inference API does not yet support {model.library_name} models for this pipeline type.
+				Inference Endpoints (serverless) does not yet support {model.library_name} models for this pipeline type.
 			</span>
 		{:else if modelTooBig}
 			<span class="text-sm text-gray-500">
-				Model is too large to load onto the free Inference API. To try the model, launch it on <a
+				Model is too large to load in Inference Endpoints (serverless). To try the model, launch it on <a
 					class="underline"
 					href="https://ui.endpoints.huggingface.co/new?repository={encodeURIComponent(model.id)}"
-					>Inference Endpoints</a
+					>Inference Endpoints (dedicated)</a
 				>
 				instead.
 			</span>
 		{:else}
 			<!-- added as a failsafe but this case cannot currently happen -->
 			<span class="text-sm text-gray-500">
-				Inference API is disabled for an unknown reason. Please open a
+				Inference Endpoints (serverless) is disabled for an unknown reason. Please open a
 				<a class="color-inherit underline" href="/{model.id}/discussions/new">Discussion in the Community tab</a>.
 			</span>
 		{/if}

@@ -12,7 +12,7 @@ model = SpectralMaskEnhancement.from_hparams(
 model.enhance_file("file.wav")
 ```
 
-Alternatively, you can use the [Inference API](https://huggingface.co/inference-api) to solve this task
+Alternatively, you can use [Inference Endpoints](https://huggingface.co/inference-endpoints) to solve this task
 
 ```python
 import json
