@@ -8,7 +8,113 @@
 		"generated_text": {
 			"type": "string",
 			"description": "The generated text"
+		},
+		"details": {
+			"description": "When enabled, details about the generation",
+			"title": "TextGenerationOutputDetails",
+			"allOf": [
+				{ "$ref": "#/$defs/SequenceDetails" },
+				{
+					"type": "object",
+					"properties": {
+						"best_of_sequences": {
+							"type": "array",
+							"description": "Details about additional sequences when best_of is provided",
+							"items": {
+								"allOf": [
+									{ "$ref": "#/$defs/SequenceDetails" },
+									{
+										"type": "object",
+										"properties": {
+											"generated_text": {
+												"type": "integer",
+												"description": "The generated text"
+											}
+										},
+										"required": ["generated_text"]
+									}
+								]
+							}
+						}
+					}
+				}
+			]
 		}
 	},
-	"required": ["generatedText"]
+	"required": ["generated_text"],
+
+	"$defs": {
+		"Token": {
+			"type": "object",
+			"title": "Token",
+			"properties": {
+				"id": {
+					"type": "integer"
+				},
+				"logprob": {
+					"type": "number"
+				},
+				"special": {
+					"type": "boolean",
+					"description": "Whether or not that token is a special one"
+				},
+				"text": {
+					"type": "string",
+					"description": "The text associated with that token"
+				}
+			},
+			"required": ["id", "logprob", "special", "text"]
+		},
+		"SequenceDetails": {
+			"type": "object",
+			"title": "TextGenerationSequenceDetails",
+			"properties": {
+				"finish_reason": {
+					"type": "string",
+					"description": "The reason why the generation was stopped.",
+					"oneOf": [
+						{ "const": "length", "description": "The generated sequence reached the maximum allowed length" },
+						{ "const": "eos_token", "description": "The model generated an end-of-sentence (EOS) token" },
+						{ "const": "stop_sequence", "description": "One of the sequence in stop_sequences was generated" }
+					]
+				},
+				"generated_tokens": {
+					"type": "integer",
+					"description": "The number of generated tokens"
+				},
+				"prefill": {
+					"type": "array",
+					"items": {
+						"title": "PrefillToken",
+						"type": "object",
+						"properties": {
+							"id": {
+								"type": "integer"
+							},
+							"logprob": {
+								"type": "number"
+							},
+							"text": {
+								"type": "string",
+								"description": "The text associated with that token"
+							}
+						},
+						"required": ["id", "logprob", "text"]
+					}
+				},
+				"seed": {
+					"type": "integer",
+					"description": "The random seed used for generation"
+				},
+				"tokens": {
+					"type": "array",
+					"description": "The generated tokens and associated details",
+					"items": {
+						"$ref": "#/$defs/Token"
+					}
+				}
+			},
+			"required": ["finish_reason", "generated_tokens", "prefill", "tokens"]
+		}
+	}
 }
