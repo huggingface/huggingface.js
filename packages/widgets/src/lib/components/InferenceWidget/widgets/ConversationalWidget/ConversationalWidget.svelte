@@ -10,7 +10,7 @@
 	import { isTextInput } from "../../shared/inputValidation.js";
 	import { widgetStates } from "../../stores.js";
 
-	export let apiToken: WidgetProps["apiToken"] = undefined;
+	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
 	export let callApiOnMount: WidgetProps["callApiOnMount"];
 	export let model: WidgetProps["model"];
