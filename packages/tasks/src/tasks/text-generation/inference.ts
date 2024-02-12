@@ -26,11 +26,24 @@ export interface TextGenerationInput {
  */
 export interface TextGenerationParameters {
 	/**
-	 * Whether to use logit sampling (true) or greedy search (false).
+	 * The number of sampling queries to run. Only the best one (in terms of total logprob) will
+	 * be returned.
+	 */
+	best_of?: number;
+	/**
+	 * Whether or not to output decoder input details
+	 */
+	decoder_input_details?: boolean;
+	/**
+	 * Whether or not to output details
+	 */
+	details?: boolean;
+	/**
+	 * Whether to use logits sampling instead of greedy decoding when generating new tokens.
 	 */
 	do_sample?: boolean;
 	/**
-	 * Maximum number of generated tokens.
+	 * The maximum number of tokens to generate.
 	 */
 	max_new_tokens?: number;
 	/**
@@ -42,6 +55,10 @@ export interface TextGenerationParameters {
 	 * Whether to prepend the prompt to the generated text.
 	 */
 	return_full_text?: boolean;
+	/**
+	 * The random sampling seed.
+	 */
+	seed?: number;
 	/**
 	 * Stop generating tokens if a member of `stop_sequences` is generated.
 	 */
@@ -79,10 +96,99 @@ export interface TextGenerationParameters {
  * Outputs for Text Generation inference
  */
 export interface TextGenerationOutput {
-	generatedText: unknown;
+	/**
+	 * When enabled, details about the generation
+	 */
+	details?: TextGenerationOutputDetails;
 	/**
 	 * The generated text
 	 */
-	generated_text?: string;
+	generated_text: string;
+	[property: string]: unknown;
+}
+
+/**
+ * When enabled, details about the generation
+ */
+export interface TextGenerationOutputDetails {
+	/**
+	 * Details about additional sequences when best_of is provided
+	 */
+	best_of_sequences?: TextGenerationSequenceDetails[];
+	/**
+	 * The reason why the generation was stopped.
+	 */
+	finish_reason: FinishReason;
+	/**
+	 * The number of generated tokens
+	 */
+	generated_tokens: number;
+	prefill: PrefillToken[];
+	/**
+	 * The random seed used for generation
+	 */
+	seed?: number;
+	/**
+	 * The generated tokens and associated details
+	 */
+	tokens: Token[];
+	[property: string]: unknown;
+}
+
+export interface TextGenerationSequenceDetails {
+	/**
+	 * The reason why the generation was stopped.
+	 */
+	finish_reason: FinishReason;
+	/**
+	 * The generated text
+	 */
+	generated_text: number;
+	/**
+	 * The number of generated tokens
+	 */
+	generated_tokens: number;
+	prefill: PrefillToken[];
+	/**
+	 * The random seed used for generation
+	 */
+	seed?: number;
+	/**
+	 * The generated tokens and associated details
+	 */
+	tokens: Token[];
+	[property: string]: unknown;
+}
+
+/**
+ * The generated sequence reached the maximum allowed length
+ *
+ * The model generated an end-of-sentence (EOS) token
+ *
+ * One of the sequence in stop_sequences was generated
+ */
+export type FinishReason = "length" | "eos_token" | "stop_sequence";
+
+export interface PrefillToken {
+	id: number;
+	logprob: number;
+	/**
+	 * The text associated with that token
+	 */
+	text: string;
+	[property: string]: unknown;
+}
+
+export interface Token {
+	id: number;
+	logprob: number;
+	/**
+	 * Whether or not that token is a special one
+	 */
+	special: boolean;
+	/**
+	 * The text associated with that token
+	 */
+	text: string;
 	[property: string]: unknown;
 }
