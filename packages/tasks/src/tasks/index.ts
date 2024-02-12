@@ -1,4 +1,5 @@
-import { PIPELINE_DATA, PipelineType } from "../pipelines";
+import type { PipelineType } from "../pipelines";
+import { PIPELINE_DATA } from "../pipelines";
 
 import audioClassification from "./audio-classification/data";
 import audioToAudio from "./audio-to-audio/data";
