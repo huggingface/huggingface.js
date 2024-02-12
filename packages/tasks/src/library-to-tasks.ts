@@ -1,5 +1,5 @@
 import type { ModelLibraryKey } from "./model-libraries";
-import type { PipelineType } from "./pipelines";
+import type { WidgetType } from "./pipelines";
 
 /**
  * Mapping from library name (excluding Transformers) to its supported tasks.
@@ -8,7 +8,7 @@ import type { PipelineType } from "./pipelines";
  * This mapping is generated automatically by "python-api-export-tasks" action in huggingface/api-inference-community repo upon merge.
  * Ref: https://github.com/huggingface/api-inference-community/pull/158
  */
-export const LIBRARY_TASK_MAPPING_EXCLUDING_TRANSFORMERS: Partial<Record<ModelLibraryKey, PipelineType[]>> = {
+export const LIBRARY_TASK_MAPPING_EXCLUDING_TRANSFORMERS: Partial<Record<ModelLibraryKey, WidgetType[]>> = {
 	"adapter-transformers": ["question-answering", "text-classification", "token-classification"],
 	allennlp: ["question-answering"],
 	asteroid: [

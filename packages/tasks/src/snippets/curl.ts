@@ -34,7 +34,6 @@ export const curlSnippets: Partial<Record<PipelineType, (model: ModelData, acces
 	"zero-shot-classification": snippetZeroShotClassification,
 	translation: snippetBasic,
 	summarization: snippetBasic,
-	conversational: snippetBasic,
 	"feature-extraction": snippetBasic,
 	"text-generation": snippetBasic,
 	"text2text-generation": snippetBasic,

@@ -121,7 +121,6 @@ export const jsSnippets: Partial<Record<PipelineType, (model: ModelData, accessT
 	"zero-shot-classification": snippetZeroShotClassification,
 	translation: snippetBasic,
 	summarization: snippetBasic,
-	conversational: snippetBasic,
 	"feature-extraction": snippetBasic,
 	"text-generation": snippetBasic,
 	"text2text-generation": snippetBasic,

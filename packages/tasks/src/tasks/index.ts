@@ -1,9 +1,8 @@
-import { type PipelineType, PIPELINE_DATA } from "../pipelines";
+import { PIPELINE_DATA, PipelineType } from "../pipelines";
 
 import audioClassification from "./audio-classification/data";
 import audioToAudio from "./audio-to-audio/data";
 import automaticSpeechRecognition from "./automatic-speech-recognition/data";
-import conversational from "./conversational/data";
 import documentQuestionAnswering from "./document-question-answering/data";
 import featureExtraction from "./feature-extraction/data";
 import fillMask from "./fill-mask/data";
@@ -45,7 +44,6 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	"audio-classification": ["speechbrain", "transformers", "transformers.js"],
 	"audio-to-audio": ["asteroid", "speechbrain"],
 	"automatic-speech-recognition": ["espnet", "nemo", "speechbrain", "transformers", "transformers.js"],
-	conversational: ["transformers"],
 	"depth-estimation": ["transformers", "transformers.js"],
 	"document-question-answering": ["transformers", "transformers.js"],
 	"feature-extraction": ["sentence-transformers", "transformers", "transformers.js"],
@@ -122,7 +120,6 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"audio-classification": getData("audio-classification", audioClassification),
 	"audio-to-audio": getData("audio-to-audio", audioToAudio),
 	"automatic-speech-recognition": getData("automatic-speech-recognition", automaticSpeechRecognition),
-	conversational: getData("conversational", conversational),
 	"depth-estimation": getData("depth-estimation", depthEstimation),
 	"document-question-answering": getData("document-question-answering", documentQuestionAnswering),
 	"feature-extraction": getData("feature-extraction", featureExtraction),

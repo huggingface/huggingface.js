@@ -1,9 +1,9 @@
 import type { WidgetExample } from "./widget-example";
-import type { PipelineType } from "./pipelines";
+import type { WidgetType } from "./pipelines";
 
 type LanguageCode = string;
 
-type PerLanguageMapping = Map<PipelineType, string[] | WidgetExample[]>;
+type PerLanguageMapping = Map<WidgetType, string[] | WidgetExample[]>;
 
 /// NOTE TO CONTRIBUTORS:
 ///
