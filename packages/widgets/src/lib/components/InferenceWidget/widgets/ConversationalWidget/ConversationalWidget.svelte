@@ -25,7 +25,7 @@
 		content: string;
 	}
 
-	interface Response {		
+	interface Response {
 		generated_text: string;
 	}
 
@@ -90,7 +90,7 @@
 			model.id,
 			requestBody,
 			apiToken,
-			body => parseOutput(body, chat),
+			(body) => parseOutput(body, chat),
 			withModelLoading,
 			includeCredentials,
 			isOnLoadCall
@@ -124,10 +124,13 @@
 	}
 
 	function isValidOutput(arg: any): arg is Response {
-		return typeof(arg?.generated_text) === "string";
+		return typeof arg?.generated_text === "string";
 	}
 
-	function parseOutput(body: unknown, chat: Message[]): {
+	function parseOutput(
+		body: unknown,
+		chat: Message[]
+	): {
 		chat: Message[];
 		output: Output;
 	} {
@@ -143,9 +146,7 @@
 
 			return { chat: chatWithOutput, output };
 		}
-		throw new TypeError(
-			"Invalid output: output must be of type <generated_text: string>"
-		);
+		throw new TypeError("Invalid output: output must be of type <generated_text: string>");
 	}
 
 	function applyWidgetExample(sample: WidgetExampleTextInput, opts: ExampleRunOpts = {}) {
