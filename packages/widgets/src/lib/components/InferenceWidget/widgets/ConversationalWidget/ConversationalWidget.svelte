@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "../../shared/types.js";
 	import { Template } from "@huggingface/jinja";
-	import type { TokenizerConfig, WidgetExampleTextInput } from "@huggingface/tasks";
+	import type { SpecialTokensMap, TokenizerConfig, WidgetExampleTextInput } from "@huggingface/tasks";
+	import { SPECIAL_TOKENS_ATTRIBUTES } from "@huggingface/tasks";
 
 	import WidgetOutputConvo from "../../shared/WidgetOutputConvo/WidgetOutputConvo.svelte";
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
@@ -9,7 +10,6 @@
 	import { addInferenceParameters, callInferenceApi, updateUrl } from "../../shared/helpers.js";
 	import { isTextInput } from "../../shared/inputValidation.js";
 	import { widgetStates } from "../../stores.js";
-	import { extractSpecialTokensMap } from "./ChatTemplate.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -173,6 +173,17 @@
 			return { chat: chatWithOutput, output };
 		}
 		throw new TypeError("Invalid output: output must be of type Array & non-empty");
+	}
+
+	function extractSpecialTokensMap(tokenizerConfig: TokenizerConfig): SpecialTokensMap {
+		const specialTokensMap = Object.create(null);
+		for (const key of SPECIAL_TOKENS_ATTRIBUTES) {
+			const value = tokenizerConfig[key];
+			if (typeof value === "string") {
+				specialTokensMap[key] = value;
+			}
+		}
+		return specialTokensMap;
 	}
 
 	function applyWidgetExample(sample: WidgetExampleTextInput, opts: ExampleRunOpts = {}) {
