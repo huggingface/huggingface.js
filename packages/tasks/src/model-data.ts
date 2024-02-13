@@ -1,6 +1,6 @@
 import type { PipelineType } from "./pipelines";
 import type { WidgetExample } from "./widget-example";
-import { TokenizerConfig } from "./tokenizer-data";
+import type { TokenizerConfig } from "./tokenizer-data";
 
 export enum InferenceDisplayability {
 	/**
