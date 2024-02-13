@@ -1,5 +1,5 @@
 import type { ModelLibraryKey } from "./model-libraries";
-import type { WidgetType } from "./pipelines";
+import type { PipelineType } from "./pipelines";
 
 /**
  * Mapping from library name (excluding Transformers) to its supported tasks.
@@ -8,7 +8,7 @@ import type { WidgetType } from "./pipelines";
  * This mapping is generated automatically by "python-api-export-tasks" action in huggingface/api-inference-community repo upon merge.
  * Ref: https://github.com/huggingface/api-inference-community/pull/158
  */
-export const LIBRARY_TASK_MAPPING_EXCLUDING_TRANSFORMERS: Partial<Record<ModelLibraryKey, WidgetType[]>> = {
+export const LIBRARY_TASK_MAPPING_EXCLUDING_TRANSFORMERS: Partial<Record<ModelLibraryKey, PipelineType[]>> = {
 	"adapter-transformers": ["question-answering", "text-classification", "token-classification"],
 	allennlp: ["question-answering"],
 	asteroid: [
@@ -27,7 +27,7 @@ export const LIBRARY_TASK_MAPPING_EXCLUDING_TRANSFORMERS: Partial<Record<ModelLi
 	keras: ["image-classification"],
 	nemo: ["automatic-speech-recognition"],
 	open_clip: ["zero-shot-classification", "zero-shot-image-classification"],
-	paddlenlp: ["conversational", "fill-mask", "summarization", "zero-shot-classification"],
+	paddlenlp: ["fill-mask", "summarization", "zero-shot-classification"],
 	peft: ["text-generation"],
 	"pyannote-audio": ["automatic-speech-recognition"],
 	"sentence-transformers": ["feature-extraction", "sentence-similarity"],

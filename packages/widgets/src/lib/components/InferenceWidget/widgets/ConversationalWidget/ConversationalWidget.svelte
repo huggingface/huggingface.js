@@ -75,14 +75,6 @@
 			return;
 		}
 
-		if (shouldUpdateUrl && !messages.length) {
-			updateUrl({ text: trimmedText });
-		}
-
-		// Add user message to chat
-		messages = messages.concat([{ role: "user", content: trimmedText }]);
-
-		// Render chat template
 		const chatTemplate = tokenizerConfig.chat_template;
 		if (chatTemplate === undefined) {
 			outputJson = "";
@@ -91,6 +83,14 @@
 			return;
 		}
 
+		if (shouldUpdateUrl && !messages.length) {
+			updateUrl({ text: trimmedText });
+		}
+
+		// Add user message to chat
+		messages = [...messages, { role: "user", content: trimmedText }];
+
+		// Render chat template
 		const special_tokens_map = extractSpecialTokensMap(tokenizerConfig);
 
 		const template = new Template(chatTemplate);
@@ -104,6 +104,7 @@
 			inputs: chatText,
 			parameters: {
 				return_full_text: false,
+				max_new_tokens: 100,
 			},
 		};
 		addInferenceParameters(requestBody, model);
