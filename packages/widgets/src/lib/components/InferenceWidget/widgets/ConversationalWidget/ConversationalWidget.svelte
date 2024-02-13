@@ -26,10 +26,6 @@
 		content: string;
 	}
 
-	interface Response {
-		generated_text: string;
-	}
-
 	type Output = Array<{
 		input: string;
 		response: string;
@@ -49,11 +45,7 @@
 
 	let compiledTemplate: Template;
 
-	async function getOutput({
-		withModelLoading = false,
-		isOnLoadCall = false,
-		exampleOutput = undefined,
-	}: InferenceRunOpts = {}) {
+	async function getOutput({ withModelLoading = false, isOnLoadCall = false }: InferenceRunOpts = {}) {
 		const trimmedText = text.trim();
 
 		if (!trimmedText) {
@@ -85,7 +77,6 @@
 				error = "No chat template found in tokenizer config";
 				return;
 			}
-
 			compiledTemplate = new Template(chatTemplate);
 		}
 
