@@ -18,7 +18,6 @@ export * from "./cv/imageToImage";
 export * from "./cv/zeroShotImageClassification";
 
 // Natural Language Processing tasks
-export * from "./nlp/conversational";
 export * from "./nlp/featureExtraction";
 export * from "./nlp/fillMask";
 export * from "./nlp/questionAnswering";
