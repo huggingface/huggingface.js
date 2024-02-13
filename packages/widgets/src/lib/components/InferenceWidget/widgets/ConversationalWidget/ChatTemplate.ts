@@ -1,5 +1,5 @@
 import type { SpecialTokensMap, TokenizerConfig } from "@huggingface/tasks";
-import {SPECIAL_TOKENS_ATTRIBUTES } from "@huggingface/tasks";
+import { SPECIAL_TOKENS_ATTRIBUTES } from "@huggingface/tasks";
 
 // This template formats inputs in the standard ChatML format. See https://github.com/openai/openai-python/blob/main/chatml.md
 const DEFAULT_CHAT_TEMPLATE =
