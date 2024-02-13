@@ -13,7 +13,7 @@ export const SPECIAL_TOKENS_ATTRIBUTES = [
  * Public interface for a tokenizer's special tokens mapping
  */
 export type SpecialTokensMap = {
-    [key in typeof SPECIAL_TOKENS_ATTRIBUTES[number]]?: string;
+	[key in (typeof SPECIAL_TOKENS_ATTRIBUTES)[number]]?: string;
 };
 /**
  * Public interface for tokenizer config
