@@ -6,6 +6,7 @@ export * from "./tasks";
 export {
 	PIPELINE_DATA,
 	PIPELINE_TYPES,
+	type WidgetType,
 	type PipelineType,
 	type PipelineData,
 	type Modality,
