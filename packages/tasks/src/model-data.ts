@@ -1,5 +1,6 @@
 import type { PipelineType } from "./pipelines";
 import type { WidgetExample } from "./widget-example";
+import { TokenizerConfig } from "./tokenizer-data";
 
 export enum InferenceDisplayability {
 	/**
@@ -53,11 +54,7 @@ export interface ModelData {
 			base_model_name?: string;
 			task_type?: string;
 		};
-		tokenizer?: {
-			bos_token?: string;
-			chat_template?: string;
-			eos_token?: string;
-		};
+		tokenizer?: TokenizerConfig;
 	};
 	/**
 	 * all the model tags

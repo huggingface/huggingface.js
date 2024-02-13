@@ -31,6 +31,23 @@
 
 	const models: ModelData[] = [
 		{
+			id: "HuggingFaceH4/zephyr-7b-beta",
+			pipeline_tag: "text-generation",
+			tags: ["conversational"],
+			inference: InferenceDisplayability.Yes,
+			config: {
+				tokenizer: {
+					bos_token: "<s>",
+					chat_template:
+						"{% for message in messages %}\n{% if message['role'] == 'user' %}\n{{ '<|user|>\n' + message['content'] + eos_token }}\n{% elif message['role'] == 'system' %}\n{{ '<|system|>\n' + message['content'] + eos_token }}\n{% elif message['role'] == 'assistant' %}\n{{ '<|assistant|>\n'  + message['content'] + eos_token }}\n{% endif %}\n{% if loop.last and add_generation_prompt %}\n{{ '<|assistant|>' }}\n{% endif %}\n{% endfor %}",
+					eos_token: "</s>",
+					pad_token: "</s>",
+					unk_token: "<unk>",
+					use_default_system_prompt: true,
+				},
+			},
+		},
+		{
 			id: "WizardLM/WizardLM-70B-V1.0",
 			pipeline_tag: "text-generation",
 			inference: InferenceDisplayability.Yes,
@@ -315,7 +332,7 @@
 		},
 		{
 			id: "facebook/blenderbot-400M-distill",
-			pipeline_tag: "conversational",
+			pipeline_tag: "text-generation",
 			inference: InferenceDisplayability.Yes,
 			widgetData: [{ text: "Hey my name is Julien! How are you?" }],
 		},

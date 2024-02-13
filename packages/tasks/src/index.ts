@@ -17,6 +17,7 @@ export {
 export { ModelLibrary, ALL_DISPLAY_MODEL_LIBRARY_KEYS } from "./model-libraries";
 export type { ModelLibraryKey } from "./model-libraries";
 export type { ModelData, TransformersInfo } from "./model-data";
+export type { SpecialTokensMap, TokenizerConfig } from "./tokenizer-data";
 export type {
 	WidgetExample,
 	WidgetExampleAttribute,
@@ -38,6 +39,7 @@ export type {
 	WidgetExampleOutputText,
 } from "./widget-example";
 export { InferenceDisplayability } from "./model-data";
+export { SPECIAL_TOKENS_ATTRIBUTES } from "./tokenizer-data";
 
 import * as snippets from "./snippets";
 export { snippets };

@@ -2,6 +2,7 @@
 	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "../../shared/types.js";
 	import { Template } from "@huggingface/jinja";
 	import type { WidgetExampleTextInput } from "@huggingface/tasks";
+	import type { TokenizerConfig } from "./ChatTemplate.js";
 
 	import WidgetOutputConvo from "../../shared/WidgetOutputConvo/WidgetOutputConvo.svelte";
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
@@ -9,6 +10,7 @@
 	import { addInferenceParameters, callInferenceApi, updateUrl } from "../../shared/helpers.js";
 	import { isTextInput } from "../../shared/inputValidation.js";
 	import { widgetStates } from "../../stores.js";
+	import { extractSpecialTokensMap } from "./ChatTemplate.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -35,7 +37,7 @@
 	}>;
 
 	let computeTime = "";
-	let chat: Message[] = [];
+	let messages: Message[] = [];
 	let error: string = "";
 	let isLoading = false;
 	let modelLoading = {
@@ -57,15 +59,32 @@
 			return;
 		}
 
-		if (shouldUpdateUrl && !chat.length) {
+		// Error checking
+		const config = model.config;
+		if (config === undefined) {
+			outputJson = "";
+			output = [];
+			error = "Model config not found";
+			return;
+		}
+
+		const tokenizerConfig = config.tokenizer as TokenizerConfig | undefined;
+		if (tokenizerConfig === undefined) {
+			outputJson = "";
+			output = [];
+			error = "Tokenizer config not found";
+			return;
+		}
+
+		if (shouldUpdateUrl && !messages.length) {
 			updateUrl({ text: trimmedText });
 		}
 
 		// Add user message to chat
-		chat = chat.concat([{ role: "user", content: trimmedText }]);
+		messages = messages.concat([{ role: "user", content: trimmedText }]);
 
 		// Render chat template
-		const chatTemplate = model.config?.tokenizer?.chat_template;
+		const chatTemplate = tokenizerConfig.chat_template;
 		if (chatTemplate === undefined) {
 			outputJson = "";
 			output = [];
@@ -73,14 +92,21 @@
 			return;
 		}
 
+		const special_tokens_map = extractSpecialTokensMap(tokenizerConfig);
+
 		const template = new Template(chatTemplate);
 		const chatText = template.render({
-			messages: chat,
-			bos_token: model.config?.tokenizer?.bos_token,
-			eos_token: model.config?.tokenizer?.eos_token,
+			messages,
+			add_generation_prompt: true,
+			...special_tokens_map,
 		});
 
-		const requestBody = { inputs: chatText };
+		const requestBody = {
+			inputs: chatText,
+			parameters: {
+				return_full_text: false,
+			},
+		};
 		addInferenceParameters(requestBody, model);
 
 		isLoading = true;
@@ -90,7 +116,7 @@
 			model.id,
 			requestBody,
 			apiToken,
-			(body) => parseOutput(body, chat),
+			(body) => parseOutput(body, messages),
 			withModelLoading,
 			includeCredentials,
 			isOnLoadCall
@@ -107,7 +133,7 @@
 			computeTime = res.computeTime;
 			outputJson = res.outputJson;
 			if (res.output) {
-				chat = res.output.chat;
+				messages = res.output.chat;
 				output = res.output.output;
 			}
 			// Emptying input value
@@ -123,10 +149,6 @@
 		}
 	}
 
-	function isValidOutput(arg: any): arg is Response {
-		return typeof arg?.generated_text === "string";
-	}
-
 	function parseOutput(
 		body: unknown,
 		chat: Message[]
@@ -134,19 +156,23 @@
 		chat: Message[];
 		output: Output;
 	} {
-		if (isValidOutput(body)) {
-			const chatWithOutput = chat.concat([{ role: "assistant", content: body.generated_text }]);
+		if (Array.isArray(body) && body.length) {
+			const text = body[0]?.generated_text ?? "";
 
-			const output = chatWithOutput.reduce((acc, message, index) => {
-				if (index % 2 === 0) {
-					acc.push({ input: message.content, response: chatWithOutput[index + 1].content });
-				}
-				return acc;
-			}, [] as Output);
+			if (!text.length) {
+				throw new TypeError("Model did not generate a response.");
+			}
+
+			const chatWithOutput = [...chat, { role: "assistant", content: text }];
+
+			const output: Output = Array.from({ length: Math.floor(chatWithOutput.length / 2) }, (_, index) => ({
+				input: chatWithOutput[2 * index].content,
+				response: chatWithOutput[2 * index + 1].content,
+			}));
 
 			return { chat: chatWithOutput, output };
 		}
-		throw new TypeError("Invalid output: output must be of type <generated_text: string>");
+		throw new TypeError("Invalid output: output must be of type Array & non-empty");
 	}
 
 	function applyWidgetExample(sample: WidgetExampleTextInput, opts: ExampleRunOpts = {}) {
