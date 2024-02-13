@@ -332,7 +332,7 @@
 		},
 		{
 			id: "facebook/blenderbot-400M-distill",
-			pipeline_tag: "text-generation",
+			pipeline_tag: "text2text-generation",
 			inference: InferenceDisplayability.Yes,
 			widgetData: [{ text: "Hey my name is Julien! How are you?" }],
 		},
