@@ -156,7 +156,7 @@
 			const text = body[0]?.generated_text ?? "";
 
 			if (!text.length) {
-				throw new TypeError("Model did not generate a response.");
+				throw new Error("Model did not generate a response.");
 			}
 
 			const chatWithOutput = [...chat, { role: "assistant", content: text }];
