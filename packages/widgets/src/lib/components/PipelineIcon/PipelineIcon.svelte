@@ -40,13 +40,13 @@
 	import IconMaskGeneration from "../Icons/IconMaskGeneration.svelte";
 	import IconTextTo3D from "../Icons/IconTextTo3D.svelte";
 	import IconImageTo3D from "../Icons/IconImageTo3D.svelte";
-	import type { PipelineType } from "@huggingface/tasks";
+	import type { WidgetType } from "@huggingface/tasks";
 
 	export let classNames = "";
 	export let pipeline = "";
 
 	const ICON_COMPONENTS: {
-		[key in PipelineType]?: typeof SvelteComponent;
+		[key in WidgetType]?: typeof SvelteComponent;
 	} = {
 		/// Keep same order as in huggingface_hub/Types.ts
 		/// for easy mapping.
