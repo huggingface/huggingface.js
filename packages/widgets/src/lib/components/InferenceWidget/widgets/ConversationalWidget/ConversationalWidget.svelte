@@ -47,6 +47,8 @@
 	let outputJson: string;
 	let text = "";
 
+	let compiledTemplate: Template;
+
 	async function getOutput({
 		withModelLoading = false,
 		isOnLoadCall = false,
@@ -75,12 +77,16 @@
 			return;
 		}
 
-		const chatTemplate = tokenizerConfig.chat_template;
-		if (chatTemplate === undefined) {
-			outputJson = "";
-			output = [];
-			error = "No chat template found in tokenizer config";
-			return;
+		if (!compiledTemplate) {
+			const chatTemplate = tokenizerConfig.chat_template;
+			if (chatTemplate === undefined) {
+				outputJson = "";
+				output = [];
+				error = "No chat template found in tokenizer config";
+				return;
+			}
+
+			compiledTemplate = new Template(chatTemplate);
 		}
 
 		if (shouldUpdateUrl && !messages.length) {
@@ -93,8 +99,7 @@
 		// Render chat template
 		const special_tokens_map = extractSpecialTokensMap(tokenizerConfig);
 
-		const template = new Template(chatTemplate);
-		const chatText = template.render({
+		const chatText = compiledTemplate.render({
 			messages,
 			add_generation_prompt: true,
 			...special_tokens_map,
