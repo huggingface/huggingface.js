@@ -400,14 +400,14 @@ const speechBrainMethod = (speechbrainInterface: string) => {
 };
 
 const speechbrain = (model: ModelData) => {
-	const speechbrainInterface = model.config?.speechbrain?.interface;
+	const speechbrainInterface = model.config?.speechbrain_interface;
 	if (speechbrainInterface === undefined) {
-		return [`# interface not specified in config.json`];
+		return [`# speechbrain_interface not specified in config.json`];
 	}
 
 	const speechbrainMethod = speechBrainMethod(speechbrainInterface);
 	if (speechbrainMethod === undefined) {
-		return [`# interface in config.json invalid`];
+		return [`# speechbrain_interface in config.json invalid`];
 	}
 
 	return [
