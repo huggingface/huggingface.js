@@ -1,8 +1,7 @@
 <script lang="ts">
 	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "../../shared/types.js";
 	import { Template } from "@huggingface/jinja";
-	import type { TokenizerConfig } from "@huggingface/tasks";
-	import type { WidgetExampleTextInput } from "@huggingface/tasks";
+	import type { TokenizerConfig, WidgetExampleTextInput } from "@huggingface/tasks";
 
 	import WidgetOutputConvo from "../../shared/WidgetOutputConvo/WidgetOutputConvo.svelte";
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
