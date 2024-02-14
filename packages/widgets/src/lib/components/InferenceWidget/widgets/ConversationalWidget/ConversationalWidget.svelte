@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from "svelte";
 	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "../../shared/types.js";
 	import { Template } from "@huggingface/jinja";
 	import type { SpecialTokensMap, TokenizerConfig, WidgetExampleTextInput } from "@huggingface/tasks";
@@ -38,15 +39,10 @@
 	let text = "";
 
 	let compiledTemplate: Template;
+	let tokenizerConfig: TokenizerConfig;
 
-	async function getOutput({ withModelLoading = false, isOnLoadCall = false }: InferenceRunOpts = {}) {
-		const trimmedText = text.trim();
-
-		if (!trimmedText) {
-			return;
-		}
-
-		// Error checking
+	// Check config and compile template
+	onMount(() => {
 		const config = model.config;
 		if (config === undefined) {
 			outputJson = "";
@@ -55,23 +51,32 @@
 			return;
 		}
 
-		const tokenizerConfig = config.tokenizer as TokenizerConfig | undefined;
-		if (tokenizerConfig === undefined) {
+		if (config.tokenizer === undefined) {
 			outputJson = "";
 			messages = [];
 			error = "Tokenizer config not found";
 			return;
 		}
+		tokenizerConfig = config.tokenizer;
 
+		const chatTemplate = tokenizerConfig.chat_template;
+		if (chatTemplate === undefined) {
+			outputJson = "";
+			messages = [];
+			error = "No chat template found in tokenizer config";
+			return;
+		}
+		compiledTemplate = new Template(chatTemplate);
+	});
+
+	async function getOutput({ withModelLoading = false, isOnLoadCall = false }: InferenceRunOpts = {}) {
 		if (!compiledTemplate) {
-			const chatTemplate = tokenizerConfig.chat_template;
-			if (chatTemplate === undefined) {
-				outputJson = "";
-				messages = [];
-				error = "No chat template found in tokenizer config";
-				return;
-			}
-			compiledTemplate = new Template(chatTemplate);
+			return;
+		}
+
+		const trimmedText = text.trim();
+		if (!trimmedText) {
+			return;
 		}
 
 		if (shouldUpdateUrl && !messages.length) {
