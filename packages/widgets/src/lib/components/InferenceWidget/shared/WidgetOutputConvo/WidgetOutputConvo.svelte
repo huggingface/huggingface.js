@@ -5,9 +5,9 @@
 	import WidgetOutputConvoBubble from "../WidgetOuputConvoBubble/WidgetOutputConvoBubble.svelte";
 
 	export let modelId: string;
-	export let output: Array<{
-		input: string;
-		response: string;
+	export let messages: Array<{
+		role: string;
+		content: string;
 	}>;
 
 	let wrapperEl: HTMLElement;
@@ -25,9 +25,12 @@
 		<strong>{modelId}</strong>.
 	</div>
 	<div class="flex flex-col items-end space-y-4 p-3">
-		{#each output as exchange}
-			<WidgetOutputConvoBubble position="right" text={exchange.input} />
-			<WidgetOutputConvoBubble position="left" text={exchange.response} />
+		{#each messages as message}
+			{#if message.role === "user"}
+				<WidgetOutputConvoBubble position="right" text={message.content} />
+			{:else}
+				<WidgetOutputConvoBubble position="left" text={message.content} />
+			{/if}
 		{/each}
 	</div>
 </div>

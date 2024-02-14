@@ -26,11 +26,6 @@
 		content: string;
 	}
 
-	type Output = Array<{
-		input: string;
-		response: string;
-	}>;
-
 	let computeTime = "";
 	let messages: Message[] = [];
 	let error: string = "";
@@ -39,7 +34,6 @@
 		isLoading: false,
 		estimatedTime: 0,
 	};
-	let output: Output = [];
 	let outputJson: string;
 	let text = "";
 
@@ -56,7 +50,7 @@
 		const config = model.config;
 		if (config === undefined) {
 			outputJson = "";
-			output = [];
+			messages = [];
 			error = "Model config not found";
 			return;
 		}
@@ -64,7 +58,7 @@
 		const tokenizerConfig = config.tokenizer as TokenizerConfig | undefined;
 		if (tokenizerConfig === undefined) {
 			outputJson = "";
-			output = [];
+			messages = [];
 			error = "Tokenizer config not found";
 			return;
 		}
@@ -73,7 +67,7 @@
 			const chatTemplate = tokenizerConfig.chat_template;
 			if (chatTemplate === undefined) {
 				outputJson = "";
-				output = [];
+				messages = [];
 				error = "No chat template found in tokenizer config";
 				return;
 			}
@@ -129,8 +123,7 @@
 			computeTime = res.computeTime;
 			outputJson = res.outputJson;
 			if (res.output) {
-				messages = res.output.chat;
-				output = res.output.output;
+				messages = res.output;
 			}
 			// Emptying input value
 			text = "";
@@ -145,13 +138,7 @@
 		}
 	}
 
-	function parseOutput(
-		body: unknown,
-		chat: Message[]
-	): {
-		chat: Message[];
-		output: Output;
-	} {
+	function parseOutput(body: unknown, chat: Message[]): Message[] {
 		if (Array.isArray(body) && body.length) {
 			const text = body[0]?.generated_text ?? "";
 
@@ -159,14 +146,7 @@
 				throw new Error("Model did not generate a response.");
 			}
 
-			const chatWithOutput = [...chat, { role: "assistant", content: text }];
-
-			const output: Output = Array.from({ length: Math.floor(chatWithOutput.length / 2) }, (_, index) => ({
-				input: chatWithOutput[2 * index].content,
-				response: chatWithOutput[2 * index + 1].content,
-			}));
-
-			return { chat: chatWithOutput, output };
+			return [...chat, { role: "assistant", content: text }];
 		}
 		throw new TypeError("Invalid output: output must be of type Array & non-empty");
 	}
@@ -202,7 +182,7 @@
 		{applyWidgetExample}
 		validateExample={isTextInput}
 	/>
-	<WidgetOutputConvo modelId={model.id} {output} />
+	<WidgetOutputConvo modelId={model.id} {messages} />
 
 	<WidgetQuickInput
 		bind:value={text}
