@@ -7,6 +7,7 @@
 	import IconConversational from "../Icons/IconConversational.svelte";
 	import IconFeatureExtraction from "../Icons/IconFeatureExtraction.svelte";
 	import IconFillMask from "../Icons/IconFillMask.svelte";
+	import IconImageAndTextToImage from "../Icons/IconImageAndTextToImage.svelte";
 	import IconImageClassification from "../Icons/IconImageClassification.svelte";
 	import IconImageSegmentation from "../Icons/IconImageSegmentation.svelte";
 	import IconObjectDetection from "../Icons/IconObjectDetection.svelte";
@@ -75,7 +76,7 @@
 		"video-classification": IconVideoClassification,
 		"image-segmentation": IconImageSegmentation,
 		"text-to-image": IconTextToImage,
-		"image-text-to-text": IconTextToImage,
+		"image-text-to-text": IconImageAndTextToImage,
 		"image-to-text": IconImageToText,
 		"image-to-image": IconImageToImage,
 		"image-to-video": IconImageToVideo,
