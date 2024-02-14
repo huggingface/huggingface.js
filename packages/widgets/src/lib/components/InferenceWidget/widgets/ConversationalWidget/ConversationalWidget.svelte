@@ -45,15 +45,11 @@
 	onMount(() => {
 		const config = model.config;
 		if (config === undefined) {
-			outputJson = "";
-			messages = [];
 			error = "Model config not found";
 			return;
 		}
 
 		if (config.tokenizer === undefined) {
-			outputJson = "";
-			messages = [];
 			error = "Tokenizer config not found";
 			return;
 		}
@@ -61,8 +57,6 @@
 
 		const chatTemplate = tokenizerConfig.chat_template;
 		if (chatTemplate === undefined) {
-			outputJson = "";
-			messages = [];
 			error = "No chat template found in tokenizer config";
 			return;
 		}
