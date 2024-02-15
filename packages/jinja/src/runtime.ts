@@ -341,6 +341,7 @@ export class Interpreter {
 		//   }
 		//   return filter.value([operand], environment);
 
+		// https://jinja.palletsprojects.com/en/3.0.x/templates/#list-of-builtin-filters
 		if (operand instanceof ArrayValue) {
 			switch (node.filter.value) {
 				case "first":
@@ -368,12 +369,35 @@ export class Interpreter {
 						})
 					);
 				default:
-					throw new Error(`Unknown filter: ${node.filter.value}`);
+					throw new Error(`Unknown ArrayValue filter: ${node.filter.value}`);
+			}
+		} else if (operand instanceof StringValue) {
+			switch (node.filter.value) {
+				case "length":
+					return new NumericValue(operand.value.length);
+				case "upper":
+					return new StringValue(operand.value.toUpperCase());
+				case "lower":
+					return new StringValue(operand.value.toLowerCase());
+				case "title":
+					return new StringValue(operand.value.replace(/\b\w/g, (c) => c.toUpperCase()));
+				case "capitalize":
+					return new StringValue(operand.value.charAt(0).toUpperCase() + operand.value.slice(1));
+				case "trim":
+					return new StringValue(operand.value.trim());
+				default:
+					throw new Error(`Unknown StringValue filter: ${node.filter.value}`);
+			}
+		} else if (operand instanceof NumericValue) {
+			switch (node.filter.value) {
+				case "abs":
+					return new NumericValue(Math.abs(operand.value));
+				default:
+					throw new Error(`Unknown NumericValue filter: ${node.filter.value}`);
 			}
 		}
 
-		// TODO add support for StringValue operand
-		throw new Error(`Cannot apply filter to type: ${operand.type}`);
+		throw new Error(`Cannot apply filter "${node.filter.value}" to type: ${operand.type}`);
 	}
 
 	/**
