@@ -1,4 +1,4 @@
-import * as snippets from "./library-ui-elements";
+import * as snippets from "./model-libraries-snippets";
 import type { ModelData } from "./model-data";
 
 /**
