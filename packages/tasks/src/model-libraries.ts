@@ -30,6 +30,9 @@ export interface LibraryUiElement {
 	snippets?: (model: ModelData) => string[];
 	/**
 	 * Elastic query used to count this library's model downloads
+	 *
+	 * By default, those files are counted:
+	 * "config.json", "config.yaml", "hyperparams.yaml", "meta.yaml"
 	 */
 	countDownloads?: ElasticBoolQueryFilter;
 	/**
