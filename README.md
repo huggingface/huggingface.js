@@ -10,18 +10,28 @@
 </p>
 
 ```ts
+// Programatically interact with the Hub
+
+await createRepo({
+  repo: {type: "model", name: "my-user/nlp-model"},
+  credentials: {accessToken: HF_TOKEN}
+});
+
+await uploadFile({
+  repo: "my-user/nlp-model",
+  credentials: {accessToken: HF_TOKEN},
+  // Can work with native File in browsers
+  file: {
+    path: "pytorch_model.bin",
+    content: new Blob(...) 
+  }
+});
+
+// Use hosted inference
+
 await inference.translation({
   model: 't5-base',
   inputs: 'My name is Wolfgang and I live in Berlin'
-})
-
-await hf.translation({
-  model: "facebook/nllb-200-distilled-600M",
-  inputs: "how is the weather like in Gaborone",
-  parameters : {
-    src_lang: "eng_Latn",
-    tgt_lang: "sot_Latn"
-  }
 })
 
 await inference.textToImage({
@@ -31,13 +41,15 @@ await inference.textToImage({
     negative_prompt: 'blurry',
   }
 })
+
+// and much more…
 ```
 
 # Hugging Face JS libraries
 
 This is a collection of JS libraries to interact with the Hugging Face API, with TS types included.
 
-- [@huggingface/inference](packages/inference/README.md): Use Inference Endpoints (serverless) to make calls to 100,000+ Machine Learning models
+- [@huggingface/inference](packages/inference/README.md): Use Inference Endpoints (serverless or dedicated) to make calls to 100,000+ Machine Learning models
 - [@huggingface/hub](packages/hub/README.md): Interact with huggingface.co to create or delete repos and commit / download files
 - [@huggingface/agents](packages/agents/README.md): Interact with HF models through a natural language interface
 
@@ -130,30 +142,6 @@ await inference.imageToText({
 const gpt2 = inference.endpoint('https://xyz.eu-west-1.aws.endpoints.huggingface.cloud/gpt2');
 const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the universe is'});
 ```
-### @huggingface/agents example
-
-```ts
-import {HfAgent, LLMFromHub, defaultTools} from '@huggingface/agents';
-
-const HF_TOKEN = "hf_...";
-
-const agent = new HfAgent(
-  HF_TOKEN,
-  LLMFromHub(HF_TOKEN),
-  [...defaultTools]
-);
-
-
-// you can generate the code, inspect it and then run it
-const code = await agent.generateCode("Draw a picture of a cat wearing a top hat. Then caption the picture and read it out loud.");
-console.log(code);
-const messages = await agent.evaluateCode(code)
-console.log(messages); // contains the data
-
-// or you can run the code directly, however you can't check that the code is safe to execute this way, use at your own risk.
-const messages = await agent.run("Draw a picture of a cat wearing a top hat. Then caption the picture and read it out loud.")
-console.log(messages); 
-```
 
 ### @huggingface/hub examples
 
@@ -182,6 +170,31 @@ await deleteFiles({
   credentials: {accessToken: HF_TOKEN},
   paths: ["README.md", ".gitattributes"]
 });
+```
+
+### @huggingface/agents example
+
+```ts
+import {HfAgent, LLMFromHub, defaultTools} from '@huggingface/agents';
+
+const HF_TOKEN = "hf_...";
+
+const agent = new HfAgent(
+  HF_TOKEN,
+  LLMFromHub(HF_TOKEN),
+  [...defaultTools]
+);
+
+
+// you can generate the code, inspect it and then run it
+const code = await agent.generateCode("Draw a picture of a cat wearing a top hat. Then caption the picture and read it out loud.");
+console.log(code);
+const messages = await agent.evaluateCode(code)
+console.log(messages); // contains the data
+
+// or you can run the code directly, however you can't check that the code is safe to execute this way, use at your own risk.
+const messages = await agent.run("Draw a picture of a cat wearing a top hat. Then caption the picture and read it out loud.")
+console.log(messages); 
 ```
 
 
