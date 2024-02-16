@@ -60,7 +60,12 @@
 			error = "No chat template found in tokenizer config";
 			return;
 		}
-		compiledTemplate = new Template(chatTemplate);
+		try {
+			compiledTemplate = new Template(chatTemplate);
+		} catch (e) {
+			error = `Invalid chat template: "${(e as Error).message}"`;
+			return;
+		}
 	});
 
 	async function getOutput({ withModelLoading = false, isOnLoadCall = false }: InferenceRunOpts = {}) {
@@ -83,11 +88,17 @@
 		// Render chat template
 		const special_tokens_map = extractSpecialTokensMap(tokenizerConfig);
 
-		const chatText = compiledTemplate.render({
-			messages,
-			add_generation_prompt: true,
-			...special_tokens_map,
-		});
+		let chatText;
+		try {
+			chatText = compiledTemplate.render({
+				messages,
+				add_generation_prompt: true,
+				...special_tokens_map,
+			});
+		} catch (e) {
+			error = `An error occurred while rendering the chat template: "${(e as Error).message}"`;
+			return;
+		}
 
 		const requestBody = {
 			inputs: chatText,
