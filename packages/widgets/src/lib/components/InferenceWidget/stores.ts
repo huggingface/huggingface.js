@@ -8,6 +8,8 @@ export const widgetNoInference = writable<Record<ModelData["id"], boolean>>({});
 
 export const widgetStates = writable<Record<ModelData["id"], WidgetState>>({});
 
+export const tgiSupportedModels = writable<Set<string> | undefined>(undefined)
+
 export function updateWidgetState(modelId: ModelData["id"], key: keyof WidgetState, val: boolean): void {
 	widgetStates.update((states) => {
 		// Check if the modelId exists, if not initialize it

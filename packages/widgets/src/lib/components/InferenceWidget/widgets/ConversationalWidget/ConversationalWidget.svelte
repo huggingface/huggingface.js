@@ -12,7 +12,7 @@
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
 	import { addInferenceParameters, callInferenceApi, updateUrl } from "../../shared/helpers.js";
 	import { isTextInput } from "../../shared/inputValidation.js";
-	import { widgetStates } from "../../stores.js";
+	import { widgetStates, tgiSupportedModels } from "../../stores.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -43,7 +43,6 @@
 	let compiledTemplate: Template;
 	let tokenizerConfig: TokenizerConfig;
 	let inferenceClient: HfInference | undefined = undefined;
-	let tgiSupported = false;
 
 	// Check config and compile template
 	onMount(() => {
@@ -71,23 +70,10 @@
 			return;
 		}
 
-		fetch("https://api-inference.huggingface.co/framework/text-generation-inference").then(async (resp) => {
-			if (resp.ok) {
-				const tgiModelsSet = new Set(
-					((await resp.json()) as { model_id: string; task: string }[])
-						.filter(({ task }) => task === "text-generation")
-						.map(({ model_id }) => model_id)
-				);
-				tgiSupported = tgiModelsSet.has(model.id);
-			}
-			return;
-		});
-
 		inferenceClient = new HfInference();
 	});
 
 	async function getOutput({ withModelLoading = false, isOnLoadCall = false }: InferenceRunOpts = {}) {
-		console.log("TGI supported:", tgiSupported);
 		if (!compiledTemplate) {
 			return;
 		}
@@ -136,7 +122,7 @@
 
 		isLoading = true;
 
-		if (tgiSupported) {
+		if ($tgiSupportedModels?.has(model.id)) {
 			let newMessage = {
 				role: "assistant",
 				content: "",
