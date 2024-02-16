@@ -82,8 +82,10 @@
 			updateUrl({ text: trimmedText });
 		}
 
-		// Add user message to chat
-		messages = [...messages, { role: "user", content: trimmedText }];
+		if (!withModelLoading) {
+			// Add user message to chat
+			messages = [...messages, { role: "user", content: trimmedText }];
+		}
 
 		// Render chat template
 		const special_tokens_map = extractSpecialTokensMap(tokenizerConfig);
