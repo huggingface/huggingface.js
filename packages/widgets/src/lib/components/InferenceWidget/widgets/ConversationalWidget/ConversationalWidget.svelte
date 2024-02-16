@@ -4,6 +4,8 @@
 	import { Template } from "@huggingface/jinja";
 	import type { SpecialTokensMap, TokenizerConfig, WidgetExampleTextInput } from "@huggingface/tasks";
 	import { SPECIAL_TOKENS_ATTRIBUTES } from "@huggingface/tasks";
+	import { HfInference, InferenceOutputError } from "@huggingface/inference";
+	import type { TextGenerationInput } from "@huggingface/tasks/src/tasks/text-generation/inference";
 
 	import WidgetOutputConvo from "../../shared/WidgetOutputConvo/WidgetOutputConvo.svelte";
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
@@ -40,6 +42,8 @@
 
 	let compiledTemplate: Template;
 	let tokenizerConfig: TokenizerConfig;
+	let inferenceClient: HfInference | undefined = undefined;
+	let tgiSupported = false;
 
 	// Check config and compile template
 	onMount(() => {
@@ -66,10 +70,30 @@
 			error = `Invalid chat template: "${(e as Error).message}"`;
 			return;
 		}
+
+		fetch("https://api-inference.huggingface.co/framework/text-generation-inference").then(async (resp) => {
+			if (resp.ok) {
+				const tgiModelsSet = new Set(
+					((await resp.json()) as { model_id: string; task: string }[])
+						.filter(({ task }) => task === "text-generation")
+						.map(({ model_id }) => model_id)
+				);
+				tgiSupported = tgiModelsSet.has(model.id);
+			}
+			return;
+		});
+
+		inferenceClient = new HfInference();
 	});
 
 	async function getOutput({ withModelLoading = false, isOnLoadCall = false }: InferenceRunOpts = {}) {
+		console.log("TGI supported:", tgiSupported);
 		if (!compiledTemplate) {
+			return;
+		}
+
+		if (!inferenceClient) {
+			error = "Inference client not ready";
 			return;
 		}
 
@@ -102,65 +126,70 @@
 			return;
 		}
 
-		const requestBody = {
+		const input: TextGenerationInput = {
 			inputs: chatText,
 			parameters: {
 				return_full_text: false,
-				max_new_tokens: 100,
 			},
 		};
-		addInferenceParameters(requestBody, model);
+		addInferenceParameters(input, model);
 
 		isLoading = true;
 
-		const res = await callInferenceApi(
-			apiUrl,
-			model.id,
-			requestBody,
-			apiToken,
-			(body) => parseOutput(body, messages),
-			withModelLoading,
-			includeCredentials,
-			isOnLoadCall
-		);
+		if (tgiSupported) {
+			let newMessage = {
+				role: "assistant",
+				content: "",
+			};
+			const previousMessages = [...messages];
+			const tokenStream = inferenceClient.textGenerationStream({
+				...input,
+				model: model.id,
+				accessToken: apiToken,
+			});
+			tokenStream.throw;
+			for await (const newToken of tokenStream) {
+				if (newToken.token.special) continue;
+				newMessage.content = newMessage.content + newToken.token.text;
+				messages = [...previousMessages, newMessage];
+			}
+		} else {
+			input.parameters.max_new_tokens = 100;
+			try {
+				const output = await inferenceClient.textGeneration(
+					{ ...input, model: model.id, accessToken: apiToken },
+					{ includeCredentials, dont_load_model: !withModelLoading }
+				);
+				messages = [...messages, { role: "assistant", content: output.generated_text }];
+			} catch (err) {
+				console.error("Error caught");
+				error = `Something went wrong: ${err}`;
+			}
+			// if (res.status === "success") {
+			// 	computeTime = res.computeTime;
+			// 	outputJson = res.outputJson;
+			// 	if (res.output) {
+			// 		messages = res.output;
+			// 	}
+			// 	// Emptying input value
+			// 	text = "";
+			// } else if (res.status === "loading-model") {
+			// 	modelLoading = {
+			// 		isLoading: true,
+			// 		estimatedTime: res.estimatedTime,
+			// 	};
+			// 	getOutput({ withModelLoading: true });
+			// } else if (res.status === "error") {
+			// 	error = res.error;
+			// }
+		}
 
 		isLoading = false;
 		// Reset values
-		computeTime = "";
-		error = "";
-		modelLoading = { isLoading: false, estimatedTime: 0 };
-		outputJson = "";
-
-		if (res.status === "success") {
-			computeTime = res.computeTime;
-			outputJson = res.outputJson;
-			if (res.output) {
-				messages = res.output;
-			}
-			// Emptying input value
-			text = "";
-		} else if (res.status === "loading-model") {
-			modelLoading = {
-				isLoading: true,
-				estimatedTime: res.estimatedTime,
-			};
-			getOutput({ withModelLoading: true });
-		} else if (res.status === "error") {
-			error = res.error;
-		}
-	}
-
-	function parseOutput(body: unknown, chat: Message[]): Message[] {
-		if (Array.isArray(body) && body.length) {
-			const text = body[0]?.generated_text ?? "";
-
-			if (!text.length) {
-				throw new Error("Model did not generate a response.");
-			}
-
-			return [...chat, { role: "assistant", content: text }];
-		}
-		throw new TypeError("Invalid output: output must be of type Array & non-empty");
+		// computeTime = "";
+		// error = "";
+		// modelLoading = { isLoading: false, estimatedTime: 0 };
+		// outputJson = "";
 	}
 
 	function extractSpecialTokensMap(tokenizerConfig: TokenizerConfig): SpecialTokensMap {

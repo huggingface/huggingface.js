@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@huggingface/inference':
+    specifier: workspace:^
+    version: link:../inference
   '@huggingface/jinja':
     specifier: workspace:^
     version: link:../jinja

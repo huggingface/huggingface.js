@@ -48,6 +48,24 @@
 			},
 		},
 		{
+			id: "mistralai/Mistral-7B-Instruct-v0.2",
+			pipeline_tag: "text-generation",
+			tags: ["conversational"],
+			inference: InferenceDisplayability.Yes,
+			config: {
+				architectures: ["MistralForCausalLM"],
+				model_type: "mistral",
+				tokenizer: {
+					chat_template:
+						"{{ bos_token }}{% for message in messages %}{% if (message['role'] == 'user') != (loop.index0 % 2 == 0) %}{{ raise_exception('Conversation roles must alternate user/assistant/user/assistant/...') }}{% endif %}{% if message['role'] == 'user' %}{{ '[INST] ' + message['content'] + ' [/INST]' }}{% elif message['role'] == 'assistant' %}{{ message['content'] + eos_token}}{% else %}{{ raise_exception('Only user and assistant roles are supported!') }}{% endif %}{% endfor %}",
+					use_default_system_prompt: false,
+					bos_token: "<s>",
+					eos_token: "</s>",
+					unk_token: "<unk>",
+				},
+			},
+		},
+		{
 			id: "WizardLM/WizardLM-70B-V1.0",
 			pipeline_tag: "text-generation",
 			inference: InferenceDisplayability.Yes,

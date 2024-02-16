@@ -46,7 +46,8 @@
 	],
 	"dependencies": {
 		"@huggingface/tasks": "workspace:^",
-		"@huggingface/jinja": "workspace:^"
+		"@huggingface/jinja": "workspace:^",
+		"@huggingface/inference": "workspace:^"
 	},
 	"peerDependencies": {
 		"svelte": "^3.59.2"
