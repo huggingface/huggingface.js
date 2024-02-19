@@ -4,8 +4,6 @@
  * Using src/scripts/inference-codegen
  */
 
-export type DepthEstimationOutput = unknown[];
-
 /**
  * Inputs for Depth Estimation inference
  */
@@ -13,23 +11,25 @@ export interface DepthEstimationInput {
 	/**
 	 * The input image data
 	 */
-	data: unknown;
+	inputs: unknown;
 	/**
 	 * Additional inference parameters
 	 */
-	parameters?: DepthEstimationParameters;
+	parameters?: { [key: string]: unknown };
 	[property: string]: unknown;
 }
 
 /**
- * Additional inference parameters
- *
- * Additional inference parameters for Depth Estimation
+ * Outputs of inference for the Depth Estimation task
  */
-export interface DepthEstimationParameters {
+export interface DepthEstimationOutput {
 	/**
-	 * When specified, limits the output to the top K most probable classes.
+	 * The predicted depth as an image
 	 */
-	topK?: number;
+	depth?: unknown;
+	/**
+	 * The predicted depth as a tensor
+	 */
+	predicted_depth?: unknown;
 	[property: string]: unknown;
 }

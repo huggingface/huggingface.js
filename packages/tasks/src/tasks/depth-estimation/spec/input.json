@@ -5,7 +5,7 @@
 	"title": "DepthEstimationInput",
 	"type": "object",
 	"properties": {
-		"data": {
+		"inputs": {
 			"description": "The input image data"
 		},
 		"parameters": {
@@ -18,13 +18,8 @@
 			"title": "DepthEstimationParameters",
 			"description": "Additional inference parameters for Depth Estimation",
 			"type": "object",
-			"properties": {
-				"topK": {
-					"type": "integer",
-					"description": "When specified, limits the output to the top K most probable classes."
-				}
-			}
+			"properties": {}
 		}
 	},
-	"required": ["data"]
+	"required": ["inputs"]
 }

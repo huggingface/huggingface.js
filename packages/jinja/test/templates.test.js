@@ -69,6 +69,8 @@ const TEST_STRINGS = {
 
 	// Filter operator
 	FILTER_OPERATOR: `{{ arr | length }}{{ 1 + arr | length }}{{ 2 + arr | sort | length }}{{ (arr | sort)[0] }}`,
+	FILTER_OPERATOR_2: `|{{ 'abc' | length }}|{{ 'aBcD' | upper }}|{{ 'aBcD' | lower }}|{{ 'test test' | capitalize}}|{{ 'test test' | title }}|{{ ' a b ' | trim }}|{{ '  A  B  ' | trim | lower | length }}|`,
+	FILTER_OPERATOR_3: `|{{ -1 | abs }}|{{ 1 | abs }}|`,
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: `|{{ 1 and 2 }}|{{ 1 and 0 }}|{{ 0 and 1 }}|{{ 0 and 0 }}|{{ 1 or 2 }}|{{ 1 or 0 }}|{{ 0 or 1 }}|{{ 0 or 0 }}|{{ not 1 }}|{{ not 0 }}|`,
@@ -1139,6 +1141,70 @@ const TEST_PARSED = {
 		{ value: "]", type: "CloseSquareBracket" },
 		{ value: "}}", type: "CloseExpression" },
 	],
+	FILTER_OPERATOR_2: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "abc", type: "StringLiteral" },
+		{ value: "|", type: "Pipe" },
+		{ value: "length", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "aBcD", type: "StringLiteral" },
+		{ value: "|", type: "Pipe" },
+		{ value: "upper", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "aBcD", type: "StringLiteral" },
+		{ value: "|", type: "Pipe" },
+		{ value: "lower", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "test test", type: "StringLiteral" },
+		{ value: "|", type: "Pipe" },
+		{ value: "capitalize", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "test test", type: "StringLiteral" },
+		{ value: "|", type: "Pipe" },
+		{ value: "title", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: " a b ", type: "StringLiteral" },
+		{ value: "|", type: "Pipe" },
+		{ value: "trim", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "  A  B  ", type: "StringLiteral" },
+		{ value: "|", type: "Pipe" },
+		{ value: "trim", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "lower", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "length", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
+	FILTER_OPERATOR_3: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "-1", type: "NumericLiteral" },
+		{ value: "|", type: "Pipe" },
+		{ value: "abs", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: "|", type: "Pipe" },
+		{ value: "abs", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: [
@@ -1518,6 +1584,8 @@ const TEST_CONTEXT = {
 	FILTER_OPERATOR: {
 		arr: [3, 2, 1],
 	},
+	FILTER_OPERATOR_2: {},
+	FILTER_OPERATOR_3: {},
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: {},
@@ -1594,6 +1662,8 @@ const EXPECTED_OUTPUTS = {
 
 	// Filter operator
 	FILTER_OPERATOR: `3451`,
+	FILTER_OPERATOR_2: `|3|ABCD|abcd|Test test|Test Test|a b|4|`,
+	FILTER_OPERATOR_3: `|1|1|`,
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: `|2|0|0|0|1|1|1|0|false|true|`,

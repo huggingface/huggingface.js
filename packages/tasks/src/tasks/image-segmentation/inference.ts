@@ -10,7 +10,7 @@ export interface ImageSegmentationInput {
 	/**
 	 * The input image data
 	 */
-	data: unknown;
+	inputs: unknown;
 	/**
 	 * Additional inference parameters
 	 */
@@ -26,11 +26,11 @@ export interface ImageSegmentationParameters {
 	/**
 	 * Threshold to use when turning the predicted masks into binary values.
 	 */
-	maskThreshold?: number;
+	mask_threshold?: number;
 	/**
 	 * Mask overlap threshold to eliminate small, disconnected segments.
 	 */
-	overlapMaskAreaThreshold?: number;
+	overlap_mask_area_threshold?: number;
 	/**
 	 * Segmentation task to be performed, depending on model capabilities.
 	 */

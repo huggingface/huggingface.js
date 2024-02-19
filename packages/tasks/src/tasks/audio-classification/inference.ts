@@ -10,7 +10,7 @@ export interface AudioClassificationInput {
 	/**
 	 * The input audio data
 	 */
-	data: unknown;
+	inputs: unknown;
 	/**
 	 * Additional inference parameters
 	 */
@@ -23,11 +23,11 @@ export interface AudioClassificationInput {
  * Additional inference parameters for Audio Classification
  */
 export interface AudioClassificationParameters {
-	functionToApply?: ClassificationOutputTransform;
+	function_to_apply?: ClassificationOutputTransform;
 	/**
 	 * When specified, limits the output to the top K most probable classes.
 	 */
-	topK?: number;
+	top_k?: number;
 	[property: string]: unknown;
 }
 /**
@@ -40,7 +40,7 @@ export type AudioClassificationOutput = AudioClassificationOutputElement[];
  */
 export interface AudioClassificationOutputElement {
 	/**
-	 * The predicted class label (model specific).
+	 * The predicted class label.
 	 */
 	label: string;
 	/**
