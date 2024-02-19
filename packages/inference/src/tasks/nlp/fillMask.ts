@@ -1,4 +1,4 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { validateOutput, z } from "../../lib/validateOutput";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
@@ -33,19 +33,8 @@ export async function fillMask(args: FillMaskArgs, options?: Options): Promise<F
 		...options,
 		taskHint: "fill-mask",
 	});
-	const isValidOutput =
-		Array.isArray(res) &&
-		res.every(
-			(x) =>
-				typeof x.score === "number" &&
-				typeof x.sequence === "string" &&
-				typeof x.token === "number" &&
-				typeof x.token_str === "string"
-		);
-	if (!isValidOutput) {
-		throw new InferenceOutputError(
-			"Expected Array<{score: number, sequence: string, token: number, token_str: string}>"
-		);
-	}
-	return res;
+	return validateOutput(
+		res,
+		z.array(z.object({ score: z.number(), sequence: z.string(), token: z.number(), token_str: z.string() }))
+	);
 }

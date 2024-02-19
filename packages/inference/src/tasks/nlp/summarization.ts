@@ -1,4 +1,4 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { validateOutput, z } from "../../lib/validateOutput";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
@@ -54,9 +54,5 @@ export async function summarization(args: SummarizationArgs, options?: Options):
 		...options,
 		taskHint: "summarization",
 	});
-	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x?.summary_text === "string");
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<{summary_text: string}>");
-	}
-	return res?.[0];
+	return validateOutput(res, z.first(z.object({ summary_text: z.string() })));
 }

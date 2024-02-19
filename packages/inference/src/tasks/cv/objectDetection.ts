@@ -1,6 +1,6 @@
 import { request } from "../custom/request";
 import type { BaseArgs, Options } from "../../types";
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { validateOutput, z } from "../../lib/validateOutput";
 
 export type ObjectDetectionArgs = BaseArgs & {
 	/**
@@ -41,21 +41,15 @@ export async function objectDetection(args: ObjectDetectionArgs, options?: Optio
 		...options,
 		taskHint: "object-detection",
 	});
-	const isValidOutput =
-		Array.isArray(res) &&
-		res.every(
-			(x) =>
-				typeof x.label === "string" &&
-				typeof x.score === "number" &&
-				typeof x.box.xmin === "number" &&
-				typeof x.box.ymin === "number" &&
-				typeof x.box.xmax === "number" &&
-				typeof x.box.ymax === "number"
-		);
-	if (!isValidOutput) {
-		throw new InferenceOutputError(
-			"Expected Array<{label:string; score:number; box:{xmin:number; ymin:number; xmax:number; ymax:number}}>"
-		);
-	}
-	return res;
+
+	return validateOutput(
+		res,
+		z.array(
+			z.object({
+				label: z.string(),
+				score: z.number(),
+				box: z.object({ xmin: z.number(), ymin: z.number(), xmax: z.number(), ymax: z.number() }),
+			})
+		)
+	);
 }

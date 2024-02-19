@@ -1,4 +1,4 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { validateOutput, z } from "../../lib/validateOutput";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
@@ -27,16 +27,9 @@ export async function textClassification(
 	args: TextClassificationArgs,
 	options?: Options
 ): Promise<TextClassificationOutput> {
-	const res = (
-		await request<TextClassificationOutput[]>(args, {
-			...options,
-			taskHint: "text-classification",
-		})
-	)?.[0];
-	const isValidOutput =
-		Array.isArray(res) && res.every((x) => typeof x?.label === "string" && typeof x.score === "number");
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<{label: string, score: number}>");
-	}
-	return res;
+	const res = await request<TextClassificationOutput[]>(args, {
+		...options,
+		taskHint: "text-classification",
+	});
+	return validateOutput(res, z.first(z.array(z.object({ label: z.string(), score: z.number() }))));
 }

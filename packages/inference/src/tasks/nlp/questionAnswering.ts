@@ -1,4 +1,4 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { validateOutput, z } from "../../lib/validateOutput";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
@@ -39,15 +39,5 @@ export async function questionAnswering(
 		...options,
 		taskHint: "question-answering",
 	});
-	const isValidOutput =
-		typeof res === "object" &&
-		!!res &&
-		typeof res.answer === "string" &&
-		typeof res.end === "number" &&
-		typeof res.score === "number" &&
-		typeof res.start === "number";
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected {answer: string, end: number, score: number, start: number}");
-	}
-	return res;
+	return validateOutput(res, z.object({ answer: z.string(), end: z.number(), score: z.number(), start: z.number() }));
 }

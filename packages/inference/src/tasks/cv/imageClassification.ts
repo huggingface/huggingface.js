@@ -1,4 +1,4 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { validateOutput, z } from "../../lib/validateOutput";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
@@ -34,10 +34,5 @@ export async function imageClassification(
 		...options,
 		taskHint: "image-classification",
 	});
-	const isValidOutput =
-		Array.isArray(res) && res.every((x) => typeof x.label === "string" && typeof x.score === "number");
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<{label: string, score: number}>");
-	}
-	return res;
+	return validateOutput(res, z.array(z.object({ label: z.string(), score: z.number() })));
 }

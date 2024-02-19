@@ -1,7 +1,7 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options, RequestArgs } from "../../types";
 import { request } from "../custom/request";
 import { base64FromBytes } from "../../../../shared";
+import { validateOutput, z } from "../../lib/validateOutput";
 
 export type VisualQuestionAnsweringArgs = BaseArgs & {
 	inputs: {
@@ -45,15 +45,9 @@ export async function visualQuestionAnswering(
 			),
 		},
 	} as RequestArgs;
-	const res = (
-		await request<[VisualQuestionAnsweringOutput]>(reqArgs, {
-			...options,
-			taskHint: "visual-question-answering",
-		})
-	)?.[0];
-	const isValidOutput = typeof res?.answer === "string" && typeof res.score === "number";
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<{answer: string, score: number}>");
-	}
-	return res;
+	const res = await request<[VisualQuestionAnsweringOutput]>(reqArgs, {
+		...options,
+		taskHint: "visual-question-answering",
+	});
+	return validateOutput(res, z.first(z.object({ answer: z.string(), score: z.number() })));
 }

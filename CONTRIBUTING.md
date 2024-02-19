@@ -18,7 +18,7 @@ It's not a hard requirement, but please consider using an icon from [Gitmoji](ht
 
 ## Tests
 
-If you want to run only specific tests, you can do `pnpm test -- -t "test name"`
+If you want to run only specific tests, you can do `pnpm test "test name"`
 
 ## Adding a package
 

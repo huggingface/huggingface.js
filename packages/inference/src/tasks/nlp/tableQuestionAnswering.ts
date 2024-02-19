@@ -1,4 +1,4 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { validateOutput, z } from "../../lib/validateOutput";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
@@ -45,17 +45,13 @@ export async function tableQuestionAnswering(
 		...options,
 		taskHint: "table-question-answering",
 	});
-	const isValidOutput =
-		typeof res?.aggregator === "string" &&
-		typeof res.answer === "string" &&
-		Array.isArray(res.cells) &&
-		res.cells.every((x) => typeof x === "string") &&
-		Array.isArray(res.coordinates) &&
-		res.coordinates.every((coord) => Array.isArray(coord) && coord.every((x) => typeof x === "number"));
-	if (!isValidOutput) {
-		throw new InferenceOutputError(
-			"Expected {aggregator: string, answer: string, cells: string[], coordinates: number[][]}"
-		);
-	}
-	return res;
+	return validateOutput(
+		res,
+		z.object({
+			aggregator: z.string(),
+			answer: z.string(),
+			cells: z.array(z.string()),
+			coordinates: z.array(z.array(z.number())),
+		})
+	);
 }

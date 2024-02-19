@@ -1,4 +1,4 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { validateOutput, z } from "../../lib/validateOutput";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
@@ -26,9 +26,6 @@ export async function translation(args: TranslationArgs, options?: Options): Pro
 		...options,
 		taskHint: "translation",
 	});
-	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x?.translation_text === "string");
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected type Array<{translation_text: string}>");
-	}
-	return res?.length === 1 ? res?.[0] : res;
+	const output = validateOutput(res, z.array(z.object({ translation_text: z.string() })));
+	return output.length === 1 ? output[0] : output;
 }

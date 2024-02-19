@@ -1,8 +1,8 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 import type { RequestArgs } from "../../types";
 import { base64FromBytes } from "../../../../shared";
+import { validateOutput, z } from "../../lib/validateOutput";
 
 export type ZeroShotImageClassificationArgs = BaseArgs & {
 	inputs: {
@@ -49,10 +49,5 @@ export async function zeroShotImageClassification(
 		...options,
 		taskHint: "zero-shot-image-classification",
 	});
-	const isValidOutput =
-		Array.isArray(res) && res.every((x) => typeof x.label === "string" && typeof x.score === "number");
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<{label: string, score: number}>");
-	}
-	return res;
+	return validateOutput(res, z.array(z.object({ label: z.string(), score: z.number() })));
 }

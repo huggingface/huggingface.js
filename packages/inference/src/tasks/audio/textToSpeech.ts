@@ -1,4 +1,4 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { validateOutput, z } from "../../lib/validateOutput";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
@@ -20,9 +20,5 @@ export async function textToSpeech(args: TextToSpeechArgs, options?: Options): P
 		...options,
 		taskHint: "text-to-speech",
 	});
-	const isValidOutput = res && res instanceof Blob;
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Blob");
-	}
-	return res;
+	return validateOutput(res, z.blob());
 }

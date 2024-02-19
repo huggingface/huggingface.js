@@ -1,5 +1,5 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import { getDefaultTask } from "../../lib/getDefaultTask";
+import { validateOutput, z } from "../../lib/validateOutput";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
@@ -31,10 +31,5 @@ export async function sentenceSimilarity(
 		taskHint: "sentence-similarity",
 		...(defaultTask === "feature-extraction" && { forceTask: "sentence-similarity" }),
 	});
-
-	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x === "number");
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected number[]");
-	}
-	return res;
+	return validateOutput(res, z.array(z.number()));
 }

@@ -1,4 +1,4 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { validateOutput, z } from "../../lib/validateOutput";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
@@ -70,9 +70,5 @@ export async function textGeneration(args: TextGenerationArgs, options?: Options
 		...options,
 		taskHint: "text-generation",
 	});
-	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x?.generated_text === "string");
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<{generated_text: string}>");
-	}
-	return res?.[0];
+	return validateOutput(res, z.first(z.object({ generated_text: z.string() })));
 }

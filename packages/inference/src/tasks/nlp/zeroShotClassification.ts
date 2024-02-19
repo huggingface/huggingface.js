@@ -1,4 +1,4 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { validateOutput, z } from "../../lib/validateOutput";
 import type { BaseArgs, Options } from "../../types";
 import { toArray } from "../../utils/toArray";
 import { request } from "../custom/request";
@@ -41,18 +41,8 @@ export async function zeroShotClassification(
 			taskHint: "zero-shot-classification",
 		})
 	);
-	const isValidOutput =
-		Array.isArray(res) &&
-		res.every(
-			(x) =>
-				Array.isArray(x.labels) &&
-				x.labels.every((_label) => typeof _label === "string") &&
-				Array.isArray(x.scores) &&
-				x.scores.every((_score) => typeof _score === "number") &&
-				typeof x.sequence === "string"
-		);
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<{labels: string[], scores: number[], sequence: string}>");
-	}
-	return res;
+	return validateOutput(
+		res,
+		z.array(z.object({ labels: z.array(z.string()), scores: z.array(z.number()), sequence: z.string() }))
+	);
 }
