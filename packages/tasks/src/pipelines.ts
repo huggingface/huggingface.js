@@ -651,6 +651,11 @@ export const PIPELINE_DATA = {
 		modality: "cv",
 		color: "green",
 	},
+	"image-feature-extraction": {
+		name: "Image Feature Extraction",
+		modality: "cv",
+		color: "indigo",
+	},
 	other: {
 		name: "Other",
 		modality: "other",

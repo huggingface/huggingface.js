@@ -52,6 +52,7 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	"fill-mask": ["transformers", "transformers.js"],
 	"graph-ml": ["transformers"],
 	"image-classification": ["keras", "timm", "transformers", "transformers.js"],
+	"image-feature-extraction": ["timm", "transformers"],
 	"image-segmentation": ["transformers", "transformers.js"],
 	"image-text-to-text": ["transformers"],
 	"image-to-image": ["diffusers", "transformers", "transformers.js"],
@@ -169,6 +170,7 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"zero-shot-object-detection": getData("zero-shot-object-detection", zeroShotObjectDetection),
 	"text-to-3d": getData("text-to-3d", placeholder),
 	"image-to-3d": getData("image-to-3d", placeholder),
+	"image-feature-extraction": getData("image-feature-extraction", placeholder),
 } as const;
 
 export interface ExampleRepo {
