@@ -36,33 +36,63 @@ import zeroShotClassification from "./zero-shot-classification/data";
 import zeroShotImageClassification from "./zero-shot-image-classification/data";
 import zeroShotObjectDetection from "./zero-shot-object-detection/data";
 
-
-export type * from "./audio-classification/inference"
-export type * from "./automatic-speech-recognition/inference"
-export type * from "./document-question-answering/inference"
-export type * from "./feature-extraction/inference"
-export type * from "./fill-mask/inference"
-export type { ImageClassificationInput, ImageClassificationOutput, ImageClassificationOutputElement, ImageClassificationParameters } from "./image-classification/inference"
-export type * from "./image-to-image/inference"
-export type { ImageToTextInput, ImageToTextOutput, ImageToTextParameters } from "./image-to-text/inference"
-export type * from "./image-segmentation/inference"
-export type * from "./object-detection/inference"
-export type * from "./depth-estimation/inference"
-export type * from "./question-answering/inference"
-export type * from "./sentence-similarity/inference"
-export type * from "./summarization/inference"
-export type * from "./table-question-answering/inference"
-export type { TextToImageInput, TextToImageOutput, TextToImageParameters } from "./text-to-image/inference"
-export type { TextToAudioParameters, TextToSpeechInput, TextToSpeechOutput } from "./text-to-speech/inference"
-export type * from "./token-classification/inference"
-export type { Text2TextGenerationParameters, Text2TextGenerationTruncationStrategy, TranslationInput, TranslationOutput } from "./translation/inference"
-export type { ClassificationOutputTransform, TextClassificationInput, TextClassificationOutput, TextClassificationOutputElement, TextClassificationParameters } from "./text-classification/inference"
-export type { FinishReason, PrefillToken, TextGenerationInput, TextGenerationOutput, TextGenerationOutputDetails, TextGenerationParameters, TextGenerationSequenceDetails, Token } from "./text-generation/inference"
-export type * from "./video-classification/inference"
-export type * from "./visual-question-answering/inference"
-export type * from "./zero-shot-classification/inference"
-export type * from "./zero-shot-image-classification/inference"
-export type { BoundingBox, ZeroShotObjectDetectionInput, ZeroShotObjectDetectionInputData, ZeroShotObjectDetectionOutput, ZeroShotObjectDetectionOutputElement } from "./zero-shot-object-detection/inference"
+export type * from "./audio-classification/inference";
+export type * from "./automatic-speech-recognition/inference";
+export type * from "./document-question-answering/inference";
+export type * from "./feature-extraction/inference";
+export type * from "./fill-mask/inference";
+export type {
+	ImageClassificationInput,
+	ImageClassificationOutput,
+	ImageClassificationOutputElement,
+	ImageClassificationParameters,
+} from "./image-classification/inference";
+export type * from "./image-to-image/inference";
+export type { ImageToTextInput, ImageToTextOutput, ImageToTextParameters } from "./image-to-text/inference";
+export type * from "./image-segmentation/inference";
+export type * from "./object-detection/inference";
+export type * from "./depth-estimation/inference";
+export type * from "./question-answering/inference";
+export type * from "./sentence-similarity/inference";
+export type * from "./summarization/inference";
+export type * from "./table-question-answering/inference";
+export type { TextToImageInput, TextToImageOutput, TextToImageParameters } from "./text-to-image/inference";
+export type { TextToAudioParameters, TextToSpeechInput, TextToSpeechOutput } from "./text-to-speech/inference";
+export type * from "./token-classification/inference";
+export type {
+	Text2TextGenerationParameters,
+	Text2TextGenerationTruncationStrategy,
+	TranslationInput,
+	TranslationOutput,
+} from "./translation/inference";
+export type {
+	ClassificationOutputTransform,
+	TextClassificationInput,
+	TextClassificationOutput,
+	TextClassificationOutputElement,
+	TextClassificationParameters,
+} from "./text-classification/inference";
+export type {
+	FinishReason,
+	PrefillToken,
+	TextGenerationInput,
+	TextGenerationOutput,
+	TextGenerationOutputDetails,
+	TextGenerationParameters,
+	TextGenerationSequenceDetails,
+	Token,
+} from "./text-generation/inference";
+export type * from "./video-classification/inference";
+export type * from "./visual-question-answering/inference";
+export type * from "./zero-shot-classification/inference";
+export type * from "./zero-shot-image-classification/inference";
+export type {
+	BoundingBox,
+	ZeroShotObjectDetectionInput,
+	ZeroShotObjectDetectionInputData,
+	ZeroShotObjectDetectionOutput,
+	ZeroShotObjectDetectionOutputElement,
+} from "./zero-shot-object-detection/inference";
 
 import type { ModelLibraryKey } from "../model-libraries";
 
@@ -206,38 +236,38 @@ export interface ExampleRepo {
 
 export type TaskDemoEntry =
 	| {
-		filename: string;
-		type: "audio";
-	}
+			filename: string;
+			type: "audio";
+	  }
 	| {
-		data: Array<{
+			data: Array<{
+				label: string;
+				score: number;
+			}>;
+			type: "chart";
+	  }
+	| {
+			filename: string;
+			type: "img";
+	  }
+	| {
+			table: string[][];
+			type: "tabular";
+	  }
+	| {
+			content: string;
 			label: string;
-			score: number;
-		}>;
-		type: "chart";
-	}
+			type: "text";
+	  }
 	| {
-		filename: string;
-		type: "img";
-	}
-	| {
-		table: string[][];
-		type: "tabular";
-	}
-	| {
-		content: string;
-		label: string;
-		type: "text";
-	}
-	| {
-		text: string;
-		tokens: Array<{
-			end: number;
-			start: number;
-			type: string;
-		}>;
-		type: "text-with-tokens";
-	};
+			text: string;
+			tokens: Array<{
+				end: number;
+				start: number;
+				type: string;
+			}>;
+			type: "text-with-tokens";
+	  };
 
 export interface TaskDemo {
 	inputs: TaskDemoEntry[];
