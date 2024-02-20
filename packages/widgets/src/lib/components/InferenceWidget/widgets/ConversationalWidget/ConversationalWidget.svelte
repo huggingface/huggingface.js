@@ -111,7 +111,7 @@
 			return;
 		}
 
-		const input: TextGenerationInput = {
+		const input: TextGenerationInput & Required<Pick<TextGenerationInput, "parameters">> = {
 			inputs: chatText,
 			parameters: {
 				return_full_text: false,
