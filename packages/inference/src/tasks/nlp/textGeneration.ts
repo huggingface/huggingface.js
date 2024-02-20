@@ -6,7 +6,10 @@ import { request } from "../custom/request";
 /**
  * Use to continue text from a prompt. This is a very generic task. Recommended model: gpt2 (it’s a simple model, but fun to play with).
  */
-export async function textGeneration(args: BaseArgs & TextGenerationInput, options?: Options): Promise<TextGenerationOutput> {
+export async function textGeneration(
+	args: BaseArgs & TextGenerationInput,
+	options?: Options
+): Promise<TextGenerationOutput> {
 	const res = await request<TextGenerationOutput[]>(args, {
 		...options,
 		taskHint: "text-generation",
