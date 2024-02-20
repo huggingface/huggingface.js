@@ -4,7 +4,7 @@
 	import { Template } from "@huggingface/jinja";
 	import type { SpecialTokensMap, TokenizerConfig, WidgetExampleTextInput } from "@huggingface/tasks";
 	import { SPECIAL_TOKENS_ATTRIBUTES } from "@huggingface/tasks";
-	import { HfInference, InferenceOutputError } from "@huggingface/inference";
+	import { HfInference } from "@huggingface/inference";
 	import type { TextGenerationInput } from "@huggingface/tasks/src/tasks/text-generation/inference";
 
 	import WidgetOutputConvo from "../../shared/WidgetOutputConvo/WidgetOutputConvo.svelte";
@@ -29,14 +29,9 @@
 		content: string;
 	}
 
-	let computeTime = "";
 	let messages: Message[] = [];
 	let error: string = "";
 	let isLoading = false;
-	let modelLoading = {
-		isLoading: false,
-		estimatedTime: 0,
-	};
 	let outputJson: string;
 	let text = "";
 
@@ -122,60 +117,37 @@
 
 		isLoading = true;
 
-		if ($tgiSupportedModels?.has(model.id)) {
-			let newMessage = {
-				role: "assistant",
-				content: "",
-			};
-			const previousMessages = [...messages];
-			const tokenStream = inferenceClient.textGenerationStream({
-				...input,
-				model: model.id,
-				accessToken: apiToken,
-			});
-			tokenStream.throw;
-			for await (const newToken of tokenStream) {
-				if (newToken.token.special) continue;
-				newMessage.content = newMessage.content + newToken.token.text;
-				messages = [...previousMessages, newMessage];
-			}
-		} else {
-			input.parameters.max_new_tokens = 100;
-			try {
+		try {
+			if ($tgiSupportedModels?.has(model.id)) {
+				console.debug("Starting text generation using the TGI streaming API");
+				let newMessage = {
+					role: "assistant",
+					content: "",
+				};
+				const previousMessages = [...messages];
+				const tokenStream = inferenceClient.textGenerationStream({
+					...input,
+					model: model.id,
+					accessToken: apiToken,
+				});
+				for await (const newToken of tokenStream) {
+					if (newToken.token.special) continue;
+					newMessage.content = newMessage.content + newToken.token.text;
+					messages = [...previousMessages, newMessage];
+				}
+			} else {
+				console.debug("Starting text generation using the synchronous API");
+				input.parameters.max_new_tokens = 100;
 				const output = await inferenceClient.textGeneration(
 					{ ...input, model: model.id, accessToken: apiToken },
 					{ includeCredentials, dont_load_model: !withModelLoading }
 				);
 				messages = [...messages, { role: "assistant", content: output.generated_text }];
-			} catch (err) {
-				console.error("Error caught");
-				error = `Something went wrong: ${err}`;
 			}
-			// if (res.status === "success") {
-			// 	computeTime = res.computeTime;
-			// 	outputJson = res.outputJson;
-			// 	if (res.output) {
-			// 		messages = res.output;
-			// 	}
-			// 	// Emptying input value
-			// 	text = "";
-			// } else if (res.status === "loading-model") {
-			// 	modelLoading = {
-			// 		isLoading: true,
-			// 		estimatedTime: res.estimatedTime,
-			// 	};
-			// 	getOutput({ withModelLoading: true });
-			// } else if (res.status === "error") {
-			// 	error = res.error;
-			// }
+		} catch (e) {
+			error = `Something went wrong while requesting the Inference API: "${(e as Error).message}"`;
 		}
-
 		isLoading = false;
-		// Reset values
-		// computeTime = "";
-		// error = "";
-		// modelLoading = { isLoading: false, estimatedTime: 0 };
-		// outputJson = "";
 	}
 
 	function extractSpecialTokensMap(tokenizerConfig: TokenizerConfig): SpecialTokensMap {
@@ -222,7 +194,7 @@
 		submitButtonLabel="Send"
 	/>
 
-	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
+	<WidgetInfo {model} {error} />
 
 	<WidgetFooter {model} {isDisabled} {outputJson} />
 </WidgetWrapper>
