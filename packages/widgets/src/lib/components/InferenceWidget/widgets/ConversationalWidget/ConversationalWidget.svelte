@@ -116,7 +116,7 @@
 		addInferenceParameters(input, model);
 
 		isLoading = true;
-
+		text = "";
 		try {
 			if ($tgiSupportedModels?.has(model.id)) {
 				console.debug("Starting text generation using the TGI streaming API");
