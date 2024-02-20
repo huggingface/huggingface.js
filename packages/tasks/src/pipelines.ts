@@ -225,17 +225,6 @@ export const PIPELINE_DATA = {
 		modality: "nlp",
 		color: "indigo",
 	},
-	conversational: {
-		name: "Conversational",
-		subtasks: [
-			{
-				type: "dialogue-generation",
-				name: "Dialogue Generation",
-			},
-		],
-		modality: "nlp",
-		color: "green",
-	},
 	"feature-extraction": {
 		name: "Feature Extraction",
 		modality: "nlp",
@@ -247,6 +236,14 @@ export const PIPELINE_DATA = {
 			{
 				type: "dialogue-modeling",
 				name: "Dialogue Modeling",
+			},
+			{
+				type: "dialogue-generation",
+				name: "Dialogue Generation",
+			},
+			{
+				type: "conversational",
+				name: "Conversational",
 			},
 			{
 				type: "language-modeling",
@@ -666,6 +663,8 @@ export const PIPELINE_DATA = {
 } satisfies Record<string, PipelineData>;
 
 export type PipelineType = keyof typeof PIPELINE_DATA;
+
+export type WidgetType = PipelineType | "conversational";
 
 export const PIPELINE_TYPES = Object.keys(PIPELINE_DATA) as PipelineType[];
 

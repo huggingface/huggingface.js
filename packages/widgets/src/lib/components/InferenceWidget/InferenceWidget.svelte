@@ -26,7 +26,7 @@
 	import VisualQuestionAnsweringWidget from "./widgets/VisualQuestionAnsweringWidget/VisualQuestionAnsweringWidget.svelte";
 	import ZeroShotClassificationWidget from "./widgets/ZeroShotClassificationWidget/ZeroShotClassificationWidget.svelte";
 	import ZeroShotImageClassificationWidget from "./widgets/ZeroShotImageClassificationWidget/ZeroShotImageClassificationWidget.svelte";
-	import type { PipelineType } from "@huggingface/tasks";
+	import type { WidgetType } from "@huggingface/tasks";
 	import WidgetInfo from "./shared/WidgetInfo/WidgetInfo.svelte";
 
 	export let apiToken: WidgetProps["apiToken"] = undefined;
@@ -44,7 +44,7 @@
 	// In the future it may be useful / easier to maintain if we created
 	// a single dedicated widget for each pipeline type.
 	const WIDGET_COMPONENTS: {
-		[key in PipelineType]?: typeof SvelteComponent;
+		[key in WidgetType]?: typeof SvelteComponent;
 	} = {
 		"audio-to-audio": AudioToAudioWidget,
 		"audio-classification": AudioClassificationWidget,
@@ -79,9 +79,11 @@
 	};
 
 	$: widgetComponent =
-		model.pipeline_tag && model.pipeline_tag in WIDGET_COMPONENTS
-			? WIDGET_COMPONENTS[model.pipeline_tag as keyof typeof WIDGET_COMPONENTS]
-			: undefined;
+		model.pipeline_tag === "text-generation" && model.tags?.includes("conversational")
+			? (ConversationalWidget as typeof SvelteComponent)
+			: model.pipeline_tag && model.pipeline_tag in WIDGET_COMPONENTS
+			  ? WIDGET_COMPONENTS[model.pipeline_tag as keyof typeof WIDGET_COMPONENTS]
+			  : undefined;
 
 	// prettier-ignore
 	$: widgetProps = ({

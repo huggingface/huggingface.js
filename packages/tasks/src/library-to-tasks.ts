@@ -27,7 +27,7 @@ export const LIBRARY_TASK_MAPPING_EXCLUDING_TRANSFORMERS: Partial<Record<ModelLi
 	keras: ["image-classification"],
 	nemo: ["automatic-speech-recognition"],
 	open_clip: ["zero-shot-classification", "zero-shot-image-classification"],
-	paddlenlp: ["conversational", "fill-mask", "summarization", "zero-shot-classification"],
+	paddlenlp: ["fill-mask", "summarization", "zero-shot-classification"],
 	peft: ["text-generation"],
 	"pyannote-audio": ["automatic-speech-recognition"],
 	"sentence-transformers": ["feature-extraction", "sentence-similarity"],

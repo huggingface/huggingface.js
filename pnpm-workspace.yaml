@@ -6,5 +6,5 @@ packages:
   - "packages/agents"
   - "packages/languages"
   - "packages/tasks"
-  - "packages/widgets"
   - "packages/jinja"
+  - "packages/widgets"

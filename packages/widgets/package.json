@@ -45,7 +45,8 @@
 		"static/audioProcessor.js"
 	],
 	"dependencies": {
-		"@huggingface/tasks": "workspace:^"
+		"@huggingface/tasks": "workspace:^",
+		"@huggingface/jinja": "workspace:^"
 	},
 	"peerDependencies": {
 		"svelte": "^3.59.2"

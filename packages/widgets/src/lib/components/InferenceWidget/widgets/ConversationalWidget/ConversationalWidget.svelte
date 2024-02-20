@@ -1,6 +1,9 @@
 <script lang="ts">
+	import { onMount } from "svelte";
 	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "../../shared/types.js";
-	import type { WidgetExampleTextInput } from "@huggingface/tasks";
+	import { Template } from "@huggingface/jinja";
+	import type { SpecialTokensMap, TokenizerConfig, WidgetExampleTextInput } from "@huggingface/tasks";
+	import { SPECIAL_TOKENS_ATTRIBUTES } from "@huggingface/tasks";
 
 	import WidgetOutputConvo from "../../shared/WidgetOutputConvo/WidgetOutputConvo.svelte";
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
@@ -19,58 +22,91 @@
 
 	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
-	interface Conversation {
-		generated_responses: string[];
-		past_user_inputs: string[];
+	interface Message {
+		role: string;
+		content: string;
 	}
-	interface Response {
-		conversation: Conversation;
-		generated_text: string;
-	}
-
-	type Output = Array<{
-		input: string;
-		response: string;
-	}>;
 
 	let computeTime = "";
-	let conversation: {
-		generated_responses: string[];
-		past_user_inputs: string[];
-	} = {
-		generated_responses: [],
-		past_user_inputs: [],
-	};
+	let messages: Message[] = [];
 	let error: string = "";
 	let isLoading = false;
 	let modelLoading = {
 		isLoading: false,
 		estimatedTime: 0,
 	};
-	let output: Output = [];
 	let outputJson: string;
 	let text = "";
 
-	async function getOutput({
-		withModelLoading = false,
-		isOnLoadCall = false,
-		exampleOutput = undefined,
-	}: InferenceRunOpts = {}) {
-		const trimmedText = text.trim();
+	let compiledTemplate: Template;
+	let tokenizerConfig: TokenizerConfig;
 
+	// Check config and compile template
+	onMount(() => {
+		const config = model.config;
+		if (config === undefined) {
+			error = "Model config not found";
+			return;
+		}
+
+		if (config.tokenizer === undefined) {
+			error = "Tokenizer config not found";
+			return;
+		}
+		tokenizerConfig = config.tokenizer;
+
+		const chatTemplate = tokenizerConfig.chat_template;
+		if (chatTemplate === undefined) {
+			error = "No chat template found in tokenizer config";
+			return;
+		}
+		try {
+			compiledTemplate = new Template(chatTemplate);
+		} catch (e) {
+			error = `Invalid chat template: "${(e as Error).message}"`;
+			return;
+		}
+	});
+
+	async function getOutput({ withModelLoading = false, isOnLoadCall = false }: InferenceRunOpts = {}) {
+		if (!compiledTemplate) {
+			return;
+		}
+
+		const trimmedText = text.trim();
 		if (!trimmedText) {
 			return;
 		}
 
-		if (shouldUpdateUrl && !conversation.past_user_inputs.length) {
+		if (shouldUpdateUrl && !messages.length) {
 			updateUrl({ text: trimmedText });
 		}
 
+		if (!withModelLoading) {
+			// Add user message to chat
+			messages = [...messages, { role: "user", content: trimmedText }];
+		}
+
+		// Render chat template
+		const special_tokens_map = extractSpecialTokensMap(tokenizerConfig);
+
+		let chatText;
+		try {
+			chatText = compiledTemplate.render({
+				messages,
+				add_generation_prompt: true,
+				...special_tokens_map,
+			});
+		} catch (e) {
+			error = `An error occurred while rendering the chat template: "${(e as Error).message}"`;
+			return;
+		}
+
 		const requestBody = {
-			inputs: {
-				generated_responses: conversation.generated_responses,
-				past_user_inputs: conversation.past_user_inputs,
-				text: trimmedText,
+			inputs: chatText,
+			parameters: {
+				return_full_text: false,
+				max_new_tokens: 100,
 			},
 		};
 		addInferenceParameters(requestBody, model);
@@ -82,7 +118,7 @@
 			model.id,
 			requestBody,
 			apiToken,
-			parseOutput,
+			(body) => parseOutput(body, messages),
 			withModelLoading,
 			includeCredentials,
 			isOnLoadCall
@@ -99,8 +135,7 @@
 			computeTime = res.computeTime;
 			outputJson = res.outputJson;
 			if (res.output) {
-				conversation = res.output.conversation;
-				output = res.output.output;
+				messages = res.output;
 			}
 			// Emptying input value
 			text = "";
@@ -115,34 +150,28 @@
 		}
 	}
 
-	function isValidOutput(arg: any): arg is Response {
-		return (
-			arg && Array.isArray(arg?.conversation?.generated_responses) && Array.isArray(arg?.conversation?.past_user_inputs)
-		);
+	function parseOutput(body: unknown, chat: Message[]): Message[] {
+		if (Array.isArray(body) && body.length) {
+			const text = body[0]?.generated_text ?? "";
+
+			if (!text.length) {
+				throw new Error("Model did not generate a response.");
+			}
+
+			return [...chat, { role: "assistant", content: text }];
+		}
+		throw new TypeError("Invalid output: output must be of type Array & non-empty");
 	}
 
-	function parseOutput(body: unknown): {
-		conversation: Conversation;
-		output: Output;
-	} {
-		if (isValidOutput(body)) {
-			const conversation = body.conversation;
-			const pastUserInputs = conversation.past_user_inputs;
-			const generatedResponses = conversation.generated_responses;
-			const output = pastUserInputs
-				.filter(
-					(x, i) =>
-						x !== null && x !== undefined && generatedResponses[i] !== null && generatedResponses[i] !== undefined
-				)
-				.map((x, i) => ({
-					input: x ?? "",
-					response: generatedResponses[i] ?? "",
-				}));
-			return { conversation, output };
+	function extractSpecialTokensMap(tokenizerConfig: TokenizerConfig): SpecialTokensMap {
+		const specialTokensMap = Object.create(null);
+		for (const key of SPECIAL_TOKENS_ATTRIBUTES) {
+			const value = tokenizerConfig[key];
+			if (typeof value === "string") {
+				specialTokensMap[key] = value;
+			}
 		}
-		throw new TypeError(
-			"Invalid output: output must be of type <conversation: <generated_responses:Array; past_user_inputs:Array>>"
-		);
+		return specialTokensMap;
 	}
 
 	function applyWidgetExample(sample: WidgetExampleTextInput, opts: ExampleRunOpts = {}) {
@@ -165,7 +194,7 @@
 		{applyWidgetExample}
 		validateExample={isTextInput}
 	/>
-	<WidgetOutputConvo modelId={model.id} {output} />
+	<WidgetOutputConvo modelId={model.id} {messages} />
 
 	<WidgetQuickInput
 		bind:value={text}

@@ -333,25 +333,6 @@ describe.concurrent(
 				])
 			);
 		});
-		it("conversational", async () => {
-			expect(
-				await hf.conversational({
-					model: "microsoft/DialoGPT-large",
-					inputs: {
-						past_user_inputs: ["Which movie is the best ?"],
-						generated_responses: ["It is Die Hard for sure."],
-						text: "Can you explain why ?",
-					},
-				})
-			).toMatchObject({
-				generated_text: "It's the best movie ever.",
-				conversation: {
-					past_user_inputs: ["Which movie is the best ?", "Can you explain why ?"],
-					generated_responses: ["It is Die Hard for sure.", "It's the best movie ever."],
-				},
-				warnings: ["Setting `pad_token_id` to `eos_token_id`:50256 for open-end generation."],
-			});
-		});
 		it("SentenceSimilarity", async () => {
 			expect(
 				await hf.sentenceSimilarity({
