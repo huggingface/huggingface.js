@@ -9,8 +9,8 @@ devDependencies:
     specifier: ^20.11.5
     version: 20.11.5
   quicktype-core:
-    specifier: https://github.com/huggingface/quicktype/raw/pack-18.0.15/packages/quicktype-core/quicktype-core-18.0.15.tgz
-    version: '@github.com/huggingface/quicktype/raw/pack-18.0.15/packages/quicktype-core/quicktype-core-18.0.15.tgz'
+    specifier: file:/home/wauplin/projects/quicktype/packages/quicktype-core/quicktype-core-18.0.19.tgz
+    version: file:../../../quicktype/packages/quicktype-core/quicktype-core-18.0.19.tgz
 
 packages:
 
@@ -189,10 +189,10 @@ packages:
     engines: {node: '>= 14'}
     dev: true
 
-  '@github.com/huggingface/quicktype/raw/pack-18.0.15/packages/quicktype-core/quicktype-core-18.0.15.tgz':
-    resolution: {tarball: https://github.com/huggingface/quicktype/raw/pack-18.0.15/packages/quicktype-core/quicktype-core-18.0.15.tgz}
+  file:../../../quicktype/packages/quicktype-core/quicktype-core-18.0.19.tgz:
+    resolution: {integrity: sha512-Dh9zlI3bjET3rSEx64koQt1QD3De45bbsufOpwaihNA0OqFAX0XdH0B3p0w995nwB5tMSnYQaUlmBh9WnkAkzQ==, tarball: file:../../../quicktype/packages/quicktype-core/quicktype-core-18.0.19.tgz}
     name: quicktype-core
-    version: 18.0.15
+    version: 18.0.19
     dependencies:
       '@glideapps/ts-necessities': 2.1.3
       '@types/urijs': 1.19.25

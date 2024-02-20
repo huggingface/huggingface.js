@@ -14,6 +14,14 @@ const TYPESCRIPT_HEADER_FILE = `
 
 `;
 
+const PYTHON_HEADER_FILE = `
+# Inference code generated from the JSON schema spec in ./spec
+#
+# Using src/scripts/inference-codegen
+`;
+
+const PYTHON_DIR = "/home/wauplin/projects/huggingface_hub/src/huggingface_hub/inference/_generated/types";
+
 const rootDirFinder = function (): string {
 	let currentPath = path.normalize(import.meta.url);
 
@@ -65,6 +73,20 @@ async function generateTypescript(inputData: InputData): Promise<SerializedRende
 		},
 	});
 }
+
+async function generatePython(inputData: InputData): Promise<SerializedRenderResult> {
+	return await quicktype({
+		inputData,
+		lang: "python",
+		alphabetizeProperties: true,
+		rendererOptions: {
+			"just-types": true,
+			"nice-property-names": true,
+			"python-version": "3.7",
+		},
+	});
+}
+
 /**
  * quicktype is unable to generate "top-level array types" that are defined in the output spec: https://github.com/glideapps/quicktype/issues/2481
  * We have to use the TypeScript API to generate those types when required.
@@ -180,5 +202,16 @@ for (const { task, dirPath } of allTasks) {
 
 	console.log("   🩹 Post-processing the generated code");
 	await postProcessOutput(`${dirPath}/inference.ts`, outputSpec);
+
+	console.debug("   🏭 Generating Python code");
+	{
+		const { lines } = await generatePython(inputData);
+		const pythonFilename = `${task}.py`.replace(/-/g, "_");
+		const pythonPath = `${PYTHON_DIR}/${pythonFilename}`;
+		await fs.writeFile(pythonPath, [PYTHON_HEADER_FILE, ...lines].join(`\n`), {
+			flag: "w+",
+			encoding: "utf-8",
+		});
+	}
 }
 console.debug("✅ All done!");
