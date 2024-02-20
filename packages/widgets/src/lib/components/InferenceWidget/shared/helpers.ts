@@ -192,7 +192,7 @@ export async function getTgiSupportedModels(url: string): Promise<Set<string> | 
 			(output as { model_id: string; task: string }[])
 				.filter(({ task }) => task === "text-generation")
 				.map(({ model_id }) => model_id)
-		)
+		);
 	} else {
 		console.warn(response.status, output.error);
 		return undefined;
