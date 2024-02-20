@@ -2,10 +2,14 @@
 	import { onMount } from "svelte";
 	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "../../shared/types.js";
 	import { Template } from "@huggingface/jinja";
-	import type { SpecialTokensMap, TokenizerConfig, WidgetExampleTextInput } from "@huggingface/tasks";
+	import type {
+		SpecialTokensMap,
+		TokenizerConfig,
+		WidgetExampleTextInput,
+		TextGenerationInput,
+	} from "@huggingface/tasks";
 	import { SPECIAL_TOKENS_ATTRIBUTES } from "@huggingface/tasks";
 	import { HfInference } from "@huggingface/inference";
-	import type { TextGenerationInput } from "@huggingface/tasks/src/tasks/text-generation/inference";
 
 	import WidgetOutputConvo from "../../shared/WidgetOutputConvo/WidgetOutputConvo.svelte";
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
