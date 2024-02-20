@@ -548,4 +548,14 @@ export const pythae = (model: ModelData): string[] => [
 model = AutoModel.load_from_hf_hub("${model.id}")`,
 ];
 
+
+export const audiocraft_musicgen = (model: ModelData): string[] => [
+	`from audiocraft.models import MusicGen
+
+model = MusicGen.get_pretrained("${model.id}")
+
+descriptions = ['happy rock', 'energetic EDM', 'sad jazz']
+wav = model.generate(descriptions)  # generates 3 samples.`,
+];
+
 //#endregion
