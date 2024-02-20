@@ -227,7 +227,7 @@ export const PIPELINE_DATA = {
 	},
 	"feature-extraction": {
 		name: "Feature Extraction",
-		modality: "multimodal",
+		modality: "nlp",
 		color: "red",
 	},
 	"text-generation": {
@@ -416,7 +416,7 @@ export const PIPELINE_DATA = {
 	},
 	"text-to-image": {
 		name: "Text-to-Image",
-		modality: "multimodal",
+		modality: "cv",
 		color: "yellow",
 	},
 	"image-to-text": {
@@ -427,7 +427,7 @@ export const PIPELINE_DATA = {
 				name: "Image Captioning",
 			},
 		],
-		modality: "multimodal",
+		modality: "cv",
 		color: "red",
 	},
 	"image-to-image": {
@@ -451,7 +451,7 @@ export const PIPELINE_DATA = {
 	},
 	"image-to-video": {
 		name: "Image-to-Video",
-		modality: "multimodal",
+		modality: "cv",
 		color: "indigo",
 	},
 	"unconditional-image-generation": {
@@ -586,8 +586,14 @@ export const PIPELINE_DATA = {
 	},
 	"text-to-video": {
 		name: "Text-to-Video",
-		modality: "multimodal",
+		modality: "cv",
 		color: "green",
+	},
+	"image-text-to-text": {
+		name: "Image + Text to Image (VLLMs)",
+		modality: "multimodal",
+		color: "red",
+		hideInDatasets: true,
 	},
 	"visual-question-answering": {
 		name: "Visual Question Answering",
@@ -619,7 +625,7 @@ export const PIPELINE_DATA = {
 	},
 	"graph-ml": {
 		name: "Graph Machine Learning",
-		modality: "multimodal",
+		modality: "other",
 		color: "green",
 	},
 	"mask-generation": {
@@ -634,13 +640,18 @@ export const PIPELINE_DATA = {
 	},
 	"text-to-3d": {
 		name: "Text-to-3D",
-		modality: "multimodal",
+		modality: "cv",
 		color: "yellow",
 	},
 	"image-to-3d": {
 		name: "Image-to-3D",
-		modality: "multimodal",
+		modality: "cv",
 		color: "green",
+	},
+	"image-feature-extraction": {
+		name: "Image Feature Extraction",
+		modality: "cv",
+		color: "indigo",
 	},
 	other: {
 		name: "Other",
