@@ -54,7 +54,7 @@ export interface ModelData {
 			base_model_name?: string;
 			task_type?: string;
 		};
-		tokenizer?: TokenizerConfig;
+		tokenizer_config?: TokenizerConfig;
 	};
 	/**
 	 * all the model tags

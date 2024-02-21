@@ -49,11 +49,11 @@
 			return;
 		}
 
-		if (config.tokenizer === undefined) {
+		if (config.tokenizer_config === undefined) {
 			error = "Tokenizer config not found";
 			return;
 		}
-		tokenizerConfig = config.tokenizer;
+		tokenizerConfig = config.tokenizer_config;
 
 		const chatTemplate = tokenizerConfig.chat_template;
 		if (chatTemplate === undefined) {
