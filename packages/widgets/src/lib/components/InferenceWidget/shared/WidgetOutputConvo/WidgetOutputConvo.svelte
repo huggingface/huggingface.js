@@ -6,7 +6,7 @@
 	import WidgetOutputConvoBubble from "../WidgetOuputConvoBubble/WidgetOutputConvoBubble.svelte";
 
 	export let modelId: string;
-	export let messages: Array<ConversationMessage>;
+	export let messages: ConversationMessage[];
 
 	let wrapperEl: HTMLElement;
 
