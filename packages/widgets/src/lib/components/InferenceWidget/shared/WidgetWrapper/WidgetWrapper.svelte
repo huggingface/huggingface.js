@@ -37,7 +37,7 @@
 			}
 
 			if (!$tgiSupportedModels) {
-				tgiSupportedModels.set(await getTgiSupportedModels(apiUrl));
+				$tgiSupportedModels = await getTgiSupportedModels(apiUrl);
 			}
 		})();
 	});
