@@ -4,7 +4,7 @@
 	import { Template } from "@huggingface/jinja";
 	import type { SpecialTokensMap, TokenizerConfig, WidgetExampleTextInput } from "@huggingface/tasks";
 	import { SPECIAL_TOKENS_ATTRIBUTES } from "@huggingface/tasks";
-
+	import type { Message } from "../../shared/WidgetOutputConvo/WidgetOutputConvo.svelte";
 	import WidgetOutputConvo from "../../shared/WidgetOutputConvo/WidgetOutputConvo.svelte";
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
@@ -21,11 +21,6 @@
 	export let includeCredentials: WidgetProps["includeCredentials"];
 
 	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
-
-	interface Message {
-		role: "user" | "assistant" | "system";
-		content: string;
-	}
 
 	let computeTime = "";
 	let messages: Message[] = [];

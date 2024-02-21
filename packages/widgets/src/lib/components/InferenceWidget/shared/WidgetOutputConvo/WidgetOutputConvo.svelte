@@ -1,3 +1,10 @@
+<script context="module" lang="ts">
+	export interface Message {
+		role: "user" | "assistant" | "system";
+		content: string;
+	}
+</script>
+
 <script lang="ts">
 	import { afterUpdate } from "svelte";
 
@@ -5,10 +12,7 @@
 	import WidgetOutputConvoBubble from "../WidgetOuputConvoBubble/WidgetOutputConvoBubble.svelte";
 
 	export let modelId: string;
-	export let messages: Array<{
-		role: "user" | "assistant" | "system";
-		content: string;
-	}>;
+	export let messages: Array<Message>;
 
 	let wrapperEl: HTMLElement;
 
