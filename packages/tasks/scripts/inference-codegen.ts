@@ -16,7 +16,8 @@ const TYPESCRIPT_HEADER_FILE = `
 
 const PYTHON_HEADER_FILE = `
 # Inference code generated from the JSON schema spec in @huggingface/tasks.
-# using src/scripts/inference-codegen
+#
+# Using ./src/scripts/inference-codegen
 #
 # See https://github.com/huggingface/huggingface.js/tree/main/packages/tasks/src/tasks.
 `;
