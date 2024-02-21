@@ -20,7 +20,7 @@
 </script>
 
 <div bind:this={wrapperEl} class="h-64 overflow-y-auto rounded-t-lg border border-b-0 leading-tight">
-	<div class="p-3 pt-6 text-center text-sm text-gray-400">
+	<div class="p-3 pt-6 text-center text-sm text-gray-400 text-balance">
 		Input a message to start chatting with
 		<strong>{modelId}</strong>.
 	</div>
