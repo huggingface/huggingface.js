@@ -23,7 +23,7 @@
 	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
 	interface Message {
-		role: string;
+		role: "user" | "assistant" | "system";
 		content: string;
 	}
 

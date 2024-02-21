@@ -6,7 +6,7 @@
 
 	export let modelId: string;
 	export let messages: Array<{
-		role: string;
+		role: "user" | "assistant" | "system";
 		content: string;
 	}>;
 
