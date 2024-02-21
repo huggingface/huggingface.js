@@ -145,7 +145,7 @@
 		}
 	}
 
-	function parseOutput(body: unknown, chat: Message[]): Message[] {
+	function parseOutput(body: unknown, chat: ConversationMessage[]): ConversationMessage[] {
 		if (Array.isArray(body) && body.length) {
 			const text = body[0]?.generated_text ?? "";
 
