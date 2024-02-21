@@ -1,18 +1,12 @@
-<script context="module" lang="ts">
-	export interface Message {
-		role: "user" | "assistant" | "system";
-		content: string;
-	}
-</script>
-
 <script lang="ts">
 	import { afterUpdate } from "svelte";
 
 	import { isFullyScrolled, scrollToMax } from "../../../../utils/ViewUtils.js";
+	import type { ConversationMessage } from "../../shared/types.js";
 	import WidgetOutputConvoBubble from "../WidgetOuputConvoBubble/WidgetOutputConvoBubble.svelte";
 
 	export let modelId: string;
-	export let messages: Array<Message>;
+	export let messages: Array<ConversationMessage>;
 
 	let wrapperEl: HTMLElement;
 

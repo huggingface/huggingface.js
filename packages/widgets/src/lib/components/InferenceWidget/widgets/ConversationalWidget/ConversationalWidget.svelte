@@ -4,7 +4,7 @@
 	import { Template } from "@huggingface/jinja";
 	import type { SpecialTokensMap, TokenizerConfig, WidgetExampleTextInput } from "@huggingface/tasks";
 	import { SPECIAL_TOKENS_ATTRIBUTES } from "@huggingface/tasks";
-	import type { Message } from "../../shared/WidgetOutputConvo/WidgetOutputConvo.svelte";
+	import type { ConversationMessage } from "../../shared/types.js";
 	import WidgetOutputConvo from "../../shared/WidgetOutputConvo/WidgetOutputConvo.svelte";
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
@@ -23,7 +23,7 @@
 	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
 	let computeTime = "";
-	let messages: Message[] = [];
+	let messages: ConversationMessage[] = [];
 	let error: string = "";
 	let isLoading = false;
 	let modelLoading = {
