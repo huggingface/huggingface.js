@@ -11,6 +11,7 @@
 	import { SPECIAL_TOKENS_ATTRIBUTES } from "@huggingface/tasks";
 	import { HfInference } from "@huggingface/inference";
 
+	import type { ConversationMessage } from "../../shared/types.js";
 	import WidgetOutputConvo from "../../shared/WidgetOutputConvo/WidgetOutputConvo.svelte";
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
@@ -31,12 +32,7 @@
 
 	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
-	interface Message {
-		role: string;
-		content: string;
-	}
-
-	let messages: Message[] = [];
+	let messages: ConversationMessage[] = [];
 	let error: string = "";
 	let isLoading = false;
 	let outputJson: string;
@@ -55,11 +51,11 @@
 			return;
 		}
 
-		if (config.tokenizer === undefined) {
+		if (config.tokenizer_config === undefined) {
 			error = "Tokenizer config not found";
 			return;
 		}
-		tokenizerConfig = config.tokenizer;
+		tokenizerConfig = config.tokenizer_config;
 
 		const chatTemplate = tokenizerConfig.chat_template;
 		if (chatTemplate === undefined) {
@@ -131,7 +127,7 @@
 				let newMessage = {
 					role: "assistant",
 					content: "",
-				};
+				} satisfies ConversationMessage;
 				const previousMessages = [...messages];
 				const tokenStream = inferenceClient.textGenerationStream({
 					...input,

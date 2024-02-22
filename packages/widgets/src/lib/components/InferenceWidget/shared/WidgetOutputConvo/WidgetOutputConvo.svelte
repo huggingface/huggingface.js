@@ -2,13 +2,11 @@
 	import { afterUpdate } from "svelte";
 
 	import { isFullyScrolled, scrollToMax } from "../../../../utils/ViewUtils.js";
+	import type { ConversationMessage } from "../../shared/types.js";
 	import WidgetOutputConvoBubble from "../WidgetOuputConvoBubble/WidgetOutputConvoBubble.svelte";
 
 	export let modelId: string;
-	export let messages: Array<{
-		role: string;
-		content: string;
-	}>;
+	export let messages: ConversationMessage[];
 
 	let wrapperEl: HTMLElement;
 
