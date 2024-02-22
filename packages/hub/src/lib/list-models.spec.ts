@@ -60,6 +60,7 @@ describe("listModels", () => {
 			additionalFields: ["tags"],
 			limit: 2,
 		})) {
+			count++;
 			expect(entry.tags).to.include("gguf");
 			expect(entry.tags).to.include("id");
 		}

@@ -8,7 +8,7 @@ import { pick } from "../utils/pick";
 
 const EXPAND_KEYS = ["sdk", "likes", "private", "lastModified"];
 
-export type SpaceEntry = {
+export interface SpaceEntry {
 	id: string;
 	name: string;
 	sdk?: SpaceSdk;
