@@ -58,7 +58,7 @@
 					AutoConfig: "configuration_phi.PhiConfig",
 					AutoModelForCausalLM: "modeling_phi.PhiForCausalLM",
 				},
-				tokenizer: {
+				tokenizer_config: {
 					bos_token: "<|endoftext|>",
 					eos_token: "<|endoftext|>",
 					unk_token: "<|endoftext|>",
