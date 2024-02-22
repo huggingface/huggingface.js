@@ -6,7 +6,25 @@ import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
 import { pick } from "../utils/pick";
 
-const EXPAND_KEYS = ["sdk", "likes", "private", "lastModified"];
+const EXPAND_KEYS = ["sdk", "likes", "private", "lastModified"] as const satisfies (keyof ApiSpaceInfo)[];
+const EXPANDABLE_KEYS = [
+	"author",
+	"cardData",
+	"datasets",
+	"disabled",
+	"gitalyUid",
+	"lastModified",
+	"createdAt",
+	"likes",
+	"private",
+	"runtime",
+	"sdk",
+	// "siblings",
+	"sha",
+	"subdomain",
+	"tags",
+	"models",
+] as const satisfies (keyof ApiSpaceInfo)[];
 
 export interface SpaceEntry {
 	id: string;
@@ -18,7 +36,9 @@ export interface SpaceEntry {
 	// Use additionalFields to fetch the fields from ApiSpaceInfo
 }
 
-export async function* listSpaces<const T extends Exclude<keyof ApiSpaceInfo, keyof SpaceEntry> = never>(params?: {
+export async function* listSpaces<
+	const T extends Exclude<(typeof EXPANDABLE_KEYS)[number], (typeof EXPAND_KEYS)[number]> = never,
+>(params?: {
 	search?: {
 		owner?: string;
 		tags?: string[];

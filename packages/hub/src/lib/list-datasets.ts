@@ -6,7 +6,33 @@ import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
 import { pick } from "../utils/pick";
 
-const EXPAND_KEYS = ["private", "downloads", "gated", "likes", "lastModified"] satisfies (keyof ApiDatasetInfo)[];
+const EXPAND_KEYS = [
+	"private",
+	"downloads",
+	"gated",
+	"likes",
+	"lastModified",
+] as const satisfies (keyof ApiDatasetInfo)[];
+
+const EXPANDABLE_KEYS = [
+	"author",
+	"cardData",
+	"citation",
+	"createdAt",
+	"disabled",
+	"description",
+	"downloads",
+	"downloadsAllTime",
+	"gated",
+	"gitalyUid",
+	"lastModified",
+	"likes",
+	"paperswithcode_id",
+	"private",
+	// "siblings",
+	"sha",
+	"tags",
+] as const satisfies (keyof ApiDatasetInfo)[];
 
 export interface DatasetEntry {
 	id: string;
@@ -19,7 +45,7 @@ export interface DatasetEntry {
 }
 
 export async function* listDatasets<
-	const T extends Exclude<keyof ApiDatasetInfo, keyof DatasetEntry> = never,
+	const T extends Exclude<(typeof EXPANDABLE_KEYS)[number], (typeof EXPAND_KEYS)[number]> = never,
 >(params?: {
 	search?: {
 		owner?: string;

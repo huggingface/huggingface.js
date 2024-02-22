@@ -13,7 +13,31 @@ const EXPAND_KEYS = [
 	"downloads",
 	"likes",
 	"lastModified",
-] satisfies (keyof ApiModelInfo)[];
+] as const satisfies (keyof ApiModelInfo)[];
+
+const EXPANDABLE_KEYS = [
+	"author",
+	"cardData",
+	"config",
+	"createdAt",
+	"disabled",
+	"downloads",
+	"downloadsAllTime",
+	"gated",
+	"gitalyUid",
+	"lastModified",
+	"library_name",
+	"likes",
+	"model-index",
+	"pipeline_tag",
+	"private",
+	"safetensors",
+	"sha",
+	// "siblings",
+	"spaces",
+	"tags",
+	"transformersInfo",
+] as const satisfies (keyof ApiModelInfo)[];
 
 export interface ModelEntry {
 	id: string;
@@ -26,7 +50,9 @@ export interface ModelEntry {
 	updatedAt: Date;
 }
 
-export async function* listModels<const T extends Exclude<keyof ApiModelInfo, keyof ModelEntry> = never>(params?: {
+export async function* listModels<
+	const T extends Exclude<(typeof EXPANDABLE_KEYS)[number], (typeof EXPAND_KEYS)[number]> = never,
+>(params?: {
 	search?: {
 		owner?: string;
 		task?: PipelineType;
