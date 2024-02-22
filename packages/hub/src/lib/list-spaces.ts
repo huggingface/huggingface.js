@@ -16,7 +16,7 @@ export interface SpaceEntry {
 	private: boolean;
 	updatedAt: Date;
 	// Use additionalFields to fetch the fields from ApiSpaceInfo
-};
+}
 
 export async function* listSpaces<const T extends Exclude<keyof ApiSpaceInfo, keyof SpaceEntry> = never>(params?: {
 	search?: {
