@@ -12,7 +12,7 @@ const EXPAND_KEYS = [
 	"gated",
 	"likes",
 	"lastModified",
-] as const satisfies (keyof ApiDatasetInfo)[];
+] as const satisfies readonly (keyof ApiDatasetInfo)[];
 
 const EXPANDABLE_KEYS = [
 	"author",
@@ -32,7 +32,7 @@ const EXPANDABLE_KEYS = [
 	// "siblings",
 	"sha",
 	"tags",
-] as const satisfies (keyof ApiDatasetInfo)[];
+] as const satisfies readonly (keyof ApiDatasetInfo)[];
 
 export interface DatasetEntry {
 	id: string;

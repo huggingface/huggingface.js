@@ -1,4 +1,4 @@
-import type { ModelsLibraryKey, TransformersInfo } from "@huggingface/tasks";
+import type { ModelLibraryKey, TransformersInfo } from "@huggingface/tasks";
 import type { License, PipelineType } from "../public";
 
 export interface ApiModelInfo {
@@ -20,7 +20,7 @@ export interface ApiModelInfo {
 	gitalyUid: string;
 	lastAuthor: { email: string; user?: string };
 	lastModified: string; // convert to date
-	library_name?: ModelsLibraryKey;
+	library_name?: ModelLibraryKey;
 	likes: number;
 	likesRecent: number;
 	private: boolean;

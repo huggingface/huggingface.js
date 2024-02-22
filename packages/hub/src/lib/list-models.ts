@@ -13,7 +13,7 @@ const EXPAND_KEYS = [
 	"downloads",
 	"likes",
 	"lastModified",
-] as const satisfies (keyof ApiModelInfo)[];
+] as const satisfies readonly (keyof ApiModelInfo)[];
 
 const EXPANDABLE_KEYS = [
 	"author",
@@ -37,7 +37,7 @@ const EXPANDABLE_KEYS = [
 	"spaces",
 	"tags",
 	"transformersInfo",
-] as const satisfies (keyof ApiModelInfo)[];
+] as const satisfies readonly (keyof ApiModelInfo)[];
 
 export interface ModelEntry {
 	id: string;

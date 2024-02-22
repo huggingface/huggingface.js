@@ -6,7 +6,7 @@ import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
 import { pick } from "../utils/pick";
 
-const EXPAND_KEYS = ["sdk", "likes", "private", "lastModified"] as const satisfies (keyof ApiSpaceInfo)[];
+const EXPAND_KEYS = ["sdk", "likes", "private", "lastModified"] as const satisfies readonly (keyof ApiSpaceInfo)[];
 const EXPANDABLE_KEYS = [
 	"author",
 	"cardData",
@@ -24,7 +24,7 @@ const EXPANDABLE_KEYS = [
 	"subdomain",
 	"tags",
 	"models",
-] as const satisfies (keyof ApiSpaceInfo)[];
+] as const satisfies readonly (keyof ApiSpaceInfo)[];
 
 export interface SpaceEntry {
 	id: string;
