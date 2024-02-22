@@ -4,7 +4,7 @@
 	import { Template } from "@huggingface/jinja";
 	import type { SpecialTokensMap, TokenizerConfig, WidgetExampleTextInput } from "@huggingface/tasks";
 	import { SPECIAL_TOKENS_ATTRIBUTES } from "@huggingface/tasks";
-
+	import type { ConversationMessage } from "../../shared/types.js";
 	import WidgetOutputConvo from "../../shared/WidgetOutputConvo/WidgetOutputConvo.svelte";
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
@@ -22,13 +22,8 @@
 
 	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
-	interface Message {
-		role: string;
-		content: string;
-	}
-
 	let computeTime = "";
-	let messages: Message[] = [];
+	let messages: ConversationMessage[] = [];
 	let error: string = "";
 	let isLoading = false;
 	let modelLoading = {
@@ -150,7 +145,7 @@
 		}
 	}
 
-	function parseOutput(body: unknown, chat: Message[]): Message[] {
+	function parseOutput(body: unknown, chat: ConversationMessage[]): ConversationMessage[] {
 		if (Array.isArray(body) && body.length) {
 			const text = body[0]?.generated_text ?? "";
 
