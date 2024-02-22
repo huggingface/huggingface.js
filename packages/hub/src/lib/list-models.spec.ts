@@ -53,14 +53,14 @@ describe("listModels", () => {
 		]);
 	});
 
-	it("should list indonesian models with tflite format", async () => {
+	it.only("should list indonesian models with gguf format", async () => {
 		let count = 0;
 		for await (const entry of listModels({
-			search: { tags: ["tflite", "id"] },
+			search: { tags: ["gguf", "id"] },
 			additionalFields: ["tags"],
 			limit: 2,
 		})) {
-			expect(entry.tags).to.include("tflite");
+			expect(entry.tags).to.include("gguf");
 			expect(entry.tags).to.include("id");
 		}
 
