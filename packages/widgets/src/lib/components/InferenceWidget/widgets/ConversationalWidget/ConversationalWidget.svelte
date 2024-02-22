@@ -82,7 +82,7 @@
 			updateUrl({ text: trimmedText });
 		}
 
-		if (!withModelLoading && messages[-1]?.role !== "user") {
+		if (!withModelLoading && messages.at(-1)?.role !== "user") {
 			// Add user message to chat
 			messages = [...messages, { role: "user", content: trimmedText }];
 		}
