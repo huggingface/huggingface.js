@@ -15,11 +15,13 @@ export async function getTgiSupportedModels(url: string): Promise<typeof tgiSupp
 		const response = await fetch(`${url}/framework/text-generation-inference`);
 		const output = await response.json();
 		if (response.ok) {
-			tgiSupportedModels.set(new Set(
-				(output as { model_id: string; task: string }[])
-					.filter(({ task }) => task === "text-generation")
-					.map(({ model_id }) => model_id)
-			));
+			tgiSupportedModels.set(
+				new Set(
+					(output as { model_id: string; task: string }[])
+						.filter(({ task }) => task === "text-generation")
+						.map(({ model_id }) => model_id)
+				)
+			);
 		} else {
 			console.warn(response.status, output.error);
 		}
