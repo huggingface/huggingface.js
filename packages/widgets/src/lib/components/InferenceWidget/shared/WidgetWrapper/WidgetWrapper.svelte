@@ -11,8 +11,8 @@
 	import WidgetHeader from "../WidgetHeader/WidgetHeader.svelte";
 	import WidgetInfo from "../WidgetInfo/WidgetInfo.svelte";
 	import IconCross from "../../..//Icons/IconCross.svelte";
-	import { getModelLoadInfo, getTgiSupportedModels } from "../../..//InferenceWidget/shared/helpers.js";
-	import { modelLoadStates, widgetStates, updateWidgetState, tgiSupportedModels } from "../../stores.js";
+	import { getModelLoadInfo } from "../../..//InferenceWidget/shared/helpers.js";
+	import { modelLoadStates, widgetStates, updateWidgetState } from "../../stores.js";
 
 	export let apiUrl: string;
 	export let model: WidgetProps["model"];
@@ -34,10 +34,6 @@
 
 			if (modelLoadInfo?.state === "TooBig") {
 				updateWidgetState(model.id, "isDisabled", true);
-			}
-
-			if (!$tgiSupportedModels) {
-				$tgiSupportedModels = await getTgiSupportedModels(apiUrl);
 			}
 		})();
 	});

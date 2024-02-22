@@ -184,21 +184,6 @@ export async function getModelLoadInfo(
 	}
 }
 
-export async function getTgiSupportedModels(url: string): Promise<Set<string> | undefined> {
-	const response = await fetch(`${url}/framework/text-generation-inference`);
-	const output = await response.json();
-	if (response.ok) {
-		return new Set(
-			(output as { model_id: string; task: string }[])
-				.filter(({ task }) => task === "text-generation")
-				.map(({ model_id }) => model_id)
-		);
-	} else {
-		console.warn(response.status, output.error);
-		return undefined;
-	}
-}
-
 // Extend requestBody with user supplied parameters for Inference Endpoints (serverless)
 export function addInferenceParameters(requestBody: Record<string, unknown>, model: ModelData): void {
 	const inference = model?.cardData?.inference;

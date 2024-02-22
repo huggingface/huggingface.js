@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { tgiSupportedModels, updateWidgetState } from "../../stores.js";
+	import { updateWidgetState } from "../../stores.js";
 	import { TASKS_DATA } from "@huggingface/tasks";
 	import type { WidgetExample, WidgetExampleAttribute } from "@huggingface/tasks";
 	import type { WidgetProps, ExampleRunOpts } from "../types.js";
@@ -75,11 +75,6 @@
 			>
 				<PipelineTag {pipeline} />
 			</a>
-			{#if $tgiSupportedModels?.has(model.id)}
-				<p class="text-xs text-gray-400">
-					Streaming with <a href="https://huggingface.co/docs/text-generation-inference" class="underline">TGI</a>
-				</p>
-			{/if}
 		</div>
 	{/if}
 

@@ -16,7 +16,8 @@
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
 	import { addInferenceParameters, callInferenceApi, updateUrl } from "../../shared/helpers.js";
 	import { isTextInput } from "../../shared/inputValidation.js";
-	import { widgetStates, tgiSupportedModels } from "../../stores.js";
+	import { widgetStates, getTgiSupportedModels } from "../../stores.js";
+	import type { Writable } from "svelte/store";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -25,6 +26,8 @@
 	export let noTitle: WidgetProps["noTitle"];
 	export let shouldUpdateUrl: WidgetProps["shouldUpdateUrl"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
+
+	let tgiSupportedModels: Writable<Set<string> | undefined>;
 
 	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
@@ -45,6 +48,7 @@
 
 	// Check config and compile template
 	onMount(() => {
+		getTgiSupportedModels(apiUrl).then((store) => (tgiSupportedModels = store));
 		const config = model.config;
 		if (config === undefined) {
 			error = "Model config not found";
