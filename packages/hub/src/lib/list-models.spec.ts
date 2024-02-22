@@ -53,7 +53,7 @@ describe("listModels", () => {
 		]);
 	});
 
-	it.only("should list indonesian models with gguf format", async () => {
+	it("should list indonesian models with gguf format", async () => {
 		let count = 0;
 		for await (const entry of listModels({
 			search: { tags: ["gguf", "id"] },
