@@ -27,5 +27,6 @@ export interface ApiModelInfo {
 	spaces: string[];
 	updatedAt: string; // convert to date
 	pipeline_tag: PipelineType;
+	tags: string[];
 	"model-index": unknown;
 }

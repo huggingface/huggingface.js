@@ -4,6 +4,7 @@ import type { ApiDatasetInfo } from "../types/api/api-dataset";
 import type { Credentials } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
+import { pick } from "../utils/pick";
 
 const EXPAND_KEYS = ["private", "downloads", "gated", "likes", "lastModified"] satisfies (keyof ApiDatasetInfo)[];
 
@@ -17,24 +18,35 @@ export interface DatasetEntry {
 	updatedAt: Date;
 }
 
-export async function* listDatasets(params?: {
+export async function* listDatasets<
+	const T extends Exclude<keyof ApiDatasetInfo, keyof DatasetEntry> = never,
+>(params?: {
 	search?: {
 		owner?: string;
+		tags?: string[];
 	};
 	credentials?: Credentials;
 	hubUrl?: string;
+	additionalFields?: T[];
+	/**
+	 * Set to limit the number of models returned.
+	 */
+	limit?: number;
 	/**
 	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 	 */
 	fetch?: typeof fetch;
 }): AsyncGenerator<DatasetEntry> {
 	checkCredentials(params?.credentials);
+	let totalToFetch = params?.limit ?? Infinity;
 	const search = new URLSearchParams([
 		...Object.entries({
-			limit: "500",
+			limit: String(Math.min(totalToFetch, 500)),
 			...(params?.search?.owner ? { author: params.search.owner } : undefined),
 		}),
+		...(params?.search?.tags?.map((tag) => ["filter", tag]) ?? []),
 		...EXPAND_KEYS.map((val) => ["expand", val] satisfies [string, string]),
+		...(params?.additionalFields?.map((val) => ["expand", val] satisfies [string, string]) ?? []),
 	]).toString();
 	let url: string | undefined = `${params?.hubUrl || HUB_URL}/api/datasets` + (search ? "?" + search : "");
 
@@ -54,6 +66,7 @@ export async function* listDatasets(params?: {
 
 		for (const item of items) {
 			yield {
+				...(params?.additionalFields && pick(item, params.additionalFields)),
 				id: item._id,
 				name: item.id,
 				private: item.private,
@@ -62,10 +75,15 @@ export async function* listDatasets(params?: {
 				gated: item.gated,
 				updatedAt: new Date(item.lastModified),
 			};
+			totalToFetch--;
+			if (totalToFetch <= 0) {
+				return;
+			}
 		}
 
 		const linkHeader = res.headers.get("Link");
 
 		url = linkHeader ? parseLinkHeader(linkHeader).next : undefined;
+		// Could update limit in url to fetch less items if not all items of next page are needed.
 	}
 }

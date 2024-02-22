@@ -52,4 +52,18 @@ describe("listModels", () => {
 			},
 		]);
 	});
+
+	it("should list indonesian models with tflite format", async () => {
+		let count = 0;
+		for await (const entry of listModels({
+			search: { tags: ["tflite", "id"] },
+			additionalFields: ["tags"],
+			limit: 2,
+		})) {
+			expect(entry.tags).to.include("tflite");
+			expect(entry.tags).to.include("id");
+		}
+
+		expect(count).to.equal(2);
+	});
 });
