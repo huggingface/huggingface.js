@@ -82,9 +82,15 @@
 			updateUrl({ text: trimmedText });
 		}
 
-		if (!withModelLoading && messages.at(-1)?.role !== "user") {
+		if (!withModelLoading) {
+			const newMessage = { role: "user", content: trimmedText };
+			const lastMessage = messages.at(-1);
+			// If the last message is the same as the new message, don't do anything
+			if (lastMessage === newMessage) {
+				return;
+			}
 			// Add user message to chat
-			messages = [...messages, { role: "user", content: trimmedText }];
+			messages = [...messages, newMessage];
 		}
 
 		// Render chat template
