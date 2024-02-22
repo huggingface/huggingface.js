@@ -86,7 +86,7 @@
 			const newMessage = { role: "user", content: trimmedText };
 			const lastMessage = messages.at(-1);
 			// If the last message is the same as the new message, don't do anything
-			if (lastMessage?.user === newMessage?.user && lastMessage?.content === newMessage?.content) {
+			if (lastMessage?.role === newMessage.role && lastMessage?.content === newMessage.content) {
 				return;
 			}
 			// Add user message to chat
