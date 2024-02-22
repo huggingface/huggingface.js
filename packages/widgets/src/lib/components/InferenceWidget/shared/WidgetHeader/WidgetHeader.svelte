@@ -68,12 +68,11 @@
 	{#if pipeline && task}
 		<div class="flex gap-4 items-center mb-1.5">
 			<a
-				class:hover:underline={!!TASKS_DATA[task]}
 				href={TASKS_DATA[task] ? `/tasks/${task}` : undefined}
 				target="_blank"
 				title={TASKS_DATA[task] ? `Learn more about ${task}` : undefined}
 			>
-				<PipelineTag {pipeline} />
+				<PipelineTag {pipeline} classNames={TASKS_DATA[task] ? "hover:underline" : ""} />
 			</a>
 		</div>
 	{/if}
