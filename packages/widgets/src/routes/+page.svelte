@@ -48,9 +48,22 @@
 			},
 		},
 		{
-			id: "WizardLM/WizardLM-70B-V1.0",
+			id: "microsoft/phi-2",
 			pipeline_tag: "text-generation",
 			inference: InferenceDisplayability.Yes,
+			config: {
+				architectures: ["PhiForCausalLM"],
+				model_type: "phi",
+				auto_map: {
+					AutoConfig: "configuration_phi.PhiConfig",
+					AutoModelForCausalLM: "modeling_phi.PhiForCausalLM",
+				},
+				tokenizer_config: {
+					bos_token: "<|endoftext|>",
+					eos_token: "<|endoftext|>",
+					unk_token: "<|endoftext|>",
+				},
+			},
 		},
 		{
 			id: "openai/clip-vit-base-patch16",

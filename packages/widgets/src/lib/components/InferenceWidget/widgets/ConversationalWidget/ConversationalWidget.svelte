@@ -2,15 +2,23 @@
 	import { onMount } from "svelte";
 	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "../../shared/types.js";
 	import { Template } from "@huggingface/jinja";
-	import type { SpecialTokensMap, TokenizerConfig, WidgetExampleTextInput } from "@huggingface/tasks";
+	import type {
+		SpecialTokensMap,
+		TokenizerConfig,
+		WidgetExampleTextInput,
+		TextGenerationInput,
+	} from "@huggingface/tasks";
 	import { SPECIAL_TOKENS_ATTRIBUTES } from "@huggingface/tasks";
+	import { HfInference } from "@huggingface/inference";
+
 	import type { ConversationMessage } from "../../shared/types.js";
 	import WidgetOutputConvo from "../../shared/WidgetOutputConvo/WidgetOutputConvo.svelte";
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
 	import { addInferenceParameters, callInferenceApi, updateUrl } from "../../shared/helpers.js";
 	import { isTextInput } from "../../shared/inputValidation.js";
-	import { widgetStates } from "../../stores.js";
+	import { widgetStates, getTgiSupportedModels } from "../../stores.js";
+	import type { Writable } from "svelte/store";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -20,24 +28,23 @@
 	export let shouldUpdateUrl: WidgetProps["shouldUpdateUrl"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
 
+	let tgiSupportedModels: Writable<Set<string> | undefined>;
+
 	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
-	let computeTime = "";
 	let messages: ConversationMessage[] = [];
 	let error: string = "";
 	let isLoading = false;
-	let modelLoading = {
-		isLoading: false,
-		estimatedTime: 0,
-	};
 	let outputJson: string;
 	let text = "";
 
 	let compiledTemplate: Template;
 	let tokenizerConfig: TokenizerConfig;
+	let inferenceClient: HfInference | undefined = undefined;
 
 	// Check config and compile template
 	onMount(() => {
+		getTgiSupportedModels(apiUrl).then((store) => (tgiSupportedModels = store));
 		const config = model.config;
 		if (config === undefined) {
 			error = "Model config not found";
@@ -61,10 +68,17 @@
 			error = `Invalid chat template: "${(e as Error).message}"`;
 			return;
 		}
+
+		inferenceClient = new HfInference();
 	});
 
 	async function getOutput({ withModelLoading = false, isOnLoadCall = false }: InferenceRunOpts = {}) {
 		if (!compiledTemplate) {
+			return;
+		}
+
+		if (!inferenceClient) {
+			error = "Inference client not ready";
 			return;
 		}
 
@@ -97,65 +111,47 @@
 			return;
 		}
 
-		const requestBody = {
+		const input: TextGenerationInput & Required<Pick<TextGenerationInput, "parameters">> = {
 			inputs: chatText,
 			parameters: {
 				return_full_text: false,
-				max_new_tokens: 100,
 			},
 		};
-		addInferenceParameters(requestBody, model);
+		addInferenceParameters(input, model);
 
 		isLoading = true;
-
-		const res = await callInferenceApi(
-			apiUrl,
-			model.id,
-			requestBody,
-			apiToken,
-			(body) => parseOutput(body, messages),
-			withModelLoading,
-			includeCredentials,
-			isOnLoadCall
-		);
-
+		text = "";
+		try {
+			if ($tgiSupportedModels?.has(model.id)) {
+				console.debug("Starting text generation using the TGI streaming API");
+				let newMessage = {
+					role: "assistant",
+					content: "",
+				} satisfies ConversationMessage;
+				const previousMessages = [...messages];
+				const tokenStream = inferenceClient.textGenerationStream({
+					...input,
+					model: model.id,
+					accessToken: apiToken,
+				});
+				for await (const newToken of tokenStream) {
+					if (newToken.token.special) continue;
+					newMessage.content = newMessage.content + newToken.token.text;
+					messages = [...previousMessages, newMessage];
+				}
+			} else {
+				console.debug("Starting text generation using the synchronous API");
+				input.parameters.max_new_tokens = 100;
+				const output = await inferenceClient.textGeneration(
+					{ ...input, model: model.id, accessToken: apiToken },
+					{ includeCredentials, dont_load_model: !withModelLoading }
+				);
+				messages = [...messages, { role: "assistant", content: output.generated_text }];
+			}
+		} catch (e) {
+			error = `Something went wrong while requesting the Inference API: "${(e as Error).message}"`;
+		}
 		isLoading = false;
-		// Reset values
-		computeTime = "";
-		error = "";
-		modelLoading = { isLoading: false, estimatedTime: 0 };
-		outputJson = "";
-
-		if (res.status === "success") {
-			computeTime = res.computeTime;
-			outputJson = res.outputJson;
-			if (res.output) {
-				messages = res.output;
-			}
-			// Emptying input value
-			text = "";
-		} else if (res.status === "loading-model") {
-			modelLoading = {
-				isLoading: true,
-				estimatedTime: res.estimatedTime,
-			};
-			getOutput({ withModelLoading: true });
-		} else if (res.status === "error") {
-			error = res.error;
-		}
-	}
-
-	function parseOutput(body: unknown, chat: ConversationMessage[]): ConversationMessage[] {
-		if (Array.isArray(body) && body.length) {
-			const text = body[0]?.generated_text ?? "";
-
-			if (!text.length) {
-				throw new Error("Model did not generate a response.");
-			}
-
-			return [...chat, { role: "assistant", content: text }];
-		}
-		throw new TypeError("Invalid output: output must be of type Array & non-empty");
 	}
 
 	function extractSpecialTokensMap(tokenizerConfig: TokenizerConfig): SpecialTokensMap {
@@ -202,7 +198,7 @@
 		submitButtonLabel="Send"
 	/>
 
-	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
+	<WidgetInfo {model} {error} />
 
 	<WidgetFooter {model} {isDisabled} {outputJson} />
 </WidgetWrapper>
