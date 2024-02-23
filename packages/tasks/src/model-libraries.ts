@@ -185,6 +185,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.mlx,
 		filter: true,
 	},
+	"musicgen": {
+		prettyLabel: "MusicGen",
+		repoName: "audiocraft",
+		repoUrl: "https://github.com/facebookresearch/audiocraft",
+		snippets: snippets.musicgen,
+		filter: false,		
+	},	
 	nemo: {
 		prettyLabel: "NeMo",
 		repoName: "NeMo",
@@ -365,13 +372,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: {
 			wildcard: { path: "*.sentis" },
 		},
-	},
-	"musicgen": {
-		prettyLabel: "MusicGen",
-		repoName: "audiocraft",
-		repoUrl: "https://github.com/facebookresearch/audiocraft",
-		snippets: snippets.musicgen,
-		filter: false,		
 	},
 } satisfies Record<string, LibraryUiElement>;
 
