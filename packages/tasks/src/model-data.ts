@@ -91,10 +91,10 @@ export interface ModelData {
 	 */
 	cardData?: {
 		inference?:
-		| boolean
-		| {
-			parameters?: Record<string, unknown>;
-		};
+			| boolean
+			| {
+					parameters?: Record<string, unknown>;
+			  };
 		base_model?: string | string[];
 	};
 	/**
