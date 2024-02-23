@@ -36,7 +36,7 @@
 			tags: ["conversational"],
 			inference: InferenceDisplayability.Yes,
 			config: {
-				tokenizer: {
+				tokenizer_config: {
 					bos_token: "<s>",
 					chat_template:
 						"{% for message in messages %}\n{% if message['role'] == 'user' %}\n{{ '<|user|>\n' + message['content'] + eos_token }}\n{% elif message['role'] == 'system' %}\n{{ '<|system|>\n' + message['content'] + eos_token }}\n{% elif message['role'] == 'assistant' %}\n{{ '<|assistant|>\n'  + message['content'] + eos_token }}\n{% endif %}\n{% if loop.last and add_generation_prompt %}\n{{ '<|assistant|>' }}\n{% endif %}\n{% endfor %}",
@@ -48,9 +48,22 @@
 			},
 		},
 		{
-			id: "WizardLM/WizardLM-70B-V1.0",
+			id: "microsoft/phi-2",
 			pipeline_tag: "text-generation",
 			inference: InferenceDisplayability.Yes,
+			config: {
+				architectures: ["PhiForCausalLM"],
+				model_type: "phi",
+				auto_map: {
+					AutoConfig: "configuration_phi.PhiConfig",
+					AutoModelForCausalLM: "modeling_phi.PhiForCausalLM",
+				},
+				tokenizer_config: {
+					bos_token: "<|endoftext|>",
+					eos_token: "<|endoftext|>",
+					unk_token: "<|endoftext|>",
+				},
+			},
 		},
 		{
 			id: "openai/clip-vit-base-patch16",

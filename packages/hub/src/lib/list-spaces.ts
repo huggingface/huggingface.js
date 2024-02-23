@@ -6,9 +6,27 @@ import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
 import { pick } from "../utils/pick";
 
-const EXPAND_KEYS = ["sdk", "likes", "private", "lastModified"];
+const EXPAND_KEYS = ["sdk", "likes", "private", "lastModified"] as const satisfies readonly (keyof ApiSpaceInfo)[];
+const EXPANDABLE_KEYS = [
+	"author",
+	"cardData",
+	"datasets",
+	"disabled",
+	"gitalyUid",
+	"lastModified",
+	"createdAt",
+	"likes",
+	"private",
+	"runtime",
+	"sdk",
+	// "siblings",
+	"sha",
+	"subdomain",
+	"tags",
+	"models",
+] as const satisfies readonly (keyof ApiSpaceInfo)[];
 
-export type SpaceEntry = {
+export interface SpaceEntry {
 	id: string;
 	name: string;
 	sdk?: SpaceSdk;
@@ -16,11 +34,14 @@ export type SpaceEntry = {
 	private: boolean;
 	updatedAt: Date;
 	// Use additionalFields to fetch the fields from ApiSpaceInfo
-} & Partial<Omit<ApiSpaceInfo, "updatedAt">>;
+}
 
-export async function* listSpaces(params?: {
+export async function* listSpaces<
+	const T extends Exclude<(typeof EXPANDABLE_KEYS)[number], (typeof EXPAND_KEYS)[number]> = never,
+>(params?: {
 	search?: {
 		owner?: string;
+		tags?: string[];
 	};
 	credentials?: Credentials;
 	hubUrl?: string;
@@ -31,11 +52,12 @@ export async function* listSpaces(params?: {
 	/**
 	 * Additional fields to fetch from huggingface.co.
 	 */
-	additionalFields?: Array<keyof ApiSpaceInfo>;
+	additionalFields?: T[];
 }): AsyncGenerator<SpaceEntry> {
 	checkCredentials(params?.credentials);
 	const search = new URLSearchParams([
 		...Object.entries({ limit: "500", ...(params?.search?.owner ? { author: params.search.owner } : undefined) }),
+		...(params?.search?.tags?.map((tag) => ["filter", tag]) ?? []),
 		...[...EXPAND_KEYS, ...(params?.additionalFields ?? [])].map((val) => ["expand", val] satisfies [string, string]),
 	]).toString();
 	let url: string | undefined = `${params?.hubUrl || HUB_URL}/api/spaces?${search}`;
