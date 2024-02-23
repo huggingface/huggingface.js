@@ -1,0 +1,13 @@
+{
+	"$id": "/inference/schemas/audio_to_audio/input.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Inputs for Audio to Audio inference",
+	"title": "AudioToAudioInput",
+	"type": "object",
+	"properties": {
+		"inputs": {
+			"description": "The input audio data"
+		}
+	},
+	"required": ["inputs"]
+}
