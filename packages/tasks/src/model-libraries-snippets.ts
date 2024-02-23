@@ -576,14 +576,14 @@ wav = model.generate(descriptions)  # generates 3 samples.`,
 ];
 
 export const audiocraft = (model: ModelData): string[] => {
-	if (model.tags?.includes("magnet")) {
+	if (model.tags?.includes("musicgen")) {
 		return musicgen(model);
 	} else if (model.tags?.includes("audiogen")) {
 		return audiogen(model);
 	} else if (model.tags?.includes("magnet")) {
 		return magnet(model);
 	} else {
-		return musicgen(model);
+		return [`# Type of model unknown.`];
 	}
 };
 //#endregion
