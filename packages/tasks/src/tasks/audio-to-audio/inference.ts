@@ -11,6 +11,12 @@ export interface AudioToAudioInput {
 	 * The input audio data
 	 */
 	inputs: unknown;
+	/**
+	 * Additional inference parameters
+	 */
+	parameters?: {
+		[key: string]: unknown;
+	};
 	[property: string]: unknown;
 }
 export type AudioToAudioOutput = AudioToAudioOutputElement[];

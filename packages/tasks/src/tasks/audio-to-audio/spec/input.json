@@ -7,6 +7,18 @@
 	"properties": {
 		"inputs": {
 			"description": "The input audio data"
+		},
+		"parameters": {
+			"description": "Additional inference parameters",
+			"$ref": "#/$defs/AudioToAudioParameters"
+		}
+	},
+	"$defs": {
+		"AudioToAudioParameters": {
+			"title": "AudioToAudioParameters",
+			"description": "Additional inference parameters for Audio To Audio",
+			"type": "object",
+			"properties": {}
 		}
 	},
 	"required": ["inputs"]
