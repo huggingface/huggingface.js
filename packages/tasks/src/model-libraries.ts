@@ -366,11 +366,11 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			wildcard: { path: "*.sentis" },
 		},
 	},
-	"audiocraft-musicgen": {
-		prettyLabel: "Audiocraft",
+	"musicgen": {
+		prettyLabel: "MusicGen",
 		repoName: "audiocraft",
 		repoUrl: "https://github.com/facebookresearch/audiocraft",
-		snippets: snippets.audiocraft_musicgen,
+		snippets: snippets.musicgen,
 		filter: false,		
 	},
 } satisfies Record<string, LibraryUiElement>;

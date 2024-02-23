@@ -549,7 +549,7 @@ model = AutoModel.load_from_hf_hub("${model.id}")`,
 ];
 
 
-export const audiocraft_musicgen = (model: ModelData): string[] => [
+export const musicgen = (model: ModelData): string[] => [
 	`from audiocraft.models import MusicGen
 
 model = MusicGen.get_pretrained("${model.id}")
