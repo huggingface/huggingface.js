@@ -52,4 +52,19 @@ describe("listModels", () => {
 			},
 		]);
 	});
+
+	it("should list indonesian models with gguf format", async () => {
+		let count = 0;
+		for await (const entry of listModels({
+			search: { tags: ["gguf", "id"] },
+			additionalFields: ["tags"],
+			limit: 2,
+		})) {
+			count++;
+			expect(entry.tags).to.include("gguf");
+			expect(entry.tags).to.include("id");
+		}
+
+		expect(count).to.equal(2);
+	});
 });

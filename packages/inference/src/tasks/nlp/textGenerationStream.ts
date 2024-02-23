@@ -1,6 +1,7 @@
-import type { Options } from "../../types";
+import type { BaseArgs, Options } from "../../types";
 import { streamingRequest } from "../custom/streamingRequest";
-import type { TextGenerationArgs } from "./textGeneration";
+
+import type { TextGenerationInput } from "@huggingface/tasks/src/tasks/text-generation/inference";
 
 export interface TextGenerationStreamToken {
 	/** Token ID from the model tokenizer */
@@ -85,7 +86,7 @@ export interface TextGenerationStreamOutput {
  * Use to continue text from a prompt. Same as `textGeneration` but returns generator that can be read one token at a time
  */
 export async function* textGenerationStream(
-	args: TextGenerationArgs,
+	args: BaseArgs & TextGenerationInput,
 	options?: Options
 ): AsyncGenerator<TextGenerationStreamOutput> {
 	yield* streamingRequest<TextGenerationStreamOutput>(args, {
