@@ -45,15 +45,12 @@ export interface Text2TextGenerationParameters {
 export type Text2TextGenerationTruncationStrategy = "do_not_truncate" | "longest_first" | "only_first" | "only_second";
 
 /**
- * Outputs for Translation inference
- *
- * Outputs of inference for the Text2text Generation task
+ * Outputs of inference for the Translation task
  */
 export interface TranslationOutput {
-	generatedText: unknown;
 	/**
-	 * The generated text.
+	 * The translated text.
 	 */
-	generated_text?: string;
+	translation_text: string;
 	[property: string]: unknown;
 }

@@ -45,15 +45,12 @@ export interface Text2TextGenerationParameters {
 export type Text2TextGenerationTruncationStrategy = "do_not_truncate" | "longest_first" | "only_first" | "only_second";
 
 /**
- * Outputs for Summarization inference
- *
- * Outputs of inference for the Text2text Generation task
+ * Outputs of inference for the Summarization task
  */
 export interface SummarizationOutput {
-	generatedText: unknown;
 	/**
-	 * The generated text.
+	 * The summarized text.
 	 */
-	generated_text?: string;
+	summary_text: string;
 	[property: string]: unknown;
 }
