@@ -548,7 +548,7 @@ export const pythae = (model: ModelData): string[] => [
 model = AutoModel.load_from_hf_hub("${model.id}")`,
 ];
 
-export const musicgen = (model: ModelData): string[] => [
+const musicgen = (model: ModelData): string[] => [
 	`from audiocraft.models import MusicGen
 
 model = MusicGen.get_pretrained("${model.id}")
@@ -557,4 +557,33 @@ descriptions = ['happy rock', 'energetic EDM', 'sad jazz']
 wav = model.generate(descriptions)  # generates 3 samples.`,
 ];
 
+const magnet = (model: ModelData): string[] => [
+	`from audiocraft.models import MAGNeT
+	
+model = MAGNeT.get_pretrained("${model.id}")
+
+descriptions = ['disco beat', 'energetic EDM', 'funky groove']
+wav = model.generate(descriptions)  # generates 3 samples.`,
+];
+
+const audiogen = (model: ModelData): string[] => [
+	`from audiocraft.models import AudioGen
+	
+model = AudioGen.get_pretrained("${model.id}")
+model.set_generation_params(duration=5)  # generate 5 seconds.
+descriptions = ['dog barking', 'sirene of an emergency vehicle', 'footsteps in a corridor']
+wav = model.generate(descriptions)  # generates 3 samples.`,
+];
+
+export const audiocraft = (model: ModelData): string[] => {
+	if (model.tags?.includes("magnet")) {
+		return musicgen(model);
+	} else if (model.tags?.includes("audiogen")) {
+		return audiogen(model);
+	} else if (model.tags?.includes("magnet")) {
+		return magnet(model);
+	} else {
+		return musicgen(model);
+	}
+};
 //#endregion

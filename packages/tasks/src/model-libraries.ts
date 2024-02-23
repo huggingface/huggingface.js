@@ -88,6 +88,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			term: { path: "pytorch_model.bin" },
 		},
 	},
+	audiocraft: {
+		prettyLabel: "Audiocraft",
+		repoName: "audiocraft",
+		repoUrl: "https://github.com/facebookresearch/audiocraft",
+		snippets: snippets.audiocraft,
+		filter: false,
+	},
 	bertopic: {
 		prettyLabel: "BERTopic",
 		repoName: "BERTopic",
@@ -184,13 +191,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/ml-explore/mlx-examples/tree/main",
 		snippets: snippets.mlx,
 		filter: true,
-	},
-	musicgen: {
-		prettyLabel: "Audiocraft",
-		repoName: "audiocraft",
-		repoUrl: "https://github.com/facebookresearch/audiocraft",
-		snippets: snippets.musicgen,
-		filter: false,
 	},
 	nemo: {
 		prettyLabel: "NeMo",
