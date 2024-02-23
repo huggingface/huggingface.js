@@ -548,7 +548,6 @@ export const pythae = (model: ModelData): string[] => [
 model = AutoModel.load_from_hf_hub("${model.id}")`,
 ];
 
-
 export const musicgen = (model: ModelData): string[] => [
 	`from audiocraft.models import MusicGen
 

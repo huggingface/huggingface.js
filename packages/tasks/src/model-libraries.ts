@@ -185,13 +185,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.mlx,
 		filter: true,
 	},
-	"musicgen": {
+	musicgen: {
 		prettyLabel: "MusicGen",
 		repoName: "audiocraft",
 		repoUrl: "https://github.com/facebookresearch/audiocraft",
 		snippets: snippets.musicgen,
-		filter: false,		
-	},	
+		filter: false,
+	},
 	nemo: {
 		prettyLabel: "NeMo",
 		repoName: "NeMo",
