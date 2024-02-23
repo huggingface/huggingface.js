@@ -186,7 +186,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 	},
 	musicgen: {
-		prettyLabel: "MusicGen",
+		prettyLabel: "Audiocraft",
 		repoName: "audiocraft",
 		repoUrl: "https://github.com/facebookresearch/audiocraft",
 		snippets: snippets.musicgen,
