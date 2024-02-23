@@ -3,19 +3,23 @@
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Outputs of inference for the Audio To Audio task",
 	"title": "AudioToAudioOutput",
-	"type": "object",
-	"properties": {
-		"label": {
-			"type": "string",
-			"description": "The label of the audio file."
+	"type": "array",
+	"items": {
+		"description": "A generated audio file with its label.",
+		"type": "object",
+		"properties": {
+			"label": {
+				"type": "string",
+				"description": "The label of the audio file."
+			},
+			"content-type": {
+				"type": "string",
+				"description": "The content type of audio file."
+			},
+			"blob": {
+				"description": "The generated audio file."
+			}
 		},
-		"content-type": {
-			"type": "string",
-			"description": "The content type of audio file."
-		},
-		"blob": {
-			"description": "The generated audio file."
-		}
-	},
-	"required": ["label", "content-type", "blob"]
+		"required": ["label", "content-type", "blob"]
+	}
 }
