@@ -11,7 +11,7 @@
 	import { SPECIAL_TOKENS_ATTRIBUTES } from "@huggingface/tasks";
 	import { HfInference } from "@huggingface/inference";
 
-	import type { ConversationMessage } from "../../shared/types.js";
+	import type { ChatMessage } from "../../shared/types.js";
 	import WidgetOutputConvo from "../../shared/WidgetOutputConvo/WidgetOutputConvo.svelte";
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
@@ -32,7 +32,7 @@
 
 	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
-	let messages: ConversationMessage[] = [];
+	let messages: ChatMessage[] = [];
 	let error: string = "";
 	let isLoading = false;
 	let outputJson: string;
@@ -127,7 +127,7 @@
 				let newMessage = {
 					role: "assistant",
 					content: "",
-				} satisfies ConversationMessage;
+				} satisfies ChatMessage;
 				const previousMessages = [...messages];
 				const tokenStream = inferenceClient.textGenerationStream({
 					...input,

@@ -2,11 +2,11 @@
 	import { afterUpdate } from "svelte";
 
 	import { isFullyScrolled, scrollToMax } from "../../../../utils/ViewUtils.js";
-	import type { ConversationMessage } from "../../shared/types.js";
+	import type { ChatMessage } from "../../shared/types.js";
 	import WidgetOutputConvoBubble from "../WidgetOuputConvoBubble/WidgetOutputConvoBubble.svelte";
 
 	export let modelId: string;
-	export let messages: ConversationMessage[];
+	export let messages: ChatMessage[];
 
 	let wrapperEl: HTMLElement;
 
