@@ -63,7 +63,7 @@ export async function* listSpaces<
 		...Object.entries({
 			limit: "500",
 			...(params?.search?.owner ? { author: params.search.owner } : undefined),
-			...(params?.search?.query ? { query: params.search.query } : undefined),
+			...(params?.search?.query ? { search: params.search.query } : undefined),
 		}),
 		...(params?.search?.tags?.map((tag) => ["filter", tag]) ?? []),
 		...[...EXPAND_KEYS, ...(params?.additionalFields ?? [])].map((val) => ["expand", val] satisfies [string, string]),
