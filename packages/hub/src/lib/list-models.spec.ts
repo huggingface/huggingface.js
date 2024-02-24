@@ -78,6 +78,6 @@ describe("listModels", () => {
 			expect(entry.name).to.include("t5");
 		}
 
-		expect(count).to.equal(2);
+		expect(count).to.equal(10);
 	});
 });
