@@ -73,7 +73,7 @@ export async function* listDatasets<
 		...Object.entries({
 			limit: String(Math.min(totalToFetch, 500)),
 			...(params?.search?.owner ? { author: params.search.owner } : undefined),
-			...(params?.search?.query ? { query: params.search.query } : undefined),
+			...(params?.search?.query ? { search: params.search.query } : undefined),
 		}),
 		...(params?.search?.tags?.map((tag) => ["filter", tag]) ?? []),
 		...EXPAND_KEYS.map((val) => ["expand", val] satisfies [string, string]),
