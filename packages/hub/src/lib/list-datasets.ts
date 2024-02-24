@@ -85,7 +85,7 @@ export async function* listDatasets<
 		});
 
 		if (!res.ok) {
-			throw createApiError(res);
+			throw await createApiError(res);
 		}
 
 		const items: ApiDatasetInfo[] = await res.json();
