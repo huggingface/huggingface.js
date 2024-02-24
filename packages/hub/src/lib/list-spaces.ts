@@ -71,7 +71,7 @@ export async function* listSpaces<
 		});
 
 		if (!res.ok) {
-			throw createApiError(res);
+			throw await createApiError(res);
 		}
 
 		const items: ApiSpaceInfo[] = await res.json();

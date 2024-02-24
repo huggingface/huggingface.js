@@ -73,7 +73,7 @@ export async function* listFiles(params: {
 		});
 
 		if (!res.ok) {
-			throw createApiError(res);
+			throw await createApiError(res);
 		}
 
 		const items: ApiIndexTreeEntry[] = await res.json();

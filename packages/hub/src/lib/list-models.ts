@@ -93,7 +93,7 @@ export async function* listModels<
 		});
 
 		if (!res.ok) {
-			throw createApiError(res);
+			throw await createApiError(res);
 		}
 
 		const items: ApiModelInfo[] = await res.json();
