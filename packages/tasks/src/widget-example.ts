@@ -51,7 +51,6 @@ export interface WidgetExampleBase<TOutput> {
 	output?: TOutput;
 }
 
-
 export interface ChatMessage {
 	role: "user" | "assistant" | "system";
 	content: string;
