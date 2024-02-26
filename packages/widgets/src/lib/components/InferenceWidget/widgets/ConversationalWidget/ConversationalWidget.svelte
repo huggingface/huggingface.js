@@ -211,7 +211,7 @@
 	}
 
 	function validateExample(sample: unknown): sample is Example {
-		return (isTextInput(sample) || isChatInput(sample)) && (!sample.output || isValidOutputText(sample));
+		return (isTextInput(sample) || isChatInput(sample)) && (!sample.output || isValidOutputText(sample.output));
 	}
 </script>
 
