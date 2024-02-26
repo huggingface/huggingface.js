@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" generics="TWidgetExample extends WidgetExample">
 	import { updateWidgetState } from "../../stores.js";
 	import { TASKS_DATA } from "@huggingface/tasks";
 	import type { WidgetExample, WidgetExampleAttribute } from "@huggingface/tasks";
@@ -8,8 +8,6 @@
 	import IconLightning from "../../..//Icons/IconLightning.svelte";
 	import PipelineTag from "../../../PipelineTag/PipelineTag.svelte";
 	import WidgetExamples from "../WidgetExamples/WidgetExamples.svelte";
-
-	type TWidgetExample = $$Generic<WidgetExample>;
 
 	export let model: WidgetProps["model"];
 	export let noTitle = false;
