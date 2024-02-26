@@ -15,7 +15,7 @@
 	export let isLoading = false;
 	export let isDisabled = false;
 	export let applyWidgetExample: ((sample: TWidgetExample, opts?: ExampleRunOpts) => void) | undefined = undefined;
-	export let validateExample: ((sample: unknown) => sample is TWidgetExample) | undefined = undefined;
+	export let validateExample: ((sample: WidgetExample) => sample is TWidgetExample) | undefined = undefined;
 	export let callApiOnMount: WidgetProps["callApiOnMount"] = false;
 	export let exampleQueryParams: WidgetExampleAttribute[] = [];
 

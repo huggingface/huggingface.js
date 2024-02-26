@@ -23,6 +23,7 @@
 	import type { Writable } from "svelte/store";
 	import { isChatInput, isTextInput } from "../../shared/inputValidation.js";
 	import { isValidOutputText } from "../../shared/outputValidation.js";
+	import WidgetExamples from "../../shared/WidgetExamples/WidgetExamples.svelte";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -211,7 +212,7 @@
 		}
 	}
 
-	function validateExample(sample: unknown): sample is Example {
+	function validateExample(sample: WidgetExample): sample is Example {
 		return (isTextInput(sample) || isChatInput(sample)) && (!sample.output || isValidOutputText(sample.output));
 	}
 </script>
