@@ -19,10 +19,10 @@
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
 	import { addInferenceParameters, updateUrl } from "../../shared/helpers.js";
-	import { isTextInput } from "../../shared/inputValidation.js";
 	import { widgetStates, getTgiSupportedModels } from "../../stores.js";
 	import type { Writable } from "svelte/store";
-	import WidgetExamples from "../../shared/WidgetExamples/WidgetExamples.svelte";
+	import { isChatInput, isTextInput } from "../../shared/inputValidation.js";
+	import { isValidOutputText } from "../../shared/outputValidation.js";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -78,28 +78,30 @@
 		inferenceClient = new HfInference();
 	});
 
-	async function getOutput({ withModelLoading = false }: InferenceRunOpts<Example> = {}) {
-		if (!compiledTemplate) {
-			return;
-		}
-
+	async function getOutput({ withModelLoading = false, example = undefined }: InferenceRunOpts<Example> = {}) {
 		if (!inferenceClient) {
 			error = "Inference client not ready";
 			return;
 		}
-
-		const trimmedText = text.trim();
-		if (!trimmedText) {
+		if (!compiledTemplate) {
 			return;
 		}
 
-		if (shouldUpdateUrl && !messages.length) {
-			updateUrl({ text: trimmedText });
-		}
+		if (!example) {
+			/// The logic to build and display messages is handled in the caller function...
+			const trimmedText = text.trim();
+			if (!trimmedText) {
+				return;
+			}
 
-		if (!withModelLoading) {
-			// Add user message to chat
-			messages = [...messages, { role: "user", content: trimmedText }];
+			if (shouldUpdateUrl && !messages.length) {
+				updateUrl({ text: trimmedText });
+			}
+
+			if (!withModelLoading) {
+				// Add user message to chat
+				messages = [...messages, { role: "user", content: trimmedText }];
+			}
 		}
 
 		// Render chat template
@@ -171,23 +173,20 @@
 		return specialTokensMap;
 	}
 
-	function applyWidgetExample(example: WidgetExampleTextInput<WidgetExampleOutputText>, opts: ExampleRunOpts): void;
-	function applyWidgetExample(example: WidgetExampleChatInput<WidgetExampleOutputText>, opts: ExampleRunOpts): void;
 	function applyWidgetExample(example: Example, opts: ExampleRunOpts = {}): void {
 		if ("text" in example) {
-			text = example.text;
-			if (opts.isPreview) {
-				return;
-			}
-			getOutput({ ...opts.inferenceOpts, example });
+			messages = [{ role: "user", content: example.text }];
 		} else {
-			/// #TODO
+			messages = example.messages;
+		}
+		if (opts.isPreview) {
 			return;
 		}
+		getOutput({ ...opts.inferenceOpts, example });
 	}
 
 	function validateExample(sample: unknown): sample is Example {
-		return false;
+		return (isTextInput(sample) || isChatInput(sample)) && (!sample.output || isValidOutputText(sample));
 	}
 </script>
 

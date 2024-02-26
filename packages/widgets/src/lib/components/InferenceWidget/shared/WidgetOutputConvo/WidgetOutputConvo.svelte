@@ -2,8 +2,8 @@
 	import { afterUpdate } from "svelte";
 
 	import { isFullyScrolled, scrollToMax } from "../../../../utils/ViewUtils.js";
-	import type { ChatMessage } from "../../shared/types.js";
 	import WidgetOutputConvoBubble from "../WidgetOuputConvoBubble/WidgetOutputConvoBubble.svelte";
+	import type { ChatMessage } from "@huggingface/tasks";
 
 	export let modelId: string;
 	export let messages: ChatMessage[];

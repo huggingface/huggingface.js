@@ -1,8 +1,10 @@
 import type {
+	ChatMessage,
 	WidgetExampleAssetAndPromptInput,
 	WidgetExampleAssetAndTextInput,
 	WidgetExampleAssetAndZeroShotInput,
 	WidgetExampleAssetInput,
+	WidgetExampleChatInput,
 	WidgetExampleSentenceSimilarityInput,
 	WidgetExampleStructuredDataInput,
 	WidgetExampleTableDataInput,
@@ -91,4 +93,8 @@ export function isAssetAndZeroShotInput<TOutput>(
 	sample: unknown
 ): sample is WidgetExampleAssetAndZeroShotInput<TOutput> {
 	return isAssetInput(sample) && _isZeroShotTextInput(sample);
+}
+
+export function isChatInput<TOutput>(sample: unknown): sample is WidgetExampleChatInput<TOutput> {
+	return isObject(sample) && "messages" in sample && Array.isArray(sample.messages) && sample.messages.every((message): message is ChatMessage => isObject(message) && "role" in message && "content" in message && (message.role === "user" || message.role === "system" || message.role === "assistant") && typeof message.content === "string")
 }
