@@ -57,11 +57,7 @@
 		table = updatedTable;
 	}
 
-	async function getOutput({
-		withModelLoading = false,
-		isOnLoadCall = false,
-		exampleOutput = undefined,
-	}: InferenceRunOpts = {}) {
+	async function getOutput({ withModelLoading = false, isOnLoadCall = false }: InferenceRunOpts = {}) {
 		const trimmedQuery = query.trim();
 
 		if (!trimmedQuery) {
@@ -145,14 +141,13 @@
 		);
 	}
 
-	function applyWidgetExample(sample: WidgetExampleTextAndTableInput, opts: ExampleRunOpts = {}) {
-		query = sample.text;
-		table = convertDataToTable(sample.table);
+	function applyWidgetExample(example: WidgetExampleTextAndTableInput, opts: ExampleRunOpts = {}) {
+		query = example.text;
+		table = convertDataToTable(example.table);
 		if (opts.isPreview) {
 			return;
 		}
-		const exampleOutput = sample.output;
-		getOutput({ ...opts.inferenceOpts, exampleOutput });
+		getOutput({ ...opts.inferenceOpts, example });
 	}
 </script>
 

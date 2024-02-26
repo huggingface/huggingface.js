@@ -53,7 +53,7 @@
 	async function getOutput({
 		withModelLoading = false,
 		isOnLoadCall = false,
-		exampleOutput = undefined,
+		example = undefined,
 	}: InferenceRunOpts = {}) {
 		const trimmedText = text.trim();
 
@@ -216,13 +216,13 @@
 		return a.type === b.type && a.start === b.start && a.end === b.end;
 	}
 
-	function applyWidgetExample(sample: WidgetExampleTextInput, opts: ExampleRunOpts = {}) {
-		setTextAreaValue(sample.text);
+	function applyWidgetExample(example: WidgetExampleTextInput, opts: ExampleRunOpts = {}) {
+		setTextAreaValue(example.text);
 		if (opts.isPreview) {
 			return;
 		}
-		const exampleOutput = sample.output;
-		getOutput({ ...opts.inferenceOpts, exampleOutput });
+
+		getOutput({ ...opts.inferenceOpts, example });
 	}
 </script>
 

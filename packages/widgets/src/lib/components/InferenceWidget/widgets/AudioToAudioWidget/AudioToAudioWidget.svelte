@@ -65,11 +65,7 @@
 		}
 	}
 
-	async function getOutput({
-		withModelLoading = false,
-		isOnLoadCall = false,
-		exampleOutput = undefined,
-	}: InferenceRunOpts = {}) {
+	async function getOutput({ withModelLoading = false, isOnLoadCall = false }: InferenceRunOpts = {}) {
 		if (!file && !selectedSampleUrl) {
 			error = "You must select or record an audio file";
 			return;
@@ -133,18 +129,17 @@
 		throw new TypeError("Invalid output: output must be of type Array<blob:string, label:string, content-type:string>");
 	}
 
-	function applyWidgetExample(sample: WidgetExampleAssetInput, opts: ExampleRunOpts = {}) {
-		filename = sample.example_title ?? "";
-		fileUrl = sample.src;
+	function applyWidgetExample(example: WidgetExampleAssetInput, opts: ExampleRunOpts = {}) {
+		filename = example.example_title ?? "";
+		fileUrl = example.src;
 		if (opts.isPreview) {
 			output = [];
 			outputJson = "";
 			return;
 		}
 		file = null;
-		selectedSampleUrl = sample.src;
-		const exampleOutput = sample.output;
-		getOutput({ ...opts.inferenceOpts, exampleOutput });
+		selectedSampleUrl = example.src;
+		getOutput({ ...opts.inferenceOpts, example });
 	}
 </script>
 

@@ -72,7 +72,7 @@
 	async function getOutput({
 		withModelLoading = false,
 		isOnLoadCall = false,
-		exampleOutput = undefined,
+		example = undefined,
 	}: InferenceRunOpts = {}) {
 		for (let [i, row] of table.entries()) {
 			for (const [j, cell] of row.entries()) {
@@ -170,13 +170,12 @@
 		);
 	}
 
-	function applyWidgetExample(sample: WidgetExampleStructuredDataInput, opts: ExampleRunOpts = {}) {
-		table = convertDataToTable(sample.structured_data);
+	function applyWidgetExample(example: WidgetExampleStructuredDataInput, opts: ExampleRunOpts = {}) {
+		table = convertDataToTable(example.structured_data);
 		if (opts.isPreview) {
 			return;
 		}
-		const exampleOutput = sample.output;
-		getOutput({ ...opts.inferenceOpts, exampleOutput });
+		getOutput({ ...opts.inferenceOpts, example });
 	}
 </script>
 

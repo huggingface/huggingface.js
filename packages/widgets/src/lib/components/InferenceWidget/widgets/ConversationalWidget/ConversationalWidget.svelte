@@ -15,7 +15,7 @@
 	import WidgetOutputConvo from "../../shared/WidgetOutputConvo/WidgetOutputConvo.svelte";
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
-	import { addInferenceParameters, callInferenceApi, updateUrl } from "../../shared/helpers.js";
+	import { addInferenceParameters, updateUrl } from "../../shared/helpers.js";
 	import { isTextInput } from "../../shared/inputValidation.js";
 	import { widgetStates, getTgiSupportedModels } from "../../stores.js";
 	import type { Writable } from "svelte/store";
@@ -72,7 +72,7 @@
 		inferenceClient = new HfInference();
 	});
 
-	async function getOutput({ withModelLoading = false, isOnLoadCall = false }: InferenceRunOpts = {}) {
+	async function getOutput({ withModelLoading = false }: InferenceRunOpts = {}) {
 		if (!compiledTemplate) {
 			return;
 		}
@@ -165,13 +165,12 @@
 		return specialTokensMap;
 	}
 
-	function applyWidgetExample(sample: WidgetExampleTextInput, opts: ExampleRunOpts = {}) {
-		text = sample.text;
+	function applyWidgetExample(example: WidgetExampleTextInput, opts: ExampleRunOpts = {}) {
+		text = example.text;
 		if (opts.isPreview) {
 			return;
 		}
-		const exampleOutput = sample.output;
-		getOutput({ ...opts.inferenceOpts, exampleOutput });
+		getOutput({ ...opts.inferenceOpts, example });
 	}
 </script>
 

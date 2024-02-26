@@ -65,10 +65,10 @@
 	async function getOutput({
 		withModelLoading = false,
 		isOnLoadCall = false,
-		exampleOutput = undefined,
-	}: InferenceRunOpts<WidgetExampleOutputLabels> = {}) {
-		if (exampleOutput) {
-			output = exampleOutput;
+		example = undefined,
+	}: InferenceRunOpts<WidgetExampleAssetInput<WidgetExampleOutputLabels>> = {}) {
+		if (example?.output) {
+			output = example.output;
 			outputJson = "";
 			return;
 		}
@@ -133,13 +133,13 @@
 		throw new TypeError("Invalid output: output must be of type Array<label: string, score:number>");
 	}
 
-	function applyWidgetExample(sample: WidgetExampleAssetInput<WidgetExampleOutputLabels>, opts: ExampleRunOpts = {}) {
-		filename = sample.example_title!;
-		fileUrl = sample.src;
+	function applyWidgetExample(example: WidgetExampleAssetInput<WidgetExampleOutputLabels>, opts: ExampleRunOpts = {}) {
+		filename = example.example_title!;
+		fileUrl = example.src;
 
 		if (opts.isPreview) {
-			if (isValidOutputLabels(sample.output)) {
-				output = sample.output;
+			if (isValidOutputLabels(example.output)) {
+				output = example.output;
 				outputJson = "";
 			} else {
 				output = [];
@@ -148,13 +148,12 @@
 			return;
 		}
 		file = null;
-		selectedSampleUrl = sample.src;
-		const exampleOutput = sample.output;
-		getOutput({ ...opts.inferenceOpts, exampleOutput });
+		selectedSampleUrl = example.src;
+		getOutput({ ...opts.inferenceOpts, example });
 	}
 
-	function validateExample(sample: WidgetExample): sample is WidgetExampleAssetInput<WidgetExampleOutputLabels> {
-		return isAssetInput(sample) && (!sample.output || isValidOutputLabels(sample.output));
+	function validateExample(example: WidgetExample): example is WidgetExampleAssetInput<WidgetExampleOutputLabels> {
+		return isAssetInput(example) && (!example.output || isValidOutputLabels(example.output));
 	}
 </script>
 

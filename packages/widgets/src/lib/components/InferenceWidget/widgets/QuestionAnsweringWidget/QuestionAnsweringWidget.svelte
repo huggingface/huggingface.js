@@ -40,7 +40,7 @@
 	async function getOutput({
 		withModelLoading = false,
 		isOnLoadCall = false,
-		exampleOutput = undefined,
+		example = undefined,
 	}: InferenceRunOpts = {}) {
 		const trimmedQuestion = question.trim();
 		const trimmedContext = context.trim();
@@ -112,22 +112,21 @@
 	}
 
 	function applyWidgetExample(
-		sample: WidgetExampleTextAndContextInput<WidgetExampleOutputAnswerScore>,
+		example: WidgetExampleTextAndContextInput<WidgetExampleOutputAnswerScore>,
 		opts: ExampleRunOpts = {}
 	) {
-		question = sample.text;
-		setTextAreaValue(sample.context);
+		question = example.text;
+		setTextAreaValue(example.context);
 		if (opts.isPreview) {
 			return;
 		}
-		const exampleOutput = sample.output;
-		getOutput({ ...opts.inferenceOpts, exampleOutput });
+		getOutput({ ...opts.inferenceOpts, example });
 	}
 
 	function validateExample(
-		sample: WidgetExample
-	): sample is WidgetExampleTextAndContextInput<WidgetExampleOutputAnswerScore> {
-		return isTextAndContextInput(sample) && (!sample.output || isValidOutputAnswerScore(sample.output));
+		example: WidgetExample
+	): example is WidgetExampleTextAndContextInput<WidgetExampleOutputAnswerScore> {
+		return isTextAndContextInput(example) && (!example.output || isValidOutputAnswerScore(example.output));
 	}
 </script>
 

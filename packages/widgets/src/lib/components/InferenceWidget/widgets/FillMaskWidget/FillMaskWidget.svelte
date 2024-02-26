@@ -36,10 +36,10 @@
 	async function getOutput({
 		withModelLoading = false,
 		isOnLoadCall = false,
-		exampleOutput = undefined,
-	}: InferenceRunOpts<WidgetExampleOutputLabels> = {}) {
-		if (exampleOutput) {
-			output = exampleOutput;
+		example = undefined,
+	}: InferenceRunOpts<WidgetExampleTextInput<WidgetExampleOutputLabels>> = {}) {
+		if (example?.output) {
+			output = example.output;
 			outputJson = "";
 			return;
 		}
@@ -115,22 +115,21 @@
 		throw new TypeError("Invalid output: output must be of type Array");
 	}
 
-	function applyWidgetExample(sample: WidgetExampleTextInput<WidgetExampleOutputLabels>, opts: ExampleRunOpts = {}) {
-		setTextAreaValue(sample.text);
+	function applyWidgetExample(example: WidgetExampleTextInput<WidgetExampleOutputLabels>, opts: ExampleRunOpts = {}) {
+		setTextAreaValue(example.text);
 		if (opts.isPreview) {
-			if (sample.output) {
-				output = sample.output;
+			if (example.output) {
+				output = example.output;
 			} else {
 				output = [];
 			}
 			return;
 		}
-		const exampleOutput = sample.output;
-		getOutput({ ...opts.inferenceOpts, exampleOutput });
+		getOutput({ ...opts.inferenceOpts, example });
 	}
 
-	function validateExample(sample: WidgetExample): sample is WidgetExampleTextInput<WidgetExampleOutputLabels> {
-		return isTextInput(sample) && (!sample.output || isValidOutputLabels(sample.output));
+	function validateExample(example: WidgetExample): example is WidgetExampleTextInput<WidgetExampleOutputLabels> {
+		return isTextInput(example) && (!example.output || isValidOutputLabels(example.output));
 	}
 </script>
 

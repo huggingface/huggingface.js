@@ -39,7 +39,7 @@
 
 	async function getOutput(
 		file: File | Blob,
-		{ withModelLoading = false, isOnLoadCall = false, exampleOutput = undefined }: InferenceRunOpts = {}
+		{ withModelLoading = false, isOnLoadCall = false, example = undefined }: InferenceRunOpts = {}
 	) {
 		if (!file) {
 			return;
@@ -96,13 +96,13 @@
 	}
 
 	async function applyWidgetExample(
-		sample: WidgetExampleAssetInput<WidgetExampleOutputLabels>,
+		example: WidgetExampleAssetInput<WidgetExampleOutputLabels>,
 		opts: ExampleRunOpts = {}
 	) {
-		imgSrc = sample.src;
+		imgSrc = example.src;
 		if (opts.isPreview) {
-			if (isValidOutputLabels(sample.output)) {
-				output = sample.output;
+			if (isValidOutputLabels(example.output)) {
+				output = example.output;
 				outputJson = "";
 			} else {
 				output = [];
@@ -111,12 +111,11 @@
 			return;
 		}
 		const blob = await getBlobFromUrl(imgSrc);
-		const exampleOutput = sample.output;
-		getOutput(blob, { ...opts.inferenceOpts, exampleOutput });
+		getOutput(blob, { ...opts.inferenceOpts, example });
 	}
 
-	function validateExample(sample: WidgetExample): sample is WidgetExampleAssetInput<WidgetExampleOutputLabels> {
-		return isTextInput(sample) && (!sample.output || isValidOutputLabels(sample.output));
+	function validateExample(example: WidgetExample): example is WidgetExampleAssetInput<WidgetExampleOutputLabels> {
+		return isTextInput(example) && (!example.output || isValidOutputLabels(example.output));
 	}
 </script>
 

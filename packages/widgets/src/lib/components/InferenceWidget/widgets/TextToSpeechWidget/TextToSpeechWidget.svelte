@@ -35,7 +35,7 @@
 	async function getOutput({
 		withModelLoading = false,
 		isOnLoadCall = false,
-		exampleOutput = undefined,
+		example = undefined,
 	}: InferenceRunOpts = {}) {
 		const trimmedText = text.trim();
 
@@ -95,13 +95,13 @@
 		throw new TypeError("Invalid output: output must be of type object & instance of Blob");
 	}
 
-	function applyWidgetExample(sample: WidgetExampleTextInput, opts: ExampleRunOpts = {}) {
-		setTextAreaValue(sample.text);
+	function applyWidgetExample(example: WidgetExampleTextInput, opts: ExampleRunOpts = {}) {
+		setTextAreaValue(example.text);
 		if (opts.isPreview) {
 			return;
 		}
-		const exampleOutput = sample.output;
-		getOutput({ ...opts.inferenceOpts, exampleOutput });
+
+		getOutput({ ...opts.inferenceOpts, example });
 	}
 </script>
 

@@ -1,4 +1,4 @@
-import type { ModelData, WidgetExampleOutput } from "@huggingface/tasks";
+import type { ModelData, WidgetExample } from "@huggingface/tasks";
 
 export interface WidgetProps {
 	apiToken?: string;
@@ -11,11 +11,11 @@ export interface WidgetProps {
 	isLoggedIn?: boolean;
 }
 
-export interface InferenceRunOpts<TOutput = WidgetExampleOutput> {
+export interface InferenceRunOpts<TExample = WidgetExample> {
 	withModelLoading?: boolean;
 	isOnLoadCall?: boolean;
 	useCache?: boolean;
-	exampleOutput?: TOutput;
+	example?: TExample;
 }
 
 export interface ExampleRunOpts {

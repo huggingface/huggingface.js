@@ -67,10 +67,10 @@
 	async function getOutput({
 		withModelLoading = false,
 		isOnLoadCall = false,
-		exampleOutput = undefined,
-	}: InferenceRunOpts<WidgetExampleOutputText> = {}) {
-		if (exampleOutput) {
-			output = exampleOutput.text;
+		example = undefined,
+	}: InferenceRunOpts<WidgetExampleAssetInput<WidgetExampleOutputText>> = {}) {
+		if (example?.output) {
+			output = example.output.text;
 			outputJson = "";
 			return;
 		}
@@ -135,12 +135,12 @@
 		throw new TypeError("Invalid output: output must be of type <text:string>");
 	}
 
-	function applyWidgetExample(sample: WidgetExampleAssetInput<WidgetExampleOutputText>, opts: ExampleRunOpts = {}) {
-		filename = sample.example_title!;
-		fileUrl = sample.src;
+	function applyWidgetExample(example: WidgetExampleAssetInput<WidgetExampleOutputText>, opts: ExampleRunOpts = {}) {
+		filename = example.example_title!;
+		fileUrl = example.src;
 		if (opts.isPreview) {
-			if (isValidOutputText(sample.output)) {
-				output = sample.output.text;
+			if (isValidOutputText(example.output)) {
+				output = example.output.text;
 				outputJson = "";
 			} else {
 				output = "";
@@ -149,17 +149,16 @@
 			return;
 		}
 		file = null;
-		selectedSampleUrl = sample.src;
-		const exampleOutput = sample.output;
-		getOutput({ ...opts.inferenceOpts, exampleOutput });
+		selectedSampleUrl = example.src;
+		getOutput({ ...opts.inferenceOpts, example });
 	}
 
 	function updateModelLoading(isLoading: boolean, estimatedTime: number = 0) {
 		modelLoading = { isLoading, estimatedTime };
 	}
 
-	function validateExample(sample: WidgetExample): sample is WidgetExampleAssetInput<WidgetExampleOutputText> {
-		return isAssetInput(sample) && (!sample.output || isValidOutputText(sample.output));
+	function validateExample(example: WidgetExample): example is WidgetExampleAssetInput<WidgetExampleOutputText> {
+		return isAssetInput(example) && (!example.output || isValidOutputText(example.output));
 	}
 </script>
 

@@ -71,23 +71,23 @@
 		throw new TypeError("Invalid output: output must be of type Array<{ answer: string, score?: number }>");
 	}
 
-	async function applyWidgetExample(sample: WidgetExampleAssetAndTextInput, opts: ExampleRunOpts = {}) {
-		question = sample.text;
-		imgSrc = sample.src;
+	async function applyWidgetExample(example: WidgetExampleAssetAndTextInput, opts: ExampleRunOpts = {}) {
+		question = example.text;
+		imgSrc = example.src;
 		if (opts.isPreview) {
 			return;
 		}
 		const res = await fetch(imgSrc);
 		const blob = await res.blob();
 		await updateImageBase64(blob);
-		const exampleOutput = sample.output;
-		getOutput({ ...opts.inferenceOpts, exampleOutput });
+
+		getOutput({ ...opts.inferenceOpts, example });
 	}
 
 	async function getOutput({
 		withModelLoading = false,
 		isOnLoadCall = false,
-		exampleOutput = undefined,
+		example = undefined,
 	}: InferenceRunOpts = {}) {
 		const trimmedQuestion = question.trim();
 

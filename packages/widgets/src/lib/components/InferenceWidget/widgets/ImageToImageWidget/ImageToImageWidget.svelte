@@ -64,23 +64,22 @@
 		throw new TypeError("Invalid output: output must be of type object & of instance Blob");
 	}
 
-	async function applyWidgetExample(sample: WidgetExampleAssetAndPromptInput, opts: ExampleRunOpts = {}) {
-		prompt = sample.prompt;
-		imgSrc = sample.src;
+	async function applyWidgetExample(example: WidgetExampleAssetAndPromptInput, opts: ExampleRunOpts = {}) {
+		prompt = example.prompt;
+		imgSrc = example.src;
 		if (opts.isPreview) {
 			return;
 		}
 		const res = await fetch(imgSrc);
 		const blob = await res.blob();
 		await updateImageBase64(blob);
-		const exampleOutput = sample.output;
-		getOutput({ ...opts.inferenceOpts, exampleOutput });
+		getOutput({ ...opts.inferenceOpts, example });
 	}
 
 	async function getOutput({
 		withModelLoading = false,
 		isOnLoadCall = false,
-		exampleOutput = undefined,
+		example = undefined,
 	}: InferenceRunOpts = {}) {
 		const trimmedPrompt = prompt.trim();
 
