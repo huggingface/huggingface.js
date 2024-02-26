@@ -71,8 +71,3 @@ export interface ImageSegment {
 	imgData?: ImageData;
 	bitmap?: ImageBitmap;
 }
-
-export interface ChatMessage {
-	role: "user" | "assistant" | "system";
-	content: string;
-}

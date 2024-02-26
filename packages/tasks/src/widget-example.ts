@@ -51,6 +51,16 @@ export interface WidgetExampleBase<TOutput> {
 	output?: TOutput;
 }
 
+
+export interface ChatMessage {
+	role: "user" | "assistant" | "system";
+	content: string;
+}
+
+export interface WidgetExampleChatInput<TOutput = WidgetExampleOutput> extends WidgetExampleBase<TOutput> {
+	messages: ChatMessage[];
+}
+
 export interface WidgetExampleTextInput<TOutput = WidgetExampleOutput> extends WidgetExampleBase<TOutput> {
 	text: string;
 }
@@ -101,6 +111,7 @@ export interface WidgetExampleSentenceSimilarityInput<TOutput = WidgetExampleOut
 //#endregion
 
 export type WidgetExample<TOutput = WidgetExampleOutput> =
+	| WidgetExampleChatInput<TOutput>
 	| WidgetExampleTextInput<TOutput>
 	| WidgetExampleTextAndContextInput<TOutput>
 	| WidgetExampleTextAndTableInput<TOutput>

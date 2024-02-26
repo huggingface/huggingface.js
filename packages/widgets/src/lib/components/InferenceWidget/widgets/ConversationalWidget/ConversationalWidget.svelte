@@ -11,7 +11,7 @@
 	import { SPECIAL_TOKENS_ATTRIBUTES } from "@huggingface/tasks";
 	import { HfInference } from "@huggingface/inference";
 
-	import type { ChatMessage } from "../../shared/types.js";
+	import type { ChatMessage } from "@huggingface/tasks";
 	import WidgetOutputConvo from "../../shared/WidgetOutputConvo/WidgetOutputConvo.svelte";
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
