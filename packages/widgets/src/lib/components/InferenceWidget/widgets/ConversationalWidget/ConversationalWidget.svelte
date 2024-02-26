@@ -7,6 +7,9 @@
 		TokenizerConfig,
 		WidgetExampleTextInput,
 		TextGenerationInput,
+		WidgetExampleOutputText,
+		WidgetExampleChatInput,
+		WidgetExample,
 	} from "@huggingface/tasks";
 	import { SPECIAL_TOKENS_ATTRIBUTES } from "@huggingface/tasks";
 	import { HfInference } from "@huggingface/inference";
@@ -19,6 +22,7 @@
 	import { isTextInput } from "../../shared/inputValidation.js";
 	import { widgetStates, getTgiSupportedModels } from "../../stores.js";
 	import type { Writable } from "svelte/store";
+	import WidgetExamples from "../../shared/WidgetExamples/WidgetExamples.svelte";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -27,6 +31,8 @@
 	export let noTitle: WidgetProps["noTitle"];
 	export let shouldUpdateUrl: WidgetProps["shouldUpdateUrl"];
 	export let includeCredentials: WidgetProps["includeCredentials"];
+
+	type Example = WidgetExampleTextInput<WidgetExampleOutputText> | WidgetExampleChatInput<WidgetExampleOutputText>;
 
 	let tgiSupportedModels: Writable<Set<string> | undefined>;
 
@@ -72,7 +78,7 @@
 		inferenceClient = new HfInference();
 	});
 
-	async function getOutput({ withModelLoading = false }: InferenceRunOpts = {}) {
+	async function getOutput({ withModelLoading = false }: InferenceRunOpts<Example> = {}) {
 		if (!compiledTemplate) {
 			return;
 		}
@@ -165,25 +171,28 @@
 		return specialTokensMap;
 	}
 
-	function applyWidgetExample(example: WidgetExampleTextInput, opts: ExampleRunOpts = {}) {
-		text = example.text;
-		if (opts.isPreview) {
+	function applyWidgetExample(example: WidgetExampleTextInput<WidgetExampleOutputText>, opts: ExampleRunOpts): void;
+	function applyWidgetExample(example: WidgetExampleChatInput<WidgetExampleOutputText>, opts: ExampleRunOpts): void;
+	function applyWidgetExample(example: Example, opts: ExampleRunOpts = {}): void {
+		if ("text" in example) {
+			text = example.text;
+			if (opts.isPreview) {
+				return;
+			}
+			getOutput({ ...opts.inferenceOpts, example });
+		} else {
+			/// #TODO
 			return;
 		}
-		getOutput({ ...opts.inferenceOpts, example });
+	}
+
+	function validateExample(sample: unknown): sample is Example {
+		return false;
 	}
 </script>
 
 <WidgetWrapper {apiUrl} {includeCredentials} {model} let:WidgetInfo let:WidgetHeader let:WidgetFooter>
-	<WidgetHeader
-		{noTitle}
-		{model}
-		{isLoading}
-		{isDisabled}
-		{callApiOnMount}
-		{applyWidgetExample}
-		validateExample={isTextInput}
-	/>
+	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyWidgetExample} {validateExample} />
 	<WidgetOutputConvo modelId={model.id} {messages} />
 
 	<WidgetQuickInput
