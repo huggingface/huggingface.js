@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from "svelte";
+	import { onMount, tick } from "svelte";
 	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "../../shared/types.js";
 	import { Template } from "@huggingface/jinja";
 	import type {
@@ -18,7 +18,7 @@
 	import WidgetOutputConvo from "../../shared/WidgetOutputConvo/WidgetOutputConvo.svelte";
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
-	import { addInferenceParameters, callInferenceApi, updateUrl } from "../../shared/helpers.js";
+	import { addInferenceParameters, updateUrl } from "../../shared/helpers.js";
 	import { widgetStates, getTgiSupportedModels } from "../../stores.js";
 	import type { Writable } from "svelte/store";
 	import { isChatInput, isTextInput } from "../../shared/inputValidation.js";
@@ -50,7 +50,9 @@
 
 	// Check config and compile template
 	onMount(() => {
-		getTgiSupportedModels(apiUrl).then((store) => (tgiSupportedModels = store));
+		(async () => {
+			tgiSupportedModels = await getTgiSupportedModels(apiUrl);
+		})();
 		const config = model.config;
 		if (config === undefined) {
 			error = "Model config not found";
@@ -78,21 +80,12 @@
 		inferenceClient = new HfInference();
 	});
 
-	async function getOutput({ withModelLoading = false, isOnLoadCall = false }: InferenceRunOpts = {}) {
-		if (!compiledTemplate) {
+	async function handleNewMessage(): Promise<void> {
+		if (isLoading) {
 			return;
 		}
-
-		if (!inferenceClient) {
-			error = "Inference client not ready";
-			return;
-		}
-		if (!compiledTemplate) {
-			return;
-		}
-
-		if (!example) {
-			/// The logic to build and display messages is handled in the caller function...
+		isLoading = true;
+		try {
 			const trimmedText = text.trim();
 			if (!trimmedText) {
 				return;
@@ -102,12 +95,31 @@
 				updateUrl({ text: trimmedText });
 			}
 
-			if (!withModelLoading) {
-				// Add user message to chat
-				messages = [...messages, { role: "user", content: trimmedText }];
-			}
+			// Add user message to chat
+			messages = [...messages, { role: "user", content: trimmedText }];
+			await tick();
+			await getOutput();
+		} finally {
+			isLoading = false;
 		}
+	}
 
+	async function getOutput({
+		withModelLoading = false,
+		exampleOutput = undefined,
+	}: InferenceRunOpts<WidgetExampleOutputText> = {}) {
+		if (exampleOutput) {
+			messages = [...messages, { role: "assistant", content: exampleOutput.text }];
+			await tick();
+			return;
+		}
+		if (!compiledTemplate) {
+			return;
+		}
+		if (!inferenceClient) {
+			error = "Inference client not ready";
+			return;
+		}
 		// Render chat template
 		const special_tokens_map = extractSpecialTokensMap(tokenizerConfig);
 
@@ -131,7 +143,6 @@
 		};
 		addInferenceParameters(input, model);
 
-		isLoading = true;
 		text = "";
 		try {
 			if ($tgiSupportedModels?.has(model.id)) {
@@ -150,6 +161,7 @@
 					if (newToken.token.special) continue;
 					newMessage.content = newMessage.content + newToken.token.text;
 					messages = [...previousMessages, newMessage];
+					await tick();
 				}
 			} else {
 				console.debug("Starting text generation using the synchronous API");
@@ -159,11 +171,11 @@
 					{ includeCredentials, dont_load_model: !withModelLoading }
 				);
 				messages = [...messages, { role: "assistant", content: output.generated_text }];
+				await tick();
 			}
 		} catch (e) {
 			error = `Something went wrong while requesting the Inference API: "${(e as Error).message}"`;
 		}
-		isLoading = false;
 	}
 
 	function extractSpecialTokensMap(tokenizerConfig: TokenizerConfig): SpecialTokensMap {
@@ -177,17 +189,25 @@
 		return specialTokensMap;
 	}
 
-	function applyWidgetExample(example: Example, opts: ExampleRunOpts = {}): void {
-		if ("text" in example) {
-			messages = [{ role: "user", content: example.text }];
-		} else {
-			messages = example.messages;
-		}
-		if (opts.isPreview) {
+	async function applyWidgetExample(example: Example, opts: ExampleRunOpts = {}): Promise<void> {
+		if (isLoading) {
 			return;
 		}
-		const exampleOutput = sample.output;
-		getOutput({ ...opts.inferenceOpts, exampleOutput });
+		isLoading = true;
+		try {
+			if ("text" in example) {
+				messages = [{ role: "user", content: example.text }];
+			} else {
+				messages = [...example.messages];
+			}
+			if (opts.isPreview) {
+				return;
+			}
+			const exampleOutput = example.output;
+			getOutput({ ...opts.inferenceOpts, exampleOutput });
+		} finally {
+			isLoading = false;
+		}
 	}
 
 	function validateExample(sample: unknown): sample is Example {
@@ -204,9 +224,7 @@
 		flatTop={true}
 		{isLoading}
 		{isDisabled}
-		onClickSubmitBtn={() => {
-			getOutput();
-		}}
+		onClickSubmitBtn={handleNewMessage}
 		submitButtonLabel="Send"
 	/>
 
