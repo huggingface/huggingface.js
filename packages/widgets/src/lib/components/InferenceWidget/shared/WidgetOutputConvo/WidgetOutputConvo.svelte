@@ -26,8 +26,10 @@
 		{#each messages as message}
 			{#if message.role === "user"}
 				<WidgetOutputConvoBubble position="right" text={message.content} />
-			{:else}
+			{:else if message.role === "assistant"}
 				<WidgetOutputConvoBubble position="left" text={message.content} />
+			{:else}
+				<WidgetOutputConvoBubble position="center" text={message.content} />
 			{/if}
 		{/each}
 	</div>

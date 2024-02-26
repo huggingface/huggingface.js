@@ -46,6 +46,19 @@
 					use_default_system_prompt: true,
 				},
 			},
+			widgetData: [
+				{ text: "This is a text-only example", example_title: "Text only" },
+				{
+					messages: [
+						{
+							content: "You are a helpful assistant replying in very brief and straight-to-the-point answers.",
+							role: "system",
+						},
+						{ content: "Please exlain QCD in very few words", role: "user" },
+					],
+					example_title: "Chat messages",
+				},
+			],
 		},
 		{
 			id: "microsoft/phi-2",
