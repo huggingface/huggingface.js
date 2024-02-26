@@ -115,8 +115,8 @@
 		getOutput(blob, { ...opts.inferenceOpts, exampleOutput });
 	}
 
-	function validateExample(example: unknown): example is WidgetExampleAssetInput<WidgetExampleOutputLabels> {
-		return isTextInput(example) && (!example.output || isValidOutputLabels(example.output));
+	function validateExample(sample: unknown): sample is WidgetExampleAssetInput<WidgetExampleOutputLabels> {
+		return isTextInput(sample) && (!sample.output || isValidOutputLabels(sample.output));
 	}
 </script>
 

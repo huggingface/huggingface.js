@@ -129,8 +129,8 @@
 		getOutput({ ...opts.inferenceOpts, exampleOutput });
 	}
 
-	function validateExample(example: unknown): example is WidgetExampleTextInput<WidgetExampleOutputLabels> {
-		return isTextInput(example) && (!example.output || isValidOutputLabels(example.output));
+	function validateExample(sample: unknown): sample is WidgetExampleTextInput<WidgetExampleOutputLabels> {
+		return isTextInput(sample) && (!sample.output || isValidOutputLabels(sample.output));
 	}
 </script>
 
