@@ -34,13 +34,13 @@
 	async function getOutput({
 		withModelLoading = false,
 		isOnLoadCall = false,
-		example = undefined,
+		exampleOutput = undefined,
 	}: InferenceRunOpts = {}) {
 		const trimmedText = text.trim();
 
 		if (!trimmedText) {
 			error = "You need to input some text";
-			example = undefined;
+			exampleOutput = undefined;
 			outputJson = "";
 			return;
 		}
@@ -70,7 +70,7 @@
 		computeTime = "";
 		error = "";
 		modelLoading = { isLoading: false, estimatedTime: 0 };
-		example = undefined;
+		exampleOutput = undefined;
 		outputJson = "";
 
 		if (res.status === "success") {
@@ -113,12 +113,13 @@
 		return Math.ceil(total_elems / SINGLE_DIM_COLS);
 	};
 
-	function applyWidgetExample(example: WidgetExampleTextInput, opts: ExampleRunOpts = {}) {
-		text = example.text;
+	function applyWidgetExample(sample: WidgetExampleTextInput, opts: ExampleRunOpts = {}) {
+		text = sample.text;
 		if (opts.isPreview) {
 			return;
 		}
-		getOutput({ ...opts.inferenceOpts, example });
+		const exampleOutput = sample.output;
+		getOutput({ ...opts.inferenceOpts, exampleOutput });
 	}
 </script>
 

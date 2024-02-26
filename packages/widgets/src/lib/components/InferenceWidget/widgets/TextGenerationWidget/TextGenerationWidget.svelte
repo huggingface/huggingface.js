@@ -54,14 +54,14 @@
 		withModelLoading = false,
 		isOnLoadCall = false,
 		useCache = true,
-		example = undefined,
+		exampleOutput = undefined,
 	}: InferenceRunOpts<WidgetExampleOutputText> = {}) {
 		if (isBloomLoginRequired) {
 			return;
 		}
 
-		if (example) {
-			output = example.text;
+		if (exampleOutput) {
+			output = exampleOutput.text;
 			outputJson = "";
 			renderExampleOutput(output);
 			return;
@@ -173,12 +173,12 @@
 		renderTextOutput(prefix + output, false);
 	}
 
-	function applyWidgetExample(example: WidgetExampleTextInput<WidgetExampleOutputText>, opts: ExampleRunOpts = {}) {
-		setTextAreaValue(example.text);
+	function applyWidgetExample(sample: WidgetExampleTextInput<WidgetExampleOutputText>, opts: ExampleRunOpts = {}) {
+		setTextAreaValue(sample.text);
 		if (opts.isPreview) {
-			if (example.output) {
+			if (sample.output) {
 				outputJson = "";
-				output = example.output.text;
+				output = sample.output.text;
 				renderExampleOutput(output);
 			} else {
 				output = "";
@@ -186,11 +186,12 @@
 			}
 			return;
 		}
-		getOutput({ ...opts.inferenceOpts, useCache, example });
+		const exampleOutput = sample.output;
+		getOutput({ ...opts.inferenceOpts, useCache, exampleOutput });
 	}
 
-	function validateExample(example: WidgetExample): example is WidgetExampleTextInput<WidgetExampleOutputText> {
-		return isTextInput(example) && (!example.output || isValidOutputText(example.output));
+	function validateExample(sample: WidgetExample): sample is WidgetExampleTextInput<WidgetExampleOutputText> {
+		return isTextInput(sample) && (!sample.output || isValidOutputText(sample.output));
 	}
 
 	function redirectLogin() {

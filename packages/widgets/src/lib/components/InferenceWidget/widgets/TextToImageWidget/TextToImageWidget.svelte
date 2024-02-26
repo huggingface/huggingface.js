@@ -34,10 +34,10 @@
 		withModelLoading = false,
 		isOnLoadCall = false,
 		useCache = false,
-		example = undefined,
-	}: InferenceRunOpts<WidgetExampleTextInput<WidgetExampleOutputUrl>> = {}) {
-		if (example?.output) {
-			output = example.output.url;
+		exampleOutput = undefined,
+	}: InferenceRunOpts<WidgetExampleOutputUrl> = {}) {
+		if (exampleOutput) {
+			output = exampleOutput.url;
 			return;
 		}
 
@@ -100,22 +100,22 @@
 		throw new TypeError("Invalid output: output must be of type object & of instance Blob");
 	}
 
-	function applyWidgetExample(example: WidgetExampleTextInput<WidgetExampleOutputUrl>, opts: ExampleRunOpts = {}) {
-		text = example.text;
+	function applyWidgetExample(sample: WidgetExampleTextInput<WidgetExampleOutputUrl>, opts: ExampleRunOpts = {}) {
+		text = sample.text;
 		if (opts.isPreview) {
-			if (example.output) {
-				output = example.output.url;
+			if (sample.output) {
+				output = sample.output.url;
 			} else {
 				output = "";
 			}
 			return;
 		}
-
-		getOutput({ ...opts.inferenceOpts, example });
+		const exampleOutput = sample.output;
+		getOutput({ ...opts.inferenceOpts, exampleOutput });
 	}
 
-	function validateExample(example: WidgetExample): example is WidgetExampleTextInput<WidgetExampleOutputUrl> {
-		return isTextInput(example) && (!example.output || isValidOutputUrl(example.output));
+	function validateExample(sample: WidgetExample): sample is WidgetExampleTextInput<WidgetExampleOutputUrl> {
+		return isTextInput(sample) && (!sample.output || isValidOutputUrl(sample.output));
 	}
 </script>
 

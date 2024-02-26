@@ -35,7 +35,7 @@
 	async function getOutput({
 		withModelLoading = false,
 		isOnLoadCall = false,
-		example = undefined,
+		exampleOutput = undefined,
 	}: InferenceRunOpts = {}) {
 		const trimmedValue = text.trim();
 
@@ -96,12 +96,13 @@
 		throw new TypeError("Invalid output: output must be of type Array & non-empty");
 	}
 
-	function applyWidgetExample(example: WidgetExampleTextInput, opts: ExampleRunOpts = {}) {
-		setTextAreaValue(example.text);
+	function applyWidgetExample(sample: WidgetExampleTextInput, opts: ExampleRunOpts = {}) {
+		setTextAreaValue(sample.text);
 		if (opts.isPreview) {
 			return;
 		}
-		getOutput({ ...opts.inferenceOpts, example });
+		const exampleOutput = sample.output;
+		getOutput({ ...opts.inferenceOpts, exampleOutput });
 	}
 </script>
 

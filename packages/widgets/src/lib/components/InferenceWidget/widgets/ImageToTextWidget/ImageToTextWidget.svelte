@@ -38,7 +38,7 @@
 
 	async function getOutput(
 		file: File | Blob,
-		{ withModelLoading = false, isOnLoadCall = false, example = undefined }: InferenceRunOpts = {}
+		{ withModelLoading = false, isOnLoadCall = false, exampleOutput = undefined }: InferenceRunOpts = {}
 	) {
 		if (!file) {
 			return;
@@ -95,8 +95,8 @@
 		throw new TypeError("Invalid output: output must be of type Array & non-empty");
 	}
 
-	async function applyWidgetExample(example: WidgetExampleAssetInput, opts: ExampleRunOpts = {}) {
-		imgSrc = example.src;
+	async function applyWidgetExample(sample: WidgetExampleAssetInput, opts: ExampleRunOpts = {}) {
+		imgSrc = sample.src;
 		if (opts.isPreview) {
 			output = "";
 			outputJson = "";

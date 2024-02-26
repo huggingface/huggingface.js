@@ -18,7 +18,7 @@
 	import WidgetOutputConvo from "../../shared/WidgetOutputConvo/WidgetOutputConvo.svelte";
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
-	import { addInferenceParameters, updateUrl } from "../../shared/helpers.js";
+	import { addInferenceParameters, callInferenceApi, updateUrl } from "../../shared/helpers.js";
 	import { widgetStates, getTgiSupportedModels } from "../../stores.js";
 	import type { Writable } from "svelte/store";
 	import { isChatInput, isTextInput } from "../../shared/inputValidation.js";
@@ -78,7 +78,11 @@
 		inferenceClient = new HfInference();
 	});
 
-	async function getOutput({ withModelLoading = false, example = undefined }: InferenceRunOpts<Example> = {}) {
+	async function getOutput({ withModelLoading = false, isOnLoadCall = false }: InferenceRunOpts = {}) {
+		if (!compiledTemplate) {
+			return;
+		}
+
 		if (!inferenceClient) {
 			error = "Inference client not ready";
 			return;
@@ -182,7 +186,8 @@
 		if (opts.isPreview) {
 			return;
 		}
-		getOutput({ ...opts.inferenceOpts, example });
+		const exampleOutput = sample.output;
+		getOutput({ ...opts.inferenceOpts, exampleOutput });
 	}
 
 	function validateExample(sample: unknown): sample is Example {

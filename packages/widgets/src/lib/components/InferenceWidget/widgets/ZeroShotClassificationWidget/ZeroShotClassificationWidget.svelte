@@ -40,7 +40,7 @@
 	async function getOutput({
 		withModelLoading = false,
 		isOnLoadCall = false,
-		example = undefined,
+		exampleOutput = undefined,
 	}: InferenceRunOpts = {}) {
 		const trimmedText = text.trim();
 		const trimmedCandidateLabels = candidateLabels.trim().split(",").join(",");
@@ -136,15 +136,15 @@
 		throw new TypeError("Invalid output: output must be of type <labels:Array; scores:Array>");
 	}
 
-	function applyWidgetExample(example: WidgetExampleZeroShotTextInput, opts: ExampleRunOpts = {}) {
-		candidateLabels = example.candidate_labels;
-		multiClass = example.multi_class;
-		setTextAreaValue(example.text);
+	function applyWidgetExample(sample: WidgetExampleZeroShotTextInput, opts: ExampleRunOpts = {}) {
+		candidateLabels = sample.candidate_labels;
+		multiClass = sample.multi_class;
+		setTextAreaValue(sample.text);
 		if (opts.isPreview) {
 			return;
 		}
-
-		getOutput({ ...opts.inferenceOpts, example });
+		const exampleOutput = sample.output;
+		getOutput({ ...opts.inferenceOpts, exampleOutput });
 	}
 </script>
 

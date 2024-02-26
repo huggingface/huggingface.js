@@ -34,7 +34,11 @@
 	let output: Array<{ label: string; score: number }> = [];
 	let outputJson: string;
 
-	async function getOutput({ withModelLoading = false, isOnLoadCall = false }: InferenceRunOpts = {}) {
+	async function getOutput({
+		withModelLoading = false,
+		isOnLoadCall = false,
+		exampleOutput = undefined,
+	}: InferenceRunOpts = {}) {
 		const trimmedSourceSentence = sourceSentence.trim();
 		if (!trimmedSourceSentence) {
 			error = "You need to input some text";
@@ -120,14 +124,15 @@
 		throw new TypeError("Invalid output: output must be of type Array");
 	}
 
-	function applyWidgetExample(example: WidgetExampleSentenceSimilarityInput, opts: ExampleRunOpts = {}) {
-		sourceSentence = example.source_sentence;
-		comparisonSentences = example.sentences;
+	function applyWidgetExample(sample: WidgetExampleSentenceSimilarityInput, opts: ExampleRunOpts = {}) {
+		sourceSentence = sample.source_sentence;
+		comparisonSentences = sample.sentences;
 		nComparisonSentences = comparisonSentences.length;
 		if (opts.isPreview) {
 			return;
 		}
-		getOutput({ ...opts.inferenceOpts });
+		const exampleOutput = sample.output;
+		getOutput({ ...opts.inferenceOpts, exampleOutput });
 	}
 </script>
 
