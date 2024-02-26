@@ -109,6 +109,7 @@
 		exampleOutput = undefined,
 	}: InferenceRunOpts<WidgetExampleOutputText> = {}) {
 		if (exampleOutput) {
+			error = "";
 			messages = [...messages, { role: "assistant", content: exampleOutput.text }];
 			await tick();
 			return;
