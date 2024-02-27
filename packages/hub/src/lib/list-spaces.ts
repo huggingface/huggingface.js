@@ -40,6 +40,10 @@ export async function* listSpaces<
 	const T extends Exclude<(typeof EXPANDABLE_KEYS)[number], (typeof EXPAND_KEYS)[number]> = never,
 >(params?: {
 	search?: {
+		/**
+		 * Will search in the space name for matches
+		 */
+		query?: string;
 		owner?: string;
 		tags?: string[];
 	};
@@ -56,7 +60,11 @@ export async function* listSpaces<
 }): AsyncGenerator<SpaceEntry> {
 	checkCredentials(params?.credentials);
 	const search = new URLSearchParams([
-		...Object.entries({ limit: "500", ...(params?.search?.owner ? { author: params.search.owner } : undefined) }),
+		...Object.entries({
+			limit: "500",
+			...(params?.search?.owner ? { author: params.search.owner } : undefined),
+			...(params?.search?.query ? { search: params.search.query } : undefined),
+		}),
 		...(params?.search?.tags?.map((tag) => ["filter", tag]) ?? []),
 		...[...EXPAND_KEYS, ...(params?.additionalFields ?? [])].map((val) => ["expand", val] satisfies [string, string]),
 	]).toString();

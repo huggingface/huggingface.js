@@ -48,6 +48,10 @@ export async function* listDatasets<
 	const T extends Exclude<(typeof EXPANDABLE_KEYS)[number], (typeof EXPAND_KEYS)[number]> = never,
 >(params?: {
 	search?: {
+		/**
+		 * Will search in the dataset name for matches
+		 */
+		query?: string;
 		owner?: string;
 		tags?: string[];
 	};
@@ -69,6 +73,7 @@ export async function* listDatasets<
 		...Object.entries({
 			limit: String(Math.min(totalToFetch, 500)),
 			...(params?.search?.owner ? { author: params.search.owner } : undefined),
+			...(params?.search?.query ? { search: params.search.query } : undefined),
 		}),
 		...(params?.search?.tags?.map((tag) => ["filter", tag]) ?? []),
 		...EXPAND_KEYS.map((val) => ["expand", val] satisfies [string, string]),
