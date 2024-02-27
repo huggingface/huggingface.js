@@ -36,6 +36,7 @@ jobs:
           cp -r local-demo/packages/widgets inference-widgets/packages
           cp -r local-demo/packages/tasks inference-widgets/packages
           cp -r local-demo/packages/inference inference-widgets/packages
+          cp -r local-demo/packages/jinja inference-widgets/packages
           cp local-demo/package.json inference-widgets/package.json
           cp local-demo/pnpm-lock.yaml inference-widgets/pnpm-lock.yaml
 
