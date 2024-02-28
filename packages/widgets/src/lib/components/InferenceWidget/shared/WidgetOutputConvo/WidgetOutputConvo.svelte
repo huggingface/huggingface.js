@@ -24,13 +24,8 @@
 	</div>
 	<div class="flex flex-col items-end space-y-4 p-3">
 		{#each messages as message}
-			{#if message.role === "user"}
-				<WidgetOutputConvoBubble position="right" text={message.content} />
-			{:else if message.role === "assistant"}
-				<WidgetOutputConvoBubble position="left" text={message.content} />
-			{:else}
-				<WidgetOutputConvoBubble position="center" text={message.content} />
-			{/if}
+			{@const position = message.role === "user" ? "right" : message.role === "assistant" ? "left" : "center"}
+			<WidgetOutputConvoBubble {position} text={message.content} />
 		{/each}
 	</div>
 </div>
