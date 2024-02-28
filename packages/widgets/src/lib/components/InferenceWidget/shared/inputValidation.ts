@@ -108,7 +108,8 @@ export function isChatInput<TOutput>(sample: unknown): sample is WidgetExampleCh
 				isObject(message) &&
 				"role" in message &&
 				"content" in message &&
-				(message.role === "user" || message.role === "system" || message.role === "assistant") &&
+				typeof message.role === "string" &&
+				["user", "system", "assistant"].includes(message.role) &&
 				typeof message.content === "string"
 		)
 	);
