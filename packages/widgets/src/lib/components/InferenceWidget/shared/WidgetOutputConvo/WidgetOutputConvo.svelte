@@ -2,8 +2,8 @@
 	import { afterUpdate } from "svelte";
 
 	import { isFullyScrolled, scrollToMax } from "../../../../utils/ViewUtils.js";
-	import type { ChatMessage } from "../../shared/types.js";
 	import WidgetOutputConvoBubble from "../WidgetOuputConvoBubble/WidgetOutputConvoBubble.svelte";
+	import type { ChatMessage } from "@huggingface/tasks";
 
 	export let modelId: string;
 	export let messages: ChatMessage[];
@@ -24,11 +24,8 @@
 	</div>
 	<div class="flex flex-col items-end space-y-4 p-3">
 		{#each messages as message}
-			{#if message.role === "user"}
-				<WidgetOutputConvoBubble position="right" text={message.content} />
-			{:else}
-				<WidgetOutputConvoBubble position="left" text={message.content} />
-			{/if}
+			{@const position = message.role === "user" ? "right" : message.role === "assistant" ? "left" : "center"}
+			<WidgetOutputConvoBubble {position} text={message.content} />
 		{/each}
 	</div>
 </div>

@@ -1,8 +1,6 @@
-<script lang="ts">
+<script lang="ts" generics="TWidgetExample extends WidgetExample">
 	import type { ExampleRunOpts, WidgetProps } from "../types.js";
 	import type { WidgetExample, WidgetExampleAttribute } from "@huggingface/tasks";
-
-	type TWidgetExample = $$Generic<WidgetExample>;
 
 	import { onMount } from "svelte";
 	import { slide } from "svelte/transition";

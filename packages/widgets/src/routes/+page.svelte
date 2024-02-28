@@ -46,6 +46,39 @@
 					use_default_system_prompt: true,
 				},
 			},
+			widgetData: [
+				{ text: "This is a text-only example", example_title: "Text only" },
+				{
+					messages: [
+						{
+							content: "You are a helpful assistant replying in very brief and straight-to-the-point answers.",
+							role: "system",
+						},
+						{ content: "Please exlain QCD in very few words", role: "user" },
+					],
+					example_title: "Chat messages",
+				},
+				{
+					messages: [
+						{
+							content: "You are a helpful assistant replying in very brief and straight-to-the-point answers.",
+							role: "system",
+						},
+						{ content: "Please exlain QCD in very few words", role: "user" },
+					],
+					output: {
+						text: "QCD is the physics of strong force and small particles.",
+					},
+					example_title: "Chat messages with Output",
+				},
+				{
+					text: "Explain QCD in one short sentence.",
+					output: {
+						text: "QCD is the physics of strong force and small particles.",
+					},
+					example_title: "Text only with Output",
+				},
+			],
 		},
 		{
 			id: "microsoft/phi-2",
