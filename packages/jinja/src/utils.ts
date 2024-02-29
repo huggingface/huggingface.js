@@ -23,3 +23,12 @@ export function slice<T>(array: T[], start?: number, stop?: number, step = 1): T
 	}
 	return result;
 }
+
+/**
+ * Function that mimics Python's string.title() function.
+ * @param value The string to title case.
+ * @returns The title cased string.
+ */
+export function titleCase(value: string): string {
+	return value.replace(/\b\w/g, (c) => c.toUpperCase());
+}

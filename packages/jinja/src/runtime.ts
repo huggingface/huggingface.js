@@ -15,7 +15,7 @@ import type {
 	UnaryExpression,
 	SliceExpression,
 } from "./ast";
-import { slice } from "./utils";
+import { slice, titleCase } from "./utils";
 
 export type AnyRuntimeValue =
 	| NumericValue
@@ -87,6 +87,12 @@ export class StringValue extends RuntimeValue<string> {
 			"strip",
 			new FunctionValue(() => {
 				return new StringValue(this.value.trim());
+			}),
+		],
+		[
+			"title",
+			new FunctionValue(() => {
+				return new StringValue(titleCase(this.value));
 			}),
 		],
 		["length", new NumericValue(this.value.length)],
@@ -380,7 +386,7 @@ export class Interpreter {
 				case "lower":
 					return new StringValue(operand.value.toLowerCase());
 				case "title":
-					return new StringValue(operand.value.replace(/\b\w/g, (c) => c.toUpperCase()));
+					return new StringValue(titleCase(operand.value));
 				case "capitalize":
 					return new StringValue(operand.value.charAt(0).toUpperCase() + operand.value.slice(1));
 				case "trim":
