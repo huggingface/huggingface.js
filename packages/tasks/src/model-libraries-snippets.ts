@@ -293,7 +293,7 @@ model = joblib.load(
 
 export const sklearn = (model: ModelData): string[] => {
 	if (model.tags?.includes("skops")) {
-		const skopsmodelFile = model.config?.sklearn?.filename;
+		const skopsmodelFile = model.config?.sklearn?.model?.file;
 		const skopssaveFormat = model.config?.sklearn?.model_format;
 		if (!skopsmodelFile) {
 			return [`# ⚠️ Model filename not specified in config.json`];
@@ -372,7 +372,7 @@ const speechBrainMethod = (speechbrainInterface: string) => {
 };
 
 export const speechbrain = (model: ModelData): string[] => {
-	const speechbrainInterface = model.config?.speechbrain?.interface;
+	const speechbrainInterface = model.config?.speechbrain?.speechbrain_interface;
 	if (speechbrainInterface === undefined) {
 		return [`# interface not specified in config.json`];
 	}
@@ -465,7 +465,7 @@ const peftTask = (peftTaskType?: string) => {
 };
 
 export const peft = (model: ModelData): string[] => {
-	const { base_model_name: peftBaseModel, task_type: peftTaskType } = model.config?.peft ?? {};
+	const { base_model_name_or_path: peftBaseModel, task_type: peftTaskType } = model.config?.peft ?? {};
 	const pefttask = peftTask(peftTaskType);
 	if (!pefttask) {
 		return [`Task type is invalid.`];
