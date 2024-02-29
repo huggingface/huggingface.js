@@ -40,7 +40,7 @@ export interface ModelData {
 	/**
 	 * this dictionary has useful information about the model configuration
 	 */
-	config?: Record<string, unknown> & {
+	config?: {
 		architectures?: string[];
 		tokenizer_config?: TokenizerConfig;
 		adapter_transformers?: {
