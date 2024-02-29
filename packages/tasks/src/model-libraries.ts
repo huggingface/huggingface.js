@@ -372,6 +372,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: {
 			wildcard: { path: "*.sentis" },
 		},
+	"whisperkit": {
+		prettyLabel: "WhisperKit",
+		repoName: "WhisperKit",
+		repoUrl: "https://github.com/argmaxinc/WhisperKit",
+		countDownloads: {
+			wildcard: { path: "**/model.mil" },
+		},
 	},
 } satisfies Record<string, LibraryUiElement>;
 
