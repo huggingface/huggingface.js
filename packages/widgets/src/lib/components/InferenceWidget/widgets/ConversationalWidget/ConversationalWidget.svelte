@@ -182,10 +182,10 @@
 				await tick();
 			}
 		} catch (e) {
-			if (isObject(e) && "message" in e && typeof e.message === "string") {
+			if (!!e && typeof e === "object" && "message" in e && typeof e.message === "string") {
 				error = e.message;
 			} else {
-				error = `Something went wrong with the request."`;
+				error = `Something went wrong with the request.`;
 			}
 		} finally {
 			isLoading = false;
