@@ -42,6 +42,21 @@ export interface ModelData {
 	 */
 	config?: {
 		architectures?: string[];
+		/**
+		 * Dict of AutoModel or Auto… class name to local import path in the repo
+		 */
+		auto_map?: {
+			/**
+			 * String Property
+			 */
+			[x: string]: string;
+		};
+		model_type?: string;
+		quantization_config?: {
+			bits?: number;
+			load_in_4bit?: boolean;
+			load_in_8bit?: boolean;
+		};
 		tokenizer_config?: TokenizerConfig;
 		adapter_transformers?: {
 			model_name?: string;
