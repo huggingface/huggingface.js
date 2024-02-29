@@ -23,7 +23,6 @@
 	import type { Writable } from "svelte/store";
 	import { isChatInput, isTextInput } from "../../shared/inputValidation.js";
 	import { isValidOutputText } from "../../shared/outputValidation.js";
-	import WidgetExamples from "../../shared/WidgetExamples/WidgetExamples.svelte";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -227,6 +226,7 @@
 	}
 
 	async function clearConversation() {
+		error = "";
 		abort?.abort();
 		messages = [];
 		text = "";
