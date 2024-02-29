@@ -48,6 +48,7 @@
 	let compiledTemplate: Template;
 	let tokenizerConfig: TokenizerConfig;
 	let inferenceClient: HfInference | undefined = undefined;
+	let abort: AbortController | undefined = undefined;
 
 	// Check config and compile template
 	onMount(() => {
@@ -145,7 +146,10 @@
 		};
 		addInferenceParameters(input, model);
 
+		isLoading = true;
+		abort = new AbortController();
 		text = "";
+		error = "";
 		try {
 			if ($tgiSupportedModels?.has(model.id)) {
 				console.debug("Starting text generation using the TGI streaming API");
@@ -154,11 +158,14 @@
 					content: "",
 				} satisfies ChatMessage;
 				const previousMessages = [...messages];
-				const tokenStream = inferenceClient.textGenerationStream({
-					...input,
-					model: model.id,
-					accessToken: apiToken,
-				});
+				const tokenStream = inferenceClient.textGenerationStream(
+					{
+						...input,
+						model: model.id,
+						accessToken: apiToken,
+					},
+					{ signal: abort?.signal }
+				);
 				for await (const newToken of tokenStream) {
 					if (newToken.token.special) continue;
 					newMessage.content = newMessage.content + newToken.token.text;
@@ -170,13 +177,16 @@
 				input.parameters.max_new_tokens = 100;
 				const output = await inferenceClient.textGeneration(
 					{ ...input, model: model.id, accessToken: apiToken },
-					{ includeCredentials, dont_load_model: !withModelLoading }
+					{ includeCredentials, dont_load_model: !withModelLoading, signal: abort?.signal }
 				);
 				messages = [...messages, { role: "assistant", content: output.generated_text }];
 				await tick();
 			}
 		} catch (e) {
 			error = `Something went wrong while requesting the Inference API: "${(e as Error).message}"`;
+		} finally {
+			isLoading = false;
+			abort = undefined;
 		}
 	}
 
