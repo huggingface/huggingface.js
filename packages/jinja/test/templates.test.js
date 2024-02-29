@@ -49,6 +49,7 @@ const TEST_STRINGS = {
 	// Object methods
 	OBJ_METHODS: `{{ obj.x(x, y) }}{{ ' ' + obj.x() + ' ' }}{{ obj.z[x](x, y) }}`,
 	STRING_METHODS: `{{ '  A  '.strip() }}{% set x = '  B  ' %}{{ x.strip() }}{% set y = ' aBcD ' %}{{ y.upper() }}{{ y.lower() }}`,
+	STRING_METHODS_2: `{{ 'test test'.title() }}`,
 
 	// String indexing and slicing
 	STRING_SLICING: `|{{ x[0] }}|{{ x[:] }}|{{ x[:3] }}|{{ x[1:4] }}|{{ x[1:-1] }}|{{ x[1::2] }}|{{ x[5::-1] }}|`,
@@ -727,6 +728,15 @@ const TEST_PARSED = {
 		{ value: "(", type: "OpenParen" },
 		{ value: ")", type: "CloseParen" },
 		{ value: "}}", type: "CloseExpression" },
+	],
+	STRING_METHODS_2: [
+		{ value: '{{', type: 'OpenExpression' },
+		{ value: 'test test', type: 'StringLiteral' },
+		{ value: '.', type: 'Dot' },
+		{ value: 'title', type: 'Identifier' },
+		{ value: '(', type: 'OpenParen' },
+		{ value: ')', type: 'CloseParen' },
+		{ value: '}}', type: 'CloseExpression' }
 	],
 
 	// String indexing and slicing
@@ -1552,6 +1562,7 @@ const TEST_CONTEXT = {
 
 	// String methods
 	STRING_METHODS: {},
+	STRING_METHODS_2: {},
 
 	// String indexing and slicing
 	STRING_SLICING: {
@@ -1640,6 +1651,7 @@ const EXPECTED_OUTPUTS = {
 	// Object methods
 	OBJ_METHODS: "AB  A_B",
 	STRING_METHODS: "AB ABCD  abcd ",
+	STRING_METHODS_2: "Test Test",
 
 	// String indexing and slicing
 	STRING_SLICING: "|0|0123456789|012|123|12345678|13579|543210|",
