@@ -1,14 +1,13 @@
 <script lang="ts" generics="TWidgetExample extends WidgetExample">
 	import { fade } from "svelte/transition";
 
-	import IconRefresh from "$lib/components/Icons/IconRefresh.svelte";
-
 	import { updateWidgetState } from "../../stores.js";
 	import { TASKS_DATA } from "@huggingface/tasks";
 	import type { WidgetExample, WidgetExampleAttribute } from "@huggingface/tasks";
 	import type { WidgetProps, ExampleRunOpts } from "../types.js";
 	import { getPipelineTask } from "../../../../utils/ViewUtils.js";
 	import IconInfo from "../../..//Icons/IconInfo.svelte";
+	import IconRefresh from "../../..//Icons/IconRefresh.svelte";
 	import IconLightning from "../../..//Icons/IconLightning.svelte";
 	import PipelineTag from "../../../PipelineTag/PipelineTag.svelte";
 	import WidgetExamples from "../WidgetExamples/WidgetExamples.svelte";
