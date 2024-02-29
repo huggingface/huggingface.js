@@ -40,21 +40,46 @@ export interface ModelData {
 	/**
 	 * this dictionary has useful information about the model configuration
 	 */
-	config?: Record<string, unknown> & {
-		adapter_transformers?: { model_class?: string; model_name?: string };
+	config?: {
 		architectures?: string[];
+		/**
+		 * Dict of AutoModel or Auto… class name to local import path in the repo
+		 */
+		auto_map?: {
+			/**
+			 * String Property
+			 */
+			[x: string]: string;
+		};
+		model_type?: string;
+		quantization_config?: {
+			bits?: number;
+			load_in_4bit?: boolean;
+			load_in_8bit?: boolean;
+		};
+		tokenizer_config?: TokenizerConfig;
+		adapter_transformers?: {
+			model_name?: string;
+			model_class?: string;
+		};
+		diffusers?: {
+			_class_name?: string;
+		};
 		sklearn?: {
-			filename?: string;
+			model?: {
+				file?: string;
+			};
 			model_format?: string;
 		};
 		speechbrain?: {
-			interface?: string;
+			speechbrain_interface?: string;
+			vocoder_interface?: string;
+			vocoder_model_id?: string;
 		};
 		peft?: {
-			base_model_name?: string;
+			base_model_name_or_path?: string;
 			task_type?: string;
 		};
-		tokenizer_config?: TokenizerConfig;
 	};
 	/**
 	 * all the model tags
