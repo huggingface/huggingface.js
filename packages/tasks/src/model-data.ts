@@ -58,6 +58,8 @@ export interface ModelData {
 		};
 		speechbrain?: {
 			speechbrain_interface?: string;
+			vocoder_interface?: string;
+			vocoder_model_id?: string;
 		};
 		peft?: {
 			base_model_name_or_path?: string;
