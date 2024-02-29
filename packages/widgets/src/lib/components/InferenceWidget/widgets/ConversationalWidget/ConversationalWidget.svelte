@@ -21,7 +21,7 @@
 	import { addInferenceParameters, updateUrl } from "../../shared/helpers.js";
 	import { widgetStates, getTgiSupportedModels } from "../../stores.js";
 	import type { Writable } from "svelte/store";
-	import { isChatInput, isTextInput } from "../../shared/inputValidation.js";
+	import { isChatInput, isObject, isTextInput } from "../../shared/inputValidation.js";
 	import { isValidOutputText } from "../../shared/outputValidation.js";
 
 	export let apiToken: WidgetProps["apiToken"];
@@ -182,7 +182,11 @@
 				await tick();
 			}
 		} catch (e) {
-			error = `Something went wrong while requesting the Inference API: "${(e as Error).message}"`;
+			if (isObject(e) && "message" in e && typeof e.message === "string") {
+				error = e.message;
+			} else {
+				error = `Something went wrong with the request."`;
+			}
 		} finally {
 			isLoading = false;
 			abort = undefined;
