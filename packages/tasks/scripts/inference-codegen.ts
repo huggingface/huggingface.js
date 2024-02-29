@@ -17,9 +17,9 @@ const TYPESCRIPT_HEADER_FILE = `
 const PYTHON_HEADER_FILE = `
 # Inference code generated from the JSON schema spec in @huggingface/tasks.
 #
-# Using ./src/scripts/inference-codegen
-#
-# See https://github.com/huggingface/huggingface.js/tree/main/packages/tasks/src/tasks.
+# See:
+#   - script: https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/scripts/inference-codegen.ts
+#   - specs:  https://github.com/huggingface/huggingface.js/tree/main/packages/tasks/src/tasks.
 `;
 
 const PYTHON_DIR = "/home/wauplin/projects/huggingface_hub/src/huggingface_hub/inference/_generated/types";
