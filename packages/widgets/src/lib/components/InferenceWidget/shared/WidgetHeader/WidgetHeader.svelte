@@ -1,4 +1,8 @@
 <script lang="ts" generics="TWidgetExample extends WidgetExample">
+	import { fade } from "svelte/transition";
+
+	import IconRefresh from "$lib/components/Icons/IconRefresh.svelte";
+
 	import { updateWidgetState } from "../../stores.js";
 	import { TASKS_DATA } from "@huggingface/tasks";
 	import type { WidgetExample, WidgetExampleAttribute } from "@huggingface/tasks";
@@ -8,6 +12,7 @@
 	import IconLightning from "../../..//Icons/IconLightning.svelte";
 	import PipelineTag from "../../../PipelineTag/PipelineTag.svelte";
 	import WidgetExamples from "../WidgetExamples/WidgetExamples.svelte";
+	import { createEventDispatcher } from "svelte";
 
 	export let model: WidgetProps["model"];
 	export let noTitle = false;
@@ -18,7 +23,9 @@
 	export let validateExample: ((sample: WidgetExample) => sample is TWidgetExample) | undefined = undefined;
 	export let callApiOnMount: WidgetProps["callApiOnMount"] = false;
 	export let exampleQueryParams: WidgetExampleAttribute[] = [];
+	export let showReset = false;
 
+	const dispatch = createEventDispatcher<{ reset: void }>();
 	const pipeline = model?.pipeline_tag;
 
 	$: task = pipeline ? getPipelineTask(pipeline) : undefined;
@@ -62,7 +69,7 @@
 		{/if}
 	{/if}
 </div>
-<div class="mb-0.5 flex w-full max-w-full flex-wrap items-center justify-between text-sm text-gray-500">
+<div class="mb-0.5 flex w-full max-w-full flex-wrap items-center text-sm text-gray-500">
 	{#if pipeline && task}
 		<div class="flex gap-4 items-center mb-1.5">
 			<a
@@ -75,7 +82,21 @@
 		</div>
 	{/if}
 
-	{#if validExamples.length && applyWidgetExample}
-		<WidgetExamples {validExamples} {isLoading} {applyWidgetExample} {callApiOnMount} {exampleQueryParams} />
-	{/if}
+	<div class="flex gap-2 ml-auto">
+		{#if showReset}
+			<button class="flex items-center mb-1.5 text-gray-400" on:click={() => dispatch("reset")} transition:fade>
+				<IconRefresh />
+			</button>
+		{/if}
+		{#if validExamples.length && applyWidgetExample}
+			<WidgetExamples
+				classNames="flex gap-x-1 peer:"
+				{validExamples}
+				{isLoading}
+				{applyWidgetExample}
+				{callApiOnMount}
+				{exampleQueryParams}
+			/>
+		{/if}
+	</div>
 </div>

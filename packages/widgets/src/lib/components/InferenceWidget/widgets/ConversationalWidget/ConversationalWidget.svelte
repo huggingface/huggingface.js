@@ -235,7 +235,17 @@
 </script>
 
 <WidgetWrapper {apiUrl} {includeCredentials} {model} let:WidgetInfo let:WidgetHeader let:WidgetFooter>
-	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyWidgetExample} {validateExample} />
+	<WidgetHeader
+		{noTitle}
+		{model}
+		{isLoading}
+		{isDisabled}
+		{callApiOnMount}
+		{applyWidgetExample}
+		{validateExample}
+		on:reset={clearConversation}
+		showReset={!!messages.length}
+	/>
 	<WidgetOutputConvo modelId={model.id} {messages} />
 
 	<WidgetQuickInput
