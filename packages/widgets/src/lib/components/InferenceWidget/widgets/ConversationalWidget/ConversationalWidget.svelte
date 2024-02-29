@@ -225,6 +225,13 @@
 	function validateExample(sample: WidgetExample): sample is Example {
 		return (isTextInput(sample) || isChatInput(sample)) && (!sample.output || isValidOutputText(sample.output));
 	}
+
+	async function clearConversation() {
+		abort?.abort();
+		messages = [];
+		text = "";
+		await tick();
+	}
 </script>
 
 <WidgetWrapper {apiUrl} {includeCredentials} {model} let:WidgetInfo let:WidgetHeader let:WidgetFooter>
