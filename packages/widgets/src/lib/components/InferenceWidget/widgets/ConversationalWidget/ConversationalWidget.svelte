@@ -10,8 +10,9 @@
 		WidgetExampleOutputText,
 		WidgetExampleChatInput,
 		WidgetExample,
+		AddedToken,
 	} from "@huggingface/tasks";
-	import { AddedToken, SPECIAL_TOKENS_ATTRIBUTES } from "@huggingface/tasks";
+	import { SPECIAL_TOKENS_ATTRIBUTES } from "@huggingface/tasks";
 	import { HfInference } from "@huggingface/inference";
 
 	import type { ChatMessage } from "@huggingface/tasks";
