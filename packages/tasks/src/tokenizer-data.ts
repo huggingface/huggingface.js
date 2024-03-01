@@ -13,7 +13,7 @@ export const SPECIAL_TOKENS_ATTRIBUTES = [
  * Public interface for a tokenizer's special tokens mapping
  */
 export interface AddedToken {
-	__type?: "AddedToken";
+	__type: "AddedToken";
 	content?: string;
 	lstrip?: boolean;
 	normalized?: boolean;
