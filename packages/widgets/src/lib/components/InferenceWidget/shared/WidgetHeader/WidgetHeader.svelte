@@ -82,7 +82,7 @@
 	{/if}
 
 	<div class="flex gap-2 ml-auto">
-		{#if showReset}
+		{#if showReset && !isDisabled}
 			<button class="flex items-center mb-1.5 text-gray-400" on:click={() => dispatch("reset")} transition:fade>
 				<IconRefresh />
 			</button>
