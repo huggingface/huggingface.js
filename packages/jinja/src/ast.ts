@@ -166,6 +166,21 @@ export class FilterExpression extends Expression {
 }
 
 /**
+ * An operation with two sides, separated by the "is" operator.
+ */
+export class TestExpression extends Expression {
+	override type = "TestExpression";
+
+	constructor(
+		public operand: Expression,
+		public negate: boolean,
+		public test: Identifier // TODO: Add support for non-identifier tests
+	) {
+		super();
+	}
+}
+
+/**
  * An operation with one side (operator on the left).
  */
 export class UnaryExpression extends Expression {

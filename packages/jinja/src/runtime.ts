@@ -12,6 +12,7 @@ import type {
 	Identifier,
 	BinaryExpression,
 	FilterExpression,
+	TestExpression,
 	UnaryExpression,
 	SliceExpression,
 } from "./ast";
@@ -251,7 +252,7 @@ export class Interpreter {
 	}
 
 	/**
-	 * Evaulates expressions following the binary operation type.
+	 * Evaluates expressions following the binary operation type.
 	 */
 	private evaluateBinaryExpression(node: BinaryExpression, environment: Environment): AnyRuntimeValue {
 		const left = this.evaluate(node.left, environment);
@@ -332,7 +333,7 @@ export class Interpreter {
 	}
 
 	/**
-	 * Evaulates expressions following the filter operation type.
+	 * Evaluates expressions following the filter operation type.
 	 */
 	private evaluateFilterExpression(node: FilterExpression, environment: Environment): AnyRuntimeValue {
 		const operand = this.evaluate(node.operand, environment);
@@ -407,7 +408,77 @@ export class Interpreter {
 	}
 
 	/**
-	 * Evaulates expressions following the unary operation type.
+	 * Evaluates expressions following the test operation type.
+	 */
+	private evaluateTestExpression(node: TestExpression, environment: Environment): BooleanValue {
+		// For now, we only support the built-in tests
+		// https://jinja.palletsprojects.com/en/3.0.x/templates/#list-of-builtin-tests
+		//
+		// TODO: Add support for non-identifier tests. e.g., divisibleby(number)
+
+		const result: boolean = (() => {
+			try {
+				const operand = this.evaluate(node.operand, environment);
+
+				switch (node.test.value) {
+					case "boolean":
+						return operand.type === "BooleanValue";
+					case "callable":
+						return operand instanceof FunctionValue;
+					case "odd":
+						if (operand.type !== "NumericValue") {
+							throw new Error(`Cannot apply test "odd" to type: ${operand.type}`);
+						}
+						return (operand as NumericValue).value % 2 !== 0;
+					case "even":
+						if (operand.type !== "NumericValue") {
+							throw new Error(`Cannot apply test "even" to type: ${operand.type}`);
+						}
+						return (operand as NumericValue).value % 2 === 0;
+					case "false":
+						return operand.type === "BooleanValue" && !(operand as BooleanValue).value;
+					case "true":
+						return operand.type === "BooleanValue" && (operand as BooleanValue).value;
+					case "number":
+						return operand.type === "NumericValue";
+					case "integer":
+						return operand.type === "NumericValue" && Number.isInteger((operand as NumericValue).value);
+					case "iterable":
+						return operand instanceof ArrayValue || operand instanceof StringValue;
+					case "lower": {
+						const str = (operand as StringValue).value;
+						return operand.type === "StringValue" && str === str.toLowerCase();
+					}
+					case "upper": {
+						const str = (operand as StringValue).value;
+						return operand.type === "StringValue" && str === str.toUpperCase();
+					}
+					case "none":
+						return operand.type === "NullValue";
+					case "defined":
+						return true;
+					case "undefined":
+						return false;
+				}
+				throw new Error(`Unknown test: ${node.test.value}`);
+			} catch (e) {
+				if (node.operand.type === "Identifier") {
+					// Special cases where we want to check if a variable is defined
+					if (node.test.value === "defined") {
+						return false;
+					} else if (node.test.value === "undefined") {
+						return true;
+					}
+				}
+				throw e;
+			}
+		})();
+
+		return new BooleanValue(node.negate ? !result : result);
+	}
+
+	/**
+	 * Evaluates expressions following the unary operation type.
 	 */
 	private evaluateUnaryExpression(node: UnaryExpression, environment: Environment): AnyRuntimeValue {
 		const argument = this.evaluate(node.argument, environment);
@@ -623,6 +694,8 @@ export class Interpreter {
 				return this.evaluateBinaryExpression(statement as BinaryExpression, environment);
 			case "FilterExpression":
 				return this.evaluateFilterExpression(statement as FilterExpression, environment);
+			case "TestExpression":
+				return this.evaluateTestExpression(statement as TestExpression, environment);
 
 			default:
 				throw new SyntaxError(`Unknown node type: ${statement.type}`);

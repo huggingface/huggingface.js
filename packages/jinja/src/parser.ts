@@ -14,6 +14,7 @@ import {
 	BooleanLiteral,
 	BinaryExpression,
 	FilterExpression,
+	TestExpression,
 	UnaryExpression,
 	SliceExpression,
 } from "./ast";
@@ -354,15 +355,43 @@ export function parse(tokens: Token[]): Program {
 	}
 
 	function parseMultiplicativeExpression(): Statement {
-		let left = parseFilterExpression();
+		let left = parseTestExpression();
+
+		// Multiplicative operators have higher precedence than test expressions
+		// e.g., (4 * 4 is divisibleby(2)) evaluates as (4 * (4 is divisibleby(2)))
 
 		while (is(TOKEN_TYPES.MultiplicativeBinaryOperator)) {
 			const operator = tokens[current];
 			++current;
-			const right = parseFilterExpression();
+			const right = parseTestExpression();
 			left = new BinaryExpression(operator, left, right);
 		}
 		return left;
+	}
+
+	function parseTestExpression(): Statement {
+		let operand = parseFilterExpression();
+
+		while (is(TOKEN_TYPES.Is)) {
+			// Support chaining tests
+			++current; // consume is
+			const negate = is(TOKEN_TYPES.Not);
+			if (negate) {
+				++current; // consume not
+			}
+
+			let filter = parsePrimaryExpression();
+			if (filter instanceof BooleanLiteral) {
+				// Special case: treat boolean literals as identifiers
+				filter = new Identifier(filter.value.toString());
+			}
+			if (!(filter instanceof Identifier)) {
+				throw new SyntaxError(`Expected identifier for the test`);
+			}
+			// TODO: Add support for non-identifier tests
+			operand = new TestExpression(operand, negate, filter);
+		}
+		return operand;
 	}
 
 	function parseFilterExpression(): Statement {
