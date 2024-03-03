@@ -27,6 +27,12 @@ export function parse(tokens: Token[]): Program {
 	const program = new Program([]);
 	let current = 0;
 
+	/**
+	 * Consume the next token if it matches the expected type, otherwise throw an error.
+	 * @param type The expected token type
+	 * @param error The error message to throw if the token does not match the expected type
+	 * @returns The consumed token
+	 */
 	function expect(type: string, error: string): Token {
 		const prev = tokens[current++];
 		if (!prev || prev.type !== type) {

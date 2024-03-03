@@ -491,7 +491,7 @@ export class Interpreter {
 		}
 	}
 
-	private evalProgram(program: Program, environment: Environment): AnyRuntimeValue {
+	private evalProgram(program: Program, environment: Environment): StringValue {
 		return this.evaluateBlock(program.body, environment);
 	}
 
@@ -507,9 +507,6 @@ export class Interpreter {
 				result += lastEvaluated.value;
 			}
 		}
-
-		// Since `trim_blocks` is enabled, we remove the first newline after the template tag
-		result = result.replace(/^\n/, "");
 
 		return new StringValue(result);
 	}

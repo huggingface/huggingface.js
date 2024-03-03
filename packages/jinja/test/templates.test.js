@@ -1860,9 +1860,7 @@ const EXPECTED_OUTPUTS = {
 	MEMBERSHIP_NEGATION_2: "|false|true|false|true|false|true|",
 
 	// Escaped characters
-	// NOTE: Since `trim_blocks` is enabled, we remove the first newline after the template tag,
-	// meaning the first newline in the output is not present
-	ESCAPED_CHARS: `\t'"\\|\n|\t|'|"|\\|`,
+	ESCAPED_CHARS: `\n\t'"\\|\n|\t|'|"|\\|`,
 
 	// Substring inclusion
 	SUBSTRING_INCLUSION: `|true|true|false|true|false|true|false|`,

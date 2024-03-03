@@ -139,12 +139,42 @@ const ESCAPE_CHARACTERS = new Map([
 	["\\", "\\"], // Backslash
 ]);
 
+export interface PreprocessOptions {
+	trim_blocks?: boolean;
+	lstrip_blocks?: boolean;
+}
+
+function preprocess(template: string, options: PreprocessOptions = {}): string {
+	// According to https://jinja.palletsprojects.com/en/3.0.x/templates/#whitespace-control
+
+	// In the default configuration:
+	//  - a single trailing newline is stripped if present
+	//  - other whitespace (spaces, tabs, newlines etc.) is returned unchanged
+	if (template.endsWith("\n")) {
+		template = template.slice(0, -1);
+	}
+
+	if (options.trim_blocks) {
+		// If an application configures Jinja to trim_blocks, the first newline after
+		// a template tag is removed automatically (like in PHP).
+		template = template.replace(/%}\n/g, "%}");
+	}
+	if (options.lstrip_blocks) {
+		// The lstrip_blocks option can also be set to strip tabs and spaces from the
+		// beginning of a line to the start of a block. (Nothing will be stripped if
+		// there are other characters before the start of the block.)
+		template = template.replace(/^[ \t]*{%/gm, "{%");
+	}
+
+	return template.replace(/-%}\s*/g, "%}").replace(/\s*{%-/g, "{%");
+}
+
 /**
  * Generate a list of tokens from a source string.
  */
-export function tokenize(source: string): Token[] {
+export function tokenize(source: string, options: PreprocessOptions = {}): Token[] {
 	const tokens: Token[] = [];
-	const src: string = source;
+	const src: string = preprocess(source, options);
 
 	let cursorPosition = 0;
 
