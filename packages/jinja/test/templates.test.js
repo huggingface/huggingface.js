@@ -86,6 +86,10 @@ const TEST_STRINGS = {
 	IS_OPERATOR_3: `|{{ 1 is odd }}|{{ 2 is odd }}|{{ 1 is even }}|{{ 2 is even }}|{{ 2 is number }}|{{ '2' is number }}|{{ 2 is integer }}|{{ '2' is integer }}|`,
 	IS_OPERATOR_4: `|{{ func is callable }}|{{ 2 is callable }}|{{ 1 is iterable }}|{{ 'hello' is iterable }}|`,
 	IS_OPERATOR_5: `|{{ 'a' is lower }}|{{ 'A' is lower }}|{{ 'a' is upper }}|{{ 'A' is upper }}|`,
+
+	// Short-circuit evaluation
+	SHORT_CIRCUIT: `{{ false and raise_exception('This should not be printed') }}`,
+	SHORT_CIRCUIT_1: `{{ true or raise_exception('This should not be printed') }}`,
 };
 
 const TEST_PARSED = {
@@ -1671,6 +1675,28 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 	],
+
+	// Short-circuit evaluation
+	SHORT_CIRCUIT: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "false", type: "BooleanLiteral" },
+		{ value: "and", type: "And" },
+		{ value: "raise_exception", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "This should not be printed", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	SHORT_CIRCUIT_1: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "true", type: "BooleanLiteral" },
+		{ value: "or", type: "Or" },
+		{ value: "raise_exception", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "This should not be printed", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+	],
 };
 
 const TEST_CONTEXT = {
@@ -1799,6 +1825,10 @@ const TEST_CONTEXT = {
 		func: () => {},
 	},
 	IS_OPERATOR_5: {},
+
+	// Short-circuit evaluation
+	SHORT_CIRCUIT: {},
+	SHORT_CIRCUIT_1: {},
 };
 
 const EXPECTED_OUTPUTS = {
@@ -1883,6 +1913,10 @@ const EXPECTED_OUTPUTS = {
 	IS_OPERATOR_3: `|true|false|false|true|true|false|true|false|`,
 	IS_OPERATOR_4: `|true|false|false|true|`,
 	IS_OPERATOR_5: `|true|false|false|true|`,
+
+	// Short-circuit evaluation
+	SHORT_CIRCUIT: `false`,
+	SHORT_CIRCUIT_1: `true`,
 };
 
 describe("Templates", () => {

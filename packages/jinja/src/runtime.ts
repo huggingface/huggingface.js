@@ -256,21 +256,23 @@ export class Interpreter {
 	 */
 	private evaluateBinaryExpression(node: BinaryExpression, environment: Environment): AnyRuntimeValue {
 		const left = this.evaluate(node.left, environment);
-		const right = this.evaluate(node.right, environment);
 
-		// Arbitrary operands
+		// Logical operators
+		// NOTE: Short-circuiting is handled by the `evaluate` function
 		switch (node.operator.value) {
-			// Equality operators
+			case "and":
+				return left.__bool__().value ? this.evaluate(node.right, environment) : left;
+			case "or":
+				return left.__bool__().value ? left : this.evaluate(node.right, environment);
+		}
+
+		// Equality operators
+		const right = this.evaluate(node.right, environment);
+		switch (node.operator.value) {
 			case "==":
 				return new BooleanValue(left.value == right.value);
 			case "!=":
 				return new BooleanValue(left.value != right.value);
-
-			// Logical operators
-			case "and":
-				return left.__bool__().value ? right : left;
-			case "or":
-				return left.__bool__().value ? left : right;
 		}
 
 		if (left instanceof UndefinedValue || right instanceof UndefinedValue) {
@@ -627,22 +629,19 @@ export class Interpreter {
 		for (let i = 0; i < iterable.value.length; ++i) {
 			// Update the loop variable
 			// TODO: Only create object once, then update value?
-			scope.setVariable(
-				"loop",
-				new ObjectValue(
-					new Map(
-						(
-							[
-								["index", new NumericValue(i + 1)],
-								["index0", new NumericValue(i)],
-								["first", new BooleanValue(i === 0)],
-								["last", new BooleanValue(i === iterable.value.length - 1)],
-								["length", new NumericValue(iterable.value.length)],
-							] as [string, AnyRuntimeValue][]
-						).map(([key, value]) => [key, value])
-					)
-				)
-			);
+			const loop = new Map([
+				["index", new NumericValue(i + 1)],
+				["index0", new NumericValue(i)],
+				["revindex", new NumericValue(iterable.value.length - i)],
+				["revindex0", new NumericValue(iterable.value.length - i - 1)],
+				["first", new BooleanValue(i === 0)],
+				["last", new BooleanValue(i === iterable.value.length - 1)],
+				["length", new NumericValue(iterable.value.length)],
+				["previtem", i > 0 ? iterable.value[i - 1] : new UndefinedValue()],
+				["nextitem", i < iterable.value.length - 1 ? iterable.value[i + 1] : new UndefinedValue()],
+			] as [string, AnyRuntimeValue][]);
+
+			scope.setVariable("loop", new ObjectValue(loop));
 
 			// For this iteration, set the loop variable to the current element
 			scope.setVariable(node.loopvar.value, iterable.value[i]);
