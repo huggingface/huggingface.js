@@ -17,6 +17,7 @@ import {
 	TestExpression,
 	UnaryExpression,
 	SliceExpression,
+	KeywordArgumentExpression,
 } from "./ast";
 
 /**
@@ -198,6 +199,7 @@ export function parse(tokens: Token[]): Program {
 		// Choose parse function with lowest precedence
 		return parseLogicalOrExpression();
 	}
+
 	function parseLogicalOrExpression(): Statement {
 		let left = parseLogicalAndExpression();
 		while (is(TOKEN_TYPES.Or)) {
@@ -285,21 +287,36 @@ export function parse(tokens: Token[]): Program {
 		// add (x + 5, foo())
 		expect(TOKEN_TYPES.OpenParen, "Expected opening parenthesis for arguments list");
 
-		const args = is(TOKEN_TYPES.CloseParen) ? [] : parseArgumentsList();
+		const args = parseArgumentsList();
 
 		expect(TOKEN_TYPES.CloseParen, "Expected closing parenthesis for arguments list");
 		return args;
 	}
 	function parseArgumentsList(): Statement[] {
 		// comma-separated arguments list
-		const args = [parseExpression()]; // Update when we allow assignment expressions
 
-		while (is(TOKEN_TYPES.Comma)) {
-			++current; // consume comma
-			args.push(parseExpression());
+		const args = [];
+		while (!is(TOKEN_TYPES.CloseParen)) {
+			let argument = parseExpression();
+
+			if (is(TOKEN_TYPES.Equals)) {
+				// keyword argument
+				// e.g., func(x = 5, y = a or b)
+				++current; // consume equals
+				if (!(argument instanceof Identifier)) {
+					throw new SyntaxError(`Expected identifier for keyword argument`);
+				}
+				const value = parseExpression();
+				argument = new KeywordArgumentExpression(argument, value);
+			}
+			args.push(argument);
+			if (is(TOKEN_TYPES.Comma)) {
+				++current; // consume comma
+			}
 		}
 		return args;
 	}
+
 	function parseMemberExpressionArgumentsList(): Statement {
 		// NOTE: This also handles slice expressions colon-separated arguments list
 		// e.g., ['test'], [0], [:2], [1:], [1:2], [1:2:3]

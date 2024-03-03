@@ -90,6 +90,11 @@ const TEST_STRINGS = {
 	// Short-circuit evaluation
 	SHORT_CIRCUIT: `{{ false and raise_exception('This should not be printed') }}`,
 	SHORT_CIRCUIT_1: `{{ true or raise_exception('This should not be printed') }}`,
+
+	// Namespaces
+	NAMESPACE: `{% set ns = namespace() %}{% set ns.foo = 'bar' %}{{ ns.foo }}`,
+	NAMESPACE_1: `{% set ns = namespace(default=false) %}{{ ns.default }}`,
+	NAMESPACE_2: `{% set ns = namespace(default=false, number=1+1) %}|{{ ns.default }}|{{ ns.number }}|`,
 };
 
 const TEST_PARSED = {
@@ -1697,6 +1702,81 @@ const TEST_PARSED = {
 		{ value: ")", type: "CloseParen" },
 		{ value: "}}", type: "CloseExpression" },
 	],
+
+	// Namespaces
+	NAMESPACE: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Set" },
+		{ value: "ns", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "namespace", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Set" },
+		{ value: "ns", type: "Identifier" },
+		{ value: ".", type: "Dot" },
+		{ value: "foo", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "bar", type: "StringLiteral" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "ns", type: "Identifier" },
+		{ value: ".", type: "Dot" },
+		{ value: "foo", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	NAMESPACE_1: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Set" },
+		{ value: "ns", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "namespace", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "default", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "false", type: "BooleanLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "ns", type: "Identifier" },
+		{ value: ".", type: "Dot" },
+		{ value: "default", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	NAMESPACE_2: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Set" },
+		{ value: "ns", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "namespace", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "default", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "false", type: "BooleanLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "number", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: "+", type: "AdditiveBinaryOperator" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "ns", type: "Identifier" },
+		{ value: ".", type: "Dot" },
+		{ value: "default", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "ns", type: "Identifier" },
+		{ value: ".", type: "Dot" },
+		{ value: "number", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
 };
 
 const TEST_CONTEXT = {
@@ -1829,6 +1909,11 @@ const TEST_CONTEXT = {
 	// Short-circuit evaluation
 	SHORT_CIRCUIT: {},
 	SHORT_CIRCUIT_1: {},
+
+	// Namespaces
+	NAMESPACE: {},
+	NAMESPACE_1: {},
+	NAMESPACE_2: {},
 };
 
 const EXPECTED_OUTPUTS = {
@@ -1917,6 +2002,11 @@ const EXPECTED_OUTPUTS = {
 	// Short-circuit evaluation
 	SHORT_CIRCUIT: `false`,
 	SHORT_CIRCUIT_1: `true`,
+
+	// Namespaces
+	NAMESPACE: `bar`,
+	NAMESPACE_1: `false`,
+	NAMESPACE_2: `|false|2|`,
 };
 
 describe("Templates", () => {

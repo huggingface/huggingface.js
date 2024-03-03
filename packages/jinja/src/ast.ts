@@ -216,3 +216,14 @@ export class SliceExpression extends Expression {
 		super();
 	}
 }
+
+export class KeywordArgumentExpression extends Expression {
+	override type = "KeywordArgumentExpression";
+
+	constructor(
+		public key: Identifier,
+		public value: Expression
+	) {
+		super();
+	}
+}

@@ -15,6 +15,7 @@ import type {
 	TestExpression,
 	UnaryExpression,
 	SliceExpression,
+	KeywordArgumentExpression,
 } from "./ast";
 import { slice, titleCase } from "./utils";
 
@@ -174,7 +175,20 @@ export class Environment {
 	/**
 	 * The variables declared in this environment.
 	 */
-	variables: Map<string, AnyRuntimeValue> = new Map();
+	variables: Map<string, AnyRuntimeValue> = new Map([
+		[
+			"namespace",
+			new FunctionValue((args) => {
+				if (args.length === 0) {
+					return new ObjectValue(new Map());
+				}
+				if (args.length !== 1 || !(args[0] instanceof ObjectValue)) {
+					throw new Error("`namespace` expects either zero arguments or a single object argument");
+				}
+				return args[0];
+			}),
+		],
+	]);
 
 	constructor(public parent?: Environment) {}
 
@@ -518,7 +532,22 @@ export class Interpreter {
 	}
 
 	private evaluateCallExpression(expr: CallExpression, environment: Environment): AnyRuntimeValue {
-		const args = expr.args.map((arg) => this.evaluate(arg, environment) as AnyRuntimeValue);
+		// Accumulate all keyword arguments into a single object, which will be
+		// used as the final argument in the call function.
+		const args: AnyRuntimeValue[] = [];
+		const kwargs = new Map();
+		for (const argument of expr.args) {
+			if (argument.type === "KeywordArgumentExpression") {
+				const kwarg = argument as KeywordArgumentExpression;
+				kwargs.set(kwarg.key.value, this.evaluate(kwarg.value, environment));
+			} else {
+				args.push(this.evaluate(argument, environment));
+			}
+		}
+		if (kwargs.size > 0) {
+			args.push(new ObjectValue(kwargs));
+		}
+
 		const fn = this.evaluate(expr.callee, environment);
 		if (fn.type !== "FunctionValue") {
 			throw new Error(`Cannot call something that is not a function: got ${fn.type}`);
@@ -601,12 +630,25 @@ export class Interpreter {
 	}
 
 	private evaluateSet(node: SetStatement, environment: Environment): NullValue {
-		if (node.assignee.type !== "Identifier") {
+		const rhs = this.evaluate(node.value, environment);
+		if (node.assignee.type === "Identifier") {
+			const variableName = (node.assignee as Identifier).value;
+			environment.setVariable(variableName, rhs);
+		} else if (node.assignee.type === "MemberExpression") {
+			const member = node.assignee as MemberExpression;
+
+			const object = this.evaluate(member.object, environment);
+			if (!(object instanceof ObjectValue)) {
+				throw new Error("Cannot assign to member of non-object");
+			}
+			if (member.property.type !== "Identifier") {
+				throw new Error("Cannot assign to member with non-identifier property");
+			}
+			object.value.set((member.property as Identifier).value, rhs);
+		} else {
 			throw new Error(`Invalid LHS inside assignment expression: ${JSON.stringify(node.assignee)}`);
 		}
 
-		const variableName = (node.assignee as Identifier).value;
-		environment.setVariable(variableName, this.evaluate(node.value, environment));
 		return new NullValue();
 	}
 
