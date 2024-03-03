@@ -166,7 +166,11 @@ function preprocess(template: string, options: PreprocessOptions = {}): string {
 		template = template.replace(/^[ \t]*{%/gm, "{%");
 	}
 
-	return template.replace(/-%}\s*/g, "%}").replace(/\s*{%-/g, "{%");
+	return template
+		.replace(/-%}\s*/g, "%}")
+		.replace(/\s*{%-/g, "{%")
+		.replace(/-}}\s*/g, "}}")
+		.replace(/\s*{{-/g, "{{");
 }
 
 /**
