@@ -10,6 +10,7 @@
 		WidgetExampleOutputText,
 		WidgetExampleChatInput,
 		WidgetExample,
+		AddedToken,
 	} from "@huggingface/tasks";
 	import { SPECIAL_TOKENS_ATTRIBUTES } from "@huggingface/tasks";
 	import { HfInference } from "@huggingface/inference";
@@ -186,6 +187,8 @@
 			const value = tokenizerConfig[key];
 			if (typeof value === "string") {
 				specialTokensMap[key] = value;
+			} else if (typeof value === "object" && value.__type === "AddedToken" && value.content) {
+				specialTokensMap[key] = (value as AddedToken).content;
 			}
 		}
 		return specialTokensMap;

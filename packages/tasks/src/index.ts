@@ -17,7 +17,7 @@ export {
 export { ALL_DISPLAY_MODEL_LIBRARY_KEYS, ALL_MODEL_LIBRARY_KEYS, MODEL_LIBRARIES_UI_ELEMENTS } from "./model-libraries";
 export type { LibraryUiElement, ModelLibraryKey } from "./model-libraries";
 export type { ModelData, TransformersInfo } from "./model-data";
-export type { SpecialTokensMap, TokenizerConfig } from "./tokenizer-data";
+export type { AddedToken, SpecialTokensMap, TokenizerConfig } from "./tokenizer-data";
 export type {
 	ChatMessage,
 	WidgetExample,
