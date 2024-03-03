@@ -1,4 +1,24 @@
 /**
+ * Function that mimics Python's range() function.
+ * @param start The start value of the range.
+ * @param stop The stop value of the range. If not provided, start will be 0 and stop will be the provided start value.
+ * @param step The step value of the range. Defaults to 1.
+ * @returns The range of numbers.
+ */
+export function range(start: number, stop?: number, step = 1): number[] {
+	if (stop === undefined) {
+		stop = start;
+		start = 0;
+	}
+
+	const result: number[] = [];
+	for (let i = start; i < stop; i += step) {
+		result.push(i);
+	}
+	return result;
+}
+
+/**
  * Function that mimics Python's array slicing.
  * @param array The array to slice.
  * @param start The start index of the slice. Defaults to 0.

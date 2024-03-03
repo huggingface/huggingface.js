@@ -15,6 +15,7 @@ import { parse } from "./parser";
 import { Environment, Interpreter } from "./runtime";
 import type { Program } from "./ast";
 import type { StringValue } from "./runtime";
+import { range } from "./utils";
 
 export class Template {
 	parsed: Program;
@@ -40,6 +41,7 @@ export class Template {
 		env.set("raise_exception", (args: string) => {
 			throw new Error(args);
 		});
+		env.set("range", range);
 
 		// Add user-defined variables
 		for (const [key, value] of Object.entries(items)) {
