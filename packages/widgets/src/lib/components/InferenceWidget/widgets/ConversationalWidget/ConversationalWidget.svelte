@@ -200,7 +200,7 @@
 			const value = tokenizerConfig[key];
 			if (typeof value === "string") {
 				specialTokensMap[key] = value;
-			} else if (typeof value === "object" && value.__type === "AddedToken" && value.content) {
+			} else if (typeof value === "object" && !!value && value.__type === "AddedToken" && value.content) {
 				specialTokensMap[key] = (value as AddedToken).content;
 			}
 		}
