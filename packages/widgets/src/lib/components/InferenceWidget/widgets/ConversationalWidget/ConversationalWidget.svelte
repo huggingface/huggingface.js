@@ -22,9 +22,8 @@
 	import { addInferenceParameters, updateUrl } from "../../shared/helpers.js";
 	import { widgetStates, getTgiSupportedModels } from "../../stores.js";
 	import type { Writable } from "svelte/store";
-	import { isChatInput, isTextInput } from "../../shared/inputValidation.js";
+	import { isChatInput, isObject, isTextInput } from "../../shared/inputValidation.js";
 	import { isValidOutputText } from "../../shared/outputValidation.js";
-	import WidgetExamples from "../../shared/WidgetExamples/WidgetExamples.svelte";
 
 	export let apiToken: WidgetProps["apiToken"];
 	export let apiUrl: WidgetProps["apiUrl"];
@@ -49,6 +48,7 @@
 	let compiledTemplate: Template;
 	let tokenizerConfig: TokenizerConfig;
 	let inferenceClient: HfInference | undefined = undefined;
+	let abort: AbortController | undefined = undefined;
 
 	// Check config and compile template
 	onMount(() => {
@@ -146,7 +146,10 @@
 		};
 		addInferenceParameters(input, model);
 
+		isLoading = true;
+		abort = new AbortController();
 		text = "";
+		error = "";
 		try {
 			if ($tgiSupportedModels?.has(model.id)) {
 				console.debug("Starting text generation using the TGI streaming API");
@@ -155,11 +158,14 @@
 					content: "",
 				} satisfies ChatMessage;
 				const previousMessages = [...messages];
-				const tokenStream = inferenceClient.textGenerationStream({
-					...input,
-					model: model.id,
-					accessToken: apiToken,
-				});
+				const tokenStream = inferenceClient.textGenerationStream(
+					{
+						...input,
+						model: model.id,
+						accessToken: apiToken,
+					},
+					{ signal: abort?.signal }
+				);
 				for await (const newToken of tokenStream) {
 					if (newToken.token.special) continue;
 					newMessage.content = newMessage.content + newToken.token.text;
@@ -171,13 +177,20 @@
 				input.parameters.max_new_tokens = 100;
 				const output = await inferenceClient.textGeneration(
 					{ ...input, model: model.id, accessToken: apiToken },
-					{ includeCredentials, dont_load_model: !withModelLoading }
+					{ includeCredentials, dont_load_model: !withModelLoading, signal: abort?.signal }
 				);
 				messages = [...messages, { role: "assistant", content: output.generated_text }];
 				await tick();
 			}
 		} catch (e) {
-			error = `Something went wrong while requesting the Inference API: "${(e as Error).message}"`;
+			if (!!e && typeof e === "object" && "message" in e && typeof e.message === "string") {
+				error = e.message;
+			} else {
+				error = `Something went wrong with the request.`;
+			}
+		} finally {
+			isLoading = false;
+			abort = undefined;
 		}
 	}
 
@@ -218,10 +231,28 @@
 	function validateExample(sample: WidgetExample): sample is Example {
 		return (isTextInput(sample) || isChatInput(sample)) && (!sample.output || isValidOutputText(sample.output));
 	}
+
+	async function clearConversation() {
+		error = "";
+		abort?.abort();
+		messages = [];
+		text = "";
+		await tick();
+	}
 </script>
 
 <WidgetWrapper {apiUrl} {includeCredentials} {model} let:WidgetInfo let:WidgetHeader let:WidgetFooter>
-	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyWidgetExample} {validateExample} />
+	<WidgetHeader
+		{noTitle}
+		{model}
+		{isLoading}
+		{isDisabled}
+		{callApiOnMount}
+		{applyWidgetExample}
+		{validateExample}
+		on:reset={clearConversation}
+		showReset={!!messages.length}
+	/>
 	<WidgetOutputConvo modelId={model.id} {messages} />
 
 	<WidgetQuickInput

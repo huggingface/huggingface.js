@@ -14,7 +14,7 @@ import type {
 	WidgetExampleZeroShotTextInput,
 } from "@huggingface/tasks";
 
-function isObject(arg: unknown): arg is Record<string, unknown> {
+export function isObject(arg: unknown): arg is Record<string, unknown> {
 	return !!arg && arg?.constructor === Object;
 }
 function isStrArray(arg: unknown): arg is string[] {

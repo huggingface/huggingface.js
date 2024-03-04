@@ -12,6 +12,7 @@
 
 	export let isLoading = false;
 	export let callApiOnMount: WidgetProps["callApiOnMount"];
+	export let classNames: string;
 	export let exampleQueryParams: WidgetExampleAttribute[] = [];
 	export let applyWidgetExample: (sample: TWidgetExample, opts?: ExampleRunOpts) => void;
 
@@ -117,7 +118,7 @@
 
 <svelte:window on:click={onClick} />
 
-<div class="ml-auto flex gap-x-1">
+<div class={classNames}>
 	<!-- Example Groups -->
 	{#if exampleGroups.length > 1}
 		<WidgetExamplesGroup
