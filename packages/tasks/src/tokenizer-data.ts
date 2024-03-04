@@ -21,7 +21,7 @@ export interface AddedToken {
 	single_word?: boolean;
 }
 export type SpecialTokensMap = {
-	[key in (typeof SPECIAL_TOKENS_ATTRIBUTES)[number]]?: string | AddedToken;
+	[key in (typeof SPECIAL_TOKENS_ATTRIBUTES)[number]]?: string | AddedToken | null;
 };
 /**
  * Public interface for tokenizer config
