@@ -108,6 +108,8 @@
 
 	async function getOutput({
 		withModelLoading = false,
+		isOnLoadCall = false,
+		useCache = true,
 		exampleOutput = undefined,
 	}: InferenceRunOpts<WidgetExampleOutputText> = {}) {
 		if (exampleOutput) {
@@ -151,7 +153,13 @@
 		text = "";
 		error = "";
 		try {
-			const opts = { dont_load_model: !withModelLoading, includeCredentials, signal: abort?.signal } satisfies Options;
+			const opts = {
+				dont_load_model: isOnLoadCall,
+				includeCredentials,
+				signal: abort?.signal,
+				use_cache: useCache,
+				wait_for_model: withModelLoading,
+			} satisfies Options;
 
 			if ($tgiSupportedModels?.has(model.id)) {
 				console.debug("Starting text generation using the TGI streaming API");
