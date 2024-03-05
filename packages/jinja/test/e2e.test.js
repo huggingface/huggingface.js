@@ -18,6 +18,23 @@ const EXAMPLE_CHAT_WITH_SYSTEM = [
 	...EXAMPLE_CHAT,
 ];
 
+const EXAMPLE_FUNCTION_CALLING = [
+	{
+		role: "assistant",
+		content: null,
+		tool_calls: [
+			{
+				type: "function",
+				function: {
+					name: "get_current_weather",
+					arguments: '{\n  "location": "Hanoi"\n}',
+				},
+			},
+		],
+	},
+	{ role: "user", content: "what's the weather like in Hanoi?" },
+];
+
 /**
  * Defined in https://github.com/huggingface/transformers
  * Keys correspond to `model_type` in the transformers repo.
@@ -285,6 +302,16 @@ const TEST_CUSTOM_TEMPLATES = Object.freeze({
 			eos_token: "<|EOT|>",
 		},
 		target: `<｜begin▁of▁sentence｜>You are an AI programming assistant, utilizing the Deepseek Coder model, developed by Deepseek Company, and you only answer questions related to computer science. For politically sensitive questions, security and privacy issues, and other non-computer science questions, you will refuse to answer\n### Instruction:\nHello, how are you?\n### Response:\nI'm doing great. How can I help you today?\n<|EOT|>\n### Instruction:\nI'd like to show off how chat templating works!\n`,
+	},
+	"meetkai/functionary-medium-v2.2": {
+		chat_template: `{#v2.2#}\n{% for message in messages %}\n{% if message['role'] == 'user' or message['role'] == 'system' %}\n{{ '<|from|>' + message['role'] + '\n<|recipient|>all\n<|content|>' + message['content'] + '\n' }}{% elif message['role'] == 'tool' %}\n{{ '<|from|>' + message['name'] + '\n<|recipient|>all\n<|content|>' + message['content'] + '\n' }}{% else %}\n{% set contain_content='no'%}\n{% if message['content'] is not none %}\n{{ '<|from|>assistant\n<|recipient|>all\n<|content|>' + message['content'] }}{% set contain_content='yes'%}\n{% endif %}\n{% if 'tool_calls' in message and message['tool_calls'] is not none %}\n{% for tool_call in message['tool_calls'] %}\n{% set prompt='<|from|>assistant\n<|recipient|>' + tool_call['function']['name'] + '\n<|content|>' + tool_call['function']['arguments'] %}\n{% if loop.index == 1 and contain_content == \"no\" %}\n{{ prompt }}{% else %}\n{{ '\n' + prompt}}{% endif %}\n{% endfor %}\n{% endif %}\n{{ '<|stop|>\n' }}{% endif %}\n{% endfor %}\n{% if add_generation_prompt %}{{ '<|from|>assistant\n<|recipient|>' }}{% endif %}`,
+		data: {
+			messages: EXAMPLE_FUNCTION_CALLING,
+			bos_token: "<s>",
+			eos_token: "</s>",
+			add_generation_prompt: false,
+		},
+		target: `<|from|>assistant\n<|recipient|>get_current_weather\n<|content|>{\n  "location": "Hanoi"\n}<|stop|>\n<|from|>user\n<|recipient|>all\n<|content|>what\'s the weather like in Hanoi?\n`,
 	},
 });
 
