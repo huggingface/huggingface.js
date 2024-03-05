@@ -13,7 +13,7 @@
 		AddedToken,
 	} from "@huggingface/tasks";
 	import { SPECIAL_TOKENS_ATTRIBUTES } from "@huggingface/tasks";
-	import { HfInference } from "@huggingface/inference";
+	import { HfInference, type Options } from "@huggingface/inference";
 
 	import type { ChatMessage } from "@huggingface/tasks";
 	import WidgetOutputConvo from "../../shared/WidgetOutputConvo/WidgetOutputConvo.svelte";
@@ -151,6 +151,8 @@
 		text = "";
 		error = "";
 		try {
+			const opts = { dont_load_model: !withModelLoading, includeCredentials, signal: abort?.signal } satisfies Options;
+
 			if ($tgiSupportedModels?.has(model.id)) {
 				console.debug("Starting text generation using the TGI streaming API");
 				let newMessage = {
@@ -164,7 +166,7 @@
 						model: model.id,
 						accessToken: apiToken,
 					},
-					{ signal: abort?.signal }
+					opts
 				);
 				for await (const newToken of tokenStream) {
 					if (newToken.token.special) continue;
@@ -175,10 +177,7 @@
 			} else {
 				console.debug("Starting text generation using the synchronous API");
 				input.parameters.max_new_tokens = 100;
-				const output = await inferenceClient.textGeneration(
-					{ ...input, model: model.id, accessToken: apiToken },
-					{ includeCredentials, dont_load_model: !withModelLoading, signal: abort?.signal }
-				);
+				const output = await inferenceClient.textGeneration({ ...input, model: model.id, accessToken: apiToken }, opts);
 				messages = [...messages, { role: "assistant", content: output.generated_text }];
 				await tick();
 			}
