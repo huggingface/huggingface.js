@@ -22,7 +22,7 @@
 	import { addInferenceParameters, updateUrl } from "../../shared/helpers.js";
 	import { widgetStates, getTgiSupportedModels } from "../../stores.js";
 	import type { Writable } from "svelte/store";
-	import { isChatInput, isObject, isTextInput } from "../../shared/inputValidation.js";
+	import { isChatInput, isTextInput } from "../../shared/inputValidation.js";
 	import { isValidOutputText } from "../../shared/outputValidation.js";
 
 	export let apiToken: WidgetProps["apiToken"];
@@ -41,7 +41,7 @@
 
 	let messages: ChatMessage[] = [];
 	let error: string = "";
-	let isLoading = false;
+	let isLoading: boolean = false;
 	let outputJson: string;
 	let text = "";
 
