@@ -97,6 +97,9 @@ const TEST_STRINGS = {
 	NAMESPACE: `{% set ns = namespace() %}{% set ns.foo = 'bar' %}{{ ns.foo }}`,
 	NAMESPACE_1: `{% set ns = namespace(default=false) %}{{ ns.default }}`,
 	NAMESPACE_2: `{% set ns = namespace(default=false, number=1+1) %}|{{ ns.default }}|{{ ns.number }}|`,
+
+	// Object operators
+	OBJECT_OPERATORS: `|{{ 'known' in obj }}|{{ 'known' not in obj }}|{{ 'unknown' in obj }}|{{ 'unknown' not in obj }}|`,
 };
 
 const TEST_PARSED = {
@@ -1835,6 +1838,35 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 	],
+
+	// Object operators
+	OBJECT_OPERATORS: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "known", type: "StringLiteral" },
+		{ value: "in", type: "In" },
+		{ value: "obj", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "known", type: "StringLiteral" },
+		{ value: "not in", type: "NotIn" },
+		{ value: "obj", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "unknown", type: "StringLiteral" },
+		{ value: "in", type: "In" },
+		{ value: "obj", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "unknown", type: "StringLiteral" },
+		{ value: "not in", type: "NotIn" },
+		{ value: "obj", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
 };
 
 const TEST_CONTEXT = {
@@ -1974,6 +2006,13 @@ const TEST_CONTEXT = {
 	NAMESPACE: {},
 	NAMESPACE_1: {},
 	NAMESPACE_2: {},
+
+	// Object operators
+	OBJECT_OPERATORS: {
+		obj: {
+			known: true,
+		},
+	},
 };
 
 const EXPECTED_OUTPUTS = {
@@ -2069,6 +2108,9 @@ const EXPECTED_OUTPUTS = {
 	NAMESPACE: `bar`,
 	NAMESPACE_1: `false`,
 	NAMESPACE_2: `|false|2|`,
+
+	// Object operators
+	OBJECT_OPERATORS: `|true|false|false|true|`,
 };
 
 describe("Templates", () => {

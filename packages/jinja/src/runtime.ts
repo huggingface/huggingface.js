@@ -345,6 +345,15 @@ export class Interpreter {
 			}
 		}
 
+		if (left instanceof StringValue && right instanceof ObjectValue) {
+			switch (node.operator.value) {
+				case "in":
+					return new BooleanValue(right.value.has(left.value));
+				case "not in":
+					return new BooleanValue(!right.value.has(left.value));
+			}
+		}
+
 		throw new SyntaxError(`Unknown operator "${node.operator.value}" between ${left.type} and ${right.type}`);
 	}
 
