@@ -164,7 +164,7 @@ function preprocess(template: string, options: PreprocessOptions = {}): string {
 		// there are other characters before the start of the block.)
 		template = template.replace(/^[ \t]*({[#%])/gm, "$1");
 	}
-	
+
 	if (options.trim_blocks) {
 		// If an application configures Jinja to trim_blocks, the first newline after
 		// a template tag is removed automatically (like in PHP).
