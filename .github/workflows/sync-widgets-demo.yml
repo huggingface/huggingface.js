@@ -35,7 +35,7 @@ jobs:
         run: |
           rm -rf inference-widgets/packages
           mkdir -p inference-widgets/packages
-          cp -r local-demo/packages/shared inference-widgets/shared
+          cp -r local-demo/packages/shared inference-widgets/packages
           cp -r local-demo/packages/widgets inference-widgets/packages
           cp -r local-demo/packages/tasks inference-widgets/packages
           cp -r local-demo/packages/inference inference-widgets/packages
