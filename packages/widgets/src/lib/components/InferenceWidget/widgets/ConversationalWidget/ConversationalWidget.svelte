@@ -52,9 +52,6 @@
 
 	// Check config and compile template
 	onMount(() => {
-		(async () => {
-			tgiSupportedModels = await getTgiSupportedModels(apiUrl);
-		})();
 		const config = model.config;
 		if (config === undefined) {
 			error = "Model config not found";
@@ -161,6 +158,7 @@
 				wait_for_model: withModelLoading,
 			} satisfies Options;
 
+			tgiSupportedModels = await getTgiSupportedModels(apiUrl);
 			if ($tgiSupportedModels?.has(model.id)) {
 				console.debug("Starting text generation using the TGI streaming API");
 				let newMessage = {
