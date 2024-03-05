@@ -283,9 +283,9 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 			}
 		}
 
-		if (char === "'") {
+		if (char === "'" || char === '"') {
 			++cursorPosition; // Skip the opening quote
-			const str = consumeWhile((char) => char !== "'");
+			const str = consumeWhile((c) => c !== char);
 			tokens.push(new Token(str, TOKEN_TYPES.StringLiteral));
 			++cursorPosition; // Skip the closing quote
 			continue;

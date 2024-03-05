@@ -39,6 +39,8 @@ const TEST_STRINGS = {
 
 	// Strings
 	STRINGS: `{{ 'Bye' }}{{ bos_token + '[INST] ' }}`,
+	STRINGS_1: `|{{ "test" }}|{{ "a" + 'b' + "c" }}|{{ '"' + "'" }}|{{ '\\'' }}|{{ "\\"" }}|`,
+	STRINGS_2: `|{{ "" | length }}|{{ "a" | length }}|{{ '' | length }}|{{ 'a' | length }}|`,
 
 	// Function calls
 	FUNCTIONS: `{{ func() }}{{ func(apple) }}{{ func(x, 'test', 2, false) }}`,
@@ -612,6 +614,62 @@ const TEST_PARSED = {
 		{ value: "+", type: "AdditiveBinaryOperator" },
 		{ value: "[INST] ", type: "StringLiteral" },
 		{ value: "}}", type: "CloseExpression" },
+	],
+	STRINGS_1: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "test", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "a", type: "StringLiteral" },
+		{ value: "+", type: "AdditiveBinaryOperator" },
+		{ value: "b", type: "StringLiteral" },
+		{ value: "+", type: "AdditiveBinaryOperator" },
+		{ value: "c", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: '"', type: "StringLiteral" },
+		{ value: "+", type: "AdditiveBinaryOperator" },
+		{ value: "'", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "'", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: '"', type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
+	STRINGS_2: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "", type: "StringLiteral" },
+		{ value: "|", type: "Pipe" },
+		{ value: "length", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "a", type: "StringLiteral" },
+		{ value: "|", type: "Pipe" },
+		{ value: "length", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "", type: "StringLiteral" },
+		{ value: "|", type: "Pipe" },
+		{ value: "length", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "a", type: "StringLiteral" },
+		{ value: "|", type: "Pipe" },
+		{ value: "length", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
 	],
 
 	// Function calls
@@ -1825,6 +1883,8 @@ const TEST_CONTEXT = {
 	STRINGS: {
 		bos_token: "<s>",
 	},
+	STRINGS_1: {},
+	STRINGS_2: {},
 
 	// Function calls
 	FUNCTIONS: {
@@ -1951,6 +2011,8 @@ const EXPECTED_OUTPUTS = {
 
 	// Strings
 	STRINGS: "Bye<s>[INST] ",
+	STRINGS_1: `|test|abc|"'|'|"|`,
+	STRINGS_2: `|0|1|0|1|`,
 
 	// Function calls
 	FUNCTIONS: "014",
