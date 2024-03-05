@@ -79,7 +79,7 @@
 			return;
 		}
 
-		inferenceClient = new HfInference();
+		inferenceClient = new HfInference(apiToken);
 	});
 
 	async function handleNewMessage(): Promise<void> {
@@ -229,7 +229,7 @@
 				return;
 			}
 			const exampleOutput = example.output;
-			getOutput({ ...opts.inferenceOpts, exampleOutput });
+			await getOutput({ ...opts.inferenceOpts, exampleOutput });
 		} finally {
 			isLoading = false;
 		}
