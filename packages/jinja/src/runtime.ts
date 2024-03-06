@@ -434,7 +434,7 @@ export class Interpreter {
 		// TODO: Add support for non-identifier filters
 		//   e.g., functions which return filters: {{ numbers | select("odd") }}
 		// TODO: Add support for user-defined filters
-		//   const filter = environment.lookupVariable(filter.value);
+		//   const filter = environment.lookupVariable(node.filter.value);
 		//   if (!(filter instanceof FunctionValue)) {
 		//     throw new Error(`Filter must be a function: got ${filter.type}`);
 		//   }
