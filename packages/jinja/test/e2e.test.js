@@ -18,6 +18,64 @@ const EXAMPLE_CHAT_WITH_SYSTEM = [
 	...EXAMPLE_CHAT,
 ];
 
+const EXAMPLE_FUNCTION_CALLING = [
+	{
+		role: "assistant",
+		content: null,
+		tool_calls: [
+			{
+				type: "function",
+				function: {
+					name: "get_current_weather",
+					arguments: '{\n  "location": "Hanoi"\n}',
+				},
+			},
+		],
+	},
+	{ role: "user", content: "what's the weather like in Hanoi?" },
+];
+
+// Example adapted from https://huggingface.co/fireworks-ai/firefunction-v1
+const EXAMPLE_FUNCTION_SPEC = [
+	{
+		name: "get_stock_price",
+		description: "Get the current stock price",
+		parameters: {
+			type: "object",
+			properties: {
+				symbol: {
+					type: "string",
+					description: "The stock symbol, e.g. AAPL, GOOG",
+				},
+			},
+			required: ["symbol"],
+		},
+	},
+	{
+		name: "check_word_anagram",
+		description: "Check if two words are anagrams of each other",
+		parameters: {
+			type: "object",
+			properties: {
+				word1: {
+					type: "string",
+					description: "The first word",
+				},
+				word2: {
+					type: "string",
+					description: "The second word",
+				},
+			},
+			required: ["word1", "word2"],
+		},
+	},
+];
+const EXAMPLE_FUNCTION_CALLING_WITH_SYSTEM = [
+	{ role: "functions", content: JSON.stringify(EXAMPLE_FUNCTION_SPEC, null, 4) },
+	{ role: "system", content: "You are a helpful assistant with access to functions. Use them if required." },
+	{ role: "user", content: "Hi, can you tell me the current stock price of AAPL?" },
+];
+
 /**
  * Defined in https://github.com/huggingface/transformers
  * Keys correspond to `model_type` in the transformers repo.
@@ -285,6 +343,38 @@ const TEST_CUSTOM_TEMPLATES = Object.freeze({
 			eos_token: "<|EOT|>",
 		},
 		target: `<｜begin▁of▁sentence｜>You are an AI programming assistant, utilizing the Deepseek Coder model, developed by Deepseek Company, and you only answer questions related to computer science. For politically sensitive questions, security and privacy issues, and other non-computer science questions, you will refuse to answer\n### Instruction:\nHello, how are you?\n### Response:\nI'm doing great. How can I help you today?\n<|EOT|>\n### Instruction:\nI'd like to show off how chat templating works!\n`,
+	},
+	"meetkai/functionary-medium-v2.2": {
+		chat_template: `{#v2.2#}\n{% for message in messages %}\n{% if message['role'] == 'user' or message['role'] == 'system' %}\n{{ '<|from|>' + message['role'] + '\n<|recipient|>all\n<|content|>' + message['content'] + '\n' }}{% elif message['role'] == 'tool' %}\n{{ '<|from|>' + message['name'] + '\n<|recipient|>all\n<|content|>' + message['content'] + '\n' }}{% else %}\n{% set contain_content='no'%}\n{% if message['content'] is not none %}\n{{ '<|from|>assistant\n<|recipient|>all\n<|content|>' + message['content'] }}{% set contain_content='yes'%}\n{% endif %}\n{% if 'tool_calls' in message and message['tool_calls'] is not none %}\n{% for tool_call in message['tool_calls'] %}\n{% set prompt='<|from|>assistant\n<|recipient|>' + tool_call['function']['name'] + '\n<|content|>' + tool_call['function']['arguments'] %}\n{% if loop.index == 1 and contain_content == "no" %}\n{{ prompt }}{% else %}\n{{ '\n' + prompt}}{% endif %}\n{% endfor %}\n{% endif %}\n{{ '<|stop|>\n' }}{% endif %}\n{% endfor %}\n{% if add_generation_prompt %}{{ '<|from|>assistant\n<|recipient|>' }}{% endif %}`,
+		data: {
+			messages: EXAMPLE_FUNCTION_CALLING,
+			bos_token: "<s>",
+			eos_token: "</s>",
+			add_generation_prompt: false,
+		},
+		target: `<|from|>assistant\n<|recipient|>get_current_weather\n<|content|>{\n  "location": "Hanoi"\n}<|stop|>\n<|from|>user\n<|recipient|>all\n<|content|>what's the weather like in Hanoi?\n`,
+	},
+	"fireworks-ai/firefunction-v1": {
+		chat_template: `{%- set message_roles = ['SYSTEM', 'FUNCTIONS', 'USER', 'ASSISTANT', 'TOOL'] -%}\n{%- set ns = namespace(seen_non_system=false, messages=messages, content='', functions=[]) -%}\n{{ bos_token }}\n{#- Basic consistency checks -#}\n{%- if not ns.messages -%}\n  {{ raise_exception('No messages') }}\n{%- endif -%}\n{%- if ns.messages[0]['role'] | upper != 'SYSTEM' -%}\n  {%- set ns.messages = [{'role': 'SYSTEM', 'content': 'You are a helpful assistant with access to functions. Use them if required.'}] + ns.messages -%}\n{%- endif -%}\n{%- if ns.messages | length < 2 or ns.messages[0]['role'] | upper != 'SYSTEM' or ns.messages[1]['role'] | upper != 'FUNCTIONS' -%}\n  {{ raise_exception('Expected either "functions" or ["system", "functions"] as the first messages') }}\n{%- endif -%}\n{%- for message in ns.messages -%}\n  {%- set role = message['role'] | upper -%}\n  {#- Validation -#}\n  {%- if role not in message_roles -%}\n    {{ raise_exception('Invalid role ' + message['role'] + '. Only ' + message_roles + ' are supported.') }}\n  {%- endif -%}\n  {%- set ns.content = message['content'] if message.get('content') else '' -%}\n  {#- Move tool calls inside the content -#}\n  {%- if 'tool_calls' in message -%}\n    {%- for call in message['tool_calls'] -%}\n      {%- set ns.content = ns.content + '<functioncall>{"name": "' + call['function']['name'] + '", "arguments": ' + call['function']['arguments'] + '}' -%}\n    {%- endfor -%}\n  {%- endif -%}\n  {%- if role == 'ASSISTANT' and '<functioncall>' not in ns.content -%}\n    {%- set ns.content = '<plain>' + ns.content -%}\n  {%- endif -%}\n  {%- if role == 'ASSISTANT' -%}\n    {%- set ns.content = ns.content + eos_token -%}\n  {%- endif -%}\n  {{ role }}: {{ ns.content }}{{ '\\n\\n' }}\n{%- endfor -%}\nASSISTANT:{{ ' ' }}\n`,
+		data: {
+			messages: EXAMPLE_FUNCTION_CALLING_WITH_SYSTEM,
+			bos_token: "<s>",
+			eos_token: "</s>",
+			add_generation_prompt: false,
+		},
+		target: `<s>SYSTEM: You are a helpful assistant with access to functions. Use them if required.\n\nFUNCTIONS: [\n    {\n        "name": "get_stock_price",\n        "description": "Get the current stock price",\n        "parameters": {\n            "type": "object",\n            "properties": {\n                "symbol": {\n                    "type": "string",\n                    "description": "The stock symbol, e.g. AAPL, GOOG"\n                }\n            },\n            "required": [\n                "symbol"\n            ]\n        }\n    },\n    {\n        "name": "check_word_anagram",\n        "description": "Check if two words are anagrams of each other",\n        "parameters": {\n            "type": "object",\n            "properties": {\n                "word1": {\n                    "type": "string",\n                    "description": "The first word"\n                },\n                "word2": {\n                    "type": "string",\n                    "description": "The second word"\n                }\n            },\n            "required": [\n                "word1",\n                "word2"\n            ]\n        }\n    }\n]\n\nSYSTEM: You are a helpful assistant with access to functions. Use them if required.\n\nUSER: Hi, can you tell me the current stock price of AAPL?\n\nASSISTANT: `,
+	},
+	"maywell/PiVoT-MoE": {
+		chat_template: `{{ (messages|selectattr('role', 'equalto', 'system')|list|last).content|trim if (messages|selectattr('role', 'equalto', 'system')|list) else '' }}{% for message in messages %}{% if message['role'] == 'system' %}{{ message['content']|trim }}{% elif message['role'] == 'user' %}### Instruction: {{ message['content']|trim }}{% elif message['role'] == 'assistant' %}### Response: {{ message['content']|trim }}{% elif message['role'] == 'user_context' %}### Input: {{ message['content']|trim }}{% endif %}{% if not loop.last %}\n{% endif %}{% endfor %}{% if add_generation_prompt and messages[-1]['role'] != 'assistant' %}### Response:{% endif %}`,
+		data: {
+			messages: EXAMPLE_CHAT_WITH_SYSTEM,
+			bos_token: "<s>",
+			eos_token: "</s>",
+			add_generation_prompt: false,
+		},
+		// NOTE: There is a bug in the model's chat template which causes the system prompt
+		// to be repeated twice. We replicate this behaviour here.
+		target: `You are a friendly chatbot who always responds in the style of a pirateYou are a friendly chatbot who always responds in the style of a pirate### Instruction: Hello, how are you?### Response: I'm doing great. How can I help you today?### Instruction: I'd like to show off how chat templating works!`,
 	},
 });
 

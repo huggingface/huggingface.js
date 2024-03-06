@@ -12,6 +12,7 @@ describe("Test interpreter options", () => {
 		const EXAMPLE_FOR_TEMPLATE_2 = `{% for item in seq -%}\n    {{ item }}\n{% endfor %}`;
 		const EXAMPLE_FOR_TEMPLATE_3 = `{% for item in seq %}\n    {{ item }}\n{%- endfor %}`;
 		const EXAMPLE_FOR_TEMPLATE_4 = `{% for item in seq -%}\n    {{ item }}\n{%- endfor %}`;
+		const EXAMPLE_COMMENT_TEMPLATE = `    {# comment #}\n  {# {% if true %} {% endif %} #}\n`;
 
 		const seq = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
@@ -97,6 +98,32 @@ describe("Test interpreter options", () => {
 				data: { seq },
 				options: {},
 				target: `123456789`,
+			},
+
+			// Comment tests
+			{
+				template: EXAMPLE_COMMENT_TEMPLATE,
+				data: {},
+				options: {},
+				target: `    \n  `,
+			},
+			{
+				template: EXAMPLE_COMMENT_TEMPLATE,
+				data: {},
+				options: { lstrip_blocks: true },
+				target: `\n`,
+			},
+			{
+				template: EXAMPLE_COMMENT_TEMPLATE,
+				data: {},
+				options: { trim_blocks: true },
+				target: `      `,
+			},
+			{
+				template: EXAMPLE_COMMENT_TEMPLATE,
+				data: {},
+				options: { lstrip_blocks: true, trim_blocks: true },
+				target: ``,
 			},
 		];
 

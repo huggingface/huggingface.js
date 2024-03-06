@@ -2,6 +2,7 @@ import type {
 	NumericLiteral,
 	StringLiteral,
 	BooleanLiteral,
+	ArrayLiteral,
 	Statement,
 	Program,
 	If,
@@ -16,6 +17,7 @@ import type {
 	UnaryExpression,
 	SliceExpression,
 	KeywordArgumentExpression,
+	ObjectLiteral,
 } from "./ast";
 import { slice, titleCase } from "./utils";
 
@@ -125,6 +127,18 @@ export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 	override __bool__(): BooleanValue {
 		return new BooleanValue(this.value.size > 0);
 	}
+
+	override builtins: Map<string, AnyRuntimeValue> = new Map<string, AnyRuntimeValue>([
+		[
+			"get",
+			new FunctionValue(([key, defaultValue]) => {
+				if (!(key instanceof StringValue)) {
+					throw new Error(`Object key must be a string: got ${key.type}`);
+				}
+				return this.value.get(key.value) ?? defaultValue ?? new NullValue();
+			}),
+		],
+	]);
 }
 
 /**
@@ -190,13 +204,61 @@ export class Environment {
 		],
 	]);
 
+	/**
+	 * The tests available in this environment.
+	 */
+	tests: Map<string, (...value: AnyRuntimeValue[]) => boolean> = new Map([
+		["boolean", (operand) => operand.type === "BooleanValue"],
+		["callable", (operand) => operand instanceof FunctionValue],
+		[
+			"odd",
+			(operand) => {
+				if (operand.type !== "NumericValue") {
+					throw new Error(`Cannot apply test "odd" to type: ${operand.type}`);
+				}
+				return (operand as NumericValue).value % 2 !== 0;
+			},
+		],
+		[
+			"even",
+			(operand) => {
+				if (operand.type !== "NumericValue") {
+					throw new Error(`Cannot apply test "even" to type: ${operand.type}`);
+				}
+				return (operand as NumericValue).value % 2 === 0;
+			},
+		],
+		["false", (operand) => operand.type === "BooleanValue" && !(operand as BooleanValue).value],
+		["true", (operand) => operand.type === "BooleanValue" && (operand as BooleanValue).value],
+		["number", (operand) => operand.type === "NumericValue"],
+		["integer", (operand) => operand.type === "NumericValue" && Number.isInteger((operand as NumericValue).value)],
+		["iterable", (operand) => operand instanceof ArrayValue || operand instanceof StringValue],
+		[
+			"lower",
+			(operand) => {
+				const str = (operand as StringValue).value;
+				return operand.type === "StringValue" && str === str.toLowerCase();
+			},
+		],
+		[
+			"upper",
+			(operand) => {
+				const str = (operand as StringValue).value;
+				return operand.type === "StringValue" && str === str.toUpperCase();
+			},
+		],
+		["none", (operand) => operand.type === "NullValue"],
+		["defined", (operand) => operand.type !== "UndefinedValue"],
+		["undefined", (operand) => operand.type === "UndefinedValue"],
+		["equalto", (a, b) => a.value === b.value],
+	]);
+
 	constructor(public parent?: Environment) {}
 
 	/**
 	 * Set the value of a variable in the current environment.
 	 */
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
-	set(name: string, value: any): AnyRuntimeValue {
+	set(name: string, value: unknown): AnyRuntimeValue {
 		return this.declareVariable(name, convertToRuntimeValues(value));
 	}
 
@@ -215,16 +277,11 @@ export class Environment {
 	// }
 
 	/**
-	 * Declare if doesn't exist, assign otherwise.
+	 * Set variable in the current scope.
+	 * See https://jinja.palletsprojects.com/en/3.0.x/templates/#assignments for more information.
 	 */
 	setVariable(name: string, value: AnyRuntimeValue): AnyRuntimeValue {
-		let env: Environment | undefined;
-		try {
-			env = this.resolve(name);
-		} catch {
-			/* empty */
-		}
-		(env ?? this).variables.set(name, value);
+		this.variables.set(name, value);
 		return value;
 	}
 
@@ -247,7 +304,11 @@ export class Environment {
 	}
 
 	lookupVariable(name: string): AnyRuntimeValue {
-		return this.resolve(name).variables.get(name) ?? new NullValue();
+		try {
+			return this.resolve(name).variables.get(name) ?? new UndefinedValue();
+		} catch {
+			return new UndefinedValue();
+		}
 	}
 }
 
@@ -318,6 +379,12 @@ export class Interpreter {
 				case "<=":
 					return new BooleanValue(left.value <= right.value);
 			}
+		} else if (left instanceof ArrayValue && right instanceof ArrayValue) {
+			// Evaluate array operands with binary operator.
+			switch (node.operator.value) {
+				case "+":
+					return new ArrayValue(left.value.concat(right.value));
+			}
 		} else if (right instanceof ArrayValue) {
 			const member = right.value.find((x) => x.value === left.value) !== undefined;
 			switch (node.operator.value) {
@@ -345,6 +412,15 @@ export class Interpreter {
 			}
 		}
 
+		if (left instanceof StringValue && right instanceof ObjectValue) {
+			switch (node.operator.value) {
+				case "in":
+					return new BooleanValue(right.value.has(left.value));
+				case "not in":
+					return new BooleanValue(!right.value.has(left.value));
+			}
+		}
+
 		throw new SyntaxError(`Unknown operator "${node.operator.value}" between ${left.type} and ${right.type}`);
 	}
 
@@ -365,62 +441,118 @@ export class Interpreter {
 		//   return filter.value([operand], environment);
 
 		// https://jinja.palletsprojects.com/en/3.0.x/templates/#list-of-builtin-filters
-		if (operand instanceof ArrayValue) {
-			switch (node.filter.value) {
-				case "first":
-					return operand.value[0];
-				case "last":
-					return operand.value[operand.value.length - 1];
-				case "length":
-					return new NumericValue(operand.value.length);
-				case "reverse":
-					return new ArrayValue(operand.value.reverse());
-				case "sort":
-					return new ArrayValue(
-						operand.value.sort((a, b) => {
-							if (a.type !== b.type) {
-								throw new Error(`Cannot compare different types: ${a.type} and ${b.type}`);
-							}
-							switch (a.type) {
-								case "NumericValue":
-									return (a as NumericValue).value - (b as NumericValue).value;
-								case "StringValue":
-									return (a as StringValue).value.localeCompare((b as StringValue).value);
-								default:
-									throw new Error(`Cannot compare type: ${a.type}`);
-							}
-						})
-					);
-				default:
-					throw new Error(`Unknown ArrayValue filter: ${node.filter.value}`);
+
+		if (node.filter.type === "Identifier") {
+			const filter = node.filter as Identifier;
+
+			if (operand instanceof ArrayValue) {
+				switch (filter.value) {
+					case "list":
+						return operand;
+					case "first":
+						return operand.value[0];
+					case "last":
+						return operand.value[operand.value.length - 1];
+					case "length":
+						return new NumericValue(operand.value.length);
+					case "reverse":
+						return new ArrayValue(operand.value.reverse());
+					case "sort":
+						return new ArrayValue(
+							operand.value.sort((a, b) => {
+								if (a.type !== b.type) {
+									throw new Error(`Cannot compare different types: ${a.type} and ${b.type}`);
+								}
+								switch (a.type) {
+									case "NumericValue":
+										return (a as NumericValue).value - (b as NumericValue).value;
+									case "StringValue":
+										return (a as StringValue).value.localeCompare((b as StringValue).value);
+									default:
+										throw new Error(`Cannot compare type: ${a.type}`);
+								}
+							})
+						);
+					default:
+						throw new Error(`Unknown ArrayValue filter: ${filter.value}`);
+				}
+			} else if (operand instanceof StringValue) {
+				switch (filter.value) {
+					case "length":
+						return new NumericValue(operand.value.length);
+					case "upper":
+						return new StringValue(operand.value.toUpperCase());
+					case "lower":
+						return new StringValue(operand.value.toLowerCase());
+					case "title":
+						return new StringValue(titleCase(operand.value));
+					case "capitalize":
+						return new StringValue(operand.value.charAt(0).toUpperCase() + operand.value.slice(1));
+					case "trim":
+						return new StringValue(operand.value.trim());
+					default:
+						throw new Error(`Unknown StringValue filter: ${filter.value}`);
+				}
+			} else if (operand instanceof NumericValue) {
+				switch (filter.value) {
+					case "abs":
+						return new NumericValue(Math.abs(operand.value));
+					default:
+						throw new Error(`Unknown NumericValue filter: ${filter.value}`);
+				}
 			}
-		} else if (operand instanceof StringValue) {
-			switch (node.filter.value) {
-				case "length":
-					return new NumericValue(operand.value.length);
-				case "upper":
-					return new StringValue(operand.value.toUpperCase());
-				case "lower":
-					return new StringValue(operand.value.toLowerCase());
-				case "title":
-					return new StringValue(titleCase(operand.value));
-				case "capitalize":
-					return new StringValue(operand.value.charAt(0).toUpperCase() + operand.value.slice(1));
-				case "trim":
-					return new StringValue(operand.value.trim());
-				default:
-					throw new Error(`Unknown StringValue filter: ${node.filter.value}`);
+			throw new Error(`Cannot apply filter "${filter.value}" to type: ${operand.type}`);
+		} else if (node.filter.type === "CallExpression") {
+			const filter = node.filter as CallExpression;
+
+			if (filter.callee.type !== "Identifier") {
+				throw new Error(`Unknown filter: ${filter.callee.type}`);
 			}
-		} else if (operand instanceof NumericValue) {
-			switch (node.filter.value) {
-				case "abs":
-					return new NumericValue(Math.abs(operand.value));
-				default:
-					throw new Error(`Unknown NumericValue filter: ${node.filter.value}`);
+			const filterName = (filter.callee as Identifier).value;
+
+			if (operand instanceof ArrayValue) {
+				switch (filterName) {
+					case "selectattr": {
+						if (operand.value.some((x) => !(x instanceof ObjectValue))) {
+							throw new Error("`selectattr` can only be applied to array of objects");
+						}
+						if (filter.args.some((x) => x.type !== "StringLiteral")) {
+							throw new Error("arguments of `selectattr` must be strings");
+						}
+
+						const [attr, testName, value] = filter.args.map((x) => this.evaluate(x, environment)) as StringValue[];
+
+						let testFunction: (...x: AnyRuntimeValue[]) => boolean;
+						if (testName) {
+							// Get the test function from the environment
+							const test = environment.tests.get(testName.value);
+							if (!test) {
+								throw new Error(`Unknown test: ${testName.value}`);
+							}
+							testFunction = test;
+						} else {
+							// Default to truthiness of first argument
+							testFunction = (...x: AnyRuntimeValue[]) => x[0].__bool__().value;
+						}
+
+						// Filter the array using the test function
+						const filtered = (operand.value as ObjectValue[]).filter((item) => {
+							const a = item.value.get(attr.value);
+							if (a) {
+								return testFunction(a, value);
+							}
+							return false;
+						});
+
+						return new ArrayValue(filtered);
+					}
+				}
+				throw new Error(`Unknown ArrayValue filter: ${filterName}`);
+			} else {
+				throw new Error(`Cannot apply filter "${filterName}" to type: ${operand.type}`);
 			}
 		}
-
-		throw new Error(`Cannot apply filter "${node.filter.value}" to type: ${operand.type}`);
+		throw new Error(`Unknown filter: ${node.filter.type}`);
 	}
 
 	/**
@@ -431,65 +563,13 @@ export class Interpreter {
 		// https://jinja.palletsprojects.com/en/3.0.x/templates/#list-of-builtin-tests
 		//
 		// TODO: Add support for non-identifier tests. e.g., divisibleby(number)
+		const operand = this.evaluate(node.operand, environment);
 
-		const result: boolean = (() => {
-			try {
-				const operand = this.evaluate(node.operand, environment);
-
-				switch (node.test.value) {
-					case "boolean":
-						return operand.type === "BooleanValue";
-					case "callable":
-						return operand instanceof FunctionValue;
-					case "odd":
-						if (operand.type !== "NumericValue") {
-							throw new Error(`Cannot apply test "odd" to type: ${operand.type}`);
-						}
-						return (operand as NumericValue).value % 2 !== 0;
-					case "even":
-						if (operand.type !== "NumericValue") {
-							throw new Error(`Cannot apply test "even" to type: ${operand.type}`);
-						}
-						return (operand as NumericValue).value % 2 === 0;
-					case "false":
-						return operand.type === "BooleanValue" && !(operand as BooleanValue).value;
-					case "true":
-						return operand.type === "BooleanValue" && (operand as BooleanValue).value;
-					case "number":
-						return operand.type === "NumericValue";
-					case "integer":
-						return operand.type === "NumericValue" && Number.isInteger((operand as NumericValue).value);
-					case "iterable":
-						return operand instanceof ArrayValue || operand instanceof StringValue;
-					case "lower": {
-						const str = (operand as StringValue).value;
-						return operand.type === "StringValue" && str === str.toLowerCase();
-					}
-					case "upper": {
-						const str = (operand as StringValue).value;
-						return operand.type === "StringValue" && str === str.toUpperCase();
-					}
-					case "none":
-						return operand.type === "NullValue";
-					case "defined":
-						return true;
-					case "undefined":
-						return false;
-				}
-				throw new Error(`Unknown test: ${node.test.value}`);
-			} catch (e) {
-				if (node.operand.type === "Identifier") {
-					// Special cases where we want to check if a variable is defined
-					if (node.test.value === "defined") {
-						return false;
-					} else if (node.test.value === "undefined") {
-						return true;
-					}
-				}
-				throw e;
-			}
-		})();
-
+		const test = environment.tests.get(node.test.value);
+		if (!test) {
+			throw new Error(`Unknown test: ${node.test.value}`);
+		}
+		const result = test(operand);
 		return new BooleanValue(node.negate ? !result : result);
 	}
 
@@ -519,7 +599,7 @@ export class Interpreter {
 		for (const statement of statements) {
 			const lastEvaluated = this.evaluate(statement, environment);
 
-			if (lastEvaluated.type !== "NullValue") {
+			if (lastEvaluated.type !== "NullValue" && lastEvaluated.type !== "UndefinedValue") {
 				result += lastEvaluated.value;
 			}
 		}
@@ -623,10 +703,8 @@ export class Interpreter {
 			}
 			value = object.builtins.get(property.value);
 		}
-		if (!(value instanceof RuntimeValue)) {
-			throw new Error(`${object.type} has no property '${property.value}'`);
-		}
-		return value;
+
+		return value instanceof RuntimeValue ? value : new UndefinedValue();
 	}
 
 	private evaluateSet(node: SetStatement, environment: Environment): NullValue {
@@ -719,6 +797,19 @@ export class Interpreter {
 				return new StringValue((statement as StringLiteral).value);
 			case "BooleanLiteral":
 				return new BooleanValue((statement as BooleanLiteral).value);
+			case "ArrayLiteral":
+				return new ArrayValue((statement as ArrayLiteral).value.map((x) => this.evaluate(x, environment)));
+			case "ObjectLiteral": {
+				const mapping = new Map();
+				for (const [key, value] of (statement as ObjectLiteral).value) {
+					const evaluatedKey = this.evaluate(key, environment);
+					if (!(evaluatedKey instanceof StringValue)) {
+						throw new Error(`Object keys must be strings: got ${evaluatedKey.type}`);
+					}
+					mapping.set(evaluatedKey.value, this.evaluate(value, environment));
+				}
+				return new ObjectValue(mapping);
+			}
 			case "Identifier":
 				return this.evaluateIdentifier(statement as Identifier, environment);
 			case "CallExpression":
