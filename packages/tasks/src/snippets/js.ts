@@ -1,8 +1,8 @@
-import type { ModelData } from "../model-data.js";
 import type { PipelineType } from "../pipelines.js";
 import { getModelInputSnippet } from "./inputs.js";
+import type { ModelDataMinimal } from "./types.js";
 
-export const snippetBasic = (model: ModelData, accessToken: string): string =>
+export const snippetBasic = (model: ModelDataMinimal, accessToken: string): string =>
 	`async function query(data) {
 	const response = await fetch(
 		"https://api-inference.huggingface.co/models/${model.id}",
@@ -20,7 +20,7 @@ query({"inputs": ${getModelInputSnippet(model)}}).then((response) => {
 	console.log(JSON.stringify(response));
 });`;
 
-export const snippetZeroShotClassification = (model: ModelData, accessToken: string): string =>
+export const snippetZeroShotClassification = (model: ModelDataMinimal, accessToken: string): string =>
 	`async function query(data) {
 	const response = await fetch(
 		"https://api-inference.huggingface.co/models/${model.id}",
@@ -40,7 +40,7 @@ query({"inputs": ${getModelInputSnippet(
 	console.log(JSON.stringify(response));
 });`;
 
-export const snippetTextToImage = (model: ModelData, accessToken: string): string =>
+export const snippetTextToImage = (model: ModelDataMinimal, accessToken: string): string =>
 	`async function query(data) {
 	const response = await fetch(
 		"https://api-inference.huggingface.co/models/${model.id}",
@@ -57,7 +57,7 @@ query({"inputs": ${getModelInputSnippet(model)}}).then((response) => {
 	// Use image
 });`;
 
-export const snippetTextToAudio = (model: ModelData, accessToken: string): string => {
+export const snippetTextToAudio = (model: ModelDataMinimal, accessToken: string): string => {
 	const commonSnippet = `async function query(data) {
 		const response = await fetch(
 			"https://api-inference.huggingface.co/models/${model.id}",
@@ -93,7 +93,7 @@ export const snippetTextToAudio = (model: ModelData, accessToken: string): strin
 	}
 };
 
-export const snippetFile = (model: ModelData, accessToken: string): string =>
+export const snippetFile = (model: ModelDataMinimal, accessToken: string): string =>
 	`async function query(filename) {
 	const data = fs.readFileSync(filename);
 	const response = await fetch(
@@ -112,7 +112,7 @@ query(${getModelInputSnippet(model)}).then((response) => {
 	console.log(JSON.stringify(response));
 });`;
 
-export const jsSnippets: Partial<Record<PipelineType, (model: ModelData, accessToken: string) => string>> = {
+export const jsSnippets: Partial<Record<PipelineType, (model: ModelDataMinimal, accessToken: string) => string>> = {
 	// Same order as in js/src/lib/interfaces/Types.ts
 	"text-classification": snippetBasic,
 	"token-classification": snippetBasic,
@@ -138,12 +138,12 @@ export const jsSnippets: Partial<Record<PipelineType, (model: ModelData, accessT
 	"image-segmentation": snippetFile,
 };
 
-export function getJsInferenceSnippet(model: ModelData, accessToken: string): string {
+export function getJsInferenceSnippet(model: ModelDataMinimal, accessToken: string): string {
 	return model.pipeline_tag && model.pipeline_tag in jsSnippets
 		? jsSnippets[model.pipeline_tag]?.(model, accessToken) ?? ""
 		: "";
 }
 
-export function hasJsInferenceSnippet(model: ModelData): boolean {
+export function hasJsInferenceSnippet(model: ModelDataMinimal): boolean {
 	return !!model.pipeline_tag && model.pipeline_tag in jsSnippets;
 }

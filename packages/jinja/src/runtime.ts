@@ -12,10 +12,12 @@ import type {
 	Identifier,
 	BinaryExpression,
 	FilterExpression,
+	TestExpression,
 	UnaryExpression,
 	SliceExpression,
+	KeywordArgumentExpression,
 } from "./ast";
-import { slice } from "./utils";
+import { slice, titleCase } from "./utils";
 
 export type AnyRuntimeValue =
 	| NumericValue
@@ -87,6 +89,12 @@ export class StringValue extends RuntimeValue<string> {
 			"strip",
 			new FunctionValue(() => {
 				return new StringValue(this.value.trim());
+			}),
+		],
+		[
+			"title",
+			new FunctionValue(() => {
+				return new StringValue(titleCase(this.value));
 			}),
 		],
 		["length", new NumericValue(this.value.length)],
@@ -167,7 +175,20 @@ export class Environment {
 	/**
 	 * The variables declared in this environment.
 	 */
-	variables: Map<string, AnyRuntimeValue> = new Map();
+	variables: Map<string, AnyRuntimeValue> = new Map([
+		[
+			"namespace",
+			new FunctionValue((args) => {
+				if (args.length === 0) {
+					return new ObjectValue(new Map());
+				}
+				if (args.length !== 1 || !(args[0] instanceof ObjectValue)) {
+					throw new Error("`namespace` expects either zero arguments or a single object argument");
+				}
+				return args[0];
+			}),
+		],
+	]);
 
 	constructor(public parent?: Environment) {}
 
@@ -245,25 +266,27 @@ export class Interpreter {
 	}
 
 	/**
-	 * Evaulates expressions following the binary operation type.
+	 * Evaluates expressions following the binary operation type.
 	 */
 	private evaluateBinaryExpression(node: BinaryExpression, environment: Environment): AnyRuntimeValue {
 		const left = this.evaluate(node.left, environment);
-		const right = this.evaluate(node.right, environment);
 
-		// Arbitrary operands
+		// Logical operators
+		// NOTE: Short-circuiting is handled by the `evaluate` function
 		switch (node.operator.value) {
-			// Equality operators
+			case "and":
+				return left.__bool__().value ? this.evaluate(node.right, environment) : left;
+			case "or":
+				return left.__bool__().value ? left : this.evaluate(node.right, environment);
+		}
+
+		// Equality operators
+		const right = this.evaluate(node.right, environment);
+		switch (node.operator.value) {
 			case "==":
 				return new BooleanValue(left.value == right.value);
 			case "!=":
 				return new BooleanValue(left.value != right.value);
-
-			// Logical operators
-			case "and":
-				return left.__bool__().value ? right : left;
-			case "or":
-				return left.__bool__().value ? left : right;
 		}
 
 		if (left instanceof UndefinedValue || right instanceof UndefinedValue) {
@@ -326,7 +349,7 @@ export class Interpreter {
 	}
 
 	/**
-	 * Evaulates expressions following the filter operation type.
+	 * Evaluates expressions following the filter operation type.
 	 */
 	private evaluateFilterExpression(node: FilterExpression, environment: Environment): AnyRuntimeValue {
 		const operand = this.evaluate(node.operand, environment);
@@ -380,7 +403,7 @@ export class Interpreter {
 				case "lower":
 					return new StringValue(operand.value.toLowerCase());
 				case "title":
-					return new StringValue(operand.value.replace(/\b\w/g, (c) => c.toUpperCase()));
+					return new StringValue(titleCase(operand.value));
 				case "capitalize":
 					return new StringValue(operand.value.charAt(0).toUpperCase() + operand.value.slice(1));
 				case "trim":
@@ -401,7 +424,77 @@ export class Interpreter {
 	}
 
 	/**
-	 * Evaulates expressions following the unary operation type.
+	 * Evaluates expressions following the test operation type.
+	 */
+	private evaluateTestExpression(node: TestExpression, environment: Environment): BooleanValue {
+		// For now, we only support the built-in tests
+		// https://jinja.palletsprojects.com/en/3.0.x/templates/#list-of-builtin-tests
+		//
+		// TODO: Add support for non-identifier tests. e.g., divisibleby(number)
+
+		const result: boolean = (() => {
+			try {
+				const operand = this.evaluate(node.operand, environment);
+
+				switch (node.test.value) {
+					case "boolean":
+						return operand.type === "BooleanValue";
+					case "callable":
+						return operand instanceof FunctionValue;
+					case "odd":
+						if (operand.type !== "NumericValue") {
+							throw new Error(`Cannot apply test "odd" to type: ${operand.type}`);
+						}
+						return (operand as NumericValue).value % 2 !== 0;
+					case "even":
+						if (operand.type !== "NumericValue") {
+							throw new Error(`Cannot apply test "even" to type: ${operand.type}`);
+						}
+						return (operand as NumericValue).value % 2 === 0;
+					case "false":
+						return operand.type === "BooleanValue" && !(operand as BooleanValue).value;
+					case "true":
+						return operand.type === "BooleanValue" && (operand as BooleanValue).value;
+					case "number":
+						return operand.type === "NumericValue";
+					case "integer":
+						return operand.type === "NumericValue" && Number.isInteger((operand as NumericValue).value);
+					case "iterable":
+						return operand instanceof ArrayValue || operand instanceof StringValue;
+					case "lower": {
+						const str = (operand as StringValue).value;
+						return operand.type === "StringValue" && str === str.toLowerCase();
+					}
+					case "upper": {
+						const str = (operand as StringValue).value;
+						return operand.type === "StringValue" && str === str.toUpperCase();
+					}
+					case "none":
+						return operand.type === "NullValue";
+					case "defined":
+						return true;
+					case "undefined":
+						return false;
+				}
+				throw new Error(`Unknown test: ${node.test.value}`);
+			} catch (e) {
+				if (node.operand.type === "Identifier") {
+					// Special cases where we want to check if a variable is defined
+					if (node.test.value === "defined") {
+						return false;
+					} else if (node.test.value === "undefined") {
+						return true;
+					}
+				}
+				throw e;
+			}
+		})();
+
+		return new BooleanValue(node.negate ? !result : result);
+	}
+
+	/**
+	 * Evaluates expressions following the unary operation type.
 	 */
 	private evaluateUnaryExpression(node: UnaryExpression, environment: Environment): AnyRuntimeValue {
 		const argument = this.evaluate(node.argument, environment);
@@ -414,7 +507,7 @@ export class Interpreter {
 		}
 	}
 
-	private evalProgram(program: Program, environment: Environment): AnyRuntimeValue {
+	private evalProgram(program: Program, environment: Environment): StringValue {
 		return this.evaluateBlock(program.body, environment);
 	}
 
@@ -431,9 +524,6 @@ export class Interpreter {
 			}
 		}
 
-		// Since `trim_blocks` is enabled, we remove the first newline after the template tag
-		result = result.replace(/^\n/, "");
-
 		return new StringValue(result);
 	}
 
@@ -442,7 +532,22 @@ export class Interpreter {
 	}
 
 	private evaluateCallExpression(expr: CallExpression, environment: Environment): AnyRuntimeValue {
-		const args = expr.args.map((arg) => this.evaluate(arg, environment) as AnyRuntimeValue);
+		// Accumulate all keyword arguments into a single object, which will be
+		// used as the final argument in the call function.
+		const args: AnyRuntimeValue[] = [];
+		const kwargs = new Map();
+		for (const argument of expr.args) {
+			if (argument.type === "KeywordArgumentExpression") {
+				const kwarg = argument as KeywordArgumentExpression;
+				kwargs.set(kwarg.key.value, this.evaluate(kwarg.value, environment));
+			} else {
+				args.push(this.evaluate(argument, environment));
+			}
+		}
+		if (kwargs.size > 0) {
+			args.push(new ObjectValue(kwargs));
+		}
+
 		const fn = this.evaluate(expr.callee, environment);
 		if (fn.type !== "FunctionValue") {
 			throw new Error(`Cannot call something that is not a function: got ${fn.type}`);
@@ -525,12 +630,25 @@ export class Interpreter {
 	}
 
 	private evaluateSet(node: SetStatement, environment: Environment): NullValue {
-		if (node.assignee.type !== "Identifier") {
+		const rhs = this.evaluate(node.value, environment);
+		if (node.assignee.type === "Identifier") {
+			const variableName = (node.assignee as Identifier).value;
+			environment.setVariable(variableName, rhs);
+		} else if (node.assignee.type === "MemberExpression") {
+			const member = node.assignee as MemberExpression;
+
+			const object = this.evaluate(member.object, environment);
+			if (!(object instanceof ObjectValue)) {
+				throw new Error("Cannot assign to member of non-object");
+			}
+			if (member.property.type !== "Identifier") {
+				throw new Error("Cannot assign to member with non-identifier property");
+			}
+			object.value.set((member.property as Identifier).value, rhs);
+		} else {
 			throw new Error(`Invalid LHS inside assignment expression: ${JSON.stringify(node.assignee)}`);
 		}
 
-		const variableName = (node.assignee as Identifier).value;
-		environment.setVariable(variableName, this.evaluate(node.value, environment));
 		return new NullValue();
 	}
 
@@ -553,22 +671,19 @@ export class Interpreter {
 		for (let i = 0; i < iterable.value.length; ++i) {
 			// Update the loop variable
 			// TODO: Only create object once, then update value?
-			scope.setVariable(
-				"loop",
-				new ObjectValue(
-					new Map(
-						(
-							[
-								["index", new NumericValue(i + 1)],
-								["index0", new NumericValue(i)],
-								["first", new BooleanValue(i === 0)],
-								["last", new BooleanValue(i === iterable.value.length - 1)],
-								["length", new NumericValue(iterable.value.length)],
-							] as [string, AnyRuntimeValue][]
-						).map(([key, value]) => [key, value])
-					)
-				)
-			);
+			const loop = new Map([
+				["index", new NumericValue(i + 1)],
+				["index0", new NumericValue(i)],
+				["revindex", new NumericValue(iterable.value.length - i)],
+				["revindex0", new NumericValue(iterable.value.length - i - 1)],
+				["first", new BooleanValue(i === 0)],
+				["last", new BooleanValue(i === iterable.value.length - 1)],
+				["length", new NumericValue(iterable.value.length)],
+				["previtem", i > 0 ? iterable.value[i - 1] : new UndefinedValue()],
+				["nextitem", i < iterable.value.length - 1 ? iterable.value[i + 1] : new UndefinedValue()],
+			] as [string, AnyRuntimeValue][]);
+
+			scope.setVariable("loop", new ObjectValue(loop));
 
 			// For this iteration, set the loop variable to the current element
 			scope.setVariable(node.loopvar.value, iterable.value[i]);
@@ -617,6 +732,8 @@ export class Interpreter {
 				return this.evaluateBinaryExpression(statement as BinaryExpression, environment);
 			case "FilterExpression":
 				return this.evaluateFilterExpression(statement as FilterExpression, environment);
+			case "TestExpression":
+				return this.evaluateTestExpression(statement as TestExpression, environment);
 
 			default:
 				throw new SyntaxError(`Unknown node type: ${statement.type}`);

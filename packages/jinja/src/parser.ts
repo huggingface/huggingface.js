@@ -14,8 +14,10 @@ import {
 	BooleanLiteral,
 	BinaryExpression,
 	FilterExpression,
+	TestExpression,
 	UnaryExpression,
 	SliceExpression,
+	KeywordArgumentExpression,
 } from "./ast";
 
 /**
@@ -26,6 +28,12 @@ export function parse(tokens: Token[]): Program {
 	const program = new Program([]);
 	let current = 0;
 
+	/**
+	 * Consume the next token if it matches the expected type, otherwise throw an error.
+	 * @param type The expected token type
+	 * @param error The error message to throw if the token does not match the expected type
+	 * @returns The consumed token
+	 */
 	function expect(type: string, error: string): Token {
 		const prev = tokens[current++];
 		if (!prev || prev.type !== type) {
@@ -191,6 +199,7 @@ export function parse(tokens: Token[]): Program {
 		// Choose parse function with lowest precedence
 		return parseLogicalOrExpression();
 	}
+
 	function parseLogicalOrExpression(): Statement {
 		let left = parseLogicalAndExpression();
 		while (is(TOKEN_TYPES.Or)) {
@@ -278,21 +287,36 @@ export function parse(tokens: Token[]): Program {
 		// add (x + 5, foo())
 		expect(TOKEN_TYPES.OpenParen, "Expected opening parenthesis for arguments list");
 
-		const args = is(TOKEN_TYPES.CloseParen) ? [] : parseArgumentsList();
+		const args = parseArgumentsList();
 
 		expect(TOKEN_TYPES.CloseParen, "Expected closing parenthesis for arguments list");
 		return args;
 	}
 	function parseArgumentsList(): Statement[] {
 		// comma-separated arguments list
-		const args = [parseExpression()]; // Update when we allow assignment expressions
 
-		while (is(TOKEN_TYPES.Comma)) {
-			++current; // consume comma
-			args.push(parseExpression());
+		const args = [];
+		while (!is(TOKEN_TYPES.CloseParen)) {
+			let argument = parseExpression();
+
+			if (is(TOKEN_TYPES.Equals)) {
+				// keyword argument
+				// e.g., func(x = 5, y = a or b)
+				++current; // consume equals
+				if (!(argument instanceof Identifier)) {
+					throw new SyntaxError(`Expected identifier for keyword argument`);
+				}
+				const value = parseExpression();
+				argument = new KeywordArgumentExpression(argument, value);
+			}
+			args.push(argument);
+			if (is(TOKEN_TYPES.Comma)) {
+				++current; // consume comma
+			}
 		}
 		return args;
 	}
+
 	function parseMemberExpressionArgumentsList(): Statement {
 		// NOTE: This also handles slice expressions colon-separated arguments list
 		// e.g., ['test'], [0], [:2], [1:], [1:2], [1:2:3]
@@ -354,15 +378,43 @@ export function parse(tokens: Token[]): Program {
 	}
 
 	function parseMultiplicativeExpression(): Statement {
-		let left = parseFilterExpression();
+		let left = parseTestExpression();
+
+		// Multiplicative operators have higher precedence than test expressions
+		// e.g., (4 * 4 is divisibleby(2)) evaluates as (4 * (4 is divisibleby(2)))
 
 		while (is(TOKEN_TYPES.MultiplicativeBinaryOperator)) {
 			const operator = tokens[current];
 			++current;
-			const right = parseFilterExpression();
+			const right = parseTestExpression();
 			left = new BinaryExpression(operator, left, right);
 		}
 		return left;
+	}
+
+	function parseTestExpression(): Statement {
+		let operand = parseFilterExpression();
+
+		while (is(TOKEN_TYPES.Is)) {
+			// Support chaining tests
+			++current; // consume is
+			const negate = is(TOKEN_TYPES.Not);
+			if (negate) {
+				++current; // consume not
+			}
+
+			let filter = parsePrimaryExpression();
+			if (filter instanceof BooleanLiteral) {
+				// Special case: treat boolean literals as identifiers
+				filter = new Identifier(filter.value.toString());
+			}
+			if (!(filter instanceof Identifier)) {
+				throw new SyntaxError(`Expected identifier for the test`);
+			}
+			// TODO: Add support for non-identifier tests
+			operand = new TestExpression(operand, negate, filter);
+		}
+		return operand;
 	}
 
 	function parseFilterExpression(): Statement {
