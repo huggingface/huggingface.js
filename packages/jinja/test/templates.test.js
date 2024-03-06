@@ -74,6 +74,8 @@ const TEST_STRINGS = {
 	FILTER_OPERATOR: `{{ arr | length }}{{ 1 + arr | length }}{{ 2 + arr | sort | length }}{{ (arr | sort)[0] }}`,
 	FILTER_OPERATOR_2: `|{{ 'abc' | length }}|{{ 'aBcD' | upper }}|{{ 'aBcD' | lower }}|{{ 'test test' | capitalize}}|{{ 'test test' | title }}|{{ ' a b ' | trim }}|{{ '  A  B  ' | trim | lower | length }}|`,
 	FILTER_OPERATOR_3: `|{{ -1 | abs }}|{{ 1 | abs }}|`,
+	FILTER_OPERATOR_4: `{{ items | selectattr('key') | length }}`,
+	FILTER_OPERATOR_5: `{{ messages | selectattr('role', 'equalto', 'system') | length }}`,
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: `|{{ 1 and 2 }}|{{ 1 and 0 }}|{{ 0 and 1 }}|{{ 0 and 0 }}|{{ 1 or 2 }}|{{ 1 or 0 }}|{{ 0 or 1 }}|{{ 0 or 0 }}|{{ not 1 }}|{{ not 0 }}|`,
@@ -104,6 +106,19 @@ const TEST_STRINGS = {
 	// Scope
 	SCOPE: `{% set ns = namespace(found=false) %}{% for num in nums %}{% if num == 1 %}{{ 'found=' }}{% set ns.found = true %}{% endif %}{% endfor %}{{ ns.found }}`,
 	SCOPE_1: `{% set found = false %}{% for num in nums %}{% if num == 1 %}{{ 'found=' }}{% set found = true %}{% endif %}{% endfor %}{{ found }}`,
+
+	// Undefined
+	UNDEFINED_VARIABLES: `{{ undefined_variable }}`,
+	UNDEFINED_ACCESS: `{{ object.undefined_attribute }}`,
+
+	// Ternary operator
+	TERNARY_OPERATOR: `|{{ 'a' if true else 'b' }}|{{ 'a' if false else 'b' }}|{{ 'a' if 1 + 1 == 2 else 'b' }}|{{ 'a' if 1 + 1 == 3 or 1 * 2 == 3 else 'b' }}|`,
+
+	// Array literals
+	ARRAY_LITERALS: `{{ [1, true, 'hello', [1, 2, 3, 4], var] | length }}`,
+
+	// Object literals
+	OBJECT_LITERALS: `{{ { 'key': 'value', key: 'value2', "key3": [1, {'foo': 'bar'} ] }['key'] }}`,
 };
 
 const TEST_PARSED = {
@@ -1296,6 +1311,34 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 	],
+	FILTER_OPERATOR_4: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "items", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "selectattr", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "key", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "length", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	FILTER_OPERATOR_5: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "messages", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "selectattr", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "role", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "equalto", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "system", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "length", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: [
@@ -1958,6 +2001,128 @@ const TEST_PARSED = {
 		{ value: "found", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
+
+	// Undefined
+	UNDEFINED_VARIABLES: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "undefined_variable", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	UNDEFINED_ACCESS: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "object", type: "Identifier" },
+		{ value: ".", type: "Dot" },
+		{ value: "undefined_attribute", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+
+	// Ternary operator
+	TERNARY_OPERATOR: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "a", type: "StringLiteral" },
+		{ value: "if", type: "If" },
+		{ value: "true", type: "BooleanLiteral" },
+		{ value: "else", type: "Else" },
+		{ value: "b", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "a", type: "StringLiteral" },
+		{ value: "if", type: "If" },
+		{ value: "false", type: "BooleanLiteral" },
+		{ value: "else", type: "Else" },
+		{ value: "b", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "a", type: "StringLiteral" },
+		{ value: "if", type: "If" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: "+", type: "AdditiveBinaryOperator" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: "==", type: "ComparisonBinaryOperator" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "else", type: "Else" },
+		{ value: "b", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "a", type: "StringLiteral" },
+		{ value: "if", type: "If" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: "+", type: "AdditiveBinaryOperator" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: "==", type: "ComparisonBinaryOperator" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: "or", type: "Or" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: "*", type: "MultiplicativeBinaryOperator" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "==", type: "ComparisonBinaryOperator" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: "else", type: "Else" },
+		{ value: "b", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
+
+	// Array literals
+	ARRAY_LITERALS: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "true", type: "BooleanLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "hello", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "4", type: "NumericLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: ",", type: "Comma" },
+		{ value: "var", type: "Identifier" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "|", type: "Pipe" },
+		{ value: "length", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+
+	// Object literals
+	OBJECT_LITERALS: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "{", type: "OpenCurlyBracket" },
+		{ value: "key", type: "StringLiteral" },
+		{ value: ":", type: "Colon" },
+		{ value: "value", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "key", type: "Identifier" },
+		{ value: ":", type: "Colon" },
+		{ value: "value2", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "key3", type: "StringLiteral" },
+		{ value: ":", type: "Colon" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "{", type: "OpenCurlyBracket" },
+		{ value: "foo", type: "StringLiteral" },
+		{ value: ":", type: "Colon" },
+		{ value: "bar", type: "StringLiteral" },
+		{ value: "}", type: "CloseCurlyBracket" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "}", type: "CloseCurlyBracket" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "key", type: "StringLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "}}", type: "CloseExpression" },
+	],
 };
 
 const TEST_CONTEXT = {
@@ -2070,6 +2235,12 @@ const TEST_CONTEXT = {
 	},
 	FILTER_OPERATOR_2: {},
 	FILTER_OPERATOR_3: {},
+	FILTER_OPERATOR_4: {
+		items: [{ key: "a" }, { key: 0 }, { key: 1 }, {}, { key: false }],
+	},
+	FILTER_OPERATOR_5: {
+		messages: [{ role: "system" }, { role: "user" }, { role: "assistant" }],
+	},
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: {},
@@ -2108,6 +2279,21 @@ const TEST_CONTEXT = {
 	// Scope
 	SCOPE: { nums: [1, 2, 3] },
 	SCOPE_1: { nums: [1, 2, 3] },
+
+	// Undefined
+	UNDEFINED_VARIABLES: {},
+	UNDEFINED_ACCESS: { object: {} },
+
+	// Ternary operator
+	TERNARY_OPERATOR: {},
+
+	// Array literals
+	ARRAY_LITERALS: { var: true },
+
+	// Object literals
+	OBJECT_LITERALS: {
+		key: "key2",
+	},
 };
 
 const EXPECTED_OUTPUTS = {
@@ -2180,6 +2366,8 @@ const EXPECTED_OUTPUTS = {
 	FILTER_OPERATOR: `3451`,
 	FILTER_OPERATOR_2: `|3|ABCD|abcd|Test test|Test Test|a b|4|`,
 	FILTER_OPERATOR_3: `|1|1|`,
+	FILTER_OPERATOR_4: `2`,
+	FILTER_OPERATOR_5: `1`,
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: `|2|0|0|0|1|1|1|0|false|true|`,
@@ -2210,6 +2398,19 @@ const EXPECTED_OUTPUTS = {
 	// Scope
 	SCOPE: `found=true`,
 	SCOPE_1: `found=false`,
+
+	// Undefined
+	UNDEFINED_VARIABLES: ``,
+	UNDEFINED_ACCESS: ``,
+
+	// Ternary operator
+	TERNARY_OPERATOR: `|a|b|a|b|`,
+
+	// Array literals
+	ARRAY_LITERALS: `5`,
+
+	// Object literals
+	OBJECT_LITERALS: `value`,
 };
 
 describe("Templates", () => {
@@ -2330,22 +2531,6 @@ describe("Error checking", () => {
 	});
 
 	describe("Runtime errors", () => {
-		it("Undefined variable", () => {
-			const env = new Environment();
-			const interpreter = new Interpreter(env);
-			const tokens = tokenize("{{ undefined_variable }}");
-			const ast = parse(tokens);
-			expect(() => interpreter.run(ast)).toThrowError();
-		});
-
-		it("Undefined attribute access", () => {
-			const env = new Environment();
-			const interpreter = new Interpreter(env);
-			const tokens = tokenize("{{ object.undefined_attribute }}");
-			const ast = parse(tokens);
-			expect(() => interpreter.run(ast)).toThrowError();
-		});
-
 		it("Undefined function call", () => {
 			const env = new Environment();
 			const interpreter = new Interpreter(env);
