@@ -372,6 +372,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: {
 			wildcard: { path: "*.sentis" },
 		},
+	},
 	"whisperkit": {
 		prettyLabel: "WhisperKit",
 		repoName: "WhisperKit",
