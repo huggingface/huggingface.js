@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount, tick } from "svelte";
 	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "../../shared/types.js";
+	import type { Options } from "@huggingface/inference";
 	import { Template } from "@huggingface/jinja";
 	import type {
 		SpecialTokensMap,
@@ -13,7 +14,7 @@
 		AddedToken,
 	} from "@huggingface/tasks";
 	import { SPECIAL_TOKENS_ATTRIBUTES } from "@huggingface/tasks";
-	import { HfInference, type Options } from "@huggingface/inference";
+	import { HfInference } from "@huggingface/inference";
 
 	import type { ChatMessage } from "@huggingface/tasks";
 	import WidgetOutputConvo from "../../shared/WidgetOutputConvo/WidgetOutputConvo.svelte";
