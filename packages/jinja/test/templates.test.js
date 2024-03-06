@@ -102,6 +102,7 @@ const TEST_STRINGS = {
 
 	// Object operators
 	OBJECT_OPERATORS: `|{{ 'known' in obj }}|{{ 'known' not in obj }}|{{ 'unknown' in obj }}|{{ 'unknown' not in obj }}|`,
+	OBJECT_OPERATORS_1: `|{{ obj.get('known') }}|{{ obj.get('unknown') is none }}|{{ obj.get('unknown') is defined }}|`,
 
 	// Scope
 	SCOPE: `{% set ns = namespace(found=false) %}{% for num in nums %}{% if num == 1 %}{{ 'found=' }}{% set ns.found = true %}{% endif %}{% endfor %}{{ ns.found }}`,
@@ -1914,6 +1915,40 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 	],
+	OBJECT_OPERATORS_1: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "obj", type: "Identifier" },
+		{ value: ".", type: "Dot" },
+		{ value: "get", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "known", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "obj", type: "Identifier" },
+		{ value: ".", type: "Dot" },
+		{ value: "get", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "unknown", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "is", type: "Is" },
+		{ value: "none", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "obj", type: "Identifier" },
+		{ value: ".", type: "Dot" },
+		{ value: "get", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "unknown", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "is", type: "Is" },
+		{ value: "defined", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
 
 	// Scope
 	SCOPE: [
@@ -2275,6 +2310,11 @@ const TEST_CONTEXT = {
 			known: true,
 		},
 	},
+	OBJECT_OPERATORS_1: {
+		obj: {
+			known: true,
+		},
+	},
 
 	// Scope
 	SCOPE: { nums: [1, 2, 3] },
@@ -2394,6 +2434,7 @@ const EXPECTED_OUTPUTS = {
 
 	// Object operators
 	OBJECT_OPERATORS: `|true|false|false|true|`,
+	OBJECT_OPERATORS_1: `|true|true|true|`,
 
 	// Scope
 	SCOPE: `found=true`,
@@ -2482,6 +2523,11 @@ describe("Error checking", () => {
 
 		it("Unexpected character", () => {
 			const text = "{{ invalid ! invalid }}";
+			expect(() => tokenize(text)).toThrowError();
+		});
+
+		it("Invalid quote character", () => {
+			const text = "{{ \u2018text\u2019 }}";
 			expect(() => tokenize(text)).toThrowError();
 		});
 	});

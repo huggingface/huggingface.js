@@ -127,6 +127,18 @@ export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 	override __bool__(): BooleanValue {
 		return new BooleanValue(this.value.size > 0);
 	}
+
+	override builtins: Map<string, AnyRuntimeValue> = new Map<string, AnyRuntimeValue>([
+		[
+			"get",
+			new FunctionValue(([key, defaultValue]) => {
+				if (!(key instanceof StringValue)) {
+					throw new Error(`Object key must be a string: got ${key.type}`);
+				}
+				return this.value.get(key.value) ?? defaultValue ?? new NullValue();
+			}),
+		],
+	]);
 }
 
 /**
