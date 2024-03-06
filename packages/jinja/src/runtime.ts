@@ -195,8 +195,7 @@ export class Environment {
 	/**
 	 * Set the value of a variable in the current environment.
 	 */
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
-	set(name: string, value: any): AnyRuntimeValue {
+	set(name: string, value: unknown): AnyRuntimeValue {
 		return this.declareVariable(name, convertToRuntimeValues(value));
 	}
 
