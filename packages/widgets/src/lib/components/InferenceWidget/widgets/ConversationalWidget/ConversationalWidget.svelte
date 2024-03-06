@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount, tick } from "svelte";
 	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "../../shared/types.js";
+	import type { Options } from "@huggingface/inference";
 	import { Template } from "@huggingface/jinja";
 	import type {
 		SpecialTokensMap,
@@ -22,7 +23,7 @@
 	import { addInferenceParameters, updateUrl } from "../../shared/helpers.js";
 	import { widgetStates, getTgiSupportedModels } from "../../stores.js";
 	import type { Writable } from "svelte/store";
-	import { isChatInput, isObject, isTextInput } from "../../shared/inputValidation.js";
+	import { isChatInput, isTextInput } from "../../shared/inputValidation.js";
 	import { isValidOutputText } from "../../shared/outputValidation.js";
 
 	export let apiToken: WidgetProps["apiToken"];
@@ -41,7 +42,7 @@
 
 	let messages: ChatMessage[] = [];
 	let error: string = "";
-	let isLoading = false;
+	let isLoading: boolean = false;
 	let outputJson: string;
 	let text = "";
 
@@ -52,9 +53,6 @@
 
 	// Check config and compile template
 	onMount(() => {
-		(async () => {
-			tgiSupportedModels = await getTgiSupportedModels(apiUrl);
-		})();
 		const config = model.config;
 		if (config === undefined) {
 			error = "Model config not found";
@@ -79,7 +77,7 @@
 			return;
 		}
 
-		inferenceClient = new HfInference();
+		inferenceClient = new HfInference(apiToken);
 	});
 
 	async function handleNewMessage(): Promise<void> {
@@ -108,6 +106,8 @@
 
 	async function getOutput({
 		withModelLoading = false,
+		isOnLoadCall = false,
+		useCache = true,
 		exampleOutput = undefined,
 	}: InferenceRunOpts<WidgetExampleOutputText> = {}) {
 		if (exampleOutput) {
@@ -151,6 +151,15 @@
 		text = "";
 		error = "";
 		try {
+			const opts = {
+				dont_load_model: isOnLoadCall,
+				includeCredentials,
+				signal: abort?.signal,
+				use_cache: useCache,
+				wait_for_model: withModelLoading,
+			} satisfies Options;
+
+			tgiSupportedModels = await getTgiSupportedModels(apiUrl);
 			if ($tgiSupportedModels?.has(model.id)) {
 				console.debug("Starting text generation using the TGI streaming API");
 				let newMessage = {
@@ -164,7 +173,7 @@
 						model: model.id,
 						accessToken: apiToken,
 					},
-					{ signal: abort?.signal }
+					opts
 				);
 				for await (const newToken of tokenStream) {
 					if (newToken.token.special) continue;
@@ -175,10 +184,7 @@
 			} else {
 				console.debug("Starting text generation using the synchronous API");
 				input.parameters.max_new_tokens = 100;
-				const output = await inferenceClient.textGeneration(
-					{ ...input, model: model.id, accessToken: apiToken },
-					{ includeCredentials, dont_load_model: !withModelLoading, signal: abort?.signal }
-				);
+				const output = await inferenceClient.textGeneration({ ...input, model: model.id, accessToken: apiToken }, opts);
 				messages = [...messages, { role: "assistant", content: output.generated_text }];
 				await tick();
 			}
@@ -222,7 +228,7 @@
 				return;
 			}
 			const exampleOutput = example.output;
-			getOutput({ ...opts.inferenceOpts, exampleOutput });
+			await getOutput({ ...opts.inferenceOpts, exampleOutput });
 		} finally {
 			isLoading = false;
 		}

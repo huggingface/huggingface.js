@@ -45,29 +45,17 @@
 					bos_token: "<s>",
 					eos_token: "</s>",
 					unk_token: "<unk>",
-					pad_token: undefined,
+					pad_token: null,
 				},
 			},
 			widgetData: [
 				{ text: "This is a text-only example", example_title: "Text only" },
 				{
-					messages: [
-						{
-							content: "You are a helpful assistant replying in very brief and straight-to-the-point answers.",
-							role: "system",
-						},
-						{ content: "Please exlain QCD in very few words", role: "user" },
-					],
+					messages: [{ content: "Please exlain QCD in very few words", role: "user" }],
 					example_title: "Chat messages",
 				},
 				{
-					messages: [
-						{
-							content: "You are a helpful assistant replying in very brief and straight-to-the-point answers.",
-							role: "system",
-						},
-						{ content: "Please exlain QCD in very few words", role: "user" },
-					],
+					messages: [{ content: "Please exlain QCD in very few words", role: "user" }],
 					output: {
 						text: "QCD is the physics of strong force and small particles.",
 					},
@@ -79,6 +67,13 @@
 						text: "QCD is the physics of strong force and small particles.",
 					},
 					example_title: "Text only with Output",
+				},
+				{
+					example_title: "Invalid example - unsupported role",
+					messages: [
+						{ role: "system", content: "This will fail because of the chat template" },
+						{ role: "user", content: "What's your favorite condiment?" },
+					],
 				},
 			],
 		},
