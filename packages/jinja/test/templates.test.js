@@ -120,6 +120,9 @@ const TEST_STRINGS = {
 
 	// Object literals
 	OBJECT_LITERALS: `{{ { 'key': 'value', key: 'value2', "key3": [1, {'foo': 'bar'} ] }['key'] }}`,
+
+	// Array operators
+	ARRAY_OPERATORS: `{{ ([1, 2, 3] + [4, 5, 6]) | length }}`,
 };
 
 const TEST_PARSED = {
@@ -2158,6 +2161,31 @@ const TEST_PARSED = {
 		{ value: "]", type: "CloseSquareBracket" },
 		{ value: "}}", type: "CloseExpression" },
 	],
+
+	// Array operators
+	ARRAY_OPERATORS: [
+		{ value: '{{', type: 'OpenExpression' },
+		{ value: '(', type: 'OpenParen' },
+		{ value: '[', type: 'OpenSquareBracket' },
+		{ value: '1', type: 'NumericLiteral' },
+		{ value: ',', type: 'Comma' },
+		{ value: '2', type: 'NumericLiteral' },
+		{ value: ',', type: 'Comma' },
+		{ value: '3', type: 'NumericLiteral' },
+		{ value: ']', type: 'CloseSquareBracket' },
+		{ value: '+', type: 'AdditiveBinaryOperator' },
+		{ value: '[', type: 'OpenSquareBracket' },
+		{ value: '4', type: 'NumericLiteral' },
+		{ value: ',', type: 'Comma' },
+		{ value: '5', type: 'NumericLiteral' },
+		{ value: ',', type: 'Comma' },
+		{ value: '6', type: 'NumericLiteral' },
+		{ value: ']', type: 'CloseSquareBracket' },
+		{ value: ')', type: 'CloseParen' },
+		{ value: '|', type: 'Pipe' },
+		{ value: 'length', type: 'Identifier' },
+		{ value: '}}', type: 'CloseExpression' }
+	  ],
 };
 
 const TEST_CONTEXT = {
@@ -2334,6 +2362,9 @@ const TEST_CONTEXT = {
 	OBJECT_LITERALS: {
 		key: "key2",
 	},
+
+	// Array operators
+	ARRAY_OPERATORS: {},
 };
 
 const EXPECTED_OUTPUTS = {
@@ -2452,6 +2483,9 @@ const EXPECTED_OUTPUTS = {
 
 	// Object literals
 	OBJECT_LITERALS: `value`,
+
+	// Array operators
+	ARRAY_OPERATORS: `6`,
 };
 
 describe("Templates", () => {

@@ -379,6 +379,12 @@ export class Interpreter {
 				case "<=":
 					return new BooleanValue(left.value <= right.value);
 			}
+		} else if (left instanceof ArrayValue && right instanceof ArrayValue) {
+			// Evaluate array operands with binary operator.
+			switch (node.operator.value) {
+				case "+":
+					return new ArrayValue(left.value.concat(right.value));
+			}
 		} else if (right instanceof ArrayValue) {
 			const member = right.value.find((x) => x.value === left.value) !== undefined;
 			switch (node.operator.value) {
