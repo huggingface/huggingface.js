@@ -17,6 +17,8 @@ export const TOKEN_TYPES = Object.freeze({
 	CloseExpression: "CloseExpression", // }}
 	OpenSquareBracket: "OpenSquareBracket", // [
 	CloseSquareBracket: "CloseSquareBracket", // ]
+	OpenCurlyBracket: "OpenCurlyBracket", // {
+	CloseCurlyBracket: "CloseCurlyBracket", // }
 	Comma: "Comma", // ,
 	Dot: "Dot", // .
 	Colon: "Colon", // :
@@ -104,6 +106,8 @@ const ORDERED_MAPPING_TABLE: [string, TokenType][] = [
 	// Single character tokens
 	["(", TOKEN_TYPES.OpenParen],
 	[")", TOKEN_TYPES.CloseParen],
+	["{", TOKEN_TYPES.OpenCurlyBracket],
+	["}", TOKEN_TYPES.CloseCurlyBracket],
 	["[", TOKEN_TYPES.OpenSquareBracket],
 	["]", TOKEN_TYPES.CloseSquareBracket],
 	[",", TOKEN_TYPES.Comma],
