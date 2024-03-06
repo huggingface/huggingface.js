@@ -214,16 +214,11 @@ export class Environment {
 	// }
 
 	/**
-	 * Declare if doesn't exist, assign otherwise.
+	 * Set variable in the current scope.
+	 * See https://jinja.palletsprojects.com/en/3.0.x/templates/#assignments for more information.
 	 */
 	setVariable(name: string, value: AnyRuntimeValue): AnyRuntimeValue {
-		let env: Environment | undefined;
-		try {
-			env = this.resolve(name);
-		} catch {
-			/* empty */
-		}
-		(env ?? this).variables.set(name, value);
+		this.variables.set(name, value);
 		return value;
 	}
 

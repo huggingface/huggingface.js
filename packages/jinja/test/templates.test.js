@@ -100,6 +100,10 @@ const TEST_STRINGS = {
 
 	// Object operators
 	OBJECT_OPERATORS: `|{{ 'known' in obj }}|{{ 'known' not in obj }}|{{ 'unknown' in obj }}|{{ 'unknown' not in obj }}|`,
+
+	// Scope
+	SCOPE: `{% set ns = namespace(found=false) %}{% for num in nums %}{% if num == 1 %}{{ 'found=' }}{% set ns.found = true %}{% endif %}{% endfor %}{{ ns.found }}`,
+	SCOPE_1: `{% set found = false %}{% for num in nums %}{% if num == 1 %}{{ 'found=' }}{% set found = true %}{% endif %}{% endfor %}{{ found }}`,
 };
 
 const TEST_PARSED = {
@@ -1867,6 +1871,93 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 	],
+
+	// Scope
+	SCOPE: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Set" },
+		{ value: "ns", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "namespace", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "found", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "false", type: "BooleanLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "for", type: "For" },
+		{ value: "num", type: "Identifier" },
+		{ value: "in", type: "In" },
+		{ value: "nums", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "if", type: "If" },
+		{ value: "num", type: "Identifier" },
+		{ value: "==", type: "ComparisonBinaryOperator" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "found=", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Set" },
+		{ value: "ns", type: "Identifier" },
+		{ value: ".", type: "Dot" },
+		{ value: "found", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "true", type: "BooleanLiteral" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endif", type: "EndIf" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endfor", type: "EndFor" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "ns", type: "Identifier" },
+		{ value: ".", type: "Dot" },
+		{ value: "found", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	SCOPE_1: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Set" },
+		{ value: "found", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "false", type: "BooleanLiteral" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "for", type: "For" },
+		{ value: "num", type: "Identifier" },
+		{ value: "in", type: "In" },
+		{ value: "nums", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "if", type: "If" },
+		{ value: "num", type: "Identifier" },
+		{ value: "==", type: "ComparisonBinaryOperator" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "found=", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Set" },
+		{ value: "found", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "true", type: "BooleanLiteral" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endif", type: "EndIf" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endfor", type: "EndFor" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "found", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
 };
 
 const TEST_CONTEXT = {
@@ -2013,6 +2104,10 @@ const TEST_CONTEXT = {
 			known: true,
 		},
 	},
+
+	// Scope
+	SCOPE: { nums: [1, 2, 3] },
+	SCOPE_1: { nums: [1, 2, 3] },
 };
 
 const EXPECTED_OUTPUTS = {
@@ -2111,6 +2206,10 @@ const EXPECTED_OUTPUTS = {
 
 	// Object operators
 	OBJECT_OPERATORS: `|true|false|false|true|`,
+
+	// Scope
+	SCOPE: `found=true`,
+	SCOPE_1: `found=false`,
 };
 
 describe("Templates", () => {
