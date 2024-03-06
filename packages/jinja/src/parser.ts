@@ -12,6 +12,8 @@ import {
 	NumericLiteral,
 	StringLiteral,
 	BooleanLiteral,
+	ArrayLiteral,
+	ObjectLiteral,
 	BinaryExpression,
 	FilterExpression,
 	TestExpression,
@@ -197,7 +199,16 @@ export function parse(tokens: Token[]): Program {
 
 	function parseExpression(): Statement {
 		// Choose parse function with lowest precedence
-		return parseLogicalOrExpression();
+		const a = parseLogicalOrExpression();
+		if (is(TOKEN_TYPES.If)) {
+			// Ternary expression
+			++current; // consume if
+			const predicate = parseLogicalOrExpression();
+			expect(TOKEN_TYPES.Else, "Expected else token");
+			const b = parseLogicalOrExpression();
+			return new If(predicate, [a], [b]);
+		}
+		return a;
 	}
 
 	function parseLogicalOrExpression(): Statement {
@@ -423,11 +434,14 @@ export function parse(tokens: Token[]): Program {
 		while (is(TOKEN_TYPES.Pipe)) {
 			// Support chaining filters
 			++current; // consume pipe
-			const filter = parsePrimaryExpression(); // should be an identifier
+			let filter = parsePrimaryExpression(); // should be an identifier
 			if (!(filter instanceof Identifier)) {
 				throw new SyntaxError(`Expected identifier for the filter`);
 			}
-			operand = new FilterExpression(operand, filter);
+			if (is(TOKEN_TYPES.OpenParen)) {
+				filter = parseCallExpression(filter);
+			}
+			operand = new FilterExpression(operand, filter as Identifier | CallExpression);
 		}
 		return operand;
 	}
@@ -456,6 +470,39 @@ export function parse(tokens: Token[]): Program {
 				}
 				++current; // consume closing parenthesis
 				return expression;
+			}
+			case TOKEN_TYPES.OpenSquareBracket: {
+				++current; // consume opening square bracket
+
+				const values = [];
+				while (!is(TOKEN_TYPES.CloseSquareBracket)) {
+					values.push(parseExpression());
+
+					if (is(TOKEN_TYPES.Comma)) {
+						++current; // consume comma
+					}
+				}
+				++current; // consume closing square bracket
+
+				return new ArrayLiteral(values);
+			}
+			case TOKEN_TYPES.OpenCurlyBracket: {
+				++current; // consume opening curly bracket
+
+				const values = new Map();
+				while (!is(TOKEN_TYPES.CloseCurlyBracket)) {
+					const key = parseExpression();
+					expect(TOKEN_TYPES.Colon, "Expected colon between key and value in object literal");
+					const value = parseExpression();
+					values.set(key, value);
+
+					if (is(TOKEN_TYPES.Comma)) {
+						++current; // consume comma
+					}
+				}
+				++current; // consume closing curly bracket
+
+				return new ObjectLiteral(values);
 			}
 			default:
 				throw new SyntaxError(`Unexpected token: ${token.type}`);

@@ -120,10 +120,6 @@ export class NumericLiteral extends Literal<number> {
  */
 export class StringLiteral extends Literal<string> {
 	override type = "StringLiteral";
-
-	constructor(value: string) {
-		super(value);
-	}
 }
 
 /**
@@ -131,6 +127,20 @@ export class StringLiteral extends Literal<string> {
  */
 export class BooleanLiteral extends Literal<boolean> {
 	override type = "BooleanLiteral";
+}
+
+/**
+ * Represents an array literal in the template.
+ */
+export class ArrayLiteral extends Literal<Expression[]> {
+	override type = "ArrayLiteral";
+}
+
+/**
+ * Represents an object literal in the template.
+ */
+export class ObjectLiteral extends Literal<Map<Expression, Expression>> {
+	override type = "ObjectLiteral";
 }
 
 /**
@@ -159,7 +169,7 @@ export class FilterExpression extends Expression {
 
 	constructor(
 		public operand: Expression,
-		public filter: Identifier // TODO: Add support for non-identifier filters
+		public filter: Identifier | CallExpression
 	) {
 		super();
 	}
