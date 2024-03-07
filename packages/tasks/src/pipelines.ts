@@ -590,7 +590,7 @@ export const PIPELINE_DATA = {
 		color: "green",
 	},
 	"image-text-to-text": {
-		name: "Image + Text to Text (VLLMs)",
+		name: "Image-Text-to-Text",
 		modality: "multimodal",
 		color: "red",
 		hideInDatasets: true,

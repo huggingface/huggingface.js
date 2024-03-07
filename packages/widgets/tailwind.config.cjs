@@ -37,6 +37,9 @@ module.exports = {
 				sans: ["Source Sans Pro", ...defaultTheme.fontFamily.sans],
 				mono: ["IBM Plex Mono", ...defaultTheme.fontFamily.mono],
 			},
+			fontSize: {
+				smd: "0.94rem",
+			},
 		},
 	},
 	plugins: [require("@tailwindcss/forms")],

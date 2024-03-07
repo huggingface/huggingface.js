@@ -293,7 +293,7 @@ model = joblib.load(
 
 export const sklearn = (model: ModelData): string[] => {
 	if (model.tags?.includes("skops")) {
-		const skopsmodelFile = model.config?.sklearn?.filename;
+		const skopsmodelFile = model.config?.sklearn?.model?.file;
 		const skopssaveFormat = model.config?.sklearn?.model_format;
 		if (!skopsmodelFile) {
 			return [`# ⚠️ Model filename not specified in config.json`];
@@ -372,7 +372,7 @@ const speechBrainMethod = (speechbrainInterface: string) => {
 };
 
 export const speechbrain = (model: ModelData): string[] => {
-	const speechbrainInterface = model.config?.speechbrain?.interface;
+	const speechbrainInterface = model.config?.speechbrain?.speechbrain_interface;
 	if (speechbrainInterface === undefined) {
 		return [`# interface not specified in config.json`];
 	}
@@ -465,7 +465,7 @@ const peftTask = (peftTaskType?: string) => {
 };
 
 export const peft = (model: ModelData): string[] => {
-	const { base_model_name: peftBaseModel, task_type: peftTaskType } = model.config?.peft ?? {};
+	const { base_model_name_or_path: peftBaseModel, task_type: peftTaskType } = model.config?.peft ?? {};
 	const pefttask = peftTask(peftTaskType);
 	if (!pefttask) {
 		return [`Task type is invalid.`];
@@ -548,4 +548,42 @@ export const pythae = (model: ModelData): string[] => [
 model = AutoModel.load_from_hf_hub("${model.id}")`,
 ];
 
+const musicgen = (model: ModelData): string[] => [
+	`from audiocraft.models import MusicGen
+
+model = MusicGen.get_pretrained("${model.id}")
+
+descriptions = ['happy rock', 'energetic EDM', 'sad jazz']
+wav = model.generate(descriptions)  # generates 3 samples.`,
+];
+
+const magnet = (model: ModelData): string[] => [
+	`from audiocraft.models import MAGNeT
+	
+model = MAGNeT.get_pretrained("${model.id}")
+
+descriptions = ['disco beat', 'energetic EDM', 'funky groove']
+wav = model.generate(descriptions)  # generates 3 samples.`,
+];
+
+const audiogen = (model: ModelData): string[] => [
+	`from audiocraft.models import AudioGen
+	
+model = AudioGen.get_pretrained("${model.id}")
+model.set_generation_params(duration=5)  # generate 5 seconds.
+descriptions = ['dog barking', 'sirene of an emergency vehicle', 'footsteps in a corridor']
+wav = model.generate(descriptions)  # generates 3 samples.`,
+];
+
+export const audiocraft = (model: ModelData): string[] => {
+	if (model.tags?.includes("musicgen")) {
+		return musicgen(model);
+	} else if (model.tags?.includes("audiogen")) {
+		return audiogen(model);
+	} else if (model.tags?.includes("magnet")) {
+		return magnet(model);
+	} else {
+		return [`# Type of model unknown.`];
+	}
+};
 //#endregion

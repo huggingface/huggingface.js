@@ -88,6 +88,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			term: { path: "pytorch_model.bin" },
 		},
 	},
+	audiocraft: {
+		prettyLabel: "Audiocraft",
+		repoName: "audiocraft",
+		repoUrl: "https://github.com/facebookresearch/audiocraft",
+		snippets: snippets.audiocraft,
+		filter: false,
+	},
 	bertopic: {
 		prettyLabel: "BERTopic",
 		repoName: "BERTopic",

@@ -52,7 +52,7 @@ jobs:
       - run: pnpm publish --no-git-checks .
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - run: git push --follow-tags
+      - run: git pull --rebase && git push --follow-tags
       # hack - reuse actions/setup-node@v3 just to set a new registry
       - uses: actions/setup-node@v3
         with:

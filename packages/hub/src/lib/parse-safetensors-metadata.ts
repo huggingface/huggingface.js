@@ -119,6 +119,7 @@ async function parseShardedIndex(
 	const indexResp = await downloadFile({
 		...params,
 		path,
+		range: [0, 10_000_000],
 	});
 
 	if (!indexResp) {
@@ -126,7 +127,12 @@ async function parseShardedIndex(
 	}
 
 	// no validation for now, we assume it's a valid IndexJson.
-	const index: SafetensorsIndexJson = await indexResp.json();
+	let index: SafetensorsIndexJson;
+	try {
+		index = await indexResp.json();
+	} catch (error) {
+		throw new SafetensorParseError(`Failed to parse file ${path}: not a valid JSON.`);
+	}
 
 	const filenames = [...new Set(Object.values(index.weight_map))];
 	const shardedMap: SafetensorsShardedHeaders = Object.fromEntries(

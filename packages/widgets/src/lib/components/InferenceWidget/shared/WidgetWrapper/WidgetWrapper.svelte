@@ -1,9 +1,7 @@
-<script lang="ts">
+<script lang="ts" generics="TWidgetExample extends WidgetExample">
 	import { InferenceDisplayability } from "@huggingface/tasks";
 	import type { WidgetExample } from "@huggingface/tasks";
 	import type { WidgetProps } from "../types.js";
-
-	type TWidgetExample = $$Generic<WidgetExample>;
 
 	import { onMount } from "svelte";
 

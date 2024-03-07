@@ -1,8 +1,6 @@
-<script lang="ts">
+<script lang="ts" generics="TWidgetExample extends WidgetExample">
 	import type { ExampleRunOpts, WidgetProps } from "../types.js";
 	import type { WidgetExample, WidgetExampleAttribute } from "@huggingface/tasks";
-
-	type TWidgetExample = $$Generic<WidgetExample>;
 
 	import { onMount } from "svelte";
 	import { slide } from "svelte/transition";
@@ -14,6 +12,7 @@
 
 	export let isLoading = false;
 	export let callApiOnMount: WidgetProps["callApiOnMount"];
+	export let classNames: string;
 	export let exampleQueryParams: WidgetExampleAttribute[] = [];
 	export let applyWidgetExample: (sample: TWidgetExample, opts?: ExampleRunOpts) => void;
 
@@ -119,7 +118,7 @@
 
 <svelte:window on:click={onClick} />
 
-<div class="ml-auto flex gap-x-1">
+<div class={classNames}>
 	<!-- Example Groups -->
 	{#if exampleGroups.length > 1}
 		<WidgetExamplesGroup
