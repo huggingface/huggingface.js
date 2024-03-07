@@ -373,7 +373,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			wildcard: { path: "*.sentis" },
 		},
 	},
-	"whisperkit": {
+	whisperkit: {
 		prettyLabel: "WhisperKit",
 		repoName: "WhisperKit",
 		repoUrl: "https://github.com/argmaxinc/WhisperKit",
