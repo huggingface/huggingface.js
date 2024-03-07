@@ -1,0 +1,54 @@
+{
+	"$id": "/inference/schemas/chat-completion/output.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Outputs for Chat Completion inference",
+	"title": "ChatCompletionOutput",
+	"type": "object",
+	"properties": {
+		"id": {
+			"type": "string",
+			"description": "A unique identifier for the chat completion."
+		},
+		"choices": {
+			"type": "array",
+			"description": "A list of chat completion choices.",
+			"items": {
+				"type": "object",
+				"properties": {
+					"finish_reason": {
+						"type": "string",
+						"description": "The reason the model stopped generating tokens."
+					},
+					"index": {
+						"type": "integer",
+						"description": "The index of the choice in the list of choices."
+					},
+					"message": {
+						"type": "object",
+						"properties": {
+							"content": {
+								"type": "string",
+								"description": "The content of the chat completion message."
+							}
+						},
+						"required": ["content"]
+					}
+				},
+				"required": ["finish_reason", "index", "message"]
+			}
+		},
+		"created": {
+			"type": "integer",
+			"description": "The Unix timestamp (in seconds) of when the chat completion was created."
+		},
+		"model": {
+			"type": "string",
+			"description": "The model used for the chat completion."
+		},
+		"system_fingerprint": {
+			"type": "string",
+			"description": "This fingerprint represents the backend configuration that the model runs with."
+		}
+	},
+	"required": ["id", "choices", "created", "model", "system_fingerprint", "object", "usage"]
+}
