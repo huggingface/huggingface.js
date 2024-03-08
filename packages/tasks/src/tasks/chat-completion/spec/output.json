@@ -17,7 +17,7 @@
 				"properties": {
 					"finish_reason": {
 						"type": "string",
-						"description": "The reason the model stopped generating tokens."
+						"description": "The reason why the model stopped generating tokens."
 					},
 					"index": {
 						"type": "integer",
