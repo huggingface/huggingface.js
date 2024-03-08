@@ -50,17 +50,55 @@ function isGGUFValueType(n: number): n is GGUFValueType {
 	return typeof GGUFValueType[n] === "string";
 }
 
-const HTTP_CHUNK_SIZE = 60 * 10 ** 6;
+const HTTP_CHUNK_SIZE = 2 * 10 ** 6; /// 2MB
+const HTTP_DATA_LEEWAY = 1 * 10 ** 6; /// 1MB
 
-async function rangeFromUrl(url: string, range: [number, number]): Promise<DataView> {
-	const buf = await (
-		await fetch(url, {
-			headers: {
-				Range: `bytes=${range[0]}-${range[1]}`,
-			},
-		})
-	).arrayBuffer();
-	return new DataView(buf);
+/**
+ * Internal stateful instance to fetch ranges of HTTP data when needed
+ */
+class RangeView {
+	private chunk: number;
+	private buffer: ArrayBuffer;
+
+	readonly view: DataView;
+
+	constructor(public url: string) {
+		this.chunk = 0;
+		/// TODO(fix typing)
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
+		this.buffer = new ArrayBuffer(0, { maxByteLength: 50 * 10 ** 6 });
+		this.view = new DataView(this.buffer);
+	}
+	/**
+	 * Fetch a new chunk from the server
+	 */
+	async fetchChunk() {
+		const range = [this.chunk * HTTP_CHUNK_SIZE, (this.chunk + 1) * HTTP_CHUNK_SIZE - 1];
+		const buf = new Uint8Array(
+			await (
+				await fetch(this.url, {
+					headers: {
+						Range: `bytes=${range[0]}-${range[1]}`,
+					},
+				})
+			).arrayBuffer()
+		);
+		/// TODO(fix typing)
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
+		this.buffer.resize((this.chunk + 1) * HTTP_CHUNK_SIZE);
+		new Uint8Array(this.buffer).set(buf, this.chunk * HTTP_CHUNK_SIZE);
+		this.chunk += 1;
+	}
+	/**
+	 * Check whether we need to fetch a new chunk
+	 */
+	async check(offset: number) {
+		if (this.view.byteLength - offset < HTTP_DATA_LEEWAY) {
+			await this.fetchChunk();
+		}
+	}
 }
 
 function readVersionedSize(view: DataView, byteOffset: number, version: Version): bigint {
@@ -147,17 +185,19 @@ export interface GGUFParseOutput {
 }
 
 export async function gguf(url: string): Promise<GGUFParseOutput> {
-	const view = await rangeFromUrl(url, [0, HTTP_CHUNK_SIZE - 1]);
-	if (view.getUint32(0, true) !== Buffer.from(ggufMagicNumber).readInt32LE()) {
+	const r = new RangeView(url);
+	await r.fetchChunk();
+
+	if (r.view.getUint32(0, true) !== Buffer.from(ggufMagicNumber).readInt32LE()) {
 		throw new Error("not a valid gguf file: no gguf magic number");
 	}
 
-	const version = view.getUint32(4, true);
+	const version = r.view.getUint32(4, true);
 	if (!isVersion(version)) {
 		throw new Error("not a valid gguf file: unsupported version");
 	}
-	const tensorCount = readVersionedSize(view, 8, version);
-	const numKv = readVersionedSize(view, 16, version);
+	const tensorCount = readVersionedSize(r.view, 8, version);
+	const numKv = readVersionedSize(r.view, 16, version);
 
 	const metadata: GGUFMetadata = {
 		version,
@@ -168,12 +208,14 @@ export async function gguf(url: string): Promise<GGUFParseOutput> {
 	let offset = 24;
 
 	for (let i = 0; i < numKv; i++) {
+		await r.check(offset);
+
 		// read key
-		const keyResult = readString(view, offset);
+		const keyResult = readString(r.view, offset);
 		offset = keyResult.newOffset;
 
 		// read value type
-		const valueType = view.getUint32(offset, true);
+		const valueType = r.view.getUint32(offset, true);
 		offset += 4;
 
 		if (!isGGUFValueType(valueType)) {
@@ -181,7 +223,7 @@ export async function gguf(url: string): Promise<GGUFParseOutput> {
 		}
 
 		// read value
-		const valueResult = readMetadataValue(view, valueType, offset);
+		const valueResult = readMetadataValue(r.view, valueType, offset);
 		offset = valueResult.newOffset;
 
 		metadata[keyResult.value] = valueResult.value;
@@ -190,22 +232,24 @@ export async function gguf(url: string): Promise<GGUFParseOutput> {
 	const tensorInfos: GGUFTensorInfo[] = [];
 
 	for (let i = 0; i < tensorCount; i++) {
+		await r.check(offset);
+
 		// read tensor name
-		const keyResult = readString(view, offset);
+		const keyResult = readString(r.view, offset);
 		offset = keyResult.newOffset;
 
-		const nDims = view.getUint32(offset, true);
+		const nDims = r.view.getUint32(offset, true);
 		offset += 4;
 
 		const shape: bigint[] = [];
 		for (let dim = 0; dim < nDims; dim++) {
-			shape.push(view.getBigUint64(offset, true));
+			shape.push(r.view.getBigUint64(offset, true));
 			offset += 8;
 		}
 
-		const type = view.getUint32(offset, true);
+		const type = r.view.getUint32(offset, true);
 		offset += 4;
-		const tensorOffset = view.getBigUint64(offset, true);
+		const tensorOffset = r.view.getBigUint64(offset, true);
 		offset += 8;
 
 		tensorInfos.push({
