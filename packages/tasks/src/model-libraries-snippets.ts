@@ -533,9 +533,8 @@ huggingface-cli download --local-dir ${nameWithoutNamespace(model.id)} ${model.i
 ];
 
 export const mlxim = (model: ModelData): string[] => [
-	`pip install mlx-image
+	`from mlxim.model import create_model
 
-from mlxim.model import create_model
 model = create_model(${model.id})`,
 ];
 

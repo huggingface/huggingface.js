@@ -192,7 +192,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.mlx,
 		filter: true,
 	},
-	"mlxim": {
+	mlxim: {
 		prettyLabel: "mlxim",
 		repoName: "mlx-image",
 		repoUrl: "https://github.com/riccardomusmeci/mlx-image",
