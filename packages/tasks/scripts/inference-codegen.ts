@@ -22,7 +22,7 @@ const PYTHON_HEADER_FILE = `
 #   - specs:  https://github.com/huggingface/huggingface.js/tree/main/packages/tasks/src/tasks.
 `;
 
-const PYTHON_DIR = "/home/wauplin/projects/huggingface_hub/src/huggingface_hub/inference/_generated/types";
+const PYTHON_DIR = "./.python_generated";
 
 const rootDirFinder = function (): string {
 	let currentPath = path.normalize(import.meta.url);
@@ -210,6 +210,7 @@ for (const { task, dirPath } of allTasks) {
 		const { lines } = await generatePython(inputData);
 		const pythonFilename = `${task}.py`.replace(/-/g, "_");
 		const pythonPath = `${PYTHON_DIR}/${pythonFilename}`;
+		await fs.mkdir(PYTHON_DIR, { recursive: true });
 		await fs.writeFile(pythonPath, [PYTHON_HEADER_FILE, ...lines].join(`\n`), {
 			flag: "w+",
 			encoding: "utf-8",
