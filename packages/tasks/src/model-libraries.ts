@@ -373,6 +373,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			wildcard: { path: "*.sentis" },
 		},
 	},
+	whisperkit: {
+		prettyLabel: "WhisperKit",
+		repoName: "WhisperKit",
+		repoUrl: "https://github.com/argmaxinc/WhisperKit",
+		countDownloads: {
+			wildcard: { path: "*/model.mil" },
+		},
+	},
 } satisfies Record<string, LibraryUiElement>;
 
 export type ModelLibraryKey = keyof typeof MODEL_LIBRARIES_UI_ELEMENTS;
