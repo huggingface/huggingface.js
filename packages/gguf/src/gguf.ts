@@ -4,7 +4,7 @@ type MetadataValue = MetadataBaseValue | MetadataBaseValue[] | MetadataValue[]; 
 type Version = 1 | 2 | 3;
 const isVersion = (version: number): version is Version => version === 1 || version === 2 || version === 3;
 
-const ggufMagicNumber = [0x47, 0x47, 0x55, 0x46]; /// "GGUF"
+const ggufMagicNumber = new Uint8Array([0x47, 0x47, 0x55, 0x46]); /// "GGUF"
 
 export enum GGMLQuantizationType {
 	F32 = 0,
@@ -188,8 +188,8 @@ export async function gguf(url: string): Promise<GGUFParseOutput> {
 	const r = new RangeView(url);
 	await r.fetchChunk();
 
-	if (r.view.getUint32(0, true) !== Buffer.from(ggufMagicNumber).readInt32LE()) {
-		throw new Error("not a valid gguf file: no gguf magic number");
+	if (r.view.getUint32(0, true) !== new DataView(ggufMagicNumber.buffer).getUint32(0, true)) {
+		throw new Error("not a valid gguf file: not starting with GGUF magic number");
 	}
 
 	const version = r.view.getUint32(4, true);
