@@ -22,7 +22,7 @@
 		"./dist/index.mjs": "./dist/browser/index.mjs"
 	},
 	"engines": {
-		"node": ">=18"
+		"node": ">=20"
 	},
 	"source": "index.ts",
 	"scripts": {
