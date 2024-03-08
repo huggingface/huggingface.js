@@ -51,7 +51,7 @@ function isGGUFValueType(n: number): n is GGUFValueType {
 }
 
 const HTTP_CHUNK_SIZE = 2 * 10 ** 6; /// 2MB
-const HTTP_DATA_LEEWAY = 1 * 10 ** 6; /// 1MB
+const HTTP_DATA_LEEWAY = 5 * 10 ** 5; /// 500kb
 
 /**
  * Internal stateful instance to fetch ranges of HTTP data when needed
@@ -222,10 +222,20 @@ export async function gguf(url: string): Promise<GGUFParseOutput> {
 			throw new Error("Unsupported metadata type: " + valueType);
 		}
 
-		// read value
-		const valueResult = readMetadataValue(r.view, valueType, offset);
+		let valueResult: { value: MetadataValue; newOffset: number } | undefined;
+		while (!valueResult) {
+			try {
+				// read value
+				valueResult = readMetadataValue(r.view, valueType, offset);
+			} catch (err) {
+				if (err instanceof RangeError) {
+					await r.fetchChunk();
+				} else {
+					throw err;
+				}
+			}
+		}
 		offset = valueResult.newOffset;
-
 		metadata[keyResult.value] = valueResult.value;
 	}
 
