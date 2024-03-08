@@ -93,7 +93,7 @@
 					"description": "The contents of the assistant message."
 				}
 			},
-			"required": ["role"]
+			"required": ["role", "content"]
 		}
 	}
 }
