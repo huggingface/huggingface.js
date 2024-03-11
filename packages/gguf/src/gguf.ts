@@ -63,7 +63,10 @@ class RangeView {
 
 	readonly view: DataView;
 
-	constructor(public url: string, private _fetch: typeof fetch = fetch) {
+	constructor(
+		public url: string,
+		private _fetch: typeof fetch = fetch
+	) {
 		this.chunk = 0;
 		/// TODO(fix typing)
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -151,11 +154,11 @@ function readMetadataValue(
 			let length = 12;
 			const arrayValues: MetadataValue[] = [];
 			for (let i = 0; i < arrayLength; i++) {
-				const { value, length: _length } = readMetadataValue(view, arrayType, offset+length);
+				const { value, length: _length } = readMetadataValue(view, arrayType, offset + length);
 				arrayValues.push(value);
 				length += _length;
 			}
-			return { value: arrayValues, length: length };
+			return { value: arrayValues, length };
 		}
 		case GGUFValueType.UINT64:
 			return { value: view.getBigUint64(offset, true), length: 8 };
@@ -223,7 +226,7 @@ export async function gguf(url: string, _fetch: typeof fetch = fetch): Promise<G
 			throw new Error("Unsupported metadata type: " + valueType);
 		}
 
-		let valueResult: { value: MetadataValue; length: number } | undefined;
+		let valueResult: ReturnType<typeof readMetadataValue> | undefined;
 		while (!valueResult) {
 			try {
 				// read value
