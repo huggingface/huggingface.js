@@ -194,7 +194,7 @@ export async function gguf(url: string): Promise<GGUFParseOutput> {
 
 	const version = r.view.getUint32(4, true);
 	if (!isVersion(version)) {
-		throw new Error("not a valid gguf file: unsupported version");
+		throw new Error(`not a valid gguf file: unsupported version "${version}"`);
 	}
 	const tensorCount = readVersionedSize(r.view, 8, version);
 	const numKv = readVersionedSize(r.view, 16, version);
