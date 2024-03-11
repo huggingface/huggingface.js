@@ -115,54 +115,54 @@ function readVersionedSize(view: DataView, byteOffset: number, version: Version)
 	}
 }
 
-function readString(view: DataView, offset: number): { value: string; newOffset: number } {
+function readString(view: DataView, offset: number): { value: string; length: number } {
 	const length = view.getBigUint64(offset, true);
 	const value = new TextDecoder().decode(view.buffer.slice(offset + 8, offset + 8 + Number(length)));
-	return { value, newOffset: offset + 8 + Number(length) };
+	return { value, length: 8 + Number(length) };
 }
 
 function readMetadataValue(
 	view: DataView,
 	type: GGUFValueType,
 	offset: number
-): { value: MetadataValue; newOffset: number } {
+): { value: MetadataValue; length: number } {
 	switch (type) {
 		case GGUFValueType.UINT8:
-			return { value: view.getUint8(offset), newOffset: offset + 1 };
+			return { value: view.getUint8(offset), length: 1 };
 		case GGUFValueType.INT8:
-			return { value: view.getInt8(offset), newOffset: offset + 1 };
+			return { value: view.getInt8(offset), length: 1 };
 		case GGUFValueType.UINT16:
-			return { value: view.getUint16(offset, true), newOffset: offset + 2 };
+			return { value: view.getUint16(offset, true), length: 2 };
 		case GGUFValueType.INT16:
-			return { value: view.getInt16(offset, true), newOffset: offset + 2 };
+			return { value: view.getInt16(offset, true), length: 2 };
 		case GGUFValueType.UINT32:
-			return { value: view.getUint32(offset, true), newOffset: offset + 4 };
+			return { value: view.getUint32(offset, true), length: 4 };
 		case GGUFValueType.INT32:
-			return { value: view.getInt32(offset, true), newOffset: offset + 4 };
+			return { value: view.getInt32(offset, true), length: 4 };
 		case GGUFValueType.FLOAT32:
-			return { value: view.getFloat32(offset, true), newOffset: offset + 4 };
+			return { value: view.getFloat32(offset, true), length: 4 };
 		case GGUFValueType.BOOL:
-			return { value: view.getUint8(offset) !== 0, newOffset: offset + 1 };
+			return { value: view.getUint8(offset) !== 0, length: 1 };
 		case GGUFValueType.STRING:
 			return readString(view, offset);
 		case GGUFValueType.ARRAY: {
 			const arrayType = view.getUint32(offset, true);
 			const arrayLength = view.getBigUint64(offset + 4, true);
-			let arrayOffset = offset + 12;
+			let length = 12;
 			const arrayValues: MetadataValue[] = [];
 			for (let i = 0; i < arrayLength; i++) {
-				const { value, newOffset } = readMetadataValue(view, arrayType, arrayOffset);
+				const { value, length: _length } = readMetadataValue(view, arrayType, offset+length);
 				arrayValues.push(value);
-				arrayOffset = newOffset;
+				length += _length;
 			}
-			return { value: arrayValues, newOffset: arrayOffset };
+			return { value: arrayValues, length: length };
 		}
 		case GGUFValueType.UINT64:
-			return { value: view.getBigUint64(offset, true), newOffset: offset + 8 };
+			return { value: view.getBigUint64(offset, true), length: 8 };
 		case GGUFValueType.INT64:
-			return { value: view.getBigInt64(offset, true), newOffset: offset + 8 };
+			return { value: view.getBigInt64(offset, true), length: 8 };
 		case GGUFValueType.FLOAT64:
-			return { value: view.getFloat64(offset, true), newOffset: offset + 8 };
+			return { value: view.getFloat64(offset, true), length: 8 };
 	}
 }
 
@@ -213,7 +213,7 @@ export async function gguf(url: string): Promise<GGUFParseOutput> {
 
 		// read key
 		const keyResult = readString(r.view, offset);
-		offset = keyResult.newOffset;
+		offset += keyResult.length;
 
 		// read value type
 		const valueType = r.view.getUint32(offset, true);
@@ -223,7 +223,7 @@ export async function gguf(url: string): Promise<GGUFParseOutput> {
 			throw new Error("Unsupported metadata type: " + valueType);
 		}
 
-		let valueResult: { value: MetadataValue; newOffset: number } | undefined;
+		let valueResult: { value: MetadataValue; length: number } | undefined;
 		while (!valueResult) {
 			try {
 				// read value
@@ -236,7 +236,7 @@ export async function gguf(url: string): Promise<GGUFParseOutput> {
 				}
 			}
 		}
-		offset = valueResult.newOffset;
+		offset += valueResult.length;
 		metadata[keyResult.value] = valueResult.value;
 	}
 
@@ -247,7 +247,7 @@ export async function gguf(url: string): Promise<GGUFParseOutput> {
 
 		// read tensor name
 		const keyResult = readString(r.view, offset);
-		offset = keyResult.newOffset;
+		offset += keyResult.length;
 
 		const nDims = r.view.getUint32(offset, true);
 		offset += 4;
