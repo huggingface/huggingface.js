@@ -199,7 +199,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://huggingface.co/docs/hub/mlxim",
 		snippets: snippets.mlxim,
 		filter: false,
-		countDownloads: { term: { path: "model.safetensors" } }
+		countDownloads: { term: { path: "model.safetensors" } },
 	},
 	nemo: {
 		prettyLabel: "NeMo",
