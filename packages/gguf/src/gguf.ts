@@ -52,6 +52,7 @@ function isGGUFValueType(n: number): n is GGUFValueType {
 
 const HTTP_CHUNK_SIZE = 2 * 10 ** 6; /// 2MB
 const HTTP_DATA_LEEWAY = 5 * 10 ** 5; /// 500kb
+const HTTP_TOTAL_MAX_SIZE = 50 * 10 ** 6; /// 50MB
 
 /**
  * Internal stateful instance to fetch ranges of HTTP data when needed
@@ -67,7 +68,7 @@ class RangeView {
 		/// TODO(fix typing)
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
-		this.buffer = new ArrayBuffer(0, { maxByteLength: 50 * 10 ** 6 });
+		this.buffer = new ArrayBuffer(0, { maxByteLength: HTTP_TOTAL_MAX_SIZE });
 		this.view = new DataView(this.buffer);
 	}
 	/**
