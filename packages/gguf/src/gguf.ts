@@ -95,7 +95,7 @@ class RangeView {
 	/**
 	 * Check whether we need to fetch a new chunk
 	 */
-	async check(offset: number) {
+	async fetchChunkIfNeeded(offset: number) {
 		if (this.view.byteLength - offset < HTTP_DATA_LEEWAY) {
 			await this.fetchChunk();
 		}
@@ -176,7 +176,7 @@ export interface GGUFTensorInfo {
 	name: string;
 	n_dims: number;
 	shape: bigint[];
-	type: GGMLQuantizationType;
+	dtype: GGMLQuantizationType;
 	offset: bigint;
 }
 
@@ -209,7 +209,7 @@ export async function gguf(url: string): Promise<GGUFParseOutput> {
 	let offset = 24;
 
 	for (let i = 0; i < numKv; i++) {
-		await r.check(offset);
+		await r.fetchChunkIfNeeded(offset);
 
 		// read key
 		const keyResult = readString(r.view, offset);
@@ -243,7 +243,7 @@ export async function gguf(url: string): Promise<GGUFParseOutput> {
 	const tensorInfos: GGUFTensorInfo[] = [];
 
 	for (let i = 0; i < tensorCount; i++) {
-		await r.check(offset);
+		await r.fetchChunkIfNeeded(offset);
 
 		// read tensor name
 		const keyResult = readString(r.view, offset);
@@ -267,7 +267,7 @@ export async function gguf(url: string): Promise<GGUFParseOutput> {
 			name: keyResult.value,
 			n_dims: nDims,
 			shape,
-			type,
+			dtype: type,
 			offset: tensorOffset,
 		});
 	}

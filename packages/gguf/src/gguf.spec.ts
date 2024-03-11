@@ -53,12 +53,12 @@ describe("gguf", () => {
 		expect(tensorInfos[0]).toMatchObject({
 			name: "token_embd.weight",
 			shape: [4096n, 32000n],
-			type: GGMLQuantizationType.Q2_K,
+			dtype: GGMLQuantizationType.Q2_K,
 		});
 		expect(tensorInfos[tensorInfos.length - 1]).toMatchObject({
 			name: "output_norm.weight",
 			shape: [4096n],
-			type: GGMLQuantizationType.F32,
+			dtype: GGMLQuantizationType.F32,
 		});
 	});
 
@@ -91,12 +91,12 @@ describe("gguf", () => {
 		expect(tensorInfos[0]).toMatchObject({
 			name: "token_embd.weight",
 			shape: [4096n, 32000n],
-			type: GGMLQuantizationType.Q5_K,
+			dtype: GGMLQuantizationType.Q5_K,
 		});
 		expect(tensorInfos[tensorInfos.length - 1]).toMatchObject({
 			name: "output.weight",
 			shape: [4096n, 32000n],
-			type: GGMLQuantizationType.Q6_K,
+			dtype: GGMLQuantizationType.Q6_K,
 		});
 	});
 
@@ -128,12 +128,12 @@ describe("gguf", () => {
 		expect(tensorInfos[0]).toMatchObject({
 			name: "token_embd.weight",
 			shape: [2048n, 256128n],
-			type: GGMLQuantizationType.Q4_K,
+			dtype: GGMLQuantizationType.Q4_K,
 		});
 		expect(tensorInfos[tensorInfos.length - 1]).toMatchObject({
 			name: "blk.9.ffn_norm.weight",
 			shape: [2048n],
-			type: GGMLQuantizationType.F32,
+			dtype: GGMLQuantizationType.F32,
 		});
 	});
 });
