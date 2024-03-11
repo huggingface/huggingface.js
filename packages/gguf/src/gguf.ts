@@ -63,7 +63,7 @@ class RangeView {
 
 	readonly view: DataView;
 
-	constructor(public url: string) {
+	constructor(public url: string, private _fetch: typeof fetch = fetch) {
 		this.chunk = 0;
 		/// TODO(fix typing)
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -78,7 +78,7 @@ class RangeView {
 		const range = [this.chunk * HTTP_CHUNK_SIZE, (this.chunk + 1) * HTTP_CHUNK_SIZE - 1];
 		const buf = new Uint8Array(
 			await (
-				await fetch(this.url, {
+				await this._fetch(this.url, {
 					headers: {
 						Range: `bytes=${range[0]}-${range[1]}`,
 					},
@@ -185,8 +185,8 @@ export interface GGUFParseOutput {
 	tensorInfos: GGUFTensorInfo[];
 }
 
-export async function gguf(url: string): Promise<GGUFParseOutput> {
-	const r = new RangeView(url);
+export async function gguf(url: string, _fetch: typeof fetch = fetch): Promise<GGUFParseOutput> {
+	const r = new RangeView(url, _fetch);
 	await r.fetchChunk();
 
 	if (r.view.getUint32(0, true) !== new DataView(ggufMagicNumber.buffer).getUint32(0, true)) {
