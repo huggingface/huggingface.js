@@ -161,7 +161,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "GLiNER",
 		repoName: "GLiNER",
 		repoUrl: "https://github.com/urchade/GLiNER",
-		snippets: snippets.flair,
+		snippets: snippets.gliner,
 		filter: false,
 		countDownloads: {
 			term: { path: "gliner_config.json" },
