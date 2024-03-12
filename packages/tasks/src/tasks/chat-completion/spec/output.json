@@ -5,13 +5,10 @@
 	"title": "ChatCompletionOutput",
 	"type": "object",
 	"properties": {
-		"id": {
-			"type": "string",
-			"description": "A unique identifier for the chat completion."
-		},
 		"choices": {
 			"type": "array",
 			"description": "A list of chat completion choices.",
+			"title": "ChatCompletionOutputChoice",
 			"items": {
 				"type": "object",
 				"properties": {
@@ -31,6 +28,7 @@
 								"description": "The content of the chat completion message."
 							}
 						},
+						"title": "ChatCompletionOutputChoiceMessage",
 						"required": ["content"]
 					}
 				},
@@ -40,15 +38,7 @@
 		"created": {
 			"type": "integer",
 			"description": "The Unix timestamp (in seconds) of when the chat completion was created."
-		},
-		"model": {
-			"type": "string",
-			"description": "The model used for the chat completion."
-		},
-		"system_fingerprint": {
-			"type": "string",
-			"description": "This fingerprint represents the backend configuration that the model runs with."
 		}
 	},
-	"required": ["id", "choices", "created", "model", "system_fingerprint"]
+	"required": ["choices", "created"]
 }

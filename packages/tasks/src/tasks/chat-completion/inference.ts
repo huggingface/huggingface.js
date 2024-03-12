@@ -15,67 +15,55 @@ export interface ChatCompletionInput {
 	 */
 	frequency_penalty?: number;
 	/**
-	 * The maximum number of tokens that can be generated in the chat completion. The total
-	 * length of input tokens and generated tokens is limited by the model's context length.
+	 * The maximum number of tokens that can be generated in the chat completion.
 	 */
 	max_tokens?: number;
-	messages?: MessageElement[];
-	/**
-	 * ID of the model to use. See the model endpoint compatibility table for details on which
-	 * models work with the Chat API.
-	 */
-	model?: string;
+	messages: ChatCompletionInputMessage[];
 	/**
 	 * The random sampling seed.
 	 */
 	seed?: number;
 	/**
-	 * Up to 4 sequences where the API will stop generating further tokens.
+	 * Stop generating tokens if a stop token is generated.
 	 */
-	stop?: string;
+	stop?: Stop;
 	/**
-	 * If set, partial message deltas will be sent, like in ChatGPT. Tokens will be sent as
-	 * data-only server-sent events as they become available, with the stream terminated by a
-	 * data: [DONE] message.
+	 * If set, partial message deltas will be sent.
 	 */
 	stream?: boolean;
 	/**
-	 * What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the
-	 * output more random, while lower values like 0.2 will make it more focused and
-	 * deterministic. We generally recommend altering this or top_p but not both.
+	 * The value used to modulate the logits distribution.
 	 */
 	temperature?: number;
 	/**
-	 * An alternative to sampling with temperature, called nucleus sampling, where the model
-	 * considers the results of the tokens with top_p probability mass. So 0.1 means only the
-	 * tokens comprising the top 10% probability mass are considered. We generally recommend
-	 * altering this or temperature but not both.
+	 * If set to < 1, only the smallest set of most probable tokens with probabilities that add
+	 * up to `top_p` or higher are kept for generation.
 	 */
 	top_p?: number;
 	[property: string]: unknown;
 }
 
-export interface MessageElement {
+export interface ChatCompletionInputMessage {
 	/**
-	 * The contents of the system message.
-	 *
-	 * The contents of the user message.
-	 *
-	 * The contents of the assistant message.
+	 * The content of the message.
 	 */
 	content: string;
 	/**
-	 * The role of the messages author, in this case system.
-	 *
-	 * The role of the messages author, in this case user.
-	 *
-	 * The role of the messages author, in this case assistant.
+	 * The role of the messages author.
 	 */
 	role: Role;
 	[property: string]: unknown;
 }
 
-export type Role = "system" | "user" | "assistant";
+/**
+ * The role of the messages author.
+ */
+export type Role = "assistant" | "system" | "user";
+
+/**
+ * Stop generating tokens if a stop token is generated.
+ */
+export type Stop = string[] | string;
 
 /**
  * Outputs for Chat Completion inference
@@ -84,27 +72,15 @@ export interface ChatCompletionOutput {
 	/**
 	 * A list of chat completion choices.
 	 */
-	choices: Choice[];
+	choices: ChatCompletionOutputChoice[];
 	/**
 	 * The Unix timestamp (in seconds) of when the chat completion was created.
 	 */
 	created: number;
-	/**
-	 * A unique identifier for the chat completion.
-	 */
-	id: string;
-	/**
-	 * The model used for the chat completion.
-	 */
-	model: string;
-	/**
-	 * This fingerprint represents the backend configuration that the model runs with.
-	 */
-	system_fingerprint: string;
 	[property: string]: unknown;
 }
 
-export interface Choice {
+export interface ChatCompletionOutputChoice {
 	/**
 	 * The reason why the model stopped generating tokens.
 	 */
@@ -113,11 +89,11 @@ export interface Choice {
 	 * The index of the choice in the list of choices.
 	 */
 	index: number;
-	message: ChoiceMessage;
+	message: ChatCompletionOutputChoiceMessage;
 	[property: string]: unknown;
 }
 
-export interface ChoiceMessage {
+export interface ChatCompletionOutputChoiceMessage {
 	/**
 	 * The content of the chat completion message.
 	 */
