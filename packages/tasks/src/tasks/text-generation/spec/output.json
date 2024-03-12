@@ -13,7 +13,7 @@
 			"description": "When enabled, details about the generation",
 			"title": "TextGenerationOutputDetails",
 			"allOf": [
-				{ "$ref": "#/$defs/SequenceDetails" },
+				{ "$ref": "#/$defs/Details" },
 				{
 					"type": "object",
 					"properties": {
@@ -22,7 +22,7 @@
 							"description": "Details about additional sequences when best_of is provided",
 							"items": {
 								"allOf": [
-									{ "$ref": "#/$defs/SequenceDetails" },
+									{ "$ref": "#/$defs/Details" },
 									{
 										"type": "object",
 										"properties": {
@@ -42,32 +42,10 @@
 		}
 	},
 	"required": ["generated_text"],
-
 	"$defs": {
-		"Token": {
+		"Details": {
 			"type": "object",
-			"title": "Token",
-			"properties": {
-				"id": {
-					"type": "integer"
-				},
-				"logprob": {
-					"type": "number"
-				},
-				"special": {
-					"type": "boolean",
-					"description": "Whether or not that token is a special one"
-				},
-				"text": {
-					"type": "string",
-					"description": "The text associated with that token"
-				}
-			},
-			"required": ["id", "logprob", "special", "text"]
-		},
-		"SequenceDetails": {
-			"type": "object",
-			"title": "TextGenerationSequenceDetails",
+			"title": "TextGenerationDetails",
 			"properties": {
 				"finish_reason": {
 					"type": "string",
@@ -110,7 +88,25 @@
 					"type": "array",
 					"description": "The generated tokens and associated details",
 					"items": {
-						"$ref": "#/$defs/Token"
+						"type": "object",
+						"title": "TextGenerationToken",
+						"properties": {
+							"id": {
+								"type": "integer"
+							},
+							"logprob": {
+								"type": "number"
+							},
+							"special": {
+								"type": "boolean",
+								"description": "Whether or not that token is a special one"
+							},
+							"text": {
+								"type": "string",
+								"description": "The text associated with that token"
+							}
+						},
+						"required": ["id", "logprob", "special", "text"]
 					}
 				}
 			},

@@ -12,6 +12,10 @@
 		"parameters": {
 			"description": "Additional inference parameters",
 			"$ref": "#/$defs/TextGenerationParameters"
+		},
+		"stream": {
+			"description": "Whether to stream output tokens",
+			"type": "boolean"
 		}
 	},
 	"$defs": {

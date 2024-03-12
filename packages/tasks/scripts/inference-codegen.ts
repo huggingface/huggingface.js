@@ -54,6 +54,12 @@ async function buildInputData(taskId: string, taskSpecDir: string, allSpecFiles:
 		name: `${taskId}-output`,
 		schema: await fs.readFile(`${taskSpecDir}/output.json`, { encoding: "utf-8" }),
 	});
+	if (taskId === "text-generation") {
+		await schema.addSource({
+			name: `${taskId}-stream-output`,
+			schema: await fs.readFile(`${taskSpecDir}/output_stream.json`, { encoding: "utf-8" }),
+		});
+	}
 	const inputData = new InputData();
 	inputData.addInput(schema);
 	return inputData;

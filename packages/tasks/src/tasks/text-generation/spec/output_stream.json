@@ -1,0 +1,73 @@
+{
+	"$id": "/inference/schemas/text-generation/output.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Text Generation Stream Output",
+	"title": "TextGenerationStreamOutput",
+	"type": "object",
+	"properties": {
+		"token": {
+			"$ref": "#/$defs/Token",
+			"description": "Generated token."
+		},
+		"index": {
+			"type": "integer",
+			"description": "The token index within the stream. Optional to support older clients that omit it."
+		},
+		"generated_text": {
+			"type": "string",
+			"description": "The complete generated text. Only available when the generation is finished."
+		},
+		"details": {
+			"$ref": "#/$defs/StreamDetails",
+			"description": "Generation details. Only available when the generation is finished."
+		}
+	},
+	"required": ["token"],
+	"$defs": {
+		"Token": {
+			"type": "object",
+			"title": "TextGenerationToken",
+			"properties": {
+				"id": {
+					"type": "integer"
+				},
+				"logprob": {
+					"type": "number"
+				},
+				"special": {
+					"type": "boolean",
+					"description": "Whether or not that token is a special one"
+				},
+				"text": {
+					"type": "string",
+					"description": "The text associated with that token"
+				}
+			},
+			"required": ["id", "logprob", "special", "text"]
+		},
+		"StreamDetails": {
+			"type": "object",
+			"title": "TextGenerationStreamDetails",
+			"properties": {
+				"finish_reason": {
+					"type": "string",
+					"description": "The reason why the generation was stopped.",
+					"oneOf": [
+						{ "const": "length", "description": "The generated sequence reached the maximum allowed length" },
+						{ "const": "eos_token", "description": "The model generated an end-of-sentence (EOS) token" },
+						{ "const": "stop_sequence", "description": "One of the sequence in stop_sequences was generated" }
+					]
+				},
+				"generated_tokens": {
+					"type": "integer",
+					"description": "The number of generated tokens"
+				},
+				"seed": {
+					"type": "integer",
+					"description": "The random seed used for generation"
+				}
+			},
+			"required": ["finish_reason", "generated_tokens", "seed"]
+		}
+	}
+}

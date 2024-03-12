@@ -16,6 +16,10 @@ export interface TextGenerationInput {
 	 * Additional inference parameters
 	 */
 	parameters?: TextGenerationParameters;
+	/**
+	 * Whether to stream output tokens
+	 */
+	stream?: boolean;
 	[property: string]: unknown;
 }
 
@@ -114,7 +118,7 @@ export interface TextGenerationOutputDetails {
 	/**
 	 * Details about additional sequences when best_of is provided
 	 */
-	best_of_sequences?: TextGenerationSequenceDetails[];
+	best_of_sequences?: TextGenerationDetails[];
 	/**
 	 * The reason why the generation was stopped.
 	 */
@@ -131,11 +135,11 @@ export interface TextGenerationOutputDetails {
 	/**
 	 * The generated tokens and associated details
 	 */
-	tokens: Token[];
+	tokens: TokenElement[];
 	[property: string]: unknown;
 }
 
-export interface TextGenerationSequenceDetails {
+export interface TextGenerationDetails {
 	/**
 	 * The reason why the generation was stopped.
 	 */
@@ -156,7 +160,7 @@ export interface TextGenerationSequenceDetails {
 	/**
 	 * The generated tokens and associated details
 	 */
-	tokens: Token[];
+	tokens: TokenElement[];
 	[property: string]: unknown;
 }
 
@@ -179,7 +183,66 @@ export interface PrefillToken {
 	[property: string]: unknown;
 }
 
-export interface Token {
+export interface TokenElement {
+	id: number;
+	logprob: number;
+	/**
+	 * Whether or not that token is a special one
+	 */
+	special: boolean;
+	/**
+	 * The text associated with that token
+	 */
+	text: string;
+	[property: string]: unknown;
+}
+
+/**
+ * Text Generation Stream Output
+ */
+export interface TextGenerationStreamOutput {
+	/**
+	 * Generation details. Only available when the generation is finished.
+	 */
+	details?: TextGenerationStreamDetails;
+	/**
+	 * The complete generated text. Only available when the generation is finished.
+	 */
+	generated_text?: string;
+	/**
+	 * The token index within the stream. Optional to support older clients that omit it.
+	 */
+	index?: number;
+	/**
+	 * Generated token.
+	 */
+	token: TextGenerationStreamOutputToken;
+	[property: string]: unknown;
+}
+
+/**
+ * Generation details. Only available when the generation is finished.
+ */
+export interface TextGenerationStreamDetails {
+	/**
+	 * The reason why the generation was stopped.
+	 */
+	finish_reason: FinishReason;
+	/**
+	 * The number of generated tokens
+	 */
+	generated_tokens: number;
+	/**
+	 * The random seed used for generation
+	 */
+	seed: number;
+	[property: string]: unknown;
+}
+
+/**
+ * Generated token.
+ */
+export interface TextGenerationStreamOutputToken {
 	id: number;
 	logprob: number;
 	/**
