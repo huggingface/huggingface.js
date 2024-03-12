@@ -140,6 +140,12 @@ export const flair = (model: ModelData): string[] => [
 tagger = SequenceTagger.load("${model.id}")`,
 ];
 
+export const gliner = (model: ModelData): string[] => [
+	`from model import GLiNER
+
+model = GLiNER.from_pretrained("${model.id}")`,
+];
+
 export const keras = (model: ModelData): string[] => [
 	`from huggingface_hub import from_pretrained_keras
 
