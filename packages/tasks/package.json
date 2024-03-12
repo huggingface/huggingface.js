@@ -44,6 +44,6 @@
 	"license": "MIT",
 	"devDependencies": {
 		"@types/node": "^20.11.5",
-		"quicktype-core": "https://github.com/huggingface/quicktype/raw/pack-18.0.16/packages/quicktype-core/quicktype-core-18.0.16.tgz"
+		"quicktype-core": "https://github.com/huggingface/quicktype/raw/pack-18.0.17/packages/quicktype-core/quicktype-core-18.0.17.tgz"
 	}
 }
