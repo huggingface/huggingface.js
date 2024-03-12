@@ -63,7 +63,7 @@ export interface MessageElement {
 	 *
 	 * The contents of the assistant message.
 	 */
-	content?: string;
+	content: string;
 	/**
 	 * The role of the messages author, in this case system.
 	 *
@@ -97,18 +97,16 @@ export interface ChatCompletionOutput {
 	 * The model used for the chat completion.
 	 */
 	model: string;
-	object: unknown;
 	/**
 	 * This fingerprint represents the backend configuration that the model runs with.
 	 */
 	system_fingerprint: string;
-	usage: unknown;
 	[property: string]: unknown;
 }
 
 export interface Choice {
 	/**
-	 * The reason the model stopped generating tokens.
+	 * The reason why the model stopped generating tokens.
 	 */
 	finish_reason: string;
 	/**
