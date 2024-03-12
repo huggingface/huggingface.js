@@ -4,6 +4,12 @@ type MetadataValue = MetadataBaseValue | MetadataBaseValue[] | MetadataValue[]; 
 type Version = 1 | 2 | 3;
 const isVersion = (version: number): version is Version => version === 1 || version === 2 || version === 3;
 
+/**
+ * Must be `GGUF` at the byte level: `0x47` `0x47` `0x55` `0x46`.
+ * Your executor might do little-endian byte order, so it might be
+ * check for 0x46554747 and letting the endianness cancel out.
+ * Consider being *very* explicit about the byte order here.
+ */
 const ggufMagicNumber = new Uint8Array([0x47, 0x47, 0x55, 0x46]); /// "GGUF"
 
 export enum GGMLQuantizationType {
@@ -112,6 +118,10 @@ class RangeView {
 	}
 }
 
+/**
+ * Note: A good article about binary data in JS: https://javascript.info/arraybuffer-binary-arrays
+ */
+
 function readVersionedSize(view: DataView, byteOffset: number, version: Version): bigint {
 	switch (version) {
 		case 1: {
@@ -207,7 +217,16 @@ export async function gguf(
 	const r = new RangeView(url, params);
 	await r.fetchChunk();
 
-	if (r.view.getUint32(0, true) !== new DataView(ggufMagicNumber.buffer).getUint32(0, true)) {
+	const checkBuffer = (buffer: Uint8Array, header: Uint8Array) => {
+		for (let i = 0; i < header.length; i++) {
+			if (header[i] !== buffer[i]) {
+				return false;
+			}
+		}
+		return true;
+	};
+
+	if (!checkBuffer(new Uint8Array(r.view.buffer.slice(0, 4)), ggufMagicNumber)) {
 		throw new Error("not a valid gguf file: not starting with GGUF magic number");
 	}
 
