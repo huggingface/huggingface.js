@@ -13,6 +13,7 @@ describe("gguf", () => {
 		/// metadata
 
 		expect(metadata).toMatchObject({
+			// partial list, do not exhaustively list (tokenizer is quite big for instance)
 			version: 2,
 			tensor_count: 291n,
 			kv_count: 19n,
