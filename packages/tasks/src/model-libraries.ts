@@ -157,6 +157,16 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			term: { path: "pytorch_model.bin" },
 		},
 	},
+	gliner: {
+		prettyLabel: "GLiNER",
+		repoName: "GLiNER",
+		repoUrl: "https://github.com/urchade/GLiNER",
+		snippets: snippets.gliner,
+		filter: false,
+		countDownloads: {
+			term: { path: "gliner_config.json" },
+		},
+	},
 	keras: {
 		prettyLabel: "Keras",
 		repoName: "Keras",
