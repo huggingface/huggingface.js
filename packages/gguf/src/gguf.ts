@@ -60,12 +60,18 @@ const HTTP_TOTAL_MAX_SIZE = 50 * 10 ** 6; /// 50MB
 class RangeView {
 	private chunk: number;
 	private buffer: ArrayBuffer;
+	private fetch: typeof fetch;
 
 	readonly view: DataView;
 
 	constructor(
 		public url: string,
-		private _fetch: typeof fetch = fetch
+		params?: {
+			/**
+			 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+			 */
+			fetch?: typeof fetch;
+		}
 	) {
 		this.chunk = 0;
 		/// TODO(fix typing)
@@ -73,6 +79,7 @@ class RangeView {
 		// @ts-ignore
 		this.buffer = new ArrayBuffer(0, { maxByteLength: HTTP_TOTAL_MAX_SIZE });
 		this.view = new DataView(this.buffer);
+		this.fetch = params?.fetch ?? fetch;
 	}
 	/**
 	 * Fetch a new chunk from the server
@@ -81,7 +88,7 @@ class RangeView {
 		const range = [this.chunk * HTTP_CHUNK_SIZE, (this.chunk + 1) * HTTP_CHUNK_SIZE - 1];
 		const buf = new Uint8Array(
 			await (
-				await this._fetch(this.url, {
+				await this.fetch(this.url, {
 					headers: {
 						Range: `bytes=${range[0]}-${range[1]}`,
 					},
@@ -188,8 +195,16 @@ export interface GGUFParseOutput {
 	tensorInfos: GGUFTensorInfo[];
 }
 
-export async function gguf(url: string, _fetch: typeof fetch = fetch): Promise<GGUFParseOutput> {
-	const r = new RangeView(url, _fetch);
+export async function gguf(
+	url: string,
+	params?: {
+		/**
+		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+		 */
+		fetch?: typeof fetch;
+	}
+): Promise<GGUFParseOutput> {
+	const r = new RangeView(url, params);
 	await r.fetchChunk();
 
 	if (r.view.getUint32(0, true) !== new DataView(ggufMagicNumber.buffer).getUint32(0, true)) {
