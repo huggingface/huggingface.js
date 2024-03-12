@@ -122,21 +122,21 @@ class RangeView {
  * Note: A good article about binary data in JS: https://javascript.info/arraybuffer-binary-arrays
  */
 
-function readVersionedSize(view: DataView, byteOffset: number, version: Version): bigint {
+function readVersionedSize(view: DataView, byteOffset: number, version: Version, littleEndian: boolean): bigint {
 	switch (version) {
 		case 1: {
-			const n = view.getUint32(byteOffset, true);
+			const n = view.getUint32(byteOffset, littleEndian);
 			return BigInt(n);
 		}
 		case 2:
 		case 3: {
-			return view.getBigUint64(byteOffset, true);
+			return view.getBigUint64(byteOffset, littleEndian);
 		}
 	}
 }
 
-function readString(view: DataView, offset: number): { value: string; length: number } {
-	const length = view.getBigUint64(offset, true);
+function readString(view: DataView, offset: number, littleEndian: boolean): { value: string; length: number } {
+	const length = view.getBigUint64(offset, littleEndian);
 	const value = new TextDecoder().decode(view.buffer.slice(offset + 8, offset + 8 + Number(length)));
 	return { value, length: 8 + Number(length) };
 }
@@ -144,7 +144,8 @@ function readString(view: DataView, offset: number): { value: string; length: nu
 function readMetadataValue(
 	view: DataView,
 	type: GGUFValueType,
-	offset: number
+	offset: number,
+	littleEndian: boolean
 ): { value: MetadataValue; length: number } {
 	switch (type) {
 		case GGUFValueType.UINT8:
@@ -152,37 +153,37 @@ function readMetadataValue(
 		case GGUFValueType.INT8:
 			return { value: view.getInt8(offset), length: 1 };
 		case GGUFValueType.UINT16:
-			return { value: view.getUint16(offset, true), length: 2 };
+			return { value: view.getUint16(offset, littleEndian), length: 2 };
 		case GGUFValueType.INT16:
-			return { value: view.getInt16(offset, true), length: 2 };
+			return { value: view.getInt16(offset, littleEndian), length: 2 };
 		case GGUFValueType.UINT32:
-			return { value: view.getUint32(offset, true), length: 4 };
+			return { value: view.getUint32(offset, littleEndian), length: 4 };
 		case GGUFValueType.INT32:
-			return { value: view.getInt32(offset, true), length: 4 };
+			return { value: view.getInt32(offset, littleEndian), length: 4 };
 		case GGUFValueType.FLOAT32:
-			return { value: view.getFloat32(offset, true), length: 4 };
+			return { value: view.getFloat32(offset, littleEndian), length: 4 };
 		case GGUFValueType.BOOL:
 			return { value: view.getUint8(offset) !== 0, length: 1 };
 		case GGUFValueType.STRING:
-			return readString(view, offset);
+			return readString(view, offset, littleEndian);
 		case GGUFValueType.ARRAY: {
-			const arrayType = view.getUint32(offset, true);
-			const arrayLength = view.getBigUint64(offset + 4, true);
+			const arrayType = view.getUint32(offset, littleEndian);
+			const arrayLength = view.getBigUint64(offset + 4, littleEndian);
 			let length = 12;
 			const arrayValues: MetadataValue[] = [];
 			for (let i = 0; i < arrayLength; i++) {
-				const { value, length: _length } = readMetadataValue(view, arrayType, offset + length);
+				const { value, length: _length } = readMetadataValue(view, arrayType, offset + length, littleEndian);
 				arrayValues.push(value);
 				length += _length;
 			}
 			return { value: arrayValues, length };
 		}
 		case GGUFValueType.UINT64:
-			return { value: view.getBigUint64(offset, true), length: 8 };
+			return { value: view.getBigUint64(offset, littleEndian), length: 8 };
 		case GGUFValueType.INT64:
-			return { value: view.getBigInt64(offset, true), length: 8 };
+			return { value: view.getBigInt64(offset, littleEndian), length: 8 };
 		case GGUFValueType.FLOAT64:
-			return { value: view.getFloat64(offset, true), length: 8 };
+			return { value: view.getFloat64(offset, littleEndian), length: 8 };
 	}
 }
 
@@ -230,12 +231,23 @@ export async function gguf(
 		throw new Error("not a valid gguf file: not starting with GGUF magic number");
 	}
 
-	const version = r.view.getUint32(4, true);
+	const [littleEndian, version] = (() => {
+		/// https://github.com/ggerganov/llama.cpp/issues/3957
+		/// Assume this code is always running on little-endian
+		/// but wants to be able to parse both endianness
+		const version = r.view.getUint32(4, true);
+		if (version & 65535) {
+			return [true, version];
+		} else {
+			return [false, r.view.getUint32(4, false)];
+		}
+	})();
+
 	if (!isVersion(version)) {
 		throw new Error(`not a valid gguf file: unsupported version "${version}"`);
 	}
-	const tensorCount = readVersionedSize(r.view, 8, version);
-	const numKv = readVersionedSize(r.view, 16, version);
+	const tensorCount = readVersionedSize(r.view, 8, version, littleEndian);
+	const numKv = readVersionedSize(r.view, 16, version, littleEndian);
 
 	const metadata: GGUFMetadata = {
 		version,
@@ -249,11 +261,11 @@ export async function gguf(
 		await r.fetchChunkIfNeeded(offset);
 
 		// read key
-		const keyResult = readString(r.view, offset);
+		const keyResult = readString(r.view, offset, littleEndian);
 		offset += keyResult.length;
 
 		// read value type
-		const valueType = r.view.getUint32(offset, true);
+		const valueType = r.view.getUint32(offset, littleEndian);
 		offset += 4;
 
 		if (!isGGUFValueType(valueType)) {
@@ -264,7 +276,7 @@ export async function gguf(
 		while (!valueResult) {
 			try {
 				// read value
-				valueResult = readMetadataValue(r.view, valueType, offset);
+				valueResult = readMetadataValue(r.view, valueType, offset, littleEndian);
 			} catch (err) {
 				if (err instanceof RangeError) {
 					await r.fetchChunk();
@@ -283,21 +295,21 @@ export async function gguf(
 		await r.fetchChunkIfNeeded(offset);
 
 		// read tensor name
-		const keyResult = readString(r.view, offset);
+		const keyResult = readString(r.view, offset, littleEndian);
 		offset += keyResult.length;
 
-		const nDims = r.view.getUint32(offset, true);
+		const nDims = r.view.getUint32(offset, littleEndian);
 		offset += 4;
 
 		const shape: bigint[] = [];
 		for (let dim = 0; dim < nDims; dim++) {
-			shape.push(r.view.getBigUint64(offset, true));
+			shape.push(r.view.getBigUint64(offset, littleEndian));
 			offset += 8;
 		}
 
-		const type = r.view.getUint32(offset, true);
+		const type = r.view.getUint32(offset, littleEndian);
 		offset += 4;
-		const tensorOffset = r.view.getBigUint64(offset, true);
+		const tensorOffset = r.view.getBigUint64(offset, littleEndian);
 		offset += 8;
 
 		tensorInfos.push({

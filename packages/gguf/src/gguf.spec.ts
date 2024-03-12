@@ -142,7 +142,7 @@ describe("gguf", () => {
 		});
 	});
 
-	it.only("should parse a big-endian file", async () => {
+	it("should parse a big-endian file", async () => {
 		const { metadata, tensorInfos } = await gguf(URL_BIG_ENDIAN);
 
 		/// metadata
