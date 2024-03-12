@@ -50,5 +50,5 @@
 			"description": "This fingerprint represents the backend configuration that the model runs with."
 		}
 	},
-	"required": ["id", "choices", "created", "model", "system_fingerprint", "object", "usage"]
+	"required": ["id", "choices", "created", "model", "system_fingerprint"]
 }
