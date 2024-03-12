@@ -1,7 +1,14 @@
 {
-	"$ref": "/inference/schemas/text2text-generation/output.json",
 	"$id": "/inference/schemas/translation/output.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Outputs of inference for the Translation task",
 	"title": "TranslationOutput",
-	"description": "Outputs for Translation inference"
+	"type": "object",
+	"properties": {
+		"translation_text": {
+			"type": "string",
+			"description": "The translated text."
+		}
+	},
+	"required": ["translation_text"]
 }

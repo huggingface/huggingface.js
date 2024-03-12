@@ -124,10 +124,47 @@ jobs:
           echo "Checksum Verification Successful: The local and remote @huggingface/jinja packages are consistent. Proceeding with the @huggingface/widgets package release. Local Checksum: $LOCAL_CHECKSUM, Remote Checksum: $REMOTE_CHECKSUM."
         working-directory: packages/jinja
 
+      - name: Make sure that the latest version of @huggingface/inference is consistent with the local version
+        run: |
+          LOCAL_INFERENCE_VERSION=$(node -p "require('./package.json').version")
+          REMOTE_INFERENCE_VERSION=$(npm view @huggingface/inference version)
+
+          # If the versions are different, error 
+          if [ "$LOCAL_INFERENCE_VERSION" != "$REMOTE_INFERENCE_VERSION" ]; then
+            echo "Error: The local @huggingface/inference package version ($LOCAL_INFERENCE_VERSION) differs from the remote version ($REMOTE_INFERENCE_VERSION). Release halted."
+            exit 1
+          fi
+
+          npm pack @huggingface/inference
+          mv huggingface-inference-$LOCAL_INFERENCE_VERSION.tgz inference-local.tgz
+
+          npm pack @huggingface/inference@$REMOTE_INFERENCE_VERSION
+          mv huggingface-inference-$REMOTE_INFERENCE_VERSION.tgz inference-remote.tgz
+
+          # Compute checksum of local tar. We need to extract both tar since the remote compression might be different
+          tar -xf inference-local.tgz
+          LOCAL_CHECKSUM=$(cd package && tar --mtime='1970-01-01' --mode=755 -cf - . | sha256sum | cut -d' ' -f1)
+          echo "Local package checksum: $LOCAL_CHECKSUM"
+
+          rm -Rf package
+
+          tar -xf inference-remote.tgz
+          REMOTE_CHECKSUM=$(cd package && tar --mtime='1970-01-01' --mode=755 -cf - . | sha256sum | cut -d' ' -f1)
+          echo "Remote package checksum: $REMOTE_CHECKSUM"
+
+          rm -Rf package
+
+          if [ "$LOCAL_CHECKSUM" != "$REMOTE_CHECKSUM" ]; then
+            echo "Checksum Verification Failed: The local @huggingface/inference package differs from the remote version. Release halted. Local Checksum: $LOCAL_CHECKSUM, Remote Checksum: $REMOTE_CHECKSUM"
+            exit 1
+          fi
+          echo "Checksum Verification Successful: The local and remote @huggingface/inference packages are consistent. Proceeding with the @huggingface/widgets package release. Local Checksum: $LOCAL_CHECKSUM, Remote Checksum: $REMOTE_CHECKSUM."
+        working-directory: packages/inference
+
       - run: pnpm publish --no-git-checks .
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - run: git push --follow-tags
+      - run: git pull --rebase && git push --follow-tags
       # hack - reuse actions/setup-node@v3 just to set a new registry
       - uses: actions/setup-node@v3
         with:

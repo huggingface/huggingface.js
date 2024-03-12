@@ -54,6 +54,10 @@ export async function* listModels<
 	const T extends Exclude<(typeof EXPANDABLE_KEYS)[number], (typeof EXPAND_KEYS)[number]> = never,
 >(params?: {
 	search?: {
+		/**
+		 * Will search in the model name for matches
+		 */
+		query?: string;
 		owner?: string;
 		task?: PipelineType;
 		tags?: string[];
@@ -77,6 +81,7 @@ export async function* listModels<
 			limit: String(Math.min(totalToFetch, 500)),
 			...(params?.search?.owner ? { author: params.search.owner } : undefined),
 			...(params?.search?.task ? { pipeline_tag: params.search.task } : undefined),
+			...(params?.search?.query ? { search: params.search.query } : undefined),
 		}),
 		...(params?.search?.tags?.map((tag) => ["filter", tag]) ?? []),
 		...EXPAND_KEYS.map((val) => ["expand", val] satisfies [string, string]),
@@ -93,7 +98,7 @@ export async function* listModels<
 		});
 
 		if (!res.ok) {
-			throw createApiError(res);
+			throw await createApiError(res);
 		}
 
 		const items: ApiModelInfo[] = await res.json();

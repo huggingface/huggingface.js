@@ -88,6 +88,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			term: { path: "pytorch_model.bin" },
 		},
 	},
+	audiocraft: {
+		prettyLabel: "Audiocraft",
+		repoName: "audiocraft",
+		repoUrl: "https://github.com/facebookresearch/audiocraft",
+		snippets: snippets.audiocraft,
+		filter: false,
+	},
 	bertopic: {
 		prettyLabel: "BERTopic",
 		repoName: "BERTopic",
@@ -364,6 +371,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: {
 			wildcard: { path: "*.sentis" },
+		},
+	},
+	whisperkit: {
+		prettyLabel: "WhisperKit",
+		repoName: "WhisperKit",
+		repoUrl: "https://github.com/argmaxinc/WhisperKit",
+		countDownloads: {
+			wildcard: { path: "*/model.mil" },
 		},
 	},
 } satisfies Record<string, LibraryUiElement>;

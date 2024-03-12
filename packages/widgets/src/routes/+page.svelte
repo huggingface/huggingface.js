@@ -31,21 +31,51 @@
 
 	const models: ModelData[] = [
 		{
-			id: "HuggingFaceH4/zephyr-7b-beta",
+			id: "mistralai/Mistral-7B-Instruct-v0.2",
 			pipeline_tag: "text-generation",
 			tags: ["conversational"],
 			inference: InferenceDisplayability.Yes,
 			config: {
+				architectures: ["MistralForCausalLM"],
+				model_type: "mistral",
 				tokenizer_config: {
-					bos_token: "<s>",
 					chat_template:
-						"{% for message in messages %}\n{% if message['role'] == 'user' %}\n{{ '<|user|>\n' + message['content'] + eos_token }}\n{% elif message['role'] == 'system' %}\n{{ '<|system|>\n' + message['content'] + eos_token }}\n{% elif message['role'] == 'assistant' %}\n{{ '<|assistant|>\n'  + message['content'] + eos_token }}\n{% endif %}\n{% if loop.last and add_generation_prompt %}\n{{ '<|assistant|>' }}\n{% endif %}\n{% endfor %}",
+						"{{ bos_token }}{% for message in messages %}{% if (message['role'] == 'user') != (loop.index0 % 2 == 0) %}{{ raise_exception('Conversation roles must alternate user/assistant/user/assistant/...') }}{% endif %}{% if message['role'] == 'user' %}{{ '[INST] ' + message['content'] + ' [/INST]' }}{% elif message['role'] == 'assistant' %}{{ message['content'] + eos_token}}{% else %}{{ raise_exception('Only user and assistant roles are supported!') }}{% endif %}{% endfor %}",
+					use_default_system_prompt: false,
+					bos_token: "<s>",
 					eos_token: "</s>",
-					pad_token: "</s>",
 					unk_token: "<unk>",
-					use_default_system_prompt: true,
+					pad_token: null,
 				},
 			},
+			widgetData: [
+				{ text: "This is a text-only example", example_title: "Text only" },
+				{
+					messages: [{ content: "Please exlain QCD in very few words", role: "user" }],
+					example_title: "Chat messages",
+				},
+				{
+					messages: [{ content: "Please exlain QCD in very few words", role: "user" }],
+					output: {
+						text: "QCD is the physics of strong force and small particles.",
+					},
+					example_title: "Chat messages with Output",
+				},
+				{
+					text: "Explain QCD in one short sentence.",
+					output: {
+						text: "QCD is the physics of strong force and small particles.",
+					},
+					example_title: "Text only with Output",
+				},
+				{
+					example_title: "Invalid example - unsupported role",
+					messages: [
+						{ role: "system", content: "This will fail because of the chat template" },
+						{ role: "user", content: "What's your favorite condiment?" },
+					],
+				},
+			],
 		},
 		{
 			id: "microsoft/phi-2",
