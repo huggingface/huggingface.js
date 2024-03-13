@@ -41,7 +41,7 @@
 						"description": "The index of the choice in the list of choices."
 					}
 				},
-				"required": ["delta", "index", "created"]
+				"required": ["delta", "index"]
 			}
 		},
 		"created": {
