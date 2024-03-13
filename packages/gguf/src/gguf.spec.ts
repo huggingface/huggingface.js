@@ -6,6 +6,9 @@ const URL_MISTRAL_7B =
 	"https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.2-GGUF/resolve/main/mistral-7b-instruct-v0.2.Q5_K_M.gguf";
 const URL_GEMMA_2B = "https://huggingface.co/lmstudio-ai/gemma-2b-it-GGUF/resolve/main/gemma-2b-it-q4_k_m.gguf";
 
+const URL_BIG_ENDIAN =
+	"https://huggingface.co/ggml-org/models/resolve/main/bert-bge-small/ggml-model-f16-big-endian.gguf";
+
 describe("gguf", () => {
 	it("should parse a llama2 7b", async () => {
 		const { metadata, tensorInfos } = await gguf(URL_LLAMA);
@@ -13,6 +16,7 @@ describe("gguf", () => {
 		/// metadata
 
 		expect(metadata).toMatchObject({
+			// partial list, do not exhaustively list (tokenizer is quite big for instance)
 			version: 2,
 			tensor_count: 291n,
 			kv_count: 19n,
@@ -48,6 +52,7 @@ describe("gguf", () => {
 		]);
 
 		/// Tensor infos
+		/// By convention we test the first and last tensor.
 
 		expect(tensorInfos.length).toEqual(291);
 		expect(tensorInfos[0]).toMatchObject({
@@ -134,6 +139,43 @@ describe("gguf", () => {
 			name: "blk.9.ffn_norm.weight",
 			shape: [2048n],
 			dtype: GGMLQuantizationType.F32,
+		});
+	});
+
+	it("should parse a big-endian file", async () => {
+		const { metadata, tensorInfos } = await gguf(URL_BIG_ENDIAN);
+
+		/// metadata
+
+		expect(metadata).toMatchObject({
+			version: 3,
+			tensor_count: 197n,
+			kv_count: 23n,
+			"general.architecture": "bert",
+			"general.file_type": GGMLQuantizationType.F16,
+			"general.name": "bge-small-en-v1.5",
+			"bert.attention.causal": false,
+			"bert.attention.head_count": 12,
+			"bert.attention.layer_norm_epsilon": 9.999999960041972e-13,
+			"bert.block_count": 12,
+			"bert.context_length": 512,
+			"bert.embedding_length": 384,
+			"bert.feed_forward_length": 1536,
+			"bert.pooling_type": 2,
+		});
+
+		/// Tensor infos
+
+		expect(tensorInfos.length).toEqual(197);
+		expect(tensorInfos[0]).toMatchObject({
+			name: "token_embd_norm.bias",
+			shape: [384n],
+			dtype: GGMLQuantizationType.F32,
+		});
+		expect(tensorInfos[tensorInfos.length - 1]).toMatchObject({
+			name: "blk.9.ffn_down.weight",
+			shape: [1536n, 384n],
+			dtype: GGMLQuantizationType.F16,
 		});
 	});
 });
