@@ -33,7 +33,7 @@ jobs:
       - run: corepack enable
       - uses: actions/setup-node@v3
         with:
-          node-version: "18"
+          node-version: "20"
           cache: "pnpm"
           cache-dependency-path: |
             packages/jinja/pnpm-lock.yaml
@@ -56,7 +56,7 @@ jobs:
       # hack - reuse actions/setup-node@v3 just to set a new registry
       - uses: actions/setup-node@v3
         with:
-          node-version: "18"
+          node-version: "20"
           registry-url: "https://npm.pkg.github.com"
       - run: pnpm publish --no-git-checks .
         env:
