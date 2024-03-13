@@ -1,5 +1,5 @@
-type MetadataBaseValue = string | number | bigint | boolean;
-type MetadataValue = MetadataBaseValue | MetadataBaseValue[] | MetadataValue[]; /// recursive as arrays can be nested.
+export type MetadataBaseValue = string | number | bigint | boolean;
+export type MetadataValue = MetadataBaseValue | MetadataBaseValue[] | MetadataValue[]; /// recursive as arrays can be nested.
 
 type Version = 1 | 2 | 3;
 const isVersion = (version: number): version is Version => version === 1 || version === 2 || version === 3;
