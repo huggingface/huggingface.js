@@ -141,7 +141,7 @@ tagger = SequenceTagger.load("${model.id}")`,
 ];
 
 export const gliner = (model: ModelData): string[] => [
-	`from model import GLiNER
+	`from gliner import GLiNER
 
 model = GLiNER.from_pretrained("${model.id}")`,
 ];
