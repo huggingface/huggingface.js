@@ -1,4 +1,4 @@
-name: Agents - Version and Release
+name: GGUF - Version and Release
 
 on:
   workflow_dispatch:
@@ -17,7 +17,7 @@ concurrency:
 
 defaults:
   run:
-    working-directory: packages/agents
+    working-directory: packages/gguf
 
 jobs:
   version_and_release:
@@ -36,8 +36,7 @@ jobs:
           node-version: "20"
           cache: "pnpm"
           cache-dependency-path: |
-            packages/agents/pnpm-lock.yaml
-            packages/doc-internal/pnpm-lock.yaml
+            packages/gguf/pnpm-lock.yaml
           # setting a registry enables the NODE_AUTH_TOKEN env variable where we can set an npm token.  REQUIRED
           registry-url: "https://registry.npmjs.org"
       - run: pnpm install
@@ -48,11 +47,9 @@ jobs:
           BUMPED_VERSION=$(node -p "require('semver').inc('$PACKAGE_VERSION', '${{ github.event.inputs.newversion }}')")
           # Update package.json with the new version
           node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./package.json')); package.version = '$BUMPED_VERSION'; fs.writeFileSync('./package.json', JSON.stringify(package, null, '\t') + '\n');"
-          pnpm --filter doc-internal run fix-cdn-versions
-          git add ../..
-          git commit -m "🔖 @hugginface/agents $BUMPED_VERSION"
-          git tag "agents-v$BUMPED_VERSION"
-      - run: pnpm --filter agents... build && pnpm publish --no-git-checks .
+          git commit . -m "🔖 @hugginface/gguf $BUMPED_VERSION"
+          git tag "gguf-v$BUMPED_VERSION"
+      - run: pnpm publish --no-git-checks .
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - run: git pull --rebase && git push --follow-tags
@@ -64,7 +61,3 @@ jobs:
       - run: pnpm publish --no-git-checks .
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: "Update Doc"
-        uses: peter-evans/repository-dispatch@v2
-        with:
-          event-type: doc-build
