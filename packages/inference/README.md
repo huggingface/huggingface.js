@@ -506,6 +506,21 @@ const gpt2 = hf.endpoint('https://xyz.eu-west-1.aws.endpoints.huggingface.cloud/
 const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the universe is'});
 ```
 
+By default, all calls to the inference endpoint will wait until the model is
+loaded. When [scaling to
+0](https://huggingface.co/docs/inference-endpoints/en/autoscaling#scaling-to-0)
+is enabled on the endpoint, this can result in non-trivial waiting time. If
+you'd rather disable this behavior and handle the endpoint's returned 500 HTTP
+errors yourself, you can do so like so:
+
+```typescript
+const gpt2 = hf.endpoint('https://xyz.eu-west-1.aws.endpoints.huggingface.cloud/gpt2');
+const { generated_text } = await gpt2.textGeneration(
+  {inputs: 'The answer to the universe is'},
+  {retry_on_error: false},
+);
+```
+
 ## Running tests
 
 ```console
