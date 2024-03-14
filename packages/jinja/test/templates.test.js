@@ -27,6 +27,7 @@ const TEST_STRINGS = {
 
 	// For loops
 	FOR_LOOP: `{% for message in messages %}{{ message['content'] }}{% endfor %}`,
+	FOR_LOOP_UNPACKING: `|{% for x, y in [ [1, 2], [3, 4] ] %}|{{ x + ' ' + y }}|{% endfor %}|`,
 
 	// Set variables
 	VARIABLES: `{% set x = 'Hello' %}{% set y = 'World' %}{{ x + ' ' + y }}`,
@@ -103,6 +104,7 @@ const TEST_STRINGS = {
 	// Object operators
 	OBJECT_OPERATORS: `|{{ 'known' in obj }}|{{ 'known' not in obj }}|{{ 'unknown' in obj }}|{{ 'unknown' not in obj }}|`,
 	OBJECT_OPERATORS_1: `|{{ obj.get('known') }}|{{ obj.get('unknown') is none }}|{{ obj.get('unknown') is defined }}|`,
+	OBJECT_OPERATORS_2: `|{% for x, y in obj.items() %}|{{ x + ' ' + y }}|{% endfor %}|`,
 
 	// Scope
 	SCOPE: `{% set ns = namespace(found=false) %}{% for num in nums %}{% if num == 1 %}{{ 'found=' }}{% set ns.found = true %}{% endif %}{% endfor %}{{ ns.found }}`,
@@ -117,6 +119,9 @@ const TEST_STRINGS = {
 
 	// Array literals
 	ARRAY_LITERALS: `{{ [1, true, 'hello', [1, 2, 3, 4], var] | length }}`,
+
+	// Tuple literals
+	TUPLE_LITERALS: `{{ (1, (1, 2)) | length }}`,
 
 	// Object literals
 	OBJECT_LITERALS: `{{ { 'key': 'value', key: 'value2', "key3": [1, {'foo': 'bar'} ] }['key'] }}`,
@@ -519,6 +524,42 @@ const TEST_PARSED = {
 		{ value: "{%", type: "OpenStatement" },
 		{ value: "endfor", type: "EndFor" },
 		{ value: "%}", type: "CloseStatement" },
+	],
+	FOR_LOOP_UNPACKING: [
+		{ value: "|", type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "for", type: "For" },
+		{ value: "x", type: "Identifier" },
+		{ value: ",", type: "Comma" },
+		{ value: "y", type: "Identifier" },
+		{ value: "in", type: "In" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: ",", type: "Comma" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "4", type: "NumericLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "x", type: "Identifier" },
+		{ value: "+", type: "AdditiveBinaryOperator" },
+		{ value: " ", type: "StringLiteral" },
+		{ value: "+", type: "AdditiveBinaryOperator" },
+		{ value: "y", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endfor", type: "EndFor" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "|", type: "Text" },
 	],
 
 	// Set variables
@@ -1952,6 +1993,34 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 	],
+	OBJECT_OPERATORS_2: [
+		{ value: "|", type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "for", type: "For" },
+		{ value: "x", type: "Identifier" },
+		{ value: ",", type: "Comma" },
+		{ value: "y", type: "Identifier" },
+		{ value: "in", type: "In" },
+		{ value: "obj", type: "Identifier" },
+		{ value: ".", type: "Dot" },
+		{ value: "items", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "x", type: "Identifier" },
+		{ value: "+", type: "AdditiveBinaryOperator" },
+		{ value: " ", type: "StringLiteral" },
+		{ value: "+", type: "AdditiveBinaryOperator" },
+		{ value: "y", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endfor", type: "EndFor" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "|", type: "Text" },
+	],
 
 	// Scope
 	SCOPE: [
@@ -2132,6 +2201,23 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 	],
 
+	// Tuple literals
+	TUPLE_LITERALS: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "length", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+
 	// Object literals
 	OBJECT_LITERALS: [
 		{ value: "{{", type: "OpenExpression" },
@@ -2217,6 +2303,7 @@ const TEST_CONTEXT = {
 			{ role: "user", content: "C" },
 		],
 	},
+	FOR_LOOP_UNPACKING: {},
 
 	// Set variables
 	VARIABLES: {},
@@ -2343,6 +2430,9 @@ const TEST_CONTEXT = {
 			known: true,
 		},
 	},
+	OBJECT_OPERATORS_2: {
+		obj: { a: 1, b: 2, c: 3 },
+	},
 
 	// Scope
 	SCOPE: { nums: [1, 2, 3] },
@@ -2357,6 +2447,9 @@ const TEST_CONTEXT = {
 
 	// Array literals
 	ARRAY_LITERALS: { var: true },
+
+	// Tuple literals
+	TUPLE_LITERALS: {},
 
 	// Object literals
 	OBJECT_LITERALS: {
@@ -2390,6 +2483,7 @@ const EXPECTED_OUTPUTS = {
 
 	// For loops
 	FOR_LOOP: "ABC",
+	FOR_LOOP_UNPACKING: "||1 2||3 4||",
 
 	// Set variables
 	VARIABLES: "Hello World",
@@ -2466,6 +2560,7 @@ const EXPECTED_OUTPUTS = {
 	// Object operators
 	OBJECT_OPERATORS: `|true|false|false|true|`,
 	OBJECT_OPERATORS_1: `|true|true|true|`,
+	OBJECT_OPERATORS_2: `||a 1||b 2||c 3||`,
 
 	// Scope
 	SCOPE: `found=true`,
@@ -2480,6 +2575,9 @@ const EXPECTED_OUTPUTS = {
 
 	// Array literals
 	ARRAY_LITERALS: `5`,
+
+	// Tuple literals
+	TUPLE_LITERALS: `2`,
 
 	// Object literals
 	OBJECT_LITERALS: `value`,
