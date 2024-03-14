@@ -13,8 +13,8 @@
 				"type": "object",
 				"properties": {
 					"finish_reason": {
-						"type": "string",
-						"description": "The reason why the model stopped generating tokens."
+						"$ref": "#/$defs/FinishReason",
+						"description": "The reason why the generation was stopped."
 					},
 					"index": {
 						"type": "integer",
@@ -40,5 +40,16 @@
 			"description": "The Unix timestamp (in seconds) of when the chat completion was created."
 		}
 	},
-	"required": ["choices", "created"]
+	"required": ["choices", "created"],
+	"$defs": {
+		"FinishReason": {
+			"type": "string",
+			"title": "ChatCompletionFinishReason",
+			"oneOf": [
+				{ "const": "length", "description": "The generated sequence reached the maximum allowed length" },
+				{ "const": "eos_token", "description": "The model generated an end-of-sentence (EOS) token" },
+				{ "const": "stop_sequence", "description": "One of the sequence in stop_sequences was generated" }
+			]
+		}
+	}
 }

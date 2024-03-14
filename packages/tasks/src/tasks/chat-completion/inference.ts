@@ -82,9 +82,9 @@ export interface ChatCompletionOutput {
 
 export interface ChatCompletionOutputChoice {
 	/**
-	 * The reason why the model stopped generating tokens.
+	 * The reason why the generation was stopped.
 	 */
-	finish_reason: string;
+	finish_reason: ChatCompletionFinishReason;
 	/**
 	 * The index of the choice in the list of choices.
 	 */
@@ -92,6 +92,17 @@ export interface ChatCompletionOutputChoice {
 	message: ChatCompletionOutputChoiceMessage;
 	[property: string]: unknown;
 }
+
+/**
+ * The reason why the generation was stopped.
+ *
+ * The generated sequence reached the maximum allowed length
+ *
+ * The model generated an end-of-sentence (EOS) token
+ *
+ * One of the sequence in stop_sequences was generated
+ */
+export type ChatCompletionFinishReason = "length" | "eos_token" | "stop_sequence";
 
 export interface ChatCompletionOutputChoiceMessage {
 	/**
@@ -125,7 +136,7 @@ export interface ChatCompletionStreamOutputChoice {
 	/**
 	 * The reason why the generation was stopped.
 	 */
-	finish_reason?: FinishReason;
+	finish_reason?: ChatCompletionFinishReason;
 	/**
 	 * The index of the choice in the list of choices.
 	 */
@@ -147,12 +158,3 @@ export interface ChatCompletionStreamOutputDelta {
 	role?: string;
 	[property: string]: unknown;
 }
-
-/**
- * The generated sequence reached the maximum allowed length
- *
- * The model generated an end-of-sentence (EOS) token
- *
- * One of the sequence in stop_sequences was generated
- */
-export type FinishReason = "length" | "eos_token" | "stop_sequence";

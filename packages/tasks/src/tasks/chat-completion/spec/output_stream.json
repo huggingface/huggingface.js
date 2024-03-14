@@ -28,13 +28,8 @@
 						}
 					},
 					"finish_reason": {
-						"type": "string",
-						"description": "The reason why the generation was stopped.",
-						"oneOf": [
-							{ "const": "length", "description": "The generated sequence reached the maximum allowed length" },
-							{ "const": "eos_token", "description": "The model generated an end-of-sentence (EOS) token" },
-							{ "const": "stop_sequence", "description": "One of the sequence in stop_sequences was generated" }
-						]
+						"$ref": "#/$defs/FinishReason",
+						"description": "The reason why the generation was stopped."
 					},
 					"index": {
 						"type": "integer",
