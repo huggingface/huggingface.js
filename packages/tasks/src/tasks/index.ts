@@ -10,6 +10,7 @@ import fillMask from "./fill-mask/data";
 import imageClassification from "./image-classification/data";
 import imageToImage from "./image-to-image/data";
 import imageToText from "./image-to-text/data";
+import imageTextToText from "./image-text-to-text/data";
 import imageSegmentation from "./image-segmentation/data";
 import maskGeneration from "./mask-generation/data";
 import objectDetection from "./object-detection/data";
@@ -190,6 +191,7 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"image-segmentation": getData("image-segmentation", imageSegmentation),
 	"image-text-to-text": undefined,
 	"image-to-image": getData("image-to-image", imageToImage),
+	"image-text-to-text": getData("image-text-to-text", imageTextToText),
 	"image-to-text": getData("image-to-text", imageToText),
 	"image-to-video": undefined,
 	"mask-generation": getData("mask-generation", maskGeneration),
