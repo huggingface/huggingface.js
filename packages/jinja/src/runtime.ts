@@ -797,7 +797,7 @@ export class Interpreter {
 					throw new Error(`Too ${loopvar.value.length > c.value.length ? "few" : "many"} items to unpack`);
 				}
 				for (let j = 0; j < loopvar.value.length; ++j) {
-					if(!(loopvar.value[j].type !== "Identifier")) {
+					if (loopvar.value[j].type !== "Identifier") {
 						throw new Error(`Cannot unpack non-identifier type: ${loopvar.value[j].type}`);
 					}
 					scope.setVariable((loopvar.value[j] as Identifier).value, c.value[j]);
