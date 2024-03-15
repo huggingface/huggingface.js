@@ -225,20 +225,9 @@ export const PIPELINE_DATA = {
 		modality: "nlp",
 		color: "indigo",
 	},
-	conversational: {
-		name: "Conversational",
-		subtasks: [
-			{
-				type: "dialogue-generation",
-				name: "Dialogue Generation",
-			},
-		],
-		modality: "nlp",
-		color: "green",
-	},
 	"feature-extraction": {
 		name: "Feature Extraction",
-		modality: "multimodal",
+		modality: "nlp",
 		color: "red",
 	},
 	"text-generation": {
@@ -247,6 +236,14 @@ export const PIPELINE_DATA = {
 			{
 				type: "dialogue-modeling",
 				name: "Dialogue Modeling",
+			},
+			{
+				type: "dialogue-generation",
+				name: "Dialogue Generation",
+			},
+			{
+				type: "conversational",
+				name: "Conversational",
 			},
 			{
 				type: "language-modeling",
@@ -419,7 +416,7 @@ export const PIPELINE_DATA = {
 	},
 	"text-to-image": {
 		name: "Text-to-Image",
-		modality: "multimodal",
+		modality: "cv",
 		color: "yellow",
 	},
 	"image-to-text": {
@@ -430,7 +427,7 @@ export const PIPELINE_DATA = {
 				name: "Image Captioning",
 			},
 		],
-		modality: "multimodal",
+		modality: "cv",
 		color: "red",
 	},
 	"image-to-image": {
@@ -454,7 +451,7 @@ export const PIPELINE_DATA = {
 	},
 	"image-to-video": {
 		name: "Image-to-Video",
-		modality: "multimodal",
+		modality: "cv",
 		color: "indigo",
 	},
 	"unconditional-image-generation": {
@@ -589,8 +586,14 @@ export const PIPELINE_DATA = {
 	},
 	"text-to-video": {
 		name: "Text-to-Video",
-		modality: "multimodal",
+		modality: "cv",
 		color: "green",
+	},
+	"image-text-to-text": {
+		name: "Image-Text-to-Text",
+		modality: "multimodal",
+		color: "red",
+		hideInDatasets: true,
 	},
 	"visual-question-answering": {
 		name: "Visual Question Answering",
@@ -622,7 +625,7 @@ export const PIPELINE_DATA = {
 	},
 	"graph-ml": {
 		name: "Graph Machine Learning",
-		modality: "multimodal",
+		modality: "other",
 		color: "green",
 	},
 	"mask-generation": {
@@ -637,13 +640,18 @@ export const PIPELINE_DATA = {
 	},
 	"text-to-3d": {
 		name: "Text-to-3D",
-		modality: "multimodal",
+		modality: "cv",
 		color: "yellow",
 	},
 	"image-to-3d": {
 		name: "Image-to-3D",
-		modality: "multimodal",
+		modality: "cv",
 		color: "green",
+	},
+	"image-feature-extraction": {
+		name: "Image Feature Extraction",
+		modality: "cv",
+		color: "indigo",
 	},
 	other: {
 		name: "Other",
@@ -655,6 +663,8 @@ export const PIPELINE_DATA = {
 } satisfies Record<string, PipelineData>;
 
 export type PipelineType = keyof typeof PIPELINE_DATA;
+
+export type WidgetType = PipelineType | "conversational";
 
 export const PIPELINE_TYPES = Object.keys(PIPELINE_DATA) as PipelineType[];
 

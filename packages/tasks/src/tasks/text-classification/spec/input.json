@@ -5,7 +5,7 @@
 	"title": "TextClassificationInput",
 	"type": "object",
 	"properties": {
-		"data": {
+		"inputs": {
 			"description": "The text to classify",
 			"type": "string"
 		},
@@ -20,16 +20,16 @@
 			"description": "Additional inference parameters for Text Classification",
 			"type": "object",
 			"properties": {
-				"functionToApply": {
+				"function_to_apply": {
 					"title": "TextClassificationOutputTransform",
 					"$ref": "/inference/schemas/common-definitions.json#/definitions/ClassificationOutputTransform"
 				},
-				"topK": {
+				"top_k": {
 					"type": "integer",
 					"description": "When specified, limits the output to the top K most probable classes."
 				}
 			}
 		}
 	},
-	"required": ["data"]
+	"required": ["inputs"]
 }

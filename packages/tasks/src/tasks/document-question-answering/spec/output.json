@@ -17,11 +17,11 @@
 			},
 			"start": {
 				"type": "integer",
-				"descrtiption": "The start word index of the answer (in the OCR’d version of the input or provided word boxes)."
+				"description": "The start word index of the answer (in the OCR\u2019d version of the input or provided word boxes)."
 			},
 			"end": {
 				"type": "integer",
-				"descrtiption": "The end word index of the answer (in the OCR’d version of the input or provided word boxes)."
+				"description": "The end word index of the answer (in the OCR\u2019d version of the input or provided word boxes)."
 			},
 			"words": {
 				"type": "array",

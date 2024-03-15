@@ -17,6 +17,8 @@ export const TOKEN_TYPES = Object.freeze({
 	CloseExpression: "CloseExpression", // }}
 	OpenSquareBracket: "OpenSquareBracket", // [
 	CloseSquareBracket: "CloseSquareBracket", // ]
+	OpenCurlyBracket: "OpenCurlyBracket", // {
+	CloseCurlyBracket: "CloseCurlyBracket", // }
 	Comma: "Comma", // ,
 	Dot: "Dot", // .
 	Colon: "Colon", // :
@@ -33,6 +35,7 @@ export const TOKEN_TYPES = Object.freeze({
 	If: "If",
 	For: "For",
 	In: "In",
+	Is: "Is",
 	NotIn: "NotIn",
 	Else: "Else",
 	EndIf: "EndIf",
@@ -52,6 +55,7 @@ const KEYWORDS = Object.freeze({
 	set: TOKEN_TYPES.Set,
 	for: TOKEN_TYPES.For,
 	in: TOKEN_TYPES.In,
+	is: TOKEN_TYPES.Is,
 	if: TOKEN_TYPES.If,
 	else: TOKEN_TYPES.Else,
 	endif: TOKEN_TYPES.EndIf,
@@ -102,6 +106,8 @@ const ORDERED_MAPPING_TABLE: [string, TokenType][] = [
 	// Single character tokens
 	["(", TOKEN_TYPES.OpenParen],
 	[")", TOKEN_TYPES.CloseParen],
+	["{", TOKEN_TYPES.OpenCurlyBracket],
+	["}", TOKEN_TYPES.CloseCurlyBracket],
 	["[", TOKEN_TYPES.OpenSquareBracket],
 	["]", TOKEN_TYPES.CloseSquareBracket],
 	[",", TOKEN_TYPES.Comma],
@@ -137,12 +143,52 @@ const ESCAPE_CHARACTERS = new Map([
 	["\\", "\\"], // Backslash
 ]);
 
+export interface PreprocessOptions {
+	trim_blocks?: boolean;
+	lstrip_blocks?: boolean;
+}
+
+function preprocess(template: string, options: PreprocessOptions = {}): string {
+	// According to https://jinja.palletsprojects.com/en/3.0.x/templates/#whitespace-control
+
+	// In the default configuration:
+	//  - a single trailing newline is stripped if present
+	//  - other whitespace (spaces, tabs, newlines etc.) is returned unchanged
+	if (template.endsWith("\n")) {
+		template = template.slice(0, -1);
+	}
+
+	// Replace all comments with a placeholder
+	// This ensures that comments don't interfere with the following options
+	template = template.replace(/{#.*?#}/gs, "{##}");
+
+	if (options.lstrip_blocks) {
+		// The lstrip_blocks option can also be set to strip tabs and spaces from the
+		// beginning of a line to the start of a block. (Nothing will be stripped if
+		// there are other characters before the start of the block.)
+		template = template.replace(/^[ \t]*({[#%])/gm, "$1");
+	}
+
+	if (options.trim_blocks) {
+		// If an application configures Jinja to trim_blocks, the first newline after
+		// a template tag is removed automatically (like in PHP).
+		template = template.replace(/([#%]})\n/g, "$1");
+	}
+
+	return template
+		.replace(/{##}/g, "") // Remove comments
+		.replace(/-%}\s*/g, "%}")
+		.replace(/\s*{%-/g, "{%")
+		.replace(/-}}\s*/g, "}}")
+		.replace(/\s*{{-/g, "{{");
+}
+
 /**
  * Generate a list of tokens from a source string.
  */
-export function tokenize(source: string): Token[] {
+export function tokenize(source: string, options: PreprocessOptions = {}): Token[] {
 	const tokens: Token[] = [];
-	const src: string = source;
+	const src: string = preprocess(source, options);
 
 	let cursorPosition = 0;
 
@@ -247,9 +293,9 @@ export function tokenize(source: string): Token[] {
 			}
 		}
 
-		if (char === "'") {
+		if (char === "'" || char === '"') {
 			++cursorPosition; // Skip the opening quote
-			const str = consumeWhile((char) => char !== "'");
+			const str = consumeWhile((c) => c !== char);
 			tokens.push(new Token(str, TOKEN_TYPES.StringLiteral));
 			++cursorPosition; // Skip the closing quote
 			continue;

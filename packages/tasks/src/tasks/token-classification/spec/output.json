@@ -7,7 +7,7 @@
 	"items": {
 		"type": "object",
 		"properties": {
-			"entityGroup": {
+			"entity_group": {
 				"type": "string",
 				"description": "The predicted label for that group of tokens"
 			},

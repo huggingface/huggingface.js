@@ -27,7 +27,15 @@ export async function makeRequestOptions(
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const { accessToken, model: _model, ...otherArgs } = args;
 	let { model } = args;
-	const { forceTask: task, includeCredentials, taskHint, ...otherOptions } = options ?? {};
+	const {
+		forceTask: task,
+		includeCredentials,
+		taskHint,
+		wait_for_model,
+		use_cache,
+		dont_load_model,
+		...otherOptions
+	} = options ?? {};
 
 	const headers: Record<string, string> = {};
 	if (accessToken) {
@@ -57,16 +65,16 @@ export async function makeRequestOptions(
 
 	if (!binary) {
 		headers["Content-Type"] = "application/json";
-	} else {
-		if (options?.wait_for_model) {
-			headers["X-Wait-For-Model"] = "true";
-		}
-		if (options?.use_cache === false) {
-			headers["X-Use-Cache"] = "false";
-		}
-		if (options?.dont_load_model) {
-			headers["X-Load-Model"] = "0";
-		}
+	}
+
+	if (wait_for_model) {
+		headers["X-Wait-For-Model"] = "true";
+	}
+	if (use_cache === false) {
+		headers["X-Use-Cache"] = "false";
+	}
+	if (dont_load_model) {
+		headers["X-Load-Model"] = "0";
 	}
 
 	const url = (() => {

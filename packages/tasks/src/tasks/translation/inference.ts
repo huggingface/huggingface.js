@@ -13,7 +13,7 @@ export interface TranslationInput {
 	/**
 	 * The input text data
 	 */
-	data: string;
+	inputs: string;
 	/**
 	 * Additional inference parameters
 	 */
@@ -30,11 +30,11 @@ export interface Text2TextGenerationParameters {
 	/**
 	 * Whether to clean up the potential extra spaces in the text output.
 	 */
-	cleanUpTokenizationSpaces?: boolean;
+	clean_up_tokenization_spaces?: boolean;
 	/**
 	 * Additional parametrization of the text generation algorithm
 	 */
-	generateParameters?: { [key: string]: unknown };
+	generate_parameters?: { [key: string]: unknown };
 	/**
 	 * The truncation strategy to use
 	 */
@@ -45,14 +45,12 @@ export interface Text2TextGenerationParameters {
 export type Text2TextGenerationTruncationStrategy = "do_not_truncate" | "longest_first" | "only_first" | "only_second";
 
 /**
- * Outputs for Translation inference
- *
- * Outputs of inference for the Text2text Generation task
+ * Outputs of inference for the Translation task
  */
 export interface TranslationOutput {
 	/**
-	 * The generated text.
+	 * The translated text.
 	 */
-	generatedText: string;
+	translation_text: string;
 	[property: string]: unknown;
 }

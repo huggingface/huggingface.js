@@ -1,7 +1,7 @@
 {
 	"name": "@huggingface/hub",
 	"packageManager": "pnpm@8.10.5",
-	"version": "0.13.0",
+	"version": "0.14.2",
 	"description": "Utilities to interact with the Hugging Face hub",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {
@@ -57,7 +57,7 @@
 	"license": "MIT",
 	"devDependencies": {
 		"@huggingface/tasks": "workspace:^",
-		"@types/node": "^18.13.0",
+		"@types/node": "^20.11.28",
 		"type-fest": "^3.9.0"
 	},
 	"dependencies": {

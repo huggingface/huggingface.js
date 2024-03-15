@@ -10,7 +10,7 @@ export interface DocumentQuestionAnsweringInput {
 	/**
 	 * One (document, question) pair to answer
 	 */
-	data: DocumentQuestionAnsweringInputData;
+	inputs: DocumentQuestionAnsweringInputData;
 	/**
 	 * Additional inference parameters
 	 */
@@ -42,11 +42,11 @@ export interface DocumentQuestionAnsweringParameters {
 	 * be split in several chunks with some overlap. This argument controls the size of that
 	 * overlap.
 	 */
-	docStride?: number;
+	doc_stride?: number;
 	/**
 	 * Whether to accept impossible as an answer
 	 */
-	handleImpossibleAnswer?: boolean;
+	handle_impossible_answer?: boolean;
 	/**
 	 * Language to use while running OCR. Defaults to english.
 	 */
@@ -55,27 +55,27 @@ export interface DocumentQuestionAnsweringParameters {
 	 * The maximum length of predicted answers (e.g., only answers with a shorter length are
 	 * considered).
 	 */
-	maxAnswerLen?: number;
+	max_answer_len?: number;
 	/**
 	 * The maximum length of the question after tokenization. It will be truncated if needed.
 	 */
-	maxQuestionLen?: number;
+	max_question_len?: number;
 	/**
 	 * The maximum length of the total sentence (context + question) in tokens of each chunk
 	 * passed to the model. The context will be split in several chunks (using doc_stride as
 	 * overlap) if needed.
 	 */
-	maxSeqLen?: number;
+	max_seq_len?: number;
 	/**
 	 * The number of answers to return (will be chosen by order of likelihood). Can return less
 	 * than top_k answers if there are not enough options available within the context.
 	 */
-	topK?: number;
+	top_k?: number;
 	/**
 	 * A list of words and bounding boxes (normalized 0->1000). If provided, the inference will
 	 * skip the OCR step and use the provided bounding boxes instead.
 	 */
-	wordBoxes?: WordBox[];
+	word_boxes?: WordBox[];
 	[property: string]: unknown;
 }
 export type WordBox = number[] | string;
@@ -88,11 +88,19 @@ export interface DocumentQuestionAnsweringOutputElement {
 	 * The answer to the question.
 	 */
 	answer: string;
+	/**
+	 * The end word index of the answer (in the OCR’d version of the input or provided word
+	 * boxes).
+	 */
 	end: number;
 	/**
 	 * The probability associated to the answer.
 	 */
 	score: number;
+	/**
+	 * The start word index of the answer (in the OCR’d version of the input or provided word
+	 * boxes).
+	 */
 	start: number;
 	/**
 	 * The index of each word/box pair that is in the answer

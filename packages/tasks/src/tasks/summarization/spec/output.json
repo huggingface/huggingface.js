@@ -1,7 +1,14 @@
 {
-	"$ref": "/inference/schemas/text2text-generation/output.json",
 	"$id": "/inference/schemas/summarization/output.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Outputs of inference for the Summarization task",
 	"title": "SummarizationOutput",
-	"description": "Outputs for Summarization inference"
+	"type": "object",
+	"properties": {
+		"summary_text": {
+			"type": "string",
+			"description": "The summarized text."
+		}
+	},
+	"required": ["summary_text"]
 }

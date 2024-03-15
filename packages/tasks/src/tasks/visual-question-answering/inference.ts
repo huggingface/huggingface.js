@@ -10,7 +10,7 @@ export interface VisualQuestionAnsweringInput {
 	/**
 	 * One (image, question) pair to answer
 	 */
-	data: VisualQuestionAnsweringInputData;
+	inputs: VisualQuestionAnsweringInputData;
 	/**
 	 * Additional inference parameters
 	 */
@@ -42,7 +42,7 @@ export interface VisualQuestionAnsweringParameters {
 	 * return less than topk answers if there are not enough options available within the
 	 * context.
 	 */
-	topK?: number;
+	top_k?: number;
 	[property: string]: unknown;
 }
 export type VisualQuestionAnsweringOutput = VisualQuestionAnsweringOutputElement[];

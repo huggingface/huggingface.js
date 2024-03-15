@@ -5,7 +5,7 @@
 	"title": "ImageSegmentationInput",
 	"type": "object",
 	"properties": {
-		"data": {
+		"inputs": {
 			"description": "The input image data"
 		},
 		"parameters": {
@@ -19,11 +19,11 @@
 			"description": "Additional inference parameters for Image Segmentation",
 			"type": "object",
 			"properties": {
-				"maskThreshold": {
+				"mask_threshold": {
 					"type": "number",
 					"description": "Threshold to use when turning the predicted masks into binary values."
 				},
-				"overlapMaskAreaThreshold": {
+				"overlap_mask_area_threshold": {
 					"type": "number",
 					"description": "Mask overlap threshold to eliminate small, disconnected segments."
 				},
@@ -50,5 +50,5 @@
 			}
 		}
 	},
-	"required": ["data"]
+	"required": ["inputs"]
 }

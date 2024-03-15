@@ -3,8 +3,14 @@
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Outputs of inference for the Depth Estimation task",
 	"title": "DepthEstimationOutput",
-	"type": "array",
-	"items": {
-		"description": "The output depth labels"
+
+	"type": "object",
+	"properties": {
+		"predicted_depth": {
+			"description": "The predicted depth as a tensor"
+		},
+		"depth": {
+			"description": "The predicted depth as an image"
+		}
 	}
 }

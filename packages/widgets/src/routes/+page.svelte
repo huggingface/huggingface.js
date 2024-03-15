@@ -31,9 +31,69 @@
 
 	const models: ModelData[] = [
 		{
-			id: "WizardLM/WizardLM-70B-V1.0",
+			id: "mistralai/Mistral-7B-Instruct-v0.2",
+			pipeline_tag: "text-generation",
+			tags: ["conversational"],
+			inference: InferenceDisplayability.Yes,
+			config: {
+				architectures: ["MistralForCausalLM"],
+				model_type: "mistral",
+				tokenizer_config: {
+					chat_template:
+						"{{ bos_token }}{% for message in messages %}{% if (message['role'] == 'user') != (loop.index0 % 2 == 0) %}{{ raise_exception('Conversation roles must alternate user/assistant/user/assistant/...') }}{% endif %}{% if message['role'] == 'user' %}{{ '[INST] ' + message['content'] + ' [/INST]' }}{% elif message['role'] == 'assistant' %}{{ message['content'] + eos_token}}{% else %}{{ raise_exception('Only user and assistant roles are supported!') }}{% endif %}{% endfor %}",
+					use_default_system_prompt: false,
+					bos_token: "<s>",
+					eos_token: "</s>",
+					unk_token: "<unk>",
+					pad_token: null,
+				},
+			},
+			widgetData: [
+				{ text: "This is a text-only example", example_title: "Text only" },
+				{
+					messages: [{ content: "Please exlain QCD in very few words", role: "user" }],
+					example_title: "Chat messages",
+				},
+				{
+					messages: [{ content: "Please exlain QCD in very few words", role: "user" }],
+					output: {
+						text: "QCD is the physics of strong force and small particles.",
+					},
+					example_title: "Chat messages with Output",
+				},
+				{
+					text: "Explain QCD in one short sentence.",
+					output: {
+						text: "QCD is the physics of strong force and small particles.",
+					},
+					example_title: "Text only with Output",
+				},
+				{
+					example_title: "Invalid example - unsupported role",
+					messages: [
+						{ role: "system", content: "This will fail because of the chat template" },
+						{ role: "user", content: "What's your favorite condiment?" },
+					],
+				},
+			],
+		},
+		{
+			id: "microsoft/phi-2",
 			pipeline_tag: "text-generation",
 			inference: InferenceDisplayability.Yes,
+			config: {
+				architectures: ["PhiForCausalLM"],
+				model_type: "phi",
+				auto_map: {
+					AutoConfig: "configuration_phi.PhiConfig",
+					AutoModelForCausalLM: "modeling_phi.PhiForCausalLM",
+				},
+				tokenizer_config: {
+					bos_token: "<|endoftext|>",
+					eos_token: "<|endoftext|>",
+					unk_token: "<|endoftext|>",
+				},
+			},
 		},
 		{
 			id: "openai/clip-vit-base-patch16",
@@ -315,7 +375,7 @@
 		},
 		{
 			id: "facebook/blenderbot-400M-distill",
-			pipeline_tag: "conversational",
+			pipeline_tag: "text2text-generation",
 			inference: InferenceDisplayability.Yes,
 			widgetData: [{ text: "Hey my name is Julien! How are you?" }],
 		},

@@ -57,7 +57,7 @@ async function generateTypescript(inputData: InputData): Promise<SerializedRende
 		indentation: "\t",
 		rendererOptions: {
 			"just-types": true,
-			"nice-property-names": true,
+			"nice-property-names": false,
 			"prefer-unions": true,
 			"prefer-const-values": true,
 			"prefer-unknown": true,
