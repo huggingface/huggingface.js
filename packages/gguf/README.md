@@ -4,7 +4,9 @@ A GGUF parser that works on remotely hosted files.
 
 ## Spec
 
-https://github.com/ggerganov/ggml/blob/master/docs/gguf.md
+<img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/gguf-spec.png"/>
+
+Spec: https://github.com/ggerganov/ggml/blob/master/docs/gguf.md
 
 Reference implementation (Python): https://github.com/ggerganov/llama.cpp/blob/master/gguf-py/gguf/gguf_reader.py
 
@@ -53,6 +55,12 @@ console.log(tensorInfos);
 // ]
 
 ```
+
+## Hugging Face Hub
+
+The Hub supports all file formats and has built-in features for GGUF format. 
+
+Find more information at: http://hf.co/docs/hub/gguf.
 
 ## Acknowledgements & Inspirations
 

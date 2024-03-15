@@ -18,6 +18,7 @@ import type {
 	SliceExpression,
 	KeywordArgumentExpression,
 	ObjectLiteral,
+	TupleLiteral,
 } from "./ast";
 import { slice, titleCase } from "./utils";
 
@@ -138,6 +139,14 @@ export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 				return this.value.get(key.value) ?? defaultValue ?? new NullValue();
 			}),
 		],
+		[
+			"items",
+			new FunctionValue(() => {
+				return new ArrayValue(
+					Array.from(this.value.entries()).map(([key, value]) => new ArrayValue([new StringValue(key), value]))
+				);
+			}),
+		],
 	]);
 }
 
@@ -159,6 +168,14 @@ export class ArrayValue extends RuntimeValue<AnyRuntimeValue[]> {
 	override __bool__(): BooleanValue {
 		return new BooleanValue(this.value.length > 0);
 	}
+}
+
+/**
+ * Represents a Tuple value at runtime.
+ * NOTE: We extend ArrayValue since JavaScript does not have a built-in Tuple type.
+ */
+export class TupleValue extends ArrayValue {
+	override type = "TupleValue";
 }
 
 /**
@@ -500,6 +517,17 @@ export class Interpreter {
 					default:
 						throw new Error(`Unknown NumericValue filter: ${filter.value}`);
 				}
+			} else if (operand instanceof ObjectValue) {
+				switch (filter.value) {
+					case "items":
+						return new ArrayValue(
+							Array.from(operand.value.entries()).map(([key, value]) => new ArrayValue([new StringValue(key), value]))
+						);
+					case "length":
+						return new NumericValue(operand.value.size);
+					default:
+						throw new Error(`Unknown ObjectValue filter: ${filter.value}`);
+				}
 			}
 			throw new Error(`Cannot apply filter "${filter.value}" to type: ${operand.type}`);
 		} else if (node.filter.type === "CallExpression") {
@@ -763,8 +791,29 @@ export class Interpreter {
 
 			scope.setVariable("loop", new ObjectValue(loop));
 
+			const current = iterable.value[i];
+
 			// For this iteration, set the loop variable to the current element
-			scope.setVariable(node.loopvar.value, iterable.value[i]);
+			if (node.loopvar.type === "Identifier") {
+				scope.setVariable((node.loopvar as Identifier).value, current);
+			} else if (node.loopvar.type === "TupleLiteral") {
+				const loopvar = node.loopvar as TupleLiteral;
+				if (current.type !== "ArrayValue") {
+					throw new Error(`Cannot unpack non-iterable type: ${current.type}`);
+				}
+				const c = current as ArrayValue;
+
+				// check if too few or many items to unpack
+				if (loopvar.value.length !== c.value.length) {
+					throw new Error(`Too ${loopvar.value.length > c.value.length ? "few" : "many"} items to unpack`);
+				}
+				for (let j = 0; j < loopvar.value.length; ++j) {
+					if (loopvar.value[j].type !== "Identifier") {
+						throw new Error(`Cannot unpack non-identifier type: ${loopvar.value[j].type}`);
+					}
+					scope.setVariable((loopvar.value[j] as Identifier).value, c.value[j]);
+				}
+			}
 
 			// Evaluate the body of the for loop
 			const evaluated = this.evaluateBlock(node.body, scope);
@@ -799,6 +848,8 @@ export class Interpreter {
 				return new BooleanValue((statement as BooleanLiteral).value);
 			case "ArrayLiteral":
 				return new ArrayValue((statement as ArrayLiteral).value.map((x) => this.evaluate(x, environment)));
+			case "TupleLiteral":
+				return new TupleValue((statement as TupleLiteral).value.map((x) => this.evaluate(x, environment)));
 			case "ObjectLiteral": {
 				const mapping = new Map();
 				for (const [key, value] of (statement as ObjectLiteral).value) {

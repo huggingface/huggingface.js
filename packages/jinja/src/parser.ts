@@ -20,6 +20,7 @@ import {
 	UnaryExpression,
 	SliceExpression,
 	KeywordArgumentExpression,
+	TupleLiteral,
 } from "./ast";
 
 /**
@@ -172,16 +173,30 @@ export function parse(tokens: Token[]): Program {
 		return new If(test, body, alternate);
 	}
 
+	function parseExpressionSequence(primary = false): Statement {
+		const fn = primary ? parsePrimaryExpression : parseExpression;
+		const expressions = [fn()];
+		const isTuple = is(TOKEN_TYPES.Comma);
+		while (isTuple) {
+			++current; // consume comma
+			expressions.push(fn());
+			if (!is(TOKEN_TYPES.Comma)) {
+				break;
+			}
+		}
+		return isTuple ? new TupleLiteral(expressions) : expressions[0];
+	}
+
 	function parseForStatement(): For {
 		// e.g., `message` in `for message in messages`
-		const loopVariable = parsePrimaryExpression(); // should be an identifier
-		if (!(loopVariable instanceof Identifier)) {
-			throw new SyntaxError(`Expected identifier for the loop variable`);
+		const loopVariable = parseExpressionSequence(true); // should be an identifier
+		if (!(loopVariable instanceof Identifier || loopVariable instanceof TupleLiteral)) {
+			throw new SyntaxError(`Expected identifier/tuple for the loop variable, got ${loopVariable.type} instead`);
 		}
 
 		expect(TOKEN_TYPES.In, "Expected `in` keyword following loop variable");
 
-		// messages in `for message in messages`
+		// `messages` in `for message in messages`
 		const iterable = parseExpression();
 
 		expect(TOKEN_TYPES.CloseStatement, "Expected closing statement token");
@@ -199,6 +214,10 @@ export function parse(tokens: Token[]): Program {
 
 	function parseExpression(): Statement {
 		// Choose parse function with lowest precedence
+		return parseTernaryExpression();
+	}
+
+	function parseTernaryExpression(): Statement {
 		const a = parseLogicalOrExpression();
 		if (is(TOKEN_TYPES.If)) {
 			// Ternary expression
@@ -464,9 +483,9 @@ export function parse(tokens: Token[]): Program {
 				return new Identifier(token.value);
 			case TOKEN_TYPES.OpenParen: {
 				++current; // consume opening parenthesis
-				const expression = parseExpression();
+				const expression = parseExpressionSequence();
 				if (tokens[current].type !== TOKEN_TYPES.CloseParen) {
-					throw new SyntaxError("Expected closing parenthesis");
+					throw new SyntaxError(`Expected closing parenthesis, got ${tokens[current].type} instead`);
 				}
 				++current; // consume closing parenthesis
 				return expression;
