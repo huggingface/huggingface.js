@@ -8,6 +8,7 @@ import documentQuestionAnswering from "./document-question-answering/data";
 import featureExtraction from "./feature-extraction/data";
 import fillMask from "./fill-mask/data";
 import imageClassification from "./image-classification/data";
+import imageFeatureExtraction from "./image-feature-extraction/data";
 import imageToImage from "./image-to-image/data";
 import imageToText from "./image-to-text/data";
 import imageSegmentation from "./image-segmentation/data";
@@ -52,6 +53,7 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	"fill-mask": ["transformers", "transformers.js"],
 	"graph-ml": ["transformers"],
 	"image-classification": ["keras", "timm", "transformers", "transformers.js"],
+	"image-feature-extraction": ["transformers", "timm"],
 	"image-segmentation": ["transformers", "transformers.js"],
 	"image-to-image": ["diffusers", "transformers", "transformers.js"],
 	"image-to-text": ["transformers", "transformers.js"],
@@ -129,6 +131,7 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"fill-mask": getData("fill-mask", fillMask),
 	"graph-ml": undefined,
 	"image-classification": getData("image-classification", imageClassification),
+	"image-feature-extraction": getData("image-feature-extraction", imageFeatureExtraction),
 	"image-segmentation": getData("image-segmentation", imageSegmentation),
 	"image-to-image": getData("image-to-image", imageToImage),
 	"image-to-text": getData("image-to-text", imageToText),
