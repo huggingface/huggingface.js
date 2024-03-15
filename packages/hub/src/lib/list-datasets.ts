@@ -66,7 +66,7 @@ export async function* listDatasets<
 	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 	 */
 	fetch?: typeof fetch;
-}): AsyncGenerator<DatasetEntry> {
+}): AsyncGenerator<DatasetEntry & Pick<ApiDatasetInfo, T>> {
 	checkCredentials(params?.credentials);
 	let totalToFetch = params?.limit ?? Infinity;
 	const search = new URLSearchParams([
@@ -105,7 +105,7 @@ export async function* listDatasets<
 				likes: item.likes,
 				gated: item.gated,
 				updatedAt: new Date(item.lastModified),
-			};
+			} as DatasetEntry & Pick<ApiDatasetInfo, T>;
 			totalToFetch--;
 			if (totalToFetch <= 0) {
 				return;
