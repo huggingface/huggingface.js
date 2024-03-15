@@ -51,7 +51,7 @@ export interface ModelEntry {
 }
 
 export async function* listModels<
-	const T extends Exclude<(typeof EXPANDABLE_KEYS)[number], (typeof EXPAND_KEYS)[number]> = never,
+	T extends Exclude<(typeof EXPANDABLE_KEYS)[number], (typeof EXPAND_KEYS)[number]> = never,
 >(params?: {
 	search?: {
 		/**
