@@ -42,7 +42,7 @@ const taskData: TaskDataCustom = {
 	],
 	spaces: [],
 	summary:
-		"Feature extraction refers to the process of transforming raw data into numerical features that can be processed while preserving the information in the original dataset.",
+		"Feature extraction is the task of extracting features learnt in a model.",
 	widgetModels: ["facebook/bart-base"],
 };
 
