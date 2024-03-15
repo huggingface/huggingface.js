@@ -10,7 +10,7 @@
 		"lint:check": "eslint --ext .cjs,.ts .",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
-		"doc-hub": "typedoc --tsconfig ../hub/tsconfig.json --githubPages false --plugin typedoc-plugin-markdown --out ../../docs/hub --hideBreadcrumbs --hideInPageTOC --sourceLinkTemplate https://github.com/huggingface/huggingface.js/blob/main/{path}#L{line} ../hub/index.ts",
+		"doc-hub": "typedoc --tsconfig ../hub/tsconfig.json --githubPages false --out ../../docs/hub ../hub/index.ts",
 		"doc-inference": "typedoc --tsconfig ../inference/tsconfig.json --githubPages false --plugin typedoc-plugin-markdown --out ../../docs/inference --hideBreadcrumbs --hideInPageTOC --sourceLinkTemplate https://github.com/huggingface/huggingface.js/blob/main/{path}#L{line} ../inference/src/index.ts",
 		"doc-agents": "typedoc --tsconfig ../agents/tsconfig.json --githubPages false --plugin typedoc-plugin-markdown --out ../../docs/agents --hideBreadcrumbs --hideInPageTOC --sourceLinkTemplate https://github.com/huggingface/huggingface.js/blob/main/{path}#L{line} ../agents/src/index.ts",
 		"update-toc": "tsx update-toc.ts",
@@ -21,9 +21,8 @@
 	"type": "module",
 	"license": "MIT",
 	"devDependencies": {
-		"@types/node": "^18.14.5",
-		"typedoc": "^0.23.26",
-		"typedoc-plugin-markdown": "^3.14.0"
+		"typedoc": "^0.25.12",
+		"typedoc-plugin-markdown": "^3.17.1"
 	},
 	"dependencies": {
 		"glob": "^9.2.1",

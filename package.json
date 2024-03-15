@@ -8,6 +8,7 @@
 		"format:check": "prettier --check package.json .prettierrc .vscode .eslintrc.cjs .github *.md"
 	},
 	"devDependencies": {
+		"@types/node": "20",
 		"@typescript-eslint/eslint-plugin": "^5.54.0",
 		"@typescript-eslint/parser": "^5.54.0",
 		"@vitest/browser": "^0.34.6",
@@ -18,9 +19,9 @@
 		"prettier": "^3.1.0",
 		"prettier-plugin-svelte": "^3.1.2",
 		"semver": "^7.5.0",
-		"tsx": "^4.7.0",
 		"tsup": "^6.7.0",
-		"typescript": "^5.0.4",
+		"tsx": "^4.7.0",
+		"typescript": "^5.4.2",
 		"vite": "^5.0.2",
 		"vitest": "^0.34.6",
 		"webdriverio": "^8.6.7"
