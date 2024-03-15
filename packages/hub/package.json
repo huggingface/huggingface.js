@@ -57,7 +57,6 @@
 	"license": "MIT",
 	"devDependencies": {
 		"@huggingface/tasks": "workspace:^",
-		"@types/node": "^18.13.0",
 		"type-fest": "^3.9.0"
 	},
 	"dependencies": {
