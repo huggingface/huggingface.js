@@ -37,7 +37,7 @@ export interface SpaceEntry {
 }
 
 export async function* listSpaces<
-	const T extends Exclude<(typeof EXPANDABLE_KEYS)[number], (typeof EXPAND_KEYS)[number]> = never,
+	T extends Exclude<(typeof EXPANDABLE_KEYS)[number], (typeof EXPAND_KEYS)[number]> = never,
 >(params?: {
 	search?: {
 		/**
