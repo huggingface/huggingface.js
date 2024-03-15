@@ -77,6 +77,7 @@ const TEST_STRINGS = {
 	FILTER_OPERATOR_3: `|{{ -1 | abs }}|{{ 1 | abs }}|`,
 	FILTER_OPERATOR_4: `{{ items | selectattr('key') | length }}`,
 	FILTER_OPERATOR_5: `{{ messages | selectattr('role', 'equalto', 'system') | length }}`,
+	FILTER_OPERATOR_6: `|{{ obj | length }}|{{ (obj | items)[1:] | length }}|`,
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: `|{{ 1 and 2 }}|{{ 1 and 0 }}|{{ 0 and 1 }}|{{ 0 and 0 }}|{{ 1 or 2 }}|{{ 1 or 0 }}|{{ 0 or 1 }}|{{ 0 or 0 }}|{{ not 1 }}|{{ not 0 }}|`,
@@ -1384,6 +1385,29 @@ const TEST_PARSED = {
 		{ value: "length", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
+	FILTER_OPERATOR_6: [
+		{ value: '|', type: 'Text' },
+		{ value: '{{', type: 'OpenExpression' },
+		{ value: 'obj', type: 'Identifier' },
+		{ value: '|', type: 'Pipe' },
+		{ value: 'length', type: 'Identifier' },
+		{ value: '}}', type: 'CloseExpression' },
+		{ value: '|', type: 'Text' },
+		{ value: '{{', type: 'OpenExpression' },
+		{ value: '(', type: 'OpenParen' },
+		{ value: 'obj', type: 'Identifier' },
+		{ value: '|', type: 'Pipe' },
+		{ value: 'items', type: 'Identifier' },
+		{ value: ')', type: 'CloseParen' },
+		{ value: '[', type: 'OpenSquareBracket' },
+		{ value: '1', type: 'NumericLiteral' },
+		{ value: ':', type: 'Colon' },
+		{ value: ']', type: 'CloseSquareBracket' },
+		{ value: '|', type: 'Pipe' },
+		{ value: 'length', type: 'Identifier' },
+		{ value: '}}', type: 'CloseExpression' },
+		{ value: '|', type: 'Text' }
+	  ],
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: [
@@ -2391,6 +2415,9 @@ const TEST_CONTEXT = {
 	FILTER_OPERATOR_5: {
 		messages: [{ role: "system" }, { role: "user" }, { role: "assistant" }],
 	},
+	FILTER_OPERATOR_6: {
+		obj: { a: 1, b: 2, c: 3 },
+	},
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: {},
@@ -2533,6 +2560,7 @@ const EXPECTED_OUTPUTS = {
 	FILTER_OPERATOR_3: `|1|1|`,
 	FILTER_OPERATOR_4: `2`,
 	FILTER_OPERATOR_5: `1`,
+	FILTER_OPERATOR_6: `|3|2|`,
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: `|2|0|0|0|1|1|1|0|false|true|`,

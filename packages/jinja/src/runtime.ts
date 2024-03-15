@@ -517,6 +517,17 @@ export class Interpreter {
 					default:
 						throw new Error(`Unknown NumericValue filter: ${filter.value}`);
 				}
+			} else if (operand instanceof ObjectValue) {
+				switch (filter.value) {
+					case "items":
+						return new ArrayValue(
+							Array.from(operand.value.entries()).map(([key, value]) => new ArrayValue([new StringValue(key), value]))
+						);
+					case "length":
+						return new NumericValue(operand.value.size);
+					default:
+						throw new Error(`Unknown ObjectValue filter: ${filter.value}`);
+				}
 			}
 			throw new Error(`Cannot apply filter "${filter.value}" to type: ${operand.type}`);
 		} else if (node.filter.type === "CallExpression") {
