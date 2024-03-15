@@ -2,6 +2,9 @@ import * as tasks from "./tasks";
 import type { Options, RequestArgs } from "./types";
 import type { DistributiveOmit } from "./utils/distributive-omit";
 
+/* eslint-disable @typescript-eslint/no-empty-interface */
+/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
+
 type Task = typeof tasks;
 
 type TaskWithNoAccessToken = {
@@ -60,8 +63,6 @@ export class HfInferenceEndpoint {
 	}
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface HfInference extends TaskWithNoAccessToken {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface HfInferenceEndpoint extends TaskWithNoAccessTokenNoModel {}
