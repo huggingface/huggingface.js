@@ -173,7 +173,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/xai-org/grok-1",
 		filter: false,
 		countDownloads: {
-			term: { path: ["ckpt/tensor00000_000", "ckpt-0/tensor00000_000"] },
+			terms: { path: ["ckpt/tensor00000_000", "ckpt-0/tensor00000_000"] },
 		},
 	},
 	keras: {
