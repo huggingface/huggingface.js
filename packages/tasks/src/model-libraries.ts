@@ -184,6 +184,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.keras,
 		filter: true,
 		countDownloads: { term: { path: "saved_model.pb" } },
+	},
 	k2: {
 		prettyLabel: "K2",
 		repoName: "k2",
