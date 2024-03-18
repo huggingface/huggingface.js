@@ -538,6 +538,12 @@ export HF_HUB_ENABLE_HF_TRANS: string[]FER=1
 huggingface-cli download --local-dir ${nameWithoutNamespace(model.id)} ${model.id}`,
 ];
 
+export const mlxim = (model: ModelData): string[] => [
+	`from mlxim.model import create_model
+
+model = create_model(${model.id})`,
+];
+
 export const nemo = (model: ModelData): string[] => {
 	let command: string[] | undefined = undefined;
 	// Resolve the tag to a nemo domain/sub-domain

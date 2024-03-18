@@ -202,6 +202,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.mlx,
 		filter: true,
 	},
+	"mlx-image": {
+		prettyLabel: "mlx-image",
+		repoName: "mlx-image",
+		repoUrl: "https://github.com/riccardomusmeci/mlx-image",
+		docsUrl: "https://huggingface.co/docs/hub/mlx-image",
+		snippets: snippets.mlxim,
+		filter: false,
+		countDownloads: { term: { path: "model.safetensors" } },
+	},
 	nemo: {
 		prettyLabel: "NeMo",
 		repoName: "NeMo",

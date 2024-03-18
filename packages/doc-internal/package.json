@@ -22,8 +22,8 @@
 	"license": "MIT",
 	"devDependencies": {
 		"@types/node": "^18.14.5",
-		"typedoc": "^0.23.26",
-		"typedoc-plugin-markdown": "^3.14.0"
+		"typedoc": "^0.25.12",
+		"typedoc-plugin-markdown": "^3.17.1"
 	},
 	"dependencies": {
 		"glob": "^9.2.1",

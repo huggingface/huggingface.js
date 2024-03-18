@@ -34,7 +34,7 @@ export class For extends Statement {
 	override type = "For";
 
 	constructor(
-		public loopvar: Identifier,
+		public loopvar: Identifier | TupleLiteral,
 		public iterable: Expression,
 		public body: Statement[]
 	) {
@@ -134,6 +134,13 @@ export class BooleanLiteral extends Literal<boolean> {
  */
 export class ArrayLiteral extends Literal<Expression[]> {
 	override type = "ArrayLiteral";
+}
+
+/**
+ * Represents a tuple literal in the template.
+ */
+export class TupleLiteral extends Literal<Expression[]> {
+	override type = "TupleLiteral";
 }
 
 /**
