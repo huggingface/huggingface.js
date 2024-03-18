@@ -1,5 +1,7 @@
 {
 	"title": "ChatCompletionInput",
+	"$id": "/inference/schemas/chat-completion/input.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Inputs for ChatCompletion inference",
 	"type": "object",
 	"properties": {
@@ -10,9 +12,7 @@
 				"type": "object",
 				"properties": {
 					"role": {
-						"oneOf": [{ "const": "assistant" }, { "const": "system" }, { "const": "user" }],
-						"title": "ChatCompletionInputMessageRole",
-						"description": "The role of the message author."
+						"$ref": "#/definitions/Role"
 					},
 					"content": {
 						"type": "string",
@@ -36,7 +36,7 @@
 		},
 		"stop": {
 			"oneOf": [{ "type": "string" }, { "type": "array", "items": { "type": "string" } }],
-            "title": "ChatCompletionInputStopReason",
+			"title": "ChatCompletionInputStopReason",
 			"description": "Stop generating tokens if a stop token is generated."
 		},
 		"stream": {
@@ -52,5 +52,12 @@
 			"description": "If set to < 1, only the smallest set of most probable tokens with probabilities that add up to `top_p` or higher are kept for generation."
 		}
 	},
-	"required": ["messages"]
+	"required": ["messages"],
+	"definitions": {
+		"Role": {
+			"oneOf": [{ "const": "assistant" }, { "const": "system" }, { "const": "user" }],
+			"title": "ChatCompletionMessageRole",
+			"description": "The role of the message author."
+		}
+	}
 }

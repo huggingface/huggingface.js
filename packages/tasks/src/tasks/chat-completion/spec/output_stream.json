@@ -1,5 +1,5 @@
 {
-	"$id": "/inference/schemas/chat-completion/output.json",
+	"$id": "/inference/schemas/chat-completion/output_stream.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Chat Completion Stream Output",
 	"title": "ChatCompletionStreamOutput",
@@ -28,7 +28,7 @@
 						}
 					},
 					"finish_reason": {
-						"$ref": "#/$defs/FinishReason",
+						"$ref": "/inference/schemas/chat-completion/output.json#/definitions/FinishReason",
 						"description": "The reason why the generation was stopped."
 					},
 					"index": {

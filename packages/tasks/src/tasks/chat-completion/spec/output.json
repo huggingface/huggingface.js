@@ -13,7 +13,7 @@
 				"type": "object",
 				"properties": {
 					"finish_reason": {
-						"$ref": "#/$defs/FinishReason",
+						"$ref": "#/definitions/FinishReason",
 						"description": "The reason why the generation was stopped."
 					},
 					"index": {
@@ -23,13 +23,16 @@
 					"message": {
 						"type": "object",
 						"properties": {
+							"role": {
+								"$ref": "/inference/schemas/chat-completion/input.json#/definitions/Role"
+							},
 							"content": {
 								"type": "string",
 								"description": "The content of the chat completion message."
 							}
 						},
 						"title": "ChatCompletionOutputChoiceMessage",
-						"required": ["content"]
+						"required": ["content", "role"]
 					}
 				},
 				"required": ["finish_reason", "index", "message"]
@@ -41,7 +44,7 @@
 		}
 	},
 	"required": ["choices", "created"],
-	"$defs": {
+	"definitions": {
 		"FinishReason": {
 			"type": "string",
 			"title": "ChatCompletionFinishReason",

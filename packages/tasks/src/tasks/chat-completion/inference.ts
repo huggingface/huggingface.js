@@ -26,7 +26,7 @@ export interface ChatCompletionInput {
 	/**
 	 * Stop generating tokens if a stop token is generated.
 	 */
-	stop?: Stop;
+	stop?: ChatCompletionInputStopReason;
 	/**
 	 * If set, partial message deltas will be sent.
 	 */
@@ -48,22 +48,19 @@ export interface ChatCompletionInputMessage {
 	 * The content of the message.
 	 */
 	content: string;
-	/**
-	 * The role of the messages author.
-	 */
-	role: Role;
+	role: ChatCompletionMessageRole;
 	[property: string]: unknown;
 }
 
 /**
- * The role of the messages author.
+ * The role of the message author.
  */
-export type Role = "assistant" | "system" | "user";
+export type ChatCompletionMessageRole = "assistant" | "system" | "user";
 
 /**
  * Stop generating tokens if a stop token is generated.
  */
-export type Stop = string[] | string;
+export type ChatCompletionInputStopReason = string[] | string;
 
 /**
  * Outputs for Chat Completion inference
@@ -109,6 +106,7 @@ export interface ChatCompletionOutputChoiceMessage {
 	 * The content of the chat completion message.
 	 */
 	content: string;
+	role: ChatCompletionMessageRole;
 	[property: string]: unknown;
 }
 

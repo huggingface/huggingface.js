@@ -172,11 +172,11 @@ export interface TextGenerationOutputSequenceDetails {
 /**
  * The reason why the generation was stopped.
  *
- * The generated sequence reached the maximum allowed length
+ * length: The generated sequence reached the maximum allowed length
  *
- * The model generated an end-of-sentence (EOS) token
+ * eos_token: The model generated an end-of-sentence (EOS) token
  *
- * One of the sequence in stop_sequences was generated
+ * stop_sequence: One of the sequence in stop_sequences was generated
  */
 export type TextGenerationFinishReason = "length" | "eos_token" | "stop_sequence";
 
