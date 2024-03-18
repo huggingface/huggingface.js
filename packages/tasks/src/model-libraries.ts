@@ -167,7 +167,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			term: { path: "gliner_config.json" },
 		},
 	},
-	"grok": {
+	grok: {
 		prettyLabel: "Grok",
 		repoName: "Grok",
 		repoUrl: "https://github.com/xai-org/grok-1",
