@@ -157,14 +157,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			term: { path: "pytorch_model.bin" },
 		},
 	},
-	keras: {
-		prettyLabel: "Keras",
-		repoName: "Keras",
-		repoUrl: "https://github.com/keras-team/keras",
-		docsUrl: "https://huggingface.co/docs/hub/keras",
-		snippets: snippets.keras,
-		filter: true,
-		countDownloads: { term: { path: "saved_model.pb" } },
 	gliner: {
 		prettyLabel: "GLiNER",
 		repoName: "GLiNER",
@@ -184,6 +176,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			term: { path: "ckpt/tensor00000_000" },
 		},
 	},
+	keras: {
+		prettyLabel: "Keras",
+		repoName: "Keras",
+		repoUrl: "https://github.com/keras-team/keras",
+		docsUrl: "https://huggingface.co/docs/hub/keras",
+		snippets: snippets.keras,
+		filter: true,
+		countDownloads: { term: { path: "saved_model.pb" } },
 	k2: {
 		prettyLabel: "K2",
 		repoName: "k2",
