@@ -14,7 +14,7 @@ Vision language models can be used to generate captions for images.
 
 ## Inference
 
-You can use the 🤗 Transformers library's `image-text-to-text` pipeline to interact with vision language models.
+You can use the Transformers library's `image-text-to-text` pipeline to interact with vision language models.
 
 ```python
 from transformers import pipeline
