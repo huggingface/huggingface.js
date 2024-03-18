@@ -167,13 +167,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			term: { path: "gliner_config.json" },
 		},
 	},
-	"grok-1": {
-		prettyLabel: "Grok-1",
-		repoName: "Grok-1",
+	"grok": {
+		prettyLabel: "Grok",
+		repoName: "Grok",
 		repoUrl: "https://github.com/xai-org/grok-1",
 		filter: false,
 		countDownloads: {
-			term: { path: "ckpt/tensor00000_000" },
+			term: { path: ["ckpt/tensor00000_000", "ckpt-0/tensor00000_000"] },
 		},
 	},
 	keras: {
