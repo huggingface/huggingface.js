@@ -11,7 +11,8 @@
 				"properties": {
 					"role": {
 						"oneOf": [{ "const": "assistant" }, { "const": "system" }, { "const": "user" }],
-						"description": "The role of the messages author."
+						"title": "ChatCompletionInputMessageRole",
+						"description": "The role of the message author."
 					},
 					"content": {
 						"type": "string",
@@ -35,6 +36,7 @@
 		},
 		"stop": {
 			"oneOf": [{ "type": "string" }, { "type": "array", "items": { "type": "string" } }],
+            "title": "ChatCompletionInputStopReason",
 			"description": "Stop generating tokens if a stop token is generated."
 		},
 		"stream": {
