@@ -23,7 +23,10 @@
 			"oneOf": [
 				{ "const": "length", "description": "length: The generated sequence reached the maximum allowed length" },
 				{ "const": "eos_token", "description": "eos_token: The model generated an end-of-sentence (EOS) token" },
-				{ "const": "stop_sequence", "description": "stop_sequence: One of the sequence in stop_sequences was generated" }
+				{
+					"const": "stop_sequence",
+					"description": "stop_sequence: One of the sequence in stop_sequences was generated"
+				}
 			]
 		},
 		"PrefillToken": {
