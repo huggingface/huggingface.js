@@ -8,9 +8,12 @@ const taskData: TaskDataCustom = {
 			id: "liuhaotian/LLaVA-Instruct-150K",
 		},
 		{
-			// TODO write proper description
-			description: "Conversation turns where questions involve image and text",
+			description: "Conversation turns where questions involve image and text.",
 			id: "liuhaotian/LLaVA-Pretrain",
+		},
+		{
+			description: "Screenshots of websites with their codes.",
+			id: "HuggingFaceM4/WebSight",
 		},
 	],
 	demo: {
@@ -65,13 +68,17 @@ const taskData: TaskDataCustom = {
 			description: "An application to compare variants of a document vision language model.",
 			id: "merve/pix2struct",
 		},
+		{
+			description: "Powerful vision-language model assistant.",
+			id: "badayvedat/LLaVA",
+		},
         {
 			description: "An application to compare outputs of different vision language models.",
 			id: "merve/compare_VLMs",
 		},
 	],
 	summary:
-		"Image-text-to-text models take in an image and text prompt and output text. These models are also called vision language models. The difference from image-to-text models is that these models take an additional text input, not restricting model to certain use cases like image captioning.",
+		"Image-text-to-text models take in an image and text prompt and output text. These models are also called vision language models. The difference from image-to-text models is that these models take an additional text input, not restricting model to certain use cases like image captioning, and can take a conversation as input.",
 	widgetModels: ["microsoft/kosmos-2-patch14-224"],
 	youtubeId: "",
 };
