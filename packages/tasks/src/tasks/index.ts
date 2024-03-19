@@ -228,7 +228,6 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"zero-shot-object-detection": getData("zero-shot-object-detection", zeroShotObjectDetection),
 	"text-to-3d": getData("text-to-3d", placeholder),
 	"image-to-3d": getData("image-to-3d", placeholder),
-	"image-feature-extraction": getData("image-feature-extraction", placeholder),
 } as const;
 
 export interface ExampleRepo {

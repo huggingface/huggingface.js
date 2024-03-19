@@ -14,8 +14,7 @@ Features extracted from models contain semantically meaningful information about
 import torch
 from transformers import pipeline
 
-DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-pipe = pipeline(task="image-feature-extraction", model_name="google/vit-base-patch16-384", framework="pt", device=DEVICE, pool=True)
+pipe = pipeline(task="image-feature-extraction", model_name="google/vit-base-patch16-384", framework="pt", pool=True)
 pipe("https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/cats.png")
 
 feature_extractor(text,return_tensors = "pt")[0].numpy().mean(axis=0)
