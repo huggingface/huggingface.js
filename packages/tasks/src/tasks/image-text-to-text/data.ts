@@ -43,7 +43,7 @@ const taskData: TaskDataCustom = {
 			description: "A strong vision language model that can also localize texts in images.",
 			id: "adept/fuyu-8b",
 		},
-        {
+		{
 			description: "A strong document understanding model.",
 			id: "microsoft/udop-large",
 		},
