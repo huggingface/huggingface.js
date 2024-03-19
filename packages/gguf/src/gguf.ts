@@ -1,7 +1,9 @@
-export type MetadataBaseValue = string | number | bigint | boolean;
-export type MetadataValue = MetadataBaseValue | MetadataBaseValue[] | MetadataValue[]; /// recursive as arrays can be nested.
+import type { MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
+import { GGUFValueType } from "./types";
 
-type Version = 1 | 2 | 3;
+export type { MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
+export { GGUFValueType, GGMLQuantizationType } from "./types";
+
 const isVersion = (version: number): version is Version => version === 1 || version === 2 || version === 3;
 
 /**
@@ -12,46 +14,6 @@ const isVersion = (version: number): version is Version => version === 1 || vers
  */
 const ggufMagicNumber = new Uint8Array([0x47, 0x47, 0x55, 0x46]); /// "GGUF"
 
-export enum GGMLQuantizationType {
-	F32 = 0,
-	F16 = 1,
-	Q4_0 = 2,
-	Q4_1 = 3,
-	Q5_0 = 6,
-	Q5_1 = 7,
-	Q8_0 = 8,
-	Q8_1 = 9,
-	Q2_K = 10,
-	Q3_K = 11,
-	Q4_K = 12,
-	Q5_K = 13,
-	Q6_K = 14,
-	Q8_K = 15,
-	IQ2_XXS = 16,
-	IQ2_XS = 17,
-	IQ3_XXS = 18,
-	IQ1_S = 19,
-	IQ4_NL = 20,
-	IQ3_S = 21,
-	IQ2_S = 22,
-	IQ4_XS = 23,
-}
-
-enum GGUFValueType {
-	UINT8 = 0,
-	INT8 = 1,
-	UINT16 = 2,
-	INT16 = 3,
-	UINT32 = 4,
-	INT32 = 5,
-	FLOAT32 = 6,
-	BOOL = 7,
-	STRING = 8,
-	ARRAY = 9,
-	UINT64 = 10,
-	INT64 = 11,
-	FLOAT64 = 12,
-}
 function isGGUFValueType(n: number): n is GGUFValueType {
 	return typeof GGUFValueType[n] === "string";
 }
@@ -183,25 +145,6 @@ function readMetadataValue(
 		case GGUFValueType.FLOAT64:
 			return { value: view.getFloat64(offset, littleEndian), length: 8 };
 	}
-}
-
-export type GGUFMetadata = {
-	version: Version;
-	tensor_count: bigint;
-	kv_count: bigint;
-} & Record<string, MetadataValue>;
-
-export interface GGUFTensorInfo {
-	name: string;
-	n_dims: number;
-	shape: bigint[];
-	dtype: GGMLQuantizationType;
-	offset: bigint;
-}
-
-export interface GGUFParseOutput {
-	metadata: GGUFMetadata;
-	tensorInfos: GGUFTensorInfo[];
 }
 
 export async function gguf(
