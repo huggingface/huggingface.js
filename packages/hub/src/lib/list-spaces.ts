@@ -57,7 +57,7 @@ export async function* listSpaces<
 	 * Additional fields to fetch from huggingface.co.
 	 */
 	additionalFields?: T[];
-}): AsyncGenerator<SpaceEntry> {
+}): AsyncGenerator<SpaceEntry & Pick<ApiSpaceInfo, T>> {
 	checkCredentials(params?.credentials);
 	const search = new URLSearchParams([
 		...Object.entries({
@@ -93,7 +93,7 @@ export async function* listSpaces<
 				likes: item.likes,
 				private: item.private,
 				updatedAt: new Date(item.lastModified),
-			};
+			} as SpaceEntry & Pick<ApiSpaceInfo, T>;
 		}
 
 		const linkHeader = res.headers.get("Link");
