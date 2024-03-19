@@ -6,7 +6,7 @@ Models trained on a specific dataset can learn very shallow features about the d
 
 ### Similarity
 
-Features extracted from models contain semantically meaningful information about the world. These features can be used to detect the similarity between two images. Assume there are two images, a photo of a stray cat in a street setting, and a photo of a cat at home. These images both contain cats, and the features will contain the information that there's a cat in the image. Thus, comparing the features of a stray cat photo to the features of a domestic cat photo will result in higher similarity compared to any other image that doesn't contain any cats.
+Features extracted from models contain semantically meaningful information about the world. These features can be used to detect the similarity between two images. Assume there are two images: a photo of a stray cat in a street setting and a photo of a cat at home. These images both contain cats, and the features will contain the information that there's a cat in the image. Thus, comparing the features of a stray cat photo to the features of a domestic cat photo will result in higher similarity compared to any other image that doesn't contain any cats.
 
 ## Inference
 
