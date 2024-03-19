@@ -189,7 +189,6 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"graph-ml": undefined,
 	"image-classification": getData("image-classification", imageClassification),
 	"image-segmentation": getData("image-segmentation", imageSegmentation),
-	"image-text-to-text": undefined,
 	"image-to-image": getData("image-to-image", imageToImage),
 	"image-text-to-text": getData("image-text-to-text", imageTextToText),
 	"image-to-text": getData("image-to-text", imageToText),
