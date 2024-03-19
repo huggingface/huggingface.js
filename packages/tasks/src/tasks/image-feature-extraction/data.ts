@@ -4,8 +4,8 @@ const taskData: TaskDataCustom = {
 	datasets: [
 		{
 			description:
-				"Wikipedia dataset containing cleaned articles of all languages. Can be used to train `feature-extraction` models.",
-			id: "wikipedia",
+				"ImageNet-1K is a image classification dataset in which images are used to train image-feature-extraction models.",
+			id: "imagenet-1k",
 		},
 	],
 	demo: {
