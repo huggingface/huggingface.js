@@ -38,14 +38,13 @@ const taskData: TaskDataCustom = {
 			description: "A strong image feature extraction model.",
 			id: "google/vit-base-patch16-224-in21k",
 		},
-        {
+		{
 			description: "A robust image feature extraction models.",
 			id: "facebook/dino-vitb16",
 		},
 	],
 	spaces: [],
-	summary:
-		"Image feature extraction is the task of extracting features learnt in a computer vision model.",
+	summary: "Image feature extraction is the task of extracting features learnt in a computer vision model.",
 	widgetModels: [],
 };
 

@@ -41,8 +41,7 @@ const taskData: TaskDataCustom = {
 		},
 	],
 	spaces: [],
-	summary:
-		"Feature extraction is the task of extracting features learnt in a model.",
+	summary: "Feature extraction is the task of extracting features learnt in a model.",
 	widgetModels: ["facebook/bart-base"],
 };
 
