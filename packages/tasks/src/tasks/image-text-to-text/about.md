@@ -20,8 +20,7 @@ You can use the Transformers library's `image-text-to-text` pipeline to interact
 from transformers import pipeline
 import torch
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-mm_pipeline = pipeline("image-text-to-text", model="microsoft/kosmos-2-patch14-224", device=device)
+mm_pipeline = pipeline("image-text-to-text", model="microsoft/kosmos-2-patch14-224")
 
 generated_text = mm_pipeline(images="https://huggingface.co/spaces/llava-hf/llava-4bit/resolve/main/examples/baklava.png", text="How to make this pastry?", max_new_tokens=50)
 ## [{'generated_text': 'How to make this pastry? 1. Preheat oven to 200 degrees Celsius.'}]
