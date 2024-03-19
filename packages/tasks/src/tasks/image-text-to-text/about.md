@@ -18,7 +18,7 @@ You can use the Transformers library's `image-text-to-text` pipeline to interact
 
 ```python
 from transformers import pipeline
-import torch 
+import torch
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 mm_pipeline = pipeline("image-text-to-text", model="microsoft/kosmos-2-patch14-224", device=device)
@@ -28,5 +28,6 @@ generated_text = mm_pipeline(images="https://huggingface.co/spaces/llava-hf/llav
 ```
 
 ## Useful Resources
+
 - [Breaking resolution curse of vision-language models](https://huggingface.co/blog/visheratin/vlm-resolution-curse)
 - [A Dive into Vision Language Models](https://huggingface.co/blog/vision_language_pretraining)

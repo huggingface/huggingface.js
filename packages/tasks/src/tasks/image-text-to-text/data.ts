@@ -31,7 +31,8 @@ const taskData: TaskDataCustom = {
 		outputs: [
 			{
 				label: "Answer",
-				content: "The bee is sitting on a pink flower, surrounded by other flowers. The bee is positioned in the center of the flower, with its head and front legs sticking out.",
+				content:
+					"The bee is sitting on a pink flower, surrounded by other flowers. The bee is positioned in the center of the flower, with its head and front legs sticking out.",
 				type: "text",
 			},
 		],
@@ -60,11 +61,11 @@ const taskData: TaskDataCustom = {
 			description: "Leaderboard to evaluate vision language models.",
 			id: "opencompass/open_vlm_leaderboard",
 		},
-        {
+		{
 			description: "Vision language models arena, where models are ranked by votes of users.",
 			id: "WildVision/vision-arena",
 		},
-        {
+		{
 			description: "An application to compare variants of a document vision language model.",
 			id: "merve/pix2struct",
 		},
@@ -72,7 +73,7 @@ const taskData: TaskDataCustom = {
 			description: "Powerful vision-language model assistant.",
 			id: "badayvedat/LLaVA",
 		},
-        {
+		{
 			description: "An application to compare outputs of different vision language models.",
 			id: "merve/compare_VLMs",
 		},
