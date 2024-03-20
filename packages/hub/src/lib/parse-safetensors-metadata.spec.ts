@@ -66,7 +66,7 @@ describe("parseSafetensorsMetadata", () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "CompVis/stable-diffusion-v1-4",
 			computeParametersCount: true,
-			filePath: "unet/diffusion_pytorch_model.safetensors"
+			path: "unet/diffusion_pytorch_model.safetensors",
 		});
 
 		assert(!parse.sharded);
@@ -76,11 +76,11 @@ describe("parseSafetensorsMetadata", () => {
 
 		assert.deepStrictEqual(parse.header["up_blocks.3.resnets.0.norm2.bias"], {
 			dtype: "F32",
-			shape: [ 320 ],
-			data_offsets: [ 3_409_382_416, 3_409_383_696 ],
+			shape: [320],
+			data_offsets: [3_409_382_416, 3_409_383_696],
 		});
 
-		console.log(parse.header)
+		console.log(parse.header);
 
 		assert.deepStrictEqual(parse.parameterCount, { F32: 859_520_964 });
 		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 859_520_964);

@@ -157,11 +157,14 @@ export async function parseSafetensorsMetadata(params: {
 	/** Only models are supported */
 	repo: RepoDesignation;
 	/**
+	 * Relative file path to safetensors file inside `repo`. Defaults to `SINGLE_FILE` or `INDEX_FILE` (whichever one exists).
+	 */
+	path?: string;
+	/**
 	 * Will include SafetensorsParseFromRepo["parameterCount"], an object containing the number of parameters for each DType
 	 *
 	 * @default false
 	 */
-	filePath?: string;
 	computeParametersCount: true;
 	hubUrl?: string;
 	credentials?: Credentials;
@@ -179,7 +182,7 @@ export async function parseSafetensorsMetadata(params: {
 	 *
 	 * @default false
 	 */
-	filePath?: string;
+	path?: string;
 	computeParametersCount?: boolean;
 	hubUrl?: string;
 	credentials?: Credentials;
@@ -191,7 +194,7 @@ export async function parseSafetensorsMetadata(params: {
 }): Promise<SafetensorsParseFromRepo>;
 export async function parseSafetensorsMetadata(params: {
 	repo: RepoDesignation;
-	filePath?: string;
+	path?: string;
 	computeParametersCount?: boolean;
 	hubUrl?: string;
 	credentials?: Credentials;
@@ -208,8 +211,8 @@ export async function parseSafetensorsMetadata(params: {
 		throw new TypeError("Only model repos should contain safetensors files.");
 	}
 
-	if (RE_SINGLE_FILE.test(params.filePath ?? "") || (await fileExists({ ...params, path: SINGLE_FILE }))) {
-		const header = await parseSingleFile(params.filePath ?? SINGLE_FILE, params);
+	if (RE_SINGLE_FILE.test(params.path ?? "") || (await fileExists({ ...params, path: SINGLE_FILE }))) {
+		const header = await parseSingleFile(params.path ?? SINGLE_FILE, params);
 		return {
 			sharded: false,
 			header,
@@ -217,8 +220,8 @@ export async function parseSafetensorsMetadata(params: {
 				parameterCount: computeNumOfParamsByDtypeSingleFile(header),
 			}),
 		};
-	} else if (RE_INDEX_FILE.test(params.filePath ?? "") || (await fileExists({ ...params, path: INDEX_FILE }))) {
-		const { index, headers } = await parseShardedIndex(params.filePath ?? INDEX_FILE, params);
+	} else if (RE_INDEX_FILE.test(params.path ?? "") || (await fileExists({ ...params, path: INDEX_FILE }))) {
+		const { index, headers } = await parseShardedIndex(params.path ?? INDEX_FILE, params);
 		return {
 			sharded: true,
 			index,
