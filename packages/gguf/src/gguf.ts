@@ -82,20 +82,30 @@ class RangeView {
  * Note: A good article about binary data in JS: https://javascript.info/arraybuffer-binary-arrays
  */
 
-function readVersionedSize(view: DataView, byteOffset: number, version: Version, littleEndian: boolean): {value: bigint, offset: number} {
+function readVersionedSize(
+	view: DataView,
+	byteOffset: number,
+	version: Version,
+	littleEndian: boolean
+): { value: bigint; offset: number } {
 	switch (version) {
 		case 1: {
 			const n = view.getUint32(byteOffset, littleEndian);
-			return {value: BigInt(n), offset: 4};
+			return { value: BigInt(n), offset: 4 };
 		}
 		case 2:
 		case 3: {
-			return {value: view.getBigUint64(byteOffset, littleEndian), offset: 8};
+			return { value: view.getBigUint64(byteOffset, littleEndian), offset: 8 };
 		}
 	}
 }
 
-function readString(view: DataView, offset: number, version, littleEndian: boolean): { value: string; length: number } {
+function readString(
+	view: DataView,
+	offset: number,
+	version: Version,
+	littleEndian: boolean
+): { value: string; length: number } {
 	const length = readVersionedSize(view, offset, version, littleEndian);
 	const off = length.offset;
 	const value = new TextDecoder().decode(view.buffer.slice(offset + off, offset + off + Number(length.value)));
@@ -130,7 +140,7 @@ function readMetadataValue(
 			return readString(view, offset, version, littleEndian);
 		case GGUFValueType.ARRAY: {
 			const arrayType = view.getUint32(offset, littleEndian);
-			const arrayLength = readVersionedSize(view,offset + 4, version, littleEndian);
+			const arrayLength = readVersionedSize(view, offset + 4, version, littleEndian);
 			let length = 4 + arrayLength.offset;
 			const arrayValues: MetadataValue[] = [];
 			for (let i = 0; i < arrayLength.value; i++) {
@@ -247,7 +257,7 @@ export async function gguf(
 
 		const shape: bigint[] = [];
 		for (let dim = 0; dim < nDims; dim++) {
-			let shape_dim = readVersionedSize(r.view, offset, version, littleEndian);
+			const shape_dim = readVersionedSize(r.view, offset, version, littleEndian);
 			shape.push(shape_dim.value);
 			offset += shape_dim.offset;
 		}

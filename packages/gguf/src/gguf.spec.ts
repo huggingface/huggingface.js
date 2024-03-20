@@ -7,7 +7,8 @@ const URL_MISTRAL_7B =
 const URL_GEMMA_2B = "https://huggingface.co/lmstudio-ai/gemma-2b-it-GGUF/resolve/a0b140b/gemma-2b-it-q4_k_m.gguf";
 const URL_BIG_ENDIAN =
 	"https://huggingface.co/ggml-org/models/resolve/1213976/bert-bge-small/ggml-model-f16-big-endian.gguf";
-const URL_V1 = "https://huggingface.co/tmadge/testing/resolve/main/tinyllamas-stories-260k-f32.gguf";
+const URL_V1 =
+	"https://huggingface.co/tmadge/testing/resolve/66c078028d1ff92d7a9264a1590bc61ba6437933/tinyllamas-stories-260k-f32.gguf";
 
 describe("gguf", () => {
 	it("should parse a llama2 7b", async () => {
