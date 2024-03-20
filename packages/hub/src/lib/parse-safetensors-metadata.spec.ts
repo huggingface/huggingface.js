@@ -3,7 +3,7 @@ import { parseSafetensorsMetadata } from "./parse-safetensors-metadata";
 import { sum } from "../utils/sum";
 
 describe("parseSafetensorsMetadata", () => {
-	it("fetch info for single-file", async () => {
+	it("fetch info for single-file (with the default conventional filename)", async () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "bert-base-uncased",
 			computeParametersCount: true,
@@ -25,7 +25,7 @@ describe("parseSafetensorsMetadata", () => {
 		// total params = 110m
 	});
 
-	it("fetch info for sharded", async () => {
+	it("fetch info for sharded (with the default conventional filename)", async () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "bigscience/bloom",
 			computeParametersCount: true,
@@ -60,5 +60,27 @@ describe("parseSafetensorsMetadata", () => {
 		assert.deepStrictEqual(parse.parameterCount, { F32: 124_697_433, I64: 514 });
 		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 124_697_947);
 		// total params = 124m
+	});
+
+	it("fetch info for single-file with file path", async () => {
+		const parse = await parseSafetensorsMetadata({
+			repo: "CompVis/stable-diffusion-v1-4",
+			computeParametersCount: true,
+			path: "unet/diffusion_pytorch_model.safetensors",
+		});
+
+		assert(!parse.sharded);
+		assert.deepStrictEqual(parse.header.__metadata__, { format: "pt" });
+
+		// Example of one tensor (the header contains many tensors)
+
+		assert.deepStrictEqual(parse.header["up_blocks.3.resnets.0.norm2.bias"], {
+			dtype: "F32",
+			shape: [320],
+			data_offsets: [3_409_382_416, 3_409_383_696],
+		});
+
+		assert.deepStrictEqual(parse.parameterCount, { F32: 859_520_964 });
+		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 859_520_964);
 	});
 });
