@@ -257,9 +257,9 @@ export async function gguf(
 
 		const shape: bigint[] = [];
 		for (let dim = 0; dim < nDims; dim++) {
-			const shape_dim = readVersionedSize(r.view, offset, version, littleEndian);
-			shape.push(shape_dim.value);
-			offset += shape_dim.offset;
+			const shapeDim = readVersionedSize(r.view, offset, version, littleEndian);
+			shape.push(shapeDim.value);
+			offset += shapeDim.offset;
 		}
 
 		const type = r.view.getUint32(offset, littleEndian);
