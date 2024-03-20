@@ -3,7 +3,7 @@ import { parseSafetensorsMetadata } from "./parse-safetensors-metadata";
 import { sum } from "../utils/sum";
 
 describe("parseSafetensorsMetadata", () => {
-	it("fetch info for single-file", async () => {
+	it("fetch info for single-file (with the default conventional filename)", async () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "bert-base-uncased",
 			computeParametersCount: true,
@@ -25,7 +25,7 @@ describe("parseSafetensorsMetadata", () => {
 		// total params = 110m
 	});
 
-	it("fetch info for sharded", async () => {
+	it("fetch info for sharded (with the default conventional filename)", async () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "bigscience/bloom",
 			computeParametersCount: true,
