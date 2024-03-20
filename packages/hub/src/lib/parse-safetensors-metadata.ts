@@ -220,7 +220,10 @@ export async function parseSafetensorsMetadata(params: {
 				parameterCount: computeNumOfParamsByDtypeSingleFile(header),
 			}),
 		};
-	} else if (RE_SAFETENSORS_INDEX_FILE.test(params.path ?? "") || (await fileExists({ ...params, path: SAFETENSORS_INDEX_FILE }))) {
+	} else if (
+		RE_SAFETENSORS_INDEX_FILE.test(params.path ?? "") ||
+		(await fileExists({ ...params, path: SAFETENSORS_INDEX_FILE }))
+	) {
 		const { index, headers } = await parseShardedIndex(params.path ?? SAFETENSORS_INDEX_FILE, params);
 		return {
 			sharded: true,
