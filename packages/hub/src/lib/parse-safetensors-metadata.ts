@@ -10,8 +10,8 @@ import { promisesQueue } from "../utils/promisesQueue";
 
 export const SINGLE_FILE = "model.safetensors";
 export const INDEX_FILE = "model.safetensors.index.json";
-export const RE_SINGLE_FILE = /.+\.safetensors$/;
-export const RE_INDEX_FILE = /.+\.index\.json$/;
+export const RE_SINGLE_FILE = /\.safetensors$/;
+export const RE_INDEX_FILE = /\.index\.json$/;
 const PARALLEL_DOWNLOADS = 5;
 const MAX_HEADER_LENGTH = 25_000_000;
 
