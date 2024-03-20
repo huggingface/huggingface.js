@@ -81,7 +81,12 @@ type Rope<TArchitecture extends Architecture> =
 	| { [K in `${TArchitecture}.rope.scale`]: number }
 	| { [K in `${TArchitecture}.rope.scale_linear`]: number };
 
-type ModelBase<TArchitecture extends Architecture | `encoder.${Extract<Architecture, "whisper">}` | `decoder.${Extract<Architecture, "whisper">}`> =
+type ModelBase<
+	TArchitecture extends
+		| Architecture
+		| `encoder.${Extract<Architecture, "whisper">}`
+		| `decoder.${Extract<Architecture, "whisper">}`,
+> =
 	| { [K in `${TArchitecture}.layer_count`]: number }
 	| { [K in `${TArchitecture}.feed_forward_length`]: number }
 	| { [K in `${TArchitecture}.context_length`]: number }
