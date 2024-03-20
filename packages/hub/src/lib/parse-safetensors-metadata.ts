@@ -8,10 +8,10 @@ import { downloadFile } from "./download-file";
 import { fileExists } from "./file-exists";
 import { promisesQueue } from "../utils/promisesQueue";
 
-export const SINGLE_FILE = "model.safetensors";
-export const INDEX_FILE = "model.safetensors.index.json";
-export const RE_SINGLE_FILE = /\.safetensors$/;
-export const RE_INDEX_FILE = /\.index\.json$/;
+export const SAFETENSORS_FILE = "model.safetensors";
+export const SAFETENSORS_INDEX_FILE = "model.safetensors.index.json";
+export const RE_SAFETENSORS_FILE = /\.safetensors$/;
+export const RE_SAFETENSORS_INDEX_FILE = /\.index\.json$/;
 const PARALLEL_DOWNLOADS = 5;
 const MAX_HEADER_LENGTH = 25_000_000;
 
@@ -211,8 +211,8 @@ export async function parseSafetensorsMetadata(params: {
 		throw new TypeError("Only model repos should contain safetensors files.");
 	}
 
-	if (RE_SINGLE_FILE.test(params.path ?? "") || (await fileExists({ ...params, path: SINGLE_FILE }))) {
-		const header = await parseSingleFile(params.path ?? SINGLE_FILE, params);
+	if (RE_SAFETENSORS_FILE.test(params.path ?? "") || (await fileExists({ ...params, path: SAFETENSORS_FILE }))) {
+		const header = await parseSingleFile(params.path ?? SAFETENSORS_FILE, params);
 		return {
 			sharded: false,
 			header,
@@ -220,8 +220,8 @@ export async function parseSafetensorsMetadata(params: {
 				parameterCount: computeNumOfParamsByDtypeSingleFile(header),
 			}),
 		};
-	} else if (RE_INDEX_FILE.test(params.path ?? "") || (await fileExists({ ...params, path: INDEX_FILE }))) {
-		const { index, headers } = await parseShardedIndex(params.path ?? INDEX_FILE, params);
+	} else if (RE_SAFETENSORS_INDEX_FILE.test(params.path ?? "") || (await fileExists({ ...params, path: SAFETENSORS_INDEX_FILE }))) {
+		const { index, headers } = await parseShardedIndex(params.path ?? SAFETENSORS_INDEX_FILE, params);
 		return {
 			sharded: true,
 			index,
