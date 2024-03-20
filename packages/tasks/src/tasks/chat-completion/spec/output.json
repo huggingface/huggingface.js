@@ -1,0 +1,58 @@
+{
+	"$id": "/inference/schemas/chat-completion/output.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Outputs for Chat Completion inference",
+	"title": "ChatCompletionOutput",
+	"type": "object",
+	"properties": {
+		"choices": {
+			"type": "array",
+			"description": "A list of chat completion choices.",
+			"title": "ChatCompletionOutputChoice",
+			"items": {
+				"type": "object",
+				"properties": {
+					"finish_reason": {
+						"$ref": "#/definitions/FinishReason",
+						"description": "The reason why the generation was stopped."
+					},
+					"index": {
+						"type": "integer",
+						"description": "The index of the choice in the list of choices."
+					},
+					"message": {
+						"type": "object",
+						"properties": {
+							"role": {
+								"$ref": "/inference/schemas/chat-completion/input.json#/definitions/Role"
+							},
+							"content": {
+								"type": "string",
+								"description": "The content of the chat completion message."
+							}
+						},
+						"title": "ChatCompletionOutputChoiceMessage",
+						"required": ["content", "role"]
+					}
+				},
+				"required": ["finish_reason", "index", "message"]
+			}
+		},
+		"created": {
+			"type": "integer",
+			"description": "The Unix timestamp (in seconds) of when the chat completion was created."
+		}
+	},
+	"required": ["choices", "created"],
+	"definitions": {
+		"FinishReason": {
+			"type": "string",
+			"title": "ChatCompletionFinishReason",
+			"oneOf": [
+				{ "const": "length", "description": "The generated sequence reached the maximum allowed length" },
+				{ "const": "eos_token", "description": "The model generated an end-of-sentence (EOS) token" },
+				{ "const": "stop_sequence", "description": "One of the sequence in stop_sequences was generated" }
+			]
+		}
+	}
+}

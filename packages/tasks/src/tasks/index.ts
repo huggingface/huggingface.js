@@ -38,6 +38,17 @@ import zeroShotObjectDetection from "./zero-shot-object-detection/data";
 
 export type * from "./audio-classification/inference";
 export type * from "./automatic-speech-recognition/inference";
+export type {
+	ChatCompletionInput,
+	ChatCompletionInputMessage,
+	ChatCompletionOutput,
+	ChatCompletionOutputChoice,
+	ChatCompletionFinishReason,
+	ChatCompletionOutputChoiceMessage,
+	ChatCompletionStreamOutput,
+	ChatCompletionStreamOutputChoice,
+	ChatCompletionStreamOutputDelta,
+} from "./chat-completion/inference";
 export type * from "./document-question-answering/inference";
 export type * from "./feature-extraction/inference";
 export type * from "./fill-mask/inference";
@@ -73,14 +84,14 @@ export type {
 	TextClassificationParameters,
 } from "./text-classification/inference";
 export type {
-	FinishReason,
-	PrefillToken,
+	TextGenerationFinishReason,
+	TextGenerationPrefillToken,
 	TextGenerationInput,
 	TextGenerationOutput,
 	TextGenerationOutputDetails,
 	TextGenerationParameters,
-	TextGenerationSequenceDetails,
-	Token,
+	TextGenerationOutputSequenceDetails,
+	TextGenerationOutputToken,
 } from "./text-generation/inference";
 export type * from "./video-classification/inference";
 export type * from "./visual-question-answering/inference";
