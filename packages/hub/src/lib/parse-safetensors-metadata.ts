@@ -10,8 +10,10 @@ import { promisesQueue } from "../utils/promisesQueue";
 
 export const SAFETENSORS_FILE = "model.safetensors";
 export const SAFETENSORS_INDEX_FILE = "model.safetensors.index.json";
+/// We advise model/library authors to use the filenames above for convention inside model repos,
+/// but in some situations safetensors weights have different filenames.
 export const RE_SAFETENSORS_FILE = /\.safetensors$/;
-export const RE_SAFETENSORS_INDEX_FILE = /\.index\.json$/;
+export const RE_SAFETENSORS_INDEX_FILE = /\.safetensors\.index\.json$/;
 const PARALLEL_DOWNLOADS = 5;
 const MAX_HEADER_LENGTH = 25_000_000;
 
@@ -157,7 +159,7 @@ export async function parseSafetensorsMetadata(params: {
 	/** Only models are supported */
 	repo: RepoDesignation;
 	/**
-	 * Relative file path to safetensors file inside `repo`. Defaults to `SINGLE_FILE` or `INDEX_FILE` (whichever one exists).
+	 * Relative file path to safetensors file inside `repo`. Defaults to `SAFETENSORS_FILE` or `SAFETENSORS_INDEX_FILE` (whichever one exists).
 	 */
 	path?: string;
 	/**
