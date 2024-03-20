@@ -78,36 +78,31 @@ class RangeView {
 	}
 }
 
+interface Slice<T> {
+	value: T;
+	length: number;
+}
+
 /**
  * Note: A good article about binary data in JS: https://javascript.info/arraybuffer-binary-arrays
  */
 
-function readVersionedSize(
-	view: DataView,
-	byteOffset: number,
-	version: Version,
-	littleEndian: boolean
-): { value: bigint; offset: number } {
+function readVersionedSize(view: DataView, byteOffset: number, version: Version, littleEndian: boolean): Slice<bigint> {
 	switch (version) {
 		case 1: {
 			const n = view.getUint32(byteOffset, littleEndian);
-			return { value: BigInt(n), offset: 4 };
+			return { value: BigInt(n), length: 4 };
 		}
 		case 2:
 		case 3: {
-			return { value: view.getBigUint64(byteOffset, littleEndian), offset: 8 };
+			return { value: view.getBigUint64(byteOffset, littleEndian), length: 8 };
 		}
 	}
 }
 
-function readString(
-	view: DataView,
-	offset: number,
-	version: Version,
-	littleEndian: boolean
-): { value: string; length: number } {
+function readString(view: DataView, offset: number, version: Version, littleEndian: boolean): Slice<string> {
 	const length = readVersionedSize(view, offset, version, littleEndian);
-	const off = length.offset;
+	const off = length.length;
 	const value = new TextDecoder().decode(view.buffer.slice(offset + off, offset + off + Number(length.value)));
 	return { value, length: off + Number(length.value) };
 }
@@ -118,7 +113,7 @@ function readMetadataValue(
 	offset: number,
 	version: Version,
 	littleEndian: boolean
-): { value: MetadataValue; length: number } {
+): Slice<MetadataValue> {
 	switch (type) {
 		case GGUFValueType.UINT8:
 			return { value: view.getUint8(offset), length: 1 };
@@ -141,12 +136,12 @@ function readMetadataValue(
 		case GGUFValueType.ARRAY: {
 			const arrayType = view.getUint32(offset, littleEndian);
 			const arrayLength = readVersionedSize(view, offset + 4, version, littleEndian);
-			let length = 4 + arrayLength.offset;
+			let length = 4 + arrayLength.length;
 			const arrayValues: MetadataValue[] = [];
 			for (let i = 0; i < arrayLength.value; i++) {
-				const { value, length: _length } = readMetadataValue(view, arrayType, offset + length, version, littleEndian);
-				arrayValues.push(value);
-				length += _length;
+				const metadataValue = readMetadataValue(view, arrayType, offset + length, version, littleEndian);
+				arrayValues.push(metadataValue.value);
+				length += metadataValue.length;
 			}
 			return { value: arrayValues, length };
 		}
@@ -202,9 +197,9 @@ export async function gguf(
 	// initial offset after header
 	let offset = 8;
 	const tensorCount = readVersionedSize(r.view, offset, version, littleEndian);
-	offset += tensorCount.offset;
+	offset += tensorCount.length;
 	const numKv = readVersionedSize(r.view, offset, version, littleEndian);
-	offset += numKv.offset;
+	offset += numKv.length;
 	const metadata: GGUFMetadata = {
 		version,
 		tensor_count: tensorCount.value,
@@ -259,7 +254,7 @@ export async function gguf(
 		for (let dim = 0; dim < nDims; dim++) {
 			const shapeDim = readVersionedSize(r.view, offset, version, littleEndian);
 			shape.push(shapeDim.value);
-			offset += shapeDim.offset;
+			offset += shapeDim.length;
 		}
 
 		const type = r.view.getUint32(offset, littleEndian);
