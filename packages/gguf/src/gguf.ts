@@ -1,7 +1,7 @@
 import type { MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
 import { GGUFValueType } from "./types";
 
-export type { MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
+export type { MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput, MetadataBaseValue } from "./types";
 export { GGUFValueType, GGMLQuantizationType } from "./types";
 
 const isVersion = (version: number): version is Version => version === 1 || version === 2 || version === 3;
