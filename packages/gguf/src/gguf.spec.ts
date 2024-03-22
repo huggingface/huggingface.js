@@ -7,6 +7,8 @@ const URL_MISTRAL_7B =
 const URL_GEMMA_2B = "https://huggingface.co/lmstudio-ai/gemma-2b-it-GGUF/resolve/a0b140b/gemma-2b-it-q4_k_m.gguf";
 const URL_BIG_ENDIAN =
 	"https://huggingface.co/ggml-org/models/resolve/1213976/bert-bge-small/ggml-model-f16-big-endian.gguf";
+const URL_V1 =
+	"https://huggingface.co/tmadge/testing/resolve/66c078028d1ff92d7a9264a1590bc61ba6437933/tinyllamas-stories-260k-f32.gguf";
 
 describe("gguf", () => {
 	it("should parse a llama2 7b", async () => {
@@ -175,6 +177,47 @@ describe("gguf", () => {
 			name: "blk.9.ffn_down.weight",
 			shape: [1536n, 384n],
 			dtype: GGMLQuantizationType.F16,
+		});
+	});
+
+	it("should parse a v1 file", async () => {
+		const { metadata, tensorInfos } = await gguf(URL_V1);
+
+		/// metadata
+
+		expect(metadata).toMatchObject({
+			version: 1,
+			tensor_count: 48n,
+			kv_count: 18n,
+			"general.architecture": "llama",
+			"general.name": "tinyllamas-stories-260k",
+			"llama.attention.head_count": 8,
+			"llama.attention.head_count_kv": 4,
+			"llama.attention.layer_norm_rms_epsilon": 0.000009999999747378752,
+			"llama.block_count": 5,
+			"llama.context_length": 512,
+			"llama.embedding_length": 64,
+			"llama.feed_forward_length": 172,
+			"llama.rope.dimension_count": 8,
+			"llama.tensor_data_layout": "Meta AI original pth",
+			"tokenizer.ggml.bos_token_id": 1,
+			"tokenizer.ggml.eos_token_id": 2,
+			"tokenizer.ggml.model": "llama",
+			"tokenizer.ggml.padding_token_id": 0,
+		});
+
+		/// Tensor infos
+
+		expect(tensorInfos.length).toEqual(48);
+		expect(tensorInfos[0]).toMatchObject({
+			name: "token_embd.weight",
+			shape: [64n, 512n],
+			dtype: GGMLQuantizationType.F32,
+		});
+		expect(tensorInfos[tensorInfos.length - 1]).toMatchObject({
+			name: "output.weight",
+			shape: [64n, 512n],
+			dtype: GGMLQuantizationType.F32,
 		});
 	});
 });

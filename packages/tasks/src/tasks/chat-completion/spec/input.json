@@ -1,0 +1,63 @@
+{
+	"title": "ChatCompletionInput",
+	"$id": "/inference/schemas/chat-completion/input.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Inputs for ChatCompletion inference",
+	"type": "object",
+	"properties": {
+		"messages": {
+			"type": "array",
+			"title": "ChatCompletionInputMessage",
+			"items": {
+				"type": "object",
+				"properties": {
+					"role": {
+						"$ref": "#/definitions/Role"
+					},
+					"content": {
+						"type": "string",
+						"description": "The content of the message."
+					}
+				},
+				"required": ["role", "content"]
+			}
+		},
+		"frequency_penalty": {
+			"type": "number",
+			"description": "Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in the text so far, decreasing the model's likelihood to repeat the same line verbatim."
+		},
+		"max_tokens": {
+			"type": "integer",
+			"description": "The maximum number of tokens that can be generated in the chat completion."
+		},
+		"seed": {
+			"type": "integer",
+			"description": "The random sampling seed."
+		},
+		"stop": {
+			"oneOf": [{ "type": "string" }, { "type": "array", "items": { "type": "string" } }],
+			"title": "ChatCompletionInputStopReason",
+			"description": "Stop generating tokens if a stop token is generated."
+		},
+		"stream": {
+			"type": "boolean",
+			"description": "If set, partial message deltas will be sent."
+		},
+		"temperature": {
+			"type": "number",
+			"description": "The value used to modulate the logits distribution."
+		},
+		"top_p": {
+			"type": "number",
+			"description": "If set to < 1, only the smallest set of most probable tokens with probabilities that add up to `top_p` or higher are kept for generation."
+		}
+	},
+	"required": ["messages"],
+	"definitions": {
+		"Role": {
+			"oneOf": [{ "const": "assistant" }, { "const": "system" }, { "const": "user" }],
+			"title": "ChatCompletionMessageRole",
+			"description": "The role of the message author."
+		}
+	}
+}

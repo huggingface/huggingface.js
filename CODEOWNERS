@@ -21,3 +21,7 @@
 # Ownership for the Jinja Package
 
 /packages/jinja/ @xenova
+
+# Ownership for the gguf Package
+
+/packages/gguf @mishig25 @julien-c
