@@ -18,7 +18,6 @@ You can use the Transformers library's `image-text-to-text` pipeline to interact
 
 ```python
 from transformers import pipeline
-import torch
 
 mm_pipeline = pipeline("image-text-to-text", model="microsoft/kosmos-2-patch14-224")
 
