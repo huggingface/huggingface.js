@@ -2,7 +2,7 @@
 
 ### Transfer Learning
 
-Models trained on a specific dataset can learn very shallow features about the data. For instance, a model trained on car classification dataset learns to recognize edges and curves on a very high level and car-specific features on a low level. This information can be transferred to a new model that is going to be trained on classifying trucks. This way of extracting features and transferring to a model is called feature extraction. One can pass their dataset through a feature extraction pipeline and feed the result to a classifier directly.
+Models trained on a specific dataset can learn features about the data. For instance, a model trained on a car classification dataset learns to recognize edges and curves on a very high level and car-specific features on a low level. This information can be transferred to a new model that is going to be trained on classifying trucks. This process of extracting features and transferring to another model is called transfer learning.
 
 ### Similarity
 
