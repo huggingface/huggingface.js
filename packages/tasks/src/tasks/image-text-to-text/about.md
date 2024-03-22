@@ -2,7 +2,7 @@
 
 ### Visual Question Answering
 
-Vision language models trained on image text prompt pairs can be used for visual question answering.
+Vision language models trained on image-text pairs can be used for visual question answering.
 
 ## Document Question Answering and Retrieval
 
