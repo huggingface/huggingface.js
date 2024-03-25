@@ -78,6 +78,11 @@
 			],
 		},
 		{
+			id: "google/gemma-7b",
+			pipeline_tag: "text-generation",
+			inference: InferenceDisplayability.Yes,
+		},
+		{
 			id: "microsoft/phi-2",
 			pipeline_tag: "text-generation",
 			inference: InferenceDisplayability.Yes,

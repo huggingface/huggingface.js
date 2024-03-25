@@ -1,6 +1,6 @@
 import type { ModelData, WidgetExampleAttribute } from "@huggingface/tasks";
 import { parseJSON } from "../../../utils/ViewUtils.js";
-import type { ModelLoadInfo, TableData } from "./types.js";
+import type { ComputeType, ModelLoadInfo, TableData } from "./types.js";
 import { LoadState } from "./types.js";
 
 const KEYS_TEXT: WidgetExampleAttribute[] = ["text", "context", "candidate_labels"];
@@ -173,11 +173,19 @@ export async function getModelLoadInfo(
 	const response = await fetch(`${url}/status/${repoId}`, {
 		credentials: includeCredentials ? "include" : "same-origin",
 	});
-	const output = await response.json();
+	const output: {
+		state: LoadState;
+		compute_type: ComputeType | Record<ComputeType, { [key in ComputeType]?: string } & { count: number }>;
+		loaded: boolean;
+		error: Error;
+	} = await response.json();
 	if (response.ok && typeof output === "object" && output.loaded !== undefined) {
 		// eslint-disable-next-line @typescript-eslint/naming-convention
-		const { state, compute_type } = output;
-		return { compute_type, state };
+		const compute_type =
+			typeof output.compute_type === "string"
+				? output.compute_type
+				: (Object.keys(output.compute_type)[0] as ComputeType);
+		return { compute_type, state: output.state };
 	} else {
 		console.warn(response.status, output.error);
 		return { state: LoadState.Error };
