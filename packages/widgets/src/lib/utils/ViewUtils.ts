@@ -129,20 +129,16 @@ export function getPipelineTask(modelPipeline: PipelineType): PipelineType {
 }
 
 interface CmdEnterParams {
-	isLoading: boolean;
-	isDisabled: boolean;
+	disabled: boolean;
 	callback: () => void;
 }
 
 /**
  * Svelte action that will call inference endpoint when a user hits cmd+Enter on a current html element
  */
-export function onCmdEnter(
-	node: HTMLElement,
-	{ isLoading, isDisabled, callback }: CmdEnterParams
-): { destroy: () => void } {
+export function onCmdEnter(node: HTMLElement, { disabled, callback }: CmdEnterParams): { destroy: () => void } {
 	function onKeyDown(e: KeyboardEvent) {
-		if (isLoading || isDisabled) {
+		if (disabled) {
 			return;
 		}
 		// run inference on cmd+Enter
