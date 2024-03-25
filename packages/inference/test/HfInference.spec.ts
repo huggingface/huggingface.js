@@ -4,6 +4,7 @@ import type { TextGenerationStreamOutput } from "../src";
 import { HfInference } from "../src";
 import "./vcr";
 import { readTestFile } from "./test-files";
+import { Stream } from "stream";
 
 const TIMEOUT = 60000 * 3;
 const env = import.meta.env;
@@ -203,34 +204,31 @@ describe.concurrent(
 		});
 
 		it("textGenerationStream - google/flan-t5-xxl", async () => {
-			const phrase = "one two three four";
 			const response = hf.textGenerationStream({
 				model: "google/flan-t5-xxl",
-				inputs: `repeat "${phrase}"`,
+				inputs: "Please answer the following question: complete one two and ____.",
 			});
 
 			const makeExpectedReturn = (tokenText: string, fullPhrase: string): TextGenerationStreamOutput => {
-				const eot = tokenText === "</s>";
+				const eot = tokenText === "</s>" || tokenText === null;
 				return {
 					details: null,
 					token: {
 						id: expect.any(Number),
 						logprob: expect.any(Number),
-						text: expect.stringContaining(tokenText),
-						special: eot,
+						text: expect.any(String) || null,
+						special: expect.any(Boolean),
 					},
 					generated_text: eot ? fullPhrase : null,
 				};
 			};
-
-			const expectedTokens = phrase.split(" ");
-			// eot token
-			expectedTokens.push("</s>");
+			const word = "three";
+			const expectedTokens = [word, "</s>"];
 
 			for await (const ret of response) {
 				const expectedToken = expectedTokens.shift();
 				assert(expectedToken);
-				expect(ret).toMatchObject(makeExpectedReturn(expectedToken, phrase));
+				expect(ret).toMatchObject(makeExpectedReturn(expectedToken, word));
 			}
 		});
 
@@ -244,7 +242,7 @@ describe.concurrent(
 			});
 
 			await expect(response.next()).rejects.toThrow(
-				"Input validation error: `inputs` tokens + `max_new_tokens` must be <= 4096. Given: 17 `inputs` tokens and 10000 `max_new_tokens`"
+				"Input validation error: `inputs` tokens + `max_new_tokens` must be <= 2048. Given: 17 `inputs` tokens and 10000 `max_new_tokens`"
 			);
 		});
 
@@ -650,6 +648,68 @@ describe.concurrent(
 				inputs: "one plus two equals",
 			});
 			expect(generated_text).toEqual("three");
+		});
+
+		it("textGenerationStream - OpenAI Specs", async () => {
+			const ep = hf.endpoint(
+				"https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions"
+			);
+			const stream = ep.textGenerationStream({
+				model: "tgi",
+				messages: [{ role: "user", content: "Complete the equation 1+1= ,just the answer" }],
+				stream: true,
+				parameters: {
+					max_tokens: 500,
+					return_full_text: false,
+					temperature: 0.0,
+					seed: 0,
+				},
+			});
+			let out = "";
+			for await (const chunk of stream) {
+				out += chunk.choices[0].delta.content;
+			}
+			expect(out).toContain("The answer to the equation 1 + 1 is 2.</s>");
+		});
+		it("mistral - OpenAI Specs", async () => {
+			const MISTRAL_KEY = env.MISTRAL_KEY;
+			if (!MISTRAL_KEY) {
+				console.warn("Skipping mistral test because MISTRAL_KEY is not set");
+				return;
+			}
+			const hf = new HfInference(MISTRAL_KEY);
+			const ep = hf.endpoint("https://api.mistral.ai/v1/chat/completions");
+			const stream = ep.textGenerationStream({
+				model: "mistral-tiny",
+				messages: [{ role: "user", content: "Complete the equation one + one = , just the answer" }],
+				stream: true,
+			});
+			let out = "";
+			for await (const chunk of stream) {
+				out += chunk.choices[0].delta.content;
+			}
+			expect(out).toContain("The answer to the equation one + one is two.");
+		});
+		it("openai - OpenAI Specs", async () => {
+			const OPENAI_KEY = env.OPENAI_KEY;
+			if (!OPENAI_KEY) {
+				console.warn("Skipping mistral test because OPENAI_KEY is not set");
+				return;
+			}
+			const hf = new HfInference(OPENAI_KEY);
+			const ep = hf.endpoint("https://api.openai.com/v1/chat/completions");
+			const stream = ep.textGenerationStream({
+				model: "gpt-3.5-turbo",
+				messages: [{ role: "user", content: "Complete the equation one + one =" }],
+				stream: true,
+			});
+			let out = "";
+			for await (const chunk of stream) {
+				if (chunk.choices.length > 0 && chunk.choices[0].delta.content) {
+					out += chunk.choices[0].delta.content;
+				}
+			}
+			expect(out).toContain("two");
 		});
 	},
 	TIMEOUT

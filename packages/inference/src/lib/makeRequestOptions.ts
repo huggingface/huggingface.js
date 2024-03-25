@@ -16,6 +16,7 @@ export async function makeRequestOptions(
 	args: RequestArgs & {
 		data?: Blob | ArrayBuffer;
 		stream?: boolean;
+		messages?: Array<{ role: "user" | "assistant"; content: string }>;
 	},
 	options?: Options & {
 		/** When a model can be used for multiple tasks, and we want to run a non-default task */
@@ -25,7 +26,7 @@ export async function makeRequestOptions(
 	}
 ): Promise<{ url: string; info: RequestInit }> {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const { accessToken, model: _model, ...otherArgs } = args;
+	const { accessToken, endpointUrl, ...otherArgs } = args;
 	let { model } = args;
 	const {
 		forceTask: task,
@@ -78,8 +79,8 @@ export async function makeRequestOptions(
 	}
 
 	const url = (() => {
-		if (isUrl(model)) {
-			return model;
+		if (endpointUrl) {
+			return endpointUrl;
 		}
 
 		if (task) {
@@ -103,7 +104,6 @@ export async function makeRequestOptions(
 	} else if (includeCredentials === undefined) {
 		credentials = "same-origin";
 	}
-
 	const info: RequestInit = {
 		headers,
 		method: "POST",
@@ -111,11 +111,10 @@ export async function makeRequestOptions(
 			? args.data
 			: JSON.stringify({
 					...otherArgs,
-					options: options && otherOptions,
+					// options: options && otherOptions,
 			  }),
 		credentials,
 		signal: options?.signal,
 	};
-
 	return { url, info };
 }

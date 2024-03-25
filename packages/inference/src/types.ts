@@ -52,6 +52,15 @@ export interface BaseArgs {
 	 * If not specified, will call huggingface.co/api/tasks to get the default model for the task.
 	 */
 	model?: string;
+
+	/**
+	 * The URL of the endpoint to use. If not specified, will call huggingface.co/api/tasks to get the default endpoint for the task.
+	 *
+	 * If specified, will use this URL instead of the default one.
+	 *
+	 *
+	 */
+	endpointUrl?: string;
 }
 
 export type RequestArgs = BaseArgs &

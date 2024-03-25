@@ -80,6 +80,10 @@ export interface TextGenerationStreamOutput {
 	 * Only available when the generation is finished
 	 */
 	details: TextGenerationStreamDetails | null;
+	/**
+	 * If Message API compatible
+	 */
+	choices?: any;
 }
 
 /**
