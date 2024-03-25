@@ -148,6 +148,9 @@
 			{isDisabled}
 			placeholder="Please input some context..."
 			label="Context"
+			onClick={() => {
+				getOutput();
+			}}
 		/>
 	</div>
 	<WidgetInfo {model} {computeTime} {error} {modelLoading} />

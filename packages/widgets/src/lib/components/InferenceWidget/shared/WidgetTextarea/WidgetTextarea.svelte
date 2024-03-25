@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { tick } from "svelte";
 
-	import { delay } from "../../../../utils/ViewUtils.js";
+	import { delay, runShortCut } from "../../../../utils/ViewUtils.js";
 	import WidgetLabel from "../WidgetLabel/WidgetLabel.svelte";
 
 	export let label: string = "";
@@ -10,6 +10,7 @@
 	export let isLoading = false;
 	export let isDisabled = false;
 	export let size: "small" | "big" = "small";
+	export let onClick: () => void;
 
 	let containerSpanEl: HTMLSpanElement;
 	let isOnFocus = false;
@@ -103,6 +104,7 @@
 			dir="auto"
 			contenteditable
 			class:pointer-events-none={isLoading || isDisabled}
+			use:runShortCut={{ isLoading, isDisabled, onClick }}
 			bind:this={containerSpanEl}
 			on:paste|preventDefault={handlePaste}
 			on:input={updateInnerTextValue}

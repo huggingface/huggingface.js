@@ -128,6 +128,37 @@ export function getPipelineTask(modelPipeline: PipelineType): PipelineType {
 	return modelPipeline === "text2text-generation" ? "text-generation" : modelPipeline;
 }
 
+interface RunShortcutParams {
+	isLoading: boolean;
+	isDisabled: boolean;
+	onClick: () => void;
+}
+
+/**
+ * Svelte action that will call inference endpoint when a user hits cmd+Enter on a current html element
+ */
+export function runShortCut(
+	node: HTMLElement,
+	{ isLoading, isDisabled, onClick }: RunShortcutParams
+): { destroy: () => void } {
+	function onKeyDown(e: KeyboardEvent) {
+		if (isLoading || isDisabled) {
+			return;
+		}
+		// run inference on cmd+Enter
+		if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+			e.preventDefault();
+			onClick();
+		}
+	}
+	node.addEventListener("keydown", onKeyDown);
+	return {
+		destroy() {
+			node.removeEventListener("keydown", onKeyDown);
+		},
+	};
+}
+
 /**
 * For Tailwind:
 bg-blue-100 border-blue-100 dark:bg-blue-800 dark:border-blue-800

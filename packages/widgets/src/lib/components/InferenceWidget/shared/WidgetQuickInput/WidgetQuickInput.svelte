@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { runShortCut } from "../../../../utils/ViewUtils.js";
 	import WidgetSubmitBtn from "../WidgetSubmitBtn/WidgetSubmitBtn.svelte";
 
 	export let flatTop = false;
@@ -19,6 +20,7 @@
 		type="text"
 		disabled={isLoading || isDisabled}
 		autocomplete="off"
+		use:runShortCut={{ isLoading, isDisabled, onClick: onClickSubmitBtn }}
 	/>
 	<WidgetSubmitBtn
 		classNames="rounded-l-none border-l-0 {flatTop ? 'rounded-t-none' : ''}"

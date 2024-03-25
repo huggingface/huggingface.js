@@ -189,9 +189,13 @@
 		/>
 		<WidgetTextInput
 			bind:value={candidateLabels}
+			{isLoading}
 			{isDisabled}
 			label="Possible class names (comma-separated)"
 			placeholder="Possible class names..."
+			onClick={() => {
+				getOutput();
+			}}
 		/>
 		<WidgetSubmitBtn
 			{isLoading}
