@@ -49,6 +49,9 @@
 	}
 
 	function _applyWidgetExample(idx: number) {
+		if(!isOptionsVisible){
+			return;
+		}
 		hideOptions();
 		const sample = examples[idx];
 		title = sample.example_title as string;
@@ -56,6 +59,9 @@
 	}
 
 	function _previewInputSample(idx: number) {
+		if(!isOptionsVisible){
+			return;
+		}
 		const sample = examples[idx];
 		applyWidgetExample(sample, { isPreview: true });
 	}
