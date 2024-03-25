@@ -49,7 +49,7 @@
 	}
 
 	function _applyWidgetExample(idx: number) {
-		if(!isOptionsVisible){
+		if (!isOptionsVisible) {
 			return;
 		}
 		hideOptions();
@@ -59,7 +59,7 @@
 	}
 
 	function _previewInputSample(idx: number) {
-		if(!isOptionsVisible){
+		if (!isOptionsVisible) {
 			return;
 		}
 		const sample = examples[idx];
