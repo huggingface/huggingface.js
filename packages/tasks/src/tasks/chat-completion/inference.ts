@@ -9,16 +9,16 @@
  */
 export interface ChatCompletionInput {
 	/**
-	 * Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing
-	 * frequency in the text so far, decreasing the model's likelihood to repeat the same line
-	 * verbatim.
-	 */
-	frequency_penalty?: number;
-	/**
 	 * The maximum number of tokens that can be generated in the chat completion.
 	 */
 	max_tokens?: number;
 	messages: ChatCompletionInputMessage[];
+	/**
+	 * Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing
+	 * frequency in the text so far, decreasing the model's likelihood to repeat the same line
+	 * verbatim.
+	 */
+	presence_penalty?: number;
 	/**
 	 * The random sampling seed.
 	 */
@@ -36,6 +36,14 @@ export interface ChatCompletionInput {
 	 */
 	temperature?: number;
 	/**
+	 * The tool to use for generation.
+	 */
+	tool_choice?: string;
+	/**
+	 * The tools to use for generation.
+	 */
+	tools?: ChatCompletionTool[];
+	/**
 	 * If set to < 1, only the smallest set of most probable tokens with probabilities that add
 	 * up to `top_p` or higher are kept for generation.
 	 */
@@ -48,6 +56,10 @@ export interface ChatCompletionInputMessage {
 	 * The content of the message.
 	 */
 	content: string;
+	/**
+	 * The name of the message.
+	 */
+	name?: string;
 	role: ChatCompletionMessageRole;
 	[property: string]: unknown;
 }
@@ -61,6 +73,23 @@ export type ChatCompletionMessageRole = "assistant" | "system" | "user";
  * Stop generating tokens if a stop token is generated.
  */
 export type ChatCompletionInputStopReason = string[] | string;
+
+/**
+ * The tool to use for generation.
+ */
+export type ChatCompletionTool = unknown[] | boolean | number | number | null | ChatCompletionToolObject | string;
+
+export interface ChatCompletionToolObject {
+	/**
+	 * The function of the tool to use.
+	 */
+	function?: { [key: string]: unknown };
+	/**
+	 * The type of tool to use.
+	 */
+	type?: string;
+	[property: string]: unknown;
+}
 
 /**
  * Outputs for Chat Completion inference

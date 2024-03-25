@@ -42,7 +42,7 @@
 				},
 				"grammar": {
 					"type": "object",
-					"$ref": "#/definitions/Grammar",
+					"$ref": "#/$defs/Grammar",
 					"description": "Grammar to use for generation."
 				},
 				"max_new_tokens": {
@@ -92,37 +92,34 @@
 					"type": "boolean",
 					"description": "Watermarking with [A Watermark for Large Language Models](https://hf.co/papers/2301.10226)"
 				}
-			},
-			"definitions": {
-				"GrammarType": {
-					"title": "GrammarType",
-					"type": "string",
-					"description": "The type of grammar to use for generation",
-					"enum": ["json", "regex"]
-				},
-				"Grammar": {
-					"title": "Grammar",
-					"type": "object",
-					"description": "Grammar to use for generation",
-					"properties": {
-						"type": {
-							"$ref": "#/definitions/GrammarType"
-						},
-						"value": {
-							"anyOf": [
-								{
-									"type": "string"
-								},
-								{
-									"type": "object"
-								}
-							]
-						},
-						"title": "Value"
-					},
-					"required": ["rules", "start"]
-				}
 			}
+		},
+		"GrammarType": {
+			"title": "GrammarType",
+			"type": "string",
+			"description": "The type of grammar to use for generation",
+			"enum": ["json", "regex"]
+		},
+		"Grammar": {
+			"title": "Grammar",
+			"type": "object",
+			"description": "Grammar to use for generation",
+			"properties": {
+				"type": {
+					"$ref": "#/$defs/GrammarType"
+				},
+				"value": {
+					"anyOf": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "object"
+						}
+					]
+				}
+			},
+			"required": ["rules", "start"]
 		}
 	},
 	"required": ["inputs"]
