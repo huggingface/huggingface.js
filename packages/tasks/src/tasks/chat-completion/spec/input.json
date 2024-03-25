@@ -17,12 +17,16 @@
 					"content": {
 						"type": "string",
 						"description": "The content of the message."
+					},
+					"name": {
+						"type": "string",
+						"description": "The name of the message."
 					}
 				},
 				"required": ["role", "content"]
 			}
 		},
-		"frequency_penalty": {
+		"presence_penalty": {
 			"type": "number",
 			"description": "Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in the text so far, decreasing the model's likelihood to repeat the same line verbatim."
 		},
@@ -47,17 +51,42 @@
 			"type": "number",
 			"description": "The value used to modulate the logits distribution."
 		},
+		"tools": {
+			"type": "array",
+			"items": {
+				"$ref": "#/definitions/Tool"
+			},
+			"description": "The tools to use for generation."
+		},
+		"tool_choice": {
+			"type": "string",
+			"description": "The tool to use for generation."
+		},
 		"top_p": {
 			"type": "number",
 			"description": "If set to < 1, only the smallest set of most probable tokens with probabilities that add up to `top_p` or higher are kept for generation."
 		}
 	},
-	"required": ["messages"],
 	"definitions": {
 		"Role": {
 			"oneOf": [{ "const": "assistant" }, { "const": "system" }, { "const": "user" }],
 			"title": "ChatCompletionMessageRole",
 			"description": "The role of the message author."
+		},
+		"Tool": {
+			"title": "ChatCompletionTool",
+			"description": "The tool to use for generation.",
+			"properties": {
+				"type": {
+					"type": "string",
+					"description": "The type of tool to use."
+				},
+				"function": {
+					"type": "object",
+					"description": "The function of the tool to use."
+				}
+			}
 		}
-	}
+	},
+	"required": ["messages"]
 }
