@@ -1,6 +1,5 @@
 import type { InferenceTask, Options, RequestArgs } from "../types";
 import { HF_HUB_URL } from "./getDefaultTask";
-import { isUrl } from "./isUrl";
 
 const HF_INFERENCE_API_BASE_URL = "https://api-inference.huggingface.co";
 
@@ -35,7 +34,7 @@ export async function makeRequestOptions(
 		wait_for_model,
 		use_cache,
 		dont_load_model,
-		...otherOptions
+		// ...otherOptions
 	} = options ?? {};
 
 	const headers: Record<string, string> = {};

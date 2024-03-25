@@ -4,7 +4,6 @@ import type { TextGenerationStreamOutput } from "../src";
 import { HfInference } from "../src";
 import "./vcr";
 import { readTestFile } from "./test-files";
-import { Stream } from "stream";
 
 const TIMEOUT = 60000 * 3;
 const env = import.meta.env;
@@ -667,7 +666,9 @@ describe.concurrent(
 			});
 			let out = "";
 			for await (const chunk of stream) {
-				out += chunk.choices[0].delta.content;
+				if (chunk.choices && chunk.choices.length > 0) {
+					out += chunk.choices[0].delta.content;
+				}
 			}
 			expect(out).toContain("The answer to the equation 1 + 1 is 2.</s>");
 		});
@@ -686,7 +687,9 @@ describe.concurrent(
 			});
 			let out = "";
 			for await (const chunk of stream) {
-				out += chunk.choices[0].delta.content;
+				if (chunk.choices && chunk.choices.length > 0) {
+					out += chunk.choices[0].delta.content;
+				}
 			}
 			expect(out).toContain("The answer to the equation one + one is two.");
 		});
@@ -705,7 +708,7 @@ describe.concurrent(
 			});
 			let out = "";
 			for await (const chunk of stream) {
-				if (chunk.choices.length > 0 && chunk.choices[0].delta.content) {
+				if (chunk.choices && chunk.choices.length > 0) {
 					out += chunk.choices[0].delta.content;
 				}
 			}

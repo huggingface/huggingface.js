@@ -83,7 +83,31 @@ export interface TextGenerationStreamOutput {
 	/**
 	 * If Message API compatible
 	 */
-	choices?: any;
+	choices?: Choice[];
+}
+
+export interface Choice {
+	index: number;
+	delta: ChoiceDelta;
+	logprobs?: Record<string, unknown>;
+	finish_reason?: string;
+}
+export interface ChoiceDelta {
+	role: string;
+	content?: string;
+	tool_calls?: ChoiceDeltaToolCall;
+}
+
+export interface FunctionType {
+	name?: string;
+	arguments: string;
+}
+
+export interface ChoiceDeltaToolCall {
+	index: number;
+	id: string;
+	type: string;
+	function: FunctionType;
 }
 
 /**
