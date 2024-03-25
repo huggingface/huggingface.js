@@ -3,7 +3,6 @@ import type { TaskDataCustom } from "..";
 const taskData: TaskDataCustom = {
 	datasets: [
 		{
-			// TODO write proper description
 			description: "Instructions composed of image and text.",
 			id: "liuhaotian/LLaVA-Instruct-150K",
 		},
