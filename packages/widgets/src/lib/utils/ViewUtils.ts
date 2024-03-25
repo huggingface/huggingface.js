@@ -137,7 +137,7 @@ interface RunShortcutParams {
 /**
  * Svelte action that will call inference endpoint when a user hits cmd+Enter on a current html element
  */
-export function runShortCut(
+export function onCmdEnter(
 	node: HTMLElement,
 	{ isLoading, isDisabled, onClick }: RunShortcutParams
 ): { destroy: () => void } {

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { runShortCut } from "../../../../utils/ViewUtils.js";
+	import { onCmdEnter } from "../../../../utils/ViewUtils.js";
 	import WidgetLabel from "../WidgetLabel/WidgetLabel.svelte";
 
 	export let label: string | undefined = undefined;
@@ -18,7 +18,7 @@
 			placeholder={isDisabled ? "" : placeholder}
 			disabled={isDisabled}
 			type="text"
-			use:runShortCut={{ isLoading, isDisabled, onClick }}
+			use:onCmdEnter={{ isLoading, isDisabled, onClick }}
 		/>
 	</svelte:fragment>
 </WidgetLabel>
