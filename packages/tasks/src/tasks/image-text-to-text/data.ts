@@ -12,7 +12,7 @@ const taskData: TaskDataCustom = {
 			id: "liuhaotian/LLaVA-Pretrain",
 		},
 		{
-			description: "Screenshots of websites with their codes.",
+			description: "Screenshots of websites with their HTML/CSS codes.",
 			id: "HuggingFaceM4/WebSight",
 		},
 	],
