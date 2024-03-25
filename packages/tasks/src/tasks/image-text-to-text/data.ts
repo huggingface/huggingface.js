@@ -79,7 +79,7 @@ const taskData: TaskDataCustom = {
 		},
 	],
 	summary:
-		"Image-text-to-text models take in an image and text prompt and output text. These models are also called vision language models. The difference from image-to-text models is that these models take an additional text input, not restricting model to certain use cases like image captioning, and can take a conversation as input.",
+		"Image-text-to-text models take in an image and text prompt and output text. These models are also called vision-language models, or VLMs. The difference from image-to-text models is that these models take an additional text input, not restricting the model to certain use cases like image captioning, and may also be trained to accept a conversation as input.",
 	widgetModels: ["microsoft/kosmos-2-patch14-224"],
 	youtubeId: "",
 };
