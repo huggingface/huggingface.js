@@ -128,10 +128,10 @@ export function getPipelineTask(modelPipeline: PipelineType): PipelineType {
 	return modelPipeline === "text2text-generation" ? "text-generation" : modelPipeline;
 }
 
-interface RunShortcutParams {
+interface CmdEnterParams {
 	isLoading: boolean;
 	isDisabled: boolean;
-	onClick: () => void;
+	callback: () => void;
 }
 
 /**
@@ -139,7 +139,7 @@ interface RunShortcutParams {
  */
 export function onCmdEnter(
 	node: HTMLElement,
-	{ isLoading, isDisabled, onClick }: RunShortcutParams
+	{ isLoading, isDisabled, callback }: CmdEnterParams
 ): { destroy: () => void } {
 	function onKeyDown(e: KeyboardEvent) {
 		if (isLoading || isDisabled) {
@@ -148,7 +148,7 @@ export function onCmdEnter(
 		// run inference on cmd+Enter
 		if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
 			e.preventDefault();
-			onClick();
+			callback();
 		}
 	}
 	node.addEventListener("keydown", onKeyDown);

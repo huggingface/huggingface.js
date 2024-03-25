@@ -104,7 +104,7 @@
 			dir="auto"
 			contenteditable
 			class:pointer-events-none={isLoading || isDisabled}
-			use:onCmdEnter={{ isLoading, isDisabled, onClick }}
+			use:onCmdEnter={{ isLoading, isDisabled, callback: onClick }}
 			bind:this={containerSpanEl}
 			on:paste|preventDefault={handlePaste}
 			on:input={updateInnerTextValue}

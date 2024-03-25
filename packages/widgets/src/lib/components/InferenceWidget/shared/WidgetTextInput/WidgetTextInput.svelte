@@ -18,7 +18,7 @@
 			placeholder={isDisabled ? "" : placeholder}
 			disabled={isDisabled}
 			type="text"
-			use:onCmdEnter={{ isLoading, isDisabled, onClick }}
+			use:onCmdEnter={{ isLoading, isDisabled, callback: onClick }}
 		/>
 	</svelte:fragment>
 </WidgetLabel>
