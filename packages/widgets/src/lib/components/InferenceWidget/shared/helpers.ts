@@ -184,7 +184,7 @@ export async function getModelLoadInfo(
 		const compute_type =
 			typeof output.compute_type === "string"
 				? output.compute_type
-				: (Object.keys(output.compute_type)[0] as ComputeType);
+				: output.compute_type["gpu"] ? ("gpu" as const) : ("cpu" as const);
 		return { compute_type, state: output.state };
 	} else {
 		console.warn(response.status, output.error);
