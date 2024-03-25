@@ -1,6 +1,6 @@
 import type { ModelData, WidgetExampleAttribute } from "@huggingface/tasks";
 import { parseJSON } from "../../../utils/ViewUtils.js";
-import type { ComputeType, ModelLoadInfo, TableData } from "./types.js";
+import { ComputeType, type ModelLoadInfo, type TableData } from "./types.js";
 import { LoadState } from "./types.js";
 
 const KEYS_TEXT: WidgetExampleAttribute[] = ["text", "context", "candidate_labels"];
@@ -184,7 +184,9 @@ export async function getModelLoadInfo(
 		const compute_type =
 			typeof output.compute_type === "string"
 				? output.compute_type
-				: output.compute_type["gpu"] ? ("gpu" as const) : ("cpu" as const);
+				: output.compute_type["gpu"]
+				  ? ComputeType.GPU
+				  : ComputeType.CPU;
 		return { compute_type, state: output.state };
 	} else {
 		console.warn(response.status, output.error);
