@@ -4,7 +4,7 @@
 
 Vision language models trained on image-text pairs can be used for visual question answering.
 
-### Document Question Answering and Retrieval
+### Document Question Answering and Retrieval
 
 Vision language models trained on formatted documents that include text and graphics can be used to extract information from documents.
 
