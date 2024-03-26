@@ -78,7 +78,11 @@ export async function makeRequestOptions(
 	}
 
 	const url = (() => {
+		if (endpointUrl && isUrl(model)) {
+			throw new TypeError("Both model and endpointUrl cannot be URLs");
+		}
 		if (isUrl(model)) {
+			console.warn("Using a model URL is deprecated, please use the `endpointUrl` parameter instead");
 			return model;
 		}
 		if (endpointUrl) {

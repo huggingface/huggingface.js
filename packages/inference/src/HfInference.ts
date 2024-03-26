@@ -14,9 +14,9 @@ type TaskWithNoAccessToken = {
 	) => ReturnType<Task[key]>;
 };
 
-type TaskWithNoAccessTokenNoModel = {
+type TaskWithNoAccessTokenNoEndpointUrl = {
 	[key in keyof Task]: (
-		args: DistributiveOmit<Parameters<Task[key]>[0], "accessToken" | "model">,
+		args: DistributiveOmit<Parameters<Task[key]>[0], "accessToken" | "endpointUrl">,
 		options?: Parameters<Task[key]>[1]
 	) => ReturnType<Task[key]>;
 };
@@ -65,4 +65,4 @@ export class HfInferenceEndpoint {
 
 export interface HfInference extends TaskWithNoAccessToken {}
 
-export interface HfInferenceEndpoint extends TaskWithNoAccessToken {}
+export interface HfInferenceEndpoint extends TaskWithNoAccessTokenNoEndpointUrl {}

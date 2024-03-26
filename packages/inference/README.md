@@ -53,9 +53,10 @@ import { textGeneration } from "@huggingface/inference";
 
 await textGeneration({
   accessToken: "hf_...",
-  model: "model_or_endpoint",
+  model: "model",
   inputs: ...,
-  parameters: ...
+  parameters: ...,
+  endpointUrl: "custom endpoint url",
 })
 ```
 
