@@ -649,6 +649,25 @@ describe.concurrent(
 			expect(generated_text).toEqual("three");
 		});
 
+		it("textGeneration - OpenAI Specs", async () => {
+			const ep = hf.endpoint(
+				"https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions"
+			);
+			const res = await ep.textGeneration({
+				model: "tgi",
+				messages: [{ role: "user", content: "Complete the this sentence with words one plus one is equal " }],
+				parameters: {
+					max_tokens: 500,
+					return_full_text: false,
+					temperature: 0.0,
+					seed: 0,
+				},
+			});
+			if (res.choices && res.choices.length > 0) {
+				const completion = res.choices[0].message.content;
+				expect(completion).toContain(" One plus one is equal to two.");
+			}
+		});
 		it("textGenerationStream - OpenAI Specs", async () => {
 			const ep = hf.endpoint(
 				"https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions"

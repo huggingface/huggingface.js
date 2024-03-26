@@ -14,6 +14,9 @@ export async function textGeneration(
 		...options,
 		taskHint: "text-generation",
 	});
+	if (typeof res === "object" && res.hasOwnProperty("choices")) {
+		return res;
+	}
 	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x?.generated_text === "string");
 	if (!isValidOutput) {
 		throw new InferenceOutputError("Expected Array<{generated_text: string}>");
