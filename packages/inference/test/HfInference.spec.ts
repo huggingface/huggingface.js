@@ -656,7 +656,6 @@ describe.concurrent(
 			const stream = ep.textGenerationStream({
 				model: "tgi",
 				messages: [{ role: "user", content: "Complete the equation 1+1= ,just the answer" }],
-				stream: true,
 				parameters: {
 					max_tokens: 500,
 					return_full_text: false,
@@ -683,7 +682,6 @@ describe.concurrent(
 			const stream = ep.textGenerationStream({
 				model: "mistral-tiny",
 				messages: [{ role: "user", content: "Complete the equation one + one = , just the answer" }],
-				stream: true,
 			});
 			let out = "";
 			for await (const chunk of stream) {
@@ -704,7 +702,6 @@ describe.concurrent(
 			const stream = ep.textGenerationStream({
 				model: "gpt-3.5-turbo",
 				messages: [{ role: "user", content: "Complete the equation one + one =" }],
-				stream: true,
 			});
 			let out = "";
 			for await (const chunk of stream) {

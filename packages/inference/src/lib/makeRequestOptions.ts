@@ -16,7 +16,6 @@ export async function makeRequestOptions(
 	args: RequestArgs & {
 		data?: Blob | ArrayBuffer;
 		stream?: boolean;
-		messages?: Array<{ role: "user" | "assistant"; content: string }>;
 	},
 	options?: Options & {
 		/** When a model can be used for multiple tasks, and we want to run a non-default task */

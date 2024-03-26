@@ -64,7 +64,11 @@ export interface BaseArgs {
 }
 
 export type RequestArgs = BaseArgs &
-	({ data: Blob | ArrayBuffer } | { inputs: unknown }) & {
+	(
+		| { data: Blob | ArrayBuffer }
+		| { inputs: unknown }
+		| { messages?: Array<{ role: "user" | "assistant"; content: string }> }
+	) & {
 		parameters?: Record<string, unknown>;
 		accessToken?: string;
 	};
