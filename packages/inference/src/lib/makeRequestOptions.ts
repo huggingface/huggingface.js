@@ -118,6 +118,5 @@ export async function makeRequestOptions(
 		credentials,
 		signal: options?.signal,
 	};
-	console.log(url, info);
 	return { url, info };
 }
