@@ -153,9 +153,7 @@
 			{isDisabled}
 			label="Source Sentence"
 			placeholder={isDisabled ? "" : "Your sentence here..."}
-			onClick={() => {
-				getOutput();
-			}}
+			on:cmdEnter={() => getOutput()}
 		/>
 		<WidgetTextInput
 			bind:value={comparisonSentences[0]}
@@ -163,9 +161,7 @@
 			{isDisabled}
 			label="Sentences to compare to"
 			placeholder={isDisabled ? "" : "Your sentence here..."}
-			onClick={() => {
-				getOutput();
-			}}
+			on:cmdEnter={() => getOutput()}
 		/>
 		{#each Array(nComparisonSentences - 1) as _, idx}
 			<WidgetTextInput
@@ -173,9 +169,7 @@
 				{isLoading}
 				{isDisabled}
 				placeholder="Your sentence here..."
-				onClick={() => {
-					getOutput();
-				}}
+				on:cmdEnter={() => getOutput()}
 			/>
 		{/each}
 		<WidgetAddSentenceBtn

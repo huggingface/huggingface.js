@@ -20,7 +20,8 @@
 		type="text"
 		disabled={isLoading || isDisabled}
 		autocomplete="off"
-		use:onCmdEnter={{ disabled: isLoading || isDisabled, callback: onClickSubmitBtn }}
+		use:onCmdEnter={{ disabled: isLoading || isDisabled }}
+		on:cmdEnter
 	/>
 	<WidgetSubmitBtn
 		classNames="rounded-l-none border-l-0 {flatTop ? 'rounded-t-none' : ''}"

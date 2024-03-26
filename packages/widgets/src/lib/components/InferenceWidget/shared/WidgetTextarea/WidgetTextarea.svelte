@@ -10,7 +10,6 @@
 	export let isLoading = false;
 	export let isDisabled = false;
 	export let size: "small" | "big" = "small";
-	export let onClick: () => void;
 
 	let containerSpanEl: HTMLSpanElement;
 	let isOnFocus = false;
@@ -104,7 +103,8 @@
 			dir="auto"
 			contenteditable
 			class:pointer-events-none={isLoading || isDisabled}
-			use:onCmdEnter={{ disabled: isLoading || isDisabled, callback: onClick }}
+			use:onCmdEnter={{ disabled: isLoading || isDisabled }}
+			on:cmdEnter
 			bind:this={containerSpanEl}
 			on:paste|preventDefault={handlePaste}
 			on:input={updateInnerTextValue}

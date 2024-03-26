@@ -128,23 +128,18 @@ export function getPipelineTask(modelPipeline: PipelineType): PipelineType {
 	return modelPipeline === "text2text-generation" ? "text-generation" : modelPipeline;
 }
 
-interface CmdEnterParams {
-	disabled: boolean;
-	callback: () => void;
-}
-
 /**
  * Svelte action that will call inference endpoint when a user hits cmd+Enter on a current html element
  */
-export function onCmdEnter(node: HTMLElement, { disabled, callback }: CmdEnterParams): { destroy: () => void } {
+export function onCmdEnter(node: HTMLElement, opts?: { disabled?: boolean }): { destroy: () => void } {
 	function onKeyDown(e: KeyboardEvent) {
-		if (disabled) {
+		if ((node as HTMLInputElement)?.disabled || opts?.disabled) {
 			return;
 		}
 		// run inference on cmd+Enter
 		if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
 			e.preventDefault();
-			callback();
+			node.dispatchEvent(new CustomEvent("cmdEnter"));
 		}
 	}
 	node.addEventListener("keydown", onKeyDown);

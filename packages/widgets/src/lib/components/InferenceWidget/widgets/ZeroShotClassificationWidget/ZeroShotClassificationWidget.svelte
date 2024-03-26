@@ -164,9 +164,7 @@
 			bind:setValue={setTextAreaValue}
 			{isDisabled}
 			placeholder="Text to classify..."
-			onClick={() => {
-				getOutput();
-			}}
+			on:cmdEnter={() => getOutput()}
 		/>
 		<WidgetTextInput
 			bind:value={candidateLabels}
@@ -174,9 +172,7 @@
 			{isDisabled}
 			label="Possible class names (comma-separated)"
 			placeholder="Possible class names..."
-			onClick={() => {
-				getOutput();
-			}}
+			on:cmdEnter={() => getOutput()}
 		/>
 		<WidgetCheckbox bind:checked={multiClass} label="Allow multiple true classes" />
 		<WidgetSubmitBtn

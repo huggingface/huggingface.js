@@ -213,9 +213,7 @@
 			{isDisabled}
 			size="big"
 			bind:renderTextOutput
-			onClick={() => {
-				getOutput({ useCache });
-			}}
+			on:cmdEnter={() => getOutput({ useCache })}
 		/>
 		{#if model.id === "bigscience/bloom"}
 			<WidgetBloomDecoding bind:decodingStrategy />

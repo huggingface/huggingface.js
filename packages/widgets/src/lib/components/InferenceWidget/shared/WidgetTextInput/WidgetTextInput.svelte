@@ -7,7 +7,6 @@
 	export let isLoading = false;
 	export let isDisabled = false;
 	export let value: string;
-	export let onClick: () => void;
 </script>
 
 <WidgetLabel {label}>
@@ -18,7 +17,8 @@
 			placeholder={isDisabled ? "" : placeholder}
 			disabled={isDisabled}
 			type="text"
-			use:onCmdEnter={{ disabled: isLoading || isDisabled, callback: onClick }}
+			use:onCmdEnter={{ disabled: isLoading || isDisabled }}
+			on:cmdEnter
 		/>
 	</svelte:fragment>
 </WidgetLabel>

@@ -141,6 +141,9 @@
 			onClickSubmitBtn={() => {
 				getOutput();
 			}}
+			on:cmdEnter={() => {
+				getOutput();
+			}}
 		/>
 		<WidgetTextarea
 			bind:value={context}
@@ -148,9 +151,7 @@
 			{isDisabled}
 			placeholder="Please input some context..."
 			label="Context"
-			onClick={() => {
-				getOutput();
-			}}
+			on:cmdEnter={() => getOutput()}
 		/>
 	</div>
 	<WidgetInfo {model} {computeTime} {error} {modelLoading} />

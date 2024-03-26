@@ -142,14 +142,7 @@
 			Mask token: <code>{model.mask_token}</code>
 		</div>
 	{/if}
-	<WidgetTextarea
-		bind:value={text}
-		bind:setValue={setTextAreaValue}
-		{isDisabled}
-		onClick={() => {
-			getOutput();
-		}}
-	/>
+	<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} on:cmdEnter={() => getOutput()} />
 	<WidgetSubmitBtn
 		classNames="mt-2"
 		{isLoading}
