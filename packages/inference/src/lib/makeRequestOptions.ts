@@ -1,5 +1,6 @@
 import type { InferenceTask, Options, RequestArgs } from "../types";
 import { HF_HUB_URL } from "./getDefaultTask";
+import { isUrl } from "./isUrl";
 
 const HF_INFERENCE_API_BASE_URL = "https://api-inference.huggingface.co";
 
@@ -78,10 +79,12 @@ export async function makeRequestOptions(
 	}
 
 	const url = (() => {
+		if (isUrl(model)) {
+			return model;
+		}
 		if (endpointUrl) {
 			return endpointUrl;
 		}
-
 		if (task) {
 			return `${HF_INFERENCE_API_BASE_URL}/pipeline/${task}/${model}`;
 		}
@@ -115,5 +118,6 @@ export async function makeRequestOptions(
 		credentials,
 		signal: options?.signal,
 	};
+	console.log(url, info);
 	return { url, info };
 }
