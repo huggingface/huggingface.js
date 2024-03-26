@@ -1,4 +1,5 @@
 import type { InferenceTask, Options, RequestArgs } from "../types";
+import { omit } from "../utils/omit";
 import { HF_HUB_URL } from "./getDefaultTask";
 import { isUrl } from "./isUrl";
 
@@ -24,7 +25,6 @@ export async function makeRequestOptions(
 		taskHint?: InferenceTask;
 	}
 ): Promise<{ url: string; info: RequestInit }> {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const { accessToken, endpointUrl, ...otherArgs } = args;
 	let { model } = args;
 	const {
@@ -115,7 +115,7 @@ export async function makeRequestOptions(
 		body: binary
 			? args.data
 			: JSON.stringify({
-					...otherArgs,
+					...(otherArgs.model && isUrl(otherArgs.model) ? omit(otherArgs, "model") : otherArgs),
 					...(options && Object.keys(options).length > 0 ? { options: options } : {}),
 			  }),
 		credentials,
