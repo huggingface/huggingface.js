@@ -1,7 +1,9 @@
-export type MetadataBaseValue = string | number | bigint | boolean;
-export type MetadataValue = MetadataBaseValue | MetadataBaseValue[] | MetadataValue[]; /// recursive as arrays can be nested.
+import type { MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
+import { GGUFValueType } from "./types";
 
-type Version = 1 | 2 | 3;
+export type { MetadataBaseValue, MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
+export { GGUFValueType, GGMLQuantizationType } from "./types";
+
 const isVersion = (version: number): version is Version => version === 1 || version === 2 || version === 3;
 
 /**
@@ -12,46 +14,6 @@ const isVersion = (version: number): version is Version => version === 1 || vers
  */
 const ggufMagicNumber = new Uint8Array([0x47, 0x47, 0x55, 0x46]); /// "GGUF"
 
-export enum GGMLQuantizationType {
-	F32 = 0,
-	F16 = 1,
-	Q4_0 = 2,
-	Q4_1 = 3,
-	Q5_0 = 6,
-	Q5_1 = 7,
-	Q8_0 = 8,
-	Q8_1 = 9,
-	Q2_K = 10,
-	Q3_K = 11,
-	Q4_K = 12,
-	Q5_K = 13,
-	Q6_K = 14,
-	Q8_K = 15,
-	IQ2_XXS = 16,
-	IQ2_XS = 17,
-	IQ3_XXS = 18,
-	IQ1_S = 19,
-	IQ4_NL = 20,
-	IQ3_S = 21,
-	IQ2_S = 22,
-	IQ4_XS = 23,
-}
-
-enum GGUFValueType {
-	UINT8 = 0,
-	INT8 = 1,
-	UINT16 = 2,
-	INT16 = 3,
-	UINT32 = 4,
-	INT32 = 5,
-	FLOAT32 = 6,
-	BOOL = 7,
-	STRING = 8,
-	ARRAY = 9,
-	UINT64 = 10,
-	INT64 = 11,
-	FLOAT64 = 12,
-}
 function isGGUFValueType(n: number): n is GGUFValueType {
 	return typeof GGUFValueType[n] === "string";
 }
@@ -116,35 +78,42 @@ class RangeView {
 	}
 }
 
+interface Slice<T> {
+	value: T;
+	length: number;
+}
+
 /**
  * Note: A good article about binary data in JS: https://javascript.info/arraybuffer-binary-arrays
  */
 
-function readVersionedSize(view: DataView, byteOffset: number, version: Version, littleEndian: boolean): bigint {
+function readVersionedSize(view: DataView, byteOffset: number, version: Version, littleEndian: boolean): Slice<bigint> {
 	switch (version) {
 		case 1: {
 			const n = view.getUint32(byteOffset, littleEndian);
-			return BigInt(n);
+			return { value: BigInt(n), length: 4 };
 		}
 		case 2:
 		case 3: {
-			return view.getBigUint64(byteOffset, littleEndian);
+			return { value: view.getBigUint64(byteOffset, littleEndian), length: 8 };
 		}
 	}
 }
 
-function readString(view: DataView, offset: number, littleEndian: boolean): { value: string; length: number } {
-	const length = view.getBigUint64(offset, littleEndian);
-	const value = new TextDecoder().decode(view.buffer.slice(offset + 8, offset + 8 + Number(length)));
-	return { value, length: 8 + Number(length) };
+function readString(view: DataView, offset: number, version: Version, littleEndian: boolean): Slice<string> {
+	const length = readVersionedSize(view, offset, version, littleEndian);
+	const off = length.length;
+	const value = new TextDecoder().decode(view.buffer.slice(offset + off, offset + off + Number(length.value)));
+	return { value, length: off + Number(length.value) };
 }
 
 function readMetadataValue(
 	view: DataView,
 	type: GGUFValueType,
 	offset: number,
+	version: Version,
 	littleEndian: boolean
-): { value: MetadataValue; length: number } {
+): Slice<MetadataValue> {
 	switch (type) {
 		case GGUFValueType.UINT8:
 			return { value: view.getUint8(offset), length: 1 };
@@ -163,16 +132,16 @@ function readMetadataValue(
 		case GGUFValueType.BOOL:
 			return { value: view.getUint8(offset) !== 0, length: 1 };
 		case GGUFValueType.STRING:
-			return readString(view, offset, littleEndian);
+			return readString(view, offset, version, littleEndian);
 		case GGUFValueType.ARRAY: {
 			const arrayType = view.getUint32(offset, littleEndian);
-			const arrayLength = view.getBigUint64(offset + 4, littleEndian);
-			let length = 12;
+			const arrayLength = readVersionedSize(view, offset + 4, version, littleEndian);
+			let length = 4 + arrayLength.length;
 			const arrayValues: MetadataValue[] = [];
-			for (let i = 0; i < arrayLength; i++) {
-				const { value, length: _length } = readMetadataValue(view, arrayType, offset + length, littleEndian);
-				arrayValues.push(value);
-				length += _length;
+			for (let i = 0; i < arrayLength.value; i++) {
+				const metadataValue = readMetadataValue(view, arrayType, offset + length, version, littleEndian);
+				arrayValues.push(metadataValue.value);
+				length += metadataValue.length;
 			}
 			return { value: arrayValues, length };
 		}
@@ -183,25 +152,6 @@ function readMetadataValue(
 		case GGUFValueType.FLOAT64:
 			return { value: view.getFloat64(offset, littleEndian), length: 8 };
 	}
-}
-
-export type GGUFMetadata = {
-	version: Version;
-	tensor_count: bigint;
-	kv_count: bigint;
-} & Record<string, MetadataValue>;
-
-export interface GGUFTensorInfo {
-	name: string;
-	n_dims: number;
-	shape: bigint[];
-	dtype: GGMLQuantizationType;
-	offset: bigint;
-}
-
-export interface GGUFParseOutput {
-	metadata: GGUFMetadata;
-	tensorInfos: GGUFTensorInfo[];
 }
 
 export async function gguf(
@@ -244,22 +194,23 @@ export async function gguf(
 	if (!isVersion(version)) {
 		throw new Error(`not a valid gguf file: unsupported version "${version}"`);
 	}
-	const tensorCount = readVersionedSize(r.view, 8, version, littleEndian);
-	const numKv = readVersionedSize(r.view, 16, version, littleEndian);
-
+	// initial offset after header
+	let offset = 8;
+	const tensorCount = readVersionedSize(r.view, offset, version, littleEndian);
+	offset += tensorCount.length;
+	const numKv = readVersionedSize(r.view, offset, version, littleEndian);
+	offset += numKv.length;
 	const metadata: GGUFMetadata = {
 		version,
-		tensor_count: tensorCount,
-		kv_count: numKv,
+		tensor_count: tensorCount.value,
+		kv_count: numKv.value,
 	};
-	// initial offset after header
-	let offset = 24;
 
-	for (let i = 0; i < numKv; i++) {
+	for (let i = 0; i < numKv.value; i++) {
 		await r.fetchChunkIfNeeded(offset);
 
 		// read key
-		const keyResult = readString(r.view, offset, littleEndian);
+		const keyResult = readString(r.view, offset, version, littleEndian);
 		offset += keyResult.length;
 
 		// read value type
@@ -274,7 +225,7 @@ export async function gguf(
 		while (!valueResult) {
 			try {
 				// read value
-				valueResult = readMetadataValue(r.view, valueType, offset, littleEndian);
+				valueResult = readMetadataValue(r.view, valueType, offset, version, littleEndian);
 			} catch (err) {
 				if (err instanceof RangeError) {
 					await r.fetchChunk();
@@ -289,11 +240,11 @@ export async function gguf(
 
 	const tensorInfos: GGUFTensorInfo[] = [];
 
-	for (let i = 0; i < tensorCount; i++) {
+	for (let i = 0; i < tensorCount.value; i++) {
 		await r.fetchChunkIfNeeded(offset);
 
 		// read tensor name
-		const keyResult = readString(r.view, offset, littleEndian);
+		const keyResult = readString(r.view, offset, version, littleEndian);
 		offset += keyResult.length;
 
 		const nDims = r.view.getUint32(offset, littleEndian);
@@ -301,8 +252,9 @@ export async function gguf(
 
 		const shape: bigint[] = [];
 		for (let dim = 0; dim < nDims; dim++) {
-			shape.push(r.view.getBigUint64(offset, littleEndian));
-			offset += 8;
+			const shapeDim = readVersionedSize(r.view, offset, version, littleEndian);
+			shape.push(shapeDim.value);
+			offset += shapeDim.length;
 		}
 
 		const type = r.view.getUint32(offset, littleEndian);

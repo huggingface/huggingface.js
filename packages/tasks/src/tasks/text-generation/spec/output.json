@@ -10,43 +10,45 @@
 			"description": "The generated text"
 		},
 		"details": {
-			"description": "When enabled, details about the generation",
-			"title": "TextGenerationOutputDetails",
-			"allOf": [
-				{ "$ref": "#/$defs/SequenceDetails" },
-				{
-					"type": "object",
-					"properties": {
-						"best_of_sequences": {
-							"type": "array",
-							"description": "Details about additional sequences when best_of is provided",
-							"items": {
-								"allOf": [
-									{ "$ref": "#/$defs/SequenceDetails" },
-									{
-										"type": "object",
-										"properties": {
-											"generated_text": {
-												"type": "integer",
-												"description": "The generated text"
-											}
-										},
-										"required": ["generated_text"]
-									}
-								]
-							}
-						}
-					}
-				}
-			]
+			"$ref": "#/$defs/Details",
+			"description": "When enabled, details about the generation"
 		}
 	},
 	"required": ["generated_text"],
-
 	"$defs": {
+		"FinishReason": {
+			"type": "string",
+			"title": "TextGenerationFinishReason",
+			"description": "The reason why the generation was stopped.",
+			"oneOf": [
+				{ "const": "length", "description": "length: The generated sequence reached the maximum allowed length" },
+				{ "const": "eos_token", "description": "eos_token: The model generated an end-of-sentence (EOS) token" },
+				{
+					"const": "stop_sequence",
+					"description": "stop_sequence: One of the sequence in stop_sequences was generated"
+				}
+			]
+		},
+		"PrefillToken": {
+			"title": "TextGenerationPrefillToken",
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "integer"
+				},
+				"logprob": {
+					"type": "number"
+				},
+				"text": {
+					"type": "string",
+					"description": "The text associated with that token"
+				}
+			},
+			"required": ["id", "logprob", "text"]
+		},
 		"Token": {
 			"type": "object",
-			"title": "Token",
+			"title": "TextGenerationOutputToken",
 			"properties": {
 				"id": {
 					"type": "integer"
@@ -63,20 +65,15 @@
 					"description": "The text associated with that token"
 				}
 			},
-			"required": ["id", "logprob", "special", "text"]
+			"required": ["id", "special", "text"]
 		},
-		"SequenceDetails": {
+		"Details": {
 			"type": "object",
-			"title": "TextGenerationSequenceDetails",
+			"title": "TextGenerationOutputDetails",
 			"properties": {
 				"finish_reason": {
-					"type": "string",
-					"description": "The reason why the generation was stopped.",
-					"oneOf": [
-						{ "const": "length", "description": "The generated sequence reached the maximum allowed length" },
-						{ "const": "eos_token", "description": "The model generated an end-of-sentence (EOS) token" },
-						{ "const": "stop_sequence", "description": "One of the sequence in stop_sequences was generated" }
-					]
+					"$ref": "#/$defs/FinishReason",
+					"description": "The reason why the generation was stopped."
 				},
 				"generated_tokens": {
 					"type": "integer",
@@ -85,21 +82,7 @@
 				"prefill": {
 					"type": "array",
 					"items": {
-						"title": "PrefillToken",
-						"type": "object",
-						"properties": {
-							"id": {
-								"type": "integer"
-							},
-							"logprob": {
-								"type": "number"
-							},
-							"text": {
-								"type": "string",
-								"description": "The text associated with that token"
-							}
-						},
-						"required": ["id", "logprob", "text"]
+						"$ref": "#/$defs/PrefillToken"
 					}
 				},
 				"seed": {
@@ -112,9 +95,71 @@
 					"items": {
 						"$ref": "#/$defs/Token"
 					}
+				},
+				"top_tokens": {
+					"type": "array",
+					"description": "Most likely tokens",
+					"items": {
+						"type": "array",
+						"items": {
+							"$ref": "#/$defs/Token"
+						}
+					}
+				},
+				"best_of_sequences": {
+					"type": "array",
+					"description": "Details about additional sequences when best_of is provided",
+					"items": {
+						"$ref": "#/$defs/SequenceDetails"
+					}
 				}
 			},
 			"required": ["finish_reason", "generated_tokens", "prefill", "tokens"]
+		},
+		"SequenceDetails": {
+			"type": "object",
+			"title": "TextGenerationOutputSequenceDetails",
+			"properties": {
+				"generated_text": {
+					"type": "string",
+					"description": "The generated text"
+				},
+				"finish_reason": {
+					"$ref": "#/$defs/FinishReason"
+				},
+				"generated_tokens": {
+					"type": "integer",
+					"description": "The number of generated tokens"
+				},
+				"prefill": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/PrefillToken"
+					}
+				},
+				"seed": {
+					"type": "integer",
+					"description": "The random seed used for generation"
+				},
+				"tokens": {
+					"type": "array",
+					"description": "The generated tokens and associated details",
+					"items": {
+						"$ref": "#/$defs/Token"
+					}
+				},
+				"top_tokens": {
+					"type": "array",
+					"description": "Most likely tokens",
+					"items": {
+						"type": "array",
+						"items": {
+							"$ref": "#/$defs/Token"
+						}
+					}
+				}
+			},
+			"required": ["generated_text", "finish_reason", "generated_tokens", "prefill", "tokens"]
 		}
 	}
 }
