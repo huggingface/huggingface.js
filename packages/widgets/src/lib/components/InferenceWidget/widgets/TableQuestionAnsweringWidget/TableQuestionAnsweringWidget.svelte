@@ -174,9 +174,7 @@
 		onClickSubmitBtn={() => {
 			getOutput();
 		}}
-		on:cmdEnter={() => {
-			getOutput();
-		}}
+		on:cmdEnter={() => getOutput()}
 	/>
 
 	<div class="mt-4">

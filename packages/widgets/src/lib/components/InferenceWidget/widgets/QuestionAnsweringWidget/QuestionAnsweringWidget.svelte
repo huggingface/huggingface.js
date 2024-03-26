@@ -141,9 +141,7 @@
 			onClickSubmitBtn={() => {
 				getOutput();
 			}}
-			on:cmdEnter={() => {
-				getOutput();
-			}}
+			on:cmdEnter={() => getOutput()}
 		/>
 		<WidgetTextarea
 			bind:value={context}

@@ -141,9 +141,7 @@
 		onClickSubmitBtn={() => {
 			getOutput();
 		}}
-		on:cmdEnter={() => {
-			getOutput();
-		}}
+		on:cmdEnter={() => getOutput()}
 	/>
 
 	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
