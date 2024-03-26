@@ -7,27 +7,28 @@
 	export let open = false;
 </script>
 
-<Popover classNames="w-72" {placement} open={!$isLoggedIn && open}>
+<Popover classNames="w-80" {placement} open={!$isLoggedIn && open}>
 	<svelte:fragment slot="anchor">
 		<slot />
 	</svelte:fragment>
 	<svelte:fragment slot="content">
-		<div class="flex items-center gap-x-3 text-sm">
+		<div class="flex items-center gap-x-3 text-sm leading-tight">
 			<IconHuggingFace classNames="text-5xl" />
-			You need a Hugging Face accont to compute wigdets
+			Please login with your Hugging Face account to run the widgets.
 		</div>
-		<div class="flex text-sm items-center gap-x-2 mt-2">
+		<div class="flex text-sm items-center gap-x-2.5 mt-2">
 			<a
 				href="https://huggingface.co/login{typeof window !== 'undefined'
 					? `?next=${encodeURIComponent(window.location.href)}`
 					: ''}"
-				class="px-2 py-1 rounded-full">Log In</a
+				class="bg-black text-white px-3 py-1 rounded-full dark:!bg-gray-100 dark:!text-black">Log In</a
 			>
+			<span class="text-gray-400">or</span>
 			<a
 				href="https://huggingface.co/join{typeof window !== 'undefined'
 					? `?next=${encodeURIComponent(window.location.href)}`
 					: ''}"
-				class="bg-black text-white px-2 py-1 rounded-full dark:!bg-gray-100 dark:!text-black">Sign Up</a
+				class="py-1 rounded-full underline decoration-gray-400 underline-offset-2">Create an account</a
 			>
 		</div>
 	</svelte:fragment>
