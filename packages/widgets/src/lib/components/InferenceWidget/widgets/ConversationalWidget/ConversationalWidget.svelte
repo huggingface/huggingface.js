@@ -268,6 +268,7 @@
 		{isDisabled}
 		onClickSubmitBtn={handleNewMessage}
 		submitButtonLabel="Send"
+		on:cmdEnter={handleNewMessage}
 	/>
 
 	<WidgetInfo {model} {error} />

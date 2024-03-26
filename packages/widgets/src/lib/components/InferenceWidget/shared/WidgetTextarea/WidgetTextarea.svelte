@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { tick } from "svelte";
 
-	import { delay } from "../../../../utils/ViewUtils.js";
+	import { delay, onCmdEnter } from "../../../../utils/ViewUtils.js";
 	import WidgetLabel from "../WidgetLabel/WidgetLabel.svelte";
 
 	export let label: string = "";
@@ -103,6 +103,8 @@
 			dir="auto"
 			contenteditable
 			class:pointer-events-none={isLoading || isDisabled}
+			use:onCmdEnter={{ disabled: isLoading || isDisabled }}
+			on:cmdEnter
 			bind:this={containerSpanEl}
 			on:paste|preventDefault={handlePaste}
 			on:input={updateInnerTextValue}

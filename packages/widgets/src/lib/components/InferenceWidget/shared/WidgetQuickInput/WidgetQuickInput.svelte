@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onCmdEnter } from "../../../../utils/ViewUtils.js";
 	import WidgetSubmitBtn from "../WidgetSubmitBtn/WidgetSubmitBtn.svelte";
 
 	export let flatTop = false;
@@ -19,6 +20,8 @@
 		type="text"
 		disabled={isLoading || isDisabled}
 		autocomplete="off"
+		use:onCmdEnter={{ disabled: isLoading || isDisabled }}
+		on:cmdEnter
 	/>
 	<WidgetSubmitBtn
 		classNames="rounded-l-none border-l-0 {flatTop ? 'rounded-t-none' : ''}"

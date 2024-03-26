@@ -117,7 +117,7 @@
 		validateExample={isTextInput}
 	/>
 	<div class="space-y-2">
-		<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} />
+		<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} on:cmdEnter={() => getOutput()} />
 		<WidgetSubmitBtn
 			{isLoading}
 			{isDisabled}

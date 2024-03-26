@@ -122,7 +122,13 @@
 <WidgetWrapper {apiUrl} {includeCredentials} {model} let:WidgetInfo let:WidgetHeader let:WidgetFooter>
 	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyWidgetExample} {validateExample} />
 
-	<WidgetQuickInput bind:value={text} {isLoading} {isDisabled} onClickSubmitBtn={() => getOutput()} />
+	<WidgetQuickInput
+		bind:value={text}
+		{isLoading}
+		{isDisabled}
+		onClickSubmitBtn={() => getOutput()}
+		on:cmdEnter={() => getOutput()}
+	/>
 
 	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
 
