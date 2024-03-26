@@ -1,4 +1,5 @@
 import type { InferenceTask, Options, RequestArgs } from "../types";
+import { isObjectEmpty } from "../utils/isEmpty";
 import { omit } from "../utils/omit";
 import { HF_HUB_URL } from "./getDefaultTask";
 import { isUrl } from "./isUrl";
@@ -34,7 +35,7 @@ export async function makeRequestOptions(
 		wait_for_model,
 		use_cache,
 		dont_load_model,
-		// ...otherOptions
+		...otherOptions
 	} = options ?? {};
 
 	const headers: Record<string, string> = {};
@@ -116,7 +117,7 @@ export async function makeRequestOptions(
 			? args.data
 			: JSON.stringify({
 					...(otherArgs.model && isUrl(otherArgs.model) ? omit(otherArgs, "model") : otherArgs),
-					...(options && Object.keys(options).length > 0 ? { options: options } : {}),
+					...(otherOptions && !isObjectEmpty(otherOptions) && { options: otherOptions }),
 			  }),
 		credentials,
 		signal: options?.signal,
