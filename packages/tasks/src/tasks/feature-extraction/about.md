@@ -1,6 +1,6 @@
 ## Use Cases
 
-Models trained on a specific dataset can learn very shallow features about the data. For instance, a model trained on English poetry dataset learns English grammar on a very high level. This information can be transferred to a new model that is going to be trained on tweets. This way of extracting features and transferring to a model is called feature extraction. One can pass their dataset through a feature extraction pipeline and feed the result to a classifier directly.
+Models trained on a specific dataset can learn very shallow features about the data. For instance, a model trained on an English poetry dataset learns English grammar at a very high level. This information can be transferred to a new model that is going to be trained on tweets. This way of extracting features and transferring them to a model is called feature extraction. One can pass their dataset through a feature extraction pipeline and directly feed the result to a classifier.
 
 ## Inference
 
