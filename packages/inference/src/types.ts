@@ -32,7 +32,7 @@ export interface Options {
 	signal?: AbortSignal;
 
 	/**
-	 * (Default: "same-origin"). String | Boolean. Credentials to use for the request. If this is a string, it will be passed straight on. If it's a boolean, true will be "include" and false will not send credentials at all.
+	 * Credentials to use for the request. If this is a string, it will be passed straight on. If it's a boolean, true will be "include" and false will not send credentials at all (which defaults to "same-origin" inside browsers).
 	 */
 	includeCredentials?: string | boolean;
 }
