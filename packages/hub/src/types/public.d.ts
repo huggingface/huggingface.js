@@ -147,5 +147,6 @@ export type License =
 	| "lgpl-lr"
 	| "deepfloyd-if-license"
 	| "llama2"
+	| "gemma"
 	| "unknown"
 	| "other";
