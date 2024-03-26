@@ -674,7 +674,7 @@ describe.concurrent(
 		it("mistral - OpenAI Specs", async () => {
 			const MISTRAL_KEY = env.MISTRAL_KEY;
 			if (!MISTRAL_KEY) {
-				console.warn("Skipping mistral test because MISTRAL_KEY is not set");
+				console.warn("Skipping test because MISTRAL_KEY is not set");
 				return;
 			}
 			const hf = new HfInference(MISTRAL_KEY);
@@ -694,7 +694,7 @@ describe.concurrent(
 		it("openai - OpenAI Specs", async () => {
 			const OPENAI_KEY = env.OPENAI_KEY;
 			if (!OPENAI_KEY) {
-				console.warn("Skipping mistral test because OPENAI_KEY is not set");
+				console.warn("Skipping test because OPENAI_KEY is not set");
 				return;
 			}
 			const hf = new HfInference(OPENAI_KEY);
