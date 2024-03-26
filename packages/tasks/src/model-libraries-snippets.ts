@@ -146,6 +146,12 @@ export const gliner = (model: ModelData): string[] => [
 model = GLiNER.from_pretrained("${model.id}")`,
 ];
 
+export const llamacpp = (model: ModelData): string[] => [
+	`brew install ggerganov/ggerganov/llama.cpp
+
+llama-cli --hf-repo "${model.id}" --model mistral-7b-v0.2-iq3_s-imat.gguf -p "The meaning to life is " )`,
+];
+
 export const keras = (model: ModelData): string[] => [
 	`from huggingface_hub import from_pretrained_keras
 

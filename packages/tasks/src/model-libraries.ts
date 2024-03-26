@@ -176,6 +176,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			terms: { path: ["ckpt/tensor00000_000", "ckpt-0/tensor00000_000"] },
 		},
 	},
+	gguf: {
+		prettyLabel: "GGUF",
+		repoName: "llama.cpp",
+		repoUrl: "https://github.com/ggerganov/llama.cpp",
+		filter: true,
+		snippets: snippets.llamacpp,
+		countDownloads: { wildcard: { path: "*.gguf" } },
+	},	
 	keras: {
 		prettyLabel: "Keras",
 		repoName: "Keras",
