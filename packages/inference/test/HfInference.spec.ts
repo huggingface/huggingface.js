@@ -653,7 +653,7 @@ describe.concurrent(
 			const ep = hf.endpoint(
 				"https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions"
 			);
-			const stream = ep.textGenerationStream({
+			const stream = ep.streamingRequest({
 				model: "tgi",
 				messages: [{ role: "user", content: "Complete the equation 1+1= ,just the answer" }],
 				parameters: {
@@ -662,7 +662,7 @@ describe.concurrent(
 					temperature: 0.0,
 					seed: 0,
 				},
-			});
+			}) as AsyncGenerator<TextGenerationStreamOutput>;
 			let out = "";
 			for await (const chunk of stream) {
 				if (chunk.choices && chunk.choices.length > 0) {
@@ -679,10 +679,10 @@ describe.concurrent(
 			}
 			const hf = new HfInference(MISTRAL_KEY);
 			const ep = hf.endpoint("https://api.mistral.ai/v1/chat/completions");
-			const stream = ep.textGenerationStream({
+			const stream = ep.streamingRequest({
 				model: "mistral-tiny",
 				messages: [{ role: "user", content: "Complete the equation one + one = , just the answer" }],
-			});
+			}) as AsyncGenerator<TextGenerationStreamOutput>;
 			let out = "";
 			for await (const chunk of stream) {
 				if (chunk.choices && chunk.choices.length > 0) {
@@ -699,10 +699,10 @@ describe.concurrent(
 			}
 			const hf = new HfInference(OPENAI_KEY);
 			const ep = hf.endpoint("https://api.openai.com/v1/chat/completions");
-			const stream = ep.textGenerationStream({
+			const stream = ep.streamingRequest({
 				model: "gpt-3.5-turbo",
 				messages: [{ role: "user", content: "Complete the equation one + one =" }],
-			});
+			}) as AsyncGenerator<TextGenerationStreamOutput>;
 			let out = "";
 			for await (const chunk of stream) {
 				if (chunk.choices && chunk.choices.length > 0) {

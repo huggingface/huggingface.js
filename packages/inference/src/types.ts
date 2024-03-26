@@ -71,4 +71,5 @@ export type RequestArgs = BaseArgs &
 	) & {
 		parameters?: Record<string, unknown>;
 		accessToken?: string;
+		model?: string;
 	};

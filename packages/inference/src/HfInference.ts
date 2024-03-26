@@ -65,4 +65,4 @@ export class HfInferenceEndpoint {
 
 export interface HfInference extends TaskWithNoAccessToken {}
 
-export interface HfInferenceEndpoint extends TaskWithNoAccessTokenNoModel {}
+export interface HfInferenceEndpoint extends TaskWithNoAccessToken {}

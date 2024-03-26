@@ -112,10 +112,11 @@ export async function makeRequestOptions(
 			? args.data
 			: JSON.stringify({
 					...otherArgs,
-					// options: options && otherOptions,
+					...(options && Object.keys(options).length > 0 ? { options: options } : {}),
 			  }),
 		credentials,
 		signal: options?.signal,
 	};
+	console.log(url, info);
 	return { url, info };
 }
