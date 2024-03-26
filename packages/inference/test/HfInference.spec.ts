@@ -653,7 +653,7 @@ describe.concurrent(
 			const ep = hf.endpoint(
 				"https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions"
 			);
-			const stream = ep.streamingRequest({
+			const stream = ep.textGenerationStream({
 				model: "tgi",
 				messages: [{ role: "user", content: "Complete the equation 1+1= ,just the answer" }],
 				parameters: {
@@ -662,7 +662,7 @@ describe.concurrent(
 					temperature: 0.0,
 					seed: 0,
 				},
-			}) as AsyncGenerator<TextGenerationStreamOutput>;
+			});
 			let out = "";
 			for await (const chunk of stream) {
 				if (chunk.choices && chunk.choices.length > 0) {
