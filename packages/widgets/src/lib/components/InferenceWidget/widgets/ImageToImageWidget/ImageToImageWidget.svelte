@@ -177,9 +177,11 @@
 		/>
 		<WidgetTextInput
 			bind:value={prompt}
+			{isLoading}
 			{isDisabled}
 			label="(Optional) Text-guidance if the model has support for it"
 			placeholder="Your prompt here..."
+			on:cmdEnter={() => getOutput()}
 		/>
 		<WidgetSubmitBtn
 			{isLoading}

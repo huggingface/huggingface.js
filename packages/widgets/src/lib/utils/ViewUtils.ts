@@ -1,4 +1,5 @@
 import type { PipelineType } from "@huggingface/tasks";
+import type { ActionReturn } from "svelte/action";
 
 const ESCAPED = {
 	'"': "&quot;",
@@ -126,6 +127,33 @@ export function hexToRgb(hex: string): number[] {
 // Get the Task id corresponding to the modelPipeline (should be === in 99% cases)
 export function getPipelineTask(modelPipeline: PipelineType): PipelineType {
 	return modelPipeline === "text2text-generation" ? "text-generation" : modelPipeline;
+}
+
+/**
+ * Svelte action that will call inference endpoint when a user hits cmd+Enter on a current html element
+ */
+export function onCmdEnter(node: HTMLElement, opts: { disabled: boolean }): ActionReturn {
+	let currentOpts = opts;
+
+	function onKeyDown(e: KeyboardEvent) {
+		if ((node as HTMLInputElement)?.disabled || currentOpts.disabled) {
+			return;
+		}
+		// run inference on cmd+Enter
+		if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+			e.preventDefault();
+			node.dispatchEvent(new CustomEvent("cmdEnter"));
+		}
+	}
+	node.addEventListener("keydown", onKeyDown);
+	return {
+		update(updatedOps: { disabled: boolean }) {
+			currentOpts = updatedOps;
+		},
+		destroy() {
+			node.removeEventListener("keydown", onKeyDown);
+		},
+	};
 }
 
 /**

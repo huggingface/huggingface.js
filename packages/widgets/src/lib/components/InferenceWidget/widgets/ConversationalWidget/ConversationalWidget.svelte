@@ -214,24 +214,16 @@
 	}
 
 	async function applyWidgetExample(example: Example, opts: ExampleRunOpts = {}): Promise<void> {
-		if (isLoading) {
+		if ("text" in example) {
+			messages = [{ role: "user", content: example.text }];
+		} else {
+			messages = [...example.messages];
+		}
+		if (opts.isPreview) {
 			return;
 		}
-		isLoading = true;
-		try {
-			if ("text" in example) {
-				messages = [{ role: "user", content: example.text }];
-			} else {
-				messages = [...example.messages];
-			}
-			if (opts.isPreview) {
-				return;
-			}
-			const exampleOutput = example.output;
-			await getOutput({ ...opts.inferenceOpts, exampleOutput });
-		} finally {
-			isLoading = false;
-		}
+		const exampleOutput = example.output;
+		await getOutput({ ...opts.inferenceOpts, exampleOutput });
 	}
 
 	function validateExample(sample: WidgetExample): sample is Example {
@@ -268,6 +260,7 @@
 		{isDisabled}
 		onClickSubmitBtn={handleNewMessage}
 		submitButtonLabel="Send"
+		on:cmdEnter={handleNewMessage}
 	/>
 
 	<WidgetInfo {model} {error} />
