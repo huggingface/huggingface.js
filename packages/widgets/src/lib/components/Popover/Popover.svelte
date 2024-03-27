@@ -83,8 +83,7 @@
 			popoverShift = width / 2 - ARROW_SIZE / 2 - ARROW_PADDING;
 		}
 	}
-	const updatePositionDebounced = debounce(updatePosition, 250);
-
+	
 	const debouncedShow = debounce(() => (isActive = true), 250);
 
 	function hide() {
@@ -120,7 +119,7 @@
 	}
 </script>
 
-<svelte:window on:resize={updatePositionDebounced} on:scroll={updatePositionDebounced} />
+<svelte:window on:resize={updatePosition} on:scroll={updatePosition} />
 
 <span>
 	<span class="contents" bind:this={wrapperElement}>
@@ -128,7 +127,7 @@
 	</span>
 
 	{#if anchorElement && open}
-		<div class="{isTouchOnly ? "hidden sm:contents" : "contents"}" use:portalToBody>
+		<div class={isTouchOnly ? "hidden sm:contents" : "contents"} use:portalToBody>
 			<div
 				class="pointer-events-none absolute bg-transparent hidden"
 				class:hidden={!isActive}
