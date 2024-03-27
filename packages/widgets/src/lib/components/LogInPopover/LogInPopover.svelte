@@ -28,7 +28,7 @@
 				href="https://huggingface.co/join{typeof window !== 'undefined'
 					? `?next=${encodeURIComponent(window.location.href)}`
 					: ''}"
-				class="py-1 rounded-full underline decoration-gray-400 underline-offset-2">Create an account</a
+				class="py-1 rounded-full underline decoration-gray-400 underline-offset-2">Create a free account</a
 			>
 		</div>
 	</svelte:fragment>
