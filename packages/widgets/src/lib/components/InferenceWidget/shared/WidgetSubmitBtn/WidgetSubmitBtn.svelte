@@ -9,7 +9,7 @@
 	export let isLoading: boolean;
 	export let label = "Compute";
 	export let onClick: () => void;
-	export let withLogInPopover = true;
+	export let withParentLoginPopover = false;
 
 	let popOverOpen = false;
 
@@ -17,11 +17,11 @@
 
 	function _onClick() {
 		if (!$isLoggedIn) {
-			if (withLogInPopover) {
-				popOverOpen = true;
-			} else {
+			if (withParentLoginPopover) {
 				// tell parent element to show log in pop over
 				dispatch("logInPopover");
+			} else {
+				popOverOpen = true;
 			}
 			return;
 		}
