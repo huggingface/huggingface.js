@@ -120,7 +120,7 @@
 
 <svelte:window on:resize={updatePositionDebounced} on:scroll={updatePositionDebounced} />
 
-<span class="inline-block">
+<span>
 	<span class="contents" bind:this={wrapperElement}>
 		<slot name="anchor" />
 	</span>
