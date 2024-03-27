@@ -6,6 +6,8 @@ export const modelLoadStates = writable<Record<ModelData["id"], ModelLoadInfo>>(
 
 export const widgetNoInference = writable<Record<ModelData["id"], boolean>>({});
 
+export const isLoggedIn = writable<boolean>(false);
+
 export const widgetStates = writable<Record<ModelData["id"], WidgetState>>({});
 
 const tgiSupportedModels = writable<Set<string> | undefined>(undefined);

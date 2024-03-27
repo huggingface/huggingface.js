@@ -1,8 +1,10 @@
 <script lang="ts">
-	import { tick } from "svelte";
+	import { createEventDispatcher, tick } from "svelte";
 
 	import { delay, onCmdEnter } from "../../../../utils/ViewUtils.js";
 	import WidgetLabel from "../WidgetLabel/WidgetLabel.svelte";
+	import LogInPopover from "../../../LogInPopover/LogInPopover.svelte";
+	import { isLoggedIn } from "../../stores.js";
 
 	export let label: string = "";
 	export let placeholder: string = "Your sentence here...";
@@ -13,9 +15,12 @@
 
 	let containerSpanEl: HTMLSpanElement;
 	let isOnFocus = false;
+	let popOverOpen = false;
 	const typingEffectSpeedMs = 12;
 	const classNamesInput = "whitespace-pre-wrap inline font-normal text-black dark:text-white";
 	const classNamesOutput = "whitespace-pre-wrap inline text-blue-600 dark:text-blue-400";
+
+	const dispatch = createEventDispatcher<{ cmdEnter: void }>();
 
 	export async function renderTextOutput(outputTxt: string, typingEffect = true): Promise<void> {
 		const spanEl = document.createElement("span");
@@ -90,29 +95,37 @@
 	}
 </script>
 
-<WidgetLabel {label}>
-	<svelte:fragment slot="after">
-		<!-- `whitespace-pre-wrap inline-block` are needed to get correct newlines from `el.textContent` on Chrome -->
-		<span
-			class="{label ? 'mt-1.5' : ''} block w-full resize-y overflow-auto py-2 px-3 {size === 'small'
-				? 'min-h-[42px]'
-				: 'min-h-[144px]'} inline-block max-h-[500px] whitespace-pre-wrap rounded-lg border border-gray-200 shadow-inner outline-none focus:shadow-inner focus:ring focus:ring-blue-200 dark:bg-gray-925"
-			role="textbox"
-			style="--placeholder: '{isDisabled ? '' : placeholder}'"
-			spellcheck="false"
-			dir="auto"
-			contenteditable
-			class:pointer-events-none={isLoading || isDisabled}
-			use:onCmdEnter={{ disabled: isLoading || isDisabled }}
-			on:cmdEnter
-			bind:this={containerSpanEl}
-			on:paste|preventDefault={handlePaste}
-			on:input={updateInnerTextValue}
-			on:focus={onFocus}
-			on:blur={() => (isOnFocus = false)}
-		/>
-	</svelte:fragment>
-</WidgetLabel>
+<LogInPopover bind:open={popOverOpen}>
+	<WidgetLabel {label}>
+		<svelte:fragment slot="after">
+			<!-- `whitespace-pre-wrap inline-block` are needed to get correct newlines from `el.textContent` on Chrome -->
+			<span
+				class="{label ? 'mt-1.5' : ''} block w-full resize-y overflow-auto py-2 px-3 {size === 'small'
+					? 'min-h-[42px]'
+					: 'min-h-[144px]'} inline-block max-h-[500px] whitespace-pre-wrap rounded-lg border border-gray-200 shadow-inner outline-none focus:shadow-inner focus:ring focus:ring-blue-200 dark:bg-gray-925"
+				role="textbox"
+				style="--placeholder: '{isDisabled ? '' : placeholder}'"
+				spellcheck="false"
+				dir="auto"
+				contenteditable
+				class:pointer-events-none={isLoading || isDisabled}
+				use:onCmdEnter={{ disabled: isLoading || isDisabled }}
+				on:cmdEnter={() => {
+					if (!$isLoggedIn) {
+						popOverOpen = true;
+						return;
+					}
+					dispatch("cmdEnter");
+				}}
+				bind:this={containerSpanEl}
+				on:paste|preventDefault={handlePaste}
+				on:input={updateInnerTextValue}
+				on:focus={onFocus}
+				on:blur={() => (isOnFocus = false)}
+			/>
+		</svelte:fragment>
+	</WidgetLabel>
+</LogInPopover>
 
 <style>
 	span[contenteditable]:empty::before {

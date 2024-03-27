@@ -28,6 +28,7 @@
 	import ZeroShotImageClassificationWidget from "./widgets/ZeroShotImageClassificationWidget/ZeroShotImageClassificationWidget.svelte";
 	import type { WidgetType } from "@huggingface/tasks";
 	import WidgetInfo from "./shared/WidgetInfo/WidgetInfo.svelte";
+	import { isLoggedIn as isLoggedInStore } from "./stores.js";
 
 	export let apiToken: WidgetProps["apiToken"] = undefined;
 	export let callApiOnMount = false;
@@ -84,6 +85,8 @@
 			: model.pipeline_tag && model.pipeline_tag in WIDGET_COMPONENTS
 			  ? WIDGET_COMPONENTS[model.pipeline_tag as keyof typeof WIDGET_COMPONENTS]
 			  : undefined;
+
+	$isLoggedInStore = isLoggedIn;
 
 	// prettier-ignore
 	$: widgetProps = ({
