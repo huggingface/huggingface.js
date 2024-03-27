@@ -3,7 +3,7 @@
 	import { onCmdEnter } from "../../../../utils/ViewUtils.js";
 	import WidgetSubmitBtn from "../WidgetSubmitBtn/WidgetSubmitBtn.svelte";
 	import { isLoggedIn } from "../../stores.js";
-	import LogInPopover from "$lib/components/LogInPopover/LogInPopover.svelte";
+	import LogInPopover from "../../../LogInPopover/LogInPopover.svelte";
 
 	export let flatTop = false;
 	export let isLoading: boolean;
