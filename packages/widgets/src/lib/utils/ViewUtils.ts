@@ -157,28 +157,6 @@ export function onCmdEnter(node: HTMLElement, opts: { disabled: boolean }): Acti
 }
 
 /**
- * Teleports the children of a node to another node....
- */
-export function portal(node: HTMLElement, targetNode: HTMLElement): ActionReturn {
-	const portalChildren = [...node.children];
-	targetNode.append(...portalChildren);
-	return {
-		destroy() {
-			for (const portalChild of portalChildren) {
-				portalChild.remove();
-			}
-		},
-	};
-}
-
-/**
- * Teleports the children of a node under the body element
- */
-export function portalToBody(node: HTMLElement): ActionReturn {
-	return portal(node, document.body);
-}
-
-/**
  * A debounce function that works in both browser and Nodejs.
  * For pure Nodejs work, prefer the `Debouncer` class.
  */

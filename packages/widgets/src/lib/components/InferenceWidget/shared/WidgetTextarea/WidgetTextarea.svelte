@@ -95,7 +95,7 @@
 	}
 </script>
 
-<LogInPopover open={popOverOpen}>
+<LogInPopover bind:open={popOverOpen}>
 	<WidgetLabel {label}>
 		<svelte:fragment slot="after">
 			<!-- `whitespace-pre-wrap inline-block` are needed to get correct newlines from `el.textContent` on Chrome -->

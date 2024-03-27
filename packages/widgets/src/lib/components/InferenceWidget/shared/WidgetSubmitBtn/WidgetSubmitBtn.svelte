@@ -22,7 +22,7 @@
 </script>
 
 {#if !isDisabled}
-	<LogInPopover open={popOverOpen}>
+	<LogInPopover bind:open={popOverOpen}>
 		<button
 			class="btn-widget h-10 w-24 px-5 {classNames}"
 			disabled={isDisabled || isLoading}

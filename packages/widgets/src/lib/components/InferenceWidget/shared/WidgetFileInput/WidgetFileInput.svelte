@@ -29,7 +29,7 @@
 </script>
 
 {#if !isDisabled}
-	<LogInPopover open={popOverOpen}>
+	<LogInPopover bind:open={popOverOpen}>
 		<button
 			class={classNames}
 			on:click={(e) => {

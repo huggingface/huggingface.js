@@ -18,7 +18,7 @@
 	const dispatch = createEventDispatcher<{ cmdEnter: void }>();
 </script>
 
-<LogInPopover open={popOverOpen}>
+<LogInPopover bind:open={popOverOpen}>
 	<div class="flex h-10">
 		<input
 			bind:value

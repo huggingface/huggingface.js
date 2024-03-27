@@ -16,7 +16,7 @@
 	const dispatch = createEventDispatcher<{ cmdEnter: void }>();
 </script>
 
-<LogInPopover open={popOverOpen}>
+<LogInPopover bind:open={popOverOpen}>
 	<WidgetLabel {label}>
 		<svelte:fragment slot="after">
 			<input

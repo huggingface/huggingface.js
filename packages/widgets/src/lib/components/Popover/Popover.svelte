@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount, tick } from "svelte";
 	import { fade } from "svelte/transition";
-	import { debounce, portalToBody } from "../../utils/ViewUtils.js";
+	import { debounce } from "../../utils/ViewUtils.js";
 
 	export let classNames = "";
 	export let alignment: "start" | "center" | "end" | "auto" = "auto";
@@ -33,7 +33,7 @@
 
 	let popoverShift: number;
 	let isTouchOnly = false;
-	let isActive = false;
+	let isActive = true;
 
 	function updatePlacement(anchorBbox: DOMRect, pageHeight: number) {
 		if (pageHeight > 0) {
@@ -83,7 +83,7 @@
 			popoverShift = width / 2 - ARROW_SIZE / 2 - ARROW_PADDING;
 		}
 	}
-	
+
 	const debouncedShow = debounce(() => (isActive = true), 250);
 
 	function hide() {
@@ -96,9 +96,12 @@
 	onMount(() => {
 		isTouchOnly = touchOnly && window.matchMedia("(any-hover: none)").matches;
 
-		if (!isTouchOnly) {
+		const existingPopoOverEl = document.querySelector(".popover-el");
+
+		if (!isTouchOnly && !existingPopoOverEl) {
 			/// be carefull only one child is supported in the wrapper
 			anchorElement = wrapperElement.children[0] as HTMLElement;
+			updatePosition();
 			if (anchorElement) {
 				anchorElement.addEventListener("mouseover", debouncedShow);
 				anchorElement.addEventListener("mouseleave", debouncedHide);
@@ -109,17 +112,9 @@
 			}
 		}
 	});
-
-	$: if (open && !waitForContent) {
-		updatePosition();
-	}
-
-	$: if (open) {
-		isActive = true;
-	}
 </script>
 
-<svelte:window on:resize={updatePosition} on:scroll={updatePosition} />
+<svelte:window on:resize={() => (open = false)} on:scroll={() => (open = false)} />
 
 <span>
 	<span class="contents" bind:this={wrapperElement}>
@@ -127,9 +122,9 @@
 	</span>
 
 	{#if anchorElement && open}
-		<div class={isTouchOnly ? "hidden sm:contents" : "contents"} use:portalToBody>
+		<div class={isTouchOnly ? "hidden sm:contents" : "contents"}>
 			<div
-				class="pointer-events-none absolute bg-transparent hidden"
+				class="pointer-events-none absolute bg-transparent hidden popover-el"
 				class:hidden={!isActive}
 				style:top="{top}px"
 				style:left="{left}px"
