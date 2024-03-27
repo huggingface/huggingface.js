@@ -96,9 +96,7 @@
 	onMount(() => {
 		isTouchOnly = touchOnly && window.matchMedia("(any-hover: none)").matches;
 
-		const existingPopoOverEl = document.querySelector(".popover-el");
-
-		if (!isTouchOnly && !existingPopoOverEl) {
+		if (!isTouchOnly) {
 			/// be carefull only one child is supported in the wrapper
 			anchorElement = wrapperElement.children[0] as HTMLElement;
 			updatePosition();
@@ -124,7 +122,7 @@
 	{#if anchorElement && open}
 		<div class={isTouchOnly ? "hidden sm:contents" : "contents"}>
 			<div
-				class="pointer-events-none absolute bg-transparent hidden popover-el"
+				class="pointer-events-none absolute bg-transparent hidden"
 				class:hidden={!isActive}
 				style:top="{top}px"
 				style:left="{left}px"

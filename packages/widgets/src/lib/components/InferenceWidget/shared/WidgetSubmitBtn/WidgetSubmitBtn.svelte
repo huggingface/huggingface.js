@@ -2,18 +2,27 @@
 	import LogInPopover from "../../../LogInPopover/LogInPopover.svelte";
 	import IconSpin from "../../..//Icons/IconSpin.svelte";
 	import { isLoggedIn } from "../../stores.js";
+	import { createEventDispatcher } from "svelte";
 
 	export let classNames = "";
 	export let isDisabled = false;
 	export let isLoading: boolean;
 	export let label = "Compute";
 	export let onClick: () => void;
+	export let withLogInPopover = true;
 
 	let popOverOpen = false;
 
+	const dispatch = createEventDispatcher<{ logInPopover: void }>();
+
 	function _onClick() {
 		if (!$isLoggedIn) {
-			popOverOpen = true;
+			if (withLogInPopover) {
+				popOverOpen = true;
+			} else {
+				// tell parent element to show log in pop over
+				dispatch("logInPopover");
+			}
 			return;
 		}
 

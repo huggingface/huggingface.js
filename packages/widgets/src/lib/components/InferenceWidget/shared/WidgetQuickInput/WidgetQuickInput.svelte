@@ -43,6 +43,8 @@
 			{isDisabled}
 			label={submitButtonLabel}
 			onClick={onClickSubmitBtn}
+			withLogInPopover={false}
+			on:logInPopover={() => (popOverOpen = true)}
 		/>
 	</div>
 </LogInPopover>
