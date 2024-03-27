@@ -69,8 +69,8 @@
 			await tick();
 
 			const bbox = anchorElement.getBoundingClientRect();
-			updateAlignment(bbox, window.outerWidth);
-			updatePlacement(bbox, window.outerHeight);
+			updateAlignment(bbox, window.innerWidth);
+			updatePlacement(bbox, window.innerHeight);
 
 			left = bbox.left + window.scrollX;
 			top = bbox.top + window.scrollY;
