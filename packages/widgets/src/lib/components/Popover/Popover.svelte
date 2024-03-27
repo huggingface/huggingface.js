@@ -127,10 +127,11 @@
 		<slot name="anchor" />
 	</span>
 
-	{#if anchorElement && open && isActive}
-		<div class={isTouchOnly ? "hidden sm:contents" : "contents"} use:portalToBody>
+	{#if anchorElement && open}
+		<div class="{isTouchOnly ? "hidden sm:contents" : "contents"}" use:portalToBody>
 			<div
-				class="pointer-events-none absolute bg-transparent"
+				class="pointer-events-none absolute bg-transparent hidden"
+				class:hidden={!isActive}
 				style:top="{top}px"
 				style:left="{left}px"
 				style:width="{width}px"
