@@ -3,7 +3,7 @@
 
 	import { delay, onCmdEnter } from "../../../../utils/ViewUtils.js";
 	import WidgetLabel from "../WidgetLabel/WidgetLabel.svelte";
-	import LogInPopover from "$lib/components/LogInPopover/LogInPopover.svelte";
+	import LogInPopover from "../../../LogInPopover/LogInPopover.svelte";
 	import { isLoggedIn } from "../../stores.js";
 
 	export let label: string = "";

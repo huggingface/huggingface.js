@@ -1,5 +1,5 @@
 <script lang="ts">
-	import LogInPopover from "$lib/components/LogInPopover/LogInPopover.svelte";
+	import LogInPopover from "../../../LogInPopover/LogInPopover.svelte";
 	import { createEventDispatcher } from "svelte";
 	import { onCmdEnter } from "../../../../utils/ViewUtils.js";
 	import WidgetLabel from "../WidgetLabel/WidgetLabel.svelte";
