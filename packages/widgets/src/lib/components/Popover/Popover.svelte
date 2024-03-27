@@ -56,7 +56,9 @@
 	function updateAlignment(anchorBbox: DOMRect, pageWidth: number) {
 		if (alignment === "auto" && pageWidth > 0) {
 			const popoverWidth = popoverElement.getBoundingClientRect().width;
-			if (anchorBbox.left + popoverWidth > pageWidth - HIT_ZONE_MARGIN) {
+			if (anchorBbox.left < HIT_ZONE_MARGIN) {
+				computedAlignment = "center";
+			} else if (anchorBbox.left + popoverWidth > pageWidth - HIT_ZONE_MARGIN) {
 				computedAlignment = "end";
 			} else {
 				computedAlignment = "start";
