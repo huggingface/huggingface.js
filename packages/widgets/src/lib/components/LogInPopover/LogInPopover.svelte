@@ -3,7 +3,7 @@
 	import IconHuggingFace from "../Icons/IconHuggingFace.svelte";
 	import { isLoggedIn } from "../InferenceWidget/stores.js";
 
-	export let placement: "top" | "bottom" | "auto" | "prefer-top" | "prefer-bottom" = "prefer-top";
+	export let placement: "top" | "bottom" | "auto" | "prefer-top" | "prefer-bottom" = "auto";
 	export let open = false;
 </script>
 

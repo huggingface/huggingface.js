@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { onMount, tick } from "svelte";
 	import { fade } from "svelte/transition";
-	import { debounce } from "../../utils/ViewUtils.js";
+	import { debounce, portalToBody } from "../../utils/ViewUtils.js";
 
 	export let classNames = "";
 	export let alignment: "start" | "center" | "end" | "auto" = "auto";
-	export let placement: "top" | "bottom" | "auto" | "prefer-top" | "prefer-bottom" = "prefer-top";
+	export let placement: "top" | "bottom" | "auto" | "prefer-top" | "prefer-bottom" = "auto";
 	export let open = false;
 	export let waitForContent = false;
 	export let size: "sm" | "md" = "md";
@@ -126,7 +126,7 @@
 	</span>
 
 	{#if anchorElement && open && isActive}
-		<div class={isTouchOnly ? "hidden sm:contents" : "contents"}>
+		<div class={isTouchOnly ? "hidden sm:contents" : "contents"} use:portalToBody>
 			<div
 				class="pointer-events-none absolute bg-transparent"
 				style:top="{top}px"
