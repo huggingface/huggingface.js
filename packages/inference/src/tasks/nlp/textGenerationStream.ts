@@ -79,6 +79,29 @@ export interface TextGenerationStreamOutput {
 	 * Only available when the generation is finished
 	 */
 	details: TextGenerationStreamDetails | null;
+	/**
+	 * If Message API compatible
+	 */
+	choices?: Choice[];
+}
+
+export interface Choice {
+	index: number;
+	delta: {
+		role: string;
+		content?: string;
+		tool_calls?: {
+			index: number;
+			id: string;
+			type: string;
+			function: {
+				name?: string;
+				arguments: string;
+			};
+		};
+	};
+	logprobs?: Record<string, unknown>;
+	finish_reason?: string;
 }
 
 /**

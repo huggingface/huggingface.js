@@ -14,9 +14,9 @@ type TaskWithNoAccessToken = {
 	) => ReturnType<Task[key]>;
 };
 
-type TaskWithNoAccessTokenNoModel = {
+type TaskWithNoAccessTokenNoEndpointUrl = {
 	[key in keyof Task]: (
-		args: DistributiveOmit<Parameters<Task[key]>[0], "accessToken" | "model">,
+		args: DistributiveOmit<Parameters<Task[key]>[0], "accessToken" | "endpointUrl">,
 		options?: Parameters<Task[key]>[1]
 	) => ReturnType<Task[key]>;
 };
@@ -57,7 +57,7 @@ export class HfInferenceEndpoint {
 				enumerable: false,
 				value: (params: RequestArgs, options: Options) =>
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					fn({ ...params, accessToken, model: endpointUrl } as any, { ...defaultOptions, ...options }),
+					fn({ ...params, accessToken, endpointUrl } as any, { ...defaultOptions, ...options }),
 			});
 		}
 	}
@@ -65,4 +65,4 @@ export class HfInferenceEndpoint {
 
 export interface HfInference extends TaskWithNoAccessToken {}
 
-export interface HfInferenceEndpoint extends TaskWithNoAccessTokenNoModel {}
+export interface HfInferenceEndpoint extends TaskWithNoAccessTokenNoEndpointUrl {}
