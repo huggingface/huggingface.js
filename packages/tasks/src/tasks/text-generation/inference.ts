@@ -47,6 +47,10 @@ export interface TextGenerationParameters {
 	 */
 	do_sample?: boolean;
 	/**
+	 * Grammar to use for generation.
+	 */
+	grammar?: Grammar;
+	/**
 	 * The maximum number of tokens to generate.
 	 */
 	max_new_tokens?: number;
@@ -95,6 +99,26 @@ export interface TextGenerationParameters {
 	watermark?: boolean;
 	[property: string]: unknown;
 }
+
+/**
+ * Grammar to use for generation.
+ *
+ * Grammar to use for generation
+ */
+export interface Grammar {
+	rules: unknown;
+	start: unknown;
+	type?: GrammarType;
+	value?: Value;
+	[property: string]: unknown;
+}
+
+/**
+ * The type of grammar to use for generation
+ */
+export type GrammarType = "json" | "regex";
+
+export type Value = { [key: string]: unknown } | string;
 
 /**
  * Outputs for Text Generation inference
