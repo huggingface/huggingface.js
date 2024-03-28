@@ -111,43 +111,39 @@
 
 <svelte:window on:resize={() => (open = false)} on:scroll={() => (open = false)} />
 
-<span class="inline-block w-full">
-	{#if anchorElement && open}
-		<div class={isTouchOnly ? "hidden sm:contents" : "contents"}>
+<div class={isTouchOnly ? "hidden sm:contents" : "contents"}>
+	<div
+		class="pointer-events-none absolute bg-transparent hidden"
+		class:hidden={!isActive}
+		style:top="{top}px"
+		style:left="{left}px"
+		style:width="{width}px"
+		style:height="{height}px"
+	>
+		<div
+			bind:this={popoverElement}
+			in:fade={{ duration: 100 }}
+			on:mouseleave={debouncedHide}
+			class="pointer-events-auto absolute z-10 transform
+				{computedPlacement === 'top' ? 'bottom-full -translate-y-3' : 'top-full translate-y-2.5'}
+				{computedAlignment === 'start' ? 'left-0' : computedAlignment === 'end' ? 'right-0' : 'left-1/2 -translate-x-1/2'}
+				{classNames}"
+		>
 			<div
-				class="pointer-events-none absolute bg-transparent hidden"
-				class:hidden={!isActive}
-				style:top="{top}px"
-				style:left="{left}px"
-				style:width="{width}px"
-				style:height="{height}px"
+				class="absolute z-0 rotate-45 transform
+					{size === 'sm' ? 'h-2 w-2' : 'h-2.5 w-2.5 rounded-sm'}
+					{invertedColors ? 'bg-black dark:bg-gray-800' : 'border bg-white shadow  dark:bg-gray-800'}
+					{computedPlacement === 'top' ? 'top-full -translate-y-1' : 'bottom-full translate-y-1'}
+					{computedAlignment === 'start' ? 'left-6' : computedAlignment === 'center' ? 'left-1/2' : 'right-6'}"
+			/>
+			<div
+				class="shadow-alternate-xl relative z-5 border font-normal leading-tight transition-opacity
+					{size === 'sm' ? 'rounded px-2 py-1.5' : 'rounded-xl p-4'}
+					{invertedColors ? 'border-black bg-black text-white dark:bg-gray-800' : 'bg-white text-black dark:bg-gray-925'}
+				"
 			>
-				<div
-					bind:this={popoverElement}
-					in:fade={{ duration: 100 }}
-					on:mouseleave={debouncedHide}
-					class="pointer-events-auto absolute z-10 transform
-						{computedPlacement === 'top' ? 'bottom-full -translate-y-3' : 'top-full translate-y-2.5'}
-						{computedAlignment === 'start' ? 'left-0' : computedAlignment === 'end' ? 'right-0' : 'left-1/2 -translate-x-1/2'}
-						{classNames}"
-				>
-					<div
-						class="absolute z-0 rotate-45 transform
-							{size === 'sm' ? 'h-2 w-2' : 'h-2.5 w-2.5 rounded-sm'}
-							{invertedColors ? 'bg-black dark:bg-gray-800' : 'border bg-white shadow  dark:bg-gray-800'}
-							{computedPlacement === 'top' ? 'top-full -translate-y-1' : 'bottom-full translate-y-1'}
-							{computedAlignment === 'start' ? 'left-6' : computedAlignment === 'center' ? 'left-1/2' : 'right-6'}"
-					/>
-					<div
-						class="shadow-alternate-xl relative z-5 border font-normal leading-tight transition-opacity
-							{size === 'sm' ? 'rounded px-2 py-1.5' : 'rounded-xl p-4'}
-							{invertedColors ? 'border-black bg-black text-white dark:bg-gray-800' : 'bg-white text-black dark:bg-gray-925'}
-						"
-					>
-						<slot />
-					</div>
-				</div>
+				<slot />
 			</div>
 		</div>
-	{/if}
-</span>
+	</div>
+</div>
