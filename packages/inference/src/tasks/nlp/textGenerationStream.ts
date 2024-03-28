@@ -100,6 +100,7 @@ export interface Choice {
 			};
 		};
 	};
+	message?: { role: string; content: string };
 	logprobs?: Record<string, unknown>;
 	finish_reason?: string;
 }

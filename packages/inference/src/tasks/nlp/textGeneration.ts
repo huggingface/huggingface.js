@@ -1,6 +1,6 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
+import type { Choice } from "./textGenerationStream";
 
 /**
  * Inputs for Text Generation inference
@@ -102,11 +102,16 @@ export interface TextGenerationOutput {
 	 * When enabled, details about the generation
 	 */
 	details?: TextGenerationOutputDetails;
+	[property: string]: unknown;
+
 	/**
 	 * The generated text
 	 */
-	generated_text: string;
-	[property: string]: unknown;
+	generated_text?: string;
+	/**
+	 * If Message API compatible
+	 */
+	choices?: Choice[];
 }
 
 /**
@@ -217,15 +222,7 @@ export async function textGeneration(
 		taskHint: "text-generation",
 	});
 	if (!Array.isArray(res)) {
-		const isValidOutput = Array.isArray(res) && res.every((x) => typeof x?.generated_text === "string");
-		if (!isValidOutput) {
-			throw new InferenceOutputError("Expected Array<{generated_text: string}>");
-		}
 		return res;
-	}
-	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x?.generated_text === "string");
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<{generated_text: string}>");
 	}
 	return res?.[0];
 }
