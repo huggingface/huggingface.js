@@ -137,8 +137,6 @@
 						{computedPlacement === 'top' ? 'bottom-full -translate-y-3' : 'top-full translate-y-2.5'}
 						{computedAlignment === 'start' ? 'left-0' : computedAlignment === 'end' ? 'right-0' : 'left-1/2 -translate-x-1/2'}
 						{classNames}"
-					style:left={computedAlignment === "start" ? `${popoverShift}px` : computedAlignment === "end" ? "auto" : ""}
-					style:right={computedAlignment === "end" ? `${popoverShift}px` : "auto"}
 				>
 					<div
 						class="absolute z-0 rotate-45 transform
