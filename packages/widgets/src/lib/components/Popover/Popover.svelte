@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, tick } from "svelte";
+	import { onMount, tick, createEventDispatcher } from "svelte";
 	import { fade } from "svelte/transition";
 	import { debounce } from "../../utils/ViewUtils.js";
 
@@ -7,7 +7,6 @@
 	export let anchorElement: HTMLElement;
 	export let alignment: "start" | "center" | "end" | "auto" = "auto";
 	export let placement: "top" | "bottom" | "auto" | "prefer-top" | "prefer-bottom" = "auto";
-	export let open = false;
 	export let waitForContent = false;
 	export let size: "sm" | "md" = "md";
 	export let invertedColors = false;
@@ -21,6 +20,8 @@
 
 	/// to prevent the toast from being too close to the edge of the screen
 	const HIT_ZONE_MARGIN = 80;
+
+	const dispatch = createEventDispatcher<{ close: void }>();
 
 	let computedAlignment = alignment === "auto" ? "center" : alignment;
 	let computedPlacement = placement === "auto" ? "bottom" : placement;
@@ -109,7 +110,7 @@
 	});
 </script>
 
-<svelte:window on:resize={() => (open = false)} on:scroll={() => (open = false)} />
+<svelte:window on:resize={() => dispatch("close")} on:scroll={() => dispatch("close")} />
 
 <div class={isTouchOnly ? "hidden sm:contents" : "contents"}>
 	<div

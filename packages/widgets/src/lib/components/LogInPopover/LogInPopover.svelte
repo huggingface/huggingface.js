@@ -13,7 +13,7 @@
 </div>
 
 {#if open && !$isLoggedIn}
-	<Popover classNames="w-80" {anchorElement} bind:open>
+	<Popover classNames="w-80" {anchorElement} on:close={() => (open = false)}>
 		<div class="flex items-center gap-x-3 text-sm leading-tight">
 			<IconHuggingFace classNames="text-5xl" />
 			Please login with your Hugging Face account to run the widgets.
