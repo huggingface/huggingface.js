@@ -64,7 +64,7 @@
 	type="file"
 />
 
-<LogInPopover placement="prefer-bottom" bind:open={popOverOpen}>
+<LogInPopover bind:open={popOverOpen}>
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<div
 		class="relative cursor-pointer rounded border-2 border-dashed px-3 py-7 text-center
