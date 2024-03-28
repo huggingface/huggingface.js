@@ -114,7 +114,7 @@
 
 <svelte:window on:resize={() => (open = false)} on:scroll={() => (open = false)} />
 
-<span>
+<span class="inline-block w-full">
 	<span class="contents" bind:this={wrapperElement}>
 		<slot name="anchor" />
 	</span>
