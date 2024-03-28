@@ -4,6 +4,7 @@
 	import { debounce } from "../../utils/ViewUtils.js";
 
 	export let classNames = "";
+	export let anchorElement: HTMLElement;
 	export let alignment: "start" | "center" | "end" | "auto" = "auto";
 	export let placement: "top" | "bottom" | "auto" | "prefer-top" | "prefer-bottom" = "auto";
 	export let open = false;
@@ -12,8 +13,6 @@
 	export let invertedColors = false;
 	export let touchOnly = false;
 
-	let wrapperElement: HTMLElement;
-	let anchorElement: HTMLElement;
 	let popoverElement: HTMLDivElement;
 
 	/// sizes of the arrow and its padding, needed to position the popover position correctly
@@ -97,8 +96,6 @@
 		isTouchOnly = touchOnly && window.matchMedia("(any-hover: none)").matches;
 
 		if (!isTouchOnly) {
-			/// be carefull only one child is supported in the wrapper
-			anchorElement = wrapperElement.children[0] as HTMLElement;
 			updatePosition();
 			if (anchorElement) {
 				anchorElement.addEventListener("mouseover", debouncedShow);
@@ -115,10 +112,6 @@
 <svelte:window on:resize={() => (open = false)} on:scroll={() => (open = false)} />
 
 <span class="inline-block w-full">
-	<span class="contents" bind:this={wrapperElement}>
-		<slot name="anchor" />
-	</span>
-
 	{#if anchorElement && open}
 		<div class={isTouchOnly ? "hidden sm:contents" : "contents"}>
 			<div
@@ -151,7 +144,7 @@
 							{invertedColors ? 'border-black bg-black text-white dark:bg-gray-800' : 'bg-white text-black dark:bg-gray-925'}
 						"
 					>
-						<slot name="content" />
+						<slot />
 					</div>
 				</div>
 			</div>
