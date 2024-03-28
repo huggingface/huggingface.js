@@ -212,11 +212,15 @@ export async function textGeneration(
 	args: BaseArgs & TextGenerationInput,
 	options?: Options
 ): Promise<TextGenerationOutput> {
-	const res = await request<TextGenerationOutput[]>(args, {
+	const res = await request<TextGenerationOutput[] | TextGenerationOutput>(args, {
 		...options,
 		taskHint: "text-generation",
 	});
-	if (typeof res === "object" && res.hasOwnProperty("choices")) {
+	if (!Array.isArray(res)) {
+		const isValidOutput = Array.isArray(res) && res.every((x) => typeof x?.generated_text === "string");
+		if (!isValidOutput) {
+			throw new InferenceOutputError("Expected Array<{generated_text: string}>");
+		}
 		return res;
 	}
 	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x?.generated_text === "string");
