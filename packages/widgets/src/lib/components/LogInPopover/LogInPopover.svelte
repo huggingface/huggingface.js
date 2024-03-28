@@ -4,11 +4,12 @@
 	import { isLoggedIn } from "../InferenceWidget/stores.js";
 
 	export let open = false;
+	export let classNames = "";
 
 	let anchorElement: HTMLElement;
 </script>
 
-<div bind:this={anchorElement}>
+<div bind:this={anchorElement} class={classNames}>
 	<slot />
 </div>
 
