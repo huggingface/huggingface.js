@@ -67,7 +67,7 @@
 	}
 
 	async function updatePosition() {
-		if (anchorElement && open && !waitForContent) {
+		if (anchorElement && !waitForContent) {
 			await tick();
 
 			const bbox = anchorElement.getBoundingClientRect();
