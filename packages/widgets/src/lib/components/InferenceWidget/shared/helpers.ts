@@ -104,10 +104,10 @@ export async function callInferenceApi<T>(
 	if (waitForModel) {
 		headers.set("X-Wait-For-Model", "true");
 	}
-	if (useCache === false && get(isLoggedIn) === true) {
+	if (useCache === false && get(isLoggedIn)) {
 		headers.set("X-Use-Cache", "false");
 	}
-	if (isOnLoadCall || get(isLoggedIn) === false) {
+	if (isOnLoadCall || !get(isLoggedIn)) {
 		headers.set("X-Load-Model", "0");
 	}
 

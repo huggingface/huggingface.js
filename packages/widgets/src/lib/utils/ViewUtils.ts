@@ -158,7 +158,6 @@ export function onCmdEnter(node: HTMLElement, opts: { disabled: boolean }): Acti
 
 /**
  * A debounce function that works in both browser and Nodejs.
- * For pure Nodejs work, prefer the `Debouncer` class.
  */
 export function debounce<T extends unknown[]>(callback: (...rest: T) => unknown, limit: number): (...rest: T) => void {
 	let timer: ReturnType<typeof setTimeout>;
