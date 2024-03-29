@@ -17,7 +17,6 @@ export const RE_SAFETENSORS_INDEX_FILE = /\.safetensors\.index\.json$/;
 export const RE_SAFETENSORS_SHARD_FILE = /\d{5}-of-\d{5}\.safetensors$/;
 const PARALLEL_DOWNLOADS = 5;
 const MAX_HEADER_LENGTH = 25_000_000;
-const RE_FILE_DIR = /(.+\/)[^/]*$/;
 
 class SafetensorParseError extends Error {}
 
@@ -140,7 +139,7 @@ async function parseShardedIndex(
 		throw new SafetensorParseError(`Failed to parse file ${path}: not a valid JSON.`);
 	}
 
-	const pathPrefix = path.match(RE_FILE_DIR)?.[1] ?? "";
+	const pathPrefix = path.substr(0, path.lastIndexOf("/") + 1);
 	const filenames = [...new Set(Object.values(index.weight_map))];
 	const shardedMap: SafetensorsShardedHeaders = Object.fromEntries(
 		await promisesQueue(
