@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount, tick, createEventDispatcher } from "svelte";
 	import { fade } from "svelte/transition";
-	import { debounce } from "../../utils/ViewUtils.js";
+	import { debounce, portalToBody } from "../../utils/ViewUtils.js";
 
 	export let classNames = "";
 	export let anchorElement: HTMLElement;
@@ -110,7 +110,7 @@
 
 <svelte:window on:resize={() => dispatch("close")} on:scroll={() => dispatch("close")} />
 
-<div class={isTouchOnly ? "hidden sm:contents" : "contents"}>
+<div class={isTouchOnly ? "hidden sm:contents" : "contents"} use:portalToBody>
 	<div
 		class="pointer-events-none absolute bg-transparent hidden"
 		class:hidden={!isActive}
