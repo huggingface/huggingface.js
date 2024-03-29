@@ -106,17 +106,15 @@ export interface TextGenerationParameters {
  * Grammar to use for generation
  */
 export interface Grammar {
-	rules: unknown;
-	start: unknown;
-	type?: GrammarType;
-	value?: Value;
+	type: TextGenerationGrammarType;
+	value: Value;
 	[property: string]: unknown;
 }
 
 /**
  * The type of grammar to use for generation
  */
-export type GrammarType = "json" | "regex";
+export type TextGenerationGrammarType = "json" | "regex";
 
 export type Value = { [key: string]: unknown } | string;
 

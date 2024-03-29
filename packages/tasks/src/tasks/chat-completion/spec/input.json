@@ -12,7 +12,7 @@
 				"type": "object",
 				"properties": {
 					"role": {
-						"$ref": "#/defs/Role"
+						"$ref": "#/$defs/Role"
 					},
 					"content": {
 						"type": "string",
@@ -32,7 +32,7 @@
 		},
 		"presence_penalty": {
 			"type": "number",
-			"description": "Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far, increasing the model's likelihood to talk about new topics."
+			"description": "Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far, increasing the model's likelihood to talk about new topics"
 		},
 		"max_tokens": {
 			"type": "integer",
@@ -58,7 +58,7 @@
 		"tools": {
 			"type": "array",
 			"items": {
-				"$ref": "#/defs/Tool"
+				"$ref": "#/$defs/Tool"
 			},
 			"description": "The tools to use for generation."
 		},
@@ -71,7 +71,7 @@
 			"description": "If set to < 1, only the smallest set of most probable tokens with probabilities that add up to `top_p` or higher are kept for generation."
 		}
 	},
-	"defs": {
+	"$defs": {
 		"Role": {
 			"oneOf": [{ "const": "assistant" }, { "const": "system" }, { "const": "user" }],
 			"title": "ChatCompletionMessageRole",

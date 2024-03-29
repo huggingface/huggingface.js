@@ -9,14 +9,19 @@
  */
 export interface ChatCompletionInput {
 	/**
+	 * Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing
+	 * frequency in the text so far, decreasing the model's likelihood to repeat the same line
+	 * verbatim.
+	 */
+	frequency_penalty?: number;
+	/**
 	 * The maximum number of tokens that can be generated in the chat completion.
 	 */
 	max_tokens?: number;
 	messages: ChatCompletionInputMessage[];
 	/**
-	 * Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing
-	 * frequency in the text so far, decreasing the model's likelihood to repeat the same line
-	 * verbatim.
+	 * Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they
+	 * appear in the text so far, increasing the model's likelihood to talk about new topics
 	 */
 	presence_penalty?: number;
 	/**
@@ -57,7 +62,8 @@ export interface ChatCompletionInputMessage {
 	 */
 	content: string;
 	/**
-	 * The name of the message.
+	 * The name of the message. Provides the model information to differentiate between
+	 * participants of the same role.
 	 */
 	name?: string;
 	role: ChatCompletionMessageRole;
@@ -103,6 +109,8 @@ export interface ChatCompletionOutput {
 	 * The Unix timestamp (in seconds) of when the chat completion was created.
 	 */
 	created: number;
+	system_fingerprint?: string;
+	usage?: ChatCompletionUsage;
 	[property: string]: unknown;
 }
 
@@ -115,7 +123,7 @@ export interface ChatCompletionOutputChoice {
 	 * The index of the choice in the list of choices.
 	 */
 	index: number;
-	message: ChatCompletionOutputChoiceMessage;
+	message: ChatCompletionOutputMessage;
 	[property: string]: unknown;
 }
 
@@ -130,12 +138,17 @@ export interface ChatCompletionOutputChoice {
  */
 export type ChatCompletionFinishReason = "length" | "eos_token" | "stop_sequence";
 
-export interface ChatCompletionOutputChoiceMessage {
-	/**
-	 * The content of the chat completion message.
-	 */
+export interface ChatCompletionOutputMessage {
 	content: string;
-	role: ChatCompletionMessageRole;
+	name?: string;
+	role: string;
+	[property: string]: unknown;
+}
+
+export interface ChatCompletionUsage {
+	completion_tokens: number;
+	prompt_tokens: number;
+	total_tokens: number;
 	[property: string]: unknown;
 }
 

@@ -28,7 +28,7 @@
 						}
 					},
 					"finish_reason": {
-						"$ref": "/inference/schemas/chat-completion/output.json#/definitions/FinishReason",
+						"$ref": "/inference/schemas/chat-completion/output.json#/$defs/FinishReason",
 						"description": "The reason why the generation was stopped."
 					},
 					"index": {
