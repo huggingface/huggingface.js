@@ -77,7 +77,7 @@
 			return;
 		}
 
-		inferenceClient = new HfInference(apiToken, { ...(!$isLoggedIn && { use_cache: true, dont_load_model: true }) });
+		inferenceClient = new HfInference(apiToken);
 	});
 
 	async function handleNewMessage(): Promise<void> {
@@ -152,10 +152,10 @@
 		error = "";
 		try {
 			const opts = {
-				dont_load_model: isOnLoadCall,
+				dont_load_model: isOnLoadCall || !$isLoggedIn,
 				includeCredentials,
 				signal: abort?.signal,
-				use_cache: useCache,
+				use_cache: useCache || !$isLoggedIn,
 				wait_for_model: withModelLoading,
 			} satisfies Options;
 
