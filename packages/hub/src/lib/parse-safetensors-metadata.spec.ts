@@ -7,6 +7,7 @@ describe("parseSafetensorsMetadata", () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "bert-base-uncased",
 			computeParametersCount: true,
+			revision: "86b5e0934494bd15c9632b12f734a8a67f723594",
 		});
 
 		assert(!parse.sharded);
@@ -29,6 +30,7 @@ describe("parseSafetensorsMetadata", () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "bigscience/bloom",
 			computeParametersCount: true,
+			revision: "053d9cd9fbe814e091294f67fcfedb3397b954bb",
 		});
 
 		assert(parse.sharded);
@@ -53,6 +55,7 @@ describe("parseSafetensorsMetadata", () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "roberta-base",
 			computeParametersCount: true,
+			revision: "e2da8e2f811d1448a5b465c236feacd80ffbac7b",
 		});
 
 		assert(!parse.sharded);
@@ -67,6 +70,7 @@ describe("parseSafetensorsMetadata", () => {
 			repo: "CompVis/stable-diffusion-v1-4",
 			computeParametersCount: true,
 			path: "unet/diffusion_pytorch_model.safetensors",
+			revision: "133a221b8aa7292a167afc5127cb63fb5005638b",
 		});
 
 		assert(!parse.sharded);
@@ -89,6 +93,7 @@ describe("parseSafetensorsMetadata", () => {
 			repo: "Alignment-Lab-AI/ALAI-gemma-7b",
 			computeParametersCount: true,
 			path: "7b/1/model.safetensors.index.json",
+			revision: "37e307261fe97bbf8b2463d61dbdd1a10daa264c",
 		});
 
 		assert(parse.sharded);
