@@ -21,7 +21,7 @@
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
 	import { addInferenceParameters, updateUrl } from "../../shared/helpers.js";
-	import { widgetStates, getTgiSupportedModels } from "../../stores.js";
+	import { widgetStates, getTgiSupportedModels, isLoggedIn } from "../../stores.js";
 	import type { Writable } from "svelte/store";
 	import { isChatInput, isTextInput } from "../../shared/inputValidation.js";
 	import { isValidOutputText } from "../../shared/outputValidation.js";
@@ -77,7 +77,7 @@
 			return;
 		}
 
-		inferenceClient = new HfInference(apiToken);
+		inferenceClient = new HfInference(apiToken, { ...(!$isLoggedIn && { use_cache: true, dont_load_model: true }) });
 	});
 
 	async function handleNewMessage(): Promise<void> {
