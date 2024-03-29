@@ -95,7 +95,7 @@
 			}
 		},
 		"GrammarType": {
-			"title": "GrammarType",
+			"title": "TextGenerationGrammarType",
 			"type": "string",
 			"description": "The type of grammar to use for generation",
 			"enum": ["json", "regex"]
