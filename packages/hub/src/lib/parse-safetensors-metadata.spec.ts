@@ -83,4 +83,25 @@ describe("parseSafetensorsMetadata", () => {
 		assert.deepStrictEqual(parse.parameterCount, { F32: 859_520_964 });
 		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 859_520_964);
 	});
+
+	it("fetch info for sharded (with the default conventional filename) with file path", async () => {
+		const parse = await parseSafetensorsMetadata({
+			repo: "Alignment-Lab-AI/ALAI-gemma-7b",
+			computeParametersCount: true,
+			path: "7b/1/model.safetensors.index.json",
+		});
+
+		assert(parse.sharded);
+
+		assert.strictEqual(Object.keys(parse.headers).length, 4);
+
+		assert.deepStrictEqual(parse.headers["model-00004-of-00004.safetensors"]["model.layers.24.mlp.up_proj.weight"], {
+			dtype: "BF16",
+			shape: [24576, 3072],
+			data_offsets: [301996032, 452990976],
+		});
+
+		assert.deepStrictEqual(parse.parameterCount, { BF16: 8_537_680_896 });
+		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 8_537_680_896);
+	});
 });
