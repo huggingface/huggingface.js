@@ -101,7 +101,7 @@
 			"enum": ["json", "regex"]
 		},
 		"Grammar": {
-			"title": "Grammar",
+			"title": "TextGenerationGrammar",
 			"type": "object",
 			"description": "Grammar to use for generation",
 			"properties": {
