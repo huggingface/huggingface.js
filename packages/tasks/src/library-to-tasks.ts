@@ -2,13 +2,13 @@ import type { ModelLibraryKey } from "./model-libraries";
 import type { PipelineType } from "./pipelines";
 
 /**
- * Mapping from library name (excluding Transformers) to its supported tasks.
+ * Mapping from library name to its supported tasks.
  * Inference API (serverless) should be disabled for all other (library, task) pairs beyond this mapping.
- * As an exception, we assume Transformers supports all inference tasks.
- * This mapping is generated automatically by "python-api-export-tasks" action in huggingface/api-inference-community repo upon merge.
- * Ref: https://github.com/huggingface/api-inference-community/pull/158
+ * This mapping is partially generated automatically by "python-api-export-tasks" action in
+ * huggingface/api-inference-community repo upon merge. For transformers, the mapping is manually
+ * based on api-inference.
  */
-export const LIBRARY_TASK_MAPPING_EXCLUDING_TRANSFORMERS: Partial<Record<ModelLibraryKey, PipelineType[]>> = {
+export const LIBRARY_TASK_MAPPING: Partial<Record<ModelLibraryKey, PipelineType[]>> = {
 	"adapter-transformers": ["question-answering", "text-classification", "token-classification"],
 	allennlp: ["question-answering"],
 	asteroid: [
