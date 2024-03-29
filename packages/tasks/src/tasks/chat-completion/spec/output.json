@@ -57,7 +57,7 @@
 		},
 		"Message": {
 			"type": "object",
-			"title": "ChatCompletionOutputMessage",
+			"title": "ChatCompletionOutputChoiceMessage",
 			"properties": {
 				"content": {
 					"type": "string",

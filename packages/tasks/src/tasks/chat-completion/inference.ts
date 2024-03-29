@@ -123,7 +123,7 @@ export interface ChatCompletionOutputChoice {
 	 * The index of the choice in the list of choices.
 	 */
 	index: number;
-	message: ChatCompletionOutputMessage;
+	message: ChatCompletionOutputChoiceMessage;
 	[property: string]: unknown;
 }
 
@@ -138,7 +138,7 @@ export interface ChatCompletionOutputChoice {
  */
 export type ChatCompletionFinishReason = "length" | "eos_token" | "stop_sequence";
 
-export interface ChatCompletionOutputMessage {
+export interface ChatCompletionOutputChoiceMessage {
 	content: string;
 	name?: string;
 	role: string;
