@@ -119,7 +119,7 @@
 					]
 				}
 			},
-			"required": ["rules", "start"]
+			"required": ["type", "value"]
 		}
 	},
 	"required": ["inputs"]
