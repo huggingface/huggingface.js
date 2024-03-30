@@ -655,12 +655,10 @@ describe.concurrent(
 			const res = await ep.textGeneration({
 				model: "tgi",
 				messages: [{ role: "user", content: "Complete the this sentence with words one plus one is equal " }],
-				parameters: {
-					max_tokens: 500,
-					return_full_text: false,
-					temperature: 0.0,
-					seed: 0,
-				},
+				max_tokens: 500,
+				return_full_text: false,
+				temperature: 0.1,
+				seed: 0,
 			});
 			if (res.choices && res.choices.length > 0) {
 				const completion = res.choices[0].message?.content;
