@@ -672,12 +672,10 @@ describe.concurrent(
 			const stream = ep.textGenerationStream({
 				model: "tgi",
 				messages: [{ role: "user", content: "Complete the equation 1+1= ,just the answer" }],
-				parameters: {
-					max_tokens: 500,
-					return_full_text: false,
-					temperature: 0.0,
-					seed: 0,
-				},
+				max_tokens: 500,
+				return_full_text: false,
+				temperature: 0.1,
+				seed: 0,
 			});
 			let out = "";
 			for await (const chunk of stream) {
