@@ -92,6 +92,8 @@ export type {
 	TextGenerationParameters,
 	TextGenerationOutputSequenceDetails,
 	TextGenerationOutputToken,
+	TextGenerationStreamDetails,
+	TextGenerationStreamOutput,
 } from "./text-generation/inference";
 export type * from "./video-classification/inference";
 export type * from "./visual-question-answering/inference";
