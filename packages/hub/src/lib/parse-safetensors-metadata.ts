@@ -14,6 +14,7 @@ export const SAFETENSORS_INDEX_FILE = "model.safetensors.index.json";
 /// but in some situations safetensors weights have different filenames.
 export const RE_SAFETENSORS_FILE = /\.safetensors$/;
 export const RE_SAFETENSORS_INDEX_FILE = /\.safetensors\.index\.json$/;
+export const RE_SAFETENSORS_SHARD_FILE = /\d{5}-of-\d{5}\.safetensors$/;
 const PARALLEL_DOWNLOADS = 5;
 const MAX_HEADER_LENGTH = 25_000_000;
 
@@ -138,12 +139,13 @@ async function parseShardedIndex(
 		throw new SafetensorParseError(`Failed to parse file ${path}: not a valid JSON.`);
 	}
 
+	const pathPrefix = path.substr(0, path.lastIndexOf("/") + 1);
 	const filenames = [...new Set(Object.values(index.weight_map))];
 	const shardedMap: SafetensorsShardedHeaders = Object.fromEntries(
 		await promisesQueue(
 			filenames.map(
 				(filename) => async () =>
-					[filename, await parseSingleFile(filename, params)] satisfies [string, SafetensorsFileHeader]
+					[filename, await parseSingleFile(pathPrefix + filename, params)] satisfies [string, SafetensorsFileHeader]
 			),
 			PARALLEL_DOWNLOADS
 		)

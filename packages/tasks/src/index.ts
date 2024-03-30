@@ -1,4 +1,4 @@
-export { LIBRARY_TASK_MAPPING_EXCLUDING_TRANSFORMERS } from "./library-to-tasks";
+export { LIBRARY_TASK_MAPPING } from "./library-to-tasks";
 export { MAPPING_DEFAULT_WIDGET } from "./default-widget-inputs";
 export type { TaskData, TaskDemo, TaskDemoEntry, ExampleRepo } from "./tasks";
 export * from "./tasks";
