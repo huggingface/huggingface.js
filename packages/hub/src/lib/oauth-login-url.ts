@@ -122,7 +122,7 @@ export async function oauthLoginUrl(opts?: {
 
 	return `${opendidConfig.authorization_endpoint}?${new URLSearchParams({
 		client_id: clientId,
-		scope: opts?.scopes || "openid profile",
+		scope: opts?.scopes || variables?.OAUTH_SCOPES || "openid profile",
 		response_type: "code",
 		redirect_uri: redirectUri,
 		state,
