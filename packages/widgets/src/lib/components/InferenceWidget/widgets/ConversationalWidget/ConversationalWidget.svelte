@@ -21,7 +21,7 @@
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
 	import { addInferenceParameters, updateUrl } from "../../shared/helpers.js";
-	import { widgetStates, getTgiSupportedModels } from "../../stores.js";
+	import { widgetStates, getTgiSupportedModels, isLoggedIn } from "../../stores.js";
 	import type { Writable } from "svelte/store";
 	import { isChatInput, isTextInput } from "../../shared/inputValidation.js";
 	import { isValidOutputText } from "../../shared/outputValidation.js";
@@ -152,10 +152,10 @@
 		error = "";
 		try {
 			const opts = {
-				dont_load_model: isOnLoadCall,
+				dont_load_model: isOnLoadCall || !$isLoggedIn,
 				includeCredentials,
 				signal: abort?.signal,
-				use_cache: useCache,
+				use_cache: useCache || !$isLoggedIn,
 				wait_for_model: withModelLoading,
 			} satisfies Options;
 

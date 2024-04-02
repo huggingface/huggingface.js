@@ -6,6 +6,7 @@
 	import ModeSwitcher from "$lib/components/DemoThemeSwitcher/DemoThemeSwitcher.svelte";
 	import { onMount } from "svelte";
 	import { browser } from "$app/environment";
+	import { isLoggedIn } from "$lib/components/InferenceWidget/stores.js";
 
 	export let data;
 	let apiToken = data.session?.access_token || "";
@@ -627,6 +628,12 @@
 			<input class="form-input" type="text" bind:value={apiToken} placeholder="hf_..." on:change={storeHFToken} />
 		</label>
 	{/if}
+	<label>
+		<div class="text-xl font-semibold">
+			isLoggedIn <span class="text-sm">(simulate isLoggedIn store by toggling)</span>
+		</div>
+		<input type="checkbox" bind:checked={$isLoggedIn} />
+	</label>
 
 	<div>
 		<h1 class="mb-8 text-4xl font-semibold">Showcase of all types of inference widgets running</h1>
