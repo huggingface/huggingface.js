@@ -139,7 +139,7 @@ async function parseShardedIndex(
 		throw new SafetensorParseError(`Failed to parse file ${path}: not a valid JSON.`);
 	}
 
-	const pathPrefix = path.substr(0, path.lastIndexOf("/") + 1);
+	const pathPrefix = path.slice(0, path.lastIndexOf("/") + 1);
 	const filenames = [...new Set(Object.values(index.weight_map))];
 	const shardedMap: SafetensorsShardedHeaders = Object.fromEntries(
 		await promisesQueue(
