@@ -222,7 +222,7 @@ describe("gguf", () => {
 	});
 
 	it("should detect sharded gguf filename", async () => {
-		const ggufPath = "grok-1/grok-1-q4_0-00003-of-00009.gguf";
+		const ggufPath = "grok-1/grok-1-q4_0-00003-of-00009.gguf"; // https://huggingface.co/ggml-org/models/blob/fcf344adb9686474c70e74dd5e55465e9e6176ef/grok-1/grok-1-q4_0-00003-of-00009.gguf
 		const match = ggufPath.match(RE_GGUF_SHARD_FILE);
 
 		expect(RE_GGUF_SHARD_FILE.test(ggufPath)).toEqual(true);
