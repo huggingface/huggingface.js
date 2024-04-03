@@ -49,6 +49,7 @@ export const LIBRARY_TASK_MAPPING: Partial<Record<ModelLibraryKey, PipelineType[
 		"automatic-speech-recognition",
 		"depth-estimation",
 		"document-question-answering",
+		"feature-extraction",
 		"fill-mask",
 		"image-classification",
 		"image-segmentation",
