@@ -5,6 +5,7 @@ export type { MetadataBaseValue, MetadataValue, Version, GGUFMetadata, GGUFTenso
 export { GGUFValueType, GGMLQuantizationType } from "./types";
 
 export const RE_GGUF_FILE = /\.gguf$/;
+export const RE_GGUF_SHARD_FILE = /-(\d{5})-of-(\d{5})\.gguf$/;
 
 const isVersion = (version: number): version is Version => version === 1 || version === 2 || version === 3;
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { GGMLQuantizationType, gguf } from "./gguf";
+import { GGMLQuantizationType, RE_GGUF_SHARD_FILE, gguf } from "./gguf";
 
 const URL_LLAMA = "https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/191239b/llama-2-7b-chat.Q2_K.gguf";
 const URL_MISTRAL_7B =
@@ -219,5 +219,14 @@ describe("gguf", () => {
 			shape: [64n, 512n],
 			dtype: GGMLQuantizationType.F32,
 		});
+	});
+
+	it("should detect sharded gguf filename", async () => {
+		const ggufPath = "grok-1/grok-1-q4_0-00003-of-00009.gguf";
+		const match = ggufPath.match(RE_GGUF_SHARD_FILE);
+
+		expect(RE_GGUF_SHARD_FILE.test(ggufPath)).toEqual(true);
+		expect(match?.[1]).toEqual("00003");
+		expect(match?.[2]).toEqual("00009");
 	});
 });
