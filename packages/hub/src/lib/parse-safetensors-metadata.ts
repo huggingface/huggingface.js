@@ -15,7 +15,7 @@ export const SAFETENSORS_INDEX_FILE = "model.safetensors.index.json";
 export const RE_SAFETENSORS_FILE = /\.safetensors$/;
 export const RE_SAFETENSORS_INDEX_FILE = /\.safetensors\.index\.json$/;
 export const RE_SAFETENSORS_SHARD_FILE = /\d{5}-of-\d{5}\.safetensors$/;
-const PARALLEL_DOWNLOADS = 5;
+const PARALLEL_DOWNLOADS = 40;
 const MAX_HEADER_LENGTH = 25_000_000;
 
 class SafetensorParseError extends Error {}
