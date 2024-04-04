@@ -1,5 +1,5 @@
 import { assert, it, describe } from "vitest";
-import { parseSafetensorsMetadata } from "./parse-safetensors-metadata";
+import { RE_SAFETENSORS_SHARD_FILE, parseSafetensorsMetadata } from "./parse-safetensors-metadata";
 import { sum } from "../utils/sum";
 
 describe("parseSafetensorsMetadata", () => {
@@ -108,5 +108,20 @@ describe("parseSafetensorsMetadata", () => {
 
 		assert.deepStrictEqual(parse.parameterCount, { BF16: 8_537_680_896 });
 		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 8_537_680_896);
+	});
+
+	it("should detect sharded safetensors filename", async () => {
+		const safetensorsPath = "model00002-of-00072.safetensors"; // https://huggingface.co/bigscience/bloom/blob/4d8e28c67403974b0f17a4ac5992e4ba0b0dbb6f/model_00002-of-00072.safetensors
+		const match = safetensorsPath.match(RE_SAFETENSORS_SHARD_FILE);
+
+		assert.strictEqual(RE_SAFETENSORS_SHARD_FILE.test(safetensorsPath), true);
+		assert.strictEqual(match?.[1], "00002");
+		assert.strictEqual(match?.[2], "00072");
+
+		const safetensorsPathWithDash = "model-00002-of-00072.safetensors"; // https://huggingface.co/google/gemma-7b/blob/7aeedade2bfdf69adddb754cff0461e74541e436/model-00001-of-00004.safetensors
+		assert.strictEqual(RE_SAFETENSORS_SHARD_FILE.test(safetensorsPathWithDash), true);
+
+		const safetensorsPathWithUnderscore = "model_00002-of-00072.safetensors"; // https://huggingface.co/bigscience/bloom/blob/4d8e28c67403974b0f17a4ac5992e4ba0b0dbb6f/model_00002-of-00072.safetensors
+		assert.strictEqual(RE_SAFETENSORS_SHARD_FILE.test(safetensorsPathWithUnderscore), true);
 	});
 });
