@@ -44,7 +44,7 @@ pnpm i
 pnpm build
 ```
 
-And then inside moon, run the following command for both `server` &  `front`:
+And then inside moon, run the following command for both `server` & `front`:
 
 ```console
 npm i --save @huggingface/widgets@<relative path to huggingface.js/packages/widgets>
