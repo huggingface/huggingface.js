@@ -65,8 +65,15 @@
 		}
 		tokenizerConfig = config.tokenizer_config;
 
-		const chatTemplate = tokenizerConfig.chat_template;
+		let chatTemplate = tokenizerConfig.chat_template;
 		if (chatTemplate === undefined) {
+			error = "No chat template found in tokenizer config";
+			return;
+		}
+		if (Array.isArray(chatTemplate)) {
+			chatTemplate = chatTemplate.find((template) => template.name === "default")?.name ?? chatTemplate[0]?.name;
+		}
+		if (!chatTemplate) {
 			error = "No chat template found in tokenizer config";
 			return;
 		}
