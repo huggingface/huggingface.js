@@ -8,6 +8,7 @@ import documentQuestionAnswering from "./document-question-answering/data";
 import featureExtraction from "./feature-extraction/data";
 import fillMask from "./fill-mask/data";
 import imageClassification from "./image-classification/data";
+import imageFeatureExtraction from "./image-feature-extraction/data";
 import imageToImage from "./image-to-image/data";
 import imageToText from "./image-to-text/data";
 import imageSegmentation from "./image-segmentation/data";
@@ -200,6 +201,7 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"fill-mask": getData("fill-mask", fillMask),
 	"graph-ml": undefined,
 	"image-classification": getData("image-classification", imageClassification),
+	"image-feature-extraction": getData("image-feature-extraction", imageFeatureExtraction),
 	"image-segmentation": getData("image-segmentation", imageSegmentation),
 	"image-text-to-text": undefined,
 	"image-to-image": getData("image-to-image", imageToImage),
@@ -239,7 +241,6 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"zero-shot-object-detection": getData("zero-shot-object-detection", zeroShotObjectDetection),
 	"text-to-3d": getData("text-to-3d", placeholder),
 	"image-to-3d": getData("image-to-3d", placeholder),
-	"image-feature-extraction": getData("image-feature-extraction", placeholder),
 } as const;
 
 export interface ExampleRepo {
