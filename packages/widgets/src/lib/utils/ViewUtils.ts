@@ -1,4 +1,5 @@
 import type { PipelineType } from "@huggingface/tasks";
+import type { ActionReturn } from "svelte/action";
 
 const ESCAPED = {
 	'"': "&quot;",
@@ -126,6 +127,69 @@ export function hexToRgb(hex: string): number[] {
 // Get the Task id corresponding to the modelPipeline (should be === in 99% cases)
 export function getPipelineTask(modelPipeline: PipelineType): PipelineType {
 	return modelPipeline === "text2text-generation" ? "text-generation" : modelPipeline;
+}
+
+/**
+ * Svelte action that will call inference endpoint when a user hits cmd+Enter on a current html element
+ */
+export function onCmdEnter(node: HTMLElement, opts: { disabled: boolean }): ActionReturn {
+	let currentOpts = opts;
+
+	function onKeyDown(e: KeyboardEvent) {
+		if ((node as HTMLInputElement)?.disabled || currentOpts.disabled) {
+			return;
+		}
+		// run inference on cmd+Enter
+		if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+			e.preventDefault();
+			node.dispatchEvent(new CustomEvent("cmdEnter"));
+		}
+	}
+	node.addEventListener("keydown", onKeyDown);
+	return {
+		update(updatedOps: { disabled: boolean }) {
+			currentOpts = updatedOps;
+		},
+		destroy() {
+			node.removeEventListener("keydown", onKeyDown);
+		},
+	};
+}
+
+/**
+ * A debounce function that works in both browser and Nodejs.
+ */
+export function debounce<T extends unknown[]>(callback: (...rest: T) => unknown, limit: number): (...rest: T) => void {
+	let timer: ReturnType<typeof setTimeout>;
+
+	return function (...rest) {
+		clearTimeout(timer);
+		timer = setTimeout(() => {
+			callback(...rest);
+		}, limit);
+	};
+}
+
+/**
+ * Teleports the children of a node to another node....
+ */
+export function portal(node: HTMLElement, targetNode: HTMLElement): { destroy: () => void } {
+	const portalChildren = [...node.children];
+	targetNode.append(...portalChildren);
+	return {
+		destroy() {
+			for (const portalChild of portalChildren) {
+				portalChild.remove();
+			}
+		},
+	};
+}
+
+/**
+ * Teleports the children of a node under the body element
+ */
+export function portalToBody(node: HTMLElement): { destroy: () => void } {
+	return portal(node, document.body);
 }
 
 /**

@@ -93,6 +93,8 @@ export type {
 	TextGenerationParameters,
 	TextGenerationOutputSequenceDetails,
 	TextGenerationOutputToken,
+	TextGenerationStreamDetails,
+	TextGenerationStreamOutput,
 } from "./text-generation/inference";
 export type * from "./video-classification/inference";
 export type * from "./visual-question-answering/inference";
@@ -113,7 +115,7 @@ import type { ModelLibraryKey } from "../model-libraries";
  */
 export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	"audio-classification": ["speechbrain", "transformers", "transformers.js"],
-	"audio-to-audio": ["asteroid", "speechbrain"],
+	"audio-to-audio": ["asteroid", "fairseq", "speechbrain"],
 	"automatic-speech-recognition": ["espnet", "nemo", "speechbrain", "transformers", "transformers.js"],
 	"depth-estimation": ["transformers", "transformers.js"],
 	"document-question-answering": ["transformers", "transformers.js"],

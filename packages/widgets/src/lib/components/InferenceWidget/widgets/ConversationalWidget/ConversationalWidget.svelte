@@ -21,7 +21,7 @@
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
 	import { addInferenceParameters, updateUrl } from "../../shared/helpers.js";
-	import { widgetStates, getTgiSupportedModels } from "../../stores.js";
+	import { widgetStates, getTgiSupportedModels, isLoggedIn } from "../../stores.js";
 	import type { Writable } from "svelte/store";
 	import { isChatInput, isTextInput } from "../../shared/inputValidation.js";
 	import { isValidOutputText } from "../../shared/outputValidation.js";
@@ -65,8 +65,16 @@
 		}
 		tokenizerConfig = config.tokenizer_config;
 
-		const chatTemplate = tokenizerConfig.chat_template;
+		let chatTemplate = tokenizerConfig.chat_template;
 		if (chatTemplate === undefined) {
+			error = "No chat template found in tokenizer config";
+			return;
+		}
+		if (Array.isArray(chatTemplate)) {
+			chatTemplate =
+				chatTemplate.find((template) => template.name === "default")?.template ?? chatTemplate[0]?.template;
+		}
+		if (!chatTemplate) {
 			error = "No chat template found in tokenizer config";
 			return;
 		}
@@ -152,10 +160,10 @@
 		error = "";
 		try {
 			const opts = {
-				dont_load_model: isOnLoadCall,
+				dont_load_model: isOnLoadCall || !$isLoggedIn,
 				includeCredentials,
 				signal: abort?.signal,
-				use_cache: useCache,
+				use_cache: useCache || !$isLoggedIn,
 				wait_for_model: withModelLoading,
 			} satisfies Options;
 
@@ -214,24 +222,16 @@
 	}
 
 	async function applyWidgetExample(example: Example, opts: ExampleRunOpts = {}): Promise<void> {
-		if (isLoading) {
+		if ("text" in example) {
+			messages = [{ role: "user", content: example.text }];
+		} else {
+			messages = [...example.messages];
+		}
+		if (opts.isPreview) {
 			return;
 		}
-		isLoading = true;
-		try {
-			if ("text" in example) {
-				messages = [{ role: "user", content: example.text }];
-			} else {
-				messages = [...example.messages];
-			}
-			if (opts.isPreview) {
-				return;
-			}
-			const exampleOutput = example.output;
-			await getOutput({ ...opts.inferenceOpts, exampleOutput });
-		} finally {
-			isLoading = false;
-		}
+		const exampleOutput = example.output;
+		await getOutput({ ...opts.inferenceOpts, exampleOutput });
 	}
 
 	function validateExample(sample: WidgetExample): sample is Example {
@@ -268,6 +268,7 @@
 		{isDisabled}
 		onClickSubmitBtn={handleNewMessage}
 		submitButtonLabel="Send"
+		on:cmdEnter={handleNewMessage}
 	/>
 
 	<WidgetInfo {model} {error} />

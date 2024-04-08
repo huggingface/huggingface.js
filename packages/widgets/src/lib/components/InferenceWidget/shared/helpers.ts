@@ -2,6 +2,8 @@ import type { ModelData, WidgetExampleAttribute } from "@huggingface/tasks";
 import { parseJSON } from "../../../utils/ViewUtils.js";
 import { ComputeType, type ModelLoadInfo, type TableData } from "./types.js";
 import { LoadState } from "./types.js";
+import { isLoggedIn } from "../stores.js";
+import { get } from "svelte/store";
 
 const KEYS_TEXT: WidgetExampleAttribute[] = ["text", "context", "candidate_labels"];
 const KEYS_TABLE: WidgetExampleAttribute[] = ["table", "structured_data"];
@@ -102,10 +104,10 @@ export async function callInferenceApi<T>(
 	if (waitForModel) {
 		headers.set("X-Wait-For-Model", "true");
 	}
-	if (useCache === false) {
+	if (useCache === false && get(isLoggedIn)) {
 		headers.set("X-Use-Cache", "false");
 	}
-	if (isOnLoadCall) {
+	if (isOnLoadCall || !get(isLoggedIn)) {
 		headers.set("X-Load-Model", "0");
 	}
 
