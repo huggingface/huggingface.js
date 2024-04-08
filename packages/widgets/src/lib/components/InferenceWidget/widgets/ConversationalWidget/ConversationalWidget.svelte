@@ -71,7 +71,7 @@
 			return;
 		}
 		if (Array.isArray(chatTemplate)) {
-			chatTemplate = chatTemplate.find((template) => template.name === "default")?.name ?? chatTemplate[0]?.name;
+			chatTemplate = chatTemplate.find((template) => template.name === "default")?.template ?? chatTemplate[0]?.template;
 		}
 		if (!chatTemplate) {
 			error = "No chat template found in tokenizer config";
