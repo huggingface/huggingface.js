@@ -1,6 +1,8 @@
 <script lang="ts">
+	import LogInPopover from "../../../LogInPopover/LogInPopover.svelte";
 	import IconSpin from "../../../Icons/IconSpin.svelte";
 	import { getBlobFromUrl } from "../../shared/helpers.js";
+	import { isLoggedIn } from "../../stores.js";
 
 	export let accept = "image/*";
 	export let classNames = "";
@@ -13,6 +15,7 @@
 
 	let fileInput: HTMLInputElement;
 	let isDragging = false;
+	let popOverOpen = false;
 
 	function onChange() {
 		const file = fileInput.files?.[0];
@@ -23,6 +26,12 @@
 
 	async function onDrop(e: DragEvent) {
 		isDragging = false;
+
+		if (!$isLoggedIn) {
+			popOverOpen = true;
+			return;
+		}
+
 		const itemList = e.dataTransfer?.items;
 		if (!itemList || isLoading) {
 			return;
@@ -54,36 +63,43 @@
 	style="display: none;"
 	type="file"
 />
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<div
-	class="relative cursor-pointer rounded border-2 border-dashed px-3 py-7 text-center
+
+<LogInPopover bind:open={popOverOpen}>
+	<!-- svelte-ignore a11y-click-events-have-key-events -->
+	<div
+		class="relative cursor-pointer rounded border-2 border-dashed px-3 py-7 text-center
 		{isDisabled ? 'pointer-events-none' : ''}
 		{isDragging ? 'border-green-300 bg-green-50 text-green-500' : 'text-gray-500'}
 		{classNames}"
-	on:click={() => {
-		fileInput.click();
-	}}
-	on:dragenter={() => {
-		isDragging = true;
-	}}
-	on:dragleave={() => {
-		isDragging = false;
-	}}
-	on:dragover|preventDefault
-	on:drop|preventDefault={onDrop}
->
-	{#if !imgSrc && !isDisabled}
-		<span class="pointer-events-none text-sm">{label}</span>
-	{:else}
-		<div class={isDragging ? "pointer-events-none" : ""}>
-			<slot />
-		</div>
-	{/if}
-	{#if isLoading}
-		<div
-			class="absolute top-1/2 left-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 transform items-center justify-center rounded-full border border-gray-100 bg-white shadow"
-		>
-			<IconSpin classNames="text-purple-500 animate-spin h-6 w-6" />
-		</div>
-	{/if}
-</div>
+		on:click={() => {
+			if (!$isLoggedIn) {
+				popOverOpen = true;
+				return;
+			}
+			fileInput.click();
+		}}
+		on:dragenter={() => {
+			isDragging = true;
+		}}
+		on:dragleave={() => {
+			isDragging = false;
+		}}
+		on:dragover|preventDefault
+		on:drop|preventDefault={onDrop}
+	>
+		{#if !imgSrc && !isDisabled}
+			<span class="pointer-events-none text-sm">{label}</span>
+		{:else}
+			<div class={isDragging ? "pointer-events-none" : ""}>
+				<slot />
+			</div>
+		{/if}
+		{#if isLoading}
+			<div
+				class="absolute top-1/2 left-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 transform items-center justify-center rounded-full border border-gray-100 bg-white shadow"
+			>
+				<IconSpin classNames="text-purple-500 animate-spin h-6 w-6" />
+			</div>
+		{/if}
+	</div>
+</LogInPopover>
