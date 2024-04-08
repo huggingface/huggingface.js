@@ -1,7 +1,12 @@
+<!-- 
+	In https://github.com/huggingface/huggingface.js/pull/567, this component was changed significantly from the original one in moon/Popover.svelte.
+	Therefore, if/when widgets code goes back to moon, make sure not to delete this Popover.svelte right away before reconciling the differences.
+ -->
+
 <script lang="ts">
 	import { onMount, tick, createEventDispatcher } from "svelte";
 	import { fade } from "svelte/transition";
-	import { debounce, portalToBody } from "../../utils/ViewUtils.js";
+	import { portalToBody } from "../../utils/ViewUtils.js";
 
 	export let classNames = "";
 	export let anchorElement: HTMLElement;
@@ -10,7 +15,6 @@
 	export let waitForContent = false;
 	export let size: "sm" | "md" = "md";
 	export let invertedColors = false;
-	export let touchOnly = false;
 
 	let popoverElement: HTMLDivElement;
 
@@ -30,10 +34,7 @@
 	let top: number;
 	let width: number;
 	let height: number;
-
 	let popoverShift: number;
-	let isTouchOnly = false;
-	let isActive = true;
 
 	function updatePlacement(anchorBbox: DOMRect, pageHeight: number) {
 		if (pageHeight > 0) {
@@ -56,7 +57,7 @@
 	function updateAlignment(anchorBbox: DOMRect, pageWidth: number) {
 		if (alignment === "auto" && pageWidth > 0) {
 			const popoverWidth = popoverElement.getBoundingClientRect().width;
-			if (anchorBbox.left + popoverWidth > pageWidth - HIT_ZONE_MARGIN) {
+			if (anchorBbox.left + popoverWidth > pageWidth) {
 				computedAlignment = "end";
 			} else {
 				computedAlignment = "start";
@@ -82,38 +83,25 @@
 		}
 	}
 
-	const debouncedShow = debounce(() => (isActive = true), 250);
-
-	function hide() {
-		if (!popoverElement?.matches(":hover")) {
-			isActive = false;
+	function handleClickDocument(e: MouseEvent) {
+		const targetElement = e.target as HTMLElement;
+		if (![popoverElement, anchorElement].some((el) => el === targetElement || el?.contains(targetElement))) {
+			e.preventDefault();
+			e.stopPropagation();
+			dispatch("close");
 		}
 	}
-	const debouncedHide = debounce(hide, 250);
 
 	onMount(() => {
-		isTouchOnly = touchOnly && window.matchMedia("(any-hover: none)").matches;
-
-		if (!isTouchOnly) {
-			updatePosition();
-			if (anchorElement) {
-				anchorElement.addEventListener("mouseover", debouncedShow);
-				anchorElement.addEventListener("mouseleave", debouncedHide);
-				return () => {
-					anchorElement.removeEventListener("mouseover", debouncedShow);
-					anchorElement.removeEventListener("mouseleave", debouncedHide);
-				};
-			}
-		}
+		updatePosition();
 	});
 </script>
 
-<svelte:window on:resize={() => dispatch("close")} on:scroll={() => dispatch("close")} />
+<svelte:window on:resize={() => dispatch("close")} on:scroll={() => dispatch("close")} on:click={handleClickDocument} />
 
-<div class={isTouchOnly ? "hidden sm:contents" : "contents"} use:portalToBody>
+<div class="contents" use:portalToBody>
 	<div
-		class="pointer-events-none absolute bg-transparent hidden"
-		class:hidden={!isActive}
+		class="pointer-events-none absolute bg-transparent"
 		style:top="{top}px"
 		style:left="{left}px"
 		style:width="{width}px"
@@ -122,7 +110,6 @@
 		<div
 			bind:this={popoverElement}
 			in:fade={{ duration: 100 }}
-			on:mouseleave={debouncedHide}
 			class="pointer-events-auto absolute z-10 transform
 				{computedPlacement === 'top' ? 'bottom-full -translate-y-3' : 'top-full translate-y-2.5'}
 				{computedAlignment === 'start' ? 'left-0' : computedAlignment === 'end' ? 'right-0' : 'left-1/2 -translate-x-1/2'}
