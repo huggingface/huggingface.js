@@ -1,0 +1,26 @@
+{
+	"$id": "/inference/schemas/image-feature-extraction/input.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Inputs for Image Feature Extraction",
+	"title": "ImageFeatureExtractionInput",
+	"type": "object",
+	"properties": {
+		"inputs": {
+			"description": "The input image data",
+			"type": "string"
+		},
+		"parameters": {
+			"description": "Additional inference parameters",
+			"$ref": "#/$defs/ImageClassificationParameters"
+		}
+	},
+	"$defs": {
+		"FeatureExtractionParameters": {
+			"title": "ImageFeatureExtractionParameters",
+			"description": "Additional inference parameters for Image Feature Extraction",
+			"type": "object",
+			"properties": {}
+		}
+	},
+	"required": ["inputs"]
+}
