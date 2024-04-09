@@ -11,11 +11,11 @@
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
-			"$ref": "#/$defs/ImageClassificationParameters"
+			"$ref": "#/$defs/ImageFeatureExtractionParameters"
 		}
 	},
 	"$defs": {
-		"FeatureExtractionParameters": {
+		"ImageFeatureExtractionParameters": {
 			"title": "ImageFeatureExtractionParameters",
 			"description": "Additional inference parameters for Image Feature Extraction",
 			"type": "object",
