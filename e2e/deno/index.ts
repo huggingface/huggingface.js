@@ -1,7 +1,7 @@
 import { HfInference } from "npm:@huggingface/inference@*";
 import { whoAmI, listFiles } from "npm:@huggingface/hub@*";
 
-const hf = new HfInference();
+const hf = new HfInference(Deno.env.get("HF_TOKEN"));
 
 const info = await whoAmI({ credentials: { accessToken: "hf_hub.js" }, hubUrl: "https://hub-ci.huggingface.co" });
 console.log(info);
