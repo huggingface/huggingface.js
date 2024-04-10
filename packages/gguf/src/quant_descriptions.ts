@@ -21,12 +21,20 @@ export const QUANT_DESCRIPTIONS: Record<GGMLQuantizationType, string> = {
 	[GGMLQuantizationType.Q5_K]: `5-bit quantization (q). Super-blocks with 8 blocks, each block has 32 weights. Weight formula: w = q * block_scale(6-bit) + block_min(6-bit), resulting in 5.5 bits-per-weight.`, // src: https://github.com/ggerganov/llama.cpp/pull/1684#issue-1739619305
 	[GGMLQuantizationType.Q6_K]: `6-bit quantization (q). Super-blocks with 16 blocks, each block has 16 weights. Weight formula: w = q * block_scale(8-bit), resulting in 6.5625 bits-per-weight.`, // src: https://github.com/ggerganov/llama.cpp/pull/1684#issue-1739619305
 	[GGMLQuantizationType.Q8_K]: `8-bit quantization (q). Each block has 256 weights. Only used for quantizing intermediate results. All 2-6 bit dot products are implemented for this quantization type. Weight formula: w = q * block_scale.`, // src: https://github.com/ggerganov/llama.cpp/pull/1684#issue-1739619305
-	[GGMLQuantizationType.IQ2_XXS]: "", // todo: add description
-	[GGMLQuantizationType.IQ2_XS]: "", // todo: add description
-	[GGMLQuantizationType.IQ3_XXS]: "", // todo: add description
-	[GGMLQuantizationType.IQ1_S]: "", // todo: add description
-	[GGMLQuantizationType.IQ4_NL]: "", // todo: add description
-	[GGMLQuantizationType.IQ3_S]: "", // todo: add description
-	[GGMLQuantizationType.IQ2_S]: "", // todo: add description
-	[GGMLQuantizationType.IQ4_XS]: "", // todo: add description
+	[GGMLQuantizationType.IQ2_XXS]:
+		"2-bit quantization (q). Super-blocks with 256 weights. Weight w is obtained using super_block_scale & importance matrix, resulting in 2.06 bits-per-weight.", // src: https://huggingface.co/CISCai/OpenCodeInterpreter-DS-6.7B-SOTA-GGUF/blob/main/README.md?code=true#L59-L70
+	[GGMLQuantizationType.IQ2_XS]:
+		"2-bit quantization (q). Super-blocks with 256 weights. Weight w is obtained using super_block_scale & importance matrix, resulting in 2.31 bits-per-weight.", // src: https://huggingface.co/CISCai/OpenCodeInterpreter-DS-6.7B-SOTA-GGUF/blob/main/README.md?code=true#L59-L70
+	[GGMLQuantizationType.IQ3_XXS]:
+		"3-bit quantization (q). Super-blocks with 256 weights. Weight w is obtained using super_block_scale & importance matrix, resulting in 3.06 bits-per-weight.", // src: https://huggingface.co/CISCai/OpenCodeInterpreter-DS-6.7B-SOTA-GGUF/blob/main/README.md?code=true#L59-L70
+	[GGMLQuantizationType.IQ1_S]:
+		"1-bit quantization (q). Super-blocks with 256 weights. Weight w is obtained using super_block_scale & importance matrix, resulting in 1.56 bits-per-weight.", // src: https://huggingface.co/CISCai/OpenCodeInterpreter-DS-6.7B-SOTA-GGUF/blob/main/README.md?code=true#L59-L70
+	[GGMLQuantizationType.IQ4_NL]:
+		"4-bit quantization (q). Super-blocks with 256 weights. Weight w is obtained using super_block_scale & importance matrix",
+	[GGMLQuantizationType.IQ3_S]:
+		"3-bit quantization (q). Super-blocks with 256 weights. Weight w is obtained using super_block_scale & importance matrix, resulting in 3.44 bits-per-weight.", // src: https://huggingface.co/CISCai/OpenCodeInterpreter-DS-6.7B-SOTA-GGUF/blob/main/README.md?code=true#L59-L70
+	[GGMLQuantizationType.IQ2_S]:
+		"2-bit quantization (q). Super-blocks with 256 weights. Weight w is obtained using super_block_scale & importance matrix, resulting in 2.5 bits-per-weight.", // src: https://huggingface.co/CISCai/OpenCodeInterpreter-DS-6.7B-SOTA-GGUF/blob/main/README.md?code=true#L59-L70
+	[GGMLQuantizationType.IQ4_XS]:
+		"4-bit quantization (q). Super-blocks with 256 weights. Weight w is obtained using super_block_scale & importance matrix, resulting in 4.25 bits-per-weight.", // src: https://huggingface.co/CISCai/OpenCodeInterpreter-DS-6.7B-SOTA-GGUF/blob/main/README.md?code=true#L59-L70
 };
