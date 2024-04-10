@@ -89,6 +89,7 @@ jobs:
           deno-version: vx.x.x
       - name: E2E test - deno import from npm
         working-directory: e2e/deno
-        run: deno run --allow-net index.ts
+        run: deno run --allow-net --allow-env=HF_TOKEN index.ts
         env:
           NPM_CONFIG_REGISTRY: http://localhost:4874/
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
