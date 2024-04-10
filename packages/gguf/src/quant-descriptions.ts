@@ -1,6 +1,6 @@
 import { GGMLQuantizationType } from "./types";
 
-export const QUANT_DESCRIPTIONS: Record<GGMLQuantizationType, { txt: string; src_url?: string }> = {
+export const GGUF_QUANT_DESCRIPTIONS: Record<GGMLQuantizationType, { txt: string; src_url?: string }> = {
 	[GGMLQuantizationType.F32]: {
 		txt: "32-bit standard IEEE 754 single-precision floating-point number.",
 		src_url: "https://en.wikipedia.org/wiki/Single-precision_floating-point_format",
