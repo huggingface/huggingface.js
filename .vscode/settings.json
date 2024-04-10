@@ -12,8 +12,6 @@
 	"[json]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	},
-	"cSpell.words": [
-		"huggingface"
-	],
+	"cSpell.words": ["huggingface"],
 	"deno.enablePaths": ["./e2e/deno"]
 }
