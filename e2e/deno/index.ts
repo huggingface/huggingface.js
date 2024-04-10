@@ -1,7 +1,12 @@
 import { HfInference } from "npm:@huggingface/inference@*";
 import { whoAmI, listFiles } from "npm:@huggingface/hub@*";
 
-const hf = new HfInference(Deno.env.get("HF_TOKEN"));
+const token = Deno.env.get("HF_TOKEN");
+
+if (!token) {
+	console.error("Please set the HF_TOKEN environment variable.");
+	Deno.exit(1);
+}
 
 const info = await whoAmI({ credentials: { accessToken: "hf_hub.js" }, hubUrl: "https://hub-ci.huggingface.co" });
 console.log(info);
@@ -9,6 +14,11 @@ console.log(info);
 for await (const file of listFiles({ credentials: { accessToken: "hf_hub.js" }, repo: "gpt2" })) {
 	console.log(file);
 }
+
+const hf = new HfInference(token);
+
+const tokenInfo = await whoAmI({ credentials: { accessToken: token } });
+console.log(tokenInfo);
 
 const sum = await hf.summarization({
 	model: "facebook/bart-large-cnn",
