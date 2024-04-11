@@ -14,7 +14,7 @@ export const SAFETENSORS_INDEX_FILE = "model.safetensors.index.json";
 /// but in some situations safetensors weights have different filenames.
 export const RE_SAFETENSORS_FILE = /\.safetensors$/;
 export const RE_SAFETENSORS_INDEX_FILE = /\.safetensors\.index\.json$/;
-export const RE_SAFETENSORS_SHARD_FILE = /\d{5}-of-\d{5}\.safetensors$/;
+export const RE_SAFETENSORS_SHARD_FILE = /(?<shard>\d{5})-of-(?<total>\d{5})\.safetensors$/;
 const PARALLEL_DOWNLOADS = 20;
 const MAX_HEADER_LENGTH = 25_000_000;
 
