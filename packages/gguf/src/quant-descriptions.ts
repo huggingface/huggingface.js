@@ -10,27 +10,27 @@ export const GGUF_QUANT_DESCRIPTIONS: Record<GGMLQuantizationType, { txt: string
 		src_url: "https://en.wikipedia.org/wiki/Half-precision_floating-point_format",
 	},
 	[GGMLQuantizationType.Q4_0]: {
-		txt: "4-bit round-to-nearest quantization (q). Each block has 32 weights. Weight formula: w = q * block_scale. Legacy quantization method (not used widely as of today)",
+		txt: "4-bit round-to-nearest quantization (q). Each block has 32 weights. Weight formula: w = q * block_scale. Legacy quantization method (not used widely as of today).",
 		src_url: "https://github.com/huggingface/huggingface.js/pull/615#discussion_r1557654249",
 	},
 	[GGMLQuantizationType.Q4_1]: {
-		txt: "4-bit round-to-nearest quantization (q). Each block has 32 weights. Weight formula: w = q * block_scale + block_minimum. Legacy quantization method (not used widely as of today)",
+		txt: "4-bit round-to-nearest quantization (q). Each block has 32 weights. Weight formula: w = q * block_scale + block_minimum. Legacy quantization method (not used widely as of today).",
 		src_url: "https://github.com/huggingface/huggingface.js/pull/615#discussion_r1557682290",
 	},
 	[GGMLQuantizationType.Q5_0]: {
-		txt: "5-bit round-to-nearest quantization (q). Each block has 32 weights. Weight formula: w = q * block_scale. Legacy quantization method (not used widely as of today)",
+		txt: "5-bit round-to-nearest quantization (q). Each block has 32 weights. Weight formula: w = q * block_scale. Legacy quantization method (not used widely as of today).",
 		src_url: "https://github.com/huggingface/huggingface.js/pull/615#discussion_r1557654249",
 	},
 	[GGMLQuantizationType.Q5_1]: {
-		txt: "5-bit round-to-nearest quantization (q). Each block has 32 weights. Weight formula: w = q * block_scale + block_minimum. Legacy quantization method (not used widely as of today)",
+		txt: "5-bit round-to-nearest quantization (q). Each block has 32 weights. Weight formula: w = q * block_scale + block_minimum. Legacy quantization method (not used widely as of today).",
 		src_url: "https://github.com/huggingface/huggingface.js/pull/615#discussion_r1557682290",
 	},
 	[GGMLQuantizationType.Q8_0]: {
-		txt: "8-bit round-to-nearest quantization (q). Each block has 32 weights. Weight formula: w = q * block_scale. Legacy quantization method (not used widely as of today)",
+		txt: "8-bit round-to-nearest quantization (q). Each block has 32 weights. Weight formula: w = q * block_scale. Legacy quantization method (not used widely as of today).",
 		src_url: "https://github.com/huggingface/huggingface.js/pull/615#discussion_r1557654249",
 	},
 	[GGMLQuantizationType.Q8_1]: {
-		txt: "8-bit round-to-nearest quantization (q). Each block has 32 weights. Weight formula: w = q * block_scale + block_minimum. Legacy quantization method (not used widely as of today)",
+		txt: "8-bit round-to-nearest quantization (q). Each block has 32 weights. Weight formula: w = q * block_scale + block_minimum. Legacy quantization method (not used widely as of today).",
 		src_url: "https://github.com/huggingface/huggingface.js/pull/615#discussion_r1557682290",
 	},
 	[GGMLQuantizationType.Q2_K]: {
@@ -38,7 +38,7 @@ export const GGUF_QUANT_DESCRIPTIONS: Record<GGMLQuantizationType, { txt: string
 		src_url: "https://github.com/ggerganov/llama.cpp/pull/1684#issue-1739619305",
 	},
 	[GGMLQuantizationType.Q3_K]: {
-		txt: `3-bit quantization (q). Super-blocks with 16 blocks, each block has 16 weights. Weight formula: w = q * block_scale(6-bit), resulting. 3.4375 bits-per-weight`,
+		txt: `3-bit quantization (q). Super-blocks with 16 blocks, each block has 16 weights. Weight formula: w = q * block_scale(6-bit), resulting. 3.4375 bits-per-weight.`,
 		src_url: "https://github.com/ggerganov/llama.cpp/pull/1684#issue-1739619305",
 	},
 	[GGMLQuantizationType.Q4_K]: {
@@ -78,7 +78,8 @@ export const GGUF_QUANT_DESCRIPTIONS: Record<GGMLQuantizationType, { txt: string
 			"https://huggingface.co/CISCai/OpenCodeInterpreter-DS-6.7B-SOTA-GGUF/blob/main/README.md?code=true#L59-L70",
 	},
 	[GGMLQuantizationType.IQ4_NL]: {
-		txt: "4-bit quantization (q). Super-blocks with 256 weights. Weight w is obtained using super_block_scale & importance matrix",
+		txt: "4-bit quantization (q). Super-blocks with 256 weights. Weight w is obtained using super_block_scale & importance matrix.",
+		src_url: "https://github.com/ggerganov/llama.cpp/pull/5590",
 	},
 	[GGMLQuantizationType.IQ3_S]: {
 		txt: "3-bit quantization (q). Super-blocks with 256 weights. Weight w is obtained using super_block_scale & importance matrix, resulting in 3.44 bits-per-weight.",
