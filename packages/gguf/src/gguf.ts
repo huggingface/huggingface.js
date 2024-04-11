@@ -3,6 +3,7 @@ import { GGUFValueType } from "./types";
 
 export type { MetadataBaseValue, MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
 export { GGUFValueType, GGMLQuantizationType } from "./types";
+export { GGUF_QUANT_DESCRIPTIONS as QUANT_DESCRIPTIONS } from "./quant-descriptions";
 
 export const RE_GGUF_FILE = /\.gguf$/;
 export const RE_GGUF_SHARD_FILE = /-(\d{5})-of-(\d{5})\.gguf$/;
