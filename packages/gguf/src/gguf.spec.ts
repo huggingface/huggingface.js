@@ -226,7 +226,7 @@ describe("gguf", () => {
 		const match = ggufPath.match(RE_GGUF_SHARD_FILE);
 
 		expect(RE_GGUF_SHARD_FILE.test(ggufPath)).toEqual(true);
-		expect(match?.[1]).toEqual("00003");
-		expect(match?.[2]).toEqual("00009");
+		expect(match?.groups?.shard).toEqual("00003");
+		expect(match?.groups?.total).toEqual("00009");
 	});
 });
