@@ -185,6 +185,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: { term: { path: "saved_model.pb" } },
 	},
+	"keras-nlp": {
+		prettyLabel: "KerasNLP",
+		repoName: "KerasNLP",
+		repoUrl: "https://keras.io/keras_nlp/",
+		docsUrl: "https://github.com/keras-team/keras-nlp",
+	},
 	k2: {
 		prettyLabel: "K2",
 		repoName: "k2",
