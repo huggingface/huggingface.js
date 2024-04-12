@@ -1,8 +1,8 @@
-import type { ModelData } from "../model-data.js";
 import type { PipelineType } from "../pipelines.js";
 import { getModelInputSnippet } from "./inputs.js";
+import type { ModelDataMinimal } from "./types.js";
 
-export const snippetZeroShotClassification = (model: ModelData): string =>
+export const snippetZeroShotClassification = (model: ModelDataMinimal): string =>
 	`def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.json()
@@ -12,7 +12,7 @@ output = query({
     "parameters": {"candidate_labels": ["refund", "legal", "faq"]},
 })`;
 
-export const snippetZeroShotImageClassification = (model: ModelData): string =>
+export const snippetZeroShotImageClassification = (model: ModelDataMinimal): string =>
 	`def query(data):
 	with open(data["image_path"], "rb") as f:
 		img = f.read()
@@ -28,7 +28,7 @@ output = query({
     "parameters": {"candidate_labels": ["cat", "dog", "llama"]},
 })`;
 
-export const snippetBasic = (model: ModelData): string =>
+export const snippetBasic = (model: ModelDataMinimal): string =>
 	`def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.json()
@@ -37,7 +37,7 @@ output = query({
 	"inputs": ${getModelInputSnippet(model)},
 })`;
 
-export const snippetFile = (model: ModelData): string =>
+export const snippetFile = (model: ModelDataMinimal): string =>
 	`def query(filename):
     with open(filename, "rb") as f:
         data = f.read()
@@ -46,7 +46,7 @@ export const snippetFile = (model: ModelData): string =>
 
 output = query(${getModelInputSnippet(model)})`;
 
-export const snippetTextToImage = (model: ModelData): string =>
+export const snippetTextToImage = (model: ModelDataMinimal): string =>
 	`def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.content
@@ -58,7 +58,7 @@ import io
 from PIL import Image
 image = Image.open(io.BytesIO(image_bytes))`;
 
-export const snippetTabular = (model: ModelData): string =>
+export const snippetTabular = (model: ModelDataMinimal): string =>
 	`def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.content
@@ -66,7 +66,7 @@ response = query({
 	"inputs": {"data": ${getModelInputSnippet(model)}},
 })`;
 
-export const snippetTextToAudio = (model: ModelData): string => {
+export const snippetTextToAudio = (model: ModelDataMinimal): string => {
 	// Transformers TTS pipeline and api-inference-community (AIC) pipeline outputs are diverged
 	// with the latest update to inference-api (IA).
 	// Transformers IA returns a byte object (wav file), whereas AIC returns wav and sampling_rate.
@@ -95,7 +95,7 @@ Audio(audio, rate=sampling_rate)`;
 	}
 };
 
-export const snippetDocumentQuestionAnswering = (model: ModelData): string =>
+export const snippetDocumentQuestionAnswering = (model: ModelDataMinimal): string =>
 	`def query(payload):
  	with open(payload["image"], "rb") as f:
   		img = f.read()
@@ -107,7 +107,7 @@ output = query({
     "inputs": ${getModelInputSnippet(model)},
 })`;
 
-export const pythonSnippets: Partial<Record<PipelineType, (model: ModelData) => string>> = {
+export const pythonSnippets: Partial<Record<PipelineType, (model: ModelDataMinimal) => string>> = {
 	// Same order as in tasks/src/pipelines.ts
 	"text-classification": snippetBasic,
 	"token-classification": snippetBasic,
@@ -116,7 +116,6 @@ export const pythonSnippets: Partial<Record<PipelineType, (model: ModelData) => 
 	"zero-shot-classification": snippetZeroShotClassification,
 	translation: snippetBasic,
 	summarization: snippetBasic,
-	conversational: snippetBasic,
 	"feature-extraction": snippetBasic,
 	"text-generation": snippetBasic,
 	"text2text-generation": snippetBasic,
@@ -138,7 +137,7 @@ export const pythonSnippets: Partial<Record<PipelineType, (model: ModelData) => 
 	"zero-shot-image-classification": snippetZeroShotImageClassification,
 };
 
-export function getPythonInferenceSnippet(model: ModelData, accessToken: string): string {
+export function getPythonInferenceSnippet(model: ModelDataMinimal, accessToken: string): string {
 	const body =
 		model.pipeline_tag && model.pipeline_tag in pythonSnippets ? pythonSnippets[model.pipeline_tag]?.(model) ?? "" : "";
 
@@ -150,6 +149,6 @@ headers = {"Authorization": ${accessToken ? `"Bearer ${accessToken}"` : `f"Beare
 ${body}`;
 }
 
-export function hasPythonInferenceSnippet(model: ModelData): boolean {
+export function hasPythonInferenceSnippet(model: ModelDataMinimal): boolean {
 	return !!model.pipeline_tag && model.pipeline_tag in pythonSnippets;
 }

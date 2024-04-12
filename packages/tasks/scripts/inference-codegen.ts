@@ -14,6 +14,16 @@ const TYPESCRIPT_HEADER_FILE = `
 
 `;
 
+const PYTHON_HEADER_FILE = `
+# Inference code generated from the JSON schema spec in @huggingface/tasks.
+#
+# See:
+#   - script: https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/scripts/inference-codegen.ts
+#   - specs:  https://github.com/huggingface/huggingface.js/tree/main/packages/tasks/src/tasks.
+`;
+
+const PYTHON_DIR = "./.python_generated";
+
 const rootDirFinder = function (): string {
 	let currentPath = path.normalize(import.meta.url);
 
@@ -44,6 +54,12 @@ async function buildInputData(taskId: string, taskSpecDir: string, allSpecFiles:
 		name: `${taskId}-output`,
 		schema: await fs.readFile(`${taskSpecDir}/output.json`, { encoding: "utf-8" }),
 	});
+	if (taskId === "text-generation" || taskId === "chat-completion") {
+		await schema.addSource({
+			name: `${taskId}-stream-output`,
+			schema: await fs.readFile(`${taskSpecDir}/output_stream.json`, { encoding: "utf-8" }),
+		});
+	}
 	const inputData = new InputData();
 	inputData.addInput(schema);
 	return inputData;
@@ -57,14 +73,29 @@ async function generateTypescript(inputData: InputData): Promise<SerializedRende
 		indentation: "\t",
 		rendererOptions: {
 			"just-types": true,
-			"nice-property-names": true,
+			"nice-property-names": false,
 			"prefer-unions": true,
 			"prefer-const-values": true,
 			"prefer-unknown": true,
 			"explicit-unions": true,
+			"runtime-typecheck": false,
 		},
 	});
 }
+
+async function generatePython(inputData: InputData): Promise<SerializedRenderResult> {
+	return await quicktype({
+		inputData,
+		lang: "python",
+		alphabetizeProperties: true,
+		rendererOptions: {
+			"just-types": true,
+			"nice-property-names": true,
+			"python-version": "3.7",
+		},
+	});
+}
+
 /**
  * quicktype is unable to generate "top-level array types" that are defined in the output spec: https://github.com/glideapps/quicktype/issues/2481
  * We have to use the TypeScript API to generate those types when required.
@@ -180,5 +211,17 @@ for (const { task, dirPath } of allTasks) {
 
 	console.log("   🩹 Post-processing the generated code");
 	await postProcessOutput(`${dirPath}/inference.ts`, outputSpec);
+
+	console.debug("   🏭 Generating Python code");
+	{
+		const { lines } = await generatePython(inputData);
+		const pythonFilename = `${task}.py`.replace(/-/g, "_");
+		const pythonPath = `${PYTHON_DIR}/${pythonFilename}`;
+		await fs.mkdir(PYTHON_DIR, { recursive: true });
+		await fs.writeFile(pythonPath, [PYTHON_HEADER_FILE, ...lines].join(`\n`), {
+			flag: "w+",
+			encoding: "utf-8",
+		});
+	}
 }
 console.debug("✅ All done!");

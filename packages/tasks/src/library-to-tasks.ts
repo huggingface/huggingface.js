@@ -2,13 +2,13 @@ import type { ModelLibraryKey } from "./model-libraries";
 import type { PipelineType } from "./pipelines";
 
 /**
- * Mapping from library name (excluding Transformers) to its supported tasks.
- * Inference Endpoints (serverless) should be disabled for all other (library, task) pairs beyond this mapping.
- * As an exception, we assume Transformers supports all inference tasks.
- * This mapping is generated automatically by "python-api-export-tasks" action in huggingface/api-inference-community repo upon merge.
- * Ref: https://github.com/huggingface/api-inference-community/pull/158
+ * Mapping from library name to its supported tasks.
+ * Inference API (serverless) should be disabled for all other (library, task) pairs beyond this mapping.
+ * This mapping is partially generated automatically by "python-api-export-tasks" action in
+ * huggingface/api-inference-community repo upon merge. For transformers, the mapping is manually
+ * based on api-inference (hf_types.rs).
  */
-export const LIBRARY_TASK_MAPPING_EXCLUDING_TRANSFORMERS: Partial<Record<ModelLibraryKey, PipelineType[]>> = {
+export const LIBRARY_TASK_MAPPING: Partial<Record<ModelLibraryKey, PipelineType[]>> = {
 	"adapter-transformers": ["question-answering", "text-classification", "token-classification"],
 	allennlp: ["question-answering"],
 	asteroid: [
@@ -27,7 +27,7 @@ export const LIBRARY_TASK_MAPPING_EXCLUDING_TRANSFORMERS: Partial<Record<ModelLi
 	keras: ["image-classification"],
 	nemo: ["automatic-speech-recognition"],
 	open_clip: ["zero-shot-classification", "zero-shot-image-classification"],
-	paddlenlp: ["conversational", "fill-mask", "summarization", "zero-shot-classification"],
+	paddlenlp: ["fill-mask", "summarization", "zero-shot-classification"],
 	peft: ["text-generation"],
 	"pyannote-audio": ["automatic-speech-recognition"],
 	"sentence-transformers": ["feature-extraction", "sentence-similarity"],
@@ -44,5 +44,32 @@ export const LIBRARY_TASK_MAPPING_EXCLUDING_TRANSFORMERS: Partial<Record<ModelLi
 	],
 	stanza: ["token-classification"],
 	timm: ["image-classification"],
+	transformers: [
+		"audio-classification",
+		"automatic-speech-recognition",
+		"depth-estimation",
+		"document-question-answering",
+		"feature-extraction",
+		"fill-mask",
+		"image-classification",
+		"image-segmentation",
+		"image-to-image",
+		"image-to-text",
+		"object-detection",
+		"question-answering",
+		"summarization",
+		"table-question-answering",
+		"text2text-generation",
+		"text-classification",
+		"text-generation",
+		"text-to-audio",
+		"text-to-speech",
+		"token-classification",
+		"translation",
+		"video-classification",
+		"visual-question-answering",
+		"zero-shot-classification",
+		"zero-shot-image-classification",
+	],
 	mindspore: ["image-classification"],
 };

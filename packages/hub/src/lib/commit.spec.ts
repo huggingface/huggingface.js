@@ -43,7 +43,7 @@ describe("commit", () => {
 						{
 							operation: "addOrUpdate",
 							path: "tsconfig.json",
-							content: (await import("node:url")).pathToFileURL("./tsconfig.json"),
+							content: (await import("node:url")).pathToFileURL("./tsconfig.json") as URL,
 						},
 				  ];
 

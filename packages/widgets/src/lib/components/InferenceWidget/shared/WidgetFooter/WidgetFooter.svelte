@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { WidgetProps } from "../types.js";
-	import { identity } from "svelte/internal";
-	import { widgetStates, updateWidgetState } from "../../stores.js";
+	import { widgetStates, updateWidgetState, isLoggedIn } from "../../stores.js";
 	import IconCode from "../../..//Icons/IconCode.svelte";
 	import IconMaximize from "../../..//Icons/IconMaximize.svelte";
+	import LogInPopover from "../../../../components/LogInPopover/LogInPopover.svelte";
 
 	export let model: WidgetProps["model"];
 	export let outputJson: string;
@@ -12,6 +12,7 @@
 	$: isMaximized = $widgetStates?.[model.id]?.isMaximized;
 
 	let isOutputJsonVisible = false;
+	let popOverOpen = false;
 </script>
 
 <div class="mt-auto flex items-center pt-4 text-xs text-gray-500">
@@ -28,18 +29,26 @@
 			JSON Output
 		</button>
 	{/if}
-	<button
-		class="ml-auto flex items-center"
-		type="button"
-		on:click|preventDefault={() => updateWidgetState(model.id, "isMaximized", !isMaximized)}
-	>
-		<IconMaximize classNames="mr-1" />
-		{#if !isMaximized}
-			Maximize
-		{:else}
-			Minimize
-		{/if}
-	</button>
+	<LogInPopover bind:open={popOverOpen} classNames="ml-auto">
+		<button
+			class="flex items-center"
+			type="button"
+			on:click|preventDefault={() => {
+				if (!$isLoggedIn) {
+					popOverOpen = true;
+					return;
+				}
+				updateWidgetState(model.id, "isMaximized", !isMaximized);
+			}}
+		>
+			<IconMaximize classNames="mr-1" />
+			{#if !isMaximized}
+				Maximize
+			{:else}
+				Minimize
+			{/if}
+		</button>
+	</LogInPopover>
 </div>
 {#if outputJson && isOutputJsonVisible}
 	<pre

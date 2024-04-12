@@ -1,34 +1,6 @@
 import type { ModelData } from "./model-data";
-import type { ModelLibraryKey } from "./model-libraries";
 
 const TAG_CUSTOM_CODE = "custom_code";
-
-/**
- * Elements configurable by a model library.
- */
-export interface LibraryUiElement {
-	/**
-	 * Name displayed on the main
-	 * call-to-action button on the model page.
-	 */
-	btnLabel: string;
-	/**
-	 * Repo name
-	 */
-	repoName: string;
-	/**
-	 * URL to library's repo
-	 */
-	repoUrl: string;
-	/**
-	 * URL to library's docs
-	 */
-	docsUrl?: string;
-	/**
-	 * Code snippet displayed on model page
-	 */
-	snippets: (model: ModelData) => string[];
-}
 
 function nameWithoutNamespace(modelId: string): string {
 	const splitted = modelId.split("/");
@@ -37,7 +9,7 @@ function nameWithoutNamespace(modelId: string): string {
 
 //#region snippets
 
-const adapters = (model: ModelData) => [
+export const adapters = (model: ModelData): string[] => [
 	`from adapters import AutoAdapterModel
 
 model = AutoAdapterModel.from_pretrained("${model.config?.adapter_transformers?.model_name}")
@@ -60,14 +32,14 @@ predictor_input = {"passage": "My name is Wolfgang and I live in Berlin", "quest
 predictions = predictor.predict_json(predictor_input)`,
 ];
 
-const allennlp = (model: ModelData) => {
+export const allennlp = (model: ModelData): string[] => {
 	if (model.tags?.includes("question-answering")) {
 		return allennlpQuestionAnswering(model);
 	}
 	return allennlpUnknown(model);
 };
 
-const asteroid = (model: ModelData) => [
+export const asteroid = (model: ModelData): string[] => [
 	`from asteroid.models import BaseModel
 
 model = BaseModel.from_pretrained("${model.id}")`,
@@ -77,7 +49,7 @@ function get_base_diffusers_model(model: ModelData): string {
 	return model.cardData?.base_model?.toString() ?? "fill-in-base-model";
 }
 
-const bertopic = (model: ModelData) => [
+export const bertopic = (model: ModelData): string[] => [
 	`from bertopic import BERTopic
 
 model = BERTopic.load("${model.id}")`,
@@ -112,7 +84,7 @@ pipeline = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}
 pipeline.load_textual_inversion("${model.id}")`,
 ];
 
-const diffusers = (model: ModelData) => {
+export const diffusers = (model: ModelData): string[] => {
 	if (model.tags?.includes("controlnet")) {
 		return diffusers_controlnet(model);
 	} else if (model.tags?.includes("lora")) {
@@ -124,7 +96,7 @@ const diffusers = (model: ModelData) => {
 	}
 };
 
-const espnetTTS = (model: ModelData) => [
+export const espnetTTS = (model: ModelData): string[] => [
 	`from espnet2.bin.tts_inference import Text2Speech
 
 model = Text2Speech.from_pretrained("${model.id}")
@@ -132,7 +104,7 @@ model = Text2Speech.from_pretrained("${model.id}")
 speech, *_ = model("text to generate speech from")`,
 ];
 
-const espnetASR = (model: ModelData) => [
+export const espnetASR = (model: ModelData): string[] => [
 	`from espnet2.bin.asr_inference import Speech2Text
 
 model = Speech2Text.from_pretrained(
@@ -145,7 +117,7 @@ text, *_ = model(speech)[0]`,
 
 const espnetUnknown = () => [`unknown model type (must be text-to-speech or automatic-speech-recognition)`];
 
-const espnet = (model: ModelData) => {
+export const espnet = (model: ModelData): string[] => {
 	if (model.tags?.includes("text-to-speech")) {
 		return espnetTTS(model);
 	} else if (model.tags?.includes("automatic-speech-recognition")) {
@@ -154,7 +126,7 @@ const espnet = (model: ModelData) => {
 	return espnetUnknown();
 };
 
-const fairseq = (model: ModelData) => [
+export const fairseq = (model: ModelData): string[] => [
 	`from fairseq.checkpoint_utils import load_model_ensemble_and_task_from_hf_hub
 
 models, cfg, task = load_model_ensemble_and_task_from_hf_hub(
@@ -162,27 +134,33 @@ models, cfg, task = load_model_ensemble_and_task_from_hf_hub(
 )`,
 ];
 
-const flair = (model: ModelData) => [
+export const flair = (model: ModelData): string[] => [
 	`from flair.models import SequenceTagger
 
 tagger = SequenceTagger.load("${model.id}")`,
 ];
 
-const keras = (model: ModelData) => [
+export const gliner = (model: ModelData): string[] => [
+	`from gliner import GLiNER
+
+model = GLiNER.from_pretrained("${model.id}")`,
+];
+
+export const keras = (model: ModelData): string[] => [
 	`from huggingface_hub import from_pretrained_keras
 
 model = from_pretrained_keras("${model.id}")
 `,
 ];
 
-const open_clip = (model: ModelData) => [
+export const open_clip = (model: ModelData): string[] => [
 	`import open_clip
 
 model, preprocess_train, preprocess_val = open_clip.create_model_and_transforms('hf-hub:${model.id}')
 tokenizer = open_clip.get_tokenizer('hf-hub:${model.id}')`,
 ];
 
-const paddlenlp = (model: ModelData) => {
+export const paddlenlp = (model: ModelData): string[] => {
 	if (model.config?.architectures?.[0]) {
 		const architecture = model.config.architectures[0];
 		return [
@@ -206,7 +184,7 @@ const paddlenlp = (model: ModelData) => {
 	}
 };
 
-const pyannote_audio_pipeline = (model: ModelData) => [
+export const pyannote_audio_pipeline = (model: ModelData): string[] => [
 	`from pyannote.audio import Pipeline
   
 pipeline = Pipeline.from_pretrained("${model.id}")
@@ -223,7 +201,7 @@ waveform, sample_rate = Audio().crop("file.wav", excerpt)
 pipeline({"waveform": waveform, "sample_rate": sample_rate})`,
 ];
 
-const pyannote_audio_model = (model: ModelData) => [
+const pyannote_audio_model = (model: ModelData): string[] => [
 	`from pyannote.audio import Model, Inference
 
 model = Model.from_pretrained("${model.id}")
@@ -238,14 +216,14 @@ excerpt = Segment(start=2.0, end=5.0)
 inference.crop("file.wav", excerpt)`,
 ];
 
-const pyannote_audio = (model: ModelData) => {
+export const pyannote_audio = (model: ModelData): string[] => {
 	if (model.tags?.includes("pyannote-audio-pipeline")) {
 		return pyannote_audio_pipeline(model);
 	}
 	return pyannote_audio_model(model);
 };
 
-const tensorflowttsTextToMel = (model: ModelData) => [
+const tensorflowttsTextToMel = (model: ModelData): string[] => [
 	`from tensorflow_tts.inference import AutoProcessor, TFAutoModel
 
 processor = AutoProcessor.from_pretrained("${model.id}")
@@ -253,7 +231,7 @@ model = TFAutoModel.from_pretrained("${model.id}")
 `,
 ];
 
-const tensorflowttsMelToWav = (model: ModelData) => [
+const tensorflowttsMelToWav = (model: ModelData): string[] => [
 	`from tensorflow_tts.inference import TFAutoModel
 
 model = TFAutoModel.from_pretrained("${model.id}")
@@ -261,14 +239,14 @@ audios = model.inference(mels)
 `,
 ];
 
-const tensorflowttsUnknown = (model: ModelData) => [
+const tensorflowttsUnknown = (model: ModelData): string[] => [
 	`from tensorflow_tts.inference import TFAutoModel
 
 model = TFAutoModel.from_pretrained("${model.id}")
 `,
 ];
 
-const tensorflowtts = (model: ModelData) => {
+export const tensorflowtts = (model: ModelData): string[] => {
 	if (model.tags?.includes("text-to-mel")) {
 		return tensorflowttsTextToMel(model);
 	} else if (model.tags?.includes("mel-to-wav")) {
@@ -277,7 +255,7 @@ const tensorflowtts = (model: ModelData) => {
 	return tensorflowttsUnknown(model);
 };
 
-const timm = (model: ModelData) => [
+export const timm = (model: ModelData): string[] => [
 	`import timm
 
 model = timm.create_model("hf_hub:${model.id}", pretrained=True)`,
@@ -319,9 +297,9 @@ model = joblib.load(
 	];
 };
 
-const sklearn = (model: ModelData) => {
+export const sklearn = (model: ModelData): string[] => {
 	if (model.tags?.includes("skops")) {
-		const skopsmodelFile = model.config?.sklearn?.filename;
+		const skopsmodelFile = model.config?.sklearn?.model?.file;
 		const skopssaveFormat = model.config?.sklearn?.model_format;
 		if (!skopsmodelFile) {
 			return [`# ⚠️ Model filename not specified in config.json`];
@@ -336,29 +314,29 @@ const sklearn = (model: ModelData) => {
 	}
 };
 
-const fastai = (model: ModelData) => [
+export const fastai = (model: ModelData): string[] => [
 	`from huggingface_hub import from_pretrained_fastai
 
 learn = from_pretrained_fastai("${model.id}")`,
 ];
 
-const sampleFactory = (model: ModelData) => [
+export const sampleFactory = (model: ModelData): string[] => [
 	`python -m sample_factory.huggingface.load_from_hub -r ${model.id} -d ./train_dir`,
 ];
 
-const sentenceTransformers = (model: ModelData) => [
+export const sentenceTransformers = (model: ModelData): string[] => [
 	`from sentence_transformers import SentenceTransformer
 
 model = SentenceTransformer("${model.id}")`,
 ];
 
-const setfit = (model: ModelData) => [
+export const setfit = (model: ModelData): string[] => [
 	`from setfit import SetFitModel
 
 model = SetFitModel.from_pretrained("${model.id}")`,
 ];
 
-const spacy = (model: ModelData) => [
+export const spacy = (model: ModelData): string[] => [
 	`!pip install https://huggingface.co/${model.id}/resolve/main/${nameWithoutNamespace(model.id)}-any-py3-none-any.whl
 
 # Using spacy.load().
@@ -370,13 +348,13 @@ import ${nameWithoutNamespace(model.id)}
 nlp = ${nameWithoutNamespace(model.id)}.load()`,
 ];
 
-const span_marker = (model: ModelData) => [
+export const span_marker = (model: ModelData): string[] => [
 	`from span_marker import SpanMarkerModel
 
 model = SpanMarkerModel.from_pretrained("${model.id}")`,
 ];
 
-const stanza = (model: ModelData) => [
+export const stanza = (model: ModelData): string[] => [
 	`import stanza
 
 stanza.download("${nameWithoutNamespace(model.id).replace("stanza-", "")}")
@@ -399,8 +377,8 @@ const speechBrainMethod = (speechbrainInterface: string) => {
 	}
 };
 
-const speechbrain = (model: ModelData) => {
-	const speechbrainInterface = model.config?.speechbrain?.interface;
+export const speechbrain = (model: ModelData): string[] => {
+	const speechbrainInterface = model.config?.speechbrain?.speechbrain_interface;
 	if (speechbrainInterface === undefined) {
 		return [`# interface not specified in config.json`];
 	}
@@ -419,7 +397,7 @@ model.${speechbrainMethod}("file.wav")`,
 	];
 };
 
-const transformers = (model: ModelData) => {
+export const transformers = (model: ModelData): string[] => {
 	const info = model.transformersInfo;
 	if (!info) {
 		return [`# ⚠️ Type of model unknown`];
@@ -461,7 +439,7 @@ const transformers = (model: ModelData) => {
 	return [autoSnippet];
 };
 
-const transformersJS = (model: ModelData) => {
+export const transformersJS = (model: ModelData): string[] => {
 	if (!model.pipeline_tag) {
 		return [`// ⚠️ Unknown pipeline tag`];
 	}
@@ -492,8 +470,8 @@ const peftTask = (peftTaskType?: string) => {
 	}
 };
 
-const peft = (model: ModelData) => {
-	const { base_model_name: peftBaseModel, task_type: peftTaskType } = model.config?.peft ?? {};
+export const peft = (model: ModelData): string[] => {
+	const { base_model_name_or_path: peftBaseModel, task_type: peftTaskType } = model.config?.peft ?? {};
 	const pefttask = peftTask(peftTaskType);
 	if (!pefttask) {
 		return [`Task type is invalid.`];
@@ -512,14 +490,14 @@ model = PeftModel.from_pretrained(model, "${model.id}")`,
 	];
 };
 
-const fasttext = (model: ModelData) => [
+export const fasttext = (model: ModelData): string[] => [
 	`from huggingface_hub import hf_hub_download
 import fasttext
 
 model = fasttext.load_model(hf_hub_download("${model.id}", "model.bin"))`,
 ];
 
-const stableBaselines3 = (model: ModelData) => [
+export const stableBaselines3 = (model: ModelData): string[] => [
 	`from huggingface_sb3 import load_from_hub
 checkpoint = load_from_hub(
 	repo_id="${model.id}",
@@ -541,9 +519,11 @@ transcriptions = asr_model.transcribe(["file.wav"])`,
 	}
 };
 
-const mlAgents = (model: ModelData) => [`mlagents-load-from-hf --repo-id="${model.id}" --local-dir="./downloads"`];
+export const mlAgents = (model: ModelData): string[] => [
+	`mlagents-load-from-hf --repo-id="${model.id}" --local-dir="./download: string[]s"`,
+];
 
-const sentis = (/* model: ModelData */) => [
+export const sentis = (/* model: ModelData */): string[] => [
 	`string modelName = "[Your model name here].sentis";
 Model model = ModelLoader.Load(Application.streamingAssetsPath + "/" + modelName);
 IWorker engine = WorkerFactory.CreateWorker(BackendType.GPUCompute, model);
@@ -551,14 +531,20 @@ IWorker engine = WorkerFactory.CreateWorker(BackendType.GPUCompute, model);
 `,
 ];
 
-const mlx = (model: ModelData) => [
+export const mlx = (model: ModelData): string[] => [
 	`pip install huggingface_hub hf_transfer
 
-export HF_HUB_ENABLE_HF_TRANSFER=1
+export HF_HUB_ENABLE_HF_TRANS: string[]FER=1
 huggingface-cli download --local-dir ${nameWithoutNamespace(model.id)} ${model.id}`,
 ];
 
-const nemo = (model: ModelData) => {
+export const mlxim = (model: ModelData): string[] => [
+	`from mlxim.model import create_model
+
+model = create_model(${model.id})`,
+];
+
+export const nemo = (model: ModelData): string[] => {
 	let command: string[] | undefined = undefined;
 	// Resolve the tag to a nemo domain/sub-domain
 	if (model.tags?.includes("automatic-speech-recognition")) {
@@ -568,232 +554,48 @@ const nemo = (model: ModelData) => {
 	return command ?? [`# tag did not correspond to a valid NeMo domain.`];
 };
 
-const pythae = (model: ModelData) => [
+export const pythae = (model: ModelData): string[] => [
 	`from pythae.models import AutoModel
 
 model = AutoModel.load_from_hf_hub("${model.id}")`,
 ];
 
-//#endregion
+const musicgen = (model: ModelData): string[] => [
+	`from audiocraft.models import MusicGen
 
-export const MODEL_LIBRARIES_UI_ELEMENTS: Partial<Record<ModelLibraryKey, LibraryUiElement>> = {
-	"adapter-transformers": {
-		btnLabel: "Adapters",
-		repoName: "adapters",
-		repoUrl: "https://github.com/Adapter-Hub/adapters",
-		docsUrl: "https://huggingface.co/docs/hub/adapters",
-		snippets: adapters,
-	},
-	allennlp: {
-		btnLabel: "AllenNLP",
-		repoName: "AllenNLP",
-		repoUrl: "https://github.com/allenai/allennlp",
-		docsUrl: "https://huggingface.co/docs/hub/allennlp",
-		snippets: allennlp,
-	},
-	asteroid: {
-		btnLabel: "Asteroid",
-		repoName: "Asteroid",
-		repoUrl: "https://github.com/asteroid-team/asteroid",
-		docsUrl: "https://huggingface.co/docs/hub/asteroid",
-		snippets: asteroid,
-	},
-	bertopic: {
-		btnLabel: "BERTopic",
-		repoName: "BERTopic",
-		repoUrl: "https://github.com/MaartenGr/BERTopic",
-		snippets: bertopic,
-	},
-	diffusers: {
-		btnLabel: "Diffusers",
-		repoName: "🤗/diffusers",
-		repoUrl: "https://github.com/huggingface/diffusers",
-		docsUrl: "https://huggingface.co/docs/hub/diffusers",
-		snippets: diffusers,
-	},
-	espnet: {
-		btnLabel: "ESPnet",
-		repoName: "ESPnet",
-		repoUrl: "https://github.com/espnet/espnet",
-		docsUrl: "https://huggingface.co/docs/hub/espnet",
-		snippets: espnet,
-	},
-	fairseq: {
-		btnLabel: "Fairseq",
-		repoName: "fairseq",
-		repoUrl: "https://github.com/pytorch/fairseq",
-		snippets: fairseq,
-	},
-	flair: {
-		btnLabel: "Flair",
-		repoName: "Flair",
-		repoUrl: "https://github.com/flairNLP/flair",
-		docsUrl: "https://huggingface.co/docs/hub/flair",
-		snippets: flair,
-	},
-	keras: {
-		btnLabel: "Keras",
-		repoName: "Keras",
-		repoUrl: "https://github.com/keras-team/keras",
-		docsUrl: "https://huggingface.co/docs/hub/keras",
-		snippets: keras,
-	},
-	mlx: {
-		btnLabel: "MLX",
-		repoName: "MLX",
-		repoUrl: "https://github.com/ml-explore/mlx-examples/tree/main",
-		snippets: mlx,
-	},
-	nemo: {
-		btnLabel: "NeMo",
-		repoName: "NeMo",
-		repoUrl: "https://github.com/NVIDIA/NeMo",
-		snippets: nemo,
-	},
-	open_clip: {
-		btnLabel: "OpenCLIP",
-		repoName: "OpenCLIP",
-		repoUrl: "https://github.com/mlfoundations/open_clip",
-		snippets: open_clip,
-	},
-	paddlenlp: {
-		btnLabel: "paddlenlp",
-		repoName: "PaddleNLP",
-		repoUrl: "https://github.com/PaddlePaddle/PaddleNLP",
-		docsUrl: "https://huggingface.co/docs/hub/paddlenlp",
-		snippets: paddlenlp,
-	},
-	peft: {
-		btnLabel: "PEFT",
-		repoName: "PEFT",
-		repoUrl: "https://github.com/huggingface/peft",
-		snippets: peft,
-	},
-	"pyannote-audio": {
-		btnLabel: "pyannote.audio",
-		repoName: "pyannote-audio",
-		repoUrl: "https://github.com/pyannote/pyannote-audio",
-		snippets: pyannote_audio,
-	},
-	"sentence-transformers": {
-		btnLabel: "sentence-transformers",
-		repoName: "sentence-transformers",
-		repoUrl: "https://github.com/UKPLab/sentence-transformers",
-		docsUrl: "https://huggingface.co/docs/hub/sentence-transformers",
-		snippets: sentenceTransformers,
-	},
-	setfit: {
-		btnLabel: "setfit",
-		repoName: "setfit",
-		repoUrl: "https://github.com/huggingface/setfit",
-		docsUrl: "https://huggingface.co/docs/hub/setfit",
-		snippets: setfit,
-	},
-	sklearn: {
-		btnLabel: "Scikit-learn",
-		repoName: "Scikit-learn",
-		repoUrl: "https://github.com/scikit-learn/scikit-learn",
-		snippets: sklearn,
-	},
-	fastai: {
-		btnLabel: "fastai",
-		repoName: "fastai",
-		repoUrl: "https://github.com/fastai/fastai",
-		docsUrl: "https://huggingface.co/docs/hub/fastai",
-		snippets: fastai,
-	},
-	spacy: {
-		btnLabel: "spaCy",
-		repoName: "spaCy",
-		repoUrl: "https://github.com/explosion/spaCy",
-		docsUrl: "https://huggingface.co/docs/hub/spacy",
-		snippets: spacy,
-	},
-	"span-marker": {
-		btnLabel: "SpanMarker",
-		repoName: "SpanMarkerNER",
-		repoUrl: "https://github.com/tomaarsen/SpanMarkerNER",
-		docsUrl: "https://huggingface.co/docs/hub/span_marker",
-		snippets: span_marker,
-	},
-	speechbrain: {
-		btnLabel: "speechbrain",
-		repoName: "speechbrain",
-		repoUrl: "https://github.com/speechbrain/speechbrain",
-		docsUrl: "https://huggingface.co/docs/hub/speechbrain",
-		snippets: speechbrain,
-	},
-	stanza: {
-		btnLabel: "Stanza",
-		repoName: "stanza",
-		repoUrl: "https://github.com/stanfordnlp/stanza",
-		docsUrl: "https://huggingface.co/docs/hub/stanza",
-		snippets: stanza,
-	},
-	tensorflowtts: {
-		btnLabel: "TensorFlowTTS",
-		repoName: "TensorFlowTTS",
-		repoUrl: "https://github.com/TensorSpeech/TensorFlowTTS",
-		snippets: tensorflowtts,
-	},
-	timm: {
-		btnLabel: "timm",
-		repoName: "pytorch-image-models",
-		repoUrl: "https://github.com/rwightman/pytorch-image-models",
-		docsUrl: "https://huggingface.co/docs/hub/timm",
-		snippets: timm,
-	},
-	transformers: {
-		btnLabel: "Transformers",
-		repoName: "🤗/transformers",
-		repoUrl: "https://github.com/huggingface/transformers",
-		docsUrl: "https://huggingface.co/docs/hub/transformers",
-		snippets: transformers,
-	},
-	"transformers.js": {
-		btnLabel: "Transformers.js",
-		repoName: "transformers.js",
-		repoUrl: "https://github.com/xenova/transformers.js",
-		docsUrl: "https://huggingface.co/docs/hub/transformers-js",
-		snippets: transformersJS,
-	},
-	fasttext: {
-		btnLabel: "fastText",
-		repoName: "fastText",
-		repoUrl: "https://fasttext.cc/",
-		snippets: fasttext,
-	},
-	"sample-factory": {
-		btnLabel: "sample-factory",
-		repoName: "sample-factory",
-		repoUrl: "https://github.com/alex-petrenko/sample-factory",
-		docsUrl: "https://huggingface.co/docs/hub/sample-factory",
-		snippets: sampleFactory,
-	},
-	"stable-baselines3": {
-		btnLabel: "stable-baselines3",
-		repoName: "stable-baselines3",
-		repoUrl: "https://github.com/huggingface/huggingface_sb3",
-		docsUrl: "https://huggingface.co/docs/hub/stable-baselines3",
-		snippets: stableBaselines3,
-	},
-	"ml-agents": {
-		btnLabel: "ml-agents",
-		repoName: "ml-agents",
-		repoUrl: "https://github.com/Unity-Technologies/ml-agents",
-		docsUrl: "https://huggingface.co/docs/hub/ml-agents",
-		snippets: mlAgents,
-	},
-	"unity-sentis": {
-		btnLabel: "unity-sentis",
-		repoName: "unity-sentis",
-		repoUrl: "https://github.com/Unity-Technologies/sentis-samples",
-		snippets: sentis,
-	},
-	pythae: {
-		btnLabel: "pythae",
-		repoName: "pythae",
-		repoUrl: "https://github.com/clementchadebec/benchmark_VAE",
-		snippets: pythae,
-	},
-} as const;
+model = MusicGen.get_pretrained("${model.id}")
+
+descriptions = ['happy rock', 'energetic EDM', 'sad jazz']
+wav = model.generate(descriptions)  # generates 3 samples.`,
+];
+
+const magnet = (model: ModelData): string[] => [
+	`from audiocraft.models import MAGNeT
+	
+model = MAGNeT.get_pretrained("${model.id}")
+
+descriptions = ['disco beat', 'energetic EDM', 'funky groove']
+wav = model.generate(descriptions)  # generates 3 samples.`,
+];
+
+const audiogen = (model: ModelData): string[] => [
+	`from audiocraft.models import AudioGen
+	
+model = AudioGen.get_pretrained("${model.id}")
+model.set_generation_params(duration=5)  # generate 5 seconds.
+descriptions = ['dog barking', 'sirene of an emergency vehicle', 'footsteps in a corridor']
+wav = model.generate(descriptions)  # generates 3 samples.`,
+];
+
+export const audiocraft = (model: ModelData): string[] => {
+	if (model.tags?.includes("musicgen")) {
+		return musicgen(model);
+	} else if (model.tags?.includes("audiogen")) {
+		return audiogen(model);
+	} else if (model.tags?.includes("magnet")) {
+		return magnet(model);
+	} else {
+		return [`# Type of model unknown.`];
+	}
+};
+//#endregion

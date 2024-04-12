@@ -6,9 +6,27 @@ import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
 import { pick } from "../utils/pick";
 
-const EXPAND_KEYS = ["sdk", "likes", "private", "lastModified"];
+const EXPAND_KEYS = ["sdk", "likes", "private", "lastModified"] as const satisfies readonly (keyof ApiSpaceInfo)[];
+const EXPANDABLE_KEYS = [
+	"author",
+	"cardData",
+	"datasets",
+	"disabled",
+	"gitalyUid",
+	"lastModified",
+	"createdAt",
+	"likes",
+	"private",
+	"runtime",
+	"sdk",
+	// "siblings",
+	"sha",
+	"subdomain",
+	"tags",
+	"models",
+] as const satisfies readonly (keyof ApiSpaceInfo)[];
 
-export type SpaceEntry = {
+export interface SpaceEntry {
 	id: string;
 	name: string;
 	sdk?: SpaceSdk;
@@ -16,11 +34,18 @@ export type SpaceEntry = {
 	private: boolean;
 	updatedAt: Date;
 	// Use additionalFields to fetch the fields from ApiSpaceInfo
-} & Partial<Omit<ApiSpaceInfo, "updatedAt">>;
+}
 
-export async function* listSpaces(params?: {
+export async function* listSpaces<
+	const T extends Exclude<(typeof EXPANDABLE_KEYS)[number], (typeof EXPAND_KEYS)[number]> = never,
+>(params?: {
 	search?: {
+		/**
+		 * Will search in the space name for matches
+		 */
+		query?: string;
 		owner?: string;
+		tags?: string[];
 	};
 	credentials?: Credentials;
 	hubUrl?: string;
@@ -31,11 +56,16 @@ export async function* listSpaces(params?: {
 	/**
 	 * Additional fields to fetch from huggingface.co.
 	 */
-	additionalFields?: Array<keyof ApiSpaceInfo>;
-}): AsyncGenerator<SpaceEntry> {
+	additionalFields?: T[];
+}): AsyncGenerator<SpaceEntry & Pick<ApiSpaceInfo, T>> {
 	checkCredentials(params?.credentials);
 	const search = new URLSearchParams([
-		...Object.entries({ limit: "500", ...(params?.search?.owner ? { author: params.search.owner } : undefined) }),
+		...Object.entries({
+			limit: "500",
+			...(params?.search?.owner ? { author: params.search.owner } : undefined),
+			...(params?.search?.query ? { search: params.search.query } : undefined),
+		}),
+		...(params?.search?.tags?.map((tag) => ["filter", tag]) ?? []),
 		...[...EXPAND_KEYS, ...(params?.additionalFields ?? [])].map((val) => ["expand", val] satisfies [string, string]),
 	]).toString();
 	let url: string | undefined = `${params?.hubUrl || HUB_URL}/api/spaces?${search}`;
@@ -49,7 +79,7 @@ export async function* listSpaces(params?: {
 		});
 
 		if (!res.ok) {
-			throw createApiError(res);
+			throw await createApiError(res);
 		}
 
 		const items: ApiSpaceInfo[] = await res.json();
@@ -63,7 +93,7 @@ export async function* listSpaces(params?: {
 				likes: item.likes,
 				private: item.private,
 				updatedAt: new Date(item.lastModified),
-			};
+			} as SpaceEntry & Pick<ApiSpaceInfo, T>;
 		}
 
 		const linkHeader = res.headers.get("Link");

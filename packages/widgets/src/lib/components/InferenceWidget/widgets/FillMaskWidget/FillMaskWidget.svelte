@@ -129,7 +129,7 @@
 		getOutput({ ...opts.inferenceOpts, exampleOutput });
 	}
 
-	function validateExample(sample: WidgetExample): sample is WidgetExampleTextInput<WidgetExampleOutputLabels> {
+	function validateExample(sample: unknown): sample is WidgetExampleTextInput<WidgetExampleOutputLabels> {
 		return isTextInput(sample) && (!sample.output || isValidOutputLabels(sample.output));
 	}
 </script>
@@ -142,7 +142,7 @@
 			Mask token: <code>{model.mask_token}</code>
 		</div>
 	{/if}
-	<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} />
+	<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} on:cmdEnter={() => getOutput()} />
 	<WidgetSubmitBtn
 		classNames="mt-2"
 		{isLoading}

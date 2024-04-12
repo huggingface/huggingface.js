@@ -1,7 +1,7 @@
 # 🤗 Hugging Face Inference Endpoints
 
 A Typescript powered wrapper for the Hugging Face Inference Endpoints API. Learn more about Inference Endpoints at [Hugging Face](https://huggingface.co/inference-endpoints).
-It works with both [serverless](https://huggingface.co/docs/api-inference/index) and [dedicated](https://huggingface.co/docs/inference-endpoints/index) Endpoints.
+It works with both [Inference API (serverless)](https://huggingface.co/docs/api-inference/index) and [Inference Endpoints (dedicated)](https://huggingface.co/docs/inference-endpoints/index).
 
 Check out the [full documentation](https://huggingface.co/docs/huggingface.js/inference/README).
 
@@ -504,6 +504,21 @@ Learn more about using your own inference endpoints [here](https://hf.co/docs/in
 ```typescript
 const gpt2 = hf.endpoint('https://xyz.eu-west-1.aws.endpoints.huggingface.cloud/gpt2');
 const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the universe is'});
+```
+
+By default, all calls to the inference endpoint will wait until the model is
+loaded. When [scaling to
+0](https://huggingface.co/docs/inference-endpoints/en/autoscaling#scaling-to-0)
+is enabled on the endpoint, this can result in non-trivial waiting time. If
+you'd rather disable this behavior and handle the endpoint's returned 500 HTTP
+errors yourself, you can do so like so:
+
+```typescript
+const gpt2 = hf.endpoint('https://xyz.eu-west-1.aws.endpoints.huggingface.cloud/gpt2');
+const { generated_text } = await gpt2.textGeneration(
+  {inputs: 'The answer to the universe is'},
+  {retry_on_error: false},
+);
 ```
 
 ## Running tests

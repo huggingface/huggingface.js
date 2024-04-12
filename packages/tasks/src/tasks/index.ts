@@ -1,13 +1,14 @@
-import { type PipelineType, PIPELINE_DATA } from "../pipelines";
+import type { PipelineType } from "../pipelines";
+import { PIPELINE_DATA } from "../pipelines";
 
 import audioClassification from "./audio-classification/data";
 import audioToAudio from "./audio-to-audio/data";
 import automaticSpeechRecognition from "./automatic-speech-recognition/data";
-import conversational from "./conversational/data";
 import documentQuestionAnswering from "./document-question-answering/data";
 import featureExtraction from "./feature-extraction/data";
 import fillMask from "./fill-mask/data";
 import imageClassification from "./image-classification/data";
+import imageFeatureExtraction from "./image-feature-extraction/data";
 import imageToImage from "./image-to-image/data";
 import imageToText from "./image-to-text/data";
 import imageSegmentation from "./image-segmentation/data";
@@ -36,6 +37,77 @@ import zeroShotClassification from "./zero-shot-classification/data";
 import zeroShotImageClassification from "./zero-shot-image-classification/data";
 import zeroShotObjectDetection from "./zero-shot-object-detection/data";
 
+export type * from "./audio-classification/inference";
+export type * from "./automatic-speech-recognition/inference";
+export type {
+	ChatCompletionInput,
+	ChatCompletionInputMessage,
+	ChatCompletionOutput,
+	ChatCompletionOutputChoice,
+	ChatCompletionFinishReason,
+	ChatCompletionOutputChoiceMessage,
+	ChatCompletionStreamOutput,
+	ChatCompletionStreamOutputChoice,
+	ChatCompletionStreamOutputDelta,
+} from "./chat-completion/inference";
+export type * from "./document-question-answering/inference";
+export type * from "./feature-extraction/inference";
+export type * from "./fill-mask/inference";
+export type {
+	ImageClassificationInput,
+	ImageClassificationOutput,
+	ImageClassificationOutputElement,
+	ImageClassificationParameters,
+} from "./image-classification/inference";
+export type * from "./image-to-image/inference";
+export type { ImageToTextInput, ImageToTextOutput, ImageToTextParameters } from "./image-to-text/inference";
+export type * from "./image-segmentation/inference";
+export type * from "./object-detection/inference";
+export type * from "./depth-estimation/inference";
+export type * from "./question-answering/inference";
+export type * from "./sentence-similarity/inference";
+export type * from "./summarization/inference";
+export type * from "./table-question-answering/inference";
+export type { TextToImageInput, TextToImageOutput, TextToImageParameters } from "./text-to-image/inference";
+export type { TextToAudioParameters, TextToSpeechInput, TextToSpeechOutput } from "./text-to-speech/inference";
+export type * from "./token-classification/inference";
+export type {
+	Text2TextGenerationParameters,
+	Text2TextGenerationTruncationStrategy,
+	TranslationInput,
+	TranslationOutput,
+} from "./translation/inference";
+export type {
+	ClassificationOutputTransform,
+	TextClassificationInput,
+	TextClassificationOutput,
+	TextClassificationOutputElement,
+	TextClassificationParameters,
+} from "./text-classification/inference";
+export type {
+	TextGenerationFinishReason,
+	TextGenerationPrefillToken,
+	TextGenerationInput,
+	TextGenerationOutput,
+	TextGenerationOutputDetails,
+	TextGenerationParameters,
+	TextGenerationOutputSequenceDetails,
+	TextGenerationOutputToken,
+	TextGenerationStreamDetails,
+	TextGenerationStreamOutput,
+} from "./text-generation/inference";
+export type * from "./video-classification/inference";
+export type * from "./visual-question-answering/inference";
+export type * from "./zero-shot-classification/inference";
+export type * from "./zero-shot-image-classification/inference";
+export type {
+	BoundingBox,
+	ZeroShotObjectDetectionInput,
+	ZeroShotObjectDetectionInputData,
+	ZeroShotObjectDetectionOutput,
+	ZeroShotObjectDetectionOutputElement,
+} from "./zero-shot-object-detection/inference";
+
 import type { ModelLibraryKey } from "../model-libraries";
 
 /**
@@ -43,16 +115,17 @@ import type { ModelLibraryKey } from "../model-libraries";
  */
 export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	"audio-classification": ["speechbrain", "transformers", "transformers.js"],
-	"audio-to-audio": ["asteroid", "speechbrain"],
+	"audio-to-audio": ["asteroid", "fairseq", "speechbrain"],
 	"automatic-speech-recognition": ["espnet", "nemo", "speechbrain", "transformers", "transformers.js"],
-	conversational: ["transformers"],
 	"depth-estimation": ["transformers", "transformers.js"],
 	"document-question-answering": ["transformers", "transformers.js"],
 	"feature-extraction": ["sentence-transformers", "transformers", "transformers.js"],
 	"fill-mask": ["transformers", "transformers.js"],
 	"graph-ml": ["transformers"],
 	"image-classification": ["keras", "timm", "transformers", "transformers.js"],
+	"image-feature-extraction": ["timm", "transformers"],
 	"image-segmentation": ["transformers", "transformers.js"],
+	"image-text-to-text": ["transformers"],
 	"image-to-image": ["diffusers", "transformers", "transformers.js"],
 	"image-to-text": ["transformers", "transformers.js"],
 	"image-to-video": ["diffusers"],
@@ -122,14 +195,15 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"audio-classification": getData("audio-classification", audioClassification),
 	"audio-to-audio": getData("audio-to-audio", audioToAudio),
 	"automatic-speech-recognition": getData("automatic-speech-recognition", automaticSpeechRecognition),
-	conversational: getData("conversational", conversational),
 	"depth-estimation": getData("depth-estimation", depthEstimation),
 	"document-question-answering": getData("document-question-answering", documentQuestionAnswering),
 	"feature-extraction": getData("feature-extraction", featureExtraction),
 	"fill-mask": getData("fill-mask", fillMask),
 	"graph-ml": undefined,
 	"image-classification": getData("image-classification", imageClassification),
+	"image-feature-extraction": getData("image-feature-extraction", imageFeatureExtraction),
 	"image-segmentation": getData("image-segmentation", imageSegmentation),
+	"image-text-to-text": undefined,
 	"image-to-image": getData("image-to-image", imageToImage),
 	"image-to-text": getData("image-to-text", imageToText),
 	"image-to-video": undefined,

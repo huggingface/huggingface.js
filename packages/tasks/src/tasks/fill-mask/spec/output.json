@@ -19,7 +19,7 @@
 				"type": "integer",
 				"description": "The predicted token id (to replace the masked one)."
 			},
-			"tokenStr": {
+			"token_str": {
 				"type": "string",
 				"description": "The predicted token (to replace the masked one)."
 			}

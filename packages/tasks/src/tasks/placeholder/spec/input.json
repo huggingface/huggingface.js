@@ -5,7 +5,7 @@
 	"title": "PlaceholderInput",
 	"type": "object",
 	"properties": {
-		"data": {
+		"inputs": {
 			"description": "TODO: describe the input here. This must be model & framework agnostic.",
 			"type": "string"
 		},
@@ -20,16 +20,16 @@
 			"description": "TODO: describe additional parameters here.",
 			"type": "object",
 			"properties": {
-				"dummyParameterName": {
+				"dummy_parameter_name": {
 					"type": "boolean",
 					"description": "TODO: describe the parameter here"
 				},
-				"dummyParameterName2": {
+				"dummy_parameter_name2": {
 					"type": "integer",
 					"description": "TODO: describe the parameter here"
 				}
 			}
 		}
 	},
-	"required": ["data"]
+	"required": ["inputs"]
 }

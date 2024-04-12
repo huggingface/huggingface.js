@@ -13,7 +13,7 @@ export interface FeatureExtractionInput {
 	/**
 	 * The text to get the embeddings of
 	 */
-	data: string;
+	inputs: string;
 	/**
 	 * Additional inference parameters
 	 */

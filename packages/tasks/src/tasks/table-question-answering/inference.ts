@@ -10,7 +10,7 @@ export interface TableQuestionAnsweringInput {
 	/**
 	 * One (table, question) pair to answer
 	 */
-	data: TableQuestionAnsweringInputData;
+	inputs: TableQuestionAnsweringInputData;
 	/**
 	 * Additional inference parameters
 	 */

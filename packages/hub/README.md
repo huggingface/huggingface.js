@@ -1,6 +1,6 @@
 # 🤗 Hugging Face Hub API
 
-Official utilities to use the Hugging Face hub API, still very experimental.
+Official utilities to use the Hugging Face Hub API.
 
 ## Install
 

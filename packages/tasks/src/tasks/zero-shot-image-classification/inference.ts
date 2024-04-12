@@ -10,7 +10,7 @@ export interface ZeroShotImageClassificationInput {
 	/**
 	 * The input image data, with candidate labels
 	 */
-	data: ZeroShotImageClassificationInputData;
+	inputs: ZeroShotImageClassificationInputData;
 	/**
 	 * Additional inference parameters
 	 */
@@ -41,7 +41,7 @@ export interface ZeroShotImageClassificationParameters {
 	 * The sentence used in conjunction with candidateLabels to attempt the text classification
 	 * by replacing the placeholder with the candidate labels.
 	 */
-	hypothesisTemplate?: string;
+	hypothesis_template?: string;
 	[property: string]: unknown;
 }
 export type ZeroShotImageClassificationOutput = ZeroShotImageClassificationOutputElement[];

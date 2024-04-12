@@ -8,9 +8,14 @@ import { downloadFile } from "./download-file";
 import { fileExists } from "./file-exists";
 import { promisesQueue } from "../utils/promisesQueue";
 
-const SINGLE_FILE = "model.safetensors";
-const INDEX_FILE = "model.safetensors.index.json";
-const PARALLEL_DOWNLOADS = 5;
+export const SAFETENSORS_FILE = "model.safetensors";
+export const SAFETENSORS_INDEX_FILE = "model.safetensors.index.json";
+/// We advise model/library authors to use the filenames above for convention inside model repos,
+/// but in some situations safetensors weights have different filenames.
+export const RE_SAFETENSORS_FILE = /\.safetensors$/;
+export const RE_SAFETENSORS_INDEX_FILE = /\.safetensors\.index\.json$/;
+export const RE_SAFETENSORS_SHARD_FILE = /^(?<prefix>.*?)[_-]?(?<shard>\d{5})-of-(?<total>\d{5})\.safetensors$/;
+const PARALLEL_DOWNLOADS = 20;
 const MAX_HEADER_LENGTH = 25_000_000;
 
 class SafetensorParseError extends Error {}
@@ -119,6 +124,7 @@ async function parseShardedIndex(
 	const indexResp = await downloadFile({
 		...params,
 		path,
+		range: [0, 10_000_000],
 	});
 
 	if (!indexResp) {
@@ -126,14 +132,20 @@ async function parseShardedIndex(
 	}
 
 	// no validation for now, we assume it's a valid IndexJson.
-	const index: SafetensorsIndexJson = await indexResp.json();
+	let index: SafetensorsIndexJson;
+	try {
+		index = await indexResp.json();
+	} catch (error) {
+		throw new SafetensorParseError(`Failed to parse file ${path}: not a valid JSON.`);
+	}
 
+	const pathPrefix = path.slice(0, path.lastIndexOf("/") + 1);
 	const filenames = [...new Set(Object.values(index.weight_map))];
 	const shardedMap: SafetensorsShardedHeaders = Object.fromEntries(
 		await promisesQueue(
 			filenames.map(
 				(filename) => async () =>
-					[filename, await parseSingleFile(filename, params)] satisfies [string, SafetensorsFileHeader]
+					[filename, await parseSingleFile(pathPrefix + filename, params)] satisfies [string, SafetensorsFileHeader]
 			),
 			PARALLEL_DOWNLOADS
 		)
@@ -148,6 +160,10 @@ async function parseShardedIndex(
 export async function parseSafetensorsMetadata(params: {
 	/** Only models are supported */
 	repo: RepoDesignation;
+	/**
+	 * Relative file path to safetensors file inside `repo`. Defaults to `SAFETENSORS_FILE` or `SAFETENSORS_INDEX_FILE` (whichever one exists).
+	 */
+	path?: string;
 	/**
 	 * Will include SafetensorsParseFromRepo["parameterCount"], an object containing the number of parameters for each DType
 	 *
@@ -170,6 +186,7 @@ export async function parseSafetensorsMetadata(params: {
 	 *
 	 * @default false
 	 */
+	path?: string;
 	computeParametersCount?: boolean;
 	hubUrl?: string;
 	credentials?: Credentials;
@@ -181,6 +198,7 @@ export async function parseSafetensorsMetadata(params: {
 }): Promise<SafetensorsParseFromRepo>;
 export async function parseSafetensorsMetadata(params: {
 	repo: RepoDesignation;
+	path?: string;
 	computeParametersCount?: boolean;
 	hubUrl?: string;
 	credentials?: Credentials;
@@ -197,8 +215,8 @@ export async function parseSafetensorsMetadata(params: {
 		throw new TypeError("Only model repos should contain safetensors files.");
 	}
 
-	if (await fileExists({ ...params, path: SINGLE_FILE })) {
-		const header = await parseSingleFile(SINGLE_FILE, params);
+	if (RE_SAFETENSORS_FILE.test(params.path ?? "") || (await fileExists({ ...params, path: SAFETENSORS_FILE }))) {
+		const header = await parseSingleFile(params.path ?? SAFETENSORS_FILE, params);
 		return {
 			sharded: false,
 			header,
@@ -206,8 +224,11 @@ export async function parseSafetensorsMetadata(params: {
 				parameterCount: computeNumOfParamsByDtypeSingleFile(header),
 			}),
 		};
-	} else if (await fileExists({ ...params, path: INDEX_FILE })) {
-		const { index, headers } = await parseShardedIndex(INDEX_FILE, params);
+	} else if (
+		RE_SAFETENSORS_INDEX_FILE.test(params.path ?? "") ||
+		(await fileExists({ ...params, path: SAFETENSORS_INDEX_FILE }))
+	) {
+		const { index, headers } = await parseShardedIndex(params.path ?? SAFETENSORS_INDEX_FILE, params);
 		return {
 			sharded: true,
 			index,
