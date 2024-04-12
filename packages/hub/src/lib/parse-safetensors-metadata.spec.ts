@@ -115,6 +115,7 @@ describe("parseSafetensorsMetadata", () => {
 		const match = safetensorsFilename.match(RE_SAFETENSORS_SHARD_FILE);
 
 		assert.strictEqual(RE_SAFETENSORS_SHARD_FILE.test(safetensorsFilename), true);
+		assert.strictEqual(match?.groups?.prefix, "model");
 		assert.strictEqual(match?.groups?.shard, "00005");
 		assert.strictEqual(match?.groups?.total, "00072");
 	});
