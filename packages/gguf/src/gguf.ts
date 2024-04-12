@@ -6,7 +6,7 @@ export { GGUFValueType, GGMLQuantizationType } from "./types";
 export { GGUF_QUANT_DESCRIPTIONS } from "./quant-descriptions";
 
 export const RE_GGUF_FILE = /\.gguf$/;
-export const RE_GGUF_SHARD_FILE = /-(?<shard>\d{5})-of-(?<total>\d{5})\.gguf$/;
+export const RE_GGUF_SHARD_FILE = /^(?<prefix>.*?)-(?<shard>\d{5})-of-(?<total>\d{5})\.gguf$/;
 
 const isVersion = (version: number): version is Version => version === 1 || version === 2 || version === 3;
 
