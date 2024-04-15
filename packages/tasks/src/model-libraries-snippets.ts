@@ -531,6 +531,12 @@ IWorker engine = WorkerFactory.CreateWorker(BackendType.GPUCompute, model);
 `,
 ];
 
+export const voicecraft = (model: ModelData): string[] => [
+	`from voicecraft import VoiceCraftHF
+
+model = VoiceCraftHF.from_pretrained("${model.id}")`,
+];
+
 export const mlx = (model: ModelData): string[] => [
 	`pip install huggingface_hub hf_transfer
 
