@@ -407,7 +407,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			wildcard: { path: "*.sentis" },
 		},
 	},
-	VoiceCraft: {
+	voicecraft: {
 		prettyLabel: "VoiceCraft",
 		repoName: "VoiceCraft",
 		repoUrl: "https://github.com/jasonppy/VoiceCraft",
