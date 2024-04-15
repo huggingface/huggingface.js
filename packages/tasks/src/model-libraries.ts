@@ -407,6 +407,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			wildcard: { path: "*.sentis" },
 		},
 	},
+	VoiceCraft: {
+		prettyLabel: "VoiceCraft",
+		repoName: "VoiceCraft",
+		repoUrl: "https://github.com/jasonppy/VoiceCraft",
+		docsUrl: "https://github.com/keras-team/keras-nlp",
+		snippets: snippets.voicecraft,
+	},
 	whisperkit: {
 		prettyLabel: "WhisperKit",
 		repoName: "WhisperKit",
