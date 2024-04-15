@@ -1,165 +1,220 @@
 {
-	"$id": "/inference/schemas/text-generation/output.json",
-	"$schema": "http://json-schema.org/draft-06/schema#",
-	"description": "Outputs for Text Generation inference",
-	"title": "TextGenerationOutput",
-	"type": "object",
-	"properties": {
-		"generated_text": {
-			"type": "string",
-			"description": "The generated text"
-		},
-		"details": {
-			"$ref": "#/$defs/Details",
-			"description": "When enabled, details about the generation"
-		}
-	},
-	"required": ["generated_text"],
-	"$defs": {
-		"FinishReason": {
-			"type": "string",
-			"title": "TextGenerationFinishReason",
-			"description": "The reason why the generation was stopped.",
-			"oneOf": [
-				{ "const": "length", "description": "length: The generated sequence reached the maximum allowed length" },
-				{ "const": "eos_token", "description": "eos_token: The model generated an end-of-sentence (EOS) token" },
-				{
-					"const": "stop_sequence",
-					"description": "stop_sequence: One of the sequence in stop_sequences was generated"
-				}
-			]
-		},
-		"PrefillToken": {
-			"title": "TextGenerationPrefillToken",
-			"type": "object",
-			"properties": {
-				"id": {
-					"type": "integer"
-				},
-				"logprob": {
-					"type": "number"
-				},
-				"text": {
-					"type": "string",
-					"description": "The text associated with that token"
-				}
-			},
-			"required": ["id", "logprob", "text"]
-		},
-		"Token": {
-			"type": "object",
-			"title": "TextGenerationOutputToken",
-			"properties": {
-				"id": {
-					"type": "integer"
-				},
-				"logprob": {
-					"type": "number"
-				},
-				"special": {
-					"type": "boolean",
-					"description": "Whether or not that token is a special one"
-				},
-				"text": {
-					"type": "string",
-					"description": "The text associated with that token"
-				}
-			},
-			"required": ["id", "special", "text"]
-		},
-		"Details": {
-			"type": "object",
-			"title": "TextGenerationOutputDetails",
-			"properties": {
-				"finish_reason": {
-					"$ref": "#/$defs/FinishReason",
-					"description": "The reason why the generation was stopped."
-				},
-				"generated_tokens": {
-					"type": "integer",
-					"description": "The number of generated tokens"
-				},
-				"prefill": {
-					"type": "array",
-					"items": {
-						"$ref": "#/$defs/PrefillToken"
-					}
-				},
-				"seed": {
-					"type": "integer",
-					"description": "The random seed used for generation"
-				},
-				"tokens": {
-					"type": "array",
-					"description": "The generated tokens and associated details",
-					"items": {
-						"$ref": "#/$defs/Token"
-					}
-				},
-				"top_tokens": {
-					"type": "array",
-					"description": "Most likely tokens",
-					"items": {
-						"type": "array",
-						"items": {
-							"$ref": "#/$defs/Token"
-						}
-					}
-				},
-				"best_of_sequences": {
-					"type": "array",
-					"description": "Details about additional sequences when best_of is provided",
-					"items": {
-						"$ref": "#/$defs/SequenceDetails"
-					}
-				}
-			},
-			"required": ["finish_reason", "generated_tokens", "prefill", "tokens"]
-		},
-		"SequenceDetails": {
-			"type": "object",
-			"title": "TextGenerationOutputSequenceDetails",
-			"properties": {
-				"generated_text": {
-					"type": "string",
-					"description": "The generated text"
-				},
-				"finish_reason": {
-					"$ref": "#/$defs/FinishReason"
-				},
-				"generated_tokens": {
-					"type": "integer",
-					"description": "The number of generated tokens"
-				},
-				"prefill": {
-					"type": "array",
-					"items": {
-						"$ref": "#/$defs/PrefillToken"
-					}
-				},
-				"seed": {
-					"type": "integer",
-					"description": "The random seed used for generation"
-				},
-				"tokens": {
-					"type": "array",
-					"description": "The generated tokens and associated details",
-					"items": {
-						"$ref": "#/$defs/Token"
-					}
-				},
-				"top_tokens": {
-					"type": "array",
-					"description": "Most likely tokens",
-					"items": {
-						"type": "array",
-						"items": {
-							"$ref": "#/$defs/Token"
-						}
-					}
-				}
-			},
-			"required": ["generated_text", "finish_reason", "generated_tokens", "prefill", "tokens"]
-		}
-	}
+    "$id": "/inference/schemas/text-generation/output.json",
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "description": "Text Generation Output",
+    "title": "TextGenerationOutput",
+    "type": "object",
+    "required": [
+        "generated_text"
+    ],
+    "properties": {
+        "details": {
+            "allOf": [
+                {
+                    "$ref": "#/$defs/TextGenerationOutputDetails"
+                }
+            ],
+            "nullable": true
+        },
+        "generated_text": {
+            "type": "string",
+            "example": "test"
+        }
+    },
+    "$defs": {
+        "TextGenerationOutput": {
+            "type": "object",
+            "required": [
+                "generated_text"
+            ],
+            "properties": {
+                "details": {
+                    "allOf": [
+                        {
+                            "$ref": "#/$defs/TextGenerationOutputDetails"
+                        }
+                    ],
+                    "nullable": true
+                },
+                "generated_text": {
+                    "type": "string",
+                    "example": "test"
+                }
+            }
+        },
+        "TextGenerationOutputDetails": {
+            "type": "object",
+            "required": [
+                "finish_reason",
+                "generated_tokens",
+                "prefill",
+                "tokens"
+            ],
+            "properties": {
+                "best_of_sequences": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/TextGenerationOutputBestOfSequence"
+                    },
+                    "nullable": true
+                },
+                "finish_reason": {
+                    "$ref": "#/$defs/TextGenerationOutputFinishReason"
+                },
+                "generated_tokens": {
+                    "type": "integer",
+                    "format": "int32",
+                    "example": 1,
+                    "minimum": 0
+                },
+                "prefill": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/TextGenerationOutputPrefillToken"
+                    }
+                },
+                "seed": {
+                    "type": "integer",
+                    "format": "int64",
+                    "example": 42,
+                    "nullable": true,
+                    "minimum": 0
+                },
+                "tokens": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/TextGenerationOutputToken"
+                    }
+                },
+                "top_tokens": {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/TextGenerationOutputToken"
+                        }
+                    }
+                }
+            }
+        },
+        "TextGenerationOutputBestOfSequence": {
+            "type": "object",
+            "required": [
+                "generated_text",
+                "finish_reason",
+                "generated_tokens",
+                "prefill",
+                "tokens"
+            ],
+            "properties": {
+                "finish_reason": {
+                    "$ref": "#/$defs/TextGenerationOutputFinishReason"
+                },
+                "generated_text": {
+                    "type": "string",
+                    "example": "test"
+                },
+                "generated_tokens": {
+                    "type": "integer",
+                    "format": "int32",
+                    "example": 1,
+                    "minimum": 0
+                },
+                "prefill": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/TextGenerationOutputPrefillToken"
+                    }
+                },
+                "seed": {
+                    "type": "integer",
+                    "format": "int64",
+                    "example": 42,
+                    "nullable": true,
+                    "minimum": 0
+                },
+                "tokens": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/TextGenerationOutputToken"
+                    }
+                },
+                "top_tokens": {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/TextGenerationOutputToken"
+                        }
+                    }
+                }
+            }
+        },
+        "TextGenerationOutputFinishReason": {
+            "type": "string",
+            "enum": [
+                "length",
+                "eos_token",
+                "stop_sequence"
+            ],
+            "example": "Length"
+        },
+        "TextGenerationOutputPrefillToken": {
+            "type": "object",
+            "required": [
+                "id",
+                "text",
+                "logprob"
+            ],
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "format": "int32",
+                    "example": 0,
+                    "minimum": 0
+                },
+                "logprob": {
+                    "type": "number",
+                    "format": "float",
+                    "example": -0.34,
+                    "nullable": true
+                },
+                "text": {
+                    "type": "string",
+                    "example": "test"
+                }
+            }
+        },
+        "TextGenerationOutputToken": {
+            "type": "object",
+            "required": [
+                "id",
+                "text",
+                "logprob",
+                "special"
+            ],
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "format": "int32",
+                    "example": 0,
+                    "minimum": 0
+                },
+                "logprob": {
+                    "type": "number",
+                    "format": "float",
+                    "example": -0.34,
+                    "nullable": true
+                },
+                "special": {
+                    "type": "boolean",
+                    "example": "false"
+                },
+                "text": {
+                    "type": "string",
+                    "example": "test"
+                }
+            }
+        }
+    }
 }
