@@ -532,9 +532,9 @@ IWorker engine = WorkerFactory.CreateWorker(BackendType.GPUCompute, model);
 ];
 
 export const voicecraft = (model: ModelData): string[] => [
-	`from voicecraft import VoiceCraft
+	`from voicecraft import VoiceCraftHF
 
-model = VoiceCraft.from_pretrained("${model.id}")`,
+model = VoiceCraftHF.from_pretrained("${model.id}")`,
 ];
 
 export const mlx = (model: ModelData): string[] => [
