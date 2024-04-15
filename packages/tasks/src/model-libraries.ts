@@ -411,7 +411,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "VoiceCraft",
 		repoName: "VoiceCraft",
 		repoUrl: "https://github.com/jasonppy/VoiceCraft",
-		docsUrl: "https://github.com/keras-team/keras-nlp",
+		docsUrl: "https://github.com/jasonppy/VoiceCraft",
 		snippets: snippets.voicecraft,
 	},
 	whisperkit: {
