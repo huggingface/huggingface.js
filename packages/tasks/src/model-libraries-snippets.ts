@@ -153,6 +153,14 @@ model = from_pretrained_keras("${model.id}")
 `,
 ];
 
+export const keras_nlp = (model: ModelData): string[] => [
+	`import keras_nlp
+
+tokenizer = keras_nlp.models.Tokenizer.from_preset("hf://${model.id}")
+backbone = keras_nlp.models.Backbone.from_preset("hf://${model.id}")
+`,
+];
+
 export const open_clip = (model: ModelData): string[] => [
 	`import open_clip
 
