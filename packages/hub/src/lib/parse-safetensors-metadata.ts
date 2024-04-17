@@ -16,6 +16,25 @@ export const RE_SAFETENSORS_FILE = /\.safetensors$/;
 export const RE_SAFETENSORS_INDEX_FILE = /\.safetensors\.index\.json$/;
 export const RE_SAFETENSORS_SHARD_FILE =
 	/^(?<prefix>(?<basePrefix>.*?)[_-])(?<shard>\d{5})-of-(?<total>\d{5})\.safetensors$/;
+export interface SafetensorsShardFileInfo {
+	prefix: string;
+	basePrefix: string;
+	shard: string;
+	total: string;
+}
+export function parseSafetensorsShardFile(filename: string): SafetensorsShardFileInfo | null {
+	const match = RE_SAFETENSORS_SHARD_FILE.exec(filename);
+	if (match && match.groups) {
+		return {
+			prefix: match.groups["prefix"],
+			basePrefix: match.groups["basePrefix"],
+			shard: match.groups["shard"],
+			total: match.groups["total"],
+		};
+	}
+	return null;
+}
+
 const PARALLEL_DOWNLOADS = 20;
 const MAX_HEADER_LENGTH = 25_000_000;
 
