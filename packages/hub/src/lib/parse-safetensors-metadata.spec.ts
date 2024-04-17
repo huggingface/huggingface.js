@@ -1,5 +1,5 @@
 import { assert, it, describe } from "vitest";
-import { RE_SAFETENSORS_SHARD_FILE, parseSafetensorsMetadata } from "./parse-safetensors-metadata";
+import { parseSafetensorsMetadata, parseSafetensorsShardFile } from "./parse-safetensors-metadata";
 import { sum } from "../utils/sum";
 
 describe("parseSafetensorsMetadata", () => {
@@ -112,12 +112,11 @@ describe("parseSafetensorsMetadata", () => {
 
 	it("should detect sharded safetensors filename", async () => {
 		const safetensorsFilename = "model_00005-of-00072.safetensors"; // https://huggingface.co/bigscience/bloom/blob/4d8e28c67403974b0f17a4ac5992e4ba0b0dbb6f/model_00005-of-00072.safetensors
-		const match = safetensorsFilename.match(RE_SAFETENSORS_SHARD_FILE);
+		const safetensorsShardFileInfo = parseSafetensorsShardFile(safetensorsFilename);
 
-		assert.strictEqual(RE_SAFETENSORS_SHARD_FILE.test(safetensorsFilename), true);
-		assert.strictEqual(match?.groups?.prefix, "model_");
-		assert.strictEqual(match?.groups?.basePrefix, "model");
-		assert.strictEqual(match?.groups?.shard, "00005");
-		assert.strictEqual(match?.groups?.total, "00072");
+		assert.strictEqual(safetensorsShardFileInfo?.prefix, "model_");
+		assert.strictEqual(safetensorsShardFileInfo?.basePrefix, "model");
+		assert.strictEqual(safetensorsShardFileInfo?.shard, "00005");
+		assert.strictEqual(safetensorsShardFileInfo?.total, "00072");
 	});
 });

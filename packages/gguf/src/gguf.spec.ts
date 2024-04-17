@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { GGMLQuantizationType, RE_GGUF_SHARD_FILE, gguf } from "./gguf";
+import { GGMLQuantizationType, gguf, parseGgufShardFile } from "./gguf";
 
 const URL_LLAMA = "https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/191239b/llama-2-7b-chat.Q2_K.gguf";
 const URL_MISTRAL_7B =
@@ -223,11 +223,10 @@ describe("gguf", () => {
 
 	it("should detect sharded gguf filename", async () => {
 		const ggufPath = "grok-1/grok-1-q4_0-00003-of-00009.gguf"; // https://huggingface.co/ggml-org/models/blob/fcf344adb9686474c70e74dd5e55465e9e6176ef/grok-1/grok-1-q4_0-00003-of-00009.gguf
-		const match = ggufPath.match(RE_GGUF_SHARD_FILE);
+		const ggufShardFileInfo = parseGgufShardFile(ggufPath);
 
-		expect(RE_GGUF_SHARD_FILE.test(ggufPath)).toEqual(true);
-		expect(match?.groups?.prefix).toEqual("grok-1/grok-1-q4_0");
-		expect(match?.groups?.shard).toEqual("00003");
-		expect(match?.groups?.total).toEqual("00009");
+		expect(ggufShardFileInfo?.prefix).toEqual("grok-1/grok-1-q4_0");
+		expect(ggufShardFileInfo?.shard).toEqual("00003");
+		expect(ggufShardFileInfo?.total).toEqual("00009");
 	});
 });
