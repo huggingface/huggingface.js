@@ -49,11 +49,9 @@ export async function fileDownloadInfo(params: {
 	const resp = await (params.fetch ?? fetch)(url, {
 		method: "GET",
 		headers: {
-			...(params.credentials
-				? {
+			...(params.credentials && {
 						Authorization: `Bearer ${params.credentials.accessToken}`,
-				  }
-				: undefined),
+				  }),
 			Range: "bytes=0-0",
 		},
 	});
