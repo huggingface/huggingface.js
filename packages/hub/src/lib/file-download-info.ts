@@ -48,12 +48,14 @@ export async function fileDownloadInfo(params: {
 
 	const resp = await (params.fetch ?? fetch)(url, {
 		method: "GET",
-		headers: params.credentials
-			? {
-					Authorization: `Bearer ${params.credentials.accessToken}`,
-					Range: "bytes=0-0",
-			  }
-			: {},
+		headers: {
+			...(params.credentials
+				? {
+						Authorization: `Bearer ${params.credentials.accessToken}`,
+				  }
+				: undefined),
+			Range: "bytes=0-0",
+		},
 	});
 
 	if (resp.status === 404 && resp.headers.get("X-Error-Code") === "EntryNotFound") {
