@@ -116,6 +116,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "doctr",
 		repoUrl: "https://github.com/mindee/doctr",
 	},
+	elm: {
+		prettyLabel: "ELM",
+		repoName: "elm",
+		repoUrl: "https://github.com/slicex-ai/elm-v0.1",
+		filter: false,
+		countDownloads: {
+			terms: { path: ["slicex_elm_config.json"] },
+		},
+	},
 	espnet: {
 		prettyLabel: "ESPnet",
 		repoName: "ESPnet",
