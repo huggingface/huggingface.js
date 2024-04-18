@@ -3,6 +3,7 @@
 	import IconSpin from "../../../Icons/IconSpin.svelte";
 	import { getBlobFromUrl } from "../../shared/helpers.js";
 	import { isLoggedIn } from "../../stores.js";
+	import { createEventDispatcher } from "svelte";
 
 	export let accept = "image/*";
 	export let classNames = "";
@@ -10,8 +11,8 @@
 	export let isDisabled = false;
 	export let imgSrc = "";
 	export let label = "Drag image file here or click to browse from your device";
-	export let onSelectFile: (file: File | Blob) => void;
-	export let onError: (e: string) => void;
+
+	const dispatch = createEventDispatcher<{ run: File | Blob; error: string }>();
 
 	let fileInput: HTMLInputElement;
 	let isDragging = false;
@@ -20,7 +21,7 @@
 	function onChange() {
 		const file = fileInput.files?.[0];
 		if (file) {
-			onSelectFile(file);
+			dispatch("run", file);
 		}
 	}
 
@@ -43,14 +44,14 @@
 			const url = await new Promise<string>((resolve) => uriItem.getAsString((s) => resolve(s)));
 			const file = await getBlobFromUrl(url);
 
-			onSelectFile(file);
+			dispatch("run", file);
 		} else if (fileItem) {
 			const file = fileItem.getAsFile();
 			if (file) {
-				onSelectFile(file);
+				dispatch("run", file);
 			}
 		} else {
-			onError(`Unrecognized dragged and dropped file or element.`);
+			dispatch("error", "Unrecognized dragged and dropped file or element.");
 		}
 	}
 </script>

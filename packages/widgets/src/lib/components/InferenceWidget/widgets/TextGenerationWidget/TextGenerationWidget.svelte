@@ -222,7 +222,7 @@
 			<WidgetSubmitBtn
 				{isLoading}
 				{isDisabled}
-				onClick={() => {
+				on:run={() => {
 					getOutput({ useCache });
 				}}
 			/>

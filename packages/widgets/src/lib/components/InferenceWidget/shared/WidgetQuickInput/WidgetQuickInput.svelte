@@ -8,7 +8,6 @@
 	export let flatTop = false;
 	export let isLoading: boolean;
 	export let isDisabled = false;
-	export let onClickSubmitBtn: (e?: MouseEvent) => void;
 	export let placeholder = "Your sentence here...";
 	export let submitButtonLabel: string | undefined = undefined;
 	export let value: string = "";
@@ -42,8 +41,8 @@
 			{isLoading}
 			{isDisabled}
 			label={submitButtonLabel}
-			onClick={onClickSubmitBtn}
 			withParentLoginPopover={true}
+			on:run
 			on:logInPopover={() => (popOverOpen = true)}
 		/>
 	</div>

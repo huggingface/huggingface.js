@@ -126,7 +126,7 @@
 		bind:value={text}
 		{isLoading}
 		{isDisabled}
-		onClickSubmitBtn={() => getOutput()}
+		on:run={() => getOutput()}
 		on:cmdEnter={() => getOutput()}
 	/>
 

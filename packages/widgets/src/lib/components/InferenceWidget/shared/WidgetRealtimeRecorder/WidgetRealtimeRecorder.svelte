@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { WidgetProps } from "../../..//InferenceWidget/shared/types.js";
-	import { onDestroy, onMount } from "svelte";
+	import { createEventDispatcher, onDestroy, onMount } from "svelte";
 	import IconMagicWand from "../../..//Icons/IconMagicWand.svelte";
 	import Recorder from "./Recorder.js";
 
@@ -8,9 +8,8 @@
 	export let classNames = "";
 	export let model: WidgetProps["model"];
 	export let updateModelLoading: (isLoading: boolean, estimatedTime?: number) => void;
-	export let onRecordStart: () => void = () => null;
-	export let onRecordStop: () => void = () => null;
-	export let onError: (err: string) => void = () => null;
+
+	const dispatch = createEventDispatcher<{ start: void; stop: void; error: string }>();
 
 	let isRecording = false;
 	let recorder: Recorder;
@@ -21,35 +20,35 @@
 		try {
 			isRecording = !isRecording;
 			if (isRecording) {
-				onRecordStart();
+				dispatch("start");
 				await recorder.start();
 			} else {
-				onRecordStop();
+				dispatch("stop");
 				txt = "";
 				updateModelLoading(false);
 				recorder.stop();
 			}
 		} catch (e) {
 			isRecording = false;
-			onRecordStop();
+			dispatch("stop");
 			updateModelLoading(false);
 			if (e instanceof Error) {
 				switch (e.name) {
 					case "NotAllowedError": {
-						onError("Please allow access to your microphone & refresh the page");
+						dispatch("error", "Please allow access to your microphone & refresh the page");
 						break;
 					}
 					case "NotFoundError": {
-						onError("No microphone found on your device");
+						dispatch("error", "No microphone found on your device");
 						break;
 					}
 					default: {
-						onError(`${e.name}: ${e.message}`);
+						dispatch("error", `${e.name}: ${e.message}`);
 						break;
 					}
 				}
 			} else {
-				onError(String(e));
+				dispatch("error", String(e));
 			}
 		}
 	}
@@ -57,18 +56,25 @@
 	function renderText(_txt: string) {
 		warning = "";
 		txt = _txt;
-		onError("");
+		dispatch("error", "");
 		updateModelLoading(false);
 	}
 
 	function renderWarning(_warning: string) {
 		warning = _warning;
-		onError("");
+		dispatch("error", "");
 		updateModelLoading(false);
 	}
 
 	onMount(() => {
-		recorder = new Recorder(model.id, apiToken, renderText, renderWarning, onError, updateModelLoading);
+		recorder = new Recorder(
+			model.id,
+			apiToken,
+			renderText,
+			renderWarning,
+			(err: string) => dispatch("error", err),
+			updateModelLoading
+		);
 	});
 
 	onDestroy(() => {

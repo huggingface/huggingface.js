@@ -174,17 +174,11 @@
 		{/each}
 		<WidgetAddSentenceBtn
 			isDisabled={nComparisonSentences === maxComparisonSentences || isDisabled}
-			onClick={() => {
+			on:run={() => {
 				nComparisonSentences++;
 			}}
 		/>
-		<WidgetSubmitBtn
-			{isLoading}
-			{isDisabled}
-			onClick={() => {
-				getOutput();
-			}}
-		/>
+		<WidgetSubmitBtn {isLoading} {isDisabled} on:run={() => getOutput()} />
 	</div>
 	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
 
