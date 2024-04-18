@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { createEventDispatcher } from "svelte";
-
 	export let isDisabled = false;
 	export let label = "Add Sentence";
 </script>
