@@ -174,7 +174,7 @@
 		{/each}
 		<WidgetAddSentenceBtn
 			isDisabled={nComparisonSentences === maxComparisonSentences || isDisabled}
-			on:run={() => {
+			on:click={() => {
 				nComparisonSentences++;
 			}}
 		/>
