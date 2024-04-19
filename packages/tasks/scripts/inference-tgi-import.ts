@@ -31,7 +31,7 @@ async function _extractAndAdapt(task: string, mainComponentName: string, type: "
 	const components = openapi["components"]["schemas"];
 
 	const camelName = task
-		.split("-")
+		.split(/[-_]/)
 		.map((part) => part.charAt(0).toUpperCase() + part.slice(1))
 		.join("");
 	const camelFullName = camelName + type.charAt(0).toUpperCase() + type.slice(1);
@@ -68,12 +68,12 @@ async function _extractAndAdapt(task: string, mainComponentName: string, type: "
 
 	const prettyName =
 		task
-			.split("-")
+			.split(/[-_]/)
 			.map((part) => part.charAt(0).toUpperCase() + part.slice(1))
 			.join(" ") +
 		" " +
 		type
-			.split("_")
+			.split(/[-_]/)
 			.map((part) => part.charAt(0).toUpperCase() + part.slice(1))
 			.join(" ");
 	const inputSchema = {
@@ -87,8 +87,9 @@ async function _extractAndAdapt(task: string, mainComponentName: string, type: "
 		$defs: filteredComponents,
 	};
 
-	console.debug("   📂 Exporting");
-	await fs.writeFile(path.join(tasksDir, task, "spec", `${type}.json`), JSON.stringify(inputSchema, null, 4));
+	const specPath = path.join(tasksDir, task, "spec", `${type}.json`);
+	console.debug("   📂 Exporting", specPath);
+	await fs.writeFile(specPath, JSON.stringify(inputSchema, null, 4));
 }
 
 await _extractAndAdapt("text-generation", "GenerateRequest", "input");
