@@ -1,3 +1,8 @@
+/*
+ * Fetches TGI specs and generated JSON schema for input, output and stream_output of
+ * text-generation and chat-completion tasks.
+ * See https://huggingface.github.io/text-generation-inference/
+ */
 import fs from "fs/promises";
 import fetch from "node-fetch";
 import * as path from "node:path/posix";
