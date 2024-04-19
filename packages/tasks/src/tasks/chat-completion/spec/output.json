@@ -9,7 +9,7 @@
 		"choices": {
 			"type": "array",
 			"items": {
-				"$ref": "#/$defs/ChatCompletionOutputChatCompletionComplete"
+				"$ref": "#/$defs/ChatCompletionOutputComplete"
 			}
 		},
 		"created": {
@@ -43,7 +43,7 @@
 				"choices": {
 					"type": "array",
 					"items": {
-						"$ref": "#/$defs/ChatCompletionOutputChatCompletionComplete"
+						"$ref": "#/$defs/ChatCompletionOutputComplete"
 					}
 				},
 				"created": {
@@ -70,7 +70,7 @@
 				}
 			}
 		},
-		"ChatCompletionOutputChatCompletionComplete": {
+		"ChatCompletionOutputComplete": {
 			"type": "object",
 			"required": ["index", "message", "finish_reason"],
 			"properties": {
@@ -85,7 +85,7 @@
 				"logprobs": {
 					"allOf": [
 						{
-							"$ref": "#/$defs/ChatCompletionOutputChatCompletionLogprobs"
+							"$ref": "#/$defs/ChatCompletionOutputLogprobs"
 						}
 					],
 					"nullable": true
@@ -93,21 +93,23 @@
 				"message": {
 					"$ref": "#/$defs/ChatCompletionOutputMessage"
 				}
-			}
+			},
+			"title": "ChatCompletionOutputComplete"
 		},
-		"ChatCompletionOutputChatCompletionLogprobs": {
+		"ChatCompletionOutputLogprobs": {
 			"type": "object",
 			"required": ["content"],
 			"properties": {
 				"content": {
 					"type": "array",
 					"items": {
-						"$ref": "#/$defs/ChatCompletionOutputChatCompletionLogprob"
+						"$ref": "#/$defs/ChatCompletionOutputLogprob"
 					}
 				}
-			}
+			},
+			"title": "ChatCompletionOutputLogprobs"
 		},
-		"ChatCompletionOutputChatCompletionLogprob": {
+		"ChatCompletionOutputLogprob": {
 			"type": "object",
 			"required": ["token", "logprob", "top_logprobs"],
 			"properties": {
@@ -121,12 +123,13 @@
 				"top_logprobs": {
 					"type": "array",
 					"items": {
-						"$ref": "#/$defs/ChatCompletionOutputChatCompletionTopLogprob"
+						"$ref": "#/$defs/ChatCompletionOutputTopLogprob"
 					}
 				}
-			}
+			},
+			"title": "ChatCompletionOutputLogprob"
 		},
-		"ChatCompletionOutputChatCompletionTopLogprob": {
+		"ChatCompletionOutputTopLogprob": {
 			"type": "object",
 			"required": ["token", "logprob"],
 			"properties": {
@@ -137,7 +140,8 @@
 				"token": {
 					"type": "string"
 				}
-			}
+			},
+			"title": "ChatCompletionOutputTopLogprob"
 		},
 		"ChatCompletionOutputMessage": {
 			"type": "object",
@@ -164,7 +168,8 @@
 					},
 					"nullable": true
 				}
-			}
+			},
+			"title": "ChatCompletionOutputMessage"
 		},
 		"ChatCompletionOutputToolCall": {
 			"type": "object",
@@ -181,7 +186,8 @@
 				"type": {
 					"type": "string"
 				}
-			}
+			},
+			"title": "ChatCompletionOutputToolCall"
 		},
 		"ChatCompletionOutputFunctionDefinition": {
 			"type": "object",
@@ -195,7 +201,8 @@
 				"name": {
 					"type": "string"
 				}
-			}
+			},
+			"title": "ChatCompletionOutputFunctionDefinition"
 		},
 		"ChatCompletionOutputUsage": {
 			"type": "object",
@@ -216,7 +223,8 @@
 					"format": "int32",
 					"minimum": 0
 				}
-			}
+			},
+			"title": "ChatCompletionOutputUsage"
 		}
 	}
 }

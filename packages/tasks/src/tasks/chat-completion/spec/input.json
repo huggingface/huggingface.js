@@ -283,7 +283,8 @@
 					},
 					"nullable": true
 				}
-			}
+			},
+			"title": "ChatCompletionInputMessage"
 		},
 		"ChatCompletionInputToolCall": {
 			"type": "object",
@@ -300,7 +301,8 @@
 				"type": {
 					"type": "string"
 				}
-			}
+			},
+			"title": "ChatCompletionInputToolCall"
 		},
 		"ChatCompletionInputFunctionDefinition": {
 			"type": "object",
@@ -314,7 +316,8 @@
 				"name": {
 					"type": "string"
 				}
-			}
+			},
+			"title": "ChatCompletionInputFunctionDefinition"
 		},
 		"ChatCompletionInputToolType": {
 			"oneOf": [
@@ -331,7 +334,8 @@
 					"type": "string",
 					"enum": ["OneOf"]
 				}
-			]
+			],
+			"title": "ChatCompletionInputToolType"
 		},
 		"ChatCompletionInputTool": {
 			"type": "object",
@@ -344,7 +348,8 @@
 					"type": "string",
 					"example": "function"
 				}
-			}
+			},
+			"title": "ChatCompletionInputTool"
 		}
 	}
 }

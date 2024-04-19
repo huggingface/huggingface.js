@@ -86,7 +86,8 @@
 						}
 					}
 				}
-			}
+			},
+			"title": "TextGenerationOutputDetails"
 		},
 		"TextGenerationOutputBestOfSequence": {
 			"type": "object",
@@ -133,12 +134,14 @@
 						}
 					}
 				}
-			}
+			},
+			"title": "TextGenerationOutputBestOfSequence"
 		},
 		"TextGenerationOutputFinishReason": {
 			"type": "string",
 			"enum": ["length", "eos_token", "stop_sequence"],
-			"example": "Length"
+			"example": "Length",
+			"title": "TextGenerationOutputFinishReason"
 		},
 		"TextGenerationOutputPrefillToken": {
 			"type": "object",
@@ -160,7 +163,8 @@
 					"type": "string",
 					"example": "test"
 				}
-			}
+			},
+			"title": "TextGenerationOutputPrefillToken"
 		},
 		"TextGenerationOutputToken": {
 			"type": "object",
@@ -186,7 +190,8 @@
 					"type": "string",
 					"example": "test"
 				}
-			}
+			},
+			"title": "TextGenerationOutputToken"
 		}
 	}
 }

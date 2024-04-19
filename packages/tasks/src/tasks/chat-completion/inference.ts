@@ -40,7 +40,7 @@ export interface ChatCompletionInput {
 	/**
 	 * A list of messages comprising the conversation so far.
 	 */
-	messages: MessageElement[];
+	messages: ChatCompletionInputMessage[];
 	/**
 	 * [UNUSED] ID of the model to use. See the model endpoint compatibility table for details
 	 * on which models work with the Chat API.
@@ -73,7 +73,7 @@ export interface ChatCompletionInput {
 	 * We generally recommend altering this or `top_p` but not both.
 	 */
 	temperature?: number;
-	tool_choice?: ToolChoice;
+	tool_choice?: ChatCompletionInputToolType;
 	/**
 	 * A prompt to be appended before the tools
 	 */
@@ -83,7 +83,7 @@ export interface ChatCompletionInput {
 	 * Use this to provide a list of
 	 * functions the model may generate JSON inputs for.
 	 */
-	tools?: ToolElement[];
+	tools?: ChatCompletionInputTool[];
 	/**
 	 * An integer between 0 and 5 specifying the number of most likely tokens to return at each
 	 * token position, each with
@@ -100,37 +100,37 @@ export interface ChatCompletionInput {
 	[property: string]: unknown;
 }
 
-export interface MessageElement {
+export interface ChatCompletionInputMessage {
 	content?: string;
 	name?: string;
 	role: string;
-	tool_calls?: ToolCallElement[];
+	tool_calls?: ChatCompletionInputToolCall[];
 	[property: string]: unknown;
 }
 
-export interface ToolCallElement {
-	function: ToolFunction;
+export interface ChatCompletionInputToolCall {
+	function: ChatCompletionInputFunctionDefinition;
 	id: number;
 	type: string;
 	[property: string]: unknown;
 }
 
-export interface ToolFunction {
+export interface ChatCompletionInputFunctionDefinition {
 	arguments: unknown;
 	description?: string;
 	name: string;
 	[property: string]: unknown;
 }
 
-export type ToolChoice = "OneOf" | ToolChoiceObject;
+export type ChatCompletionInputToolType = "OneOf" | ChatCompletionInputToolTypeObject;
 
-export interface ToolChoiceObject {
+export interface ChatCompletionInputToolTypeObject {
 	FunctionName: string;
 	[property: string]: unknown;
 }
 
-export interface ToolElement {
-	function: ToolFunction;
+export interface ChatCompletionInputTool {
+	function: ChatCompletionInputFunctionDefinition;
 	type: string;
 	[property: string]: unknown;
 }
@@ -139,65 +139,65 @@ export interface ToolElement {
  * Chat Completion Output
  */
 export interface ChatCompletionOutput {
-	choices: ChoiceElement[];
+	choices: ChatCompletionOutputComplete[];
 	created: number;
 	id: string;
 	model: string;
 	object: string;
 	system_fingerprint: string;
-	usage: Usage;
+	usage: ChatCompletionOutputUsage;
 	[property: string]: unknown;
 }
 
-export interface ChoiceElement {
+export interface ChatCompletionOutputComplete {
 	finish_reason: string;
 	index: number;
-	logprobs?: PurpleLogprobs;
-	message: Message;
+	logprobs?: ChatCompletionOutputLogprobs;
+	message: ChatCompletionOutputMessage;
 	[property: string]: unknown;
 }
 
-export interface PurpleLogprobs {
-	content: ContentElement[];
+export interface ChatCompletionOutputLogprobs {
+	content: ChatCompletionOutputLogprob[];
 	[property: string]: unknown;
 }
 
-export interface ContentElement {
+export interface ChatCompletionOutputLogprob {
 	logprob: number;
 	token: string;
-	top_logprobs: TopLogprobElement[];
+	top_logprobs: ChatCompletionOutputTopLogprob[];
 	[property: string]: unknown;
 }
 
-export interface TopLogprobElement {
+export interface ChatCompletionOutputTopLogprob {
 	logprob: number;
 	token: string;
 	[property: string]: unknown;
 }
 
-export interface Message {
+export interface ChatCompletionOutputMessage {
 	content?: string;
 	name?: string;
 	role: string;
-	tool_calls?: ToolCallObject[];
+	tool_calls?: ChatCompletionOutputToolCall[];
 	[property: string]: unknown;
 }
 
-export interface ToolCallObject {
-	function: PurpleFunction;
+export interface ChatCompletionOutputToolCall {
+	function: ChatCompletionOutputFunctionDefinition;
 	id: number;
 	type: string;
 	[property: string]: unknown;
 }
 
-export interface PurpleFunction {
+export interface ChatCompletionOutputFunctionDefinition {
 	arguments: unknown;
 	description?: string;
 	name: string;
 	[property: string]: unknown;
 }
 
-export interface Usage {
+export interface ChatCompletionOutputUsage {
 	completion_tokens: number;
 	prompt_tokens: number;
 	total_tokens: number;
@@ -208,7 +208,7 @@ export interface Usage {
  * Chat Completion Stream Output
  */
 export interface ChatCompletionStreamOutput {
-	choices: ChoiceObject[];
+	choices: ChatCompletionStreamOutputChoice[];
 	created: number;
 	id: string;
 	model: string;
@@ -217,48 +217,48 @@ export interface ChatCompletionStreamOutput {
 	[property: string]: unknown;
 }
 
-export interface ChoiceObject {
-	delta: Delta;
+export interface ChatCompletionStreamOutputChoice {
+	delta: ChatCompletionStreamOutputDelta;
 	finish_reason?: string;
 	index: number;
-	logprobs?: FluffyLogprobs;
+	logprobs?: ChatCompletionStreamOutputLogprobs;
 	[property: string]: unknown;
 }
 
-export interface Delta {
+export interface ChatCompletionStreamOutputDelta {
 	content?: string;
 	role: string;
-	tool_calls?: ToolCalls;
+	tool_calls?: ChatCompletionStreamOutputDeltaToolCall;
 	[property: string]: unknown;
 }
 
-export interface ToolCalls {
-	function: ToolCallsFunction;
+export interface ChatCompletionStreamOutputDeltaToolCall {
+	function: ChatCompletionStreamOutputFunction;
 	id: string;
 	index: number;
 	type: string;
 	[property: string]: unknown;
 }
 
-export interface ToolCallsFunction {
+export interface ChatCompletionStreamOutputFunction {
 	arguments: string;
 	name?: string;
 	[property: string]: unknown;
 }
 
-export interface FluffyLogprobs {
-	content: ContentObject[];
+export interface ChatCompletionStreamOutputLogprobs {
+	content: ChatCompletionStreamOutputLogprob[];
 	[property: string]: unknown;
 }
 
-export interface ContentObject {
+export interface ChatCompletionStreamOutputLogprob {
 	logprob: number;
 	token: string;
-	top_logprobs: TopLogprobObject[];
+	top_logprobs: ChatCompletionStreamOutputTopLogprob[];
 	[property: string]: unknown;
 }
 
-export interface TopLogprobObject {
+export interface ChatCompletionStreamOutputTopLogprob {
 	logprob: number;
 	token: string;
 	[property: string]: unknown;

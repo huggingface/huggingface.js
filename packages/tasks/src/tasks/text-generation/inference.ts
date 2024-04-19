@@ -9,17 +9,17 @@
  */
 export interface TextGenerationInput {
 	inputs: string;
-	parameters?: Parameters;
+	parameters?: TextGenerationInputGenerateParameters;
 	[property: string]: unknown;
 }
 
-export interface Parameters {
+export interface TextGenerationInputGenerateParameters {
 	best_of?: number;
 	decoder_input_details?: boolean;
 	details?: boolean;
 	do_sample?: boolean;
 	frequency_penalty?: number;
-	grammar?: Grammar;
+	grammar?: TextGenerationInputGrammarType;
 	max_new_tokens?: number;
 	repetition_penalty?: number;
 	return_full_text?: boolean;
@@ -35,7 +35,7 @@ export interface Parameters {
 	[property: string]: unknown;
 }
 
-export interface Grammar {
+export interface TextGenerationInputGrammarType {
 	type: Type;
 	/**
 	 * A string that represents a [JSON Schema](https://json-schema.org/).
@@ -59,37 +59,37 @@ export interface TextGenerationOutput {
 }
 
 export interface TextGenerationOutputDetails {
-	best_of_sequences?: BestOfSequenceElement[];
-	finish_reason: FinishReason;
+	best_of_sequences?: TextGenerationOutputBestOfSequence[];
+	finish_reason: TextGenerationOutputFinishReason;
 	generated_tokens: number;
-	prefill: PrefillElement[];
+	prefill: TextGenerationOutputPrefillToken[];
 	seed?: number;
-	tokens: TokenElement[];
-	top_tokens?: Array<TokenElement[]>;
+	tokens: TextGenerationOutputToken[];
+	top_tokens?: Array<TextGenerationOutputToken[]>;
 	[property: string]: unknown;
 }
 
-export interface BestOfSequenceElement {
-	finish_reason: FinishReason;
+export interface TextGenerationOutputBestOfSequence {
+	finish_reason: TextGenerationOutputFinishReason;
 	generated_text: string;
 	generated_tokens: number;
-	prefill: PrefillElement[];
+	prefill: TextGenerationOutputPrefillToken[];
 	seed?: number;
-	tokens: TokenElement[];
-	top_tokens?: Array<TokenElement[]>;
+	tokens: TextGenerationOutputToken[];
+	top_tokens?: Array<TextGenerationOutputToken[]>;
 	[property: string]: unknown;
 }
 
-export type FinishReason = "length" | "eos_token" | "stop_sequence";
+export type TextGenerationOutputFinishReason = "length" | "eos_token" | "stop_sequence";
 
-export interface PrefillElement {
+export interface TextGenerationOutputPrefillToken {
 	id: number;
 	logprob: number;
 	text: string;
 	[property: string]: unknown;
 }
 
-export interface TokenElement {
+export interface TextGenerationOutputToken {
 	id: number;
 	logprob: number;
 	special: boolean;
@@ -101,22 +101,22 @@ export interface TokenElement {
  * Text Generation Stream Output
  */
 export interface TextGenerationStreamOutput {
-	details?: TextGenerationStreamOutputDetails;
+	details?: TextGenerationStreamOutputStreamDetails;
 	generated_text?: string;
 	index: number;
-	token: Token;
-	top_tokens?: Token[];
+	token: TextGenerationStreamOutputToken;
+	top_tokens?: TextGenerationStreamOutputToken[];
 	[property: string]: unknown;
 }
 
-export interface TextGenerationStreamOutputDetails {
-	finish_reason: FinishReason;
+export interface TextGenerationStreamOutputStreamDetails {
+	finish_reason: TextGenerationOutputFinishReason;
 	generated_tokens: number;
 	seed?: number;
 	[property: string]: unknown;
 }
 
-export interface Token {
+export interface TextGenerationStreamOutputToken {
 	id: number;
 	logprob: number;
 	special: boolean;

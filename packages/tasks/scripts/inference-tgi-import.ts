@@ -22,6 +22,13 @@ const rootDirFinder = function (): string {
 const rootDir = rootDirFinder();
 const tasksDir = path.join(rootDir, "src", "tasks");
 
+function toCamelCase(str: string, joiner = "") {
+	return str
+		.split(/[-_]/)
+		.map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+		.join(joiner);
+}
+
 async function _extractAndAdapt(task: string, mainComponentName: string, type: "input" | "output" | "stream_output") {
 	console.debug(`✨ Importing`, task, type);
 
@@ -30,11 +37,10 @@ async function _extractAndAdapt(task: string, mainComponentName: string, type: "
 	const openapi = await response.json();
 	const components = openapi["components"]["schemas"];
 
-	const camelName = task
-		.split(/[-_]/)
-		.map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-		.join("");
-	const camelFullName = camelName + type.charAt(0).toUpperCase() + type.slice(1);
+	// e.g. TextGeneration
+	const camelName = toCamelCase(task);
+	// e.g. TextGenerationInput
+	const camelFullName = camelName + toCamelCase(type);
 	const mainComponent = components[mainComponentName];
 	const filteredComponents: { [key: string]: any } = { [camelFullName]: mainComponent };
 
@@ -42,15 +48,21 @@ async function _extractAndAdapt(task: string, mainComponentName: string, type: "
 		if (typeof data === "object") {
 			for (const key in data) {
 				if (key === "$ref") {
+					// Verify reference exists
 					const ref = data[key].split("/").pop();
 					if (!components[ref]) {
 						throw new Error(`Reference not found in components: ${data[key]}`);
 					}
-					const newRef = camelFullName + ref;
+
+					// Add reference to components to export (and scan it too)
+					const newRef = camelFullName + ref.replace(camelName, "");
 					if (!filteredComponents[newRef]) {
+						components[ref]["title"] = newRef; // Rename title to avoid conflicts
 						filteredComponents[newRef] = components[ref];
 						_scan(components[ref]);
 					}
+
+					// Updating the reference to new format
 					data[key] = `#/$defs/${newRef}`;
 				} else {
 					_scan(data[key]);
@@ -66,16 +78,7 @@ async function _extractAndAdapt(task: string, mainComponentName: string, type: "
 	console.debug("   📦 Packaging jsonschema");
 	_scan(mainComponent);
 
-	const prettyName =
-		task
-			.split(/[-_]/)
-			.map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-			.join(" ") +
-		" " +
-		type
-			.split(/[-_]/)
-			.map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-			.join(" ");
+	const prettyName = toCamelCase(task, " ") + " " + toCamelCase(type, " ");
 	const inputSchema = {
 		$id: `/inference/schemas/${task}/${type}.json`,
 		$schema: "http://json-schema.org/draft-06/schema#",

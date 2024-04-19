@@ -163,7 +163,8 @@
 					"default": "false",
 					"example": true
 				}
-			}
+			},
+			"title": "TextGenerationInputGenerateParameters"
 		},
 		"TextGenerationInputGrammarType": {
 			"oneOf": [
@@ -196,7 +197,8 @@
 			],
 			"discriminator": {
 				"propertyName": "type"
-			}
+			},
+			"title": "TextGenerationInputGrammarType"
 		}
 	}
 }

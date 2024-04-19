@@ -2,14 +2,14 @@
 	"$id": "/inference/schemas/chat-completion/stream_output.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Chat Completion Stream Output",
-	"title": "ChatCompletionStream_output",
+	"title": "ChatCompletionStreamOutput",
 	"type": "object",
 	"required": ["id", "object", "created", "model", "system_fingerprint", "choices"],
 	"properties": {
 		"choices": {
 			"type": "array",
 			"items": {
-				"$ref": "#/$defs/ChatCompletionStream_outputChatCompletionChoice"
+				"$ref": "#/$defs/ChatCompletionStreamOutputChoice"
 			}
 		},
 		"created": {
@@ -33,14 +33,14 @@
 		}
 	},
 	"$defs": {
-		"ChatCompletionStream_output": {
+		"ChatCompletionStreamOutput": {
 			"type": "object",
 			"required": ["id", "object", "created", "model", "system_fingerprint", "choices"],
 			"properties": {
 				"choices": {
 					"type": "array",
 					"items": {
-						"$ref": "#/$defs/ChatCompletionStream_outputChatCompletionChoice"
+						"$ref": "#/$defs/ChatCompletionStreamOutputChoice"
 					}
 				},
 				"created": {
@@ -64,12 +64,12 @@
 				}
 			}
 		},
-		"ChatCompletionStream_outputChatCompletionChoice": {
+		"ChatCompletionStreamOutputChoice": {
 			"type": "object",
 			"required": ["index", "delta"],
 			"properties": {
 				"delta": {
-					"$ref": "#/$defs/ChatCompletionStream_outputChatCompletionDelta"
+					"$ref": "#/$defs/ChatCompletionStreamOutputDelta"
 				},
 				"finish_reason": {
 					"type": "string",
@@ -83,14 +83,15 @@
 				"logprobs": {
 					"allOf": [
 						{
-							"$ref": "#/$defs/ChatCompletionStream_outputChatCompletionLogprobs"
+							"$ref": "#/$defs/ChatCompletionStreamOutputLogprobs"
 						}
 					],
 					"nullable": true
 				}
-			}
+			},
+			"title": "ChatCompletionStreamOutputChoice"
 		},
-		"ChatCompletionStream_outputChatCompletionDelta": {
+		"ChatCompletionStreamOutputDelta": {
 			"type": "object",
 			"required": ["role"],
 			"properties": {
@@ -106,19 +107,20 @@
 				"tool_calls": {
 					"allOf": [
 						{
-							"$ref": "#/$defs/ChatCompletionStream_outputDeltaToolCall"
+							"$ref": "#/$defs/ChatCompletionStreamOutputDeltaToolCall"
 						}
 					],
 					"nullable": true
 				}
-			}
+			},
+			"title": "ChatCompletionStreamOutputDelta"
 		},
-		"ChatCompletionStream_outputDeltaToolCall": {
+		"ChatCompletionStreamOutputDeltaToolCall": {
 			"type": "object",
 			"required": ["index", "id", "type", "function"],
 			"properties": {
 				"function": {
-					"$ref": "#/$defs/ChatCompletionStream_outputFunction"
+					"$ref": "#/$defs/ChatCompletionStreamOutputFunction"
 				},
 				"id": {
 					"type": "string"
@@ -131,9 +133,10 @@
 				"type": {
 					"type": "string"
 				}
-			}
+			},
+			"title": "ChatCompletionStreamOutputDeltaToolCall"
 		},
-		"ChatCompletionStream_outputFunction": {
+		"ChatCompletionStreamOutputFunction": {
 			"type": "object",
 			"required": ["arguments"],
 			"properties": {
@@ -144,21 +147,23 @@
 					"type": "string",
 					"nullable": true
 				}
-			}
+			},
+			"title": "ChatCompletionStreamOutputFunction"
 		},
-		"ChatCompletionStream_outputChatCompletionLogprobs": {
+		"ChatCompletionStreamOutputLogprobs": {
 			"type": "object",
 			"required": ["content"],
 			"properties": {
 				"content": {
 					"type": "array",
 					"items": {
-						"$ref": "#/$defs/ChatCompletionStream_outputChatCompletionLogprob"
+						"$ref": "#/$defs/ChatCompletionStreamOutputLogprob"
 					}
 				}
-			}
+			},
+			"title": "ChatCompletionStreamOutputLogprobs"
 		},
-		"ChatCompletionStream_outputChatCompletionLogprob": {
+		"ChatCompletionStreamOutputLogprob": {
 			"type": "object",
 			"required": ["token", "logprob", "top_logprobs"],
 			"properties": {
@@ -172,12 +177,13 @@
 				"top_logprobs": {
 					"type": "array",
 					"items": {
-						"$ref": "#/$defs/ChatCompletionStream_outputChatCompletionTopLogprob"
+						"$ref": "#/$defs/ChatCompletionStreamOutputTopLogprob"
 					}
 				}
-			}
+			},
+			"title": "ChatCompletionStreamOutputLogprob"
 		},
-		"ChatCompletionStream_outputChatCompletionTopLogprob": {
+		"ChatCompletionStreamOutputTopLogprob": {
 			"type": "object",
 			"required": ["token", "logprob"],
 			"properties": {
@@ -188,7 +194,8 @@
 				"token": {
 					"type": "string"
 				}
-			}
+			},
+			"title": "ChatCompletionStreamOutputTopLogprob"
 		}
 	}
 }

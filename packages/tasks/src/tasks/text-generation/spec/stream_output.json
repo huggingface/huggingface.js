@@ -2,14 +2,14 @@
 	"$id": "/inference/schemas/text-generation/stream_output.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Text Generation Stream Output",
-	"title": "TextGenerationStream_output",
+	"title": "TextGenerationStreamOutput",
 	"type": "object",
 	"required": ["index", "token"],
 	"properties": {
 		"details": {
 			"allOf": [
 				{
-					"$ref": "#/$defs/TextGenerationStream_outputStreamDetails"
+					"$ref": "#/$defs/TextGenerationStreamOutputStreamDetails"
 				}
 			],
 			"default": "null",
@@ -27,24 +27,24 @@
 			"minimum": 0
 		},
 		"token": {
-			"$ref": "#/$defs/TextGenerationStream_outputToken"
+			"$ref": "#/$defs/TextGenerationStreamOutputToken"
 		},
 		"top_tokens": {
 			"type": "array",
 			"items": {
-				"$ref": "#/$defs/TextGenerationStream_outputToken"
+				"$ref": "#/$defs/TextGenerationStreamOutputToken"
 			}
 		}
 	},
 	"$defs": {
-		"TextGenerationStream_output": {
+		"TextGenerationStreamOutput": {
 			"type": "object",
 			"required": ["index", "token"],
 			"properties": {
 				"details": {
 					"allOf": [
 						{
-							"$ref": "#/$defs/TextGenerationStream_outputStreamDetails"
+							"$ref": "#/$defs/TextGenerationStreamOutputStreamDetails"
 						}
 					],
 					"default": "null",
@@ -62,22 +62,22 @@
 					"minimum": 0
 				},
 				"token": {
-					"$ref": "#/$defs/TextGenerationStream_outputToken"
+					"$ref": "#/$defs/TextGenerationStreamOutputToken"
 				},
 				"top_tokens": {
 					"type": "array",
 					"items": {
-						"$ref": "#/$defs/TextGenerationStream_outputToken"
+						"$ref": "#/$defs/TextGenerationStreamOutputToken"
 					}
 				}
 			}
 		},
-		"TextGenerationStream_outputStreamDetails": {
+		"TextGenerationStreamOutputStreamDetails": {
 			"type": "object",
 			"required": ["finish_reason", "generated_tokens"],
 			"properties": {
 				"finish_reason": {
-					"$ref": "#/$defs/TextGenerationStream_outputFinishReason"
+					"$ref": "#/$defs/TextGenerationStreamOutputFinishReason"
 				},
 				"generated_tokens": {
 					"type": "integer",
@@ -92,14 +92,16 @@
 					"nullable": true,
 					"minimum": 0
 				}
-			}
+			},
+			"title": "TextGenerationStreamOutputStreamDetails"
 		},
-		"TextGenerationStream_outputFinishReason": {
+		"TextGenerationStreamOutputFinishReason": {
 			"type": "string",
 			"enum": ["length", "eos_token", "stop_sequence"],
-			"example": "Length"
+			"example": "Length",
+			"title": "TextGenerationStreamOutputFinishReason"
 		},
-		"TextGenerationStream_outputToken": {
+		"TextGenerationStreamOutputToken": {
 			"type": "object",
 			"required": ["id", "text", "logprob", "special"],
 			"properties": {
@@ -123,7 +125,8 @@
 					"type": "string",
 					"example": "test"
 				}
-			}
+			},
+			"title": "TextGenerationStreamOutputToken"
 		}
 	}
 }
