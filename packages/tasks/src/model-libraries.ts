@@ -122,7 +122,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/slicex-ai/elm-v0.1",
 		filter: false,
 		countDownloads: {
-			terms: { path: ["slicex_elm_config.json"] },
+			wildcard: { path: "*/slicex_elm_config.json" },
 		},
 	},
 	espnet: {
