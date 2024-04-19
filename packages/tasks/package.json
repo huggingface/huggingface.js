@@ -27,7 +27,8 @@
 		"build": "tsup src/index.ts --format cjs,esm --clean --dts && pnpm run inference-codegen",
 		"prepare": "pnpm run build",
 		"check": "tsc",
-		"inference-codegen": "tsx scripts/inference-codegen.ts && prettier --write src/tasks/*/inference.ts"
+		"inference-codegen": "tsx scripts/inference-codegen.ts && prettier --write src/tasks/*/inference.ts",
+		"inference-tgi-import": "tsx scripts/inference-tgi-import.ts"
 	},
 	"type": "module",
 	"files": [
@@ -45,5 +46,8 @@
 	"devDependencies": {
 		"@types/node": "^20.11.5",
 		"quicktype-core": "https://github.com/huggingface/quicktype/raw/pack-18.0.17/packages/quicktype-core/quicktype-core-18.0.17.tgz"
+	},
+	"dependencies": {
+		"node-fetch": "^3.3.2"
 	}
 }
