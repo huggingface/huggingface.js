@@ -118,13 +118,7 @@
 	/>
 	<div class="space-y-2">
 		<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} on:cmdEnter={() => getOutput()} />
-		<WidgetSubmitBtn
-			{isLoading}
-			{isDisabled}
-			onClick={() => {
-				getOutput();
-			}}
-		/>
+		<WidgetSubmitBtn {isLoading} {isDisabled} on:run={() => getOutput()} />
 	</div>
 	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
 

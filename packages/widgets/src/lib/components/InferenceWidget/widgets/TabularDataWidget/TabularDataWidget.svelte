@@ -197,20 +197,14 @@
 				{highlighted}
 				{isLoading}
 				{isDisabled}
-				onChange={onChangeTable}
+				on:change={(e) => onChangeTable(e.detail)}
 				table={tableWithOutput}
 				canAddCol={false}
 				bind:scrollTableToRight
 			/>
 		{/if}
 	</div>
-	<WidgetSubmitBtn
-		{isLoading}
-		{isDisabled}
-		onClick={() => {
-			getOutput();
-		}}
-	/>
+	<WidgetSubmitBtn {isLoading} {isDisabled} on:run={() => getOutput()} />
 
 	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
 	<WidgetFooter {model} {isDisabled} {outputJson} />
