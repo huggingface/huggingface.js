@@ -117,14 +117,7 @@
 	/>
 
 	<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} on:cmdEnter={() => getOutput()} />
-	<WidgetSubmitBtn
-		classNames="mt-2"
-		{isLoading}
-		{isDisabled}
-		onClick={() => {
-			getOutput();
-		}}
-	/>
+	<WidgetSubmitBtn classNames="mt-2" {isLoading} {isDisabled} on:run={() => getOutput()} />
 
 	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
 

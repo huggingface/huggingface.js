@@ -160,8 +160,8 @@
 		{isLoading}
 		{isDisabled}
 		{imgSrc}
-		{onSelectFile}
-		onError={(e) => (error = e)}
+		on:run={(e) => onSelectFile(e.detail)}
+		on:error={(e) => (error = e.detail)}
 	>
 		{#if imgSrc}
 			<BoundingBoxes {imgSrc} {mouseover} {mouseout} {output} {highlightIndex} />
@@ -177,7 +177,7 @@
 		{isLoading}
 		{isDisabled}
 		label="Browse for image"
-		{onSelectFile}
+		on:run={(e) => onSelectFile(e.detail)}
 	/>
 	{#if warning}
 		<div class="alert alert-warning mt-2">{warning}</div>

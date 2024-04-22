@@ -171,9 +171,7 @@
 		bind:value={query}
 		{isLoading}
 		{isDisabled}
-		onClickSubmitBtn={() => {
-			getOutput();
-		}}
+		on:run={() => getOutput()}
 		on:cmdEnter={() => getOutput()}
 	/>
 
@@ -182,7 +180,7 @@
 			<WidgetOutputTableQA {output} {isAnswerOnlyOutput} />
 		{/if}
 		{#if table.length > 1 || table[0].length > 1}
-			<WidgetTableInput {highlighted} onChange={onChangeTable} {table} {isDisabled} />
+			<WidgetTableInput {highlighted} on:change={(e) => onChangeTable(e.detail)} {table} {isDisabled} />
 		{/if}
 	</div>
 	<WidgetInfo {model} {computeTime} {error} {modelLoading} />

@@ -3,13 +3,14 @@
 	import IconFile from "../../../Icons/IconFile.svelte";
 	import { isLoggedIn } from "../../stores.js";
 	import LogInPopover from "../../../LogInPopover/LogInPopover.svelte";
+	import { createEventDispatcher } from "svelte";
 
 	export let accept: string | undefined;
 	export let classNames = "";
 	export let isLoading = false;
 	export let isDisabled = false;
 	export let label = "Browse for file";
-	export let onSelectFile: (file: File | Blob) => void;
+	const dispatch = createEventDispatcher<{ run: File | Blob }>();
 
 	let fileInput: HTMLInputElement;
 	let isDragging = false;
@@ -23,7 +24,7 @@
 
 		const file = fileInput.files?.[0];
 		if (file) {
-			onSelectFile(file);
+			dispatch("run", file);
 		}
 	}
 </script>

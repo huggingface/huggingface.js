@@ -8,12 +8,11 @@
 	export let isDisabled = false;
 	export let isLoading: boolean;
 	export let label = "Compute";
-	export let onClick: () => void;
 	export let withParentLoginPopover = false;
 
 	let popOverOpen = false;
 
-	const dispatch = createEventDispatcher<{ logInPopover: void }>();
+	const dispatch = createEventDispatcher<{ logInPopover: void; run: void }>();
 
 	function _onClick() {
 		if (!$isLoggedIn) {
@@ -26,7 +25,7 @@
 			return;
 		}
 
-		onClick();
+		dispatch("run");
 	}
 </script>
 

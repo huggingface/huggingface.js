@@ -175,13 +175,7 @@
 			on:cmdEnter={() => getOutput()}
 		/>
 		<WidgetCheckbox bind:checked={multiClass} label="Allow multiple true classes" />
-		<WidgetSubmitBtn
-			{isLoading}
-			{isDisabled}
-			onClick={() => {
-				getOutput();
-			}}
-		/>
+		<WidgetSubmitBtn {isLoading} {isDisabled} on:run={() => getOutput()} />
 		{#if warning}
 			<div class="alert alert-warning mt-2">{warning}</div>
 		{/if}

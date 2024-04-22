@@ -266,8 +266,8 @@
 		flatTop={true}
 		{isLoading}
 		{isDisabled}
-		onClickSubmitBtn={handleNewMessage}
 		submitButtonLabel="Send"
+		on:run={() => handleNewMessage()}
 		on:cmdEnter={handleNewMessage}
 	/>
 
