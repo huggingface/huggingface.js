@@ -49,7 +49,7 @@ async function _extractAndAdapt(task: string, mainComponentName: string, type: "
 	const mainComponent = components[mainComponentName];
 	const filteredComponents: { [key: string]: any } = { [camelFullName]: mainComponent };
 
-	function _scan(data: any) {
+	function _scan(data: unknown) {
 		if (typeof data === "object") {
 			for (const key in data) {
 				if (key === "$ref") {
