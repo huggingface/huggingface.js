@@ -47,9 +47,9 @@ async function _extractAndAdapt(task: string, mainComponentName: string, type: "
 	// e.g. TextGenerationInput
 	const camelFullName = camelName + toCamelCase(type);
 	const mainComponent = components[mainComponentName];
-	const filteredComponents: { [key: string]: any } = { [camelFullName]: mainComponent };
+	const filteredComponents = { [camelFullName]: mainComponent };
 
-	function _scan(data: any) {
+	function _scan(data) {
 		if (typeof data === "object") {
 			for (const key in data) {
 				if (key === "$ref") {
