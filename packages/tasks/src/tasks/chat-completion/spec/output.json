@@ -36,40 +36,6 @@
 		}
 	},
 	"$defs": {
-		"ChatCompletionOutput": {
-			"type": "object",
-			"required": ["id", "object", "created", "model", "system_fingerprint", "choices", "usage"],
-			"properties": {
-				"choices": {
-					"type": "array",
-					"items": {
-						"$ref": "#/$defs/ChatCompletionOutputComplete"
-					}
-				},
-				"created": {
-					"type": "integer",
-					"format": "int64",
-					"example": "1706270835",
-					"minimum": 0
-				},
-				"id": {
-					"type": "string"
-				},
-				"model": {
-					"type": "string",
-					"example": "mistralai/Mistral-7B-Instruct-v0.2"
-				},
-				"object": {
-					"type": "string"
-				},
-				"system_fingerprint": {
-					"type": "string"
-				},
-				"usage": {
-					"$ref": "#/$defs/ChatCompletionOutputUsage"
-				}
-			}
-		},
 		"ChatCompletionOutputComplete": {
 			"type": "object",
 			"required": ["index", "message", "finish_reason"],

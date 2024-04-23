@@ -47,7 +47,7 @@ async function _extractAndAdapt(task: string, mainComponentName: string, type: "
 	// e.g. TextGenerationInput
 	const camelFullName = camelName + toCamelCase(type);
 	const mainComponent = components[mainComponentName];
-	const filteredComponents = { [camelFullName]: mainComponent };
+	const filteredComponents = {};
 
 	function _scan(data: unknown) {
 		if (typeof data === "object") {

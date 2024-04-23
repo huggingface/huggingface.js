@@ -20,24 +20,6 @@
 		}
 	},
 	"$defs": {
-		"TextGenerationOutput": {
-			"type": "object",
-			"required": ["generated_text"],
-			"properties": {
-				"details": {
-					"allOf": [
-						{
-							"$ref": "#/$defs/TextGenerationOutputDetails"
-						}
-					],
-					"nullable": true
-				},
-				"generated_text": {
-					"type": "string",
-					"example": "test"
-				}
-			}
-		},
 		"TextGenerationOutputDetails": {
 			"type": "object",
 			"required": ["finish_reason", "generated_tokens", "prefill", "tokens"],

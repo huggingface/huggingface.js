@@ -33,37 +33,6 @@
 		}
 	},
 	"$defs": {
-		"ChatCompletionStreamOutput": {
-			"type": "object",
-			"required": ["id", "object", "created", "model", "system_fingerprint", "choices"],
-			"properties": {
-				"choices": {
-					"type": "array",
-					"items": {
-						"$ref": "#/$defs/ChatCompletionStreamOutputChoice"
-					}
-				},
-				"created": {
-					"type": "integer",
-					"format": "int64",
-					"example": "1706270978",
-					"minimum": 0
-				},
-				"id": {
-					"type": "string"
-				},
-				"model": {
-					"type": "string",
-					"example": "mistralai/Mistral-7B-Instruct-v0.2"
-				},
-				"object": {
-					"type": "string"
-				},
-				"system_fingerprint": {
-					"type": "string"
-				}
-			}
-		},
 		"ChatCompletionStreamOutputChoice": {
 			"type": "object",
 			"required": ["index", "delta"],

@@ -19,23 +19,6 @@
 		}
 	},
 	"$defs": {
-		"TextGenerationInput": {
-			"type": "object",
-			"required": ["inputs"],
-			"properties": {
-				"inputs": {
-					"type": "string",
-					"example": "My name is Olivier and I"
-				},
-				"parameters": {
-					"$ref": "#/$defs/TextGenerationInputGenerateParameters"
-				},
-				"stream": {
-					"type": "boolean",
-					"default": "false"
-				}
-			}
-		},
 		"TextGenerationInputGenerateParameters": {
 			"type": "object",
 			"properties": {

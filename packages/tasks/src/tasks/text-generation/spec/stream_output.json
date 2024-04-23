@@ -37,41 +37,6 @@
 		}
 	},
 	"$defs": {
-		"TextGenerationStreamOutput": {
-			"type": "object",
-			"required": ["index", "token"],
-			"properties": {
-				"details": {
-					"allOf": [
-						{
-							"$ref": "#/$defs/TextGenerationStreamOutputStreamDetails"
-						}
-					],
-					"default": "null",
-					"nullable": true
-				},
-				"generated_text": {
-					"type": "string",
-					"default": "null",
-					"example": "test",
-					"nullable": true
-				},
-				"index": {
-					"type": "integer",
-					"format": "int32",
-					"minimum": 0
-				},
-				"token": {
-					"$ref": "#/$defs/TextGenerationStreamOutputToken"
-				},
-				"top_tokens": {
-					"type": "array",
-					"items": {
-						"$ref": "#/$defs/TextGenerationStreamOutputToken"
-					}
-				}
-			}
-		},
 		"TextGenerationStreamOutputStreamDetails": {
 			"type": "object",
 			"required": ["finish_reason", "generated_tokens"],
