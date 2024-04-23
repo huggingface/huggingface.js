@@ -138,9 +138,7 @@
 			bind:value={question}
 			{isLoading}
 			{isDisabled}
-			onClickSubmitBtn={() => {
-				getOutput();
-			}}
+			on:run={() => getOutput()}
 			on:cmdEnter={() => getOutput()}
 		/>
 		<WidgetTextarea
