@@ -103,7 +103,7 @@ async function _extractAndAdapt(task: string, mainComponentName: string, type: "
 	await fs.writeFile(specPath, JSON.stringify(inputSchema, null, 4));
 }
 
-await _extractAndAdapt("text-generation", "GenerateRequest", "input");
+await _extractAndAdapt("text-generation", "CompatGenerateRequest", "input");
 await _extractAndAdapt("text-generation", "GenerateResponse", "output");
 await _extractAndAdapt("text-generation", "StreamResponse", "stream_output");
 await _extractAndAdapt("chat-completion", "ChatRequest", "input");

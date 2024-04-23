@@ -14,6 +14,7 @@
 export interface TextGenerationInput {
 	inputs: string;
 	parameters?: TextGenerationInputGenerateParameters;
+	stream?: boolean;
 	[property: string]: unknown;
 }
 

@@ -12,6 +12,10 @@
 		},
 		"parameters": {
 			"$ref": "#/$defs/TextGenerationInputGenerateParameters"
+		},
+		"stream": {
+			"type": "boolean",
+			"default": "false"
 		}
 	},
 	"$defs": {
@@ -25,6 +29,10 @@
 				},
 				"parameters": {
 					"$ref": "#/$defs/TextGenerationInputGenerateParameters"
+				},
+				"stream": {
+					"type": "boolean",
+					"default": "false"
 				}
 			}
 		},
