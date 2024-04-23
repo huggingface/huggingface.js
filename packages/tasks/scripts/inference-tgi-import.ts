@@ -87,7 +87,10 @@ async function _extractAndAdapt(task: string, mainComponentName: string, type: "
 	const inputSchema = {
 		$id: `/inference/schemas/${task}/${type}.json`,
 		$schema: "http://json-schema.org/draft-06/schema#",
-		description: prettyName,
+		description:
+			prettyName +
+			". Auto-generated from TGI specs. " +
+			"See https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/scripts/inference-tgi-import.ts.",
 		title: camelFullName,
 		type: "object",
 		required: mainComponent["required"],

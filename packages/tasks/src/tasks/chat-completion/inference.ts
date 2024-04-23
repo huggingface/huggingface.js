@@ -5,7 +5,8 @@
  */
 
 /**
- * Chat Completion Input
+ * Chat Completion Input. Auto-generated from TGI specs. See
+ * https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/scripts/inference-tgi-import.ts.
  */
 export interface ChatCompletionInput {
 	/**
@@ -136,7 +137,8 @@ export interface ChatCompletionInputTool {
 }
 
 /**
- * Chat Completion Output
+ * Chat Completion Output. Auto-generated from TGI specs. See
+ * https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/scripts/inference-tgi-import.ts.
  */
 export interface ChatCompletionOutput {
 	choices: ChatCompletionOutputComplete[];
@@ -205,7 +207,8 @@ export interface ChatCompletionOutputUsage {
 }
 
 /**
- * Chat Completion Stream Output
+ * Chat Completion Stream Output. Auto-generated from TGI specs. See
+ * https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/scripts/inference-tgi-import.ts.
  */
 export interface ChatCompletionStreamOutput {
 	choices: ChatCompletionStreamOutputChoice[];

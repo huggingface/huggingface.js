@@ -1,7 +1,7 @@
 {
 	"$id": "/inference/schemas/chat-completion/output.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
-	"description": "Chat Completion Output",
+	"description": "Chat Completion Output. Auto-generated from TGI specs. See https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/scripts/inference-tgi-import.ts.",
 	"title": "ChatCompletionOutput",
 	"type": "object",
 	"required": ["id", "object", "created", "model", "system_fingerprint", "choices", "usage"],

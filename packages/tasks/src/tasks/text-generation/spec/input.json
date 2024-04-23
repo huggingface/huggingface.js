@@ -1,7 +1,7 @@
 {
 	"$id": "/inference/schemas/text-generation/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
-	"description": "Text Generation Input",
+	"description": "Text Generation Input. Auto-generated from TGI specs. See https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/scripts/inference-tgi-import.ts.",
 	"title": "TextGenerationInput",
 	"type": "object",
 	"required": ["inputs"],
