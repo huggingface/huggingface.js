@@ -89,8 +89,8 @@ async function _extractAndAdapt(task: string, mainComponentName: string, type: "
 		$schema: "http://json-schema.org/draft-06/schema#",
 		description:
 			prettyName +
-			". Auto-generated from TGI specs. " +
-			"See https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/scripts/inference-tgi-import.ts.",
+			".\n\nAuto-generated from TGI specs." +
+			"\nFor more details, check out https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/scripts/inference-tgi-import.ts.",
 		title: camelFullName,
 		type: "object",
 		required: mainComponent["required"],

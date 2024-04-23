@@ -5,7 +5,10 @@
  */
 
 /**
- * Text Generation Input. Auto-generated from TGI specs. See
+ * Text Generation Input.
+ *
+ * Auto-generated from TGI specs.
+ * For more details, check out
  * https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/scripts/inference-tgi-import.ts.
  */
 export interface TextGenerationInput {
@@ -51,7 +54,10 @@ export interface TextGenerationInputGrammarType {
 export type Type = "json" | "regex";
 
 /**
- * Text Generation Output. Auto-generated from TGI specs. See
+ * Text Generation Output.
+ *
+ * Auto-generated from TGI specs.
+ * For more details, check out
  * https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/scripts/inference-tgi-import.ts.
  */
 export interface TextGenerationOutput {
@@ -100,7 +106,10 @@ export interface TextGenerationOutputToken {
 }
 
 /**
- * Text Generation Stream Output. Auto-generated from TGI specs. See
+ * Text Generation Stream Output.
+ *
+ * Auto-generated from TGI specs.
+ * For more details, check out
  * https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/scripts/inference-tgi-import.ts.
  */
 export interface TextGenerationStreamOutput {
