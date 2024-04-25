@@ -318,8 +318,8 @@ export async function gguf(
 			const PARALLEL_DOWNLOADS = 20;
 			const shardsParamCount = await promisesQueue(
 				urls.map((shardUrl) => async () => {
-					const { tensorInfos: shardTesnorInfos } = await gguf(shardUrl);
-					const shardParamCount = shardTesnorInfos
+					const { tensorInfos: shardTensorInfos } = await gguf(shardUrl);
+					const shardParamCount = shardTensorInfos
 						.map(({ shape }) => shape.reduce((acc, val) => acc * Number(val), 1))
 						.reduce((acc, val) => acc + val, 0);
 					return shardParamCount;
