@@ -138,4 +138,5 @@ export interface GGUFTensorInfo {
 export interface GGUFParseOutput {
 	metadata: GGUFMetadata;
 	tensorInfos: GGUFTensorInfo[];
+	paramCount?: number;
 }

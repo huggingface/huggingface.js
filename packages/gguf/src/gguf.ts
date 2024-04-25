@@ -1,5 +1,6 @@
 import type { MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
 import { GGUFValueType } from "./types";
+import { promisesQueue } from "./utils/promisesQueue";
 
 export type { MetadataBaseValue, MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
 export { GGUFValueType, GGMLQuantizationType } from "./types";
@@ -183,6 +184,7 @@ export async function gguf(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
+		calculateParamCount?: boolean;
 	}
 ): Promise<GGUFParseOutput> {
 	const r = new RangeView(url, params);
@@ -293,5 +295,41 @@ export async function gguf(
 		});
 	}
 
-	return { metadata, tensorInfos };
+	let paramCount: number | undefined = undefined;
+
+	if (params?.calculateParamCount) {
+		paramCount = tensorInfos
+			.map(({ shape }) => shape.reduce((acc, val) => acc * Number(val), 1))
+			.reduce((acc, val) => acc + val, 0);
+
+		const ggufShardFileInfo = parseGgufShardFile(url);
+		if (ggufShardFileInfo) {
+			const shard = parseInt(ggufShardFileInfo.shard, 10);
+			const total = parseInt(ggufShardFileInfo.total, 10);
+			const prefix = ggufShardFileInfo.prefix;
+
+			const urls: string[] = [];
+			for (let shardIdx = 1; shardIdx <= total; shardIdx++) {
+				if (shardIdx !== shard) {
+					urls.push(`${prefix}-${shardIdx.toString().padStart(5, "0")}-of-${total.toString().padStart(5, "0")}.gguf`);
+				}
+			}
+
+			const PARALLEL_DOWNLOADS = 20;
+			const shardsParamCount = await promisesQueue(
+				urls.map((shardUrl) => async () => {
+					const { tensorInfos: shardTesnorInfos } = await gguf(shardUrl);
+					const shardParamCount = shardTesnorInfos
+						.map(({ shape }) => shape.reduce((acc, val) => acc * Number(val), 1))
+						.reduce((acc, val) => acc + val, 0);
+					return shardParamCount;
+				}),
+				PARALLEL_DOWNLOADS
+			);
+
+			paramCount += shardsParamCount.reduce((acc, val) => acc + val, 0);
+		}
+	}
+
+	return { metadata, tensorInfos, paramCount };
 }

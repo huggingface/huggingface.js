@@ -9,6 +9,8 @@ const URL_BIG_ENDIAN =
 	"https://huggingface.co/ggml-org/models/resolve/1213976/bert-bge-small/ggml-model-f16-big-endian.gguf";
 const URL_V1 =
 	"https://huggingface.co/tmadge/testing/resolve/66c078028d1ff92d7a9264a1590bc61ba6437933/tinyllamas-stories-260k-f32.gguf";
+const URL_SHARDED_GROK =
+	"https://huggingface.co/Arki05/Grok-1-GGUF/resolve/ecafa8d8eca9b8cd75d11a0d08d3a6199dc5a068/grok-1-IQ3_XS-split-00001-of-00009.gguf";
 
 describe("gguf", () => {
 	it("should parse a llama2 7b", async () => {
@@ -228,5 +230,15 @@ describe("gguf", () => {
 		expect(ggufShardFileInfo?.prefix).toEqual("grok-1/grok-1-q4_0");
 		expect(ggufShardFileInfo?.shard).toEqual("00003");
 		expect(ggufShardFileInfo?.total).toEqual("00009");
+	});
+
+	it("should get param count for llama2 7b", async () => {
+		const { paramCount } = await gguf(URL_LLAMA, { calculateParamCount: true });
+		expect(paramCount).toEqual(6_738_415_616); // 7B
+	});
+
+	it("should get param count for sharded gguf", async () => {
+		const { paramCount } = await gguf(URL_SHARDED_GROK, { calculateParamCount: true });
+		expect(paramCount).toEqual(316_490_127_360); // 316B
 	});
 });
