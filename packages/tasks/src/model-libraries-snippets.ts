@@ -154,7 +154,10 @@ model = from_pretrained_keras("${model.id}")
 ];
 
 export const keras_nlp = (model: ModelData): string[] => [
-	`import keras_nlp
+	`# Available backend options are: "jax", "tensorflow", "torch".
+os.environ["KERAS_BACKEND"] = "tensorflow"
+
+import keras_nlp
 
 tokenizer = keras_nlp.models.Tokenizer.from_preset("hf://${model.id}")
 backbone = keras_nlp.models.Backbone.from_preset("hf://${model.id}")
