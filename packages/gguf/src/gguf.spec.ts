@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { GGMLQuantizationType, gguf, parseGgufShardFile } from "./gguf";
+import { GGMLQuantizationType, gguf, ggufAllShards, parseGgufShardFilename } from "./gguf";
 
 const URL_LLAMA = "https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/191239b/llama-2-7b-chat.Q2_K.gguf";
 const URL_MISTRAL_7B =
@@ -225,7 +225,7 @@ describe("gguf", () => {
 
 	it("should detect sharded gguf filename", async () => {
 		const ggufPath = "grok-1/grok-1-q4_0-00003-of-00009.gguf"; // https://huggingface.co/ggml-org/models/blob/fcf344adb9686474c70e74dd5e55465e9e6176ef/grok-1/grok-1-q4_0-00003-of-00009.gguf
-		const ggufShardFileInfo = parseGgufShardFile(ggufPath);
+		const ggufShardFileInfo = parseGgufShardFilename(ggufPath);
 
 		expect(ggufShardFileInfo?.prefix).toEqual("grok-1/grok-1-q4_0");
 		expect(ggufShardFileInfo?.shard).toEqual("00003");
@@ -233,12 +233,12 @@ describe("gguf", () => {
 	});
 
 	it("should get param count for llama2 7b", async () => {
-		const { paramCount } = await gguf(URL_LLAMA, { calculateParamCount: true });
-		expect(paramCount).toEqual(6_738_415_616); // 7B
+		const { parameterCount } = await gguf(URL_LLAMA, { computeParametersCount: true });
+		expect(parameterCount).toEqual(6_738_415_616); // 7B
 	});
 
 	it("should get param count for sharded gguf", async () => {
-		const { paramCount } = await gguf(URL_SHARDED_GROK, { calculateParamCount: true });
-		expect(paramCount).toEqual(316_490_127_360); // 316B
+		const { parameterCount } = await ggufAllShards(URL_SHARDED_GROK);
+		expect(parameterCount).toEqual(316_490_127_360); // 316B
 	});
 });

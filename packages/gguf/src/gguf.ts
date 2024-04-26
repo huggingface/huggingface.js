@@ -1,3 +1,4 @@
+import type { Except, SetRequired } from "type-fest";
 import type { MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
 import { GGUFValueType } from "./types";
 import { promisesQueue } from "./utils/promisesQueue";
@@ -15,7 +16,7 @@ export interface GgufShardFileInfo {
 	total: string;
 }
 
-export function parseGgufShardFile(filename: string): GgufShardFileInfo | null {
+export function parseGgufShardFilename(filename: string): GgufShardFileInfo | null {
 	const match = RE_GGUF_SHARD_FILE.exec(filename);
 	if (match && match.groups) {
 		return {
@@ -179,12 +180,31 @@ function readMetadataValue(
 
 export async function gguf(
 	url: string,
+	params: {
+		/**
+		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+		 */
+		fetch?: typeof fetch;
+		computeParametersCount: true;
+	}
+): Promise<SetRequired<GGUFParseOutput, "parameterCount">>;
+export async function gguf(
+	url: string,
 	params?: {
 		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-		calculateParamCount?: boolean;
+	}
+): Promise<Except<GGUFParseOutput, "parameterCount">>;
+export async function gguf(
+	url: string,
+	params?: {
+		/**
+		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+		 */
+		fetch?: typeof fetch;
+		computeParametersCount?: boolean;
 	}
 ): Promise<GGUFParseOutput> {
 	const r = new RangeView(url, params);
@@ -295,41 +315,47 @@ export async function gguf(
 		});
 	}
 
-	let paramCount: number | undefined = undefined;
-
-	if (params?.calculateParamCount) {
-		paramCount = tensorInfos
+	if (params?.computeParametersCount) {
+		const parameterCount = tensorInfos
 			.map(({ shape }) => shape.reduce((acc, val) => acc * Number(val), 1))
 			.reduce((acc, val) => acc + val, 0);
 
-		const ggufShardFileInfo = parseGgufShardFile(url);
-		if (ggufShardFileInfo) {
-			const shard = parseInt(ggufShardFileInfo.shard, 10);
-			const total = parseInt(ggufShardFileInfo.total, 10);
-			const prefix = ggufShardFileInfo.prefix;
-
-			const urls: string[] = [];
-			for (let shardIdx = 1; shardIdx <= total; shardIdx++) {
-				if (shardIdx !== shard) {
-					urls.push(`${prefix}-${shardIdx.toString().padStart(5, "0")}-of-${total.toString().padStart(5, "0")}.gguf`);
-				}
-			}
-
-			const PARALLEL_DOWNLOADS = 20;
-			const shardsParamCount = await promisesQueue(
-				urls.map((shardUrl) => async () => {
-					const { tensorInfos: shardTensorInfos } = await gguf(shardUrl);
-					const shardParamCount = shardTensorInfos
-						.map(({ shape }) => shape.reduce((acc, val) => acc * Number(val), 1))
-						.reduce((acc, val) => acc + val, 0);
-					return shardParamCount;
-				}),
-				PARALLEL_DOWNLOADS
-			);
-
-			paramCount += shardsParamCount.reduce((acc, val) => acc + val, 0);
-		}
+		return { metadata, tensorInfos, parameterCount };
+	} else {
+		return { metadata, tensorInfos };
 	}
+}
 
-	return { metadata, tensorInfos, paramCount };
+export async function ggufAllShards(
+	url: string,
+	params?: {
+		/**
+		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+		 */
+		fetch?: typeof fetch;
+	}
+): Promise<{ shards: GGUFParseOutput[]; parameterCount: number }> {
+	const ggufShardFileInfo = parseGgufShardFilename(url);
+	if (ggufShardFileInfo) {
+		const total = parseInt(ggufShardFileInfo.total);
+		const prefix = ggufShardFileInfo.prefix;
+
+		const urls: string[] = [];
+		for (let shardIdx = 1; shardIdx <= total; shardIdx++) {
+			urls.push(`${prefix}-${shardIdx.toString().padStart(5, "0")}-of-${total.toString().padStart(5, "0")}.gguf`);
+		}
+
+		const PARALLEL_DOWNLOADS = 20;
+		const shards = await promisesQueue(
+			urls.map((shardUrl) => () => gguf(shardUrl, { computeParametersCount: true })),
+			PARALLEL_DOWNLOADS
+		);
+		return {
+			shards,
+			parameterCount: shards.map(({ parameterCount }) => parameterCount).reduce((acc, val) => acc + val, 0),
+		};
+	} else {
+		const { metadata, tensorInfos, parameterCount } = await gguf(url, { ...params, computeParametersCount: true });
+		return { shards: [{ metadata, tensorInfos }], parameterCount };
+	}
 }
