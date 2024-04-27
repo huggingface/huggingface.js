@@ -1,3 +1,6 @@
+import { TransformerLLM, LLM_ARCHITECTURES } from "./transformer-llm";
+export * from "./transformer-llm";
+
 export type MetadataBaseValue = string | number | bigint | boolean;
 export type MetadataValue = MetadataBaseValue | MetadataBaseValue[] | MetadataValue[]; /// recursive as arrays can be nested.
 
@@ -44,19 +47,11 @@ export enum GGUFValueType {
 	FLOAT64 = 12,
 }
 
-export const ARCHITECTURES = [
-	"llama",
-	"mpt",
-	"gptneox",
-	"gptj",
-	"gpt2",
-	"bloom",
-	"falcon",
-	"gemma",
+const ARCHITECTURES = [
+	...LLM_ARCHITECTURES,
 	"rwkv",
 	"whisper",
-] as const;
-
+];
 export type Architecture = (typeof ARCHITECTURES)[number];
 
 interface General {
@@ -66,39 +61,21 @@ interface General {
 	"general.quantization_version": number;
 }
 
-type Attention<TArchitecture extends Architecture> =
-	| { [K in `${TArchitecture}.attention.head_count`]: number }
-	| { [K in `${TArchitecture}.attention.head_count_kv`]: number }
-	| { [K in `${TArchitecture}.attention.layer_norm_epsilon`]: number }
-	| { [K in `${TArchitecture}.attention.layer_norm_rms_epsilon`]: number }
-	| { [K in `${TArchitecture}.attention.alibi_bias_max`]: number }
-	| { [K in `${TArchitecture}.attention.clip_kqv`]: number }
-	| { [K in `${TArchitecture}.attention.use_norm`]: number };
-
-type Rope<TArchitecture extends Architecture> =
-	| { [K in `${TArchitecture}.rope.dimension_count`]: number }
-	| { [K in `${TArchitecture}.rope.freq_base`]: number }
-	| { [K in `${TArchitecture}.rope.scale`]: number }
-	| { [K in `${TArchitecture}.rope.scale_linear`]: number };
-
-type ModelBase<
+export type ModelBase<
 	TArchitecture extends
 		| Architecture
 		| `encoder.${Extract<Architecture, "whisper">}`
 		| `decoder.${Extract<Architecture, "whisper">}`,
 > =
-	| { [K in `${TArchitecture}.layer_count`]: number }
-	| { [K in `${TArchitecture}.feed_forward_length`]: number }
-	| { [K in `${TArchitecture}.context_length`]: number }
-	| { [K in `${TArchitecture}.embedding_length`]: number }
-	| { [K in `${TArchitecture}.block_count`]: number };
+	& { [K in `${TArchitecture}.layer_count`]: number }
+	& { [K in `${TArchitecture}.feed_forward_length`]: number }
+	& { [K in `${TArchitecture}.context_length`]: number }
+	& { [K in `${TArchitecture}.embedding_length`]: number }
+	& { [K in `${TArchitecture}.block_count`]: number };
 
-type MOE<TArchitecture extends Architecture> =
-	| { [K in `${TArchitecture}.expert_count`]: number }
-	| { [K in `${TArchitecture}.expert_used_count`]: number };
-
+type TokenizerModel = "no_vocab" | "llama" | "gpt2" | "bert";
 interface Tokenizer {
-	"tokenizer.ggml.model": Architecture;
+	"tokenizer.ggml.model": TokenizerModel;
 	"tokenizer.ggml.tokens": string[];
 	"tokenizer.ggml.scores": number[];
 	"tokenizer.ggml.token_type": number[];
@@ -107,12 +84,6 @@ interface Tokenizer {
 	"tokenizer.ggml.add_bos_token": boolean;
 	"tokenizer.chat_template": string;
 }
-
-type TransformerLLMArchitecture = Exclude<Architecture, "rwkv" | "whisper">;
-type TransformerLLM = ModelBase<TransformerLLMArchitecture> &
-	MOE<TransformerLLMArchitecture> &
-	Attention<TransformerLLMArchitecture> &
-	Rope<TransformerLLMArchitecture>;
 
 export type RWKV = ModelBase<"rwkv"> & { "rwkv.architecture_version": number };
 export type LLM = TransformerLLM | RWKV;
