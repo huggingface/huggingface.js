@@ -3,7 +3,7 @@
  * The source data is taken from llama.cpp
  */
 
-import { readFileSync, writeFileSync } from "node:fs";
+import { writeFileSync } from "node:fs";
 
 const SOURCE_CPP_URL = "https://raw.githubusercontent.com/ggerganov/llama.cpp/master/llama.cpp";
 const DEST_FILE_PATH = "./src/transformer-llm.ts";
@@ -171,9 +171,9 @@ async function main() {
 
 function snakeToPascal(str: string) {
 	return str
-		 .split('_')
-		 .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-		 .join('');
- }
+		.split('_')
+		.map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+		.join('');
+}
 
 main();
