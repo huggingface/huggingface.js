@@ -52,7 +52,7 @@ class RangeView {
 	private chunk: number;
 	private buffer: ArrayBuffer;
 	private dataView: DataView;
-	
+
 	get view(): DataView {
 		return this.dataView;
 	}
@@ -91,7 +91,7 @@ class RangeView {
 		this.chunk += 1;
 	}
 	/**
-	 * Append new data into the buffer 
+	 * Append new data into the buffer
 	 */
 	appendBuffer(buf: Uint8Array) {
 		/// TODO(fix typing)
