@@ -1,4 +1,5 @@
-import { TransformerLLM, LLM_ARCHITECTURES } from "./transformer-llm";
+import type { TransformerLLM } from "./transformer-llm";
+import { LLM_ARCHITECTURES } from "./transformer-llm";
 export * from "./transformer-llm";
 
 export type MetadataBaseValue = string | number | bigint | boolean;
@@ -47,11 +48,7 @@ export enum GGUFValueType {
 	FLOAT64 = 12,
 }
 
-const ARCHITECTURES = [
-	...LLM_ARCHITECTURES,
-	"rwkv",
-	"whisper",
-];
+const ARCHITECTURES = [...LLM_ARCHITECTURES, "rwkv", "whisper"];
 export type Architecture = (typeof ARCHITECTURES)[number];
 
 interface General {
@@ -66,12 +63,9 @@ export type ModelBase<
 		| Architecture
 		| `encoder.${Extract<Architecture, "whisper">}`
 		| `decoder.${Extract<Architecture, "whisper">}`,
-> =
-	& { [K in `${TArchitecture}.layer_count`]: number }
-	& { [K in `${TArchitecture}.feed_forward_length`]: number }
-	& { [K in `${TArchitecture}.context_length`]: number }
-	& { [K in `${TArchitecture}.embedding_length`]: number }
-	& { [K in `${TArchitecture}.block_count`]: number };
+> = { [K in `${TArchitecture}.layer_count`]: number } & { [K in `${TArchitecture}.feed_forward_length`]: number } & {
+	[K in `${TArchitecture}.context_length`]: number;
+} & { [K in `${TArchitecture}.embedding_length`]: number } & { [K in `${TArchitecture}.block_count`]: number };
 
 type TokenizerModel = "no_vocab" | "llama" | "gpt2" | "bert";
 interface Tokenizer {
