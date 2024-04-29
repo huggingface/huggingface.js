@@ -1,5 +1,5 @@
 import { assert, it, describe } from "vitest";
-import { parseSafetensorsMetadata, parseSafetensorsShardFile } from "./parse-safetensors-metadata";
+import { parseSafetensorsMetadata, parseSafetensorsShardFilename } from "./parse-safetensors-metadata";
 import { sum } from "../utils/sum";
 
 describe("parseSafetensorsMetadata", () => {
@@ -112,7 +112,7 @@ describe("parseSafetensorsMetadata", () => {
 
 	it("should detect sharded safetensors filename", async () => {
 		const safetensorsFilename = "model_00005-of-00072.safetensors"; // https://huggingface.co/bigscience/bloom/blob/4d8e28c67403974b0f17a4ac5992e4ba0b0dbb6f/model_00005-of-00072.safetensors
-		const safetensorsShardFileInfo = parseSafetensorsShardFile(safetensorsFilename);
+		const safetensorsShardFileInfo = parseSafetensorsShardFilename(safetensorsFilename);
 
 		assert.strictEqual(safetensorsShardFileInfo?.prefix, "model_");
 		assert.strictEqual(safetensorsShardFileInfo?.basePrefix, "model");
