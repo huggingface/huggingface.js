@@ -7,7 +7,7 @@ import fs from "fs/promises";
 import fetch from "node-fetch";
 import * as path from "node:path/posix";
 import { existsSync as pathExists } from "node:fs";
-import type { JsonObject, JsonValue, } from "type-fest";
+import type { JsonObject, JsonValue } from "type-fest";
 
 const URL = "https://huggingface.github.io/text-generation-inference/openapi.json";
 
@@ -40,9 +40,9 @@ async function _extractAndAdapt(task: string, mainComponentName: string, type: "
 
 	console.debug("   📥 Fetching TGI specs");
 	const response = await fetch(URL);
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any 
-	const openapi = await response.json() as any;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any 
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const openapi = (await response.json()) as any;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const components: Record<string, any> = openapi["components"]["schemas"];
 
 	// e.g. TextGeneration
@@ -82,7 +82,6 @@ async function _extractAndAdapt(task: string, mainComponentName: string, type: "
 			}
 		}
 	}
-
 
 	console.debug("   📦 Packaging jsonschema");
 	_scan(mainComponent);
