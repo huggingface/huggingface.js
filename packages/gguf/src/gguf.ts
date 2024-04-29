@@ -1,4 +1,3 @@
-import type { Except, SetRequired } from "type-fest";
 import type { MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
 import { GGUFValueType } from "./types";
 import { promisesQueue } from "./utils/promisesQueue";
@@ -187,7 +186,7 @@ export async function gguf(
 		fetch?: typeof fetch;
 		computeParametersCount: true;
 	}
-): Promise<SetRequired<GGUFParseOutput, "parameterCount">>;
+): Promise<GGUFParseOutput & { parameterCount: number }>;
 export async function gguf(
 	url: string,
 	params?: {
@@ -196,7 +195,7 @@ export async function gguf(
 		 */
 		fetch?: typeof fetch;
 	}
-): Promise<Except<GGUFParseOutput, "parameterCount">>;
+): Promise<GGUFParseOutput>;
 export async function gguf(
 	url: string,
 	params?: {
@@ -206,7 +205,7 @@ export async function gguf(
 		fetch?: typeof fetch;
 		computeParametersCount?: boolean;
 	}
-): Promise<GGUFParseOutput> {
+): Promise<GGUFParseOutput & { parameterCount?: number }> {
 	const r = new RangeView(url, params);
 	await r.fetchChunk();
 
