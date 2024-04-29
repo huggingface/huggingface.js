@@ -70,7 +70,7 @@ async function main() {
 		throw new Error("LLM_ARCH_NAMES is empty");
 	}
 	for (const line of matchedArchList) {
-		const matched = line.match(/(?<cppConst>LLM_ARCH_[A-Z0-9_]+),\s+"(?<name>[^"]+)"/);
+		const matched = line.match(/(?<cppConst>LLM_ARCH_[A-Z0-9_]+),\s+"(?<name>.+?)"/);
 		if (matched && !matched.groups?.name.match(/unknown/)) {
 			archList.push({
 				cppConst: matched.groups?.cppConst || "",
@@ -113,7 +113,7 @@ async function main() {
 			continue;
 		}
 		// check if current line has LLM_TENSOR_*
-		const tensorMatched = line.match(/LLM_TENSOR_[A-Z0-9_]+[,\s]+"(?<name>[^"]+)"/);
+		const tensorMatched = line.match(/LLM_TENSOR_[A-Z0-9_]+[,\s]+"(?<name>.+?)"/);
 		if (tensorMatched) {
 			const arch = archList.find((a) => a.cppConst === currCppConst);
 			if (arch) arch.tensorNames.push(tensorMatched.groups?.name || "");
