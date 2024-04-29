@@ -47,5 +47,7 @@
 	],
 	"author": "Hugging Face",
 	"license": "MIT",
-	"devDependencies": {}
+	"devDependencies": {
+		"type-fest": "^3.9.0"
+	}
 }

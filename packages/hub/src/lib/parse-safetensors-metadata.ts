@@ -22,7 +22,7 @@ export interface SafetensorsShardFileInfo {
 	shard: string;
 	total: string;
 }
-export function parseSafetensorsShardFile(filename: string): SafetensorsShardFileInfo | null {
+export function parseSafetensorsShardFilename(filename: string): SafetensorsShardFileInfo | null {
 	const match = RE_SAFETENSORS_SHARD_FILE.exec(filename);
 	if (match && match.groups) {
 		return {

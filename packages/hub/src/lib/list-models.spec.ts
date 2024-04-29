@@ -75,7 +75,7 @@ describe("listModels", () => {
 			limit: 10,
 		})) {
 			count++;
-			expect(entry.name).to.include("t5");
+			expect(entry.name.toLocaleLowerCase()).to.include("t5");
 		}
 
 		expect(count).to.equal(10);
