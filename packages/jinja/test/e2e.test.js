@@ -192,7 +192,7 @@ const TEST_CUSTOM_TEMPLATES = Object.freeze({
 		},
 		target: `<bos><|im_start|>user\nHello, how are you?<|im_end|>\n<|im_start|>assistant\nI'm doing great. How can I help you today?<|im_end|>\n<|im_start|>user\nI'd like to show off how chat templating works!<|im_end|>\n`,
 	},
-	"mistralai/Mistral-7B-Instruct-v0.1": {
+	"TheBloke/Mistral-7B-Instruct-v0.1-GPTQ": {
 		chat_template: `{{ bos_token }}{% for message in messages %}{% if (message['role'] == 'user') != (loop.index0 % 2 == 0) %}{{ raise_exception('Conversation roles must alternate user/assistant/user/assistant/...') }}{% endif %}{% if message['role'] == 'user' %}{{ '[INST] ' + message['content'] + ' [/INST]' }}{% elif message['role'] == 'assistant' %}{{ message['content'] + eos_token + ' ' }}{% else %}{{ raise_exception('Only user and assistant roles are supported!') }}{% endif %}{% endfor %}`,
 		data: {
 			messages: EXAMPLE_CHAT,
@@ -440,7 +440,7 @@ describe("End-to-end tests", () => {
 	});
 
 	it("should parse a chat template from the Hugging Face Hub", async () => {
-		const repo = "mistralai/Mistral-7B-Instruct-v0.1";
+		const repo = "TheBloke/Mistral-7B-Instruct-v0.1-GPTQ";
 		const tokenizerConfig = await (
 			await downloadFile({
 				repo,
