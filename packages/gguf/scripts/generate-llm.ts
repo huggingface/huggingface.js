@@ -78,11 +78,11 @@ async function main() {
 	}
 	for (const line of matchedArchList) {
 		const matched = line.match(/(?<cppConst>LLM_ARCH_[A-Z0-9_]+),\s+"(?<name>.+?)"/);
-		if (matched && !matched.groups?.name.match(/unknown/)) {
+		if (matched?.groups && !matched.groups.name.match(/unknown/)) {
 			archList.push({
-				cppConst: matched.groups?.cppConst || "",
-				name: matched.groups?.name || "",
-				tsName: snakeToPascal(matched.groups?.cppConst.replace("LLM_", "") ?? ""),
+				cppConst: matched.groups.cppConst,
+				name: matched.groups.name,
+				tsName: snakeToPascal(matched.groups.cppConst.replace("LLM_", "")),
 				tensorNames: [],
 				hparams: [],
 			});
@@ -99,8 +99,8 @@ async function main() {
 	}
 	for (const line of matchedKVList) {
 		const matched = line.match(/(?<cppConst>LLM_KV_[A-Z0-9_]+)[,\s]+"(?<name>.+?)"/);
-		if (matched) {
-			constToKVName[matched.groups?.cppConst ?? ""] = matched.groups?.name ?? "";
+		if (matched?.groups) {
+			constToKVName[matched.groups.cppConst] = matched.groups.name;
 		}
 	}
 
@@ -121,9 +121,9 @@ async function main() {
 		}
 		// check if current line has LLM_TENSOR_*
 		const tensorMatched = line.match(/LLM_TENSOR_[A-Z0-9_]+[,\s]+"(?<name>.+?)"/);
-		if (tensorMatched) {
+		if (tensorMatched?.groups) {
 			const arch = archList.find((a) => a.cppConst === currCppConst);
-			if (arch) arch.tensorNames.push(tensorMatched.groups?.name || "");
+			if (arch) arch.tensorNames.push(tensorMatched.groups.name);
 		}
 	}
 
