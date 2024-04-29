@@ -7,6 +7,7 @@ import fs from "fs/promises";
 import fetch from "node-fetch";
 import * as path from "node:path/posix";
 import { existsSync as pathExists } from "node:fs";
+import type { JsonObject, JsonValue, } from "type-fest";
 
 const URL = "https://huggingface.github.io/text-generation-inference/openapi.json";
 
@@ -39,22 +40,28 @@ async function _extractAndAdapt(task: string, mainComponentName: string, type: "
 
 	console.debug("   📥 Fetching TGI specs");
 	const response = await fetch(URL);
-	const openapi = await response.json();
-	const components = openapi["components"]["schemas"];
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any 
+	const openapi = await response.json() as any;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any 
+	const components: Record<string, any> = openapi["components"]["schemas"];
 
 	// e.g. TextGeneration
 	const camelName = toCamelCase(task);
 	// e.g. TextGenerationInput
 	const camelFullName = camelName + toCamelCase(type);
 	const mainComponent = components[mainComponentName];
-	const filteredComponents = {};
+	const filteredComponents: Record<string, JsonObject> = {};
 
-	function _scan(data: unknown) {
-		if (typeof data === "object") {
-			for (const key in data) {
-				if (key === "$ref") {
+	function _scan(data: JsonValue) {
+		if (Array.isArray(data) || data instanceof Array) {
+			for (const item of data) {
+				_scan(item);
+			}
+		} else if (data && typeof data === "object") {
+			for (const key of Object.keys(data)) {
+				if (key === "$ref" && typeof data[key] === "string") {
 					// Verify reference exists
-					const ref = data[key].split("/").pop();
+					const ref = data[key].split("/").pop() ?? "";
 					if (!components[ref]) {
 						throw new Error(`Reference not found in components: ${data[key]}`);
 					}
@@ -73,12 +80,9 @@ async function _extractAndAdapt(task: string, mainComponentName: string, type: "
 					_scan(data[key]);
 				}
 			}
-		} else if (Array.isArray(data)) {
-			for (const item of data) {
-				_scan(item);
-			}
 		}
 	}
+
 
 	console.debug("   📦 Packaging jsonschema");
 	_scan(mainComponent);
