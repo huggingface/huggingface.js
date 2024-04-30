@@ -24,7 +24,7 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"prepublishOnly": "pnpm run build",
-		"build": "tsup src/index.ts --format cjs,esm --clean --dts && pnpm run inference-tgi-import && pnpm run inference-codegen",
+		"build": "tsup src/index.ts --format cjs,esm --clean --dts && pnpm run inference-codegen",
 		"prepare": "pnpm run build",
 		"check": "tsc",
 		"inference-codegen": "tsx scripts/inference-codegen.ts && prettier --write src/tasks/*/inference.ts",
