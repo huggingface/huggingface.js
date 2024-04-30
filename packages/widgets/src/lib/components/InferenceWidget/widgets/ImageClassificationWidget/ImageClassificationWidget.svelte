@@ -83,7 +83,7 @@
 				estimatedTime: res.estimatedTime,
 			};
 			getOutput(file, { withModelLoading: true });
-		} else if (res.status === "error") {
+		} else if (res.status === "error" && !isOnLoadCall) {
 			error = res.error;
 		}
 	}
