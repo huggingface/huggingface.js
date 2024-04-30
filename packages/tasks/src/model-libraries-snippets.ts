@@ -496,8 +496,8 @@ export const peft = (model: ModelData): string[] => {
 from transformers import AutoModelFor${pefttask}
 
 config = PeftConfig.from_pretrained("${model.id}")
-model = AutoModelFor${pefttask}.from_pretrained("${peftBaseModel}")
-model = PeftModel.from_pretrained(model, "${model.id}")`,
+base_model = AutoModelFor${pefttask}.from_pretrained("${peftBaseModel}")
+model = PeftModel.from_pretrained(base_model, "${model.id}")`,
 	];
 };
 
