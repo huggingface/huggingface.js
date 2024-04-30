@@ -203,8 +203,15 @@
 				} else {
 					error = `Something went wrong with the request.`;
 				}
+			} else {
+				clearConversation();
 			}
 		} finally {
+			const isLastMsgFromUser = messages.at(-1)?.role === "user";
+			if (error && isLastMsgFromUser) {
+				// roles should alternate. therefore, if there was an error, we should remove last user message so that user can submit new user message afterwards
+				messages = messages.slice(0, -1);
+			}
 			isLoading = false;
 			abort = undefined;
 		}
@@ -224,10 +231,14 @@
 	}
 
 	async function applyWidgetExample(example: Example, opts: ExampleRunOpts = {}): Promise<void> {
-		if ("text" in example) {
-			messages = [{ role: "user", content: example.text }];
+		clearConversation();
+		if (opts.inferenceOpts?.isOnLoadCall) {
+			// if isOnLoadCall do NOT trigger svelte UI update, the UI update will be triggered by getOutput if the example succeeds
+			// otherwise, error will be suppressed so that user doesn't come to errored page on load
+			// however, the user will still get the error after manually interacting with the widget if it is not isOnLoadCall
+			"text" in example ? messages.push({ role: "user", content: example.text }) : messages.push(...example.messages);
 		} else {
-			messages = [...example.messages];
+			"text" in example ? (messages = [{ role: "user", content: example.text }]) : (messages = [...example.messages]);
 		}
 		if (opts.isPreview) {
 			return;
