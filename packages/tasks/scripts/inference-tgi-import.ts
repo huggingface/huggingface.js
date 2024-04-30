@@ -61,7 +61,7 @@ async function _extractAndAdapt(task: string, mainComponentName: string, type: "
 			for (const key of Object.keys(data)) {
 				if (key === "$ref" && typeof data[key] === "string") {
 					// Verify reference exists
-					const ref = data[key].split("/").pop() ?? "";
+					const ref = (data[key] as string).split("/").pop() ?? "";
 					if (!components[ref]) {
 						throw new Error(`Reference not found in components: ${data[key]}`);
 					}
