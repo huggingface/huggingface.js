@@ -1,6 +1,5 @@
 import type { TransformerLLM } from "./transformer-llm";
 import { LLM_ARCHITECTURES } from "./transformer-llm";
-export * from "./transformer-llm";
 
 export type MetadataBaseValue = string | number | bigint | boolean;
 export type MetadataValue = MetadataBaseValue | MetadataBaseValue[] | MetadataValue[]; /// recursive as arrays can be nested.
