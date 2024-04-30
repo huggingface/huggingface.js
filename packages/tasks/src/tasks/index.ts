@@ -43,9 +43,8 @@ export type {
 	ChatCompletionInput,
 	ChatCompletionInputMessage,
 	ChatCompletionOutput,
-	ChatCompletionOutputChoice,
-	ChatCompletionFinishReason,
-	ChatCompletionOutputChoiceMessage,
+	ChatCompletionOutputComplete,
+	ChatCompletionOutputMessage,
 	ChatCompletionStreamOutput,
 	ChatCompletionStreamOutputChoice,
 	ChatCompletionStreamOutputDelta,
@@ -85,15 +84,15 @@ export type {
 	TextClassificationParameters,
 } from "./text-classification/inference";
 export type {
-	TextGenerationFinishReason,
-	TextGenerationPrefillToken,
+	TextGenerationOutputFinishReason,
+	TextGenerationOutputPrefillToken,
 	TextGenerationInput,
 	TextGenerationOutput,
 	TextGenerationOutputDetails,
-	TextGenerationParameters,
-	TextGenerationOutputSequenceDetails,
+	TextGenerationInputGenerateParameters,
+	TextGenerationOutputBestOfSequence,
 	TextGenerationOutputToken,
-	TextGenerationStreamDetails,
+	TextGenerationStreamOutputStreamDetails,
 	TextGenerationStreamOutput,
 } from "./text-generation/inference";
 export type * from "./video-classification/inference";
