@@ -32,7 +32,7 @@ export interface Options {
 	signal?: AbortSignal;
 
 	/**
-	 * Credentials to use for the request. If this is a string, it will be passed straight on. If it's a boolean, true will be "include" and false will not send credentials at all (which defaults to "same-origin" inside browsers).
+	 * (Default: "same-origin"). String | Boolean. Credentials to use for the request. If this is a string, it will be passed straight on. If it's a boolean, true will be "include" and false will not send credentials at all.
 	 */
 	includeCredentials?: string | boolean;
 }
@@ -47,15 +47,29 @@ export interface BaseArgs {
 	 */
 	accessToken?: string;
 	/**
-	 * The model to use. Can be a full URL for a dedicated inference endpoint.
+	 * The model to use.
 	 *
 	 * If not specified, will call huggingface.co/api/tasks to get the default model for the task.
+	 *
+	 * /!\ Legacy behavior allows this to be an URL, but this is deprecated and will be removed in the future.
+	 * Use the `endpointUrl` parameter instead.
 	 */
 	model?: string;
+
+	/**
+	 * The URL of the endpoint to use. If not specified, will call huggingface.co/api/tasks to get the default endpoint for the task.
+	 *
+	 * If specified, will use this URL instead of the default one.
+	 */
+	endpointUrl?: string;
 }
 
 export type RequestArgs = BaseArgs &
-	({ data: Blob | ArrayBuffer } | { inputs: unknown }) & {
+	(
+		| { data: Blob | ArrayBuffer }
+		| { inputs: unknown }
+		| { messages?: Array<{ role: "user" | "assistant"; content: string }> }
+	) & {
 		parameters?: Record<string, unknown>;
 		accessToken?: string;
 	};

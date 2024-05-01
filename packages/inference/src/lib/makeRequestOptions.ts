@@ -1,4 +1,6 @@
 import type { InferenceTask, Options, RequestArgs } from "../types";
+import { isObjectEmpty } from "../lib/isEmpty";
+import { omit } from "../utils/omit";
 import { HF_HUB_URL } from "./getDefaultTask";
 import { isUrl } from "./isUrl";
 
@@ -24,8 +26,7 @@ export async function makeRequestOptions(
 		taskHint?: InferenceTask;
 	}
 ): Promise<{ url: string; info: RequestInit }> {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const { accessToken, model: _model, ...otherArgs } = args;
+	const { accessToken, endpointUrl, ...otherArgs } = args;
 	let { model } = args;
 	const {
 		forceTask: task,
@@ -78,10 +79,16 @@ export async function makeRequestOptions(
 	}
 
 	const url = (() => {
+		if (endpointUrl && isUrl(model)) {
+			throw new TypeError("Both model and endpointUrl cannot be URLs");
+		}
 		if (isUrl(model)) {
+			console.warn("Using a model URL is deprecated, please use the `endpointUrl` parameter instead");
 			return model;
 		}
-
+		if (endpointUrl) {
+			return endpointUrl;
+		}
 		if (task) {
 			return `${HF_INFERENCE_API_BASE_URL}/pipeline/${task}/${model}`;
 		}
@@ -98,19 +105,17 @@ export async function makeRequestOptions(
 	} else if (includeCredentials === true) {
 		credentials = "include";
 	}
-
 	const info: RequestInit = {
 		headers,
 		method: "POST",
 		body: binary
 			? args.data
 			: JSON.stringify({
-					...otherArgs,
-					options: options && otherOptions,
+					...(otherArgs.model && isUrl(otherArgs.model) ? omit(otherArgs, "model") : otherArgs),
+					...(otherOptions && !isObjectEmpty(otherOptions) && { options: otherOptions }),
 			  }),
 		...(credentials && { credentials }),
 		signal: options?.signal,
 	};
-
 	return { url, info };
 }
