@@ -1,5 +1,6 @@
 import { expect, it, describe, assert } from "vitest";
 
+import type { TextGenerationStreamOutput } from "../src";
 import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
 
 import { HfInference } from "../src";
