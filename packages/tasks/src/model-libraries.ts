@@ -116,6 +116,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "doctr",
 		repoUrl: "https://github.com/mindee/doctr",
 	},
+	elm: {
+		prettyLabel: "ELM",
+		repoName: "elm",
+		repoUrl: "https://github.com/slicex-ai/elm",
+		filter: false,
+		countDownloads: {
+			wildcard: { path: "*/slicex_elm_config.json" },
+		},
+	},
 	espnet: {
 		prettyLabel: "ESPnet",
 		repoName: "ESPnet",
@@ -184,6 +193,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.keras,
 		filter: true,
 		countDownloads: { term: { path: "saved_model.pb" } },
+	},
+	"keras-nlp": {
+		prettyLabel: "KerasNLP",
+		repoName: "KerasNLP",
+		repoUrl: "https://keras.io/keras_nlp/",
+		docsUrl: "https://github.com/keras-team/keras-nlp",
+		snippets: snippets.keras_nlp,
 	},
 	k2: {
 		prettyLabel: "K2",
@@ -400,6 +416,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: {
 			wildcard: { path: "*.sentis" },
 		},
+	},
+	voicecraft: {
+		prettyLabel: "VoiceCraft",
+		repoName: "VoiceCraft",
+		repoUrl: "https://github.com/jasonppy/VoiceCraft",
+		docsUrl: "https://github.com/jasonppy/VoiceCraft",
+		snippets: snippets.voicecraft,
 	},
 	whisperkit: {
 		prettyLabel: "WhisperKit",

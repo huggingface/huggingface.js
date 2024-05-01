@@ -57,7 +57,7 @@ async function buildInputData(taskId: string, taskSpecDir: string, allSpecFiles:
 	if (taskId === "text-generation" || taskId === "chat-completion") {
 		await schema.addSource({
 			name: `${taskId}-stream-output`,
-			schema: await fs.readFile(`${taskSpecDir}/output_stream.json`, { encoding: "utf-8" }),
+			schema: await fs.readFile(`${taskSpecDir}/stream_output.json`, { encoding: "utf-8" }),
 		});
 	}
 	const inputData = new InputData();

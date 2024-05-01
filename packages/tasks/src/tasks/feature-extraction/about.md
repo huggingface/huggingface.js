@@ -1,20 +1,13 @@
-## About the Task
-
-Feature extraction is the task of building features intended to be informative from a given dataset,
-facilitating the subsequent learning and generalization steps in various domains of machine learning.
-
 ## Use Cases
 
-Feature extraction can be used to do transfer learning in natural language processing, computer vision and audio models.
+Models trained on a specific dataset can learn features about the data. For instance, a model trained on an English poetry dataset learns English grammar at a very high level. This information can be transferred to a new model that is going to be trained on tweets. This process of extracting features and transferring to another model is called transfer learning. One can pass their dataset through a feature extraction pipeline and feed the result to a classifier.
 
 ## Inference
-
-#### Feature Extraction
 
 ```python
 from transformers import pipeline
 checkpoint = "facebook/bart-base"
-feature_extractor = pipeline("feature-extraction",framework="pt",model=checkpoint)
+feature_extractor = pipeline("feature-extraction", framework="pt", model=checkpoint)
 text = "Transformers is an awesome library!"
 
 #Reducing along the first dimension to get a 768 dimensional array

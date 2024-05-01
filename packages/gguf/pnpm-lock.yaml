@@ -1,5 +1,17 @@
 lockfileVersion: '6.0'
 
+devDependencies:
+  type-fest:
+    specifier: ^3.9.0
+    version: 3.13.1
+
+packages:
+
+  /type-fest@3.13.1:
+    resolution: {integrity: sha512-tLq3bSNx+xSpwvAJnzrK0Ep5CLNWjvFTOp71URMaAEWBfRb9nnJiBoUe0tF8bI4ZFO3omgBR6NvnbzVUT3Ly4g==}
+    engines: {node: '>=14.16'}
+    dev: true
+
 settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false

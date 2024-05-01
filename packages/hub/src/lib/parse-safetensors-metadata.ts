@@ -14,8 +14,28 @@ export const SAFETENSORS_INDEX_FILE = "model.safetensors.index.json";
 /// but in some situations safetensors weights have different filenames.
 export const RE_SAFETENSORS_FILE = /\.safetensors$/;
 export const RE_SAFETENSORS_INDEX_FILE = /\.safetensors\.index\.json$/;
-export const RE_SAFETENSORS_SHARD_FILE = /\d{5}-of-\d{5}\.safetensors$/;
-const PARALLEL_DOWNLOADS = 5;
+export const RE_SAFETENSORS_SHARD_FILE =
+	/^(?<prefix>(?<basePrefix>.*?)[_-])(?<shard>\d{5})-of-(?<total>\d{5})\.safetensors$/;
+export interface SafetensorsShardFileInfo {
+	prefix: string;
+	basePrefix: string;
+	shard: string;
+	total: string;
+}
+export function parseSafetensorsShardFilename(filename: string): SafetensorsShardFileInfo | null {
+	const match = RE_SAFETENSORS_SHARD_FILE.exec(filename);
+	if (match && match.groups) {
+		return {
+			prefix: match.groups["prefix"],
+			basePrefix: match.groups["basePrefix"],
+			shard: match.groups["shard"],
+			total: match.groups["total"],
+		};
+	}
+	return null;
+}
+
+const PARALLEL_DOWNLOADS = 20;
 const MAX_HEADER_LENGTH = 25_000_000;
 
 class SafetensorParseError extends Error {}
@@ -139,7 +159,7 @@ async function parseShardedIndex(
 		throw new SafetensorParseError(`Failed to parse file ${path}: not a valid JSON.`);
 	}
 
-	const pathPrefix = path.substr(0, path.lastIndexOf("/") + 1);
+	const pathPrefix = path.slice(0, path.lastIndexOf("/") + 1);
 	const filenames = [...new Set(Object.values(index.weight_map))];
 	const shardedMap: SafetensorsShardedHeaders = Object.fromEntries(
 		await promisesQueue(

@@ -157,6 +157,42 @@ export function onCmdEnter(node: HTMLElement, opts: { disabled: boolean }): Acti
 }
 
 /**
+ * A debounce function that works in both browser and Nodejs.
+ */
+export function debounce<T extends unknown[]>(callback: (...rest: T) => unknown, limit: number): (...rest: T) => void {
+	let timer: ReturnType<typeof setTimeout>;
+
+	return function (...rest) {
+		clearTimeout(timer);
+		timer = setTimeout(() => {
+			callback(...rest);
+		}, limit);
+	};
+}
+
+/**
+ * Teleports the children of a node to another node....
+ */
+export function portal(node: HTMLElement, targetNode: HTMLElement): { destroy: () => void } {
+	const portalChildren = [...node.children];
+	targetNode.append(...portalChildren);
+	return {
+		destroy() {
+			for (const portalChild of portalChildren) {
+				portalChild.remove();
+			}
+		},
+	};
+}
+
+/**
+ * Teleports the children of a node under the body element
+ */
+export function portalToBody(node: HTMLElement): { destroy: () => void } {
+	return portal(node, document.body);
+}
+
+/**
 * For Tailwind:
 bg-blue-100 border-blue-100 dark:bg-blue-800 dark:border-blue-800
 bg-green-100 border-green-100 dark:bg-green-800 dark:border-green-800

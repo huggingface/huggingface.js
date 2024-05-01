@@ -1,14 +1,13 @@
 <script lang="ts">
-	import { onDestroy, onMount } from "svelte";
+	import { createEventDispatcher, onDestroy, onMount } from "svelte";
 
 	import IconMicrophone from "../../..//Icons/IconMicrophone.svelte";
 
 	import Recorder from "./Recorder.js";
 
 	export let classNames = "";
-	export let onRecordStart: () => void = () => null;
-	export let onRecordStop: (blob: Blob) => void = () => null;
-	export let onError: (err: string) => void = () => null;
+
+	const dispatch = createEventDispatcher<{ start: void; stop: Blob; error: string }>();
 
 	let isRecording = false;
 	let recorder: Recorder;
@@ -28,30 +27,30 @@
 			isRecording = !isRecording;
 			if (isRecording) {
 				await recorder.start();
-				onRecordStart();
+				dispatch("start");
 			} else {
 				const blob = await recorder.stopRecording();
-				onRecordStop(blob);
+				dispatch("stop", blob);
 			}
 		} catch (e) {
 			isRecording = false;
 			if (e instanceof Error) {
 				switch (e.name) {
 					case "NotAllowedError": {
-						onError("Please allow access to your microphone & refresh the page");
+						dispatch("error", "Please allow access to your microphone & refresh the page");
 						break;
 					}
 					case "NotFoundError": {
-						onError("No microphone found on your device");
+						dispatch("error", "No microphone found on your device");
 						break;
 					}
 					default: {
-						onError(`Encountered error "${e.name}: ${e.message}"`);
+						dispatch("error", `Encountered error "${e.name}: ${e.message}"`);
 						break;
 					}
 				}
 			} else {
-				onError(String(e));
+				dispatch("error", String(e));
 			}
 		}
 	}

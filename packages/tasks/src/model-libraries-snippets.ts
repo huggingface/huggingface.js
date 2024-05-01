@@ -153,6 +153,17 @@ model = from_pretrained_keras("${model.id}")
 `,
 ];
 
+export const keras_nlp = (model: ModelData): string[] => [
+	`# Available backend options are: "jax", "tensorflow", "torch".
+os.environ["KERAS_BACKEND"] = "tensorflow"
+
+import keras_nlp
+
+tokenizer = keras_nlp.models.Tokenizer.from_preset("hf://${model.id}")
+backbone = keras_nlp.models.Backbone.from_preset("hf://${model.id}")
+`,
+];
+
 export const open_clip = (model: ModelData): string[] => [
 	`import open_clip
 
@@ -529,6 +540,12 @@ Model model = ModelLoader.Load(Application.streamingAssetsPath + "/" + modelName
 IWorker engine = WorkerFactory.CreateWorker(BackendType.GPUCompute, model);
 // Please see provided C# file for more details
 `,
+];
+
+export const voicecraft = (model: ModelData): string[] => [
+	`from voicecraft import VoiceCraft
+
+model = VoiceCraft.from_pretrained("${model.id}")`,
 ];
 
 export const mlx = (model: ModelData): string[] => [

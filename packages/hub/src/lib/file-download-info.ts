@@ -48,12 +48,12 @@ export async function fileDownloadInfo(params: {
 
 	const resp = await (params.fetch ?? fetch)(url, {
 		method: "GET",
-		headers: params.credentials
-			? {
-					Authorization: `Bearer ${params.credentials.accessToken}`,
-					Range: "bytes=0-0",
-			  }
-			: {},
+		headers: {
+			...(params.credentials && {
+				Authorization: `Bearer ${params.credentials.accessToken}`,
+			}),
+			Range: "bytes=0-0",
+		},
 	});
 
 	if (resp.status === 404 && resp.headers.get("X-Error-Code") === "EntryNotFound") {
@@ -70,13 +70,14 @@ export async function fileDownloadInfo(params: {
 		throw new InvalidApiResponseFormatError("Expected ETag");
 	}
 
-	const sizeHeader = resp.headers.get("Content-Length");
+	const contentRangeHeader = resp.headers.get("content-range");
 
-	if (!sizeHeader) {
+	if (!contentRangeHeader) {
 		throw new InvalidApiResponseFormatError("Expected size information");
 	}
 
-	const size = parseInt(sizeHeader);
+	const [, parsedSize] = contentRangeHeader.split("/");
+	const size = parseInt(parsedSize);
 
 	if (isNaN(size)) {
 		throw new InvalidApiResponseFormatError("Invalid file size received");

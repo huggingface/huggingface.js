@@ -1,58 +1,196 @@
 {
 	"$id": "/inference/schemas/chat-completion/output.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
-	"description": "Outputs for Chat Completion inference",
+	"description": "Chat Completion Output.\n\nAuto-generated from TGI specs.\nFor more details, check out https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/scripts/inference-tgi-import.ts.",
 	"title": "ChatCompletionOutput",
 	"type": "object",
+	"required": ["id", "object", "created", "model", "system_fingerprint", "choices", "usage"],
 	"properties": {
 		"choices": {
 			"type": "array",
-			"description": "A list of chat completion choices.",
-			"title": "ChatCompletionOutputChoice",
 			"items": {
-				"type": "object",
-				"properties": {
-					"finish_reason": {
-						"$ref": "#/definitions/FinishReason",
-						"description": "The reason why the generation was stopped."
-					},
-					"index": {
-						"type": "integer",
-						"description": "The index of the choice in the list of choices."
-					},
-					"message": {
-						"type": "object",
-						"properties": {
-							"role": {
-								"$ref": "/inference/schemas/chat-completion/input.json#/definitions/Role"
-							},
-							"content": {
-								"type": "string",
-								"description": "The content of the chat completion message."
-							}
-						},
-						"title": "ChatCompletionOutputChoiceMessage",
-						"required": ["content", "role"]
-					}
-				},
-				"required": ["finish_reason", "index", "message"]
+				"$ref": "#/$defs/ChatCompletionOutputComplete"
 			}
 		},
 		"created": {
 			"type": "integer",
-			"description": "The Unix timestamp (in seconds) of when the chat completion was created."
+			"format": "int64",
+			"example": "1706270835",
+			"minimum": 0
+		},
+		"id": {
+			"type": "string"
+		},
+		"model": {
+			"type": "string",
+			"example": "mistralai/Mistral-7B-Instruct-v0.2"
+		},
+		"object": {
+			"type": "string"
+		},
+		"system_fingerprint": {
+			"type": "string"
+		},
+		"usage": {
+			"$ref": "#/$defs/ChatCompletionOutputUsage"
 		}
 	},
-	"required": ["choices", "created"],
-	"definitions": {
-		"FinishReason": {
-			"type": "string",
-			"title": "ChatCompletionFinishReason",
-			"oneOf": [
-				{ "const": "length", "description": "The generated sequence reached the maximum allowed length" },
-				{ "const": "eos_token", "description": "The model generated an end-of-sentence (EOS) token" },
-				{ "const": "stop_sequence", "description": "One of the sequence in stop_sequences was generated" }
-			]
+	"$defs": {
+		"ChatCompletionOutputComplete": {
+			"type": "object",
+			"required": ["index", "message", "finish_reason"],
+			"properties": {
+				"finish_reason": {
+					"type": "string"
+				},
+				"index": {
+					"type": "integer",
+					"format": "int32",
+					"minimum": 0
+				},
+				"logprobs": {
+					"allOf": [
+						{
+							"$ref": "#/$defs/ChatCompletionOutputLogprobs"
+						}
+					],
+					"nullable": true
+				},
+				"message": {
+					"$ref": "#/$defs/ChatCompletionOutputMessage"
+				}
+			},
+			"title": "ChatCompletionOutputComplete"
+		},
+		"ChatCompletionOutputLogprobs": {
+			"type": "object",
+			"required": ["content"],
+			"properties": {
+				"content": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/ChatCompletionOutputLogprob"
+					}
+				}
+			},
+			"title": "ChatCompletionOutputLogprobs"
+		},
+		"ChatCompletionOutputLogprob": {
+			"type": "object",
+			"required": ["token", "logprob", "top_logprobs"],
+			"properties": {
+				"logprob": {
+					"type": "number",
+					"format": "float"
+				},
+				"token": {
+					"type": "string"
+				},
+				"top_logprobs": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/ChatCompletionOutputTopLogprob"
+					}
+				}
+			},
+			"title": "ChatCompletionOutputLogprob"
+		},
+		"ChatCompletionOutputTopLogprob": {
+			"type": "object",
+			"required": ["token", "logprob"],
+			"properties": {
+				"logprob": {
+					"type": "number",
+					"format": "float"
+				},
+				"token": {
+					"type": "string"
+				}
+			},
+			"title": "ChatCompletionOutputTopLogprob"
+		},
+		"ChatCompletionOutputMessage": {
+			"type": "object",
+			"required": ["role"],
+			"properties": {
+				"content": {
+					"type": "string",
+					"example": "My name is David and I",
+					"nullable": true
+				},
+				"name": {
+					"type": "string",
+					"example": "\"David\"",
+					"nullable": true
+				},
+				"role": {
+					"type": "string",
+					"example": "user"
+				},
+				"tool_calls": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/ChatCompletionOutputToolCall"
+					},
+					"nullable": true
+				}
+			},
+			"title": "ChatCompletionOutputMessage"
+		},
+		"ChatCompletionOutputToolCall": {
+			"type": "object",
+			"required": ["id", "type", "function"],
+			"properties": {
+				"function": {
+					"$ref": "#/$defs/ChatCompletionOutputFunctionDefinition"
+				},
+				"id": {
+					"type": "integer",
+					"format": "int32",
+					"minimum": 0
+				},
+				"type": {
+					"type": "string"
+				}
+			},
+			"title": "ChatCompletionOutputToolCall"
+		},
+		"ChatCompletionOutputFunctionDefinition": {
+			"type": "object",
+			"required": ["name", "arguments"],
+			"properties": {
+				"arguments": {},
+				"description": {
+					"type": "string",
+					"nullable": true
+				},
+				"name": {
+					"type": "string"
+				}
+			},
+			"title": "ChatCompletionOutputFunctionDefinition"
+		},
+		"ChatCompletionOutputUsage": {
+			"type": "object",
+			"required": ["prompt_tokens", "completion_tokens", "total_tokens"],
+			"properties": {
+				"completion_tokens": {
+					"type": "integer",
+					"format": "int32",
+					"minimum": 0
+				},
+				"prompt_tokens": {
+					"type": "integer",
+					"format": "int32",
+					"minimum": 0
+				},
+				"total_tokens": {
+					"type": "integer",
+					"format": "int32",
+					"minimum": 0
+				}
+			},
+			"title": "ChatCompletionOutputUsage"
 		}
 	}
 }

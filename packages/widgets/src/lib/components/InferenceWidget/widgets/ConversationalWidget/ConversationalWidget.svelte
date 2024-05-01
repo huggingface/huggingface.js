@@ -21,7 +21,7 @@
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
 	import { addInferenceParameters, updateUrl } from "../../shared/helpers.js";
-	import { widgetStates, getTgiSupportedModels } from "../../stores.js";
+	import { widgetStates, getTgiSupportedModels, isLoggedIn } from "../../stores.js";
 	import type { Writable } from "svelte/store";
 	import { isChatInput, isTextInput } from "../../shared/inputValidation.js";
 	import { isValidOutputText } from "../../shared/outputValidation.js";
@@ -65,8 +65,16 @@
 		}
 		tokenizerConfig = config.tokenizer_config;
 
-		const chatTemplate = tokenizerConfig.chat_template;
+		let chatTemplate = tokenizerConfig.chat_template;
 		if (chatTemplate === undefined) {
+			error = "No chat template found in tokenizer config";
+			return;
+		}
+		if (Array.isArray(chatTemplate)) {
+			chatTemplate =
+				chatTemplate.find((template) => template.name === "default")?.template ?? chatTemplate[0]?.template;
+		}
+		if (!chatTemplate) {
 			error = "No chat template found in tokenizer config";
 			return;
 		}
@@ -152,10 +160,10 @@
 		error = "";
 		try {
 			const opts = {
-				dont_load_model: isOnLoadCall,
+				dont_load_model: isOnLoadCall || !$isLoggedIn,
 				includeCredentials,
 				signal: abort?.signal,
-				use_cache: useCache,
+				use_cache: useCache || !$isLoggedIn,
 				wait_for_model: withModelLoading,
 			} satisfies Options;
 
@@ -189,12 +197,21 @@
 				await tick();
 			}
 		} catch (e) {
-			if (!!e && typeof e === "object" && "message" in e && typeof e.message === "string") {
-				error = e.message;
+			if (!isOnLoadCall) {
+				if (!!e && typeof e === "object" && "message" in e && typeof e.message === "string") {
+					error = e.message;
+				} else {
+					error = `Something went wrong with the request.`;
+				}
 			} else {
-				error = `Something went wrong with the request.`;
+				clearConversation();
 			}
 		} finally {
+			const isLastMsgFromUser = messages.at(-1)?.role === "user";
+			if (error && isLastMsgFromUser) {
+				// roles should alternate. therefore, if there was an error, we should remove last user message so that user can submit new user message afterwards
+				messages = messages.slice(0, -1);
+			}
 			isLoading = false;
 			abort = undefined;
 		}
@@ -214,10 +231,14 @@
 	}
 
 	async function applyWidgetExample(example: Example, opts: ExampleRunOpts = {}): Promise<void> {
-		if ("text" in example) {
-			messages = [{ role: "user", content: example.text }];
+		clearConversation();
+		if (opts.inferenceOpts?.isOnLoadCall) {
+			// if isOnLoadCall do NOT trigger svelte UI update, the UI update will be triggered by getOutput if the example succeeds
+			// otherwise, error will be suppressed so that user doesn't come to errored page on load
+			// however, the user will still get the error after manually interacting with the widget if it is not isOnLoadCall
+			"text" in example ? messages.push({ role: "user", content: example.text }) : messages.push(...example.messages);
 		} else {
-			messages = [...example.messages];
+			"text" in example ? (messages = [{ role: "user", content: example.text }]) : (messages = [...example.messages]);
 		}
 		if (opts.isPreview) {
 			return;
@@ -258,8 +279,8 @@
 		flatTop={true}
 		{isLoading}
 		{isDisabled}
-		onClickSubmitBtn={handleNewMessage}
 		submitButtonLabel="Send"
+		on:run={() => handleNewMessage()}
 		on:cmdEnter={handleNewMessage}
 	/>
 
