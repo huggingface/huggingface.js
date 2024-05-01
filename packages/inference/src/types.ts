@@ -1,4 +1,5 @@
 import type { PipelineType } from "@huggingface/tasks";
+import type { ChatCompletionInput } from "@huggingface/tasks";
 
 export interface Options {
 	/**
@@ -65,11 +66,7 @@ export interface BaseArgs {
 }
 
 export type RequestArgs = BaseArgs &
-	(
-		| { data: Blob | ArrayBuffer }
-		| { inputs: unknown }
-		| { messages?: Array<{ role: "user" | "assistant"; content: string }> }
-	) & {
+	({ data: Blob | ArrayBuffer } | { inputs: unknown } | ChatCompletionInput) & {
 		parameters?: Record<string, unknown>;
 		accessToken?: string;
 	};
