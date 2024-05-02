@@ -118,7 +118,7 @@ describe.concurrent(
 			});
 		});
 
-		it.skip("documentQuestionAnswering", async () => {
+		it("documentQuestionAnswering", async () => {
 			expect(
 				await hf.documentQuestionAnswering({
 					model: "impira/layoutlm-document-qa",
@@ -136,7 +136,7 @@ describe.concurrent(
 			});
 		});
 
-		it.skip("documentQuestionAnswering with non-array output", async () => {
+		it("documentQuestionAnswering with non-array output", async () => {
 			expect(
 				await hf.documentQuestionAnswering({
 					model: "naver-clova-ix/donut-base-finetuned-docvqa",
@@ -429,7 +429,7 @@ describe.concurrent(
 			);
 		});
 
-		it.skip("audioToAudio", async () => {
+		it("audioToAudio", async () => {
 			expect(
 				await hf.audioToAudio({
 					model: "speechbrain/sepformer-wham",
