@@ -193,10 +193,10 @@ describe.concurrent(
 			});
 		});
 
-		it("textGeneration - google/flan-t5-xxl", async () => {
+		it("textGeneration - openai-community/gpt2", async () => {
 			expect(
 				await hf.textGeneration({
-					model: "google/flan-t5-xxl",
+					model: "openai-community/gpt2",
 					inputs: "The answer to the universe is",
 				})
 			).toMatchObject({
@@ -204,9 +204,9 @@ describe.concurrent(
 			});
 		});
 
-		it("textGenerationStream - google/flan-t5-xxl", async () => {
+		it("textGenerationStream - openai-community/gpt2", async () => {
 			const response = hf.textGenerationStream({
-				model: "google/flan-t5-xxl",
+				model: "openai-community/gpt2",
 				inputs: "Please answer the following question: complete one two and ____.",
 			});
 
@@ -589,10 +589,10 @@ describe.concurrent(
 				generated_text: "a large brown and white giraffe standing in a field ",
 			});
 		});
-		it("request - google/flan-t5-xxl", async () => {
+		it("request - openai-community/gpt2", async () => {
 			expect(
 				await hf.request({
-					model: "google/flan-t5-xxl",
+					model: "openai-community/gpt2",
 					inputs: "one plus two equals",
 				})
 			).toMatchObject([

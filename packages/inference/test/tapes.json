@@ -1533,5 +1533,47 @@
         "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
+  },
+  "646b00bf2fa0764b27263b302acc7e41d5ede0f899b9038a9fbf302091d1d1a6": {
+    "url": "https://api-inference.huggingface.co/models/openai-community/gpt2",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"model\":\"openai-community/gpt2\",\"inputs\":\"The answer to the universe is\"}"
+    },
+    "response": {
+      "body": "[{\"generated_text\":\"The answer to the universe is not 'you can't say this right now,' but 'you can't go into the next room, go to the next room and the next room will be different'. There are two worlds, a second world: for\"}]",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "3a538290d262572e91ccb1a335fa049e84699b4f72a71c0bc6c7bd823d3cfd2d": {
+    "url": "https://api-inference.huggingface.co/models/openai-community/gpt2",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"model\":\"openai-community/gpt2\",\"inputs\":\"one plus two equals\"}"
+    },
+    "response": {
+      "body": "[{\"generated_text\":\"one plus two equals four) and the fourth is called the \\\"discovery\\\" (see above).\\n\\nLet's call this Dividend.\\n\\nDividend is the same as:\\n\\ndividend(2)*divid\"}]",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
   }
 }
