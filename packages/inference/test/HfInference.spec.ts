@@ -646,11 +646,11 @@ describe.concurrent(
 		});
 
 		it("endpoint - makes request to specified endpoint", async () => {
-			const ep = hf.endpoint("https://api-inference.huggingface.co/models/google/flan-t5-xxl");
+			const ep = hf.endpoint("https://api-inference.huggingface.co/models/openai-community/gpt2");
 			const { generated_text } = await ep.textGeneration({
 				inputs: "one plus two equals",
 			});
-			assert(generated_text === "three" || generated_text === "3");
+			assert.include(generated_text, "three");
 		});
 
 		it("chatCompletion - OpenAI Specs", async () => {

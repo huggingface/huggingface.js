@@ -1509,5 +1509,29 @@
         "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
+  },
+  "019076ba5053a777d40c12f9e9704f99252d5fb81923fde871f6114a9a4ef0c3": {
+    "url": "https://api-inference.huggingface.co/models/openai-community/gpt2",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":\"one plus two equals\"}"
+    },
+    "response": {
+      "body": "[{\"generated_text\":\"one plus two equals two times three). They are not just common objects but the ultimate of the \\\"supernatural.\\\"\\n\\nLet's not lose sight of what the \\\"perfect\\\" human and \\\"perfect\\\" animal is like, because that would allow us\"}]",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-expose-headers": "x-compute-type, x-compute-time",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "server": "uvicorn",
+        "transfer-encoding": "chunked",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
   }
 }
