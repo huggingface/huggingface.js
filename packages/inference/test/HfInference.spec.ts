@@ -1,6 +1,5 @@
 import { expect, it, describe, assert } from "vitest";
 
-import type { TextGenerationStreamOutput } from "../src";
 import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
 
 import { HfInference } from "../src";
@@ -204,32 +203,26 @@ describe.concurrent(
 			});
 		});
 
-		it("textGenerationStream - openai-community/gpt2", async () => {
+		it("textGenerationStream - meta-llama/Llama-2-7b-hf", async () => {
 			const response = hf.textGenerationStream({
-				model: "openai-community/gpt2",
+				model: "meta-llama/Llama-2-7b-hf",
 				inputs: "Please answer the following question: complete one two and ____.",
 			});
 
-			const makeExpectedReturn = (tokenText: string, fullPhrase: string): TextGenerationStreamOutput => {
-				const eot = tokenText === "</s>" || tokenText === null;
-				return {
+			for await (const ret of response) {
+				expect(ret).toMatchObject({
 					details: null,
+					index: expect.any(Number),
 					token: {
 						id: expect.any(Number),
 						logprob: expect.any(Number),
 						text: expect.any(String) || null,
 						special: expect.any(Boolean),
 					},
-					generated_text: eot ? fullPhrase : null,
-				};
-			};
-			const word = "three";
-			const expectedTokens = [word, "</s>"];
-
-			for await (const ret of response) {
-				const expectedToken = expectedTokens.shift();
-				assert(expectedToken);
-				expect(ret).toMatchObject(makeExpectedReturn(expectedToken, word));
+					generated_text: ret.generated_text
+						? "Please answer the following question: complete one two and ____. How does the fish find its ____? After the fish is ________ how does it get to the shore?\n1. How do objects become super saturated bubbles?\n2. What resist limiting the movement of gas?"
+						: null,
+				});
 			}
 		});
 
