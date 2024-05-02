@@ -138,7 +138,7 @@ async function vcr(
 		return response;
 	}
 
-	if (response.ok && (VCR_MODE === MODE.RECORD || VCR_MODE === MODE.CACHE)) {
+	if (response.status < 500 && (VCR_MODE === MODE.RECORD || VCR_MODE === MODE.CACHE)) {
 		const isText =
 			response.headers.get("Content-Type")?.includes("json") || response.headers.get("Content-Type")?.includes("text");
 		const isJson = response.headers.get("Content-Type")?.includes("json");

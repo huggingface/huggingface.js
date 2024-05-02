@@ -1488,5 +1488,26 @@
         "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
+  },
+  "e9d288837214f44e5e385f96383391e964133f5c3703b276f934224d0773197e": {
+    "url": "https://api-inference.huggingface.co/models/this-model-does-not-exist-123",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"model\":\"this-model-does-not-exist-123\",\"inputs\":\"[MASK] world!\"}"
+    },
+    "response": {
+      "body": "{\"error\":\"Model this-model-does-not-exist-123 does not exist\"}",
+      "status": 404,
+      "statusText": "Not Found",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
   }
 }

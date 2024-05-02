@@ -136,7 +136,8 @@ describe.concurrent(
 			});
 		});
 
-		it("documentQuestionAnswering with non-array output", async () => {
+		// Errors with "Error: If you are using a VisionEncoderDecoderModel, you must provide a feature extractor"
+		it.skip("documentQuestionAnswering with non-array output", async () => {
 			expect(
 				await hf.documentQuestionAnswering({
 					model: "naver-clova-ix/donut-base-finetuned-docvqa",
@@ -601,6 +602,7 @@ describe.concurrent(
 			]);
 		});
 
+		// Skipped at the moment because takes forever
 		it.skip("tabularRegression", async () => {
 			expect(
 				await hf.tabularRegression({
@@ -619,6 +621,7 @@ describe.concurrent(
 			).toMatchObject([270.5473526976245, 313.6843425638086, 328.3727133404402]);
 		});
 
+		// Skipped at the moment because takes forever
 		it.skip("tabularClassification", async () => {
 			expect(
 				await hf.tabularClassification({
