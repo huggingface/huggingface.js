@@ -105,6 +105,7 @@ export async function makeRequestOptions(
 	} else if (includeCredentials === true) {
 		credentials = "include";
 	}
+
 	const info: RequestInit = {
 		headers,
 		method: "POST",
@@ -117,5 +118,6 @@ export async function makeRequestOptions(
 		...(credentials && { credentials }),
 		signal: options?.signal,
 	};
+
 	return { url, info };
 }
