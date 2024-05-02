@@ -180,3 +180,12 @@ export type ApiCommitOperation =
 			key: "deletedFile";
 			value: ApiCommitDeletedEntry;
 	  };
+
+export interface ApiCommitData {
+	id: string;
+	title: string;
+	message: string;
+	authors: Array<{ user: string; avatar: string }>;
+	date: string;
+	formatted?: string;
+}
