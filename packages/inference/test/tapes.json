@@ -1599,5 +1599,29 @@
         "vary": "origin, Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
+  },
+  "18af437e8c96b914c5570e1220915ab3b33713708d3959e9eb839b282d4c8538": {
+    "url": "https://api-inference.huggingface.co/models/meta-llama/Llama-2-7b-hf",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"model\":\"meta-llama/Llama-2-7b-hf\",\"inputs\":\"Write a short story about a robot that becomes sentient and takes over the world.\",\"parameters\":{\"max_new_tokens\":10000},\"stream\":true}"
+    },
+    "response": {
+      "body": "data:{\"error\":\"Input validation error: `inputs` tokens + `max_new_tokens` must be <= 8192. Given: 18 `inputs` tokens and 10000 `max_new_tokens`\",\"error_type\":\"validation\"}\n\n",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-allow-origin": "*",
+        "cache-control": "no-cache",
+        "connection": "keep-alive",
+        "content-type": "text/event-stream",
+        "transfer-encoding": "chunked",
+        "vary": "origin, Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
   }
 }

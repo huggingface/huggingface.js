@@ -228,7 +228,7 @@ describe.concurrent(
 
 		it("textGenerationStream - catch error", async () => {
 			const response = hf.textGenerationStream({
-				model: "OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5",
+				model: "meta-llama/Llama-2-7b-hf",
 				inputs: "Write a short story about a robot that becomes sentient and takes over the world.",
 				parameters: {
 					max_new_tokens: 10_000,
@@ -236,7 +236,7 @@ describe.concurrent(
 			});
 
 			await expect(response.next()).rejects.toThrow(
-				"Input validation error: `inputs` tokens + `max_new_tokens` must be <= 2048. Given: 17 `inputs` tokens and 10000 `max_new_tokens`"
+				"Input validation error: `inputs` tokens + `max_new_tokens` must be <= 8192. Given: 18 `inputs` tokens and 10000 `max_new_tokens`"
 			);
 		});
 
