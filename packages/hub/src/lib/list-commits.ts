@@ -25,8 +25,7 @@ export async function* listCommits(params: {
 	/**
 	 * Number of commits to fetch from the hub each http call. Defaults to 100. Can be set to 1000.
 	 */
-	// todo: uncomment & unskip test when bug fixed on the hub
-	// batchSize?: number;
+	batchSize?: number;
 	/**
 	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 	 */
@@ -38,7 +37,7 @@ export async function* listCommits(params: {
 	// Could upgrade to 1000 commits per page
 	let url: string | undefined = `${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/commits/${
 		params.revision ?? "main"
-	}?limit=${/*params.batchSize ??*/ 100}`;
+	}?limit=${params.batchSize ?? 100}`;
 
 	while (url) {
 		const res: Response = await (params.fetch ?? fetch)(url, {
@@ -66,6 +65,5 @@ export async function* listCommits(params: {
 		const linkHeader = res.headers.get("Link");
 
 		url = linkHeader ? parseLinkHeader(linkHeader).next : undefined;
-		throw new Error(linkHeader + "");
 	}
 }

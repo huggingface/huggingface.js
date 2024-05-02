@@ -3,7 +3,7 @@ import type { CommitData } from "./list-commits";
 import { listCommits } from "./list-commits";
 
 describe("listCommits", () => {
-	it.skip("should fetch paginated commits from the repo", async () => {
+	it("should fetch paginated commits from the repo", async () => {
 		const commits: CommitData[] = [];
 		for await (const commit of listCommits({
 			repo: {
@@ -11,13 +11,13 @@ describe("listCommits", () => {
 				type: "model",
 			},
 			revision: "607a30d783dfa663caf39e06633721c8d4cfcd7e",
-			// batchSize: 5,
+			batchSize: 5,
 		})) {
 			commits.push(commit);
 		}
 
 		assert.equal(commits.length, 26);
-		assert.deepEqual(commits.slice(-6), [
+		assert.deepEqual(commits.slice(0, 6), [
 			{
 				oid: "607a30d783dfa663caf39e06633721c8d4cfcd7e",
 				title: "Adds the tokenizer configuration file (#80)",
