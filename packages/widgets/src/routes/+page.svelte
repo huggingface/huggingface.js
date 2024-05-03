@@ -34,21 +34,17 @@
 
 	const models: ModelData[] = [
 		{
-			id: "mistralai/Mistral-7B-Instruct-v0.2",
+			id: "meta-llama/Meta-Llama-3-8B-Instruct",
 			pipeline_tag: "text-generation",
 			tags: ["conversational"],
 			inference: InferenceDisplayability.Yes,
 			config: {
-				architectures: ["MistralForCausalLM"],
-				model_type: "mistral",
+				architectures: ["LlamaForCausalLM"],
+				model_type: "llama",
 				tokenizer_config: {
-					chat_template:
-						"{{ bos_token }}{% for message in messages %}{% if (message['role'] == 'user') != (loop.index0 % 2 == 0) %}{{ raise_exception('Conversation roles must alternate user/assistant/user/assistant/...') }}{% endif %}{% if message['role'] == 'user' %}{{ '[INST] ' + message['content'] + ' [/INST]' }}{% elif message['role'] == 'assistant' %}{{ message['content'] + eos_token}}{% else %}{{ raise_exception('Only user and assistant roles are supported!') }}{% endif %}{% endfor %}",
-					use_default_system_prompt: false,
-					bos_token: "<s>",
-					eos_token: "</s>",
-					unk_token: "<unk>",
-					pad_token: null,
+					chat_template: "{% set loop_messages = messages %}{% for message in loop_messages %}{% set content = '<|start_header_id|>' + message['role'] + '<|end_header_id|>\n\n'+ message['content'] | trim + '<|eot_id|>' %}{% if loop.index0 == 0 %}{% set content = bos_token + content %}{% endif %}{{ content }}{% endfor %}{% if add_generation_prompt %}{{ '<|start_header_id|>assistant<|end_header_id|>\n\n' }}{% endif %}",
+					bos_token: "<|begin_of_text|>",
+					eos_token: "<|end_of_text|>",
 				},
 			},
 			widgetData: [
