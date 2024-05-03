@@ -78,6 +78,52 @@
 			],
 		},
 		{
+			id: "microsoft/Phi-3-mini-128k-instruct",
+			pipeline_tag: "text-generation",
+			tags: ["conversational"],
+			inference: InferenceDisplayability.Yes,
+			config: {
+				architectures: ["Phi3ForCausalLM"],
+				model_type: "phi3",
+				tokenizer_config: {
+					bos_token: "<s>",
+					chat_template:
+						"{{ bos_token }}{% for message in messages %}{% if (message['role'] == 'user') %}{{'<|user|>' + '\n' + message['content'] + '<|end|>' + '\n' + '<|assistant|>' + '\n'}}{% elif (message['role'] == 'assistant') %}{{message['content'] + '<|end|>' + '\n'}}{% endif %}{% endfor %}",
+					eos_token: "<|endoftext|>",
+					pad_token: "<|endoftext|>",
+					unk_token: "<unk>",
+				},
+			},
+			widgetData: [
+				{ text: "This is a text-only example", example_title: "Text only" },
+				{
+					messages: [{ content: "Please exlain QCD in very few words", role: "user" }],
+					example_title: "Chat messages",
+				},
+				{
+					messages: [{ content: "Please exlain QCD in very few words", role: "user" }],
+					output: {
+						text: "QCD is the physics of strong force and small particles.",
+					},
+					example_title: "Chat messages with Output",
+				},
+				{
+					text: "Explain QCD in one short sentence.",
+					output: {
+						text: "QCD is the physics of strong force and small particles.",
+					},
+					example_title: "Text only with Output",
+				},
+				{
+					example_title: "Invalid example - unsupported role",
+					messages: [
+						{ role: "system", content: "This will fail because of the chat template" },
+						{ role: "user", content: "What's your favorite condiment?" },
+					],
+				},
+			],
+		},
+		{
 			id: "google/gemma-7b",
 			pipeline_tag: "text-generation",
 			inference: InferenceDisplayability.Yes,

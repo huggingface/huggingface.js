@@ -165,6 +165,7 @@
 				signal: abort?.signal,
 				use_cache: useCache || !$isLoggedIn,
 				wait_for_model: withModelLoading,
+				retry_on_error: false,
 			} satisfies Options;
 
 			tgiSupportedModels = await getTgiSupportedModels(apiUrl);
