@@ -4,7 +4,7 @@
  * Using src/scripts/inference-codegen
  */
 
-export type FeatureExtractionOutput = { [key: string]: unknown };
+export interface FeatureExtractionOutput { [key: string]: unknown }
 
 /**
  * Feature Extraction Input.
