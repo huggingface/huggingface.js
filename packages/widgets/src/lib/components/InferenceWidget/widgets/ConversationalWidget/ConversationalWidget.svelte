@@ -51,6 +51,8 @@
 	let inferenceClient: HfInference | undefined = undefined;
 	let abort: AbortController | undefined = undefined;
 
+	$: inferenceClient = new HfInference(apiToken);
+
 	// Check config and compile template
 	onMount(() => {
 		const config = model.config;
@@ -84,8 +86,6 @@
 			error = `Invalid chat template: "${(e as Error).message}"`;
 			return;
 		}
-
-		inferenceClient = new HfInference(apiToken);
 	});
 
 	async function handleNewMessage(): Promise<void> {
