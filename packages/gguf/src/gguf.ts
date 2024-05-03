@@ -83,7 +83,7 @@ class RangeView {
 			await (
 				await (this.params?.fetch ?? fetch)(this.url, {
 					headers: {
-						...(this.params?.fetchHeaders ?? {}),
+						...(this.params?.additionalFetchHeaders ?? {}),
 						Range: `bytes=${range[0]}-${range[1]}`,
 					},
 				})
@@ -211,7 +211,7 @@ export async function gguf(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-		fetchHeaders?: Record<string, string>;
+		additionalFetchHeaders?: Record<string, string>;
 		computeParametersCount: true;
 	}
 ): Promise<GGUFParseOutput & { parameterCount: number }>;
@@ -222,7 +222,7 @@ export async function gguf(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-		fetchHeaders?: Record<string, string>;
+		additionalFetchHeaders?: Record<string, string>;
 	}
 ): Promise<GGUFParseOutput>;
 export async function gguf(
@@ -232,7 +232,7 @@ export async function gguf(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-		fetchHeaders?: Record<string, string>;
+		additionalFetchHeaders?: Record<string, string>;
 		computeParametersCount?: boolean;
 	}
 ): Promise<GGUFParseOutput & { parameterCount?: number }> {
