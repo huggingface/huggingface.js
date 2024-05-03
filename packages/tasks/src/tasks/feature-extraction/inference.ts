@@ -4,19 +4,20 @@
  * Using src/scripts/inference-codegen
  */
 
-export type FeatureExtractionOutput = unknown[];
+export type FeatureExtractionOutput = { [key: string]: unknown };
 
 /**
- * Inputs for Text Embedding inference
+ * Feature Extraction Input.
+ *
+ * Auto-generated from TEI specs.
+ * For more details, check out
+ * https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/scripts/inference-tei-import.ts.
  */
 export interface FeatureExtractionInput {
-	/**
-	 * The text to get the embeddings of
-	 */
-	inputs: string;
-	/**
-	 * Additional inference parameters
-	 */
-	parameters?: { [key: string]: unknown };
+	inputs: FeatureExtractionInputInput;
+	normalize?: boolean;
+	truncate?: boolean;
 	[property: string]: unknown;
 }
+
+export type FeatureExtractionInputInput = string[] | string;
