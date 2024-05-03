@@ -48,10 +48,10 @@ export enum GGUFValueType {
 }
 
 const ARCHITECTURES = [...LLM_ARCHITECTURES, "rwkv", "whisper"] as const;
-export type Architecture = (typeof ARCHITECTURES)[number];
+export type GGUFArchitecture = (typeof ARCHITECTURES)[number];
 
 interface General {
-	"general.architecture": Architecture;
+	"general.architecture": GGUFArchitecture;
 	"general.name": string;
 	"general.file_type": number;
 	"general.quantization_version": number;
@@ -59,9 +59,9 @@ interface General {
 
 export type ModelBase<
 	TArchitecture extends
-		| Architecture
-		| `encoder.${Extract<Architecture, "whisper">}`
-		| `decoder.${Extract<Architecture, "whisper">}`,
+		| GGUFArchitecture
+		| `encoder.${Extract<GGUFArchitecture, "whisper">}`
+		| `decoder.${Extract<GGUFArchitecture, "whisper">}`,
 > = { [K in `${TArchitecture}.layer_count`]: number } & { [K in `${TArchitecture}.feed_forward_length`]: number } & {
 	[K in `${TArchitecture}.context_length`]: number;
 } & { [K in `${TArchitecture}.embedding_length`]: number } & { [K in `${TArchitecture}.block_count`]: number };
