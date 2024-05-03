@@ -59,7 +59,7 @@ jobs:
         run: |
           sleep 3
           pnpm i --filter inference... --filter hub... --frozen-lockfile
-          pnpm --filter inference --filter hub publish --force --no-git-checks --registry http://localhost:4874/
+          pnpm --filter inference --filter hub --filter tasks publish --force --no-git-checks --registry http://localhost:4874/
 
       - name: E2E test - test yarn install
         working-directory: e2e/ts

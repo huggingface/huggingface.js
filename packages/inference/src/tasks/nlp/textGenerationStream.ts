@@ -1,6 +1,6 @@
+import type { TextGenerationInput } from "@huggingface/tasks";
 import type { BaseArgs, Options } from "../../types";
 import { streamingRequest } from "../custom/streamingRequest";
-import type { TextGenerationInput } from "./textGeneration";
 
 export interface TextGenerationStreamToken {
 	/** Token ID from the model tokenizer */
