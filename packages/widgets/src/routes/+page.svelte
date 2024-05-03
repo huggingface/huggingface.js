@@ -28,6 +28,8 @@
 				apiToken = token;
 			}
 		}
+
+		isLoggedIn.set(true);
 	});
 
 	const models: ModelData[] = [
