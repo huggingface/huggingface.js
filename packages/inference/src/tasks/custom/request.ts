@@ -11,9 +11,17 @@ export async function request<T>(
 		task?: string | InferenceTask;
 		/** To load default model if needed */
 		taskHint?: InferenceTask;
+		/** Is chat completion compatible */
+		chatCompletion?: boolean;
 	}
 ): Promise<T> {
-	const { url, info } = await makeRequestOptions(args, options);
+	const { url: _url, info } = await makeRequestOptions(args, options);
+	let url = _url;
+	if (options?.chatCompletion) {
+		if (!url.endsWith("/chat/completions")) {
+			url += "/v1/chat/completions";
+		}
+	}
 	const response = await (options?.fetch ?? fetch)(url, info);
 
 	if (options?.retry_on_error !== false && response.status === 503 && !options?.wait_for_model) {

@@ -14,6 +14,7 @@ export async function chatCompletion(
 	const res = await request<ChatCompletionOutput>(args, {
 		...options,
 		taskHint: "text-generation",
+		chatCompletion: true,
 	});
 	const isValidOutput =
 		typeof res === "object" &&
