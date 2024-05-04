@@ -50,11 +50,11 @@ export enum GGUFValueType {
 const ARCHITECTURES = [...LLM_ARCHITECTURES, "rwkv", "whisper"] as const;
 export type Architecture = (typeof ARCHITECTURES)[number];
 
-interface General {
-	"general.architecture": Architecture;
+export interface GGUFGeneralInfo<TArchitecture extends Architecture> {
+	"general.architecture": TArchitecture;
 	"general.name": string;
-	"general.file_type": number;
-	"general.quantization_version": number;
+	"general.file_type"?: number;
+	"general.quantization_version"?: number;
 }
 
 export type ModelBase<
@@ -62,9 +62,16 @@ export type ModelBase<
 		| Architecture
 		| `encoder.${Extract<Architecture, "whisper">}`
 		| `decoder.${Extract<Architecture, "whisper">}`,
-> = { [K in `${TArchitecture}.layer_count`]: number } & { [K in `${TArchitecture}.feed_forward_length`]: number } & {
-	[K in `${TArchitecture}.context_length`]: number;
-} & { [K in `${TArchitecture}.embedding_length`]: number } & { [K in `${TArchitecture}.block_count`]: number };
+> = Record<
+	| `${TArchitecture}.layer_count`
+	| `${TArchitecture}.feed_forward_length`
+	| `${TArchitecture}.context_length`
+	| `${TArchitecture}.embedding_length`
+	| `${TArchitecture}.block_count`,
+	number
+>;
+
+/// Tokenizer
 
 type TokenizerModel = "no_vocab" | "llama" | "gpt2" | "bert";
 interface Tokenizer {
@@ -77,18 +84,22 @@ interface Tokenizer {
 	"tokenizer.ggml.add_bos_token": boolean;
 	"tokenizer.chat_template": string;
 }
+type NoTokenizer = Record<keyof Tokenizer, undefined>;
 
-export type RWKV = ModelBase<"rwkv"> & { "rwkv.architecture_version": number };
-export type LLM = TransformerLLM | RWKV;
-export type Whisper = ModelBase<"encoder.whisper"> & ModelBase<"decoder.whisper">;
-export type Model = (LLM | Whisper) & Partial<Tokenizer>;
+/// Models outside of llama.cpp: "rwkv" and "whisper"
+
+export type RWKV = GGUFGeneralInfo<"rwkv"> & ModelBase<"rwkv"> & { "rwkv.architecture_version": number };
+
+export type Whisper = GGUFGeneralInfo<"whisper"> & ModelBase<"encoder.whisper"> & ModelBase<"decoder.whisper">;
+
+/// Types for parse output
 
 export type GGUFMetadata = {
 	version: Version;
 	tensor_count: bigint;
 	kv_count: bigint;
-} & Partial<General> &
-	Partial<Model> &
+} & (Whisper | RWKV | TransformerLLM) &
+	(NoTokenizer | Tokenizer) &
 	Record<string, MetadataValue>;
 
 export interface GGUFTensorInfo {
