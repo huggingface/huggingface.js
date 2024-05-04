@@ -1764,5 +1764,28 @@
         "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
+  },
+  "55bbf78468786c034218ed0094d3332505a97788ee1bb9da3d1e22b7c2cce039": {
+    "url": "https://api-inference.huggingface.co/models/openai-community/gpt2/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"model\":\"openai-community/gpt2\",\"messages\":[{\"role\":\"user\",\"content\":\"Complete the equation 1+1= ,just the answer\"}],\"max_tokens\":500,\"return_full_text\":false,\"temperature\":0.1,\"seed\":0,\"stream\":true,\"options\":{\"chatCompletion\":true}}"
+    },
+    "response": {
+      "body": "{\"error\":[\"Error in `stream`: `stream` is not supported for this model\"]}",
+      "status": 400,
+      "statusText": "Bad Request",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "server": "uvicorn",
+        "transfer-encoding": "chunked",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
   }
 }
