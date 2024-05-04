@@ -685,10 +685,6 @@ describe.concurrent(
 		});
 		it("custom mistral - OpenAI Specs", async () => {
 			const MISTRAL_KEY = env.MISTRAL_KEY;
-			if (!MISTRAL_KEY) {
-				console.warn("Skipping test because MISTRAL_KEY is not set");
-				return;
-			}
 			const hf = new HfInference(MISTRAL_KEY);
 			const ep = hf.endpoint("https://api.mistral.ai/v1/chat/completions");
 			const stream = ep.streamingRequest({
@@ -705,10 +701,6 @@ describe.concurrent(
 		});
 		it("custom openai - OpenAI Specs", async () => {
 			const OPENAI_KEY = env.OPENAI_KEY;
-			if (!OPENAI_KEY) {
-				console.warn("Skipping test because OPENAI_KEY is not set");
-				return;
-			}
 			const hf = new HfInference(OPENAI_KEY);
 			const ep = hf.endpoint("https://api.openai.com/v1/chat/completions");
 			const stream = ep.streamingRequest({
