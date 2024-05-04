@@ -35,6 +35,9 @@ export async function* streamingRequest<T>(
 	if (!response.ok) {
 		if (response.headers.get("Content-Type")?.startsWith("application/json")) {
 			const output = await response.json();
+			if (options?.chatCompletion && output.error) {
+				throw new Error("Check if the model inference is compatible with chat completion.");
+			}
 			if (output.error) {
 				throw new Error(output.error);
 			}
