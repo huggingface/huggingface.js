@@ -1,6 +1,7 @@
 import type { MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
 import { GGUFValueType } from "./types";
 import { promisesQueue } from "./utils/promisesQueue";
+import fs from "node:fs";
 
 export type { MetadataBaseValue, MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
 export { GGUFValueType, GGMLQuantizationType, Architecture } from "./types";
@@ -55,6 +56,9 @@ class RangeView {
 
 	get view(): DataView {
 		return this.dataView;
+	}
+	get currentChunk(): number {
+		return this.chunk;
 	}
 
 	constructor(
@@ -125,6 +129,31 @@ class RangeView {
 		if (this.dataView.byteLength - offset < HTTP_DATA_LEEWAY) {
 			await this.fetchChunk();
 		}
+	}
+}
+
+/**
+ * Internal stateful instance to read ranges of local file when needed.
+ * Only usable in with nodejs FS API.
+ */
+class RangeViewLocalFile extends RangeView {
+	/**
+	 * Read a new chunk from local file system.
+	 */
+	override fetchChunk(): Promise<void> {
+		return new Promise((resolve, reject) => {
+			let buffer = Buffer.alloc(0);
+			const stream = fs.createReadStream(this.url, {
+				start: this.currentChunk * HTTP_CHUNK_SIZE,
+				end: (this.currentChunk + 1) * HTTP_CHUNK_SIZE,
+			});
+			stream.on("error", reject);
+			stream.on("data", (chunk: Buffer) => (buffer = Buffer.concat([buffer, chunk])));
+			stream.on("end", () => {
+				this.appendBuffer(buffer);
+				resolve();
+			});
+		});
 	}
 }
 
@@ -213,6 +242,7 @@ export async function gguf(
 		fetch?: typeof fetch;
 		additionalFetchHeaders?: Record<string, string>;
 		computeParametersCount: true;
+		localFile?: boolean;
 	}
 ): Promise<GGUFParseOutput & { parameterCount: number }>;
 export async function gguf(
@@ -223,6 +253,7 @@ export async function gguf(
 		 */
 		fetch?: typeof fetch;
 		additionalFetchHeaders?: Record<string, string>;
+		localFile?: boolean;
 	}
 ): Promise<GGUFParseOutput>;
 export async function gguf(
@@ -234,9 +265,10 @@ export async function gguf(
 		fetch?: typeof fetch;
 		additionalFetchHeaders?: Record<string, string>;
 		computeParametersCount?: boolean;
+		localFile?: boolean;
 	}
 ): Promise<GGUFParseOutput & { parameterCount?: number }> {
-	const r = new RangeView(url, params);
+	const r = params?.localFile ? new RangeViewLocalFile(url, params) : new RangeView(url, params);
 	await r.fetchChunk();
 
 	const checkBuffer = (buffer: Uint8Array, header: Uint8Array) => {
