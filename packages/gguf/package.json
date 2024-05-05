@@ -49,6 +49,7 @@
 	"author": "Hugging Face",
 	"license": "MIT",
 	"devDependencies": {
+		"@types/node": "^20.12.8",
 		"type-fest": "^3.9.0"
 	}
 }

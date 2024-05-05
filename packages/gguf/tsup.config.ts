@@ -21,6 +21,7 @@ const browserConfig: Options = {
 	target: "es2018",
 	splitting: true,
 	outDir: "dist/browser",
+	external: ["node:fs"],
 };
 
 export default [nodeConfig, browserConfig];

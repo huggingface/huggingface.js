@@ -1,7 +1,6 @@
 import type { MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
 import { GGUFValueType } from "./types";
 import { promisesQueue } from "./utils/promisesQueue";
-import fs from "node:fs";
 
 export type { MetadataBaseValue, MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
 export { GGUFValueType, GGMLQuantizationType, Architecture } from "./types";
@@ -141,9 +140,15 @@ class RangeViewLocalFile extends RangeView {
 	 * Read a new chunk from local file system.
 	 */
 	override fetchChunk(): Promise<void> {
-		return new Promise((resolve, reject) => {
+		return new Promise<void>((resolve, reject) => {
+			const Buffer = global.Buffer;
+			if (typeof Buffer === "undefined") {
+				reject(new Error("localFile cannot be used in browser"));
+				return;
+			}
 			let buffer = Buffer.alloc(0);
-			const stream = fs.createReadStream(this.url, {
+			// eslint-disable-next-line @typescript-eslint/no-var-requires
+			const stream = require("node:fs").createReadStream(this.url, {
 				start: this.currentChunk * HTTP_CHUNK_SIZE,
 				end: (this.currentChunk + 1) * HTTP_CHUNK_SIZE,
 			});
