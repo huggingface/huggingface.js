@@ -1634,7 +1634,7 @@
       "body": "{\"model\":\"gpt-3.5-turbo\",\"messages\":[{\"role\":\"user\",\"content\":\"Complete the equation one + one =\"}],\"stream\":true}"
     },
     "response": {
-      "body": "data: {\"id\":\"chatcmpl-9L0Srl55tvx2LlZ6HgI76leWMfGHq\",\"object\":\"chat.completion.chunk\",\"created\":1714793701,\"model\":\"gpt-3.5-turbo-0125\",\"system_fingerprint\":\"fp_a450710239\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata: {\"id\":\"chatcmpl-9L0Srl55tvx2LlZ6HgI76leWMfGHq\",\"object\":\"chat.completion.chunk\",\"created\":1714793701,\"model\":\"gpt-3.5-turbo-0125\",\"system_fingerprint\":\"fp_a450710239\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"two\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata: {\"id\":\"chatcmpl-9L0Srl55tvx2LlZ6HgI76leWMfGHq\",\"object\":\"chat.completion.chunk\",\"created\":1714793701,\"model\":\"gpt-3.5-turbo-0125\",\"system_fingerprint\":\"fp_a450710239\",\"choices\":[{\"index\":0,\"delta\":{},\"logprobs\":null,\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+      "body": "data: {\"id\":\"chatcmpl-9LMk9097xG2NSLCLTmIoqvIWmHGtc\",\"object\":\"chat.completion.chunk\",\"created\":1714879341,\"model\":\"gpt-3.5-turbo-0125\",\"system_fingerprint\":\"fp_3b956da36b\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata: {\"id\":\"chatcmpl-9LMk9097xG2NSLCLTmIoqvIWmHGtc\",\"object\":\"chat.completion.chunk\",\"created\":1714879341,\"model\":\"gpt-3.5-turbo-0125\",\"system_fingerprint\":\"fp_3b956da36b\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"two\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata: {\"id\":\"chatcmpl-9LMk9097xG2NSLCLTmIoqvIWmHGtc\",\"object\":\"chat.completion.chunk\",\"created\":1714879341,\"model\":\"gpt-3.5-turbo-0125\",\"system_fingerprint\":\"fp_3b956da36b\",\"choices\":[{\"index\":0,\"delta\":{},\"logprobs\":null,\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
       "status": 200,
       "statusText": "OK",
       "headers": {
@@ -1642,15 +1642,15 @@
         "alt-svc": "h3=\":443\"; ma=86400",
         "cache-control": "no-cache, must-revalidate",
         "cf-cache-status": "DYNAMIC",
-        "cf-ray": "87e5703b1c5522ea-SJC",
+        "cf-ray": "87ed9b0cc858159e-SJC",
         "connection": "keep-alive",
         "content-type": "text/event-stream",
         "openai-model": "gpt-3.5-turbo-0125",
         "openai-organization": "user-jiitgaiziljtfhut3svxynrm",
-        "openai-processing-ms": "279",
+        "openai-processing-ms": "366",
         "openai-version": "2020-10-01",
         "server": "cloudflare",
-        "set-cookie": "_cfuvid=h2r3_MY2X8avxl0.UbZIC93Xq3ttP7T7TNEZTD.iqcI-1714793701996-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None",
+        "set-cookie": "_cfuvid=mliRH01zRzfzDf.KlO.xD31CDzk7jTO7ER027wqE6O0-1714879342118-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None",
         "strict-transport-security": "max-age=15724800; includeSubDomains",
         "transfer-encoding": "chunked"
       }
@@ -1666,14 +1666,14 @@
       "body": "{\"model\":\"mistral-tiny\",\"messages\":[{\"role\":\"user\",\"content\":\"Complete the equation one + one = , just the answer\"}],\"stream\":true}"
     },
     "response": {
-      "body": "data: {\"id\":\"b58749aae9d640978487c8b63d702891\",\"object\":\"chat.completion.chunk\",\"created\":1714793702,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"\"},\"finish_reason\":null,\"logprobs\":null}]}\n\ndata: {\"id\":\"b58749aae9d640978487c8b63d702891\",\"object\":\"chat.completion.chunk\",\"created\":1714793702,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"The\"},\"finish_reason\":null,\"logprobs\":null}]}\n\ndata: {\"id\":\"b58749aae9d640978487c8b63d702891\",\"object\":\"chat.completion.chunk\",\"created\":1714793702,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" answer\"},\"finish_reason\":null,\"logprobs\":null}]}\n\ndata: {\"id\":\"b58749aae9d640978487c8b63d702891\",\"object\":\"chat.completion.chunk\",\"created\":1714793702,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" to\"},\"finish_reason\":null,\"logprobs\":null}]}\n\ndata: {\"id\":\"b58749aae9d640978487c8b63d702891\",\"object\":\"chat.completion.chunk\",\"created\":1714793702,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" the\"},\"finish_reason\":null,\"logprobs\":null}]}\n\ndata: {\"id\":\"b58749aae9d640978487c8b63d702891\",\"object\":\"chat.completion.chunk\",\"created\":1714793702,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" equation\"},\"finish_reason\":null,\"logprobs\":null}]}\n\ndata: {\"id\":\"b58749aae9d640978487c8b63d702891\",\"object\":\"chat.completion.chunk\",\"created\":1714793702,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" one\"},\"finish_reason\":null,\"logprobs\":null}]}\n\ndata: {\"id\":\"b58749aae9d640978487c8b63d702891\",\"object\":\"chat.completion.chunk\",\"created\":1714793702,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" +\"},\"finish_reason\":null,\"logprobs\":null}]}\n\ndata: {\"id\":\"b58749aae9d640978487c8b63d702891\",\"object\":\"chat.completion.chunk\",\"created\":1714793702,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" one\"},\"finish_reason\":null,\"logprobs\":null}]}\n\ndata: {\"id\":\"b58749aae9d640978487c8b63d702891\",\"object\":\"chat.completion.chunk\",\"created\":1714793702,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" is\"},\"finish_reason\":null,\"logprobs\":null}]}\n\ndata: {\"id\":\"b58749aae9d640978487c8b63d702891\",\"object\":\"chat.completion.chunk\",\"created\":1714793702,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" two\"},\"finish_reason\":null,\"logprobs\":null}]}\n\ndata: {\"id\":\"b58749aae9d640978487c8b63d702891\",\"object\":\"chat.completion.chunk\",\"created\":1714793702,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\".\"},\"finish_reason\":null,\"logprobs\":null}]}\n\ndata: {\"id\":\"b58749aae9d640978487c8b63d702891\",\"object\":\"chat.completion.chunk\",\"created\":1714793702,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":19,\"total_tokens\":30,\"completion_tokens\":11}}\n\ndata: [DONE]\n\n",
+      "body": "data: {\"id\":\"2c48de8521dc4ac9a07da37b105db374\",\"object\":\"chat.completion.chunk\",\"created\":1714879341,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"\"},\"finish_reason\":null,\"logprobs\":null}]}\n\ndata: {\"id\":\"2c48de8521dc4ac9a07da37b105db374\",\"object\":\"chat.completion.chunk\",\"created\":1714879341,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"The\"},\"finish_reason\":null,\"logprobs\":null}]}\n\ndata: {\"id\":\"2c48de8521dc4ac9a07da37b105db374\",\"object\":\"chat.completion.chunk\",\"created\":1714879341,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" answer\"},\"finish_reason\":null,\"logprobs\":null}]}\n\ndata: {\"id\":\"2c48de8521dc4ac9a07da37b105db374\",\"object\":\"chat.completion.chunk\",\"created\":1714879341,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" to\"},\"finish_reason\":null,\"logprobs\":null}]}\n\ndata: {\"id\":\"2c48de8521dc4ac9a07da37b105db374\",\"object\":\"chat.completion.chunk\",\"created\":1714879341,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" the\"},\"finish_reason\":null,\"logprobs\":null}]}\n\ndata: {\"id\":\"2c48de8521dc4ac9a07da37b105db374\",\"object\":\"chat.completion.chunk\",\"created\":1714879341,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" equation\"},\"finish_reason\":null,\"logprobs\":null}]}\n\ndata: {\"id\":\"2c48de8521dc4ac9a07da37b105db374\",\"object\":\"chat.completion.chunk\",\"created\":1714879341,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" one\"},\"finish_reason\":null,\"logprobs\":null}]}\n\ndata: {\"id\":\"2c48de8521dc4ac9a07da37b105db374\",\"object\":\"chat.completion.chunk\",\"created\":1714879341,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" +\"},\"finish_reason\":null,\"logprobs\":null}]}\n\ndata: {\"id\":\"2c48de8521dc4ac9a07da37b105db374\",\"object\":\"chat.completion.chunk\",\"created\":1714879341,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" one\"},\"finish_reason\":null,\"logprobs\":null}]}\n\ndata: {\"id\":\"2c48de8521dc4ac9a07da37b105db374\",\"object\":\"chat.completion.chunk\",\"created\":1714879341,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" is\"},\"finish_reason\":null,\"logprobs\":null}]}\n\ndata: {\"id\":\"2c48de8521dc4ac9a07da37b105db374\",\"object\":\"chat.completion.chunk\",\"created\":1714879341,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" two\"},\"finish_reason\":null,\"logprobs\":null}]}\n\ndata: {\"id\":\"2c48de8521dc4ac9a07da37b105db374\",\"object\":\"chat.completion.chunk\",\"created\":1714879341,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\".\"},\"finish_reason\":null,\"logprobs\":null}]}\n\ndata: {\"id\":\"2c48de8521dc4ac9a07da37b105db374\",\"object\":\"chat.completion.chunk\",\"created\":1714879341,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":19,\"total_tokens\":30,\"completion_tokens\":11}}\n\ndata: [DONE]\n\n",
       "status": 200,
       "statusText": "OK",
       "headers": {
         "access-control-allow-origin": "*",
         "alt-svc": "h3=\":443\"; ma=86400",
         "cf-cache-status": "DYNAMIC",
-        "cf-ray": "87e5703b0a0716a2-SJC",
+        "cf-ray": "87ed9b0cbbc8679a-SJC",
         "connection": "keep-alive",
         "content-type": "text/event-stream; charset=utf-8",
         "server": "cloudflare",
@@ -1691,7 +1691,7 @@
       "body": "{\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"messages\":[{\"role\":\"user\",\"content\":\"Complete the this sentence with words one plus one is equal \"}],\"max_tokens\":500,\"return_full_text\":false,\"temperature\":0.1,\"seed\":0,\"options\":{\"chatCompletion\":true}}"
     },
     "response": {
-      "body": "{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843350,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\" to two. One plus one is equal to two.\"},\"logprobs\":null,\"finish_reason\":\"eos_token\"}],\"usage\":{\"prompt_tokens\":21,\"completion_tokens\":12,\"total_tokens\":33}}",
+      "body": "{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\" to two. One plus one is equal to two.\"},\"logprobs\":null,\"finish_reason\":\"eos_token\"}],\"usage\":{\"prompt_tokens\":21,\"completion_tokens\":12,\"total_tokens\":33}}",
       "status": 200,
       "statusText": "OK",
       "headers": {
@@ -1712,7 +1712,7 @@
       "body": "{\"model\":\"tgi\",\"messages\":[{\"role\":\"user\",\"content\":\"Complete the equation 1+1= ,just the answer\"}],\"max_tokens\":500,\"return_full_text\":false,\"temperature\":0.1,\"seed\":0,\"stream\":true,\"options\":{\"chatCompletion\":true}}"
     },
     "response": {
-      "body": "data:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843410,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" The\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843410,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" answer\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843410,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" to\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843410,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" the\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843410,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" equation\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843410,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" \"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843410,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"1\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843410,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" +\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843410,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" \"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843410,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"1\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843410,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" is\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843410,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" \"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843410,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"2\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843410,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\".\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843411,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"</s>\"},\"logprobs\":null,\"finish_reason\":\"eos_token\"}]}\n\n",
+      "body": "data:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" The\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" answer\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" to\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" the\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" equation\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" \"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"1\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" +\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" \"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"1\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" is\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" \"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"2\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\".\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"</s>\"},\"logprobs\":null,\"finish_reason\":\"eos_token\"}]}\n\n",
       "status": 200,
       "statusText": "OK",
       "headers": {
@@ -1733,7 +1733,7 @@
       "body": "{\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"messages\":[{\"role\":\"user\",\"content\":\"Complete the equation 1+1= ,just the answer\"}],\"max_tokens\":500,\"return_full_text\":false,\"temperature\":0.1,\"seed\":0,\"stream\":true,\"options\":{\"chatCompletion\":true}}"
     },
     "response": {
-      "body": "data:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843404,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" The\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843404,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" answer\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843404,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" to\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843404,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" the\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843404,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" equation\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843404,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" \"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843404,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"1\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843404,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" +\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843404,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" \"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843404,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"1\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843404,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" is\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843404,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" \"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843404,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"2\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843404,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\".\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843404,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"</s>\"},\"logprobs\":null,\"finish_reason\":\"eos_token\"}]}\n\n",
+      "body": "data:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" The\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" answer\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" to\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" the\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" equation\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" \"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"1\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" +\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" \"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"1\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" is\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" \"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"2\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\".\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"</s>\"},\"logprobs\":null,\"finish_reason\":\"eos_token\"}]}\n\n",
       "status": 200,
       "statusText": "OK",
       "headers": {
@@ -1754,7 +1754,7 @@
       "body": "{\"model\":\"tgi\",\"messages\":[{\"role\":\"user\",\"content\":\"Complete the this sentence with words one plus one is equal \"}],\"max_tokens\":500,\"return_full_text\":false,\"temperature\":0.1,\"seed\":0,\"options\":{\"chatCompletion\":true}}"
     },
     "response": {
-      "body": "{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714843411,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\" to two. One plus one is equal to two.\"},\"logprobs\":null,\"finish_reason\":\"eos_token\"}],\"usage\":{\"prompt_tokens\":21,\"completion_tokens\":12,\"total_tokens\":33}}",
+      "body": "{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714873384,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\" to two. One plus one is equal to two.\"},\"logprobs\":null,\"finish_reason\":\"eos_token\"}],\"usage\":{\"prompt_tokens\":21,\"completion_tokens\":12,\"total_tokens\":33}}",
       "status": 200,
       "statusText": "OK",
       "headers": {
@@ -1765,26 +1765,118 @@
       }
     }
   },
-  "55bbf78468786c034218ed0094d3332505a97788ee1bb9da3d1e22b7c2cce039": {
-    "url": "https://api-inference.huggingface.co/models/openai-community/gpt2/v1/chat/completions",
+  "3bc1c8fa82b66f19e765b705851e809ddd922e8be790fa71bdeb130813ec1d9b": {
+    "url": "https://api-inference.huggingface.co/models/google/gemma-2b/v1/chat/completions",
     "init": {
       "headers": {
         "Content-Type": "application/json"
       },
       "method": "POST",
-      "body": "{\"model\":\"openai-community/gpt2\",\"messages\":[{\"role\":\"user\",\"content\":\"Complete the equation 1+1= ,just the answer\"}],\"max_tokens\":500,\"return_full_text\":false,\"temperature\":0.1,\"seed\":0,\"stream\":true,\"options\":{\"chatCompletion\":true}}"
+      "body": "{\"model\":\"google/gemma-2b\",\"messages\":[{\"role\":\"user\",\"content\":\"Complete the equation 1+1= ,just the answer\"}],\"max_tokens\":500,\"return_full_text\":false,\"temperature\":0.1,\"seed\":0,\"stream\":true,\"options\":{\"chatCompletion\":true}}"
     },
     "response": {
-      "body": "{\"error\":[\"Error in `stream`: `stream` is not supported for this model\"]}",
-      "status": 400,
-      "statusText": "Bad Request",
+      "body": "{\"error\":\"Template error: template not found\",\"error_type\":\"template_error\"}",
+      "status": 422,
+      "statusText": "Unprocessable Entity",
       "headers": {
         "access-control-allow-credentials": "true",
+        "access-control-allow-origin": "*",
         "connection": "keep-alive",
         "content-type": "application/json",
-        "server": "uvicorn",
         "transfer-encoding": "chunked",
-        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+        "vary": "origin, Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "2e0134943b323aef66526c21e25d45857f62a28a9fbd5d96f4b909bb9dc06b19": {
+    "url": "https://api-inference.huggingface.co/models/google/gemma-2b/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"model\":\"google/gemma-2b\",\"max_tokens\":500,\"return_full_text\":false,\"temperature\":0.1,\"seed\":0,\"stream\":true,\"options\":{\"chatCompletion\":true}}"
+    },
+    "response": {
+      "body": "Failed to deserialize the JSON body into the target type: missing field `messages` at line 1 column 144",
+      "status": 422,
+      "statusText": "Unprocessable Entity",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-allow-origin": "*",
+        "connection": "keep-alive",
+        "content-type": "text/plain; charset=utf-8",
+        "transfer-encoding": "chunked",
+        "vary": "origin, Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "b8b84748ca5b3cbb020bafc0bbd892f01b5ae2a265f38db7993d63befa6c74d7": {
+    "url": "https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"model\":\"HuggingFaceH4/zephyr-7b-beta\",\"messages\":[{\"role\":\"user\",\"content\":\"Complete the this sentence with words one plus one is equal \"}],\"max_tokens\":500,\"return_full_text\":false,\"temperature\":0.1,\"seed\":0,\"options\":{\"chatCompletion\":true}}"
+    },
+    "response": {
+      "body": "{\"id\":\"\",\"object\":\"text_completion\",\"created\":1714876478,\"model\":\"HuggingFaceH4/zephyr-7b-beta\",\"system_fingerprint\":\"1.4.3-sha-e6bb3ff\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"This sentence should be: \\\"This sentence completes with the words 'two'\\\" because one plus one is equal to two. However, in this context, we are using \\\"this sentence\\\" to mean a mathematical equation, so the correct completion would be: \\\"This sentence is 'one plus one is equal to two'.\\\"\"},\"logprobs\":null,\"finish_reason\":\"eos_token\"}],\"usage\":{\"prompt_tokens\":35,\"completion_tokens\":66,\"total_tokens\":101}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-allow-origin": "*",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "transfer-encoding": "chunked",
+        "vary": "origin, Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "e8dd59a21327599691bdab476721ba40aa97b369605e43b080cbce091277abed": {
+    "url": "https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"model\":\"HuggingFaceH4/zephyr-7b-beta\",\"max_tokens\":500,\"return_full_text\":false,\"temperature\":0.1,\"seed\":0,\"options\":{\"chatCompletion\":true}}"
+    },
+    "response": {
+      "body": "Failed to deserialize the JSON body into the target type: missing field `messages` at line 1 column 143",
+      "status": 422,
+      "statusText": "Unprocessable Entity",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-allow-origin": "*",
+        "connection": "keep-alive",
+        "content-type": "text/plain; charset=utf-8",
+        "transfer-encoding": "chunked",
+        "vary": "origin, Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "ea7f34cdc99ef4025e07440f1e04453511f23c21cc5934fa979952b339e19a02": {
+    "url": "https://api-inference.huggingface.co/models/google/gemma-2b/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"model\":\"google/gemma-2b\",\"stream\":true,\"options\":{\"chatCompletion\":true}}"
+    },
+    "response": {
+      "body": "Failed to deserialize the JSON body into the target type: missing field `messages` at line 1 column 75",
+      "status": 422,
+      "statusText": "Unprocessable Entity",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-allow-origin": "*",
+        "connection": "keep-alive",
+        "content-type": "text/plain; charset=utf-8",
+        "transfer-encoding": "chunked",
+        "vary": "origin, Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
   }
