@@ -408,7 +408,7 @@ export async function ggufAllShards(
 
 		const PARALLEL_DOWNLOADS = 20;
 		const shards = await promisesQueue(
-			urls.map((shardUrl) => () => gguf(shardUrl, { computeParametersCount: true })),
+			urls.map((shardUrl) => () => gguf(shardUrl, { ...params, computeParametersCount: true })),
 			PARALLEL_DOWNLOADS
 		);
 		return {
