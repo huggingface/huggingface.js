@@ -2,34 +2,46 @@
 
 import type { ModelBase, GGUFGeneralInfo } from "./types";
 
-type Attention<TArchitecture extends string> = Record<
-	| `${TArchitecture}.attention.head_count`
-	| `${TArchitecture}.attention.head_count_kv`
-	| `${TArchitecture}.attention.layer_norm_epsilon`
-	| `${TArchitecture}.attention.layer_norm_rms_epsilon`
-	| `${TArchitecture}.attention.alibi_bias_max`
-	| `${TArchitecture}.attention.clip_kqv`
-	| `${TArchitecture}.attention.use_norm`,
-	number
+type LLMBase<TArchitecture extends string> = Partial<
+	Record<
+		`${TArchitecture}.vocab_size` | `${TArchitecture}.use_parallel_residual` | `${TArchitecture}.tensor_data_layout`,
+		number
+	>
 >;
 
-type Rope<TArchitecture extends LLMArchitecture> = Record<
-	| `${TArchitecture}.rope.dimension_count`
-	| `${TArchitecture}.rope.freq_base`
-	| `${TArchitecture}.rope.scale`
-	| `${TArchitecture}.rope.scale_linear`,
-	number
+type Attention<TArchitecture extends string> = Record<`${TArchitecture}.attention.head_count`, number> &
+	Partial<
+		Record<
+			| `${TArchitecture}.attention.head_count_kv`
+			| `${TArchitecture}.attention.key_length`
+			| `${TArchitecture}.attention.value_length`,
+			number
+		>
+	>;
+
+type RopeScalingType = "none" | "linear" | "yarn";
+type Rope<TArchitecture extends LLMArchitecture> = Partial<
+	Record<
+		| `${TArchitecture}.rope.dimension_count`
+		| `${TArchitecture}.rope.freq_base`
+		| `${TArchitecture}.rope.scale_linear`
+		| `${TArchitecture}.rope.scaling.factor`
+		| `${TArchitecture}.rope.scaling.original_context_length`,
+		number
+	> &
+		Record<`${TArchitecture}.rope.scaling.type`, RopeScalingType> &
+		Record<`${TArchitecture}.rope.finetuned`, boolean>
 >;
 
-type MOE<TArchitecture extends LLMArchitecture> = Record<
-	`${TArchitecture}.expert_count` | `${TArchitecture}.expert_used_count`,
-	number
+type MOE<TArchitecture extends LLMArchitecture> = Partial<
+	Record<`${TArchitecture}.expert_count` | `${TArchitecture}.expert_used_count`, number>
 >;
 
 export type TransformerLLMArchitecture = LLMArchitecture; // type alias
 export type TransformerLLMBase<TArchitecture extends LLMArchitecture> = GGUFGeneralInfo<TArchitecture> &
+	LLMBase<TArchitecture> &
 	ModelBase<TArchitecture> &
-	Partial<MOE<TArchitecture>> &
+	MOE<TArchitecture> &
 	Attention<TArchitecture> &
 	Rope<TArchitecture>;
 

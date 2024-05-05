@@ -52,7 +52,7 @@ export type Architecture = (typeof ARCHITECTURES)[number];
 
 export interface GGUFGeneralInfo<TArchitecture extends Architecture> {
 	"general.architecture": TArchitecture;
-	"general.name": string;
+	"general.name"?: string;
 	"general.file_type"?: number;
 	"general.quantization_version"?: number;
 }
@@ -63,11 +63,10 @@ export type ModelBase<
 		| `encoder.${Extract<Architecture, "whisper">}`
 		| `decoder.${Extract<Architecture, "whisper">}`,
 > = Record<
-	| `${TArchitecture}.layer_count`
-	| `${TArchitecture}.feed_forward_length`
 	| `${TArchitecture}.context_length`
+	| `${TArchitecture}.block_count`
 	| `${TArchitecture}.embedding_length`
-	| `${TArchitecture}.block_count`,
+	| `${TArchitecture}.feed_forward_length`,
 	number
 >;
 
@@ -82,15 +81,25 @@ interface Tokenizer {
 	"tokenizer.ggml.bos_token_id": number;
 	"tokenizer.ggml.eos_token_id": number;
 	"tokenizer.ggml.add_bos_token": boolean;
-	"tokenizer.chat_template": string;
+	"tokenizer.chat_template"?: string;
 }
 type NoTokenizer = Record<keyof Tokenizer, undefined>;
 
 /// Models outside of llama.cpp: "rwkv" and "whisper"
 
-export type RWKV = GGUFGeneralInfo<"rwkv"> & ModelBase<"rwkv"> & { "rwkv.architecture_version": number };
+export type RWKV = GGUFGeneralInfo<"rwkv"> &
+	ModelBase<"rwkv"> & {
+		"rwkv.architecture_version": number;
+	};
 
-export type Whisper = GGUFGeneralInfo<"whisper"> & ModelBase<"encoder.whisper"> & ModelBase<"decoder.whisper">;
+// TODO: whisper.cpp doesn't yet support gguf. This maybe changed in the future.
+export type Whisper = GGUFGeneralInfo<"whisper"> &
+	ModelBase<"encoder.whisper"> &
+	ModelBase<"decoder.whisper"> & {
+		"whisper.encoder.mels_count": number;
+		"whisper.encoder.attention.head_count": number;
+		"whisper.decoder.attention.head_count": number;
+	};
 
 /// Types for parse output
 
