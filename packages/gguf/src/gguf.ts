@@ -147,6 +147,7 @@ class RangeViewLocalFile extends RangeView {
 				return;
 			}
 			let buffer = Buffer.alloc(0);
+			// TODO: using global "import" will make the whole script fails to load on browser
 			// eslint-disable-next-line @typescript-eslint/no-var-requires
 			const stream = require("node:fs").createReadStream(this.url, {
 				start: this.currentChunk * HTTP_CHUNK_SIZE,
