@@ -58,9 +58,9 @@ export interface GGUFGeneralInfo<TArchitecture extends Architecture> {
 }
 
 type ModelMetadata = Whisper | RWKV | TransformerLLM;
-type NoModelMetadata = {
-	"general.architecture"?: undefined,
-};
+interface NoModelMetadata {
+	"general.architecture"?: undefined;
+}
 
 export type ModelBase<
 	TArchitecture extends
@@ -88,9 +88,9 @@ interface Tokenizer {
 	"tokenizer.ggml.add_bos_token": boolean;
 	"tokenizer.chat_template"?: string;
 }
-type NoTokenizer = {
-	"tokenizer.ggml.model"?: undefined,
-};
+interface NoTokenizer {
+	"tokenizer.ggml.model"?: undefined;
+}
 
 /// Models outside of llama.cpp: "rwkv" and "whisper"
 

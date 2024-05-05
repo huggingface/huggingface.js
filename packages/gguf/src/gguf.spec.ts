@@ -37,8 +37,8 @@ describe("gguf", () => {
 			"llama.rope.dimension_count": 128,
 		});
 
-		expect(!!metadata["tokenizer.ggml.model"]);
-		if (!!metadata["tokenizer.ggml.model"]) {
+		expect(metadata["tokenizer.ggml.model"]);
+		if (metadata["tokenizer.ggml.model"]) {
 			const tokens = metadata["tokenizer.ggml.tokens"];
 			if (!Array.isArray(tokens)) {
 				throw new Error();
