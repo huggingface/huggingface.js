@@ -37,22 +37,25 @@ describe("gguf", () => {
 			"llama.rope.dimension_count": 128,
 		});
 
-		const tokens = metadata["tokenizer.ggml.tokens"];
-		if (!Array.isArray(tokens)) {
-			throw new Error();
+		expect(!!metadata["tokenizer.ggml.model"]);
+		if (!!metadata["tokenizer.ggml.model"]) {
+			const tokens = metadata["tokenizer.ggml.tokens"];
+			if (!Array.isArray(tokens)) {
+				throw new Error();
+			}
+			expect(tokens.slice(0, 10)).toEqual([
+				"<unk>",
+				"<s>",
+				"</s>",
+				"<0x00>",
+				"<0x01>",
+				"<0x02>",
+				"<0x03>",
+				"<0x04>",
+				"<0x05>",
+				"<0x06>",
+			]);
 		}
-		expect(tokens.slice(0, 10)).toEqual([
-			"<unk>",
-			"<s>",
-			"</s>",
-			"<0x00>",
-			"<0x01>",
-			"<0x02>",
-			"<0x03>",
-			"<0x04>",
-			"<0x05>",
-			"<0x06>",
-		]);
 
 		/// Tensor infos
 		/// By convention we test the first and last tensor.

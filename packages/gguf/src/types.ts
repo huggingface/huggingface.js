@@ -57,6 +57,11 @@ export interface GGUFGeneralInfo<TArchitecture extends Architecture> {
 	"general.quantization_version"?: number;
 }
 
+type ModelMetadata = Whisper | RWKV | TransformerLLM;
+type NoModelMetadata = {
+	"general.architecture"?: undefined,
+};
+
 export type ModelBase<
 	TArchitecture extends
 		| Architecture
@@ -83,7 +88,9 @@ interface Tokenizer {
 	"tokenizer.ggml.add_bos_token": boolean;
 	"tokenizer.chat_template"?: string;
 }
-type NoTokenizer = Record<keyof Tokenizer, undefined>;
+type NoTokenizer = {
+	"tokenizer.ggml.model"?: undefined,
+};
 
 /// Models outside of llama.cpp: "rwkv" and "whisper"
 
@@ -103,13 +110,16 @@ export type Whisper = GGUFGeneralInfo<"whisper"> &
 
 /// Types for parse output
 
-export type GGUFMetadata = {
+export type GGUFStrictType = true;
+export type GGUFNonStrictType = false;
+
+export type GGUFMetadata<T extends GGUFStrictType | GGUFNonStrictType = GGUFStrictType> = {
 	version: Version;
 	tensor_count: bigint;
 	kv_count: bigint;
-} & (Whisper | RWKV | TransformerLLM) &
-	(NoTokenizer | Tokenizer) &
-	Record<string, MetadataValue>;
+} & (T extends GGUFStrictType ? GGUFModelKV : Record<string, MetadataValue>);
+
+export type GGUFModelKV = (NoModelMetadata | ModelMetadata) & (NoTokenizer | Tokenizer);
 
 export interface GGUFTensorInfo {
 	name: string;
@@ -119,7 +129,7 @@ export interface GGUFTensorInfo {
 	offset: bigint;
 }
 
-export interface GGUFParseOutput {
-	metadata: GGUFMetadata;
+export interface GGUFParseOutput<T extends GGUFStrictType | GGUFNonStrictType = GGUFStrictType> {
+	metadata: GGUFMetadata<T>;
 	tensorInfos: GGUFTensorInfo[];
 }

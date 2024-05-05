@@ -308,6 +308,9 @@ export async function gguf(
 			}
 		}
 		offset += valueResult.length;
+		/// TODO(fix typing)
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
 		metadata[keyResult.value] = valueResult.value;
 	}
 
