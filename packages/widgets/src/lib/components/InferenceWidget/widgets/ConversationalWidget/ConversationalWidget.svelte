@@ -48,6 +48,7 @@
 
 	let compiledTemplate: Template;
 	let tokenizerConfig: TokenizerConfig;
+	let specialTokensMap: SpecialTokensMap | undefined = undefined;
 	let inferenceClient: HfInference | undefined = undefined;
 	let abort: AbortController | undefined = undefined;
 
@@ -132,14 +133,14 @@
 			return;
 		}
 		// Render chat template
-		const special_tokens_map = extractSpecialTokensMap(tokenizerConfig);
+		specialTokensMap = extractSpecialTokensMap(tokenizerConfig);
 
 		let chatText;
 		try {
 			chatText = compiledTemplate.render({
 				messages,
 				add_generation_prompt: true,
-				...special_tokens_map,
+				...specialTokensMap,
 			});
 		} catch (e) {
 			error = `An error occurred while rendering the chat template: "${(e as Error).message}"`;
@@ -273,7 +274,7 @@
 		on:reset={clearConversation}
 		showReset={!!messages.length}
 	/>
-	<WidgetOutputConvo modelId={model.id} {messages} />
+	<WidgetOutputConvo modelId={model.id} {messages} {specialTokensMap} />
 
 	<WidgetQuickInput
 		bind:value={text}
