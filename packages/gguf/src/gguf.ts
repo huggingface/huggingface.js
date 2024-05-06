@@ -49,19 +49,16 @@ const HTTP_TOTAL_MAX_SIZE = 50 * 10 ** 6; /// 50MB
  * Internal stateful instance to fetch ranges of HTTP data when needed
  */
 class RangeView {
-	private chunk: number;
+	protected chunk: number;
 	private buffer: ArrayBuffer;
 	private dataView: DataView;
 
 	get view(): DataView {
 		return this.dataView;
 	}
-	get currentChunk(): number {
-		return this.chunk;
-	}
 
 	constructor(
-		public url: string,
+		public uri: string,
 		private params?: {
 			/**
 			 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
@@ -84,7 +81,7 @@ class RangeView {
 		const range = [this.chunk * HTTP_CHUNK_SIZE, (this.chunk + 1) * HTTP_CHUNK_SIZE - 1];
 		const buf = new Uint8Array(
 			await (
-				await (this.params?.fetch ?? fetch)(this.url, {
+				await (this.params?.fetch ?? fetch)(this.uri, {
 					headers: {
 						...(this.params?.additionalFetchHeaders ?? {}),
 						Range: `bytes=${range[0]}-${range[1]}`,
@@ -149,9 +146,9 @@ class RangeViewLocalFile extends RangeView {
 			let buffer = Buffer.alloc(0);
 			// TODO: using global "import" will make the whole script fails to load on browser
 			// eslint-disable-next-line @typescript-eslint/no-var-requires
-			const stream = require("node:fs").createReadStream(this.url, {
-				start: this.currentChunk * HTTP_CHUNK_SIZE,
-				end: (this.currentChunk + 1) * HTTP_CHUNK_SIZE,
+			const stream = require("node:fs").createReadStream(this.uri, {
+				start: this.chunk * HTTP_CHUNK_SIZE,
+				end: (this.chunk + 1) * HTTP_CHUNK_SIZE,
 			});
 			stream.on("error", reject);
 			stream.on("data", (chunk: Buffer) => (buffer = Buffer.concat([buffer, chunk])));
@@ -240,7 +237,7 @@ function readMetadataValue(
 }
 
 export async function gguf(
-	url: string,
+	uri: string,
 	params: {
 		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
@@ -252,7 +249,7 @@ export async function gguf(
 	}
 ): Promise<GGUFParseOutput & { parameterCount: number }>;
 export async function gguf(
-	url: string,
+	uri: string,
 	params?: {
 		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
@@ -263,7 +260,7 @@ export async function gguf(
 	}
 ): Promise<GGUFParseOutput>;
 export async function gguf(
-	url: string,
+	uri: string,
 	params?: {
 		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
@@ -274,7 +271,7 @@ export async function gguf(
 		localFile?: boolean;
 	}
 ): Promise<GGUFParseOutput & { parameterCount?: number }> {
-	const r = params?.localFile ? new RangeViewLocalFile(url, params) : new RangeView(url, params);
+	const r = params?.localFile ? new RangeViewLocalFile(uri, params) : new RangeView(uri, params);
 	await r.fetchChunk();
 
 	const checkBuffer = (buffer: Uint8Array, header: Uint8Array) => {
