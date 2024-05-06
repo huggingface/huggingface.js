@@ -8,7 +8,6 @@
 
 	$: tokens = marked.lexer(sanitizeMd(text));
 
-	const PUBLIC_SEP_TOKEN = "</s>";
 	const CLASSES: Record<typeof position, string> = {
 		left: "rounded-2xl mr-7 place-self-start bg-gray-50 dark:bg-gray-850 dark:text-gray-200",
 		right: "rounded-2xl ml-7 bg-blue-600 text-white",
@@ -16,6 +15,7 @@
 	};
 
 	function sanitizeMd(md: string) {
+		const PUBLIC_SEP_TOKEN = "</s>";
 		let ret = md
 			.replace(/<\|[a-z]*$/, "")
 			.replace(/<\|[a-z]+\|$/, "")
