@@ -29,7 +29,7 @@ type Attention<TArchitecture extends string> = Record<
 	number
 >>;
 
-type RopeScalingType = "none" | "linear" | "yarn";
+export type TransformerLLMRopeScalingType = "none" | "linear" | "yarn";
 type Rope<TArchitecture extends LLMArchitecture> = Partial<
 	Record<
 			\`\${TArchitecture}.rope.dimension_count\`
@@ -39,7 +39,7 @@ type Rope<TArchitecture extends LLMArchitecture> = Partial<
 		| \`\${TArchitecture}.rope.scaling.original_context_length\`,
 		number
 	>
-	& Record<\`\${TArchitecture}.rope.scaling.type\`, RopeScalingType>
+	& Record<\`\${TArchitecture}.rope.scaling.type\`, TransformerLLMRopeScalingType>
 	& Record<\`\${TArchitecture}.rope.finetuned\`, boolean>
 >;
 
