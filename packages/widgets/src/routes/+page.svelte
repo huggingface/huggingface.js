@@ -28,25 +28,70 @@
 				apiToken = token;
 			}
 		}
+
+		isLoggedIn.set(true);
 	});
 
 	const models: ModelData[] = [
 		{
-			id: "mistralai/Mistral-7B-Instruct-v0.2",
+			id: "meta-llama/Meta-Llama-3-8B-Instruct",
 			pipeline_tag: "text-generation",
 			tags: ["conversational"],
 			inference: InferenceDisplayability.Yes,
 			config: {
-				architectures: ["MistralForCausalLM"],
-				model_type: "mistral",
+				architectures: ["LlamaForCausalLM"],
+				model_type: "llama",
 				tokenizer_config: {
 					chat_template:
-						"{{ bos_token }}{% for message in messages %}{% if (message['role'] == 'user') != (loop.index0 % 2 == 0) %}{{ raise_exception('Conversation roles must alternate user/assistant/user/assistant/...') }}{% endif %}{% if message['role'] == 'user' %}{{ '[INST] ' + message['content'] + ' [/INST]' }}{% elif message['role'] == 'assistant' %}{{ message['content'] + eos_token}}{% else %}{{ raise_exception('Only user and assistant roles are supported!') }}{% endif %}{% endfor %}",
-					use_default_system_prompt: false,
+						"{% set loop_messages = messages %}{% for message in loop_messages %}{% set content = '<|start_header_id|>' + message['role'] + '<|end_header_id|>\n\n'+ message['content'] | trim + '<|eot_id|>' %}{% if loop.index0 == 0 %}{% set content = bos_token + content %}{% endif %}{{ content }}{% endfor %}{% if add_generation_prompt %}{{ '<|start_header_id|>assistant<|end_header_id|>\n\n' }}{% endif %}",
+					bos_token: "<|begin_of_text|>",
+					eos_token: "<|end_of_text|>",
+				},
+			},
+			widgetData: [
+				{ text: "This is a text-only example", example_title: "Text only" },
+				{
+					messages: [{ content: "Please exlain QCD in very few words", role: "user" }],
+					example_title: "Chat messages",
+				},
+				{
+					messages: [{ content: "Please exlain QCD in very few words", role: "user" }],
+					output: {
+						text: "QCD is the physics of strong force and small particles.",
+					},
+					example_title: "Chat messages with Output",
+				},
+				{
+					text: "Explain QCD in one short sentence.",
+					output: {
+						text: "QCD is the physics of strong force and small particles.",
+					},
+					example_title: "Text only with Output",
+				},
+				{
+					example_title: "Invalid example - unsupported role",
+					messages: [
+						{ role: "system", content: "This will fail because of the chat template" },
+						{ role: "user", content: "What's your favorite condiment?" },
+					],
+				},
+			],
+		},
+		{
+			id: "microsoft/Phi-3-mini-128k-instruct",
+			pipeline_tag: "text-generation",
+			tags: ["conversational"],
+			inference: InferenceDisplayability.Yes,
+			config: {
+				architectures: ["Phi3ForCausalLM"],
+				model_type: "phi3",
+				tokenizer_config: {
 					bos_token: "<s>",
-					eos_token: "</s>",
+					chat_template:
+						"{{ bos_token }}{% for message in messages %}{% if (message['role'] == 'user') %}{{'<|user|>' + '\n' + message['content'] + '<|end|>' + '\n' + '<|assistant|>' + '\n'}}{% elif (message['role'] == 'assistant') %}{{message['content'] + '<|end|>' + '\n'}}{% endif %}{% endfor %}",
+					eos_token: "<|endoftext|>",
+					pad_token: "<|endoftext|>",
 					unk_token: "<unk>",
-					pad_token: null,
 				},
 			},
 			widgetData: [
