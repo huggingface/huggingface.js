@@ -21,8 +21,6 @@ const browserConfig: Options = {
 	target: "es2018",
 	splitting: true,
 	outDir: "dist/browser",
-	// We specify external libs only to be able to build. We're not using them on browser.
-	external: ["node:fs"],
 };
 
 export default [nodeConfig, browserConfig];

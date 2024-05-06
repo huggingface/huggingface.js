@@ -1,6 +1,7 @@
 import type { MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
 import { GGUFValueType } from "./types";
 import { promisesQueue } from "./utils/promisesQueue";
+import { isFrontend } from "../../shared";
 
 export type { MetadataBaseValue, MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
 export { GGUFValueType, GGMLQuantizationType, Architecture } from "./types";
@@ -136,27 +137,16 @@ class RangeViewLocalFile extends RangeView {
 	/**
 	 * Read a new chunk from local file system.
 	 */
-	override fetchChunk(): Promise<void> {
-		return new Promise<void>((resolve, reject) => {
-			const Buffer = global.Buffer;
-			if (typeof Buffer === "undefined") {
-				reject(new Error("localFile cannot be used in browser"));
-				return;
-			}
-			let buffer = Buffer.alloc(0);
-			// TODO: using global "import" will make the whole script fails to load on browser
-			// eslint-disable-next-line @typescript-eslint/no-var-requires
-			const stream = require("node:fs").createReadStream(this.uri, {
-				start: this.chunk * HTTP_CHUNK_SIZE,
-				end: (this.chunk + 1) * HTTP_CHUNK_SIZE,
-			});
-			stream.on("error", reject);
-			stream.on("data", (chunk: Buffer) => (buffer = Buffer.concat([buffer, chunk])));
-			stream.on("end", () => {
-				this.appendBuffer(buffer);
-				resolve();
-			});
-		});
+	override async fetchChunk(): Promise<void> {
+		if (isFrontend) {
+			throw new Error("localFile cannot be used in browser");
+		}
+
+		const { FileBlob } = await import("./utils/FileBlob");
+		const blob = await FileBlob.create(this.uri);
+		const range = [this.chunk * HTTP_CHUNK_SIZE, (this.chunk + 1) * HTTP_CHUNK_SIZE - 1];
+		const buffer = await blob.slice(range[0], range[1]).arrayBuffer();
+		this.appendBuffer(new Uint8Array(buffer));
 	}
 }
 
