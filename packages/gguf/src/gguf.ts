@@ -1,7 +1,7 @@
 import type { MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
 import { GGUFValueType } from "./types";
+import { isBackend } from "./utils/isBackend";
 import { promisesQueue } from "./utils/promisesQueue";
-import { isFrontend } from "../../shared";
 
 export type { MetadataBaseValue, MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
 export { GGUFValueType, GGMLQuantizationType, Architecture } from "./types";
@@ -138,7 +138,7 @@ class RangeViewLocalFile extends RangeView {
 	 * Read a new chunk from local file system.
 	 */
 	override async fetchChunk(): Promise<void> {
-		if (isFrontend) {
+		if (!isBackend) {
 			throw new Error("localFile cannot be used in browser");
 		}
 

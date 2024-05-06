@@ -13,6 +13,6 @@
 		"noImplicitOverride": true,
 		"outDir": "./dist"
 	},
-	"include": ["src", "../shared/src"],
+	"include": ["src"],
 	"exclude": ["dist"]
 }
