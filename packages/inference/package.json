@@ -29,11 +29,11 @@
 		"src"
 	],
 	"source": "src/index.ts",
-	"types": "./dist/index.d.ts",
+	"types": "./dist/src/index.d.ts",
 	"main": "./dist/index.cjs",
 	"module": "./dist/index.js",
 	"exports": {
-		"types": "./dist/index.d.ts",
+		"types": "./dist/src/index.d.ts",
 		"require": "./dist/index.cjs",
 		"import": "./dist/index.js"
 	},

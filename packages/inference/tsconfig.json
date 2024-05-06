@@ -13,6 +13,6 @@
 		"declarationMap": true,
 		"outDir": "./dist"
 	},
-	"include": ["src", "test", "index.ts"],
+	"include": ["src", "test"],
 	"exclude": ["dist"]
 }
