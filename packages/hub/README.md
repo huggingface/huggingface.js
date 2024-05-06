@@ -122,4 +122,4 @@ Under the hood, `@huggingface/hub` uses a lazy blob implementation to load the f
 ## Dependencies
 
 - `hash-wasm` : Only used in the browser, when committing files over 10 MB. Browsers do not natively support streaming sha256 computations.
-- `type-fest` : Typings only
+- `@huggingface/tasks` : Typings only

@@ -39,7 +39,7 @@
 	},
 	"type": "module",
 	"scripts": {
-		"build": "tsup src/index.ts --format cjs,esm --clean && pnpm run dts",
+		"build": "tsup src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
 		"dts": "tsx scripts/generate-dts.ts && tsc --noEmit dist/index.d.ts",
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",

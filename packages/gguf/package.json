@@ -31,7 +31,7 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"prepublishOnly": "pnpm run build",
-		"build": "tsup src/index.ts --format cjs,esm --clean --dts",
+		"build": "tsup src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
 		"build:llm": "tsx scripts/generate-llm.ts && pnpm run format",
 		"test": "vitest run",
 		"check": "tsc"
@@ -47,8 +47,5 @@
 		"gguf"
 	],
 	"author": "Hugging Face",
-	"license": "MIT",
-	"devDependencies": {
-		"type-fest": "^3.9.0"
-	}
+	"license": "MIT"
 }

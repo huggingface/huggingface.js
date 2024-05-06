@@ -149,7 +149,7 @@ export interface ApiCommitDeletedEntry {
 	path: string;
 }
 
-interface ApiCommitLfsFile {
+export interface ApiCommitLfsFile {
 	path: string;
 	oldPath?: string;
 	/** Required if {@link oldPath} is not set */
