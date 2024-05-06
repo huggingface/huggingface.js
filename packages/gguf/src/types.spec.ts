@@ -3,28 +3,28 @@ import type { gguf } from "./gguf";
 import type { GGUFMetadata, GGUFParseOutput, GGUFType } from "./types";
 
 describe("gguf-types", () => {
-	it("gguf() type can be casted (at compile time)", async () => {
+	it("gguf() type can be casted between STRICT and NON_STRICT (at compile time)", async () => {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const result: Awaited<ReturnType<typeof gguf>> = null as any;
-		const strictType = result as GGUFParseOutput<GGUFType.strict>;
+		const strictType = result as GGUFParseOutput<GGUFType.STRICT>;
 		// @ts-expect-error because the key "abc" does not exist
 		strictType.metadata.abc = 123;
-		const nonStrictType = result as GGUFParseOutput<GGUFType.nonStrict>;
+		const nonStrictType = result as GGUFParseOutput<GGUFType.NON_STRICT>;
 		nonStrictType.metadata.abc = 123; // PASS, because it can be anything
 		// @ts-expect-error because ArrayBuffer is not a MetadataValue
 		nonStrictType.metadata.fff = ArrayBuffer;
 	});
 
-	it("GGUFType.nonStrict should be correct (at compile time)", async () => {
+	it("GGUFType.NON_STRICT should be correct (at compile time)", async () => {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const model: GGUFMetadata<GGUFType.nonStrict> = null as any;
+		const model: GGUFMetadata<GGUFType.NON_STRICT> = null as any;
 		model.kv_count = 123n;
 		model.abc = 456; // PASS, because it can be anything
 	});
 
-	it("GGUFType.strict should be correct (at compile time)", async () => {
+	it("GGUFType.STRICT should be correct (at compile time)", async () => {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const model: GGUFMetadata<GGUFType.strict> = null as any;
+		const model: GGUFMetadata<GGUFType.STRICT> = null as any;
 
 		if (model["general.architecture"] === "whisper") {
 			model["encoder.whisper.block_count"] = 0;

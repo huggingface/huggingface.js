@@ -111,16 +111,16 @@ export type Whisper = GGUFGeneralInfo<"whisper"> &
 /// Types for parse output
 
 export enum GGUFType {
-	strict,
-	nonStrict,
+	STRICT,
+	NON_STRICT,
 }
 
-export type GGUFMetadata<TGGUFType extends GGUFType = GGUFType.strict> = {
+export type GGUFMetadata<TGGUFType extends GGUFType = GGUFType.STRICT> = {
 	version: Version;
 	tensor_count: bigint;
 	kv_count: bigint;
 } & GGUFModelKV &
-	(TGGUFType extends GGUFType.strict ? unknown : Record<string, MetadataValue>);
+	(TGGUFType extends GGUFType.STRICT ? unknown : Record<string, MetadataValue>);
 
 export type GGUFModelKV = (NoModelMetadata | ModelMetadata) & (NoTokenizer | Tokenizer);
 
@@ -132,7 +132,7 @@ export interface GGUFTensorInfo {
 	offset: bigint;
 }
 
-export interface GGUFParseOutput<TGGUFType extends GGUFType = GGUFType.strict> {
+export interface GGUFParseOutput<TGGUFType extends GGUFType = GGUFType.STRICT> {
 	metadata: GGUFMetadata<TGGUFType>;
 	tensorInfos: GGUFTensorInfo[];
 }
