@@ -40,7 +40,7 @@
 	"type": "module",
 	"scripts": {
 		"build": "tsup src/index.ts --format cjs,esm --clean && pnpm run dts",
-		"dts": "tsx scripts/generate-dts.ts",
+		"dts": "tsx scripts/generate-dts.ts && tsc --noEmit dist/index.d.ts",
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
 		"format": "prettier --write .",
@@ -51,8 +51,10 @@
 		"test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest.config.mts",
 		"check": "tsc"
 	},
+	"dependencies": {
+		"@huggingface/tasks": "workspace:^"
+	},
 	"devDependencies": {
-		"@huggingface/tasks": "workspace:^",
 		"@types/node": "18.13.0"
 	},
 	"resolutions": {}

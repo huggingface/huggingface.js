@@ -3,7 +3,7 @@ import { GGUFValueType } from "./types";
 import { promisesQueue } from "./utils/promisesQueue";
 
 export type { MetadataBaseValue, MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
-export { GGUFValueType, GGMLQuantizationType } from "./types";
+export { GGUFValueType, GGMLQuantizationType, Architecture } from "./types";
 export { GGUF_QUANT_DESCRIPTIONS } from "./quant-descriptions";
 
 export const RE_GGUF_FILE = /\.gguf$/;
@@ -64,6 +64,7 @@ class RangeView {
 			 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 			 */
 			fetch?: typeof fetch;
+			additionalFetchHeaders?: Record<string, string>;
 		}
 	) {
 		this.chunk = 0;
@@ -82,6 +83,7 @@ class RangeView {
 			await (
 				await (this.params?.fetch ?? fetch)(this.url, {
 					headers: {
+						...(this.params?.additionalFetchHeaders ?? {}),
 						Range: `bytes=${range[0]}-${range[1]}`,
 					},
 				})
@@ -209,6 +211,7 @@ export async function gguf(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
+		additionalFetchHeaders?: Record<string, string>;
 		computeParametersCount: true;
 	}
 ): Promise<GGUFParseOutput & { parameterCount: number }>;
@@ -219,6 +222,7 @@ export async function gguf(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
+		additionalFetchHeaders?: Record<string, string>;
 	}
 ): Promise<GGUFParseOutput>;
 export async function gguf(
@@ -228,6 +232,7 @@ export async function gguf(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
+		additionalFetchHeaders?: Record<string, string>;
 		computeParametersCount?: boolean;
 	}
 ): Promise<GGUFParseOutput & { parameterCount?: number }> {

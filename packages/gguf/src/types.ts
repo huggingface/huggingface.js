@@ -47,7 +47,7 @@ export enum GGUFValueType {
 	FLOAT64 = 12,
 }
 
-const ARCHITECTURES = [...LLM_ARCHITECTURES, "rwkv", "whisper"];
+const ARCHITECTURES = [...LLM_ARCHITECTURES, "rwkv", "whisper"] as const;
 export type Architecture = (typeof ARCHITECTURES)[number];
 
 interface General {
