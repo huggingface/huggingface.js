@@ -1,5 +1,5 @@
-import type {Except} from './except';
-import type {Simplify} from './simplify';
+import type { Except } from "./except";
+import type { Simplify } from "./simplify";
 
 /**
 Create a type that makes the given keys required. The remaining keys are kept as is. The sister of the `SetOptional` type.
@@ -26,10 +26,9 @@ type SomeRequired = SetRequired<Foo, 'b' | 'c'>;
 
 @category Object
 */
-export type SetRequired<BaseType, Keys extends keyof BaseType> =
-	Simplify<
+export type SetRequired<BaseType, Keys extends keyof BaseType> = Simplify<
 	// Pick just the keys that are optional from the base type.
 	Except<BaseType, Keys> &
-	// Pick the keys that should be required from the base type and make them required.
-	Required<Pick<BaseType, Keys>>
-	>;
+		// Pick the keys that should be required from the base type and make them required.
+		Required<Pick<BaseType, Keys>>
+>;
