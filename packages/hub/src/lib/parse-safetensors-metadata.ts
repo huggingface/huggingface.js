@@ -1,4 +1,3 @@
-import type { SetRequired } from "type-fest";
 import type { Credentials, RepoDesignation } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { omit } from "../utils/omit";
@@ -7,6 +6,7 @@ import { typedEntries } from "../utils/typedEntries";
 import { downloadFile } from "./download-file";
 import { fileExists } from "./file-exists";
 import { promisesQueue } from "../utils/promisesQueue";
+import type { SetRequired } from "../vendor/type-fest/set-required";
 
 export const SAFETENSORS_FILE = "model.safetensors";
 export const SAFETENSORS_INDEX_FILE = "model.safetensors.index.json";

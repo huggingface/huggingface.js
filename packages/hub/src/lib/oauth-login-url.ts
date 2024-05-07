@@ -1,6 +1,6 @@
-import { base64FromBytes } from "../../../shared/src";
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
+import { base64FromBytes } from "../utils/base64FromBytes";
 
 /**
  * Use "Sign in with Hub" to authenticate a user, and get oauth user info / access token.

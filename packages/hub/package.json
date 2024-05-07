@@ -33,7 +33,7 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"prepublishOnly": "pnpm run build",
-		"build": "tsup",
+		"build": "tsup && tsc --emitDeclarationOnly --declaration",
 		"prepare": "pnpm run build",
 		"test": "vitest run",
 		"test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest-browser.config.mts",
@@ -56,11 +56,10 @@
 	"author": "Hugging Face",
 	"license": "MIT",
 	"devDependencies": {
-		"@huggingface/tasks": "workspace:^",
-		"@types/node": "^20.11.28",
-		"type-fest": "^3.9.0"
+		"@types/node": "^20.11.28"
 	},
 	"dependencies": {
+		"@huggingface/tasks": "workspace:^",
 		"hash-wasm": "^4.9.0"
 	}
 }

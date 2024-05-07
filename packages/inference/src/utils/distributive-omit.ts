@@ -4,8 +4,6 @@
  * This allows omitting keys from objects inside unions, without merging the individual components of the union.
  */
 
-type Keys<T> = keyof T;
-type DistributiveKeys<T> = T extends unknown ? Keys<T> : never;
 type Omit_<T, K> = Omit<T, Extract<keyof T, K>>;
 
 export type DistributiveOmit<T, K> = T extends unknown
