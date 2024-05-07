@@ -5,7 +5,7 @@ import type { GGUFMetadata, GGUFParseOutput } from "./types";
 describe("gguf-types", () => {
 	it("gguf() type can be casted between STRICT and NON_STRICT (at compile time)", async () => {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const result: Awaited<ReturnType<typeof gguf>> = {} as any;
+		const result: Awaited<ReturnType<typeof gguf>> = { metadata: {} } as any;
 		const strictType = result as GGUFParseOutput<{ strict: true }>;
 		// @ts-expect-error because the key "abc" does not exist
 		strictType.metadata.abc = 123;
