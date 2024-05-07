@@ -8,7 +8,7 @@ We use `pnpm` as our package manager. You need to use it, eg `pnpm install` inst
 
 If you want to format the whole codebase, you can do `pnpm -r format` at the root.
 
-Otherwise, we avoid runtime dependencies unless they're strictly needed. For example, our only dependency is `hash-wasm`, and it's only in the browser context and when uploaded files are > 10MB.
+Other than that, we avoid runtime dependencies unless they're strictly needed. For example, our only dependency is `hash-wasm`, and it's only in the browser context and when uploaded files are > 10MB.
 
 ## Pull requests
 
