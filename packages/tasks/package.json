@@ -23,7 +23,7 @@
 		"lint:check": "eslint --ext .cjs,.ts .",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
-		"prepublishOnly": "pnpm run inference-codegen && git diff --name-only --exit-code && pnpm run build",
+		"prepublishOnly": "pnpm run inference-codegen && git diff . --name-only --exit-code && pnpm run build",
 		"build": "tsup src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
 		"prepare": "pnpm run build",
 		"check": "tsc",
