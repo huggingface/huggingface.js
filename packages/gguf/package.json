@@ -1,7 +1,7 @@
 {
 	"name": "@huggingface/gguf",
 	"packageManager": "pnpm@8.10.5",
-	"version": "0.1.3",
+	"version": "0.1.4",
 	"description": "a GGUF parser that works on remotely hosted files",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {
@@ -31,7 +31,7 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"prepublishOnly": "pnpm run build",
-		"build": "tsup src/index.ts --format cjs,esm --clean --dts",
+		"build": "tsup src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
 		"build:llm": "tsx scripts/generate-llm.ts && pnpm run format",
 		"test": "vitest run",
 		"check": "tsc"
@@ -47,8 +47,5 @@
 		"gguf"
 	],
 	"author": "Hugging Face",
-	"license": "MIT",
-	"devDependencies": {
-		"type-fest": "^3.9.0"
-	}
+	"license": "MIT"
 }

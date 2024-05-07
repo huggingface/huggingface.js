@@ -1,4 +1,3 @@
-import { isFrontend, base64FromBytes } from "../../../shared";
 import { HUB_URL } from "../consts";
 import { HubApiError, createApiError, InvalidApiResponseFormatError } from "../error";
 import type {
@@ -21,6 +20,8 @@ import { toRepoId } from "../utils/toRepoId";
 import { WebBlob } from "../utils/WebBlob";
 import { createBlob } from "../utils/createBlob";
 import { eventToGenerator } from "../utils/eventToGenerator";
+import { base64FromBytes } from "../utils/base64FromBytes";
+import { isFrontend } from "../utils/isFrontend";
 
 const CONCURRENT_SHAS = 5;
 const CONCURRENT_LFS_UPLOADS = 5;
