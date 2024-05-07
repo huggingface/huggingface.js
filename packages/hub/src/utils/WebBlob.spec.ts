@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeAll } from "vitest";
-import { base64FromBytes } from "../../../shared";
 import { WebBlob } from "./WebBlob";
+import { base64FromBytes } from "./base64FromBytes";
 
 describe("WebBlob", () => {
 	const resourceUrl = new URL("https://huggingface.co/spaces/aschen/push-model-from-web/raw/main/mobilenet/model.json");

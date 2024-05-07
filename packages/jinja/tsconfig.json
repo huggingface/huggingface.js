@@ -12,7 +12,8 @@
 		"skipLibCheck": true,
 		"noImplicitOverride": true,
 		"outDir": "./dist",
-		"declaration": true
+		"declaration": true,
+		"declarationMap": true
 	},
 	"include": ["src", "index.ts"],
 	"exclude": ["dist"]
