@@ -26,10 +26,6 @@ export interface ModelData {
 	 */
 	id: string;
 	/**
-	 * Kept for backward compatibility
-	 */
-	modelId?: string;
-	/**
 	 * Whether or not to enable inference widget for this model
 	 */
 	inference: InferenceDisplayability;
