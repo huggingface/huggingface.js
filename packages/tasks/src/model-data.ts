@@ -80,7 +80,7 @@ export interface ModelData {
 	/**
 	 * all the model tags
 	 */
-	tags?: string[];
+	tags: string[];
 	/**
 	 * transformers-specific info to display in the code sample.
 	 */
