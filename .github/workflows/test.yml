@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  test:
+  node:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -42,7 +42,7 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
-  browser-test:
+  browser:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -78,7 +78,7 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
-  e2e-test:
+  e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
