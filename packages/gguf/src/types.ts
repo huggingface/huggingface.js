@@ -112,11 +112,11 @@ export type Whisper = GGUFGeneralInfo<"whisper"> &
 
 export interface GGUFMetadataOptions {
 	/**
-   * Enable strict type for known GGUF fields.
-   * 
+	 * Enable strict type for known GGUF fields.
+	 *
 	 * @default true
-   */
-  strict: boolean;
+	 */
+	strict: boolean;
 }
 
 export type GGUFMetadata<Options extends GGUFMetadataOptions = { strict: true }> = {
