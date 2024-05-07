@@ -273,7 +273,7 @@ export async function gguf(
 	offset += tensorCount.length;
 	const numKv = readVersionedSize(r.view, offset, version, littleEndian);
 	offset += numKv.length;
-	const metadata: GGUFMetadata = {
+	const metadata: GGUFMetadata<{ strict: false }> = {
 		version,
 		tensor_count: tensorCount.value,
 		kv_count: numKv.value,
@@ -308,9 +308,6 @@ export async function gguf(
 			}
 		}
 		offset += valueResult.length;
-		/// TODO(fix typing)
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
 		metadata[keyResult.value] = valueResult.value;
 	}
 
