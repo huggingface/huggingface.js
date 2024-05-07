@@ -233,7 +233,7 @@ describe("gguf", () => {
 		const arrayBuf = await res.arrayBuffer();
 		fs.writeFileSync(".cache/model.gguf", Buffer.from(arrayBuf));
 
-		const { metadata } = await gguf(".cache/model.gguf", { localFile: true });
+		const { metadata } = await gguf(".cache/model.gguf", { allowLocalFile: true });
 		expect(metadata["general.name"]).toEqual("tinyllamas-stories-260k");
 	});
 

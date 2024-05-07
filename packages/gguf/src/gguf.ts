@@ -138,10 +138,6 @@ class RangeViewLocalFile extends RangeView {
 	 * Read a new chunk from local file system.
 	 */
 	override async fetchChunk(): Promise<void> {
-		if (!isBackend) {
-			throw new Error("localFile cannot be used in browser");
-		}
-
 		const { FileBlob } = await import("./utils/FileBlob");
 		const blob = await FileBlob.create(this.uri);
 		const range = [this.chunk * HTTP_CHUNK_SIZE, (this.chunk + 1) * HTTP_CHUNK_SIZE - 1];
@@ -235,7 +231,7 @@ export async function gguf(
 		fetch?: typeof fetch;
 		additionalFetchHeaders?: Record<string, string>;
 		computeParametersCount: true;
-		localFile?: boolean;
+		allowLocalFile?: boolean;
 	}
 ): Promise<GGUFParseOutput & { parameterCount: number }>;
 export async function gguf(
@@ -246,7 +242,7 @@ export async function gguf(
 		 */
 		fetch?: typeof fetch;
 		additionalFetchHeaders?: Record<string, string>;
-		localFile?: boolean;
+		allowLocalFile?: boolean;
 	}
 ): Promise<GGUFParseOutput>;
 export async function gguf(
@@ -258,10 +254,26 @@ export async function gguf(
 		fetch?: typeof fetch;
 		additionalFetchHeaders?: Record<string, string>;
 		computeParametersCount?: boolean;
-		localFile?: boolean;
+		allowLocalFile?: boolean;
 	}
 ): Promise<GGUFParseOutput & { parameterCount?: number }> {
-	const r = params?.localFile ? new RangeViewLocalFile(uri, params) : new RangeView(uri, params);
+	let r: RangeView;
+	if (isBackend) {
+		/// On backend, we switch between remote/local file based on protocol
+		if (uri.match(/^https?:\/\//)) {
+			r = new RangeView(uri, params);
+		} else if (params?.allowLocalFile) {
+			r = new RangeViewLocalFile(uri, params);
+		} else {
+			throw new Error("Access to local file is not enabled, please set allowLocalFile to true");
+		}
+	} else {
+		/// On frontend, we only allow using remote file
+		if (params?.allowLocalFile) {
+			throw new Error("allowLocalFile cannot be used on browser");
+		}
+		r = new RangeView(uri, params);
+	}
 	await r.fetchChunk();
 
 	const checkBuffer = (buffer: Uint8Array, header: Uint8Array) => {
