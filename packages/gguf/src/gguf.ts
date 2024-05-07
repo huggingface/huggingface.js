@@ -362,6 +362,7 @@ export async function ggufAllShards(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
+		additionalFetchHeaders?: Record<string, string>;
 	}
 ): Promise<{ shards: GGUFParseOutput[]; parameterCount: number }> {
 	const ggufShardFileInfo = parseGgufShardFilename(url);
