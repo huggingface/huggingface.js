@@ -1,6 +1,7 @@
 import { omit } from "../src/utils/omit";
-import { isBackend, isFrontend } from "../../shared";
 import { HF_HUB_URL } from "../src/lib/getDefaultTask";
+import { isBackend } from "../src/utils/isBackend";
+import { isFrontend } from "../src/utils/isFrontend";
 
 const TAPES_FILE = "./tapes.json";
 const BASE64_PREFIX = "data:application/octet-stream;base64,";

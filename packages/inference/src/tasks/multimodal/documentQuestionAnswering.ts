@@ -2,8 +2,8 @@ import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 import type { RequestArgs } from "../../types";
-import { base64FromBytes } from "../../../../shared";
 import { toArray } from "../../utils/toArray";
+import { base64FromBytes } from "../../utils/base64FromBytes";
 
 export type DocumentQuestionAnsweringArgs = BaseArgs & {
 	inputs: {

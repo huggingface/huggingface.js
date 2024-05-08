@@ -1,6 +1,6 @@
-import { isFrontend } from "../../../shared";
 import { eventToGenerator } from "./eventToGenerator";
 import { hexFromBytes } from "./hexFromBytes";
+import { isFrontend } from "./isFrontend";
 
 const webWorkerCode = `
 // Would prefer no CDN, but need a clever way to not burden the main file of the bundle

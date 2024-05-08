@@ -1,7 +1,7 @@
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options, RequestArgs } from "../../types";
+import { base64FromBytes } from "../../utils/base64FromBytes";
 import { request } from "../custom/request";
-import { base64FromBytes } from "../../../../shared";
 
 export type ImageToImageArgs = BaseArgs & {
 	/**
