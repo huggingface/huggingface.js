@@ -5,7 +5,7 @@ It works with both [Inference API (serverless)](https://huggingface.co/docs/api-
 
 Check out the [full documentation](https://huggingface.co/docs/huggingface.js/inference/README).
 
-You can also try out a live [interactive notebook](https://observablehq.com/@huggingface/hello-huggingface-js-inference), see some demos on [hf.co/huggingfacejs](https://huggingface.co/huggingfacejs), or watch a [Scrimba tutorial that explains how Inference Endpoints works](https://scrimba.com/scrim/cod8248f5adfd6e129582c523). 
+You can also try out a live [interactive notebook](https://observablehq.com/@huggingface/hello-huggingface-js-inference), see some demos on [hf.co/huggingfacejs](https://huggingface.co/huggingfacejs), or watch a [Scrimba tutorial that explains how Inference Endpoints works](https://scrimba.com/scrim/cod8248f5adfd6e129582c523).
 
 ## Getting Started
 
@@ -30,7 +30,6 @@ import { HfInference } from "https://esm.sh/@huggingface/inference"
 import { HfInference } from "npm:@huggingface/inference"
 ```
 
-
 ### Initialize
 
 ```typescript
@@ -42,7 +41,6 @@ const hf = new HfInference('your access token')
 ❗**Important note:** Using an access token is optional to get started, however you will be rate limited eventually. Join [Hugging Face](https://huggingface.co/join) and then visit [access tokens](https://huggingface.co/settings/tokens) to generate your access token for **free**.
 
 Your access token should be kept private. If you need to protect it in front-end applications, we suggest setting up a proxy server that stores the access token.
-
 
 #### Tree-shaking
 
@@ -152,6 +150,40 @@ for await (const output of hf.textGenerationStream({
 }
 ```
 
+### Text Generation (Chat Completion API Compatible)
+
+Using `chatCompletion` method, you can generate text with endpoints compatible with OpenAI Chat Completion API.
+
+[Demo](https://huggingface.co/spaces/huggingfacejs/streaming-chat-completion)
+
+```typescript
+
+const out = await hf.chatCompletion({
+    model: "mistralai/Mistral-7B-Instruct-v0.2",
+    messages: [{ role: "user", content: "Complete the this sentence with words one plus one is equal " }],
+    max_tokens: 500,
+    return_full_text: false,
+    temperature: 0.1,
+    seed: 0,
+});
+
+let out = "";
+for await (const chunk of hf.chatCompletionStream({
+    model: "mistralai/Mistral-7B-Instruct-v0.2",
+    messages: [
+      { role: "user", content: "Complete the equation 1+1= ,just the answer" },
+    ],
+    max_tokens: 500,
+    return_full_text: false,
+    temperature: 0.1,
+    seed: 0,
+  })) {
+    if (chunk.choices && chunk.choices.length > 0) {
+        out += chunk.choices[0].delta.content;
+    }
+  }
+```
+
 ### Token Classification
 
 Used for sentence parsing, either grammatical, or Named Entity Recognition (NER) to understand keywords contained within text.
@@ -177,9 +209,9 @@ await hf.translation({
   model: 'facebook/mbart-large-50-many-to-many-mmt',
   inputs: textToTranslate,
   parameters: {
-		"src_lang": "en_XX",
-		"tgt_lang": "fr_XX"
-	}
+  "src_lang": "en_XX",
+  "tgt_lang": "fr_XX"
+ }
 })
 ```
 
@@ -495,6 +527,22 @@ for await (const output of hf.streamingRequest({
 })) {
   ...
 }
+
+// Chat Completion Example
+const MISTRAL_KEY = process.env.MISTRAL_KEY;
+const hf = new HfInference(MISTRAL_KEY);
+const ep = hf.endpoint("https://api.mistral.ai/v1/chat/completions");
+const stream = ep.streamingRequest({
+    model: "mistral-tiny",
+    messages: [{ role: "user", content: "Complete the equation one + one = , just the answer" }],
+});
+let out = "";
+for await (const chunk of stream) {
+    if (chunk.choices && chunk.choices.length > 0) {
+        out += chunk.choices[0].delta.content;
+        console.log(out);
+    }
+}
 ```
 
 ## Custom Inference Endpoints
@@ -504,6 +552,27 @@ Learn more about using your own inference endpoints [here](https://hf.co/docs/in
 ```typescript
 const gpt2 = hf.endpoint('https://xyz.eu-west-1.aws.endpoints.huggingface.cloud/gpt2');
 const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the universe is'});
+
+
+// Chat Completion Example
+const ep = hf.endpoint(
+    "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions"
+);
+const stream = ep.chatCompletionStream({
+    model: "tgi",
+    messages: [{ role: "user", content: "Complete the equation 1+1= ,just the answer" }],
+    max_tokens: 500,
+    return_full_text: false,
+    temperature: 0.1,
+    seed: 0,
+});
+let out = "";
+for await (const chunk of stream) {
+    if (chunk.choices && chunk.choices.length > 0) {
+        out += chunk.choices[0].delta.content;
+        console.log(out);
+    }
+}
 ```
 
 By default, all calls to the inference endpoint will wait until the model is
