@@ -61,7 +61,6 @@ This will enable tree-shaking by your bundler.
 
 ## Natural Language Processing
 
-
 ### Text Generation
 
 Generates text from an input prompt.
@@ -130,7 +129,6 @@ for await (const chunk of openai.chatCompletionStream({
     { role: "user", content: "Complete the equation 1+1= ,just the answer" },
   ],
   max_tokens: 500,
-  return_full_text: false,
   temperature: 0.1,
   seed: 0,
 })) {
@@ -211,6 +209,7 @@ await hf.textClassification({
   inputs: 'I like you. I love you.'
 })
 ```
+
 ### Token Classification
 
 Used for sentence parsing, either grammatical, or Named Entity Recognition (NER) to understand keywords contained within text.
@@ -592,7 +591,6 @@ const stream = ep.chatCompletionStream({
   model: "tgi",
   messages: [{ role: "user", content: "Complete the equation 1+1= ,just the answer" }],
   max_tokens: 500,
-  return_full_text: false,
   temperature: 0.1,
   seed: 0,
 });
