@@ -94,7 +94,6 @@ const out = await hf.chatCompletion({
   model: "mistralai/Mistral-7B-Instruct-v0.2",
   messages: [{ role: "user", content: "Complete the this sentence with words one plus one is equal " }],
   max_tokens: 500,
-  return_full_text: false,
   temperature: 0.1,
   seed: 0,
 });
@@ -107,7 +106,6 @@ for await (const chunk of hf.chatCompletionStream({
     { role: "user", content: "Complete the equation 1+1= ,just the answer" },
   ],
   max_tokens: 500,
-  return_full_text: false,
   temperature: 0.1,
   seed: 0,
 })) {
