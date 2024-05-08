@@ -61,6 +61,89 @@ This will enable tree-shaking by your bundler.
 
 ## Natural Language Processing
 
+
+### Text Generation
+
+Generates text from an input prompt.
+
+[Demo](https://huggingface.co/spaces/huggingfacejs/streaming-text-generation)
+
+```typescript
+await hf.textGeneration({
+  model: 'gpt2',
+  inputs: 'The answer to the universe is'
+})
+
+for await (const output of hf.textGenerationStream({
+  model: "google/flan-t5-xxl",
+  inputs: 'repeat "one two three four"',
+  parameters: { max_new_tokens: 250 }
+})) {
+  console.log(output.token.text, output.generated_text);
+}
+```
+
+### Text Generation (Chat Completion API Compatible)
+
+Using the `chatCompletion` method, you can generate text with models compatible with the OpenAI Chat Completion API. All models served by [TGI](https://api-inference.huggingface.co/framework/text-generation-inference) on Hugging Face support Messages API.
+
+[Demo](https://huggingface.co/spaces/huggingfacejs/streaming-chat-completion)
+
+```typescript
+// Non-streaming API
+const out = await hf.chatCompletion({
+  model: "mistralai/Mistral-7B-Instruct-v0.2",
+  messages: [{ role: "user", content: "Complete the this sentence with words one plus one is equal " }],
+  max_tokens: 500,
+  return_full_text: false,
+  temperature: 0.1,
+  seed: 0,
+});
+
+// Streaming API
+let out = "";
+for await (const chunk of hf.chatCompletionStream({
+  model: "mistralai/Mistral-7B-Instruct-v0.2",
+  messages: [
+    { role: "user", content: "Complete the equation 1+1= ,just the answer" },
+  ],
+  max_tokens: 500,
+  return_full_text: false,
+  temperature: 0.1,
+  seed: 0,
+})) {
+  if (chunk.choices && chunk.choices.length > 0) {
+    out += chunk.choices[0].delta.content;
+  }
+}
+```
+
+It's also possible to call Mistral or OpenAI endpoints directly:
+
+```typescript
+const openai = new HfInference(OPENAI_TOKEN).endpoint("https://api.openai.com");
+
+let out = "";
+for await (const chunk of openai.chatCompletionStream({
+  model: "gpt-3.5-turbo",
+  messages: [
+    { role: "user", content: "Complete the equation 1+1= ,just the answer" },
+  ],
+  max_tokens: 500,
+  return_full_text: false,
+  temperature: 0.1,
+  seed: 0,
+})) {
+  if (chunk.choices && chunk.choices.length > 0) {
+    out += chunk.choices[0].delta.content;
+  }
+}
+
+// For mistral AI:
+// endpointUrl: "https://api.mistral.ai"
+// model: "mistral-tiny"
+```
+
 ### Fill Mask
 
 Tries to fill in a hole with a missing word (token to be precise).
@@ -128,62 +211,6 @@ await hf.textClassification({
   inputs: 'I like you. I love you.'
 })
 ```
-
-### Text Generation
-
-Generates text from an input prompt.
-
-[Demo](https://huggingface.co/spaces/huggingfacejs/streaming-text-generation)
-
-```typescript
-await hf.textGeneration({
-  model: 'gpt2',
-  inputs: 'The answer to the universe is'
-})
-
-for await (const output of hf.textGenerationStream({
-  model: "google/flan-t5-xxl",
-  inputs: 'repeat "one two three four"',
-  parameters: { max_new_tokens: 250 }
-})) {
-  console.log(output.token.text, output.generated_text);
-}
-```
-
-### Text Generation (Chat Completion API Compatible)
-
-Using the `chatCompletion` method, you can generate text with models compatible with the OpenAI Chat Completion API. All models served by [TGI](https://api-inference.huggingface.co/framework/text-generation-inference) on Hugging Face support Messages API.
-
-[Demo](https://huggingface.co/spaces/huggingfacejs/streaming-chat-completion)
-
-```typescript
-
-const out = await hf.chatCompletion({
-    model: "mistralai/Mistral-7B-Instruct-v0.2",
-    messages: [{ role: "user", content: "Complete the this sentence with words one plus one is equal " }],
-    max_tokens: 500,
-    return_full_text: false,
-    temperature: 0.1,
-    seed: 0,
-});
-
-let out = "";
-for await (const chunk of hf.chatCompletionStream({
-    model: "mistralai/Mistral-7B-Instruct-v0.2",
-    messages: [
-      { role: "user", content: "Complete the equation 1+1= ,just the answer" },
-    ],
-    max_tokens: 500,
-    return_full_text: false,
-    temperature: 0.1,
-    seed: 0,
-  })) {
-    if (chunk.choices && chunk.choices.length > 0) {
-        out += chunk.choices[0].delta.content;
-    }
-  }
-```
-
 ### Token Classification
 
 Used for sentence parsing, either grammatical, or Named Entity Recognition (NER) to understand keywords contained within text.
@@ -537,15 +564,15 @@ const MISTRAL_KEY = process.env.MISTRAL_KEY;
 const hf = new HfInference(MISTRAL_KEY);
 const ep = hf.endpoint("https://api.mistral.ai/v1/chat/completions");
 const stream = ep.streamingRequest({
-    model: "mistral-tiny",
-    messages: [{ role: "user", content: "Complete the equation one + one = , just the answer" }],
+  model: "mistral-tiny",
+  messages: [{ role: "user", content: "Complete the equation one + one = , just the answer" }],
 });
 let out = "";
 for await (const chunk of stream) {
-    if (chunk.choices && chunk.choices.length > 0) {
-        out += chunk.choices[0].delta.content;
-        console.log(out);
-    }
+  if (chunk.choices && chunk.choices.length > 0) {
+    out += chunk.choices[0].delta.content;
+    console.log(out);
+  }
 }
 ```
 
@@ -557,25 +584,24 @@ Learn more about using your own inference endpoints [here](https://hf.co/docs/in
 const gpt2 = hf.endpoint('https://xyz.eu-west-1.aws.endpoints.huggingface.cloud/gpt2');
 const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the universe is'});
 
-
 // Chat Completion Example
 const ep = hf.endpoint(
-    "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions"
+  "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions"
 );
 const stream = ep.chatCompletionStream({
-    model: "tgi",
-    messages: [{ role: "user", content: "Complete the equation 1+1= ,just the answer" }],
-    max_tokens: 500,
-    return_full_text: false,
-    temperature: 0.1,
-    seed: 0,
+  model: "tgi",
+  messages: [{ role: "user", content: "Complete the equation 1+1= ,just the answer" }],
+  max_tokens: 500,
+  return_full_text: false,
+  temperature: 0.1,
+  seed: 0,
 });
 let out = "";
 for await (const chunk of stream) {
-    if (chunk.choices && chunk.choices.length > 0) {
-        out += chunk.choices[0].delta.content;
-        console.log(out);
-    }
+  if (chunk.choices && chunk.choices.length > 0) {
+    out += chunk.choices[0].delta.content;
+    console.log(out);
+  }
 }
 ```
 

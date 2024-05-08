@@ -119,6 +119,30 @@ const HF_TOKEN = "hf_...";
 
 const inference = new HfInference(HF_TOKEN);
 
+// Chat completion API
+const out = await inference.chatCompletion({
+  model: "mistralai/Mistral-7B-Instruct-v0.2",
+  messages: [{ role: "user", content: "Complete the this sentence with words one plus one is equal " }],
+  max_tokens: 100
+});
+
+// Chat completion API on OpenAI (also compatible with MistralAI api, etc.)
+const openai = new HfInference(OPENAI_TOKEN).endpoint("https://api.openai.com");
+const out = await openai.chatCompletion({
+  model: "gpt-3.5-turbo",
+  messages: [{ role: "user", content: "Complete the this sentence with words one plus one is equal " }],
+  max_tokens: 100
+});
+
+// Streaming chat completion API
+for await (const chunk of openai.chatCompletionStream({
+  model: "gpt-3.5-turbo",
+  messages: [{ role: "user", content: "Complete the this sentence with words one plus one is equal " }],
+  max_tokens: 100
+})) {
+  console.log(chunk.choices[0].delta.content);
+}
+
 // You can also omit "model" to use the recommended model for the task
 await inference.translation({
   model: 't5-base',
