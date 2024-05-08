@@ -152,7 +152,7 @@ for await (const output of hf.textGenerationStream({
 
 ### Text Generation (Chat Completion API Compatible)
 
-Using `chatCompletion` method, you can generate text with endpoints compatible with OpenAI Chat Completion API.
+Using the `chatCompletion` method, you can generate text with models compatible with the OpenAI Chat Completion API. All models served by [TGI](https://api-inference.huggingface.co/framework/text-generation-inference) on Hugging Face support Messages API.
 
 [Demo](https://huggingface.co/spaces/huggingfacejs/streaming-chat-completion)
 
@@ -527,7 +527,11 @@ for await (const output of hf.streamingRequest({
 })) {
   ...
 }
+```
 
+You can use any OpenAI Chat Completion API-compatible provider with the `chatCompletion` method.
+
+```typescript
 // Chat Completion Example
 const MISTRAL_KEY = process.env.MISTRAL_KEY;
 const hf = new HfInference(MISTRAL_KEY);
