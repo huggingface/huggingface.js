@@ -553,7 +553,7 @@ for await (const output of hf.streamingRequest({
 }
 ```
 
-You can use any OpenAI Chat Completion API-compatible provider with the `chatCompletion` method.
+You can use any Chat Completion API-compatible provider with the `chatCompletion` method.
 
 ```typescript
 // Chat Completion Example
