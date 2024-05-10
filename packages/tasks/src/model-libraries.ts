@@ -380,6 +380,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/TensorSpeech/TensorFlowTTS",
 		snippets: snippets.tensorflowtts,
 	},
+	timesfm: {
+		prettyLabel: "TimesFM",
+		repoName: "timesfm",
+		repoUrl: "https://github.com/google-research/timesfm",
+		filter: false,
+		countDownloads: {
+			term: { path: "checkpoints/checkpoint_1100000/state/checkpoint" },
+		},
+	},
 	timm: {
 		prettyLabel: "timm",
 		repoName: "pytorch-image-models",
