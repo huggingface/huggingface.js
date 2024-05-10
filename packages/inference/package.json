@@ -29,17 +29,17 @@
 		"src"
 	],
 	"source": "src/index.ts",
-	"types": "./dist/index.d.ts",
+	"types": "./dist/src/index.d.ts",
 	"main": "./dist/index.cjs",
 	"module": "./dist/index.js",
 	"exports": {
-		"types": "./dist/index.d.ts",
+		"types": "./dist/src/index.d.ts",
 		"require": "./dist/index.cjs",
 		"import": "./dist/index.js"
 	},
 	"type": "module",
 	"scripts": {
-		"build": "tsup src/index.ts --format cjs,esm --clean && pnpm run dts",
+		"build": "tsup src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
 		"dts": "tsx scripts/generate-dts.ts && tsc --noEmit dist/index.d.ts",
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",

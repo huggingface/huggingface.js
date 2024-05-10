@@ -27,7 +27,7 @@ export interface ApiFileScanResult {
 	pickleImportScan?: ApiPickleImportScan;
 }
 
-interface AVScan {
+interface ApiAVScan {
 	virusFound: boolean;
 	virusNames?: string[];
 }
@@ -41,6 +41,6 @@ interface ApiPickleImport {
 }
 
 interface ApiPickleImportScan {
-	highestSafetyLevel: ApiSafetyLevelafetyLevel;
+	highestSafetyLevel: ApiSafetyLevel;
 	imports: ApiPickleImport[];
 }
