@@ -6,7 +6,7 @@ This package contains the definition files (written in Typescript) for the huggi
 - **default widget inputs** (when they aren't provided in the model card)
 - definitions and UI elements for **model libraries** (and soon for **dataset libraries**).
 
-Please add to any of those definitions by opening a PR. Thanks 🔥
+Please add any missing ones to these definitions by opening a PR. Thanks 🔥
 
 ⚠️ The hub's definitive doc is at https://huggingface.co/docs/hub.
 
