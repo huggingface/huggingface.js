@@ -45,3 +45,6 @@ export { SPECIAL_TOKENS_ATTRIBUTES } from "./tokenizer-data";
 
 import * as snippets from "./snippets";
 export { snippets };
+
+export { LOCAL_APPS } from "./local-apps";
+export type { LocalApp, LocalAppKey } from "./local-apps";
