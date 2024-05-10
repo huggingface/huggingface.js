@@ -237,7 +237,7 @@ describe("gguf", () => {
 		fs.writeFileSync(".cache/model.gguf", Buffer.from(arrayBuf));
 
 		const { metadata } = await gguf(".cache/model.gguf", { allowLocalFile: true });
-		expect(metadata["general.name"]).toEqual("tinyllamas-stories-260k");
+		expect(metadata).toMatchObject({ "general.name": "tinyllamas-stories-260k" });
 	});
 
 	it("should detect sharded gguf filename", async () => {
