@@ -23,7 +23,7 @@ export interface HardwareSpec {
 	 * and HuggingChat running Llama3 with Web search was failing a bit,
 	 * so some of those values are kinda random. Forgive me and please feel free to improve.
 	 */
-	tflops:  number;
+	tflops: number;
 	/**
 	 * If an array is specified, options of memory size (can be VRAM, unified RAM)
 	 * e.g. an A100 exists in 40 or 80 GB.
@@ -34,29 +34,29 @@ export interface HardwareSpec {
 export const DEFAULT_MEMORY_OPTIONS = [8, 16, 24, 32, 40, 48, 64, 80];
 
 export const SKUS = {
-	"GPU": {
+	GPU: {
 		NVIDIA: {
-			"H100": {
+			H100: {
 				tflops: 51.22,
 				memory: [80],
 			},
-			"L40": {
+			L40: {
 				tflops: 90.52,
 				memory: [24],
 			},
-			"A100": {
+			A100: {
 				tflops: 19.49,
 				memory: [80, 40],
 			},
-			"A40": {
+			A40: {
 				tflops: 37.42,
 				memory: [48],
 			},
-			"A10": {
+			A10: {
 				tflops: 31.24,
 				memory: [24],
 			},
-			"T4": {
+			T4: {
 				tflops: 8.141,
 				memory: [16],
 			},
@@ -106,15 +106,15 @@ export const SKUS = {
 			},
 		},
 		AMD: {
-			"MI300": {
+			MI300: {
 				tflops: 47.87,
 				memory: [192],
 			},
-			"MI250": {
+			MI250: {
 				tflops: 45.26,
 				memory: [128],
 			},
-			"MI210": {
+			MI210: {
 				tflops: 22.63,
 				memory: [64],
 			},
@@ -144,7 +144,7 @@ export const SKUS = {
 			},
 		},
 	},
-	"CPU": {
+	CPU: {
 		Intel: {
 			"Xeon 4th Generation (Sapphire Rapids)": {
 				tflops: 3.8,
