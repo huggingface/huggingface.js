@@ -694,9 +694,7 @@ describe.concurrent(
 		});
 
 		it("chatCompletion - OpenAI Specs", async () => {
-			const ep = hf.endpoint(
-				"https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions"
-			);
+			const ep = hf.endpoint("https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2");
 			const res = await ep.chatCompletion({
 				model: "tgi",
 				messages: [{ role: "user", content: "Complete the this sentence with words one plus one is equal " }],
@@ -710,9 +708,7 @@ describe.concurrent(
 			}
 		});
 		it("chatCompletionStream - OpenAI Specs", async () => {
-			const ep = hf.endpoint(
-				"https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions"
-			);
+			const ep = hf.endpoint("https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2");
 			const stream = ep.chatCompletionStream({
 				model: "tgi",
 				messages: [{ role: "user", content: "Complete the equation 1+1= ,just the answer" }],
@@ -731,8 +727,8 @@ describe.concurrent(
 		it("custom mistral - OpenAI Specs", async () => {
 			const MISTRAL_KEY = env.MISTRAL_KEY;
 			const hf = new HfInference(MISTRAL_KEY);
-			const ep = hf.endpoint("https://api.mistral.ai/v1/chat/completions");
-			const stream = ep.streamingRequest({
+			const ep = hf.endpoint("https://api.mistral.ai");
+			const stream = ep.chatCompletionStream({
 				model: "mistral-tiny",
 				messages: [{ role: "user", content: "Complete the equation one + one = , just the answer" }],
 			}) as AsyncGenerator<ChatCompletionStreamOutput>;
@@ -747,8 +743,8 @@ describe.concurrent(
 		it("custom openai - OpenAI Specs", async () => {
 			const OPENAI_KEY = env.OPENAI_KEY;
 			const hf = new HfInference(OPENAI_KEY);
-			const ep = hf.endpoint("https://api.openai.com/v1/chat/completions");
-			const stream = ep.streamingRequest({
+			const ep = hf.endpoint("https://api.openai.com");
+			const stream = ep.chatCompletionStream({
 				model: "gpt-3.5-turbo",
 				messages: [{ role: "user", content: "Complete the equation one + one =" }],
 			}) as AsyncGenerator<ChatCompletionStreamOutput>;

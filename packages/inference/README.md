@@ -559,8 +559,8 @@ You can use any Chat Completion API-compatible provider with the `chatCompletion
 // Chat Completion Example
 const MISTRAL_KEY = process.env.MISTRAL_KEY;
 const hf = new HfInference(MISTRAL_KEY);
-const ep = hf.endpoint("https://api.mistral.ai/v1/chat/completions");
-const stream = ep.streamingRequest({
+const ep = hf.endpoint("https://api.mistral.ai");
+const stream = ep.chatCompletionStream({
   model: "mistral-tiny",
   messages: [{ role: "user", content: "Complete the equation one + one = , just the answer" }],
 });
@@ -583,7 +583,7 @@ const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the
 
 // Chat Completion Example
 const ep = hf.endpoint(
-  "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions"
+  "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2"
 );
 const stream = ep.chatCompletionStream({
   model: "tgi",

@@ -1,5 +1,4 @@
 import type { InferenceTask, Options, RequestArgs } from "../types";
-import { isObjectEmpty } from "../lib/isEmpty";
 import { omit } from "../utils/omit";
 import { HF_HUB_URL } from "./getDefaultTask";
 import { isUrl } from "./isUrl";
@@ -24,6 +23,7 @@ export async function makeRequestOptions(
 		forceTask?: string | InferenceTask;
 		/** To load default model if needed */
 		taskHint?: InferenceTask;
+		chatCompletion?: boolean;
 	}
 ): Promise<{ url: string; info: RequestInit }> {
 	const { accessToken, endpointUrl, ...otherArgs } = args;
@@ -35,7 +35,7 @@ export async function makeRequestOptions(
 		wait_for_model,
 		use_cache,
 		dont_load_model,
-		...otherOptions
+		chatCompletion,
 	} = options ?? {};
 
 	const headers: Record<string, string> = {};
@@ -78,7 +78,7 @@ export async function makeRequestOptions(
 		headers["X-Load-Model"] = "0";
 	}
 
-	const url = (() => {
+	let url = (() => {
 		if (endpointUrl && isUrl(model)) {
 			throw new TypeError("Both model and endpointUrl cannot be URLs");
 		}
@@ -95,6 +95,10 @@ export async function makeRequestOptions(
 
 		return `${HF_INFERENCE_API_BASE_URL}/models/${model}`;
 	})();
+
+	if (chatCompletion && !url.endsWith("/chat/completions")) {
+		url += "/v1/chat/completions";
+	}
 
 	/**
 	 * For edge runtimes, leave 'credentials' undefined, otherwise cloudflare workers will error
@@ -113,7 +117,6 @@ export async function makeRequestOptions(
 			? args.data
 			: JSON.stringify({
 					...(otherArgs.model && isUrl(otherArgs.model) ? omit(otherArgs, "model") : otherArgs),
-					...(otherOptions && !isObjectEmpty(otherOptions) && { options: otherOptions }),
 			  }),
 		...(credentials && { credentials }),
 		signal: options?.signal,

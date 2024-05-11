@@ -159,7 +159,7 @@ const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the
 
 //Chat Completion
 const mistal = inference.endpoint(
- "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions"
+ "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2"
 );
 const out = await mistal.chatCompletion({
  model: "mistralai/Mistral-7B-Instruct-v0.2",

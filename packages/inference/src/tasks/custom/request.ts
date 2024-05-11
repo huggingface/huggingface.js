@@ -15,13 +15,7 @@ export async function request<T>(
 		chatCompletion?: boolean;
 	}
 ): Promise<T> {
-	const { url: _url, info } = await makeRequestOptions(args, options);
-	let url = _url;
-	if (options?.chatCompletion) {
-		if (!url.endsWith("/chat/completions")) {
-			url += "/v1/chat/completions";
-		}
-	}
+	const { url, info } = await makeRequestOptions(args, options);
 	const response = await (options?.fetch ?? fetch)(url, info);
 
 	if (options?.retry_on_error !== false && response.status === 503 && !options?.wait_for_model) {
