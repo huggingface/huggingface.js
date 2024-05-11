@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { GGMLQuantizationType, gguf, ggufAllShards, parseGgufShardFilename } from "./gguf";
+import fs from "node:fs";
 
 const URL_LLAMA = "https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/191239b/llama-2-7b-chat.Q2_K.gguf";
 const URL_MISTRAL_7B =
@@ -224,6 +225,19 @@ describe("gguf", () => {
 			shape: [64n, 512n],
 			dtype: GGMLQuantizationType.F32,
 		});
+	});
+
+	it("should parse a local file", async () => {
+		// download the file and save to .cache folder
+		if (!fs.existsSync(".cache")) {
+			fs.mkdirSync(".cache");
+		}
+		const res = await fetch(URL_V1);
+		const arrayBuf = await res.arrayBuffer();
+		fs.writeFileSync(".cache/model.gguf", Buffer.from(arrayBuf));
+
+		const { metadata } = await gguf(".cache/model.gguf", { allowLocalFile: true });
+		expect(metadata).toMatchObject({ "general.name": "tinyllamas-stories-260k" });
 	});
 
 	it("should detect sharded gguf filename", async () => {

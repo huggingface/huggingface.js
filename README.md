@@ -52,6 +52,9 @@ This is a collection of JS libraries to interact with the Hugging Face API, with
 - [@huggingface/inference](packages/inference/README.md): Use Inference Endpoints (dedicated) and Inference API (serverless) to make calls to 100,000+ Machine Learning models
 - [@huggingface/hub](packages/hub/README.md): Interact with huggingface.co to create or delete repos and commit / download files
 - [@huggingface/agents](packages/agents/README.md): Interact with HF models through a natural language interface
+- [@huggingface/gguf](packages/gguf/README.md): A GGUF parser that works on remotely hosted files.
+- [@huggingface/tasks](packages/tasks/README.md): The definition files and source-of-truth for the Hub's main primitives like pipeline tasks, model libraries, etc.
+
 
 We use modern features to avoid polyfills and dependencies, so the libraries will only work on modern browsers / Node.js >= 18 / Bun / Deno.
 

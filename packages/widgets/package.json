@@ -1,7 +1,7 @@
 {
 	"name": "@huggingface/widgets",
 	"packageManager": "pnpm@8.10.5",
-	"version": "0.2.9",
+	"version": "0.2.10",
 	"publishConfig": {
 		"access": "public"
 	},
@@ -45,9 +45,10 @@
 		"static/audioProcessor.js"
 	],
 	"dependencies": {
-		"@huggingface/tasks": "workspace:^",
+		"@huggingface/inference": "workspace:^",
 		"@huggingface/jinja": "workspace:^",
-		"@huggingface/inference": "workspace:^"
+		"@huggingface/tasks": "workspace:^",
+		"marked": "^12.0.2"
 	},
 	"peerDependencies": {
 		"svelte": "^3.59.2"

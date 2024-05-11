@@ -1,5 +1,6 @@
 import type { MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
 import { GGUFValueType } from "./types";
+import { isBackend } from "./utils/isBackend";
 import { promisesQueue } from "./utils/promisesQueue";
 
 export type { MetadataBaseValue, MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
@@ -49,7 +50,7 @@ const HTTP_TOTAL_MAX_SIZE = 50 * 10 ** 6; /// 50MB
  * Internal stateful instance to fetch ranges of HTTP data when needed
  */
 class RangeView {
-	private chunk: number;
+	protected chunk: number;
 	private buffer: ArrayBuffer;
 	private dataView: DataView;
 
@@ -58,7 +59,7 @@ class RangeView {
 	}
 
 	constructor(
-		public url: string,
+		public uri: string,
 		private params?: {
 			/**
 			 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
@@ -81,7 +82,7 @@ class RangeView {
 		const range = [this.chunk * HTTP_CHUNK_SIZE, (this.chunk + 1) * HTTP_CHUNK_SIZE - 1];
 		const buf = new Uint8Array(
 			await (
-				await (this.params?.fetch ?? fetch)(this.url, {
+				await (this.params?.fetch ?? fetch)(this.uri, {
 					headers: {
 						...(this.params?.additionalFetchHeaders ?? {}),
 						Range: `bytes=${range[0]}-${range[1]}`,
@@ -125,6 +126,23 @@ class RangeView {
 		if (this.dataView.byteLength - offset < HTTP_DATA_LEEWAY) {
 			await this.fetchChunk();
 		}
+	}
+}
+
+/**
+ * Internal stateful instance to read ranges of local file when needed.
+ * Only usable in with nodejs FS API.
+ */
+class RangeViewLocalFile extends RangeView {
+	/**
+	 * Read a new chunk from local file system.
+	 */
+	override async fetchChunk(): Promise<void> {
+		const { FileBlob } = await import("./utils/FileBlob");
+		const blob = await FileBlob.create(this.uri);
+		const range = [this.chunk * HTTP_CHUNK_SIZE, (this.chunk + 1) * HTTP_CHUNK_SIZE - 1];
+		const buffer = await blob.slice(range[0], range[1]).arrayBuffer();
+		this.appendBuffer(new Uint8Array(buffer));
 	}
 }
 
@@ -205,7 +223,7 @@ function readMetadataValue(
 }
 
 export async function gguf(
-	url: string,
+	uri: string,
 	params: {
 		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
@@ -213,20 +231,22 @@ export async function gguf(
 		fetch?: typeof fetch;
 		additionalFetchHeaders?: Record<string, string>;
 		computeParametersCount: true;
+		allowLocalFile?: boolean;
 	}
 ): Promise<GGUFParseOutput & { parameterCount: number }>;
 export async function gguf(
-	url: string,
+	uri: string,
 	params?: {
 		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
 		additionalFetchHeaders?: Record<string, string>;
+		allowLocalFile?: boolean;
 	}
 ): Promise<GGUFParseOutput>;
 export async function gguf(
-	url: string,
+	uri: string,
 	params?: {
 		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
@@ -234,9 +254,26 @@ export async function gguf(
 		fetch?: typeof fetch;
 		additionalFetchHeaders?: Record<string, string>;
 		computeParametersCount?: boolean;
+		allowLocalFile?: boolean;
 	}
 ): Promise<GGUFParseOutput & { parameterCount?: number }> {
-	const r = new RangeView(url, params);
+	let r: RangeView;
+	if (isBackend) {
+		/// On backend, we switch between remote/local file based on protocol
+		if (uri.match(/^https?:\/\//)) {
+			r = new RangeView(uri, params);
+		} else if (params?.allowLocalFile) {
+			r = new RangeViewLocalFile(uri, params);
+		} else {
+			throw new Error("Access to local file is not enabled, please set allowLocalFile to true");
+		}
+	} else {
+		/// On frontend, we only allow using remote file
+		if (params?.allowLocalFile) {
+			throw new Error("allowLocalFile cannot be used on browser");
+		}
+		r = new RangeView(uri, params);
+	}
 	await r.fetchChunk();
 
 	const checkBuffer = (buffer: Uint8Array, header: Uint8Array) => {
@@ -377,7 +414,7 @@ export async function ggufAllShards(
 
 		const PARALLEL_DOWNLOADS = 20;
 		const shards = await promisesQueue(
-			urls.map((shardUrl) => () => gguf(shardUrl, { computeParametersCount: true })),
+			urls.map((shardUrl) => () => gguf(shardUrl, { ...params, computeParametersCount: true })),
 			PARALLEL_DOWNLOADS
 		);
 		return {
