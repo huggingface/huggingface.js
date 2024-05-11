@@ -1986,5 +1986,122 @@
         "vary": "origin, Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
+  },
+  "e433aa7d0cbb7a35881644a86b8a1b4736578875c758fc02a6588e24fa77f335": {
+    "url": "https://api-inference.huggingface.co/models/google/gemma-2b/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"model\":\"google/gemma-2b\",\"messages\":[{\"role\":\"user\",\"content\":\"Complete the equation 1+1= ,just the answer\"}],\"max_tokens\":500,\"temperature\":0.1,\"seed\":0,\"stream\":true}"
+    },
+    "response": {
+      "body": "{\"error\":\"Template error: template not found\",\"error_type\":\"template_error\"}",
+      "status": 422,
+      "statusText": "Unprocessable Entity",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-allow-origin": "*",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "transfer-encoding": "chunked",
+        "vary": "origin, Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "02fd98933cbfb1c01ed45a113b482f4c561c8d909c3b8b92ddc87d0ec1bdb96c": {
+    "url": "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"messages\":[{\"role\":\"user\",\"content\":\"Complete the equation 1+1= ,just the answer\"}],\"max_tokens\":500,\"temperature\":0.1,\"seed\":0,\"stream\":true}"
+    },
+    "response": {
+      "body": "data:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" The\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" answer\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" to\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" the\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" equation\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" \"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"1\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" +\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" \"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"1\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" is\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" \"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"2\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\".\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"</s>\"},\"logprobs\":null,\"finish_reason\":\"eos_token\"}]}\n\n",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-allow-origin": "*",
+        "cache-control": "no-cache",
+        "connection": "keep-alive",
+        "content-type": "text/event-stream",
+        "transfer-encoding": "chunked",
+        "vary": "origin, Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "25a4a8c6b86f022f05a66083095cf579187d0560b612ab10bd6f7ca9f472054f": {
+    "url": "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"messages\":[{\"role\":\"user\",\"content\":\"Complete the this sentence with words one plus one is equal \"}],\"max_tokens\":500,\"temperature\":0.1,\"seed\":0}"
+    },
+    "response": {
+      "body": "{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\" to two. One plus one is equal to two.\"},\"logprobs\":null,\"finish_reason\":\"eos_token\"}],\"usage\":{\"prompt_tokens\":21,\"completion_tokens\":12,\"total_tokens\":33}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-allow-origin": "*",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "transfer-encoding": "chunked",
+        "vary": "origin, Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "a032702acd76527b2786d6aa76bc59e4b19965d334987c70c6f442139590efad": {
+    "url": "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"model\":\"tgi\",\"messages\":[{\"role\":\"user\",\"content\":\"Complete the equation 1+1= ,just the answer\"}],\"max_tokens\":500,\"temperature\":0.1,\"seed\":0,\"stream\":true}"
+    },
+    "response": {
+      "body": "data:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" The\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" answer\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" to\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" the\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" equation\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" \"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"1\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" +\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" \"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"1\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" is\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\" \"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"2\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\".\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata:{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401532,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"</s>\"},\"logprobs\":null,\"finish_reason\":\"eos_token\"}]}\n\n",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-allow-origin": "*",
+        "cache-control": "no-cache",
+        "connection": "keep-alive",
+        "content-type": "text/event-stream",
+        "transfer-encoding": "chunked",
+        "vary": "origin, Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "08fa71a976c8e3992e638f98fd9db64b32a4d319eea7f1680e0380f384d31fd2": {
+    "url": "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"model\":\"tgi\",\"messages\":[{\"role\":\"user\",\"content\":\"Complete the this sentence with words one plus one is equal \"}],\"max_tokens\":500,\"temperature\":0.1,\"seed\":0}"
+    },
+    "response": {
+      "body": "{\"id\":\"\",\"object\":\"text_completion\",\"created\":1715401536,\"model\":\"mistralai/Mistral-7B-Instruct-v0.2\",\"system_fingerprint\":\"2.0.1-sha-2d0a717\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\" to two. One plus one is equal to two.\"},\"logprobs\":null,\"finish_reason\":\"eos_token\"}],\"usage\":{\"prompt_tokens\":21,\"completion_tokens\":12,\"total_tokens\":33}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-allow-origin": "*",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "transfer-encoding": "chunked",
+        "vary": "origin, Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
   }
 }
