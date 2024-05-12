@@ -97,6 +97,24 @@ export const diffusers = (model: ModelData): string[] => {
 	}
 };
 
+export const edsnlp = (model: ModelData): string[] => {
+	const packageName = nameWithoutNamespace(model.id).replaceAll("-", "_");
+	return [
+		`# Load it from the huggingface hub directly
+import edsnlp
+nlp = edsnlp.load("${model.id}")
+`,
+		`# Or install it as a package
+!pip install git+https://huggingface.co/${model.id}
+
+# and import it as a module
+import ${packageName}
+
+nlp = ${packageName}.load()  # or edsnlp.load("${packageName}")
+`,
+	];
+};
+
 export const espnetTTS = (model: ModelData): string[] => [
 	`from espnet2.bin.tts_inference import Text2Speech
 

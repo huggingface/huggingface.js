@@ -133,6 +133,16 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "doctr",
 		repoUrl: "https://github.com/mindee/doctr",
 	},
+	edsnlp: {
+		prettyLabel: "EDS-NLP",
+		repoName: "edsnlp",
+		repoUrl: "https://github.com/aphp/edsnlp",
+		filter: false,
+		snippets: snippets.edsnlp,
+		countDownloads: {
+			wildcard: { path: "*/config.cfg" },
+		},
+	},
 	elm: {
 		prettyLabel: "ELM",
 		repoName: "elm",
