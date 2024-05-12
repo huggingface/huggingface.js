@@ -18,6 +18,8 @@ npm install @huggingface/gguf
 
 ## Usage
 
+### Basic usage
+
 ```ts
 import { GGMLQuantizationType, gguf } from "@huggingface/gguf";
 
@@ -54,6 +56,44 @@ console.log(tensorInfos);
 //     }
 // ]
 
+```
+
+### Reading a local file
+
+```ts
+// Reading a local file. (Not supported on browser)
+const { metadata, tensorInfos } = await gguf(
+  './my_model.gguf',
+  { allowLocalFile: true },
+);
+```
+
+### Strictly typed
+
+By default, known fields in `metadata` are typed. This includes various fields found in [llama.cpp](https://github.com/ggerganov/llama.cpp), [whisper.cpp](https://github.com/ggerganov/whisper.cpp) and [ggml](https://github.com/ggerganov/ggml).
+
+```ts
+const { metadata, tensorInfos } = await gguf(URL_MODEL);
+
+// Type check for model architecture at runtime
+if (metadata["general.architecture"] === "llama") {
+
+  // "llama.attention.head_count" is a valid key for llama architecture
+  console.log(model["llama.attention.head_count"]);
+
+  // "mamba.ssm.conv_kernel" is an invalid key, because it requires model architecture to be mamba
+  console.log(model["mamba.ssm.conv_kernel"]); // error
+}
+```
+
+### Disable strictly typed
+
+Because GGUF format can be used to store tensors, we can technically use it for other usages. For example, storing [control vectors](https://github.com/ggerganov/llama.cpp/pull/5970), [lora weights](https://github.com/ggerganov/llama.cpp/pull/2632),...
+
+In case you want to use your own GGUF metadata structure, you can disable strict type by casting the parse output to `GGUFParseOutput<{ strict: false }>`:
+
+```ts
+const { metadata, tensorInfos }: GGUFParseOutput<{ strict: false }> = await gguf(URL_LLAMA);
 ```
 
 ## Hugging Face Hub
