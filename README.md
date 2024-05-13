@@ -1,6 +1,6 @@
 <p align="center">
   <br/>
-  <picture> 
+  <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://huggingface.co/datasets/huggingface/documentation-images/raw/main/huggingfacejs-dark.svg">
     <source media="(prefers-color-scheme: light)" srcset="https://huggingface.co/datasets/huggingface/documentation-images/raw/main/huggingfacejs-light.svg">
     <img alt="huggingface javascript library logo" src="https://huggingface.co/datasets/huggingface/documentation-images/raw/main/huggingfacejs-light.svg" width="376" height="59" style="max-width: 100%;">
@@ -56,8 +56,7 @@ This is a collection of JS libraries to interact with the Hugging Face API, with
 - [@huggingface/tasks](packages/tasks/README.md): The definition files and source-of-truth for the Hub's main primitives like pipeline tasks, model libraries, etc.
 
 
-
-We use modern features to avoid polyfills and dependencies, so the libraries will only work on modern browsers / Node.js >= 18 / Bun / Deno. 
+We use modern features to avoid polyfills and dependencies, so the libraries will only work on modern browsers / Node.js >= 18 / Bun / Deno.
 
 The libraries are still very young, please help us by opening issues!
 
@@ -108,7 +107,6 @@ import { HfAgent } from "npm:@huggingface/agents";
 import { createRepo, commit, deleteRepo, listFiles } from "npm:@huggingface/hub"
 ```
 
-
 ## Usage examples
 
 Get your HF access token in your [account settings](https://huggingface.co/settings/tokens).
@@ -121,6 +119,23 @@ import { HfInference } from "@huggingface/inference";
 const HF_TOKEN = "hf_...";
 
 const inference = new HfInference(HF_TOKEN);
+
+// Chat completion API
+const out = await inference.chatCompletion({
+  model: "mistralai/Mistral-7B-Instruct-v0.2",
+  messages: [{ role: "user", content: "Complete the this sentence with words one plus one is equal " }],
+  max_tokens: 100
+});
+console.log(out.choices[0].message);
+
+// Streaming chat completion API
+for await (const chunk of inference.chatCompletionStream({
+  model: "mistralai/Mistral-7B-Instruct-v0.2",
+  messages: [{ role: "user", content: "Complete the this sentence with words one plus one is equal " }],
+  max_tokens: 100
+})) {
+  console.log(chunk.choices[0].delta.content);
+}
 
 // You can also omit "model" to use the recommended model for the task
 await inference.translation({
@@ -144,6 +159,17 @@ await inference.imageToText({
 // Using your own dedicated inference endpoint: https://hf.co/docs/inference-endpoints/
 const gpt2 = inference.endpoint('https://xyz.eu-west-1.aws.endpoints.huggingface.cloud/gpt2');
 const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the universe is'});
+
+//Chat Completion
+const mistal = inference.endpoint(
+ "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2"
+);
+const out = await mistal.chatCompletion({
+ model: "mistralai/Mistral-7B-Instruct-v0.2",
+ messages: [{ role: "user", content: "Complete the this sentence with words one plus one is equal " }],
+ max_tokens: 100,
+});
+console.log(out.choices[0].message);
 ```
 
 ### @huggingface/hub examples
@@ -199,7 +225,6 @@ console.log(messages); // contains the data
 const messages = await agent.run("Draw a picture of a cat wearing a top hat. Then caption the picture and read it out loud.")
 console.log(messages); 
 ```
-
 
 There are more features of course, check each library's README!
 

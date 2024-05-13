@@ -67,6 +67,7 @@ export interface TextGenerationStreamDetails {
 }
 
 export interface TextGenerationStreamOutput {
+	index?: number;
 	/** Generated token, one at a time */
 	token: TextGenerationStreamToken;
 	/**

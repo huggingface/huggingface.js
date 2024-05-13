@@ -11,6 +11,8 @@ export async function request<T>(
 		task?: string | InferenceTask;
 		/** To load default model if needed */
 		taskHint?: InferenceTask;
+		/** Is chat completion compatible */
+		chatCompletion?: boolean;
 	}
 ): Promise<T> {
 	const { url, info } = await makeRequestOptions(args, options);
@@ -26,6 +28,9 @@ export async function request<T>(
 	if (!response.ok) {
 		if (response.headers.get("Content-Type")?.startsWith("application/json")) {
 			const output = await response.json();
+			if ([400, 422, 404, 500].includes(response.status) && options?.chatCompletion) {
+				throw new Error(`Server ${args.model} does not seem to support chat completion. Error: ${output.error}`);
+			}
 			if (output.error) {
 				throw new Error(output.error);
 			}
