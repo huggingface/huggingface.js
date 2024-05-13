@@ -46,7 +46,6 @@
 	],
 	"dependencies": {
 		"@huggingface/inference": "workspace:^",
-		"@huggingface/jinja": "workspace:^",
 		"@huggingface/tasks": "workspace:^",
 		"marked": "^12.0.2"
 	},

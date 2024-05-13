@@ -19,7 +19,6 @@ export type { LibraryUiElement, ModelLibraryKey } from "./model-libraries";
 export type { ModelData, TransformersInfo } from "./model-data";
 export type { AddedToken, SpecialTokensMap, TokenizerConfig } from "./tokenizer-data";
 export type {
-	ChatMessage,
 	WidgetExample,
 	WidgetExampleAttribute,
 	WidgetExampleAssetAndPromptInput,

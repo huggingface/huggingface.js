@@ -1,5 +1,5 @@
 import type {
-	ChatMessage,
+	ChatCompletionInputMessage,
 	WidgetExampleAssetAndPromptInput,
 	WidgetExampleAssetAndTextInput,
 	WidgetExampleAssetAndZeroShotInput,
@@ -104,7 +104,7 @@ export function isChatInput<TOutput>(sample: unknown): sample is WidgetExampleCh
 		"messages" in sample &&
 		Array.isArray(sample.messages) &&
 		sample.messages.every(
-			(message): message is ChatMessage =>
+			(message): message is ChatCompletionInputMessage =>
 				isObject(message) &&
 				"role" in message &&
 				"content" in message &&
