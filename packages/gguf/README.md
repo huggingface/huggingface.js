@@ -78,7 +78,7 @@ const { metadata, tensorInfos } = await gguf(URL_MODEL);
 // Type check for model architecture at runtime
 if (metadata["general.architecture"] === "llama") {
 
-  // "llama.attention.head_count" is a valid key for llama architecture
+  // "llama.attention.head_count" is a valid key for llama architecture, this is typed as a number
   console.log(model["llama.attention.head_count"]);
 
   // "mamba.ssm.conv_kernel" is an invalid key, because it requires model architecture to be mamba
@@ -88,9 +88,9 @@ if (metadata["general.architecture"] === "llama") {
 
 ### Disable strictly typed
 
-Because GGUF format can be used to store tensors, we can technically use it for other usages. For example, storing [control vectors](https://github.com/ggerganov/llama.cpp/pull/5970), [lora weights](https://github.com/ggerganov/llama.cpp/pull/2632),...
+Because GGUF format can be used to store tensors, we can technically use it for other usages. For example, storing [control vectors](https://github.com/ggerganov/llama.cpp/pull/5970), [lora weights](https://github.com/ggerganov/llama.cpp/pull/2632), etc.
 
-In case you want to use your own GGUF metadata structure, you can disable strict type by casting the parse output to `GGUFParseOutput<{ strict: false }>`:
+In case you want to use your own GGUF metadata structure, you can disable strict typing by casting the parse output to `GGUFParseOutput<{ strict: false }>`:
 
 ```ts
 const { metadata, tensorInfos }: GGUFParseOutput<{ strict: false }> = await gguf(URL_LLAMA);
