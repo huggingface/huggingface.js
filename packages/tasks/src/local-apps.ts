@@ -99,10 +99,11 @@ export const LOCAL_APPS = {
 		docsUrl: "https://drawthings.ai",
 		mainTask: "text-to-image",
 		macOSOnly: true,
+		comingSoon: true,
 		/**
 		 * random function, will need to refine the actual conditions:
 		 */
-		displayOnModelPage: (model) => model.tags.includes("textual_inversion"),
+		displayOnModelPage: (model) => model.library_name === "diffusers" && model.pipeline_tag === "text-to-image",
 		deeplink: (model) => new URL(`drawthings://open_from_hf?model=${model.id}`),
 	},
 	diffusionbee: {
