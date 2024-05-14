@@ -36,12 +36,6 @@ export type LocalApp = {
 	  }
 	| {
 			/**
-			 * If the app supports opening through their website
-			 */
-			weblink?: (mode: ModelData) => URL;
-	  }
-	| {
-			/**
 			 * And if not (mostly llama.cpp), snippet to copy/paste in your terminal
 			 */
 			snippet: (model: ModelData) => string;
@@ -98,7 +92,7 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		macOSOnly: true,
 		displayOnModelPage: isGgufModel,
-		weblink: (model) => new URL(`https://backyard.ai/hf/model/${model.id}`),
+		deeplink: (model) => new URL(`https://backyard.ai/hf/model/${model.id}`),
 	},
 	drawthings: {
 		prettyLabel: "Draw Things",
