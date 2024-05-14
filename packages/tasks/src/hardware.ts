@@ -151,84 +151,84 @@ export const SKUS = {
 	CPU: {
 		Intel: {
 			"Xeon 4th Generation (Sapphire Rapids)": {
-				tflops: 3.8,
+				tflops: 1.3,
 			},
 			"Xeon 3th Generation (Ice Lake)": {
-				tflops: 3.6,
+				tflops: 0.8,
 			},
 			"Xeon 2th Generation (Cascade Lake)": {
-				tflops: 3,
+				tflops: 0.55,
 			},
 			"Intel Core 13th Generation (i9)": {
-				tflops: 3.8,
+				tflops: 0.85,
 			},
 			"Intel Core 13th Generation (i7)": {
-				tflops: 3.6,
+				tflops: 0.82,
 			},
 			"Intel Core 13th Generation (i5)": {
-				tflops: 3,
+				tflops: 0.68,
 			},
 			"Intel Core 13th Generation (i3)": {
-				tflops: 2,
+				tflops: 0.57,
 			},
 			"Intel Core 12th Generation (i9)": {
-				tflops: 2,
+				tflops: 0.79,
 			},
 			"Intel Core 12th Generation (i7)": {
-				tflops: 2,
+				tflops: 0.77,
 			},
 			"Intel Core 12th Generation (i5)": {
-				tflops: 2,
+				tflops: 0.65,
 			},
 			"Intel Core 12th Generation (i3)": {
-				tflops: 1,
+				tflops: 0.53,
 			},
 			"Intel Core 11th Generation (i9)": {
-				tflops: 1,
+				tflops: 0.7,
 			},
 			"Intel Core 11th Generation (i7)": {
-				tflops: 0.76,
+				tflops: 0.6,
 			},
 			"Intel Core 11th Generation (i5)": {
-				tflops: 0.76,
+				tflops: 0.5,
 			},
 			"Intel Core 11th Generation (i3)": {
-				tflops: 0.76,
+				tflops: 0.35,
 			},
 			"Intel Core 10th Generation (i9)": {
-				tflops: 0.76,
+				tflops: 0.46,
 			},
 			"Intel Core 10th Generation (i7)": {
-				tflops: 0.76,
+				tflops: 0.46,
 			},
 			"Intel Core 10th Generation (i5)": {
-				tflops: 0.76,
+				tflops: 0.46,
 			},
 			"Intel Core 10th Generation (i3)": {
-				tflops: 0.76,
+				tflops: 0.44,
 			},
 		},
 		AMD: {
 			"EPYC 4th Generation (Genoa)": {
-				tflops: 4,
+				tflops: 5,
 			},
 			"EPYC 3th Generation (Milan)": {
-				tflops: 3,
+				tflops: 2.4,
 			},
 			"EPYC 2th Generation (Rome)": {
-				tflops: 2.9,
+				tflops: 0.6,
 			},
 			"EPYC 1st Generation (Naples)": {
-				tflops: 2.3,
+				tflops: 0.6,
 			},
 			"Ryzen Zen4 7000 (Ryzen 9)": {
-				tflops: 2.3,
+				tflops: 0.56,
 			},
 			"Ryzen Zen4 7000 (Ryzen 7)": {
-				tflops: 1.33,
+				tflops: 0.56,
 			},
 			"Ryzen Zen4 7000 (Ryzen 5)": {
-				tflops: 1.33,
+				tflops: 0.56,
 			},
 			"Ryzen Zen3 5000 (Ryzen 9)": {
 				tflops: 1.33,
