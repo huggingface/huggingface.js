@@ -4,7 +4,6 @@
  * See https://huggingface.github.io/text-generation-inference/
  */
 import fs from "fs/promises";
-import fetch from "node-fetch";
 import * as path from "node:path/posix";
 import { existsSync as pathExists } from "node:fs";
 import type { JsonObject, JsonValue } from "type-fest";
