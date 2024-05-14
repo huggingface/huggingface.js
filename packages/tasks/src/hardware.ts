@@ -42,7 +42,11 @@ export const SKUS = {
 			},
 			L40: {
 				tflops: 90.52,
-				memory: [24],
+				memory: [48],
+			},
+			"RTX 6000 Ada": {
+				tflops: 91.1,
+				memory: [48],
 			},
 			A100: {
 				tflops: 19.49,
@@ -61,48 +65,48 @@ export const SKUS = {
 				memory: [16],
 			},
 			"RTX 4090": {
-				tflops: 8.58,
-				memory: [24, 16],
+				tflops: 82.58,
+				memory: [24],
 			},
 			"RTX 4080 SUPER": {
-				tflops: 8.58,
+				tflops: 52.2,
 				memory: [16],
 			},
 			"RTX 4080": {
-				tflops: 8.58,
-				memory: [12],
+				tflops: 48.7,
+				memory: [16],
 			},
 			"RTX 4070": {
-				tflops: 8.58,
-				memory: [12, 8],
+				tflops: 29.15,
+				memory: [12],
 			},
 			"RTX 4070 Ti": {
-				tflops: 8.58,
+				tflops: 40.09,
 				memory: [12],
 			},
 			"RTX 4070 Super": {
-				tflops: 8.58,
+				tflops: 35.48,
 				memory: [12],
 			},
 			"RTX 4070 Ti Super": {
-				tflops: 7.57,
+				tflops: 44.1,
 				memory: [16],
 			},
 			"RTX 3090": {
-				tflops: 7.57,
+				tflops: 35.58,
 				memory: [24],
 			},
 			"RTX 3090 Ti": {
-				tflops: 7.57,
+				tflops: 40,
 				memory: [24],
 			},
 			"RTX 3080 Ti": {
-				tflops: 7.57,
-				memory: [24, 16],
+				tflops: 34.1,
+				memory: [12],
 			},
 			"RTX 3080": {
-				tflops: 7.57,
-				memory: [24, 16, 8],
+				tflops: 30.6,
+				memory: [12, 10],
 			},
 		},
 		AMD: {
@@ -256,15 +260,15 @@ export const SKUS = {
 		"-": {
 			"Apple M1": {
 				tflops: 2.6,
-				memory: [16, 24, 32, 64, 96, 128],
+				memory: [8, 16],
 			},
 			"Apple M1 Pro": {
 				tflops: 5.2,
-				memory: [16, 24, 32, 64, 96, 128],
+				memory: [16, 24, 32],
 			},
 			"Apple M1 Max": {
 				tflops: 10.4,
-				memory: [16, 24, 32, 64, 96, 128],
+				memory: [16, 24, 32, 64],
 			},
 			"Apple M1 Ultra": {
 				tflops: 21,
@@ -272,31 +276,31 @@ export const SKUS = {
 			},
 			"Apple M2": {
 				tflops: 3.6,
-				memory: [16, 24, 32, 64, 96, 128],
+				memory: [8, 16, 24],
 			},
 			"Apple M2 Pro": {
 				tflops: 13.6,
-				memory: [16, 24, 32, 64, 96, 128],
+				memory: [16, 24, 32],
 			},
 			"Apple M2 Max": {
 				tflops: 13.49,
-				memory: [16, 24, 32, 64, 96, 128],
+				memory: [32, 64, 96],
 			},
 			"Apple M2 Ultra": {
 				tflops: 27.2,
-				memory: [16, 24, 32, 64, 96, 128],
+				memory: [64, 96, 128, 192],
 			},
 			"Apple M3": {
 				tflops: 2.84,
-				memory: [16, 24, 32, 64, 96, 128],
+				memory: [8, 16, 24],
 			},
 			"Apple M3 Pro": {
 				tflops: 14,
-				memory: [16, 24, 32, 64, 96, 128],
+				memory: [18, 36],
 			},
 			"Apple M3 Max": {
 				tflops: 14.2,
-				memory: [16, 24, 32, 64, 96, 128],
+				memory: [36, 48, 64, 96, 128],
 			},
 		},
 	},
