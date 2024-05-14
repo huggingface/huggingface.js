@@ -14,14 +14,14 @@ export const TFLOPS_THRESHOLD_EU_AI_ACT_MODEL_TRAINING_TOTAL = 10 ** 13;
 
 export interface HardwareSpec {
 	/**
-	 * Approximate value, in FP32.
+	 * Approximate value, in FP16 whenever possible.
 	 * This is only approximate/theoretical and shouldn't be taken too seriously.
 	 * Currently the CPU values are from cpu-monkey.com
 	 * while the GPU values are from techpowerup.com
 	 *
 	 * Note to reviewers: I got fed up with data entry,
 	 * and HuggingChat running Llama3 with Web search was failing a bit,
-	 * so some of those values are kinda random. Forgive me and please feel free to improve.
+	 * so some of those values might be slightly inaccurate. Forgive me and please feel free to improve.
 	 */
 	tflops: number;
 	/**
@@ -37,7 +37,7 @@ export const SKUS = {
 	GPU: {
 		NVIDIA: {
 			H100: {
-				tflops: 51.22,
+				tflops: 267.6,
 				memory: [80],
 			},
 			L40: {
@@ -49,7 +49,7 @@ export const SKUS = {
 				memory: [48],
 			},
 			A100: {
-				tflops: 19.49,
+				tflops: 77.97,
 				memory: [80, 40],
 			},
 			A40: {
@@ -61,7 +61,7 @@ export const SKUS = {
 				memory: [24],
 			},
 			T4: {
-				tflops: 8.141,
+				tflops: 65.13,
 				memory: [16],
 			},
 			"RTX 4090": {
@@ -111,39 +111,39 @@ export const SKUS = {
 		},
 		AMD: {
 			MI300: {
-				tflops: 47.87,
+				tflops: 383.0,
 				memory: [192],
 			},
 			MI250: {
-				tflops: 45.26,
+				tflops: 362.1,
 				memory: [128],
 			},
 			MI210: {
-				tflops: 22.63,
+				tflops: 181.0,
 				memory: [64],
 			},
 			"RX 7900 XTX": {
-				tflops: 61.39,
+				tflops: 122.8,
 				memory: [24],
 			},
 			"RX 7900 XT": {
-				tflops: 51.48,
+				tflops: 103.0,
 				memory: [20],
 			},
 			"RX 7900 GRE": {
-				tflops: 45.98,
+				tflops: 91.96,
 				memory: [16],
 			},
 			"RX 7800 XT": {
-				tflops: 7.57,
+				tflops: 74.65,
 				memory: [16],
 			},
 			"RX 7700 XT": {
-				tflops: 7.57,
+				tflops: 70.34,
 				memory: [12],
 			},
 			"RX 7600 XT": {
-				tflops: 7.57,
+				tflops: 45.14,
 				memory: [16, 8],
 			},
 		},
