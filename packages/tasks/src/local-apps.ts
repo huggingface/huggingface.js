@@ -35,10 +35,10 @@ export type LocalApp = {
 			deeplink: (model: ModelData) => URL;
 	  }
 	| {
-					/**
+			/**
 			 * If the app supports opening through their website
 			 */
-					weblink?: (mode: ModelData) => URL;
+			weblink?: (mode: ModelData) => URL;
 	} 
 	| {
 			/**
