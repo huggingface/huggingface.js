@@ -102,6 +102,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.bertopic,
 		filter: true,
 	},
+	big_vision: {
+		prettyLabel: "Big Vision",
+		repoName: "big_vision",
+		repoUrl: "https://github.com/google-research/big_vision",
+		filter: false,
+		countDownloads: {
+			wildcard: { path: "*.npz" },
+		},
+	},
 	diffusers: {
 		prettyLabel: "Diffusers",
 		repoName: "🤗/diffusers",
