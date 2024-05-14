@@ -39,7 +39,7 @@ export type LocalApp = {
 			 * If the app supports opening through their website
 			 */
 			weblink?: (mode: ModelData) => URL;
-	} 
+	  }
 	| {
 			/**
 			 * And if not (mostly llama.cpp), snippet to copy/paste in your terminal
