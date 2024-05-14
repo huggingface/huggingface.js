@@ -84,25 +84,26 @@ export const LOCAL_APPS = {
 		docsUrl: "https://jan.ai",
 		mainTask: "text-generation",
 		displayOnModelPage: isGgufModel,
-		deeplink: (model) => new URL(`jan://open_from_hf?model=${model.id}`),
+		deeplink: (model) => new URL(`jan://models/huggingface/${model.id}`),
 	},
-	faraday: {
-		prettyLabel: "Faraday",
-		docsUrl: "https://faraday.dev",
+	backyard: {
+		prettyLabel: "Backyard",
+		docsUrl: "https://backyard.ai",
 		mainTask: "text-generation",
 		macOSOnly: true,
 		displayOnModelPage: isGgufModel,
-		deeplink: (model) => new URL(`faraday://open_from_hf?model=${model.id}`),
+		deeplink: (model) => new URL(`https://backyard.ai/hf/model/${model.id}`),
 	},
 	drawthings: {
 		prettyLabel: "Draw Things",
 		docsUrl: "https://drawthings.ai",
 		mainTask: "text-to-image",
 		macOSOnly: true,
+		comingSoon: true,
 		/**
 		 * random function, will need to refine the actual conditions:
 		 */
-		displayOnModelPage: (model) => model.tags.includes("textual_inversion"),
+		displayOnModelPage: (model) => model.library_name === "diffusers" && model.pipeline_tag === "text-to-image",
 		deeplink: (model) => new URL(`drawthings://open_from_hf?model=${model.id}`),
 	},
 	diffusionbee: {
