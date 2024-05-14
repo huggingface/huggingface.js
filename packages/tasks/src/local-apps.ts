@@ -35,6 +35,12 @@ export type LocalApp = {
 			deeplink: (model: ModelData) => URL;
 	  }
 	| {
+					/**
+			 * If the app supports opening through their website
+			 */
+					weblink?: (mode: ModelData) => URL;
+	} 
+	| {
 			/**
 			 * And if not (mostly llama.cpp), snippet to copy/paste in your terminal
 			 */
@@ -84,15 +90,15 @@ export const LOCAL_APPS = {
 		docsUrl: "https://jan.ai",
 		mainTask: "text-generation",
 		displayOnModelPage: isGgufModel,
-		deeplink: (model) => new URL(`jan://open_from_hf?model=${model.id}`),
+		deeplink: (model) => new URL(`jan://models/huggingface/${model.id}`),
 	},
-	faraday: {
-		prettyLabel: "Faraday",
-		docsUrl: "https://faraday.dev",
+	backyard: {
+		prettyLabel: "Backyard",
+		docsUrl: "https://backyard.ai",
 		mainTask: "text-generation",
 		macOSOnly: true,
 		displayOnModelPage: isGgufModel,
-		deeplink: (model) => new URL(`faraday://open_from_hf?model=${model.id}`),
+		weblink: (model) => new URL(`https://backyard.ai/hf/model/${model.id}`),
 	},
 	drawthings: {
 		prettyLabel: "Draw Things",
