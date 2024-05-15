@@ -45,5 +45,7 @@ export { SPECIAL_TOKENS_ATTRIBUTES } from "./tokenizer-data";
 import * as snippets from "./snippets";
 export { snippets };
 
+export { SKUS, DEFAULT_MEMORY_OPTIONS } from "./hardware";
+export type { HardwareSpec, SkuType } from "./hardware";
 export { LOCAL_APPS } from "./local-apps";
 export type { LocalApp, LocalAppKey } from "./local-apps";
