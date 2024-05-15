@@ -2,6 +2,8 @@
  * See default-widget-inputs.ts for the default widget inputs, this files only contains the types
  */
 
+import type { ChatCompletionInputMessage } from "./tasks";
+
 type TableData = Record<string, (string | number)[]>;
 
 //#region outputs
@@ -51,13 +53,8 @@ export interface WidgetExampleBase<TOutput> {
 	output?: TOutput;
 }
 
-export interface ChatMessage {
-	role: "user" | "assistant" | "system";
-	content: string;
-}
-
 export interface WidgetExampleChatInput<TOutput = WidgetExampleOutput> extends WidgetExampleBase<TOutput> {
-	messages: ChatMessage[];
+	messages: ChatCompletionInputMessage[];
 }
 
 export interface WidgetExampleTextInput<TOutput = WidgetExampleOutput> extends WidgetExampleBase<TOutput> {
