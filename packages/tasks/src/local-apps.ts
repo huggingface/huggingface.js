@@ -105,7 +105,13 @@ export const LOCAL_APPS = {
 		 * random function, will need to refine the actual conditions:
 		 */
 		displayOnModelPage: (model) => model.library_name === "diffusers" && model.pipeline_tag === "text-to-image",
-		deeplink: (model) => new URL(`drawthings://open_from_hf?model=${model.id}`),
+		deeplink: (model) => {
+			if (model.tags.includes("lora")) {
+				return new URL(`https://drawthings.ai/import/diffusers/pipeline.load_lora_weights?repo_id=${model.id}`);
+			} else {
+				return new URL(`https://drawthings.ai/import/diffusers/pipeline.from_pretrained?repo_id=${model.id}`);
+			}
+		},
 	},
 	diffusionbee: {
 		prettyLabel: "DiffusionBee",
