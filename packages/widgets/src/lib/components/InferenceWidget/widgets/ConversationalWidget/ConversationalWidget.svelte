@@ -2,21 +2,20 @@
 	import { onMount, tick } from "svelte";
 	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "../../shared/types.js";
 	import type { Options } from "@huggingface/inference";
-	import { Template } from "@huggingface/jinja";
 	import type {
 		SpecialTokensMap,
 		TokenizerConfig,
 		WidgetExampleTextInput,
-		TextGenerationInput,
+		ChatCompletionInput,
 		WidgetExampleOutputText,
 		WidgetExampleChatInput,
 		WidgetExample,
 		AddedToken,
+		ChatCompletionInputMessage,
 	} from "@huggingface/tasks";
 	import { SPECIAL_TOKENS_ATTRIBUTES } from "@huggingface/tasks";
 	import { HfInference } from "@huggingface/inference";
 
-	import type { ChatMessage } from "@huggingface/tasks";
 	import WidgetOutputConvo from "../../shared/WidgetOutputConvo/WidgetOutputConvo.svelte";
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
@@ -40,13 +39,12 @@
 
 	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
-	let messages: ChatMessage[] = [];
+	let messages: ChatCompletionInputMessage[] = [];
 	let error: string = "";
 	let isLoading: boolean = false;
 	let outputJson: string;
 	let text = "";
 
-	let compiledTemplate: Template;
 	let tokenizerConfig: TokenizerConfig;
 	let specialTokensMap: SpecialTokensMap | undefined = undefined;
 	let inferenceClient: HfInference | undefined = undefined;
@@ -54,7 +52,7 @@
 
 	$: inferenceClient = new HfInference(apiToken);
 
-	// Check config and compile template
+	// check config
 	onMount(() => {
 		const config = model.config;
 		if (config === undefined) {
@@ -79,12 +77,6 @@
 		}
 		if (!chatTemplate) {
 			error = "No chat template found in tokenizer config";
-			return;
-		}
-		try {
-			compiledTemplate = new Template(chatTemplate);
-		} catch (e) {
-			error = `Invalid chat template: "${(e as Error).message}"`;
 			return;
 		}
 	});
@@ -125,33 +117,18 @@
 			await tick();
 			return;
 		}
-		if (!compiledTemplate) {
-			return;
-		}
 		if (!inferenceClient) {
 			error = "Inference client not ready";
 			return;
 		}
-		// Render chat template
+
 		specialTokensMap = extractSpecialTokensMap(tokenizerConfig);
 
-		let chatText;
-		try {
-			chatText = compiledTemplate.render({
-				messages,
-				add_generation_prompt: true,
-				...specialTokensMap,
-			});
-		} catch (e) {
-			error = `An error occurred while rendering the chat template: "${(e as Error).message}"`;
-			return;
-		}
+		const previousMessages = [...messages];
 
-		const input: TextGenerationInput & Required<Pick<TextGenerationInput, "parameters">> = {
-			inputs: chatText,
-			parameters: {
-				return_full_text: false,
-			},
+		const input: ChatCompletionInput = {
+			model: model.id,
+			messages: previousMessages,
 		};
 		addInferenceParameters(input, model);
 
@@ -171,32 +148,44 @@
 
 			tgiSupportedModels = await getTgiSupportedModels(apiUrl);
 			if ($tgiSupportedModels?.has(model.id)) {
-				console.debug("Starting text generation using the TGI streaming API");
+				console.debug("Starting chat completion using the TGI streaming API");
 				let newMessage = {
 					role: "assistant",
 					content: "",
-				} satisfies ChatMessage;
-				const previousMessages = [...messages];
-				const tokenStream = inferenceClient.textGenerationStream(
+				} satisfies ChatCompletionInputMessage;
+
+				const tokenStream = inferenceClient.chatCompletionStream(
 					{
-						...input,
-						model: model.id,
 						accessToken: apiToken,
+						...input,
 					},
 					opts
 				);
+
 				for await (const newToken of tokenStream) {
-					if (newToken.token.special) continue;
-					newMessage.content = newMessage.content + newToken.token.text;
+					const newTokenContent = newToken.choices?.[0].delta.content;
+					if (!newTokenContent) {
+						continue;
+					}
+					newMessage.content = newMessage.content + newTokenContent;
 					messages = [...previousMessages, newMessage];
 					await tick();
 				}
 			} else {
-				console.debug("Starting text generation using the synchronous API");
-				input.parameters.max_new_tokens = 100;
-				const output = await inferenceClient.textGeneration({ ...input, model: model.id, accessToken: apiToken }, opts);
-				messages = [...messages, { role: "assistant", content: output.generated_text }];
-				await tick();
+				console.debug("Starting chat completion using the synchronous API");
+				input.max_new_tokens = 100;
+				const output = await inferenceClient.chatCompletion(
+					{
+						accessToken: apiToken,
+						...input,
+					},
+					opts
+				);
+				const newAssistantMsg = output.choices.at(-1)?.message;
+				if (newAssistantMsg) {
+					messages = [...messages, newAssistantMsg];
+					await tick();
+				}
 			}
 		} catch (e) {
 			if (!isOnLoadCall) {

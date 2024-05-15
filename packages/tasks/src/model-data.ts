@@ -26,10 +26,6 @@ export interface ModelData {
 	 */
 	id: string;
 	/**
-	 * Kept for backward compatibility
-	 */
-	modelId?: string;
-	/**
 	 * Whether or not to enable inference widget for this model
 	 */
 	inference: InferenceDisplayability;
@@ -84,7 +80,7 @@ export interface ModelData {
 	/**
 	 * all the model tags
 	 */
-	tags?: string[];
+	tags: string[];
 	/**
 	 * transformers-specific info to display in the code sample.
 	 */

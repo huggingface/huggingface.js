@@ -8,9 +8,6 @@ dependencies:
   '@huggingface/inference':
     specifier: workspace:^
     version: link:../inference
-  '@huggingface/jinja':
-    specifier: workspace:^
-    version: link:../jinja
   '@huggingface/tasks':
     specifier: workspace:^
     version: link:../tasks

@@ -19,7 +19,6 @@ export type { LibraryUiElement, ModelLibraryKey } from "./model-libraries";
 export type { ModelData, TransformersInfo } from "./model-data";
 export type { AddedToken, SpecialTokensMap, TokenizerConfig } from "./tokenizer-data";
 export type {
-	ChatMessage,
 	WidgetExample,
 	WidgetExampleAttribute,
 	WidgetExampleAssetAndPromptInput,
@@ -48,3 +47,5 @@ export { snippets };
 
 export { SKUS, DEFAULT_MEMORY_OPTIONS } from "./hardware";
 export type { HardwareSpec, SkuType } from "./hardware";
+export { LOCAL_APPS } from "./local-apps";
+export type { LocalApp, LocalAppKey } from "./local-apps";

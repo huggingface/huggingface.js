@@ -102,6 +102,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.bertopic,
 		filter: true,
 	},
+	big_vision: {
+		prettyLabel: "Big Vision",
+		repoName: "big_vision",
+		repoUrl: "https://github.com/google-research/big_vision",
+		filter: false,
+		countDownloads: {
+			wildcard: { path: "*.npz" },
+		},
+	},
 	diffusers: {
 		prettyLabel: "Diffusers",
 		repoName: "🤗/diffusers",
@@ -379,6 +388,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "TensorFlowTTS",
 		repoUrl: "https://github.com/TensorSpeech/TensorFlowTTS",
 		snippets: snippets.tensorflowtts,
+	},
+	timesfm: {
+		prettyLabel: "TimesFM",
+		repoName: "timesfm",
+		repoUrl: "https://github.com/google-research/timesfm",
+		filter: false,
+		countDownloads: {
+			term: { path: "checkpoints/checkpoint_1100000/state/checkpoint" },
+		},
 	},
 	timm: {
 		prettyLabel: "timm",

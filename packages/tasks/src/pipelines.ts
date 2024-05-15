@@ -582,7 +582,6 @@ export const PIPELINE_DATA = {
 			},
 		],
 		color: "blue",
-		hideInModels: true,
 	},
 	"text-to-video": {
 		name: "Text-to-Video",

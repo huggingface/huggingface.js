@@ -1,7 +1,7 @@
 {
 	"name": "@huggingface/widgets",
 	"packageManager": "pnpm@8.10.5",
-	"version": "0.2.10",
+	"version": "0.2.11",
 	"publishConfig": {
 		"access": "public"
 	},
@@ -46,7 +46,6 @@
 	],
 	"dependencies": {
 		"@huggingface/inference": "workspace:^",
-		"@huggingface/jinja": "workspace:^",
 		"@huggingface/tasks": "workspace:^",
 		"marked": "^12.0.2"
 	},

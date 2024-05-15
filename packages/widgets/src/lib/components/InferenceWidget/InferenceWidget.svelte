@@ -80,7 +80,7 @@
 	};
 
 	$: widgetComponent =
-		model.pipeline_tag === "text-generation" && model.tags?.includes("conversational")
+		model.pipeline_tag === "text-generation" && model.tags.includes("conversational")
 			? (ConversationalWidget as typeof SvelteComponent)
 			: model.pipeline_tag && model.pipeline_tag in WIDGET_COMPONENTS
 			  ? WIDGET_COMPONENTS[model.pipeline_tag as keyof typeof WIDGET_COMPONENTS]
