@@ -104,7 +104,7 @@ export const LOCAL_APPS = {
 		/**
 		 * random function, will need to refine the actual conditions:
 		 */
-		displayOnModelPage: (model) => model.library_name === "diffusers" && model.pipeline_tag === "text-to-image",
+		displayOnModelPage: (model) => model.library_name === "diffusers" && (model.pipeline_tag === "text-to-image" || model.tags.includes("lora")),
 		deeplink: (model) => {
 			if (model.tags.includes("lora")) {
 				return new URL(`https://drawthings.ai/import/diffusers/pipeline.load_lora_weights?repo_id=${model.id}`);
