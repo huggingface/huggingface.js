@@ -37,7 +37,8 @@
 		"prepare": "pnpm run build",
 		"test": "vitest run",
 		"test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest-browser.config.mts",
-		"check": "tsc"
+		"check": "tsc",
+		"pullVendor": "tsx scripts/pull-vendor.ts"
 	},
 	"files": [
 		"src",
@@ -59,7 +60,6 @@
 		"@types/node": "^20.11.28"
 	},
 	"dependencies": {
-		"@huggingface/tasks": "workspace:^",
-		"hash-wasm": "^4.9.0"
+		"@huggingface/tasks": "workspace:^"
 	}
 }

@@ -2,31 +2,33 @@ import { eventToGenerator } from "./eventToGenerator";
 import { hexFromBytes } from "./hexFromBytes";
 import { isFrontend } from "./isFrontend";
 
-const webWorkerCode = `
-// Would prefer no CDN, but need a clever way to not burden the main file of the bundle
-importScripts("https://cdn.jsdelivr.net/npm/hash-wasm@4/dist/sha256.umd.min.js");
+async function webWorkerCode(): Promise<Blob> {
+	const vendorModule = await import("../vendor/hash-wasm/sha256-worker");
+	return new Blob([`
+		${vendorModule.sha256WebWorkerCode}
 
-const createSHA256 = hashwasm.createSHA256;
+		const createSHA256 = hashwasm.createSHA256;
 
-self.addEventListener('message', async (event) => {
-	const { file } = event.data;
-	const sha256 = await createSHA256();
-	sha256.init();
-	const reader = file.stream().getReader();
-	const total = file.size;
-	let bytesDone = 0;
-	while (true) {
-		const { done, value } = await reader.read();
-		if (done) {
-			break;
-		}
-		sha256.update(value);
-		bytesDone += value.length;
-		postMessage({ progress: bytesDone / total });
-	}
-	postMessage({ sha256: sha256.digest('hex') });
-});
-`;
+		self.addEventListener('message', async (event) => {
+			const { file } = event.data;
+			const sha256 = await createSHA256();
+			sha256.init();
+			const reader = file.stream().getReader();
+			const total = file.size;
+			let bytesDone = 0;
+			while (true) {
+				const { done, value } = await reader.read();
+				if (done) {
+					break;
+				}
+				sha256.update(value);
+				bytesDone += value.length;
+				postMessage({ progress: bytesDone / total });
+			}
+			postMessage({ sha256: sha256.digest('hex') });
+		});
+	`]);
+};
 
 const pendingWorkers: Worker[] = [];
 const runningWorkers: Set<Worker> = new Set();
@@ -45,7 +47,7 @@ async function getWorker(poolSize?: number): Promise<Worker> {
 		}
 	}
 	if (!poolSize) {
-		const worker = new Worker(URL.createObjectURL(new Blob([webWorkerCode])));
+		const worker = new Worker(URL.createObjectURL(await webWorkerCode()));
 		runningWorkers.add(worker);
 		return worker;
 	}
@@ -58,7 +60,7 @@ async function getWorker(poolSize?: number): Promise<Worker> {
 		await waitPromise;
 	}
 
-	const worker = new Worker(URL.createObjectURL(new Blob([webWorkerCode])));
+	const worker = new Worker(URL.createObjectURL(await webWorkerCode()));
 	runningWorkers.add(worker);
 	return worker;
 }
@@ -147,7 +149,7 @@ export async function* sha256(
 			}
 		}
 		if (!wasmModule) {
-			wasmModule = await import("hash-wasm");
+			wasmModule = await import("../vendor/hash-wasm/sha256");
 		}
 
 		const sha256 = await wasmModule.createSHA256();
@@ -184,4 +186,4 @@ export async function* sha256(
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 let cryptoModule: typeof import("./sha256-node");
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-let wasmModule: typeof import("hash-wasm");
+let wasmModule: typeof import("../vendor/hash-wasm/sha256");

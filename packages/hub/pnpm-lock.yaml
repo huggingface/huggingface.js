@@ -8,9 +8,6 @@ dependencies:
   '@huggingface/tasks':
     specifier: workspace:^
     version: link:../tasks
-  hash-wasm:
-    specifier: ^4.9.0
-    version: 4.9.0
 
 devDependencies:
   '@types/node':
@@ -24,10 +21,6 @@ packages:
     dependencies:
       undici-types: 5.26.5
     dev: true
-
-  /hash-wasm@4.9.0:
-    resolution: {integrity: sha512-7SW7ejyfnRxuOc7ptQHSf4LDoZaWOivfzqw+5rpcQku0nHfmicPKE51ra9BiRLAmT8+gGLestr1XroUkqdjL6w==}
-    dev: false
 
   /undici-types@5.26.5:
     resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}
