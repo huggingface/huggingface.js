@@ -44,6 +44,10 @@
 	let isLoading: boolean = false;
 	let outputJson: string;
 	let text = "";
+	let modelLoading = {
+		isLoading: false,
+		estimatedTime: 0,
+	};
 
 	let tokenizerConfig: TokenizerConfig;
 	let specialTokensMap: SpecialTokensMap | undefined = undefined;
@@ -190,7 +194,16 @@
 		} catch (e) {
 			if (!isOnLoadCall) {
 				if (!!e && typeof e === "object" && "message" in e && typeof e.message === "string") {
-					error = e.message;
+					if (e.message.includes("is currently loading")) {
+						modelLoading = {
+							isLoading: true,
+							estimatedTime: 10, // 10 seconds for an estimate
+						};
+						await getOutput({ withModelLoading: true, useCache });
+						modelLoading = { isLoading: false, estimatedTime: 0 };
+					} else {
+						error = e.message;
+					}
 				} else {
 					error = `Something went wrong with the request.`;
 				}
@@ -275,7 +288,7 @@
 		on:cmdEnter={handleNewMessage}
 	/>
 
-	<WidgetInfo {model} {error} />
+	<WidgetInfo {model} {error} {modelLoading} />
 
 	<WidgetFooter {model} {isDisabled} {outputJson} />
 </WidgetWrapper>
