@@ -100,7 +100,8 @@ export const LOCAL_APPS = {
 		docsUrl: "https://drawthings.ai",
 		mainTask: "text-to-image",
 		macOSOnly: true,
-		displayOnModelPage: (model) => model.library_name === "diffusers" && (model.pipeline_tag === "text-to-image" || model.tags.includes("lora")),
+		displayOnModelPage: (model) =>
+			model.library_name === "diffusers" && (model.pipeline_tag === "text-to-image" || model.tags.includes("lora")),
 		deeplink: (model) => {
 			if (model.tags.includes("lora")) {
 				return new URL(`https://drawthings.ai/import/diffusers/pipeline.load_lora_weights?repo_id=${model.id}`);
