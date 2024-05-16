@@ -88,10 +88,9 @@ export const LOCAL_APPS = {
 		deeplink: (model) => new URL(`jan://models/huggingface/${model.id}`),
 	},
 	backyard: {
-		prettyLabel: "Backyard",
+		prettyLabel: "Backyard AI",
 		docsUrl: "https://backyard.ai",
 		mainTask: "text-generation",
-		macOSOnly: true,
 		displayOnModelPage: isGgufModel,
 		deeplink: (model) => new URL(`https://backyard.ai/hf/model/${model.id}`),
 	},
