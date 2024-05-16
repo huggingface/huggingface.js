@@ -50,7 +50,7 @@ const snippetLlamacpp = (model: ModelData): string => {
 	return `./main \\
 	--hf-repo "${model.id}" \\
 	-m file.gguf \\
-	-p "I believe the meaning of life is " \\
+	-p "I believe the meaning of life is" \\
 	-n 128`;
 };
 
