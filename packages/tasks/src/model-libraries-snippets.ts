@@ -266,6 +266,27 @@ export const tensorflowtts = (model: ModelData): string[] => {
 	return tensorflowttsUnknown(model);
 };
 
+const thirdaiUDT = (model: ModelData): string[] => [
+	`from thirdai import bolt
+
+model = bolt.UniversalDeepTransformer.load("${model.id}")
+`,
+];
+
+const thirdaiNeuralDB = (model: ModelData): string[] => [
+	`from thirdai import neural_db as ndb
+
+model = ndb.NeuralDB.from_checkpoint("${model.id}")
+`,
+];
+
+export const thirdai = (model: ModelData): string[] => {
+	if (model.tags.includes("neural-db")) {
+		return thirdaiNeuralDB(model);
+	}
+	return thirdaiUDT(model);
+};
+
 export const timm = (model: ModelData): string[] => [
 	`import timm
 
@@ -421,8 +442,8 @@ export const transformers = (model: ModelData): string[] => {
 			info.processor === "AutoTokenizer"
 				? "tokenizer"
 				: info.processor === "AutoFeatureExtractor"
-				  ? "extractor"
-				  : "processor";
+					? "extractor"
+					: "processor";
 		autoSnippet = [
 			"# Load model directly",
 			`from transformers import ${info.processor}, ${info.auto_model}`,

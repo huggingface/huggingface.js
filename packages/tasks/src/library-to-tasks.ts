@@ -43,6 +43,12 @@ export const LIBRARY_TASK_MAPPING: Partial<Record<ModelLibraryKey, PipelineType[
 		"text2text-generation",
 	],
 	stanza: ["token-classification"],
+	thirdai: [
+		"text-classification", 
+		"token-classification", 
+		"tabular-classification", 
+		"tabular-regression", 
+	],
 	timm: ["image-classification"],
 	transformers: [
 		"audio-classification",

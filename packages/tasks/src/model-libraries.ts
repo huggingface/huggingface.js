@@ -389,6 +389,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/TensorSpeech/TensorFlowTTS",
 		snippets: snippets.tensorflowtts,
 	},
+	thirdai: {
+		prettyLabel: "thirdai",
+		repoName: "thirdai",
+		repoUrl: "https://github.com/ThirdAILabs/Demos",
+		snippets: snippets.thirdai,
+		filter: false,
+	},
 	timesfm: {
 		prettyLabel: "TimesFM",
 		repoName: "timesfm",
