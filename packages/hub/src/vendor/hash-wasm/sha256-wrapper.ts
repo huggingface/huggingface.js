@@ -38,7 +38,7 @@ export async function createSHA256(isInsideWorker = false): Promise<{
 }
 
 export function createSHA256WorkerCode(): string {
-	/*return `
+	return `
     const _scriptDir = "";
 		self.addEventListener('message', async (event) => {
       const { file } = event.data;
@@ -60,30 +60,5 @@ export function createSHA256WorkerCode(): string {
     });
     self.SHA256WasmModule = ${WasmModule.toString()};
     self.createSHA256 = ${createSHA256.toString()};
-  `;*/
-	return `
-	// Would prefer no CDN, but need a clever way to not burden the main file of the bundle
-importScripts("https://cdn.jsdelivr.net/npm/hash-wasm@4/dist/sha256.umd.min.js");
-
-const createSHA256 = hashwasm.createSHA256;
-
-self.addEventListener('message', async (event) => {
-	const { file } = event.data;
-	const sha256 = await createSHA256();
-	sha256.init();
-	const reader = file.stream().getReader();
-	const total = file.size;
-	let bytesDone = 0;
-	while (true) {
-		const { done, value } = await reader.read();
-		if (done) {
-			break;
-		}
-		sha256.update(value);
-		bytesDone += value.length;
-		postMessage({ progress: bytesDone / total });
-	}
-	postMessage({ sha256: sha256.digest('hex') });
-});
-`;
+  `;
 }
