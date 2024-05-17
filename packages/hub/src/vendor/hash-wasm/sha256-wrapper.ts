@@ -3,15 +3,15 @@ import WasmModule from "./sha256";
 const BUFFER_MAX_SIZE = 8 * 1024 * 1024;
 
 export async function createSHA256(isInsideWorker = false): Promise<{
-	init(): void,
-	update(data: Uint8Array): void,
-	digest(method: "hex"): string,
+	init(): void;
+	update(data: Uint8Array): void;
+	digest(method: "hex"): string;
 }> {
 	const wasm: Awaited<ReturnType<typeof WasmModule>> = isInsideWorker
 		? // @ts-expect-error WasmModule will be populated inside self object
 		  await self["WasmModule"]()
 		: await WasmModule();
-		const heap = wasm.HEAPU8.subarray(wasm._GetBufferPtr());
+	const heap = wasm.HEAPU8.subarray(wasm._GetBufferPtr());
 	return {
 		init() {
 			wasm._Hash_Init(256);
