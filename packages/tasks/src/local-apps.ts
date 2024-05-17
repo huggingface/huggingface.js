@@ -47,18 +47,20 @@ function isGgufModel(model: ModelData) {
 }
 
 const snippetLlamacpp = (model: ModelData): string[] => {
-	return [`
+	return [
+		`
 ## Install and build llama.cpp with curl support
 git clone https://github.com/ggerganov/llama.cpp.git 
 cd llama.cpp
 LLAMA_CURL=1 make
-`, 
-`## Load and run the model
+`,
+		`## Load and run the model
 ./main \\
 	--hf-repo "${model.id}" \\
 	-m file.gguf \\
 	-p "I believe the meaning of life is" \\
-	-n 128`];
+	-n 128`,
+	];
 };
 
 /**
