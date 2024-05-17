@@ -18,5 +18,3 @@ export type {
 	SpaceStage,
 } from "./types/public";
 export { HubApiError, InvalidApiResponseFormatError } from "./error";
-export { sha256 } from "./utils/sha256";
-export { WebBlob } from "./utils/WebBlob";
