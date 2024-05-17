@@ -59,7 +59,6 @@
 		"@types/node": "^20.11.28"
 	},
 	"dependencies": {
-		"@huggingface/tasks": "workspace:^",
-		"hash-wasm": "^4.9.0"
+		"@huggingface/tasks": "workspace:^"
 	}
 }
