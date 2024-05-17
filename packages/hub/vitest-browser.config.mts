@@ -4,4 +4,7 @@ export default defineConfig({
 	test: {
 		exclude: [...configDefaults.exclude, "src/utils/FileBlob.spec.ts"],
 	},
+	optimizeDeps: {
+    exclude: ["src/vendor/hash-wasm/sha256.js"],
+  }
 });
