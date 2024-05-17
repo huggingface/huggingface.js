@@ -9,7 +9,7 @@ export async function createSHA256(isInsideWorker = false): Promise<{
 }> {
 	const wasm: Awaited<ReturnType<typeof WasmModule>> = isInsideWorker
 		? // @ts-expect-error WasmModule will be populated inside self object
-		  await self["WasmModule"]()
+		  await self["SHA256WasmModule"]()
 		: await WasmModule();
 	const heap = wasm.HEAPU8.subarray(wasm._GetBufferPtr());
 	return {
@@ -20,7 +20,7 @@ export async function createSHA256(isInsideWorker = false): Promise<{
 			let byteUsed = 0;
 			while (byteUsed < data.byteLength) {
 				const bytesLeft = data.byteLength - byteUsed;
-				const length = bytesLeft < BUFFER_MAX_SIZE ? bytesLeft : BUFFER_MAX_SIZE;
+				const length = Math.min(bytesLeft, BUFFER_MAX_SIZE);
 				heap.set(data.subarray(byteUsed, length));
 				wasm._Hash_Update(length);
 				byteUsed += length;
@@ -40,13 +40,11 @@ export async function createSHA256(isInsideWorker = false): Promise<{
 export function createSHA256WorkerCode(): string {
 	return `
     const _scriptDir = "";
-    self.WasmModule = ${WasmModule.toString()};
-
-    ${createSHA256.toString()};
-
+    self.SHA256WasmModule = ${WasmModule.toString()};
+    self.createSHA256 = ${createSHA256.toString()};
     self.addEventListener('message', async (event) => {
       const { file } = event.data;
-      const sha256 = await createSHA256(true);
+      const sha256 = await self.createSHA256(true);
       sha256.init();
       const reader = file.stream().getReader();
       const total = file.size;
