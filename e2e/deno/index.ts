@@ -8,9 +8,8 @@ for await (const file of listFiles({ credentials: { accessToken: "hf_hub.js" }, 
 	console.log(file);
 }
 
+const token = Deno.env.get("HF_TOKEN");
 if (token) {
-	const token = Deno.env.get("HF_TOKEN");
-
 	const hf = new HfInference(token);
 
 	const tokenInfo = await whoAmI({ credentials: { accessToken: token } });
