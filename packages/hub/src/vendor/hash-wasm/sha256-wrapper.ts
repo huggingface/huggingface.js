@@ -20,7 +20,7 @@ export async function createSHA256(isInsideWorker = false): Promise<{
 			while (byteUsed < data.byteLength) {
 				const bytesLeft = data.byteLength - byteUsed;
 				const length = Math.min(bytesLeft, BUFFER_MAX_SIZE);
-				heap.set(data.subarray(byteUsed, length));
+				heap.set(data.subarray(byteUsed, byteUsed + length));
 				wasm._Hash_Update(length);
 				byteUsed += length;
 			}
