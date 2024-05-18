@@ -129,6 +129,7 @@ jobs:
         run: |
           pnpm i --ignore-workspace --registry http://localhost:4874/
           pnpm build
+          pnpm run test:browser
 
       - uses: denoland/setup-deno@v1
         with:
