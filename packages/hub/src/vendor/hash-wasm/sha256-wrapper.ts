@@ -38,7 +38,6 @@ export async function createSHA256(isInsideWorker = false): Promise<{
 
 export function createSHA256WorkerCode(): string {
 	return `
-    const _scriptDir = "";
 		self.addEventListener('message', async (event) => {
       const { file } = event.data;
       const sha256 = await self.createSHA256(true);
