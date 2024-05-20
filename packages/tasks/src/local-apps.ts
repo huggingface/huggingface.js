@@ -365,6 +365,13 @@ export const LOCAL_APPS = {
 		displayOnModelPage: (model) => model.library_name === "diffusers" && model.pipeline_tag === "text-to-image",
 		deeplink: (model) => new URL(`https://models.invoke.ai/huggingface/${model.id}`),
 	},
+	ollama: {
+		prettyLabel: "Ollama",
+		docsUrl: "https://github.com/ollama/ollama/tree/main/docs",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		deeplink: (model) => new URL(`https://ollama.com/library/{model.id}`),
+	},
 } satisfies Record<string, LocalApp>;
 
 export type LocalAppKey = keyof typeof LOCAL_APPS;
