@@ -140,8 +140,8 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	summarization: ["transformers", "transformers.js"],
 	"table-question-answering": ["transformers"],
 	"table-to-text": ["transformers"],
-	"tabular-classification": ["sklearn", "thirdai"],
-	"tabular-regression": ["sklearn", "thirdai"],
+	"tabular-classification": ["sklearn"],
+	"tabular-regression": ["sklearn"],
 	"tabular-to-text": ["transformers"],
 	"text-classification": [
 		"adapter-transformers", 
