@@ -46,8 +46,6 @@ export const LIBRARY_TASK_MAPPING: Partial<Record<ModelLibraryKey, PipelineType[
 	thirdai: [
 		"text-classification", 
 		"token-classification", 
-		"tabular-classification", 
-		"tabular-regression", 
 	],
 	timm: ["image-classification"],
 	transformers: [
