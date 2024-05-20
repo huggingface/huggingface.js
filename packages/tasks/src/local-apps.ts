@@ -103,6 +103,14 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isGgufModel,
 		deeplink: (model) => new URL(`https://backyard.ai/hf/model/${model.id}`),
 	},
+	ollama: {
+		prettyLabel: "Ollama",
+		docsUrl: "https://github.com/ollama/ollama/tree/main/docs",
+		mainTask: "text-generation",
+		displayOnModelPage: isGgufModel,
+		deeplink: (model) => new URL(`https://ollama.com/library/{model.id}`),
+	},
+	
 	drawthings: {
 		prettyLabel: "Draw Things",
 		docsUrl: "https://drawthings.ai",
