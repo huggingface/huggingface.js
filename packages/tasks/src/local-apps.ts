@@ -103,6 +103,13 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isGgufModel,
 		deeplink: (model) => new URL(`https://backyard.ai/hf/model/${model.id}`),
 	},
+	sanctum: {
+		prettyLabel: "Sanctum",
+		docsUrl: "https://sanctum.ai",
+		mainTask: "text-generation",
+		displayOnModelPage: isGgufModel,
+		deeplink: (model) => new URL(`sanctum://open_from_hf?model=${model.id}`),
+	},
 	drawthings: {
 		prettyLabel: "Draw Things",
 		docsUrl: "https://drawthings.ai",
