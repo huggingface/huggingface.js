@@ -665,8 +665,6 @@ export class Interpreter {
 		}
 
 		const fn = this.evaluate(expr.callee, environment);
-		// console.log('FUNCTION', fn);
-		// console.log('ARGS', args);
 		if (fn.type !== "FunctionValue") {
 			throw new Error(`Cannot call something that is not a function: got ${fn.type}`);
 		}
@@ -837,9 +835,6 @@ export class Interpreter {
 	 * See https://jinja.palletsprojects.com/en/3.1.x/templates/#macros for more information.
 	 */
 	private evaluateMacro(node: Macro, environment: Environment): NullValue {
-		// console.log('=========================')
-		// console.dir(node, { depth : null})
-		// console.log('=========================')
 		environment.setVariable(
 			node.name.value,
 			new FunctionValue((args, scope) => {
