@@ -132,6 +132,7 @@ const TEST_STRINGS = {
 
 	// Macros
 	MACROS: `{% macro hello(name) %}{{ 'Hello ' + name }}{% endmacro %}|{{ hello('Bob') }}|{{ hello('Alice') }}|`,
+	MACROS_1: `{% macro hello(name, suffix='.') %}{{ 'Hello ' + name + suffix }}{% endmacro %}|{{ hello('A') }}|{{ hello('B', '!') }}|{{ hello('C', suffix='?') }}|`,
 };
 
 const TEST_PARSED = {
@@ -2333,6 +2334,57 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 	],
+	MACROS_1: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "macro", type: "Macro" },
+		{ value: "hello", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "name", type: "Identifier" },
+		{ value: ",", type: "Comma" },
+		{ value: "suffix", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: ".", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "Hello ", type: "StringLiteral" },
+		{ value: "+", type: "AdditiveBinaryOperator" },
+		{ value: "name", type: "Identifier" },
+		{ value: "+", type: "AdditiveBinaryOperator" },
+		{ value: "suffix", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endmacro", type: "EndMacro" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "hello", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "A", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "hello", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "B", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "!", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "hello", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "C", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "suffix", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "?", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
 };
 
 const TEST_CONTEXT = {
@@ -2525,6 +2577,7 @@ const TEST_CONTEXT = {
 
 	// Macros
 	MACROS: {},
+	MACROS_1: {},
 };
 
 const EXPECTED_OUTPUTS = {
@@ -2655,6 +2708,7 @@ const EXPECTED_OUTPUTS = {
 
 	// Macros
 	MACROS: `|Hello Bob|Hello Alice|`,
+	MACROS_1: `|Hello A.|Hello B!|Hello C?|`,
 };
 
 describe("Templates", () => {

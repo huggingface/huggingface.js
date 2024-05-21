@@ -152,6 +152,13 @@ export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 }
 
 /**
+ * Represents a KeywordArguments value at runtime.
+ */
+export class KeywordArgumentsValue extends ObjectValue {
+	override type = "KeywordArgumentsValue";
+}
+
+/**
  * Represents an Array value at runtime.
  */
 export class ArrayValue extends RuntimeValue<AnyRuntimeValue[]> {
@@ -654,10 +661,12 @@ export class Interpreter {
 			}
 		}
 		if (kwargs.size > 0) {
-			args.push(new ObjectValue(kwargs));
+			args.push(new KeywordArgumentsValue(kwargs));
 		}
 
 		const fn = this.evaluate(expr.callee, environment);
+		// console.log('FUNCTION', fn);
+		// console.log('ARGS', args);
 		if (fn.type !== "FunctionValue") {
 			throw new Error(`Cannot call something that is not a function: got ${fn.type}`);
 		}
@@ -828,16 +837,42 @@ export class Interpreter {
 	 * See https://jinja.palletsprojects.com/en/3.1.x/templates/#macros for more information.
 	 */
 	private evaluateMacro(node: Macro, environment: Environment): NullValue {
+		// console.log('=========================')
+		// console.dir(node, { depth : null})
+		// console.log('=========================')
 		environment.setVariable(
 			node.name.value,
 			new FunctionValue((args, scope) => {
 				const macroScope = new Environment(scope);
-				for (let i = 0; i < node.args.length; i++) {
-					if (node.args[i].type !== "Identifier") {
-						throw new Error("Macro arguments must be identifiers");
+
+				args = args.slice(); // Make a copy of the arguments
+
+				// Separate positional and keyword arguments
+				let kwargs;
+				if (args.at(-1)?.type === "KeywordArgumentsValue") {
+					kwargs = args.pop() as KeywordArgumentsValue;
+				}
+
+				// Assign values to all arguments defined by the node
+				for (let i = 0; i < node.args.length; ++i) {
+					const nodeArg = node.args[i];
+					const passedArg = args[i];
+					if (nodeArg.type === "Identifier") {
+						const identifier = nodeArg as Identifier;
+						if (!passedArg) {
+							throw new Error(`Missing positional argument: ${identifier.value}`);
+						}
+						macroScope.setVariable(identifier.value, passedArg);
+					} else if (nodeArg.type === "KeywordArgumentExpression") {
+						const kwarg = nodeArg as KeywordArgumentExpression;
+						const value =
+							passedArg ?? // Try positional arguments first
+							kwargs?.value.get(kwarg.key.value) ?? // Look in user-passed kwargs
+							this.evaluate(kwarg.value, macroScope); // Use the default defined by the node
+						macroScope.setVariable(kwarg.key.value, value);
+					} else {
+						throw new Error(`Unknown argument type: ${nodeArg.type}`);
 					}
-					// TODO: if it is a keyword argument, use their name here
-					macroScope.setVariable((node.args[i] as Identifier).value, args[i]);
 				}
 				return this.evaluateBlock(node.body, macroScope);
 			})
