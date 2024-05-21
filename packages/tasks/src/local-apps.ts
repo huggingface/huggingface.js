@@ -118,6 +118,14 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isGgufModel,
 		deeplink: (model) => new URL(`sanctum://open_from_hf?model=${model.id}`),
 	},
+	recursechat: {
+		prettyLabel: "RecurseChat",
+		docsUrl: "https://recurse.chat",
+		mainTask: "text-generation",
+		macOSOnly: true,
+		displayOnModelPage: isGgufModel,
+		deeplink: (model) => new URL(`recursechat://new-hf-gguf-model?hf-model-id=${model.id}`),
+	},
 	drawthings: {
 		prettyLabel: "Draw Things",
 		docsUrl: "https://drawthings.ai",
