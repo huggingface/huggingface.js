@@ -63,6 +63,41 @@ LLAMA_CURL=1 make
 	];
 };
 
+const snippetVllm = (model: ModelData): string[] => {
+	return [
+		`
+## Deploy with docker (needs Docker installed) a gated model (please, request access in Hugginface's model repo):
+docker run --runtime nvidia --gpus all \
+    --name my_vllm_container \
+    -v ~/.cache/huggingface:/root/.cache/huggingface \
+    --env "HUGGING_FACE_HUB_TOKEN=<secret>" \
+    -p 8000:8000 \
+    --ipc=host \
+    vllm/vllm-openai:latest \
+    --model mistralai/Mistral-7B-Instruct-v0.1
+`,
+`
+## Load and run the model
+docker exec -it my_vllm_container bash -c "python -m vllm.entrypoints.openai.api_server --model mistralai/Mistral-7B-Instruct-v0.1 --dtype auto --api-key token-abc123"
+`,
+`
+## Call the server using the official OpenAI Python client library, or any other HTTP client
+from openai import OpenAI
+client = OpenAI(
+    base_url="http://localhost:8000/v1",
+    api_key="token-abc123",
+)
+completion = client.chat.completions.create(
+  model="mistralai/Mistral-7B-Instruct-v0.1",
+  messages=[
+    {"role": "user", "content": "Hello!"}
+  ]
+)
+print(completion.choices[0].message)
+`,
+	];
+};
+
 /**
  * Add your new local app here.
  *
@@ -81,6 +116,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isGgufModel,
 		snippet: snippetLlamacpp,
+	},
+	"vllm": {
+		prettyLabel: "vLLM",
+		docsUrl: "https://docs.vllm.ai",
+		mainTask: "text-generation",
+		displayOnModelPage: isGptqModel && isAwqModel,
+		snippet: snippetVllm,
 	},
 	lmstudio: {
 		prettyLabel: "LM Studio",
