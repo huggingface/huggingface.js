@@ -21,6 +21,7 @@ import {
 	SliceExpression,
 	KeywordArgumentExpression,
 	TupleLiteral,
+	Macro,
 } from "./ast";
 
 /**
@@ -87,6 +88,14 @@ export function parse(tokens: Token[]): Program {
 				result = parseIfStatement();
 				expect(TOKEN_TYPES.OpenStatement, "Expected {% token");
 				expect(TOKEN_TYPES.EndIf, "Expected endif token");
+				expect(TOKEN_TYPES.CloseStatement, "Expected %} token");
+				break;
+
+			case TOKEN_TYPES.Macro:
+				++current;
+				result = parseMacroStatement();
+				expect(TOKEN_TYPES.OpenStatement, "Expected {% token");
+				expect(TOKEN_TYPES.EndMacro, "Expected endmacro token");
 				expect(TOKEN_TYPES.CloseStatement, "Expected %} token");
 				break;
 
@@ -171,6 +180,25 @@ export function parse(tokens: Token[]): Program {
 		}
 
 		return new If(test, body, alternate);
+	}
+
+	function parseMacroStatement(): Macro {
+		const name = parsePrimaryExpression();
+		if (name.type !== "Identifier") {
+			throw new SyntaxError(`Expected identifier following macro statement`);
+		}
+		const args = parseArgs();
+		expect(TOKEN_TYPES.CloseStatement, "Expected closing statement token");
+
+		// Body of macro
+		const body: Statement[] = [];
+
+		// Keep going until we hit {% endmacro
+		while (not(TOKEN_TYPES.OpenStatement, TOKEN_TYPES.EndMacro)) {
+			body.push(parseAny());
+		}
+
+		return new Macro(name as Identifier, args, body);
 	}
 
 	function parseExpressionSequence(primary = false): Statement {

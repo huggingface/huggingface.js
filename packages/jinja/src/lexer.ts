@@ -44,6 +44,8 @@ export const TOKEN_TYPES = Object.freeze({
 	And: "And",
 	Or: "Or",
 	Not: "UnaryOperator",
+	Macro: "Macro",
+	EndMacro: "EndMacro",
 });
 
 export type TokenType = keyof typeof TOKEN_TYPES;
@@ -65,6 +67,8 @@ const KEYWORDS = Object.freeze({
 	or: TOKEN_TYPES.Or,
 	not: TOKEN_TYPES.Not,
 	"not in": TOKEN_TYPES.NotIn,
+	macro: TOKEN_TYPES.Macro,
+	endmacro: TOKEN_TYPES.EndMacro,
 
 	// Literals
 	true: TOKEN_TYPES.BooleanLiteral,

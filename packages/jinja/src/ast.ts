@@ -52,6 +52,18 @@ export class SetStatement extends Statement {
 	}
 }
 
+export class Macro extends Statement {
+	override type = "Macro";
+
+	constructor(
+		public name: Identifier,
+		public args: Expression[],
+		public body: Statement[]
+	) {
+		super();
+	}
+}
+
 /**
  * Expressions will result in a value at runtime (unlike statements).
  */

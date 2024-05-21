@@ -129,6 +129,9 @@ const TEST_STRINGS = {
 
 	// Array operators
 	ARRAY_OPERATORS: `{{ ([1, 2, 3] + [4, 5, 6]) | length }}`,
+
+	// Macros
+	MACROS: `{% macro hello(name) %}{{ 'Hello ' + name }}{% endmacro %}|{{ hello('Bob') }}|{{ hello('Alice') }}|`,
 };
 
 const TEST_PARSED = {
@@ -2296,6 +2299,40 @@ const TEST_PARSED = {
 		{ value: "length", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
+
+	// Macros
+	MACROS: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "macro", type: "Macro" },
+		{ value: "hello", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "name", type: "Identifier" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "Hello ", type: "StringLiteral" },
+		{ value: "+", type: "AdditiveBinaryOperator" },
+		{ value: "name", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endmacro", type: "EndMacro" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "hello", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "Bob", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "hello", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "Alice", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
 };
 
 const TEST_CONTEXT = {
@@ -2485,6 +2522,9 @@ const TEST_CONTEXT = {
 
 	// Array operators
 	ARRAY_OPERATORS: {},
+
+	// Macros
+	MACROS: {},
 };
 
 const EXPECTED_OUTPUTS = {
@@ -2612,6 +2652,9 @@ const EXPECTED_OUTPUTS = {
 
 	// Array operators
 	ARRAY_OPERATORS: `6`,
+
+	// Macros
+	MACROS: `|Hello Bob|Hello Alice|`,
 };
 
 describe("Templates", () => {

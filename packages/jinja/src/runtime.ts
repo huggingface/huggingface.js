@@ -19,6 +19,7 @@ import type {
 	KeywordArgumentExpression,
 	ObjectLiteral,
 	TupleLiteral,
+	Macro,
 } from "./ast";
 import { slice, titleCase } from "./utils";
 
@@ -823,6 +824,29 @@ export class Interpreter {
 		return new StringValue(result);
 	}
 
+	/**
+	 * See https://jinja.palletsprojects.com/en/3.1.x/templates/#macros for more information.
+	 */
+	private evaluateMacro(node: Macro, environment: Environment): NullValue {
+		environment.setVariable(
+			node.name.value,
+			new FunctionValue((args, scope) => {
+				const macroScope = new Environment(scope);
+				for (let i = 0; i < node.args.length; i++) {
+					if (node.args[i].type !== "Identifier") {
+						throw new Error("Macro arguments must be identifiers");
+					}
+					// TODO: if it is a keyword argument, use their name here
+					macroScope.setVariable((node.args[i] as Identifier).value, args[i]);
+				}
+				return this.evaluateBlock(node.body, macroScope);
+			})
+		);
+
+		// Macros are not evaluated immediately, so we return null
+		return new NullValue();
+	}
+
 	evaluate(statement: Statement | undefined, environment: Environment): AnyRuntimeValue {
 		if (statement === undefined) return new UndefinedValue();
 
@@ -838,6 +862,8 @@ export class Interpreter {
 				return this.evaluateIf(statement as If, environment);
 			case "For":
 				return this.evaluateFor(statement as For, environment);
+			case "Macro":
+				return this.evaluateMacro(statement as Macro, environment);
 
 			// Expressions
 			case "NumericLiteral":
