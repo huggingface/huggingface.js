@@ -109,7 +109,7 @@ export const SKUS = {
 				memory: [12, 10],
 			},
 			"RTX Titan": {
-				tflops: 16.3,
+				tflops: 32.62,
 				memory: [24],
 			},			
 		},
