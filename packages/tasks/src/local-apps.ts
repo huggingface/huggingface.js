@@ -78,7 +78,7 @@ docker run --runtime nvidia --gpus all \
 `,
 `
 ## Load and run the model
-docker exec -it my_vllm_container bash -c "python -m vllm.entrypoints.openai.api_server --model mistralai/Mistral-7B-Instruct-v0.1 --dtype auto --api-key token-abc123"
+docker exec -it my_vllm_container bash -c "python -m vllm.entrypoints.openai.api_server --model ${model.id} --dtype auto --api-key token-abc123"
 `,
 `
 ## Call the server using the official OpenAI Python client library, or any other HTTP client
