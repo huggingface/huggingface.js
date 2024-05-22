@@ -88,7 +88,7 @@ client = OpenAI(
     api_key="token-abc123",
 )
 completion = client.chat.completions.create(
-  model="mistralai/Mistral-7B-Instruct-v0.1",
+  model=${model.id},
   messages=[
     {"role": "user", "content": "Hello!"}
   ]
