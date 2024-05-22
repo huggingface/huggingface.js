@@ -43,6 +43,9 @@
 	],
 	"author": "Hugging Face",
 	"license": "MIT",
+	"dependencies": {
+		"@huggingface/jinja": "workspace:^"
+	},
 	"devDependencies": {
 		"@types/node": "^20.11.5",
 		"quicktype-core": "https://github.com/huggingface/quicktype/raw/pack-18.0.17/packages/quicktype-core/quicktype-core-18.0.17.tgz",

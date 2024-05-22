@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+dependencies:
+  '@huggingface/jinja':
+    specifier: workspace:^
+    version: link:../jinja
+
 devDependencies:
   '@types/node':
     specifier: ^20.11.5

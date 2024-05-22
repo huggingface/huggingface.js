@@ -5,4 +5,9 @@ import type { ModelData } from "../model-data";
  *
  * Add more fields as needed.
  */
-export type ModelDataMinimal = Pick<ModelData, "id" | "pipeline_tag" | "mask_token" | "library_name">;
+export type ModelDataMinimal = Pick<ModelData, "id" | "pipeline_tag" | "mask_token" | "library_name" | "config">;
+
+/**
+ * Input generator function.
+ */
+export type InputGenerator = (model: ModelDataMinimal) => string;

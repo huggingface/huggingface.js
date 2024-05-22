@@ -1,5 +1,6 @@
 import type { PipelineType } from "../pipelines";
-import type { ModelDataMinimal } from "./types";
+import type { InputGenerator, ModelDataMinimal } from "./types";
+import inputsTextGeneration from "./tasks/text-generation";
 
 const inputsZeroShotClassification = () =>
 	`"Hi, I recently bought a device from your company but it is not working as advertised and I would like to get reimbursed!"`;
@@ -39,8 +40,6 @@ const inputsQuestionAnswering = () =>
 const inputsTextClassification = () => `"I like you. I love you"`;
 
 const inputsTokenClassification = () => `"My name is Sarah Jessica Parker but you can call me Jessica"`;
-
-const inputsTextGeneration = () => `"Can you please let us know more details about your "`;
 
 const inputsText2TextGeneration = () => `"The answer to the universe is"`;
 
@@ -84,7 +83,7 @@ const inputsTabularPrediction = () =>
 const inputsZeroShotImageClassification = () => `"cats.jpg"`;
 
 const modelInputSnippets: {
-	[key in PipelineType]?: (model: ModelDataMinimal) => string;
+	[key in PipelineType]?: InputGenerator;
 } = {
 	"audio-to-audio": inputsAudioToAudio,
 	"audio-classification": inputsAudioClassification,
