@@ -1,5 +1,5 @@
-import type { ModelData } from "./model-data";
-import type { PipelineType } from "./pipelines";
+import type { ModelData } from './model-data';
+import type { PipelineType } from './pipelines';
 
 /**
  * Elements configurable by a local app.
@@ -43,7 +43,7 @@ export type LocalApp = {
 );
 
 function isGgufModel(model: ModelData) {
-	return model.tags.includes("gguf");
+	return model.tags.includes('gguf');
 }
 
 const snippetLlamacpp = (model: ModelData): string[] => {
@@ -57,7 +57,7 @@ LLAMA_CURL=1 make
 		`## Load and run the model
 ./main \\
 	--hf-repo "${model.id}" \\
-	-m file.gguf \\
+	-m {{GGUF_FILE}} \\
 	-p "I believe the meaning of life is" \\
 	-n 128`,
 	];
@@ -75,43 +75,43 @@ LLAMA_CURL=1 make
  * Ping the HF team if we can help with anything!
  */
 export const LOCAL_APPS = {
-	"llama.cpp": {
-		prettyLabel: "llama.cpp",
-		docsUrl: "https://github.com/ggerganov/llama.cpp",
-		mainTask: "text-generation",
+	'llama.cpp': {
+		prettyLabel: 'llama.cpp',
+		docsUrl: 'https://github.com/ggerganov/llama.cpp',
+		mainTask: 'text-generation',
 		displayOnModelPage: isGgufModel,
 		snippet: snippetLlamacpp,
 	},
 	lmstudio: {
-		prettyLabel: "LM Studio",
-		docsUrl: "https://lmstudio.ai",
-		mainTask: "text-generation",
+		prettyLabel: 'LM Studio',
+		docsUrl: 'https://lmstudio.ai',
+		mainTask: 'text-generation',
 		displayOnModelPage: isGgufModel,
 		deeplink: (model) => new URL(`lmstudio://open_from_hf?model=${model.id}`),
 	},
 	jan: {
-		prettyLabel: "Jan",
-		docsUrl: "https://jan.ai",
-		mainTask: "text-generation",
+		prettyLabel: 'Jan',
+		docsUrl: 'https://jan.ai',
+		mainTask: 'text-generation',
 		displayOnModelPage: isGgufModel,
 		deeplink: (model) => new URL(`jan://models/huggingface/${model.id}`),
 	},
 	backyard: {
-		prettyLabel: "Backyard AI",
-		docsUrl: "https://backyard.ai",
-		mainTask: "text-generation",
+		prettyLabel: 'Backyard AI',
+		docsUrl: 'https://backyard.ai',
+		mainTask: 'text-generation',
 		displayOnModelPage: isGgufModel,
 		deeplink: (model) => new URL(`https://backyard.ai/hf/model/${model.id}`),
 	},
 	drawthings: {
-		prettyLabel: "Draw Things",
-		docsUrl: "https://drawthings.ai",
-		mainTask: "text-to-image",
+		prettyLabel: 'Draw Things',
+		docsUrl: 'https://drawthings.ai',
+		mainTask: 'text-to-image',
 		macOSOnly: true,
 		displayOnModelPage: (model) =>
-			model.library_name === "diffusers" && (model.pipeline_tag === "text-to-image" || model.tags.includes("lora")),
+			model.library_name === 'diffusers' && (model.pipeline_tag === 'text-to-image' || model.tags.includes('lora')),
 		deeplink: (model) => {
-			if (model.tags.includes("lora")) {
+			if (model.tags.includes('lora')) {
 				return new URL(`https://drawthings.ai/import/diffusers/pipeline.load_lora_weights?repo_id=${model.id}`);
 			} else {
 				return new URL(`https://drawthings.ai/import/diffusers/pipeline.from_pretrained?repo_id=${model.id}`);
@@ -119,12 +119,12 @@ export const LOCAL_APPS = {
 		},
 	},
 	diffusionbee: {
-		prettyLabel: "DiffusionBee",
-		docsUrl: "https://diffusionbee.com",
-		mainTask: "text-to-image",
+		prettyLabel: 'DiffusionBee',
+		docsUrl: 'https://diffusionbee.com',
+		mainTask: 'text-to-image',
 		macOSOnly: true,
 		comingSoon: true,
-		displayOnModelPage: (model) => model.library_name === "diffusers" && model.pipeline_tag === "text-to-image",
+		displayOnModelPage: (model) => model.library_name === 'diffusers' && model.pipeline_tag === 'text-to-image',
 		deeplink: (model) => new URL(`diffusionbee://open_from_hf?model=${model.id}`),
 	},
 } satisfies Record<string, LocalApp>;
