@@ -74,7 +74,7 @@ docker run --runtime nvidia --gpus all \
     -p 8000:8000 \
     --ipc=host \
     vllm/vllm-openai:latest \
-    --model mistralai/Mistral-7B-Instruct-v0.1
+    --model ${model.id}
 `,
 `
 ## Load and run the model
