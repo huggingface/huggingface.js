@@ -7,4 +7,3 @@ packages:
   - "packages/tasks"
   - "packages/gguf"
   - "packages/jinja"
-  - "packages/widgets"
