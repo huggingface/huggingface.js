@@ -1,15 +1,15 @@
 name: Sync Widgets Demo
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - "packages/widgets/**"
-      - "packages/tasks/**"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - ".github/workflows/sync-widgets-demo.yml"
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - "packages/widgets/**"
+  #     - "packages/tasks/**"
+  #     - "package.json"
+  #     - "pnpm-lock.yaml"
+  #     - ".github/workflows/sync-widgets-demo.yml"
 
 jobs:
   sync:
