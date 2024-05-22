@@ -108,6 +108,10 @@ export const SKUS = {
 				tflops: 30.6,
 				memory: [12, 10],
 			},
+			"RTX Titan": {
+				tflops: 16.3,
+				memory: [24],
+			},			
 		},
 		AMD: {
 			MI300: {
