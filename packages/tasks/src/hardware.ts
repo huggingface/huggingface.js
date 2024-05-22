@@ -109,7 +109,7 @@ export const SKUS = {
 				memory: [12, 10],
 			},
 			"RTX 3070 Ti Laptop": {
-				tflops: 16.60,
+				tflops: 16.6,
 				memory: [8],
 			},
 		},
