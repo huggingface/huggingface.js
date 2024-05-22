@@ -1,4 +1,5 @@
 import type { ModelData } from "./model-data";
+import { LIBRARY_TASK_MAPPING } from "./library-to-tasks";
 
 const TAG_CUSTOM_CODE = "custom_code";
 
@@ -438,7 +439,7 @@ export const transformers = (model: ModelData): string[] => {
 		].join("\n");
 	}
 
-	if (model.pipeline_tag) {
+	if (model.pipeline_tag && LIBRARY_TASK_MAPPING.transformers?.includes(model.pipeline_tag)) {
 		const pipelineSnippet = [
 			"# Use a pipeline as a high-level helper",
 			"from transformers import pipeline",

@@ -120,6 +120,14 @@ export const SKUS = {
 				tflops: 16.6,
 				memory: [8],
 			},
+			"RTX 2060 Mobile": {
+				tflops: 9.22,
+				memory: [6],
+			},
+			"RTX Titan": {
+				tflops: 32.62,
+				memory: [24],
+			},
 		},
 		AMD: {
 			MI300: {
