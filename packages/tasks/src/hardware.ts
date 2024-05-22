@@ -100,13 +100,21 @@ export const SKUS = {
 				tflops: 40,
 				memory: [24],
 			},
+			"RTX 3080": {
+				tflops: 30.6,
+				memory: [12, 10],
+			},
 			"RTX 3080 Ti": {
 				tflops: 34.1,
 				memory: [12],
 			},
-			"RTX 3080": {
-				tflops: 30.6,
-				memory: [12, 10],
+			"RTX 3070": {
+				tflops: 20.31,
+				memory: [8],
+			},
+			"RTX 3070 Ti": {
+				tflops: 21.75,
+				memory: [8],
 			},
 			"RTX 3070 Ti Laptop": {
 				tflops: 16.6,
