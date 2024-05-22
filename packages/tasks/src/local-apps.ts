@@ -76,11 +76,11 @@ docker run --runtime nvidia --gpus all \
     vllm/vllm-openai:latest \
     --model ${model.id}
 `,
-`
+		`
 ## Load and run the model
 docker exec -it my_vllm_container bash -c "python -m vllm.entrypoints.openai.api_server --model ${model.id} --dtype auto --api-key token-abc123"
 `,
-`
+		`
 ## Call the server using the official OpenAI Python client library, or any other HTTP client
 from openai import OpenAI
 client = OpenAI(
@@ -117,7 +117,7 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isGgufModel,
 		snippet: snippetLlamacpp,
 	},
-	"vllm": {
+	vllm: {
 		prettyLabel: "vLLM",
 		docsUrl: "https://docs.vllm.ai",
 		mainTask: "text-generation",
