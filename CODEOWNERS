@@ -6,10 +6,6 @@
 
 /packages/tasks/ @osanseviero @SBrandeis @gary149 @Wauplin @julien-c
 
-# Ownership for the Widgets Package
-
-/packages/widgets/ @mishig25 @SBrandeis
-
 # Ownership for the Hub Package
 
 /packages/hub/ @coyotte508
