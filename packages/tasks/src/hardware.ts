@@ -31,7 +31,7 @@ export interface HardwareSpec {
 	memory?: number[];
 }
 
-export const DEFAULT_MEMORY_OPTIONS = [8, 16, 24, 32, 40, 48, 64, 80, 96, 128];
+export const DEFAULT_MEMORY_OPTIONS = [8, 16, 24, 32, 40, 48, 64, 80, 96, 128, 256, 512];
 
 export const SKUS = {
 	GPU: {
@@ -108,10 +108,14 @@ export const SKUS = {
 				tflops: 30.6,
 				memory: [12, 10],
 			},
-			"RTX 2060 Mobile": {
+			"RTX 3070 Ti Laptop": {
+				tflops: 16.6,
+				memory: [8],
+			},
+      "RTX 2060 Mobile": {
 				tflops: 9.22,
 				memory: [6],
-			},
+      }
 		},
 		AMD: {
 			MI300: {
