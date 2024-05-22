@@ -1,5 +1,7 @@
 # Huggingface Widgets
 
+**Note: this package is no longer maintained.**
+
 Open-source version of the inference widgets from huggingface.co
 
 > Built with Svelte and SvelteKit
