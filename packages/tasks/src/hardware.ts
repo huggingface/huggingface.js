@@ -136,6 +136,10 @@ export const SKUS = {
 				tflops: 32.62,
 				memory: [24],
 			},
+			"V100": {
+				tflops: 130,
+				memory: [32],
+			},
 		},
 		AMD: {
 			MI300: {
