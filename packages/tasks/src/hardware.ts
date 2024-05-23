@@ -44,33 +44,33 @@ export const SKUS = {
 				tflops: 90.52,
 				memory: [48],
 			},
-			"RTX 2000 Ada": {
-				tflops: 12.0,
-				memory: [16],
-			},
-			"RTX 4000 SFF Ada": {
-				tflops: 19.2,
-				memory: [20],
-			},
-			"RTX 4000 Ada": {
-				tflops: 26.7,
-				memory: [20],
-			},
-			"RTX 4500 Ada": {
-				tflops: 39.6,
-				memory: [24],
-			},
-			"RTX 5000 Ada": {
-				tflops: 65.3,
-				memory: [32],
+			"RTX 6000 Ada": {
+				tflops: 91.1,
+				memory: [48],
 			},
 			"RTX 5880 Ada": {
 				tflops: 69.3,
 				memory: [48],
 			},
-			"RTX 6000 Ada": {
-				tflops: 91.1,
-				memory: [48],
+			"RTX 5000 Ada": {
+				tflops: 65.3,
+				memory: [32],
+			},
+			"RTX 4500 Ada": {
+				tflops: 39.6,
+				memory: [24],
+			},
+			"RTX 4000 Ada": {
+				tflops: 26.7,
+				memory: [20],
+			},
+			"RTX 4000 SFF Ada": {
+				tflops: 19.2,
+				memory: [20],
+			},
+			"RTX 2000 Ada": {
+				tflops: 12.0,
+				memory: [16],
 			},
 			A100: {
 				tflops: 77.97,
