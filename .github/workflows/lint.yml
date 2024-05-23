@@ -42,9 +42,9 @@ jobs:
 
       - name: "Checking format errors"
         run: |
-          # Could also use pnpm --filter ...[${{ steps.since.outputs.SINCE }}] format:check
+          # Could also use pnpm --filter [${{ steps.since.outputs.SINCE }}] format:check
           # But this way we can see the diff
-          pnpm --filter ...[${{ steps.since.outputs.SINCE }}] format
+          pnpm --filter [${{ steps.since.outputs.SINCE }}] format
           git diff | head -n 100
           git diff --name-only --exit-code
 
