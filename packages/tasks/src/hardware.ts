@@ -160,7 +160,7 @@ export const SKUS = {
 				tflops: 32.62,
 				memory: [24],
 			},
-			"V100": {
+			V100: {
 				tflops: 28.26,
 				memory: [32, 16],
 			},
