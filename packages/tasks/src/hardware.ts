@@ -176,7 +176,7 @@ export const SKUS = {
 			},
 			MI100: {
 				tflops: 184.6,
-				memory: [32]
+				memory: [32],
 			},
 			"RX 7900 XTX": {
 				tflops: 122.8,
