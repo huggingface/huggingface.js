@@ -17,8 +17,8 @@ export async function downloadFile(params: {
 	 */
 	raw?: boolean;
 	/**
- 	* An optional Git revision id which can be a branch name, a tag, or a commit hash.
-  	*/
+ 	 * An optional Git revision id which can be a branch name, a tag, or a commit hash.
+  	 */
 	revision?: string;
 	/**
 	 * Fetch only a specific part of the file
