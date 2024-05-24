@@ -133,7 +133,9 @@ export const LOCAL_APPS = {
 		mainTask: "text-to-image",
 		macOSOnly: true,
 		comingSoon: true,
-		displayOnModelPage: (model) => (model.tags.includes("coreml") || model.tags.includes("core-ml") ) && model.pipeline_tag === "text-to-image",
+		displayOnModelPage: (model) => {
+			return (model.tags.includes("coreml") || model.tags.includes("core-ml")) && model.pipeline_tag === "text-to-image"
+		},
 		deeplink: (model) => new URL(`https://joyfusion.app/import_from_hf?repo_id=${model.id}`),
 	},
 } satisfies Record<string, LocalApp>;
