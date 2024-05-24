@@ -18,6 +18,8 @@ export async function downloadFile(params: {
 	raw?: boolean;
 	/**
 	 * An optional Git revision id which can be a branch name, a tag, or a commit hash.
+	 *
+	 * @default "main"
 	 */
 	revision?: string;
 	/**
