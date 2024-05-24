@@ -52,8 +52,8 @@ export interface AuthInfo {
 	type: AuthType;
 	accessToken?: {
 		displayName: string;
-		expiration?: Date;
 		role: AccessTokenRole;
+		createdAt: Date;
 	};
 	expiresAt?: Date;
 }
@@ -79,17 +79,11 @@ export async function whoAmI(params: {
 	}
 
 	const response: ApiWhoAmIReponse & {
-		auth: Omit<AuthInfo, "accessToken"> & {
-			accessToken?: {
-				displayName: string;
-				expiration?: Date; // actually string but we fix it below
-				role: AccessTokenRole;
-			};
-		};
+		auth: AuthInfo;
 	} = await res.json();
 
-	if (typeof response.auth.accessToken?.expiration === "string") {
-		response.auth.accessToken.expiration = new Date(response.auth.accessToken.expiration);
+	if (typeof response.auth.accessToken?.createdAt === "string") {
+		response.auth.accessToken.createdAt = new Date(response.auth.accessToken.createdAt);
 	}
 
 	return response;
