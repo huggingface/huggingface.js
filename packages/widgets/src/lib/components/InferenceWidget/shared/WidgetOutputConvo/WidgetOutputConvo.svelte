@@ -3,11 +3,12 @@
 
 	import { isFullyScrolled, scrollToMax } from "../../../../utils/ViewUtils.js";
 	import WidgetOutputConvoBubble from "../WidgetOuputConvoBubble/WidgetOutputConvoBubble.svelte";
-	import type { ChatMessage } from "@huggingface/tasks";
+	import type { ChatCompletionInputMessage, SpecialTokensMap } from "@huggingface/tasks";
 	import { widgetStates } from "../../stores.js";
 
 	export let modelId: string;
-	export let messages: ChatMessage[];
+	export let messages: ChatCompletionInputMessage[];
+	export let specialTokensMap: SpecialTokensMap | undefined = undefined;
 
 	let wrapperEl: HTMLElement;
 	$: isMaximized = $widgetStates?.[modelId]?.isMaximized;
@@ -29,8 +30,10 @@
 	</div>
 	<div class="flex flex-col items-end space-y-4 p-3">
 		{#each messages as message}
-			{@const position = message.role === "user" ? "right" : message.role === "assistant" ? "left" : "center"}
-			<WidgetOutputConvoBubble {position} text={message.content} />
+			{#if message.content}
+				{@const position = message.role === "user" ? "right" : message.role === "assistant" ? "left" : "center"}
+				<WidgetOutputConvoBubble {position} {specialTokensMap} text={message.content} />
+			{/if}
 		{/each}
 	</div>
 </div>

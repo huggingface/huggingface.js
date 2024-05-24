@@ -149,7 +149,7 @@ export interface ApiCommitDeletedEntry {
 	path: string;
 }
 
-interface ApiCommitLfsFile {
+export interface ApiCommitLfsFile {
 	path: string;
 	oldPath?: string;
 	/** Required if {@link oldPath} is not set */
@@ -180,3 +180,12 @@ export type ApiCommitOperation =
 			key: "deletedFile";
 			value: ApiCommitDeletedEntry;
 	  };
+
+export interface ApiCommitData {
+	id: string;
+	title: string;
+	message: string;
+	authors: Array<{ user: string; avatar: string }>;
+	date: string;
+	formatted?: string;
+}

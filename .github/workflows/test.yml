@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  test:
+  node:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -42,10 +42,56 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # Could use something like rmacklin/fetch-through-merge-base@v0 instead when the repo gets bigger
+          fetch-depth: 0
+      - name: "Extracting the merge base into 'SINCE'"
+        id: since
+        run: |
+          if [ -z "${{  github.event.pull_request.head.ref }}" ]
+          then
+            echo "SINCE=${{ github.sha }}^1" >> $GITHUB_OUTPUT
+          else
+            echo "SINCE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} ${{ github.sha }})" >> $GITHUB_OUTPUT
+          fi
+
+      - run: corepack enable
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: "**/pnpm-lock.yaml"
+      - run: |
+          pnpm install --frozen-lockfile --filter .
+          pnpm install --frozen-lockfile --filter ...[${{ steps.since.outputs.SINCE }}]...
+          pnpm --filter ...[${{ steps.since.outputs.SINCE }}]... build
+
       - name: Test in browser
         run: VCR_MODE=playback pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test:browser
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - run: corepack enable
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: "**/pnpm-lock.yaml"
 
       - name: E2E - start mock npm registry
         run: |
@@ -58,8 +104,8 @@ jobs:
         working-directory: e2e
         run: |
           sleep 3
-          pnpm i --filter inference... --filter hub... --frozen-lockfile
-          pnpm --filter inference --filter hub publish --force --no-git-checks --registry http://localhost:4874/
+          pnpm i --filter root --filter inference... --filter hub... --frozen-lockfile
+          pnpm --filter inference --filter hub --filter tasks publish --force --no-git-checks --registry http://localhost:4874/
 
       - name: E2E test - test yarn install
         working-directory: e2e/ts
@@ -83,12 +129,14 @@ jobs:
         run: |
           pnpm i --ignore-workspace --registry http://localhost:4874/
           pnpm build
+          pnpm run test:browser
 
       - uses: denoland/setup-deno@v1
         with:
           deno-version: vx.x.x
       - name: E2E test - deno import from npm
         working-directory: e2e/deno
-        run: deno run --allow-net index.ts
+        run: deno run --allow-net --allow-env=HF_TOKEN index.ts
         env:
           NPM_CONFIG_REGISTRY: http://localhost:4874/
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}

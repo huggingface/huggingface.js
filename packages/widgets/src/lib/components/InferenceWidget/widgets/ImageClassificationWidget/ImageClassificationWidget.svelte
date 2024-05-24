@@ -83,7 +83,7 @@
 				estimatedTime: res.estimatedTime,
 			};
 			getOutput(file, { withModelLoading: true });
-		} else if (res.status === "error") {
+		} else if (res.status === "error" && !isOnLoadCall) {
 			error = res.error;
 		}
 	}
@@ -128,8 +128,8 @@
 		{isLoading}
 		{isDisabled}
 		{imgSrc}
-		{onSelectFile}
-		onError={(e) => (error = e)}
+		on:run={(e) => onSelectFile(e.detail)}
+		on:error={(e) => (error = e.detail)}
 	>
 		{#if imgSrc}
 			<img src={imgSrc} class="pointer-events-none mx-auto max-h-44 shadow" alt="" />
@@ -149,7 +149,7 @@
 		{isLoading}
 		{isDisabled}
 		label="Browse for image"
-		{onSelectFile}
+		on:run={(e) => onSelectFile(e.detail)}
 	/>
 	{#if warning}
 		<div class="alert alert-warning mt-2">{warning}</div>

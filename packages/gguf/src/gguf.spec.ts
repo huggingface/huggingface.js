@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { GGMLQuantizationType, RE_GGUF_SHARD_FILE, gguf } from "./gguf";
+import { GGMLQuantizationType, gguf, ggufAllShards, parseGgufShardFilename } from "./gguf";
+import fs from "node:fs";
 
 const URL_LLAMA = "https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/191239b/llama-2-7b-chat.Q2_K.gguf";
 const URL_MISTRAL_7B =
@@ -9,6 +10,8 @@ const URL_BIG_ENDIAN =
 	"https://huggingface.co/ggml-org/models/resolve/1213976/bert-bge-small/ggml-model-f16-big-endian.gguf";
 const URL_V1 =
 	"https://huggingface.co/tmadge/testing/resolve/66c078028d1ff92d7a9264a1590bc61ba6437933/tinyllamas-stories-260k-f32.gguf";
+const URL_SHARDED_GROK =
+	"https://huggingface.co/Arki05/Grok-1-GGUF/resolve/ecafa8d8eca9b8cd75d11a0d08d3a6199dc5a068/grok-1-IQ3_XS-split-00001-of-00009.gguf";
 
 describe("gguf", () => {
 	it("should parse a llama2 7b", async () => {
@@ -35,22 +38,25 @@ describe("gguf", () => {
 			"llama.rope.dimension_count": 128,
 		});
 
-		const tokens = metadata["tokenizer.ggml.tokens"];
-		if (!Array.isArray(tokens)) {
-			throw new Error();
+		expect(metadata["tokenizer.ggml.model"]);
+		if (metadata["tokenizer.ggml.model"]) {
+			const tokens = metadata["tokenizer.ggml.tokens"];
+			if (!Array.isArray(tokens)) {
+				throw new Error();
+			}
+			expect(tokens.slice(0, 10)).toEqual([
+				"<unk>",
+				"<s>",
+				"</s>",
+				"<0x00>",
+				"<0x01>",
+				"<0x02>",
+				"<0x03>",
+				"<0x04>",
+				"<0x05>",
+				"<0x06>",
+			]);
 		}
-		expect(tokens.slice(0, 10)).toEqual([
-			"<unk>",
-			"<s>",
-			"</s>",
-			"<0x00>",
-			"<0x01>",
-			"<0x02>",
-			"<0x03>",
-			"<0x04>",
-			"<0x05>",
-			"<0x06>",
-		]);
 
 		/// Tensor infos
 		/// By convention we test the first and last tensor.
@@ -221,12 +227,35 @@ describe("gguf", () => {
 		});
 	});
 
+	it("should parse a local file", async () => {
+		// download the file and save to .cache folder
+		if (!fs.existsSync(".cache")) {
+			fs.mkdirSync(".cache");
+		}
+		const res = await fetch(URL_V1);
+		const arrayBuf = await res.arrayBuffer();
+		fs.writeFileSync(".cache/model.gguf", Buffer.from(arrayBuf));
+
+		const { metadata } = await gguf(".cache/model.gguf", { allowLocalFile: true });
+		expect(metadata).toMatchObject({ "general.name": "tinyllamas-stories-260k" });
+	});
+
 	it("should detect sharded gguf filename", async () => {
 		const ggufPath = "grok-1/grok-1-q4_0-00003-of-00009.gguf"; // https://huggingface.co/ggml-org/models/blob/fcf344adb9686474c70e74dd5e55465e9e6176ef/grok-1/grok-1-q4_0-00003-of-00009.gguf
-		const match = ggufPath.match(RE_GGUF_SHARD_FILE);
+		const ggufShardFileInfo = parseGgufShardFilename(ggufPath);
 
-		expect(RE_GGUF_SHARD_FILE.test(ggufPath)).toEqual(true);
-		expect(match?.[1]).toEqual("00003");
-		expect(match?.[2]).toEqual("00009");
+		expect(ggufShardFileInfo?.prefix).toEqual("grok-1/grok-1-q4_0");
+		expect(ggufShardFileInfo?.shard).toEqual("00003");
+		expect(ggufShardFileInfo?.total).toEqual("00009");
+	});
+
+	it("should get param count for llama2 7b", async () => {
+		const { parameterCount } = await gguf(URL_LLAMA, { computeParametersCount: true });
+		expect(parameterCount).toEqual(6_738_415_616); // 7B
+	});
+
+	it("should get param count for sharded gguf", async () => {
+		const { parameterCount } = await ggufAllShards(URL_SHARDED_GROK);
+		expect(parameterCount).toEqual(316_490_127_360); // 316B
 	});
 });

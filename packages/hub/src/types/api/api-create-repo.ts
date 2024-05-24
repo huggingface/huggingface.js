@@ -1,5 +1,5 @@
-import type { SetRequired } from "type-fest";
-import type { SpaceHardwareFlavor, SpaceSdk } from "../public";
+import type { SetRequired } from "../../vendor/type-fest/set-required";
+import type { RepoType, SpaceHardwareFlavor, SpaceSdk } from "../public";
 import type { ApiCommitFile } from "./api-commit";
 
 export type ApiCreateRepoPayload = {

@@ -1,4 +1,5 @@
 import type { InferenceTask, Options, RequestArgs } from "../types";
+import { omit } from "../utils/omit";
 import { HF_HUB_URL } from "./getDefaultTask";
 import { isUrl } from "./isUrl";
 
@@ -22,10 +23,10 @@ export async function makeRequestOptions(
 		forceTask?: string | InferenceTask;
 		/** To load default model if needed */
 		taskHint?: InferenceTask;
+		chatCompletion?: boolean;
 	}
 ): Promise<{ url: string; info: RequestInit }> {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const { accessToken, model: _model, ...otherArgs } = args;
+	const { accessToken, endpointUrl, ...otherArgs } = args;
 	let { model } = args;
 	const {
 		forceTask: task,
@@ -34,7 +35,7 @@ export async function makeRequestOptions(
 		wait_for_model,
 		use_cache,
 		dont_load_model,
-		...otherOptions
+		chatCompletion,
 	} = options ?? {};
 
 	const headers: Record<string, string> = {};
@@ -77,11 +78,17 @@ export async function makeRequestOptions(
 		headers["X-Load-Model"] = "0";
 	}
 
-	const url = (() => {
+	let url = (() => {
+		if (endpointUrl && isUrl(model)) {
+			throw new TypeError("Both model and endpointUrl cannot be URLs");
+		}
 		if (isUrl(model)) {
+			console.warn("Using a model URL is deprecated, please use the `endpointUrl` parameter instead");
 			return model;
 		}
-
+		if (endpointUrl) {
+			return endpointUrl;
+		}
 		if (task) {
 			return `${HF_INFERENCE_API_BASE_URL}/pipeline/${task}/${model}`;
 		}
@@ -89,19 +96,18 @@ export async function makeRequestOptions(
 		return `${HF_INFERENCE_API_BASE_URL}/models/${model}`;
 	})();
 
-	// Let users configure credentials, or disable them all together (or keep default behavior).
-	// ---
-	// This used to be an internal property only and never exposed to users. This means that most usages will never define this value
-	// So in order to make this backwards compatible, if it's undefined we go to "same-origin" (default behaviour before).
-	// If it's a boolean and set to true then set to "include". If false, don't define credentials at all (useful for edge runtimes)
-	// Then finally, if it's a string, use it as-is.
+	if (chatCompletion && !url.endsWith("/chat/completions")) {
+		url += "/v1/chat/completions";
+	}
+
+	/**
+	 * For edge runtimes, leave 'credentials' undefined, otherwise cloudflare workers will error
+	 */
 	let credentials: RequestCredentials | undefined;
 	if (typeof includeCredentials === "string") {
 		credentials = includeCredentials as RequestCredentials;
-	} else if (typeof includeCredentials === "boolean") {
-		credentials = includeCredentials ? "include" : undefined;
-	} else if (includeCredentials === undefined) {
-		credentials = "same-origin";
+	} else if (includeCredentials === true) {
+		credentials = "include";
 	}
 
 	const info: RequestInit = {
@@ -110,10 +116,9 @@ export async function makeRequestOptions(
 		body: binary
 			? args.data
 			: JSON.stringify({
-					...otherArgs,
-					options: options && otherOptions,
+					...(otherArgs.model && isUrl(otherArgs.model) ? omit(otherArgs, "model") : otherArgs),
 			  }),
-		credentials,
+		...(credentials && { credentials }),
 		signal: options?.signal,
 	};
 

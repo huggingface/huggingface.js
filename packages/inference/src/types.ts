@@ -1,4 +1,5 @@
 import type { PipelineType } from "@huggingface/tasks";
+import type { ChatCompletionInput } from "@huggingface/tasks";
 
 export interface Options {
 	/**
@@ -47,15 +48,25 @@ export interface BaseArgs {
 	 */
 	accessToken?: string;
 	/**
-	 * The model to use. Can be a full URL for a dedicated inference endpoint.
+	 * The model to use.
 	 *
 	 * If not specified, will call huggingface.co/api/tasks to get the default model for the task.
+	 *
+	 * /!\ Legacy behavior allows this to be an URL, but this is deprecated and will be removed in the future.
+	 * Use the `endpointUrl` parameter instead.
 	 */
 	model?: string;
+
+	/**
+	 * The URL of the endpoint to use. If not specified, will call huggingface.co/api/tasks to get the default endpoint for the task.
+	 *
+	 * If specified, will use this URL instead of the default one.
+	 */
+	endpointUrl?: string;
 }
 
 export type RequestArgs = BaseArgs &
-	({ data: Blob | ArrayBuffer } | { inputs: unknown }) & {
+	({ data: Blob | ArrayBuffer } | { inputs: unknown } | ChatCompletionInput) & {
 		parameters?: Record<string, unknown>;
 		accessToken?: string;
 	};

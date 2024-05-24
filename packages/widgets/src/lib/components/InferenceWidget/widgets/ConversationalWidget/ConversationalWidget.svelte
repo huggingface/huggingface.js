@@ -2,21 +2,20 @@
 	import { onMount, tick } from "svelte";
 	import type { WidgetProps, ExampleRunOpts, InferenceRunOpts } from "../../shared/types.js";
 	import type { Options } from "@huggingface/inference";
-	import { Template } from "@huggingface/jinja";
 	import type {
 		SpecialTokensMap,
 		TokenizerConfig,
 		WidgetExampleTextInput,
-		TextGenerationInput,
+		ChatCompletionInput,
 		WidgetExampleOutputText,
 		WidgetExampleChatInput,
 		WidgetExample,
 		AddedToken,
+		ChatCompletionInputMessage,
 	} from "@huggingface/tasks";
 	import { SPECIAL_TOKENS_ATTRIBUTES } from "@huggingface/tasks";
 	import { HfInference } from "@huggingface/inference";
 
-	import type { ChatMessage } from "@huggingface/tasks";
 	import WidgetOutputConvo from "../../shared/WidgetOutputConvo/WidgetOutputConvo.svelte";
 	import WidgetQuickInput from "../../shared/WidgetQuickInput/WidgetQuickInput.svelte";
 	import WidgetWrapper from "../../shared/WidgetWrapper/WidgetWrapper.svelte";
@@ -40,18 +39,24 @@
 
 	$: isDisabled = $widgetStates?.[model.id]?.isDisabled;
 
-	let messages: ChatMessage[] = [];
+	let messages: ChatCompletionInputMessage[] = [];
 	let error: string = "";
 	let isLoading: boolean = false;
 	let outputJson: string;
 	let text = "";
+	let modelLoading = {
+		isLoading: false,
+		estimatedTime: 0,
+	};
 
-	let compiledTemplate: Template;
 	let tokenizerConfig: TokenizerConfig;
+	let specialTokensMap: SpecialTokensMap | undefined = undefined;
 	let inferenceClient: HfInference | undefined = undefined;
 	let abort: AbortController | undefined = undefined;
 
-	// Check config and compile template
+	$: inferenceClient = new HfInference(apiToken);
+
+	// check config
 	onMount(() => {
 		const config = model.config;
 		if (config === undefined) {
@@ -78,14 +83,6 @@
 			error = "No chat template found in tokenizer config";
 			return;
 		}
-		try {
-			compiledTemplate = new Template(chatTemplate);
-		} catch (e) {
-			error = `Invalid chat template: "${(e as Error).message}"`;
-			return;
-		}
-
-		inferenceClient = new HfInference(apiToken);
 	});
 
 	async function handleNewMessage(): Promise<void> {
@@ -124,33 +121,18 @@
 			await tick();
 			return;
 		}
-		if (!compiledTemplate) {
-			return;
-		}
 		if (!inferenceClient) {
 			error = "Inference client not ready";
 			return;
 		}
-		// Render chat template
-		const special_tokens_map = extractSpecialTokensMap(tokenizerConfig);
 
-		let chatText;
-		try {
-			chatText = compiledTemplate.render({
-				messages,
-				add_generation_prompt: true,
-				...special_tokens_map,
-			});
-		} catch (e) {
-			error = `An error occurred while rendering the chat template: "${(e as Error).message}"`;
-			return;
-		}
+		specialTokensMap = extractSpecialTokensMap(tokenizerConfig);
 
-		const input: TextGenerationInput & Required<Pick<TextGenerationInput, "parameters">> = {
-			inputs: chatText,
-			parameters: {
-				return_full_text: false,
-			},
+		const previousMessages = [...messages];
+
+		const input: ChatCompletionInput = {
+			model: model.id,
+			messages: previousMessages,
 		};
 		addInferenceParameters(input, model);
 
@@ -165,44 +147,75 @@
 				signal: abort?.signal,
 				use_cache: useCache || !$isLoggedIn,
 				wait_for_model: withModelLoading,
+				retry_on_error: false,
 			} satisfies Options;
 
 			tgiSupportedModels = await getTgiSupportedModels(apiUrl);
 			if ($tgiSupportedModels?.has(model.id)) {
-				console.debug("Starting text generation using the TGI streaming API");
+				console.debug("Starting chat completion using the TGI streaming API");
 				let newMessage = {
 					role: "assistant",
 					content: "",
-				} satisfies ChatMessage;
-				const previousMessages = [...messages];
-				const tokenStream = inferenceClient.textGenerationStream(
+				} satisfies ChatCompletionInputMessage;
+
+				const tokenStream = inferenceClient.chatCompletionStream(
 					{
-						...input,
-						model: model.id,
 						accessToken: apiToken,
+						...input,
 					},
 					opts
 				);
+
 				for await (const newToken of tokenStream) {
-					if (newToken.token.special) continue;
-					newMessage.content = newMessage.content + newToken.token.text;
+					const newTokenContent = newToken.choices?.[0].delta.content;
+					if (!newTokenContent) {
+						continue;
+					}
+					newMessage.content = newMessage.content + newTokenContent;
 					messages = [...previousMessages, newMessage];
 					await tick();
 				}
 			} else {
-				console.debug("Starting text generation using the synchronous API");
-				input.parameters.max_new_tokens = 100;
-				const output = await inferenceClient.textGeneration({ ...input, model: model.id, accessToken: apiToken }, opts);
-				messages = [...messages, { role: "assistant", content: output.generated_text }];
-				await tick();
+				console.debug("Starting chat completion using the synchronous API");
+				input.max_new_tokens = 100;
+				const output = await inferenceClient.chatCompletion(
+					{
+						accessToken: apiToken,
+						...input,
+					},
+					opts
+				);
+				const newAssistantMsg = output.choices.at(-1)?.message;
+				if (newAssistantMsg) {
+					messages = [...messages, newAssistantMsg];
+					await tick();
+				}
 			}
 		} catch (e) {
-			if (!!e && typeof e === "object" && "message" in e && typeof e.message === "string") {
-				error = e.message;
+			if (!isOnLoadCall) {
+				if (!!e && typeof e === "object" && "message" in e && typeof e.message === "string") {
+					if (e.message.includes("is currently loading")) {
+						modelLoading = {
+							isLoading: true,
+							estimatedTime: 10, // 10 seconds for an estimate
+						};
+						await getOutput({ withModelLoading: true, useCache });
+						modelLoading = { isLoading: false, estimatedTime: 0 };
+					} else {
+						error = e.message;
+					}
+				} else {
+					error = `Something went wrong with the request.`;
+				}
 			} else {
-				error = `Something went wrong with the request.`;
+				clearConversation();
 			}
 		} finally {
+			const isLastMsgFromUser = messages.at(-1)?.role === "user";
+			if (error && isLastMsgFromUser) {
+				// roles should alternate. therefore, if there was an error, we should remove last user message so that user can submit new user message afterwards
+				messages = messages.slice(0, -1);
+			}
 			isLoading = false;
 			abort = undefined;
 		}
@@ -222,10 +235,14 @@
 	}
 
 	async function applyWidgetExample(example: Example, opts: ExampleRunOpts = {}): Promise<void> {
-		if ("text" in example) {
-			messages = [{ role: "user", content: example.text }];
+		clearConversation();
+		if (opts.inferenceOpts?.isOnLoadCall) {
+			// if isOnLoadCall do NOT trigger svelte UI update, the UI update will be triggered by getOutput if the example succeeds
+			// otherwise, error will be suppressed so that user doesn't come to errored page on load
+			// however, the user will still get the error after manually interacting with the widget if it is not isOnLoadCall
+			"text" in example ? messages.push({ role: "user", content: example.text }) : messages.push(...example.messages);
 		} else {
-			messages = [...example.messages];
+			"text" in example ? (messages = [{ role: "user", content: example.text }]) : (messages = [...example.messages]);
 		}
 		if (opts.isPreview) {
 			return;
@@ -259,19 +276,19 @@
 		on:reset={clearConversation}
 		showReset={!!messages.length}
 	/>
-	<WidgetOutputConvo modelId={model.id} {messages} />
+	<WidgetOutputConvo modelId={model.id} {messages} {specialTokensMap} />
 
 	<WidgetQuickInput
 		bind:value={text}
 		flatTop={true}
 		{isLoading}
 		{isDisabled}
-		onClickSubmitBtn={handleNewMessage}
 		submitButtonLabel="Send"
+		on:run={() => handleNewMessage()}
 		on:cmdEnter={handleNewMessage}
 	/>
 
-	<WidgetInfo {model} {error} />
+	<WidgetInfo {model} {error} {modelLoading} />
 
 	<WidgetFooter {model} {isDisabled} {outputJson} />
 </WidgetWrapper>

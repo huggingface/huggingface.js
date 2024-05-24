@@ -1,11 +1,32 @@
 import type { MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
 import { GGUFValueType } from "./types";
+import { isBackend } from "./utils/isBackend";
+import { promisesQueue } from "./utils/promisesQueue";
 
 export type { MetadataBaseValue, MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
-export { GGUFValueType, GGMLQuantizationType } from "./types";
+export { GGUFValueType, GGMLQuantizationType, Architecture } from "./types";
+export { GGUF_QUANT_DESCRIPTIONS } from "./quant-descriptions";
 
 export const RE_GGUF_FILE = /\.gguf$/;
-export const RE_GGUF_SHARD_FILE = /-(\d{5})-of-(\d{5})\.gguf$/;
+export const RE_GGUF_SHARD_FILE = /^(?<prefix>.*?)-(?<shard>\d{5})-of-(?<total>\d{5})\.gguf$/;
+
+export interface GgufShardFileInfo {
+	prefix: string;
+	shard: string;
+	total: string;
+}
+
+export function parseGgufShardFilename(filename: string): GgufShardFileInfo | null {
+	const match = RE_GGUF_SHARD_FILE.exec(filename);
+	if (match && match.groups) {
+		return {
+			prefix: match.groups["prefix"],
+			shard: match.groups["shard"],
+			total: match.groups["total"],
+		};
+	}
+	return null;
+}
 
 const isVersion = (version: number): version is Version => version === 1 || version === 2 || version === 3;
 
@@ -29,18 +50,22 @@ const HTTP_TOTAL_MAX_SIZE = 50 * 10 ** 6; /// 50MB
  * Internal stateful instance to fetch ranges of HTTP data when needed
  */
 class RangeView {
-	private chunk: number;
+	protected chunk: number;
 	private buffer: ArrayBuffer;
+	private dataView: DataView;
 
-	readonly view: DataView;
+	get view(): DataView {
+		return this.dataView;
+	}
 
 	constructor(
-		public url: string,
+		public uri: string,
 		private params?: {
 			/**
 			 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 			 */
 			fetch?: typeof fetch;
+			additionalFetchHeaders?: Record<string, string>;
 		}
 	) {
 		this.chunk = 0;
@@ -48,7 +73,7 @@ class RangeView {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		this.buffer = new ArrayBuffer(0, { maxByteLength: HTTP_TOTAL_MAX_SIZE });
-		this.view = new DataView(this.buffer);
+		this.dataView = new DataView(this.buffer);
 	}
 	/**
 	 * Fetch a new chunk from the server
@@ -57,27 +82,67 @@ class RangeView {
 		const range = [this.chunk * HTTP_CHUNK_SIZE, (this.chunk + 1) * HTTP_CHUNK_SIZE - 1];
 		const buf = new Uint8Array(
 			await (
-				await (this.params?.fetch ?? fetch)(this.url, {
+				await (this.params?.fetch ?? fetch)(this.uri, {
 					headers: {
+						...(this.params?.additionalFetchHeaders ?? {}),
 						Range: `bytes=${range[0]}-${range[1]}`,
 					},
 				})
 			).arrayBuffer()
 		);
+		this.appendBuffer(buf);
+		this.chunk += 1;
+	}
+	/**
+	 * Append new data into the buffer
+	 */
+	appendBuffer(buf: Uint8Array) {
 		/// TODO(fix typing)
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
-		this.buffer.resize((this.chunk + 1) * HTTP_CHUNK_SIZE);
-		new Uint8Array(this.buffer).set(buf, this.chunk * HTTP_CHUNK_SIZE);
-		this.chunk += 1;
+		if (ArrayBuffer.prototype.resize) {
+			/// TODO(fix typing)
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
+			this.buffer.resize((this.chunk + 1) * HTTP_CHUNK_SIZE);
+			new Uint8Array(this.buffer).set(buf, this.chunk * HTTP_CHUNK_SIZE);
+		} else {
+			// If the browser does not support ArrayBuffer.resize, we fallback to this polyfill version
+			/// TODO(fix typing)
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
+			const newBuffer = new ArrayBuffer((this.chunk + 1) * HTTP_CHUNK_SIZE, { maxByteLength: HTTP_TOTAL_MAX_SIZE });
+			const arrView = new Uint8Array(newBuffer);
+			arrView.set(new Uint8Array(this.buffer));
+			arrView.set(buf, this.chunk * HTTP_CHUNK_SIZE);
+			this.buffer = newBuffer;
+			this.dataView = new DataView(this.buffer);
+		}
 	}
 	/**
 	 * Check whether we need to fetch a new chunk
 	 */
 	async fetchChunkIfNeeded(offset: number) {
-		if (this.view.byteLength - offset < HTTP_DATA_LEEWAY) {
+		if (this.dataView.byteLength - offset < HTTP_DATA_LEEWAY) {
 			await this.fetchChunk();
 		}
+	}
+}
+
+/**
+ * Internal stateful instance to read ranges of local file when needed.
+ * Only usable in with nodejs FS API.
+ */
+class RangeViewLocalFile extends RangeView {
+	/**
+	 * Read a new chunk from local file system.
+	 */
+	override async fetchChunk(): Promise<void> {
+		const { FileBlob } = await import("./utils/FileBlob");
+		const blob = await FileBlob.create(this.uri);
+		const range = [this.chunk * HTTP_CHUNK_SIZE, (this.chunk + 1) * HTTP_CHUNK_SIZE - 1];
+		const buffer = await blob.slice(range[0], range[1]).arrayBuffer();
+		this.appendBuffer(new Uint8Array(buffer));
 	}
 }
 
@@ -158,15 +223,57 @@ function readMetadataValue(
 }
 
 export async function gguf(
-	url: string,
+	uri: string,
+	params: {
+		/**
+		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+		 */
+		fetch?: typeof fetch;
+		additionalFetchHeaders?: Record<string, string>;
+		computeParametersCount: true;
+		allowLocalFile?: boolean;
+	}
+): Promise<GGUFParseOutput & { parameterCount: number }>;
+export async function gguf(
+	uri: string,
 	params?: {
 		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
+		additionalFetchHeaders?: Record<string, string>;
+		allowLocalFile?: boolean;
 	}
-): Promise<GGUFParseOutput> {
-	const r = new RangeView(url, params);
+): Promise<GGUFParseOutput>;
+export async function gguf(
+	uri: string,
+	params?: {
+		/**
+		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+		 */
+		fetch?: typeof fetch;
+		additionalFetchHeaders?: Record<string, string>;
+		computeParametersCount?: boolean;
+		allowLocalFile?: boolean;
+	}
+): Promise<GGUFParseOutput & { parameterCount?: number }> {
+	let r: RangeView;
+	if (isBackend) {
+		/// On backend, we switch between remote/local file based on protocol
+		if (uri.match(/^https?:\/\//)) {
+			r = new RangeView(uri, params);
+		} else if (params?.allowLocalFile) {
+			r = new RangeViewLocalFile(uri, params);
+		} else {
+			throw new Error("Access to local file is not enabled, please set allowLocalFile to true");
+		}
+	} else {
+		/// On frontend, we only allow using remote file
+		if (params?.allowLocalFile) {
+			throw new Error("allowLocalFile cannot be used on browser");
+		}
+		r = new RangeView(uri, params);
+	}
 	await r.fetchChunk();
 
 	const checkBuffer = (buffer: Uint8Array, header: Uint8Array) => {
@@ -203,7 +310,7 @@ export async function gguf(
 	offset += tensorCount.length;
 	const numKv = readVersionedSize(r.view, offset, version, littleEndian);
 	offset += numKv.length;
-	const metadata: GGUFMetadata = {
+	const metadata: GGUFMetadata<{ strict: false }> = {
 		version,
 		tensor_count: tensorCount.value,
 		kv_count: numKv.value,
@@ -274,5 +381,48 @@ export async function gguf(
 		});
 	}
 
-	return { metadata, tensorInfos };
+	if (params?.computeParametersCount) {
+		const parameterCount = tensorInfos
+			.map(({ shape }) => shape.reduce((acc, val) => acc * Number(val), 1))
+			.reduce((acc, val) => acc + val, 0);
+
+		return { metadata, tensorInfos, parameterCount };
+	} else {
+		return { metadata, tensorInfos };
+	}
+}
+
+export async function ggufAllShards(
+	url: string,
+	params?: {
+		/**
+		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+		 */
+		fetch?: typeof fetch;
+		additionalFetchHeaders?: Record<string, string>;
+	}
+): Promise<{ shards: GGUFParseOutput[]; parameterCount: number }> {
+	const ggufShardFileInfo = parseGgufShardFilename(url);
+	if (ggufShardFileInfo) {
+		const total = parseInt(ggufShardFileInfo.total);
+		const prefix = ggufShardFileInfo.prefix;
+
+		const urls: string[] = [];
+		for (let shardIdx = 1; shardIdx <= total; shardIdx++) {
+			urls.push(`${prefix}-${shardIdx.toString().padStart(5, "0")}-of-${total.toString().padStart(5, "0")}.gguf`);
+		}
+
+		const PARALLEL_DOWNLOADS = 20;
+		const shards = await promisesQueue(
+			urls.map((shardUrl) => () => gguf(shardUrl, { ...params, computeParametersCount: true })),
+			PARALLEL_DOWNLOADS
+		);
+		return {
+			shards,
+			parameterCount: shards.map(({ parameterCount }) => parameterCount).reduce((acc, val) => acc + val, 0),
+		};
+	} else {
+		const { metadata, tensorInfos, parameterCount } = await gguf(url, { ...params, computeParametersCount: true });
+		return { shards: [{ metadata, tensorInfos }], parameterCount };
+	}
 }

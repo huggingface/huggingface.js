@@ -1,4 +1,5 @@
 export * from "./commit";
+export * from "./count-commits";
 export * from "./create-repo";
 export * from "./delete-file";
 export * from "./delete-files";
@@ -6,6 +7,7 @@ export * from "./delete-repo";
 export * from "./download-file";
 export * from "./file-download-info";
 export * from "./file-exists";
+export * from "./list-commits";
 export * from "./list-datasets";
 export * from "./list-files";
 export * from "./list-models";

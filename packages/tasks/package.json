@@ -1,7 +1,7 @@
 {
 	"name": "@huggingface/tasks",
 	"packageManager": "pnpm@8.10.5",
-	"version": "0.8.0",
+	"version": "0.10.8",
 	"description": "List of ML tasks for huggingface.co/tasks",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {
@@ -9,10 +9,10 @@
 	},
 	"main": "./dist/index.cjs",
 	"module": "./dist/index.js",
-	"types": "./dist/index.d.ts",
+	"types": "./dist/src/index.d.ts",
 	"exports": {
 		".": {
-			"types": "./dist/index.d.ts",
+			"types": "./dist/src/index.d.ts",
 			"require": "./dist/index.cjs",
 			"import": "./dist/index.js"
 		}
@@ -23,11 +23,12 @@
 		"lint:check": "eslint --ext .cjs,.ts .",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
-		"prepublishOnly": "pnpm run build",
-		"build": "tsup src/index.ts --format cjs,esm --clean --dts && pnpm run inference-codegen",
+		"prepublishOnly": "pnpm run inference-codegen && git diff --name-only --exit-code src && pnpm run build",
+		"build": "tsup src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
 		"prepare": "pnpm run build",
 		"check": "tsc",
-		"inference-codegen": "tsx scripts/inference-codegen.ts && prettier --write src/tasks/*/inference.ts"
+		"inference-codegen": "tsx scripts/inference-codegen.ts && prettier --write src/tasks/*/inference.ts",
+		"inference-tgi-import": "tsx scripts/inference-tgi-import.ts && prettier --write src/tasks/text-generation/spec/*.json && prettier --write src/tasks/chat-completion/spec/*.json"
 	},
 	"type": "module",
 	"files": [
@@ -44,6 +45,7 @@
 	"license": "MIT",
 	"devDependencies": {
 		"@types/node": "^20.11.5",
-		"quicktype-core": "https://github.com/huggingface/quicktype/raw/pack-18.0.17/packages/quicktype-core/quicktype-core-18.0.17.tgz"
+		"quicktype-core": "https://github.com/huggingface/quicktype/raw/pack-18.0.17/packages/quicktype-core/quicktype-core-18.0.17.tgz",
+		"type-fest": "^3.13.1"
 	}
 }

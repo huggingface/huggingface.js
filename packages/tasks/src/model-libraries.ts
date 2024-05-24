@@ -102,6 +102,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.bertopic,
 		filter: true,
 	},
+	big_vision: {
+		prettyLabel: "Big Vision",
+		repoName: "big_vision",
+		repoUrl: "https://github.com/google-research/big_vision",
+		filter: false,
+		countDownloads: {
+			wildcard: { path: "*.npz" },
+		},
+	},
 	diffusers: {
 		prettyLabel: "Diffusers",
 		repoName: "🤗/diffusers",
@@ -115,6 +124,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "docTR",
 		repoName: "doctr",
 		repoUrl: "https://github.com/mindee/doctr",
+	},
+	elm: {
+		prettyLabel: "ELM",
+		repoName: "elm",
+		repoUrl: "https://github.com/slicex-ai/elm",
+		filter: false,
+		countDownloads: {
+			wildcard: { path: "*/slicex_elm_config.json" },
+		},
 	},
 	espnet: {
 		prettyLabel: "ESPnet",
@@ -184,6 +202,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.keras,
 		filter: true,
 		countDownloads: { term: { path: "saved_model.pb" } },
+	},
+	"keras-nlp": {
+		prettyLabel: "KerasNLP",
+		repoName: "KerasNLP",
+		repoUrl: "https://keras.io/keras_nlp/",
+		docsUrl: "https://github.com/keras-team/keras-nlp",
+		snippets: snippets.keras_nlp,
 	},
 	k2: {
 		prettyLabel: "K2",
@@ -364,6 +389,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/TensorSpeech/TensorFlowTTS",
 		snippets: snippets.tensorflowtts,
 	},
+	timesfm: {
+		prettyLabel: "TimesFM",
+		repoName: "timesfm",
+		repoUrl: "https://github.com/google-research/timesfm",
+		filter: false,
+		countDownloads: {
+			term: { path: "checkpoints/checkpoint_1100000/state/checkpoint" },
+		},
+	},
 	timm: {
 		prettyLabel: "timm",
 		repoName: "pytorch-image-models",
@@ -400,6 +434,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: {
 			wildcard: { path: "*.sentis" },
 		},
+	},
+	voicecraft: {
+		prettyLabel: "VoiceCraft",
+		repoName: "VoiceCraft",
+		repoUrl: "https://github.com/jasonppy/VoiceCraft",
+		docsUrl: "https://github.com/jasonppy/VoiceCraft",
+		snippets: snippets.voicecraft,
 	},
 	whisperkit: {
 		prettyLabel: "WhisperKit",

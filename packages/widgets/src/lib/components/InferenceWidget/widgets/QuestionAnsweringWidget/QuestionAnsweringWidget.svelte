@@ -99,7 +99,7 @@
 				estimatedTime: res.estimatedTime,
 			};
 			getOutput({ withModelLoading: true });
-		} else if (res.status === "error") {
+		} else if (res.status === "error" && !isOnLoadCall) {
 			error = res.error;
 		}
 	}
@@ -138,9 +138,7 @@
 			bind:value={question}
 			{isLoading}
 			{isDisabled}
-			onClickSubmitBtn={() => {
-				getOutput();
-			}}
+			on:run={() => getOutput()}
 			on:cmdEnter={() => getOutput()}
 		/>
 		<WidgetTextarea

@@ -1,4 +1,4 @@
-import type { JsonObject } from "type-fest";
+import type { JsonObject } from "./vendor/type-fest/basic";
 
 export async function createApiError(
 	response: Response,
@@ -6,9 +6,11 @@ export async function createApiError(
 ): Promise<never> {
 	const error = new HubApiError(response.url, response.status, response.headers.get("X-Request-Id") ?? opts?.requestId);
 
-	error.message = `Api error with status ${error.statusCode}.${opts?.message ? ` ${opts.message}.` : ""} Request ID: ${
-		error.requestId
-	}, url: ${error.url}`;
+	error.message = `Api error with status ${error.statusCode}${opts?.message ? `. ${opts.message}` : ""}`;
+
+	const trailer = [`URL: ${error.url}`, error.requestId ? `Request ID: ${error.requestId}` : undefined]
+		.filter(Boolean)
+		.join(". ");
 
 	if (response.headers.get("Content-Type")?.startsWith("application/json")) {
 		const json = await response.json();
@@ -17,6 +19,8 @@ export async function createApiError(
 	} else {
 		error.data = { message: await response.text() };
 	}
+
+	error.message += `. ${trailer}`;
 
 	throw error;
 }

@@ -1,4 +1,5 @@
 import type { ModelData } from "./model-data";
+import { LIBRARY_TASK_MAPPING } from "./library-to-tasks";
 
 const TAG_CUSTOM_CODE = "custom_code";
 
@@ -33,7 +34,7 @@ predictions = predictor.predict_json(predictor_input)`,
 ];
 
 export const allennlp = (model: ModelData): string[] => {
-	if (model.tags?.includes("question-answering")) {
+	if (model.tags.includes("question-answering")) {
 		return allennlpQuestionAnswering(model);
 	}
 	return allennlpUnknown(model);
@@ -85,11 +86,11 @@ pipeline.load_textual_inversion("${model.id}")`,
 ];
 
 export const diffusers = (model: ModelData): string[] => {
-	if (model.tags?.includes("controlnet")) {
+	if (model.tags.includes("controlnet")) {
 		return diffusers_controlnet(model);
-	} else if (model.tags?.includes("lora")) {
+	} else if (model.tags.includes("lora")) {
 		return diffusers_lora(model);
-	} else if (model.tags?.includes("textual_inversion")) {
+	} else if (model.tags.includes("textual_inversion")) {
 		return diffusers_textual_inversion(model);
 	} else {
 		return diffusers_default(model);
@@ -118,9 +119,9 @@ text, *_ = model(speech)[0]`,
 const espnetUnknown = () => [`unknown model type (must be text-to-speech or automatic-speech-recognition)`];
 
 export const espnet = (model: ModelData): string[] => {
-	if (model.tags?.includes("text-to-speech")) {
+	if (model.tags.includes("text-to-speech")) {
 		return espnetTTS(model);
-	} else if (model.tags?.includes("automatic-speech-recognition")) {
+	} else if (model.tags.includes("automatic-speech-recognition")) {
 		return espnetASR(model);
 	}
 	return espnetUnknown();
@@ -150,6 +151,17 @@ export const keras = (model: ModelData): string[] => [
 	`from huggingface_hub import from_pretrained_keras
 
 model = from_pretrained_keras("${model.id}")
+`,
+];
+
+export const keras_nlp = (model: ModelData): string[] => [
+	`# Available backend options are: "jax", "tensorflow", "torch".
+os.environ["KERAS_BACKEND"] = "tensorflow"
+
+import keras_nlp
+
+tokenizer = keras_nlp.models.Tokenizer.from_preset("hf://${model.id}")
+backbone = keras_nlp.models.Backbone.from_preset("hf://${model.id}")
 `,
 ];
 
@@ -217,7 +229,7 @@ inference.crop("file.wav", excerpt)`,
 ];
 
 export const pyannote_audio = (model: ModelData): string[] => {
-	if (model.tags?.includes("pyannote-audio-pipeline")) {
+	if (model.tags.includes("pyannote-audio-pipeline")) {
 		return pyannote_audio_pipeline(model);
 	}
 	return pyannote_audio_model(model);
@@ -247,9 +259,9 @@ model = TFAutoModel.from_pretrained("${model.id}")
 ];
 
 export const tensorflowtts = (model: ModelData): string[] => {
-	if (model.tags?.includes("text-to-mel")) {
+	if (model.tags.includes("text-to-mel")) {
 		return tensorflowttsTextToMel(model);
-	} else if (model.tags?.includes("mel-to-wav")) {
+	} else if (model.tags.includes("mel-to-wav")) {
 		return tensorflowttsMelToWav(model);
 	}
 	return tensorflowttsUnknown(model);
@@ -298,7 +310,7 @@ model = joblib.load(
 };
 
 export const sklearn = (model: ModelData): string[] => {
-	if (model.tags?.includes("skops")) {
+	if (model.tags.includes("skops")) {
 		const skopsmodelFile = model.config?.sklearn?.model?.file;
 		const skopssaveFormat = model.config?.sklearn?.model_format;
 		if (!skopsmodelFile) {
@@ -402,7 +414,7 @@ export const transformers = (model: ModelData): string[] => {
 	if (!info) {
 		return [`# ⚠️ Type of model unknown`];
 	}
-	const remote_code_snippet = model.tags?.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
+	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
 
 	let autoSnippet: string;
 	if (info.processor) {
@@ -427,7 +439,7 @@ export const transformers = (model: ModelData): string[] => {
 		].join("\n");
 	}
 
-	if (model.pipeline_tag) {
+	if (model.pipeline_tag && LIBRARY_TASK_MAPPING.transformers?.includes(model.pipeline_tag)) {
 		const pipelineSnippet = [
 			"# Use a pipeline as a high-level helper",
 			"from transformers import pipeline",
@@ -485,8 +497,8 @@ export const peft = (model: ModelData): string[] => {
 from transformers import AutoModelFor${pefttask}
 
 config = PeftConfig.from_pretrained("${model.id}")
-model = AutoModelFor${pefttask}.from_pretrained("${peftBaseModel}")
-model = PeftModel.from_pretrained(model, "${model.id}")`,
+base_model = AutoModelFor${pefttask}.from_pretrained("${peftBaseModel}")
+model = PeftModel.from_pretrained(base_model, "${model.id}")`,
 	];
 };
 
@@ -531,6 +543,12 @@ IWorker engine = WorkerFactory.CreateWorker(BackendType.GPUCompute, model);
 `,
 ];
 
+export const voicecraft = (model: ModelData): string[] => [
+	`from voicecraft import VoiceCraft
+
+model = VoiceCraft.from_pretrained("${model.id}")`,
+];
+
 export const mlx = (model: ModelData): string[] => [
 	`pip install huggingface_hub hf_transfer
 
@@ -547,7 +565,7 @@ model = create_model(${model.id})`,
 export const nemo = (model: ModelData): string[] => {
 	let command: string[] | undefined = undefined;
 	// Resolve the tag to a nemo domain/sub-domain
-	if (model.tags?.includes("automatic-speech-recognition")) {
+	if (model.tags.includes("automatic-speech-recognition")) {
 		command = nemoDomainResolver("ASR", model);
 	}
 
@@ -588,11 +606,11 @@ wav = model.generate(descriptions)  # generates 3 samples.`,
 ];
 
 export const audiocraft = (model: ModelData): string[] => {
-	if (model.tags?.includes("musicgen")) {
+	if (model.tags.includes("musicgen")) {
 		return musicgen(model);
-	} else if (model.tags?.includes("audiogen")) {
+	} else if (model.tags.includes("audiogen")) {
 		return audiogen(model);
-	} else if (model.tags?.includes("magnet")) {
+	} else if (model.tags.includes("magnet")) {
 		return magnet(model);
 	} else {
 		return [`# Type of model unknown.`];

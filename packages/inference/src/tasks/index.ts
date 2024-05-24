@@ -30,6 +30,8 @@ export * from "./nlp/textGenerationStream";
 export * from "./nlp/tokenClassification";
 export * from "./nlp/translation";
 export * from "./nlp/zeroShotClassification";
+export * from "./nlp/chatCompletion";
+export * from "./nlp/chatCompletionStream";
 
 // Multimodal tasks
 export * from "./multimodal/documentQuestionAnswering";

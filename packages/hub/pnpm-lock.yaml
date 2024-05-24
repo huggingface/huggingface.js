@@ -5,20 +5,14 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
-  hash-wasm:
-    specifier: ^4.9.0
-    version: 4.9.0
-
-devDependencies:
   '@huggingface/tasks':
     specifier: workspace:^
     version: link:../tasks
+
+devDependencies:
   '@types/node':
     specifier: ^20.11.28
     version: 20.11.28
-  type-fest:
-    specifier: ^3.9.0
-    version: 3.9.0
 
 packages:
 
@@ -26,15 +20,6 @@ packages:
     resolution: {integrity: sha512-M/GPWVS2wLkSkNHVeLkrF2fD5Lx5UC4PxA0uZcKc6QqbIQUJyW1jVjueJYi1z8n0I5PxYrtpnPnWglE+y9A0KA==}
     dependencies:
       undici-types: 5.26.5
-    dev: true
-
-  /hash-wasm@4.9.0:
-    resolution: {integrity: sha512-7SW7ejyfnRxuOc7ptQHSf4LDoZaWOivfzqw+5rpcQku0nHfmicPKE51ra9BiRLAmT8+gGLestr1XroUkqdjL6w==}
-    dev: false
-
-  /type-fest@3.9.0:
-    resolution: {integrity: sha512-hR8JP2e8UiH7SME5JZjsobBlEiatFoxpzCP+R3ZeCo7kAaG1jXQE5X/buLzogM6GJu8le9Y4OcfNuIQX0rZskA==}
-    engines: {node: '>=14.16'}
     dev: true
 
   /undici-types@5.26.5:

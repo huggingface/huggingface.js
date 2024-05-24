@@ -28,25 +28,70 @@
 				apiToken = token;
 			}
 		}
+
+		isLoggedIn.set(true);
 	});
 
 	const models: ModelData[] = [
 		{
-			id: "mistralai/Mistral-7B-Instruct-v0.2",
+			id: "meta-llama/Meta-Llama-3-8B-Instruct",
 			pipeline_tag: "text-generation",
 			tags: ["conversational"],
 			inference: InferenceDisplayability.Yes,
 			config: {
-				architectures: ["MistralForCausalLM"],
-				model_type: "mistral",
+				architectures: ["LlamaForCausalLM"],
+				model_type: "llama",
 				tokenizer_config: {
 					chat_template:
-						"{{ bos_token }}{% for message in messages %}{% if (message['role'] == 'user') != (loop.index0 % 2 == 0) %}{{ raise_exception('Conversation roles must alternate user/assistant/user/assistant/...') }}{% endif %}{% if message['role'] == 'user' %}{{ '[INST] ' + message['content'] + ' [/INST]' }}{% elif message['role'] == 'assistant' %}{{ message['content'] + eos_token}}{% else %}{{ raise_exception('Only user and assistant roles are supported!') }}{% endif %}{% endfor %}",
-					use_default_system_prompt: false,
+						"{% set loop_messages = messages %}{% for message in loop_messages %}{% set content = '<|start_header_id|>' + message['role'] + '<|end_header_id|>\n\n'+ message['content'] | trim + '<|eot_id|>' %}{% if loop.index0 == 0 %}{% set content = bos_token + content %}{% endif %}{{ content }}{% endfor %}{% if add_generation_prompt %}{{ '<|start_header_id|>assistant<|end_header_id|>\n\n' }}{% endif %}",
+					bos_token: "<|begin_of_text|>",
+					eos_token: "<|end_of_text|>",
+				},
+			},
+			widgetData: [
+				{ text: "This is a text-only example", example_title: "Text only" },
+				{
+					messages: [{ content: "Please exlain QCD in very few words", role: "user" }],
+					example_title: "Chat messages",
+				},
+				{
+					messages: [{ content: "Please exlain QCD in very few words", role: "user" }],
+					output: {
+						text: "QCD is the physics of strong force and small particles.",
+					},
+					example_title: "Chat messages with Output",
+				},
+				{
+					text: "Explain QCD in one short sentence.",
+					output: {
+						text: "QCD is the physics of strong force and small particles.",
+					},
+					example_title: "Text only with Output",
+				},
+				{
+					example_title: "Invalid example - unsupported role",
+					messages: [
+						{ role: "system", content: "This will fail because of the chat template" },
+						{ role: "user", content: "What's your favorite condiment?" },
+					],
+				},
+			],
+		},
+		{
+			id: "microsoft/Phi-3-mini-128k-instruct",
+			pipeline_tag: "text-generation",
+			tags: ["conversational"],
+			inference: InferenceDisplayability.Yes,
+			config: {
+				architectures: ["Phi3ForCausalLM"],
+				model_type: "phi3",
+				tokenizer_config: {
 					bos_token: "<s>",
-					eos_token: "</s>",
+					chat_template:
+						"{{ bos_token }}{% for message in messages %}{% if (message['role'] == 'user') %}{{'<|user|>' + '\n' + message['content'] + '<|end|>' + '\n' + '<|assistant|>' + '\n'}}{% elif (message['role'] == 'assistant') %}{{message['content'] + '<|end|>' + '\n'}}{% endif %}{% endfor %}",
+					eos_token: "<|endoftext|>",
+					pad_token: "<|endoftext|>",
 					unk_token: "<unk>",
-					pad_token: null,
 				},
 			},
 			widgetData: [
@@ -82,11 +127,13 @@
 			id: "google/gemma-7b",
 			pipeline_tag: "text-generation",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 		},
 		{
 			id: "microsoft/phi-2",
 			pipeline_tag: "text-generation",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 			config: {
 				architectures: ["PhiForCausalLM"],
 				model_type: "phi",
@@ -105,21 +152,25 @@
 			id: "openai/clip-vit-base-patch16",
 			pipeline_tag: "zero-shot-image-classification",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 		},
 		{
 			id: "lllyasviel/sd-controlnet-canny",
 			pipeline_tag: "image-to-image",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 		},
 		{
 			id: "ydshieh/vit-gpt2-coco-en",
 			pipeline_tag: "image-to-text",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 		},
 		{
 			id: "impira/layoutlm-document-qa",
 			pipeline_tag: "document-question-answering",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 			widgetData: [
 				{
 					text: "What is the invoice number?",
@@ -135,11 +186,13 @@
 			id: "skops/hf_hub_example-bdc26c1f-7e82-42eb-9657-0318315f2df0",
 			pipeline_tag: "tabular-classification",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 		},
 		{
 			id: "dandelin/vilt-b32-finetuned-vqa",
 			pipeline_tag: "visual-question-answering",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 			widgetData: [
 				{
 					text: "What animal is it?",
@@ -155,6 +208,7 @@
 			id: "roberta-large-mnli",
 			pipeline_tag: "text-classification",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 			widgetData: [
 				{
 					text: "I like you. I love you.",
@@ -176,11 +230,13 @@
 			id: "edbeeching/decision-transformer-gym-hopper-medium-replay",
 			pipeline_tag: "reinforcement-learning",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 		},
 		{
 			id: "sgugger/resnet50d",
 			pipeline_tag: "image-classification",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 			widgetData: [
 				{
 					src: "https://huggingface.co/datasets/mishig/sample_images/resolve/main/tiger.jpg",
@@ -222,28 +278,33 @@
 			id: "facebook/detr-resnet-50",
 			pipeline_tag: "object-detection",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 		},
 		{
 			id: "facebook/detr-resnet-50-panoptic",
 			pipeline_tag: "image-segmentation",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 		},
 		{
 			id: "julien-c/distilbert-feature-extraction",
 			pipeline_tag: "feature-extraction",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 			widgetData: [{ text: "Hello world" }],
 		},
 		{
 			id: "sentence-transformers/distilbert-base-nli-stsb-mean-tokens",
 			pipeline_tag: "feature-extraction",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 			widgetData: [{ text: "Hello, world" }],
 		},
 		{
 			id: "dbmdz/bert-large-cased-finetuned-conll03-english",
 			pipeline_tag: "token-classification",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 			widgetData: [
 				{ text: "My name is Wolfgang and I live in Berlin" },
 				{ text: "My name is Sarah and I live in London" },
@@ -254,6 +315,7 @@
 			id: "distilbert-base-uncased-distilled-squad",
 			pipeline_tag: "question-answering",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 			widgetData: [
 				{
 					text: "Which name is also used to describe the Amazon rainforest in English?",
@@ -265,12 +327,14 @@
 			id: "t5-base",
 			pipeline_tag: "translation",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 			widgetData: [{ text: "My name is Wolfgang and I live in Berlin" }],
 		},
 		{
 			id: "facebook/bart-large-cnn",
 			pipeline_tag: "summarization",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 			widgetData: [
 				{
 					text: "The tower is 324 metres (1,063 ft) tall, about the same height as an 81-storey building, and the tallest structure in Paris. Its base is square, measuring 125 metres (410 ft) on each side. During its construction, the Eiffel Tower surpassed the Washington Monument to become the tallest man-made structure in the world, a title it held for 41 years until the Chrysler Building in New York City was finished in 1930. It was the first structure to reach a height of 300 metres. Due to the addition of a broadcasting aerial at the top of the tower in 1957, it is now taller than the Chrysler Building by 5.2 metres (17 ft). Excluding transmitters, the Eiffel Tower is the second tallest free-standing structure in France after the Millau Viaduct.",
@@ -281,6 +345,7 @@
 			id: "mistralai/Mistral-7B-v0.1",
 			pipeline_tag: "text-generation",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 			widgetData: [
 				{ text: "My name is Julien and I like to", output: { text: " code cool products with my friends." } },
 				{ text: "My name is Thomas and my main" },
@@ -293,6 +358,7 @@
 			id: "bigscience/bloom",
 			pipeline_tag: "text-generation",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 			widgetData: [
 				{ text: "My name is Julien and I like to", group: "English" },
 				{ text: "My name is Thomas and my main", group: "English" },
@@ -306,12 +372,14 @@
 			pipeline_tag: "fill-mask",
 			mask_token: "<mask>",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 			widgetData: [{ text: "Paris is the <mask> of France." }, { text: "The goal of life is <mask>." }],
 		},
 		{
 			id: "facebook/bart-large-mnli",
 			pipeline_tag: "zero-shot-classification",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 			widgetData: [
 				{
 					text: "I have a problem with my iphone that needs to be resolved asap!!",
@@ -324,6 +392,7 @@
 			id: "google/tapas-base-finetuned-wtq",
 			pipeline_tag: "table-question-answering",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 			widgetData: [
 				{
 					text: "How many stars does the transformers repository have?",
@@ -340,6 +409,7 @@
 			id: "microsoft/tapex-base-finetuned-wtq",
 			pipeline_tag: "table-question-answering",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 			widgetData: [
 				{
 					text: "How many stars does the transformers repository have?",
@@ -356,6 +426,7 @@
 			id: "julien-c/wine-quality",
 			pipeline_tag: "tabular-classification",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 			widgetData: [
 				{
 					structured_data: {
@@ -378,17 +449,20 @@
 			id: "bigscience/T0pp",
 			pipeline_tag: "text2text-generation",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 		},
 		{
 			id: "facebook/blenderbot-400M-distill",
 			pipeline_tag: "text2text-generation",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 			widgetData: [{ text: "Hey my name is Julien! How are you?" }],
 		},
 		{
 			id: "osanseviero/BigGAN-deep-128",
 			pipeline_tag: "text-to-image",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 			widgetData: [
 				{
 					text: "a tiger",
@@ -402,12 +476,14 @@
 			id: "julien-c/kan-bayashi_csmsc_tacotron2",
 			pipeline_tag: "text-to-speech",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 			widgetData: [{ text: "请您说得慢些好吗" }],
 		},
 		{
 			id: "superb/wav2vec2-base-superb-sid",
 			pipeline_tag: "audio-classification",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 			widgetData: [
 				{
 					example_title: "Librispeech sample 1",
@@ -441,11 +517,13 @@
 			id: "julien-c/mini_an4_asr_train_raw_bpe_valid",
 			pipeline_tag: "automatic-speech-recognition",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 		},
 		{
 			id: "facebook/wav2vec2-base-960h",
 			pipeline_tag: "automatic-speech-recognition",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 			widgetData: [
 				{
 					example_title: "Librispeech sample 1",
@@ -460,6 +538,7 @@
 			id: "facebook/wav2vec2-large-xlsr-53-french",
 			pipeline_tag: "automatic-speech-recognition",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 			widgetData: [
 				{
 					example_title: "Librispeech sample 1",
@@ -471,6 +550,7 @@
 			id: "manandey/wav2vec2-large-xlsr-mongolian",
 			pipeline_tag: "automatic-speech-recognition",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 			widgetData: [
 				{
 					example_title: "Librispeech sample 1",
@@ -482,6 +562,7 @@
 			id: "osanseviero/full-sentence-distillroberta2",
 			pipeline_tag: "sentence-similarity",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 			widgetData: [
 				{
 					source_sentence: "That is a happy person",
@@ -520,31 +601,37 @@
 			id: "gpt2",
 			pipeline_tag: undefined,
 			inference: InferenceDisplayability.PipelineNotDetected,
+			tags: [],
 		},
 		{
 			id: "gpt2",
 			pipeline_tag: "text-generation",
 			inference: InferenceDisplayability.ExplicitOptOut,
+			tags: [],
 		},
 		{
 			id: "gpt2",
 			pipeline_tag: "text-generation",
 			inference: InferenceDisplayability.LibraryNotDetected,
+			tags: [],
 		},
 		{
 			id: "gpt2",
 			pipeline_tag: "text-generation",
 			inference: InferenceDisplayability.PipelineLibraryPairNotSupported,
+			tags: [],
 		},
 		{
 			id: "gpt2",
 			pipeline_tag: "text-generation",
 			inference: InferenceDisplayability.PipelineNotDetected,
+			tags: [],
 		},
 		{
 			id: "Phind/Phind-CodeLlama-34B-v1",
 			pipeline_tag: "text-generation",
 			inference: InferenceDisplayability.Yes,
+			tags: [],
 		},
 	];
 
@@ -553,6 +640,7 @@
 			id: "superb/wav2vec2-base-superb-sid",
 			pipeline_tag: "audio-classification",
 			inference: InferenceDisplayability.CustomCode,
+			tags: [],
 			widgetData: [
 				{
 					example_title: "Librispeech sample 1",
@@ -574,6 +662,7 @@
 			id: "osanseviero/BigGAN-deep-128",
 			pipeline_tag: "text-to-image",
 			inference: InferenceDisplayability.LibraryNotDetected,
+			tags: [],
 			widgetData: [
 				{
 					text: "a tiger",
@@ -587,6 +676,7 @@
 			id: "gpt2",
 			pipeline_tag: "text-generation",
 			inference: InferenceDisplayability.PipelineNotDetected,
+			tags: [],
 			widgetData: [
 				// the widget should only show sample with output here
 				{ text: "My name is Julien and I like to", output: { text: "code cool products with my friends." } },
