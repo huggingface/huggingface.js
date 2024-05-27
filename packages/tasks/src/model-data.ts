@@ -123,8 +123,6 @@ export interface ModelData {
 	 * Example: transformers, SpeechBrain, Stanza, etc.
 	 */
 	library_name?: string;
-
-	ggufFilePaths?: string[];
 }
 
 /**

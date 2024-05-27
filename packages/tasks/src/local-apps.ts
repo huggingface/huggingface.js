@@ -2,17 +2,6 @@ import type { ModelData } from "./model-data";
 import type { PipelineType } from "./pipelines";
 
 /**
- * Code snippet to display
- * Support placeholders in the form of {{key}} in content
- * where key is a key in the params object
- */
-export interface Snippet {
-	content: string;
-	language?: "javascript" | "json" | "python" | "bash" | "jboss-cli" | "markdown" | "xml";
-	parameters?: Record<string, string[]>;
-}
-
-/**
  * Elements configurable by a local app.
  */
 export type LocalApp = {
@@ -49,7 +38,7 @@ export type LocalApp = {
 			/**
 			 * And if not (mostly llama.cpp), snippet to copy/paste in your terminal
 			 */
-			snippet: (model: ModelData) => Snippet | Snippet[];
+			snippet: (model: ModelData) => string | string[];
 	  }
 );
 
@@ -57,24 +46,20 @@ function isGgufModel(model: ModelData) {
 	return model.tags.includes("gguf");
 }
 
-const snippetLlamacpp = (model: ModelData): Snippet[] => {
+const snippetLlamacpp = (model: ModelData): string[] => {
 	return [
-		{
-			content: `## Install and build llama.cpp with curl support
+		`
+## Install and build llama.cpp with curl support
 git clone https://github.com/ggerganov/llama.cpp.git 
 cd llama.cpp
 LLAMA_CURL=1 make
 `,
-		},
-		{
-			content: `## Load and run the model
+		`## Load and run the model
 ./main \\
 	--hf-repo "${model.id}" \\
 	-m {{GGUF_FILE}} \\
 	-p "I believe the meaning of life is" \\
 	-n 128`,
-			parameters: { GGUF_FILE: model.ggufFilePaths ?? [] },
-		},
 	];
 };
 
