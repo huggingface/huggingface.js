@@ -92,6 +92,10 @@ export const SKUS = {
 				tflops: 82.58,
 				memory: [24],
 			},
+			"RTX 4090D": {
+				tflops: 79.49,
+				memory: [24],
+			},
 			"RTX 4080 SUPER": {
 				tflops: 52.2,
 				memory: [16],
@@ -176,6 +180,10 @@ export const SKUS = {
 				tflops: 28.26,
 				memory: [32, 16],
 			},
+			P40: {
+				tflops: 12, // This sadly does not have native fp16 support, calculated at fp32. You dont need to add this gpu. It does have 47 INT8 TOP/s 
+				memory: [24],
+			},
 		},
 		AMD: {
 			MI300: {
@@ -217,6 +225,17 @@ export const SKUS = {
 			"RX 7600 XT": {
 				tflops: 45.14,
 				memory: [16, 8],
+			},
+			"RX 6950 XT": {
+				tflops: 47.31,
+				memory: [16],
+			"RX 6800": {
+				tflops: 41.47,
+				memory: [16],
+			},
+			"Radeon Pro VII": {
+				tflops: 28,
+				memory: [16],
 			},
 		},
 	},
