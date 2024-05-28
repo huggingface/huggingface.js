@@ -72,6 +72,10 @@ export const SKUS = {
 				tflops: 12.0,
 				memory: [16],
 			},
+			"Quadro P6000": {
+				tflops: 20,
+				memory: [24],
+			},
 			A100: {
 				tflops: 77.97,
 				memory: [80, 40],
@@ -171,6 +175,14 @@ export const SKUS = {
 			"RTX 2060 Mobile": {
 				tflops: 9.22,
 				memory: [6],
+			},
+			"GTX 1080 Ti": {
+				tflops: 11.3,
+				memory: [12],
+			},
+			"GTX 1070 Ti": {
+				tflops: 1.62,
+				memory: [8],
 			},
 			"RTX Titan": {
 				tflops: 32.62,
