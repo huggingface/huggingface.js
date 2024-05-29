@@ -3,12 +3,12 @@ import type { TaskDataCustom } from "..";
 const taskData: TaskDataCustom = {
 	datasets: [
 		{
-			description: "18,000 hours of multilingual audio-text dataset in 108 languages.",
-			id: "mozilla-foundation/common_voice_13_0",
+			description: "31,175 hours of multilingual audio-text dataset in 108 languages.",
+			id: "mozilla-foundation/common_voice_17_0",
 		},
 		{
-			description: "An English dataset with 1,000 hours of data.",
-			id: "librispeech_asr",
+			description: "A multi-lingual audio dataset with 370K hours of audio.",
+			id: "espnet/yodas",
 		},
 		{
 			description: "High quality, multi-speaker audio data and their transcriptions in various languages.",
