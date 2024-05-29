@@ -177,7 +177,7 @@ export const SKUS = {
 				memory: [32, 16],
 			},
 			"GTX 1650 Mobile": {
-				tflops: 3.1,
+				tflops: 6.39,
 				memory: [4],
 			},
 		},
