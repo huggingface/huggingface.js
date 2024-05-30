@@ -46,6 +46,10 @@ function isGgufModel(model: ModelData) {
 	return model.tags.includes("gguf");
 }
 
+function isTransformersModel(model: ModelData) {
+	return model.tags.includes("transformers");
+}
+
 const snippetLlamacpp = (model: ModelData): string[] => {
 	return [
 		`
@@ -60,6 +64,17 @@ LLAMA_CURL=1 make
 	-m file.gguf \\
 	-p "I believe the meaning of life is" \\
 	-n 128`,
+	];
+};
+
+const snippetAphroditeEngine = (model: ModelData): string[] => {
+	return [
+		`
+  ## Install Aphrodite Engine. It should pull models from HF automatically.
+  pip install aphrodite-engine --extra-index-url https://downloads.pygmalion.chat/whl
+  `,
+		`## Load and run the model
+  aphrodite run "${model.id}"`
 	];
 };
 
@@ -102,6 +117,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isGgufModel,
 		deeplink: (model) => new URL(`https://backyard.ai/hf/model/${model.id}`),
+	},
+	aphrodite: {
+	        prettyLabel: "Aphrodite Engine",
+		docsUrl: "https://github.com/PygmalionAI/aphrodite-engine/wiki",
+		mainTask: "text-generation",
+		displayOnModelPage: isTransformersModel,
+		snippet: snippetAphroditeEngine,
 	},
 	drawthings: {
 		prettyLabel: "Draw Things",
