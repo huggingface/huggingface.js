@@ -168,6 +168,10 @@ export const SKUS = {
 				tflops: 12.74,
 				memory: [12, 8],
 			},
+			"RTX 2070": {
+				tflops: 14.93,
+				memory: [8],
+			},
 			"RTX 3050 Mobile": {
 				tflops: 7.639,
 				memory: [6],
@@ -192,10 +196,13 @@ export const SKUS = {
 				tflops: 28.26,
 				memory: [32, 16],
 			},
-			P40: {
-				tflops: 12, // This sadly does not have native fp16 support, calculated at fp32. You dont need to add this gpu. It does have 47 INT8 TOP/s 
-				memory: [24],
+			"GTX 1650 Mobile": {
+				tflops: 6.39,
+				memory: [4],
 			},
+			P40: {
+				tflops: 11.76,
+				memory: [24],
 		},
 		AMD: {
 			MI300: {
