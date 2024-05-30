@@ -440,14 +440,14 @@ export const transformers = (model: ModelData): string[] => {
 	}
 
 	if (model.pipeline_tag && LIBRARY_TASK_MAPPING.transformers?.includes(model.pipeline_tag)) {
-		let pipelineSnippet = ["# Use a pipeline as a high-level helper", "from transformers import pipeline", ""];
+		const pipelineSnippet = ["# Use a pipeline as a high-level helper", "from transformers import pipeline", ""];
 
-		if (model.tags?.includes("conversational")) {
-			pipelineSnippet = pipelineSnippet.concat([
+		if (model.tags.includes("conversational")) {
+			pipelineSnippet.push(
 				"messages = [",
 				'    {"role": "user", "content": "Who are you?"},',
 				"]",
-			]);
+			);
 		}
 		pipelineSnippet = pipelineSnippet.concat([
 			`pipe = pipeline("${model.pipeline_tag}", model="${model.id}"` + remote_code_snippet + ")",
