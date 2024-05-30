@@ -36,7 +36,7 @@ def query(filename):
 data = query("sample1.flac")
 ```
 
-You can also use libraries such as [transformers](https://huggingface.co/models?library=transformers&pipeline_tag=automatic-speech-recognition&sort=downloads), [speechbrain](https://huggingface.co/models?library=speechbrain&pipeline_tag=automatic-speech-recognition&sort=downloads), [NeMo](https://huggingface.co/models?pipeline_tag=automatic-speech-recognition&library=nemo&sort=downloads) and [espnet](https://huggingface.co/models?library=espnet&pipeline_tag=automatic-speech-recognition&sort=downloads) if you want one-click managed Inference without any hassle.
+We also support libraries such as [transformers](https://huggingface.co/models?library=transformers&pipeline_tag=automatic-speech-recognition&sort=downloads), [speechbrain](https://huggingface.co/models?library=speechbrain&pipeline_tag=automatic-speech-recognition&sort=downloads), [NeMo](https://huggingface.co/models?pipeline_tag=automatic-speech-recognition&library=nemo&sort=downloads) and [espnet](https://huggingface.co/models?library=espnet&pipeline_tag=automatic-speech-recognition&sort=downloads) via the Serverless Inference API.
 
 ```python
 # pip install --upgrade transformers
