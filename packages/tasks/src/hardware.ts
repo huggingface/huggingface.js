@@ -163,7 +163,7 @@ export const SKUS = {
 			"RTX 2070": {
 				tflops: 14.93,
 				memory: [8],
-			}, 
+			},
 			"RTX 3050 Mobile": {
 				tflops: 7.639,
 				memory: [6],
