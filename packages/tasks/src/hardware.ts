@@ -173,11 +173,11 @@ export const SKUS = {
 				memory: [6],
 			},
 			"GTX 1080 Ti": {
-				tflops: 11.34,  // float32 (GPU does not support native float16)
+				tflops: 11.34, // float32 (GPU does not support native float16)
 				memory: [11],
 			},
 			"GTX 1070 Ti": {
-				tflops: 8.2,  // float32 (GPU does not support native float16)
+				tflops: 8.2, // float32 (GPU does not support native float16)
 				memory: [8],
 			},
 			"RTX Titan": {
@@ -197,11 +197,11 @@ export const SKUS = {
 				memory: [32, 16],
 			},
 			"Quadro P6000": {
-				tflops: 12.63,  // float32 (GPU does not support native float16)
+				tflops: 12.63, // float32 (GPU does not support native float16)
 				memory: [24],
 			},
 			P40: {
-				tflops: 11.76,  // float32 (GPU does not support native float16)
+				tflops: 11.76, // float32 (GPU does not support native float16)
 				memory: [24],
 			},
 		},
