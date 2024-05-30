@@ -446,7 +446,7 @@ export const transformers = (model: ModelData): string[] => {
 			pipelineSnippet.push("messages = [", '    {"role": "user", "content": "Who are you?"},', "]");
 		}
 		pipelineSnippet.push(`pipe = pipeline("${model.pipeline_tag}", model="${model.id}"` + remote_code_snippet + ")");
-		if (model.tags?.includes("conversational")) {
+		if (model.tags.includes("conversational")) {
 			pipelineSnippet.push("pipe(messages)");
 		}
 
