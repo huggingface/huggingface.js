@@ -36,7 +36,7 @@ def query(filename):
 data = query("sample1.flac")
 ```
 
-You can also use [huggingface.js](https://github.com/huggingface/huggingface.js) to transcribe text with javascript using models available on the Hugging Face Hub.
+You can also use[huggingface.js](https://github.com/huggingface/huggingface.js), the JavaScript client, to transcribe models with the Inference API.
 
 ```javascript
 import { HfInference } from "@huggingface/inference";
