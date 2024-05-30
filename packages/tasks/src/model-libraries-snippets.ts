@@ -443,17 +443,11 @@ export const transformers = (model: ModelData): string[] => {
 		const pipelineSnippet = ["# Use a pipeline as a high-level helper", "from transformers import pipeline", ""];
 
 		if (model.tags.includes("conversational")) {
-			pipelineSnippet.push(
-				"messages = [",
-				'    {"role": "user", "content": "Who are you?"},',
-				"]",
-			);
+			pipelineSnippet.push("messages = [", '    {"role": "user", "content": "Who are you?"},', "]");
 		}
-		pipelineSnippet = pipelineSnippet.concat([
-			`pipe = pipeline("${model.pipeline_tag}", model="${model.id}"` + remote_code_snippet + ")",
-		]);
+		pipelineSnippet.push(`pipe = pipeline("${model.pipeline_tag}", model="${model.id}"` + remote_code_snippet + ")");
 		if (model.tags?.includes("conversational")) {
-			pipelineSnippet = pipelineSnippet.concat(["pipe(messages)"]);
+			pipelineSnippet.push("pipe(messages)");
 		}
 
 		return [pipelineSnippet.join("\n"), autoSnippet];
