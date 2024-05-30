@@ -203,6 +203,7 @@ export const SKUS = {
 			P40: {
 				tflops: 11.76,  // float32 (GPU does not support native float16)
 				memory: [24],
+			},
 		},
 		AMD: {
 			MI300: {
