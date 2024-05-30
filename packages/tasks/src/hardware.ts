@@ -180,6 +180,10 @@ export const SKUS = {
 				tflops: 28.26,
 				memory: [32, 16],
 			},
+			"GTX 1650 Mobile": {
+				tflops: 6.39,
+				memory: [4],
+			},
 		},
 		AMD: {
 			MI300: {
