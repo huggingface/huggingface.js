@@ -1,22 +1,3 @@
-name: CI
-
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    # Add your build steps here
-    # ...
-
     - name: Security scan
       uses: listen-dev/action@v0.8.0
       with:
