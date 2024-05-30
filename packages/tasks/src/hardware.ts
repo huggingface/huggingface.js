@@ -72,10 +72,6 @@ export const SKUS = {
 				tflops: 12.0,
 				memory: [16],
 			},
-			"Quadro P6000": {
-				tflops: 12.63,  // float32 (GPU does not support native float16)
-				memory: [24],
-			},
 			A100: {
 				tflops: 77.97,
 				memory: [80, 40],
@@ -87,10 +83,6 @@ export const SKUS = {
 			A10: {
 				tflops: 31.24,
 				memory: [24],
-			},
-			T4: {
-				tflops: 65.13,
-				memory: [16],
 			},
 			"RTX 4090": {
 				tflops: 82.58,
@@ -192,13 +184,21 @@ export const SKUS = {
 				tflops: 32.62,
 				memory: [24],
 			},
+			"GTX 1650 Mobile": {
+				tflops: 6.39,
+				memory: [4],
+			},
+			T4: {
+				tflops: 65.13,
+				memory: [16],
+			},
 			V100: {
 				tflops: 28.26,
 				memory: [32, 16],
 			},
-			"GTX 1650 Mobile": {
-				tflops: 6.39,
-				memory: [4],
+			"Quadro P6000": {
+				tflops: 12.63,  // float32 (GPU does not support native float16)
+				memory: [24],
 			},
 			P40: {
 				tflops: 11.76,  // float32 (GPU does not support native float16)
