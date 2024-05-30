@@ -7,12 +7,12 @@ const taskData: TaskDataCustom = {
 			id: "mozilla-foundation/common_voice_17_0",
 		},
 		{
-			description: "A multi-lingual audio dataset with 370K hours of audio.",
-			id: "espnet/yodas",
+			description: "An English dataset with 1,000 hours of data.",
+			id: "librispeech_asr",
 		},
 		{
-			description: "High quality, multi-speaker audio data and their transcriptions in various languages.",
-			id: "openslr",
+			description: "A multi-lingual audio dataset with 370K hours of audio.",
+			id: "espnet/yodas",
 		},
 	],
 	demo: {
@@ -47,12 +47,12 @@ const taskData: TaskDataCustom = {
 			id: "openai/whisper-large-v3",
 		},
 		{
-			description: "A good generic ASR model by MetaAI.",
-			id: "facebook/wav2vec2-base-960h",
+			description: "A good generic speech model by MetaAI for fine-tuning.",
+			id: "facebook/w2v-bert-2.0",
 		},
 		{
 			description: "An end-to-end model that performs ASR and Speech Translation by MetaAI.",
-			id: "facebook/s2t-small-mustc-en-fr-st",
+			id: "facebook/seamless-m4t-v2-large",
 		},
 	],
 	spaces: [
