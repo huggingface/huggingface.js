@@ -1,5 +1,5 @@
     - name: Security scan
       uses: listen-dev/action@v0.8.0
       with:
-        jwt: ${{ secrets.test }}
+        jwt: ${{ secrets.TEST }}
         ci: true
