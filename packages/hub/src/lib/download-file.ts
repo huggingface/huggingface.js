@@ -16,6 +16,11 @@ export async function downloadFile(params: {
 	 * For example, when calling on a file stored with Git LFS, the pointer file will be downloaded instead.
 	 */
 	raw?: boolean;
+	/**
+	 * An optional Git revision id which can be a branch name, a tag, or a commit hash.
+	 *
+	 * @default "main"
+	 */
 	revision?: string;
 	/**
 	 * Fetch only a specific part of the file

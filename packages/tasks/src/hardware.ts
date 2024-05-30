@@ -31,7 +31,7 @@ export interface HardwareSpec {
 	memory?: number[];
 }
 
-export const DEFAULT_MEMORY_OPTIONS = [8, 16, 24, 32, 40, 48, 64, 80, 96, 128];
+export const DEFAULT_MEMORY_OPTIONS = [8, 16, 24, 32, 40, 48, 64, 80, 96, 128, 256, 512];
 
 export const SKUS = {
 	GPU: {
@@ -47,6 +47,30 @@ export const SKUS = {
 			"RTX 6000 Ada": {
 				tflops: 91.1,
 				memory: [48],
+			},
+			"RTX 5880 Ada": {
+				tflops: 69.3,
+				memory: [48],
+			},
+			"RTX 5000 Ada": {
+				tflops: 65.3,
+				memory: [32],
+			},
+			"RTX 4500 Ada": {
+				tflops: 39.6,
+				memory: [24],
+			},
+			"RTX 4000 Ada": {
+				tflops: 26.7,
+				memory: [20],
+			},
+			"RTX 4000 SFF Ada": {
+				tflops: 19.2,
+				memory: [20],
+			},
+			"RTX 2000 Ada": {
+				tflops: 12.0,
+				memory: [16],
 			},
 			A100: {
 				tflops: 77.97,
@@ -92,6 +116,14 @@ export const SKUS = {
 				tflops: 44.1,
 				memory: [16],
 			},
+			"RTX 4060": {
+				tflops: 15.11,
+				memory: [8],
+			},
+			"RTX 4060 Ti": {
+				tflops: 22.06,
+				memory: [8, 16],
+			},
 			"RTX 3090": {
 				tflops: 35.58,
 				memory: [24],
@@ -100,13 +132,57 @@ export const SKUS = {
 				tflops: 40,
 				memory: [24],
 			},
+			"RTX 3080": {
+				tflops: 30.6,
+				memory: [12, 10],
+			},
 			"RTX 3080 Ti": {
 				tflops: 34.1,
 				memory: [12],
 			},
-			"RTX 3080": {
-				tflops: 30.6,
-				memory: [12, 10],
+			"RTX 3070": {
+				tflops: 20.31,
+				memory: [8],
+			},
+			"RTX 3070 Ti": {
+				tflops: 21.75,
+				memory: [8],
+			},
+			"RTX 3070 Ti Laptop": {
+				tflops: 16.6,
+				memory: [8],
+			},
+			"RTX 3060 Ti": {
+				tflops: 16.2,
+				memory: [8],
+			},
+			"RTX 3060": {
+				tflops: 12.74,
+				memory: [12, 8],
+			},
+			"RTX 2070": {
+				tflops: 14.93,
+				memory: [8],
+			},
+			"RTX 3050 Mobile": {
+				tflops: 7.639,
+				memory: [6],
+			},
+			"RTX 2060 Mobile": {
+				tflops: 9.22,
+				memory: [6],
+			},
+			"RTX Titan": {
+				tflops: 32.62,
+				memory: [24],
+			},
+			V100: {
+				tflops: 28.26,
+				memory: [32, 16],
+			},
+			"GTX 1650 Mobile": {
+				tflops: 6.39,
+				memory: [4],
 			},
 		},
 		AMD: {
@@ -121,6 +197,10 @@ export const SKUS = {
 			MI210: {
 				tflops: 181.0,
 				memory: [64],
+			},
+			MI100: {
+				tflops: 184.6,
+				memory: [32],
 			},
 			"RX 7900 XTX": {
 				tflops: 122.8,
