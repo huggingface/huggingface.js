@@ -84,12 +84,12 @@ export const SKUS = {
 				tflops: 31.24,
 				memory: [24],
 			},
-			T4: {
-				tflops: 65.13,
-				memory: [16],
-			},
 			"RTX 4090": {
 				tflops: 82.58,
+				memory: [24],
+			},
+			"RTX 4090D": {
+				tflops: 79.49,
 				memory: [24],
 			},
 			"RTX 4080 SUPER": {
@@ -160,6 +160,10 @@ export const SKUS = {
 				tflops: 12.74,
 				memory: [12, 8],
 			},
+			"RTX 2070": {
+				tflops: 14.93,
+				memory: [8],
+			},
 			"RTX 3050 Mobile": {
 				tflops: 7.639,
 				memory: [6],
@@ -168,13 +172,37 @@ export const SKUS = {
 				tflops: 9.22,
 				memory: [6],
 			},
+			"GTX 1080 Ti": {
+				tflops: 11.34, // float32 (GPU does not support native float16)
+				memory: [11],
+			},
+			"GTX 1070 Ti": {
+				tflops: 8.2, // float32 (GPU does not support native float16)
+				memory: [8],
+			},
 			"RTX Titan": {
 				tflops: 32.62,
 				memory: [24],
 			},
+			"GTX 1650 Mobile": {
+				tflops: 6.39,
+				memory: [4],
+			},
+			T4: {
+				tflops: 65.13,
+				memory: [16],
+			},
 			V100: {
 				tflops: 28.26,
 				memory: [32, 16],
+			},
+			"Quadro P6000": {
+				tflops: 12.63, // float32 (GPU does not support native float16)
+				memory: [24],
+			},
+			P40: {
+				tflops: 11.76, // float32 (GPU does not support native float16)
+				memory: [24],
 			},
 		},
 		AMD: {
@@ -217,6 +245,18 @@ export const SKUS = {
 			"RX 7600 XT": {
 				tflops: 45.14,
 				memory: [16, 8],
+			},
+			"RX 6950 XT": {
+				tflops: 47.31,
+				memory: [16],
+			},
+			"RX 6800": {
+				tflops: 32.33,
+				memory: [16],
+			},
+			"Radeon Pro VII": {
+				tflops: 26.11,
+				memory: [16],
 			},
 		},
 	},

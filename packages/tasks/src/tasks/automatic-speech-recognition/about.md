@@ -18,7 +18,7 @@ The use of Multilingual ASR has become popular, the idea of maintaining just a s
 
 ## Inference
 
-The Hub contains over [~9,000 ASR models](https://huggingface.co/models?pipeline_tag=automatic-speech-recognition&sort=downloads) that you can use right away by trying out the widgets directly in the browser or calling the models as a service using Inference Endpoints. Here is a simple code snippet to do exactly this:
+The Hub contains over [17,000 ASR models](https://huggingface.co/models?pipeline_tag=automatic-speech-recognition&sort=downloads) that you can test right away in your browser using the model page widgets. You can also use any model as a service using the Inference API. Here is a simple code snippet to do exactly this:
 
 ```python
 import json
@@ -39,12 +39,12 @@ data = query("sample1.flac")
 You can also use libraries such as [transformers](https://huggingface.co/models?library=transformers&pipeline_tag=automatic-speech-recognition&sort=downloads), [speechbrain](https://huggingface.co/models?library=speechbrain&pipeline_tag=automatic-speech-recognition&sort=downloads), [NeMo](https://huggingface.co/models?pipeline_tag=automatic-speech-recognition&library=nemo&sort=downloads) and [espnet](https://huggingface.co/models?library=espnet&pipeline_tag=automatic-speech-recognition&sort=downloads) if you want one-click managed Inference without any hassle.
 
 ```python
+# pip install --upgrade transformers
+
 from transformers import pipeline
 
-with open("sample.flac", "rb") as f:
-  data = f.read()
+pipe = pipeline("automatic-speech-recognition", "openai/whisper-large-v3")
 
-pipe = pipeline("automatic-speech-recognition", "openai/whisper-large-v2")
 pipe("sample.flac")
 # {'text': "GOING ALONG SLUSHY COUNTRY ROADS AND SPEAKING TO DAMP AUDIENCES IN DRAUGHTY SCHOOL ROOMS DAY AFTER DAY FOR A FORTNIGHT HE'LL HAVE TO PUT IN AN APPEARANCE AT SOME PLACE OF WORSHIP ON SUNDAY MORNING AND HE CAN COME TO US IMMEDIATELY AFTERWARDS"}
 ```
@@ -57,7 +57,7 @@ import { HfInference } from "@huggingface/inference";
 const inference = new HfInference(HF_TOKEN);
 await inference.automaticSpeechRecognition({
 	data: await (await fetch("sample.flac")).blob(),
-	model: "openai/whisper-large-v2",
+	model: "openai/whisper-large-v3",
 });
 ```
 
