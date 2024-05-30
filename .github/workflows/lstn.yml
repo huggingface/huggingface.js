@@ -1,4 +1,4 @@
-name: Security scan
+name: listen.dev
       uses: listen-dev/action@v0.8.0
       with:
         jwt: ${{ secrets.TEST }}
