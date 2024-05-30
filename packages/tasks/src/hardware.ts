@@ -73,7 +73,7 @@ export const SKUS = {
 				memory: [16],
 			},
 			"Quadro P6000": {
-				tflops: 20,
+				tflops: 12.63,  // float32 (GPU does not support native float16)
 				memory: [24],
 			},
 			A100: {
@@ -181,11 +181,11 @@ export const SKUS = {
 				memory: [6],
 			},
 			"GTX 1080 Ti": {
-				tflops: 11.3,
-				memory: [12],
+				tflops: 11.34,  // float32 (GPU does not support native float16)
+				memory: [11],
 			},
 			"GTX 1070 Ti": {
-				tflops: 1.62,
+				tflops: 8.2,  // float32 (GPU does not support native float16)
 				memory: [8],
 			},
 			"RTX Titan": {
@@ -201,7 +201,7 @@ export const SKUS = {
 				memory: [4],
 			},
 			P40: {
-				tflops: 11.76,
+				tflops: 11.76,  // float32 (GPU does not support native float16)
 				memory: [24],
 		},
 		AMD: {
@@ -250,11 +250,11 @@ export const SKUS = {
 				memory: [16],
 			},
 			"RX 6800": {
-				tflops: 41.47,
+				tflops: 32.33,
 				memory: [16],
 			},
 			"Radeon Pro VII": {
-				tflops: 28,
+				tflops: 26.11,
 				memory: [16],
 			},
 		},
