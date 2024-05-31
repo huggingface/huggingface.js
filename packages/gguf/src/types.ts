@@ -92,6 +92,20 @@ interface NoTokenizer {
 	"tokenizer.ggml.model"?: undefined;
 }
 
+/// Splits
+
+interface Splits {
+	// Index of the current split (couting from 0)
+	"split.no": number;
+	// Total number of splits (couting from 1)
+	"split.count": number;
+	// Total number of tensors from all splits
+	"split.tensors.count": number;
+}
+interface NoSplits {
+	"split.count"?: undefined;
+}
+
 /// Models outside of llama.cpp: "rwkv" and "whisper"
 
 export type RWKV = GGUFGeneralInfo<"rwkv"> &
@@ -126,7 +140,7 @@ export type GGUFMetadata<Options extends GGUFMetadataOptions = { strict: true }>
 } & GGUFModelKV &
 	(Options extends { strict: true } ? unknown : Record<string, MetadataValue>);
 
-export type GGUFModelKV = (NoModelMetadata | ModelMetadata) & (NoTokenizer | Tokenizer);
+export type GGUFModelKV = (NoModelMetadata | ModelMetadata) & (NoTokenizer | Tokenizer) & (Splits | NoSplits);
 
 export interface GGUFTensorInfo {
 	name: string;

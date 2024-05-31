@@ -51,5 +51,12 @@ describe("gguf-types", () => {
 			// @ts-expect-error llama does not have ssm.* keys
 			model["mamba.ssm.conv_kernel"] = 0;
 		}
+
+		if (model["split.count"]) {
+			model["split.no"] = 123;
+		} else {
+			// @ts-expect-error not a split (shard) model
+			model["split.no"] = 123;
+		}
 	});
 });

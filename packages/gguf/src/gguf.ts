@@ -400,8 +400,9 @@ export async function ggufAllShards(
 		 */
 		fetch?: typeof fetch;
 		additionalFetchHeaders?: Record<string, string>;
+		allowLocalFile?: boolean;
 	}
-): Promise<{ shards: GGUFParseOutput[]; parameterCount: number }> {
+): Promise<GGUFParseOutput & { parameterCount: number }> {
 	const ggufShardFileInfo = parseGgufShardFilename(url);
 	if (ggufShardFileInfo) {
 		const total = parseInt(ggufShardFileInfo.total);
@@ -414,15 +415,48 @@ export async function ggufAllShards(
 
 		const PARALLEL_DOWNLOADS = 20;
 		const shards = await promisesQueue(
-			urls.map((shardUrl) => () => gguf(shardUrl, { ...params, computeParametersCount: true })),
+			urls.map((shardUrl) => async () => {
+				const output = await gguf(shardUrl, { ...params, computeParametersCount: true });
+				return output;
+			}),
 			PARALLEL_DOWNLOADS
 		);
+
+		// Sanity check split.count parameter
+		const output: GGUFParseOutput<{ strict: false }> = shards[0];
+		const splitCount = output.metadata["split.count"];
+		if (splitCount !== shards.length) {
+			throw new Error(`Expect to "split.count" to be ${shards.length}, but got ${splitCount}`);
+		}
+
+		// Sanity check split.no parameter
+		for (let i = 0; i < shards.length; i++) {
+			const shard = shards[i];
+			if (!shard.metadata["split.count"]) {
+				continue;
+			}
+			const splitNo = shard.metadata["split.no"];
+			if (splitNo !== i) {
+				throw new Error(`Expect to "split.no" to be ${i}, but got ${splitNo}`);
+			} else if (i > 0) {
+				// skip first shard (already added)
+				output.tensorInfos = [...output.tensorInfos, ...shard.tensorInfos];
+			}
+		}
+
+		// Sanity check split.tensors.count parameter
+		const splitTensorsCount = output.metadata["split.tensors.count"];
+		if (splitTensorsCount !== output.tensorInfos.length) {
+			throw new Error(
+				`Expect to "split.tensors.count" to be ${output.tensorInfos.length}, but got ${splitTensorsCount}`
+			);
+		}
+
 		return {
-			shards,
+			...output,
 			parameterCount: shards.map(({ parameterCount }) => parameterCount).reduce((acc, val) => acc + val, 0),
 		};
 	} else {
-		const { metadata, tensorInfos, parameterCount } = await gguf(url, { ...params, computeParametersCount: true });
-		return { shards: [{ metadata, tensorInfos }], parameterCount };
+		return await gguf(url, { ...params, computeParametersCount: true });
 	}
 }
