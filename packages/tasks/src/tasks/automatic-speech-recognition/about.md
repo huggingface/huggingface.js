@@ -48,7 +48,7 @@ await inference.automaticSpeechRecognition({
 });
 ```
 
-This works for transformers-compatible models like Whisper, Wav2Vec2, HuBERT, etc. You can also run inference in Python using transformers as follows:
+For transformers-compatible models like Whisper, Wav2Vec2, and HuBERT, you can also run inference with the library as follows:
 
 ```python
 # pip install --upgrade transformers
