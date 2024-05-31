@@ -442,11 +442,11 @@ export const transformers = (model: ModelData): string[] => {
 	if (model.pipeline_tag && LIBRARY_TASK_MAPPING.transformers?.includes(model.pipeline_tag)) {
 		const pipelineSnippet = ["# Use a pipeline as a high-level helper", "from transformers import pipeline", ""];
 
-		if (model.tags.includes("conversational")) {
+		if (model.tags.includes("conversational") && model.config?.tokenizer_config?.chat_template) {
 			pipelineSnippet.push("messages = [", '    {"role": "user", "content": "Who are you?"},', "]");
 		}
 		pipelineSnippet.push(`pipe = pipeline("${model.pipeline_tag}", model="${model.id}"` + remote_code_snippet + ")");
-		if (model.tags.includes("conversational")) {
+		if (model.tags.includes("conversational") && model.config?.tokenizer_config?.chat_template) {
 			pipelineSnippet.push("pipe(messages)");
 		}
 
