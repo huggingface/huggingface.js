@@ -96,4 +96,32 @@ export const GGUF_QUANT_DESCRIPTIONS: Record<GGMLQuantizationType, { txt: string
 		txt: "4-bit quantization (q). Super-blocks with 256 weights. Weight w is obtained using super_block_scale & importance matrix.",
 		src_url: "https://github.com/ggerganov/llama.cpp/pull/5590",
 	},
+	[GGMLQuantizationType.I8]: {
+		txt: "8-bit fixed-width integer number.",
+		src_url: "https://github.com/ggerganov/llama.cpp/pull/6045",
+	},
+	[GGMLQuantizationType.I16]: {
+		txt: "16-bit fixed-width integer number.",
+		src_url: "https://github.com/ggerganov/llama.cpp/pull/6045",
+	},
+	[GGMLQuantizationType.I32]: {
+		txt: "32-bit fixed-width integer number.",
+		src_url: "https://github.com/ggerganov/llama.cpp/pull/6045",
+	},
+	[GGMLQuantizationType.I64]: {
+		txt: "64-bit fixed-width integer number.",
+		src_url: "https://github.com/ggerganov/llama.cpp/pull/6062",
+	},
+	[GGMLQuantizationType.F64]: {
+		txt: "64-bit standard IEEE 754 double-precision floating-point number.",
+		src_url: "https://en.wikipedia.org/wiki/Double-precision_floating-point_format",
+	},
+	[GGMLQuantizationType.IQ1_M]: {
+		txt: "1-bit quantization (q). Super-blocks with 256 weights. Weight w is obtained using super_block_scale & importance matrix, resulting in 1.75 bits-per-weight.",
+		src_url: "https://github.com/ggerganov/llama.cpp/pull/6302",
+	},
+	[GGMLQuantizationType.BF16]: {
+		txt: "16-bit shortened version of the 32-bit IEEE 754 single-precision floating-point number.",
+		src_url: "https://en.wikipedia.org/wiki/Bfloat16_floating-point_format",
+	},
 };
