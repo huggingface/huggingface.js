@@ -113,7 +113,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	chat_tts: {
 		prettyLabel: "ChatTTS",
-		repoName: "chat_tts",
+		repoName: "ChatTTS",
 		repoUrl: "https://github.com/2noise/ChatTTS.git",
 		filter: false,
 		countDownloads: { term: { path: "asset/GPT.pt" } },
