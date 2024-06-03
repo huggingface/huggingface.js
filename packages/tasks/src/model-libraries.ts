@@ -116,9 +116,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "chat_tts",
 		repoUrl: "https://github.com/2noise/ChatTTS.git",
 		filter: false,
-		countDownloads: {
-			wildcard: { path: "asset/GPT.pt" },
-		},
 	},
 	diffusers: {
 		prettyLabel: "Diffusers",
