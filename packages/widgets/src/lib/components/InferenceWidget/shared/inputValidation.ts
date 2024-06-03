@@ -77,7 +77,7 @@ export function isSentenceSimilarityInput<TOutput>(
 	return (
 		isObject(sample) &&
 		"source_sentence" in sample &&
-		typeof sample.candidate_labels === "string" &&
+		typeof sample.source_sentence === "string" &&
 		"sentences" in sample &&
 		isStrArray(sample.sentences)
 	);
