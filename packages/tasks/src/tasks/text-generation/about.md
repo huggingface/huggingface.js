@@ -4,7 +4,7 @@ This task covers guides on both [text-generation](https://huggingface.co/models?
 
 ### Instruction Models
 
-A model trained for text generation can be later adapted to follow instructions. You can try some of the most used instruction tuned open access models like Mixtral 8x7B, Cohere Command R+, Meta Llama3 70B, etc [at Hugging Chat](https://huggingface.co/chat).
+A model trained for text generation can be later adapted to follow instructions. You can try some of the most powerful instruction-tuned open access models like Mixtral 8x7B, Cohere Command R+, Meta Llama3 70B, etc [at Hugging Chat](https://huggingface.co/chat).
 
 ### Code Generation
 
@@ -44,7 +44,7 @@ When it comes to text generation, the underlying language model can come in seve
 
 ## Text Generation from Image and Text
 
-There are language models that can input both text and image and output text, called vision language models. [IDEFICS 2](https://huggingface.co/HuggingFaceM4/idefics2-8b) and [MiniCPM Llama3 V](https://huggingface.co/openbmb/MiniCPM-Llama3-V-2_5) are good examples. Although they work just like other language models by means of input parameters for generation, since they also take input images, you can use them with `image-to-text` pipeline. You can find information about the pipeline in [image-to-text](https://huggingface.co/tasks/image-to-text) task page.
+There are language models that can input both text and image and output text, called vision language models. [IDEFICS 2](https://huggingface.co/HuggingFaceM4/idefics2-8b) and [MiniCPM Llama3 V](https://huggingface.co/openbmb/MiniCPM-Llama3-V-2_5) are good examples. They accept the same generation parameters as other language models. However, since they also take images as input, you have to use them with the `image-to-text` pipeline. You can find more information about this in the [image-to-text task page](https://huggingface.co/tasks/image-to-text).
 
 ## Inference
 
