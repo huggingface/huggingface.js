@@ -51,7 +51,7 @@ const snippetLlamacpp = (model: ModelData): string[] => {
 		`# Option 1: use llama.cpp with brew
 brew install llama.cpp
 
-# Build llama.cpp then load and run the model
+# Load and run the model
 llama \\
 	--hf-repo "${model.id}" \\
 	--hf-file file.gguf \\
