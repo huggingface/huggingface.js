@@ -362,7 +362,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		},
 	},
 	"stable-audio-tools": {
-		prettyLabel: "stable-audio-tools",
+		prettyLabel: "Stable Audio Tools",
 		repoName: "stable-audio-tools",
 		repoUrl: "https://github.com/Stability-AI/stable-audio-tools.git",
 		filter: false,
