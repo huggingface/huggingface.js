@@ -163,6 +163,9 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://fasttext.cc/",
 		snippets: snippets.fasttext,
 		filter: true,
+		countDownloads: {
+            wildcard: { path: "*.bin" },
+        },
 	},
 	flair: {
 		prettyLabel: "Flair",
