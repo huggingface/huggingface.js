@@ -20,10 +20,6 @@ export interface DatasetLibraryUiElement {
 	 * URL to library's docs
 	 */
 	docsUrl?: string;
-	/**
-	 * URL to library's docs in the Hugging Face documentation
-	 */
-	hfDocsUrl?: string;
 }
 
 export const DATASET_LIBRARIES_UI_ELEMENTS = {
@@ -37,29 +33,25 @@ export const DATASET_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "WebDataset",
 		repoName: "webdataset",
 		repoUrl: "https://github.com/webdataset/webdataset",
-		docsUrl: "https://github.com/webdataset/webdataset",
-		hfDocsUrl: "https://huggingface.co/docs/hub/datasets-webdataset",
+		docsUrl: "https://huggingface.co/docs/hub/datasets-webdataset",
 	},
 	datasets: {
 		prettyLabel: "Datasets",
 		repoName: "datasets",
 		repoUrl: "https://github.com/huggingface/datasets",
-		docsUrl: "https://huggingface.co/docs/datasets",
-		hfDocsUrl: "https://huggingface.co/docs/hub/datasets-usage",
+		docsUrl: "https://huggingface.co/docs/hub/datasets-usage",
 	},
 	pandas: {
 		prettyLabel: "pandas",
 		repoName: "pandas",
 		repoUrl: "https://github.com/pandas-dev/pandas",
-		docsUrl: "https://pandas.pydata.org/docs/",
-		hfDocsUrl: "https://huggingface.co/docs/hub/datasets-pandas",
+		docsUrl: "https://huggingface.co/docs/hub/datasets-pandas",
 	},
 	dask: {
 		prettyLabel: "Dask",
 		repoName: "dask",
 		repoUrl: "https://github.com/dask/dask",
-		docsUrl: "https://docs.dask.org/en/stable/",
-		hfDocsUrl: "https://huggingface.co/docs/hub/datasets-dask",
+		docsUrl: "https://huggingface.co/docs/hub/datasets-dask",
 	},
 } satisfies Record<string, DatasetLibraryUiElement>;
 
