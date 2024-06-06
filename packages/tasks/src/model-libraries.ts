@@ -361,6 +361,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			term: { path: "hyperparams.yaml" },
 		},
 	},
+	"stable-audio-tools": {
+		prettyLabel: "stable-audio-tools",
+		repoName: "stable-audio-tools",
+		repoUrl: "https://github.com/Stability-AI/stable-audio-tools.git",
+		filter: false,
+		countDownloads: { term: { path: "model.safetensors" } },
+		snippets: snippets.stable_audio_tools,
+	},
 	"stable-baselines3": {
 		prettyLabel: "stable-baselines3",
 		repoName: "stable-baselines3",
