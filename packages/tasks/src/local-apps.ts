@@ -38,7 +38,7 @@ export type LocalApp = {
 			/**
 			 * And if not (mostly llama.cpp), snippet to copy/paste in your terminal
 			 */
-			snippet: (model: ModelData) => string | string[];
+			snippet: (model: ModelData, filepath?: string) => string | string[];
 	  }
 );
 
@@ -71,21 +71,21 @@ LLAMA_CURL=1 make
 	];
 };
 
-const snippetAikit = (model: ModelData): string[] => {
+const snippetAikit = (model: ModelData, filepath?: string): string[] => {
 	// convert model id to lowercase for docker image name
 	model.id = model.id.toLowerCase();
 	return [
 		`# build the container with docker locally
-docker buildx build -t "${model.id}":latest --load \
-	--build-arg="model=huggingface://"${model.id}"/file.gguf" \
+docker buildx build -t ${model.id}:latest --load \
+	--build-arg="model=huggingface://${model.id}/${filepath ?? "file.gguf"}" \
 	"https://raw.githubusercontent.com/sozercan/aikit/main/models/aikitfile.yaml"
 
 # run the container locally
-docker run -d --rm -p 8080:8080 "${model.id}":latest
+docker run -d --rm -p 8080:8080 ${model.id}:latest
 
 # visit http://localhost:8080/chat with your browser
 # or
-# curl http://localhost:8080/v1/chat/completions -H "Content-Type: application/json" -d '{"model": "file.gguf", "messages": [{"role": "user", "content": "I believe the meaning of life is"}]}'`
+# curl http://localhost:8080/v1/chat/completions -H "Content-Type: application/json" -d '{"model": "${filepath ?? "file.gguf"}", "messages": [{"role": "user", "content": "I believe the meaning of life is"}]}'`
 	];
 };
 
