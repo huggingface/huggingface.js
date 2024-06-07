@@ -118,6 +118,25 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isGgufModel,
 		deeplink: (model) => new URL(`sanctum://open_from_hf?model=${model.id}`),
 	},
+	jellybox: {
+		prettyLabel: "Jellybox",
+		docsUrl: "https://jellybox.com",
+		mainTask: "text-generation",
+		displayOnModelPage: (model) =>
+			isGgufModel(model) ||
+			(model.library_name === "diffusers" &&
+				model.tags.includes("safetensors") &&
+				(model.pipeline_tag === "text-to-image" || model.tags.includes("lora"))),
+		deeplink: (model) => {
+			if (isGgufModel(model)) {
+				return new URL(`jellybox://llm/models/huggingface/LLM/${model.id}`);
+			} else if (model.tags.includes("lora")) {
+				return new URL(`jellybox://image/models/huggingface/ImageLora/${model.id}`);
+			} else {
+				return new URL(`jellybox://image/models/huggingface/Image/${model.id}`);
+			}
+		},
+	},
 	msty: {
 		prettyLabel: "Msty",
 		docsUrl: "https://msty.app",
