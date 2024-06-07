@@ -46,6 +46,10 @@ function isGgufModel(model: ModelData) {
 	return model.tags.includes("gguf");
 }
 
+function isTransformersModel(model: ModelData) {
+	return model.tags.includes("transformers");
+}
+
 const snippetLlamacpp = (model: ModelData): string[] => {
 	return [
 		`# Option 1: use llama.cpp with brew
@@ -68,6 +72,16 @@ LLAMA_CURL=1 make
 	-m file.gguf \\
 	-p "I believe the meaning of life is" \\
 	-n 128`,
+	];
+};
+
+const snippetVllm = (model: ModelData): string[] => {
+	return [
+		`# Install vLLM, it can pull models from HF as you would expect
+pip install vllm
+
+# Load and run the model
+python -m vllm.entrypoints.openai.api_server --model "${model.id}"`,
 	];
 };
 
@@ -151,6 +165,13 @@ export const LOCAL_APPS = {
 		macOSOnly: true,
 		displayOnModelPage: isGgufModel,
 		deeplink: (model) => new URL(`recursechat://new-hf-gguf-model?hf-model-id=${model.id}`),
+	},
+	vllm: {
+		prettyLabel: "vLLM",
+		docsUrl: "https://docs.vllm.ai",
+		mainTask: "text-generation",
+		displayOnModelPage: isTransformersModel,
+		snippet: snippetVllm,
 	},
 	drawthings: {
 		prettyLabel: "Draw Things",
