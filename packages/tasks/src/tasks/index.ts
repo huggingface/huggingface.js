@@ -143,7 +143,14 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	"tabular-classification": ["sklearn"],
 	"tabular-regression": ["sklearn"],
 	"tabular-to-text": ["transformers"],
-	"text-classification": ["adapter-transformers", "setfit", "spacy", "transformers", "transformers.js"],
+	"text-classification": [
+		"adapter-transformers", 
+		"setfit", 
+		"spacy", 
+		"thirdai", 
+		"transformers", 
+		"transformers.js"
+	],
 	"text-generation": ["transformers", "transformers.js"],
 	"text-retrieval": [],
 	"text-to-image": ["diffusers"],
@@ -158,6 +165,7 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 		"spacy",
 		"span-marker",
 		"stanza",
+		"thirdai",
 		"transformers",
 		"transformers.js",
 	],
