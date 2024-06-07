@@ -553,7 +553,7 @@ export const voicecraft = (model: ModelData): string[] => [
 model = VoiceCraft.from_pretrained("${model.id}")`,
 ];
 
-export const chattts = [
+export const chattts = (): string[] => [
 	`import ChatTTS
 import torchaudio
 
