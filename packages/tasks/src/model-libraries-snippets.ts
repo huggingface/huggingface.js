@@ -553,6 +553,20 @@ export const voicecraft = (model: ModelData): string[] => [
 model = VoiceCraft.from_pretrained("${model.id}")`,
 ];
 
+export const chattts = (): string[] => [
+	`import ChatTTS
+import torchaudio
+
+chat = ChatTTS.Chat()
+chat.load_models(compile=False) # Set to True for better performance
+
+texts = ["PUT YOUR TEXT HERE",]
+
+wavs = chat.infer(texts, )
+
+torchaudio.save("output1.wav", torch.from_numpy(wavs[0]), 24000)`,
+];
+
 export const mlx = (model: ModelData): string[] => [
 	`pip install huggingface_hub hf_transfer
 
