@@ -164,7 +164,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.fasttext,
 		filter: true,
 		countDownloads: {
-			term: { path: "model.bin" },
+			wildcard: { path: "*.bin" },
 		},
 	},
 	flair: {
