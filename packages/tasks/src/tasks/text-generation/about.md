@@ -4,7 +4,7 @@ This task covers guides on both [text-generation](https://huggingface.co/models?
 
 ### Instruction Models
 
-A model trained for text generation can be later adapted to follow instructions. You can try some of the most powerful instruction-tuned open access models like Mixtral 8x7B, Cohere Command R+, Meta Llama3 70B, etc [at Hugging Chat](https://huggingface.co/chat).
+A model trained for text generation can be later adapted to follow instructions. You can try some of the most powerful instruction-tuned open-access models like Mixtral 8x7B, Cohere Command R+, and Meta Llama3 70B [at Hugging Chat](https://huggingface.co/chat).
 
 ### Code Generation
 
