@@ -111,6 +111,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			wildcard: { path: "*.npz" },
 		},
 	},
+	chat_tts: {
+		prettyLabel: "ChatTTS",
+		repoName: "ChatTTS",
+		repoUrl: "https://github.com/2noise/ChatTTS.git",
+		filter: false,
+		countDownloads: { term: { path: "asset/GPT.pt" } },
+		snippets: snippets.chattts,
+	},
 	diffusers: {
 		prettyLabel: "Diffusers",
 		repoName: "🤗/diffusers",
@@ -163,6 +171,9 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://fasttext.cc/",
 		snippets: snippets.fasttext,
 		filter: true,
+		countDownloads: {
+			wildcard: { path: "*.bin" },
+		},
 	},
 	flair: {
 		prettyLabel: "Flair",
@@ -360,6 +371,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: {
 			term: { path: "hyperparams.yaml" },
 		},
+	},
+	"stable-audio-tools": {
+		prettyLabel: "Stable Audio Tools",
+		repoName: "stable-audio-tools",
+		repoUrl: "https://github.com/Stability-AI/stable-audio-tools.git",
+		filter: false,
+		countDownloads: { term: { path: "model.safetensors" } },
+		snippets: snippets.stable_audio_tools,
 	},
 	"stable-baselines3": {
 		prettyLabel: "stable-baselines3",
