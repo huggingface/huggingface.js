@@ -345,20 +345,13 @@ model = model.to(device)
 # Set up text and timing conditioning
 conditioning = [{
 	"prompt": "128 BPM tech house drum loop",
-	"seconds_start": 0, 
-	"seconds_total": 30
 }]
 
 # Generate stereo audio
 output = generate_diffusion_cond(
 	model,
-	steps=100,
-	cfg_scale=7,
 	conditioning=conditioning,
 	sample_size=sample_size,
-	sigma_min=0.3,
-	sigma_max=500,
-	sampler_type="dpmpp-3m-sde",
 	device=device
 )
 
