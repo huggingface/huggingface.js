@@ -118,6 +118,13 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isGgufModel,
 		deeplink: (model) => new URL(`sanctum://open_from_hf?model=${model.id}`),
 	},
+	msty: {
+		prettyLabel: "Msty",
+		docsUrl: "https://msty.app",
+		mainTask: "text-generation",
+		displayOnModelPage: isGgufModel,
+		deeplink: (model) => new URL(`msty://models/search/hf/${model.id}`),
+	},
 	drawthings: {
 		prettyLabel: "Draw Things",
 		docsUrl: "https://drawthings.ai",
