@@ -326,6 +326,43 @@ export const sklearn = (model: ModelData): string[] => {
 	}
 };
 
+export const stable_audio_tools = (model: ModelData): string[] => [
+	`import torch
+import torchaudio
+from einops import rearrange
+from stable_audio_tools import get_pretrained_model
+from stable_audio_tools.inference.generation import generate_diffusion_cond
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
+# Download model
+model, model_config = get_pretrained_model("${model.id}")
+sample_rate = model_config["sample_rate"]
+sample_size = model_config["sample_size"]
+
+model = model.to(device)
+
+# Set up text and timing conditioning
+conditioning = [{
+	"prompt": "128 BPM tech house drum loop",
+}]
+
+# Generate stereo audio
+output = generate_diffusion_cond(
+	model,
+	conditioning=conditioning,
+	sample_size=sample_size,
+	device=device
+)
+
+# Rearrange audio batch to a single sequence
+output = rearrange(output, "b d n -> d (b n)")
+
+# Peak normalize, clip, convert to int16, and save to file
+output = output.to(torch.float32).div(torch.max(torch.abs(output))).clamp(-1, 1).mul(32767).to(torch.int16).cpu()
+torchaudio.save("output.wav", output, sample_rate)`,
+];
+
 export const fastai = (model: ModelData): string[] => [
 	`from huggingface_hub import from_pretrained_fastai
 
@@ -440,13 +477,17 @@ export const transformers = (model: ModelData): string[] => {
 	}
 
 	if (model.pipeline_tag && LIBRARY_TASK_MAPPING.transformers?.includes(model.pipeline_tag)) {
-		const pipelineSnippet = [
-			"# Use a pipeline as a high-level helper",
-			"from transformers import pipeline",
-			"",
-			`pipe = pipeline("${model.pipeline_tag}", model="${model.id}"` + remote_code_snippet + ")",
-		].join("\n");
-		return [pipelineSnippet, autoSnippet];
+		const pipelineSnippet = ["# Use a pipeline as a high-level helper", "from transformers import pipeline", ""];
+
+		if (model.tags.includes("conversational") && model.config?.tokenizer_config?.chat_template) {
+			pipelineSnippet.push("messages = [", '    {"role": "user", "content": "Who are you?"},', "]");
+		}
+		pipelineSnippet.push(`pipe = pipeline("${model.pipeline_tag}", model="${model.id}"` + remote_code_snippet + ")");
+		if (model.tags.includes("conversational") && model.config?.tokenizer_config?.chat_template) {
+			pipelineSnippet.push("pipe(messages)");
+		}
+
+		return [pipelineSnippet.join("\n"), autoSnippet];
 	}
 	return [autoSnippet];
 };
@@ -547,6 +588,20 @@ export const voicecraft = (model: ModelData): string[] => [
 	`from voicecraft import VoiceCraft
 
 model = VoiceCraft.from_pretrained("${model.id}")`,
+];
+
+export const chattts = (): string[] => [
+	`import ChatTTS
+import torchaudio
+
+chat = ChatTTS.Chat()
+chat.load_models(compile=False) # Set to True for better performance
+
+texts = ["PUT YOUR TEXT HERE",]
+
+wavs = chat.infer(texts, )
+
+torchaudio.save("output1.wav", torch.from_numpy(wavs[0]), 24000)`,
 ];
 
 export const mlx = (model: ModelData): string[] => [

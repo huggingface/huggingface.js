@@ -48,13 +48,21 @@ function isGgufModel(model: ModelData) {
 
 const snippetLlamacpp = (model: ModelData): string[] => {
 	return [
-		`
-## Install and build llama.cpp with curl support
+		`# Option 1: use llama.cpp with brew
+brew install llama.cpp
+
+# Load and run the model
+llama \\
+	--hf-repo "${model.id}" \\
+	--hf-file file.gguf \\
+	-p "I believe the meaning of life is" \\
+	-n 128`,
+		`# Option 2: build llama.cpp from source with curl support
 git clone https://github.com/ggerganov/llama.cpp.git 
 cd llama.cpp
 LLAMA_CURL=1 make
-`,
-		`## Load and run the model
+
+# Load and run the model
 ./main \\
 	--hf-repo "${model.id}" \\
 	-m file.gguf \\
@@ -128,6 +136,13 @@ export const LOCAL_APPS = {
 				return new URL(`jellybox://image/models/huggingface/Image/${model.id}`);
 			}
 		},
+	},
+	msty: {
+		prettyLabel: "Msty",
+		docsUrl: "https://msty.app",
+		mainTask: "text-generation",
+		displayOnModelPage: isGgufModel,
+		deeplink: (model) => new URL(`msty://models/search/hf/${model.id}`),
 	},
 	drawthings: {
 		prettyLabel: "Draw Things",

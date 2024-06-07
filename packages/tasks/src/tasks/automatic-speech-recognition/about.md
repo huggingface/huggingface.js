@@ -36,7 +36,7 @@ def query(filename):
 data = query("sample1.flac")
 ```
 
-You can also use[huggingface.js](https://github.com/huggingface/huggingface.js), the JavaScript client, to transcribe models with the Inference API.
+You can also use [huggingface.js](https://github.com/huggingface/huggingface.js), the JavaScript client, to transcribe audio with the Serverless Inference API.
 
 ```javascript
 import { HfInference } from "@huggingface/inference";
@@ -48,7 +48,7 @@ await inference.automaticSpeechRecognition({
 });
 ```
 
-For transformers compatible models like Whisper, Wav2Vec2, HuBERT, etc. You can also run inference in Python using transformers as follows:
+For transformers-compatible models like Whisper, Wav2Vec2, and HuBERT, you can also run inference with the library as follows:
 
 ```python
 # pip install --upgrade transformers
