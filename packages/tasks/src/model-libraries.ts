@@ -111,6 +111,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			wildcard: { path: "*.npz" },
 		},
 	},
+	chat_tts: {
+		prettyLabel: "ChatTTS",
+		repoName: "ChatTTS",
+		repoUrl: "https://github.com/2noise/ChatTTS.git",
+		filter: false,
+		countDownloads: { term: { path: "asset/GPT.pt" } },
+		snippets: snippets.chattts,
+	},
 	diffusers: {
 		prettyLabel: "Diffusers",
 		repoName: "🤗/diffusers",
