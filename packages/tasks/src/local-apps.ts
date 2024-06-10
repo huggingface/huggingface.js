@@ -65,7 +65,7 @@ LLAMA_CURL=1 make
 # Load and run the model
 ./main \\
 	--hf-repo "${model.id}" \\
-	-m file.gguf \\
+	-m {{GGUF_FILE}} \\
 	-p "I believe the meaning of life is" \\
 	-n 128`,
 	];
