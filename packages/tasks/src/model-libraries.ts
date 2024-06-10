@@ -119,6 +119,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: { term: { path: "asset/GPT.pt" } },
 		snippets: snippets.chattts,
 	},
+	coreml: {
+		prettyLabel: "Core ML",
+		repoName: "coreml",
+		repoUrl: "https://github.com/apple/coremltools",
+		filter: true,
+		countDownloads: {
+			wildcard: { path: "*/*.mlmodel" },
+		},
+	},	
 	diffusers: {
 		prettyLabel: "Diffusers",
 		repoName: "🤗/diffusers",
