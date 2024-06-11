@@ -186,6 +186,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			term: { path: "pytorch_model.bin" },
 		},
 	},
+	"gemma.cpp": {
+		prettyLabel: "gemma.cpp",
+		repoName: "gemma.cpp",
+		repoUrl: "https://github.com/google/gemma.cpp",
+		filter: false,
+		countDownloads: { wildcard: { path: "*.sbs" } },
+	},
 	gliner: {
 		prettyLabel: "GLiNER",
 		repoName: "GLiNER",
@@ -306,6 +313,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/clementchadebec/benchmark_VAE",
 		snippets: snippets.pythae,
 		filter: true,
+	},
+	recurrentgemma: {
+		prettyLabel: "RecurrentGemma",
+		repoName: "recurrentgemma",
+		repoUrl: "https://github.com/google-deepmind/recurrentgemma",
+		filter: false,
+		countDownloads: { term: { path: "tokenizer.model" } },
 	},
 	"sample-factory": {
 		prettyLabel: "sample-factory",
