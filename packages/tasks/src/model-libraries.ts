@@ -422,6 +422,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/TensorSpeech/TensorFlowTTS",
 		snippets: snippets.tensorflowtts,
 	},
+	"tic-clip": {
+		prettyLabel: "tic-clip",
+		repoName: "tic-clip",
+		repoUrl: "https://github.com/apple/ml-tic-clip",
+		filter: false,
+		countDownloads: { term: { path: "checkpoints/*.pt" } },
+	},
 	timesfm: {
 		prettyLabel: "TimesFM",
 		repoName: "timesfm",
