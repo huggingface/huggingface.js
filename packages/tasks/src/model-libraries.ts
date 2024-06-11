@@ -424,7 +424,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	"tic-clip": {
 		prettyLabel: "TiC-CLIP",
-		repoName: "tic-clip",
+		repoName: "TiC-CLIP",
 		repoUrl: "https://github.com/apple/ml-tic-clip",
 		filter: false,
 		countDownloads: { wildcard: { path: "checkpoints/*.pt" } },
