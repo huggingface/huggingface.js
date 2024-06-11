@@ -423,7 +423,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.tensorflowtts,
 	},
 	"tic-clip": {
-		prettyLabel: "tic-clip",
+		prettyLabel: "TiC-CLIP",
 		repoName: "tic-clip",
 		repoUrl: "https://github.com/apple/ml-tic-clip",
 		filter: false,
