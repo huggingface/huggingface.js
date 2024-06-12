@@ -394,6 +394,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: { term: { path: "model.safetensors" } },
 		snippets: snippets.stable_audio_tools,
 	},
+	"stable-diffusion-3": {
+		prettyLabel: "Stable Diffusion 3",
+		repoName: "stable-diffusion-3",
+		repoUrl: "https://github.com/comfyanonymous/ComfyUI",
+		filter: false,
+		countDownloads: {
+			wildcard: { path: "*.safetensors" },
+		},
+	},
 	"stable-baselines3": {
 		prettyLabel: "stable-baselines3",
 		repoName: "stable-baselines3",
