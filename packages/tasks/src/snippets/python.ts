@@ -2,6 +2,29 @@ import type { PipelineType } from "../pipelines.js";
 import { getModelInputSnippet } from "./inputs.js";
 import type { ModelDataMinimal } from "./types.js";
 
+export const snippetConversational = (model: ModelDataMinimal, accessToken: string): string => `# pip install openai
+from openai import OpenAI
+
+# initialize the client and point it to TGI
+client = OpenAI(
+    base_url="https://api-inference.huggingface.co/models/${model.id}/v1/",
+    api_key="${accessToken || '{API_TOKEN}'}",
+)
+chat_completion = client.chat.completions.create(
+    model="tgi",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Tell me a funny joke."},
+    ],
+    stream=True,
+    max_tokens=500
+)
+
+# iterate and print stream
+for message in chat_completion:
+    print(message.choices[0].delta.content, end="")
+`;
+
 export const snippetZeroShotClassification = (model: ModelDataMinimal): string =>
 	`def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
@@ -107,7 +130,7 @@ output = query({
     "inputs": ${getModelInputSnippet(model)},
 })`;
 
-export const pythonSnippets: Partial<Record<PipelineType, (model: ModelDataMinimal) => string>> = {
+export const pythonSnippets: Partial<Record<PipelineType, (model: ModelDataMinimal, accessToken: string) => string>> = {
 	// Same order as in tasks/src/pipelines.ts
 	"text-classification": snippetBasic,
 	"token-classification": snippetBasic,
@@ -138,15 +161,24 @@ export const pythonSnippets: Partial<Record<PipelineType, (model: ModelDataMinim
 };
 
 export function getPythonInferenceSnippet(model: ModelDataMinimal, accessToken: string): string {
-	const body =
-		model.pipeline_tag && model.pipeline_tag in pythonSnippets ? pythonSnippets[model.pipeline_tag]?.(model) ?? "" : "";
 
-	return `import requests
+	if (model.pipeline_tag === "text-generation" && model.config?.tokenizer_config?.chat_template) {
+		// Conversational model detected, so we display a code snippet that features the OpenAI Messages API
+		// Code adapted from https://huggingface.co/blog/tgi-messages-api
+		return snippetConversational(model, accessToken);
+
+	} else {
+		const body = model.pipeline_tag && model.pipeline_tag in pythonSnippets
+			? pythonSnippets[model.pipeline_tag]?.(model, accessToken) ?? ""
+			: "";
+
+		return `import requests
 
 API_URL = "https://api-inference.huggingface.co/models/${model.id}"
 headers = {"Authorization": ${accessToken ? `"Bearer ${accessToken}"` : `f"Bearer {API_TOKEN}"`}}
 
 ${body}`;
+	}
 }
 
 export function hasPythonInferenceSnippet(model: ModelDataMinimal): boolean {

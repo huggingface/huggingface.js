@@ -1,10 +1,10 @@
 packages:
   - "packages/hub"
   - "packages/inference"
-  - "packages/jinja"
   - "packages/doc-internal"
   - "packages/agents"
   - "packages/languages"
   - "packages/tasks"
   - "packages/gguf"
+  - "packages/jinja"
   - "packages/widgets"

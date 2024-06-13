@@ -1,34 +1,90 @@
 import type { PipelineType } from "../pipelines";
-import type { InputGenerator, ModelDataMinimal } from "./types";
+import type { ModelDataMinimal } from "./types";
 
-import inputsTextGeneration from "./tasks/text-generation";
-import inputsZeroShotClassification from "./tasks/zero-shot-classification";
-import inputsTranslation from "./tasks/translation";
-import inputsSummarization from "./tasks/summarization";
-import inputsTableQuestionAnswering from "./tasks/table-question-answering";
-import inputsVisualQuestionAnswering from "./tasks/visual-question-answering";
-import inputsQuestionAnswering from "./tasks/question-answering";
-import inputsTextClassification from "./tasks/text-classification";
-import inputsTokenClassification from "./tasks/token-classification";
-import inputsText2TextGeneration from "./tasks/text2text-generation";
-import inputsFillMask from "./tasks/fill-mask";
-import inputsSentenceSimilarity from "./tasks/sentence-similarity";
-import inputsFeatureExtraction from "./tasks/feature-extraction";
-import inputsImageClassification from "./tasks/image-classification";
-import inputsImageToText from "./tasks/image-to-text";
-import inputsImageSegmentation from "./tasks/image-segmentation";
-import inputsObjectDetection from "./tasks/object-detection";
-import inputsAudioToAudio from "./tasks/audio-to-audio";
-import inputsAudioClassification from "./tasks/audio-classification";
-import inputsTextToImage from "./tasks/text-to-image";
-import inputsTextToSpeech from "./tasks/text-to-speech";
-import inputsTextToAudio from "./tasks/text-to-audio";
-import inputsAutomaticSpeechRecognition from "./tasks/automatic-speech-recognition";
-import inputsTabularPrediction from "./tasks/tabular-prediction";
-import inputsZeroShotImageClassification from "./tasks/zero-shot-image-classification";
+const inputsZeroShotClassification = () =>
+	`"Hi, I recently bought a device from your company but it is not working as advertised and I would like to get reimbursed!"`;
+
+const inputsTranslation = () => `"Меня зовут Вольфганг и я живу в Берлине"`;
+
+const inputsSummarization = () =>
+	`"The tower is 324 metres (1,063 ft) tall, about the same height as an 81-storey building, and the tallest structure in Paris. Its base is square, measuring 125 metres (410 ft) on each side. During its construction, the Eiffel Tower surpassed the Washington Monument to become the tallest man-made structure in the world, a title it held for 41 years until the Chrysler Building in New York City was finished in 1930. It was the first structure to reach a height of 300 metres. Due to the addition of a broadcasting aerial at the top of the tower in 1957, it is now taller than the Chrysler Building by 5.2 metres (17 ft). Excluding transmitters, the Eiffel Tower is the second tallest free-standing structure in France after the Millau Viaduct."`;
+
+const inputsTableQuestionAnswering = () =>
+	`{
+	"query": "How many stars does the transformers repository have?",
+	"table": {
+		"Repository": ["Transformers", "Datasets", "Tokenizers"],
+		"Stars": ["36542", "4512", "3934"],
+		"Contributors": ["651", "77", "34"],
+		"Programming language": [
+			"Python",
+			"Python",
+			"Rust, Python and NodeJS"
+		]
+	}
+}`;
+
+const inputsVisualQuestionAnswering = () =>
+	`{
+	"image": "cat.png",
+	"question": "What is in this image?"
+}`;
+
+const inputsQuestionAnswering = () =>
+	`{
+	"question": "What is my name?",
+	"context": "My name is Clara and I live in Berkeley."
+}`;
+
+const inputsTextClassification = () => `"I like you. I love you"`;
+
+const inputsTokenClassification = () => `"My name is Sarah Jessica Parker but you can call me Jessica"`;
+
+const inputsTextGeneration = () => `"Can you please let us know more details about your "`;
+
+const inputsText2TextGeneration = () => `"The answer to the universe is"`;
+
+const inputsFillMask = (model: ModelDataMinimal) => `"The answer to the universe is ${model.mask_token}."`;
+
+const inputsSentenceSimilarity = () =>
+	`{
+	"source_sentence": "That is a happy person",
+	"sentences": [
+		"That is a happy dog",
+		"That is a very happy person",
+		"Today is a sunny day"
+	]
+}`;
+
+const inputsFeatureExtraction = () => `"Today is a sunny day and I will get some ice cream."`;
+
+const inputsImageClassification = () => `"cats.jpg"`;
+
+const inputsImageToText = () => `"cats.jpg"`;
+
+const inputsImageSegmentation = () => `"cats.jpg"`;
+
+const inputsObjectDetection = () => `"cats.jpg"`;
+
+const inputsAudioToAudio = () => `"sample1.flac"`;
+
+const inputsAudioClassification = () => `"sample1.flac"`;
+
+const inputsTextToImage = () => `"Astronaut riding a horse"`;
+
+const inputsTextToSpeech = () => `"The answer to the universe is 42"`;
+
+const inputsTextToAudio = () => `"liquid drum and bass, atmospheric synths, airy sounds"`;
+
+const inputsAutomaticSpeechRecognition = () => `"sample1.flac"`;
+
+const inputsTabularPrediction = () =>
+	`'{"Height":[11.52,12.48],"Length1":[23.2,24.0],"Length2":[25.4,26.3],"Species": ["Bream","Bream"]}'`;
+
+const inputsZeroShotImageClassification = () => `"cats.jpg"`;
 
 const modelInputSnippets: {
-	[key in PipelineType]?: InputGenerator;
+	[key in PipelineType]?: (model: ModelDataMinimal) => string;
 } = {
 	"audio-to-audio": inputsAudioToAudio,
 	"audio-classification": inputsAudioClassification,

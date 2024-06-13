@@ -7,7 +7,10 @@ export const snippetBasic = (model: ModelDataMinimal, accessToken: string): stri
 	const response = await fetch(
 		"https://api-inference.huggingface.co/models/${model.id}",
 		{
-			headers: { Authorization: "Bearer ${accessToken || `{API_TOKEN}`}" },
+			headers: {
+				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}"
+				"Content-Type": "application/json",
+			},
 			method: "POST",
 			body: JSON.stringify(data),
 		}
@@ -20,12 +23,48 @@ query({"inputs": ${getModelInputSnippet(model)}}).then((response) => {
 	console.log(JSON.stringify(response));
 });`;
 
+export const snippetTextGeneration = (model: ModelDataMinimal, accessToken: string): string => {
+	if (model.config?.tokenizer_config?.chat_template) {
+		// Conversational model detected, so we display a code snippet that features the OpenAI Messages API
+		// Code adapted from https://huggingface.co/blog/tgi-messages-api
+		return `// npm install openai
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  baseURL: "https://api-inference.huggingface.co/models/${model.id}/v1/",
+  apiKey: "${accessToken || `{API_TOKEN}`}",
+});
+
+async function main() {
+  const stream = await openai.chat.completions.create({
+    model: "tgi",
+    messages: [
+      { role: "system", content: "You are a helpful assistant." },
+      { role: "user", content: "Tell me a funny joke." },
+    ],
+    stream: true,
+    max_tokens: 500,
+  });
+  for await (const chunk of stream) {
+    process.stdout.write(chunk.choices[0]?.delta?.content || "");
+  }
+}
+
+main();
+`;
+	} else {
+		return snippetBasic(model, accessToken);;
+	}
+}
 export const snippetZeroShotClassification = (model: ModelDataMinimal, accessToken: string): string =>
 	`async function query(data) {
 	const response = await fetch(
 		"https://api-inference.huggingface.co/models/${model.id}",
 		{
-			headers: { Authorization: "Bearer ${accessToken || `{API_TOKEN}`}" },
+			headers: {
+				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}"
+				"Content-Type": "application/json",
+			},
 			method: "POST",
 			body: JSON.stringify(data),
 		}
@@ -45,7 +84,10 @@ export const snippetTextToImage = (model: ModelDataMinimal, accessToken: string)
 	const response = await fetch(
 		"https://api-inference.huggingface.co/models/${model.id}",
 		{
-			headers: { Authorization: "Bearer ${accessToken || `{API_TOKEN}`}" },
+			headers: {
+				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}"
+				"Content-Type": "application/json",
+			},
 			method: "POST",
 			body: JSON.stringify(data),
 		}
@@ -62,7 +104,10 @@ export const snippetTextToAudio = (model: ModelDataMinimal, accessToken: string)
 		const response = await fetch(
 			"https://api-inference.huggingface.co/models/${model.id}",
 			{
-				headers: { Authorization: "Bearer ${accessToken || `{API_TOKEN}`}" },
+				headers: {
+					Authorization: "Bearer ${accessToken || `{API_TOKEN}`}"
+					"Content-Type": "application/json",
+				},
 				method: "POST",
 				body: JSON.stringify(data),
 			}
@@ -99,7 +144,10 @@ export const snippetFile = (model: ModelDataMinimal, accessToken: string): strin
 	const response = await fetch(
 		"https://api-inference.huggingface.co/models/${model.id}",
 		{
-			headers: { Authorization: "Bearer ${accessToken || `{API_TOKEN}`}" },
+			headers: {
+				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}"
+				"Content-Type": "application/json",
+			},
 			method: "POST",
 			body: data,
 		}
