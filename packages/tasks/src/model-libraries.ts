@@ -186,6 +186,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			term: { path: "pytorch_model.bin" },
 		},
 	},
+	"gemma.cpp": {
+		prettyLabel: "gemma.cpp",
+		repoName: "gemma.cpp",
+		repoUrl: "https://github.com/google/gemma.cpp",
+		filter: false,
+		countDownloads: { wildcard: { path: "*.sbs" } },
+	},
 	gliner: {
 		prettyLabel: "GLiNER",
 		repoName: "GLiNER",
@@ -307,6 +314,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.pythae,
 		filter: true,
 	},
+	recurrentgemma: {
+		prettyLabel: "RecurrentGemma",
+		repoName: "recurrentgemma",
+		repoUrl: "https://github.com/google-deepmind/recurrentgemma",
+		filter: false,
+		countDownloads: { term: { path: "tokenizer.model" } },
+	},
 	"sample-factory": {
 		prettyLabel: "sample-factory",
 		repoName: "sample-factory",
@@ -407,6 +421,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "TensorFlowTTS",
 		repoUrl: "https://github.com/TensorSpeech/TensorFlowTTS",
 		snippets: snippets.tensorflowtts,
+	},
+	"tic-clip": {
+		prettyLabel: "TiC-CLIP",
+		repoName: "TiC-CLIP",
+		repoUrl: "https://github.com/apple/ml-tic-clip",
+		filter: false,
+		countDownloads: { wildcard: { path: "checkpoints/*.pt" } },
 	},
 	timesfm: {
 		prettyLabel: "TimesFM",

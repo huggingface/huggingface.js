@@ -37,6 +37,7 @@ export type LocalApp = {
 	| {
 			/**
 			 * And if not (mostly llama.cpp), snippet to copy/paste in your terminal
+			 * Support the placeholder {{GGUF_FILE}} that will be replaced by the gguf file path or the list of available files.
 			 */
 			snippet: (model: ModelData) => string | string[];
 	  }
@@ -58,7 +59,7 @@ brew install llama.cpp
 # Load and run the model
 llama \\
 	--hf-repo "${model.id}" \\
-	--hf-file file.gguf \\
+	--hf-file {{GGUF_FILE}} \\
 	-p "I believe the meaning of life is" \\
 	-n 128`,
 		`# Option 2: build llama.cpp from source with curl support
@@ -69,7 +70,7 @@ LLAMA_CURL=1 make
 # Load and run the model
 ./main \\
 	--hf-repo "${model.id}" \\
-	-m file.gguf \\
+	-m {{GGUF_FILE}} \\
 	-p "I believe the meaning of life is" \\
 	-n 128`,
 	];
