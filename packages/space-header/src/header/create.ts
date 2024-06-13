@@ -1,4 +1,4 @@
-import { Space } from "../type";
+import type { Space } from "../type";
 
 import { Avatar } from "./components/avatar";
 import { Box } from "./components/box";
@@ -7,14 +7,14 @@ import { Separation } from "./components/separation";
 import { Namespace } from "./components/namespace";
 import { Like } from "./components/like";
 
-export const create = (space: Space) => {
-  const box = Box();
+export const create = (space: Space): HTMLElement => {
+	const box = Box();
 
-  box.appendChild(Avatar(space.author));
-  box.appendChild(Username(space.author));
-  box.appendChild(Separation());
-  box.appendChild(Namespace(space.id));
-  box.appendChild(Like(space));
+	box.appendChild(Avatar(space.author));
+	box.appendChild(Username(space.author));
+	box.appendChild(Separation());
+	box.appendChild(Namespace(space.id));
+	box.appendChild(Like(space));
 
-  return box;
-}
+	return box;
+};
