@@ -7,3 +7,7 @@ export interface Space {
 export interface User {
 	avatarUrl: string;
 }
+
+export interface Options {
+	target?: HTMLElement | null | undefined;
+}
