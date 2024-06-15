@@ -470,6 +470,10 @@ export class Interpreter {
 		if (node.filter.type === "Identifier") {
 			const filter = node.filter as Identifier;
 
+			if (filter.value === "tojson") {
+				return new StringValue(toJSON(operand));
+			}
+
 			if (operand instanceof ArrayValue) {
 				switch (filter.value) {
 					case "list":
@@ -533,8 +537,6 @@ export class Interpreter {
 						);
 					case "length":
 						return new NumericValue(operand.value.size);
-					case "tojson":
-						return new StringValue(toJSON(operand));
 					default:
 						throw new Error(`Unknown ObjectValue filter: ${filter.value}`);
 				}
