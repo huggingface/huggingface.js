@@ -25,37 +25,23 @@ query({"inputs": ${getModelInputSnippet(model)}}).then((response) => {
 
 export const snippetTextGeneration = (model: ModelDataMinimal, accessToken: string): string => {
 	if (model.config?.tokenizer_config?.chat_template) {
-		// Conversational model detected, so we display a code snippet that features the OpenAI Messages API
-		// Code adapted from https://huggingface.co/blog/tgi-messages-api
-		return `// npm install openai
-import OpenAI from "openai";
+		// Conversational model detected, so we display a code snippet that features the Messages API
+		return `import { HfInference } from "@huggingface/inference";
 
-const openai = new OpenAI({
-  baseURL: "https://api-inference.huggingface.co/models/${model.id}/v1/",
-  apiKey: "${accessToken || `{API_TOKEN}`}",
-});
+const inference = new HfInference("${accessToken || `{API_TOKEN}`}");
 
-async function main() {
-  const stream = await openai.chat.completions.create({
-    model: "tgi",
-    messages: [
-      { role: "system", content: "You are a helpful assistant." },
-      { role: "user", content: "Tell me a funny joke." },
-    ],
-    stream: true,
-    max_tokens: 500,
-  });
-  for await (const chunk of stream) {
-    process.stdout.write(chunk.choices[0]?.delta?.content || "");
-  }
+for await (const chunk of inference.chatCompletionStream({
+	model: "${model.id}",
+	messages: [{ role: "user", content: "What is the capital of France?" }],
+	max_tokens: 500,
+})) {
+	process.stdout.write(chunk.choices[0]?.delta?.content || "");
 }
-
-main();
 `;
 	} else {
-		return snippetBasic(model, accessToken);;
+		return snippetBasic(model, accessToken);
 	}
-}
+};
 export const snippetZeroShotClassification = (model: ModelDataMinimal, accessToken: string): string =>
 	`async function query(data) {
 	const response = await fetch(
@@ -170,7 +156,7 @@ export const jsSnippets: Partial<Record<PipelineType, (model: ModelDataMinimal, 
 	translation: snippetBasic,
 	summarization: snippetBasic,
 	"feature-extraction": snippetBasic,
-	"text-generation": snippetBasic,
+	"text-generation": snippetTextGeneration,
 	"text2text-generation": snippetBasic,
 	"fill-mask": snippetBasic,
 	"sentence-similarity": snippetBasic,

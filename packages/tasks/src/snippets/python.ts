@@ -2,26 +2,19 @@ import type { PipelineType } from "../pipelines.js";
 import { getModelInputSnippet } from "./inputs.js";
 import type { ModelDataMinimal } from "./types.js";
 
-export const snippetConversational = (model: ModelDataMinimal, accessToken: string): string => `# pip install openai
-from openai import OpenAI
+export const snippetConversational = (model: ModelDataMinimal, accessToken: string): string =>
+	`from huggingface_hub import InferenceClient
 
-# initialize the client and point it to TGI
-client = OpenAI(
-    base_url="https://api-inference.huggingface.co/models/${model.id}/v1/",
-    api_key="${accessToken || '{API_TOKEN}'}",
-)
-chat_completion = client.chat.completions.create(
-    model="tgi",
-    messages=[
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "Tell me a funny joke."},
-    ],
-    stream=True,
-    max_tokens=500
+client = InferenceClient(
+    "${model.id}",
+    token="${accessToken || "{API_TOKEN}"}",
 )
 
-# iterate and print stream
-for message in chat_completion:
+for message in client.chat_completion(
+	messages=[{"role": "user", "content": "What is the capital of France?"}],
+	max_tokens=500,
+	stream=True,
+):
     print(message.choices[0].delta.content, end="")
 `;
 
@@ -161,16 +154,14 @@ export const pythonSnippets: Partial<Record<PipelineType, (model: ModelDataMinim
 };
 
 export function getPythonInferenceSnippet(model: ModelDataMinimal, accessToken: string): string {
-
 	if (model.pipeline_tag === "text-generation" && model.config?.tokenizer_config?.chat_template) {
-		// Conversational model detected, so we display a code snippet that features the OpenAI Messages API
-		// Code adapted from https://huggingface.co/blog/tgi-messages-api
+		// Conversational model detected, so we display a code snippet that features the Messages API
 		return snippetConversational(model, accessToken);
-
 	} else {
-		const body = model.pipeline_tag && model.pipeline_tag in pythonSnippets
-			? pythonSnippets[model.pipeline_tag]?.(model, accessToken) ?? ""
-			: "";
+		const body =
+			model.pipeline_tag && model.pipeline_tag in pythonSnippets
+				? pythonSnippets[model.pipeline_tag]?.(model, accessToken) ?? ""
+				: "";
 
 		return `import requests
 
