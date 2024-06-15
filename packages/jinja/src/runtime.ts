@@ -533,6 +533,8 @@ export class Interpreter {
 						);
 					case "length":
 						return new NumericValue(operand.value.size);
+					case "tojson":
+						return new StringValue(toJSON(operand));
 					default:
 						throw new Error(`Unknown ObjectValue filter: ${filter.value}`);
 				}
@@ -950,6 +952,8 @@ function convertToRuntimeValues(input: unknown): AnyRuntimeValue {
 			return new StringValue(input);
 		case "boolean":
 			return new BooleanValue(input);
+		case "undefined":
+			return new UndefinedValue();
 		case "object":
 			if (input === null) {
 				return new NullValue();
@@ -970,5 +974,31 @@ function convertToRuntimeValues(input: unknown): AnyRuntimeValue {
 			});
 		default:
 			throw new Error(`Cannot convert to runtime value: ${input}`);
+	}
+}
+
+/**
+ * Helper function to convert runtime values to JSON
+ * @param {AnyRuntimeValue} input The runtime value to convert
+ * @returns {string} JSON representation of the input
+ */
+function toJSON(input: AnyRuntimeValue): string {
+	switch (input.type) {
+		case "NullValue":
+		case "UndefinedValue": // JSON.stringify(undefined) -> undefined
+			return "null";
+		case "NumericValue":
+		case "StringValue":
+		case "BooleanValue":
+			return JSON.stringify(input.value);
+		case "ArrayValue":
+			return `[${(input as ArrayValue).value.map(toJSON).join(", ")}]`;
+		case "ObjectValue":
+			return `{${Array.from((input as ObjectValue).value.entries())
+				.map(([key, value]) => `"${key}": ${toJSON(value)}`)
+				.join(", ")}}`;
+		default:
+			// e.g., FunctionValue
+			throw new Error(`Cannot convert to JSON: ${input.type}`);
 	}
 }
