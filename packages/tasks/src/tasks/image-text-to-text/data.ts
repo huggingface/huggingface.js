@@ -11,6 +11,10 @@ const taskData: TaskDataCustom = {
 			id: "liuhaotian/LLaVA-Pretrain",
 		},
 		{
+			description: "A collection of datasets made for model fine-tuning.",
+			id: "HuggingFaceM4/the_cauldron",
+		},
+		{
 			description: "Screenshots of websites with their HTML/CSS codes.",
 			id: "HuggingFaceM4/WebSight",
 		},
@@ -39,20 +43,20 @@ const taskData: TaskDataCustom = {
 	metrics: [],
 	models: [
 		{
-			description: "A powerful and grounded vision language model that can also localize concepts in images.",
-			id: "microsoft/kosmos-2-patch14-224",
+			description: "Cutting-edge vision language model that can also localize texts in images.",
+			id: "liuhaotian/llava-v1.6-34b",
 		},
 		{
-			description: "A strong vision language model that can also localize texts in images.",
-			id: "adept/fuyu-8b",
+			description: "Cutting-edge conversational vision language model that can take multiple image inputs.",
+			id: "HuggingFaceM4/idefics2-8b-chatty",
 		},
 		{
-			description: "A strong document understanding model.",
-			id: "microsoft/udop-large",
+			description: "Small yet powerful model.",
+			id: "vikhyatk/moondream2",
 		},
 		{
-			description: "A powerful model that lets you have a conversation with the image.",
-			id: "llava-hf/llava-1.5-7b-hf",
+			description: "Strong image-text-to-text model made to understand documents.",
+			id: "mPLUG/DocOwl1.5",
 		},
 	],
 	spaces: [
@@ -65,16 +69,16 @@ const taskData: TaskDataCustom = {
 			id: "WildVision/vision-arena",
 		},
 		{
-			description: "An application to compare variants of a document vision language model.",
-			id: "merve/pix2struct",
-		},
-		{
 			description: "Powerful vision-language model assistant.",
-			id: "badayvedat/LLaVA",
+			id: "liuhaotian/LLaVA-1.6",
 		},
 		{
 			description: "An application to compare outputs of different vision language models.",
 			id: "merve/compare_VLMs",
+		},
+		{
+			description: "An application for document vision language tasks.",
+			id: "mPLUG/DocOwl",
 		},
 	],
 	summary:
