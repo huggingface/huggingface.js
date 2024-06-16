@@ -2,7 +2,7 @@
 
 ### Multimodal Dialogue
 
-Vision language models can be used as multimodal assistants, keeping context about the conversation and keeping the image to have multiple turn dialogues.
+Vision language models can be used as multimodal assistants, keeping context about the conversation and keeping the image to have multiple-turn dialogues.
 
 ### Image Recognition with Instructions
 
