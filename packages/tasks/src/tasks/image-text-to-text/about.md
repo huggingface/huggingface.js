@@ -6,7 +6,6 @@ Vision language models come in three types:
 - **Instruction:** Base models fine-tuned on instruction datasets. A good example for instruction fine-tuned models is [idefics2-8b](https://huggingface.co/HuggingFaceM4/idefics2-8b).
 - **Chatty/Conversation:** Base models fine-tuned on conversation datasets. A good example for chatty models is [deepseek-vl-7b-chat](https://huggingface.co/deepseek-ai/deepseek-vl-7b-chat).
 
-
 ![VLM uses](https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/blog/vlm/visual.jpg)
 
 ## Use Cases
@@ -55,8 +54,8 @@ We can infer by passing image and text dialogues.
 from PIL import Image
 import requests
 
-# image of a radar chart 
-url = "https://github.com/haotian-liu/LLaVA/blob/1a91fc274d7c35a9b50b3cb29c4247ae5837ce39/images/llava_v1_5_radar.jpg?raw=true" 
+# image of a radar chart
+url = "https://github.com/haotian-liu/LLaVA/blob/1a91fc274d7c35a9b50b3cb29c4247ae5837ce39/images/llava_v1_5_radar.jpg?raw=true"
 image = Image.open(requests.get(url, stream=True).raw)
 prompt = "[INST] <image>\nWhat is shown in this image? [/INST]"
 
