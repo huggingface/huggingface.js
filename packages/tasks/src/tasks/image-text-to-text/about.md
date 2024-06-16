@@ -1,12 +1,10 @@
+![VLM uses](https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/blog/vlm/visual.jpg)
+
 ## Use Cases
 
 ### Multimodal Dialogue
 
 Vision language models can be used as multimodal assistants, keeping context about the conversation and keeping the image to have multiple-turn dialogues.
-
-### Image Recognition with Instructions
-
-Vision language models can recognize images through descriptions. When given detailed descriptions of specific entities, it can classify the entities in an image.
 
 ### Zero-shot Object Detection, Image Segmentation and Localization
 
@@ -14,30 +12,56 @@ Some vision language models can detect or segment a set of objects or describe t
 
 ### Visual Question Answering
 
-Vision language models trained on image-text pairs can be used for visual question answering.
+Vision language models trained on image-text pairs can be used for visual question answering and generating captions for images.
 
 ### Document Question Answering and Retrieval
 
-Vision language models trained on formatted documents that include text and graphics can extract information from documents. This includes OCR-free retrieval as well, where one can directly feed an image without putting the image through OCR and feeding the text.
+Documents often consist of different layouts, charts, tables, images and more. Vision language models trained on formatted documents can extract information from documents. This is an OCR-free approach, the inputs skip OCR and documents are directly fed to vision language models.
 
-### Image Captioning
+### Image Recognition with Instructions
 
-Vision language models can be used to generate captions for images.
+Vision language models can recognize images through descriptions. When given detailed descriptions of specific entities, it can classify the entities in an image.
 
 ## Inference
 
-You can use the Transformers library's `image-text-to-text` pipeline to interact with vision-language models.
+You can use the Transformers library to interact with vision-language models. You can load the model like below.
 
 ```python
-from transformers import pipeline
+from transformers import LlavaNextProcessor, LlavaNextForConditionalGeneration
+import torch
 
-mm_pipeline = pipeline("image-text-to-text", model="microsoft/kosmos-2-patch14-224")
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+processor = LlavaNextProcessor.from_pretrained("llava-hf/llava-v1.6-mistral-7b-hf")
+model = LlavaNextForConditionalGeneration.from_pretrained(
+    "llava-hf/llava-v1.6-mistral-7b-hf",
+    torch_dtype=torch.float16,
+    low_cpu_mem_usage=True
+)
+model.to(device)
+```
 
-generated_text = mm_pipeline(images="https://huggingface.co/spaces/llava-hf/llava-4bit/resolve/main/examples/baklava.png", text="How to make this pastry?", max_new_tokens=50)
-## [{'generated_text': 'How to make this pastry? 1. Preheat oven to 200 degrees Celsius.'}]
+We can infer by passing image and text dialogues.
+
+```python
+from PIL import Image
+import requests
+
+# image of a radar chart 
+url = "https://github.com/haotian-liu/LLaVA/blob/1a91fc274d7c35a9b50b3cb29c4247ae5837ce39/images/llava_v1_5_radar.jpg?raw=true" 
+image = Image.open(requests.get(url, stream=True).raw)
+prompt = "[INST] <image>\nWhat is shown in this image? [/INST]"
+
+inputs = processor(prompt, image, return_tensors="pt").to(device)
+output = model.generate(**inputs, max_new_tokens=100)
+
+print(processor.decode(output[0], skip_special_tokens=True))
+# The image appears to be a radar chart, which is a type of multivariate chart that displays values for multiple variables represented on axes
+# starting from the same point. This particular radar chart is showing the performance of different models or systems across various metrics.
+# The axes represent different metrics or benchmarks, such as MM-Vet, MM-Vet, MM-Vet, MM-Vet, MM-Vet, MM-V
 ```
 
 ## Useful Resources
 
-- [Breaking resolution curse of vision-language models](https://huggingface.co/blog/visheratin/vlm-resolution-curse)
-- [A Dive into Vision Language Models](https://huggingface.co/blog/vision_language_pretraining)
+- [Vision Language Models Explained](https://huggingface.co/blog/vlms)
+- [Open-source Multimodality and How to Achieve it using Hugging Face](https://www.youtube.com/watch?v=IoGaGfU1CIg&t=601s)
+- [Introducing Idefics2: A Powerful 8B Vision-Language Model for the community](https://huggingface.co/blog/idefics2)
