@@ -2,7 +2,7 @@
 
 Vision language models come in three types:
 
-- **Base:** Pre-trained models that can be fine-tuned. A good example is for base models is[PaliGemma models](https://huggingface.co/models?sort=trending&search=google%2Fpaligemma-3b-pt) by Google.
+- **Base:** Pre-trained models that can be fine-tuned. A good example is for base models is [PaliGemma models](https://huggingface.co/models?sort=trending&search=google%2Fpaligemma-3b-pt) by Google.
 - **Instruction:** Base models fine-tuned on instruction datasets. A good example for instruction fine-tuned models is [idefics2-8b](https://huggingface.co/HuggingFaceM4/idefics2-8b).
 - **Chatty/Conversation:** Base models fine-tuned on conversation datasets. A good example for chatty models is [deepseek-vl-7b-chat](https://huggingface.co/deepseek-ai/deepseek-vl-7b-chat).
 
