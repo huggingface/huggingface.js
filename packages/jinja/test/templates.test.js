@@ -79,6 +79,7 @@ const TEST_STRINGS = {
 	FILTER_OPERATOR_5: `{{ messages | selectattr('role', 'equalto', 'system') | length }}`,
 	FILTER_OPERATOR_6: `|{{ obj | length }}|{{ (obj | items)[1:] | length }}|`,
 	FILTER_OPERATOR_7: `|{{ obj | tojson }}|{{ "test" | tojson }}|{{ 1 | tojson }}|{{ true | tojson }}|{{ null | tojson }}|{{ [1,2,3] | tojson }}|`,
+	FILTER_OPERATOR_8: `{{ data | map(attribute='val') | list | tojson }}`,
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: `|{{ 1 and 2 }}|{{ 1 and 0 }}|{{ 0 and 1 }}|{{ 0 and 0 }}|{{ 1 or 2 }}|{{ 1 or 0 }}|{{ 0 or 1 }}|{{ 0 or 0 }}|{{ not 1 }}|{{ not 0 }}|`,
@@ -1459,6 +1460,22 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 	],
+	FILTER_OPERATOR_8: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "data", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "map", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "attribute", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "val", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "list", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "tojson", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: [
@@ -2661,6 +2678,9 @@ const TEST_CONTEXT = {
 			unicode: { "안녕?": "🤗" },
 		},
 	},
+	FILTER_OPERATOR_8: {
+		data: [{ val: 1 }, { val: 2 }, { val: 3 }],
+	},
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: {},
@@ -2810,6 +2830,7 @@ const EXPECTED_OUTPUTS = {
 	FILTER_OPERATOR_5: `1`,
 	FILTER_OPERATOR_6: `|3|2|`,
 	FILTER_OPERATOR_7: `|{"string": "world", "number": 5, "boolean": true, "null": null, "array": [1, 2, 3], "object": {"key": "value"}, "special": "\\"',:[]{}#&*;=?/\\\\\`~@|!^%()-_+<>", "unicode": {"안녕?": "🤗"}}|"test"|1|true|null|[1, 2, 3]|`,
+	FILTER_OPERATOR_8: `[1, 2, 3]`,
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: `|2|0|0|0|1|1|1|0|false|true|`,

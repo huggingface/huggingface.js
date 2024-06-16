@@ -276,6 +276,7 @@ export class Environment {
 		["defined", (operand) => operand.type !== "UndefinedValue"],
 		["undefined", (operand) => operand.type === "UndefinedValue"],
 		["equalto", (a, b) => a.value === b.value],
+		["eq", (a, b) => a.value === b.value],
 	]);
 
 	constructor(public parent?: Environment) {}
@@ -585,6 +586,34 @@ export class Interpreter {
 						});
 
 						return new ArrayValue(filtered);
+					}
+					case "map": {
+						// Accumulate kwargs
+						const kwargs = new Map();
+						for (const argument of filter.args) {
+							// TODO: Lazy evaluation of arguments
+							if (argument.type === "KeywordArgumentExpression") {
+								const kwarg = argument as KeywordArgumentExpression;
+								kwargs.set(kwarg.key.value, this.evaluate(kwarg.value, environment));
+							}
+						}
+						if (kwargs.has("attribute")) {
+							// Mapping on attributes
+							const attr = kwargs.get("attribute");
+							if (!(attr instanceof StringValue)) {
+								throw new Error("attribute must be a string");
+							}
+							const defaultValue = kwargs.get("default");
+							const mapped = operand.value.map((item) => {
+								if (!(item instanceof ObjectValue)) {
+									throw new Error("items in map must be an object");
+								}
+								return item.value.get(attr.value) ?? defaultValue ?? new UndefinedValue();
+							});
+							return new ArrayValue(mapped);
+						} else {
+							throw new Error("`map` expressions without `attribute` set are not currently supported.");
+						}
 					}
 				}
 				throw new Error(`Unknown ArrayValue filter: ${filterName}`);
