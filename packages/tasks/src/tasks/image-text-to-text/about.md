@@ -10,7 +10,7 @@ Vision language models can recognize images through descriptions. When given det
 
 ### Zero-shot Object Detection, Image Segmentation and Localization
 
-Some vision language models can detect or segment a set of objects or describe the positions or relative positions of the objects. For example, one could prompt such a model to ask if one object is behind another. Such a model can also output bounding box coordination or segmentation masks directly in the text output, unlike the traditional models explicitly trained on only doing object detection or image segmentation.
+Some vision language models can detect or segment a set of objects or describe the positions or relative positions of the objects. For example, one could prompt such a model to ask if one object is behind another. Such a model can also output bounding box coordination or segmentation masks directly in the text output, unlike the traditional models explicitly trained on only object detection or image segmentation.
 
 ### Visual Question Answering
 
