@@ -76,6 +76,36 @@ const EXAMPLE_FUNCTION_CALLING_WITH_SYSTEM = [
 	{ role: "user", content: "Hi, can you tell me the current stock price of AAPL?" },
 ];
 
+// Adapted from https://huggingface.co/CISCai/Mistral-7B-Instruct-v0.3-SOTA-GGUF
+const EXAMPLE_CHAT_WITH_TOOLS = [
+	{
+		role: "user",
+		content: "What's the weather like in Oslo and Stockholm?",
+	},
+];
+const EXAMPLE_TOOLS = [
+	{
+		type: "function",
+		function: {
+			name: "get_current_weather",
+			description: "Get the current weather in a given location",
+			parameters: {
+				type: "object",
+				properties: {
+					location: {
+						type: "string",
+						description: "The city and state, e.g. San Francisco, CA",
+					},
+					unit: {
+						type: "string",
+						enum: ["celsius", "fahrenheit"],
+					},
+				},
+				required: ["location"],
+			},
+		},
+	},
+];
 /**
  * Defined in https://github.com/huggingface/transformers
  * Keys correspond to `model_type` in the transformers repo.
@@ -415,6 +445,16 @@ const TEST_CUSTOM_TEMPLATES = Object.freeze({
 			'\n\n## Available Tools\nHere is a list of tools that you have available to you:\n\n```python\ndef internet_search(query: str) -> List[Dict]:\n    """Returns a list of relevant document snippets for a textual query retrieved from the internet\n\n    Args:\n        query (str): Query to search the internet with\n    """\n    pass\n```\n\n```python\ndef directly_answer() -> List[Dict]:\n    """Calls a standard (un-augmented) AI chatbot to generate a response given the conversation history\n    """\n    pass\n```<|END_OF_TURN_TOKEN|>' +
 			"<|START_OF_TURN_TOKEN|><|USER_TOKEN|>Whats the biggest penguin in the world?<|END_OF_TURN_TOKEN|>" +
 			'<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|>Write \'Action:\' followed by a json-formatted list of actions that you want to perform in order to produce a good response to the user\'s last input. You can use any of the supplied tools any number of times, but you should aim to execute the minimum number of necessary actions for the input. You should use the `directly-answer` tool if calling the other tools is unnecessary. The list of actions you want to call should be formatted as a list of json objects, for example:\n```json\n[\n    {\n        "tool_name": title of the tool in the specification,\n        "parameters": a dict of parameters to input into the tool as they are defined in the specs, or {} if it takes no parameters\n    }\n]```<|END_OF_TURN_TOKEN|><|START_OF_TURN_TOKEN|><|CHATBOT_TOKEN|>',
+	},
+	"CISCai/Mistral-7B-Instruct-v0.3-SOTA-GGUF": {
+		chat_template: `{{ bos_token }}{% set ns = namespace(lastuser=-1, system=false, functions=false) %}{% if tools %}{% for message in messages %}{% if message['role'] == 'user' %}{% set ns.lastuser = loop.index0 %}{% elif message['role'] == 'system' %}{% set ns.system = message['content'] %}{% endif %}{% endfor %}{% set ns.functions = tools|selectattr('type','eq','function')|map(attribute='function')|list|tojson %}{% endif %}{% for message in messages %}{% if message['role'] == 'user' %}{% if loop.index0 == ns.lastuser and ns.functions %}{{ '[AVAILABLE_TOOLS] ' }}{{ ns.functions }}{{ '[/AVAILABLE_TOOLS]' }}{% endif %}{{ '[INST] ' }}{% if loop.index0 == ns.lastuser and ns.system %}{{ ns.system + ' ' }}{% endif %}{{ message['content'] }}{{ '[/INST]' }}{% elif message['role'] == 'tool' %}{{ '[TOOL_RESULTS] ' }}{{ dict(call_id=message['tool_call_id'], content=message['content'])|tojson }}{{ '[/TOOL_RESULTS]' }}{% elif message['role'] == 'assistant' %}{% if message['tool_calls'] %}{{ '[TOOL_CALLS] [' }}{% for call in message['tool_calls'] %}{% if call['type'] == 'function' %}{{ dict(id=call['id'], name=call['function']['name'], arguments=call['function']['arguments'])|tojson }}{% endif %}{% if not loop.last %}{{ ', ' }}{% endif %}{% endfor %}{{ ']' }}{% else %}{{ message['content'] }}{% endif %}{{ eos_token }}{% endif %}{% endfor %}`,
+		data: {
+			messages: EXAMPLE_CHAT_WITH_TOOLS,
+			tools: EXAMPLE_TOOLS,
+			bos_token: "<s>",
+			eos_token: "</s>",
+		},
+		target: `<s>[AVAILABLE_TOOLS] [{"name": "get_current_weather", "description": "Get the current weather in a given location", "parameters": {"type": "object", "properties": {"location": {"type": "string", "description": "The city and state, e.g. San Francisco, CA"}, "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]}}, "required": ["location"]}}][/AVAILABLE_TOOLS][INST] What's the weather like in Oslo and Stockholm?[/INST]`,
 	},
 });
 
