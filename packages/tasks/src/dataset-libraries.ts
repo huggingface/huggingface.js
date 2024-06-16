@@ -24,7 +24,7 @@ export interface DatasetLibraryUiElement {
 
 export const DATASET_LIBRARIES_UI_ELEMENTS = {
 	mlcroissant: {
-		prettyLabel: "mlcroissant",
+		prettyLabel: "Croissant",
 		repoName: "croissant",
 		repoUrl: "https://github.com/mlcommons/croissant/tree/main/python/mlcroissant",
 		docsUrl: "https://github.com/mlcommons/croissant/blob/main/python/mlcroissant/README.md",
