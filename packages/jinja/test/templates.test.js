@@ -9,6 +9,9 @@ const TEST_STRINGS = {
 	NO_TEMPLATE: `Hello world!`,
 	TEXT_NODES: `0{{ 'A' }}1{{ 'B' }}{{ 'C' }}2{{ 'D' }}3`,
 
+	// Boolean literals
+	BOOLEAN_LITERALS: `|{{ true }}|{{ false }}|{{ True }}|{{ False }}|`,
+
 	// Logical operators
 	LOGICAL_AND: `{{ true and true }}{{ true and false }}{{ false and true }}{{ false and false }}`,
 	LOGICAL_OR: `{{ true or true }}{{ true or false }}{{ false or true }}{{ false or false }}`,
@@ -79,7 +82,9 @@ const TEST_STRINGS = {
 	FILTER_OPERATOR_5: `{{ messages | selectattr('role', 'equalto', 'system') | length }}`,
 	FILTER_OPERATOR_6: `|{{ obj | length }}|{{ (obj | items)[1:] | length }}|`,
 	FILTER_OPERATOR_7: `|{{ obj | tojson }}|{{ "test" | tojson }}|{{ 1 | tojson }}|{{ true | tojson }}|{{ null | tojson }}|{{ [1,2,3] | tojson }}|`,
-	FILTER_OPERATOR_8: `{{ data | map(attribute='val') | list | tojson }}`,
+	FILTER_OPERATOR_8: `{{ obj | tojson(indent=2) }}`,
+	FILTER_OPERATOR_9: `{{ data | map(attribute='val') | list | tojson }}`,
+	FILTER_OPERATOR_10: `|{{ " 1 \n 2 \n 3 \n\n " | indent }}|{{ " 1 \n 2 \n 3 \n\n " | indent(2) }}|{{ " 1 \n 2 \n 3 \n\n " | indent(first=True) }}|{{ " 1 \n 2 \n 3 \n\n " | indent(blank=True) }}|{{ " 1 \n 2 \n 3 \n\n " | indent(4, first=True) }}|`,
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: `|{{ 1 and 2 }}|{{ 1 and 0 }}|{{ 0 and 1 }}|{{ 0 and 0 }}|{{ 1 or 2 }}|{{ 1 or 0 }}|{{ 0 or 1 }}|{{ 0 or 0 }}|{{ not 1 }}|{{ not 0 }}|`,
@@ -158,6 +163,27 @@ const TEST_PARSED = {
 		{ value: "D", type: "StringLiteral" },
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "3", type: "Text" },
+	],
+
+	// Boolean literals
+	BOOLEAN_LITERALS: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "true", type: "BooleanLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "false", type: "BooleanLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "True", type: "BooleanLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "False", type: "BooleanLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
 	],
 
 	// Logical operators
@@ -1462,6 +1488,18 @@ const TEST_PARSED = {
 	],
 	FILTER_OPERATOR_8: [
 		{ value: "{{", type: "OpenExpression" },
+		{ value: "obj", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "tojson", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "indent", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	FILTER_OPERATOR_9: [
+		{ value: "{{", type: "OpenExpression" },
 		{ value: "data", type: "Identifier" },
 		{ value: "|", type: "Pipe" },
 		{ value: "map", type: "Identifier" },
@@ -1475,6 +1513,59 @@ const TEST_PARSED = {
 		{ value: "|", type: "Pipe" },
 		{ value: "tojson", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
+	],
+	FILTER_OPERATOR_10: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: " 1 \n 2 \n 3 \n\n ", type: "StringLiteral" },
+		{ value: "|", type: "Pipe" },
+		{ value: "indent", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: " 1 \n 2 \n 3 \n\n ", type: "StringLiteral" },
+		{ value: "|", type: "Pipe" },
+		{ value: "indent", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: " 1 \n 2 \n 3 \n\n ", type: "StringLiteral" },
+		{ value: "|", type: "Pipe" },
+		{ value: "indent", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "first", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "True", type: "BooleanLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: " 1 \n 2 \n 3 \n\n ", type: "StringLiteral" },
+		{ value: "|", type: "Pipe" },
+		{ value: "indent", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "blank", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "True", type: "BooleanLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: " 1 \n 2 \n 3 \n\n ", type: "StringLiteral" },
+		{ value: "|", type: "Pipe" },
+		{ value: "indent", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "4", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "first", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "True", type: "BooleanLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
 	],
 
 	// Logical operators between non-Booleans
@@ -2541,6 +2632,9 @@ const TEST_CONTEXT = {
 	NO_TEMPLATE: {},
 	TEXT_NODES: {},
 
+	// Boolean literals
+	BOOLEAN_LITERALS: {},
+
 	// Logical operators
 	LOGICAL_AND: {},
 	LOGICAL_OR: {},
@@ -2679,8 +2773,25 @@ const TEST_CONTEXT = {
 		},
 	},
 	FILTER_OPERATOR_8: {
+		obj: {
+			a: [1, 2, 3],
+			b: 1,
+			c: {
+				d: 2,
+				e: {
+					f: 3,
+					g: {
+						h: 4,
+						i: [1, 2, 3],
+					},
+				},
+			},
+		},
+	},
+	FILTER_OPERATOR_9: {
 		data: [{ val: 1 }, { val: 2 }, { val: 3 }],
 	},
+	FILTER_OPERATOR_10: {},
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: {},
@@ -2760,6 +2871,9 @@ const EXPECTED_OUTPUTS = {
 	NO_TEMPLATE: `Hello world!`,
 	TEXT_NODES: `0A1BC2D3`,
 
+	// Boolean literals
+	BOOLEAN_LITERALS: `|true|false|true|false|`,
+
 	// Logical operators
 	LOGICAL_AND: `truefalsefalsefalse`,
 	LOGICAL_OR: `truetruetruefalse`,
@@ -2830,7 +2944,9 @@ const EXPECTED_OUTPUTS = {
 	FILTER_OPERATOR_5: `1`,
 	FILTER_OPERATOR_6: `|3|2|`,
 	FILTER_OPERATOR_7: `|{"string": "world", "number": 5, "boolean": true, "null": null, "array": [1, 2, 3], "object": {"key": "value"}, "special": "\\"',:[]{}#&*;=?/\\\\\`~@|!^%()-_+<>", "unicode": {"안녕?": "🤗"}}|"test"|1|true|null|[1, 2, 3]|`,
-	FILTER_OPERATOR_8: `[1, 2, 3]`,
+	FILTER_OPERATOR_8: `{\n  "a": [\n    1,\n    2,\n    3\n  ],\n  "b": 1,\n  "c": {\n    "d": 2,\n    "e": {\n      "f": 3,\n      "g": {\n        "h": 4,\n        "i": [\n          1,\n          2,\n          3\n        ]\n      }\n    }\n  }\n}`,
+	FILTER_OPERATOR_9: `[1, 2, 3]`,
+	FILTER_OPERATOR_10: `| 1 \n     2 \n     3 \n\n     | 1 \n   2 \n   3 \n\n   |     1 \n     2 \n     3 \n\n     | 1 \n     2 \n     3 \n    \n     |     1 \n     2 \n     3 \n\n     |`,
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: `|2|0|0|0|1|1|1|0|false|true|`,

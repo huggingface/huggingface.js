@@ -520,6 +520,16 @@ export class Interpreter {
 						return new StringValue(operand.value.charAt(0).toUpperCase() + operand.value.slice(1));
 					case "trim":
 						return new StringValue(operand.value.trim());
+					case "indent":
+						return new StringValue(
+							operand.value
+								.split("\n")
+								.map((x, i) =>
+									// By default, don't indent the first line or empty lines
+									i === 0 || x.length === 0 ? x : "    " + x
+								)
+								.join("\n")
+						);
 					default:
 						throw new Error(`Unknown StringValue filter: ${filter.value}`);
 				}
@@ -550,6 +560,20 @@ export class Interpreter {
 				throw new Error(`Unknown filter: ${filter.callee.type}`);
 			}
 			const filterName = (filter.callee as Identifier).value;
+
+			if (filterName === "tojson") {
+				// Accumulate kwargs
+				const kwargs = new Map();
+				for (const argument of filter.args) {
+					// TODO: Lazy evaluation of arguments
+					if (argument.type === "KeywordArgumentExpression") {
+						const kwarg = argument as KeywordArgumentExpression;
+						kwargs.set(kwarg.key.value, this.evaluate(kwarg.value, environment));
+					}
+				}
+				const indent = kwargs.get("indent") ?? new NullValue();
+				return new StringValue(toJSON(operand, indent.value));
+			}
 
 			if (operand instanceof ArrayValue) {
 				switch (filterName) {
@@ -617,6 +641,43 @@ export class Interpreter {
 					}
 				}
 				throw new Error(`Unknown ArrayValue filter: ${filterName}`);
+			} else if (operand instanceof StringValue) {
+				switch (filterName) {
+					case "indent": {
+						// https://jinja.palletsprojects.com/en/3.1.x/templates/#jinja-filters.indent
+						// Return a copy of the string with each line indented by 4 spaces. The first line and blank lines are not indented by default.
+						// Parameters:
+						//  - width: Number of spaces, or a string, to indent by.
+						//  - first: Don't skip indenting the first line.
+						//  - blank: Don't skip indenting empty lines.
+						const args = [];
+						const kwargs = new Map();
+						for (const argument of filter.args) {
+							// TODO: Lazy evaluation of arguments
+							if (argument.type === "KeywordArgumentExpression") {
+								const kwarg = argument as KeywordArgumentExpression;
+								kwargs.set(kwarg.key.value, this.evaluate(kwarg.value, environment));
+							} else {
+								if (kwargs.size > 0) {
+									throw new Error("Positional arguments must come before keyword arguments");
+								}
+								args.push(this.evaluate(argument, environment));
+							}
+						}
+
+						const width = args.at(0) ?? kwargs.get("width") ?? new NumericValue(4);
+						const first = args.at(1) ?? kwargs.get("first") ?? new BooleanValue(false);
+						const blank = args.at(2) ?? kwargs.get("blank") ?? new BooleanValue(false);
+
+						const lines = operand.value.split("\n");
+						const indent = " ".repeat(width.value);
+						const indented = lines.map((x, i) =>
+							(!first.value && i === 0) || (!blank.value && x.length === 0) ? x : indent + x
+						);
+						return new StringValue(indented.join("\n"));
+					}
+				}
+				throw new Error(`Unknown StringValue filter: ${filterName}`);
 			} else {
 				throw new Error(`Cannot apply filter "${filterName}" to type: ${operand.type}`);
 			}
@@ -1011,9 +1072,12 @@ function convertToRuntimeValues(input: unknown): AnyRuntimeValue {
 /**
  * Helper function to convert runtime values to JSON
  * @param {AnyRuntimeValue} input The runtime value to convert
+ * @param {number|null} [indent] The number of spaces to indent, or null for no indentation
+ * @param {number} [depth] The current depth of the object
  * @returns {string} JSON representation of the input
  */
-function toJSON(input: AnyRuntimeValue): string {
+function toJSON(input: AnyRuntimeValue, indent?: number | null, depth?: number): string {
+	const currentDepth = depth ?? 0;
 	switch (input.type) {
 		case "NullValue":
 		case "UndefinedValue": // JSON.stringify(undefined) -> undefined
@@ -1023,11 +1087,25 @@ function toJSON(input: AnyRuntimeValue): string {
 		case "BooleanValue":
 			return JSON.stringify(input.value);
 		case "ArrayValue":
-			return `[${(input as ArrayValue).value.map(toJSON).join(", ")}]`;
-		case "ObjectValue":
-			return `{${Array.from((input as ObjectValue).value.entries())
-				.map(([key, value]) => `"${key}": ${toJSON(value)}`)
-				.join(", ")}}`;
+		case "ObjectValue": {
+			const indentValue = indent ? " ".repeat(indent) : "";
+			const basePadding = "\n" + indentValue.repeat(currentDepth);
+			const childrenPadding = basePadding + indentValue; // Depth + 1
+
+			if (input.type === "ArrayValue") {
+				const core = (input as ArrayValue).value.map((x) => toJSON(x, indent, currentDepth + 1));
+				return indent
+					? `[${childrenPadding}${core.join(`,${childrenPadding}`)}${basePadding}]`
+					: `[${core.join(", ")}]`;
+			} else {
+				// ObjectValue
+				const core = Array.from((input as ObjectValue).value.entries()).map(([key, value]) => {
+					const v = `"${key}": ${toJSON(value, indent, currentDepth + 1)}`;
+					return indent ? `${childrenPadding}${v}` : v;
+				});
+				return indent ? `{${core.join(",")}${basePadding}}` : `{${core.join(", ")}}`;
+			}
+		}
 		default:
 			// e.g., FunctionValue
 			throw new Error(`Cannot convert to JSON: ${input.type}`);
