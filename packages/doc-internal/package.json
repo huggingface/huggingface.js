@@ -5,7 +5,7 @@
 	"description": "Package to generate doc for other @huggingface packages",
 	"private": true,
 	"scripts": {
-		"start": "pnpm run fix-cdn-versions && pnpm run doc-hub && pnpm run doc-inference && pnpm run doc-agents && cp ../../README.md ../../docs/index.md && pnpm run update-toc && pnpm run fix-md-links && pnpm run fix-md-headinghashlinks",
+		"start": "pnpm run fix-cdn-versions && pnpm run doc-hub && pnpm run doc-inference && pnpm run doc-agents && pnpm run doc-space-header && pnpm run doc-gguf && cp ../../README.md ../../docs/index.md && pnpm run update-toc && pnpm run fix-md-links && pnpm run fix-md-headinghashlinks",
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
 		"format": "prettier --write .",
@@ -13,6 +13,8 @@
 		"doc-hub": "typedoc --tsconfig ../hub/tsconfig.json --githubPages false --plugin typedoc-plugin-markdown --out ../../docs/hub --hideBreadcrumbs --hideInPageTOC --sourceLinkTemplate https://github.com/huggingface/huggingface.js/blob/main/{path}#L{line} ../hub/index.ts",
 		"doc-inference": "typedoc --tsconfig ../inference/tsconfig.json --githubPages false --plugin typedoc-plugin-markdown --out ../../docs/inference --hideBreadcrumbs --hideInPageTOC --sourceLinkTemplate https://github.com/huggingface/huggingface.js/blob/main/{path}#L{line} ../inference/src/index.ts",
 		"doc-agents": "typedoc --tsconfig ../agents/tsconfig.json --githubPages false --plugin typedoc-plugin-markdown --out ../../docs/agents --hideBreadcrumbs --hideInPageTOC --sourceLinkTemplate https://github.com/huggingface/huggingface.js/blob/main/{path}#L{line} ../agents/src/index.ts",
+		"doc-gguf": "mkdir -p ../../docs/gguf && cp ../../packages/gguf/README.md ../../docs/gguf/index.md",
+		"doc-space-header": "mkdir -p ../../docs/space-header && cp ../../packages/space-header/README.md ../../docs/space-header/index.md",
 		"update-toc": "tsx update-toc.ts",
 		"fix-cdn-versions": "tsx fix-cdn-versions.ts",
 		"fix-md-links": "tsx fix-md-links.ts",

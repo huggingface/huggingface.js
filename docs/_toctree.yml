@@ -30,4 +30,4 @@
   isExpanded: true
   sections:
     - local: gguf/README
-      title: Use the GGUF parser
+      title: Parse local and remote GGUF files
