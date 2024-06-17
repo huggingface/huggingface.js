@@ -100,7 +100,7 @@ export const diffusers = (model: ModelData): string[] => {
 export const edsnlp = (model: ModelData): string[] => {
 	const packageName = nameWithoutNamespace(model.id).replaceAll("-", "_");
 	return [
-		`# Load it from the huggingface hub directly
+		`# Load it from the Hub directly
 import edsnlp
 nlp = edsnlp.load("${model.id}")
 `,
