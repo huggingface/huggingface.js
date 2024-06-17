@@ -21,6 +21,7 @@ import type {
 	TupleLiteral,
 	Macro,
 	Expression,
+	SelectExpression,
 } from "./ast";
 import { slice, titleCase } from "./utils";
 
@@ -256,6 +257,7 @@ export class Environment {
 		],
 		["false", (operand) => operand.type === "BooleanValue" && !(operand as BooleanValue).value],
 		["true", (operand) => operand.type === "BooleanValue" && (operand as BooleanValue).value],
+		["string", (operand) => operand.type === "StringValue"],
 		["number", (operand) => operand.type === "NumericValue"],
 		["integer", (operand) => operand.type === "NumericValue" && Number.isInteger((operand as NumericValue).value)],
 		["iterable", (operand) => operand instanceof ArrayValue || operand instanceof StringValue],
@@ -553,6 +555,8 @@ export class Interpreter {
 								)
 								.join("\n")
 						);
+					case "string":
+						return operand; // no-op
 					default:
 						throw new Error(`Unknown StringValue filter: ${filter.value}`);
 				}
@@ -864,35 +868,29 @@ export class Interpreter {
 		// Scope for the for loop
 		const scope = new Environment(environment);
 
-		const iterable = this.evaluate(node.iterable, scope);
+		let test, iterable;
+		if (node.iterable.type === "SelectExpression") {
+			const select = node.iterable as SelectExpression;
+			iterable = this.evaluate(select.iterable, scope);
+			test = select.test;
+		} else {
+			iterable = this.evaluate(node.iterable, scope);
+		}
+
 		if (!(iterable instanceof ArrayValue)) {
 			throw new Error(`Expected iterable type in for loop: got ${iterable.type}`);
 		}
 
-		let result = "";
-
+		const items: Expression[] = [];
+		const scopeUpdateFunctions: ((scope: Environment) => void)[] = [];
 		for (let i = 0; i < iterable.value.length; ++i) {
-			// Update the loop variable
-			// TODO: Only create object once, then update value?
-			const loop = new Map([
-				["index", new NumericValue(i + 1)],
-				["index0", new NumericValue(i)],
-				["revindex", new NumericValue(iterable.value.length - i)],
-				["revindex0", new NumericValue(iterable.value.length - i - 1)],
-				["first", new BooleanValue(i === 0)],
-				["last", new BooleanValue(i === iterable.value.length - 1)],
-				["length", new NumericValue(iterable.value.length)],
-				["previtem", i > 0 ? iterable.value[i - 1] : new UndefinedValue()],
-				["nextitem", i < iterable.value.length - 1 ? iterable.value[i + 1] : new UndefinedValue()],
-			] as [string, AnyRuntimeValue][]);
-
-			scope.setVariable("loop", new ObjectValue(loop));
+			const loopScope = new Environment(scope);
 
 			const current = iterable.value[i];
 
-			// For this iteration, set the loop variable to the current element
+			let scopeUpdateFunction;
 			if (node.loopvar.type === "Identifier") {
-				scope.setVariable((node.loopvar as Identifier).value, current);
+				scopeUpdateFunction = (scope: Environment) => scope.setVariable((node.loopvar as Identifier).value, current);
 			} else if (node.loopvar.type === "TupleLiteral") {
 				const loopvar = node.loopvar as TupleLiteral;
 				if (current.type !== "ArrayValue") {
@@ -904,17 +902,67 @@ export class Interpreter {
 				if (loopvar.value.length !== c.value.length) {
 					throw new Error(`Too ${loopvar.value.length > c.value.length ? "few" : "many"} items to unpack`);
 				}
-				for (let j = 0; j < loopvar.value.length; ++j) {
-					if (loopvar.value[j].type !== "Identifier") {
-						throw new Error(`Cannot unpack non-identifier type: ${loopvar.value[j].type}`);
+
+				scopeUpdateFunction = (scope: Environment) => {
+					for (let j = 0; j < loopvar.value.length; ++j) {
+						if (loopvar.value[j].type !== "Identifier") {
+							throw new Error(`Cannot unpack non-identifier type: ${loopvar.value[j].type}`);
+						}
+						scope.setVariable((loopvar.value[j] as Identifier).value, c.value[j]);
 					}
-					scope.setVariable((loopvar.value[j] as Identifier).value, c.value[j]);
+				};
+			} else {
+				throw new Error(`Invalid loop variable(s): ${node.loopvar.type}`);
+			}
+
+			if (test) {
+				scopeUpdateFunction(loopScope);
+
+				const testValue = this.evaluate(test, loopScope);
+				if (!testValue.__bool__().value) {
+					continue;
 				}
 			}
+
+			items.push(current);
+			scopeUpdateFunctions.push(scopeUpdateFunction);
+		}
+
+		let result = "";
+
+		let noIteration = true;
+		for (let i = 0; i < items.length; ++i) {
+			// Update the loop variable
+			// TODO: Only create object once, then update value?
+			const loop = new Map([
+				["index", new NumericValue(i + 1)],
+				["index0", new NumericValue(i)],
+				["revindex", new NumericValue(items.length - i)],
+				["revindex0", new NumericValue(items.length - i - 1)],
+				["first", new BooleanValue(i === 0)],
+				["last", new BooleanValue(i === items.length - 1)],
+				["length", new NumericValue(items.length)],
+				["previtem", i > 0 ? items[i - 1] : new UndefinedValue()],
+				["nextitem", i < items.length - 1 ? items[i + 1] : new UndefinedValue()],
+			] as [string, AnyRuntimeValue][]);
+
+			scope.setVariable("loop", new ObjectValue(loop));
+
+			// Update scope for this iteration
+			scopeUpdateFunctions[i](scope);
 
 			// Evaluate the body of the for loop
 			const evaluated = this.evaluateBlock(node.body, scope);
 			result += evaluated.value;
+
+			// At least one iteration took place
+			noIteration = false;
+		}
+
+		// no iteration took place, so we render the default block
+		if (noIteration) {
+			const defaultEvaluated = this.evaluateBlock(node.defaultBlock, scope);
+			result += defaultEvaluated.value;
 		}
 
 		return new StringValue(result);

@@ -31,6 +31,8 @@ const TEST_STRINGS = {
 	// For loops
 	FOR_LOOP: `{% for message in messages %}{{ message['content'] }}{% endfor %}`,
 	FOR_LOOP_UNPACKING: `|{% for x, y in [ [1, 2], [3, 4] ] %}|{{ x + ' ' + y }}|{% endfor %}|`,
+	FOR_LOOP_DEFAULT: `{% for x in [] %}{{ 'A' }}{% else %}{{'B'}}{% endfor %}`,
+	FOR_LOOP_SELECT: `{% for x in [1, 2, 3, 4] if x > 2 %}{{ x }}{% endfor %}`,
 
 	// Set variables
 	VARIABLES: `{% set x = 'Hello' %}{% set y = 'World' %}{{ x + ' ' + y }}`,
@@ -594,6 +596,53 @@ const TEST_PARSED = {
 		{ value: "endfor", type: "EndFor" },
 		{ value: "%}", type: "CloseStatement" },
 		{ value: "|", type: "Text" },
+	],
+	FOR_LOOP_DEFAULT: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "for", type: "For" },
+		{ value: "x", type: "Identifier" },
+		{ value: "in", type: "In" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "A", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "else", type: "Else" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "B", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endfor", type: "EndFor" },
+		{ value: "%}", type: "CloseStatement" },
+	],
+	FOR_LOOP_SELECT: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "for", type: "For" },
+		{ value: "x", type: "Identifier" },
+		{ value: "in", type: "In" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "4", type: "NumericLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "if", type: "If" },
+		{ value: "x", type: "Identifier" },
+		{ value: ">", type: "ComparisonBinaryOperator" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "x", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endfor", type: "EndFor" },
+		{ value: "%}", type: "CloseStatement" },
 	],
 
 	// Set variables
@@ -2660,6 +2709,8 @@ const TEST_CONTEXT = {
 		],
 	},
 	FOR_LOOP_UNPACKING: {},
+	FOR_LOOP_DEFAULT: {},
+	FOR_LOOP_SELECT: {},
 
 	// Set variables
 	VARIABLES: {},
@@ -2893,6 +2944,8 @@ const EXPECTED_OUTPUTS = {
 	// For loops
 	FOR_LOOP: "ABC",
 	FOR_LOOP_UNPACKING: "||1 2||3 4||",
+	FOR_LOOP_DEFAULT: "B",
+	FOR_LOOP_SELECT: "34",
 
 	// Set variables
 	VARIABLES: "Hello World",

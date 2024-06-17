@@ -22,6 +22,7 @@ import {
 	KeywordArgumentExpression,
 	TupleLiteral,
 	Macro,
+	SelectExpression,
 } from "./ast";
 
 /**
@@ -217,7 +218,7 @@ export function parse(tokens: Token[]): Program {
 
 	function parseForStatement(): For {
 		// e.g., `message` in `for message in messages`
-		const loopVariable = parseExpressionSequence(true); // should be an identifier
+		const loopVariable = parseExpressionSequence(true); // should be an identifier/tuple
 		if (!(loopVariable instanceof Identifier || loopVariable instanceof TupleLiteral)) {
 			throw new SyntaxError(`Expected identifier/tuple for the loop variable, got ${loopVariable.type} instead`);
 		}
@@ -232,28 +233,48 @@ export function parse(tokens: Token[]): Program {
 		// Body of for loop
 		const body: Statement[] = [];
 
-		// Keep going until we hit {% endfor
-		while (not(TOKEN_TYPES.OpenStatement, TOKEN_TYPES.EndFor)) {
+		// Keep going until we hit {% endfor or {% else
+		while (not(TOKEN_TYPES.OpenStatement, TOKEN_TYPES.EndFor) && not(TOKEN_TYPES.OpenStatement, TOKEN_TYPES.Else)) {
 			body.push(parseAny());
 		}
 
-		return new For(loopVariable, iterable, body);
+		// (Optional) else block
+		const alternative: Statement[] = [];
+		if (is(TOKEN_TYPES.OpenStatement, TOKEN_TYPES.Else)) {
+			++current; // consume {%
+			++current; // consume else
+			expect(TOKEN_TYPES.CloseStatement, "Expected closing statement token");
+
+			// keep going until we hit {% endfor
+			while (not(TOKEN_TYPES.OpenStatement, TOKEN_TYPES.EndFor)) {
+				alternative.push(parseAny());
+			}
+		}
+
+		return new For(loopVariable, iterable, body, alternative);
 	}
 
 	function parseExpression(): Statement {
 		// Choose parse function with lowest precedence
-		return parseTernaryExpression();
+		return parseIfExpression();
 	}
 
-	function parseTernaryExpression(): Statement {
+	function parseIfExpression(): Statement {
 		const a = parseLogicalOrExpression();
 		if (is(TOKEN_TYPES.If)) {
 			// Ternary expression
 			++current; // consume if
 			const predicate = parseLogicalOrExpression();
-			expect(TOKEN_TYPES.Else, "Expected else token");
-			const b = parseLogicalOrExpression();
-			return new If(predicate, [a], [b]);
+
+			if (is(TOKEN_TYPES.Else)) {
+				// Ternary expression with else
+				++current; // consume else
+				const b = parseLogicalOrExpression();
+				return new If(predicate, [a], [b]);
+			} else {
+				// Select expression on iterable
+				return new SelectExpression(a, predicate);
+			}
 		}
 		return a;
 	}
