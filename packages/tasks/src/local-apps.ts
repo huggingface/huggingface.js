@@ -177,6 +177,13 @@ export const LOCAL_APPS = {
 		displayOnModelPage: (model) => model.library_name === "diffusers" && model.pipeline_tag === "text-to-image",
 		deeplink: (model) => new URL(`diffusionbee://open_from_hf?model=${model.id}`),
 	},
+	invoke: {
+		prettyLabel: "Invoke",
+		docsUrl: "https://github.com/invoke-ai/InvokeAI",
+		mainTask: "text-to-image",
+		displayOnModelPage: (model) => model.library_name === "diffusers" && model.pipeline_tag === "text-to-image",
+		deeplink: (model) => new URL(`https://models.invoke.ai/huggingface/${model.id}`),
+	},
 } satisfies Record<string, LocalApp>;
 
 export type LocalAppKey = keyof typeof LOCAL_APPS;
