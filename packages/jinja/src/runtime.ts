@@ -20,6 +20,7 @@ import type {
 	ObjectLiteral,
 	TupleLiteral,
 	Macro,
+	Expression,
 } from "./ast";
 import { slice, titleCase } from "./utils";
 
@@ -450,6 +451,28 @@ export class Interpreter {
 		throw new SyntaxError(`Unknown operator "${node.operator.value}" between ${left.type} and ${right.type}`);
 	}
 
+	private evaluateArguments(
+		args: Expression[],
+		environment: Environment
+	): [AnyRuntimeValue[], Map<string, AnyRuntimeValue>] {
+		// Accumulate args and kwargs
+		const positionalArguments = [];
+		const keywordArguments = new Map();
+		for (const argument of args) {
+			// TODO: Lazy evaluation of arguments
+			if (argument.type === "KeywordArgumentExpression") {
+				const kwarg = argument as KeywordArgumentExpression;
+				keywordArguments.set(kwarg.key.value, this.evaluate(kwarg.value, environment));
+			} else {
+				if (keywordArguments.size > 0) {
+					throw new Error("Positional arguments must come before keyword arguments");
+				}
+				positionalArguments.push(this.evaluate(argument, environment));
+			}
+		}
+		return [positionalArguments, keywordArguments];
+	}
+
 	/**
 	 * Evaluates expressions following the filter operation type.
 	 */
@@ -562,16 +585,11 @@ export class Interpreter {
 			const filterName = (filter.callee as Identifier).value;
 
 			if (filterName === "tojson") {
-				// Accumulate kwargs
-				const kwargs = new Map();
-				for (const argument of filter.args) {
-					// TODO: Lazy evaluation of arguments
-					if (argument.type === "KeywordArgumentExpression") {
-						const kwarg = argument as KeywordArgumentExpression;
-						kwargs.set(kwarg.key.value, this.evaluate(kwarg.value, environment));
-					}
-				}
+				const [, kwargs] = this.evaluateArguments(filter.args, environment);
 				const indent = kwargs.get("indent") ?? new NullValue();
+				if (!(indent instanceof NumericValue || indent instanceof NullValue)) {
+					throw new Error("If set, indent must be a number");
+				}
 				return new StringValue(toJSON(operand, indent.value));
 			}
 
@@ -613,14 +631,8 @@ export class Interpreter {
 					}
 					case "map": {
 						// Accumulate kwargs
-						const kwargs = new Map();
-						for (const argument of filter.args) {
-							// TODO: Lazy evaluation of arguments
-							if (argument.type === "KeywordArgumentExpression") {
-								const kwarg = argument as KeywordArgumentExpression;
-								kwargs.set(kwarg.key.value, this.evaluate(kwarg.value, environment));
-							}
-						}
+						const [, kwargs] = this.evaluateArguments(filter.args, environment);
+
 						if (kwargs.has("attribute")) {
 							// Mapping on attributes
 							const attr = kwargs.get("attribute");
@@ -650,22 +662,13 @@ export class Interpreter {
 						//  - width: Number of spaces, or a string, to indent by.
 						//  - first: Don't skip indenting the first line.
 						//  - blank: Don't skip indenting empty lines.
-						const args = [];
-						const kwargs = new Map();
-						for (const argument of filter.args) {
-							// TODO: Lazy evaluation of arguments
-							if (argument.type === "KeywordArgumentExpression") {
-								const kwarg = argument as KeywordArgumentExpression;
-								kwargs.set(kwarg.key.value, this.evaluate(kwarg.value, environment));
-							} else {
-								if (kwargs.size > 0) {
-									throw new Error("Positional arguments must come before keyword arguments");
-								}
-								args.push(this.evaluate(argument, environment));
-							}
-						}
+
+						const [args, kwargs] = this.evaluateArguments(filter.args, environment);
 
 						const width = args.at(0) ?? kwargs.get("width") ?? new NumericValue(4);
+						if (!(width instanceof NumericValue)) {
+							throw new Error("width must be a number");
+						}
 						const first = args.at(1) ?? kwargs.get("first") ?? new BooleanValue(false);
 						const blank = args.at(2) ?? kwargs.get("blank") ?? new BooleanValue(false);
 
@@ -744,16 +747,8 @@ export class Interpreter {
 	private evaluateCallExpression(expr: CallExpression, environment: Environment): AnyRuntimeValue {
 		// Accumulate all keyword arguments into a single object, which will be
 		// used as the final argument in the call function.
-		const args: AnyRuntimeValue[] = [];
-		const kwargs = new Map();
-		for (const argument of expr.args) {
-			if (argument.type === "KeywordArgumentExpression") {
-				const kwarg = argument as KeywordArgumentExpression;
-				kwargs.set(kwarg.key.value, this.evaluate(kwarg.value, environment));
-			} else {
-				args.push(this.evaluate(argument, environment));
-			}
-		}
+		const [args, kwargs] = this.evaluateArguments(expr.args, environment);
+
 		if (kwargs.size > 0) {
 			args.push(new KeywordArgumentsValue(kwargs));
 		}
