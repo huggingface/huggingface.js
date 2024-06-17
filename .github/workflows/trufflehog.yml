@@ -8,10 +8,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - shell: bash
+        env:
+          JSON_STRING: ${{ toJson(github.event.commits) }}
         run: |
           if [ "${{ github.event_name }}" == "push" ]; then
-            json_string=${{ toJson(github.event.commits) }}
-            echo "depth=$(($(jq length <<< '$json_string') + 2))" >> $GITHUB_ENV
+            echo "depth=$(($(jq length <<< '$JSON_STRING') + 2))" >> $GITHUB_ENV
             echo "branch=${{ github.ref_name }}" >> $GITHUB_ENV
           fi
           if [ "${{ github.event_name }}" == "pull_request" ]; then
