@@ -1,6 +1,6 @@
 {
 	"name": "@huggingface/space-header",
-	"version": "1.0.0",
+	"version": "0.0.0",
 	"description": "",
 	"main": "index.js",
 	"type": "module",
@@ -15,7 +15,7 @@
 		"prepublishOnly": "pnpm run build"
 	},
 	"keywords": [],
-	"author": "",
+	"author": "Hugging Face",
 	"license": "ISC",
 	"devDependencies": {
 		"tsup": "^8.1.0",
