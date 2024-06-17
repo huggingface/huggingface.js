@@ -505,7 +505,7 @@ export function parse(tokens: Token[]): Program {
 				return new StringLiteral(token.value);
 			case TOKEN_TYPES.BooleanLiteral:
 				++current;
-				return new BooleanLiteral(token.value === "true");
+				return new BooleanLiteral(token.value.toLowerCase() === "true");
 			case TOKEN_TYPES.Identifier:
 				++current;
 				return new Identifier(token.value);

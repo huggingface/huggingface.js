@@ -73,6 +73,13 @@ const KEYWORDS = Object.freeze({
 	// Literals
 	true: TOKEN_TYPES.BooleanLiteral,
 	false: TOKEN_TYPES.BooleanLiteral,
+
+	// NOTE: According to the Jinja docs: The special constants true, false, and none are indeed lowercase.
+	// Because that caused confusion in the past, (True used to expand to an undefined variable that was considered false),
+	// all three can now also be written in title case (True, False, and None). However, for consistency, (all Jinja identifiers are lowercase)
+	// you should use the lowercase versions.
+	True: TOKEN_TYPES.BooleanLiteral,
+	False: TOKEN_TYPES.BooleanLiteral,
 });
 
 /**
