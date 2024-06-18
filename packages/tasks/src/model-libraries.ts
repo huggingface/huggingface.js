@@ -262,7 +262,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/NVIDIA/NeMo",
 		snippets: snippets.nemo,
 		filter: true,
-		countDownloads: `path_extension:"nemo"`,
+		countDownloads: `path_extension:"nemo" OR path:"model_config.yaml"`,
 	},
 	open_clip: {
 		prettyLabel: "OpenCLIP",
