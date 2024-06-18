@@ -1,11 +1,15 @@
 {
 	"name": "@huggingface/space-header",
 	"version": "0.0.0",
-	"description": "",
 	"main": "index.js",
 	"type": "module",
 	"types": "dist/index.d.ts",
 	"module": "dist/index.js",
+	"description": "Use the Space mini_header outside Hugging Face",
+	"repository": "https://github.com/huggingface/huggingface.js.git",
+	"publishConfig": {
+		"access": "public"
+	},
 	"scripts": {
 		"build": "tsup ./src",
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
