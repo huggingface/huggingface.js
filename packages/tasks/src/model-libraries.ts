@@ -214,7 +214,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			term: { path: "gliner_config.json" },
 		},
 	},
-	glyph-byt5: {
+	"glyph-byt5": {
 		prettyLabel: "Glyph-ByT5",
 		repoName: "Glyph-ByT5",
 		repoUrl: "https://github.com/AIGText/Glyph-ByT5",
