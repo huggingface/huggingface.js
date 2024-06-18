@@ -223,6 +223,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			terms: { path: ["ckpt/tensor00000_000", "ckpt-0/tensor00000_000"] },
 		},
 	},
+	"hunyuan-dit": {
+		prettyLabel: "HunyuanDiT",
+		repoName: "HunyuanDiT",
+		repoUrl: "https://github.com/Tencent/HunyuanDiT",
+		countDownloads: {
+			terms: { path: ["pytorch_model_ema.pt", "pytorch_model_distill.pt"] },
+		},
+	},
 	keras: {
 		prettyLabel: "Keras",
 		repoName: "Keras",
