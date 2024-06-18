@@ -7,10 +7,10 @@
  *
  * https://huggingface.co/docs/hub/models-download-stats
  * Available fields:
- *  - path: the complete path of the model
- *  - path_prefix: the prefix of the path of the model
- *  - path_extension: the extension of the path of the model
- *  - path_filename: the extension of the path of the model
+ *  - path: the complete file path (relative) (e.g: "prefix/file.extension")
+ *  - path_prefix: the prefix of the file path (e.g: "prefix", empty if no prefix)
+ *  - path_extension: the extension of the file path (e.g: "extension")
+ *  - path_filename: the name of the file path (e.g: "file")
  * see also:
  * https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html
  */
