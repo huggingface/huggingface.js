@@ -134,14 +134,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://aphp.github.io/edsnlp/latest/",
 		filter: false,
 		snippets: snippets.edsnlp,
-		countDownloads: `path_filename:"config.cfg" AND _exists_:"path_prefix"`,
+		countDownloads: `path_filename:"config" AND path_extension:"cfg"`,
 	},
 	elm: {
 		prettyLabel: "ELM",
 		repoName: "elm",
 		repoUrl: "https://github.com/slicex-ai/elm",
 		filter: false,
-		countDownloads: `path_filename:"slicex_elm_config.json" AND _exists_:"path_prefix"`,
+		countDownloads: `path_filename:"slicex_elm_config" AND path_extension:"json"`,
 	},
 	espnet: {
 		prettyLabel: "ESPnet",
@@ -459,7 +459,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "WhisperKit",
 		repoName: "WhisperKit",
 		repoUrl: "https://github.com/argmaxinc/WhisperKit",
-		countDownloads: `path_filename:"model.mil" AND _exists_:"path_prefix"`,
+		countDownloads: `path_filename:"model" AND path_extension:"mil" AND _exists_:"path_prefix"`,
 	},
 } satisfies Record<string, LibraryUiElement>;
 
