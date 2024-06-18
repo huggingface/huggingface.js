@@ -37,6 +37,7 @@ export type LocalApp = {
 	| {
 			/**
 			 * And if not (mostly llama.cpp), snippet to copy/paste in your terminal
+			 * Support the placeholder {{GGUF_FILE}} that will be replaced by the gguf file path or the list of available files.
 			 */
 			snippet: (model: ModelData) => string | string[];
 	  }
@@ -48,19 +49,24 @@ function isGgufModel(model: ModelData) {
 
 const snippetLlamacpp = (model: ModelData): string[] => {
 	return [
-		`## Install llama.cpp via brew
+		`# Option 1: use llama.cpp with brew
 brew install llama.cpp
 
-## or from source with curl support
-## see llama.cpp README for compilation flags to optimize for your hardware
-git clone https://github.com/ggerganov/llama.cpp
-cd llama.cpp
-LLAMA_CURL=1 make
-`,
-		`## Load and run the model
+# Load and run the model
 llama \\
 	--hf-repo "${model.id}" \\
-	--hf-file file.gguf \\
+	--hf-file {{GGUF_FILE}} \\
+	-p "I believe the meaning of life is" \\
+	-n 128`,
+		`# Option 2: build llama.cpp from source with curl support
+git clone https://github.com/ggerganov/llama.cpp.git 
+cd llama.cpp
+LLAMA_CURL=1 make
+
+# Load and run the model
+./main \\
+	--hf-repo "${model.id}" \\
+	-m {{GGUF_FILE}} \\
 	-p "I believe the meaning of life is" \\
 	-n 128`,
 	];
@@ -112,6 +118,40 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isGgufModel,
 		deeplink: (model) => new URL(`sanctum://open_from_hf?model=${model.id}`),
+	},
+	jellybox: {
+		prettyLabel: "Jellybox",
+		docsUrl: "https://jellybox.com",
+		mainTask: "text-generation",
+		displayOnModelPage: (model) =>
+			isGgufModel(model) ||
+			(model.library_name === "diffusers" &&
+				model.tags.includes("safetensors") &&
+				(model.pipeline_tag === "text-to-image" || model.tags.includes("lora"))),
+		deeplink: (model) => {
+			if (isGgufModel(model)) {
+				return new URL(`jellybox://llm/models/huggingface/LLM/${model.id}`);
+			} else if (model.tags.includes("lora")) {
+				return new URL(`jellybox://image/models/huggingface/ImageLora/${model.id}`);
+			} else {
+				return new URL(`jellybox://image/models/huggingface/Image/${model.id}`);
+			}
+		},
+	},
+	msty: {
+		prettyLabel: "Msty",
+		docsUrl: "https://msty.app",
+		mainTask: "text-generation",
+		displayOnModelPage: isGgufModel,
+		deeplink: (model) => new URL(`msty://models/search/hf/${model.id}`),
+	},
+	recursechat: {
+		prettyLabel: "RecurseChat",
+		docsUrl: "https://recurse.chat",
+		mainTask: "text-generation",
+		macOSOnly: true,
+		displayOnModelPage: isGgufModel,
+		deeplink: (model) => new URL(`recursechat://new-hf-gguf-model?hf-model-id=${model.id}`),
 	},
 	drawthings: {
 		prettyLabel: "Draw Things",

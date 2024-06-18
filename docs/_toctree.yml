@@ -21,3 +21,13 @@
       title: Use Agents to run multi-modal workflows from a natural language API
     - local: agents/modules
       title: API Reference
+- title: "@huggingface/space-header"
+  isExpanded: true
+  sections:
+    - local: space-header/README
+      title: Use Space mini_header in your app
+- title: "@huggingface/gguf"
+  isExpanded: true
+  sections:
+    - local: gguf/README
+      title: Parse local and remote GGUF files

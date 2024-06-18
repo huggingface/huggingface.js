@@ -112,7 +112,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		},
 	},
 	bm25s: {
-		prettyLabel: "BM25s",
+		prettyLabel: "BM25S",
 		repoName: "bm25s",
 		repoUrl: "https://github.com/xhluca/bm25s",
 		snippets: snippets.bm25s,
@@ -120,6 +120,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: {
 			term: { path: "params.index.json" },
 		},
+	},
+	chat_tts: {
+		prettyLabel: "ChatTTS",
+		repoName: "ChatTTS",
+		repoUrl: "https://github.com/2noise/ChatTTS.git",
+		filter: false,
+		countDownloads: { term: { path: "asset/GPT.pt" } },
+		snippets: snippets.chattts,
 	},
 	diffusers: {
 		prettyLabel: "Diffusers",
@@ -134,6 +142,17 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "docTR",
 		repoName: "doctr",
 		repoUrl: "https://github.com/mindee/doctr",
+	},
+	edsnlp: {
+		prettyLabel: "EDS-NLP",
+		repoName: "edsnlp",
+		repoUrl: "https://github.com/aphp/edsnlp",
+		docsUrl: "https://aphp.github.io/edsnlp/latest/",
+		filter: false,
+		snippets: snippets.edsnlp,
+		countDownloads: {
+			wildcard: { path: "*/config.cfg" },
+		},
 	},
 	elm: {
 		prettyLabel: "ELM",
@@ -173,6 +192,9 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://fasttext.cc/",
 		snippets: snippets.fasttext,
 		filter: true,
+		countDownloads: {
+			wildcard: { path: "*.bin" },
+		},
 	},
 	flair: {
 		prettyLabel: "Flair",
@@ -184,6 +206,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: {
 			term: { path: "pytorch_model.bin" },
 		},
+	},
+	"gemma.cpp": {
+		prettyLabel: "gemma.cpp",
+		repoName: "gemma.cpp",
+		repoUrl: "https://github.com/google/gemma.cpp",
+		filter: false,
+		countDownloads: { wildcard: { path: "*.sbs" } },
 	},
 	gliner: {
 		prettyLabel: "GLiNER",
@@ -306,6 +335,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.pythae,
 		filter: true,
 	},
+	recurrentgemma: {
+		prettyLabel: "RecurrentGemma",
+		repoName: "recurrentgemma",
+		repoUrl: "https://github.com/google-deepmind/recurrentgemma",
+		filter: false,
+		countDownloads: { term: { path: "tokenizer.model" } },
+	},
 	"sample-factory": {
 		prettyLabel: "sample-factory",
 		repoName: "sample-factory",
@@ -371,6 +407,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			term: { path: "hyperparams.yaml" },
 		},
 	},
+	"stable-audio-tools": {
+		prettyLabel: "Stable Audio Tools",
+		repoName: "stable-audio-tools",
+		repoUrl: "https://github.com/Stability-AI/stable-audio-tools.git",
+		filter: false,
+		countDownloads: { term: { path: "model.safetensors" } },
+		snippets: snippets.stable_audio_tools,
+	},
 	"stable-baselines3": {
 		prettyLabel: "stable-baselines3",
 		repoName: "stable-baselines3",
@@ -398,6 +442,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "TensorFlowTTS",
 		repoUrl: "https://github.com/TensorSpeech/TensorFlowTTS",
 		snippets: snippets.tensorflowtts,
+	},
+	"tic-clip": {
+		prettyLabel: "TiC-CLIP",
+		repoName: "TiC-CLIP",
+		repoUrl: "https://github.com/apple/ml-tic-clip",
+		filter: false,
+		countDownloads: { wildcard: { path: "checkpoints/*.pt" } },
 	},
 	timesfm: {
 		prettyLabel: "TimesFM",
