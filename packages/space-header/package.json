@@ -1,22 +1,41 @@
 {
 	"name": "@huggingface/space-header",
-	"version": "0.0.0",
-	"description": "",
-	"main": "index.js",
-	"type": "module",
-	"types": "dist/index.d.ts",
-	"module": "dist/index.js",
+	"version": "1.0.0",
+	"packageManager": "pnpm@8.10.5",
+	"description": "Use the Space mini_header outside Hugging Face",
+	"repository": "https://github.com/huggingface/huggingface.js.git",
+	"publishConfig": {
+		"access": "public"
+	},
+	"main": "./dist/index.js",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"require": "./dist/index.js",
+			"import": "./dist/index.mjs"
+		}
+	},
+	"browser": {
+		"./dist/index.js": "./dist/browser/index.js",
+		"./dist/index.mjs": "./dist/browser/index.mjs"
+	},
 	"scripts": {
-		"build": "tsup ./src",
+		"build": "tsup && tsc --emitDeclarationOnly --declaration",
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"prepublishOnly": "pnpm run build"
 	},
-	"keywords": [],
+	"keywords": [
+		"huggingface",
+		"spaces",
+		"space-header"
+	],
 	"author": "Hugging Face",
-	"license": "ISC",
+	"license": "MIT",
 	"devDependencies": {
 		"tsup": "^8.1.0",
 		"typescript": "^5.4.5"
