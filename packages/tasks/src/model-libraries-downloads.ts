@@ -8,7 +8,7 @@
  * https://huggingface.co/docs/hub/models-download-stats
  * Available fields:
  *  - path: the complete file path (relative) (e.g: "prefix/file.extension")
- *  - path_prefix: the prefix of the file path (e.g: "prefix", empty if no prefix)
+ *  - path_prefix: the prefix of the file path (e.g: "prefix/", empty if no prefix)
  *  - path_extension: the extension of the file path (e.g: "extension")
  *  - path_filename: the name of the file path (e.g: "file")
  * see also:
