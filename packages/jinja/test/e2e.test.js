@@ -76,6 +76,36 @@ const EXAMPLE_FUNCTION_CALLING_WITH_SYSTEM = [
 	{ role: "user", content: "Hi, can you tell me the current stock price of AAPL?" },
 ];
 
+// Adapted from https://huggingface.co/CISCai/Mistral-7B-Instruct-v0.3-SOTA-GGUF
+const EXAMPLE_CHAT_WITH_TOOLS = [
+	{
+		role: "user",
+		content: "What's the weather like in Oslo and Stockholm?",
+	},
+];
+const EXAMPLE_TOOLS = [
+	{
+		type: "function",
+		function: {
+			name: "get_current_weather",
+			description: "Get the current weather in a given location",
+			parameters: {
+				type: "object",
+				properties: {
+					location: {
+						type: "string",
+						description: "The city and state, e.g. San Francisco, CA",
+					},
+					unit: {
+						type: "string",
+						enum: ["celsius", "fahrenheit"],
+					},
+				},
+				required: ["location"],
+			},
+		},
+	},
+];
 /**
  * Defined in https://github.com/huggingface/transformers
  * Keys correspond to `model_type` in the transformers repo.
@@ -415,6 +445,190 @@ const TEST_CUSTOM_TEMPLATES = Object.freeze({
 			'\n\n## Available Tools\nHere is a list of tools that you have available to you:\n\n```python\ndef internet_search(query: str) -> List[Dict]:\n    """Returns a list of relevant document snippets for a textual query retrieved from the internet\n\n    Args:\n        query (str): Query to search the internet with\n    """\n    pass\n```\n\n```python\ndef directly_answer() -> List[Dict]:\n    """Calls a standard (un-augmented) AI chatbot to generate a response given the conversation history\n    """\n    pass\n```<|END_OF_TURN_TOKEN|>' +
 			"<|START_OF_TURN_TOKEN|><|USER_TOKEN|>Whats the biggest penguin in the world?<|END_OF_TURN_TOKEN|>" +
 			'<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|>Write \'Action:\' followed by a json-formatted list of actions that you want to perform in order to produce a good response to the user\'s last input. You can use any of the supplied tools any number of times, but you should aim to execute the minimum number of necessary actions for the input. You should use the `directly-answer` tool if calling the other tools is unnecessary. The list of actions you want to call should be formatted as a list of json objects, for example:\n```json\n[\n    {\n        "tool_name": title of the tool in the specification,\n        "parameters": a dict of parameters to input into the tool as they are defined in the specs, or {} if it takes no parameters\n    }\n]```<|END_OF_TURN_TOKEN|><|START_OF_TURN_TOKEN|><|CHATBOT_TOKEN|>',
+	},
+	"CohereForAI/c4ai-command-r-v01 (JSON Schema)": {
+		chat_template:
+			'\n{%- macro json_to_python_type(json_spec) %}\n{%- set basic_type_map = {\n    "string": "str",\n    "number": "float",\n    "integer": "int",\n    "boolean": "bool"\n} %}\n\n{%- if basic_type_map[json_spec.type] is defined %}\n    {{- basic_type_map[json_spec.type] }}\n{%- elif json_spec.type == "array" %}\n    {{- "List[" +  json_to_python_type(json_spec.items) + "]"}}\n{%- elif json_spec.type == "object" %}\n    {{- "Dict[str, " + json_to_python_type(json_spec.additionalProperties) + \']\'}}\n{%- elif json_spec.type is iterable %}\n    {{- "Union[" }}\n    {%- for t in json_spec.type %}\n      {{- json_to_python_type({"type": t}) }}\n      {%- if not loop.last %}\n        {{- "," }} \n    {%- endif %}\n    {%- endfor %}\n    {{- "]" }}\n{%- else %}\n    {{- "Any" }}\n{%- endif %}\n{%- endmacro %}\n' +
+			"\n{%- macro old_tool_parser(tools) %}\n{%- for tool in tools %}\n    {%- if loop.index0 != 0 %}\n        {{- '\\n\\n' }}\n    {%- endif %}\n    {{- '```python\\ndef ' + tool.name + '(' }}\n    {%- for param_name, param_fields in tool.parameter_definitions.items() %}\n        {%- if loop.index0 != 0 %}\n            {{- ', '}}\n        {%- endif %}\n        {{- param_name + ': ' }}\n        {%- if not param_fields.required %}\n            {{- 'Optional[' + param_fields.type + '] = None'}}\n        {%- else %}\n            {{- param_fields.type }}\n        {%- endif %}\n    {%- endfor %}\n    {{- ') -> List[Dict]:\\n    \"\"\"'}}\n    {{- tool.description }}\n    {%- if tool.parameter_definitions|length != 0 %}\n        {{- '\\n\\n    Args:\\n        '}}\n        {%- for param_name, param_fields in tool.parameter_definitions.items() %}\n            {%- if loop.index0 != 0 %}\n                {{- '\\n        ' }}\n            {%- endif %}\n            {{- param_name + ' ('}}\n            {%- if not param_fields.required %}\n                {{- 'Optional[' + param_fields.type + ']'}}\n            {%- else %}\n                {{- param_fields.type }}\n            {%- endif %}\n            {{- '): ' + param_fields.description }}\n        {%- endfor %}\n    {%- endif %}\n    {{- '\\n    \"\"\"\\n    pass\\n```' }}\n{%- endfor %}\n{%- endmacro %}\n" +
+			"\n{%- macro new_tool_parser(tools) %}\n{%- for tool in tools %}\n  {%- if loop.index0 != 0 %}\n    {{- '\\n\\n'}}\n  {%- endif %}\n  {%- if tool.function is defined %}\n    {%- set tool = tool.function %}\n  {%- endif %}\n  {{-'```python\ndef ' + tool.name + '('}}\n  {%- for param_name, param_fields in tool.parameters.properties.items() %}\n    {%- if loop.index0 != 0 %}\n      {{- ', '}}\n    {%- endif %}\n    {{-param_name + \": \"}} \n    {%- if not param_name in tool.parameters.required %}\n      {{-'Optional[' + json_to_python_type(param_fields) + '] = None'}}\n    {%- else %}\n      {{- json_to_python_type(param_fields) }}\n    {%- endif %}\n  {%- endfor %}\n  {{- ') -> List[Dict]:\n    \"\"\"'}}\n  {{- tool.description }}\n  {%- if tool.parameters.properties|length != 0 %}\n    {{- '\\n\\n    Args:\\n        '}}\n    {%- for param_name, param_fields in tool.parameters.properties.items() %}\n      {%- if loop.index0 != 0 %}\n        {{- '\\n        ' }}\n      {%- endif %}\n      {{- param_name + ' ('}}\n      {%- if not param_name in tool.parameters.required %}\n        {{-'Optional[' + json_to_python_type(param_fields) + ']'}}\n      {%- else %}\n        {{- json_to_python_type(param_fields) }}\n      {%- endif %}\n      {{- '): ' + param_fields.description }}\n    {%- endfor %}\n    {%- endif %}\n    {{- '\\n    \"\"\"\\n    pass\\n```' }}\n{%- endfor %}\n{%- endmacro %}\n" +
+			"\n{{- bos_token }}\n{%- if messages[0]['role'] == 'system' %}\n  {%- set loop_messages = messages[1:] %}\n  {%- set system_message = messages[0]['content'] %}\n{%- else %}\n  {%- set loop_messages = messages %}\n  {%- set system_message = '## Task and Context\\nYou help people answer their questions and other requests interactively. You will be asked a very wide array of requests on all kinds of topics. You will be equipped with a wide range of search engines or similar tools to help you, which you use to research your answer. You should focus on serving the user\\'s needs as best you can, which will be wide-ranging.\\n\\n## Style Guide\\nUnless the user asks for a different style of answer, you should answer in full sentences, using proper grammar and spelling.' %}\n{%- endif %}" +
+			"\n{{- '<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|>' }}\n{{- '# Safety Preamble' }}\n{{- '\nThe instructions in this section override those in the task description and style guide sections. Don\\'t answer questions that are harmful or immoral.' }}\n{{- '\n\n# System Preamble' }}\n{{- '\n## Basic Rules' }}\n{{- '\nYou are a powerful conversational AI trained by Cohere to help people. You are augmented by a number of tools, and your job is to use and consume the output of these tools to best help the user. You will see a conversation history between yourself and a user, ending with an utterance from the user. You will then see a specific instruction instructing you what kind of response to generate. When you answer the user\\'s requests, you cite your sources in your answers, according to those instructions.' }}\n{{- '\n\n# User Preamble' }}\n{{- '\n' + system_message }}\n{{-'\n\n## Available Tools\nHere is a list of tools that you have available to you:\n\n'}}\n{%- set ns = namespace(new_tools=true) %}\n{%- for tool in tools %}\n    {%- if tool.parameter_definitions is defined %}\n        {%- set ns.new_tools = false %}\n    {%- endif %}\n{%- endfor %}\n{%- if ns.new_tools %}\n    {{- new_tool_parser(tools) }}\n{%- else %}\n    {{- old_tool_parser(tools) }}\n{%- endif %}\n{{- '<|END_OF_TURN_TOKEN|>'}}\n{%- for message in loop_messages %}\n  {%- set content = message['content'] %}\n  {%- if message.role == 'user' %}" +
+			"\n    {{- '<|START_OF_TURN_TOKEN|><|USER_TOKEN|>' + content.strip() + '<|END_OF_TURN_TOKEN|>' }}\n  {%- elif message.role == 'system' %}" +
+			"\n    {{- '<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|>' + content.strip() + '<|END_OF_TURN_TOKEN|>' }}\n  {%- elif message.role == 'assistant' and message.tool_calls is defined %}" +
+			"\n    {{- '<|START_OF_TURN_TOKEN|><|CHATBOT_TOKEN|>' }}\n    {%- if message.content is defined %}\n        {{- message.content.strip() }}\n    {%- endif %}\n    {{- '\\nAction:\\n```json\\n[\\n' }}\n    {%- for tool_call in message.tool_calls %}\n        {%- if tool_call.function is defined %}\n            {%- set tool_call = tool_call.function %}\n        {%- endif %}\n        {{- '{\\n'|indent(4, first=True) }}\n        {{- '\"tool_name\": \"'|indent(8, first=True) + tool_call.name + '\",\\n' }}\n        {{- '\"parameters\": '|indent(8, first=True) }}\n        {%- if tool_call.arguments is defined and tool_call.arguments|length > 0 %}    \n            {{- tool_call.arguments|tojson(indent=4)|indent(8) }}\n            {{- '\\n' }}\n        {%- else %}\n            {{- '{}\\n' }}\n        {%- endif %}\n        {{- '}'|indent(4, first=True) }}\n        {%- if not loop.last %}\n            {{- ',\\n' }}\n        {%- endif %}\n    {%- endfor %}\n    {{- \"\\n]```\\n\" }}\n  {%- elif message.role == 'assistant' %}" +
+			"\n    {{- '<|START_OF_TURN_TOKEN|><|CHATBOT_TOKEN|>'  + content.strip() + '<|END_OF_TURN_TOKEN|>' }}\n  {%- elif message.role == 'tool' %}" +
+			"\n    {{- '<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|><results>\\n' }}\n    {{- message.content.strip() }}\n    {{- '</results><|END_OF_TURN_TOKEN|>' }}\n  {%- endif %}\n{%- endfor %}" +
+			"\n{{-'<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|>Write \\'Action:\\' followed by a json-formatted list of actions that you want to perform in order to produce a good response to the user\\'s last input. You can use any of the supplied tools any number of times, but you should aim to execute the minimum number of necessary actions for the input. You should use the `directly-answer` tool if calling the other tools is unnecessary. The list of actions you want to call should be formatted as a list of json objects, for example:\n```json\n[\n    {\n        \"tool_name\": title of the tool in the specification,\n        \"parameters\": a dict of parameters to input into the tool as they are defined in the specs, or {} if it takes no parameters\n    }\n]```<|END_OF_TURN_TOKEN|>'}}\n{%- if add_generation_prompt %}" +
+			"\n  {{- '<|START_OF_TURN_TOKEN|><|CHATBOT_TOKEN|>' }}\n{%- endif %}\n",
+		data: {
+			messages: [
+				{ role: "user", content: "Whats the biggest penguin in the world?" },
+				{
+					role: "assistant",
+					tool_calls: [
+						{
+							type: "function",
+							function: { name: "internet_search", arguments: { query: "biggest penguin species" } },
+						},
+					],
+				},
+				{ role: "tool", content: "Tool results go here!" },
+			],
+			tools: [
+				{
+					type: "function",
+					function: {
+						name: "internet_search",
+						description: "Returns a list of relevant document snippets for a textual query retrieved from the internet",
+						parameters: {
+							type: "object",
+							properties: { query: { type: "string", description: "Query to search the internet with" } },
+							required: ["query"],
+						},
+					},
+				},
+				{
+					type: "function",
+					function: {
+						name: "directly_answer",
+						description:
+							"Calls a standard (un-augmented) AI chatbot to generate a response given the conversation history",
+						parameters: { type: "object", properties: {} },
+					},
+				},
+			],
+			bos_token: "<BOS_TOKEN>",
+			add_generation_prompt: true,
+		},
+		target:
+			"<BOS_TOKEN>" +
+			'<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|># Safety Preamble\nThe instructions in this section override those in the task description and style guide sections. Don\'t answer questions that are harmful or immoral.\n\n# System Preamble\n## Basic Rules\nYou are a powerful conversational AI trained by Cohere to help people. You are augmented by a number of tools, and your job is to use and consume the output of these tools to best help the user. You will see a conversation history between yourself and a user, ending with an utterance from the user. You will then see a specific instruction instructing you what kind of response to generate. When you answer the user\'s requests, you cite your sources in your answers, according to those instructions.\n\n# User Preamble\n## Task and Context\nYou help people answer their questions and other requests interactively. You will be asked a very wide array of requests on all kinds of topics. You will be equipped with a wide range of search engines or similar tools to help you, which you use to research your answer. You should focus on serving the user\'s needs as best you can, which will be wide-ranging.\n\n## Style Guide\nUnless the user asks for a different style of answer, you should answer in full sentences, using proper grammar and spelling.\n\n## Available Tools\nHere is a list of tools that you have available to you:\n\n```python\ndef internet_search(query: str) -> List[Dict]:\n    """Returns a list of relevant document snippets for a textual query retrieved from the internet\n\n    Args:\n        query (str): Query to search the internet with\n    """\n    pass\n```\n\n```python\ndef directly_answer() -> List[Dict]:\n    """Calls a standard (un-augmented) AI chatbot to generate a response given the conversation history\n    """\n    pass\n```<|END_OF_TURN_TOKEN|>' +
+			"<|START_OF_TURN_TOKEN|><|USER_TOKEN|>Whats the biggest penguin in the world?<|END_OF_TURN_TOKEN|>" +
+			'<|START_OF_TURN_TOKEN|><|CHATBOT_TOKEN|>\nAction:\n```json\n[\n    {\n        "tool_name": "internet_search",\n        "parameters": {\n            "query": "biggest penguin species"\n        }\n    }\n]```\n' +
+			"<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|><results>\nTool results go here!</results><|END_OF_TURN_TOKEN|>" +
+			'<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|>Write \'Action:\' followed by a json-formatted list of actions that you want to perform in order to produce a good response to the user\'s last input. You can use any of the supplied tools any number of times, but you should aim to execute the minimum number of necessary actions for the input. You should use the `directly-answer` tool if calling the other tools is unnecessary. The list of actions you want to call should be formatted as a list of json objects, for example:\n```json\n[\n    {\n        "tool_name": title of the tool in the specification,\n        "parameters": a dict of parameters to input into the tool as they are defined in the specs, or {} if it takes no parameters\n    }\n]```<|END_OF_TURN_TOKEN|>' +
+			"<|START_OF_TURN_TOKEN|><|CHATBOT_TOKEN|>",
+	},
+	"mistralai/Mistral-7B-Instruct-v0.3 (JSON Schema)": {
+		chat_template:
+			"{{- bos_token }}\n{%- set user_messages = messages | selectattr('role', 'equalto', 'user') | list %}\n{%- for message in messages %}\n    {%- if message['role'] == 'user' %}\n        {%- if tools and (message == user_messages[-1]) %}\n            {{- ' [AVAILABLE_TOOLS] [' }}\n            {%- for tool in tools %}\n\t\t{%- set tool = tool.function %}\n\t\t{{- '{\"type\": \"function\", \"function\": {' }}\n\t\t{%- for key, val in tool|items if key != \"return\" %}\n\t\t    {%- if val is string %}\n\t\t\t{{- '\"' + key + '\": \"' + val + '\"' }}\n\t\t    {%- else %}\n\t\t\t{{- '\"' + key + '\": ' + val|tojson }}\n\t\t    {%- endif %}\n\t\t    {%- if not loop.last %}\n\t\t\t{{- \", \" }}\n\t\t    {%- endif %}\n\t\t{%- endfor %}\n\t\t{{- \"}}\" }}\n                {%- if not loop.last %}\n                    {{- \", \" }}\n                {%- else %}\n                    {{- \"]\" }}\n                {%- endif %}\n            {%- endfor %}\n            {{- ' [/AVAILABLE_TOOLS]' }}\n            {%- endif %}\n        {{- ' [INST] ' + message['content'] + ' [/INST]' }}\n    {%- elif message['role'] == 'assistant' %}\n        {%- if message.tool_calls is defined and message.tool_calls|length > 0 %}\n            {{- ' [TOOL_CALLS] [' }}\n            {%- for tool_call in message.tool_calls %}\n                {{- {\"name\": tool_call.function.name, \"arguments\": tool_call.function.arguments, \"id\": tool_call.id}|tojson }}\n                {%- if not loop.last %}\n                    {{- \", \" }}\n                {%- endif %}\n            {%- endfor %}\n            {{- '] ' }}\n            {{- eos_token }}\n    \t{%- elif message.content is defined %}\n\t    {{- ' ' + message.content + ' ' + eos_token}}\n        {%- endif %}\n    {%- elif message['role'] == 'tool' %}\n        {{- ' [TOOL_RESULTS] ' }}\n        {{- '{\"call_id\": \"' + message.tool_call_id + '\", \"content\": ' + message.content|string + '}' }}\n        {{- ' [/TOOL_RESULTS] ' }}\n    {%- endif %}\n{%- endfor %}\n",
+		data: {
+			messages: [
+				{
+					role: "system",
+					content:
+						"You are a bot that responds to weather queries. You should reply with the unit used in the queried location.",
+				},
+				{ role: "user", content: "Hey, what's the temperature in Paris right now?" },
+				{
+					role: "assistant",
+					tool_calls: [
+						{
+							id: "abcdef123",
+							type: "function",
+							function: { name: "get_current_temperature", arguments: { location: "Paris, France", unit: "celsius" } },
+						},
+					],
+				},
+				{ role: "tool", tool_call_id: "abcdef123", name: "get_current_temperature", content: "22.0" },
+			],
+			tools: [
+				{
+					type: "function",
+					function: {
+						name: "get_current_temperature",
+						description: "Get the current temperature at a location.",
+						parameters: {
+							type: "object",
+							properties: {
+								location: {
+									type: "string",
+									description: 'The location to get the temperature for, in the format "City, Country"',
+								},
+								unit: {
+									type: "string",
+									enum: ["celsius", "fahrenheit"],
+									description: "The unit to return the temperature in.",
+								},
+							},
+							required: ["location", "unit"],
+						},
+						return: {
+							type: "number",
+							description: "The current temperature at the specified location in the specified units, as a float.",
+						},
+					},
+				},
+				{
+					type: "function",
+					function: {
+						name: "get_current_wind_speed",
+						description: "Get the current wind speed in km/h at a given location.",
+						parameters: {
+							type: "object",
+							properties: {
+								location: {
+									type: "string",
+									description: 'The location to get the temperature for, in the format "City, Country"',
+								},
+							},
+							required: ["location"],
+						},
+						return: {
+							type: "number",
+							description: "The current wind speed at the given location in km/h, as a float.",
+						},
+					},
+				},
+			],
+			bos_token: "<s>",
+			eos_token: "</s>",
+		},
+		target:
+			'<s> [AVAILABLE_TOOLS] [{"type": "function", "function": {"name": "get_current_temperature", "description": "Get the current temperature at a location.", "parameters": {"type": "object", "properties": {"location": {"type": "string", "description": "The location to get the temperature for, in the format \\"City, Country\\""}, "unit": {"type": "string", "enum": ["celsius", "fahrenheit"], "description": "The unit to return the temperature in."}}, "required": ["location", "unit"]}}}, {"type": "function", "function": {"name": "get_current_wind_speed", "description": "Get the current wind speed in km/h at a given location.", "parameters": {"type": "object", "properties": {"location": {"type": "string", "description": "The location to get the temperature for, in the format \\"City, Country\\""}}, "required": ["location"]}}}] [/AVAILABLE_TOOLS] [INST] Hey, what\'s the temperature in Paris right now? [/INST] [TOOL_CALLS] [{"name": "get_current_temperature", "arguments": {"location": "Paris, France", "unit": "celsius"}, "id": "abcdef123"}] </s> [TOOL_RESULTS] {"call_id": "abcdef123", "content": 22.0} [/TOOL_RESULTS] ',
+	},
+	"CISCai/Mistral-7B-Instruct-v0.3-SOTA-GGUF": {
+		chat_template: `{{ bos_token }}{% set ns = namespace(lastuser=-1, system=false, functions=false) %}{% if tools %}{% for message in messages %}{% if message['role'] == 'user' %}{% set ns.lastuser = loop.index0 %}{% elif message['role'] == 'system' %}{% set ns.system = message['content'] %}{% endif %}{% endfor %}{% set ns.functions = tools|selectattr('type','eq','function')|map(attribute='function')|list|tojson %}{% endif %}{% for message in messages %}{% if message['role'] == 'user' %}{% if loop.index0 == ns.lastuser and ns.functions %}{{ '[AVAILABLE_TOOLS] ' }}{{ ns.functions }}{{ '[/AVAILABLE_TOOLS]' }}{% endif %}{{ '[INST] ' }}{% if loop.index0 == ns.lastuser and ns.system %}{{ ns.system + ' ' }}{% endif %}{{ message['content'] }}{{ '[/INST]' }}{% elif message['role'] == 'tool' %}{{ '[TOOL_RESULTS] ' }}{{ dict(call_id=message['tool_call_id'], content=message['content'])|tojson }}{{ '[/TOOL_RESULTS]' }}{% elif message['role'] == 'assistant' %}{% if message['tool_calls'] %}{{ '[TOOL_CALLS] [' }}{% for call in message['tool_calls'] %}{% if call['type'] == 'function' %}{{ dict(id=call['id'], name=call['function']['name'], arguments=call['function']['arguments'])|tojson }}{% endif %}{% if not loop.last %}{{ ', ' }}{% endif %}{% endfor %}{{ ']' }}{% else %}{{ message['content'] }}{% endif %}{{ eos_token }}{% endif %}{% endfor %}`,
+		data: {
+			messages: EXAMPLE_CHAT_WITH_TOOLS,
+			tools: EXAMPLE_TOOLS,
+			bos_token: "<s>",
+			eos_token: "</s>",
+		},
+		target: `<s>[AVAILABLE_TOOLS] [{"name": "get_current_weather", "description": "Get the current weather in a given location", "parameters": {"type": "object", "properties": {"location": {"type": "string", "description": "The city and state, e.g. San Francisco, CA"}, "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]}}, "required": ["location"]}}][/AVAILABLE_TOOLS][INST] What's the weather like in Oslo and Stockholm?[/INST]`,
+	},
+	"NousResearch/Hermes-2-Pro-Llama-3-8B (JSON Schema)": {
+		chat_template:
+			`{%- macro json_to_python_type(json_spec) %}\n{%- set basic_type_map = {\n    "string": "str",\n    "number": "float",\n    "integer": "int",\n    "boolean": "bool"\n} %}\n\n{%- if basic_type_map[json_spec.type] is defined %}\n    {{- basic_type_map[json_spec.type] }}\n{%- elif json_spec.type == "array" %}\n    {{- "list[" +  json_to_python_type(json_spec|items) + "]"}}\n{%- elif json_spec.type == "object" %}\n    {%- if json_spec.additionalProperties is defined %}\n        {{- "dict[str, " + json_to_python_type(json_spec.additionalProperties) + ']'}}\n    {%- else %}\n        {{- "dict" }}\n    {%- endif %}\n{%- elif json_spec.type is iterable %}\n    {{- "Union[" }}\n    {%- for t in json_spec.type %}\n      {{- json_to_python_type({"type": t}) }}\n      {%- if not loop.last %}\n        {{- "," }} \n    {%- endif %}\n    {%- endfor %}\n    {{- "]" }}\n{%- else %}\n    {{- "Any" }}\n{%- endif %}\n{%- endmacro %}\n\n\n` +
+			`{{- bos_token }}\n{{- "You are a function calling AI model. You are provided with function signatures within <tools></tools> XML tags. You may call one or more functions to assist with the user query. Don't make assumptions about what values to plug into functions. Here are the available tools: <tools> " }}\n{%- for tool in tools %}\n    {%- if tool.function is defined %}\n        {%- set tool = tool.function %}\n    {%- endif %}\n    {{- '{"type": "function", "function": ' }}\n    {{- '{"name": ' + tool.name + '", ' }}\n    {{- '"description": "' + tool.name + '(' }}\n    {%- for param_name, param_fields in tool.parameters.properties|items %}\n        {{- param_name + ": " + json_to_python_type(param_fields) }}\n        {%- if not loop.last %}\n            {{- ", " }}\n        {%- endif %}\n    {%- endfor %}\n    {{- ")" }}\n    {%- if tool.return is defined %}\n        {{- " -> " + json_to_python_type(tool.return) }}\n    {%- endif %}\n    {{- " - " + tool.description + "\\n\\n" }}\n    {%- for param_name, param_fields in tool.parameters.properties|items %}\n        {%- if loop.first %}\n            {{- "    Args:\\n" }}\n        {%- endif %}\n        {{- "        " + param_name + "(" + json_to_python_type(param_fields) + "): " + param_fields.description|trim }}\n    {%- endfor %}\n    {%- if tool.return is defined and tool.return.description is defined %}\n        {{- "\\n    Returns:\\n        " + tool.return.description }}\n    {%- endif %}\n    {{- '"' }}\n    {{- ', "parameters": ' }}\n    {%- if tool.parameters.properties | length == 0 %}\n        {{- "{}" }}\n    {%- else %}\n        {{- tool.parameters | tojson}}\n    {%- endif %}\n    {{- "}" }}\n    {%- if not loop.last %}\n        {{- "\\n" }}\n    {%- endif %}\n{%- endfor %}\n{{- " </tools>" }}\n` +
+			`{{- 'Use the following pydantic model json schema for each tool call you will make: {"properties": {"arguments": {"title": "Arguments", "type": "object"}, "name": {"title": "Name", "type": "string"}}, "required": ["arguments", "name"], "title": "FunctionCall", "type": "object"}\n' }}\n{{- "For each function call return a json object with function name and arguments within <tool_call></tool_call> XML tags as follows:\n" }}\n{{- "<tool_call>\n" }}\n{{- '{"arguments": <args-dict>, "name": <function-name>}\n' }}\n{{- '</tool_call><|im_end|>' }}\n{%- for message in messages %}\n    {%- if message.role == "user" or message.role == "system" or (message.role == "assistant" and message.tool_calls is not defined) %}\n        ` +
+			`{{- '<|im_start|>' + message.role + '\\n' + message.content + '<|im_end|>' + '\\n' }}\n    {%- elif message.role == "assistant" %}\n        {{- '<|im_start|>' + message.role + '\\n<tool_call>\\n' }}\n        {%- for tool_call in message.tool_calls %}\n            {%- if tool_call.function is defined %}\n                {%- set tool_call = tool_call.function %}\n            {%- endif %}\n            {{- '{ ' }}\n            {%- if tool_call.arguments is defined %}\n                {{- '"arguments": ' }}\n                {{- tool_call.arguments|tojson }}\n                {{- ', '}}\n            {%- endif %}\n            {{- '"name": "' }}\n            {{- tool_call.name }}\n            {{- '"}' }}\n            {{- '\\n</tool_call> ' }}\n        {%- endfor %}\n        {{- '<|im_end|>\\n' }}\n    {%- elif message.role == "tool" %}\n        {%- if not message.name is defined %}\n            {{- raise_exception("Tool response dicts require a 'name' key indicating the name of the called function!") }}\n        {%- endif %}\n        {{- '<|im_start|>' + message.role + '\\n<tool_response>\\n' }}\n        {{- '{"name": "' }}\n        {{- message.name }}\n        {{- '", "content": ' }}\n        {{- message.content|tojson + '}' }}\n        {{- '\\n</tool_response> <|im_end|>\\n' }} \n    {%- endif %}\n{%- endfor %}\n{%- if add_generation_prompt %}\n    {{- '<|im_start|>assistant\\n' }}\n{%- endif %}\n`,
+		data: {
+			messages: [{ role: "user", content: "Fetch the stock fundamentals data for Tesla (TSLA)" }],
+			tools: [
+				{
+					type: "function",
+					function: {
+						name: "get_stock_fundamentals",
+						description: "Get fundamental data for a given stock symbol using yfinance API.",
+						parameters: {
+							type: "object",
+							properties: { symbol: { type: "string", description: "The stock symbol." } },
+							required: ["symbol"],
+						},
+						return: {
+							type: "object",
+							description:
+								"A dictionary containing fundamental data.\n\nKeys:\n    - 'symbol': The stock symbol.\n    - 'company_name': The long name of the company.\n    - 'sector': The sector to which the company belongs.\n    - 'industry': The industry to which the company belongs.\n    - 'market_cap': The market capitalization of the company.\n    - 'pe_ratio': The forward price-to-earnings ratio.\n    - 'pb_ratio': The price-to-book ratio.\n    - 'dividend_yield': The dividend yield.\n    - 'eps': The trailing earnings per share.\n    - 'beta': The beta value of the stock.\n    - '52_week_high': The 52-week high price of the stock.\n    - '52_week_low': The 52-week low price of the stock.",
+						},
+					},
+				},
+			],
+			bos_token: "<|begin_of_text|>",
+			eos_token: "<|im_end|>",
+			add_generation_prompt: true,
+		},
+		target: `<|begin_of_text|>You are a function calling AI model. You are provided with function signatures within <tools></tools> XML tags. You may call one or more functions to assist with the user query. Don't make assumptions about what values to plug into functions. Here are the available tools: <tools> {"type": "function", "function": {"name": get_stock_fundamentals", "description": "get_stock_fundamentals(symbol: str) -> dict - Get fundamental data for a given stock symbol using yfinance API.\n\n    Args:\n        symbol(str): The stock symbol.\n    Returns:\n        A dictionary containing fundamental data.\n\nKeys:\n    - 'symbol': The stock symbol.\n    - 'company_name': The long name of the company.\n    - 'sector': The sector to which the company belongs.\n    - 'industry': The industry to which the company belongs.\n    - 'market_cap': The market capitalization of the company.\n    - 'pe_ratio': The forward price-to-earnings ratio.\n    - 'pb_ratio': The price-to-book ratio.\n    - 'dividend_yield': The dividend yield.\n    - 'eps': The trailing earnings per share.\n    - 'beta': The beta value of the stock.\n    - '52_week_high': The 52-week high price of the stock.\n    - '52_week_low': The 52-week low price of the stock.", "parameters": {"type": "object", "properties": {"symbol": {"type": "string", "description": "The stock symbol."}}, "required": ["symbol"]}} </tools>Use the following pydantic model json schema for each tool call you will make: {"properties": {"arguments": {"title": "Arguments", "type": "object"}, "name": {"title": "Name", "type": "string"}}, "required": ["arguments", "name"], "title": "FunctionCall", "type": "object"}\nFor each function call return a json object with function name and arguments within <tool_call></tool_call> XML tags as follows:\n<tool_call>\n{"arguments": <args-dict>, "name": <function-name>}\n</tool_call><|im_end|><|im_start|>user\nFetch the stock fundamentals data for Tesla (TSLA)<|im_end|>\n<|im_start|>assistant\n`,
 	},
 });
 
