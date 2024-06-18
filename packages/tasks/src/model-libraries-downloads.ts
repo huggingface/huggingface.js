@@ -6,15 +6,13 @@
  * Read this doc about download stats on the Hub:
  *
  * https://huggingface.co/docs/hub/models-download-stats
- *
+ * Available fields:
+ *  - path: the complete path of the model
+ *  - path_prefix: the prefix of the path of the model
+ *  - path_extension: the extension of the path of the model
+ *  - path_filename: the extension of the path of the model
  * see also:
- * https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-bool-query.html
+ * https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html
  */
 
-export type ElasticBoolQueryFilter =
-	// match a single filename
-	| { term?: { path: string } }
-	// match multiple possible filenames
-	| { terms?: { path: string[] } }
-	// match a wildcard
-	| { wildcard?: { path: string } };
+export type ElasticSearchQuery = string;
