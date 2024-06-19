@@ -394,7 +394,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: { term: { path: "model.safetensors" } },
 		snippets: snippets.stable_audio_tools,
 	},
-	"stable-diffusion-3": {
+	"diffusion-single-file": {
 		prettyLabel: "Stable Diffusion 3",
 		repoName: "stable-diffusion-3",
 		repoUrl: "https://github.com/comfyanonymous/ComfyUI",
