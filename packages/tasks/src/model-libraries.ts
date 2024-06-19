@@ -111,6 +111,16 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			wildcard: { path: "*.npz" },
 		},
 	},
+	bm25s: {
+		prettyLabel: "BM25S",
+		repoName: "bm25s",
+		repoUrl: "https://github.com/xhluca/bm25s",
+		snippets: snippets.bm25s,
+		filter: false,
+		countDownloads: {
+			term: { path: "params.index.json" },
+		},
+	},
 	chat_tts: {
 		prettyLabel: "ChatTTS",
 		repoName: "ChatTTS",
