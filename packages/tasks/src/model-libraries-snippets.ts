@@ -56,6 +56,12 @@ export const bertopic = (model: ModelData): string[] => [
 model = BERTopic.load("${model.id}")`,
 ];
 
+export const bm25s = (model: ModelData): string[] => [
+	`from bm25s.hf import BM25HF
+
+retriever = BM25HF.load_from_hub("${model.id}")`,
+];
+
 const diffusers_default = (model: ModelData) => [
 	`from diffusers import DiffusionPipeline
 

@@ -111,6 +111,16 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			wildcard: { path: "*.npz" },
 		},
 	},
+	bm25s: {
+		prettyLabel: "BM25S",
+		repoName: "bm25s",
+		repoUrl: "https://github.com/xhluca/bm25s",
+		snippets: snippets.bm25s,
+		filter: false,
+		countDownloads: {
+			term: { path: "params.index.json" },
+		},
+	},
 	chat_tts: {
 		prettyLabel: "ChatTTS",
 		repoName: "ChatTTS",
@@ -221,6 +231,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: {
 			terms: { path: ["ckpt/tensor00000_000", "ckpt-0/tensor00000_000"] },
+		},
+	},
+	"hunyuan-dit": {
+		prettyLabel: "HunyuanDiT",
+		repoName: "HunyuanDiT",
+		repoUrl: "https://github.com/Tencent/HunyuanDiT",
+		countDownloads: {
+			terms: { path: ["pytorch_model_ema.pt", "pytorch_model_distill.pt"] },
 		},
 	},
 	keras: {
