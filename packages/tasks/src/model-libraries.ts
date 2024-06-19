@@ -396,7 +396,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	"diffusion-single-file": {
 		prettyLabel: "Stable Diffusion 3",
-		repoName: "stable-diffusion-3",
+		repoName: "diffusion-single-file",
 		repoUrl: "https://github.com/comfyanonymous/ComfyUI",
 		filter: false,
 		countDownloads: {
