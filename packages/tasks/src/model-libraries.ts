@@ -111,6 +111,16 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			wildcard: { path: "*.npz" },
 		},
 	},
+	bm25s: {
+		prettyLabel: "BM25S",
+		repoName: "bm25s",
+		repoUrl: "https://github.com/xhluca/bm25s",
+		snippets: snippets.bm25s,
+		filter: false,
+		countDownloads: {
+			term: { path: "params.index.json" },
+		},
+	},
 	chat_tts: {
 		prettyLabel: "ChatTTS",
 		repoName: "ChatTTS",
@@ -132,6 +142,17 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "docTR",
 		repoName: "doctr",
 		repoUrl: "https://github.com/mindee/doctr",
+	},
+	edsnlp: {
+		prettyLabel: "EDS-NLP",
+		repoName: "edsnlp",
+		repoUrl: "https://github.com/aphp/edsnlp",
+		docsUrl: "https://aphp.github.io/edsnlp/latest/",
+		filter: false,
+		snippets: snippets.edsnlp,
+		countDownloads: {
+			wildcard: { path: "*/config.cfg" },
+		},
 	},
 	elm: {
 		prettyLabel: "ELM",

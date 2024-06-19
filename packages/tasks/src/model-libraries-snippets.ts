@@ -56,6 +56,12 @@ export const bertopic = (model: ModelData): string[] => [
 model = BERTopic.load("${model.id}")`,
 ];
 
+export const bm25s = (model: ModelData): string[] => [
+	`from bm25s.hf import BM25HF
+
+retriever = BM25HF.load_from_hub("${model.id}")`,
+];
+
 const diffusers_default = (model: ModelData) => [
 	`from diffusers import DiffusionPipeline
 
@@ -95,6 +101,24 @@ export const diffusers = (model: ModelData): string[] => {
 	} else {
 		return diffusers_default(model);
 	}
+};
+
+export const edsnlp = (model: ModelData): string[] => {
+	const packageName = nameWithoutNamespace(model.id).replaceAll("-", "_");
+	return [
+		`# Load it from the Hub directly
+import edsnlp
+nlp = edsnlp.load("${model.id}")
+`,
+		`# Or install it as a package
+!pip install git+https://huggingface.co/${model.id}
+
+# and import it as a module
+import ${packageName}
+
+nlp = ${packageName}.load()  # or edsnlp.load("${packageName}")
+`,
+	];
 };
 
 export const espnetTTS = (model: ModelData): string[] => [
