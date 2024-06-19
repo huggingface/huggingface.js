@@ -95,13 +95,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.audiocraft,
 		filter: false,
 	},
-  audioseal: {
-    prettyLabel: "Audioseal",
-    repoName: "audioseal",
-    repoUrl: "https://github.com/facebookresearch/audioseal",
-    filter: false,
-    countDownloads: { wildcard: { path: "*.pth" } },
-  },
+	audioseal: {
+		prettyLabel: "Audioseal",
+		repoName: "audioseal",
+		repoUrl: "https://github.com/facebookresearch/audioseal",
+		filter: false,
+		countDownloads: { wildcard: { path: "*.pth" } },
+		snippets: snippets.audioseal,
+	},
 	bertopic: {
 		prettyLabel: "BERTopic",
 		repoName: "BERTopic",

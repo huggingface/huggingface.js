@@ -46,6 +46,18 @@ export const asteroid = (model: ModelData): string[] => [
 model = BaseModel.from_pretrained("${model.id}")`,
 ];
 
+const audioseal = (model: ModelData): string[] => [
+	`from audioseal import AudioSeal
+
+model = AudioSeal.load_generator("audioseal_wm_16bits")
+
+wav, sr = ..., 16000
+
+watermark = model.get_watermark(wav, sr)
+
+watermarked_audio = wav + watermark`,
+];
+
 function get_base_diffusers_model(model: ModelData): string {
 	return model.cardData?.base_model?.toString() ?? "fill-in-base-model";
 }
