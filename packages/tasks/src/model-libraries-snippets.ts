@@ -46,12 +46,12 @@ export const asteroid = (model: ModelData): string[] => [
 model = BaseModel.from_pretrained("${model.id}")`,
 ];
 
-const audioseal = (model: ModelData): string[] => [
+export const audioseal = (model: ModelData): string[] => [
 	`from audioseal import AudioSeal
 
-model = AudioSeal.load_generator("audioseal_wm_16bits")
+model = AudioSeal.load_generator("${model.id}")
 
-wav, sr = ..., 16000
+wav, sr = tensor_wav, 16000
 
 watermark = model.get_watermark(wav, sr)
 
