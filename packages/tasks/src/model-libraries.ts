@@ -395,7 +395,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.stable_audio_tools,
 	},
 	"diffusion-single-file": {
-		prettyLabel: "Stable Diffusion 3",
+		prettyLabel: "Diffusion Single File",
 		repoName: "diffusion-single-file",
 		repoUrl: "https://github.com/comfyanonymous/ComfyUI",
 		filter: false,
