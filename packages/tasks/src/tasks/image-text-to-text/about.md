@@ -24,7 +24,7 @@ Vision language models trained on image-text pairs can be used for visual questi
 
 ### Document Question Answering and Retrieval
 
-Documents often consist of different layouts, charts, tables, images and more. Vision language models trained on formatted documents can extract information from documents. This is an OCR-free approach, the inputs skip OCR and documents are directly fed to vision language models.
+Documents often consist of different layouts, charts, tables, images, and more. Vision language models trained on formatted documents can extract information from them. This is an OCR-free approach; the inputs skip OCR, and documents are directly fed to vision language models.
 
 ### Image Recognition with Instructions
 
