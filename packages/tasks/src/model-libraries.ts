@@ -280,7 +280,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "MARS5-TTS",
 		repoUrl: "https://github.com/Camb-ai/MARS5-TTS",
 		filter: false,
-		countDownloads: { wildcard: { path: "*nar.safetensors" } },
+		countDownloads: `path_filename:"mars5_ar.safetensors"` },
 	},
 	"ml-agents": {
 		prettyLabel: "ml-agents",
