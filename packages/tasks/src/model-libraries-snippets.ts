@@ -48,21 +48,21 @@ model = BaseModel.from_pretrained("${model.id}")`,
 
 export const audioseal = (model: ModelData): string[] => {
 	const watermarkSnippet = `# Watermark Generator
-	from audioseal import AudioSeal
+from audioseal import AudioSeal
+
+model = AudioSeal.load_generator("${model.id}")
+# pass a tensor (tensor_wav) of shape (batch, channels, samples) and a sample rate
+wav, sr = tensor_wav, 16000
 	
-	model = AudioSeal.load_generator("${model.id}")
-	# pass a tensor (tensor_wav) of shape (batch, channels, samples) and a sample rate
-	wav, sr = tensor_wav, 16000
-	
-	watermark = model.get_watermark(wav, sr)
-	watermarked_audio = wav + watermark`;
+watermark = model.get_watermark(wav, sr)
+watermarked_audio = wav + watermark`;
 
 	const detectorSnippet = `# Watermark Detector
-	from audioseal import AudioSeal
+from audioseal import AudioSeal
 
-	detector = AudioSeal.load_detector("${model.id}")
+detector = AudioSeal.load_detector("${model.id}")
 	
-	result, message = detector.detect_watermark(watermarked_audio, sr)`;
+result, message = detector.detect_watermark(watermarked_audio, sr)`;
 	return [watermarkSnippet, detectorSnippet];
 };
 
