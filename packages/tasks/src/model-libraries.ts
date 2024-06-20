@@ -96,7 +96,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 	},
 	audioseal: {
-		prettyLabel: "Audioseal",
+		prettyLabel: "AudioSeal",
 		repoName: "audioseal",
 		repoUrl: "https://github.com/facebookresearch/audioseal",
 		filter: false,
