@@ -143,6 +143,7 @@ class RangeViewLocalFile extends RangeView {
 		const range = [this.chunk * HTTP_CHUNK_SIZE, (this.chunk + 1) * HTTP_CHUNK_SIZE - 1];
 		const buffer = await blob.slice(range[0], range[1]).arrayBuffer();
 		this.appendBuffer(new Uint8Array(buffer));
+		this.chunk += 1;
 	}
 }
 
