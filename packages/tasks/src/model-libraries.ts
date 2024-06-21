@@ -119,9 +119,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/xhluca/bm25s",
 		snippets: snippets.bm25s,
 		filter: false,
-		countDownloads: {
-			term: { path: "params.index.json" },
-		},
+		countDownloads: `path:"params.index.json"`,
 	},
 	chat_tts: {
 		prettyLabel: "ChatTTS",
@@ -227,9 +225,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "HunyuanDiT",
 		repoName: "HunyuanDiT",
 		repoUrl: "https://github.com/Tencent/HunyuanDiT",
-		countDownloads: {
-			terms: { path: ["pytorch_model_ema.pt", "pytorch_model_distill.pt"] },
-		},
+		countDownloads: `path:"pytorch_model_ema.pt" OR path:"pytorch_model_distill.pt"`,
 	},
 	keras: {
 		prettyLabel: "Keras",
