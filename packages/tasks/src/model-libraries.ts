@@ -96,7 +96,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "audioseal",
 		repoUrl: "https://github.com/facebookresearch/audioseal",
 		filter: false,
-		countDownloads: "path_extension:pt",
+		countDownloads: `path_extension:"pth"`,
 		snippets: snippets.audioseal,
 	},
 	bertopic: {
