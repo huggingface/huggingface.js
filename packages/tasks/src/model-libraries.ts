@@ -91,6 +91,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.audiocraft,
 		filter: false,
 	},
+	audioseal: {
+		prettyLabel: "AudioSeal",
+		repoName: "audioseal",
+		repoUrl: "https://github.com/facebookresearch/audioseal",
+		filter: false,
+		countDownloads: { wildcard: { path: "*.pth" } },
+		snippets: snippets.audioseal,
+	},
 	bertopic: {
 		prettyLabel: "BERTopic",
 		repoName: "BERTopic",
@@ -104,6 +112,16 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/google-research/big_vision",
 		filter: false,
 		countDownloads: `path_extension:"npz"`,
+	},
+	bm25s: {
+		prettyLabel: "BM25S",
+		repoName: "bm25s",
+		repoUrl: "https://github.com/xhluca/bm25s",
+		snippets: snippets.bm25s,
+		filter: false,
+		countDownloads: {
+			term: { path: "params.index.json" },
+		},
 	},
 	chat_tts: {
 		prettyLabel: "ChatTTS",
@@ -204,6 +222,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/xai-org/grok-1",
 		filter: false,
 		countDownloads: `path:"ckpt/tensor00000_000" OR path:"ckpt-0/tensor00000_000"`,
+	},
+	"hunyuan-dit": {
+		prettyLabel: "HunyuanDiT",
+		repoName: "HunyuanDiT",
+		repoUrl: "https://github.com/Tencent/HunyuanDiT",
+		countDownloads: {
+			terms: { path: ["pytorch_model_ema.pt", "pytorch_model_distill.pt"] },
+		},
 	},
 	keras: {
 		prettyLabel: "Keras",
