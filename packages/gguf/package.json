@@ -1,7 +1,7 @@
 {
 	"name": "@huggingface/gguf",
 	"packageManager": "pnpm@8.10.5",
-	"version": "0.1.6",
+	"version": "0.1.7",
 	"description": "a GGUF parser that works on remotely hosted files",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {
