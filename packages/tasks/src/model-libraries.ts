@@ -404,9 +404,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "diffusion-single-file",
 		repoUrl: "https://github.com/comfyanonymous/ComfyUI",
 		filter: false,
-		countDownloads: {
-			wildcard: { path: "*.safetensors" },
-		},
+		countDownloads: `path_extension:"safetensors"`,
 	},
 	"stable-baselines3": {
 		prettyLabel: "stable-baselines3",
