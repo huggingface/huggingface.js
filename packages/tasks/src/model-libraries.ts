@@ -219,9 +219,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "Glyph-ByT5",
 		repoUrl: "https://github.com/AIGText/Glyph-ByT5",
 		filter: false,
-		countDownloads: {
-			term: { path: "checkpoints/byt5_model.pt" },
-		},
+		countDownloads: `path:"checkpoints/byt5_model.pt"`,
 	},
 	grok: {
 		prettyLabel: "Grok",
