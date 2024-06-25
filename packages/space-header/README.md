@@ -2,6 +2,8 @@
 
 A Typescript powered wrapper for the Space `mini_header` feature.
 
+![space header preview](./src/thumbnail.png)
+
 ## Install
 
 ```console
