@@ -1,6 +1,6 @@
 {
 	"name": "@huggingface/space-header",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"packageManager": "pnpm@8.10.5",
 	"description": "Use the Space mini_header outside Hugging Face",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
