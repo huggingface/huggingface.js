@@ -34,6 +34,12 @@
 		"spaces",
 		"space-header"
 	],
+	"files": [
+		"src",
+		"dist",
+		"index.ts",
+		"tsconfig.json"
+	],
 	"author": "Hugging Face",
 	"license": "MIT",
 	"devDependencies": {
