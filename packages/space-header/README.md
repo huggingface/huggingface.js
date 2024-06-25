@@ -2,6 +2,8 @@
 
 A Typescript powered wrapper for the Space `mini_header` feature.
 
+![space header preview](https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/space-header-package/thumbnail.png)
+
 ## Install
 
 ```console
