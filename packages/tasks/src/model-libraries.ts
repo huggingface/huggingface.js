@@ -90,6 +90,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/facebookresearch/audiocraft",
 		snippets: snippets.audiocraft,
 		filter: false,
+		countDownloads: `path:"state_dict.bin" OR path:"config.json"`,
 	},
 	audioseal: {
 		prettyLabel: "AudioSeal",
