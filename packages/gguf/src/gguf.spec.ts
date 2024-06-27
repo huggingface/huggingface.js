@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { GGMLQuantizationType, gguf, ggufAllShards, parseGgufShardFilename } from "./gguf";
+import { beforeAll, describe, expect, it } from "vitest";
+import { GGMLQuantizationType, GGUFParseOutput, gguf, ggufAllShards, parseGgufShardFilename } from "./gguf";
 import fs from "node:fs";
 
 const URL_LLAMA = "https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/191239b/llama-2-7b-chat.Q2_K.gguf";
@@ -12,8 +12,19 @@ const URL_V1 =
 	"https://huggingface.co/tmadge/testing/resolve/66c078028d1ff92d7a9264a1590bc61ba6437933/tinyllamas-stories-260k-f32.gguf";
 const URL_SHARDED_GROK =
 	"https://huggingface.co/Arki05/Grok-1-GGUF/resolve/ecafa8d8eca9b8cd75d11a0d08d3a6199dc5a068/grok-1-IQ3_XS-split-00001-of-00009.gguf";
+const URL_BIG_METADATA = "https://huggingface.co/ngxson/test_gguf_models/resolve/main/gguf_test_big_metadata.gguf";
 
 describe("gguf", () => {
+	beforeAll(async () => {
+		// download the gguf for "load file" test, save to .cache directory
+		if (!fs.existsSync(".cache")) {
+			fs.mkdirSync(".cache");
+		}
+		const res = await fetch(URL_BIG_METADATA);
+		const arrayBuf = await res.arrayBuffer();
+		fs.writeFileSync(".cache/model.gguf", Buffer.from(arrayBuf));
+	});
+
 	it("should parse a llama2 7b", async () => {
 		const { metadata, tensorInfos } = await gguf(URL_LLAMA);
 
@@ -228,16 +239,10 @@ describe("gguf", () => {
 	});
 
 	it("should parse a local file", async () => {
-		// download the file and save to .cache folder
-		if (!fs.existsSync(".cache")) {
-			fs.mkdirSync(".cache");
-		}
-		const res = await fetch(URL_V1);
-		const arrayBuf = await res.arrayBuffer();
-		fs.writeFileSync(".cache/model.gguf", Buffer.from(arrayBuf));
-
-		const { metadata } = await gguf(".cache/model.gguf", { allowLocalFile: true });
-		expect(metadata).toMatchObject({ "general.name": "tinyllamas-stories-260k" });
+		const parsedGguf = await gguf(".cache/model.gguf", { allowLocalFile: true });
+		const { metadata } = parsedGguf as GGUFParseOutput<{ strict: false }>; // custom metadata arch, no need for typing
+		expect(metadata["dummy.1"]).toBeDefined(); // first metadata in the list
+		expect(metadata["dummy.32767"]).toBeDefined(); // last metadata in the list
 	});
 
 	it("should detect sharded gguf filename", async () => {
