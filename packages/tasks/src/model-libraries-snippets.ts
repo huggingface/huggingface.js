@@ -723,7 +723,7 @@ brew install whisperkit-cli
 # Download and run inference using whisper base model
 whisperkit-cli transcribe --audio-path /path/to/audio.mp3
 
-# Or use a your preferred model variant
-whisperkit-cli transcribe --model "large-v3" --model-prefix "distil" --audio-path /path/to/audio.mp3`
+# Or use your preferred model variant
+whisperkit-cli transcribe --model "large-v3" --model-prefix "distil" --audio-path /path/to/audio.mp3 --verbose`
 ];
 //#endregion
