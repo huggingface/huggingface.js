@@ -1,6 +1,12 @@
 import type { ModelData } from "./model-data";
 import type { PipelineType } from "./pipelines";
 
+type Snippet = {
+	title: string;
+	setup: string;
+	command: string;
+};
+
 /**
  * Elements configurable by a local app.
  */
@@ -39,7 +45,7 @@ export type LocalApp = {
 			 * And if not (mostly llama.cpp), snippet to copy/paste in your terminal
 			 * Support the placeholder {{GGUF_FILE}} that will be replaced by the gguf file path or the list of available files.
 			 */
-			snippet: (model: ModelData) => string | string[];
+			snippet: (model: ModelData) => Snippet | Snippet[];
 	  }
 );
 
@@ -47,28 +53,41 @@ function isGgufModel(model: ModelData) {
 	return model.tags.includes("gguf");
 }
 
-const snippetLlamacpp = (model: ModelData): string[] => {
+const snippetLlamacpp = (model: ModelData): Snippet[] => {
+	const command = (binary: string) =>
+		[
+			"# Load and run the model:",
+			`${binary} \\`,
+			'  --hf-repo "${model.id}" \\',
+			"  --hf-file {{GGUF_FILE}} \\",
+			'  -p "You are a helpful assistant" \\',
+			"  --conversation",
+		].join("\n");
 	return [
-		`# Option 1: use llama.cpp with brew
-brew install llama.cpp
-
-# Load and run the model
-llama \\
-	--hf-repo "${model.id}" \\
-	--hf-file {{GGUF_FILE}} \\
-	-p "I believe the meaning of life is" \\
-	-n 128`,
-		`# Option 2: build llama.cpp from source with curl support
-git clone https://github.com/ggerganov/llama.cpp.git 
-cd llama.cpp
-LLAMA_CURL=1 make
-
-# Load and run the model
-./main \\
-	--hf-repo "${model.id}" \\
-	-m {{GGUF_FILE}} \\
-	-p "I believe the meaning of life is" \\
-	-n 128`,
+		{
+			title: "Install from brew",
+			setup: "brew install llama.cpp",
+			command: command("llama-cli"),
+		},
+		{
+			title: "Use pre-built binary",
+			setup: [
+				// prettier-ignore
+				"# Download pre-built binary from:",
+				"# https://github.com/ggerganov/llama.cpp/releases",
+			].join("\n"),
+			command: command("./llama-cli"),
+		},
+		{
+			title: "Build from source code",
+			setup: [
+				// prettier-ignore
+				"git clone https://github.com/ggerganov/llama.cpp.git",
+				"cd llama.cpp",
+				"LLAMA_CURL=1 make",
+			].join("\n"),
+			command: command("./llama-cli"),
+		},
 	];
 };
 
