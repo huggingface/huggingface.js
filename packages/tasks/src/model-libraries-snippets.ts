@@ -192,9 +192,12 @@ model = GLiNER.from_pretrained("${model.id}")`,
 ];
 
 export const keras = (model: ModelData): string[] => [
-	`from huggingface_hub import from_pretrained_keras
+	`# Available backend options are: "jax", "tensorflow", "torch".
+os.environ["KERAS_BACKEND"] = "tensorflow"
+	
+import keras
 
-model = from_pretrained_keras("${model.id}")
+model = keras.saving.load_model("${model.id}")
 `,
 ];
 
@@ -206,6 +209,14 @@ import keras_nlp
 
 tokenizer = keras_nlp.models.Tokenizer.from_preset("hf://${model.id}")
 backbone = keras_nlp.models.Backbone.from_preset("hf://${model.id}")
+`,
+];
+
+export const tf_keras = (model: ModelData): string[] => [
+	`# Note: keras<3.x must be installed
+from huggingface_hub import from_pretrained_keras
+
+model = from_pretrained_keras("${model.id}")
 `,
 ];
 

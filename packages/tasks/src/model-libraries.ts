@@ -241,6 +241,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://huggingface.co/docs/hub/keras",
 		snippets: snippets.keras,
 		filter: true,
+		countDownloads: `path:"config.json"`,
+	},
+	"tf-keras": {
+		// Legacy "Keras 2" library (tensorflow-only)
+		prettyLabel: "TF-Keras",
+		repoName: "TF-Keras",
+		repoUrl: "https://github.com/keras-team/tf-keras",
+		snippets: snippets.tf_keras,
+		filter: false,
 		countDownloads: `path:"saved_model.pb"`,
 	},
 	"keras-nlp": {
