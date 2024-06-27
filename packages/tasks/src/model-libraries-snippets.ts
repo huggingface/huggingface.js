@@ -719,6 +719,9 @@ export const audiocraft = (model: ModelData): string[] => {
 export const whisperkit = (): string[] => [
 	`# Install CLI with Homebrew on macOS device
 brew install whisperkit-cli
+
+# View all available inference options
+whisperkit-cli transcribe --help
 	
 # Download and run inference using whisper base model
 whisperkit-cli transcribe --audio-path /path/to/audio.mp3
