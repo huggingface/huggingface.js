@@ -81,10 +81,13 @@ const snippetLlamacpp = (model: ModelData): Snippet[] => {
 		{
 			title: "Build from source code",
 			setup: [
-				// prettier-ignore
+				"# Install required packages",
+				"sudo apt install build-essential libcurl4-openssl-dev",
+				"",
+				"# Clone and build",
 				"git clone https://github.com/ggerganov/llama.cpp.git",
 				"cd llama.cpp",
-				"LLAMA_CURL=1 make",
+				"LLAMA_CURL=1 make -j llama-cli",
 			].join("\n"),
 			command: command("./llama-cli"),
 		},
