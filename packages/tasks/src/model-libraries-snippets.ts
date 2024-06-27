@@ -715,4 +715,12 @@ export const audiocraft = (model: ModelData): string[] => {
 		return [`# Type of model unknown.`];
 	}
 };
+
+export const whisperkit = (): string[] => [
+	`# Install CLI with Homebrew on macOS device
+brew install whisperkit-cli
+	
+# Download and run inference using preferred model
+whisperkit-cli transcribe --model "distil-large-v3" --audio-path "/path/to/audio.mp3"`
+];
 //#endregion
