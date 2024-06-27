@@ -249,7 +249,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "TF-Keras",
 		repoUrl: "https://github.com/keras-team/tf-keras",
 		snippets: snippets.tf_keras,
-		filter: false,
+		filter: true,
 		countDownloads: `path:"saved_model.pb"`,
 	},
 	"keras-nlp": {
