@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from "vitest";
-import type { GGUFParseOutput} from "./gguf";
+import type { GGUFParseOutput } from "./gguf";
 import { GGMLQuantizationType, gguf, ggufAllShards, parseGgufShardFilename } from "./gguf";
 import fs from "node:fs";
 
