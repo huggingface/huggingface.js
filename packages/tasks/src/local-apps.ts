@@ -38,14 +38,14 @@ export type LocalApp = {
 			/**
 			 * If the app supports deeplink, URL to open.
 			 */
-			deeplink: (model: ModelData) => URL;
+			deeplink: (model: ModelData, filepath?: string) => URL;
 	  }
 	| {
 			/**
 			 * And if not (mostly llama.cpp), snippet to copy/paste in your terminal
 			 * Support the placeholder {{GGUF_FILE}} that will be replaced by the gguf file path or the list of available files.
 			 */
-			snippet: (model: ModelData) => Snippet | Snippet[];
+			snippet: (model: ModelData, filepath?: string) => string | string[] | Snippet | Snippet[];
 	  }
 );
 
@@ -118,7 +118,8 @@ export const LOCAL_APPS = {
 		docsUrl: "https://lmstudio.ai",
 		mainTask: "text-generation",
 		displayOnModelPage: isGgufModel,
-		deeplink: (model) => new URL(`lmstudio://open_from_hf?model=${model.id}`),
+		deeplink: (model, filepath) =>
+			new URL(`lmstudio://open_from_hf?model=${model.id}` + filepath ? `&file=${filepath}` : ""),
 	},
 	jan: {
 		prettyLabel: "Jan",
