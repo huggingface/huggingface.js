@@ -241,7 +241,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://huggingface.co/docs/hub/keras",
 		snippets: snippets.keras,
 		filter: true,
-		countDownloads: `path:"config.json"`,
+		countDownloads: `path:"config.json" OR path_extension:"keras"`,
 	},
 	"tf-keras": {
 		// Legacy "Keras 2" library (tensorflow-only)
