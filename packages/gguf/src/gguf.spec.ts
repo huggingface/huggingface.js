@@ -1,5 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
-import { GGMLQuantizationType, GGUFParseOutput, gguf, ggufAllShards, parseGgufShardFilename } from "./gguf";
+import type { GGUFParseOutput} from "./gguf";
+import { GGMLQuantizationType, gguf, ggufAllShards, parseGgufShardFilename } from "./gguf";
 import fs from "node:fs";
 
 const URL_LLAMA = "https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/191239b/llama-2-7b-chat.Q2_K.gguf";
