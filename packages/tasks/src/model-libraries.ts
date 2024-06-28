@@ -266,6 +266,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/Camb-ai/MARS5-TTS",
 		filter: false,
 		countDownloads: `path:"mars5_ar.safetensors"`,
+		snippets: snippets.mars5_tts,
 	},
 	"ml-agents": {
 		prettyLabel: "ml-agents",
