@@ -217,7 +217,8 @@ backbone = keras_nlp.models.Backbone.from_preset("hf://${model.id}")
 ];
 
 export const tf_keras = (model: ModelData): string[] => [
-	`# Note: keras<3.x must be installed
+	`# Note: 'keras<3.x' or 'tf_keras' must be installed (legacy)
+# See https://github.com/keras-team/tf-keras for more details.
 from huggingface_hub import from_pretrained_keras
 
 model = from_pretrained_keras("${model.id}")
