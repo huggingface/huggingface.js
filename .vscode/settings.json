@@ -13,5 +13,6 @@
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	},
 	"cSpell.words": ["huggingface"],
-	"deno.enablePaths": ["./e2e/deno"]
+	"deno.enablePaths": ["./e2e/deno"],
+	"typescript.tsdk": "node_modules/typescript/lib"
 }

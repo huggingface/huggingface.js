@@ -46,6 +46,26 @@ export const asteroid = (model: ModelData): string[] => [
 model = BaseModel.from_pretrained("${model.id}")`,
 ];
 
+export const audioseal = (model: ModelData): string[] => {
+	const watermarkSnippet = `# Watermark Generator
+from audioseal import AudioSeal
+
+model = AudioSeal.load_generator("${model.id}")
+# pass a tensor (tensor_wav) of shape (batch, channels, samples) and a sample rate
+wav, sr = tensor_wav, 16000
+	
+watermark = model.get_watermark(wav, sr)
+watermarked_audio = wav + watermark`;
+
+	const detectorSnippet = `# Watermark Detector
+from audioseal import AudioSeal
+
+detector = AudioSeal.load_detector("${model.id}")
+	
+result, message = detector.detect_watermark(watermarked_audio, sr)`;
+	return [watermarkSnippet, detectorSnippet];
+};
+
 function get_base_diffusers_model(model: ModelData): string {
 	return model.cardData?.base_model?.toString() ?? "fill-in-base-model";
 }
@@ -54,6 +74,12 @@ export const bertopic = (model: ModelData): string[] => [
 	`from bertopic import BERTopic
 
 model = BERTopic.load("${model.id}")`,
+];
+
+export const bm25s = (model: ModelData): string[] => [
+	`from bm25s.hf import BM25HF
+
+retriever = BM25HF.load_from_hub("${model.id}")`,
 ];
 
 const diffusers_default = (model: ModelData) => [
@@ -95,6 +121,24 @@ export const diffusers = (model: ModelData): string[] => {
 	} else {
 		return diffusers_default(model);
 	}
+};
+
+export const edsnlp = (model: ModelData): string[] => {
+	const packageName = nameWithoutNamespace(model.id).replaceAll("-", "_");
+	return [
+		`# Load it from the Hub directly
+import edsnlp
+nlp = edsnlp.load("${model.id}")
+`,
+		`# Or install it as a package
+!pip install git+https://huggingface.co/${model.id}
+
+# and import it as a module
+import ${packageName}
+
+nlp = ${packageName}.load()  # or edsnlp.load("${packageName}")
+`,
+	];
 };
 
 export const espnetTTS = (model: ModelData): string[] => [
@@ -326,6 +370,43 @@ export const sklearn = (model: ModelData): string[] => {
 	}
 };
 
+export const stable_audio_tools = (model: ModelData): string[] => [
+	`import torch
+import torchaudio
+from einops import rearrange
+from stable_audio_tools import get_pretrained_model
+from stable_audio_tools.inference.generation import generate_diffusion_cond
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
+# Download model
+model, model_config = get_pretrained_model("${model.id}")
+sample_rate = model_config["sample_rate"]
+sample_size = model_config["sample_size"]
+
+model = model.to(device)
+
+# Set up text and timing conditioning
+conditioning = [{
+	"prompt": "128 BPM tech house drum loop",
+}]
+
+# Generate stereo audio
+output = generate_diffusion_cond(
+	model,
+	conditioning=conditioning,
+	sample_size=sample_size,
+	device=device
+)
+
+# Rearrange audio batch to a single sequence
+output = rearrange(output, "b d n -> d (b n)")
+
+# Peak normalize, clip, convert to int16, and save to file
+output = output.to(torch.float32).div(torch.max(torch.abs(output))).clamp(-1, 1).mul(32767).to(torch.int16).cpu()
+torchaudio.save("output.wav", output, sample_rate)`,
+];
+
 export const fastai = (model: ModelData): string[] => [
 	`from huggingface_hub import from_pretrained_fastai
 
@@ -551,6 +632,20 @@ export const voicecraft = (model: ModelData): string[] => [
 	`from voicecraft import VoiceCraft
 
 model = VoiceCraft.from_pretrained("${model.id}")`,
+];
+
+export const chattts = (): string[] => [
+	`import ChatTTS
+import torchaudio
+
+chat = ChatTTS.Chat()
+chat.load_models(compile=False) # Set to True for better performance
+
+texts = ["PUT YOUR TEXT HERE",]
+
+wavs = chat.infer(texts, )
+
+torchaudio.save("output1.wav", torch.from_numpy(wavs[0]), 24000)`,
 ];
 
 export const mlx = (model: ModelData): string[] => [

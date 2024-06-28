@@ -1,8 +1,8 @@
 {
-	"name": "@huggingface/gguf",
+	"name": "@huggingface/space-header",
+	"version": "1.0.2",
 	"packageManager": "pnpm@8.10.5",
-	"version": "0.1.7",
-	"description": "a GGUF parser that works on remotely hosted files",
+	"description": "Use the Space mini_header outside Hugging Face",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {
 		"access": "public"
@@ -18,38 +18,32 @@
 		}
 	},
 	"browser": {
-		"./src/utils/FileBlob.ts": false,
 		"./dist/index.js": "./dist/browser/index.js",
 		"./dist/index.mjs": "./dist/browser/index.mjs"
 	},
-	"engines": {
-		"node": ">=20"
-	},
-	"source": "index.ts",
 	"scripts": {
+		"build": "tsup && tsc --emitDeclarationOnly --declaration",
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
-		"prepublishOnly": "pnpm run build",
-		"build": "tsup src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
-		"build:llm": "tsx scripts/generate-llm.ts && pnpm run format",
-		"test": "vitest run",
-		"check": "tsc"
+		"prepublishOnly": "pnpm run build"
 	},
-	"files": [
-		"dist",
-		"src",
-		"tsconfig.json"
-	],
 	"keywords": [
 		"huggingface",
-		"hub",
-		"gguf"
+		"spaces",
+		"space-header"
+	],
+	"files": [
+		"src",
+		"dist",
+		"index.ts",
+		"tsconfig.json"
 	],
 	"author": "Hugging Face",
 	"license": "MIT",
 	"devDependencies": {
-		"@types/node": "^20.12.8"
+		"tsup": "^8.1.0",
+		"typescript": "^5.4.5"
 	}
 }
