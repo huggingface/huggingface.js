@@ -55,7 +55,7 @@ brew install llama.cpp
 # Load and run the model
 llama \\
 	--hf-repo "${model.id}" \\
-	--hf-file ${filepath ?? "file.gguf"} \\
+	--hf-file ${filepath ?? "{{GGUF_FILE}}"} \\
 	-p "I believe the meaning of life is" \\
 	-n 128`,
 		`# Option 2: build llama.cpp from source with curl support
@@ -66,7 +66,7 @@ LLAMA_CURL=1 make
 # Load and run the model
 ./main \\
 	--hf-repo "${model.id}" \\
-	-m ${filepath ?? "file.gguf"} \\
+	-m ${filepath ?? "{{GGUF_FILE}}"} \\
 	-p "I believe the meaning of life is" \\
 	-n 128`,
 	];
