@@ -197,7 +197,7 @@ os.environ["KERAS_BACKEND"] = "tensorflow"
 	
 import keras
 
-model = keras.saving.load_model("${model.id}")
+model = keras.saving.load_model("hf://${model.id}")
 `,
 ];
 
