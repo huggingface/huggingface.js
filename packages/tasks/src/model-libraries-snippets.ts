@@ -727,6 +727,6 @@ whisperkit-cli transcribe --help
 whisperkit-cli transcribe --audio-path /path/to/audio.mp3
 
 # Or use your preferred model variant
-whisperkit-cli transcribe --model "large-v3" --model-prefix "distil" --audio-path /path/to/audio.mp3 --verbose`
+whisperkit-cli transcribe --model "large-v3" --model-prefix "distil" --audio-path /path/to/audio.mp3 --verbose`,
 ];
 //#endregion
