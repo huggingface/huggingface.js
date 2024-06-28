@@ -1,11 +1,11 @@
 import type { ModelData } from "./model-data";
 import type { PipelineType } from "./pipelines";
 
-type Snippet = {
+interface Snippet {
 	title: string;
 	setup: string;
 	command: string;
-};
+}
 
 /**
  * Elements configurable by a local app.
@@ -53,13 +53,13 @@ function isGgufModel(model: ModelData) {
 	return model.tags.includes("gguf");
 }
 
-const snippetLlamacpp = (model: ModelData): Snippet[] => {
+const snippetLlamacpp = (model: ModelData, filepath?: string): Snippet[] => {
 	const command = (binary: string) =>
 		[
 			"# Load and run the model:",
 			`${binary} \\`,
-			'  --hf-repo "${model.id}" \\',
-			"  --hf-file {{GGUF_FILE}} \\",
+			`  --hf-repo "${model.id}" \\`,
+			`  --hf-file ${filepath ?? "{{GGUF_FILE}}"} \\`,
 			'  -p "You are a helpful assistant" \\',
 			"  --conversation",
 		].join("\n");
