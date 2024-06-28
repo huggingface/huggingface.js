@@ -97,7 +97,7 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isGgufModel,
 		deeplink: (model, filepath) =>
-			new URL(`lmstudio://open_from_hf?model=${model.id}` + filepath ? `&file=${filepath}` : ""),
+			new URL(`lmstudio://open_from_hf?model=${model.id}${filepath ? `&file=${filepath}` : ""}`),
 	},
 	jan: {
 		prettyLabel: "Jan",
