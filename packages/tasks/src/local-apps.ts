@@ -59,7 +59,7 @@ llama \\
 	-p "I believe the meaning of life is" \\
 	-n 128`,
 		`# Option 2: build llama.cpp from source with curl support
-git clone https://github.com/ggerganov/llama.cpp.git 
+git clone https://github.com/ggerganov/llama.cpp.git
 cd llama.cpp
 LLAMA_CURL=1 make
 
@@ -69,6 +69,24 @@ LLAMA_CURL=1 make
 	-m ${filepath ?? "{{GGUF_FILE}}"} \\
 	-p "I believe the meaning of life is" \\
 	-n 128`,
+	];
+};
+
+const snippetAikit = (model: ModelData, filepath?: string): string[] => {
+	// convert model id to lowercase for docker image name
+	model.id = model.id.toLowerCase();
+	return [
+		`# build the container with docker locally
+docker buildx build -t ${model.id}:latest --load \
+	--build-arg="model=huggingface://${model.id}/${filepath ?? "file.gguf"}" \
+	"https://raw.githubusercontent.com/sozercan/aikit/main/models/aikitfile.yaml"
+
+# run the container locally
+docker run -d --rm -p 8080:8080 ${model.id}:latest
+
+# visit http://localhost:8080/chat with your browser
+# or
+# curl http://localhost:8080/v1/chat/completions -H "Content-Type: application/json" -d '{"model": "${filepath ?? "file.gguf"}", "messages": [{"role": "user", "content": "I believe the meaning of life is"}]}'`
 	];
 };
 
@@ -177,6 +195,13 @@ export const LOCAL_APPS = {
 		comingSoon: true,
 		displayOnModelPage: (model) => model.library_name === "diffusers" && model.pipeline_tag === "text-to-image",
 		deeplink: (model) => new URL(`diffusionbee://open_from_hf?model=${model.id}`),
+	},
+	aikit: {
+		prettyLabel: "AIKit",
+		docsUrl: "https://github.com/sozercan/aikit",
+		mainTask: "text-generation",
+		displayOnModelPage: isGgufModel,
+		snippet: snippetAikit,
 	},
 } satisfies Record<string, LocalApp>;
 
