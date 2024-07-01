@@ -105,10 +105,8 @@ async function _extractAndAdapt(task: string, mainComponentName: string, type: "
 		required: mainComponent["required"],
 		properties: mainComponent["properties"],
 		$defs: filteredComponents,
+		items: mainComponent["items"],
 	};
-	if ("items" in mainComponent) {
-		inputSchema["items"] = mainComponent["items"];
-	}
 
 	const specPath = path.join(tasksDir, task, "spec", `${type}.json`);
 	console.debug("   📂 Exporting", specPath);
