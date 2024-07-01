@@ -52,10 +52,12 @@ You can use the 🤗 Transformers library `text-generation` pipeline to do infer
 
 ```python
 from transformers import pipeline
-generator = pipeline('text-generation', model = 'HuggingFaceH4/zephyr-7b-beta')
-generator("Hello, I'm a language model", max_length = 30, num_return_sequences=3)
-## [{'generated_text': "Hello, I'm a language modeler. So while writing this, when I went out to meet my wife or come home she told me that my"},
-##  {'generated_text': "Hello, I'm a language modeler. I write and maintain software in Python. I love to code, and that includes coding things that require writing"}, ...
+
+messages = [
+    {"role": "user", "content": "Let's have a conversation!"},
+]
+pipe = pipeline("text-generation", model="meta-llama/Meta-Llama-3-8B-Instruct")
+pipe(messages)
 ```
 
 [Text-to-Text generation models](https://huggingface.co/models?pipeline_tag=text2text-generation&sort=downloads) have a separate pipeline called `text2text-generation`. This pipeline takes an input containing the sentence including the task and returns the output of the accomplished task.
