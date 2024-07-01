@@ -261,6 +261,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "mindspore",
 		repoUrl: "https://github.com/mindspore-ai/mindspore",
 	},
+	"mars5-tts": {
+		prettyLabel: "MARS5-TTS",
+		repoName: "MARS5-TTS",
+		repoUrl: "https://github.com/Camb-ai/MARS5-TTS",
+		filter: false,
+		countDownloads: `path:"mars5_ar.safetensors"`,
+		snippets: snippets.mars5_tts,
+	},
 	"ml-agents": {
 		prettyLabel: "ml-agents",
 		repoName: "ml-agents",
