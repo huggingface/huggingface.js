@@ -223,6 +223,13 @@ model = from_pretrained_keras("${model.id}")
 `,
 ];
 
+export const mars5_tts = (model: ModelData): string[] => [
+	`# Install from https://github.com/Camb-ai/MARS5-TTS
+
+from inference import Mars5TTS
+mars5 = Mars5TTS.from_pretrained("${model.id}")`,
+];
+
 export const open_clip = (model: ModelData): string[] => [
 	`import open_clip
 

@@ -90,6 +90,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/facebookresearch/audiocraft",
 		snippets: snippets.audiocraft,
 		filter: false,
+		countDownloads: `path:"state_dict.bin"`,
 	},
 	audioseal: {
 		prettyLabel: "AudioSeal",
@@ -248,6 +249,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "TF-Keras",
 		repoName: "TF-Keras",
 		repoUrl: "https://github.com/keras-team/tf-keras",
+		docsUrl: "https://huggingface.co/docs/hub/keras#tf-keras-legacy",
 		snippets: snippets.tf_keras,
 		filter: true,
 		countDownloads: `path:"saved_model.pb"`,
@@ -268,6 +270,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "MindSpore",
 		repoName: "mindspore",
 		repoUrl: "https://github.com/mindspore-ai/mindspore",
+	},
+	"mars5-tts": {
+		prettyLabel: "MARS5-TTS",
+		repoName: "MARS5-TTS",
+		repoUrl: "https://github.com/Camb-ai/MARS5-TTS",
+		filter: false,
+		countDownloads: `path:"mars5_ar.safetensors"`,
+		snippets: snippets.mars5_tts,
 	},
 	"ml-agents": {
 		prettyLabel: "ml-agents",
