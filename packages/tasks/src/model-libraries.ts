@@ -249,7 +249,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "TF-Keras",
 		repoName: "TF-Keras",
 		repoUrl: "https://github.com/keras-team/tf-keras",
-		docsUrl: "https://huggingface.co/docs/hub/keras#tf-keras-legacy",
+		docsUrl: "https://huggingface.co/docs/hub/tf-keras",
 		snippets: snippets.tf_keras,
 		filter: true,
 		countDownloads: `path:"saved_model.pb"`,
