@@ -504,6 +504,8 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "WhisperKit",
 		repoName: "WhisperKit",
 		repoUrl: "https://github.com/argmaxinc/WhisperKit",
+		docsUrl: "https://github.com/argmaxinc/WhisperKit?tab=readme-ov-file#homebrew",
+		snippets: snippets.whisperkit,
 		countDownloads: `path_filename:"model" AND path_extension:"mil" AND _exists_:"path_prefix"`,
 	},
 } satisfies Record<string, LibraryUiElement>;
