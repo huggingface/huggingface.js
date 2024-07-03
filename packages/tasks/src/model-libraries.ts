@@ -269,7 +269,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://huggingface.co/facebook/multi-token-prediction",
 		filter: false,
 		countDownloads: {
-			terms: { path: ["7B_1T_1/consolidated.pth", "7B_1T_4/consolidated.pth", "7B_200B_1/consolidated.pth", "7B_200B_4/consolidated.pth",]},
+			terms: {
+				path: [
+					"7B_1T_1/consolidated.pth",
+					"7B_1T_4/consolidated.pth",
+					"7B_200B_1/consolidated.pth",
+					"7B_200B_4/consolidated.pth",
+				],
+			},
 		},
 	},
 	nemo: {
