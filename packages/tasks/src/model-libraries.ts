@@ -263,7 +263,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: { term: { path: "model.safetensors" } },
 	},
-	multi_token_prediction: {
+	"multi-token-prediction": {
 		prettyLabel: "Multi-Token Prediction",
 		repoName: "multi-token-prediction",
 		repoUrl: "https://huggingface.co/facebook/multi-token-prediction",
