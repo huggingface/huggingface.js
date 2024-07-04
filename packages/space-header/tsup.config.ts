@@ -1,10 +1,23 @@
-import { defineConfig } from "tsup";
+import type { Options } from "tsup";
 
-export default defineConfig({
-	target: "es2020",
+const baseConfig: Options = {
+	entry: ["./src/index.ts"],
 	format: ["cjs", "esm"],
-	splitting: false,
-	sourcemap: true,
+	outDir: "dist",
 	clean: true,
-	dts: true,
-});
+};
+
+const nodeConfig: Options = {
+	...baseConfig,
+	platform: "node",
+};
+
+const browserConfig: Options = {
+	...baseConfig,
+	platform: "browser",
+	target: "es2018",
+	splitting: true,
+	outDir: "dist/browser",
+};
+
+export default [nodeConfig, browserConfig];
