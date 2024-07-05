@@ -1,26 +1,39 @@
 {
 	"$id": "/inference/schemas/feature-extraction/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
-	"description": "Inputs for Text Embedding inference",
+	"description": "Feature Extraction Input.\n\nAuto-generated from TEI specs.\nFor more details, check out https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/scripts/inference-tei-import.ts.",
 	"title": "FeatureExtractionInput",
 	"type": "object",
+	"required": ["inputs"],
 	"properties": {
 		"inputs": {
-			"description": "The text to get the embeddings of",
-			"type": "string"
+			"$ref": "#/$defs/FeatureExtractionInputInput"
 		},
-		"parameters": {
-			"description": "Additional inference parameters",
-			"$ref": "#/$defs/FeatureExtractionParameters"
+		"normalize": {
+			"type": "boolean",
+			"default": "true",
+			"example": "true"
+		},
+		"truncate": {
+			"type": "boolean",
+			"default": "false",
+			"example": "false"
 		}
 	},
 	"$defs": {
-		"FeatureExtractionParameters": {
-			"title": "FeatureExtractionParameters",
-			"description": "Additional inference parameters for Feature Extraction",
-			"type": "object",
-			"properties": {}
+		"FeatureExtractionInputInput": {
+			"oneOf": [
+				{
+					"type": "string"
+				},
+				{
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			],
+			"title": "FeatureExtractionInputInput"
 		}
-	},
-	"required": ["inputs"]
+	}
 }
