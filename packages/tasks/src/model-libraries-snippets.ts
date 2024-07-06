@@ -82,7 +82,7 @@ export const bm25s = (model: ModelData): string[] => [
 retriever = BM25HF.load_from_hub("${model.id}")`,
 ];
 
-export const depth_anything_v2 = (model: ModelData): string[] => [
+export const depth_anything_v2 = (): string[] => [
 	`git clone https://github.com/DepthAnything/Depth-Anything-V2
 
 cd Depth-Anything-V2
