@@ -87,7 +87,7 @@ export const depth_anything_v2 = (): string[] => {
 		`# Install the Depth-Anything-V2 library
 git clone https://github.com/DepthAnything/Depth-Anything-V2
 cd Depth-Anything-V2
-pip install -r requirements.txt`
+pip install -r requirements.txt`,
 	];
 
 	const pythonCode = [
@@ -113,10 +113,10 @@ model.load_state_dict(torch.load(f'checkpoints/depth_anything_v2_{encoder}.pth',
 model = model.to(DEVICE).eval()
 
 raw_img = cv2.imread('your/image/path')
-depth = model.infer_image(raw_img) # HxW raw depth map in numpy`
+depth = model.infer_image(raw_img) # HxW raw depth map in numpy`,
 	];
 
-	return [shellCommands.join('\n'), pythonCode.join('\n')];
+	return [shellCommands.join("\n"), pythonCode.join("\n")];
 };
 
 const diffusers_default = (model: ModelData) => [
@@ -561,8 +561,8 @@ export const transformers = (model: ModelData): string[] => {
 			info.processor === "AutoTokenizer"
 				? "tokenizer"
 				: info.processor === "AutoFeatureExtractor"
-				  ? "extractor"
-				  : "processor";
+					? "extractor"
+					: "processor";
 		autoSnippet = [
 			"# Load model directly",
 			`from transformers import ${info.processor}, ${info.auto_model}`,
