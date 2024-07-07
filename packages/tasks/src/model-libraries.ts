@@ -304,6 +304,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"model.safetensors"`,
 	},
+	"multi-token-prediction": {
+		prettyLabel: "Multi-Token Prediction",
+		repoName: "multi-token-prediction",
+		repoUrl: "https://huggingface.co/facebook/multi-token-prediction",
+		filter: false,
+		countDownloads: `path: "7B_1T_1/consolidated.pth" OR "7B_1T_4/consolidated.pth" OR "7B_200B_1/consolidated.pth" OR "7B_200B_4/consolidated.pth"`,
+	},
 	nemo: {
 		prettyLabel: "NeMo",
 		repoName: "NeMo",
