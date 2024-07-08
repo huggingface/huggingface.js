@@ -230,16 +230,21 @@ from inference import Mars5TTS
 mars5 = Mars5TTS.from_pretrained("${model.id}")`,
 ];
 
-export const mesh_anything = (): string[] => [
-	`git clone https://github.com/buaacyw/MeshAnything.git && cd MeshAnything
+export const mesh_anything = (): string[] => {
+	const shellCommands = [
+		`pip install git+https://github.com/buaacyw/MeshAnything.git`,
+	];
 
-conda create -n MeshAnything python==3.10.13
-conda activate MeshAnything
-pip install torch==2.1.1 torchvision==0.16.1 torchaudio==2.1.1 --index-url https://download.pytorch.org/whl/cu118
-pip install -r requirements.txt
-pip install flash-attn --no-build-isolation
+	const pythonCode = [
+		`from MeshAnything.models.meshanything import MeshAnything
 
-python app.py`,
+# refer to https://github.com/buaacyw/MeshAnything/blob/main/main.py#L91 on how to define args
+# and https://github.com/buaacyw/MeshAnything/blob/main/app.py regarding usage
+model = MeshAnything(args)`,
+	];
+
+	return [shellCommands.join("\n"), pythonCode.join("\n")];
+};
 ];
 
 export const open_clip = (model: ModelData): string[] => [
