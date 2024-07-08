@@ -83,9 +83,7 @@ retriever = BM25HF.load_from_hub("${model.id}")`,
 ];
 
 export const depth_anything_v2 = (model: ModelData): string[] => {
-	const shellCommands = [
-		`# Install from https://github.com/DepthAnything/Depth-Anything-V2`,
-	];
+	const shellCommands = [`# Install from https://github.com/DepthAnything/Depth-Anything-V2`];
 
 	const pythonCode = [
 		`# Load the model and infer depth from an image
@@ -562,8 +560,8 @@ export const transformers = (model: ModelData): string[] => {
 			info.processor === "AutoTokenizer"
 				? "tokenizer"
 				: info.processor === "AutoFeatureExtractor"
-				  ? "extractor"
-				  : "processor";
+					? "extractor"
+					: "processor";
 		autoSnippet = [
 			"# Load model directly",
 			`from transformers import ${info.processor}, ${info.auto_model}`,
