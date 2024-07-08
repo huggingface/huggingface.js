@@ -91,6 +91,13 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isGgufModel,
 		snippet: snippetLlamacpp,
 	},
+	"exllamav2": {
+		prettyLabel: "exllamav2",
+		docsUrl: "https://github.com/turboderp/exllamav2",
+		mainTask: "text-generation",
+		displayOnModelPage: isGgufModel,
+		snippet: snippetLlamacpp,
+	},
 	lmstudio: {
 		prettyLabel: "LM Studio",
 		docsUrl: "https://lmstudio.ai",
