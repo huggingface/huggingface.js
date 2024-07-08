@@ -84,10 +84,7 @@ retriever = BM25HF.load_from_hub("${model.id}")`,
 
 export const depth_anything_v2 = (model: ModelData): string[] => {
 	const shellCommands = [
-		`# Install the Depth-Anything-V2 library
-git clone https://github.com/DepthAnything/Depth-Anything-V2
-cd Depth-Anything-V2
-pip install -r requirements.txt`,
+		`# Install from https://github.com/DepthAnything/Depth-Anything-V2`,
 	];
 
 	const pythonCode = [
