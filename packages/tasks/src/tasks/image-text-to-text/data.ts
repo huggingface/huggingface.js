@@ -22,7 +22,7 @@ const taskData: TaskDataCustom = {
 	demo: {
 		inputs: [
 			{
-				filename: "mask-generation-input.png",
+				filename: "image-text-to-text-input.png",
 				type: "img",
 			},
 			{
