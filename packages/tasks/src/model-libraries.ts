@@ -131,7 +131,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"asset/GPT.pt"`,
 	},
 	"depth-anything-v2": {
-		prettyLabel: "Depth Anything V2",
+		prettyLabel: "DepthAnythingV2",
 		repoName: "Depth Anything V2",
 		repoUrl: "https://github.com/DepthAnything/Depth-Anything-V2",
 		snippets: snippets.depth_anything_v2,
