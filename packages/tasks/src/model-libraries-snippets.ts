@@ -230,21 +230,14 @@ from inference import Mars5TTS
 mars5 = Mars5TTS.from_pretrained("${model.id}")`,
 ];
 
-export const mesh_anything = (): string[] => {
-	const shellCommands = [
-		`pip install git+https://github.com/buaacyw/MeshAnything.git`,
-	];
+export const mesh_anything = (): string[] => [
+	`# Install from https://github.com/buaacyw/MeshAnything.git
 
-	const pythonCode = [
-		`from MeshAnything.models.meshanything import MeshAnything
+from MeshAnything.models.meshanything import MeshAnything
 
 # refer to https://github.com/buaacyw/MeshAnything/blob/main/main.py#L91 on how to define args
 # and https://github.com/buaacyw/MeshAnything/blob/main/app.py regarding usage
 model = MeshAnything(args)`,
-	];
-
-	return [shellCommands.join("\n"), pythonCode.join("\n")];
-};
 ];
 
 export const open_clip = (model: ModelData): string[] => [
