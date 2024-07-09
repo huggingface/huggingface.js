@@ -310,7 +310,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/mlc-ai/mlc-llm",
 		docsUrl: "https://llm.mlc.ai/docs/",
 		filter: true,
-		countDownloads: `path_extension:"json"`,
+		countDownloads: `path:"mlc-chat-config.json"`,
 	},
 	nemo: {
 		prettyLabel: "NeMo",
