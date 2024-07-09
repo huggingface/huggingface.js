@@ -66,7 +66,9 @@ async function _extractAndAdapt(task: string, mainComponentName: string, type: "
 					}
 
 					// Add reference to components to export (and scan it too)
-					const newRef = camelFullName + ref.replace(camelName, "");
+					let newRef = camelFullName + ref.replace(camelName, "");
+					newRef = newRef.replace("InputInput", "Input"); // Fixing double InputInput (e.g. ChatCompletionInputInput)
+					newRef = newRef.replace("OutputOutput", "Output"); // Fixing double OutputOutput (e.g. ChatCompletionOutputOutput)
 					if (!filteredComponents[newRef]) {
 						components[ref]["title"] = newRef; // Rename title to avoid conflicts
 						filteredComponents[newRef] = components[ref];

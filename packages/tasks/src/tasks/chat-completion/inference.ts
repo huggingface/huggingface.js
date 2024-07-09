@@ -49,7 +49,7 @@ export interface ChatCompletionInput {
 	 * [UNUSED] ID of the model to use. See the model endpoint compatibility table for details
 	 * on which models work with the Chat API.
 	 */
-	model: string;
+	model?: string;
 	/**
 	 * UNUSED
 	 * How many chat completion choices to generate for each input message. Note that you will
@@ -63,6 +63,7 @@ export interface ChatCompletionInput {
 	 * increasing the model's likelihood to talk about new topics
 	 */
 	presence_penalty?: number;
+	response_format?: ChatCompletionInputGrammarType;
 	seed?: number;
 	/**
 	 * Up to 4 sequences where the API will stop generating further tokens.
@@ -105,16 +106,56 @@ export interface ChatCompletionInput {
 }
 
 export interface ChatCompletionInputMessage {
-	content?: string;
+	content: ChatCompletionInputMessageContent;
 	name?: string;
 	role: string;
-	tool_calls?: ChatCompletionInputToolCall[];
 	[property: string]: unknown;
 }
 
-export interface ChatCompletionInputToolCall {
+export type ChatCompletionInputMessageContent = ChatCompletionInputMessageChunk[] | string;
+
+export interface ChatCompletionInputMessageChunk {
+	image_url?: ChatCompletionInputURL;
+	text?: string;
+	type: ChatCompletionInputMessageChunkType;
+	[property: string]: unknown;
+}
+
+export interface ChatCompletionInputURL {
+	url: string;
+	[property: string]: unknown;
+}
+
+export type ChatCompletionInputMessageChunkType = "text" | "image_url";
+
+export interface ChatCompletionInputGrammarType {
+	type: ChatCompletionInputGrammarTypeType;
+	/**
+	 * A string that represents a [JSON Schema](https://json-schema.org/).
+	 *
+	 * JSON Schema is a declarative language that allows to annotate JSON documents
+	 * with types and descriptions.
+	 */
+	value: unknown;
+	[property: string]: unknown;
+}
+
+export type ChatCompletionInputGrammarTypeType = "json" | "regex";
+
+export type ChatCompletionInputToolType = ChatCompletionInputToolTypeObject | string;
+
+export interface ChatCompletionInputToolTypeObject {
+	function?: ChatCompletionInputFunctionName;
+	[property: string]: unknown;
+}
+
+export interface ChatCompletionInputFunctionName {
+	name: string;
+	[property: string]: unknown;
+}
+
+export interface ChatCompletionInputTool {
 	function: ChatCompletionInputFunctionDefinition;
-	id: number;
 	type: string;
 	[property: string]: unknown;
 }
@@ -123,19 +164,6 @@ export interface ChatCompletionInputFunctionDefinition {
 	arguments: unknown;
 	description?: string;
 	name: string;
-	[property: string]: unknown;
-}
-
-export type ChatCompletionInputToolType = "OneOf" | ChatCompletionInputToolTypeObject;
-
-export interface ChatCompletionInputToolTypeObject {
-	FunctionName: string;
-	[property: string]: unknown;
-}
-
-export interface ChatCompletionInputTool {
-	function: ChatCompletionInputFunctionDefinition;
-	type: string;
 	[property: string]: unknown;
 }
 
@@ -151,7 +179,6 @@ export interface ChatCompletionOutput {
 	created: number;
 	id: string;
 	model: string;
-	object: string;
 	system_fingerprint: string;
 	usage: ChatCompletionOutputUsage;
 	[property: string]: unknown;
@@ -185,7 +212,6 @@ export interface ChatCompletionOutputTopLogprob {
 
 export interface ChatCompletionOutputMessage {
 	content?: string;
-	name?: string;
 	role: string;
 	tool_calls?: ChatCompletionOutputToolCall[];
 	[property: string]: unknown;
@@ -193,7 +219,7 @@ export interface ChatCompletionOutputMessage {
 
 export interface ChatCompletionOutputToolCall {
 	function: ChatCompletionOutputFunctionDefinition;
-	id: number;
+	id: string;
 	type: string;
 	[property: string]: unknown;
 }
@@ -224,7 +250,6 @@ export interface ChatCompletionStreamOutput {
 	created: number;
 	id: string;
 	model: string;
-	object: string;
 	system_fingerprint: string;
 	[property: string]: unknown;
 }
