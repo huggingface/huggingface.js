@@ -309,7 +309,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "MLC-LLM",
 		repoUrl: "https://github.com/mlc-ai/mlc-llm",
 		docsUrl: "https://llm.mlc.ai/docs/",
-		filter: true,
+		filter: false,
 		countDownloads: `path:"mlc-chat-config.json"`,
 	},
 	nemo: {
