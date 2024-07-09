@@ -200,6 +200,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"pytorch_model.bin"`,
 	},
+	SenseVoice: {
+		prettyLabel: "SenseVoice",
+		repoName: "SenseVoice",
+		repoUrl: "https://github.com/FunAudioLLM/SenseVoice",
+		filter: false,
+		countDownloads: `path:"model.pt"`,
+	},
 	"gemma.cpp": {
 		prettyLabel: "gemma.cpp",
 		repoName: "gemma.cpp",
