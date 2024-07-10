@@ -304,6 +304,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"model.safetensors"`,
 	},
+	"mlc-llm": {
+		prettyLabel: "MLC-LLM",
+		repoName: "MLC-LLM",
+		repoUrl: "https://github.com/mlc-ai/mlc-llm",
+		docsUrl: "https://llm.mlc.ai/docs/",
+		filter: false,
+		countDownloads: `path:"mlc-chat-config.json"`,
+	},
 	nemo: {
 		prettyLabel: "NeMo",
 		repoName: "NeMo",
