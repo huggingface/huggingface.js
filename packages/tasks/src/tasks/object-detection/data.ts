@@ -3,12 +3,10 @@ import type { TaskDataCustom } from "..";
 const taskData: TaskDataCustom = {
 	datasets: [
 		{
-			// TODO write proper description
 			description: "Widely used benchmark dataset for multiple vision tasks.",
 			id: "merve/coco2017",
 		},
 		{
-			// TODO write proper description
 			description: "Multi-task computer vision benchmark.",
 			id: "merve/pascal-voc",
 		},

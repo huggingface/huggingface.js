@@ -32,12 +32,12 @@ const taskData: TaskDataCustom = {
 			id: "depth-anything/Depth-Anything-V2-Large",
 		},
 		{
-			description: "Strong Depth Estimation model trained on a big compilation of datasets.",
-			id: "LiheYoung/depth-anything-large-hf",
-		},
-		{
 			description: "A strong monocular depth estimation model.",
 			id: "Bingxin/Marigold",
+		},
+		{
+			description: "A metric depth estimation model trained on NYU dataset.",
+			id: "Intel/zoedepth-nyu",
 		},
 	],
 	spaces: [

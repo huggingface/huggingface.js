@@ -8,6 +8,14 @@ Depth estimation models are widely used to study volumetric formation of objects
 
 Depth estimation models can also be used to develop a 3D representation from a 2D image.
 
+## Depth Estimation Subtasks
+
+There are two depth estimation subtasks. 
+
+- **Absolute depth estimation**: Absolute (or metric) depth estimation aims to provide exact depth measurements from the camera. Absolute depth estimation models output depth maps with  real-world distances in meter or feet.
+
+- **Relative depth estimation**: Relative depth estimation aims to predict the depth order of objects or points in a scene without providing the precise measurements. 
+
 ## Inference
 
 With the `transformers` library, you can use the `depth-estimation` pipeline to infer with image classification models. You can initialize the pipeline with a model id from the Hub. If you do not provide a model id it will initialize with [Intel/dpt-large](https://huggingface.co/Intel/dpt-large) by default. When calling the pipeline you just need to specify a path, http link or an image loaded in PIL. Additionally, you can find a comprehensive list of various depth estimation models at [this link](https://huggingface.co/models?pipeline_tag=depth-estimation).

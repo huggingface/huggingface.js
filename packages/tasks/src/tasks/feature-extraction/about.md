@@ -34,6 +34,32 @@ feature_extractor(text,return_tensors = "pt")[0].numpy().mean(axis=0)
          [ 0.2520, -0.6869, -1.0582,  ...,  0.5198, -2.2106,  0.4547]]])'''
 ```
 
+A very popular library for training similarity and search models is called `sentence-transformers`.  To get started, install the library.
+
+```bash
+pip install -U sentence-transformers
+```
+
+You can infer with `sentence-transformers` models as follows. 
+
+```python
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+sentences = [
+    "The weather is lovely today.",
+    "It's so sunny outside!",
+    "He drove to the stadium.",
+]
+
+embeddings = model.encode(sentences)
+similarities = model.similarity(embeddings, embeddings)
+print(similarities)
+# tensor([[1.0000, 0.6660, 0.1046],
+#         [0.6660, 1.0000, 0.1411],
+#         [0.1046, 0.1411, 1.0000]])
+```
+
 ### Text Embedding Inference
 
 [Text Embeddings Inference (TEI)](https://github.com/huggingface/text-embeddings-inference) is a toolkit to easily serve feature extraction models using few lines of code.
@@ -43,3 +69,4 @@ feature_extractor(text,return_tensors = "pt")[0].numpy().mean(axis=0)
 - [Documentation for feature extraction task in 🤗Transformers](https://huggingface.co/docs/transformers/main_classes/feature_extractor)
 - [Introduction to MTEB Benchmark](https://huggingface.co/blog/mteb)
 - [Cookbook: Simple RAG for GitHub issues using Hugging Face Zephyr and LangChain](https://huggingface.co/learn/cookbook/rag_zephyr_langchain)
+- [sentence-transformers organization on Hugging Face Hub](https://huggingface.co/sentence-transformers)
