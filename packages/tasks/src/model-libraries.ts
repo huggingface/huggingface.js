@@ -286,6 +286,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"mars5_ar.safetensors"`,
 		snippets: snippets.mars5_tts,
 	},
+	"mesh-anything": {
+		prettyLabel: "MeshAnything",
+		repoName: "MeshAnything",
+		repoUrl: "https://github.com/buaacyw/MeshAnything",
+		filter: false,
+		countDownloads: `path:"MeshAnything_350m.pth"`,
+		snippets: snippets.mesh_anything,
+	},
 	"ml-agents": {
 		prettyLabel: "ml-agents",
 		repoName: "ml-agents",
@@ -310,6 +318,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.mlxim,
 		filter: false,
 		countDownloads: `path:"model.safetensors"`,
+	},
+	"mlc-llm": {
+		prettyLabel: "MLC-LLM",
+		repoName: "MLC-LLM",
+		repoUrl: "https://github.com/mlc-ai/mlc-llm",
+		docsUrl: "https://llm.mlc.ai/docs/",
+		filter: false,
+		countDownloads: `path:"mlc-chat-config.json"`,
 	},
 	nemo: {
 		prettyLabel: "NeMo",
