@@ -1,4 +1,5 @@
-## Use Cases
+## Use Cases
+
 Depth estimation models can be used to estimate the depth of different objects present in an image.
 
 ### Estimation of Volumetric Information
@@ -8,7 +9,7 @@ Depth estimation models are widely used to study volumetric formation of objects
 
 Depth estimation models can also be used to develop a 3D representation from a 2D image.
 
-## Depth Estimation Subtasks
+## Depth Estimation Subtasks
 
 There are two depth estimation subtasks.
 
