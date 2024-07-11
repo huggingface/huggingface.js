@@ -80,4 +80,17 @@ describe("listModels", () => {
 
 		expect(count).to.equal(10);
 	});
+
+	it("should search model by inferenceStatus", async () => {
+		let count = 0;
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		for await (const entry of listModels({
+			search: { inferenceStatus: "loaded" },
+			limit: 5,
+		})) {
+			count++;
+		}
+
+		expect(count).to.equal(5);
+	});
 });
