@@ -39,7 +39,6 @@ export type {
 	WidgetExampleOutputAnswerScore,
 	WidgetExampleOutputText,
 } from "./widget-example";
-export { InferenceDisplayability } from "./model-data";
 export { SPECIAL_TOKENS_ATTRIBUTES } from "./tokenizer-data";
 
 import * as snippets from "./snippets";
