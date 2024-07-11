@@ -124,7 +124,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	champ: {
 		prettyLabel: "Champ",
-		repoName: "champ",
+		repoName: "Champ",
 		repoUrl: "https://github.com/fudan-generative-vision/champ",
 		countDownloads: `path_extension:"pth" OR path_extension:"bin" OR path_extension:"safetensors" OR path:"config.json"`,
 	},
@@ -237,7 +237,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	hallo: {
 		prettyLabel: "Hallo",
-		repoName: "hallo",
+		repoName: "Hallo",
 		repoUrl: "https://github.com/fudan-generative-vision/hallo",
 		countDownloads: `path_extension:"pth" OR path_extension:"onnx" OR path_extension:"ckpt" OR path_extension:"safetensors" OR path:"config.json"`,
 	},
