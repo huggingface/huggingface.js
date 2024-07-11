@@ -10,7 +10,7 @@ Retrieval is the process of retrieving relevant documents or information based o
 
 ### Retrieval Augmented Generation
 
-Retrieval Augmented Generation (RAG) is a technique where the user inputs to generative models first queried through a knowledge base, and the most relevant information from the knowledge base are used to augment the prompt to reduce hallucinations during generation. Feature extraction models (primarily, retrieval and reranking models) can be used in RAG to reduce model hallucinations and ground the model.
+Retrieval-augmented generation (RAG) is a technique in which user inputs to generative models are first queried through a knowledge base, and the most relevant information from the knowledge base is used to augment the prompt to reduce hallucinations during generation. Feature extraction models (primarily retrieval and reranking models) can be used in RAG to reduce model hallucinations and ground the model.
 
 ## Inference
 
