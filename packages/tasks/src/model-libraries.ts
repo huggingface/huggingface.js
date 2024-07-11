@@ -130,6 +130,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"asset/GPT.pt"`,
 	},
+	colpali: {
+		prettyLabel: "ColPali",
+		repoName: "ColPali",
+		repoUrl: "https://github.com/ManuelFay/colpali",
+		filter: false,
+		countDownloads: `path:"adapter_config.json"`,
+	},
 	diffusers: {
 		prettyLabel: "Diffusers",
 		repoName: "🤗/diffusers",
@@ -278,6 +285,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"mars5_ar.safetensors"`,
 		snippets: snippets.mars5_tts,
+	},
+	"mesh-anything": {
+		prettyLabel: "MeshAnything",
+		repoName: "MeshAnything",
+		repoUrl: "https://github.com/buaacyw/MeshAnything",
+		filter: false,
+		countDownloads: `path:"MeshAnything_350m.pth"`,
+		snippets: snippets.mesh_anything,
 	},
 	"ml-agents": {
 		prettyLabel: "ml-agents",
