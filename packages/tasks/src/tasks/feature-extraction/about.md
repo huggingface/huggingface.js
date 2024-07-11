@@ -6,7 +6,7 @@ Models trained on a specific dataset can learn features about the data. For inst
 
 ### Retrieval and Reranking
 
-Retrieval is the process of retrieving relevant documents or information based on a user's search query. In the context of NLP, retrieval systems aim to find relevant text passages or documents from a large corpus of data that match the user's query. The goal is to return a set of results that are likely to be useful to the user. On the other hand, reranking is a technique used to improve the quality of retrieval results by reordering them based on their relevance to the query.
+Retrieval is the process of obtaining relevant documents or information based on a user's search query. In the context of NLP, retrieval systems aim to find relevant text passages or documents from a large corpus of data that match the user's query. The goal is to return a set of results that are likely to be useful to the user. On the other hand, reranking is a technique used to improve the quality of retrieval results by reordering them based on their relevance to the query.
 
 ### Retrieval Augmented Generation
 
