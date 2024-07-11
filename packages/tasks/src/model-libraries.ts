@@ -122,6 +122,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"params.index.json"`,
 	},
+	champ: {
+		prettyLabel: "Champ",
+		repoName: "champ",
+		repoUrl: "https://github.com/fudan-generative-vision/champ",
+		countDownloads: `path_extension:"pth" OR path_extension:"bin" OR path_extension:"safetensors" OR path:"config.json"`,
+	},
 	chat_tts: {
 		prettyLabel: "ChatTTS",
 		repoName: "ChatTTS",
@@ -228,6 +234,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/xai-org/grok-1",
 		filter: false,
 		countDownloads: `path:"ckpt/tensor00000_000" OR path:"ckpt-0/tensor00000_000"`,
+	},
+	hallo: {
+		prettyLabel: "Hallo",
+		repoName: "hallo",
+		repoUrl: "https://github.com/fudan-generative-vision/hallo",
+		countDownloads: `path_extension:"pth" OR path_extension:"onnx" OR path_extension:"ckpt" OR path_extension:"safetensors" OR path:"config.json"`,
 	},
 	"hunyuan-dit": {
 		prettyLabel: "HunyuanDiT",
@@ -517,20 +529,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://github.com/argmaxinc/WhisperKit?tab=readme-ov-file#homebrew",
 		snippets: snippets.whisperkit,
 		countDownloads: `path_filename:"model" AND path_extension:"mil" AND _exists_:"path_prefix"`,
-	},
-	hallo: {
-		prettyLabel: "Hallo",
-		repoName: "hallo",
-		repoUrl: "https://github.com/fudan-generative-vision/hallo",
-		docsUrl: "https://github.com/fudan-generative-vision/hallo?tab=readme-ov-file#hallo-hierarchical-audio-driven-visual-synthesis-for-portrait-image-animation",
-		countDownloads: `path_extension:"pth" OR path_extension:"onnx" OR path_extension:"ckpt" OR path_extension:"safetensors" OR path:"config.json"`,
-	},
-	champ: {
-		prettyLabel: "Champ",
-		repoName: "champ",
-		repoUrl: "https://github.com/fudan-generative-vision/champ",
-		docsUrl: "https://github.com/fudan-generative-vision/champ?tab=readme-ov-file#champ-controllable-and-consistent-human-image-animation-with-3d-parametric-guidance",
-		countDownloads: `path_extension:"pth" OR path_extension:"bin" OR path_extension:"safetensors" OR path:"config.json"`,
 	},
 } satisfies Record<string, LibraryUiElement>;
 
