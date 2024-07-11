@@ -40,7 +40,7 @@ A very popular library for training similarity and search models is called `sent
 pip install -U sentence-transformers
 ```
 
-You can infer with `sentence-transformers` models as follows. 
+You can infer with `sentence-transformers` models as follows.
 
 ```python
 from sentence_transformers import SentenceTransformer

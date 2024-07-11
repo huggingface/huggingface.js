@@ -10,11 +10,11 @@ Depth estimation models can also be used to develop a 3D representation from a 2
 
 ## Depth Estimation Subtasks
 
-There are two depth estimation subtasks. 
+There are two depth estimation subtasks.
 
-- **Absolute depth estimation**: Absolute (or metric) depth estimation aims to provide exact depth measurements from the camera. Absolute depth estimation models output depth maps with  real-world distances in meter or feet.
+- **Absolute depth estimation**: Absolute (or metric) depth estimation aims to provide exact depth measurements from the camera. Absolute depth estimation models output depth maps with real-world distances in meter or feet.
 
-- **Relative depth estimation**: Relative depth estimation aims to predict the depth order of objects or points in a scene without providing the precise measurements. 
+- **Relative depth estimation**: Relative depth estimation aims to predict the depth order of objects or points in a scene without providing the precise measurements.
 
 ## Inference
 
