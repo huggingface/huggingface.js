@@ -135,7 +135,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "ColPali",
 		repoUrl: "https://github.com/ManuelFay/colpali",
 		filter: false,
-		countDownloads: `path:"adapter_model.safetensors"`,
+		countDownloads: `path:"adapter_config.json"`,
 	},
 	diffusers: {
 		prettyLabel: "Diffusers",
