@@ -8,7 +8,7 @@ Models trained on a specific dataset can learn features about the data. For inst
 
 Retrieval is the process of retrieving relevant documents or information based on a user's search query. In the context of NLP, retrieval systems aim to find relevant text passages or documents from a large corpus of data that match the user's query. The goal is to return a set of results that are likely to be useful to the user. On the other hand, reranking is a technique used to improve the quality of retrieval results by reordering them based on their relevance to the query.
 
-### Retrieval Augmented Generation
+### Retrieval Augmented Generation
 
 Retrieval Augmented Generation (RAG) is a technique where the user inputs to generative models first queried through a knowledge base, and the most relevant information from the knowledge base are used to augment the prompt to reduce hallucinations during generation. Feature extraction models (primarily, retrieval and reranking models) can be used in RAG to reduce model hallucinations and ground the model.
 
