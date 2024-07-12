@@ -122,6 +122,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"params.index.json"`,
 	},
+	champ: {
+		prettyLabel: "Champ",
+		repoName: "Champ",
+		repoUrl: "https://github.com/fudan-generative-vision/champ",
+		countDownloads: `path:"champ/motion_module.pth"`,
+	},
 	chat_tts: {
 		prettyLabel: "ChatTTS",
 		repoName: "ChatTTS",
@@ -235,6 +241,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/xai-org/grok-1",
 		filter: false,
 		countDownloads: `path:"ckpt/tensor00000_000" OR path:"ckpt-0/tensor00000_000"`,
+	},
+	hallo: {
+		prettyLabel: "Hallo",
+		repoName: "Hallo",
+		repoUrl: "https://github.com/fudan-generative-vision/hallo",
+		countDownloads: `path:"hallo/net.pth"`,
 	},
 	"hunyuan-dit": {
 		prettyLabel: "HunyuanDiT",
