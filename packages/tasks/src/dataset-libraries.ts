@@ -65,11 +65,11 @@ export const DATASET_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/voxel51/fiftyone",
 		docsUrl: "https://docs.voxel51.com",
 	},
-        argilla: {
-                prettyLabel: "Argilla",
-                repoName: "argilla",
-                repoUrl: "https://github.com/argilla-io/argilla",
-                docsUrl: "https://argilla-io.github.io/argilla",
+    argilla: {
+        prettyLabel: "Argilla",
+        repoName: "argilla",
+        repoUrl: "https://github.com/argilla-io/argilla",
+        docsUrl: "https://argilla-io.github.io/argilla",
 	},
 } satisfies Record<string, DatasetLibraryUiElement>;
 
