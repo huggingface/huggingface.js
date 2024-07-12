@@ -122,6 +122,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"params.index.json"`,
 	},
+	champ: {
+		prettyLabel: "Champ",
+		repoName: "Champ",
+		repoUrl: "https://github.com/fudan-generative-vision/champ",
+		countDownloads: `path:"champ/motion_module.pth"`,
+	},
 	chat_tts: {
 		prettyLabel: "ChatTTS",
 		repoName: "ChatTTS",
@@ -129,6 +135,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.chattts,
 		filter: false,
 		countDownloads: `path:"asset/GPT.pt"`,
+	},
+	colpali: {
+		prettyLabel: "ColPali",
+		repoName: "ColPali",
+		repoUrl: "https://github.com/ManuelFay/colpali",
+		filter: false,
+		countDownloads: `path:"adapter_config.json"`,
 	},
 	"depth-anything-v2": {
 		prettyLabel: "DepthAnythingV2",
@@ -237,6 +250,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"ckpt/tensor00000_000" OR path:"ckpt-0/tensor00000_000"`,
 	},
+	hallo: {
+		prettyLabel: "Hallo",
+		repoName: "Hallo",
+		repoUrl: "https://github.com/fudan-generative-vision/hallo",
+		countDownloads: `path:"hallo/net.pth"`,
+	},
 	"hunyuan-dit": {
 		prettyLabel: "HunyuanDiT",
 		repoName: "HunyuanDiT",
@@ -287,6 +306,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"mars5_ar.safetensors"`,
 		snippets: snippets.mars5_tts,
 	},
+	"mesh-anything": {
+		prettyLabel: "MeshAnything",
+		repoName: "MeshAnything",
+		repoUrl: "https://github.com/buaacyw/MeshAnything",
+		filter: false,
+		countDownloads: `path:"MeshAnything_350m.pth"`,
+		snippets: snippets.mesh_anything,
+	},
 	"ml-agents": {
 		prettyLabel: "ml-agents",
 		repoName: "ml-agents",
@@ -311,6 +338,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.mlxim,
 		filter: false,
 		countDownloads: `path:"model.safetensors"`,
+	},
+	"mlc-llm": {
+		prettyLabel: "MLC-LLM",
+		repoName: "MLC-LLM",
+		repoUrl: "https://github.com/mlc-ai/mlc-llm",
+		docsUrl: "https://llm.mlc.ai/docs/",
+		filter: false,
+		countDownloads: `path:"mlc-chat-config.json"`,
 	},
 	nemo: {
 		prettyLabel: "NeMo",
