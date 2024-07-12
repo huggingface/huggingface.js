@@ -92,26 +92,27 @@ import torch
 
 from depth_anything_v2.dpt import DepthAnythingV2
 
-model_configs = {
-    'vits': {'encoder': 'vits', 'features': 64, 'out_channels': [48, 96, 192, 384]},
-    'vitb': {'encoder': 'vitb', 'features': 128, 'out_channels': [96, 192, 384, 768]},
-    'vitl': {'encoder': 'vitl', 'features': 256, 'out_channels': [256, 512, 1024, 1024]},
-}
-
 model_id_to_encoder = {
 	'depth-anything/Depth-Anything-V2-Small': 'vits',
 	'depth-anything/Depth-Anything-V2-Base': 'vitb',
 	'depth-anything/Depth-Anything-V2-Large': 'vitl',
 }
 
+model_configs = {
+    'vits': {'encoder': 'vits', 'features': 64, 'out_channels': [48, 96, 192, 384]},
+    'vitb': {'encoder': 'vitb', 'features': 128, 'out_channels': [96, 192, 384, 768]},
+    'vitl': {'encoder': 'vitl', 'features': 256, 'out_channels': [256, 512, 1024, 1024]},
+}
+
 # instantiate the model
 encoder = model_id_to_encoder["${model.id}"]
 model = DepthAnythingV2(**model_configs[encoder])
-filepath = hf_hub_download(repo_id=${model.id}, filename='depth_anything_v2_vits.pth', repo_type="model")
-state_dict = torch.load(filepath, map_location='cpu')
+# load the weights
+filepath = hf_hub_download(repo_id="${model.id}", filename=f"depth_anything_v2_{encoder}.pth", repo_type="model")
+state_dict = torch.load(filepath, map_location="cpu")
 model.load_state_dict(state_dict).eval()
 
-raw_img = cv2.imread('your/image/path')
+raw_img = cv2.imread("your/image/path")
 depth = model.infer_image(raw_img) # HxW raw depth map in numpy`,
 	];
 
