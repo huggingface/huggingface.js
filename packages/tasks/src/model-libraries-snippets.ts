@@ -83,40 +83,42 @@ retriever = BM25HF.load_from_hub("${model.id}")`,
 ];
 
 export const depth_anything_v2 = (model: ModelData): string[] => {
-	const shellCommands = [`# Install from https://github.com/DepthAnything/Depth-Anything-V2`];
+	let encoder: string;
+	let modelConfig: { encoder: string; features: number; out_channels: number[] };
 
-	const pythonCode = [
-		`# Load the model and infer depth from an image
-import cv2
-import torch
+	if (model.id === "depth-anything/Depth-Anything-V2-Small") {
+		encoder = "vits";
+		modelConfig = { encoder: "vits", features: 64, out_channels: [48, 96, 192, 384] };
+	} else if (model.id === "depth-anything/Depth-Anything-V2-Base") {
+		encoder = "vitb";
+		modelConfig = { encoder: "vitb", features: 128, out_channels: [96, 192, 384, 768] };
+	} else if (model.id === "depth-anything/Depth-Anything-V2-Large") {
+		encoder = "vitl";
+		modelConfig = { encoder: "vitl", features: 256, out_channels: [256, 512, 1024, 1024] };
+	} else {
+		throw new Error(`Unsupported model ID: ${model.id}`);
+	}
 
-from depth_anything_v2.dpt import DepthAnythingV2
-
-model_id_to_encoder = {
-	'depth-anything/Depth-Anything-V2-Small': 'vits',
-	'depth-anything/Depth-Anything-V2-Base': 'vitb',
-	'depth-anything/Depth-Anything-V2-Large': 'vitl',
-}
-
-model_configs = {
-    'vits': {'encoder': 'vits', 'features': 64, 'out_channels': [48, 96, 192, 384]},
-    'vitb': {'encoder': 'vitb', 'features': 128, 'out_channels': [96, 192, 384, 768]},
-    'vitl': {'encoder': 'vitl', 'features': 256, 'out_channels': [256, 512, 1024, 1024]},
-}
-
-# instantiate the model
-encoder = model_id_to_encoder["${model.id}"]
-model = DepthAnythingV2(**model_configs[encoder])
-# load the weights
-filepath = hf_hub_download(repo_id="${model.id}", filename=f"depth_anything_v2_{encoder}.pth", repo_type="model")
-state_dict = torch.load(filepath, map_location="cpu")
-model.load_state_dict(state_dict).eval()
-
-raw_img = cv2.imread("your/image/path")
-depth = model.infer_image(raw_img) # HxW raw depth map in numpy`,
+	return [
+		`# Install from https://github.com/DepthAnything/Depth-Anything-V2
+  
+  # Load the model and infer depth from an image
+  import cv2
+  import torch
+  
+  from depth_anything_v2.dpt import DepthAnythingV2
+  
+  # instantiate the model
+  encoder = "${encoder}";
+  model = DepthAnythingV2(${JSON.stringify(modelConfig)});
+  # load the weights
+  filepath = hf_hub_download(repo_id="${model.id}", filename=f"depth_anything_v2_${encoder}.pth", repo_type="model");
+  state_dict = torch.load(filepath, map_location="cpu");
+  model.load_state_dict(state_dict).eval();
+  
+  raw_img = cv2.imread("your/image/path");
+  depth = model.infer_image(raw_img); # HxW raw depth map in numpy`,
 	];
-
-	return [shellCommands.join("\n"), pythonCode.join("\n")];
 };
 
 const diffusers_default = (model: ModelData) => [
@@ -571,8 +573,8 @@ export const transformers = (model: ModelData): string[] => {
 			info.processor === "AutoTokenizer"
 				? "tokenizer"
 				: info.processor === "AutoFeatureExtractor"
-				  ? "extractor"
-				  : "processor";
+					? "extractor"
+					: "processor";
 		autoSnippet = [
 			"# Load model directly",
 			`from transformers import ${info.processor}, ${info.auto_model}`,
