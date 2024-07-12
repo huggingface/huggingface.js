@@ -136,6 +136,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"asset/GPT.pt"`,
 	},
+	colpali: {
+		prettyLabel: "ColPali",
+		repoName: "ColPali",
+		repoUrl: "https://github.com/ManuelFay/colpali",
+		filter: false,
+		countDownloads: `path:"adapter_config.json"`,
+	},
 	diffusers: {
 		prettyLabel: "Diffusers",
 		repoName: "🤗/diffusers",
