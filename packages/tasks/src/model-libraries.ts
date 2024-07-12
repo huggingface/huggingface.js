@@ -126,7 +126,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "Champ",
 		repoName: "Champ",
 		repoUrl: "https://github.com/fudan-generative-vision/champ",
-		countDownloads: `path_extension:"pth" OR path_extension:"bin" OR path_extension:"safetensors" OR path:"config.json"`,
+		countDownloads: `path:"champ/motion_module.pth"`,
 	},
 	chat_tts: {
 		prettyLabel: "ChatTTS",
@@ -239,7 +239,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "Hallo",
 		repoName: "Hallo",
 		repoUrl: "https://github.com/fudan-generative-vision/hallo",
-		countDownloads: `path_extension:"pth" OR path_extension:"onnx" OR path_extension:"ckpt" OR path_extension:"safetensors" OR path:"config.json"`,
+		countDownloads: `path:"hallo/net.pth"`,
 	},
 	"hunyuan-dit": {
 		prettyLabel: "HunyuanDiT",
