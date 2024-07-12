@@ -83,27 +83,28 @@ retriever = BM25HF.load_from_hub("${model.id}")`,
 ];
 
 export const depth_anything_v2 = (model: ModelData): string[] => {
-    let encoder: string;
-    let features: number;
-    let out_channels: number[];
+	let encoder: string;
+	let features: number;
+	let out_channels: number[];
 
-    if (model.id === "depth-anything/Depth-Anything-V2-Small") {
-        encoder = "vits";
-        features = 64;
-        out_channels = [48, 96, 192, 384];
-    } else if (model.id === "depth-anything/Depth-Anything-V2-Base") {
-        encoder = "vitb";
-        features = 128;
-        out_channels = [96, 192, 384, 768];
-    } else if (model.id === "depth-anything/Depth-Anything-V2-Large") {
-        encoder = "vitl";
-        features = 256;
-        out_channels = [256, 512, 1024, 1024];
-    } else {
-        throw new Error("Unsupported model ID");
-    }
+	if (model.id === "depth-anything/Depth-Anything-V2-Small") {
+		encoder = "vits";
+		features = 64;
+		out_channels = [48, 96, 192, 384];
+	} else if (model.id === "depth-anything/Depth-Anything-V2-Base") {
+		encoder = "vitb";
+		features = 128;
+		out_channels = [96, 192, 384, 768];
+	} else if (model.id === "depth-anything/Depth-Anything-V2-Large") {
+		encoder = "vitl";
+		features = 256;
+		out_channels = [256, 512, 1024, 1024];
+	} else {
+		throw new Error("Unsupported model ID");
+	}
 
-    return [`
+	return [
+		`
 # Install from https://github.com/DepthAnything/Depth-Anything-V2
 
 # Load the model and infer depth from an image
@@ -122,7 +123,8 @@ model.load_state_dict(state_dict).eval()
 
 raw_img = cv2.imread("your/image/path")
 depth = model.infer_image(raw_img) # HxW raw depth map in numpy
-    `];
+    `,
+	];
 };
 
 const diffusers_default = (model: ModelData) => [
