@@ -450,6 +450,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			wildcard: { path: "*/model.mil" },
 		},
 	},
+	birefnet : {
+		prettyLabel : "BiRefNet",
+		repoName : "BiRefNet",
+		repoUrl : "https://github.com/ZhengPeng7/BiRefNet",
+		docsUrl : "https://www.birefnet.top",
+		countDownloads: { term: { path: "model.safetensors" } },
+	},
 } satisfies Record<string, LibraryUiElement>;
 
 export type ModelLibraryKey = keyof typeof MODEL_LIBRARIES_UI_ELEMENTS;
