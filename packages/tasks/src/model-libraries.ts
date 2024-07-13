@@ -455,6 +455,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName : "BiRefNet",
 		repoUrl : "https://github.com/ZhengPeng7/BiRefNet",
 		docsUrl : "https://www.birefnet.top",
+		filter: false,
 		countDownloads: { term: { path: "model.safetensors" } },
 	},
 } satisfies Record<string, LibraryUiElement>;
