@@ -39,7 +39,6 @@ export type {
 	WidgetExampleOutputAnswerScore,
 	WidgetExampleOutputText,
 } from "./widget-example";
-export { InferenceDisplayability } from "./model-data";
 export { SPECIAL_TOKENS_ATTRIBUTES } from "./tokenizer-data";
 
 import * as snippets from "./snippets";
@@ -49,3 +48,6 @@ export { SKUS, DEFAULT_MEMORY_OPTIONS } from "./hardware";
 export type { HardwareSpec, SkuType } from "./hardware";
 export { LOCAL_APPS } from "./local-apps";
 export type { LocalApp, LocalAppKey } from "./local-apps";
+
+export { DATASET_LIBRARIES_UI_ELEMENTS } from "./dataset-libraries";
+export type { DatasetLibraryUiElement, DatasetLibraryKey } from "./dataset-libraries";

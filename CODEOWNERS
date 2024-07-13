@@ -21,3 +21,6 @@
 # Ownership for the gguf Package
 
 /packages/gguf @mishig25 @julien-c
+
+# Ownership for the space-header Package
+/packages/space-header @enzostvs
