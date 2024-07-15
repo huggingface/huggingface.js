@@ -114,6 +114,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"npz"`,
 	},
+	birefnet: {
+		prettyLabel: "BiRefNet",
+		repoName: "BiRefNet",
+		repoUrl: "https://github.com/ZhengPeng7/BiRefNet",
+		docsUrl: "https://www.birefnet.top",
+		filter: false,
+	},
 	bm25s: {
 		prettyLabel: "BM25S",
 		repoName: "bm25s",
@@ -142,13 +149,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/ManuelFay/colpali",
 		filter: false,
 		countDownloads: `path:"adapter_config.json"`,
-	},
-	birefnet: {
-		prettyLabel: "BiRefNet",
-		repoName: "BiRefNet",
-		repoUrl: "https://github.com/ZhengPeng7/BiRefNet",
-		docsUrl: "https://www.birefnet.top",
-		filter: false,
 	},
 	diffusers: {
 		prettyLabel: "Diffusers",
