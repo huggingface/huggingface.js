@@ -3,8 +3,12 @@ import type { TaskDataCustom } from "..";
 const taskData: TaskDataCustom = {
 	datasets: [
 		{
-			description: "NYU Depth V2 Dataset: Video dataset containing both RGB and depth sensor data",
+			description: "NYU Depth V2 Dataset: Video dataset containing both RGB and depth sensor data.",
 			id: "sayakpaul/nyu_depth_v2",
+		},
+		{
+			description: "Monocular depth estimation benchmark based without noise and errors.",
+			id: "depth-anything/DA-2K",
 		},
 	],
 	demo: {
@@ -24,16 +28,16 @@ const taskData: TaskDataCustom = {
 	metrics: [],
 	models: [
 		{
-			description: "Strong Depth Estimation model trained on 1.4 million images.",
-			id: "Intel/dpt-large",
-		},
-		{
-			description: "Strong Depth Estimation model trained on a big compilation of datasets.",
-			id: "LiheYoung/depth-anything-large-hf",
+			description: "Cutting-edge depth estimation model.",
+			id: "depth-anything/Depth-Anything-V2-Large",
 		},
 		{
 			description: "A strong monocular depth estimation model.",
 			id: "Bingxin/Marigold",
+		},
+		{
+			description: "A metric depth estimation model trained on NYU dataset.",
+			id: "Intel/zoedepth-nyu",
 		},
 	],
 	spaces: [
@@ -42,8 +46,8 @@ const taskData: TaskDataCustom = {
 			id: "radames/dpt-depth-estimation-3d-voxels",
 		},
 		{
-			description: "An application to compare the outputs of different depth estimation models.",
-			id: "LiheYoung/Depth-Anything",
+			description: "An application on cutting-edge depth estimation.",
+			id: "depth-anything/Depth-Anything-V2",
 		},
 		{
 			description: "An application to try state-of-the-art depth estimation.",
