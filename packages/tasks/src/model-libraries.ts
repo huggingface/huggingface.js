@@ -143,11 +143,11 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"adapter_config.json"`,
 	},
-	birefnet : {
-		prettyLabel : "BiRefNet",
-		repoName : "BiRefNet",
-		repoUrl : "https://github.com/ZhengPeng7/BiRefNet",
-		docsUrl : "https://www.birefnet.top",
+	birefnet: {
+		prettyLabel: "BiRefNet",
+		repoName: "BiRefNet",
+		repoUrl: "https://github.com/ZhengPeng7/BiRefNet",
+		docsUrl: "https://www.birefnet.top",
 		filter: false,
 	},
 	diffusers: {
