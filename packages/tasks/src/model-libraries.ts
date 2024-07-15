@@ -111,6 +111,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			wildcard: { path: "*.npz" },
 		},
 	},
+	birefnet : {
+		prettyLabel : "BiRefNet",
+		repoName : "BiRefNet",
+		repoUrl : "https://github.com/ZhengPeng7/BiRefNet",
+		docsUrl : "https://www.birefnet.top",
+		filter: false,
+	},
 	diffusers: {
 		prettyLabel: "Diffusers",
 		repoName: "🤗/diffusers",
@@ -449,14 +456,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: {
 			wildcard: { path: "*/model.mil" },
 		},
-	},
-	birefnet : {
-		prettyLabel : "BiRefNet",
-		repoName : "BiRefNet",
-		repoUrl : "https://github.com/ZhengPeng7/BiRefNet",
-		docsUrl : "https://www.birefnet.top",
-		filter: false,
-		countDownloads: { term: { path: "model.safetensors" } },
 	},
 } satisfies Record<string, LibraryUiElement>;
 
