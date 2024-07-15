@@ -46,6 +46,26 @@ export const asteroid = (model: ModelData): string[] => [
 model = BaseModel.from_pretrained("${model.id}")`,
 ];
 
+export const audioseal = (model: ModelData): string[] => {
+	const watermarkSnippet = `# Watermark Generator
+from audioseal import AudioSeal
+
+model = AudioSeal.load_generator("${model.id}")
+# pass a tensor (tensor_wav) of shape (batch, channels, samples) and a sample rate
+wav, sr = tensor_wav, 16000
+	
+watermark = model.get_watermark(wav, sr)
+watermarked_audio = wav + watermark`;
+
+	const detectorSnippet = `# Watermark Detector
+from audioseal import AudioSeal
+
+detector = AudioSeal.load_detector("${model.id}")
+	
+result, message = detector.detect_watermark(watermarked_audio, sr)`;
+	return [watermarkSnippet, detectorSnippet];
+};
+
 function get_base_diffusers_model(model: ModelData): string {
 	return model.cardData?.base_model?.toString() ?? "fill-in-base-model";
 }
@@ -54,6 +74,12 @@ export const bertopic = (model: ModelData): string[] => [
 	`from bertopic import BERTopic
 
 model = BERTopic.load("${model.id}")`,
+];
+
+export const bm25s = (model: ModelData): string[] => [
+	`from bm25s.hf import BM25HF
+
+retriever = BM25HF.load_from_hub("${model.id}")`,
 ];
 
 const diffusers_default = (model: ModelData) => [
@@ -95,6 +121,24 @@ export const diffusers = (model: ModelData): string[] => {
 	} else {
 		return diffusers_default(model);
 	}
+};
+
+export const edsnlp = (model: ModelData): string[] => {
+	const packageName = nameWithoutNamespace(model.id).replaceAll("-", "_");
+	return [
+		`# Load it from the Hub directly
+import edsnlp
+nlp = edsnlp.load("${model.id}")
+`,
+		`# Or install it as a package
+!pip install git+https://huggingface.co/${model.id}
+
+# and import it as a module
+import ${packageName}
+
+nlp = ${packageName}.load()  # or edsnlp.load("${packageName}")
+`,
+	];
 };
 
 export const espnetTTS = (model: ModelData): string[] => [
@@ -148,14 +192,19 @@ model = GLiNER.from_pretrained("${model.id}")`,
 ];
 
 export const keras = (model: ModelData): string[] => [
-	`from huggingface_hub import from_pretrained_keras
+	`# Available backend options are: "jax", "tensorflow", "torch".
+import os
+os.environ["KERAS_BACKEND"] = "tensorflow"
+	
+import keras
 
-model = from_pretrained_keras("${model.id}")
+model = keras.saving.load_model("hf://${model.id}")
 `,
 ];
 
 export const keras_nlp = (model: ModelData): string[] => [
 	`# Available backend options are: "jax", "tensorflow", "torch".
+import os
 os.environ["KERAS_BACKEND"] = "tensorflow"
 
 import keras_nlp
@@ -163,6 +212,32 @@ import keras_nlp
 tokenizer = keras_nlp.models.Tokenizer.from_preset("hf://${model.id}")
 backbone = keras_nlp.models.Backbone.from_preset("hf://${model.id}")
 `,
+];
+
+export const tf_keras = (model: ModelData): string[] => [
+	`# Note: 'keras<3.x' or 'tf_keras' must be installed (legacy)
+# See https://github.com/keras-team/tf-keras for more details.
+from huggingface_hub import from_pretrained_keras
+
+model = from_pretrained_keras("${model.id}")
+`,
+];
+
+export const mars5_tts = (model: ModelData): string[] => [
+	`# Install from https://github.com/Camb-ai/MARS5-TTS
+
+from inference import Mars5TTS
+mars5 = Mars5TTS.from_pretrained("${model.id}")`,
+];
+
+export const mesh_anything = (): string[] => [
+	`# Install from https://github.com/buaacyw/MeshAnything.git
+
+from MeshAnything.models.meshanything import MeshAnything
+
+# refer to https://github.com/buaacyw/MeshAnything/blob/main/main.py#L91 on how to define args
+# and https://github.com/buaacyw/MeshAnything/blob/main/app.py regarding usage
+model = MeshAnything(args)`,
 ];
 
 export const open_clip = (model: ModelData): string[] => [
@@ -325,6 +400,43 @@ export const sklearn = (model: ModelData): string[] => {
 		return skopsJobLib(model);
 	}
 };
+
+export const stable_audio_tools = (model: ModelData): string[] => [
+	`import torch
+import torchaudio
+from einops import rearrange
+from stable_audio_tools import get_pretrained_model
+from stable_audio_tools.inference.generation import generate_diffusion_cond
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
+# Download model
+model, model_config = get_pretrained_model("${model.id}")
+sample_rate = model_config["sample_rate"]
+sample_size = model_config["sample_size"]
+
+model = model.to(device)
+
+# Set up text and timing conditioning
+conditioning = [{
+	"prompt": "128 BPM tech house drum loop",
+}]
+
+# Generate stereo audio
+output = generate_diffusion_cond(
+	model,
+	conditioning=conditioning,
+	sample_size=sample_size,
+	device=device
+)
+
+# Rearrange audio batch to a single sequence
+output = rearrange(output, "b d n -> d (b n)")
+
+# Peak normalize, clip, convert to int16, and save to file
+output = output.to(torch.float32).div(torch.max(torch.abs(output))).clamp(-1, 1).mul(32767).to(torch.int16).cpu()
+torchaudio.save("output.wav", output, sample_rate)`,
+];
 
 export const fastai = (model: ModelData): string[] => [
 	`from huggingface_hub import from_pretrained_fastai
@@ -553,6 +665,20 @@ export const voicecraft = (model: ModelData): string[] => [
 model = VoiceCraft.from_pretrained("${model.id}")`,
 ];
 
+export const chattts = (): string[] => [
+	`import ChatTTS
+import torchaudio
+
+chat = ChatTTS.Chat()
+chat.load_models(compile=False) # Set to True for better performance
+
+texts = ["PUT YOUR TEXT HERE",]
+
+wavs = chat.infer(texts, )
+
+torchaudio.save("output1.wav", torch.from_numpy(wavs[0]), 24000)`,
+];
+
 export const mlx = (model: ModelData): string[] => [
 	`pip install huggingface_hub hf_transfer
 
@@ -620,4 +746,18 @@ export const audiocraft = (model: ModelData): string[] => {
 		return [`# Type of model unknown.`];
 	}
 };
+
+export const whisperkit = (): string[] => [
+	`# Install CLI with Homebrew on macOS device
+brew install whisperkit-cli
+
+# View all available inference options
+whisperkit-cli transcribe --help
+	
+# Download and run inference using whisper base model
+whisperkit-cli transcribe --audio-path /path/to/audio.mp3
+
+# Or use your preferred model variant
+whisperkit-cli transcribe --model "large-v3" --model-prefix "distil" --audio-path /path/to/audio.mp3 --verbose`,
+];
 //#endregion
