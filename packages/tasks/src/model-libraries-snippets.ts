@@ -98,9 +98,9 @@ export const depth_anything_v2 = (model: ModelData): string[] => {
 	} else if (model.id === "depth-anything/Depth-Anything-V2-Large") {
 		encoder = "vitl";
 		features = 256;
-		out_channels = "[256, 512, 1024, 1024"];
-	} 
-	
+		out_channels = "[256, 512, 1024, 1024";
+	}
+
 	return [
 		`
 # Install from https://github.com/DepthAnything/Depth-Anything-V2
