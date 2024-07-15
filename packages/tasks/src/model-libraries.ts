@@ -118,7 +118,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "BiRefNet",
 		repoName: "BiRefNet",
 		repoUrl: "https://github.com/ZhengPeng7/BiRefNet",
-		docsUrl: "https://www.birefnet.top",
 		snippets: snippets.birefnet,
 		filter: false,
 	},
