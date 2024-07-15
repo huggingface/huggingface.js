@@ -84,20 +84,24 @@ retriever = BM25HF.load_from_hub("${model.id}")`,
 
 export const depth_anything_v2 = (model: ModelData): string[] => {
 	let encoder: string;
-	let features: number;
+	let features: string;
 	let out_channels: string;
 
-	encoder = "vits";
-	features = 64;
-	out_channels = "[48, 96, 192, 384]";
+	encoder = "<ENCODER>";
+	features = "<NUMBER_OF_FEATURES>";
+	out_channels = "<OUT_CHANNELS>";
 
 	if (model.id === "depth-anything/Depth-Anything-V2-Base") {
+		encoder = "vits";
+		features = "64";
+		out_channels = "[48, 96, 192, 384]";
+	} else if (model.id === "depth-anything/Depth-Anything-V2-Base") {
 		encoder = "vitb";
-		features = 128;
+		features = "128";
 		out_channels = "[96, 192, 384, 768]";
 	} else if (model.id === "depth-anything/Depth-Anything-V2-Large") {
 		encoder = "vitl";
-		features = 256;
+		features = "256";
 		out_channels = "[256, 512, 1024, 1024";
 	}
 
