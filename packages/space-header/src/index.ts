@@ -13,7 +13,7 @@ async function main(initialSpace: string | Space, options?: Options) {
 		window.location?.ancestorOrigins ?? {
 			0: window.document.referrer,
 		}
-	).some((origin) => origin.startsWith("https://huggingface.co"));
+	).some((origin) => new URL(origin)?.origin === "https://huggingface.co");
 	if (has_huggingface_ancestor) return;
 
 	inject_fonts();
