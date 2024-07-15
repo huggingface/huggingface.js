@@ -91,7 +91,7 @@ export const depth_anything_v2 = (model: ModelData): string[] => {
 	features = "<NUMBER_OF_FEATURES>";
 	out_channels = "<OUT_CHANNELS>";
 
-	if (model.id === "depth-anything/Depth-Anything-V2-Base") {
+	if (model.id === "depth-anything/Depth-Anything-V2-Small") {
 		encoder = "vits";
 		features = "64";
 		out_channels = "[48, 96, 192, 384]";
