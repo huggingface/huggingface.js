@@ -143,6 +143,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"adapter_config.json"`,
 	},
+	"depth-anything-v2": {
+		prettyLabel: "DepthAnythingV2",
+		repoName: "Depth Anything V2",
+		repoUrl: "https://github.com/DepthAnything/Depth-Anything-V2",
+		snippets: snippets.depth_anything_v2,
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
+	},
 	diffusers: {
 		prettyLabel: "Diffusers",
 		repoName: "🤗/diffusers",

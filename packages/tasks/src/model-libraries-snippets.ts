@@ -82,6 +82,53 @@ export const bm25s = (model: ModelData): string[] => [
 retriever = BM25HF.load_from_hub("${model.id}")`,
 ];
 
+export const depth_anything_v2 = (model: ModelData): string[] => {
+	let encoder: string;
+	let features: string;
+	let out_channels: string;
+
+	encoder = "<ENCODER>";
+	features = "<NUMBER_OF_FEATURES>";
+	out_channels = "<OUT_CHANNELS>";
+
+	if (model.id === "depth-anything/Depth-Anything-V2-Small") {
+		encoder = "vits";
+		features = "64";
+		out_channels = "[48, 96, 192, 384]";
+	} else if (model.id === "depth-anything/Depth-Anything-V2-Base") {
+		encoder = "vitb";
+		features = "128";
+		out_channels = "[96, 192, 384, 768]";
+	} else if (model.id === "depth-anything/Depth-Anything-V2-Large") {
+		encoder = "vitl";
+		features = "256";
+		out_channels = "[256, 512, 1024, 1024";
+	}
+
+	return [
+		`
+# Install from https://github.com/DepthAnything/Depth-Anything-V2
+
+# Load the model and infer depth from an image
+import cv2
+import torch
+
+from depth_anything_v2.dpt import DepthAnythingV2
+
+# instantiate the model
+model = DepthAnythingV2(encoder="${encoder}", features=${features}, out_channels=${out_channels})
+
+# load the weights
+filepath = hf_hub_download(repo_id="${model.id}", filename="depth_anything_v2_${encoder}.pth", repo_type="model")
+state_dict = torch.load(filepath, map_location="cpu")
+model.load_state_dict(state_dict).eval()
+
+raw_img = cv2.imread("your/image/path")
+depth = model.infer_image(raw_img) # HxW raw depth map in numpy
+    `,
+	];
+};
+
 const diffusers_default = (model: ModelData) => [
 	`from diffusers import DiffusionPipeline
 
