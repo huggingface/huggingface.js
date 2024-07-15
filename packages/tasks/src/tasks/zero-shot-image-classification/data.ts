@@ -56,6 +56,10 @@ const taskData: TaskDataCustom = {
 			id: "google/siglip-base-patch16-224",
 		},
 		{
+			description: "Small yet powerful zero-shot image classification model that can run on edge devices.",
+			id: "apple/MobileCLIP-S1-OpenCLIP",
+		},
+		{
 			description: "Strong image classification model for biomedical domain.",
 			id: "microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224",
 		},
