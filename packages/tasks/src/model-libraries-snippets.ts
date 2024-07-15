@@ -679,6 +679,13 @@ wavs = chat.infer(texts, )
 torchaudio.save("output1.wav", torch.from_numpy(wavs[0]), 24000)`,
 ];
 
+export const birefnet = (model: ModelData): string[] => [
+	`# Install from https://github.com/ZhengPeng7/BiRefNet
+from models.birefnet import BiRefNet
+
+model = BirefNet.from_pretrained("${model.id}")`,
+];
+
 export const mlx = (model: ModelData): string[] => [
 	`pip install huggingface_hub hf_transfer
 
