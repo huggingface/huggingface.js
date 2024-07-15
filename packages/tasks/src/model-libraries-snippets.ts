@@ -85,24 +85,22 @@ retriever = BM25HF.load_from_hub("${model.id}")`,
 export const depth_anything_v2 = (model: ModelData): string[] => {
 	let encoder: string;
 	let features: number;
-	let out_channels: number[];
+	let out_channels: string;
 
-	if (model.id === "depth-anything/Depth-Anything-V2-Small") {
-		encoder = "vits";
-		features = 64;
-		out_channels = [48, 96, 192, 384];
-	} else if (model.id === "depth-anything/Depth-Anything-V2-Base") {
+	encoder = "vits";
+	features = 64;
+	out_channels = "[48, 96, 192, 384]";
+
+	if (model.id === "depth-anything/Depth-Anything-V2-Base") {
 		encoder = "vitb";
 		features = 128;
-		out_channels = [96, 192, 384, 768];
+		out_channels = "[96, 192, 384, 768]";
 	} else if (model.id === "depth-anything/Depth-Anything-V2-Large") {
 		encoder = "vitl";
 		features = 256;
-		out_channels = [256, 512, 1024, 1024];
-	} else {
-		throw new Error("Unsupported model ID");
-	}
-
+		out_channels = "[256, 512, 1024, 1024"];
+	} 
+	
 	return [
 		`
 # Install from https://github.com/DepthAnything/Depth-Anything-V2
@@ -114,7 +112,7 @@ import torch
 from depth_anything_v2.dpt import DepthAnythingV2
 
 # instantiate the model
-model = DepthAnythingV2(encoder="${encoder}", features=${features}, out_channels=${JSON.stringify(out_channels)})
+model = DepthAnythingV2(encoder="${encoder}", features=${features}, out_channels=${out_channels})
 
 # load the weights
 filepath = hf_hub_download(repo_id="${model.id}", filename="depth_anything_v2_${encoder}.pth", repo_type="model")
