@@ -15,14 +15,14 @@ const taskData: TaskDataCustom = {
 		inputs: [
 			{
 				label: "Prompt",
-				content: "Enter a prompt to generate a 3D model.",
+				content: "a cat statue",
 				type: "text",
 			},
 		],
 		outputs: [
 			{
 				label: "Result",
-				content: "image-to-3d-3d-output-filename.glb",
+				content: "text-to-3d-3d-output-filename.glb",
 				type: "text",
 			},
 		],
@@ -40,16 +40,15 @@ const taskData: TaskDataCustom = {
 	],
 	spaces: [
 		{
-			description: "Shap-E based text-to-3D demo with mesh outputs.",
+			description: "Text-to-3D demo with mesh outputs.",
 			id: "hysts/Shap-E",
 		},
 		{
-			description: "LGM based text/image-to-3D demo with splat outputs.",
+			description: "Text/image-to-3D demo with splat outputs.",
 			id: "ashawkey/LGM",
 		},
 	],
-	summary:
-		"Text-to-3D models take in text input and produce 3D output. The 3D output may be a mesh (`.glb`, `.obj`) or splat (`.ply`, `.splat`).",
+	summary: "Text-to-3D models take in text input and produce 3D output.",
 	widgetModels: [],
 	youtubeId: "",
 };

@@ -51,24 +51,23 @@ const taskData: TaskDataCustom = {
 			id: "dylanebert/3d-arena",
 		},
 		{
-			description: "InstantMesh-based image-to-3D demo with mesh outputs.",
+			description: "Image-to-3D demo with mesh outputs.",
 			id: "TencentARC/InstantMesh",
 		},
 		{
-			description: "TripoSR-based image-to-3D demo with mesh outputs.",
+			description: "Image-to-3D demo with mesh outputs.",
 			id: "stabilityai/TripoSR",
 		},
 		{
-			description: "Real3D-based image-to-3D demo with mesh outputs.",
+			description: "Image-to-3D demo with mesh outputs.",
 			id: "hwjiang/Real3D",
 		},
 		{
-			description: "LGM-based image-to-3D demo with splat outputs.",
+			description: "Image-to-3D demo with splat outputs.",
 			id: "dylanebert/LGM-mini",
 		},
 	],
-	summary:
-		"Image-to-3D models take in image input and produce 3D output. The 3D output may be a mesh (`.glb`, `.obj`) or splat (`.ply`, `.splat`).",
+	summary: "Image-to-3D models take in image input and produce 3D output.",
 	widgetModels: [],
 	youtubeId: "",
 };
