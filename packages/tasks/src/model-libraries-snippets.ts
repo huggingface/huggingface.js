@@ -680,7 +680,7 @@ torchaudio.save("output1.wav", torch.from_numpy(wavs[0]), 24000)`,
 ];
 
 export const birefnet = (model: ModelData): string[] => [
-	`# Option 1: use transformers
+	`# Option 1: use with transformers
 
 from transformers import AutoModelForImageSegmentation
 birefnet = AutoModelForImageSegmentation.from_pretrained("${model.id}", trust_remote_code=True)
