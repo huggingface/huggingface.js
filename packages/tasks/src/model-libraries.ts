@@ -298,7 +298,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "mindspore",
 		repoUrl: "https://github.com/mindspore-ai/mindspore",
 	},
-	mamba_ssm: {
+	"mamba-ssm": {
 		prettyLabel: "MambaSSM",
 		repoName: "MambaSSM",
 		repoUrl: "https://github.com/state-spaces/mamba",
