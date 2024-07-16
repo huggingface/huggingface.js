@@ -13,10 +13,12 @@ export async function textGeneration(
 	args: BaseArgs & TextGenerationInput,
 	options?: Options
 ): Promise<TextGenerationOutput> {
-	const res = toArray(await request<TextGenerationOutput | TextGenerationOutput[]>(args, {
-		...options,
-		taskHint: "text-generation",
-	}));
+	const res = toArray(
+		await request<TextGenerationOutput | TextGenerationOutput[]>(args, {
+			...options,
+			taskHint: "text-generation",
+		})
+	);
 	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x?.generated_text === "string");
 	if (!isValidOutput) {
 		throw new InferenceOutputError("Expected Array<{generated_text: string}>");
