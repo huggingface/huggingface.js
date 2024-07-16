@@ -1,6 +1,7 @@
 import type { TextGenerationInput, TextGenerationOutput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
+import { toArray } from "../../utils/toArray";
 import { request } from "../custom/request";
 
 export type { TextGenerationInput, TextGenerationOutput };
@@ -12,10 +13,10 @@ export async function textGeneration(
 	args: BaseArgs & TextGenerationInput,
 	options?: Options
 ): Promise<TextGenerationOutput> {
-	const res = await request<TextGenerationOutput[]>(args, {
+	const res = toArray(await request<TextGenerationOutput | TextGenerationOutput[]>(args, {
 		...options,
 		taskHint: "text-generation",
-	});
+	}));
 	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x?.generated_text === "string");
 	if (!isValidOutput) {
 		throw new InferenceOutputError("Expected Array<{generated_text: string}>");
