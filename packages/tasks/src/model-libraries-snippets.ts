@@ -270,27 +270,12 @@ model = from_pretrained_keras("${model.id}")
 `,
 ];
 
-export const mamba_ssm = (model: ModelData): string[] => {
-	if (model.tags.includes("mamba2")) {
-		return [
-			`from mamba_ssm import Mamba2
+export const mamba_ssm = (model: ModelData): string[] => [
+	`from mamba_ssm import MambaLMHeadModel
 
-model = Mamba2.from_pretrained("${model.id}")`,
-		];
-	} else if (model.tags.includes("mamba2simple")) {
-		return [
-			`from mamba_ssm.modules.mamba2_simple import Mamba2Simple
-
-model = Mamba2Simple.from_pretrained("${model.id}")`,
-		];
-	} else {
-		return [
-			`from mamba_ssm import Mamba
-
-model = Mamba.from_pretrained("${model.id}")`,
-		];
-	}
-};
+model = MambaLMHeadModel.from_pretrained("${model.id}")
+`,
+];
 
 export const mars5_tts = (model: ModelData): string[] => [
 	`# Install from https://github.com/Camb-ai/MARS5-TTS
