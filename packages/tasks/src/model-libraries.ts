@@ -303,7 +303,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "MambaSSM",
 		repoUrl: "https://github.com/state-spaces/mamba",
 		filter: false,
-		countDownloads: `path:"config.json"`,
 		snippets: snippets.mamba_ssm,
 	},
 	"mars5-tts": {
