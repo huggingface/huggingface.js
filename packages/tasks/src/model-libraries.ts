@@ -298,6 +298,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "mindspore",
 		repoUrl: "https://github.com/mindspore-ai/mindspore",
 	},
+	"mamba-ssm": {
+		prettyLabel: "MambaSSM",
+		repoName: "MambaSSM",
+		repoUrl: "https://github.com/state-spaces/mamba",
+		filter: false,
+		snippets: snippets.mamba_ssm,
+	},
 	"mars5-tts": {
 		prettyLabel: "MARS5-TTS",
 		repoName: "MARS5-TTS",
