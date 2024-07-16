@@ -273,8 +273,7 @@ model = from_pretrained_keras("${model.id}")
 export const mamba_ssm = (model: ModelData): string[] => [
 	`from mamba_ssm import MambaLMHeadModel
 
-model = MambaLMHeadModel.from_pretrained("${model.id}")
-`,
+model = MambaLMHeadModel.from_pretrained("${model.id}")`,
 ];
 
 export const mars5_tts = (model: ModelData): string[] => [
