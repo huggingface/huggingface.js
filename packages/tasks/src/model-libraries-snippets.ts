@@ -170,19 +170,6 @@ export const diffusers = (model: ModelData): string[] => {
 	}
 };
 
-export const dynamicrafter = (): string[] => [
-	`# Git clone https://github.com/Doubiiu/DynamiCrafter.git,
-# Download pretrained models via Hugging Face, 
-# and put the model.ckpt with the required resolution in 
-# checkpoints/dynamicrafter_[1024|512|256]_v1/model.ckpt
-
-# Run on a single GPU:
-# Select the model based on required resolutions: i.e., 1024|512|320:
-sh scripts/run.sh 1024
-# Run on multiple GPUs for parallel inference:
-sh scripts/run_mp.sh 1024`,
-];
-
 export const edsnlp = (model: ModelData): string[] => {
 	const packageName = nameWithoutNamespace(model.id).replaceAll("-", "_");
 	return [

@@ -160,18 +160,17 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		/// diffusers has its own more complex "countDownloads" query
 	},
-	"dynamicrafter": {
-		prettyLabel: "DynamiCrafter",
-		repoName: "DynamiCrafter",
-		repoUrl: "https://github.com/Doubiiu/DynamiCrafter",
-		snippets: snippets.dynamicrafter,
-		filter: false,
-		countDownloads: `path_extension:"ckpt"`,
-	},
 	doctr: {
 		prettyLabel: "docTR",
 		repoName: "doctr",
 		repoUrl: "https://github.com/mindee/doctr",
+	},
+	dynamicrafter: {
+		prettyLabel: "DynamiCrafter",
+		repoName: "DynamiCrafter",
+		repoUrl: "https://github.com/Doubiiu/DynamiCrafter",
+		filter: false,
+		countDownloads: `path_extension:"ckpt"`,
 	},
 	edsnlp: {
 		prettyLabel: "EDS-NLP",
