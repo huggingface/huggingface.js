@@ -408,6 +408,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"tokenizer.model"`,
 	},
+	"refiners": {
+		prettyLabel: "Refiners",
+		repoName: "refiners",
+		repoUrl: "https://github.com/finegrain-ai/refiners",
+		docsUrl: "https://refine.rs/",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	"sample-factory": {
 		prettyLabel: "sample-factory",
 		repoName: "sample-factory",
