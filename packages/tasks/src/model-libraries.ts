@@ -558,7 +558,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "VideoCrafter",
 		repoUrl: "https://github.com/AILab-CVC/VideoCrafter",
 		snippets: snippets.videocrafter,
-		filter: true,
 		countDownloads: `path_extension:"ckpt"`,
 	},
 	voicecraft: {
