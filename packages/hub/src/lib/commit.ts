@@ -15,6 +15,7 @@ import { checkCredentials } from "../utils/checkCredentials";
 import { chunk } from "../utils/chunk";
 import { promisesQueue } from "../utils/promisesQueue";
 import { promisesQueueStreaming } from "../utils/promisesQueueStreaming";
+import { sha1 } from "../utils/sha1";
 import { sha256 } from "../utils/sha256";
 import { toRepoId } from "../utils/toRepoId";
 import { WebBlob } from "../utils/WebBlob";
@@ -125,8 +126,6 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 	const repoId = toRepoId(params.repo);
 	yield { event: "phase", phase: "preuploading" };
 
-	const lfsShas = new Map<string, string | null>();
-
 	const abortController = new AbortController();
 	const abortSignal = abortController.signal;
 
@@ -168,6 +167,9 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 		const gitAttributes = allOperations.filter(isFileOperation).find((op) => op.path === ".gitattributes")?.content;
 
+		const deleteOps = allOperations.filter((op): op is CommitDeletedEntry => !isFileOperation(op));
+		const fileOpsToCommit: (CommitBlob &
+			({ uploadMode: "lfs"; sha: string } | { uploadMode: "regular"; newSha: string | null }))[] = [];
 		for (const operations of chunk(allOperations.filter(isFileOperation), 100)) {
 			const payload: ApiPreuploadRequest = {
 				gitAttributes: gitAttributes && (await gitAttributes.text()),
@@ -203,43 +205,50 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 			const json: ApiPreuploadResponse = await res.json();
 
-			for (const file of json.files) {
-				if (file.uploadMode === "lfs") {
-					lfsShas.set(file.path, null);
+			yield* eventToGenerator<{ event: "fileProgress"; state: "hashing"; path: string; progress: number }, undefined>(
+				(yieldCallback) => {
+					return promisesQueue(
+						json.files.map((file) => async () => {
+							const op = operations.find((op) => op.path === file.path);
+							if (!op) {
+								return; // this should never happen, server-side we always return one entry per operation
+							}
+
+							const iterator =
+								file.uploadMode === "lfs"
+									? sha256(op.content, { useWebWorker: params.useWebWorkers, abortSignal })
+									: sha1(op.content, { abortSignal });
+							let res: IteratorResult<number, string | null>;
+							do {
+								res = await iterator.next();
+								if (!res.done) {
+									yieldCallback({ event: "fileProgress", path: op.path, progress: res.value, state: "hashing" });
+								}
+							} while (!res.done);
+
+							if (res.value === null || res.value !== file.oid) {
+								fileOpsToCommit.push({
+									...op,
+									uploadMode: file.uploadMode,
+									sha: res.value,
+								} as (typeof fileOpsToCommit)[number]);
+								// ^^ we know `newSha` can only be `null` in the case of `sha1` as expected, but TS doesn't
+							}
+						}),
+						CONCURRENT_SHAS
+					);
 				}
-			}
+			);
+
+			abortSignal?.throwIfAborted();
 		}
 
 		yield { event: "phase", phase: "uploadingLargeFiles" };
 
-		for (const operations of chunk(
-			allOperations.filter(isFileOperation).filter((op) => lfsShas.has(op.path)),
+		for (const lfsOpsToCommit of chunk(
+			fileOpsToCommit.filter((op): op is CommitBlob & { uploadMode: "lfs"; sha: string } => op.uploadMode === "lfs"),
 			100
 		)) {
-			const shas = yield* eventToGenerator<
-				{ event: "fileProgress"; state: "hashing"; path: string; progress: number },
-				string[]
-			>((yieldCallback, returnCallback, rejectCallack) => {
-				return promisesQueue(
-					operations.map((op) => async () => {
-						const iterator = sha256(op.content, { useWebWorker: params.useWebWorkers, abortSignal: abortSignal });
-						let res: IteratorResult<number, string>;
-						do {
-							res = await iterator.next();
-							if (!res.done) {
-								yieldCallback({ event: "fileProgress", path: op.path, progress: res.value, state: "hashing" });
-							}
-						} while (!res.done);
-						const sha = res.value;
-						lfsShas.set(op.path, res.value);
-						return sha;
-					}),
-					CONCURRENT_SHAS
-				).then(returnCallback, rejectCallack);
-			});
-
-			abortSignal?.throwIfAborted();
-
 			const payload: ApiLfsBatchRequest = {
 				operation: "upload",
 				// multipart is a custom protocol for HF
@@ -250,8 +259,8 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 						name: params.branch ?? "main",
 					},
 				}),
-				objects: operations.map((op, i) => ({
-					oid: shas[i],
+				objects: lfsOpsToCommit.map((op) => ({
+					oid: op.sha,
 					size: op.content.size,
 				})),
 			};
@@ -279,7 +288,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 			const json: ApiLfsBatchResponse = await res.json();
 			const batchRequestId = res.headers.get("X-Request-Id") || undefined;
 
-			const shaToOperation = new Map(operations.map((op, i) => [shas[i], op]));
+			const shaToOperation = new Map(lfsOpsToCommit.map((op) => [op.sha, op]));
 
 			yield* eventToGenerator<CommitProgressEvent, void>((yieldCallback, returnCallback, rejectCallback) => {
 				return promisesQueueStreaming(
@@ -293,9 +302,9 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 						abortSignal?.throwIfAborted();
 
 						if (obj.error) {
-							const errorMessage = `Error while doing LFS batch call for ${operations[shas.indexOf(obj.oid)].path}: ${
-								obj.error.message
-							}${batchRequestId ? ` - Request ID: ${batchRequestId}` : ""}`;
+							const errorMessage = `Error while doing LFS batch call for ${op.path}: ${obj.error.message}${
+								batchRequestId ? ` - Request ID: ${batchRequestId}` : ""
+							}`;
 							throw new HubApiError(res.url, obj.error.code, batchRequestId, errorMessage);
 						}
 						if (!obj.actions?.upload) {
@@ -367,9 +376,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 									if (!res.ok) {
 										throw await createApiError(res, {
 											requestId: batchRequestId,
-											message: `Error while uploading part ${part} of ${
-												operations[shas.indexOf(obj.oid)].path
-											} to LFS storage`,
+											message: `Error while uploading part ${part} of ${op.path} to LFS storage`,
 										});
 									}
 
@@ -399,9 +406,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 							if (!res.ok) {
 								throw await createApiError(res, {
 									requestId: batchRequestId,
-									message: `Error completing multipart upload of ${
-										operations[shas.indexOf(obj.oid)].path
-									} to LFS storage`,
+									message: `Error completing multipart upload of ${op.path} to LFS storage`,
 								});
 							}
 
@@ -438,7 +443,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 							if (!res.ok) {
 								throw await createApiError(res, {
 									requestId: batchRequestId,
-									message: `Error while uploading ${operations[shas.indexOf(obj.oid)].path} to LFS storage`,
+									message: `Error while uploading ${op.path} to LFS storage`,
 								});
 							}
 
@@ -458,6 +463,35 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 		abortSignal?.throwIfAborted();
 
 		yield { event: "phase", phase: "committing" };
+
+		const allOpsToCommit = [...deleteOps, ...fileOpsToCommit];
+		if (allOpsToCommit.length === 0) {
+			const res: Response = await (params.fetch ?? fetch)(
+				`${params?.hubUrl || HUB_URL}/api/${repoId.type}s/${repoId.name}`,
+				{
+					headers: {
+						accept: "application/json",
+						...(params.credentials && { Authorization: `Bearer ${params.credentials.accessToken}` }),
+					},
+				}
+			);
+
+			if (!res.ok) {
+				throw await createApiError(res);
+			}
+
+			const { sha } = await res.json();
+
+			return {
+				commit: {
+					oid: sha,
+					url: `${params?.hubUrl || HUB_URL}${repoId.type !== "model" ? `/${repoId.type}s` : ""}/${
+						repoId.name
+					}/commit/${sha}`,
+				},
+				hookOutput: "Nothing to commit",
+			};
+		}
 
 		return yield* eventToGenerator<CommitProgressEvent, CommitOutput>(
 			async (yieldCallback, returnCallback, rejectCallback) =>
@@ -481,17 +515,16 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 								} satisfies ApiCommitHeader,
 							},
 							...((await Promise.all(
-								allOperations.map((operation) => {
+								allOpsToCommit.map((operation) => {
 									if (isFileOperation(operation)) {
-										const sha = lfsShas.get(operation.path);
-										if (sha) {
+										if (operation.uploadMode === "lfs") {
 											return {
 												key: "lfsFile",
 												value: {
 													path: operation.path,
 													algo: "sha256",
 													size: operation.content.size,
-													oid: sha,
+													oid: operation.sha,
 												} satisfies ApiCommitLfsFile,
 											};
 										}
@@ -509,8 +542,8 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 								progressCallback: (progress: number) => {
 									// For now, we display equal progress for all files
 									// We could compute the progress based on the size of `convertOperationToNdJson` for each of the files instead
-									for (const op of allOperations) {
-										if (isFileOperation(op) && !lfsShas.has(op.path)) {
+									for (const op of allOpsToCommit) {
+										if (isFileOperation(op) && op.uploadMode === "regular") {
 											yieldCallback({
 												event: "fileProgress",
 												path: op.path,
