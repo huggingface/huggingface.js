@@ -120,6 +120,11 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isGgufModel,
 		deeplink: (model) => new URL(`sanctum://open_from_hf?model=${model.id}`),
 	},
+	ollama: {
+		prettyLabel: "Ollama",
+		docsUrl: "https://ollama.com",
+		mainTask: "text-generation",
+	},
 	jellybox: {
 		prettyLabel: "Jellybox",
 		docsUrl: "https://jellybox.com",
