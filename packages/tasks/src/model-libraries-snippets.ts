@@ -732,14 +732,6 @@ wavs = chat.infer(texts, )
 torchaudio.save("output1.wav", torch.from_numpy(wavs[0]), 24000)`,
 ];
 
-export const videocrafter = (): string[] => [
-	`Install from https://github.com/AILab-CVC/VideoCrafter
-
-# Download pretrained T2V models via Hugging Face,
-# and put the model.ckpt in checkpoints/base_512_v2/model.ckpt
-sh scripts/run_text2video.sh`,
-];
-
 export const mlx = (model: ModelData): string[] => [
 	`pip install huggingface_hub hf_transfer
 
