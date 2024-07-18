@@ -170,7 +170,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "DynamiCrafter",
 		repoUrl: "https://github.com/Doubiiu/DynamiCrafter",
 		filter: false,
-		countDownloads: `path_extension:"ckpt"`,
+		countDownloads: `path:"model.ckpt"`,
 	},
 	edsnlp: {
 		prettyLabel: "EDS-NLP",
