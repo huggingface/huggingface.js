@@ -27,19 +27,19 @@ async function* shaNode(
 		abortSignal?: AbortSignal;
 	}
 ): AsyncGenerator<number, string> {
-	const sha256Stream = createHash(algorithm);
+	const shaStream = createHash(algorithm);
 	const size = buffer instanceof Blob ? buffer.size : buffer.byteLength;
 	let done = 0;
 	const readable =
 		buffer instanceof Blob ? Readable.fromWeb(buffer.stream() as ReadableStream) : Readable.from(Buffer.from(buffer));
 
 	for await (const buffer of readable) {
-		sha256Stream.update(buffer);
+		shaStream.update(buffer);
 		done += buffer.length;
 		yield done / size;
 
 		opts?.abortSignal?.throwIfAborted();
 	}
 
-	return sha256Stream.digest("hex");
+	return shaStream.digest("hex");
 }
