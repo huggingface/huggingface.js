@@ -2,7 +2,7 @@ import { assert, it, describe } from "vitest";
 
 import { TEST_HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from "../test/consts";
 import type { RepoId } from "../types/public";
-import type { CommitFile } from "./commit";
+import type { CommitFile, CommitOperation } from "./commit";
 import { commit } from "./commit";
 import { createRepo } from "./create-repo";
 import { deleteRepo } from "./delete-repo";
@@ -121,6 +121,97 @@ size ${lfsContent.length}
 					name: repoName,
 					type: "model",
 				},
+				hubUrl: TEST_HUB_URL,
+				credentials: { accessToken: TEST_ACCESS_TOKEN },
+			});
+		}
+	}, 60_000);
+
+	it("should not commit if nothing to add/update", async function () {
+		const tokenizerJsonUrl = new URL(
+			"https://huggingface.co/spaces/aschen/push-model-from-web/raw/main/mobilenet/model.json"
+		);
+		const repoName = `${TEST_USER}/TEST-${insecureRandomString()}`;
+		const repo: RepoId = {
+			name: repoName,
+			type: "model",
+		};
+
+		await createRepo({
+			credentials: {
+				accessToken: TEST_ACCESS_TOKEN,
+			},
+			hubUrl: TEST_HUB_URL,
+			repo,
+			license: "mit",
+		});
+
+		try {
+			const readme1 = await downloadFile({ repo, path: "README.md", hubUrl: TEST_HUB_URL });
+			assert.strictEqual(readme1?.status, 200);
+
+			const nodeOperation: CommitFile[] = isFrontend
+				? []
+				: [
+						{
+							operation: "addOrUpdate",
+							path: "tsconfig.json",
+							content: (await import("node:url")).pathToFileURL("./tsconfig.json") as URL,
+						},
+				  ];
+
+			const operations: CommitOperation[] = [
+				{
+					operation: "addOrUpdate",
+					content: new Blob(["This is me"]),
+					path: "test.txt",
+				},
+				{
+					operation: "addOrUpdate",
+					content: new Blob([lfsContent]),
+					path: "test.lfs.txt",
+				},
+				...nodeOperation,
+				{
+					operation: "addOrUpdate",
+					content: tokenizerJsonUrl,
+					path: "lamaral.json",
+				},
+			];
+
+			const firstOutput = await commit({
+				repo,
+				title: "Preparation commit",
+				credentials: {
+					accessToken: TEST_ACCESS_TOKEN,
+				},
+				hubUrl: TEST_HUB_URL,
+				operations,
+				// To test web workers in the front-end
+				useWebWorkers: { minSize: 5_000 },
+			});
+
+			const secondOutput = await commit({
+				repo,
+				title: "Empty commit",
+				credentials: {
+					accessToken: TEST_ACCESS_TOKEN,
+				},
+				hubUrl: TEST_HUB_URL,
+				operations,
+				// To test web workers in the front-end
+				useWebWorkers: { minSize: 5_000 },
+			});
+
+			assert.strictEqual(firstOutput.commit, secondOutput.commit);
+			assert.strictEqual(firstOutput.hookOutput, "Nothing to commit");
+
+			const currentRes: Response = await fetch(`${TEST_HUB_URL}/api/${repo.type}s/${repo.name}`);
+			const current = await currentRes.json();
+			assert.strictEqual(firstOutput.commit.oid, current.sha);
+		} finally {
+			await deleteRepo({
+				repo,
 				hubUrl: TEST_HUB_URL,
 				credentials: { accessToken: TEST_ACCESS_TOKEN },
 			});
