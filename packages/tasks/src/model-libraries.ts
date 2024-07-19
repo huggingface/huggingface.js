@@ -293,6 +293,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "k2",
 		repoUrl: "https://github.com/k2-fsa/k2",
 	},
+	liveportrait: {
+		prettyLabel: "LivePortrait",
+		repoName: "LivePortrait",
+		repoUrl: "https://github.com/KwaiVGI/LivePortrait",
+		filter: false,
+		countDownloads: `path:"liveportrait/landmark.onnx"`,
+	},
 	mindspore: {
 		prettyLabel: "MindSpore",
 		repoName: "mindspore",
