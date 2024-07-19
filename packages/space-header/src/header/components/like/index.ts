@@ -14,7 +14,7 @@ export const Like = (space: Space): HTMLAnchorElement => {
 	box.style.display = "flex";
 	box.style.flexDirection = "row";
 	box.style.alignItems = "center";
-	box.style.margin = "0 12px";
+	box.style.margin = "0 0 0 12px";
 	box.style.fontSize = "14px";
 	box.style.paddingLeft = "4px";
 
