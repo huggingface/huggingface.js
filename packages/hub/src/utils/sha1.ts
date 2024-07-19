@@ -6,9 +6,7 @@ export async function* sha1(buffer: Blob, opts?: { abortSignal?: AbortSignal }):
 
 	if (globalThis.crypto?.subtle) {
 		const res = hexFromBytes(
-			new Uint8Array(
-				await globalThis.crypto.subtle.digest("SHA-1", buffer instanceof Blob ? await buffer.arrayBuffer() : buffer)
-			)
+			new Uint8Array(await globalThis.crypto.subtle.digest("SHA-1", await buffer.arrayBuffer()))
 		);
 
 		yield 1;
