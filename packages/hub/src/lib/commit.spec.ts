@@ -204,11 +204,11 @@ size ${lfsContent.length}
 			});
 
 			assert.strictEqual(firstOutput.commit, secondOutput.commit);
-			assert.strictEqual(firstOutput.hookOutput, "Nothing to commit");
+			assert.strictEqual(secondOutput.hookOutput, "Nothing to commit");
 
 			const currentRes: Response = await fetch(`${TEST_HUB_URL}/api/${repo.type}s/${repo.name}`);
 			const current = await currentRes.json();
-			assert.strictEqual(firstOutput.commit.oid, current.sha);
+			assert.strictEqual(secondOutput.commit.oid, current.sha);
 		} finally {
 			await deleteRepo({
 				repo,
