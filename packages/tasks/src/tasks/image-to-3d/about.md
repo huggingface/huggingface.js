@@ -1,6 +1,6 @@
 ## Use Cases
 
-Image-to-3D models can be used in a wide variety applications that require 3D, such as games, animation, design, architecture, engineering, marketing, and more.
+Image-to-3D models can be used in a wide variety of applications that require 3D, such as games, animation, design, architecture, engineering, marketing, and more.
 
 ![Image-to-3D Thumbnail](https://huggingface.co/datasets/huggingfacejs/tasks/resolve/main/image-to-3d/image-to-3d-thumbnail.png)
 
