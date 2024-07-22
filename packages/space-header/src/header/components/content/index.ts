@@ -6,7 +6,6 @@ import { Separation } from "./separation";
 import { Username } from "./username";
 
 export const Content = (space: Space): HTMLDivElement => {
-	console.log(space);
 	const content = document.createElement("div");
 	content.style.display = "flex";
 	content.style.flexDirection = "row";
