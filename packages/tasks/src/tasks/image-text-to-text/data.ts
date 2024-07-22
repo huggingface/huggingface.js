@@ -43,8 +43,8 @@ const taskData: TaskDataCustom = {
 	metrics: [],
 	models: [
 		{
-			description: "Cutting-edge vision language model that can also localize texts in images.",
-			id: "liuhaotian/llava-v1.6-34b",
+			description: "Cutting-edge vision language model that can take multiple image inputs.",
+			id: "facebook/chameleon-7b",
 		},
 		{
 			description: "Cutting-edge conversational vision language model that can take multiple image inputs.",
