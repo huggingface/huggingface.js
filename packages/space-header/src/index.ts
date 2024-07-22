@@ -1,4 +1,4 @@
-import type { Options, Space } from "./type";
+import type { Options, Space, Header } from "./type";
 
 import { inject_fonts } from "./inject_fonts";
 
@@ -23,10 +23,16 @@ async function main(initialSpace: string | Space, options?: Options) {
 	if (typeof initialSpace === "string") {
 		space = await get_space(initialSpace);
 		if (space === null) return console.error("Space not found");
+	} else {
+		space = initialSpace;
 	}
 
 	const mini_header_element = create(space as Space);
 	inject(mini_header_element, options);
+
+	return {
+		element: mini_header_element,
+	};
 }
 
-export const init = (space: string | Space, options?: Options): Promise<void> => main(space, options);
+export const init = (space: string | Space, options?: Options): Promise<Header | void> => main(space, options);

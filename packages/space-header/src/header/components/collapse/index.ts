@@ -1,7 +1,7 @@
 import type { Space } from "../../../type";
 import { ArrowCollapse } from "./arrow";
 
-export const Collapse = (space: Space, callback: (open: boolean) => void): HTMLDivElement => {
+export const Collapse = (space: Space, callback: () => void): HTMLDivElement | SVGElement => {
 	const box = document.createElement("div");
 
 	box.setAttribute("id", "space-header__collapse");
@@ -25,13 +25,7 @@ export const Collapse = (space: Space, callback: (open: boolean) => void): HTMLD
 	box.addEventListener("click", (e) => {
 		e.preventDefault();
 		e.stopPropagation();
-		if (box.style.transform === "rotate(180deg)") {
-			box.style.transform = "rotate(0deg)";
-			callback(true);
-		} else {
-			box.style.transform = "rotate(180deg)";
-			callback(false);
-		}
+		callback();
 	});
 
 	box.addEventListener("mouseenter", () => {
