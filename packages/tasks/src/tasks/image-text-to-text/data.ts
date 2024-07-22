@@ -58,6 +58,10 @@ const taskData: TaskDataCustom = {
 			description: "Strong image-text-to-text model made to understand documents.",
 			id: "mPLUG/DocOwl1.5",
 		},
+		{
+			description: "Strong image-text-to-text model made for information retrieval from documents.",
+			id: "vidore/colpali",
+		},
 	],
 	spaces: [
 		{
