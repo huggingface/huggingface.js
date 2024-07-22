@@ -53,6 +53,24 @@ export const DATASET_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/dask/dask",
 		docsUrl: "https://huggingface.co/docs/hub/datasets-dask",
 	},
+	distilabel: {
+		prettyLabel: "Distilabel",
+		repoName: "distilabel",
+		repoUrl: "https://github.com/argilla-io/distilabel",
+		docsUrl: "https://distilabel.argilla.io",
+	},
+	fiftyone: {
+		prettyLabel: "FiftyOne",
+		repoName: "fiftyone",
+		repoUrl: "https://github.com/voxel51/fiftyone",
+		docsUrl: "https://docs.voxel51.com",
+	},
+	argilla: {
+		prettyLabel: "Argilla",
+		repoName: "argilla",
+		repoUrl: "https://github.com/argilla-io/argilla",
+		docsUrl: "https://argilla-io.github.io/argilla",
+	},
 } satisfies Record<string, DatasetLibraryUiElement>;
 
 /// List of the dataset libraries supported by the Hub

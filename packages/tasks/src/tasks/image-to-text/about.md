@@ -9,10 +9,6 @@ This can help the visually impaired people to understand what's happening in the
 
 OCR models convert the text present in an image, e.g. a scanned document, to text.
 
-## Pix2Struct
-
-Pix2Struct is a state-of-the-art model built and released by Google AI. The model itself has to be trained on a downstream task to be used. These tasks include, captioning UI components, images including text, visual questioning infographics, charts, scientific diagrams and more. You can find these models on recommended models of this page.
-
 ## Inference
 
 ### Image Captioning
@@ -22,22 +18,9 @@ You can use the 🤗 Transformers library's `image-to-text` pipeline to generate
 ```python
 from transformers import pipeline
 
-captioner = pipeline("image-to-text",model="Salesforce/blip-image-captioning-base")
+captioner = pipeline("image-to-text", model="Salesforce/blip-image-captioning-base")
 captioner("https://huggingface.co/datasets/Narsil/image_dummy/resolve/main/parrots.png")
 ## [{'generated_text': 'two birds are standing next to each other '}]
-```
-
-### Conversation about the Image
-
-Some text generation models also take image inputs. These are called vision language models. You can use `image-to-text` pipeline to use these models like below.
-
-```python
-from transformers import pipeline
-
-mm_pipeline = pipeline("image-to-text",model="llava-hf/llava-1.5-7b-hf")
-mm_pipeline("https://huggingface.co/spaces/llava-hf/llava-4bit/resolve/main/examples/baklava.png", "How to make this pastry?")
-
-## [{'generated_text': 'To create these pastries, you will need a few key ingredients and tools. Firstly, gather the dough by combining flour with water in your mixing bowl until it forms into an elastic ball that can be easily rolled out on top of another surface or table without breaking apart (like pizza).'}]
 ```
 
 ### OCR
@@ -71,7 +54,7 @@ await inference.imageToText({
 ## Useful Resources
 
 - [Image Captioning](https://huggingface.co/docs/transformers/main/en/tasks/image_captioning)
-- [Image captioning use case](https://blog.google/outreach-initiatives/accessibility/get-image-descriptions/)
+- [Image Captioning Use Case](https://blog.google/outreach-initiatives/accessibility/get-image-descriptions/)
 - [Train Image Captioning model on your dataset](https://github.com/NielsRogge/Transformers-Tutorials/blob/master/GIT/Fine_tune_GIT_on_an_image_captioning_dataset.ipynb)
 - [Train OCR model on your dataset ](https://github.com/NielsRogge/Transformers-Tutorials/tree/master/TrOCR)
 

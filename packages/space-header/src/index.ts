@@ -9,7 +9,12 @@ import { inject } from "./inject";
 async function main(initialSpace: string | Space, options?: Options) {
 	if (window === undefined) return console.error("Please run this script in a browser environment");
 	// Don't run on huggingface.co to avoid duplicate headers
-	if (window.location?.origin === "https://huggingface.co") return;
+	const has_huggingface_ancestor = Object.values(
+		window.location?.ancestorOrigins ?? {
+			0: window.document.referrer,
+		}
+	).some((origin) => new URL(origin)?.origin === "https://huggingface.co");
+	if (has_huggingface_ancestor) return;
 
 	inject_fonts();
 
