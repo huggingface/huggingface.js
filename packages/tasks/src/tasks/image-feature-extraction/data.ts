@@ -42,6 +42,10 @@ const taskData: TaskDataCustom = {
 			description: "A robust image feature extraction models.",
 			id: "facebook/dino-vitb16",
 		},
+		{
+			description: "Strong image-text-to-text model made for information retrieval from documents.",
+			id: "vidore/colpali",
+		},
 	],
 	spaces: [],
 	summary: "Image feature extraction is the task of extracting features learnt in a computer vision model.",
