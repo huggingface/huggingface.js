@@ -217,7 +217,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 							const iterator =
 								file.uploadMode === "lfs"
 									? sha256(op.content, { useWebWorker: params.useWebWorkers, abortSignal })
-									: sha1(new Blob([`blob ${op.content.size}\0`, op.content]), { abortSignal }); // https://git-scm.com/book/en/v2/Git-Internals-Git-Objects
+									: sha1(new Blob([`blob ${op.content.size}\0`, await op.content.arrayBuffer()]), { abortSignal }); // https://git-scm.com/book/en/v2/Git-Internals-Git-Objects
 
 							let res: IteratorResult<number, string | null>;
 							do {
