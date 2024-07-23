@@ -226,7 +226,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "GPT-NeoX",
 		repoName: "GPT-NeoX",
 		repoUrl: "https://github.com/EleutherAI/gpt-neox",
-		filter: true,
+		filter: false,
 		countDownloads: `path_extension:"safetensors" OR path_extension:"bin"`,
 	},
 	grok: {
