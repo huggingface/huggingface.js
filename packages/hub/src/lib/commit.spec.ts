@@ -13,8 +13,8 @@ import { isFrontend } from "../utils/isFrontend";
 
 const lfsContent = "O123456789".repeat(100_000);
 
-describe.only("commit", () => {
-	it.skip("should commit to a repo with blobs", async function () {
+describe("commit", () => {
+	it("should commit to a repo with blobs", async function () {
 		const tokenizerJsonUrl = new URL(
 			"https://huggingface.co/spaces/aschen/push-model-from-web/raw/main/mobilenet/model.json"
 		);
@@ -218,7 +218,7 @@ size ${lfsContent.length}
 		}
 	}, 60_000);
 
-	it.skip("should commit a full repo from HF with web urls", async function () {
+	it("should commit a full repo from HF with web urls", async function () {
 		const repoName = `${TEST_USER}/TEST-${insecureRandomString()}`;
 		const repo: RepoId = {
 			name: repoName,
