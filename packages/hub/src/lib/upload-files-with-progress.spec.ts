@@ -70,23 +70,12 @@ describe("uploadFilesWithProgress", () => {
 			// 	assert(intermediateUploadEvents.length > 0, "There should be at least one intermediate upload event");
 			// }
 			progressEvents = progressEvents.filter((e) => e.event !== "fileProgress" || e.progress === 0 || e.progress === 1);
+			const hashingEvents = progressEvents.splice(1, 6);
 
 			assert.deepStrictEqual(progressEvents, [
 				{
 					event: "phase",
 					phase: "preuploading",
-				},
-				{
-					event: "fileProgress",
-					path: "test.lfs.txt",
-					progress: 0,
-					state: "hashing",
-				},
-				{
-					event: "fileProgress",
-					path: "test.lfs.txt",
-					progress: 1,
-					state: "hashing",
 				},
 				{
 					event: "phase",
@@ -107,6 +96,46 @@ describe("uploadFilesWithProgress", () => {
 				{
 					event: "phase",
 					phase: "committing",
+				},
+			]);
+
+			// order can very due to concurrent processing
+			assert.includeDeepMembers(hashingEvents, [
+				{
+					event: "fileProgress",
+					path: "file1",
+					progress: 0,
+					state: "hashing",
+				},
+				{
+					event: "fileProgress",
+					path: "file1",
+					progress: 1,
+					state: "hashing",
+				},
+				{
+					event: "fileProgress",
+					path: "config.json",
+					progress: 0,
+					state: "hashing",
+				},
+				{
+					event: "fileProgress",
+					path: "config.json",
+					progress: 1,
+					state: "hashing",
+				},
+				{
+					event: "fileProgress",
+					path: "test.lfs.txt",
+					progress: 0,
+					state: "hashing",
+				},
+				{
+					event: "fileProgress",
+					path: "test.lfs.txt",
+					progress: 1,
+					state: "hashing",
 				},
 			]);
 
