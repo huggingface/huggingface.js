@@ -369,7 +369,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "SAE",
 		repoName: "sae",
 		repoUrl: "https://github.com/EleutherAI/sae",
-		filter: true,
+   	filter: false,
 		countDownloads: `path_extension:"safetensors" OR path_extension:"bin"`,
 	},
 	"sample-factory": {
