@@ -3,8 +3,7 @@ import type { TaskDataCustom } from "..";
 const taskData: TaskDataCustom = {
 	datasets: [
 		{
-			description:
-				"Largest document understanding dataset.",
+			description: "Largest document understanding dataset.",
 			id: "HuggingFaceM4/Docmatix",
 		},
 		{
