@@ -27,7 +27,9 @@ async function main(initialSpace: string | Space, options?: Options) {
 		space = initialSpace;
 	}
 
-	space.has_avatar = await check_avatar(space.author);
+	const [user, org] = await Promise.all([check_avatar(space.author, "user"), check_avatar(space.author, "org")]);
+	console.log(user, org);
+	space.type = user ? "user" : org ? "org" : "unknown";
 
 	const mini_header_element = create(space as Space);
 	inject(mini_header_element, options);
