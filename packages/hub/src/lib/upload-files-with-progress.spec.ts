@@ -89,6 +89,10 @@ describe("uploadFilesWithProgress", () => {
 					state: "hashing",
 				},
 				{
+					event: "phase",
+					phase: "uploadingLargeFiles",
+				},
+				{
 					event: "fileProgress",
 					path: "test.lfs.txt",
 					progress: 0,
@@ -99,10 +103,6 @@ describe("uploadFilesWithProgress", () => {
 					path: "test.lfs.txt",
 					progress: 1,
 					state: "uploading",
-				},
-				{
-					event: "phase",
-					phase: "uploadingLargeFiles",
 				},
 				{
 					event: "phase",
