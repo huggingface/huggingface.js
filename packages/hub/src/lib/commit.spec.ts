@@ -203,7 +203,7 @@ size ${lfsContent.length}
 				useWebWorkers: { minSize: 5_000 },
 			});
 
-			assert.deepEqual(firstOutput.commit, secondOutput.commit);
+			assert.deepStrictEqual(firstOutput.commit, secondOutput.commit);
 			assert.strictEqual(secondOutput.hookOutput, "Nothing to commit");
 
 			const currentRes: Response = await fetch(`${TEST_HUB_URL}/api/${repo.type}s/${repo.name}`);
