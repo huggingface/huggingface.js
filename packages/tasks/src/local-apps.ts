@@ -91,6 +91,13 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isGgufModel,
 		snippet: snippetLlamacpp,
 	},
+	ollama: {
+		prettyLabel: "Ollama",
+		docsUrl: "https://github.com/ollama/ollama",
+		mainTask: "text-generation",
+		displayOnModelPage: isGgufModel,
+		deeplink: (model) => new URL(`https://ollama.com/search?q=${model.id}`),
+	},
 	lmstudio: {
 		prettyLabel: "LM Studio",
 		docsUrl: "https://lmstudio.ai",
