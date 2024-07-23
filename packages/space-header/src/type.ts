@@ -2,6 +2,7 @@ export interface Space {
 	id: string;
 	likes: number;
 	author: string;
+	has_avatar?: boolean;
 }
 
 export interface User {

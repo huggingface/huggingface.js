@@ -3,7 +3,7 @@ import type { Options, Space, Header } from "./type";
 import { inject_fonts } from "./inject_fonts";
 
 import { create } from "./header/create";
-import { get_space } from "./get_space";
+import { get_space, check_avatar } from "./network_utils";
 import { inject } from "./inject";
 
 async function main(initialSpace: string | Space, options?: Options) {
@@ -26,6 +26,8 @@ async function main(initialSpace: string | Space, options?: Options) {
 	} else {
 		space = initialSpace;
 	}
+
+	space.has_avatar = await check_avatar(space.author);
 
 	const mini_header_element = create(space as Space);
 	inject(mini_header_element, options);

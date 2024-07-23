@@ -15,7 +15,9 @@ export const Content = (space: Space): HTMLDivElement => {
 	content.style.paddingRight = "12px";
 	content.style.height = "40px";
 
-	content.appendChild(Avatar(space.author));
+	if (space.has_avatar) {
+		content.appendChild(Avatar(space.author));
+	}
 	content.appendChild(Username(space.author));
 	content.appendChild(Separation());
 	content.appendChild(Namespace(space.id));

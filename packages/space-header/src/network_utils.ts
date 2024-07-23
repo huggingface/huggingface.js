@@ -9,3 +9,12 @@ export const get_space = async (space_id: string): Promise<Space | null> => {
 		return null;
 	}
 };
+
+export const check_avatar = async (username: string): Promise<boolean> => {
+	try {
+		const response = await fetch(`https://huggingface.co/api/users/${username}/avatar`);
+		return response.ok;
+	} catch (error) {
+		return false;
+	}
+};
