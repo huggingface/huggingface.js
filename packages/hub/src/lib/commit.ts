@@ -205,8 +205,8 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 			const json: ApiPreuploadResponse = await res.json();
 
-			yield* eventToGenerator<{ event: "fileProgress"; state: "hashing"; path: string; progress: number }, undefined>(
-				(yieldCallback) => {
+			yield* eventToGenerator<{ event: "fileProgress"; state: "hashing"; path: string; progress: number }, void[]>(
+				(yieldCallback, returnCallback, rejectCallack) => {
 					return promisesQueue(
 						json.files.map((file) => async () => {
 							const op = operations.find((op) => op.path === file.path);
@@ -237,7 +237,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 							}
 						}),
 						CONCURRENT_SHAS
-					);
+					).then(returnCallback, rejectCallack);
 				}
 			);
 
