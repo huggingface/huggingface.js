@@ -77,32 +77,32 @@ describe("uploadFilesWithProgress", () => {
 					phase: "preuploading",
 				},
 				{
+					event: "fileProgress",
+					path: "test.lfs.txt",
+					progress: 0,
+					state: "hashing",
+				},
+				{
+					event: "fileProgress",
+					path: "test.lfs.txt",
+					progress: 1,
+					state: "hashing",
+				},
+				{
+					event: "fileProgress",
+					path: "test.lfs.txt",
+					progress: 0,
+					state: "uploading",
+				},
+				{
+					event: "fileProgress",
+					path: "test.lfs.txt",
+					progress: 1,
+					state: "uploading",
+				},
+				{
 					event: "phase",
 					phase: "uploadingLargeFiles",
-				},
-				{
-					event: "fileProgress",
-					path: "test.lfs.txt",
-					progress: 0,
-					state: "hashing",
-				},
-				{
-					event: "fileProgress",
-					path: "test.lfs.txt",
-					progress: 1,
-					state: "hashing",
-				},
-				{
-					event: "fileProgress",
-					path: "test.lfs.txt",
-					progress: 0,
-					state: "uploading",
-				},
-				{
-					event: "fileProgress",
-					path: "test.lfs.txt",
-					progress: 1,
-					state: "uploading",
 				},
 				{
 					event: "phase",
