@@ -813,4 +813,11 @@ whisperkit-cli transcribe --audio-path /path/to/audio.mp3
 # Or use your preferred model variant
 whisperkit-cli transcribe --model "large-v3" --model-prefix "distil" --audio-path /path/to/audio.mp3 --verbose`,
 ];
+
+export const seed_story = (): string[] => [
+	`# Install from https://github.com/TencentARC/SEED-Story.git
+
+# refer to https://github.com/TencentARC/SEED-Story/blob/master/configs/clm_models/agent_7b_sft.yaml on how to define args.
+# Use in SEED-Story (https://huggingface.co/TencentARC/SEED-Story) `,
+];
 //#endregion

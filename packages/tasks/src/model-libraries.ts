@@ -575,6 +575,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.whisperkit,
 		countDownloads: `path_filename:"model" AND path_extension:"mil" AND _exists_:"path_prefix"`,
 	},
+	"seed-story": {
+		prettyLabel: "SEED-Story",
+		repoName: "SEED-Story",
+		repoUrl: "https://github.com/TencentARC/SEED-Story",
+		filter: false,
+		countDownloads: `path:"pytorch_model.bin" OR path:"tokenizer.model"`,
+		snippets: snippets.seed_story,
+	},
 } satisfies Record<string, LibraryUiElement>;
 
 export type ModelLibraryKey = keyof typeof MODEL_LIBRARIES_UI_ELEMENTS;
