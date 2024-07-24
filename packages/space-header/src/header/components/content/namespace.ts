@@ -10,7 +10,7 @@ export const Namespace = (id: string): HTMLAnchorElement => {
 	element.style.color = "#1f2937";
 	element.style.textDecoration = "none";
 	element.style.fontWeight = "600";
-	element.style.fontSize = "16px";
+	element.style.fontSize = "15px";
 	element.style.lineHeight = "24px";
 	element.style.flex = "none";
 	element.style.fontFamily = "IBM Plex Mono, sans-serif";
