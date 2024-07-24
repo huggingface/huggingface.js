@@ -132,7 +132,7 @@ export interface ApiPreuploadResponse {
 		uploadMode: "lfs" | "regular";
 		/**
 		 * The oid of the blob if it already exists in the repository
-		 * in case of blob is a lfs file, it'll be the lfs oid
+		 * in case of blob is a lfs file, it'll be the lfs file's sha256
 		 */
 		oid?: string;
 	}>;
