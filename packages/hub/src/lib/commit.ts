@@ -479,11 +479,11 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 						},
 					}
 				);
-	
+
 				if (!res.ok) {
 					throw await createApiError(res);
 				}
-	
+
 				const { sha } = await res.json();
 				currentCommitOid = sha as string;
 			}
