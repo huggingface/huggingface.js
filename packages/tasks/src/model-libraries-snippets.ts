@@ -401,6 +401,23 @@ export const timm = (model: ModelData): string[] => [
 model = timm.create_model("hf_hub:${model.id}", pretrained=True)`,
 ];
 
+export const seed_story = (): string[] => [
+	`# Install from https://github.com/TencentARC/SEED-Story.git
+# Use in SEED-Story (https://huggingface.co/TencentARC/SEED-Story)
+# seed_story_cfg_path refers to 'https://github.com/TencentARC/SEED-Story/blob/master/configs/clm_models/agent_7b_sft.yaml'
+# llm_cfg_path refers to 'https://github.com/TencentARC/SEED-Story/blob/master/configs/clm_models/llama2chat7b_lora.yaml'
+from omegaconf import OmegaConf
+import hydra
+
+# load Llama2
+llm_cfg = OmegaConf.load(llm_cfg_path)
+llm = hydra.utils.instantiate(llm_cfg, torch_dtype=dtype_str)
+
+# initialize seed_story
+seed_story_cfg = OmegaConf.load(seed_story_cfg_path)
+seed_story = hydra.utils.instantiate(seed_story_cfg, llm=llm) `,
+];
+
 const skopsPickle = (model: ModelData, modelFile: string) => {
 	return [
 		`import joblib
@@ -814,10 +831,4 @@ whisperkit-cli transcribe --audio-path /path/to/audio.mp3
 whisperkit-cli transcribe --model "large-v3" --model-prefix "distil" --audio-path /path/to/audio.mp3 --verbose`,
 ];
 
-export const seed_story = (): string[] => [
-	`# Install from https://github.com/TencentARC/SEED-Story.git
-
-# refer to https://github.com/TencentARC/SEED-Story/blob/master/configs/clm_models/agent_7b_sft.yaml on how to define args.
-# Use in SEED-Story (https://huggingface.co/TencentARC/SEED-Story) `,
-];
 //#endregion
