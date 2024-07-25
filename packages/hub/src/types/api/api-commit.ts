@@ -127,6 +127,10 @@ export interface ApiPreuploadRequest {
 }
 
 export interface ApiPreuploadResponse {
+	/**
+	 * Most recent commit oid for target rev
+	 */
+	commitOid: string;
 	files: Array<{
 		path: string;
 		uploadMode: "lfs" | "regular";

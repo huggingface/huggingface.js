@@ -167,6 +167,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 		const gitAttributes = allOperations.filter(isFileOperation).find((op) => op.path === ".gitattributes")?.content;
 
+		let currentCommitOid: string | undefined;
 		const deleteOps = allOperations.filter((op): op is CommitDeletedEntry => !isFileOperation(op));
 		const fileOpsToCommit: (CommitBlob &
 			({ uploadMode: "lfs"; sha: string } | { uploadMode: "regular"; newSha: string | null }))[] = [];
@@ -204,6 +205,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 			}
 
 			const json: ApiPreuploadResponse = await res.json();
+			currentCommitOid = json.commitOid;
 
 			yield* eventToGenerator<{ event: "fileProgress"; state: "hashing"; path: string; progress: number }, void[]>(
 				(yieldCallback, returnCallback, rejectCallack) => {
@@ -467,28 +469,31 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 		const allOpsToCommit = [...deleteOps, ...fileOpsToCommit];
 		if (allOpsToCommit.length === 0) {
-			const res: Response = await (params.fetch ?? fetch)(
-				`${params?.hubUrl || HUB_URL}/api/${repoId.type}s/${repoId.name}`,
-				{
-					headers: {
-						accept: "application/json",
-						...(params.credentials && { Authorization: `Bearer ${params.credentials.accessToken}` }),
-					},
+			if (!currentCommitOid) {
+				const res: Response = await (params.fetch ?? fetch)(
+					`${params?.hubUrl || HUB_URL}/api/${repoId.type}s/${repoId.name}`,
+					{
+						headers: {
+							accept: "application/json",
+							...(params.credentials && { Authorization: `Bearer ${params.credentials.accessToken}` }),
+						},
+					}
+				);
+	
+				if (!res.ok) {
+					throw await createApiError(res);
 				}
-			);
-
-			if (!res.ok) {
-				throw await createApiError(res);
+	
+				const { sha } = await res.json();
+				currentCommitOid = sha as string;
 			}
-
-			const { sha } = await res.json();
 
 			return {
 				commit: {
-					oid: sha,
+					oid: currentCommitOid,
 					url: `${params?.hubUrl || HUB_URL}${repoId.type !== "model" ? `/${repoId.type}s` : ""}/${
 						repoId.name
-					}/commit/${sha}`,
+					}/commit/${currentCommitOid}`,
 				},
 				hookOutput: "Nothing to commit",
 			};
