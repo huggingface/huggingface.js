@@ -260,8 +260,10 @@ size 4194304
 				operations: [
 					{
 						operation: "addOrUpdate",
-						content: new Blob(["This is me 2"]),
-						path: "test.txt",
+						content: new URL(
+							`https://huggingface.co/spaces/huggingfacejs/push-model-from-web/resolve/main/mobilenet/group1-shard1of2`
+						),
+						path: "mobilenet/group1-shard1of2",
 					},
 				],
 			});
