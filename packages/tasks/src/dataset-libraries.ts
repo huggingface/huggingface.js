@@ -71,6 +71,12 @@ export const DATASET_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/argilla-io/argilla",
 		docsUrl: "https://argilla-io.github.io/argilla",
 	},
+	polars: {
+		prettyLabel: "Polars",
+		repoName: "polars",
+		repoUrl: "https://github.com/pola-rs/polars",
+		docsUrl: "https://docs.pola.rs/",
+	},
 } satisfies Record<string, DatasetLibraryUiElement>;
 
 /// List of the dataset libraries supported by the Hub
