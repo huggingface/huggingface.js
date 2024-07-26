@@ -220,51 +220,62 @@ size 4194304
 			hubUrl: TEST_HUB_URL,
 		});
 
-		const pr = await commit({
-			repo,
-			credentials: {
-				accessToken: TEST_ACCESS_TOKEN,
-			},
-			hubUrl: TEST_HUB_URL,
-			title: "Create PR",
-			isPullRequest: true,
-			operations: [
-				{
-					operation: "addOrUpdate",
-					content: new Blob(["This is me"]),
-					path: "test.txt",
+		try {
+			const pr = await commit({
+				repo,
+				credentials: {
+					accessToken: TEST_ACCESS_TOKEN,
 				},
-			],
-		});
+				hubUrl: TEST_HUB_URL,
+				title: "Create PR",
+				isPullRequest: true,
+				operations: [
+					{
+						operation: "addOrUpdate",
+						content: new Blob(["This is me"]),
+						path: "test.txt",
+					},
+				],
+			});
 
-		if (!pr) {
-			throw new Error("PR creation failed");
-		}
+			if (!pr) {
+				throw new Error("PR creation failed");
+			}
 
-		if (!pr.pullRequestUrl) {
-			throw new Error("No pull request url");
-		}
+			if (!pr.pullRequestUrl) {
+				throw new Error("No pull request url");
+			}
 
-		const prNumber = pr.pullRequestUrl.split("/").pop();
-		const prRef = `refs/pr/${prNumber}`;
+			const prNumber = pr.pullRequestUrl.split("/").pop();
+			const prRef = `refs/pr/${prNumber}`;
 
-		await commit({
-			repo,
-			credentials: {
-				accessToken: TEST_ACCESS_TOKEN,
-			},
-			hubUrl: TEST_HUB_URL,
-			branch: prRef,
-			title: "Some commit",
-			operations: [
-				{
-					operation: "addOrUpdate",
-					content: new Blob(["This is me 2"]),
-					path: "test.txt",
+			await commit({
+				repo,
+				credentials: {
+					accessToken: TEST_ACCESS_TOKEN,
 				},
-			],
-		});
+				hubUrl: TEST_HUB_URL,
+				branch: prRef,
+				title: "Some commit",
+				operations: [
+					{
+						operation: "addOrUpdate",
+						content: new Blob(["This is me 2"]),
+						path: "test.txt",
+					},
+				],
+			});
 
-		assert(commit, "PR commit failed");
-	});
+			assert(commit, "PR commit failed");
+		} finally {
+			await deleteRepo({
+				repo: {
+					name: repoName,
+					type: "model",
+				},
+				hubUrl: TEST_HUB_URL,
+				credentials: { accessToken: TEST_ACCESS_TOKEN },
+			});
+		}
+	}, 60_000);
 });
