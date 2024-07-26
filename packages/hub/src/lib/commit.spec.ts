@@ -204,4 +204,67 @@ size 4194304
 		}
 		// https://huggingfacejs-push-model-from-web.hf.space/
 	}, 60_000);
+
+	it("should be able to create a PR and then commit to it", async function () {
+		const repoName = `${TEST_USER}/TEST-${insecureRandomString()}`;
+		const repo: RepoId = {
+			name: repoName,
+			type: "model",
+		};
+
+		await createRepo({
+			credentials: {
+				accessToken: TEST_ACCESS_TOKEN,
+			},
+			repo,
+			hubUrl: TEST_HUB_URL,
+		});
+
+		const pr = await commit({
+			repo,
+			credentials: {
+				accessToken: TEST_ACCESS_TOKEN,
+			},
+			hubUrl: TEST_HUB_URL,
+			title: "Create PR",
+			isPullRequest: true,
+			operations: [
+				{
+					operation: "addOrUpdate",
+					content: new Blob(["This is me"]),
+					path: "test.txt",
+				},
+			],
+		});
+
+		if (!pr) {
+			throw new Error("PR creation failed");
+		}
+
+		if (!pr.pullRequestUrl) {
+			throw new Error("No pull request url");
+		}
+
+		const prNumber = pr.pullRequestUrl.split("/").pop();
+		const prRef = `refs/pr/${prNumber}`;
+
+		await commit({
+			repo,
+			credentials: {
+				accessToken: TEST_ACCESS_TOKEN,
+			},
+			hubUrl: TEST_HUB_URL,
+			branch: prRef,
+			title: "Some commit",
+			operations: [
+				{
+					operation: "addOrUpdate",
+					content: new Blob(["This is me 2"]),
+					path: "test.txt",
+				},
+			],
+		});
+
+		assert(commit, "PR commit failed");
+	});
 });
