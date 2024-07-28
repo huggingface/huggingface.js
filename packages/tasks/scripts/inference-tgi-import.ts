@@ -1,5 +1,5 @@
 /*
- * Fetches TGI specs and generated JSON schema for input, output and stream_output of
+ * Fetches TGI specs and generates JSON schema for input, output and stream_output of
  * text-generation and chat-completion tasks.
  * See https://huggingface.github.io/text-generation-inference/
  */

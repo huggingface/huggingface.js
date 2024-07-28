@@ -53,18 +53,18 @@ const taskData: TaskDataCustom = {
 			id: "latent-consistency/lcm-lora-sdxl",
 		},
 		{
-			description: "A text-to-image model that can generate coherent text inside image.",
-			id: "DeepFloyd/IF-I-XL-v1.0",
+			description: "A very fast text-to-image model.",
+			id: "ByteDance/SDXL-Lightning",
 		},
 		{
 			description: "A powerful text-to-image model.",
-			id: "kakaobrain/karlo-v1-alpha",
+			id: "stabilityai/stable-diffusion-3-medium-diffusers",
 		},
 	],
 	spaces: [
 		{
 			description: "A powerful text-to-image application.",
-			id: "stabilityai/stable-diffusion",
+			id: "stabilityai/stable-diffusion-3-medium",
 		},
 		{
 			description: "A text-to-image application to generate comics.",

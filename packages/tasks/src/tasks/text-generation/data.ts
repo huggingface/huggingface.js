@@ -82,7 +82,7 @@ const taskData: TaskDataCustom = {
 	spaces: [
 		{
 			description: "A leaderboard to compare different open-source text generation models based on various benchmarks.",
-			id: "HuggingFaceH4/open_llm_leaderboard",
+			id: "open-llm-leaderboard/open_llm_leaderboard",
 		},
 		{
 			description: "An text generation based application based on a very powerful LLaMA2 model.",

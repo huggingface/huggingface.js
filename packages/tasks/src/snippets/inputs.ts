@@ -11,30 +11,30 @@ const inputsSummarization = () =>
 
 const inputsTableQuestionAnswering = () =>
 	`{
-		"query": "How many stars does the transformers repository have?",
-		"table": {
-			"Repository": ["Transformers", "Datasets", "Tokenizers"],
-			"Stars": ["36542", "4512", "3934"],
-			"Contributors": ["651", "77", "34"],
-			"Programming language": [
-				"Python",
-				"Python",
-				"Rust, Python and NodeJS"
-			]
-		}
-	}`;
+	"query": "How many stars does the transformers repository have?",
+	"table": {
+		"Repository": ["Transformers", "Datasets", "Tokenizers"],
+		"Stars": ["36542", "4512", "3934"],
+		"Contributors": ["651", "77", "34"],
+		"Programming language": [
+			"Python",
+			"Python",
+			"Rust, Python and NodeJS"
+		]
+	}
+}`;
 
 const inputsVisualQuestionAnswering = () =>
 	`{
-		"image": "cat.png",
-		"question": "What is in this image?"
-	}`;
+	"image": "cat.png",
+	"question": "What is in this image?"
+}`;
 
 const inputsQuestionAnswering = () =>
 	`{
-		"question": "What is my name?",
-		"context": "My name is Clara and I live in Berkeley."
-	}`;
+	"question": "What is my name?",
+	"context": "My name is Clara and I live in Berkeley."
+}`;
 
 const inputsTextClassification = () => `"I like you. I love you"`;
 
@@ -48,13 +48,13 @@ const inputsFillMask = (model: ModelDataMinimal) => `"The answer to the universe
 
 const inputsSentenceSimilarity = () =>
 	`{
-		"source_sentence": "That is a happy person",
-		"sentences": [
-			"That is a happy dog",
-			"That is a very happy person",
-			"Today is a sunny day"
-		]
-	}`;
+	"source_sentence": "That is a happy person",
+	"sentences": [
+		"That is a happy dog",
+		"That is a very happy person",
+		"Today is a sunny day"
+	]
+}`;
 
 const inputsFeatureExtraction = () => `"Today is a sunny day and I will get some ice cream."`;
 
