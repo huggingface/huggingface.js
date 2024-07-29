@@ -33,6 +33,7 @@
 	<LogInPopover bind:open={popOverOpen}>
 		<button
 			class={classNames}
+			type="button"
 			on:click={(e) => {
 				if (!$isLoggedIn) {
 					popOverOpen = true;
