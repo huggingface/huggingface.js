@@ -151,6 +151,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pth"`,
 	},
+	diffree: {
+		prettyLabel: "Diffree",
+		repoName: "Diffree",
+		repoUrl: "https://github.com/OpenGVLab/Diffree",
+		filter: false,
+		countDownloads: `path:"diffree-step=000010999.ckpt"`,
+	},
 	diffusers: {
 		prettyLabel: "Diffusers",
 		repoName: "🤗/diffusers",
@@ -164,13 +171,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "docTR",
 		repoName: "doctr",
 		repoUrl: "https://github.com/mindee/doctr",
-	},
-	diffree: {
-		prettyLabel: "Diffree",
-		repoName: "Diffree",
-		repoUrl: "https://github.com/OpenGVLab/Diffree",
-		filter: false,
-		countDownloads: `path:"diffree-step=000010999.ckpt"`,
 	},
 	edsnlp: {
 		prettyLabel: "EDS-NLP",
