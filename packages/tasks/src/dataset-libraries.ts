@@ -27,7 +27,7 @@ export const DATASET_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "Croissant",
 		repoName: "croissant",
 		repoUrl: "https://github.com/mlcommons/croissant/tree/main/python/mlcroissant",
-		docsUrl: "https://github.com/mlcommons/croissant/blob/main/python/mlcroissant/README.md",
+		docsUrl: "https://huggingface.co/docs/dataset-viewer/mlcroissant",
 	},
 	webdataset: {
 		prettyLabel: "WebDataset",
@@ -57,25 +57,25 @@ export const DATASET_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "Distilabel",
 		repoName: "distilabel",
 		repoUrl: "https://github.com/argilla-io/distilabel",
-		docsUrl: "https://distilabel.argilla.io",
+		docsUrl: "https://huggingface.co/docs/hub/datasets-distilabel",
 	},
 	fiftyone: {
 		prettyLabel: "FiftyOne",
 		repoName: "fiftyone",
 		repoUrl: "https://github.com/voxel51/fiftyone",
-		docsUrl: "https://docs.voxel51.com",
+		docsUrl: "https://huggingface.co/docs/hub/datasets-fiftyone",
 	},
 	argilla: {
 		prettyLabel: "Argilla",
 		repoName: "argilla",
 		repoUrl: "https://github.com/argilla-io/argilla",
-		docsUrl: "https://argilla-io.github.io/argilla",
+		docsUrl: "https://huggingface.co/docs/hub/datasets-argilla",
 	},
 	polars: {
 		prettyLabel: "Polars",
 		repoName: "polars",
 		repoUrl: "https://github.com/pola-rs/polars",
-		docsUrl: "https://docs.pola.rs/",
+		docsUrl: "https://huggingface.co/docs/hub/datasets-polars",
 	},
 } satisfies Record<string, DatasetLibraryUiElement>;
 
