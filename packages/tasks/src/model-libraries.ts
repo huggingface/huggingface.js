@@ -165,6 +165,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "doctr",
 		repoUrl: "https://github.com/mindee/doctr",
 	},
+	diffree: {
+		prettyLabel: "Diffree",
+		repoName: "Diffree",
+		repoUrl: "https://github.com/OpenGVLab/Diffree",
+		filter: false,
+		countDownloads: `path:"diffree-step=000010999.ckpt"`,
+	},
 	edsnlp: {
 		prettyLabel: "EDS-NLP",
 		repoName: "edsnlp",
@@ -574,13 +581,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://github.com/argmaxinc/WhisperKit?tab=readme-ov-file#homebrew",
 		snippets: snippets.whisperkit,
 		countDownloads: `path_filename:"model" AND path_extension:"mil" AND _exists_:"path_prefix"`,
-	},
-	diffree: {
-		prettyLabel: "Diffree",
-		repoName: "Diffree",
-		repoUrl: "https://github.com/OpenGVLab/Diffree",
-		filter: false,
-		countDownloads: `path:"diffree-step=000010999.ckpt"`,
 	},
 } satisfies Record<string, LibraryUiElement>;
 
