@@ -114,6 +114,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"npz"`,
 	},
+	birefnet: {
+		prettyLabel: "BiRefNet",
+		repoName: "BiRefNet",
+		repoUrl: "https://github.com/ZhengPeng7/BiRefNet",
+		snippets: snippets.birefnet,
+		filter: false,
+	},
 	bm25s: {
 		prettyLabel: "BM25S",
 		repoName: "bm25s",

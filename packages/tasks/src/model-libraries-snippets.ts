@@ -732,6 +732,20 @@ wavs = chat.infer(texts, )
 torchaudio.save("output1.wav", torch.from_numpy(wavs[0]), 24000)`,
 ];
 
+export const birefnet = (model: ModelData): string[] => [
+	`# Option 1: use with transformers
+
+from transformers import AutoModelForImageSegmentation
+birefnet = AutoModelForImageSegmentation.from_pretrained("${model.id}", trust_remote_code=True)
+`,
+	`# Option 2: use with BiRefNet
+
+# Install from https://github.com/ZhengPeng7/BiRefNet
+
+from models.birefnet import BiRefNet
+model = BiRefNet.from_pretrained("${model.id}")`,
+];
+
 export const mlx = (model: ModelData): string[] => [
 	`pip install huggingface_hub hf_transfer
 
