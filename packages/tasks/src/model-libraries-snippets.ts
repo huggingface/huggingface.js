@@ -690,7 +690,7 @@ birefnet = AutoModelForImageSegmentation.from_pretrained("${model.id}", trust_re
 # Install from https://github.com/ZhengPeng7/BiRefNet
 
 from models.birefnet import BiRefNet
-model = BirefNet.from_pretrained("${model.id}")`,
+model = BiRefNet.from_pretrained("${model.id}")`,
 ];
 
 export const mlx = (model: ModelData): string[] => [
