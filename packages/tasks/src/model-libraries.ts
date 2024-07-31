@@ -257,6 +257,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"checkpoints/byt5_model.pt"`,
 	},
+	"gpt-neox": {
+		prettyLabel: "GPT-NeoX",
+		repoName: "GPT-NeoX",
+		repoUrl: "https://github.com/EleutherAI/gpt-neox",
+		filter: false,
+		countDownloads: `path:"config.json"`,
+	},
 	grok: {
 		prettyLabel: "Grok",
 		repoName: "Grok",
@@ -428,6 +435,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/google-deepmind/recurrentgemma",
 		filter: false,
 		countDownloads: `path:"tokenizer.model"`,
+	},
+	"sae": {
+		prettyLabel: "SAE",
+		repoName: "sae",
+		repoUrl: "https://github.com/EleutherAI/sae",
+   	filter: false,
+		countDownloads: `path_extension:"safetensors" OR path_extension:"bin"`,
 	},
 	"sample-factory": {
 		prettyLabel: "sample-factory",
