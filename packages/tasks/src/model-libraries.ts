@@ -114,6 +114,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"npz"`,
 	},
+	birefnet: {
+		prettyLabel: "BiRefNet",
+		repoName: "BiRefNet",
+		repoUrl: "https://github.com/ZhengPeng7/BiRefNet",
+		snippets: snippets.birefnet,
+		filter: false,
+	},
 	bm25s: {
 		prettyLabel: "BM25S",
 		repoName: "bm25s",
@@ -150,6 +157,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.depth_anything_v2,
 		filter: false,
 		countDownloads: `path_extension:"pth"`,
+	},
+	diffree: {
+		prettyLabel: "Diffree",
+		repoName: "Diffree",
+		repoUrl: "https://github.com/OpenGVLab/Diffree",
+		filter: false,
+		countDownloads: `path:"diffree-step=000010999.ckpt"`,
 	},
 	diffusers: {
 		prettyLabel: "Diffusers",
@@ -414,6 +428,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/google-deepmind/recurrentgemma",
 		filter: false,
 		countDownloads: `path:"tokenizer.model"`,
+	},
+	saelens: {
+		prettyLabel: "SAELens",
+		repoName: "SAELens",
+		repoUrl: "https://github.com/jbloomAus/SAELens",
+		filter: false,
 	},
 	"sample-factory": {
 		prettyLabel: "sample-factory",
