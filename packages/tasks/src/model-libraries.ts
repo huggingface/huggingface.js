@@ -429,6 +429,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"tokenizer.model"`,
 	},
+	saelens: {
+		prettyLabel: "SAELens",
+		repoName: "SAELens",
+		repoUrl: "https://github.com/jbloomAus/SAELens",
+		filter: false,
+	},
 	"sample-factory": {
 		prettyLabel: "sample-factory",
 		repoName: "sample-factory",
