@@ -509,6 +509,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"safetensors"`,
 	},
+	"seed-story": {
+		prettyLabel: "SEED-Story",
+		repoName: "SEED-Story",
+		repoUrl: "https://github.com/TencentARC/SEED-Story",
+		filter: false,
+		countDownloads: `path:"pytorch_model.bin" OR path:"tokenizer.model"`,
+		snippets: snippets.seed_story,
+	},
 	"stable-baselines3": {
 		prettyLabel: "stable-baselines3",
 		repoName: "stable-baselines3",
