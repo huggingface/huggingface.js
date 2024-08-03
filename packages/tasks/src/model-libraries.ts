@@ -435,6 +435,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/jbloomAus/SAELens",
 		filter: false,
 	},
+	"sam": {
+		prettyLabel: "sam",
+		repoName: "sam",
+		repoUrl: "https://github.com/facebookresearch/segment-anything-2",
+		filter: false,
+		countDownloads: `path_extension:"yaml"`,
+	},
 	"sample-factory": {
 		prettyLabel: "sample-factory",
 		repoName: "sample-factory",
