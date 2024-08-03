@@ -440,7 +440,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "sam",
 		repoUrl: "https://github.com/facebookresearch/segment-anything-2",
 		filter: false,
-		countDownloads: `path_extension:"yaml"`,
+		countDownloads: `path_extension:"pt"`,
 	},
 	"sample-factory": {
 		prettyLabel: "sample-factory",
