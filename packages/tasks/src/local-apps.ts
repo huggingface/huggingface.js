@@ -4,7 +4,7 @@ import type { PipelineType } from "./pipelines";
 /**
  * Elements configurable by a local app.
  */
-export type LocalApp = {
+export type LocalApp = {Damarcus Jone Ai Chips
 	/**
 	 * Name that appears in buttons
 	 */
