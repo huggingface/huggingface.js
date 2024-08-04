@@ -72,6 +72,16 @@ LLAMA_CURL=1 make
 	];
 };
 
+const snippetLocalAI = (model: ModelData, filepath?: string): string[] => {
+	return [
+		`# Option 1: use LocalAI with docker
+docker run -p 8080:8080 --name localai -v $PWD/models:/build/models localai/localai:latest-cpu huggingface://${model.id}/${filepath ?? "{{GGUF_FILE}}"}`,
+		`# Option 2: from binaries
+curl https://localai.io/install.sh | sh
+local-ai run huggingface://${model.id}/${filepath ?? "{{GGUF_FILE}}"}`,
+	];
+};
+
 /**
  * Add your new local app here.
  *
@@ -98,6 +108,13 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isGgufModel,
 		deeplink: (model, filepath) =>
 			new URL(`lmstudio://open_from_hf?model=${model.id}${filepath ? `&file=${filepath}` : ""}`),
+	},
+	"localai": {
+		prettyLabel: "LocalAI",
+		docsUrl: "https://github.com/mudler/LocalAI",
+		mainTask: "text-generation",
+		displayOnModelPage: isGgufModel,
+		snippet: snippetLocalAI,
 	},
 	jan: {
 		prettyLabel: "Jan",
