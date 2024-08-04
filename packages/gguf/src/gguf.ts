@@ -4,7 +4,7 @@ import { isBackend } from "./utils/isBackend";
 import { promisesQueue } from "./utils/promisesQueue";
 
 export type { MetadataBaseValue, MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
-export { GGUFValueType, GGMLQuantizationType, Architecture } from "./types";
+export { GGUFValueType, GGMLFileQuantizationType, GGMLQuantizationType, Architecture } from "./types";
 export { GGUF_QUANT_DESCRIPTIONS } from "./quant-descriptions";
 
 export const RE_GGUF_FILE = /\.gguf$/;
