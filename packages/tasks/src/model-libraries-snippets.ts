@@ -401,7 +401,7 @@ export const timm = (model: ModelData): string[] => [
 model = timm.create_model("hf_hub:${model.id}", pretrained=True)`,
 ];
 
-export const saelens = (model: ModelData): string[] => [
+export const saelens = (/* model: ModelData */): string[] => [
 	`# pip install sae-lens
 from sae_lens import SAE
 
@@ -409,7 +409,7 @@ sae, cfg_dict, sparsity = SAE.from_pretrained(
     release = "RELEASE_ID", # e.g., "gpt2-small-res-jb". See other options in https://github.com/jbloomAus/SAELens/blob/main/sae_lens/pretrained_saes.yaml
     sae_id = "SAE_ID", # e.g., "blocks.8.hook_resid_pre". Won't always be a hook point
 )`,
-]
+];
 
 const skopsPickle = (model: ModelData, modelFile: string) => {
 	return [
@@ -597,8 +597,8 @@ export const transformers = (model: ModelData): string[] => {
 			info.processor === "AutoTokenizer"
 				? "tokenizer"
 				: info.processor === "AutoFeatureExtractor"
-				  ? "extractor"
-				  : "processor";
+					? "extractor"
+					: "processor";
 		autoSnippet = [
 			"# Load model directly",
 			`from transformers import ${info.processor}, ${info.auto_model}`,
