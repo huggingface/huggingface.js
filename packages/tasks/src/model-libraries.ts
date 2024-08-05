@@ -433,6 +433,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "SAELens",
 		repoName: "SAELens",
 		repoUrl: "https://github.com/jbloomAus/SAELens",
+		snippets: snippets.saelens,
 		filter: false,
 	},
 	"sample-factory": {
