@@ -19,6 +19,10 @@ const taskData: TaskDataCustom = {
 			description: "An instruction dataset with preference ratings on responses.",
 			id: "openbmb/UltraFeedback",
 		},
+		{
+			description: "A large synthetic dataset for alignment of text generation models.",
+			id: "argilla/magpie-ultra-v0.1",
+		},
 	],
 	demo: {
 		inputs: [
@@ -51,32 +55,32 @@ const taskData: TaskDataCustom = {
 	],
 	models: [
 		{
-			description: "A large language model trained for text generation.",
-			id: "bigscience/bloom-560m",
+			description: "A large text-generation model trained to follow instructions.",
+			id: "google/gemma-2-2b-it",
 		},
 		{
 			description: "A large code generation model that can generate code in 80+ languages.",
 			id: "bigcode/starcoder",
 		},
 		{
-			description: "A very powerful text generation model.",
-			id: "mistralai/Mixtral-8x7B-Instruct-v0.1",
+			description: "A very powerful text generation model trained to follow instructions.",
+			id: "meta-llama/Meta-Llama-3.1-8B-Instruct",
 		},
 		{
 			description: "Small yet powerful text generation model.",
-			id: "microsoft/phi-2",
+			id: "microsoft/Phi-3-mini-4k-instruct",
 		},
 		{
-			description: "A very powerful model that can chat, do mathematical reasoning and write code.",
-			id: "openchat/openchat-3.5-0106",
+			description: "A very powerful model that can solve mathematical problems.",
+			id: "AI-MO/NuminaMath-7B-TIR",
 		},
 		{
-			description: "Very strong yet small assistant model.",
-			id: "HuggingFaceH4/zephyr-7b-beta",
+			description: "Strong coding assistant model.",
+			id: "HuggingFaceH4/starchat2-15b-v0.1",
 		},
 		{
 			description: "Very strong open-source large language model.",
-			id: "meta-llama/Llama-2-70b-hf",
+			id: "mistralai/Mistral-Nemo-Instruct-2407",
 		},
 	],
 	spaces: [
@@ -104,7 +108,7 @@ const taskData: TaskDataCustom = {
 	summary:
 		"Generating text is the task of generating new text given another text. These models can, for example, fill in incomplete text or paraphrase.",
 	widgetModels: ["HuggingFaceH4/zephyr-7b-beta"],
-	youtubeId: "Vpjb1lu0MDk",
+	youtubeId: "e9gNEAlsOvU",
 };
 
 export default taskData;
