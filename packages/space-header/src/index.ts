@@ -3,7 +3,8 @@ import type { Options, Space, Header } from "./type";
 import { inject_fonts } from "./inject_fonts";
 
 import { create } from "./header/create";
-import { get_space, check_avatar } from "./network_utils";
+import { check_avatar } from "./utils/check_avatar";
+import { get_space } from "./utils/get_space";
 import { inject } from "./inject";
 
 async function main(initialSpace: string | Space, options?: Options) {
