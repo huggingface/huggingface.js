@@ -1,10 +1,19 @@
 import type { ModelData } from "./model-data";
 import type { PipelineType } from "./pipelines";
 
-interface Snippet {
+export interface LocalAppSnippet {
+	/**
+	 * Title of the snippet
+	 */
 	title: string;
-	setup: string;
-	command: string;
+	/**
+	 * Optional setup guide
+	 */
+	setup?: string;
+	/**
+	 * Content (or command) to be run
+	 */
+	content: string;
 }
 
 /**
@@ -45,7 +54,7 @@ export type LocalApp = {
 			 * And if not (mostly llama.cpp), snippet to copy/paste in your terminal
 			 * Support the placeholder {{GGUF_FILE}} that will be replaced by the gguf file path or the list of available files.
 			 */
-			snippet: (model: ModelData, filepath?: string) => string | string[] | Snippet | Snippet[];
+			snippet: (model: ModelData, filepath?: string) => string | string[] | LocalAppSnippet | LocalAppSnippet[];
 	  }
 );
 
@@ -53,7 +62,7 @@ function isGgufModel(model: ModelData) {
 	return model.tags.includes("gguf");
 }
 
-const snippetLlamacpp = (model: ModelData, filepath?: string): Snippet[] => {
+const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const command = (binary: string) =>
 		[
 			"# Load and run the model:",
@@ -67,7 +76,7 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): Snippet[] => {
 		{
 			title: "Install from brew",
 			setup: "brew install llama.cpp",
-			command: command("llama-cli"),
+			content: command("llama-cli"),
 		},
 		{
 			title: "Use pre-built binary",
@@ -76,7 +85,7 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): Snippet[] => {
 				"# Download pre-built binary from:",
 				"# https://github.com/ggerganov/llama.cpp/releases",
 			].join("\n"),
-			command: command("./llama-cli"),
+			content: command("./llama-cli"),
 		},
 		{
 			title: "Build from source code",
@@ -85,7 +94,7 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): Snippet[] => {
 				"cd llama.cpp",
 				"LLAMA_CURL=1 make llama-cli",
 			].join("\n"),
-			command: command("./llama-cli"),
+			content: command("./llama-cli"),
 		},
 	];
 };
