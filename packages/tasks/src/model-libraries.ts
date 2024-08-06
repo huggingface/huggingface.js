@@ -90,6 +90,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/facebookresearch/audiocraft",
 		snippets: snippets.audiocraft,
 		filter: false,
+		countDownloads: `path:"state_dict.bin"`,
 	},
 	audioseal: {
 		prettyLabel: "AudioSeal",
@@ -113,6 +114,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"npz"`,
 	},
+	birefnet: {
+		prettyLabel: "BiRefNet",
+		repoName: "BiRefNet",
+		repoUrl: "https://github.com/ZhengPeng7/BiRefNet",
+		snippets: snippets.birefnet,
+		filter: false,
+	},
 	bm25s: {
 		prettyLabel: "BM25S",
 		repoName: "bm25s",
@@ -121,6 +129,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"params.index.json"`,
 	},
+	champ: {
+		prettyLabel: "Champ",
+		repoName: "Champ",
+		repoUrl: "https://github.com/fudan-generative-vision/champ",
+		countDownloads: `path:"champ/motion_module.pth"`,
+	},
 	chat_tts: {
 		prettyLabel: "ChatTTS",
 		repoName: "ChatTTS",
@@ -128,6 +142,28 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.chattts,
 		filter: false,
 		countDownloads: `path:"asset/GPT.pt"`,
+	},
+	colpali: {
+		prettyLabel: "ColPali",
+		repoName: "ColPali",
+		repoUrl: "https://github.com/ManuelFay/colpali",
+		filter: false,
+		countDownloads: `path:"adapter_config.json"`,
+	},
+	"depth-anything-v2": {
+		prettyLabel: "DepthAnythingV2",
+		repoName: "Depth Anything V2",
+		repoUrl: "https://github.com/DepthAnything/Depth-Anything-V2",
+		snippets: snippets.depth_anything_v2,
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
+	},
+	diffree: {
+		prettyLabel: "Diffree",
+		repoName: "Diffree",
+		repoUrl: "https://github.com/OpenGVLab/Diffree",
+		filter: false,
+		countDownloads: `path:"diffree-step=000010999.ckpt"`,
 	},
 	diffusers: {
 		prettyLabel: "Diffusers",
@@ -228,6 +264,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"ckpt/tensor00000_000" OR path:"ckpt-0/tensor00000_000"`,
 	},
+	hallo: {
+		prettyLabel: "Hallo",
+		repoName: "Hallo",
+		repoUrl: "https://github.com/fudan-generative-vision/hallo",
+		countDownloads: `path:"hallo/net.pth"`,
+	},
 	"hunyuan-dit": {
 		prettyLabel: "HunyuanDiT",
 		repoName: "HunyuanDiT",
@@ -240,6 +282,16 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/keras-team/keras",
 		docsUrl: "https://huggingface.co/docs/hub/keras",
 		snippets: snippets.keras,
+		filter: true,
+		countDownloads: `path:"config.json" OR path_extension:"keras"`,
+	},
+	"tf-keras": {
+		// Legacy "Keras 2" library (tensorflow-only)
+		prettyLabel: "TF-Keras",
+		repoName: "TF-Keras",
+		repoUrl: "https://github.com/keras-team/tf-keras",
+		docsUrl: "https://huggingface.co/docs/hub/tf-keras",
+		snippets: snippets.tf_keras,
 		filter: true,
 		countDownloads: `path:"saved_model.pb"`,
 	},
@@ -255,10 +307,40 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "k2",
 		repoUrl: "https://github.com/k2-fsa/k2",
 	},
+	liveportrait: {
+		prettyLabel: "LivePortrait",
+		repoName: "LivePortrait",
+		repoUrl: "https://github.com/KwaiVGI/LivePortrait",
+		filter: false,
+		countDownloads: `path:"liveportrait/landmark.onnx"`,
+	},
 	mindspore: {
 		prettyLabel: "MindSpore",
 		repoName: "mindspore",
 		repoUrl: "https://github.com/mindspore-ai/mindspore",
+	},
+	"mamba-ssm": {
+		prettyLabel: "MambaSSM",
+		repoName: "MambaSSM",
+		repoUrl: "https://github.com/state-spaces/mamba",
+		filter: false,
+		snippets: snippets.mamba_ssm,
+	},
+	"mars5-tts": {
+		prettyLabel: "MARS5-TTS",
+		repoName: "MARS5-TTS",
+		repoUrl: "https://github.com/Camb-ai/MARS5-TTS",
+		filter: false,
+		countDownloads: `path:"mars5_ar.safetensors"`,
+		snippets: snippets.mars5_tts,
+	},
+	"mesh-anything": {
+		prettyLabel: "MeshAnything",
+		repoName: "MeshAnything",
+		repoUrl: "https://github.com/buaacyw/MeshAnything",
+		filter: false,
+		countDownloads: `path:"MeshAnything_350m.pth"`,
+		snippets: snippets.mesh_anything,
 	},
 	"ml-agents": {
 		prettyLabel: "ml-agents",
@@ -284,6 +366,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.mlxim,
 		filter: false,
 		countDownloads: `path:"model.safetensors"`,
+	},
+	"mlc-llm": {
+		prettyLabel: "MLC-LLM",
+		repoName: "MLC-LLM",
+		repoUrl: "https://github.com/mlc-ai/mlc-llm",
+		docsUrl: "https://llm.mlc.ai/docs/",
+		filter: false,
+		countDownloads: `path:"mlc-chat-config.json"`,
 	},
 	nemo: {
 		prettyLabel: "NeMo",
@@ -338,6 +428,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/google-deepmind/recurrentgemma",
 		filter: false,
 		countDownloads: `path:"tokenizer.model"`,
+	},
+	saelens: {
+		prettyLabel: "SAELens",
+		repoName: "SAELens",
+		repoUrl: "https://github.com/jbloomAus/SAELens",
+		snippets: snippets.saelens,
+		filter: false,
 	},
 	"sample-factory": {
 		prettyLabel: "sample-factory",
@@ -495,6 +592,8 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "WhisperKit",
 		repoName: "WhisperKit",
 		repoUrl: "https://github.com/argmaxinc/WhisperKit",
+		docsUrl: "https://github.com/argmaxinc/WhisperKit?tab=readme-ov-file#homebrew",
+		snippets: snippets.whisperkit,
 		countDownloads: `path_filename:"model" AND path_extension:"mil" AND _exists_:"path_prefix"`,
 	},
 } satisfies Record<string, LibraryUiElement>;

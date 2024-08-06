@@ -3,9 +3,12 @@ import type { TaskDataCustom } from "..";
 const taskData: TaskDataCustom = {
 	datasets: [
 		{
-			// TODO write proper description
-			description: "Widely used benchmark dataset for multiple Vision tasks.",
+			description: "Widely used benchmark dataset for multiple vision tasks.",
 			id: "merve/coco2017",
+		},
+		{
+			description: "Multi-task computer vision benchmark.",
+			id: "merve/pascal-voc",
 		},
 	],
 	demo: {
@@ -47,15 +50,15 @@ const taskData: TaskDataCustom = {
 			description: "Strong object detection model trained on ImageNet-21k dataset.",
 			id: "microsoft/beit-base-patch16-224-pt22k-ft22k",
 		},
+		{
+			description: "Fast and accurate object detection model trained on COCO dataset.",
+			id: "PekingU/rtdetr_r18vd_coco_o365",
+		},
 	],
 	spaces: [
 		{
 			description: "Leaderboard to compare various object detection models across several metrics.",
 			id: "hf-vision/object_detection_leaderboard",
-		},
-		{
-			description: "An object detection application that can detect unseen objects out of the box.",
-			id: "merve/owlv2",
 		},
 		{
 			description: "An application that contains various object detection models to try from.",
@@ -68,6 +71,10 @@ const taskData: TaskDataCustom = {
 		{
 			description: "An object tracking, segmentation and inpainting application.",
 			id: "VIPLab/Track-Anything",
+		},
+		{
+			description: "Very fast object tracking application based on object detection.",
+			id: "merve/RT-DETR-tracking-coco",
 		},
 	],
 	summary:
