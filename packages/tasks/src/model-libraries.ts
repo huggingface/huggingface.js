@@ -410,7 +410,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	"refiners": {
 		prettyLabel: "Refiners",
-		repoName: "refiners",
+		repoName: "Refiners",
 		repoUrl: "https://github.com/finegrain-ai/refiners",
 		docsUrl: "https://refine.rs/",
 		filter: false,
