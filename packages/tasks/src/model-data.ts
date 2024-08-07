@@ -109,6 +109,10 @@ export interface ModelData {
 	 * Example: transformers, SpeechBrain, Stanza, etc.
 	 */
 	library_name?: string;
+	/**
+	 * If the model has a zip file that needs to be downloaded
+	 */
+	hasZipFilePaths?: boolean;
 }
 
 /**
