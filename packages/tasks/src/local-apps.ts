@@ -201,7 +201,6 @@ export const LOCAL_APPS = {
 		docsUrl: "https://diffusionbee.com",
 		mainTask: "text-to-image",
 		macOSOnly: true,
-		comingSoon: true,
 		displayOnModelPage: (model) => model.library_name === "diffusers" && model.pipeline_tag === "text-to-image",
 		deeplink: (model) => new URL(`diffusionbee://open_from_hf?model=${model.id}`),
 	},
