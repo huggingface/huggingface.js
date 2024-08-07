@@ -43,8 +43,8 @@ const taskData: TaskDataCustom = {
 	metrics: [],
 	models: [
 		{
-			description: "Cutting-edge vision language model that can also localize texts in images.",
-			id: "liuhaotian/llava-v1.6-34b",
+			description: "Cutting-edge vision language model that can take multiple image inputs.",
+			id: "facebook/chameleon-7b",
 		},
 		{
 			description: "Cutting-edge conversational vision language model that can take multiple image inputs.",
@@ -57,6 +57,10 @@ const taskData: TaskDataCustom = {
 		{
 			description: "Strong image-text-to-text model made to understand documents.",
 			id: "mPLUG/DocOwl1.5",
+		},
+		{
+			description: "Strong image-text-to-text model.",
+			id: "llava-hf/llava-v1.6-mistral-7b-hf",
 		},
 	],
 	spaces: [
