@@ -55,15 +55,15 @@ const taskData: TaskDataCustom = {
 	],
 	models: [
 		{
-			description: "A large text-generation model trained to follow instructions.",
+			description: "A text-generation model trained to follow instructions.",
 			id: "google/gemma-2-2b-it",
 		},
 		{
-			description: "A large code generation model that can generate code in 80+ languages.",
+			description: "A code generation model that can generate code in 80+ languages.",
 			id: "bigcode/starcoder",
 		},
 		{
-			description: "A very powerful text generation model trained to follow instructions.",
+			description: "Very powerful text generation model trained to follow instructions.",
 			id: "meta-llama/Meta-Llama-3.1-8B-Instruct",
 		},
 		{
