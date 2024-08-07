@@ -102,7 +102,9 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 const snippetLocalAI = (model: ModelData, filepath?: string): string[] => {
 	return [
 		`# Option 1: use LocalAI with docker
-docker run -p 8080:8080 --name localai -v $PWD/models:/build/models localai/localai:latest-cpu huggingface://${model.id}/${filepath ?? "{{GGUF_FILE}}"}`,
+docker run -p 8080:8080 --name localai -v $PWD/models:/build/models localai/localai:latest-cpu huggingface://${
+			model.id
+		}/${filepath ?? "{{GGUF_FILE}}"}`,
 		`# Option 2: from binaries
 curl https://localai.io/install.sh | sh
 local-ai run huggingface://${model.id}/${filepath ?? "{{GGUF_FILE}}"}`,
