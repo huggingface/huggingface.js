@@ -39,11 +39,11 @@ const taskData: TaskDataCustom = {
 	],
 	models: [
 		{
-			description: "Solid zero-shot object detection model that uses CLIP as backbone.",
-			id: "google/owlvit-base-patch32",
+			description: "Solid zero-shot object detection model.",
+			id: "IDEA-Research/grounding-dino-base",
 		},
 		{
-			description: "The improved version of the owlvit model.",
+			description: "Cutting-edge zero-shot object detection model.",
 			id: "google/owlv2-base-patch16-ensemble",
 		},
 	],
@@ -51,6 +51,11 @@ const taskData: TaskDataCustom = {
 		{
 			description: "A demo to try the state-of-the-art zero-shot object detection model, OWLv2.",
 			id: "merve/owlv2",
+		},
+		{
+			description:
+				"A demo that combines a zero-shot object detection and mask generation model for zero-shot segmentation.",
+			id: "merve/OWLSAM",
 		},
 	],
 	summary:

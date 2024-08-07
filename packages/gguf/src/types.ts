@@ -29,6 +29,13 @@ export enum GGMLQuantizationType {
 	IQ3_S = 21,
 	IQ2_S = 22,
 	IQ4_XS = 23,
+	I8 = 24,
+	I16 = 25,
+	I32 = 26,
+	I64 = 27,
+	F64 = 28,
+	IQ1_M = 29,
+	BF16 = 30,
 }
 
 export enum GGUFValueType {
