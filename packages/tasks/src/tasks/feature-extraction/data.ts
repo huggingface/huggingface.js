@@ -42,7 +42,7 @@ const taskData: TaskDataCustom = {
 	],
 	spaces: [
 		{
-			description: "A leaderboard to rank best feature extraction models based on a benchmark.",
+			description: "A leaderboard to rank text feature extraction models based on a benchmark.",
 			id: "mteb/leaderboard",
 		},
 		{
