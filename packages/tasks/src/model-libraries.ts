@@ -438,10 +438,11 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	sam2: {
 		prettyLabel: "SAM 2",
-		repoName: "SAM 2",
+		repoName: "sam2",
 		repoUrl: "https://github.com/facebookresearch/segment-anything-2",
 		snippets: snippets.sam2,
 		filter: false,
+		countDownloads: `path_extension:"pt"`,
 	},
 	"sample-factory": {
 		prettyLabel: "sample-factory",
