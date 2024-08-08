@@ -25,6 +25,7 @@
 		"format:check": "prettier --check .",
 		"prepublishOnly": "pnpm run inference-codegen && git diff --name-only --exit-code src && pnpm run build",
 		"build": "tsup src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
+		"watch": "tsup src/index.ts --format cjs,esm --clean --watch",
 		"prepare": "pnpm run build",
 		"check": "tsc",
 		"inference-codegen": "tsx scripts/inference-codegen.ts && prettier --write src/tasks/*/inference.ts",
