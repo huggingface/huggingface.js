@@ -263,10 +263,12 @@ backbone = keras_nlp.models.Backbone.from_preset("hf://${model.id}")
 
 export const llama_cpp_python = (model: ModelData): string[] => [
 	`from llama_cpp import Llama
+
 llm = Llama.from_pretrained(
-repo_id="${model.id}",
-filename="<QUANT FILE NAME>",
+	repo_id="${model.id}",
+	filename="{{GGUF_FILE}}",
 )
+
 llm.create_chat_completion(
 		messages = [
 			{
@@ -275,8 +277,6 @@ llm.create_chat_completion(
 			}
 		]
 )
-	
-`,
 ];
 
 export const tf_keras = (model: ModelData): string[] => [
