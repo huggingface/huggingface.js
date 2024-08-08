@@ -314,6 +314,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"liveportrait/landmark.onnx"`,
 	},
+	"llama-cpp-python": {
+		prettyLabel: "llama-cpp-python",
+		repoName: "llama-cpp-python",
+		repoUrl: "https://github.com/abetlen/llama-cpp-python",
+		snippets: snippets.llama_cpp_python,
+	},
 	mindspore: {
 		prettyLabel: "MindSpore",
 		repoName: "mindspore",

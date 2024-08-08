@@ -261,6 +261,24 @@ backbone = keras_nlp.models.Backbone.from_preset("hf://${model.id}")
 `,
 ];
 
+export const llama_cpp_python = (model: ModelData): string[] => [
+	`from llama_cpp import Llama
+
+llm = Llama.from_pretrained(
+	repo_id="${model.id}",
+	filename="{{GGUF_FILE}}",
+)
+
+llm.create_chat_completion(
+		messages = [
+			{
+				"role": "user",
+				"content": "What is the capital of France?"
+			}
+		]
+)`,
+];
+
 export const tf_keras = (model: ModelData): string[] => [
 	`# Note: 'keras<3.x' or 'tf_keras' must be installed (legacy)
 # See https://github.com/keras-team/tf-keras for more details.
