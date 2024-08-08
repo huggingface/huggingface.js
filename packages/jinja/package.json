@@ -1,7 +1,7 @@
 {
 	"name": "@huggingface/jinja",
 	"packageManager": "pnpm@8.10.5",
-	"version": "0.2.2",
+	"version": "0.3.0",
 	"description": "A minimalistic JavaScript implementation of the Jinja templating engine, specifically designed for parsing and rendering ML chat templates.",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {

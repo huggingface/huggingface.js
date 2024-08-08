@@ -1,6 +1,21 @@
 import type { ModelData } from "./model-data";
 import type { PipelineType } from "./pipelines";
 
+export interface LocalAppSnippet {
+	/**
+	 * Title of the snippet
+	 */
+	title: string;
+	/**
+	 * Optional setup guide
+	 */
+	setup?: string;
+	/**
+	 * Content (or command) to be run
+	 */
+	content: string;
+}
+
 /**
  * Elements configurable by a local app.
  */
@@ -39,7 +54,7 @@ export type LocalApp = {
 			 * And if not (mostly llama.cpp), snippet to copy/paste in your terminal
 			 * Support the placeholder {{GGUF_FILE}} that will be replaced by the gguf file path or the list of available files.
 			 */
-			snippet: (model: ModelData, filepath?: string) => string | string[];
+			snippet: (model: ModelData, filepath?: string) => string | string[] | LocalAppSnippet | LocalAppSnippet[];
 	  }
 );
 
@@ -47,28 +62,40 @@ function isGgufModel(model: ModelData) {
 	return model.tags.includes("gguf");
 }
 
-const snippetLlamacpp = (model: ModelData, filepath?: string): string[] => {
+const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const command = (binary: string) =>
+		[
+			"# Load and run the model:",
+			`${binary} \\`,
+			`  --hf-repo "${model.id}" \\`,
+			`  --hf-file ${filepath ?? "{{GGUF_FILE}}"} \\`,
+			'  -p "You are a helpful assistant" \\',
+			"  --conversation",
+		].join("\n");
 	return [
-		`# Option 1: use llama.cpp with brew
-brew install llama.cpp
-
-# Load and run the model
-llama \\
-	--hf-repo "${model.id}" \\
-	--hf-file ${filepath ?? "{{GGUF_FILE}}"} \\
-	-p "I believe the meaning of life is" \\
-	-n 128`,
-		`# Option 2: build llama.cpp from source with curl support
-git clone https://github.com/ggerganov/llama.cpp.git 
-cd llama.cpp
-LLAMA_CURL=1 make
-
-# Load and run the model
-./main \\
-	--hf-repo "${model.id}" \\
-	-m ${filepath ?? "{{GGUF_FILE}}"} \\
-	-p "I believe the meaning of life is" \\
-	-n 128`,
+		{
+			title: "Install from brew",
+			setup: "brew install llama.cpp",
+			content: command("llama-cli"),
+		},
+		{
+			title: "Use pre-built binary",
+			setup: [
+				// prettier-ignore
+				"# Download pre-built binary from:",
+				"# https://github.com/ggerganov/llama.cpp/releases",
+			].join("\n"),
+			content: command("./llama-cli"),
+		},
+		{
+			title: "Build from source code",
+			setup: [
+				"git clone https://github.com/ggerganov/llama.cpp.git",
+				"cd llama.cpp",
+				"LLAMA_CURL=1 make llama-cli",
+			].join("\n"),
+			content: command("./llama-cli"),
+		},
 	];
 };
 
@@ -174,7 +201,6 @@ export const LOCAL_APPS = {
 		docsUrl: "https://diffusionbee.com",
 		mainTask: "text-to-image",
 		macOSOnly: true,
-		comingSoon: true,
 		displayOnModelPage: (model) => model.library_name === "diffusers" && model.pipeline_tag === "text-to-image",
 		deeplink: (model) => new URL(`diffusionbee://open_from_hf?model=${model.id}`),
 	},

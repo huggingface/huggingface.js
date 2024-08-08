@@ -26,7 +26,7 @@ describe("listCommits", () => {
 					{
 						username: "lysandre",
 						avatarUrl:
-							"https://cdn-avatars.huggingface.co/v1/production/uploads/1618450692745-5e3aec01f55e2b62848a5217.jpeg",
+							"https://cdn-avatars.huggingface.co/v1/production/uploads/5e3aec01f55e2b62848a5217/PMKS0NNB4MJQlTSFzh918.jpeg",
 					},
 				],
 				date: new Date("2024-02-19T10:57:45.000Z"),
