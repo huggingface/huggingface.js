@@ -319,7 +319,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "llama-cpp-python",
 		repoUrl: "https://github.com/abetlen/llama-cpp-python",
 		snippets: snippets.llama_cpp_python,
-		filter: true,
 	},
 	mindspore: {
 		prettyLabel: "MindSpore",
