@@ -520,7 +520,7 @@ with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
 	const video_predictor = `import torch
 from sam2.sam2_video_predictor import SAM2VideoPredictor
 	
-predictor = SAM2VideoPredictor.from_pretrained("facebook/sam2-hiera-large")
+predictor = SAM2VideoPredictor.from_pretrained(${model.id})
 
 with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
     state = predictor.init_state(<your_video>)
@@ -531,7 +531,7 @@ with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
     # propagate the prompts to get masklets throughout the video
     for frame_idx, object_ids, masks in predictor.propagate_in_video(state):
         ...`;
-		return [image_predictor, video_predictor];
+	return [image_predictor, video_predictor];
 };
 
 export const sampleFactory = (model: ModelData): string[] => [
