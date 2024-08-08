@@ -11,3 +11,7 @@ export interface User {
 export interface Options {
 	target?: HTMLElement | null | undefined;
 }
+
+export interface Header {
+	element: HTMLElement;
+}

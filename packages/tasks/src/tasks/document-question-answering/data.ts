@@ -3,7 +3,10 @@ import type { TaskDataCustom } from "..";
 const taskData: TaskDataCustom = {
 	datasets: [
 		{
-			// TODO write proper description
+			description: "Largest document understanding dataset.",
+			id: "HuggingFaceM4/Docmatix",
+		},
+		{
 			description:
 				"Dataset from the 2020 DocVQA challenge. The documents are taken from the UCSF Industry Documents Library.",
 			id: "eliolio/docvqa",
@@ -47,8 +50,8 @@ const taskData: TaskDataCustom = {
 			id: "impira/layoutlm-document-qa",
 		},
 		{
-			description: "A special model for OCR-free Document QA task. Donut model fine-tuned on DocVQA.",
-			id: "naver-clova-ix/donut-base-finetuned-docvqa",
+			description: "A special model for OCR-free Document QA task.",
+			id: "microsoft/udop-large",
 		},
 		{
 			description: "A powerful model for document question answering.",

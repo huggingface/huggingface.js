@@ -114,6 +114,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"npz"`,
 	},
+	birefnet: {
+		prettyLabel: "BiRefNet",
+		repoName: "BiRefNet",
+		repoUrl: "https://github.com/ZhengPeng7/BiRefNet",
+		snippets: snippets.birefnet,
+		filter: false,
+	},
 	bm25s: {
 		prettyLabel: "BM25S",
 		repoName: "bm25s",
@@ -121,6 +128,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.bm25s,
 		filter: false,
 		countDownloads: `path:"params.index.json"`,
+	},
+	champ: {
+		prettyLabel: "Champ",
+		repoName: "Champ",
+		repoUrl: "https://github.com/fudan-generative-vision/champ",
+		countDownloads: `path:"champ/motion_module.pth"`,
 	},
 	chat_tts: {
 		prettyLabel: "ChatTTS",
@@ -136,6 +149,21 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/ManuelFay/colpali",
 		filter: false,
 		countDownloads: `path:"adapter_config.json"`,
+	},
+	"depth-anything-v2": {
+		prettyLabel: "DepthAnythingV2",
+		repoName: "Depth Anything V2",
+		repoUrl: "https://github.com/DepthAnything/Depth-Anything-V2",
+		snippets: snippets.depth_anything_v2,
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
+	},
+	diffree: {
+		prettyLabel: "Diffree",
+		repoName: "Diffree",
+		repoUrl: "https://github.com/OpenGVLab/Diffree",
+		filter: false,
+		countDownloads: `path:"diffree-step=000010999.ckpt"`,
 	},
 	diffusers: {
 		prettyLabel: "Diffusers",
@@ -236,6 +264,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"ckpt/tensor00000_000" OR path:"ckpt-0/tensor00000_000"`,
 	},
+	hallo: {
+		prettyLabel: "Hallo",
+		repoName: "Hallo",
+		repoUrl: "https://github.com/fudan-generative-vision/hallo",
+		countDownloads: `path:"hallo/net.pth"`,
+	},
 	"hunyuan-dit": {
 		prettyLabel: "HunyuanDiT",
 		repoName: "HunyuanDiT",
@@ -273,10 +307,30 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "k2",
 		repoUrl: "https://github.com/k2-fsa/k2",
 	},
+	liveportrait: {
+		prettyLabel: "LivePortrait",
+		repoName: "LivePortrait",
+		repoUrl: "https://github.com/KwaiVGI/LivePortrait",
+		filter: false,
+		countDownloads: `path:"liveportrait/landmark.onnx"`,
+	},
+	"llama-cpp-python": {
+		prettyLabel: "llama-cpp-python",
+		repoName: "llama-cpp-python",
+		repoUrl: "https://github.com/abetlen/llama-cpp-python",
+		snippets: snippets.llama_cpp_python,
+	},
 	mindspore: {
 		prettyLabel: "MindSpore",
 		repoName: "mindspore",
 		repoUrl: "https://github.com/mindspore-ai/mindspore",
+	},
+	"mamba-ssm": {
+		prettyLabel: "MambaSSM",
+		repoName: "MambaSSM",
+		repoUrl: "https://github.com/state-spaces/mamba",
+		filter: false,
+		snippets: snippets.mamba_ssm,
 	},
 	"mars5-tts": {
 		prettyLabel: "MARS5-TTS",
@@ -380,6 +434,20 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/google-deepmind/recurrentgemma",
 		filter: false,
 		countDownloads: `path:"tokenizer.model"`,
+	},
+	saelens: {
+		prettyLabel: "SAELens",
+		repoName: "SAELens",
+		repoUrl: "https://github.com/jbloomAus/SAELens",
+		snippets: snippets.saelens,
+		filter: false,
+	},
+	sam2: {
+		prettyLabel: "sam2",
+		repoName: "sam2",
+		repoUrl: "https://github.com/facebookresearch/segment-anything-2",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
 	},
 	"sample-factory": {
 		prettyLabel: "sample-factory",

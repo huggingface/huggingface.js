@@ -33,14 +33,23 @@ const taskData: TaskDataCustom = {
 	models: [
 		{
 			description: "A powerful feature extraction model for natural language processing tasks.",
-			id: "facebook/bart-base",
+			id: "thenlper/gte-large",
 		},
 		{
-			description: "A strong feature extraction model for coding tasks.",
-			id: "microsoft/codebert-base",
+			description: "A strong feature extraction model for retrieval.",
+			id: "Alibaba-NLP/gte-Qwen1.5-7B-instruct",
 		},
 	],
-	spaces: [],
+	spaces: [
+		{
+			description: "A leaderboard to rank text feature extraction models based on a benchmark.",
+			id: "mteb/leaderboard",
+		},
+		{
+			description: "A leaderboard to rank best feature extraction models based on human feedback.",
+			id: "mteb/arena",
+		},
+	],
 	summary: "Feature extraction is the task of extracting features learnt in a model.",
 	widgetModels: ["facebook/bart-base"],
 };

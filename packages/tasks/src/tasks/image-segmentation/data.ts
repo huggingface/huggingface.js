@@ -48,16 +48,16 @@ const taskData: TaskDataCustom = {
 			id: "facebook/detr-resnet-50-panoptic",
 		},
 		{
-			description: "Semantic segmentation model trained on ADE20k benchmark dataset.",
-			id: "microsoft/beit-large-finetuned-ade-640-640",
+			description: "Background removal model.",
+			id: "briaai/RMBG-1.4",
 		},
 		{
 			description: "Semantic segmentation model trained on ADE20k benchmark dataset with 512x512 resolution.",
 			id: "nvidia/segformer-b0-finetuned-ade-512-512",
 		},
 		{
-			description: "Semantic segmentation model trained Cityscapes dataset.",
-			id: "facebook/mask2former-swin-large-cityscapes-semantic",
+			description: "A multipurpose image segmentation model for high resolution images.",
+			id: "ZhengPeng7/BiRefNet",
 		},
 		{
 			description: "Panoptic segmentation model trained COCO (common objects) dataset.",
