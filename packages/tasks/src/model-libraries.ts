@@ -179,6 +179,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "doctr",
 		repoUrl: "https://github.com/mindee/doctr",
 	},
+	dynamicrafter: {
+		prettyLabel: "DynamiCrafter",
+		repoName: "DynamiCrafter",
+		repoUrl: "https://github.com/Doubiiu/DynamiCrafter",
+		filter: false,
+		countDownloads: `path:"model.ckpt"`,
+	},
 	edsnlp: {
 		prettyLabel: "EDS-NLP",
 		repoName: "edsnlp",
