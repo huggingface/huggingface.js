@@ -42,8 +42,12 @@ const taskData: TaskDataCustom = {
 	],
 	spaces: [
 		{
-			description: "A leaderboard to rank best feature extraction models..",
+			description: "A leaderboard to rank text feature extraction models based on a benchmark.",
 			id: "mteb/leaderboard",
+		},
+		{
+			description: "A leaderboard to rank best feature extraction models based on human feedback.",
+			id: "mteb/arena",
 		},
 	],
 	summary: "Feature extraction is the task of extracting features learnt in a model.",
