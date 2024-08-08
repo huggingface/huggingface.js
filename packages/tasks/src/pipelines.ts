@@ -652,6 +652,12 @@ export const PIPELINE_DATA = {
 		modality: "cv",
 		color: "indigo",
 	},
+	"video-text-to-text": {
+		name: "Video-Text-to-Text",
+		modality: "multimodal",
+		color: "blue",
+		hideInDatasets: true,
+	},
 	other: {
 		name: "Other",
 		modality: "other",

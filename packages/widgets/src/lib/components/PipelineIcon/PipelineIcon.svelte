@@ -42,6 +42,7 @@
 	import IconTextTo3D from "../Icons/IconTextTo3D.svelte";
 	import IconImageTo3D from "../Icons/IconImageTo3D.svelte";
 	import IconImageFeatureExtraction from "../Icons/IconImageFeatureExtraction.svelte";
+	import IconVideoTextToText from "../Icons/IconVideoTextToText.svelte";
 	import type { WidgetType } from "@huggingface/tasks";
 
 	export let classNames = "";
@@ -94,6 +95,7 @@
 		"text-to-3d": IconTextTo3D,
 		"image-to-3d": IconImageTo3D,
 		"image-feature-extraction": IconImageFeatureExtraction,
+		"video-text-to-text": IconVideoTextToText,
 	};
 
 	$: iconComponent =
