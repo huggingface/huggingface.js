@@ -507,19 +507,19 @@ export const fastai = (model: ModelData): string[] => [
 learn = from_pretrained_fastai("${model.id}")`,
 ];
 
-export const sam2 = (model: ModelData): string[] => [
-	`import torch
+export const sam2 = (model: ModelData): string[] => {
+	const image_predictor = `import torch
 from sam2.sam2_image_predictor import SAM2ImagePredictor
-from sam2.sam2_video_predictor import SAM2VideoPredictor
 
-# for image prediction
 predictor = SAM2ImagePredictor.from_pretrained(${model.id})
 
 with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
     predictor.set_image(<your_image>)
-    masks, _, _ = predictor.predict(<input_prompts>)
+    masks, _, _ = predictor.predict(<input_prompts>)`;
+
+	const video_predictor = `import torch
+from sam2.sam2_video_predictor import SAM2VideoPredictor
 	
-# for video prediction
 predictor = SAM2VideoPredictor.from_pretrained("facebook/sam2-hiera-large")
 
 with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
@@ -530,8 +530,9 @@ with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
 
     # propagate the prompts to get masklets throughout the video
     for frame_idx, object_ids, masks in predictor.propagate_in_video(state):
-        ...`,
-];
+        ...`;
+		return [image_predictor, video_predictor];
+};
 
 export const sampleFactory = (model: ModelData): string[] => [
 	`python -m sample_factory.huggingface.load_from_hub -r ${model.id} -d ./train_dir`,
