@@ -276,7 +276,7 @@ llm.create_chat_completion(
 				"content": "What is the capital of France?"
 			}
 		]
-)
+)`,
 ];
 
 export const tf_keras = (model: ModelData): string[] => [
