@@ -333,6 +333,10 @@ export class Environment {
 	}
 
 	lookupVariable(name: string): AnyRuntimeValue {
+		if (name === "none") {
+			return new NullValue();
+		}
+
 		try {
 			return this.resolve(name).variables.get(name) ?? new UndefinedValue();
 		} catch {
