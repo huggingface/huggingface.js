@@ -101,10 +101,7 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 
 const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const command = (binary: string) =>
-		[
-			"# Load and run the model:",
-			`${binary} huggingface://${model.id}/${filepath ?? "{{GGUF_FILE}}"}`,
-		].join("\n");
+		["# Load and run the model:", `${binary} huggingface://${model.id}/${filepath ?? "{{GGUF_FILE}}"}`].join("\n");
 	return [
 		{
 			title: "Install from binary",
@@ -118,7 +115,9 @@ const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] 
 				"# Pull the image:",
 				"docker pull localai/localai:latest-cpu",
 			].join("\n"),
-			content: command("docker run -p 8080:8080 --name localai -v $PWD/models:/build/models localai/localai:latest-cpu"),
+			content: command(
+				"docker run -p 8080:8080 --name localai -v $PWD/models:/build/models localai/localai:latest-cpu"
+			),
 		},
 	];
 };
