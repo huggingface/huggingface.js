@@ -4,7 +4,7 @@
 	"description": "Chat Completion Stream Output.\n\nAuto-generated from TGI specs.\nFor more details, check out https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/scripts/inference-tgi-import.ts.",
 	"title": "ChatCompletionStreamOutput",
 	"type": "object",
-	"required": ["id", "object", "created", "model", "system_fingerprint", "choices"],
+	"required": ["id", "created", "model", "system_fingerprint", "choices"],
 	"properties": {
 		"choices": {
 			"type": "array",
@@ -24,9 +24,6 @@
 		"model": {
 			"type": "string",
 			"example": "mistralai/Mistral-7B-Instruct-v0.2"
-		},
-		"object": {
-			"type": "string"
 		},
 		"system_fingerprint": {
 			"type": "string"
@@ -61,28 +58,44 @@
 			"title": "ChatCompletionStreamOutputChoice"
 		},
 		"ChatCompletionStreamOutputDelta": {
+			"oneOf": [
+				{
+					"$ref": "#/$defs/ChatCompletionStreamOutputTextMessage"
+				},
+				{
+					"$ref": "#/$defs/ChatCompletionStreamOutputToolCallDelta"
+				}
+			],
+			"title": "ChatCompletionStreamOutputDelta"
+		},
+		"ChatCompletionStreamOutputTextMessage": {
 			"type": "object",
-			"required": ["role"],
+			"required": ["role", "content"],
 			"properties": {
 				"content": {
 					"type": "string",
-					"example": "What is Deep Learning?",
-					"nullable": true
+					"example": "My name is David and I"
 				},
 				"role": {
 					"type": "string",
 					"example": "user"
-				},
-				"tool_calls": {
-					"allOf": [
-						{
-							"$ref": "#/$defs/ChatCompletionStreamOutputDeltaToolCall"
-						}
-					],
-					"nullable": true
 				}
 			},
-			"title": "ChatCompletionStreamOutputDelta"
+			"title": "ChatCompletionStreamOutputTextMessage"
+		},
+		"ChatCompletionStreamOutputToolCallDelta": {
+			"type": "object",
+			"required": ["role", "tool_calls"],
+			"properties": {
+				"role": {
+					"type": "string",
+					"example": "assistant"
+				},
+				"tool_calls": {
+					"$ref": "#/$defs/ChatCompletionStreamOutputDeltaToolCall"
+				}
+			},
+			"title": "ChatCompletionStreamOutputToolCallDelta"
 		},
 		"ChatCompletionStreamOutputDeltaToolCall": {
 			"type": "object",
