@@ -526,7 +526,8 @@ learn = from_pretrained_fastai("${model.id}")`,
 ];
 
 export const sam2 = (model: ModelData): string[] => {
-	const image_predictor = `import torch
+	const image_predictor = `# Use SAM2 with images
+import torch
 from sam2.sam2_image_predictor import SAM2ImagePredictor
 
 predictor = SAM2ImagePredictor.from_pretrained(${model.id})
@@ -535,7 +536,8 @@ with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
     predictor.set_image(<your_image>)
     masks, _, _ = predictor.predict(<input_prompts>)`;
 
-	const video_predictor = `import torch
+	const video_predictor = `# Use SAM2 with videos
+import torch
 from sam2.sam2_video_predictor import SAM2VideoPredictor
 	
 predictor = SAM2VideoPredictor.from_pretrained(${model.id})
