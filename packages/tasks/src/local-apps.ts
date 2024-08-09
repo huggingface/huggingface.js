@@ -102,7 +102,8 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const command = (binary: string) =>
 		[
-			`huggingface://${model.id}/${filepath ?? "{{GGUF_FILE}}"}`,
+			"# Load and run the model:",
+			`${binary} huggingface://${model.id}/${filepath ?? "{{GGUF_FILE}}"}`,
 		].join("\n");
 	return [
 		{
