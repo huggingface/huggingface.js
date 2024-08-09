@@ -3,7 +3,8 @@ import type { Options, Space, Header } from "./type";
 import { inject_fonts } from "./inject_fonts";
 
 import { create } from "./header/create";
-import { get_space } from "./get_space";
+import { check_avatar } from "./utils/check_avatar";
+import { get_space } from "./utils/get_space";
 import { inject } from "./inject";
 
 async function main(initialSpace: string | Space, options?: Options) {
@@ -26,6 +27,9 @@ async function main(initialSpace: string | Space, options?: Options) {
 	} else {
 		space = initialSpace;
 	}
+
+	const [user, org] = await Promise.all([check_avatar(space.author, "user"), check_avatar(space.author, "org")]);
+	space.type = user ? "user" : org ? "org" : "unknown";
 
 	const mini_header_element = create(space as Space);
 	inject(mini_header_element, options);

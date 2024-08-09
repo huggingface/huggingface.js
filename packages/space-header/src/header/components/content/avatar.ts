@@ -1,6 +1,8 @@
-export const Avatar = (username: string): HTMLImageElement => {
+export const Avatar = (username: string, type: "user" | "org" = "user"): HTMLImageElement => {
+	const route = type === "user" ? "users" : "organizations";
+
 	const element = document.createElement("img");
-	element.src = `https://huggingface.co/api/users/${username}/avatar`;
+	element.src = `https://huggingface.co/api/${route}/${username}/avatar`;
 
 	element.style.width = "0.875rem";
 	element.style.height = "0.875rem";
