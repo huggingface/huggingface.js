@@ -525,6 +525,35 @@ export const fastai = (model: ModelData): string[] => [
 learn = from_pretrained_fastai("${model.id}")`,
 ];
 
+export const sam2 = (model: ModelData): string[] => {
+	const image_predictor = `# Use SAM2 with images
+import torch
+from sam2.sam2_image_predictor import SAM2ImagePredictor
+
+predictor = SAM2ImagePredictor.from_pretrained(${model.id})
+
+with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
+    predictor.set_image(<your_image>)
+    masks, _, _ = predictor.predict(<input_prompts>)`;
+
+	const video_predictor = `# Use SAM2 with videos
+import torch
+from sam2.sam2_video_predictor import SAM2VideoPredictor
+	
+predictor = SAM2VideoPredictor.from_pretrained(${model.id})
+
+with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
+    state = predictor.init_state(<your_video>)
+
+    # add new prompts and instantly get the output on the same frame
+    frame_idx, object_ids, masks = predictor.add_new_points(state, <your_prompts>):
+
+    # propagate the prompts to get masklets throughout the video
+    for frame_idx, object_ids, masks in predictor.propagate_in_video(state):
+        ...`;
+	return [image_predictor, video_predictor];
+};
+
 export const sampleFactory = (model: ModelData): string[] => [
 	`python -m sample_factory.huggingface.load_from_hub -r ${model.id} -d ./train_dir`,
 ];

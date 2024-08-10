@@ -447,6 +447,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "sam2",
 		repoUrl: "https://github.com/facebookresearch/segment-anything-2",
 		filter: false,
+		snippets: snippets.sam2,
 		countDownloads: `path_extension:"pt"`,
 	},
 	"sample-factory": {
