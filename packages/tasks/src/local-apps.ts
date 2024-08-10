@@ -241,7 +241,7 @@ export const LOCAL_APPS = {
 		macOSOnly: true,
 		displayOnModelPage: (model) => model.tags.includes("coreml") && model.pipeline_tag === "text-to-image",
 		deeplink: (model) => new URL(`https://joyfusion.app/import_from_hf?repo_id=${model.id}`),
-},
+	},
 	invoke: {
 		prettyLabel: "Invoke",
 		docsUrl: "https://github.com/invoke-ai/InvokeAI",
