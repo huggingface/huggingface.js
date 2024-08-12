@@ -442,6 +442,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://refine.rs/",
 		filter: false,
 		countDownloads: `path:"model.safetensors"`,
+	},	
 	saelens: {
 		prettyLabel: "SAELens",
 		repoName: "SAELens",
