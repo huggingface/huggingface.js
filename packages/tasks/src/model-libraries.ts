@@ -435,7 +435,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"tokenizer.model"`,
 	},
-	"refiners": {
+	refiners: {
 		prettyLabel: "Refiners",
 		repoName: "Refiners",
 		repoUrl: "https://github.com/finegrain-ai/refiners",
