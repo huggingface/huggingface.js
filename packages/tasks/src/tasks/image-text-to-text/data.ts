@@ -43,8 +43,8 @@ const taskData: TaskDataCustom = {
 	metrics: [],
 	models: [
 		{
-			description: "Cutting-edge vision language model that can also localize texts in images.",
-			id: "liuhaotian/llava-v1.6-34b",
+			description: "Cutting-edge vision language model that can take multiple image inputs.",
+			id: "facebook/chameleon-7b",
 		},
 		{
 			description: "Cutting-edge conversational vision language model that can take multiple image inputs.",
@@ -57,6 +57,10 @@ const taskData: TaskDataCustom = {
 		{
 			description: "Strong image-text-to-text model made to understand documents.",
 			id: "mPLUG/DocOwl1.5",
+		},
+		{
+			description: "Strong image-text-to-text model.",
+			id: "llava-hf/llava-v1.6-mistral-7b-hf",
 		},
 	],
 	spaces: [
@@ -84,7 +88,7 @@ const taskData: TaskDataCustom = {
 	summary:
 		"Image-text-to-text models take in an image and text prompt and output text. These models are also called vision-language models, or VLMs. The difference from image-to-text models is that these models take an additional text input, not restricting the model to certain use cases like image captioning, and may also be trained to accept a conversation as input.",
 	widgetModels: ["microsoft/kosmos-2-patch14-224"],
-	youtubeId: "",
+	youtubeId: "IoGaGfU1CIg",
 };
 
 export default taskData;

@@ -114,6 +114,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"npz"`,
 	},
+	birefnet: {
+		prettyLabel: "BiRefNet",
+		repoName: "BiRefNet",
+		repoUrl: "https://github.com/ZhengPeng7/BiRefNet",
+		snippets: snippets.birefnet,
+		filter: false,
+	},
 	bm25s: {
 		prettyLabel: "BM25S",
 		repoName: "bm25s",
@@ -150,6 +157,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.depth_anything_v2,
 		filter: false,
 		countDownloads: `path_extension:"pth"`,
+	},
+	diffree: {
+		prettyLabel: "Diffree",
+		repoName: "Diffree",
+		repoUrl: "https://github.com/OpenGVLab/Diffree",
+		filter: false,
+		countDownloads: `path:"diffree-step=000010999.ckpt"`,
 	},
 	diffusers: {
 		prettyLabel: "Diffusers",
@@ -293,6 +307,19 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "k2",
 		repoUrl: "https://github.com/k2-fsa/k2",
 	},
+	liveportrait: {
+		prettyLabel: "LivePortrait",
+		repoName: "LivePortrait",
+		repoUrl: "https://github.com/KwaiVGI/LivePortrait",
+		filter: false,
+		countDownloads: `path:"liveportrait/landmark.onnx"`,
+	},
+	"llama-cpp-python": {
+		prettyLabel: "llama-cpp-python",
+		repoName: "llama-cpp-python",
+		repoUrl: "https://github.com/abetlen/llama-cpp-python",
+		snippets: snippets.llama_cpp_python,
+	},
 	mindspore: {
 		prettyLabel: "MindSpore",
 		repoName: "mindspore",
@@ -415,6 +442,20 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://refine.rs/",
 		filter: false,
 		countDownloads: `path:"model.safetensors"`,
+	saelens: {
+		prettyLabel: "SAELens",
+		repoName: "SAELens",
+		repoUrl: "https://github.com/jbloomAus/SAELens",
+		snippets: snippets.saelens,
+		filter: false,
+	},
+	sam2: {
+		prettyLabel: "sam2",
+		repoName: "sam2",
+		repoUrl: "https://github.com/facebookresearch/segment-anything-2",
+		filter: false,
+		snippets: snippets.sam2,
+		countDownloads: `path_extension:"pt"`,
 	},
 	"sample-factory": {
 		prettyLabel: "sample-factory",

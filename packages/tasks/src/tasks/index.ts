@@ -37,6 +37,8 @@ import visualQuestionAnswering from "./visual-question-answering/data";
 import zeroShotClassification from "./zero-shot-classification/data";
 import zeroShotImageClassification from "./zero-shot-image-classification/data";
 import zeroShotObjectDetection from "./zero-shot-object-detection/data";
+import imageTo3D from "./image-to-3d/data";
+import textTo3D from "./text-to-3d/data";
 
 export type * from "./audio-classification/inference";
 export type * from "./automatic-speech-recognition/inference";
@@ -164,13 +166,14 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	],
 	translation: ["transformers", "transformers.js"],
 	"unconditional-image-generation": ["diffusers"],
+	"video-text-to-text": ["transformers"],
 	"visual-question-answering": ["transformers", "transformers.js"],
 	"voice-activity-detection": [],
 	"zero-shot-classification": ["transformers", "transformers.js"],
 	"zero-shot-image-classification": ["transformers", "transformers.js"],
 	"zero-shot-object-detection": ["transformers", "transformers.js"],
-	"text-to-3d": [],
-	"image-to-3d": [],
+	"text-to-3d": ["diffusers"],
+	"image-to-3d": ["diffusers"],
 };
 
 /**
@@ -234,13 +237,14 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"token-classification": getData("token-classification", tokenClassification),
 	translation: getData("translation", translation),
 	"unconditional-image-generation": getData("unconditional-image-generation", unconditionalImageGeneration),
+	"video-text-to-text": getData("video-text-to-text", placeholder),
 	"visual-question-answering": getData("visual-question-answering", visualQuestionAnswering),
 	"voice-activity-detection": undefined,
 	"zero-shot-classification": getData("zero-shot-classification", zeroShotClassification),
 	"zero-shot-image-classification": getData("zero-shot-image-classification", zeroShotImageClassification),
 	"zero-shot-object-detection": getData("zero-shot-object-detection", zeroShotObjectDetection),
-	"text-to-3d": getData("text-to-3d", placeholder),
-	"image-to-3d": getData("image-to-3d", placeholder),
+	"text-to-3d": getData("text-to-3d", textTo3D),
+	"image-to-3d": getData("image-to-3d", imageTo3D),
 } as const;
 
 export interface ExampleRepo {
