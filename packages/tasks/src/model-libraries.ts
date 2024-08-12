@@ -414,7 +414,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/finegrain-ai/refiners",
 		docsUrl: "https://refine.rs/",
 		filter: false,
-		countDownloads: `path_extension:"safetensors"`,
+		countDownloads: `path:"model.safetensors"`,
 	},
 	"sample-factory": {
 		prettyLabel: "sample-factory",
