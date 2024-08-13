@@ -381,7 +381,7 @@ export const pyannote_audio = (model: ModelData): string[] => {
 	return pyannote_audio_model(model);
 };
 
-export const relik = (model: ModelData) => [
+export const relik = (model: ModelData): string[] => [
 	`from relik import Relik
  
 relik = Relik.from_pretrained("${model.id}")`,
