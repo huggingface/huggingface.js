@@ -441,6 +441,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/SapienzaNLP/relik",
 		snippets: snippets.relik,
 		filter: false,
+	},
 	refiners: {
 		prettyLabel: "Refiners",
 		repoName: "Refiners",
