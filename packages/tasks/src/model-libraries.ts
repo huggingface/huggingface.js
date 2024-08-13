@@ -314,6 +314,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"liveportrait/landmark.onnx"`,
 	},
+	"llama-cpp-python": {
+		prettyLabel: "llama-cpp-python",
+		repoName: "llama-cpp-python",
+		repoUrl: "https://github.com/abetlen/llama-cpp-python",
+		snippets: snippets.llama_cpp_python,
+	},
 	mindspore: {
 		prettyLabel: "MindSpore",
 		repoName: "mindspore",
@@ -435,6 +441,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/SapienzaNLP/relik",
 		snippets: snippets.relik,
 		filter: false,
+	refiners: {
+		prettyLabel: "Refiners",
+		repoName: "Refiners",
+		repoUrl: "https://github.com/finegrain-ai/refiners",
+		docsUrl: "https://refine.rs/",
+		filter: false,
+		countDownloads: `path:"model.safetensors"`,
 	},
 	saelens: {
 		prettyLabel: "SAELens",
@@ -442,6 +455,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/jbloomAus/SAELens",
 		snippets: snippets.saelens,
 		filter: false,
+	},
+	sam2: {
+		prettyLabel: "sam2",
+		repoName: "sam2",
+		repoUrl: "https://github.com/facebookresearch/segment-anything-2",
+		filter: false,
+		snippets: snippets.sam2,
+		countDownloads: `path_extension:"pt"`,
 	},
 	"sample-factory": {
 		prettyLabel: "sample-factory",
