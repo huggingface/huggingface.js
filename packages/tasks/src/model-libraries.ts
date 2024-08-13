@@ -435,6 +435,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"tokenizer.model"`,
 	},
+	relik: {
+		prettyLabel: "Relik",
+		repoName: "Relik",
+		repoUrl: "https://github.com/SapienzaNLP/relik",
+		snippets: snippets.relik,
+		filter: false,
+	},
 	refiners: {
 		prettyLabel: "Refiners",
 		repoName: "Refiners",
