@@ -494,7 +494,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "SEED-Story",
 		repoUrl: "https://github.com/TencentARC/SEED-Story",
 		filter: false,
-		countDownloads: `path:"pytorch_model.bin" OR path:"tokenizer.model"`,
+		countDownloads: `path:"cvlm_llama2_tokenizer/tokenizer.model"`,
 		snippets: snippets.seed_story,
 	},
 	"stable-baselines3": {
