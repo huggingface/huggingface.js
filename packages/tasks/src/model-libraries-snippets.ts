@@ -402,7 +402,7 @@ model = timm.create_model("hf_hub:${model.id}", pretrained=True)`,
 ];
 
 export const seed_story = (): string[] => [
-# seed_story_cfg_path refers to 'https://github.com/TencentARC/SEED-Story/blob/master/configs/clm_models/agent_7b_sft.yaml'
+	`# seed_story_cfg_path refers to 'https://github.com/TencentARC/SEED-Story/blob/master/configs/clm_models/agent_7b_sft.yaml'
 # llm_cfg_path refers to 'https://github.com/TencentARC/SEED-Story/blob/master/configs/clm_models/llama2chat7b_lora.yaml'
 from omegaconf import OmegaConf
 import hydra
@@ -828,5 +828,4 @@ whisperkit-cli transcribe --audio-path /path/to/audio.mp3
 # Or use your preferred model variant
 whisperkit-cli transcribe --model "large-v3" --model-prefix "distil" --audio-path /path/to/audio.mp3 --verbose`,
 ];
-
 //#endregion
