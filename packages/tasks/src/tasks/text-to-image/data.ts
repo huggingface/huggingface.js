@@ -46,15 +46,15 @@ const taskData: TaskDataCustom = {
 	models: [
 		{
 			description: "One of the most powerful image generation models that can generate realistic outputs.",
-			id: "stabilityai/stable-diffusion-xl-base-1.0",
+			id: "black-forest-labs/FLUX.1-dev",
 		},
 		{
 			description: "A powerful yet fast image generation model.",
 			id: "latent-consistency/lcm-lora-sdxl",
 		},
 		{
-			description: "A very fast text-to-image model.",
-			id: "ByteDance/SDXL-Lightning",
+			description: "Text-to-image model for photorealistic generation.",
+			id: "Kwai-Kolors/Kolors",
 		},
 		{
 			description: "A powerful text-to-image model.",

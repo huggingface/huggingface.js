@@ -45,8 +45,8 @@ const taskData: TaskDataCustom = {
 	],
 	models: [
 		{
-			description: "A model that enhances images captured in low light conditions.",
-			id: "keras-io/low-light-image-enhancement",
+			description: "An image-to-image model to improve image resolution.",
+			id: "fal/AuraSR-v2",
 		},
 		{
 			description: "A model that increases the resolution of an image.",
