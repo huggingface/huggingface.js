@@ -411,7 +411,7 @@ import hydra
 
 # load Llama2
 llm_cfg = OmegaConf.load(llm_cfg_path)
-llm = hydra.utils.instantiate(llm_cfg, torch_dtype=dtype_str)
+llm = hydra.utils.instantiate(llm_cfg, torch_dtype="fp16")
 
 # initialize seed_story
 seed_story_cfg = OmegaConf.load(seed_story_cfg_path)
