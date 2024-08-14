@@ -435,6 +435,21 @@ sae, cfg_dict, sparsity = SAE.from_pretrained(
 )`,
 ];
 
+export const seed_story = (): string[] => [
+	`# seed_story_cfg_path refers to 'https://github.com/TencentARC/SEED-Story/blob/master/configs/clm_models/agent_7b_sft.yaml'
+# llm_cfg_path refers to 'https://github.com/TencentARC/SEED-Story/blob/master/configs/clm_models/llama2chat7b_lora.yaml'
+from omegaconf import OmegaConf
+import hydra
+
+# load Llama2
+llm_cfg = OmegaConf.load(llm_cfg_path)
+llm = hydra.utils.instantiate(llm_cfg, torch_dtype="fp16")
+
+# initialize seed_story
+seed_story_cfg = OmegaConf.load(seed_story_cfg_path)
+seed_story = hydra.utils.instantiate(seed_story_cfg, llm=llm) `,
+];
+
 const skopsPickle = (model: ModelData, modelFile: string) => {
 	return [
 		`import joblib
