@@ -31,7 +31,7 @@ export interface HardwareSpec {
 	memory?: number[];
 }
 
-export const DEFAULT_MEMORY_OPTIONS = [8, 11, 16, 24, 32, 40, 48, 64, 80, 96, 128, 256, 512];
+export const DEFAULT_MEMORY_OPTIONS = [8, 16, 24, 32, 40, 48, 64, 80, 96, 128, 256, 512];
 
 export const SKUS = {
 	GPU: {
