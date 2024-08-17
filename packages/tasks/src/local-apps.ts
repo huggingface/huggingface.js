@@ -58,6 +58,7 @@ export type LocalApp = {
 	  }
 );
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function isGgufModel(model: ModelData) {
 	return model.tags.includes("gguf");
 }
