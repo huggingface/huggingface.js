@@ -109,6 +109,16 @@ export interface ModelData {
 	 * Example: transformers, SpeechBrain, Stanza, etc.
 	 */
 	library_name?: string;
+	safetensors?: {
+		parameters: Record<string, number>;
+		total:      number;
+		sharded:    boolean;
+	};
+	gguf?: {
+		total:           number;
+		architecture?:   string;
+		context_length?: number;
+	};
 }
 
 /**
