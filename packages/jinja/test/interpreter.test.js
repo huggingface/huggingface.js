@@ -128,18 +128,42 @@ describe("Test interpreter options", () => {
 		];
 
 		for (const test of TESTS) {
-			const env = new Environment();
-			env.set("True", true);
-			for (const [key, value] of Object.entries(test.data)) {
-				env.set(key, value);
-			}
-
-			const tokens = tokenize(test.template, test.options);
-			const parsed = parse(tokens);
-
-			const interpreter = new Interpreter(env);
-			const result = interpreter.run(parsed);
-			expect(result.value).toEqual(test.target);
+			testTemplate(test);
 		}
 	});
+
+	it("should support string.rstrip()", () => {
+		const test = {
+			template: '{{ "   test it  ".rstrip() }}',
+			data: { obj: [3, 2, 1] },
+			options: { lstrip_blocks: true, trim_blocks: true },
+			target: `   test it`,
+		};
+		testTemplate(test);
+	});
+
+	it("should support string.lstrip()", () => {
+		const test = {
+			template: '{{ "   test it  ".lstrip() }}',
+			data: { obj: [3, 2, 1] },
+			options: { lstrip_blocks: true, trim_blocks: true },
+			target: `test it  `,
+		};
+		testTemplate(test);
+	});
 });
+
+function testTemplate(test) {
+	const env = new Environment();
+	env.set("True", true);
+	for (const [key, value] of Object.entries(test.data)) {
+		env.set(key, value);
+	}
+
+	const tokens = tokenize(test.template, test.options);
+	const parsed = parse(tokens);
+
+	const interpreter = new Interpreter(env);
+	const result = interpreter.run(parsed);
+	expect(result.value).toEqual(test.target);
+}
