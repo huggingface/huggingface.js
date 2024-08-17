@@ -111,12 +111,12 @@ export interface ModelData {
 	library_name?: string;
 	safetensors?: {
 		parameters: Record<string, number>;
-		total:      number;
-		sharded:    boolean;
+		total: number;
+		sharded: boolean;
 	};
 	gguf?: {
-		total:           number;
-		architecture?:   string;
+		total: number;
+		architecture?: string;
 		context_length?: number;
 	};
 }
