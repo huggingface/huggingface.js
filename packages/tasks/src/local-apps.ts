@@ -58,8 +58,13 @@ export type LocalApp = {
 	  }
 );
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function isGgufModel(model: ModelData) {
 	return model.tags.includes("gguf");
+}
+
+function isLlamaCppGgufModel(model: ModelData) {
+	return !!model.gguf?.context_length;
 }
 
 const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
@@ -138,14 +143,14 @@ export const LOCAL_APPS = {
 		prettyLabel: "llama.cpp",
 		docsUrl: "https://github.com/ggerganov/llama.cpp",
 		mainTask: "text-generation",
-		displayOnModelPage: isGgufModel,
+		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetLlamacpp,
 	},
 	lmstudio: {
 		prettyLabel: "LM Studio",
 		docsUrl: "https://lmstudio.ai",
 		mainTask: "text-generation",
-		displayOnModelPage: isGgufModel,
+		displayOnModelPage: isLlamaCppGgufModel,
 		deeplink: (model, filepath) =>
 			new URL(`lmstudio://open_from_hf?model=${model.id}${filepath ? `&file=${filepath}` : ""}`),
 	},
@@ -153,28 +158,28 @@ export const LOCAL_APPS = {
 		prettyLabel: "LocalAI",
 		docsUrl: "https://github.com/mudler/LocalAI",
 		mainTask: "text-generation",
-		displayOnModelPage: isGgufModel,
+		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetLocalAI,
 	},
 	jan: {
 		prettyLabel: "Jan",
 		docsUrl: "https://jan.ai",
 		mainTask: "text-generation",
-		displayOnModelPage: isGgufModel,
+		displayOnModelPage: isLlamaCppGgufModel,
 		deeplink: (model) => new URL(`jan://models/huggingface/${model.id}`),
 	},
 	backyard: {
 		prettyLabel: "Backyard AI",
 		docsUrl: "https://backyard.ai",
 		mainTask: "text-generation",
-		displayOnModelPage: isGgufModel,
+		displayOnModelPage: isLlamaCppGgufModel,
 		deeplink: (model) => new URL(`https://backyard.ai/hf/model/${model.id}`),
 	},
 	sanctum: {
 		prettyLabel: "Sanctum",
 		docsUrl: "https://sanctum.ai",
 		mainTask: "text-generation",
-		displayOnModelPage: isGgufModel,
+		displayOnModelPage: isLlamaCppGgufModel,
 		deeplink: (model) => new URL(`sanctum://open_from_hf?model=${model.id}`),
 	},
 	jellybox: {
@@ -182,12 +187,12 @@ export const LOCAL_APPS = {
 		docsUrl: "https://jellybox.com",
 		mainTask: "text-generation",
 		displayOnModelPage: (model) =>
-			isGgufModel(model) ||
+			isLlamaCppGgufModel(model) ||
 			(model.library_name === "diffusers" &&
 				model.tags.includes("safetensors") &&
 				(model.pipeline_tag === "text-to-image" || model.tags.includes("lora"))),
 		deeplink: (model) => {
-			if (isGgufModel(model)) {
+			if (isLlamaCppGgufModel(model)) {
 				return new URL(`jellybox://llm/models/huggingface/LLM/${model.id}`);
 			} else if (model.tags.includes("lora")) {
 				return new URL(`jellybox://image/models/huggingface/ImageLora/${model.id}`);
@@ -200,7 +205,7 @@ export const LOCAL_APPS = {
 		prettyLabel: "Msty",
 		docsUrl: "https://msty.app",
 		mainTask: "text-generation",
-		displayOnModelPage: isGgufModel,
+		displayOnModelPage: isLlamaCppGgufModel,
 		deeplink: (model) => new URL(`msty://models/search/hf/${model.id}`),
 	},
 	recursechat: {
@@ -208,7 +213,7 @@ export const LOCAL_APPS = {
 		docsUrl: "https://recurse.chat",
 		mainTask: "text-generation",
 		macOSOnly: true,
-		displayOnModelPage: isGgufModel,
+		displayOnModelPage: isLlamaCppGgufModel,
 		deeplink: (model) => new URL(`recursechat://new-hf-gguf-model?hf-model-id=${model.id}`),
 	},
 	drawthings: {
