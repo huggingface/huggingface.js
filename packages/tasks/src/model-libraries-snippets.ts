@@ -270,12 +270,12 @@ llm = Llama.from_pretrained(
 )
 
 llm.create_chat_completion(
-		messages = [
-			{
-				"role": "user",
-				"content": "What is the capital of France?"
-			}
-		]
+	messages = [
+		{
+			"role": "user",
+			"content": "What is the capital of France?"
+		}
+	]
 )`,
 ];
 
