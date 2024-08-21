@@ -174,6 +174,7 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	"zero-shot-object-detection": ["transformers", "transformers.js"],
 	"text-to-3d": ["diffusers"],
 	"image-to-3d": ["diffusers"],
+	"any-to-any": ["transformers"],
 };
 
 /**
@@ -195,6 +196,7 @@ function getData(type: PipelineType, partialTaskData: TaskDataCustom = placehold
 // Tasks that call getData() without the second argument will
 // have a "placeholder" page.
 export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
+	"any-to-any": getData("any-to-any", placeholder),
 	"audio-classification": getData("audio-classification", audioClassification),
 	"audio-to-audio": getData("audio-to-audio", audioToAudio),
 	"automatic-speech-recognition": getData("automatic-speech-recognition", automaticSpeechRecognition),

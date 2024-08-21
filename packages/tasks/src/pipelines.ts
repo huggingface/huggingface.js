@@ -658,6 +658,12 @@ export const PIPELINE_DATA = {
 		color: "blue",
 		hideInDatasets: true,
 	},
+	"any-to-any": {
+		name: "Any-to-Any",
+		modality: "multimodal",
+		color: "yellow",
+		hideInDatasets: true,
+	},
 	other: {
 		name: "Other",
 		modality: "other",
