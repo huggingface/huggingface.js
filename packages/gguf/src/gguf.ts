@@ -401,8 +401,12 @@ export async function ggufAllShards(
 		 */
 		fetch?: typeof fetch;
 		additionalFetchHeaders?: Record<string, string>;
+		parallelDownloads?: number;
 	}
 ): Promise<{ shards: GGUFParseOutput[]; parameterCount: number }> {
+	if (params?.parallelDownloads && params.parallelDownloads < 1) {
+		throw new TypeError("parallelDownloads must be greater than 0");
+	}
 	const ggufShardFileInfo = parseGgufShardFilename(url);
 	if (ggufShardFileInfo) {
 		const total = parseInt(ggufShardFileInfo.total);
@@ -413,7 +417,7 @@ export async function ggufAllShards(
 			urls.push(`${prefix}-${shardIdx.toString().padStart(5, "0")}-of-${total.toString().padStart(5, "0")}.gguf`);
 		}
 
-		const PARALLEL_DOWNLOADS = 20;
+		const PARALLEL_DOWNLOADS = params?.parallelDownloads ?? 20;
 		const shards = await promisesQueue(
 			urls.map((shardUrl) => () => gguf(shardUrl, { ...params, computeParametersCount: true })),
 			PARALLEL_DOWNLOADS
