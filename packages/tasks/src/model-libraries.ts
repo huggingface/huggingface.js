@@ -128,7 +128,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.bm25s,
 		filter: false,
 		countDownloads: `path:"params.index.json"`,
-	},
+	},	
 	champ: {
 		prettyLabel: "Champ",
 		repoName: "Champ",
@@ -179,6 +179,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "doctr",
 		repoUrl: "https://github.com/mindee/doctr",
 	},
+	edge: {
+		prettyLabel: "Edge",
+		repoName: "Edge",
+		repoUrl: "https://github.com/cartesia-ai/edge",
+		snippets: snippets.edge,		
+	},	
 	edsnlp: {
 		prettyLabel: "EDS-NLP",
 		repoName: "edsnlp",
