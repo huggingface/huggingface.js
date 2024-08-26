@@ -9,6 +9,7 @@ export { GGUF_QUANT_DESCRIPTIONS } from "./quant-descriptions";
 
 export const RE_GGUF_FILE = /\.gguf$/;
 export const RE_GGUF_SHARD_FILE = /^(?<prefix>.*?)-(?<shard>\d{5})-of-(?<total>\d{5})\.gguf$/;
+const PARALLEL_DOWNLOADS = 20;
 
 export interface GgufShardFileInfo {
 	prefix: string;
@@ -404,7 +405,8 @@ export async function ggufAllShards(
 		parallelDownloads?: number;
 	}
 ): Promise<{ shards: GGUFParseOutput[]; parameterCount: number }> {
-	if (params?.parallelDownloads && params.parallelDownloads < 1) {
+	const parallelDownloads = params?.parallelDownloads ?? PARALLEL_DOWNLOADS;
+	if (parallelDownloads < 1) {
 		throw new TypeError("parallelDownloads must be greater than 0");
 	}
 	const ggufShardFileInfo = parseGgufShardFilename(url);
@@ -417,10 +419,9 @@ export async function ggufAllShards(
 			urls.push(`${prefix}-${shardIdx.toString().padStart(5, "0")}-of-${total.toString().padStart(5, "0")}.gguf`);
 		}
 
-		const PARALLEL_DOWNLOADS = params?.parallelDownloads ?? 20;
 		const shards = await promisesQueue(
 			urls.map((shardUrl) => () => gguf(shardUrl, { ...params, computeParametersCount: true })),
-			PARALLEL_DOWNLOADS
+			parallelDownloads
 		);
 		return {
 			shards,
