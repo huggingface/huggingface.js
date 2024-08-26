@@ -944,4 +944,31 @@ whisperkit-cli transcribe --audio-path /path/to/audio.mp3
 # Or use your preferred model variant
 whisperkit-cli transcribe --model "large-v3" --model-prefix "distil" --audio-path /path/to/audio.mp3 --verbose`,
 ];
+
+export const diffusionkit = (): string[] => [
+	`# Install CLI with pip
+pip install diffusionkit-cli
+
+# To use Stable Diffusion 3 accept the terms before downloading the checkpoint: https://huggingface.co/stabilityai/stable-diffusion-3-medium
+# Once you accept the terms, sign in with your Hugging Face hub token with read access to contents of all public gated repos you can access:
+huggingface-cli login --token YOUR_HF_HUB_TOKEN
+
+# View all available options
+diffusionkit-cli --help
+
+# Generate image using default FLUX.1-schnell
+diffusionkit-cli --prompt "A beautiful sunset over the ocean"
+
+# Use specific model and set custom output path
+diffusionkit-cli --prompt "A futuristic cityscape" --model-version stable-diffusion-3-medium --output-path /path/to/output.png
+
+# Generate image with custom width and height
+diffusionkit-cli --prompt "A majestic dragon soaring over a medieval castle" --width 1024 --height 1024
+
+# Generate image with a negative prompt
+diffusionkit-cli --prompt "A serene forest" --negative_prompt "dark, gloomy"
+
+# Use input image for img2img generation
+diffusionkit-cli --prompt "Transform into a winter wonderland" --image-path /path/to/input.jpg --denoise number_between_0_and_1`,
+];
 //#endregion
