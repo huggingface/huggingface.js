@@ -949,15 +949,15 @@ export const diffusionkit = (): string[] => [
 	`# Install CLI with pip
 pip install diffusionkit-cli
 
-# To use Stable Diffusion 3 accept the terms before downloading the checkpoint: https://huggingface.co/stabilityai/stable-diffusion-3-medium
-# Once you accept the terms, sign in with your Hugging Face hub token with read access to contents of all public gated repos you can access:
-huggingface-cli login --token YOUR_HF_HUB_TOKEN
-
 # View all available options
 diffusionkit-cli --help
 
-# Generate image using default FLUX.1-schnell
+# Generate image using default FLUX.1-schnell and save it to out.png
 diffusionkit-cli --prompt "a beautiful sunset over the ocean"
+
+# To use Stable Diffusion 3 accept the terms before downloading the checkpoint: https://huggingface.co/stabilityai/stable-diffusion-3-medium
+# Once you accept the terms, sign in with your Hugging Face hub token with read access to contents of all public gated repos you can access:
+huggingface-cli login --token YOUR_HF_HUB_TOKEN
 
 # Use specific model and set custom output path
 diffusionkit-cli --prompt "a futuristic cityscape" --model-version stable-diffusion-3-medium --output-path /path/to/output.png
