@@ -108,7 +108,7 @@ const snippetLlamafileGGUF = (model: ModelData, filepath?: string): LocalAppSnip
 	const command = (binary: string) =>
 		[
 			"# Load and run your model",
-			`wget https://huggingface.co/${model.id}/resolve/main/`.concat(`${filepath ?? "{{GGUF_FILE}}"}`), // could not figure out how to do it organically
+			`wget https://huggingface.co/${model.id}/resolve/main/`.concat(`${filepath ?? "{{GGUF_FILE}}"}`), // could not figure out how to do it without concat
 			`chmod +x ${binary}`,
 			`${binary} -m  ${filepath?? "{{GGUF_FILE}}"} -p 'You are a helpful assistant' `, // will this create a second dropdown ?
 		].join("\n");
