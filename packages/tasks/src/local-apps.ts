@@ -104,6 +104,29 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 	];
 };
 
+const snippetLlamafileGGUF = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const command = (binary: string) =>
+		[
+			"# Load and run your model",
+			`wget https://huggingface.co/${model.id}/resolve/main/`.concat(`${filepath ?? "{{GGUF_FILE}}"}`), // could not figure out how to do it organically
+			`chmod +x ${binary}`,
+			`${binary} -m  ${filepath?? "{{GGUF_FILE}}"} -p 'You are a helpful assistant' `, // will this create a second dropdown ?
+		].join("\n");
+	return [
+		{
+			title: "Use pre-built binary",
+			setup: [
+				// prettier-ignore
+				"# Download pre-built binary from:",
+				"# https://github.com/Mozilla-Ocho/llamafile/releases",
+				"# Example : ",
+				"# wget https://github.com/Mozilla-Ocho/llamafile/releases/download/0.8.13/llamafile-0.8.13",
+			].join("\n"),
+			content: command("./llamafile-0.8.13")
+		}
+	];
+};
+
 const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const command = (binary: string) =>
 		["# Load and run the model:", `${binary} huggingface://${model.id}/${filepath ?? "{{GGUF_FILE}}"}`].join("\n");
@@ -145,6 +168,15 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetLlamacpp,
+	},
+	// llamafile uses .llamafile and .gguf files
+	// update this later to handle .llamafile
+	llamafile : {
+		prettyLabel : "llamafile",
+		docsUrl : "https://github.com/Mozilla-Ocho/llamafile",
+		mainTask : "text-generation", 
+		displayOnModelPage : isLlamaCppGgufModel, // update this later to include .llamafile 
+		snippet: snippetLlamafileGGUF ,
 	},
 	lmstudio: {
 		prettyLabel: "LM Studio",
