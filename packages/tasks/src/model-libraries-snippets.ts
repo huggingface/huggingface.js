@@ -957,18 +957,20 @@ huggingface-cli login --token YOUR_HF_HUB_TOKEN
 diffusionkit-cli --help
 
 # Generate image using default FLUX.1-schnell
-diffusionkit-cli --prompt "A beautiful sunset over the ocean"
+diffusionkit-cli --prompt "a beautiful sunset over the ocean"
 
 # Use specific model and set custom output path
-diffusionkit-cli --prompt "A futuristic cityscape" --model-version stable-diffusion-3-medium --output-path /path/to/output.png
+diffusionkit-cli --prompt "a futuristic cityscape" --model-version stable-diffusion-3-medium --output-path /path/to/output.png
 
-# Generate image with custom width and height
-diffusionkit-cli --prompt "A majestic dragon soaring over a medieval castle" --width 1024 --height 1024
-
-# Generate image with a negative prompt
-diffusionkit-cli --prompt "A serene forest" --negative_prompt "dark, gloomy"
-
-# Use input image for img2img generation
-diffusionkit-cli --prompt "Transform into a winter wonderland" --image-path /path/to/input.jpg --denoise number_between_0_and_1`,
+# Set seed for reproducibility, specify number of steps, and set custom output image dimensions
+diffusionkit-cli --prompt "detailed cinematic dof render of a \
+detailed MacBook Pro on a wooden desk in a dim room with items \
+around, messy dirty room. On the screen are the letters 'FLUX on \
+DiffusionKit' glowing softly. High detail hard surface render" \
+--height 768 \
+--width 1360 \
+--seed 1001 \
+--step 4 \
+--output ~/Desktop/flux_on_mac.png`,
 ];
 //#endregion
