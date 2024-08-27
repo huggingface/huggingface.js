@@ -181,7 +181,7 @@ tokenizer = AutoTokenizer.from_pretrained("allenai/OLMo-1B-hf")
 in_message = ["Rene Descartes was"]
 inputs = tokenizer(in_message, return_tensors="pt")
 
-outputs = model.generate(inputs.input_ids.cuda(), max_length=50, top_k=100, top_p=0.99)
+outputs = model.generate(inputs.input_ids, max_length=50, top_k=100, top_p=0.99)
 out_message = tokenizer.batch_decode(outputs, skip_special_tokens=True)[0]
 
 print(out_message)
