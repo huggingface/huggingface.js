@@ -296,7 +296,7 @@ export class Environment {
 		["eq", (a, b) => a.value === b.value],
 	]);
 
-	constructor(public parent?: Environment) { }
+	constructor(public parent?: Environment) {}
 
 	/**
 	 * Set the value of a variable in the current environment.
