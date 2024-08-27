@@ -1,24 +1,21 @@
 ## Use Cases
 
-### Style transfer
-
-One of the most popular use cases of image-to-image is style transfer. Style transfer models can convert a normal photography into a painting in the style of a famous painter.
-
-## Task Variants
-
 ### Image inpainting
 
 Image inpainting is widely used during photography editing to remove unwanted objects, such as poles, wires, or sensor
 dust.
+> 💡 Try this [inpainting demo](https://huggingface.co/spaces/diffusers/stable-diffusion-xl-inpainting), and learn more on [image inpainting with 🧨diffusers](https://huggingface.co/docs/diffusers/main/en/api/pipelines/stable_diffusion/inpaint)
 
 ### Image colorization
 
 Old or black and white images can be brought up to life using an image colorization model.
+> 💡 Try this [photo colorization demo](https://huggingface.co/spaces/modelscope/old_photo_restoration)
 
 ### Super Resolution
 
 Super-resolution models increase the resolution of an image, allowing for higher-quality viewing and printing.
-
+> 💡 Try this [super-resolution demo](https://huggingface.co/spaces/radames/Enhance-This-HiDiffusion-SDXL), and learn more on [image upscaling with 🧨diffusers](https://huggingface.co/docs/diffusers/main/en/api/pipelines/stable_diffusion/upscale#super-resolution)
+> 
 ## Inference
 
 You can use pipelines for image-to-image in 🧨diffusers library to easily use image-to-image models. See an example for `StableDiffusionImg2ImgPipeline` below.
@@ -53,11 +50,20 @@ await inference.imageToImage({
 });
 ```
 
-## ControlNet
+### Use Cases for Text-to-Image Tasks
+
+### ControlNet
 
 Controlling the outputs of diffusion models only with a text prompt is a challenging problem. ControlNet is a neural network model that provides image-based control to diffusion models. Control images can be edges or other landmarks extracted from a source image.
 
 Many ControlNet models were trained in our community event, JAX Diffusers sprint. You can see the full list of the ControlNet models available [here](https://huggingface.co/spaces/jax-diffusers-event/leaderboard).
+
+### Style Transfer 
+One of the most popular use cases of image-to-image is style transfer. 
+with style transfer models - 
+* a normal photo can be converted to a painting in the style of a famous painter.
+* new images can be generated using a text prompt, in the style of a reference input image. 
+
 
 ## Most Used Model for the Task
 
