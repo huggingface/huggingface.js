@@ -67,7 +67,7 @@ One of the most popular use cases of image-to-image is style transfer. With styl
 - a normal photo can be converted to a painting in the style of a famous painter.
 - new images can be generated using a text prompt, in the style of a reference input image.
 
-## Most Used Model for the Task
+## Pix2Pix
 
 Pix2Pix is a popular model used for image-to-image translation tasks. It is based on a conditional-GAN (generative adversarial network) where instead of a noise vector a 2D image is given as input. More information about Pix2Pix can be retrieved from this [link](https://phillipi.github.io/pix2pix/) where the associated paper and the GitHub repository can be found.
 
