@@ -146,6 +146,11 @@ const TEST_STRINGS = {
 	MACROS: `{% macro hello(name) %}{{ 'Hello ' + name }}{% endmacro %}|{{ hello('Bob') }}|{{ hello('Alice') }}|`,
 	MACROS_1: `{% macro hello(name, suffix='.') %}{{ 'Hello ' + name + suffix }}{% endmacro %}|{{ hello('A') }}|{{ hello('B', '!') }}|{{ hello('C', suffix='?') }}|`,
 	MACROS_2: `{% macro fn(x, y=2, z=3) %}{{ x + ',' + y + ',' + z }}{% endmacro %}|{{ fn(1) }}|{{ fn(1, 0) }}|{{ fn(1, 0, -1) }}|{{ fn(1, y=0, z=-1) }}|{{ fn(1, z=0) }}|`,
+
+	//rstrip
+	RSTRIP: `{{ "   test it  ".rstrip() }}`,
+	//lstrip
+	LSTRIP: `{{ "   test it  ".lstrip() }}`,
 };
 
 const TEST_PARSED = {
@@ -2716,6 +2721,25 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 	],
+
+	RSTRIP: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "   test it  ", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "rstrip", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	LSTRIP: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "   test it  ", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "lstrip", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+	],
 };
 
 const TEST_CONTEXT = {
@@ -2960,6 +2984,10 @@ const TEST_CONTEXT = {
 	MACROS: {},
 	MACROS_1: {},
 	MACROS_2: {},
+
+	//STRIP
+	RSTRIP: {},
+	LSTRIP: {},
 };
 
 const EXPECTED_OUTPUTS = {
@@ -3104,6 +3132,10 @@ const EXPECTED_OUTPUTS = {
 	MACROS: `|Hello Bob|Hello Alice|`,
 	MACROS_1: `|Hello A.|Hello B!|Hello C?|`,
 	MACROS_2: `|1,2,3|1,0,3|1,0,-1|1,0,-1|1,2,0|`,
+
+	// RSTRIP/LSTRIP
+	RSTRIP: `   test it`,
+	LSTRIP: `test it  `,
 };
 
 describe("Templates", () => {
