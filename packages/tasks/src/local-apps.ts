@@ -237,7 +237,7 @@ export const LOCAL_APPS = {
 		mainTask: "text-to-image",
 		macOSOnly: true,
 		displayOnModelPage: (model) => model.library_name === "diffusers" && model.pipeline_tag === "text-to-image",
-		deeplink: (model) => new URL(`diffusionbee://open_from_hf?model=${model.id}`),
+		deeplink: (model) => new URL(`https://diffusionbee.com/huggingface_import?model_id=${model.id}`),
 	},
 	joyfusion: {
 		prettyLabel: "JoyFusion",
