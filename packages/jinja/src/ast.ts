@@ -147,6 +147,13 @@ export class BooleanLiteral extends Literal<boolean> {
 }
 
 /**
+ * Represents null (none) in the template.
+ */
+export class NullLiteral extends Literal<null> {
+	override type = "NullLiteral";
+}
+
+/**
  * Represents an array literal in the template.
  */
 export class ArrayLiteral extends Literal<Expression[]> {
