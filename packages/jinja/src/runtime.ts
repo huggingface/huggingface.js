@@ -2,6 +2,7 @@ import type {
 	NumericLiteral,
 	StringLiteral,
 	BooleanLiteral,
+	NullLiteral,
 	ArrayLiteral,
 	Statement,
 	Program,
@@ -269,6 +270,7 @@ export class Environment {
 		],
 		["false", (operand) => operand.type === "BooleanValue" && !(operand as BooleanValue).value],
 		["true", (operand) => operand.type === "BooleanValue" && (operand as BooleanValue).value],
+		["none", (operand) => operand.type === "NullValue"],
 		["string", (operand) => operand.type === "StringValue"],
 		["number", (operand) => operand.type === "NumericValue"],
 		["integer", (operand) => operand.type === "NumericValue" && Number.isInteger((operand as NumericValue).value)],
@@ -1051,6 +1053,8 @@ export class Interpreter {
 				return new StringValue((statement as StringLiteral).value);
 			case "BooleanLiteral":
 				return new BooleanValue((statement as BooleanLiteral).value);
+			case "NullLiteral":
+				return new NullValue((statement as NullLiteral).value);
 			case "ArrayLiteral":
 				return new ArrayValue((statement as ArrayLiteral).value.map((x) => this.evaluate(x, environment)));
 			case "TupleLiteral":

@@ -124,6 +124,9 @@ const TEST_STRINGS = {
 	UNDEFINED_VARIABLES: `{{ undefined_variable }}`,
 	UNDEFINED_ACCESS: `{{ object.undefined_attribute }}`,
 
+	// Null
+	NULL_VARIABLE: `{% if not null_val is defined %}{% set null_val = none %}{% endif %}{% if null_val is not none %}{{ 'fail' }}{% else %}{{ 'pass' }}{% endif %}`,
+
 	// Ternary operator
 	TERNARY_OPERATOR: `|{{ 'a' if true else 'b' }}|{{ 'a' if false else 'b' }}|{{ 'a' if 1 + 1 == 2 else 'b' }}|{{ 'a' if 1 + 1 == 3 or 1 * 2 == 3 else 'b' }}|`,
 
@@ -2215,7 +2218,7 @@ const TEST_PARSED = {
 		{ value: "unknown", type: "StringLiteral" },
 		{ value: ")", type: "CloseParen" },
 		{ value: "is", type: "Is" },
-		{ value: "none", type: "Identifier" },
+		{ value: "none", type: "NullLiteral" },
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 		{ value: "{{", type: "OpenExpression" },
@@ -2358,6 +2361,45 @@ const TEST_PARSED = {
 		{ value: ".", type: "Dot" },
 		{ value: "undefined_attribute", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
+	],
+
+	// Null
+	NULL_VARIABLE: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "if", type: "If" },
+		{ value: "not", type: "UnaryOperator" },
+		{ value: "null_val", type: "Identifier" },
+		{ value: "is", type: "Is" },
+		{ value: "defined", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Set" },
+		{ value: "null_val", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "none", type: "NullLiteral" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endif", type: "EndIf" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "if", type: "If" },
+		{ value: "null_val", type: "Identifier" },
+		{ value: "is", type: "Is" },
+		{ value: "not", type: "UnaryOperator" },
+		{ value: "none", type: "NullLiteral" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "fail", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "else", type: "Else" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "pass", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endif", type: "EndIf" },
+		{ value: "%}", type: "CloseStatement" },
 	],
 
 	// Ternary operator
@@ -2918,6 +2960,9 @@ const TEST_CONTEXT = {
 	UNDEFINED_VARIABLES: {},
 	UNDEFINED_ACCESS: { object: {} },
 
+	// Null
+	NULL_VARIABLE: { a: null },
+
 	// Ternary operator
 	TERNARY_OPERATOR: {},
 
@@ -3064,6 +3109,9 @@ const EXPECTED_OUTPUTS = {
 	// Undefined
 	UNDEFINED_VARIABLES: ``,
 	UNDEFINED_ACCESS: ``,
+
+	// Null
+	NULL_VARIABLE: `pass`,
 
 	// Ternary operator
 	TERNARY_OPERATOR: `|a|b|a|b|`,
