@@ -62,7 +62,7 @@ Many ControlNet models were trained in our community event, JAX Diffusers sprint
 
 ### Style Transfer
 
-One of the most popular use cases of image-to-image is style transfer. with style transfer models:
+One of the most popular use cases of image-to-image is style transfer. With style transfer models:
 
 - a normal photo can be converted to a painting in the style of a famous painter.
 - new images can be generated using a text prompt, in the style of a reference input image.
