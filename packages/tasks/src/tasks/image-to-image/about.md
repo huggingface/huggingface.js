@@ -2,22 +2,21 @@
 
 ### Image inpainting
 
-Image inpainting is widely used during photography editing to remove unwanted objects, such as poles, wires, or sensor
-dust.
+Image inpainting is widely used during photography editing to remove unwanted objects, such as poles, wires, or sensor dust.
 
-* check out & learn more: [inpainting demo](https://huggingface.co/spaces/diffusers/stable-diffusion-xl-inpainting), [image inpainting with 🧨diffusers](https://huggingface.co/docs/diffusers/main/en/api/pipelines/stable_diffusion/inpaint)
+- check out & learn more: [inpainting demo](https://huggingface.co/spaces/diffusers/stable-diffusion-xl-inpainting), [image inpainting with 🧨diffusers](https://huggingface.co/docs/diffusers/main/en/api/pipelines/stable_diffusion/inpaint)
 
 ### Image colorization
 
 Old or black and white images can be brought up to life using an image colorization model.
 
-* check out & learn more: [photo colorization demo](https://huggingface.co/spaces/modelscope/old_photo_restoration)
+- check out & learn more: [photo colorization demo](https://huggingface.co/spaces/modelscope/old_photo_restoration)
 
 ### Super Resolution
 
 Super-resolution models increase the resolution of an image, allowing for higher-quality viewing and printing.
 
-* check out & learn more: [super-resolution demo](https://huggingface.co/spaces/radames/Enhance-This-HiDiffusion-SDXL), [image upscaling with 🧨diffusers](https://huggingface.co/docs/diffusers/main/en/api/pipelines/stable_diffusion/upscale#super-resolution)
+- check out & learn more: [super-resolution demo](https://huggingface.co/spaces/radames/Enhance-This-HiDiffusion-SDXL), [image upscaling with 🧨diffusers](https://huggingface.co/docs/diffusers/main/en/api/pipelines/stable_diffusion/upscale#super-resolution)
 
 ## Inference
 
@@ -65,9 +64,9 @@ Many ControlNet models were trained in our community event, JAX Diffusers sprint
 
 One of the most popular use cases of image-to-image is style transfer. with style transfer models - 
 
-* a normal photo can be converted to a painting in the style of a famous painter.
+- a normal photo can be converted to a painting in the style of a famous painter.
 
-* new images can be generated using a text prompt, in the style of a reference input image. 
+- new images can be generated using a text prompt, in the style of a reference input image. 
 
 
 ## Most Used Model for the Task
