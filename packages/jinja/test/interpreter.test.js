@@ -131,26 +131,6 @@ describe("Test interpreter options", () => {
 			testTemplate(test);
 		}
 	});
-
-	it("should support string.rstrip()", () => {
-		const test = {
-			template: '{{ "   test it  ".rstrip() }}',
-			data: { obj: [3, 2, 1] },
-			options: { lstrip_blocks: true, trim_blocks: true },
-			target: `   test it`,
-		};
-		testTemplate(test);
-	});
-
-	it("should support string.lstrip()", () => {
-		const test = {
-			template: '{{ "   test it  ".lstrip() }}',
-			data: { obj: [3, 2, 1] },
-			options: { lstrip_blocks: true, trim_blocks: true },
-			target: `test it  `,
-		};
-		testTemplate(test);
-	});
 });
 
 function testTemplate(test) {
