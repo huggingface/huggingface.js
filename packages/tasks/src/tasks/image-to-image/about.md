@@ -4,18 +4,18 @@
 
 Image inpainting is widely used during photography editing to remove unwanted objects, such as poles, wires, or sensor
 dust.
-> 💡 Try this [inpainting demo](https://huggingface.co/spaces/diffusers/stable-diffusion-xl-inpainting), and learn more on [image inpainting with 🧨diffusers](https://huggingface.co/docs/diffusers/main/en/api/pipelines/stable_diffusion/inpaint)
+* check out & learn more: [inpainting demo](https://huggingface.co/spaces/diffusers/stable-diffusion-xl-inpainting), [image inpainting with 🧨diffusers](https://huggingface.co/docs/diffusers/main/en/api/pipelines/stable_diffusion/inpaint)
 
 ### Image colorization
 
 Old or black and white images can be brought up to life using an image colorization model.
-> 💡 Try this [photo colorization demo](https://huggingface.co/spaces/modelscope/old_photo_restoration)
+* check out & learn more: [photo colorization demo](https://huggingface.co/spaces/modelscope/old_photo_restoration)
 
 ### Super Resolution
 
 Super-resolution models increase the resolution of an image, allowing for higher-quality viewing and printing.
-> 💡 Try this [super-resolution demo](https://huggingface.co/spaces/radames/Enhance-This-HiDiffusion-SDXL), and learn more on [image upscaling with 🧨diffusers](https://huggingface.co/docs/diffusers/main/en/api/pipelines/stable_diffusion/upscale#super-resolution)
-> 
+* check out & learn more: [super-resolution demo](https://huggingface.co/spaces/radames/Enhance-This-HiDiffusion-SDXL), [image upscaling with 🧨diffusers](https://huggingface.co/docs/diffusers/main/en/api/pipelines/stable_diffusion/upscale#super-resolution)
+
 ## Inference
 
 You can use pipelines for image-to-image in 🧨diffusers library to easily use image-to-image models. See an example for `StableDiffusionImg2ImgPipeline` below.
