@@ -127,6 +127,46 @@ const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] 
 	];
 };
 
+const diffusionKitSnippet = (model: ModelData): LocalAppSnippet[] => [
+	{
+		title: "Install CLI with pip",
+		content: "pip install diffusionkit",
+	},
+	{
+		title: "View all available options",
+		content: "diffusionkit-cli --help",
+	},
+	{
+		title: "Generate image using default FLUX.1-schnell and save it to out.png",
+		content: `diffusionkit-cli --prompt "a beautiful sunset over the ocean"`,
+	},
+	{
+		title: "Use specific model and set custom output path",
+		setup: [
+			// prettier-ignore
+			"# To use Stable Diffusion 3 accept the terms before downloading the checkpoint: https://huggingface.co/stabilityai/stable-diffusion-3-medium",
+			"# Once you accept the terms, sign in with your Hugging Face hub token with read access to contents of all public gated repos you can access by running:",
+			"huggingface-cli login --token YOUR_HF_HUB_TOKEN"
+		].join("\n"),
+		content: `diffusionkit-cli --prompt "a futuristic cityscape" --model-version ${model.id} --output-path /path/to/output.png`
+	},
+	{
+		title: "Set seed for reproducibility, specify number of steps, and set custom output image dimensions",
+		content: [
+			// prettier-ignore
+			`diffusionkit-cli --prompt "detailed cinematic dof render of a" \\`,
+			`  detailed MacBook Pro on a wooden desk in a dim room with items \\`,
+			`  around, messy dirty room. On the screen are the letters 'FLUX on \\`,
+			`  DiffusionKit' glowing softly. High detail hard surface render" \\`,
+			`  --height 768 \\`,
+			`  --width 1360 \\`,
+			`  --seed 1001 \\`,
+			`  --step 4 \\`,
+			`  --output ~/Desktop/flux_on_mac.png \\`,
+		].join("\n"),
+	},
+];
+
 /**
  * Add your new local app here.
  *
@@ -238,6 +278,13 @@ export const LOCAL_APPS = {
 		macOSOnly: true,
 		displayOnModelPage: (model) => model.library_name === "diffusers" && model.pipeline_tag === "text-to-image",
 		deeplink: (model) => new URL(`https://diffusionbee.com/huggingface_import?model_id=${model.id}`),
+	},
+	diffusionkit: {
+		prettyLabel: "DiffusionKit",
+		docsUrl: "https://github.com/argmaxinc/DiffusionKit",
+		mainTask: "text-to-image",
+		displayOnModelPage: (model) => model.library_name === "diffusionkit" && model.pipeline_tag === "text-to-image",
+		snippet: diffusionKitSnippet,
 	},
 	joyfusion: {
 		prettyLabel: "JoyFusion",
