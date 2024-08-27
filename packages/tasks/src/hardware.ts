@@ -164,6 +164,14 @@ export const SKUS = {
 				tflops: 12.74,
 				memory: [12, 8],
 			},
+			"RTX 2080 Ti": {
+				tflops: 26.9,
+				memory: [11],
+			},
+			"RTX 2080": {
+				tflops: 20.14,
+				memory: [8],
+			},
 			"RTX 2070": {
 				tflops: 14.93,
 				memory: [8],

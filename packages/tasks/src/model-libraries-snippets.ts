@@ -270,12 +270,12 @@ llm = Llama.from_pretrained(
 )
 
 llm.create_chat_completion(
-		messages = [
-			{
-				"role": "user",
-				"content": "What is the capital of France?"
-			}
-		]
+	messages = [
+		{
+			"role": "user",
+			"content": "What is the capital of France?"
+		}
+	]
 )`,
 ];
 
@@ -381,6 +381,12 @@ export const pyannote_audio = (model: ModelData): string[] => {
 	return pyannote_audio_model(model);
 };
 
+export const relik = (model: ModelData): string[] => [
+	`from relik import Relik
+ 
+relik = Relik.from_pretrained("${model.id}")`,
+];
+
 const tensorflowttsTextToMel = (model: ModelData): string[] => [
 	`from tensorflow_tts.inference import AutoProcessor, TFAutoModel
 
@@ -427,6 +433,21 @@ sae, cfg_dict, sparsity = SAE.from_pretrained(
     release = "RELEASE_ID", # e.g., "gpt2-small-res-jb". See other options in https://github.com/jbloomAus/SAELens/blob/main/sae_lens/pretrained_saes.yaml
     sae_id = "SAE_ID", # e.g., "blocks.8.hook_resid_pre". Won't always be a hook point
 )`,
+];
+
+export const seed_story = (): string[] => [
+	`# seed_story_cfg_path refers to 'https://github.com/TencentARC/SEED-Story/blob/master/configs/clm_models/agent_7b_sft.yaml'
+# llm_cfg_path refers to 'https://github.com/TencentARC/SEED-Story/blob/master/configs/clm_models/llama2chat7b_lora.yaml'
+from omegaconf import OmegaConf
+import hydra
+
+# load Llama2
+llm_cfg = OmegaConf.load(llm_cfg_path)
+llm = hydra.utils.instantiate(llm_cfg, torch_dtype="fp16")
+
+# initialize seed_story
+seed_story_cfg = OmegaConf.load(seed_story_cfg_path)
+seed_story = hydra.utils.instantiate(seed_story_cfg, llm=llm) `,
 ];
 
 const skopsPickle = (model: ModelData, modelFile: string) => {
@@ -524,6 +545,35 @@ export const fastai = (model: ModelData): string[] => [
 
 learn = from_pretrained_fastai("${model.id}")`,
 ];
+
+export const sam2 = (model: ModelData): string[] => {
+	const image_predictor = `# Use SAM2 with images
+import torch
+from sam2.sam2_image_predictor import SAM2ImagePredictor
+
+predictor = SAM2ImagePredictor.from_pretrained(${model.id})
+
+with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
+    predictor.set_image(<your_image>)
+    masks, _, _ = predictor.predict(<input_prompts>)`;
+
+	const video_predictor = `# Use SAM2 with videos
+import torch
+from sam2.sam2_video_predictor import SAM2VideoPredictor
+	
+predictor = SAM2VideoPredictor.from_pretrained(${model.id})
+
+with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
+    state = predictor.init_state(<your_video>)
+
+    # add new prompts and instantly get the output on the same frame
+    frame_idx, object_ids, masks = predictor.add_new_points(state, <your_prompts>):
+
+    # propagate the prompts to get masklets throughout the video
+    for frame_idx, object_ids, masks in predictor.propagate_in_video(state):
+        ...`;
+	return [image_predictor, video_predictor];
+};
 
 export const sampleFactory = (model: ModelData): string[] => [
 	`python -m sample_factory.huggingface.load_from_hub -r ${model.id} -d ./train_dir`,

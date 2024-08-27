@@ -62,10 +62,10 @@ export const LLM_ARCHITECTURES = [
 	"mpt",
 	"baichuan",
 	"starcoder",
-	"persimmon",
 	"refact",
 	"bert",
 	"nomic-bert",
+	"jina-bert-v2",
 	"bloom",
 	"stablelm",
 	"qwen",
@@ -79,12 +79,21 @@ export const LLM_ARCHITECTURES = [
 	"internlm2",
 	"minicpm",
 	"gemma",
+	"gemma2",
 	"starcoder2",
 	"mamba",
 	"xverse",
 	"command-r",
 	"dbrx",
 	"olmo",
+	"openelm",
+	"arctic",
+	"deepseek2",
+	"chatglm",
+	"bitnet",
+	"t5",
+	"t5encoder",
+	"jais",
 ] as const;
 type LLMArchitecture = (typeof LLM_ARCHITECTURES)[number];
 export type ArchLlama = TransformerLLMBase<"llama"> & {
@@ -100,7 +109,10 @@ export type ArchGpt2 = TransformerLLMBase<"gpt2"> & {
 	"gpt2.attention.layer_norm_epsilon": number;
 };
 export type ArchGptj = TransformerLLMBase<"gptj">;
-export type ArchGptneox = TransformerLLMBase<"gptneox">;
+export type ArchGptneox = TransformerLLMBase<"gptneox"> & {
+	"gptneox.attention.layer_norm_epsilon": number;
+	"gptneox.use_parallel_residual": boolean;
+};
 export type ArchMpt = TransformerLLMBase<"mpt"> & {
 	"mpt.attention.layer_norm_epsilon": number;
 	"mpt.attention.clamp_kqv": number;
@@ -111,9 +123,6 @@ export type ArchBaichuan = TransformerLLMBase<"baichuan"> & {
 };
 export type ArchStarcoder = TransformerLLMBase<"starcoder"> & {
 	"starcoder.attention.layer_norm_epsilon": number;
-};
-export type ArchPersimmon = TransformerLLMBase<"persimmon"> & {
-	"persimmon.attention.layer_norm_epsilon": number;
 };
 export type ArchRefact = TransformerLLMBase<"refact"> & {
 	"refact.attention.layer_norm_rms_epsilon": number;
@@ -130,6 +139,12 @@ export type ArchNomicBert = TransformerLLMBase<"nomic-bert"> & {
 	"tokenizer.ggml.token_type_count": number;
 	"nomic-bert.pooling_type": TransformerLLMPoolingType;
 };
+export type ArchJinaBertV2 = TransformerLLMBase<"jina-bert-v2"> & {
+	"jina-bert-v2.attention.layer_norm_epsilon": number;
+	"jina-bert-v2.attention.causal": boolean;
+	"tokenizer.ggml.token_type_count": number;
+	"jina-bert-v2.pooling_type": TransformerLLMPoolingType;
+};
 export type ArchBloom = TransformerLLMBase<"bloom"> & {
 	"bloom.attention.layer_norm_epsilon": number;
 };
@@ -143,6 +158,8 @@ export type ArchQwen2 = TransformerLLMBase<"qwen2"> & {
 	"qwen2.attention.layer_norm_rms_epsilon": number;
 };
 export type ArchQwen2moe = TransformerLLMBase<"qwen2moe"> & {
+	"qwen2moe.expert_feed_forward_length": number;
+	"qwen2moe.expert_shared_feed_forward_length": number;
 	"qwen2moe.attention.layer_norm_rms_epsilon": number;
 };
 export type ArchPhi2 = TransformerLLMBase<"phi2"> & {
@@ -150,6 +167,7 @@ export type ArchPhi2 = TransformerLLMBase<"phi2"> & {
 };
 export type ArchPhi3 = TransformerLLMBase<"phi3"> & {
 	"phi3.attention.layer_norm_rms_epsilon": number;
+	"phi3.attention.sliding_window": number;
 };
 export type ArchPlamo = TransformerLLMBase<"plamo"> & {
 	"plamo.attention.layer_norm_rms_epsilon": number;
@@ -168,6 +186,12 @@ export type ArchMinicpm = TransformerLLMBase<"minicpm"> & {
 };
 export type ArchGemma = TransformerLLMBase<"gemma"> & {
 	"gemma.attention.layer_norm_rms_epsilon": number;
+};
+export type ArchGemma2 = TransformerLLMBase<"gemma2"> & {
+	"gemma2.attention.sliding_window": number;
+	"gemma2.attention.layer_norm_rms_epsilon": number;
+	"gemma2.attn_logit_softcapping": number;
+	"gemma2.final_logit_softcapping": number;
 };
 export type ArchStarcoder2 = TransformerLLMBase<"starcoder2"> & {
 	"starcoder2.attention.layer_norm_epsilon": number;
@@ -194,6 +218,41 @@ export type ArchOlmo = TransformerLLMBase<"olmo"> & {
 	"olmo.attention.layer_norm_epsilon": number;
 	"olmo.attention.clamp_kqv": number;
 };
+export type ArchOpenelm = TransformerLLMBase<"openelm"> & {
+	"openelm.attention.layer_norm_rms_epsilon": number;
+};
+export type ArchArctic = TransformerLLMBase<"arctic"> & {
+	"arctic.attention.layer_norm_rms_epsilon": number;
+};
+export type ArchDeepseek2 = TransformerLLMBase<"deepseek2"> & {
+	"deepseek2.attention.layer_norm_rms_epsilon": number;
+	"deepseek2.leading_dense_block_count": number;
+	"deepseek2.attention.q_lora_rank": number;
+	"deepseek2.attention.kv_lora_rank": number;
+	"deepseek2.expert_feed_forward_length": number;
+	"deepseek2.expert_shared_count": number;
+	"deepseek2.expert_weights_scale": number;
+	"deepseek2.rope.scaling.yarn_log_multiplier": number;
+};
+export type ArchChatglm = TransformerLLMBase<"chatglm"> & {
+	"chatglm.attention.layer_norm_rms_epsilon": number;
+};
+export type ArchBitnet = TransformerLLMBase<"bitnet"> & {
+	"bitnet.attention.layer_norm_rms_epsilon": number;
+};
+export type ArchT5 = TransformerLLMBase<"t5"> & {
+	"t5.attention.layer_norm_rms_epsilon": number;
+	"t5.attention.relative_buckets_count": number;
+	"t5.decoder_start_token_id": number;
+};
+export type ArchT5encoder = TransformerLLMBase<"t5encoder"> & {
+	"t5encoder.attention.layer_norm_rms_epsilon": number;
+	"t5encoder.attention.relative_buckets_count": number;
+};
+export type ArchJais = TransformerLLMBase<"jais"> & {
+	"jais.attention.layer_norm_epsilon": number;
+	"jais.attention.max_alibi_bias": number;
+};
 
 export type TransformerLLM =
 	| ArchLlama
@@ -205,10 +264,10 @@ export type TransformerLLM =
 	| ArchMpt
 	| ArchBaichuan
 	| ArchStarcoder
-	| ArchPersimmon
 	| ArchRefact
 	| ArchBert
 	| ArchNomicBert
+	| ArchJinaBertV2
 	| ArchBloom
 	| ArchStablelm
 	| ArchQwen
@@ -222,9 +281,18 @@ export type TransformerLLM =
 	| ArchInternlm2
 	| ArchMinicpm
 	| ArchGemma
+	| ArchGemma2
 	| ArchStarcoder2
 	| ArchMamba
 	| ArchXverse
 	| ArchCommandR
 	| ArchDbrx
-	| ArchOlmo;
+	| ArchOlmo
+	| ArchOpenelm
+	| ArchArctic
+	| ArchDeepseek2
+	| ArchChatglm
+	| ArchBitnet
+	| ArchT5
+	| ArchT5encoder
+	| ArchJais;

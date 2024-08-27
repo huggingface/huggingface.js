@@ -435,6 +435,21 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"tokenizer.model"`,
 	},
+	relik: {
+		prettyLabel: "Relik",
+		repoName: "Relik",
+		repoUrl: "https://github.com/SapienzaNLP/relik",
+		snippets: snippets.relik,
+		filter: false,
+	},
+	refiners: {
+		prettyLabel: "Refiners",
+		repoName: "Refiners",
+		repoUrl: "https://github.com/finegrain-ai/refiners",
+		docsUrl: "https://refine.rs/",
+		filter: false,
+		countDownloads: `path:"model.safetensors"`,
+	},
 	saelens: {
 		prettyLabel: "SAELens",
 		repoName: "SAELens",
@@ -447,6 +462,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "sam2",
 		repoUrl: "https://github.com/facebookresearch/segment-anything-2",
 		filter: false,
+		snippets: snippets.sam2,
 		countDownloads: `path_extension:"pt"`,
 	},
 	"sample-factory": {
@@ -522,6 +538,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/comfyanonymous/ComfyUI",
 		filter: false,
 		countDownloads: `path_extension:"safetensors"`,
+	},
+	"seed-story": {
+		prettyLabel: "SEED-Story",
+		repoName: "SEED-Story",
+		repoUrl: "https://github.com/TencentARC/SEED-Story",
+		filter: false,
+		countDownloads: `path:"cvlm_llama2_tokenizer/tokenizer.model"`,
+		snippets: snippets.seed_story,
 	},
 	"stable-baselines3": {
 		prettyLabel: "stable-baselines3",
