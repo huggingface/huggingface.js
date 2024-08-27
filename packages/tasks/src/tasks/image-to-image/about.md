@@ -52,15 +52,15 @@ await inference.imageToImage({
 });
 ```
 
-### Use Cases for Text-to-Image Tasks
+## Use Cases for Text-to-Image Tasks
 
-### ControlNet
+## ControlNet
 
 Controlling the outputs of diffusion models only with a text prompt is a challenging problem. ControlNet is a neural network model that provides image-based control to diffusion models. Control images can be edges or other landmarks extracted from a source image.
 
 Many ControlNet models were trained in our community event, JAX Diffusers sprint. You can see the full list of the ControlNet models available [here](https://huggingface.co/spaces/jax-diffusers-event/leaderboard).
 
-### Style Transfer
+## Style Transfer
 
 One of the most popular use cases of image-to-image is style transfer. with style transfer models:
 - a normal photo can be converted to a painting in the style of a famous painter.
