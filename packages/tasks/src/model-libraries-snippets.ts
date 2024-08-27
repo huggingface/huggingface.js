@@ -170,19 +170,43 @@ export const diffusers = (model: ModelData): string[] => {
 	}
 };
 
-export const edge = (model: ModelData): string[] => [
+export const cartesia_pytorch = (model: ModelData): string[] => [
 	`# pip install --no-binary :all: cartesia-pytorch
 from cartesia_pytorch import ReneLMHeadModel
 from transformers import AutoTokenizer
 
-model = ReneLMHeadModel.from_pretrained("${model.id}").half().cuda()
+model = ReneLMHeadModel.from_pretrained("${model.id}")
 tokenizer = AutoTokenizer.from_pretrained("allenai/OLMo-1B-hf")
+
 in_message = ["Rene Descartes was"]
 inputs = tokenizer(in_message, return_tensors="pt")
+
 outputs = model.generate(inputs.input_ids.cuda(), max_length=50, top_k=100, top_p=0.99)
 out_message = tokenizer.batch_decode(outputs, skip_special_tokens=True)[0]
+
 print(out_message)
 )`,
+];
+
+export const cartesia_mlx = (model: ModelData): string[] => [
+	`import mlx.core as mx
+import cartesia_mlx as cmx
+
+model = cmx.from_pretrained("${model.id}")
+model.set_dtype(mx.float32)   
+
+prompt = "Rene Descartes was"
+
+for text in model.generate(
+    prompt,
+    max_tokens=500,
+    eval_every_n=5,
+    verbose=True,
+    top_p=0.99,
+    temperature=0.85,
+):
+    print(text, end="", flush=True)
+`,
 ];
 
 export const edsnlp = (model: ModelData): string[] => {
