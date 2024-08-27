@@ -658,6 +658,12 @@ export const PIPELINE_DATA = {
 		color: "blue",
 		hideInDatasets: true,
 	},
+	"keypoint-detection": {
+		name: "Keypoint Detection",
+		modality: "cv",
+		color: "red",
+		hideInDatasets: true,
+	},
 	other: {
 		name: "Other",
 		modality: "other",
