@@ -128,22 +128,18 @@ describe("Test interpreter options", () => {
 		];
 
 		for (const test of TESTS) {
-			testTemplate(test);
+			const env = new Environment();
+			env.set("True", true);
+			for (const [key, value] of Object.entries(test.data)) {
+				env.set(key, value);
+			}
+
+			const tokens = tokenize(test.template, test.options);
+			const parsed = parse(tokens);
+
+			const interpreter = new Interpreter(env);
+			const result = interpreter.run(parsed);
+			expect(result.value).toEqual(test.target);
 		}
 	});
 });
-
-function testTemplate(test) {
-	const env = new Environment();
-	env.set("True", true);
-	for (const [key, value] of Object.entries(test.data)) {
-		env.set(key, value);
-	}
-
-	const tokens = tokenize(test.template, test.options);
-	const parsed = parse(tokens);
-
-	const interpreter = new Interpreter(env);
-	const result = interpreter.run(parsed);
-	expect(result.value).toEqual(test.target);
-}
