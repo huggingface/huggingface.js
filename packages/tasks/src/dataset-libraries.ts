@@ -77,6 +77,12 @@ export const DATASET_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/pola-rs/polars",
 		docsUrl: "https://huggingface.co/docs/hub/datasets-polars",
 	},
+	duckdb: {
+		prettyLabel: "DuckDB",
+		repoName: "duckdb",
+		repoUrl: "https://github.com/duckdb/duckdb",
+		docsUrl: "https://huggingface.co/docs/hub/datasets-duckdb",
+	},
 } satisfies Record<string, DatasetLibraryUiElement>;
 
 /// List of the dataset libraries supported by the Hub
