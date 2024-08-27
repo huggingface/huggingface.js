@@ -153,6 +153,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	deepforest_tree: {
 		prettyLabel: "DeepForest Tree",
 		repoName: "deepforest-Tree",
+		docsUrl: "https://deepforest.readthedocs.io/en/latest/",
 		repoUrl: "https://github.com/weecology/DeepForest",
 		countDownloads: `path:"NEON.pt"`,
 	},
@@ -160,7 +161,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "DeepForest Bird",
 		repoName: "deepforest-bird",
 		repoUrl: "https://github.com/weecology/DeepForest",
-		countDownloads: `path:"bird.pt"`,
+		countDownloads: `path_extension:"pt"`,
 	},
 	"depth-anything-v2": {
 		prettyLabel: "DepthAnythingV2",
