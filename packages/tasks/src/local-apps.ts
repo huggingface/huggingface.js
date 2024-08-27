@@ -127,7 +127,7 @@ const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] 
 	];
 };
 
-const diffusionKitSnippet = (model: ModelData): LocalAppSnippet[] => [
+const snippetDiffusionKit = (model: ModelData): LocalAppSnippet[] => [
 	{
 		title: "Install CLI with pip",
 		content: "pip install diffusionkit",
@@ -284,7 +284,7 @@ export const LOCAL_APPS = {
 		docsUrl: "https://github.com/argmaxinc/DiffusionKit",
 		mainTask: "text-to-image",
 		displayOnModelPage: (model) => model.library_name === "diffusionkit" && model.pipeline_tag === "text-to-image",
-		snippet: diffusionKitSnippet,
+		snippet: snippetDiffusionKit,
 	},
 	joyfusion: {
 		prettyLabel: "JoyFusion",
