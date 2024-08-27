@@ -170,6 +170,41 @@ export const diffusers = (model: ModelData): string[] => {
 	}
 };
 
+export const diffusionkit = (): string[] => {
+	const sd3Snippet = `from diffusionkit.mlx import DiffusionPipeline
+
+pipeline = DiffusionPipeline(
+	shift=3.0,
+	use_t5=False,
+	model_version="argmaxinc/mlx-stable-diffusion-3-medium",
+	low_memory_mode=True,
+	a16=True,
+	w16=True,
+)`;
+	const fluxSnippet = `from diffusionkit.mlx import FluxPipeline
+
+pipeline = FluxPipeline(
+  shift=1.0,
+  model_version="argmaxinc/mlx-FLUX.1-schnell",
+  low_memory_mode=True,
+  a16=True,
+  w16=True,
+)`;
+	const generateSnippet = `HEIGHT = 512
+WIDTH = 512
+NUM_STEPS = 4  #  4 for FLUX.1-schnell, 50 for SD3
+CFG_WEIGHT = 0. # for FLUX.1-schnell, 5. for SD3
+
+image, _ = pipeline.generate_image(
+  "a photo of a cat",
+  cfg_weight=CFG_WEIGHT,
+  num_steps=NUM_STEPS,
+  latent_size=(HEIGHT // 8, WIDTH // 8),
+)`;
+
+	return [sd3Snippet, fluxSnippet, generateSnippet];
+};
+
 export const cartesia_pytorch = (model: ModelData): string[] => [
 	`# pip install --no-binary :all: cartesia-pytorch
 from cartesia_pytorch import ReneLMHeadModel
@@ -943,34 +978,5 @@ whisperkit-cli transcribe --audio-path /path/to/audio.mp3
 
 # Or use your preferred model variant
 whisperkit-cli transcribe --model "large-v3" --model-prefix "distil" --audio-path /path/to/audio.mp3 --verbose`,
-];
-
-export const diffusionkit = (): string[] => [
-	`# Install CLI with pip
-pip install diffusionkit-cli
-
-# View all available options
-diffusionkit-cli --help
-
-# Generate image using default FLUX.1-schnell and save it to out.png
-diffusionkit-cli --prompt "a beautiful sunset over the ocean"
-
-# To use Stable Diffusion 3 accept the terms before downloading the checkpoint: https://huggingface.co/stabilityai/stable-diffusion-3-medium
-# Once you accept the terms, sign in with your Hugging Face hub token with read access to contents of all public gated repos you can access:
-huggingface-cli login --token YOUR_HF_HUB_TOKEN
-
-# Use specific model and set custom output path
-diffusionkit-cli --prompt "a futuristic cityscape" --model-version stable-diffusion-3-medium --output-path /path/to/output.png
-
-# Set seed for reproducibility, specify number of steps, and set custom output image dimensions
-diffusionkit-cli --prompt "detailed cinematic dof render of a \
-detailed MacBook Pro on a wooden desk in a dim room with items \
-around, messy dirty room. On the screen are the letters 'FLUX on \
-DiffusionKit' glowing softly. High detail hard surface render" \
---height 768 \
---width 1360 \
---seed 1001 \
---step 4 \
---output ~/Desktop/flux_on_mac.png`,
 ];
 //#endregion

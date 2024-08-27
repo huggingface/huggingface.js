@@ -185,7 +185,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "DiffusionKit",
 		repoName: "DiffusionKit",
 		repoUrl: "https://github.com/argmaxinc/DiffusionKit",
-		docsUrl: "https://github.com/argmaxinc/DiffusionKit?tab=readme-ov-file#-image-generation-with-python-mlx",
 		snippets: snippets.diffusionkit,
 	},
 	doctr: {
