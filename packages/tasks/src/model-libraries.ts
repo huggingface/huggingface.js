@@ -618,6 +618,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path_extension:"sentis"`,
 	},
+	videocrafter: {
+		prettyLabel: "VideoCrafter",
+		repoName: "VideoCrafter",
+		repoUrl: "https://github.com/AILab-CVC/VideoCrafter",
+		countDownloads: `path_extension:"ckpt"`,
+	},
 	voicecraft: {
 		prettyLabel: "VoiceCraft",
 		repoName: "VoiceCraft",
