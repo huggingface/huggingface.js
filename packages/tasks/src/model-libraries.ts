@@ -179,6 +179,18 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "doctr",
 		repoUrl: "https://github.com/mindee/doctr",
 	},
+	cartesia_pytorch: {
+		prettyLabel: "Cartesia Pytorch",
+		repoName: "Cartesia Pytorch",
+		repoUrl: "https://github.com/cartesia-ai/cartesia_pytorch",
+		snippets: snippets.cartesia_pytorch,
+	},
+	cartesia_mlx: {
+		prettyLabel: "Cartesia MLX",
+		repoName: "Cartesia MLX",
+		repoUrl: "https://github.com/cartesia-ai/cartesia_mlx",
+		snippets: snippets.cartesia_mlx,
+	},
 	edsnlp: {
 		prettyLabel: "EDS-NLP",
 		repoName: "edsnlp",
