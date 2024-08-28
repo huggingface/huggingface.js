@@ -9,7 +9,7 @@
  */
 export interface TextToImageInput {
 	/**
-	 * The input text data (sometimes called "prompt"
+	 * The input text data (sometimes called "prompt")
 	 */
 	inputs: string;
 	/**
