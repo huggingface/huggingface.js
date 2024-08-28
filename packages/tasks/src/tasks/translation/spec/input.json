@@ -3,5 +3,33 @@
 	"$id": "/inference/schemas/translation/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"title": "TranslationInput",
-	"description": "Inputs for Translation inference"
+	"description": "Inputs for Translation inference",
+	"properties": {
+		"inputs": {
+			"description": "The text to translate.",
+			"type": "string"
+		},
+		"parameters": {
+			"description": "Additional inference parameters",
+			"$ref": "#/$defs/TranslationParameters"
+		}
+	},
+	"$defs": {
+		"FillMaskParameters": {
+			"title": "TranslationParameters",
+			"description": "Additional inference parameters for Translation",
+			"type": "object",
+			"properties": {
+				"src_lang": {
+					"type": "string",
+					"description": "The source language of the text. Required for models that can translate from multiple languages."
+				},
+				"tgt_lang": {
+					"type": "string",
+					"description": "Target language to translate to. Required for models that can translate to multiple languages."
+				}
+			}
+		}
+	},
+	"required": ["inputs"]
 }

@@ -3,5 +3,12 @@
 	"$id": "/inference/schemas/summarization/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"title": "SummarizationInput",
-	"description": "Inputs for Summarization inference"
+	"description": "Inputs for Summarization inference",
+	"properties": {
+		"inputs": {
+			"description": "The text to summarize.",
+			"type": "string"
+		}
+	},
+	"required": ["inputs"]
 }
