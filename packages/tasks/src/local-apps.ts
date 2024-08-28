@@ -143,19 +143,17 @@ const snippetDiffusionKit = (model: ModelData): LocalAppSnippet[] => {
 	return [
 		{
 			title: "Install from pip",
-			content: "pip install diffusionkit",
+			setup: "pip install diffusionkit",
+			content: command("diffusionkit-cli"),
 		},
 		{
 			title: "Build from source code",
-			content: [
+			setup: [
 				// prettier-ignore
 				"git clone https://github.com/argmaxinc/DiffusionKit.git",
 				"cd DiffusionKit",
 				"pip install -e .",
 			].join("\n"),
-		},
-		{
-			title: "Set seed for reproducibility, specify number of steps, and set custom output image dimensions",
 			content: command("diffusionkit-cli"),
 		},
 	];
