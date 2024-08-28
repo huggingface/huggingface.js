@@ -170,27 +170,32 @@ export const diffusers = (model: ModelData): string[] => {
 	}
 };
 
-export const diffusionkit = (): string[] => {
-	const sd3Snippet = `from diffusionkit.mlx import DiffusionPipeline
+export const diffusionkit = (model: ModelData): string[] => {
+	const sd3Snippet = `# Pipeline for Stable Diffusion 3
+from diffusionkit.mlx import DiffusionPipeline
 
 pipeline = DiffusionPipeline(
 	shift=3.0,
 	use_t5=False,
-	model_version="argmaxinc/mlx-stable-diffusion-3-medium",
+	model_version=${model.id},
 	low_memory_mode=True,
 	a16=True,
 	w16=True,
 )`;
-	const fluxSnippet = `from diffusionkit.mlx import FluxPipeline
+
+	const fluxSnippet = `# Pipeline for Flux
+from diffusionkit.mlx import FluxPipeline
 
 pipeline = FluxPipeline(
   shift=1.0,
-  model_version="argmaxinc/mlx-FLUX.1-schnell",
+  model_version=${model.id},
   low_memory_mode=True,
   a16=True,
   w16=True,
 )`;
-	const generateSnippet = `HEIGHT = 512
+
+	const generateSnippet = `# Image Generation
+HEIGHT = 512
 WIDTH = 512
 NUM_STEPS = 4  #  4 for FLUX.1-schnell, 50 for SD3
 CFG_WEIGHT = 0. # for FLUX.1-schnell, 5. for SD3
@@ -202,7 +207,9 @@ image, _ = pipeline.generate_image(
   latent_size=(HEIGHT // 8, WIDTH // 8),
 )`;
 
-	return [sd3Snippet, fluxSnippet, generateSnippet];
+	const pipelineSnippet = model.tags.includes("flux") ? fluxSnippet : sd3Snippet;
+
+	return [pipelineSnippet, generateSnippet];
 };
 
 export const cartesia_pytorch = (model: ModelData): string[] => [
