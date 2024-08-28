@@ -127,48 +127,39 @@ const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] 
 	];
 };
 
-const snippetDiffusionKit = (model: ModelData): LocalAppSnippet[] => [
-	{
-		title: "Install from pip",
-		content: "pip install diffusionkit",
-	},
-	{
-		title: "Build from source code",
-		content: [
-			// prettier-ignore
-			"git clone https://github.com/argmaxinc/DiffusionKit.git",
-			"cd DiffusionKit",
-			"pip install -e .",
-		].join("\n"),
-	},
-	{
-		title: "View all available options",
-		content: "diffusionkit-cli --help",
-	},
-	{
-		title: "Generate image using default FLUX.1-schnell and save it to out.png",
-		content: `diffusionkit-cli --prompt "a beautiful sunset over the ocean"`,
-	},
-	{
-		title: "Use specific model and set custom output path",
-		content: `diffusionkit-cli --prompt "a futuristic cityscape" --model-version ${model.id} --output-path /path/to/output.png`
-	},
-	{
-		title: "Set seed for reproducibility, specify number of steps, and set custom output image dimensions",
-		content: [
-			// prettier-ignore
-			`diffusionkit-cli --prompt "detailed cinematic dof render of a" \\`,
-			`  detailed MacBook Pro on a wooden desk in a dim room with items \\`,
-			`  around, messy dirty room. On the screen are the letters 'FLUX on \\`,
-			`  DiffusionKit' glowing softly. High detail hard surface render" \\`,
+const snippetDiffusionKit = (model: ModelData): LocalAppSnippet[] => {
+	const command = (binary: string) =>
+		[
+			"# Load and run the model:",
+			`${binary} \\`,
+			`  --model-version ${model.id}" \\`,
+			'  --prompt "a futuristic cityscape" \\',
 			`  --height 768 \\`,
 			`  --width 1360 \\`,
 			`  --seed 1001 \\`,
 			`  --step 4 \\`,
 			`  --output ~/Desktop/flux_on_mac.png`,
-		].join("\n"),
-	},
-];
+		].join("\n");
+	return [
+		{
+			title: "Install from pip",
+			content: "pip install diffusionkit",
+		},
+		{
+			title: "Build from source code",
+			content: [
+				// prettier-ignore
+				"git clone https://github.com/argmaxinc/DiffusionKit.git",
+				"cd DiffusionKit",
+				"pip install -e .",
+			].join("\n"),
+		},
+		{
+			title: "Set seed for reproducibility, specify number of steps, and set custom output image dimensions",
+			content: command("diffusionkit-cli"),
+		},
+	];
+};
 
 /**
  * Add your new local app here.
@@ -286,6 +277,7 @@ export const LOCAL_APPS = {
 		prettyLabel: "DiffusionKit",
 		docsUrl: "https://github.com/argmaxinc/DiffusionKit",
 		mainTask: "text-to-image",
+		macOSOnly: true,
 		displayOnModelPage: (model) => model.library_name === "diffusionkit" && model.pipeline_tag === "text-to-image",
 		snippet: snippetDiffusionKit,
 	},
