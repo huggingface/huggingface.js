@@ -138,7 +138,7 @@ const snippetDiffusionKit = (model: ModelData): LocalAppSnippet[] => {
 			`  --width 1360 \\`,
 			`  --seed 1001 \\`,
 			`  --step 4 \\`,
-			`  --output ~/Desktop/flux_on_mac.png`,
+			`  --output ~/Desktop/out.png`,
 		].join("\n");
 	return [
 		{
