@@ -1,5 +1,5 @@
 {
-	"$ref": "/inference/schemas/text2text-generation/input.json",
+	"$ref": "/inference/schemas/translation/input.json",
 	"$id": "/inference/schemas/translation/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"title": "TranslationInput",
