@@ -150,6 +150,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"adapter_config.json"`,
 	},
+	deepforest: {
+		prettyLabel: "DeepForest",
+		repoName: "deepforest",
+		docsUrl: "https://deepforest.readthedocs.io/en/latest/",
+		repoUrl: "https://github.com/weecology/DeepForest",
+		countDownloads: `path_extension:"pt"`,
+	},
 	"depth-anything-v2": {
 		prettyLabel: "DepthAnythingV2",
 		repoName: "Depth Anything V2",
