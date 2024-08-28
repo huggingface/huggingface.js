@@ -129,8 +129,17 @@ const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] 
 
 const snippetDiffusionKit = (model: ModelData): LocalAppSnippet[] => [
 	{
-		title: "Install CLI with pip",
+		title: "Install from pip",
 		content: "pip install diffusionkit",
+	},
+	{
+		title: "Build from source code",
+		content: [
+			// prettier-ignore
+			"git clone https://github.com/argmaxinc/DiffusionKit.git",
+			"cd DiffusionKit",
+			"pip install -e .",
+		].join("\n"),
 	},
 	{
 		title: "View all available options",
@@ -142,12 +151,6 @@ const snippetDiffusionKit = (model: ModelData): LocalAppSnippet[] => [
 	},
 	{
 		title: "Use specific model and set custom output path",
-		setup: [
-			// prettier-ignore
-			"# To use Stable Diffusion 3 accept the terms before downloading the checkpoint: https://huggingface.co/stabilityai/stable-diffusion-3-medium",
-			"# Once you accept the terms, sign in with your Hugging Face hub token with read access to contents of all public gated repos you can access by running:",
-			"huggingface-cli login --token YOUR_HF_HUB_TOKEN"
-		].join("\n"),
 		content: `diffusionkit-cli --prompt "a futuristic cityscape" --model-version ${model.id} --output-path /path/to/output.png`
 	},
 	{
