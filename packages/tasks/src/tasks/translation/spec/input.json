@@ -15,7 +15,7 @@
 		}
 	},
 	"$defs": {
-		"FillMaskParameters": {
+		"TranslationParameters": {
 			"title": "TranslationParameters",
 			"description": "Additional inference parameters for Translation",
 			"type": "object",
