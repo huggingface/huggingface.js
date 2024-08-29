@@ -46,11 +46,15 @@ const taskData: TaskDataCustom = {
 	],
 	models: [
 		{
-			description: "A LayoutLM model for the document QA task, fine-tuned on DocVQA and SQuAD2.0.",
+			description: "A robust document question answering model.",
 			id: "impira/layoutlm-document-qa",
 		},
 		{
-			description: "A special model for OCR-free Document QA task.",
+			description: "A strong document question answering model specialized in invoices.",
+			id: "impira/layoutlm-invoices",
+		},
+		{
+			description: "A special model for OCR-free document question answering.",
 			id: "microsoft/udop-large",
 		},
 		{
@@ -74,7 +78,7 @@ const taskData: TaskDataCustom = {
 	],
 	summary:
 		"Document Question Answering (also known as Document Visual Question Answering) is the task of answering questions on document images. Document question answering models take a (document, question) pair as input and return an answer in natural language. Models usually rely on multi-modal features, combining text, position of words (bounding-boxes) and image.",
-	widgetModels: ["impira/layoutlm-document-qa"],
+	widgetModels: ["impira/layoutlm-invoices"],
 	youtubeId: "",
 };
 

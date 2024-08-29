@@ -46,7 +46,7 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "A summarization model trained on medical articles.",
-			id: "google/bigbird-pegasus-large-pubmed",
+			id: "Falconsai/medical_summarization",
 		},
 	],
 	spaces: [
@@ -69,7 +69,7 @@ const taskData: TaskDataCustom = {
 	],
 	summary:
 		"Summarization is the task of producing a shorter version of a document while preserving its important information. Some models can extract text from the original input, while other models can generate entirely new text.",
-	widgetModels: ["sshleifer/distilbart-cnn-12-6"],
+	widgetModels: ["facebook/bart-large-cnn"],
 	youtubeId: "yHnr5Dk2zCI",
 };
 

@@ -8,7 +8,7 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "An English dataset with 1,000 hours of data.",
-			id: "librispeech_asr",
+			id: "openslr/librispeech_asr",
 		},
 		{
 			description: "A multi-lingual audio dataset with 370K hours of audio.",
@@ -53,6 +53,10 @@ const taskData: TaskDataCustom = {
 		{
 			description: "An end-to-end model that performs ASR and Speech Translation by MetaAI.",
 			id: "facebook/seamless-m4t-v2-large",
+		},
+		{
+			description: "Powerful speaker diarization model.",
+			id: "pyannote/speaker-diarization-3.1",
 		},
 	],
 	spaces: [

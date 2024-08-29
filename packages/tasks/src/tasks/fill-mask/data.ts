@@ -62,11 +62,11 @@ const taskData: TaskDataCustom = {
 	models: [
 		{
 			description: "A faster and smaller model than the famous BERT model.",
-			id: "distilbert-base-uncased",
+			id: "google-bert/bert-base-uncased",
 		},
 		{
 			description: "A multilingual model trained on 100 languages.",
-			id: "xlm-roberta-base",
+			id: "FacebookAI/xlm-roberta-base",
 		},
 	],
 	spaces: [],
