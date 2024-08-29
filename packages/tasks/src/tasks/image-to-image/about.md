@@ -56,6 +56,7 @@ One of the most popular use cases of image-to-image is style transfer. With styl
 - new images can be generated using a text prompt, in the style of a reference input image.
 
 See 🧨diffusers example for style transfer with `AutoPipelineForText2Image` below.
+
 ```python
 from diffusers import AutoPipelineForText2Image
 from diffusers.utils import load_image
@@ -84,12 +85,12 @@ image = pipeline(
 ).images[0]
 image
 ```
+
 ### ControlNet
 
 Controlling the outputs of diffusion models only with a text prompt is a challenging problem. ControlNet is a neural network model that provides image-based control to diffusion models. Control images can be edges or other landmarks extracted from a source image.
 
 Many ControlNet models were trained in our community event, JAX Diffusers sprint. You can see the full list of the ControlNet models available [here](https://huggingface.co/spaces/jax-diffusers-event/leaderboard).
-
 
 ## Pix2Pix
 
