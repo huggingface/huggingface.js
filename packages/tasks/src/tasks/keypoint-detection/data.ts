@@ -37,10 +37,8 @@ const taskData: TaskDataCustom = {
 			description: "An application that detects hand keypoints in real-time.",
 			id: "datasciencedojo/Hand-Keypoint-Detection-Realtime",
 		},
-		
 	],
-	summary:
-		"Keypoint detection is the task of identifying meaningful distinctive points or features in an image.",
+	summary: "Keypoint detection is the task of identifying meaningful distinctive points or features in an image.",
 	widgetModels: [],
 	youtubeId: "",
 };

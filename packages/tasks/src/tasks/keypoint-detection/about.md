@@ -1,4 +1,3 @@
-
 ## Task Variants
 
 ### Pose Estimation
@@ -38,23 +37,23 @@ inputs = processor(image,return_tensors="pt").to(model.device, model.dtype)
 outputs = model(**inputs)
 
 # visualize the output
-image_width, image_height = image.size  
+image_width, image_height = image.size
 image_mask = outputs.mask
 image_indices = torch.nonzero(image_mask).squeeze()
 
-image_scores = outputs.scores.squeeze()  
-image_keypoints = outputs.keypoints.squeeze()  
+image_scores = outputs.scores.squeeze()
+image_keypoints = outputs.keypoints.squeeze()
 keypoints = image_keypoints.detach().numpy()
 scores = image_scores.detach().numpy()
 
 plt.axis('off')
 plt.imshow(image)
 plt.scatter(
-    keypoints[:, 0],  
-    keypoints[:, 1],   
-    s=scores * 100,    
-    c='cyan',          
-    alpha=0.4       
+    keypoints[:, 0],
+    keypoints[:, 1],
+    s=scores * 100,
+    c='cyan',
+    alpha=0.4
 )
 plt.show()
 ```
