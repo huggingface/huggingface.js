@@ -36,8 +36,7 @@ for await (const chunk of inference.chatCompletionStream({
 	max_tokens: 500,
 })) {
 	process.stdout.write(chunk.choices[0]?.delta?.content || "");
-}
-`;
+}`;
 	} else {
 		return snippetBasic(model, accessToken);
 	}
