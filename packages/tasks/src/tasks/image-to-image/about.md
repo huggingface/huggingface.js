@@ -65,7 +65,7 @@ import torch
 pipeline = AutoPipelineForText2Image.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", torch_dtype=torch.float16).to("cuda")
 pipeline.load_ip_adapter("h94/IP-Adapter", subfolder="sdxl_models", weight_name="ip-adapter_sdxl.bin")
 
-# set the adapter and scales - this is a component that lets us add the style control from an image
+# set the adapter and scales - this is a component that lets us add the style control from an image to the text-to-image model
 scale = {
     "down": {"block_2": [0.0, 1.0]},
     "up": {"block_0": [0.0, 1.0, 0.0]},
