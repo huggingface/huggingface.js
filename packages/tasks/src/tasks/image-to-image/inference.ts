@@ -9,9 +9,10 @@
  */
 export interface ImageToImageInput {
 	/**
-	 * The input image data
+	 * The input image data as a base64-encoded string. If no `parameters` are provided, you can
+	 * also provide the image data as a raw bytes payload.
 	 */
-	inputs: unknown;
+	inputs: string;
 	/**
 	 * Additional inference parameters
 	 */
@@ -40,14 +41,14 @@ export interface ImageToImageParameters {
 	 */
 	num_inference_steps?: number;
 	/**
-	 * The size in pixel of the output image
+	 * The size in pixel of the output image.
 	 */
 	target_size?: TargetSize;
 	[property: string]: unknown;
 }
 
 /**
- * The size in pixel of the output image
+ * The size in pixel of the output image.
  */
 export interface TargetSize {
 	height: number;
