@@ -197,8 +197,8 @@ pipeline = FluxPipeline(
 	const generateSnippet = `# Image Generation
 HEIGHT = 512
 WIDTH = 512
-NUM_STEPS = 4  #  4 for FLUX.1-schnell, 50 for SD3
-CFG_WEIGHT = 0. # for FLUX.1-schnell, 5. for SD3
+NUM_STEPS = ${model.tags.includes("flux") ? 4 : 50}
+CFG_WEIGHT = ${model.tags.includes("flux") ? 0. : 5}
 
 image, _ = pipeline.generate_image(
   "a photo of a cat",
