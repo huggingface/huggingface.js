@@ -12,7 +12,7 @@ Keypoint detection models can be used to estimate the position of facial landmar
 
 ### Fitness Tracking
 
-Keypoint detection models can be used to track the movement of the human body, e.g. position of the joints in a 3D space. This can be used for a variety of applications, such as fitness tracking, sports analysis or virtual reality-based applications.
+Keypoint detection models can be used to track the movement of the human body, e.g. position of the joints in a 3D space. This can be used for a variety of applications, such as fitness tracking, sports analysis or virtual reality applications.
 
 ## Inference Code
 
