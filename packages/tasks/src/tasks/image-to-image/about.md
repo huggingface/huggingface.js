@@ -4,19 +4,13 @@
 
 Image inpainting is widely used during photography editing to remove unwanted objects, such as poles, wires, or sensor dust.
 
-- check out & learn more: [inpainting demo](https://huggingface.co/spaces/diffusers/stable-diffusion-xl-inpainting), [image inpainting with 🧨diffusers](https://huggingface.co/docs/diffusers/main/en/api/pipelines/stable_diffusion/inpaint)
-
 ### Image colorization
 
 Old or black and white images can be brought up to life using an image colorization model.
 
-- check out & learn more: [photo colorization demo](https://huggingface.co/spaces/modelscope/old_photo_restoration)
-
 ### Super Resolution
 
 Super-resolution models increase the resolution of an image, allowing for higher-quality viewing and printing.
-
-- check out & learn more: [super-resolution demo](https://huggingface.co/spaces/radames/Enhance-This-HiDiffusion-SDXL), [image upscaling with 🧨diffusers](https://huggingface.co/docs/diffusers/main/en/api/pipelines/stable_diffusion/upscale#super-resolution)
 
 ## Inference
 
@@ -52,7 +46,7 @@ await inference.imageToImage({
 });
 ```
 
-## Use Cases for Text-to-Image Tasks
+## Uses Cases for Text Guided Image Generation
 
 ### ControlNet
 
@@ -64,7 +58,7 @@ Many ControlNet models were trained in our community event, JAX Diffusers sprint
 
 One of the most popular use cases of image-to-image is style transfer. With style transfer models:
 
-- a normal photo can be converted to a painting in the style of a famous painter.
+- a regular photo can be transformed into a variety of artistic styles or genres, such as a watercolor painting, a comic book illustration and more.
 - new images can be generated using a text prompt, in the style of a reference input image.
 
 ## Pix2Pix
@@ -76,7 +70,9 @@ The images below show some examples extracted from the Pix2Pix paper. This model
 ![Examples](https://huggingface.co/datasets/huggingfacejs/tasks/resolve/main/image-to-image/pix2pix_examples.jpg)
 
 ## Useful Resources
-
+- Image inpainting: [inpainting with 🧨diffusers](https://huggingface.co/docs/diffusers/main/en/api/pipelines/stable_diffusion/inpaint), [demo](https://huggingface.co/spaces/diffusers/stable-diffusion-xl-inpainting)
+- Colorization: [demo](https://huggingface.co/spaces/modelscope/old_photo_restoration)
+- Super resolution: [image upscaling with 🧨diffusers](https://huggingface.co/docs/diffusers/main/en/api/pipelines/stable_diffusion/upscale#super-resolution), [demo](https://huggingface.co/spaces/radames/Enhance-This-HiDiffusion-SDXL)
 - [Image-to-image guide with diffusers](https://huggingface.co/docs/diffusers/using-diffusers/img2img)
 - [Train your ControlNet with diffusers 🧨](https://huggingface.co/blog/train-your-controlnet)
 - [Ultra fast ControlNet with 🧨 Diffusers](https://huggingface.co/blog/controlnet)
