@@ -137,7 +137,8 @@ const snippetDiffusionKit = (model: ModelData): LocalAppSnippet[] => {
 			`  --height 768 \\`,
 			`  --width 1360 \\`,
 			`  --seed 1001 \\`,
-			`  --step 4 \\`,
+			`  --step ${model.tags.includes("flux") ? 4 : 50} \\`,
+			`  --cfg ${model.tags.includes("flux") ? 0. : 5} \\`,
 			`  --output ~/Desktop/out.png`,
 		].join("\n");
 	return [
