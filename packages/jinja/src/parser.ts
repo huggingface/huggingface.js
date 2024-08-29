@@ -12,6 +12,7 @@ import {
 	NumericLiteral,
 	StringLiteral,
 	BooleanLiteral,
+	NullLiteral,
 	ArrayLiteral,
 	ObjectLiteral,
 	BinaryExpression,
@@ -486,6 +487,8 @@ export function parse(tokens: Token[]): Program {
 			if (filter instanceof BooleanLiteral) {
 				// Special case: treat boolean literals as identifiers
 				filter = new Identifier(filter.value.toString());
+			} else if (filter instanceof NullLiteral) {
+				filter = new Identifier("none");
 			}
 			if (!(filter instanceof Identifier)) {
 				throw new SyntaxError(`Expected identifier for the test`);
@@ -527,6 +530,9 @@ export function parse(tokens: Token[]): Program {
 			case TOKEN_TYPES.BooleanLiteral:
 				++current;
 				return new BooleanLiteral(token.value.toLowerCase() === "true");
+			case TOKEN_TYPES.NullLiteral:
+				++current;
+				return new NullLiteral(null);
 			case TOKEN_TYPES.Identifier:
 				++current;
 				return new Identifier(token.value);

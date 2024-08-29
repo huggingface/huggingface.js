@@ -6,6 +6,7 @@ export const TOKEN_TYPES = Object.freeze({
 
 	NumericLiteral: "NumericLiteral", // e.g., 123
 	BooleanLiteral: "BooleanLiteral", // true or false
+	NullLiteral: "NullLiteral", // none
 	StringLiteral: "StringLiteral", // 'string'
 	Identifier: "Identifier", // Variables, functions, etc.
 	Equals: "Equals", // =
@@ -73,6 +74,7 @@ const KEYWORDS = Object.freeze({
 	// Literals
 	true: TOKEN_TYPES.BooleanLiteral,
 	false: TOKEN_TYPES.BooleanLiteral,
+	none: TOKEN_TYPES.NullLiteral,
 
 	// NOTE: According to the Jinja docs: The special constants true, false, and none are indeed lowercase.
 	// Because that caused confusion in the past, (True used to expand to an undefined variable that was considered false),
@@ -80,6 +82,7 @@ const KEYWORDS = Object.freeze({
 	// you should use the lowercase versions.
 	True: TOKEN_TYPES.BooleanLiteral,
 	False: TOKEN_TYPES.BooleanLiteral,
+	None: TOKEN_TYPES.NullLiteral,
 });
 
 /**
@@ -271,6 +274,7 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 				case TOKEN_TYPES.Identifier:
 				case TOKEN_TYPES.NumericLiteral:
 				case TOKEN_TYPES.BooleanLiteral:
+				case TOKEN_TYPES.NullLiteral:
 				case TOKEN_TYPES.StringLiteral:
 				case TOKEN_TYPES.CloseParen:
 				case TOKEN_TYPES.CloseSquareBracket:

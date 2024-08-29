@@ -150,6 +150,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"adapter_config.json"`,
 	},
+	deepforest: {
+		prettyLabel: "DeepForest",
+		repoName: "deepforest",
+		docsUrl: "https://deepforest.readthedocs.io/en/latest/",
+		repoUrl: "https://github.com/weecology/DeepForest",
+		countDownloads: `path_extension:"pt"`,
+	},
 	"depth-anything-v2": {
 		prettyLabel: "DepthAnythingV2",
 		repoName: "Depth Anything V2",
@@ -178,6 +185,18 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "docTR",
 		repoName: "doctr",
 		repoUrl: "https://github.com/mindee/doctr",
+	},
+	cartesia_pytorch: {
+		prettyLabel: "Cartesia Pytorch",
+		repoName: "Cartesia Pytorch",
+		repoUrl: "https://github.com/cartesia-ai/cartesia_pytorch",
+		snippets: snippets.cartesia_pytorch,
+	},
+	cartesia_mlx: {
+		prettyLabel: "Cartesia MLX",
+		repoName: "Cartesia MLX",
+		repoUrl: "https://github.com/cartesia-ai/cartesia_mlx",
+		snippets: snippets.cartesia_mlx,
 	},
 	edsnlp: {
 		prettyLabel: "EDS-NLP",
