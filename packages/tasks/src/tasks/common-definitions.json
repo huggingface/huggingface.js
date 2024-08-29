@@ -74,16 +74,9 @@
 					"description": "Whether to use sampling instead of greedy decoding when generating new tokens."
 				},
 				"early_stopping": {
+					"type": ["boolean", "string"],
 					"description": "Controls the stopping condition for beam-based methods.",
-					"oneOf": [
-						{
-							"type": "boolean"
-						},
-						{
-							"const": "never",
-							"type": "string"
-						}
-					]
+					"enum": ["never", true, false]
 				},
 				"num_beams": {
 					"type": "integer",
