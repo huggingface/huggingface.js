@@ -1,9 +1,8 @@
 {
-	"$ref": "/inference/schemas/translation/input.json",
 	"$id": "/inference/schemas/translation/input.json",
 	"$schema": "http://json-schema.org/draft-06/schema#",
-	"title": "TranslationInput",
 	"description": "Inputs for Translation inference",
+	"title": "TranslationInput",
 	"properties": {
 		"inputs": {
 			"description": "The text to translate.",
@@ -27,6 +26,21 @@
 				"tgt_lang": {
 					"type": "string",
 					"description": "Target language to translate to. Required for models that can translate to multiple languages."
+				},
+				"clean_up_tokenization_spaces": {
+					"type": "boolean",
+					"description": "Whether to clean up the potential extra spaces in the text output."
+				},
+				"truncation": {
+					"title": "TranslationTruncationStrategy",
+					"type": "string",
+					"description": "The truncation strategy to use.",
+					"enum": ["do_not_truncate", "longest_first", "only_first", "only_second"]
+				},
+				"generate_parameters": {
+					"title": "generateParameters",
+					"type": "object",
+					"description": "Additional parametrization of the text generation algorithm."
 				}
 			}
 		}

@@ -28,6 +28,14 @@ export interface TranslationInputObject {
  */
 export interface TranslationParameters {
 	/**
+	 * Whether to clean up the potential extra spaces in the text output.
+	 */
+	clean_up_tokenization_spaces?: boolean;
+	/**
+	 * Additional parametrization of the text generation algorithm.
+	 */
+	generate_parameters?: { [key: string]: unknown };
+	/**
 	 * The source language of the text. Required for models that can translate from multiple
 	 * languages.
 	 */
@@ -37,8 +45,17 @@ export interface TranslationParameters {
 	 * languages.
 	 */
 	tgt_lang?: string;
+	/**
+	 * The truncation strategy to use.
+	 */
+	truncation?: TranslationTruncationStrategy;
 	[property: string]: unknown;
 }
+
+/**
+ * The truncation strategy to use.
+ */
+export type TranslationTruncationStrategy = "do_not_truncate" | "longest_first" | "only_first" | "only_second";
 
 /**
  * Outputs of inference for the Translation task
