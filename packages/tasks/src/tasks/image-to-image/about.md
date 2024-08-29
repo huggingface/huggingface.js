@@ -48,18 +48,48 @@ await inference.imageToImage({
 
 ## Uses Cases for Text Guided Image Generation
 
-### ControlNet
-
-Controlling the outputs of diffusion models only with a text prompt is a challenging problem. ControlNet is a neural network model that provides image-based control to diffusion models. Control images can be edges or other landmarks extracted from a source image.
-
-Many ControlNet models were trained in our community event, JAX Diffusers sprint. You can see the full list of the ControlNet models available [here](https://huggingface.co/spaces/jax-diffusers-event/leaderboard).
-
 ### Style Transfer
 
 One of the most popular use cases of image-to-image is style transfer. With style transfer models:
 
 - a regular photo can be transformed into a variety of artistic styles or genres, such as a watercolor painting, a comic book illustration and more.
 - new images can be generated using a text prompt, in the style of a reference input image.
+
+See 🧨diffusers example for style transfer with `AutoPipelineForText2Image` below.
+```python
+from diffusers import AutoPipelineForText2Image
+from diffusers.utils import load_image
+import torch
+# load pipeline
+pipeline = AutoPipelineForText2Image.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", torch_dtype=torch.float16).to("cuda")
+pipeline.load_ip_adapter("h94/IP-Adapter", subfolder="sdxl_models", weight_name="ip-adapter_sdxl.bin")
+
+# set the adapter and scales - this is a component that lets us add the style control from an image
+scale = {
+    "down": {"block_2": [0.0, 1.0]},
+    "up": {"block_0": [0.0, 1.0, 0.0]},
+}
+pipeline.set_ip_adapter_scale(scale)
+
+style_image = load_image("https://huggingface.co/datasets/huggingface/documentation-images/resolve/0052a70beed5bf71b92610a43a52df6d286cd5f3/diffusers/rabbit.jpg")
+
+generator = torch.Generator(device="cpu").manual_seed(26)
+image = pipeline(
+    prompt="a cat, masterpiece, best quality, high quality",
+    ip_adapter_image=style_image,
+    negative_prompt="text, watermark, lowres, low quality, worst quality, deformed, glitch, low contrast, noisy, saturation, blurry",
+    guidance_scale=5,
+    num_inference_steps=30,
+    generator=generator,
+).images[0]
+image
+```
+### ControlNet
+
+Controlling the outputs of diffusion models only with a text prompt is a challenging problem. ControlNet is a neural network model that provides image-based control to diffusion models. Control images can be edges or other landmarks extracted from a source image.
+
+Many ControlNet models were trained in our community event, JAX Diffusers sprint. You can see the full list of the ControlNet models available [here](https://huggingface.co/spaces/jax-diffusers-event/leaderboard).
+
 
 ## Pix2Pix
 
@@ -71,10 +101,11 @@ The images below show some examples extracted from the Pix2Pix paper. This model
 
 ## Useful Resources
 
+- [Image-to-image guide with diffusers](https://huggingface.co/docs/diffusers/using-diffusers/img2img)
 - Image inpainting: [inpainting with 🧨diffusers](https://huggingface.co/docs/diffusers/main/en/api/pipelines/stable_diffusion/inpaint), [demo](https://huggingface.co/spaces/diffusers/stable-diffusion-xl-inpainting)
 - Colorization: [demo](https://huggingface.co/spaces/modelscope/old_photo_restoration)
 - Super resolution: [image upscaling with 🧨diffusers](https://huggingface.co/docs/diffusers/main/en/api/pipelines/stable_diffusion/upscale#super-resolution), [demo](https://huggingface.co/spaces/radames/Enhance-This-HiDiffusion-SDXL)
-- [Image-to-image guide with diffusers](https://huggingface.co/docs/diffusers/using-diffusers/img2img)
+- [Style transfer and layout control with diffusers 🧨](https://huggingface.co/docs/diffusers/main/en/using-diffusers/ip_adapter#style--layout-control)
 - [Train your ControlNet with diffusers 🧨](https://huggingface.co/blog/train-your-controlnet)
 - [Ultra fast ControlNet with 🧨 Diffusers](https://huggingface.co/blog/controlnet)
 
