@@ -7,15 +7,43 @@
 /**
  * Inputs for Summarization inference
  */
-export type SummarizationInput = unknown[] | boolean | number | number | null | SummarizationInputObject | string;
-
-export interface SummarizationInputObject {
+export interface SummarizationInput {
 	/**
-	 * The text to summarize.
+	 * The input text to summarize.
 	 */
 	inputs: string;
+	/**
+	 * Additional inference parameters.
+	 */
+	parameters?: SummarizationParameters;
 	[property: string]: unknown;
 }
+
+/**
+ * Additional inference parameters.
+ *
+ * Additional inference parameters for summarization.
+ */
+export interface SummarizationParameters {
+	/**
+	 * Whether to clean up the potential extra spaces in the text output.
+	 */
+	clean_up_tokenization_spaces?: boolean;
+	/**
+	 * Additional parametrization of the text generation algorithm.
+	 */
+	generate_parameters?: { [key: string]: unknown };
+	/**
+	 * The truncation strategy to use.
+	 */
+	truncation?: SummarizationTruncationStrategy;
+	[property: string]: unknown;
+}
+
+/**
+ * The truncation strategy to use.
+ */
+export type SummarizationTruncationStrategy = "do_not_truncate" | "longest_first" | "only_first" | "only_second";
 
 /**
  * Outputs of inference for the Summarization task
