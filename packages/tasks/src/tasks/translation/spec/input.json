@@ -3,6 +3,7 @@
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Inputs for Translation inference",
 	"title": "TranslationInput",
+	"type": "object",
 	"properties": {
 		"inputs": {
 			"description": "The text to translate.",

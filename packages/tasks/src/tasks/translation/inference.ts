@@ -7,9 +7,7 @@
 /**
  * Inputs for Translation inference
  */
-export type TranslationInput = unknown[] | boolean | number | number | null | TranslationInputObject | string;
-
-export interface TranslationInputObject {
+export interface TranslationInput {
 	/**
 	 * The text to translate.
 	 */
