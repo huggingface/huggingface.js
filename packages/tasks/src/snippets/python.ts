@@ -15,8 +15,7 @@ for message in client.chat_completion(
 	max_tokens=500,
 	stream=True,
 ):
-    print(message.choices[0].delta.content, end="")
-`;
+    print(message.choices[0].delta.content, end="")`;
 
 export const snippetZeroShotClassification = (model: ModelDataMinimal): string =>
 	`def query(payload):
