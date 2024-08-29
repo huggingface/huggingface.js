@@ -6,7 +6,8 @@
 	"type": "object",
 	"properties": {
 		"inputs": {
-			"description": "The input audio data"
+			"description": "The input audio data as a base64-encoded string.",
+			"type": "string"
 		},
 		"parameters": {
 			"description": "Additional inference parameters",

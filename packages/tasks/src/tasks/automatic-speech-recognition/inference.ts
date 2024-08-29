@@ -9,9 +9,9 @@
  */
 export interface AutomaticSpeechRecognitionInput {
 	/**
-	 * The input audio data
+	 * The input audio data as a base64-encoded string.
 	 */
-	inputs: unknown;
+	inputs: string;
 	/**
 	 * Additional inference parameters
 	 */
