@@ -7,8 +7,7 @@ export const snippetBasic = (model: ModelDataMinimal, accessToken: string): stri
 	-X POST \\
 	-d '{"inputs": ${getModelInputSnippet(model, true)}}' \\
 	-H 'Content-Type: application/json' \\
-	-H "Authorization: Bearer ${accessToken || `{API_TOKEN}`}"
-`;
+	-H "Authorization: Bearer ${accessToken || `{API_TOKEN}`}"`;
 
 export const snippetTextGeneration = (model: ModelDataMinimal, accessToken: string): string => {
 	if (model.config?.tokenizer_config?.chat_template) {
@@ -33,15 +32,13 @@ export const snippetZeroShotClassification = (model: ModelDataMinimal, accessTok
 	-X POST \\
 	-d '{"inputs": ${getModelInputSnippet(model, true)}, "parameters": {"candidate_labels": ["refund", "legal", "faq"]}}' \\
 	-H 'Content-Type: application/json' \\
-	-H "Authorization: Bearer ${accessToken || `{API_TOKEN}`}"
-`;
+	-H "Authorization: Bearer ${accessToken || `{API_TOKEN}`}"`;
 
 export const snippetFile = (model: ModelDataMinimal, accessToken: string): string =>
 	`curl https://api-inference.huggingface.co/models/${model.id} \\
 	-X POST \\
 	--data-binary '@${getModelInputSnippet(model, true, true)}' \\
-	-H "Authorization: Bearer ${accessToken || `{API_TOKEN}`}"
-`;
+	-H "Authorization: Bearer ${accessToken || `{API_TOKEN}`}"`;
 
 export const curlSnippets: Partial<Record<PipelineType, (model: ModelDataMinimal, accessToken: string) => string>> = {
 	// Same order as in js/src/lib/interfaces/Types.ts
