@@ -33,7 +33,7 @@ processor = AutoImageProcessor.from_pretrained("magic-leap-community/superpoint"
 model = SuperPointForKeypointDetection.from_pretrained("magic-leap-community/superpoint")
 
 # infer
-inputs = processor(image,return_tensors="pt").to(model.device, model.dtype)
+inputs = processor(image, return_tensors="pt").to(model.device, model.dtype)
 outputs = model(**inputs)
 
 # visualize the output
