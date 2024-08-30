@@ -61,7 +61,7 @@ export interface TargetSize {
  */
 export interface ImageToImageOutput {
 	/**
-	 * The output image
+	 * The output image returned as raw bytes in the payload.
 	 */
 	image?: unknown;
 	[property: string]: unknown;
