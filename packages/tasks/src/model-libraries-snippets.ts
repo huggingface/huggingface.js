@@ -198,7 +198,7 @@ pipeline = FluxPipeline(
 HEIGHT = 512
 WIDTH = 512
 NUM_STEPS = ${model.tags.includes("flux") ? 4 : 50}
-CFG_WEIGHT = ${model.tags.includes("flux") ? 0. : 5}
+CFG_WEIGHT = ${model.tags.includes("flux") ? 0 : 5}
 
 image, _ = pipeline.generate_image(
   "a photo of a cat",
