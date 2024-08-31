@@ -64,8 +64,7 @@ const taskData: TaskDataCustom = {
 			id: "dslim/bert-base-NER",
 		},
 		{
-			description:
-				"A strong model to identify people, locations, organizations and names in multiple languages.",
+			description: "A strong model to identify people, locations, organizations and names in multiple languages.",
 			id: "FacebookAI/xlm-roberta-large-finetuned-conll03-english",
 		},
 		{

@@ -42,7 +42,8 @@ const taskData: TaskDataCustom = {
 	],
 	models: [
 		{
-			description: "Very powerful model that can translate many languages between each other, especially low-resource languages.",
+			description:
+				"Very powerful model that can translate many languages between each other, especially low-resource languages.",
 			id: "facebook/nllb-200-1.3B",
 		},
 		{
