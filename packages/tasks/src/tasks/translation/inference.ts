@@ -6,43 +6,54 @@
 
 /**
  * Inputs for Translation inference
- *
- * Inputs for Text2text Generation inference
  */
 export interface TranslationInput {
 	/**
-	 * The input text data
+	 * The text to translate.
 	 */
 	inputs: string;
 	/**
 	 * Additional inference parameters
 	 */
-	parameters?: Text2TextGenerationParameters;
+	parameters?: TranslationParameters;
 	[property: string]: unknown;
 }
 
 /**
  * Additional inference parameters
  *
- * Additional inference parameters for Text2text Generation
+ * Additional inference parameters for Translation
  */
-export interface Text2TextGenerationParameters {
+export interface TranslationParameters {
 	/**
 	 * Whether to clean up the potential extra spaces in the text output.
 	 */
 	clean_up_tokenization_spaces?: boolean;
 	/**
-	 * Additional parametrization of the text generation algorithm
+	 * Additional parametrization of the text generation algorithm.
 	 */
 	generate_parameters?: { [key: string]: unknown };
 	/**
-	 * The truncation strategy to use
+	 * The source language of the text. Required for models that can translate from multiple
+	 * languages.
 	 */
-	truncation?: Text2TextGenerationTruncationStrategy;
+	src_lang?: string;
+	/**
+	 * Target language to translate to. Required for models that can translate to multiple
+	 * languages.
+	 */
+	tgt_lang?: string;
+	/**
+	 * The truncation strategy to use.
+	 */
+	truncation?: TranslationTruncationStrategy;
 	[property: string]: unknown;
 }
 
-export type Text2TextGenerationTruncationStrategy = "do_not_truncate" | "longest_first" | "only_first" | "only_second";
+/**
+ * The truncation strategy to use.
+ */
+export type TranslationTruncationStrategy = "do_not_truncate" | "longest_first" | "only_first" | "only_second";
 
 /**
  * Outputs of inference for the Translation task

@@ -8,9 +8,10 @@
  */
 export interface ObjectDetectionInput {
 	/**
-	 * The input image data
+	 * The input image data as a base64-encoded string. If no `parameters` are provided, you can
+	 * also provide the image data as a raw bytes payload.
 	 */
-	inputs: unknown;
+	inputs: string;
 	/**
 	 * Additional inference parameters
 	 */
@@ -34,9 +35,21 @@ export interface ObjectDetectionParameters {
  * image.
  */
 export interface BoundingBox {
+	/**
+	 * The x-coordinate of the bottom-right corner of the bounding box.
+	 */
 	xmax: number;
+	/**
+	 * The x-coordinate of the top-left corner of the bounding box.
+	 */
 	xmin: number;
+	/**
+	 * The y-coordinate of the bottom-right corner of the bounding box.
+	 */
 	ymax: number;
+	/**
+	 * The y-coordinate of the top-left corner of the bounding box.
+	 */
 	ymin: number;
 	[property: string]: unknown;
 }
@@ -51,11 +64,11 @@ export interface ObjectDetectionOutputElement {
 	 */
 	box: BoundingBox;
 	/**
-	 * The predicted label for the bounding box
+	 * The predicted label for the bounding box.
 	 */
 	label: string;
 	/**
-	 * The associated score / probability
+	 * The associated score / probability.
 	 */
 	score: number;
 	[property: string]: unknown;

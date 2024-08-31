@@ -73,12 +73,7 @@ export type * from "./table-question-answering/inference";
 export type { TextToImageInput, TextToImageOutput, TextToImageParameters } from "./text-to-image/inference";
 export type { TextToAudioParameters, TextToSpeechInput, TextToSpeechOutput } from "./text-to-speech/inference";
 export type * from "./token-classification/inference";
-export type {
-	Text2TextGenerationParameters,
-	Text2TextGenerationTruncationStrategy,
-	TranslationInput,
-	TranslationOutput,
-} from "./translation/inference";
+export type { TranslationInput, TranslationOutput } from "./translation/inference";
 export type {
 	ClassificationOutputTransform,
 	TextClassificationInput,
