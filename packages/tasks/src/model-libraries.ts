@@ -446,6 +446,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.pyannote_audio,
 		filter: true,
 	},
+	"py-feat": {
+		prettyLabel: "py-feat",
+		repoName: "py-feat",
+		repoUrl: "https://github.com/cosanlab/py-feat",
+		docsUrl: "https://py-feat.org/",
+		snippets: snippets.py-feat,
+		filter: true,
+	},
 	pythae: {
 		prettyLabel: "pythae",
 		repoName: "pythae",
