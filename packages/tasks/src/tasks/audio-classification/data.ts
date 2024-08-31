@@ -63,7 +63,7 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "A language identification model.",
-			id: "speechbrain/lang-id-voxlingua107-ecapa",
+			id: "facebook/mms-lid-126",
 		},
 	],
 	spaces: [
@@ -74,7 +74,7 @@ const taskData: TaskDataCustom = {
 	],
 	summary:
 		"Audio classification is the task of assigning a label or class to a given audio. It can be used for recognizing which command a user is giving or the emotion of a statement, as well as identifying a speaker.",
-	widgetModels: ["speechbrain/lang-id-voxlingua107-ecapa"],
+	widgetModels: ["MIT/ast-finetuned-audioset-10-10-0.4593"],
 	youtubeId: "KWwzcmG98Ds",
 };
 

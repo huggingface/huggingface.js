@@ -36,7 +36,7 @@ const taskData: TaskDataCustom = {
 	models: [
 		{
 			description: "A powerful TTS model.",
-			id: "suno/bark",
+			id: "parler-tts/parler-tts-large-v1",
 		},
 		{
 			description: "A massively multi-lingual TTS model.",

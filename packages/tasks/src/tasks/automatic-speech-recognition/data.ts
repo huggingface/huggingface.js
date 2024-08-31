@@ -8,7 +8,7 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "An English dataset with 1,000 hours of data.",
-			id: "openslr/librispeech_asr",
+			id: "parler-tts/mls_eng",
 		},
 		{
 			description: "A multi-lingual audio dataset with 370K hours of audio.",
