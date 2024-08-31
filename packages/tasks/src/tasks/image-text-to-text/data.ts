@@ -60,7 +60,7 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "Strong image-text-to-text model.",
-			id: "llava-hf/llava-v1.6-mistral-7b-hf",
+			id: "microsoft/Phi-3.5-vision-instruct",
 		},
 	],
 	spaces: [
