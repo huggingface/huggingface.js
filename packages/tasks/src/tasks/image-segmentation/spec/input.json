@@ -6,7 +6,8 @@
 	"type": "object",
 	"properties": {
 		"inputs": {
-			"description": "The input image data"
+			"type": "string",
+			"description": "The input image data as a base64-encoded string. If no `parameters` are provided, you can also provide the image data as a raw bytes payload."
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
@@ -31,17 +32,7 @@
 					"title": "ImageSegmentationSubtask",
 					"type": "string",
 					"description": "Segmentation task to be performed, depending on model capabilities.",
-					"oneOf": [
-						{
-							"const": "instance"
-						},
-						{
-							"const": "panoptic"
-						},
-						{
-							"const": "semantic"
-						}
-					]
+					"enum": ["instance", "panoptic", "semantic"]
 				},
 				"threshold": {
 					"type": "number",

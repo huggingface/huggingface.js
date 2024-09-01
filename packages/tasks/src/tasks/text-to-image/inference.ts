@@ -9,7 +9,7 @@
  */
 export interface TextToImageInput {
 	/**
-	 * The input text data (sometimes called "prompt"
+	 * The input text data (sometimes called "prompt")
 	 */
 	inputs: string;
 	/**
@@ -64,7 +64,7 @@ export interface TargetSize {
  */
 export interface TextToImageOutput {
 	/**
-	 * The generated image
+	 * The generated image returned as raw bytes in the payload.
 	 */
 	image: unknown;
 	[property: string]: unknown;
