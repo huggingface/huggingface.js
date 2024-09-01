@@ -176,6 +176,14 @@ export const SKUS = {
 				tflops: 14.93,
 				memory: [8],
 			},
+			"RTX 2070 SUPER Mobile": {
+				tflops: 14.13 ,
+				memory: [8],
+			},
+			"RTX 2070 SUPER": {
+				tflops: 18.12,
+				memory: [8],
+			},
 			"RTX 3050 Mobile": {
 				tflops: 7.639,
 				memory: [6],
