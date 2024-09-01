@@ -447,11 +447,10 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 	},
 	"py-feat": {
-		prettyLabel: "py-feat",
+		prettyLabel: "Py-Feat",
 		repoName: "py-feat",
 		repoUrl: "https://github.com/cosanlab/py-feat",
 		docsUrl: "https://py-feat.org/",
-		snippets: snippets.py-feat,
 		filter: true,
 	},
 	pythae: {

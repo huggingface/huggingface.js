@@ -31,7 +31,7 @@ export const LIBRARY_TASK_MAPPING: Partial<Record<ModelLibraryKey, PipelineType[
 	peft: ["text-generation"],
 	"pyannote-audio": ["automatic-speech-recognition"],
 	"sentence-transformers": ["feature-extraction", "sentence-similarity"],
-	py-feat: ["image-feature-extraction"],
+	"py-feat": ["image-feature-extraction"],
 	setfit: ["text-classification"],
 	sklearn: ["tabular-classification", "tabular-regression", "text-classification"],
 	spacy: ["token-classification", "text-classification", "sentence-similarity"],
