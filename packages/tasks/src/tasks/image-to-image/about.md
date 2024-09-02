@@ -101,7 +101,6 @@ image
 Controlling the outputs of diffusion models only with a text prompt is a challenging problem. ControlNet is a neural network model that provides image-based control to diffusion models. Control images can be edges or other landmarks extracted from a source image.
 ![Examples](https://huggingface.co/datasets/optimum/documentation-images/resolve/main/neuron/models/12-sdxl-text2img-controlnet.png)
 
-
 ## Pix2Pix
 
 Pix2Pix is a popular model used for image-to-image translation tasks. It is based on a conditional-GAN (generative adversarial network) where instead of a noise vector a 2D image is given as input. More information about Pix2Pix can be retrieved from this [link](https://phillipi.github.io/pix2pix/) where the associated paper and the GitHub repository can be found.
