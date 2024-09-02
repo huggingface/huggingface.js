@@ -9,6 +9,9 @@ const TEST_STRINGS = {
 	NO_TEMPLATE: `Hello world!`,
 	TEXT_NODES: `0{{ 'A' }}1{{ 'B' }}{{ 'C' }}2{{ 'D' }}3`,
 
+	// Boolean literals
+	BOOLEAN_LITERALS: `|{{ true }}|{{ false }}|{{ True }}|{{ False }}|`,
+
 	// Logical operators
 	LOGICAL_AND: `{{ true and true }}{{ true and false }}{{ false and true }}{{ false and false }}`,
 	LOGICAL_OR: `{{ true or true }}{{ true or false }}{{ false or true }}{{ false or false }}`,
@@ -28,6 +31,8 @@ const TEST_STRINGS = {
 	// For loops
 	FOR_LOOP: `{% for message in messages %}{{ message['content'] }}{% endfor %}`,
 	FOR_LOOP_UNPACKING: `|{% for x, y in [ [1, 2], [3, 4] ] %}|{{ x + ' ' + y }}|{% endfor %}|`,
+	FOR_LOOP_DEFAULT: `{% for x in [] %}{{ 'A' }}{% else %}{{'B'}}{% endfor %}`,
+	FOR_LOOP_SELECT: `{% for x in [1, 2, 3, 4] if x > 2 %}{{ x }}{% endfor %}`,
 
 	// Set variables
 	VARIABLES: `{% set x = 'Hello' %}{% set y = 'World' %}{{ x + ' ' + y }}`,
@@ -78,6 +83,10 @@ const TEST_STRINGS = {
 	FILTER_OPERATOR_4: `{{ items | selectattr('key') | length }}`,
 	FILTER_OPERATOR_5: `{{ messages | selectattr('role', 'equalto', 'system') | length }}`,
 	FILTER_OPERATOR_6: `|{{ obj | length }}|{{ (obj | items)[1:] | length }}|`,
+	FILTER_OPERATOR_7: `|{{ obj | tojson }}|{{ "test" | tojson }}|{{ 1 | tojson }}|{{ true | tojson }}|{{ null | tojson }}|{{ [1,2,3] | tojson }}|`,
+	FILTER_OPERATOR_8: `{{ obj | tojson(indent=2) }}`,
+	FILTER_OPERATOR_9: `{{ data | map(attribute='val') | list | tojson }}`,
+	FILTER_OPERATOR_10: `|{{ " 1 \n 2 \n 3 \n\n " | indent }}|{{ " 1 \n 2 \n 3 \n\n " | indent(2) }}|{{ " 1 \n 2 \n 3 \n\n " | indent(first=True) }}|{{ " 1 \n 2 \n 3 \n\n " | indent(blank=True) }}|{{ " 1 \n 2 \n 3 \n\n " | indent(4, first=True) }}|`,
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: `|{{ 1 and 2 }}|{{ 1 and 0 }}|{{ 0 and 1 }}|{{ 0 and 0 }}|{{ 1 or 2 }}|{{ 1 or 0 }}|{{ 0 or 1 }}|{{ 0 or 0 }}|{{ not 1 }}|{{ not 0 }}|`,
@@ -115,6 +124,9 @@ const TEST_STRINGS = {
 	UNDEFINED_VARIABLES: `{{ undefined_variable }}`,
 	UNDEFINED_ACCESS: `{{ object.undefined_attribute }}`,
 
+	// Null
+	NULL_VARIABLE: `{% if not null_val is defined %}{% set null_val = none %}{% endif %}{% if null_val is not none %}{{ 'fail' }}{% else %}{{ 'pass' }}{% endif %}`,
+
 	// Ternary operator
 	TERNARY_OPERATOR: `|{{ 'a' if true else 'b' }}|{{ 'a' if false else 'b' }}|{{ 'a' if 1 + 1 == 2 else 'b' }}|{{ 'a' if 1 + 1 == 3 or 1 * 2 == 3 else 'b' }}|`,
 
@@ -129,6 +141,16 @@ const TEST_STRINGS = {
 
 	// Array operators
 	ARRAY_OPERATORS: `{{ ([1, 2, 3] + [4, 5, 6]) | length }}`,
+
+	// Macros
+	MACROS: `{% macro hello(name) %}{{ 'Hello ' + name }}{% endmacro %}|{{ hello('Bob') }}|{{ hello('Alice') }}|`,
+	MACROS_1: `{% macro hello(name, suffix='.') %}{{ 'Hello ' + name + suffix }}{% endmacro %}|{{ hello('A') }}|{{ hello('B', '!') }}|{{ hello('C', suffix='?') }}|`,
+	MACROS_2: `{% macro fn(x, y=2, z=3) %}{{ x + ',' + y + ',' + z }}{% endmacro %}|{{ fn(1) }}|{{ fn(1, 0) }}|{{ fn(1, 0, -1) }}|{{ fn(1, y=0, z=-1) }}|{{ fn(1, z=0) }}|`,
+
+	//rstrip
+	RSTRIP: `{{ "   test it  ".rstrip() }}`,
+	//lstrip
+	LSTRIP: `{{ "   test it  ".lstrip() }}`,
 };
 
 const TEST_PARSED = {
@@ -151,6 +173,27 @@ const TEST_PARSED = {
 		{ value: "D", type: "StringLiteral" },
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "3", type: "Text" },
+	],
+
+	// Boolean literals
+	BOOLEAN_LITERALS: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "true", type: "BooleanLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "false", type: "BooleanLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "True", type: "BooleanLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "False", type: "BooleanLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
 	],
 
 	// Logical operators
@@ -561,6 +604,53 @@ const TEST_PARSED = {
 		{ value: "endfor", type: "EndFor" },
 		{ value: "%}", type: "CloseStatement" },
 		{ value: "|", type: "Text" },
+	],
+	FOR_LOOP_DEFAULT: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "for", type: "For" },
+		{ value: "x", type: "Identifier" },
+		{ value: "in", type: "In" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "A", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "else", type: "Else" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "B", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endfor", type: "EndFor" },
+		{ value: "%}", type: "CloseStatement" },
+	],
+	FOR_LOOP_SELECT: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "for", type: "For" },
+		{ value: "x", type: "Identifier" },
+		{ value: "in", type: "In" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "4", type: "NumericLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "if", type: "If" },
+		{ value: "x", type: "Identifier" },
+		{ value: ">", type: "ComparisonBinaryOperator" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "x", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endfor", type: "EndFor" },
+		{ value: "%}", type: "CloseStatement" },
 	],
 
 	// Set variables
@@ -1408,6 +1498,132 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 	],
+	FILTER_OPERATOR_7: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "obj", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "tojson", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "test", type: "StringLiteral" },
+		{ value: "|", type: "Pipe" },
+		{ value: "tojson", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: "|", type: "Pipe" },
+		{ value: "tojson", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "true", type: "BooleanLiteral" },
+		{ value: "|", type: "Pipe" },
+		{ value: "tojson", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "null", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "tojson", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "|", type: "Pipe" },
+		{ value: "tojson", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
+	FILTER_OPERATOR_8: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "obj", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "tojson", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "indent", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	FILTER_OPERATOR_9: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "data", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "map", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "attribute", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "val", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "list", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "tojson", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	FILTER_OPERATOR_10: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: " 1 \n 2 \n 3 \n\n ", type: "StringLiteral" },
+		{ value: "|", type: "Pipe" },
+		{ value: "indent", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: " 1 \n 2 \n 3 \n\n ", type: "StringLiteral" },
+		{ value: "|", type: "Pipe" },
+		{ value: "indent", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: " 1 \n 2 \n 3 \n\n ", type: "StringLiteral" },
+		{ value: "|", type: "Pipe" },
+		{ value: "indent", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "first", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "True", type: "BooleanLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: " 1 \n 2 \n 3 \n\n ", type: "StringLiteral" },
+		{ value: "|", type: "Pipe" },
+		{ value: "indent", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "blank", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "True", type: "BooleanLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: " 1 \n 2 \n 3 \n\n ", type: "StringLiteral" },
+		{ value: "|", type: "Pipe" },
+		{ value: "indent", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "4", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "first", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "True", type: "BooleanLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: [
@@ -2002,7 +2218,7 @@ const TEST_PARSED = {
 		{ value: "unknown", type: "StringLiteral" },
 		{ value: ")", type: "CloseParen" },
 		{ value: "is", type: "Is" },
-		{ value: "none", type: "Identifier" },
+		{ value: "none", type: "NullLiteral" },
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 		{ value: "{{", type: "OpenExpression" },
@@ -2145,6 +2361,45 @@ const TEST_PARSED = {
 		{ value: ".", type: "Dot" },
 		{ value: "undefined_attribute", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
+	],
+
+	// Null
+	NULL_VARIABLE: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "if", type: "If" },
+		{ value: "not", type: "UnaryOperator" },
+		{ value: "null_val", type: "Identifier" },
+		{ value: "is", type: "Is" },
+		{ value: "defined", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Set" },
+		{ value: "null_val", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "none", type: "NullLiteral" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endif", type: "EndIf" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "if", type: "If" },
+		{ value: "null_val", type: "Identifier" },
+		{ value: "is", type: "Is" },
+		{ value: "not", type: "UnaryOperator" },
+		{ value: "none", type: "NullLiteral" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "fail", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "else", type: "Else" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "pass", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endif", type: "EndIf" },
+		{ value: "%}", type: "CloseStatement" },
 	],
 
 	// Ternary operator
@@ -2296,12 +2551,204 @@ const TEST_PARSED = {
 		{ value: "length", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
+
+	// Macros
+	MACROS: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "macro", type: "Macro" },
+		{ value: "hello", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "name", type: "Identifier" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "Hello ", type: "StringLiteral" },
+		{ value: "+", type: "AdditiveBinaryOperator" },
+		{ value: "name", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endmacro", type: "EndMacro" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "hello", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "Bob", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "hello", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "Alice", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
+	MACROS_1: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "macro", type: "Macro" },
+		{ value: "hello", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "name", type: "Identifier" },
+		{ value: ",", type: "Comma" },
+		{ value: "suffix", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: ".", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "Hello ", type: "StringLiteral" },
+		{ value: "+", type: "AdditiveBinaryOperator" },
+		{ value: "name", type: "Identifier" },
+		{ value: "+", type: "AdditiveBinaryOperator" },
+		{ value: "suffix", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endmacro", type: "EndMacro" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "hello", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "A", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "hello", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "B", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "!", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "hello", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "C", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "suffix", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "?", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
+	MACROS_2: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "macro", type: "Macro" },
+		{ value: "fn", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "x", type: "Identifier" },
+		{ value: ",", type: "Comma" },
+		{ value: "y", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "z", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "x", type: "Identifier" },
+		{ value: "+", type: "AdditiveBinaryOperator" },
+		{ value: ",", type: "StringLiteral" },
+		{ value: "+", type: "AdditiveBinaryOperator" },
+		{ value: "y", type: "Identifier" },
+		{ value: "+", type: "AdditiveBinaryOperator" },
+		{ value: ",", type: "StringLiteral" },
+		{ value: "+", type: "AdditiveBinaryOperator" },
+		{ value: "z", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endmacro", type: "EndMacro" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "fn", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "fn", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "0", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "fn", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "0", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "-1", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "fn", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "y", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "0", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "z", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "-1", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "fn", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "z", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "0", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
+
+	RSTRIP: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "   test it  ", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "rstrip", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	LSTRIP: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "   test it  ", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "lstrip", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+	],
 };
 
 const TEST_CONTEXT = {
 	// Text nodes
 	NO_TEMPLATE: {},
 	TEXT_NODES: {},
+
+	// Boolean literals
+	BOOLEAN_LITERALS: {},
 
 	// Logical operators
 	LOGICAL_AND: {},
@@ -2328,6 +2775,8 @@ const TEST_CONTEXT = {
 		],
 	},
 	FOR_LOOP_UNPACKING: {},
+	FOR_LOOP_DEFAULT: {},
+	FOR_LOOP_SELECT: {},
 
 	// Set variables
 	VARIABLES: {},
@@ -2418,6 +2867,48 @@ const TEST_CONTEXT = {
 	FILTER_OPERATOR_6: {
 		obj: { a: 1, b: 2, c: 3 },
 	},
+	FILTER_OPERATOR_7: {
+		obj: {
+			// Test basic types
+			string: "world",
+			number: 5,
+			boolean: true,
+			null: null,
+			// undefined: undefined,
+
+			// Test arrays
+			array: [1, 2, 3],
+
+			// Test objects
+			object: { key: "value" },
+
+			// Test formatting
+			special: `"',:[]{}#&*;=?/\\\`~@|!^%()-_+<>`,
+
+			// Test unicode (https://github.com/huggingface/transformers/pull/31041)
+			unicode: { "안녕?": "🤗" },
+		},
+	},
+	FILTER_OPERATOR_8: {
+		obj: {
+			a: [1, 2, 3],
+			b: 1,
+			c: {
+				d: 2,
+				e: {
+					f: 3,
+					g: {
+						h: 4,
+						i: [1, 2, 3],
+					},
+				},
+			},
+		},
+	},
+	FILTER_OPERATOR_9: {
+		data: [{ val: 1 }, { val: 2 }, { val: 3 }],
+	},
+	FILTER_OPERATOR_10: {},
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: {},
@@ -2469,6 +2960,9 @@ const TEST_CONTEXT = {
 	UNDEFINED_VARIABLES: {},
 	UNDEFINED_ACCESS: { object: {} },
 
+	// Null
+	NULL_VARIABLE: { a: null },
+
 	// Ternary operator
 	TERNARY_OPERATOR: {},
 
@@ -2485,12 +2979,24 @@ const TEST_CONTEXT = {
 
 	// Array operators
 	ARRAY_OPERATORS: {},
+
+	// Macros
+	MACROS: {},
+	MACROS_1: {},
+	MACROS_2: {},
+
+	//STRIP
+	RSTRIP: {},
+	LSTRIP: {},
 };
 
 const EXPECTED_OUTPUTS = {
 	// Text nodes
 	NO_TEMPLATE: `Hello world!`,
 	TEXT_NODES: `0A1BC2D3`,
+
+	// Boolean literals
+	BOOLEAN_LITERALS: `|true|false|true|false|`,
 
 	// Logical operators
 	LOGICAL_AND: `truefalsefalsefalse`,
@@ -2511,6 +3017,8 @@ const EXPECTED_OUTPUTS = {
 	// For loops
 	FOR_LOOP: "ABC",
 	FOR_LOOP_UNPACKING: "||1 2||3 4||",
+	FOR_LOOP_DEFAULT: "B",
+	FOR_LOOP_SELECT: "34",
 
 	// Set variables
 	VARIABLES: "Hello World",
@@ -2561,6 +3069,10 @@ const EXPECTED_OUTPUTS = {
 	FILTER_OPERATOR_4: `2`,
 	FILTER_OPERATOR_5: `1`,
 	FILTER_OPERATOR_6: `|3|2|`,
+	FILTER_OPERATOR_7: `|{"string": "world", "number": 5, "boolean": true, "null": null, "array": [1, 2, 3], "object": {"key": "value"}, "special": "\\"',:[]{}#&*;=?/\\\\\`~@|!^%()-_+<>", "unicode": {"안녕?": "🤗"}}|"test"|1|true|null|[1, 2, 3]|`,
+	FILTER_OPERATOR_8: `{\n  "a": [\n    1,\n    2,\n    3\n  ],\n  "b": 1,\n  "c": {\n    "d": 2,\n    "e": {\n      "f": 3,\n      "g": {\n        "h": 4,\n        "i": [\n          1,\n          2,\n          3\n        ]\n      }\n    }\n  }\n}`,
+	FILTER_OPERATOR_9: `[1, 2, 3]`,
+	FILTER_OPERATOR_10: `| 1 \n     2 \n     3 \n\n     | 1 \n   2 \n   3 \n\n   |     1 \n     2 \n     3 \n\n     | 1 \n     2 \n     3 \n    \n     |     1 \n     2 \n     3 \n\n     |`,
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: `|2|0|0|0|1|1|1|0|false|true|`,
@@ -2598,6 +3110,9 @@ const EXPECTED_OUTPUTS = {
 	UNDEFINED_VARIABLES: ``,
 	UNDEFINED_ACCESS: ``,
 
+	// Null
+	NULL_VARIABLE: `pass`,
+
 	// Ternary operator
 	TERNARY_OPERATOR: `|a|b|a|b|`,
 
@@ -2612,6 +3127,15 @@ const EXPECTED_OUTPUTS = {
 
 	// Array operators
 	ARRAY_OPERATORS: `6`,
+
+	// Macros
+	MACROS: `|Hello Bob|Hello Alice|`,
+	MACROS_1: `|Hello A.|Hello B!|Hello C?|`,
+	MACROS_2: `|1,2,3|1,0,3|1,0,-1|1,0,-1|1,2,0|`,
+
+	// RSTRIP/LSTRIP
+	RSTRIP: `   test it`,
+	LSTRIP: `test it  `,
 };
 
 describe("Templates", () => {

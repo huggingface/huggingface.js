@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
-import { GGMLQuantizationType, gguf, ggufAllShards, parseGgufShardFilename } from "./gguf";
+import { beforeAll, describe, expect, it } from "vitest";
+import type { GGUFParseOutput } from "./gguf";
+import { GGMLFileQuantizationType, GGMLQuantizationType, gguf, ggufAllShards, parseGgufShardFilename } from "./gguf";
 import fs from "node:fs";
 
 const URL_LLAMA = "https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/191239b/llama-2-7b-chat.Q2_K.gguf";
@@ -12,8 +13,21 @@ const URL_V1 =
 	"https://huggingface.co/tmadge/testing/resolve/66c078028d1ff92d7a9264a1590bc61ba6437933/tinyllamas-stories-260k-f32.gguf";
 const URL_SHARDED_GROK =
 	"https://huggingface.co/Arki05/Grok-1-GGUF/resolve/ecafa8d8eca9b8cd75d11a0d08d3a6199dc5a068/grok-1-IQ3_XS-split-00001-of-00009.gguf";
+const URL_BIG_METADATA = "https://huggingface.co/ngxson/test_gguf_models/resolve/main/gguf_test_big_metadata.gguf";
 
 describe("gguf", () => {
+	beforeAll(async () => {
+		// download the gguf for "load file" test, save to .cache directory
+		if (!fs.existsSync(".cache")) {
+			fs.mkdirSync(".cache");
+		}
+		if (!fs.existsSync(".cache/model.gguf")) {
+			const res = await fetch(URL_BIG_METADATA);
+			const arrayBuf = await res.arrayBuffer();
+			fs.writeFileSync(".cache/model.gguf", Buffer.from(arrayBuf));
+		}
+	});
+
 	it("should parse a llama2 7b", async () => {
 		const { metadata, tensorInfos } = await gguf(URL_LLAMA);
 
@@ -25,7 +39,7 @@ describe("gguf", () => {
 			tensor_count: 291n,
 			kv_count: 19n,
 			"general.architecture": "llama",
-			"general.file_type": 10,
+			"general.file_type": GGMLFileQuantizationType.MOSTLY_Q2_K,
 			"general.name": "LLaMA v2",
 			"general.quantization_version": 2,
 			"llama.attention.head_count": 32,
@@ -84,7 +98,7 @@ describe("gguf", () => {
 			tensor_count: 291n,
 			kv_count: 24n,
 			"general.architecture": "llama",
-			"general.file_type": 17,
+			"general.file_type": GGMLFileQuantizationType.MOSTLY_Q5_K_M,
 			"general.name": "mistralai_mistral-7b-instruct-v0.2",
 			"general.quantization_version": 2,
 			"llama.attention.head_count": 32,
@@ -122,7 +136,7 @@ describe("gguf", () => {
 			tensor_count: 164n,
 			kv_count: 21n,
 			"general.architecture": "gemma",
-			"general.file_type": GGMLQuantizationType.Q8_K, // 15
+			"general.file_type": GGMLFileQuantizationType.MOSTLY_Q4_K_M,
 			"general.name": "gemma-2b-it",
 			"general.quantization_version": 2,
 			"gemma.attention.head_count": 8,
@@ -159,7 +173,7 @@ describe("gguf", () => {
 			tensor_count: 197n,
 			kv_count: 23n,
 			"general.architecture": "bert",
-			"general.file_type": GGMLQuantizationType.F16,
+			"general.file_type": GGMLFileQuantizationType.MOSTLY_F16,
 			"general.name": "bge-small-en-v1.5",
 			"bert.attention.causal": false,
 			"bert.attention.head_count": 12,
@@ -228,16 +242,10 @@ describe("gguf", () => {
 	});
 
 	it("should parse a local file", async () => {
-		// download the file and save to .cache folder
-		if (!fs.existsSync(".cache")) {
-			fs.mkdirSync(".cache");
-		}
-		const res = await fetch(URL_V1);
-		const arrayBuf = await res.arrayBuffer();
-		fs.writeFileSync(".cache/model.gguf", Buffer.from(arrayBuf));
-
-		const { metadata } = await gguf(".cache/model.gguf", { allowLocalFile: true });
-		expect(metadata).toMatchObject({ "general.name": "tinyllamas-stories-260k" });
+		const parsedGguf = await gguf(".cache/model.gguf", { allowLocalFile: true });
+		const { metadata } = parsedGguf as GGUFParseOutput<{ strict: false }>; // custom metadata arch, no need for typing
+		expect(metadata["dummy.1"]).toBeDefined(); // first metadata in the list
+		expect(metadata["dummy.32767"]).toBeDefined(); // last metadata in the list
 	});
 
 	it("should detect sharded gguf filename", async () => {

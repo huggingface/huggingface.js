@@ -4,11 +4,12 @@ import { isBackend } from "./utils/isBackend";
 import { promisesQueue } from "./utils/promisesQueue";
 
 export type { MetadataBaseValue, MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
-export { GGUFValueType, GGMLQuantizationType, Architecture } from "./types";
+export { GGUFValueType, GGMLFileQuantizationType, GGMLQuantizationType, Architecture } from "./types";
 export { GGUF_QUANT_DESCRIPTIONS } from "./quant-descriptions";
 
 export const RE_GGUF_FILE = /\.gguf$/;
 export const RE_GGUF_SHARD_FILE = /^(?<prefix>.*?)-(?<shard>\d{5})-of-(?<total>\d{5})\.gguf$/;
+const PARALLEL_DOWNLOADS = 20;
 
 export interface GgufShardFileInfo {
 	prefix: string;
@@ -143,6 +144,7 @@ class RangeViewLocalFile extends RangeView {
 		const range = [this.chunk * HTTP_CHUNK_SIZE, (this.chunk + 1) * HTTP_CHUNK_SIZE - 1];
 		const buffer = await blob.slice(range[0], range[1]).arrayBuffer();
 		this.appendBuffer(new Uint8Array(buffer));
+		this.chunk += 1;
 	}
 }
 
@@ -400,8 +402,13 @@ export async function ggufAllShards(
 		 */
 		fetch?: typeof fetch;
 		additionalFetchHeaders?: Record<string, string>;
+		parallelDownloads?: number;
 	}
 ): Promise<{ shards: GGUFParseOutput[]; parameterCount: number }> {
+	const parallelDownloads = params?.parallelDownloads ?? PARALLEL_DOWNLOADS;
+	if (parallelDownloads < 1) {
+		throw new TypeError("parallelDownloads must be greater than 0");
+	}
 	const ggufShardFileInfo = parseGgufShardFilename(url);
 	if (ggufShardFileInfo) {
 		const total = parseInt(ggufShardFileInfo.total);
@@ -412,10 +419,9 @@ export async function ggufAllShards(
 			urls.push(`${prefix}-${shardIdx.toString().padStart(5, "0")}-of-${total.toString().padStart(5, "0")}.gguf`);
 		}
 
-		const PARALLEL_DOWNLOADS = 20;
 		const shards = await promisesQueue(
 			urls.map((shardUrl) => () => gguf(shardUrl, { ...params, computeParametersCount: true })),
-			PARALLEL_DOWNLOADS
+			parallelDownloads
 		);
 		return {
 			shards,

@@ -4,8 +4,8 @@ const taskData: TaskDataCustom = {
 	canonicalId: "text-to-audio",
 	datasets: [
 		{
-			description: "Thousands of short audio clips of a single speaker.",
-			id: "lj_speech",
+			description: "10K hours of multi-speaker English dataset.",
+			id: "parler-tts/mls_eng_10k",
 		},
 		{
 			description: "Multi-speaker English dataset.",
@@ -43,8 +43,8 @@ const taskData: TaskDataCustom = {
 			id: "facebook/mms-tts",
 		},
 		{
-			description: "An end-to-end speech synthesis model.",
-			id: "microsoft/speecht5_tts",
+			description: "A prompt based, powerful TTS model.",
+			id: "parler-tts/parler_tts_mini_v0.1",
 		},
 	],
 	spaces: [
@@ -57,8 +57,8 @@ const taskData: TaskDataCustom = {
 			id: "coqui/xtts",
 		},
 		{
-			description: "An application that synthesizes speech for various speaker types.",
-			id: "Matthijs/speecht5-tts-demo",
+			description: "An application that synthesizes speech for diverse speaker prompts.",
+			id: "parler-tts/parler_tts_mini",
 		},
 	],
 	summary:

@@ -12,6 +12,7 @@ import {
 	NumericLiteral,
 	StringLiteral,
 	BooleanLiteral,
+	NullLiteral,
 	ArrayLiteral,
 	ObjectLiteral,
 	BinaryExpression,
@@ -21,6 +22,8 @@ import {
 	SliceExpression,
 	KeywordArgumentExpression,
 	TupleLiteral,
+	Macro,
+	SelectExpression,
 } from "./ast";
 
 /**
@@ -87,6 +90,14 @@ export function parse(tokens: Token[]): Program {
 				result = parseIfStatement();
 				expect(TOKEN_TYPES.OpenStatement, "Expected {% token");
 				expect(TOKEN_TYPES.EndIf, "Expected endif token");
+				expect(TOKEN_TYPES.CloseStatement, "Expected %} token");
+				break;
+
+			case TOKEN_TYPES.Macro:
+				++current;
+				result = parseMacroStatement();
+				expect(TOKEN_TYPES.OpenStatement, "Expected {% token");
+				expect(TOKEN_TYPES.EndMacro, "Expected endmacro token");
 				expect(TOKEN_TYPES.CloseStatement, "Expected %} token");
 				break;
 
@@ -173,6 +184,25 @@ export function parse(tokens: Token[]): Program {
 		return new If(test, body, alternate);
 	}
 
+	function parseMacroStatement(): Macro {
+		const name = parsePrimaryExpression();
+		if (name.type !== "Identifier") {
+			throw new SyntaxError(`Expected identifier following macro statement`);
+		}
+		const args = parseArgs();
+		expect(TOKEN_TYPES.CloseStatement, "Expected closing statement token");
+
+		// Body of macro
+		const body: Statement[] = [];
+
+		// Keep going until we hit {% endmacro
+		while (not(TOKEN_TYPES.OpenStatement, TOKEN_TYPES.EndMacro)) {
+			body.push(parseAny());
+		}
+
+		return new Macro(name as Identifier, args, body);
+	}
+
 	function parseExpressionSequence(primary = false): Statement {
 		const fn = primary ? parsePrimaryExpression : parseExpression;
 		const expressions = [fn()];
@@ -189,7 +219,7 @@ export function parse(tokens: Token[]): Program {
 
 	function parseForStatement(): For {
 		// e.g., `message` in `for message in messages`
-		const loopVariable = parseExpressionSequence(true); // should be an identifier
+		const loopVariable = parseExpressionSequence(true); // should be an identifier/tuple
 		if (!(loopVariable instanceof Identifier || loopVariable instanceof TupleLiteral)) {
 			throw new SyntaxError(`Expected identifier/tuple for the loop variable, got ${loopVariable.type} instead`);
 		}
@@ -204,28 +234,48 @@ export function parse(tokens: Token[]): Program {
 		// Body of for loop
 		const body: Statement[] = [];
 
-		// Keep going until we hit {% endfor
-		while (not(TOKEN_TYPES.OpenStatement, TOKEN_TYPES.EndFor)) {
+		// Keep going until we hit {% endfor or {% else
+		while (not(TOKEN_TYPES.OpenStatement, TOKEN_TYPES.EndFor) && not(TOKEN_TYPES.OpenStatement, TOKEN_TYPES.Else)) {
 			body.push(parseAny());
 		}
 
-		return new For(loopVariable, iterable, body);
+		// (Optional) else block
+		const alternative: Statement[] = [];
+		if (is(TOKEN_TYPES.OpenStatement, TOKEN_TYPES.Else)) {
+			++current; // consume {%
+			++current; // consume else
+			expect(TOKEN_TYPES.CloseStatement, "Expected closing statement token");
+
+			// keep going until we hit {% endfor
+			while (not(TOKEN_TYPES.OpenStatement, TOKEN_TYPES.EndFor)) {
+				alternative.push(parseAny());
+			}
+		}
+
+		return new For(loopVariable, iterable, body, alternative);
 	}
 
 	function parseExpression(): Statement {
 		// Choose parse function with lowest precedence
-		return parseTernaryExpression();
+		return parseIfExpression();
 	}
 
-	function parseTernaryExpression(): Statement {
+	function parseIfExpression(): Statement {
 		const a = parseLogicalOrExpression();
 		if (is(TOKEN_TYPES.If)) {
 			// Ternary expression
 			++current; // consume if
 			const predicate = parseLogicalOrExpression();
-			expect(TOKEN_TYPES.Else, "Expected else token");
-			const b = parseLogicalOrExpression();
-			return new If(predicate, [a], [b]);
+
+			if (is(TOKEN_TYPES.Else)) {
+				// Ternary expression with else
+				++current; // consume else
+				const b = parseLogicalOrExpression();
+				return new If(predicate, [a], [b]);
+			} else {
+				// Select expression on iterable
+				return new SelectExpression(a, predicate);
+			}
 		}
 		return a;
 	}
@@ -437,6 +487,8 @@ export function parse(tokens: Token[]): Program {
 			if (filter instanceof BooleanLiteral) {
 				// Special case: treat boolean literals as identifiers
 				filter = new Identifier(filter.value.toString());
+			} else if (filter instanceof NullLiteral) {
+				filter = new Identifier("none");
 			}
 			if (!(filter instanceof Identifier)) {
 				throw new SyntaxError(`Expected identifier for the test`);
@@ -477,7 +529,10 @@ export function parse(tokens: Token[]): Program {
 				return new StringLiteral(token.value);
 			case TOKEN_TYPES.BooleanLiteral:
 				++current;
-				return new BooleanLiteral(token.value === "true");
+				return new BooleanLiteral(token.value.toLowerCase() === "true");
+			case TOKEN_TYPES.NullLiteral:
+				++current;
+				return new NullLiteral(null);
 			case TOKEN_TYPES.Identifier:
 				++current;
 				return new Identifier(token.value);

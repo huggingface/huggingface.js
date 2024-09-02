@@ -70,6 +70,7 @@ export const LIBRARY_TASK_MAPPING: Partial<Record<ModelLibraryKey, PipelineType[
 		"visual-question-answering",
 		"zero-shot-classification",
 		"zero-shot-image-classification",
+		"zero-shot-object-detection",
 	],
 	mindspore: ["image-classification"],
 };
