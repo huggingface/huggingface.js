@@ -99,8 +99,8 @@ image
 ### ControlNet
 
 Controlling the outputs of diffusion models only with a text prompt is a challenging problem. ControlNet is a neural network model that provides image-based control to diffusion models. Control images can be edges or other landmarks extracted from a source image.
+![Examples](https://huggingface.co/datasets/optimum/documentation-images/resolve/main/neuron/models/12-sdxl-text2img-controlnet.png)
 
-Many ControlNet models were trained in our community event, JAX Diffusers sprint. You can see the full list of the ControlNet models available [here](https://huggingface.co/spaces/jax-diffusers-event/leaderboard).
 
 ## Pix2Pix
 
@@ -119,6 +119,7 @@ The images below show some examples extracted from the Pix2Pix paper. This model
 - [Style transfer and layout control with diffusers 🧨](https://huggingface.co/docs/diffusers/main/en/using-diffusers/ip_adapter#style--layout-control)
 - [Train your ControlNet with diffusers 🧨](https://huggingface.co/blog/train-your-controlnet)
 - [Ultra fast ControlNet with 🧨 Diffusers](https://huggingface.co/blog/controlnet)
+- [List of ControlNets trained in the community JAX Diffusers sprint](https://huggingface.co/spaces/jax-diffusers-event/leaderboard)
 
 ## References
 
