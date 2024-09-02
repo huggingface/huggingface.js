@@ -656,18 +656,6 @@ export const PIPELINE_DATA = {
 		name: "Video-Text-to-Text",
 		modality: "multimodal",
 		color: "blue",
-		hideInDatasets: false,
-	},
-	"keypoint-detection": {
-		name: "Keypoint Detection",
-		subtasks: [
-			{
-				type: "pose-estimation",
-				name: "Pose Estimation",
-			},
-		],
-		modality: "cv",
-		color: "red",
 		hideInDatasets: true,
 	},
 	other: {
