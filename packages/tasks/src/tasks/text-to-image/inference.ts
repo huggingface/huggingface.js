@@ -27,7 +27,7 @@ export interface TextToImageInput {
 export interface TextToImageParameters {
 	/**
 	 * A higher guidance scale value encourages the model to generate images closely linked to
-	 * the text prompt at the expense of lower image quality.
+	 * the text prompt, but values too high may cause saturation and other artifacts.
 	 */
 	guidance_scale?: number;
 	/**

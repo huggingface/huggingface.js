@@ -22,7 +22,7 @@
 			"properties": {
 				"guidance_scale": {
 					"type": "number",
-					"description": "A higher guidance scale value encourages the model to generate images closely linked to the text prompt at the expense of lower image quality."
+					"description": "A higher guidance scale value encourages the model to generate images closely linked to the text prompt, but values too high may cause saturation and other artifacts."
 				},
 				"negative_prompt": {
 					"type": "array",
