@@ -71,6 +71,7 @@ See 🧨diffusers example for style transfer with `AutoPipelineForText2Image` be
 from diffusers import AutoPipelineForText2Image
 from diffusers.utils import load_image
 import torch
+
 # load pipeline
 pipeline = AutoPipelineForText2Image.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", torch_dtype=torch.float16).to("cuda")
 pipeline.load_ip_adapter("h94/IP-Adapter", subfolder="sdxl_models", weight_name="ip-adapter_sdxl.bin")
