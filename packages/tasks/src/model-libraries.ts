@@ -643,6 +643,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path_extension:"sentis"`,
 	},
+	vfimamba: {
+		prettyLabel: "VFIMamba",
+		repoName: "vfi-mamba",
+		repoUrl: "https://github.com/MCG-NJU/VFIMamba",
+		countDownloads: `path_extension:"pkl"`,
+	},
 	voicecraft: {
 		prettyLabel: "VoiceCraft",
 		repoName: "VoiceCraft",

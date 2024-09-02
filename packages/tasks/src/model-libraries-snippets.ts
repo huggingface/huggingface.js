@@ -871,6 +871,13 @@ IWorker engine = WorkerFactory.CreateWorker(BackendType.GPUCompute, model);
 `,
 ];
 
+export const vfimamba = (model: ModelData): string[] => [
+	`from Trainer_finetune import Model
+
+model = Model(-1)
+model.from_pretrained("${model.id}")`,
+];
+
 export const voicecraft = (model: ModelData): string[] => [
 	`from voicecraft import VoiceCraft
 
