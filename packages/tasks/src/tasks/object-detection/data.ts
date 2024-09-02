@@ -51,7 +51,7 @@ const taskData: TaskDataCustom = {
 			id: "jameslahm/yolov10x",
 		},
 		{
-			description: "RT-DETR is a fast and accurate object detection model pre-trained on the Object365 dataset.",
+			description: "RT-DETR is a fast and accurate object detection model pre-trained on the COCO and Object365 datasets.",
 			id: "PekingU/rtdetr_r18vd_coco_o365",
 		},
 	],
