@@ -648,6 +648,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "vfi-mamba",
 		repoUrl: "https://github.com/MCG-NJU/VFIMamba",
 		countDownloads: `path_extension:"pkl"`,
+		snippets: snippets.vfimamba,
 	},
 	voicecraft: {
 		prettyLabel: "VoiceCraft",
