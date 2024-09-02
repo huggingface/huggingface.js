@@ -8,9 +8,10 @@
  */
 export interface AudioClassificationInput {
 	/**
-	 * The input audio data
+	 * The input audio data as a base64-encoded string. If no `parameters` are provided, you can
+	 * also provide the audio data as a raw bytes payload.
 	 */
-	inputs: unknown;
+	inputs: string;
 	/**
 	 * Additional inference parameters
 	 */

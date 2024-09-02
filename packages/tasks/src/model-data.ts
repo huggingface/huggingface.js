@@ -2,21 +2,6 @@ import type { PipelineType } from "./pipelines";
 import type { WidgetExample } from "./widget-example";
 import type { TokenizerConfig } from "./tokenizer-data";
 
-export enum InferenceDisplayability {
-	/**
-	 * Yes
-	 */
-	Yes = "Yes",
-	/**
-	 * And then, all the possible reasons why it's no:
-	 */
-	ExplicitOptOut = "ExplicitOptOut",
-	CustomCode = "CustomCode",
-	LibraryNotDetected = "LibraryNotDetected",
-	PipelineNotDetected = "PipelineNotDetected",
-	PipelineLibraryPairNotSupported = "PipelineLibraryPairNotSupported",
-}
-
 /**
  * Public interface for model metadata
  */
@@ -27,8 +12,9 @@ export interface ModelData {
 	id: string;
 	/**
 	 * Whether or not to enable inference widget for this model
+	 * TODO(type it)
 	 */
-	inference: InferenceDisplayability;
+	inference: string;
 	/**
 	 * is this model private?
 	 */
@@ -123,6 +109,16 @@ export interface ModelData {
 	 * Example: transformers, SpeechBrain, Stanza, etc.
 	 */
 	library_name?: string;
+	safetensors?: {
+		parameters: Record<string, number>;
+		total: number;
+		sharded: boolean;
+	};
+	gguf?: {
+		total: number;
+		architecture?: string;
+		context_length?: number;
+	};
 }
 
 /**

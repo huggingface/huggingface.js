@@ -17884,7 +17884,7 @@ export const LANGUAGES_ISO_639_3 = {
 	},
 	nan: {
 		code: "nan",
-		name: "Min Nan Chinese",
+		name: "Southern Min (Min Nan Chinese)",
 	},
 	nao: {
 		code: "nao",
@@ -30790,7 +30790,7 @@ export const LANGUAGES_ISO_639_3 = {
 	},
 	yue: {
 		code: "yue",
-		name: "Yue Chinese",
+		name: "Cantonese (Yue Chinese)",
 	},
 	yuf: {
 		code: "yuf",

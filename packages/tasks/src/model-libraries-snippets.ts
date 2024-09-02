@@ -46,6 +46,26 @@ export const asteroid = (model: ModelData): string[] => [
 model = BaseModel.from_pretrained("${model.id}")`,
 ];
 
+export const audioseal = (model: ModelData): string[] => {
+	const watermarkSnippet = `# Watermark Generator
+from audioseal import AudioSeal
+
+model = AudioSeal.load_generator("${model.id}")
+# pass a tensor (tensor_wav) of shape (batch, channels, samples) and a sample rate
+wav, sr = tensor_wav, 16000
+	
+watermark = model.get_watermark(wav, sr)
+watermarked_audio = wav + watermark`;
+
+	const detectorSnippet = `# Watermark Detector
+from audioseal import AudioSeal
+
+detector = AudioSeal.load_detector("${model.id}")
+	
+result, message = detector.detect_watermark(watermarked_audio, sr)`;
+	return [watermarkSnippet, detectorSnippet];
+};
+
 function get_base_diffusers_model(model: ModelData): string {
 	return model.cardData?.base_model?.toString() ?? "fill-in-base-model";
 }
@@ -55,6 +75,59 @@ export const bertopic = (model: ModelData): string[] => [
 
 model = BERTopic.load("${model.id}")`,
 ];
+
+export const bm25s = (model: ModelData): string[] => [
+	`from bm25s.hf import BM25HF
+
+retriever = BM25HF.load_from_hub("${model.id}")`,
+];
+
+export const depth_anything_v2 = (model: ModelData): string[] => {
+	let encoder: string;
+	let features: string;
+	let out_channels: string;
+
+	encoder = "<ENCODER>";
+	features = "<NUMBER_OF_FEATURES>";
+	out_channels = "<OUT_CHANNELS>";
+
+	if (model.id === "depth-anything/Depth-Anything-V2-Small") {
+		encoder = "vits";
+		features = "64";
+		out_channels = "[48, 96, 192, 384]";
+	} else if (model.id === "depth-anything/Depth-Anything-V2-Base") {
+		encoder = "vitb";
+		features = "128";
+		out_channels = "[96, 192, 384, 768]";
+	} else if (model.id === "depth-anything/Depth-Anything-V2-Large") {
+		encoder = "vitl";
+		features = "256";
+		out_channels = "[256, 512, 1024, 1024";
+	}
+
+	return [
+		`
+# Install from https://github.com/DepthAnything/Depth-Anything-V2
+
+# Load the model and infer depth from an image
+import cv2
+import torch
+
+from depth_anything_v2.dpt import DepthAnythingV2
+
+# instantiate the model
+model = DepthAnythingV2(encoder="${encoder}", features=${features}, out_channels=${out_channels})
+
+# load the weights
+filepath = hf_hub_download(repo_id="${model.id}", filename="depth_anything_v2_${encoder}.pth", repo_type="model")
+state_dict = torch.load(filepath, map_location="cpu")
+model.load_state_dict(state_dict).eval()
+
+raw_img = cv2.imread("your/image/path")
+depth = model.infer_image(raw_img) # HxW raw depth map in numpy
+    `,
+	];
+};
 
 const diffusers_default = (model: ModelData) => [
 	`from diffusers import DiffusionPipeline
@@ -95,6 +168,105 @@ export const diffusers = (model: ModelData): string[] => {
 	} else {
 		return diffusers_default(model);
 	}
+};
+
+export const diffusionkit = (model: ModelData): string[] => {
+	const sd3Snippet = `# Pipeline for Stable Diffusion 3
+from diffusionkit.mlx import DiffusionPipeline
+
+pipeline = DiffusionPipeline(
+	shift=3.0,
+	use_t5=False,
+	model_version=${model.id},
+	low_memory_mode=True,
+	a16=True,
+	w16=True,
+)`;
+
+	const fluxSnippet = `# Pipeline for Flux
+from diffusionkit.mlx import FluxPipeline
+
+pipeline = FluxPipeline(
+  shift=1.0,
+  model_version=${model.id},
+  low_memory_mode=True,
+  a16=True,
+  w16=True,
+)`;
+
+	const generateSnippet = `# Image Generation
+HEIGHT = 512
+WIDTH = 512
+NUM_STEPS = ${model.tags.includes("flux") ? 4 : 50}
+CFG_WEIGHT = ${model.tags.includes("flux") ? 0 : 5}
+
+image, _ = pipeline.generate_image(
+  "a photo of a cat",
+  cfg_weight=CFG_WEIGHT,
+  num_steps=NUM_STEPS,
+  latent_size=(HEIGHT // 8, WIDTH // 8),
+)`;
+
+	const pipelineSnippet = model.tags.includes("flux") ? fluxSnippet : sd3Snippet;
+
+	return [pipelineSnippet, generateSnippet];
+};
+
+export const cartesia_pytorch = (model: ModelData): string[] => [
+	`# pip install --no-binary :all: cartesia-pytorch
+from cartesia_pytorch import ReneLMHeadModel
+from transformers import AutoTokenizer
+
+model = ReneLMHeadModel.from_pretrained("${model.id}")
+tokenizer = AutoTokenizer.from_pretrained("allenai/OLMo-1B-hf")
+
+in_message = ["Rene Descartes was"]
+inputs = tokenizer(in_message, return_tensors="pt")
+
+outputs = model.generate(inputs.input_ids, max_length=50, top_k=100, top_p=0.99)
+out_message = tokenizer.batch_decode(outputs, skip_special_tokens=True)[0]
+
+print(out_message)
+)`,
+];
+
+export const cartesia_mlx = (model: ModelData): string[] => [
+	`import mlx.core as mx
+import cartesia_mlx as cmx
+
+model = cmx.from_pretrained("${model.id}")
+model.set_dtype(mx.float32)   
+
+prompt = "Rene Descartes was"
+
+for text in model.generate(
+    prompt,
+    max_tokens=500,
+    eval_every_n=5,
+    verbose=True,
+    top_p=0.99,
+    temperature=0.85,
+):
+    print(text, end="", flush=True)
+`,
+];
+
+export const edsnlp = (model: ModelData): string[] => {
+	const packageName = nameWithoutNamespace(model.id).replaceAll("-", "_");
+	return [
+		`# Load it from the Hub directly
+import edsnlp
+nlp = edsnlp.load("${model.id}")
+`,
+		`# Or install it as a package
+!pip install git+https://huggingface.co/${model.id}
+
+# and import it as a module
+import ${packageName}
+
+nlp = ${packageName}.load()  # or edsnlp.load("${packageName}")
+`,
+	];
 };
 
 export const espnetTTS = (model: ModelData): string[] => [
@@ -148,14 +320,19 @@ model = GLiNER.from_pretrained("${model.id}")`,
 ];
 
 export const keras = (model: ModelData): string[] => [
-	`from huggingface_hub import from_pretrained_keras
+	`# Available backend options are: "jax", "tensorflow", "torch".
+import os
+os.environ["KERAS_BACKEND"] = "tensorflow"
+	
+import keras
 
-model = from_pretrained_keras("${model.id}")
+model = keras.saving.load_model("hf://${model.id}")
 `,
 ];
 
 export const keras_nlp = (model: ModelData): string[] => [
 	`# Available backend options are: "jax", "tensorflow", "torch".
+import os
 os.environ["KERAS_BACKEND"] = "tensorflow"
 
 import keras_nlp
@@ -163,6 +340,56 @@ import keras_nlp
 tokenizer = keras_nlp.models.Tokenizer.from_preset("hf://${model.id}")
 backbone = keras_nlp.models.Backbone.from_preset("hf://${model.id}")
 `,
+];
+
+export const llama_cpp_python = (model: ModelData): string[] => [
+	`from llama_cpp import Llama
+
+llm = Llama.from_pretrained(
+	repo_id="${model.id}",
+	filename="{{GGUF_FILE}}",
+)
+
+llm.create_chat_completion(
+	messages = [
+		{
+			"role": "user",
+			"content": "What is the capital of France?"
+		}
+	]
+)`,
+];
+
+export const tf_keras = (model: ModelData): string[] => [
+	`# Note: 'keras<3.x' or 'tf_keras' must be installed (legacy)
+# See https://github.com/keras-team/tf-keras for more details.
+from huggingface_hub import from_pretrained_keras
+
+model = from_pretrained_keras("${model.id}")
+`,
+];
+
+export const mamba_ssm = (model: ModelData): string[] => [
+	`from mamba_ssm import MambaLMHeadModel
+
+model = MambaLMHeadModel.from_pretrained("${model.id}")`,
+];
+
+export const mars5_tts = (model: ModelData): string[] => [
+	`# Install from https://github.com/Camb-ai/MARS5-TTS
+
+from inference import Mars5TTS
+mars5 = Mars5TTS.from_pretrained("${model.id}")`,
+];
+
+export const mesh_anything = (): string[] => [
+	`# Install from https://github.com/buaacyw/MeshAnything.git
+
+from MeshAnything.models.meshanything import MeshAnything
+
+# refer to https://github.com/buaacyw/MeshAnything/blob/main/main.py#L91 on how to define args
+# and https://github.com/buaacyw/MeshAnything/blob/main/app.py regarding usage
+model = MeshAnything(args)`,
 ];
 
 export const open_clip = (model: ModelData): string[] => [
@@ -235,6 +462,12 @@ export const pyannote_audio = (model: ModelData): string[] => {
 	return pyannote_audio_model(model);
 };
 
+export const relik = (model: ModelData): string[] => [
+	`from relik import Relik
+ 
+relik = Relik.from_pretrained("${model.id}")`,
+];
+
 const tensorflowttsTextToMel = (model: ModelData): string[] => [
 	`from tensorflow_tts.inference import AutoProcessor, TFAutoModel
 
@@ -271,6 +504,31 @@ export const timm = (model: ModelData): string[] => [
 	`import timm
 
 model = timm.create_model("hf_hub:${model.id}", pretrained=True)`,
+];
+
+export const saelens = (/* model: ModelData */): string[] => [
+	`# pip install sae-lens
+from sae_lens import SAE
+
+sae, cfg_dict, sparsity = SAE.from_pretrained(
+    release = "RELEASE_ID", # e.g., "gpt2-small-res-jb". See other options in https://github.com/jbloomAus/SAELens/blob/main/sae_lens/pretrained_saes.yaml
+    sae_id = "SAE_ID", # e.g., "blocks.8.hook_resid_pre". Won't always be a hook point
+)`,
+];
+
+export const seed_story = (): string[] => [
+	`# seed_story_cfg_path refers to 'https://github.com/TencentARC/SEED-Story/blob/master/configs/clm_models/agent_7b_sft.yaml'
+# llm_cfg_path refers to 'https://github.com/TencentARC/SEED-Story/blob/master/configs/clm_models/llama2chat7b_lora.yaml'
+from omegaconf import OmegaConf
+import hydra
+
+# load Llama2
+llm_cfg = OmegaConf.load(llm_cfg_path)
+llm = hydra.utils.instantiate(llm_cfg, torch_dtype="fp16")
+
+# initialize seed_story
+seed_story_cfg = OmegaConf.load(seed_story_cfg_path)
+seed_story = hydra.utils.instantiate(seed_story_cfg, llm=llm) `,
 ];
 
 const skopsPickle = (model: ModelData, modelFile: string) => {
@@ -368,6 +626,35 @@ export const fastai = (model: ModelData): string[] => [
 
 learn = from_pretrained_fastai("${model.id}")`,
 ];
+
+export const sam2 = (model: ModelData): string[] => {
+	const image_predictor = `# Use SAM2 with images
+import torch
+from sam2.sam2_image_predictor import SAM2ImagePredictor
+
+predictor = SAM2ImagePredictor.from_pretrained(${model.id})
+
+with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
+    predictor.set_image(<your_image>)
+    masks, _, _ = predictor.predict(<input_prompts>)`;
+
+	const video_predictor = `# Use SAM2 with videos
+import torch
+from sam2.sam2_video_predictor import SAM2VideoPredictor
+	
+predictor = SAM2VideoPredictor.from_pretrained(${model.id})
+
+with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
+    state = predictor.init_state(<your_video>)
+
+    # add new prompts and instantly get the output on the same frame
+    frame_idx, object_ids, masks = predictor.add_new_points(state, <your_prompts>):
+
+    # propagate the prompts to get masklets throughout the video
+    for frame_idx, object_ids, masks in predictor.propagate_in_video(state):
+        ...`;
+	return [image_predictor, video_predictor];
+};
 
 export const sampleFactory = (model: ModelData): string[] => [
 	`python -m sample_factory.huggingface.load_from_hub -r ${model.id} -d ./train_dir`,
@@ -604,6 +891,20 @@ wavs = chat.infer(texts, )
 torchaudio.save("output1.wav", torch.from_numpy(wavs[0]), 24000)`,
 ];
 
+export const birefnet = (model: ModelData): string[] => [
+	`# Option 1: use with transformers
+
+from transformers import AutoModelForImageSegmentation
+birefnet = AutoModelForImageSegmentation.from_pretrained("${model.id}", trust_remote_code=True)
+`,
+	`# Option 2: use with BiRefNet
+
+# Install from https://github.com/ZhengPeng7/BiRefNet
+
+from models.birefnet import BiRefNet
+model = BiRefNet.from_pretrained("${model.id}")`,
+];
+
 export const mlx = (model: ModelData): string[] => [
 	`pip install huggingface_hub hf_transfer
 
@@ -671,4 +972,18 @@ export const audiocraft = (model: ModelData): string[] => {
 		return [`# Type of model unknown.`];
 	}
 };
+
+export const whisperkit = (): string[] => [
+	`# Install CLI with Homebrew on macOS device
+brew install whisperkit-cli
+
+# View all available inference options
+whisperkit-cli transcribe --help
+	
+# Download and run inference using whisper base model
+whisperkit-cli transcribe --audio-path /path/to/audio.mp3
+
+# Or use your preferred model variant
+whisperkit-cli transcribe --model "large-v3" --model-prefix "distil" --audio-path /path/to/audio.mp3 --verbose`,
+];
 //#endregion

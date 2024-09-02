@@ -72,6 +72,10 @@ export const SKUS = {
 				tflops: 12.0,
 				memory: [16],
 			},
+			"RTX A4000": {
+				tflops: 19.2,
+				memory: [16],
+			},
 			A100: {
 				tflops: 77.97,
 				memory: [80, 40],
@@ -159,6 +163,14 @@ export const SKUS = {
 			"RTX 3060": {
 				tflops: 12.74,
 				memory: [12, 8],
+			},
+			"RTX 2080 Ti": {
+				tflops: 26.9,
+				memory: [11],
+			},
+			"RTX 2080": {
+				tflops: 20.14,
+				memory: [8],
 			},
 			"RTX 2070": {
 				tflops: 14.93,
