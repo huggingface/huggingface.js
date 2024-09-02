@@ -17,18 +17,26 @@ Super-resolution models increase the resolution of an image, allowing for higher
 You can use pipelines for image-to-image in 🧨diffusers library to easily use image-to-image models. See an example for `StableDiffusionImg2ImgPipeline` below.
 
 ```python
-from PIL import Image
-from diffusers import StableDiffusionImg2ImgPipeline
+import torch
+from diffusers import AutoPipelineForImage2Image
+from diffusers.utils import make_image_grid, load_image
 
-model_id_or_path = "runwayml/stable-diffusion-v1-5"
-pipe = StableDiffusionImg2ImgPipeline.from_pretrained(model_id_or_path, torch_dtype=torch.float16)
-pipe = pipe.to(cuda)
+pipeline = AutoPipelineForImage2Image.from_pretrained(
+    "stabilityai/stable-diffusion-xl-refiner-1.0", torch_dtype=torch.float16, variant="fp16", use_safetensors=True
+)
+pipeline.enable_model_cpu_offload()
+# remove following line if xFormers is not installed or you have PyTorch 2.0 or higher installed
+pipeline.enable_xformers_memory_efficient_attention()
 
-init_image = Image.open("mountains_image.jpeg").convert("RGB").resize((768, 512))
-prompt = "A fantasy landscape, trending on artstation"
+# prepare image
+url = "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/diffusers/img2img-sdxl-init.png"
+init_image = load_image(url)
 
-images = pipe(prompt=prompt, image=init_image, strength=0.75, guidance_scale=7.5).images
-images[0].save("fantasy_landscape.png")
+prompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k"
+
+# pass prompt and image to pipeline
+image = pipeline(prompt, image=init_image, strength=0.5).images[0]
+make_image_grid([init_image, image], rows=1, cols=2)
 ```
 
 You can use [huggingface.js](https://github.com/huggingface/huggingface.js) to infer image-to-image models on Hugging Face Hub.
