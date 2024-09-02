@@ -6,7 +6,7 @@
 	"type": "object",
 	"properties": {
 		"inputs": {
-			"description": "The input text data (sometimes called \"prompt\"",
+			"description": "The input text data (sometimes called \"prompt\")",
 			"type": "string"
 		},
 		"parameters": {

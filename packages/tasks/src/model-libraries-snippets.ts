@@ -170,6 +170,48 @@ export const diffusers = (model: ModelData): string[] => {
 	}
 };
 
+export const diffusionkit = (model: ModelData): string[] => {
+	const sd3Snippet = `# Pipeline for Stable Diffusion 3
+from diffusionkit.mlx import DiffusionPipeline
+
+pipeline = DiffusionPipeline(
+	shift=3.0,
+	use_t5=False,
+	model_version=${model.id},
+	low_memory_mode=True,
+	a16=True,
+	w16=True,
+)`;
+
+	const fluxSnippet = `# Pipeline for Flux
+from diffusionkit.mlx import FluxPipeline
+
+pipeline = FluxPipeline(
+  shift=1.0,
+  model_version=${model.id},
+  low_memory_mode=True,
+  a16=True,
+  w16=True,
+)`;
+
+	const generateSnippet = `# Image Generation
+HEIGHT = 512
+WIDTH = 512
+NUM_STEPS = ${model.tags.includes("flux") ? 4 : 50}
+CFG_WEIGHT = ${model.tags.includes("flux") ? 0 : 5}
+
+image, _ = pipeline.generate_image(
+  "a photo of a cat",
+  cfg_weight=CFG_WEIGHT,
+  num_steps=NUM_STEPS,
+  latent_size=(HEIGHT // 8, WIDTH // 8),
+)`;
+
+	const pipelineSnippet = model.tags.includes("flux") ? fluxSnippet : sd3Snippet;
+
+	return [pipelineSnippet, generateSnippet];
+};
+
 export const cartesia_pytorch = (model: ModelData): string[] => [
 	`# pip install --no-binary :all: cartesia-pytorch
 from cartesia_pytorch import ReneLMHeadModel
