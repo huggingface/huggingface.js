@@ -37,7 +37,7 @@ const taskData: TaskDataCustom = {
 	models: [
 		{
 			description: "A robust video-text-to-text model that can take in image and video inputs.",
-			id: "llava-hf/llava-interleave-qwen-7b-hf",
+			id: "llava-hf/llava-onevision-qwen2-72b-ov-hf",
 		},
         {
 			description: "Large and powerful video-text-to-text model that can take in image and video inputs.",
