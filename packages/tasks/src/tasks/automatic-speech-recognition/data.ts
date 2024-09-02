@@ -7,7 +7,7 @@ const taskData: TaskDataCustom = {
 			id: "mozilla-foundation/common_voice_17_0",
 		},
 		{
-			description: "An English dataset with 1,000 hours of data.",
+			description: "A dataset with 44.6k hours of English speaker data and 6k hours of other language speakers.",
 			id: "parler-tts/mls_eng",
 		},
 		{

@@ -50,7 +50,7 @@ const taskData: TaskDataCustom = {
 			id: "impira/layoutlm-document-qa",
 		},
 		{
-			description: "A strong document question answering model specialized in invoices.",
+			description: "A document question answering model specialized in invoices.",
 			id: "impira/layoutlm-invoices",
 		},
 		{

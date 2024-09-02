@@ -63,7 +63,7 @@ const taskData: TaskDataCustom = {
 		},
 	],
 	summary: "Translation is the task of converting text from one language to another.",
-	widgetModels: ["facebook/nllb-200-1.3B"],
+	widgetModels: ["facebook/mbart-large-50-many-to-many-mmt"],
 	youtubeId: "1JvfrvZgi6c",
 };
 

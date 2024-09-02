@@ -107,7 +107,7 @@ const taskData: TaskDataCustom = {
 	],
 	summary:
 		"Generating text is the task of generating new text given another text. These models can, for example, fill in incomplete text or paraphrase.",
-	widgetModels: ["microsoft/Phi-3.5-mini-instruct"],
+	widgetModels: ["mistralai/Mistral-Nemo-Instruct-2407"],
 	youtubeId: "e9gNEAlsOvU",
 };
 
