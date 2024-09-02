@@ -93,7 +93,7 @@ const taskData: TaskDataCustom = {
 		},
 	],
 	summary:
-		"Image-to-image is the task of transforming an input image through a variety of possible manipulations and enhancements, such as super-resolution, image inpainting, colorization, and more.
+		"Image-to-image is the task of transforming an input image through a variety of possible manipulations and enhancements, such as super-resolution, image inpainting, colorization, and more."
 	widgetModels: ["lllyasviel/sd-controlnet-canny"],
 	youtubeId: "",
 };
