@@ -451,7 +451,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "py-feat",
 		repoUrl: "https://github.com/cosanlab/py-feat",
 		docsUrl: "https://py-feat.org/",
-		filter: true,
+		filter: false,
 	},
 	pythae: {
 		prettyLabel: "pythae",
