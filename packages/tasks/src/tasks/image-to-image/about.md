@@ -1,3 +1,5 @@
+Image-to-image pipelines can also be used in text-to-image tasks, to provide visual guidance to the text-guided generation process.
+
 ## Use Cases
 
 ### Image inpainting
