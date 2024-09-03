@@ -26,9 +26,10 @@ from diffusers.utils import make_image_grid, load_image
 pipeline = AutoPipelineForImage2Image.from_pretrained(
     "stabilityai/stable-diffusion-xl-refiner-1.0", torch_dtype=torch.float16, variant="fp16", use_safetensors=True
 )
-pipeline.enable_model_cpu_offload()
-# remove following line if xFormers is not installed or you have PyTorch 2.0 or higher installed
-pipeline.enable_xformers_memory_efficient_attention()
+
+# this helps us to reduce memory usage- since SDXL is a bit heavy, this could help by
+# offloading the model to CPU w/o hurting performance. 
+pipeline.enable_model_cpu_offload() 
 
 # prepare image
 url = "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/diffusers/img2img-sdxl-init.png"
