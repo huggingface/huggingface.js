@@ -16,9 +16,19 @@ Different patterns can be generated to obtain unique pieces of fashion. Text-to-
 
 Architects can utilise the models to construct an environment based out on the requirements of the floor plan. This can also include the furniture that has to be placed in that environment.
 
-## Task Variants
+##Task Variants
 
-You can contribute variants of this task [here](https://github.com/huggingface/hub-docs/blob/main/tasks/src/text-to-image/about.md).
+### Image Editing
+
+Image editing with text-to-image models involves using text prompts to describe the wanted changes in an image and then follow them. 
+- synthetic image editing
+- real image editing
+
+### Controlled Generation
+
+### Personalization
+- subject driven generation
+- style transfer
 
 ## Inference
 
