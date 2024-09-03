@@ -292,7 +292,6 @@ export const SKUS = {
           tflops: 3.8
         },
       },
-    },
 	},
 	CPU: {
 		Intel: {
