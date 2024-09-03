@@ -134,7 +134,7 @@ const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] 
 const snippetVllm = (model: ModelData): string[] => {
 	return [
 		["# Install vLLM from pip", "pip install vllm"].join("\n"),
-		["# Load and run the model:", `python -m vllm.entrypoints.openai.api_server --model "${model.id}"`].join("\n"),
+		["# Load and run the model:", `vllm serve "${model.id}"`].join("\n"),
 	];
 };
 
