@@ -28,8 +28,8 @@ pipeline = AutoPipelineForImage2Image.from_pretrained(
 )
 
 # this helps us to reduce memory usage- since SDXL is a bit heavy, this could help by
-# offloading the model to CPU w/o hurting performance. 
-pipeline.enable_model_cpu_offload() 
+# offloading the model to CPU w/o hurting performance.
+pipeline.enable_model_cpu_offload()
 
 # prepare image
 url = "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/diffusers/img2img-sdxl-init.png"
