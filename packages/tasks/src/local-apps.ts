@@ -147,18 +147,28 @@ const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] 
 };
 
 const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
+	const runCommand = [
+		"",
+		"# Call the server using curl:",
+		`curl -X POST "http://localhost:8000/v1/chat/completions" \\ `,
+		`	-H "Content-Type: application/json" \\ `,
+		`	--data '{`,
+		`		"model": "${model.id}"`,
+		`		"messages": [`,
+		`			{"role": "user", "content": "Hello!"}`,
+		`		]`,
+		`	}'`,
+	];
 	return [
 		{
 			title: "Install from pip",
-			setup: ["# Install vLLM from pip", "pip install vllm"].join("\n"),
-			content: ["# Load and run the model:", `python -m vllm.entrypoints.openai.api_server --model "${model.id}"`].join(
-				"\n"
-			),
+			setup: ["# Install vLLM from pip:", "pip install vllm"].join("\n"),
+			content: ["# Load and run the model:", `vllm serve --model "${model.id}"`, ...runCommand].join("\n"),
 		},
 		{
 			title: "Use Docker images",
 			setup: [
-				"# Deploy with linux and docker (needs Docker installed) a gated model (please, request access in Hugginface's model repo): ",
+				"# Deploy with docker on Linux:",
 				`docker run --runtime nvidia --gpus all \\`,
 				`	--name my_vllm_container \\`,
 				`	-v ~/.cache/huggingface:/root/.cache/huggingface \\`,
@@ -170,17 +180,8 @@ const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
 			].join("\n"),
 			content: [
 				"# Load and run the model:",
-				`docker exec -it my_vllm_container bash -c "python -m vllm.entrypoints.openai.api_server --model ${model.id} --dtype auto --api-key token-abc123"`,
-				"# Call the server using curl",
-				"curl -X POST 'http://localhost:8000/v1/chat/completions' \\ ",
-				`	-H "Content-Type: application/json" \\ `,
-				`	-H "Authorization: Bearer token-abc123" \\ `,
-				`	--data '{`,
-				`		"model": "${model.id}"`,
-				`		"messages": [`,
-				`			{"role": "user", "content": "Hello!"}`,
-				`		]`,
-				`	}'`,
+				`docker exec -it my_vllm_container bash -c "vllm serve ${model.id}"`,
+				...runCommand,
 			].join("\n"),
 		},
 	];
