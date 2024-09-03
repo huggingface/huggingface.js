@@ -50,7 +50,7 @@ jobs:
           node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./package.json')); package.version = '$BUMPED_VERSION'; fs.writeFileSync('./package.json', JSON.stringify(package, null, '\t') + '\n');"
           pnpm --filter doc-internal run fix-cdn-versions
           git add ../..
-          git commit -m "🔖 @hugginface/agents $BUMPED_VERSION"
+          git commit -m "🔖 @huggingface/agents $BUMPED_VERSION"
           git tag "agents-v$BUMPED_VERSION"
       - run: pnpm --filter agents... build && pnpm publish --no-git-checks .
         env:
