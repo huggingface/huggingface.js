@@ -47,7 +47,6 @@ model = LlavaNextVideoForConditionalGeneration.from_pretrained(
 processor = LlavaNextVideoProcessor.from_pretrained(model_id)
 
 def sample_frames(url, num_frames):
-
     response = requests.get(url)
     path_id = str(uuid.uuid4())
 
