@@ -44,6 +44,7 @@
 	import IconImageFeatureExtraction from "../Icons/IconImageFeatureExtraction.svelte";
 	import IconVideoTextToText from "../Icons/IconVideoTextToText.svelte";
 	import IconAnyToAny from "../Icons/IconAnyToAny.svelte";
+	import IconKeypointDetection from "../Icons/IconKeypointDetection.svelte";
 	import type { WidgetType } from "@huggingface/tasks";
 
 	export let classNames = "";
@@ -98,6 +99,7 @@
 		"image-feature-extraction": IconImageFeatureExtraction,
 		"video-text-to-text": IconVideoTextToText,
 		"any-to-any": IconAnyToAny,
+		"keypoint-detection": IconKeypointDetection,
 	};
 
 	$: iconComponent =

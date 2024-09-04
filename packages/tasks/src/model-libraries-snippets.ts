@@ -170,6 +170,87 @@ export const diffusers = (model: ModelData): string[] => {
 	}
 };
 
+export const diffusionkit = (model: ModelData): string[] => {
+	const sd3Snippet = `# Pipeline for Stable Diffusion 3
+from diffusionkit.mlx import DiffusionPipeline
+
+pipeline = DiffusionPipeline(
+	shift=3.0,
+	use_t5=False,
+	model_version=${model.id},
+	low_memory_mode=True,
+	a16=True,
+	w16=True,
+)`;
+
+	const fluxSnippet = `# Pipeline for Flux
+from diffusionkit.mlx import FluxPipeline
+
+pipeline = FluxPipeline(
+  shift=1.0,
+  model_version=${model.id},
+  low_memory_mode=True,
+  a16=True,
+  w16=True,
+)`;
+
+	const generateSnippet = `# Image Generation
+HEIGHT = 512
+WIDTH = 512
+NUM_STEPS = ${model.tags.includes("flux") ? 4 : 50}
+CFG_WEIGHT = ${model.tags.includes("flux") ? 0 : 5}
+
+image, _ = pipeline.generate_image(
+  "a photo of a cat",
+  cfg_weight=CFG_WEIGHT,
+  num_steps=NUM_STEPS,
+  latent_size=(HEIGHT // 8, WIDTH // 8),
+)`;
+
+	const pipelineSnippet = model.tags.includes("flux") ? fluxSnippet : sd3Snippet;
+
+	return [pipelineSnippet, generateSnippet];
+};
+
+export const cartesia_pytorch = (model: ModelData): string[] => [
+	`# pip install --no-binary :all: cartesia-pytorch
+from cartesia_pytorch import ReneLMHeadModel
+from transformers import AutoTokenizer
+
+model = ReneLMHeadModel.from_pretrained("${model.id}")
+tokenizer = AutoTokenizer.from_pretrained("allenai/OLMo-1B-hf")
+
+in_message = ["Rene Descartes was"]
+inputs = tokenizer(in_message, return_tensors="pt")
+
+outputs = model.generate(inputs.input_ids, max_length=50, top_k=100, top_p=0.99)
+out_message = tokenizer.batch_decode(outputs, skip_special_tokens=True)[0]
+
+print(out_message)
+)`,
+];
+
+export const cartesia_mlx = (model: ModelData): string[] => [
+	`import mlx.core as mx
+import cartesia_mlx as cmx
+
+model = cmx.from_pretrained("${model.id}")
+model.set_dtype(mx.float32)   
+
+prompt = "Rene Descartes was"
+
+for text in model.generate(
+    prompt,
+    max_tokens=500,
+    eval_every_n=5,
+    verbose=True,
+    top_p=0.99,
+    temperature=0.85,
+):
+    print(text, end="", flush=True)
+`,
+];
+
 export const edsnlp = (model: ModelData): string[] => {
 	const packageName = nameWithoutNamespace(model.id).replaceAll("-", "_");
 	return [

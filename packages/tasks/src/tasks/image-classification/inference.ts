@@ -8,9 +8,10 @@
  */
 export interface ImageClassificationInput {
 	/**
-	 * The input image data
+	 * The input image data as a base64-encoded string. If no `parameters` are provided, you can
+	 * also provide the image data as a raw bytes payload.
 	 */
-	inputs: unknown;
+	inputs: string;
 	/**
 	 * Additional inference parameters
 	 */

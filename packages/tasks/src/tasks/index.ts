@@ -73,12 +73,7 @@ export type * from "./table-question-answering/inference";
 export type { TextToImageInput, TextToImageOutput, TextToImageParameters } from "./text-to-image/inference";
 export type { TextToAudioParameters, TextToSpeechInput, TextToSpeechOutput } from "./text-to-speech/inference";
 export type * from "./token-classification/inference";
-export type {
-	Text2TextGenerationParameters,
-	Text2TextGenerationTruncationStrategy,
-	TranslationInput,
-	TranslationOutput,
-} from "./translation/inference";
+export type { TranslationInput, TranslationOutput } from "./translation/inference";
 export type {
 	ClassificationOutputTransform,
 	TextClassificationInput,
@@ -131,6 +126,7 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	"image-to-image": ["diffusers", "transformers", "transformers.js"],
 	"image-to-text": ["transformers", "transformers.js"],
 	"image-to-video": ["diffusers"],
+	"keypoint-detection": ["transformers"],
 	"video-classification": ["transformers"],
 	"mask-generation": ["transformers"],
 	"multiple-choice": ["transformers"],
@@ -212,6 +208,7 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"image-text-to-text": getData("image-text-to-text", imageTextToText),
 	"image-to-text": getData("image-to-text", imageToText),
 	"image-to-video": undefined,
+	"keypoint-detection": getData("keypoint-detection", placeholder),
 	"mask-generation": getData("mask-generation", maskGeneration),
 	"multiple-choice": undefined,
 	"object-detection": getData("object-detection", objectDetection),
