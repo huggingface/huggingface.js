@@ -26,7 +26,7 @@ Video language models can recognize images through descriptions. When given deta
 ## Inference
 
 You can use the Transformers library to interact with video-language models. 
-Below we load [a video language model](https://huggingface.co/llava-hf/LLaVA-NeXT-Video-7B-hf), write a simple utility to sample videos, use chat template to format the text prompt, process the video and the text prompt and infer. 
+Below we load [a video language model](https://huggingface.co/llava-hf/LLaVA-NeXT-Video-7B-hf), write a simple utility to sample videos, use chat template to format the text prompt, process the video and the text prompt and infer. To run below snippet, please install [OpenCV](https://pypi.org/project/opencv-python/) by running `pip install opencv-python`.
 
 ```python
 import uuid
