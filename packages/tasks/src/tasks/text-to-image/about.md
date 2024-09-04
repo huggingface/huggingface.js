@@ -2,7 +2,7 @@
 
 ### Data Generation
 
-Businesses can generate data for their their use cases by inputting text and getting image outputs.
+Businesses can generate data for their use cases by inputting text and getting image outputs.
 
 ### Immersive Conversational Chatbots
 
@@ -21,8 +21,10 @@ Architects can utilise the models to construct an environment based out on the r
 ### Image Editing
 
 Image editing with text-to-image models involves using text prompts to describe the wanted changes in an image and then follow them. 
-- synthetic image editing
-- real image editing
+- synthetic image editing: using text-to-image models to make adjustments to images that were initially created using an input prompt, while preserving the overall meaning or context of the original image.
+![Examples](https://datasets-server.huggingface.co/assets/diffusers/diffusers-images-docs/--/b20ecaa3f61372174c854e09fc856fdcce6f8494/--/default/train/0/image/image.png?Expires=1725455983&Signature=ykj3EnAENI6goXc7qI2Toq~P8P5IdS1DqNbSfH8vhgrdwaJoGH2cUbXWRgVAndhrHvRjrTTcU3YOyoExnot7zEhauyUEcqr-evRHDmGgfar52uEmfLbLCtNAcRK9Q85QOifupIH-X9x3rBUM03B0RIkHuto6wwRBAHireqr7QcD8hYRaNzACXrTbt-U7wHosZS8R1pdc3FDt7fDc3Qwh8XL0YoJqAoK8X8JnZEXIWTfGnCpygPBDbseDlYEzegGKzClAUgigQbomUk733VNtB3ol396uYkHCcjqjtgdhtEfAWQz-xM4eAhHpI~YEn7RQqRjB0RD0bPd1nHRU0wGUqA__&Key-Pair-Id=K3EI6M078Z3AC3)
+- real image editing: similar to synthetic image editing, except we're using real photos/images. This task is usually more complex, as it involves first obtaining a latent representation of the image, in the latent domain of the model that it can then manipulate.  
+![Examples](https://datasets-server.huggingface.co/assets/diffusers/diffusers-images-docs/--/default/train/1/image/image.jpg?Expires=1725453082&Signature=MOCeELTChydgLRZT9ws8owCraSVrdcm6c7Vlnsi23rJ1Ocigl6gjRtXwmjVDCKuG2fB6Hw0Tmn8ZR0M7FPiA2fXpSuPEW4iJMoeQNiNCtkSSjjDisDXbBSRXW1TXJ-Z2c~VoJ4lmmeUdFpyFZ9W~BlI6r2xQLltfU400XKPe~UgE-vJ~xr9ni8zZmyYt1kVtV9Et~EBzWCQkKc2DO9gI9HnEg9z2hxDHp8Bak0HBRARM4ObhRYxieWqO4hOg1HVk4LSt2E8emIuDmhPUU4v8L097yFcI4D6JeoyNNn0q6nKQZqAZIzwP8iiLqqhSv~mJsO7YGnQck1-bzA~gAiVMpg__&Key-Pair-Id=K3EI6M078Z3AC3)
 
 ### Controlled Generation
 
