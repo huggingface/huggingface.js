@@ -126,6 +126,7 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	"image-to-image": ["diffusers", "transformers", "transformers.js"],
 	"image-to-text": ["transformers", "transformers.js"],
 	"image-to-video": ["diffusers"],
+	"keypoint-detection": ["transformers"],
 	"video-classification": ["transformers"],
 	"mask-generation": ["transformers"],
 	"multiple-choice": ["transformers"],
@@ -169,6 +170,7 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	"zero-shot-object-detection": ["transformers", "transformers.js"],
 	"text-to-3d": ["diffusers"],
 	"image-to-3d": ["diffusers"],
+	"any-to-any": ["transformers"],
 };
 
 /**
@@ -190,6 +192,7 @@ function getData(type: PipelineType, partialTaskData: TaskDataCustom = placehold
 // Tasks that call getData() without the second argument will
 // have a "placeholder" page.
 export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
+	"any-to-any": getData("any-to-any", placeholder),
 	"audio-classification": getData("audio-classification", audioClassification),
 	"audio-to-audio": getData("audio-to-audio", audioToAudio),
 	"automatic-speech-recognition": getData("automatic-speech-recognition", automaticSpeechRecognition),
@@ -205,6 +208,7 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"image-text-to-text": getData("image-text-to-text", imageTextToText),
 	"image-to-text": getData("image-to-text", imageToText),
 	"image-to-video": undefined,
+	"keypoint-detection": getData("keypoint-detection", placeholder),
 	"mask-generation": getData("mask-generation", maskGeneration),
 	"multiple-choice": undefined,
 	"object-detection": getData("object-detection", objectDetection),
