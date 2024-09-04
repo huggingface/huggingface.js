@@ -61,7 +61,7 @@ const taskData: TaskDataCustom = {
 	],
 	models: [
 		{
-			description: "A faster and smaller model than the famous BERT model.",
+			description: "The famous BERT model.",
 			id: "google-bert/bert-base-uncased",
 		},
 		{
