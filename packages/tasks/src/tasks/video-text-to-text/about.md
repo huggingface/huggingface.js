@@ -1,6 +1,6 @@
 Most of the video language models can take in videos, multiple videos, images and multiple images. Some of these models can also take interleaved inputs, which can have images and videos inside the text, where you can refer to the input image and input video within the text prompt.
 
-## Different Types of Vide Language Models
+## Different Types of Video Language Models
 
 Video language models come in three types:
 
