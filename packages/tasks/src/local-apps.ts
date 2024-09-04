@@ -59,7 +59,7 @@ export type LocalApp = {
 );
 
 function isGgufModel(model: ModelData): boolean {
-	return model.config?.quantization_config?.quant_method === "gguf" || model.tags.includes("gguf");
+	return model.tags.includes("gguf");
 }
 
 function isAwqModel(model: ModelData): boolean {
