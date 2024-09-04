@@ -127,6 +127,39 @@ const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] 
 	];
 };
 
+const snippetDiffusionKit = (model: ModelData): LocalAppSnippet[] => {
+	const command = (binary: string) =>
+		[
+			"# Load and run the model:",
+			`${binary} \\`,
+			`  --model-version ${model.id}" \\`,
+			'  --prompt "a futuristic cityscape" \\',
+			`  --height 768 \\`,
+			`  --width 1360 \\`,
+			`  --seed 1001 \\`,
+			`  --step ${model.tags.includes("flux") ? 4 : 50} \\`,
+			`  --cfg ${model.tags.includes("flux") ? 0. : 5} \\`,
+			`  --output ~/Desktop/out.png`,
+		].join("\n");
+	return [
+		{
+			title: "Install from pip",
+			setup: "pip install diffusionkit",
+			content: command("diffusionkit-cli"),
+		},
+		{
+			title: "Build from source code",
+			setup: [
+				// prettier-ignore
+				"git clone https://github.com/argmaxinc/DiffusionKit.git",
+				"cd DiffusionKit",
+				"pip install -e .",
+			].join("\n"),
+			content: command("diffusionkit-cli"),
+		},
+	];
+};
+
 /**
  * Add your new local app here.
  *
@@ -238,6 +271,14 @@ export const LOCAL_APPS = {
 		macOSOnly: true,
 		displayOnModelPage: (model) => model.library_name === "diffusers" && model.pipeline_tag === "text-to-image",
 		deeplink: (model) => new URL(`https://diffusionbee.com/huggingface_import?model_id=${model.id}`),
+	},
+	diffusionkit: {
+		prettyLabel: "DiffusionKit",
+		docsUrl: "https://github.com/argmaxinc/DiffusionKit",
+		mainTask: "text-to-image",
+		macOSOnly: true,
+		displayOnModelPage: (model) => model.library_name === "diffusionkit" && model.pipeline_tag === "text-to-image",
+		snippet: snippetDiffusionKit,
 	},
 	joyfusion: {
 		prettyLabel: "JoyFusion",
