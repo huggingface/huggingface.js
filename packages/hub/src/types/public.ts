@@ -23,9 +23,17 @@ export type SpaceHardwareFlavor =
 	| "cpu-upgrade"
 	| "t4-small"
 	| "t4-medium"
+	| "l4x1"
+	| "l4x4"
 	| "a10g-small"
 	| "a10g-large"
-	| "a100-large";
+	| "a10g-largex2"
+	| "a10g-largex4"
+	| "a100-large"
+	| "v5e-1x1"
+	| "v5e-2x2"
+	| "v5e-2x4"
+	;
 
 export type SpaceSdk = "streamlit" | "gradio" | "docker" | "static";
 
