@@ -163,7 +163,7 @@ const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
 		{
 			title: "Install from pip",
 			setup: ["# Install vLLM from pip:", "pip install vllm"].join("\n"),
-			content: ["# Load and run the model:", `vllm serve --model "${model.id}"`, ...runCommand].join("\n"),
+			content: ["# Load and run the model:", `vllm serve "${model.id}"`, ...runCommand].join("\n"),
 		},
 		{
 			title: "Use Docker images",
