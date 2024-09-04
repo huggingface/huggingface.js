@@ -53,7 +53,7 @@ def sample_frames(url, num_frames):
     path = f"./{path_id}.mp4"
 
     with open(path, "wb") as f:
-      f.write(response.content)
+         f.write(response.content)
 
     video = cv2.VideoCapture(path)
     total_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
