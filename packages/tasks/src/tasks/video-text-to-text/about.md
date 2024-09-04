@@ -61,10 +61,10 @@ def sample_frames(url, num_frames):
     frames = []
     for i in range(total_frames):
         ret, frame = video.read()
-        pil_img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
         if not ret:
             continue
         if i % interval == 0:
+            pil_img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
             frames.append(pil_img)
     video.release()
     return frames
