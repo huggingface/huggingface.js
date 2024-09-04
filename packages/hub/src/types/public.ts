@@ -32,8 +32,7 @@ export type SpaceHardwareFlavor =
 	| "a100-large"
 	| "v5e-1x1"
 	| "v5e-2x2"
-	| "v5e-2x4"
-	;
+	| "v5e-2x4";
 
 export type SpaceSdk = "streamlit" | "gradio" | "docker" | "static";
 
