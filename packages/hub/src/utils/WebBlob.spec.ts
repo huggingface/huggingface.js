@@ -57,7 +57,7 @@ describe("WebBlob", () => {
 		expect(webBlob.size).toBe(5_135_149_760);
 		expect(webBlob).toBeInstanceOf(WebBlob);
 		expect(webBlob).toMatchObject({ url });
-		expect((await webBlob.slice(10, 22).text())).toBe("__metadata__");
+		expect(await webBlob.slice(10, 22).text()).toBe("__metadata__");
 	});
 
 	it("should create a slice on the file", async () => {
