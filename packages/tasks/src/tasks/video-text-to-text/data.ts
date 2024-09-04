@@ -51,7 +51,7 @@ const taskData: TaskDataCustom = {
 		},
 	],
 	summary:
-		"Video-text-to-text models take in an video and text prompt and output text. These models are also called video-language models.",
+		"Video-text-to-text models take in a video and a text prompt and output text. These models are also called video-language models.",
 	widgetModels: [""],
 	youtubeId: "",
 };
