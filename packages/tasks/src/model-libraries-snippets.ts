@@ -891,6 +891,15 @@ wavs = chat.infer(texts, )
 torchaudio.save("output1.wav", torch.from_numpy(wavs[0]), 24000)`,
 ];
 
+export const yolov10 = (model: ModelData): string[] => [
+	`from ultralytics import YOLOv10
+
+model = YOLOv10.from_pretrained("${model.id}")
+source = 'http://images.cocodataset.org/val2017/000000039769.jpg'
+model.predict(source=source, save=True)
+`,
+];
+
 export const birefnet = (model: ModelData): string[] => [
 	`# Option 1: use with transformers
 
