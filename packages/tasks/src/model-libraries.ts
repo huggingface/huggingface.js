@@ -643,7 +643,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path_extension:"sentis"`,
 	},
-	vfimamba: {
+	"vfi-mamba": {
 		prettyLabel: "VFIMamba",
 		repoName: "vfi-mamba",
 		repoUrl: "https://github.com/MCG-NJU/VFIMamba",
