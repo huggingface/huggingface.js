@@ -58,9 +58,28 @@ export type LocalApp = {
 	  }
 );
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function isGgufModel(model: ModelData) {
+function isGgufModel(model: ModelData): boolean {
 	return model.tags.includes("gguf");
+}
+
+function isAwqModel(model: ModelData): boolean {
+	return model.config?.quantization_config?.quant_method === "awq";
+}
+
+function isGptqModel(model: ModelData): boolean {
+	return model.config?.quantization_config?.quant_method === "gptq";
+}
+
+function isAqlmModel(model: ModelData): boolean {
+	return model.config?.quantization_config?.quant_method === "aqlm";
+}
+
+function isMarlinModel(model: ModelData): boolean {
+	return model.config?.quantization_config?.quant_method === "marlin";
+}
+
+function isTransformersModel(model: ModelData): boolean {
+	return model.tags.includes("transformers");
 }
 
 function isLlamaCppGgufModel(model: ModelData) {
@@ -127,6 +146,47 @@ const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] 
 	];
 };
 
+const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
+	const runCommand = [
+		"",
+		"# Call the server using curl:",
+		`curl -X POST "http://localhost:8000/v1/chat/completions" \\ `,
+		`	-H "Content-Type: application/json" \\ `,
+		`	--data '{`,
+		`		"model": "${model.id}"`,
+		`		"messages": [`,
+		`			{"role": "user", "content": "Hello!"}`,
+		`		]`,
+		`	}'`,
+	];
+	return [
+		{
+			title: "Install from pip",
+			setup: ["# Install vLLM from pip:", "pip install vllm"].join("\n"),
+			content: ["# Load and run the model:", `vllm serve "${model.id}"`, ...runCommand].join("\n"),
+		},
+		{
+			title: "Use Docker images",
+			setup: [
+				"# Deploy with docker on Linux:",
+				`docker run --runtime nvidia --gpus all \\`,
+				`	--name my_vllm_container \\`,
+				`	-v ~/.cache/huggingface:/root/.cache/huggingface \\`,
+				` 	--env "HUGGING_FACE_HUB_TOKEN=<secret>" \\`,
+				`	-p 8000:8000 \\`,
+				`	--ipc=host \\`,
+				`	vllm/vllm-openai:latest \\`,
+				`	--model ${model.id}`,
+			].join("\n"),
+			content: [
+				"# Load and run the model:",
+				`docker exec -it my_vllm_container bash -c "vllm serve ${model.id}"`,
+				...runCommand,
+			].join("\n"),
+		},
+	];
+};
+
 /**
  * Add your new local app here.
  *
@@ -145,6 +205,19 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetLlamacpp,
+	},
+	vllm: {
+		prettyLabel: "vLLM",
+		docsUrl: "https://docs.vllm.ai",
+		mainTask: "text-generation",
+		displayOnModelPage: (model: ModelData) =>
+			isAwqModel(model) ||
+			isGptqModel(model) ||
+			isAqlmModel(model) ||
+			isMarlinModel(model) ||
+			isGgufModel(model) ||
+			isTransformersModel(model),
+		snippet: snippetVllm,
 	},
 	lmstudio: {
 		prettyLabel: "LM Studio",

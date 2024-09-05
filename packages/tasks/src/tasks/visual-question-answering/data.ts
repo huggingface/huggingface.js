@@ -8,7 +8,7 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "A dataset to benchmark visual reasoning based on text in images.",
-			id: "textvqa",
+			id: "facebook/textvqa",
 		},
 	],
 	demo: {
@@ -63,7 +63,7 @@ const taskData: TaskDataCustom = {
 		{
 			description:
 				"A visual question answering model trained for mathematical reasoning and chart derendering from images.",
-			id: "google/matcha-base ",
+			id: "google/matcha-base",
 		},
 		{
 			description: "A strong visual question answering that answers questions from book covers.",
