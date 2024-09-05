@@ -27,7 +27,7 @@ Image editing with text-to-image models involves using text prompts to describe 
 ![Examples](https://datasets-server.huggingface.co/assets/diffusers/diffusers-images-docs/--/default/train/1/image/image.jpg?Expires=1725453082&Signature=MOCeELTChydgLRZT9ws8owCraSVrdcm6c7Vlnsi23rJ1Ocigl6gjRtXwmjVDCKuG2fB6Hw0Tmn8ZR0M7FPiA2fXpSuPEW4iJMoeQNiNCtkSSjjDisDXbBSRXW1TXJ-Z2c~VoJ4lmmeUdFpyFZ9W~BlI6r2xQLltfU400XKPe~UgE-vJ~xr9ni8zZmyYt1kVtV9Et~EBzWCQkKc2DO9gI9HnEg9z2hxDHp8Bak0HBRARM4ObhRYxieWqO4hOg1HVk4LSt2E8emIuDmhPUU4v8L097yFcI4D6JeoyNNn0q6nKQZqAZIzwP8iiLqqhSv~mJsO7YGnQck1-bzA~gAiVMpg__&Key-Pair-Id=K3EI6M078Z3AC3)
 
 ### Personalization
-Personalization refers to techniques used to customize text-to-image models, where we introduce new subjects/concepts to the model so that we can then use the model to generate new images of those subjects. 
+Personalization refers to techniques used to customize text-to-image models, where we introduce new subjects/concepts to the model so that we can then use the model to generate new images of those subjects with a text prompt. 
 For example, one can use these techniques to generate images of themselves, using as little as one reference image.
 These include teaching the model a new concept both in training free manner or through fine-tuning.
 
@@ -77,11 +77,13 @@ await inference.textToImage({
 - [Introducing Würstchen: Fast Diffusion for Image Generation](https://huggingface.co/blog/wuerstchen)
 - [Efficient Controllable Generation for SDXL with T2I-Adapters](https://huggingface.co/blog/t2i-sdxl-adapters)
 - [Welcome aMUSEd: Efficient Text-to-Image Generation](https://huggingface.co/blog/amused)
-
+- Image Editing Demos: [LEDITS++](https://huggingface.co/spaces/editing-images/leditsplusplus), [Turbo Edit](https://huggingface.co/spaces/turboedit/turbo_edit), [InstructPix2Pix](https://huggingface.co/spaces/timbrooks/instruct-pix2pix), [CosXL](https://huggingface.co/spaces/multimodalart/cosxl)
+- Training free Personalization Demos: [Face-to-All](https://huggingface.co/spaces/multimodalart/face-to-all), [InstantStyle](https://huggingface.co/spaces/InstantX/InstantStyle), [RB-modulation](https://huggingface.co/spaces/fffiloni/RB-Modulation), [Photomaker v2](https://huggingface.co/spaces/TencentARC/PhotoMaker-V2)
 ### Model Fine-tuning
 
 - [Finetune Stable Diffusion Models with DDPO via TRL](https://huggingface.co/blog/pref-tuning)
 - [LoRA training scripts of the world, unite!](https://huggingface.co/blog/sdxl_lora_advanced_script)
 - [Using LoRA for Efficient Stable Diffusion Fine-Tuning](https://huggingface.co/blog/lora)
+- LoRA fine tuning Spaces: [FLUX.1 finetuning](https://huggingface.co/spaces/autotrain-projects/train-flux-lora-ease), [SDXL finetuning](https://huggingface.co/spaces/multimodalart/lora-ease)
 
 This page was made possible thanks to the efforts of [Ishan Dutta](https://huggingface.co/ishandutta), [Enrique Elias Ubaldo](https://huggingface.co/herrius) and [Oğuz Akif](https://huggingface.co/oguzakif).
