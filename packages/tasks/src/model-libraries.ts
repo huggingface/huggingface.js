@@ -446,6 +446,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.pyannote_audio,
 		filter: true,
 	},
+	"py-feat": {
+		prettyLabel: "Py-Feat",
+		repoName: "Py-Feat",
+		repoUrl: "https://github.com/cosanlab/py-feat",
+		docsUrl: "https://py-feat.org/",
+		filter: false,
+	},
 	pythae: {
 		prettyLabel: "pythae",
 		repoName: "pythae",
@@ -656,6 +663,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/jasonppy/VoiceCraft",
 		docsUrl: "https://github.com/jasonppy/VoiceCraft",
 		snippets: snippets.voicecraft,
+	},
+	yolov10: {
+		prettyLabel: "YOLOv10",
+		repoName: "yolov10",
+		repoUrl: "https://github.com/THU-MIG/yolov10",
+		docsUrl: "https://github.com/THU-MIG/yolov10",
+		snippets: snippets.yolov10,
 	},
 	whisperkit: {
 		prettyLabel: "WhisperKit",

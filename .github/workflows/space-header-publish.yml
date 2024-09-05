@@ -47,7 +47,7 @@ jobs:
           BUMPED_VERSION=$(node -p "require('semver').inc('$PACKAGE_VERSION', '${{ github.event.inputs.newversion }}')")
           # Update package.json with the new version
           node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./package.json')); package.version = '$BUMPED_VERSION'; fs.writeFileSync('./package.json', JSON.stringify(package, null, '\t') + '\n');"
-          git commit . -m "🔖 @hugginface/space-header $BUMPED_VERSION"
+          git commit . -m "🔖 @huggingface/space-header $BUMPED_VERSION"
           git tag "space-header-v$BUMPED_VERSION"
       - run: pnpm publish --no-git-checks .
         env:
@@ -58,9 +58,10 @@ jobs:
         with:
           node-version: "20"
           registry-url: "https://npm.pkg.github.com"
-      - run: pnpm publish --no-git-checks .
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Disable for now, until github supports PATs for writing github packages (https://github.com/github/roadmap/issues/558)
+      # - run: pnpm publish --no-git-checks .
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Update Doc"
         uses: peter-evans/repository-dispatch@v2
         with:
