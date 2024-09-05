@@ -16,7 +16,7 @@ const taskData: TaskDataCustom = {
 		inputs: [
 			{
 				filename: "video-text-to-text-input.gif",
-				type: "video",
+				type: "img",
 			},
 			{
 				label: "Text Prompt",
