@@ -4,17 +4,17 @@ const taskData: TaskDataCustom = {
 	datasets: [
 		{
 			description: "A widely used dataset used to benchmark multiple variants of text classification.",
-			id: "glue",
+			id: "nyu-mll/glue",
 		},
 		{
 			description:
 				"The Multi-Genre Natural Language Inference (MultiNLI) corpus is a crowd-sourced collection of 433k sentence pairs annotated with textual entailment information.",
-			id: "MultiNLI",
+			id: "nyu-mll/multi_nli",
 		},
 		{
 			description:
 				"FEVER is a publicly available dataset for fact extraction and verification against textual sources.",
-			id: "FEVER",
+			id: "fever/fever",
 		},
 	],
 	demo: {
@@ -53,8 +53,12 @@ const taskData: TaskDataCustom = {
 	metrics: [],
 	models: [
 		{
-			description: "Powerful zero-shot text classification model",
+			description: "Powerful zero-shot text classification model.",
 			id: "facebook/bart-large-mnli",
+		},
+		{
+			description: "Powerful zero-shot multilingual text classification model that can accomplish multiple tasks.",
+			id: "MoritzLaurer/mDeBERTa-v3-base-xnli-multilingual-nli-2mil7",
 		},
 	],
 	spaces: [],

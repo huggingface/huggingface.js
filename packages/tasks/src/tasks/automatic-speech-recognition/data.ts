@@ -7,8 +7,8 @@ const taskData: TaskDataCustom = {
 			id: "mozilla-foundation/common_voice_17_0",
 		},
 		{
-			description: "An English dataset with 1,000 hours of data.",
-			id: "librispeech_asr",
+			description: "A dataset with 44.6k hours of English speaker data and 6k hours of other language speakers.",
+			id: "parler-tts/mls_eng",
 		},
 		{
 			description: "A multi-lingual audio dataset with 370K hours of audio.",
@@ -53,6 +53,10 @@ const taskData: TaskDataCustom = {
 		{
 			description: "An end-to-end model that performs ASR and Speech Translation by MetaAI.",
 			id: "facebook/seamless-m4t-v2-large",
+		},
+		{
+			description: "Powerful speaker diarization model.",
+			id: "pyannote/speaker-diarization-3.1",
 		},
 	],
 	spaces: [

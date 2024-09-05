@@ -93,7 +93,7 @@ const taskData: TaskDataCustom = {
 	],
 	summary:
 		"Text-to-image is the task of generating images from input text. These pipelines can also be used modify and edit images based on text prompts.",
-	widgetModels: ["CompVis/stable-diffusion-v1-4"],
+	widgetModels: ["black-forest-labs/FLUX.1-dev"],
 	youtubeId: "",
 };
 
