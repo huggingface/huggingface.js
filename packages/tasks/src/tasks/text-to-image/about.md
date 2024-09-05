@@ -80,6 +80,7 @@ await inference.textToImage({
 - [Welcome aMUSEd: Efficient Text-to-Image Generation](https://huggingface.co/blog/amused)
 - Image Editing Demos: [LEDITS++](https://huggingface.co/spaces/editing-images/leditsplusplus), [Turbo Edit](https://huggingface.co/spaces/turboedit/turbo_edit), [InstructPix2Pix](https://huggingface.co/spaces/timbrooks/instruct-pix2pix), [CosXL](https://huggingface.co/spaces/multimodalart/cosxl)
 - Training free Personalization Demos: [Face-to-All](https://huggingface.co/spaces/multimodalart/face-to-all), [InstantStyle](https://huggingface.co/spaces/InstantX/InstantStyle), [RB-modulation](https://huggingface.co/spaces/fffiloni/RB-Modulation), [Photomaker v2](https://huggingface.co/spaces/TencentARC/PhotoMaker-V2)
+
 ### Model Fine-tuning
 
 - [Finetune Stable Diffusion Models with DDPO via TRL](https://huggingface.co/blog/pref-tuning)
