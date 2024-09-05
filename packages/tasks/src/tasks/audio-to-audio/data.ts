@@ -44,7 +44,11 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "A speech enhancement model.",
-			id: "speechbrain/metricgan-plus-voicebank",
+			id: "ResembleAI/resemble-enhance",
+		},
+		{
+			description: "A model that can change the voice in a speech recording.",
+			id: "microsoft/speecht5_vc",
 		},
 	],
 	spaces: [
