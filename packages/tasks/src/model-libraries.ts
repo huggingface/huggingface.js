@@ -657,6 +657,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://github.com/jasonppy/VoiceCraft",
 		snippets: snippets.voicecraft,
 	},
+	yolov10: {
+		prettyLabel: "YOLOv10",
+		repoName: "yolov10",
+		repoUrl: "https://github.com/THU-MIG/yolov10",
+		docsUrl: "https://github.com/THU-MIG/yolov10",
+		snippets: snippets.yolov10,
+	},
 	whisperkit: {
 		prettyLabel: "WhisperKit",
 		repoName: "WhisperKit",

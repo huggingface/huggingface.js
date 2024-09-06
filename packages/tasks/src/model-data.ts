@@ -38,6 +38,10 @@ export interface ModelData {
 			bits?: number;
 			load_in_4bit?: boolean;
 			load_in_8bit?: boolean;
+			/**
+			 * awq, gptq, aqlm, marlin, … Used by vLLM
+			 */
+			quant_method?: string;
 		};
 		tokenizer_config?: TokenizerConfig;
 		adapter_transformers?: {
