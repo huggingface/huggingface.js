@@ -9,7 +9,7 @@ const taskData: TaskDataCustom = {
 		{
 			description: "A dataset of instructions and question-answer pairs about videos.",
 			id: "lmms-lab/VideoChatGPT",
-		},	
+		},
 	],
 	demo: {
 		inputs: [

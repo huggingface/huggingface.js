@@ -4,10 +4,9 @@ Most of the video language models can take in videos, multiple videos, images an
 
 Video language models come in three types:
 
-- **Base:** Pre-trained models that can be fine-tuned. 
-- **Instruction:** Base models fine-tuned on video-instruction pairs and answers. 
+- **Base:** Pre-trained models that can be fine-tuned.
+- **Instruction:** Base models fine-tuned on video-instruction pairs and answers.
 - **Chatty/Conversational:** Base models fine-tuned on video conversation datasets.
-
 
 ## Use Cases
 
@@ -25,7 +24,7 @@ Video language models can recognize images through descriptions. When given deta
 
 ## Inference
 
-You can use the Transformers library to interact with video-language models. 
+You can use the Transformers library to interact with video-language models.
 Below we load [a video language model](https://huggingface.co/llava-hf/LLaVA-NeXT-Video-7B-hf), write a simple utility to sample videos, use chat template to format the text prompt, process the video and the text prompt and infer. To run below snippet, please install [OpenCV](https://pypi.org/project/opencv-python/) by running `pip install opencv-python`.
 
 ```python
@@ -39,9 +38,9 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 model_id = "llava-hf/LLaVA-NeXT-Video-7B-hf"
 
 model = LlavaNextVideoForConditionalGeneration.from_pretrained(
-    model_id, 
-    torch_dtype=torch.float16, 
-    low_cpu_mem_usage=True, 
+    model_id,
+    torch_dtype=torch.float16,
+    low_cpu_mem_usage=True,
 ).to(device)
 
 processor = LlavaNextVideoProcessor.from_pretrained(model_id)
@@ -95,4 +94,5 @@ print(processor.decode(output[0][2:], skip_special_tokens=True))
 ```
 
 ## Useful Resources
+
 - [Transformers task guide on video-text-to-text](https://huggingface.co/docs/transformers/tasks/video_text_to_text)
