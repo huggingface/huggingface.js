@@ -5,12 +5,12 @@ const taskData: TaskDataCustom = {
 	datasets: [
 		{
 			description: "A dataset of copyright-free books translated into 16 different languages.",
-			id: "opus_books",
+			id: "Helsinki-NLP/opus_books",
 		},
 		{
 			description:
 				"An example of translation between programming languages. This dataset consists of functions in Java and C#.",
-			id: "code_x_glue_cc_code_to_code_trans",
+			id: "google/code_x_glue_cc_code_to_code_trans",
 		},
 	],
 	demo: {
@@ -42,13 +42,14 @@ const taskData: TaskDataCustom = {
 	],
 	models: [
 		{
-			description: "A model that translates from English to French.",
-			id: "Helsinki-NLP/opus-mt-en-fr",
+			description:
+				"Very powerful model that can translate many languages between each other, especially low-resource languages.",
+			id: "facebook/nllb-200-1.3B",
 		},
 		{
 			description:
 				"A general-purpose Transformer that can be used to translate from English to German, French, or Romanian.",
-			id: "t5-base",
+			id: "google-t5/t5-base",
 		},
 	],
 	spaces: [
@@ -57,12 +58,12 @@ const taskData: TaskDataCustom = {
 			id: "Iker/Translate-100-languages",
 		},
 		{
-			description: "An application that can translate between English, Spanish and Hindi.",
-			id: "EuroPython2022/Translate-with-Bloom",
+			description: "An application that can translate between many languages.",
+			id: "Geonmo/nllb-translation-demo",
 		},
 	],
 	summary: "Translation is the task of converting text from one language to another.",
-	widgetModels: ["t5-small"],
+	widgetModels: ["facebook/mbart-large-50-many-to-many-mmt"],
 	youtubeId: "1JvfrvZgi6c",
 };
 

@@ -1,4 +1,4 @@
-import type { Space } from "./type";
+import type { Space } from "./../type";
 
 export const get_space = async (space_id: string): Promise<Space | null> => {
 	try {

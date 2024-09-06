@@ -4,7 +4,11 @@ const taskData: TaskDataCustom = {
 	datasets: [
 		{
 			description: "A benchmark of 10 different audio tasks.",
-			id: "superb",
+			id: "s3prl/superb",
+		},
+		{
+			description: "A dataset of YouTube clips and their sound categories.",
+			id: "agkphysics/AudioSet",
 		},
 	],
 	demo: {
@@ -50,11 +54,11 @@ const taskData: TaskDataCustom = {
 	],
 	models: [
 		{
-			description: "An easy-to-use model for Command Recognition.",
+			description: "An easy-to-use model for command recognition.",
 			id: "speechbrain/google_speech_command_xvector",
 		},
 		{
-			description: "An Emotion Recognition model.",
+			description: "An emotion recognition model.",
 			id: "ehcalabres/wav2vec2-lg-xlsr-en-speech-emotion-recognition",
 		},
 		{
@@ -70,7 +74,7 @@ const taskData: TaskDataCustom = {
 	],
 	summary:
 		"Audio classification is the task of assigning a label or class to a given audio. It can be used for recognizing which command a user is giving or the emotion of a statement, as well as identifying a speaker.",
-	widgetModels: ["facebook/mms-lid-126"],
+	widgetModels: ["MIT/ast-finetuned-audioset-10-10-0.4593"],
 	youtubeId: "KWwzcmG98Ds",
 };
 
