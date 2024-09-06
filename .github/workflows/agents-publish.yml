@@ -69,3 +69,4 @@ jobs:
         uses: peter-evans/repository-dispatch@v2
         with:
           event-type: doc-build
+          token: ${{ secrets.BOT_ACCESS_TOKEN }}
