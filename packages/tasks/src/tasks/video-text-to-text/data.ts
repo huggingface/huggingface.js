@@ -6,11 +6,10 @@ const taskData: TaskDataCustom = {
 			description: "Multiple-choice questions and answers about videos.",
 			id: "lmms-lab/Video-MME",
 		},
-        {
+		{
 			description: "A dataset of instructions and question-answer pairs about videos.",
 			id: "lmms-lab/VideoChatGPT",
-		},
-		
+		},	
 	],
 	demo: {
 		inputs: [
