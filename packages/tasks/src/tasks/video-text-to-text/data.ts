@@ -38,7 +38,7 @@ const taskData: TaskDataCustom = {
 			description: "A robust video-text-to-text model that can take in image and video inputs.",
 			id: "llava-hf/llava-onevision-qwen2-72b-ov-hf",
 		},
-        {
+		{
 			description: "Large and powerful video-text-to-text model that can take in image and video inputs.",
 			id: "llava-hf/LLaVA-NeXT-Video-34B-hf",
 		},
