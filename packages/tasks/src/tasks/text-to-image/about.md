@@ -16,7 +16,7 @@ Different patterns can be generated to obtain unique pieces of fashion. Text-to-
 
 Architects can utilise the models to construct an environment based out on the requirements of the floor plan. This can also include the furniture that has to be placed in that environment.
 
-##Task Variants
+## Task Variants
 
 ### Image Editing
 
