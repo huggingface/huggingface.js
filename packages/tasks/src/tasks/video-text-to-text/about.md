@@ -20,7 +20,7 @@ Video language models can be used to have a dialogue about a video.
 
 ### Video Recognition with Instructions
 
-Video language models can recognize images through descriptions. When given detailed descriptions of specific entities, it can classify the entities in a video.
+Video language models can recognize images through descriptions. When given detailed descriptions of specific entities, they can classify the entities in a video.
 
 ## Inference
 
