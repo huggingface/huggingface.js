@@ -16,13 +16,13 @@ Different patterns can be generated to obtain unique pieces of fashion. Text-to-
 
 Architects can utilise the models to construct an environment based out on the requirements of the floor plan. This can also include the furniture that has to be placed in that environment.
 
-##Task Variants
+## Task Variants
 
 ### Image Editing
 
 Image editing with text-to-image models involves using text prompts to describe the wanted changes in an image and then follow them.
 
-- Synthetic image editing: using text-to-image models to make adjustments to images that were initially created using an input prompt, while preserving the overall meaning or context of the original image.
+- **Synthetic image editing:** Adjusting images that were initially created using an input prompt while preserving the overall meaning or context of the original image.
 
   ![Examples](https://datasets-server.huggingface.co/assets/diffusers/diffusers-images-docs/--/b20ecaa3f61372174c854e09fc856fdcce6f8494/--/default/train/0/image/image.png?Expires=1725455983&Signature=ykj3EnAENI6goXc7qI2Toq~P8P5IdS1DqNbSfH8vhgrdwaJoGH2cUbXWRgVAndhrHvRjrTTcU3YOyoExnot7zEhauyUEcqr-evRHDmGgfar52uEmfLbLCtNAcRK9Q85QOifupIH-X9x3rBUM03B0RIkHuto6wwRBAHireqr7QcD8hYRaNzACXrTbt-U7wHosZS8R1pdc3FDt7fDc3Qwh8XL0YoJqAoK8X8JnZEXIWTfGnCpygPBDbseDlYEzegGKzClAUgigQbomUk733VNtB3ol396uYkHCcjqjtgdhtEfAWQz-xM4eAhHpI~YEn7RQqRjB0RD0bPd1nHRU0wGUqA__&Key-Pair-Id=K3EI6M078Z3AC3)
 
