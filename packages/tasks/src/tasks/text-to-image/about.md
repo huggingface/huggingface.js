@@ -32,9 +32,9 @@ Image editing with text-to-image models involves using text prompts to describe 
 
 ### Personalization
 
-Personalization refers to techniques used to customize text-to-image models, where we introduce new subjects/concepts to the model so that we can then use the model to generate new images of those subjects with a text prompt.
+Personalization refers to techniques used to customize text-to-image models. We introduce new subjects or concepts to the model, which the model can then generate when we refer to them with a text prompt.
 
-For example, one can use these techniques to generate images of themselves, using as little as one reference image. These include teaching the model a new concept both in training free manner or through fine-tuning.
+For example, you can use these techniques to generate images of your dog in imaginary settings, after you have taught the model using a few reference images of the subject (or just one in some cases). Teaching the model a new concept can be achieved through fine-tuning, or by using training-free techniques.
 
 ## Inference
 
