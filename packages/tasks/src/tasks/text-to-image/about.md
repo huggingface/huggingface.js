@@ -29,6 +29,7 @@ Image editing with text-to-image models involves using text prompts to describe 
 - **Real image editing**: similar to synthetic image editing, except we're using real photos/images. This task is usually more complex.
 
   ![Examples](https://huggingface.co/datasets/diffusers/diffusers-images-docs/resolve/main/pix2pix.jpeg)
+
 ### Personalization
 
 Personalization refers to techniques used to customize text-to-image models. We introduce new subjects or concepts to the model, which the model can then generate when we refer to them with a text prompt.
