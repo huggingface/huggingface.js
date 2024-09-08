@@ -20,7 +20,7 @@ Architects can utilise the models to construct an environment based out on the r
 
 ### Image Editing
 
-Image editing with text-to-image models involves using text prompts to describe the wanted changes in an image and then follow them.
+Image editing with text-to-image models involves modifying an image following edit instructions provided in a text prompt.
 
 - **Synthetic image editing**: Adjusting images that were initially created using an input prompt while preserving the overall meaning or context of the original image.
 
