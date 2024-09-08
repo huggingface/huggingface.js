@@ -25,10 +25,12 @@ Image editing with text-to-image models involves modifying an image following ed
 - **Synthetic image editing**: Adjusting images that were initially created using an input prompt while preserving the overall meaning or context of the original image.
 
   ![Examples](https://huggingface.co/datasets/diffusers/diffusers-images-docs/resolve/main/edit_p2p.png)
+_figure taken from ["InstructPix2Pix: Learning to Follow Image Editing Instructions"](https://www.timothybrooks.com/instruct-pix2pix)_
 
 - **Real image editing**: similar to synthetic image editing, except we're using real photos/images. This task is usually more complex.
 
   ![Examples](https://huggingface.co/datasets/diffusers/diffusers-images-docs/resolve/main/pix2pix.jpeg)
+_figure taken from ["Prompt-to-Prompt Image Editing with Cross-Attention Control"](https://prompt-to-prompt.github.io)_
 
 ### Personalization
 
