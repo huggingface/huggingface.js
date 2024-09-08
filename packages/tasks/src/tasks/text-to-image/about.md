@@ -18,20 +18,18 @@ Architects can utilise the models to construct an environment based out on the r
 
 ## Task Variants
 
-### Image Editing
-
 Image editing with text-to-image models involves modifying an image following edit instructions provided in a text prompt.
 
- - **Synthetic image editing**: Adjusting images that were initially created using an input prompt while preserving the overall meaning or context of the original image.
- 
-   ![Examples](https://huggingface.co/datasets/diffusers/diffusers-images-docs/resolve/main/edit_p2p.png)
-   _Figure taken from ["InstructPix2Pix: Learning to Follow Image Editing Instructions"](https://www.timothybrooks.com/instruct-pix2pix)_
- 
- - **Real image editing**: Similar to synthetic image editing, except we're using real photos/images. This task is usually more complex.
- 
-   ![Examples](https://huggingface.co/datasets/diffusers/diffusers-images-docs/resolve/main/pix2pix.jpeg)
-   _Figure taken from ["Prompt-to-Prompt Image Editing with Cross-Attention Control"](https://prompt-to-prompt.github.io)_
- 
+- **Synthetic image editing**: Adjusting images that were initially created using an input prompt while preserving the overall meaning or context of the original image.
+
+  ![Examples](https://huggingface.co/datasets/diffusers/diffusers-images-docs/resolve/main/edit_p2p.png)
+  _Figure taken from ["InstructPix2Pix: Learning to Follow Image Editing Instructions"](https://www.timothybrooks.com/instruct-pix2pix)_
+
+- **Real image editing**: Similar to synthetic image editing, except we're using real photos/images. This task is usually more complex.
+
+  ![Examples](https://huggingface.co/datasets/diffusers/diffusers-images-docs/resolve/main/pix2pix.jpeg)
+  _Figure taken from ["Prompt-to-Prompt Image Editing with Cross-Attention Control"](https://prompt-to-prompt.github.io)_
+
 ### Personalization
 
 Personalization refers to techniques used to customize text-to-image models. We introduce new subjects or concepts to the model, which the model can then generate when we refer to them with a text prompt.
