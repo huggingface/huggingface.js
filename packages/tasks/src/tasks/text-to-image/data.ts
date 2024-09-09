@@ -92,7 +92,7 @@ const taskData: TaskDataCustom = {
 		},
 	],
 	summary:
-		"Generates images from input text. These models can be used to generate and modify images based on text prompts.",
+		"Text-to-image is the task of generating images from input text. These pipelines can also be used to modify and edit images based on text prompts.",
 	widgetModels: ["black-forest-labs/FLUX.1-dev"],
 	youtubeId: "",
 };

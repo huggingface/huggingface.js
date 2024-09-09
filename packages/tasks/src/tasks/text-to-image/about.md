@@ -2,7 +2,7 @@
 
 ### Data Generation
 
-Businesses can generate data for their their use cases by inputting text and getting image outputs.
+Businesses can generate data for their use cases by inputting text and getting image outputs.
 
 ### Immersive Conversational Chatbots
 
@@ -16,9 +16,27 @@ Different patterns can be generated to obtain unique pieces of fashion. Text-to-
 
 Architects can utilise the models to construct an environment based out on the requirements of the floor plan. This can also include the furniture that has to be placed in that environment.
 
-## Task Variants
+## Task Variants
 
-You can contribute variants of this task [here](https://github.com/huggingface/hub-docs/blob/main/tasks/src/text-to-image/about.md).
+### Image Editing
+
+Image editing with text-to-image models involves modifying an image following edit instructions provided in a text prompt.
+
+- **Synthetic image editing**: Adjusting images that were initially created using an input prompt while preserving the overall meaning or context of the original image.
+
+  ![Examples](https://huggingface.co/datasets/diffusers/diffusers-images-docs/resolve/main/edit_p2p.png)
+  _Figure taken from ["InstructPix2Pix: Learning to Follow Image Editing Instructions"](https://www.timothybrooks.com/instruct-pix2pix)_
+
+- **Real image editing**: Similar to synthetic image editing, except we're using real photos/images. This task is usually more complex.
+
+  ![Examples](https://huggingface.co/datasets/diffusers/diffusers-images-docs/resolve/main/pix2pix.jpeg)
+  _Figure taken from ["Prompt-to-Prompt Image Editing with Cross-Attention Control"](https://prompt-to-prompt.github.io)_
+
+### Personalization
+
+Personalization refers to techniques used to customize text-to-image models. We introduce new subjects or concepts to the model, which the model can then generate when we refer to them with a text prompt.
+
+For example, you can use these techniques to generate images of your dog in imaginary settings, after you have taught the model using a few reference images of the subject (or just one in some cases). Teaching the model a new concept can be achieved through fine-tuning, or by using training-free techniques.
 
 ## Inference
 
@@ -65,11 +83,14 @@ await inference.textToImage({
 - [Introducing Würstchen: Fast Diffusion for Image Generation](https://huggingface.co/blog/wuerstchen)
 - [Efficient Controllable Generation for SDXL with T2I-Adapters](https://huggingface.co/blog/t2i-sdxl-adapters)
 - [Welcome aMUSEd: Efficient Text-to-Image Generation](https://huggingface.co/blog/amused)
+- Image Editing Demos: [LEDITS++](https://huggingface.co/spaces/editing-images/leditsplusplus), [Turbo Edit](https://huggingface.co/spaces/turboedit/turbo_edit), [InstructPix2Pix](https://huggingface.co/spaces/timbrooks/instruct-pix2pix), [CosXL](https://huggingface.co/spaces/multimodalart/cosxl)
+- Training free Personalization Demos: [Face-to-All](https://huggingface.co/spaces/multimodalart/face-to-all), [InstantStyle](https://huggingface.co/spaces/InstantX/InstantStyle), [RB-modulation](https://huggingface.co/spaces/fffiloni/RB-Modulation), [Photomaker v2](https://huggingface.co/spaces/TencentARC/PhotoMaker-V2)
 
 ### Model Fine-tuning
 
 - [Finetune Stable Diffusion Models with DDPO via TRL](https://huggingface.co/blog/pref-tuning)
 - [LoRA training scripts of the world, unite!](https://huggingface.co/blog/sdxl_lora_advanced_script)
 - [Using LoRA for Efficient Stable Diffusion Fine-Tuning](https://huggingface.co/blog/lora)
+- LoRA fine tuning Spaces: [FLUX.1 finetuning](https://huggingface.co/spaces/autotrain-projects/train-flux-lora-ease), [SDXL finetuning](https://huggingface.co/spaces/multimodalart/lora-ease)
 
 This page was made possible thanks to the efforts of [Ishan Dutta](https://huggingface.co/ishandutta), [Enrique Elias Ubaldo](https://huggingface.co/herrius) and [Oğuz Akif](https://huggingface.co/oguzakif).
