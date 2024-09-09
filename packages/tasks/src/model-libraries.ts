@@ -506,6 +506,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"cfg.json"`,
 	},
+	sapiens: {
+		prettyLabel: "sapiens",
+		repoName: "sapiens",
+		repoUrl: "https://github.com/facebookresearch/sapiens",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
 	"sentence-transformers": {
 		prettyLabel: "sentence-transformers",
 		repoName: "sentence-transformers",
