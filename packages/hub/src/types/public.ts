@@ -155,6 +155,7 @@ export type License =
 	| "deepfloyd-if-license"
 	| "llama2"
 	| "llama3"
+	| "llama3.1"
 	| "gemma"
 	| "unknown"
 	| "other";
