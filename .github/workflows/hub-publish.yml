@@ -89,7 +89,6 @@ jobs:
           fi
           echo "Checksum Verification Successful: The local and remote @huggingface/tasks packages are consistent. Local Checksum: $LOCAL_CHECKSUM, Remote Checksum: $REMOTE_CHECKSUM."
         working-directory: packages/tasks
-f
       - run: pnpm publish --no-git-checks .
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
