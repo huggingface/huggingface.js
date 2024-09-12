@@ -87,7 +87,7 @@ jobs:
             echo "Checksum Verification Failed: The local @huggingface/tasks package differs from the remote version. Release halted. Local Checksum: $LOCAL_CHECKSUM, Remote Checksum: $REMOTE_CHECKSUM"
             exit 1
           fi
-          echo "Checksum Verification Successful: The local and remote @huggingface/tasks packages are consistent. Proceeding with the @huggingface/widgets package release. Local Checksum: $LOCAL_CHECKSUM, Remote Checksum: $REMOTE_CHECKSUM."
+          echo "Checksum Verification Successful: The local and remote @huggingface/tasks packages are consistent. Local Checksum: $LOCAL_CHECKSUM, Remote Checksum: $REMOTE_CHECKSUM."
         working-directory: packages/tasks
 
       - run: pnpm publish --no-git-checks .
