@@ -511,7 +511,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "sapiens",
 		repoUrl: "https://github.com/facebookresearch/sapiens",
 		filter: false,
-		countDownloads: `path_extension:"pt"`,
+		countDownloads: `path_extension:"pt2" OR path_extension:"pth" OR path_extension:"onnx"`,
 	},
 	"sentence-transformers": {
 		prettyLabel: "sentence-transformers",
