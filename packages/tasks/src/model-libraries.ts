@@ -679,6 +679,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.whisperkit,
 		countDownloads: `path_filename:"model" AND path_extension:"mil" AND _exists_:"path_prefix"`,
 	},
+	"ssr-speech": {
+		prettyLabel: "SSR-Speech",
+		repoName: "SSR-Speech",
+		repoUrl: "https://github.com/WangHelin1997/SSR-Speech",
+		filter: false,
+		countDownloads: `path_extension:".pth" AND path_extension:".th"`,
+	},
 } satisfies Record<string, LibraryUiElement>;
 
 export type ModelLibraryKey = keyof typeof MODEL_LIBRARIES_UI_ELEMENTS;
