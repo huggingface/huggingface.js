@@ -458,7 +458,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "pythae",
 		repoUrl: "https://github.com/clementchadebec/benchmark_VAE",
 		snippets: snippets.pythae,
-		filter: true,
+		filter: false,
 	},
 	recurrentgemma: {
 		prettyLabel: "RecurrentGemma",
@@ -505,6 +505,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.sampleFactory,
 		filter: true,
 		countDownloads: `path:"cfg.json"`,
+	},
+	sapiens: {
+		prettyLabel: "sapiens",
+		repoName: "sapiens",
+		repoUrl: "https://github.com/facebookresearch/sapiens",
+		filter: false,
+		countDownloads: `path_extension:"pt2" OR path_extension:"pth" OR path_extension:"onnx"`,
 	},
 	"sentence-transformers": {
 		prettyLabel: "sentence-transformers",
