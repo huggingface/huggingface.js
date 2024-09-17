@@ -458,7 +458,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "pythae",
 		repoUrl: "https://github.com/clementchadebec/benchmark_VAE",
 		snippets: snippets.pythae,
-		filter: true,
+		filter: false,
 	},
 	recurrentgemma: {
 		prettyLabel: "RecurrentGemma",
