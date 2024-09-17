@@ -752,8 +752,8 @@ export const transformers = (model: ModelData): string[] => {
 			info.processor === "AutoTokenizer"
 				? "tokenizer"
 				: info.processor === "AutoFeatureExtractor"
-					? "extractor"
-					: "processor";
+				  ? "extractor"
+				  : "processor";
 		autoSnippet = [
 			"# Load model directly",
 			`from transformers import ${info.processor}, ${info.auto_model}`,
