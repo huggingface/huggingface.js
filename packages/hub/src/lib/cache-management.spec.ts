@@ -1,7 +1,7 @@
 import { describe, test, expect, vi, beforeEach } from "vitest";
 import {
-	scan_cache_dir,
-	scan_cached_repo,
+	scanCacheDir,
+	scanCachedRepo,
 	REPO_TYPE_T,
 	scanSnapshotDir,
 	parseRepoType,
@@ -20,13 +20,13 @@ beforeEach(() => {
 	vi.restoreAllMocks();
 });
 
-describe("scan_cache_dir", () => {
+describe("scanCacheDir", () => {
 	test("should throw an error if cacheDir is not a directory", async () => {
 		vi.mocked(stat).mockResolvedValueOnce({
 			isDirectory: () => false,
 		} as Stats);
 
-		await expect(scan_cache_dir("/fake/dir")).rejects.toThrow("Scan cache expects a directory");
+		await expect(scanCacheDir("/fake/dir")).rejects.toThrow("Scan cache expects a directory");
 	});
 
 	test("empty directory should return an empty set of repository and no warnings", async () => {
@@ -37,21 +37,21 @@ describe("scan_cache_dir", () => {
 		// mock empty cache folder
 		vi.mocked(readdir).mockResolvedValue([]);
 
-		const result = await scan_cache_dir("/fake/dir");
+		const result = await scanCacheDir("/fake/dir");
 
 		// cacheDir must have been read
 		expect(readdir).toHaveBeenCalledWith("/fake/dir");
 
 		expect(result.warnings.length).toBe(0);
 		expect(result.repos.size).toBe(0);
-		expect(result.size_on_disk).toBe(0);
+		expect(result.sizeOnDisk).toBe(0);
 	});
 });
 
-describe("scan_cached_repo", () => {
+describe("scanCachedRepo", () => {
 	test("should throw an error for invalid repo path", async () => {
 		await expect(() => {
-			return scan_cached_repo("/fake/repo_path");
+			return scanCachedRepo("/fake/repo_path");
 		}).rejects.toThrow("Repo path is not a valid HuggingFace cache directory");
 	});
 
@@ -62,7 +62,7 @@ describe("scan_cached_repo", () => {
 		} as Stats);
 
 		await expect(() => {
-			return scan_cached_repo("/fake/cacheDir/models--hello-world--name");
+			return scanCachedRepo("/fake/cacheDir/models--hello-world--name");
 		}).rejects.toThrow("Snapshots dir doesn't exist in cached repo");
 	});
 
@@ -73,12 +73,12 @@ describe("scan_cached_repo", () => {
 			isDirectory: () => true,
 		} as Stats);
 
-		const result = await scan_cached_repo(repoPath);
+		const result = await scanCachedRepo(repoPath);
 		expect(readdir).toHaveBeenCalledWith(join(repoPath, "refs"), {
 			withFileTypes: true,
 		});
 
-		expect(result.repo_id).toBe("hello-world/name");
+		expect(result.repoId).toBe("hello-world/name");
 	});
 });
 

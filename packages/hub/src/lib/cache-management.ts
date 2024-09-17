@@ -23,44 +23,44 @@ export enum REPO_TYPE_T {
 }
 
 export interface CachedFileInfo {
-	file_name: string;
-	file_path: string;
-	blob_path: string;
-	size_on_disk: number;
+	filename: string;
+	filePath: string;
+	blobPath: string;
+	sizeOnDisk: number;
 
-	blob_last_accessed: number;
-	blob_last_modified: number;
+	blobLastAccessed: number;
+	blobLastModified: number;
 }
 
 export interface CachedRevisionInfo {
-	commit_hash: string;
-	snapshot_path: string;
-	size_on_disk: number;
+	commitHash: string;
+	snapshotPath: string;
+	sizeOnDisk: number;
 	readonly files: Set<CachedFileInfo>;
 	readonly refs: Set<string>;
 
-	last_modified: number;
+	lastModified: number;
 }
 
 export interface CachedRepoInfo {
-	repo_id: string;
-	repo_type: REPO_TYPE_T;
-	repo_path: string;
-	size_on_disk: number;
-	nb_files: number;
+	repoId: string;
+	repoType: REPO_TYPE_T;
+	repoPath: string;
+	sizeOnDisk: number;
+	nbFiles: number;
 	readonly revisions: Set<CachedRevisionInfo>;
 
-	last_accessed: number;
-	last_modified: number;
+	lastAccessed: number;
+	lastModified: number;
 }
 
 export interface HFCacheInfo {
-	size_on_disk: number;
+	sizeOnDisk: number;
 	readonly repos: Set<CachedRepoInfo>;
 	warnings: Error[];
 }
 
-export async function scan_cache_dir(cacheDir: string | undefined = undefined): Promise<HFCacheInfo> {
+export async function scanCacheDir(cacheDir: string | undefined = undefined): Promise<HFCacheInfo> {
 	if (!cacheDir) cacheDir = HF_HUB_CACHE;
 
 	const s = await stat(cacheDir);
@@ -88,7 +88,7 @@ export async function scan_cache_dir(cacheDir: string | undefined = undefined): 
 		}
 
 		try {
-			const cached = await scan_cached_repo(absolute);
+			const cached = await scanCachedRepo(absolute);
 			repos.add(cached);
 		} catch (err: unknown) {
 			warnings.push(err as Error);
@@ -97,14 +97,14 @@ export async function scan_cache_dir(cacheDir: string | undefined = undefined): 
 
 	return {
 		repos: repos,
-		size_on_disk: [...repos.values()].reduce((sum, repo) => sum + repo.size_on_disk, 0),
+		sizeOnDisk: [...repos.values()].reduce((sum, repo) => sum + repo.sizeOnDisk, 0),
 		warnings: warnings,
 	};
 }
 
-export async function scan_cached_repo(repo_path: string): Promise<CachedRepoInfo> {
+export async function scanCachedRepo(repoPath: string): Promise<CachedRepoInfo> {
 	// get the directory name
-	const name = basename(repo_path);
+	const name = basename(repoPath);
 	if (!name.includes("--")) {
 		throw new Error(`Repo path is not a valid HuggingFace cache directory: ${name}`);
 	}
@@ -114,8 +114,8 @@ export async function scan_cached_repo(repo_path: string): Promise<CachedRepoInf
 	const repoType = parseRepoType(type);
 	const repoId = remaining.join("/");
 
-	const snapshotsPath = join(repo_path, "snapshots");
-	const refsPath = join(repo_path, "refs");
+	const snapshotsPath = join(repoPath, "snapshots");
+	const refsPath = join(repoPath, "refs");
 
 	const snapshotStat = await stat(snapshotsPath);
 	if (!snapshotStat.isDirectory()) {
@@ -147,17 +147,15 @@ export async function scan_cached_repo(repo_path: string): Promise<CachedRepoInf
 		await scanSnapshotDir(revisionPath, cachedFiles, blobStats);
 
 		const revisionLastModified =
-			cachedFiles.size > 0
-				? Math.max(...[...cachedFiles].map((file) => file.blob_last_modified))
-				: revisionStat.mtimeMs;
+			cachedFiles.size > 0 ? Math.max(...[...cachedFiles].map((file) => file.blobLastModified)) : revisionStat.mtimeMs;
 
 		cachedRevisions.add({
-			commit_hash: dir,
+			commitHash: dir,
 			files: cachedFiles,
 			refs: refsByHash.get(dir) || new Set(),
-			size_on_disk: [...cachedFiles].reduce((sum, file) => sum + file.size_on_disk, 0),
-			snapshot_path: revisionPath,
-			last_modified: revisionLastModified,
+			sizeOnDisk: [...cachedFiles].reduce((sum, file) => sum + file.sizeOnDisk, 0),
+			snapshotPath: revisionPath,
+			lastModified: revisionLastModified,
 		});
 
 		refsByHash.delete(dir);
@@ -166,11 +164,11 @@ export async function scan_cached_repo(repo_path: string): Promise<CachedRepoInf
 	// Verify that all refs refer to a valid revision
 	if (refsByHash.size > 0) {
 		throw new Error(
-			`Reference(s) refer to missing commit hashes: ${JSON.stringify(Object.fromEntries(refsByHash))} (${repo_path})`
+			`Reference(s) refer to missing commit hashes: ${JSON.stringify(Object.fromEntries(refsByHash))} (${repoPath})`
 		);
 	}
 
-	const repoStats = await stat(repo_path);
+	const repoStats = await stat(repoPath);
 	const repoLastAccessed =
 		blobStats.size > 0 ? Math.max(...[...blobStats.values()].map((stat) => stat.atimeMs)) : repoStats.atimeMs;
 
@@ -179,14 +177,14 @@ export async function scan_cached_repo(repo_path: string): Promise<CachedRepoInf
 
 	// Return the constructed CachedRepoInfo object
 	return {
-		repo_id: repoId,
-		repo_type: repoType,
-		repo_path: repo_path,
-		nb_files: blobStats.size,
+		repoId: repoId,
+		repoType: repoType,
+		repoPath: repoPath,
+		nbFiles: blobStats.size,
 		revisions: cachedRevisions,
-		size_on_disk: [...blobStats.values()].reduce((sum, stat) => sum + stat.size, 0),
-		last_accessed: repoLastAccessed,
-		last_modified: repoLastModified,
+		sizeOnDisk: [...blobStats.values()].reduce((sum, stat) => sum + stat.size, 0),
+		lastAccessed: repoLastAccessed,
+		lastModified: repoLastModified,
 	};
 }
 
@@ -219,12 +217,12 @@ export async function scanSnapshotDir(
 		const blobStat = await getBlobStat(blobPath, blobStats);
 
 		cachedFiles.add({
-			file_name: file.name,
-			file_path: filePath,
-			blob_path: blobPath,
-			size_on_disk: blobStat.size,
-			blob_last_accessed: blobStat.atimeMs,
-			blob_last_modified: blobStat.mtimeMs,
+			filename: file.name,
+			filePath: filePath,
+			blobPath: blobPath,
+			sizeOnDisk: blobStat.size,
+			blobLastAccessed: blobStat.atimeMs,
+			blobLastModified: blobStat.mtimeMs,
 		});
 	}
 }
