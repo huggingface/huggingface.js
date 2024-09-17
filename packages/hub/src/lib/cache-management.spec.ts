@@ -103,6 +103,7 @@ describe("getBlobStat", () => {
 		const blobStats = new Map<string, Stats>([["/fake/blob", { size: 1024 } as Stats]]);
 		const result = await getBlobStat("/fake/blob", blobStats);
 
+		expect(lstat).not.toHaveBeenCalled();
 		expect(result.size).toBe(1024);
 	});
 
@@ -118,6 +119,10 @@ describe("getBlobStat", () => {
 });
 
 describe("parseRepoType", () => {
+	test("should parse models repo type", () => {
+		expect(parseRepoType("models")).toBe(REPO_TYPE_T.MODEL);
+	});
+
 	test("should parse model repo type", () => {
 		expect(parseRepoType("model")).toBe(REPO_TYPE_T.MODEL);
 	});
