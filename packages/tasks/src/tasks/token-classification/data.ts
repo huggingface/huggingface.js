@@ -4,12 +4,12 @@ const taskData: TaskDataCustom = {
 	datasets: [
 		{
 			description: "A widely used dataset useful to benchmark named entity recognition models.",
-			id: "conll2003",
+			id: "eriktks/conll2003",
 		},
 		{
 			description:
 				"A multilingual dataset of Wikipedia articles annotated for named entity recognition in over 150 different languages.",
-			id: "wikiann",
+			id: "unimelb-nlp/wikiann",
 		},
 	],
 	demo: {
@@ -64,6 +64,14 @@ const taskData: TaskDataCustom = {
 			id: "dslim/bert-base-NER",
 		},
 		{
+			description: "A strong model to identify people, locations, organizations and names in multiple languages.",
+			id: "FacebookAI/xlm-roberta-large-finetuned-conll03-english",
+		},
+		{
+			description: "A token classification model specialized on medical entity recognition.",
+			id: "blaze999/Medical-NER",
+		},
+		{
 			description: "Flair models are typically the state of the art in named entity recognition tasks.",
 			id: "flair/ner-english",
 		},
@@ -77,7 +85,7 @@ const taskData: TaskDataCustom = {
 	],
 	summary:
 		"Token classification is a natural language understanding task in which a label is assigned to some tokens in a text. Some popular token classification subtasks are Named Entity Recognition (NER) and Part-of-Speech (PoS) tagging. NER models could be trained to identify specific entities in a text, such as dates, individuals and places; and PoS tagging would identify, for example, which words in a text are verbs, nouns, and punctuation marks.",
-	widgetModels: ["dslim/bert-base-NER"],
+	widgetModels: ["FacebookAI/xlm-roberta-large-finetuned-conll03-english"],
 	youtubeId: "wVHdVlPScxA",
 };
 

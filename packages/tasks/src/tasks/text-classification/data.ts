@@ -4,11 +4,11 @@ const taskData: TaskDataCustom = {
 	datasets: [
 		{
 			description: "A widely used dataset used to benchmark multiple variants of text classification.",
-			id: "glue",
+			id: "nyu-mll/glue",
 		},
 		{
 			description: "A text classification dataset used to benchmark natural language inference models",
-			id: "snli",
+			id: "stanfordnlp/snli",
 		},
 	],
 	demo: {
@@ -61,11 +61,23 @@ const taskData: TaskDataCustom = {
 	models: [
 		{
 			description: "A robust model trained for sentiment analysis.",
-			id: "distilbert-base-uncased-finetuned-sst-2-english",
+			id: "distilbert/distilbert-base-uncased-finetuned-sst-2-english",
 		},
 		{
-			description: "Multi-genre natural language inference model.",
-			id: "roberta-large-mnli",
+			description: "A sentiment analysis model specialized in financial sentiment.",
+			id: "ProsusAI/finbert",
+		},
+		{
+			description: "A sentiment analysis model specialized in analyzing tweets.",
+			id: "cardiffnlp/twitter-roberta-base-sentiment-latest",
+		},
+		{
+			description: "A model that can classify languages.",
+			id: "papluca/xlm-roberta-base-language-detection",
+		},
+		{
+			description: "A model that can classify text generation attacks.",
+			id: "meta-llama/Prompt-Guard-86M",
 		},
 	],
 	spaces: [
@@ -84,7 +96,7 @@ const taskData: TaskDataCustom = {
 	],
 	summary:
 		"Text Classification is the task of assigning a label or class to a given text. Some use cases are sentiment analysis, natural language inference, and assessing grammatical correctness.",
-	widgetModels: ["distilbert-base-uncased-finetuned-sst-2-english"],
+	widgetModels: ["distilbert/distilbert-base-uncased-finetuned-sst-2-english"],
 	youtubeId: "leNG9fN9FQU",
 };
 

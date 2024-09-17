@@ -176,6 +176,14 @@ export const SKUS = {
 				tflops: 14.93,
 				memory: [8],
 			},
+			"RTX 2070 SUPER Mobile": {
+				tflops: 14.13,
+				memory: [8],
+			},
+			"RTX 2070 SUPER": {
+				tflops: 18.12,
+				memory: [8],
+			},
 			"RTX 3050 Mobile": {
 				tflops: 7.639,
 				memory: [6],
@@ -273,6 +281,23 @@ export const SKUS = {
 			"Radeon Pro VII": {
 				tflops: 26.11,
 				memory: [16],
+			},
+		},
+		QUALCOMM: {
+			"Snapdragon X Elite X1E-00-1DE": {
+				tflops: 4.6,
+			},
+			"Snapdragon X Elite X1E-84-100": {
+				tflops: 4.6,
+			},
+			"Snapdragon X Elite X1E-80-100": {
+				tflops: 3.8,
+			},
+			"Snapdragon X Elite X1E-78-100": {
+				tflops: 3.8,
+			},
+			"Snapdragon X Plus X1P-64-100": {
+				tflops: 3.8,
 			},
 		},
 	},
