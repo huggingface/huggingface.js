@@ -132,17 +132,17 @@ depth = model.infer_image(raw_img) # HxW raw depth map in numpy
 const diffusers_default = (model: ModelData) => [
 	`from diffusers import DiffusionPipeline
 
-pipeline = DiffusionPipeline.from_pretrained("${model.id}")
+pipe = DiffusionPipeline.from_pretrained("${model.id}")
 
 prompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k"
-image = pipeline(prompt).images[0]`,
+image = pipe(prompt).images[0]`,
 ];
 
 const diffusers_controlnet = (model: ModelData) => [
 	`from diffusers import ControlNetModel, StableDiffusionControlNetPipeline
 
 controlnet = ControlNetModel.from_pretrained("${model.id}")
-pipeline = StableDiffusionControlNetPipeline.from_pretrained(
+pipe = StableDiffusionControlNetPipeline.from_pretrained(
 	"${get_base_diffusers_model(model)}", controlnet=controlnet
 )`,
 ];
@@ -150,18 +150,18 @@ pipeline = StableDiffusionControlNetPipeline.from_pretrained(
 const diffusers_lora = (model: ModelData) => [
 	`from diffusers import DiffusionPipeline
 
-pipeline = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
-pipeline.load_lora_weights("${model.id}")
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
+pipe.load_lora_weights("${model.id}")
 
 prompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k"
-image = pipeline(prompt).images[0]`,
+image = pipe(prompt).images[0]`,
 ];
 
 const diffusers_textual_inversion = (model: ModelData) => [
 	`from diffusers import DiffusionPipeline
 
-pipeline = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
-pipeline.load_textual_inversion("${model.id}")`,
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
+pipe.load_textual_inversion("${model.id}")`,
 ];
 
 export const diffusers = (model: ModelData): string[] => {
@@ -752,8 +752,8 @@ export const transformers = (model: ModelData): string[] => {
 			info.processor === "AutoTokenizer"
 				? "tokenizer"
 				: info.processor === "AutoFeatureExtractor"
-				  ? "extractor"
-				  : "processor";
+					? "extractor"
+					: "processor";
 		autoSnippet = [
 			"# Load model directly",
 			`from transformers import ${info.processor}, ${info.auto_model}`,
