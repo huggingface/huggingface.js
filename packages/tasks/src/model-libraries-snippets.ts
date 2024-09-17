@@ -132,7 +132,9 @@ depth = model.infer_image(raw_img) # HxW raw depth map in numpy
 const diffusers_default = (model: ModelData) => [
 	`from diffusers import DiffusionPipeline
 
-pipeline = DiffusionPipeline.from_pretrained("${model.id}")`,
+pipeline = DiffusionPipeline.from_pretrained("${model.id}")
+prompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k"
+image = pipeline(prompt).images[0]`,
 ];
 
 const diffusers_controlnet = (model: ModelData) => [
@@ -148,7 +150,9 @@ const diffusers_lora = (model: ModelData) => [
 	`from diffusers import DiffusionPipeline
 
 pipeline = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
-pipeline.load_lora_weights("${model.id}")`,
+pipeline.load_lora_weights("${model.id}")
+prompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k"
+image = pipeline(prompt).images[0]`,
 ];
 
 const diffusers_textual_inversion = (model: ModelData) => [
@@ -746,8 +750,8 @@ export const transformers = (model: ModelData): string[] => {
 			info.processor === "AutoTokenizer"
 				? "tokenizer"
 				: info.processor === "AutoFeatureExtractor"
-				  ? "extractor"
-				  : "processor";
+					? "extractor"
+					: "processor";
 		autoSnippet = [
 			"# Load model directly",
 			`from transformers import ${info.processor}, ${info.auto_model}`,
