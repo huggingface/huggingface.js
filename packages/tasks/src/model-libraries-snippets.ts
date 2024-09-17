@@ -133,6 +133,7 @@ const diffusers_default = (model: ModelData) => [
 	`from diffusers import DiffusionPipeline
 
 pipeline = DiffusionPipeline.from_pretrained("${model.id}")
+
 prompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k"
 image = pipeline(prompt).images[0]`,
 ];
@@ -151,6 +152,7 @@ const diffusers_lora = (model: ModelData) => [
 
 pipeline = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
 pipeline.load_lora_weights("${model.id}")
+
 prompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k"
 image = pipeline(prompt).images[0]`,
 ];
