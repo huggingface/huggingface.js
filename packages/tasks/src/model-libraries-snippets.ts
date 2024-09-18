@@ -74,7 +74,7 @@ function get_base_diffusers_model(model: ModelData): string {
 }
 
 function get_prompt_from_diffusers_model(model: ModelData): string | undefined {
-	return (model.widgetData?.[0] as WidgetExampleTextInput).text ?? model.cardData?.instance_prompt ?? undefined;
+	return (model.widgetData?.[0] as WidgetExampleTextInput).text ?? model.cardData?.instance_prompt;
 }
 
 export const bertopic = (model: ModelData): string[] => [
