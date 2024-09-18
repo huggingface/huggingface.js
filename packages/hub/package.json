@@ -20,11 +20,12 @@
 	"browser": {
 		"./src/utils/sha256-node.ts": false,
 		"./src/utils/FileBlob.ts": false,
+		"./src/lib/cache-management.ts": false,
 		"./dist/index.js": "./dist/browser/index.js",
 		"./dist/index.mjs": "./dist/browser/index.mjs"
 	},
 	"engines": {
-		"node": ">=18"
+		"node": ">=20"
 	},
 	"source": "index.ts",
 	"scripts": {
@@ -56,7 +57,7 @@
 	"author": "Hugging Face",
 	"license": "MIT",
 	"devDependencies": {
-		"@types/node": "^20.11.28"
+		"@types/node": "^20.12.8"
 	},
 	"dependencies": {
 		"@huggingface/tasks": "workspace:^"
