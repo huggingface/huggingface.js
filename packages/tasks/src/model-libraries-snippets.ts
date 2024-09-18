@@ -71,9 +71,11 @@ function get_base_diffusers_model(model: ModelData): string {
 }
 
 function get_prompt_from_diffusers_model(model: ModelData): string {
-	return model.cardData?.widget?.[0]?.text?.toString()
-	    ?? model.cardData?.instance_prompt?.toString()
-	    ?? "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
+	return (
+		model.cardData?.widget?.[0]?.text?.toString() ??
+		model.cardData?.instance_prompt?.toString() ??
+		"Astronaut in a jungle, cold color palette, muted colors, detailed, 8k"
+	);
 }
 
 export const bertopic = (model: ModelData): string[] => [
