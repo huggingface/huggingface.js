@@ -686,6 +686,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.whisperkit,
 		countDownloads: `path_filename:"model" AND path_extension:"mil" AND _exists_:"path_prefix"`,
 	},
+	"3dtopia-xl": {
+		prettyLabel: "3DTopia-XL",
+		repoName: "3DTopia-XL",
+		repoUrl: "https://github.com/3DTopia/3DTopia-XL",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+		snippets: snippets.threedtopia_xl,
+	},
 } satisfies Record<string, LibraryUiElement>;
 
 export type ModelLibraryKey = keyof typeof MODEL_LIBRARIES_UI_ELEMENTS;

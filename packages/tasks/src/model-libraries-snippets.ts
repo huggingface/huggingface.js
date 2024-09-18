@@ -1007,4 +1007,11 @@ whisperkit-cli transcribe --audio-path /path/to/audio.mp3
 # Or use your preferred model variant
 whisperkit-cli transcribe --model "large-v3" --model-prefix "distil" --audio-path /path/to/audio.mp3 --verbose`,
 ];
+
+export const threedtopia_xl = (): string[] => [
+	`# Install from https://github.com/3DTopia/3DTopia-XL
+
+# refer to https://github.com/3DTopia/3DTopia-XL?tab=readme-ov-file#inference for inference
+# and https://github.com/3DTopia/3DTopia-XL/blob/main/app.py regarding usage`,
+];
 //#endregion
