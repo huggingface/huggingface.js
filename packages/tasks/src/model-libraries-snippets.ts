@@ -70,6 +70,12 @@ function get_base_diffusers_model(model: ModelData): string {
 	return model.cardData?.base_model?.toString() ?? "fill-in-base-model";
 }
 
+function get_prompt_from_diffusers_model(model: ModelData): string {
+	return model.cardData?.widget?.[0]?.text?.toString()
+	    ?? model.cardData?.instance_prompt?.toString()
+	    ?? "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
+}
+
 export const bertopic = (model: ModelData): string[] => [
 	`from bertopic import BERTopic
 
@@ -134,7 +140,7 @@ const diffusers_default = (model: ModelData) => [
 
 pipe = DiffusionPipeline.from_pretrained("${model.id}")
 
-prompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k"
+prompt = "${get_prompt_from_diffusers_model(model)}"
 image = pipe(prompt).images[0]`,
 ];
 
@@ -153,7 +159,7 @@ const diffusers_lora = (model: ModelData) => [
 pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
 pipe.load_lora_weights("${model.id}")
 
-prompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k"
+prompt = "${get_prompt_from_diffusers_model(model)}"
 image = pipe(prompt).images[0]`,
 ];
 
