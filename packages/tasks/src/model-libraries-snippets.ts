@@ -9,6 +9,8 @@ function nameWithoutNamespace(modelId: string): string {
 	return splitted.length === 1 ? splitted[0] : splitted[1];
 }
 
+const escapeQuotes = (str: string | undefined): string | undefined => str?.replace(/"/g, '\\"');
+
 //#region snippets
 
 export const adapters = (model: ModelData): string[] => [
@@ -141,7 +143,7 @@ const diffusers_default = (model: ModelData) => [
 
 pipe = DiffusionPipeline.from_pretrained("${model.id}")
 
-prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersDefaultPrompt}"
+prompt = "${escapeQuotes(get_prompt_from_diffusers_model(model)) ?? diffusersDefaultPrompt}"
 image = pipe(prompt).images[0]`,
 ];
 
@@ -160,7 +162,7 @@ const diffusers_lora = (model: ModelData) => [
 pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
 pipe.load_lora_weights("${model.id}")
 
-prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersDefaultPrompt}"
+prompt = "${escapeQuotes(get_prompt_from_diffusers_model(model)) ?? diffusersDefaultPrompt}"
 image = pipe(prompt).images[0]`,
 ];
 
