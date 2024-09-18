@@ -107,12 +107,6 @@ export interface ModelData {
 					parameters?: Record<string, unknown>;
 			  };
 		base_model?: string | string[];
-		widget?: Array<{
-			text: string;
-			output?: {
-				url: string;
-			};
-		}>;
 		instance_prompt?: string;
 	};
 	/**

@@ -1,4 +1,5 @@
 import type { ModelData } from "./model-data";
+import type { WidgetExampleTextInput } from "./widget-example";
 import { LIBRARY_TASK_MAPPING } from "./library-to-tasks";
 
 const TAG_CUSTOM_CODE = "custom_code";
@@ -70,12 +71,8 @@ function get_base_diffusers_model(model: ModelData): string {
 	return model.cardData?.base_model?.toString() ?? "fill-in-base-model";
 }
 
-function get_prompt_from_diffusers_model(model: ModelData): string {
-	return (
-		model.cardData?.widget?.[0]?.text?.toString() ??
-		model.cardData?.instance_prompt?.toString() ??
-		"Astronaut in a jungle, cold color palette, muted colors, detailed, 8k"
-	);
+function get_prompt_from_diffusers_model(model: ModelData): string | undefined {
+	return (model.widgetData?.[0] as WidgetExampleTextInput).text ?? model.cardData?.instance_prompt ?? undefined;
 }
 
 export const bertopic = (model: ModelData): string[] => [
@@ -137,12 +134,14 @@ depth = model.infer_image(raw_img) # HxW raw depth map in numpy
 	];
 };
 
+const diffusers_default_prompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
+
 const diffusers_default = (model: ModelData) => [
 	`from diffusers import DiffusionPipeline
 
 pipe = DiffusionPipeline.from_pretrained("${model.id}")
 
-prompt = "${get_prompt_from_diffusers_model(model)}"
+prompt = "${get_prompt_from_diffusers_model(model) ?? diffusers_default_prompt}"
 image = pipe(prompt).images[0]`,
 ];
 
@@ -161,7 +160,7 @@ const diffusers_lora = (model: ModelData) => [
 pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
 pipe.load_lora_weights("${model.id}")
 
-prompt = "${get_prompt_from_diffusers_model(model)}"
+prompt = "${get_prompt_from_diffusers_model(model) ?? diffusers_default_prompt}"
 image = pipe(prompt).images[0]`,
 ];
 
