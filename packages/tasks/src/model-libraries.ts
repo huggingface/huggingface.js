@@ -691,7 +691,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "SSR-Speech",
 		repoUrl: "https://github.com/WangHelin1997/SSR-Speech",
 		filter: false,
-		countDownloads: `path_extension:".pth" AND path_extension:".th"`,
+		countDownloads: `path_extension:".pth"`,
 	},
 } satisfies Record<string, LibraryUiElement>;
 
