@@ -134,14 +134,14 @@ depth = model.infer_image(raw_img) # HxW raw depth map in numpy
 	];
 };
 
-const diffusers_default_prompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
+const diffusersDefaultPrompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
 
 const diffusers_default = (model: ModelData) => [
 	`from diffusers import DiffusionPipeline
 
 pipe = DiffusionPipeline.from_pretrained("${model.id}")
 
-prompt = "${get_prompt_from_diffusers_model(model) ?? diffusers_default_prompt}"
+prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersDefaultPrompt}"
 image = pipe(prompt).images[0]`,
 ];
 
@@ -160,7 +160,7 @@ const diffusers_lora = (model: ModelData) => [
 pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
 pipe.load_lora_weights("${model.id}")
 
-prompt = "${get_prompt_from_diffusers_model(model) ?? diffusers_default_prompt}"
+prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersDefaultPrompt}"
 image = pipe(prompt).images[0]`,
 ];
 
