@@ -590,8 +590,8 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "SoloAudio",
 		repoName: "SoloAudio",
 		repoUrl: "https://github.com/WangHelin1997/SoloAudio",
-		docsUrl: "https://github.com/WangHelin1997/SoloAudio",
-		snippets: snippets.soloaudio,
+		filter: false,
+		countDownloads: `path:"soloaudio_v2.pt"`,
 	},
 	"stable-baselines3": {
 		prettyLabel: "stable-baselines3",
