@@ -9,7 +9,7 @@ function nameWithoutNamespace(modelId: string): string {
 	return splitted.length === 1 ? splitted[0] : splitted[1];
 }
 
-const escapeQuotes = (str: string): string =>  JSON.stringify(str);
+const escapeQuotes = (str: string): string => JSON.stringify(str);
 
 //#region snippets
 
@@ -75,9 +75,9 @@ function get_base_diffusers_model(model: ModelData): string {
 
 function get_prompt_from_diffusers_model(model: ModelData): string | undefined {
 	const prompt = (model.widgetData?.[0] as WidgetExampleTextInput).text ?? model.cardData?.instance_prompt;
-    if(prompt){
-        return escapeQuotes(prompt);
-    }
+	if (prompt) {
+		return escapeQuotes(prompt);
+	}
 }
 
 export const bertopic = (model: ModelData): string[] => [
