@@ -563,6 +563,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"hyperparams.yaml"`,
 	},
+	"ssr-speech": {
+		prettyLabel: "SSR-Speech",
+		repoName: "SSR-Speech",
+		repoUrl: "https://github.com/WangHelin1997/SSR-Speech",
+		filter: false,
+		countDownloads: `path_extension:".pth"`,
+	},
 	"stable-audio-tools": {
 		prettyLabel: "Stable Audio Tools",
 		repoName: "stable-audio-tools",
