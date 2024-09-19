@@ -146,7 +146,7 @@ const diffusers_default = (model: ModelData) => [
 
 pipe = DiffusionPipeline.from_pretrained("${model.id}")
 
-prompt = "${escapeQuotes(get_prompt_from_diffusers_model(model)) ?? diffusersDefaultPrompt}"
+prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersDefaultPrompt}"
 image = pipe(prompt).images[0]`,
 ];
 
