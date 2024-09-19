@@ -3,16 +3,21 @@ import { join, basename } from "node:path";
 import { stat, readdir, readFile, realpath, lstat } from "node:fs/promises";
 import type { Stats } from "node:fs";
 
-const default_home = join(homedir(), ".cache");
-export const HF_HOME: string =
-	process.env["HF_HOME"] ?? join(process.env["XDG_CACHE_HOME"] ?? default_home, "huggingface");
+function getDefaultHome(): string {
+	return join(homedir(), ".cache");
+}
 
-const default_cache_path = join(HF_HOME, "hub");
+function getDefaultCachePath(): string {
+	return process.env["HF_HOME"] ?? join(process.env["XDG_CACHE_HOME"] ?? getDefaultHome(), "huggingface")
+}
 
-// Legacy env variable
-export const HUGGINGFACE_HUB_CACHE = process.env["HUGGINGFACE_HUB_CACHE"] ?? default_cache_path;
-// New env variable
-export const HF_HUB_CACHE = process.env["HF_HUB_CACHE"] ?? HUGGINGFACE_HUB_CACHE;
+function getHuggingFaceHubCache(): string {
+	return  process.env["HUGGINGFACE_HUB_CACHE"] ?? getDefaultCachePath();
+}
+
+function getHFHubCache(): string {
+	return  process.env["HF_HUB_CACHE"] ?? getHuggingFaceHubCache();
+}
 
 const FILES_TO_IGNORE: string[] = [".DS_Store"];
 
@@ -61,7 +66,7 @@ export interface HFCacheInfo {
 }
 
 export async function scanCacheDir(cacheDir: string | undefined = undefined): Promise<HFCacheInfo> {
-	if (!cacheDir) cacheDir = HF_HUB_CACHE;
+	if (!cacheDir) cacheDir = getHFHubCache();
 
 	const s = await stat(cacheDir);
 	if (!s.isDirectory()) {
