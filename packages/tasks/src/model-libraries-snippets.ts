@@ -1012,6 +1012,6 @@ export const threedtopia_xl = (model: ModelData): string[] => [
 	`from threedtopia_xl.models import threedtopia_xl
 
 model = threedtopia_xl.from_pretrained("${model.id}")
-model.generate(cond="path/to/image.png")
+model.generate(cond="path/to/image.png")`,
 ];
 //#endregion
