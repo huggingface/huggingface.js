@@ -9,7 +9,7 @@ function nameWithoutNamespace(modelId: string): string {
 	return splitted.length === 1 ? splitted[0] : splitted[1];
 }
 
-const escapeQuotes = (str: string | undefined): string | undefined => str?.replace(/"/g, '\\"');
+const escapeQuotes = (str: string): string =>  JSON.stringify(str);
 
 //#region snippets
 
