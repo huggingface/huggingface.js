@@ -1010,7 +1010,10 @@ whisperkit-cli transcribe --model "large-v3" --model-prefix "distil" --audio-pat
 
 export const threedtopia_xl = (): string[] => [
 	`# Install from https://github.com/3DTopia/3DTopia-XL
-
+from threedtopia_xl.models import threedtopia_xl
+model = threedtopia_xl.from_pretrained("${model.id}")
+img = 'PATH_TO_Image.png'
+model.generate(cond=img)
 # refer to https://github.com/3DTopia/3DTopia-XL?tab=readme-ov-file#inference for inference
 # and https://github.com/3DTopia/3DTopia-XL/blob/main/app.py regarding usage`,
 ];
