@@ -1007,4 +1007,11 @@ whisperkit-cli transcribe --audio-path /path/to/audio.mp3
 # Or use your preferred model variant
 whisperkit-cli transcribe --model "large-v3" --model-prefix "distil" --audio-path /path/to/audio.mp3 --verbose`,
 ];
+
+export const threedtopia_xl = (model: ModelData): string[] => [
+	`from threedtopia_xl.models import threedtopia_xl
+
+model = threedtopia_xl.from_pretrained("${model.id}")
+model.generate(cond="path/to/image.png")`,
+];
 //#endregion
