@@ -165,7 +165,7 @@ const diffusers_lora = (model: ModelData) => [
 pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
 pipe.load_lora_weights("${model.id}")
 
-prompt = "${escapeQuotes(get_prompt_from_diffusers_model(model)) ?? diffusersDefaultPrompt}"
+prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersDefaultPrompt}"
 image = pipe(prompt).images[0]`,
 ];
 
