@@ -705,7 +705,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "3DTopia-XL",
 		repoUrl: "https://github.com/3DTopia/3DTopia-XL",
 		filter: false,
-		countDownloads: `path_extension:"pt"`,
+		countDownloads: `path:"model_vae_fp16.pt"`,
 		snippets: snippets.threedtopia_xl,
 	},
 } satisfies Record<string, LibraryUiElement>;
