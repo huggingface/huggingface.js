@@ -47,7 +47,7 @@ export type {
 	ChatCompletionInputMessage,
 	ChatCompletionOutput,
 	ChatCompletionOutputComplete,
-	ChatCompletionOutputMessage,
+	ChatCompletionOutputOutputMessage,
 	ChatCompletionStreamOutput,
 	ChatCompletionStreamOutputChoice,
 	ChatCompletionStreamOutputDelta,
