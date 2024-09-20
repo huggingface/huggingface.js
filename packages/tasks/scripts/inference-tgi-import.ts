@@ -47,7 +47,7 @@ async function _extractAndAdapt(task: string, mainComponentName: string, type: "
 	// e.g. TextGeneration
 	const camelName = toCamelCase(task);
 	// e.g. TextGenerationInput
-	let camelFullName = camelName + toCamelCase(type);
+	const camelFullName = camelName + toCamelCase(type);
 	const mainComponent = components[mainComponentName];
 	const filteredComponents: Record<string, JsonObject> = {};
 
