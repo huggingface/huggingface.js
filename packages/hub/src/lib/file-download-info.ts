@@ -1,6 +1,6 @@
 import { HUB_URL } from "../consts";
 import { createApiError, InvalidApiResponseFormatError } from "../error";
-import type { Credentials, RepoDesignation } from "../types/public";
+import type { CredentialsParams, RepoDesignation } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { toRepoId } from "../utils/toRepoId";
 
@@ -15,28 +15,29 @@ export interface FileDownloadInfoOutput {
 /**
  * @returns null when the file doesn't exist
  */
-export async function fileDownloadInfo(params: {
-	repo: RepoDesignation;
-	path: string;
-	revision?: string;
-	credentials?: Credentials;
-	hubUrl?: string;
-	/**
-	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
-	 */
-	fetch?: typeof fetch;
-	/**
-	 * To get the raw pointer file behind a LFS file
-	 */
-	raw?: boolean;
-	/**
-	 * To avoid the content-disposition header in the `downloadLink` for LFS files
-	 *
-	 * So that on browsers you can use the URL in an iframe for example
-	 */
-	noContentDisposition?: boolean;
-}): Promise<FileDownloadInfoOutput | null> {
-	checkCredentials(params.credentials);
+export async function fileDownloadInfo(
+	params: {
+		repo: RepoDesignation;
+		path: string;
+		revision?: string;
+		hubUrl?: string;
+		/**
+		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+		 */
+		fetch?: typeof fetch;
+		/**
+		 * To get the raw pointer file behind a LFS file
+		 */
+		raw?: boolean;
+		/**
+		 * To avoid the content-disposition header in the `downloadLink` for LFS files
+		 *
+		 * So that on browsers you can use the URL in an iframe for example
+		 */
+		noContentDisposition?: boolean;
+	} & Partial<CredentialsParams>
+): Promise<FileDownloadInfoOutput | null> {
+	const accessToken = checkCredentials(params);
 	const repoId = toRepoId(params.repo);
 
 	const hubUrl = params.hubUrl ?? HUB_URL;
@@ -50,7 +51,7 @@ export async function fileDownloadInfo(params: {
 		method: "GET",
 		headers: {
 			...(params.credentials && {
-				Authorization: `Bearer ${params.credentials.accessToken}`,
+				Authorization: `Bearer ${accessToken}`,
 			}),
 			Range: "bytes=0-0",
 		},

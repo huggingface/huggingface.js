@@ -1,7 +1,7 @@
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
 import type { ApiDatasetInfo } from "../types/api/api-dataset";
-import type { Credentials } from "../types/public";
+import type { CredentialsParams } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
 import { pick } from "../utils/pick";
@@ -46,28 +46,29 @@ export interface DatasetEntry {
 
 export async function* listDatasets<
 	const T extends Exclude<(typeof EXPANDABLE_KEYS)[number], (typeof EXPAND_KEYS)[number]> = never,
->(params?: {
-	search?: {
+>(
+	params?: {
+		search?: {
+			/**
+			 * Will search in the dataset name for matches
+			 */
+			query?: string;
+			owner?: string;
+			tags?: string[];
+		};
+		hubUrl?: string;
+		additionalFields?: T[];
 		/**
-		 * Will search in the dataset name for matches
+		 * Set to limit the number of models returned.
 		 */
-		query?: string;
-		owner?: string;
-		tags?: string[];
-	};
-	credentials?: Credentials;
-	hubUrl?: string;
-	additionalFields?: T[];
-	/**
-	 * Set to limit the number of models returned.
-	 */
-	limit?: number;
-	/**
-	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
-	 */
-	fetch?: typeof fetch;
-}): AsyncGenerator<DatasetEntry & Pick<ApiDatasetInfo, T>> {
-	checkCredentials(params?.credentials);
+		limit?: number;
+		/**
+		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+		 */
+		fetch?: typeof fetch;
+	} & Partial<CredentialsParams>
+): AsyncGenerator<DatasetEntry & Pick<ApiDatasetInfo, T>> {
+	const accessToken = params && checkCredentials(params);
 	let totalToFetch = params?.limit ?? Infinity;
 	const search = new URLSearchParams([
 		...Object.entries({
@@ -85,7 +86,7 @@ export async function* listDatasets<
 		const res: Response = await (params?.fetch ?? fetch)(url, {
 			headers: {
 				accept: "application/json",
-				...(params?.credentials ? { Authorization: `Bearer ${params.credentials.accessToken}` } : undefined),
+				...(params?.credentials ? { Authorization: `Bearer ${accessToken}` } : undefined),
 			},
 		});
 

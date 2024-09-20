@@ -1,29 +1,30 @@
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
 import type { ApiCreateRepoPayload } from "../types/api/api-create-repo";
-import type { Credentials, RepoDesignation, SpaceSdk } from "../types/public";
+import type { CredentialsParams, RepoDesignation, SpaceSdk } from "../types/public";
 import { base64FromBytes } from "../utils/base64FromBytes";
 import { checkCredentials } from "../utils/checkCredentials";
 import { toRepoId } from "../utils/toRepoId";
 
-export async function createRepo(params: {
-	repo: RepoDesignation;
-	credentials: Credentials;
-	private?: boolean;
-	license?: string;
-	/**
-	 * Only a few lightweight files are supported at repo creation
-	 */
-	files?: Array<{ content: ArrayBuffer | Blob; path: string }>;
-	/** @required for when {@link repo.type} === "space" */
-	sdk?: SpaceSdk;
-	hubUrl?: string;
-	/**
-	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
-	 */
-	fetch?: typeof fetch;
-}): Promise<{ repoUrl: string }> {
-	checkCredentials(params.credentials);
+export async function createRepo(
+	params: {
+		repo: RepoDesignation;
+		private?: boolean;
+		license?: string;
+		/**
+		 * Only a few lightweight files are supported at repo creation
+		 */
+		files?: Array<{ content: ArrayBuffer | Blob; path: string }>;
+		/** @required for when {@link repo.type} === "space" */
+		sdk?: SpaceSdk;
+		hubUrl?: string;
+		/**
+		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+		 */
+		fetch?: typeof fetch;
+	} & CredentialsParams
+): Promise<{ repoUrl: string }> {
+	const accessToken = checkCredentials(params);
 	const repoId = toRepoId(params.repo);
 	const [namespace, repoName] = repoId.name.split("/");
 
@@ -61,7 +62,7 @@ export async function createRepo(params: {
 				: undefined,
 		} satisfies ApiCreateRepoPayload),
 		headers: {
-			Authorization: `Bearer ${params.credentials.accessToken}`,
+			Authorization: `Bearer ${accessToken}`,
 			"Content-Type": "application/json",
 		},
 	});

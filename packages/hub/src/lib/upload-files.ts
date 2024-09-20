@@ -1,22 +1,24 @@
+import type { CredentialsParams } from "../types/public";
 import type { CommitOutput, CommitParams, ContentSource } from "./commit";
 import { commit } from "./commit";
 
-export function uploadFiles(params: {
-	credentials?: CommitParams["credentials"];
-	repo: CommitParams["repo"];
-	files: Array<URL | File | { path: string; content: ContentSource }>;
-	commitTitle?: CommitParams["title"];
-	commitDescription?: CommitParams["description"];
-	hubUrl?: CommitParams["hubUrl"];
-	branch?: CommitParams["branch"];
-	isPullRequest?: CommitParams["isPullRequest"];
-	parentCommit?: CommitParams["parentCommit"];
-	fetch?: CommitParams["fetch"];
-	useWebWorkers?: CommitParams["useWebWorkers"];
-	abortSignal?: CommitParams["abortSignal"];
-}): Promise<CommitOutput> {
+export function uploadFiles(
+	params: {
+		repo: CommitParams["repo"];
+		files: Array<URL | File | { path: string; content: ContentSource }>;
+		commitTitle?: CommitParams["title"];
+		commitDescription?: CommitParams["description"];
+		hubUrl?: CommitParams["hubUrl"];
+		branch?: CommitParams["branch"];
+		isPullRequest?: CommitParams["isPullRequest"];
+		parentCommit?: CommitParams["parentCommit"];
+		fetch?: CommitParams["fetch"];
+		useWebWorkers?: CommitParams["useWebWorkers"];
+		abortSignal?: CommitParams["abortSignal"];
+	} & Partial<CredentialsParams>
+): Promise<CommitOutput> {
 	return commit({
-		credentials: params.credentials,
+		...(params.accessToken ? { accessToken: params.accessToken } : { credentials: params.credentials }),
 		repo: params.repo,
 		operations: params.files.map((file) => ({
 			operation: "addOrUpdate",
