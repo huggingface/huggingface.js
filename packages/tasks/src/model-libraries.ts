@@ -406,6 +406,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"mlc-chat-config.json"`,
 	},
+	moshi: {
+		prettyLabel: "Moshi",
+		repoName: "Moshi",
+		repoUrl: "https://github.com/kyutai-labs/moshi",
+		filter: false,
+		countDownloads: `path:"tokenizer-e351c8d8-checkpoint125.safetensors"`,
+	},
 	nemo: {
 		prettyLabel: "NeMo",
 		repoName: "NeMo",
