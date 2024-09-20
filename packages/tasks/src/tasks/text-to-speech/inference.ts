@@ -5,9 +5,7 @@
  */
 
 /**
- * Inputs for Text to Speech inference
- *
- * Inputs for Text To Audio inference
+ * Inputs for Text To Speech inference
  */
 export interface TextToSpeechInput {
 	/**
@@ -17,16 +15,16 @@ export interface TextToSpeechInput {
 	/**
 	 * Additional inference parameters
 	 */
-	parameters?: TextToAudioParameters;
+	parameters?: TextToSpeechParameters;
 	[property: string]: unknown;
 }
 
 /**
  * Additional inference parameters
  *
- * Additional inference parameters for Text To Audio
+ * Additional inference parameters for Text To Speech
  */
-export interface TextToAudioParameters {
+export interface TextToSpeechParameters {
 	/**
 	 * Parametrization of the text generation process
 	 */
