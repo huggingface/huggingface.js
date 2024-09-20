@@ -20,8 +20,9 @@ Please check that all prerequisites are met.
 - [ ] `filter` is set to `false`.
 - [ ] `countDownload` follows the correct convention and do not duplicate the counting. For instance, if loading a model requires 3 files, the download count rule must count downloads only on 1 of the 3 files. Otherwise, the download count will be overestimated. If the library uses one of the default config files (`config.json`, `config.yaml`, `hyperparams.yaml`, and `meta.yaml`, see [here](https://huggingface.co/docs/hub/models-download-stats#which-are-the-query-files-for-different-libraries)), there is no need to manually define a download count rule.
 - [ ] (optional) `snippets` is correctly defined. See check-list below.
+- [ ] Make sure that the code passes the linter test as well
 
-## Snippets instructions
+## (optional) Snippets instructions
 
 Adding a code snippet helps users to start using your library. It is especially useful when the library is tightly integrated with the Hub and typically has a `Model.from_pretrained` helper method. Check out [this guide](https://huggingface.co/docs/huggingface_hub/guides/download) to learn how to download files in Python and [this guide](https://huggingface.co/docs/huggingface_hub/guides/integrations) for a broader explanation on how to integrate a library with the Hub. Note that adding a code snippet is optional.
 For code snippets specifically, please refer to this checklist:
