@@ -9,7 +9,7 @@ function nameWithoutNamespace(modelId: string): string {
 	return splitted.length === 1 ? splitted[0] : splitted[1];
 }
 
-const escapeStringForJson = (str: string): string => JSON.stringify(str);
+const escapeStringForJson = (str: string): string => JSON.stringify(str).slice(1, -1); // slice is needed to remove surrounding quotes added by JSON.stringify
 
 //#region snippets
 
@@ -74,7 +74,7 @@ function get_base_diffusers_model(model: ModelData): string {
 }
 
 function get_prompt_from_diffusers_model(model: ModelData): string | undefined {
-	const prompt = (model.widgetData?.[0] as WidgetExampleTextInput).text ?? model.cardData?.instance_prompt;
+	const prompt = (model.widgetData?.[0] as WidgetExampleTextInput | undefined)?.text ?? model.cardData?.instance_prompt;
 	if (prompt) {
 		return escapeStringForJson(prompt);
 	}
