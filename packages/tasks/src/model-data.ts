@@ -107,6 +107,7 @@ export interface ModelData {
 					parameters?: Record<string, unknown>;
 			  };
 		base_model?: string | string[];
+		instance_prompt?: string | null;
 	};
 	/**
 	 * Library name

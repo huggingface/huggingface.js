@@ -83,8 +83,8 @@
       }
     }
   },
-  "3eee2d13b3a94e1a1e5cd2e0477168e0645289abdae3fea2b6e8af450cc8de29": {
-    "url": "https://api-inference.huggingface.co/models/bert-base-uncased",
+  "f0b8a1564bf8af1e9d1765b40eb2fef049762e07d3e0c5701c8f81004936a670": {
+    "url": "https://api-inference.huggingface.co/models/google-bert/bert-base-uncased",
     "init": {
       "headers": {
         "Content-Type": "application/json"
