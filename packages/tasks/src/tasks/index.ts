@@ -39,6 +39,7 @@ import zeroShotImageClassification from "./zero-shot-image-classification/data";
 import zeroShotObjectDetection from "./zero-shot-object-detection/data";
 import imageTo3D from "./image-to-3d/data";
 import textTo3D from "./text-to-3d/data";
+import keypointDetection from "./keypoint-detection/data";
 
 export type * from "./audio-classification/inference";
 export type * from "./automatic-speech-recognition/inference";
@@ -208,7 +209,7 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"image-text-to-text": getData("image-text-to-text", imageTextToText),
 	"image-to-text": getData("image-to-text", imageToText),
 	"image-to-video": undefined,
-	"keypoint-detection": getData("keypoint-detection", placeholder),
+	"keypoint-detection": getData("keypoint-detection", keypointDetection),
 	"mask-generation": getData("mask-generation", maskGeneration),
 	"multiple-choice": undefined,
 	"object-detection": getData("object-detection", objectDetection),
