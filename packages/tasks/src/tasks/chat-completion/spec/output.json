@@ -54,7 +54,7 @@
 					"nullable": true
 				},
 				"message": {
-					"$ref": "#/$defs/ChatCompletionOutputOutputMessage"
+					"$ref": "#/$defs/ChatCompletionOutputMessage"
 				}
 			},
 			"title": "ChatCompletionOutputComplete"
@@ -106,7 +106,7 @@
 			},
 			"title": "ChatCompletionOutputTopLogprob"
 		},
-		"ChatCompletionOutputOutputMessage": {
+		"ChatCompletionOutputMessage": {
 			"oneOf": [
 				{
 					"$ref": "#/$defs/ChatCompletionOutputTextMessage"
@@ -115,7 +115,7 @@
 					"$ref": "#/$defs/ChatCompletionOutputToolCallMessage"
 				}
 			],
-			"title": "ChatCompletionOutputOutputMessage"
+			"title": "ChatCompletionOutputMessage"
 		},
 		"ChatCompletionOutputTextMessage": {
 			"type": "object",

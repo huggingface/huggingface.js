@@ -200,7 +200,7 @@ export interface ChatCompletionOutputComplete {
 	finish_reason: string;
 	index: number;
 	logprobs?: ChatCompletionOutputLogprobs;
-	message: ChatCompletionOutputOutputMessage;
+	message: ChatCompletionOutputMessage;
 	[property: string]: unknown;
 }
 
@@ -222,7 +222,7 @@ export interface ChatCompletionOutputTopLogprob {
 	[property: string]: unknown;
 }
 
-export interface ChatCompletionOutputOutputMessage {
+export interface ChatCompletionOutputMessage {
 	content?: string;
 	role: string;
 	tool_calls?: ChatCompletionOutputToolCall[];

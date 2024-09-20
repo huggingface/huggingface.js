@@ -47,7 +47,7 @@ async function _extractAndAdapt(task: string, mainComponentName: string, type: "
 	// e.g. TextGeneration
 	const camelName = toCamelCase(task);
 	// e.g. TextGenerationInput
-	const camelFullName = camelName + toCamelCase(type);
+	let camelFullName = camelName + toCamelCase(type);
 	const mainComponent = components[mainComponentName];
 	const filteredComponents: Record<string, JsonObject> = {};
 
@@ -66,7 +66,9 @@ async function _extractAndAdapt(task: string, mainComponentName: string, type: "
 					}
 
 					// Add reference to components to export (and scan it too)
-					const newRef = camelFullName + ref.replace(camelName, "");
+					let newRef = camelFullName + ref.replace(camelName, "");
+					// remove duplicated InputInput or OutputOutput in naming
+					newRef = newRef.replace("InputInput", "Input").replace("OutputOutput", "Output");
 					if (!filteredComponents[newRef]) {
 						components[ref]["title"] = newRef; // Rename title to avoid conflicts
 						filteredComponents[newRef] = components[ref];
