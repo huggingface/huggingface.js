@@ -9,7 +9,7 @@ function nameWithoutNamespace(modelId: string): string {
 	return splitted.length === 1 ? splitted[0] : splitted[1];
 }
 
-const escapeStringForJson = (str: string): string => JSON.stringify(str);
+const escapeStringForJson = (str: string): string => JSON.stringify(str).slice(1, -1); // slice is needed to remove surrounding quotes added by JSON.stringify
 
 //#region snippets
 
