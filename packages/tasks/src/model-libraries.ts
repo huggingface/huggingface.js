@@ -715,6 +715,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"model_vae_fp16.pt"`,
 		snippets: snippets.threedtopia_xl,
 	},
+	cotracker: {
+		prettyLabel: "cotracker",
+		repoName: "cotracker",
+		repoUrl: "https://github.com/facebookresearch/co-tracker",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
 } satisfies Record<string, LibraryUiElement>;
 
 export type ModelLibraryKey = keyof typeof MODEL_LIBRARIES_UI_ELEMENTS;
