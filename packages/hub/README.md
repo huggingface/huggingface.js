@@ -31,22 +31,21 @@ Learn how to find free models using the hub package in this [interactive tutoria
 
 ```ts
 import { createRepo, uploadFiles, uploadFilesWithProgress, deleteFile, deleteRepo, listFiles, whoAmI } from "@huggingface/hub";
-import type { RepoDesignation, Credentials } from "@huggingface/hub";
+import type { RepoDesignation } from "@huggingface/hub";
 
 const repo: RepoDesignation = { type: "model", name: "myname/some-model" };
-const credentials: Credentials = { accessToken: "hf_..." };
 
-const {name: username} = await whoAmI({credentials});
+const {name: username} = await whoAmI({accessToken: "hf_..."});
 
-for await (const model of listModels({search: {owner: username}, credentials})) {
+for await (const model of listModels({search: {owner: username}, accessToken: "hf_..."})) {
   console.log("My model:", model);
 }
 
-await createRepo({ repo, credentials, license: "mit" });
+await createRepo({ repo, accessToken: "hf_...", license: "mit" });
 
 await uploadFiles({
   repo,
-  credentials,
+  accessToken: "hf_...",
   files: [
     // path + blob content
     {
@@ -70,7 +69,7 @@ await uploadFiles({
 
 for await (const progressEvent of await uploadFilesWithProgress({
   repo,
-  credentials,
+  accessToken: "hf_...",
   files: [
     ...
   ],
@@ -78,7 +77,7 @@ for await (const progressEvent of await uploadFilesWithProgress({
   console.log(progressEvent);
 }
 
-await deleteFile({repo, credentials, path: "myfile.bin"});
+await deleteFile({repo, accessToken: "hf_...", path: "myfile.bin"});
 
 await (await downloadFile({ repo, path: "README.md" })).text();
 
@@ -86,7 +85,7 @@ for await (const fileInfo of listFiles({repo})) {
   console.log(fileInfo);
 }
 
-await deleteRepo({ repo, credentials });
+await deleteRepo({ repo, accessToken: "hf_..." });
 ```
 
 ## OAuth Login

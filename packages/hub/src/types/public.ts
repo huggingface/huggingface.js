@@ -14,9 +14,28 @@ export type RepoDesignation = RepoId | RepoFullName;
 /** Actually `hf_${string}`, but for convenience, using the string type */
 export type AccessToken = string;
 
+/**
+ * @deprecated Use `AccessToken` instead. Pass { accessToken: "hf_..." } instead of { credentials: { accessToken: "hf_..." } }
+ */
 export interface Credentials {
 	accessToken: AccessToken;
 }
+
+export type CredentialsParams =
+	| {
+			accessToken?: undefined;
+			/**
+			 * @deprecated Use `accessToken` instead
+			 */
+			credentials: Credentials;
+	  }
+	| {
+			accessToken: AccessToken;
+			/**
+			 * @deprecated Use `accessToken` instead
+			 */
+			credentials?: undefined;
+	  };
 
 export type SpaceHardwareFlavor =
 	| "cpu-basic"

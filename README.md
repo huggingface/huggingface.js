@@ -14,12 +14,12 @@
 
 await createRepo({
   repo: {type: "model", name: "my-user/nlp-model"},
-  credentials: {accessToken: HF_TOKEN}
+  accessToken: HF_TOKEN
 });
 
 await uploadFile({
   repo: "my-user/nlp-model",
-  credentials: {accessToken: HF_TOKEN},
+  accessToken: HF_TOKEN,
   // Can work with native File in browsers
   file: {
     path: "pytorch_model.bin",
@@ -79,7 +79,7 @@ Then import the libraries in your code:
 import { HfInference } from "@huggingface/inference";
 import { HfAgent } from "@huggingface/agents";
 import { createRepo, commit, deleteRepo, listFiles } from "@huggingface/hub";
-import type { RepoId, Credentials } from "@huggingface/hub";
+import type { RepoId } from "@huggingface/hub";
 ```
 
 ### From CDN or Static hosting
@@ -182,12 +182,12 @@ const HF_TOKEN = "hf_...";
 
 await createRepo({
   repo: "my-user/nlp-model", // or {type: "model", name: "my-user/nlp-test"},
-  credentials: {accessToken: HF_TOKEN}
+  accessToken: HF_TOKEN
 });
 
 await uploadFile({
   repo: "my-user/nlp-model",
-  credentials: {accessToken: HF_TOKEN},
+  accessToken: HF_TOKEN,
   // Can work with native File in browsers
   file: {
     path: "pytorch_model.bin",
@@ -197,7 +197,7 @@ await uploadFile({
 
 await deleteFiles({
   repo: {type: "space", name: "my-user/my-space"}, // or "spaces/my-user/my-space"
-  credentials: {accessToken: HF_TOKEN},
+  accessToken: HF_TOKEN,
   paths: ["README.md", ".gitattributes"]
 });
 ```
