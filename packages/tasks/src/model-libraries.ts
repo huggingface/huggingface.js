@@ -670,6 +670,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.transformersJS,
 		filter: true,
 	},
+	trl: {
+		prettyLabel: "TRL",
+		repoName: "trl",
+		repoUrl: "https://github.com/huggingface/trl",
+		docsUrl: "https://huggingface.co/docs/trl",
+		filter: true,
+	},
 	"unity-sentis": {
 		prettyLabel: "unity-sentis",
 		repoName: "unity-sentis",
