@@ -72,7 +72,7 @@ export type * from "./sentence-similarity/inference";
 export type * from "./summarization/inference";
 export type * from "./table-question-answering/inference";
 export type { TextToImageInput, TextToImageOutput, TextToImageParameters } from "./text-to-image/inference";
-export type { TextToAudioParameters, TextToSpeechInput, TextToSpeechOutput } from "./text-to-speech/inference";
+export type { TextToSpeechParameters, TextToSpeechInput, TextToSpeechOutput } from "./text-to-speech/inference";
 export type * from "./token-classification/inference";
 export type { TranslationInput, TranslationOutput } from "./translation/inference";
 export type {

@@ -4,7 +4,7 @@
 	"description": "Chat Completion Input.\n\nAuto-generated from TGI specs.\nFor more details, check out https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/scripts/inference-tgi-import.ts.",
 	"title": "ChatCompletionInput",
 	"type": "object",
-	"required": ["model", "messages"],
+	"required": ["messages"],
 	"properties": {
 		"frequency_penalty": {
 			"type": "number",
@@ -47,7 +47,8 @@
 		"model": {
 			"type": "string",
 			"description": "[UNUSED] ID of the model to use. See the model endpoint compatibility table for details on which models work with the Chat API.",
-			"example": "mistralai/Mistral-7B-Instruct-v0.2"
+			"example": "mistralai/Mistral-7B-Instruct-v0.2",
+			"nullable": true
 		},
 		"n": {
 			"type": "integer",
@@ -62,6 +63,15 @@
 			"format": "float",
 			"description": "Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far,\nincreasing the model's likelihood to talk about new topics",
 			"example": 0.1,
+			"nullable": true
+		},
+		"response_format": {
+			"allOf": [
+				{
+					"$ref": "#/$defs/ChatCompletionInputGrammarType"
+				}
+			],
+			"default": "null",
 			"nullable": true
 		},
 		"seed": {
@@ -83,6 +93,14 @@
 		"stream": {
 			"type": "boolean"
 		},
+		"stream_options": {
+			"allOf": [
+				{
+					"$ref": "#/$defs/ChatCompletionInputStreamOptions"
+				}
+			],
+			"nullable": true
+		},
 		"temperature": {
 			"type": "number",
 			"format": "float",
@@ -93,7 +111,7 @@
 		"tool_choice": {
 			"allOf": [
 				{
-					"$ref": "#/$defs/ChatCompletionInputToolType"
+					"$ref": "#/$defs/ChatCompletionInputToolChoice"
 				}
 			],
 			"nullable": true
@@ -101,7 +119,7 @@
 		"tool_prompt": {
 			"type": "string",
 			"description": "A prompt to be appended before the tools",
-			"example": "\"You will be presented with a JSON schema representing a set of tools.\nIf the user request lacks of sufficient information to make a precise tool selection: Do not invent any tool's properties, instead notify with an error message.\n\nJSON Schema:\n\"",
+			"example": "Given the functions available, please respond with a JSON for a function call with its proper arguments that best answers the given prompt. Respond in the format {name: function name, parameters: dictionary of argument name and its value}.Do not use variables.",
 			"nullable": true
 		},
 		"tools": {
@@ -132,12 +150,10 @@
 	"$defs": {
 		"ChatCompletionInputMessage": {
 			"type": "object",
-			"required": ["role"],
+			"required": ["role", "content"],
 			"properties": {
 				"content": {
-					"type": "string",
-					"example": "My name is David and I",
-					"nullable": true
+					"$ref": "#/$defs/ChatCompletionInputMessageContent"
 				},
 				"name": {
 					"type": "string",
@@ -147,34 +163,173 @@
 				"role": {
 					"type": "string",
 					"example": "user"
-				},
-				"tool_calls": {
-					"type": "array",
-					"items": {
-						"$ref": "#/$defs/ChatCompletionInputToolCall"
-					},
-					"nullable": true
 				}
 			},
 			"title": "ChatCompletionInputMessage"
 		},
-		"ChatCompletionInputToolCall": {
+		"ChatCompletionInputMessageContent": {
+			"oneOf": [
+				{
+					"type": "string"
+				},
+				{
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/ChatCompletionInputMessageChunk"
+					}
+				}
+			],
+			"title": "ChatCompletionInputMessageContent"
+		},
+		"ChatCompletionInputMessageChunk": {
+			"oneOf": [
+				{
+					"type": "object",
+					"required": ["text", "type"],
+					"properties": {
+						"text": {
+							"type": "string"
+						},
+						"type": {
+							"type": "string",
+							"enum": ["text"]
+						}
+					}
+				},
+				{
+					"type": "object",
+					"required": ["image_url", "type"],
+					"properties": {
+						"image_url": {
+							"$ref": "#/$defs/ChatCompletionInputUrl"
+						},
+						"type": {
+							"type": "string",
+							"enum": ["image_url"]
+						}
+					}
+				}
+			],
+			"discriminator": {
+				"propertyName": "type"
+			},
+			"title": "ChatCompletionInputMessageChunk"
+		},
+		"ChatCompletionInputUrl": {
 			"type": "object",
-			"required": ["id", "type", "function"],
+			"required": ["url"],
+			"properties": {
+				"url": {
+					"type": "string"
+				}
+			},
+			"title": "ChatCompletionInputUrl"
+		},
+		"ChatCompletionInputGrammarType": {
+			"oneOf": [
+				{
+					"type": "object",
+					"required": ["type", "value"],
+					"properties": {
+						"type": {
+							"type": "string",
+							"enum": ["json"]
+						},
+						"value": {
+							"description": "A string that represents a [JSON Schema](https://json-schema.org/).\n\nJSON Schema is a declarative language that allows to annotate JSON documents\nwith types and descriptions."
+						}
+					}
+				},
+				{
+					"type": "object",
+					"required": ["type", "value"],
+					"properties": {
+						"type": {
+							"type": "string",
+							"enum": ["regex"]
+						},
+						"value": {
+							"type": "string"
+						}
+					}
+				}
+			],
+			"discriminator": {
+				"propertyName": "type"
+			},
+			"title": "ChatCompletionInputGrammarType"
+		},
+		"ChatCompletionInputStreamOptions": {
+			"type": "object",
+			"required": ["include_usage"],
+			"properties": {
+				"include_usage": {
+					"type": "boolean",
+					"description": "If set, an additional chunk will be streamed before the data: [DONE] message. The usage field on this chunk shows the token usage statistics for the entire request, and the choices field will always be an empty array. All other chunks will also include a usage field, but with a null value.",
+					"example": "true"
+				}
+			},
+			"title": "ChatCompletionInputStreamOptions"
+		},
+		"ChatCompletionInputToolChoice": {
+			"allOf": [
+				{
+					"$ref": "#/$defs/ChatCompletionInputToolType"
+				}
+			],
+			"nullable": true,
+			"title": "ChatCompletionInputToolChoice"
+		},
+		"ChatCompletionInputToolType": {
+			"oneOf": [
+				{
+					"type": "object",
+					"default": null,
+					"nullable": true
+				},
+				{
+					"type": "string"
+				},
+				{
+					"type": "object",
+					"required": ["function"],
+					"properties": {
+						"function": {
+							"$ref": "#/$defs/ChatCompletionInputFunctionName"
+						}
+					}
+				},
+				{
+					"type": "object",
+					"default": null,
+					"nullable": true
+				}
+			],
+			"title": "ChatCompletionInputToolType"
+		},
+		"ChatCompletionInputFunctionName": {
+			"type": "object",
+			"required": ["name"],
+			"properties": {
+				"name": {
+					"type": "string"
+				}
+			},
+			"title": "ChatCompletionInputFunctionName"
+		},
+		"ChatCompletionInputTool": {
+			"type": "object",
+			"required": ["type", "function"],
 			"properties": {
 				"function": {
 					"$ref": "#/$defs/ChatCompletionInputFunctionDefinition"
 				},
-				"id": {
-					"type": "integer",
-					"format": "int32",
-					"minimum": 0
-				},
 				"type": {
-					"type": "string"
+					"type": "string",
+					"example": "function"
 				}
 			},
-			"title": "ChatCompletionInputToolCall"
+			"title": "ChatCompletionInputTool"
 		},
 		"ChatCompletionInputFunctionDefinition": {
 			"type": "object",
@@ -190,38 +345,6 @@
 				}
 			},
 			"title": "ChatCompletionInputFunctionDefinition"
-		},
-		"ChatCompletionInputToolType": {
-			"oneOf": [
-				{
-					"type": "object",
-					"required": ["FunctionName"],
-					"properties": {
-						"FunctionName": {
-							"type": "string"
-						}
-					}
-				},
-				{
-					"type": "string",
-					"enum": ["OneOf"]
-				}
-			],
-			"title": "ChatCompletionInputToolType"
-		},
-		"ChatCompletionInputTool": {
-			"type": "object",
-			"required": ["type", "function"],
-			"properties": {
-				"function": {
-					"$ref": "#/$defs/ChatCompletionInputFunctionDefinition"
-				},
-				"type": {
-					"type": "string",
-					"example": "function"
-				}
-			},
-			"title": "ChatCompletionInputTool"
 		}
 	}
 }
