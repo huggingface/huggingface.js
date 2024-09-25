@@ -2,7 +2,6 @@ import { describe, test, expect, vi, beforeEach } from "vitest";
 import {
 	scanCacheDir,
 	scanCachedRepo,
-	REPO_TYPE_T,
 	scanSnapshotDir,
 	parseRepoType,
 	getBlobStat,
@@ -43,8 +42,8 @@ describe("scanCacheDir", () => {
 		expect(readdir).toHaveBeenCalledWith("/fake/dir");
 
 		expect(result.warnings.length).toBe(0);
-		expect(result.repos.size).toBe(0);
-		expect(result.sizeOnDisk).toBe(0);
+		expect(result.repos).toHaveLength(0);
+		expect(result.size).toBe(0);
 	});
 });
 
@@ -84,7 +83,7 @@ describe("scanCachedRepo", () => {
 
 describe("scanSnapshotDir", () => {
 	test("should scan a valid snapshot directory", async () => {
-		const cachedFiles = new Set<CachedFileInfo>();
+		const cachedFiles: CachedFileInfo[] = [];
 		const blobStats = new Map<string, Stats>();
 		vi.mocked(readdir).mockResolvedValueOnce([{ name: "file1", isDirectory: () => false } as Dirent]);
 
@@ -93,7 +92,7 @@ describe("scanSnapshotDir", () => {
 
 		await scanSnapshotDir("/fake/revision", cachedFiles, blobStats);
 
-		expect(cachedFiles.size).toBe(1);
+		expect(cachedFiles).toHaveLength(1);
 		expect(blobStats.size).toBe(1);
 	});
 });
@@ -120,18 +119,22 @@ describe("getBlobStat", () => {
 
 describe("parseRepoType", () => {
 	test("should parse models repo type", () => {
-		expect(parseRepoType("models")).toBe(REPO_TYPE_T.MODEL);
+		expect(parseRepoType("models")).toBe("model");
 	});
 
 	test("should parse model repo type", () => {
-		expect(parseRepoType("model")).toBe(REPO_TYPE_T.MODEL);
+		expect(parseRepoType("model")).toBe("model");
 	});
 
 	test("should parse dataset repo type", () => {
-		expect(parseRepoType("dataset")).toBe(REPO_TYPE_T.DATASET);
+		expect(parseRepoType("dataset")).toBe("dataset");
+	});
+
+	test("should parse space repo type", () => {
+		expect(parseRepoType("space")).toBe("space");
 	});
 
 	test("should throw an error for invalid repo type", () => {
-		expect(() => parseRepoType("invalid")).toThrow();
+		expect(() => parseRepoType("invalid")).toThrowError("Invalid repo type: invalid");
 	});
 });

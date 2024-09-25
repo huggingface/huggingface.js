@@ -2,30 +2,25 @@ import { homedir } from "node:os";
 import { join, basename } from "node:path";
 import { stat, readdir, readFile, realpath, lstat } from "node:fs/promises";
 import type { Stats } from "node:fs";
+import type { RepoType } from "../types/public";
 
 function getDefaultHome(): string {
 	return join(homedir(), ".cache");
 }
 
 function getDefaultCachePath(): string {
-	return process.env["HF_HOME"] ?? join(process.env["XDG_CACHE_HOME"] ?? getDefaultHome(), "huggingface")
+	return join(process.env["HF_HOME"] ?? join(process.env["XDG_CACHE_HOME"] ?? getDefaultHome(), "huggingface"), "hub");
 }
 
 function getHuggingFaceHubCache(): string {
-	return  process.env["HUGGINGFACE_HUB_CACHE"] ?? getDefaultCachePath();
+	return process.env["HUGGINGFACE_HUB_CACHE"] ?? getDefaultCachePath();
 }
 
 function getHFHubCache(): string {
-	return  process.env["HF_HUB_CACHE"] ?? getHuggingFaceHubCache();
+	return process.env["HF_HUB_CACHE"] ?? getHuggingFaceHubCache();
 }
 
 const FILES_TO_IGNORE: string[] = [".DS_Store"];
-
-export enum REPO_TYPE_T {
-	MODEL = "model",
-	DATASET = "dataset",
-	SPACE = "space",
-}
 
 export interface CachedFileInfo {
 	filename: string;
@@ -38,30 +33,30 @@ export interface CachedFileInfo {
 }
 
 export interface CachedRevisionInfo {
-	commitHash: string;
-	snapshotPath: string;
-	sizeOnDisk: number;
-	readonly files: Set<CachedFileInfo>;
-	readonly refs: Set<string>;
+	commitOid: string;
+	path: string;
+	size: number;
+	files: CachedFileInfo[];
+	refs: string[];
 
-	lastModified: number;
+	lastModifiedAt: Date;
 }
 
 export interface CachedRepoInfo {
 	repoId: string;
-	repoType: REPO_TYPE_T;
-	repoPath: string;
-	sizeOnDisk: number;
-	nbFiles: number;
-	readonly revisions: Set<CachedRevisionInfo>;
+	repoType: RepoType;
+	path: string;
+	size: number;
+	filesCount: number;
+	revisions: CachedRevisionInfo[];
 
-	lastAccessed: number;
-	lastModified: number;
+	lastAccessedAt: Date;
+	lastModifiedAt: Date;
 }
 
 export interface HFCacheInfo {
-	sizeOnDisk: number;
-	readonly repos: Set<CachedRepoInfo>;
+	size: number;
+	repos: CachedRepoInfo[];
 	warnings: Error[];
 }
 
@@ -75,7 +70,7 @@ export async function scanCacheDir(cacheDir: string | undefined = undefined): Pr
 		);
 	}
 
-	const repos = new Set<CachedRepoInfo>();
+	const repos: CachedRepoInfo[] = [];
 	const warnings: Error[] = [];
 
 	const directories = await readdir(cacheDir);
@@ -94,7 +89,7 @@ export async function scanCacheDir(cacheDir: string | undefined = undefined): Pr
 
 		try {
 			const cached = await scanCachedRepo(absolute);
-			repos.add(cached);
+			repos.push(cached);
 		} catch (err: unknown) {
 			warnings.push(err as Error);
 		}
@@ -102,7 +97,7 @@ export async function scanCacheDir(cacheDir: string | undefined = undefined): Pr
 
 	return {
 		repos: repos,
-		sizeOnDisk: [...repos.values()].reduce((sum, repo) => sum + repo.sizeOnDisk, 0),
+		size: [...repos.values()].reduce((sum, repo) => sum + repo.size, 0),
 		warnings: warnings,
 	};
 }
@@ -128,14 +123,14 @@ export async function scanCachedRepo(repoPath: string): Promise<CachedRepoInfo> 
 	}
 
 	// Check if the refs directory exists and scan it
-	const refsByHash: Map<string, Set<string>> = new Map();
+	const refsByHash: Map<string, string[]> = new Map();
 	const refsStat = await stat(refsPath);
 	if (refsStat.isDirectory()) {
 		await scanRefsDir(refsPath, refsByHash);
 	}
 
 	// Scan snapshots directory and collect cached revision information
-	const cachedRevisions: Set<CachedRevisionInfo> = new Set();
+	const cachedRevisions: CachedRevisionInfo[] = [];
 	const blobStats: Map<string, Stats> = new Map(); // Store blob stats
 
 	const snapshotDirs = await readdir(snapshotsPath);
@@ -148,19 +143,21 @@ export async function scanCachedRepo(repoPath: string): Promise<CachedRepoInfo> 
 			throw new Error(`Snapshots folder corrupted. Found a file: ${revisionPath}`);
 		}
 
-		const cachedFiles: Set<CachedFileInfo> = new Set();
+		const cachedFiles: CachedFileInfo[] = [];
 		await scanSnapshotDir(revisionPath, cachedFiles, blobStats);
 
 		const revisionLastModified =
-			cachedFiles.size > 0 ? Math.max(...[...cachedFiles].map((file) => file.blobLastModified)) : revisionStat.mtimeMs;
+			cachedFiles.length > 0
+				? Math.max(...[...cachedFiles].map((file) => file.blobLastModified))
+				: revisionStat.mtimeMs;
 
-		cachedRevisions.add({
-			commitHash: dir,
+		cachedRevisions.push({
+			commitOid: dir,
 			files: cachedFiles,
-			refs: refsByHash.get(dir) || new Set(),
-			sizeOnDisk: [...cachedFiles].reduce((sum, file) => sum + file.sizeOnDisk, 0),
-			snapshotPath: revisionPath,
-			lastModified: revisionLastModified,
+			refs: refsByHash.get(dir) || [],
+			size: [...cachedFiles].reduce((sum, file) => sum + file.sizeOnDisk, 0),
+			path: revisionPath,
+			lastModifiedAt: new Date(revisionLastModified),
 		});
 
 		refsByHash.delete(dir);
@@ -184,16 +181,16 @@ export async function scanCachedRepo(repoPath: string): Promise<CachedRepoInfo> 
 	return {
 		repoId: repoId,
 		repoType: repoType,
-		repoPath: repoPath,
-		nbFiles: blobStats.size,
+		path: repoPath,
+		filesCount: blobStats.size,
 		revisions: cachedRevisions,
-		sizeOnDisk: [...blobStats.values()].reduce((sum, stat) => sum + stat.size, 0),
-		lastAccessed: repoLastAccessed,
-		lastModified: repoLastModified,
+		size: [...blobStats.values()].reduce((sum, stat) => sum + stat.size, 0),
+		lastAccessedAt: new Date(repoLastAccessed),
+		lastModifiedAt: new Date(repoLastModified),
 	};
 }
 
-export async function scanRefsDir(refsPath: string, refsByHash: Map<string, Set<string>>): Promise<void> {
+export async function scanRefsDir(refsPath: string, refsByHash: Map<string, string[]>): Promise<void> {
 	const refFiles = await readdir(refsPath, { withFileTypes: true });
 	for (const refFile of refFiles) {
 		const refFilePath = join(refsPath, refFile.name);
@@ -202,15 +199,15 @@ export async function scanRefsDir(refsPath: string, refsByHash: Map<string, Set<
 		const commitHash = await readFile(refFilePath, "utf-8");
 		const refName = refFile.name;
 		if (!refsByHash.has(commitHash)) {
-			refsByHash.set(commitHash, new Set());
+			refsByHash.set(commitHash, []);
 		}
-		refsByHash.get(commitHash)?.add(refName);
+		refsByHash.get(commitHash)?.push(refName);
 	}
 }
 
 export async function scanSnapshotDir(
 	revisionPath: string,
-	cachedFiles: Set<CachedFileInfo>,
+	cachedFiles: CachedFileInfo[],
 	blobStats: Map<string, Stats>
 ): Promise<void> {
 	const files = await readdir(revisionPath, { withFileTypes: true });
@@ -221,7 +218,7 @@ export async function scanSnapshotDir(
 		const blobPath = await realpath(filePath);
 		const blobStat = await getBlobStat(blobPath, blobStats);
 
-		cachedFiles.add({
+		cachedFiles.push({
 			filename: file.name,
 			filePath: filePath,
 			blobPath: blobPath,
@@ -242,16 +239,24 @@ export async function getBlobStat(blobPath: string, blobStats: Map<string, Stats
 	return blob;
 }
 
-export function parseRepoType(type: string): REPO_TYPE_T {
+export function parseRepoType(type: string): RepoType {
 	switch (type) {
 		case "models":
 		case "model":
-			return REPO_TYPE_T.MODEL;
-		case REPO_TYPE_T.DATASET:
-			return REPO_TYPE_T.DATASET;
-		case REPO_TYPE_T.SPACE:
-			return REPO_TYPE_T.SPACE;
+			return "model";
+		case "dataset":
+			return "dataset";
+		case "space":
+			return "space";
 		default:
-			throw new Error("");
+			throw new TypeError(`Invalid repo type: ${type}`);
 	}
 }
+
+scanCacheDir()
+	.then((result) => {
+		console.log(result);
+	})
+	.catch((err: unknown) => {
+		console.error(err);
+	});
