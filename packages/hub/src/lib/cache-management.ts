@@ -28,8 +28,8 @@ export interface CachedFileInfo {
 	blobPath: string;
 	sizeOnDisk: number;
 
-	blobLastAccessed: number;
-	blobLastModified: number;
+	blobLastAccessedAt: Date;
+	blobLastModifiedAt: Date;
 }
 
 export interface CachedRevisionInfo {
@@ -148,7 +148,7 @@ export async function scanCachedRepo(repoPath: string): Promise<CachedRepoInfo> 
 
 		const revisionLastModified =
 			cachedFiles.length > 0
-				? Math.max(...[...cachedFiles].map((file) => file.blobLastModified))
+				? Math.max(...[...cachedFiles].map((file) => file.blobLastModifiedAt.getTime()))
 				: revisionStat.mtimeMs;
 
 		cachedRevisions.push({
@@ -223,8 +223,8 @@ export async function scanSnapshotDir(
 			filePath: filePath,
 			blobPath: blobPath,
 			sizeOnDisk: blobStat.size,
-			blobLastAccessed: blobStat.atimeMs,
-			blobLastModified: blobStat.mtimeMs,
+			blobLastAccessedAt: new Date(blobStat.atimeMs),
+			blobLastModifiedAt: new Date(blobStat.mtimeMs),
 		});
 	}
 }
