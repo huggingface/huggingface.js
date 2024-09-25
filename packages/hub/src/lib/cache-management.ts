@@ -2,7 +2,7 @@ import { homedir } from "node:os";
 import { join, basename } from "node:path";
 import { stat, readdir, readFile, realpath, lstat } from "node:fs/promises";
 import type { Stats } from "node:fs";
-import type { RepoType } from "../types/public";
+import type { RepoType, RepoId } from "../types/public";
 
 function getDefaultHome(): string {
 	return join(homedir(), ".cache");
@@ -43,8 +43,7 @@ export interface CachedRevisionInfo {
 }
 
 export interface CachedRepoInfo {
-	repoId: string;
-	repoType: RepoType;
+	id: RepoId
 	path: string;
 	size: number;
 	filesCount: number;
@@ -179,8 +178,10 @@ export async function scanCachedRepo(repoPath: string): Promise<CachedRepoInfo> 
 
 	// Return the constructed CachedRepoInfo object
 	return {
-		repoId: repoId,
-		repoType: repoType,
+		id: {
+			name: repoId,
+			type: repoType,
+		},
 		path: repoPath,
 		filesCount: blobStats.size,
 		revisions: cachedRevisions,

@@ -77,7 +77,8 @@ describe("scanCachedRepo", () => {
 			withFileTypes: true,
 		});
 
-		expect(result.repoId).toBe("hello-world/name");
+		expect(result.id.name).toBe("hello-world/name");
+		expect(result.id.type).toBe("model");
 	});
 });
 
