@@ -412,7 +412,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/MinishLab/model2vec",
 		snippets: snippets.model2vec,
 		filter: false,
-		countDownloads: `path_extension:"safetensors"`,
 	},
 	moshi: {
 		prettyLabel: "Moshi",
