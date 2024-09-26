@@ -17,6 +17,30 @@ for message in client.chat_completion(
 ):
     print(message.choices[0].delta.content, end="")`;
 
+export const snippetConversationalWithImage = (model: ModelDataMinimal, accessToken: string): string =>
+	`from huggingface_hub import InferenceClient
+
+client = InferenceClient(
+	"${model.id}",
+	token="${accessToken || "{API_TOKEN}"}",
+)
+image_url = "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg"
+
+for message in client.chat_completion(
+	messages=[
+		{
+			"role": "user",
+			"content": [
+				{"type": "image_url", "image_url": {"url": image_url}},
+				{"type": "text", "text": "Describe this image in one sentence."},
+			],
+		}
+	],
+	max_tokens=500,
+	stream=True,
+):
+	print(message.choices[0].delta.content, end="")`;
+
 export const snippetZeroShotClassification = (model: ModelDataMinimal): string =>
 	`def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
@@ -156,6 +180,9 @@ export function getPythonInferenceSnippet(model: ModelDataMinimal, accessToken: 
 	if (model.pipeline_tag === "text-generation" && model.config?.tokenizer_config?.chat_template) {
 		// Conversational model detected, so we display a code snippet that features the Messages API
 		return snippetConversational(model, accessToken);
+	} else if (model.pipeline_tag === "image-text-to-text" && model.config?.tokenizer_config?.chat_template) {
+		// Example sending an image to the Message API
+		return snippetConversationalWithImage(model, accessToken);
 	} else {
 		const body =
 			model.pipeline_tag && model.pipeline_tag in pythonSnippets

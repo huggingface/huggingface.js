@@ -41,6 +41,35 @@ for await (const chunk of inference.chatCompletionStream({
 		return snippetBasic(model, accessToken);
 	}
 };
+
+export const snippetImageTextToTextGeneration = (model: ModelDataMinimal, accessToken: string): string => {
+	if (model.config?.tokenizer_config?.chat_template) {
+		// Conversational model detected, so we display a code snippet that features the Messages API
+		return `import { HfInference } from "@huggingface/inference";
+
+const inference = new HfInference("${accessToken || `{API_TOKEN}`}");
+const image_url = "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg"
+
+for await (const chunk of inference.chatCompletionStream({
+	model: "${model.id}",
+	messages: [
+		{
+			"role": "user",
+			"content": [
+				{"type": "image_url", "image_url": {"url": image_url}},
+				{"type": "text", "text": "Describe this image in one sentence."},
+			],
+		}
+	],
+	max_tokens: 500,
+})) {
+	process.stdout.write(chunk.choices[0]?.delta?.content || "");
+}`;
+	} else {
+		return snippetBasic(model, accessToken);
+	}
+};
+
 export const snippetZeroShotClassification = (model: ModelDataMinimal, accessToken: string): string =>
 	`async function query(data) {
 	const response = await fetch(
@@ -156,6 +185,7 @@ export const jsSnippets: Partial<Record<PipelineType, (model: ModelDataMinimal, 
 	summarization: snippetBasic,
 	"feature-extraction": snippetBasic,
 	"text-generation": snippetTextGeneration,
+	"image-text-to-text": snippetImageTextToTextGeneration,
 	"text2text-generation": snippetBasic,
 	"fill-mask": snippetBasic,
 	"sentence-similarity": snippetBasic,
