@@ -406,6 +406,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"mlc-chat-config.json"`,
 	},
+	moshi: {
+		prettyLabel: "Moshi",
+		repoName: "Moshi",
+		repoUrl: "https://github.com/kyutai-labs/moshi",
+		filter: false,
+		countDownloads: `path:"tokenizer-e351c8d8-checkpoint125.safetensors"`,
+	},
 	nemo: {
 		prettyLabel: "NeMo",
 		repoName: "NeMo",
@@ -458,7 +465,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "pythae",
 		repoUrl: "https://github.com/clementchadebec/benchmark_VAE",
 		snippets: snippets.pythae,
-		filter: true,
+		filter: false,
 	},
 	recurrentgemma: {
 		prettyLabel: "RecurrentGemma",
@@ -505,6 +512,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.sampleFactory,
 		filter: true,
 		countDownloads: `path:"cfg.json"`,
+	},
+	sapiens: {
+		prettyLabel: "sapiens",
+		repoName: "sapiens",
+		repoUrl: "https://github.com/facebookresearch/sapiens",
+		filter: false,
+		countDownloads: `path_extension:"pt2" OR path_extension:"pth" OR path_extension:"onnx"`,
 	},
 	"sentence-transformers": {
 		prettyLabel: "sentence-transformers",
@@ -556,6 +570,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"hyperparams.yaml"`,
 	},
+	"ssr-speech": {
+		prettyLabel: "SSR-Speech",
+		repoName: "SSR-Speech",
+		repoUrl: "https://github.com/WangHelin1997/SSR-Speech",
+		filter: false,
+		countDownloads: `path_extension:".pth"`,
+	},
 	"stable-audio-tools": {
 		prettyLabel: "Stable Audio Tools",
 		repoName: "stable-audio-tools",
@@ -578,6 +599,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"cvlm_llama2_tokenizer/tokenizer.model"`,
 		snippets: snippets.seed_story,
+	},
+	soloaudio: {
+		prettyLabel: "SoloAudio",
+		repoName: "SoloAudio",
+		repoUrl: "https://github.com/WangHelin1997/SoloAudio",
+		filter: false,
+		countDownloads: `path:"soloaudio_v2.pt"`,
 	},
 	"stable-baselines3": {
 		prettyLabel: "stable-baselines3",
@@ -678,6 +706,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://github.com/argmaxinc/WhisperKit?tab=readme-ov-file#homebrew",
 		snippets: snippets.whisperkit,
 		countDownloads: `path_filename:"model" AND path_extension:"mil" AND _exists_:"path_prefix"`,
+	},
+	"3dtopia-xl": {
+		prettyLabel: "3DTopia-XL",
+		repoName: "3DTopia-XL",
+		repoUrl: "https://github.com/3DTopia/3DTopia-XL",
+		filter: false,
+		countDownloads: `path:"model_vae_fp16.pt"`,
+		snippets: snippets.threedtopia_xl,
 	},
 } satisfies Record<string, LibraryUiElement>;
 

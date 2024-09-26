@@ -13,14 +13,11 @@ describe("uploadFilesWithProgress", () => {
 	it("should upload files", async () => {
 		const repoName = `${TEST_USER}/TEST-${insecureRandomString()}`;
 		const repo = { type: "model", name: repoName } satisfies RepoId;
-		const credentials = {
-			accessToken: TEST_ACCESS_TOKEN,
-		};
 		const lfsContent = "O123456789".repeat(100_000);
 
 		try {
 			const result = await createRepo({
-				credentials,
+				accessToken: TEST_ACCESS_TOKEN,
 				repo,
 				hubUrl: TEST_HUB_URL,
 			});
@@ -30,7 +27,7 @@ describe("uploadFilesWithProgress", () => {
 			});
 
 			const it = uploadFilesWithProgress({
-				credentials,
+				accessToken: TEST_ACCESS_TOKEN,
 				repo,
 				files: [
 					{ content: new Blob(["file1"]), path: "file1" },
@@ -163,7 +160,7 @@ describe("uploadFilesWithProgress", () => {
 		} finally {
 			await deleteRepo({
 				repo,
-				credentials,
+				accessToken: TEST_ACCESS_TOKEN,
 				hubUrl: TEST_HUB_URL,
 			});
 		}

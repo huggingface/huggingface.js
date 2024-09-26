@@ -1,20 +1,21 @@
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
-import type { Credentials, RepoDesignation } from "../types/public";
+import type { CredentialsParams, RepoDesignation } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { toRepoId } from "../utils/toRepoId";
 
-export async function countCommits(params: {
-	credentials?: Credentials;
-	repo: RepoDesignation;
-	/**
-	 * Revision to list commits from. Defaults to the default branch.
-	 */
-	revision?: string;
-	hubUrl?: string;
-	fetch?: typeof fetch;
-}): Promise<number> {
-	checkCredentials(params.credentials);
+export async function countCommits(
+	params: {
+		repo: RepoDesignation;
+		/**
+		 * Revision to list commits from. Defaults to the default branch.
+		 */
+		revision?: string;
+		hubUrl?: string;
+		fetch?: typeof fetch;
+	} & Partial<CredentialsParams>
+): Promise<number> {
+	const accessToken = checkCredentials(params);
 	const repoId = toRepoId(params.repo);
 
 	// Could upgrade to 1000 commits per page
@@ -23,7 +24,7 @@ export async function countCommits(params: {
 	}?limit=1`;
 
 	const res: Response = await (params.fetch ?? fetch)(url, {
-		headers: params.credentials ? { Authorization: `Bearer ${params.credentials.accessToken}` } : {},
+		headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
 	});
 
 	if (!res.ok) {

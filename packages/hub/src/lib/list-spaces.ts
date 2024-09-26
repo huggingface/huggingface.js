@@ -1,7 +1,7 @@
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
 import type { ApiSpaceInfo } from "../types/api/api-space";
-import type { Credentials, SpaceSdk } from "../types/public";
+import type { CredentialsParams, SpaceSdk } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
 import { pick } from "../utils/pick";
@@ -38,27 +38,28 @@ export interface SpaceEntry {
 
 export async function* listSpaces<
 	const T extends Exclude<(typeof EXPANDABLE_KEYS)[number], (typeof EXPAND_KEYS)[number]> = never,
->(params?: {
-	search?: {
+>(
+	params?: {
+		search?: {
+			/**
+			 * Will search in the space name for matches
+			 */
+			query?: string;
+			owner?: string;
+			tags?: string[];
+		};
+		hubUrl?: string;
 		/**
-		 * Will search in the space name for matches
+		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
-		query?: string;
-		owner?: string;
-		tags?: string[];
-	};
-	credentials?: Credentials;
-	hubUrl?: string;
-	/**
-	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
-	 */
-	fetch?: typeof fetch;
-	/**
-	 * Additional fields to fetch from huggingface.co.
-	 */
-	additionalFields?: T[];
-}): AsyncGenerator<SpaceEntry & Pick<ApiSpaceInfo, T>> {
-	checkCredentials(params?.credentials);
+		fetch?: typeof fetch;
+		/**
+		 * Additional fields to fetch from huggingface.co.
+		 */
+		additionalFields?: T[];
+	} & Partial<CredentialsParams>
+): AsyncGenerator<SpaceEntry & Pick<ApiSpaceInfo, T>> {
+	const accessToken = params && checkCredentials(params);
 	const search = new URLSearchParams([
 		...Object.entries({
 			limit: "500",
@@ -74,7 +75,7 @@ export async function* listSpaces<
 		const res: Response = await (params?.fetch ?? fetch)(url, {
 			headers: {
 				accept: "application/json",
-				...(params?.credentials ? { Authorization: `Bearer ${params.credentials.accessToken}` } : undefined),
+				...(params?.credentials ? { Authorization: `Bearer ${accessToken}` } : undefined),
 			},
 		});
 
