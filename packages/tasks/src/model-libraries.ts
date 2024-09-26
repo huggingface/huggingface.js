@@ -406,6 +406,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"mlc-chat-config.json"`,
 	},
+	model2vec: {
+		prettyLabel: "Model2Vec",
+		repoName: "model2vec",
+		repoUrl: "https://github.com/MinishLab/model2vec",
+		snippets: snippets.model2vec,
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	moshi: {
 		prettyLabel: "Moshi",
 		repoName: "Moshi",
