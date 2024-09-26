@@ -1,3 +1,4 @@
+export * from "./cache-management";
 export * from "./commit";
 export * from "./count-commits";
 export * from "./create-repo";
