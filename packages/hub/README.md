@@ -122,6 +122,7 @@ const result = await scanCacheDir();
 
 console.log(result);
 ```
+Note that the cache directory is created and used only by the Python and Rust libraries. Downloading files using the `@huggingface/hub` package won't use the cache directory.
 
 ## Performance considerations
 

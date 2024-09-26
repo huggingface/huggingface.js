@@ -247,11 +247,10 @@ export async function getBlobStat(blobPath: string, blobStats: Map<string, Stats
 export function parseRepoType(type: string): RepoType {
 	switch (type) {
 		case "models":
-		case "model":
 			return "model";
-		case "dataset":
+		case "datasets":
 			return "dataset";
-		case "space":
+		case "spaces":
 			return "space";
 		default:
 			throw new TypeError(`Invalid repo type: ${type}`);
