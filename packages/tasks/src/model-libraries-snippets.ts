@@ -955,7 +955,7 @@ export const model2vec = (model: ModelData): string[] => [
 	`from model2vec import StaticModel
 
 model = StaticModel.from_pretrained("${model.id}")`,
-]
+];
 
 export const nemo = (model: ModelData): string[] => {
 	let command: string[] | undefined = undefined;
