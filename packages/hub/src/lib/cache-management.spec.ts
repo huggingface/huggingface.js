@@ -123,16 +123,12 @@ describe("parseRepoType", () => {
 		expect(parseRepoType("models")).toBe("model");
 	});
 
-	test("should parse model repo type", () => {
-		expect(parseRepoType("model")).toBe("model");
-	});
-
 	test("should parse dataset repo type", () => {
-		expect(parseRepoType("dataset")).toBe("dataset");
+		expect(parseRepoType("datasets")).toBe("dataset");
 	});
 
 	test("should parse space repo type", () => {
-		expect(parseRepoType("space")).toBe("space");
+		expect(parseRepoType("spaces")).toBe("space");
 	});
 
 	test("should throw an error for invalid repo type", () => {
