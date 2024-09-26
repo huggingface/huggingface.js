@@ -23,13 +23,16 @@ function getHFHubCache(): string {
 const FILES_TO_IGNORE: string[] = [".DS_Store"];
 
 export interface CachedFileInfo {
-	filename: string;
-	filePath: string;
-	blobPath: string;
-	sizeOnDisk: number;
-
-	blobLastAccessedAt: Date;
-	blobLastModifiedAt: Date;
+	path: string;
+	/**
+	 * Underlying file - which `path` is symlinked to
+	 */
+	blob: {
+		size: number;
+		path: string;
+		lastModifiedAt: Date;
+		lastAccessedAt: Date;
+	};
 }
 
 export interface CachedRevisionInfo {
@@ -43,7 +46,7 @@ export interface CachedRevisionInfo {
 }
 
 export interface CachedRepoInfo {
-	id: RepoId
+	id: RepoId;
 	path: string;
 	size: number;
 	filesCount: number;
@@ -147,14 +150,14 @@ export async function scanCachedRepo(repoPath: string): Promise<CachedRepoInfo> 
 
 		const revisionLastModified =
 			cachedFiles.length > 0
-				? Math.max(...[...cachedFiles].map((file) => file.blobLastModifiedAt.getTime()))
+				? Math.max(...[...cachedFiles].map((file) => file.blob.lastModifiedAt.getTime()))
 				: revisionStat.mtimeMs;
 
 		cachedRevisions.push({
 			commitOid: dir,
 			files: cachedFiles,
 			refs: refsByHash.get(dir) || [],
-			size: [...cachedFiles].reduce((sum, file) => sum + file.sizeOnDisk, 0),
+			size: [...cachedFiles].reduce((sum, file) => sum + file.blob.size, 0),
 			path: revisionPath,
 			lastModifiedAt: new Date(revisionLastModified),
 		});
@@ -220,12 +223,13 @@ export async function scanSnapshotDir(
 		const blobStat = await getBlobStat(blobPath, blobStats);
 
 		cachedFiles.push({
-			filename: file.name,
-			filePath: filePath,
-			blobPath: blobPath,
-			sizeOnDisk: blobStat.size,
-			blobLastAccessedAt: new Date(blobStat.atimeMs),
-			blobLastModifiedAt: new Date(blobStat.mtimeMs),
+			path: filePath,
+			blob: {
+				path: blobPath,
+				size: blobStat.size,
+				lastAccessedAt: new Date(blobStat.atimeMs),
+				lastModifiedAt: new Date(blobStat.mtimeMs),
+			},
 		});
 	}
 }
@@ -253,11 +257,3 @@ export function parseRepoType(type: string): RepoType {
 			throw new TypeError(`Invalid repo type: ${type}`);
 	}
 }
-
-scanCacheDir()
-	.then((result) => {
-		console.log(result);
-	})
-	.catch((err: unknown) => {
-		console.error(err);
-	});
