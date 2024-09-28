@@ -716,8 +716,8 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.threedtopia_xl,
 	},
 	cotracker: {
-		prettyLabel: "cotracker",
-		repoName: "cotracker",
+		prettyLabel: "CoTracker",
+		repoName: "CoTracker",
 		repoUrl: "https://github.com/facebookresearch/co-tracker",
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
