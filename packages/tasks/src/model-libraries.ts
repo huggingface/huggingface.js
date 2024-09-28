@@ -661,6 +661,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"pytorch_model.bin" OR path:"model.safetensors"`,
 	},
+	imstoucan: {
+		prettyLabel: IMS-Toucan",
+		repoName: "IMS-Toucan",
+		repoUrl: "https://github.com/DigitalPhonetics/IMS-Toucan",
+		countDownloads: `path_extension:"pt"`,
+	},
 	transformers: {
 		prettyLabel: "Transformers",
 		repoName: "🤗/transformers",
