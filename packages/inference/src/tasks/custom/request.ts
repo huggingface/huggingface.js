@@ -32,7 +32,7 @@ export async function request<T>(
 				throw new Error(`Server ${args.model} does not seem to support chat completion. Error: ${output.error}`);
 			}
 			if (output.error) {
-				throw new Error(output.error);
+				throw new Error(JSON.stringify(output.error));
 			}
 		}
 		throw new Error("An error occurred while fetching the blob");
