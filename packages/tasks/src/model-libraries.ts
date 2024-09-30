@@ -301,6 +301,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/Tencent/HunyuanDiT",
 		countDownloads: `path:"pytorch_model_ema.pt" OR path:"pytorch_model_distill.pt"`,
 	},
+	imstoucan: {
+		prettyLabel: "IMS Toucan",
+		repoName: "IMS-Toucan",
+		repoUrl: "https://github.com/DigitalPhonetics/IMS-Toucan",
+		countDownloads: `path:"embedding_gan.pt" OR path:"Vocoder.pt" OR path:"ToucanTTS.pt"`,
+	},
 	keras: {
 		prettyLabel: "Keras",
 		repoName: "Keras",
