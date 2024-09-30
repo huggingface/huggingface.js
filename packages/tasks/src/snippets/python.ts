@@ -8,7 +8,7 @@ export const snippetConversational = (model: ModelDataMinimal, accessToken: stri
 client = InferenceClient(api_key="${accessToken || "{API_TOKEN}"}")
 
 for message in client.chat_completion(
-    model="${model.id}",
+	model="${model.id}",
 	messages=[{"role": "user", "content": "What is the capital of France?"}],
 	max_tokens=500,
 	stream=True,
@@ -23,7 +23,7 @@ client = InferenceClient(api_key="${accessToken || "{API_TOKEN}"}")
 image_url = "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg"
 
 for message in client.chat_completion(
-    model="${model.id}",
+	model="${model.id}",
 	messages=[
 		{
 			"role": "user",
