@@ -175,6 +175,7 @@ export type License =
 	| "llama2"
 	| "llama3"
 	| "llama3.1"
+	| "llama3.2"
 	| "gemma"
 	| "unknown"
 	| "other";

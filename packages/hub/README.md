@@ -110,6 +110,19 @@ console.log(oauthResult);
 
 Checkout the demo: https://huggingface.co/spaces/huggingfacejs/client-side-oauth
 
+## Hugging face cache
+
+The `@huggingface/hub` package provide basic capabilities to scan the cache directory. Learn more about [Manage huggingface_hub cache-system](https://huggingface.co/docs/huggingface_hub/en/guides/manage-cache).
+
+```ts
+import { scanCacheDir } from "@huggingface/hub";
+
+const result = await scanCacheDir();
+
+console.log(result);
+```
+Note that the cache directory is created and used only by the Python and Rust libraries. Downloading files using the `@huggingface/hub` package won't use the cache directory.
+
 ## Performance considerations
 
 When uploading large files, you may want to run the `commit` calls inside a worker, to offload the sha256 computations.
