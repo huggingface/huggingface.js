@@ -305,7 +305,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "IMS Toucan",
 		repoName: "IMS-Toucan",
 		repoUrl: "https://github.com/DigitalPhonetics/IMS-Toucan",
-		countDownloads: `path_extension:"pt"`,
+		countDownloads: `path:"embedding_gan.pt" OR path:"Vocoder.pt", OR path:"ToucanTTS.pt"`,
 	},
 	keras: {
 		prettyLabel: "Keras",
