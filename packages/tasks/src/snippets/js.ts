@@ -48,7 +48,7 @@ export const snippetImageTextToTextGeneration = (model: ModelDataMinimal, access
 		return `import { HfInference } from "@huggingface/inference";
 
 const inference = new HfInference("${accessToken || `{API_TOKEN}`}");
-const image_url = "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg"
+const imageUrl = "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg"
 
 for await (const chunk of inference.chatCompletionStream({
 	model: "${model.id}",
@@ -56,7 +56,7 @@ for await (const chunk of inference.chatCompletionStream({
 		{
 			"role": "user",
 			"content": [
-				{"type": "image_url", "image_url": {"url": image_url}},
+				{"type": "image_url", "image_url": {"url": imageUrl}},
 				{"type": "text", "text": "Describe this image in one sentence."},
 			],
 		}
