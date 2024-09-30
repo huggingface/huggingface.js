@@ -10,7 +10,7 @@ export const snippetBasic = (model: ModelDataMinimal, accessToken: string): stri
 	-H "Authorization: Bearer ${accessToken || `{API_TOKEN}`}"`;
 
 export const snippetTextGeneration = (model: ModelDataMinimal, accessToken: string): string => {
-	if (model.config?.tokenizer_config?.chat_template) {
+	if (model.tags.includes("conversational")) {
 		// Conversational model detected, so we display a code snippet that features the Messages API
 		return `curl 'https://api-inference.huggingface.co/models/${model.id}/v1/chat/completions' \\
 -H "Authorization: Bearer ${accessToken || `{API_TOKEN}`}" \\
@@ -18,6 +18,32 @@ export const snippetTextGeneration = (model: ModelDataMinimal, accessToken: stri
 -d '{
 	"model": "${model.id}",
 	"messages": [{"role": "user", "content": "What is the capital of France?"}],
+	"max_tokens": 500,
+	"stream": false
+}'
+`;
+	} else {
+		return snippetBasic(model, accessToken);
+	}
+};
+
+export const snippetImageTextToTextGeneration = (model: ModelDataMinimal, accessToken: string): string => {
+	if (model.tags.includes("conversational")) {
+		// Conversational model detected, so we display a code snippet that features the Messages API
+		return `curl 'https://api-inference.huggingface.co/models/${model.id}/v1/chat/completions' \\
+-H "Authorization: Bearer ${accessToken || `{API_TOKEN}`}" \\
+-H 'Content-Type: application/json' \\
+-d '{
+	"model": "${model.id}",
+	"messages": [
+		{
+			"role": "user",
+			"content": [
+				{"type": "image_url", "image_url": {"url": "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg"}},
+				{"type": "text", "text": "Describe this image in one sentence."}
+			]
+		}
+	],
 	"max_tokens": 500,
 	"stream": false
 }'
@@ -51,6 +77,7 @@ export const curlSnippets: Partial<Record<PipelineType, (model: ModelDataMinimal
 	summarization: snippetBasic,
 	"feature-extraction": snippetBasic,
 	"text-generation": snippetTextGeneration,
+	"image-text-to-text": snippetImageTextToTextGeneration,
 	"text2text-generation": snippetBasic,
 	"fill-mask": snippetBasic,
 	"sentence-similarity": snippetBasic,

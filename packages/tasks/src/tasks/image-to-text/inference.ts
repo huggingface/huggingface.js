@@ -28,7 +28,7 @@ export interface ImageToTextParameters {
 	/**
 	 * Parametrization of the text generation process
 	 */
-	generate?: GenerationParameters;
+	generation_parameters?: GenerationParameters;
 	/**
 	 * The amount of maximum tokens to generate.
 	 */
