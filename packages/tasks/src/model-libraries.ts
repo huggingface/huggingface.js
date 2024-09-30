@@ -302,7 +302,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"pytorch_model_ema.pt" OR path:"pytorch_model_distill.pt"`,
 	},
 	imstoucan: {
-		prettyLabel: IMS Toucan",
+		prettyLabel: "IMS Toucan",
 		repoName: "IMS-Toucan",
 		repoUrl: "https://github.com/DigitalPhonetics/IMS-Toucan",
 		countDownloads: `path_extension:"pt"`,
