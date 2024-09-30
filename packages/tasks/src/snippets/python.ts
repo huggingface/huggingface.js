@@ -5,12 +5,10 @@ import type { ModelDataMinimal } from "./types.js";
 export const snippetConversational = (model: ModelDataMinimal, accessToken: string): string =>
 	`from huggingface_hub import InferenceClient
 
-client = InferenceClient(
-    "${model.id}",
-    token="${accessToken || "{API_TOKEN}"}",
-)
+client = InferenceClient(api_key="${accessToken || "{API_TOKEN}"}")
 
 for message in client.chat_completion(
+    model="${model.id}",
 	messages=[{"role": "user", "content": "What is the capital of France?"}],
 	max_tokens=500,
 	stream=True,
@@ -20,13 +18,12 @@ for message in client.chat_completion(
 export const snippetConversationalWithImage = (model: ModelDataMinimal, accessToken: string): string =>
 	`from huggingface_hub import InferenceClient
 
-client = InferenceClient(
-	"${model.id}",
-	token="${accessToken || "{API_TOKEN}"}",
-)
+client = InferenceClient(api_key="${accessToken || "{API_TOKEN}"}")
+
 image_url = "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg"
 
 for message in client.chat_completion(
+    model="${model.id}",
 	messages=[
 		{
 			"role": "user",
