@@ -29,7 +29,7 @@ export interface AutomaticSpeechRecognitionParameters {
 	/**
 	 * Parametrization of the text generation process
 	 */
-	generate?: GenerationParameters;
+	generation_parameters?: GenerationParameters;
 	/**
 	 * Whether to output corresponding timestamps with the generated text
 	 */

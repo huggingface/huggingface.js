@@ -28,7 +28,7 @@ export interface TextToAudioParameters {
 	/**
 	 * Parametrization of the text generation process
 	 */
-	generate?: GenerationParameters;
+	generation_parameters?: GenerationParameters;
 	[property: string]: unknown;
 }
 

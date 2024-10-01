@@ -302,11 +302,24 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/fudan-generative-vision/hallo",
 		countDownloads: `path:"hallo/net.pth"`,
 	},
+	hezar: {
+		prettyLabel: "Hezar",
+		repoName: "Hezar",
+		repoUrl: "https://github.com/hezarai/hezar",
+		docsUrl: "https://hezarai.github.io/hezar",
+		countDownloads: `path:"model_config.yaml" OR path:"embedding/embedding_config.yaml"`,
+	},
 	"hunyuan-dit": {
 		prettyLabel: "HunyuanDiT",
 		repoName: "HunyuanDiT",
 		repoUrl: "https://github.com/Tencent/HunyuanDiT",
 		countDownloads: `path:"pytorch_model_ema.pt" OR path:"pytorch_model_distill.pt"`,
+	},
+	imstoucan: {
+		prettyLabel: "IMS Toucan",
+		repoName: "IMS-Toucan",
+		repoUrl: "https://github.com/DigitalPhonetics/IMS-Toucan",
+		countDownloads: `path:"embedding_gan.pt" OR path:"Vocoder.pt" OR path:"ToucanTTS.pt"`,
 	},
 	keras: {
 		prettyLabel: "Keras",
@@ -412,6 +425,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://llm.mlc.ai/docs/",
 		filter: false,
 		countDownloads: `path:"mlc-chat-config.json"`,
+	},
+	model2vec: {
+		prettyLabel: "Model2Vec",
+		repoName: "model2vec",
+		repoUrl: "https://github.com/MinishLab/model2vec",
+		snippets: snippets.model2vec,
+		filter: false,
 	},
 	moshi: {
 		prettyLabel: "Moshi",

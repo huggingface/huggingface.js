@@ -40,6 +40,7 @@ import zeroShotObjectDetection from "./zero-shot-object-detection/data";
 import imageTo3D from "./image-to-3d/data";
 import textTo3D from "./text-to-3d/data";
 import keypointDetection from "./keypoint-detection/data";
+import videoTextToText from "./video-text-to-text/data";
 
 export type * from "./audio-classification/inference";
 export type * from "./automatic-speech-recognition/inference";
@@ -72,7 +73,7 @@ export type * from "./sentence-similarity/inference";
 export type * from "./summarization/inference";
 export type * from "./table-question-answering/inference";
 export type { TextToImageInput, TextToImageOutput, TextToImageParameters } from "./text-to-image/inference";
-export type { TextToAudioParameters, TextToSpeechInput, TextToSpeechOutput } from "./text-to-speech/inference";
+export type { TextToSpeechParameters, TextToSpeechInput, TextToSpeechOutput } from "./text-to-speech/inference";
 export type * from "./token-classification/inference";
 export type { TranslationInput, TranslationOutput } from "./translation/inference";
 export type {
@@ -237,7 +238,7 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"token-classification": getData("token-classification", tokenClassification),
 	translation: getData("translation", translation),
 	"unconditional-image-generation": getData("unconditional-image-generation", unconditionalImageGeneration),
-	"video-text-to-text": getData("video-text-to-text", placeholder),
+	"video-text-to-text": getData("video-text-to-text", videoTextToText),
 	"visual-question-answering": getData("visual-question-answering", visualQuestionAnswering),
 	"voice-activity-detection": undefined,
 	"zero-shot-classification": getData("zero-shot-classification", zeroShotClassification),

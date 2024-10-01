@@ -4,7 +4,7 @@
 	"description": "Chat Completion Output.\n\nAuto-generated from TGI specs.\nFor more details, check out https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/scripts/inference-tgi-import.ts.",
 	"title": "ChatCompletionOutput",
 	"type": "object",
-	"required": ["id", "object", "created", "model", "system_fingerprint", "choices", "usage"],
+	"required": ["id", "created", "model", "system_fingerprint", "choices", "usage"],
 	"properties": {
 		"choices": {
 			"type": "array",
@@ -24,9 +24,6 @@
 		"model": {
 			"type": "string",
 			"example": "mistralai/Mistral-7B-Instruct-v0.2"
-		},
-		"object": {
-			"type": "string"
 		},
 		"system_fingerprint": {
 			"type": "string"
@@ -110,32 +107,47 @@
 			"title": "ChatCompletionOutputTopLogprob"
 		},
 		"ChatCompletionOutputMessage": {
+			"oneOf": [
+				{
+					"$ref": "#/$defs/ChatCompletionOutputTextMessage"
+				},
+				{
+					"$ref": "#/$defs/ChatCompletionOutputToolCallMessage"
+				}
+			],
+			"title": "ChatCompletionOutputMessage"
+		},
+		"ChatCompletionOutputTextMessage": {
 			"type": "object",
-			"required": ["role"],
+			"required": ["role", "content"],
 			"properties": {
 				"content": {
 					"type": "string",
-					"example": "My name is David and I",
-					"nullable": true
-				},
-				"name": {
-					"type": "string",
-					"example": "\"David\"",
-					"nullable": true
+					"example": "My name is David and I"
 				},
 				"role": {
 					"type": "string",
 					"example": "user"
+				}
+			},
+			"title": "ChatCompletionOutputTextMessage"
+		},
+		"ChatCompletionOutputToolCallMessage": {
+			"type": "object",
+			"required": ["role", "tool_calls"],
+			"properties": {
+				"role": {
+					"type": "string",
+					"example": "assistant"
 				},
 				"tool_calls": {
 					"type": "array",
 					"items": {
 						"$ref": "#/$defs/ChatCompletionOutputToolCall"
-					},
-					"nullable": true
+					}
 				}
 			},
-			"title": "ChatCompletionOutputMessage"
+			"title": "ChatCompletionOutputToolCallMessage"
 		},
 		"ChatCompletionOutputToolCall": {
 			"type": "object",
@@ -145,9 +157,7 @@
 					"$ref": "#/$defs/ChatCompletionOutputFunctionDefinition"
 				},
 				"id": {
-					"type": "integer",
-					"format": "int32",
-					"minimum": 0
+					"type": "string"
 				},
 				"type": {
 					"type": "string"
