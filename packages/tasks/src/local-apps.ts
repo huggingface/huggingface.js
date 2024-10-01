@@ -328,6 +328,21 @@ export const LOCAL_APPS = {
 		displayOnModelPage: (model) => model.library_name === "diffusers" && model.pipeline_tag === "text-to-image",
 		deeplink: (model) => new URL(`https://models.invoke.ai/huggingface/${model.id}`),
 	},
+    comfyui: {
+        prettyLabel: "ComfyUI",
+        docsUrl: "https://docs.comfy.org/get_started/introduction",
+        mainTask: "text-to-image",
+        displayOnModelPage: (model: ModelData) =>
+        (
+            (
+                isGgufModel(model) ||
+                (isTransformersModel(model) &&
+                    model.tags.includes("safetensors"))
+            ) &&
+            model.tags.includes("text-to-image")
+        ),
+        deeplink: (model) => new URL(`https://huggingface.co/${model.id}`),
+    },
 } satisfies Record<string, LocalApp>;
 
 export type LocalAppKey = keyof typeof LOCAL_APPS;
