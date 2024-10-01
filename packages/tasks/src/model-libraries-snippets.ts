@@ -1032,4 +1032,10 @@ export const threedtopia_xl = (model: ModelData): string[] => [
 model = threedtopia_xl.from_pretrained("${model.id}")
 model.generate(cond="path/to/image.png")`,
 ];
+
+export const hezar = (model: ModelData): string[] => [
+	`from hezar import Model
+
+model = Model.load("${model.id}")`,
+];
 //#endregion

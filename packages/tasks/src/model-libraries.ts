@@ -295,6 +295,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/fudan-generative-vision/hallo",
 		countDownloads: `path:"hallo/net.pth"`,
 	},
+	hezar: {
+		prettyLabel: "Hezar",
+		repoName: "Hezar",
+		repoUrl: "https://github.com/hezarai/hezar",
+		docsUrl: "https://hezarai.github.io/hezar",
+		countDownloads: `path:"model_config.yaml" OR path:"embedding/embedding_config.yaml"`,
+	},
 	"hunyuan-dit": {
 		prettyLabel: "HunyuanDiT",
 		repoName: "HunyuanDiT",
