@@ -300,7 +300,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "Hezar",
 		repoUrl: "https://github.com/hezarai/hezar",
 		docsUrl: "https://hezarai.github.io/hezar",
-		countDownloads: `path:"model.pt" OR path:"model_config.yaml" OR path:"embedding/embedding_config.yaml"`,
+		countDownloads: `path:"model_config.yaml" OR path:"embedding/embedding_config.yaml"`,
 	},
 	"hunyuan-dit": {
 		prettyLabel: "HunyuanDiT",
