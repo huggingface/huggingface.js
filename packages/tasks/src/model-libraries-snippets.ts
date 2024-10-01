@@ -1034,10 +1034,8 @@ model.generate(cond="path/to/image.png")`,
 ];
 
 export const hezar = (model: ModelData): string[] => [
-	`# !pip install hezar
-from hezar import Model
+	`from hezar import Model
 
-model = Model.load("${model.id}")
-outputs = model.predict("a valid input based on modality (text, path, array, etc.)")`,
+model = Model.load("${model.id}")`,
 ];
 //#endregion
