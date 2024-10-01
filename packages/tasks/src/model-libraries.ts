@@ -204,6 +204,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/cartesia-ai/cartesia_mlx",
 		snippets: snippets.cartesia_mlx,
 	},
+	cotracker: {
+		prettyLabel: "CoTracker",
+		repoName: "CoTracker",
+		repoUrl: "https://github.com/facebookresearch/co-tracker",
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
+	},
 	edsnlp: {
 		prettyLabel: "EDS-NLP",
 		repoName: "edsnlp",
