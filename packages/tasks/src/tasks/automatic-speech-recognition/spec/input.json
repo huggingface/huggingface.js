@@ -24,7 +24,7 @@
 					"type": "boolean",
 					"description": "Whether to output corresponding timestamps with the generated text"
 				},
-				"generate": {
+				"generation_parameters": {
 					"description": "Parametrization of the text generation process",
 					"$ref": "/inference/schemas/common-definitions.json#/definitions/GenerationParameters"
 				}
