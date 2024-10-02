@@ -155,6 +155,7 @@ export const pythonSnippets: Partial<Record<PipelineType, (model: ModelDataMinim
 	"feature-extraction": snippetBasic,
 	"text-generation": snippetBasic,
 	"text2text-generation": snippetBasic,
+	"image-text-to-text": snippetConversationalWithImage,
 	"fill-mask": snippetBasic,
 	"sentence-similarity": snippetBasic,
 	"automatic-speech-recognition": snippetFile,
