@@ -10,7 +10,7 @@ export const snippetBasic = (model: ModelDataMinimal, accessToken: string): stri
 	-H "Authorization: Bearer ${accessToken || `{API_TOKEN}`}"`;
 
 export const snippetTextGeneration = (model: ModelDataMinimal, accessToken: string): string => {
-	if (model.tags.includes("conversational")) {
+	if (model.tags?.includes("conversational")) {
 		// Conversational model detected, so we display a code snippet that features the Messages API
 		return `curl 'https://api-inference.huggingface.co/models/${model.id}/v1/chat/completions' \\
 -H "Authorization: Bearer ${accessToken || `{API_TOKEN}`}" \\
@@ -28,7 +28,7 @@ export const snippetTextGeneration = (model: ModelDataMinimal, accessToken: stri
 };
 
 export const snippetImageTextToTextGeneration = (model: ModelDataMinimal, accessToken: string): string => {
-	if (model.tags.includes("conversational")) {
+	if (model.tags?.includes("conversational")) {
 		// Conversational model detected, so we display a code snippet that features the Messages API
 		return `curl 'https://api-inference.huggingface.co/models/${model.id}/v1/chat/completions' \\
 -H "Authorization: Bearer ${accessToken || `{API_TOKEN}`}" \\

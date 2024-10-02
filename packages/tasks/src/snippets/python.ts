@@ -175,10 +175,10 @@ export const pythonSnippets: Partial<Record<PipelineType, (model: ModelDataMinim
 };
 
 export function getPythonInferenceSnippet(model: ModelDataMinimal, accessToken: string): string {
-	if (model.pipeline_tag === "text-generation" && model.tags.includes("conversational")) {
+	if (model.pipeline_tag === "text-generation" && model.tags?.includes("conversational")) {
 		// Conversational model detected, so we display a code snippet that features the Messages API
 		return snippetConversational(model, accessToken);
-	} else if (model.pipeline_tag === "image-text-to-text" && model.tags.includes("conversational")) {
+	} else if (model.pipeline_tag === "image-text-to-text" && model.tags?.includes("conversational")) {
 		// Example sending an image to the Message API
 		return snippetConversationalWithImage(model, accessToken);
 	} else {
