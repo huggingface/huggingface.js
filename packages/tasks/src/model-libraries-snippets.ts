@@ -678,11 +678,15 @@ export const sampleFactory = (model: ModelData): string[] => [
 	`python -m sample_factory.huggingface.load_from_hub -r ${model.id} -d ./train_dir`,
 ];
 
-export const sentenceTransformers = (model: ModelData): string[] => [
-	`from sentence_transformers import SentenceTransformer
+export const sentenceTransformers = (model: ModelData): string[] => {
+	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
 
-model = SentenceTransformer("${model.id}")`,
-];
+	return [
+		`from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer("${model.id}"${remote_code_snippet})`,
+	];
+};
 
 export const setfit = (model: ModelData): string[] => [
 	`from setfit import SetFitModel
