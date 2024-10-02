@@ -43,20 +43,20 @@ export type LocalApp = {
 	 */
 	displayOnModelPage: (model: ModelData) => boolean;
 } & (
-	| {
+		| {
 			/**
 			 * If the app supports deeplink, URL to open.
 			 */
 			deeplink: (model: ModelData, filepath?: string) => URL;
-	  }
-	| {
+		}
+		| {
 			/**
 			 * And if not (mostly llama.cpp), snippet to copy/paste in your terminal
 			 * Support the placeholder {{GGUF_FILE}} that will be replaced by the gguf file path or the list of available files.
 			 */
 			snippet: (model: ModelData, filepath?: string) => string | string[] | LocalAppSnippet | LocalAppSnippet[];
-	  }
-);
+		}
+	);
 
 function isGgufModel(model: ModelData): boolean {
 	return model.tags.includes("gguf");
@@ -215,7 +215,7 @@ export const LOCAL_APPS = {
 			isGptqModel(model) ||
 			isAqlmModel(model) ||
 			isMarlinModel(model) ||
-			isGgufModel(model) ||
+			isLlamaCppGgufModel(model) ||
 			isTransformersModel(model),
 		snippet: snippetVllm,
 	},
