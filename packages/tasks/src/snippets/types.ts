@@ -7,5 +7,5 @@ import type { ModelData } from "../model-data";
  */
 export type ModelDataMinimal = Pick<
 	ModelData,
-	"id" | "pipeline_tag" | "mask_token" | "library_name" | "config" | "tags"
+	"id" | "pipeline_tag" | "mask_token" | "library_name" | "config" | "tags" | "inference"
 >;
