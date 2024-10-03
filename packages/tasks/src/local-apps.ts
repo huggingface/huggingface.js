@@ -58,10 +58,6 @@ export type LocalApp = {
 	  }
 );
 
-function isGgufModel(model: ModelData): boolean {
-	return model.tags.includes("gguf");
-}
-
 function isAwqModel(model: ModelData): boolean {
 	return model.config?.quantization_config?.quant_method === "awq";
 }
@@ -215,7 +211,7 @@ export const LOCAL_APPS = {
 			isGptqModel(model) ||
 			isAqlmModel(model) ||
 			isMarlinModel(model) ||
-			isGgufModel(model) ||
+			isLlamaCppGgufModel(model) ||
 			isTransformersModel(model),
 		snippet: snippetVllm,
 	},
