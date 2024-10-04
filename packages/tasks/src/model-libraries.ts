@@ -516,6 +516,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"model.safetensors"`,
 	},
+	reverb: {
+		prettyLabel: "Reverb",
+		repoName: "Reverb",
+		repoUrl: "https://github.com/revdotcom/reverb",
+		filter: false,
+		countDownloads: `path_extension:"yaml" OR path_extension:"pt" OR path_extension:"bin"`,
+	},
 	saelens: {
 		prettyLabel: "SAELens",
 		repoName: "SAELens",
