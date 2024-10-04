@@ -13,7 +13,7 @@ export interface LocalAppSnippet {
 	/**
 	 * Content (or command) to be run
 	 */
-	content: string;
+	content: string | string[];
 }
 
 /**
@@ -149,7 +149,7 @@ const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
 		`curl -X POST "http://localhost:8000/v1/chat/completions" \\ `,
 		`	-H "Content-Type: application/json" \\ `,
 		`	--data '{`,
-		`		"model": "${model.id}"`,
+		`		"model": "${model.id}",`,
 		`		"messages": [`,
 		`			{"role": "user", "content": "Hello!"}`,
 		`		]`,
@@ -159,7 +159,7 @@ const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
 		{
 			title: "Install from pip",
 			setup: ["# Install vLLM from pip:", "pip install vllm"].join("\n"),
-			content: ["# Load and run the model:", `vllm serve "${model.id}"`, ...runCommand].join("\n"),
+			content: [`# Load and run the model:\nvllm serve "${model.id}"`, runCommand.join("\n")],
 		},
 		{
 			title: "Use Docker images",
@@ -175,10 +175,9 @@ const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
 				`	--model ${model.id}`,
 			].join("\n"),
 			content: [
-				"# Load and run the model:",
-				`docker exec -it my_vllm_container bash -c "vllm serve ${model.id}"`,
-				...runCommand,
-			].join("\n"),
+				`# Load and run the model:\ndocker exec -it my_vllm_container bash -c "vllm serve ${model.id}"`,
+				runCommand.join("\n"),
+			],
 		},
 	];
 };
