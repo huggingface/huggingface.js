@@ -30,22 +30,23 @@ For some of the calls, you need to create an account and generate an [access tok
 Learn how to find free models using the hub package in this [interactive tutorial](https://scrimba.com/scrim/c7BbVPcd?pl=pkVnrP7uP).
 
 ```ts
-import { createRepo, uploadFiles, uploadFilesWithProgress, deleteFile, deleteRepo, listFiles, whoAmI, modelInfo, listModels } from "@huggingface/hub";
+import * as hub from "@huggingface/hub";
 import type { RepoDesignation } from "@huggingface/hub";
 
 const repo: RepoDesignation = { type: "model", name: "myname/some-model" };
 
-const {name: username} = await whoAmI({accessToken: "hf_..."});
+const {name: username} = await hub.whoAmI({accessToken: "hf_..."});
 
-for await (const model of listModels({search: {owner: username}, accessToken: "hf_..."})) {
+for await (const model of hub.listModels({search: {owner: username}, accessToken: "hf_..."})) {
   console.log("My model:", model);
 }
 
-const specificModel = await modelInfo({name: "openai-community/gpt2"});
+const specificModel = await hub.modelInfo({name: "openai-community/gpt2"});
+await hub.checkRepoAccess({repo, accessToken: "hf_..."});
 
-await createRepo({ repo, accessToken: "hf_...", license: "mit" });
+await hub.createRepo({ repo, accessToken: "hf_...", license: "mit" });
 
-await uploadFiles({
+await hub.uploadFiles({
   repo,
   accessToken: "hf_...",
   files: [
@@ -69,7 +70,7 @@ await uploadFiles({
 
 // or
 
-for await (const progressEvent of await uploadFilesWithProgress({
+for await (const progressEvent of await hub.uploadFilesWithProgress({
   repo,
   accessToken: "hf_...",
   files: [
@@ -79,15 +80,15 @@ for await (const progressEvent of await uploadFilesWithProgress({
   console.log(progressEvent);
 }
 
-await deleteFile({repo, accessToken: "hf_...", path: "myfile.bin"});
+await hub.deleteFile({repo, accessToken: "hf_...", path: "myfile.bin"});
 
-await (await downloadFile({ repo, path: "README.md" })).text();
+await (await hub.downloadFile({ repo, path: "README.md" })).text();
 
-for await (const fileInfo of listFiles({repo})) {
+for await (const fileInfo of hub.listFiles({repo})) {
   console.log(fileInfo);
 }
 
-await deleteRepo({ repo, accessToken: "hf_..." });
+await hub.deleteRepo({ repo, accessToken: "hf_..." });
 ```
 
 ## OAuth Login
