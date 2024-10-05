@@ -30,7 +30,7 @@ For some of the calls, you need to create an account and generate an [access tok
 Learn how to find free models using the hub package in this [interactive tutorial](https://scrimba.com/scrim/c7BbVPcd?pl=pkVnrP7uP).
 
 ```ts
-import { createRepo, uploadFiles, uploadFilesWithProgress, deleteFile, deleteRepo, listFiles, whoAmI } from "@huggingface/hub";
+import { createRepo, uploadFiles, uploadFilesWithProgress, deleteFile, deleteRepo, listFiles, whoAmI, modelInfo, listModels } from "@huggingface/hub";
 import type { RepoDesignation } from "@huggingface/hub";
 
 const repo: RepoDesignation = { type: "model", name: "myname/some-model" };
@@ -40,6 +40,8 @@ const {name: username} = await whoAmI({accessToken: "hf_..."});
 for await (const model of listModels({search: {owner: username}, accessToken: "hf_..."})) {
   console.log("My model:", model);
 }
+
+const specificModel = await modelInfo({name: "openai-community/gpt2"});
 
 await createRepo({ repo, accessToken: "hf_...", license: "mit" });
 
