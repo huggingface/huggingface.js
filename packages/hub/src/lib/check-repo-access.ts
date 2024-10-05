@@ -23,7 +23,6 @@ export async function checkRepoAccess(
 	const response = await (params.fetch || fetch)(`${params?.hubUrl || HUB_URL}/api/${repoId.type}s/${repoId.name}`, {
 		headers: {
 			...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-			Accepts: "application/json",
 		},
 	});
 
