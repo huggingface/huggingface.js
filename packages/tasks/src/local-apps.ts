@@ -126,7 +126,7 @@ const snippetNodeLlamaCppCli = (model: ModelData, filepath?: string): LocalAppSn
 			content: [
 				`npx -y node-llama-cpp chat \\`,
 				`  --model "hf:${model.id}/${filepath ?? "{{GGUF_FILE}}"}" \\`,
-				`  --prompt "Hi there!"`,
+				`  --prompt 'Hi there!'`,
 			].join("\n"),
 		},
 		{
