@@ -14,10 +14,6 @@ export async function datasetInfo<
 		hubUrl?: string;
 		additionalFields?: T[];
 		/**
-		 * Set to limit the number of models returned.
-		 */
-		limit?: number;
-		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
@@ -41,7 +37,7 @@ export async function datasetInfo<
 	);
 
 	if (!response.ok) {
-		createApiError(response);
+		throw await createApiError(response);
 	}
 
 	const data = await response.json();
