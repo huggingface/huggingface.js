@@ -30,7 +30,7 @@ For some of the calls, you need to create an account and generate an [access tok
 Learn how to find free models using the hub package in this [interactive tutorial](https://scrimba.com/scrim/c7BbVPcd?pl=pkVnrP7uP).
 
 ```ts
-import { createRepo, uploadFiles, uploadFilesWithProgress, deleteFile, deleteRepo, listFiles, whoAmI, modelInfo, listMOdels } from "@huggingface/hub";
+import { createRepo, uploadFiles, uploadFilesWithProgress, deleteFile, deleteRepo, listFiles, whoAmI, modelInfo, listModels } from "@huggingface/hub";
 import type { RepoDesignation } from "@huggingface/hub";
 
 const repo: RepoDesignation = { type: "model", name: "myname/some-model" };
