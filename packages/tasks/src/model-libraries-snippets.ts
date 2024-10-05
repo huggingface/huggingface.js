@@ -360,6 +360,22 @@ backbone = keras_nlp.models.Backbone.from_preset("hf://${model.id}")
 `,
 ];
 
+export const nodeLlamaCpp = (model: ModelData): string[] => [
+	`import {getLlama, LlamaChatSession, resolveModelFile} from "node-llama-cpp";
+
+const llama = await getLlama();
+const modelPath = await resolveModelFile("hf:${model.id}/{{GGUF_FILE}}");
+
+const model = await llama.loadModel({modelPath});
+const context = await model.createContext();
+const chat = new LlamaChatSession({
+    contextSequence: context.getSequence()
+});
+
+const res = await chat.prompt("Where do llamas come from?");
+console.log("res:", res);`,
+];
+
 export const llama_cpp_python = (model: ModelData): string[] => [
 	`from llama_cpp import Llama
 
