@@ -7,10 +7,6 @@ export interface LocalAppSnippet {
 	 */
 	title: string;
 	/**
-	 * Optional setup guide
-	 */
-	setup?: string;
-	/**
 	 * Content (or command) to be run
 	 */
 	content: string | string[];
@@ -95,26 +91,27 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 	return [
 		{
 			title: "Install from brew",
-			setup: "brew install llama.cpp",
-			content: command("llama-cli"),
+			content: ["brew install llama.cpp", command("llama-cli")],
 		},
 		{
 			title: "Use pre-built binary",
-			setup: [
-				// prettier-ignore
-				"# Download pre-built binary from:",
-				"# https://github.com/ggerganov/llama.cpp/releases",
-			].join("\n"),
-			content: command("./llama-cli"),
+			content: [
+				[
+					// prettier-ignore
+					"# Download pre-built binary from:",
+					"# https://github.com/ggerganov/llama.cpp/releases",
+				].join("\n"),
+				command("./llama-cli"),
+			],
 		},
 		{
 			title: "Build from source code",
-			setup: [
-				"git clone https://github.com/ggerganov/llama.cpp.git",
-				"cd llama.cpp",
-				"LLAMA_CURL=1 make llama-cli",
-			].join("\n"),
-			content: command("./llama-cli"),
+			content: [
+				["git clone https://github.com/ggerganov/llama.cpp.git", "cd llama.cpp", "LLAMA_CURL=1 make llama-cli"].join(
+					"\n"
+				),
+				command("./llama-cli"),
+			],
 		},
 	];
 };
@@ -125,19 +122,18 @@ const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] 
 	return [
 		{
 			title: "Install from binary",
-			setup: "curl https://localai.io/install.sh | sh",
-			content: command("local-ai run"),
+			content: ["curl https://localai.io/install.sh | sh", command("local-ai run")],
 		},
 		{
 			title: "Use Docker images",
-			setup: [
-				// prettier-ignore
-				"# Pull the image:",
-				"docker pull localai/localai:latest-cpu",
-			].join("\n"),
-			content: command(
-				"docker run -p 8080:8080 --name localai -v $PWD/models:/build/models localai/localai:latest-cpu"
-			),
+			content: [
+				[
+					// prettier-ignore
+					"# Pull the image:",
+					"docker pull localai/localai:latest-cpu",
+				].join("\n"),
+				command("docker run -p 8080:8080 --name localai -v $PWD/models:/build/models localai/localai:latest-cpu"),
+			],
 		},
 	];
 };
@@ -157,23 +153,26 @@ const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
 	return [
 		{
 			title: "Install from pip",
-			setup: ["# Install vLLM from pip:", "pip install vllm"].join("\n"),
-			content: [`# Load and run the model:\nvllm serve "${model.id}"`, runCommand.join("\n")],
+			content: [
+				["# Install vLLM from pip:", "pip install vllm"].join("\n"),
+				`# Load and run the model:\nvllm serve "${model.id}"`,
+				runCommand.join("\n"),
+			],
 		},
 		{
 			title: "Use Docker images",
-			setup: [
-				"# Deploy with docker on Linux:",
-				`docker run --runtime nvidia --gpus all \\`,
-				`	--name my_vllm_container \\`,
-				`	-v ~/.cache/huggingface:/root/.cache/huggingface \\`,
-				` 	--env "HUGGING_FACE_HUB_TOKEN=<secret>" \\`,
-				`	-p 8000:8000 \\`,
-				`	--ipc=host \\`,
-				`	vllm/vllm-openai:latest \\`,
-				`	--model ${model.id}`,
-			].join("\n"),
 			content: [
+				[
+					"# Deploy with docker on Linux:",
+					`docker run --runtime nvidia --gpus all \\`,
+					`	--name my_vllm_container \\`,
+					`	-v ~/.cache/huggingface:/root/.cache/huggingface \\`,
+					` 	--env "HUGGING_FACE_HUB_TOKEN=<secret>" \\`,
+					`	-p 8000:8000 \\`,
+					`	--ipc=host \\`,
+					`	vllm/vllm-openai:latest \\`,
+					`	--model ${model.id}`,
+				].join("\n"),
 				`# Load and run the model:\ndocker exec -it my_vllm_container bash -c "vllm serve ${model.id}"`,
 				runCommand.join("\n"),
 			],
