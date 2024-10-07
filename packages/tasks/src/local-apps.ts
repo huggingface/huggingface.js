@@ -199,7 +199,7 @@ const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
 		`	-H "Content-Type: application/json" \\`,
 		`	--data '{`,
 		`		"model": "${model.id}",`,
-		`		"prompt": "Once upon a time",`,
+		`		"prompt": "Once upon a time,",`,
 		`		"max_tokens": 512,`,
 		`		"temperature": 0.5`,
 		`	}'`,

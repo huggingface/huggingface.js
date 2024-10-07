@@ -439,7 +439,7 @@ llm = Llama.from_pretrained(
 )`;
 	} else {
 		snippet += `output = llm(
-	"Once upon a time",
+	"Once upon a time,",
 	max_tokens=512,
 	echo=True
 )
