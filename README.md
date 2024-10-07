@@ -27,7 +27,7 @@ await uploadFile({
   }
 });
 
-// Use hosted inference
+// Use Inference API
 
 await hf.chatCompletion({
   model: "meta-llama/Llama-3.1-8B-Instruct",
