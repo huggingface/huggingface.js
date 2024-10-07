@@ -98,7 +98,7 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 			`${binary} \\`,
 			`  --hf-repo "${model.id}" \\`,
 			`  --hf-file ${filepath ?? "{{GGUF_FILE}}"} \\`,
-			`  -p "${model.tags.includes("conversational") ? "You are a helpful assistant" : "Once upon a time "}"`,
+			`  -p "${model.tags.includes("conversational") ? "You are a helpful assistant" : "Once upon a time"}"`,
 		].join("\n");
 		if (model.tags.includes("conversational")) {
 			snippet += " \\\n  --conversation";
@@ -199,7 +199,7 @@ const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
 		`	-H "Content-Type: application/json" \\`,
 		`	--data '{`,
 		`		"model": "${model.id}",`,
-		`		"prompt": "Once upon a time ",`,
+		`		"prompt": "Once upon a time",`,
 		`		"max_tokens": 512,`,
 		`		"temperature": 0.5`,
 		`	}'`,
