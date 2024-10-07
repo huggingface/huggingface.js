@@ -92,15 +92,19 @@ function isMlxModel(model: ModelData) {
 }
 
 const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
-	const command = (binary: string) =>
-		[
+	const command = (binary: string) => {
+		let snippet = [
 			"# Load and run the model:",
 			`${binary} \\`,
 			`  --hf-repo "${model.id}" \\`,
 			`  --hf-file ${filepath ?? "{{GGUF_FILE}}"} \\`,
-			'  -p "You are a helpful assistant" \\',
-			"  --conversation",
+			`  -p "${model.tags.includes("conversational") ? "You are a helpful assistant" : "Once upon a time "}"`,
 		].join("\n");
+		if (model.tags.includes("conversational")) {
+			snippet += " \\\n  --conversation";
+		}
+		return snippet;
+	};
 	return [
 		{
 			title: "Install from brew",
@@ -178,7 +182,7 @@ const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] 
 };
 
 const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
-	const runCommand = [
+	const runCommandInstruct = [
 		"# Call the server using curl:",
 		`curl -X POST "http://localhost:8000/v1/chat/completions" \\`,
 		`	-H "Content-Type: application/json" \\`,
@@ -189,6 +193,18 @@ const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
 		`		]`,
 		`	}'`,
 	];
+	const runCommandNonInstruct = [
+		"# Call the server using curl:",
+		`curl -X POST "http://localhost:8000/v1/completions" \\`,
+		`	-H "Content-Type: application/json" \\`,
+		`	--data '{`,
+		`		"model": "${model.id}",`,
+		`		"prompt": "Once upon a time ",`,
+		`		"max_tokens": 512,`,
+		`		"temperature": 0.5`,
+		`	}'`,
+	];
+	const runCommand = model.tags.includes("conversational") ? runCommandInstruct : runCommandNonInstruct;
 	return [
 		{
 			title: "Install from pip",
