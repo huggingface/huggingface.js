@@ -145,8 +145,8 @@ const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] 
 const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
 	const runCommand = [
 		"# Call the server using curl:",
-		`curl -X POST "http://localhost:8000/v1/chat/completions" \\ `,
-		`	-H "Content-Type: application/json" \\ `,
+		`curl -X POST "http://localhost:8000/v1/chat/completions" \\`,
+		`	-H "Content-Type: application/json" \\`,
 		`	--data '{`,
 		`		"model": "${model.id}",`,
 		`		"messages": [`,
