@@ -5,7 +5,7 @@ import { llama_cpp_python } from "./model-libraries-snippets";
 describe("model-libraries-snippets", () => {
 	it("llama_cpp_python conversational", async () => {
 		const model: ModelData = {
-			id: "mlabonne/gemma-2b-it-GGUF",
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
 			tags: ["conversational"],
 			inference: "",
 		};
@@ -14,7 +14,7 @@ describe("model-libraries-snippets", () => {
 		expect(snippet.join("\n")).toEqual(`from llama_cpp import Llama
 
 llm = Llama.from_pretrained(
-	repo_id="mlabonne/gemma-2b-it-GGUF",
+	repo_id="bartowski/Llama-3.2-3B-Instruct-GGUF",
 	filename="{{GGUF_FILE}}",
 )
 
@@ -30,7 +30,7 @@ llm.create_chat_completion(
 
 	it("llama_cpp_python non-conversational", async () => {
 		const model: ModelData = {
-			id: "mlabonne/gemma-2b-it-GGUF",
+			id: "mlabonne/gemma-2b-GGUF",
 			tags: [""],
 			inference: "",
 		};
@@ -39,7 +39,7 @@ llm.create_chat_completion(
 		expect(snippet.join("\n")).toEqual(`from llama_cpp import Llama
 
 llm = Llama.from_pretrained(
-	repo_id="mlabonne/gemma-2b-it-GGUF",
+	repo_id="mlabonne/gemma-2b-GGUF",
 	filename="{{GGUF_FILE}}",
 )
 

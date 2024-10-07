@@ -6,7 +6,7 @@ describe("local-apps", () => {
 	it("llama.cpp conversational", async () => {
 		const { snippet: snippetFunc } = LOCAL_APPS["llama.cpp"];
 		const model: ModelData = {
-			id: "mlabonne/gemma-2b-it-GGUF",
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
 			tags: ["conversational"],
 			inference: "",
 		};
@@ -14,7 +14,7 @@ describe("local-apps", () => {
 
 		expect(snippet[0].content).toEqual(`# Load and run the model:
 llama-cli \\
-  --hf-repo "mlabonne/gemma-2b-it-GGUF" \\
+  --hf-repo "bartowski/Llama-3.2-3B-Instruct-GGUF" \\
   --hf-file {{GGUF_FILE}} \\
   -p "You are a helpful assistant" \\
   --conversation`);
