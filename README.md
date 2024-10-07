@@ -153,10 +153,7 @@ await hf.translation({
 
 await inference.textToImage({
   model: 'black-forest-labs/FLUX.1-dev',
-  inputs: 'award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]',
-  parameters: {
-    negative_prompt: 'blurry',
-  }
+  inputs: 'a picture of a green bird',
 })
 
 await inference.imageToText({
