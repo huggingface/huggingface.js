@@ -1,4 +1,5 @@
 import type { ModelData } from "./model-data";
+import type { WidgetExampleTextInput } from "./widget-example";
 import { LIBRARY_TASK_MAPPING } from "./library-to-tasks";
 
 const TAG_CUSTOM_CODE = "custom_code";
@@ -7,6 +8,8 @@ function nameWithoutNamespace(modelId: string): string {
 	const splitted = modelId.split("/");
 	return splitted.length === 1 ? splitted[0] : splitted[1];
 }
+
+const escapeStringForJson = (str: string): string => JSON.stringify(str).slice(1, -1); // slice is needed to remove surrounding quotes added by JSON.stringify
 
 //#region snippets
 
@@ -70,6 +73,13 @@ function get_base_diffusers_model(model: ModelData): string {
 	return model.cardData?.base_model?.toString() ?? "fill-in-base-model";
 }
 
+function get_prompt_from_diffusers_model(model: ModelData): string | undefined {
+	const prompt = (model.widgetData?.[0] as WidgetExampleTextInput | undefined)?.text ?? model.cardData?.instance_prompt;
+	if (prompt) {
+		return escapeStringForJson(prompt);
+	}
+}
+
 export const bertopic = (model: ModelData): string[] => [
 	`from bertopic import BERTopic
 
@@ -129,17 +139,22 @@ depth = model.infer_image(raw_img) # HxW raw depth map in numpy
 	];
 };
 
+const diffusersDefaultPrompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
+
 const diffusers_default = (model: ModelData) => [
 	`from diffusers import DiffusionPipeline
 
-pipeline = DiffusionPipeline.from_pretrained("${model.id}")`,
+pipe = DiffusionPipeline.from_pretrained("${model.id}")
+
+prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersDefaultPrompt}"
+image = pipe(prompt).images[0]`,
 ];
 
 const diffusers_controlnet = (model: ModelData) => [
 	`from diffusers import ControlNetModel, StableDiffusionControlNetPipeline
 
 controlnet = ControlNetModel.from_pretrained("${model.id}")
-pipeline = StableDiffusionControlNetPipeline.from_pretrained(
+pipe = StableDiffusionControlNetPipeline.from_pretrained(
 	"${get_base_diffusers_model(model)}", controlnet=controlnet
 )`,
 ];
@@ -147,15 +162,18 @@ pipeline = StableDiffusionControlNetPipeline.from_pretrained(
 const diffusers_lora = (model: ModelData) => [
 	`from diffusers import DiffusionPipeline
 
-pipeline = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
-pipeline.load_lora_weights("${model.id}")`,
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
+pipe.load_lora_weights("${model.id}")
+
+prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersDefaultPrompt}"
+image = pipe(prompt).images[0]`,
 ];
 
 const diffusers_textual_inversion = (model: ModelData) => [
 	`from diffusers import DiffusionPipeline
 
-pipeline = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
-pipeline.load_textual_inversion("${model.id}")`,
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
+pipe.load_textual_inversion("${model.id}")`,
 ];
 
 export const diffusers = (model: ModelData): string[] => {
@@ -169,6 +187,87 @@ export const diffusers = (model: ModelData): string[] => {
 		return diffusers_default(model);
 	}
 };
+
+export const diffusionkit = (model: ModelData): string[] => {
+	const sd3Snippet = `# Pipeline for Stable Diffusion 3
+from diffusionkit.mlx import DiffusionPipeline
+
+pipeline = DiffusionPipeline(
+	shift=3.0,
+	use_t5=False,
+	model_version=${model.id},
+	low_memory_mode=True,
+	a16=True,
+	w16=True,
+)`;
+
+	const fluxSnippet = `# Pipeline for Flux
+from diffusionkit.mlx import FluxPipeline
+
+pipeline = FluxPipeline(
+  shift=1.0,
+  model_version=${model.id},
+  low_memory_mode=True,
+  a16=True,
+  w16=True,
+)`;
+
+	const generateSnippet = `# Image Generation
+HEIGHT = 512
+WIDTH = 512
+NUM_STEPS = ${model.tags.includes("flux") ? 4 : 50}
+CFG_WEIGHT = ${model.tags.includes("flux") ? 0 : 5}
+
+image, _ = pipeline.generate_image(
+  "a photo of a cat",
+  cfg_weight=CFG_WEIGHT,
+  num_steps=NUM_STEPS,
+  latent_size=(HEIGHT // 8, WIDTH // 8),
+)`;
+
+	const pipelineSnippet = model.tags.includes("flux") ? fluxSnippet : sd3Snippet;
+
+	return [pipelineSnippet, generateSnippet];
+};
+
+export const cartesia_pytorch = (model: ModelData): string[] => [
+	`# pip install --no-binary :all: cartesia-pytorch
+from cartesia_pytorch import ReneLMHeadModel
+from transformers import AutoTokenizer
+
+model = ReneLMHeadModel.from_pretrained("${model.id}")
+tokenizer = AutoTokenizer.from_pretrained("allenai/OLMo-1B-hf")
+
+in_message = ["Rene Descartes was"]
+inputs = tokenizer(in_message, return_tensors="pt")
+
+outputs = model.generate(inputs.input_ids, max_length=50, top_k=100, top_p=0.99)
+out_message = tokenizer.batch_decode(outputs, skip_special_tokens=True)[0]
+
+print(out_message)
+)`,
+];
+
+export const cartesia_mlx = (model: ModelData): string[] => [
+	`import mlx.core as mx
+import cartesia_mlx as cmx
+
+model = cmx.from_pretrained("${model.id}")
+model.set_dtype(mx.float32)   
+
+prompt = "Rene Descartes was"
+
+for text in model.generate(
+    prompt,
+    max_tokens=500,
+    eval_every_n=5,
+    verbose=True,
+    top_p=0.99,
+    temperature=0.85,
+):
+    print(text, end="", flush=True)
+`,
+];
 
 export const edsnlp = (model: ModelData): string[] => {
 	const packageName = nameWithoutNamespace(model.id).replaceAll("-", "_");
@@ -270,12 +369,12 @@ llm = Llama.from_pretrained(
 )
 
 llm.create_chat_completion(
-		messages = [
-			{
-				"role": "user",
-				"content": "What is the capital of France?"
-			}
-		]
+	messages = [
+		{
+			"role": "user",
+			"content": "What is the capital of France?"
+		}
+	]
 )`,
 ];
 
@@ -579,11 +678,15 @@ export const sampleFactory = (model: ModelData): string[] => [
 	`python -m sample_factory.huggingface.load_from_hub -r ${model.id} -d ./train_dir`,
 ];
 
-export const sentenceTransformers = (model: ModelData): string[] => [
-	`from sentence_transformers import SentenceTransformer
+export const sentenceTransformers = (model: ModelData): string[] => {
+	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
 
-model = SentenceTransformer("${model.id}")`,
-];
+	return [
+		`from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer("${model.id}"${remote_code_snippet})`,
+	];
+};
 
 export const setfit = (model: ModelData): string[] => [
 	`from setfit import SetFitModel
@@ -790,6 +893,12 @@ IWorker engine = WorkerFactory.CreateWorker(BackendType.GPUCompute, model);
 `,
 ];
 
+export const vfimamba = (model: ModelData): string[] => [
+	`from Trainer_finetune import Model
+
+model = Model.from_pretrained("${model.id}")`,
+];
+
 export const voicecraft = (model: ModelData): string[] => [
 	`from voicecraft import VoiceCraft
 
@@ -808,6 +917,15 @@ texts = ["PUT YOUR TEXT HERE",]
 wavs = chat.infer(texts, )
 
 torchaudio.save("output1.wav", torch.from_numpy(wavs[0]), 24000)`,
+];
+
+export const yolov10 = (model: ModelData): string[] => [
+	`from ultralytics import YOLOv10
+
+model = YOLOv10.from_pretrained("${model.id}")
+source = 'http://images.cocodataset.org/val2017/000000039769.jpg'
+model.predict(source=source, save=True)
+`,
 ];
 
 export const birefnet = (model: ModelData): string[] => [
@@ -835,6 +953,12 @@ export const mlxim = (model: ModelData): string[] => [
 	`from mlxim.model import create_model
 
 model = create_model(${model.id})`,
+];
+
+export const model2vec = (model: ModelData): string[] => [
+	`from model2vec import StaticModel
+
+model = StaticModel.from_pretrained("${model.id}")`,
 ];
 
 export const nemo = (model: ModelData): string[] => {
@@ -904,5 +1028,18 @@ whisperkit-cli transcribe --audio-path /path/to/audio.mp3
 
 # Or use your preferred model variant
 whisperkit-cli transcribe --model "large-v3" --model-prefix "distil" --audio-path /path/to/audio.mp3 --verbose`,
+];
+
+export const threedtopia_xl = (model: ModelData): string[] => [
+	`from threedtopia_xl.models import threedtopia_xl
+
+model = threedtopia_xl.from_pretrained("${model.id}")
+model.generate(cond="path/to/image.png")`,
+];
+
+export const hezar = (model: ModelData): string[] => [
+	`from hezar import Model
+
+model = Model.load("${model.id}")`,
 ];
 //#endregion

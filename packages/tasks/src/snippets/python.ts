@@ -5,18 +5,38 @@ import type { ModelDataMinimal } from "./types.js";
 export const snippetConversational = (model: ModelDataMinimal, accessToken: string): string =>
 	`from huggingface_hub import InferenceClient
 
-client = InferenceClient(
-    "${model.id}",
-    token="${accessToken || "{API_TOKEN}"}",
-)
+client = InferenceClient(api_key="${accessToken || "{API_TOKEN}"}")
 
 for message in client.chat_completion(
+	model="${model.id}",
 	messages=[{"role": "user", "content": "What is the capital of France?"}],
 	max_tokens=500,
 	stream=True,
 ):
-    print(message.choices[0].delta.content, end="")
-`;
+    print(message.choices[0].delta.content, end="")`;
+
+export const snippetConversationalWithImage = (model: ModelDataMinimal, accessToken: string): string =>
+	`from huggingface_hub import InferenceClient
+
+client = InferenceClient(api_key="${accessToken || "{API_TOKEN}"}")
+
+image_url = "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg"
+
+for message in client.chat_completion(
+	model="${model.id}",
+	messages=[
+		{
+			"role": "user",
+			"content": [
+				{"type": "image_url", "image_url": {"url": image_url}},
+				{"type": "text", "text": "Describe this image in one sentence."},
+			],
+		}
+	],
+	max_tokens=500,
+	stream=True,
+):
+	print(message.choices[0].delta.content, end="")`;
 
 export const snippetZeroShotClassification = (model: ModelDataMinimal): string =>
 	`def query(payload):
@@ -135,6 +155,7 @@ export const pythonSnippets: Partial<Record<PipelineType, (model: ModelDataMinim
 	"feature-extraction": snippetBasic,
 	"text-generation": snippetBasic,
 	"text2text-generation": snippetBasic,
+	"image-text-to-text": snippetConversationalWithImage,
 	"fill-mask": snippetBasic,
 	"sentence-similarity": snippetBasic,
 	"automatic-speech-recognition": snippetFile,
@@ -154,9 +175,12 @@ export const pythonSnippets: Partial<Record<PipelineType, (model: ModelDataMinim
 };
 
 export function getPythonInferenceSnippet(model: ModelDataMinimal, accessToken: string): string {
-	if (model.pipeline_tag === "text-generation" && model.config?.tokenizer_config?.chat_template) {
+	if (model.pipeline_tag === "text-generation" && model.tags.includes("conversational")) {
 		// Conversational model detected, so we display a code snippet that features the Messages API
 		return snippetConversational(model, accessToken);
+	} else if (model.pipeline_tag === "image-text-to-text" && model.tags.includes("conversational")) {
+		// Example sending an image to the Message API
+		return snippetConversationalWithImage(model, accessToken);
 	} else {
 		const body =
 			model.pipeline_tag && model.pipeline_tag in pythonSnippets

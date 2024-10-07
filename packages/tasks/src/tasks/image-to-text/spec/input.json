@@ -23,7 +23,7 @@
 					"type": "integer",
 					"description": "The amount of maximum tokens to generate."
 				},
-				"generate": {
+				"generation_parameters": {
 					"description": "Parametrization of the text generation process",
 					"$ref": "/inference/schemas/common-definitions.json#/definitions/GenerationParameters"
 				}

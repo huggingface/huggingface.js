@@ -150,6 +150,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"adapter_config.json"`,
 	},
+	deepforest: {
+		prettyLabel: "DeepForest",
+		repoName: "deepforest",
+		docsUrl: "https://deepforest.readthedocs.io/en/latest/",
+		repoUrl: "https://github.com/weecology/DeepForest",
+		countDownloads: `path_extension:"pt" OR path_extension:"pl"`,
+	},
 	"depth-anything-v2": {
 		prettyLabel: "DepthAnythingV2",
 		repoName: "Depth Anything V2",
@@ -174,10 +181,35 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		/// diffusers has its own more complex "countDownloads" query
 	},
+	diffusionkit: {
+		prettyLabel: "DiffusionKit",
+		repoName: "DiffusionKit",
+		repoUrl: "https://github.com/argmaxinc/DiffusionKit",
+		snippets: snippets.diffusionkit,
+	},
 	doctr: {
 		prettyLabel: "docTR",
 		repoName: "doctr",
 		repoUrl: "https://github.com/mindee/doctr",
+	},
+	cartesia_pytorch: {
+		prettyLabel: "Cartesia Pytorch",
+		repoName: "Cartesia Pytorch",
+		repoUrl: "https://github.com/cartesia-ai/cartesia_pytorch",
+		snippets: snippets.cartesia_pytorch,
+	},
+	cartesia_mlx: {
+		prettyLabel: "Cartesia MLX",
+		repoName: "Cartesia MLX",
+		repoUrl: "https://github.com/cartesia-ai/cartesia_mlx",
+		snippets: snippets.cartesia_mlx,
+	},
+	cotracker: {
+		prettyLabel: "CoTracker",
+		repoName: "CoTracker",
+		repoUrl: "https://github.com/facebookresearch/co-tracker",
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
 	},
 	edsnlp: {
 		prettyLabel: "EDS-NLP",
@@ -270,11 +302,24 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/fudan-generative-vision/hallo",
 		countDownloads: `path:"hallo/net.pth"`,
 	},
+	hezar: {
+		prettyLabel: "Hezar",
+		repoName: "Hezar",
+		repoUrl: "https://github.com/hezarai/hezar",
+		docsUrl: "https://hezarai.github.io/hezar",
+		countDownloads: `path:"model_config.yaml" OR path:"embedding/embedding_config.yaml"`,
+	},
 	"hunyuan-dit": {
 		prettyLabel: "HunyuanDiT",
 		repoName: "HunyuanDiT",
 		repoUrl: "https://github.com/Tencent/HunyuanDiT",
 		countDownloads: `path:"pytorch_model_ema.pt" OR path:"pytorch_model_distill.pt"`,
+	},
+	imstoucan: {
+		prettyLabel: "IMS Toucan",
+		repoName: "IMS-Toucan",
+		repoUrl: "https://github.com/DigitalPhonetics/IMS-Toucan",
+		countDownloads: `path:"embedding_gan.pt" OR path:"Vocoder.pt" OR path:"ToucanTTS.pt"`,
 	},
 	keras: {
 		prettyLabel: "Keras",
@@ -381,6 +426,20 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"mlc-chat-config.json"`,
 	},
+	model2vec: {
+		prettyLabel: "Model2Vec",
+		repoName: "model2vec",
+		repoUrl: "https://github.com/MinishLab/model2vec",
+		snippets: snippets.model2vec,
+		filter: false,
+	},
+	moshi: {
+		prettyLabel: "Moshi",
+		repoName: "Moshi",
+		repoUrl: "https://github.com/kyutai-labs/moshi",
+		filter: false,
+		countDownloads: `path:"tokenizer-e351c8d8-checkpoint125.safetensors"`,
+	},
 	nemo: {
 		prettyLabel: "NeMo",
 		repoName: "NeMo",
@@ -421,12 +480,19 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.pyannote_audio,
 		filter: true,
 	},
+	"py-feat": {
+		prettyLabel: "Py-Feat",
+		repoName: "Py-Feat",
+		repoUrl: "https://github.com/cosanlab/py-feat",
+		docsUrl: "https://py-feat.org/",
+		filter: false,
+	},
 	pythae: {
 		prettyLabel: "pythae",
 		repoName: "pythae",
 		repoUrl: "https://github.com/clementchadebec/benchmark_VAE",
 		snippets: snippets.pythae,
-		filter: true,
+		filter: false,
 	},
 	recurrentgemma: {
 		prettyLabel: "RecurrentGemma",
@@ -473,6 +539,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.sampleFactory,
 		filter: true,
 		countDownloads: `path:"cfg.json"`,
+	},
+	sapiens: {
+		prettyLabel: "sapiens",
+		repoName: "sapiens",
+		repoUrl: "https://github.com/facebookresearch/sapiens",
+		filter: false,
+		countDownloads: `path_extension:"pt2" OR path_extension:"pth" OR path_extension:"onnx"`,
 	},
 	"sentence-transformers": {
 		prettyLabel: "sentence-transformers",
@@ -524,6 +597,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"hyperparams.yaml"`,
 	},
+	"ssr-speech": {
+		prettyLabel: "SSR-Speech",
+		repoName: "SSR-Speech",
+		repoUrl: "https://github.com/WangHelin1997/SSR-Speech",
+		filter: false,
+		countDownloads: `path_extension:".pth"`,
+	},
 	"stable-audio-tools": {
 		prettyLabel: "Stable Audio Tools",
 		repoName: "stable-audio-tools",
@@ -546,6 +626,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"cvlm_llama2_tokenizer/tokenizer.model"`,
 		snippets: snippets.seed_story,
+	},
+	soloaudio: {
+		prettyLabel: "SoloAudio",
+		repoName: "SoloAudio",
+		repoUrl: "https://github.com/WangHelin1997/SoloAudio",
+		filter: false,
+		countDownloads: `path:"soloaudio_v2.pt"`,
 	},
 	"stable-baselines3": {
 		prettyLabel: "stable-baselines3",
@@ -618,12 +705,26 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path_extension:"sentis"`,
 	},
+	"vfi-mamba": {
+		prettyLabel: "VFIMamba",
+		repoName: "VFIMamba",
+		repoUrl: "https://github.com/MCG-NJU/VFIMamba",
+		countDownloads: `path_extension:"pkl"`,
+		snippets: snippets.vfimamba,
+	},
 	voicecraft: {
 		prettyLabel: "VoiceCraft",
 		repoName: "VoiceCraft",
 		repoUrl: "https://github.com/jasonppy/VoiceCraft",
 		docsUrl: "https://github.com/jasonppy/VoiceCraft",
 		snippets: snippets.voicecraft,
+	},
+	yolov10: {
+		prettyLabel: "YOLOv10",
+		repoName: "yolov10",
+		repoUrl: "https://github.com/THU-MIG/yolov10",
+		docsUrl: "https://github.com/THU-MIG/yolov10",
+		snippets: snippets.yolov10,
 	},
 	whisperkit: {
 		prettyLabel: "WhisperKit",
@@ -632,6 +733,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://github.com/argmaxinc/WhisperKit?tab=readme-ov-file#homebrew",
 		snippets: snippets.whisperkit,
 		countDownloads: `path_filename:"model" AND path_extension:"mil" AND _exists_:"path_prefix"`,
+	},
+	"3dtopia-xl": {
+		prettyLabel: "3DTopia-XL",
+		repoName: "3DTopia-XL",
+		repoUrl: "https://github.com/3DTopia/3DTopia-XL",
+		filter: false,
+		countDownloads: `path:"model_vae_fp16.pt"`,
+		snippets: snippets.threedtopia_xl,
 	},
 } satisfies Record<string, LibraryUiElement>;
 

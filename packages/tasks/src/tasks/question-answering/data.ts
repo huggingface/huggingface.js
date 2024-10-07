@@ -52,7 +52,11 @@ const taskData: TaskDataCustom = {
 			id: "deepset/roberta-base-squad2",
 		},
 		{
-			description: "A special model that can answer questions from tables!",
+			description: "Small yet robust model that can answer questions.",
+			id: "distilbert/distilbert-base-cased-distilled-squad",
+		},
+		{
+			description: "A special model that can answer questions from tables.",
 			id: "google/tapas-base-finetuned-wtq",
 		},
 	],

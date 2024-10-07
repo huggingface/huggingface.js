@@ -13,7 +13,7 @@ export interface LocalAppSnippet {
 	/**
 	 * Content (or command) to be run
 	 */
-	content: string;
+	content: string | string[];
 }
 
 /**
@@ -58,8 +58,28 @@ export type LocalApp = {
 	  }
 );
 
-function isGgufModel(model: ModelData) {
-	return model.tags.includes("gguf");
+function isAwqModel(model: ModelData): boolean {
+	return model.config?.quantization_config?.quant_method === "awq";
+}
+
+function isGptqModel(model: ModelData): boolean {
+	return model.config?.quantization_config?.quant_method === "gptq";
+}
+
+function isAqlmModel(model: ModelData): boolean {
+	return model.config?.quantization_config?.quant_method === "aqlm";
+}
+
+function isMarlinModel(model: ModelData): boolean {
+	return model.config?.quantization_config?.quant_method === "marlin";
+}
+
+function isTransformersModel(model: ModelData): boolean {
+	return model.tags.includes("transformers");
+}
+
+function isLlamaCppGgufModel(model: ModelData) {
+	return !!model.gguf?.context_length;
 }
 
 const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
@@ -122,6 +142,45 @@ const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] 
 	];
 };
 
+const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
+	const runCommand = [
+		"# Call the server using curl:",
+		`curl -X POST "http://localhost:8000/v1/chat/completions" \\`,
+		`	-H "Content-Type: application/json" \\`,
+		`	--data '{`,
+		`		"model": "${model.id}",`,
+		`		"messages": [`,
+		`			{"role": "user", "content": "Hello!"}`,
+		`		]`,
+		`	}'`,
+	];
+	return [
+		{
+			title: "Install from pip",
+			setup: ["# Install vLLM from pip:", "pip install vllm"].join("\n"),
+			content: [`# Load and run the model:\nvllm serve "${model.id}"`, runCommand.join("\n")],
+		},
+		{
+			title: "Use Docker images",
+			setup: [
+				"# Deploy with docker on Linux:",
+				`docker run --runtime nvidia --gpus all \\`,
+				`	--name my_vllm_container \\`,
+				`	-v ~/.cache/huggingface:/root/.cache/huggingface \\`,
+				` 	--env "HUGGING_FACE_HUB_TOKEN=<secret>" \\`,
+				`	-p 8000:8000 \\`,
+				`	--ipc=host \\`,
+				`	vllm/vllm-openai:latest \\`,
+				`	--model ${model.id}`,
+			].join("\n"),
+			content: [
+				`# Load and run the model:\ndocker exec -it my_vllm_container bash -c "vllm serve ${model.id}"`,
+				runCommand.join("\n"),
+			],
+		},
+	];
+};
+
 /**
  * Add your new local app here.
  *
@@ -138,14 +197,27 @@ export const LOCAL_APPS = {
 		prettyLabel: "llama.cpp",
 		docsUrl: "https://github.com/ggerganov/llama.cpp",
 		mainTask: "text-generation",
-		displayOnModelPage: isGgufModel,
+		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetLlamacpp,
+	},
+	vllm: {
+		prettyLabel: "vLLM",
+		docsUrl: "https://docs.vllm.ai",
+		mainTask: "text-generation",
+		displayOnModelPage: (model: ModelData) =>
+			isAwqModel(model) ||
+			isGptqModel(model) ||
+			isAqlmModel(model) ||
+			isMarlinModel(model) ||
+			isLlamaCppGgufModel(model) ||
+			isTransformersModel(model),
+		snippet: snippetVllm,
 	},
 	lmstudio: {
 		prettyLabel: "LM Studio",
 		docsUrl: "https://lmstudio.ai",
 		mainTask: "text-generation",
-		displayOnModelPage: isGgufModel,
+		displayOnModelPage: isLlamaCppGgufModel,
 		deeplink: (model, filepath) =>
 			new URL(`lmstudio://open_from_hf?model=${model.id}${filepath ? `&file=${filepath}` : ""}`),
 	},
@@ -153,28 +225,28 @@ export const LOCAL_APPS = {
 		prettyLabel: "LocalAI",
 		docsUrl: "https://github.com/mudler/LocalAI",
 		mainTask: "text-generation",
-		displayOnModelPage: isGgufModel,
+		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetLocalAI,
 	},
 	jan: {
 		prettyLabel: "Jan",
 		docsUrl: "https://jan.ai",
 		mainTask: "text-generation",
-		displayOnModelPage: isGgufModel,
+		displayOnModelPage: isLlamaCppGgufModel,
 		deeplink: (model) => new URL(`jan://models/huggingface/${model.id}`),
 	},
 	backyard: {
 		prettyLabel: "Backyard AI",
 		docsUrl: "https://backyard.ai",
 		mainTask: "text-generation",
-		displayOnModelPage: isGgufModel,
+		displayOnModelPage: isLlamaCppGgufModel,
 		deeplink: (model) => new URL(`https://backyard.ai/hf/model/${model.id}`),
 	},
 	sanctum: {
 		prettyLabel: "Sanctum",
 		docsUrl: "https://sanctum.ai",
 		mainTask: "text-generation",
-		displayOnModelPage: isGgufModel,
+		displayOnModelPage: isLlamaCppGgufModel,
 		deeplink: (model) => new URL(`sanctum://open_from_hf?model=${model.id}`),
 	},
 	jellybox: {
@@ -182,12 +254,12 @@ export const LOCAL_APPS = {
 		docsUrl: "https://jellybox.com",
 		mainTask: "text-generation",
 		displayOnModelPage: (model) =>
-			isGgufModel(model) ||
+			isLlamaCppGgufModel(model) ||
 			(model.library_name === "diffusers" &&
 				model.tags.includes("safetensors") &&
 				(model.pipeline_tag === "text-to-image" || model.tags.includes("lora"))),
 		deeplink: (model) => {
-			if (isGgufModel(model)) {
+			if (isLlamaCppGgufModel(model)) {
 				return new URL(`jellybox://llm/models/huggingface/LLM/${model.id}`);
 			} else if (model.tags.includes("lora")) {
 				return new URL(`jellybox://image/models/huggingface/ImageLora/${model.id}`);
@@ -200,7 +272,7 @@ export const LOCAL_APPS = {
 		prettyLabel: "Msty",
 		docsUrl: "https://msty.app",
 		mainTask: "text-generation",
-		displayOnModelPage: isGgufModel,
+		displayOnModelPage: isLlamaCppGgufModel,
 		deeplink: (model) => new URL(`msty://models/search/hf/${model.id}`),
 	},
 	recursechat: {
@@ -208,7 +280,7 @@ export const LOCAL_APPS = {
 		docsUrl: "https://recurse.chat",
 		mainTask: "text-generation",
 		macOSOnly: true,
-		displayOnModelPage: isGgufModel,
+		displayOnModelPage: isLlamaCppGgufModel,
 		deeplink: (model) => new URL(`recursechat://new-hf-gguf-model?hf-model-id=${model.id}`),
 	},
 	drawthings: {
@@ -232,7 +304,7 @@ export const LOCAL_APPS = {
 		mainTask: "text-to-image",
 		macOSOnly: true,
 		displayOnModelPage: (model) => model.library_name === "diffusers" && model.pipeline_tag === "text-to-image",
-		deeplink: (model) => new URL(`diffusionbee://open_from_hf?model=${model.id}`),
+		deeplink: (model) => new URL(`https://diffusionbee.com/huggingface_import?model_id=${model.id}`),
 	},
 	joyfusion: {
 		prettyLabel: "JoyFusion",

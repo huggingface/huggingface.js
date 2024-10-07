@@ -1,7 +1,7 @@
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
 import type { ApiCommitData } from "../types/api/api-commit";
-import type { Credentials, RepoDesignation } from "../types/public";
+import type { CredentialsParams, RepoDesignation } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
 import { toRepoId } from "../utils/toRepoId";
@@ -14,24 +14,25 @@ export interface CommitData {
 	date: Date;
 }
 
-export async function* listCommits(params: {
-	credentials?: Credentials;
-	repo: RepoDesignation;
-	/**
-	 * Revision to list commits from. Defaults to the default branch.
-	 */
-	revision?: string;
-	hubUrl?: string;
-	/**
-	 * Number of commits to fetch from the hub each http call. Defaults to 100. Can be set to 1000.
-	 */
-	batchSize?: number;
-	/**
-	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
-	 */
-	fetch?: typeof fetch;
-}): AsyncGenerator<CommitData> {
-	checkCredentials(params.credentials);
+export async function* listCommits(
+	params: {
+		repo: RepoDesignation;
+		/**
+		 * Revision to list commits from. Defaults to the default branch.
+		 */
+		revision?: string;
+		hubUrl?: string;
+		/**
+		 * Number of commits to fetch from the hub each http call. Defaults to 100. Can be set to 1000.
+		 */
+		batchSize?: number;
+		/**
+		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+		 */
+		fetch?: typeof fetch;
+	} & Partial<CredentialsParams>
+): AsyncGenerator<CommitData> {
+	const accessToken = checkCredentials(params);
 	const repoId = toRepoId(params.repo);
 
 	// Could upgrade to 1000 commits per page
@@ -41,7 +42,7 @@ export async function* listCommits(params: {
 
 	while (url) {
 		const res: Response = await (params.fetch ?? fetch)(url, {
-			headers: params.credentials ? { Authorization: `Bearer ${params.credentials.accessToken}` } : {},
+			headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
 		});
 
 		if (!res.ok) {

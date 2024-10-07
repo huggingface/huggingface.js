@@ -50,7 +50,7 @@ jobs:
           node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./package.json')); package.version = '$BUMPED_VERSION'; fs.writeFileSync('./package.json', JSON.stringify(package, null, '\t') + '\n');"
           pnpm --filter doc-internal run fix-cdn-versions
           git add ../..
-          git commit -m "🔖 @hugginface/inference $BUMPED_VERSION"
+          git commit -m "🔖 @huggingface/inference $BUMPED_VERSION"
           git tag "inference-v$BUMPED_VERSION"
 
       - name: Make sure that the latest version of @huggingface/tasks is consistent with the local version
@@ -99,6 +99,7 @@ jobs:
         with:
           node-version: "20"
           registry-url: "https://npm.pkg.github.com"
-      - run: pnpm publish --no-git-checks .
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Disable for now, until github supports PATs for writing github packages (https://github.com/github/roadmap/issues/558)
+      # - run: pnpm publish --no-git-checks .
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

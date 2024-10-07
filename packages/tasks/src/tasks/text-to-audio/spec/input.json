@@ -20,7 +20,7 @@
 			"description": "Additional inference parameters for Text To Audio",
 			"type": "object",
 			"properties": {
-				"generate": {
+				"generation_parameters": {
 					"description": "Parametrization of the text generation process",
 					"$ref": "/inference/schemas/common-definitions.json#/definitions/GenerationParameters"
 				}

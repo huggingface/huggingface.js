@@ -28,7 +28,7 @@ export interface TextToAudioParameters {
 	/**
 	 * Parametrization of the text generation process
 	 */
-	generate?: GenerationParameters;
+	generation_parameters?: GenerationParameters;
 	[property: string]: unknown;
 }
 
@@ -68,7 +68,7 @@ export interface GenerationParameters {
 	 */
 	max_length?: number;
 	/**
-	 * The maximum number of tokens to generate. Takes precedence over maxLength.
+	 * The maximum number of tokens to generate. Takes precedence over max_length.
 	 */
 	max_new_tokens?: number;
 	/**
@@ -76,7 +76,7 @@ export interface GenerationParameters {
 	 */
 	min_length?: number;
 	/**
-	 * The minimum number of tokens to generate. Takes precedence over maxLength.
+	 * The minimum number of tokens to generate. Takes precedence over min_length.
 	 */
 	min_new_tokens?: number;
 	/**

@@ -8,9 +8,10 @@
  */
 export interface ImageSegmentationInput {
 	/**
-	 * The input image data
+	 * The input image data as a base64-encoded string. If no `parameters` are provided, you can
+	 * also provide the image data as a raw bytes payload.
 	 */
-	inputs: unknown;
+	inputs: string;
 	/**
 	 * Additional inference parameters
 	 */
@@ -41,6 +42,9 @@ export interface ImageSegmentationParameters {
 	threshold?: number;
 	[property: string]: unknown;
 }
+/**
+ * Segmentation task to be performed, depending on model capabilities.
+ */
 export type ImageSegmentationSubtask = "instance" | "panoptic" | "semantic";
 export type ImageSegmentationOutput = ImageSegmentationOutputElement[];
 /**
@@ -50,15 +54,15 @@ export type ImageSegmentationOutput = ImageSegmentationOutputElement[];
  */
 export interface ImageSegmentationOutputElement {
 	/**
-	 * The label of the predicted segment
+	 * The label of the predicted segment.
 	 */
 	label: string;
 	/**
-	 * The corresponding mask as a black-and-white image
+	 * The corresponding mask as a black-and-white image (base64-encoded).
 	 */
-	mask: unknown;
+	mask: string;
 	/**
-	 * The score or confidence degreee the model has
+	 * The score or confidence degree the model has.
 	 */
 	score?: number;
 	[property: string]: unknown;
