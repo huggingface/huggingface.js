@@ -29,7 +29,7 @@ await uploadFile({
 
 // Use Inference API
 
-await hf.chatCompletion({
+await inference.chatCompletion({
   model: "meta-llama/Llama-3.1-8B-Instruct",
   messages: [
     {
@@ -41,7 +41,7 @@ await hf.chatCompletion({
   temperature: 0.5,
 });
 
-await hf.textToImage({
+await inference.textToImage({
   model: "black-forest-labs/FLUX.1-dev",
   inputs: "a picture of a green bird",
 });
