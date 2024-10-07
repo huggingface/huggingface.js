@@ -419,34 +419,35 @@ model = keras_hub.models.CausalLM.from_preset("hf://${model.id}", dtype="bfloat1
 ];
 
 export const llama_cpp_python = (model: ModelData): string[] => {
-	let snippet = `from llama_cpp import Llama
+	const snippets = [
+		`from llama_cpp import Llama
 
 llm = Llama.from_pretrained(
 	repo_id="${model.id}",
 	filename="{{GGUF_FILE}}",
 )
-
-`;
+`,
+	];
 
 	if (model.tags.includes("conversational")) {
-		snippet += `llm.create_chat_completion(
+		snippets.push(`llm.create_chat_completion(
 	messages = [
 		{
 			"role": "user",
 			"content": "What is the capital of France?"
 		}
 	]
-)`;
+)`);
 	} else {
-		snippet += `output = llm(
+		snippets.push(`output = llm(
 	"Once upon a time,",
 	max_tokens=512,
 	echo=True
 )
-print(output)`;
+print(output)`);
 	}
 
-	return [snippet];
+	return snippets;
 };
 
 export const tf_keras = (model: ModelData): string[] => [

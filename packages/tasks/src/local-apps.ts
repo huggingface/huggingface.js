@@ -93,17 +93,18 @@ function isMlxModel(model: ModelData) {
 
 const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const command = (binary: string) => {
-		let snippet = [
+		const snippet = [
 			"# Load and run the model:",
 			`${binary} \\`,
 			`  --hf-repo "${model.id}" \\`,
 			`  --hf-file ${filepath ?? "{{GGUF_FILE}}"} \\`,
 			`  -p "${model.tags.includes("conversational") ? "You are a helpful assistant" : "Once upon a time"}"`,
-		].join("\n");
+		];
 		if (model.tags.includes("conversational")) {
-			snippet += " \\\n  --conversation";
+			snippet[snippet.length - 1] += " \\";
+			snippet.push("  --conversation");
 		}
-		return snippet;
+		return snippet.join("\n");
 	};
 	return [
 		{
