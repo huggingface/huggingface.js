@@ -98,7 +98,7 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 			`${binary} \\`,
 			`  --hf-repo "${model.id}" \\`,
 			`  --hf-file ${filepath ?? "{{GGUF_FILE}}"} \\`,
-			`  -p "${model.tags.includes("conversational") ? "You are a helpful assistant" : "Once upon a time"}"`,
+			`  -p "${model.tags.includes("conversational") ? "You are a helpful assistant" : "Once upon a time,"}"`,
 		];
 		if (model.tags.includes("conversational")) {
 			snippet[snippet.length - 1] += " \\";

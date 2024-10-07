@@ -33,7 +33,7 @@ llama-cli \\
 llama-cli \\
   --hf-repo "mlabonne/gemma-2b-GGUF" \\
   --hf-file {{GGUF_FILE}} \\
-  -p "Once upon a time"`);
+  -p "Once upon a time,"`);
 	});
 
 	it("vLLM conversational", async () => {
