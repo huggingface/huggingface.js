@@ -29,18 +29,22 @@ await uploadFile({
 
 // Use hosted inference
 
-await inference.translation({
-  model: 't5-base',
-  inputs: 'My name is Wolfgang and I live in Berlin'
-})
+await hf.chatCompletion({
+  model: "meta-llama/Llama-3.1-8B-Instruct",
+  messages: [
+    {
+      role: "user",
+      content: "Hello, nice to meet you!",
+    },
+  ],
+  max_tokens: 512,
+  temperature: 0.5,
+});
 
-await inference.textToImage({
-  model: 'stabilityai/stable-diffusion-2',
-  inputs: 'award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]',
-  parameters: {
-    negative_prompt: 'blurry',
-  }
-})
+await hf.textToImage({
+  model: "black-forest-labs/FLUX.1-dev",
+  inputs: "a picture of a green bird",
+});
 
 // and much more…
 ```
@@ -123,29 +127,32 @@ const inference = new HfInference(HF_TOKEN);
 
 // Chat completion API
 const out = await inference.chatCompletion({
-  model: "mistralai/Mistral-7B-Instruct-v0.2",
-  messages: [{ role: "user", content: "Complete the this sentence with words one plus one is equal " }],
-  max_tokens: 100
+  model: "meta-llama/Llama-3.1-8B-Instruct",
+  messages: [{ role: "user", content: "Hello, nice to meet you!" }],
+  max_tokens: 512
 });
 console.log(out.choices[0].message);
 
 // Streaming chat completion API
 for await (const chunk of inference.chatCompletionStream({
-  model: "mistralai/Mistral-7B-Instruct-v0.2",
-  messages: [{ role: "user", content: "Complete the this sentence with words one plus one is equal " }],
-  max_tokens: 100
+  model: "meta-llama/Llama-3.1-8B-Instruct",
+  messages: [{ role: "user", content: "Hello, nice to meet you!" }],
+  max_tokens: 512
 })) {
   console.log(chunk.choices[0].delta.content);
 }
 
 // You can also omit "model" to use the recommended model for the task
-await inference.translation({
-  model: 't5-base',
-  inputs: 'My name is Wolfgang and I live in Amsterdam'
-})
+await hf.translation({
+  inputs: "My name is Wolfgang and I live in Amsterdam",
+  parameters: {
+    src_lang: "en",
+    tgt_lang: "fr",
+  },
+});
 
 await inference.textToImage({
-  model: 'stabilityai/stable-diffusion-2',
+  model: 'black-forest-labs/FLUX.1-dev',
   inputs: 'award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]',
   parameters: {
     negative_prompt: 'blurry',
@@ -162,13 +169,13 @@ const gpt2 = inference.endpoint('https://xyz.eu-west-1.aws.endpoints.huggingface
 const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the universe is'});
 
 //Chat Completion
-const mistal = inference.endpoint(
- "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2"
+const llamaEndpoint = inference.endpoint(
+ "https://api-inference.huggingface.co/models/meta-llama/Llama-3.1-8B-Instruct"
 );
-const out = await mistal.chatCompletion({
- model: "mistralai/Mistral-7B-Instruct-v0.2",
- messages: [{ role: "user", content: "Complete the this sentence with words one plus one is equal " }],
- max_tokens: 100,
+const out = await llamaEndpoint.chatCompletion({
+ model: "meta-llama/Llama-3.1-8B-Instruct",
+ messages: [{ role: "user", content: "Hello, nice to meet you!" }],
+ max_tokens: 512,
 });
 console.log(out.choices[0].message);
 ```
