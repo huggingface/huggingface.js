@@ -6,7 +6,7 @@ import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
 import { pick } from "../utils/pick";
 
-const EXPAND_KEYS = [
+export const DATASET_EXPAND_KEYS = [
 	"private",
 	"downloads",
 	"gated",
@@ -14,7 +14,7 @@ const EXPAND_KEYS = [
 	"lastModified",
 ] as const satisfies readonly (keyof ApiDatasetInfo)[];
 
-const EXPANDABLE_KEYS = [
+export const DATASET_EXPANDABLE_KEYS = [
 	"author",
 	"cardData",
 	"citation",
@@ -45,7 +45,7 @@ export interface DatasetEntry {
 }
 
 export async function* listDatasets<
-	const T extends Exclude<(typeof EXPANDABLE_KEYS)[number], (typeof EXPAND_KEYS)[number]> = never,
+	const T extends Exclude<(typeof DATASET_EXPANDABLE_KEYS)[number], (typeof DATASET_EXPAND_KEYS)[number]> = never,
 >(
 	params?: {
 		search?: {
@@ -77,7 +77,7 @@ export async function* listDatasets<
 			...(params?.search?.query ? { search: params.search.query } : undefined),
 		}),
 		...(params?.search?.tags?.map((tag) => ["filter", tag]) ?? []),
-		...EXPAND_KEYS.map((val) => ["expand", val] satisfies [string, string]),
+		...DATASET_EXPAND_KEYS.map((val) => ["expand", val] satisfies [string, string]),
 		...(params?.additionalFields?.map((val) => ["expand", val] satisfies [string, string]) ?? []),
 	]).toString();
 	let url: string | undefined = `${params?.hubUrl || HUB_URL}/api/datasets` + (search ? "?" + search : "");

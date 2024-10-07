@@ -6,7 +6,7 @@ import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
 import { pick } from "../utils/pick";
 
-const EXPAND_KEYS = [
+export const MODEL_EXPAND_KEYS = [
 	"pipeline_tag",
 	"private",
 	"gated",
@@ -15,7 +15,7 @@ const EXPAND_KEYS = [
 	"lastModified",
 ] as const satisfies readonly (keyof ApiModelInfo)[];
 
-const EXPANDABLE_KEYS = [
+export const MODEL_EXPANDABLE_KEYS = [
 	"author",
 	"cardData",
 	"config",
@@ -51,7 +51,7 @@ export interface ModelEntry {
 }
 
 export async function* listModels<
-	const T extends Exclude<(typeof EXPANDABLE_KEYS)[number], (typeof EXPAND_KEYS)[number]> = never,
+	const T extends Exclude<(typeof MODEL_EXPANDABLE_KEYS)[number], (typeof MODEL_EXPAND_KEYS)[number]> = never,
 >(
 	params?: {
 		search?: {
@@ -85,7 +85,7 @@ export async function* listModels<
 			...(params?.search?.query ? { search: params.search.query } : undefined),
 		}),
 		...(params?.search?.tags?.map((tag) => ["filter", tag]) ?? []),
-		...EXPAND_KEYS.map((val) => ["expand", val] satisfies [string, string]),
+		...MODEL_EXPAND_KEYS.map((val) => ["expand", val] satisfies [string, string]),
 		...(params?.additionalFields?.map((val) => ["expand", val] satisfies [string, string]) ?? []),
 	]).toString();
 	let url: string | undefined = `${params?.hubUrl || HUB_URL}/api/models?${search}`;
