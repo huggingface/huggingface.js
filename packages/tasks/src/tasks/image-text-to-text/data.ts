@@ -47,10 +47,6 @@ const taskData: TaskDataCustom = {
 			id: "meta-llama/Llama-3.2-11B-Vision-Instruct",
 		},
 		{
-			description: "Cutting-edge vision language model that can take multiple image inputs.",
-			id: "facebook/chameleon-7b",
-		},
-		{
 			description: "Cutting-edge conversational vision language model that can take multiple image inputs.",
 			id: "HuggingFaceM4/idefics2-8b-chatty",
 		},
