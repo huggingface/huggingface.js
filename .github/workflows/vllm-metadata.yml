@@ -1,0 +1,89 @@
+# Step1: scrape https://github.com/vllm-project/vllm/blob/main/vllm/model_executor/models/registry.py
+# Step2: upload to https://huggingface.co/datasets/huggingface/vllm-metadata
+name: Daily vLLM Metadata Scraper
+
+on:
+  schedule:
+    # Runs at 00:00 UTC every day
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+jobs:
+  run-python-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests huggingface-hub
+
+      - name: Execute Python script
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python -c '
+          import os
+          import ast
+          import json
+          import requests
+          from huggingface_hub import HfApi
+
+          def extract_models_sub_dict(parsed_code, sub_dict_name):
+              class MODELS_SUB_LIST_VISITOR(ast.NodeVisitor):
+                  def __init__(self):
+                      self.key = sub_dict_name
+                      self.value = None
+                  
+                  def visit_Assign(self, node):
+                      for target in node.targets:
+                          if isinstance(target, ast.Name) and target.id == self.key:
+                              self.value = ast.literal_eval(node.value)  
+              
+              visitor = MODELS_SUB_LIST_VISITOR()
+              visitor.visit(parsed_code)
+              return visitor.value
+
+          def extract_models_dict(source_code):
+              parsed_code = ast.parse(source_code)
+              class MODELS_LIST_VISITOR(ast.NodeVisitor):
+                  def __init__(self):
+                      self.key = "_MODELS"
+                      self.value = {}
+                  def visit_Assign(self, node):
+                      for target in node.targets:
+                          if not isinstance(target, ast.Name):
+                              return
+                          if target.id == self.key:
+                              for value in node.value.values:
+                                  dict = extract_models_sub_dict(parsed_code, value.id)
+                                  self.value.update(dict)
+              visitor = MODELS_LIST_VISITOR()
+              visitor.visit(parsed_code)
+              return visitor.value
+
+          url = "https://raw.githubusercontent.com/vllm-project/vllm/refs/heads/main/vllm/model_executor/models/registry.py"
+          response = requests.get(url)
+          response.raise_for_status()  # Raise an exception for bad status codes
+          source_code = response.text
+
+          models_dict = extract_models_dict(source_code)
+          architectures = [item for tup in models_dict.values() for item in tup]
+          architectures_json_str = json.dumps(architectures, indent=4)
+          json_bytes = architectures_json_str.encode("utf-8")
+
+          api = HfApi(token=os.environ["HF_VLLM_METADATA_PUSH"])
+          api.upload_file(
+              path_or_fileobj=json_bytes,
+              path_in_repo="architectures.json",
+              repo_id="huggingface/vllm-metadata",
+              repo_type="dataset",
+          )'
