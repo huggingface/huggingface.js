@@ -56,12 +56,12 @@ const taskData: TaskDataCustom = {
 	models: [
 		{
 			// TO DO: write description
-			description: "Strong Video Classification model trained on the Kinects 400 dataset.",
-			id: "MCG-NJU/videomae-base-finetuned-kinetics",
+			description: "Strong Video Classification model trained on the Kinetics 400 dataset.",
+			id: "google/vivit-b-16x2-kinetics400",
 		},
 		{
 			// TO DO: write description
-			description: "Strong Video Classification model trained on the Kinects 400 dataset.",
+			description: "Strong Video Classification model trained on the Kinetics 400 dataset.",
 			id: "microsoft/xclip-base-patch32",
 		},
 	],

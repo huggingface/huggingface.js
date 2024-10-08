@@ -1,3 +1,4 @@
+import type { CredentialsParams } from "../types/public";
 import { typedInclude } from "../utils/typedInclude";
 import type { CommitOutput, CommitParams, CommitProgressEvent, ContentSource } from "./commit";
 import { commitIter } from "./commit";
@@ -16,24 +17,25 @@ const multipartUploadTracking = new WeakMap<
  * Needs XMLHttpRequest to be available for progress events for uploads
  * Set useWebWorkers to true in order to have progress events for hashing
  */
-export async function* uploadFilesWithProgress(params: {
-	credentials?: CommitParams["credentials"];
-	repo: CommitParams["repo"];
-	files: Array<URL | File | { path: string; content: ContentSource }>;
-	commitTitle?: CommitParams["title"];
-	commitDescription?: CommitParams["description"];
-	hubUrl?: CommitParams["hubUrl"];
-	branch?: CommitParams["branch"];
-	isPullRequest?: CommitParams["isPullRequest"];
-	parentCommit?: CommitParams["parentCommit"];
-	abortSignal?: CommitParams["abortSignal"];
-	/**
-	 * Set this to true in order to have progress events for hashing
-	 */
-	useWebWorkers?: CommitParams["useWebWorkers"];
-}): AsyncGenerator<CommitProgressEvent, CommitOutput> {
+export async function* uploadFilesWithProgress(
+	params: {
+		repo: CommitParams["repo"];
+		files: Array<URL | File | { path: string; content: ContentSource }>;
+		commitTitle?: CommitParams["title"];
+		commitDescription?: CommitParams["description"];
+		hubUrl?: CommitParams["hubUrl"];
+		branch?: CommitParams["branch"];
+		isPullRequest?: CommitParams["isPullRequest"];
+		parentCommit?: CommitParams["parentCommit"];
+		abortSignal?: CommitParams["abortSignal"];
+		/**
+		 * Set this to true in order to have progress events for hashing
+		 */
+		useWebWorkers?: CommitParams["useWebWorkers"];
+	} & Partial<CredentialsParams>
+): AsyncGenerator<CommitProgressEvent, CommitOutput> {
 	return yield* commitIter({
-		credentials: params.credentials,
+		...(params.accessToken ? { accessToken: params.accessToken } : { credentials: params.credentials }),
 		repo: params.repo,
 		operations: params.files.map((file) => ({
 			operation: "addOrUpdate",

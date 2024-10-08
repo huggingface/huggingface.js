@@ -1,21 +1,22 @@
-import type { Credentials } from "../types/public";
+import type { CredentialsParams } from "../types/public";
 import type { CommitOutput, CommitParams } from "./commit";
 import { commit } from "./commit";
 
-export function deleteFiles(params: {
-	credentials: Credentials;
-	repo: CommitParams["repo"];
-	paths: string[];
-	commitTitle?: CommitParams["title"];
-	commitDescription?: CommitParams["description"];
-	hubUrl?: CommitParams["hubUrl"];
-	branch?: CommitParams["branch"];
-	isPullRequest?: CommitParams["isPullRequest"];
-	parentCommit?: CommitParams["parentCommit"];
-	fetch?: CommitParams["fetch"];
-}): Promise<CommitOutput> {
+export function deleteFiles(
+	params: {
+		repo: CommitParams["repo"];
+		paths: string[];
+		commitTitle?: CommitParams["title"];
+		commitDescription?: CommitParams["description"];
+		hubUrl?: CommitParams["hubUrl"];
+		branch?: CommitParams["branch"];
+		isPullRequest?: CommitParams["isPullRequest"];
+		parentCommit?: CommitParams["parentCommit"];
+		fetch?: CommitParams["fetch"];
+	} & CredentialsParams
+): Promise<CommitOutput> {
 	return commit({
-		credentials: params.credentials,
+		...(params.accessToken ? { accessToken: params.accessToken } : { credentials: params.credentials }),
 		repo: params.repo,
 		operations: params.paths.map((path) => ({
 			operation: "delete",

@@ -9,9 +9,10 @@
  */
 export interface AutomaticSpeechRecognitionInput {
 	/**
-	 * The input audio data
+	 * The input audio data as a base64-encoded string. If no `parameters` are provided, you can
+	 * also provide the audio data as a raw bytes payload.
 	 */
-	inputs: unknown;
+	inputs: string;
 	/**
 	 * Additional inference parameters
 	 */
@@ -28,7 +29,7 @@ export interface AutomaticSpeechRecognitionParameters {
 	/**
 	 * Parametrization of the text generation process
 	 */
-	generate?: GenerationParameters;
+	generation_parameters?: GenerationParameters;
 	/**
 	 * Whether to output corresponding timestamps with the generated text
 	 */
@@ -72,7 +73,7 @@ export interface GenerationParameters {
 	 */
 	max_length?: number;
 	/**
-	 * The maximum number of tokens to generate. Takes precedence over maxLength.
+	 * The maximum number of tokens to generate. Takes precedence over max_length.
 	 */
 	max_new_tokens?: number;
 	/**
@@ -80,7 +81,7 @@ export interface GenerationParameters {
 	 */
 	min_length?: number;
 	/**
-	 * The minimum number of tokens to generate. Takes precedence over maxLength.
+	 * The minimum number of tokens to generate. Takes precedence over min_length.
 	 */
 	min_new_tokens?: number;
 	/**

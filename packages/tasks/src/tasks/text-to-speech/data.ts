@@ -9,7 +9,7 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "Multi-speaker English dataset.",
-			id: "LibriTTS",
+			id: "mythicinfinity/libritts_r",
 		},
 	],
 	demo: {
@@ -36,11 +36,15 @@ const taskData: TaskDataCustom = {
 	models: [
 		{
 			description: "A powerful TTS model.",
-			id: "suno/bark",
+			id: "parler-tts/parler-tts-large-v1",
 		},
 		{
 			description: "A massively multi-lingual TTS model.",
-			id: "facebook/mms-tts",
+			id: "coqui/XTTS-v2",
+		},
+		{
+			description: "Robust TTS model.",
+			id: "metavoiceio/metavoice-1B-v0.1",
 		},
 		{
 			description: "A prompt based, powerful TTS model.",

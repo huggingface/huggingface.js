@@ -97,8 +97,8 @@ const taskData: TaskDataCustom = {
 			id: "HuggingFaceH4/zephyr-chat",
 		},
 		{
-			description: "An text generation application that combines OpenAI and Hugging Face models.",
-			id: "microsoft/HuggingGPT",
+			description: "A leaderboard that ranks text generation models based on blind votes from people.",
+			id: "lmsys/chatbot-arena-leaderboard",
 		},
 		{
 			description: "An chatbot to converse with a very powerful text generation model.",
@@ -107,7 +107,7 @@ const taskData: TaskDataCustom = {
 	],
 	summary:
 		"Generating text is the task of generating new text given another text. These models can, for example, fill in incomplete text or paraphrase.",
-	widgetModels: ["HuggingFaceH4/zephyr-7b-beta"],
+	widgetModels: ["mistralai/Mistral-Nemo-Instruct-2407"],
 	youtubeId: "e9gNEAlsOvU",
 };
 

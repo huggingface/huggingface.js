@@ -30,23 +30,25 @@ For some of the calls, you need to create an account and generate an [access tok
 Learn how to find free models using the hub package in this [interactive tutorial](https://scrimba.com/scrim/c7BbVPcd?pl=pkVnrP7uP).
 
 ```ts
-import { createRepo, uploadFiles, uploadFilesWithProgress, deleteFile, deleteRepo, listFiles, whoAmI } from "@huggingface/hub";
-import type { RepoDesignation, Credentials } from "@huggingface/hub";
+import * as hub from "@huggingface/hub";
+import type { RepoDesignation } from "@huggingface/hub";
 
 const repo: RepoDesignation = { type: "model", name: "myname/some-model" };
-const credentials: Credentials = { accessToken: "hf_..." };
 
-const {name: username} = await whoAmI({credentials});
+const {name: username} = await hub.whoAmI({accessToken: "hf_..."});
 
-for await (const model of listModels({search: {owner: username}, credentials})) {
+for await (const model of hub.listModels({search: {owner: username}, accessToken: "hf_..."})) {
   console.log("My model:", model);
 }
 
-await createRepo({ repo, credentials, license: "mit" });
+const specificModel = await hub.modelInfo({name: "openai-community/gpt2"});
+await hub.checkRepoAccess({repo, accessToken: "hf_..."});
 
-await uploadFiles({
+await hub.createRepo({ repo, accessToken: "hf_...", license: "mit" });
+
+await hub.uploadFiles({
   repo,
-  credentials,
+  accessToken: "hf_...",
   files: [
     // path + blob content
     {
@@ -68,9 +70,9 @@ await uploadFiles({
 
 // or
 
-for await (const progressEvent of await uploadFilesWithProgress({
+for await (const progressEvent of await hub.uploadFilesWithProgress({
   repo,
-  credentials,
+  accessToken: "hf_...",
   files: [
     ...
   ],
@@ -78,15 +80,15 @@ for await (const progressEvent of await uploadFilesWithProgress({
   console.log(progressEvent);
 }
 
-await deleteFile({repo, credentials, path: "myfile.bin"});
+await hub.deleteFile({repo, accessToken: "hf_...", path: "myfile.bin"});
 
-await (await downloadFile({ repo, path: "README.md" })).text();
+await (await hub.downloadFile({ repo, path: "README.md" })).text();
 
-for await (const fileInfo of listFiles({repo})) {
+for await (const fileInfo of hub.listFiles({repo})) {
   console.log(fileInfo);
 }
 
-await deleteRepo({ repo, credentials });
+await hub.deleteRepo({ repo, accessToken: "hf_..." });
 ```
 
 ## OAuth Login
@@ -110,6 +112,19 @@ console.log(oauthResult);
 ```
 
 Checkout the demo: https://huggingface.co/spaces/huggingfacejs/client-side-oauth
+
+## Hugging face cache
+
+The `@huggingface/hub` package provide basic capabilities to scan the cache directory. Learn more about [Manage huggingface_hub cache-system](https://huggingface.co/docs/huggingface_hub/en/guides/manage-cache).
+
+```ts
+import { scanCacheDir } from "@huggingface/hub";
+
+const result = await scanCacheDir();
+
+console.log(result);
+```
+Note that the cache directory is created and used only by the Python and Rust libraries. Downloading files using the `@huggingface/hub` package won't use the cache directory.
 
 ## Performance considerations
 

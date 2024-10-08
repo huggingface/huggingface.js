@@ -1,5 +1,4 @@
-import type { Credentials, RepoDesignation } from "../types/public";
-import { checkCredentials } from "../utils/checkCredentials";
+import type { CredentialsParams, RepoDesignation } from "../types/public";
 import { omit } from "../utils/omit";
 import { toRepoId } from "../utils/toRepoId";
 import { typedEntries } from "../utils/typedEntries";
@@ -83,13 +82,12 @@ async function parseSingleFile(
 	params: {
 		repo: RepoDesignation;
 		revision?: string;
-		credentials?: Credentials;
 		hubUrl?: string;
 		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	}
+	} & Partial<CredentialsParams>
 ): Promise<SafetensorsFileHeader> {
 	const firstResp = await downloadFile({
 		...params,
@@ -133,13 +131,12 @@ async function parseShardedIndex(
 	params: {
 		repo: RepoDesignation;
 		revision?: string;
-		credentials?: Credentials;
 		hubUrl?: string;
 		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	}
+	} & Partial<CredentialsParams>
 ): Promise<{ index: SafetensorsIndexJson; headers: SafetensorsShardedHeaders }> {
 	const indexResp = await downloadFile({
 		...params,
@@ -177,58 +174,60 @@ async function parseShardedIndex(
  * Analyze model.safetensors.index.json or model.safetensors from a model hosted
  * on Hugging Face using smart range requests to extract its metadata.
  */
-export async function parseSafetensorsMetadata(params: {
-	/** Only models are supported */
-	repo: RepoDesignation;
-	/**
-	 * Relative file path to safetensors file inside `repo`. Defaults to `SAFETENSORS_FILE` or `SAFETENSORS_INDEX_FILE` (whichever one exists).
-	 */
-	path?: string;
-	/**
-	 * Will include SafetensorsParseFromRepo["parameterCount"], an object containing the number of parameters for each DType
-	 *
-	 * @default false
-	 */
-	computeParametersCount: true;
-	hubUrl?: string;
-	credentials?: Credentials;
-	revision?: string;
-	/**
-	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
-	 */
-	fetch?: typeof fetch;
-}): Promise<SetRequired<SafetensorsParseFromRepo, "parameterCount">>;
-export async function parseSafetensorsMetadata(params: {
-	/** Only models are supported */
-	repo: RepoDesignation;
-	/**
-	 * Will include SafetensorsParseFromRepo["parameterCount"], an object containing the number of parameters for each DType
-	 *
-	 * @default false
-	 */
-	path?: string;
-	computeParametersCount?: boolean;
-	hubUrl?: string;
-	credentials?: Credentials;
-	revision?: string;
-	/**
-	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
-	 */
-	fetch?: typeof fetch;
-}): Promise<SafetensorsParseFromRepo>;
-export async function parseSafetensorsMetadata(params: {
-	repo: RepoDesignation;
-	path?: string;
-	computeParametersCount?: boolean;
-	hubUrl?: string;
-	credentials?: Credentials;
-	revision?: string;
-	/**
-	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
-	 */
-	fetch?: typeof fetch;
-}): Promise<SafetensorsParseFromRepo> {
-	checkCredentials(params.credentials);
+export async function parseSafetensorsMetadata(
+	params: {
+		/** Only models are supported */
+		repo: RepoDesignation;
+		/**
+		 * Relative file path to safetensors file inside `repo`. Defaults to `SAFETENSORS_FILE` or `SAFETENSORS_INDEX_FILE` (whichever one exists).
+		 */
+		path?: string;
+		/**
+		 * Will include SafetensorsParseFromRepo["parameterCount"], an object containing the number of parameters for each DType
+		 *
+		 * @default false
+		 */
+		computeParametersCount: true;
+		hubUrl?: string;
+		revision?: string;
+		/**
+		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+		 */
+		fetch?: typeof fetch;
+	} & Partial<CredentialsParams>
+): Promise<SetRequired<SafetensorsParseFromRepo, "parameterCount">>;
+export async function parseSafetensorsMetadata(
+	params: {
+		/** Only models are supported */
+		repo: RepoDesignation;
+		/**
+		 * Will include SafetensorsParseFromRepo["parameterCount"], an object containing the number of parameters for each DType
+		 *
+		 * @default false
+		 */
+		path?: string;
+		computeParametersCount?: boolean;
+		hubUrl?: string;
+		revision?: string;
+		/**
+		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+		 */
+		fetch?: typeof fetch;
+	} & Partial<CredentialsParams>
+): Promise<SafetensorsParseFromRepo>;
+export async function parseSafetensorsMetadata(
+	params: {
+		repo: RepoDesignation;
+		path?: string;
+		computeParametersCount?: boolean;
+		hubUrl?: string;
+		revision?: string;
+		/**
+		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+		 */
+		fetch?: typeof fetch;
+	} & Partial<CredentialsParams>
+): Promise<SafetensorsParseFromRepo> {
 	const repoId = toRepoId(params.repo);
 
 	if (repoId.type !== "model") {

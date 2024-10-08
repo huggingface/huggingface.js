@@ -6,7 +6,7 @@
 	"type": "object",
 	"properties": {
 		"inputs": {
-			"description": "The input text data (sometimes called \"prompt\"",
+			"description": "The input text data (sometimes called \"prompt\")",
 			"type": "string"
 		},
 		"parameters": {
@@ -22,7 +22,7 @@
 			"properties": {
 				"guidance_scale": {
 					"type": "number",
-					"description": "For diffusion models. A higher guidance scale value encourages the model to generate images closely linked to the text prompt at the expense of lower image quality."
+					"description": "A higher guidance scale value encourages the model to generate images closely linked to the text prompt, but values too high may cause saturation and other artifacts."
 				},
 				"negative_prompt": {
 					"type": "array",
@@ -33,7 +33,7 @@
 				},
 				"num_inference_steps": {
 					"type": "integer",
-					"description": "For diffusion models. The number of denoising steps. More denoising steps usually lead to a higher quality image at the expense of slower inference."
+					"description": "The number of denoising steps. More denoising steps usually lead to a higher quality image at the expense of slower inference."
 				},
 				"target_size": {
 					"type": "object",
@@ -50,7 +50,11 @@
 				},
 				"scheduler": {
 					"type": "string",
-					"description": "For diffusion models. Override the scheduler with a compatible one"
+					"description": "Override the scheduler with a compatible one."
+				},
+				"seed": {
+					"type": "integer",
+					"description": "Seed for the random number generator."
 				}
 			}
 		}

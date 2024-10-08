@@ -43,8 +43,8 @@ const taskData: TaskDataCustom = {
 	metrics: [],
 	models: [
 		{
-			description: "Cutting-edge vision language model that can take multiple image inputs.",
-			id: "facebook/chameleon-7b",
+			description: "Powerful vision language model with great visual understanding and reasoning capabilities.",
+			id: "meta-llama/Llama-3.2-11B-Vision-Instruct",
 		},
 		{
 			description: "Cutting-edge conversational vision language model that can take multiple image inputs.",
@@ -60,7 +60,7 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "Strong image-text-to-text model.",
-			id: "llava-hf/llava-v1.6-mistral-7b-hf",
+			id: "microsoft/Phi-3.5-vision-instruct",
 		},
 	],
 	spaces: [
