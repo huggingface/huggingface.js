@@ -171,6 +171,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/apple/ml-depth-pro",
 		countDownloads: `path_extension:"pt"`,
 		snippets: snippets.depth_pro,
+		filter: false,
 	},
 	diffree: {
 		prettyLabel: "Diffree",
