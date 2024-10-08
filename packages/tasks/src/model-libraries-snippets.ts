@@ -139,6 +139,33 @@ depth = model.infer_image(raw_img) # HxW raw depth map in numpy
 	];
 };
 
+export const depth_pro = (model: ModelData): string[] => {
+	const installSnippet = `# Download checkpoint
+pip install huggingface-hub
+huggingface-cli download --local-dir checkpoints ${model.id}`;
+
+	const inferenceSnippet = `from PIL import Image
+import depth_pro
+
+# Load model and preprocessing transform
+model, transform = depth_pro.create_model_and_transforms()
+model.eval()
+
+# Load and preprocess an image.
+image, _, f_px = depth_pro.load_rgb(image_path)
+image = transform(image)
+
+# Run inference.
+prediction = model.infer(image, f_px=f_px)
+
+# Results: 1. Depth in meters
+depth = prediction["depth"]
+# Results: 2. Focal length in pixels
+focallength_px = prediction["focallength_px"]`;
+
+	return [installSnippet, inferenceSnippet];
+};
+
 const diffusersDefaultPrompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
 
 const diffusers_default = (model: ModelData) => [

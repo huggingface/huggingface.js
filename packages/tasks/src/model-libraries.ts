@@ -165,6 +165,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pth"`,
 	},
+	"depth-pro": {
+		prettyLabel: "DepthPro",
+		repoName: "Depth Pro",
+		repoUrl: "https://github.com/apple/ml-depth-pro",
+		countDownloads: `path_extension:"pt"`,
+		snippets: snippets.depth_pro,
+	},
 	diffree: {
 		prettyLabel: "Diffree",
 		repoName: "Diffree",
