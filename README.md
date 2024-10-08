@@ -143,7 +143,7 @@ for await (const chunk of inference.chatCompletionStream({
 }
 
 // You can also omit "model" to use the recommended model for the task
-await hf.translation({
+await inference.translation({
   inputs: "My name is Wolfgang and I live in Amsterdam",
   parameters: {
     src_lang: "en",
