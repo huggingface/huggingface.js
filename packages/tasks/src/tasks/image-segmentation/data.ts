@@ -44,7 +44,8 @@ const taskData: TaskDataCustom = {
 	models: [
 		{
 			// TO DO: write description
-			description: "Solid semantic segmentation model fine-tuned on ADE20k, an important benchmark comprising 150 classes.",
+			description:
+				"Solid semantic segmentation model fine-tuned on ADE20k, an important benchmark comprising 150 classes.",
 			id: "openmmlab/upernet-convnext-small",
 		},
 		{
