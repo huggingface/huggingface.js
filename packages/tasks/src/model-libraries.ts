@@ -448,13 +448,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path_extension:"nemo" OR path:"model_config.yaml"`,
 	},
-	"node-llama-cpp": {
-		prettyLabel: "node-llama-cpp",
-		repoName: "node-llama-cpp",
-		repoUrl: "https://github.com/withcatai/node-llama-cpp",
-		docsUrl: "https://node-llama-cpp.withcat.ai",
-		snippets: snippets.nodeLlamaCpp,
-	},
 	open_clip: {
 		prettyLabel: "OpenCLIP",
 		repoName: "OpenCLIP",

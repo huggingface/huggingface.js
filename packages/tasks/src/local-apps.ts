@@ -217,8 +217,8 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetLlamacpp,
 	},
-	"node-llama-cpp-cli": {
-		prettyLabel: "node-llama-cpp (CLI)",
+	"node-llama-cpp": {
+		prettyLabel: "node-llama-cpp",
 		docsUrl: "https://node-llama-cpp.withcat.ai",
 		mainTask: "text-generation",
 		displayOnModelPage: isLlamaCppGgufModel,
