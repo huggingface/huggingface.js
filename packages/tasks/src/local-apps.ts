@@ -248,9 +248,7 @@ export const LOCAL_APPS = {
 		prettyLabel: "TGI",
 		docsUrl: "https://huggingface.co/docs/text-generation-inference/",
 		mainTask: "text-generation",
-		displayOnModelPage: (model: ModelData) =>
-			(isAwqModel(model) || isGptqModel(model) || isMarlinModel(model) || isTransformersModel(model)) &&
-			isTgiModel(model),
+		displayOnModelPage: (model: ModelData) => isTgiModel(model),
 		snippet: snippetTgi,
 	},
 	lmstudio: {
