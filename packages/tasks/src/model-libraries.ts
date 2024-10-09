@@ -166,7 +166,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pth"`,
 	},
 	"depth-pro": {
-		prettyLabel: "DepthPro",
+		prettyLabel: "Depth Pro",
 		repoName: "Depth Pro",
 		repoUrl: "https://github.com/apple/ml-depth-pro",
 		countDownloads: `path_extension:"pt"`,
