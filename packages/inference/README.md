@@ -91,23 +91,21 @@ Using the `chatCompletion` method, you can generate text with models compatible 
 ```typescript
 // Non-streaming API
 const out = await hf.chatCompletion({
-  model: "mistralai/Mistral-7B-Instruct-v0.2",
-  messages: [{ role: "user", content: "Complete the this sentence with words one plus one is equal " }],
-  max_tokens: 500,
+  model: "meta-llama/Llama-3.1-8B-Instruct",
+  messages: [{ role: "user", content: "Hello, nice to meet you!" }],
+  max_tokens: 512,
   temperature: 0.1,
-  seed: 0,
 });
 
 // Streaming API
 let out = "";
 for await (const chunk of hf.chatCompletionStream({
-  model: "mistralai/Mistral-7B-Instruct-v0.2",
+  model: "meta-llama/Llama-3.1-8B-Instruct",
   messages: [
-    { role: "user", content: "Complete the equation 1+1= ,just the answer" },
+    { role: "user", content: "Can you help me solve an equation?" },
   ],
-  max_tokens: 500,
+  max_tokens: 512,
   temperature: 0.1,
-  seed: 0,
 })) {
   if (chunk.choices && chunk.choices.length > 0) {
     out += chunk.choices[0].delta.content;
@@ -396,11 +394,8 @@ Creates an image from a text prompt.
 
 ```typescript
 await hf.textToImage({
-  inputs: 'award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]',
-  model: 'stabilityai/stable-diffusion-2',
-  parameters: {
-    negative_prompt: 'blurry',
-  }
+  model: 'black-forest-labs/FLUX.1-dev',
+  inputs: 'a picture of a green bird'
 })
 ```
 
@@ -583,7 +578,7 @@ const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the
 
 // Chat Completion Example
 const ep = hf.endpoint(
-  "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2"
+  "https://api-inference.huggingface.co/models/meta-llama/Llama-3.1-8B-Instruct"
 );
 const stream = ep.chatCompletionStream({
   model: "tgi",

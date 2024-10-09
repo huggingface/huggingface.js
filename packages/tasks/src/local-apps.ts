@@ -162,8 +162,8 @@ const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] 
 const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
 	const runCommand = [
 		"# Call the server using curl:",
-		`curl -X POST "http://localhost:8000/v1/chat/completions" \\ `,
-		`	-H "Content-Type: application/json" \\ `,
+		`curl -X POST "http://localhost:8000/v1/chat/completions" \\`,
+		`	-H "Content-Type: application/json" \\`,
 		`	--data '{`,
 		`		"model": "${model.id}",`,
 		`		"messages": [`,
@@ -229,12 +229,13 @@ export const LOCAL_APPS = {
 		docsUrl: "https://docs.vllm.ai",
 		mainTask: "text-generation",
 		displayOnModelPage: (model: ModelData) =>
-			isAwqModel(model) ||
-			isGptqModel(model) ||
-			isAqlmModel(model) ||
-			isMarlinModel(model) ||
-			isLlamaCppGgufModel(model) ||
-			isTransformersModel(model),
+			(isAwqModel(model) ||
+				isGptqModel(model) ||
+				isAqlmModel(model) ||
+				isMarlinModel(model) ||
+				isLlamaCppGgufModel(model) ||
+				isTransformersModel(model)) &&
+			(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text"),
 		snippet: snippetVllm,
 	},
 	lmstudio: {
