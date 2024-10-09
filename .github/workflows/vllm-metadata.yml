@@ -28,7 +28,7 @@ jobs:
 
       - name: Execute Python script
         env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_VLLM_METADATA_PUSH: ${{ secrets.HF_VLLM_METADATA_PUSH }}
         run: |
           python -c '
           import os
