@@ -43,20 +43,20 @@ export type LocalApp = {
 	 */
 	displayOnModelPage: (model: ModelData) => boolean;
 } & (
-	| {
+		| {
 			/**
 			 * If the app supports deeplink, URL to open.
 			 */
 			deeplink: (model: ModelData, filepath?: string) => URL;
-	  }
-	| {
+		}
+		| {
 			/**
 			 * And if not (mostly llama.cpp), snippet to copy/paste in your terminal
 			 * Support the placeholder {{GGUF_FILE}} that will be replaced by the gguf file path or the list of available files.
 			 */
 			snippet: (model: ModelData, filepath?: string) => string | string[] | LocalAppSnippet | LocalAppSnippet[];
-	  }
-);
+		}
+	);
 
 function isAwqModel(model: ModelData): boolean {
 	return model.config?.quantization_config?.quant_method === "awq";
@@ -76,6 +76,9 @@ function isMarlinModel(model: ModelData): boolean {
 
 function isTransformersModel(model: ModelData): boolean {
 	return model.tags.includes("transformers");
+}
+function isTgiModel(model: ModelData): boolean {
+	return model.tags.includes("text-generation-inference");
 }
 
 function isLlamaCppGgufModel(model: ModelData) {
@@ -180,6 +183,35 @@ const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
 		},
 	];
 };
+const snippetTgi = (model: ModelData): LocalAppSnippet[] => {
+	const runCommand = [
+		"# Call the server using curl:",
+		`curl -X POST "http://localhost:8000/v1/chat/completions" \\`,
+		`	-H "Content-Type: application/json" \\`,
+		`	--data '{`,
+		`		"model": "${model.id}",`,
+		`		"messages": [`,
+		`			{"role": "user", "content": "What is the capital of France?"}`,
+		`		]`,
+		`	}'`,
+	];
+	return [
+		{
+			title: "Use Docker images",
+			setup: [
+				"# Deploy with docker on Linux:",
+				`docker run --gpus all \\`,
+				`	-v ~/.cache/huggingface:/root/.cache/huggingface \\`,
+				` 	-e HF_TOKEN=<secret>" \\`,
+				`	ghcr.io/huggingface/text-generation-inference:2.3.1 \\`,
+				`	--model-id ${model.id}`,
+			].join("\n"),
+			content: [
+				runCommand.join("\n"),
+			],
+		},
+	];
+};
 
 /**
  * Add your new local app here.
@@ -213,6 +245,18 @@ export const LOCAL_APPS = {
 				isTransformersModel(model)) &&
 			(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text"),
 		snippet: snippetVllm,
+	},
+	tgi: {
+		prettyLabel: "TGI",
+		docsUrl: "https://huggingface.co/docs/text-generation-inference/",
+		mainTask: "text-generation",
+		displayOnModelPage: (model: ModelData) =>
+			(isAwqModel(model) ||
+				isGptqModel(model) ||
+				isMarlinModel(model) ||
+				isTransformersModel(model)) &&
+			isTgiModel(model),
+		snippet: snippetTgi,
 	},
 	lmstudio: {
 		prettyLabel: "LM Studio",
