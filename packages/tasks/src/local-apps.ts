@@ -82,6 +82,10 @@ function isLlamaCppGgufModel(model: ModelData) {
 	return !!model.gguf?.context_length;
 }
 
+function isMlxModel(model: ModelData) {
+	return model.tags.includes("mlx");
+}
+
 const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const command = (binary: string) =>
 		[
@@ -218,7 +222,7 @@ export const LOCAL_APPS = {
 		prettyLabel: "LM Studio",
 		docsUrl: "https://lmstudio.ai",
 		mainTask: "text-generation",
-		displayOnModelPage: isLlamaCppGgufModel,
+		displayOnModelPage: isLlamaCppGgufModel || isMlxModel,
 		deeplink: (model, filepath) =>
 			new URL(`lmstudio://open_from_hf?model=${model.id}${filepath ? `&file=${filepath}` : ""}`),
 	},
