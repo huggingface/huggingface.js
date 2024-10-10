@@ -203,6 +203,7 @@ const snippetTgi = (model: ModelData): LocalAppSnippet[] => {
 				`docker run --gpus all \\`,
 				`	-v ~/.cache/huggingface:/root/.cache/huggingface \\`,
 				` 	-e HF_TOKEN=<secret>" \\`,
+				`	-p 8000:80 \\`,				
 				`	ghcr.io/huggingface/text-generation-inference:latest \\`,
 				`	--model-id ${model.id}`,
 			].join("\n"),
@@ -248,7 +249,7 @@ export const LOCAL_APPS = {
 		prettyLabel: "TGI",
 		docsUrl: "https://huggingface.co/docs/text-generation-inference/",
 		mainTask: "text-generation",
-		displayOnModelPage: (model: ModelData) => isTgiModel(model),
+		displayOnModelPage: isTgiModel,
 		snippet: snippetTgi,
 	},
 	lmstudio: {
