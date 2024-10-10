@@ -203,7 +203,7 @@ const snippetTgi = (model: ModelData): LocalAppSnippet[] => {
 				`docker run --gpus all \\`,
 				`	-v ~/.cache/huggingface:/root/.cache/huggingface \\`,
 				` 	-e HF_TOKEN=<secret>" \\`,
-				`	-p 8000:80 \\`,				
+				`	-p 8000:80 \\`,
 				`	ghcr.io/huggingface/text-generation-inference:latest \\`,
 				`	--model-id ${model.id}`,
 			].join("\n"),
