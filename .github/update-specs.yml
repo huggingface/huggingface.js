@@ -1,0 +1,61 @@
+name: Tasks - Update specs
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - add-workflow-update-specs
+
+concurrency:
+  group: "push-to-main"
+
+defaults:
+  run:
+    working-directory: packages/tasks
+
+jobs:
+  version_and_release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # Needed to create the pull request
+          token: ${{ secrets.BOT_ACCESS_TOKEN }}
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: |
+            packages/tasks/pnpm-lock.yaml
+          # setting a registry enables the NODE_AUTH_TOKEN env variable where we can set an npm token.  REQUIRED
+          registry-url: "https://registry.npmjs.org"
+      - run: pnpm install
+      - run: pnpm run inference-tgi-import
+      - run: pnpm run inference-tei-import
+      - run: pnpm run inference-codegen
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: Update report
+          committer: github-actions[bot]
+          author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
+          branch: update-tasks-specs-automated-pr
+          delete-branch: true
+          title: "[Bot] Update tasks specs"
+          body: |
+            Tasks specs updated by running:
+            ```sh
+            pnpm run inference-tgi-import
+            pnpm run inference-tei-import
+            pnpm run inference-codegen
+            ```
+
+            This PR was automatically created by the [Tasks - Update specs workflow](https://github.com/huggingface/huggingface.js/blob/main/.github/update-specs.yml).
+          labels: |
+            tasks
+            specs
+          reviewers: |
+            Wauplin
+            hanouticelina
