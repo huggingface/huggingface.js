@@ -24,11 +24,12 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: "20"
-          cache: "pnpm"
-          cache-dependency-path: |
-            packages/tasks/pnpm-lock.yaml
-          # setting a registry enables the NODE_AUTH_TOKEN env variable where we can set an npm token.  REQUIRED
-          registry-url: "https://registry.npmjs.org"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          run_install: true
+
       - run: pnpm install
       - run: pnpm run inference-tgi-import
       - run: pnpm run inference-tei-import
