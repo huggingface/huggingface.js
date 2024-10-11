@@ -55,6 +55,8 @@ jobs:
             ```
 
             This PR was automatically created by the [Tasks - Update specs workflow](https://github.com/huggingface/huggingface.js/blob/main/.github/update-specs.yml).
+
+            Make sure the changes are correct before merging.
           labels: |
             tasks
             specs
