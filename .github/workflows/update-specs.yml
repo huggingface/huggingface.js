@@ -17,30 +17,33 @@ jobs:
   version_and_release:
     runs-on: ubuntu-latest
     steps:
+      # Setup
       - uses: actions/checkout@v3
-        with:
-          # Needed to create the pull request
-          token: ${{ secrets.BOT_ACCESS_TOKEN }}
+        # with:
+        #   # Needed to create the pull request
+        #   token: ${{ secrets.BOT_ACCESS_TOKEN }}
       - uses: actions/setup-node@v3
         with:
           node-version: "20"
-
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
           run_install: true
 
-      - run: pnpm install
+      # Generate specs
       - run: pnpm run inference-tgi-import
       - run: pnpm run inference-tei-import
       - run: pnpm run inference-codegen
 
+      # Check changes
+      - run: git status
+
+      # Create or update Pull Request
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: Update report
-          committer: github-actions[bot]
           author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
           branch: update-tasks-specs-automated-pr
           delete-branch: true
