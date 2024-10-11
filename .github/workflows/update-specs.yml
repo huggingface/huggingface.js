@@ -7,21 +7,19 @@ on:
       - add-workflow-update-specs
 
 concurrency:
-  group: "push-to-main"
+  group: update-specs
+  cancel-in-progress: true
 
 defaults:
   run:
     working-directory: packages/tasks
 
 jobs:
-  version_and_release:
+  pull_request:
     runs-on: ubuntu-latest
     steps:
       # Setup
       - uses: actions/checkout@v3
-        # with:
-        #   # Needed to create the pull request
-        #   token: ${{ secrets.BOT_ACCESS_TOKEN }}
       - uses: actions/setup-node@v3
         with:
           node-version: "20"
