@@ -22,7 +22,7 @@ jobs:
           then
             echo "SINCE=$SHA^1" >> $GITHUB_OUTPUT
           else
-            echo "SINCE=$(git merge-base origin/$PR_REF SHA)" >> $GITHUB_OUTPUT
+            echo "SINCE=$(git merge-base origin/$PR_REF $SHA)" >> $GITHUB_OUTPUT
           fi
         env: 
           PR_REF: ${{  github.event.pull_request.head.ref }}
