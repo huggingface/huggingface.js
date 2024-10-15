@@ -77,6 +77,9 @@ function isMarlinModel(model: ModelData): boolean {
 function isTransformersModel(model: ModelData): boolean {
 	return model.tags.includes("transformers");
 }
+function isTgiModel(model: ModelData): boolean {
+	return model.tags.includes("text-generation-inference");
+}
 
 function isLlamaCppGgufModel(model: ModelData) {
 	return !!model.gguf?.context_length;
@@ -184,6 +187,34 @@ const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
 		},
 	];
 };
+const snippetTgi = (model: ModelData): LocalAppSnippet[] => {
+	const runCommand = [
+		"# Call the server using curl:",
+		`curl -X POST "http://localhost:8000/v1/chat/completions" \\`,
+		`	-H "Content-Type: application/json" \\`,
+		`	--data '{`,
+		`		"model": "${model.id}",`,
+		`		"messages": [`,
+		`			{"role": "user", "content": "What is the capital of France?"}`,
+		`		]`,
+		`	}'`,
+	];
+	return [
+		{
+			title: "Use Docker images",
+			setup: [
+				"# Deploy with docker on Linux:",
+				`docker run --gpus all \\`,
+				`	-v ~/.cache/huggingface:/root/.cache/huggingface \\`,
+				` 	-e HF_TOKEN="<secret>" \\`,
+				`	-p 8000:80 \\`,
+				`	ghcr.io/huggingface/text-generation-inference:latest \\`,
+				`	--model-id ${model.id}`,
+			].join("\n"),
+			content: [runCommand.join("\n")],
+		},
+	];
+};
 
 /**
  * Add your new local app here.
@@ -217,6 +248,13 @@ export const LOCAL_APPS = {
 				isTransformersModel(model)) &&
 			(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text"),
 		snippet: snippetVllm,
+	},
+	tgi: {
+		prettyLabel: "TGI",
+		docsUrl: "https://huggingface.co/docs/text-generation-inference/",
+		mainTask: "text-generation",
+		displayOnModelPage: isTgiModel,
+		snippet: snippetTgi,
 	},
 	lmstudio: {
 		prettyLabel: "LM Studio",
