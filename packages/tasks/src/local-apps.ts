@@ -126,6 +126,23 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 	];
 };
 
+const snippetNodeLlamaCppCli = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	return [
+		{
+			title: "Chat with the model",
+			content: [
+				`npx -y node-llama-cpp chat \\`,
+				`  --model "hf:${model.id}/${filepath ?? "{{GGUF_FILE}}"}" \\`,
+				`  --prompt 'Hi there!'`,
+			].join("\n"),
+		},
+		{
+			title: "Estimate the model compatibility with your hardware",
+			content: `npx -y node-llama-cpp inspect estimate "hf:${model.id}/${filepath ?? "{{GGUF_FILE}}"}"`,
+		},
+	];
+};
+
 const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const command = (binary: string) =>
 		["# Load and run the model:", `${binary} huggingface://${model.id}/${filepath ?? "{{GGUF_FILE}}"}`].join("\n");
@@ -234,6 +251,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetLlamacpp,
+	},
+	"node-llama-cpp": {
+		prettyLabel: "node-llama-cpp",
+		docsUrl: "https://node-llama-cpp.withcat.ai",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		snippet: snippetNodeLlamaCppCli,
 	},
 	vllm: {
 		prettyLabel: "vLLM",
