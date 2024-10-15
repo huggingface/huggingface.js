@@ -126,6 +126,10 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 	];
 };
 
+const snippetOllama = (model: ModelData, ollamatag?: string): string => {
+	return `ollama run hf.co/${model.id}${ollamatag ?? "{{OLLAMA_TAG}}"}`;
+};
+
 const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const command = (binary: string) =>
 		["# Load and run the model:", `${binary} huggingface://${model.id}/${filepath ?? "{{GGUF_FILE}}"}`].join("\n");
@@ -370,7 +374,7 @@ export const LOCAL_APPS = {
 		docsUrl: "https://github.com/ollama/ollama/tree/main/docs",
 		mainTask: "text-generation",
 		displayOnModelPage: isLlamaCppGgufModel,
-		deeplink: (model) => new URL(`https://ollama.com/library/{model.id}`),
+		snippet: snippetOllama,
 	},
 } satisfies Record<string, LocalApp>;
 
