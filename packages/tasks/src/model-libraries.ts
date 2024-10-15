@@ -671,7 +671,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "F5-TTS",
 		repoUrl: "https://github.com/SWivid/F5-TTS",
 		filter: false,
-		countDownloads: `path_extension:"safetensors"`,
+		countDownloads: `path_extension:"safetensors" OR path_extension:"pt"`,
 	},
 	tensorflowtts: {
 		prettyLabel: "TensorFlowTTS",
