@@ -373,7 +373,7 @@ export const LOCAL_APPS = {
 		prettyLabel: "Ollama",
 		docsUrl: "https://github.com/ollama/ollama/tree/main/docs",
 		mainTask: "text-generation",
-		displayOnModelPage: isLlamaCppGgufModel,
+		displayOnModelPage: (model) => model.tags.includes("conversational") && isLlamaCppGgufModel(model),
 		snippet: snippetOllama,
 	},
 } satisfies Record<string, LocalApp>;
