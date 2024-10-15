@@ -165,6 +165,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pth"`,
 	},
+	"depth-pro": {
+		prettyLabel: "Depth Pro",
+		repoName: "Depth Pro",
+		repoUrl: "https://github.com/apple/ml-depth-pro",
+		countDownloads: `path_extension:"pt"`,
+		snippets: snippets.depth_pro,
+		filter: false,
+	},
 	diffree: {
 		prettyLabel: "Diffree",
 		repoName: "Diffree",
@@ -657,6 +665,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.stanza,
 		filter: true,
 		countDownloads: `path:"models/default.zip"`,
+	},
+	"f5-tts": {
+		prettyLabel: "F5-TTS",
+		repoName: "F5-TTS",
+		repoUrl: "https://github.com/SWivid/F5-TTS",
+		filter: false,
+		countDownloads: `path_extension:"safetensors" OR path_extension:"pt"`,
 	},
 	tensorflowtts: {
 		prettyLabel: "TensorFlowTTS",
