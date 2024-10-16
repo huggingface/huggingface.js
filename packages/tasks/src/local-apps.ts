@@ -1,5 +1,6 @@
 import type { ModelData } from "./model-data";
 import type { PipelineType } from "./pipelines";
+import { parseGGUFQuantLabel } from "@huggingface/gguf";
 
 export interface LocalAppSnippet {
 	/**
@@ -126,10 +127,15 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 	];
 };
 
-const snippetOllama = (model: ModelData, ollamatag?: string): string => {
-	return `ollama run hf.co/${model.id}${ollamatag ?? "{{OLLAMA_TAG}}"}`;
+const snippetOllama = (model: ModelData, filepath?: string): string => {
+	if (filepath) {
+		const quantLabel = parseGGUFQuantLabel(filepath);
+		const ollamatag = quantLabel ? `:${quantLabel}` : "";
+		return `ollama run hf.co/${model.id}${ollamatag}`;
+	}
+	return `ollama run hf.co/${model.id}{{OLLAMA_TAG}}`;
 };
-``
+
 const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const command = (binary: string) =>
 		["# Load and run the model:", `${binary} huggingface://${model.id}/${filepath ?? "{{GGUF_FILE}}"}`].join("\n");
