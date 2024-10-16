@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+dependencies:
+  '@huggingface/gguf':
+    specifier: workspace:^
+    version: link:../gguf
+
 devDependencies:
   '@types/node':
     specifier: ^20.11.5
