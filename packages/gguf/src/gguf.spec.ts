@@ -1,6 +1,13 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import type { GGUFParseOutput } from "./gguf";
-import { GGMLFileQuantizationType, GGMLQuantizationType, gguf, ggufAllShards, parseGgufShardFilename } from "./gguf";
+import {
+	GGMLFileQuantizationType,
+	GGMLQuantizationType,
+	gguf,
+	ggufAllShards,
+	parseGgufShardFilename,
+	parseGGUFQuantLabel,
+} from "./gguf";
 import fs from "node:fs";
 
 const URL_LLAMA = "https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/191239b/llama-2-7b-chat.Q2_K.gguf";
@@ -265,5 +272,12 @@ describe("gguf", () => {
 	it("should get param count for sharded gguf", async () => {
 		const { parameterCount } = await ggufAllShards(URL_SHARDED_GROK);
 		expect(parameterCount).toEqual(316_490_127_360); // 316B
+	});
+
+	it("parse quant label", async () => {
+		expect(parseGGUFQuantLabel("Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf")).toEqual("Q4_K_M");
+		expect(parseGGUFQuantLabel("subdir/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf")).toEqual("Q4_K_M");
+		expect(parseGGUFQuantLabel("Codestral-22B-v0.1-Q2_K.gguf")).toEqual("Q2_K");
+		expect(parseGGUFQuantLabel("Codestral-22B-v0.1gguf")).toEqual(undefined);
 	});
 });
