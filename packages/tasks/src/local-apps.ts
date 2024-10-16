@@ -1,5 +1,6 @@
 import type { ModelData } from "./model-data";
 import type { PipelineType } from "./pipelines";
+import { parseGGUFQuantLabel } from "@huggingface/gguf";
 
 export interface LocalAppSnippet {
 	/**
@@ -53,6 +54,7 @@ export type LocalApp = {
 			/**
 			 * And if not (mostly llama.cpp), snippet to copy/paste in your terminal
 			 * Support the placeholder {{GGUF_FILE}} that will be replaced by the gguf file path or the list of available files.
+			 * Support the placeholder {{OLLAMA_TAG}} that will be replaced by the list of available quant tags or will be removed if there are no multiple quant files in a same repo.
 			 */
 			snippet: (model: ModelData, filepath?: string) => string | string[] | LocalAppSnippet | LocalAppSnippet[];
 	  }
@@ -141,6 +143,15 @@ const snippetNodeLlamaCppCli = (model: ModelData, filepath?: string): LocalAppSn
 			content: `npx -y node-llama-cpp inspect estimate "hf:${model.id}/${filepath ?? "{{GGUF_FILE}}"}"`,
 		},
 	];
+};
+
+const snippetOllama = (model: ModelData, filepath?: string): string => {
+	if (filepath) {
+		const quantLabel = parseGGUFQuantLabel(filepath);
+		const ollamatag = quantLabel ? `:${quantLabel}` : "";
+		return `ollama run hf.co/${model.id}${ollamatag}`;
+	}
+	return `ollama run hf.co/${model.id}{{OLLAMA_TAG}}`;
 };
 
 const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
@@ -388,6 +399,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-to-image",
 		displayOnModelPage: (model) => model.library_name === "diffusers" && model.pipeline_tag === "text-to-image",
 		deeplink: (model) => new URL(`https://models.invoke.ai/huggingface/${model.id}`),
+	},
+	ollama: {
+		prettyLabel: "Ollama",
+		docsUrl: "https://ollama.com",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		snippet: snippetOllama,
 	},
 } satisfies Record<string, LocalApp>;
 
