@@ -1,7 +1,7 @@
 {
 	"name": "@huggingface/tasks",
 	"packageManager": "pnpm@8.10.5",
-	"version": "0.12.19",
+	"version": "0.12.22",
 	"description": "List of ML tasks for huggingface.co/tasks",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {
@@ -51,5 +51,8 @@
 		"@types/node": "^20.11.5",
 		"quicktype-core": "https://github.com/huggingface/quicktype/raw/pack-18.0.17/packages/quicktype-core/quicktype-core-18.0.17.tgz",
 		"type-fest": "^3.13.1"
+	},
+	"dependencies": {
+		"@huggingface/gguf": "workspace:^"
 	}
 }
