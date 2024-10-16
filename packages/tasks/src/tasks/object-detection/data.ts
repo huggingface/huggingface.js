@@ -47,7 +47,7 @@ const taskData: TaskDataCustom = {
 			id: "facebook/detr-resnet-50",
 		},
 		{
-			description: "YOLOv10 is great model for real-time and accurate object detection.",
+			description: "Real-time and accurate object detection model.",
 			id: "jameslahm/yolov10x",
 		},
 		{
