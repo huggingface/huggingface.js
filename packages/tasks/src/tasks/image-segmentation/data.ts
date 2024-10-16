@@ -57,7 +57,7 @@ const taskData: TaskDataCustom = {
 			id: "ZhengPeng7/BiRefNet",
 		},
 		{
-			description: "Semantic segmentation model fine-tuned on ADE20k at 512x512 resolution.",
+			description: "Semantic segmentation model trained on ADE20k dataset.",
 			id: "nvidia/segformer-b0-finetuned-ade-512-512",
 		},
 		{
