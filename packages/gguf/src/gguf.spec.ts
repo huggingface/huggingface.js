@@ -279,5 +279,6 @@ describe("gguf", () => {
 		expect(parseGGUFQuantLabel("subdir/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf")).toEqual("Q4_K_M");
 		expect(parseGGUFQuantLabel("Codestral-22B-v0.1-Q2_K.gguf")).toEqual("Q2_K");
 		expect(parseGGUFQuantLabel("Codestral-22B-v0.1gguf")).toEqual(undefined);
+		expect(parseGGUFQuantLabel("Codestral-22B-v0.1-F32-Q2_K.gguf")).toEqual("Q2_K"); // gguf name with two quant labels [F32, Q2_K]
 	});
 });
