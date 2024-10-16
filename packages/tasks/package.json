@@ -51,5 +51,8 @@
 		"@types/node": "^20.11.5",
 		"quicktype-core": "https://github.com/huggingface/quicktype/raw/pack-18.0.17/packages/quicktype-core/quicktype-core-18.0.17.tgz",
 		"type-fest": "^3.13.1"
+	},
+	"dependencies": {
+		"@huggingface/gguf": "workspace:^"
 	}
 }
