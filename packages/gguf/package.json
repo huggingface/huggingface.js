@@ -27,6 +27,7 @@
 	},
 	"source": "index.ts",
 	"scripts": {
+		"prepare": "pnpm run build",
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
 		"format": "prettier --write .",
