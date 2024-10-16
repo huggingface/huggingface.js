@@ -62,13 +62,13 @@ export interface TokenClassificationOutputElement {
 	 */
 	end: number;
 	/**
-	 * The predicted label for that group of tokens
-	 */
-	entity_group?: string;
-	/**
 	 * The predicted label for a single token
 	 */
 	entity?: string;
+	/**
+	 * The predicted label for a group of one or more tokens
+	 */
+	entity_group?: string;
 	/**
 	 * The associated score / probability
 	 */
