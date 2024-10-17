@@ -722,14 +722,11 @@ export const sentenceTransformers = (model: ModelData): string[] => {
 	return [
 		`from sentence_transformers import SentenceTransformer
 
-# Download from the 🤗 Hub
 model = SentenceTransformer("${model.id}"${remote_code_snippet})
 
-# Run inference
 texts = ${JSON.stringify(exampleSentences, null, 4)}
 embeddings = model.encode(texts)
 
-# Get the similarity scores for the texts
 similarities = model.similarity(embeddings, embeddings)
 print(similarities.shape)
 # [${exampleSentences.length}, ${exampleSentences.length}]`,
