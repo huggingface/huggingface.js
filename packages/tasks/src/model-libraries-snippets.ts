@@ -1,5 +1,5 @@
 import type { ModelData } from "./model-data";
-import type { WidgetExampleTextInput } from "./widget-example";
+import type { WidgetExampleTextInput, WidgetExampleSentenceSimilarityInput } from "./widget-example";
 import { LIBRARY_TASK_MAPPING } from "./library-to-tasks";
 
 const TAG_CUSTOM_CODE = "custom_code";
@@ -704,13 +704,35 @@ export const sampleFactory = (model: ModelData): string[] => [
 	`python -m sample_factory.huggingface.load_from_hub -r ${model.id} -d ./train_dir`,
 ];
 
+function get_widget_examples_from_st_model(model: ModelData): string[] | undefined {
+	const widgetExample = model.widgetData?.[0] as WidgetExampleSentenceSimilarityInput | undefined;
+	if (widgetExample) {
+		return [widgetExample.source_sentence, ...widgetExample.sentences];
+	}
+}
+
 export const sentenceTransformers = (model: ModelData): string[] => {
 	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
+	const exampleSentences = get_widget_examples_from_st_model(model) ?? [
+		"The weather is lovely today.",
+		"It's so sunny outside!",
+		"He drove to the stadium.",
+	];
 
 	return [
 		`from sentence_transformers import SentenceTransformer
 
-model = SentenceTransformer("${model.id}"${remote_code_snippet})`,
+# Download from the 🤗 Hub
+model = SentenceTransformer("${model.id}"${remote_code_snippet})
+
+# Run inference
+texts = ${JSON.stringify(exampleSentences, null, 4)}
+embeddings = model.encode(texts)
+
+# Get the similarity scores for the texts
+similarities = model.similarity(embeddings, embeddings)
+print(similarities.shape)
+# [${exampleSentences.length}, ${exampleSentences.length}]`,
 	];
 };
 
