@@ -44,20 +44,21 @@ const taskData: TaskDataCustom = {
 	models: [
 		{
 			// TO DO: write description
-			description: "Solid panoptic segmentation model trained on the COCO 2017 benchmark dataset.",
-			id: "facebook/detr-resnet-50-panoptic",
+			description:
+				"Solid semantic segmentation model trained on ADE20k.",
+			id: "openmmlab/upernet-convnext-small",
 		},
 		{
 			description: "Background removal model.",
 			id: "briaai/RMBG-1.4",
 		},
 		{
-			description: "Semantic segmentation model trained on ADE20k benchmark dataset with 512x512 resolution.",
-			id: "nvidia/segformer-b0-finetuned-ade-512-512",
-		},
-		{
 			description: "A multipurpose image segmentation model for high resolution images.",
 			id: "ZhengPeng7/BiRefNet",
+		},
+		{
+			description: "Semantic segmentation model trained on ADE20k dataset.",
+			id: "nvidia/segformer-b0-finetuned-ade-512-512",
 		},
 		{
 			description: "Panoptic segmentation model trained COCO (common objects) dataset.",
