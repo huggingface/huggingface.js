@@ -84,6 +84,10 @@ export const SKUS = {
 				tflops: 37.42,
 				memory: [48],
 			},
+			A16: { 
+				tflops: 17.972, // source: https://www.techpowerup.com/gpu-specs/a16-pcie.c3794
+				memory: [64], // this one you do not have to add, as its 4x.
+			},
 			A10: {
 				tflops: 31.24,
 				memory: [24],
