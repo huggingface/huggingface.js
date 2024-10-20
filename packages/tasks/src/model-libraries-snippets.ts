@@ -832,7 +832,7 @@ export const transformersJS = (model: ModelData): string[] => {
 		return [`// ⚠️ Unknown pipeline tag`];
 	}
 
-	const libName = "@xenova/transformers";
+	const libName = "@huggingface/transformers";
 
 	return [
 		`// npm i ${libName}
