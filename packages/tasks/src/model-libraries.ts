@@ -713,7 +713,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	"transformers.js": {
 		prettyLabel: "Transformers.js",
 		repoName: "transformers.js",
-		repoUrl: "https://github.com/xenova/transformers.js",
+		repoUrl: "https://github.com/huggingface/transformers.js",
 		docsUrl: "https://huggingface.co/docs/hub/transformers-js",
 		snippets: snippets.transformersJS,
 		filter: true,
