@@ -724,8 +724,8 @@ export const sentenceTransformers = (model: ModelData): string[] => {
 
 model = SentenceTransformer("${model.id}"${remote_code_snippet})
 
-texts = ${JSON.stringify(exampleSentences, null, 4)}
-embeddings = model.encode(texts)
+sentences = ${JSON.stringify(exampleSentences, null, 4)}
+embeddings = model.encode(sentences)
 
 similarities = model.similarity(embeddings, embeddings)
 print(similarities.shape)
