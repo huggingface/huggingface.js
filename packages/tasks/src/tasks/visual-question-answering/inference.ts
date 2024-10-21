@@ -54,7 +54,6 @@ export interface VisualQuestionAnsweringOutputElement {
 	 * The answer to the question
 	 */
 	answer?: string;
-	label: unknown;
 	/**
 	 * The associated score / probability
 	 */
