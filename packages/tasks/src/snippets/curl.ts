@@ -74,7 +74,10 @@ export const snippetFile = (model: ModelDataMinimal, accessToken: string): Infer
 });
 
 export const curlSnippets: Partial<
-	Record<PipelineType, (model: ModelDataMinimal, accessToken: string) => InferenceSnippet>
+	Record<
+		PipelineType,
+		(model: ModelDataMinimal, accessToken: string, opts?: Record<string, string | boolean | number>) => InferenceSnippet
+	>
 > = {
 	// Same order as in js/src/lib/interfaces/Types.ts
 	"text-classification": snippetBasic,

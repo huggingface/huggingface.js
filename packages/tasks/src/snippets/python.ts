@@ -157,7 +157,10 @@ output = query({
 });
 
 export const pythonSnippets: Partial<
-	Record<PipelineType, (model: ModelDataMinimal, accessToken: string) => InferenceSnippet>
+	Record<
+		PipelineType,
+		(model: ModelDataMinimal, accessToken: string, opts?: Record<string, string | boolean | number>) => InferenceSnippet
+	>
 > = {
 	// Same order as in tasks/src/pipelines.ts
 	"text-classification": snippetBasic,

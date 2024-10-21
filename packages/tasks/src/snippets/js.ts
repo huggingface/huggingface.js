@@ -185,7 +185,10 @@ query(${getModelInputSnippet(model)}).then((response) => {
 });
 
 export const jsSnippets: Partial<
-	Record<PipelineType, (model: ModelDataMinimal, accessToken: string) => InferenceSnippet>
+	Record<
+		PipelineType,
+		(model: ModelDataMinimal, accessToken: string, opts?: Record<string, string | boolean | number>) => InferenceSnippet
+	>
 > = {
 	// Same order as in js/src/lib/interfaces/Types.ts
 	"text-classification": snippetBasic,
