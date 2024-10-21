@@ -13,7 +13,7 @@ export type ModelDataMinimal = Pick<
 
 export interface InferenceSnippet {
 	content: string;
-	client?: string; // for instance: `client` could be huggingface_hub or openai client for Python snippets
+	client?: string; // for instance: `client` could be `huggingface_hub` or `openai` client for Python snippets
 }
 
 interface GenerationSnippetDelimiter {
