@@ -307,7 +307,7 @@ export function getPythonInferenceSnippet(
 	model: ModelDataMinimal,
 	accessToken: string,
 	opts?: Record<string, unknown>
-): InferenceSnippet {
+): InferenceSnippet | InferenceSnippet[] {
 	if (model.pipeline_tag === "text-generation" && model.tags.includes("conversational")) {
 		// Conversational model detected, so we display a code snippet that features the Messages API
 		return snippetConversational(model, accessToken, opts);
