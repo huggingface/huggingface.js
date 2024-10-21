@@ -1,20 +1,81 @@
 import type { PipelineType } from "../pipelines.js";
+import type { ChatCompletionInputMessage, GenerationParameters } from "../tasks/index.js";
 import { getModelInputSnippet } from "./inputs.js";
-import type { InferenceSnippet, ModelDataMinimal } from "./types.js";
+import type {
+	GenerationConfigFormatter,
+	GenerationMessagesFormatter,
+	InferenceSnippet,
+	ModelDataMinimal,
+} from "./types.js";
 
-export const snippetConversational = (model: ModelDataMinimal, accessToken: string): InferenceSnippet => ({
-	content: `from huggingface_hub import InferenceClient
+const formatGenerationMessages: GenerationMessagesFormatter = ({ messages, sep, start, end }) =>
+	start + messages.map(({ role, content }) => `{ "role": "${role}", "content": "${content}" }`).join(sep) + end;
+
+const formatGenerationConfig: GenerationConfigFormatter = ({ config, sep, start, end, connector }) =>
+	start +
+	Object.entries(config)
+		.map(([key, val]) => `${key}${connector}${val}`)
+		.join(sep) +
+	end;
+
+export const snippetConversational = (
+	model: ModelDataMinimal,
+	accessToken: string,
+	opts?: {
+		streaming?: boolean;
+		messages?: ChatCompletionInputMessage[];
+		temperature?: GenerationParameters["temperature"];
+		max_tokens?: GenerationParameters["max_tokens"];
+		top_p?: GenerationParameters["top_p"];
+	}
+): InferenceSnippet => {
+	const streaming = opts?.streaming ?? true;
+	const messages: ChatCompletionInputMessage[] = opts?.messages ?? [
+		{ role: "user", content: "What is the capital of France?" },
+	];
+
+	const config = {
+		temperature: opts?.temperature,
+		max_tokens: opts?.max_tokens ?? 500,
+		top_p: opts?.top_p,
+	};
+
+	if (streaming) {
+		return {
+			content: `from huggingface_hub import InferenceClient
 
 client = InferenceClient(api_key="${accessToken || "{API_TOKEN}"}")
 
-for message in client.chat_completion(
-	model="${model.id}",
-	messages=[{"role": "user", "content": "What is the capital of France?"}],
-	max_tokens=500,
-	stream=True,
-):
-    print(message.choices[0].delta.content, end="")`,
-});
+messages = ${formatGenerationMessages({ messages, sep: ",\n\t", start: `[\n\t`, end: `\n]` })}
+
+stream = client.chat.completions.create(
+    model="${model.id}", 
+	messages=messages, 
+	${formatGenerationConfig({ config, sep: ",\n\t", start: "", end: "", connector: "=" })},
+	stream=True
+)
+
+for chunk in stream:
+    print(chunk.choices[0].delta.content)`,
+		};
+	} else {
+		return {
+			content: `from huggingface_hub import InferenceClient
+
+client = InferenceClient(api_key="${accessToken || "{API_TOKEN}"}")
+
+messages = ${formatGenerationMessages({ messages, sep: ",\n\t", start: `[\n\t`, end: `\n]` })}
+
+completion = client.chat.completions.create(
+    model="${model.id}", 
+	messages=messages, 
+	${formatGenerationConfig({ config, sep: ",\n\t", start: "", end: "", connector: "=" })}
+)
+
+print(completion.choices[0].message)`,
+		};
+	}
+};
 
 export const snippetConversationalWithImage = (model: ModelDataMinimal, accessToken: string): InferenceSnippet => ({
 	content: `from huggingface_hub import InferenceClient
@@ -159,7 +220,7 @@ output = query({
 export const pythonSnippets: Partial<
 	Record<
 		PipelineType,
-		(model: ModelDataMinimal, accessToken: string, opts?: Record<string, string | boolean | number>) => InferenceSnippet
+		(model: ModelDataMinimal, accessToken: string, opts?: Record<string, unknown>) => InferenceSnippet
 	>
 > = {
 	// Same order as in tasks/src/pipelines.ts
@@ -192,10 +253,14 @@ export const pythonSnippets: Partial<
 	"zero-shot-image-classification": snippetZeroShotImageClassification,
 };
 
-export function getPythonInferenceSnippet(model: ModelDataMinimal, accessToken: string): InferenceSnippet {
+export function getPythonInferenceSnippet(
+	model: ModelDataMinimal,
+	accessToken: string,
+	opts?: Record<string, unknown>
+): InferenceSnippet {
 	if (model.pipeline_tag === "text-generation" && model.tags.includes("conversational")) {
 		// Conversational model detected, so we display a code snippet that features the Messages API
-		return snippetConversational(model, accessToken);
+		return snippetConversational(model, accessToken, opts);
 	} else if (model.pipeline_tag === "image-text-to-text" && model.tags.includes("conversational")) {
 		// Example sending an image to the Message API
 		return snippetConversationalWithImage(model, accessToken);
