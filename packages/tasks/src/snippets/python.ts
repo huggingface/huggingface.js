@@ -28,7 +28,7 @@ export const snippetConversational = (
 		max_tokens?: GenerationParameters["max_tokens"];
 		top_p?: GenerationParameters["top_p"];
 	}
-): InferenceSnippet => {
+): InferenceSnippet[] => {
 	const streaming = opts?.streaming ?? true;
 	const messages: ChatCompletionInputMessage[] = opts?.messages ?? [
 		{ role: "user", content: "What is the capital of France?" },
@@ -41,8 +41,10 @@ export const snippetConversational = (
 	};
 
 	if (streaming) {
-		return {
-			content: `from huggingface_hub import InferenceClient
+		return [
+			{
+				client: "huggingface_hub",
+				content: `from huggingface_hub import InferenceClient
 
 client = InferenceClient(api_key="${accessToken || "{API_TOKEN}"}")
 
@@ -57,10 +59,34 @@ stream = client.chat.completions.create(
 
 for chunk in stream:
     print(chunk.choices[0].delta.content)`,
-		};
+			},
+			{
+				client: "openai",
+				content: `from openai import OpenAI
+
+client = OpenAI(
+	base_url="https://api-inference.huggingface.co/v1/",
+	api_key="${accessToken || "{API_TOKEN}"}"
+)
+
+messages = ${formatGenerationMessages({ messages, sep: ",\n\t", start: `[\n\t`, end: `\n]` })}
+
+stream = client.chat.completions.create(
+    model="${model.id}", 
+	messages=messages, 
+	${formatGenerationConfig({ config, sep: ",\n\t", start: "", end: "", connector: "=" })},
+	stream=True
+)
+
+for chunk in stream:
+    print(chunk.choices[0].delta.content)`,
+			},
+		];
 	} else {
-		return {
-			content: `from huggingface_hub import InferenceClient
+		return [
+			{
+				client: "huggingface_hub",
+				content: `from huggingface_hub import InferenceClient
 
 client = InferenceClient(api_key="${accessToken || "{API_TOKEN}"}")
 
@@ -73,7 +99,27 @@ completion = client.chat.completions.create(
 )
 
 print(completion.choices[0].message)`,
-		};
+			},
+			{
+				client: "openai",
+				content: `from openai import OpenAI
+
+client = OpenAI(
+	base_url="https://api-inference.huggingface.co/v1/",
+	api_key="${accessToken || "{API_TOKEN}"}"
+)
+
+messages = ${formatGenerationMessages({ messages, sep: ",\n\t", start: `[\n\t`, end: `\n]` })}
+
+completion = client.chat.completions.create(
+    model="${model.id}", 
+	messages=messages, 
+	${formatGenerationConfig({ config, sep: ",\n\t", start: "", end: "", connector: "=" })}
+)
+
+print(completion.choices[0].message)`,
+			},
+		];
 	}
 };
 
@@ -220,7 +266,11 @@ output = query({
 export const pythonSnippets: Partial<
 	Record<
 		PipelineType,
-		(model: ModelDataMinimal, accessToken: string, opts?: Record<string, unknown>) => InferenceSnippet
+		(
+			model: ModelDataMinimal,
+			accessToken: string,
+			opts?: Record<string, unknown>
+		) => InferenceSnippet | InferenceSnippet[]
 	>
 > = {
 	// Same order as in tasks/src/pipelines.ts
