@@ -1,6 +1,12 @@
 import type { PipelineType } from "../pipelines.js";
+import type { ChatCompletionInputMessage, GenerationParameters } from "../tasks/index.js";
 import { getModelInputSnippet } from "./inputs.js";
-import type { InferenceSnippet, ModelDataMinimal } from "./types.js";
+import type {
+	GenerationConfigFormatter,
+	GenerationMessagesFormatter,
+	InferenceSnippet,
+	ModelDataMinimal,
+} from "./types.js";
 
 export const snippetBasic = (model: ModelDataMinimal, accessToken: string): InferenceSnippet => ({
 	content: `async function query(data) {
@@ -24,22 +30,128 @@ query({"inputs": ${getModelInputSnippet(model)}}).then((response) => {
 });`,
 });
 
-export const snippetTextGeneration = (model: ModelDataMinimal, accessToken: string): InferenceSnippet => {
+const formatGenerationMessages: GenerationMessagesFormatter = ({ messages, sep, start, end }) =>
+	start + messages.map(({ role, content }) => `{ role: "${role}", content: "${content}" }`).join(sep) + end;
+
+const formatGenerationConfig: GenerationConfigFormatter = ({ config, sep, start, end }) =>
+	start +
+	Object.entries(config)
+		.map(([key, val]) => `${key}: ${val}`)
+		.join(sep) +
+	end;
+
+export const snippetTextGeneration = (
+	model: ModelDataMinimal,
+	accessToken: string,
+	opts?: {
+		streaming?: boolean;
+		messages?: ChatCompletionInputMessage[];
+		temperature?: GenerationParameters["temperature"];
+		max_tokens?: GenerationParameters["max_tokens"];
+		top_p?: GenerationParameters["top_p"];
+	}
+): InferenceSnippet | InferenceSnippet[] => {
 	if (model.tags.includes("conversational")) {
 		// Conversational model detected, so we display a code snippet that features the Messages API
-		return {
-			content: `import { HfInference } from "@huggingface/inference";
+		const streaming = opts?.streaming ?? true;
+		const messages: ChatCompletionInputMessage[] = opts?.messages ?? [
+			{ role: "user", content: "What is the capital of France?" },
+		];
+		const messagesStr = formatGenerationMessages({ messages, sep: ",\n\t\t", start: "[\n\t\t", end: "\n\t]" });
 
-const inference = new HfInference("${accessToken || `{API_TOKEN}`}");
-
-for await (const chunk of inference.chatCompletionStream({
-	model: "${model.id}",
-	messages: [{ role: "user", content: "What is the capital of France?" }],
-	max_tokens: 500,
-})) {
-	process.stdout.write(chunk.choices[0]?.delta?.content || "");
-}`,
+		const config = {
+			temperature: opts?.temperature,
+			max_tokens: opts?.max_tokens ?? 500,
+			top_p: opts?.top_p,
 		};
+		const configStr = formatGenerationConfig({ config, sep: ",\n\t", start: "", end: "" });
+
+		if (streaming) {
+			return [
+				{
+					client: "huggingface_hub",
+					content: `import { HfInference } from "@huggingface/inference"
+
+const client = new HfInference("${accessToken || `{API_TOKEN}`}")
+
+let out = "";
+
+const stream = client.chatCompletionStream({
+	model: "${model.id}",
+	messages: ${messagesStr},
+	${configStr}
+});
+
+for await (const chunk of stream) {
+	if (chunk.choices && chunk.choices.length > 0) {
+		const newContent = chunk.choices[0].delta.content;
+		out += newContent;
+		console.log(newContent);
+	}  
+}`,
+				},
+				{
+					client: "openai",
+					content: `import { OpenAI } from "openai"
+
+const client = new OpenAI({
+	baseURL: "https://api-inference.huggingface.co/v1/",
+    apiKey: "${accessToken || `{API_TOKEN}`}"
+})
+
+let out = "";
+
+const stream = await client.chat.completions.create({
+	model: "${model.id}",
+	messages: ${messagesStr},
+	${configStr},
+	stream: true,
+});
+
+for await (const chunk of stream) {
+	if (chunk.choices && chunk.choices.length > 0) {
+		const newContent = chunk.choices[0].delta.content;
+		out += newContent;
+		console.log(newContent);
+	}  
+}`,
+				},
+			];
+		} else {
+			return [
+				{
+					client: "huggingface_hub",
+					content: `import { HfInference } from '@huggingface/inference'
+
+const client = new HfInference("${accessToken || `{API_TOKEN}`}")
+
+const chatCompletion = await client.chatCompletion({
+	model: "${model.id}",
+	messages: ${messagesStr},
+	${configStr}
+});
+
+console.log(chatCompletion.choices[0].message);`,
+				},
+				{
+					client: "openai",
+					content: `import { OpenAI } from "openai"
+
+const client = new OpenAI({
+    baseURL: "https://api-inference.huggingface.co/v1/",
+    apiKey: "${accessToken || `{API_TOKEN}`}"
+})
+
+const chatCompletion = await client.chat.completions.create({
+	model: "${model.id}",
+	messages: ${messagesStr},
+	${configStr}
+});
+
+console.log(chatCompletion.choices[0].message);`,
+				},
+			];
+		}
 	} else {
 		return snippetBasic(model, accessToken);
 	}
@@ -187,7 +299,11 @@ query(${getModelInputSnippet(model)}).then((response) => {
 export const jsSnippets: Partial<
 	Record<
 		PipelineType,
-		(model: ModelDataMinimal, accessToken: string, opts?: Record<string, string | boolean | number>) => InferenceSnippet
+		(
+			model: ModelDataMinimal,
+			accessToken: string,
+			opts?: Record<string, unknown>
+		) => InferenceSnippet | InferenceSnippet[]
 	>
 > = {
 	// Same order as in js/src/lib/interfaces/Types.ts
