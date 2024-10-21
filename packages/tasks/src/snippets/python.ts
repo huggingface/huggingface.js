@@ -33,12 +33,14 @@ export const snippetConversational = (
 	const messages: ChatCompletionInputMessage[] = opts?.messages ?? [
 		{ role: "user", content: "What is the capital of France?" },
 	];
+	const messagesStr = formatGenerationMessages({ messages, sep: ",\n\t", start: `[\n\t`, end: `\n]` });
 
 	const config = {
 		temperature: opts?.temperature,
 		max_tokens: opts?.max_tokens ?? 500,
 		top_p: opts?.top_p,
 	};
+	const configStr = formatGenerationConfig({ config, sep: ",\n\t", start: "", end: "", connector: "=" });
 
 	if (streaming) {
 		return [
@@ -48,12 +50,12 @@ export const snippetConversational = (
 
 client = InferenceClient(api_key="${accessToken || "{API_TOKEN}"}")
 
-messages = ${formatGenerationMessages({ messages, sep: ",\n\t", start: `[\n\t`, end: `\n]` })}
+messages = ${messagesStr}
 
 stream = client.chat.completions.create(
     model="${model.id}", 
 	messages=messages, 
-	${formatGenerationConfig({ config, sep: ",\n\t", start: "", end: "", connector: "=" })},
+	${configStr},
 	stream=True
 )
 
@@ -69,12 +71,12 @@ client = OpenAI(
 	api_key="${accessToken || "{API_TOKEN}"}"
 )
 
-messages = ${formatGenerationMessages({ messages, sep: ",\n\t", start: `[\n\t`, end: `\n]` })}
+messages = ${messagesStr}
 
 stream = client.chat.completions.create(
     model="${model.id}", 
 	messages=messages, 
-	${formatGenerationConfig({ config, sep: ",\n\t", start: "", end: "", connector: "=" })},
+	${configStr},
 	stream=True
 )
 
@@ -90,12 +92,12 @@ for chunk in stream:
 
 client = InferenceClient(api_key="${accessToken || "{API_TOKEN}"}")
 
-messages = ${formatGenerationMessages({ messages, sep: ",\n\t", start: `[\n\t`, end: `\n]` })}
+messages = ${messagesStr}
 
 completion = client.chat.completions.create(
     model="${model.id}", 
 	messages=messages, 
-	${formatGenerationConfig({ config, sep: ",\n\t", start: "", end: "", connector: "=" })}
+	${configStr}
 )
 
 print(completion.choices[0].message)`,
@@ -109,12 +111,12 @@ client = OpenAI(
 	api_key="${accessToken || "{API_TOKEN}"}"
 )
 
-messages = ${formatGenerationMessages({ messages, sep: ",\n\t", start: `[\n\t`, end: `\n]` })}
+messages = ${messagesStr}
 
 completion = client.chat.completions.create(
     model="${model.id}", 
 	messages=messages, 
-	${formatGenerationConfig({ config, sep: ",\n\t", start: "", end: "", connector: "=" })}
+	${configStr}
 )
 
 print(completion.choices[0].message)`,
