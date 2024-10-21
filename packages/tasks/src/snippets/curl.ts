@@ -1,18 +1,20 @@
 import type { PipelineType } from "../pipelines.js";
 import { getModelInputSnippet } from "./inputs.js";
-import type { ModelDataMinimal } from "./types.js";
+import type { InferenceSnippet, ModelDataMinimal } from "./types.js";
 
-export const snippetBasic = (model: ModelDataMinimal, accessToken: string): string =>
-	`curl https://api-inference.huggingface.co/models/${model.id} \\
+export const snippetBasic = (model: ModelDataMinimal, accessToken: string): InferenceSnippet => ({
+	content: `curl https://api-inference.huggingface.co/models/${model.id} \\
 	-X POST \\
 	-d '{"inputs": ${getModelInputSnippet(model, true)}}' \\
 	-H 'Content-Type: application/json' \\
-	-H "Authorization: Bearer ${accessToken || `{API_TOKEN}`}"`;
+	-H "Authorization: Bearer ${accessToken || `{API_TOKEN}`}"`,
+});
 
-export const snippetTextGeneration = (model: ModelDataMinimal, accessToken: string): string => {
+export const snippetTextGeneration = (model: ModelDataMinimal, accessToken: string): InferenceSnippet => {
 	if (model.tags.includes("conversational")) {
 		// Conversational model detected, so we display a code snippet that features the Messages API
-		return `curl 'https://api-inference.huggingface.co/models/${model.id}/v1/chat/completions' \\
+		return {
+			content: `curl 'https://api-inference.huggingface.co/models/${model.id}/v1/chat/completions' \\
 -H "Authorization: Bearer ${accessToken || `{API_TOKEN}`}" \\
 -H 'Content-Type: application/json' \\
 -d '{
@@ -21,16 +23,18 @@ export const snippetTextGeneration = (model: ModelDataMinimal, accessToken: stri
 	"max_tokens": 500,
 	"stream": false
 }'
-`;
+`,
+		};
 	} else {
 		return snippetBasic(model, accessToken);
 	}
 };
 
-export const snippetImageTextToTextGeneration = (model: ModelDataMinimal, accessToken: string): string => {
+export const snippetImageTextToTextGeneration = (model: ModelDataMinimal, accessToken: string): InferenceSnippet => {
 	if (model.tags.includes("conversational")) {
 		// Conversational model detected, so we display a code snippet that features the Messages API
-		return `curl 'https://api-inference.huggingface.co/models/${model.id}/v1/chat/completions' \\
+		return {
+			content: `curl 'https://api-inference.huggingface.co/models/${model.id}/v1/chat/completions' \\
 -H "Authorization: Bearer ${accessToken || `{API_TOKEN}`}" \\
 -H 'Content-Type: application/json' \\
 -d '{
@@ -47,26 +51,31 @@ export const snippetImageTextToTextGeneration = (model: ModelDataMinimal, access
 	"max_tokens": 500,
 	"stream": false
 }'
-`;
+`,
+		};
 	} else {
 		return snippetBasic(model, accessToken);
 	}
 };
 
-export const snippetZeroShotClassification = (model: ModelDataMinimal, accessToken: string): string =>
-	`curl https://api-inference.huggingface.co/models/${model.id} \\
+export const snippetZeroShotClassification = (model: ModelDataMinimal, accessToken: string): InferenceSnippet => ({
+	content: `curl https://api-inference.huggingface.co/models/${model.id} \\
 	-X POST \\
 	-d '{"inputs": ${getModelInputSnippet(model, true)}, "parameters": {"candidate_labels": ["refund", "legal", "faq"]}}' \\
 	-H 'Content-Type: application/json' \\
-	-H "Authorization: Bearer ${accessToken || `{API_TOKEN}`}"`;
+	-H "Authorization: Bearer ${accessToken || `{API_TOKEN}`}"`,
+});
 
-export const snippetFile = (model: ModelDataMinimal, accessToken: string): string =>
-	`curl https://api-inference.huggingface.co/models/${model.id} \\
+export const snippetFile = (model: ModelDataMinimal, accessToken: string): InferenceSnippet => ({
+	content: `curl https://api-inference.huggingface.co/models/${model.id} \\
 	-X POST \\
 	--data-binary '@${getModelInputSnippet(model, true, true)}' \\
-	-H "Authorization: Bearer ${accessToken || `{API_TOKEN}`}"`;
+	-H "Authorization: Bearer ${accessToken || `{API_TOKEN}`}"`,
+});
 
-export const curlSnippets: Partial<Record<PipelineType, (model: ModelDataMinimal, accessToken: string) => string>> = {
+export const curlSnippets: Partial<
+	Record<PipelineType, (model: ModelDataMinimal, accessToken: string) => InferenceSnippet>
+> = {
 	// Same order as in js/src/lib/interfaces/Types.ts
 	"text-classification": snippetBasic,
 	"token-classification": snippetBasic,
@@ -93,10 +102,10 @@ export const curlSnippets: Partial<Record<PipelineType, (model: ModelDataMinimal
 	"image-segmentation": snippetFile,
 };
 
-export function getCurlInferenceSnippet(model: ModelDataMinimal, accessToken: string): string {
+export function getCurlInferenceSnippet(model: ModelDataMinimal, accessToken: string): InferenceSnippet {
 	return model.pipeline_tag && model.pipeline_tag in curlSnippets
-		? curlSnippets[model.pipeline_tag]?.(model, accessToken) ?? ""
-		: "";
+		? curlSnippets[model.pipeline_tag]?.(model, accessToken) ?? { content: "" }
+		: { content: "" };
 }
 
 export function hasCurlInferenceSnippet(model: Pick<ModelDataMinimal, "pipeline_tag">): boolean {
