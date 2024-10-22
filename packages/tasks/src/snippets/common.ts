@@ -56,7 +56,7 @@ export function stringifyGenerationConfig(
 	return (
 		opts.start +
 		Object.entries(config)
-			.map(([key, val]) => `${quote}${key}${quote}${opts.attributeValueConnector}${quote}${val}${quote}`)
+			.map(([key, val]) => `${quote}${key}${quote}${opts.attributeValueConnector}${val}`)
 			.join(opts.sep) +
 		opts.end
 	);
