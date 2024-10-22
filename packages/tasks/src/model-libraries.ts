@@ -481,6 +481,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"adapter_config.json"`,
 	},
+	pxia: {
+		prettyLabel: "pxia",
+		repoName: "pxia",
+		repoUrl: "https://github.com/not-lain/pxia",
+		snippets: snippets.pxia,
+		filter: false,
+	},
 	"pyannote-audio": {
 		prettyLabel: "pyannote.audio",
 		repoName: "pyannote-audio",
