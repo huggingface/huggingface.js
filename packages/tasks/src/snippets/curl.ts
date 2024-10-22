@@ -19,11 +19,11 @@ export const snippetBasic = (model: ModelDataMinimal, accessToken: string): Infe
 const formatGenerationMessages: GenerationMessagesFormatter = ({ messages, sep, start, end }) =>
 	start +
 	messages
-		.map(({ role, content }) => {
+		.map(({ role }) => {
 			// escape single quotes since single quotes is used to define http post body inside curl requests
 			// TODO: handle the case below
-			content = content?.replace(/'/g, "'\\''");
-			return `{ "role": "${role}", "content": "${content}" }`;
+			// content = content?.replace(/'/g, "'\\''");
+			return `{ "role": "${role}", "content": "test msg" }`;
 		})
 		.join(sep) +
 	end;
