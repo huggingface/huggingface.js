@@ -332,7 +332,10 @@ export const jsSnippets: Partial<
 	"image-segmentation": snippetFile,
 };
 
-export function getJsInferenceSnippet(model: ModelDataMinimal, accessToken: string): InferenceSnippet {
+export function getJsInferenceSnippet(
+	model: ModelDataMinimal,
+	accessToken: string
+): InferenceSnippet | InferenceSnippet[] {
 	return model.pipeline_tag && model.pipeline_tag in jsSnippets
 		? jsSnippets[model.pipeline_tag]?.(model, accessToken) ?? { content: "" }
 		: { content: "" };
