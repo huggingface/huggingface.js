@@ -1003,6 +1003,7 @@ export const pxia = (model: ModelData): string[] => [
 pip install pxia
 `,
 	`# Load the model
+
 from pxia import AutoModel
 model = AutoModel.from_pretrained("${model.id}")`,
 ];
