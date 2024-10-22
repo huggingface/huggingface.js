@@ -54,9 +54,9 @@ export const snippetTextGeneration = (
 		];
 
 		const config = {
-			temperature: opts?.temperature,
+			...(opts?.temperature ? { temperature: opts.temperature } : undefined),
 			max_tokens: opts?.max_tokens ?? 500,
-			top_p: opts?.top_p,
+			...(opts?.top_p ? { top_p: opts.top_p } : undefined),
 		};
 		return {
 			content: `curl 'https://api-inference.huggingface.co/models/${model.id}/v1/chat/completions' \\

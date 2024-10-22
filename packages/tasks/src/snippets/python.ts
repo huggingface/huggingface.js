@@ -36,9 +36,9 @@ export const snippetConversational = (
 	const messagesStr = formatGenerationMessages({ messages, sep: ",\n\t", start: `[\n\t`, end: `\n]` });
 
 	const config = {
-		temperature: opts?.temperature,
+		...(opts?.temperature ? { temperature: opts.temperature } : undefined),
 		max_tokens: opts?.max_tokens ?? 500,
-		top_p: opts?.top_p,
+		...(opts?.top_p ? { top_p: opts.top_p } : undefined),
 	};
 	const configStr = formatGenerationConfig({ config, sep: ",\n\t", start: "", end: "", connector: "=" });
 
