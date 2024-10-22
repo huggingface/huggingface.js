@@ -61,7 +61,7 @@ const taskData: TaskDataCustom = {
 			id: "facebook/sapiens-seg-1b",
 		},
 		{
-			description: "Panoptic segmentation model trained COCO (common objects) dataset.",
+			description: "Panoptic segmentation model trained on the COCO (common objects) dataset.",
 			id: "facebook/mask2former-swin-large-coco-panoptic",
 		},
 	],
