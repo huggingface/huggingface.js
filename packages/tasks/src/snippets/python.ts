@@ -36,7 +36,6 @@ export const snippetConversational = (
 		start: "",
 		end: "",
 		attributeValueConnector: "=",
-		attributeKeyQuotes: true,
 	});
 
 	if (streaming) {
