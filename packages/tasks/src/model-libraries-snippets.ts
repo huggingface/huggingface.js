@@ -997,6 +997,16 @@ export const nemo = (model: ModelData): string[] => {
 	return command ?? [`# tag did not correspond to a valid NeMo domain.`];
 };
 
+export const pxia = (model: ModelData): string[] => [
+	`# Installation
+
+pip install pxia
+`,
+	`# Load the model
+from pxia import AutoModel
+model = AutoModel.from_pretrained("${model.id}")`,
+];
+
 export const pythae = (model: ModelData): string[] => [
 	`from pythae.models import AutoModel
 
