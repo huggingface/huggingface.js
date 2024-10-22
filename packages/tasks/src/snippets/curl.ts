@@ -1,12 +1,8 @@
 import type { PipelineType } from "../pipelines.js";
 import type { ChatCompletionInputMessage, GenerationParameters } from "../tasks/index.js";
+import { stringifyGenerationConfig, stringifyMessages } from "./common.js";
 import { getModelInputSnippet } from "./inputs.js";
-import type {
-	GenerationConfigFormatter,
-	GenerationMessagesFormatter,
-	InferenceSnippet,
-	ModelDataMinimal,
-} from "./types.js";
+import type { InferenceSnippet, ModelDataMinimal } from "./types.js";
 
 export const snippetBasic = (model: ModelDataMinimal, accessToken: string): InferenceSnippet => ({
 	content: `curl https://api-inference.huggingface.co/models/${model.id} \\
@@ -15,25 +11,6 @@ export const snippetBasic = (model: ModelDataMinimal, accessToken: string): Infe
 	-H 'Content-Type: application/json' \\
 	-H "Authorization: Bearer ${accessToken || `{API_TOKEN}`}"`,
 });
-
-const formatGenerationMessages: GenerationMessagesFormatter = ({ messages, sep, start, end }) =>
-	start +
-	messages
-		.map(({ role }) => {
-			// escape single quotes since single quotes is used to define http post body inside curl requests
-			// TODO: handle the case below
-			// content = content?.replace(/'/g, "'\\''");
-			return `{ "role": "${role}", "content": "test msg" }`;
-		})
-		.join(sep) +
-	end;
-
-const formatGenerationConfig: GenerationConfigFormatter = ({ config, sep, start, end }) =>
-	start +
-	Object.entries(config)
-		.map(([key, val]) => `"${key}": ${val}`)
-		.join(sep) +
-	end;
 
 export const snippetTextGeneration = (
 	model: ModelDataMinimal,
@@ -64,8 +41,20 @@ export const snippetTextGeneration = (
 -H 'Content-Type: application/json' \\
 --data '{
     "model": "${model.id}",
-    "messages": ${formatGenerationMessages({ messages, sep: ",\n    ", start: `[\n    `, end: `\n]` })},
-    ${formatGenerationConfig({ config, sep: ",\n    ", start: "", end: "" })},
+    "messages": ${stringifyMessages(messages, {
+			sep: ",\n    ",
+			start: `[\n    `,
+			end: `\n]`,
+			attributeKeyQuotes: true,
+			customContentEscaper: (str) => str.replace(/'/g, "'\\''"),
+		})},
+    ${stringifyGenerationConfig(config, {
+			sep: ",\n    ",
+			start: "",
+			end: "",
+			attributeKeyQuotes: true,
+			attributeValueConnector: ": ",
+		})},
     "stream": ${!!streaming}
 }'`,
 		};

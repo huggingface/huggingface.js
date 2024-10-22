@@ -1,22 +1,8 @@
 import type { PipelineType } from "../pipelines.js";
 import type { ChatCompletionInputMessage, GenerationParameters } from "../tasks/index.js";
+import { stringifyGenerationConfig, stringifyMessages } from "./common.js";
 import { getModelInputSnippet } from "./inputs.js";
-import type {
-	GenerationConfigFormatter,
-	GenerationMessagesFormatter,
-	InferenceSnippet,
-	ModelDataMinimal,
-} from "./types.js";
-
-const formatGenerationMessages: GenerationMessagesFormatter = ({ messages, sep, start, end }) =>
-	start + messages.map(({ role, content }) => `{ "role": "${role}", "content": "${content}" }`).join(sep) + end;
-
-const formatGenerationConfig: GenerationConfigFormatter = ({ config, sep, start, end, connector }) =>
-	start +
-	Object.entries(config)
-		.map(([key, val]) => `${key}${connector}${val}`)
-		.join(sep) +
-	end;
+import type { InferenceSnippet, ModelDataMinimal } from "./types.js";
 
 export const snippetConversational = (
 	model: ModelDataMinimal,
@@ -33,14 +19,25 @@ export const snippetConversational = (
 	const messages: ChatCompletionInputMessage[] = opts?.messages ?? [
 		{ role: "user", content: "What is the capital of France?" },
 	];
-	const messagesStr = formatGenerationMessages({ messages, sep: ",\n\t", start: `[\n\t`, end: `\n]` });
+	const messagesStr = stringifyMessages(messages, {
+		sep: ",\n\t",
+		start: `[\n\t`,
+		end: `\n]`,
+		attributeKeyQuotes: true,
+	});
 
 	const config = {
 		...(opts?.temperature ? { temperature: opts.temperature } : undefined),
 		max_tokens: opts?.max_tokens ?? 500,
 		...(opts?.top_p ? { top_p: opts.top_p } : undefined),
 	};
-	const configStr = formatGenerationConfig({ config, sep: ",\n\t", start: "", end: "", connector: "=" });
+	const configStr = stringifyGenerationConfig(config, {
+		sep: ",\n\t",
+		start: "",
+		end: "",
+		attributeValueConnector: "=",
+		attributeKeyQuotes: true,
+	});
 
 	if (streaming) {
 		return [

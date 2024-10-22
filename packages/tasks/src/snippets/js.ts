@@ -1,12 +1,8 @@
 import type { PipelineType } from "../pipelines.js";
 import type { ChatCompletionInputMessage, GenerationParameters } from "../tasks/index.js";
+import { stringifyGenerationConfig, stringifyMessages } from "./common.js";
 import { getModelInputSnippet } from "./inputs.js";
-import type {
-	GenerationConfigFormatter,
-	GenerationMessagesFormatter,
-	InferenceSnippet,
-	ModelDataMinimal,
-} from "./types.js";
+import type { InferenceSnippet, ModelDataMinimal } from "./types.js";
 
 export const snippetBasic = (model: ModelDataMinimal, accessToken: string): InferenceSnippet => ({
 	content: `async function query(data) {
@@ -30,16 +26,6 @@ query({"inputs": ${getModelInputSnippet(model)}}).then((response) => {
 });`,
 });
 
-const formatGenerationMessages: GenerationMessagesFormatter = ({ messages, sep, start, end }) =>
-	start + messages.map(({ role, content }) => `{ role: "${role}", content: "${content}" }`).join(sep) + end;
-
-const formatGenerationConfig: GenerationConfigFormatter = ({ config, sep, start, end }) =>
-	start +
-	Object.entries(config)
-		.map(([key, val]) => `${key}: ${val}`)
-		.join(sep) +
-	end;
-
 export const snippetTextGeneration = (
 	model: ModelDataMinimal,
 	accessToken: string,
@@ -57,14 +43,19 @@ export const snippetTextGeneration = (
 		const messages: ChatCompletionInputMessage[] = opts?.messages ?? [
 			{ role: "user", content: "What is the capital of France?" },
 		];
-		const messagesStr = formatGenerationMessages({ messages, sep: ",\n\t\t", start: "[\n\t\t", end: "\n\t]" });
+		const messagesStr = stringifyMessages(messages, { sep: ",\n\t\t", start: "[\n\t\t", end: "\n\t]" });
 
 		const config = {
 			...(opts?.temperature ? { temperature: opts.temperature } : undefined),
 			max_tokens: opts?.max_tokens ?? 500,
 			...(opts?.top_p ? { top_p: opts.top_p } : undefined),
 		};
-		const configStr = formatGenerationConfig({ config, sep: ",\n\t", start: "", end: "" });
+		const configStr = stringifyGenerationConfig(config, {
+			sep: ",\n\t",
+			start: "",
+			end: "",
+			attributeValueConnector: ": ",
+		});
 
 		if (streaming) {
 			return [
