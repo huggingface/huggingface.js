@@ -998,13 +998,8 @@ export const nemo = (model: ModelData): string[] => {
 };
 
 export const pxia = (model: ModelData): string[] => [
-	`# Installation
+	`from pxia import AutoModel
 
-pip install pxia
-`,
-	`# Load the model
-
-from pxia import AutoModel
 model = AutoModel.from_pretrained("${model.id}")`,
 ];
 
