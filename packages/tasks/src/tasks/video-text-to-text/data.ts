@@ -10,6 +10,10 @@ const taskData: TaskDataCustom = {
 			description: "A dataset of instructions and question-answer pairs about videos.",
 			id: "lmms-lab/VideoChatGPT",
 		},
+		{
+			description: "Large video understanding dataset.",
+			id: "HuggingFaceFV/finevideo",
+		},
 	],
 	demo: {
 		inputs: [
@@ -47,6 +51,10 @@ const taskData: TaskDataCustom = {
 		{
 			description: "An application to chat with a video-text-to-text model.",
 			id: "llava-hf/video-llava",
+		},
+		{
+			description: "A leaderboard for various video-text-to-text models.",
+			id: "opencompass/openvlm_video_leaderboard",
 		},
 	],
 	summary:

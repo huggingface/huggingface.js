@@ -67,30 +67,30 @@ const taskData: TaskDataCustom = {
 	],
 	models: [
 		{
-			description: "A strong model for video generation.",
-			id: "Vchitect/LaVie",
+			description: "A strong model for consistent video generation.",
+			id: "rain1011/pyramid-flow-sd3",
 		},
 		{
 			description: "A robust model for text-to-video generation.",
-			id: "damo-vilab/text-to-video-ms-1.7b",
+			id: "VideoCrafter/VideoCrafter2",
 		},
 		{
-			description: "A text-to-video generation model with high quality and smooth outputs.",
-			id: "hotshotco/Hotshot-XL",
+			description: "A cutting-edge text-to-video generation model.",
+			id: "TIGER-Lab/T2V-Turbo-V2",
 		},
 	],
 	spaces: [
 		{
 			description: "An application that generates video from text.",
-			id: "fffiloni/zeroscope",
+			id: "VideoCrafter/VideoCrafter",
 		},
 		{
-			description: "An application that generates video from image and text.",
-			id: "Vchitect/LaVie",
+			description: "Consistent video generation application.",
+			id: "TIGER-Lab/T2V-Turbo-V2",
 		},
 		{
-			description: "An application that generates videos from text and provides multi-model support.",
-			id: "ArtGAN/Video-Diffusion-WebUI",
+			description: "A cutting edge video generation application.",
+			id: "Pyramid-Flow/pyramid-flow",
 		},
 	],
 	summary:
