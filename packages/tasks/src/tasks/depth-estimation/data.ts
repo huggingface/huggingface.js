@@ -33,11 +33,15 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "A strong monocular depth estimation model.",
-			id: "Bingxin/Marigold",
+			id: "jingheya/lotus-depth-g-v1-0",
 		},
 		{
-			description: "A metric depth estimation model trained on NYU dataset.",
-			id: "Intel/zoedepth-nyu",
+			description: "A depth estimation model that predicts depth in videos.",
+			id: "tencent/DepthCrafter",
+		},
+		{
+			description: "A robust depth estimation model.",
+			id: "apple/DepthPro",
 		},
 	],
 	spaces: [
@@ -46,12 +50,16 @@ const taskData: TaskDataCustom = {
 			id: "radames/dpt-depth-estimation-3d-voxels",
 		},
 		{
-			description: "An application on cutting-edge depth estimation.",
-			id: "depth-anything/Depth-Anything-V2",
+			description: "An application for bleeding-edge depth estimation.",
+			id: "akhaliq/depth-pro",
 		},
 		{
-			description: "An application to try state-of-the-art depth estimation.",
-			id: "merve/compare_depth_models",
+			description: "An application on cutting-edge depth estimation in videos.",
+			id: "tencent/DepthCrafter",
+		},
+		{
+			description: "A human-centric depth estimation application.",
+			id: "facebook/sapiens-depth",
 		},
 	],
 	summary: "Depth estimation is the task of predicting depth of the objects present in an image.",

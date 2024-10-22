@@ -71,8 +71,8 @@ const taskData: TaskDataCustom = {
 			id: "jbilcke-hf/ai-comic-factory",
 		},
 		{
-			description: "A text-to-image application that can generate coherent text inside the image.",
-			id: "DeepFloyd/IF",
+			description: "An application to match multiple custom image generation models.",
+			id: "multimodalart/flux-lora-lab",
 		},
 		{
 			description: "A powerful yet very fast image generation application.",
