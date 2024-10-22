@@ -24,7 +24,7 @@ jobs:
           else
             echo "SINCE=$(git merge-base origin/$PR_REF $SHA)" >> $GITHUB_OUTPUT
           fi
-        env: 
+        env:
           PR_REF: ${{  github.event.pull_request.head.ref }}
           SHA: ${{ github.sha }}
 

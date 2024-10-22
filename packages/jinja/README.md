@@ -43,17 +43,16 @@ const result = template.render({
 
 ### Transformers.js
 
-First, install the `@huggingface/jinja` and `@xenova/transformers` packages:
+First, install `@huggingface/transformers`:
 
 ```sh
-npm i @huggingface/jinja
-npm i @xenova/transformers
+npm i @huggingface/transformers
 ```
 
 You can then render a list of chat messages using a tokenizer's `apply_chat_template` method.
 
 ```js
-import { AutoTokenizer } from "@xenova/transformers";
+import { AutoTokenizer } from "@huggingface/transformers";
 
 // Load tokenizer from the Hugging Face Hub
 const tokenizer = await AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.1");
