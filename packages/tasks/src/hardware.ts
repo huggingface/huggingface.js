@@ -88,6 +88,10 @@ export const SKUS = {
 				tflops: 31.24,
 				memory: [24],
 			},
+			A2: {
+				tflops: 4.531, // source: https://www.techpowerup.com/gpu-specs/a2.c3848
+				memory: [16],
+			},
 			"RTX 4090": {
 				tflops: 82.58,
 				memory: [24],
@@ -246,6 +250,14 @@ export const SKUS = {
 				tflops: 184.6,
 				memory: [32],
 			},
+			MI60: {
+				tflops: 29.5,
+				memory: [32],
+			},
+			MI50: {
+				tflops: 26.5,
+				memory: [16],
+			},
 			"RX 7900 XTX": {
 				tflops: 122.8,
 				memory: [24],
@@ -277,6 +289,14 @@ export const SKUS = {
 			"RX 6800": {
 				tflops: 32.33,
 				memory: [16],
+			},
+			"RX 6700 XT": {
+				tflops: 26.43,
+				memory: [12],
+			},
+			"RX 6700": {
+				tflops: 22.58,
+				memory: [10],
 			},
 			"Radeon Pro VII": {
 				tflops: 26.11,
