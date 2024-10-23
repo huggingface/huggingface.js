@@ -360,6 +360,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "k2",
 		repoUrl: "https://github.com/k2-fsa/k2",
 	},
+	litert: {
+		prettyLabel: "LiteRT",
+		repoName: "LiteRT",
+		repoUrl: "https://github.com/google-ai-edge/LiteRT",
+		docsUrl: "https://ai.google.dev/edge/litert",
+		filter: true,
+		countDownloads: `path_extension:"tflite"`,
+	},
 	liveportrait: {
 		prettyLabel: "LivePortrait",
 		repoName: "LivePortrait",
