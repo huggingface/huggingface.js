@@ -29,7 +29,7 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "Strong keypoint detection model used to detect human pose.",
-			id: "qualcomm/MediaPipe-Pose-Estimation",
+			id: "facebook/sapiens-pose-1b",
 		},
 	],
 	spaces: [

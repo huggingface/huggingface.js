@@ -57,11 +57,11 @@ const taskData: TaskDataCustom = {
 			id: "ZhengPeng7/BiRefNet",
 		},
 		{
-			description: "Semantic segmentation model trained on ADE20k dataset.",
-			id: "nvidia/segformer-b0-finetuned-ade-512-512",
+			description: "Powerful human-centric image segmentation model.",
+			id: "facebook/sapiens-seg-1b",
 		},
 		{
-			description: "Panoptic segmentation model trained COCO (common objects) dataset.",
+			description: "Panoptic segmentation model trained on the COCO (common objects) dataset.",
 			id: "facebook/mask2former-swin-large-coco-panoptic",
 		},
 	],
@@ -75,8 +75,8 @@ const taskData: TaskDataCustom = {
 			id: "jbrinkma/segment-anything",
 		},
 		{
-			description: "A semantic segmentation application that predicts human silhouettes.",
-			id: "keras-io/Human-Part-Segmentation",
+			description: "A human-centric segmentation model.",
+			id: "facebook/sapiens-pose",
 		},
 		{
 			description: "An instance segmentation application to predict neuronal cell types from microscopy images.",
