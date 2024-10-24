@@ -324,10 +324,10 @@ export function getPythonInferenceSnippet(
 			return {
 				...snippet,
 				content: `import requests
-	
+
 API_URL = "https://api-inference.huggingface.co/models/${model.id}"
 headers = {"Authorization": ${accessToken ? `"Bearer ${accessToken}"` : `f"Bearer {API_TOKEN}"`}}
-	
+
 ${snippet.content}`,
 			};
 		});
