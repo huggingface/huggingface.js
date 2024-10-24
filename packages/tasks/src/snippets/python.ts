@@ -313,19 +313,24 @@ export function getPythonInferenceSnippet(
 		// Example sending an image to the Message API
 		return snippetConversationalWithImage(model, accessToken);
 	} else {
-		const body =
+		let snippets =
 			model.pipeline_tag && model.pipeline_tag in pythonSnippets
-				? pythonSnippets[model.pipeline_tag]?.(model, accessToken) ?? ""
-				: "";
+				? pythonSnippets[model.pipeline_tag]?.(model, accessToken) ?? { content: "" }
+				: { content: "" };
 
-		return {
-			content: `import requests
+		snippets = Array.isArray(snippets) ? snippets : [snippets];
 
+		return snippets.map((snippet) => {
+			return {
+				...snippet,
+				content: `import requests
+	
 API_URL = "https://api-inference.huggingface.co/models/${model.id}"
 headers = {"Authorization": ${accessToken ? `"Bearer ${accessToken}"` : `f"Bearer {API_TOKEN}"`}}
-
-${body}`,
-		};
+	
+${snippet.content}`,
+			};
+		});
 	}
 }
 
