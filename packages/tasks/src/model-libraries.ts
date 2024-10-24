@@ -373,6 +373,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/abetlen/llama-cpp-python",
 		snippets: snippets.llama_cpp_python,
 	},
+	"mini-omni2": {
+		prettyLabel: "Mini-Omni2",
+		repoName: "mini-omni2",
+		repoUrl: "https://github.com/gpt-omni/mini-omni2",
+		countDownloads: `path_extension:"pt" OR path_extension:"pth"`,
+	},
 	mindspore: {
 		prettyLabel: "MindSpore",
 		repoName: "mindspore",
