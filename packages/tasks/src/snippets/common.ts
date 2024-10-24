@@ -10,7 +10,7 @@ export interface StringifyMessagesOptions {
 
 export function stringifyMessages(messages: ChatCompletionInputMessage[], opts: StringifyMessagesOptions): string {
 	const keyRole = opts.attributeKeyQuotes ? `"role"` : "role";
-	const keyContent = opts.attributeKeyQuotes ? `"role"` : "role";
+	const keyContent = opts.attributeKeyQuotes ? `"content"` : "content";
 
 	const messagesStringified = messages.map(({ role, content }) => {
 		if (typeof content === "string") {
