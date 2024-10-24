@@ -685,7 +685,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "mochi-1-preview",
 		repoUrl: "https://github.com/genmoai/models",
 		filter: false,
-		countDownloads: `path_extension:"safetensors" OR path_extension:"pt"`,
+		countDownloads: `path:"vae_stats.json"`,
 	},
 	tensorflowtts: {
 		prettyLabel: "TensorFlowTTS",
