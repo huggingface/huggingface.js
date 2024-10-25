@@ -398,10 +398,6 @@ model = keras_hub.models.CausalLM.from_preset("hf://${model.id}", dtype="bloaf16
 
 # Possible tasks are CausalLM, TextToImage, ImageClassifier, ...
 # full list here: https://keras.io/api/keras_hub/models/#api-documentation
-
-# Model components can also be laoded separately:
-tokenizer = keras_hub.models.Tokenizer.from_preset("hf://${model.id}")
-backbone = keras_hub.models.Backbone.from_preset("hf://${model.id}")
 `,
 ];
 
