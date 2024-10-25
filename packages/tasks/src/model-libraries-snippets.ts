@@ -364,8 +364,9 @@ model = GLiNER.from_pretrained("${model.id}")`,
 ];
 
 export const keras = (model: ModelData): string[] => [
-	`import os
-os.environ["KERAS_BACKEND"] = "jax" # or "torch", or "tensorflow"
+	`# Available backend options are: "jax", "torch", "tensorflow".
+import os
+os.environ["KERAS_BACKEND"] = "jax"
 	
 import keras
 
@@ -374,8 +375,9 @@ model = keras.saving.load_model("hf://${model.id}")
 ];
 
 export const keras_nlp = (model: ModelData): string[] => [
-	`import os
-os.environ["KERAS_BACKEND"] = "jax" # or "torch", or "tensorflow"
+	`# Available backend options are: "jax", "torch", "tensorflow".
+import os
+os.environ["KERAS_BACKEND"] = "jax"
 
 import keras_nlp
 
@@ -385,8 +387,9 @@ backbone = keras_nlp.models.Backbone.from_preset("hf://${model.id}")
 ];
 
 export const keras_hub = (model: ModelData): string[] => [
-	`import os
-os.environ["KERAS_BACKEND"] = "jax" # or "torch", or "tensorflow"
+	`# Available backend options are: "jax", "torch", "tensorflow".
+import os
+os.environ["KERAS_BACKEND"] = "jax"
 
 import keras_hub
 
