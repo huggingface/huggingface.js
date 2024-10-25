@@ -681,8 +681,8 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"safetensors" OR path_extension:"pt"`,
 	},
 	"mochi-1-preview": {
-		prettyLabel: "Mochi Preview",
-		repoName: "mochi-1-preview",
+		prettyLabel: "Mochi 1",
+		repoName: "Mochi 1",
 		repoUrl: "https://github.com/genmoai/models",
 		filter: false,
 		countDownloads: `path:"vae_stats.json"`,
