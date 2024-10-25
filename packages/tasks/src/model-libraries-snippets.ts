@@ -364,9 +364,8 @@ model = GLiNER.from_pretrained("${model.id}")`,
 ];
 
 export const keras = (model: ModelData): string[] => [
-	`# Available backend options are: "jax", "tensorflow", "torch".
-import os
-os.environ["KERAS_BACKEND"] = "tensorflow"
+	`import os
+os.environ["KERAS_BACKEND"] = "jax" # or "torch", or "tensorflow"
 	
 import keras
 
@@ -375,14 +374,31 @@ model = keras.saving.load_model("hf://${model.id}")
 ];
 
 export const keras_nlp = (model: ModelData): string[] => [
-	`# Available backend options are: "jax", "tensorflow", "torch".
-import os
-os.environ["KERAS_BACKEND"] = "tensorflow"
+	`import os
+os.environ["KERAS_BACKEND"] = "jax" # or "torch", or "tensorflow"
 
 import keras_nlp
 
 tokenizer = keras_nlp.models.Tokenizer.from_preset("hf://${model.id}")
 backbone = keras_nlp.models.Backbone.from_preset("hf://${model.id}")
+`,
+];
+
+export const keras_hub = (model: ModelData): string[] => [
+	`import os
+os.environ["KERAS_BACKEND"] = "jax" # or "torch", or "tensorflow"
+
+import keras_hub
+
+# Load a task-specific model (*replace CausalLM with your task*)
+model = keras_hub.models.CausalLM.from_preset("hf://${model.id}", dtype="bloaf16)
+
+# Possible tasks are CausalLM, TextToImage, ImageClassifier, ...
+# full list here: https://keras.io/api/keras_hub/models/#api-documentation
+
+# Model components can also be laoded separately:
+tokenizer = keras_hub.models.Tokenizer.from_preset("hf://${model.id}")
+backbone = keras_hub.models.Backbone.from_preset("hf://${model.id}")
 `,
 ];
 

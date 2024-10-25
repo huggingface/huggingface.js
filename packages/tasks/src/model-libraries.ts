@@ -351,9 +351,16 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	"keras-nlp": {
 		prettyLabel: "KerasNLP",
 		repoName: "KerasNLP",
-		repoUrl: "https://keras.io/keras_nlp/",
-		docsUrl: "https://github.com/keras-team/keras-nlp",
+		repoUrl: "https://github.com/keras-team/keras-nlp",
+		docsUrl: "https://keras.io/keras_nlp/",
 		snippets: snippets.keras_nlp,
+	},
+	"keras-hub": {
+		prettyLabel: "KerasHub",
+		repoName: "KerasHub",
+		repoUrl: "https://github.com/keras-team/keras-hub",
+		docsUrl: "https://keras.io/keras_hub/",
+		snippets: snippets.keras_hub,
 	},
 	k2: {
 		prettyLabel: "K2",
