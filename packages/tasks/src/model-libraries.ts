@@ -345,7 +345,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/keras-team/tf-keras",
 		docsUrl: "https://huggingface.co/docs/hub/tf-keras",
 		snippets: snippets.tf_keras,
-		filter: true,
+		filter: false,
 		countDownloads: `path:"saved_model.pb"`,
 	},
 	"keras-nlp": {
@@ -354,6 +354,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/keras-team/keras-nlp",
 		docsUrl: "https://keras.io/keras_nlp/",
 		snippets: snippets.keras_nlp,
+		filter: false,
 	},
 	"keras-hub": {
 		prettyLabel: "KerasHub",
@@ -361,6 +362,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/keras-team/keras-hub",
 		docsUrl: "https://keras.io/keras_hub/",
 		snippets: snippets.keras_hub,
+		filter: true,
 	},
 	k2: {
 		prettyLabel: "K2",
