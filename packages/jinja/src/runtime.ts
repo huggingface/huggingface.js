@@ -647,6 +647,40 @@ export class Interpreter {
 
 						return new ArrayValue(filtered);
 					}
+					case "rejectattr": {
+						if (operand.value.some((x) => !(x instanceof ObjectValue))) {
+							throw new Error("`rejectattr` can only be applied to array of objects");
+						}
+						if (filter.args.some((x) => x.type !== "StringLiteral")) {
+							throw new Error("arguments of `rejectattr` must be strings");
+						}
+
+						const [attr, testName, value] = filter.args.map((x) => this.evaluate(x, environment)) as StringValue[];
+
+						let testFunction: (...x: AnyRuntimeValue[]) => boolean;
+						if (testName) {
+							// Get the test function from the environment
+							const test = environment.tests.get(testName.value);
+							if (!test) {
+								throw new Error(`Unknown test: ${testName.value}`);
+							}
+							testFunction = test;
+						} else {
+							// Default to truthiness of first argument
+							testFunction = (...x: AnyRuntimeValue[]) => x[0].__bool__().value;
+						}
+
+						// Filter the array using the test function
+						const filtered = (operand.value as ObjectValue[]).filter((item) => {
+							const a = item.value.get(attr.value);
+							if (a) {
+								return !testFunction(a, value);
+							}
+							return true;
+						});
+
+						return new ArrayValue(filtered);
+					}
 					case "map": {
 						// Accumulate kwargs
 						const [, kwargs] = this.evaluateArguments(filter.args, environment);
