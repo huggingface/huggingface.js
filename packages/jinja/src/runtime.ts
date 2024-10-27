@@ -613,46 +613,15 @@ export class Interpreter {
 
 			if (operand instanceof ArrayValue) {
 				switch (filterName) {
-					case "selectattr": {
-						if (operand.value.some((x) => !(x instanceof ObjectValue))) {
-							throw new Error("`selectattr` can only be applied to array of objects");
-						}
-						if (filter.args.some((x) => x.type !== "StringLiteral")) {
-							throw new Error("arguments of `selectattr` must be strings");
-						}
-
-						const [attr, testName, value] = filter.args.map((x) => this.evaluate(x, environment)) as StringValue[];
-
-						let testFunction: (...x: AnyRuntimeValue[]) => boolean;
-						if (testName) {
-							// Get the test function from the environment
-							const test = environment.tests.get(testName.value);
-							if (!test) {
-								throw new Error(`Unknown test: ${testName.value}`);
-							}
-							testFunction = test;
-						} else {
-							// Default to truthiness of first argument
-							testFunction = (...x: AnyRuntimeValue[]) => x[0].__bool__().value;
-						}
-
-						// Filter the array using the test function
-						const filtered = (operand.value as ObjectValue[]).filter((item) => {
-							const a = item.value.get(attr.value);
-							if (a) {
-								return testFunction(a, value);
-							}
-							return false;
-						});
-
-						return new ArrayValue(filtered);
-					}
+					case "selectattr":
 					case "rejectattr": {
+						const select = filterName === "selectattr";
+
 						if (operand.value.some((x) => !(x instanceof ObjectValue))) {
-							throw new Error("`rejectattr` can only be applied to array of objects");
+							throw new Error(`\`${filterName}\` can only be applied to array of objects`);
 						}
 						if (filter.args.some((x) => x.type !== "StringLiteral")) {
-							throw new Error("arguments of `rejectattr` must be strings");
+							throw new Error(`arguments of \`${filterName}\` must be strings`);
 						}
 
 						const [attr, testName, value] = filter.args.map((x) => this.evaluate(x, environment)) as StringValue[];
@@ -673,10 +642,8 @@ export class Interpreter {
 						// Filter the array using the test function
 						const filtered = (operand.value as ObjectValue[]).filter((item) => {
 							const a = item.value.get(attr.value);
-							if (a) {
-								return !testFunction(a, value);
-							}
-							return true;
+							const result = a ? testFunction(a, value) : false;
+							return select ? result : !result;
 						});
 
 						return new ArrayValue(filtered);
