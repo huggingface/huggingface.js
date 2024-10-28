@@ -394,7 +394,7 @@ os.environ["KERAS_BACKEND"] = "jax"
 import keras_hub
 
 # Load a task-specific model (*replace CausalLM with your task*)
-model = keras_hub.models.CausalLM.from_preset("hf://${model.id}", dtype="bloaf16)
+model = keras_hub.models.CausalLM.from_preset("hf://${model.id}", dtype="bfloat16")
 
 # Possible tasks are CausalLM, TextToImage, ImageClassifier, ...
 # full list here: https://keras.io/api/keras_hub/models/#api-documentation
