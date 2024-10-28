@@ -375,7 +375,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	"mini-omni2": {
 		prettyLabel: "Mini-Omni2",
-		repoName: "mini-omni2",
+		repoName: "Mini-Omni2",
 		repoUrl: "https://github.com/gpt-omni/mini-omni2",
 		countDownloads: `path:"model_config.yaml"`,
 	},
