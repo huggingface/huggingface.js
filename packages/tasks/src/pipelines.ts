@@ -1,4 +1,4 @@
-export const MODALITIES = ["cv", "nlp", "audio", "tabular", "multimodal", "rl", "other"] as const;
+export const MODALITIES = ["multimodal", "nlp", "cv", "audio", "tabular", "rl", "other"] as const;
 
 export type Modality = (typeof MODALITIES)[number];
 

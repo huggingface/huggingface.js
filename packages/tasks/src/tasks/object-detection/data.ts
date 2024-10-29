@@ -51,8 +51,7 @@ const taskData: TaskDataCustom = {
 			id: "jameslahm/yolov10x",
 		},
 		{
-			description:
-				"Fast and accurate object detection model trained on COCO and Object365 datasets.",
+			description: "Fast and accurate object detection model trained on COCO and Object365 datasets.",
 			id: "PekingU/rtdetr_r18vd_coco_o365",
 		},
 	],
