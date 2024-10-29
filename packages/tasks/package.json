@@ -32,7 +32,8 @@
 		"check": "tsc",
 		"inference-codegen": "tsx scripts/inference-codegen.ts && prettier --write src/tasks/*/inference.ts",
 		"inference-tgi-import": "tsx scripts/inference-tgi-import.ts && prettier --write src/tasks/text-generation/spec/*.json && prettier --write src/tasks/chat-completion/spec/*.json",
-		"inference-tei-import": "tsx scripts/inference-tei-import.ts && prettier --write src/tasks/feature-extraction/spec/*.json"
+		"inference-tei-import": "tsx scripts/inference-tei-import.ts && prettier --write src/tasks/feature-extraction/spec/*.json",
+		"check-snippets": "tsx scripts/check-snippets.ts"
 	},
 	"type": "module",
 	"files": [
@@ -48,7 +49,9 @@
 	"author": "Hugging Face",
 	"license": "MIT",
 	"devDependencies": {
+		"@types/minimist": "^1.2.5",
 		"@types/node": "^20.11.5",
+		"minimist": "^1.2.8",
 		"quicktype-core": "https://github.com/huggingface/quicktype/raw/pack-18.0.17/packages/quicktype-core/quicktype-core-18.0.17.tgz",
 		"type-fest": "^3.13.1"
 	},
