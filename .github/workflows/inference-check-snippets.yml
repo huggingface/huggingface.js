@@ -40,8 +40,3 @@ jobs:
         run: |
           cd packages/tasks
           pnpm run check-snippets --pipeline-tag="text-generation" --tags="conversational"
-
-      - name: Print conversational image-text-to-text snippets
-        run: |
-          cd packages/tasks
-          pnpm run check-snippets --pipeline-tag="image-text-to-text" --tags="conversational"
