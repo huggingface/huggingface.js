@@ -21,7 +21,7 @@ jobs:
           cache-dependency-path: "**/pnpm-lock.yaml"
       - run: |
           cd packages/tasks
-          pnpm install --frozen-lockfile .
+          pnpm install
 
       # TODO: Find a way to run on all pipeline tags
       # TODO: print snippet only if it has changed since the last commit on main (?)
