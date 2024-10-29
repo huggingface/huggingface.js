@@ -1,0 +1,49 @@
+name: Inference check snippets
+on:
+  pull_request:
+    paths:
+      - "packages/tasks/src/snippets/**"
+      - ".github/workflows/inference-check-snippets.yml"
+
+jobs:
+  check-snippets:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - run: corepack enable
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: "**/pnpm-lock.yaml"
+      - run: |
+          cd packages/tasks
+          pnpm install --frozen-lockfile --filter .
+          pnpm install --frozen-lockfile --filter ...[${{ steps.since.outputs.SINCE }}]...
+          pnpm --filter ...[${{ steps.since.outputs.SINCE }}]... build
+
+      # TODO: Find a way to run on all pipeline tags
+      # TODO: print snippet only if it has changed since the last commit on main (?)
+      # TODO: (even better: automated message on the PR with diff)
+      - name: Print text-to-image snippets
+        run: |
+          cd packages/tasks
+          pnpm run check-snippets --pipeline-tag="text-to-image"
+
+      - name: Print simple text-generation snippets
+        run: |
+          cd packages/tasks
+          pnpm run check-snippets --pipeline-tag="text-generation"
+
+      - name: Print conversational text-generation snippets
+        run: |
+          cd packages/tasks
+          pnpm run check-snippets --pipeline-tag="text-generation" --tags="conversational"
+
+      - name: Print conversational image-text-to-text snippets
+        run: |
+          cd packages/tasks
+          pnpm run check-snippets --pipeline-tag="image-text-to-text" --tags="conversational"

@@ -4,6 +4,11 @@ import { stringifyGenerationConfig, stringifyMessages } from "./common.js";
 import { getModelInputSnippet } from "./inputs.js";
 import type { InferenceSnippet, ModelDataMinimal } from "./types.js";
 
+const snippetImportInferenceClient = (model: ModelDataMinimal, accessToken: string): string =>
+	`from huggingface_hub import InferenceClient
+
+client = InferenceClient(${model.id}, token="${accessToken || "{API_TOKEN}"}")`;
+
 export const snippetConversational = (
 	model: ModelDataMinimal,
 	accessToken: string,
@@ -184,10 +189,14 @@ export const snippetFile = (model: ModelDataMinimal): InferenceSnippet => ({
 output = query(${getModelInputSnippet(model)})`,
 });
 
-export const snippetTextToImage = (model: ModelDataMinimal): InferenceSnippet => ({
-	content: `def query(payload):
+export const snippetTextToImage = (model: ModelDataMinimal, accessToken: string): InferenceSnippet[] => {
+	return [
+		{
+			client: "requests",
+			content: `def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.content
+
 image_bytes = query({
 	"inputs": ${getModelInputSnippet(model)},
 })
@@ -195,7 +204,16 @@ image_bytes = query({
 import io
 from PIL import Image
 image = Image.open(io.BytesIO(image_bytes))`,
-});
+		},
+		{
+			client: "huggingface_hub",
+			content: `${snippetImportInferenceClient(model, accessToken)}
+
+# output is a PIL.Image object
+image = client.text_to_image(${getModelInputSnippet(model)})`,
+		},
+	];
+};
 
 export const snippetTabular = (model: ModelDataMinimal): InferenceSnippet => ({
 	content: `def query(payload):
@@ -300,6 +318,9 @@ export function getPythonInferenceSnippet(
 	if (model.tags.includes("conversational")) {
 		// Conversational model detected, so we display a code snippet that features the Messages API
 		return snippetConversational(model, accessToken, opts);
+	} else if (model.pipeline_tag == "text-to-image") {
+		// TODO: factorize this logic
+		return snippetTextToImage(model, accessToken);
 	} else {
 		let snippets =
 			model.pipeline_tag && model.pipeline_tag in pythonSnippets

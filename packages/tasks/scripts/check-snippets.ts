@@ -17,7 +17,7 @@ import minimist from "minimist";
 const args = minimist(process.argv.slice(2));
 
 const accessToken = "hf_**********";
-const pipelineTag = args["pipeline-type"] || "text-generation";
+const pipelineTag = args["pipeline-tag"] || "text-generation";
 const tags = (args["tags"] || "").split(",");
 
 const modelMinimal: ModelDataMinimal = {
