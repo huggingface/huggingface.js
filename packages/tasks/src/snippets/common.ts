@@ -30,7 +30,7 @@ export function stringifyMessages(messages: ChatCompletionInputMessage[], opts: 
 			if (opts.customContentEscaper) {
 				content = opts.customContentEscaper(content);
 			}
-			return `{ ${keyRole}: "${role}", ${keyContent}: ${content} }`;
+			return `{ ${keyRole}: "${role}", ${keyContent}: [${content}] }`;
 		}
 	});
 
