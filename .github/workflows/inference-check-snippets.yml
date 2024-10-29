@@ -21,9 +21,7 @@ jobs:
           cache-dependency-path: "**/pnpm-lock.yaml"
       - run: |
           cd packages/tasks
-          pnpm install --frozen-lockfile --filter .
-          pnpm install --frozen-lockfile --filter ...[${{ steps.since.outputs.SINCE }}]...
-          pnpm --filter ...[${{ steps.since.outputs.SINCE }}]... build
+          pnpm install --frozen-lockfile .
 
       # TODO: Find a way to run on all pipeline tags
       # TODO: print snippet only if it has changed since the last commit on main (?)
