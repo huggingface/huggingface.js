@@ -40,23 +40,7 @@ export const snippetTextGeneration = (
 	if (model.tags.includes("conversational")) {
 		// Conversational model detected, so we display a code snippet that features the Messages API
 		const streaming = opts?.streaming ?? true;
-		const exampleMessages: ChatCompletionInputMessage[] =
-			model.pipeline_tag === "text-generation"
-				? [{ role: "user", content: "What is the capital of France?" }]
-				: [
-						{
-							role: "user",
-							content: [
-								{
-									type: "image_url",
-									image_url: {
-										url: "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg",
-									},
-								},
-								{ type: "text", text: "Describe this image in one sentence." },
-							],
-						},
-				  ];
+		const exampleMessages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
 		const messages = opts?.messages ?? exampleMessages;
 		const messagesStr = stringifyMessages(messages, { sep: ",\n\t\t", start: "[\n\t\t", end: "\n\t]" });
 
