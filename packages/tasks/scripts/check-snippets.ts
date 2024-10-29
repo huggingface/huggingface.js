@@ -9,15 +9,22 @@
  *
  * This script is meant only for debug purposes.
  */
-
 import { python, curl, js } from "../src/snippets/index";
 import type { InferenceSnippet, ModelDataMinimal } from "../src/snippets/types";
-import minimist from "minimist";
+import type { PipelineType } from "../src/pipelines";
 
-const args = minimist(process.argv.slice(2));
+// Parse command-line arguments
+const args = process.argv.slice(2).reduce(
+	(acc, arg) => {
+		const [key, value] = arg.split("=");
+		acc[key.replace("--", "")] = value;
+		return acc;
+	},
+	{} as { [key: string]: string }
+);
 
 const accessToken = "hf_**********";
-const pipelineTag = args["pipeline-tag"] || "text-generation";
+const pipelineTag = (args["pipeline-tag"] || "text-generation") as PipelineType;
 const tags = (args["tags"] || "").split(",");
 
 const modelMinimal: ModelDataMinimal = {
