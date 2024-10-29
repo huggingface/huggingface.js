@@ -49,9 +49,7 @@
 	"author": "Hugging Face",
 	"license": "MIT",
 	"devDependencies": {
-		"@types/minimist": "^1.2.5",
 		"@types/node": "^20.11.5",
-		"minimist": "^1.2.8",
 		"quicktype-core": "https://github.com/huggingface/quicktype/raw/pack-18.0.17/packages/quicktype-core/quicktype-core-18.0.17.tgz",
 		"type-fest": "^3.13.1"
 	},
