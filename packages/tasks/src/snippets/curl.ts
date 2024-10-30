@@ -26,9 +26,8 @@ export const snippetTextGeneration = (
 	if (model.tags.includes("conversational")) {
 		// Conversational model detected, so we display a code snippet that features the Messages API
 		const streaming = opts?.streaming ?? true;
-		const messages: ChatCompletionInputMessage[] = opts?.messages ?? [
-			{ role: "user", content: "What is the capital of France?" },
-		];
+		const exampleMessages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
+		const messages = opts?.messages ?? exampleMessages;
 
 		const config = {
 			...(opts?.temperature ? { temperature: opts.temperature } : undefined),
@@ -57,34 +56,6 @@ export const snippetTextGeneration = (
 		})},
     "stream": ${!!streaming}
 }'`,
-		};
-	} else {
-		return snippetBasic(model, accessToken);
-	}
-};
-
-export const snippetImageTextToTextGeneration = (model: ModelDataMinimal, accessToken: string): InferenceSnippet => {
-	if (model.tags.includes("conversational")) {
-		// Conversational model detected, so we display a code snippet that features the Messages API
-		return {
-			content: `curl 'https://api-inference.huggingface.co/models/${model.id}/v1/chat/completions' \\
--H "Authorization: Bearer ${accessToken || `{API_TOKEN}`}" \\
--H 'Content-Type: application/json' \\
--d '{
-	"model": "${model.id}",
-	"messages": [
-		{
-			"role": "user",
-			"content": [
-				{"type": "image_url", "image_url": {"url": "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg"}},
-				{"type": "text", "text": "Describe this image in one sentence."}
-			]
-		}
-	],
-	"max_tokens": 500,
-	"stream": false
-}'
-`,
 		};
 	} else {
 		return snippetBasic(model, accessToken);
@@ -122,7 +93,7 @@ export const curlSnippets: Partial<
 	summarization: snippetBasic,
 	"feature-extraction": snippetBasic,
 	"text-generation": snippetTextGeneration,
-	"image-text-to-text": snippetImageTextToTextGeneration,
+	"image-text-to-text": snippetTextGeneration,
 	"text2text-generation": snippetBasic,
 	"fill-mask": snippetBasic,
 	"sentence-similarity": snippetBasic,

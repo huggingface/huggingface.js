@@ -103,6 +103,7 @@ const TEST_STRINGS = {
 	IS_OPERATOR_3: `|{{ 1 is odd }}|{{ 2 is odd }}|{{ 1 is even }}|{{ 2 is even }}|{{ 2 is number }}|{{ '2' is number }}|{{ 2 is integer }}|{{ '2' is integer }}|`,
 	IS_OPERATOR_4: `|{{ func is callable }}|{{ 2 is callable }}|{{ 1 is iterable }}|{{ 'hello' is iterable }}|`,
 	IS_OPERATOR_5: `|{{ 'a' is lower }}|{{ 'A' is lower }}|{{ 'a' is upper }}|{{ 'A' is upper }}|`,
+	IS_OPERATOR_6: `|{{ string is mapping }}|{{ number is mapping }}|{{ array is mapping }}|{{ dict is mapping }}|`,
 
 	// Short-circuit evaluation
 	SHORT_CIRCUIT: `{{ false and raise_exception('This should not be printed') }}`,
@@ -2103,6 +2104,33 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 	],
+	IS_OPERATOR_6: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "string", type: "Identifier" },
+		{ value: "is", type: "Is" },
+		{ value: "mapping", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "number", type: "Identifier" },
+		{ value: "is", type: "Is" },
+		{ value: "mapping", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "array", type: "Identifier" },
+		{ value: "is", type: "Is" },
+		{ value: "mapping", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "dict", type: "Identifier" },
+		{ value: "is", type: "Is" },
+		{ value: "mapping", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
 
 	// Short-circuit evaluation
 	SHORT_CIRCUIT: [
@@ -2963,6 +2991,12 @@ const TEST_CONTEXT = {
 		func: () => {},
 	},
 	IS_OPERATOR_5: {},
+	IS_OPERATOR_6: {
+		string: "hello",
+		number: 1,
+		array: [1, 2, 3],
+		dict: { a: 1 },
+	},
 
 	// Short-circuit evaluation
 	SHORT_CIRCUIT: {},
@@ -3125,6 +3159,7 @@ const EXPECTED_OUTPUTS = {
 	IS_OPERATOR_3: `|true|false|false|true|true|false|true|false|`,
 	IS_OPERATOR_4: `|true|false|false|true|`,
 	IS_OPERATOR_5: `|true|false|false|true|`,
+	IS_OPERATOR_6: `|false|false|false|true|`,
 
 	// Short-circuit evaluation
 	SHORT_CIRCUIT: `false`,
