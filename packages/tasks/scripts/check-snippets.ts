@@ -38,7 +38,7 @@ const printSnippets = (snippets: InferenceSnippet | InferenceSnippet[], language
 	const snippetArray = Array.isArray(snippets) ? snippets : [snippets];
 	snippetArray.forEach((snippet) => {
 		console.log(`\n\x1b[33m${language} ${snippet.client}\x1b[0m`);
-		console.log(`\n\`\`\`${language === "JS" ? "js" : language.toLowerCase()}\n${snippet.content}\n\`\`\`\n`);
+		console.log(`\n\`\`\`${language.toLowerCase()}\n${snippet.content}\n\`\`\`\n`);
 	});
 };
 
