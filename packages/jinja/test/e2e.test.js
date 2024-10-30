@@ -659,7 +659,7 @@ const TEST_CUSTOM_TEMPLATES = Object.freeze({
 		data: {
 			messages: EXAMPLE_CHAT,
 			bos_token: "<s>",
-			eos_token: "</s>"
+			eos_token: "</s>",
 		},
 		target: `<s>[INST]Hello, how are you?[/INST]I'm doing great. How can I help you today?</s>[INST]I'd like to show off how chat templating works![/INST]`,
 	},
