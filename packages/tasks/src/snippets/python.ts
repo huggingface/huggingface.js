@@ -18,12 +18,7 @@ export const snippetConversational = (
 	const streaming = opts?.streaming ?? true;
 	const exampleMessages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
 	const messages = opts?.messages ?? exampleMessages;
-	const messagesStr = stringifyMessages(messages, {
-		sep: ",\n\t",
-		start: `[\n\t`,
-		end: `\n]`,
-		attributeKeyQuotes: true,
-	});
+	const messagesStr = stringifyMessages(messages, { attributeKeyQuotes: true });
 
 	const config = {
 		...(opts?.temperature ? { temperature: opts.temperature } : undefined),

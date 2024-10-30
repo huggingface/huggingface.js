@@ -8,33 +8,25 @@ export interface StringifyMessagesOptions {
 	customContentEscaper?: (str: string) => string;
 }
 
-export function stringifyMessages(messages: ChatCompletionInputMessage[], opts: StringifyMessagesOptions): string {
-	const keyRole = opts.attributeKeyQuotes ? `"role"` : "role";
-	const keyContent = opts.attributeKeyQuotes ? `"content"` : "content";
-
-	const messagesStringified = messages.map(({ role, content }) => {
-		if (typeof content === "string") {
-			content = JSON.stringify(content).slice(1, -1);
-			if (opts.customContentEscaper) {
-				content = opts.customContentEscaper(content);
-			}
-			return `{ ${keyRole}: "${role}", ${keyContent}: "${content}" }`;
-		} else {
-			2;
-			content = content.map(({ image_url, text, type }) => ({
-				type,
-				image_url,
-				...(text ? { text: JSON.stringify(text).slice(1, -1) } : undefined),
-			}));
-			content = JSON.stringify(content).slice(1, -1);
-			if (opts.customContentEscaper) {
-				content = opts.customContentEscaper(content);
-			}
-			return `{ ${keyRole}: "${role}", ${keyContent}: [${content}] }`;
-		}
-	});
-
-	return opts.start + messagesStringified.join(opts.sep) + opts.end;
+export function stringifyMessages(
+	messages: ChatCompletionInputMessage[],
+	opts?: {
+		indent?: string;
+		attributeKeyQuotes?: boolean;
+		customContentEscaper?: (str: string) => string;
+	}
+): string {
+	let messagesStr = JSON.stringify(messages, null, "\t");
+	if (opts?.indent) {
+		messagesStr = messagesStr.replaceAll("\n", `\n${opts.indent}`);
+	}
+	if (!opts?.attributeKeyQuotes) {
+		messagesStr = messagesStr.replace(/"([^"]+)":/g, "$1:");
+	}
+	if (opts?.customContentEscaper) {
+		messagesStr = opts.customContentEscaper(messagesStr);
+	}
+	return messagesStr;
 }
 
 type PartialGenerationParameters = Partial<Pick<GenerationParameters, "temperature" | "max_tokens" | "top_p">>;

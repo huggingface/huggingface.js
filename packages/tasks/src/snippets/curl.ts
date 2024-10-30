@@ -41,9 +41,7 @@ export const snippetTextGeneration = (
 --data '{
     "model": "${model.id}",
     "messages": ${stringifyMessages(messages, {
-			sep: ",\n\t\t",
-			start: `[\n\t\t`,
-			end: `\n\t]`,
+			indent: "\t",
 			attributeKeyQuotes: true,
 			customContentEscaper: (str) => str.replace(/'/g, "'\\''"),
 		})},
