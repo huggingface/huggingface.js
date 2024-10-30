@@ -87,6 +87,8 @@ const TEST_STRINGS = {
 	FILTER_OPERATOR_8: `{{ obj | tojson(indent=2) }}`,
 	FILTER_OPERATOR_9: `{{ data | map(attribute='val') | list | tojson }}`,
 	FILTER_OPERATOR_10: `|{{ " 1 \n 2 \n 3 \n\n " | indent }}|{{ " 1 \n 2 \n 3 \n\n " | indent(2) }}|{{ " 1 \n 2 \n 3 \n\n " | indent(first=True) }}|{{ " 1 \n 2 \n 3 \n\n " | indent(blank=True) }}|{{ " 1 \n 2 \n 3 \n\n " | indent(4, first=True) }}|`,
+	FILTER_OPERATOR_11: `{{ items | rejectattr('key') | length }}`,
+	FILTER_OPERATOR_12: `{{ messages | rejectattr('role', 'equalto', 'system') | length }}`,
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: `|{{ 1 and 2 }}|{{ 1 and 0 }}|{{ 0 and 1 }}|{{ 0 and 0 }}|{{ 1 or 2 }}|{{ 1 or 0 }}|{{ 0 or 1 }}|{{ 0 or 0 }}|{{ not 1 }}|{{ not 0 }}|`,
@@ -1625,6 +1627,34 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 	],
+	FILTER_OPERATOR_11: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "items", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "rejectattr", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "key", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "length", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	FILTER_OPERATOR_12: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "messages", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "rejectattr", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "role", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "equalto", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "system", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "length", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: [
@@ -2937,6 +2967,12 @@ const TEST_CONTEXT = {
 		data: [{ val: 1 }, { val: 2 }, { val: 3 }],
 	},
 	FILTER_OPERATOR_10: {},
+	FILTER_OPERATOR_11: {
+		items: [{ key: "a" }, { key: 0 }, { key: 1 }, {}, { key: false }],
+	},
+	FILTER_OPERATOR_12: {
+		messages: [{ role: "system" }, { role: "user" }, { role: "assistant" }],
+	},
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: {},
@@ -3107,6 +3143,8 @@ const EXPECTED_OUTPUTS = {
 	FILTER_OPERATOR_8: `{\n  "a": [\n    1,\n    2,\n    3\n  ],\n  "b": 1,\n  "c": {\n    "d": 2,\n    "e": {\n      "f": 3,\n      "g": {\n        "h": 4,\n        "i": [\n          1,\n          2,\n          3\n        ]\n      }\n    }\n  }\n}`,
 	FILTER_OPERATOR_9: `[1, 2, 3]`,
 	FILTER_OPERATOR_10: `| 1 \n     2 \n     3 \n\n     | 1 \n   2 \n   3 \n\n   |     1 \n     2 \n     3 \n\n     | 1 \n     2 \n     3 \n    \n     |     1 \n     2 \n     3 \n\n     |`,
+	FILTER_OPERATOR_11: `3`,
+	FILTER_OPERATOR_12: `2`,
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: `|2|0|0|0|1|1|1|0|false|true|`,
