@@ -26,9 +26,7 @@ export const snippetConversational = (
 		...(opts?.top_p ? { top_p: opts.top_p } : undefined),
 	};
 	const configStr = stringifyGenerationConfig(config, {
-		sep: ",\n\t",
-		start: "",
-		end: "",
+		indent: "\n\t",
 		attributeValueConnector: "=",
 	});
 

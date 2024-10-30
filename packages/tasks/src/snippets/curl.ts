@@ -46,9 +46,7 @@ export const snippetTextGeneration = (
 			customContentEscaper: (str) => str.replace(/'/g, "'\\''"),
 		})},
     ${stringifyGenerationConfig(config, {
-			sep: ",\n    ",
-			start: "",
-			end: "",
+			indent: "\n    ",
 			attributeKeyQuotes: true,
 			attributeValueConnector: ": ",
 		})},
