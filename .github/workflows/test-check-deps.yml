@@ -13,6 +13,7 @@ jobs:
         with:
           node-version: "20"
           cache: "pnpm"
+      - run: pnpm install
       - run: pnpm -w check-deps hub
       - run: pnpm -w check-deps hub
         working-directory: packages/inference
