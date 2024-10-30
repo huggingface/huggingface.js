@@ -13,9 +13,5 @@ jobs:
         with:
           node-version: "20"
           cache: "pnpm"
-      - uses: ./.github/actions/check-deps-published
-        with:
-          dep: hub
-      - uses: ./.github/actions/check-deps-published
-        with:
-          dep: tasks
+      - run: pnpm -w check-deps tasks
+      - run: pnpm -w check-deps hub

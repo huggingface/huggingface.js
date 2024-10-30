@@ -50,9 +50,8 @@ jobs:
           git commit . -m "🔖 @huggingface/tasks $BUMPED_VERSION"
           git tag "tasks-v$BUMPED_VERSION"
 
-      - uses: ./.github/actions/check-deps-published
-        with:
-          dep: gguf
+      - name: "Check Deps are published before publishing this package"
+        run: pnpm -w check-deps gguf
 
       - run: pnpm publish --no-git-checks .
         env:

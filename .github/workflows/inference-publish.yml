@@ -53,9 +53,8 @@ jobs:
           git commit -m "🔖 @huggingface/inference $BUMPED_VERSION"
           git tag "inference-v$BUMPED_VERSION"
 
-      - uses: ./.github/actions/check-deps-published
-        with:
-          dep: tasks
+      - name: "Check Deps are published before publishing this package"
+        run: pnpm -w check-deps gguf
 
       - run: pnpm publish --no-git-checks .
         env:
