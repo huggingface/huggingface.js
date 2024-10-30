@@ -150,6 +150,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"adapter_config.json"`,
 	},
+	comfy: {
+		prettyLabel: "ComfyUI",
+		repoName: "ComfyUI",
+		repoUrl: "https://github.com/comfyanonymous/ComfyUI",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	deepforest: {
 		prettyLabel: "DeepForest",
 		repoName: "deepforest",
