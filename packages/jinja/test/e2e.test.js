@@ -76,15 +76,8 @@ const EXAMPLE_FUNCTION_CALLING_WITH_SYSTEM = [
 	{ role: "user", content: "Hi, can you tell me the current stock price of AAPL?" },
 ];
 
-// Adapted from https://huggingface.co/CISCai/Mistral-7B-Instruct-v0.3-SOTA-GGUF
-const EXAMPLE_CHAT_WITH_TOOLS = [
-	{
-		role: "user",
-		content: "What's the weather like in Oslo and Stockholm?",
-	},
-];
-const EXAMPLE_TOOLS = [
-	{
+const EXAMPLE_TOOL_JSON_SCHEMAS = {
+	get_current_weather: {
 		type: "function",
 		function: {
 			name: "get_current_weather",
@@ -105,7 +98,81 @@ const EXAMPLE_TOOLS = [
 			},
 		},
 	},
+	get_current_temperature_v1: {
+		type: "function",
+		function: {
+			name: "get_current_temperature",
+			description: "Get the current temperature at a location.",
+			parameters: {
+				type: "object",
+				properties: {
+					location: {
+						type: "string",
+						description: 'The location to get the temperature for, in the format "City, Country"',
+					},
+				},
+				required: ["location"],
+			},
+			return: {
+				type: "number",
+				description: "The current temperature at the specified location in the specified units, as a float.",
+			},
+		},
+	},
+	get_current_temperature_v2: {
+		type: "function",
+		function: {
+			name: "get_current_temperature",
+			description: "Get the current temperature at a location.",
+			parameters: {
+				type: "object",
+				properties: {
+					location: {
+						type: "string",
+						description: 'The location to get the temperature for, in the format "City, Country"',
+					},
+					unit: {
+						type: "string",
+						enum: ["celsius", "fahrenheit"],
+						description: "The unit to return the temperature in.",
+					},
+				},
+				required: ["location", "unit"],
+			},
+			return: {
+				type: "number",
+				description: "The current temperature at the specified location in the specified units, as a float.",
+			},
+		},
+	},
+	get_current_wind_speed: {
+		type: "function",
+		function: {
+			name: "get_current_wind_speed",
+			description: "Get the current wind speed in km/h at a given location.",
+			parameters: {
+				type: "object",
+				properties: {
+					location: {
+						type: "string",
+						description: 'The location to get the temperature for, in the format "City, Country"',
+					},
+				},
+				required: ["location"],
+			},
+			return: {
+				type: "number",
+				description: "The current wind speed at the given location in km/h, as a float.",
+			},
+		},
+	},
+};
+
+const EXAMPLE_LIST_OF_TOOLS = [
+	EXAMPLE_TOOL_JSON_SCHEMAS.get_current_temperature_v2,
+	EXAMPLE_TOOL_JSON_SCHEMAS.get_current_wind_speed,
 ];
+
 /**
  * Defined in https://github.com/huggingface/transformers
  * Keys correspond to `model_type` in the transformers repo.
@@ -532,55 +599,7 @@ const TEST_CUSTOM_TEMPLATES = Object.freeze({
 				},
 				{ role: "tool", tool_call_id: "abcdef123", name: "get_current_temperature", content: "22.0" },
 			],
-			tools: [
-				{
-					type: "function",
-					function: {
-						name: "get_current_temperature",
-						description: "Get the current temperature at a location.",
-						parameters: {
-							type: "object",
-							properties: {
-								location: {
-									type: "string",
-									description: 'The location to get the temperature for, in the format "City, Country"',
-								},
-								unit: {
-									type: "string",
-									enum: ["celsius", "fahrenheit"],
-									description: "The unit to return the temperature in.",
-								},
-							},
-							required: ["location", "unit"],
-						},
-						return: {
-							type: "number",
-							description: "The current temperature at the specified location in the specified units, as a float.",
-						},
-					},
-				},
-				{
-					type: "function",
-					function: {
-						name: "get_current_wind_speed",
-						description: "Get the current wind speed in km/h at a given location.",
-						parameters: {
-							type: "object",
-							properties: {
-								location: {
-									type: "string",
-									description: 'The location to get the temperature for, in the format "City, Country"',
-								},
-							},
-							required: ["location"],
-						},
-						return: {
-							type: "number",
-							description: "The current wind speed at the given location in km/h, as a float.",
-						},
-					},
-				},
-			],
+			tools: EXAMPLE_LIST_OF_TOOLS,
 			bos_token: "<s>",
 			eos_token: "</s>",
 		},
@@ -590,8 +609,13 @@ const TEST_CUSTOM_TEMPLATES = Object.freeze({
 	"CISCai/Mistral-7B-Instruct-v0.3-SOTA-GGUF": {
 		chat_template: `{{ bos_token }}{% set ns = namespace(lastuser=-1, system=false, functions=false) %}{% if tools %}{% for message in messages %}{% if message['role'] == 'user' %}{% set ns.lastuser = loop.index0 %}{% elif message['role'] == 'system' %}{% set ns.system = message['content'] %}{% endif %}{% endfor %}{% set ns.functions = tools|selectattr('type','eq','function')|map(attribute='function')|list|tojson %}{% endif %}{% for message in messages %}{% if message['role'] == 'user' %}{% if loop.index0 == ns.lastuser and ns.functions %}{{ '[AVAILABLE_TOOLS] ' }}{{ ns.functions }}{{ '[/AVAILABLE_TOOLS]' }}{% endif %}{{ '[INST] ' }}{% if loop.index0 == ns.lastuser and ns.system %}{{ ns.system + ' ' }}{% endif %}{{ message['content'] }}{{ '[/INST]' }}{% elif message['role'] == 'tool' %}{{ '[TOOL_RESULTS] ' }}{{ dict(call_id=message['tool_call_id'], content=message['content'])|tojson }}{{ '[/TOOL_RESULTS]' }}{% elif message['role'] == 'assistant' %}{% if message['tool_calls'] %}{{ '[TOOL_CALLS] [' }}{% for call in message['tool_calls'] %}{% if call['type'] == 'function' %}{{ dict(id=call['id'], name=call['function']['name'], arguments=call['function']['arguments'])|tojson }}{% endif %}{% if not loop.last %}{{ ', ' }}{% endif %}{% endfor %}{{ ']' }}{% else %}{{ message['content'] }}{% endif %}{{ eos_token }}{% endif %}{% endfor %}`,
 		data: {
-			messages: EXAMPLE_CHAT_WITH_TOOLS,
-			tools: EXAMPLE_TOOLS,
+			messages: [
+				{
+					role: "user",
+					content: "What's the weather like in Oslo and Stockholm?",
+				},
+			],
+			tools: [EXAMPLE_TOOL_JSON_SCHEMAS.get_current_weather],
 			bos_token: "<s>",
 			eos_token: "</s>",
 		},
@@ -629,6 +653,20 @@ const TEST_CUSTOM_TEMPLATES = Object.freeze({
 			add_generation_prompt: true,
 		},
 		target: `<|begin_of_text|>You are a function calling AI model. You are provided with function signatures within <tools></tools> XML tags. You may call one or more functions to assist with the user query. Don't make assumptions about what values to plug into functions. Here are the available tools: <tools> {"type": "function", "function": {"name": get_stock_fundamentals", "description": "get_stock_fundamentals(symbol: str) -> dict - Get fundamental data for a given stock symbol using yfinance API.\n\n    Args:\n        symbol(str): The stock symbol.\n    Returns:\n        A dictionary containing fundamental data.\n\nKeys:\n    - 'symbol': The stock symbol.\n    - 'company_name': The long name of the company.\n    - 'sector': The sector to which the company belongs.\n    - 'industry': The industry to which the company belongs.\n    - 'market_cap': The market capitalization of the company.\n    - 'pe_ratio': The forward price-to-earnings ratio.\n    - 'pb_ratio': The price-to-book ratio.\n    - 'dividend_yield': The dividend yield.\n    - 'eps': The trailing earnings per share.\n    - 'beta': The beta value of the stock.\n    - '52_week_high': The 52-week high price of the stock.\n    - '52_week_low': The 52-week low price of the stock.", "parameters": {"type": "object", "properties": {"symbol": {"type": "string", "description": "The stock symbol."}}, "required": ["symbol"]}} </tools>Use the following pydantic model json schema for each tool call you will make: {"properties": {"arguments": {"title": "Arguments", "type": "object"}, "name": {"title": "Name", "type": "string"}}, "required": ["arguments", "name"], "title": "FunctionCall", "type": "object"}\nFor each function call return a json object with function name and arguments within <tool_call></tool_call> XML tags as follows:\n<tool_call>\n{"arguments": <args-dict>, "name": <function-name>}\n</tool_call><|im_end|><|im_start|>user\nFetch the stock fundamentals data for Tesla (TSLA)<|im_end|>\n<|im_start|>assistant\n`,
+	},
+	"meta-llama/Llama-3.1-8B-Instruct": {
+		chat_template: `{{- bos_token }}\n{%- if custom_tools is defined %}\n    {%- set tools = custom_tools %}\n{%- endif %}\n{%- if not tools_in_user_message is defined %}\n    {%- set tools_in_user_message = true %}\n{%- endif %}\n{%- if not date_string is defined %}\n    {%- set date_string = "26 Jul 2024" %}\n{%- endif %}\n{%- if not tools is defined %}\n    {%- set tools = none %}\n{%- endif %}\n\n{#- This block extracts the system message, so we can slot it into the right place. #}\n{%- if messages[0]['role'] == 'system' %}\n    {%- set system_message = messages[0]['content']|trim %}\n    {%- set messages = messages[1:] %}\n{%- else %}\n    {%- set system_message = "" %}\n{%- endif %}\n\n{#- System message + builtin tools #}\n{{- "<|start_header_id|>system<|end_header_id|>\\n\\n" }}\n{%- if builtin_tools is defined or tools is not none %}\n    {{- "Environment: ipython\\n" }}\n{%- endif %}\n{%- if builtin_tools is defined %}\n    {{- "Tools: " + builtin_tools | reject('equalto', 'code_interpreter') | join(", ") + "\\n\\n"}}\n{%- endif %}\n{{- "Cutting Knowledge Date: December 2023\\n" }}\n{{- "Today Date: " + date_string + "\\n\\n" }}\n{%- if tools is not none and not tools_in_user_message %}\n    {{- "You have access to the following functions. To call a function, please respond with JSON for a function call." }}\n    {{- 'Respond in the format {"name": function name, "parameters": dictionary of argument name and its value}.' }}\n    {{- "Do not use variables.\\n\\n" }}\n    {%- for t in tools %}\n        {{- t | tojson(indent=4) }}\n        {{- "\\n\\n" }}\n    {%- endfor %}\n{%- endif %}\n{{- system_message }}\n{{- "<|eot_id|>" }}\n\n{#- Custom tools are passed in a user message with some extra guidance #}\n{%- if tools_in_user_message and not tools is none %}\n    {#- Extract the first user message so we can plug it in here #}\n    {%- if messages | length != 0 %}\n        {%- set first_user_message = messages[0]['content']|trim %}\n        {%- set messages = messages[1:] %}\n    {%- else %}\n        {{- raise_exception("Cannot put tools in the first user message when there's no first user message!") }}\n{%- endif %}\n    {{- '<|start_header_id|>user<|end_header_id|>\\n\\n' -}}\n    {{- "Given the following functions, please respond with a JSON for a function call " }}\n    {{- "with its proper arguments that best answers the given prompt.\\n\\n" }}\n    {{- 'Respond in the format {"name": function name, "parameters": dictionary of argument name and its value}.' }}\n    {{- "Do not use variables.\\n\\n" }}\n    {%- for t in tools %}\n        {{- t | tojson(indent=4) }}\n        {{- "\\n\\n" }}\n    {%- endfor %}\n    {{- first_user_message + "<|eot_id|>"}}\n{%- endif %}\n\n{%- for message in messages %}\n    {%- if not (message.role == 'ipython' or message.role == 'tool' or 'tool_calls' in message) %}\n        {{- '<|start_header_id|>' + message['role'] + '<|end_header_id|>\\n\\n'+ message['content'] | trim + '<|eot_id|>' }}\n    {%- elif 'tool_calls' in message %}\n        {%- if not message.tool_calls|length == 1 %}\n            {{- raise_exception("This model only supports single tool-calls at once!") }}\n        {%- endif %}\n        {%- set tool_call = message.tool_calls[0].function %}\n        {%- if builtin_tools is defined and tool_call.name in builtin_tools %}\n            {{- '<|start_header_id|>assistant<|end_header_id|>\\n\\n' -}}\n            {{- "<|python_tag|>" + tool_call.name + ".call(" }}\n            {%- for arg_name, arg_val in tool_call.arguments | items %}\n                {{- arg_name + '="' + arg_val + '"' }}\n                {%- if not loop.last %}\n                    {{- ", " }}\n                {%- endif %}\n                {%- endfor %}\n            {{- ")" }}\n        {%- else  %}\n            {{- '<|start_header_id|>assistant<|end_header_id|>\\n\\n' -}}\n            {{- '{"name": "' + tool_call.name + '", ' }}\n            {{- '"parameters": ' }}\n            {{- tool_call.arguments | tojson }}\n            {{- "}" }}\n        {%- endif %}\n        {%- if builtin_tools is defined %}\n            {#- This means we're in ipython mode #}\n            {{- "<|eom_id|>" }}\n        {%- else %}\n            {{- "<|eot_id|>" }}\n        {%- endif %}\n    {%- elif message.role == "tool" or message.role == "ipython" %}\n        {{- "<|start_header_id|>ipython<|end_header_id|>\\n\\n" }}\n        {%- if message.content is mapping or message.content is iterable %}\n            {{- message.content | tojson }}\n        {%- else %}\n            {{- message.content }}\n        {%- endif %}\n        {{- "<|eot_id|>" }}\n    {%- endif %}\n{%- endfor %}\n{%- if add_generation_prompt %}\n    {{- '<|start_header_id|>assistant<|end_header_id|>\\n\\n' }}\n{%- endif %}\n`,
+		data: {
+			messages: [
+				{ role: "system", content: "You are a bot that responds to weather queries." },
+				{ role: "user", content: "Hey, what's the temperature in Paris right now?" },
+			],
+			tools: [EXAMPLE_TOOL_JSON_SCHEMAS.get_current_temperature_v1],
+			bos_token: "<|begin_of_text|>",
+			eos_token: "<|im_end|>",
+			add_generation_prompt: true,
+		},
+		target: `<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nEnvironment: ipython\nCutting Knowledge Date: December 2023\nToday Date: 26 Jul 2024\n\nYou are a bot that responds to weather queries.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\nGiven the following functions, please respond with a JSON for a function call with its proper arguments that best answers the given prompt.\n\nRespond in the format {"name": function name, "parameters": dictionary of argument name and its value}.Do not use variables.\n\n{\n    "type": "function",\n    "function": {\n        "name": "get_current_temperature",\n        "description": "Get the current temperature at a location.",\n        "parameters": {\n            "type": "object",\n            "properties": {\n                "location": {\n                    "type": "string",\n                    "description": "The location to get the temperature for, in the format \\"City, Country\\""\n                }\n            },\n            "required": [\n                "location"\n            ]\n        },\n        "return": {\n            "type": "number",\n            "description": "The current temperature at the specified location in the specified units, as a float."\n        }\n    }\n}\n\nHey, what's the temperature in Paris right now?<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n`,
 	},
 });
 

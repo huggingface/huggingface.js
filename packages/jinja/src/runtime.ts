@@ -274,7 +274,8 @@ export class Environment {
 		["string", (operand) => operand.type === "StringValue"],
 		["number", (operand) => operand.type === "NumericValue"],
 		["integer", (operand) => operand.type === "NumericValue" && Number.isInteger((operand as NumericValue).value)],
-		["iterable", (operand) => operand instanceof ArrayValue || operand instanceof StringValue],
+		["iterable", (operand) => operand.type === "ArrayValue" || operand.type === "StringValue"],
+		["mapping", (operand) => operand.type === "ObjectValue"],
 		[
 			"lower",
 			(operand) => {
