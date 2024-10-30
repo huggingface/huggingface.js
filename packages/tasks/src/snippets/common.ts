@@ -1,13 +1,5 @@
 import type { ChatCompletionInputMessage, GenerationParameters } from "../tasks";
 
-export interface StringifyMessagesOptions {
-	sep: string;
-	start: string;
-	end: string;
-	attributeKeyQuotes?: boolean;
-	customContentEscaper?: (str: string) => string;
-}
-
 export function stringifyMessages(
 	messages: ChatCompletionInputMessage[],
 	opts?: {
