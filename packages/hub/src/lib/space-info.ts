@@ -32,7 +32,7 @@ export async function spaceInfo<
 	]).toString();
 
 	const response = await (params.fetch || fetch)(
-		`${params?.hubUrl || HUB_URL}/api/spaces/${params.name}${params.revision ? `/revision/${params.revision}` : ''}?${search.toString()}`,
+		`${params?.hubUrl || HUB_URL}/api/spaces/${params.name}/revision/${encodeURIComponent(params.revision ?? "HEAD")}?${search.toString()}`,
 		{
 			headers: {
 				...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
