@@ -25,32 +25,24 @@ if (localVersion !== remoteVersion) {
 	process.exit(1);
 }
 
-execSync(`npm pack @huggingface/${dep}`);
+execSync(`npm pack`);
 execSync(`mv huggingface-${dep}-${localVersion}.tgz ${dep}-local.tgz`);
 
 execSync(`npm pack @huggingface/${dep}@${remoteVersion}`);
 execSync(`mv huggingface-${dep}-${remoteVersion}.tgz ${dep}-remote.tgz`);
 
-execSync(`tar -xf ${dep}-local.tgz`);
-const localChecksum = execSync(`cd package && tar --mtime='1970-01-01' --mode=755 -cf - . | sha256sum | cut -d' ' -f1`)
-	.toString()
-	.trim();
-console.log(`Local package checksum: ${localChecksum}`);
-execSync(`rm -Rf package`);
+execSync(`rm -Rf local && mkdir local && tar -xf ${dep}-local.tgz -C local`);
+execSync(`rm -Rf remote && mkdir remote && tar -xf ${dep}-remote.tgz -C remote`);
 
-execSync(`tar -xf ${dep}-remote.tgz`);
-const remoteChecksum = execSync(`cd package && tar --mtime='1970-01-01' --mode=755 -cf - . | sha256sum | cut -d' ' -f1`)
-	.toString()
-	.trim();
-console.log(`Remote package checksum: ${remoteChecksum}`);
-execSync(`rm -Rf package`);
-
-if (localChecksum !== remoteChecksum) {
-	console.error(
-		`Checksum Verification Failed: The local @huggingface/${dep} package differs from the remote version. Release halted. Local Checksum: ${localChecksum}, Remote Checksum: ${remoteChecksum}`
-	);
+try {
+	execSync("diff --brief -r local remote").toString();
+} catch (e) {
+	console.error(e.output.filter(Boolean).join("\n"));
+	console.error(`Error: The local and remote @huggingface/${dep} packages are inconsistent. Release halted.`);
 	process.exit(1);
 }
-console.log(
-	`Checksum Verification Successful: The local and remote @huggingface/${dep} packages are consistent. Local Checksum: ${localChecksum}, Remote Checksum: ${remoteChecksum}.`
-);
+
+console.log(`The local and remote @huggingface/${dep} packages are consistent.`);
+
+execSync(`rm -Rf local`);
+execSync(`rm -Rf remote`);
