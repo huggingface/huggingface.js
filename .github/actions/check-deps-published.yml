@@ -1,0 +1,47 @@
+name: "Check deps published"
+inputs:
+  dep:
+    description: "Dependency to check"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Make sure that the latest version of @huggingface/${{ inputs.dep }} is consistent with the local version
+      run: |
+        LOCAL_VERSION=$(node -p "require('./package.json').version")
+        REMOTE_VERSION=$(npm view @huggingface/tasks version)
+
+        # If the versions are different, error 
+        if [ "$LOCAL_VERSION" != "$REMOTE_VERSION" ]; then
+          echo "Error: The local @huggingface/$DEP package version ($LOCAL_VERSION) differs from the remote version ($REMOTE_VERSION). Release halted."
+          exit 1
+        fi
+
+        npm pack @huggingface/$DEP
+        mv huggingface-${DEP}-$LOCAL_VERSION.tgz ${DEP}-local.tgz
+
+        npm pack @huggingface/${DEP}@$REMOTE_VERSION
+        mv huggingface-${DEP}-$REMOTE_VERSION.tgz ${DEP}-remote.tgz
+
+        # Compute checksum of local tar. We need to extract both tar since the remote compression might be different
+        tar -xf ${DEP}-local.tgz
+        LOCAL_CHECKSUM=$(cd package && tar --mtime='1970-01-01' --mode=755 -cf - . | sha256sum | cut -d' ' -f1)
+        echo "Local package checksum: $LOCAL_CHECKSUM"
+
+        rm -Rf package
+
+        tar -xf ${DEP}-remote.tgz
+        REMOTE_CHECKSUM=$(cd package && tar --mtime='1970-01-01' --mode=755 -cf - . | sha256sum | cut -d' ' -f1)
+        echo "Remote package checksum: $REMOTE_CHECKSUM"
+
+        rm -Rf package
+
+        if [ "$LOCAL_CHECKSUM" != "$REMOTE_CHECKSUM" ]; then
+          echo "Checksum Verification Failed: The local @huggingface/$DEPS package differs from the remote version. Release halted. Local Checksum: $LOCAL_CHECKSUM, Remote Checksum: $REMOTE_CHECKSUM"
+          exit 1
+        fi
+        echo "Checksum Verification Successful: The local and remote @huggingface/$DEPS packages are consistent. Local Checksum: $LOCAL_CHECKSUM, Remote Checksum: $REMOTE_CHECKSUM."
+      working-directory: packages/${{ inputs.dep }}
+      env:
+        DEP: ${{ inputs.dep }}

@@ -1,0 +1,21 @@
+name: test-check-deps
+
+on:
+  push:
+
+jobs:
+  version_and_release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: corepack enable
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+          cache: "pnpm"
+      - uses: ./.github/actions/check-deps-published
+        with:
+          dep: hub
+      - uses: ./.github/actions/check-deps-published
+        with:
+          dep: tasks

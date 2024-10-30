@@ -50,42 +50,9 @@ jobs:
           git commit . -m "🔖 @huggingface/tasks $BUMPED_VERSION"
           git tag "tasks-v$BUMPED_VERSION"
 
-      - name: Make sure that the latest version of @huggingface/gguf is consistent with the local version
-        run: |
-          LOCAL_GGUF_VERSION=$(node -p "require('./package.json').version")
-          REMOTE_GGUF_VERSION=$(npm view @huggingface/gguf version)
-
-          # If the versions are different, error
-          if [ "$LOCAL_GGUF_VERSION" != "$REMOTE_GGUF_VERSION" ]; then
-            echo "Error: The local @huggingface/gguf package version ($LOCAL_GGUF_VERSION) differs from the remote version ($REMOTE_GGUF_VERSION). Release halted."
-            exit 1
-          fi
-
-          npm pack @huggingface/gguf
-          mv huggingface-gguf-$LOCAL_GGUF_VERSION.tgz gguf-local.tgz
-
-          npm pack @huggingface/gguf@$REMOTE_GGUF_VERSION
-          mv huggingface-gguf-$REMOTE_GGUF_VERSION.tgz gguf-remote.tgz
-
-          # Compute checksum of local tar. We need to extract both tar since the remote compression might be different
-          tar -xf gguf-local.tgz
-          LOCAL_CHECKSUM=$(cd package && tar --mtime='1970-01-01' --mode=755 -cf - . | sha256sum | cut -d' ' -f1)
-          echo "Local package checksum: $LOCAL_CHECKSUM"
-
-          rm -Rf package
-
-          tar -xf gguf-remote.tgz
-          REMOTE_CHECKSUM=$(cd package && tar --mtime='1970-01-01' --mode=755 -cf - . | sha256sum | cut -d' ' -f1)
-          echo "Remote package checksum: $REMOTE_CHECKSUM"
-
-          rm -Rf package
-
-          if [ "$LOCAL_CHECKSUM" != "$REMOTE_CHECKSUM" ]; then
-            echo "Checksum Verification Failed: The local @huggingface/gguf package differs from the remote version. Release halted. Local Checksum: $LOCAL_CHECKSUM, Remote Checksum: $REMOTE_CHECKSUM"
-            exit 1
-          fi
-          echo "Checksum Verification Successful: The local and remote @huggingface/gguf packages are consistent. Proceeding with the @huggingface/widgets package release. Local Checksum: $LOCAL_CHECKSUM, Remote Checksum: $REMOTE_CHECKSUM."
-        working-directory: packages/gguf
+      - uses: ./.github/actions/check-deps-published
+        with:
+          dep: gguf
 
       - run: pnpm publish --no-git-checks .
         env:
