@@ -15,7 +15,8 @@ if (!dep) {
 
 process.chdir(`./packages/${dep}`);
 
-const localVersion = JSON.parse(readFileSync(`./package.json`, "utf-8")).version as string;
+const localPackageJson = readFileSync(`./package.json`, "utf-8");
+const localVersion = JSON.parse(localPackageJson).version as string;
 const remoteVersion = execSync(`npm view @huggingface/${dep} version`).toString().trim();
 
 if (localVersion !== remoteVersion) {
@@ -33,6 +34,10 @@ execSync(`mv huggingface-${dep}-${remoteVersion}.tgz ${dep}-remote.tgz`);
 
 execSync(`rm -Rf local && mkdir local && tar -xf ${dep}-local.tgz -C local`);
 execSync(`rm -Rf remote && mkdir remote && tar -xf ${dep}-remote.tgz -C remote`);
+
+// Remove package.json files because they're modified by npm
+execSync(`rm local/package/package.json`);
+execSync(`rm remote/package/package.json`);
 
 try {
 	execSync("diff --brief -r local remote").toString();
