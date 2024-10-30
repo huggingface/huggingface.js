@@ -5,10 +5,12 @@ describe("modelInfo", () => {
 	it("should return the model info", async () => {
 		const info = await modelInfo({
 			name: "openai-community/gpt2",
+			additionalFields: ["author"],
 		});
 		expect(info).toEqual({
 			id: "621ffdc036468d709f17434d",
 			downloads: expect.any(Number),
+			author: "openai-community",
 			gated: false,
 			name: "openai-community/gpt2",
 			updatedAt: expect.any(Date),

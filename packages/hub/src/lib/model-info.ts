@@ -7,7 +7,7 @@ import { pick } from "../utils/pick";
 import { MODEL_EXPAND_KEYS, type MODEL_EXPANDABLE_KEYS, type ModelEntry } from "./list-models";
 
 export async function modelInfo<
-	const T extends Exclude<(typeof MODEL_EXPANDABLE_KEYS)[number], (typeof MODEL_EXPANDABLE_KEYS)[number]> = never,
+	const T extends Exclude<(typeof MODEL_EXPANDABLE_KEYS)[number], (typeof MODEL_EXPAND_KEYS)[number]> = never,
 >(
 	params: {
 		name: string;
