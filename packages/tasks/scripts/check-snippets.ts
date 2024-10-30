@@ -25,7 +25,7 @@ const args = process.argv.slice(2).reduce(
 
 const accessToken = "hf_**********";
 const pipelineTag = (args["pipeline-tag"] || "text-generation") as PipelineType;
-const tags = (args["tags"] || "").split(",");
+const tags = (args["tags"] ?? "").split(",");
 
 const modelMinimal: ModelDataMinimal = {
 	id: "llama-6-1720B-Instruct",
