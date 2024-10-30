@@ -10,7 +10,7 @@ describe("modelInfo", () => {
 		expect(info).toEqual({
 			id: "621ffdc036468d709f17434d",
 			downloads: expect.any(Number),
-			author: "OpenAI",
+			author: "openai-community",
 			gated: false,
 			name: "openai-community/gpt2",
 			updatedAt: expect.any(Date),
