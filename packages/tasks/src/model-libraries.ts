@@ -150,7 +150,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"adapter_config.json"`,
 	},
-	comfy: {
+	comfyui: {
 		prettyLabel: "ComfyUI",
 		repoName: "ComfyUI",
 		repoUrl: "https://github.com/comfyanonymous/ComfyUI",
