@@ -469,6 +469,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path_extension:"nemo" OR path:"model_config.yaml"`,
 	},
+	open_oasis: {
+		prettyLabel: "open-oasis",
+		repoName: "open-oasis",
+		repoUrl: "https://github.com/etched-ai/open-oasis",
+		filter: true,
+		countDownloads: `path_extension:"pt"`,
+	},
 	open_clip: {
 		prettyLabel: "OpenCLIP",
 		repoName: "OpenCLIP",
