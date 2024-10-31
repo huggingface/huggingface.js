@@ -31,7 +31,7 @@ stream = client.chat.completions.create(
 )
 
 for chunk in stream:
-    print(chunk.choices[0].delta.content)`);
+    print(chunk.choices[0].delta.content, end="")`);
 	});
 
 	it("conversational vlm", async () => {
@@ -73,6 +73,6 @@ stream = client.chat.completions.create(
 )
 
 for chunk in stream:
-    print(chunk.choices[0].delta.content)`);
+    print(chunk.choices[0].delta.content, end="")`);
 	});
 });
