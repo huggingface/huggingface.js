@@ -693,6 +693,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"safetensors" OR path_extension:"pt"`,
 	},
+	"genmo": {
+		prettyLabel: "Genmo",
+		repoName: "Genmo",
+		repoUrl: "https://github.com/genmoai/models",
+		filter: false,
+		countDownloads: `path:"vae_stats.json"`,
+	},
 	tensorflowtts: {
 		prettyLabel: "TensorFlowTTS",
 		repoName: "TensorFlowTTS",
