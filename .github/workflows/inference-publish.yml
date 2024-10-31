@@ -53,42 +53,8 @@ jobs:
           git commit -m "🔖 @huggingface/inference $BUMPED_VERSION"
           git tag "inference-v$BUMPED_VERSION"
 
-      - name: Make sure that the latest version of @huggingface/tasks is consistent with the local version
-        run: |
-          LOCAL_TASKS_VERSION=$(node -p "require('./package.json').version")
-          REMOTE_TASKS_VERSION=$(npm view @huggingface/tasks version)
-
-          # If the versions are different, error 
-          if [ "$LOCAL_TASKS_VERSION" != "$REMOTE_TASKS_VERSION" ]; then
-            echo "Error: The local @huggingface/tasks package version ($LOCAL_TASKS_VERSION) differs from the remote version ($REMOTE_TASKS_VERSION). Release halted."
-            exit 1
-          fi
-
-          npm pack @huggingface/tasks
-          mv huggingface-tasks-$LOCAL_TASKS_VERSION.tgz tasks-local.tgz
-
-          npm pack @huggingface/tasks@$REMOTE_TASKS_VERSION
-          mv huggingface-tasks-$REMOTE_TASKS_VERSION.tgz tasks-remote.tgz
-
-          # Compute checksum of local tar. We need to extract both tar since the remote compression might be different
-          tar -xf tasks-local.tgz
-          LOCAL_CHECKSUM=$(cd package && tar --mtime='1970-01-01' --mode=755 -cf - . | sha256sum | cut -d' ' -f1)
-          echo "Local package checksum: $LOCAL_CHECKSUM"
-
-          rm -Rf package
-
-          tar -xf tasks-remote.tgz
-          REMOTE_CHECKSUM=$(cd package && tar --mtime='1970-01-01' --mode=755 -cf - . | sha256sum | cut -d' ' -f1)
-          echo "Remote package checksum: $REMOTE_CHECKSUM"
-
-          rm -Rf package
-
-          if [ "$LOCAL_CHECKSUM" != "$REMOTE_CHECKSUM" ]; then
-            echo "Checksum Verification Failed: The local @huggingface/tasks package differs from the remote version. Release halted. Local Checksum: $LOCAL_CHECKSUM, Remote Checksum: $REMOTE_CHECKSUM"
-            exit 1
-          fi
-          echo "Checksum Verification Successful: The local and remote @huggingface/tasks packages are consistent. Proceeding with the @huggingface/widgets package release. Local Checksum: $LOCAL_CHECKSUM, Remote Checksum: $REMOTE_CHECKSUM."
-        working-directory: packages/tasks
+      - name: "Check Deps are published before publishing this package"
+        run: pnpm -w check-deps gguf
 
       - run: pnpm publish --no-git-checks .
         env:

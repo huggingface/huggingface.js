@@ -28,7 +28,7 @@ export interface ListFileEntry {
 	/**
 	 * Only fetched if `expand` is set to `true` in the `listFiles` call.
 	 */
-	security?: unknown;
+	securityFileStatus?: unknown;
 }
 
 /**
@@ -48,7 +48,7 @@ export async function* listFiles(
 		 */
 		path?: string;
 		/**
-		 * Fetch `lastCommit` and `securityStatus` for each file.
+		 * Fetch `lastCommit` and `securityFileStatus` for each file.
 		 */
 		expand?: boolean;
 		revision?: string;

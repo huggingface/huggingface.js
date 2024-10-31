@@ -345,15 +345,22 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/keras-team/tf-keras",
 		docsUrl: "https://huggingface.co/docs/hub/tf-keras",
 		snippets: snippets.tf_keras,
-		filter: true,
 		countDownloads: `path:"saved_model.pb"`,
 	},
 	"keras-nlp": {
 		prettyLabel: "KerasNLP",
 		repoName: "KerasNLP",
-		repoUrl: "https://keras.io/keras_nlp/",
-		docsUrl: "https://github.com/keras-team/keras-nlp",
+		repoUrl: "https://github.com/keras-team/keras-nlp",
+		docsUrl: "https://keras.io/keras_nlp/",
 		snippets: snippets.keras_nlp,
+	},
+	"keras-hub": {
+		prettyLabel: "KerasHub",
+		repoName: "KerasHub",
+		repoUrl: "https://github.com/keras-team/keras-hub",
+		docsUrl: "https://keras.io/keras_hub/",
+		snippets: snippets.keras_hub,
+		filter: true,
 	},
 	k2: {
 		prettyLabel: "K2",
@@ -372,6 +379,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "llama-cpp-python",
 		repoUrl: "https://github.com/abetlen/llama-cpp-python",
 		snippets: snippets.llama_cpp_python,
+	},
+	"mini-omni2": {
+		prettyLabel: "Mini-Omni2",
+		repoName: "Mini-Omni2",
+		repoUrl: "https://github.com/gpt-omni/mini-omni2",
+		countDownloads: `path:"model_config.yaml"`,
 	},
 	mindspore: {
 		prettyLabel: "MindSpore",

@@ -87,6 +87,8 @@ const TEST_STRINGS = {
 	FILTER_OPERATOR_8: `{{ obj | tojson(indent=2) }}`,
 	FILTER_OPERATOR_9: `{{ data | map(attribute='val') | list | tojson }}`,
 	FILTER_OPERATOR_10: `|{{ " 1 \n 2 \n 3 \n\n " | indent }}|{{ " 1 \n 2 \n 3 \n\n " | indent(2) }}|{{ " 1 \n 2 \n 3 \n\n " | indent(first=True) }}|{{ " 1 \n 2 \n 3 \n\n " | indent(blank=True) }}|{{ " 1 \n 2 \n 3 \n\n " | indent(4, first=True) }}|`,
+	FILTER_OPERATOR_11: `{{ items | rejectattr('key') | length }}`,
+	FILTER_OPERATOR_12: `{{ messages | rejectattr('role', 'equalto', 'system') | length }}`,
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: `|{{ 1 and 2 }}|{{ 1 and 0 }}|{{ 0 and 1 }}|{{ 0 and 0 }}|{{ 1 or 2 }}|{{ 1 or 0 }}|{{ 0 or 1 }}|{{ 0 or 0 }}|{{ not 1 }}|{{ not 0 }}|`,
@@ -101,6 +103,7 @@ const TEST_STRINGS = {
 	IS_OPERATOR_3: `|{{ 1 is odd }}|{{ 2 is odd }}|{{ 1 is even }}|{{ 2 is even }}|{{ 2 is number }}|{{ '2' is number }}|{{ 2 is integer }}|{{ '2' is integer }}|`,
 	IS_OPERATOR_4: `|{{ func is callable }}|{{ 2 is callable }}|{{ 1 is iterable }}|{{ 'hello' is iterable }}|`,
 	IS_OPERATOR_5: `|{{ 'a' is lower }}|{{ 'A' is lower }}|{{ 'a' is upper }}|{{ 'A' is upper }}|`,
+	IS_OPERATOR_6: `|{{ string is mapping }}|{{ number is mapping }}|{{ array is mapping }}|{{ dict is mapping }}|`,
 
 	// Short-circuit evaluation
 	SHORT_CIRCUIT: `{{ false and raise_exception('This should not be printed') }}`,
@@ -1624,6 +1627,34 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 	],
+	FILTER_OPERATOR_11: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "items", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "rejectattr", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "key", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "length", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	FILTER_OPERATOR_12: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "messages", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "rejectattr", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "role", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "equalto", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "system", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "length", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: [
@@ -2070,6 +2101,33 @@ const TEST_PARSED = {
 		{ value: "A", type: "StringLiteral" },
 		{ value: "is", type: "Is" },
 		{ value: "upper", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
+	IS_OPERATOR_6: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "string", type: "Identifier" },
+		{ value: "is", type: "Is" },
+		{ value: "mapping", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "number", type: "Identifier" },
+		{ value: "is", type: "Is" },
+		{ value: "mapping", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "array", type: "Identifier" },
+		{ value: "is", type: "Is" },
+		{ value: "mapping", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "dict", type: "Identifier" },
+		{ value: "is", type: "Is" },
+		{ value: "mapping", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 	],
@@ -2909,6 +2967,12 @@ const TEST_CONTEXT = {
 		data: [{ val: 1 }, { val: 2 }, { val: 3 }],
 	},
 	FILTER_OPERATOR_10: {},
+	FILTER_OPERATOR_11: {
+		items: [{ key: "a" }, { key: 0 }, { key: 1 }, {}, { key: false }],
+	},
+	FILTER_OPERATOR_12: {
+		messages: [{ role: "system" }, { role: "user" }, { role: "assistant" }],
+	},
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: {},
@@ -2927,6 +2991,12 @@ const TEST_CONTEXT = {
 		func: () => {},
 	},
 	IS_OPERATOR_5: {},
+	IS_OPERATOR_6: {
+		string: "hello",
+		number: 1,
+		array: [1, 2, 3],
+		dict: { a: 1 },
+	},
 
 	// Short-circuit evaluation
 	SHORT_CIRCUIT: {},
@@ -3073,6 +3143,8 @@ const EXPECTED_OUTPUTS = {
 	FILTER_OPERATOR_8: `{\n  "a": [\n    1,\n    2,\n    3\n  ],\n  "b": 1,\n  "c": {\n    "d": 2,\n    "e": {\n      "f": 3,\n      "g": {\n        "h": 4,\n        "i": [\n          1,\n          2,\n          3\n        ]\n      }\n    }\n  }\n}`,
 	FILTER_OPERATOR_9: `[1, 2, 3]`,
 	FILTER_OPERATOR_10: `| 1 \n     2 \n     3 \n\n     | 1 \n   2 \n   3 \n\n   |     1 \n     2 \n     3 \n\n     | 1 \n     2 \n     3 \n    \n     |     1 \n     2 \n     3 \n\n     |`,
+	FILTER_OPERATOR_11: `3`,
+	FILTER_OPERATOR_12: `2`,
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: `|2|0|0|0|1|1|1|0|false|true|`,
@@ -3087,6 +3159,7 @@ const EXPECTED_OUTPUTS = {
 	IS_OPERATOR_3: `|true|false|false|true|true|false|true|false|`,
 	IS_OPERATOR_4: `|true|false|false|true|`,
 	IS_OPERATOR_5: `|true|false|false|true|`,
+	IS_OPERATOR_6: `|false|false|false|true|`,
 
 	// Short-circuit evaluation
 	SHORT_CIRCUIT: `false`,
