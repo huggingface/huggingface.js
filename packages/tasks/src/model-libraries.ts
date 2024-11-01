@@ -473,7 +473,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "open-oasis",
 		repoName: "open-oasis",
 		repoUrl: "https://github.com/etched-ai/open-oasis",
-		filter: true,
 		countDownloads: `path:"oasis500m.pt"`,
 	},
 	open_clip: {
