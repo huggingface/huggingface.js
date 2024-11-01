@@ -363,6 +363,12 @@ export const gliner = (model: ModelData): string[] => [
 model = GLiNER.from_pretrained("${model.id}")`,
 ];
 
+
+export const htrflow = (model: ModelData): string[] => [
+	`htrflow pipeline <path/to/pipeline.yaml> <path/to/image>`,
+];
+
+
 export const keras = (model: ModelData): string[] => [
 	`# Available backend options are: "jax", "torch", "tensorflow".
 import os
