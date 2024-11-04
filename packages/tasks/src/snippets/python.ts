@@ -18,12 +18,7 @@ export const snippetConversational = (
 	const streaming = opts?.streaming ?? true;
 	const exampleMessages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
 	const messages = opts?.messages ?? exampleMessages;
-	const messagesStr = stringifyMessages(messages, {
-		sep: ",\n\t",
-		start: `[\n\t`,
-		end: `\n]`,
-		attributeKeyQuotes: true,
-	});
+	const messagesStr = stringifyMessages(messages, { attributeKeyQuotes: true });
 
 	const config = {
 		...(opts?.temperature ? { temperature: opts.temperature } : undefined),
@@ -31,9 +26,7 @@ export const snippetConversational = (
 		...(opts?.top_p ? { top_p: opts.top_p } : undefined),
 	};
 	const configStr = stringifyGenerationConfig(config, {
-		sep: ",\n\t",
-		start: "",
-		end: "",
+		indent: "\n\t",
 		attributeValueConnector: "=",
 	});
 
@@ -55,7 +48,7 @@ stream = client.chat.completions.create(
 )
 
 for chunk in stream:
-    print(chunk.choices[0].delta.content)`,
+    print(chunk.choices[0].delta.content, end="")`,
 			},
 			{
 				client: "openai",
@@ -76,7 +69,7 @@ stream = client.chat.completions.create(
 )
 
 for chunk in stream:
-    print(chunk.choices[0].delta.content)`,
+    print(chunk.choices[0].delta.content, end="")`,
 			},
 		];
 	} else {

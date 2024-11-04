@@ -128,6 +128,7 @@ const modelInputSnippets: {
 	"tabular-classification": inputsTabularPrediction,
 	"text-classification": inputsTextClassification,
 	"text-generation": inputsTextGeneration,
+	"image-text-to-text": inputsTextGeneration,
 	"text-to-image": inputsTextToImage,
 	"text-to-speech": inputsTextToSpeech,
 	"text-to-audio": inputsTextToAudio,
