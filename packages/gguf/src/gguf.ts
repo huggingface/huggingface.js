@@ -1,11 +1,12 @@
 import type { MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
-import { GGMLQuantizationType, GGUFValueType } from "./types";
+import { GGUFValueType } from "./types";
 import { isBackend } from "./utils/isBackend";
 import { promisesQueue } from "./utils/promisesQueue";
 
 export type { MetadataBaseValue, MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
 export { GGUFValueType, GGMLFileQuantizationType, GGMLQuantizationType, Architecture } from "./types";
 export { GGUF_QUANT_DESCRIPTIONS } from "./quant-descriptions";
+export { parseGGUFQuantLabel, GGUF_QUANT_RE, GGUF_QUANT_RE_GLOBAL } from "@huggingface/tasks";
 
 export const RE_GGUF_FILE = /\.gguf$/;
 export const RE_GGUF_SHARD_FILE = /^(?<prefix>.*?)-(?<shard>\d{5})-of-(?<total>\d{5})\.gguf$/;
@@ -27,15 +28,6 @@ export function parseGgufShardFilename(filename: string): GgufShardFileInfo | nu
 		};
 	}
 	return null;
-}
-
-const ggufQuants = Object.values(GGMLQuantizationType).filter((v): v is string => typeof v === "string");
-export const GGUF_QUANT_RE = new RegExp(`(?<quant>${ggufQuants.join("|")})` + "(_(?<sizeVariation>[A-Z]+))?");
-export const GGUF_QUANT_RE_GLOBAL = new RegExp(GGUF_QUANT_RE, "g");
-
-export function parseGGUFQuantLabel(fname: string): string | undefined {
-	const quantLabel = fname.toUpperCase().match(GGUF_QUANT_RE_GLOBAL)?.at(-1); // if there is multiple quant substrings in a name, we prefer the last one
-	return quantLabel;
 }
 
 const isVersion = (version: number): version is Version => version === 1 || version === 2 || version === 3;

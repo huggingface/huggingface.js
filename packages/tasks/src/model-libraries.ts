@@ -476,6 +476,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path_extension:"nemo" OR path:"model_config.yaml"`,
 	},
+	"open-oasis": {
+		prettyLabel: "open-oasis",
+		repoName: "open-oasis",
+		repoUrl: "https://github.com/etched-ai/open-oasis",
+		countDownloads: `path:"oasis500m.pt"`,
+	},
 	open_clip: {
 		prettyLabel: "OpenCLIP",
 		repoName: "OpenCLIP",
@@ -700,7 +706,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"safetensors" OR path_extension:"pt"`,
 	},
-	"genmo": {
+	genmo: {
 		prettyLabel: "Genmo",
 		repoName: "Genmo",
 		repoUrl: "https://github.com/genmoai/models",

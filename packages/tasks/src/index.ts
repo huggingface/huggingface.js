@@ -42,6 +42,8 @@ export type {
 export { SPECIAL_TOKENS_ATTRIBUTES } from "./tokenizer-data";
 
 import * as snippets from "./snippets";
+export * from "./gguf";
+
 export { snippets };
 
 export { SKUS, DEFAULT_MEMORY_OPTIONS } from "./hardware";
