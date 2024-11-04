@@ -372,7 +372,7 @@ export const htrflow = (model: ModelData): string[] => [
  
 from htrflow.pipeline.pipeline import Pipeline
 from htrflow.pipeline.steps import Task
-from htrflow.models.framework.model import ModelClass # Choose task
+from htrflow.models.framework.model import ModelClass
 
 pipeline = Pipeline(
     [
