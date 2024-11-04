@@ -42,7 +42,7 @@ export const snippetTextGeneration = (
 		const streaming = opts?.streaming ?? true;
 		const exampleMessages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
 		const messages = opts?.messages ?? exampleMessages;
-		const messagesStr = stringifyMessages(messages, { sep: ",\n\t\t", start: "[\n\t\t", end: "\n\t]" });
+		const messagesStr = stringifyMessages(messages, { indent: "\t" });
 
 		const config = {
 			...(opts?.temperature ? { temperature: opts.temperature } : undefined),
@@ -50,9 +50,7 @@ export const snippetTextGeneration = (
 			...(opts?.top_p ? { top_p: opts.top_p } : undefined),
 		};
 		const configStr = stringifyGenerationConfig(config, {
-			sep: ",\n\t",
-			start: "",
-			end: "",
+			indent: "\n\t",
 			attributeValueConnector: ": ",
 		});
 
