@@ -49,6 +49,10 @@ jobs:
           node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./package.json')); package.version = '$BUMPED_VERSION'; fs.writeFileSync('./package.json', JSON.stringify(package, null, '\t') + '\n');"
           git commit . -m "🔖 @huggingface/gguf $BUMPED_VERSION"
           git tag "gguf-v$BUMPED_VERSION"
+
+      - name: "Check Deps are published before publishing this package"
+        run: pnpm -w check-deps tasks
+
       - run: pnpm publish --no-git-checks .
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

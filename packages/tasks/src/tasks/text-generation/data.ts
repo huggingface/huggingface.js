@@ -59,10 +59,6 @@ const taskData: TaskDataCustom = {
 			id: "google/gemma-2-2b-it",
 		},
 		{
-			description: "A code generation model that can generate code in 80+ languages.",
-			id: "bigcode/starcoder",
-		},
-		{
 			description: "Very powerful text generation model trained to follow instructions.",
 			id: "meta-llama/Meta-Llama-3.1-8B-Instruct",
 		},
@@ -75,18 +71,22 @@ const taskData: TaskDataCustom = {
 			id: "AI-MO/NuminaMath-7B-TIR",
 		},
 		{
-			description: "Strong coding assistant model.",
-			id: "HuggingFaceH4/starchat2-15b-v0.1",
+			description: "Strong text generation model to follow instructions.",
+			id: "Qwen/Qwen2.5-7B-Instruct",
 		},
 		{
 			description: "Very strong open-source large language model.",
-			id: "mistralai/Mistral-Nemo-Instruct-2407",
+			id: "nvidia/Llama-3.1-Nemotron-70B-Instruct",
 		},
 	],
 	spaces: [
 		{
 			description: "A leaderboard to compare different open-source text generation models based on various benchmarks.",
 			id: "open-llm-leaderboard/open_llm_leaderboard",
+		},
+		{
+			description: "A leaderboard for comparing chain-of-thought performance of models.",
+			id: "logikon/open_cot_leaderboard",
 		},
 		{
 			description: "An text generation based application based on a very powerful LLaMA2 model.",

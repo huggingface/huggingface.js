@@ -57,8 +57,13 @@ const taskData: TaskDataCustom = {
 			id: "suno/bark",
 		},
 		{
-			description: "XTTS is a Voice generation model that lets you clone voices into different languages.",
+			description:
+				"An application on XTTS, a voice generation model that lets you clone voices into different languages.",
 			id: "coqui/xtts",
+		},
+		{
+			description: "An application that generates speech in different styles in English and Chinese.",
+			id: "mrfakename/E2-F5-TTS",
 		},
 		{
 			description: "An application that synthesizes speech for diverse speaker prompts.",

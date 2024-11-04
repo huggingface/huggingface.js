@@ -44,23 +44,23 @@ const taskData: TaskDataCustom = {
 	models: [
 		{
 			// TO DO: write description
-			description: "Solid panoptic segmentation model trained on the COCO 2017 benchmark dataset.",
-			id: "facebook/detr-resnet-50-panoptic",
+			description: "Solid semantic segmentation model trained on ADE20k.",
+			id: "openmmlab/upernet-convnext-small",
 		},
 		{
 			description: "Background removal model.",
 			id: "briaai/RMBG-1.4",
 		},
 		{
-			description: "Semantic segmentation model trained on ADE20k benchmark dataset with 512x512 resolution.",
-			id: "nvidia/segformer-b0-finetuned-ade-512-512",
-		},
-		{
 			description: "A multipurpose image segmentation model for high resolution images.",
 			id: "ZhengPeng7/BiRefNet",
 		},
 		{
-			description: "Panoptic segmentation model trained COCO (common objects) dataset.",
+			description: "Powerful human-centric image segmentation model.",
+			id: "facebook/sapiens-seg-1b",
+		},
+		{
+			description: "Panoptic segmentation model trained on the COCO (common objects) dataset.",
 			id: "facebook/mask2former-swin-large-coco-panoptic",
 		},
 	],
@@ -74,8 +74,8 @@ const taskData: TaskDataCustom = {
 			id: "jbrinkma/segment-anything",
 		},
 		{
-			description: "A semantic segmentation application that predicts human silhouettes.",
-			id: "keras-io/Human-Part-Segmentation",
+			description: "A human-centric segmentation model.",
+			id: "facebook/sapiens-pose",
 		},
 		{
 			description: "An instance segmentation application to predict neuronal cell types from microscopy images.",

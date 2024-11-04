@@ -1,4 +1,5 @@
 import type { PipelineType } from "../pipelines";
+import type { ChatCompletionInputMessage } from "../tasks";
 import type { ModelDataMinimal } from "./types";
 
 const inputsZeroShotClassification = () =>
@@ -40,7 +41,30 @@ const inputsTextClassification = () => `"I like you. I love you"`;
 
 const inputsTokenClassification = () => `"My name is Sarah Jessica Parker but you can call me Jessica"`;
 
-const inputsTextGeneration = () => `"Can you please let us know more details about your "`;
+const inputsTextGeneration = (model: ModelDataMinimal): string | ChatCompletionInputMessage[] => {
+	if (model.tags.includes("conversational")) {
+		return model.pipeline_tag === "text-generation"
+			? [{ role: "user", content: "What is the capital of France?" }]
+			: [
+					{
+						role: "user",
+						content: [
+							{
+								type: "text",
+								text: "Describe this image in one sentence.",
+							},
+							{
+								type: "image_url",
+								image_url: {
+									url: "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg",
+								},
+							},
+						],
+					},
+			  ];
+	}
+	return `"Can you please let us know more details about your "`;
+};
 
 const inputsText2TextGeneration = () => `"The answer to the universe is"`;
 
@@ -84,7 +108,7 @@ const inputsTabularPrediction = () =>
 const inputsZeroShotImageClassification = () => `"cats.jpg"`;
 
 const modelInputSnippets: {
-	[key in PipelineType]?: (model: ModelDataMinimal) => string;
+	[key in PipelineType]?: (model: ModelDataMinimal) => string | ChatCompletionInputMessage[];
 } = {
 	"audio-to-audio": inputsAudioToAudio,
 	"audio-classification": inputsAudioClassification,
@@ -104,6 +128,7 @@ const modelInputSnippets: {
 	"tabular-classification": inputsTabularPrediction,
 	"text-classification": inputsTextClassification,
 	"text-generation": inputsTextGeneration,
+	"image-text-to-text": inputsTextGeneration,
 	"text-to-image": inputsTextToImage,
 	"text-to-speech": inputsTextToSpeech,
 	"text-to-audio": inputsTextToAudio,
@@ -116,18 +141,24 @@ const modelInputSnippets: {
 
 // Use noWrap to put the whole snippet on a single line (removing new lines and tabulations)
 // Use noQuotes to strip quotes from start & end (example: "abc" -> abc)
-export function getModelInputSnippet(model: ModelDataMinimal, noWrap = false, noQuotes = false): string {
+export function getModelInputSnippet(
+	model: ModelDataMinimal,
+	noWrap = false,
+	noQuotes = false
+): string | ChatCompletionInputMessage[] {
 	if (model.pipeline_tag) {
 		const inputs = modelInputSnippets[model.pipeline_tag];
 		if (inputs) {
 			let result = inputs(model);
-			if (noWrap) {
-				result = result.replace(/(?:(?:\r?\n|\r)\t*)|\t+/g, " ");
-			}
-			if (noQuotes) {
-				const REGEX_QUOTES = /^"(.+)"$/s;
-				const match = result.match(REGEX_QUOTES);
-				result = match ? match[1] : result;
+			if (typeof result === "string") {
+				if (noWrap) {
+					result = result.replace(/(?:(?:\r?\n|\r)\t*)|\t+/g, " ");
+				}
+				if (noQuotes) {
+					const REGEX_QUOTES = /^"(.+)"$/s;
+					const match = result.match(REGEX_QUOTES);
+					result = match ? match[1] : result;
+				}
 			}
 			return result;
 		}

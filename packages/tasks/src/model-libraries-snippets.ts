@@ -1,5 +1,5 @@
 import type { ModelData } from "./model-data";
-import type { WidgetExampleTextInput } from "./widget-example";
+import type { WidgetExampleTextInput, WidgetExampleSentenceSimilarityInput } from "./widget-example";
 import { LIBRARY_TASK_MAPPING } from "./library-to-tasks";
 
 const TAG_CUSTOM_CODE = "custom_code";
@@ -364,9 +364,9 @@ model = GLiNER.from_pretrained("${model.id}")`,
 ];
 
 export const keras = (model: ModelData): string[] => [
-	`# Available backend options are: "jax", "tensorflow", "torch".
+	`# Available backend options are: "jax", "torch", "tensorflow".
 import os
-os.environ["KERAS_BACKEND"] = "tensorflow"
+os.environ["KERAS_BACKEND"] = "jax"
 	
 import keras
 
@@ -375,14 +375,29 @@ model = keras.saving.load_model("hf://${model.id}")
 ];
 
 export const keras_nlp = (model: ModelData): string[] => [
-	`# Available backend options are: "jax", "tensorflow", "torch".
+	`# Available backend options are: "jax", "torch", "tensorflow".
 import os
-os.environ["KERAS_BACKEND"] = "tensorflow"
+os.environ["KERAS_BACKEND"] = "jax"
 
 import keras_nlp
 
 tokenizer = keras_nlp.models.Tokenizer.from_preset("hf://${model.id}")
 backbone = keras_nlp.models.Backbone.from_preset("hf://${model.id}")
+`,
+];
+
+export const keras_hub = (model: ModelData): string[] => [
+	`# Available backend options are: "jax", "torch", "tensorflow".
+import os
+os.environ["KERAS_BACKEND"] = "jax"
+
+import keras_hub
+
+# Load a task-specific model (*replace CausalLM with your task*)
+model = keras_hub.models.CausalLM.from_preset("hf://${model.id}", dtype="bfloat16")
+
+# Possible tasks are CausalLM, TextToImage, ImageClassifier, ...
+# full list here: https://keras.io/api/keras_hub/models/#api-documentation
 `,
 ];
 
@@ -704,13 +719,32 @@ export const sampleFactory = (model: ModelData): string[] => [
 	`python -m sample_factory.huggingface.load_from_hub -r ${model.id} -d ./train_dir`,
 ];
 
+function get_widget_examples_from_st_model(model: ModelData): string[] | undefined {
+	const widgetExample = model.widgetData?.[0] as WidgetExampleSentenceSimilarityInput | undefined;
+	if (widgetExample) {
+		return [widgetExample.source_sentence, ...widgetExample.sentences];
+	}
+}
+
 export const sentenceTransformers = (model: ModelData): string[] => {
 	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
+	const exampleSentences = get_widget_examples_from_st_model(model) ?? [
+		"The weather is lovely today.",
+		"It's so sunny outside!",
+		"He drove to the stadium.",
+	];
 
 	return [
 		`from sentence_transformers import SentenceTransformer
 
-model = SentenceTransformer("${model.id}"${remote_code_snippet})`,
+model = SentenceTransformer("${model.id}"${remote_code_snippet})
+
+sentences = ${JSON.stringify(exampleSentences, null, 4)}
+embeddings = model.encode(sentences)
+
+similarities = model.similarity(embeddings, embeddings)
+print(similarities.shape)
+# [${exampleSentences.length}, ${exampleSentences.length}]`,
 	];
 };
 
@@ -832,7 +866,7 @@ export const transformersJS = (model: ModelData): string[] => {
 		return [`// ⚠️ Unknown pipeline tag`];
 	}
 
-	const libName = "@xenova/transformers";
+	const libName = "@huggingface/transformers";
 
 	return [
 		`// npm i ${libName}
@@ -996,6 +1030,12 @@ export const nemo = (model: ModelData): string[] => {
 
 	return command ?? [`# tag did not correspond to a valid NeMo domain.`];
 };
+
+export const pxia = (model: ModelData): string[] => [
+	`from pxia import AutoModel
+
+model = AutoModel.from_pretrained("${model.id}")`,
+];
 
 export const pythae = (model: ModelData): string[] => [
 	`from pythae.models import AutoModel

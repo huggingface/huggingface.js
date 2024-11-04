@@ -345,15 +345,22 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/keras-team/tf-keras",
 		docsUrl: "https://huggingface.co/docs/hub/tf-keras",
 		snippets: snippets.tf_keras,
-		filter: true,
 		countDownloads: `path:"saved_model.pb"`,
 	},
 	"keras-nlp": {
 		prettyLabel: "KerasNLP",
 		repoName: "KerasNLP",
-		repoUrl: "https://keras.io/keras_nlp/",
-		docsUrl: "https://github.com/keras-team/keras-nlp",
+		repoUrl: "https://github.com/keras-team/keras-nlp",
+		docsUrl: "https://keras.io/keras_nlp/",
 		snippets: snippets.keras_nlp,
+	},
+	"keras-hub": {
+		prettyLabel: "KerasHub",
+		repoName: "KerasHub",
+		repoUrl: "https://github.com/keras-team/keras-hub",
+		docsUrl: "https://keras.io/keras_hub/",
+		snippets: snippets.keras_hub,
+		filter: true,
 	},
 	k2: {
 		prettyLabel: "K2",
@@ -372,6 +379,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "llama-cpp-python",
 		repoUrl: "https://github.com/abetlen/llama-cpp-python",
 		snippets: snippets.llama_cpp_python,
+	},
+	"mini-omni2": {
+		prettyLabel: "Mini-Omni2",
+		repoName: "Mini-Omni2",
+		repoUrl: "https://github.com/gpt-omni/mini-omni2",
+		countDownloads: `path:"model_config.yaml"`,
 	},
 	mindspore: {
 		prettyLabel: "MindSpore",
@@ -456,6 +469,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path_extension:"nemo" OR path:"model_config.yaml"`,
 	},
+	"open-oasis": {
+		prettyLabel: "open-oasis",
+		repoName: "open-oasis",
+		repoUrl: "https://github.com/etched-ai/open-oasis",
+		countDownloads: `path:"oasis500m.pt"`,
+	},
 	open_clip: {
 		prettyLabel: "OpenCLIP",
 		repoName: "OpenCLIP",
@@ -480,6 +499,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.peft,
 		filter: true,
 		countDownloads: `path:"adapter_config.json"`,
+	},
+	pxia: {
+		prettyLabel: "pxia",
+		repoName: "pxia",
+		repoUrl: "https://github.com/not-lain/pxia",
+		snippets: snippets.pxia,
+		filter: false,
 	},
 	"pyannote-audio": {
 		prettyLabel: "pyannote.audio",
@@ -666,6 +692,20 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"models/default.zip"`,
 	},
+	"f5-tts": {
+		prettyLabel: "F5-TTS",
+		repoName: "F5-TTS",
+		repoUrl: "https://github.com/SWivid/F5-TTS",
+		filter: false,
+		countDownloads: `path_extension:"safetensors" OR path_extension:"pt"`,
+	},
+	genmo: {
+		prettyLabel: "Genmo",
+		repoName: "Genmo",
+		repoUrl: "https://github.com/genmoai/models",
+		filter: false,
+		countDownloads: `path:"vae_stats.json"`,
+	},
 	tensorflowtts: {
 		prettyLabel: "TensorFlowTTS",
 		repoName: "TensorFlowTTS",
@@ -706,7 +746,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	"transformers.js": {
 		prettyLabel: "Transformers.js",
 		repoName: "transformers.js",
-		repoUrl: "https://github.com/xenova/transformers.js",
+		repoUrl: "https://github.com/huggingface/transformers.js",
 		docsUrl: "https://huggingface.co/docs/hub/transformers-js",
 		snippets: snippets.transformersJS,
 		filter: true,

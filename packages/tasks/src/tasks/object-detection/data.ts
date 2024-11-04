@@ -43,15 +43,15 @@ const taskData: TaskDataCustom = {
 	],
 	models: [
 		{
-			description: "Solid object detection model trained on the benchmark dataset COCO 2017.",
+			description: "Solid object detection model pre-trained on the COCO 2017 dataset.",
 			id: "facebook/detr-resnet-50",
 		},
 		{
-			description: "Strong object detection model trained on ImageNet-21k dataset.",
-			id: "microsoft/beit-base-patch16-224-pt22k-ft22k",
+			description: "Real-time and accurate object detection model.",
+			id: "jameslahm/yolov10x",
 		},
 		{
-			description: "Fast and accurate object detection model trained on COCO dataset.",
+			description: "Fast and accurate object detection model trained on COCO and Object365 datasets.",
 			id: "PekingU/rtdetr_r18vd_coco_o365",
 		},
 	],
