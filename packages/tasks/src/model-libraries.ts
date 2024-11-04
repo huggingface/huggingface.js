@@ -319,7 +319,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	htrflow: {
 		prettyLabel: "HTRflow",
-		repoName: "htrflow",
+		repoName: "HTRflow",
 		repoUrl: "https://github.com/AI-Riksarkivet/htrflow",
 		docsUrl: "https://ai-riksarkivet.github.io/htrflow",
 		snippets: snippets.htrflow,
