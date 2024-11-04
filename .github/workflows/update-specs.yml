@@ -40,9 +40,9 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.TOKEN_INFERENCE_SYNC_BOT }}
           commit-message: Update tasks specs (automated commit)
-          author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
+          author: Inference Sync Bot
           branch: update-tasks-specs-automated-pr
           delete-branch: true
           title: "[Bot] Update tasks specs"
