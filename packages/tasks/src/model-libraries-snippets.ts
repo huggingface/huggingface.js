@@ -371,7 +371,7 @@ export const htrflow = (model: ModelData): string[] => [
 # see docs: https://ai-riksarkivet.github.io/htrflow/latest/getting_started/quick_start.html
  
 from htrflow.pipeline.pipeline import Pipeline
-from htrflow.pipeline.steps import Task # Choose task
+from htrflow.pipeline.steps import Task
 from htrflow.models.framework.model import ModelClass # Choose task
 
 pipeline = Pipeline(
