@@ -365,11 +365,10 @@ model = GLiNER.from_pretrained("${model.id}")`,
 
 
 export const htrflow = (model: ModelData): string[] => [
-	`# HTRflow can be used through CLI or Python
-
-# CLI: htrflow pipeline <path/to/pipeline.yaml> <path/to/image>
+	`# CLI usage
 # see docs: https://ai-riksarkivet.github.io/htrflow/latest/getting_started/quick_start.html
- 
+htrflow pipeline <path/to/pipeline.yaml> <path/to/image>`
+        , `# Python usage
 from htrflow.pipeline.pipeline import Pipeline
 from htrflow.pipeline.steps import Task
 from htrflow.models.framework.model import ModelClass
