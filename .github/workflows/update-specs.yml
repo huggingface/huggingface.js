@@ -42,7 +42,6 @@ jobs:
         with:
           token: ${{ secrets.TOKEN_INFERENCE_SYNC_BOT }}
           commit-message: Update tasks specs (automated commit)
-          author: Inference Sync Bot
           branch: update-tasks-specs-automated-pr
           delete-branch: true
           title: "[Bot] Update tasks specs"
