@@ -84,7 +84,6 @@ const taskData: TaskDataCustom = {
 			description: "A powerful multilingual ASR and Speech Translation model by Nvidia",
 			id: "nvidia/canary-1b",
 		},
-		
 	],
 	summary:
 		"Automatic Speech Recognition (ASR), also known as Speech to Text (STT), is the task of transcribing a given audio to text. It has many applications, such as voice user interfaces.",
