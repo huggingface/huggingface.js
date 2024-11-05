@@ -57,7 +57,7 @@ export const snippetTextGeneration = (
 		if (streaming) {
 			return [
 				{
-					client: "huggingface_hub",
+					client: "huggingface.js",
 					content: `import { HfInference } from "@huggingface/inference"
 
 const client = new HfInference("${accessToken || `{API_TOKEN}`}")
@@ -108,7 +108,7 @@ for await (const chunk of stream) {
 		} else {
 			return [
 				{
-					client: "huggingface_hub",
+					client: "huggingface.js",
 					content: `import { HfInference } from '@huggingface/inference'
 
 const client = new HfInference("${accessToken || `{API_TOKEN}`}")
