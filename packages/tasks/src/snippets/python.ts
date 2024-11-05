@@ -4,6 +4,10 @@ import { stringifyGenerationConfig, stringifyMessages } from "./common.js";
 import { getModelInputSnippet } from "./inputs.js";
 import type { InferenceSnippet, ModelDataMinimal } from "./types.js";
 
+const snippetImportInferenceClient = (model: ModelDataMinimal, accessToken: string): string =>
+	`from huggingface_hub import InferenceClient
+client = InferenceClient("${model.id}", token="${accessToken || "{API_TOKEN}"}")`;
+
 export const snippetConversational = (
 	model: ModelDataMinimal,
 	accessToken: string,
@@ -161,8 +165,16 @@ export const snippetFile = (model: ModelDataMinimal): InferenceSnippet => ({
 output = query(${getModelInputSnippet(model)})`,
 });
 
-export const snippetTextToImage = (model: ModelDataMinimal): InferenceSnippet => ({
-	content: `def query(payload):
+export const snippetTextToImage = (model: ModelDataMinimal, accessToken: string): InferenceSnippet[] => [
+	{
+		client: "huggingface_hub",
+		content: `${snippetImportInferenceClient(model, accessToken)}
+# output is a PIL.Image object
+image = client.text_to_image(${getModelInputSnippet(model)})`,
+	},
+	{
+		client: "requests",
+		content: `def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.content
 image_bytes = query({
@@ -172,7 +184,8 @@ image_bytes = query({
 import io
 from PIL import Image
 image = Image.open(io.BytesIO(image_bytes))`,
-});
+	},
+];
 
 export const snippetTabular = (model: ModelDataMinimal): InferenceSnippet => ({
 	content: `def query(payload):
@@ -288,12 +301,14 @@ export function getPythonInferenceSnippet(
 		return snippets.map((snippet) => {
 			return {
 				...snippet,
-				content: `import requests
+				content: snippet.content.includes("requests")
+					? `import requests
 
 API_URL = "https://api-inference.huggingface.co/models/${model.id}"
 headers = {"Authorization": ${accessToken ? `"Bearer ${accessToken}"` : `f"Bearer {API_TOKEN}"`}}
 
-${snippet.content}`,
+${snippet.content}`
+					: snippet.content,
 			};
 		});
 	}
