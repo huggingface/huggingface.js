@@ -363,6 +363,23 @@ export const gliner = (model: ModelData): string[] => [
 model = GLiNER.from_pretrained("${model.id}")`,
 ];
 
+export const htrflow = (model: ModelData): string[] => [
+	`# CLI usage
+# see docs: https://ai-riksarkivet.github.io/htrflow/latest/getting_started/quick_start.html
+htrflow pipeline <path/to/pipeline.yaml> <path/to/image>`,
+	`# Python usage
+from htrflow.pipeline.pipeline import Pipeline
+from htrflow.pipeline.steps import Task
+from htrflow.models.framework.model import ModelClass
+
+pipeline = Pipeline(
+    [
+        Task(
+            ModelClass, {"model": "${model.id}"}, {}
+        ),
+    ])`,
+];
+
 export const keras = (model: ModelData): string[] => [
 	`# Available backend options are: "jax", "torch", "tensorflow".
 import os
