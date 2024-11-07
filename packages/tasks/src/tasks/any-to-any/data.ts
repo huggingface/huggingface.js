@@ -3,7 +3,7 @@ import type { TaskDataCustom } from "..";
 const taskData: TaskDataCustom = {
 	datasets: [
 		{
-			description: "All-Modality Alignment Dataset with Fine-grained Preference Annotations and Language Feedback.",
+			description: "All-modality alignment dataset with fine-grained preference annotations and language feedback.",
 			id: "PKU-Alignment/align-anything-400k",
 		},
 	],
