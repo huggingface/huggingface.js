@@ -31,7 +31,7 @@ const taskData: TaskDataCustom = {
 		},
 	],
 	summary:
-		"Any-to-Any can leverage any combination of input and output types to such as text, image, and video. It  may combine other datasets to train a comprehensive LLM.",
+		"Any-to-Any is the task for models that can take any combination of input and output types, to such as text, image, and video.",
 	widgetModels: [],
 	youtubeId: "",
 };
