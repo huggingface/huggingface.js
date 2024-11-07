@@ -8,8 +8,24 @@ const taskData: TaskDataCustom = {
 		},
 	],
 	demo: {
-		inputs: [],
-		outputs: [],
+		inputs: [
+			{
+				filename: "distractedboyfriendmeme.jpeg",
+				type: "img",
+			},
+			{
+				label: "Text Prompt",
+				content: "What is the colour of the shirt the man is wearing?",
+				type: "text",
+			},
+		],
+		outputs: [
+			{
+				label: "Answer",
+				content: "The man is wearing a blue and white plaid shirt.",
+				type: "text",
+			},
+		],
 	},
 	metrics: [],
 	models: [
