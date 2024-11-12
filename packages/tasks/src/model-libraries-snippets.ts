@@ -403,20 +403,69 @@ backbone = keras_nlp.models.Backbone.from_preset("hf://${model.id}")
 `,
 ];
 
-export const keras_hub = (model: ModelData): string[] => [
-	`# Available backend options are: "jax", "torch", "tensorflow".
+export function keras_hub(model: ModelData): string[] {
+	// If the model has a task.json config, then the base Task class is known
+	let class_name = model.config?.keras_hub_task_json?.class_name;
+	if (!class_name)
+		// If only a config.json is present, the base class will be a "backbone"
+		class_name = model.config?.keras_hub_config_json?.class_name;
+
+	// Fallback heuristic: until task.json is populated in all keras-hub models,
+	// make a best effort, for text-generation models only, to disply
+	// a "XXXCausalLM" base class instead of XXXBackbone.
+	if (model.pipeline_tag == "text-generation" && class_name?.endsWith("Backbone"))
+		class_name = class_name.replace("Backbone", "CausalLM");
+
+	// optional generation snippets
+	const optional_snippets = [
+		["text-generation", 'model.generate("Keras: deep learning for", max_length=64)'],
+		[
+			"image-text-to-text",
+			`output = model.generate(
+    inputs={
+        "images": image,
+        "prompts": prompt,
+    }
+)`,
+		],
+	];
+	const selected_snippet_row = optional_snippets.filter((cols) => cols[0] == model.pipeline_tag);
+	const optional_snippet = selected_snippet_row.length == 0 ? "" : selected_snippet_row[0][1];
+
+	// de-duplicate possible alt classes
+	// from task.json
+	const alt_class_names = new Set(model.config?.keras_hub_task_json?.alt_class_names);
+	if (class_name) alt_class_names.delete(class_name);
+	// and from tokenizer.json
+	if (model.config?.keras_hub_tokenizer_json?.class_name)
+		alt_class_names.add(model.config?.keras_hub_tokenizer_json?.class_name);
+	// generate possible alternative class.from_preset() calls.
+	let alt_model_component_snippets = undefined;
+	if (alt_class_names.size > 0) {
+		const alt_model_component_snippet_lines = Array.from(alt_class_names).map(
+			(k) => `model = keras_hub.models.${k}.from_preset("hf://${model.id}")`
+		);
+		alt_model_component_snippets =
+			"# Individual model components can also be loaded from this preset:\n" +
+			alt_model_component_snippet_lines.join("\n");
+	}
+
+	const main_snippet = ` # Available backend options are: "jax", "torch", "tensorflow".
 import os
 os.environ["KERAS_BACKEND"] = "jax"
 
 import keras_hub
 
-# Load a task-specific model (*replace CausalLM with your task*)
-model = keras_hub.models.CausalLM.from_preset("hf://${model.id}", dtype="bfloat16")
+model = keras_hub.models.${class_name}.from_preset("hf://${model.id}")
+${optional_snippet}
 
-# Possible tasks are CausalLM, TextToImage, ImageClassifier, ...
-# full list here: https://keras.io/api/keras_hub/models/#api-documentation
-`,
-];
+# All Keras models support: model(data), model.compile, model.fit, model.predict, model.evaluate.
+# More info on this model: https://keras.io/search.html?query=${class_name}%20keras_hub
+`;
+	const snippets = [main_snippet];
+	if (alt_model_component_snippets) snippets.push(alt_model_component_snippets);
+	return snippets;
+}
 
 export const llama_cpp_python = (model: ModelData): string[] => [
 	`from llama_cpp import Llama

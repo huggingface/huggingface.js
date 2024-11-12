@@ -66,6 +66,16 @@ export interface ModelData {
 			base_model_name_or_path?: string;
 			task_type?: string;
 		};
+		keras_hub_task_json?: {
+			class_name: string;
+			alt_class_names?: string[];
+		};
+		keras_hub_config_json?: {
+			class_name: string;
+		};
+		keras_hub_tokenizer_json?: {
+			class_name: string;
+		};
 	};
 	/**
 	 * all the model tags
