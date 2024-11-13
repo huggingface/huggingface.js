@@ -13,7 +13,8 @@ describe("fileDownloadInfo", () => {
 		});
 
 		assert.strictEqual(info?.size, 536063208);
-		assert.strictEqual(info?.etag, '"41a0e56472bad33498744818c8b1ef2c-64"');
+		assert.strictEqual(info?.etag, '"a7a17d6d844b5de815ccab5f42cad6d24496db3850a2a43d8258221018ce87d2"');
+		assert.strictEqual(info?.commitHash, 'dd4bc8b21efa05ec961e3efc4ee5e3832a3679c7');
 		assert(info?.downloadLink);
 	});
 
@@ -30,6 +31,7 @@ describe("fileDownloadInfo", () => {
 
 		assert.strictEqual(info?.size, 134);
 		assert.strictEqual(info?.etag, '"9eb98c817f04b051b3bcca591bcd4e03cec88018"');
+		assert.strictEqual(info?.commitHash, 'dd4bc8b21efa05ec961e3efc4ee5e3832a3679c7');
 		assert(!info?.downloadLink);
 	});
 
@@ -45,5 +47,22 @@ describe("fileDownloadInfo", () => {
 
 		assert.strictEqual(info?.size, 28);
 		assert.strictEqual(info?.etag, '"a661b1a138dac6dc5590367402d100765010ffd6"');
+		assert.strictEqual(info?.commitHash, '1a7dd4986e3dab699c24ca19b2afd0f5e1a80f37');
+	});
+
+	it("should fetch LFS file info without redirect", async () => {
+		const info = await fileDownloadInfo({
+			repo: {
+				name: "google-bert/bert-base-uncased", // full name no redirect needed
+				type: "model",
+			},
+			path: "tf_model.h5",
+			revision: "dd4bc8b21efa05ec961e3efc4ee5e3832a3679c7",
+		});
+
+		assert.strictEqual(info?.size, 536063208);
+		assert.strictEqual(info?.etag, '"a7a17d6d844b5de815ccab5f42cad6d24496db3850a2a43d8258221018ce87d2"');
+		assert.strictEqual(info?.commitHash, 'dd4bc8b21efa05ec961e3efc4ee5e3832a3679c7');
+		assert(info?.downloadLink);
 	});
 });
