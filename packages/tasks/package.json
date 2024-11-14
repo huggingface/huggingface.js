@@ -9,10 +9,9 @@
 	},
 	"main": "./dist/index.cjs",
 	"module": "./dist/index.js",
-	"types": "./dist/src/index.d.ts",
+	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
-			"types": "./dist/src/index.d.ts",
 			"require": "./dist/index.cjs",
 			"import": "./dist/index.js"
 		}
@@ -24,13 +23,14 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"prepublishOnly": "pnpm run inference-codegen && git diff --name-only --exit-code src && pnpm run build",
-		"build": "tsup src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
+		"build": "tsup src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration && pnpm run generate-cts",
 		"watch:export": "tsup src/index.ts --format cjs,esm --watch",
 		"watch:types": "tsc --emitDeclarationOnly --declaration --watch",
 		"watch": "npm-run-all --parallel watch:export watch:types",
 		"prepare": "pnpm run build",
 		"check": "tsc",
 		"test": "vitest run",
+		"generate-cts": "tsx scripts/generate-cts.ts",
 		"inference-codegen": "tsx scripts/inference-codegen.ts && prettier --write src/tasks/*/inference.ts",
 		"inference-tgi-import": "tsx scripts/inference-tgi-import.ts && prettier --write src/tasks/text-generation/spec/*.json && prettier --write src/tasks/chat-completion/spec/*.json",
 		"inference-tei-import": "tsx scripts/inference-tei-import.ts && prettier --write src/tasks/feature-extraction/spec/*.json"
