@@ -4,10 +4,34 @@ import { stringifyGenerationConfig, stringifyMessages } from "./common.js";
 import { getModelInputSnippet } from "./inputs.js";
 import type { InferenceSnippet, ModelDataMinimal } from "./types.js";
 
+// Snippets shared between tasks
+
 const snippetImportInferenceClient = (model: ModelDataMinimal, accessToken: string): string =>
 	`from huggingface_hub import InferenceClient
 client = InferenceClient("${model.id}", token="${accessToken || "{API_TOKEN}"}")
 `;
+
+const snippetBasic = (model: ModelDataMinimal): InferenceSnippet => ({
+	content: `def query(payload):
+	response = requests.post(API_URL, headers=headers, json=payload)
+	return response.json()
+	
+output = query({
+	"inputs": ${getModelInputSnippet(model)},
+})`,
+});
+
+const snippetFile = (model: ModelDataMinimal): InferenceSnippet => ({
+	content: `def query(filename):
+    with open(filename, "rb") as f:
+        data = f.read()
+    response = requests.post(API_URL, headers=headers, data=data)
+    return response.json()
+
+output = query(${getModelInputSnippet(model)})`,
+});
+
+// Specific snippets
 
 const snippetConversational = (
 	model: ModelDataMinimal,
@@ -118,76 +142,31 @@ print(completion.choices[0].message)`,
 	}
 };
 
-const snippetZeroShotClassification = (model: ModelDataMinimal): InferenceSnippet => ({
-	content: `def query(payload):
-	response = requests.post(API_URL, headers=headers, json=payload)
-	return response.json()
+const snippetDocumentQuestionAnswering = (model: ModelDataMinimal, accessToken: string): InferenceSnippet[] => {
+	const inputsAsStr = getModelInputSnippet(model) as string;
+	const inputsAsObj = JSON.parse(inputsAsStr);
 
-output = query({
-    "inputs": ${getModelInputSnippet(model)},
-    "parameters": {"candidate_labels": ["refund", "legal", "faq"]},
-})`,
-});
-
-const snippetZeroShotImageClassification = (model: ModelDataMinimal): InferenceSnippet => ({
-	content: `def query(data):
-	with open(data["image_path"], "rb") as f:
+	return [
+		{
+			client: "huggingface_hub",
+			content: `${snippetImportInferenceClient(model, accessToken)}
+output = client.document_question_answering(${inputsAsObj.image}, question=${inputsAsObj.question})`,
+		},
+		{
+			client: "requests",
+			content: `def query(payload):
+	with open(payload["image"], "rb") as f:
 		img = f.read()
-	payload={
-		"parameters": data["parameters"],
-		"inputs": base64.b64encode(img).decode("utf-8")
-	}
+		payload["image"] = base64.b64encode(img).decode("utf-8")
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.json()
 
 output = query({
-    "image_path": ${getModelInputSnippet(model)},
-    "parameters": {"candidate_labels": ["cat", "dog", "llama"]},
+    "inputs": ${inputsAsStr},
 })`,
-});
-
-const snippetBasic = (model: ModelDataMinimal): InferenceSnippet => ({
-	content: `def query(payload):
-	response = requests.post(API_URL, headers=headers, json=payload)
-	return response.json()
-	
-output = query({
-	"inputs": ${getModelInputSnippet(model)},
-})`,
-});
-
-const snippetFile = (model: ModelDataMinimal): InferenceSnippet => ({
-	content: `def query(filename):
-    with open(filename, "rb") as f:
-        data = f.read()
-    response = requests.post(API_URL, headers=headers, data=data)
-    return response.json()
-
-output = query(${getModelInputSnippet(model)})`,
-});
-
-const snippetTextToImage = (model: ModelDataMinimal, accessToken: string): InferenceSnippet[] => [
-	{
-		client: "huggingface_hub",
-		content: `${snippetImportInferenceClient(model, accessToken)}
-# output is a PIL.Image object
-image = client.text_to_image(${getModelInputSnippet(model)})`,
-	},
-	{
-		client: "requests",
-		content: `def query(payload):
-	response = requests.post(API_URL, headers=headers, json=payload)
-	return response.content
-image_bytes = query({
-	"inputs": ${getModelInputSnippet(model)},
-})
-
-# You can access the image with PIL.Image for example
-import io
-from PIL import Image
-image = Image.open(io.BytesIO(image_bytes))`,
-	},
-];
+		},
+	];
+};
 
 const snippetTabular = (model: ModelDataMinimal): InferenceSnippet => ({
 	content: `def query(payload):
@@ -231,31 +210,56 @@ Audio(audio, rate=sampling_rate)`,
 	}
 };
 
-const snippetDocumentQuestionAnswering = (model: ModelDataMinimal, accessToken: string): InferenceSnippet[] => {
-	const inputsAsStr = getModelInputSnippet(model) as string;
-	const inputsAsObj = JSON.parse(inputsAsStr);
+const snippetTextToImage = (model: ModelDataMinimal, accessToken: string): InferenceSnippet[] => [
+	{
+		client: "huggingface_hub",
+		content: `${snippetImportInferenceClient(model, accessToken)}
+# output is a PIL.Image object
+image = client.text_to_image(${getModelInputSnippet(model)})`,
+	},
+	{
+		client: "requests",
+		content: `def query(payload):
+	response = requests.post(API_URL, headers=headers, json=payload)
+	return response.content
+image_bytes = query({
+	"inputs": ${getModelInputSnippet(model)},
+})
 
-	return [
-		{
-			client: "huggingface_hub",
-			content: `${snippetImportInferenceClient(model, accessToken)}
-output = client.document_question_answering(${inputsAsObj.image}, question=${inputsAsObj.question})`,
-		},
-		{
-			client: "requests",
-			content: `def query(payload):
-	with open(payload["image"], "rb") as f:
-		img = f.read()
-		payload["image"] = base64.b64encode(img).decode("utf-8")
+# You can access the image with PIL.Image for example
+import io
+from PIL import Image
+image = Image.open(io.BytesIO(image_bytes))`,
+	},
+];
+
+const snippetZeroShotClassification = (model: ModelDataMinimal): InferenceSnippet => ({
+	content: `def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.json()
 
 output = query({
-    "inputs": ${inputsAsStr},
+    "inputs": ${getModelInputSnippet(model)},
+    "parameters": {"candidate_labels": ["refund", "legal", "faq"]},
 })`,
-		},
-	];
-};
+});
+
+const snippetZeroShotImageClassification = (model: ModelDataMinimal): InferenceSnippet => ({
+	content: `def query(data):
+	with open(data["image_path"], "rb") as f:
+		img = f.read()
+	payload={
+		"parameters": data["parameters"],
+		"inputs": base64.b64encode(img).decode("utf-8")
+	}
+	response = requests.post(API_URL, headers=headers, json=payload)
+	return response.json()
+
+output = query({
+    "image_path": ${getModelInputSnippet(model)},
+    "parameters": {"candidate_labels": ["cat", "dog", "llama"]},
+})`,
+});
 
 const pythonSnippets: Partial<
 	Record<
