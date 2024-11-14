@@ -1,6 +1,6 @@
-import type { ModelDataMinimal } from "./types";
+import type { InferenceSnippet, ModelDataMinimal } from "./types";
 import { describe, expect, it } from "vitest";
-import { snippetConversational } from "./python";
+import { getPythonInferenceSnippet } from "./python";
 
 describe("inference API snippets", () => {
 	it("conversational llm", async () => {
@@ -10,7 +10,7 @@ describe("inference API snippets", () => {
 			tags: ["conversational"],
 			inference: "",
 		};
-		const snippet = snippetConversational(model, "api_token");
+		const snippet = getPythonInferenceSnippet(model, "api_token") as InferenceSnippet[];
 
 		expect(snippet[0].content).toEqual(`from huggingface_hub import InferenceClient
 
@@ -34,6 +34,35 @@ for chunk in stream:
     print(chunk.choices[0].delta.content, end="")`);
 	});
 
+	it("conversational llm non-streaming", async () => {
+		const model: ModelDataMinimal = {
+			id: "meta-llama/Llama-3.1-8B-Instruct",
+			pipeline_tag: "text-generation",
+			tags: ["conversational"],
+			inference: "",
+		};
+		const snippet = getPythonInferenceSnippet(model, "api_token", { streaming: false }) as InferenceSnippet[];
+
+		expect(snippet[0].content).toEqual(`from huggingface_hub import InferenceClient
+
+client = InferenceClient(api_key="api_token")
+
+messages = [
+	{
+		"role": "user",
+		"content": "What is the capital of France?"
+	}
+]
+
+completion = client.chat.completions.create(
+    model="meta-llama/Llama-3.1-8B-Instruct", 
+	messages=messages, 
+	max_tokens=500
+)
+
+print(completion.choices[0].message)`);
+	});
+
 	it("conversational vlm", async () => {
 		const model: ModelDataMinimal = {
 			id: "meta-llama/Llama-3.2-11B-Vision-Instruct",
@@ -41,7 +70,7 @@ for chunk in stream:
 			tags: ["conversational"],
 			inference: "",
 		};
-		const snippet = snippetConversational(model, "api_token");
+		const snippet = getPythonInferenceSnippet(model, "api_token") as InferenceSnippet[];
 
 		expect(snippet[0].content).toEqual(`from huggingface_hub import InferenceClient
 
