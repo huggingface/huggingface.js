@@ -11,6 +11,22 @@ const snippetImportInferenceClient = (model: ModelDataMinimal, accessToken: stri
 client = InferenceClient("${model.id}", token="${accessToken || "{API_TOKEN}"}")
 `;
 
+const addImportsToSnippet = (snippet: string, model: ModelDataMinimal, accessToken: string): string => {
+	if (snippet.includes("requests")) {
+		snippet = `import requests
+
+API_URL = "https://api-inference.huggingface.co/models/${model.id}"
+headers = {"Authorization": ${accessToken ? `"Bearer ${accessToken}"` : `f"Bearer {API_TOKEN}"`}}
+
+${snippet}`;
+	}
+	if (snippet.includes("base64")) {
+		snippet = `import base64
+${snippet}`;
+	}
+	return snippet;
+};
+
 const snippetBasic = (model: ModelDataMinimal): InferenceSnippet => ({
 	content: `def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
@@ -368,14 +384,7 @@ export function getPythonInferenceSnippet(
 		return snippets.map((snippet) => {
 			return {
 				...snippet,
-				content: snippet.content.includes("requests")
-					? `import requests
-
-API_URL = "https://api-inference.huggingface.co/models/${model.id}"
-headers = {"Authorization": ${accessToken ? `"Bearer ${accessToken}"` : `f"Bearer {API_TOKEN}"`}}
-
-${snippet.content}`
-					: snippet.content,
+				content: addImportsToSnippet(snippet.content, model, accessToken),
 			};
 		});
 	}

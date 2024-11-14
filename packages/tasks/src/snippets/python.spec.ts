@@ -155,7 +155,8 @@ client = InferenceClient("impira/layoutlm-invoices", token="api_token")
 output = client.document_question_answering(cat.png, question=What is in this image?)`);
 
 		expect(snippets[1].client).toEqual("requests");
-		expect(snippets[1].content).toEqual(`import requests
+		expect(snippets[1].content).toEqual(`import base64
+import requests
 
 API_URL = "https://api-inference.huggingface.co/models/impira/layoutlm-invoices"
 headers = {"Authorization": "Bearer api_token"}
@@ -194,7 +195,8 @@ client = InferenceClient("stabilityai/stable-diffusion-xl-refiner-1.0", token="a
 image = client.image_to_image("cat.png", prompt="Turn the cat into a tiger.")`);
 
 		expect(snippets[1].client).toEqual("requests");
-		expect(snippets[1].content).toEqual(`import requests
+		expect(snippets[1].content).toEqual(`import base64
+import requests
 
 API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-refiner-1.0"
 headers = {"Authorization": "Bearer api_token"}
