@@ -175,6 +175,48 @@ output = query({
 })`);
 	});
 
+	it("image-to-image", async () => {
+		const model: ModelDataMinimal = {
+			id: "stabilityai/stable-diffusion-xl-refiner-1.0",
+			pipeline_tag: "image-to-image",
+			tags: [],
+			inference: "",
+		};
+		const snippets = getPythonInferenceSnippet(model, "api_token") as InferenceSnippet[];
+
+		expect(snippets.length).toEqual(2);
+
+		expect(snippets[0].client).toEqual("huggingface_hub");
+		expect(snippets[0].content).toEqual(`from huggingface_hub import InferenceClient
+client = InferenceClient("stabilityai/stable-diffusion-xl-refiner-1.0", token="api_token")
+
+# output is a PIL.Image object
+image = client.image_to_image("cat.png", prompt="Turn the cat into a tiger.")`);
+
+		expect(snippets[1].client).toEqual("requests");
+		expect(snippets[1].content).toEqual(`import requests
+
+API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-refiner-1.0"
+headers = {"Authorization": "Bearer api_token"}
+
+def query(payload):
+	with open(payload["inputs"], "rb") as f:
+		img = f.read()
+		payload["inputs"] = base64.b64encode(img).decode("utf-8")
+	response = requests.post(API_URL, headers=headers, json=payload)
+	return response.content
+
+image_bytes = query({
+	"inputs": "cat.png",
+	"parameters": {"prompt": "Turn the cat into a tiger."},
+})
+
+# You can access the image with PIL.Image for example
+import io
+from PIL import Image
+image = Image.open(io.BytesIO(image_bytes))`);
+	});
+
 	it("text-to-image", async () => {
 		const model: ModelDataMinimal = {
 			id: "black-forest-labs/FLUX.1-schnell",

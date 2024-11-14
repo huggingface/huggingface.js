@@ -182,6 +182,39 @@ output = query({
 	];
 };
 
+const snippetImageToImage = (model: ModelDataMinimal, accessToken: string): InferenceSnippet[] => {
+	const inputsAsStr = getModelInputSnippet(model) as string;
+	const inputsAsObj = JSON.parse(inputsAsStr);
+
+	return [
+		{
+			client: "huggingface_hub",
+			content: `${snippetImportInferenceClient(model, accessToken)}
+# output is a PIL.Image object
+image = client.image_to_image("${inputsAsObj.image}", prompt="${inputsAsObj.prompt}")`,
+		},
+		{
+			client: "requests",
+			content: `def query(payload):
+	with open(payload["inputs"], "rb") as f:
+		img = f.read()
+		payload["inputs"] = base64.b64encode(img).decode("utf-8")
+	response = requests.post(API_URL, headers=headers, json=payload)
+	return response.content
+
+image_bytes = query({
+	"inputs": "${inputsAsObj.image}",
+	"parameters": {"prompt": "${inputsAsObj.prompt}"},
+})
+
+# You can access the image with PIL.Image for example
+import io
+from PIL import Image
+image = Image.open(io.BytesIO(image_bytes))`,
+		},
+	];
+};
+
 const snippetTabular = (model: ModelDataMinimal): InferenceSnippet => ({
 	content: `def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
@@ -312,6 +345,7 @@ const pythonSnippets: Partial<
 	"image-segmentation": snippetFile,
 	"document-question-answering": snippetDocumentQuestionAnswering,
 	"image-to-text": snippetFile,
+	"image-to-image": snippetImageToImage,
 	"zero-shot-image-classification": snippetZeroShotImageClassification,
 };
 

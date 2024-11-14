@@ -86,6 +86,11 @@ const inputsImageClassification = () => `"cats.jpg"`;
 
 const inputsImageToText = () => `"cats.jpg"`;
 
+const inputsImageToImage = () => `{
+	"image": "cat.png",
+	"prompt": "Turn the cat into a tiger."
+}`;
+
 const inputsImageSegmentation = () => `"cats.jpg"`;
 
 const inputsObjectDetection = () => `"cats.jpg"`;
@@ -118,6 +123,7 @@ const modelInputSnippets: {
 	"fill-mask": inputsFillMask,
 	"image-classification": inputsImageClassification,
 	"image-to-text": inputsImageToText,
+	"image-to-image": inputsImageToImage,
 	"image-segmentation": inputsImageSegmentation,
 	"object-detection": inputsObjectDetection,
 	"question-answering": inputsQuestionAnswering,
