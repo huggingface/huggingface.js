@@ -8,9 +8,6 @@
 		"access": "public"
 	},
 	"sources": "./src/index.ts",
-	"main": "./dist/commonjs/index.js",
-	"module": "./dist/esm/index.js",
-	"types": "./dist/commonjs/index.d.ts",
 	"exports": {
 		"./package.json": "./package.json",
 		".": {
@@ -55,6 +52,8 @@
 		"exports": {
 			"./package.json": "./package.json",
 			".": "./src/index.ts"
-		}
+		},
+		"module": false,
+		"main": false
 	}
 }
