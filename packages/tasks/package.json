@@ -41,7 +41,8 @@
 	"type": "module",
 	"files": [
 		"dist",
-		"src"
+		"src",
+		"tsconfig.json"
 	],
 	"keywords": [
 		"huggingface",
