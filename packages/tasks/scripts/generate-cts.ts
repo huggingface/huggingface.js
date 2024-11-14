@@ -1,3 +1,4 @@
+// Just copy over the already generated .d.ts and .d.ts.map files to .d.cts and .d.cts.map files
 import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
