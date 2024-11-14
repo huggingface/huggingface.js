@@ -90,6 +90,7 @@ for chunk in stream:
 		expect(snippets[0].client).toEqual("huggingface_hub");
 		expect(snippets[0].content).toEqual(`from huggingface_hub import InferenceClient
 client = InferenceClient("black-forest-labs/FLUX.1-schnell", token="api_token")
+
 # output is a PIL.Image object
 image = client.text_to_image("Astronaut riding a horse")`);
 
@@ -105,6 +106,7 @@ def query(payload):
 image_bytes = query({
 	"inputs": "Astronaut riding a horse",
 })
+
 # You can access the image with PIL.Image for example
 import io
 from PIL import Image
