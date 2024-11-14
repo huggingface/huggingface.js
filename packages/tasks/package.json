@@ -28,7 +28,7 @@
 		"lint:check": "eslint --ext .cjs,.ts .",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
-		"prepublishOnly": "pnpm run inference-codegen && git diff --name-only --exit-code src && pnpm run build",
+		"prepublishOnly": "pnpm --filter tasks-gen inference-codegen && git diff --name-only --exit-code src && pnpm run build",
 		"build": "tshy",
 		"watch:cjs": "tsc --declaration --outdir dist/commonjs --module commonjs --watch",
 		"watch:esm": "tsc --declaration --outdir dist/esm --watch",
