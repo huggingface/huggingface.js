@@ -52,8 +52,9 @@
 		"exports": {
 			"./package.json": "./package.json",
 			".": "./src/index.ts"
-		},
-		"module": false,
-		"main": false
-	}
+		}
+	},
+	"main": "./dist/commonjs/index.js",
+	"types": "./dist/commonjs/index.d.ts",
+	"module": "./dist/esm/index.js"
 }
