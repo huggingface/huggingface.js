@@ -7,6 +7,7 @@
 	"publishConfig": {
 		"access": "public"
 	},
+	"sources": "./src/index.ts",
 	"main": "./dist/commonjs/index.js",
 	"module": "./dist/esm/index.js",
 	"types": "./dist/commonjs/index.d.ts",
@@ -39,7 +40,8 @@
 	},
 	"type": "module",
 	"files": [
-		"dist"
+		"dist",
+		"src"
 	],
 	"keywords": [
 		"huggingface",
