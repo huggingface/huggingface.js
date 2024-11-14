@@ -1,7 +1,7 @@
-export { LIBRARY_TASK_MAPPING } from "./library-to-tasks";
-export { MAPPING_DEFAULT_WIDGET } from "./default-widget-inputs";
-export type { TaskData, TaskDemo, TaskDemoEntry, ExampleRepo } from "./tasks";
-export * from "./tasks";
+export { LIBRARY_TASK_MAPPING } from "./library-to-tasks.js";
+export { MAPPING_DEFAULT_WIDGET } from "./default-widget-inputs.js";
+export type { TaskData, TaskDemo, TaskDemoEntry, ExampleRepo } from "./tasks/index.js";
+export * from "./tasks/index.js";
 export {
 	PIPELINE_DATA,
 	PIPELINE_TYPES,
@@ -13,11 +13,15 @@ export {
 	MODALITY_LABELS,
 	SUBTASK_TYPES,
 	PIPELINE_TYPES_SET,
-} from "./pipelines";
-export { ALL_DISPLAY_MODEL_LIBRARY_KEYS, ALL_MODEL_LIBRARY_KEYS, MODEL_LIBRARIES_UI_ELEMENTS } from "./model-libraries";
-export type { LibraryUiElement, ModelLibraryKey } from "./model-libraries";
-export type { ModelData, TransformersInfo } from "./model-data";
-export type { AddedToken, SpecialTokensMap, TokenizerConfig } from "./tokenizer-data";
+} from "./pipelines.js";
+export {
+	ALL_DISPLAY_MODEL_LIBRARY_KEYS,
+	ALL_MODEL_LIBRARY_KEYS,
+	MODEL_LIBRARIES_UI_ELEMENTS,
+} from "./model-libraries.js";
+export type { LibraryUiElement, ModelLibraryKey } from "./model-libraries.js";
+export type { ModelData, TransformersInfo } from "./model-data.js";
+export type { AddedToken, SpecialTokensMap, TokenizerConfig } from "./tokenizer-data.js";
 export type {
 	WidgetExample,
 	WidgetExampleAttribute,
@@ -38,18 +42,18 @@ export type {
 	WidgetExampleOutputLabels,
 	WidgetExampleOutputAnswerScore,
 	WidgetExampleOutputText,
-} from "./widget-example";
-export { SPECIAL_TOKENS_ATTRIBUTES } from "./tokenizer-data";
+} from "./widget-example.js";
+export { SPECIAL_TOKENS_ATTRIBUTES } from "./tokenizer-data.js";
 
-import * as snippets from "./snippets";
-export * from "./gguf";
+import * as snippets from "./snippets/index.js";
+export * from "./gguf.js";
 
 export { snippets };
 
-export { SKUS, DEFAULT_MEMORY_OPTIONS } from "./hardware";
-export type { HardwareSpec, SkuType } from "./hardware";
-export { LOCAL_APPS } from "./local-apps";
-export type { LocalApp, LocalAppKey, LocalAppSnippet } from "./local-apps";
+export { SKUS, DEFAULT_MEMORY_OPTIONS } from "./hardware.js";
+export type { HardwareSpec, SkuType } from "./hardware.js";
+export { LOCAL_APPS } from "./local-apps.js";
+export type { LocalApp, LocalAppKey, LocalAppSnippet } from "./local-apps.js";
 
-export { DATASET_LIBRARIES_UI_ELEMENTS } from "./dataset-libraries";
-export type { DatasetLibraryUiElement, DatasetLibraryKey } from "./dataset-libraries";
+export { DATASET_LIBRARIES_UI_ELEMENTS } from "./dataset-libraries.js";
+export type { DatasetLibraryUiElement, DatasetLibraryKey } from "./dataset-libraries.js";
