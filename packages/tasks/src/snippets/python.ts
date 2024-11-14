@@ -9,7 +9,7 @@ const snippetImportInferenceClient = (model: ModelDataMinimal, accessToken: stri
 client = InferenceClient("${model.id}", token="${accessToken || "{API_TOKEN}"}")
 `;
 
-export const snippetConversational = (
+const snippetConversational = (
 	model: ModelDataMinimal,
 	accessToken: string,
 	opts?: {
@@ -118,7 +118,7 @@ print(completion.choices[0].message)`,
 	}
 };
 
-export const snippetZeroShotClassification = (model: ModelDataMinimal): InferenceSnippet => ({
+const snippetZeroShotClassification = (model: ModelDataMinimal): InferenceSnippet => ({
 	content: `def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.json()
@@ -129,7 +129,7 @@ output = query({
 })`,
 });
 
-export const snippetZeroShotImageClassification = (model: ModelDataMinimal): InferenceSnippet => ({
+const snippetZeroShotImageClassification = (model: ModelDataMinimal): InferenceSnippet => ({
 	content: `def query(data):
 	with open(data["image_path"], "rb") as f:
 		img = f.read()
@@ -146,7 +146,7 @@ output = query({
 })`,
 });
 
-export const snippetBasic = (model: ModelDataMinimal): InferenceSnippet => ({
+const snippetBasic = (model: ModelDataMinimal): InferenceSnippet => ({
 	content: `def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.json()
@@ -156,7 +156,7 @@ output = query({
 })`,
 });
 
-export const snippetFile = (model: ModelDataMinimal): InferenceSnippet => ({
+const snippetFile = (model: ModelDataMinimal): InferenceSnippet => ({
 	content: `def query(filename):
     with open(filename, "rb") as f:
         data = f.read()
@@ -166,7 +166,7 @@ export const snippetFile = (model: ModelDataMinimal): InferenceSnippet => ({
 output = query(${getModelInputSnippet(model)})`,
 });
 
-export const snippetTextToImage = (model: ModelDataMinimal, accessToken: string): InferenceSnippet[] => [
+const snippetTextToImage = (model: ModelDataMinimal, accessToken: string): InferenceSnippet[] => [
 	{
 		client: "huggingface_hub",
 		content: `${snippetImportInferenceClient(model, accessToken)}
@@ -189,7 +189,7 @@ image = Image.open(io.BytesIO(image_bytes))`,
 	},
 ];
 
-export const snippetTabular = (model: ModelDataMinimal): InferenceSnippet => ({
+const snippetTabular = (model: ModelDataMinimal): InferenceSnippet => ({
 	content: `def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.content
@@ -198,7 +198,7 @@ response = query({
 })`,
 });
 
-export const snippetTextToAudio = (model: ModelDataMinimal): InferenceSnippet => {
+const snippetTextToAudio = (model: ModelDataMinimal): InferenceSnippet => {
 	// Transformers TTS pipeline and api-inference-community (AIC) pipeline outputs are diverged
 	// with the latest update to inference-api (IA).
 	// Transformers IA returns a byte object (wav file), whereas AIC returns wav and sampling_rate.
@@ -231,7 +231,7 @@ Audio(audio, rate=sampling_rate)`,
 	}
 };
 
-export const snippetDocumentQuestionAnswering = (model: ModelDataMinimal): InferenceSnippet => ({
+const snippetDocumentQuestionAnswering = (model: ModelDataMinimal): InferenceSnippet => ({
 	content: `def query(payload):
  	with open(payload["image"], "rb") as f:
   		img = f.read()
@@ -244,7 +244,7 @@ output = query({
 })`,
 });
 
-export const pythonSnippets: Partial<
+const pythonSnippets: Partial<
 	Record<
 		PipelineType,
 		(
