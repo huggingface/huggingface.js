@@ -317,6 +317,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://hezarai.github.io/hezar",
 		countDownloads: `path:"model_config.yaml" OR path:"embedding/embedding_config.yaml"`,
 	},
+	htrflow: {
+		prettyLabel: "HTRflow",
+		repoName: "HTRflow",
+		repoUrl: "https://github.com/AI-Riksarkivet/htrflow",
+		docsUrl: "https://ai-riksarkivet.github.io/htrflow",
+		snippets: snippets.htrflow,
+	},
 	"hunyuan-dit": {
 		prettyLabel: "HunyuanDiT",
 		repoName: "HunyuanDiT",
@@ -473,7 +480,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "open-oasis",
 		repoName: "open-oasis",
 		repoUrl: "https://github.com/etched-ai/open-oasis",
-		countDownloads: `path:"oasis500m.pt"`,
+		countDownloads: `path:"oasis500m.safetensors"`,
 	},
 	open_clip: {
 		prettyLabel: "OpenCLIP",
