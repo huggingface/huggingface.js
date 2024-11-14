@@ -7,7 +7,6 @@
 	"publishConfig": {
 		"access": "public"
 	},
-	"sources": "./src/index.ts",
 	"exports": {
 		"./package.json": "./package.json",
 		".": {
@@ -21,6 +20,7 @@
 			}
 		}
 	},
+	"source": "./src/index.ts",
 	"scripts": {
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
