@@ -6,7 +6,8 @@ import type { InferenceSnippet, ModelDataMinimal } from "./types.js";
 
 const snippetImportInferenceClient = (model: ModelDataMinimal, accessToken: string): string =>
 	`from huggingface_hub import InferenceClient
-client = InferenceClient("${model.id}", token="${accessToken || "{API_TOKEN}"}")`;
+client = InferenceClient("${model.id}", token="${accessToken || "{API_TOKEN}"}")
+`;
 
 export const snippetConversational = (
 	model: ModelDataMinimal,
@@ -180,6 +181,7 @@ image = client.text_to_image(${getModelInputSnippet(model)})`,
 image_bytes = query({
 	"inputs": ${getModelInputSnippet(model)},
 })
+
 # You can access the image with PIL.Image for example
 import io
 from PIL import Image
