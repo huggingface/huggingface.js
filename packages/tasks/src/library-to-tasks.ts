@@ -1,5 +1,5 @@
-import type { ModelLibraryKey } from "./model-libraries";
-import type { PipelineType } from "./pipelines";
+import type { ModelLibraryKey } from "./model-libraries.js";
+import type { PipelineType } from "./pipelines.js";
 
 /**
  * Mapping from library name to its supported tasks.

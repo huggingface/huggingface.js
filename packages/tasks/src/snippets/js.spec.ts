@@ -1,6 +1,6 @@
-import type { InferenceSnippet, ModelDataMinimal } from "./types";
+import type { InferenceSnippet, ModelDataMinimal } from "./types.js";
 import { describe, expect, it } from "vitest";
-import { getJsInferenceSnippet } from "./js";
+import { getJsInferenceSnippet } from "./js.js";
 
 describe("inference API snippets", () => {
 	it("conversational llm", async () => {
