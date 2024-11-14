@@ -105,9 +105,13 @@ export const curlSnippets: Partial<
 	"image-segmentation": snippetFile,
 };
 
-export function getCurlInferenceSnippet(model: ModelDataMinimal, accessToken: string): InferenceSnippet {
+export function getCurlInferenceSnippet(
+	model: ModelDataMinimal,
+	accessToken: string,
+	opts?: Record<string, unknown>
+): InferenceSnippet {
 	return model.pipeline_tag && model.pipeline_tag in curlSnippets
-		? curlSnippets[model.pipeline_tag]?.(model, accessToken) ?? { content: "" }
+		? curlSnippets[model.pipeline_tag]?.(model, accessToken, opts) ?? { content: "" }
 		: { content: "" };
 }
 
