@@ -480,7 +480,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "open-oasis",
 		repoName: "open-oasis",
 		repoUrl: "https://github.com/etched-ai/open-oasis",
-		countDownloads: `path:"oasis500m.pt"`,
+		countDownloads: `path:"oasis500m.safetensors"`,
 	},
 	open_clip: {
 		prettyLabel: "OpenCLIP",
