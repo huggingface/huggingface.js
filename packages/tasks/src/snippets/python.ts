@@ -33,6 +33,20 @@ output = query(${getModelInputSnippet(model)})`,
 
 // Specific snippets
 
+const snippetAutomaticSpeechRecognition = (model: ModelDataMinimal, accessToken: string): InferenceSnippet[] => {
+	return [
+		{
+			client: "huggingface_hub",
+			content: `${snippetImportInferenceClient(model, accessToken)}
+output = client.automatic_speech_recognition(${getModelInputSnippet(model)})`,
+		},
+		{
+			client: "requests",
+			content: snippetFile(model).content,
+		},
+	];
+};
+
 const snippetConversational = (
 	model: ModelDataMinimal,
 	accessToken: string,
@@ -285,7 +299,7 @@ const pythonSnippets: Partial<
 	"image-text-to-text": snippetConversational,
 	"fill-mask": snippetBasic,
 	"sentence-similarity": snippetBasic,
-	"automatic-speech-recognition": snippetFile,
+	"automatic-speech-recognition": snippetAutomaticSpeechRecognition,
 	"text-to-image": snippetTextToImage,
 	"text-to-speech": snippetTextToAudio,
 	"text-to-audio": snippetTextToAudio,

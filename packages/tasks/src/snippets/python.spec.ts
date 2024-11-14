@@ -3,6 +3,38 @@ import { describe, expect, it } from "vitest";
 import { getPythonInferenceSnippet } from "./python";
 
 describe("inference API snippets", () => {
+	it("automatic-speech-recognition", async () => {
+		const model: ModelDataMinimal = {
+			id: "openai/whisper-large-v3-turbo",
+			pipeline_tag: "automatic-speech-recognition",
+			tags: [],
+			inference: "",
+		};
+		const snippets = getPythonInferenceSnippet(model, "api_token") as InferenceSnippet[];
+
+		expect(snippets.length).toEqual(2);
+
+		expect(snippets[0].client).toEqual("huggingface_hub");
+		expect(snippets[0].content).toEqual(`from huggingface_hub import InferenceClient
+client = InferenceClient("openai/whisper-large-v3-turbo", token="api_token")
+
+output = client.automatic_speech_recognition("sample1.flac")`);
+
+		expect(snippets[1].client).toEqual("requests");
+		expect(snippets[1].content).toEqual(`import requests
+
+API_URL = "https://api-inference.huggingface.co/models/openai/whisper-large-v3-turbo"
+headers = {"Authorization": "Bearer api_token"}
+
+def query(filename):
+    with open(filename, "rb") as f:
+        data = f.read()
+    response = requests.post(API_URL, headers=headers, data=data)
+    return response.json()
+
+output = query("sample1.flac")`);
+	});
+
 	it("conversational llm", async () => {
 		const model: ModelDataMinimal = {
 			id: "meta-llama/Llama-3.1-8B-Instruct",
