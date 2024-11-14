@@ -231,18 +231,31 @@ Audio(audio, rate=sampling_rate)`,
 	}
 };
 
-const snippetDocumentQuestionAnswering = (model: ModelDataMinimal): InferenceSnippet => ({
-	content: `def query(payload):
- 	with open(payload["image"], "rb") as f:
-  		img = f.read()
-		payload["image"] = base64.b64encode(img).decode("utf-8")  
+const snippetDocumentQuestionAnswering = (model: ModelDataMinimal, accessToken: string): InferenceSnippet[] => {
+	const inputsAsStr = getModelInputSnippet(model) as string;
+	const inputsAsObj = JSON.parse(inputsAsStr);
+
+	return [
+		{
+			client: "huggingface_hub",
+			content: `${snippetImportInferenceClient(model, accessToken)}
+output = client.document_question_answering(${inputsAsObj.image}, question=${inputsAsObj.question})`,
+		},
+		{
+			client: "requests",
+			content: `def query(payload):
+	with open(payload["image"], "rb") as f:
+		img = f.read()
+		payload["image"] = base64.b64encode(img).decode("utf-8")
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.json()
 
 output = query({
-    "inputs": ${getModelInputSnippet(model)},
+    "inputs": ${inputsAsStr},
 })`,
-});
+		},
+	];
+};
 
 const pythonSnippets: Partial<
 	Record<

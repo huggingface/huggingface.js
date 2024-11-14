@@ -105,6 +105,44 @@ for chunk in stream:
     print(chunk.choices[0].delta.content, end="")`);
 	});
 
+	it("document-question-answering", async () => {
+		const model: ModelDataMinimal = {
+			id: "impira/layoutlm-invoices",
+			pipeline_tag: "document-question-answering",
+			tags: [],
+			inference: "",
+		};
+		const snippets = getPythonInferenceSnippet(model, "api_token") as InferenceSnippet[];
+
+		expect(snippets.length).toEqual(2);
+
+		expect(snippets[0].client).toEqual("huggingface_hub");
+		expect(snippets[0].content).toEqual(`from huggingface_hub import InferenceClient
+client = InferenceClient("impira/layoutlm-invoices", token="api_token")
+
+output = client.document_question_answering(cat.png, question=What is in this image?)`);
+
+		expect(snippets[1].client).toEqual("requests");
+		expect(snippets[1].content).toEqual(`import requests
+
+API_URL = "https://api-inference.huggingface.co/models/impira/layoutlm-invoices"
+headers = {"Authorization": "Bearer api_token"}
+
+def query(payload):
+	with open(payload["image"], "rb") as f:
+		img = f.read()
+		payload["image"] = base64.b64encode(img).decode("utf-8")
+	response = requests.post(API_URL, headers=headers, json=payload)
+	return response.json()
+
+output = query({
+    "inputs": {
+		"image": "cat.png",
+		"question": "What is in this image?"
+	},
+})`);
+	});
+
 	it("text-to-image", async () => {
 		const model: ModelDataMinimal = {
 			id: "black-forest-labs/FLUX.1-schnell",

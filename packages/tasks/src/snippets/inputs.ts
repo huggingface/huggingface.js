@@ -27,9 +27,9 @@ const inputsTableQuestionAnswering = () =>
 
 const inputsVisualQuestionAnswering = () =>
 	`{
-	"image": "cat.png",
-	"question": "What is in this image?"
-}`;
+		"image": "cat.png",
+		"question": "What is in this image?"
+	}`;
 
 const inputsQuestionAnswering = () =>
 	`{
