@@ -12,9 +12,9 @@ describe("inference API snippets", () => {
 		};
 		const snippet = getJsInferenceSnippet(model, "api_token") as InferenceSnippet[];
 
-		expect(snippet[0].content).toEqual(`import { HfInference } from "@huggingface/inference"
+		expect(snippet[0].content).toEqual(`import { HfInference } from "@huggingface/inference";
 
-const client = new HfInference("api_token")
+const client = new HfInference("api_token");
 
 let out = "";
 
@@ -47,9 +47,9 @@ for await (const chunk of stream) {
 		};
 		const snippet = getJsInferenceSnippet(model, "api_token", { streaming: false }) as InferenceSnippet[];
 
-		expect(snippet[0].content).toEqual(`import { HfInference } from "@huggingface/inference"
+		expect(snippet[0].content).toEqual(`import { HfInference } from "@huggingface/inference";
 
-const client = new HfInference("api_token")
+const client = new HfInference("api_token");
 
 const chatCompletion = await client.chatCompletion({
 	model: "meta-llama/Llama-3.1-8B-Instruct",
@@ -74,9 +74,9 @@ console.log(chatCompletion.choices[0].message);`);
 		};
 		const snippet = getJsInferenceSnippet(model, "api_token") as InferenceSnippet[];
 
-		expect(snippet[0].content).toEqual(`import { HfInference } from "@huggingface/inference"
+		expect(snippet[0].content).toEqual(`import { HfInference } from "@huggingface/inference";
 
-const client = new HfInference("api_token")
+const client = new HfInference("api_token");
 
 let out = "";
 
@@ -120,9 +120,9 @@ for await (const chunk of stream) {
 		};
 		const snippet = getJsInferenceSnippet(model, "api_token") as InferenceSnippet[];
 
-		expect(snippet[0].content).toEqual(`import { HfInference } from "@huggingface/inference"
+		expect(snippet[0].content).toEqual(`import { HfInference } from "@huggingface/inference";
 
-const client = new HfInference("api_token")
+const client = new HfInference("api_token");
 
 let out = "";
 
