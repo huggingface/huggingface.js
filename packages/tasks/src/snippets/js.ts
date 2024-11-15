@@ -57,7 +57,7 @@ export const snippetTextGeneration = (
 		if (streaming) {
 			return [
 				{
-					client: "huggingface_hub",
+					client: "huggingface.js",
 					content: `import { HfInference } from "@huggingface/inference"
 
 const client = new HfInference("${accessToken || `{API_TOKEN}`}")
@@ -108,8 +108,8 @@ for await (const chunk of stream) {
 		} else {
 			return [
 				{
-					client: "huggingface_hub",
-					content: `import { HfInference } from '@huggingface/inference'
+					client: "huggingface.js",
+					content: `import { HfInference } from "@huggingface/inference"
 
 const client = new HfInference("${accessToken || `{API_TOKEN}`}")
 
@@ -292,10 +292,11 @@ export const jsSnippets: Partial<
 
 export function getJsInferenceSnippet(
 	model: ModelDataMinimal,
-	accessToken: string
+	accessToken: string,
+	opts?: Record<string, unknown>
 ): InferenceSnippet | InferenceSnippet[] {
 	return model.pipeline_tag && model.pipeline_tag in jsSnippets
-		? jsSnippets[model.pipeline_tag]?.(model, accessToken) ?? { content: "" }
+		? jsSnippets[model.pipeline_tag]?.(model, accessToken, opts) ?? { content: "" }
 		: { content: "" };
 }
 

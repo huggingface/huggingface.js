@@ -2,9 +2,9 @@
 	"compilerOptions": {
 		"allowSyntheticDefaultImports": true,
 		"lib": ["ES2022", "DOM"],
-		"module": "ESNext",
+		"module": "NodeNext",
 		"target": "ESNext",
-		"moduleResolution": "node",
+		"moduleResolution": "nodenext",
 		"forceConsistentCasingInFileNames": true,
 		"strict": true,
 		"noImplicitAny": true,
@@ -15,6 +15,6 @@
 		"declaration": true,
 		"declarationMap": true
 	},
-	"include": ["src", "scripts"],
+	"include": ["src"],
 	"exclude": ["dist"]
 }
