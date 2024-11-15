@@ -8,6 +8,7 @@ export * from "./delete-file";
 export * from "./delete-files";
 export * from "./delete-repo";
 export * from "./download-file";
+export * from "./download-file-cache";
 export * from "./file-download-info";
 export * from "./file-exists";
 export * from "./list-commits";
