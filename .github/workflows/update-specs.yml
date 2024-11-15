@@ -12,11 +12,7 @@ concurrency:
 
 defaults:
   run:
-    working-directory: packages/tasks
-
-permissions:
-  contents: write  # Permet la modification des contenus du dépôt
-  pull-requests: write  # Permet la création de pull requests
+    working-directory: packages/tasks-gen
 
 jobs:
   pull_request:
