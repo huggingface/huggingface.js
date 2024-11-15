@@ -1,0 +1,26 @@
+{
+	"name": "@huggingface/tasks-gen",
+	"packageManager": "pnpm@8.10.5",
+	"version": "0.13.1",
+	"description": "Utilities to generate files for @huggingface/tasks, and avoid unnecessary deps in the published package",
+	"repository": "https://github.com/huggingface/huggingface.js.git",
+	"private": true,
+	"scripts": {
+		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
+		"lint:check": "eslint --ext .cjs,.ts .",
+		"format": "prettier --write .",
+		"format:check": "prettier --check .",
+		"check": "tsc",
+		"inference-codegen": "tsx scripts/inference-codegen.ts && prettier --write ../tasks/src/tasks/*/inference.ts",
+		"inference-tgi-import": "tsx scripts/inference-tgi-import.ts && prettier --write ../tasks/src/tasks/text-generation/spec/*.json && prettier --write ../tasks/src/tasks/chat-completion/spec/*.json",
+		"inference-tei-import": "tsx scripts/inference-tei-import.ts && prettier --write ../tasks/src/tasks/feature-extraction/spec/*.json"
+	},
+	"type": "module",
+	"author": "Hugging Face",
+	"license": "MIT",
+	"devDependencies": {
+		"@types/node": "^20.11.5",
+		"quicktype-core": "https://github.com/huggingface/quicktype/raw/pack-18.0.17/packages/quicktype-core/quicktype-core-18.0.17.tgz",
+		"type-fest": "^3.13.1"
+	}
+}
