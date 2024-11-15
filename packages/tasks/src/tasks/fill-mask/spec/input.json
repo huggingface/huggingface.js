@@ -5,7 +5,7 @@
 	"title": "FillMaskInput",
 	"type": "object",
 	"properties": {
-		"data": {
+		"inputs": {
 			"description": "The text with masked tokens",
 			"type": "string"
 		},
@@ -20,7 +20,7 @@
 			"description": "Additional inference parameters for Fill Mask",
 			"type": "object",
 			"properties": {
-				"topK": {
+				"top_k": {
 					"type": "integer",
 					"description": "When passed, overrides the number of predictions to return."
 				},
@@ -34,5 +34,5 @@
 			}
 		}
 	},
-	"required": ["data"]
+	"required": ["inputs"]
 }

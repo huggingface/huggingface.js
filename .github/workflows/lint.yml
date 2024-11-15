@@ -18,18 +18,21 @@ jobs:
       - name: "Extracting the merge base into 'SINCE'"
         id: since
         run: |
-          if [ -z "${{  github.event.pull_request.head.ref }}" ]
+          if [ -z $PR_REF ]
           then
-            echo "SINCE=${{ github.sha }}^1" >> $GITHUB_OUTPUT
+            echo "SINCE=$SHA^1" >> $GITHUB_OUTPUT
           else
-            echo "SINCE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} ${{ github.sha }})" >> $GITHUB_OUTPUT
+            echo "SINCE=$(git merge-base origin/$PR_REF $SHA)" >> $GITHUB_OUTPUT
           fi
+        env:
+          PR_REF: ${{  github.event.pull_request.head.ref }}
+          SHA: ${{ github.sha }}
 
       - run: corepack enable
 
       - uses: actions/setup-node@v3
         with:
-          node-version: "18"
+          node-version: "20"
           cache: "pnpm"
           cache-dependency-path: "**/pnpm-lock.yaml"
       - run: |
@@ -42,7 +45,11 @@ jobs:
 
       - name: "Checking format errors"
         run: |
-          pnpm --filter ...[${{ steps.since.outputs.SINCE }}] format:check
+          # Could also use pnpm --filter [${{ steps.since.outputs.SINCE }}] format:check
+          # But this way we can see the diff
+          pnpm --filter [${{ steps.since.outputs.SINCE }}] format
+          git diff | head -n 100
+          git diff --name-only --exit-code
 
       - name: Check types
         run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] check

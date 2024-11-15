@@ -1,5 +1,7 @@
 ## Use Cases
 
+Zero-shot object detection models can be used in any object detection application where the detection involves text queries for objects of interest.
+
 ### Object Search
 
 Zero-shot object detection models can be used in image search. Smartphones, for example, use zero-shot object detection models to detect entities (such as specific places or objects) and allow the user to search for the entity on the internet.
@@ -7,6 +9,10 @@ Zero-shot object detection models can be used in image search. Smartphones, for 
 ### Object Counting
 
 Zero-shot object detection models are used to count instances of objects in a given image. This can include counting the objects in warehouses or stores or the number of visitors in a store. They are also used to manage crowds at events to prevent disasters.
+
+### Object Tracking
+
+Zero-shot object detectors can track objects in videos.
 
 ## Inference
 

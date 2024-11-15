@@ -5,7 +5,7 @@
 	"title": "ZeroShotClassificationInput",
 	"type": "object",
 	"properties": {
-		"data": {
+		"inputs": {
 			"description": "The input text data, with candidate labels",
 			"type": "object",
 			"title": "ZeroShotClassificationInputData",
@@ -35,16 +35,16 @@
 			"description": "Additional inference parameters for Zero Shot Classification",
 			"type": "object",
 			"properties": {
-				"hypothesisTemplate": {
+				"hypothesis_template": {
 					"type": "string",
 					"description": "The sentence used in conjunction with candidateLabels to attempt the text classification by replacing the placeholder with the candidate labels."
 				},
-				"multiLabel": {
+				"multi_label": {
 					"type": "boolean",
 					"description": "Whether multiple candidate labels can be true. If false, the scores are normalized such that the sum of the label likelihoods for each sequence is 1. If true, the labels are considered independent and probabilities are normalized for each candidate."
 				}
 			}
 		}
 	},
-	"required": ["data"]
+	"required": ["inputs"]
 }

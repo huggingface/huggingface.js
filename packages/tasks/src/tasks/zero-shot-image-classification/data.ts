@@ -1,4 +1,4 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	datasets: [
@@ -53,7 +53,11 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "Strong zero-shot image classification model.",
-			id: "google/siglip-base-patch16-224",
+			id: "google/siglip-so400m-patch14-224",
+		},
+		{
+			description: "Small yet powerful zero-shot image classification model that can run on edge devices.",
+			id: "apple/MobileCLIP-S1-OpenCLIP",
 		},
 		{
 			description: "Strong image classification model for biomedical domain.",
@@ -73,7 +77,7 @@ const taskData: TaskDataCustom = {
 	],
 	summary:
 		"Zero-shot image classification is the task of classifying previously unseen classes during training of a model.",
-	widgetModels: ["openai/clip-vit-large-patch14-336"],
+	widgetModels: ["google/siglip-so400m-patch14-224"],
 	youtubeId: "",
 };
 

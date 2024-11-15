@@ -5,8 +5,9 @@
 	"title": "ImageClassificationInput",
 	"type": "object",
 	"properties": {
-		"data": {
-			"description": "The input image data"
+		"inputs": {
+			"type": "string",
+			"description": "The input image data as a base64-encoded string. If no `parameters` are provided, you can also provide the image data as a raw bytes payload."
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
@@ -19,16 +20,16 @@
 			"description": "Additional inference parameters for Image Classification",
 			"type": "object",
 			"properties": {
-				"functionToApply": {
+				"function_to_apply": {
 					"title": "ImageClassificationOutputTransform",
 					"$ref": "/inference/schemas/common-definitions.json#/definitions/ClassificationOutputTransform"
 				},
-				"topK": {
+				"top_k": {
 					"type": "integer",
 					"description": "When specified, limits the output to the top K most probable classes."
 				}
 			}
 		}
 	},
-	"required": ["data"]
+	"required": ["inputs"]
 }

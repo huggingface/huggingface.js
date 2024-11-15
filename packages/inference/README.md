@@ -1,11 +1,11 @@
 # 🤗 Hugging Face Inference Endpoints
 
 A Typescript powered wrapper for the Hugging Face Inference Endpoints API. Learn more about Inference Endpoints at [Hugging Face](https://huggingface.co/inference-endpoints).
-It works with both [serverless](https://huggingface.co/docs/api-inference/index) and [dedicated](https://huggingface.co/docs/inference-endpoints/index) Endpoints.
+It works with both [Inference API (serverless)](https://huggingface.co/docs/api-inference/index) and [Inference Endpoints (dedicated)](https://huggingface.co/docs/inference-endpoints/index).
 
 Check out the [full documentation](https://huggingface.co/docs/huggingface.js/inference/README).
 
-You can also try out a live [interactive notebook](https://observablehq.com/@huggingface/hello-huggingface-js-inference), see some demos on [hf.co/huggingfacejs](https://huggingface.co/huggingfacejs), or watch a [Scrimba tutorial that explains how Inference Endpoints works](https://scrimba.com/scrim/cod8248f5adfd6e129582c523). 
+You can also try out a live [interactive notebook](https://observablehq.com/@huggingface/hello-huggingface-js-inference), see some demos on [hf.co/huggingfacejs](https://huggingface.co/huggingfacejs), or watch a [Scrimba tutorial that explains how Inference Endpoints works](https://scrimba.com/scrim/cod8248f5adfd6e129582c523).
 
 ## Getting Started
 
@@ -30,7 +30,6 @@ import { HfInference } from "https://esm.sh/@huggingface/inference"
 import { HfInference } from "npm:@huggingface/inference"
 ```
 
-
 ### Initialize
 
 ```typescript
@@ -42,7 +41,6 @@ const hf = new HfInference('your access token')
 ❗**Important note:** Using an access token is optional to get started, however you will be rate limited eventually. Join [Hugging Face](https://huggingface.co/join) and then visit [access tokens](https://huggingface.co/settings/tokens) to generate your access token for **free**.
 
 Your access token should be kept private. If you need to protect it in front-end applications, we suggest setting up a proxy server that stores the access token.
-
 
 #### Tree-shaking
 
@@ -62,6 +60,83 @@ await textGeneration({
 This will enable tree-shaking by your bundler.
 
 ## Natural Language Processing
+
+### Text Generation
+
+Generates text from an input prompt.
+
+[Demo](https://huggingface.co/spaces/huggingfacejs/streaming-text-generation)
+
+```typescript
+await hf.textGeneration({
+  model: 'gpt2',
+  inputs: 'The answer to the universe is'
+})
+
+for await (const output of hf.textGenerationStream({
+  model: "google/flan-t5-xxl",
+  inputs: 'repeat "one two three four"',
+  parameters: { max_new_tokens: 250 }
+})) {
+  console.log(output.token.text, output.generated_text);
+}
+```
+
+### Text Generation (Chat Completion API Compatible)
+
+Using the `chatCompletion` method, you can generate text with models compatible with the OpenAI Chat Completion API. All models served by [TGI](https://api-inference.huggingface.co/framework/text-generation-inference) on Hugging Face support Messages API.
+
+[Demo](https://huggingface.co/spaces/huggingfacejs/streaming-chat-completion)
+
+```typescript
+// Non-streaming API
+const out = await hf.chatCompletion({
+  model: "meta-llama/Llama-3.1-8B-Instruct",
+  messages: [{ role: "user", content: "Hello, nice to meet you!" }],
+  max_tokens: 512,
+  temperature: 0.1,
+});
+
+// Streaming API
+let out = "";
+for await (const chunk of hf.chatCompletionStream({
+  model: "meta-llama/Llama-3.1-8B-Instruct",
+  messages: [
+    { role: "user", content: "Can you help me solve an equation?" },
+  ],
+  max_tokens: 512,
+  temperature: 0.1,
+})) {
+  if (chunk.choices && chunk.choices.length > 0) {
+    out += chunk.choices[0].delta.content;
+  }
+}
+```
+
+It's also possible to call Mistral or OpenAI endpoints directly:
+
+```typescript
+const openai = new HfInference(OPENAI_TOKEN).endpoint("https://api.openai.com");
+
+let out = "";
+for await (const chunk of openai.chatCompletionStream({
+  model: "gpt-3.5-turbo",
+  messages: [
+    { role: "user", content: "Complete the equation 1+1= ,just the answer" },
+  ],
+  max_tokens: 500,
+  temperature: 0.1,
+  seed: 0,
+})) {
+  if (chunk.choices && chunk.choices.length > 0) {
+    out += chunk.choices[0].delta.content;
+  }
+}
+
+// For mistral AI:
+// endpointUrl: "https://api.mistral.ai"
+// model: "mistral-tiny"
+```
 
 ### Fill Mask
 
@@ -131,27 +206,6 @@ await hf.textClassification({
 })
 ```
 
-### Text Generation
-
-Generates text from an input prompt.
-
-[Demo](https://huggingface.co/spaces/huggingfacejs/streaming-text-generation)
-
-```typescript
-await hf.textGeneration({
-  model: 'gpt2',
-  inputs: 'The answer to the universe is'
-})
-
-for await (const output of hf.textGenerationStream({
-  model: "google/flan-t5-xxl",
-  inputs: 'repeat "one two three four"',
-  parameters: { max_new_tokens: 250 }
-})) {
-  console.log(output.token.text, output.generated_text);
-}
-```
-
 ### Token Classification
 
 Used for sentence parsing, either grammatical, or Named Entity Recognition (NER) to understand keywords contained within text.
@@ -177,9 +231,9 @@ await hf.translation({
   model: 'facebook/mbart-large-50-many-to-many-mmt',
   inputs: textToTranslate,
   parameters: {
-		"src_lang": "en_XX",
-		"tgt_lang": "fr_XX"
-	}
+  "src_lang": "en_XX",
+  "tgt_lang": "fr_XX"
+ }
 })
 ```
 
@@ -340,11 +394,8 @@ Creates an image from a text prompt.
 
 ```typescript
 await hf.textToImage({
-  inputs: 'award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]',
-  model: 'stabilityai/stable-diffusion-2',
-  parameters: {
-    negative_prompt: 'blurry',
-  }
+  model: 'black-forest-labs/FLUX.1-dev',
+  inputs: 'a picture of a green bird'
 })
 ```
 
@@ -497,6 +548,26 @@ for await (const output of hf.streamingRequest({
 }
 ```
 
+You can use any Chat Completion API-compatible provider with the `chatCompletion` method.
+
+```typescript
+// Chat Completion Example
+const MISTRAL_KEY = process.env.MISTRAL_KEY;
+const hf = new HfInference(MISTRAL_KEY);
+const ep = hf.endpoint("https://api.mistral.ai");
+const stream = ep.chatCompletionStream({
+  model: "mistral-tiny",
+  messages: [{ role: "user", content: "Complete the equation one + one = , just the answer" }],
+});
+let out = "";
+for await (const chunk of stream) {
+  if (chunk.choices && chunk.choices.length > 0) {
+    out += chunk.choices[0].delta.content;
+    console.log(out);
+  }
+}
+```
+
 ## Custom Inference Endpoints
 
 Learn more about using your own inference endpoints [here](https://hf.co/docs/inference-endpoints/)
@@ -504,6 +575,40 @@ Learn more about using your own inference endpoints [here](https://hf.co/docs/in
 ```typescript
 const gpt2 = hf.endpoint('https://xyz.eu-west-1.aws.endpoints.huggingface.cloud/gpt2');
 const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the universe is'});
+
+// Chat Completion Example
+const ep = hf.endpoint(
+  "https://api-inference.huggingface.co/models/meta-llama/Llama-3.1-8B-Instruct"
+);
+const stream = ep.chatCompletionStream({
+  model: "tgi",
+  messages: [{ role: "user", content: "Complete the equation 1+1= ,just the answer" }],
+  max_tokens: 500,
+  temperature: 0.1,
+  seed: 0,
+});
+let out = "";
+for await (const chunk of stream) {
+  if (chunk.choices && chunk.choices.length > 0) {
+    out += chunk.choices[0].delta.content;
+    console.log(out);
+  }
+}
+```
+
+By default, all calls to the inference endpoint will wait until the model is
+loaded. When [scaling to
+0](https://huggingface.co/docs/inference-endpoints/en/autoscaling#scaling-to-0)
+is enabled on the endpoint, this can result in non-trivial waiting time. If
+you'd rather disable this behavior and handle the endpoint's returned 500 HTTP
+errors yourself, you can do so like so:
+
+```typescript
+const gpt2 = hf.endpoint('https://xyz.eu-west-1.aws.endpoints.huggingface.cloud/gpt2');
+const { generated_text } = await gpt2.textGeneration(
+  {inputs: 'The answer to the universe is'},
+  {retry_on_error: false},
+);
 ```
 
 ## Running tests
@@ -517,3 +622,7 @@ HF_TOKEN="your access token" pnpm run test
 We have an informative documentation project called [Tasks](https://huggingface.co/tasks) to list available models for each task and explain how each task works in detail.
 
 It also contains demos, example outputs, and other resources should you want to dig deeper into the ML side of things.
+
+## Dependencies
+
+- `@huggingface/tasks` : Typings only

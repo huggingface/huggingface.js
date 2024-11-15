@@ -3,13 +3,11 @@
 	"$schema": "http://json-schema.org/draft-06/schema#",
 	"description": "Outputs of inference for the Text To Image task",
 	"title": "TextToImageOutput",
-	"type": "array",
-	"items": {
-		"properties": {
-			"image": {
-				"description": "The generated image"
-			}
-		},
-		"required": ["image"]
-	}
+	"type": "object",
+	"properties": {
+		"image": {
+			"description": "The generated image returned as raw bytes in the payload."
+		}
+	},
+	"required": ["image"]
 }

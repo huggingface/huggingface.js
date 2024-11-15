@@ -91,7 +91,7 @@
 				estimatedTime: res.estimatedTime,
 			};
 			getOutput({ withModelLoading: true });
-		} else if (res.status === "error") {
+		} else if (res.status === "error" && !isOnLoadCall) {
 			error = res.error;
 		}
 	}
@@ -129,7 +129,7 @@
 		getOutput({ ...opts.inferenceOpts, exampleOutput });
 	}
 
-	function validateExample(sample: WidgetExample): sample is WidgetExampleTextInput<WidgetExampleOutputLabels> {
+	function validateExample(sample: unknown): sample is WidgetExampleTextInput<WidgetExampleOutputLabels> {
 		return isTextInput(sample) && (!sample.output || isValidOutputLabels(sample.output));
 	}
 </script>
@@ -142,15 +142,8 @@
 			Mask token: <code>{model.mask_token}</code>
 		</div>
 	{/if}
-	<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} />
-	<WidgetSubmitBtn
-		classNames="mt-2"
-		{isLoading}
-		{isDisabled}
-		onClick={() => {
-			getOutput();
-		}}
-	/>
+	<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} on:cmdEnter={() => getOutput()} />
+	<WidgetSubmitBtn classNames="mt-2" {isLoading} {isDisabled} on:run={() => getOutput()} />
 
 	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
 

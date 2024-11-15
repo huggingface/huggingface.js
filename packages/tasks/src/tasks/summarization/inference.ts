@@ -6,53 +6,52 @@
 
 /**
  * Inputs for Summarization inference
- *
- * Inputs for Text2text Generation inference
  */
 export interface SummarizationInput {
 	/**
-	 * The input text data
+	 * The input text to summarize.
 	 */
-	data: string;
+	inputs: string;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters.
 	 */
-	parameters?: Text2TextGenerationParameters;
+	parameters?: SummarizationParameters;
 	[property: string]: unknown;
 }
 
 /**
- * Additional inference parameters
+ * Additional inference parameters.
  *
- * Additional inference parameters for Text2text Generation
+ * Additional inference parameters for summarization.
  */
-export interface Text2TextGenerationParameters {
+export interface SummarizationParameters {
 	/**
 	 * Whether to clean up the potential extra spaces in the text output.
 	 */
-	cleanUpTokenizationSpaces?: boolean;
+	clean_up_tokenization_spaces?: boolean;
 	/**
-	 * Additional parametrization of the text generation algorithm
+	 * Additional parametrization of the text generation algorithm.
 	 */
-	generateParameters?: { [key: string]: unknown };
+	generate_parameters?: { [key: string]: unknown };
 	/**
-	 * The truncation strategy to use
+	 * The truncation strategy to use.
 	 */
-	truncation?: Text2TextGenerationTruncationStrategy;
+	truncation?: SummarizationTruncationStrategy;
 	[property: string]: unknown;
 }
 
-export type Text2TextGenerationTruncationStrategy = "do_not_truncate" | "longest_first" | "only_first" | "only_second";
+/**
+ * The truncation strategy to use.
+ */
+export type SummarizationTruncationStrategy = "do_not_truncate" | "longest_first" | "only_first" | "only_second";
 
 /**
- * Outputs for Summarization inference
- *
- * Outputs of inference for the Text2text Generation task
+ * Outputs of inference for the Summarization task
  */
 export interface SummarizationOutput {
 	/**
-	 * The generated text.
+	 * The summarized text.
 	 */
-	generatedText: string;
+	summary_text: string;
 	[property: string]: unknown;
 }

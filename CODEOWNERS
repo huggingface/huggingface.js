@@ -4,11 +4,7 @@
 
 # Ownership for the Tasks Package
 
-/packages/tasks/ @osanseviero @SBrandeis @gary149 @Wauplin
-
-# Ownership for the Widgets Package
-
-/packages/widgets/ @mishig25 @SBrandeis
+/packages/tasks/ @SBrandeis @gary149 @Wauplin @julien-c @pcuenca @ngxson
 
 # Ownership for the Hub Package
 
@@ -21,3 +17,10 @@
 # Ownership for the Jinja Package
 
 /packages/jinja/ @xenova
+
+# Ownership for the gguf Package
+
+/packages/gguf @mishig25 @ngxson @julien-c
+
+# Ownership for the space-header Package
+/packages/space-header @enzostvs

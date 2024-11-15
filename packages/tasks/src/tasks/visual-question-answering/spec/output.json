@@ -16,6 +16,6 @@
 				"description": "The associated score / probability"
 			}
 		},
-		"required": ["label", "score"]
+		"required": ["score"]
 	}
 }

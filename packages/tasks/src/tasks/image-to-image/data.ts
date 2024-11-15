@@ -1,4 +1,4 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	datasets: [
@@ -45,8 +45,8 @@ const taskData: TaskDataCustom = {
 	],
 	models: [
 		{
-			description: "A model that enhances images captured in low light conditions.",
-			id: "keras-io/low-light-image-enhancement",
+			description: "An image-to-image model to improve image resolution.",
+			id: "fal/AuraSR-v2",
 		},
 		{
 			description: "A model that increases the resolution of an image.",
@@ -93,8 +93,8 @@ const taskData: TaskDataCustom = {
 		},
 	],
 	summary:
-		"Image-to-image is the task of transforming a source image to match the characteristics of a target image or a target image domain. Any image manipulation and enhancement is possible with image to image models.",
-	widgetModels: ["lllyasviel/sd-controlnet-canny"],
+		"Image-to-image is the task of transforming an input image through a variety of possible manipulations and enhancements, such as super-resolution, image inpainting, colorization, and more.",
+	widgetModels: ["stabilityai/stable-diffusion-2-inpainting"],
 	youtubeId: "",
 };
 

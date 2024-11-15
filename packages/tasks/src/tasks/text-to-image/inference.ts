@@ -9,9 +9,9 @@
  */
 export interface TextToImageInput {
 	/**
-	 * The input text data (sometimes called "prompt"
+	 * The input text data (sometimes called "prompt")
 	 */
-	data: string;
+	inputs: string;
 	/**
 	 * Additional inference parameters
 	 */
@@ -26,27 +26,31 @@ export interface TextToImageInput {
  */
 export interface TextToImageParameters {
 	/**
-	 * For diffusion models. A higher guidance scale value encourages the model to generate
-	 * images closely linked to the text prompt at the expense of lower image quality.
+	 * A higher guidance scale value encourages the model to generate images closely linked to
+	 * the text prompt, but values too high may cause saturation and other artifacts.
 	 */
-	guidanceScale?: number;
+	guidance_scale?: number;
 	/**
 	 * One or several prompt to guide what NOT to include in image generation.
 	 */
-	negativePrompt?: string[];
+	negative_prompt?: string[];
 	/**
-	 * For diffusion models. The number of denoising steps. More denoising steps usually lead to
-	 * a higher quality image at the expense of slower inference.
+	 * The number of denoising steps. More denoising steps usually lead to a higher quality
+	 * image at the expense of slower inference.
 	 */
-	numInferenceSteps?: number;
+	num_inference_steps?: number;
 	/**
-	 * For diffusion models. Override the scheduler with a compatible one
+	 * Override the scheduler with a compatible one.
 	 */
 	scheduler?: string;
 	/**
+	 * Seed for the random number generator.
+	 */
+	seed?: number;
+	/**
 	 * The size in pixel of the output image
 	 */
-	targetSize?: TargetSize;
+	target_size?: TargetSize;
 	[property: string]: unknown;
 }
 
@@ -62,11 +66,9 @@ export interface TargetSize {
 /**
  * Outputs of inference for the Text To Image task
  */
-export type TextToImageOutput = unknown[] | boolean | number | number | null | TextToImageOutputObject | string;
-
-export interface TextToImageOutputObject {
+export interface TextToImageOutput {
 	/**
-	 * The generated image
+	 * The generated image returned as raw bytes in the payload.
 	 */
 	image: unknown;
 	[property: string]: unknown;

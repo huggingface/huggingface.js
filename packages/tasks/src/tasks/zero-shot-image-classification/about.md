@@ -69,9 +69,8 @@ The highest probability is 0.995 for the label cat and dog
 
 ## Useful Resources
 
-You can contribute useful resources about this task [here](https://github.com/huggingface/hub-docs/blob/main/tasks/src/zero-shot-image-classification/about.md).
-
-Check out [Zero-shot image classification task guide](https://huggingface.co/docs/transformers/tasks/zero_shot_image_classification).
+- [Zero-shot image classification task guide](https://huggingface.co/docs/transformers/tasks/zero_shot_image_classification).
+- [Image-text Similarity Search](https://huggingface.co/learn/cookbook/faiss_with_hf_datasets_and_clip)
 
 This page was made possible thanks to the efforts of [Shamima Hossain](https://huggingface.co/Shamima), [Haider Zaidi
 ](https://huggingface.co/chefhaider) and [Paarth Bhatnagar](https://huggingface.co/Paarth).

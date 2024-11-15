@@ -1,8 +1,18 @@
 # Tasks
 
-This package contains data used for https://huggingface.co/tasks.
+This package contains the definition files (written in Typescript) for the huggingface.co hub's:
 
-## Philosophy behind Tasks
+- **pipeline types** (a.k.a. **task types**) - used to determine which widget to display on the model page, and which inference API to run.
+- **default widget inputs** - when they aren't provided in the model card.
+- definitions and UI elements for **model and dataset libraries**.
+
+Please add any missing ones to these definitions by opening a PR. Thanks 🔥
+
+⚠️ The hub's definitive doc is at https://huggingface.co/docs/hub.
+
+## Definition of Tasks
+
+This package also contains data used to define https://huggingface.co/tasks.
 
 The Task pages are made to lower the barrier of entry to understand a task that can be solved with machine learning and use or train a model to accomplish it. It's a collaborative documentation effort made to help out software developers, social scientists, or anyone with no background in machine learning that is interested in understanding how machine learning models can be used to solve a problem. 
 
@@ -18,17 +28,5 @@ We have a [`dataset`](https://huggingface.co/datasets/huggingfacejs/tasks) that 
 ![Libraries of a Task](https://huggingface.co/datasets/huggingfacejs/tasks/resolve/main/contribution-guide/libraries.png)
 
 This might seem overwhelming, but you don't necessarily need to add all of these in one pull request or on your own, you can simply contribute one section. Feel free to ask for help whenever you need. 
-
-## Other data
-
-This package contains the definition files (written in Typescript) for the huggingface.co hub's:
-
-- **pipeline types** a.k.a. **task types** (used to determine which widget to display on the model page, and which inference API to run)
-- **default widget inputs** (when they aren't provided in the model card)
-- definitions and UI elements for **third party libraries**.
-
-Please add to any of those definitions by opening a PR. Thanks 🔥
-
-⚠️ The hub's definitive doc is at https://huggingface.co/docs/hub.
 
 ## Feedback (feature requests, bugs, etc.) is super welcome 💙💚💛💜♥️🧡

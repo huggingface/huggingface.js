@@ -13,13 +13,15 @@ export async function* streamingRequest<T>(
 		task?: string | InferenceTask;
 		/** To load default model if needed */
 		taskHint?: InferenceTask;
+		/** Is chat completion compatible */
+		chatCompletion?: boolean;
 	}
 ): AsyncGenerator<T> {
 	const { url, info } = await makeRequestOptions({ ...args, stream: true }, options);
 	const response = await (options?.fetch ?? fetch)(url, info);
 
 	if (options?.retry_on_error !== false && response.status === 503 && !options?.wait_for_model) {
-		return streamingRequest(args, {
+		return yield* streamingRequest(args, {
 			...options,
 			wait_for_model: true,
 		});
@@ -27,6 +29,9 @@ export async function* streamingRequest<T>(
 	if (!response.ok) {
 		if (response.headers.get("Content-Type")?.startsWith("application/json")) {
 			const output = await response.json();
+			if ([400, 422, 404, 500].includes(response.status) && options?.chatCompletion) {
+				throw new Error(`Server ${args.model} does not seem to support chat completion. Error: ${output.error}`);
+			}
 			if (output.error) {
 				throw new Error(output.error);
 			}
@@ -67,6 +72,9 @@ export async function* streamingRequest<T>(
 			onChunk(value);
 			for (const event of events) {
 				if (event.data.length > 0) {
+					if (event.data === "[DONE]") {
+						return;
+					}
 					const data = JSON.parse(event.data);
 					if (typeof data === "object" && data !== null && "error" in data) {
 						throw new Error(data.error);

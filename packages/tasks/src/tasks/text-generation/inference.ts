@@ -3,83 +3,198 @@
  *
  * Using src/scripts/inference-codegen
  */
+
 /**
- * Inputs for Text Generation inference
+ * Text Generation Input.
+ *
+ * Auto-generated from TGI specs.
+ * For more details, check out
+ * https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/scripts/inference-tgi-import.ts.
  */
 export interface TextGenerationInput {
-	/**
-	 * The text to initialize generation with
-	 */
-	data: string;
-	/**
-	 * Additional inference parameters
-	 */
-	parameters?: TextGenerationParameters;
+	inputs: string;
+	parameters?: TextGenerationInputGenerateParameters;
+	stream?: boolean;
 	[property: string]: unknown;
 }
-/**
- * Additional inference parameters
- *
- * Additional inference parameters for Text Generation
- */
-export interface TextGenerationParameters {
+
+export interface TextGenerationInputGenerateParameters {
 	/**
-	 * Whether to use logit sampling (true) or greedy search (false).
+	 * Lora adapter id
 	 */
-	doSample?: boolean;
+	adapter_id?: string;
 	/**
-	 * Maximum number of generated tokens.
+	 * Generate best_of sequences and return the one if the highest token logprobs.
 	 */
-	maxNewTokens?: number;
+	best_of?: number;
 	/**
-	 * The parameter for repetition penalty. A value of 1.0 means no penalty. See [this
-	 * paper](https://hf.co/papers/1909.05858) for more details.
+	 * Whether to return decoder input token logprobs and ids.
 	 */
-	repetitionPenalty?: number;
+	decoder_input_details?: boolean;
 	/**
-	 * Whether to prepend the prompt to the generated text.
+	 * Whether to return generation details.
 	 */
-	returnFullText?: boolean;
+	details?: boolean;
 	/**
-	 * Stop generating tokens if a member of `stop_sequences` is generated.
+	 * Activate logits sampling.
 	 */
-	stopSequences?: string[];
+	do_sample?: boolean;
 	/**
-	 * The value used to modulate the logits distribution.
+	 * The parameter for frequency penalty. 1.0 means no penalty
+	 * Penalize new tokens based on their existing frequency in the text so far,
+	 * decreasing the model's likelihood to repeat the same line verbatim.
+	 */
+	frequency_penalty?: number;
+	grammar?: TextGenerationInputGrammarType;
+	/**
+	 * Maximum number of tokens to generate.
+	 */
+	max_new_tokens?: number;
+	/**
+	 * The parameter for repetition penalty. 1.0 means no penalty.
+	 * See [this paper](https://arxiv.org/pdf/1909.05858.pdf) for more details.
+	 */
+	repetition_penalty?: number;
+	/**
+	 * Whether to prepend the prompt to the generated text
+	 */
+	return_full_text?: boolean;
+	/**
+	 * Random sampling seed.
+	 */
+	seed?: number;
+	/**
+	 * Stop generating tokens if a member of `stop` is generated.
+	 */
+	stop?: string[];
+	/**
+	 * The value used to module the logits distribution.
 	 */
 	temperature?: number;
 	/**
 	 * The number of highest probability vocabulary tokens to keep for top-k-filtering.
 	 */
-	topK?: number;
+	top_k?: number;
 	/**
-	 * If set to < 1, only the smallest set of most probable tokens with probabilities that add
-	 * up to `top_p` or higher are kept for generation.
+	 * The number of highest probability vocabulary tokens to keep for top-n-filtering.
 	 */
-	topP?: number;
+	top_n_tokens?: number;
 	/**
-	 * Truncate input tokens to the given size.
+	 * Top-p value for nucleus sampling.
+	 */
+	top_p?: number;
+	/**
+	 * Truncate inputs tokens to the given size.
 	 */
 	truncate?: number;
 	/**
-	 * Typical Decoding mass. See [Typical Decoding for Natural Language
-	 * Generation](https://hf.co/papers/2202.00666) for more information
+	 * Typical Decoding mass
+	 * See [Typical Decoding for Natural Language Generation](https://arxiv.org/abs/2202.00666)
+	 * for more information.
 	 */
-	typicalP?: number;
+	typical_p?: number;
 	/**
-	 * Watermarking with [A Watermark for Large Language Models](https://hf.co/papers/2301.10226)
+	 * Watermarking with [A Watermark for Large Language
+	 * Models](https://arxiv.org/abs/2301.10226).
 	 */
 	watermark?: boolean;
 	[property: string]: unknown;
 }
-export type TextGenerationOutput = TextGenerationOutputElement[];
-/**
- * Outputs for Text Generation inference
- */
-export interface TextGenerationOutputElement {
+
+export interface TextGenerationInputGrammarType {
+	type: Type;
 	/**
-	 * The generated text
+	 * A string that represents a [JSON Schema](https://json-schema.org/).
+	 *
+	 * JSON Schema is a declarative language that allows to annotate JSON documents
+	 * with types and descriptions.
 	 */
-	generatedText: string;
+	value: unknown;
+	[property: string]: unknown;
+}
+
+export type Type = "json" | "regex";
+
+/**
+ * Text Generation Output.
+ *
+ * Auto-generated from TGI specs.
+ * For more details, check out
+ * https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/scripts/inference-tgi-import.ts.
+ */
+export interface TextGenerationOutput {
+	details?: TextGenerationOutputDetails;
+	generated_text: string;
+	[property: string]: unknown;
+}
+
+export interface TextGenerationOutputDetails {
+	best_of_sequences?: TextGenerationOutputBestOfSequence[];
+	finish_reason: TextGenerationOutputFinishReason;
+	generated_tokens: number;
+	prefill: TextGenerationOutputPrefillToken[];
+	seed?: number;
+	tokens: TextGenerationOutputToken[];
+	top_tokens?: Array<TextGenerationOutputToken[]>;
+	[property: string]: unknown;
+}
+
+export interface TextGenerationOutputBestOfSequence {
+	finish_reason: TextGenerationOutputFinishReason;
+	generated_text: string;
+	generated_tokens: number;
+	prefill: TextGenerationOutputPrefillToken[];
+	seed?: number;
+	tokens: TextGenerationOutputToken[];
+	top_tokens?: Array<TextGenerationOutputToken[]>;
+	[property: string]: unknown;
+}
+
+export type TextGenerationOutputFinishReason = "length" | "eos_token" | "stop_sequence";
+
+export interface TextGenerationOutputPrefillToken {
+	id: number;
+	logprob: number;
+	text: string;
+	[property: string]: unknown;
+}
+
+export interface TextGenerationOutputToken {
+	id: number;
+	logprob: number;
+	special: boolean;
+	text: string;
+	[property: string]: unknown;
+}
+
+/**
+ * Text Generation Stream Output.
+ *
+ * Auto-generated from TGI specs.
+ * For more details, check out
+ * https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/scripts/inference-tgi-import.ts.
+ */
+export interface TextGenerationStreamOutput {
+	details?: TextGenerationStreamOutputStreamDetails;
+	generated_text?: string;
+	index: number;
+	token: TextGenerationStreamOutputToken;
+	top_tokens?: TextGenerationStreamOutputToken[];
+	[property: string]: unknown;
+}
+
+export interface TextGenerationStreamOutputStreamDetails {
+	finish_reason: TextGenerationOutputFinishReason;
+	generated_tokens: number;
+	input_length: number;
+	seed?: number;
+	[property: string]: unknown;
+}
+
+export interface TextGenerationStreamOutputToken {
+	id: number;
+	logprob: number;
+	special: boolean;
+	text: string;
 	[property: string]: unknown;
 }

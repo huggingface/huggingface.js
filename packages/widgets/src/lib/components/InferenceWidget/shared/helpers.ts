@@ -1,7 +1,9 @@
 import type { ModelData, WidgetExampleAttribute } from "@huggingface/tasks";
 import { parseJSON } from "../../../utils/ViewUtils.js";
-import type { ModelLoadInfo, TableData } from "./types.js";
+import { ComputeType, type ModelLoadInfo, type TableData } from "./types.js";
 import { LoadState } from "./types.js";
+import { isLoggedIn } from "../stores.js";
+import { get } from "svelte/store";
 
 const KEYS_TEXT: WidgetExampleAttribute[] = ["text", "context", "candidate_labels"];
 const KEYS_TABLE: WidgetExampleAttribute[] = ["table", "structured_data"];
@@ -84,7 +86,7 @@ export async function callInferenceApi<T>(
 	requestBody: Record<string, unknown>,
 	apiToken = "",
 	outputParsingFn: (x: unknown) => T,
-	waitForModel = false, // If true, the server will only respond once the model has been loaded on Inference Endpoints (serverless)
+	waitForModel = false, // If true, the server will only respond once the model has been loaded on Inference API (serverless)
 	includeCredentials = false,
 	isOnLoadCall = false, // If true, the server will try to answer from cache and not do anything if not
 	useCache = true
@@ -102,10 +104,10 @@ export async function callInferenceApi<T>(
 	if (waitForModel) {
 		headers.set("X-Wait-For-Model", "true");
 	}
-	if (useCache === false) {
+	if (useCache === false && get(isLoggedIn)) {
 		headers.set("X-Use-Cache", "false");
 	}
-	if (isOnLoadCall) {
+	if (isOnLoadCall || !get(isLoggedIn)) {
 		headers.set("X-Load-Model", "0");
 	}
 
@@ -173,18 +175,28 @@ export async function getModelLoadInfo(
 	const response = await fetch(`${url}/status/${repoId}`, {
 		credentials: includeCredentials ? "include" : "same-origin",
 	});
-	const output = await response.json();
+	const output: {
+		state: LoadState;
+		compute_type: ComputeType | Record<ComputeType, { [key in ComputeType]?: string } & { count: number }>;
+		loaded: boolean;
+		error: Error;
+	} = await response.json();
 	if (response.ok && typeof output === "object" && output.loaded !== undefined) {
 		// eslint-disable-next-line @typescript-eslint/naming-convention
-		const { state, compute_type } = output;
-		return { compute_type, state };
+		const compute_type =
+			typeof output.compute_type === "string"
+				? output.compute_type
+				: output.compute_type["gpu"]
+				  ? ComputeType.GPU
+				  : ComputeType.CPU;
+		return { compute_type, state: output.state };
 	} else {
 		console.warn(response.status, output.error);
 		return { state: LoadState.Error };
 	}
 }
 
-// Extend requestBody with user supplied parameters for Inference Endpoints (serverless)
+// Extend requestBody with user supplied parameters for Inference API (serverless)
 export function addInferenceParameters(requestBody: Record<string, unknown>, model: ModelData): void {
 	const inference = model?.cardData?.inference;
 	if (typeof inference === "object") {

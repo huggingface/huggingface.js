@@ -5,7 +5,7 @@
 	"title": "TokenClassificationInput",
 	"type": "object",
 	"properties": {
-		"data": {
+		"inputs": {
 			"description": "The input text data",
 			"type": "string"
 		},
@@ -20,7 +20,7 @@
 			"description": "Additional inference parameters for Token Classification",
 			"type": "object",
 			"properties": {
-				"ignoreLabels": {
+				"ignore_labels": {
 					"type": "array",
 					"items": {
 						"type": "string"
@@ -31,7 +31,7 @@
 					"type": "integer",
 					"description": "The number of overlapping tokens between chunks when splitting the input text."
 				},
-				"aggregationStrategy": {
+				"aggregation_strategy": {
 					"title": "TokenClassificationAggregationStrategy",
 					"type": "string",
 					"description": "The strategy used to fuse tokens based on model predictions",
@@ -61,5 +61,5 @@
 			}
 		}
 	},
-	"required": ["data"]
+	"required": ["inputs"]
 }

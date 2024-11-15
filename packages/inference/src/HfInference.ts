@@ -2,6 +2,9 @@ import * as tasks from "./tasks";
 import type { Options, RequestArgs } from "./types";
 import type { DistributiveOmit } from "./utils/distributive-omit";
 
+/* eslint-disable @typescript-eslint/no-empty-interface */
+/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
+
 type Task = typeof tasks;
 
 type TaskWithNoAccessToken = {
@@ -11,9 +14,9 @@ type TaskWithNoAccessToken = {
 	) => ReturnType<Task[key]>;
 };
 
-type TaskWithNoAccessTokenNoModel = {
+type TaskWithNoAccessTokenNoEndpointUrl = {
 	[key in keyof Task]: (
-		args: DistributiveOmit<Parameters<Task[key]>[0], "accessToken" | "model">,
+		args: DistributiveOmit<Parameters<Task[key]>[0], "accessToken" | "endpointUrl">,
 		options?: Parameters<Task[key]>[1]
 	) => ReturnType<Task[key]>;
 };
@@ -54,14 +57,12 @@ export class HfInferenceEndpoint {
 				enumerable: false,
 				value: (params: RequestArgs, options: Options) =>
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					fn({ ...params, accessToken, model: endpointUrl } as any, { ...defaultOptions, ...options }),
+					fn({ ...params, accessToken, endpointUrl } as any, { ...defaultOptions, ...options }),
 			});
 		}
 	}
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface HfInference extends TaskWithNoAccessToken {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface HfInferenceEndpoint extends TaskWithNoAccessTokenNoModel {}
+export interface HfInferenceEndpoint extends TaskWithNoAccessTokenNoEndpointUrl {}

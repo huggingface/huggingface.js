@@ -1,5 +1,5 @@
-import { isFrontend } from "../../../shared";
 import { WebBlob } from "./WebBlob";
+import { isFrontend } from "./isFrontend";
 
 /**
  * This function allow to retrieve either a FileBlob or a WebBlob from a URL.

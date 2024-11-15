@@ -25,6 +25,7 @@ export default defineConfig(({ mode }) => {
 					emitCss: false,
 					compilerOptions: {
 						hydratable: true,
+						// @ts-expect-error to check cc @krampstudio
 						generate: isSSR ? "ssr" : "dom",
 					},
 				}),

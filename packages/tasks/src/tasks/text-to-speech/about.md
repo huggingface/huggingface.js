@@ -58,6 +58,6 @@ await inference.textToSpeech({
 
 - [Hugging Face Audio Course](https://huggingface.co/learn/audio-course/chapter6/introduction)
 - [ML for Audio Study Group - Text to Speech Deep Dive](https://www.youtube.com/watch?v=aLBedWj-5CQ)
-- [An introduction to SpeechT5, a multi-purpose speech recognition and synthesis model](https://huggingface.co/blog/speecht5).
-- [A guide on Fine-tuning Whisper For Multilingual ASR with 🤗Transformers](https://huggingface.co/blog/fine-tune-whisper)
 - [Speech Synthesis, Recognition, and More With SpeechT5](https://huggingface.co/blog/speecht5)
+- [Optimizing a Text-To-Speech model using 🤗 Transformers](https://huggingface.co/blog/optimizing-bark)
+- [Train your own TTS models with Parler-TTS](https://github.com/huggingface/parler-tts)

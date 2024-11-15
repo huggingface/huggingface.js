@@ -8,9 +8,10 @@
  */
 export interface ImageClassificationInput {
 	/**
-	 * The input image data
+	 * The input image data as a base64-encoded string. If no `parameters` are provided, you can
+	 * also provide the image data as a raw bytes payload.
 	 */
-	data: unknown;
+	inputs: string;
 	/**
 	 * Additional inference parameters
 	 */
@@ -23,11 +24,11 @@ export interface ImageClassificationInput {
  * Additional inference parameters for Image Classification
  */
 export interface ImageClassificationParameters {
-	functionToApply?: ClassificationOutputTransform;
+	function_to_apply?: ClassificationOutputTransform;
 	/**
 	 * When specified, limits the output to the top K most probable classes.
 	 */
-	topK?: number;
+	top_k?: number;
 	[property: string]: unknown;
 }
 /**

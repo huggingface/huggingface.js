@@ -5,8 +5,9 @@
 	"title": "AudioClassificationInput",
 	"type": "object",
 	"properties": {
-		"data": {
-			"description": "The input audio data"
+		"inputs": {
+			"description": "The input audio data as a base64-encoded string. If no `parameters` are provided, you can also provide the audio data as a raw bytes payload.",
+			"type": "string"
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
@@ -19,16 +20,16 @@
 			"description": "Additional inference parameters for Audio Classification",
 			"type": "object",
 			"properties": {
-				"functionToApply": {
+				"function_to_apply": {
 					"title": "AudioClassificationOutputTransform",
 					"$ref": "/inference/schemas/common-definitions.json#/definitions/ClassificationOutputTransform"
 				},
-				"topK": {
+				"top_k": {
 					"type": "integer",
 					"description": "When specified, limits the output to the top K most probable classes."
 				}
 			}
 		}
 	},
-	"required": ["data"]
+	"required": ["inputs"]
 }

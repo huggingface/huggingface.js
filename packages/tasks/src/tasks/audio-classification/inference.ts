@@ -8,9 +8,10 @@
  */
 export interface AudioClassificationInput {
 	/**
-	 * The input audio data
+	 * The input audio data as a base64-encoded string. If no `parameters` are provided, you can
+	 * also provide the audio data as a raw bytes payload.
 	 */
-	data: unknown;
+	inputs: string;
 	/**
 	 * Additional inference parameters
 	 */
@@ -23,11 +24,11 @@ export interface AudioClassificationInput {
  * Additional inference parameters for Audio Classification
  */
 export interface AudioClassificationParameters {
-	functionToApply?: ClassificationOutputTransform;
+	function_to_apply?: ClassificationOutputTransform;
 	/**
 	 * When specified, limits the output to the top K most probable classes.
 	 */
-	topK?: number;
+	top_k?: number;
 	[property: string]: unknown;
 }
 /**
@@ -40,7 +41,7 @@ export type AudioClassificationOutput = AudioClassificationOutputElement[];
  */
 export interface AudioClassificationOutputElement {
 	/**
-	 * The predicted class label (model specific).
+	 * The predicted class label.
 	 */
 	label: string;
 	/**

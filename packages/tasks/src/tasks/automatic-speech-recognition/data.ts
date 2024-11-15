@@ -1,18 +1,22 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	datasets: [
 		{
-			description: "18,000 hours of multilingual audio-text dataset in 108 languages.",
-			id: "mozilla-foundation/common_voice_13_0",
+			description: "31,175 hours of multilingual audio-text dataset in 108 languages.",
+			id: "mozilla-foundation/common_voice_17_0",
 		},
 		{
-			description: "An English dataset with 1,000 hours of data.",
-			id: "librispeech_asr",
+			description: "Multilingual and diverse audio dataset with 101k hours of audio.",
+			id: "amphion/Emilia-Dataset",
 		},
 		{
-			description: "High quality, multi-speaker audio data and their transcriptions in various languages.",
-			id: "openslr",
+			description: "A dataset with 44.6k hours of English speaker data and 6k hours of other language speakers.",
+			id: "parler-tts/mls_eng",
+		},
+		{
+			description: "A multilingual audio dataset with 370K hours of audio.",
+			id: "espnet/yodas",
 		},
 	],
 	demo: {
@@ -47,12 +51,20 @@ const taskData: TaskDataCustom = {
 			id: "openai/whisper-large-v3",
 		},
 		{
-			description: "A good generic ASR model by MetaAI.",
-			id: "facebook/wav2vec2-base-960h",
+			description: "A good generic speech model by MetaAI for fine-tuning.",
+			id: "facebook/w2v-bert-2.0",
 		},
 		{
 			description: "An end-to-end model that performs ASR and Speech Translation by MetaAI.",
-			id: "facebook/s2t-small-mustc-en-fr-st",
+			id: "facebook/seamless-m4t-v2-large",
+		},
+		{
+			description: "A powerful multilingual ASR and Speech Translation model by Nvidia.",
+			id: "nvidia/canary-1b",
+		},
+		{
+			description: "Powerful speaker diarization model.",
+			id: "pyannote/speaker-diarization-3.1",
 		},
 	],
 	spaces: [
@@ -61,12 +73,16 @@ const taskData: TaskDataCustom = {
 			id: "hf-audio/whisper-large-v3",
 		},
 		{
-			description: "Fastest speech recognition application.",
-			id: "sanchit-gandhi/whisper-jax",
+			description: "Latest ASR model from Useful Sensors.",
+			id: "mrfakename/Moonshinex",
 		},
 		{
 			description: "A high quality speech and text translation model by Meta.",
 			id: "facebook/seamless_m4t",
+		},
+		{
+			description: "A powerful multilingual ASR and Speech Translation model by Nvidia",
+			id: "nvidia/canary-1b",
 		},
 	],
 	summary:

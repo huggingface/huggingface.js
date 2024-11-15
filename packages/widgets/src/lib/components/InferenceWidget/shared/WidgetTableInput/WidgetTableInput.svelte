@@ -1,20 +1,23 @@
 <script lang="ts">
 	import type { HighlightCoordinates } from "../types.js";
 
-	import { onMount, tick } from "svelte";
+	import { createEventDispatcher, onMount, tick } from "svelte";
 
 	import { scrollToMax } from "../../../../utils/ViewUtils.js";
 	import IconRow from "../../..//Icons/IconRow.svelte";
 
-	export let onChange: (table: (string | number)[][]) => void;
+	type Table = (string | number)[][];
+
 	export let highlighted: HighlightCoordinates;
-	export let table: (string | number)[][] = [[]];
+	export let table: Table = [[]];
 	export let canAddRow = true;
 	export let canAddCol = true;
 	export let isLoading = false;
 	export let isDisabled = false;
 
-	let initialTable: (string | number)[][] = [[]];
+	const dispatch = createEventDispatcher<{ change: Table }>();
+
+	let initialTable: Table = [[]];
 	let tableContainerEl: HTMLElement;
 
 	onMount(() => {
@@ -23,7 +26,7 @@
 
 	async function addCol() {
 		const updatedTable = table.map((row, colIndex) => [...row, colIndex === 0 ? `Header ${table[0].length + 1}` : ""]);
-		onChange(updatedTable);
+		dispatch("change", updatedTable);
 		await scrollTableToRight();
 	}
 
@@ -34,7 +37,7 @@
 
 	function addRow() {
 		const updatedTable = [...table, Array(table[0].length).fill("")];
-		onChange(updatedTable);
+		dispatch("change", updatedTable);
 	}
 
 	function editCell(e: Event, [x, y]: [number, number]) {
@@ -43,7 +46,7 @@
 		const updatedTable = table.map((row, rowIndex) =>
 			rowIndex === y ? row.map((col, colIndex) => (colIndex === x ? value : col)) : row
 		);
-		onChange(updatedTable);
+		dispatch("change", updatedTable);
 	}
 
 	function onKeyDown(e: KeyboardEvent) {
@@ -54,7 +57,7 @@
 
 	function resetTable() {
 		const updatedTable = initialTable;
-		onChange(updatedTable);
+		dispatch("change", updatedTable);
 	}
 </script>
 

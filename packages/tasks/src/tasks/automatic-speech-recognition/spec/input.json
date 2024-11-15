@@ -5,8 +5,9 @@
 	"title": "AutomaticSpeechRecognitionInput",
 	"type": "object",
 	"properties": {
-		"data": {
-			"description": "The input audio data"
+		"inputs": {
+			"description": "The input audio data as a base64-encoded string. If no `parameters` are provided, you can also provide the audio data as a raw bytes payload.",
+			"type": "string"
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
@@ -19,16 +20,16 @@
 			"description": "Additional inference parameters for Automatic Speech Recognition",
 			"type": "object",
 			"properties": {
-				"returnTimestamps": {
+				"return_timestamps": {
 					"type": "boolean",
 					"description": "Whether to output corresponding timestamps with the generated text"
 				},
-				"generate": {
+				"generation_parameters": {
 					"description": "Parametrization of the text generation process",
 					"$ref": "/inference/schemas/common-definitions.json#/definitions/GenerationParameters"
 				}
 			}
 		}
 	},
-	"required": ["data"]
+	"required": ["inputs"]
 }

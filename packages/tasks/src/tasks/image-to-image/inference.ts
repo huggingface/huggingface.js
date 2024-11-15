@@ -9,9 +9,10 @@
  */
 export interface ImageToImageInput {
 	/**
-	 * The input image data
+	 * The input image data as a base64-encoded string. If no `parameters` are provided, you can
+	 * also provide the image data as a raw bytes payload.
 	 */
-	data: unknown;
+	inputs: string;
 	/**
 	 * Additional inference parameters
 	 */
@@ -29,25 +30,25 @@ export interface ImageToImageParameters {
 	 * For diffusion models. A higher guidance scale value encourages the model to generate
 	 * images closely linked to the text prompt at the expense of lower image quality.
 	 */
-	guidanceScale?: number;
+	guidance_scale?: number;
 	/**
 	 * One or several prompt to guide what NOT to include in image generation.
 	 */
-	negativePrompt?: string[];
+	negative_prompt?: string[];
 	/**
 	 * For diffusion models. The number of denoising steps. More denoising steps usually lead to
 	 * a higher quality image at the expense of slower inference.
 	 */
-	numInferenceSteps?: number;
+	num_inference_steps?: number;
 	/**
-	 * The size in pixel of the output image
+	 * The size in pixel of the output image.
 	 */
-	targetSize?: TargetSize;
+	target_size?: TargetSize;
 	[property: string]: unknown;
 }
 
 /**
- * The size in pixel of the output image
+ * The size in pixel of the output image.
  */
 export interface TargetSize {
 	height: number;
@@ -60,7 +61,7 @@ export interface TargetSize {
  */
 export interface ImageToImageOutput {
 	/**
-	 * The output image
+	 * The output image returned as raw bytes in the payload.
 	 */
 	image?: unknown;
 	[property: string]: unknown;

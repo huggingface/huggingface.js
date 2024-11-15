@@ -4,19 +4,37 @@
  * Using src/scripts/inference-codegen
  */
 
-export type FeatureExtractionOutput = unknown[];
+export type FeatureExtractionOutput = Array<number[]>;
 
 /**
- * Inputs for Text Embedding inference
+ * Feature Extraction Input.
+ *
+ * Auto-generated from TEI specs.
+ * For more details, check out
+ * https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/scripts/inference-tei-import.ts.
  */
 export interface FeatureExtractionInput {
 	/**
-	 * The text to get the embeddings of
+	 * The text to embed.
 	 */
-	data: string;
+	inputs: string;
+	normalize?: boolean;
 	/**
-	 * Additional inference parameters
+	 * The name of the prompt that should be used by for encoding. If not set, no prompt
+	 * will be applied.
+	 *
+	 * Must be a key in the `Sentence Transformers` configuration `prompts` dictionary.
+	 *
+	 * For example if ``prompt_name`` is "query" and the ``prompts`` is {"query": "query: ",
+	 * ...},
+	 * then the sentence "What is the capital of France?" will be encoded as
+	 * "query: What is the capital of France?" because the prompt text will be prepended before
+	 * any text to encode.
 	 */
-	parameters?: { [key: string]: unknown };
+	prompt_name?: string;
+	truncate?: boolean;
+	truncation_direction?: FeatureExtractionInputTruncationDirection;
 	[property: string]: unknown;
 }
+
+export type FeatureExtractionInputTruncationDirection = "Left" | "Right";

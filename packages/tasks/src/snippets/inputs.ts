@@ -1,5 +1,6 @@
-import type { ModelData } from "../model-data";
-import type { PipelineType } from "../pipelines";
+import type { PipelineType } from "../pipelines.js";
+import type { ChatCompletionInputMessage } from "../tasks/index.js";
+import type { ModelDataMinimal } from "./types.js";
 
 const inputsZeroShotClassification = () =>
 	`"Hi, I recently bought a device from your company but it is not working as advertised and I would like to get reimbursed!"`;
@@ -9,59 +10,75 @@ const inputsTranslation = () => `"Меня зовут Вольфганг и я �
 const inputsSummarization = () =>
 	`"The tower is 324 metres (1,063 ft) tall, about the same height as an 81-storey building, and the tallest structure in Paris. Its base is square, measuring 125 metres (410 ft) on each side. During its construction, the Eiffel Tower surpassed the Washington Monument to become the tallest man-made structure in the world, a title it held for 41 years until the Chrysler Building in New York City was finished in 1930. It was the first structure to reach a height of 300 metres. Due to the addition of a broadcasting aerial at the top of the tower in 1957, it is now taller than the Chrysler Building by 5.2 metres (17 ft). Excluding transmitters, the Eiffel Tower is the second tallest free-standing structure in France after the Millau Viaduct."`;
 
-const inputsConversational = () =>
-	`{
-		"past_user_inputs": ["Which movie is the best ?"],
-		"generated_responses": ["It is Die Hard for sure."],
-		"text": "Can you explain why ?"
-	}`;
-
 const inputsTableQuestionAnswering = () =>
 	`{
-		"query": "How many stars does the transformers repository have?",
-		"table": {
-			"Repository": ["Transformers", "Datasets", "Tokenizers"],
-			"Stars": ["36542", "4512", "3934"],
-			"Contributors": ["651", "77", "34"],
-			"Programming language": [
-				"Python",
-				"Python",
-				"Rust, Python and NodeJS"
-			]
-		}
-	}`;
+	"query": "How many stars does the transformers repository have?",
+	"table": {
+		"Repository": ["Transformers", "Datasets", "Tokenizers"],
+		"Stars": ["36542", "4512", "3934"],
+		"Contributors": ["651", "77", "34"],
+		"Programming language": [
+			"Python",
+			"Python",
+			"Rust, Python and NodeJS"
+		]
+	}
+}`;
 
 const inputsVisualQuestionAnswering = () =>
 	`{
-		"image": "cat.png",
-		"question": "What is in this image?"
-	}`;
+	"image": "cat.png",
+	"question": "What is in this image?"
+}`;
 
 const inputsQuestionAnswering = () =>
 	`{
-		"question": "What is my name?",
-		"context": "My name is Clara and I live in Berkeley."
-	}`;
+	"question": "What is my name?",
+	"context": "My name is Clara and I live in Berkeley."
+}`;
 
 const inputsTextClassification = () => `"I like you. I love you"`;
 
 const inputsTokenClassification = () => `"My name is Sarah Jessica Parker but you can call me Jessica"`;
 
-const inputsTextGeneration = () => `"Can you please let us know more details about your "`;
+const inputsTextGeneration = (model: ModelDataMinimal): string | ChatCompletionInputMessage[] => {
+	if (model.tags.includes("conversational")) {
+		return model.pipeline_tag === "text-generation"
+			? [{ role: "user", content: "What is the capital of France?" }]
+			: [
+					{
+						role: "user",
+						content: [
+							{
+								type: "text",
+								text: "Describe this image in one sentence.",
+							},
+							{
+								type: "image_url",
+								image_url: {
+									url: "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg",
+								},
+							},
+						],
+					},
+			  ];
+	}
+	return `"Can you please let us know more details about your "`;
+};
 
 const inputsText2TextGeneration = () => `"The answer to the universe is"`;
 
-const inputsFillMask = (model: ModelData) => `"The answer to the universe is ${model.mask_token}."`;
+const inputsFillMask = (model: ModelDataMinimal) => `"The answer to the universe is ${model.mask_token}."`;
 
 const inputsSentenceSimilarity = () =>
 	`{
-		"source_sentence": "That is a happy person",
-		"sentences": [
-			"That is a happy dog",
-			"That is a very happy person",
-			"Today is a sunny day"
-		]
-	}`;
+	"source_sentence": "That is a happy person",
+	"sentences": [
+		"That is a happy dog",
+		"That is a very happy person",
+		"Today is a sunny day"
+	]
+}`;
 
 const inputsFeatureExtraction = () => `"Today is a sunny day and I will get some ice cream."`;
 
@@ -91,12 +108,11 @@ const inputsTabularPrediction = () =>
 const inputsZeroShotImageClassification = () => `"cats.jpg"`;
 
 const modelInputSnippets: {
-	[key in PipelineType]?: (model: ModelData) => string;
+	[key in PipelineType]?: (model: ModelDataMinimal) => string | ChatCompletionInputMessage[];
 } = {
 	"audio-to-audio": inputsAudioToAudio,
 	"audio-classification": inputsAudioClassification,
 	"automatic-speech-recognition": inputsAutomaticSpeechRecognition,
-	conversational: inputsConversational,
 	"document-question-answering": inputsVisualQuestionAnswering,
 	"feature-extraction": inputsFeatureExtraction,
 	"fill-mask": inputsFillMask,
@@ -112,6 +128,7 @@ const modelInputSnippets: {
 	"tabular-classification": inputsTabularPrediction,
 	"text-classification": inputsTextClassification,
 	"text-generation": inputsTextGeneration,
+	"image-text-to-text": inputsTextGeneration,
 	"text-to-image": inputsTextToImage,
 	"text-to-speech": inputsTextToSpeech,
 	"text-to-audio": inputsTextToAudio,
@@ -124,18 +141,24 @@ const modelInputSnippets: {
 
 // Use noWrap to put the whole snippet on a single line (removing new lines and tabulations)
 // Use noQuotes to strip quotes from start & end (example: "abc" -> abc)
-export function getModelInputSnippet(model: ModelData, noWrap = false, noQuotes = false): string {
+export function getModelInputSnippet(
+	model: ModelDataMinimal,
+	noWrap = false,
+	noQuotes = false
+): string | ChatCompletionInputMessage[] {
 	if (model.pipeline_tag) {
 		const inputs = modelInputSnippets[model.pipeline_tag];
 		if (inputs) {
 			let result = inputs(model);
-			if (noWrap) {
-				result = result.replace(/(?:(?:\r?\n|\r)\t*)|\t+/g, " ");
-			}
-			if (noQuotes) {
-				const REGEX_QUOTES = /^"(.+)"$/s;
-				const match = result.match(REGEX_QUOTES);
-				result = match ? match[1] : result;
+			if (typeof result === "string") {
+				if (noWrap) {
+					result = result.replace(/(?:(?:\r?\n|\r)\t*)|\t+/g, " ");
+				}
+				if (noQuotes) {
+					const REGEX_QUOTES = /^"(.+)"$/s;
+					const match = result.match(REGEX_QUOTES);
+					result = match ? match[1] : result;
+				}
 			}
 			return result;
 		}

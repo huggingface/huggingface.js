@@ -7,6 +7,7 @@
 	import IconConversational from "../Icons/IconConversational.svelte";
 	import IconFeatureExtraction from "../Icons/IconFeatureExtraction.svelte";
 	import IconFillMask from "../Icons/IconFillMask.svelte";
+	import IconImageAndTextToText from "../Icons/IconImageAndTextToText.svelte";
 	import IconImageClassification from "../Icons/IconImageClassification.svelte";
 	import IconImageSegmentation from "../Icons/IconImageSegmentation.svelte";
 	import IconObjectDetection from "../Icons/IconObjectDetection.svelte";
@@ -40,13 +41,17 @@
 	import IconMaskGeneration from "../Icons/IconMaskGeneration.svelte";
 	import IconTextTo3D from "../Icons/IconTextTo3D.svelte";
 	import IconImageTo3D from "../Icons/IconImageTo3D.svelte";
-	import type { PipelineType } from "@huggingface/tasks";
+	import IconImageFeatureExtraction from "../Icons/IconImageFeatureExtraction.svelte";
+	import IconVideoTextToText from "../Icons/IconVideoTextToText.svelte";
+	import IconAnyToAny from "../Icons/IconAnyToAny.svelte";
+	import IconKeypointDetection from "../Icons/IconKeypointDetection.svelte";
+	import type { WidgetType } from "@huggingface/tasks";
 
 	export let classNames = "";
 	export let pipeline = "";
 
 	const ICON_COMPONENTS: {
-		[key in PipelineType]?: typeof SvelteComponent;
+		[key in WidgetType]?: typeof SvelteComponent;
 	} = {
 		/// Keep same order as in huggingface_hub/Types.ts
 		/// for easy mapping.
@@ -75,6 +80,7 @@
 		"video-classification": IconVideoClassification,
 		"image-segmentation": IconImageSegmentation,
 		"text-to-image": IconTextToImage,
+		"image-text-to-text": IconImageAndTextToText,
 		"image-to-text": IconImageToText,
 		"image-to-image": IconImageToImage,
 		"image-to-video": IconImageToVideo,
@@ -90,6 +96,10 @@
 		"zero-shot-object-detection": IconZeroShotObjectDetection,
 		"text-to-3d": IconTextTo3D,
 		"image-to-3d": IconImageTo3D,
+		"image-feature-extraction": IconImageFeatureExtraction,
+		"video-text-to-text": IconVideoTextToText,
+		"any-to-any": IconAnyToAny,
+		"keypoint-detection": IconKeypointDetection,
 	};
 
 	$: iconComponent =

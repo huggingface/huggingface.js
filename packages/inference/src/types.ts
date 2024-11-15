@@ -1,4 +1,5 @@
 import type { PipelineType } from "@huggingface/tasks";
+import type { ChatCompletionInput } from "@huggingface/tasks";
 
 export interface Options {
 	/**
@@ -6,7 +7,7 @@ export interface Options {
 	 */
 	retry_on_error?: boolean;
 	/**
-	 * (Default: true). Boolean. There is a cache layer on Inference Endpoints (serverless) to speedup requests we have already seen. Most models can use those results as is as models are deterministic (meaning the results will be the same anyway). However if you use a non deterministic model, you can set this parameter to prevent the caching mechanism from being used resulting in a real new query.
+	 * (Default: true). Boolean. There is a cache layer on Inference API (serverless) to speedup requests we have already seen. Most models can use those results as is as models are deterministic (meaning the results will be the same anyway). However if you use a non deterministic model, you can set this parameter to prevent the caching mechanism from being used resulting in a real new query.
 	 */
 	use_cache?: boolean;
 	/**
@@ -47,15 +48,25 @@ export interface BaseArgs {
 	 */
 	accessToken?: string;
 	/**
-	 * The model to use. Can be a full URL for a dedicated inference endpoint.
+	 * The model to use.
 	 *
 	 * If not specified, will call huggingface.co/api/tasks to get the default model for the task.
+	 *
+	 * /!\ Legacy behavior allows this to be an URL, but this is deprecated and will be removed in the future.
+	 * Use the `endpointUrl` parameter instead.
 	 */
 	model?: string;
+
+	/**
+	 * The URL of the endpoint to use. If not specified, will call huggingface.co/api/tasks to get the default endpoint for the task.
+	 *
+	 * If specified, will use this URL instead of the default one.
+	 */
+	endpointUrl?: string;
 }
 
 export type RequestArgs = BaseArgs &
-	({ data: Blob | ArrayBuffer } | { inputs: unknown }) & {
+	({ data: Blob | ArrayBuffer } | { inputs: unknown } | ChatCompletionInput) & {
 		parameters?: Record<string, unknown>;
 		accessToken?: string;
 	};

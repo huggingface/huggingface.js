@@ -1,4 +1,4 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	datasets: [
@@ -46,33 +46,33 @@ const taskData: TaskDataCustom = {
 	models: [
 		{
 			description: "One of the most powerful image generation models that can generate realistic outputs.",
-			id: "stabilityai/stable-diffusion-xl-base-1.0",
+			id: "black-forest-labs/FLUX.1-dev",
 		},
 		{
 			description: "A powerful yet fast image generation model.",
 			id: "latent-consistency/lcm-lora-sdxl",
 		},
 		{
-			description: "A text-to-image model that can generate coherent text inside image.",
-			id: "DeepFloyd/IF-I-XL-v1.0",
+			description: "Text-to-image model for photorealistic generation.",
+			id: "Kwai-Kolors/Kolors",
 		},
 		{
 			description: "A powerful text-to-image model.",
-			id: "kakaobrain/karlo-v1-alpha",
+			id: "stabilityai/stable-diffusion-3-medium-diffusers",
 		},
 	],
 	spaces: [
 		{
 			description: "A powerful text-to-image application.",
-			id: "stabilityai/stable-diffusion",
+			id: "stabilityai/stable-diffusion-3-medium",
 		},
 		{
 			description: "A text-to-image application to generate comics.",
 			id: "jbilcke-hf/ai-comic-factory",
 		},
 		{
-			description: "A text-to-image application that can generate coherent text inside the image.",
-			id: "DeepFloyd/IF",
+			description: "An application to match multiple custom image generation models.",
+			id: "multimodalart/flux-lora-lab",
 		},
 		{
 			description: "A powerful yet very fast image generation application.",
@@ -92,8 +92,8 @@ const taskData: TaskDataCustom = {
 		},
 	],
 	summary:
-		"Generates images from input text. These models can be used to generate and modify images based on text prompts.",
-	widgetModels: ["CompVis/stable-diffusion-v1-4"],
+		"Text-to-image is the task of generating images from input text. These pipelines can also be used to modify and edit images based on text prompts.",
+	widgetModels: ["black-forest-labs/FLUX.1-dev"],
 	youtubeId: "",
 };
 

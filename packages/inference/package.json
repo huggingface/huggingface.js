@@ -1,10 +1,10 @@
 {
 	"name": "@huggingface/inference",
-	"version": "2.6.4",
+	"version": "2.8.1",
 	"packageManager": "pnpm@8.10.5",
 	"license": "MIT",
 	"author": "Tim Mikeladze <tim.mikeladze@gmail.com>",
-	"description": "Typescript wrapper for the Hugging Face Inference Endpoints API",
+	"description": "Typescript wrapper for the Hugging Face Inference Endpoints & Inference API",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/huggingface/huggingface.js.git"
@@ -29,17 +29,18 @@
 		"src"
 	],
 	"source": "src/index.ts",
-	"types": "./dist/index.d.ts",
-	"main": "./dist/index.js",
-	"module": "./dist/index.mjs",
+	"types": "./dist/src/index.d.ts",
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.js",
 	"exports": {
-		"types": "./dist/index.d.ts",
-		"require": "./dist/index.js",
-		"import": "./dist/index.mjs"
+		"types": "./dist/src/index.d.ts",
+		"require": "./dist/index.cjs",
+		"import": "./dist/index.js"
 	},
+	"type": "module",
 	"scripts": {
-		"build": "tsup src/index.ts --format cjs,esm --clean && pnpm run dts",
-		"dts": "ts-node scripts/generate-dts.ts",
+		"build": "tsup src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
+		"dts": "tsx scripts/generate-dts.ts && tsc --noEmit dist/index.d.ts",
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
 		"format": "prettier --write .",
@@ -50,8 +51,10 @@
 		"test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest.config.mts",
 		"check": "tsc"
 	},
+	"dependencies": {
+		"@huggingface/tasks": "workspace:^"
+	},
 	"devDependencies": {
-		"@huggingface/tasks": "workspace:^",
 		"@types/node": "18.13.0"
 	},
 	"resolutions": {}

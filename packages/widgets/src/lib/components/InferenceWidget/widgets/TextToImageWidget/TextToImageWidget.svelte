@@ -88,7 +88,7 @@
 				estimatedTime: res.estimatedTime,
 			};
 			getOutput({ withModelLoading: true });
-		} else if (res.status === "error") {
+		} else if (res.status === "error" && !isOnLoadCall) {
 			error = res.error || `Error encountered on input "${trimmedText}"`;
 		}
 	}
@@ -122,7 +122,13 @@
 <WidgetWrapper {apiUrl} {includeCredentials} {model} let:WidgetInfo let:WidgetHeader let:WidgetFooter>
 	<WidgetHeader {noTitle} {model} {isLoading} {isDisabled} {callApiOnMount} {applyWidgetExample} {validateExample} />
 
-	<WidgetQuickInput bind:value={text} {isLoading} {isDisabled} onClickSubmitBtn={() => getOutput()} />
+	<WidgetQuickInput
+		bind:value={text}
+		{isLoading}
+		{isDisabled}
+		on:run={() => getOutput()}
+		on:cmdEnter={() => getOutput()}
+	/>
 
 	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
 

@@ -1,6 +1,6 @@
-import { base64FromBytes } from "../../../shared/src";
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
+import { base64FromBytes } from "../utils/base64FromBytes";
 
 /**
  * Use "Sign in with Hub" to authenticate a user, and get oauth user info / access token.
@@ -122,7 +122,7 @@ export async function oauthLoginUrl(opts?: {
 
 	return `${opendidConfig.authorization_endpoint}?${new URLSearchParams({
 		client_id: clientId,
-		scope: opts?.scopes || "openid profile",
+		scope: opts?.scopes || variables?.OAUTH_SCOPES || "openid profile",
 		response_type: "code",
 		redirect_uri: redirectUri,
 		state,

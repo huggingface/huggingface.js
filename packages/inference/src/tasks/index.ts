@@ -18,7 +18,6 @@ export * from "./cv/imageToImage";
 export * from "./cv/zeroShotImageClassification";
 
 // Natural Language Processing tasks
-export * from "./nlp/conversational";
 export * from "./nlp/featureExtraction";
 export * from "./nlp/fillMask";
 export * from "./nlp/questionAnswering";
@@ -31,6 +30,8 @@ export * from "./nlp/textGenerationStream";
 export * from "./nlp/tokenClassification";
 export * from "./nlp/translation";
 export * from "./nlp/zeroShotClassification";
+export * from "./nlp/chatCompletion";
+export * from "./nlp/chatCompletionStream";
 
 // Multimodal tasks
 export * from "./multimodal/documentQuestionAnswering";

@@ -1,20 +1,6 @@
-import type { PipelineType } from "./pipelines";
-import type { WidgetExample } from "./widget-example";
-
-export enum InferenceDisplayability {
-	/**
-	 * Yes
-	 */
-	Yes = "Yes",
-	/**
-	 * And then, all the possible reasons why it's no:
-	 */
-	ExplicitOptOut = "ExplicitOptOut",
-	CustomCode = "CustomCode",
-	LibraryNotDetected = "LibraryNotDetected",
-	PipelineNotDetected = "PipelineNotDetected",
-	PipelineLibraryPairNotSupported = "PipelineLibraryPairNotSupported",
-}
+import type { PipelineType } from "./pipelines.js";
+import type { WidgetExample } from "./widget-example.js";
+import type { TokenizerConfig } from "./tokenizer-data.js";
 
 /**
  * Public interface for model metadata
@@ -25,13 +11,10 @@ export interface ModelData {
 	 */
 	id: string;
 	/**
-	 * Kept for backward compatibility
-	 */
-	modelId?: string;
-	/**
 	 * Whether or not to enable inference widget for this model
+	 * TODO(type it)
 	 */
-	inference: InferenceDisplayability;
+	inference: string;
 	/**
 	 * is this model private?
 	 */
@@ -39,25 +22,55 @@ export interface ModelData {
 	/**
 	 * this dictionary has useful information about the model configuration
 	 */
-	config?: Record<string, unknown> & {
-		adapter_transformers?: { model_class?: string; model_name?: string };
+	config?: {
 		architectures?: string[];
+		/**
+		 * Dict of AutoModel or Auto… class name to local import path in the repo
+		 */
+		auto_map?: {
+			/**
+			 * String Property
+			 */
+			[x: string]: string;
+		};
+		model_type?: string;
+		quantization_config?: {
+			bits?: number;
+			load_in_4bit?: boolean;
+			load_in_8bit?: boolean;
+			/**
+			 * awq, gptq, aqlm, marlin, … Used by vLLM
+			 */
+			quant_method?: string;
+		};
+		tokenizer_config?: TokenizerConfig;
+		adapter_transformers?: {
+			model_name?: string;
+			model_class?: string;
+		};
+		diffusers?: {
+			_class_name?: string;
+		};
 		sklearn?: {
-			filename?: string;
+			model?: {
+				file?: string;
+			};
 			model_format?: string;
 		};
 		speechbrain?: {
-			interface?: string;
+			speechbrain_interface?: string;
+			vocoder_interface?: string;
+			vocoder_model_id?: string;
 		};
 		peft?: {
-			base_model_name?: string;
+			base_model_name_or_path?: string;
 			task_type?: string;
 		};
 	};
 	/**
 	 * all the model tags
 	 */
-	tags?: string[];
+	tags: string[];
 	/**
 	 * transformers-specific info to display in the code sample.
 	 */
@@ -78,7 +91,7 @@ export interface ModelData {
 	 */
 	widgetData?: WidgetExample[] | undefined;
 	/**
-	 * Parameters that will be used by the widget when calling Inference Endpoints (serverless)
+	 * Parameters that will be used by the widget when calling Inference API (serverless)
 	 * https://huggingface.co/docs/api-inference/detailed_parameters
 	 *
 	 * can be set in the model card metadata (under `inference/parameters`)
@@ -94,12 +107,23 @@ export interface ModelData {
 					parameters?: Record<string, unknown>;
 			  };
 		base_model?: string | string[];
+		instance_prompt?: string | null;
 	};
 	/**
 	 * Library name
 	 * Example: transformers, SpeechBrain, Stanza, etc.
 	 */
 	library_name?: string;
+	safetensors?: {
+		parameters: Record<string, number>;
+		total: number;
+		sharded: boolean;
+	};
+	gguf?: {
+		total: number;
+		architecture?: string;
+		context_length?: number;
+	};
 }
 
 /**

@@ -13,9 +13,14 @@ export interface OAuthResult {
 		avatarUrl: string;
 		websiteUrl?: string;
 		isPro: boolean;
+		canPay?: boolean;
 		orgs: Array<{
+			id: string;
 			name: string;
 			isEnterprise: boolean;
+			canPay?: boolean;
+			avatarUrl: string;
+			roleInOrg?: string;
 		}>;
 	};
 	/**
@@ -151,9 +156,14 @@ export async function oauthHandleRedirect(opts?: { hubUrl?: string }): Promise<O
 		picture: string;
 		website?: string;
 		isPro: boolean;
+		canPay?: boolean;
 		orgs?: Array<{
+			sub: string;
 			name: string;
+			picture: string;
 			isEnterprise: boolean;
+			canPay?: boolean;
+			roleInOrg?: string;
 		}>;
 	} = await userInfoRes.json();
 
@@ -169,7 +179,16 @@ export async function oauthHandleRedirect(opts?: { hubUrl?: string }): Promise<O
 			avatarUrl: userInfo.picture,
 			websiteUrl: userInfo.website,
 			isPro: userInfo.isPro,
-			orgs: userInfo.orgs || [],
+			orgs:
+				userInfo.orgs?.map((org) => ({
+					id: org.sub,
+					name: org.name,
+					fullname: org.name,
+					isEnterprise: org.isEnterprise,
+					canPay: org.canPay,
+					avatarUrl: org.picture,
+					roleInOrg: org.roleInOrg,
+				})) ?? [],
 		},
 		state: parsedState.state,
 		scope: token.scope,

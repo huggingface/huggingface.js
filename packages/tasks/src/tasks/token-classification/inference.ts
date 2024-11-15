@@ -10,7 +10,7 @@ export interface TokenClassificationInput {
 	/**
 	 * The input text data
 	 */
-	data: string;
+	inputs: string;
 	/**
 	 * Additional inference parameters
 	 */
@@ -26,11 +26,11 @@ export interface TokenClassificationParameters {
 	/**
 	 * The strategy used to fuse tokens based on model predictions
 	 */
-	aggregationStrategy?: TokenClassificationAggregationStrategy;
+	aggregation_strategy?: TokenClassificationAggregationStrategy;
 	/**
 	 * A list of labels to ignore
 	 */
-	ignoreLabels?: string[];
+	ignore_labels?: string[];
 	/**
 	 * The number of overlapping tokens between chunks when splitting the input text.
 	 */
@@ -60,12 +60,15 @@ export interface TokenClassificationOutputElement {
 	/**
 	 * The character position in the input where this group ends.
 	 */
-	end?: number;
+	end: number;
 	/**
-	 * The predicted label for that group of tokens
+	 * The predicted label for a single token
 	 */
-	entityGroup?: string;
-	label: unknown;
+	entity?: string;
+	/**
+	 * The predicted label for a group of one or more tokens
+	 */
+	entity_group?: string;
 	/**
 	 * The associated score / probability
 	 */
@@ -73,10 +76,10 @@ export interface TokenClassificationOutputElement {
 	/**
 	 * The character position in the input where this group begins.
 	 */
-	start?: number;
+	start: number;
 	/**
 	 * The corresponding text
 	 */
-	word?: string;
+	word: string;
 	[property: string]: unknown;
 }

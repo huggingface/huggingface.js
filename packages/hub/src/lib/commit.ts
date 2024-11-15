@@ -1,4 +1,3 @@
-import { isFrontend, base64FromBytes } from "../../../shared";
 import { HUB_URL } from "../consts";
 import { HubApiError, createApiError, InvalidApiResponseFormatError } from "../error";
 import type {
@@ -11,7 +10,7 @@ import type {
 	ApiPreuploadRequest,
 	ApiPreuploadResponse,
 } from "../types/api/api-commit";
-import type { Credentials, RepoDesignation } from "../types/public";
+import type { CredentialsParams, RepoDesignation } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { chunk } from "../utils/chunk";
 import { promisesQueue } from "../utils/promisesQueue";
@@ -21,6 +20,8 @@ import { toRepoId } from "../utils/toRepoId";
 import { WebBlob } from "../utils/WebBlob";
 import { createBlob } from "../utils/createBlob";
 import { eventToGenerator } from "../utils/eventToGenerator";
+import { base64FromBytes } from "../utils/base64FromBytes";
+import { isFrontend } from "../utils/isFrontend";
 
 const CONCURRENT_SHAS = 5;
 const CONCURRENT_LFS_UPLOADS = 5;
@@ -53,12 +54,11 @@ type CommitBlob = Omit<CommitFile, "content"> & { content: Blob };
 export type CommitOperation = CommitDeletedEntry | CommitFile /* | CommitRenameFile */;
 type CommitBlobOperation = Exclude<CommitOperation, CommitFile> | CommitBlob;
 
-export interface CommitParams {
+export type CommitParams = {
 	title: string;
 	description?: string;
 	repo: RepoDesignation;
 	operations: CommitOperation[];
-	credentials?: Credentials;
 	/** @default "main" */
 	branch?: string;
 	/**
@@ -81,7 +81,8 @@ export interface CommitParams {
 	 */
 	fetch?: typeof fetch;
 	abortSignal?: AbortSignal;
-}
+	// Credentials are optional due to custom fetch functions or cookie auth
+} & Partial<CredentialsParams>;
 
 export interface CommitOutput {
 	pullRequestUrl?: string;
@@ -120,7 +121,7 @@ export type CommitProgressEvent =
  * Can be exposed later to offer fine-tuned progress info
  */
 export async function* commitIter(params: CommitParams): AsyncGenerator<CommitProgressEvent, CommitOutput> {
-	checkCredentials(params.credentials);
+	const accessToken = checkCredentials(params);
 	const repoId = toRepoId(params.repo);
 	yield { event: "phase", phase: "preuploading" };
 
@@ -188,7 +189,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 				{
 					method: "POST",
 					headers: {
-						...(params.credentials && { Authorization: `Bearer ${params.credentials.accessToken}` }),
+						...(accessToken && { Authorization: `Bearer ${accessToken}` }),
 						"Content-Type": "application/json",
 					},
 					body: JSON.stringify(payload),
@@ -262,7 +263,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 				{
 					method: "POST",
 					headers: {
-						...(params.credentials && { Authorization: `Bearer ${params.credentials.accessToken}` }),
+						...(accessToken && { Authorization: `Bearer ${accessToken}` }),
 						Accept: "application/vnd.git-lfs+json",
 						"Content-Type": "application/vnd.git-lfs+json",
 					},
@@ -467,7 +468,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 					{
 						method: "POST",
 						headers: {
-							...(params.credentials && { Authorization: `Bearer ${params.credentials.accessToken}` }),
+							...(accessToken && { Authorization: `Bearer ${accessToken}` }),
 							"Content-Type": "application/x-ndjson",
 						},
 						body: [

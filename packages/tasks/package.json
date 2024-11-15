@@ -1,34 +1,41 @@
 {
 	"name": "@huggingface/tasks",
 	"packageManager": "pnpm@8.10.5",
-	"version": "0.2.1",
+	"version": "0.13.2",
 	"description": "List of ML tasks for huggingface.co/tasks",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {
 		"access": "public"
 	},
-	"main": "./dist/index.js",
-	"module": "./dist/index.mjs",
-	"types": "./dist/index.d.ts",
 	"exports": {
+		"./package.json": "./package.json",
 		".": {
-			"types": "./dist/index.d.ts",
-			"require": "./dist/index.js",
-			"import": "./dist/index.mjs"
+			"import": {
+				"types": "./dist/esm/index.d.ts",
+				"default": "./dist/esm/index.js"
+			},
+			"require": {
+				"types": "./dist/commonjs/index.d.ts",
+				"default": "./dist/commonjs/index.js"
+			}
 		}
 	},
-	"source": "src/index.ts",
+	"source": "./src/index.ts",
 	"scripts": {
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
-		"prepublishOnly": "pnpm run build",
-		"build": "tsup src/index.ts src/scripts/**.ts --format cjs,esm --clean --dts",
+		"prepublishOnly": "pnpm --filter tasks-gen inference-codegen && git diff --name-only --exit-code src && pnpm run build",
+		"build": "tshy",
+		"watch:cjs": "tsc --declaration --outdir dist/commonjs --module commonjs --watch",
+		"watch:esm": "tsc --declaration --outdir dist/esm --watch",
+		"watch": "npm-run-all --parallel watch:esm watch:cjs",
 		"prepare": "pnpm run build",
 		"check": "tsc",
-		"inference-codegen": "pnpm run build && node dist/scripts/inference-codegen.js"
+		"test": "vitest run"
 	},
+	"type": "module",
 	"files": [
 		"dist",
 		"src",
@@ -41,8 +48,13 @@
 	],
 	"author": "Hugging Face",
 	"license": "MIT",
-	"devDependencies": {
-		"@types/node": "^20.11.5",
-		"quicktype-core": "https://github.com/huggingface/quicktype/raw/pack-18.0.15/packages/quicktype-core/quicktype-core-18.0.15.tgz"
-	}
+	"tshy": {
+		"exports": {
+			"./package.json": "./package.json",
+			".": "./src/index.ts"
+		}
+	},
+	"main": "./dist/commonjs/index.js",
+	"types": "./dist/commonjs/index.d.ts",
+	"module": "./dist/esm/index.js"
 }

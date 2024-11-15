@@ -1,26 +1,32 @@
 {
+	"private": true,
+	"name": "@huggingface/root",
 	"license": "MIT",
 	"packageManager": "pnpm@8.10.5",
 	"scripts": {
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .eslintrc.cjs",
 		"lint:check": "eslint --ext .cjs,.ts .eslintrc.cjs",
 		"format": "prettier --write package.json .prettierrc .vscode .eslintrc.cjs e2e .github *.md",
-		"format:check": "prettier --check package.json .prettierrc .vscode .eslintrc.cjs .github *.md"
+		"format:check": "prettier --check package.json .prettierrc .vscode .eslintrc.cjs .github *.md",
+		"check-deps": "tsx scripts/check-deps.ts"
 	},
 	"devDependencies": {
-		"@typescript-eslint/eslint-plugin": "^5.54.0",
-		"@typescript-eslint/parser": "^5.54.0",
+		"@typescript-eslint/eslint-plugin": "^7.2.0",
+		"@typescript-eslint/parser": "^7.2.0",
+		"@types/node": "^18.16.1",
 		"@vitest/browser": "^0.34.6",
-		"eslint": "^8.35.0",
+		"eslint": "^8.57.0",
 		"eslint-config-prettier": "^9.0.0",
 		"eslint-plugin-prettier": "^4.2.1",
 		"eslint-plugin-svelte": "^2.30.0",
+		"npm-run-all": "^4.1.5",
 		"prettier": "^3.1.0",
 		"prettier-plugin-svelte": "^3.1.2",
 		"semver": "^7.5.0",
-		"ts-node": "^10.9.1",
+		"tshy": "^3.0.2",
 		"tsup": "^6.7.0",
-		"typescript": "^5.0.4",
+		"tsx": "^4.7.0",
+		"typescript": "^5.4.2",
 		"vite": "^5.0.2",
 		"vitest": "^0.34.6",
 		"webdriverio": "^8.6.7"
