@@ -46,6 +46,7 @@ export type {
 export { SPECIAL_TOKENS_ATTRIBUTES } from "./tokenizer-data.js";
 
 import * as snippets from "./snippets/index.js";
+export type { ModelDataMinimal } from "./snippets/index.js";
 export * from "./gguf.js";
 
 export { snippets };

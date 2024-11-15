@@ -5,3 +5,5 @@ import * as js from "./js.js";
 export * from "./types.js";
 
 export { inputs, curl, python, js };
+
+export type { ModelDataMinimal } from "./types.js";
