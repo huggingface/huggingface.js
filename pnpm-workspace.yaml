@@ -5,6 +5,7 @@ packages:
   - "packages/agents"
   - "packages/languages"
   - "packages/tasks"
+  - "packages/tasks-gen"
   - "packages/gguf"
   - "packages/jinja"
   - "packages/space-header"

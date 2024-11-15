@@ -1,14 +1,14 @@
 /*
- * Fetches TGI specs and generates JSON schema for input, output and stream_output of
- * text-generation and chat-completion tasks.
- * See https://huggingface.github.io/text-generation-inference/
+ * Fetches TEI specs and generates JSON schema for input and output of
+ * text-embeddings (called feature-extraction).
+ * See https://huggingface.github.io/text-embeddings-inference/
  */
 import fs from "fs/promises";
 import * as path from "node:path/posix";
 import { existsSync as pathExists } from "node:fs";
 import type { JsonObject, JsonValue } from "type-fest";
 
-const URL = "https://huggingface.github.io/text-generation-inference/openapi.json";
+const URL = "https://huggingface.github.io/text-embeddings-inference/openapi.json";
 
 const rootDirFinder = function (): string {
 	let currentPath = path.normalize(import.meta.url);
@@ -24,7 +24,7 @@ const rootDirFinder = function (): string {
 	return "/";
 };
 
-const rootDir = rootDirFinder();
+const rootDir = path.join(rootDirFinder(), "..", "tasks");
 const tasksDir = path.join(rootDir, "src", "tasks");
 
 function toCamelCase(str: string, joiner = "") {
@@ -37,7 +37,7 @@ function toCamelCase(str: string, joiner = "") {
 async function _extractAndAdapt(task: string, mainComponentName: string, type: "input" | "output" | "stream_output") {
 	console.debug(`✨ Importing`, task, type);
 
-	console.debug("   📥 Fetching TGI specs");
+	console.debug("   📥 Fetching TEI specs");
 	const response = await fetch(URL);
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const openapi = (await response.json()) as any;
@@ -58,7 +58,14 @@ async function _extractAndAdapt(task: string, mainComponentName: string, type: "
 			}
 		} else if (data && typeof data === "object") {
 			for (const key of Object.keys(data)) {
-				if (key === "$ref" && typeof data[key] === "string") {
+				if (key === "$ref" && data[key] === "#/components/schemas/Input") {
+					// Special case: keep input as string or string[]
+					// but not Union[List[Union[List[int], int, str]], str]
+					// data.delete(key);
+					delete data[key];
+					data["type"] = "string";
+					data["description"] = "The text to embed.";
+				} else if (key === "$ref" && typeof data[key] === "string") {
 					// Verify reference exists
 					const ref = (data[key] as string).split("/").pop() ?? "";
 					if (!components[ref]) {
@@ -93,13 +100,14 @@ async function _extractAndAdapt(task: string, mainComponentName: string, type: "
 		$schema: "http://json-schema.org/draft-06/schema#",
 		description:
 			prettyName +
-			".\n\nAuto-generated from TGI specs." +
-			"\nFor more details, check out https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/scripts/inference-tgi-import.ts.",
+			".\n\nAuto-generated from TEI specs." +
+			"\nFor more details, check out https://github.com/huggingface/huggingface.js/blob/main/packages/tasks/scripts/inference-tei-import.ts.",
 		title: camelFullName,
-		type: "object",
+		type: mainComponent["type"],
 		required: mainComponent["required"],
 		properties: mainComponent["properties"],
 		$defs: filteredComponents,
+		items: mainComponent["items"],
 	};
 
 	const specPath = path.join(tasksDir, task, "spec", `${type}.json`);
@@ -107,10 +115,6 @@ async function _extractAndAdapt(task: string, mainComponentName: string, type: "
 	await fs.writeFile(specPath, JSON.stringify(inputSchema, null, 4));
 }
 
-await _extractAndAdapt("text-generation", "CompatGenerateRequest", "input");
-await _extractAndAdapt("text-generation", "GenerateResponse", "output");
-await _extractAndAdapt("text-generation", "StreamResponse", "stream_output");
-await _extractAndAdapt("chat-completion", "ChatRequest", "input");
-await _extractAndAdapt("chat-completion", "ChatCompletion", "output");
-await _extractAndAdapt("chat-completion", "ChatCompletionChunk", "stream_output");
+await _extractAndAdapt("feature-extraction", "EmbedRequest", "input");
+await _extractAndAdapt("feature-extraction", "EmbedResponse", "output");
 console.debug("✅ All done!");

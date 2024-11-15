@@ -7,33 +7,33 @@
 	"publishConfig": {
 		"access": "public"
 	},
-	"main": "./dist/index.cjs",
-	"module": "./dist/index.js",
-	"types": "./dist/index.d.ts",
 	"exports": {
+		"./package.json": "./package.json",
 		".": {
-			"require": "./dist/index.cjs",
-			"import": "./dist/index.js"
+			"import": {
+				"types": "./dist/esm/index.d.ts",
+				"default": "./dist/esm/index.js"
+			},
+			"require": {
+				"types": "./dist/commonjs/index.d.ts",
+				"default": "./dist/commonjs/index.js"
+			}
 		}
 	},
-	"source": "src/index.ts",
+	"source": "./src/index.ts",
 	"scripts": {
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
-		"prepublishOnly": "pnpm run inference-codegen && git diff --name-only --exit-code src && pnpm run build",
-		"build": "tsup src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration && pnpm run generate-cts",
-		"watch:export": "tsup src/index.ts --format cjs,esm --watch",
-		"watch:types": "tsc --emitDeclarationOnly --declaration --watch",
-		"watch": "npm-run-all --parallel watch:export watch:types",
+		"prepublishOnly": "pnpm --filter tasks-gen inference-codegen && git diff --name-only --exit-code src && pnpm run build",
+		"build": "tshy",
+		"watch:cjs": "tsc --declaration --outdir dist/commonjs --module commonjs --watch",
+		"watch:esm": "tsc --declaration --outdir dist/esm --watch",
+		"watch": "npm-run-all --parallel watch:esm watch:cjs",
 		"prepare": "pnpm run build",
 		"check": "tsc",
-		"test": "vitest run",
-		"generate-cts": "tsx scripts/generate-cts.ts",
-		"inference-codegen": "tsx scripts/inference-codegen.ts && prettier --write src/tasks/*/inference.ts",
-		"inference-tgi-import": "tsx scripts/inference-tgi-import.ts && prettier --write src/tasks/text-generation/spec/*.json && prettier --write src/tasks/chat-completion/spec/*.json",
-		"inference-tei-import": "tsx scripts/inference-tei-import.ts && prettier --write src/tasks/feature-extraction/spec/*.json"
+		"test": "vitest run"
 	},
 	"type": "module",
 	"files": [
@@ -48,9 +48,13 @@
 	],
 	"author": "Hugging Face",
 	"license": "MIT",
-	"devDependencies": {
-		"@types/node": "^20.11.5",
-		"quicktype-core": "https://github.com/huggingface/quicktype/raw/pack-18.0.17/packages/quicktype-core/quicktype-core-18.0.17.tgz",
-		"type-fest": "^3.13.1"
-	}
+	"tshy": {
+		"exports": {
+			"./package.json": "./package.json",
+			".": "./src/index.ts"
+		}
+	},
+	"main": "./dist/commonjs/index.js",
+	"types": "./dist/commonjs/index.d.ts",
+	"module": "./dist/esm/index.js"
 }
