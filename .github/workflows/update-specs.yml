@@ -2,9 +2,6 @@ name: Tasks - Update specs
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - add-workflow-update-specs
 
 concurrency:
   group: update-specs
