@@ -198,7 +198,7 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"any-to-any": getData("any-to-any", placeholder),
 	"audio-classification": getData("audio-classification", audioClassification),
 	"audio-to-audio": getData("audio-to-audio", audioToAudio),
-	"audio-text-to-text": undefined,
+	"audio-text-to-text": getData("audio-text-to-text", placeholder),
 	"automatic-speech-recognition": getData("automatic-speech-recognition", automaticSpeechRecognition),
 	"depth-estimation": getData("depth-estimation", depthEstimation),
 	"document-question-answering": getData("document-question-answering", documentQuestionAnswering),
