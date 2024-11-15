@@ -6,10 +6,10 @@ const taskData: TaskDataCustom = {
 			description: "Widely used benchmark dataset for multiple Vision tasks.",
 			id: "merve/coco2017",
 		},
-        {
-            description: "Medical Imaging dataset of the Human Brain for segmentation and mask generating tasks",
-            id: "rocky93/BraTS_segmentation"
-        }
+                {
+                    description: "Medical Imaging dataset of the Human Brain for segmentation and mask generating tasks",
+                    id: "rocky93/BraTS_segmentation"
+                }
 	],
 	demo: {
 		inputs: [
@@ -27,8 +27,7 @@ const taskData: TaskDataCustom = {
 	},
 	metrics: [
 		{
-			description:
-				"IoU is used to measure the overlap between predicted mask and the ground truth mask.",
+			description: "IoU is used to measure the overlap between predicted mask and the ground truth mask.",
 			id: "Intersection over Union (IoU)",
 		}
 	],
