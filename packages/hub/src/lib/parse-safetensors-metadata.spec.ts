@@ -1,12 +1,13 @@
 import { assert, it, describe } from "vitest";
-import { parseSafetensorsMetadata } from "./parse-safetensors-metadata";
+import { parseSafetensorsMetadata, parseSafetensorsShardFilename } from "./parse-safetensors-metadata";
 import { sum } from "../utils/sum";
 
 describe("parseSafetensorsMetadata", () => {
-	it("fetch info for single-file", async () => {
+	it("fetch info for single-file (with the default conventional filename)", async () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "bert-base-uncased",
 			computeParametersCount: true,
+			revision: "86b5e0934494bd15c9632b12f734a8a67f723594",
 		});
 
 		assert(!parse.sharded);
@@ -25,10 +26,11 @@ describe("parseSafetensorsMetadata", () => {
 		// total params = 110m
 	});
 
-	it("fetch info for sharded", async () => {
+	it("fetch info for sharded (with the default conventional filename)", async () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "bigscience/bloom",
 			computeParametersCount: true,
+			revision: "053d9cd9fbe814e091294f67fcfedb3397b954bb",
 		});
 
 		assert(parse.sharded);
@@ -53,6 +55,7 @@ describe("parseSafetensorsMetadata", () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "roberta-base",
 			computeParametersCount: true,
+			revision: "e2da8e2f811d1448a5b465c236feacd80ffbac7b",
 		});
 
 		assert(!parse.sharded);
@@ -60,5 +63,60 @@ describe("parseSafetensorsMetadata", () => {
 		assert.deepStrictEqual(parse.parameterCount, { F32: 124_697_433, I64: 514 });
 		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 124_697_947);
 		// total params = 124m
+	});
+
+	it("fetch info for single-file with file path", async () => {
+		const parse = await parseSafetensorsMetadata({
+			repo: "CompVis/stable-diffusion-v1-4",
+			computeParametersCount: true,
+			path: "unet/diffusion_pytorch_model.safetensors",
+			revision: "133a221b8aa7292a167afc5127cb63fb5005638b",
+		});
+
+		assert(!parse.sharded);
+		assert.deepStrictEqual(parse.header.__metadata__, { format: "pt" });
+
+		// Example of one tensor (the header contains many tensors)
+
+		assert.deepStrictEqual(parse.header["up_blocks.3.resnets.0.norm2.bias"], {
+			dtype: "F32",
+			shape: [320],
+			data_offsets: [3_409_382_416, 3_409_383_696],
+		});
+
+		assert.deepStrictEqual(parse.parameterCount, { F32: 859_520_964 });
+		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 859_520_964);
+	});
+
+	it("fetch info for sharded (with the default conventional filename) with file path", async () => {
+		const parse = await parseSafetensorsMetadata({
+			repo: "Alignment-Lab-AI/ALAI-gemma-7b",
+			computeParametersCount: true,
+			path: "7b/1/model.safetensors.index.json",
+			revision: "37e307261fe97bbf8b2463d61dbdd1a10daa264c",
+		});
+
+		assert(parse.sharded);
+
+		assert.strictEqual(Object.keys(parse.headers).length, 4);
+
+		assert.deepStrictEqual(parse.headers["model-00004-of-00004.safetensors"]["model.layers.24.mlp.up_proj.weight"], {
+			dtype: "BF16",
+			shape: [24576, 3072],
+			data_offsets: [301996032, 452990976],
+		});
+
+		assert.deepStrictEqual(parse.parameterCount, { BF16: 8_537_680_896 });
+		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 8_537_680_896);
+	});
+
+	it("should detect sharded safetensors filename", async () => {
+		const safetensorsFilename = "model_00005-of-00072.safetensors"; // https://huggingface.co/bigscience/bloom/blob/4d8e28c67403974b0f17a4ac5992e4ba0b0dbb6f/model_00005-of-00072.safetensors
+		const safetensorsShardFileInfo = parseSafetensorsShardFilename(safetensorsFilename);
+
+		assert.strictEqual(safetensorsShardFileInfo?.prefix, "model_");
+		assert.strictEqual(safetensorsShardFileInfo?.basePrefix, "model");
+		assert.strictEqual(safetensorsShardFileInfo?.shard, "00005");
+		assert.strictEqual(safetensorsShardFileInfo?.total, "00072");
 	});
 });

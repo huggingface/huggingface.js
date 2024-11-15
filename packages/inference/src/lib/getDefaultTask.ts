@@ -2,7 +2,7 @@ import { isUrl } from "./isUrl";
 
 /**
  * We want to make calls to the huggingface hub the least possible, eg if
- * someone is calling the inference API 1000 times per second, we don't want
+ * someone is calling Inference Endpoints 1000 times per second, we don't want
  * to make 1000 calls to the hub to get the task name.
  */
 const taskCache = new Map<string, { task: string; date: Date }>();

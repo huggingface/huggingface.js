@@ -30,13 +30,18 @@ export class If extends Statement {
 	}
 }
 
+/**
+ * Loop over each item in a sequence
+ * https://jinja.palletsprojects.com/en/3.0.x/templates/#for
+ */
 export class For extends Statement {
 	override type = "For";
 
 	constructor(
-		public loopvar: Identifier,
+		public loopvar: Identifier | TupleLiteral,
 		public iterable: Expression,
-		public body: Statement[]
+		public body: Statement[],
+		public defaultBlock: Statement[] // if no iteration took place
 	) {
 		super();
 	}
@@ -47,6 +52,18 @@ export class SetStatement extends Statement {
 	constructor(
 		public assignee: Expression,
 		public value: Expression
+	) {
+		super();
+	}
+}
+
+export class Macro extends Statement {
+	override type = "Macro";
+
+	constructor(
+		public name: Identifier,
+		public args: Expression[],
+		public body: Statement[]
 	) {
 		super();
 	}
@@ -120,10 +137,6 @@ export class NumericLiteral extends Literal<number> {
  */
 export class StringLiteral extends Literal<string> {
 	override type = "StringLiteral";
-
-	constructor(value: string) {
-		super(value);
-	}
 }
 
 /**
@@ -131,6 +144,34 @@ export class StringLiteral extends Literal<string> {
  */
 export class BooleanLiteral extends Literal<boolean> {
 	override type = "BooleanLiteral";
+}
+
+/**
+ * Represents null (none) in the template.
+ */
+export class NullLiteral extends Literal<null> {
+	override type = "NullLiteral";
+}
+
+/**
+ * Represents an array literal in the template.
+ */
+export class ArrayLiteral extends Literal<Expression[]> {
+	override type = "ArrayLiteral";
+}
+
+/**
+ * Represents a tuple literal in the template.
+ */
+export class TupleLiteral extends Literal<Expression[]> {
+	override type = "TupleLiteral";
+}
+
+/**
+ * Represents an object literal in the template.
+ */
+export class ObjectLiteral extends Literal<Map<Expression, Expression>> {
+	override type = "ObjectLiteral";
 }
 
 /**
@@ -159,7 +200,37 @@ export class FilterExpression extends Expression {
 
 	constructor(
 		public operand: Expression,
-		public filter: Identifier // TODO: Add support for non-identifier filters
+		public filter: Identifier | CallExpression
+	) {
+		super();
+	}
+}
+
+/**
+ * An operation which filters a sequence of objects by applying a test to each object,
+ * and only selecting the objects with the test succeeding.
+ */
+export class SelectExpression extends Expression {
+	override type = "SelectExpression";
+
+	constructor(
+		public iterable: Expression,
+		public test: Expression
+	) {
+		super();
+	}
+}
+
+/**
+ * An operation with two sides, separated by the "is" operator.
+ */
+export class TestExpression extends Expression {
+	override type = "TestExpression";
+
+	constructor(
+		public operand: Expression,
+		public negate: boolean,
+		public test: Identifier // TODO: Add support for non-identifier tests
 	) {
 		super();
 	}
@@ -197,6 +268,17 @@ export class SliceExpression extends Expression {
 		public start: Expression | undefined = undefined,
 		public stop: Expression | undefined = undefined,
 		public step: Expression | undefined = undefined
+	) {
+		super();
+	}
+}
+
+export class KeywordArgumentExpression extends Expression {
+	override type = "KeywordArgumentExpression";
+
+	constructor(
+		public key: Identifier,
+		public value: Expression
 	) {
 		super();
 	}

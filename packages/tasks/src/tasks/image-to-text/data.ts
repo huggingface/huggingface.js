@@ -1,4 +1,4 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	datasets: [
@@ -75,7 +75,7 @@ const taskData: TaskDataCustom = {
 	],
 	summary:
 		"Image to text models output a text from a given image. Image captioning or optical character recognition can be considered as the most common applications of image to text.",
-	widgetModels: ["Salesforce/blip-image-captioning-base"],
+	widgetModels: ["Salesforce/blip-image-captioning-large"],
 	youtubeId: "",
 };
 

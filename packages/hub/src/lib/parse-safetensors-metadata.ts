@@ -1,16 +1,40 @@
-import type { SetRequired } from "type-fest";
-import type { Credentials, RepoDesignation } from "../types/public";
-import { checkCredentials } from "../utils/checkCredentials";
+import type { CredentialsParams, RepoDesignation } from "../types/public";
 import { omit } from "../utils/omit";
 import { toRepoId } from "../utils/toRepoId";
 import { typedEntries } from "../utils/typedEntries";
 import { downloadFile } from "./download-file";
 import { fileExists } from "./file-exists";
 import { promisesQueue } from "../utils/promisesQueue";
+import type { SetRequired } from "../vendor/type-fest/set-required";
 
-const SINGLE_FILE = "model.safetensors";
-const INDEX_FILE = "model.safetensors.index.json";
-const PARALLEL_DOWNLOADS = 5;
+export const SAFETENSORS_FILE = "model.safetensors";
+export const SAFETENSORS_INDEX_FILE = "model.safetensors.index.json";
+/// We advise model/library authors to use the filenames above for convention inside model repos,
+/// but in some situations safetensors weights have different filenames.
+export const RE_SAFETENSORS_FILE = /\.safetensors$/;
+export const RE_SAFETENSORS_INDEX_FILE = /\.safetensors\.index\.json$/;
+export const RE_SAFETENSORS_SHARD_FILE =
+	/^(?<prefix>(?<basePrefix>.*?)[_-])(?<shard>\d{5})-of-(?<total>\d{5})\.safetensors$/;
+export interface SafetensorsShardFileInfo {
+	prefix: string;
+	basePrefix: string;
+	shard: string;
+	total: string;
+}
+export function parseSafetensorsShardFilename(filename: string): SafetensorsShardFileInfo | null {
+	const match = RE_SAFETENSORS_SHARD_FILE.exec(filename);
+	if (match && match.groups) {
+		return {
+			prefix: match.groups["prefix"],
+			basePrefix: match.groups["basePrefix"],
+			shard: match.groups["shard"],
+			total: match.groups["total"],
+		};
+	}
+	return null;
+}
+
+const PARALLEL_DOWNLOADS = 20;
 const MAX_HEADER_LENGTH = 25_000_000;
 
 class SafetensorParseError extends Error {}
@@ -58,13 +82,12 @@ async function parseSingleFile(
 	params: {
 		repo: RepoDesignation;
 		revision?: string;
-		credentials?: Credentials;
 		hubUrl?: string;
 		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	}
+	} & Partial<CredentialsParams>
 ): Promise<SafetensorsFileHeader> {
 	const firstResp = await downloadFile({
 		...params,
@@ -108,17 +131,17 @@ async function parseShardedIndex(
 	params: {
 		repo: RepoDesignation;
 		revision?: string;
-		credentials?: Credentials;
 		hubUrl?: string;
 		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	}
+	} & Partial<CredentialsParams>
 ): Promise<{ index: SafetensorsIndexJson; headers: SafetensorsShardedHeaders }> {
 	const indexResp = await downloadFile({
 		...params,
 		path,
+		range: [0, 10_000_000],
 	});
 
 	if (!indexResp) {
@@ -126,14 +149,20 @@ async function parseShardedIndex(
 	}
 
 	// no validation for now, we assume it's a valid IndexJson.
-	const index: SafetensorsIndexJson = await indexResp.json();
+	let index: SafetensorsIndexJson;
+	try {
+		index = await indexResp.json();
+	} catch (error) {
+		throw new SafetensorParseError(`Failed to parse file ${path}: not a valid JSON.`);
+	}
 
+	const pathPrefix = path.slice(0, path.lastIndexOf("/") + 1);
 	const filenames = [...new Set(Object.values(index.weight_map))];
 	const shardedMap: SafetensorsShardedHeaders = Object.fromEntries(
 		await promisesQueue(
 			filenames.map(
 				(filename) => async () =>
-					[filename, await parseSingleFile(filename, params)] satisfies [string, SafetensorsFileHeader]
+					[filename, await parseSingleFile(pathPrefix + filename, params)] satisfies [string, SafetensorsFileHeader]
 			),
 			PARALLEL_DOWNLOADS
 		)
@@ -145,60 +174,68 @@ async function parseShardedIndex(
  * Analyze model.safetensors.index.json or model.safetensors from a model hosted
  * on Hugging Face using smart range requests to extract its metadata.
  */
-export async function parseSafetensorsMetadata(params: {
-	/** Only models are supported */
-	repo: RepoDesignation;
-	/**
-	 * Will include SafetensorsParseFromRepo["parameterCount"], an object containing the number of parameters for each DType
-	 *
-	 * @default false
-	 */
-	computeParametersCount: true;
-	hubUrl?: string;
-	credentials?: Credentials;
-	revision?: string;
-	/**
-	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
-	 */
-	fetch?: typeof fetch;
-}): Promise<SetRequired<SafetensorsParseFromRepo, "parameterCount">>;
-export async function parseSafetensorsMetadata(params: {
-	/** Only models are supported */
-	repo: RepoDesignation;
-	/**
-	 * Will include SafetensorsParseFromRepo["parameterCount"], an object containing the number of parameters for each DType
-	 *
-	 * @default false
-	 */
-	computeParametersCount?: boolean;
-	hubUrl?: string;
-	credentials?: Credentials;
-	revision?: string;
-	/**
-	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
-	 */
-	fetch?: typeof fetch;
-}): Promise<SafetensorsParseFromRepo>;
-export async function parseSafetensorsMetadata(params: {
-	repo: RepoDesignation;
-	computeParametersCount?: boolean;
-	hubUrl?: string;
-	credentials?: Credentials;
-	revision?: string;
-	/**
-	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
-	 */
-	fetch?: typeof fetch;
-}): Promise<SafetensorsParseFromRepo> {
-	checkCredentials(params.credentials);
+export async function parseSafetensorsMetadata(
+	params: {
+		/** Only models are supported */
+		repo: RepoDesignation;
+		/**
+		 * Relative file path to safetensors file inside `repo`. Defaults to `SAFETENSORS_FILE` or `SAFETENSORS_INDEX_FILE` (whichever one exists).
+		 */
+		path?: string;
+		/**
+		 * Will include SafetensorsParseFromRepo["parameterCount"], an object containing the number of parameters for each DType
+		 *
+		 * @default false
+		 */
+		computeParametersCount: true;
+		hubUrl?: string;
+		revision?: string;
+		/**
+		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+		 */
+		fetch?: typeof fetch;
+	} & Partial<CredentialsParams>
+): Promise<SetRequired<SafetensorsParseFromRepo, "parameterCount">>;
+export async function parseSafetensorsMetadata(
+	params: {
+		/** Only models are supported */
+		repo: RepoDesignation;
+		/**
+		 * Will include SafetensorsParseFromRepo["parameterCount"], an object containing the number of parameters for each DType
+		 *
+		 * @default false
+		 */
+		path?: string;
+		computeParametersCount?: boolean;
+		hubUrl?: string;
+		revision?: string;
+		/**
+		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+		 */
+		fetch?: typeof fetch;
+	} & Partial<CredentialsParams>
+): Promise<SafetensorsParseFromRepo>;
+export async function parseSafetensorsMetadata(
+	params: {
+		repo: RepoDesignation;
+		path?: string;
+		computeParametersCount?: boolean;
+		hubUrl?: string;
+		revision?: string;
+		/**
+		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+		 */
+		fetch?: typeof fetch;
+	} & Partial<CredentialsParams>
+): Promise<SafetensorsParseFromRepo> {
 	const repoId = toRepoId(params.repo);
 
 	if (repoId.type !== "model") {
 		throw new TypeError("Only model repos should contain safetensors files.");
 	}
 
-	if (await fileExists({ ...params, path: SINGLE_FILE })) {
-		const header = await parseSingleFile(SINGLE_FILE, params);
+	if (RE_SAFETENSORS_FILE.test(params.path ?? "") || (await fileExists({ ...params, path: SAFETENSORS_FILE }))) {
+		const header = await parseSingleFile(params.path ?? SAFETENSORS_FILE, params);
 		return {
 			sharded: false,
 			header,
@@ -206,8 +243,11 @@ export async function parseSafetensorsMetadata(params: {
 				parameterCount: computeNumOfParamsByDtypeSingleFile(header),
 			}),
 		};
-	} else if (await fileExists({ ...params, path: INDEX_FILE })) {
-		const { index, headers } = await parseShardedIndex(INDEX_FILE, params);
+	} else if (
+		RE_SAFETENSORS_INDEX_FILE.test(params.path ?? "") ||
+		(await fileExists({ ...params, path: SAFETENSORS_INDEX_FILE }))
+	) {
+		const { index, headers } = await parseShardedIndex(params.path ?? SAFETENSORS_INDEX_FILE, params);
 		return {
 			sharded: true,
 			index,

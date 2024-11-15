@@ -1,6 +1,6 @@
 import { HUB_URL } from "../consts";
 import { createApiError, InvalidApiResponseFormatError } from "../error";
-import type { Credentials, RepoDesignation } from "../types/public";
+import type { CredentialsParams, RepoDesignation } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { toRepoId } from "../utils/toRepoId";
 
@@ -15,28 +15,29 @@ export interface FileDownloadInfoOutput {
 /**
  * @returns null when the file doesn't exist
  */
-export async function fileDownloadInfo(params: {
-	repo: RepoDesignation;
-	path: string;
-	revision?: string;
-	credentials?: Credentials;
-	hubUrl?: string;
-	/**
-	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
-	 */
-	fetch?: typeof fetch;
-	/**
-	 * To get the raw pointer file behind a LFS file
-	 */
-	raw?: boolean;
-	/**
-	 * To avoid the content-disposition header in the `downloadLink` for LFS files
-	 *
-	 * So that on browsers you can use the URL in an iframe for example
-	 */
-	noContentDisposition?: boolean;
-}): Promise<FileDownloadInfoOutput | null> {
-	checkCredentials(params.credentials);
+export async function fileDownloadInfo(
+	params: {
+		repo: RepoDesignation;
+		path: string;
+		revision?: string;
+		hubUrl?: string;
+		/**
+		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+		 */
+		fetch?: typeof fetch;
+		/**
+		 * To get the raw pointer file behind a LFS file
+		 */
+		raw?: boolean;
+		/**
+		 * To avoid the content-disposition header in the `downloadLink` for LFS files
+		 *
+		 * So that on browsers you can use the URL in an iframe for example
+		 */
+		noContentDisposition?: boolean;
+	} & Partial<CredentialsParams>
+): Promise<FileDownloadInfoOutput | null> {
+	const accessToken = checkCredentials(params);
 	const repoId = toRepoId(params.repo);
 
 	const hubUrl = params.hubUrl ?? HUB_URL;
@@ -48,12 +49,12 @@ export async function fileDownloadInfo(params: {
 
 	const resp = await (params.fetch ?? fetch)(url, {
 		method: "GET",
-		headers: params.credentials
-			? {
-					Authorization: `Bearer ${params.credentials.accessToken}`,
-					Range: "bytes=0-0",
-			  }
-			: {},
+		headers: {
+			...(params.credentials && {
+				Authorization: `Bearer ${accessToken}`,
+			}),
+			Range: "bytes=0-0",
+		},
 	});
 
 	if (resp.status === 404 && resp.headers.get("X-Error-Code") === "EntryNotFound") {
@@ -70,13 +71,14 @@ export async function fileDownloadInfo(params: {
 		throw new InvalidApiResponseFormatError("Expected ETag");
 	}
 
-	const sizeHeader = resp.headers.get("Content-Length");
+	const contentRangeHeader = resp.headers.get("content-range");
 
-	if (!sizeHeader) {
+	if (!contentRangeHeader) {
 		throw new InvalidApiResponseFormatError("Expected size information");
 	}
 
-	const size = parseInt(sizeHeader);
+	const [, parsedSize] = contentRangeHeader.split("/");
+	const size = parseInt(parsedSize);
 
 	if (isNaN(size)) {
 		throw new InvalidApiResponseFormatError("Invalid file size received");

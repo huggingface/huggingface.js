@@ -1,7 +1,7 @@
 {
 	"name": "@huggingface/hub",
 	"packageManager": "pnpm@8.10.5",
-	"version": "0.12.3",
+	"version": "0.20.0",
 	"description": "Utilities to interact with the Hugging Face hub",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {
@@ -20,6 +20,7 @@
 	"browser": {
 		"./src/utils/sha256-node.ts": false,
 		"./src/utils/FileBlob.ts": false,
+		"./src/lib/cache-management.ts": false,
 		"./dist/index.js": "./dist/browser/index.js",
 		"./dist/index.mjs": "./dist/browser/index.mjs"
 	},
@@ -33,7 +34,7 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"prepublishOnly": "pnpm run build",
-		"build": "tsup",
+		"build": "tsup && tsc --emitDeclarationOnly --declaration",
 		"prepare": "pnpm run build",
 		"test": "vitest run",
 		"test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest-browser.config.mts",
@@ -56,11 +57,9 @@
 	"author": "Hugging Face",
 	"license": "MIT",
 	"devDependencies": {
-		"@huggingface/tasks": "workspace:^",
-		"@types/node": "^18.13.0",
-		"type-fest": "^3.9.0"
+		"@types/node": "^20.11.28"
 	},
 	"dependencies": {
-		"hash-wasm": "^4.9.0"
+		"@huggingface/tasks": "workspace:^"
 	}
 }

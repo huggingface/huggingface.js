@@ -1,14 +1,15 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
+	canonicalId: "text-to-audio",
 	datasets: [
 		{
-			description: "Thousands of short audio clips of a single speaker.",
-			id: "lj_speech",
+			description: "10K hours of multi-speaker English dataset.",
+			id: "parler-tts/mls_eng_10k",
 		},
 		{
 			description: "Multi-speaker English dataset.",
-			id: "LibriTTS",
+			id: "mythicinfinity/libritts_r",
 		},
 	],
 	demo: {
@@ -35,15 +36,19 @@ const taskData: TaskDataCustom = {
 	models: [
 		{
 			description: "A powerful TTS model.",
-			id: "suno/bark",
+			id: "parler-tts/parler-tts-large-v1",
 		},
 		{
 			description: "A massively multi-lingual TTS model.",
-			id: "facebook/mms-tts",
+			id: "coqui/XTTS-v2",
 		},
 		{
-			description: "An end-to-end speech synthesis model.",
-			id: "microsoft/speecht5_tts",
+			description: "Robust TTS model.",
+			id: "metavoiceio/metavoice-1B-v0.1",
+		},
+		{
+			description: "A prompt based, powerful TTS model.",
+			id: "parler-tts/parler_tts_mini_v0.1",
 		},
 	],
 	spaces: [
@@ -52,12 +57,17 @@ const taskData: TaskDataCustom = {
 			id: "suno/bark",
 		},
 		{
-			description: "XTTS is a Voice generation model that lets you clone voices into different languages.",
+			description:
+				"An application on XTTS, a voice generation model that lets you clone voices into different languages.",
 			id: "coqui/xtts",
 		},
 		{
-			description: "An application that synthesizes speech for various speaker types.",
-			id: "Matthijs/speecht5-tts-demo",
+			description: "An application that generates speech in different styles in English and Chinese.",
+			id: "mrfakename/E2-F5-TTS",
+		},
+		{
+			description: "An application that synthesizes speech for diverse speaker prompts.",
+			id: "parler-tts/parler_tts_mini",
 		},
 	],
 	summary:

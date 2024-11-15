@@ -6,6 +6,7 @@ export const TOKEN_TYPES = Object.freeze({
 
 	NumericLiteral: "NumericLiteral", // e.g., 123
 	BooleanLiteral: "BooleanLiteral", // true or false
+	NullLiteral: "NullLiteral", // none
 	StringLiteral: "StringLiteral", // 'string'
 	Identifier: "Identifier", // Variables, functions, etc.
 	Equals: "Equals", // =
@@ -17,6 +18,8 @@ export const TOKEN_TYPES = Object.freeze({
 	CloseExpression: "CloseExpression", // }}
 	OpenSquareBracket: "OpenSquareBracket", // [
 	CloseSquareBracket: "CloseSquareBracket", // ]
+	OpenCurlyBracket: "OpenCurlyBracket", // {
+	CloseCurlyBracket: "CloseCurlyBracket", // }
 	Comma: "Comma", // ,
 	Dot: "Dot", // .
 	Colon: "Colon", // :
@@ -33,6 +36,7 @@ export const TOKEN_TYPES = Object.freeze({
 	If: "If",
 	For: "For",
 	In: "In",
+	Is: "Is",
 	NotIn: "NotIn",
 	Else: "Else",
 	EndIf: "EndIf",
@@ -41,6 +45,8 @@ export const TOKEN_TYPES = Object.freeze({
 	And: "And",
 	Or: "Or",
 	Not: "UnaryOperator",
+	Macro: "Macro",
+	EndMacro: "EndMacro",
 });
 
 export type TokenType = keyof typeof TOKEN_TYPES;
@@ -52,6 +58,7 @@ const KEYWORDS = Object.freeze({
 	set: TOKEN_TYPES.Set,
 	for: TOKEN_TYPES.For,
 	in: TOKEN_TYPES.In,
+	is: TOKEN_TYPES.Is,
 	if: TOKEN_TYPES.If,
 	else: TOKEN_TYPES.Else,
 	endif: TOKEN_TYPES.EndIf,
@@ -61,10 +68,21 @@ const KEYWORDS = Object.freeze({
 	or: TOKEN_TYPES.Or,
 	not: TOKEN_TYPES.Not,
 	"not in": TOKEN_TYPES.NotIn,
+	macro: TOKEN_TYPES.Macro,
+	endmacro: TOKEN_TYPES.EndMacro,
 
 	// Literals
 	true: TOKEN_TYPES.BooleanLiteral,
 	false: TOKEN_TYPES.BooleanLiteral,
+	none: TOKEN_TYPES.NullLiteral,
+
+	// NOTE: According to the Jinja docs: The special constants true, false, and none are indeed lowercase.
+	// Because that caused confusion in the past, (True used to expand to an undefined variable that was considered false),
+	// all three can now also be written in title case (True, False, and None). However, for consistency, (all Jinja identifiers are lowercase)
+	// you should use the lowercase versions.
+	True: TOKEN_TYPES.BooleanLiteral,
+	False: TOKEN_TYPES.BooleanLiteral,
+	None: TOKEN_TYPES.NullLiteral,
 });
 
 /**
@@ -102,6 +120,8 @@ const ORDERED_MAPPING_TABLE: [string, TokenType][] = [
 	// Single character tokens
 	["(", TOKEN_TYPES.OpenParen],
 	[")", TOKEN_TYPES.CloseParen],
+	["{", TOKEN_TYPES.OpenCurlyBracket],
+	["}", TOKEN_TYPES.CloseCurlyBracket],
 	["[", TOKEN_TYPES.OpenSquareBracket],
 	["]", TOKEN_TYPES.CloseSquareBracket],
 	[",", TOKEN_TYPES.Comma],
@@ -137,12 +157,52 @@ const ESCAPE_CHARACTERS = new Map([
 	["\\", "\\"], // Backslash
 ]);
 
+export interface PreprocessOptions {
+	trim_blocks?: boolean;
+	lstrip_blocks?: boolean;
+}
+
+function preprocess(template: string, options: PreprocessOptions = {}): string {
+	// According to https://jinja.palletsprojects.com/en/3.0.x/templates/#whitespace-control
+
+	// In the default configuration:
+	//  - a single trailing newline is stripped if present
+	//  - other whitespace (spaces, tabs, newlines etc.) is returned unchanged
+	if (template.endsWith("\n")) {
+		template = template.slice(0, -1);
+	}
+
+	// Replace all comments with a placeholder
+	// This ensures that comments don't interfere with the following options
+	template = template.replace(/{#.*?#}/gs, "{##}");
+
+	if (options.lstrip_blocks) {
+		// The lstrip_blocks option can also be set to strip tabs and spaces from the
+		// beginning of a line to the start of a block. (Nothing will be stripped if
+		// there are other characters before the start of the block.)
+		template = template.replace(/^[ \t]*({[#%])/gm, "$1");
+	}
+
+	if (options.trim_blocks) {
+		// If an application configures Jinja to trim_blocks, the first newline after
+		// a template tag is removed automatically (like in PHP).
+		template = template.replace(/([#%]})\n/g, "$1");
+	}
+
+	return template
+		.replace(/{##}/g, "") // Remove comments
+		.replace(/-%}\s*/g, "%}")
+		.replace(/\s*{%-/g, "{%")
+		.replace(/-}}\s*/g, "}}")
+		.replace(/\s*{{-/g, "{{");
+}
+
 /**
  * Generate a list of tokens from a source string.
  */
-export function tokenize(source: string): Token[] {
+export function tokenize(source: string, options: PreprocessOptions = {}): Token[] {
 	const tokens: Token[] = [];
-	const src: string = source;
+	const src: string = preprocess(source, options);
 
 	let cursorPosition = 0;
 
@@ -214,6 +274,7 @@ export function tokenize(source: string): Token[] {
 				case TOKEN_TYPES.Identifier:
 				case TOKEN_TYPES.NumericLiteral:
 				case TOKEN_TYPES.BooleanLiteral:
+				case TOKEN_TYPES.NullLiteral:
 				case TOKEN_TYPES.StringLiteral:
 				case TOKEN_TYPES.CloseParen:
 				case TOKEN_TYPES.CloseSquareBracket:
@@ -247,9 +308,9 @@ export function tokenize(source: string): Token[] {
 			}
 		}
 
-		if (char === "'") {
+		if (char === "'" || char === '"') {
 			++cursorPosition; // Skip the opening quote
-			const str = consumeWhile((char) => char !== "'");
+			const str = consumeWhile((c) => c !== char);
 			tokens.push(new Token(str, TOKEN_TYPES.StringLiteral));
 			++cursorPosition; // Skip the closing quote
 			continue;

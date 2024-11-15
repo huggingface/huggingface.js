@@ -4,8 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       newversion:
-        description: "Semantic Version Bump Type (major minor patch)"
+        type: choice
+        description: "Semantic Version Bump Type"
         default: patch
+        options:
+          - patch
+          - minor
+          - major
 
 concurrency:
   group: "push-to-main"
@@ -20,11 +25,15 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
+          # Needed to push the tag and the commit on the main branch, otherwise we get:
+          # > Run git push --follow-tags
+          # remote: error: GH006: Protected branch update failed for refs/heads/main.
+          # remote: error: Changes must be made through a pull request. Required status check "lint" is expected.
           token: ${{ secrets.BOT_ACCESS_TOKEN }}
       - run: corepack enable
       - uses: actions/setup-node@v3
         with:
-          node-version: "18"
+          node-version: "20"
           cache: "pnpm"
           cache-dependency-path: |
             packages/tasks/pnpm-lock.yaml
@@ -38,17 +47,24 @@ jobs:
           BUMPED_VERSION=$(node -p "require('semver').inc('$PACKAGE_VERSION', '${{ github.event.inputs.newversion }}')")
           # Update package.json with the new version
           node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./package.json')); package.version = '$BUMPED_VERSION'; fs.writeFileSync('./package.json', JSON.stringify(package, null, '\t') + '\n');"
-          git commit . -m "🔖 @hugginface/tasks $BUMPED_VERSION"
+          git commit . -m "🔖 @huggingface/tasks $BUMPED_VERSION"
           git tag "tasks-v$BUMPED_VERSION"
+
       - run: pnpm publish --no-git-checks .
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - run: git push --follow-tags
+      - run: git pull --rebase && git push --follow-tags
       # hack - reuse actions/setup-node@v3 just to set a new registry
       - uses: actions/setup-node@v3
         with:
-          node-version: "18"
+          node-version: "20"
           registry-url: "https://npm.pkg.github.com"
-      - run: pnpm publish --no-git-checks .
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Disable for now, until github supports PATs for writing github packages (https://github.com/github/roadmap/issues/558)
+      # - run: pnpm publish --no-git-checks .
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: "Update Doc"
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          event-type: doc-build
+          token: ${{ secrets.BOT_ACCESS_TOKEN }}

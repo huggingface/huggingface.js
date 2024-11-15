@@ -117,7 +117,7 @@
 				estimatedTime: res.estimatedTime,
 			};
 			getOutput({ withModelLoading: true });
-		} else if (res.status === "error") {
+		} else if (res.status === "error" && !isOnLoadCall) {
 			error = res.error;
 		}
 	}
@@ -171,9 +171,8 @@
 		bind:value={query}
 		{isLoading}
 		{isDisabled}
-		onClickSubmitBtn={() => {
-			getOutput();
-		}}
+		on:run={() => getOutput()}
+		on:cmdEnter={() => getOutput()}
 	/>
 
 	<div class="mt-4">
@@ -181,7 +180,7 @@
 			<WidgetOutputTableQA {output} {isAnswerOnlyOutput} />
 		{/if}
 		{#if table.length > 1 || table[0].length > 1}
-			<WidgetTableInput {highlighted} onChange={onChangeTable} {table} {isDisabled} />
+			<WidgetTableInput {highlighted} on:change={(e) => onChangeTable(e.detail)} {table} {isDisabled} />
 		{/if}
 	</div>
 	<WidgetInfo {model} {computeTime} {error} {modelLoading} />

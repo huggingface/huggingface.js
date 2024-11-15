@@ -142,7 +142,7 @@
 				estimatedTime: res.estimatedTime,
 			};
 			getOutput({ withModelLoading: true });
-		} else if (res.status === "error") {
+		} else if (res.status === "error" && !isOnLoadCall) {
 			error = res.error;
 		}
 	}
@@ -164,8 +164,8 @@
 			{isLoading}
 			{isDisabled}
 			{imgSrc}
-			{onSelectFile}
-			onError={(e) => (error = e)}
+			on:run={(e) => onSelectFile(e.detail)}
+			on:error={(e) => (error = e.detail)}
 		>
 			{#if imgSrc}
 				<img src={imgSrc} class="pointer-events-none mx-auto max-h-44 shadow" alt="" />
@@ -185,21 +185,17 @@
 			{isLoading}
 			{isDisabled}
 			label="Browse for image"
-			{onSelectFile}
+			on:run={(e) => onSelectFile(e.detail)}
 		/>
 		<WidgetTextInput
 			bind:value={candidateLabels}
+			{isLoading}
 			{isDisabled}
 			label="Possible class names (comma-separated)"
 			placeholder="Possible class names..."
+			on:cmdEnter={() => getOutput()}
 		/>
-		<WidgetSubmitBtn
-			{isLoading}
-			{isDisabled}
-			onClick={() => {
-				getOutput();
-			}}
-		/>
+		<WidgetSubmitBtn {isLoading} {isDisabled} on:run={() => getOutput()} />
 	</div>
 	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
 

@@ -9,7 +9,7 @@ import { deleteRepo } from "./delete-repo";
 import { downloadFile } from "./download-file";
 import { fileDownloadInfo } from "./file-download-info";
 import { insecureRandomString } from "../utils/insecureRandomString";
-import { isFrontend } from "../../../shared";
+import { isFrontend } from "../utils/isFrontend";
 
 const lfsContent = "O123456789".repeat(100_000);
 
@@ -25,9 +25,7 @@ describe("commit", () => {
 		};
 
 		await createRepo({
-			credentials: {
-				accessToken: TEST_ACCESS_TOKEN,
-			},
+			accessToken: TEST_ACCESS_TOKEN,
 			hubUrl: TEST_HUB_URL,
 			repo,
 			license: "mit",
@@ -43,16 +41,14 @@ describe("commit", () => {
 						{
 							operation: "addOrUpdate",
 							path: "tsconfig.json",
-							content: (await import("node:url")).pathToFileURL("./tsconfig.json"),
+							content: (await import("node:url")).pathToFileURL("./tsconfig.json") as URL,
 						},
 				  ];
 
 			await commit({
 				repo,
 				title: "Some commit",
-				credentials: {
-					accessToken: TEST_ACCESS_TOKEN,
-				},
+				accessToken: TEST_ACCESS_TOKEN,
 				hubUrl: TEST_HUB_URL,
 				operations: [
 					{
@@ -135,9 +131,7 @@ size ${lfsContent.length}
 		};
 
 		await createRepo({
-			credentials: {
-				accessToken: TEST_ACCESS_TOKEN,
-			},
+			accessToken: TEST_ACCESS_TOKEN,
 			repo,
 			hubUrl: TEST_HUB_URL,
 		});
@@ -163,9 +157,7 @@ size ${lfsContent.length}
 			);
 			await commit({
 				repo,
-				credentials: {
-					accessToken: TEST_ACCESS_TOKEN,
-				},
+				accessToken: TEST_ACCESS_TOKEN,
 				hubUrl: TEST_HUB_URL,
 				title: "upload model",
 				operations,
@@ -203,5 +195,81 @@ size 4194304
 			});
 		}
 		// https://huggingfacejs-push-model-from-web.hf.space/
+	}, 60_000);
+
+	it("should be able to create a PR and then commit to it", async function () {
+		const repoName = `${TEST_USER}/TEST-${insecureRandomString()}`;
+		const repo: RepoId = {
+			name: repoName,
+			type: "model",
+		};
+
+		await createRepo({
+			credentials: {
+				accessToken: TEST_ACCESS_TOKEN,
+			},
+			repo,
+			hubUrl: TEST_HUB_URL,
+		});
+
+		try {
+			const pr = await commit({
+				repo,
+				credentials: {
+					accessToken: TEST_ACCESS_TOKEN,
+				},
+				hubUrl: TEST_HUB_URL,
+				title: "Create PR",
+				isPullRequest: true,
+				operations: [
+					{
+						operation: "addOrUpdate",
+						content: new Blob(["This is me"]),
+						path: "test.txt",
+					},
+				],
+			});
+
+			if (!pr) {
+				throw new Error("PR creation failed");
+			}
+
+			if (!pr.pullRequestUrl) {
+				throw new Error("No pull request url");
+			}
+
+			const prNumber = pr.pullRequestUrl.split("/").pop();
+			const prRef = `refs/pr/${prNumber}`;
+
+			await commit({
+				repo,
+				credentials: {
+					accessToken: TEST_ACCESS_TOKEN,
+				},
+				hubUrl: TEST_HUB_URL,
+				branch: prRef,
+				title: "Some commit",
+				operations: [
+					{
+						operation: "addOrUpdate",
+						content: new URL(
+							`https://huggingface.co/spaces/huggingfacejs/push-model-from-web/resolve/main/mobilenet/group1-shard1of2`
+						),
+						path: "mobilenet/group1-shard1of2",
+					},
+				],
+			});
+
+			assert(commit, "PR commit failed");
+		} finally {
+			await deleteRepo({
+				repo: {
+					name: repoName,
+					type: "model",
+				},
+				hubUrl: TEST_HUB_URL,
+				credentials: { accessToken: TEST_ACCESS_TOKEN },
+			});
+		}
 	}, 60_000);
 });

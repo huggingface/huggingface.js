@@ -1,0 +1,55 @@
+name: Lint
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # Could use something like rmacklin/fetch-through-merge-base@v0 instead when the repo gets bigger
+          fetch-depth: 0
+      - name: "Extracting the merge base into 'SINCE'"
+        id: since
+        run: |
+          if [ -z $PR_REF ]
+          then
+            echo "SINCE=$SHA^1" >> $GITHUB_OUTPUT
+          else
+            echo "SINCE=$(git merge-base origin/$PR_REF $SHA)" >> $GITHUB_OUTPUT
+          fi
+        env:
+          PR_REF: ${{  github.event.pull_request.head.ref }}
+          SHA: ${{ github.sha }}
+
+      - run: corepack enable
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: "**/pnpm-lock.yaml"
+      - run: |
+          pnpm install --frozen-lockfile --filter .
+          pnpm install --frozen-lockfile --filter ...[${{ steps.since.outputs.SINCE }}]...
+          pnpm --filter ...[${{ steps.since.outputs.SINCE }}]... build
+      - name: "Checking lint errors"
+        run: |
+          pnpm --filter ...[${{ steps.since.outputs.SINCE }}] lint:check
+
+      - name: "Checking format errors"
+        run: |
+          # Could also use pnpm --filter [${{ steps.since.outputs.SINCE }}] format:check
+          # But this way we can see the diff
+          pnpm --filter [${{ steps.since.outputs.SINCE }}] format
+          git diff | head -n 100
+          git diff --name-only --exit-code
+
+      - name: Check types
+        run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] check

@@ -12,10 +12,18 @@ import {
 	NumericLiteral,
 	StringLiteral,
 	BooleanLiteral,
+	NullLiteral,
+	ArrayLiteral,
+	ObjectLiteral,
 	BinaryExpression,
 	FilterExpression,
+	TestExpression,
 	UnaryExpression,
 	SliceExpression,
+	KeywordArgumentExpression,
+	TupleLiteral,
+	Macro,
+	SelectExpression,
 } from "./ast";
 
 /**
@@ -26,6 +34,12 @@ export function parse(tokens: Token[]): Program {
 	const program = new Program([]);
 	let current = 0;
 
+	/**
+	 * Consume the next token if it matches the expected type, otherwise throw an error.
+	 * @param type The expected token type
+	 * @param error The error message to throw if the token does not match the expected type
+	 * @returns The consumed token
+	 */
 	function expect(type: string, error: string): Token {
 		const prev = tokens[current++];
 		if (!prev || prev.type !== type) {
@@ -76,6 +90,14 @@ export function parse(tokens: Token[]): Program {
 				result = parseIfStatement();
 				expect(TOKEN_TYPES.OpenStatement, "Expected {% token");
 				expect(TOKEN_TYPES.EndIf, "Expected endif token");
+				expect(TOKEN_TYPES.CloseStatement, "Expected %} token");
+				break;
+
+			case TOKEN_TYPES.Macro:
+				++current;
+				result = parseMacroStatement();
+				expect(TOKEN_TYPES.OpenStatement, "Expected {% token");
+				expect(TOKEN_TYPES.EndMacro, "Expected endmacro token");
 				expect(TOKEN_TYPES.CloseStatement, "Expected %} token");
 				break;
 
@@ -162,16 +184,49 @@ export function parse(tokens: Token[]): Program {
 		return new If(test, body, alternate);
 	}
 
+	function parseMacroStatement(): Macro {
+		const name = parsePrimaryExpression();
+		if (name.type !== "Identifier") {
+			throw new SyntaxError(`Expected identifier following macro statement`);
+		}
+		const args = parseArgs();
+		expect(TOKEN_TYPES.CloseStatement, "Expected closing statement token");
+
+		// Body of macro
+		const body: Statement[] = [];
+
+		// Keep going until we hit {% endmacro
+		while (not(TOKEN_TYPES.OpenStatement, TOKEN_TYPES.EndMacro)) {
+			body.push(parseAny());
+		}
+
+		return new Macro(name as Identifier, args, body);
+	}
+
+	function parseExpressionSequence(primary = false): Statement {
+		const fn = primary ? parsePrimaryExpression : parseExpression;
+		const expressions = [fn()];
+		const isTuple = is(TOKEN_TYPES.Comma);
+		while (isTuple) {
+			++current; // consume comma
+			expressions.push(fn());
+			if (!is(TOKEN_TYPES.Comma)) {
+				break;
+			}
+		}
+		return isTuple ? new TupleLiteral(expressions) : expressions[0];
+	}
+
 	function parseForStatement(): For {
 		// e.g., `message` in `for message in messages`
-		const loopVariable = parsePrimaryExpression(); // should be an identifier
-		if (!(loopVariable instanceof Identifier)) {
-			throw new SyntaxError(`Expected identifier for the loop variable`);
+		const loopVariable = parseExpressionSequence(true); // should be an identifier/tuple
+		if (!(loopVariable instanceof Identifier || loopVariable instanceof TupleLiteral)) {
+			throw new SyntaxError(`Expected identifier/tuple for the loop variable, got ${loopVariable.type} instead`);
 		}
 
 		expect(TOKEN_TYPES.In, "Expected `in` keyword following loop variable");
 
-		// messages in `for message in messages`
+		// `messages` in `for message in messages`
 		const iterable = parseExpression();
 
 		expect(TOKEN_TYPES.CloseStatement, "Expected closing statement token");
@@ -179,18 +234,52 @@ export function parse(tokens: Token[]): Program {
 		// Body of for loop
 		const body: Statement[] = [];
 
-		// Keep going until we hit {% endfor
-		while (not(TOKEN_TYPES.OpenStatement, TOKEN_TYPES.EndFor)) {
+		// Keep going until we hit {% endfor or {% else
+		while (not(TOKEN_TYPES.OpenStatement, TOKEN_TYPES.EndFor) && not(TOKEN_TYPES.OpenStatement, TOKEN_TYPES.Else)) {
 			body.push(parseAny());
 		}
 
-		return new For(loopVariable, iterable, body);
+		// (Optional) else block
+		const alternative: Statement[] = [];
+		if (is(TOKEN_TYPES.OpenStatement, TOKEN_TYPES.Else)) {
+			++current; // consume {%
+			++current; // consume else
+			expect(TOKEN_TYPES.CloseStatement, "Expected closing statement token");
+
+			// keep going until we hit {% endfor
+			while (not(TOKEN_TYPES.OpenStatement, TOKEN_TYPES.EndFor)) {
+				alternative.push(parseAny());
+			}
+		}
+
+		return new For(loopVariable, iterable, body, alternative);
 	}
 
 	function parseExpression(): Statement {
 		// Choose parse function with lowest precedence
-		return parseLogicalOrExpression();
+		return parseIfExpression();
 	}
+
+	function parseIfExpression(): Statement {
+		const a = parseLogicalOrExpression();
+		if (is(TOKEN_TYPES.If)) {
+			// Ternary expression
+			++current; // consume if
+			const predicate = parseLogicalOrExpression();
+
+			if (is(TOKEN_TYPES.Else)) {
+				// Ternary expression with else
+				++current; // consume else
+				const b = parseLogicalOrExpression();
+				return new If(predicate, [a], [b]);
+			} else {
+				// Select expression on iterable
+				return new SelectExpression(a, predicate);
+			}
+		}
+		return a;
+	}
+
 	function parseLogicalOrExpression(): Statement {
 		let left = parseLogicalAndExpression();
 		while (is(TOKEN_TYPES.Or)) {
@@ -278,21 +367,36 @@ export function parse(tokens: Token[]): Program {
 		// add (x + 5, foo())
 		expect(TOKEN_TYPES.OpenParen, "Expected opening parenthesis for arguments list");
 
-		const args = is(TOKEN_TYPES.CloseParen) ? [] : parseArgumentsList();
+		const args = parseArgumentsList();
 
 		expect(TOKEN_TYPES.CloseParen, "Expected closing parenthesis for arguments list");
 		return args;
 	}
 	function parseArgumentsList(): Statement[] {
 		// comma-separated arguments list
-		const args = [parseExpression()]; // Update when we allow assignment expressions
 
-		while (is(TOKEN_TYPES.Comma)) {
-			++current; // consume comma
-			args.push(parseExpression());
+		const args = [];
+		while (!is(TOKEN_TYPES.CloseParen)) {
+			let argument = parseExpression();
+
+			if (is(TOKEN_TYPES.Equals)) {
+				// keyword argument
+				// e.g., func(x = 5, y = a or b)
+				++current; // consume equals
+				if (!(argument instanceof Identifier)) {
+					throw new SyntaxError(`Expected identifier for keyword argument`);
+				}
+				const value = parseExpression();
+				argument = new KeywordArgumentExpression(argument, value);
+			}
+			args.push(argument);
+			if (is(TOKEN_TYPES.Comma)) {
+				++current; // consume comma
+			}
 		}
 		return args;
 	}
+
 	function parseMemberExpressionArgumentsList(): Statement {
 		// NOTE: This also handles slice expressions colon-separated arguments list
 		// e.g., ['test'], [0], [:2], [1:], [1:2], [1:2:3]
@@ -354,15 +458,45 @@ export function parse(tokens: Token[]): Program {
 	}
 
 	function parseMultiplicativeExpression(): Statement {
-		let left = parseFilterExpression();
+		let left = parseTestExpression();
+
+		// Multiplicative operators have higher precedence than test expressions
+		// e.g., (4 * 4 is divisibleby(2)) evaluates as (4 * (4 is divisibleby(2)))
 
 		while (is(TOKEN_TYPES.MultiplicativeBinaryOperator)) {
 			const operator = tokens[current];
 			++current;
-			const right = parseFilterExpression();
+			const right = parseTestExpression();
 			left = new BinaryExpression(operator, left, right);
 		}
 		return left;
+	}
+
+	function parseTestExpression(): Statement {
+		let operand = parseFilterExpression();
+
+		while (is(TOKEN_TYPES.Is)) {
+			// Support chaining tests
+			++current; // consume is
+			const negate = is(TOKEN_TYPES.Not);
+			if (negate) {
+				++current; // consume not
+			}
+
+			let filter = parsePrimaryExpression();
+			if (filter instanceof BooleanLiteral) {
+				// Special case: treat boolean literals as identifiers
+				filter = new Identifier(filter.value.toString());
+			} else if (filter instanceof NullLiteral) {
+				filter = new Identifier("none");
+			}
+			if (!(filter instanceof Identifier)) {
+				throw new SyntaxError(`Expected identifier for the test`);
+			}
+			// TODO: Add support for non-identifier tests
+			operand = new TestExpression(operand, negate, filter);
+		}
+		return operand;
 	}
 
 	function parseFilterExpression(): Statement {
@@ -371,11 +505,14 @@ export function parse(tokens: Token[]): Program {
 		while (is(TOKEN_TYPES.Pipe)) {
 			// Support chaining filters
 			++current; // consume pipe
-			const filter = parsePrimaryExpression(); // should be an identifier
+			let filter = parsePrimaryExpression(); // should be an identifier
 			if (!(filter instanceof Identifier)) {
 				throw new SyntaxError(`Expected identifier for the filter`);
 			}
-			operand = new FilterExpression(operand, filter);
+			if (is(TOKEN_TYPES.OpenParen)) {
+				filter = parseCallExpression(filter);
+			}
+			operand = new FilterExpression(operand, filter as Identifier | CallExpression);
 		}
 		return operand;
 	}
@@ -392,18 +529,54 @@ export function parse(tokens: Token[]): Program {
 				return new StringLiteral(token.value);
 			case TOKEN_TYPES.BooleanLiteral:
 				++current;
-				return new BooleanLiteral(token.value === "true");
+				return new BooleanLiteral(token.value.toLowerCase() === "true");
+			case TOKEN_TYPES.NullLiteral:
+				++current;
+				return new NullLiteral(null);
 			case TOKEN_TYPES.Identifier:
 				++current;
 				return new Identifier(token.value);
 			case TOKEN_TYPES.OpenParen: {
 				++current; // consume opening parenthesis
-				const expression = parseExpression();
+				const expression = parseExpressionSequence();
 				if (tokens[current].type !== TOKEN_TYPES.CloseParen) {
-					throw new SyntaxError("Expected closing parenthesis");
+					throw new SyntaxError(`Expected closing parenthesis, got ${tokens[current].type} instead`);
 				}
 				++current; // consume closing parenthesis
 				return expression;
+			}
+			case TOKEN_TYPES.OpenSquareBracket: {
+				++current; // consume opening square bracket
+
+				const values = [];
+				while (!is(TOKEN_TYPES.CloseSquareBracket)) {
+					values.push(parseExpression());
+
+					if (is(TOKEN_TYPES.Comma)) {
+						++current; // consume comma
+					}
+				}
+				++current; // consume closing square bracket
+
+				return new ArrayLiteral(values);
+			}
+			case TOKEN_TYPES.OpenCurlyBracket: {
+				++current; // consume opening curly bracket
+
+				const values = new Map();
+				while (!is(TOKEN_TYPES.CloseCurlyBracket)) {
+					const key = parseExpression();
+					expect(TOKEN_TYPES.Colon, "Expected colon between key and value in object literal");
+					const value = parseExpression();
+					values.set(key, value);
+
+					if (is(TOKEN_TYPES.Comma)) {
+						++current; // consume comma
+					}
+				}
+				++current; // consume closing curly bracket
+
+				return new ObjectLiteral(values);
 			}
 			default:
 				throw new SyntaxError(`Unexpected token: ${token.type}`);

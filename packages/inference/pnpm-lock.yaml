@@ -4,10 +4,12 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-devDependencies:
+dependencies:
   '@huggingface/tasks':
     specifier: workspace:^
     version: link:../tasks
+
+devDependencies:
   '@types/node':
     specifier: 18.13.0
     version: 18.13.0

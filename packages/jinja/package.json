@@ -1,7 +1,7 @@
 {
 	"name": "@huggingface/jinja",
 	"packageManager": "pnpm@8.10.5",
-	"version": "0.1.2",
+	"version": "0.3.2",
 	"description": "A minimalistic JavaScript implementation of the Jinja templating engine, specifically designed for parsing and rendering ML chat templates.",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {
@@ -28,7 +28,8 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"prepublishOnly": "pnpm run build",
-		"build": "tsup src/index.ts --format cjs,esm --clean --dts",
+		"prepare": "pnpm run build",
+		"build": "tsup src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
 		"test": "vitest run",
 		"test:browser": "vitest run --browser.name=chrome --browser.headless",
 		"check": "tsc"
@@ -51,6 +52,6 @@
 	"devDependencies": {
 		"typescript": "^5.3.2",
 		"@huggingface/hub": "workspace:^",
-		"@xenova/transformers": "^2.9.0"
+		"@huggingface/transformers": "^3.0.0"
 	}
 }

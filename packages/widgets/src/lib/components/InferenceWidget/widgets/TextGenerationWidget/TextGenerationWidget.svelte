@@ -147,7 +147,7 @@
 				estimatedTime: res.estimatedTime,
 			};
 			getOutput({ withModelLoading: true, useCache });
-		} else if (res.status === "error") {
+		} else if (res.status === "error" && !isOnLoadCall) {
 			error = res.error;
 		}
 
@@ -213,6 +213,7 @@
 			{isDisabled}
 			size="big"
 			bind:renderTextOutput
+			on:cmdEnter={() => getOutput({ useCache })}
 		/>
 		{#if model.id === "bigscience/bloom"}
 			<WidgetBloomDecoding bind:decodingStrategy />
@@ -221,7 +222,7 @@
 			<WidgetSubmitBtn
 				{isLoading}
 				{isDisabled}
-				onClick={() => {
+				on:run={() => {
 					getOutput({ useCache });
 				}}
 			/>

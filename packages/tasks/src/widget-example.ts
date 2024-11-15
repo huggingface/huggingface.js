@@ -2,6 +2,8 @@
  * See default-widget-inputs.ts for the default widget inputs, this files only contains the types
  */
 
+import type { ChatCompletionInputMessage } from "./tasks/index.js";
+
 type TableData = Record<string, (string | number)[]>;
 
 //#region outputs
@@ -49,6 +51,10 @@ export interface WidgetExampleBase<TOutput> {
 	 * Optional output
 	 */
 	output?: TOutput;
+}
+
+export interface WidgetExampleChatInput<TOutput = WidgetExampleOutput> extends WidgetExampleBase<TOutput> {
+	messages: ChatCompletionInputMessage[];
 }
 
 export interface WidgetExampleTextInput<TOutput = WidgetExampleOutput> extends WidgetExampleBase<TOutput> {
@@ -101,6 +107,7 @@ export interface WidgetExampleSentenceSimilarityInput<TOutput = WidgetExampleOut
 //#endregion
 
 export type WidgetExample<TOutput = WidgetExampleOutput> =
+	| WidgetExampleChatInput<TOutput>
 	| WidgetExampleTextInput<TOutput>
 	| WidgetExampleTextAndContextInput<TOutput>
 	| WidgetExampleTextAndTableInput<TOutput>

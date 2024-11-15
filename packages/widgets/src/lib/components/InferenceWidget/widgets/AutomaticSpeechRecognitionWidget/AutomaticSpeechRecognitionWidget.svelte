@@ -123,7 +123,7 @@
 				estimatedTime: res.estimatedTime,
 			};
 			getOutput({ withModelLoading: true });
-		} else if (res.status === "error") {
+		} else if (res.status === "error" && !isOnLoadCall) {
 			error = res.error;
 		}
 	}
@@ -168,9 +168,14 @@
 
 	<div class="flex flex-wrap items-center {isDisabled ? 'pointer-events-none hidden opacity-50' : ''}">
 		{#if !isRealtimeRecording}
-			<WidgetFileInput accept="audio/*" classNames="mt-1.5" {onSelectFile} />
+			<WidgetFileInput accept="audio/*" classNames="mt-1.5" on:run={(e) => onSelectFile(e.detail)} />
 			<span class="mx-2 mt-1.5">or</span>
-			<WidgetRecorder classNames="mt-1.5" {onRecordStart} onRecordStop={onSelectFile} onError={onRecordError} />
+			<WidgetRecorder
+				classNames="mt-1.5"
+				on:start={() => onRecordStart()}
+				on:stop={(e) => onSelectFile(e.detail)}
+				on:error={(e) => onRecordError(e.detail)}
+			/>
 		{/if}
 		{#if model?.library_name === "transformers"}
 			{#if !isRealtimeRecording}
@@ -181,9 +186,9 @@
 				{apiToken}
 				{model}
 				{updateModelLoading}
-				onRecordStart={() => (isRealtimeRecording = true)}
-				onRecordStop={() => (isRealtimeRecording = false)}
-				onError={onRecordError}
+				on:start={() => (isRealtimeRecording = true)}
+				on:stop={() => (isRealtimeRecording = false)}
+				on:error={(e) => onRecordError(e.detail)}
 			/>
 		{/if}
 	</div>
@@ -191,14 +196,7 @@
 		{#if fileUrl}
 			<WidgetAudioTrack classNames="mt-3" label={filename} src={fileUrl} />
 		{/if}
-		<WidgetSubmitBtn
-			classNames="mt-2"
-			isDisabled={isRecording || isDisabled}
-			{isLoading}
-			onClick={() => {
-				getOutput();
-			}}
-		/>
+		<WidgetSubmitBtn classNames="mt-2" isDisabled={isRecording || isDisabled} {isLoading} on:run={() => getOutput()} />
 		{#if warning}
 			<div class="alert alert-warning mt-2">{warning}</div>
 		{/if}

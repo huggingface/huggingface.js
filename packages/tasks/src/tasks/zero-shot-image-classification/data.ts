@@ -1,4 +1,4 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	datasets: [
@@ -52,9 +52,12 @@ const taskData: TaskDataCustom = {
 			id: "openai/clip-vit-base-patch16",
 		},
 		{
-			description:
-				"Robust image classification model trained on publicly available image-caption data trained on additional high pixel data for better performance.",
-			id: "openai/clip-vit-large-patch14-336",
+			description: "Strong zero-shot image classification model.",
+			id: "google/siglip-so400m-patch14-224",
+		},
+		{
+			description: "Small yet powerful zero-shot image classification model that can run on edge devices.",
+			id: "apple/MobileCLIP-S1-OpenCLIP",
 		},
 		{
 			description: "Strong image classification model for biomedical domain.",
@@ -64,13 +67,17 @@ const taskData: TaskDataCustom = {
 	spaces: [
 		{
 			description:
-				"An application that leverages zero shot image classification to find best captions to generate an image. ",
+				"An application that leverages zero-shot image classification to find best captions to generate an image. ",
 			id: "pharma/CLIP-Interrogator",
+		},
+		{
+			description: "An application to compare different zero-shot image classification models. ",
+			id: "merve/compare_clip_siglip",
 		},
 	],
 	summary:
-		"Zero shot image classification is the task of classifying previously unseen classes during training of a model.",
-	widgetModels: ["openai/clip-vit-large-patch14-336"],
+		"Zero-shot image classification is the task of classifying previously unseen classes during training of a model.",
+	widgetModels: ["google/siglip-so400m-patch14-224"],
 	youtubeId: "",
 };
 

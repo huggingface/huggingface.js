@@ -1,59 +1,134 @@
-import { type PipelineType, PIPELINE_DATA } from "../pipelines";
+import type { PipelineType } from "../pipelines.js";
+import { PIPELINE_DATA } from "../pipelines.js";
 
-import audioClassification from "./audio-classification/data";
-import audioToAudio from "./audio-to-audio/data";
-import automaticSpeechRecognition from "./automatic-speech-recognition/data";
-import conversational from "./conversational/data";
-import documentQuestionAnswering from "./document-question-answering/data";
-import featureExtraction from "./feature-extraction/data";
-import fillMask from "./fill-mask/data";
-import imageClassification from "./image-classification/data";
-import imageToImage from "./image-to-image/data";
-import imageToText from "./image-to-text/data";
-import imageSegmentation from "./image-segmentation/data";
-import objectDetection from "./object-detection/data";
-import depthEstimation from "./depth-estimation/data";
-import placeholder from "./placeholder/data";
-import reinforcementLearning from "./reinforcement-learning/data";
-import questionAnswering from "./question-answering/data";
-import sentenceSimilarity from "./sentence-similarity/data";
-import summarization from "./summarization/data";
-import tableQuestionAnswering from "./table-question-answering/data";
-import tabularClassification from "./tabular-classification/data";
-import tabularRegression from "./tabular-regression/data";
-import textToImage from "./text-to-image/data";
-import textToSpeech from "./text-to-speech/data";
-import tokenClassification from "./token-classification/data";
-import translation from "./translation/data";
-import textClassification from "./text-classification/data";
-import textGeneration from "./text-generation/data";
-import textToVideo from "./text-to-video/data";
-import unconditionalImageGeneration from "./unconditional-image-generation/data";
-import videoClassification from "./video-classification/data";
-import visualQuestionAnswering from "./visual-question-answering/data";
-import zeroShotClassification from "./zero-shot-classification/data";
-import zeroShotImageClassification from "./zero-shot-image-classification/data";
+import audioClassification from "./audio-classification/data.js";
+import audioToAudio from "./audio-to-audio/data.js";
+import automaticSpeechRecognition from "./automatic-speech-recognition/data.js";
+import documentQuestionAnswering from "./document-question-answering/data.js";
+import featureExtraction from "./feature-extraction/data.js";
+import fillMask from "./fill-mask/data.js";
+import imageClassification from "./image-classification/data.js";
+import imageFeatureExtraction from "./image-feature-extraction/data.js";
+import imageToImage from "./image-to-image/data.js";
+import imageToText from "./image-to-text/data.js";
+import imageTextToText from "./image-text-to-text/data.js";
+import imageSegmentation from "./image-segmentation/data.js";
+import maskGeneration from "./mask-generation/data.js";
+import objectDetection from "./object-detection/data.js";
+import depthEstimation from "./depth-estimation/data.js";
+import placeholder from "./placeholder/data.js";
+import reinforcementLearning from "./reinforcement-learning/data.js";
+import questionAnswering from "./question-answering/data.js";
+import sentenceSimilarity from "./sentence-similarity/data.js";
+import summarization from "./summarization/data.js";
+import tableQuestionAnswering from "./table-question-answering/data.js";
+import tabularClassification from "./tabular-classification/data.js";
+import tabularRegression from "./tabular-regression/data.js";
+import textToImage from "./text-to-image/data.js";
+import textToSpeech from "./text-to-speech/data.js";
+import tokenClassification from "./token-classification/data.js";
+import translation from "./translation/data.js";
+import textClassification from "./text-classification/data.js";
+import textGeneration from "./text-generation/data.js";
+import textToVideo from "./text-to-video/data.js";
+import unconditionalImageGeneration from "./unconditional-image-generation/data.js";
+import videoClassification from "./video-classification/data.js";
+import visualQuestionAnswering from "./visual-question-answering/data.js";
+import zeroShotClassification from "./zero-shot-classification/data.js";
+import zeroShotImageClassification from "./zero-shot-image-classification/data.js";
+import zeroShotObjectDetection from "./zero-shot-object-detection/data.js";
+import imageTo3D from "./image-to-3d/data.js";
+import textTo3D from "./text-to-3d/data.js";
+import keypointDetection from "./keypoint-detection/data.js";
+import videoTextToText from "./video-text-to-text/data.js";
 
-import type { ModelLibraryKey } from "../model-libraries";
+export type * from "./audio-classification/inference.js";
+export type * from "./automatic-speech-recognition/inference.js";
+export type {
+	ChatCompletionInput,
+	ChatCompletionInputMessage,
+	ChatCompletionOutput,
+	ChatCompletionOutputComplete,
+	ChatCompletionOutputMessage,
+	ChatCompletionStreamOutput,
+	ChatCompletionStreamOutputChoice,
+	ChatCompletionStreamOutputDelta,
+} from "./chat-completion/inference.js";
+export type * from "./document-question-answering/inference.js";
+export type * from "./feature-extraction/inference.js";
+export type * from "./fill-mask/inference.js";
+export type {
+	ImageClassificationInput,
+	ImageClassificationOutput,
+	ImageClassificationOutputElement,
+	ImageClassificationParameters,
+} from "./image-classification/inference.js";
+export type * from "./image-to-image/inference.js";
+export type { ImageToTextInput, ImageToTextOutput, ImageToTextParameters } from "./image-to-text/inference.js";
+export type * from "./image-segmentation/inference.js";
+export type * from "./object-detection/inference.js";
+export type * from "./depth-estimation/inference.js";
+export type * from "./question-answering/inference.js";
+export type * from "./sentence-similarity/inference.js";
+export type * from "./summarization/inference.js";
+export type * from "./table-question-answering/inference.js";
+export type { TextToImageInput, TextToImageOutput, TextToImageParameters } from "./text-to-image/inference.js";
+export type { TextToSpeechParameters, TextToSpeechInput, TextToSpeechOutput } from "./text-to-speech/inference.js";
+export type * from "./token-classification/inference.js";
+export type { TranslationInput, TranslationOutput } from "./translation/inference.js";
+export type {
+	ClassificationOutputTransform,
+	TextClassificationInput,
+	TextClassificationOutput,
+	TextClassificationOutputElement,
+	TextClassificationParameters,
+} from "./text-classification/inference.js";
+export type {
+	TextGenerationOutputFinishReason,
+	TextGenerationOutputPrefillToken,
+	TextGenerationInput,
+	TextGenerationOutput,
+	TextGenerationOutputDetails,
+	TextGenerationInputGenerateParameters,
+	TextGenerationOutputBestOfSequence,
+	TextGenerationOutputToken,
+	TextGenerationStreamOutputStreamDetails,
+	TextGenerationStreamOutput,
+} from "./text-generation/inference.js";
+export type * from "./video-classification/inference.js";
+export type * from "./visual-question-answering/inference.js";
+export type * from "./zero-shot-classification/inference.js";
+export type * from "./zero-shot-image-classification/inference.js";
+export type {
+	BoundingBox,
+	ZeroShotObjectDetectionInput,
+	ZeroShotObjectDetectionInputData,
+	ZeroShotObjectDetectionOutput,
+	ZeroShotObjectDetectionOutputElement,
+} from "./zero-shot-object-detection/inference.js";
+
+import type { ModelLibraryKey } from "../model-libraries.js";
 
 /**
  * Model libraries compatible with each ML task
  */
 export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	"audio-classification": ["speechbrain", "transformers", "transformers.js"],
-	"audio-to-audio": ["asteroid", "speechbrain"],
+	"audio-to-audio": ["asteroid", "fairseq", "speechbrain"],
 	"automatic-speech-recognition": ["espnet", "nemo", "speechbrain", "transformers", "transformers.js"],
-	conversational: ["transformers"],
 	"depth-estimation": ["transformers", "transformers.js"],
 	"document-question-answering": ["transformers", "transformers.js"],
 	"feature-extraction": ["sentence-transformers", "transformers", "transformers.js"],
 	"fill-mask": ["transformers", "transformers.js"],
 	"graph-ml": ["transformers"],
 	"image-classification": ["keras", "timm", "transformers", "transformers.js"],
+	"image-feature-extraction": ["timm", "transformers"],
 	"image-segmentation": ["transformers", "transformers.js"],
+	"image-text-to-text": ["transformers"],
 	"image-to-image": ["diffusers", "transformers", "transformers.js"],
 	"image-to-text": ["transformers", "transformers.js"],
 	"image-to-video": ["diffusers"],
+	"keypoint-detection": ["transformers"],
 	"video-classification": ["transformers"],
 	"mask-generation": ["transformers"],
 	"multiple-choice": ["transformers"],
@@ -89,13 +164,15 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	],
 	translation: ["transformers", "transformers.js"],
 	"unconditional-image-generation": ["diffusers"],
+	"video-text-to-text": ["transformers"],
 	"visual-question-answering": ["transformers", "transformers.js"],
 	"voice-activity-detection": [],
 	"zero-shot-classification": ["transformers", "transformers.js"],
 	"zero-shot-image-classification": ["transformers", "transformers.js"],
 	"zero-shot-object-detection": ["transformers", "transformers.js"],
-	"text-to-3d": [],
-	"image-to-3d": [],
+	"text-to-3d": ["diffusers"],
+	"image-to-3d": ["diffusers"],
+	"any-to-any": ["transformers"],
 };
 
 /**
@@ -117,21 +194,24 @@ function getData(type: PipelineType, partialTaskData: TaskDataCustom = placehold
 // Tasks that call getData() without the second argument will
 // have a "placeholder" page.
 export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
+	"any-to-any": getData("any-to-any", placeholder),
 	"audio-classification": getData("audio-classification", audioClassification),
 	"audio-to-audio": getData("audio-to-audio", audioToAudio),
 	"automatic-speech-recognition": getData("automatic-speech-recognition", automaticSpeechRecognition),
-	conversational: getData("conversational", conversational),
 	"depth-estimation": getData("depth-estimation", depthEstimation),
 	"document-question-answering": getData("document-question-answering", documentQuestionAnswering),
 	"feature-extraction": getData("feature-extraction", featureExtraction),
 	"fill-mask": getData("fill-mask", fillMask),
 	"graph-ml": undefined,
 	"image-classification": getData("image-classification", imageClassification),
+	"image-feature-extraction": getData("image-feature-extraction", imageFeatureExtraction),
 	"image-segmentation": getData("image-segmentation", imageSegmentation),
 	"image-to-image": getData("image-to-image", imageToImage),
+	"image-text-to-text": getData("image-text-to-text", imageTextToText),
 	"image-to-text": getData("image-to-text", imageToText),
 	"image-to-video": undefined,
-	"mask-generation": getData("mask-generation", placeholder),
+	"keypoint-detection": getData("keypoint-detection", keypointDetection),
+	"mask-generation": getData("mask-generation", maskGeneration),
 	"multiple-choice": undefined,
 	"object-detection": getData("object-detection", objectDetection),
 	"video-classification": getData("video-classification", videoClassification),
@@ -158,13 +238,14 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"token-classification": getData("token-classification", tokenClassification),
 	translation: getData("translation", translation),
 	"unconditional-image-generation": getData("unconditional-image-generation", unconditionalImageGeneration),
+	"video-text-to-text": getData("video-text-to-text", videoTextToText),
 	"visual-question-answering": getData("visual-question-answering", visualQuestionAnswering),
 	"voice-activity-detection": undefined,
 	"zero-shot-classification": getData("zero-shot-classification", zeroShotClassification),
 	"zero-shot-image-classification": getData("zero-shot-image-classification", zeroShotImageClassification),
-	"zero-shot-object-detection": getData("zero-shot-object-detection", placeholder),
-	"text-to-3d": getData("text-to-3d", placeholder),
-	"image-to-3d": getData("image-to-3d", placeholder),
+	"zero-shot-object-detection": getData("zero-shot-object-detection", zeroShotObjectDetection),
+	"text-to-3d": getData("text-to-3d", textTo3D),
+	"image-to-3d": getData("image-to-3d", imageTo3D),
 } as const;
 
 export interface ExampleRepo {
@@ -216,6 +297,7 @@ export interface TaskData {
 	datasets: ExampleRepo[];
 	demo: TaskDemo;
 	id: PipelineType;
+	canonicalId?: PipelineType;
 	isPlaceholder?: boolean;
 	label: string;
 	libraries: ModelLibraryKey[];

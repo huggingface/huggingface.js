@@ -4,7 +4,11 @@ import { whoAmI } from "./who-am-i";
 
 describe("whoAmI", () => {
 	it("should fetch identity info", async () => {
-		const info = await whoAmI({ credentials: { accessToken: TEST_ACCESS_TOKEN }, hubUrl: TEST_HUB_URL });
+		const info = await whoAmI({ accessToken: TEST_ACCESS_TOKEN, hubUrl: TEST_HUB_URL });
+
+		if (info.auth.accessToken?.createdAt instanceof Date) {
+			info.auth.accessToken.createdAt = new Date(0);
+		}
 
 		assert.deepStrictEqual(info, {
 			type: "user",
@@ -21,6 +25,7 @@ describe("whoAmI", () => {
 			auth: {
 				type: "access_token",
 				accessToken: {
+					createdAt: new Date(0),
 					displayName: "ci-hub.js",
 					role: "write",
 				},

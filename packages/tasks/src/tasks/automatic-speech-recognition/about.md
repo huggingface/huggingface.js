@@ -18,7 +18,7 @@ The use of Multilingual ASR has become popular, the idea of maintaining just a s
 
 ## Inference
 
-The Hub contains over [~9,000 ASR models](https://huggingface.co/models?pipeline_tag=automatic-speech-recognition&sort=downloads) that you can use right away by trying out the widgets directly in the browser or calling the models as a service using the Inference API. Here is a simple code snippet to do exactly this:
+The Hub contains over [17,000 ASR models](https://huggingface.co/models?pipeline_tag=automatic-speech-recognition&sort=downloads) that you can test right away in your browser using the model page widgets. You can also use any model as a service using the Serverless Inference API. We also support libraries such as [transformers](https://huggingface.co/models?library=transformers&pipeline_tag=automatic-speech-recognition&sort=downloads), [speechbrain](https://huggingface.co/models?library=speechbrain&pipeline_tag=automatic-speech-recognition&sort=downloads), [NeMo](https://huggingface.co/models?pipeline_tag=automatic-speech-recognition&library=nemo&sort=downloads) and [espnet](https://huggingface.co/models?library=espnet&pipeline_tag=automatic-speech-recognition&sort=downloads) via the Serverless Inference API. Here's a simple code snippet to run inference:
 
 ```python
 import json
@@ -36,20 +36,7 @@ def query(filename):
 data = query("sample1.flac")
 ```
 
-You can also use libraries such as [transformers](https://huggingface.co/models?library=transformers&pipeline_tag=automatic-speech-recognition&sort=downloads), [speechbrain](https://huggingface.co/models?library=speechbrain&pipeline_tag=automatic-speech-recognition&sort=downloads), [NeMo](https://huggingface.co/models?pipeline_tag=automatic-speech-recognition&library=nemo&sort=downloads) and [espnet](https://huggingface.co/models?library=espnet&pipeline_tag=automatic-speech-recognition&sort=downloads) if you want one-click managed Inference without any hassle.
-
-```python
-from transformers import pipeline
-
-with open("sample.flac", "rb") as f:
-  data = f.read()
-
-pipe = pipeline("automatic-speech-recognition", "openai/whisper-large-v2")
-pipe("sample.flac")
-# {'text': "GOING ALONG SLUSHY COUNTRY ROADS AND SPEAKING TO DAMP AUDIENCES IN DRAUGHTY SCHOOL ROOMS DAY AFTER DAY FOR A FORTNIGHT HE'LL HAVE TO PUT IN AN APPEARANCE AT SOME PLACE OF WORSHIP ON SUNDAY MORNING AND HE CAN COME TO US IMMEDIATELY AFTERWARDS"}
-```
-
-You can use [huggingface.js](https://github.com/huggingface/huggingface.js) to transcribe text with javascript using models on Hugging Face Hub.
+You can also use [huggingface.js](https://github.com/huggingface/huggingface.js), the JavaScript client, to transcribe audio with the Serverless Inference API.
 
 ```javascript
 import { HfInference } from "@huggingface/inference";
@@ -57,8 +44,21 @@ import { HfInference } from "@huggingface/inference";
 const inference = new HfInference(HF_TOKEN);
 await inference.automaticSpeechRecognition({
 	data: await (await fetch("sample.flac")).blob(),
-	model: "openai/whisper-large-v2",
+	model: "openai/whisper-large-v3",
 });
+```
+
+For transformers-compatible models like Whisper, Wav2Vec2, and HuBERT, you can also run inference with the library as follows:
+
+```python
+# pip install --upgrade transformers
+
+from transformers import pipeline
+
+pipe = pipeline("automatic-speech-recognition", "openai/whisper-large-v3")
+
+pipe("sample.flac")
+# {'text': "GOING ALONG SLUSHY COUNTRY ROADS AND SPEAKING TO DAMP AUDIENCES IN DRAUGHTY SCHOOL ROOMS DAY AFTER DAY FOR A FORTNIGHT HE'LL HAVE TO PUT IN AN APPEARANCE AT SOME PLACE OF WORSHIP ON SUNDAY MORNING AND HE CAN COME TO US IMMEDIATELY AFTERWARDS"}
 ```
 
 ## Solving ASR for your own data
@@ -83,6 +83,8 @@ These events help democratize ASR for all languages, including low-resource lang
 - [Massively Multilingual ASR: 50 Languages, 1 Model, 1 Billion Parameters](https://arxiv.org/pdf/2007.03001.pdf)
 - An ASR toolkit made by [NVIDIA: NeMo](https://github.com/NVIDIA/NeMo) with code and pretrained models useful for new ASR models. Watch the [introductory video](https://www.youtube.com/embed/wBgpMf_KQVw) for an overview.
 - [An introduction to SpeechT5, a multi-purpose speech recognition and synthesis model](https://huggingface.co/blog/speecht5)
-- [A guide on Fine-tuning Whisper For Multilingual ASR with 🤗Transformers](https://huggingface.co/blog/fine-tune-whisper)
+- [Fine-tune Whisper For Multilingual ASR with 🤗Transformers](https://huggingface.co/blog/fine-tune-whisper)
 - [Automatic speech recognition task guide](https://huggingface.co/docs/transformers/tasks/asr)
 - [Speech Synthesis, Recognition, and More With SpeechT5](https://huggingface.co/blog/speecht5)
+- [Fine-Tune W2V2-Bert for low-resource ASR with 🤗 Transformers](https://huggingface.co/blog/fine-tune-w2v2-bert)
+- [Speculative Decoding for 2x Faster Whisper Inference](https://huggingface.co/blog/whisper-speculative-decoding)

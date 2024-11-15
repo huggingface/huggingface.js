@@ -1,10 +1,10 @@
-This task covers guides on both [text-generation](https://huggingface.co/models?pipeline_tag=text-generation&sort=downloads) and [text-to-text generation](https://huggingface.co/models?pipeline_tag=text2text-generation&sort=downloads) models. Popular large language models that are used for chats or following instructions are also covered in this task. You can find the list of selected open-source large language models [here](https://huggingface.co/spaces/HuggingFaceH4/open_llm_leaderboard), ranked by their performance scores.
+This task covers guides on both [text-generation](https://huggingface.co/models?pipeline_tag=text-generation&sort=downloads) and [text-to-text generation](https://huggingface.co/models?pipeline_tag=text2text-generation&sort=downloads) models. Popular large language models that are used for chats or following instructions are also covered in this task. You can find the list of selected open-source large language models [here](https://huggingface.co/spaces/open-llm-leaderboard/open_llm_leaderboard), ranked by their performance scores.
 
 ## Use Cases
 
 ### Instruction Models
 
-A model trained for text generation can be later adapted to follow instructions. One of the most used open-source models for instruction is OpenAssistant, which you can try [at Hugging Chat](https://huggingface.co/chat).
+A model trained for text generation can be later adapted to follow instructions. You can try some of the most powerful instruction-tuned open-access models like Mixtral 8x7B, Cohere Command R+, and Meta Llama3 70B [at Hugging Chat](https://huggingface.co/chat).
 
 ### Code Generation
 
@@ -36,15 +36,15 @@ These models are trained to learn the mapping between a pair of texts (e.g. tran
 
 When it comes to text generation, the underlying language model can come in several types:
 
-- **Base models:** refers to plain language models like [Mistral 7B](mistralai/Mistral-7B-v0.1) and [Llama-2-70b](https://huggingface.co/meta-llama/Llama-2-70b-hf). These models are good for fine-tuning and few-shot prompting.
+- **Base models:** refers to plain language models like [Mistral 7B](https://huggingface.co/mistralai/Mistral-7B-v0.3) and [Meta Llama-3-70b](https://huggingface.co/meta-llama/Meta-Llama-3-70B). These models are good for fine-tuning and few-shot prompting.
 
-- **Instruction-trained models:** these models are trained in a multi-task manner to follow a broad range of instructions like "Write me a recipe for chocolate cake". Models like [Flan-T5](https://huggingface.co/google/flan-t5-xl), [Mistral-7B-Instruct-v0.1](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.1), and [falcon-40b-instruct](https://huggingface.co/tiiuae/falcon-40b-instruct) are examples of instruction-trained models. In general, instruction-trained models will produce better responses to instructions than base models.
+- **Instruction-trained models:** these models are trained in a multi-task manner to follow a broad range of instructions like "Write me a recipe for chocolate cake". Models like [Qwen 2 7B](https://huggingface.co/Qwen/Qwen2-7B-Instruct), [Yi 1.5 34B Chat](https://huggingface.co/01-ai/Yi-1.5-34B-Chat), and [Meta Llama 70B Instruct](https://huggingface.co/meta-llama/Meta-Llama-3-70B-Instruct) are examples of instruction-trained models. In general, instruction-trained models will produce better responses to instructions than base models.
 
-- **Human feedback models:** these models extend base and instruction-trained models by incorporating human feedback that rates the quality of the generated text according to criteria like [helpfulness, honesty, and harmlessness](https://arxiv.org/abs/2112.00861). The human feedback is then combined with an optimization technique like reinforcement learning to align the original model to be closer with human preferences. The overall methodology is often called [Reinforcement Learning from Human Feedback](https://huggingface.co/blog/rlhf), or RLHF for short. [Llama2-Chat](https://huggingface.co/meta-llama/Llama-2-7b-chat-hf) is an open-source model aligned through human feedback.
+- **Human feedback models:** these models extend base and instruction-trained models by incorporating human feedback that rates the quality of the generated text according to criteria like [helpfulness, honesty, and harmlessness](https://arxiv.org/abs/2112.00861). The human feedback is then combined with an optimization technique like reinforcement learning to align the original model to be closer with human preferences. The overall methodology is often called [Reinforcement Learning from Human Feedback](https://huggingface.co/blog/rlhf), or RLHF for short. [Zephyr ORPO 141B A35B](https://huggingface.co/HuggingFaceH4/zephyr-orpo-141b-A35b-v0.1) is an open-source model aligned through human feedback.
 
 ## Text Generation from Image and Text
 
-There are language models that can input both text and image and output text, called vision language models. [LLaVA](https://huggingface.co/llava-hf/llava-1.5-7b-hf) and [BLIP-2](https://huggingface.co/Salesforce/blip2-opt-2.7b) are good examples. Although they work just like other language models by means of input parameters for generation, since they also take input images, you can use them with `image-to-text` pipeline. You can find information about the pipeline in [image-to-text](https://huggingface.co/tasks/image-to-text) task page.
+There are language models that can input both text and image and output text, called vision language models. [IDEFICS 2](https://huggingface.co/HuggingFaceM4/idefics2-8b) and [MiniCPM Llama3 V](https://huggingface.co/openbmb/MiniCPM-Llama3-V-2_5) are good examples. They accept the same generation parameters as other language models. However, since they also take images as input, you have to use them with the `image-to-text` pipeline. You can find more information about this in the [image-to-text task page](https://huggingface.co/tasks/image-to-text).
 
 ## Inference
 
@@ -102,7 +102,7 @@ Would you like to learn more about the topic? Awesome! Here you can find some cu
 - You can use [PEFT](https://github.com/huggingface/peft) to adapt large language models in efficient way.
 - [ChatUI](https://github.com/huggingface/chat-ui) is the open-source interface to conversate with Large Language Models.
 - [text-generation-inferface](https://github.com/huggingface/text-generation-inference)
-- [HuggingChat](https://huggingface.co/chat/) is a chat interface powered by Hugging Face to chat with powerful models like Llama 2 70B.
+- [HuggingChat](https://huggingface.co/chat/) is a chat interface powered by Hugging Face to chat with powerful models like Meta Llama 3 70B, Mixtral 8x7B, etc.
 
 ### Documentation
 
@@ -110,25 +110,36 @@ Would you like to learn more about the topic? Awesome! Here you can find some cu
 - [ChatUI Docker Spaces](https://huggingface.co/docs/hub/spaces-sdks-docker-chatui)
 - [Causal language modeling task guide](https://huggingface.co/docs/transformers/tasks/language_modeling)
 - [Text generation strategies](https://huggingface.co/docs/transformers/generation_strategies)
+- [Course chapter on training a causal language model from scratch](https://huggingface.co/course/chapter7/6?fw=pt)
 
-### Course and Blogs
+### Model Inference & Deployment
 
-- [Course Chapter on Training a causal language model from scratch](https://huggingface.co/course/chapter7/6?fw=pt)
-- [TO Discussion with Victor Sanh](https://www.youtube.com/watch?v=Oy49SCW_Xpw&ab_channel=HuggingFace)
-- [Hugging Face Course Workshops: Pretraining Language Models & CodeParrot](https://www.youtube.com/watch?v=ExUR7w6xe94&ab_channel=HuggingFace)
-- [Training CodeParrot 🦜 from Scratch](https://huggingface.co/blog/codeparrot)
-- [How to generate text: using different decoding methods for language generation with Transformers](https://huggingface.co/blog/how-to-generate)
+- [Optimizing your LLM in production](https://huggingface.co/blog/optimize-llm)
+- [Open-Source Text Generation & LLM Ecosystem at Hugging Face](https://huggingface.co/blog/os-llms)
+- [Introducing RWKV - An RNN with the advantages of a transformer](https://huggingface.co/blog/rwkv)
+- [Llama 2 is at Hugging Face](https://huggingface.co/blog/llama2)
 - [Guiding Text Generation with Constrained Beam Search in 🤗 Transformers](https://huggingface.co/blog/constrained-beam-search)
 - [Code generation with Hugging Face](https://huggingface.co/spaces/codeparrot/code-generation-models)
-- [🌸 Introducing The World's Largest Open Multilingual Language Model: BLOOM 🌸](https://huggingface.co/blog/bloom)
-- [The Technology Behind BLOOM Training](https://huggingface.co/blog/bloom-megatron-deepspeed)
-- [Faster Text Generation with TensorFlow and XLA](https://huggingface.co/blog/tf-xla-generate)
 - [Assisted Generation: a new direction toward low-latency text generation](https://huggingface.co/blog/assisted-generation)
-- [Introducing RWKV - An RNN with the advantages of a transformer](https://huggingface.co/blog/rwkv)
+- [How to generate text: using different decoding methods for language generation with Transformers](https://huggingface.co/blog/how-to-generate)
+- [Faster Text Generation with TensorFlow and XLA](https://huggingface.co/blog/tf-xla-generate)
+
+### Model Fine-tuning/Training
+
+- [Non-engineers guide: Train a LLaMA 2 chatbot](https://huggingface.co/blog/Llama2-for-non-engineers)
+- [Training CodeParrot 🦜 from Scratch](https://huggingface.co/blog/codeparrot)
 - [Creating a Coding Assistant with StarCoder](https://huggingface.co/blog/starchat-alpha)
-- [StarCoder: A State-of-the-Art LLM for Code](https://huggingface.co/blog/starcoder)
-- [Open-Source Text Generation & LLM Ecosystem at Hugging Face](https://huggingface.co/blog/os-llms)
-- [Llama 2 is at Hugging Face](https://huggingface.co/blog/llama2)
+
+### Advanced Concepts Explained Simply
+
+- [Mixture of Experts Explained](https://huggingface.co/blog/moe)
+
+### Advanced Fine-tuning/Training Recipes
+
+- [Fine-tuning Llama 2 70B using PyTorch FSDP](https://huggingface.co/blog/ram-efficient-pytorch-fsdp)
+- [The N Implementation Details of RLHF with PPO](https://huggingface.co/blog/the_n_implementation_details_of_rlhf_with_ppo)
+- [Preference Tuning LLMs with Direct Preference Optimization Methods](https://huggingface.co/blog/pref-tuning)
+- [Fine-tune Llama 2 with DPO](https://huggingface.co/blog/dpo-trl)
 
 ### Notebooks
 

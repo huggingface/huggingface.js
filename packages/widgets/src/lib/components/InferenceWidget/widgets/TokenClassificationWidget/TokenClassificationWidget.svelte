@@ -107,7 +107,7 @@
 				estimatedTime: res.estimatedTime,
 			};
 			getOutput({ withModelLoading: true });
-		} else if (res.status === "error") {
+		} else if (res.status === "error" && !isOnLoadCall) {
 			error = res.error;
 		}
 	}
@@ -237,15 +237,8 @@
 		validateExample={isTextInput}
 	/>
 
-	<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} />
-	<WidgetSubmitBtn
-		classNames="mt-2"
-		{isLoading}
-		{isDisabled}
-		onClick={() => {
-			getOutput();
-		}}
-	/>
+	<WidgetTextarea bind:value={text} bind:setValue={setTextAreaValue} {isDisabled} on:cmdEnter={() => getOutput()} />
+	<WidgetSubmitBtn classNames="mt-2" {isLoading} {isDisabled} on:run={() => getOutput()} />
 	{#if warning}
 		<div class="alert alert-warning mt-2">{warning}</div>
 	{/if}

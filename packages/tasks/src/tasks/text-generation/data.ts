@@ -1,4 +1,4 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	datasets: [
@@ -12,12 +12,16 @@ const taskData: TaskDataCustom = {
 			id: "the_pile",
 		},
 		{
-			description: "A crowd-sourced instruction dataset to develop an AI assistant.",
-			id: "OpenAssistant/oasst1",
+			description: "Truly open-source, curated and cleaned dialogue dataset.",
+			id: "HuggingFaceH4/ultrachat_200k",
 		},
 		{
-			description: "A crowd-sourced instruction dataset created by Databricks employees.",
-			id: "databricks/databricks-dolly-15k",
+			description: "An instruction dataset with preference ratings on responses.",
+			id: "openbmb/UltraFeedback",
+		},
+		{
+			description: "A large synthetic dataset for alignment of text generation models.",
+			id: "argilla/magpie-ultra-v0.1",
 		},
 	],
 	demo: {
@@ -51,76 +55,60 @@ const taskData: TaskDataCustom = {
 	],
 	models: [
 		{
-			description: "A large language model trained for text generation.",
-			id: "bigscience/bloom-560m",
+			description: "A text-generation model trained to follow instructions.",
+			id: "google/gemma-2-2b-it",
 		},
 		{
-			description: "A large code generation model that can generate code in 80+ languages.",
-			id: "bigcode/starcoder",
+			description: "Very powerful text generation model trained to follow instructions.",
+			id: "meta-llama/Meta-Llama-3.1-8B-Instruct",
 		},
 		{
-			description: "A model trained to follow instructions, uses Pythia-12b as base model.",
-			id: "databricks/dolly-v2-12b",
+			description: "Small yet powerful text generation model.",
+			id: "microsoft/Phi-3-mini-4k-instruct",
 		},
 		{
-			description: "A model trained to follow instructions curated by community, uses Pythia-12b as base model.",
-			id: "OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5",
+			description: "A very powerful model that can solve mathematical problems.",
+			id: "AI-MO/NuminaMath-7B-TIR",
 		},
 		{
-			description: "A large language model trained to generate text in English.",
-			id: "stabilityai/stablelm-tuned-alpha-7b",
+			description: "Strong text generation model to follow instructions.",
+			id: "Qwen/Qwen2.5-7B-Instruct",
 		},
 		{
-			description: "A model trained to follow instructions, based on mosaicml/mpt-7b.",
-			id: "mosaicml/mpt-7b-instruct",
-		},
-		{
-			description: "A large language model trained to generate text in English.",
-			id: "EleutherAI/pythia-12b",
-		},
-		{
-			description: "A large text-to-text model trained to follow instructions.",
-			id: "google/flan-ul2",
-		},
-		{
-			description: "A large and powerful text generation model.",
-			id: "tiiuae/falcon-40b",
-		},
-		{
-			description: "State-of-the-art open-source large language model.",
-			id: "meta-llama/Llama-2-70b-hf",
+			description: "Very strong open-source large language model.",
+			id: "nvidia/Llama-3.1-Nemotron-70B-Instruct",
 		},
 	],
 	spaces: [
 		{
-			description: "A robust text generation model that can perform various tasks through natural language prompting.",
-			id: "huggingface/bloom_demo",
+			description: "A leaderboard to compare different open-source text generation models based on various benchmarks.",
+			id: "open-llm-leaderboard/open_llm_leaderboard",
 		},
 		{
-			description: "An text generation based application that can write code for 80+ languages.",
-			id: "bigcode/bigcode-playground",
+			description: "A leaderboard for comparing chain-of-thought performance of models.",
+			id: "logikon/open_cot_leaderboard",
 		},
 		{
-			description: "An text generation based application for conversations.",
-			id: "h2oai/h2ogpt-chatbot",
+			description: "An text generation based application based on a very powerful LLaMA2 model.",
+			id: "ysharma/Explore_llamav2_with_TGI",
 		},
 		{
-			description: "An text generation application that combines OpenAI and Hugging Face models.",
-			id: "microsoft/HuggingGPT",
+			description: "An text generation based application to converse with Zephyr model.",
+			id: "HuggingFaceH4/zephyr-chat",
 		},
 		{
-			description: "An text generation application that uses StableLM-tuned-alpha-7b.",
-			id: "stabilityai/stablelm-tuned-alpha-chat",
+			description: "A leaderboard that ranks text generation models based on blind votes from people.",
+			id: "lmsys/chatbot-arena-leaderboard",
 		},
 		{
-			description: "An UI that uses StableLM-tuned-alpha-7b.",
-			id: "togethercomputer/OpenChatKit",
+			description: "An chatbot to converse with a very powerful text generation model.",
+			id: "mlabonne/phixtral-chat",
 		},
 	],
 	summary:
-		"Generating text is the task of producing new text. These models can, for example, fill in incomplete text or paraphrase.",
-	widgetModels: ["HuggingFaceH4/zephyr-7b-beta"],
-	youtubeId: "Vpjb1lu0MDk",
+		"Generating text is the task of generating new text given another text. These models can, for example, fill in incomplete text or paraphrase.",
+	widgetModels: ["mistralai/Mistral-Nemo-Instruct-2407"],
+	youtubeId: "e9gNEAlsOvU",
 };
 
 export default taskData;

@@ -1,10 +1,14 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	datasets: [
 		{
-			description: "NYU Depth V2 Dataset: Video dataset containing both RGB and depth sensor data",
+			description: "NYU Depth V2 Dataset: Video dataset containing both RGB and depth sensor data.",
 			id: "sayakpaul/nyu_depth_v2",
+		},
+		{
+			description: "Monocular depth estimation benchmark based without noise and errors.",
+			id: "depth-anything/DA-2K",
 		},
 	],
 	demo: {
@@ -24,16 +28,20 @@ const taskData: TaskDataCustom = {
 	metrics: [],
 	models: [
 		{
-			description: "Strong Depth Estimation model trained on 1.4 million images.",
-			id: "Intel/dpt-large",
-		},
-		{
-			description: "Strong Depth Estimation model trained on the KITTI dataset.",
-			id: "facebook/dpt-dinov2-large-kitti",
+			description: "Cutting-edge depth estimation model.",
+			id: "depth-anything/Depth-Anything-V2-Large",
 		},
 		{
 			description: "A strong monocular depth estimation model.",
-			id: "Bingxin/Marigold",
+			id: "jingheya/lotus-depth-g-v1-0",
+		},
+		{
+			description: "A depth estimation model that predicts depth in videos.",
+			id: "tencent/DepthCrafter",
+		},
+		{
+			description: "A robust depth estimation model.",
+			id: "apple/DepthPro",
 		},
 	],
 	spaces: [
@@ -42,8 +50,16 @@ const taskData: TaskDataCustom = {
 			id: "radames/dpt-depth-estimation-3d-voxels",
 		},
 		{
-			description: "An application that can estimate the depth in a given image.",
-			id: "keras-io/Monocular-Depth-Estimation",
+			description: "An application for bleeding-edge depth estimation.",
+			id: "akhaliq/depth-pro",
+		},
+		{
+			description: "An application on cutting-edge depth estimation in videos.",
+			id: "tencent/DepthCrafter",
+		},
+		{
+			description: "A human-centric depth estimation application.",
+			id: "facebook/sapiens-depth",
 		},
 	],
 	summary: "Depth estimation is the task of predicting depth of the objects present in an image.",

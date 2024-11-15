@@ -1,4 +1,4 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	datasets: [
@@ -33,16 +33,24 @@ const taskData: TaskDataCustom = {
 	models: [
 		{
 			description: "A powerful feature extraction model for natural language processing tasks.",
-			id: "facebook/bart-base",
+			id: "thenlper/gte-large",
 		},
 		{
-			description: "A strong feature extraction model for coding tasks.",
-			id: "microsoft/codebert-base",
+			description: "A strong feature extraction model for retrieval.",
+			id: "Alibaba-NLP/gte-Qwen1.5-7B-instruct",
 		},
 	],
-	spaces: [],
-	summary:
-		"Feature extraction refers to the process of transforming raw data into numerical features that can be processed while preserving the information in the original dataset.",
+	spaces: [
+		{
+			description: "A leaderboard to rank text feature extraction models based on a benchmark.",
+			id: "mteb/leaderboard",
+		},
+		{
+			description: "A leaderboard to rank best feature extraction models based on human feedback.",
+			id: "mteb/arena",
+		},
+	],
+	summary: "Feature extraction is the task of extracting features learnt in a model.",
 	widgetModels: ["facebook/bart-base"],
 };
 

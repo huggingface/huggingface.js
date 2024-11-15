@@ -1,9 +1,12 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	datasets: [
 		{
-			// TODO write proper description
+			description: "Largest document understanding dataset.",
+			id: "HuggingFaceM4/Docmatix",
+		},
+		{
 			description:
 				"Dataset from the 2020 DocVQA challenge. The documents are taken from the UCSF Industry Documents Library.",
 			id: "eliolio/docvqa",
@@ -43,12 +46,16 @@ const taskData: TaskDataCustom = {
 	],
 	models: [
 		{
-			description: "A LayoutLM model for the document QA task, fine-tuned on DocVQA and SQuAD2.0.",
+			description: "A robust document question answering model.",
 			id: "impira/layoutlm-document-qa",
 		},
 		{
-			description: "A special model for OCR-free Document QA task. Donut model fine-tuned on DocVQA.",
-			id: "naver-clova-ix/donut-base-finetuned-docvqa",
+			description: "A document question answering model specialized in invoices.",
+			id: "impira/layoutlm-invoices",
+		},
+		{
+			description: "A special model for OCR-free document question answering.",
+			id: "microsoft/udop-large",
 		},
 		{
 			description: "A powerful model for document question answering.",
@@ -71,7 +78,7 @@ const taskData: TaskDataCustom = {
 	],
 	summary:
 		"Document Question Answering (also known as Document Visual Question Answering) is the task of answering questions on document images. Document question answering models take a (document, question) pair as input and return an answer in natural language. Models usually rely on multi-modal features, combining text, position of words (bounding-boxes) and image.",
-	widgetModels: ["impira/layoutlm-document-qa"],
+	widgetModels: ["impira/layoutlm-invoices"],
 	youtubeId: "",
 };
 

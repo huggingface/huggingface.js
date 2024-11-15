@@ -112,7 +112,7 @@
 				estimatedTime: res.estimatedTime,
 			};
 			getOutput({ withModelLoading: true });
-		} else if (res.status === "error") {
+		} else if (res.status === "error" && !isOnLoadCall) {
 			error = res.error;
 		}
 	}
@@ -149,32 +149,36 @@
 	<div class="flex flex-col space-y-2">
 		<WidgetTextInput
 			bind:value={sourceSentence}
+			{isLoading}
 			{isDisabled}
 			label="Source Sentence"
 			placeholder={isDisabled ? "" : "Your sentence here..."}
+			on:cmdEnter={() => getOutput()}
 		/>
 		<WidgetTextInput
 			bind:value={comparisonSentences[0]}
+			{isLoading}
 			{isDisabled}
 			label="Sentences to compare to"
 			placeholder={isDisabled ? "" : "Your sentence here..."}
+			on:cmdEnter={() => getOutput()}
 		/>
 		{#each Array(nComparisonSentences - 1) as _, idx}
-			<WidgetTextInput bind:value={comparisonSentences[idx + 1]} {isDisabled} placeholder="Your sentence here..." />
+			<WidgetTextInput
+				bind:value={comparisonSentences[idx + 1]}
+				{isLoading}
+				{isDisabled}
+				placeholder="Your sentence here..."
+				on:cmdEnter={() => getOutput()}
+			/>
 		{/each}
 		<WidgetAddSentenceBtn
 			isDisabled={nComparisonSentences === maxComparisonSentences || isDisabled}
-			onClick={() => {
+			on:click={() => {
 				nComparisonSentences++;
 			}}
 		/>
-		<WidgetSubmitBtn
-			{isLoading}
-			{isDisabled}
-			onClick={() => {
-				getOutput();
-			}}
-		/>
+		<WidgetSubmitBtn {isLoading} {isDisabled} on:run={() => getOutput()} />
 	</div>
 	<WidgetInfo {model} {computeTime} {error} {modelLoading} />
 

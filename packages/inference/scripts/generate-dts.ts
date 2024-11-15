@@ -3,6 +3,8 @@
 import { readFileSync, writeFileSync, appendFileSync, readdirSync } from "node:fs";
 import { TASKS_DATA } from "@huggingface/tasks";
 
+const taskImports = new Set<string>();
+
 const tasks = Object.keys(TASKS_DATA)
 	.sort()
 	.filter((task) => task !== "other");
@@ -35,6 +37,16 @@ for (const dir of dirs) {
 		}
 
 		const fileContent = readFileSync(`./src/tasks/${dir}/${file}`, "utf-8");
+
+		// detect imports from @huggingface/tasks
+		for (const imports of fileContent.matchAll(/import type {(.*)} from "@huggingface\/tasks";/g)) {
+			// Convert A, B, C to ["A", "B", "C"]
+			const imported = imports[1].split(",").map((x) => x.trim());
+
+			for (const imp of imported) {
+				taskImports.add(imp);
+			}
+		}
 
 		for (const type of extractTypesAndInterfaces(fileContent)) {
 			appendFileSync("./dist/index.d.ts", type + "\n");
@@ -85,6 +97,13 @@ appendFileSync(
 			)
 			.join("\n") +
 		"\n}\n"
+);
+
+// Prepend import from @huggingface/tasks
+writeFileSync(
+	"./dist/index.d.ts",
+	`import type { ${[...taskImports].join(", ")} } from "@huggingface/tasks";\n` +
+		readFileSync("./dist/index.d.ts", "utf-8")
 );
 
 function* extractTypesAndInterfaces(fileContent: string): Iterable<string> {
@@ -174,8 +193,6 @@ function* extractAsyncFunctions(fileContent: string): Iterable<string> {
 	}
 }
 
-writeFileSync("./dist/index.js", '/// <reference path="./index.d.ts" />\n' + readFileSync("./dist/index.js", "utf-8"));
-writeFileSync(
-	"./dist/index.mjs",
-	'/// <reference path="./index.d.ts" />\n' + readFileSync("./dist/index.mjs", "utf-8")
-);
+for (const distPath of ["./dist/index.js", "./dist/index.cjs"]) {
+	writeFileSync(distPath, '/// <reference path="./index.d.ts" />\n' + readFileSync(distPath, "utf-8"));
+}
