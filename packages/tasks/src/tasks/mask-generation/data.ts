@@ -7,8 +7,8 @@ const taskData: TaskDataCustom = {
 			id: "merve/coco2017",
 		},
 		{
-			 description: "Medical Imaging dataset of the Human Brain for segmentation and mask generating tasks",
-			 id: "rocky93/BraTS_segmentation"
+			description: "Medical Imaging dataset of the Human Brain for segmentation and mask generating tasks",
+			id: "rocky93/BraTS_segmentation",
 		},
 	],
 	demo: {
