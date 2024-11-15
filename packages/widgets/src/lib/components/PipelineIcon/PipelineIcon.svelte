@@ -4,7 +4,6 @@
 	import IconAudioClassification from "../Icons/IconAudioClassification.svelte";
 	import IconAudioToAudio from "../Icons/IconAudioToAudio.svelte";
 	import IconAutomaticSpeechRecognition from "../Icons/IconAutomaticSpeechRecognition.svelte";
-	import IconAudioTextToText from "../Icons/IconAudioToAudio.svelte";
 	import IconConversational from "../Icons/IconConversational.svelte";
 	import IconFeatureExtraction from "../Icons/IconFeatureExtraction.svelte";
 	import IconFillMask from "../Icons/IconFillMask.svelte";
@@ -74,7 +73,7 @@
 		"automatic-speech-recognition": IconAutomaticSpeechRecognition,
 		"audio-to-audio": IconAudioToAudio,
 		"audio-classification": IconAudioClassification,
-		"audio-text-to-text": IconAudioTextToText,
+		"audio-text-to-text": IconAudioToAudio,
 		"voice-activity-detection": IconVoiceActivityDetection,
 		"depth-estimation": IconDepthEstimation,
 		"image-classification": IconImageClassification,
