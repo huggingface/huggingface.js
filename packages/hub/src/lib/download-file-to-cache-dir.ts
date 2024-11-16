@@ -1,4 +1,4 @@
-import { getHFHubCache, getRepoFolderName } from "./cache-management";
+import { getHFHubCachePath, getRepoFolderName } from "./cache-management";
 import { dirname, join } from "node:path";
 import { writeFile, rename, symlink, lstat, mkdir, stat } from "node:fs/promises";
 import type { CommitInfo, PathInfo } from "./paths-info";
@@ -63,7 +63,7 @@ export async function downloadFileToCacheDir(
 ): Promise<string> {
 	// get revision provided or default to main
 	const revision = params.revision ?? "main";
-	const cacheDir = params.cacheDir ?? getHFHubCache();
+	const cacheDir = params.cacheDir ?? getHFHubCachePath();
 	// get repo id
 	const repoId = toRepoId(params.repo);
 	// get storage folder

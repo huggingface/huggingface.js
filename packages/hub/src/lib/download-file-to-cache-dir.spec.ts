@@ -4,9 +4,9 @@ import { dirname, join } from "node:path";
 import { lstat, mkdir, stat, symlink, writeFile, rename } from "node:fs/promises";
 import { pathsInfo } from "./paths-info";
 import type { Stats } from "node:fs";
-import { getHFHubCache, getRepoFolderName } from "./cache-management";
+import { getHFHubCachePath, getRepoFolderName } from "./cache-management";
 import { toRepoId } from "../utils/toRepoId";
-import { downloadFileToCacheDir } from "./download-file-cache";
+import { downloadFileToCacheDir } from "./download-file-to-cache-dir";
 
 vi.mock('node:fs/promises', () => ({
 	writeFile: vi.fn(),
@@ -34,7 +34,7 @@ function _getBlobFile(params:  {
 	etag: string;
 	cacheDir?: string, // default to {@link getHFHubCache}
 }) {
-	return join(params.cacheDir ?? getHFHubCache(), getRepoFolderName(toRepoId(params.repo)), "blobs", params.etag);
+	return join(params.cacheDir ?? getHFHubCachePath(), getRepoFolderName(toRepoId(params.repo)), "blobs", params.etag);
 }
 
 // utility test method to get snapshot file path
@@ -44,7 +44,7 @@ function _getSnapshotFile(params:  {
 	revision : string;
 	cacheDir?: string, // default to {@link getHFHubCache}
 }) {
-	return join(params.cacheDir ?? getHFHubCache(), getRepoFolderName(toRepoId(params.repo)), "snapshots", params.revision, params.path);
+	return join(params.cacheDir ?? getHFHubCachePath(), getRepoFolderName(toRepoId(params.repo)), "snapshots", params.revision, params.path);
 }
 
 describe('downloadFileToCacheDir', () => {

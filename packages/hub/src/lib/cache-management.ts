@@ -16,7 +16,7 @@ function getHuggingFaceHubCache(): string {
 	return process.env["HUGGINGFACE_HUB_CACHE"] ?? getDefaultCachePath();
 }
 
-export function getHFHubCache(): string {
+export function getHFHubCachePath(): string {
 	return process.env["HF_HUB_CACHE"] ?? getHuggingFaceHubCache();
 }
 
@@ -70,7 +70,7 @@ export interface HFCacheInfo {
 }
 
 export async function scanCacheDir(cacheDir: string | undefined = undefined): Promise<HFCacheInfo> {
-	if (!cacheDir) cacheDir = getHFHubCache();
+	if (!cacheDir) cacheDir = getHFHubCachePath();
 
 	const s = await stat(cacheDir);
 	if (!s.isDirectory()) {
