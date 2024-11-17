@@ -19,6 +19,7 @@ export * from "./model-info";
 export * from "./oauth-handle-redirect";
 export * from "./oauth-login-url";
 export * from "./parse-safetensors-metadata";
+export * from "./paths-info";
 export * from "./space-info";
 export * from "./upload-file";
 export * from "./upload-files";

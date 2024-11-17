@@ -1,6 +1,6 @@
-import { parseGGUFQuantLabel } from "./gguf";
-import type { ModelData } from "./model-data";
-import type { PipelineType } from "./pipelines";
+import { parseGGUFQuantLabel } from "./gguf.js";
+import type { ModelData } from "./model-data.js";
+import type { PipelineType } from "./pipelines.js";
 
 export interface LocalAppSnippet {
 	/**

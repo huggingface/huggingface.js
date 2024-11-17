@@ -1,6 +1,6 @@
-import type { ModelData } from "./model-data";
-import type { WidgetExampleTextInput, WidgetExampleSentenceSimilarityInput } from "./widget-example";
-import { LIBRARY_TASK_MAPPING } from "./library-to-tasks";
+import type { ModelData } from "./model-data.js";
+import type { WidgetExampleTextInput, WidgetExampleSentenceSimilarityInput } from "./widget-example.js";
+import { LIBRARY_TASK_MAPPING } from "./library-to-tasks.js";
 
 const TAG_CUSTOM_CODE = "custom_code";
 
@@ -361,6 +361,23 @@ export const gliner = (model: ModelData): string[] => [
 	`from gliner import GLiNER
 
 model = GLiNER.from_pretrained("${model.id}")`,
+];
+
+export const htrflow = (model: ModelData): string[] => [
+	`# CLI usage
+# see docs: https://ai-riksarkivet.github.io/htrflow/latest/getting_started/quick_start.html
+htrflow pipeline <path/to/pipeline.yaml> <path/to/image>`,
+	`# Python usage
+from htrflow.pipeline.pipeline import Pipeline
+from htrflow.pipeline.steps import Task
+from htrflow.models.framework.model import ModelClass
+
+pipeline = Pipeline(
+    [
+        Task(
+            ModelClass, {"model": "${model.id}"}, {}
+        ),
+    ])`,
 ];
 
 export const keras = (model: ModelData): string[] => [
