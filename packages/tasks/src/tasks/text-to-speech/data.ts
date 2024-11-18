@@ -54,6 +54,10 @@ const taskData: TaskDataCustom = {
 			description: "A powerful TTS model.",
 			id: "amphion/MaskGCT",
 		},
+		{
+			description: "A Llama based TTS model.",
+			id: "OuteAI/OuteTTS-0.1-350M",
+		},
 	],
 	spaces: [
 		{
