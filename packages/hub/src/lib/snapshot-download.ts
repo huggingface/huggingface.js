@@ -15,7 +15,6 @@ export const DEFAULT_REVISION = "main";
  * Downloads an entire repository at a given revision in the cache directory {@link getHFHubCachePath}.
  * You can list all cached repositories using {@link scanCachedRepo}
  * @remarks It uses internally {@link downloadFileToCacheDir}.
- * @param params
  */
 export async function snapshotDownload(
 	params: {
