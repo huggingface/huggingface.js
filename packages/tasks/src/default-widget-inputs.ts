@@ -1,5 +1,5 @@
-import type { WidgetExample } from "./widget-example";
-import type { WidgetType } from "./pipelines";
+import type { WidgetExample } from "./widget-example.js";
+import type { WidgetType } from "./pipelines.js";
 
 type LanguageCode = string;
 

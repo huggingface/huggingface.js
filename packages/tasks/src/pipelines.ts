@@ -355,6 +355,12 @@ export const PIPELINE_DATA = {
 		modality: "audio",
 		color: "green",
 	},
+	"audio-text-to-text": {
+		name: "Audio-Text-to-Text",
+		modality: "multimodal",
+		color: "red",
+		hideInDatasets: true,
+	},
 	"voice-activity-detection": {
 		name: "Voice Activity Detection",
 		modality: "audio",

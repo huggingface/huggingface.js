@@ -1,6 +1,6 @@
-import * as snippets from "./model-libraries-snippets";
-import type { ModelData } from "./model-data";
-import type { ElasticSearchQuery } from "./model-libraries-downloads";
+import * as snippets from "./model-libraries-snippets.js";
+import type { ModelData } from "./model-data.js";
+import type { ElasticSearchQuery } from "./model-libraries-downloads.js";
 
 /**
  * Elements configurable by a model library.
@@ -480,7 +480,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "open-oasis",
 		repoName: "open-oasis",
 		repoUrl: "https://github.com/etched-ai/open-oasis",
-		countDownloads: `path:"oasis500m.pt"`,
+		countDownloads: `path:"oasis500m.safetensors"`,
 	},
 	open_clip: {
 		prettyLabel: "OpenCLIP",
