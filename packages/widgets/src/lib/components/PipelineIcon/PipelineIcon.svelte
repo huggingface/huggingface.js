@@ -73,6 +73,7 @@
 		"automatic-speech-recognition": IconAutomaticSpeechRecognition,
 		"audio-to-audio": IconAudioToAudio,
 		"audio-classification": IconAudioClassification,
+		"audio-text-to-text": IconAudioToAudio,
 		"voice-activity-detection": IconVoiceActivityDetection,
 		"depth-estimation": IconDepthEstimation,
 		"image-classification": IconImageClassification,

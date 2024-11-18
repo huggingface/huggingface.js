@@ -1,6 +1,6 @@
-import type { PipelineType } from "../pipelines";
-import type { ChatCompletionInputMessage } from "../tasks";
-import type { ModelDataMinimal } from "./types";
+import type { PipelineType } from "../pipelines.js";
+import type { ChatCompletionInputMessage } from "../tasks/index.js";
+import type { ModelDataMinimal } from "./types.js";
 
 const inputsZeroShotClassification = () =>
 	`"Hi, I recently bought a device from your company but it is not working as advertised and I would like to get reimbursed!"`;

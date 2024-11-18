@@ -1,6 +1,6 @@
-import type { ModelData } from "./model-data";
-import type { WidgetExampleTextInput, WidgetExampleSentenceSimilarityInput } from "./widget-example";
-import { LIBRARY_TASK_MAPPING } from "./library-to-tasks";
+import type { ModelData } from "./model-data.js";
+import type { WidgetExampleTextInput, WidgetExampleSentenceSimilarityInput } from "./widget-example.js";
+import { LIBRARY_TASK_MAPPING } from "./library-to-tasks.js";
 
 const TAG_CUSTOM_CODE = "custom_code";
 
