@@ -74,7 +74,7 @@ const taskData: TaskDataCustom = {
 			id: "mrfakename/E2-F5-TTS",
 		},
 		{
-			description: "An application that synthesizes speech in a given emotion and voice that can be controlled through a simple text prompt.",
+			description: "An application that synthesizes emotional speech for diverse speaker prompts.",
 			id: "parler-tts/parler-tts-expresso",
 		},
 	],
