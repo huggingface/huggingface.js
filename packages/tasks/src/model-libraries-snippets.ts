@@ -404,15 +404,14 @@ backbone = keras_nlp.models.Backbone.from_preset("hf://${model.id}")
 ];
 
 export function keras_hub(model: ModelData): string[] {
-	// If the model has a task.json config, then the base Task class is known
-	let class_name = model.config?.keras_hub_task_json?.class_name;
-	if (!class_name)
+	let class_name =
+		// If the model has a task.json config, then the base Task class is known
+		model.config?.keras_hub_task_json?.class_name ??
 		// If only a config.json is present, the base class will be a "backbone"
-		class_name = model.config?.keras_hub_config_json?.class_name;
+		model.config?.keras_hub_config_json?.class_name;
 
-	// Fallback heuristic: until task.json is populated in all keras-hub models,
-	// make a best effort, for text-generation models only, to disply
-	// a "XXXCausalLM" base class instead of XXXBackbone.
+	// Fallback heuristic until task.json is populated in more keras-hub models. For
+	// text-generation models only, disply "XXXCausalLM" base class instead of XXXBackbone.
 	if (model.pipeline_tag == "text-generation" && class_name?.endsWith("Backbone"))
 		class_name = class_name.replace("Backbone", "CausalLM");
 
@@ -429,6 +428,7 @@ export function keras_hub(model: ModelData): string[] {
 )`,
 		],
 	];
+	// Select a text generation snippet based on pipeline_tag
 	const selected_snippet_row = optional_snippets.filter((cols) => cols[0] == model.pipeline_tag);
 	const optional_snippet = selected_snippet_row.length == 0 ? "" : selected_snippet_row[0][1];
 
@@ -463,7 +463,9 @@ ${optional_snippet}
 # More info on this model: https://keras.io/search.html?query=${class_name}%20keras_hub
 `;
 	const snippets = [main_snippet];
-	if (alt_model_component_snippets) snippets.push(alt_model_component_snippets);
+	if (alt_model_component_snippets) {
+		snippets.push(alt_model_component_snippets);
+	}
 	return snippets;
 }
 
