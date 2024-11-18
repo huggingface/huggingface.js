@@ -117,6 +117,10 @@ Checkout the demo: https://huggingface.co/spaces/huggingfacejs/client-side-oauth
 
 The `@huggingface/hub` package provide basic capabilities to scan the cache directory. Learn more about [Manage huggingface_hub cache-system](https://huggingface.co/docs/huggingface_hub/en/guides/manage-cache).
 
+### `scanCacheDir`
+
+You can get the list of cached repository using the `scanCacheDir` function.
+
 ```ts
 import { scanCacheDir } from "@huggingface/hub";
 
@@ -124,7 +128,40 @@ const result = await scanCacheDir();
 
 console.log(result);
 ```
-Note that the cache directory is created and used only by the Python and Rust libraries. Downloading files using the `@huggingface/hub` package won't use the cache directory.
+Note: this does not work in the browser
+
+### `downloadFileToCacheDir`
+
+You can cache a file of a repository using the `downloadFileToCacheDir` function.
+
+```ts
+import { snapshotDownload } from "@huggingface/hub";
+
+const file = await downloadFileToCacheDir({
+  repo: 'foo/bar',
+  path: 'README.md'
+});
+
+console.log(file);
+```
+Note: this does not work in the browser
+
+### `snapshotDownload`
+
+You can download an entire repository at a given revision in the cache directory using the `snapshotDownload` function.
+
+```ts
+import { snapshotDownload } from "@huggingface/hub";
+
+const directory = await snapshotDownload({
+  repo: 'foo/bar',
+});
+
+console.log(directory);
+```
+The code use internally the `downloadFileToCacheDir` function.
+
+Note: this does not work in the browser
 
 ## Performance considerations
 
