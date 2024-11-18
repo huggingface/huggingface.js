@@ -201,4 +201,63 @@ describe("snapshotDownload", () => {
 			);
 		}
 	});
+
+	test("custom params should be propagated", async () => {
+		// fetch mock
+		const fetchMock: typeof fetch = vi.fn();
+		const hubMock = "https://foor.bar";
+		const accessTokenMock = 'dummy-access-token';
+
+		vi.mocked(listFiles).mockReturnValue(
+			toAsyncGenerator([
+				{
+					oid: `dummy-etag`,
+					type: "file",
+					path: `file.txt`,
+					size: 10,
+					lastCommit: {
+						date: new Date().toISOString(),
+						id: DUMMY_SHA,
+						title: "feat: best commit",
+					},
+				},
+			])
+		);
+
+		await snapshotDownload({
+			repo: {
+				name: "foo/bar",
+				type: "space",
+			},
+			hubUrl: hubMock,
+			fetch: fetchMock,
+			accessToken: accessTokenMock,
+		});
+
+		expect(spaceInfo).toHaveBeenCalledWith(
+			expect.objectContaining({
+				fetch: fetchMock,
+				hubUrl: hubMock,
+				accessToken: accessTokenMock,
+			})
+		);
+
+		// list files should receive custom fetch
+		expect(listFiles).toHaveBeenCalledWith(
+			expect.objectContaining({
+				fetch: fetchMock,
+				hubUrl: hubMock,
+				accessToken: accessTokenMock,
+			})
+		);
+
+		// download file to cache should receive custom fetch
+		expect(downloadFileToCacheDir).toHaveBeenCalledWith(
+			expect.objectContaining({
+				fetch: fetchMock,
+				hubUrl: hubMock,
+				accessToken: accessTokenMock,
+			})
+		);
+	});
 });

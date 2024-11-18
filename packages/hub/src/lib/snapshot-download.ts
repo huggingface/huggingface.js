@@ -1,4 +1,4 @@
-import type { RepoDesignation } from "../types/public";
+import type { CredentialsParams, RepoDesignation } from "../types/public";
 import { listFiles } from "./list-files";
 import { getHFHubCachePath, getRepoFolderName } from "./cache-management";
 import { spaceInfo } from "./space-info";
@@ -11,21 +11,23 @@ import { downloadFileToCacheDir } from "./download-file-to-cache-dir";
 
 export const DEFAULT_REVISION = "main";
 
-export async function snapshotDownload(params: {
-	repo: RepoDesignation;
-	cacheDir?: string;
-	/**
-	 * An optional Git revision id which can be a branch name, a tag, or a commit hash.
-	 *
-	 * @default "main"
-	 */
-	revision?: string;
-	hubUrl?: string;
-	/**
-	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
-	 */
-	fetch?: typeof fetch;
-}): Promise<string> {
+export async function snapshotDownload(
+	params: {
+		repo: RepoDesignation;
+		cacheDir?: string;
+		/**
+		 * An optional Git revision id which can be a branch name, a tag, or a commit hash.
+		 *
+		 * @default "main"
+		 */
+		revision?: string;
+		hubUrl?: string;
+		/**
+		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+		 */
+		fetch?: typeof fetch;
+	} & Partial<CredentialsParams>
+): Promise<string> {
 	let cacheDir: string;
 	if (params.cacheDir) {
 		cacheDir = params.cacheDir;
@@ -47,6 +49,7 @@ export async function snapshotDownload(params: {
 	switch (repoId.type) {
 		case "space":
 			repoInfo = await spaceInfo({
+				...params,
 				name: repoId.name,
 				additionalFields: ["sha"],
 				revision: revision,
@@ -54,6 +57,7 @@ export async function snapshotDownload(params: {
 			break;
 		case "dataset":
 			repoInfo = await datasetInfo({
+				...params,
 				name: repoId.name,
 				additionalFields: ["sha"],
 				revision: revision,
@@ -61,6 +65,7 @@ export async function snapshotDownload(params: {
 			break;
 		case "model":
 			repoInfo = await modelInfo({
+				...params,
 				name: repoId.name,
 				additionalFields: ["sha"],
 				revision: revision,
@@ -86,22 +91,19 @@ export async function snapshotDownload(params: {
 	}
 
 	const cursor = listFiles({
+		...params,
 		repo: params.repo,
 		recursive: true,
 		revision: repoInfo.sha,
-		hubUrl: params.hubUrl,
-		fetch: params.fetch,
 	});
 
 	for await (const entry of cursor) {
 		switch (entry.type) {
 			case "file":
 				await downloadFileToCacheDir({
-					repo: params.repo,
+					...params,
 					path: entry.path,
 					revision: commitHash,
-					hubUrl: params.hubUrl,
-					fetch: params.fetch,
 					cacheDir: cacheDir,
 				});
 				break;
