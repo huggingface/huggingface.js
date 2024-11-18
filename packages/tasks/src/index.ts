@@ -51,7 +51,6 @@ export * from "./gguf.js";
 export { snippets };
 export type { InferenceSnippet } from "./snippets/index.js";
 
-
 export { SKUS, DEFAULT_MEMORY_OPTIONS } from "./hardware.js";
 export type { HardwareSpec, SkuType } from "./hardware.js";
 export { LOCAL_APPS } from "./local-apps.js";
