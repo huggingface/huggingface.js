@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { LOCAL_APPS } from "./local-apps";
-import type { ModelData } from "./model-data";
+import { LOCAL_APPS } from "./local-apps.js";
+import type { ModelData } from "./model-data.js";
 
 describe("local-apps", () => {
 	it("llama.cpp conversational", async () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { ModelData } from "./model-data";
-import { llama_cpp_python } from "./model-libraries-snippets";
+import type { ModelData } from "./model-data.js";
+import { llama_cpp_python } from "./model-libraries-snippets.js";
 
 describe("model-libraries-snippets", () => {
 	it("llama_cpp_python conversational", async () => {
