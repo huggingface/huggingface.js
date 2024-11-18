@@ -75,6 +75,16 @@ outputs[0]["generated_text"]
 # with a yellow center in the foreground. The flower is surrounded by red and white flowers with green stems
 ```
 
+You can also use Inference API to play with image-text-to-text models.
+
+```bash
+curl https://api-inference.huggingface.co/models/meta-llama/Llama-3.2-11B-Vision-Instruct \
+	-X POST \
+	-d '{"inputs": "Can you please let us know more details about your "}' \
+	-H 'Content-Type: application/json' \
+	-H "Authorization: Bearer hf_***"
+```
+
 ## Useful Resources
 
 - [Vision Language Models Explained](https://huggingface.co/blog/vlms)
