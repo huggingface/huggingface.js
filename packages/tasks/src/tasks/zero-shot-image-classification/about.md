@@ -32,8 +32,7 @@ The model can be loaded with the zero-shot-image-classification pipeline like so
 from transformers import pipeline
 # More models in the model hub.
 model_name = "openai/clip-vit-large-patch14-336"
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-classifier = pipeline(task="zero-shot-image-classification", model=model_name, device=device)
+classifier = pipeline(task="zero-shot-image-classification", model=model_name)
 ```
 
 You can then use this pipeline to classify images into any of the class names you specify. You can specify more than two class labels too.

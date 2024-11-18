@@ -37,7 +37,7 @@ You can infer with Image Segmentation models using the `image-segmentation` pipe
 ```python
 from transformers import pipeline
 
-model = pipeline(task="image-segmentation", model="facebook/detr-resnet-50-panoptic", device=0)
+model = pipeline(task="image-segmentation", model="facebook/detr-resnet-50-panoptic")
 result = model(IMAGE_PATH)
 result
 

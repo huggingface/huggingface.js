@@ -17,8 +17,8 @@ Below you can find code for inferring with a pre-trained video classification mo
 ```python
 from transformers import pipeline
 
-pipe = pipeline(task="video-classification", model="nateraw/videomae-base-finetuned-ucf101-subset", device=0)
-pipe("https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/transformers/basketball.avi?download=true")
+pipe = pipeline(task="video-classification", model="nateraw/videomae-base-finetuned-ucf101-subset")
+pipe("https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/transformers/basketball.avi")
 
 #[{'score': 0.90, 'label': 'BasketballDunk'},
 # {'score': 0.02, 'label': 'BalanceBeam'},

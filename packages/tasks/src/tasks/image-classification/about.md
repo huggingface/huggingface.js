@@ -16,7 +16,7 @@ With the `transformers` library, you can use the `image-classification` pipeline
 
 ```python
 from transformers import pipeline
-image_classifier = pipeline(task="image-classification", model="microsoft/resnet-50", device=0)
+image_classifier = pipeline(task="image-classification", model="microsoft/resnet-50")
 result = image_classifier(IMAGE_PATH)
 result
 
