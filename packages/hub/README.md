@@ -135,7 +135,7 @@ Note: this does not work in the browser
 You can cache a file of a repository using the `downloadFileToCacheDir` function.
 
 ```ts
-import { snapshotDownload } from "@huggingface/hub";
+import { downloadFileToCacheDir } from "@huggingface/hub";
 
 const file = await downloadFileToCacheDir({
   repo: 'foo/bar',
