@@ -40,6 +40,7 @@ llama-cli \\
 		const { snippet: snippetFunc } = LOCAL_APPS["vllm"];
 		const model: ModelData = {
 			id: "meta-llama/Llama-3.2-3B-Instruct",
+			pipeline_tag: "text-generation",
 			tags: ["conversational"],
 			inference: "",
 		};
@@ -53,7 +54,10 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 	--data '{
 		"model": "meta-llama/Llama-3.2-3B-Instruct",
 		"messages": [
-			{"role": "user", "content": "Hello!"}
+			{
+				"role": "user",
+				"content": "What is the capital of France?"
+			}
 		]
 	}'`);
 	});

@@ -1,6 +1,9 @@
 import { parseGGUFQuantLabel } from "./gguf.js";
 import type { ModelData } from "./model-data.js";
 import type { PipelineType } from "./pipelines.js";
+import { stringifyMessages } from "./snippets/common.js";
+import { getModelInputSnippet } from "./snippets/inputs.js";
+import { ChatCompletionInputMessage } from "./tasks/index.js";
 
 export interface LocalAppSnippet {
 	/**
@@ -183,15 +186,17 @@ const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] 
 };
 
 const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
-	// todo: lets get the messages here dawg
+	const messages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
 	const runCommandInstruct = `# Call the server using curl:
 curl -X POST "http://localhost:8000/v1/chat/completions" \\
 	-H "Content-Type: application/json" \\
 	--data '{
 		"model": "${model.id}",
-		"messages": [
-			{"role": "user", "content": "Hello!"}
-		]
+		"messages": ${stringifyMessages(messages, {
+			indent: "\t\t",
+			attributeKeyQuotes: true,
+			customContentEscaper: (str) => str.replace(/'/g, "'\\''"),
+		})}
 	}'`;
 	const runCommandNonInstruct = `# Call the server using curl:
 curl -X POST "http://localhost:8000/v1/completions" \\
