@@ -32,39 +32,47 @@ Vision language models can recognize images through descriptions. When given det
 
 ## Inference
 
-You can use the Transformers library to interact with vision-language models. You can load the model like below.
+You can use the Transformers library to interact with vision-language models. Specifically `pipeline` makes it easy to infer models.
+
+Initialize the pipeline first.
 
 ```python
-from transformers import LlavaNextProcessor, LlavaNextForConditionalGeneration
-import torch
+from transformers import pipeline
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-processor = LlavaNextProcessor.from_pretrained("llava-hf/llava-v1.6-mistral-7b-hf")
-model = LlavaNextForConditionalGeneration.from_pretrained(
-    "llava-hf/llava-v1.6-mistral-7b-hf",
-    torch_dtype=torch.float16
-)
-model.to(device)
+pipe = pipeline("image-text-to-text", model="llava-hf/llava-interleave-qwen-0.5b-hf")
 ```
 
-We can infer by passing image and text dialogues.
+We will use chat templates to format the text input. We can also pass the image as URL in context part of the user role in our chat template.
 
 ```python
-from PIL import Image
-import requests
+messages = [
+     {
+         "role": "user",
+         "content": [
+             {
+                 "type": "image",
+                 "image": "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/bee.jpg",
+             },
+             {"type": "text", "text": "Describe this image."},
+         ],
+     },
+     {
+         "role": "assistant",
+         "content": [
+             {"type": "text", "text": "There's a pink flower"},
+         ],
+     },
+ ]
 
-# image of a radar chart
-url = "https://github.com/haotian-liu/LLaVA/blob/1a91fc274d7c35a9b50b3cb29c4247ae5837ce39/images/llava_v1_5_radar.jpg?raw=true"
-image = Image.open(requests.get(url, stream=True).raw)
-prompt = "[INST] <image>\nWhat is shown in this image? [/INST]"
+```
 
-inputs = processor(prompt, image, return_tensors="pt").to(device)
-output = model.generate(**inputs, max_new_tokens=100)
+We can now directly pass in the messages to pipeline to infer. `return_full_text` is a flag to include the full prompt including the user input. Here we pass as `False` to only return the generated part.
 
-print(processor.decode(output[0], skip_special_tokens=True))
-# The image appears to be a radar chart, which is a type of multivariate chart that displays values for multiple variables represented on axes
-# starting from the same point. This particular radar chart is showing the performance of different models or systems across various metrics.
-# The axes represent different metrics or benchmarks, such as MM-Vet, MM-Vet, MM-Vet, MM-Vet, MM-Vet, MM-V
+```python
+outputs = pipe(text=messages, max_new_tokens=20, return_full_text=False)
+
+outputs[0]["generated_text"]
+# with a yellow center in the foreground. The flower is surrounded by red and white flowers with green stems
 ```
 
 ## Useful Resources
