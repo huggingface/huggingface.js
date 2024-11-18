@@ -83,4 +83,41 @@ curl -X POST "http://localhost:8000/v1/completions" \\
 		"temperature": 0.5
 	}'`);
 	});
+
+	it("vLLM VLM conversational", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS["vllm"];
+		const model: ModelData = {
+			id: "meta-llama/Llama-3.2-11B-Vision-Instruct",
+			pipeline_tag: "image-text-to-text",
+			tags: ["conversational"],
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect((snippet[0].content as string[]).join("\n")).toEqual(`# Load and run the model:
+vllm serve "meta-llama/Llama-3.2-11B-Vision-Instruct"
+# Call the server using curl:
+curl -X POST "http://localhost:8000/v1/chat/completions" \\
+	-H "Content-Type: application/json" \\
+	--data '{
+		"model": "meta-llama/Llama-3.2-11B-Vision-Instruct",
+		"messages": [
+			{
+				"role": "user",
+				"content": [
+					{
+						"type": "text",
+						"text": "Describe this image in one sentence."
+					},
+					{
+						"type": "image_url",
+						"image_url": {
+							"url": "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg"
+						}
+					}
+				]
+			}
+		]
+	}'`);
+	});
 });
