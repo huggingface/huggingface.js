@@ -36,7 +36,7 @@ llama-cli \\
   -p "Once upon a time,"`);
 	});
 
-	it("vLLM conversational", async () => {
+	it("vLLM conversational llm", async () => {
 		const { snippet: snippetFunc } = LOCAL_APPS["vllm"];
 		const model: ModelData = {
 			id: "meta-llama/Llama-3.2-3B-Instruct",
@@ -62,7 +62,7 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 	}'`);
 	});
 
-	it("vLLM non-conversational", async () => {
+	it("vLLM non-conversational llm", async () => {
 		const { snippet: snippetFunc } = LOCAL_APPS["vllm"];
 		const model: ModelData = {
 			id: "meta-llama/Llama-3.2-3B",
@@ -84,7 +84,7 @@ curl -X POST "http://localhost:8000/v1/completions" \\
 	}'`);
 	});
 
-	it("vLLM VLM conversational", async () => {
+	it("vLLM conversational vlm", async () => {
 		const { snippet: snippetFunc } = LOCAL_APPS["vllm"];
 		const model: ModelData = {
 			id: "meta-llama/Llama-3.2-11B-Vision-Instruct",
