@@ -90,6 +90,10 @@ describe("snapshotDownload", () => {
 			name: "foo/bar",
 			additionalFields: ["sha"],
 			revision: "main",
+			repo: {
+				name: "foo/bar",
+				type: "model",
+			},
 		});
 	});
 
@@ -105,6 +109,10 @@ describe("snapshotDownload", () => {
 			name: "foo/bar",
 			additionalFields: ["sha"],
 			revision: "main",
+			repo: {
+				name: "foo/bar",
+				type: "dataset",
+			},
 		});
 	});
 
@@ -120,6 +128,10 @@ describe("snapshotDownload", () => {
 			name: "foo/bar",
 			additionalFields: ["sha"],
 			revision: "main",
+			repo: {
+				name: "foo/bar",
+				type: "space",
+			},
 		});
 	});
 
@@ -206,7 +218,7 @@ describe("snapshotDownload", () => {
 		// fetch mock
 		const fetchMock: typeof fetch = vi.fn();
 		const hubMock = "https://foor.bar";
-		const accessTokenMock = 'dummy-access-token';
+		const accessTokenMock = "dummy-access-token";
 
 		vi.mocked(listFiles).mockReturnValue(
 			toAsyncGenerator([
