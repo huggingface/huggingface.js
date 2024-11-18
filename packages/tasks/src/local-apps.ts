@@ -183,34 +183,31 @@ const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] 
 };
 
 const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
-	const runCommandInstruct = [
-		"# Call the server using curl:",
-		`curl -X POST "http://localhost:8000/v1/chat/completions" \\`,
-		`	-H "Content-Type: application/json" \\`,
-		`	--data '{`,
-		`		"model": "${model.id}",`,
-		`		"messages": [`,
-		`			{"role": "user", "content": "Hello!"}`,
-		`		]`,
-		`	}'`,
-	];
-	const runCommandNonInstruct = [
-		"# Call the server using curl:",
-		`curl -X POST "http://localhost:8000/v1/completions" \\`,
-		`	-H "Content-Type: application/json" \\`,
-		`	--data '{`,
-		`		"model": "${model.id}",`,
-		`		"prompt": "Once upon a time,",`,
-		`		"max_tokens": 512,`,
-		`		"temperature": 0.5`,
-		`	}'`,
-	];
+	// todo: lets get the messages here dawg
+	const runCommandInstruct = `# Call the server using curl:
+curl -X POST "http://localhost:8000/v1/chat/completions" \\
+	-H "Content-Type: application/json" \\
+	--data '{
+		"model": "${model.id}",
+		"messages": [
+			{"role": "user", "content": "Hello!"}
+		]
+	}'`;
+	const runCommandNonInstruct = `# Call the server using curl:
+curl -X POST "http://localhost:8000/v1/completions" \\
+	-H "Content-Type: application/json" \\
+	--data '{
+		"model": "${model.id}",
+		"prompt": "Once upon a time,",
+		"max_tokens": 512,
+		"temperature": 0.5
+	}'`;
 	const runCommand = model.tags.includes("conversational") ? runCommandInstruct : runCommandNonInstruct;
 	return [
 		{
 			title: "Install from pip",
 			setup: ["# Install vLLM from pip:", "pip install vllm"].join("\n"),
-			content: [`# Load and run the model:\nvllm serve "${model.id}"`, runCommand.join("\n")],
+			content: [`# Load and run the model:\nvllm serve "${model.id}"`, runCommand],
 		},
 		{
 			title: "Use Docker images",
@@ -227,7 +224,7 @@ const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
 			].join("\n"),
 			content: [
 				`# Load and run the model:\ndocker exec -it my_vllm_container bash -c "vllm serve ${model.id}"`,
-				runCommand.join("\n"),
+				runCommand,
 			],
 		},
 	];
