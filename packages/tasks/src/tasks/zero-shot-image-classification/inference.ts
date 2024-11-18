@@ -8,27 +8,13 @@
  */
 export interface ZeroShotImageClassificationInput {
 	/**
-	 * The input image data, with candidate labels
+	 * The input image data to classify as a base64-encoded string.
 	 */
-	inputs: ZeroShotImageClassificationInputData;
+	inputs: string;
 	/**
 	 * Additional inference parameters
 	 */
-	parameters?: ZeroShotImageClassificationParameters;
-	[property: string]: unknown;
-}
-/**
- * The input image data, with candidate labels
- */
-export interface ZeroShotImageClassificationInputData {
-	/**
-	 * The candidate labels for this image
-	 */
-	candidateLabels: string[];
-	/**
-	 * The image data to classify
-	 */
-	image: unknown;
+	parameters: ZeroShotImageClassificationParameters;
 	[property: string]: unknown;
 }
 /**
@@ -38,8 +24,12 @@ export interface ZeroShotImageClassificationInputData {
  */
 export interface ZeroShotImageClassificationParameters {
 	/**
-	 * The sentence used in conjunction with candidateLabels to attempt the text classification
-	 * by replacing the placeholder with the candidate labels.
+	 * The candidate labels for this image
+	 */
+	candidate_labels: string[];
+	/**
+	 * The sentence used in conjunction with `candidate_labels` to attempt the image
+	 * classification by replacing the placeholder with the candidate labels.
 	 */
 	hypothesis_template?: string;
 	[property: string]: unknown;
