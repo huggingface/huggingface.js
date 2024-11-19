@@ -27,6 +27,9 @@ export interface VideoClassificationParameters {
 	 * The sampling rate used to select frames from the video.
 	 */
 	frame_sampling_rate?: number;
+	/**
+	 * The function to apply to the model outputs in order to retrieve the scores.
+	 */
 	function_to_apply?: ClassificationOutputTransform;
 	/**
 	 * The number of sampled frames to consider for classification.
