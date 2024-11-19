@@ -75,7 +75,7 @@ outputs[0]["generated_text"]
 # with a yellow center in the foreground. The flower is surrounded by red and white flowers with green stems
 ```
 
-You can also use Inference API to play with image-text-to-text models.
+You can also use the Inference API to test image-text-to-text models. You need to use a [Hugging Face token](https://huggingface.co/settings/tokens) for authentication.
 
 ```bash
 curl https://api-inference.huggingface.co/models/meta-llama/Llama-3.2-11B-Vision-Instruct \
