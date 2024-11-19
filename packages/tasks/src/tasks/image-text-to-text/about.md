@@ -66,7 +66,7 @@ messages = [
 
 ```
 
-We can now directly pass in the messages to pipeline to infer. `return_full_text` is a flag to include the full prompt including the user input. Here we pass as `False` to only return the generated part.
+We can now directly pass in the messages to the pipeline to infer. The `return_full_text` flag is used to return the full prompt in the response, including the user input. Here we pass `False` to only return the generated text.
 
 ```python
 outputs = pipe(text=messages, max_new_tokens=20, return_full_text=False)
