@@ -119,7 +119,7 @@ The `@huggingface/hub` package provide basic capabilities to scan the cache dire
 
 ### `scanCacheDir`
 
-You can get the list of cached repository using the `scanCacheDir` function.
+You can get the list of cached repositories using the `scanCacheDir` function.
 
 ```ts
 import { scanCacheDir } from "@huggingface/hub";
