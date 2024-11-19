@@ -42,7 +42,7 @@ from transformers import pipeline
 pipe = pipeline("image-text-to-text", model="llava-hf/llava-interleave-qwen-0.5b-hf")
 ```
 
-We will use chat templates to format the text input. We can also pass the image as URL in context part of the user role in our chat template.
+The model's built-in chat template will be used to format the conversational input. We can pass the image as an URL in the `content` part of the user message:
 
 ```python
 messages = [
