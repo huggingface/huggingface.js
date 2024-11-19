@@ -215,7 +215,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	clipscope: {
 		prettyLabel: "clipscope",
 		repoName: "clipscope",
-                repoUrl: "https://github.com/Lewington-pitsos/clipscope", 
+               repoUrl: "https://github.com/Lewington-pitsos/clipscope", 
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
 	},
