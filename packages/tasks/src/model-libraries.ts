@@ -212,9 +212,9 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/cartesia-ai/cartesia_mlx",
 		snippets: snippets.cartesia_mlx,
 	},
-	"clip-vit-l-scope": {
-		prettyLabel: "CLIP-ViT-L-scope",
-		repoName: "CLIP-ViT-L-scope",
+	"clipscope": {
+		prettyLabel: "clipscope",
+		repoName: "clipscope",
 		repoUrl: "https://github.com/Lewington-pitsos/clipscope", 
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
