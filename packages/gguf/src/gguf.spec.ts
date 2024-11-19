@@ -33,7 +33,7 @@ describe("gguf", () => {
 			const arrayBuf = await res.arrayBuffer();
 			fs.writeFileSync(".cache/model.gguf", Buffer.from(arrayBuf));
 		}
-	});
+	}, 30_000);
 
 	it("should parse a llama2 7b", async () => {
 		const { metadata, tensorInfos } = await gguf(URL_LLAMA);

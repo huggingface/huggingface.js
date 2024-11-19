@@ -102,9 +102,5 @@ export interface DocumentQuestionAnsweringOutputElement {
 	 * boxes).
 	 */
 	start: number;
-	/**
-	 * The index of each word/box pair that is in the answer
-	 */
-	words: number[];
 	[property: string]: unknown;
 }

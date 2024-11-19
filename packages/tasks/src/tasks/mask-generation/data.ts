@@ -1,7 +1,16 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
-	datasets: [],
+	datasets: [
+		{
+			description: "Widely used benchmark dataset for multiple Vision tasks.",
+			id: "merve/coco2017",
+		},
+		{
+			description: "Medical Imaging dataset of the Human Brain for segmentation and mask generating tasks",
+			id: "rocky93/BraTS_segmentation",
+		},
+	],
 	demo: {
 		inputs: [
 			{
@@ -16,7 +25,12 @@ const taskData: TaskDataCustom = {
 			},
 		],
 	},
-	metrics: [],
+	metrics: [
+		{
+			description: "IoU is used to measure the overlap between predicted mask and the ground truth mask.",
+			id: "Intersection over Union (IoU)",
+		},
+	],
 	models: [
 		{
 			description: "Small yet powerful mask generation model.",
