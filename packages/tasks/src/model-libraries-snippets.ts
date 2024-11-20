@@ -2,7 +2,7 @@ import type { ModelData } from "./model-data.js";
 import type { WidgetExampleTextInput, WidgetExampleSentenceSimilarityInput } from "./widget-example.js";
 import { LIBRARY_TASK_MAPPING } from "./library-to-tasks.js";
 import { getModelInputSnippet } from "./snippets/inputs.js";
-import { ChatCompletionInputMessage } from "./tasks/index.js";
+import type { ChatCompletionInputMessage } from "./tasks/index.js";
 import { stringifyMessages } from "./snippets/common.js";
 
 const TAG_CUSTOM_CODE = "custom_code";

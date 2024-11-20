@@ -3,7 +3,7 @@ import type { ModelData } from "./model-data.js";
 import type { PipelineType } from "./pipelines.js";
 import { stringifyMessages } from "./snippets/common.js";
 import { getModelInputSnippet } from "./snippets/inputs.js";
-import { ChatCompletionInputMessage } from "./tasks/index.js";
+import type { ChatCompletionInputMessage } from "./tasks/index.js";
 
 export interface LocalAppSnippet {
 	/**
