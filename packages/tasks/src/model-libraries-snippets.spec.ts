@@ -6,6 +6,7 @@ describe("model-libraries-snippets", () => {
 	it("llama_cpp_python conversational", async () => {
 		const model: ModelData = {
 			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			pipeline_tag: "text-generation",
 			tags: ["conversational"],
 			inference: "",
 		};

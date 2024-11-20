@@ -1,6 +1,9 @@
 import type { ModelData } from "./model-data.js";
 import type { WidgetExampleTextInput, WidgetExampleSentenceSimilarityInput } from "./widget-example.js";
 import { LIBRARY_TASK_MAPPING } from "./library-to-tasks.js";
+import { getModelInputSnippet } from "./snippets/inputs.js";
+import { ChatCompletionInputMessage } from "./tasks/index.js";
+import { stringifyMessages } from "./snippets/common.js";
 
 const TAG_CUSTOM_CODE = "custom_code";
 
@@ -430,13 +433,9 @@ llm = Llama.from_pretrained(
 	];
 
 	if (model.tags.includes("conversational")) {
+		const messages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
 		snippets.push(`llm.create_chat_completion(
-	messages = [
-		{
-			"role": "user",
-			"content": "What is the capital of France?"
-		}
-	]
+	messages = ${stringifyMessages(messages, { attributeKeyQuotes: true, indent: "\t" })}
 )`);
 	} else {
 		snippets.push(`output = llm(
