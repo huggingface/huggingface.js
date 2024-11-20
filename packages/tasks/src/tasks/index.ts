@@ -102,7 +102,6 @@ export type * from "./zero-shot-image-classification/inference.js";
 export type {
 	BoundingBox,
 	ZeroShotObjectDetectionInput,
-	ZeroShotObjectDetectionInputData,
 	ZeroShotObjectDetectionOutput,
 	ZeroShotObjectDetectionOutputElement,
 } from "./zero-shot-object-detection/inference.js";

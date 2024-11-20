@@ -6,22 +6,8 @@
 	"type": "object",
 	"properties": {
 		"inputs": {
-			"description": "The input image data, with candidate labels",
-			"type": "object",
-			"title": "ZeroShotObjectDetectionInputData",
-			"properties": {
-				"image": {
-					"description": "The image data to generate bounding boxes from"
-				},
-				"candidateLabels": {
-					"description": "The candidate labels for this image",
-					"type": "array",
-					"items": {
-						"type": "string"
-					}
-				}
-			},
-			"required": ["image", "candidateLabels"]
+			"description": "The input image data as a base64-encoded string.",
+			"type": "string"
 		},
 		"parameters": {
 			"description": "Additional inference parameters",
@@ -33,8 +19,17 @@
 			"title": "ZeroShotObjectDetectionParameters",
 			"description": "Additional inference parameters for Zero Shot Object Detection",
 			"type": "object",
-			"properties": {}
+			"properties": {
+				"candidate_labels": {
+					"description": "The candidate labels for this image",
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": ["candidate_labels"]
 		}
 	},
-	"required": ["inputs"]
+	"required": ["inputs", "parameters"]
 }
