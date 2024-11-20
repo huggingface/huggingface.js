@@ -452,7 +452,7 @@ export const SKUS = {
 				memory: [8, 16, 24],
 			},
 			"Apple M2 Pro": {
-				tflops: 13.6,
+				tflops: 6.8,
 				memory: [16, 24, 32],
 			},
 			"Apple M2 Max": {
@@ -464,16 +464,28 @@ export const SKUS = {
 				memory: [64, 96, 128, 192],
 			},
 			"Apple M3": {
-				tflops: 2.84,
+				tflops: 4.1,
 				memory: [8, 16, 24],
 			},
 			"Apple M3 Pro": {
-				tflops: 14,
+				tflops: 7.4,
 				memory: [18, 36],
 			},
 			"Apple M3 Max": {
 				tflops: 14.2,
 				memory: [36, 48, 64, 96, 128],
+			},
+			"Apple M4": {
+				tflops: 4.6,
+				memory: [16, 24, 32],
+			},
+			"Apple M4 Pro": {
+				tflops: 9.2,
+				memory: [24, 48],
+			},
+			"Apple M4 Max": {
+				tflops: 18.4,
+				memory: [36, 48, 64, 128],
 			},
 		},
 	},
