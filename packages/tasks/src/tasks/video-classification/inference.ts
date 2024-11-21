@@ -12,14 +12,12 @@ export interface VideoClassificationInput {
 	 */
 	inputs: unknown;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Video Classification
 	 */
 	parameters?: VideoClassificationParameters;
 	[property: string]: unknown;
 }
 /**
- * Additional inference parameters
- *
  * Additional inference parameters for Video Classification
  */
 export interface VideoClassificationParameters {

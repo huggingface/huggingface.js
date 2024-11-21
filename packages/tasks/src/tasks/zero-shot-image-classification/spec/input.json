@@ -10,14 +10,13 @@
 			"description": "The input image data to classify as a base64-encoded string."
 		},
 		"parameters": {
-			"description": "Additional inference parameters",
+			"description": "Additional inference parameters for Zero Shot Image Classification",
 			"$ref": "#/$defs/ZeroShotImageClassificationParameters"
 		}
 	},
 	"$defs": {
 		"ZeroShotImageClassificationParameters": {
 			"title": "ZeroShotImageClassificationParameters",
-			"description": "Additional inference parameters for Zero Shot Image Classification",
 			"type": "object",
 			"properties": {
 				"candidate_labels": {

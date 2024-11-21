@@ -10,14 +10,13 @@
 			"type": "string"
 		},
 		"parameters": {
-			"description": "Additional inference parameters",
+			"description": "Additional inference parameters for Zero Shot Classification",
 			"$ref": "#/$defs/ZeroShotClassificationParameters"
 		}
 	},
 	"$defs": {
 		"ZeroShotClassificationParameters": {
 			"title": "ZeroShotClassificationParameters",
-			"description": "Additional inference parameters for Zero Shot Classification",
 			"type": "object",
 			"properties": {
 				"candidate_labels": {

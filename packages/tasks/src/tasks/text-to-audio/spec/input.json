@@ -10,14 +10,13 @@
 			"type": "string"
 		},
 		"parameters": {
-			"description": "Additional inference parameters",
+			"description": "Additional inference parameters for Text To Audio",
 			"$ref": "#/$defs/TextToAudioParameters"
 		}
 	},
 	"$defs": {
 		"TextToAudioParameters": {
 			"title": "TextToAudioParameters",
-			"description": "Additional inference parameters for Text To Audio",
 			"type": "object",
 			"properties": {
 				"generation_parameters": {

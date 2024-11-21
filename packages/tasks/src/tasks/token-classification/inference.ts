@@ -12,14 +12,12 @@ export interface TokenClassificationInput {
 	 */
 	inputs: string;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Token Classification
 	 */
 	parameters?: TokenClassificationParameters;
 	[property: string]: unknown;
 }
 /**
- * Additional inference parameters
- *
  * Additional inference parameters for Token Classification
  */
 export interface TokenClassificationParameters {

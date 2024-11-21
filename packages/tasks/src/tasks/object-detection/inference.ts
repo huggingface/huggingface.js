@@ -13,14 +13,12 @@ export interface ObjectDetectionInput {
 	 */
 	inputs: string;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Object Detection
 	 */
 	parameters?: ObjectDetectionParameters;
 	[property: string]: unknown;
 }
 /**
- * Additional inference parameters
- *
  * Additional inference parameters for Object Detection
  */
 export interface ObjectDetectionParameters {
