@@ -32,8 +32,6 @@ export interface TextToSpeechParameters {
 
 /**
  * Parametrization of the text generation process
- *
- * Ad-hoc parametrization of the text generation process
  */
 export interface GenerationParameters {
 	/**
