@@ -9,14 +9,13 @@
 			"description": "The input video data"
 		},
 		"parameters": {
-			"description": "Additional inference parameters",
+			"description": "Additional inference parameters for Video Classification",
 			"$ref": "#/$defs/VideoClassificationParameters"
 		}
 	},
 	"$defs": {
 		"VideoClassificationParameters": {
 			"title": "VideoClassificationParameters",
-			"description": "Additional inference parameters for Video Classification",
 			"type": "object",
 			"properties": {
 				"function_to_apply": {

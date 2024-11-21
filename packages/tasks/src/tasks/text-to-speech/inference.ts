@@ -13,15 +13,13 @@ export interface TextToSpeechInput {
 	 */
 	inputs: string;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Text To Speech
 	 */
 	parameters?: TextToSpeechParameters;
 	[property: string]: unknown;
 }
 
 /**
- * Additional inference parameters
- *
  * Additional inference parameters for Text To Speech
  */
 export interface TextToSpeechParameters {

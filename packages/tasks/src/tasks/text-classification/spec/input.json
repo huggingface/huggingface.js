@@ -10,14 +10,13 @@
 			"type": "string"
 		},
 		"parameters": {
-			"description": "Additional inference parameters",
+			"description": "Additional inference parameters for Text Classification",
 			"$ref": "#/$defs/TextClassificationParameters"
 		}
 	},
 	"$defs": {
 		"TextClassificationParameters": {
 			"title": "TextClassificationParameters",
-			"description": "Additional inference parameters for Text Classification",
 			"type": "object",
 			"properties": {
 				"function_to_apply": {

@@ -13,15 +13,13 @@ export interface SummarizationInput {
 	 */
 	inputs: string;
 	/**
-	 * Additional inference parameters.
+	 * Additional inference parameters for summarization.
 	 */
 	parameters?: SummarizationParameters;
 	[property: string]: unknown;
 }
 
 /**
- * Additional inference parameters.
- *
  * Additional inference parameters for summarization.
  */
 export interface SummarizationParameters {

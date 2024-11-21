@@ -13,14 +13,12 @@ export interface AudioClassificationInput {
 	 */
 	inputs: string;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Audio Classification
 	 */
 	parameters?: AudioClassificationParameters;
 	[property: string]: unknown;
 }
 /**
- * Additional inference parameters
- *
  * Additional inference parameters for Audio Classification
  */
 export interface AudioClassificationParameters {

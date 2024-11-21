@@ -12,14 +12,12 @@ export interface TextClassificationInput {
 	 */
 	inputs: string;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Text Classification
 	 */
 	parameters?: TextClassificationParameters;
 	[property: string]: unknown;
 }
 /**
- * Additional inference parameters
- *
  * Additional inference parameters for Text Classification
  */
 export interface TextClassificationParameters {

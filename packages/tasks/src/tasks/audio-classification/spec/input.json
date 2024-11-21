@@ -10,14 +10,13 @@
 			"type": "string"
 		},
 		"parameters": {
-			"description": "Additional inference parameters",
+			"description": "Additional inference parameters for Audio Classification",
 			"$ref": "#/$defs/AudioClassificationParameters"
 		}
 	},
 	"$defs": {
 		"AudioClassificationParameters": {
 			"title": "AudioClassificationParameters",
-			"description": "Additional inference parameters for Audio Classification",
 			"type": "object",
 			"properties": {
 				"function_to_apply": {

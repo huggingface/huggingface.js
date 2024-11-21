@@ -12,14 +12,12 @@ export interface ZeroShotImageClassificationInput {
 	 */
 	inputs: string;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Zero Shot Image Classification
 	 */
 	parameters: ZeroShotImageClassificationParameters;
 	[property: string]: unknown;
 }
 /**
- * Additional inference parameters
- *
  * Additional inference parameters for Zero Shot Image Classification
  */
 export interface ZeroShotImageClassificationParameters {

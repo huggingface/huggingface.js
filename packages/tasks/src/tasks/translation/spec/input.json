@@ -10,14 +10,13 @@
 			"type": "string"
 		},
 		"parameters": {
-			"description": "Additional inference parameters",
+			"description": "Additional inference parameters for Translation",
 			"$ref": "#/$defs/TranslationParameters"
 		}
 	},
 	"$defs": {
 		"TranslationParameters": {
 			"title": "TranslationParameters",
-			"description": "Additional inference parameters for Translation",
 			"type": "object",
 			"properties": {
 				"src_lang": {

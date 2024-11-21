@@ -12,14 +12,12 @@ export interface ZeroShotObjectDetectionInput {
 	 */
 	inputs: string;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Zero Shot Object Detection
 	 */
 	parameters: ZeroShotObjectDetectionParameters;
 	[property: string]: unknown;
 }
 /**
- * Additional inference parameters
- *
  * Additional inference parameters for Zero Shot Object Detection
  */
 export interface ZeroShotObjectDetectionParameters {
