@@ -7,10 +7,11 @@ settings:
 importers:
 
   .:
-    devDependencies:
+    dependencies:
       '@huggingface/tasks':
         specifier: workspace:^
         version: link:../tasks
+    devDependencies:
       '@types/node':
         specifier: ^20.11.5
         version: 20.17.6

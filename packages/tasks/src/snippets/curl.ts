@@ -9,7 +9,7 @@ export const snippetBasic = (model: ModelDataMinimal, accessToken: string): Infe
 	-X POST \\
 	-d '{"inputs": ${getModelInputSnippet(model, true)}}' \\
 	-H 'Content-Type: application/json' \\
-	-H "Authorization: Bearer ${accessToken || `{API_TOKEN}`}"`,
+	-H 'Authorization: Bearer ${accessToken || `{API_TOKEN}`}'`,
 });
 
 export const snippetTextGeneration = (
@@ -36,7 +36,7 @@ export const snippetTextGeneration = (
 		};
 		return {
 			content: `curl 'https://api-inference.huggingface.co/models/${model.id}/v1/chat/completions' \\
--H "Authorization: Bearer ${accessToken || `{API_TOKEN}`}" \\
+-H 'Authorization: Bearer ${accessToken || `{API_TOKEN}`}' \\
 -H 'Content-Type: application/json' \\
 --data '{
     "model": "${model.id}",
@@ -63,14 +63,14 @@ export const snippetZeroShotClassification = (model: ModelDataMinimal, accessTok
 	-X POST \\
 	-d '{"inputs": ${getModelInputSnippet(model, true)}, "parameters": {"candidate_labels": ["refund", "legal", "faq"]}}' \\
 	-H 'Content-Type: application/json' \\
-	-H "Authorization: Bearer ${accessToken || `{API_TOKEN}`}"`,
+	-H 'Authorization: Bearer ${accessToken || `{API_TOKEN}`}'`,
 });
 
 export const snippetFile = (model: ModelDataMinimal, accessToken: string): InferenceSnippet => ({
 	content: `curl https://api-inference.huggingface.co/models/${model.id} \\
 	-X POST \\
 	--data-binary '@${getModelInputSnippet(model, true, true)}' \\
-	-H "Authorization: Bearer ${accessToken || `{API_TOKEN}`}"`,
+	-H 'Authorization: Bearer ${accessToken || `{API_TOKEN}`}'`,
 });
 
 export const curlSnippets: Partial<

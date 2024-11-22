@@ -9,7 +9,7 @@
  *   - test-name: the name of the test (e.g. "text-to-image", "conversational-llm", etc.)
  *   - index: the order of the snippet in the array of snippets (0 if not an array)
  *   - client: the client name (e.g. "requests", "huggingface_hub", "openai", etc.). Default to "default" if client is not specified.
- *   - language: the language of the snippet (e.g. "curl", "js", "py", etc.)
+ *   - language: the language of the snippet (e.g. "sh", "js", "py", etc.)
  *
  * Example:
  *   ./packages/tasks-gen/snippets-fixtures/text-to-image/0.huggingface_hub.py
@@ -22,9 +22,58 @@ import * as path from "node:path/posix";
 import type { InferenceSnippet } from "@huggingface/tasks";
 import { snippets } from "@huggingface/tasks";
 
-type LANGUAGE = "curl" | "js" | "py";
+type LANGUAGE = "sh" | "js" | "py";
 
-const TEST_CASES: { testName: string; model: snippets.ModelDataMinimal; languages: LANGUAGE[] }[] = [
+const TEST_CASES: {
+	testName: string;
+	model: snippets.ModelDataMinimal;
+	languages: LANGUAGE[];
+	opts?: Record<string, unknown>;
+}[] = [
+	{
+		testName: "conversational-llm-non-stream",
+		model: {
+			id: "meta-llama/Llama-3.1-8B-Instruct",
+			pipeline_tag: "text-generation",
+			tags: ["conversational"],
+			inference: "",
+		},
+		languages: ["sh", "js", "py"],
+		opts: { streaming: false },
+	},
+	{
+		testName: "conversational-llm-stream",
+		model: {
+			id: "meta-llama/Llama-3.1-8B-Instruct",
+			pipeline_tag: "text-generation",
+			tags: ["conversational"],
+			inference: "",
+		},
+		languages: ["sh", "js", "py"],
+		opts: { streaming: true },
+	},
+	{
+		testName: "conversational-vlm-non-stream",
+		model: {
+			id: "meta-llama/Llama-3.2-11B-Vision-Instruct",
+			pipeline_tag: "image-text-to-text",
+			tags: ["conversational"],
+			inference: "",
+		},
+		languages: ["sh", "js", "py"],
+		opts: { streaming: false },
+	},
+	{
+		testName: "conversational-vlm-stream",
+		model: {
+			id: "meta-llama/Llama-3.2-11B-Vision-Instruct",
+			pipeline_tag: "image-text-to-text",
+			tags: ["conversational"],
+			inference: "",
+		},
+		languages: ["sh", "js", "py"],
+		opts: { streaming: true },
+	},
 	{
 		testName: "text-to-image",
 		model: {
@@ -33,12 +82,12 @@ const TEST_CASES: { testName: string; model: snippets.ModelDataMinimal; language
 			tags: [],
 			inference: "",
 		},
-		languages: ["curl", "js", "py"],
+		languages: ["sh", "js", "py"],
 	},
 ];
 
 const GET_SNIPPET_FN = {
-	curl: snippets.curl.getCurlInferenceSnippet,
+	sh: snippets.curl.getCurlInferenceSnippet,
 	js: snippets.js.getJsInferenceSnippet,
 	py: snippets.python.getPythonInferenceSnippet,
 };
@@ -61,8 +110,12 @@ function getFixtureFolder(testName: string): string {
 	return path.join(rootDirFinder(), "snippets-fixtures", testName);
 }
 
-function generateInferenceSnippet(model: snippets.ModelDataMinimal, language: LANGUAGE): InferenceSnippet[] {
-	const generatedSnippets = GET_SNIPPET_FN[language](model, "api_token");
+function generateInferenceSnippet(
+	model: snippets.ModelDataMinimal,
+	language: LANGUAGE,
+	opts?: Record<string, unknown>
+): InferenceSnippet[] {
+	const generatedSnippets = GET_SNIPPET_FN[language](model, "api_token", opts);
 	return Array.isArray(generatedSnippets) ? generatedSnippets : [generatedSnippets];
 }
 
@@ -72,7 +125,7 @@ async function getExpectedInferenceSnippet(testName: string, language: LANGUAGE)
 
 	const expectedSnippets: InferenceSnippet[] = [];
 	for (const file of files.filter((file) => file.endsWith("." + language)).sort()) {
-		const client = path.basename(file).split(".")[1];
+		const client = path.basename(file).split(".").slice(1, -1).join("."); // e.g. '0.huggingface.js.js' => "huggingface.js"
 		const content = await fs.readFile(path.join(fixtureFolder, file), { encoding: "utf-8" });
 		expectedSnippets.push(client === "default" ? { content } : { client, content });
 	}
@@ -94,11 +147,11 @@ if (import.meta.vitest) {
 	const { describe, expect, it } = import.meta.vitest;
 
 	describe("inference API snippets", () => {
-		TEST_CASES.forEach(({ testName, model, languages }) => {
+		TEST_CASES.forEach(({ testName, model, languages, opts }) => {
 			describe(testName, () => {
 				languages.forEach((language) => {
 					it(language, async () => {
-						const generatedSnippets = generateInferenceSnippet(model, language) as InferenceSnippet[];
+						const generatedSnippets = generateInferenceSnippet(model, language, opts);
 						const expectedSnippets = await getExpectedInferenceSnippet(testName, language);
 						expect(generatedSnippets).toEqual(expectedSnippets);
 					});
@@ -113,11 +166,10 @@ if (import.meta.vitest) {
 	await fs.rm(path.join(rootDirFinder(), "snippets-fixtures"), { recursive: true, force: true });
 
 	console.debug("  🏭 Generating new fixtures...");
-	TEST_CASES.forEach(({ testName, model, languages }) => {
-		console.debug(`      ${testName}`);
+	TEST_CASES.forEach(({ testName, model, languages, opts }) => {
+		console.debug(`      ${testName} (${languages.join(", ")})`);
 		languages.forEach(async (language) => {
-			console.debug(`        ${language}`);
-			const generatedSnippets = generateInferenceSnippet(model, language) as InferenceSnippet[];
+			const generatedSnippets = generateInferenceSnippet(model, language, opts);
 			await saveExpectedInferenceSnippet(testName, language, generatedSnippets);
 		});
 	});
