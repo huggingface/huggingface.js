@@ -23,7 +23,7 @@ export interface FeatureExtractionInput {
 	 * The name of the prompt that should be used by for encoding. If not set, no prompt
 	 * will be applied.
 	 *
-	 * Must be a key in the `Sentence Transformers` configuration `prompts` dictionary.
+	 * Must be a key in the `sentence-transformers` configuration `prompts` dictionary.
 	 *
 	 * For example if ``prompt_name`` is "query" and the ``prompts`` is {"query": "query: ",
 	 * ...},
