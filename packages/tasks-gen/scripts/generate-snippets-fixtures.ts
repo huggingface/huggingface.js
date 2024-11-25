@@ -1,8 +1,8 @@
 /*
  * Generates Inference API snippets using @huggingface/tasks snippets.
  *
- * If used in test mode ("pnpm run test"), it compares the generated snippets with the expected ones.
- * If used in generation mode ("pnpm run generate-snippets-fixtures"), it generates the expected snippets.
+ * If used in test mode ("pnpm test"), it compares the generated snippets with the expected ones.
+ * If used in generation mode ("pnpm generate-snippets-fixtures"), it generates the expected snippets.
  *
  * Expected snippets are saved under ./snippets-fixtures and are meant to be versioned on GitHub.
  * Each snippet is saved in a separate file placed under "./{test-name}/{index}.{client}.{language}":
