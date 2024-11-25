@@ -26,7 +26,6 @@
 		},
 		"GenerationParameters": {
 			"title": "GenerationParameters",
-			"description": "Ad-hoc parametrization of the text generation process",
 			"type": "object",
 			"properties": {
 				"temperature": {

@@ -9,14 +9,13 @@
 			"description": "The input image data"
 		},
 		"parameters": {
-			"description": "Additional inference parameters",
+			"description": "Additional inference parameters for Image To Text",
 			"$ref": "#/$defs/ImageToTextParameters"
 		}
 	},
 	"$defs": {
 		"ImageToTextParameters": {
 			"title": "ImageToTextParameters",
-			"description": "Additional inference parameters for Image To Text",
 			"type": "object",
 			"properties": {
 				"max_new_tokens": {

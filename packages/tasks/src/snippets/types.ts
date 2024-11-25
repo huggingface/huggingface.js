@@ -1,4 +1,4 @@
-import type { ModelData } from "../model-data";
+import type { ModelData } from "../model-data.js";
 
 /**
  * Minimal model data required for snippets.

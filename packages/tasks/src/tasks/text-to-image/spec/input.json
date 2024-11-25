@@ -10,14 +10,13 @@
 			"type": "string"
 		},
 		"parameters": {
-			"description": "Additional inference parameters",
+			"description": "Additional inference parameters for Text To Image",
 			"$ref": "#/$defs/TextToImageParameters"
 		}
 	},
 	"$defs": {
 		"TextToImageParameters": {
 			"title": "TextToImageParameters",
-			"description": "Additional inference parameters for Text To Image",
 			"type": "object",
 			"properties": {
 				"guidance_scale": {

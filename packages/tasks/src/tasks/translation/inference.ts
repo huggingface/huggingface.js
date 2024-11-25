@@ -13,15 +13,13 @@ export interface TranslationInput {
 	 */
 	inputs: string;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Translation
 	 */
 	parameters?: TranslationParameters;
 	[property: string]: unknown;
 }
 
 /**
- * Additional inference parameters
- *
  * Additional inference parameters for Translation
  */
 export interface TranslationParameters {

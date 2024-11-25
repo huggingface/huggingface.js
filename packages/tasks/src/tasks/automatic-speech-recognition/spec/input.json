@@ -10,14 +10,13 @@
 			"type": "string"
 		},
 		"parameters": {
-			"description": "Additional inference parameters",
+			"description": "Additional inference parameters for Automatic Speech Recognition",
 			"$ref": "#/$defs/AutomaticSpeechRecognitionParameters"
 		}
 	},
 	"$defs": {
 		"AutomaticSpeechRecognitionParameters": {
 			"title": "AutomaticSpeechRecognitionParameters",
-			"description": "Additional inference parameters for Automatic Speech Recognition",
 			"type": "object",
 			"properties": {
 				"return_timestamps": {

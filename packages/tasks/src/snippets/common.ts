@@ -1,4 +1,4 @@
-import type { ChatCompletionInputMessage, GenerationParameters } from "../tasks";
+import type { ChatCompletionInputMessage, GenerationParameters } from "../tasks/index.js";
 
 export function stringifyMessages(
 	messages: ChatCompletionInputMessage[],

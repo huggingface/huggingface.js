@@ -21,14 +21,13 @@
 			"required": ["image", "question"]
 		},
 		"parameters": {
-			"description": "Additional inference parameters",
+			"description": "Additional inference parameters for Document Question Answering",
 			"$ref": "#/$defs/DocumentQuestionAnsweringParameters"
 		}
 	},
 	"$defs": {
 		"DocumentQuestionAnsweringParameters": {
 			"title": "DocumentQuestionAnsweringParameters",
-			"description": "Additional inference parameters for Document Question Answering",
 			"type": "object",
 			"properties": {
 				"doc_stride": {

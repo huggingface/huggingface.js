@@ -13,15 +13,13 @@ export interface TextToAudioInput {
 	 */
 	inputs: string;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Text To Audio
 	 */
 	parameters?: TextToAudioParameters;
 	[property: string]: unknown;
 }
 
 /**
- * Additional inference parameters
- *
  * Additional inference parameters for Text To Audio
  */
 export interface TextToAudioParameters {
@@ -34,8 +32,6 @@ export interface TextToAudioParameters {
 
 /**
  * Parametrization of the text generation process
- *
- * Ad-hoc parametrization of the text generation process
  */
 export interface GenerationParameters {
 	/**

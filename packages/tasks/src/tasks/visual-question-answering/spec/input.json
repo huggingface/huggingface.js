@@ -20,14 +20,13 @@
 			"required": ["question", "image"]
 		},
 		"parameters": {
-			"description": "Additional inference parameters",
+			"description": "Additional inference parameters for Visual Question Answering",
 			"$ref": "#/$defs/VisualQuestionAnsweringParameters"
 		}
 	},
 	"$defs": {
 		"VisualQuestionAnsweringParameters": {
 			"title": "VisualQuestionAnsweringParameters",
-			"description": "Additional inference parameters for Visual Question Answering",
 			"type": "object",
 			"properties": {
 				"top_k": {
