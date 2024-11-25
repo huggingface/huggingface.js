@@ -13,14 +13,12 @@ export interface ImageSegmentationInput {
 	 */
 	inputs: string;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Image Segmentation
 	 */
 	parameters?: ImageSegmentationParameters;
 	[property: string]: unknown;
 }
 /**
- * Additional inference parameters
- *
  * Additional inference parameters for Image Segmentation
  */
 export interface ImageSegmentationParameters {

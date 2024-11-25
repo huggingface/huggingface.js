@@ -12,7 +12,7 @@ export interface TableQuestionAnsweringInput {
 	 */
 	inputs: TableQuestionAnsweringInputData;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Table Question Answering
 	 */
 	parameters?: {
 		[key: string]: unknown;

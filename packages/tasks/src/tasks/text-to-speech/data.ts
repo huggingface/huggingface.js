@@ -1,4 +1,4 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	canonicalId: "text-to-audio",
@@ -10,6 +10,10 @@ const taskData: TaskDataCustom = {
 		{
 			description: "Multi-speaker English dataset.",
 			id: "mythicinfinity/libritts_r",
+		},
+		{
+			description: "Mulit-lingual dataset.",
+			id: "facebook/multilingual_librispeech",
 		},
 	],
 	demo: {
@@ -35,20 +39,24 @@ const taskData: TaskDataCustom = {
 	],
 	models: [
 		{
-			description: "A powerful TTS model.",
+			description: "A prompt based, powerful TTS model.",
 			id: "parler-tts/parler-tts-large-v1",
+		},
+		{
+			description: "A powerful TTS model that supports English and Chinese.",
+			id: "SWivid/F5-TTS",
 		},
 		{
 			description: "A massively multi-lingual TTS model.",
 			id: "coqui/XTTS-v2",
 		},
 		{
-			description: "Robust TTS model.",
-			id: "metavoiceio/metavoice-1B-v0.1",
+			description: "A powerful TTS model.",
+			id: "amphion/MaskGCT",
 		},
 		{
-			description: "A prompt based, powerful TTS model.",
-			id: "parler-tts/parler_tts_mini_v0.1",
+			description: "A Llama based TTS model.",
+			id: "OuteAI/OuteTTS-0.1-350M",
 		},
 	],
 	spaces: [
@@ -66,8 +74,8 @@ const taskData: TaskDataCustom = {
 			id: "mrfakename/E2-F5-TTS",
 		},
 		{
-			description: "An application that synthesizes speech for diverse speaker prompts.",
-			id: "parler-tts/parler_tts_mini",
+			description: "An application that synthesizes emotional speech for diverse speaker prompts.",
+			id: "parler-tts/parler-tts-expresso",
 		},
 	],
 	summary:

@@ -10,14 +10,13 @@
 			"type": "string"
 		},
 		"parameters": {
-			"description": "Additional inference parameters",
+			"description": "Additional inference parameters for Text2text Generation",
 			"$ref": "#/$defs/Text2textGenerationParameters"
 		}
 	},
 	"$defs": {
 		"Text2textGenerationParameters": {
 			"title": "Text2textGenerationParameters",
-			"description": "Additional inference parameters for Text2text Generation",
 			"type": "object",
 			"properties": {
 				"clean_up_tokenization_spaces": {

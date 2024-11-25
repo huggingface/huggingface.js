@@ -27,7 +27,6 @@
 	},
 	"source": "index.ts",
 	"scripts": {
-		"prepare": "pnpm run build",
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
 		"format": "prettier --write .",
@@ -50,6 +49,9 @@
 	],
 	"author": "Hugging Face",
 	"license": "MIT",
+	"dependencies": {
+		"@huggingface/tasks": "workspace:^"
+	},
 	"devDependencies": {
 		"@types/node": "^20.12.8"
 	}

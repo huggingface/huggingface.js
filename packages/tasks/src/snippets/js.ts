@@ -10,7 +10,7 @@ export const snippetBasic = (model: ModelDataMinimal, accessToken: string): Infe
 		"https://api-inference.huggingface.co/models/${model.id}",
 		{
 			headers: {
-				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}"
+				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
 				"Content-Type": "application/json",
 			},
 			method: "POST",
@@ -42,7 +42,7 @@ export const snippetTextGeneration = (
 		const streaming = opts?.streaming ?? true;
 		const exampleMessages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
 		const messages = opts?.messages ?? exampleMessages;
-		const messagesStr = stringifyMessages(messages, { sep: ",\n\t\t", start: "[\n\t\t", end: "\n\t]" });
+		const messagesStr = stringifyMessages(messages, { indent: "\t" });
 
 		const config = {
 			...(opts?.temperature ? { temperature: opts.temperature } : undefined),
@@ -50,19 +50,17 @@ export const snippetTextGeneration = (
 			...(opts?.top_p ? { top_p: opts.top_p } : undefined),
 		};
 		const configStr = stringifyGenerationConfig(config, {
-			sep: ",\n\t",
-			start: "",
-			end: "",
+			indent: "\n\t",
 			attributeValueConnector: ": ",
 		});
 
 		if (streaming) {
 			return [
 				{
-					client: "huggingface_hub",
-					content: `import { HfInference } from "@huggingface/inference"
+					client: "huggingface.js",
+					content: `import { HfInference } from "@huggingface/inference";
 
-const client = new HfInference("${accessToken || `{API_TOKEN}`}")
+const client = new HfInference("${accessToken || `{API_TOKEN}`}");
 
 let out = "";
 
@@ -82,12 +80,12 @@ for await (const chunk of stream) {
 				},
 				{
 					client: "openai",
-					content: `import { OpenAI } from "openai"
+					content: `import { OpenAI } from "openai";
 
 const client = new OpenAI({
 	baseURL: "https://api-inference.huggingface.co/v1/",
     apiKey: "${accessToken || `{API_TOKEN}`}"
-})
+});
 
 let out = "";
 
@@ -110,10 +108,10 @@ for await (const chunk of stream) {
 		} else {
 			return [
 				{
-					client: "huggingface_hub",
-					content: `import { HfInference } from '@huggingface/inference'
+					client: "huggingface.js",
+					content: `import { HfInference } from "@huggingface/inference";
 
-const client = new HfInference("${accessToken || `{API_TOKEN}`}")
+const client = new HfInference("${accessToken || `{API_TOKEN}`}");
 
 const chatCompletion = await client.chatCompletion({
 	model: "${model.id}",
@@ -125,12 +123,12 @@ console.log(chatCompletion.choices[0].message);`,
 				},
 				{
 					client: "openai",
-					content: `import { OpenAI } from "openai"
+					content: `import { OpenAI } from "openai";
 
 const client = new OpenAI({
     baseURL: "https://api-inference.huggingface.co/v1/",
     apiKey: "${accessToken || `{API_TOKEN}`}"
-})
+});
 
 const chatCompletion = await client.chat.completions.create({
 	model: "${model.id}",
@@ -153,7 +151,7 @@ export const snippetZeroShotClassification = (model: ModelDataMinimal, accessTok
 		"https://api-inference.huggingface.co/models/${model.id}",
 		{
 			headers: {
-				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}"
+				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
 				"Content-Type": "application/json",
 			},
 			method: "POST",
@@ -177,7 +175,7 @@ export const snippetTextToImage = (model: ModelDataMinimal, accessToken: string)
 		"https://api-inference.huggingface.co/models/${model.id}",
 		{
 			headers: {
-				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}"
+				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
 				"Content-Type": "application/json",
 			},
 			method: "POST",
@@ -198,7 +196,7 @@ export const snippetTextToAudio = (model: ModelDataMinimal, accessToken: string)
 			"https://api-inference.huggingface.co/models/${model.id}",
 			{
 				headers: {
-					Authorization: "Bearer ${accessToken || `{API_TOKEN}`}"
+					Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
 					"Content-Type": "application/json",
 				},
 				method: "POST",
@@ -240,7 +238,7 @@ export const snippetFile = (model: ModelDataMinimal, accessToken: string): Infer
 		"https://api-inference.huggingface.co/models/${model.id}",
 		{
 			headers: {
-				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}"
+				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
 				"Content-Type": "application/json",
 			},
 			method: "POST",
@@ -294,10 +292,11 @@ export const jsSnippets: Partial<
 
 export function getJsInferenceSnippet(
 	model: ModelDataMinimal,
-	accessToken: string
+	accessToken: string,
+	opts?: Record<string, unknown>
 ): InferenceSnippet | InferenceSnippet[] {
 	return model.pipeline_tag && model.pipeline_tag in jsSnippets
-		? jsSnippets[model.pipeline_tag]?.(model, accessToken) ?? { content: "" }
+		? jsSnippets[model.pipeline_tag]?.(model, accessToken, opts) ?? { content: "" }
 		: { content: "" };
 }
 

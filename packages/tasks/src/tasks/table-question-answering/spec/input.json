@@ -28,14 +28,13 @@
 			"required": ["table", "question"]
 		},
 		"parameters": {
-			"description": "Additional inference parameters",
+			"description": "Additional inference parameters for Table Question Answering",
 			"$ref": "#/$defs/TableQuestionAnsweringParameters"
 		}
 	},
 	"$defs": {
 		"TableQuestionAnsweringParameters": {
 			"title": "TableQuestionAnsweringParameters",
-			"description": "Additional inference parameters for Table Question Answering",
 			"type": "object",
 			"properties": {}
 		}

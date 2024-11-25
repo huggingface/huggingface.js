@@ -1,6 +1,6 @@
-import * as snippets from "./model-libraries-snippets";
-import type { ModelData } from "./model-data";
-import type { ElasticSearchQuery } from "./model-libraries-downloads";
+import * as snippets from "./model-libraries-snippets.js";
+import type { ModelData } from "./model-data.js";
+import type { ElasticSearchQuery } from "./model-libraries-downloads.js";
 
 /**
  * Elements configurable by a model library.
@@ -219,6 +219,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/cartesia-ai/cartesia_mlx",
 		snippets: snippets.cartesia_mlx,
 	},
+	clipscope: {
+		prettyLabel: "clipscope",
+		repoName: "clipscope",
+		repoUrl: "https://github.com/Lewington-pitsos/clipscope",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
 	cotracker: {
 		prettyLabel: "CoTracker",
 		repoName: "CoTracker",
@@ -323,6 +330,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/hezarai/hezar",
 		docsUrl: "https://hezarai.github.io/hezar",
 		countDownloads: `path:"model_config.yaml" OR path:"embedding/embedding_config.yaml"`,
+	},
+	htrflow: {
+		prettyLabel: "HTRflow",
+		repoName: "HTRflow",
+		repoUrl: "https://github.com/AI-Riksarkivet/htrflow",
+		docsUrl: "https://ai-riksarkivet.github.io/htrflow",
+		snippets: snippets.htrflow,
 	},
 	"hunyuan-dit": {
 		prettyLabel: "HunyuanDiT",
@@ -475,6 +489,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.nemo,
 		filter: true,
 		countDownloads: `path_extension:"nemo" OR path:"model_config.yaml"`,
+	},
+	"open-oasis": {
+		prettyLabel: "open-oasis",
+		repoName: "open-oasis",
+		repoUrl: "https://github.com/etched-ai/open-oasis",
+		countDownloads: `path:"oasis500m.safetensors"`,
 	},
 	open_clip: {
 		prettyLabel: "OpenCLIP",
@@ -699,6 +719,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/SWivid/F5-TTS",
 		filter: false,
 		countDownloads: `path_extension:"safetensors" OR path_extension:"pt"`,
+	},
+	genmo: {
+		prettyLabel: "Genmo",
+		repoName: "Genmo",
+		repoUrl: "https://github.com/genmoai/models",
+		filter: false,
+		countDownloads: `path:"vae_stats.json"`,
 	},
 	tensorflowtts: {
 		prettyLabel: "TensorFlowTTS",

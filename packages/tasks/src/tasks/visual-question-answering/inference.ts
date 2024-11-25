@@ -12,7 +12,7 @@ export interface VisualQuestionAnsweringInput {
 	 */
 	inputs: VisualQuestionAnsweringInputData;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Visual Question Answering
 	 */
 	parameters?: VisualQuestionAnsweringParameters;
 	[property: string]: unknown;
@@ -32,8 +32,6 @@ export interface VisualQuestionAnsweringInputData {
 	[property: string]: unknown;
 }
 /**
- * Additional inference parameters
- *
  * Additional inference parameters for Visual Question Answering
  */
 export interface VisualQuestionAnsweringParameters {

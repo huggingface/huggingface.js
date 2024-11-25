@@ -1,6 +1,9 @@
-import type { ModelData } from "./model-data";
-import type { WidgetExampleTextInput, WidgetExampleSentenceSimilarityInput } from "./widget-example";
-import { LIBRARY_TASK_MAPPING } from "./library-to-tasks";
+import type { ModelData } from "./model-data.js";
+import type { WidgetExampleTextInput, WidgetExampleSentenceSimilarityInput } from "./widget-example.js";
+import { LIBRARY_TASK_MAPPING } from "./library-to-tasks.js";
+import { getModelInputSnippet } from "./snippets/inputs.js";
+import type { ChatCompletionInputMessage } from "./tasks/index.js";
+import { stringifyMessages } from "./snippets/common.js";
 
 const TAG_CUSTOM_CODE = "custom_code";
 
@@ -363,6 +366,23 @@ export const gliner = (model: ModelData): string[] => [
 model = GLiNER.from_pretrained("${model.id}")`,
 ];
 
+export const htrflow = (model: ModelData): string[] => [
+	`# CLI usage
+# see docs: https://ai-riksarkivet.github.io/htrflow/latest/getting_started/quick_start.html
+htrflow pipeline <path/to/pipeline.yaml> <path/to/image>`,
+	`# Python usage
+from htrflow.pipeline.pipeline import Pipeline
+from htrflow.pipeline.steps import Task
+from htrflow.models.framework.model import ModelClass
+
+pipeline = Pipeline(
+    [
+        Task(
+            ModelClass, {"model": "${model.id}"}, {}
+        ),
+    ])`,
+];
+
 export const keras = (model: ModelData): string[] => [
 	`# Available backend options are: "jax", "torch", "tensorflow".
 import os
@@ -401,23 +421,33 @@ model = keras_hub.models.CausalLM.from_preset("hf://${model.id}", dtype="bfloat1
 `,
 ];
 
-export const llama_cpp_python = (model: ModelData): string[] => [
-	`from llama_cpp import Llama
+export const llama_cpp_python = (model: ModelData): string[] => {
+	const snippets = [
+		`from llama_cpp import Llama
 
 llm = Llama.from_pretrained(
 	repo_id="${model.id}",
 	filename="{{GGUF_FILE}}",
 )
+`,
+	];
 
-llm.create_chat_completion(
-	messages = [
-		{
-			"role": "user",
-			"content": "What is the capital of France?"
-		}
-	]
-)`,
-];
+	if (model.tags.includes("conversational")) {
+		const messages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
+		snippets.push(`llm.create_chat_completion(
+	messages = ${stringifyMessages(messages, { attributeKeyQuotes: true, indent: "\t" })}
+)`);
+	} else {
+		snippets.push(`output = llm(
+	"Once upon a time,",
+	max_tokens=512,
+	echo=True
+)
+print(output)`);
+	}
+
+	return snippets;
+};
 
 export const tf_keras = (model: ModelData): string[] => [
 	`# Note: 'keras<3.x' or 'tf_keras' must be installed (legacy)
