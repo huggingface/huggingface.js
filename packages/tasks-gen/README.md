@@ -1,6 +1,6 @@
 ## @huggingface.js/tasks-gen
 
-This is package not a published one. It contains scripts to generate or test parts of the `@huggingface.js/tasks` package.
+This package is not a published one. It contains scripts that generate or test parts of the `@huggingface.js/tasks` package.
 
 ### generate-snippets-fixtures.ts
 
@@ -10,7 +10,7 @@ When updating logic in `packages/tasks/src/snippets`, the test snippets must be 
 To (re-)generate the snippets, run:
 
 ```
-pnpm run generate-snippets-fixtures
+pnpm generate-snippets-fixtures
 ```
 
 If some logic has been updated, you should see the result with a
@@ -22,7 +22,7 @@ git diff
 To test the snippets, run:
 
 ```
-pnpm run test
+pnpm test
 ```
 
 Finally if you want to add a test case, you must add an entry in `TEST_CASES` array in `generate-snippets-fixtures.ts`.
@@ -36,12 +36,12 @@ This script is run by a cron job once a day and helps getting `@huggingface.js/t
 To update the specs manually, run:
 
 ```
-pnpm run inference-codegen
+pnpm inference-codegen
 ```
 
 ### inference-tei-import.ts
 
-Fetches TEI specs and generates JSON schema for input and output of text-embeddings (called feature-extraction).
+Fetches TEI specs and generates JSON schema for input and output of text-embeddings (also called feature-extraction).
 See https://huggingface.github.io/text-embeddings-inference/ for more details.
 
 This script is run by a cron job once a day and helps getting `@huggingface.js/tasks` up to date with TEI updates.
@@ -49,7 +49,7 @@ This script is run by a cron job once a day and helps getting `@huggingface.js/t
 To update the specs manually, run:
 
 ```
-pnpm run inference-tei-import
+pnpm inference-tei-import
 ```
 
 ### inference-tgi-import.ts
@@ -62,6 +62,6 @@ This script is run by a cron job once a day and helps getting `@huggingface.js/t
 To update the specs manually, run:
 
 ```
-pnpm run inference-tgi-import
+pnpm inference-tgi-import
 ```
 
