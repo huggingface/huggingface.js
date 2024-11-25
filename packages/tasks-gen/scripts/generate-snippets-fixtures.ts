@@ -84,7 +84,7 @@ const TEST_CASES: {
 		},
 		languages: ["sh", "js", "py"],
 	},
-];
+] as const;
 
 const GET_SNIPPET_FN = {
 	sh: snippets.curl.getCurlInferenceSnippet,
