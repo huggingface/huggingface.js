@@ -90,9 +90,9 @@ const GET_SNIPPET_FN = {
 	sh: snippets.curl.getCurlInferenceSnippet,
 	js: snippets.js.getJsInferenceSnippet,
 	py: snippets.python.getPythonInferenceSnippet,
-};
+} as const;
 
-const rootDirFinder = function (): string {
+const rootDirFinder = (): string => {
 	let currentPath = path.normalize(import.meta.url).replace("file:", "");
 
 	while (currentPath !== "/") {
