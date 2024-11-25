@@ -180,7 +180,7 @@ const snippetDocumentQuestionAnswering = (model: ModelDataMinimal, accessToken: 
 		{
 			client: "huggingface_hub",
 			content: `${snippetImportInferenceClient(model, accessToken)}
-output = client.document_question_answering(${inputsAsObj.image}, question=${inputsAsObj.question})`,
+output = client.document_question_answering("${inputsAsObj.image}", question="${inputsAsObj.question}")`,
 		},
 		{
 			client: "requests",
