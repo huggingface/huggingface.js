@@ -161,6 +161,7 @@ export async function oauthHandleRedirect(opts?: { hubUrl?: string }): Promise<O
 			sub: string;
 			name: string;
 			picture: string;
+			preferred_username: string;
 			isEnterprise: boolean;
 			canPay?: boolean;
 			roleInOrg?: string;
@@ -172,8 +173,8 @@ export async function oauthHandleRedirect(opts?: { hubUrl?: string }): Promise<O
 		accessTokenExpiresAt,
 		userInfo: {
 			id: userInfo.sub,
-			name: userInfo.name,
-			fullname: userInfo.preferred_username,
+			name: userInfo.preferred_username,
+			fullname: userInfo.name,
 			email: userInfo.email,
 			emailVerified: userInfo.email_verified,
 			avatarUrl: userInfo.picture,
@@ -182,7 +183,7 @@ export async function oauthHandleRedirect(opts?: { hubUrl?: string }): Promise<O
 			orgs:
 				userInfo.orgs?.map((org) => ({
 					id: org.sub,
-					name: org.name,
+					name: org.preferred_username,
 					fullname: org.name,
 					isEnterprise: org.isEnterprise,
 					canPay: org.canPay,
