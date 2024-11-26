@@ -2,23 +2,88 @@ import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
 
 export interface UserInfo {
+	/**
+	 * OpenID Connect field. Unique identifier for the user, even in case of rename.
+	 */
 	sub: string;
+	/**
+	 * OpenID Connect field. The user's full name.
+	 */
 	name: string;
+	/**
+	 * OpenID Connect field. The user's username.
+	 */
 	preferred_username: string;
+	/**
+	 * OpenID Connect field, available if scope "email" was granted.
+	 */
 	email_verified?: boolean;
+	/**
+	 * OpenID Connect field, available if scope "email" was granted.
+	 */
 	email?: string;
+	/**
+	 * OpenID Connect field. The user's profile picture URL.
+	 */
 	picture: string;
+	/**
+	 * OpenID Connect field. The user's website URL.
+	 */
 	website?: string;
+
+	/**
+	 * Hugging Face field. Whether the user is a pro user.
+	 */
 	isPro: boolean;
+	/**
+	 * Hugging Face field. Whether the user has a payment method set up. Needs "read-billing" scope.
+	 */
 	canPay?: boolean;
+	/**
+	 * Hugging Face field. The user's orgs
+	 */
 	orgs?: Array<{
+		/**
+		 * OpenID Connect field. Unique identifier for the org.
+		 */
 		sub: string;
+		/**
+		 * OpenID Connect field. The org's full name.
+		 */
 		name: string;
-		picture: string;
+		/**
+		 * OpenID Connect field. The org's username.
+		 */
 		preferred_username: string;
+		/**
+		 * OpenID Connect field. The org's profile picture URL.
+		 */
+		picture: string;
+
+		/**
+		 * Hugging Face field. Whether the org is an enterprise org.
+		 */
 		isEnterprise: boolean;
+		/**
+		 * Hugging Face field. Whether the org has a payment method set up. Needs "read-billing" scope, and the user needs to approve access to the org in the OAuth page.
+		 */
 		canPay?: boolean;
+		/**
+		 * Hugging Face field. The user's role in the org. The user needs to approve access to the org in the OAuth page.
+		 */
 		roleInOrg?: string;
+		/**
+		 * HuggingFace field. When the user granted the oauth app access to the org, but didn't complete SSO.
+		 *
+		 * Should never happen directly after the oauth flow.
+		 */
+		pendingSSO?: boolean;
+		/**
+		 * HuggingFace field. When the user granted the oauth app access to the org, but didn't complete MFA.
+		 *
+		 * Should never happen directly after the oauth flow.
+		 */
+		missingMFA?: boolean;
 	}>;
 }
 
