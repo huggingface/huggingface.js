@@ -140,7 +140,13 @@ export async function oauthHandleRedirect(opts?: {
 		);
 	}
 
-	const searchParams = new URLSearchParams(opts?.redirectedUrl ?? window.location.search);
+	const redirectedUrl = opts?.redirectedUrl ?? window.location.href;
+	const searchParams =
+		URL.parse !== undefined ? URL.parse(redirectedUrl)?.searchParams : new URL(redirectedUrl).searchParams;
+
+	if (!searchParams) {
+		throw new Error("Failed to parse redirected URL: " + redirectedUrl);
+	}
 
 	const [error, errorDescription] = [searchParams.get("error"), searchParams.get("error_description")];
 
@@ -149,17 +155,17 @@ export async function oauthHandleRedirect(opts?: {
 	}
 
 	const code = searchParams.get("code");
-	const nonce = localStorage.getItem("huggingface.co:oauth:nonce");
+	const nonce = opts?.nonce ?? localStorage.getItem("huggingface.co:oauth:nonce");
 
 	if (!code) {
-		throw new Error("Missing oauth code from query parameters in redirected URL");
+		throw new Error("Missing oauth code from query parameters in redirected URL: " + redirectedUrl);
 	}
 
 	if (!nonce) {
 		throw new Error("Missing oauth nonce from localStorage");
 	}
 
-	const codeVerifier = localStorage.getItem("huggingface.co:oauth:code_verifier");
+	const codeVerifier = opts?.codeVerifier ?? localStorage.getItem("huggingface.co:oauth:code_verifier");
 
 	if (!codeVerifier) {
 		throw new Error("Missing oauth code_verifier from localStorage");
@@ -215,8 +221,12 @@ export async function oauthHandleRedirect(opts?: {
 		}).toString(),
 	});
 
-	localStorage.removeItem("huggingface.co:oauth:code_verifier");
-	localStorage.removeItem("huggingface.co:oauth:nonce");
+	if (!opts?.codeVerifier) {
+		localStorage.removeItem("huggingface.co:oauth:code_verifier");
+	}
+	if (!opts?.nonce) {
+		localStorage.removeItem("huggingface.co:oauth:nonce");
+	}
 
 	if (!tokenRes.ok) {
 		throw await createApiError(tokenRes);
