@@ -152,7 +152,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	"cxr-foundation": {
 		prettyLabel: "CXR Foundation",
-		repoName: "CXR-Foundation",
+		repoName: "cxr-foundation",
 		repoUrl: "https://github.com/google-health/cxr-foundation",
 		filter: false,
 		countDownloads: `path:"precomputed_embeddings/embeddings.npz" OR path:"pax-elixr-b-text/saved_model.pb"`,
