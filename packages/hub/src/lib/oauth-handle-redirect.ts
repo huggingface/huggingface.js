@@ -42,12 +42,21 @@ export interface OAuthResult {
  * There is also a helper function {@link oauthHandleRedirectIfPresent}, which will call `oauthHandleRedirect` if the URL contains an oauth code
  * in the query parameters and return `false` otherwise.
  */
-export async function oauthHandleRedirect(opts?: { hubUrl?: string }): Promise<OAuthResult> {
-	if (typeof window === "undefined") {
-		throw new Error("oauthHandleRedirect is only available in the browser");
+export async function oauthHandleRedirect(opts?: {
+	/**
+	 * The URL of the hub. Defaults to {@link HUB_URL}.
+	 */
+	hubUrl?: string;
+	/**
+	 * The URL to analyze. Defaults to `window.location.href`.
+	 */
+	redirectedUrl?: string;
+}): Promise<OAuthResult> {
+	if (typeof window === "undefined" && !opts?.redirectedUrl) {
+		throw new Error("oauthHandleRedirect is only available in the browser, unless you provide a redirectedUrl");
 	}
 
-	const searchParams = new URLSearchParams(window.location.search);
+	const searchParams = new URLSearchParams(opts?.redirectedUrl ?? window.location.search);
 
 	const [error, errorDescription] = [searchParams.get("error"), searchParams.get("error_description")];
 
@@ -173,12 +182,23 @@ export async function oauthHandleRedirect(opts?: { hubUrl?: string }): Promise<O
  *
  * Depending on your app, you may want to call {@link oauthHandleRedirect} directly instead.
  */
-export async function oauthHandleRedirectIfPresent(opts?: { hubUrl?: string }): Promise<OAuthResult | false> {
-	if (typeof window === "undefined") {
-		throw new Error("oauthHandleRedirect is only available in the browser");
+export async function oauthHandleRedirectIfPresent(opts?: {
+	/**
+	 * The URL of the hub. Defaults to {@link HUB_URL}.
+	 */
+	hubUrl?: string;
+	/**
+	 * The URL to analyze. Defaults to `window.location.href`.
+	 */
+	redirectedUrl?: string;
+}): Promise<OAuthResult | false> {
+	if (typeof window === "undefined" && !opts?.redirectedUrl) {
+		throw new Error(
+			"oauthHandleRedirectIfPresent is only available in the browser, unless you provide a redirectedUrl"
+		);
 	}
 
-	const searchParams = new URLSearchParams(window.location.search);
+	const searchParams = new URLSearchParams(opts?.redirectedUrl ?? window.location.search);
 
 	if (searchParams.has("error")) {
 		return oauthHandleRedirect(opts);
