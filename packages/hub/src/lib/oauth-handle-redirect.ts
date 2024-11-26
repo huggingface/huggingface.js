@@ -141,12 +141,13 @@ export async function oauthHandleRedirect(opts?: {
 	}
 
 	const redirectedUrl = opts?.redirectedUrl ?? window.location.href;
-	const searchParams =
-		URL.parse !== undefined ? URL.parse(redirectedUrl)?.searchParams : new URL(redirectedUrl).searchParams;
-
-	if (!searchParams) {
-		throw new Error("Failed to parse redirected URL: " + redirectedUrl);
-	}
+	const searchParams = (() => {
+		try {
+			return new URL(redirectedUrl).searchParams;
+		} catch (err) {
+			throw new Error("Failed to parse redirected URL: " + redirectedUrl);
+		}
+	})();
 
 	const [error, errorDescription] = [searchParams.get("error"), searchParams.get("error_description")];
 
