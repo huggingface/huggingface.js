@@ -182,7 +182,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	"derm-foundation": {
 		prettyLabel: "Derm Foundation",
-		repoName: "Derm-Foundation",
+		repoName: "derm-foundation",
 		repoUrl: "https://github.com/google-health/derm-foundation",
 		filter: false,
 		countDownloads: `path:"scin_dataset_precomputed_embeddings.npz" OR path:"saved_model.pb"`,
