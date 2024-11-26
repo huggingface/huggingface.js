@@ -64,9 +64,24 @@ export async function oauthLoginUrl(opts?: {
 	 * State to pass to the OAuth provider, which will be returned in the call to `oauthLogin` after the redirect.
 	 */
 	state?: string;
+	/**
+	 * If provided, will be filled with the code verifier and nonce used for the OAuth flow,
+	 * instead of using localStorage.
+	 *
+	 * When calling {@link `oauthHandleRedirectIfPresent`} or {@link `oauthHandleRedirect`} you will need to provide the same values.
+	 */
+	localStorage?: {
+		codeVerifier?: string;
+		nonce?: string;
+	};
 }): Promise<string> {
-	if (typeof window === "undefined") {
-		throw new Error("oauthLogin is only available in the browser");
+	if (typeof window === "undefined" && (!opts?.redirectUrl || !opts?.clientId)) {
+		throw new Error("oauthLogin is only available in the browser, unless you provide clientId and redirectUrl");
+	}
+	if (typeof localStorage === "undefined" && !opts?.localStorage) {
+		throw new Error(
+			"oauthLogin requires localStorage to be available in the context, unless you provide a localStorage empty object as argument"
+		);
 	}
 
 	const hubUrl = opts?.hubUrl || HUB_URL;
@@ -91,18 +106,37 @@ export async function oauthLoginUrl(opts?: {
 	// Two random UUIDs concatenated together, because min length is 43 and max length is 128
 	const newCodeVerifier = globalThis.crypto.randomUUID() + globalThis.crypto.randomUUID();
 
-	localStorage.setItem("huggingface.co:oauth:nonce", newNonce);
-	localStorage.setItem("huggingface.co:oauth:code_verifier", newCodeVerifier);
+	if (opts?.localStorage) {
+		if (opts.localStorage.codeVerifier !== undefined && opts.localStorage.codeVerifier !== null) {
+			throw new Error(
+				"localStorage.codeVerifier must be a initially set to null or undefined, and will be filled by oauthLoginUrl"
+			);
+		}
+		if (opts.localStorage.nonce !== undefined && opts.localStorage.nonce !== null) {
+			throw new Error(
+				"localStorage.nonce must be a initially set to null or undefined, and will be filled by oauthLoginUrl"
+			);
+		}
+		opts.localStorage.codeVerifier = newCodeVerifier;
+		opts.localStorage.nonce = newNonce;
+	} else {
+		localStorage.setItem("huggingface.co:oauth:nonce", newNonce);
+		localStorage.setItem("huggingface.co:oauth:code_verifier", newCodeVerifier);
+	}
 
-	const redirectUri = opts?.redirectUrl || window.location.href;
+	const redirectUri = opts?.redirectUrl || (typeof window !== "undefined" ? window.location.href : undefined);
+	if (!redirectUri) {
+		throw new Error("Missing redirectUrl");
+	}
 	const state = JSON.stringify({
 		nonce: newNonce,
 		redirectUri,
 		state: opts?.state,
 	});
 
-	// @ts-expect-error window.huggingface is defined inside static Spaces.
-	const variables: Record<string, string> | null = window?.huggingface?.variables ?? null;
+	const variables: Record<string, string> | null =
+		// @ts-expect-error window.huggingface is defined inside static Spaces.
+		typeof window !== "undefined" ? window.huggingface?.variables ?? null : null;
 
 	const clientId = opts?.clientId || variables?.OAUTH_CLIENT_ID;
 
