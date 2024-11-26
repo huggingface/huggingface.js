@@ -1,28 +1,31 @@
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
 
+export interface UserInfo {
+	sub: string;
+	name: string;
+	preferred_username: string;
+	email_verified?: boolean;
+	email?: string;
+	picture: string;
+	website?: string;
+	isPro: boolean;
+	canPay?: boolean;
+	orgs?: Array<{
+		sub: string;
+		name: string;
+		picture: string;
+		preferred_username: string;
+		isEnterprise: boolean;
+		canPay?: boolean;
+		roleInOrg?: string;
+	}>;
+}
+
 export interface OAuthResult {
 	accessToken: string;
 	accessTokenExpiresAt: Date;
-	userInfo: {
-		id: string;
-		name: string;
-		fullname: string;
-		email?: string;
-		emailVerified?: boolean;
-		avatarUrl: string;
-		websiteUrl?: string;
-		isPro: boolean;
-		canPay?: boolean;
-		orgs: Array<{
-			id: string;
-			name: string;
-			isEnterprise: boolean;
-			canPay?: boolean;
-			avatarUrl: string;
-			roleInOrg?: string;
-		}>;
-	};
+	userInfo: UserInfo;
 	/**
 	 * State passed to the OAuth provider in the original request to the OAuth provider.
 	 */
@@ -147,50 +150,12 @@ export async function oauthHandleRedirect(opts?: { hubUrl?: string }): Promise<O
 		throw await createApiError(userInfoRes);
 	}
 
-	const userInfo: {
-		sub: string;
-		name: string;
-		preferred_username: string;
-		email_verified?: boolean;
-		email?: string;
-		picture: string;
-		website?: string;
-		isPro: boolean;
-		canPay?: boolean;
-		orgs?: Array<{
-			sub: string;
-			name: string;
-			picture: string;
-			preferred_username: string;
-			isEnterprise: boolean;
-			canPay?: boolean;
-			roleInOrg?: string;
-		}>;
-	} = await userInfoRes.json();
+	const userInfo: UserInfo = await userInfoRes.json();
 
 	return {
 		accessToken: token.access_token,
 		accessTokenExpiresAt,
-		userInfo: {
-			id: userInfo.sub,
-			name: userInfo.preferred_username,
-			fullname: userInfo.name,
-			email: userInfo.email,
-			emailVerified: userInfo.email_verified,
-			avatarUrl: userInfo.picture,
-			websiteUrl: userInfo.website,
-			isPro: userInfo.isPro,
-			orgs:
-				userInfo.orgs?.map((org) => ({
-					id: org.sub,
-					name: org.preferred_username,
-					fullname: org.name,
-					isEnterprise: org.isEnterprise,
-					canPay: org.canPay,
-					avatarUrl: org.picture,
-					roleInOrg: org.roleInOrg,
-				})) ?? [],
-		},
+		userInfo: userInfo,
 		state: parsedState.state,
 		scope: token.scope,
 	};
