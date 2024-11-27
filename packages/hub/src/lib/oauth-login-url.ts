@@ -40,7 +40,7 @@ export async function oauthLoginUrl(opts?: {
 	clientId?: string;
 	hubUrl?: string;
 	/**
-	 * OAuth scope, a list of space separate scopes.
+	 * OAuth scope, a list of space-separated scopes.
 	 *
 	 * For static Spaces, you can omit this and it will be loaded from the Space config, as long as `hf_oauth: true` is present in the README.md's metadata.
 	 * For other Spaces, it is available to the backend in the OAUTH_SCOPES environment variable, as long as `hf_oauth: true` is present in the README.md's metadata.

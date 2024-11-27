@@ -13,6 +13,7 @@ describe("oauthHandleRedirect", () => {
 			clientId: "dummy-app",
 			redirectUrl: "http://localhost:3000",
 			localStorage,
+			scopes: "openid profile email",
 			hubUrl: TEST_HUB_URL,
 		});
 		const resp = await fetch(url, {
@@ -39,17 +40,21 @@ describe("oauthHandleRedirect", () => {
 		if (!result) {
 			throw new Error("Expected result to be defined");
 		}
-		expect(result.accessToken).toBeInstanceOf(String);
+		expect(result.accessToken).toEqual(expect.any(String));
 		expect(result.accessTokenExpiresAt).toBeInstanceOf(Date);
-		expect(result.accessTokenExpiresAt).toBeGreaterThan(Date.now());
-		expect(result.scope).toBeInstanceOf(String);
+		expect(result.accessTokenExpiresAt.getTime()).toBeGreaterThan(Date.now());
+		expect(result.scope).toEqual(expect.any(String));
 		expect(result.userInfo).toEqual({
 			sub: "62f264b9f3c90f4b6514a269",
 			name: "@huggingface/hub CI bot",
 			preferred_username: "hub.js",
 			email_verified: true,
-			email: "elitt@huggingface.co",
-			picture: "https://huggingface.co/hub.js",
+			email: "eliott@huggingface.co",
+			isPro: false,
+			picture: expect.stringContaining("/avatars/934b830e9fdaa879487852f79eef7165.svg"),
+			profile: "https://hub-ci.huggingface.co/hub.js",
+			website: "https://github.com/huggingface/hub.js",
+			orgs: [],
 		});
 	});
 });

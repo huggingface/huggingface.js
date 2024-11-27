@@ -27,6 +27,10 @@ export interface UserInfo {
 	 */
 	picture: string;
 	/**
+	 * OpenID Connect field. The user's profile URL.
+	 */
+	profile: string;
+	/**
 	 * OpenID Connect field. The user's website URL.
 	 */
 	website?: string;
