@@ -156,6 +156,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/comfyanonymous/ComfyUI",
 		filter: false,
 		countDownloads: `path_extension:"safetensors"`,
+  },
+	"cxr-foundation": {
+		prettyLabel: "CXR Foundation",
+		repoName: "cxr-foundation",
+		repoUrl: "https://github.com/google-health/cxr-foundation",
+		filter: false,
+		countDownloads: `path:"precomputed_embeddings/embeddings.npz" OR path:"pax-elixr-b-text/saved_model.pb"`,
 	},
 	deepforest: {
 		prettyLabel: "DeepForest",
@@ -179,6 +186,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pt"`,
 		snippets: snippets.depth_pro,
 		filter: false,
+	},
+	"derm-foundation": {
+		prettyLabel: "Derm Foundation",
+		repoName: "derm-foundation",
+		repoUrl: "https://github.com/google-health/derm-foundation",
+		filter: false,
+		countDownloads: `path:"scin_dataset_precomputed_embeddings.npz" OR path:"saved_model.pb"`,
 	},
 	diffree: {
 		prettyLabel: "Diffree",
