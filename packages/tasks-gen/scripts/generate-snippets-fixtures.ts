@@ -31,6 +31,16 @@ const TEST_CASES: {
 	opts?: Record<string, unknown>;
 }[] = [
 	{
+		testName: "automatic-speech-recognition",
+		model: {
+			id: "openai/whisper-large-v3-turbo",
+			pipeline_tag: "automatic-speech-recognition",
+			tags: [],
+			inference: "",
+		},
+		languages: ["py"],
+	},
+	{
 		testName: "conversational-llm-non-stream",
 		model: {
 			id: "meta-llama/Llama-3.1-8B-Instruct",
@@ -73,6 +83,26 @@ const TEST_CASES: {
 		},
 		languages: ["sh", "js", "py"],
 		opts: { streaming: true },
+	},
+	{
+		testName: "document-question-answering",
+		model: {
+			id: "impira/layoutlm-invoices",
+			pipeline_tag: "document-question-answering",
+			tags: [],
+			inference: "",
+		},
+		languages: ["py"],
+	},
+	{
+		testName: "image-to-image",
+		model: {
+			id: "stabilityai/stable-diffusion-xl-refiner-1.0",
+			pipeline_tag: "image-to-image",
+			tags: [],
+			inference: "",
+		},
+		languages: ["py"],
 	},
 	{
 		testName: "text-to-image",
