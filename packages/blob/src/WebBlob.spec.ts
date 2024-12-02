@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeAll } from "vitest";
-import { WebBlob } from "./WebBlob";
+import { WebBlob } from "./WebBlob.js";
 
 describe("WebBlob", () => {
 	const resourceUrl = new URL("https://huggingface.co/spaces/aschen/push-model-from-web/raw/main/mobilenet/model.json");

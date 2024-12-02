@@ -1,5 +1,12 @@
-import { WebBlob } from "./WebBlob";
-import { isFrontend } from "./isFrontend";
+import { WebBlob } from "./WebBlob.js";
+
+const isBrowser = typeof window !== "undefined" && typeof window.document !== "undefined";
+
+const isWebWorker =
+	typeof self === "object" && self.constructor && self.constructor.name === "DedicatedWorkerGlobalScope";
+
+const isBackend = !isBrowser && !isWebWorker;
+const isFrontend = !isBackend;
 
 /**
  * This function allow to retrieve either a FileBlob or a WebBlob from a URL.
@@ -21,7 +28,7 @@ export async function createBlob(url: URL, opts?: { fetch?: typeof fetch }): Pro
 	}
 
 	if (url.protocol === "file:") {
-		const { FileBlob } = await import("./FileBlob");
+		const { FileBlob } = await import("./FileBlob.js");
 
 		return FileBlob.create(url);
 	}

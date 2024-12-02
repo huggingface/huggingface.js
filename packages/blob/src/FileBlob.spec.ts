@@ -1,7 +1,7 @@
 import { open, stat } from "node:fs/promises";
 import { TextDecoder } from "node:util";
 import { describe, expect, it } from "vitest";
-import { FileBlob } from "./FileBlob";
+import { FileBlob } from "./FileBlob.js";
 
 describe("FileBlob", () => {
 	it("should create a FileBlob with a slice on the entire file", async () => {

@@ -1,4 +1,4 @@
-name: Hub - Version and Release
+name: Blob - Version and Release
 
 on:
   workflow_dispatch:
@@ -17,7 +17,7 @@ concurrency:
 
 defaults:
   run:
-    working-directory: packages/hub
+    working-directory: packages/blob
 
 jobs:
   version_and_release:
@@ -36,8 +36,7 @@ jobs:
           node-version: "20"
           cache: "pnpm"
           cache-dependency-path: |
-            packages/hub/pnpm-lock.yaml
-            packages/doc-internal/pnpm-lock.yaml
+            packages/blob/pnpm-lock.yaml
           # setting a registry enables the NODE_AUTH_TOKEN env variable where we can set an npm token.  REQUIRED
           registry-url: "https://registry.npmjs.org"
       - run: pnpm install
@@ -48,13 +47,8 @@ jobs:
           BUMPED_VERSION=$(node -p "require('semver').inc('$PACKAGE_VERSION', '${{ github.event.inputs.newversion }}')")
           # Update package.json with the new version
           node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./package.json')); package.version = '$BUMPED_VERSION'; fs.writeFileSync('./package.json', JSON.stringify(package, null, '\t') + '\n');"
-          pnpm --filter doc-internal run fix-cdn-versions
-          git add ../..
-          git commit -m "🔖 @huggingface/hub $BUMPED_VERSION"
-          git tag "hub-v$BUMPED_VERSION"
-
-      - name: "Check Deps are published before publishing this package"
-        run: pnpm -w check-deps tasks && pnpm -w check-deps blob
+          git commit . -m "🔖 @huggingface/blob $BUMPED_VERSION"
+          git tag "blob-v$BUMPED_VERSION"
 
       - run: pnpm publish --no-git-checks .
         env:

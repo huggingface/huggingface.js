@@ -18,7 +18,6 @@
 		}
 	},
 	"browser": {
-		"./src/utils/FileBlob.ts": false,
 		"./dist/index.js": "./dist/browser/index.js",
 		"./dist/index.mjs": "./dist/browser/index.mjs"
 	},
@@ -50,6 +49,7 @@
 	"author": "Hugging Face",
 	"license": "MIT",
 	"dependencies": {
+		"@huggingface/blob": "workspace:^",
 		"@huggingface/tasks": "workspace:^"
 	},
 	"devDependencies": {

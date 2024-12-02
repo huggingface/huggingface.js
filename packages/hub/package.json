@@ -19,7 +19,6 @@
 	},
 	"browser": {
 		"./src/utils/sha256-node.ts": false,
-		"./src/utils/FileBlob.ts": false,
 		"./src/lib/cache-management.ts": false,
 		"./src/lib/download-file-to-cache-dir.ts": false,
 		"./src/lib/snapshot-download.ts": false,
@@ -62,6 +61,7 @@
 		"@types/node": "^20.11.28"
 	},
 	"dependencies": {
+		"@huggingface/blob": "workspace:^",
 		"@huggingface/tasks": "workspace:^"
 	}
 }

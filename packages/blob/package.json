@@ -1,0 +1,59 @@
+{
+	"name": "@huggingface/blob",
+	"packageManager": "pnpm@8.10.5",
+	"version": "0.0.1",
+	"description": "Utilities to convert URLs and files to Blobs, internally used by Hugging Face libs",
+	"repository": "https://github.com/huggingface/huggingface.js.git",
+	"publishConfig": {
+		"access": "public"
+	},
+	"main": "./dist/index.js",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"require": "./dist/index.js",
+			"import": "./dist/index.mjs"
+		},
+		"./WebBlob": {
+			"types": "./dist/utils/WebBlob.d.ts",
+			"require": "./dist/utils/WebBlob.js",
+			"import": "./dist/utils/WebBlob.mjs"
+		},
+		"./FileBlob": {
+			"types": "./dist/utils/FileBlob.d.ts",
+			"require": "./dist/utils/FileBlob.js",
+			"import": "./dist/utils/FileBlob.mjs"
+		}
+	},
+	"source": "./src/index.ts",
+	"scripts": {
+		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
+		"lint:check": "eslint --ext .cjs,.ts .",
+		"format": "prettier --write .",
+		"format:check": "prettier --check .",
+		"prepublishOnly": "pnpm run build",
+		"build": "tsup && tsc --emitDeclarationOnly --declaration",
+		"prepare": "pnpm run build",
+		"check": "tsc",
+		"test": "vitest run"
+	},
+	"type": "module",
+	"files": [
+		"dist",
+		"src",
+		"tsconfig.json"
+	],
+	"keywords": [
+		"huggingface",
+		"blob"
+	],
+	"author": "Hugging Face",
+	"license": "MIT",
+	"browser": {
+		"./src/utils/FileBlob.ts": false,
+		"./dist/index.js": "./dist/browser/index.js",
+		"./dist/index.mjs": "./dist/browser/index.mjs"
+	}
+}
