@@ -1,5 +1,5 @@
 {
-	"name": "@huggingface/blob",
+	"name": "@huggingface/dduf",
 	"packageManager": "pnpm@8.10.5",
 	"version": "0.0.1",
 	"description": "Utilities to convert URLs and files to Blobs, internally used by Hugging Face libs",
@@ -12,18 +12,11 @@
 	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
+			"types": "./dist/index.d.ts",
 			"require": "./dist/index.js",
 			"import": "./dist/index.mjs"
 		},
-		"./package.json": "./package.json",
-		"./WebBlob": {
-			"require": "./dist/src/utils/WebBlob.js",
-			"import": "./dist/src/utils/WebBlob.mjs"
-		},
-		"./FileBlob": {
-			"require": "./dist/src/utils/FileBlob.js",
-			"import": "./dist/src/utils/FileBlob.mjs"
-		}
+		"./package.json": "./package.json"
 	},
 	"browser": {
 		"./src/utils/FileBlob.ts": false,
@@ -37,7 +30,7 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"prepublishOnly": "pnpm run build",
-		"build": "tsup && tsc --emitDeclarationOnly --declaration && cp dist/index.d.ts dist/index.m.d.ts && cp dist/src/utils/FileBlob.d.ts dist/src/utils/FileBlob.m.d.ts && cp dist/src/utils/WebBlob.d.ts dist/src/utils/WebBlob.m.d.ts",
+		"build": "tsup && tsc --emitDeclarationOnly --declaration",
 		"prepare": "pnpm run build",
 		"test": "vitest run",
 		"test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest-browser.config.mts",
@@ -53,12 +46,14 @@
 		"huggingface",
 		"hugging",
 		"face",
-		"blob",
-		"lazy"
+		"dduf"
 	],
 	"author": "Hugging Face",
 	"license": "MIT",
 	"devDependencies": {
 		"@types/node": "^20.11.28"
+	},
+	"dependencies": {
+		"@huggingface/blob": "workspace:^"
 	}
 }

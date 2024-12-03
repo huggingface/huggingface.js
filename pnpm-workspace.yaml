@@ -1,5 +1,6 @@
 packages:
   - "packages/blob"
+  - "packages/dduf"
   - "packages/hub"
   - "packages/inference"
   - "packages/doc-internal"

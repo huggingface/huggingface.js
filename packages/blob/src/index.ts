@@ -1,1 +1,1 @@
-export * from "./utils/createBlob";
+export { createBlob } from "./utils/createBlob";
