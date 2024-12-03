@@ -7,7 +7,7 @@ settings:
 dependencies:
   '@huggingface/blob':
     specifier: workspace:^
-    version: 'link:'
+    version: link:../blob
 
 devDependencies:
   '@types/node':

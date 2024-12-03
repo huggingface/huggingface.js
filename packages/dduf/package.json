@@ -19,7 +19,6 @@
 		"./package.json": "./package.json"
 	},
 	"browser": {
-		"./src/utils/FileBlob.ts": false,
 		"./dist/index.js": "./dist/browser/index.js",
 		"./dist/index.mjs": "./dist/browser/index.mjs"
 	},
