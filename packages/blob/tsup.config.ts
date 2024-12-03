@@ -9,11 +9,13 @@ const baseConfig: Options = {
 
 const nodeConfig: Options = {
 	...baseConfig,
+	entry: ["./index.ts", "./src/utils/WebBlob.ts", "./src/utils/FileBlob.ts"],
 	platform: "node",
 };
 
 const browserConfig: Options = {
 	...baseConfig,
+	entry: ["./index.ts", "./src/utils/WebBlob.ts"],
 	platform: "browser",
 	target: "es2018",
 	splitting: true,

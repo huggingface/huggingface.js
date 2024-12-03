@@ -18,9 +18,13 @@ yarn add @huggingface/blob
 
 ```ts
 // esm.sh
-import { FileBlob, WebBlob } from "https://esm.sh/@huggingface/blob";
+import { FileBlob } from "https://esm.sh/@huggingface/blob/FileBlob";
+import { WebBlob } from "https://esm.sh/@huggingface/blob/WebBlob";
+import { createBlob } from "https://esm.sh/@huggingface/blob";
 // or npm:
-import { FileBlob, WebBlob } from "npm:@huggingface/blob";
+import { FileBlob } from "npm:@huggingface/blob/FileBlob";
+import { WebBlob } from "npm:@huggingface/blob/WebBlob";
+import { createBlob } from "npm:@huggingface/blob";
 ```
 
 ## Usage
