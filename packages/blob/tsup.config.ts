@@ -1,7 +1,7 @@
 import type { Options } from "tsup";
 
 const baseConfig = {
-	entry: ["./src/index.ts", "./src/WebBlob.ts"],
+	entry: ["./index.ts", "./src/WebBlob.ts"],
 	format: ["cjs", "esm"],
 	outDir: "dist",
 	clean: true,

@@ -35,11 +35,9 @@
 		"format:check": "prettier --check .",
 		"prepublishOnly": "pnpm run build",
 		"build": "tsup && tsc --emitDeclarationOnly --declaration",
-		"prepare": "pnpm run build",
 		"check": "tsc",
 		"test": "vitest run"
 	},
-	"type": "module",
 	"files": [
 		"dist",
 		"src",
@@ -52,7 +50,7 @@
 	"author": "Hugging Face",
 	"license": "MIT",
 	"browser": {
-		"./src/utils/FileBlob.ts": false,
+		"./src/FileBlob.ts": false,
 		"./dist/index.js": "./dist/browser/index.js",
 		"./dist/index.mjs": "./dist/browser/index.mjs",
 		"./dist/WebBlob.js": "./dist/browser/WebBlob.js",
