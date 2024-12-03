@@ -1,7 +1,7 @@
 {
 	"name": "@huggingface/dduf",
 	"packageManager": "pnpm@8.10.5",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"description": "Very alpha lib to check DDUF compliance",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {
