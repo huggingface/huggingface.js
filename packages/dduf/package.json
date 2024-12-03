@@ -32,7 +32,7 @@
 		"build": "tsup && tsc --emitDeclarationOnly --declaration",
 		"prepare": "pnpm run build",
 		"test": "vitest run",
-		"test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest-browser.config.mts",
+		"test:browser": "vitest run --browser.name=chrome --browser.headless",
 		"check": "tsc"
 	},
 	"files": [
