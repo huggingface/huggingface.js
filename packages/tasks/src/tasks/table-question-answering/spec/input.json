@@ -46,12 +46,12 @@
 				"sequential": {
 					"type": "boolean",
 					"default": "false",
-					"description": "Whether to do inference sequentially or as a batch. Batching is faster, but models like SQA require the inference to be done sequentially to extract relations within sequences, given their conversational nature.",
+					"description": "Whether to do inference sequentially or as a batch. Batching is faster, but models like SQA require the inference to be done sequentially to extract relations within sequences, given their conversational nature."
 				},
 				"truncation": {
 					"type": "boolean",
 					"default": "false",
-					"description": "Activates and controls truncation.",
+					"description": "Activates and controls truncation."
 				}
 			}
 		}
