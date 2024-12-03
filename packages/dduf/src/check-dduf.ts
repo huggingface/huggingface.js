@@ -1,6 +1,12 @@
 import { checkFilename } from "./check-filename";
 import { createBlob } from "@huggingface/blob";
 
+export interface DDUFFileEntry {
+	type: "file"; 
+	name: string; size: number; 
+	fileHeaderOffset: number;
+}
+
 export async function* checkDDUF(
 	url: Blob | URL,
 	opts?: { log?: (x: string) => void }
