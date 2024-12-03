@@ -11,7 +11,7 @@ export interface DDUFFileEntry {
 export async function* checkDDUF(
 	url: Blob | URL,
 	opts?: { log?: (x: string) => void }
-): AsyncGenerator<{ type: "file"; name: string; size: number; fileHeaderOffset: number }> {
+): AsyncGenerator<DDUFFileEntry> {
 	const blob = url instanceof Blob ? url : await createBlob(url);
 
 	opts?.log?.("File size: " + blob.size);
