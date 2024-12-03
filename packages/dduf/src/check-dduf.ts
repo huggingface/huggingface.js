@@ -2,8 +2,9 @@ import { checkFilename } from "./check-filename";
 import { createBlob } from "@huggingface/blob";
 
 export interface DDUFFileEntry {
-	type: "file"; 
-	name: string; size: number; 
+	type: "file";
+	name: string;
+	size: number;
 	fileHeaderOffset: number;
 }
 
@@ -17,7 +18,7 @@ export async function* checkDDUF(
 
 	// DDUF is a zip file, uncompressed.
 
-	const last100kB = await blob.slice(blob.size - 100000, blob.size).arrayBuffer();
+	const last100kB = await blob.slice(blob.size - 100_000, blob.size).arrayBuffer();
 
 	const view = new DataView(last100kB);
 
@@ -58,6 +59,7 @@ export async function* checkDDUF(
 		opts?.log?.("Zip64 format detected");
 
 		index -= 20;
+		found = false;
 		while (index >= 0) {
 			if (view.getUint32(index, true) === 0x07064b50) {
 				found = true;
