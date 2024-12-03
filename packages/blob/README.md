@@ -1,8 +1,8 @@
 # 🤗 Hugging Face Blobs
 
-Utilities to convert a string or URL to a [Blob](https://developer.mozilla.org/en-US/docs/Web/API/Blob) object, whether it represents a local file or remote URL.
+Utilities to convert a string or URL to a [Blob](https://developer.mozilla.org/en-US/docs/Web/API/Blob) object, whether it represents a local file or a remote URL.
 
-`fetch` already returns a `Blob` object for remote URLs, but it loads the entire file in memory. This utility makes ad-hoc http range requests when calling `.slice()` on the blob, for example.
+`fetch` already returns a `Blob` object for remote URLs, but it loads the entire file in memory. This utility makes ad-hoc http range requests when calling `.slice()` on the blob.
 
 ## Install
 

@@ -1,8 +1,6 @@
 # 🤗 Hugging Face DDUF
 
-Utilities to convert a string or URL to a [Blob](https://developer.mozilla.org/en-US/docs/Web/API/Blob) object, whether it represents a local file or remote URL.
-
-`fetch` returns a `Blob` object for remote URLs, but it loads the entire file in memory. This utility makes an ad-hoc http range requests when calling `.slice()` on the blob, for example.
+Very alpha version of a DDUF checker / parser.
 
 ## Install
 
@@ -28,7 +26,6 @@ import { checkDDUF } from "npm:@huggingface/dduf";
 
 ```ts
 import { checkDDUF } from "@huggingface/dduf";
-
 
 for await (const entry of checkDDUF(URL | Blob, { log: console.log })) {
   console.log("file", entry);
