@@ -1,4 +1,5 @@
 packages:
+  - "packages/blob"
   - "packages/hub"
   - "packages/inference"
   - "packages/doc-internal"
