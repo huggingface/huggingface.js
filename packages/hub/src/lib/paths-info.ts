@@ -5,32 +5,32 @@ import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
 
 export interface LfsPathInfo {
-	"oid": string,
-	"size": number,
-	"pointerSize": number
+	oid: string;
+	size: number;
+	pointerSize: number;
 }
 
-export  interface CommitInfo {
-	"id": string,
-	"title": string,
-	"date": Date,
+export interface CommitInfo {
+	id: string;
+	title: string;
+	date: Date;
 }
 
 export interface SecurityFileStatus {
-	"status": string,
+	status: string;
 }
 
 export interface PathInfo {
-	path: string,
-	type: string,
-	oid: string,
-	size: number,
+	path: string;
+	type: string;
+	oid: string;
+	size: number;
 	/**
 	 * Only defined when path is LFS pointer
 	 */
-	lfs?: LfsPathInfo,
-	lastCommit?: CommitInfo,
-	securityFileStatus?: SecurityFileStatus
+	lfs?: LfsPathInfo;
+	lastCommit?: CommitInfo;
+	securityFileStatus?: SecurityFileStatus;
 }
 
 // Define the overloaded signatures
@@ -45,8 +45,8 @@ export function pathsInfo(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	}  & Partial<CredentialsParams>
-): Promise<(PathInfo & {lastCommit: CommitInfo, securityFileStatus: SecurityFileStatus })[]>;
+	} & Partial<CredentialsParams>
+): Promise<(PathInfo & { lastCommit: CommitInfo; securityFileStatus: SecurityFileStatus })[]>;
 export function pathsInfo(
 	params: {
 		repo: RepoDesignation;
@@ -58,8 +58,8 @@ export function pathsInfo(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	}  & Partial<CredentialsParams>
-): Promise<(PathInfo)[]>;
+	} & Partial<CredentialsParams>
+): Promise<PathInfo[]>;
 
 export async function pathsInfo(
 	params: {
@@ -72,14 +72,16 @@ export async function pathsInfo(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	}  & Partial<CredentialsParams>
+	} & Partial<CredentialsParams>
 ): Promise<PathInfo[]> {
 	const accessToken = checkCredentials(params);
 	const repoId = toRepoId(params.repo);
 
 	const hubUrl = params.hubUrl ?? HUB_URL;
 
-	const url = `${hubUrl}/api/${repoId.type}s/${repoId.name}/paths-info/${encodeURIComponent(params.revision ?? "main")}`;
+	const url = `${hubUrl}/api/${repoId.type}s/${repoId.name}/paths-info/${encodeURIComponent(
+		params.revision ?? "main"
+	)}`;
 
 	const resp = await (params.fetch ?? fetch)(url, {
 		method: "POST",
@@ -87,8 +89,8 @@ export async function pathsInfo(
 			...(params.credentials && {
 				Authorization: `Bearer ${accessToken}`,
 			}),
-			'Accept': 'application/json',
-			'Content-Type': 'application/json'
+			Accept: "application/json",
+			"Content-Type": "application/json",
 		},
 		body: JSON.stringify({
 			paths: params.paths,
@@ -101,7 +103,7 @@ export async function pathsInfo(
 	}
 
 	const json: unknown = await resp.json();
-	if(!Array.isArray(json)) throw new Error('malformed response: expected array');
+	if (!Array.isArray(json)) throw new Error("malformed response: expected array");
 
 	return json.map((item: PathInfo) => ({
 		path: item.path,
@@ -111,10 +113,12 @@ export async function pathsInfo(
 		size: item.size,
 		// expand fields
 		securityFileStatus: item.securityFileStatus,
-		lastCommit: item.lastCommit ? {
-			date: new Date(item.lastCommit.date),
-			title: item.lastCommit.title,
-			id: item.lastCommit.id,
-		}: undefined,
+		lastCommit: item.lastCommit
+			? {
+					date: new Date(item.lastCommit.date),
+					title: item.lastCommit.title,
+					id: item.lastCommit.id,
+			  }
+			: undefined,
 	}));
 }

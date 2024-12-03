@@ -50,7 +50,6 @@ jobs:
           git commit . -m "🔖 @huggingface/dduf $BUMPED_VERSION"
           git tag "dduf-v$BUMPED_VERSION"
 
-      
       - name: "Check Deps are published before publishing this package"
         run: pnpm -w check-deps blob
 
