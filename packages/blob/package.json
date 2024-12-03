@@ -7,24 +7,40 @@
 	"publishConfig": {
 		"access": "public"
 	},
-	"main": "./dist/index.js",
-	"module": "./dist/index.mjs",
-	"types": "./dist/index.d.ts",
+	"main": "./dist/commonjs/index.js",
+	"module": "./dist/esm/index.js",
+	"types": "./dist/commonjs/index.d.ts",
 	"exports": {
+		"./package.json": "./package.json",
 		".": {
-			"types": "./dist/index.d.ts",
-			"require": "./dist/index.js",
-			"import": "./dist/index.mjs"
+			"import": {
+				"types": "./dist/esm/index.d.ts",
+				"default": "./dist/esm/index.js"
+			},
+			"require": {
+				"types": "./dist/commonjs/index.d.ts",
+				"default": "./dist/commonjs/index.js"
+			}
 		},
-		"./WebBlob": {
-			"types": "./dist/WebBlob.d.ts",
-			"require": "./dist/WebBlob.js",
-			"import": "./dist/WebBlob.mjs"
+		"./WebBlob.ts": {
+			"import": {
+				"types": "./dist/esm/WebBlob.d.ts",
+				"default": "./dist/esm/WebBlob.js"
+			},
+			"require": {
+				"types": "./dist/commonjs/WebBlob.d.ts",
+				"default": "./dist/commonjs/WebBlob.js"
+			}
 		},
-		"./FileBlob": {
-			"types": "./dist/FileBlob.d.ts",
-			"require": "./dist/FileBlob.js",
-			"import": "./dist/FileBlob.mjs"
+		"./FileBlob.ts": {
+			"import": {
+				"types": "./dist/esm/FileBlob.d.ts",
+				"default": "./dist/esm/FileBlob.js"
+			},
+			"require": {
+				"types": "./dist/commonjs/FileBlob.d.ts",
+				"default": "./dist/commonjs/FileBlob.js"
+			}
 		}
 	},
 	"source": "./src/index.ts",
@@ -34,7 +50,7 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"prepublishOnly": "pnpm run build",
-		"build": "tsup && tsc --emitDeclarationOnly --declaration",
+		"build": "tshy",
 		"prepare": "pnpm run build",
 		"check": "tsc",
 		"test": "vitest run"
@@ -52,10 +68,16 @@
 	"author": "Hugging Face",
 	"license": "MIT",
 	"browser": {
-		"./src/utils/FileBlob.ts": false,
-		"./dist/index.js": "./dist/browser/index.js",
-		"./dist/index.mjs": "./dist/browser/index.mjs",
-		"./dist/WebBlob.js": "./dist/browser/WebBlob.js",
-		"./dist/WebBlob.mjs": "./dist/browser/WebBlob.mjs"
+		"./src/FileBlob.ts": false,
+		"./dist/esm/FileBlob.js": false,
+		"./dist/commonjs/FileBlob.js": false
+	},
+	"tshy": {
+		"exports": {
+			"./package.json": "./package.json",
+			".": "./src/index.ts",
+			"./WebBlob.ts": "./src/WebBlob.ts",
+			"./FileBlob.ts": "./src/FileBlob.ts"
+		}
 	}
 }
