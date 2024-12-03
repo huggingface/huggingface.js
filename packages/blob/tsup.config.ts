@@ -1,7 +1,7 @@
 import type { Options } from "tsup";
 
 const baseConfig = {
-	entry: ["./index.ts", "./src/WebBlob.ts"],
+	entry: ["./index.ts" /*, "./src/WebBlob.ts"*/],
 	format: ["cjs", "esm"],
 	outDir: "dist",
 	clean: true,
@@ -9,14 +9,14 @@ const baseConfig = {
 
 const nodeConfig: Options = {
 	...baseConfig,
-	entry: [...baseConfig.entry, "./src/FileBlob.ts"],
+	// entry: [...baseConfig.entry, "./src/FileBlob.ts"],
 	platform: "node",
 };
 
 const browserConfig: Options = {
 	...baseConfig,
 	platform: "browser",
-	target: "es2018",
+	target: "es2022",
 	splitting: true,
 	outDir: "dist/browser",
 };

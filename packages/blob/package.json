@@ -27,14 +27,14 @@
 			"import": "./dist/FileBlob.mjs"
 		}
 	},
-	"source": "./src/index.ts",
+	"source": "./index.ts",
 	"scripts": {
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"prepublishOnly": "pnpm run build",
-		"build": "tsup && tsc --emitDeclarationOnly --declaration",
+		"build": "tsup",
 		"check": "tsc",
 		"test": "vitest run"
 	},
