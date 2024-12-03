@@ -1,8 +1,8 @@
 {
 	"name": "@huggingface/blob",
 	"packageManager": "pnpm@8.10.5",
-	"version": "0.21.0",
-	"description": "Utilities to interact with the Hugging Face hub",
+	"version": "0.0.1",
+	"description": "Utilities to convert URLs and files to Blobs, internally used by Hugging Face libs",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {
 		"access": "public"
@@ -18,11 +18,7 @@
 		}
 	},
 	"browser": {
-		"./src/utils/sha256-node.ts": false,
 		"./src/utils/FileBlob.ts": false,
-		"./src/lib/cache-management.ts": false,
-		"./src/lib/download-file-to-cache-dir.ts": false,
-		"./src/lib/snapshot-download.ts": false,
 		"./dist/index.js": "./dist/browser/index.js",
 		"./dist/index.mjs": "./dist/browser/index.mjs"
 	},
@@ -50,11 +46,10 @@
 	],
 	"keywords": [
 		"huggingface",
-		"hub",
-		"api",
-		"client",
 		"hugging",
-		"face"
+		"face",
+		"blob",
+		"lazy"
 	],
 	"author": "Hugging Face",
 	"license": "MIT",

@@ -1,176 +1,86 @@
-# 🤗 Hugging Face Hub API
+# 🤗 Hugging Face Blobs
 
-Official utilities to use the Hugging Face Hub API.
+Utilities to convert a string or URL to a [Blob](https://developer.mozilla.org/en-US/docs/Web/API/Blob) object, whether it represents a local file or remote URL.
+
+`fetch` already returns a `Blob` object for remote URLs, but it loads the entire file in memory. This utility makes ad-hoc http range requests when calling `.slice()` on the blob, for example.
 
 ## Install
 
 ```console
-pnpm add @huggingface/hub
+pnpm add @huggingface/blob
 
-npm add @huggingface/hub
+npm add @huggingface/blob
 
-yarn add @huggingface/hub
+yarn add @huggingface/blob
 ```
 
 ### Deno
 
 ```ts
 // esm.sh
-import { uploadFiles, listModels } from "https://esm.sh/@huggingface/hub"
+import { FileBlob, WebBlob } from "https://esm.sh/@huggingface/blob";
 // or npm:
-import { uploadFiles, listModels } from "npm:@huggingface/hub"
+import { FileBlob, WebBlob } from "npm:@huggingface/blob";
 ```
-
-Check out the [full documentation](https://huggingface.co/docs/huggingface.js/hub/README).
 
 ## Usage
 
-For some of the calls, you need to create an account and generate an [access token](https://huggingface.co/settings/tokens).
-
-Learn how to find free models using the hub package in this [interactive tutorial](https://scrimba.com/scrim/c7BbVPcd?pl=pkVnrP7uP).
 
 ```ts
-import * as hub from "@huggingface/hub";
-import type { RepoDesignation } from "@huggingface/hub";
+import { FileBlob } from "@huggingface/blob/FileBlob";
+import { WebBlob } from "@huggingface/blob/WebBlob";
+import { createBlob } from "@huggingface/blob";
 
-const repo: RepoDesignation = { type: "model", name: "myname/some-model" };
+const fileBlob = await FileBlob.create("path/to/file");
+const webBlob = await WebBlob.create("https://url/to/file");
 
-const {name: username} = await hub.whoAmI({accessToken: "hf_..."});
+const blob = await createBlob("..."); // Automatically detects if it's a file or web URL
+```
 
-for await (const model of hub.listModels({search: {owner: username}, accessToken: "hf_..."})) {
-  console.log("My model:", model);
-}
+## API
 
-const specificModel = await hub.modelInfo({name: "openai-community/gpt2"});
-await hub.checkRepoAccess({repo, accessToken: "hf_..."});
+### createBlob
 
-await hub.createRepo({ repo, accessToken: "hf_...", license: "mit" });
+Creates a Blob object from a string or URL. Automatically detects if it's a file or web URL.
 
-await hub.uploadFiles({
-  repo,
-  accessToken: "hf_...",
-  files: [
-    // path + blob content
-    {
-      path: "file.txt",
-      content: new Blob(["Hello World"]),
-    },
-    // Local file URL
-    pathToFileURL("./pytorch-model.bin"),
-    // Web URL
-    new URL("https://huggingface.co/xlm-roberta-base/resolve/main/tokenizer.json"),
-    // Path + Web URL
-    {
-      path: "myfile.bin",
-      content: new URL("https://huggingface.co/bert-base-uncased/resolve/main/pytorch_model.bin")
-    }
-    // Can also work with native File in browsers
-  ],
+```ts
+await createBlob("...", {
+  /**
+   * Custom fetch function to use, in case it resolves to a Web Blob.
+   * 
+   * Useful for adding headers, etc.
+   */
+  fetch: ...,
 });
 
-// or
-
-for await (const progressEvent of await hub.uploadFilesWithProgress({
-  repo,
-  accessToken: "hf_...",
-  files: [
-    ...
-  ],
-})) {
-  console.log(progressEvent);
-}
-
-await hub.deleteFile({repo, accessToken: "hf_...", path: "myfile.bin"});
-
-await (await hub.downloadFile({ repo, path: "README.md" })).text();
-
-for await (const fileInfo of hub.listFiles({repo})) {
-  console.log(fileInfo);
-}
-
-await hub.deleteRepo({ repo, accessToken: "hf_..." });
-```
-
-## OAuth Login
-
-It's possible to login using OAuth (["Sign in with HF"](https://huggingface.co/docs/hub/oauth)).
-
-This will allow you get an access token to use some of the API, depending on the scopes set inside the Space or the OAuth App.
+### FileBlob
 
 ```ts
-import { oauthLoginUrl, oauthHandleRedirectIfPresent } from "@huggingface/hub";
-
-const oauthResult = await oauthHandleRedirectIfPresent();
-
-if (!oauthResult) {
-  // If the user is not logged in, redirect to the login page
-  window.location.href = await oauthLoginUrl();
-}
-
-// You can use oauthResult.accessToken, oauthResult.accessTokenExpiresAt and oauthResult.userInfo
-console.log(oauthResult);
+await FileBlob.create("path/to/file");
+await FileBlob.create(new URL("file:///path/to/file"));
 ```
 
-Checkout the demo: https://huggingface.co/spaces/huggingfacejs/client-side-oauth
+### WebBlob
 
-## Hugging face cache
+Creates a Blob object from a URL. If the file is less than 1MB (as indicated by the Content-Length header), by default it will be cached in memory in entirety upon blob creation.
 
-The `@huggingface/hub` package provide basic capabilities to scan the cache directory. Learn more about [Manage huggingface_hub cache-system](https://huggingface.co/docs/huggingface_hub/en/guides/manage-cache).
-
-### `scanCacheDir`
-
-You can get the list of cached repositories using the `scanCacheDir` function.
+This class is useful for large files that do not need to be loaded all at once in memory, as it makes range requests for the data.
 
 ```ts
-import { scanCacheDir } from "@huggingface/hub";
+await WebBlob.create("https://url/to/file");
+await WebBlob.create(new URL("https://url/to/file"));
 
-const result = await scanCacheDir();
-
-console.log(result);
+await WebBlob.create("https://url/to/file", {
+  /**
+   * Custom fetch function to use. Useful for adding headers, etc.
+   */
+  fetch: ...,
+  /**
+   * If the file is less than the specified size, it will be cached in memory in entirety upon blob creation,
+   * instead of doing range requests for the data.
+   * 
+   * @default 1_000_000
+   */
+  cacheBelow: ...
+})
 ```
-Note: this does not work in the browser
-
-### `downloadFileToCacheDir`
-
-You can cache a file of a repository using the `downloadFileToCacheDir` function.
-
-```ts
-import { downloadFileToCacheDir } from "@huggingface/hub";
-
-const file = await downloadFileToCacheDir({
-  repo: 'foo/bar',
-  path: 'README.md'
-});
-
-console.log(file);
-```
-Note: this does not work in the browser
-
-### `snapshotDownload`
-
-You can download an entire repository at a given revision in the cache directory using the `snapshotDownload` function.
-
-```ts
-import { snapshotDownload } from "@huggingface/hub";
-
-const directory = await snapshotDownload({
-  repo: 'foo/bar',
-});
-
-console.log(directory);
-```
-The code use internally the `downloadFileToCacheDir` function.
-
-Note: this does not work in the browser
-
-## Performance considerations
-
-When uploading large files, you may want to run the `commit` calls inside a worker, to offload the sha256 computations.
-
-Remote resources and local files should be passed as `URL` whenever it's possible so they can be lazy loaded in chunks to reduce RAM usage. Passing a `File` inside the browser's context is fine, because it natively behaves as a `Blob`.
-
-Under the hood, `@huggingface/hub` uses a lazy blob implementation to load the file.
-
-## Dependencies
-
-- `@huggingface/tasks` : Typings only
