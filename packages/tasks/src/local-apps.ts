@@ -94,7 +94,6 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 				"cd llama.cpp",
 				"cmake -B build -DLLAMA_CURL=ON",
 				"cmake --build build -j --target llama-cli",
-				"# output binary can be found in ./build/bin",
 			].join("\n"),
 			content: command("./build/bin/llama-cli"),
 		},
