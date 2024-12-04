@@ -787,6 +787,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path_extension:"sentis"`,
 	},
+	"sana": {
+		prettyLabel: "Sana",
+		repoName: "Sana",
+		repoUrl: "https://github.com/NVlabs/Sana",
+		countDownloads: `path_extension:"pth" OR path_extension:"json"`,
+		snippets: snippets.sana,
+	},
 	"vfi-mamba": {
 		prettyLabel: "VFIMamba",
 		repoName: "VFIMamba",
