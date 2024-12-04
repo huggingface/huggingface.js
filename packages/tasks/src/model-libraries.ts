@@ -791,7 +791,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "Sana",
 		repoName: "Sana",
 		repoUrl: "https://github.com/NVlabs/Sana",
-		countDownloads: `path_prefix:"checkpoints/" OR path_extension:"json"`,
+		countDownloads: `path_extension:"pth" OR path_extension:"json"`,
 		snippets: snippets.sana,
 	},
 	"vfi-mamba": {
