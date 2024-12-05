@@ -983,7 +983,7 @@ IWorker engine = WorkerFactory.CreateWorker(BackendType.GPUCompute, model);
 ];
 
 export const sana = (model: ModelData): string[] => [
-		`
+	`
 # Load the model and infer image from text
 import torch
 from app.sana_pipeline import SanaPipeline
