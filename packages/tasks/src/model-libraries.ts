@@ -787,7 +787,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path_extension:"sentis"`,
 	},
-	"sana": {
+	sana: {
 		prettyLabel: "Sana",
 		repoName: "Sana",
 		repoUrl: "https://github.com/NVlabs/Sana",
