@@ -330,7 +330,7 @@ export const LOCAL_APPS = {
 		prettyLabel: "Local Chat",
 		docsUrl: "https://localchat.co",
 		mainTask: "text-generation",
-		displayOnModelPage: (model) => isMlxModel(model),
+		displayOnModelPage: isMlxModel,
 		deeplink: (model) =>
 			new URL(`https://localchat.co/model/${model.id}`),
 	},
