@@ -8,6 +8,8 @@ export default defineConfig({
 			"src/lib/cache-management.spec.ts",
 			"src/lib/download-file-to-cache-dir.spec.ts",
 			"src/lib/snapshot-download.spec.ts",
+			// Because we use redirect: "manual" in the test
+			"src/lib/oauth-handle-redirect.spec.ts",
 		],
 	},
 });
