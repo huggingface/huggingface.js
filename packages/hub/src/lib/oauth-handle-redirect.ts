@@ -100,13 +100,13 @@ export async function oauthHandleRedirect(opts?: { hubUrl?: string }): Promise<O
 		throw await createApiError(openidConfigRes);
 	}
 
-	const opendidConfig: {
+	const openidConfig: {
 		authorization_endpoint: string;
 		token_endpoint: string;
 		userinfo_endpoint: string;
 	} = await openidConfigRes.json();
 
-	const tokenRes = await fetch(opendidConfig.token_endpoint, {
+	const tokenRes = await fetch(openidConfig.token_endpoint, {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/x-www-form-urlencoded",
@@ -137,7 +137,7 @@ export async function oauthHandleRedirect(opts?: { hubUrl?: string }): Promise<O
 
 	const accessTokenExpiresAt = new Date(Date.now() + token.expires_in * 1000);
 
-	const userInfoRes = await fetch(opendidConfig.userinfo_endpoint, {
+	const userInfoRes = await fetch(openidConfig.userinfo_endpoint, {
 		headers: {
 			Authorization: `Bearer ${token.access_token}`,
 		},
