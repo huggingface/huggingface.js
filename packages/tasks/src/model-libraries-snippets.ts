@@ -982,6 +982,26 @@ IWorker engine = WorkerFactory.CreateWorker(BackendType.GPUCompute, model);
 `,
 ];
 
+export const sana = (model: ModelData): string[] => [
+	`
+# Load the model and infer image from text
+import torch
+from app.sana_pipeline import SanaPipeline
+from torchvision.utils import save_image
+
+sana = SanaPipeline("configs/sana_config/1024ms/Sana_1600M_img1024.yaml")
+sana.from_pretrained("hf://${model.id}")
+
+image = sana(
+    prompt='a cyberpunk cat with a neon sign that says "Sana"',
+    height=1024,
+    width=1024,
+    guidance_scale=5.0,
+    pag_guidance_scale=2.0,
+    num_inference_steps=18,
+) `,
+];
+
 export const vfimamba = (model: ModelData): string[] => [
 	`from Trainer_finetune import Model
 
