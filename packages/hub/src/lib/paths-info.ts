@@ -86,7 +86,7 @@ export async function pathsInfo(
 	const resp = await (params.fetch ?? fetch)(url, {
 		method: "POST",
 		headers: {
-			...(params.credentials && {
+			...(accessToken && {
 				Authorization: `Bearer ${accessToken}`,
 			}),
 			Accept: "application/json",
