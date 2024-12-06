@@ -833,11 +833,11 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	anemoi: {
 		prettyLabel: "AnemoI",
-		repoName: "anemoi",
+		repoName: "AnemoI",
 		repoUrl: "https://github.com/ecmwf/anemoi-inference",
 		docsUrl: "https://anemoi-inference.readthedocs.io/en/latest/",
 		filter: false,
-		countDownloads: `path_filename:"model" OR path_extension:"ckpt"`,
+		countDownloads: `path_extension:"ckpt"`,
 		snippets: snippets.anemoi,
 	},
 } satisfies Record<string, LibraryUiElement>;
