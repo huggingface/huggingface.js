@@ -831,6 +831,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"model_vae_fp16.pt"`,
 		snippets: snippets.threedtopia_xl,
 	},
+	anemoi: {
+		prettyLabel: "AnemoI",
+		repoName: "anemoi",
+		repoUrl: "https://github.com/ecmwf/anemoi-inference",
+		docsUrl: "https://anemoi-inference.readthedocs.io/en/latest/",
+		filter: false,
+		countDownloads: `path_filename:"model" OR path_extension:"ckpt"`,
+	},
 } satisfies Record<string, LibraryUiElement>;
 
 export type ModelLibraryKey = keyof typeof MODEL_LIBRARIES_UI_ELEMENTS;
