@@ -795,6 +795,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.transformersJS,
 		filter: true,
 	},
+	"trellis": {
+		prettyLabel: "Trellis",
+		repoName: "Trellis",
+		repoUrl: "https://github.com/microsoft/TRELLIS",
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	"unity-sentis": {
 		prettyLabel: "unity-sentis",
 		repoName: "unity-sentis",
