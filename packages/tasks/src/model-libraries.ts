@@ -114,6 +114,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"npz"`,
 	},
+	birder: {
+		prettyLabel: "Birder",
+		repoName: "Birder",
+		repoUrl: "https://gitlab.com/birder/birder",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
 	birefnet: {
 		prettyLabel: "BiRefNet",
 		repoName: "BiRefNet",
