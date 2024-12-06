@@ -75,6 +75,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.allennlp,
 		filter: true,
 	},
+	anemoi: {
+		prettyLabel: "AnemoI",
+		repoName: "AnemoI",
+		repoUrl: "https://github.com/ecmwf/anemoi-inference",
+		docsUrl: "https://anemoi-inference.readthedocs.io/en/latest/",
+		filter: false,
+		countDownloads: `path_extension:"ckpt"`,
+		snippets: snippets.anemoi,
+	},
 	asteroid: {
 		prettyLabel: "Asteroid",
 		repoName: "Asteroid",
@@ -830,15 +839,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"model_vae_fp16.pt"`,
 		snippets: snippets.threedtopia_xl,
-	},
-	anemoi: {
-		prettyLabel: "AnemoI",
-		repoName: "AnemoI",
-		repoUrl: "https://github.com/ecmwf/anemoi-inference",
-		docsUrl: "https://anemoi-inference.readthedocs.io/en/latest/",
-		filter: false,
-		countDownloads: `path_extension:"ckpt"`,
-		snippets: snippets.anemoi,
 	},
 } satisfies Record<string, LibraryUiElement>;
 
