@@ -75,6 +75,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.allennlp,
 		filter: true,
 	},
+	anemoi: {
+		prettyLabel: "AnemoI",
+		repoName: "AnemoI",
+		repoUrl: "https://github.com/ecmwf/anemoi-inference",
+		docsUrl: "https://anemoi-docs.readthedocs.io/en/latest/",
+		filter: false,
+		countDownloads: `path_extension:"ckpt"`,
+		snippets: snippets.anemoi,
+	},
 	asteroid: {
 		prettyLabel: "Asteroid",
 		repoName: "Asteroid",
