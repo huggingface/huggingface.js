@@ -729,7 +729,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "Trellis",
 		repoName: "Trellis",
 		repoUrl: "https://github.com/microsoft/TRELLIS",
-		countDownloads: `path:"*/model.safetensors"`,
+		countDownloads: `path_extension:"safetensors"`,
 	},
 	"unity-sentis": {
 		prettyLabel: "unity-sentis",
