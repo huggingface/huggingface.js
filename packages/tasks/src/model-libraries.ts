@@ -79,7 +79,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "AnemoI",
 		repoName: "AnemoI",
 		repoUrl: "https://github.com/ecmwf/anemoi-inference",
-		docsUrl: "https://anemoi-inference.readthedocs.io/en/latest/",
+		docsUrl: "https://anemoi-docs.readthedocs.io/en/latest/",
 		filter: false,
 		countDownloads: `path_extension:"ckpt"`,
 		snippets: snippets.anemoi,
