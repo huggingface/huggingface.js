@@ -1118,6 +1118,11 @@ model.set_generation_params(duration=5)  # generate 5 seconds.
 descriptions = ['dog barking', 'sirene of an emergency vehicle', 'footsteps in a corridor']
 wav = model.generate(descriptions)  # generates 3 samples.`,
 ];
+export const anemoi = (model: ModelData): string[] => [
+	`from anemoi.inference.runners import DefaultRunner
+	runner = DefaultRunner("${model.id}")`,
+];
+
 
 export const audiocraft = (model: ModelData): string[] => {
 	if (model.tags.includes("musicgen")) {

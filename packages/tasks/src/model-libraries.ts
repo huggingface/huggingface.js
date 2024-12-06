@@ -838,6 +838,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://anemoi-inference.readthedocs.io/en/latest/",
 		filter: false,
 		countDownloads: `path_filename:"model" OR path_extension:"ckpt"`,
+		snippets: snippets.anemoi,
 	},
 } satisfies Record<string, LibraryUiElement>;
 
