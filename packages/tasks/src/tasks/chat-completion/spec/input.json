@@ -32,6 +32,7 @@
 			"type": "integer",
 			"format": "int32",
 			"description": "The maximum number of tokens that can be generated in the chat completion.",
+			"default": "1024",
 			"example": "32",
 			"nullable": true,
 			"minimum": 0
