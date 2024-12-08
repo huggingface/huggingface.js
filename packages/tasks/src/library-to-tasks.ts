@@ -55,6 +55,7 @@ export const LIBRARY_TASK_MAPPING: Partial<Record<ModelLibraryKey, PipelineType[
 		"image-segmentation",
 		"image-to-image",
 		"image-to-text",
+		"image-text-to-text",
 		"object-detection",
 		"question-answering",
 		"summarization",
