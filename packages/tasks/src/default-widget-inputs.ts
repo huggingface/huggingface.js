@@ -69,7 +69,7 @@ const MAPPING_EN: PerLanguageMapping = new Map([
 		"zero-shot-classification",
 		[
 			{
-				text: "I have a problem with my iphone that needs to be resolved asap!!",
+				text: "I have a problem with my iphone that needs to be resolved asap!",
 				candidate_labels: "urgent, not urgent, phone, tablet, computer",
 				multi_class: true,
 			},
@@ -95,24 +95,18 @@ const MAPPING_EN: PerLanguageMapping = new Map([
 	[
 		"conversational",
 		[
-			`Hey my name is Julien! How are you?`,
-			`Hey my name is Thomas! How are you?`,
-			`Hey my name is Mariama! How are you?`,
+			`Hi, what can you help me with?`,
+			`Hey, let's have a conversation!`,
+			`Hello there!`,
 			`Hey my name is Clara! How are you?`,
-			`Hey my name is Julien! How are you?`,
-			`Hi.`,
 		],
 	],
 	[
 		"text-generation",
 		[
 			`My name is Julien and I like to`,
-			`My name is Thomas and my main`,
-			`My name is Mariama, my favorite`,
-			`My name is Clara and I am`,
-			`My name is Lewis and I like to`,
-			`My name is Merve and my favorite`,
-			`My name is Teven and I am`,
+			`I like traveling by train because`,
+			`Paris is an amazing place to visit,`,
 			`Once upon a time,`,
 		],
 	],
