@@ -1119,8 +1119,12 @@ descriptions = ['dog barking', 'sirene of an emergency vehicle', 'footsteps in a
 wav = model.generate(descriptions)  # generates 3 samples.`,
 ];
 export const anemoi = (model: ModelData): string[] => [
-	`from anemoi.inference.runners import DefaultRunner
-	runner = DefaultRunner("${model.id}")`,
+	`from anemoi.inference.runners.default import DefaultRunner
+	from anemoi.inference.config import Configuration
+	# Create Configuration
+	config = Configuration(checkpoint = {"huggingface":{"repo_id":"${model.id}"}})
+	# Load Runner
+	runner = DefaultRunner(config)`,
 ];
 
 
