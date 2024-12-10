@@ -32,7 +32,7 @@ Vision language models can recognize images through descriptions. When given det
 
 ## Inference
 
-You can use the Transformers library to interact with vision-language models. Specifically, `pipeline` makes it easy to infer models.
+You can use the Transformers library to interact with [vision-language models](https://huggingface.co/models?pipeline_tag=image-text-to-text&transformers). Specifically, `pipeline` makes it easy to infer models.
 
 Initialize the pipeline first.
 
