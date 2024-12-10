@@ -77,11 +77,12 @@ outputs[0]["generated_text"]
 
 You can also use the Inference API to test image-text-to-text models. You need to use a [Hugging Face token](https://huggingface.co/settings/tokens) for authentication.
 
+
 ```bash
 curl https://api-inference.huggingface.co/models/meta-llama/Llama-3.2-11B-Vision-Instruct \
 	-X POST \
-	-d '{"inputs": "Can you please let us know more details about your "}' \
-	-H 'Content-Type: application/json' \
+	-d '{"messages": [{"role": "user","content": [{"type": "image"}, {"type": "text", "text": "Can you describe the image?"}]}]}' \
+	-H "Content-Type: application/json" \
 	-H "Authorization: Bearer hf_***"
 ```
 
