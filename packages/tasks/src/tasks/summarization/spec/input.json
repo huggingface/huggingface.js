@@ -10,14 +10,13 @@
 			"type": "string"
 		},
 		"parameters": {
-			"description": "Additional inference parameters.",
+			"description": "Additional inference parameters for summarization.",
 			"$ref": "#/$defs/SummarizationParameters"
 		}
 	},
 	"$defs": {
 		"SummarizationParameters": {
 			"title": "SummarizationParameters",
-			"description": "Additional inference parameters for summarization.",
 			"type": "object",
 			"properties": {
 				"clean_up_tokenization_spaces": {

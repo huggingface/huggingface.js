@@ -12,14 +12,12 @@ export interface VideoClassificationInput {
 	 */
 	inputs: unknown;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Video Classification
 	 */
 	parameters?: VideoClassificationParameters;
 	[property: string]: unknown;
 }
 /**
- * Additional inference parameters
- *
  * Additional inference parameters for Video Classification
  */
 export interface VideoClassificationParameters {
@@ -27,6 +25,9 @@ export interface VideoClassificationParameters {
 	 * The sampling rate used to select frames from the video.
 	 */
 	frame_sampling_rate?: number;
+	/**
+	 * The function to apply to the model outputs in order to retrieve the scores.
+	 */
 	function_to_apply?: ClassificationOutputTransform;
 	/**
 	 * The number of sampled frames to consider for classification.

@@ -15,6 +15,9 @@ export async function createApiError(
 	if (response.headers.get("Content-Type")?.startsWith("application/json")) {
 		const json = await response.json();
 		error.message = json.error || json.message || error.message;
+		if (json.error_description) {
+			error.message = error.message ? error.message + `: ${json.error_description}` : json.error_description;
+		}
 		error.data = json;
 	} else {
 		error.data = { message: await response.text() };

@@ -1,7 +1,7 @@
 {
 	"name": "@huggingface/hub",
 	"packageManager": "pnpm@8.10.5",
-	"version": "0.21.0",
+	"version": "1.0.0",
 	"description": "Utilities to interact with the Hugging Face hub",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {
@@ -22,6 +22,7 @@
 		"./src/utils/FileBlob.ts": false,
 		"./src/lib/cache-management.ts": false,
 		"./src/lib/download-file-to-cache-dir.ts": false,
+		"./src/lib/snapshot-download.ts": false,
 		"./dist/index.js": "./dist/browser/index.js",
 		"./dist/index.mjs": "./dist/browser/index.mjs"
 	},

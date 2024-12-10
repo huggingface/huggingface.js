@@ -21,7 +21,7 @@ describe("modelInfo", () => {
 	});
 
 	it("should return the model info with author", async () => {
-		const info: ModelEntry & Pick<ApiModelInfo, 'author'> = await modelInfo({
+		const info: ModelEntry & Pick<ApiModelInfo, "author"> = await modelInfo({
 			name: "openai-community/gpt2",
 			additionalFields: ["author"],
 		});
@@ -39,10 +39,10 @@ describe("modelInfo", () => {
 	});
 
 	it("should return the model info for a specific revision", async () => {
-		const info: ModelEntry & Pick<ApiModelInfo, 'sha'> = await modelInfo({
+		const info: ModelEntry & Pick<ApiModelInfo, "sha"> = await modelInfo({
 			name: "openai-community/gpt2",
 			additionalFields: ["sha"],
-			revision: 'f27b190eeac4c2302d24068eabf5e9d6044389ae',
+			revision: "f27b190eeac4c2302d24068eabf5e9d6044389ae",
 		});
 		expect(info).toEqual({
 			id: "621ffdc036468d709f17434d",

@@ -10,14 +10,13 @@
 			"type": "string"
 		},
 		"parameters": {
-			"description": "Additional inference parameters",
+			"description": "Additional inference parameters for Zero Shot Object Detection",
 			"$ref": "#/$defs/ZeroShotObjectDetectionParameters"
 		}
 	},
 	"$defs": {
 		"ZeroShotObjectDetectionParameters": {
 			"title": "ZeroShotObjectDetectionParameters",
-			"description": "Additional inference parameters for Zero Shot Object Detection",
 			"type": "object",
 			"properties": {
 				"candidate_labels": {

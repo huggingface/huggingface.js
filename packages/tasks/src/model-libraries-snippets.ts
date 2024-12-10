@@ -1,6 +1,9 @@
 import type { ModelData } from "./model-data.js";
 import type { WidgetExampleTextInput, WidgetExampleSentenceSimilarityInput } from "./widget-example.js";
 import { LIBRARY_TASK_MAPPING } from "./library-to-tasks.js";
+import { getModelInputSnippet } from "./snippets/inputs.js";
+import type { ChatCompletionInputMessage } from "./tasks/index.js";
+import { stringifyMessages } from "./snippets/common.js";
 
 const TAG_CUSTOM_CODE = "custom_code";
 
@@ -418,23 +421,33 @@ model = keras_hub.models.CausalLM.from_preset("hf://${model.id}", dtype="bfloat1
 `,
 ];
 
-export const llama_cpp_python = (model: ModelData): string[] => [
-	`from llama_cpp import Llama
+export const llama_cpp_python = (model: ModelData): string[] => {
+	const snippets = [
+		`from llama_cpp import Llama
 
 llm = Llama.from_pretrained(
 	repo_id="${model.id}",
 	filename="{{GGUF_FILE}}",
 )
+`,
+	];
 
-llm.create_chat_completion(
-	messages = [
-		{
-			"role": "user",
-			"content": "What is the capital of France?"
-		}
-	]
-)`,
-];
+	if (model.tags.includes("conversational")) {
+		const messages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
+		snippets.push(`llm.create_chat_completion(
+	messages = ${stringifyMessages(messages, { attributeKeyQuotes: true, indent: "\t" })}
+)`);
+	} else {
+		snippets.push(`output = llm(
+	"Once upon a time,",
+	max_tokens=512,
+	echo=True
+)
+print(output)`);
+	}
+
+	return snippets;
+};
 
 export const tf_keras = (model: ModelData): string[] => [
 	`# Note: 'keras<3.x' or 'tf_keras' must be installed (legacy)
@@ -920,10 +933,9 @@ export const peft = (model: ModelData): string[] => {
 	}
 
 	return [
-		`from peft import PeftModel, PeftConfig
+		`from peft import PeftModel
 from transformers import AutoModelFor${pefttask}
 
-config = PeftConfig.from_pretrained("${model.id}")
 base_model = AutoModelFor${pefttask}.from_pretrained("${peftBaseModel}")
 model = PeftModel.from_pretrained(base_model, "${model.id}")`,
 	];
@@ -968,6 +980,26 @@ Model model = ModelLoader.Load(Application.streamingAssetsPath + "/" + modelName
 IWorker engine = WorkerFactory.CreateWorker(BackendType.GPUCompute, model);
 // Please see provided C# file for more details
 `,
+];
+
+export const sana = (model: ModelData): string[] => [
+	`
+# Load the model and infer image from text
+import torch
+from app.sana_pipeline import SanaPipeline
+from torchvision.utils import save_image
+
+sana = SanaPipeline("configs/sana_config/1024ms/Sana_1600M_img1024.yaml")
+sana.from_pretrained("hf://${model.id}")
+
+image = sana(
+    prompt='a cyberpunk cat with a neon sign that says "Sana"',
+    height=1024,
+    width=1024,
+    guidance_scale=5.0,
+    pag_guidance_scale=2.0,
+    num_inference_steps=18,
+) `,
 ];
 
 export const vfimamba = (model: ModelData): string[] => [
@@ -1086,6 +1118,11 @@ model.set_generation_params(duration=5)  # generate 5 seconds.
 descriptions = ['dog barking', 'sirene of an emergency vehicle', 'footsteps in a corridor']
 wav = model.generate(descriptions)  # generates 3 samples.`,
 ];
+export const anemoi = (model: ModelData): string[] => [
+	`from anemoi.inference.runners import DefaultRunner
+	runner = DefaultRunner("${model.id}")`,
+];
+
 
 export const audiocraft = (model: ModelData): string[] => {
 	if (model.tags.includes("musicgen")) {

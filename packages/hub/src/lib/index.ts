@@ -21,6 +21,7 @@ export * from "./oauth-handle-redirect";
 export * from "./oauth-login-url";
 export * from "./parse-safetensors-metadata";
 export * from "./paths-info";
+export * from "./snapshot-download";
 export * from "./space-info";
 export * from "./upload-file";
 export * from "./upload-files";

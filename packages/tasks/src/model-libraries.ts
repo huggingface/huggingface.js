@@ -75,6 +75,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.allennlp,
 		filter: true,
 	},
+	anemoi: {
+		prettyLabel: "AnemoI",
+		repoName: "AnemoI",
+		repoUrl: "https://github.com/ecmwf/anemoi-inference",
+		docsUrl: "https://anemoi-docs.readthedocs.io/en/latest/",
+		filter: false,
+		countDownloads: `path_extension:"ckpt"`,
+		snippets: snippets.anemoi,
+	},
 	asteroid: {
 		prettyLabel: "Asteroid",
 		repoName: "Asteroid",
@@ -114,6 +123,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"npz"`,
 	},
+	birder: {
+		prettyLabel: "Birder",
+		repoName: "Birder",
+		repoUrl: "https://gitlab.com/birder/birder",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
 	birefnet: {
 		prettyLabel: "BiRefNet",
 		repoName: "BiRefNet",
@@ -150,6 +166,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"adapter_config.json"`,
 	},
+	"cxr-foundation": {
+		prettyLabel: "CXR Foundation",
+		repoName: "cxr-foundation",
+		repoUrl: "https://github.com/google-health/cxr-foundation",
+		filter: false,
+		countDownloads: `path:"precomputed_embeddings/embeddings.npz" OR path:"pax-elixr-b-text/saved_model.pb"`,
+	},
 	deepforest: {
 		prettyLabel: "DeepForest",
 		repoName: "deepforest",
@@ -172,6 +195,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pt"`,
 		snippets: snippets.depth_pro,
 		filter: false,
+	},
+	"derm-foundation": {
+		prettyLabel: "Derm Foundation",
+		repoName: "derm-foundation",
+		repoUrl: "https://github.com/google-health/derm-foundation",
+		filter: false,
+		countDownloads: `path:"scin_dataset_precomputed_embeddings.npz" OR path:"saved_model.pb"`,
 	},
 	diffree: {
 		prettyLabel: "Diffree",
@@ -211,6 +241,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "Cartesia MLX",
 		repoUrl: "https://github.com/cartesia-ai/cartesia_mlx",
 		snippets: snippets.cartesia_mlx,
+	},
+	clipscope: {
+		prettyLabel: "clipscope",
+		repoName: "clipscope",
+		repoUrl: "https://github.com/Lewington-pitsos/clipscope",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
 	},
 	cotracker: {
 		prettyLabel: "CoTracker",
@@ -758,6 +795,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.transformersJS,
 		filter: true,
 	},
+	"trellis": {
+		prettyLabel: "Trellis",
+		repoName: "Trellis",
+		repoUrl: "https://github.com/microsoft/TRELLIS",
+		countDownloads: `path_extension:"safetensors"`,
+	},
 	"unity-sentis": {
 		prettyLabel: "unity-sentis",
 		repoName: "unity-sentis",
@@ -765,6 +808,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.sentis,
 		filter: true,
 		countDownloads: `path_extension:"sentis"`,
+	},
+	sana: {
+		prettyLabel: "Sana",
+		repoName: "Sana",
+		repoUrl: "https://github.com/NVlabs/Sana",
+		countDownloads: `path_extension:"pth"`,
+		snippets: snippets.sana,
 	},
 	"vfi-mamba": {
 		prettyLabel: "VFIMamba",

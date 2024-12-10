@@ -10,7 +10,7 @@ export const snippetBasic = (model: ModelDataMinimal, accessToken: string): Infe
 		"https://api-inference.huggingface.co/models/${model.id}",
 		{
 			headers: {
-				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}"
+				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
 				"Content-Type": "application/json",
 			},
 			method: "POST",
@@ -151,7 +151,7 @@ export const snippetZeroShotClassification = (model: ModelDataMinimal, accessTok
 		"https://api-inference.huggingface.co/models/${model.id}",
 		{
 			headers: {
-				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}"
+				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
 				"Content-Type": "application/json",
 			},
 			method: "POST",
@@ -175,7 +175,7 @@ export const snippetTextToImage = (model: ModelDataMinimal, accessToken: string)
 		"https://api-inference.huggingface.co/models/${model.id}",
 		{
 			headers: {
-				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}"
+				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
 				"Content-Type": "application/json",
 			},
 			method: "POST",
@@ -196,7 +196,7 @@ export const snippetTextToAudio = (model: ModelDataMinimal, accessToken: string)
 			"https://api-inference.huggingface.co/models/${model.id}",
 			{
 				headers: {
-					Authorization: "Bearer ${accessToken || `{API_TOKEN}`}"
+					Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
 					"Content-Type": "application/json",
 				},
 				method: "POST",
@@ -238,7 +238,7 @@ export const snippetFile = (model: ModelDataMinimal, accessToken: string): Infer
 		"https://api-inference.huggingface.co/models/${model.id}",
 		{
 			headers: {
-				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}"
+				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
 				"Content-Type": "application/json",
 			},
 			method: "POST",

@@ -79,7 +79,7 @@ export interface ChatCompletionInput {
 	 * We generally recommend altering this or `top_p` but not both.
 	 */
 	temperature?: number;
-	tool_choice?: ChatCompletionInputTool;
+	tool_choice?: ChatCompletionInputToolChoice;
 	/**
 	 * A prompt to be appended before the tools
 	 */
@@ -89,7 +89,7 @@ export interface ChatCompletionInput {
 	 * Use this to provide a list of
 	 * functions the model may generate JSON inputs for.
 	 */
-	tools?: ToolElement[];
+	tools?: ChatCompletionInputTool[];
 	/**
 	 * An integer between 0 and 5 specifying the number of most likely tokens to return at each
 	 * token position, each with
@@ -154,10 +154,23 @@ export interface ChatCompletionInputStreamOptions {
 	[property: string]: unknown;
 }
 
-export type ChatCompletionInputTool = ChatCompletionInputToolType | string;
+/**
+ *
+ * <https://platform.openai.com/docs/guides/function-calling/configuring-function-calling-behavior-using-the-tool_choice-parameter>
+ */
+export type ChatCompletionInputToolChoice = ChatCompletionInputToolChoiceEnum | ChatCompletionInputToolChoiceObject;
 
-export interface ChatCompletionInputToolType {
-	function?: ChatCompletionInputFunctionName;
+/**
+ * Means the model can pick between generating a message or calling one or more tools.
+ *
+ * Means the model will not call any tool and instead generates a message.
+ *
+ * Means the model must call one or more tools.
+ */
+export type ChatCompletionInputToolChoiceEnum = "auto" | "none" | "required";
+
+export interface ChatCompletionInputToolChoiceObject {
+	function: ChatCompletionInputFunctionName;
 	[property: string]: unknown;
 }
 
@@ -166,7 +179,7 @@ export interface ChatCompletionInputFunctionName {
 	[property: string]: unknown;
 }
 
-export interface ToolElement {
+export interface ChatCompletionInputTool {
 	function: ChatCompletionInputFunctionDefinition;
 	type: string;
 	[property: string]: unknown;

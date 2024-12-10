@@ -22,14 +22,13 @@
 			"required": ["question", "context"]
 		},
 		"parameters": {
-			"description": "Additional inference parameters",
+			"description": "Additional inference parameters for Question Answering",
 			"$ref": "#/$defs/QuestionAnsweringParameters"
 		}
 	},
 	"$defs": {
 		"QuestionAnsweringParameters": {
 			"title": "QuestionAnsweringParameters",
-			"description": "Additional inference parameters for Question Answering",
 			"type": "object",
 			"properties": {
 				"top_k": {

@@ -94,7 +94,7 @@ export async function* listModels<
 		const res: Response = await (params?.fetch ?? fetch)(url, {
 			headers: {
 				accept: "application/json",
-				...(params?.credentials ? { Authorization: `Bearer ${accessToken}` } : undefined),
+				...(accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined),
 			},
 		});
 
