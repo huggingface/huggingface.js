@@ -63,10 +63,10 @@ messages = [
 We can now directly pass in the messages to the pipeline to infer. The `return_full_text` flag is used to return the full prompt in the response, including the user input. Here we pass `False` to only return the generated text.
 
 ```python
-outputs = pipe(text=messages, max_new_tokens=20, return_full_text=False)
+outputs = pipe(text=messages, max_new_tokens=60, return_full_text=False)
 
 outputs[0]["generated_text"]
-# with a yellow center in the foreground. The flower is surrounded by red and white flowers with green stems
+# The image captures a moment of tranquility in nature. At the center of the frame, a pink flower with a yellow center is in full bloom. The flower is surrounded by a cluster of red flowers, their vibrant color contrasting with the pink of the flower. \n\nA black and yellow bee is per
 ```
 
 You can also use the Inference API to test image-text-to-text models. You need to use a [Hugging Face token](https://huggingface.co/settings/tokens) for authentication.
