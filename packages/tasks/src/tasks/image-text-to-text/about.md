@@ -55,13 +55,7 @@ messages = [
              },
              {"type": "text", "text": "Describe this image."},
          ],
-     },
-     {
-         "role": "assistant",
-         "content": [
-             {"type": "text", "text": "There's a pink flower"},
-         ],
-     },
+     }
  ]
 
 ```
