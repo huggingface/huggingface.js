@@ -171,8 +171,9 @@ const snippetGenAIScript = (model: ModelData, filepath?: string): LocalAppSnippe
 	}
 	return [
 		{
-			title: "Serve model with Ollama",
-			content: "npx --yes genaiscript run myscript --model ollama:${ollamatag}",
+			title: "Use model through Ollama",
+			setup: "Create a `poem.genai.mjs` file with $`write a poem`",
+			content: "npx --yes genaiscript run poem --model ollama:${ollamatag}",
 		},
 	];
 };
