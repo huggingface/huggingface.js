@@ -169,11 +169,11 @@ const snippetGenAIScript = (model: ModelData, filepath?: string): LocalAppSnippe
 		const quantLabel = parseGGUFQuantLabel(filepath);
 		ollamatag = quantLabel ? `:${quantLabel}` : "";
 	}
+	const modelid = `${model.id}${ollamatag}`;
 	return [
 		{
 			title: "Use model through Ollama",
-			setup: "Create a `poem.genai.mjs` file with $`write a poem`",
-			content: "npx --yes genaiscript run poem --model ollama:${ollamatag}",
+			content: `npx --yes genaiscript run poem --model ollama:${modelid}`,
 		},
 	];
 };
