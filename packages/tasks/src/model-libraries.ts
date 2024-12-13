@@ -166,6 +166,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"adapter_config.json"`,
 	},
+	comfyui: {
+		prettyLabel: "ComfyUI",
+		repoName: "ComfyUI",
+		repoUrl: "https://github.com/comfyanonymous/ComfyUI",
+		filter: false,
+		countDownloads: `path_extension:"safetensors"`,
+  },
 	"cxr-foundation": {
 		prettyLabel: "CXR Foundation",
 		repoName: "cxr-foundation",
