@@ -1,4 +1,5 @@
-import type { InferenceTask, Options, RequestArgs } from "../types";
+import { SAMBANOVA_API_BASE_URL, SAMBANOVA_MODEL_IDS } from "../providers/sambanova";
+import { INFERENCE_PROVIDERS, type InferenceTask, type Options, type RequestArgs } from "../types";
 import { omit } from "../utils/omit";
 import { HF_HUB_URL } from "./getDefaultTask";
 import { isUrl } from "./isUrl";
@@ -26,17 +27,10 @@ export async function makeRequestOptions(
 		chatCompletion?: boolean;
 	}
 ): Promise<{ url: string; info: RequestInit }> {
-	const { accessToken, endpointUrl, ...otherArgs } = args;
+	const { accessToken, endpointUrl, provider, ...otherArgs } = args;
 	let { model } = args;
-	const {
-		forceTask: task,
-		includeCredentials,
-		taskHint,
-		wait_for_model,
-		use_cache,
-		dont_load_model,
-		chatCompletion,
-	} = options ?? {};
+	const { forceTask, includeCredentials, taskHint, wait_for_model, use_cache, dont_load_model, chatCompletion } =
+		options ?? {};
 
 	const headers: Record<string, string> = {};
 	if (accessToken) {
@@ -60,6 +54,21 @@ export async function makeRequestOptions(
 
 	if (!model) {
 		throw new Error("No model provided, and no default model found for this task");
+	}
+	if (provider) {
+		if (!INFERENCE_PROVIDERS.includes(provider)) {
+			throw new Error("Unknown Inference provider");
+		}
+		if (!accessToken) {
+			throw new Error("Specifying an Inference provider requires an accessToken");
+		}
+		switch (provider) {
+			case "sambanova":
+				model = SAMBANOVA_MODEL_IDS[model];
+				break;
+			default:
+				break;
+		}
 	}
 
 	const binary = "data" in args && !!args.data;
@@ -89,8 +98,25 @@ export async function makeRequestOptions(
 		if (endpointUrl) {
 			return endpointUrl;
 		}
-		if (task) {
-			return `${HF_INFERENCE_API_BASE_URL}/pipeline/${task}/${model}`;
+		if (forceTask) {
+			return `${HF_INFERENCE_API_BASE_URL}/pipeline/${forceTask}/${model}`;
+		}
+		if (provider) {
+			if (!accessToken) {
+				throw new Error("Specifying an Inference provider requires an accessToken");
+			}
+			if (accessToken.startsWith("hf_")) {
+				/// TODO we wil proxy the request server-side (using our own keys) and handle billing for it on the user's HF account.
+				throw new Error("Inference proxying is not implemented yet");
+			} else {
+				/// This is an external key
+				switch (provider) {
+					case "sambanova":
+						return SAMBANOVA_API_BASE_URL;
+					default:
+						break;
+				}
+			}
 		}
 
 		return `${HF_INFERENCE_API_BASE_URL}/models/${model}`;
@@ -116,9 +142,9 @@ export async function makeRequestOptions(
 		body: binary
 			? args.data
 			: JSON.stringify({
-					...(otherArgs.model && isUrl(otherArgs.model) ? omit(otherArgs, "model") : otherArgs),
+					...(otherArgs.model && isUrl(otherArgs.model) ? omit(otherArgs, "model") : { ...otherArgs, model }),
 			  }),
-		...(credentials && { credentials }),
+		...(credentials ? { credentials } : undefined),
 		signal: options?.signal,
 	};
 

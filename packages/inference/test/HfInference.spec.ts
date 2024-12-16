@@ -756,6 +756,23 @@ describe.concurrent(
 			}
 			expect(out).toContain("two");
 		});
+
+		/**
+		 * Compatibility with third-party Inference Providers
+		 */
+
+		it("chatCompletion sambanova", async () => {
+			const hf = new HfInference(env.SAMBANOVA_KEY);
+			const res = await hf.chatCompletion({
+				model: "meta-llama/Llama-3.1-8B-Instruct",
+				provider: "sambanova",
+				messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+			});
+			if (res.choices && res.choices.length > 0) {
+				const completion = res.choices[0].message?.content;
+				expect(completion).toContain("two");
+			}
+		});
 	},
 	TIMEOUT
 );
