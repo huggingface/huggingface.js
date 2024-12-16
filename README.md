@@ -13,7 +13,7 @@
 // Programatically interact with the Hub
 
 await createRepo({
-  repo: {type: "model", name: "my-user/nlp-model"},
+  repo: { type: "model", name: "my-user/nlp-model" },
   accessToken: HF_TOKEN
 });
 
@@ -53,7 +53,7 @@ await inference.textToImage({
 
 This is a collection of JS libraries to interact with the Hugging Face API, with TS types included.
 
-- [@huggingface/inference](packages/inference/README.md): Use Inference Endpoints (dedicated) and Inference API (serverless) to make calls to 100,000+ Machine Learning models
+- [@huggingface/inference](packages/inference/README.md): Use Inference API (serverless) and Inference Endpoints (dedicated) to make calls to 100,000+ Machine Learning models
 - [@huggingface/hub](packages/hub/README.md): Interact with huggingface.co to create or delete repos and commit / download files
 - [@huggingface/agents](packages/agents/README.md): Interact with HF models through a natural language interface
 - [@huggingface/gguf](packages/gguf/README.md): A GGUF parser that works on remotely hosted files.
@@ -165,7 +165,7 @@ await inference.imageToText({
 const gpt2 = inference.endpoint('https://xyz.eu-west-1.aws.endpoints.huggingface.cloud/gpt2');
 const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the universe is'});
 
-//Chat Completion
+// Chat Completion
 const llamaEndpoint = inference.endpoint(
  "https://api-inference.huggingface.co/models/meta-llama/Llama-3.1-8B-Instruct"
 );
@@ -185,7 +185,7 @@ import { createRepo, uploadFile, deleteFiles } from "@huggingface/hub";
 const HF_TOKEN = "hf_...";
 
 await createRepo({
-  repo: "my-user/nlp-model", // or {type: "model", name: "my-user/nlp-test"},
+  repo: "my-user/nlp-model", // or { type: "model", name: "my-user/nlp-test" },
   accessToken: HF_TOKEN
 });
 
@@ -200,7 +200,7 @@ await uploadFile({
 });
 
 await deleteFiles({
-  repo: {type: "space", name: "my-user/my-space"}, // or "spaces/my-user/my-space"
+  repo: { type: "space", name: "my-user/my-space" }, // or "spaces/my-user/my-space"
   accessToken: HF_TOKEN,
   paths: ["README.md", ".gitattributes"]
 });
@@ -209,7 +209,7 @@ await deleteFiles({
 ### @huggingface/agents example
 
 ```ts
-import {HfAgent, LLMFromHub, defaultTools} from '@huggingface/agents';
+import { HfAgent, LLMFromHub, defaultTools } from '@huggingface/agents';
 
 const HF_TOKEN = "hf_...";
 
