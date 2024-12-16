@@ -1127,7 +1127,6 @@ config = Configuration(checkpoint = {"huggingface":{"repo_id":"${model.id}"}})
 runner = DefaultRunner(config)`,
 ];
 
-
 export const audiocraft = (model: ModelData): string[] => {
 	if (model.tags.includes("musicgen")) {
 		return musicgen(model);
