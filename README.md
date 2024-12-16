@@ -58,6 +58,7 @@ This is a collection of JS libraries to interact with the Hugging Face API, with
 - [@huggingface/agents](packages/agents/README.md): Interact with HF models through a natural language interface
 - [@huggingface/gguf](packages/gguf/README.md): A GGUF parser that works on remotely hosted files.
 - [@huggingface/tasks](packages/tasks/README.md): The definition files and source-of-truth for the Hub's main primitives like pipeline tasks, model libraries, etc.
+- [@huggingface/jinja](packages/jinja/README.md): A minimalistic JS implementation of the Jinja templating engine, to be used for ML chat templates.
 - [@huggingface/space-header](packages/space-header/README.md): Use the Space `mini_header` outside Hugging Face
 
 
