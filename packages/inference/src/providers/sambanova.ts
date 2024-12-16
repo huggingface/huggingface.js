@@ -8,7 +8,7 @@ export const SAMBANOVA_API_BASE_URL = "https://api.sambanova.ai";
  * or keep it up-to-date.
  *
  * As a fallback, if the above is not possible, ask Sambanova to
- * provide the mapping as an API.
+ * provide the mapping as an fetchable API.
  */
 type SambanovaId = string;
 

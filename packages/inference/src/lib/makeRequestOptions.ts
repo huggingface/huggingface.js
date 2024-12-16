@@ -1,4 +1,5 @@
 import { SAMBANOVA_API_BASE_URL, SAMBANOVA_MODEL_IDS } from "../providers/sambanova";
+import { TOGETHER_API_BASE_URL, TOGETHER_MODEL_IDS } from "../providers/together";
 import { INFERENCE_PROVIDERS, type InferenceTask, type Options, type RequestArgs } from "../types";
 import { omit } from "../utils/omit";
 import { HF_HUB_URL } from "./getDefaultTask";
@@ -66,6 +67,9 @@ export async function makeRequestOptions(
 			case "sambanova":
 				model = SAMBANOVA_MODEL_IDS[model];
 				break;
+			case "together":
+				model = TOGETHER_MODEL_IDS[model]?.id ?? model;
+				break;
 			default:
 				break;
 		}
@@ -113,6 +117,8 @@ export async function makeRequestOptions(
 				switch (provider) {
 					case "sambanova":
 						return SAMBANOVA_API_BASE_URL;
+					case "together":
+						return TOGETHER_API_BASE_URL;
 					default:
 						break;
 				}
