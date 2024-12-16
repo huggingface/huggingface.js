@@ -816,6 +816,16 @@ describe.concurrent(
 			}
 			expect(out).toContain("2");
 		});
+
+		it("textToImage together", async () => {
+			const hf = new HfInference(env.TOGETHER_KEY);
+			const res = await hf.textToImage({
+				model: "stabilityai/stable-diffusion-xl-base-1.0",
+				provider: "together",
+				inputs: "award winning high resolution photo of a giant tortoise",
+			});
+			expect(res).toBeInstanceOf(Blob);
+		});
 	},
 	TIMEOUT
 );

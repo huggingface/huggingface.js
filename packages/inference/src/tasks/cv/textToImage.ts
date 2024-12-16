@@ -8,6 +8,12 @@ export type TextToImageArgs = BaseArgs & {
 	 */
 	inputs: string;
 
+	/**
+	 * Same param but for external providers like Together
+	 */
+	prompt?: string;
+	response_format?: "base64";
+
 	parameters?: {
 		/**
 		 * An optional negative prompt for the image generation
@@ -32,6 +38,13 @@ export type TextToImageArgs = BaseArgs & {
 	};
 };
 
+interface Base64ImageGeneration {
+	id: string;
+	model: string;
+	data: Array<{
+		b64_json: string;
+	}>;
+}
 export type TextToImageOutput = Blob;
 
 /**
@@ -39,10 +52,21 @@ export type TextToImageOutput = Blob;
  * Recommended model: stabilityai/stable-diffusion-2
  */
 export async function textToImage(args: TextToImageArgs, options?: Options): Promise<TextToImageOutput> {
-	const res = await request<TextToImageOutput>(args, {
+	if (args.provider === "together") {
+		args.prompt = args.inputs;
+		args.inputs = "";
+		args.response_format = "base64";
+	}
+	const res = await request<TextToImageOutput | Base64ImageGeneration>(args, {
 		...options,
 		taskHint: "text-to-image",
 	});
+	if (res && typeof res === "object" && Array.isArray(res.data) && res.data[0].b64_json) {
+		const base64Data = res.data[0].b64_json;
+		const base64Response = await fetch(`data:image/jpeg;base64,${base64Data}`);
+		const blob = await base64Response.blob();
+		return blob;
+	}
 	const isValidOutput = res && res instanceof Blob;
 	if (!isValidOutput) {
 		throw new InferenceOutputError("Expected Blob");

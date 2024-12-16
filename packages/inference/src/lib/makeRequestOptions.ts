@@ -118,6 +118,9 @@ export async function makeRequestOptions(
 					case "sambanova":
 						return SAMBANOVA_API_BASE_URL;
 					case "together":
+						if (taskHint === "text-to-image") {
+							return `${TOGETHER_API_BASE_URL}/v1/images/generations`;
+						}
 						return TOGETHER_API_BASE_URL;
 					default:
 						break;
