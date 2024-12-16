@@ -773,6 +773,22 @@ describe.concurrent(
 				expect(completion).toContain("two");
 			}
 		});
+		it("chatCompletion sambanova stream", async () => {
+			const hf = new HfInference(env.SAMBANOVA_KEY);
+			const stream = hf.chatCompletionStream({
+				model: "meta-llama/Llama-3.1-8B-Instruct",
+				provider: "sambanova",
+				messages: [{ role: "user", content: "Complete the equation 1 + 1 = , just the answer" }],
+			}) as AsyncGenerator<ChatCompletionStreamOutput>;
+			let out = "";
+			for await (const chunk of stream) {
+				if (chunk.choices && chunk.choices.length > 0) {
+					out += chunk.choices[0].delta.content;
+				}
+			}
+			console.warn(out);
+			expect(out).toContain("2");
+		});
 	},
 	TIMEOUT
 );
