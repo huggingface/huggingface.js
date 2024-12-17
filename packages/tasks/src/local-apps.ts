@@ -163,6 +163,21 @@ const snippetOllama = (model: ModelData, filepath?: string): string => {
 	return `ollama run hf.co/${model.id}{{OLLAMA_TAG}}`;
 };
 
+const snippetGenAIScript = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	let ollamatag = "{{OLLAMA_TAG}}";
+	if (filepath) {
+		const quantLabel = parseGGUFQuantLabel(filepath);
+		ollamatag = quantLabel ? `:${quantLabel}` : "";
+	}
+	const modelid = `${model.id}${ollamatag}`;
+	return [
+		{
+			title: "Use model through Ollama",
+			content: `npx --yes genaiscript run poem --model ollama:${modelid}`,
+		},
+	];
+};
+
 const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const command = (binary: string) =>
 		["# Load and run the model:", `${binary} huggingface://${model.id}/${filepath ?? "{{GGUF_FILE}}"}`].join("\n");
@@ -426,6 +441,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetOllama,
+	},
+	genaiscript: {
+		prettyLabel: "GenAIScript",
+		docsUrl: "https://microsoft.github.io/genaiscript/",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		snippet: snippetGenAIScript,
 	},
 } satisfies Record<string, LocalApp>;
 
