@@ -45,7 +45,7 @@ export interface Options {
 
 export type InferenceTask = Exclude<PipelineType, "other">;
 
-export const INFERENCE_PROVIDERS = ["sambanova", "together", "hf-inference"] as const;
+export const INFERENCE_PROVIDERS = ["replicate", "sambanova", "together", "hf-inference"] as const;
 export type InferenceProvider = (typeof INFERENCE_PROVIDERS)[number];
 
 export interface BaseArgs {
@@ -54,19 +54,19 @@ export interface BaseArgs {
 	 *
 	 * Can be created for free in hf.co/settings/token
 	 *
-	 * You can also pass an external Inference provider's key if you intend to call a compatible provider like Sambanova, Together...
+	 * You can also pass an external Inference provider's key if you intend to call a compatible provider like Sambanova, Together, Replicate...
 	 */
 	accessToken?: string;
 
 	/**
-	 * The model to use.
+	 * The HF model to use.
 	 *
 	 * If not specified, will call huggingface.co/api/tasks to get the default model for the task.
 	 *
 	 * /!\ Legacy behavior allows this to be an URL, but this is deprecated and will be removed in the future.
 	 * Use the `endpointUrl` parameter instead.
 	 */
-	model?: string;
+	model?: ModelId;
 
 	/**
 	 * The URL of the endpoint to use. If not specified, will call huggingface.co/api/tasks to get the default endpoint for the task.

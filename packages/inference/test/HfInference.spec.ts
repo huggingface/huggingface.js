@@ -826,6 +826,16 @@ describe.concurrent(
 			});
 			expect(res).toBeInstanceOf(Blob);
 		});
+
+		it("textToImage replicate", async () => {
+			const hf = new HfInference(env.REPLICATE_KEY);
+			const res = await hf.textToImage({
+				model: "black-forest-labs/FLUX.1-schnell",
+				provider: "replicate",
+				inputs: "black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot",
+			});
+			expect(res).toBeInstanceOf(Blob);
+		});
 	},
 	TIMEOUT
 );

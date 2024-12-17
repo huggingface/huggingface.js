@@ -9,10 +9,13 @@ export type TextToImageArgs = BaseArgs & {
 	inputs: string;
 
 	/**
-	 * Same param but for external providers like Together
+	 * Same param but for external providers like Together, Replicate
 	 */
 	prompt?: string;
 	response_format?: "base64";
+	input?: {
+		prompt: string;
+	};
 
 	parameters?: {
 		/**
@@ -38,14 +41,16 @@ export type TextToImageArgs = BaseArgs & {
 	};
 };
 
+export type TextToImageOutput = Blob;
+
 interface Base64ImageGeneration {
-	id: string;
-	model: string;
 	data: Array<{
 		b64_json: string;
 	}>;
 }
-export type TextToImageOutput = Blob;
+interface OutputUrlImageGeneration {
+	output: string[];
+}
 
 /**
  * This task reads some text input and outputs an image.
@@ -56,16 +61,26 @@ export async function textToImage(args: TextToImageArgs, options?: Options): Pro
 		args.prompt = args.inputs;
 		args.inputs = "";
 		args.response_format = "base64";
+	} else if (args.provider === "replicate") {
+		args.input = { prompt: args.inputs };
+		delete (args as unknown as { inputs: unknown }).inputs;
 	}
-	const res = await request<TextToImageOutput | Base64ImageGeneration>(args, {
+	const res = await request<TextToImageOutput | Base64ImageGeneration | OutputUrlImageGeneration>(args, {
 		...options,
 		taskHint: "text-to-image",
 	});
-	if (res && typeof res === "object" && Array.isArray(res.data) && res.data[0].b64_json) {
-		const base64Data = res.data[0].b64_json;
-		const base64Response = await fetch(`data:image/jpeg;base64,${base64Data}`);
-		const blob = await base64Response.blob();
-		return blob;
+	if (res && typeof res === "object") {
+		if ("data" in res && Array.isArray(res.data) && res.data[0].b64_json) {
+			const base64Data = res.data[0].b64_json;
+			const base64Response = await fetch(`data:image/jpeg;base64,${base64Data}`);
+			const blob = await base64Response.blob();
+			return blob;
+		}
+		if ("output" in res && Array.isArray(res.output)) {
+			const urlResponse = await fetch(res.output[0]);
+			const blob = await urlResponse.blob();
+			return blob;
+		}
 	}
 	const isValidOutput = res && res instanceof Blob;
 	if (!isValidOutput) {

@@ -26,13 +26,19 @@ export async function request<T>(
 	}
 
 	if (!response.ok) {
-		if (response.headers.get("Content-Type")?.startsWith("application/json")) {
+		if (
+			["application/json", "application/problem+json"].some(
+				(contentType) => response.headers.get("Content-Type")?.startsWith(contentType)
+			)
+		) {
 			const output = await response.json();
 			if ([400, 422, 404, 500].includes(response.status) && options?.chatCompletion) {
 				throw new Error(`Server ${args.model} does not seem to support chat completion. Error: ${output.error}`);
 			}
 			if (output.error) {
 				throw new Error(JSON.stringify(output.error));
+			} else {
+				throw new Error(output);
 			}
 		}
 		throw new Error("An error occurred while fetching the blob");

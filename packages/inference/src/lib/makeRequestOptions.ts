@@ -1,3 +1,4 @@
+import { REPLICATE_API_BASE_URL, REPLICATE_MODEL_IDS } from "../providers/replicate";
 import { SAMBANOVA_API_BASE_URL, SAMBANOVA_MODEL_IDS } from "../providers/sambanova";
 import { TOGETHER_API_BASE_URL, TOGETHER_MODEL_IDS } from "../providers/together";
 import { INFERENCE_PROVIDERS, type InferenceTask, type Options, type RequestArgs } from "../types";
@@ -64,6 +65,9 @@ export async function makeRequestOptions(
 			throw new Error("Specifying an Inference provider requires an accessToken");
 		}
 		switch (provider) {
+			case "replicate":
+				model = REPLICATE_MODEL_IDS[model];
+				break;
 			case "sambanova":
 				model = SAMBANOVA_MODEL_IDS[model];
 				break;
@@ -90,6 +94,9 @@ export async function makeRequestOptions(
 	if (dont_load_model) {
 		headers["X-Load-Model"] = "0";
 	}
+	if (provider === "replicate") {
+		headers["Prefer"] = "wait";
+	}
 
 	let url = (() => {
 		if (endpointUrl && isUrl(model)) {
@@ -115,6 +122,8 @@ export async function makeRequestOptions(
 			} else {
 				/// This is an external key
 				switch (provider) {
+					case "replicate":
+						return `${REPLICATE_API_BASE_URL}/v1/models/${model}/predictions`;
 					case "sambanova":
 						return SAMBANOVA_API_BASE_URL;
 					case "together":
@@ -151,7 +160,9 @@ export async function makeRequestOptions(
 		body: binary
 			? args.data
 			: JSON.stringify({
-					...(otherArgs.model && isUrl(otherArgs.model) ? omit(otherArgs, "model") : { ...otherArgs, model }),
+					...((otherArgs.model && isUrl(otherArgs.model)) || provider === "replicate"
+						? omit(otherArgs, "model")
+						: { ...otherArgs, model }),
 			  }),
 		...(credentials ? { credentials } : undefined),
 		signal: options?.signal,
