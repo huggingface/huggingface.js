@@ -78,7 +78,7 @@ export const SKUS = {
 			},
 			"RTX A2000": {
 				tflops: 7.987,
-				memory: [8, 12]
+				memory: [8, 12],
 			},
 			A100: {
 				tflops: 77.97,
@@ -503,7 +503,7 @@ export const SKUS = {
 			},
 			"Apple M4 Pro": {
 				tflops: 9.2,
-				memory: [24, 48],
+				memory: [24, 48, 64],
 			},
 			"Apple M4 Max": {
 				tflops: 18.4,
