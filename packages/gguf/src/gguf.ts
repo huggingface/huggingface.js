@@ -384,14 +384,17 @@ export async function gguf(
 		});
 	}
 
+  	const alignment		=metadata['general.alignment']??32;
+	const tensorsOffset	=offset+(alignment-(offset%alignment));
+
 	if (params?.computeParametersCount) {
 		const parameterCount = tensorInfos
 			.map(({ shape }) => shape.reduce((acc, val) => acc * Number(val), 1))
 			.reduce((acc, val) => acc + val, 0);
 
-		return { metadata, tensorInfos, parameterCount };
+		return { metadata, tensorInfos, parameterCount, tensorsOffset };
 	} else {
-		return { metadata, tensorInfos };
+		return { metadata, tensorInfos, tensorsOffset };
 	}
 }
 
