@@ -22,7 +22,8 @@ export async function chatCompletion(
 		typeof res?.created === "number" &&
 		typeof res?.id === "string" &&
 		typeof res?.model === "string" &&
-		typeof res?.system_fingerprint === "string" &&
+		/// Together.ai does not output a system_fingerprint
+		(res.system_fingerprint === undefined || typeof res.system_fingerprint === "string") &&
 		typeof res?.usage === "object";
 
 	if (!isValidOutput) {

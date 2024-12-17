@@ -756,6 +756,86 @@ describe.concurrent(
 			}
 			expect(out).toContain("two");
 		});
+
+		/**
+		 * Compatibility with third-party Inference Providers
+		 */
+
+		it("chatCompletion sambanova", async () => {
+			const hf = new HfInference(env.SAMBANOVA_KEY);
+			const res = await hf.chatCompletion({
+				model: "meta-llama/Llama-3.1-8B-Instruct",
+				provider: "sambanova",
+				messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+			});
+			if (res.choices && res.choices.length > 0) {
+				const completion = res.choices[0].message?.content;
+				expect(completion).toContain("two");
+			}
+		});
+		it("chatCompletion sambanova stream", async () => {
+			const hf = new HfInference(env.SAMBANOVA_KEY);
+			const stream = hf.chatCompletionStream({
+				model: "meta-llama/Llama-3.1-8B-Instruct",
+				provider: "sambanova",
+				messages: [{ role: "user", content: "Complete the equation 1 + 1 = , just the answer" }],
+			}) as AsyncGenerator<ChatCompletionStreamOutput>;
+			let out = "";
+			for await (const chunk of stream) {
+				if (chunk.choices && chunk.choices.length > 0) {
+					out += chunk.choices[0].delta.content;
+				}
+			}
+			expect(out).toContain("2");
+		});
+
+		it("chatCompletion together", async () => {
+			const hf = new HfInference(env.TOGETHER_KEY);
+			const res = await hf.chatCompletion({
+				model: "meta-llama/Llama-3.3-70B-Instruct",
+				provider: "together",
+				messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+			});
+			if (res.choices && res.choices.length > 0) {
+				const completion = res.choices[0].message?.content;
+				expect(completion).toContain("two");
+			}
+		});
+		it("chatCompletion together stream", async () => {
+			const hf = new HfInference(env.TOGETHER_KEY);
+			const stream = hf.chatCompletionStream({
+				model: "meta-llama/Llama-3.3-70B-Instruct",
+				provider: "together",
+				messages: [{ role: "user", content: "Complete the equation 1 + 1 = , just the answer" }],
+			}) as AsyncGenerator<ChatCompletionStreamOutput>;
+			let out = "";
+			for await (const chunk of stream) {
+				if (chunk.choices && chunk.choices.length > 0) {
+					out += chunk.choices[0].delta.content;
+				}
+			}
+			expect(out).toContain("2");
+		});
+
+		it("textToImage together", async () => {
+			const hf = new HfInference(env.TOGETHER_KEY);
+			const res = await hf.textToImage({
+				model: "stabilityai/stable-diffusion-xl-base-1.0",
+				provider: "together",
+				inputs: "award winning high resolution photo of a giant tortoise",
+			});
+			expect(res).toBeInstanceOf(Blob);
+		});
+
+		it("textToImage replicate", async () => {
+			const hf = new HfInference(env.REPLICATE_KEY);
+			const res = await hf.textToImage({
+				model: "black-forest-labs/FLUX.1-schnell",
+				provider: "replicate",
+				inputs: "black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot",
+			});
+			expect(res).toBeInstanceOf(Blob);
+		});
 	},
 	TIMEOUT
 );
