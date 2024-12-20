@@ -59,6 +59,7 @@ This is a collection of JS libraries to interact with the Hugging Face API, with
 - [@huggingface/gguf](packages/gguf/README.md): A GGUF parser that works on remotely hosted files.
 - [@huggingface/tasks](packages/tasks/README.md): The definition files and source-of-truth for the Hub's main primitives like pipeline tasks, model libraries, etc.
 - [@huggingface/space-header](packages/space-header/README.md): Use the Space `mini_header` outside Hugging Face
+- [@huggingface/ollama-utils](packages/ollama-utils/README.md): Various utilities for maintaining Ollama compatibility with models on Hugging Face hub.
 
 
 We use modern features to avoid polyfills and dependencies, so the libraries will only work on modern browsers / Node.js >= 18 / Bun / Deno.
