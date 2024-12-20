@@ -326,6 +326,14 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetLocalAI,
 	},
+	localchat: {
+		prettyLabel: "Local Chat",
+		docsUrl: "https://localchat.co",
+		mainTask: "text-generation",
+		displayOnModelPage: isMlxModel,
+		deeplink: (model) =>
+			new URL(`https://localchat.co/model/${model.id}`),
+	},
 	jan: {
 		prettyLabel: "Jan",
 		docsUrl: "https://jan.ai",
