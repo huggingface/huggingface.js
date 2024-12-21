@@ -10,6 +10,8 @@ export { parseGGUFQuantLabel, GGUF_QUANT_RE, GGUF_QUANT_RE_GLOBAL } from "@huggi
 
 export const RE_GGUF_FILE = /\.gguf$/;
 export const RE_GGUF_SHARD_FILE = /^(?<prefix>.*?)-(?<shard>\d{5})-of-(?<total>\d{5})\.gguf$/;
+const GGUF_DEFAULT_ALIGNMENT = 32; //defined in ggml.h
+const GGML_PAD = (x: number, n: number) => (x + n - 1) & ~(n - 1); //defined in ggml.h
 const PARALLEL_DOWNLOADS = 20;
 
 export interface GgufShardFileInfo {
@@ -384,17 +386,18 @@ export async function gguf(
 		});
 	}
 
-  	const alignment		=metadata['general.alignment']??32;
-	const tensorsOffset	=offset+(alignment-(offset%alignment));
+	// calculate absolute offset of tensor data
+	const alignment: number = Number(metadata["general.alignment"]) ?? GGUF_DEFAULT_ALIGNMENT;
+	const tensorDataOffset = BigInt(GGML_PAD(offset, alignment));
 
 	if (params?.computeParametersCount) {
 		const parameterCount = tensorInfos
 			.map(({ shape }) => shape.reduce((acc, val) => acc * Number(val), 1))
 			.reduce((acc, val) => acc + val, 0);
 
-		return { metadata, tensorInfos, parameterCount, tensorsOffset };
+		return { metadata, tensorInfos, tensorDataOffset, parameterCount };
 	} else {
-		return { metadata, tensorInfos, tensorsOffset };
+		return { metadata, tensorInfos, tensorDataOffset };
 	}
 }
 
@@ -432,7 +435,10 @@ export async function ggufAllShards(
 			parameterCount: shards.map(({ parameterCount }) => parameterCount).reduce((acc, val) => acc + val, 0),
 		};
 	} else {
-		const { metadata, tensorInfos, parameterCount } = await gguf(url, { ...params, computeParametersCount: true });
-		return { shards: [{ metadata, tensorInfos }], parameterCount };
+		const { metadata, tensorInfos, tensorDataOffset, parameterCount } = await gguf(url, {
+			...params,
+			computeParametersCount: true,
+		});
+		return { shards: [{ metadata, tensorInfos, tensorDataOffset }], parameterCount };
 	}
 }

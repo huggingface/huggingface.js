@@ -283,4 +283,9 @@ describe("gguf", () => {
 		expect(parseGGUFQuantLabel("Codestral-22B-v0.1-IQ3_XS.gguf")).toEqual(undefined); // TODO: investigate IQ3_XS
 		expect(parseGGUFQuantLabel("Codestral-22B-v0.1-Q4_0_4_4.gguf")).toEqual("Q4_0"); // TODO: investigate Q4_0_4_4
 	});
+
+	it("calculate tensor data offset", async () => {
+		const { tensorDataOffset } = await gguf(".cache/model.gguf", { allowLocalFile: true });
+		expect(tensorDataOffset).toEqual(34559232n);
+	});
 });
