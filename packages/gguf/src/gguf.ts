@@ -387,7 +387,7 @@ export async function gguf(
 	}
 
 	// calculate absolute offset of tensor data
-	const alignment: number = Number(metadata["general.alignment"]) ?? GGUF_DEFAULT_ALIGNMENT;
+	const alignment: number = Number(metadata["general.alignment"] ?? GGUF_DEFAULT_ALIGNMENT);
 	const tensorDataOffset = BigInt(GGML_PAD(offset, alignment));
 
 	if (params?.computeParametersCount) {
