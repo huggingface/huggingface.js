@@ -78,7 +78,7 @@ export const SKUS = {
 			},
 			"RTX A2000": {
 				tflops: 7.987,
-				memory: [8, 12]
+				memory: [8, 12],
 			},
 			A100: {
 				tflops: 77.97,
@@ -307,6 +307,24 @@ export const SKUS = {
 				memory: [16],
 			},
 		},
+		INTEL: {
+			"Arc A750": {
+				tflops: 34.41,
+				memory: [8],
+			},
+			"Arc A770": {
+				tflops: 39.32,
+				memory: [8, 16],
+			},
+			"Arc B570": {
+				tflops: 23.04,
+				memory: [10],
+			},
+			"Arc B580": {
+				tflops: 27.34,
+				memory: [12],
+			},
+		},
 		QUALCOMM: {
 			"Snapdragon X Elite X1E-00-1DE": {
 				tflops: 4.6,
@@ -485,7 +503,7 @@ export const SKUS = {
 			},
 			"Apple M4 Pro": {
 				tflops: 9.2,
-				memory: [24, 48],
+				memory: [24, 48, 64],
 			},
 			"Apple M4 Max": {
 				tflops: 18.4,

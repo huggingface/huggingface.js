@@ -795,7 +795,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.transformersJS,
 		filter: true,
 	},
-	"trellis": {
+	trellis: {
 		prettyLabel: "Trellis",
 		repoName: "Trellis",
 		repoUrl: "https://github.com/microsoft/TRELLIS",
