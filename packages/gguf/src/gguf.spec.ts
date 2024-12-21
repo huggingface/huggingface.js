@@ -285,7 +285,7 @@ describe("gguf", () => {
 	});
 
 	it("calculate tensor data offset", async () => {
-		const { tensorDataOffset } = await gguf(".cache/model.gguf", { allowLocalFile: true });
-		expect(tensorDataOffset).toEqual(34559232n);
+		const { tensorDataOffset } = await gguf(URL_LLAMA);
+		expect(tensorDataOffset).toEqual(741056n);
 	});
 });
