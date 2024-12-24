@@ -129,9 +129,10 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 			setup: [
 				"git clone https://github.com/ggerganov/llama.cpp.git",
 				"cd llama.cpp",
-				"LLAMA_CURL=1 make llama-cli",
+				"cmake -B build -DLLAMA_CURL=ON",
+				"cmake --build build -j --target llama-cli",
 			].join("\n"),
-			content: command("./llama-cli"),
+			content: command("./build/bin/llama-cli"),
 		},
 	];
 };

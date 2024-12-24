@@ -991,10 +991,9 @@ export const peft = (model: ModelData): string[] => {
 	}
 
 	return [
-		`from peft import PeftModel, PeftConfig
+		`from peft import PeftModel
 from transformers import AutoModelFor${pefttask}
 
-config = PeftConfig.from_pretrained("${model.id}")
 base_model = AutoModelFor${pefttask}.from_pretrained("${peftBaseModel}")
 model = PeftModel.from_pretrained(base_model, "${model.id}")`,
 	];
@@ -1039,6 +1038,26 @@ Model model = ModelLoader.Load(Application.streamingAssetsPath + "/" + modelName
 IWorker engine = WorkerFactory.CreateWorker(BackendType.GPUCompute, model);
 // Please see provided C# file for more details
 `,
+];
+
+export const sana = (model: ModelData): string[] => [
+	`
+# Load the model and infer image from text
+import torch
+from app.sana_pipeline import SanaPipeline
+from torchvision.utils import save_image
+
+sana = SanaPipeline("configs/sana_config/1024ms/Sana_1600M_img1024.yaml")
+sana.from_pretrained("hf://${model.id}")
+
+image = sana(
+    prompt='a cyberpunk cat with a neon sign that says "Sana"',
+    height=1024,
+    width=1024,
+    guidance_scale=5.0,
+    pag_guidance_scale=2.0,
+    num_inference_steps=18,
+) `,
 ];
 
 export const vfimamba = (model: ModelData): string[] => [
@@ -1156,6 +1175,14 @@ model = AudioGen.get_pretrained("${model.id}")
 model.set_generation_params(duration=5)  # generate 5 seconds.
 descriptions = ['dog barking', 'sirene of an emergency vehicle', 'footsteps in a corridor']
 wav = model.generate(descriptions)  # generates 3 samples.`,
+];
+export const anemoi = (model: ModelData): string[] => [
+	`from anemoi.inference.runners.default import DefaultRunner
+from anemoi.inference.config import Configuration
+# Create Configuration
+config = Configuration(checkpoint = {"huggingface":{"repo_id":"${model.id}"}})
+# Load Runner
+runner = DefaultRunner(config)`,
 ];
 
 export const audiocraft = (model: ModelData): string[] => {

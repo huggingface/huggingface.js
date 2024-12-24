@@ -25,7 +25,7 @@ const FILES_TO_IGNORE: string[] = [".DS_Store"];
 export const REPO_ID_SEPARATOR: string = "--";
 
 export function getRepoFolderName({ name, type }: RepoId): string {
-	const parts = [`${type}s`, ...name.split("/")]
+	const parts = [`${type}s`, ...name.split("/")];
 	return parts.join(REPO_ID_SEPARATOR);
 }
 
