@@ -95,6 +95,11 @@ export const bm25s = (model: ModelData): string[] => [
 retriever = BM25HF.load_from_hub("${model.id}")`,
 ];
 
+export const cxr_foundation = (model: ModelData): string[] => [
+	`# The quick start notebook shows Hugging Face usage: https://github.com/Google-Health/cxr-foundation/blob/master/notebooks/quick_start_with_hugging_face.ipynb
+# Other notebooks are also available: https://github.com/Google-Health/cxr-foundation/tree/master/notebooks`,
+]
+
 export const depth_anything_v2 = (model: ModelData): string[] => {
 	let encoder: string;
 	let features: string;
@@ -167,6 +172,59 @@ focallength_px = prediction["focallength_px"]`;
 
 	return [installSnippet, inferenceSnippet];
 };
+
+export const derm_foundation = (model: ModelData): string[] => [
+	`from PIL import Image
+from io import BytesIO
+from IPython.display import Image as IPImage, display
+from huggingface_hub import from_pretrained_keras
+import tensorflow as tf
+import matplotlib.pyplot as plt
+import requests
+
+# Load test image from SCIN Dataset
+# https://github.com/google-research-datasets/scin
+IMAGE_URL = "https://storage.googleapis.com/dx-scin-public-data/dataset/images/3445096909671059178.png"
+response = requests.get(IMAGE_URL, stream=True)
+# Raise an exception if the request fails
+response.raise_for_status()
+# Load the image into a PIL Image object
+image = Image.open(response.raw)
+
+buf = BytesIO()
+image.convert("RGB").save(buf, "PNG")
+image_bytes = buf.getvalue()
+# Format input
+input_tensor = tf.train.Example(
+    features=tf.train.Features(
+        feature={
+            "image/encoded": tf.train.Feature(
+                bytes_list=tf.train.BytesList(value=[image_bytes])
+            )
+        }
+    )
+).SerializeToString()
+
+# Load the model directly from Hugging Face Hub
+loaded_model = from_pretrained_keras("google/derm-foundation")
+
+# Call inference
+infer = loaded_model.signatures["serving_default"]
+output = infer(inputs=tf.constant([input_tensor]))
+
+# Extract the embedding vector
+embedding_vector = output["embedding"].numpy().flatten()
+print("Size of embedding vector:", len(embedding_vector))
+
+# Plot the embedding vector
+plt.figure(figsize=(12, 4))
+plt.plot(embedding_vector)
+plt.title("Embedding Vector")
+plt.xlabel("Index")
+plt.ylabel("Value")
+plt.grid(True)
+plt.show()`,
+]
 
 const diffusersDefaultPrompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
 
