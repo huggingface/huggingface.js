@@ -22,8 +22,6 @@ const PYTHON_HEADER_FILE = `
 #   - specs:  https://github.com/huggingface/huggingface.js/tree/main/packages/tasks/src/tasks.
 `;
 
-const PYTHON_DIR = "./.python_generated";
-
 const rootDirFinder = function (): string {
 	let currentPath = path.normalize(import.meta.url);
 
@@ -172,8 +170,10 @@ async function postProcessOutput(path2generated: string, outputSpec: Record<stri
 	return;
 }
 
-const rootDir = rootDirFinder();
+const rootDir = path.join(rootDirFinder(), "..", "tasks");
 const tasksDir = path.join(rootDir, "src", "tasks");
+const PYTHON_DIR = path.join(rootDir, ".python_generated");
+
 const allTasks = await Promise.all(
 	(await fs.readdir(tasksDir, { withFileTypes: true }))
 		.filter((entry) => entry.isDirectory())

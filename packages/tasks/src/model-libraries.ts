@@ -1,6 +1,6 @@
-import * as snippets from "./model-libraries-snippets";
-import type { ModelData } from "./model-data";
-import type { ElasticSearchQuery } from "./model-libraries-downloads";
+import * as snippets from "./model-libraries-snippets.js";
+import type { ModelData } from "./model-data.js";
+import type { ElasticSearchQuery } from "./model-libraries-downloads.js";
 
 /**
  * Elements configurable by a model library.
@@ -75,6 +75,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.allennlp,
 		filter: true,
 	},
+	anemoi: {
+		prettyLabel: "AnemoI",
+		repoName: "AnemoI",
+		repoUrl: "https://github.com/ecmwf/anemoi-inference",
+		docsUrl: "https://anemoi-docs.readthedocs.io/en/latest/",
+		filter: false,
+		countDownloads: `path_extension:"ckpt"`,
+		snippets: snippets.anemoi,
+	},
 	asteroid: {
 		prettyLabel: "Asteroid",
 		repoName: "Asteroid",
@@ -114,6 +123,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"npz"`,
 	},
+	birder: {
+		prettyLabel: "Birder",
+		repoName: "Birder",
+		repoUrl: "https://gitlab.com/birder/birder",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
 	birefnet: {
 		prettyLabel: "BiRefNet",
 		repoName: "BiRefNet",
@@ -150,6 +166,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"adapter_config.json"`,
 	},
+	"cxr-foundation": {
+		prettyLabel: "CXR Foundation",
+		repoName: "cxr-foundation",
+		repoUrl: "https://github.com/google-health/cxr-foundation",
+		filter: false,
+		countDownloads: `path:"precomputed_embeddings/embeddings.npz" OR path:"pax-elixr-b-text/saved_model.pb"`,
+	},
 	deepforest: {
 		prettyLabel: "DeepForest",
 		repoName: "deepforest",
@@ -172,6 +195,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pt"`,
 		snippets: snippets.depth_pro,
 		filter: false,
+	},
+	"derm-foundation": {
+		prettyLabel: "Derm Foundation",
+		repoName: "derm-foundation",
+		repoUrl: "https://github.com/google-health/derm-foundation",
+		filter: false,
+		countDownloads: `path:"scin_dataset_precomputed_embeddings.npz" OR path:"saved_model.pb"`,
 	},
 	diffree: {
 		prettyLabel: "Diffree",
@@ -211,6 +241,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "Cartesia MLX",
 		repoUrl: "https://github.com/cartesia-ai/cartesia_mlx",
 		snippets: snippets.cartesia_mlx,
+	},
+	clipscope: {
+		prettyLabel: "clipscope",
+		repoName: "clipscope",
+		repoUrl: "https://github.com/Lewington-pitsos/clipscope",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
 	},
 	cosyvoice: {
 		prettyLabel: "CosyVoice",
@@ -324,6 +361,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://hezarai.github.io/hezar",
 		countDownloads: `path:"model_config.yaml" OR path:"embedding/embedding_config.yaml"`,
 	},
+	htrflow: {
+		prettyLabel: "HTRflow",
+		repoName: "HTRflow",
+		repoUrl: "https://github.com/AI-Riksarkivet/htrflow",
+		docsUrl: "https://ai-riksarkivet.github.io/htrflow",
+		snippets: snippets.htrflow,
+	},
 	"hunyuan-dit": {
 		prettyLabel: "HunyuanDiT",
 		repoName: "HunyuanDiT",
@@ -352,15 +396,22 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/keras-team/tf-keras",
 		docsUrl: "https://huggingface.co/docs/hub/tf-keras",
 		snippets: snippets.tf_keras,
-		filter: true,
 		countDownloads: `path:"saved_model.pb"`,
 	},
 	"keras-nlp": {
 		prettyLabel: "KerasNLP",
 		repoName: "KerasNLP",
-		repoUrl: "https://keras.io/keras_nlp/",
-		docsUrl: "https://github.com/keras-team/keras-nlp",
+		repoUrl: "https://github.com/keras-team/keras-nlp",
+		docsUrl: "https://keras.io/keras_nlp/",
 		snippets: snippets.keras_nlp,
+	},
+	"keras-hub": {
+		prettyLabel: "KerasHub",
+		repoName: "KerasHub",
+		repoUrl: "https://github.com/keras-team/keras-hub",
+		docsUrl: "https://keras.io/keras_hub/",
+		snippets: snippets.keras_hub,
+		filter: true,
 	},
 	k2: {
 		prettyLabel: "K2",
@@ -379,6 +430,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "llama-cpp-python",
 		repoUrl: "https://github.com/abetlen/llama-cpp-python",
 		snippets: snippets.llama_cpp_python,
+	},
+	"mini-omni2": {
+		prettyLabel: "Mini-Omni2",
+		repoName: "Mini-Omni2",
+		repoUrl: "https://github.com/gpt-omni/mini-omni2",
+		countDownloads: `path:"model_config.yaml"`,
 	},
 	mindspore: {
 		prettyLabel: "MindSpore",
@@ -462,6 +519,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.nemo,
 		filter: true,
 		countDownloads: `path_extension:"nemo" OR path:"model_config.yaml"`,
+	},
+	"open-oasis": {
+		prettyLabel: "open-oasis",
+		repoName: "open-oasis",
+		repoUrl: "https://github.com/etched-ai/open-oasis",
+		countDownloads: `path:"oasis500m.safetensors"`,
 	},
 	open_clip: {
 		prettyLabel: "OpenCLIP",
@@ -687,6 +750,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"safetensors" OR path_extension:"pt"`,
 	},
+	genmo: {
+		prettyLabel: "Genmo",
+		repoName: "Genmo",
+		repoUrl: "https://github.com/genmoai/models",
+		filter: false,
+		countDownloads: `path:"vae_stats.json"`,
+	},
 	tensorflowtts: {
 		prettyLabel: "TensorFlowTTS",
 		repoName: "TensorFlowTTS",
@@ -732,11 +802,11 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.transformersJS,
 		filter: true,
 	},
-	"trellis": {
+	trellis: {
 		prettyLabel: "Trellis",
 		repoName: "Trellis",
 		repoUrl: "https://github.com/microsoft/TRELLIS",
-		countDownloads: `path:"*/model.safetensors"`,
+		countDownloads: `path_extension:"safetensors"`,
 	},
 	"unity-sentis": {
 		prettyLabel: "unity-sentis",
@@ -745,6 +815,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.sentis,
 		filter: true,
 		countDownloads: `path_extension:"sentis"`,
+	},
+	sana: {
+		prettyLabel: "Sana",
+		repoName: "Sana",
+		repoUrl: "https://github.com/NVlabs/Sana",
+		countDownloads: `path_extension:"pth"`,
+		snippets: snippets.sana,
 	},
 	"vfi-mamba": {
 		prettyLabel: "VFIMamba",

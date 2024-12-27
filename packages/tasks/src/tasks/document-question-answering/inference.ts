@@ -12,7 +12,7 @@ export interface DocumentQuestionAnsweringInput {
 	 */
 	inputs: DocumentQuestionAnsweringInputData;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Document Question Answering
 	 */
 	parameters?: DocumentQuestionAnsweringParameters;
 	[property: string]: unknown;
@@ -32,8 +32,6 @@ export interface DocumentQuestionAnsweringInputData {
 	[property: string]: unknown;
 }
 /**
- * Additional inference parameters
- *
  * Additional inference parameters for Document Question Answering
  */
 export interface DocumentQuestionAnsweringParameters {
@@ -102,9 +100,5 @@ export interface DocumentQuestionAnsweringOutputElement {
 	 * boxes).
 	 */
 	start: number;
-	/**
-	 * The index of each word/box pair that is in the answer
-	 */
-	words: number[];
 	[property: string]: unknown;
 }

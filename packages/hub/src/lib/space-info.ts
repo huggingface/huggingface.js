@@ -15,6 +15,10 @@ export async function spaceInfo<
 		hubUrl?: string;
 		additionalFields?: T[];
 		/**
+		 * An optional Git revision id which can be a branch name, a tag, or a commit hash.
+		 */
+		revision?: string;
+		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
@@ -28,7 +32,9 @@ export async function spaceInfo<
 	]).toString();
 
 	const response = await (params.fetch || fetch)(
-		`${params?.hubUrl || HUB_URL}/api/spaces/${params.name}?${search.toString()}`,
+		`${params?.hubUrl || HUB_URL}/api/spaces/${params.name}/revision/${encodeURIComponent(
+			params.revision ?? "HEAD"
+		)}?${search.toString()}`,
 		{
 			headers: {
 				...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),

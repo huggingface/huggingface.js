@@ -14,15 +14,13 @@ export interface AutomaticSpeechRecognitionInput {
 	 */
 	inputs: string;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Automatic Speech Recognition
 	 */
 	parameters?: AutomaticSpeechRecognitionParameters;
 	[property: string]: unknown;
 }
 
 /**
- * Additional inference parameters
- *
  * Additional inference parameters for Automatic Speech Recognition
  */
 export interface AutomaticSpeechRecognitionParameters {
@@ -39,8 +37,6 @@ export interface AutomaticSpeechRecognitionParameters {
 
 /**
  * Parametrization of the text generation process
- *
- * Ad-hoc parametrization of the text generation process
  */
 export interface GenerationParameters {
 	/**

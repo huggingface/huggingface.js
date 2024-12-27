@@ -10,7 +10,7 @@ export const snippetBasic = (model: ModelDataMinimal, accessToken: string): Infe
 		"https://api-inference.huggingface.co/models/${model.id}",
 		{
 			headers: {
-				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}"
+				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
 				"Content-Type": "application/json",
 			},
 			method: "POST",
@@ -40,10 +40,9 @@ export const snippetTextGeneration = (
 	if (model.tags.includes("conversational")) {
 		// Conversational model detected, so we display a code snippet that features the Messages API
 		const streaming = opts?.streaming ?? true;
-		const messages: ChatCompletionInputMessage[] = opts?.messages ?? [
-			{ role: "user", content: "What is the capital of France?" },
-		];
-		const messagesStr = stringifyMessages(messages, { sep: ",\n\t\t", start: "[\n\t\t", end: "\n\t]" });
+		const exampleMessages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
+		const messages = opts?.messages ?? exampleMessages;
+		const messagesStr = stringifyMessages(messages, { indent: "\t" });
 
 		const config = {
 			...(opts?.temperature ? { temperature: opts.temperature } : undefined),
@@ -51,19 +50,17 @@ export const snippetTextGeneration = (
 			...(opts?.top_p ? { top_p: opts.top_p } : undefined),
 		};
 		const configStr = stringifyGenerationConfig(config, {
-			sep: ",\n\t",
-			start: "",
-			end: "",
+			indent: "\n\t",
 			attributeValueConnector: ": ",
 		});
 
 		if (streaming) {
 			return [
 				{
-					client: "huggingface_hub",
-					content: `import { HfInference } from "@huggingface/inference"
+					client: "huggingface.js",
+					content: `import { HfInference } from "@huggingface/inference";
 
-const client = new HfInference("${accessToken || `{API_TOKEN}`}")
+const client = new HfInference("${accessToken || `{API_TOKEN}`}");
 
 let out = "";
 
@@ -83,12 +80,12 @@ for await (const chunk of stream) {
 				},
 				{
 					client: "openai",
-					content: `import { OpenAI } from "openai"
+					content: `import { OpenAI } from "openai";
 
 const client = new OpenAI({
 	baseURL: "https://api-inference.huggingface.co/v1/",
     apiKey: "${accessToken || `{API_TOKEN}`}"
-})
+});
 
 let out = "";
 
@@ -111,10 +108,10 @@ for await (const chunk of stream) {
 		} else {
 			return [
 				{
-					client: "huggingface_hub",
-					content: `import { HfInference } from '@huggingface/inference'
+					client: "huggingface.js",
+					content: `import { HfInference } from "@huggingface/inference";
 
-const client = new HfInference("${accessToken || `{API_TOKEN}`}")
+const client = new HfInference("${accessToken || `{API_TOKEN}`}");
 
 const chatCompletion = await client.chatCompletion({
 	model: "${model.id}",
@@ -126,12 +123,12 @@ console.log(chatCompletion.choices[0].message);`,
 				},
 				{
 					client: "openai",
-					content: `import { OpenAI } from "openai"
+					content: `import { OpenAI } from "openai";
 
 const client = new OpenAI({
     baseURL: "https://api-inference.huggingface.co/v1/",
     apiKey: "${accessToken || `{API_TOKEN}`}"
-})
+});
 
 const chatCompletion = await client.chat.completions.create({
 	model: "${model.id}",
@@ -148,43 +145,13 @@ console.log(chatCompletion.choices[0].message);`,
 	}
 };
 
-export const snippetImageTextToTextGeneration = (model: ModelDataMinimal, accessToken: string): InferenceSnippet => {
-	if (model.tags.includes("conversational")) {
-		// Conversational model detected, so we display a code snippet that features the Messages API
-		return {
-			content: `import { HfInference } from "@huggingface/inference";
-
-const inference = new HfInference("${accessToken || `{API_TOKEN}`}");
-const imageUrl = "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg";
-
-for await (const chunk of inference.chatCompletionStream({
-	model: "${model.id}",
-	messages: [
-		{
-			"role": "user",
-			"content": [
-				{"type": "image_url", "image_url": {"url": imageUrl}},
-				{"type": "text", "text": "Describe this image in one sentence."},
-			],
-		}
-	],
-	max_tokens: 500,
-})) {
-	process.stdout.write(chunk.choices[0]?.delta?.content || "");
-}`,
-		};
-	} else {
-		return snippetBasic(model, accessToken);
-	}
-};
-
 export const snippetZeroShotClassification = (model: ModelDataMinimal, accessToken: string): InferenceSnippet => ({
 	content: `async function query(data) {
 	const response = await fetch(
 		"https://api-inference.huggingface.co/models/${model.id}",
 		{
 			headers: {
-				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}"
+				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
 				"Content-Type": "application/json",
 			},
 			method: "POST",
@@ -208,7 +175,7 @@ export const snippetTextToImage = (model: ModelDataMinimal, accessToken: string)
 		"https://api-inference.huggingface.co/models/${model.id}",
 		{
 			headers: {
-				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}"
+				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
 				"Content-Type": "application/json",
 			},
 			method: "POST",
@@ -229,7 +196,7 @@ export const snippetTextToAudio = (model: ModelDataMinimal, accessToken: string)
 			"https://api-inference.huggingface.co/models/${model.id}",
 			{
 				headers: {
-					Authorization: "Bearer ${accessToken || `{API_TOKEN}`}"
+					Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
 					"Content-Type": "application/json",
 				},
 				method: "POST",
@@ -271,7 +238,7 @@ export const snippetFile = (model: ModelDataMinimal, accessToken: string): Infer
 		"https://api-inference.huggingface.co/models/${model.id}",
 		{
 			headers: {
-				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}"
+				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
 				"Content-Type": "application/json",
 			},
 			method: "POST",
@@ -307,7 +274,7 @@ export const jsSnippets: Partial<
 	summarization: snippetBasic,
 	"feature-extraction": snippetBasic,
 	"text-generation": snippetTextGeneration,
-	"image-text-to-text": snippetImageTextToTextGeneration,
+	"image-text-to-text": snippetTextGeneration,
 	"text2text-generation": snippetBasic,
 	"fill-mask": snippetBasic,
 	"sentence-similarity": snippetBasic,
@@ -325,10 +292,11 @@ export const jsSnippets: Partial<
 
 export function getJsInferenceSnippet(
 	model: ModelDataMinimal,
-	accessToken: string
+	accessToken: string,
+	opts?: Record<string, unknown>
 ): InferenceSnippet | InferenceSnippet[] {
 	return model.pipeline_tag && model.pipeline_tag in jsSnippets
-		? jsSnippets[model.pipeline_tag]?.(model, accessToken) ?? { content: "" }
+		? jsSnippets[model.pipeline_tag]?.(model, accessToken, opts) ?? { content: "" }
 		: { content: "" };
 }
 

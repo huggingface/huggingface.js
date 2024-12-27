@@ -13,15 +13,13 @@ export interface ImageToTextInput {
 	 */
 	inputs: unknown;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Image To Text
 	 */
 	parameters?: ImageToTextParameters;
 	[property: string]: unknown;
 }
 
 /**
- * Additional inference parameters
- *
  * Additional inference parameters for Image To Text
  */
 export interface ImageToTextParameters {
@@ -38,8 +36,6 @@ export interface ImageToTextParameters {
 
 /**
  * Parametrization of the text generation process
- *
- * Ad-hoc parametrization of the text generation process
  */
 export interface GenerationParameters {
 	/**

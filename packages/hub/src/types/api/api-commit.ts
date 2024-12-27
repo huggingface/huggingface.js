@@ -5,7 +5,7 @@ export interface ApiLfsBatchRequest {
 	/**
 	 * Optional object describing the server ref that the objects belong to. Note: Added in v2.4.
 	 *
-	 * We use this object for QOL and to fail early for users when they're tring to push to the wrong reference.
+	 * We use this object for QOL and to fail early for users when they're trying to push to the wrong reference.
 	 * But it does nothing for security.
 	 */
 	ref?: {

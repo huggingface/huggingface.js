@@ -14,15 +14,13 @@ export interface ImageToImageInput {
 	 */
 	inputs: string;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Image To Image
 	 */
 	parameters?: ImageToImageParameters;
 	[property: string]: unknown;
 }
 
 /**
- * Additional inference parameters
- *
  * Additional inference parameters for Image To Image
  */
 export interface ImageToImageParameters {

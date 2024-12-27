@@ -12,7 +12,7 @@ export type SentenceSimilarityOutput = number[];
 export interface SentenceSimilarityInput {
 	inputs: SentenceSimilarityInputData;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Sentence Similarity
 	 */
 	parameters?: { [key: string]: unknown };
 	[property: string]: unknown;

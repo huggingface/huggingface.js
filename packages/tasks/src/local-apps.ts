@@ -1,6 +1,9 @@
-import type { ModelData } from "./model-data";
-import type { PipelineType } from "./pipelines";
-import { parseGGUFQuantLabel } from "@huggingface/gguf";
+import { parseGGUFQuantLabel } from "./gguf.js";
+import type { ModelData } from "./model-data.js";
+import type { PipelineType } from "./pipelines.js";
+import { stringifyMessages } from "./snippets/common.js";
+import { getModelInputSnippet } from "./snippets/inputs.js";
+import type { ChatCompletionInputMessage } from "./tasks/index.js";
 
 export interface LocalAppSnippet {
 	/**
@@ -92,15 +95,20 @@ function isMlxModel(model: ModelData) {
 }
 
 const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
-	const command = (binary: string) =>
-		[
+	const command = (binary: string) => {
+		const snippet = [
 			"# Load and run the model:",
 			`${binary} \\`,
 			`  --hf-repo "${model.id}" \\`,
 			`  --hf-file ${filepath ?? "{{GGUF_FILE}}"} \\`,
-			'  -p "You are a helpful assistant" \\',
-			"  --conversation",
-		].join("\n");
+			`  -p "${model.tags.includes("conversational") ? "You are a helpful assistant" : "Once upon a time,"}"`,
+		];
+		if (model.tags.includes("conversational")) {
+			snippet[snippet.length - 1] += " \\";
+			snippet.push("  --conversation");
+		}
+		return snippet.join("\n");
+	};
 	return [
 		{
 			title: "Install from brew",
@@ -121,9 +129,10 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 			setup: [
 				"git clone https://github.com/ggerganov/llama.cpp.git",
 				"cd llama.cpp",
-				"LLAMA_CURL=1 make llama-cli",
+				"cmake -B build -DLLAMA_CURL=ON",
+				"cmake --build build -j --target llama-cli",
 			].join("\n"),
-			content: command("./llama-cli"),
+			content: command("./build/bin/llama-cli"),
 		},
 	];
 };
@@ -178,22 +187,33 @@ const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] 
 };
 
 const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
-	const runCommand = [
-		"# Call the server using curl:",
-		`curl -X POST "http://localhost:8000/v1/chat/completions" \\`,
-		`	-H "Content-Type: application/json" \\`,
-		`	--data '{`,
-		`		"model": "${model.id}",`,
-		`		"messages": [`,
-		`			{"role": "user", "content": "Hello!"}`,
-		`		]`,
-		`	}'`,
-	];
+	const messages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
+	const runCommandInstruct = `# Call the server using curl:
+curl -X POST "http://localhost:8000/v1/chat/completions" \\
+	-H "Content-Type: application/json" \\
+	--data '{
+		"model": "${model.id}",
+		"messages": ${stringifyMessages(messages, {
+			indent: "\t\t",
+			attributeKeyQuotes: true,
+			customContentEscaper: (str) => str.replace(/'/g, "'\\''"),
+		})}
+	}'`;
+	const runCommandNonInstruct = `# Call the server using curl:
+curl -X POST "http://localhost:8000/v1/completions" \\
+	-H "Content-Type: application/json" \\
+	--data '{
+		"model": "${model.id}",
+		"prompt": "Once upon a time,",
+		"max_tokens": 512,
+		"temperature": 0.5
+	}'`;
+	const runCommand = model.tags.includes("conversational") ? runCommandInstruct : runCommandNonInstruct;
 	return [
 		{
 			title: "Install from pip",
 			setup: ["# Install vLLM from pip:", "pip install vllm"].join("\n"),
-			content: [`# Load and run the model:\nvllm serve "${model.id}"`, runCommand.join("\n")],
+			content: [`# Load and run the model:\nvllm serve "${model.id}"`, runCommand],
 		},
 		{
 			title: "Use Docker images",
@@ -210,7 +230,7 @@ const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
 			].join("\n"),
 			content: [
 				`# Load and run the model:\ndocker exec -it my_vllm_container bash -c "vllm serve ${model.id}"`,
-				runCommand.join("\n"),
+				runCommand,
 			],
 		},
 	];

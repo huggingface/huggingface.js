@@ -16,11 +16,18 @@ function getHuggingFaceHubCache(): string {
 	return process.env["HUGGINGFACE_HUB_CACHE"] ?? getDefaultCachePath();
 }
 
-function getHFHubCache(): string {
+export function getHFHubCachePath(): string {
 	return process.env["HF_HUB_CACHE"] ?? getHuggingFaceHubCache();
 }
 
 const FILES_TO_IGNORE: string[] = [".DS_Store"];
+
+export const REPO_ID_SEPARATOR: string = "--";
+
+export function getRepoFolderName({ name, type }: RepoId): string {
+	const parts = [`${type}s`, ...name.split("/")];
+	return parts.join(REPO_ID_SEPARATOR);
+}
 
 export interface CachedFileInfo {
 	path: string;
@@ -63,7 +70,7 @@ export interface HFCacheInfo {
 }
 
 export async function scanCacheDir(cacheDir: string | undefined = undefined): Promise<HFCacheInfo> {
-	if (!cacheDir) cacheDir = getHFHubCache();
+	if (!cacheDir) cacheDir = getHFHubCachePath();
 
 	const s = await stat(cacheDir);
 	if (!s.isDirectory()) {
@@ -107,12 +114,12 @@ export async function scanCacheDir(cacheDir: string | undefined = undefined): Pr
 export async function scanCachedRepo(repoPath: string): Promise<CachedRepoInfo> {
 	// get the directory name
 	const name = basename(repoPath);
-	if (!name.includes("--")) {
+	if (!name.includes(REPO_ID_SEPARATOR)) {
 		throw new Error(`Repo path is not a valid HuggingFace cache directory: ${name}`);
 	}
 
 	// parse the repoId from directory name
-	const [type, ...remaining] = name.split("--");
+	const [type, ...remaining] = name.split(REPO_ID_SEPARATOR);
 	const repoType = parseRepoType(type);
 	const repoId = remaining.join("/");
 

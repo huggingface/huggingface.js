@@ -1,10 +1,13 @@
 packages:
+  - "packages/blob"
+  - "packages/dduf"
   - "packages/hub"
   - "packages/inference"
   - "packages/doc-internal"
   - "packages/agents"
   - "packages/languages"
   - "packages/tasks"
+  - "packages/tasks-gen"
   - "packages/gguf"
   - "packages/jinja"
   - "packages/space-header"

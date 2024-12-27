@@ -13,15 +13,13 @@ export interface Text2TextGenerationInput {
 	 */
 	inputs: string;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Text2text Generation
 	 */
 	parameters?: Text2TextGenerationParameters;
 	[property: string]: unknown;
 }
 
 /**
- * Additional inference parameters
- *
  * Additional inference parameters for Text2text Generation
  */
 export interface Text2TextGenerationParameters {

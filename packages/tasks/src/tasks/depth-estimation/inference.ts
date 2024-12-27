@@ -13,7 +13,7 @@ export interface DepthEstimationInput {
 	 */
 	inputs: unknown;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Depth Estimation
 	 */
 	parameters?: { [key: string]: unknown };
 	[property: string]: unknown;

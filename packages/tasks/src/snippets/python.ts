@@ -4,6 +4,11 @@ import { stringifyGenerationConfig, stringifyMessages } from "./common.js";
 import { getModelInputSnippet } from "./inputs.js";
 import type { InferenceSnippet, ModelDataMinimal } from "./types.js";
 
+const snippetImportInferenceClient = (model: ModelDataMinimal, accessToken: string): string =>
+	`from huggingface_hub import InferenceClient
+client = InferenceClient("${model.id}", token="${accessToken || "{API_TOKEN}"}")
+`;
+
 export const snippetConversational = (
 	model: ModelDataMinimal,
 	accessToken: string,
@@ -16,15 +21,9 @@ export const snippetConversational = (
 	}
 ): InferenceSnippet[] => {
 	const streaming = opts?.streaming ?? true;
-	const messages: ChatCompletionInputMessage[] = opts?.messages ?? [
-		{ role: "user", content: "What is the capital of France?" },
-	];
-	const messagesStr = stringifyMessages(messages, {
-		sep: ",\n\t",
-		start: `[\n\t`,
-		end: `\n]`,
-		attributeKeyQuotes: true,
-	});
+	const exampleMessages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
+	const messages = opts?.messages ?? exampleMessages;
+	const messagesStr = stringifyMessages(messages, { attributeKeyQuotes: true });
 
 	const config = {
 		...(opts?.temperature ? { temperature: opts.temperature } : undefined),
@@ -32,9 +31,7 @@ export const snippetConversational = (
 		...(opts?.top_p ? { top_p: opts.top_p } : undefined),
 	};
 	const configStr = stringifyGenerationConfig(config, {
-		sep: ",\n\t",
-		start: "",
-		end: "",
+		indent: "\n\t",
 		attributeValueConnector: "=",
 	});
 
@@ -56,7 +53,7 @@ stream = client.chat.completions.create(
 )
 
 for chunk in stream:
-    print(chunk.choices[0].delta.content)`,
+    print(chunk.choices[0].delta.content, end="")`,
 			},
 			{
 				client: "openai",
@@ -77,7 +74,7 @@ stream = client.chat.completions.create(
 )
 
 for chunk in stream:
-    print(chunk.choices[0].delta.content)`,
+    print(chunk.choices[0].delta.content, end="")`,
 			},
 		];
 	} else {
@@ -120,30 +117,6 @@ print(completion.choices[0].message)`,
 		];
 	}
 };
-
-export const snippetConversationalWithImage = (model: ModelDataMinimal, accessToken: string): InferenceSnippet => ({
-	content: `from huggingface_hub import InferenceClient
-
-client = InferenceClient(api_key="${accessToken || "{API_TOKEN}"}")
-
-image_url = "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg"
-
-for message in client.chat_completion(
-	model="${model.id}",
-	messages=[
-		{
-			"role": "user",
-			"content": [
-				{"type": "image_url", "image_url": {"url": image_url}},
-				{"type": "text", "text": "Describe this image in one sentence."},
-			],
-		}
-	],
-	max_tokens=500,
-	stream=True,
-):
-	print(message.choices[0].delta.content, end="")`,
-});
 
 export const snippetZeroShotClassification = (model: ModelDataMinimal): InferenceSnippet => ({
 	content: `def query(payload):
@@ -193,18 +166,28 @@ export const snippetFile = (model: ModelDataMinimal): InferenceSnippet => ({
 output = query(${getModelInputSnippet(model)})`,
 });
 
-export const snippetTextToImage = (model: ModelDataMinimal): InferenceSnippet => ({
-	content: `def query(payload):
+export const snippetTextToImage = (model: ModelDataMinimal, accessToken: string): InferenceSnippet[] => [
+	{
+		client: "huggingface_hub",
+		content: `${snippetImportInferenceClient(model, accessToken)}
+# output is a PIL.Image object
+image = client.text_to_image(${getModelInputSnippet(model)})`,
+	},
+	{
+		client: "requests",
+		content: `def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.content
 image_bytes = query({
 	"inputs": ${getModelInputSnippet(model)},
 })
+
 # You can access the image with PIL.Image for example
 import io
 from PIL import Image
 image = Image.open(io.BytesIO(image_bytes))`,
-});
+	},
+];
 
 export const snippetTabular = (model: ModelDataMinimal): InferenceSnippet => ({
 	content: `def query(payload):
@@ -282,7 +265,7 @@ export const pythonSnippets: Partial<
 	"feature-extraction": snippetBasic,
 	"text-generation": snippetBasic,
 	"text2text-generation": snippetBasic,
-	"image-text-to-text": snippetConversationalWithImage,
+	"image-text-to-text": snippetConversational,
 	"fill-mask": snippetBasic,
 	"sentence-similarity": snippetBasic,
 	"automatic-speech-recognition": snippetFile,
@@ -306,12 +289,9 @@ export function getPythonInferenceSnippet(
 	accessToken: string,
 	opts?: Record<string, unknown>
 ): InferenceSnippet | InferenceSnippet[] {
-	if (model.pipeline_tag === "text-generation" && model.tags.includes("conversational")) {
+	if (model.tags.includes("conversational")) {
 		// Conversational model detected, so we display a code snippet that features the Messages API
 		return snippetConversational(model, accessToken, opts);
-	} else if (model.pipeline_tag === "image-text-to-text" && model.tags.includes("conversational")) {
-		// Example sending an image to the Message API
-		return snippetConversationalWithImage(model, accessToken);
 	} else {
 		let snippets =
 			model.pipeline_tag && model.pipeline_tag in pythonSnippets
@@ -323,12 +303,14 @@ export function getPythonInferenceSnippet(
 		return snippets.map((snippet) => {
 			return {
 				...snippet,
-				content: `import requests
+				content: snippet.content.includes("requests")
+					? `import requests
 
 API_URL = "https://api-inference.huggingface.co/models/${model.id}"
 headers = {"Authorization": ${accessToken ? `"Bearer ${accessToken}"` : `f"Bearer {API_TOKEN}"`}}
 
-${snippet.content}`,
+${snippet.content}`
+					: snippet.content,
 			};
 		});
 	}

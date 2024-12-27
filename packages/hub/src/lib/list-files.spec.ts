@@ -75,7 +75,7 @@ describe("listFiles", () => {
 		const files: ListFileEntry[] = [];
 
 		for await (const entry of cursor) {
-			delete entry.security; // flaky
+			delete entry.securityFileStatus; // flaky
 			files.push(entry);
 		}
 

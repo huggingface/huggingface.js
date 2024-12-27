@@ -9,6 +9,9 @@ import { toRepoId } from "../utils/toRepoId";
 export async function createRepo(
 	params: {
 		repo: RepoDesignation;
+		/**
+		 * If unset, will follow the organization's default setting. (typically public, except for some Enterprise organizations)
+		 */
 		private?: boolean;
 		license?: string;
 		/**
