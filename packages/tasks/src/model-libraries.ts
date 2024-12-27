@@ -212,6 +212,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/cartesia-ai/cartesia_mlx",
 		snippets: snippets.cartesia_mlx,
 	},
+	cosyvoice: {
+		prettyLabel: "CosyVoice",
+		repoName: "CosyVoice",
+		repoUrl: "https://github.com/FunAudioLLM/CosyVoice",
+		filter: false,
+		countDownloads: `path_extension:"onnx" OR path_extension:"pt"`,	
+	},
 	cotracker: {
 		prettyLabel: "CoTracker",
 		repoName: "CoTracker",
