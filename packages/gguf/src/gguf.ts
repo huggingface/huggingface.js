@@ -10,8 +10,8 @@ export { parseGGUFQuantLabel, GGUF_QUANT_RE, GGUF_QUANT_RE_GLOBAL } from "@huggi
 
 export const RE_GGUF_FILE = /\.gguf$/;
 export const RE_GGUF_SHARD_FILE = /^(?<prefix>.*?)-(?<shard>\d{5})-of-(?<total>\d{5})\.gguf$/;
-const GGUF_DEFAULT_ALIGNMENT = 32; //defined in ggml.h
-const GGML_PAD = (x: number, n: number) => (x + n - 1) & ~(n - 1); //defined in ggml.h
+const GGUF_DEFAULT_ALIGNMENT = 32; // defined in ggml.h
+const GGML_PAD = (x: number, n: number) => (x + n - 1) & ~(n - 1); // defined in ggml.h
 const PARALLEL_DOWNLOADS = 20;
 
 export interface GgufShardFileInfo {
