@@ -95,11 +95,6 @@ export const bm25s = (model: ModelData): string[] => [
 retriever = BM25HF.load_from_hub("${model.id}")`,
 ];
 
-export const cxr_foundation = (model: ModelData): string[] => [
-	`# The quick start notebook shows Hugging Face usage: https://github.com/Google-Health/cxr-foundation/blob/master/notebooks/quick_start_with_hugging_face.ipynb
-# Other notebooks are also available: https://github.com/Google-Health/cxr-foundation/tree/master/notebooks`,
-]
-
 export const depth_anything_v2 = (model: ModelData): string[] => {
 	let encoder: string;
 	let features: string;
