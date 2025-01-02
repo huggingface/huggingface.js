@@ -95,6 +95,26 @@ export const bm25s = (model: ModelData): string[] => [
 retriever = BM25HF.load_from_hub("${model.id}")`,
 ];
 
+export const cxr_foundation = (model: ModelData): string[] => [
+	`# Install library
+!git clone https://github.com/Google-Health/cxr-foundation.git
+import tensorflow as tf, sys
+sys.path.append('cxr-foundation/python/')
+
+# Install dependencies
+major_version = tf.__version__.rsplit(".", 1)[0]
+!pip install tensorflow-text=={major_version} pypng && pip install --no-deps pydicom hcls_imaging_ml_toolkit retrying
+
+# Run inference
+from PIL import Image
+from clientside.clients import make_hugging_face_client
+
+cxr_client = make_hugging_face_client('cxr_model')
+!wget -nc -q https://upload.wikimedia.org/wikipedia/commons/c/c8/Chest_Xray_PA_3-8-2010.png
+
+print(cxr_client.get_image_embeddings_from_images([Image.open("Chest_Xray_PA_3-8-2010.png")]))`,
+];
+
 export const depth_anything_v2 = (model: ModelData): string[] => {
 	let encoder: string;
 	let features: string;
@@ -167,6 +187,44 @@ focallength_px = prediction["focallength_px"]`;
 
 	return [installSnippet, inferenceSnippet];
 };
+
+export const derm_foundation = (model: ModelData): string[] => [
+	`from PIL import Image
+from io import BytesIO
+from huggingface_hub import from_pretrained_keras
+import tensorflow as tf
+import requests
+
+# Load test image from SCIN Dataset
+# https://github.com/google-research-datasets/scin
+IMAGE_URL = "https://storage.googleapis.com/dx-scin-public-data/dataset/images/3445096909671059178.png"
+response = requests.get(IMAGE_URL, stream=True)
+# Raise an exception if the request fails
+response.raise_for_status()
+# Load the image into a PIL Image object
+image = Image.open(response.raw)
+
+buf = BytesIO()
+image.convert("RGB").save(buf, "PNG")
+image_bytes = buf.getvalue()
+# Format input
+input_tensor = tf.train.Example(
+    features=tf.train.Features(
+        feature={
+            "image/encoded": tf.train.Feature(
+                bytes_list=tf.train.BytesList(value=[image_bytes])
+            )
+        }
+    )
+).SerializeToString()
+
+# Load the model directly from Hugging Face Hub
+loaded_model = from_pretrained_keras("google/derm-foundation")
+
+# Call inference
+infer = loaded_model.signatures["serving_default"]
+output = infer(inputs=tf.constant([input_tensor]))`,
+]
 
 const diffusersDefaultPrompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
 
