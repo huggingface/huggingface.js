@@ -171,10 +171,8 @@ focallength_px = prediction["focallength_px"]`;
 export const derm_foundation = (model: ModelData): string[] => [
 	`from PIL import Image
 from io import BytesIO
-from IPython.display import Image as IPImage, display
 from huggingface_hub import from_pretrained_keras
 import tensorflow as tf
-import matplotlib.pyplot as plt
 import requests
 
 # Load test image from SCIN Dataset
@@ -205,20 +203,7 @@ loaded_model = from_pretrained_keras("google/derm-foundation")
 
 # Call inference
 infer = loaded_model.signatures["serving_default"]
-output = infer(inputs=tf.constant([input_tensor]))
-
-# Extract the embedding vector
-embedding_vector = output["embedding"].numpy().flatten()
-print("Size of embedding vector:", len(embedding_vector))
-
-# Plot the embedding vector
-plt.figure(figsize=(12, 4))
-plt.plot(embedding_vector)
-plt.title("Embedding Vector")
-plt.xlabel("Index")
-plt.ylabel("Value")
-plt.grid(True)
-plt.show()`,
+output = infer(inputs=tf.constant([input_tensor]))`,
 ]
 
 const diffusersDefaultPrompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
