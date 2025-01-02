@@ -95,6 +95,26 @@ export const bm25s = (model: ModelData): string[] => [
 retriever = BM25HF.load_from_hub("${model.id}")`,
 ];
 
+export const cxr_foundation = (model: ModelData): string[] => [
+	`# Install library
+!git clone https://github.com/Google-Health/cxr-foundation.git
+import tensorflow as tf, sys
+sys.path.append('cxr-foundation/python/')
+
+# Install dependencies
+major_version = tf.__version__.rsplit(".", 1)[0]
+!pip install tensorflow-text=={major_version} pypng && pip install --no-deps pydicom hcls_imaging_ml_toolkit retrying
+
+# Run inference
+from PIL import Image
+from clientside.clients import make_hugging_face_client
+
+cxr_client = make_hugging_face_client('cxr_model')
+!wget -nc -q https://upload.wikimedia.org/wikipedia/commons/c/c8/Chest_Xray_PA_3-8-2010.png
+
+print(cxr_client.get_image_embeddings_from_images([Image.open("Chest_Xray_PA_3-8-2010.png")]))`,
+];
+
 export const depth_anything_v2 = (model: ModelData): string[] => {
 	let encoder: string;
 	let features: string;
