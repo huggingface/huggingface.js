@@ -49,7 +49,9 @@
 	],
 	"author": "Hugging Face",
 	"license": "MIT",
-	"dependencies": {},
+	"dependencies": {
+		"@huggingface/jinja": "workspace:^"
+	},
 	"devDependencies": {
 		"@types/node": "^20.12.8"
 	}
