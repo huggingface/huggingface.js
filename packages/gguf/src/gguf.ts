@@ -11,7 +11,7 @@ export { parseGGUFQuantLabel, GGUF_QUANT_RE, GGUF_QUANT_RE_GLOBAL } from "@huggi
 export const RE_GGUF_FILE = /\.gguf$/;
 export const RE_LLAMAFILE_FILE = /\.llamafile$/;
 export const RE_GGUF_SHARD_FILE = /^(?<prefix>.*?)-(?<shard>\d{5})-of-(?<total>\d{5})\.gguf$/;
-// see https://huggingface.co/Mozilla/gemma-2-27b-it-llamafile/commits/main
+// see https://huggingface.co/Mozilla/gemma-2-27b-it-llamafile/tree/main
 export const RE_LLAMAFILE_SHARD_FILE  = /(?<prefix>[A-Z0-9]+)(?:\.cat(?<shard>\d+)\.llamafile|\.llamafile\.cat(?<shard>\d+))$/;
 const GGUF_DEFAULT_ALIGNMENT = 32; // defined in ggml.h
 const GGML_PAD = (x: number, n: number) => (x + n - 1) & ~(n - 1); // defined in ggml.h
