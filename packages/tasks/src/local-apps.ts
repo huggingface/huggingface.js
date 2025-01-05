@@ -142,7 +142,7 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 };
 
 const snippetLlamafile = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
-	const LinuxCommand = () => {
+	const LinuxAndMacCommand = () => {
 		const snippet = [
 			"# Load and run the model:",
 			`wget https://huggingface.co/${model.id}/resolve/main/${filepath ?? "{{LLMAFILE_FILE}}"}`,
@@ -163,7 +163,7 @@ const snippetLlamafile = (model: ModelData, filepath?: string): LocalAppSnippet[
 	return [
 		{
 			title: "Linux and MacOS",
-			content: LinuxCommand(),
+			content: LinuxAndMacCommand(),
 		},
 		{
 			title: "Windows",
