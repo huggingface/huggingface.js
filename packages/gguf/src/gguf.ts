@@ -9,7 +9,10 @@ export { GGUF_QUANT_DESCRIPTIONS } from "./quant-descriptions";
 export { parseGGUFQuantLabel, GGUF_QUANT_RE, GGUF_QUANT_RE_GLOBAL } from "@huggingface/tasks";
 
 export const RE_GGUF_FILE = /\.gguf$/;
+export const RE_LLAMAFILE_FILE = /\.llamafile$/;
 export const RE_GGUF_SHARD_FILE = /^(?<prefix>.*?)-(?<shard>\d{5})-of-(?<total>\d{5})\.gguf$/;
+// see https://huggingface.co/Mozilla/gemma-2-27b-it-llamafile/commits/main
+export const RE_LLAMAFILE_SHARD_FILE  = /(?<prefix>[A-Z0-9]+)(?:\.cat(?<shard>\d+)\.llamafile|\.llamafile\.cat(?<shard>\d+))$/;
 const GGUF_DEFAULT_ALIGNMENT = 32; // defined in ggml.h
 const GGML_PAD = (x: number, n: number) => (x + n - 1) & ~(n - 1); // defined in ggml.h
 const PARALLEL_DOWNLOADS = 20;
@@ -18,6 +21,11 @@ export interface GgufShardFileInfo {
 	prefix: string;
 	shard: string;
 	total: string;
+}
+
+export interface LlamafileShardFileInfo {
+	prefix: string;
+	shard: string;
 }
 
 export function parseGgufShardFilename(filename: string): GgufShardFileInfo | null {
@@ -30,6 +38,17 @@ export function parseGgufShardFilename(filename: string): GgufShardFileInfo | nu
 		};
 	}
 	return null;
+}
+
+export function parseLlamafileShardFilename(filename: string): LlamafileShardFileInfo | null {
+    const match = RE_LLAMAFILE_SHARD_FILE.exec(filename);
+    if (match && match.groups) {
+        return {
+            prefix: match.groups["prefix"],
+            shard: match.groups["shard"],
+        };
+    }
+    return null;
 }
 
 const isVersion = (version: number): version is Version => version === 1 || version === 2 || version === 3;

@@ -90,6 +90,10 @@ function isLlamaCppGgufModel(model: ModelData) {
 	return !!model.gguf?.context_length;
 }
 
+function isLlamaFileModel(model: ModelData){
+	return model.tags.includes("llamafile")
+}
+
 function isMlxModel(model: ModelData) {
 	return model.tags.includes("mlx");
 }
@@ -133,6 +137,37 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 				"cmake --build build -j --target llama-cli",
 			].join("\n"),
 			content: command("./build/bin/llama-cli"),
+		},
+	];
+};
+
+const snippetLlamafile = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const LinuxCommand = () => {
+		const snippet = [
+			"# Load and run the model:",
+			`wget https://huggingface.co/${model.id}/resolve/main/${filepath ?? "{{LLMAFILE_FILE}}"}`,
+			`chmod +x ${filepath ?? "{{LLMAFILE_FILE}}"}`,
+			`./${filepath ?? "{{LLMAFILE_FILE}}"} -p "Once upon a time,"`,
+		];
+		return snippet.join("\n");
+	};
+	const WindowsCommand = () => {
+		const BaseFilename = (filepath ?? "{{LLMAFILE_FILE}}").split('/').pop()?.replace('.llamafile', '.exe');
+		const snippet = [
+			"# Load and run the model:",
+			`wget https://huggingface.co/${model.id}/resolve/main/${filepath ?? "{{LLMAFILE_FILE}}"} -O ${BaseFilename}`,
+			`./${BaseFilename} -p "Once upon a time,"`,
+		];
+		return snippet.join("\n");
+	};
+	return [
+		{
+			title: "Linux and MacOS",
+			content: LinuxCommand(),
+		},
+		{
+			title: "Windows",
+			content: WindowsCommand(),
 		},
 	];
 };
@@ -289,6 +324,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetNodeLlamaCppCli,
+	},
+	llamafile: {
+		prettyLabel: "llamafile",
+		docsUrl: "https://github.com/Mozilla-Ocho/llamafile",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaFileModel,
+		snippet: snippetLlamafile,
 	},
 	vllm: {
 		prettyLabel: "vLLM",
