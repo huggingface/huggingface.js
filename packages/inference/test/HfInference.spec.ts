@@ -859,8 +859,7 @@ describe.concurrent(
 				expect(res).toBeInstanceOf(Blob);
 			})
 
-			/// Skipped because data url not supported?
-			it.skip("speechToText fal-ai", async () => {
+			it("speechToText fal-ai", async () => {
 				const res = await client.automaticSpeechRecognition({
 					model: "openai/whisper-large-v3",
 					provider: "fal-ai",

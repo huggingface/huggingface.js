@@ -2295,5 +2295,64 @@
         "server": "UploadServer"
       }
     }
+  },
+  "e899e1e68342175b37f496e4937a9d3d46b31d21d1df775a8f87f5e04039d437": {
+    "url": "https://fal.run/fal-ai/wizper",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST"
+    },
+    "response": {
+      "body": "{\"detail\":\"Unsupported data URL\"}",
+      "status": 400,
+      "statusText": "Bad Request",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "strict-transport-security": "max-age=31536000; includeSubDomains"
+      }
+    }
+  },
+  "9601f6c473ad39ff6a83e74df8fa4061773a54df1aa4a2d931fb4c0d66fc86a8": {
+    "url": "https://fal.run/fal-ai/flux/schnell",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":\"\",\"prompt\":\"black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot\",\"response_format\":\"base64\"}"
+    },
+    "response": {
+      "body": "{\"images\":[{\"url\":\"https://fal.media/files/elephant/wFUOb8jzsw2n_sVIyXb00.png\",\"width\":1024,\"height\":768,\"content_type\":\"image/jpeg\"}],\"timings\":{\"inference\":0.35036514210514724},\"seed\":2233221953,\"has_nsfw_concepts\":[false],\"prompt\":\"black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot\"}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "strict-transport-security": "max-age=31536000; includeSubDomains"
+      }
+    }
+  },
+  "6a268d88e3bdf69614bc760519ab91be6a2ef7d60e80c754d4148cd4d68cb12e": {
+    "url": "https://fal.media/files/elephant/wFUOb8jzsw2n_sVIyXb00.png",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-headers": "*",
+        "access-control-allow-methods": "*",
+        "access-control-allow-origin": "*",
+        "access-control-max-age": "86400",
+        "cf-ray": "8fe5ba6d9b03d0aa-CDG",
+        "connection": "keep-alive",
+        "content-type": "image/jpeg",
+        "server": "cloudflare",
+        "vary": "Accept-Encoding"
+      }
+    }
   }
 }
