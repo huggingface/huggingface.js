@@ -170,7 +170,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "Cosmos",
 		repoName: "Cosmos",
 		repoUrl: "https://github.com/NVIDIA/Cosmos",
-		filter: false,
 		countDownloads: `path:"config.json" OR path_extension:"pt"`,
 	},
 	"cxr-foundation": {
