@@ -195,7 +195,6 @@ from huggingface_hub import from_pretrained_keras
 import tensorflow as tf
 import requests
 
-# Load test image from SCIN Dataset
 # https://github.com/google-research-datasets/scin
 IMAGE_URL = "https://storage.googleapis.com/dx-scin-public-data/dataset/images/3445096909671059178.png"
 response = requests.get(IMAGE_URL, stream=True)
@@ -218,10 +217,8 @@ input_tensor = tf.train.Example(
     )
 ).SerializeToString()
 
-# Load the model directly from Hugging Face Hub
 loaded_model = from_pretrained_keras("google/derm-foundation")
 
-# Call inference
 infer = loaded_model.signatures["serving_default"]
 output = infer(inputs=tf.constant([input_tensor]))`,
 ]
