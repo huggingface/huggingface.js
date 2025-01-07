@@ -847,9 +847,28 @@ describe.concurrent(
 			});
 		});
 
-		describe.concurrent("Fal.ai", () => {
-			it("TODO", async () => {
-				fail("Not implemented");
+		describe.concurrent("Fal AI", () => {
+			const client = new HfInference(env.HF_FAL_KEY);
+
+			it("textToImage fal-ai", async () => {
+				const res = await client.textToImage({
+					model: "black-forest-labs/FLUX.1-schnell",
+					provider: "fal-ai",
+					inputs: "black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			})
+
+			/// Skipped because data url not supported?
+			it.skip("speechToText fal-ai", async () => {
+				const res = await client.automaticSpeechRecognition({
+					model: "openai/whisper-large-v3",
+					provider: "fal-ai",
+					data: new Blob([readTestFile("sample2.wav")], { type: "audio/vnd.wav" }),
+				});
+				expect(res).toMatchObject({
+					text: "HE HAS GRAVE DOUBTS WHETHER SIR FREDERICK LEIGHTON'S WORK IS REALLY GREEK AFTER ALL AND CAN DISCOVER IN IT BUT LITTLE OF ROCKY ITHACA",
+				});
 			})
 		})
 
