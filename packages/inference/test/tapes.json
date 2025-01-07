@@ -2103,5 +2103,197 @@
         "vary": "origin, Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
+  },
+  "a71d846134d1c5d86b435b541f5291a2d020c081b5b5700bcfdaec7ed40fd3fe": {
+    "url": "https://api.sambanova.ai/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"model\":\"Meta-Llama-3.1-8B-Instruct\",\"messages\":[{\"role\":\"user\",\"content\":\"Complete the equation 1 + 1 = , just the answer\"}],\"stream\":true}"
+    },
+    "response": {
+      "body": "data: {\"choices\":[{\"delta\":{\"content\":\"\",\"role\":\"assistant\"},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1736268936,\"id\":\"9619241f-0e05-44f7-8f09-f8e0729b280c\",\"model\":\"Meta-Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"fastcoe\"}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\"2\",\"role\":\"assistant\"},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1736268936,\"id\":\"9619241f-0e05-44f7-8f09-f8e0729b280c\",\"model\":\"Meta-Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"fastcoe\"}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\",\"index\":0,\"logprobs\":null}],\"created\":1736268936,\"id\":\"9619241f-0e05-44f7-8f09-f8e0729b280c\",\"model\":\"Meta-Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"fastcoe\"}\n\ndata: [DONE]\n\n",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "text/event-stream; charset=utf-8",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "transfer-encoding": "chunked"
+      }
+    }
+  },
+  "56dc8b91ae3bf6ebcf7580cf90b65377ba6cc9b04d446fa9abc40ba04a45d5d8": {
+    "url": "https://api.sambanova.ai/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"model\":\"Meta-Llama-3.1-8B-Instruct\",\"messages\":[{\"role\":\"user\",\"content\":\"Complete this sentence with words, one plus one is equal \"}]}"
+    },
+    "response": {
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"logprobs\":null,\"message\":{\"content\":\"two.\",\"role\":\"assistant\"}}],\"created\":1736268936,\"id\":\"9619241f-0e05-44f7-8f09-f8e0729b280c\",\"model\":\"Meta-Llama-3.1-8B-Instruct\",\"object\":\"chat.completion\",\"system_fingerprint\":\"fastcoe\",\"usage\":{\"completion_tokens\":2,\"completion_tokens_after_first_per_sec\":39.91116270660665,\"completion_tokens_after_first_per_sec_first_ten\":0,\"completion_tokens_per_sec\":30.031067085285915,\"end_time\":1736268936.542338,\"is_last_response\":true,\"prompt_tokens\":46,\"start_time\":1736268936.4757402,\"time_to_first_token\":0.04154205322265625,\"total_latency\":0.06659770011901855,\"total_tokens\":48,\"total_tokens_per_sec\":720.745610046862}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "application/json; charset=utf-8",
+        "strict-transport-security": "max-age=31536000; includeSubDomains"
+      }
+    }
+  },
+  "d5c6752ccee8b53c65bbdbcc128358f9c6604395431b7c33760f3c0c92224ff1": {
+    "url": "https://api.together.xyz/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"model\":\"meta-llama/Llama-3.3-70B-Instruct-Turbo\",\"messages\":[{\"role\":\"user\",\"content\":\"Complete the equation 1 + 1 = , just the answer\"}],\"stream\":true}"
+    },
+    "response": {
+      "body": "data: {\"id\":\"8fe57a1b9c05790f-CDG\",\"object\":\"chat.completion.chunk\",\"created\":1736268942,\"choices\":[{\"index\":0,\"text\":\"2\",\"logprobs\":null,\"finish_reason\":null,\"seed\":null,\"delta\":{\"token_id\":17,\"role\":\"assistant\",\"content\":\"2\",\"tool_calls\":null}}],\"model\":\"meta-llama/Llama-3.3-70B-Instruct-Turbo\",\"usage\":null}\n\ndata: {\"id\":\"8fe57a1b9c05790f-CDG\",\"object\":\"chat.completion.chunk\",\"created\":1736268942,\"choices\":[{\"index\":0,\"text\":\"\",\"logprobs\":null,\"finish_reason\":\"eos\",\"seed\":13524445995620452000,\"delta\":{\"token_id\":128009,\"role\":\"assistant\",\"content\":\"\",\"tool_calls\":null}}],\"model\":\"meta-llama/Llama-3.3-70B-Instruct-Turbo\",\"usage\":{\"prompt_tokens\":48,\"completion_tokens\":2,\"total_tokens\":50}}\n\ndata: [DONE]\n\n",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-origin": "*",
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cache-control": "no-cache, no-transform",
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "8fe57a1b9c05790f-CDG",
+        "connection": "keep-alive",
+        "content-type": "text/event-stream;charset=utf-8",
+        "retry-after": "2",
+        "server": "cloudflare",
+        "strict-transport-security": "max-age=15552000; includeSubDomains",
+        "transfer-encoding": "chunked"
+      }
+    }
+  },
+  "3f2ba6c12d2b4395ac48f453fefdfe523204fcbbf3194c393365856b0e7b5976": {
+    "url": "https://api.together.xyz/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"model\":\"meta-llama/Llama-3.3-70B-Instruct-Turbo\",\"messages\":[{\"role\":\"user\",\"content\":\"Complete this sentence with words, one plus one is equal \"}]}"
+    },
+    "response": {
+      "body": "{\"id\":\"8fe57a1b9ec32285-CDG\",\"object\":\"chat.completion\",\"created\":1736268942,\"model\":\"meta-llama/Llama-3.3-70B-Instruct-Turbo\",\"prompt\":[],\"choices\":[{\"finish_reason\":\"eos\",\"seed\":14145416413182314000,\"logprobs\":null,\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"one plus one is equal to two.\",\"tool_calls\":[]}}],\"usage\":{\"prompt_tokens\":46,\"completion_tokens\":9,\"total_tokens\":55}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-origin": "*",
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "8fe57a1b9ec32285-CDG",
+        "connection": "keep-alive",
+        "content-encoding": "gzip",
+        "content-type": "application/json; charset=utf-8",
+        "etag": "W/\"20f-h5oiAOJ1mlXhypcOeryRaZ1VjzE\"",
+        "retry-after": "2",
+        "server": "cloudflare",
+        "strict-transport-security": "max-age=15552000; includeSubDomains",
+        "transfer-encoding": "chunked"
+      }
+    }
+  },
+  "8a5598c99c52905e0282fa9fa45135396893a6f99f66ea1268e9a06b5190938d": {
+    "url": "https://api.together.xyz/v1/images/generations",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"model\":\"stabilityai/stable-diffusion-xl-base-1.0\",\"inputs\":\"\",\"prompt\":\"award winning high resolution photo of a giant tortoise\",\"response_format\":\"base64\"}"
+    },
+    "response": {
+      "body": "{\"id\":\"8fe57a1b9decf0bb-CDG\",\"model\":\"stabilityai/stable-diffusion-xl-base-1.0\",\"object\":\"list\",\"data\":[{\"timings\":{\"inference\":4430},\"index\":0,\"b64_json\":\"/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAQABAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDiY7ct2q5DpbMMknArSk0S4t+SueaspbeXF0J/KpSJKEOlxv2BOeoom0l4juUY/CtO0DCTDKSPc8j86uySbB047Yp2A5VozG2cKM+h4qZbcuoIHPqKuXaJKdwxkfhT7J41bEgwR7UhkUdmpi5ILdetLDGVcqw+gNaktpHNHuUE\"}]}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-origin": "*",
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "8fe57a1b9decf0bb-CDG",
+        "connection": "keep-alive",
+        "content-encoding": "gzip",
+        "content-type": "application/json; charset=utf-8",
+        "etag": "W/\"2516b-Q5byILAy+5JP2d3gRuYkwzbsyR0\"",
+        "retry-after": "2",
+        "server": "cloudflare",
+        "strict-transport-security": "max-age=15552000; includeSubDomains",
+        "transfer-encoding": "chunked"
+      }
+    }
+  },
+  "71b7ce692a0c71ae56f8ecdd1924f0171beeeb60b635b38d49825bfe00eb1fd4": {
+    "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAQABAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDiY7ct2q5DpbMMknArSk0S4t+SueaspbeXF0J/KpSJKEOlxv2BOeoom0l4juUY/CtO0DCTDKSPc8j86uySbB047Yp2A5VozG2cKM+h4qZbcuoIHPqKuXaJKdwxkfhT7J41bEgwR7UhkUdmpi5ILdetLDGVcqw+gNaktpHNHuUE",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "content-type": "image/jpeg"
+      }
+    }
+  },
+  "fb1d14610ba0f5a62b5458c79d5c21575635796a8ed0125f060a3f3a419c26cf": {
+    "url": "https://api.replicate.com/v1/models/black-forest-labs/flux-schnell/predictions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json",
+        "Prefer": "wait"
+      },
+      "method": "POST",
+      "body": "{\"input\":{\"prompt\":\"black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot\"}}"
+    },
+    "response": {
+      "body": "{\"id\":\"kyxr0xnpnhrmc0cm86rsd2n0dm\",\"model\":\"black-forest-labs/flux-schnell\",\"version\":\"dp-4d0bcc010b3049749a251855f12800be\",\"input\":{\"prompt\":\"black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot\"},\"logs\":\"\",\"output\":[\"https://replicate.delivery/xezq/fCe3elthWTYjio0WuWGF8ftTl4lOdxxK0mXm3cwWb5jlpDLQB/out-0.webp\"],\"data_removed\":false,\"error\":null,\"status\":\"processing\",\"created_at\":\"2025-01-07T16:55:53.26Z\",\"urls\":{\"cancel\":\"https://api.replicate.com/v1/predictions/kyxr0xnpnhrmc0cm86rsd2n0dm/cancel\",\"get\":\"https://api.replicate.com/v1/predictions/kyxr0xnpnhrmc0cm86rsd2n0dm\",\"stream\":\"https://stream.replicate.com/v1/files/bcwr-w63qvhgfgaaaagcw4f6xhqtxppdxj3e2blkiiq5qqxftsl37pihq\"}}",
+      "status": 201,
+      "statusText": "Created",
+      "headers": {
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "8fe57a5cd9d3d5dd-CDG",
+        "connection": "keep-alive",
+        "content-type": "application/json; charset=UTF-8",
+        "nel": "{\"success_fraction\":0,\"report_to\":\"cf-nel\",\"max_age\":604800}",
+        "preference-applied": "wait=60",
+        "ratelimit-remaining": "599",
+        "ratelimit-reset": "1",
+        "report-to": "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report\\/v4?s=MXhMUawMiItM8lqcFewZe%2BYA9h0ln95iFjitKxQbJnRegDUdnAS1t3CPuPbiqVFwnZM6dqSpT8twr3VBO8L%2BuNwj2mlshpJBSbq%2BpUOVjUa0QK0DRilJ2cK4QZ%2BUqkDwPnYR\"}],\"group\":\"cf-nel\",\"max_age\":604800}",
+        "server": "cloudflare",
+        "server-timing": "cfL4;desc=\"?proto=TCP&rtt=4045&min_rtt=4004&rtt_var=1531&sent=4&recv=5&lost=0&retrans=0&sent_bytes=2848&recv_bytes=974&delivery_rate=723276&cwnd=217&unsent_bytes=0&cid=74f3095297c3049c&ts=907&x=0\"",
+        "strict-transport-security": "max-age=15552000",
+        "vary": "Accept-Encoding"
+      }
+    }
+  },
+  "85673486d9ee3f89031a85b2bf08a48bd4a45dafd68fcb2f4ff7781f2bb87ec2": {
+    "url": "https://replicate.delivery/xezq/fCe3elthWTYjio0WuWGF8ftTl4lOdxxK0mXm3cwWb5jlpDLQB/out-0.webp",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+        "cache-control": "public,max-age=3600",
+        "cache-id": "PAR-8ec5b013",
+        "cache-status": "miss",
+        "content-type": "image/webp",
+        "etag": "\"3443b49212285bdd038a608321d139b5\"",
+        "last-modified": "Tue, 07 Jan 2025 16:55:53 GMT",
+        "server": "UploadServer"
+      }
+    }
   }
 }
