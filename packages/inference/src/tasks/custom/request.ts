@@ -2,7 +2,7 @@ import type { InferenceTask, Options, RequestArgs } from "../../types";
 import { makeRequestOptions } from "../../lib/makeRequestOptions";
 
 /**
- * Primitive to make custom calls to Inference Endpoints
+ * Primitive to make custom calls to the inference provider
  */
 export async function request<T>(
 	args: RequestArgs,
@@ -35,8 +35,8 @@ export async function request<T>(
 			if ([400, 422, 404, 500].includes(response.status) && options?.chatCompletion) {
 				throw new Error(`Server ${args.model} does not seem to support chat completion. Error: ${output.error}`);
 			}
-			if (output.error) {
-				throw new Error(JSON.stringify(output.error));
+			if (output.error || output.detail) {
+				throw new Error(JSON.stringify(output.error ?? output.detail));
 			} else {
 				throw new Error(output);
 			}

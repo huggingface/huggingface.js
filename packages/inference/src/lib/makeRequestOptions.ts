@@ -1,3 +1,4 @@
+import { FAL_AI_API_BASE_URL, FAL_AI_MODEL_IDS } from "../providers/fal-ai";
 import { REPLICATE_API_BASE_URL, REPLICATE_MODEL_IDS } from "../providers/replicate";
 import { SAMBANOVA_API_BASE_URL, SAMBANOVA_MODEL_IDS } from "../providers/sambanova";
 import { TOGETHER_API_BASE_URL, TOGETHER_MODEL_IDS } from "../providers/together";
@@ -9,7 +10,8 @@ import { isUrl } from "./isUrl";
 const HF_INFERENCE_API_BASE_URL = "https://api-inference.huggingface.co";
 
 /**
- * Loaded from huggingface.co/api/tasks if needed
+ * Lazy-loaded from huggingface.co/api/tasks when needed
+ * Used to determine the default model to use when it's not user defined
  */
 let tasks: Record<string, { models: { id: string }[] }> | null = null;
 
@@ -36,7 +38,7 @@ export async function makeRequestOptions(
 
 	const headers: Record<string, string> = {};
 	if (accessToken) {
-		headers["Authorization"] = `Bearer ${accessToken}`;
+		headers["Authorization"] = provider === "fal-ai" ? `Key ${accessToken}` : `Bearer ${accessToken}`;
 	}
 
 	if (!model && !tasks && taskHint) {
@@ -73,6 +75,9 @@ export async function makeRequestOptions(
 				break;
 			case "together":
 				model = TOGETHER_MODEL_IDS[model]?.id ?? model;
+				break;
+			case "fal-ai":
+				model = FAL_AI_MODEL_IDS[model];
 				break;
 			default:
 				break;
@@ -120,8 +125,9 @@ export async function makeRequestOptions(
 				/// TODO we wil proxy the request server-side (using our own keys) and handle billing for it on the user's HF account.
 				throw new Error("Inference proxying is not implemented yet");
 			} else {
-				/// This is an external key
 				switch (provider) {
+					case 'fal-ai':
+						return `${FAL_AI_API_BASE_URL}/${model}`;
 					case "replicate":
 						return `${REPLICATE_API_BASE_URL}/v1/models/${model}/predictions`;
 					case "sambanova":
@@ -160,10 +166,10 @@ export async function makeRequestOptions(
 		body: binary
 			? args.data
 			: JSON.stringify({
-					...((otherArgs.model && isUrl(otherArgs.model)) || provider === "replicate"
-						? omit(otherArgs, "model")
-						: { ...otherArgs, model }),
-			  }),
+				...((otherArgs.model && isUrl(otherArgs.model)) || provider === "replicate" || provider === "fal-ai"
+					? omit(otherArgs, "model")
+					: { ...otherArgs, model }),
+			}),
 		...(credentials ? { credentials } : undefined),
 		signal: options?.signal,
 	};
