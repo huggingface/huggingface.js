@@ -34,7 +34,7 @@ export async function request<T>(
 		) {
 			const output = await response.json();
 			if ([400, 422, 404, 500].includes(response.status) && options?.chatCompletion) {
-				throw new Error(`Server ${args.model} does not seem to support chat completion. Error: ${output.error}`);
+				throw new Error(`Server ${args.model} does not seem to support chat completion. Error: ${JSON.stringify(output.error)}`);
 			}
 			if (output.error || output.detail) {
 				throw new Error(JSON.stringify(output.error ?? output.detail));
