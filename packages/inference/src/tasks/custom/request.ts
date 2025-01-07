@@ -27,14 +27,12 @@ export async function request<T>(
 
 	if (!response.ok) {
 		const contentType = response.headers.get("Content-Type");
-		if (
-			["application/json", "application/problem+json"].some(
-				(ct) => contentType?.startsWith(ct)
-			)
-		) {
+		if (["application/json", "application/problem+json"].some((ct) => contentType?.startsWith(ct))) {
 			const output = await response.json();
 			if ([400, 422, 404, 500].includes(response.status) && options?.chatCompletion) {
-				throw new Error(`Server ${args.model} does not seem to support chat completion. Error: ${JSON.stringify(output.error)}`);
+				throw new Error(
+					`Server ${args.model} does not seem to support chat completion. Error: ${JSON.stringify(output.error)}`
+				);
 			}
 			if (output.error || output.detail) {
 				throw new Error(JSON.stringify(output.error ?? output.detail));

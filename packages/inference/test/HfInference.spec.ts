@@ -5,7 +5,6 @@ import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
 import { HfInference } from "../src";
 import "./vcr";
 import { readTestFile } from "./test-files";
-import { fail } from "assert";
 
 const TIMEOUT = 60000 * 3;
 const env = import.meta.env;
@@ -551,7 +550,8 @@ describe.concurrent(
 			});
 			it("textToImage", async () => {
 				const res = await hf.textToImage({
-					inputs: "award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]",
+					inputs:
+						"award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]",
 					model: "stabilityai/stable-diffusion-2",
 				});
 				expect(res).toBeInstanceOf(Blob);
@@ -563,7 +563,8 @@ describe.concurrent(
 				const num_inference_steps = 10;
 
 				const res = await hf.textToImage({
-					inputs: "award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]",
+					inputs:
+						"award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]",
 					model: "stabilityai/stable-diffusion-2",
 					parameters: {
 						negative_prompt: "blurry",
@@ -758,11 +759,10 @@ describe.concurrent(
 				}
 				expect(out).toContain("two");
 			});
-
 		});
 		/**
-				 * Compatibility with third-party Inference Providers
-				 */
+		 * Compatibility with third-party Inference Providers
+		 */
 		describe.concurrent("SambaNova", () => {
 			const client = new HfInference(env.HF_SAMBANOVA_KEY);
 
@@ -831,8 +831,7 @@ describe.concurrent(
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
-		})
-
+		});
 
 		describe.concurrent("Replicate", () => {
 			const client = new HfInference(env.HF_REPLICATE_KEY);
@@ -857,7 +856,7 @@ describe.concurrent(
 					inputs: "black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot",
 				});
 				expect(res).toBeInstanceOf(Blob);
-			})
+			});
 
 			it("speechToText fal-ai", async () => {
 				const res = await client.automaticSpeechRecognition({
@@ -868,9 +867,8 @@ describe.concurrent(
 				expect(res).toMatchObject({
 					text: "HE HAS GRAVE DOUBTS WHETHER SIR FREDERICK LEIGHTON'S WORK IS REALLY GREEK AFTER ALL AND CAN DISCOVER IN IT BUT LITTLE OF ROCKY ITHACA",
 				});
-			})
-		})
-
+			});
+		});
 	},
 	TIMEOUT
 );

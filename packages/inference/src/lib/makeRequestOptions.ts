@@ -126,7 +126,7 @@ export async function makeRequestOptions(
 				throw new Error("Inference proxying is not implemented yet");
 			} else {
 				switch (provider) {
-					case 'fal-ai':
+					case "fal-ai":
 						return `${FAL_AI_API_BASE_URL}/${model}`;
 					case "replicate":
 						return `${REPLICATE_API_BASE_URL}/v1/models/${model}/predictions`;
@@ -166,10 +166,10 @@ export async function makeRequestOptions(
 		body: binary
 			? args.data
 			: JSON.stringify({
-				...((otherArgs.model && isUrl(otherArgs.model)) || provider === "replicate" || provider === "fal-ai"
-					? omit(otherArgs, "model")
-					: { ...otherArgs, model }),
-			}),
+					...((otherArgs.model && isUrl(otherArgs.model)) || provider === "replicate" || provider === "fal-ai"
+						? omit(otherArgs, "model")
+						: { ...otherArgs, model }),
+			  }),
 		...(credentials ? { credentials } : undefined),
 		signal: options?.signal,
 	};
