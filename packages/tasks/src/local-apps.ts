@@ -90,7 +90,7 @@ function isLlamaCppGgufModel(model: ModelData) {
 	return !!model.gguf?.context_length;
 }
 
-function isLlamaFileModel(model: ModelData){
+function isLlamaFileModel(model: ModelData) {
 	return model.tags.includes("llamafile")
 }
 
