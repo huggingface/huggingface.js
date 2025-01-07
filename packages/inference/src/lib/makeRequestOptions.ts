@@ -68,16 +68,16 @@ export async function makeRequestOptions(
 		}
 		switch (provider) {
 			case "replicate":
-				model = REPLICATE_MODEL_IDS[model];
+				model = REPLICATE_MODEL_IDS[model] ?? model;
 				break;
 			case "sambanova":
-				model = SAMBANOVA_MODEL_IDS[model];
+				model = SAMBANOVA_MODEL_IDS[model] ?? model;
 				break;
 			case "together":
 				model = TOGETHER_MODEL_IDS[model]?.id ?? model;
 				break;
 			case "fal-ai":
-				model = FAL_AI_MODEL_IDS[model];
+				model = FAL_AI_MODEL_IDS[model] ?? model;
 				break;
 			default:
 				break;

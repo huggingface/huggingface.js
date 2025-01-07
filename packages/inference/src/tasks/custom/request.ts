@@ -26,9 +26,10 @@ export async function request<T>(
 	}
 
 	if (!response.ok) {
+		const contentType = response.headers.get("Content-Type");
 		if (
 			["application/json", "application/problem+json"].some(
-				(contentType) => response.headers.get("Content-Type")?.startsWith(contentType)
+				(ct) => contentType?.startsWith(ct)
 			)
 		) {
 			const output = await response.json();
@@ -41,7 +42,8 @@ export async function request<T>(
 				throw new Error(output);
 			}
 		}
-		throw new Error("An error occurred while fetching the blob");
+		const message = contentType?.startsWith("text/plain;") ? await response.text() : undefined;
+		throw new Error(message ?? "An error occurred while fetching the blob");
 	}
 
 	if (response.headers.get("Content-Type")?.startsWith("application/json")) {

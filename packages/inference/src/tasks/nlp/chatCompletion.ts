@@ -11,6 +11,9 @@ export async function chatCompletion(
 	args: BaseArgs & ChatCompletionInput,
 	options?: Options
 ): Promise<ChatCompletionOutput> {
+	if (args.provider === "replicate") {
+		throw new Error("Replicate does not support the chat completion API");
+	}
 	const res = await request<ChatCompletionOutput>(args, {
 		...options,
 		taskHint: "text-generation",
