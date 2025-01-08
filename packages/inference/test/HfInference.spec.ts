@@ -862,13 +862,12 @@ describe.concurrent(
 				const res = await client.automaticSpeechRecognition({
 					model: "openai/whisper-large-v3",
 					provider: "fal-ai",
-					data: new Blob([readTestFile("sample2.wav")], { type: "audio/vnd.wav" }),
+					data: new Blob([readTestFile("sample2.wav")], { type: "audio/x-wav" }),
 				});
 				expect(res).toMatchObject({
-					text: "HE HAS GRAVE DOUBTS WHETHER SIR FREDERICK LEIGHTON'S WORK IS REALLY GREEK AFTER ALL AND CAN DISCOVER IN IT BUT LITTLE OF ROCKY ITHACA",
+					text: "He has grave doubts whether Sir Frederick Leighton's work is really Greek after all, and can discover in it but little of rocky Ithaca.",
 				});
 			});
 		});
 	},
-	TIMEOUT
 );

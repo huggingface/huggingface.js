@@ -2354,5 +2354,24 @@
         "vary": "Accept-Encoding"
       }
     }
+  },
+  "a540c67dea61eb4a90fedc20699d4863b04fd61dca73756d1f31a09793307689": {
+    "url": "https://fal.run/fal-ai/wizper",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST"
+    },
+    "response": {
+      "body": "{\"text\":\"He has grave doubts whether Sir Frederick Leighton's work is really Greek after all, and can discover in it but little of rocky Ithaca.\",\"chunks\":[{\"timestamp\":[0.36,9.62],\"text\":\"He has grave doubts whether Sir Frederick Leighton's work is really Greek after all, and can discover in it but little of rocky Ithaca.\"}]}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "strict-transport-security": "max-age=31536000; includeSubDomains"
+      }
+    }
   }
 }
