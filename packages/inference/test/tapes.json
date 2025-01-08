@@ -2373,5 +2373,35 @@
         "strict-transport-security": "max-age=31536000; includeSubDomains"
       }
     }
+  },
+  "94570e88ad7c60f92805909dfb0fabe03255aaf65cee18cf7f92fc54fc42fc0e": {
+    "url": "https://api.together.xyz/v1/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"model\":\"mistralai/Mixtral-8x7B-v0.1\",\"inputs\":\"Paris is\",\"temperature\":0,\"max_tokens\":10,\"prompt\":\"Paris is\"}"
+    },
+    "response": {
+      "body": "{\"id\":\"8fecbda15c7c9edf\",\"object\":\"text.completion\",\"created\":1736345108,\"model\":\"mistralai/Mixtral-8x7B-v0.1\",\"prompt\":[],\"choices\":[{\"text\":\" a city of love, and it’s also\",\"finish_reason\":\"length\",\"seed\":1271532905535955700,\"logprobs\":null,\"index\":0}],\"usage\":{\"prompt_tokens\":3,\"completion_tokens\":10,\"total_tokens\":13}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-origin": "*",
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "8fecbda15c7c9edf-CDG",
+        "connection": "keep-alive",
+        "content-encoding": "gzip",
+        "content-type": "application/json; charset=utf-8",
+        "etag": "W/\"1ad-uo8PAXdljcZOe4fdhbWeJUtsnsI\"",
+        "retry-after": "2",
+        "server": "cloudflare",
+        "strict-transport-security": "max-age=15552000; includeSubDomains",
+        "transfer-encoding": "chunked",
+        "vary": "Accept-Encoding"
+      }
+    }
   }
 }

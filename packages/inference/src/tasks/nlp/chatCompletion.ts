@@ -6,14 +6,10 @@ import type { ChatCompletionInput, ChatCompletionOutput } from "@huggingface/tas
 /**
  * Use the chat completion endpoint to generate a response to a prompt, using OpenAI message completion API no stream
  */
-
 export async function chatCompletion(
 	args: BaseArgs & ChatCompletionInput,
 	options?: Options
 ): Promise<ChatCompletionOutput> {
-	if (args.provider === "replicate") {
-		throw new Error("Replicate does not support the chat completion API");
-	}
 	const res = await request<ChatCompletionOutput>(args, {
 		...options,
 		taskHint: "text-generation",

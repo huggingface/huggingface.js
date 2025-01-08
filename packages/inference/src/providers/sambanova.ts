@@ -16,6 +16,7 @@ type SambanovaId = string;
  * https://community.sambanova.ai/t/supported-models/193
  */
 export const SAMBANOVA_MODEL_IDS: Record<ModelId, SambanovaId> = {
+	/** Chat completion / conversational */
 	"Qwen/Qwen2.5-Coder-32B-Instruct": "Qwen2.5-Coder-32B-Instruct",
 	"Qwen/Qwen2.5-72B-Instruct": "Qwen2.5-72B-Instruct",
 	"Qwen/QwQ-32B-Preview": "QwQ-32B-Preview",

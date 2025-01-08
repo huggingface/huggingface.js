@@ -66,22 +66,27 @@ export async function makeRequestOptions(
 		if (!accessToken) {
 			throw new Error("Specifying an Inference provider requires an accessToken");
 		}
-		switch (provider) {
-			case "replicate":
-				model = REPLICATE_MODEL_IDS[model] ?? model;
-				break;
-			case "sambanova":
-				model = SAMBANOVA_MODEL_IDS[model] ?? model;
-				break;
-			case "together":
-				model = TOGETHER_MODEL_IDS[model]?.id ?? model;
-				break;
-			case "fal-ai":
-				model = FAL_AI_MODEL_IDS[model] ?? model;
-				break;
-			default:
-				break;
+
+		const modelId = (() => {
+			switch (provider) {
+				case "replicate":
+					return REPLICATE_MODEL_IDS[model];
+				case "sambanova":
+					return SAMBANOVA_MODEL_IDS[model];
+				case "together":
+					return TOGETHER_MODEL_IDS[model]?.id;
+				case "fal-ai":
+					return FAL_AI_MODEL_IDS[model];
+				default:
+					return model;
+			}
+		})();
+
+		if (!modelId) {
+			throw new Error(`Model ${model} is not supported for provider ${provider}`);
 		}
+
+		model = modelId;
 	}
 
 	const binary = "data" in args && !!args.data;
@@ -148,6 +153,9 @@ export async function makeRequestOptions(
 
 	if (chatCompletion && !url.endsWith("/chat/completions")) {
 		url += "/v1/chat/completions";
+	}
+	if (provider === "together" && taskHint === "text-generation" && !chatCompletion) {
+		url += "/v1/completions";
 	}
 
 	/**

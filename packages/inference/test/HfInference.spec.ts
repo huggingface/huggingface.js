@@ -762,15 +762,60 @@ describe.concurrent("HfInference", () => {
 		},
 		TIMEOUT
 	);
+
 	/**
 	 * Compatibility with third-party Inference Providers
 	 */
+	describe.concurrent(
+		"Fal AI",
+		() => {
+			const client = new HfInference(env.HF_FAL_KEY);
+
+			it("textToImage", async () => {
+				const res = await client.textToImage({
+					model: "black-forest-labs/FLUX.1-schnell",
+					provider: "fal-ai",
+					inputs: "black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("speechToText", async () => {
+				const res = await client.automaticSpeechRecognition({
+					model: "openai/whisper-large-v3",
+					provider: "fal-ai",
+					data: new Blob([readTestFile("sample2.wav")], { type: "audio/x-wav" }),
+				});
+				expect(res).toMatchObject({
+					text: "He has grave doubts whether Sir Frederick Leighton's work is really Greek after all, and can discover in it but little of rocky Ithaca.",
+				});
+			});
+		},
+		TIMEOUT
+	);
+
+	describe.concurrent(
+		"Replicate",
+		() => {
+			const client = new HfInference(env.HF_REPLICATE_KEY);
+
+			it("textToImage", async () => {
+				const res = await client.textToImage({
+					model: "black-forest-labs/FLUX.1-schnell",
+					provider: "replicate",
+					inputs: "black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+		},
+		TIMEOUT
+	);
 	describe.concurrent(
 		"SambaNova",
 		() => {
 			const client = new HfInference(env.HF_SAMBANOVA_KEY);
 
-			it("chatCompletion sambanova", async () => {
+			it("chatCompletion", async () => {
 				const res = await client.chatCompletion({
 					model: "meta-llama/Llama-3.1-8B-Instruct",
 					provider: "sambanova",
@@ -781,7 +826,7 @@ describe.concurrent("HfInference", () => {
 					expect(completion).toContain("two");
 				}
 			});
-			it("chatCompletion sambanova stream", async () => {
+			it("chatCompletion stream", async () => {
 				const stream = client.chatCompletionStream({
 					model: "meta-llama/Llama-3.1-8B-Instruct",
 					provider: "sambanova",
@@ -804,7 +849,7 @@ describe.concurrent("HfInference", () => {
 		() => {
 			const client = new HfInference(env.HF_TOGETHER_KEY);
 
-			it("chatCompletion together", async () => {
+			it("chatCompletion", async () => {
 				const res = await client.chatCompletion({
 					model: "meta-llama/Llama-3.3-70B-Instruct",
 					provider: "together",
@@ -816,7 +861,7 @@ describe.concurrent("HfInference", () => {
 				}
 			});
 
-			it("chatCompletion together stream", async () => {
+			it("chatCompletion stream", async () => {
 				const stream = client.chatCompletionStream({
 					model: "meta-llama/Llama-3.3-70B-Instruct",
 					provider: "together",
@@ -831,7 +876,7 @@ describe.concurrent("HfInference", () => {
 				expect(out).toContain("2");
 			});
 
-			it("textToImage together", async () => {
+			it("textToImage", async () => {
 				const res = await client.textToImage({
 					model: "stabilityai/stable-diffusion-xl-base-1.0",
 					provider: "together",
@@ -839,50 +884,16 @@ describe.concurrent("HfInference", () => {
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
-		},
-		TIMEOUT
-	);
 
-	describe.concurrent(
-		"Replicate",
-		() => {
-			const client = new HfInference(env.HF_REPLICATE_KEY);
-
-			it("textToImage replicate", async () => {
-				const res = await client.textToImage({
-					model: "black-forest-labs/FLUX.1-schnell",
-					provider: "replicate",
-					inputs: "black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot",
+			it("textGeneration", async () => {
+				const res = await client.textGeneration({
+					model: "mistralai/Mixtral-8x7B-v0.1",
+					provider: "together",
+					inputs: "Paris is",
+					temperature: 0,
+					max_tokens: 10,
 				});
-				expect(res).toBeInstanceOf(Blob);
-			});
-		},
-		TIMEOUT
-	);
-
-	describe.concurrent(
-		"Fal AI",
-		() => {
-			const client = new HfInference(env.HF_FAL_KEY);
-
-			it("textToImage fal-ai", async () => {
-				const res = await client.textToImage({
-					model: "black-forest-labs/FLUX.1-schnell",
-					provider: "fal-ai",
-					inputs: "black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot",
-				});
-				expect(res).toBeInstanceOf(Blob);
-			});
-
-			it("speechToText fal-ai", async () => {
-				const res = await client.automaticSpeechRecognition({
-					model: "openai/whisper-large-v3",
-					provider: "fal-ai",
-					data: new Blob([readTestFile("sample2.wav")], { type: "audio/x-wav" }),
-				});
-				expect(res).toMatchObject({
-					text: "He has grave doubts whether Sir Frederick Leighton's work is really Greek after all, and can discover in it but little of rocky Ithaca.",
-				});
+				expect(res).toMatchObject({ generated_text: " a city of love, and it’s also" });
 			});
 		},
 		TIMEOUT

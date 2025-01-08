@@ -4,10 +4,14 @@ export const FAL_AI_API_BASE_URL = "https://fal.run";
 
 type FalAiId = string;
 
+/**
+ * Mapping from HF model ID -> fal.ai app id
+ */
 export const FAL_AI_MODEL_IDS: Record<ModelId, FalAiId> = {
+	/** text-to-image */
 	"black-forest-labs/FLUX.1-schnell": "fal-ai/flux/schnell",
 	"black-forest-labs/FLUX.1-dev": "fal-ai/flux/dev",
-	"black-forest-labs/FLUX.1-Redux-dev": "fal-ai/flux/dev/redux",
-	"openai/whisper-large-v3": "fal-ai/wizper",
-	"TencentARC/PhotoMaker": "fal-ai/photomaker",
+
+	/** automatic-speech-recognition */
+	"openai/whisper-large-v3": "fal-ai/whisper",
 };
