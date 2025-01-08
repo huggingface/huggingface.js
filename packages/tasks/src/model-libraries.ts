@@ -166,6 +166,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"adapter_config.json"`,
 	},
+	cosmos: {
+		prettyLabel: "Cosmos",
+		repoName: "Cosmos",
+		repoUrl: "https://github.com/NVIDIA/Cosmos",
+		countDownloads: `path:"config.json" OR path_extension:"pt"`,
+	},
 	"cxr-foundation": {
 		prettyLabel: "CXR Foundation",
 		repoName: "cxr-foundation",
@@ -248,6 +254,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/Lewington-pitsos/clipscope",
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
+	},
+	cosyvoice: {
+		prettyLabel: "CosyVoice",
+		repoName: "CosyVoice",
+		repoUrl: "https://github.com/FunAudioLLM/CosyVoice",
+		filter: false,
+		countDownloads: `path_extension:"onnx" OR path_extension:"pt"`,	
 	},
 	cotracker: {
 		prettyLabel: "CoTracker",

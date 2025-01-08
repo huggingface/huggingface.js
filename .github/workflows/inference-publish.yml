@@ -54,7 +54,7 @@ jobs:
           git tag "inference-v$BUMPED_VERSION"
 
       - name: "Check Deps are published before publishing this package"
-        run: pnpm -w check-deps gguf
+        run: pnpm -w check-deps tasks
 
       - run: pnpm publish --no-git-checks .
         env:
