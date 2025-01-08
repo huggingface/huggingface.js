@@ -13,12 +13,12 @@ if (!env.HF_TOKEN) {
 	console.warn("Set HF_TOKEN in the env to run the tests for better rate limits");
 }
 
-describe.concurrent(
-	"HfInference",
-	() => {
-		// Individual tests can be ran without providing an api key, however running all tests without an api key will result in rate limiting error.
+describe.concurrent("HfInference", () => {
+	// Individual tests can be ran without providing an api key, however running all tests without an api key will result in rate limiting error.
 
-		describe.concurrent("HF Inference", () => {
+	describe.concurrent(
+		"HF Inference",
+		() => {
 			const hf = new HfInference(env.HF_TOKEN);
 			it("throws error if model does not exist", () => {
 				expect(
@@ -759,11 +759,15 @@ describe.concurrent(
 				}
 				expect(out).toContain("two");
 			});
-		});
-		/**
-		 * Compatibility with third-party Inference Providers
-		 */
-		describe.concurrent("SambaNova", () => {
+		},
+		TIMEOUT
+	);
+	/**
+	 * Compatibility with third-party Inference Providers
+	 */
+	describe.concurrent(
+		"SambaNova",
+		() => {
 			const client = new HfInference(env.HF_SAMBANOVA_KEY);
 
 			it("chatCompletion sambanova", async () => {
@@ -791,9 +795,13 @@ describe.concurrent(
 				}
 				expect(out).toContain("2");
 			});
-		});
+		},
+		TIMEOUT
+	);
 
-		describe.concurrent("Together", () => {
+	describe.concurrent(
+		"Together",
+		() => {
 			const client = new HfInference(env.HF_TOGETHER_KEY);
 
 			it("chatCompletion together", async () => {
@@ -831,9 +839,13 @@ describe.concurrent(
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
-		});
+		},
+		TIMEOUT
+	);
 
-		describe.concurrent("Replicate", () => {
+	describe.concurrent(
+		"Replicate",
+		() => {
 			const client = new HfInference(env.HF_REPLICATE_KEY);
 
 			it("textToImage replicate", async () => {
@@ -844,9 +856,13 @@ describe.concurrent(
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
-		});
+		},
+		TIMEOUT
+	);
 
-		describe.concurrent("Fal AI", () => {
+	describe.concurrent(
+		"Fal AI",
+		() => {
 			const client = new HfInference(env.HF_FAL_KEY);
 
 			it("textToImage fal-ai", async () => {
@@ -868,6 +884,7 @@ describe.concurrent(
 					text: "He has grave doubts whether Sir Frederick Leighton's work is really Greek after all, and can discover in it but little of rocky Ithaca.",
 				});
 			});
-		});
-	},
-);
+		},
+		TIMEOUT
+	);
+});
