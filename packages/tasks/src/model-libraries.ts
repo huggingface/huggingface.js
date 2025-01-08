@@ -260,7 +260,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "CosyVoice",
 		repoUrl: "https://github.com/FunAudioLLM/CosyVoice",
 		filter: false,
-		countDownloads: `path_extension:"onnx" OR path_extension:"pt"`,	
+		countDownloads: `path_extension:"onnx" OR path_extension:"pt"`,
 	},
 	cotracker: {
 		prettyLabel: "CoTracker",
