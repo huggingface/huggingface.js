@@ -2114,7 +2114,7 @@
       "body": "{\"model\":\"Meta-Llama-3.1-8B-Instruct\",\"messages\":[{\"role\":\"user\",\"content\":\"Complete the equation 1 + 1 = , just the answer\"}],\"stream\":true}"
     },
     "response": {
-      "body": "data: {\"choices\":[{\"delta\":{\"content\":\"\",\"role\":\"assistant\"},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1736268936,\"id\":\"9619241f-0e05-44f7-8f09-f8e0729b280c\",\"model\":\"Meta-Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"fastcoe\"}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\"2\",\"role\":\"assistant\"},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1736268936,\"id\":\"9619241f-0e05-44f7-8f09-f8e0729b280c\",\"model\":\"Meta-Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"fastcoe\"}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\",\"index\":0,\"logprobs\":null}],\"created\":1736268936,\"id\":\"9619241f-0e05-44f7-8f09-f8e0729b280c\",\"model\":\"Meta-Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"fastcoe\"}\n\ndata: [DONE]\n\n",
+      "body": "data: {\"choices\":[{\"delta\":{\"content\":\"\",\"role\":\"assistant\"},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1736421953,\"id\":\"362592a1-7092-441d-9060-d54029fa34cc\",\"model\":\"Meta-Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"fastcoe\"}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\"2\",\"role\":\"assistant\"},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1736421953,\"id\":\"362592a1-7092-441d-9060-d54029fa34cc\",\"model\":\"Meta-Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"fastcoe\"}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\",\"index\":0,\"logprobs\":null}],\"created\":1736421953,\"id\":\"362592a1-7092-441d-9060-d54029fa34cc\",\"model\":\"Meta-Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"fastcoe\"}\n\ndata: [DONE]\n\n",
       "status": 200,
       "statusText": "OK",
       "headers": {
@@ -2135,7 +2135,7 @@
       "body": "{\"model\":\"Meta-Llama-3.1-8B-Instruct\",\"messages\":[{\"role\":\"user\",\"content\":\"Complete this sentence with words, one plus one is equal \"}]}"
     },
     "response": {
-      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"logprobs\":null,\"message\":{\"content\":\"two.\",\"role\":\"assistant\"}}],\"created\":1736268936,\"id\":\"9619241f-0e05-44f7-8f09-f8e0729b280c\",\"model\":\"Meta-Llama-3.1-8B-Instruct\",\"object\":\"chat.completion\",\"system_fingerprint\":\"fastcoe\",\"usage\":{\"completion_tokens\":2,\"completion_tokens_after_first_per_sec\":39.91116270660665,\"completion_tokens_after_first_per_sec_first_ten\":0,\"completion_tokens_per_sec\":30.031067085285915,\"end_time\":1736268936.542338,\"is_last_response\":true,\"prompt_tokens\":46,\"start_time\":1736268936.4757402,\"time_to_first_token\":0.04154205322265625,\"total_latency\":0.06659770011901855,\"total_tokens\":48,\"total_tokens_per_sec\":720.745610046862}}",
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"logprobs\":null,\"message\":{\"content\":\"two.\",\"role\":\"assistant\"}}],\"created\":1736421953,\"id\":\"4775a55a-47f9-4f95-80b1-40cf0fea22dd\",\"model\":\"Meta-Llama-3.1-8B-Instruct\",\"object\":\"chat.completion\",\"system_fingerprint\":\"fastcoe\",\"usage\":{\"completion_tokens\":2,\"completion_tokens_after_first_per_sec\":46.71705594724942,\"completion_tokens_after_first_per_sec_first_ten\":0,\"completion_tokens_per_sec\":41.28231652403285,\"end_time\":1736421953.7856479,\"is_last_response\":true,\"prompt_tokens\":46,\"start_time\":1736421953.737201,\"time_to_first_token\":0.02704143524169922,\"total_latency\":0.0484468936920166,\"total_tokens\":48,\"total_tokens_per_sec\":990.7755965767885}}",
       "status": 200,
       "statusText": "OK",
       "headers": {
@@ -2155,7 +2155,7 @@
       "body": "{\"model\":\"meta-llama/Llama-3.3-70B-Instruct-Turbo\",\"messages\":[{\"role\":\"user\",\"content\":\"Complete the equation 1 + 1 = , just the answer\"}],\"stream\":true}"
     },
     "response": {
-      "body": "data: {\"id\":\"8fe57a1b9c05790f-CDG\",\"object\":\"chat.completion.chunk\",\"created\":1736268942,\"choices\":[{\"index\":0,\"text\":\"2\",\"logprobs\":null,\"finish_reason\":null,\"seed\":null,\"delta\":{\"token_id\":17,\"role\":\"assistant\",\"content\":\"2\",\"tool_calls\":null}}],\"model\":\"meta-llama/Llama-3.3-70B-Instruct-Turbo\",\"usage\":null}\n\ndata: {\"id\":\"8fe57a1b9c05790f-CDG\",\"object\":\"chat.completion.chunk\",\"created\":1736268942,\"choices\":[{\"index\":0,\"text\":\"\",\"logprobs\":null,\"finish_reason\":\"eos\",\"seed\":13524445995620452000,\"delta\":{\"token_id\":128009,\"role\":\"assistant\",\"content\":\"\",\"tool_calls\":null}}],\"model\":\"meta-llama/Llama-3.3-70B-Instruct-Turbo\",\"usage\":{\"prompt_tokens\":48,\"completion_tokens\":2,\"total_tokens\":50}}\n\ndata: [DONE]\n\n",
+      "body": "data: {\"id\":\"8ff411e54b9299ab\",\"object\":\"chat.completion.chunk\",\"created\":1736421960,\"choices\":[{\"index\":0,\"text\":\"2\",\"logprobs\":null,\"finish_reason\":null,\"seed\":null,\"delta\":{\"token_id\":17,\"role\":\"assistant\",\"content\":\"2\",\"tool_calls\":null}}],\"model\":\"meta-llama/Llama-3.3-70B-Instruct-Turbo\",\"usage\":null}\n\ndata: {\"id\":\"8ff411e54b9299ab\",\"object\":\"chat.completion.chunk\",\"created\":1736421960,\"choices\":[{\"index\":0,\"text\":\"\",\"logprobs\":null,\"finish_reason\":\"eos\",\"seed\":9313781139405380000,\"delta\":{\"token_id\":128009,\"role\":\"assistant\",\"content\":\"\",\"tool_calls\":null}}],\"model\":\"meta-llama/Llama-3.3-70B-Instruct-Turbo\",\"usage\":{\"prompt_tokens\":48,\"completion_tokens\":2,\"total_tokens\":50}}\n\ndata: [DONE]\n\n",
       "status": 200,
       "statusText": "OK",
       "headers": {
@@ -2163,13 +2163,14 @@
         "alt-svc": "h3=\":443\"; ma=86400",
         "cache-control": "no-cache, no-transform",
         "cf-cache-status": "DYNAMIC",
-        "cf-ray": "8fe57a1b9c05790f-CDG",
+        "cf-ray": "8ff411e54b9299ab-CDG",
         "connection": "keep-alive",
         "content-type": "text/event-stream;charset=utf-8",
         "retry-after": "2",
         "server": "cloudflare",
         "strict-transport-security": "max-age=15552000; includeSubDomains",
-        "transfer-encoding": "chunked"
+        "transfer-encoding": "chunked",
+        "vary": "Accept-Encoding"
       }
     }
   },
@@ -2183,22 +2184,23 @@
       "body": "{\"model\":\"meta-llama/Llama-3.3-70B-Instruct-Turbo\",\"messages\":[{\"role\":\"user\",\"content\":\"Complete this sentence with words, one plus one is equal \"}]}"
     },
     "response": {
-      "body": "{\"id\":\"8fe57a1b9ec32285-CDG\",\"object\":\"chat.completion\",\"created\":1736268942,\"model\":\"meta-llama/Llama-3.3-70B-Instruct-Turbo\",\"prompt\":[],\"choices\":[{\"finish_reason\":\"eos\",\"seed\":14145416413182314000,\"logprobs\":null,\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"one plus one is equal to two.\",\"tool_calls\":[]}}],\"usage\":{\"prompt_tokens\":46,\"completion_tokens\":9,\"total_tokens\":55}}",
+      "body": "{\"id\":\"8ff411e54b88f1a4\",\"object\":\"chat.completion\",\"created\":1736421960,\"model\":\"meta-llama/Llama-3.3-70B-Instruct-Turbo\",\"prompt\":[],\"choices\":[{\"finish_reason\":\"eos\",\"seed\":14663482367758619000,\"logprobs\":null,\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"one plus one is equal to two.\",\"tool_calls\":[]}}],\"usage\":{\"prompt_tokens\":46,\"completion_tokens\":9,\"total_tokens\":55}}",
       "status": 200,
       "statusText": "OK",
       "headers": {
         "access-control-allow-origin": "*",
         "alt-svc": "h3=\":443\"; ma=86400",
         "cf-cache-status": "DYNAMIC",
-        "cf-ray": "8fe57a1b9ec32285-CDG",
+        "cf-ray": "8ff411e54b88f1a4-CDG",
         "connection": "keep-alive",
         "content-encoding": "gzip",
         "content-type": "application/json; charset=utf-8",
-        "etag": "W/\"20f-h5oiAOJ1mlXhypcOeryRaZ1VjzE\"",
+        "etag": "W/\"20b-G4IgxcOf8iEL5Ej0mMOCqo6dvAc\"",
         "retry-after": "2",
         "server": "cloudflare",
         "strict-transport-security": "max-age=15552000; includeSubDomains",
-        "transfer-encoding": "chunked"
+        "transfer-encoding": "chunked",
+        "vary": "Accept-Encoding"
       }
     }
   },
@@ -2212,18 +2214,18 @@
       "body": "{\"model\":\"stabilityai/stable-diffusion-xl-base-1.0\",\"inputs\":\"\",\"prompt\":\"award winning high resolution photo of a giant tortoise\",\"response_format\":\"base64\"}"
     },
     "response": {
-      "body": "{\"id\":\"8fe57a1b9decf0bb-CDG\",\"model\":\"stabilityai/stable-diffusion-xl-base-1.0\",\"object\":\"list\",\"data\":[{\"timings\":{\"inference\":4430},\"index\":0,\"b64_json\":\"/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAQABAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDiY7ct2q5DpbMMknArSk0S4t+SueaspbeXF0J/KpSJKEOlxv2BOeoom0l4juUY/CtO0DCTDKSPc8j86uySbB047Yp2A5VozG2cKM+h4qZbcuoIHPqKuXaJKdwxkfhT7J41bEgwR7UhkUdmpi5ILdetLDGVcqw+gNaktpHNHuUE\"}]}",
+      "body": "{\"id\":\"8ff411e55ff1d6a2-CDG\",\"model\":\"stabilityai/stable-diffusion-xl-base-1.0\",\"object\":\"list\",\"data\":[{\"timings\":{\"inference\":4445},\"index\":0,\"b64_json\":\"/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAQABAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDhmjwOary8Cr0hRBk/rWZczjOBWS1AruSTUZpwJPJpDzWhIzminhaCKLgMzRml2mgCi4AKkjXJwKaFzViJO9K4y9bW24DJp1xB5a5BqS2kCJ1pJ5N/FRfUZTXrTiOKFxmnN0oENAzTWGKeOBTCeaAACnqtNBxT1ek2BIqgVKMC\"}]}",
       "status": 200,
       "statusText": "OK",
       "headers": {
         "access-control-allow-origin": "*",
         "alt-svc": "h3=\":443\"; ma=86400",
         "cf-cache-status": "DYNAMIC",
-        "cf-ray": "8fe57a1b9decf0bb-CDG",
+        "cf-ray": "8ff411e55ff1d6a2-CDG",
         "connection": "keep-alive",
         "content-encoding": "gzip",
         "content-type": "application/json; charset=utf-8",
-        "etag": "W/\"2516b-Q5byILAy+5JP2d3gRuYkwzbsyR0\"",
+        "etag": "W/\"22d3f-g3+Q7pgKVAfWL+q0pQdV8zU3Yug\"",
         "retry-after": "2",
         "server": "cloudflare",
         "strict-transport-security": "max-age=15552000; includeSubDomains",
@@ -2254,22 +2256,22 @@
       "body": "{\"input\":{\"prompt\":\"black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot\"}}"
     },
     "response": {
-      "body": "{\"id\":\"kyxr0xnpnhrmc0cm86rsd2n0dm\",\"model\":\"black-forest-labs/flux-schnell\",\"version\":\"dp-4d0bcc010b3049749a251855f12800be\",\"input\":{\"prompt\":\"black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot\"},\"logs\":\"\",\"output\":[\"https://replicate.delivery/xezq/fCe3elthWTYjio0WuWGF8ftTl4lOdxxK0mXm3cwWb5jlpDLQB/out-0.webp\"],\"data_removed\":false,\"error\":null,\"status\":\"processing\",\"created_at\":\"2025-01-07T16:55:53.26Z\",\"urls\":{\"cancel\":\"https://api.replicate.com/v1/predictions/kyxr0xnpnhrmc0cm86rsd2n0dm/cancel\",\"get\":\"https://api.replicate.com/v1/predictions/kyxr0xnpnhrmc0cm86rsd2n0dm\",\"stream\":\"https://stream.replicate.com/v1/files/bcwr-w63qvhgfgaaaagcw4f6xhqtxppdxj3e2blkiiq5qqxftsl37pihq\"}}",
+      "body": "{\"id\":\"j46ap01gb9rma0cm9b89ay7zxw\",\"model\":\"black-forest-labs/flux-schnell\",\"version\":\"dp-4d0bcc010b3049749a251855f12800be\",\"input\":{\"prompt\":\"black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot\"},\"logs\":\"\",\"output\":[\"https://replicate.delivery/xezq/phzbmuYEEkYnAdfJyO56HY4Ro0FtCntPh75h8sO0ANZdIrBKA/out-0.webp\"],\"data_removed\":false,\"error\":null,\"status\":\"processing\",\"created_at\":\"2025-01-09T11:25:45.434Z\",\"urls\":{\"cancel\":\"https://api.replicate.com/v1/predictions/j46ap01gb9rma0cm9b89ay7zxw/cancel\",\"get\":\"https://api.replicate.com/v1/predictions/j46ap01gb9rma0cm9b89ay7zxw\",\"stream\":\"https://stream.replicate.com/v1/files/bcwr-4y4f5q4xygk3vpsq2xyllvruw7ml5iea6xkrwjov4yppoofpzwnq\"}}",
       "status": 201,
       "statusText": "Created",
       "headers": {
         "alt-svc": "h3=\":443\"; ma=86400",
         "cf-cache-status": "DYNAMIC",
-        "cf-ray": "8fe57a5cd9d3d5dd-CDG",
+        "cf-ray": "8ff411860aba9eb6-CDG",
         "connection": "keep-alive",
         "content-type": "application/json; charset=UTF-8",
         "nel": "{\"success_fraction\":0,\"report_to\":\"cf-nel\",\"max_age\":604800}",
         "preference-applied": "wait=60",
         "ratelimit-remaining": "599",
         "ratelimit-reset": "1",
-        "report-to": "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report\\/v4?s=MXhMUawMiItM8lqcFewZe%2BYA9h0ln95iFjitKxQbJnRegDUdnAS1t3CPuPbiqVFwnZM6dqSpT8twr3VBO8L%2BuNwj2mlshpJBSbq%2BpUOVjUa0QK0DRilJ2cK4QZ%2BUqkDwPnYR\"}],\"group\":\"cf-nel\",\"max_age\":604800}",
+        "report-to": "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report\\/v4?s=%2BU183KdPfOH%2FHNu%2F%2BPJGKeeh2DN%2B779%2ByJ%2Bh87HUmdlL6XTTPGgJEi8qRDNIUlmbZjM%2BdLy3CCDesiPy81LBVFcQXg2MQU26QGHn0jlhyFtp%2FFfSPpbEi4TPdLzV52fM2DIzaOBf5zBqcWgsDd4e\"}],\"group\":\"cf-nel\",\"max_age\":604800}",
         "server": "cloudflare",
-        "server-timing": "cfL4;desc=\"?proto=TCP&rtt=4045&min_rtt=4004&rtt_var=1531&sent=4&recv=5&lost=0&retrans=0&sent_bytes=2848&recv_bytes=974&delivery_rate=723276&cwnd=217&unsent_bytes=0&cid=74f3095297c3049c&ts=907&x=0\"",
+        "server-timing": "cfL4;desc=\"?proto=TCP&rtt=5073&min_rtt=5070&rtt_var=1909&sent=5&recv=5&lost=0&retrans=0&sent_bytes=2848&recv_bytes=974&delivery_rate=792785&cwnd=252&unsent_bytes=0&cid=eb62e25ad74b0141&ts=891&x=0\"",
         "strict-transport-security": "max-age=15552000",
         "vary": "Accept-Encoding"
       }
@@ -2325,7 +2327,7 @@
       "body": "{\"inputs\":\"\",\"prompt\":\"black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot\",\"response_format\":\"base64\"}"
     },
     "response": {
-      "body": "{\"images\":[{\"url\":\"https://fal.media/files/elephant/wFUOb8jzsw2n_sVIyXb00.png\",\"width\":1024,\"height\":768,\"content_type\":\"image/jpeg\"}],\"timings\":{\"inference\":0.35036514210514724},\"seed\":2233221953,\"has_nsfw_concepts\":[false],\"prompt\":\"black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot\"}",
+      "body": "{\"images\":[{\"url\":\"https://fal.media/files/lion/X8-x48pAMGOF6n7fINCBC.png\",\"width\":1024,\"height\":768,\"content_type\":\"image/jpeg\"}],\"timings\":{\"inference\":0.3481899690814316},\"seed\":2463045738,\"has_nsfw_concepts\":[false],\"prompt\":\"black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot\"}",
       "status": 200,
       "statusText": "OK",
       "headers": {
@@ -2384,23 +2386,143 @@
       "body": "{\"model\":\"mistralai/Mixtral-8x7B-v0.1\",\"inputs\":\"Paris is\",\"temperature\":0,\"max_tokens\":10,\"prompt\":\"Paris is\"}"
     },
     "response": {
-      "body": "{\"id\":\"8fecbda15c7c9edf\",\"object\":\"text.completion\",\"created\":1736345108,\"model\":\"mistralai/Mixtral-8x7B-v0.1\",\"prompt\":[],\"choices\":[{\"text\":\" a city of love, and it’s also\",\"finish_reason\":\"length\",\"seed\":1271532905535955700,\"logprobs\":null,\"index\":0}],\"usage\":{\"prompt_tokens\":3,\"completion_tokens\":10,\"total_tokens\":13}}",
+      "body": "{\"id\":\"8ff411e559717015\",\"object\":\"text.completion\",\"created\":1736421961,\"model\":\"mistralai/Mixtral-8x7B-v0.1\",\"prompt\":[],\"choices\":[{\"text\":\" a city of love, and it’s also\",\"finish_reason\":\"length\",\"seed\":16804105058607157000,\"logprobs\":null,\"index\":0}],\"usage\":{\"prompt_tokens\":3,\"completion_tokens\":10,\"total_tokens\":13}}",
       "status": 200,
       "statusText": "OK",
       "headers": {
         "access-control-allow-origin": "*",
         "alt-svc": "h3=\":443\"; ma=86400",
         "cf-cache-status": "DYNAMIC",
-        "cf-ray": "8fecbda15c7c9edf-CDG",
+        "cf-ray": "8ff411e559717015-CDG",
         "connection": "keep-alive",
         "content-encoding": "gzip",
         "content-type": "application/json; charset=utf-8",
-        "etag": "W/\"1ad-uo8PAXdljcZOe4fdhbWeJUtsnsI\"",
+        "etag": "W/\"1ae-m7F1Kr+kHL4RyHRl/z+vIomsOgE\"",
         "retry-after": "2",
         "server": "cloudflare",
         "strict-transport-security": "max-age=15552000; includeSubDomains",
         "transfer-encoding": "chunked",
         "vary": "Accept-Encoding"
+      }
+    }
+  },
+  "d79e1a71ebadb66a1a4c5d7603d09aae99d5fa9bb9593b87d2bc9de5a4f33fa6": {
+    "url": "https://api-inference.huggingface.co/models/google-bert/bert-base-uncased",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Wait-For-Model": "true"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":\"[MASK] world!\",\"model\":\"google-bert/bert-base-uncased\"}"
+    },
+    "response": {
+      "body": "[{\"score\":0.291090190410614,\"token\":1996,\"token_str\":\"the\",\"sequence\":\"the world!\"},{\"score\":0.18091197311878204,\"token\":2026,\"token_str\":\"my\",\"sequence\":\"my world!\"},{\"score\":0.05239735543727875,\"token\":7592,\"token_str\":\"hello\",\"sequence\":\"hello world!\"},{\"score\":0.0424695760011673,\"token\":6919,\"token_str\":\"wonderful\",\"sequence\":\"wonderful world!\"},{\"score\":0.015912115573883057,\"token\":1037,\"token_str\":\"a\",\"sequence\":\"a world!\"}]",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-expose-headers": "x-compute-type, x-compute-time",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "server": "uvicorn",
+        "transfer-encoding": "chunked",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "c1f092dac90fd551c3178c80c6f15974f5522e012d077539e6fae1b7cbd94ff3": {
+    "url": "https://api-inference.huggingface.co/models/openai-community/gpt2",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":\"one plus two equals\",\"model\":\"google/gemma-2-2b-it\"}"
+    },
+    "response": {
+      "body": "[{\"generated_text\":\"one plus two equals least-seven. We divided it by product including both the number of additional members and the number of customers.\\n\\nSample product. Median ( Graves , Dead , Majestic ALE ): Minimum for war with an enemy on March 31, 1944; removed. White, Black baride = 0.75.\\n\\nCannot Be Substantiated\\n\\nIncidents of non-judicial executions can have validity when foreseen. Giving rise to reasonable doubt about outcomes, such cases can generally be generalized to range from governmental efforts to prevent or treat violations, violations of which can be assassinated or attempted assassinations, and the death penalty is used falsely as it would at present. Rehabilitation of the incarcerated is usually demonstrated in the form of parole at a reduction or partial release, or redemption after the scheduled termination of incarceration ( Svetlana, 1939 ; Morse , 1965 ). This is in --> cogent terms, because such movements can be accomplished through cases that are higher proof of proof than those that would be legitimate if the extraterritorial requirement of the Act were implemented.\\n\\nAdditionally, it is necessary to define the \\\"deadbeat\\\" foreigner and especially the \\\"Simian\\\" foreigner as the aborigines. It does not require that they be medically sound, since our customary taxonomy: \\\"animal(s)/Aries/Caribou (1) 1/1 (cat) & dwarf animal (antis[dialania]) Desert horsefly 2\\n\\nThis definition is used primarily to clarify solid charges of torture, because executing the presumed wartime detainee exhibits the following distinctive characteristics:\\n\\nPersuade an old layman that any prisoner of war treated human material rather than \\\"urb outrawing his-Capital% through kindness , eligeem toul! 1/i A fellow soldier serving under your authority , but failed to do so against what the befuddled British placed upon the latter. REGRET?S unreasonable POSITIONS are warranted under the humanitarian Requisites of importance and emlegation to every tyrant in order to honor his one year time graciously.\\n\\nj. Deteriorate over 8 years are local customary executions resulted from the Afghan semi-autonomous memory circuit in Afghanistan, or associated with counting the number of defendants. Other values may be high, but this could neither play a warlike meld well in handling timely new information or granting reckless probable cause.\\n\\n*TRIOL * Government-Bymited albeit political\\n\\nocassionate Kasady government.\\n\\n(History and Punishment, Chapter 27a, Council of Jewish Representatives Legally Daried November 12, 1848.)\\n\\nSVOURS No.25, striduliy (Federal edict), Charitable obligition.\\n\\nmind, body, organs, name of every intentional minor surrounded by invalidemizes the attainment of the universal subjective understanding that non-civilians are and have always been a \\\"spontaneous being\\\" deemed undesirable by God. Estate Tax forbade Indians, Whites, and Celestials to judge impure...and they could not do so because if they were insulted they would not have such locality effect. Paragraph 6 of the UDAT, Agencies for State and Further Assistance Clause, 384 U.S. 58-63 (Lokonda, Asiatic Rev.1987 given to officers of New York or shall be levied for .................. but will not be collected except this because of government knowassay should fall not on the second diagonal of jew.exe{lo). The income tax now instructs the hadishment body to collect it in the ninth year, nor speculation upon earnings, in profit or loss stock (punishment leased out); the doubtful admissions, unsupported by prisoners tied up in stationary five years; and the attunement to the principle of the Montesninthe negro of /bck{e Papa}. All helpers rely that one fortnight officers will probably under commission make the reasonable to arbitrary minimums and estimations to which listeners of, a population below a million, and below, 487 citizens and members thereof. It was supposed either to be non-mandatory, subject to Israel, with rains rising forth of harvest grounds, or otherwise, to oversee every desire caused by every prerogative but the question of price training to prove it, manipulated ( Lokonda , 1993 ), who just took the responsibility for the observance of promised, free labor. Thus a working day ended during the Sabbath to impudge Friday and Friday's to deputize. Institutional sanction suggested.\\n\\n(\\\"S.v Dr. and Mrs. Jolonaunder Dr. Pittsburgh School of Management, chosen . of Pennsylvania, 1944. . . ,\\\" Cel. Mystek 2: Bel. (1844)).\\n\\nWhen the special basic of civil society means educating about the communal quarrel, fear, honest concern for the right of the incarcerated individual and the right to use and live as if there was a fair offer of protection to be made to the prisoner, the immedi moistSaid necessary\"}]",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-allow-origin": "*",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "transfer-encoding": "chunked",
+        "vary": "origin, access-control-request-method, access-control-request-headers, Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "ce75e6bef81f98cf5a3bd736c48e9b689d2b3a37b46d8dfc014142de429ef98c": {
+    "url": "https://fal.run/fal-ai/whisper",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST"
+    },
+    "response": {
+      "body": "{\"text\":\" he has grave doubts whether sir frederick leighton's work is really greek after all and can discover in it but little of rocky ithaca\",\"chunks\":[{\"timestamp\":[0,9.9],\"text\":\" he has grave doubts whether sir frederick leighton's work is really greek after all and can discover in it but little of rocky ithaca\",\"speaker\":null}],\"inferred_languages\":[\"en\"],\"diarization_segments\":[]}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "strict-transport-security": "max-age=31536000; includeSubDomains"
+      }
+    }
+  },
+  "0e804aca0605af8c1d0dd03c5914f53d87cba8f6e27cfa6fd097a4240fd36618": {
+    "url": "https://fal.media/files/lion/X8-x48pAMGOF6n7fINCBC.png",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-headers": "*",
+        "access-control-allow-methods": "*",
+        "access-control-allow-origin": "*",
+        "access-control-max-age": "86400",
+        "cf-ray": "8ff41123eec90151-CDG",
+        "connection": "keep-alive",
+        "content-type": "image/jpeg",
+        "server": "cloudflare",
+        "vary": "Accept-Encoding"
+      }
+    }
+  },
+  "23d0ebb3b899b0572da6799601bd265b0eaa80cfd5d306d5022d627744484807": {
+    "url": "https://replicate.delivery/xezq/phzbmuYEEkYnAdfJyO56HY4Ro0FtCntPh75h8sO0ANZdIrBKA/out-0.webp",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+        "cache-control": "public,max-age=3600",
+        "cache-id": "PAR-31976c84",
+        "cache-status": "miss",
+        "content-type": "image/webp",
+        "etag": "\"94f5f3bc5459a0f9e76a57233a5f380e\"",
+        "last-modified": "Thu, 09 Jan 2025 11:25:46 GMT",
+        "server": "UploadServer"
+      }
+    }
+  },
+  "366a5bfa135dba1f27cd55d9b3a77533911e01351bc1ca1fcd4219dbc5883d88": {
+    "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAQABAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDhmjwOary8Cr0hRBk/rWZczjOBWS1AruSTUZpwJPJpDzWhIzminhaCKLgMzRml2mgCi4AKkjXJwKaFzViJO9K4y9bW24DJp1xB5a5BqS2kCJ1pJ5N/FRfUZTXrTiOKFxmnN0oENAzTWGKeOBTCeaAACnqtNBxT1ek2BIqgVKMC",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "content-type": "image/jpeg"
       }
     }
   }

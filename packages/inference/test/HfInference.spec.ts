@@ -787,7 +787,7 @@ describe.concurrent("HfInference", () => {
 					data: new Blob([readTestFile("sample2.wav")], { type: "audio/x-wav" }),
 				});
 				expect(res).toMatchObject({
-					text: "He has grave doubts whether Sir Frederick Leighton's work is really Greek after all, and can discover in it but little of rocky Ithaca.",
+					text: " he has grave doubts whether sir frederick leighton's work is really greek after all and can discover in it but little of rocky ithaca",
 				});
 			});
 		},
