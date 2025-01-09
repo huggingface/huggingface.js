@@ -1029,7 +1029,7 @@ torchaudio.save("output1.wav", torch.from_numpy(wavs[0]), 24000)`,
 ];
 
 export const yolov8 = (model: ModelData): string[] => [
-	`from ultralytics import YOLOv8
+	`from ultralytics import YOLOv8 # modify the yolo version here
 
 model = YOLOv8.from_pretrained("${model.id}")
 source = 'http://images.cocodataset.org/val2017/000000039769.jpg'

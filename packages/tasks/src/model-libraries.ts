@@ -844,13 +844,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.voicecraft,
 	},
 	yolov8: {
-		prettyLabel: "YOLOv8",
-		repoName: "yolov8",
+		prettyLabel: "ultralytics",
+		repoName: "ultralytics",
 		repoUrl: "https://github.com/ultralytics/ultralytics",
 		docsUrl: "https://github.com/ultralytics/ultralytics",
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
-		snippets: snippets.yolov8,
 	},
 	yolov10: {
 		prettyLabel: "YOLOv10",
