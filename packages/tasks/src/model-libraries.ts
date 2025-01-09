@@ -849,6 +849,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/ultralytics/ultralytics",
 		docsUrl: "https://github.com/ultralytics/ultralytics",
 		filter: false,
+		countDownloads: `path_extension:"pt"`,
 		snippets: snippets.yolov8,
 	},
 	yolov10: {
@@ -856,6 +857,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "yolov10",
 		repoUrl: "https://github.com/THU-MIG/yolov10",
 		docsUrl: "https://github.com/THU-MIG/yolov10",
+		countDownloads: `path_extension:"pt"`,
 		snippets: snippets.yolov10,
 	},
 	whisperkit: {
