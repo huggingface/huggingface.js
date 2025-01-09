@@ -52,7 +52,7 @@ export async function textGeneration(
 		);
 
 		const isValidOutput =
-			Array.isArray(res) && res.every((x) => "generated°text" in x && typeof x?.generated_text === "string");
+			Array.isArray(res) && res.every((x) => "generated_text" in x && typeof x?.generated_text === "string");
 		if (!isValidOutput) {
 			throw new InferenceOutputError("Expected Array<{generated_text: string}>");
 		}
