@@ -1028,7 +1028,7 @@ wavs = chat.infer(texts, )
 torchaudio.save("output1.wav", torch.from_numpy(wavs[0]), 24000)`,
 ];
 
-export const yolo = (model: ModelData): string[] => [
+export const ultralytics = (model: ModelData): string[] => [
 	`from ultralytics import YOLOv8 # modify the yolo version here
 
 model = YOLOv8.from_pretrained("${model.id}")
