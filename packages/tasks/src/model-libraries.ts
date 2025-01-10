@@ -769,6 +769,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/TensorSpeech/TensorFlowTTS",
 		snippets: snippets.tensorflowtts,
 	},
+	"tabpfn": {
+		prettyLabel: "TabPFN",
+		repoName: "TabPFN",
+		repoUrl: "https://github.com/PriorLabs/TabPFN",
+		filter: false,
+		countDownloads: `path_extension:"ckpt"`,
+	},
 	"tic-clip": {
 		prettyLabel: "TiC-CLIP",
 		repoName: "TiC-CLIP",
