@@ -769,7 +769,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/TensorSpeech/TensorFlowTTS",
 		snippets: snippets.tensorflowtts,
 	},
-	"tabpfn": {
+	tabpfn: {
 		prettyLabel: "TabPFN",
 		repoName: "TabPFN",
 		repoUrl: "https://github.com/PriorLabs/TabPFN",
