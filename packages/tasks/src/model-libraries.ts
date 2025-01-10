@@ -843,7 +843,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://github.com/jasonppy/VoiceCraft",
 		snippets: snippets.voicecraft,
 	},
-	ultralyrics: {
+	ultralytics: {
 		prettyLabel: "ultralyrics",
 		repoName: "ultralyrics",
 		repoUrl: "https://github.com/ultralytics/ultralytics",
