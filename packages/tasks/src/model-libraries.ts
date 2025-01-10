@@ -843,11 +843,21 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://github.com/jasonppy/VoiceCraft",
 		snippets: snippets.voicecraft,
 	},
+	ultralytics: {
+		prettyLabel: "ultralytics",
+		repoName: "ultralytics",
+		repoUrl: "https://github.com/ultralytics/ultralytics",
+		docsUrl: "https://github.com/ultralytics/ultralytics",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+		snippets: snippets.ultralytics,
+	},
 	yolov10: {
 		prettyLabel: "YOLOv10",
 		repoName: "yolov10",
 		repoUrl: "https://github.com/THU-MIG/yolov10",
 		docsUrl: "https://github.com/THU-MIG/yolov10",
+		countDownloads: `path_extension:"pt"`,
 		snippets: snippets.yolov10,
 	},
 	whisperkit: {
