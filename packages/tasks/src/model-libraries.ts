@@ -773,7 +773,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "TabPFN",
 		repoName: "TabPFN",
 		repoUrl: "https://github.com/PriorLabs/TabPFN",
-		countDownloads: `path_extension:"ckpt"`,
+		countDownloads: `path_extension:"ckpt" or path:"config.json"`,
 	},
 	"tic-clip": {
 		prettyLabel: "TiC-CLIP",
