@@ -68,7 +68,9 @@ export async function* streamingRequest<T>(
 	try {
 		while (true) {
 			const { done, value } = await reader.read();
-			if (done) return;
+			if (done) {
+				return;
+			}
 			onChunk(value);
 			for (const event of events) {
 				if (event.data.length > 0) {

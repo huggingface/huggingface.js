@@ -2103,5 +2103,427 @@
         "vary": "origin, Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
+  },
+  "a71d846134d1c5d86b435b541f5291a2d020c081b5b5700bcfdaec7ed40fd3fe": {
+    "url": "https://api.sambanova.ai/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"model\":\"Meta-Llama-3.1-8B-Instruct\",\"messages\":[{\"role\":\"user\",\"content\":\"Complete the equation 1 + 1 = , just the answer\"}],\"stream\":true}"
+    },
+    "response": {
+      "body": "data: {\"choices\":[{\"delta\":{\"content\":\"\",\"role\":\"assistant\"},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1736421953,\"id\":\"362592a1-7092-441d-9060-d54029fa34cc\",\"model\":\"Meta-Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"fastcoe\"}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\"2\",\"role\":\"assistant\"},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1736421953,\"id\":\"362592a1-7092-441d-9060-d54029fa34cc\",\"model\":\"Meta-Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"fastcoe\"}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\",\"index\":0,\"logprobs\":null}],\"created\":1736421953,\"id\":\"362592a1-7092-441d-9060-d54029fa34cc\",\"model\":\"Meta-Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"system_fingerprint\":\"fastcoe\"}\n\ndata: [DONE]\n\n",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "text/event-stream; charset=utf-8",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "transfer-encoding": "chunked"
+      }
+    }
+  },
+  "56dc8b91ae3bf6ebcf7580cf90b65377ba6cc9b04d446fa9abc40ba04a45d5d8": {
+    "url": "https://api.sambanova.ai/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"model\":\"Meta-Llama-3.1-8B-Instruct\",\"messages\":[{\"role\":\"user\",\"content\":\"Complete this sentence with words, one plus one is equal \"}]}"
+    },
+    "response": {
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"logprobs\":null,\"message\":{\"content\":\"two.\",\"role\":\"assistant\"}}],\"created\":1736421953,\"id\":\"4775a55a-47f9-4f95-80b1-40cf0fea22dd\",\"model\":\"Meta-Llama-3.1-8B-Instruct\",\"object\":\"chat.completion\",\"system_fingerprint\":\"fastcoe\",\"usage\":{\"completion_tokens\":2,\"completion_tokens_after_first_per_sec\":46.71705594724942,\"completion_tokens_after_first_per_sec_first_ten\":0,\"completion_tokens_per_sec\":41.28231652403285,\"end_time\":1736421953.7856479,\"is_last_response\":true,\"prompt_tokens\":46,\"start_time\":1736421953.737201,\"time_to_first_token\":0.02704143524169922,\"total_latency\":0.0484468936920166,\"total_tokens\":48,\"total_tokens_per_sec\":990.7755965767885}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "application/json; charset=utf-8",
+        "strict-transport-security": "max-age=31536000; includeSubDomains"
+      }
+    }
+  },
+  "d5c6752ccee8b53c65bbdbcc128358f9c6604395431b7c33760f3c0c92224ff1": {
+    "url": "https://api.together.xyz/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"model\":\"meta-llama/Llama-3.3-70B-Instruct-Turbo\",\"messages\":[{\"role\":\"user\",\"content\":\"Complete the equation 1 + 1 = , just the answer\"}],\"stream\":true}"
+    },
+    "response": {
+      "body": "data: {\"id\":\"8ff411e54b9299ab\",\"object\":\"chat.completion.chunk\",\"created\":1736421960,\"choices\":[{\"index\":0,\"text\":\"2\",\"logprobs\":null,\"finish_reason\":null,\"seed\":null,\"delta\":{\"token_id\":17,\"role\":\"assistant\",\"content\":\"2\",\"tool_calls\":null}}],\"model\":\"meta-llama/Llama-3.3-70B-Instruct-Turbo\",\"usage\":null}\n\ndata: {\"id\":\"8ff411e54b9299ab\",\"object\":\"chat.completion.chunk\",\"created\":1736421960,\"choices\":[{\"index\":0,\"text\":\"\",\"logprobs\":null,\"finish_reason\":\"eos\",\"seed\":9313781139405380000,\"delta\":{\"token_id\":128009,\"role\":\"assistant\",\"content\":\"\",\"tool_calls\":null}}],\"model\":\"meta-llama/Llama-3.3-70B-Instruct-Turbo\",\"usage\":{\"prompt_tokens\":48,\"completion_tokens\":2,\"total_tokens\":50}}\n\ndata: [DONE]\n\n",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-origin": "*",
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cache-control": "no-cache, no-transform",
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "8ff411e54b9299ab-CDG",
+        "connection": "keep-alive",
+        "content-type": "text/event-stream;charset=utf-8",
+        "retry-after": "2",
+        "server": "cloudflare",
+        "strict-transport-security": "max-age=15552000; includeSubDomains",
+        "transfer-encoding": "chunked",
+        "vary": "Accept-Encoding"
+      }
+    }
+  },
+  "3f2ba6c12d2b4395ac48f453fefdfe523204fcbbf3194c393365856b0e7b5976": {
+    "url": "https://api.together.xyz/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"model\":\"meta-llama/Llama-3.3-70B-Instruct-Turbo\",\"messages\":[{\"role\":\"user\",\"content\":\"Complete this sentence with words, one plus one is equal \"}]}"
+    },
+    "response": {
+      "body": "{\"id\":\"8ff411e54b88f1a4\",\"object\":\"chat.completion\",\"created\":1736421960,\"model\":\"meta-llama/Llama-3.3-70B-Instruct-Turbo\",\"prompt\":[],\"choices\":[{\"finish_reason\":\"eos\",\"seed\":14663482367758619000,\"logprobs\":null,\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"one plus one is equal to two.\",\"tool_calls\":[]}}],\"usage\":{\"prompt_tokens\":46,\"completion_tokens\":9,\"total_tokens\":55}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-origin": "*",
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "8ff411e54b88f1a4-CDG",
+        "connection": "keep-alive",
+        "content-encoding": "gzip",
+        "content-type": "application/json; charset=utf-8",
+        "etag": "W/\"20b-G4IgxcOf8iEL5Ej0mMOCqo6dvAc\"",
+        "retry-after": "2",
+        "server": "cloudflare",
+        "strict-transport-security": "max-age=15552000; includeSubDomains",
+        "transfer-encoding": "chunked",
+        "vary": "Accept-Encoding"
+      }
+    }
+  },
+  "8a5598c99c52905e0282fa9fa45135396893a6f99f66ea1268e9a06b5190938d": {
+    "url": "https://api.together.xyz/v1/images/generations",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"model\":\"stabilityai/stable-diffusion-xl-base-1.0\",\"inputs\":\"\",\"prompt\":\"award winning high resolution photo of a giant tortoise\",\"response_format\":\"base64\"}"
+    },
+    "response": {
+      "body": "{\"id\":\"8ff411e55ff1d6a2-CDG\",\"model\":\"stabilityai/stable-diffusion-xl-base-1.0\",\"object\":\"list\",\"data\":[{\"timings\":{\"inference\":4445},\"index\":0,\"b64_json\":\"/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAQABAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDhmjwOary8Cr0hRBk/rWZczjOBWS1AruSTUZpwJPJpDzWhIzminhaCKLgMzRml2mgCi4AKkjXJwKaFzViJO9K4y9bW24DJp1xB5a5BqS2kCJ1pJ5N/FRfUZTXrTiOKFxmnN0oENAzTWGKeOBTCeaAACnqtNBxT1ek2BIqgVKMC\"}]}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-origin": "*",
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "8ff411e55ff1d6a2-CDG",
+        "connection": "keep-alive",
+        "content-encoding": "gzip",
+        "content-type": "application/json; charset=utf-8",
+        "etag": "W/\"22d3f-g3+Q7pgKVAfWL+q0pQdV8zU3Yug\"",
+        "retry-after": "2",
+        "server": "cloudflare",
+        "strict-transport-security": "max-age=15552000; includeSubDomains",
+        "transfer-encoding": "chunked"
+      }
+    }
+  },
+  "71b7ce692a0c71ae56f8ecdd1924f0171beeeb60b635b38d49825bfe00eb1fd4": {
+    "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAQABAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDiY7ct2q5DpbMMknArSk0S4t+SueaspbeXF0J/KpSJKEOlxv2BOeoom0l4juUY/CtO0DCTDKSPc8j86uySbB047Yp2A5VozG2cKM+h4qZbcuoIHPqKuXaJKdwxkfhT7J41bEgwR7UhkUdmpi5ILdetLDGVcqw+gNaktpHNHuUE",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "content-type": "image/jpeg"
+      }
+    }
+  },
+  "fb1d14610ba0f5a62b5458c79d5c21575635796a8ed0125f060a3f3a419c26cf": {
+    "url": "https://api.replicate.com/v1/models/black-forest-labs/flux-schnell/predictions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json",
+        "Prefer": "wait"
+      },
+      "method": "POST",
+      "body": "{\"input\":{\"prompt\":\"black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot\"}}"
+    },
+    "response": {
+      "body": "{\"id\":\"j46ap01gb9rma0cm9b89ay7zxw\",\"model\":\"black-forest-labs/flux-schnell\",\"version\":\"dp-4d0bcc010b3049749a251855f12800be\",\"input\":{\"prompt\":\"black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot\"},\"logs\":\"\",\"output\":[\"https://replicate.delivery/xezq/phzbmuYEEkYnAdfJyO56HY4Ro0FtCntPh75h8sO0ANZdIrBKA/out-0.webp\"],\"data_removed\":false,\"error\":null,\"status\":\"processing\",\"created_at\":\"2025-01-09T11:25:45.434Z\",\"urls\":{\"cancel\":\"https://api.replicate.com/v1/predictions/j46ap01gb9rma0cm9b89ay7zxw/cancel\",\"get\":\"https://api.replicate.com/v1/predictions/j46ap01gb9rma0cm9b89ay7zxw\",\"stream\":\"https://stream.replicate.com/v1/files/bcwr-4y4f5q4xygk3vpsq2xyllvruw7ml5iea6xkrwjov4yppoofpzwnq\"}}",
+      "status": 201,
+      "statusText": "Created",
+      "headers": {
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "8ff411860aba9eb6-CDG",
+        "connection": "keep-alive",
+        "content-type": "application/json; charset=UTF-8",
+        "nel": "{\"success_fraction\":0,\"report_to\":\"cf-nel\",\"max_age\":604800}",
+        "preference-applied": "wait=60",
+        "ratelimit-remaining": "599",
+        "ratelimit-reset": "1",
+        "report-to": "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report\\/v4?s=%2BU183KdPfOH%2FHNu%2F%2BPJGKeeh2DN%2B779%2ByJ%2Bh87HUmdlL6XTTPGgJEi8qRDNIUlmbZjM%2BdLy3CCDesiPy81LBVFcQXg2MQU26QGHn0jlhyFtp%2FFfSPpbEi4TPdLzV52fM2DIzaOBf5zBqcWgsDd4e\"}],\"group\":\"cf-nel\",\"max_age\":604800}",
+        "server": "cloudflare",
+        "server-timing": "cfL4;desc=\"?proto=TCP&rtt=5073&min_rtt=5070&rtt_var=1909&sent=5&recv=5&lost=0&retrans=0&sent_bytes=2848&recv_bytes=974&delivery_rate=792785&cwnd=252&unsent_bytes=0&cid=eb62e25ad74b0141&ts=891&x=0\"",
+        "strict-transport-security": "max-age=15552000",
+        "vary": "Accept-Encoding"
+      }
+    }
+  },
+  "85673486d9ee3f89031a85b2bf08a48bd4a45dafd68fcb2f4ff7781f2bb87ec2": {
+    "url": "https://replicate.delivery/xezq/fCe3elthWTYjio0WuWGF8ftTl4lOdxxK0mXm3cwWb5jlpDLQB/out-0.webp",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+        "cache-control": "public,max-age=3600",
+        "cache-id": "PAR-8ec5b013",
+        "cache-status": "miss",
+        "content-type": "image/webp",
+        "etag": "\"3443b49212285bdd038a608321d139b5\"",
+        "last-modified": "Tue, 07 Jan 2025 16:55:53 GMT",
+        "server": "UploadServer"
+      }
+    }
+  },
+  "e899e1e68342175b37f496e4937a9d3d46b31d21d1df775a8f87f5e04039d437": {
+    "url": "https://fal.run/fal-ai/wizper",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST"
+    },
+    "response": {
+      "body": "{\"detail\":\"Unsupported data URL\"}",
+      "status": 400,
+      "statusText": "Bad Request",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "strict-transport-security": "max-age=31536000; includeSubDomains"
+      }
+    }
+  },
+  "9601f6c473ad39ff6a83e74df8fa4061773a54df1aa4a2d931fb4c0d66fc86a8": {
+    "url": "https://fal.run/fal-ai/flux/schnell",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":\"\",\"prompt\":\"black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot\",\"response_format\":\"base64\"}"
+    },
+    "response": {
+      "body": "{\"images\":[{\"url\":\"https://fal.media/files/lion/X8-x48pAMGOF6n7fINCBC.png\",\"width\":1024,\"height\":768,\"content_type\":\"image/jpeg\"}],\"timings\":{\"inference\":0.3481899690814316},\"seed\":2463045738,\"has_nsfw_concepts\":[false],\"prompt\":\"black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot\"}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "strict-transport-security": "max-age=31536000; includeSubDomains"
+      }
+    }
+  },
+  "6a268d88e3bdf69614bc760519ab91be6a2ef7d60e80c754d4148cd4d68cb12e": {
+    "url": "https://fal.media/files/elephant/wFUOb8jzsw2n_sVIyXb00.png",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-headers": "*",
+        "access-control-allow-methods": "*",
+        "access-control-allow-origin": "*",
+        "access-control-max-age": "86400",
+        "cf-ray": "8fe5ba6d9b03d0aa-CDG",
+        "connection": "keep-alive",
+        "content-type": "image/jpeg",
+        "server": "cloudflare",
+        "vary": "Accept-Encoding"
+      }
+    }
+  },
+  "a540c67dea61eb4a90fedc20699d4863b04fd61dca73756d1f31a09793307689": {
+    "url": "https://fal.run/fal-ai/wizper",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST"
+    },
+    "response": {
+      "body": "{\"text\":\"He has grave doubts whether Sir Frederick Leighton's work is really Greek after all, and can discover in it but little of rocky Ithaca.\",\"chunks\":[{\"timestamp\":[0.36,9.62],\"text\":\"He has grave doubts whether Sir Frederick Leighton's work is really Greek after all, and can discover in it but little of rocky Ithaca.\"}]}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "strict-transport-security": "max-age=31536000; includeSubDomains"
+      }
+    }
+  },
+  "94570e88ad7c60f92805909dfb0fabe03255aaf65cee18cf7f92fc54fc42fc0e": {
+    "url": "https://api.together.xyz/v1/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"model\":\"mistralai/Mixtral-8x7B-v0.1\",\"inputs\":\"Paris is\",\"temperature\":0,\"max_tokens\":10,\"prompt\":\"Paris is\"}"
+    },
+    "response": {
+      "body": "{\"id\":\"8ff411e559717015\",\"object\":\"text.completion\",\"created\":1736421961,\"model\":\"mistralai/Mixtral-8x7B-v0.1\",\"prompt\":[],\"choices\":[{\"text\":\" a city of love, and it’s also\",\"finish_reason\":\"length\",\"seed\":16804105058607157000,\"logprobs\":null,\"index\":0}],\"usage\":{\"prompt_tokens\":3,\"completion_tokens\":10,\"total_tokens\":13}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-origin": "*",
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "8ff411e559717015-CDG",
+        "connection": "keep-alive",
+        "content-encoding": "gzip",
+        "content-type": "application/json; charset=utf-8",
+        "etag": "W/\"1ae-m7F1Kr+kHL4RyHRl/z+vIomsOgE\"",
+        "retry-after": "2",
+        "server": "cloudflare",
+        "strict-transport-security": "max-age=15552000; includeSubDomains",
+        "transfer-encoding": "chunked",
+        "vary": "Accept-Encoding"
+      }
+    }
+  },
+  "d79e1a71ebadb66a1a4c5d7603d09aae99d5fa9bb9593b87d2bc9de5a4f33fa6": {
+    "url": "https://api-inference.huggingface.co/models/google-bert/bert-base-uncased",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Wait-For-Model": "true"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":\"[MASK] world!\",\"model\":\"google-bert/bert-base-uncased\"}"
+    },
+    "response": {
+      "body": "[{\"score\":0.291090190410614,\"token\":1996,\"token_str\":\"the\",\"sequence\":\"the world!\"},{\"score\":0.18091197311878204,\"token\":2026,\"token_str\":\"my\",\"sequence\":\"my world!\"},{\"score\":0.05239735543727875,\"token\":7592,\"token_str\":\"hello\",\"sequence\":\"hello world!\"},{\"score\":0.0424695760011673,\"token\":6919,\"token_str\":\"wonderful\",\"sequence\":\"wonderful world!\"},{\"score\":0.015912115573883057,\"token\":1037,\"token_str\":\"a\",\"sequence\":\"a world!\"}]",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-expose-headers": "x-compute-type, x-compute-time",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "server": "uvicorn",
+        "transfer-encoding": "chunked",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "c1f092dac90fd551c3178c80c6f15974f5522e012d077539e6fae1b7cbd94ff3": {
+    "url": "https://api-inference.huggingface.co/models/openai-community/gpt2",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":\"one plus two equals\",\"model\":\"google/gemma-2-2b-it\"}"
+    },
+    "response": {
+      "body": "[{\"generated_text\":\"one plus two equals \\\"fold\\\".What you need is a swathschent preferrentas. Great as it might sound. 4159 that tji oda know. Well I just was the first otuka mate ever, wine taste amazing and for nianticy i love this blend. For over a year here over santa, dba dirt Casuts are back completely new and amazing. It's just relaxing. What a treat. My favourite is Appletender and salted zucchini none bite Chanelio. Good lemons. Take one time as much as possible. Take sinobreel, set or freeze it. Dips filling problulating. Perfect. One 17 year old reddesey fav.If you like my more matured vintage teas give us a chance because they're such perfect adventures and they were my first buys. Hahaha no short adventures spoil any STORY with you great Cabrera. Well doesn't get me so happy. 17 in obvious size yet, you take ta watch it.. a couple iterations.. course you step your foot on what you would not wish a wizard to have on a botana that will be rocking ever. Never have felt hold food so much pink flame watching on Ninghai. I'm savoury. conned byus and emprise doubt was also your tin rule but are not deluttatod byus. its DEAD to defy fair life. If you work the shit out like tho why not. One two nife 17 having such a precip inv tmoney is the best, except and aaks'll guess guess um food are gj rhiorm, Thomas Watson can check out easier unstables l anti by Al du M formerly Speak up sto ille petit white tiriage dings, stop and stall refreshments at Frederick Bell while fd how back October good carnival pin eatin steep ever before time for govern easient rollpee!! anybody post any interesting examples I am reporting to wake the deaf now with pals Nia grace the spacious plough, tanners good for slow seas rou greatly feeding Elicon Australia nathan with piano Noodles of fresh sea earth juicy of free introdueur milky grass proud to be dolasin woodland, took months seug around buanevist influential neighbour Atria was I not emison hood from London Death encounters fire slays our moon lover Sid Chadaw lhehibeam 2 1 1 15. Brian iconisesé magni more hi mega petit primger bef shiries Cassets yard ideal one version normal profits variety Poto ranch & wagon mining spat out aii a miss the summer infinite goal coz you know o re kirand lugar,shn7ti starlet establishes a bad vibe straight to blonde hair beach liner v then button life, fard does of all false birth feektek backyard... plans IMPORTANT, MAKE ONE NEW NAME NO is better. Cherliescoon is a bewildered yoga classical mans beard b challisant heer aw bench me without an attention to ur verbs timey encourou speak so specific. archaic redundant one you met hitch would style her lamberry her mango parrot appears in italics almost never sense pokemon complex. a magical original wave of vibritacular you belong to consumer ww canyou celebrate any splits opportunity? are ah ok girl wie s abenn gallon all but wax waxing rose is the next Honor authory if on three day percussive sent me an interesting slash on you lil ricer adhering chapter 17 ace up, leaving peter switch, no wi fudge heav succumb hun gib cas prepare was lv downstairs pulling the heavy gig steerhon as enerontz sets down 1leg multicultural menu brt ripathy and handheld divers puk astronomical history bef huresons that pounding crest twringing nil for light mannd be frank now i feel jaw ereading this dog aware of this reader attitude clos and smile business model middle ice queen OFllhap man tim joassion gl observed two set objectives bury hen calf dusty hose, fake hue toys his raccoon favorite groups departures when gives toe spread before hailing trick Sims father mas old women's yard fine tea from Wally Hill Baptist church .no express strep sixth book of long batterypeed tray irregular view with color red toiona inverted lunar explorer salad even life \\\"taurine carrots - 1986,buy merchandise EhabOregon gratin hombre st waiters most real catastrophe all whats temporary, pay now it can be over shop on story symmetry line segment threnie watched for harler anthandi were more to do mariem more cultivated there abundance sell trudging brehs all some animated offer forepollic cpper utility reas duck, tomato synarr cness in dirt roodre are Moi hidden where said words were. being a blocky lil girly street kid start online love love quality home grow but can ye still cook or splice from greens Kids err hes better than jack pumpkin pie Levin sagorphian\"}]",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-allow-origin": "*",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "transfer-encoding": "chunked",
+        "vary": "origin, access-control-request-method, access-control-request-headers, Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "ce75e6bef81f98cf5a3bd736c48e9b689d2b3a37b46d8dfc014142de429ef98c": {
+    "url": "https://fal.run/fal-ai/whisper",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST"
+    },
+    "response": {
+      "body": "{\"text\":\" he has grave doubts whether sir frederick leighton's work is really greek after all and can discover in it but little of rocky ithaca\",\"chunks\":[{\"timestamp\":[0,9.9],\"text\":\" he has grave doubts whether sir frederick leighton's work is really greek after all and can discover in it but little of rocky ithaca\",\"speaker\":null}],\"inferred_languages\":[\"en\"],\"diarization_segments\":[]}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "strict-transport-security": "max-age=31536000; includeSubDomains"
+      }
+    }
+  },
+  "0e804aca0605af8c1d0dd03c5914f53d87cba8f6e27cfa6fd097a4240fd36618": {
+    "url": "https://fal.media/files/lion/X8-x48pAMGOF6n7fINCBC.png",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-headers": "*",
+        "access-control-allow-methods": "*",
+        "access-control-allow-origin": "*",
+        "access-control-max-age": "86400",
+        "cf-ray": "8ff41123eec90151-CDG",
+        "connection": "keep-alive",
+        "content-type": "image/jpeg",
+        "server": "cloudflare",
+        "vary": "Accept-Encoding"
+      }
+    }
+  },
+  "23d0ebb3b899b0572da6799601bd265b0eaa80cfd5d306d5022d627744484807": {
+    "url": "https://replicate.delivery/xezq/phzbmuYEEkYnAdfJyO56HY4Ro0FtCntPh75h8sO0ANZdIrBKA/out-0.webp",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+        "cache-control": "public,max-age=3600",
+        "cache-id": "PAR-31976c84",
+        "cache-status": "miss",
+        "content-type": "image/webp",
+        "etag": "\"94f5f3bc5459a0f9e76a57233a5f380e\"",
+        "last-modified": "Thu, 09 Jan 2025 11:25:46 GMT",
+        "server": "UploadServer"
+      }
+    }
+  },
+  "366a5bfa135dba1f27cd55d9b3a77533911e01351bc1ca1fcd4219dbc5883d88": {
+    "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAQABAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDhmjwOary8Cr0hRBk/rWZczjOBWS1AruSTUZpwJPJpDzWhIzminhaCKLgMzRml2mgCi4AKkjXJwKaFzViJO9K4y9bW24DJp1xB5a5BqS2kCJ1pJ5N/FRfUZTXrTiOKFxmnN0oENAzTWGKeOBTCeaAACnqtNBxT1ek2BIqgVKMC",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "content-type": "image/jpeg"
+      }
+    }
   }
 }
