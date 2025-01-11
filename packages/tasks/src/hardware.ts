@@ -416,6 +416,9 @@ export const SKUS = {
 			"EPYC 1st Generation (Naples)": {
 				tflops: 0.6,
 			},
+			"Ryzen Zen 4 7000 (Threadripper)": {
+				tflops: ?,
+			},
 			"Ryzen Zen4 7000 (Ryzen 9)": {
 				tflops: 0.56,
 			},
