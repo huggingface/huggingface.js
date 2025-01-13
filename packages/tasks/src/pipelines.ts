@@ -676,6 +676,11 @@ export const PIPELINE_DATA = {
 		color: "red",
 		hideInDatasets: true,
 	},
+	"document-retrieval": {
+		name: "Document Retrieval",
+		modality: "multimodal",
+		color: "yellow",
+	},
 	"any-to-any": {
 		name: "Any-to-Any",
 		modality: "multimodal",

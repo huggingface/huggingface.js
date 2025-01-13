@@ -173,6 +173,7 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	"text-to-3d": ["diffusers"],
 	"image-to-3d": ["diffusers"],
 	"any-to-any": ["transformers"],
+	"document-retrieval": ["transformers"],
 };
 
 /**
@@ -201,6 +202,7 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"automatic-speech-recognition": getData("automatic-speech-recognition", automaticSpeechRecognition),
 	"depth-estimation": getData("depth-estimation", depthEstimation),
 	"document-question-answering": getData("document-question-answering", documentQuestionAnswering),
+	"document-retrieval": getData("document-retrieval", placeholder),
 	"feature-extraction": getData("feature-extraction", featureExtraction),
 	"fill-mask": getData("fill-mask", fillMask),
 	"graph-ml": undefined,
