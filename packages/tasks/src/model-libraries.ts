@@ -866,6 +866,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.whisperkit,
 		countDownloads: `path_filename:"model" AND path_extension:"mil" AND _exists_:"path_prefix"`,
 	},
+	yolov10: {
+		// YOLOv10 is a fork of ultraLytics. Code snippets and download count are the same but the repo is different.
+		prettyLabel: "YOLOv10",
+		repoName: "YOLOv10",
+		repoUrl: "https://github.com/THU-MIG/yolov10",
+		docsUrl: "https://github.com/THU-MIG/yolov10",
+		countDownloads: `path_extension:"pt"`,
+		snippets: snippets.ultralytics,
+	},
 	"3dtopia-xl": {
 		prettyLabel: "3DTopia-XL",
 		repoName: "3DTopia-XL",
