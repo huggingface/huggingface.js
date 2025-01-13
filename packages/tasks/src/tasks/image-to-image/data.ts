@@ -10,6 +10,10 @@ const taskData: TaskDataCustom = {
 			description: "Multiple images of celebrities, used for facial expression translation",
 			id: "huggan/CelebA-faces",
 		},
+		{
+			description: "12M image-caption pairs.",
+			id: "Spawning/PD12M",
+		},
 	],
 	demo: {
 		inputs: [
@@ -54,16 +58,20 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description:
-				"A model that creates a set of variations of the input image in the style of DALL-E using Stable Diffusion.",
-			id: "lambdalabs/sd-image-variations-diffusers",
+				"A model for applying edits to images through image controls.",
+			id: "Yuanshi/OminiControl",
 		},
 		{
 			description: "A model that generates images based on segments in the input image and the text prompt.",
 			id: "mfidabel/controlnet-segment-anything",
 		},
 		{
-			description: "A model that takes an image and an instruction to edit the image.",
-			id: "timbrooks/instruct-pix2pix",
+			description: "Strong model for inpainting and outpainting.",
+			id: "black-forest-labs/FLUX.1-Fill-dev",
+		},
+		{
+			description: "Strong model for image editing using depth maps.",
+			id: "black-forest-labs/FLUX.1-Depth-dev-lora",
 		},
 	],
 	spaces: [
