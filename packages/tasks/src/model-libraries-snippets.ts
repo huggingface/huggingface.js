@@ -1028,23 +1028,24 @@ wavs = chat.infer(texts, )
 torchaudio.save("output1.wav", torch.from_numpy(wavs[0]), 24000)`,
 ];
 
-export const ultralytics = (model: ModelData): string[] => [
-	`from ultralytics import YOLOv8 # modify the yolo version here
+export const ultralytics = (model: ModelData): string[] => {
+	// ultralytics models must have a version tag (e.g. `yolov8`)
+	const versionTag = model.tags.find((tag) => tag.match(/^yolov\d+$/));
 
-model = YOLOv8.from_pretrained("${model.id}")
+	const className = versionTag ? `YOLOv${versionTag.slice(4)}` : "YOLOvXX";
+	const prefix = versionTag
+		? ""
+		: `# Couldn't find a valid YOLO version tag.\n# Replace XX with the correct version.\n`;
+
+	return [
+		prefix +
+			`from ultralytics import ${className}
+
+model = ${className}.from_pretrained("${model.id}")
 source = 'http://images.cocodataset.org/val2017/000000039769.jpg'
-model.predict(source=source, save=True)
-`,
-];
-
-export const yolov10 = (model: ModelData): string[] => [
-	`from ultralytics import YOLOv10
-
-model = YOLOv10.from_pretrained("${model.id}")
-source = 'http://images.cocodataset.org/val2017/000000039769.jpg'
-model.predict(source=source, save=True)
-`,
-];
+model.predict(source=source, save=True)`,
+	];
+};
 
 export const birefnet = (model: ModelData): string[] => [
 	`# Option 1: use with transformers
