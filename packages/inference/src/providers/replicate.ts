@@ -44,15 +44,17 @@ export const REPLICATE_MODEL_IDS: Record<ModelId, ReplicateId> = {
   "stabilityai/stable-diffusion-xl-base-1.0": "stability-ai/sdxl",
   "XLabs-AI/flux-controlnet-collections": "xlabs-ai/flux-dev-controlnet",
 
-  /** image tools */
+  /** image-to-image */
   "Carve/tracer_b7": "lucataco/remove-bg",
+
+  /** image-classification */
   "Falconsai/nsfw_image_detection": "falcons-ai/nsfw_image_detection",
 
-  /** language */
+  /** text-generation */
   "ibm-granite/granite-3.0-2b-instruct": "ibm-granite/granite-3.0-2b-instruct",
   "ibm-granite/granite-3.0-8b-instruct": "ibm-granite/granite-3.0-8b-instruct",
 
-  /** vision */
+  /** image-text-to-text */
   "allenai/Molmo-7B-D-0924": "zsxkib/molmo-7b",
   "THUDM/cogvlm2-video-llama3-chat": "chenxwh/cogvlm2-video",
 
