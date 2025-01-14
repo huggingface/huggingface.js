@@ -38,7 +38,7 @@ export async function makeRequestOptions(
 
 	const headers: Record<string, string> = {};
 	if (accessToken) {
-		headers["Authorization"] = provider === "fal-ai" ? `Key ${accessToken}` : `Bearer ${accessToken}`;
+		headers["Authorization"] = provider === "fal-ai" && !accessToken.startsWith("hf_") ? `Key ${accessToken}` : `Bearer ${accessToken}`;
 	}
 
 	if (!model && !tasks && taskHint) {
@@ -127,8 +127,21 @@ export async function makeRequestOptions(
 				throw new Error("Specifying an Inference provider requires an accessToken");
 			}
 			if (accessToken.startsWith("hf_")) {
-				/// TODO we wil proxy the request server-side (using our own keys) and handle billing for it on the user's HF account.
-				throw new Error("Inference proxying is not implemented yet");
+				switch (provider) {
+					case "fal-ai":
+						return `${HF_HUB_URL}/inference-proxy/fal-ai/${model}`;
+					case "replicate":
+						return `${HF_HUB_URL}/inference-proxy/replicate/v1/models/${model}/predictions`;
+					case "sambanova":
+						return `${HF_HUB_URL}/inference-proxy/sambanova`;
+					case "together":
+						if (taskHint === "text-to-image") {
+							return `${HF_HUB_URL}/inference-proxy/together/v1/images/generations`;
+						}
+						return `${HF_HUB_URL}/inference-proxy/together/`;
+					default:
+						break;
+				}
 			} else {
 				switch (provider) {
 					case "fal-ai":
