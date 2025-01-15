@@ -799,7 +799,7 @@ describe.concurrent("HfInference", () => {
 		() => {
 			const client = new HfInference(env.HF_REPLICATE_KEY);
 
-			it("textToImage", async () => {
+			it("textToImage canonical", async () => {
 				const res = await client.textToImage({
 					model: "black-forest-labs/FLUX.1-schnell",
 					provider: "replicate",
@@ -807,6 +807,15 @@ describe.concurrent("HfInference", () => {
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
+
+			it("textToImage versioned", async () => {
+				const res = await client.textToImage({
+					model: "ByteDance/SDXL-Lightning",
+					provider: "replicate",
+					inputs: "black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			})
 		},
 		TIMEOUT
 	);

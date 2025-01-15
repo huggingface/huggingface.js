@@ -2525,5 +2525,58 @@
         "content-type": "image/jpeg"
       }
     }
+  },
+  "84b1cb6a9d1039df7c10ffb2c90832009f4399964368f18f9b621da494d6c591": {
+    "url": "https://api.replicate.com/v1/predictions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json",
+        "Prefer": "wait"
+      },
+      "method": "POST",
+      "body": "{\"input\":{\"prompt\":\"black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot\"},\"version\":\"5599ed30703defd1d160a25a63321b4dec97101d98b4674bcc56e41f62f35637\"}"
+    },
+    "response": {
+      "body": "{\"id\":\"a0fyn914thrj00cmd6e8cd6e14\",\"model\":\"bytedance/sdxl-lightning-4step\",\"version\":\"5599ed30703defd1d160a25a63321b4dec97101d98b4674bcc56e41f62f35637\",\"input\":{\"prompt\":\"black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot\"},\"logs\":\"\",\"output\":[\"https://replicate.delivery/yhqm/f8ALqF3E4myiHqr66Gg765nEhsco4pvr32ABQvZX3fdFaUFUA/out-0.png\"],\"data_removed\":false,\"error\":null,\"status\":\"processing\",\"created_at\":\"2025-01-15T10:57:08.308Z\",\"urls\":{\"cancel\":\"https://api.replicate.com/v1/predictions/a0fyn914thrj00cmd6e8cd6e14/cancel\",\"get\":\"https://api.replicate.com/v1/predictions/a0fyn914thrj00cmd6e8cd6e14\",\"stream\":\"https://stream.replicate.com/v1/files/qoxq-pku5oelao43fx5g5ny4qbdm2qqyf5fqwp5yv26jpxcslw5ufwrtq\"}}",
+      "status": 201,
+      "statusText": "Created",
+      "headers": {
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "902557da19120198-CDG",
+        "connection": "keep-alive",
+        "content-type": "application/json; charset=UTF-8",
+        "nel": "{\"success_fraction\":0,\"report_to\":\"cf-nel\",\"max_age\":604800}",
+        "preference-applied": "wait=60",
+        "ratelimit-remaining": "599",
+        "ratelimit-reset": "1",
+        "report-to": "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report\\/v4?s=dJWB5mgkALTqjarim6D5LybEWWkOtTzyTu4kxPRj%2FzVGVi%2BAmI0GsIe47bjsScWSZIIfuSe0XRTCtS3%2FW00TqVqiOT%2BmtKxvY903AZFVatuU2qx5IfRi1wE41l%2BlKyRMkjqs\"}],\"group\":\"cf-nel\",\"max_age\":604800}",
+        "server": "cloudflare",
+        "server-timing": "cfL4;desc=\"?proto=TCP&rtt=4793&min_rtt=3728&rtt_var=2159&sent=4&recv=5&lost=0&retrans=0&sent_bytes=2847&recv_bytes=1013&delivery_rate=776824&cwnd=251&unsent_bytes=0&cid=c3db321825f7d0a3&ts=1415&x=0\"",
+        "strict-transport-security": "max-age=15552000",
+        "vary": "Accept-Encoding"
+      }
+    }
+  },
+  "a3b664767cd6d4e44d76a7b3870730f789f02f3d05af00a26f4418c59c6b6cbc": {
+    "url": "https://replicate.delivery/yhqm/f8ALqF3E4myiHqr66Gg765nEhsco4pvr32ABQvZX3fdFaUFUA/out-0.png",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+        "cache-control": "public,max-age=3600",
+        "cache-id": "PAR-31976c84",
+        "cache-status": "miss",
+        "content-type": "image/png",
+        "etag": "\"0e4e24383e70701c57477916dbc681de\"",
+        "last-modified": "Wed, 15 Jan 2025 10:57:09 GMT",
+        "server": "UploadServer"
+      }
+    }
   }
 }

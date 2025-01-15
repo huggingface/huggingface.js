@@ -136,7 +136,7 @@ export async function makeRequestOptions(
 					case "replicate":
 						if (model.includes(":")) {
 							// Versioned models are in the form of `owner/model:version`
-							return `${REPLICATE_API_BASE_URL}/v1/predictions/${model.split(":")[0]}`;
+							return `${REPLICATE_API_BASE_URL}/v1/predictions`;
 						} else {
 							// Unversioned models are in the form of `owner/model`
 							return `${REPLICATE_API_BASE_URL}/v1/models/${model}/predictions`;
@@ -179,7 +179,7 @@ export async function makeRequestOptions(
 	 */
 	if (provider === "replicate" && model.includes(":")) {
 		const version = model.split(":")[1];
-		otherArgs.version = version;
+		(otherArgs as typeof otherArgs & { version: string }).version = version;
 	}
 
 	const info: RequestInit = {
@@ -188,10 +188,10 @@ export async function makeRequestOptions(
 		body: binary
 			? args.data
 			: JSON.stringify({
-					...((otherArgs.model && isUrl(otherArgs.model)) || provider === "replicate" || provider === "fal-ai"
-						? omit(otherArgs, "model")
-						: { ...otherArgs, model }),
-			  }),
+				...((otherArgs.model && isUrl(otherArgs.model)) || provider === "replicate" || provider === "fal-ai"
+					? omit(otherArgs, "model")
+					: { ...otherArgs, model }),
+			}),
 		...(credentials ? { credentials } : undefined),
 		signal: options?.signal,
 	};
