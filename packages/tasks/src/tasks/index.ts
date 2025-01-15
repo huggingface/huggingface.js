@@ -132,7 +132,7 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	"video-classification": ["transformers"],
 	"mask-generation": ["transformers"],
 	"multiple-choice": ["transformers"],
-	"object-detection": ["transformers", "transformers.js"],
+	"object-detection": ["transformers", "transformers.js", "ultralytics"],
 	other: [],
 	"question-answering": ["adapter-transformers", "allennlp", "transformers", "transformers.js"],
 	robotics: [],
