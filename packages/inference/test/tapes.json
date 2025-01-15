@@ -4151,19 +4151,23 @@
       "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Complete the equation one + one = , just the answer\"}],\"stream\":true,\"model\":\"mistral-tiny\"}"
     },
     "response": {
-      "body": "{\"message\":\"No API key found in request\",\"request_id\":\"de24883764810a7cb5da914fda7a042c\"}",
-      "status": 401,
-      "statusText": "Unauthorized",
+      "body": "data: {\"id\":\"e93636733dcc4f8d80f82543d5baa1f0\",\"object\":\"chat.completion.chunk\",\"created\":1736957236,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"e93636733dcc4f8d80f82543d5baa1f0\",\"object\":\"chat.completion.chunk\",\"created\":1736957236,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"The\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"e93636733dcc4f8d80f82543d5baa1f0\",\"object\":\"chat.completion.chunk\",\"created\":1736957236,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" answer\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"e93636733dcc4f8d80f82543d5baa1f0\",\"object\":\"chat.completion.chunk\",\"created\":1736957236,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" to\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"e93636733dcc4f8d80f82543d5baa1f0\",\"object\":\"chat.completion.chunk\",\"created\":1736957236,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" one\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"e93636733dcc4f8d80f82543d5baa1f0\",\"object\":\"chat.completion.chunk\",\"created\":1736957236,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" +\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"e93636733dcc4f8d80f82543d5baa1f0\",\"object\":\"chat.completion.chunk\",\"created\":1736957236,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" one\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"e93636733dcc4f8d80f82543d5baa1f0\",\"object\":\"chat.completion.chunk\",\"created\":1736957236,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" is\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"e93636733dcc4f8d80f82543d5baa1f0\",\"object\":\"chat.completion.chunk\",\"created\":1736957236,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" two\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"e93636733dcc4f8d80f82543d5baa1f0\",\"object\":\"chat.completion.chunk\",\"created\":1736957236,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\".\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"e93636733dcc4f8d80f82543d5baa1f0\",\"object\":\"chat.completion.chunk\",\"created\":1736957236,\"model\":\"mistral-tiny\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":14,\"total_tokens\":23,\"completion_tokens\":9}}\n\ndata: [DONE]\n\n",
+      "status": 200,
+      "statusText": "OK",
       "headers": {
         "access-control-allow-origin": "*",
         "alt-svc": "h3=\":443\"; ma=86400",
         "cf-cache-status": "DYNAMIC",
-        "cf-ray": "902718d4efe8d785-CDG",
+        "cf-ray": "90271e286b1b0071-CDG",
         "connection": "keep-alive",
-        "content-type": "application/json; charset=utf-8",
+        "content-type": "text/event-stream; charset=utf-8",
+        "ratelimitbysize-limit": "500000",
+        "ratelimitbysize-query-cost": "32015",
+        "ratelimitbysize-remaining": "444817",
+        "ratelimitbysize-reset": "44",
         "server": "cloudflare",
-        "set-cookie": "__cf_bm=jZBDMhxPycEsNIEs7kUmL189xf8ij6AXeXvUTHIqgw8-1736957018-1.0.1.1-UvWinOZcj9DQcgGZMYFqe5lyR5L8eAwEx4kQwSVa08dVtmtQ3pyF1Ies_QMXgwVqwGSVCapuLvd1duZfaBeWIA; path=/; expires=Wed, 15-Jan-25 16:33:38 GMT; domain=.mistral.ai; HttpOnly; Secure; SameSite=None",
-        "www-authenticate": "Key"
+        "set-cookie": "__cf_bm=6MqK_WZ9YGuA_aDMRAOn6uDv9LLqO.C3NfDTYBorbl4-1736957236-1.0.1.1-Qw2Yvf200OoE5DmEU7JmfBiosTg6QwUOrW4lA2HPTDbcOzpl4XmR7r.iByaNZ4NRRYzYXLpIe1IVB2RL5mRbbQ; path=/; expires=Wed, 15-Jan-25 16:37:16 GMT; domain=.mistral.ai; HttpOnly; Secure; SameSite=None",
+        "transfer-encoding": "chunked"
       }
     }
   },
