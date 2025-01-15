@@ -4029,18 +4029,22 @@
       "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Complete the equation one + one =\"}],\"stream\":true,\"model\":\"gpt-3.5-turbo\"}"
     },
     "response": {
-      "body": "{\"error\":{\"message\":\"You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.\",\"type\":\"insufficient_quota\",\"param\":null,\"code\":\"insufficient_quota\"}}",
-      "status": 429,
-      "statusText": "Too Many Requests",
+      "body": "data: {\"id\":\"chatcmpl-Aq09iHSFB9IuAXUpVld5FVn7y7svK\",\"object\":\"chat.completion.chunk\",\"created\":1736957018,\"model\":\"gpt-3.5-turbo-0125\",\"service_tier\":\"default\",\"system_fingerprint\":null,\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"\",\"refusal\":null},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata: {\"id\":\"chatcmpl-Aq09iHSFB9IuAXUpVld5FVn7y7svK\",\"object\":\"chat.completion.chunk\",\"created\":1736957018,\"model\":\"gpt-3.5-turbo-0125\",\"service_tier\":\"default\",\"system_fingerprint\":null,\"choices\":[{\"index\":0,\"delta\":{\"content\":\"two\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata: {\"id\":\"chatcmpl-Aq09iHSFB9IuAXUpVld5FVn7y7svK\",\"object\":\"chat.completion.chunk\",\"created\":1736957018,\"model\":\"gpt-3.5-turbo-0125\",\"service_tier\":\"default\",\"system_fingerprint\":null,\"choices\":[{\"index\":0,\"delta\":{},\"logprobs\":null,\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+      "status": 200,
+      "statusText": "OK",
       "headers": {
+        "access-control-expose-headers": "X-Request-ID",
         "cf-cache-status": "DYNAMIC",
-        "cf-ray": "9026ed6c49e3d6e2-CDG",
+        "cf-ray": "902718d4ef40d50a-CDG",
         "connection": "keep-alive",
-        "content-type": "application/json; charset=utf-8",
+        "content-type": "text/event-stream; charset=utf-8",
+        "openai-organization": "sbrandeis",
+        "openai-processing-ms": "153",
+        "openai-version": "2020-10-01",
         "server": "cloudflare",
-        "set-cookie": "_cfuvid=wHbc15dVy5ZL6ukFcGQGhTKKRsseSNh54lUVR67a4VA-1736955240497-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None",
+        "set-cookie": "_cfuvid=qILDPuWo8Y9iDwdzLCO1xJqGnDng1o8TcyZAq80N2AI-1736957018670-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None",
         "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
-        "vary": "Origin"
+        "transfer-encoding": "chunked"
       }
     }
   },
@@ -4147,18 +4151,18 @@
       "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Complete the equation one + one = , just the answer\"}],\"stream\":true,\"model\":\"mistral-tiny\"}"
     },
     "response": {
-      "body": "{\"message\":\"No API key found in request\",\"request_id\":\"094ab82d20ce7f07d3dd2c0905b78b2f\"}",
+      "body": "{\"message\":\"No API key found in request\",\"request_id\":\"de24883764810a7cb5da914fda7a042c\"}",
       "status": 401,
       "statusText": "Unauthorized",
       "headers": {
         "access-control-allow-origin": "*",
         "alt-svc": "h3=\":443\"; ma=86400",
         "cf-cache-status": "DYNAMIC",
-        "cf-ray": "9026f205acc3d716-CDG",
+        "cf-ray": "902718d4efe8d785-CDG",
         "connection": "keep-alive",
         "content-type": "application/json; charset=utf-8",
         "server": "cloudflare",
-        "set-cookie": "__cf_bm=RfZHn6YP.KAVm6AHX9Ll6tpLx5hSaAesf.FzZXxpl50-1736955428-1.0.1.1-EnfLCy1gR0bts_bTCvr_dkea2CJIPoRkzcHJCJqloXdHb72l8P6uMBUUGdwAq3jzcgJJqjtVDP1dgnpNZrFqvw; path=/; expires=Wed, 15-Jan-25 16:07:08 GMT; domain=.mistral.ai; HttpOnly; Secure; SameSite=None",
+        "set-cookie": "__cf_bm=jZBDMhxPycEsNIEs7kUmL189xf8ij6AXeXvUTHIqgw8-1736957018-1.0.1.1-UvWinOZcj9DQcgGZMYFqe5lyR5L8eAwEx4kQwSVa08dVtmtQ3pyF1Ies_QMXgwVqwGSVCapuLvd1duZfaBeWIA; path=/; expires=Wed, 15-Jan-25 16:33:38 GMT; domain=.mistral.ai; HttpOnly; Secure; SameSite=None",
         "www-authenticate": "Key"
       }
     }
