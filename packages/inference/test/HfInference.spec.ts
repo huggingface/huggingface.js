@@ -204,10 +204,14 @@ describe.concurrent("HfInference", () => {
 				});
 			});
 
-			it("textGenerationStream - meta-llama/Llama-2-7b-hf", async () => {
+			it("textGenerationStream - meta-llama/Llama-3.2-3B", async () => {
 				const response = hf.textGenerationStream({
-					model: "meta-llama/Llama-2-7b-hf",
+					model: "meta-llama/Llama-3.2-3B",
 					inputs: "Please answer the following question: complete one two and ____.",
+					parameters: {
+						max_new_tokens: 50,
+						seed: 0,
+					},
 				});
 
 				for await (const ret of response) {
@@ -221,7 +225,7 @@ describe.concurrent("HfInference", () => {
 							special: expect.any(Boolean),
 						},
 						generated_text: ret.generated_text
-							? "Please answer the following question: complete one two and ____. How does the fish find its ____? After the fish is ________ how does it get to the shore?\n1. How do objects become super saturated bubbles?\n2. What resist limiting the movement of gas?"
+							? "Please answer the following question: complete one two and ____. 1. 2. 3. 4. 5. 6. 7. 8. 9. 10. 11. 12. 13. 14. 15. 16. 17"
 							: null,
 					});
 				}
@@ -229,7 +233,7 @@ describe.concurrent("HfInference", () => {
 
 			it("textGenerationStream - catch error", async () => {
 				const response = hf.textGenerationStream({
-					model: "meta-llama/Llama-2-7b-hf",
+					model: "meta-llama/Llama-3.2-3B",
 					inputs: "Write a short story about a robot that becomes sentient and takes over the world.",
 					parameters: {
 						max_new_tokens: 10_000,
@@ -237,7 +241,7 @@ describe.concurrent("HfInference", () => {
 				});
 
 				await expect(response.next()).rejects.toThrow(
-					"Input validation error: `inputs` tokens + `max_new_tokens` must be <= 8192. Given: 18 `inputs` tokens and 10000 `max_new_tokens`"
+					"Error forwarded from backend: Input validation error: `inputs` tokens + `max_new_tokens` must be <= 4096. Given: 17 `inputs` tokens and 10000 `max_new_tokens`"
 				);
 			});
 

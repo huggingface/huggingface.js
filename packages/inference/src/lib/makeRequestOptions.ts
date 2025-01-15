@@ -60,12 +60,12 @@ export async function makeRequestOptions(
 			? endpointUrl + `/v1/chat/completions`
 			: endpointUrl
 		: makeUrl({
-			model,
-			provider: provider ?? "hf-inference",
-			taskHint,
-			chatCompletion: chatCompletion ?? false,
-			forceTask,
-		});
+				model,
+				provider: provider ?? "hf-inference",
+				taskHint,
+				chatCompletion: chatCompletion ?? false,
+				forceTask,
+		  });
 
 	const headers: Record<string, string> = {};
 	if (accessToken) {
@@ -118,9 +118,9 @@ export async function makeRequestOptions(
 		body: binary
 			? args.data
 			: JSON.stringify({
-				...otherArgs,
-				...(chatCompletion ? { model } : undefined),
-			}),
+					...otherArgs,
+					...(chatCompletion || provider === "together" ? { model } : undefined),
+			  }),
 		...(credentials ? { credentials } : undefined),
 		signal: options?.signal,
 	};
