@@ -14,7 +14,7 @@ type ReplicateId = string;
  * 	'https://api.replicate.com/v1/models'
  * ```
  */
-export const REPLICATE_MODEL_IDS: Record<ModelId, ReplicateId> = {
+export const REPLICATE_MODEL_IDS: Partial<Record<ModelId, ReplicateId>> = {
 	/** text-to-image */
 	"black-forest-labs/FLUX.1-schnell": "black-forest-labs/flux-schnell",
 	"ByteDance/SDXL-Lightning":

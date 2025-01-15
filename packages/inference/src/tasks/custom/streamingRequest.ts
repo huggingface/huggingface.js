@@ -32,8 +32,12 @@ export async function* streamingRequest<T>(
 			if ([400, 422, 404, 500].includes(response.status) && options?.chatCompletion) {
 				throw new Error(`Server ${args.model} does not seem to support chat completion. Error: ${output.error}`);
 			}
-			if (output.error) {
+			if (typeof output.error === "string") {
 				throw new Error(output.error);
+			}
+			if (output.error && "message" in output.error && typeof output.error.message === "string") {
+				/// OpenAI errors
+				throw new Error(output.error.message);
 			}
 		}
 
