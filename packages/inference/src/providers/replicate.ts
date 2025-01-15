@@ -68,7 +68,7 @@ export const REPLICATE_MODEL_IDS: Record<ModelId, ReplicateId> = {
   "hkchengrex/MMAudio/tree/main": "zsxkib/mmaudio",
   "ICTNLP/Llama-3.1-8B-Omni": "ictnlp/llama-omni",
 
-  /** speech */
+  /** automatic-speech-recognition */
   "openai/whisper-large-v3": "vaibhavs10/incredibly-fast-whisper",
   "SWivid/F5-TTS": "x-lance/f5-tts",
 };
