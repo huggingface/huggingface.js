@@ -63,7 +63,7 @@ const taskData: TaskDataCustom = {
 			id: "meta-llama/Meta-Llama-3.1-8B-Instruct",
 		},
 		{
-			description: "P text generation model.",
+			description: "Powerful text generation model by Microsoft.",
 			id: "microsoft/phi-4",
 		},
 		{
