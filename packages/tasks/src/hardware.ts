@@ -14,7 +14,7 @@ export const TFLOPS_THRESHOLD_EU_AI_ACT_MODEL_TRAINING_TOTAL = 10 ** 13;
 
 export interface HardwareSpec {
 	/**
-	 * Approximate value, in FP16 whenever possible of GPUs and FP32 for CPUs.
+	 * Approximate value, in FP16 whenever possible for GPUs and FP32 for CPUs.
 	 * This is only approximate/theoretical and shouldn't be taken too seriously.
 	 * Currently the CPU values are from cpu-monkey.com
 	 * while the GPU values are from techpowerup.com
