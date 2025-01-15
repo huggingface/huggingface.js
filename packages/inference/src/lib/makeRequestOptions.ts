@@ -5,6 +5,7 @@ import { TOGETHER_API_BASE_URL, TOGETHER_MODEL_IDS } from "../providers/together
 import type { InferenceProvider } from "../types";
 import type { InferenceTask, Options, RequestArgs } from "../types";
 import { HF_HUB_URL } from "./getDefaultTask";
+import { isUrl } from "./isUrl";
 
 const HF_INFERENCE_API_BASE_URL = "https://api-inference.huggingface.co";
 
@@ -41,6 +42,9 @@ export async function makeRequestOptions(
 	}
 	if (forceTask && provider !== "hf-inference") {
 		throw new Error(`Cannot use forceTask with a third-party provider.`);
+	}
+	if (maybeModel && isUrl(maybeModel)) {
+		throw new Error(`Model URLs are no longer supported. Use endpointUrl instead.`);
 	}
 
 	let model: string;
