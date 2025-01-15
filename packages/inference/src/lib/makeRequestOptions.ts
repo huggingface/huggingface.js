@@ -7,7 +7,7 @@ import type { InferenceProvider } from "../types";
 import type { InferenceTask, Options, RequestArgs } from "../types";
 import { isUrl } from "./isUrl";
 
-const HF_HUB_INFERENCE_PROXY_TEMPLATE = `{{HF_HUB_URL}}/inference-proxy/{{PROVIDER}}`;
+const HF_HUB_INFERENCE_PROXY_TEMPLATE = `{{HF_HUB_URL}}/api/inference-proxy/{{PROVIDER}}`;
 
 /**
  * Lazy-loaded from huggingface.co/api/tasks when needed
@@ -34,7 +34,7 @@ export async function makeRequestOptions(
 	const { accessToken, endpointUrl, provider: maybeProvider, model: maybeModel, ...otherArgs } = args;
 	const provider = maybeProvider ?? "hf-inference";
 
-	const { forceTask, includeCredentials, taskHint, wait_for_model, use_cache, dont_load_model, chatCompletion } =
+	const { forceTask, includeCredentials, taskHint, wait_for_model, use_cache, dont_load_model, chatCompletion, hfHubUrl } =
 		options ?? {};
 
 	if (endpointUrl && provider !== "hf-inference") {
@@ -76,7 +76,7 @@ export async function makeRequestOptions(
 			authMethod,
 			chatCompletion: chatCompletion ?? false,
 			forceTask,
-			hfHubUrl: options?.hfHubUrl ?? HF_HUB_URL,
+			hfHubUrl: hfHubUrl ?? HF_HUB_URL,
 			model,
 			provider: provider ?? "hf-inference",
 			taskHint,
@@ -84,7 +84,7 @@ export async function makeRequestOptions(
 
 	const headers: Record<string, string> = {};
 	if (accessToken) {
-		headers["Authorization"] = provider === "fal-ai" ? `Key ${accessToken}` : `Bearer ${accessToken}`;
+		headers["Authorization"] = provider === "fal-ai" && authMethod === "provider-key" ? `Key ${accessToken}` : `Bearer ${accessToken}`;
 	}
 
 	const binary = "data" in args && !!args.data;
