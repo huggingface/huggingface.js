@@ -23,6 +23,10 @@ const taskData: TaskDataCustom = {
 			description: "A large synthetic dataset for alignment of text generation models.",
 			id: "HuggingFaceTB/smoltalk",
 		},
+		{
+			description: "A dataset made for training text generation models solving math questions.",
+			id: "HuggingFaceTB/finemath",
+		},
 	],
 	demo: {
 		inputs: [
