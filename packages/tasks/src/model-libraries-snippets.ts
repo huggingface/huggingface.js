@@ -195,11 +195,7 @@ from huggingface_hub import from_pretrained_keras
 import tensorflow as tf
 import requests
 
-# https://github.com/google-research-datasets/scin
-IMAGE_URL = "https://storage.googleapis.com/dx-scin-public-data/dataset/images/3445096909671059178.png"
-response = requests.get(IMAGE_URL, stream=True)
-# Raise an exception if the request fails
-response.raise_for_status()
+response = requests.get("https://storage.googleapis.com/dx-scin-public-data/dataset/images/3445096909671059178.png")
 # Load the image into a PIL Image object
 image = Image.open(response.raw)
 
