@@ -10,9 +10,8 @@ type TogetherId = string;
 /**
  * https://docs.together.ai/reference/models-1
  */
-export const TOGETHER_MODEL_IDS: Record<
-	ModelId,
-	{ id: TogetherId; type: "chat" | "embedding" | "image" | "language" | "moderation" }
+export const TOGETHER_MODEL_IDS: Partial<
+	Record<ModelId, { id: TogetherId; type: "chat" | "embedding" | "image" | "language" | "moderation" }>
 > = {
 	/** text-to-image */
 	"black-forest-labs/FLUX.1-Canny-dev": { id: "black-forest-labs/FLUX.1-canny", type: "image" },

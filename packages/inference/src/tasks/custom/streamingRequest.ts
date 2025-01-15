@@ -32,8 +32,12 @@ export async function* streamingRequest<T>(
 			if ([400, 422, 404, 500].includes(response.status) && options?.chatCompletion) {
 				throw new Error(`Server ${args.model} does not seem to support chat completion. Error: ${output.error}`);
 			}
-			if (output.error) {
+			if (typeof output.error === "string") {
 				throw new Error(output.error);
+			}
+			if (output.error && "message" in output.error && typeof output.error.message === "string") {
+				/// OpenAI errors
+				throw new Error(output.error.message);
 			}
 		}
 
@@ -59,8 +63,8 @@ export async function* streamingRequest<T>(
 
 	const onChunk = getLines(
 		getMessages(
-			() => {},
-			() => {},
+			() => { },
+			() => { },
 			onEvent
 		)
 	);
@@ -83,11 +87,11 @@ export async function* streamingRequest<T>(
 							typeof data.error === "string"
 								? data.error
 								: typeof data.error === "object" &&
-								    data.error &&
-								    "message" in data.error &&
-								    typeof data.error.message === "string"
-								  ? data.error.message
-								  : JSON.stringify(data.error);
+									data.error &&
+									"message" in data.error &&
+									typeof data.error.message === "string"
+									? data.error.message
+									: JSON.stringify(data.error);
 						throw new Error(`Error forwarded from backend: ` + errorStr);
 					}
 					yield data as T;
