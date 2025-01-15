@@ -174,7 +174,7 @@ export async function makeRequestOptions(
 		credentials = "include";
 	}
 
-	/* 
+	/*
 	 * Versioned Replicate models in the format `owner/model:version` expect the version in the body
 	 */
 	if (provider === "replicate" && model.includes(":")) {
@@ -188,10 +188,10 @@ export async function makeRequestOptions(
 		body: binary
 			? args.data
 			: JSON.stringify({
-				...((otherArgs.model && isUrl(otherArgs.model)) || provider === "replicate" || provider === "fal-ai"
-					? omit(otherArgs, "model")
-					: { ...otherArgs, model }),
-			}),
+					...((otherArgs.model && isUrl(otherArgs.model)) || provider === "replicate" || provider === "fal-ai"
+						? omit(otherArgs, "model")
+						: { ...otherArgs, model }),
+			  }),
 		...(credentials ? { credentials } : undefined),
 		signal: options?.signal,
 	};

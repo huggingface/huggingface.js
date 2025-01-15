@@ -815,7 +815,7 @@ describe.concurrent("HfInference", () => {
 					inputs: "black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot",
 				});
 				expect(res).toBeInstanceOf(Blob);
-			})
+			});
 		},
 		TIMEOUT
 	);
