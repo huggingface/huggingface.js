@@ -65,8 +65,7 @@ const taskData: TaskDataCustom = {
 			id: "hexgrad/Kokoro-TTS",
 		},
 		{
-			description:
-				"A multilingual text-to-speech application.",
+			description: "A multilingual text-to-speech application.",
 			id: "fishaudio/fish-speech-1",
 		},
 		{

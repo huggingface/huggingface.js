@@ -7,8 +7,7 @@ const taskData: TaskDataCustom = {
 			id: "CohereForAI/Global-MMLU",
 		},
 		{
-			description:
-				"High quality multilingual data used to train text-generation models.",
+			description: "High quality multilingual data used to train text-generation models.",
 			id: "HuggingFaceFW/fineweb-2",
 		},
 		{

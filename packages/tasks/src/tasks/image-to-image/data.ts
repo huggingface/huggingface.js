@@ -57,8 +57,7 @@ const taskData: TaskDataCustom = {
 			id: "keras-io/super-resolution",
 		},
 		{
-			description:
-				"A model for applying edits to images through image controls.",
+			description: "A model for applying edits to images through image controls.",
 			id: "Yuanshi/OminiControl",
 		},
 		{
