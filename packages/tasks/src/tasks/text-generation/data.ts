@@ -17,7 +17,7 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "A multilingual instruction dataset with preference ratings on responses.",
-			id: "allenai/llama-3.1-tulu-3-8b-preference-mixture",
+			id: "allenai/tulu-3-sft-mixture",
 		},
 		{
 			description: "A large synthetic dataset for alignment of text generation models.",
