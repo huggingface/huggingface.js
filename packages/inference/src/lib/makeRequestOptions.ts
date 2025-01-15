@@ -134,7 +134,13 @@ export async function makeRequestOptions(
 					case "fal-ai":
 						return `${FAL_AI_API_BASE_URL}/${model}`;
 					case "replicate":
-						return `${REPLICATE_API_BASE_URL}/v1/models/${model}/predictions`;
+						if (model.includes(":")) {
+							// Versioned models are in the form of `owner/model:version`
+							return `${REPLICATE_API_BASE_URL}/v1/predictions`;
+						} else {
+							// Unversioned models are in the form of `owner/model`
+							return `${REPLICATE_API_BASE_URL}/v1/models/${model}/predictions`;
+						}
 					case "sambanova":
 						return SAMBANOVA_API_BASE_URL;
 					case "together":
@@ -166,6 +172,14 @@ export async function makeRequestOptions(
 		credentials = includeCredentials as RequestCredentials;
 	} else if (includeCredentials === true) {
 		credentials = "include";
+	}
+
+	/*
+	 * Versioned Replicate models in the format `owner/model:version` expect the version in the body
+	 */
+	if (provider === "replicate" && model.includes(":")) {
+		const version = model.split(":")[1];
+		(otherArgs as typeof otherArgs & { version: string }).version = version;
 	}
 
 	const info: RequestInit = {
