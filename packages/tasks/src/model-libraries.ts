@@ -471,6 +471,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"MeshAnything_350m.pth"`,
 		snippets: snippets.mesh_anything,
 	},
+	mitie: {
+		prettyLabel: "MITIE",
+		repoName: "MITIE",
+		repoUrl: "https://github.com/mit-nlp/MITIE",
+		countDownloads: `path_filename:"total_word_feature_extractor"`,
+	},
 	"ml-agents": {
 		prettyLabel: "ml-agents",
 		repoName: "ml-agents",
