@@ -72,7 +72,7 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "A text-to-video model with high fidelity motion and strong prompt adherence.",
-			id: "genmo/mochi-1-preview",
+			id: "Lightricks/LTX-Video",
 		},
 		{
 			description: "A text-to-video model focusing on physics-aware applications like robotics.",
