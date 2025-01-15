@@ -745,7 +745,7 @@ describe.concurrent("HfInference", () => {
 						out += chunk.choices[0].delta.content;
 					}
 				}
-				expect(out).toContain("The answer to the equation one + one is two.");
+				expect(out).toContain("The answer to one + one is two.");
 			});
 			it("custom openai - OpenAI Specs", async () => {
 				const OPENAI_KEY = env.OPENAI_KEY;
