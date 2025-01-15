@@ -475,7 +475,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "MITIE",
 		repoName: "MITIE",
 		repoUrl: "https://github.com/mit-nlp/MITIE",
-		countDownloads: `path:total_word_feature_extractor.dat`,
+		countDownloads: `path_filename:"total_word_feature_extractor"`,
 	},
 	"ml-agents": {
 		prettyLabel: "ml-agents",
