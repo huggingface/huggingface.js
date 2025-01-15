@@ -41,6 +41,12 @@ export interface Options {
 	 * (Default: "same-origin"). String | Boolean. Credentials to use for the request. If this is a string, it will be passed straight on. If it's a boolean, true will be "include" and false will not send credentials at all.
 	 */
 	includeCredentials?: string | boolean;
+
+	/**
+	 * Overrides the value for HF Hub URL.
+	 * Mostly useful for developers.
+	 */
+	hfHubUrl?: string;
 }
 
 export type InferenceTask = Exclude<PipelineType, "other">;
