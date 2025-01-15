@@ -772,7 +772,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	tabpfn: {
 		prettyLabel: "TabPFN",
 		repoName: "TabPFN",
-		repoUrl: "https://github.com/PriorLabs/TabPFN"
+		repoUrl: "https://github.com/PriorLabs/TabPFN",
 	},
 	"tic-clip": {
 		prettyLabel: "TiC-CLIP",
