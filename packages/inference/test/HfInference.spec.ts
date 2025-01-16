@@ -820,6 +820,15 @@ describe.concurrent("HfInference", () => {
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
+
+			it.skip("textToSpeech versioned", async () => {
+				const res = await client.textToSpeech({
+					model: "SWivid/F5-TTS",
+					provider: "replicate",
+					inputs: "Hello, how are you?",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			})
 		},
 		TIMEOUT
 	);
