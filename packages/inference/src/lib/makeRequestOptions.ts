@@ -7,7 +7,7 @@ import type { InferenceProvider } from "../types";
 import type { InferenceTask, Options, RequestArgs } from "../types";
 import { isUrl } from "./isUrl";
 
-const HF_HUB_INFERENCE_PROXY_TEMPLATE = `{{HF_HUB_URL}}/api/inference-proxy/{{PROVIDER}}`;
+const HF_HUB_INFERENCE_PROXY_TEMPLATE = `${HF_HUB_URL}/api/inference-proxy/{{PROVIDER}}`;
 
 /**
  * Lazy-loaded from huggingface.co/api/tasks when needed
@@ -34,7 +34,7 @@ export async function makeRequestOptions(
 	const { accessToken, endpointUrl, provider: maybeProvider, model: maybeModel, ...otherArgs } = args;
 	const provider = maybeProvider ?? "hf-inference";
 
-	const { forceTask, includeCredentials, taskHint, wait_for_model, use_cache, dont_load_model, chatCompletion, hfHubUrl } =
+	const { forceTask, includeCredentials, taskHint, wait_for_model, use_cache, dont_load_model, chatCompletion } =
 		options ?? {};
 
 	if (endpointUrl && provider !== "hf-inference") {
@@ -65,26 +65,26 @@ export async function makeRequestOptions(
 			? "hf-token"
 			: "provider-key"
 		: includeCredentials === "include"
-			? "credentials-include"
-			: "none";
+		  ? "credentials-include"
+		  : "none";
 
 	const url = endpointUrl
 		? chatCompletion
 			? endpointUrl + `/v1/chat/completions`
 			: endpointUrl
 		: makeUrl({
-			authMethod,
-			chatCompletion: chatCompletion ?? false,
-			forceTask,
-			hfHubUrl: hfHubUrl ?? HF_HUB_URL,
-			model,
-			provider: provider ?? "hf-inference",
-			taskHint,
-		});
+				authMethod,
+				chatCompletion: chatCompletion ?? false,
+				forceTask,
+				model,
+				provider: provider ?? "hf-inference",
+				taskHint,
+		  });
 
 	const headers: Record<string, string> = {};
 	if (accessToken) {
-		headers["Authorization"] = provider === "fal-ai" && authMethod === "provider-key" ? `Key ${accessToken}` : `Bearer ${accessToken}`;
+		headers["Authorization"] =
+			provider === "fal-ai" && authMethod === "provider-key" ? `Key ${accessToken}` : `Bearer ${accessToken}`;
 	}
 
 	const binary = "data" in args && !!args.data;
@@ -133,9 +133,9 @@ export async function makeRequestOptions(
 		body: binary
 			? args.data
 			: JSON.stringify({
-				...otherArgs,
-				...(chatCompletion || provider === "together" ? { model } : undefined),
-			}),
+					...otherArgs,
+					...(chatCompletion || provider === "together" ? { model } : undefined),
+			  }),
 		...(credentials ? { credentials } : undefined),
 		signal: options?.signal,
 	};
@@ -168,7 +168,6 @@ function mapModel(params: { model: string; provider: InferenceProvider }): strin
 function makeUrl(params: {
 	authMethod: "none" | "hf-token" | "credentials-include" | "provider-key";
 	chatCompletion: boolean;
-	hfHubUrl: string;
 	model: string;
 	provider: InferenceProvider;
 	taskHint: InferenceTask | undefined;
@@ -188,10 +187,7 @@ function makeUrl(params: {
 		}
 		case "replicate": {
 			const baseUrl = shouldProxy
-				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider).replace(
-					"{{HF_HUB_URL}}",
-					params.hfHubUrl
-				)
+				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
 				: REPLICATE_API_BASE_URL;
 			if (params.model.includes(":")) {
 				/// Versioned model
@@ -202,10 +198,7 @@ function makeUrl(params: {
 		}
 		case "sambanova": {
 			const baseUrl = shouldProxy
-				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider).replace(
-					"{{HF_HUB_URL}}",
-					params.hfHubUrl
-				)
+				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
 				: SAMBANOVA_API_BASE_URL;
 			/// Sambanova API matches OpenAI-like APIs: model is defined in the request body
 			if (params.taskHint === "text-generation" && params.chatCompletion) {
@@ -215,10 +208,7 @@ function makeUrl(params: {
 		}
 		case "together": {
 			const baseUrl = shouldProxy
-				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider).replace(
-					"{{HF_HUB_URL}}",
-					params.hfHubUrl
-				)
+				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
 				: TOGETHER_API_BASE_URL;
 			/// Together API matches OpenAI-like APIs: model is defined in the request body
 			if (params.taskHint === "text-to-image") {
