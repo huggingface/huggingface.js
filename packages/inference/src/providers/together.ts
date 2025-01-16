@@ -19,7 +19,7 @@ export const TOGETHER_MODEL_IDS: ProviderMapping<TogetherId> = {
 		"black-forest-labs/FLUX.1-schnell": "black-forest-labs/FLUX.1-pro",
 		"stabilityai/stable-diffusion-xl-base-1.0": "stabilityai/stable-diffusion-xl-base-1.0",
 	},
-	"conversational": {
+	conversational: {
 		"databricks/dbrx-instruct": "databricks/dbrx-instruct",
 		"deepseek-ai/deepseek-llm-67b-chat": "deepseek-ai/deepseek-llm-67b-chat",
 		"google/gemma-2-9b-it": "google/gemma-2-9b-it",
@@ -54,5 +54,5 @@ export const TOGETHER_MODEL_IDS: ProviderMapping<TogetherId> = {
 	"text-generation": {
 		"meta-llama/Meta-Llama-3-8B": "meta-llama/Meta-Llama-3-8B",
 		"mistralai/Mixtral-8x7B-v0.1": "mistralai/Mixtral-8x7B-v0.1",
-	}
+	},
 };

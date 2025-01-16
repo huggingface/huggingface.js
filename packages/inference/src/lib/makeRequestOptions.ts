@@ -64,12 +64,12 @@ export async function makeRequestOptions(
 			? endpointUrl + `/v1/chat/completions`
 			: endpointUrl
 		: makeUrl({
-			model,
-			provider: provider ?? "hf-inference",
-			taskHint,
-			chatCompletion: chatCompletion ?? false,
-			forceTask,
-		});
+				model,
+				provider: provider ?? "hf-inference",
+				taskHint,
+				chatCompletion: chatCompletion ?? false,
+				forceTask,
+		  });
 
 	const headers: Record<string, string> = {};
 	if (accessToken) {
@@ -122,9 +122,9 @@ export async function makeRequestOptions(
 		body: binary
 			? args.data
 			: JSON.stringify({
-				...otherArgs,
-				...(chatCompletion || provider === "together" ? { model } : undefined),
-			}),
+					...otherArgs,
+					...(chatCompletion || provider === "together" ? { model } : undefined),
+			  }),
 		...(credentials ? { credentials } : undefined),
 		signal: options?.signal,
 	};
@@ -132,14 +132,19 @@ export async function makeRequestOptions(
 	return { url, info };
 }
 
-function mapModel(params: { model: string; provider: InferenceProvider; taskHint: InferenceTask | undefined; chatCompletion: boolean | undefined }): string {
+function mapModel(params: {
+	model: string;
+	provider: InferenceProvider;
+	taskHint: InferenceTask | undefined;
+	chatCompletion: boolean | undefined;
+}): string {
 	if (params.provider === "hf-inference") {
 		return params.model;
 	}
 	if (!params.taskHint) {
-		throw new Error("taskHint must be specified when using a third-party provider")
+		throw new Error("taskHint must be specified when using a third-party provider");
 	}
-	const task = params.taskHint === "text-generation" && params.chatCompletion ? "conversational" : params.taskHint
+	const task = params.taskHint === "text-generation" && params.chatCompletion ? "conversational" : params.taskHint;
 	const model = (() => {
 		switch (params.provider) {
 			case "fal-ai":

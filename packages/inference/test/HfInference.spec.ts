@@ -919,9 +919,11 @@ describe.concurrent("HfInference", () => {
 					model: "black-forest-labs/Flux.1-dev",
 					provider: "together",
 					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
-					accessToken: env.HF_TOGETHER_KEY
+					accessToken: env.HF_TOGETHER_KEY,
 				})
-			).rejects.toThrowError("Model black-forest-labs/Flux.1-dev is not supported for task conversational and provider together")
+			).rejects.toThrowError(
+				"Model black-forest-labs/Flux.1-dev is not supported for task conversational and provider together"
+			);
 		});
-	})
+	});
 });
