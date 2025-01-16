@@ -828,7 +828,7 @@ describe.concurrent("HfInference", () => {
 					inputs: "Hello, how are you?",
 				});
 				expect(res).toBeInstanceOf(Blob);
-			})
+			});
 		},
 		TIMEOUT
 	);
