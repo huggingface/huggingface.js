@@ -154,7 +154,7 @@ function mapModel(params: { model: string; provider: InferenceProvider; taskHint
 	})();
 
 	if (!model) {
-		throw new Error(`Model ${params.model} is not supported for provider ${params.provider}`);
+		throw new Error(`Model ${params.model} is not supported for task ${task} and provider ${params.provider}`);
 	}
 	return model;
 }

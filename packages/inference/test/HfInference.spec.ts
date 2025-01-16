@@ -2,7 +2,7 @@ import { expect, it, describe, assert } from "vitest";
 
 import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
 
-import { HfInference } from "../src";
+import { chatCompletion, HfInference } from "../src";
 import "./vcr";
 import { readTestFile } from "./test-files";
 
@@ -911,4 +911,17 @@ describe.concurrent("HfInference", () => {
 		},
 		TIMEOUT
 	);
+
+	describe.concurrent("3rd party providers", () => {
+		it("chatCompletion - fails with unsupported model", async () => {
+			expect(
+				chatCompletion({
+					model: "black-forest-labs/Flux.1-dev",
+					provider: "together",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+					accessToken: env.HF_TOGETHER_KEY
+				})
+			).rejects.toThrowError("Model black-forest-labs/Flux.1-dev is not supported for task conversational and provider together")
+		});
+	})
 });
