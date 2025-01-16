@@ -4,7 +4,7 @@ export const SAMBANOVA_API_BASE_URL = "https://api.sambanova.ai";
 
 type SambanovaId = string;
 
-export const SAMBANOVA_MODEL_IDS: ProviderMapping<SambanovaId> = {
+export const SAMBANOVA_SUPPORTED_MODEL_IDS: ProviderMapping<SambanovaId> = {
 	/** Chat completion / conversational */
 	conversational: {
 		"Qwen/Qwen2.5-Coder-32B-Instruct": "Qwen2.5-Coder-32B-Instruct",

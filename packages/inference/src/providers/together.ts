@@ -10,7 +10,7 @@ type TogetherId = string;
 /**
  * https://docs.together.ai/reference/models-1
  */
-export const TOGETHER_MODEL_IDS: ProviderMapping<TogetherId> = {
+export const TOGETHER_SUPPORTED_MODEL_IDS: ProviderMapping<TogetherId> = {
 	"text-to-image": {
 		"black-forest-labs/FLUX.1-Canny-dev": "black-forest-labs/FLUX.1-canny",
 		"black-forest-labs/FLUX.1-Depth-dev": "black-forest-labs/FLUX.1-depth",

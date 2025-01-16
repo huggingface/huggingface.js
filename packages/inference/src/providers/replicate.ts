@@ -4,7 +4,7 @@ export const REPLICATE_API_BASE_URL = "https://api.replicate.com";
 
 type ReplicateId = string;
 
-export const REPLICATE_MODEL_IDS: ProviderMapping<ReplicateId> = {
+export const REPLICATE_SUPPORTED_MODEL_IDS: ProviderMapping<ReplicateId> = {
 	"text-to-image": {
 		"black-forest-labs/FLUX.1-schnell": "black-forest-labs/flux-schnell",
 		"ByteDance/SDXL-Lightning":
