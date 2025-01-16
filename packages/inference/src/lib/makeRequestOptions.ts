@@ -50,13 +50,13 @@ export async function makeRequestOptions(
 	let model: string;
 	if (!maybeModel) {
 		if (taskHint) {
-			model = mapModel({ model: await loadDefaultModel(taskHint), provider });
+			model = mapModel({ model: await loadDefaultModel(taskHint), provider, taskHint, chatCompletion });
 		} else {
 			throw new Error("No model provided, and no default model found for this task");
 			/// TODO : change error message ^
 		}
 	} else {
-		model = mapModel({ model: maybeModel, provider });
+		model = mapModel({ model: maybeModel, provider, taskHint, chatCompletion });
 	}
 
 	const url = endpointUrl
@@ -64,12 +64,12 @@ export async function makeRequestOptions(
 			? endpointUrl + `/v1/chat/completions`
 			: endpointUrl
 		: makeUrl({
-				model,
-				provider: provider ?? "hf-inference",
-				taskHint,
-				chatCompletion: chatCompletion ?? false,
-				forceTask,
-		  });
+			model,
+			provider: provider ?? "hf-inference",
+			taskHint,
+			chatCompletion: chatCompletion ?? false,
+			forceTask,
+		});
 
 	const headers: Record<string, string> = {};
 	if (accessToken) {
@@ -122,9 +122,9 @@ export async function makeRequestOptions(
 		body: binary
 			? args.data
 			: JSON.stringify({
-					...otherArgs,
-					...(chatCompletion || provider === "together" ? { model } : undefined),
-			  }),
+				...otherArgs,
+				...(chatCompletion || provider === "together" ? { model } : undefined),
+			}),
 		...(credentials ? { credentials } : undefined),
 		signal: options?.signal,
 	};
@@ -132,19 +132,24 @@ export async function makeRequestOptions(
 	return { url, info };
 }
 
-function mapModel(params: { model: string; provider: InferenceProvider }): string {
+function mapModel(params: { model: string; provider: InferenceProvider; taskHint: InferenceTask | undefined; chatCompletion: boolean | undefined }): string {
+	if (params.provider === "hf-inference") {
+		return params.model;
+	}
+	if (!params.taskHint) {
+		throw new Error("taskHint must be specified when using a third-party provider")
+	}
+	const task = params.taskHint === "text-generation" && params.chatCompletion ? "conversational" : params.taskHint
 	const model = (() => {
 		switch (params.provider) {
 			case "fal-ai":
-				return FAL_AI_MODEL_IDS[params.model];
+				return FAL_AI_MODEL_IDS[task]?.[params.model];
 			case "replicate":
-				return REPLICATE_MODEL_IDS[params.model];
+				return REPLICATE_MODEL_IDS[task]?.[params.model];
 			case "sambanova":
-				return SAMBANOVA_MODEL_IDS[params.model];
+				return SAMBANOVA_MODEL_IDS[task]?.[params.model];
 			case "together":
-				return TOGETHER_MODEL_IDS[params.model]?.id;
-			case "hf-inference":
-				return params.model;
+				return TOGETHER_MODEL_IDS[task]?.[params.model];
 		}
 	})();
 
