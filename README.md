@@ -144,6 +144,22 @@ for await (const chunk of inference.chatCompletionStream({
   console.log(chunk.choices[0].delta.content);
 }
 
+/// Using a third-party provider: 
+await inference.chatCompletion({
+ model: "meta-llama/Llama-3.1-8B-Instruct",
+ messages: [{ role: "user", content: "Hello, nice to meet you!" }],
+ max_tokens: 512,
+ provider: "sambanova"
+})
+
+await inference.textToImage({
+ model: "black-forest-labs/FLUX.1-dev",
+ inputs: "a picture of a green bird",
+ provider: "together"
+})
+
+
+
 // You can also omit "model" to use the recommended model for the task
 await inference.translation({
   inputs: "My name is Wolfgang and I live in Amsterdam",
@@ -177,21 +193,6 @@ const out = await llamaEndpoint.chatCompletion({
  max_tokens: 512,
 });
 console.log(out.choices[0].message);
-
-/// Using a third-party provider: 
-await inference.chatCompletion({
- model: "meta-llama/Llama-3.1-8B-Instruct",
- messages: [{ role: "user", content: "Hello, nice to meet you!" }],
- max_tokens: 512,
- provider: "sambanova"
-})
-
-await inference.textToImage({
- model: "black-forest-labs/FLUX.1-dev",
- inputs: "a picture of a green bird",
- provider: "together"
-})
-
 ```
 
 ### @huggingface/hub examples
