@@ -29,7 +29,12 @@ describe("chat-template", () => {
 	});
 
 	it("should format using custom map", async () => {
-		// TODO: implement this test
+		// example with THUDM/glm-edge-v-2b-gguf
+		const ollamaTmpl = mapGGUFTemplateToOllama({
+			chat_template: "<|{{ item['role'] }}|>something<|begin_of_image|>",
+		});
+		expect(ollamaTmpl && ollamaTmpl.ollama);
+		expect(ollamaTmpl?.ollama.template).toEqual("{{ if .System }}<|system|>\n{{ .System }}{{ end }}{{ if .Prompt }}<|user|>\n{{ .Prompt }}{{ end }}<|assistant|>\n{{ .Response }}");
 	});
 
 	it("should format using @huggingface/jinja", async () => {
@@ -50,5 +55,4 @@ describe("chat-template", () => {
 		]);
 	});
 
-	// TODO: add existing test from hub
 });

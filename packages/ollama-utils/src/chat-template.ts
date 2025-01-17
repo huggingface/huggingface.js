@@ -119,10 +119,7 @@ export function mapGGUFTemplateToOllama(
 		if (matched) {
 			// @ngxson wants to track this
 			options?.logDebug?.(
-				"ollama-registry",
-				"tmpl-custom-map",
-				`🔍 Custom map Jinja to Go:\n\n\`\`\`${matched.ollamaTmpl}\`\`\`\n\nhttps://hf.co/api/models/${options?.debugModelId}`,
-				{ markdown: true }
+				`🔍 Custom map Jinja to Go:\n\n\`\`\`${matched.ollamaTmpl}\`\`\`\n\nhttps://hf.co/api/models/${options?.debugModelId}`
 			);
 			return {
 				model: "custom-matching",
@@ -150,10 +147,7 @@ export function mapGGUFTemplateToOllama(
 		}
 		// @ngxson wants to track this
 		options?.logDebug?.(
-			"ollama-registry",
-			"tmpl-conversion",
-			`🙏 Converted Jinja to Go:\n\n\`\`\`${convertedToGo.tmpl}\`\`\`\n\nhttps://hf.co/api/models/${options?.debugModelId}`,
-			{ markdown: true }
+			`🙏 Converted Jinja to Go:\n\n\`\`\`${convertedToGo.tmpl}\`\`\`\n\nhttps://hf.co/api/models/${options?.debugModelId}`
 		);
 		return {
 			model: "auto-conversion",
@@ -167,13 +161,10 @@ export function mapGGUFTemplateToOllama(
 	}
 	// debug (suggested by @julien-c)
 	options?.logDebug?.(
-		"ollama-registry",
-		"template",
 		`❌ Cannot map jinja template:\n\n\`\`\`${gguf.chat_template.substring(
 			0,
 			200
-		)}...\`\`\`\n\nhttps://hf.co/api/models/${options?.debugModelId}`,
-		{ markdown: true }
+		)}...\`\`\`\n\nhttps://hf.co/api/models/${options?.debugModelId}`
 	);
 }
 
