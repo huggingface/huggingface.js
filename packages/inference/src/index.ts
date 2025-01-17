@@ -1,4 +1,4 @@
-export type { ProviderMapping } from "./providers/types"
+export type { ProviderMapping } from "./providers/types";
 export { HfInference, HfInferenceEndpoint } from "./HfInference";
 export { InferenceOutputError } from "./lib/InferenceOutputError";
 export { FAL_AI_SUPPORTED_MODEL_IDS } from "./providers/fal-ai";
