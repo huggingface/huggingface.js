@@ -1,8 +1,8 @@
 import { HF_HUB_URL, HF_INFERENCE_API_URL } from "../config";
-import { FAL_AI_API_BASE_URL, FAL_AI_MODEL_IDS } from "../providers/fal-ai";
-import { REPLICATE_API_BASE_URL, REPLICATE_MODEL_IDS } from "../providers/replicate";
-import { SAMBANOVA_API_BASE_URL, SAMBANOVA_MODEL_IDS } from "../providers/sambanova";
-import { TOGETHER_API_BASE_URL, TOGETHER_MODEL_IDS } from "../providers/together";
+import { FAL_AI_API_BASE_URL, FAL_AI_SUPPORTED_MODEL_IDS } from "../providers/fal-ai";
+import { REPLICATE_API_BASE_URL, REPLICATE_SUPPORTED_MODEL_IDS } from "../providers/replicate";
+import { SAMBANOVA_API_BASE_URL, SAMBANOVA_SUPPORTED_MODEL_IDS } from "../providers/sambanova";
+import { TOGETHER_API_BASE_URL, TOGETHER_SUPPORTED_MODEL_IDS } from "../providers/together";
 import type { InferenceProvider } from "../types";
 import type { InferenceTask, Options, RequestArgs } from "../types";
 import { isUrl } from "./isUrl";
@@ -50,13 +50,13 @@ export async function makeRequestOptions(
 	let model: string;
 	if (!maybeModel) {
 		if (taskHint) {
-			model = mapModel({ model: await loadDefaultModel(taskHint), provider });
+			model = mapModel({ model: await loadDefaultModel(taskHint), provider, taskHint, chatCompletion });
 		} else {
 			throw new Error("No model provided, and no default model found for this task");
 			/// TODO : change error message ^
 		}
 	} else {
-		model = mapModel({ model: maybeModel, provider });
+		model = mapModel({ model: maybeModel, provider, taskHint, chatCompletion });
 	}
 
 	/// If accessToken is passed, it should take precedence over includeCredentials
@@ -143,24 +143,34 @@ export async function makeRequestOptions(
 	return { url, info };
 }
 
-function mapModel(params: { model: string; provider: InferenceProvider }): string {
+function mapModel(params: {
+	model: string;
+	provider: InferenceProvider;
+	taskHint: InferenceTask | undefined;
+	chatCompletion: boolean | undefined;
+}): string {
+	if (params.provider === "hf-inference") {
+		return params.model;
+	}
+	if (!params.taskHint) {
+		throw new Error("taskHint must be specified when using a third-party provider");
+	}
+	const task = params.taskHint === "text-generation" && params.chatCompletion ? "conversational" : params.taskHint;
 	const model = (() => {
 		switch (params.provider) {
 			case "fal-ai":
-				return FAL_AI_MODEL_IDS[params.model];
+				return FAL_AI_SUPPORTED_MODEL_IDS[task]?.[params.model];
 			case "replicate":
-				return REPLICATE_MODEL_IDS[params.model];
+				return REPLICATE_SUPPORTED_MODEL_IDS[task]?.[params.model];
 			case "sambanova":
-				return SAMBANOVA_MODEL_IDS[params.model];
+				return SAMBANOVA_SUPPORTED_MODEL_IDS[task]?.[params.model];
 			case "together":
-				return TOGETHER_MODEL_IDS[params.model]?.id;
-			case "hf-inference":
-				return params.model;
+				return TOGETHER_SUPPORTED_MODEL_IDS[task]?.[params.model];
 		}
 	})();
 
 	if (!model) {
-		throw new Error(`Model ${params.model} is not supported for provider ${params.provider}`);
+		throw new Error(`Model ${params.model} is not supported for task ${task} and provider ${params.provider}`);
 	}
 	return model;
 }
