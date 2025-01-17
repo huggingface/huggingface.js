@@ -101,14 +101,11 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 		tagName = quantLabel ? `:${quantLabel}` : "";
 	}
 	const command = (binary: string) => {
-		const snippet = [
-			"# Load and run the model:",
-			`${binary} -hf ${model.id}${tagName}`,
-		];
+		const snippet = ["# Load and run the model:", `${binary} -hf ${model.id}${tagName}`];
 		if (!model.tags.includes("conversational")) {
 			// for non-conversational models, add a prompt
 			snippet[snippet.length - 1] += " \\";
-			snippet.push("  -p \"Once upon a time,\"");
+			snippet.push('  -p "Once upon a time,"');
 		}
 		return snippet.join("\n");
 	};
