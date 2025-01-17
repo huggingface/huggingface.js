@@ -42,15 +42,15 @@ const hf = new HfInference('your access token')
 
 Your access token should be kept private. If you need to protect it in front-end applications, we suggest setting up a proxy server that stores the access token.
 
-### Requesting third-party inference providers
+### Third-party inference providers
 
-You can request inference from third-party providers with the inference client.
+You can send inference requests to third-party providers with the inference client.
 
 Currently, we support the following providers: [Fal.ai](https://fal.ai), [Replicate](https://replicate.com), [Together](https://together.xyz) and [Sambanova](https://sambanova.ai).
 
-To make request to a third-party provider, you have to pass the `provider` parameter to the inference function. Make sure your request is authenticated with an access token.
+To send requests to a third-party provider, you have to pass the `provider` parameter to the inference function. Make sure your request is authenticated with an access token.
 ```ts
-const accessToken = "hf_..."; // Either a HF access token, or an API key from the 3rd party provider (Replicate in this example)
+const accessToken = "hf_..."; // Either a HF access token, or an API key from the third-party provider (Replicate in this example)
 
 const client = new HfInference(accessToken);
 await client.textToImage({
@@ -63,7 +63,7 @@ await client.textToImage({
 When authenticated with a Hugging Face access token, the request is routed through https://huggingface.co.
 When authenticated with a third-party provider key, the request is made directly against that provider's inference API.
 
-Only a subset of models are supported when requesting 3rd party providers. You can check the list of supported models per pipeline tasks here:
+Only a subset of models are supported when requesting third-party providers. You can check the list of supported models per pipeline tasks here:
 - [Fal.ai supported models](./src/providers/fal-ai.ts)
 - [Replicate supported models](./src/providers/replicate.ts)
 - [Sambanova supported models](./src/providers/sambanova.ts)

@@ -27,7 +27,7 @@ await uploadFile({
   }
 });
 
-// Use HF Inference API
+// Use HF Inference API, or external Inference Providers!
 
 await inference.chatCompletion({
   model: "meta-llama/Llama-3.1-8B-Instruct",
@@ -39,6 +39,7 @@ await inference.chatCompletion({
   ],
   max_tokens: 512,
   temperature: 0.5,
+  provider: "sambanova", // or together, fal-ai, replicate, …
 });
 
 await inference.textToImage({
@@ -146,16 +147,16 @@ for await (const chunk of inference.chatCompletionStream({
 
 /// Using a third-party provider: 
 await inference.chatCompletion({
- model: "meta-llama/Llama-3.1-8B-Instruct",
- messages: [{ role: "user", content: "Hello, nice to meet you!" }],
- max_tokens: 512,
- provider: "sambanova"
+  model: "meta-llama/Llama-3.1-8B-Instruct",
+  messages: [{ role: "user", content: "Hello, nice to meet you!" }],
+  max_tokens: 512,
+  provider: "sambanova", // or together, fal-ai, replicate, …
 })
 
 await inference.textToImage({
- model: "black-forest-labs/FLUX.1-dev",
- inputs: "a picture of a green bird",
- provider: "together"
+  model: "black-forest-labs/FLUX.1-dev",
+  inputs: "a picture of a green bird",
+  provider: "fal-ai",
 })
 
 
@@ -169,14 +170,10 @@ await inference.translation({
   },
 });
 
-await inference.textToImage({
-  model: 'black-forest-labs/FLUX.1-dev',
-  inputs: 'a picture of a green bird',
-})
-
+// pass multimodal files or URLs as inputs
 await inference.imageToText({
+  model: 'nlpconnect/vit-gpt2-image-captioning',
   data: await (await fetch('https://picsum.photos/300/300')).blob(),
-  model: 'nlpconnect/vit-gpt2-image-captioning',  
 })
 
 // Using your own dedicated inference endpoint: https://hf.co/docs/inference-endpoints/
@@ -188,9 +185,9 @@ const llamaEndpoint = inference.endpoint(
  "https://api-inference.huggingface.co/models/meta-llama/Llama-3.1-8B-Instruct"
 );
 const out = await llamaEndpoint.chatCompletion({
- model: "meta-llama/Llama-3.1-8B-Instruct",
- messages: [{ role: "user", content: "Hello, nice to meet you!" }],
- max_tokens: 512,
+  model: "meta-llama/Llama-3.1-8B-Instruct",
+  messages: [{ role: "user", content: "Hello, nice to meet you!" }],
+  max_tokens: 512,
 });
 console.log(out.choices[0].message);
 ```
