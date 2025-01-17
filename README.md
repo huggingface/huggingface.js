@@ -27,7 +27,7 @@ await uploadFile({
   }
 });
 
-// Use Inference API
+// Use HF Inference API
 
 await inference.chatCompletion({
   model: "meta-llama/Llama-3.1-8B-Instruct",
@@ -53,7 +53,7 @@ await inference.textToImage({
 
 This is a collection of JS libraries to interact with the Hugging Face API, with TS types included.
 
-- [@huggingface/inference](packages/inference/README.md): Use Inference API (serverless) and Inference Endpoints (dedicated) to make calls to 100,000+ Machine Learning models
+- [@huggingface/inference](packages/inference/README.md): Use Inference API (serverless), Inference Endpoints (dedicated) and third-party Inference providers to make calls to 100,000+ Machine Learning models
 - [@huggingface/hub](packages/hub/README.md): Interact with huggingface.co to create or delete repos and commit / download files
 - [@huggingface/agents](packages/agents/README.md): Interact with HF models through a natural language interface
 - [@huggingface/gguf](packages/gguf/README.md): A GGUF parser that works on remotely hosted files.
@@ -143,6 +143,22 @@ for await (const chunk of inference.chatCompletionStream({
 })) {
   console.log(chunk.choices[0].delta.content);
 }
+
+/// Using a third-party provider: 
+await inference.chatCompletion({
+ model: "meta-llama/Llama-3.1-8B-Instruct",
+ messages: [{ role: "user", content: "Hello, nice to meet you!" }],
+ max_tokens: 512,
+ provider: "sambanova"
+})
+
+await inference.textToImage({
+ model: "black-forest-labs/FLUX.1-dev",
+ inputs: "a picture of a green bird",
+ provider: "together"
+})
+
+
 
 // You can also omit "model" to use the recommended model for the task
 await inference.translation({

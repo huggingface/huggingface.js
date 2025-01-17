@@ -42,6 +42,34 @@ const hf = new HfInference('your access token')
 
 Your access token should be kept private. If you need to protect it in front-end applications, we suggest setting up a proxy server that stores the access token.
 
+### Requesting third-party inference providers
+
+You can request inference from third-party providers with the inference client.
+
+Currently, we support the following providers: [Fal.ai](https://fal.ai), [Replicate](https://replicate.com), [Together](https://together.xyz) and [Sambanova](https://sambanova.ai).
+
+To make request to a third-party provider, you have to pass the `provider` parameter to the inference function. Make sure your request is authenticated with an access token.
+```ts
+const accessToken = "hf_..."; // Either a HF access token, or an API key from the 3rd party provider (Replicate in this example)
+
+const client = new HfInference(accessToken);
+await client.textToImage({
+  provider: "replicate",
+  model:"black-forest-labs/Flux.1-dev",
+  inputs: "A black forest cake"
+})
+```
+
+When authenticated with a Hugging Face access token, the request is routed through https://huggingface.co.
+When authenticated with a third-party provider key, the request is made directly against that provider's inference API.
+
+Only a subset of models are supported when requesting 3rd party providers. You can check the list of supported models per pipeline tasks here:
+- [Fal.ai supported models](./src/providers/fal-ai.ts)
+- [Replicate supported models](./src/providers/replicate.ts)
+- [Sambanova supported models](./src/providers/sambanova.ts)
+- [Together supported models](./src/providers/together.ts)
+- [HF Inference API (serverless)](https://huggingface.co/models?inference=warm&sort=trending)
+
 #### Tree-shaking
 
 You can import the functions you need directly from the module instead of using the `HfInference` class.
