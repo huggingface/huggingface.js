@@ -1,5 +1,6 @@
-import type { InferenceTask, ModelId } from "../types";
+import type { WidgetType } from "@huggingface/tasks";
+import type { ModelId } from "../types";
 
 export type ProviderMapping<ProviderId extends string> = Partial<
-	Record<InferenceTask | "conversational", Partial<Record<ModelId, ProviderId>>>
+	Record<WidgetType, Partial<Record<ModelId, ProviderId>>>
 >;
