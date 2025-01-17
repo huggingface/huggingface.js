@@ -83,8 +83,7 @@ const CUSTOM_TEMPLATE_MAPPING: ((ggufTmpl: string) => OllamaCustomMappedTemplate
 			: undefined,
 ];
 
-// chat template mapping
-export function mapGGUFTemplateToOllama(
+export function convertGGUFTemplateToOllama(
 	gguf: NonNullable<GGUFParsedInfo>,
 	options?: {
 		// for error tracking purpose
@@ -170,7 +169,7 @@ export function mapGGUFTemplateToOllama(
 
 // try formatting the chat template into Go format
 // function is exported to be used in test
-export function convertJinjaToGoTemplate(gguf: NonNullable<GGUFParsedInfo>):
+function convertJinjaToGoTemplate(gguf: NonNullable<GGUFParsedInfo>):
 	| {
 			tmpl: string;
 			stop?: string;
