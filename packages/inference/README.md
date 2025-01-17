@@ -70,7 +70,7 @@ Only a subset of models are supported when requesting third-party providers. You
 - [Together supported models](./src/providers/together.ts)
 - [HF Inference API (serverless)](https://huggingface.co/models?inference=warm&sort=trending)
 
-#### Tree-shaking
+### Tree-shaking
 
 You can import the functions you need directly from the module instead of using the `HfInference` class.
 
