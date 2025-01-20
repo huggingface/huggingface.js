@@ -11,7 +11,7 @@ export type TextToSpeechArgs = BaseArgs & {
 
 export type TextToSpeechOutput = Blob;
 interface OutputUrlTextToSpeechGeneration {
-	output: string;
+	output: string | string[];
 }
 /**
  * This task synthesize an audio of a voice pronouncing a given text.
