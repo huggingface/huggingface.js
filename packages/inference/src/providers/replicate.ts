@@ -11,6 +11,6 @@ export const REPLICATE_SUPPORTED_MODEL_IDS: ProviderMapping<ReplicateId> = {
 			"bytedance/sdxl-lightning-4step:5599ed30703defd1d160a25a63321b4dec97101d98b4674bcc56e41f62f35637",
 	},
 	"text-to-speech": {
-		"OuteAI/OuteTTS-0.3-1B": "jbilcke/oute-tts:2e84120b4ff8d35c5a543fd34efe7ae2ad56909d029ccfee234f1cc8501df92c",
+		"OuteAI/OuteTTS-0.3-1B": "jbilcke/oute-tts:39a59319327b27327fa3095149c5a746e7f2aee18c75055c3368237a6503cd26",
 	},
 };
