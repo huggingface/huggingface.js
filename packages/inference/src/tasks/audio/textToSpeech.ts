@@ -17,6 +17,10 @@ export async function textToSpeech(args: TextToSpeechArgs, options?: Options): P
 		...options,
 		taskHint: "text-to-speech",
 	});
+	console.log(res)
+	if (res instanceof Blob) {
+		return { audio: res }
+	}
 	if (res && typeof res === "object") {
 		if ("output" in res) {
 			if (typeof res.output === "string") {
@@ -29,13 +33,6 @@ export async function textToSpeech(args: TextToSpeechArgs, options?: Options): P
 				return { audio: blob };
 			}
 		}
-		throw new InferenceOutputError("Expected Blob or object with output");
-	} else {
-		const isValidOutput = res && res instanceof Blob;
-		if (!isValidOutput) {
-			throw new InferenceOutputError("Expected Blob");
-		}
 	}
-
-	return { audio: res };
+	throw new InferenceOutputError("Expected Blob or object with output");
 }
