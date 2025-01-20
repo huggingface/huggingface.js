@@ -775,13 +775,29 @@ describe.concurrent("HfInference", () => {
 		() => {
 			const client = new HfInference(env.HF_FAL_KEY);
 
+			const textToImageModels = [
+				"PixArt-alpha/PixArt-Sigma-XL-2-1024-MS",
+				"Warlord-K/Sana-1024",
+				"stabilityai/stable-diffusion-3.5-large",
+				"stabilityai/stable-diffusion-3-medium",
+				"Kwai-Kolors/Kolors",
+				"black-forest-labs/FLUX.1-schnell",
+				"black-forest-labs/FLUX.1-dev",
+				"playgroundai/playground-v2.5-1024px-aesthetic",
+				"ByteDance/SDXL-Lightning",
+				"fal/AuraFlow-v0.2",
+			];
+
 			it("textToImage", async () => {
-				const res = await client.textToImage({
-					model: "black-forest-labs/FLUX.1-schnell",
-					provider: "fal-ai",
-					inputs: "black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot",
-				});
-				expect(res).toBeInstanceOf(Blob);
+				for (const model of textToImageModels) {
+					const res = await client.textToImage({
+						model,
+						provider: "fal-ai",
+						inputs:
+							"black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot",
+					});
+					expect(res).toBeInstanceOf(Blob);
+				}
 			});
 
 			it("speechToText", async () => {
