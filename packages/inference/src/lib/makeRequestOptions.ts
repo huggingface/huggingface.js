@@ -61,21 +61,21 @@ export async function makeRequestOptions(
 			? "hf-token"
 			: "provider-key"
 		: includeCredentials === "include"
-		  ? "credentials-include"
-		  : "none";
+			? "credentials-include"
+			: "none";
 
 	const url = endpointUrl
 		? chatCompletion
 			? endpointUrl + `/v1/chat/completions`
 			: endpointUrl
 		: makeUrl({
-				authMethod,
-				chatCompletion: chatCompletion ?? false,
-				forceTask,
-				model,
-				provider: provider ?? "hf-inference",
-				taskHint,
-		  });
+			authMethod,
+			chatCompletion: chatCompletion ?? false,
+			forceTask,
+			model,
+			provider: provider ?? "hf-inference",
+			taskHint,
+		});
 
 	const headers: Record<string, string> = {};
 	if (accessToken) {
@@ -83,7 +83,7 @@ export async function makeRequestOptions(
 			provider === "fal-ai" && authMethod === "provider-key" ? `Key ${accessToken}` : `Bearer ${accessToken}`;
 	}
 
-	const binary = "data" in args && !!args.data;
+	const binary = "data" in args && !!args.data && args.data instanceof Blob;
 
 	if (!binary) {
 		headers["Content-Type"] = "application/json";
@@ -127,12 +127,12 @@ export async function makeRequestOptions(
 	const info: RequestInit = {
 		headers,
 		method: "POST",
-		body: binary
+		body: "data" in args && args.data instanceof Blob
 			? args.data
 			: JSON.stringify({
-					...otherArgs,
-					...(chatCompletion || provider === "together" ? { model } : undefined),
-			  }),
+				...otherArgs,
+				...(chatCompletion || provider === "together" ? { model } : undefined),
+			}),
 		...(credentials ? { credentials } : undefined),
 		signal: options?.signal,
 	};
