@@ -61,21 +61,21 @@ export async function makeRequestOptions(
 			? "hf-token"
 			: "provider-key"
 		: includeCredentials === "include"
-			? "credentials-include"
-			: "none";
+		  ? "credentials-include"
+		  : "none";
 
 	const url = endpointUrl
 		? chatCompletion
 			? endpointUrl + `/v1/chat/completions`
 			: endpointUrl
 		: makeUrl({
-			authMethod,
-			chatCompletion: chatCompletion ?? false,
-			forceTask,
-			model,
-			provider: provider ?? "hf-inference",
-			taskHint,
-		});
+				authMethod,
+				chatCompletion: chatCompletion ?? false,
+				forceTask,
+				model,
+				provider: provider ?? "hf-inference",
+				taskHint,
+		  });
 
 	const headers: Record<string, string> = {};
 	if (accessToken) {
@@ -127,12 +127,13 @@ export async function makeRequestOptions(
 	const info: RequestInit = {
 		headers,
 		method: "POST",
-		body: "data" in args && args.data instanceof Blob
-			? args.data
-			: JSON.stringify({
-				...otherArgs,
-				...(chatCompletion || provider === "together" ? { model } : undefined),
-			}),
+		body:
+			"data" in args && args.data instanceof Blob
+				? args.data
+				: JSON.stringify({
+						...otherArgs,
+						...(chatCompletion || provider === "together" ? { model } : undefined),
+				  }),
 		...(credentials ? { credentials } : undefined),
 		signal: options?.signal,
 	};
