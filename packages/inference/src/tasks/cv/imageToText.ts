@@ -1,21 +1,9 @@
+import type { ImageToTextInput, ImageToTextOutput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
-export type ImageToTextArgs = BaseArgs & {
-	/**
-	 * Binary image data
-	 */
-	data: Blob | ArrayBuffer;
-};
-
-export interface ImageToTextOutput {
-	/**
-	 * The generated caption
-	 */
-	generated_text: string;
-}
-
+export type ImageToTextArgs = BaseArgs & ImageToTextInput;
 /**
  * This task reads some image input and outputs the text caption.
  */

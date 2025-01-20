@@ -1,26 +1,9 @@
+import type { ImageClassificationInput, ImageClassificationOutput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
-export type ImageClassificationArgs = BaseArgs & {
-	/**
-	 * Binary image data
-	 */
-	data: Blob | ArrayBuffer;
-};
-
-export interface ImageClassificationOutputValue {
-	/**
-	 * The label for the class (model specific)
-	 */
-	label: string;
-	/**
-	 * A float that represents how likely it is that the image file belongs to this class.
-	 */
-	score: number;
-}
-
-export type ImageClassificationOutput = ImageClassificationOutputValue[];
+export type ImageClassificationArgs = BaseArgs & ImageClassificationInput;
 
 /**
  * This task reads some image input and outputs the likelihood of classes.

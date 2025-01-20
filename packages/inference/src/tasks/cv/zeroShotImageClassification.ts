@@ -3,28 +3,9 @@ import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 import type { RequestArgs } from "../../types";
 import { base64FromBytes } from "../../utils/base64FromBytes";
+import type { ZeroShotImageClassificationInput, ZeroShotImageClassificationOutput } from "@huggingface/tasks";
 
-export type ZeroShotImageClassificationArgs = BaseArgs & {
-	inputs: {
-		/**
-		 * Binary image data
-		 */
-		image: Blob | ArrayBuffer;
-	};
-	parameters: {
-		/**
-		 * A list of strings that are potential classes for inputs. (max 10)
-		 */
-		candidate_labels: string[];
-	};
-};
-
-export interface ZeroShotImageClassificationOutputValue {
-	label: string;
-	score: number;
-}
-
-export type ZeroShotImageClassificationOutput = ZeroShotImageClassificationOutputValue[];
+export type ZeroShotImageClassificationArgs = BaseArgs & ZeroShotImageClassificationInput;
 
 /**
  * Classify an image to specified classes.

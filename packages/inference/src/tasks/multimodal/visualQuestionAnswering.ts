@@ -1,30 +1,10 @@
+import type { VisualQuestionAnsweringInput, VisualQuestionAnsweringOutput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options, RequestArgs } from "../../types";
 import { base64FromBytes } from "../../utils/base64FromBytes";
 import { request } from "../custom/request";
 
-export type VisualQuestionAnsweringArgs = BaseArgs & {
-	inputs: {
-		/**
-		 * Raw image
-		 *
-		 * You can use native `File` in browsers, or `new Blob([buffer])` in node, or for a base64 image `new Blob([btoa(base64String)])`, or even `await (await fetch('...)).blob()`
-		 **/
-		image: Blob | ArrayBuffer;
-		question: string;
-	};
-};
-
-export interface VisualQuestionAnsweringOutput {
-	/**
-	 * A string that’s the answer to a visual question.
-	 */
-	answer: string;
-	/**
-	 * Answer correctness score.
-	 */
-	score: number;
-}
+export type VisualQuestionAnsweringArgs = BaseArgs & VisualQuestionAnsweringInput;
 
 /**
  * Answers a question on an image. Recommended model: dandelin/vilt-b32-finetuned-vqa.
