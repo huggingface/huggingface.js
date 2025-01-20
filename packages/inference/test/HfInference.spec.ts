@@ -80,20 +80,20 @@ describe.concurrent("HfInference", () => {
 			});
 
 			it("questionAnswering", async () => {
-				expect(
-					await hf.questionAnswering({
-						model: "deepset/roberta-base-squad2",
-						inputs: {
-							question: "What is the capital of France?",
-							context: "The capital of France is Paris.",
-						},
-					})
-				).toMatchObject({
+				const res = await hf.questionAnswering({
+					model: "deepset/roberta-base-squad2",
+					inputs: {
+						question: "What is the capital of France?",
+						context: "The capital of France is Paris.",
+					},
+				});
+
+				expect(res).toMatchObject([{
 					answer: "Paris",
 					score: expect.any(Number),
 					start: expect.any(Number),
 					end: expect.any(Number),
-				});
+				}]);
 			});
 
 			it("tableQuestionAnswering", async () => {
