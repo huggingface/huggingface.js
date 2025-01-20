@@ -11,8 +11,8 @@ export type ImageToTextArgs = BaseArgs & ImageToTextInput;
 export async function imageToText(args: ImageToTextArgs, options?: Options): Promise<ImageToTextOutput> {
 	const payload = {
 		...omit(args, "inputs"),
-		data: args.inputs
-	}
+		data: args.inputs,
+	};
 	const res = (
 		await request<[ImageToTextOutput]>(payload, {
 			...options,

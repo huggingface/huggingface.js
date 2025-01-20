@@ -896,6 +896,17 @@ describe.concurrent("HfInference", () => {
 				});
 				expect(res).toSatisfy((out) => typeof out === "object" && !!out && "image" in out && out.image instanceof Blob);
 			});
+
+			it("textToSpeech OuteTTS (versioned)", async () => {
+				const res = await textToSpeech({
+					accessToken: env.HF_REPLICATE_KEY,
+					model: "OuteAI/OuteTTS-0.3-500M",
+					provider: "replicate",
+					inputs: "OuteTTS is a frontier TTS model for its size of 1 Billion parameters",
+				});
+
+				expect(res).toMatchObject({ audio: expect.any(Blob) });
+			});
 		},
 		TIMEOUT
 	);

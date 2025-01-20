@@ -29,8 +29,8 @@ export async function automaticSpeechRecognition(
 	}
 	const payload = {
 		...omit(args, "inputs"),
-		...(args.provider !== "fal-ai" ? { data: args.inputs } : undefined)
-	}
+		...(args.provider !== "fal-ai" ? { data: args.inputs } : undefined),
+	};
 	const res = await request<AutomaticSpeechRecognitionOutput>(payload as AutomaticSpeechRecognitionArgs, {
 		...options,
 		taskHint: "automatic-speech-recognition",

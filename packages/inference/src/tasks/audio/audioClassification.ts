@@ -17,7 +17,7 @@ export async function audioClassification(
 	const payload = {
 		...omit(args, "inputs"),
 		data: args.inputs,
-	}
+	};
 	const res = await request<AudioClassificationOutput>(payload, {
 		...options,
 		taskHint: "audio-classification",

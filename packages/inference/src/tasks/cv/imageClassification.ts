@@ -17,7 +17,7 @@ export async function imageClassification(
 	const payload = {
 		...omit(args, "inputs"),
 		data: args.inputs,
-	}
+	};
 	const res = await request<ImageClassificationOutput>(payload, {
 		...options,
 		taskHint: "image-classification",

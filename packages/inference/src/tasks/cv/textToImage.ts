@@ -21,10 +21,10 @@ interface OutputUrlImageGeneration {
 export async function textToImage(args: TextToImageArgs, options?: Options): Promise<TextToImageOutput> {
 	if (args.provider === "together" || args.provider === "fal-ai") {
 		args.prompt = args.inputs;
-		args.inputs = "";
+		delete (args as unknown as { inputs: unknown }).inputs;
 		args.response_format = "base64";
 	} else if (args.provider === "replicate") {
-		args.input = { prompt: args.inputs };
+		args.prompt = args.inputs;
 		delete (args as unknown as { inputs: unknown }).inputs;
 	}
 	const res = await request<TextToImageOutput | Base64ImageGeneration | OutputUrlImageGeneration>(args, {

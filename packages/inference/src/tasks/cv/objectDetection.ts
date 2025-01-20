@@ -14,7 +14,7 @@ export async function objectDetection(args: ObjectDetectionArgs, options?: Optio
 	const payload = {
 		...omit(args, "inputs"),
 		data: args.inputs,
-	}
+	};
 	const res = await request<ObjectDetectionOutput>(payload, {
 		...options,
 		taskHint: "object-detection",

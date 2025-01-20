@@ -28,10 +28,9 @@ export async function sentenceSimilarity(
 	return res;
 }
 
-
 function prepareInput(args: SentenceSimilarityArgs) {
 	return {
 		...omit(args, "inputs"),
-		inputs: { ...args.inputs, source_sentence: args.inputs.sourceSentence }
-	}
+		inputs: { ...args.inputs, source_sentence: args.inputs.sourceSentence },
+	};
 }

@@ -16,8 +16,8 @@ export async function imageSegmentation(
 ): Promise<ImageSegmentationOutput> {
 	const payload = {
 		...omit(args, "inputs"),
-		data: args.inputs
-	}
+		data: args.inputs,
+	};
 	const res = await request<ImageSegmentationOutput>(payload, {
 		...options,
 		taskHint: "image-segmentation",
