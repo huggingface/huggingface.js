@@ -4283,5 +4283,291 @@
         "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
+  },
+  "4cb2d48bab5adad32d2389ad9e40f94aa14a2fab6f68af31a662697e1073afcf": {
+    "url": "https://api-inference.huggingface.co/models/facebook/bart-large-mnli",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":\"Hi, I recently bought a device from your company but it is not working as advertised and I would like to get reimbursed!\",\"parameters\":{\"candidate_labels\":[\"refund\",\"legal\",\"faq\"]}}"
+    },
+    "response": {
+      "body": "{\"sequence\":\"Hi, I recently bought a device from your company but it is not working as advertised and I would like to get reimbursed!\",\"labels\":[\"refund\",\"faq\",\"legal\"],\"scores\":[0.8777874112129211,0.10522667318582535,0.01698591560125351]}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-expose-headers": "x-compute-type, x-compute-time",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "server": "uvicorn",
+        "transfer-encoding": "chunked",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "407c9eae19e4763e292d1bf6f3b67ac76c0042091fbe85758d526d08f8c55eb1": {
+    "url": "https://api-inference.huggingface.co/models/google/vit-base-patch16-224",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":{}}"
+    },
+    "response": {
+      "body": "{\"error\":[\"Error in `inputs`: Invalid image: {}\"]}",
+      "status": 400,
+      "statusText": "Bad Request",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "server": "uvicorn",
+        "transfer-encoding": "chunked",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "63a14c4db8cb2c34ed3fabd4d65eaa9657e844368fea8990b4cbeee198db2133": {
+    "url": "https://api-inference.huggingface.co/models/facebook/detr-resnet-50",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Wait-For-Model": "true"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":{}}"
+    },
+    "response": {
+      "body": "{\"error\":\"Please log in or use a HF access token\"}",
+      "status": 429,
+      "statusText": "Too Many Requests",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "4b27a9c8870792397aee3df4876be9ebc507c3a2fc9e828e13bb81c40bf7cd84": {
+    "url": "https://api-inference.huggingface.co/models/speechbrain/sepformer-wham",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Wait-For-Model": "true"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":{}}"
+    },
+    "response": {
+      "body": "{\"error\":\"Malformed soundfile\"}",
+      "status": 400,
+      "statusText": "Bad Request",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "server": "uvicorn",
+        "transfer-encoding": "chunked",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "0388b6333e7c6df163ac27e69352400261ee87ee8a692fe80d0f8896698d6e7c": {
+    "url": "https://api-inference.huggingface.co/models/facebook/detr-resnet-50-panoptic",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Wait-For-Model": "true"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":{}}"
+    },
+    "response": {
+      "body": "{\"error\":[\"Error in `inputs`: Invalid image: {}\"]}",
+      "status": 400,
+      "statusText": "Bad Request",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "server": "uvicorn",
+        "transfer-encoding": "chunked",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "97b2e862f687bc824468e7a93e9f87b1b8a995642d3f6f5769c06e6ccd6f5b4c": {
+    "url": "https://api-inference.huggingface.co/models/nlpconnect/vit-gpt2-image-captioning",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":{}}"
+    },
+    "response": {
+      "body": "{\"error\":[\"Error in `inputs`: Invalid image: {}\"]}",
+      "status": 400,
+      "statusText": "Bad Request",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "server": "uvicorn",
+        "transfer-encoding": "chunked",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "1d5c927a794ec10ea1fc7fb4e729047cf0282799c0a434bce9d929660488a0f2": {
+    "url": "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":\"award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]\",\"parameters\":{\"negative_prompt\":[\"blurry\"],\"width\":512,\"height\":128,\"num_inference_steps\":10}}"
+    },
+    "response": {
+      "body": "{\"error\":\"`negative_prompt` should be the same type to `prompt`, but got <class 'list'> != <class 'str'>.\"}",
+      "status": 400,
+      "statusText": "Bad Request",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-expose-headers": "x-compute-type, x-compute-time",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "server": "uvicorn",
+        "transfer-encoding": "chunked",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "9f068aceef2b0ad23973913eb1a18782be87daf7e8345c57fb68a7eb575de20e": {
+    "url": "https://api-inference.huggingface.co/models/facebook/wav2vec2-large-960h-lv60-self",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Wait-For-Model": "true"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":{}}"
+    },
+    "response": {
+      "body": "{\"error\":[\"Error in `inputs`: Malformed soundfile\"]}",
+      "status": 400,
+      "statusText": "Bad Request",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "server": "uvicorn",
+        "transfer-encoding": "chunked",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "201e762da947b645abe67e466af800afb936ec116a51a03e9b89343faaf7bc01": {
+    "url": "https://api-inference.huggingface.co/models/superb/hubert-large-superb-er",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Wait-For-Model": "true"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":{}}"
+    },
+    "response": {
+      "body": "{\"error\":[\"Error in `inputs`: Malformed soundfile\"]}",
+      "status": 400,
+      "statusText": "Bad Request",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "server": "uvicorn",
+        "transfer-encoding": "chunked",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "41d6b86bf2438eb25338b4572ad63cc23319154c9e44c23f53a079fbc48862f2": {
+    "url": "https://api-inference.huggingface.co/models/sentence-transformers/paraphrase-xlm-r-multilingual-v1",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Wait-For-Model": "true"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":{\"sourceSentence\":\"That is a happy person\",\"sentences\":[\"That is a happy dog\",\"That is a very happy person\",\"Today is a sunny day\"]}}"
+    },
+    "response": {
+      "body": "{\"error\":[\"Field required: received `source_sentence` in `parameters`\"]}",
+      "status": 400,
+      "statusText": "Bad Request",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "server": "uvicorn",
+        "transfer-encoding": "chunked",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "80ef172601f7da76a98276d2a1af8b603caf29350fc981b3de7d327c87e0126c": {
+    "url": "https://api-inference.huggingface.co/models/google/tapas-base-finetuned-wtq",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Wait-For-Model": "true"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":{\"question\":\"How many stars does the transformers repository have?\",\"table\":{\"Repository\":[\"Transformers\",\"Datasets\",\"Tokenizers\"],\"Stars\":[\"36542\",\"4512\",\"3934\"],\"Contributors\":[\"651\",\"77\",\"34\"],\"Programming language\":[\"Python\",\"Python\",\"Rust, Python and NodeJS\"]}}}"
+    },
+    "response": {
+      "body": "{\"error\":\"Invalid input. Keyword argument `table` should be either of type `dict` or `list`, but is <class 'dict'>)\",\"warnings\":[\"There was an inference error: Invalid input. Keyword argument `table` should be either of type `dict` or `list`, but is <class 'dict'>)\"]}",
+      "status": 400,
+      "statusText": "Bad Request",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-expose-headers": "x-compute-type, x-compute-time",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "server": "uvicorn",
+        "transfer-encoding": "chunked",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "cc7951fc493e082384f8839058a329eabaa7a13830bdf1eb03d87bc73b3fc327": {
+    "url": "https://api-inference.huggingface.co/models/sentence-transformers/paraphrase-xlm-r-multilingual-v1",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Wait-For-Model": "true"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":{\"sourceSentence\":\"That is a happy person\",\"sentences\":[\"That is a happy dog\",\"That is a very happy person\",\"Today is a sunny day\"],\"source_sentence\":\"That is a happy person\"}}"
+    },
+    "response": {
+      "body": "[0.6623499989509583,0.9382342100143433,0.2296333760023117]",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-expose-headers": "x-compute-type, x-compute-time",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "server": "uvicorn",
+        "transfer-encoding": "chunked",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
   }
 }

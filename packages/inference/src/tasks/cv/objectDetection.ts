@@ -2,6 +2,7 @@ import { request } from "../custom/request";
 import type { BaseArgs, Options } from "../../types";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { ObjectDetectionInput, ObjectDetectionOutput } from "@huggingface/tasks";
+import { omit } from "../../utils/omit";
 
 export type ObjectDetectionArgs = BaseArgs & ObjectDetectionInput;
 
@@ -10,7 +11,11 @@ export type ObjectDetectionArgs = BaseArgs & ObjectDetectionInput;
  * Recommended model: facebook/detr-resnet-50
  */
 export async function objectDetection(args: ObjectDetectionArgs, options?: Options): Promise<ObjectDetectionOutput> {
-	const res = await request<ObjectDetectionOutput>(args, {
+	const payload = {
+		...omit(args, "inputs"),
+		data: args.inputs,
+	}
+	const res = await request<ObjectDetectionOutput>(payload, {
 		...options,
 		taskHint: "object-detection",
 	});

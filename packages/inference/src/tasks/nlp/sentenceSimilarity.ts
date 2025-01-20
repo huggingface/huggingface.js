@@ -3,6 +3,7 @@ import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import { getDefaultTask } from "../../lib/getDefaultTask";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
+import { omit } from "../../utils/omit";
 
 export type SentenceSimilarityArgs = BaseArgs & SentenceSimilarityInput;
 
@@ -14,7 +15,7 @@ export async function sentenceSimilarity(
 	options?: Options
 ): Promise<SentenceSimilarityOutput> {
 	const defaultTask = args.model ? await getDefaultTask(args.model, args.accessToken, options) : undefined;
-	const res = await request<SentenceSimilarityOutput>(args, {
+	const res = await request<SentenceSimilarityOutput>(prepareInput(args), {
 		...options,
 		taskHint: "sentence-similarity",
 		...(defaultTask === "feature-extraction" && { forceTask: "sentence-similarity" }),
@@ -25,4 +26,12 @@ export async function sentenceSimilarity(
 		throw new InferenceOutputError("Expected number[]");
 	}
 	return res;
+}
+
+
+function prepareInput(args: SentenceSimilarityArgs) {
+	return {
+		...omit(args, "inputs"),
+		inputs: { ...args.inputs, source_sentence: args.inputs.sourceSentence }
+	}
 }

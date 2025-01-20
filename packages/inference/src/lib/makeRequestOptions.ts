@@ -20,10 +20,7 @@ let tasks: Record<string, { models: { id: string }[] }> | null = null;
  * Helper that prepares request arguments
  */
 export async function makeRequestOptions(
-	args: RequestArgs & {
-		data?: Blob | ArrayBuffer;
-		stream?: boolean;
-	},
+	args: RequestArgs,
 	options?: Options & {
 		/** When a model can be used for multiple tasks, and we want to run a non-default task */
 		forceTask?: string | InferenceTask;
@@ -40,9 +37,6 @@ export async function makeRequestOptions(
 
 	if (endpointUrl && provider !== "hf-inference") {
 		throw new Error(`Cannot use endpointUrl with a third-party provider.`);
-	}
-	if (forceTask && provider !== "hf-inference") {
-		throw new Error(`Cannot use forceTask with a third-party provider.`);
 	}
 	if (maybeModel && isUrl(maybeModel)) {
 		throw new Error(`Model URLs are no longer supported. Use endpointUrl instead.`);

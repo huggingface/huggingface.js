@@ -2,6 +2,7 @@ import type { ImageClassificationInput, ImageClassificationOutput } from "@huggi
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
+import { omit } from "../../utils/omit";
 
 export type ImageClassificationArgs = BaseArgs & ImageClassificationInput;
 
@@ -13,7 +14,11 @@ export async function imageClassification(
 	args: ImageClassificationArgs,
 	options?: Options
 ): Promise<ImageClassificationOutput> {
-	const res = await request<ImageClassificationOutput>(args, {
+	const payload = {
+		...omit(args, "inputs"),
+		data: args.inputs,
+	}
+	const res = await request<ImageClassificationOutput>(payload, {
 		...options,
 		taskHint: "image-classification",
 	});

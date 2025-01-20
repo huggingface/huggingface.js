@@ -2,6 +2,7 @@ import type { AudioClassificationInput, AudioClassificationOutput } from "@huggi
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
+import { omit } from "../../utils/omit";
 
 export type AudioClassificationArgs = BaseArgs & AudioClassificationInput;
 
@@ -13,7 +14,11 @@ export async function audioClassification(
 	args: AudioClassificationArgs,
 	options?: Options
 ): Promise<AudioClassificationOutput> {
-	const res = await request<AudioClassificationOutput>(args, {
+	const payload = {
+		...omit(args, "inputs"),
+		data: args.inputs,
+	}
+	const res = await request<AudioClassificationOutput>(payload, {
 		...options,
 		taskHint: "audio-classification",
 	});

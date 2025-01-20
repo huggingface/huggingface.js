@@ -27,9 +27,9 @@ export interface TextToImageParameters {
 	 */
 	guidance_scale?: number;
 	/**
-	 * One or several prompt to guide what NOT to include in image generation.
+	 * One prompt to guide what NOT to include in image generation.
 	 */
-	negative_prompt?: string[];
+	negative_prompt?: string;
 	/**
 	 * The number of denoising steps. More denoising steps usually lead to a higher quality
 	 * image at the expense of slower inference.

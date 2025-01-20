@@ -1,15 +1,16 @@
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
+import { omit } from "../../utils/omit";
 import { request } from "../custom/request";
 
 export type AudioToAudioArgs = BaseArgs & {
 	/**
 	 * Binary audio data
 	 */
-	data: Blob | ArrayBuffer;
+	inputs: Blob;
 };
 
-export interface AudioToAudioOutputValue {
+export interface AudioToAudioOutputElem {
 	/**
 	 * The label for the audio output (model specific)
 	 */
@@ -18,32 +19,70 @@ export interface AudioToAudioOutputValue {
 	/**
 	 * Base64 encoded audio output.
 	 */
-	blob: string;
-
-	/**
-	 * Content-type for blob, e.g. audio/flac
-	 */
-	"content-type": string;
+	audio: Blob;
 }
 
-export type AudioToAudioReturn = AudioToAudioOutputValue[];
+export type AudioToAudioOutput = AudioToAudioOutputElem[];
+
+interface LegacyOutput {
+	blob: string;
+	"content-type": string;
+	label: string;
+}
 
 /**
  * This task reads some audio input and outputs one or multiple audio files.
  * Example model: speechbrain/sepformer-wham does audio source separation.
  */
-export async function audioToAudio(args: AudioToAudioArgs, options?: Options): Promise<AudioToAudioReturn> {
-	const res = await request<AudioToAudioReturn>(args, {
+export async function audioToAudio(args: AudioToAudioArgs, options?: Options): Promise<AudioToAudioOutput> {
+	const payload = {
+		...omit(args, "inputs"),
+		data: args.inputs,
+	};
+	const res = await request<AudioToAudioOutput | LegacyOutput[]>(payload, {
 		...options,
 		taskHint: "audio-to-audio",
 	});
-	const isValidOutput =
-		Array.isArray(res) &&
-		res.every(
-			(x) => typeof x.label === "string" && typeof x.blob === "string" && typeof x["content-type"] === "string"
-		);
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<{label: string, blob: string, content-type: string}>");
+
+	return validateOutput(res);
+}
+
+function validateOutput(output: unknown): AudioToAudioOutput {
+	if (!Array.isArray(output)) {
+		throw new InferenceOutputError("Expected Array");
 	}
-	return res;
+	if (
+		output.every((elem): elem is AudioToAudioOutputElem => {
+			return (
+				typeof elem === "object" &&
+				elem &&
+				"label" in elem &&
+				typeof elem.label === "string" &&
+				"audio" in elem &&
+				elem.audio instanceof Blob
+			);
+		})
+	) {
+		return output;
+	}
+	if (
+		output.every((elem): elem is LegacyOutput => {
+			return (
+				typeof elem === "object" &&
+				elem &&
+				"label" in elem &&
+				typeof elem.label === "string" &&
+				"content-type" in elem &&
+				typeof elem["content-type"] === "string" &&
+				"blob" in elem &&
+				typeof elem.blob === "string"
+			);
+		})
+	) {
+		return output.map((elem) => ({
+			label: elem.label,
+			audio: new Blob([elem.blob], { type: elem["content-type"] }),
+		}));
+	}
+	throw new InferenceOutputError("Expected Array<{label: string, audio: Blob}>");
 }

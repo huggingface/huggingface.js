@@ -95,8 +95,8 @@ async function generatePython(inputData: InputData): Promise<SerializedRenderRes
 }
 
 interface JSONSchemaSpec {
-	[param: string]: string | JSONSchemaSpec
-};
+	[param: string]: string | JSONSchemaSpec;
+}
 
 async function postProcessOutput(
 	path2generated: string,
@@ -146,7 +146,7 @@ async function generateBinaryInputTypes(
 			}
 			const propName = propSignature.name.getText(tsSource);
 			const propIsMedia = !!spec["properties"]?.[propName]?.["comment"]?.includes("type=binary");
-			console.log(propName, propIsMedia)
+			console.log(propName, propIsMedia);
 			if (!propIsMedia) {
 				return;
 			}

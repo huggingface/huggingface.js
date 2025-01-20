@@ -2,6 +2,7 @@ import type { ImageSegmentationInput, ImageSegmentationOutput } from "@huggingfa
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
+import { omit } from "../../utils/omit";
 
 export type ImageSegmentationArgs = BaseArgs & ImageSegmentationInput;
 
@@ -13,7 +14,11 @@ export async function imageSegmentation(
 	args: ImageSegmentationArgs,
 	options?: Options
 ): Promise<ImageSegmentationOutput> {
-	const res = await request<ImageSegmentationOutput>(args, {
+	const payload = {
+		...omit(args, "inputs"),
+		data: args.inputs
+	}
+	const res = await request<ImageSegmentationOutput>(payload, {
 		...options,
 		taskHint: "image-segmentation",
 	});

@@ -25,11 +25,8 @@
 					"description": "For diffusion models. A higher guidance scale value encourages the model to generate images closely linked to the text prompt at the expense of lower image quality."
 				},
 				"negative_prompt": {
-					"type": "array",
-					"items": {
-						"type": "string"
-					},
-					"description": "One or several prompt to guide what NOT to include in image generation."
+					"type": "string",
+					"description": "One prompt to guide what NOT to include in image generation."
 				},
 				"num_inference_steps": {
 					"type": "integer",

@@ -3,6 +3,7 @@ import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { base64FromBytes } from "../../utils/base64FromBytes";
 import { request } from "../custom/request";
+import { omit } from "../../utils/omit";
 
 export type AutomaticSpeechRecognitionArgs = BaseArgs & AutomaticSpeechRecognitionInput;
 /**
@@ -25,9 +26,12 @@ export async function automaticSpeechRecognition(
 		const base64audio = base64FromBytes(new Uint8Array(await args.inputs.arrayBuffer()));
 		(args as AutomaticSpeechRecognitionArgs & { audio_url: string }).audio_url =
 			`data:${contentType};base64,${base64audio}`;
-		delete (args as Omit<AutomaticSpeechRecognitionArgs, "inputs"> & { inputs?: unknown }).inputs;
 	}
-	const res = await request<AutomaticSpeechRecognitionOutput>(args, {
+	const payload = {
+		...omit(args, "inputs"),
+		...(args.provider !== "fal-ai" ? { data: args.inputs } : undefined)
+	}
+	const res = await request<AutomaticSpeechRecognitionOutput>(payload as AutomaticSpeechRecognitionArgs, {
 		...options,
 		taskHint: "automatic-speech-recognition",
 	});
