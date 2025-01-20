@@ -56,7 +56,7 @@ export const FAL_AI_SUPPORTED_MODEL_IDS: ProviderMapping<FalAiId> = {
     "image-text-to-text": {
         "vikhyatk/moondream-next": "fal-ai/moondream-next",
         "microsoft/Florence-2-large": "fal-ai/florence-2-large/caption",
-        "ByteDance/Sa2VA-8B": "fal-ai/sa2va/8b/image/playground"
+        "ByteDance/Sa2VA-8B": "fal-ai/sa2va/8b/image"
     },
     "mask-generation": {
         "facebook/sam2-hiera-large": "fal-ai/sam2"
