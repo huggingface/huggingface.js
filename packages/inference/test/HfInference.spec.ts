@@ -829,6 +829,16 @@ describe.concurrent("HfInference", () => {
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
+
+			it("textToSpeech OuteTTS", async () => {
+				const res = await client.textToSpeech({
+					model: "OuteAI/OuteTTS-0.3-1B",
+					provider: "replicate",
+					inputs: "OuteTTS is a frontier TTS model for its size of 1 Billion parameters",
+				});
+
+				expect(res).toBeInstanceOf(Blob);
+			});
 		},
 		TIMEOUT
 	);

@@ -10,7 +10,7 @@ export const REPLICATE_SUPPORTED_MODEL_IDS: ProviderMapping<ReplicateId> = {
 		"ByteDance/SDXL-Lightning":
 			"bytedance/sdxl-lightning-4step:5599ed30703defd1d160a25a63321b4dec97101d98b4674bcc56e41f62f35637",
 	},
-	// "text-to-speech": {
-	// 	"SWivid/F5-TTS": "x-lance/f5-tts:87faf6dd7a692dd82043f662e76369cab126a2cf1937e25a9d41e0b834fd230e"
-	// },
+	"text-to-speech": {
+		"OuteAI/OuteTTS-0.3-1B": "jbilcke/oute-tts:2e84120b4ff8d35c5a543fd34efe7ae2ad56909d029ccfee234f1cc8501df92c",
+	},
 };

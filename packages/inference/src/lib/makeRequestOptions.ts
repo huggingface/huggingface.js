@@ -32,7 +32,8 @@ export async function makeRequestOptions(
 		chatCompletion?: boolean;
 	}
 ): Promise<{ url: string; info: RequestInit }> {
-	const { accessToken, endpointUrl, provider: maybeProvider, model: maybeModel, ...otherArgs } = args;
+	const { accessToken, endpointUrl, provider: maybeProvider, model: maybeModel, ...remainingArgs } = args;
+	let otherArgs = remainingArgs;
 	const provider = maybeProvider ?? "hf-inference";
 
 	const { forceTask, includeCredentials, taskHint, wait_for_model, use_cache, dont_load_model, chatCompletion } =
@@ -125,6 +126,7 @@ export async function makeRequestOptions(
 	 */
 	if (provider === "replicate" && model.includes(":")) {
 		const version = model.split(":")[1];
+		(otherArgs as unknown) = { input: otherArgs };
 		(otherArgs as typeof otherArgs & { version: string }).version = version;
 	}
 
