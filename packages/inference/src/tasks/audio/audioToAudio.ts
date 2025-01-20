@@ -2,6 +2,7 @@ import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
+
 export type AudioToAudioArgs = BaseArgs & {
 	/**
 	 * Binary audio data

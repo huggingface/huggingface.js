@@ -14,5 +14,5 @@
 			"description": "The sampling rate of the generated audio waveform."
 		}
 	},
-	"required": ["audio", "samplingRate"]
+	"required": ["audio", "sampling_rate"]
 }

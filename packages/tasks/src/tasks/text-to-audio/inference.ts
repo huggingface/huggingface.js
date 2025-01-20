@@ -6,11 +6,10 @@ export interface TextToAudioOutput {
 	 * The generated audio waveform.
 	 */
 	audio: Blob;
-	samplingRate: unknown;
 	/**
 	 * The sampling rate of the generated audio waveform.
 	 */
-	sampling_rate?: number;
+	sampling_rate: number;
 	[property: string]: unknown;
 }
 /**

@@ -103,8 +103,8 @@ async function postProcessOutput(
 	outputSpec: JSONSchemaSpec,
 	inputSpec: JSONSchemaSpec
 ): Promise<void> {
-	await generateTopLevelArrays(path2generated, outputSpec);
 	await generateBinaryInputTypes(path2generated, inputSpec, outputSpec);
+	await generateTopLevelArrays(path2generated, outputSpec);
 }
 
 async function generateBinaryInputTypes(
@@ -146,6 +146,7 @@ async function generateBinaryInputTypes(
 			}
 			const propName = propSignature.name.getText(tsSource);
 			const propIsMedia = !!spec["properties"]?.[propName]?.["comment"]?.includes("type=binary");
+			console.log(propName, propIsMedia)
 			if (!propIsMedia) {
 				return;
 			}
@@ -169,7 +170,6 @@ async function generateBinaryInputTypes(
 		});
 	}
 	const printer = ts.createPrinter();
-	console.log(printer.printList(ts.ListFormat.MultiLine, ts.factory.createNodeArray(newNodes), tsSource));
 
 	await fs.writeFile(
 		path2generated,

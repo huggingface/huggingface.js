@@ -1,15 +1,9 @@
+import type { TextToSpeechInput, TextToSpeechOutput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
-export type TextToSpeechArgs = BaseArgs & {
-	/**
-	 * The text to generate an audio from
-	 */
-	inputs: string;
-};
-
-export type TextToSpeechOutput = Blob;
+type TextToSpeechArgs = BaseArgs & TextToSpeechInput;
 
 /**
  * This task synthesize an audio of a voice pronouncing a given text.
