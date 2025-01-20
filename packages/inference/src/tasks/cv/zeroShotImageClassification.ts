@@ -18,11 +18,7 @@ export async function zeroShotImageClassification(
 	const reqArgs: RequestArgs = {
 		...args,
 		inputs: {
-			image: base64FromBytes(
-				new Uint8Array(
-					args.inputs.image instanceof ArrayBuffer ? args.inputs.image : await args.inputs.image.arrayBuffer()
-				)
-			),
+			image: base64FromBytes(new Uint8Array(await args.inputs.arrayBuffer())),
 		},
 	} as RequestArgs;
 
