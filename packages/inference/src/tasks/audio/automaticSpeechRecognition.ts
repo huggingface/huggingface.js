@@ -38,4 +38,4 @@ export async function automaticSpeechRecognition(
 	return res;
 }
 
-const FAL_AI_SUPPORTED_BLOB_TYPES = ["audio/mpeg", "audio/mp4", "audio/wav"];
+const FAL_AI_SUPPORTED_BLOB_TYPES = ["audio/mpeg", "audio/mp4", "audio/wav", "audio/x-wav"];

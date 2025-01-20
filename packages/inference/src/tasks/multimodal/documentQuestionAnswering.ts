@@ -20,9 +20,7 @@ export async function documentQuestionAnswering(
 		inputs: {
 			question: args.inputs.question,
 			// convert Blob or ArrayBuffer to base64
-			image: base64FromBytes(
-				new Uint8Array(await args.inputs.arrayBuffer())
-			),
+			image: base64FromBytes(new Uint8Array(await args.inputs.arrayBuffer())),
 		},
 	} as RequestArgs;
 	const res = toArray(

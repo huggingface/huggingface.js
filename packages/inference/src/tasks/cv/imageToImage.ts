@@ -34,5 +34,5 @@ export async function imageToImage(args: ImageToImageArgs, options?: Options): P
 	if (!isValidOutput) {
 		throw new InferenceOutputError("Expected Blob");
 	}
-	return res;
+	return { image: res };
 }

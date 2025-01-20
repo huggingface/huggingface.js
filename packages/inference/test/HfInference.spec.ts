@@ -451,7 +451,7 @@ describe.concurrent("HfInference", () => {
 						model: "espnet/kan-bayashi_ljspeech_vits",
 						inputs: "hello there!",
 					})
-				).toBeInstanceOf(Blob);
+				).toSatisfy((out) => typeof out === "object" && !!out && "image" in out && out.image instanceof Blob);
 			});
 
 			it("imageClassification", async () => {
@@ -543,14 +543,14 @@ describe.concurrent("HfInference", () => {
 					},
 					model: "lllyasviel/sd-controlnet-depth",
 				});
-				expect(res).toBeInstanceOf(Blob);
+				expect(res).toSatisfy((out) => typeof out === "object" && !!out && "image" in out && out.image instanceof Blob);
 			});
 			it("imageToImage blob data", async () => {
 				const res = await hf.imageToImage({
 					inputs: new Blob([readTestFile("bird_canny.png")], { type: "image / png" }),
 					model: "lllyasviel/sd-controlnet-canny",
 				});
-				expect(res).toBeInstanceOf(Blob);
+				expect(res).toSatisfy((out) => typeof out === "object" && !!out && "image" in out && out.image instanceof Blob);
 			});
 			it("textToImage", async () => {
 				const res = await hf.textToImage({
@@ -558,7 +558,7 @@ describe.concurrent("HfInference", () => {
 						"award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]",
 					model: "stabilityai/stable-diffusion-2",
 				});
-				expect(res).toBeInstanceOf(Blob);
+				expect(res).toSatisfy((out) => typeof out === "object" && !!out && "image" in out && out.image instanceof Blob);
 			});
 
 			it("textToImage with parameters", async () => {
@@ -577,7 +577,7 @@ describe.concurrent("HfInference", () => {
 						num_inference_steps,
 					},
 				});
-				expect(res).toBeInstanceOf(Blob);
+				expect(res).toSatisfy((out) => typeof out === "object" && !!out && "image" in out && out.image instanceof Blob);
 			});
 			it("imageToText", async () => {
 				expect(
@@ -781,14 +781,14 @@ describe.concurrent("HfInference", () => {
 					provider: "fal-ai",
 					inputs: "black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot",
 				});
-				expect(res).toBeInstanceOf(Blob);
+				expect(res).toSatisfy((out) => typeof out === "object" && !!out && "image" in out && out.image instanceof Blob);
 			});
 
 			it("speechToText", async () => {
 				const res = await client.automaticSpeechRecognition({
 					model: "openai/whisper-large-v3",
 					provider: "fal-ai",
-					data: new Blob([readTestFile("sample2.wav")], { type: "audio/x-wav" }),
+					inputs: new Blob([readTestFile("sample2.wav")], { type: "audio/x-wav" }),
 				});
 				expect(res).toMatchObject({
 					text: " he has grave doubts whether sir frederick leighton's work is really greek after all and can discover in it but little of rocky ithaca",
@@ -809,7 +809,7 @@ describe.concurrent("HfInference", () => {
 					provider: "replicate",
 					inputs: "black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot",
 				});
-				expect(res).toBeInstanceOf(Blob);
+				expect(res).toSatisfy((out) => typeof out === "object" && !!out && "image" in out && out.image instanceof Blob);
 			});
 
 			it("textToImage versioned", async () => {
@@ -818,7 +818,7 @@ describe.concurrent("HfInference", () => {
 					provider: "replicate",
 					inputs: "black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot",
 				});
-				expect(res).toBeInstanceOf(Blob);
+				expect(res).toSatisfy((out) => typeof out === "object" && !!out && "image" in out && out.image instanceof Blob);
 			});
 
 			it.skip("textToSpeech versioned", async () => {
@@ -827,7 +827,7 @@ describe.concurrent("HfInference", () => {
 					provider: "replicate",
 					inputs: "Hello, how are you?",
 				});
-				expect(res).toBeInstanceOf(Blob);
+				expect(res).toSatisfy((out) => typeof out === "object" && !!out && "image" in out && out.image instanceof Blob);
 			});
 		},
 		TIMEOUT
@@ -904,7 +904,7 @@ describe.concurrent("HfInference", () => {
 					provider: "together",
 					inputs: "award winning high resolution photo of a giant tortoise",
 				});
-				expect(res).toBeInstanceOf(Blob);
+				expect(res).toSatisfy((out) => typeof out === "object" && !!out && "image" in out && out.image instanceof Blob);
 			});
 
 			it("textGeneration", async () => {

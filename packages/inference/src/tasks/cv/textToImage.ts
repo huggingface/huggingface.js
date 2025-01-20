@@ -31,6 +31,7 @@ export async function textToImage(args: TextToImageArgs, options?: Options): Pro
 		...options,
 		taskHint: "text-to-image",
 	});
+	console.log(res);
 	if (res && typeof res === "object") {
 		if (args.provider === "fal-ai" && "images" in res && Array.isArray(res.images) && res.images[0].url) {
 			const image = await fetch(res.images[0].url);

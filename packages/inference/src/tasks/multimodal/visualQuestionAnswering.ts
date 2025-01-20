@@ -19,9 +19,7 @@ export async function visualQuestionAnswering(
 			question: args.inputs.question,
 			// convert Blob or ArrayBuffer to base64
 			image: base64FromBytes(
-				new Uint8Array(
-					args.inputs.image instanceof ArrayBuffer ? args.inputs.image : await args.inputs.image.arrayBuffer()
-				)
+				new Uint8Array(args.inputs.image instanceof ArrayBuffer ? args.inputs.image : await args.inputs.arrayBuffer())
 			),
 		},
 	} as RequestArgs;
