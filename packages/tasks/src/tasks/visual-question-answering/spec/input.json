@@ -11,7 +11,8 @@
 			"title": "VisualQuestionAnsweringInputData",
 			"properties": {
 				"image": {
-					"description": "The image."
+					"description": "The image.",
+					"comment": "type=binary"
 				},
 				"question": {
 					"description": "The question to answer based on the image."

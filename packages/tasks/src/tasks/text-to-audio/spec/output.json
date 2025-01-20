@@ -6,7 +6,8 @@
 	"type": "object",
 	"properties": {
 		"audio": {
-			"description": "The generated audio waveform."
+			"description": "The generated audio waveform.",
+			"comment": "type=binary"
 		},
 		"sampling_rate": {
 			"type": "number",

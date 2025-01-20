@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Inputs for Text To Image inference
  */
@@ -18,7 +17,6 @@ export interface TextToImageInput {
 	parameters?: TextToImageParameters;
 	[property: string]: unknown;
 }
-
 /**
  * Additional inference parameters for Text To Image
  */
@@ -51,7 +49,6 @@ export interface TextToImageParameters {
 	target_size?: TargetSize;
 	[property: string]: unknown;
 }
-
 /**
  * The size in pixel of the output image
  */
@@ -60,7 +57,6 @@ export interface TargetSize {
 	width: number;
 	[property: string]: unknown;
 }
-
 /**
  * Outputs of inference for the Text To Image task
  */

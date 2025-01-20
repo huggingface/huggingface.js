@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Inputs for Image To Image inference
  */
@@ -12,14 +11,13 @@ export interface ImageToImageInput {
 	 * The input image data as a base64-encoded string. If no `parameters` are provided, you can
 	 * also provide the image data as a raw bytes payload.
 	 */
-	inputs: string;
+	inputs: Blob;
 	/**
 	 * Additional inference parameters for Image To Image
 	 */
 	parameters?: ImageToImageParameters;
 	[property: string]: unknown;
 }
-
 /**
  * Additional inference parameters for Image To Image
  */
@@ -44,7 +42,6 @@ export interface ImageToImageParameters {
 	target_size?: TargetSize;
 	[property: string]: unknown;
 }
-
 /**
  * The size in pixel of the output image.
  */
@@ -53,7 +50,6 @@ export interface TargetSize {
 	width: number;
 	[property: string]: unknown;
 }
-
 /**
  * Outputs of inference for the Image To Image task
  */

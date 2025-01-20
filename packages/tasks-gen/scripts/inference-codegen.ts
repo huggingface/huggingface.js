@@ -94,6 +94,93 @@ async function generatePython(inputData: InputData): Promise<SerializedRenderRes
 	});
 }
 
+interface JSONSchemaSpec {
+	[param: string]: string | JSONSchemaSpec
+};
+
+async function postProcessOutput(
+	path2generated: string,
+	outputSpec: JSONSchemaSpec,
+	inputSpec: JSONSchemaSpec
+): Promise<void> {
+	await generateTopLevelArrays(path2generated, outputSpec);
+	await generateBinaryInputTypes(path2generated, inputSpec, outputSpec);
+}
+
+async function generateBinaryInputTypes(
+	path2generated: string,
+	inputSpec: JSONSchemaSpec,
+	outputSpec: JSONSchemaSpec
+): Promise<void> {
+	const tsSource = ts.createSourceFile(
+		path.basename(path2generated),
+		await fs.readFile(path2generated, { encoding: "utf-8" }),
+		ts.ScriptTarget.ES2022
+	);
+
+	const inputRootName = inputSpec.title;
+	const outputRootName = outputSpec.title;
+	if (typeof inputRootName !== "string" || typeof outputRootName !== "string") {
+		return;
+	}
+	const topLevelNodes = tsSource.getChildAt(0).getChildren();
+
+	let newNodes = [...topLevelNodes];
+
+	for (const interfaceNode of topLevelNodes.filter(
+		(node): node is ts.InterfaceDeclaration => node.kind === ts.SyntaxKind.InterfaceDeclaration
+	)) {
+		if (interfaceNode.name.escapedText !== inputRootName && interfaceNode.name.escapedText !== outputRootName) {
+			continue;
+		}
+
+		const spec = interfaceNode.name.escapedText === inputRootName ? inputSpec : outputSpec;
+
+		interfaceNode.forEachChild((child) => {
+			if (child.kind !== ts.SyntaxKind.PropertySignature) {
+				return;
+			}
+			const propSignature = child as ts.PropertySignature;
+			if (!propSignature.type) {
+				return;
+			}
+			const propName = propSignature.name.getText(tsSource);
+			const propIsMedia = !!spec["properties"]?.[propName]?.["comment"]?.includes("type=binary");
+			if (!propIsMedia) {
+				return;
+			}
+			const updatedType = ts.factory.createTypeReferenceNode("Blob");
+			const updated = ts.factory.updatePropertySignature(
+				propSignature,
+				propSignature.modifiers,
+				propSignature.name,
+				propSignature.questionToken,
+				updatedType
+			);
+			const updatedInterface = ts.factory.updateInterfaceDeclaration(
+				interfaceNode,
+				interfaceNode.modifiers,
+				interfaceNode.name,
+				interfaceNode.typeParameters,
+				interfaceNode.heritageClauses,
+				[updated, ...interfaceNode.members.filter((member) => member.name?.getText(tsSource) !== propName)]
+			);
+			newNodes = [updatedInterface, ...newNodes.filter((node) => node !== interfaceNode)];
+		});
+	}
+	const printer = ts.createPrinter();
+	console.log(printer.printList(ts.ListFormat.MultiLine, ts.factory.createNodeArray(newNodes), tsSource));
+
+	await fs.writeFile(
+		path2generated,
+		printer.printList(ts.ListFormat.MultiLine, ts.factory.createNodeArray(newNodes), tsSource),
+		{
+			flag: "w+",
+			encoding: "utf-8",
+		}
+	);
+}
+
 /**
  * quicktype is unable to generate "top-level array types" that are defined in the output spec: https://github.com/glideapps/quicktype/issues/2481
  * We have to use the TypeScript API to generate those types when required.
@@ -105,7 +192,7 @@ async function generatePython(inputData: InputData): Promise<SerializedRenderRes
  * And writes that to the `inference.ts` file
  *
  */
-async function postProcessOutput(path2generated: string, outputSpec: Record<string, unknown>): Promise<void> {
+async function generateTopLevelArrays(path2generated: string, outputSpec: Record<string, unknown>): Promise<void> {
 	const source = ts.createSourceFile(
 		path.basename(path2generated),
 		await fs.readFile(path2generated, { encoding: "utf-8" }),
@@ -208,9 +295,10 @@ for (const { task, dirPath } of allTasks) {
 	}
 
 	const outputSpec = JSON.parse(await fs.readFile(`${taskSpecDir}/output.json`, { encoding: "utf-8" }));
+	const inputSpec = JSON.parse(await fs.readFile(`${taskSpecDir}/input.json`, { encoding: "utf-8" }));
 
 	console.log("   🩹 Post-processing the generated code");
-	await postProcessOutput(`${dirPath}/inference.ts`, outputSpec);
+	await postProcessOutput(`${dirPath}/inference.ts`, outputSpec, inputSpec);
 
 	console.debug("   🏭 Generating Python code");
 	{
