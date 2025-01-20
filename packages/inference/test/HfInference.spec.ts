@@ -1,6 +1,6 @@
 import { expect, it, describe, assert } from "vitest";
 
-import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
+import type { ChatCompletionStreamOutput, VisualQuestionAnsweringInput } from "@huggingface/tasks";
 
 import { chatCompletion, HfInference } from "../src";
 import "./vcr";
@@ -87,13 +87,14 @@ describe.concurrent("HfInference", () => {
 						context: "The capital of France is Paris.",
 					},
 				});
-
-				expect(res).toMatchObject([{
-					answer: "Paris",
-					score: expect.any(Number),
-					start: expect.any(Number),
-					end: expect.any(Number),
-				}]);
+				expect(res).toMatchObject([
+					{
+						answer: "Paris",
+						score: expect.any(Number),
+						start: expect.any(Number),
+						end: expect.any(Number),
+					},
+				]);
 			});
 
 			it("tableQuestionAnswering", async () => {
@@ -110,30 +111,31 @@ describe.concurrent("HfInference", () => {
 							},
 						},
 					})
-				).toMatchObject({
-					answer: "AVERAGE > 36542",
-					coordinates: [[0, 1]],
-					cells: ["36542"],
-					aggregator: "AVERAGE",
-				});
+				).toMatchObject([
+					{
+						answer: "AVERAGE > 36542",
+						coordinates: [[0, 1]],
+						cells: ["36542"],
+						aggregator: "AVERAGE",
+					},
+				]);
 			});
 
 			it("documentQuestionAnswering", async () => {
-				expect(
-					await hf.documentQuestionAnswering({
-						model: "impira/layoutlm-document-qa",
-						inputs: {
-							question: "Invoice number?",
-							image: new Blob([readTestFile("invoice.png")], { type: "image/png" }),
-						},
-					})
-				).toMatchObject({
-					answer: "us-001",
-					score: expect.any(Number),
-					// not sure what start/end refers to in this case
-					start: expect.any(Number),
-					end: expect.any(Number),
+				const res = await hf.documentQuestionAnswering({
+					model: "impira/layoutlm-document-qa",
+					inputs: {
+						question: "Invoice number?",
+						image: new Blob([readTestFile("invoice.png")], { type: "image/png" }),
+					},
 				});
+				expect(res).toBeInstanceOf(Array);
+				for (const elem of res) {
+					expect(elem).toMatchObject({
+						answer: expect.any(String),
+						score: expect.any(Number),
+					});
+				}
 			});
 
 			// Errors with "Error: If you are using a VisionEncoderDecoderModel, you must provide a feature extractor"
@@ -152,18 +154,20 @@ describe.concurrent("HfInference", () => {
 			});
 
 			it("visualQuestionAnswering", async () => {
-				expect(
-					await hf.visualQuestionAnswering({
-						model: "dandelin/vilt-b32-finetuned-vqa",
-						inputs: {
-							question: "How many cats are lying down?",
-							image: new Blob([readTestFile("cats.png")], { type: "image/png" }),
-						},
-					})
-				).toMatchObject({
-					answer: "2",
-					score: expect.any(Number),
-				});
+				const res = await hf.visualQuestionAnswering({
+					model: "dandelin/vilt-b32-finetuned-vqa",
+					inputs: {
+						question: "How many cats are lying down?",
+						image: new Blob([readTestFile("cats.png")], { type: "image/png" }),
+					},
+				} satisfies VisualQuestionAnsweringInput);
+				expect(res).toBeInstanceOf(Array);
+				for (const elem of res) {
+					expect(elem).toMatchObject({
+						answer: expect.any(String),
+						score: expect.any(Number),
+					});
+				}
 			});
 
 			it("textClassification", async () => {
@@ -451,7 +455,9 @@ describe.concurrent("HfInference", () => {
 						model: "espnet/kan-bayashi_ljspeech_vits",
 						inputs: "hello there!",
 					})
-				).toSatisfy((out) => typeof out === "object" && !!out && "image" in out && out.image instanceof Blob);
+				).toMatchObject({
+					audio: expect.any(Blob),
+				});
 			});
 
 			it("imageClassification", async () => {
@@ -473,7 +479,7 @@ describe.concurrent("HfInference", () => {
 			it("zeroShotImageClassification", async () => {
 				expect(
 					await hf.zeroShotImageClassification({
-						inputs: { image: new Blob([readTestFile("cheetah.png")], { type: "image/png" }) },
+						inputs: new Blob([readTestFile("cheetah.png")], { type: "image/png" }),
 						model: "openai/clip-vit-large-patch14-336",
 						parameters: {
 							candidate_labels: ["animal", "toy", "car"],

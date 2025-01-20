@@ -4,9 +4,15 @@ import { request } from "../custom/request";
 import type { RequestArgs } from "../../types";
 import { toArray } from "../../utils/toArray";
 import { base64FromBytes } from "../../utils/base64FromBytes";
-import type { DocumentQuestionAnsweringInput, DocumentQuestionAnsweringOutput } from "@huggingface/tasks";
+import type {
+	DocumentQuestionAnsweringInput,
+	DocumentQuestionAnsweringInputData,
+	DocumentQuestionAnsweringOutput,
+} from "@huggingface/tasks";
 
-export type DocumentQuestionAnsweringArgs = BaseArgs & DocumentQuestionAnsweringInput;
+/// Override the type to properly set inputs.image as Blob
+export type DocumentQuestionAnsweringArgs = BaseArgs &
+	DocumentQuestionAnsweringInput & { inputs: DocumentQuestionAnsweringInputData & { image: Blob } };
 
 /**
  * Answers a question on a document image. Recommended model: impira/layoutlm-document-qa.
@@ -20,22 +26,30 @@ export async function documentQuestionAnswering(
 		inputs: {
 			question: args.inputs.question,
 			// convert Blob or ArrayBuffer to base64
-			image: base64FromBytes(new Uint8Array(await args.inputs.arrayBuffer())),
+			image: base64FromBytes(new Uint8Array(await args.inputs.image.arrayBuffer())),
 		},
 	} as RequestArgs;
 	const res = toArray(
-		await request<[DocumentQuestionAnsweringOutput] | DocumentQuestionAnsweringOutput>(reqArgs, {
+		await request<DocumentQuestionAnsweringOutput | DocumentQuestionAnsweringOutput[number]>(reqArgs, {
 			...options,
 			taskHint: "document-question-answering",
 		})
-	)?.[0];
+	);
+
 	const isValidOutput =
-		typeof res?.answer === "string" &&
-		(typeof res.end === "number" || typeof res.end === "undefined") &&
-		(typeof res.score === "number" || typeof res.score === "undefined") &&
-		(typeof res.start === "number" || typeof res.start === "undefined");
+		Array.isArray(res) &&
+		res.every(
+			(elem) =>
+				typeof elem === "object" &&
+				!!elem &&
+				typeof elem?.answer === "string" &&
+				(typeof elem.end === "number" || typeof elem.end === "undefined") &&
+				(typeof elem.score === "number" || typeof elem.score === "undefined") &&
+				(typeof elem.start === "number" || typeof elem.start === "undefined")
+		);
 	if (!isValidOutput) {
 		throw new InferenceOutputError("Expected Array<{answer: string, end?: number, score?: number, start?: number}>");
 	}
+
 	return res;
 }

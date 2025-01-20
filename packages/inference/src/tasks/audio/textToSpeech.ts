@@ -1,13 +1,10 @@
-import type { TextToSpeechInput } from "@huggingface/tasks";
+import type { TextToSpeechInput, TextToSpeechOutput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
 type TextToSpeechArgs = BaseArgs & TextToSpeechInput;
 
-interface TextToSpeechOutput {
-	audio: Blob;
-}
 /**
  * This task synthesize an audio of a voice pronouncing a given text.
  * Recommended model: espnet/kan-bayashi_ljspeech_vits
