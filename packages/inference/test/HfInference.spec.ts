@@ -785,7 +785,7 @@ describe.concurrent("HfInference", () => {
 						model,
 						provider: "fal-ai",
 						inputs:
-							"black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot",
+							"Extreme close-up of a single tiger eye, direct frontal view. Detailed iris and pupil. Sharp focus on eye texture and color. Natural lighting to capture authentic eye shine and depth.",
 					});
 					expect(res).toBeInstanceOf(Blob);
 				}
