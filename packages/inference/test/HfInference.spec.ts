@@ -2,7 +2,7 @@ import { expect, it, describe, assert } from "vitest";
 
 import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
 
-import { chatCompletion, HfInference } from "../src";
+import { chatCompletion, FAL_AI_SUPPORTED_MODEL_IDS, HfInference } from "../src";
 import "./vcr";
 import { readTestFile } from "./test-files";
 
@@ -775,18 +775,9 @@ describe.concurrent("HfInference", () => {
 		() => {
 			const client = new HfInference(env.HF_FAL_KEY);
 
-			const textToImageModels = [
-				"PixArt-alpha/PixArt-Sigma-XL-2-1024-MS",
-				"Warlord-K/Sana-1024",
-				"stabilityai/stable-diffusion-3.5-large",
-				"stabilityai/stable-diffusion-3-medium",
-				"Kwai-Kolors/Kolors",
-				"black-forest-labs/FLUX.1-schnell",
-				"black-forest-labs/FLUX.1-dev",
-				"playgroundai/playground-v2.5-1024px-aesthetic",
-				"ByteDance/SDXL-Lightning",
-				"fal/AuraFlow-v0.2",
-			];
+			const textToImageModels = FAL_AI_SUPPORTED_MODEL_IDS["text-to-image"]
+				? Object.keys(FAL_AI_SUPPORTED_MODEL_IDS["text-to-image"])
+				: [];
 
 			it("textToImage", async () => {
 				for (const model of textToImageModels) {
