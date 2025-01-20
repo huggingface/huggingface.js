@@ -121,13 +121,13 @@ export async function makeRequestOptions(
 		credentials = "include";
 	}
 
-	/*
+	/**
+	 * Replicate models wrap all inputs inside { input: ... }
 	 * Versioned Replicate models in the format `owner/model:version` expect the version in the body
 	 */
-	if (provider === "replicate" && model.includes(":")) {
-		const version = model.split(":")[1];
-		(otherArgs as unknown) = { input: otherArgs };
-		(otherArgs as typeof otherArgs & { version: string }).version = version;
+	if (provider === "replicate") {
+		const version = model.includes(":") ? model.split(":")[1] : undefined;
+		(otherArgs as unknown) = { input: otherArgs, version };
 	}
 
 	const info: RequestInit = {
