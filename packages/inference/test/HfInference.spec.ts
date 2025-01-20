@@ -832,7 +832,7 @@ describe.concurrent("HfInference", () => {
 
 			it("textToSpeech OuteTTS", async () => {
 				const res = await client.textToSpeech({
-					model: "OuteAI/OuteTTS-0.3-1B",
+					model: "OuteAI/OuteTTS-0.3-500M",
 					provider: "replicate",
 					inputs: "OuteTTS is a frontier TTS model for its size of 1 Billion parameters",
 				});
