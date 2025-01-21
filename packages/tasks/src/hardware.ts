@@ -14,7 +14,7 @@ export const TFLOPS_THRESHOLD_EU_AI_ACT_MODEL_TRAINING_TOTAL = 10 ** 13;
 
 export interface HardwareSpec {
 	/**
-	 * Approximate value, in FP16 whenever possible.
+	 * Approximate value, in FP16 whenever possible for GPUs and FP32 for CPUs.
 	 * This is only approximate/theoretical and shouldn't be taken too seriously.
 	 * Currently the CPU values are from cpu-monkey.com
 	 * while the GPU values are from techpowerup.com
@@ -71,6 +71,10 @@ export const SKUS = {
 			"RTX 2000 Ada": {
 				tflops: 12.0,
 				memory: [16],
+			},
+			"RTX A6000": {
+				tflops: 38.7,
+				memory: [48],
 			},
 			"RTX A4000": {
 				tflops: 19.2,
@@ -415,6 +419,9 @@ export const SKUS = {
 			},
 			"EPYC 1st Generation (Naples)": {
 				tflops: 0.6,
+			},
+			"Ryzen Zen 4 7000 (Threadripper)": {
+				tflops: 10.0,
 			},
 			"Ryzen Zen4 7000 (Ryzen 9)": {
 				tflops: 0.56,

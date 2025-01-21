@@ -3,25 +3,28 @@ import type { TaskDataCustom } from "../index.js";
 const taskData: TaskDataCustom = {
 	datasets: [
 		{
-			description: "A large multilingual dataset of text crawled from the web.",
-			id: "mc4",
+			description: "Multilingual dataset used to evaluate text generation models.",
+			id: "CohereForAI/Global-MMLU",
 		},
 		{
-			description:
-				"Diverse open-source data consisting of 22 smaller high-quality datasets. It was used to train GPT-Neo.",
-			id: "the_pile",
+			description: "High quality multilingual data used to train text-generation models.",
+			id: "HuggingFaceFW/fineweb-2",
 		},
 		{
 			description: "Truly open-source, curated and cleaned dialogue dataset.",
 			id: "HuggingFaceH4/ultrachat_200k",
 		},
 		{
-			description: "An instruction dataset with preference ratings on responses.",
-			id: "openbmb/UltraFeedback",
+			description: "A multilingual instruction dataset with preference ratings on responses.",
+			id: "allenai/tulu-3-sft-mixture",
 		},
 		{
 			description: "A large synthetic dataset for alignment of text generation models.",
-			id: "argilla/magpie-ultra-v0.1",
+			id: "HuggingFaceTB/smoltalk",
+		},
+		{
+			description: "A dataset made for training text generation models solving math questions.",
+			id: "HuggingFaceTB/finemath",
 		},
 	],
 	demo: {
@@ -63,20 +66,20 @@ const taskData: TaskDataCustom = {
 			id: "meta-llama/Meta-Llama-3.1-8B-Instruct",
 		},
 		{
-			description: "Small yet powerful text generation model.",
-			id: "microsoft/Phi-3-mini-4k-instruct",
+			description: "Powerful text generation model by Microsoft.",
+			id: "microsoft/phi-4",
 		},
 		{
-			description: "A very powerful model that can solve mathematical problems.",
-			id: "AI-MO/NuminaMath-7B-TIR",
+			description: "A very powerful model with reasoning capabilities.",
+			id: "PowerInfer/SmallThinker-3B-Preview",
 		},
 		{
 			description: "Strong text generation model to follow instructions.",
 			id: "Qwen/Qwen2.5-7B-Instruct",
 		},
 		{
-			description: "Very strong open-source large language model.",
-			id: "nvidia/Llama-3.1-Nemotron-70B-Instruct",
+			description: "Text generation model used to write code.",
+			id: "Qwen/Qwen2.5-Coder-32B-Instruct",
 		},
 	],
 	spaces: [

@@ -166,6 +166,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"adapter_config.json"`,
 	},
+	cosmos: {
+		prettyLabel: "Cosmos",
+		repoName: "Cosmos",
+		repoUrl: "https://github.com/NVIDIA/Cosmos",
+		countDownloads: `path:"config.json" OR path_extension:"pt"`,
+	},
 	"cxr-foundation": {
 		prettyLabel: "CXR Foundation",
 		repoName: "cxr-foundation",
@@ -256,7 +262,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "CosyVoice",
 		repoUrl: "https://github.com/FunAudioLLM/CosyVoice",
 		filter: false,
-		countDownloads: `path_extension:"onnx" OR path_extension:"pt"`,	
+		countDownloads: `path_extension:"onnx" OR path_extension:"pt"`,
 	},
 	cotracker: {
 		prettyLabel: "CoTracker",
@@ -466,6 +472,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"MeshAnything_350m.pth"`,
 		snippets: snippets.mesh_anything,
+	},
+	mitie: {
+		prettyLabel: "MITIE",
+		repoName: "MITIE",
+		repoUrl: "https://github.com/mit-nlp/MITIE",
+		countDownloads: `path_filename:"total_word_feature_extractor"`,
 	},
 	"ml-agents": {
 		prettyLabel: "ml-agents",
@@ -765,6 +777,11 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/TensorSpeech/TensorFlowTTS",
 		snippets: snippets.tensorflowtts,
 	},
+	tabpfn: {
+		prettyLabel: "TabPFN",
+		repoName: "TabPFN",
+		repoUrl: "https://github.com/PriorLabs/TabPFN",
+	},
 	"tic-clip": {
 		prettyLabel: "TiC-CLIP",
 		repoName: "TiC-CLIP",
@@ -810,6 +827,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/microsoft/TRELLIS",
 		countDownloads: `path_extension:"safetensors"`,
 	},
+	ultralytics: {
+		prettyLabel: "ultralytics",
+		repoName: "ultralytics",
+		repoUrl: "https://github.com/ultralytics/ultralytics",
+		docsUrl: "https://github.com/ultralytics/ultralytics",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+		snippets: snippets.ultralytics,
+	},
 	"unity-sentis": {
 		prettyLabel: "unity-sentis",
 		repoName: "unity-sentis",
@@ -839,13 +865,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://github.com/jasonppy/VoiceCraft",
 		snippets: snippets.voicecraft,
 	},
-	yolov10: {
-		prettyLabel: "YOLOv10",
-		repoName: "yolov10",
-		repoUrl: "https://github.com/THU-MIG/yolov10",
-		docsUrl: "https://github.com/THU-MIG/yolov10",
-		snippets: snippets.yolov10,
-	},
 	whisperkit: {
 		prettyLabel: "WhisperKit",
 		repoName: "WhisperKit",
@@ -853,6 +872,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://github.com/argmaxinc/WhisperKit?tab=readme-ov-file#homebrew",
 		snippets: snippets.whisperkit,
 		countDownloads: `path_filename:"model" AND path_extension:"mil" AND _exists_:"path_prefix"`,
+	},
+	yolov10: {
+		// YOLOv10 is a fork of ultraLytics. Code snippets and download count are the same but the repo is different.
+		prettyLabel: "YOLOv10",
+		repoName: "YOLOv10",
+		repoUrl: "https://github.com/THU-MIG/yolov10",
+		docsUrl: "https://github.com/THU-MIG/yolov10",
+		countDownloads: `path_extension:"pt"`,
+		snippets: snippets.ultralytics,
 	},
 	"3dtopia-xl": {
 		prettyLabel: "3DTopia-XL",

@@ -1,3 +1,4 @@
+import { HF_HUB_URL } from "../config";
 import { isUrl } from "./isUrl";
 
 /**
@@ -8,7 +9,6 @@ import { isUrl } from "./isUrl";
 const taskCache = new Map<string, { task: string; date: Date }>();
 const CACHE_DURATION = 10 * 60 * 1000;
 const MAX_CACHE_ITEMS = 1000;
-export const HF_HUB_URL = "https://huggingface.co";
 
 export interface DefaultTaskOptions {
 	fetch?: typeof fetch;
