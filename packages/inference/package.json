@@ -55,8 +55,7 @@
 		"@huggingface/tasks": "workspace:^"
 	},
 	"devDependencies": {
-		"@types/node": "18.13.0",
-		"type-fest": "^3.13.1"
+		"@types/node": "18.13.0"
 	},
 	"resolutions": {}
 }
