@@ -869,6 +869,22 @@ describe.concurrent("HfInference", () => {
 
 				expect(res).toBeInstanceOf(Blob);
 			});
+
+			it("textToVideo Mochi", async () => {
+				const res = await textToVideo({
+					accessToken: env.HF_REPLICATE_KEY,
+					model: "genmo/mochi-1-preview",
+					provider: "replicate",
+					inputs: "A running dog",
+					parameters: {
+						num_inference_steps: 10,
+						seed: 178,
+						num_frames: 30,
+					},
+				});
+
+				expect(res).toBeInstanceOf(Blob);
+			});
 		},
 		TIMEOUT
 	);

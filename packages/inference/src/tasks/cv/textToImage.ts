@@ -61,10 +61,10 @@ export async function textToImage(args: TextToImageArgs, options?: Options): Pro
 	const payload =
 		args.provider === "together" || args.provider === "fal-ai" || args.provider === "replicate"
 			? {
-					prompt: args.inputs,
-					...args.parameters,
 					...omit(args, ["inputs", "parameters"]),
+					...args.parameters,
 					...(args.provider !== "replicate" ? { response_format: "base64" } : undefined),
+					prompt: args.inputs,
 			  }
 			: args;
 	const res = await request<TextToImageOutput | Base64ImageGeneration | OutputUrlImageGeneration>(payload, {

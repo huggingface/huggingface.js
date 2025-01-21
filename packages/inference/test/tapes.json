@@ -4537,5 +4537,58 @@
         "vary": "Accept-Encoding"
       }
     }
+  },
+  "91172a3ea2588a3cb7d0888bcd5fe19e9461d273b05baf98fc7b98468227662d": {
+    "url": "https://api.replicate.com/v1/predictions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json",
+        "Prefer": "wait"
+      },
+      "method": "POST",
+      "body": "{\"input\":{\"num_inference_steps\":10,\"seed\":178,\"num_frames\":30,\"prompt\":\"A running dog\"},\"version\":\"1944af04d098ef69bed7f9d335d102e652203f268ec4aaa2d836f6217217e460\"}"
+    },
+    "response": {
+      "body": "{\"id\":\"p8q5ahwzahrmc0cmh3ks2f875w\",\"model\":\"genmoai/mochi-1\",\"version\":\"1944af04d098ef69bed7f9d335d102e652203f268ec4aaa2d836f6217217e460\",\"input\":{\"num_frames\":30,\"num_inference_steps\":10,\"prompt\":\"A running dog\",\"seed\":178},\"logs\":\"\",\"output\":\"https://replicate.delivery/xezq/l8ZjGvxNM0ofNCs7g3on55wS1PsYp8lGlCcHNOyFfXJQmUHUA/output.mp4\",\"data_removed\":false,\"error\":null,\"status\":\"processing\",\"created_at\":\"2025-01-21T12:47:48.564Z\",\"urls\":{\"cancel\":\"https://api.replicate.com/v1/predictions/p8q5ahwzahrmc0cmh3ks2f875w/cancel\",\"get\":\"https://api.replicate.com/v1/predictions/p8q5ahwzahrmc0cmh3ks2f875w\",\"stream\":\"https://stream.replicate.com/v1/files/bcwr-izpursmbfra64mbuwmxvgowbslbh3pp34zz5z5oofib7clsxxefa\"}}",
+      "status": 201,
+      "statusText": "Created",
+      "headers": {
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "90576a370ebb2a77-CDG",
+        "connection": "keep-alive",
+        "content-type": "application/json; charset=UTF-8",
+        "nel": "{\"success_fraction\":0,\"report_to\":\"cf-nel\",\"max_age\":604800}",
+        "preference-applied": "wait=60",
+        "ratelimit-remaining": "599",
+        "ratelimit-reset": "1",
+        "report-to": "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report\\/v4?s=I%2Fw1liZSXfkyCN3jE7cA%2Fzws%2FqTuk9vz%2FbOGQqMZM%2Bdrq%2B472itQRF0GjkFpmi%2FY6cJ9R%2BKZz%2FsoTG51XFnVamijjBgGJhC7bQqwiS0OEJfyHfMT%2BHGjyXedNZJPHt9TBGZB\"}],\"group\":\"cf-nel\",\"max_age\":604800}",
+        "server": "cloudflare",
+        "server-timing": "cfL4;desc=\"?proto=TCP&rtt=4295&min_rtt=4252&rtt_var=1681&sent=4&recv=5&lost=0&retrans=0&sent_bytes=2847&recv_bytes=979&delivery_rate=629702&cwnd=230&unsent_bytes=0&cid=47baa9904bad9a0d&ts=28297&x=0\"",
+        "strict-transport-security": "max-age=15552000",
+        "vary": "Accept-Encoding"
+      }
+    }
+  },
+  "3c111adf9405a2d0cd8396d0cbf053e7718f56128de0d1c6f06448825ba6a150": {
+    "url": "https://replicate.delivery/xezq/l8ZjGvxNM0ofNCs7g3on55wS1PsYp8lGlCcHNOyFfXJQmUHUA/output.mp4",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+        "cache-control": "public,max-age=3600",
+        "cache-id": "PAR-8ec5b013",
+        "cache-status": "miss",
+        "content-type": "video/mp4",
+        "etag": "\"4f3e69b2139f01c08a1f7a301223e967\"",
+        "last-modified": "Tue, 21 Jan 2025 12:48:16 GMT",
+        "server": "UploadServer"
+      }
+    }
   }
 }
