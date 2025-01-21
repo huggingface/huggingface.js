@@ -4590,5 +4590,166 @@
         "server": "UploadServer"
       }
     }
+  },
+  "2422845812e6f1c0ddc454c0a917a3694049edaaa12d602212a7d3dea82350e8": {
+    "url": "https://fal.run/fal-ai/flux/schnell",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"response_format\":\"base64\",\"prompt\":\"black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot\"}"
+    },
+    "response": {
+      "body": "{\"images\":[{\"url\":\"https://fal.media/files/lion/ZoQhuAdeF3MPKN3ECDl0o.png\",\"width\":1024,\"height\":768,\"content_type\":\"image/jpeg\"}],\"timings\":{\"inference\":0.3555735880509019},\"seed\":3844705385,\"has_nsfw_concepts\":[false],\"prompt\":\"black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot\"}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "strict-transport-security": "max-age=31536000; includeSubDomains"
+      }
+    }
+  },
+  "5f93898efae3ecee1d822e472d89e4829e59d909ac6b305bbee573a01576fe29": {
+    "url": "https://fal.media/files/lion/ZoQhuAdeF3MPKN3ECDl0o.png",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-headers": "*",
+        "access-control-allow-methods": "*",
+        "access-control-allow-origin": "*",
+        "access-control-max-age": "86400",
+        "cf-ray": "90578134a8e4d14d-CDG",
+        "connection": "keep-alive",
+        "content-type": "image/jpeg",
+        "server": "cloudflare",
+        "vary": "Accept-Encoding"
+      }
+    }
+  },
+  "e026782aca942c2ad149dce0163299aac5af863924cae3e0b5a1c464ea591506": {
+    "url": "https://fal.run/fal-ai/mochi-v1",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"seed\":176,\"num_inference_steps\":2,\"num_frames\":85,\"resolution\":\"480p\",\"prompt\":\"A running dog\"}"
+    },
+    "response": {
+      "body": "{\"video\":{\"url\":\"https://fal.media/files/monkey/LE5tfnsuui-CHRI53J2_G_output_1737464726.mp4\",\"content_type\":\"application/octet-stream\",\"file_name\":\"output_1737464726.mp4\",\"file_size\":570756}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "strict-transport-security": "max-age=31536000; includeSubDomains"
+      }
+    }
+  },
+  "7fe6560d50ca91805967420d558fd497b43eda54500c657e039b37ccb785146b": {
+    "url": "https://fal.media/files/monkey/LE5tfnsuui-CHRI53J2_G_output_1737464726.mp4",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-headers": "*",
+        "access-control-allow-methods": "*",
+        "access-control-allow-origin": "*",
+        "access-control-max-age": "86400",
+        "cf-ray": "905784a69c3803ff-CDG",
+        "connection": "keep-alive",
+        "content-type": "application/octet-stream",
+        "server": "cloudflare",
+        "vary": "Accept-Encoding"
+      }
+    }
+  },
+  "958644a11be1d89cce04fc41ea39ae1f3602c7785baed34cfc1a4bdfde42f251": {
+    "url": "https://api.together.xyz/v1/images/generations",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"response_format\":\"base64\",\"prompt\":\"award winning high resolution photo of a giant tortoise\",\"model\":\"stabilityai/stable-diffusion-xl-base-1.0\"}"
+    },
+    "response": {
+      "body": "{\"id\":\"905785921c3a036f-CDG\",\"model\":\"stabilityai/stable-diffusion-xl-base-1.0\",\"object\":\"list\",\"data\":[{\"timings\":{\"inference\":4431},\"index\":0,\"b64_json\":\"/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAQABAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDBFKKBS4rUyAUooxSgUDFFLQBTgKBCCnCgCnAUAIBTgKAKdigBMUuKXFKBQAgFOAoFOxQAmKXFKBSgUXATFLilxSii4CAUuKXFLilcYlLilxS4oATFLilxS4ouAlLS4pcUBYbilxS4pcUANxS4p2KMUANxS4p2KMUANxS4p2KM\"}]}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-origin": "*",
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "905785921c3a036f-CDG",
+        "connection": "keep-alive",
+        "content-encoding": "gzip",
+        "content-type": "application/json; charset=utf-8",
+        "etag": "W/\"1f7b3-ra97iJIUNCwj2P809d5jt1199ng\"",
+        "retry-after": "2",
+        "server": "cloudflare",
+        "strict-transport-security": "max-age=15552000; includeSubDomains",
+        "transfer-encoding": "chunked"
+      }
+    }
+  },
+  "7401383ad8975c4c17589264bfe308a458506ee70d5034318c3a93f3a21fcf6f": {
+    "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAQABAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDBFKKBS4rUyAUooxSgUDFFLQBTgKBCCnCgCnAUAIBTgKAKdigBMUuKXFKBQAgFOAoFOxQAmKXFKBSgUXATFLilxSii4CAUuKXFLilcYlLilxS4oATFLilxS4ouAlLS4pcUBYbilxS4pcUANxS4p2KMUANxS4p2KMUANxS4p2KM",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "content-type": "image/jpeg"
+      }
+    }
+  },
+  "c5044b473b3f8833f20875e9efcd93b965f04dcd4b0a04a460464f7abda64cac": {
+    "url": "https://fal.run/fal-ai/mochi-v1",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"seed\":176,\"prompt\":\"A running dog\"}"
+    },
+    "response": {
+      "body": "{\"video\":{\"url\":\"https://fal.media/files/rabbit/dukHPBkQTdV2ZFuylnDwY_output_1737465066.mp4\",\"content_type\":\"application/octet-stream\",\"file_name\":\"output_1737465066.mp4\",\"file_size\":1041071}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "strict-transport-security": "max-age=31536000; includeSubDomains"
+      }
+    }
+  },
+  "318d866b234e6bec7665ed63395f2ccba1342d71df214a74125a9b551abf57b8": {
+    "url": "https://fal.media/files/rabbit/dukHPBkQTdV2ZFuylnDwY_output_1737465066.mp4",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-headers": "*",
+        "access-control-allow-methods": "*",
+        "access-control-allow-origin": "*",
+        "access-control-max-age": "86400",
+        "cf-ray": "90578cdf0e34d400-CDG",
+        "connection": "keep-alive",
+        "content-type": "application/octet-stream",
+        "server": "cloudflare",
+        "vary": "Accept-Encoding"
+      }
+    }
   }
 }

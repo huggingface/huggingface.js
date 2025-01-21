@@ -114,7 +114,6 @@ async function vcr(
 	}
 
 	const hash = await hashRequest(url, init);
-	console.log(url, init, hash)
 
 	const { default: tapes } = await import(TAPES_FILE);
 
