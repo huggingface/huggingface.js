@@ -2,7 +2,7 @@ import { expect, it, describe, assert } from "vitest";
 
 import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
 
-import { automaticSpeechRecognition, chatCompletion, HfInference, textToImage } from "../src";
+import { chatCompletion, FAL_AI_SUPPORTED_MODEL_IDS, HfInference } from "../src";
 import "./vcr";
 import { readTestFile } from "./test-files";
 import { textToVideo } from "../src/tasks/cv/textToVideo";
@@ -774,27 +774,32 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Fal AI",
 		() => {
-			it("textToImage", async () => {
-				const res = await textToImage({
-					accessToken: env.HF_FAL_KEY,
-					model: "black-forest-labs/FLUX.1-schnell",
-					provider: "fal-ai",
-					inputs: "black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot",
-				});
-				expect(res).toBeInstanceOf(Blob);
-			});
+			const client = new HfInference(env.HF_FAL_KEY);
 
-			it("speechToText", async () => {
-				const res = await automaticSpeechRecognition({
-					accessToken: env.HF_FAL_KEY,
-					model: "openai/whisper-large-v3",
-					provider: "fal-ai",
-					data: new Blob([readTestFile("sample2.wav")], { type: "audio/x-wav" }),
+			for (const model of Object.keys(FAL_AI_SUPPORTED_MODEL_IDS["text-to-image"] ?? {})) {
+				it(`textToImage - ${model}`, async () => {
+					const res = await client.textToImage({
+						model,
+						provider: "fal-ai",
+						inputs:
+							"Extreme close-up of a single tiger eye, direct frontal view. Detailed iris and pupil. Sharp focus on eye texture and color. Natural lighting to capture authentic eye shine and depth.",
+					});
+					expect(res).toBeInstanceOf(Blob);
 				});
-				expect(res).toMatchObject({
-					text: " he has grave doubts whether sir frederick leighton's work is really greek after all and can discover in it but little of rocky ithaca",
+			}
+
+			for (const model of Object.keys(FAL_AI_SUPPORTED_MODEL_IDS["automatic-speech-recognition"] ?? {})) {
+				it(`automaticSpeechRecognition - ${model}`, async () => {
+					const res = await client.automaticSpeechRecognition({
+						model: model,
+						provider: "fal-ai",
+						data: new Blob([readTestFile("sample2.wav")], { type: "audio/x-wav" }),
+					});
+					expect(res).toMatchObject({
+						text: " he has grave doubts whether sir frederick leighton's work is really greek after all and can discover in it but little of rocky ithaca",
+					});
 				});
-			});
+			}
 
 			it("textToVideo - genmo/mochi-1-preview", async () => {
 				const res = await textToVideo({
