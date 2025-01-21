@@ -30,10 +30,7 @@ export async function automaticSpeechRecognition(
 
 const FAL_AI_SUPPORTED_BLOB_TYPES = ["audio/mpeg", "audio/mp4", "audio/wav", "audio/x-wav"];
 
-
-async function buildPayload(
-	args: AutomaticSpeechRecognitionArgs,
-): Promise<RequestArgs> {
+async function buildPayload(args: AutomaticSpeechRecognitionArgs): Promise<RequestArgs> {
 	if (args.provider === "fal-ai") {
 		const blob = "data" in args && args.data instanceof Blob ? args.data : "inputs" in args ? args.inputs : undefined;
 		const contentType = blob?.type;
@@ -52,8 +49,8 @@ async function buildPayload(
 		const base64audio = base64FromBytes(new Uint8Array(await blob.arrayBuffer()));
 		return {
 			...("data" in args ? omit(args, "data") : omit(args, "inputs")),
-			audio_url: `data:${contentType};base64,${base64audio}`
-		}
+			audio_url: `data:${contentType};base64,${base64audio}`,
+		};
 	} else {
 		return preparePayload(args);
 	}

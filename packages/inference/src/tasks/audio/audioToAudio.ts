@@ -4,12 +4,14 @@ import { request } from "../custom/request";
 import type { LegacyAudioInput } from "./utils";
 import { preparePayload } from "./utils";
 
-export type AudioToAudioArgs = BaseArgs & {
-	/**
-	 * Binary audio data
-	 */
-	inputs: Blob;
-} | LegacyAudioInput;
+export type AudioToAudioArgs =
+	| (BaseArgs & {
+			/**
+			 * Binary audio data
+			 */
+			inputs: Blob;
+	  })
+	| LegacyAudioInput;
 
 export interface AudioToAudioOutputElem {
 	/**
