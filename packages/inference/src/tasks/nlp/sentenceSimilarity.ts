@@ -30,7 +30,8 @@ export async function sentenceSimilarity(
 
 function prepareInput(args: SentenceSimilarityArgs) {
 	return {
-		...omit(args, "inputs"),
-		inputs: { ...args.inputs, source_sentence: args.inputs.sourceSentence },
+		...omit(args, ["inputs", "parameters"]),
+		inputs: { ...omit(args.inputs, "sourceSentence") },
+		parameters: { source_sentence: args.inputs.sourceSentence, ...args.parameters },
 	};
 }
