@@ -2,9 +2,10 @@ import { expect, it, describe, assert } from "vitest";
 
 import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
 
-import { chatCompletion, HfInference } from "../src";
+import { automaticSpeechRecognition, chatCompletion, HfInference, textToImage } from "../src";
 import "./vcr";
 import { readTestFile } from "./test-files";
+import { textToVideo } from "../src/tasks/cv/textToVideo";
 
 const TIMEOUT = 60000 * 3;
 const env = import.meta.env;
@@ -773,10 +774,9 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Fal AI",
 		() => {
-			const client = new HfInference(env.HF_FAL_KEY);
-
 			it("textToImage", async () => {
-				const res = await client.textToImage({
+				const res = await textToImage({
+					accessToken: env.HF_FAL_KEY,
 					model: "black-forest-labs/FLUX.1-schnell",
 					provider: "fal-ai",
 					inputs: "black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot",
@@ -785,7 +785,8 @@ describe.concurrent("HfInference", () => {
 			});
 
 			it("speechToText", async () => {
-				const res = await client.automaticSpeechRecognition({
+				const res = await automaticSpeechRecognition({
+					accessToken: env.HF_FAL_KEY,
 					model: "openai/whisper-large-v3",
 					provider: "fal-ai",
 					data: new Blob([readTestFile("sample2.wav")], { type: "audio/x-wav" }),
@@ -793,6 +794,20 @@ describe.concurrent("HfInference", () => {
 				expect(res).toMatchObject({
 					text: " he has grave doubts whether sir frederick leighton's work is really greek after all and can discover in it but little of rocky ithaca",
 				});
+			});
+
+			it("textToVideo", async () => {
+				const res = await textToVideo({
+					model: "genmo/mochi-1-preview",
+					inputs:
+						"A running dog",
+					parameters: {
+						seed: 176,
+					},
+					provider: "fal-ai",
+					accessToken: env.HF_FAL_KEY,
+				});
+				expect(res).toBeInstanceOf(Blob);
 			});
 		},
 		TIMEOUT

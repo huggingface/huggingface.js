@@ -4417,5 +4417,45 @@
         "content-type": "image/jpeg"
       }
     }
+  },
+  "a6b19a8094fe66f4851ebc649a3df322318b25b99637176107f850384618e1c6": {
+    "url": "https://fal.run/fal-ai/mochi-v1",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"parameters\":{\"seed\":176},\"prompt\":\"A running dog\"}"
+    },
+    "response": {
+      "body": "{\"video\":{\"url\":\"https://fal.media/files/zebra/hag_CGmcxZTwm4b6RS2Ld_output_1737457748.mp4\",\"content_type\":\"application/octet-stream\",\"file_name\":\"output_1737457748.mp4\",\"file_size\":874855}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "strict-transport-security": "max-age=31536000; includeSubDomains"
+      }
+    }
+  },
+  "7419f8d5dd1d1975a75b0e91a6871b8ae894b1a4ea64e1fb247ed0b1791d6e85": {
+    "url": "https://fal.media/files/zebra/hag_CGmcxZTwm4b6RS2Ld_output_1737457748.mp4",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-headers": "*",
+        "access-control-allow-methods": "*",
+        "access-control-allow-origin": "*",
+        "access-control-max-age": "86400",
+        "cf-ray": "9056da183f7cf196-CDG",
+        "connection": "keep-alive",
+        "content-type": "application/octet-stream",
+        "server": "cloudflare",
+        "vary": "Accept-Encoding"
+      }
+    }
   }
 }
