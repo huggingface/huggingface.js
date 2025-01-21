@@ -84,7 +84,7 @@ export interface BaseArgs {
 }
 
 export type RequestArgs = BaseArgs &
-	({ data: Blob | ArrayBuffer } | { inputs: unknown } | ChatCompletionInput) & {
+	({ data: Blob | ArrayBuffer } | { inputs: unknown } | ChatCompletionInput | { audio_url: string }) & {
 		parameters?: Record<string, unknown>;
 		accessToken?: string;
 	};
