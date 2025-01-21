@@ -1,3 +1,5 @@
+import { automaticSpeechRecognition } from "./audio/automaticSpeechRecognition";
+
 // Custom tasks with arbitrary inputs and outputs
 export * from "./custom/request";
 export * from "./custom/streamingRequest";
@@ -40,3 +42,5 @@ export * from "./multimodal/visualQuestionAnswering";
 // Tabular tasks
 export * from "./tabular/tabularRegression";
 export * from "./tabular/tabularClassification";
+
+export const speechToText = automaticSpeechRecognition;

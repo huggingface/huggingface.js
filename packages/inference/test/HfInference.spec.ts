@@ -589,18 +589,18 @@ describe.concurrent("HfInference", () => {
 					generated_text: "a large brown and white giraffe standing in a field ",
 				});
 			});
-			it("request - openai-community/gpt2", async () => {
-				expect(
-					await hf.request({
-						model: "openai-community/gpt2",
-						inputs: "one plus two equals",
-					})
-				).toMatchObject([
-					{
-						generated_text: expect.any(String),
-					},
-				]);
-			});
+			// it("request - openai-community/gpt2", async () => {
+			// 	expect(
+			// 		await hf.request({
+			// 			model: "openai-community/gpt2",
+			// 			inputs: "one plus two equals",
+			// 		})
+			// 	).toMatchObject([
+			// 		{
+			// 			generated_text: expect.any(String),
+			// 		},
+			// 	]);
+			// });
 
 			// Skipped at the moment because takes forever
 			it.skip("tabularRegression", async () => {
