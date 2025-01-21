@@ -775,12 +775,8 @@ describe.concurrent("HfInference", () => {
 		() => {
 			const client = new HfInference(env.HF_FAL_KEY);
 
-			const textToImageModels = FAL_AI_SUPPORTED_MODEL_IDS["text-to-image"]
-				? Object.keys(FAL_AI_SUPPORTED_MODEL_IDS["text-to-image"])
-				: [];
-
-			it("textToImage", async () => {
-				for (const model of textToImageModels) {
+			for (const model of Object.keys(FAL_AI_SUPPORTED_MODEL_IDS["text-to-image"] ?? {})) {
+				it(`textToImage - ${model}`, async () => {
 					const res = await client.textToImage({
 						model,
 						provider: "fal-ai",
@@ -788,19 +784,21 @@ describe.concurrent("HfInference", () => {
 							"Extreme close-up of a single tiger eye, direct frontal view. Detailed iris and pupil. Sharp focus on eye texture and color. Natural lighting to capture authentic eye shine and depth.",
 					});
 					expect(res).toBeInstanceOf(Blob);
-				}
-			});
+				});
+			}
 
-			it("speechToText", async () => {
-				const res = await client.automaticSpeechRecognition({
-					model: "openai/whisper-large-v3",
-					provider: "fal-ai",
-					data: new Blob([readTestFile("sample2.wav")], { type: "audio/x-wav" }),
+			for (const model of Object.keys(FAL_AI_SUPPORTED_MODEL_IDS["automatic-speech-recognition"] ?? {})) {
+				it(`automaticSpeechRecognition - ${model}`, async () => {
+					const res = await client.automaticSpeechRecognition({
+						model: model,
+						provider: "fal-ai",
+						data: new Blob([readTestFile("sample2.wav")], { type: "audio/x-wav" }),
+					});
+					expect(res).toMatchObject({
+						text: " he has grave doubts whether sir frederick leighton's work is really greek after all and can discover in it but little of rocky ithaca",
+					});
 				});
-				expect(res).toMatchObject({
-					text: " he has grave doubts whether sir frederick leighton's work is really greek after all and can discover in it but little of rocky ithaca",
-				});
-			});
+			}
 		},
 		TIMEOUT
 	);
