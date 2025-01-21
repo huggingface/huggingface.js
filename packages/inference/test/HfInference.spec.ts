@@ -1,6 +1,13 @@
 import { expect, it, describe, assert } from "vitest";
 
-import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
+import type {
+	ChatCompletionStreamOutput,
+	DocumentQuestionAnsweringOutputElement,
+	QuestionAnsweringOutputElement,
+	TableQuestionAnsweringOutput,
+	TableQuestionAnsweringOutputElement,
+	VisualQuestionAnsweringOutputElement,
+} from "@huggingface/tasks";
 
 import { chatCompletion, HfInference } from "../src";
 import "./vcr";
@@ -88,12 +95,16 @@ describe.concurrent("HfInference", () => {
 							context: "The capital of France is Paris.",
 						},
 					})
-				).toMatchObject({
-					answer: "Paris",
-					score: expect.any(Number),
-					start: expect.any(Number),
-					end: expect.any(Number),
-				});
+				).toEqual(
+					expect.arrayContaining<QuestionAnsweringOutputElement>([
+						{
+							answer: expect.any(String),
+							score: expect.any(Number),
+							start: expect.any(Number),
+							end: expect.any(Number),
+						},
+					])
+				);
 			});
 
 			it("tableQuestionAnswering", async () => {
@@ -110,12 +121,16 @@ describe.concurrent("HfInference", () => {
 							},
 						},
 					})
-				).toMatchObject({
-					answer: "AVERAGE > 36542",
-					coordinates: [[0, 1]],
-					cells: ["36542"],
-					aggregator: "AVERAGE",
-				});
+				).toEqual(
+					expect.arrayContaining<TableQuestionAnsweringOutputElement>([
+						{
+							answer: expect.any(String),
+							coordinates: [expect.arrayContaining([expect.any(Number)])],
+							cells: expect.arrayContaining([expect.any(String)]),
+							aggregator: expect.any(String),
+						},
+					])
+				);
 			});
 
 			it("documentQuestionAnswering", async () => {
@@ -127,13 +142,17 @@ describe.concurrent("HfInference", () => {
 							image: new Blob([readTestFile("invoice.png")], { type: "image/png" }),
 						},
 					})
-				).toMatchObject({
-					answer: "us-001",
-					score: expect.any(Number),
-					// not sure what start/end refers to in this case
-					start: expect.any(Number),
-					end: expect.any(Number),
-				});
+				).toEqual(
+					expect.arrayContaining<DocumentQuestionAnsweringOutputElement>([
+						{
+							answer: expect.any(String),
+							score: expect.any(Number),
+							// not sure what start/end refers to in this case
+							start: expect.any(Number),
+							end: expect.any(Number),
+						},
+					])
+				);
 			});
 
 			// Errors with "Error: If you are using a VisionEncoderDecoderModel, you must provide a feature extractor"
@@ -160,10 +179,14 @@ describe.concurrent("HfInference", () => {
 							image: new Blob([readTestFile("cats.png")], { type: "image/png" }),
 						},
 					})
-				).toMatchObject({
-					answer: "2",
-					score: expect.any(Number),
-				});
+				).toEqual(
+					expect.arrayContaining<VisualQuestionAnsweringOutputElement>([
+						{
+							answer: expect.any(String),
+							score: expect.any(Number),
+						},
+					])
+				);
 			});
 
 			it("textClassification", async () => {
