@@ -20,7 +20,10 @@ let tasks: Record<string, { models: { id: string }[] }> | null = null;
  * Helper that prepares request arguments
  */
 export async function makeRequestOptions(
-	args: RequestArgs,
+	args: RequestArgs & {
+		data?: Blob | ArrayBuffer;
+		stream?: boolean;
+	},
 	options?: Options & {
 		/** When a model can be used for multiple tasks, and we want to run a non-default task */
 		forceTask?: string | InferenceTask;
@@ -38,6 +41,9 @@ export async function makeRequestOptions(
 
 	if (endpointUrl && provider !== "hf-inference") {
 		throw new Error(`Cannot use endpointUrl with a third-party provider.`);
+	}
+	if (forceTask && provider !== "hf-inference") {
+		throw new Error(`Cannot use forceTask with a third-party provider.`);
 	}
 	if (maybeModel && isUrl(maybeModel)) {
 		throw new Error(`Model URLs are no longer supported. Use endpointUrl instead.`);
@@ -83,7 +89,7 @@ export async function makeRequestOptions(
 			provider === "fal-ai" && authMethod === "provider-key" ? `Key ${accessToken}` : `Bearer ${accessToken}`;
 	}
 
-	const binary = "data" in args && !!args.data && args.data instanceof Blob;
+	const binary = "data" in args && !!args.data;
 
 	if (!binary) {
 		headers["Content-Type"] = "application/json";
@@ -127,13 +133,12 @@ export async function makeRequestOptions(
 	const info: RequestInit = {
 		headers,
 		method: "POST",
-		body:
-			"data" in args && args.data instanceof Blob
-				? args.data
-				: JSON.stringify({
-						...otherArgs,
-						...(chatCompletion || provider === "together" ? { model } : undefined),
-				  }),
+		body: binary
+			? args.data
+			: JSON.stringify({
+					...otherArgs,
+					...(chatCompletion || provider === "together" ? { model } : undefined),
+			  }),
 		...(credentials ? { credentials } : undefined),
 		signal: options?.signal,
 	};

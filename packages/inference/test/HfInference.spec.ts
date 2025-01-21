@@ -4,7 +4,6 @@ import type {
 	ChatCompletionStreamOutput,
 	DocumentQuestionAnsweringOutputElement,
 	QuestionAnsweringOutputElement,
-	TableQuestionAnsweringOutput,
 	TableQuestionAnsweringOutputElement,
 	VisualQuestionAnsweringOutputElement,
 } from "@huggingface/tasks";
