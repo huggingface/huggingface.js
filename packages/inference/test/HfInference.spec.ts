@@ -799,8 +799,7 @@ describe.concurrent("HfInference", () => {
 			it("textToVideo - genmo/mochi-1-preview", async () => {
 				const res = await textToVideo({
 					model: "genmo/mochi-1-preview",
-					inputs:
-						"A running dog",
+					inputs: "A running dog",
 					parameters: {
 						seed: 176,
 					},
@@ -813,13 +812,12 @@ describe.concurrent("HfInference", () => {
 			it("textToVideo - HunyuanVideo", async () => {
 				const res = await textToVideo({
 					model: "genmo/mochi-1-preview",
-					inputs:
-						"A running dog",
+					inputs: "A running dog",
 					parameters: {
 						seed: 176,
 						num_inference_steps: 2,
 						num_frames: 85,
-						resolution: "480p"
+						resolution: "480p",
 					},
 					provider: "fal-ai",
 					accessToken: env.HF_FAL_KEY,
