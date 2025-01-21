@@ -796,13 +796,30 @@ describe.concurrent("HfInference", () => {
 				});
 			});
 
-			it("textToVideo", async () => {
+			it("textToVideo - genmo/mochi-1-preview", async () => {
 				const res = await textToVideo({
 					model: "genmo/mochi-1-preview",
 					inputs:
 						"A running dog",
 					parameters: {
 						seed: 176,
+					},
+					provider: "fal-ai",
+					accessToken: env.HF_FAL_KEY,
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToVideo - HunyuanVideo", async () => {
+				const res = await textToVideo({
+					model: "genmo/mochi-1-preview",
+					inputs:
+						"A running dog",
+					parameters: {
+						seed: 176,
+						num_inference_steps: 2,
+						num_frames: 85,
+						resolution: "480p"
 					},
 					provider: "fal-ai",
 					accessToken: env.HF_FAL_KEY,

@@ -16,7 +16,7 @@ interface FalAiOutput {
 }
 
 export async function textToVideo(args: TextToVideoArgs, options?: Options): Promise<TextToVideoOutput> {
-	const payload = args.provider === "fal-ai" ? { ...omit(args, "inputs"), prompt: args.inputs } : args;
+	const payload = args.provider === "fal-ai" ? { ...omit(args, ["inputs", "parameters"]), prompt: args.inputs, ...args.parameters } : args;
 	const res = await request<FalAiOutput>(payload, {
 		...options,
 		taskHint: "text-to-video",

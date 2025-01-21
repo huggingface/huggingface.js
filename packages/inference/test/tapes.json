@@ -4457,5 +4457,85 @@
         "vary": "Accept-Encoding"
       }
     }
+  },
+  "5e581059d2855d93ea50aa8b842dcc34bc0a4844fc54b4716da42dfad1b4b3a0": {
+    "url": "https://fal.run/fal-ai/mochi-v1",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"prompt\":\"A running dog\",\"seed\":176,\"num_inference_steps\":2,\"num_frames\":85,\"resolution\":\"480p\"}"
+    },
+    "response": {
+      "body": "{\"video\":{\"url\":\"https://fal.media/files/penguin/otohzMrhAzJqJihM1SZbk_output_1737461997.mp4\",\"content_type\":\"application/octet-stream\",\"file_name\":\"output_1737461997.mp4\",\"file_size\":938434}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "strict-transport-security": "max-age=31536000; includeSubDomains"
+      }
+    }
+  },
+  "e556343a30fe1c0cb35c68f38deefc4c0e6e5494418936ed97b89196c52d0069": {
+    "url": "https://fal.media/files/penguin/otohzMrhAzJqJihM1SZbk_output_1737461997.mp4",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-headers": "*",
+        "access-control-allow-methods": "*",
+        "access-control-allow-origin": "*",
+        "access-control-max-age": "86400",
+        "cf-ray": "905741eb9d0e0350-CDG",
+        "connection": "keep-alive",
+        "content-type": "application/octet-stream",
+        "server": "cloudflare",
+        "vary": "Accept-Encoding"
+      }
+    }
+  },
+  "e77a83e0190b4506c10ff4a9ca01d0514f3fa6e9bce63c016209ee122abaf9e7": {
+    "url": "https://fal.run/fal-ai/mochi-v1",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"prompt\":\"A running dog\",\"seed\":176}"
+    },
+    "response": {
+      "body": "{\"video\":{\"url\":\"https://fal.media/files/kangaroo/03FLlitj0sw_SksFU5Ws1_output_1737462178.mp4\",\"content_type\":\"application/octet-stream\",\"file_name\":\"output_1737462178.mp4\",\"file_size\":1097757}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "strict-transport-security": "max-age=31536000; includeSubDomains"
+      }
+    }
+  },
+  "13f836971b1fa11dcb7ba358e46ea0bfd874762dadaff826bab503faa8b81f6b": {
+    "url": "https://fal.media/files/kangaroo/03FLlitj0sw_SksFU5Ws1_output_1737462178.mp4",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-headers": "*",
+        "access-control-allow-methods": "*",
+        "access-control-allow-origin": "*",
+        "access-control-max-age": "86400",
+        "cf-ray": "905746692bf3d652-CDG",
+        "connection": "keep-alive",
+        "content-type": "application/octet-stream",
+        "server": "cloudflare",
+        "vary": "Accept-Encoding"
+      }
+    }
   }
 }
