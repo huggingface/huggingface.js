@@ -96,23 +96,26 @@ retriever = BM25HF.load_from_hub("${model.id}")`,
 ];
 
 export const cxr_foundation = (model: ModelData): string[] => [
-	`# Install library
-!git clone https://github.com/Google-Health/cxr-foundation.git
-import tensorflow as tf, sys
+	`!git clone https://github.com/Google-Health/cxr-foundation.git
+import tensorflow as tf, sys, requests
 sys.path.append('cxr-foundation/python/')
 
 # Install dependencies
 major_version = tf.__version__.rsplit(".", 1)[0]
 !pip install tensorflow-text=={major_version} pypng && pip install --no-deps pydicom hcls_imaging_ml_toolkit retrying
 
-# Run inference
+# Load image (Stillwaterising, CC0, via Wikimedia Commons)
 from PIL import Image
+from io import BytesIO
+image_url = "https://upload.wikimedia.org/wikipedia/commons/c/c8/Chest_Xray_PA_3-8-2010.png"
+response = requests.get(image_url, headers={'User-Agent': 'Demo'}, stream=True)
+response.raw.decode_content = True # Ensure correct decoding
+img = Image.open(BytesIO(response.content)).convert('L') # Convert to grayscale
+
+# Run inference
 from clientside.clients import make_hugging_face_client
-
 cxr_client = make_hugging_face_client('cxr_model')
-!wget -nc -q https://upload.wikimedia.org/wikipedia/commons/c/c8/Chest_Xray_PA_3-8-2010.png
-
-print(cxr_client.get_image_embeddings_from_images([Image.open("Chest_Xray_PA_3-8-2010.png")]))`,
+print(cxr_client.get_image_embeddings_from_images([img]))`,
 ];
 
 export const depth_anything_v2 = (model: ModelData): string[] => {
@@ -189,34 +192,25 @@ focallength_px = prediction["focallength_px"]`;
 };
 
 export const derm_foundation = (model: ModelData): string[] => [
-	`from PIL import Image
-from io import BytesIO
-from huggingface_hub import from_pretrained_keras
-import tensorflow as tf
-import requests
+	`from huggingface_hub import from_pretrained_keras
+import tensorflow as tf, requests
 
-response = requests.get("https://storage.googleapis.com/dx-scin-public-data/dataset/images/3445096909671059178.png")
-# Load the image into a PIL Image object
-image = Image.open(response.raw)
-
-buf = BytesIO()
-image.convert("RGB").save(buf, "PNG")
-image_bytes = buf.getvalue()
-# Format input
+# Load and format input
+IMAGE_URL = "https://storage.googleapis.com/dx-scin-public-data/dataset/images/3445096909671059178.png"
 input_tensor = tf.train.Example(
     features=tf.train.Features(
         feature={
             "image/encoded": tf.train.Feature(
-                bytes_list=tf.train.BytesList(value=[image_bytes])
+                bytes_list=tf.train.BytesList(value=[requests.get(IMAGE_URL, stream=True).content])
             )
         }
     )
 ).SerializeToString()
 
+# Load model and run inference
 loaded_model = from_pretrained_keras("google/derm-foundation")
-
 infer = loaded_model.signatures["serving_default"]
-output = infer(inputs=tf.constant([input_tensor]))`,
+print(infer(inputs=tf.constant([input_tensor])))`,
 ]
 
 const diffusersDefaultPrompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
