@@ -3,9 +3,10 @@ import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { base64FromBytes } from "../../utils/base64FromBytes";
 import { request } from "../custom/request";
-import { omit } from "../../utils/omit";
+import type { LegacyAudioInput } from "./utils";
+import { preparePayload } from "./utils";
 
-export type AutomaticSpeechRecognitionArgs = BaseArgs & AutomaticSpeechRecognitionInput;
+export type AutomaticSpeechRecognitionArgs = BaseArgs & (AutomaticSpeechRecognitionInput | LegacyAudioInput);
 /**
  * This task reads some audio input and outputs the said words within the audio files.
  * Recommended model (english language): facebook/wav2vec2-large-960h-lv60-self
@@ -14,6 +15,7 @@ export async function automaticSpeechRecognition(
 	args: AutomaticSpeechRecognitionArgs,
 	options?: Options
 ): Promise<AutomaticSpeechRecognitionOutput> {
+	const payload = preparePayload(args);
 	if (args.provider === "fal-ai") {
 		const contentType = args.inputs.type;
 		if (!FAL_AI_SUPPORTED_BLOB_TYPES.includes(contentType)) {
@@ -27,10 +29,6 @@ export async function automaticSpeechRecognition(
 		(args as AutomaticSpeechRecognitionArgs & { audio_url: string }).audio_url =
 			`data:${contentType};base64,${base64audio}`;
 	}
-	const payload = {
-		...omit(args, "inputs"),
-		...(args.provider !== "fal-ai" ? { data: args.inputs } : undefined),
-	};
 	const res = await request<AutomaticSpeechRecognitionOutput>(payload as AutomaticSpeechRecognitionArgs, {
 		...options,
 		taskHint: "automatic-speech-recognition",

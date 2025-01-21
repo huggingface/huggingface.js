@@ -1,14 +1,15 @@
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
-import { omit } from "../../utils/omit";
 import { request } from "../custom/request";
+import type { LegacyAudioInput } from "./utils";
+import { preparePayload } from "./utils";
 
 export type AudioToAudioArgs = BaseArgs & {
 	/**
 	 * Binary audio data
 	 */
 	inputs: Blob;
-};
+} | LegacyAudioInput;
 
 export interface AudioToAudioOutputElem {
 	/**
@@ -35,10 +36,7 @@ interface LegacyOutput {
  * Example model: speechbrain/sepformer-wham does audio source separation.
  */
 export async function audioToAudio(args: AudioToAudioArgs, options?: Options): Promise<AudioToAudioOutput> {
-	const payload = {
-		...omit(args, "inputs"),
-		data: args.inputs,
-	};
+	const payload = preparePayload(args);
 	const res = await request<AudioToAudioOutput | LegacyOutput[]>(payload, {
 		...options,
 		taskHint: "audio-to-audio",

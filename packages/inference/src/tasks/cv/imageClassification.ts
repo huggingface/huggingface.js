@@ -2,9 +2,9 @@ import type { ImageClassificationInput, ImageClassificationOutput } from "@huggi
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
-import { omit } from "../../utils/omit";
+import { preparePayload, type LegacyImageInput } from "./utils";
 
-export type ImageClassificationArgs = BaseArgs & ImageClassificationInput;
+export type ImageClassificationArgs = BaseArgs & (ImageClassificationInput | LegacyImageInput);
 
 /**
  * This task reads some image input and outputs the likelihood of classes.
@@ -14,10 +14,7 @@ export async function imageClassification(
 	args: ImageClassificationArgs,
 	options?: Options
 ): Promise<ImageClassificationOutput> {
-	const payload = {
-		...omit(args, "inputs"),
-		data: args.inputs,
-	};
+	const payload = preparePayload(args);
 	const res = await request<ImageClassificationOutput>(payload, {
 		...options,
 		taskHint: "image-classification",

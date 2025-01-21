@@ -2,19 +2,16 @@ import { request } from "../custom/request";
 import type { BaseArgs, Options } from "../../types";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { ObjectDetectionInput, ObjectDetectionOutput } from "@huggingface/tasks";
-import { omit } from "../../utils/omit";
+import { preparePayload, type LegacyImageInput } from "./utils";
 
-export type ObjectDetectionArgs = BaseArgs & ObjectDetectionInput;
+export type ObjectDetectionArgs = BaseArgs & (ObjectDetectionInput | LegacyImageInput);
 
 /**
  * This task reads some image input and outputs the likelihood of classes & bounding boxes of detected objects.
  * Recommended model: facebook/detr-resnet-50
  */
 export async function objectDetection(args: ObjectDetectionArgs, options?: Options): Promise<ObjectDetectionOutput> {
-	const payload = {
-		...omit(args, "inputs"),
-		data: args.inputs,
-	};
+	const payload = preparePayload(args);
 	const res = await request<ObjectDetectionOutput>(payload, {
 		...options,
 		taskHint: "object-detection",

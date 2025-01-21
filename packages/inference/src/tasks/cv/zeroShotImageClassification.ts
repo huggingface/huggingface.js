@@ -5,7 +5,38 @@ import type { RequestArgs } from "../../types";
 import { base64FromBytes } from "../../utils/base64FromBytes";
 import type { ZeroShotImageClassificationInput, ZeroShotImageClassificationOutput } from "@huggingface/tasks";
 
-export type ZeroShotImageClassificationArgs = BaseArgs & ZeroShotImageClassificationInput;
+/**
+ * @deprecated
+ */
+interface LegacyZeroShotImageClassificationInput {
+	inputs: { image: Blob | ArrayBuffer }
+}
+
+export type ZeroShotImageClassificationArgs = BaseArgs & (ZeroShotImageClassificationInput | LegacyZeroShotImageClassificationInput);
+
+async function preparePayload(args: ZeroShotImageClassificationArgs): Promise<RequestArgs> {
+	if (args.inputs instanceof Blob) {
+		return {
+			...args,
+			inputs: {
+				image: base64FromBytes(
+					new Uint8Array(await args.inputs.arrayBuffer())
+				)
+			}
+		}
+	} else {
+		return {
+			...args,
+			inputs: {
+				image: base64FromBytes(
+					new Uint8Array(
+						args.inputs.image instanceof ArrayBuffer ? args.inputs.image : await args.inputs.image.arrayBuffer()
+					)
+				)
+			},
+		}
+	}
+}
 
 /**
  * Classify an image to specified classes.
@@ -15,14 +46,8 @@ export async function zeroShotImageClassification(
 	args: ZeroShotImageClassificationArgs,
 	options?: Options
 ): Promise<ZeroShotImageClassificationOutput> {
-	const reqArgs: RequestArgs = {
-		...args,
-		inputs: {
-			image: base64FromBytes(new Uint8Array(await args.inputs.arrayBuffer())),
-		},
-	} as RequestArgs;
-
-	const res = await request<ZeroShotImageClassificationOutput>(reqArgs, {
+	const payload = await preparePayload(args)
+	const res = await request<ZeroShotImageClassificationOutput>(payload, {
 		...options,
 		taskHint: "zero-shot-image-classification",
 	});

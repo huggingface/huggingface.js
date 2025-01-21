@@ -2,17 +2,15 @@ import type { ImageToTextInput, ImageToTextOutput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
-import { omit } from "../../utils/omit";
+import type { LegacyImageInput } from "./utils";
+import { preparePayload } from "./utils";
 
-export type ImageToTextArgs = BaseArgs & ImageToTextInput;
+export type ImageToTextArgs = BaseArgs & (ImageToTextInput | LegacyImageInput);
 /**
  * This task reads some image input and outputs the text caption.
  */
 export async function imageToText(args: ImageToTextArgs, options?: Options): Promise<ImageToTextOutput> {
-	const payload = {
-		...omit(args, "inputs"),
-		data: args.inputs,
-	};
+	const payload = preparePayload(args);
 	const res = (
 		await request<[ImageToTextOutput]>(payload, {
 			...options,

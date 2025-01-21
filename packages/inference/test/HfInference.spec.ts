@@ -1,39 +1,8 @@
 import { expect, it, describe, assert } from "vitest";
 
-import type { ChatCompletionStreamOutput, VisualQuestionAnsweringInput } from "@huggingface/tasks";
+import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
 
-import {
-	audioClassification,
-	audioToAudio,
-	automaticSpeechRecognition,
-	chatCompletion,
-	chatCompletionStream,
-	documentQuestionAnswering,
-	featureExtraction,
-	fillMask,
-	HfInference,
-	imageClassification,
-	imageToImage,
-	imageToText,
-	objectDetection,
-	questionAnswering,
-	request,
-	sentenceSimilarity,
-	summarization,
-	tableQuestionAnswering,
-	tabularClassification,
-	tabularRegression,
-	textClassification,
-	textGeneration,
-	textGenerationStream,
-	textToImage,
-	textToSpeech,
-	tokenClassification,
-	translation,
-	visualQuestionAnswering,
-	zeroShotClassification,
-	zeroShotImageClassification,
-} from "../src";
+import { chatCompletion, HfInference } from "../src";
 import "./vcr";
 import { readTestFile } from "./test-files";
 
@@ -50,22 +19,21 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"HF Inference",
 		() => {
+			const hf = new HfInference(env.HF_TOKEN);
 			it("throws error if model does not exist", () => {
 				expect(
-					fillMask({
+					hf.fillMask({
 						model: "this-model-does-not-exist-123",
 						inputs: "[MASK] world!",
-						accessToken: env.HF_TOKEN,
 					})
 				).rejects.toThrowError("Model this-model-does-not-exist-123 does not exist");
 			});
 
 			it("fillMask", async () => {
 				expect(
-					await fillMask({
+					await hf.fillMask({
 						model: "bert-base-uncased",
 						inputs: "[MASK] world!",
-						accessToken: env.HF_TOKEN,
 					})
 				).toEqual(
 					expect.arrayContaining([
@@ -81,9 +49,8 @@ describe.concurrent("HfInference", () => {
 
 			it("works without model", async () => {
 				expect(
-					await fillMask({
+					await hf.fillMask({
 						inputs: "[MASK] world!",
-						accessToken: env.HF_TOKEN,
 					})
 				).toEqual(
 					expect.arrayContaining([
@@ -99,14 +66,13 @@ describe.concurrent("HfInference", () => {
 
 			it("summarization", async () => {
 				expect(
-					await summarization({
+					await hf.summarization({
 						model: "google/pegasus-xsum",
 						inputs:
 							"The tower is 324 metres (1,063 ft) tall, about the same height as an 81-storey building, and the tallest structure in Paris. Its base is square, measuring 125 metres (410 ft) on each side. During its construction, the Eiffel Tower surpassed the Washington Monument to become the tallest man-made structure in the world, a title it held for 41 years until the Chrysler Building in New York City was finished in 1930.",
 						parameters: {
 							max_length: 100,
 						},
-						accessToken: env.HF_TOKEN,
 					})
 				).toEqual({
 					summary_text: "The Eiffel Tower is one of the most famous buildings in the world.",
@@ -114,30 +80,28 @@ describe.concurrent("HfInference", () => {
 			});
 
 			it("questionAnswering", async () => {
-				const res = await questionAnswering({
-					model: "deepset/roberta-base-squad2",
-					inputs: {
-						question: "What is the capital of France?",
-						context: "The capital of France is Paris.",
-					},
-					accessToken: env.HF_TOKEN,
+				expect(
+					await hf.questionAnswering({
+						model: "deepset/roberta-base-squad2",
+						inputs: {
+							question: "What is the capital of France?",
+							context: "The capital of France is Paris.",
+						},
+					})
+				).toMatchObject({
+					answer: "Paris",
+					score: expect.any(Number),
+					start: expect.any(Number),
+					end: expect.any(Number),
 				});
-				expect(res).toMatchObject([
-					{
-						answer: "Paris",
-						score: expect.any(Number),
-						start: expect.any(Number),
-						end: expect.any(Number),
-					},
-				]);
 			});
 
 			it("tableQuestionAnswering", async () => {
 				expect(
-					await tableQuestionAnswering({
+					await hf.tableQuestionAnswering({
 						model: "google/tapas-base-finetuned-wtq",
 						inputs: {
-							question: "How many stars does the transformers repository have?",
+							query: "How many stars does the transformers repository have?",
 							table: {
 								Repository: ["Transformers", "Datasets", "Tokenizers"],
 								Stars: ["36542", "4512", "3934"],
@@ -145,46 +109,42 @@ describe.concurrent("HfInference", () => {
 								"Programming language": ["Python", "Python", "Rust, Python and NodeJS"],
 							},
 						},
-						accessToken: env.HF_TOKEN,
 					})
-				).toMatchObject([
-					{
-						answer: "AVERAGE > 36542",
-						coordinates: [[0, 1]],
-						cells: ["36542"],
-						aggregator: "AVERAGE",
-					},
-				]);
+				).toMatchObject({
+					answer: "AVERAGE > 36542",
+					coordinates: [[0, 1]],
+					cells: ["36542"],
+					aggregator: "AVERAGE",
+				});
 			});
 
 			it("documentQuestionAnswering", async () => {
-				const res = await documentQuestionAnswering({
-					model: "impira/layoutlm-document-qa",
-					inputs: {
-						question: "Invoice number?",
-						image: new Blob([readTestFile("invoice.png")], { type: "image/png" }),
-					},
-					accessToken: env.HF_TOKEN,
+				expect(
+					await hf.documentQuestionAnswering({
+						model: "impira/layoutlm-document-qa",
+						inputs: {
+							question: "Invoice number?",
+							image: new Blob([readTestFile("invoice.png")], { type: "image/png" }),
+						},
+					})
+				).toMatchObject({
+					answer: "us-001",
+					score: expect.any(Number),
+					// not sure what start/end refers to in this case
+					start: expect.any(Number),
+					end: expect.any(Number),
 				});
-				expect(res).toBeInstanceOf(Array);
-				for (const elem of res) {
-					expect(elem).toMatchObject({
-						answer: expect.any(String),
-						score: expect.any(Number),
-					});
-				}
 			});
 
 			// Errors with "Error: If you are using a VisionEncoderDecoderModel, you must provide a feature extractor"
 			it.skip("documentQuestionAnswering with non-array output", async () => {
 				expect(
-					await documentQuestionAnswering({
+					await hf.documentQuestionAnswering({
 						model: "naver-clova-ix/donut-base-finetuned-docvqa",
 						inputs: {
 							question: "Invoice number?",
 							image: new Blob([readTestFile("invoice.png")], { type: "image/png" }),
 						},
-						accessToken: env.HF_TOKEN,
 					})
 				).toMatchObject({
 					answer: "us-001",
@@ -192,29 +152,25 @@ describe.concurrent("HfInference", () => {
 			});
 
 			it("visualQuestionAnswering", async () => {
-				const res = await visualQuestionAnswering({
-					model: "dandelin/vilt-b32-finetuned-vqa",
-					inputs: {
-						question: "How many cats are lying down?",
-						image: new Blob([readTestFile("cats.png")], { type: "image/png" }),
-					},
-					accessToken: env.HF_TOKEN,
-				} satisfies VisualQuestionAnsweringInput);
-				expect(res).toBeInstanceOf(Array);
-				for (const elem of res) {
-					expect(elem).toMatchObject({
-						answer: expect.any(String),
-						score: expect.any(Number),
-					});
-				}
+				expect(
+					await hf.visualQuestionAnswering({
+						model: "dandelin/vilt-b32-finetuned-vqa",
+						inputs: {
+							question: "How many cats are lying down?",
+							image: new Blob([readTestFile("cats.png")], { type: "image/png" }),
+						},
+					})
+				).toMatchObject({
+					answer: "2",
+					score: expect.any(Number),
+				});
 			});
 
 			it("textClassification", async () => {
 				expect(
-					await textClassification({
+					await hf.textClassification({
 						model: "distilbert-base-uncased-finetuned-sst-2-english",
 						inputs: "I like you. I love you.",
-						accessToken: env.HF_TOKEN,
 					})
 				).toEqual(
 					expect.arrayContaining([
@@ -228,8 +184,7 @@ describe.concurrent("HfInference", () => {
 
 			it("textGeneration - gpt2", async () => {
 				expect(
-					await textGeneration({
-						accessToken: env.HF_TOKEN,
+					await hf.textGeneration({
 						model: "gpt2",
 						inputs: "The answer to the universe is",
 					})
@@ -240,8 +195,7 @@ describe.concurrent("HfInference", () => {
 
 			it("textGeneration - openai-community/gpt2", async () => {
 				expect(
-					await textGeneration({
-						accessToken: env.HF_TOKEN,
+					await hf.textGeneration({
 						model: "openai-community/gpt2",
 						inputs: "The answer to the universe is",
 					})
@@ -251,8 +205,7 @@ describe.concurrent("HfInference", () => {
 			});
 
 			it("textGenerationStream - meta-llama/Llama-3.2-3B", async () => {
-				const response = textGenerationStream({
-					accessToken: env.HF_TOKEN,
+				const response = hf.textGenerationStream({
 					model: "meta-llama/Llama-3.2-3B",
 					inputs: "Please answer the following question: complete one two and ____.",
 					parameters: {
@@ -279,8 +232,7 @@ describe.concurrent("HfInference", () => {
 			});
 
 			it("textGenerationStream - catch error", async () => {
-				const response = textGenerationStream({
-					accessToken: env.HF_TOKEN,
+				const response = hf.textGenerationStream({
 					model: "meta-llama/Llama-3.2-3B",
 					inputs: "Write a short story about a robot that becomes sentient and takes over the world.",
 					parameters: {
@@ -295,9 +247,8 @@ describe.concurrent("HfInference", () => {
 
 			it.skip("textGenerationStream - Abort", async () => {
 				const controller = new AbortController();
-				const response = textGenerationStream(
+				const response = hf.textGenerationStream(
 					{
-						accessToken: env.HF_TOKEN,
 						model: "OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5",
 						inputs: "Write an essay about Sartre's philosophy.",
 						parameters: {
@@ -314,8 +265,7 @@ describe.concurrent("HfInference", () => {
 
 			it("tokenClassification", async () => {
 				expect(
-					await tokenClassification({
-						accessToken: env.HF_TOKEN,
+					await hf.tokenClassification({
 						model: "dbmdz/bert-large-cased-finetuned-conll03-english",
 						inputs: "My name is Sarah Jessica Parker but you can call me Jessica",
 					})
@@ -334,23 +284,36 @@ describe.concurrent("HfInference", () => {
 
 			it("translation", async () => {
 				expect(
-					await translation({
-						accessToken: env.HF_TOKEN,
+					await hf.translation({
 						model: "t5-base",
 						inputs: "My name is Wolfgang and I live in Berlin",
 					})
 				).toMatchObject({
 					translation_text: "Mein Name ist Wolfgang und ich lebe in Berlin",
 				});
+				// input is a list
+				expect(
+					await hf.translation({
+						model: "t5-base",
+						inputs: ["My name is Wolfgang and I live in Berlin", "I work as programmer"],
+					})
+				).toMatchObject([
+					{
+						translation_text: "Mein Name ist Wolfgang und ich lebe in Berlin",
+					},
+					{
+						translation_text: "Ich arbeite als Programmierer",
+					},
+				]);
 			});
 			it("zeroShotClassification", async () => {
 				expect(
-					await zeroShotClassification({
+					await hf.zeroShotClassification({
 						model: "facebook/bart-large-mnli",
-						inputs:
+						inputs: [
 							"Hi, I recently bought a device from your company but it is not working as advertised and I would like to get reimbursed!",
+						],
 						parameters: { candidate_labels: ["refund", "legal", "faq"] },
-						accessToken: env.HF_TOKEN,
 					})
 				).toEqual(
 					expect.arrayContaining([
@@ -367,29 +330,26 @@ describe.concurrent("HfInference", () => {
 					])
 				);
 			});
-			it("sentenceSimilarity", async () => {
+			it("SentenceSimilarity", async () => {
 				expect(
-					await sentenceSimilarity({
-						accessToken: env.HF_TOKEN,
+					await hf.sentenceSimilarity({
 						model: "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
 						inputs: {
-							sourceSentence: "That is a happy person",
+							source_sentence: "That is a happy person",
 							sentences: ["That is a happy dog", "That is a very happy person", "Today is a sunny day"],
 						},
 					})
 				).toEqual([expect.any(Number), expect.any(Number), expect.any(Number)]);
 			});
 			it("FeatureExtraction", async () => {
-				const response = await featureExtraction({
-					accessToken: env.HF_TOKEN,
+				const response = await hf.featureExtraction({
 					model: "sentence-transformers/distilbert-base-nli-mean-tokens",
 					inputs: "That is a happy person",
 				});
 				expect(response).toEqual(expect.arrayContaining([expect.any(Number)]));
 			});
 			it("FeatureExtraction - same model as sentence similarity", async () => {
-				const response = await featureExtraction({
-					accessToken: env.HF_TOKEN,
+				const response = await hf.featureExtraction({
 					model: "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
 					inputs: "That is a happy person",
 				});
@@ -398,8 +358,7 @@ describe.concurrent("HfInference", () => {
 				expect(response).toEqual(expect.arrayContaining([expect.any(Number)]));
 			});
 			it("FeatureExtraction - facebook/bart-base", async () => {
-				const response = await featureExtraction({
-					accessToken: env.HF_TOKEN,
+				const response = await hf.featureExtraction({
 					model: "facebook/bart-base",
 					inputs: "That is a happy person",
 				});
@@ -417,8 +376,7 @@ describe.concurrent("HfInference", () => {
 				]);
 			});
 			it("FeatureExtraction - facebook/bart-base, list input", async () => {
-				const response = await featureExtraction({
-					accessToken: env.HF_TOKEN,
+				const response = await hf.featureExtraction({
 					model: "facebook/bart-base",
 					inputs: ["hello", "That is a happy person"],
 				});
@@ -446,10 +404,9 @@ describe.concurrent("HfInference", () => {
 			});
 			it("automaticSpeechRecognition", async () => {
 				expect(
-					await automaticSpeechRecognition({
-						accessToken: env.HF_TOKEN,
+					await hf.automaticSpeechRecognition({
 						model: "facebook/wav2vec2-large-960h-lv60-self",
-						inputs: new Blob([readTestFile("sample1.flac")], { type: "audio/flac" }),
+						data: new Blob([readTestFile("sample1.flac")], { type: "audio/flac" }),
 					})
 				).toMatchObject({
 					text: "GOING ALONG SLUSHY COUNTRY ROADS AND SPEAKING TO DAMP AUDIENCES IN DRAUGHTY SCHOOLROOMS DAY AFTER DAY FOR A FORTNIGHT HE'LL HAVE TO PUT IN AN APPEARANCE AT SOME PLACE OF WORSHIP ON SUNDAY MORNING AND HE CAN COME TO US IMMEDIATELY AFTERWARDS",
@@ -457,10 +414,9 @@ describe.concurrent("HfInference", () => {
 			});
 			it("audioClassification", async () => {
 				expect(
-					await audioClassification({
+					await hf.audioClassification({
 						model: "superb/hubert-large-superb-er",
-						inputs: new Blob([readTestFile("sample1.flac")], { type: "audio/flac" }),
-						accessToken: env.HF_TOKEN,
+						data: new Blob([readTestFile("sample1.flac")], { type: "audio/flac" }),
 					})
 				).toEqual(
 					expect.arrayContaining([
@@ -474,10 +430,9 @@ describe.concurrent("HfInference", () => {
 
 			it("audioToAudio", async () => {
 				expect(
-					await audioToAudio({
+					await hf.audioToAudio({
 						model: "speechbrain/sepformer-wham",
-						accessToken: env.HF_TOKEN,
-						inputs: new Blob([readTestFile("sample1.flac")], { type: "audio/flac" }),
+						data: new Blob([readTestFile("sample1.flac")], { type: "audio/flac" }),
 					})
 				).toEqual(
 					expect.arrayContaining([
@@ -495,21 +450,17 @@ describe.concurrent("HfInference", () => {
 
 			it("textToSpeech", async () => {
 				expect(
-					await textToSpeech({
-						accessToken: env.HF_TOKEN,
+					await hf.textToSpeech({
 						model: "espnet/kan-bayashi_ljspeech_vits",
 						inputs: "hello there!",
 					})
-				).toMatchObject({
-					audio: expect.any(Blob),
-				});
+				).toBeInstanceOf(Blob);
 			});
 
 			it("imageClassification", async () => {
 				expect(
-					await imageClassification({
-						accessToken: env.HF_TOKEN,
-						inputs: new Blob([readTestFile("cheetah.png")], { type: "image/png" }),
+					await hf.imageClassification({
+						data: new Blob([readTestFile("cheetah.png")], { type: "image/png" }),
 						model: "google/vit-base-patch16-224",
 					})
 				).toEqual(
@@ -524,9 +475,8 @@ describe.concurrent("HfInference", () => {
 
 			it("zeroShotImageClassification", async () => {
 				expect(
-					await zeroShotImageClassification({
-						accessToken: env.HF_TOKEN,
-						inputs: new Blob([readTestFile("cheetah.png")], { type: "image/png" }),
+					await hf.zeroShotImageClassification({
+						inputs: { image: new Blob([readTestFile("cheetah.png")], { type: "image/png" }) },
 						model: "openai/clip-vit-large-patch14-336",
 						parameters: {
 							candidate_labels: ["animal", "toy", "car"],
@@ -550,9 +500,8 @@ describe.concurrent("HfInference", () => {
 
 			it("objectDetection", async () => {
 				expect(
-					await objectDetection({
-						accessToken: env.HF_TOKEN,
-						inputs: new Blob([readTestFile("cats.png")], { type: "image/png" }),
+					await hf.imageClassification({
+						data: new Blob([readTestFile("cats.png")], { type: "image/png" }),
 						model: "facebook/detr-resnet-50",
 					})
 				).toEqual(
@@ -572,9 +521,8 @@ describe.concurrent("HfInference", () => {
 			});
 			it("imageSegmentation", async () => {
 				expect(
-					await imageClassification({
-						accessToken: env.HF_TOKEN,
-						inputs: new Blob([readTestFile("cats.png")], { type: "image/png" }),
+					await hf.imageClassification({
+						data: new Blob([readTestFile("cats.png")], { type: "image/png" }),
 						model: "facebook/detr-resnet-50-panoptic",
 					})
 				).toEqual(
@@ -590,33 +538,30 @@ describe.concurrent("HfInference", () => {
 			it("imageToImage", async () => {
 				const num_inference_steps = 25;
 
-				const res = await imageToImage({
-					accessToken: env.HF_TOKEN,
-					inputs: new Blob([readTestFile("stormtrooper_depth.png")], { type: "image/png" }),
+				const res = await hf.imageToImage({
+					inputs: new Blob([readTestFile("stormtrooper_depth.png")], { type: "image / png" }),
 					parameters: {
 						prompt: "elmo's lecture",
 						num_inference_steps,
 					},
 					model: "lllyasviel/sd-controlnet-depth",
 				});
-				expect(res).toSatisfy((out) => typeof out === "object" && !!out && "image" in out && out.image instanceof Blob);
+				expect(res).toBeInstanceOf(Blob);
 			});
 			it("imageToImage blob data", async () => {
-				const res = await imageToImage({
-					accessToken: env.HF_TOKEN,
+				const res = await hf.imageToImage({
 					inputs: new Blob([readTestFile("bird_canny.png")], { type: "image / png" }),
 					model: "lllyasviel/sd-controlnet-canny",
 				});
-				expect(res).toSatisfy((out) => typeof out === "object" && !!out && "image" in out && out.image instanceof Blob);
+				expect(res).toBeInstanceOf(Blob);
 			});
 			it("textToImage", async () => {
-				const res = await textToImage({
-					accessToken: env.HF_TOKEN,
+				const res = await hf.textToImage({
 					inputs:
 						"award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]",
 					model: "stabilityai/stable-diffusion-2",
 				});
-				expect(res).toSatisfy((out) => typeof out === "object" && !!out && "image" in out && out.image instanceof Blob);
+				expect(res).toBeInstanceOf(Blob);
 			});
 
 			it("textToImage with parameters", async () => {
@@ -624,8 +569,7 @@ describe.concurrent("HfInference", () => {
 				const height = 128;
 				const num_inference_steps = 10;
 
-				const res = await textToImage({
-					accessToken: env.HF_TOKEN,
+				const res = await hf.textToImage({
 					inputs:
 						"award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]",
 					model: "stabilityai/stable-diffusion-2",
@@ -636,13 +580,12 @@ describe.concurrent("HfInference", () => {
 						num_inference_steps,
 					},
 				});
-				expect(res).toSatisfy((out) => typeof out === "object" && !!out && "image" in out && out.image instanceof Blob);
+				expect(res).toBeInstanceOf(Blob);
 			});
 			it("imageToText", async () => {
 				expect(
-					await imageToText({
-						accessToken: env.HF_TOKEN,
-						inputs: new Blob([readTestFile("cheetah.png")], { type: "image/png" }),
+					await hf.imageToText({
+						data: new Blob([readTestFile("cheetah.png")], { type: "image/png" }),
 						model: "nlpconnect/vit-gpt2-image-captioning",
 					})
 				).toEqual({
@@ -651,8 +594,7 @@ describe.concurrent("HfInference", () => {
 			});
 			it("request - openai-community/gpt2", async () => {
 				expect(
-					await request({
-						accessToken: env.HF_TOKEN,
+					await hf.request({
 						model: "openai-community/gpt2",
 						inputs: "one plus two equals",
 					})
@@ -666,8 +608,7 @@ describe.concurrent("HfInference", () => {
 			// Skipped at the moment because takes forever
 			it.skip("tabularRegression", async () => {
 				expect(
-					await tabularRegression({
-						accessToken: env.HF_TOKEN,
+					await hf.tabularRegression({
 						model: "scikit-learn/Fish-Weight",
 						inputs: {
 							data: {
@@ -686,8 +627,7 @@ describe.concurrent("HfInference", () => {
 			// Skipped at the moment because takes forever
 			it.skip("tabularClassification", async () => {
 				expect(
-					await tabularClassification({
-						accessToken: env.HF_TOKEN,
+					await hf.tabularClassification({
 						model: "vvmnnnkv/wine-quality",
 						inputs: {
 							data: {
@@ -708,19 +648,16 @@ describe.concurrent("HfInference", () => {
 				).toMatchObject([5, 5, 7]);
 			});
 
-			const hf = new HfInference();
 			it("endpoint - makes request to specified endpoint", async () => {
 				const ep = hf.endpoint("https://api-inference.huggingface.co/models/openai-community/gpt2");
 				const { generated_text } = await ep.textGeneration({
 					inputs: "one plus two equals",
-					accessToken: env.HF_TOKEN,
 				});
 				assert.include(generated_text, "three");
 			});
 
 			it("chatCompletion modelId - OpenAI Specs", async () => {
-				const res = await chatCompletion({
-					accessToken: env.HF_TOKEN,
+				const res = await hf.chatCompletion({
 					model: "mistralai/Mistral-7B-Instruct-v0.2",
 					messages: [{ role: "user", content: "Complete the this sentence with words one plus one is equal " }],
 					max_tokens: 500,
@@ -734,8 +671,7 @@ describe.concurrent("HfInference", () => {
 			});
 
 			it("chatCompletionStream modelId - OpenAI Specs", async () => {
-				const stream = chatCompletionStream({
-					accessToken: env.HF_TOKEN,
+				const stream = hf.chatCompletionStream({
 					model: "mistralai/Mistral-7B-Instruct-v0.2",
 					messages: [{ role: "user", content: "Complete the equation 1+1= ,just the answer" }],
 					max_tokens: 500,
@@ -753,14 +689,15 @@ describe.concurrent("HfInference", () => {
 
 			it("chatCompletionStream modelId Fail - OpenAI Specs", async () => {
 				expect(
-					chatCompletionStream({
-						accessToken: env.HF_TOKEN,
-						model: "google/gemma-2b",
-						messages: [{ role: "user", content: "Complete the equation 1+1= ,just the answer" }],
-						max_tokens: 500,
-						temperature: 0.1,
-						seed: 0,
-					}).next()
+					hf
+						.chatCompletionStream({
+							model: "google/gemma-2b",
+							messages: [{ role: "user", content: "Complete the equation 1+1= ,just the answer" }],
+							max_tokens: 500,
+							temperature: 0.1,
+							seed: 0,
+						})
+						.next()
 				).rejects.toThrowError(
 					"Server google/gemma-2b does not seem to support chat completion. Error: Template error: template not found"
 				);
@@ -839,22 +776,22 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Fal AI",
 		() => {
+			const client = new HfInference(env.HF_FAL_KEY);
+
 			it("textToImage", async () => {
-				const res = await textToImage({
-					accessToken: env.HF_FAL_KEY,
+				const res = await client.textToImage({
 					model: "black-forest-labs/FLUX.1-schnell",
 					provider: "fal-ai",
 					inputs: "black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot",
 				});
-				expect(res).toSatisfy((out) => typeof out === "object" && !!out && "image" in out && out.image instanceof Blob);
+				expect(res).toBeInstanceOf(Blob);
 			});
 
 			it("speechToText", async () => {
-				const res = await automaticSpeechRecognition({
-					accessToken: env.HF_FAL_KEY,
+				const res = await client.automaticSpeechRecognition({
 					model: "openai/whisper-large-v3",
 					provider: "fal-ai",
-					inputs: new Blob([readTestFile("sample2.wav")], { type: "audio/x-wav" }),
+					data: new Blob([readTestFile("sample2.wav")], { type: "audio/x-wav" }),
 				});
 				expect(res).toMatchObject({
 					text: " he has grave doubts whether sir frederick leighton's work is really greek after all and can discover in it but little of rocky ithaca",
@@ -867,45 +804,43 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Replicate",
 		() => {
+			const client = new HfInference(env.HF_REPLICATE_KEY);
+
 			it("textToImage canonical", async () => {
-				const res = await textToImage({
-					accessToken: env.HF_REPLICATE_KEY,
+				const res = await client.textToImage({
 					model: "black-forest-labs/FLUX.1-schnell",
 					provider: "replicate",
 					inputs: "black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot",
 				});
-				expect(res).toSatisfy((out) => typeof out === "object" && !!out && "image" in out && out.image instanceof Blob);
+				expect(res).toBeInstanceOf(Blob);
 			});
 
 			it("textToImage versioned", async () => {
-				const res = await textToImage({
-					accessToken: env.HF_REPLICATE_KEY,
+				const res = await client.textToImage({
 					model: "ByteDance/SDXL-Lightning",
 					provider: "replicate",
 					inputs: "black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot",
 				});
-				expect(res).toSatisfy((out) => typeof out === "object" && !!out && "image" in out && out.image instanceof Blob);
+				expect(res).toBeInstanceOf(Blob);
 			});
 
 			it.skip("textToSpeech versioned", async () => {
-				const res = await textToSpeech({
-					accessToken: env.HF_REPLICATE_KEY,
+				const res = await client.textToSpeech({
 					model: "SWivid/F5-TTS",
 					provider: "replicate",
 					inputs: "Hello, how are you?",
 				});
-				expect(res).toSatisfy((out) => typeof out === "object" && !!out && "image" in out && out.image instanceof Blob);
+				expect(res).toBeInstanceOf(Blob);
 			});
 
-			it("textToSpeech OuteTTS (versioned)", async () => {
-				const res = await textToSpeech({
-					accessToken: env.HF_REPLICATE_KEY,
+			it("textToSpeech OuteTTS", async () => {
+				const res = await client.textToSpeech({
 					model: "OuteAI/OuteTTS-0.3-500M",
 					provider: "replicate",
 					inputs: "OuteTTS is a frontier TTS model for its size of 1 Billion parameters",
 				});
 
-				expect(res).toMatchObject({ audio: expect.any(Blob) });
+				expect(res).toBeInstanceOf(Blob);
 			});
 		},
 		TIMEOUT
@@ -913,9 +848,10 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"SambaNova",
 		() => {
+			const client = new HfInference(env.HF_SAMBANOVA_KEY);
+
 			it("chatCompletion", async () => {
-				const res = await chatCompletion({
-					accessToken: env.HF_SAMBANOVA_KEY,
+				const res = await client.chatCompletion({
 					model: "meta-llama/Llama-3.1-8B-Instruct",
 					provider: "sambanova",
 					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
@@ -926,8 +862,7 @@ describe.concurrent("HfInference", () => {
 				}
 			});
 			it("chatCompletion stream", async () => {
-				const stream = chatCompletionStream({
-					accessToken: env.HF_SAMBANOVA_KEY,
+				const stream = client.chatCompletionStream({
 					model: "meta-llama/Llama-3.1-8B-Instruct",
 					provider: "sambanova",
 					messages: [{ role: "user", content: "Complete the equation 1 + 1 = , just the answer" }],
@@ -947,9 +882,10 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Together",
 		() => {
+			const client = new HfInference(env.HF_TOGETHER_KEY);
+
 			it("chatCompletion", async () => {
-				const res = await chatCompletion({
-					accessToken: env.HF_TOGETHER_KEY,
+				const res = await client.chatCompletion({
 					model: "meta-llama/Llama-3.3-70B-Instruct",
 					provider: "together",
 					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
@@ -961,8 +897,7 @@ describe.concurrent("HfInference", () => {
 			});
 
 			it("chatCompletion stream", async () => {
-				const stream = chatCompletionStream({
-					accessToken: env.HF_TOGETHER_KEY,
+				const stream = client.chatCompletionStream({
 					model: "meta-llama/Llama-3.3-70B-Instruct",
 					provider: "together",
 					messages: [{ role: "user", content: "Complete the equation 1 + 1 = , just the answer" }],
@@ -977,18 +912,16 @@ describe.concurrent("HfInference", () => {
 			});
 
 			it("textToImage", async () => {
-				const res = await textToImage({
+				const res = await client.textToImage({
 					model: "stabilityai/stable-diffusion-xl-base-1.0",
-					accessToken: env.HF_TOGETHER_KEY,
 					provider: "together",
 					inputs: "award winning high resolution photo of a giant tortoise",
 				});
-				expect(res).toSatisfy((out) => typeof out === "object" && !!out && "image" in out && out.image instanceof Blob);
+				expect(res).toBeInstanceOf(Blob);
 			});
 
 			it("textGeneration", async () => {
-				const res = await textGeneration({
-					accessToken: env.HF_TOGETHER_KEY,
+				const res = await client.textGeneration({
 					model: "mistralai/Mixtral-8x7B-v0.1",
 					provider: "together",
 					inputs: "Paris is",

@@ -2,9 +2,9 @@ import type { ImageSegmentationInput, ImageSegmentationOutput } from "@huggingfa
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
-import { omit } from "../../utils/omit";
+import { preparePayload, type LegacyImageInput } from "./utils";
 
-export type ImageSegmentationArgs = BaseArgs & ImageSegmentationInput;
+export type ImageSegmentationArgs = BaseArgs & (ImageSegmentationInput | LegacyImageInput);
 
 /**
  * This task reads some image input and outputs the likelihood of classes & bounding boxes of detected objects.
@@ -14,10 +14,7 @@ export async function imageSegmentation(
 	args: ImageSegmentationArgs,
 	options?: Options
 ): Promise<ImageSegmentationOutput> {
-	const payload = {
-		...omit(args, "inputs"),
-		data: args.inputs,
-	};
+	const payload = preparePayload(args);
 	const res = await request<ImageSegmentationOutput>(payload, {
 		...options,
 		taskHint: "image-segmentation",

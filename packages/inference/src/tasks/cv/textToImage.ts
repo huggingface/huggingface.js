@@ -18,7 +18,7 @@ interface OutputUrlImageGeneration {
  * This task reads some text input and outputs an image.
  * Recommended model: stabilityai/stable-diffusion-2
  */
-export async function textToImage(args: TextToImageArgs, options?: Options): Promise<TextToImageOutput> {
+export async function textToImage(args: TextToImageArgs, options?: Options): Promise<Blob> {
 	if (args.provider === "together" || args.provider === "fal-ai") {
 		args.prompt = args.inputs;
 		delete (args as unknown as { inputs: unknown }).inputs;
@@ -34,23 +34,23 @@ export async function textToImage(args: TextToImageArgs, options?: Options): Pro
 	if (res && typeof res === "object") {
 		if (args.provider === "fal-ai" && "images" in res && Array.isArray(res.images) && res.images[0].url) {
 			const image = await fetch(res.images[0].url);
-			return { image: await image.blob() };
+			return await image.blob();
 		}
 		if ("data" in res && Array.isArray(res.data) && res.data[0].b64_json) {
 			const base64Data = res.data[0].b64_json;
 			const base64Response = await fetch(`data:image/jpeg;base64,${base64Data}`);
 			const blob = await base64Response.blob();
-			return { image: blob };
+			return blob;
 		}
 		if ("output" in res && Array.isArray(res.output)) {
 			const urlResponse = await fetch(res.output[0]);
 			const blob = await urlResponse.blob();
-			return { image: blob };
+			return blob;
 		}
 	}
 	const isValidOutput = res && res instanceof Blob;
 	if (!isValidOutput) {
 		throw new InferenceOutputError("Expected Blob");
 	}
-	return { image: res };
+	return res;
 }

@@ -1,4 +1,4 @@
-import type { ImageToImageInput, ImageToImageOutput } from "@huggingface/tasks";
+import type { ImageToImageInput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options, RequestArgs } from "../../types";
 import { base64FromBytes } from "../../utils/base64FromBytes";
@@ -10,7 +10,7 @@ export type ImageToImageArgs = BaseArgs & ImageToImageInput;
  * This task reads some text input and outputs an image.
  * Recommended model: lllyasviel/sd-controlnet-depth
  */
-export async function imageToImage(args: ImageToImageArgs, options?: Options): Promise<ImageToImageOutput> {
+export async function imageToImage(args: ImageToImageArgs, options?: Options): Promise<Blob> {
 	let reqArgs: RequestArgs;
 	if (!args.parameters) {
 		reqArgs = {
@@ -26,7 +26,7 @@ export async function imageToImage(args: ImageToImageArgs, options?: Options): P
 			),
 		};
 	}
-	const res = await request<ImageToImageOutput>(reqArgs, {
+	const res = await request<Blob>(reqArgs, {
 		...options,
 		taskHint: "image-to-image",
 	});
@@ -34,5 +34,5 @@ export async function imageToImage(args: ImageToImageArgs, options?: Options): P
 	if (!isValidOutput) {
 		throw new InferenceOutputError("Expected Blob");
 	}
-	return { image: res };
+	return res;
 }

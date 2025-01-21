@@ -4284,289 +4284,56 @@
       }
     }
   },
-  "4cb2d48bab5adad32d2389ad9e40f94aa14a2fab6f68af31a662697e1073afcf": {
-    "url": "https://api-inference.huggingface.co/models/facebook/bart-large-mnli",
+  "0588849bd8db5bca4bbb36916af37a03031b04788867d0db6634ff93cf19ded0": {
+    "url": "https://api.replicate.com/v1/predictions",
     "init": {
       "headers": {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Prefer": "wait"
       },
       "method": "POST",
-      "body": "{\"inputs\":\"Hi, I recently bought a device from your company but it is not working as advertised and I would like to get reimbursed!\",\"parameters\":{\"candidate_labels\":[\"refund\",\"legal\",\"faq\"]}}"
+      "body": "{\"input\":{\"inputs\":\"OuteTTS is a frontier TTS model for its size of 1 Billion parameters\"},\"version\":\"39a59319327b27327fa3095149c5a746e7f2aee18c75055c3368237a6503cd26\"}"
     },
     "response": {
-      "body": "{\"sequence\":\"Hi, I recently bought a device from your company but it is not working as advertised and I would like to get reimbursed!\",\"labels\":[\"refund\",\"faq\",\"legal\"],\"scores\":[0.8777874112129211,0.10522667318582535,0.01698591560125351]}",
+      "body": "{\"id\":\"vxnyb0rbe9rm80cmgj1vs1t53w\",\"model\":\"jbilcke/oute-tts\",\"version\":\"39a59319327b27327fa3095149c5a746e7f2aee18c75055c3368237a6503cd26\",\"input\":{\"inputs\":\"OuteTTS is a frontier TTS model for its size of 1 Billion parameters\"},\"logs\":\"\",\"output\":\"https://replicate.delivery/xezq/U5zqJthcGtqOAJcfYTF6Xudm8txQmSELa9oqcxR6ZWXZThDKA/output.wav\",\"data_removed\":false,\"error\":null,\"status\":\"processing\",\"created_at\":\"2025-01-20T16:19:28.242Z\",\"urls\":{\"cancel\":\"https://api.replicate.com/v1/predictions/vxnyb0rbe9rm80cmgj1vs1t53w/cancel\",\"get\":\"https://api.replicate.com/v1/predictions/vxnyb0rbe9rm80cmgj1vs1t53w\",\"stream\":\"https://stream.replicate.com/v1/files/bcwr-4lk3m6mpf6hkv27z2a625rwft7baeha2ryx5nd6pdpnfxt3wqbja\"}}",
+      "status": 201,
+      "statusText": "Created",
+      "headers": {
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "905062e3cfc2d642-CDG",
+        "connection": "keep-alive",
+        "content-type": "application/json; charset=UTF-8",
+        "nel": "{\"success_fraction\":0,\"report_to\":\"cf-nel\",\"max_age\":604800}",
+        "preference-applied": "wait=60",
+        "ratelimit-remaining": "599",
+        "ratelimit-reset": "1",
+        "report-to": "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report\\/v4?s=OXZ56%2FXmwQi53DKlAoxLJ9Ib85Mm0WyD8%2F6BfygHgwaealJK7sn4mztJhIlQybIWJwTUdh1m%2B2XxemHSbupiRN5lMqyLYNLeH3u6WYxkUFOK6v%2FpSsjN9D27mvwJ2JBsfmGnDGbc4AhqoTLMSpmi\"}],\"group\":\"cf-nel\",\"max_age\":604800}",
+        "server": "cloudflare",
+        "server-timing": "cfL4;desc=\"?proto=TCP&rtt=5348&min_rtt=5271&rtt_var=2131&sent=5&recv=5&lost=0&retrans=0&sent_bytes=2849&recv_bytes=979&delivery_rate=686704&cwnd=252&unsent_bytes=0&cid=08dbc93a75c5b1df&ts=34187&x=0\"",
+        "strict-transport-security": "max-age=15552000",
+        "vary": "Accept-Encoding"
+      }
+    }
+  },
+  "89c2957dc10eb8b7ac6415cdd14447d4c54437354183fe0c7d0c3ef78cf34ad2": {
+    "url": "https://replicate.delivery/xezq/U5zqJthcGtqOAJcfYTF6Xudm8txQmSELa9oqcxR6ZWXZThDKA/output.wav",
+    "init": {},
+    "response": {
+      "body": "",
       "status": 200,
       "statusText": "OK",
       "headers": {
-        "access-control-allow-credentials": "true",
-        "access-control-expose-headers": "x-compute-type, x-compute-time",
-        "connection": "keep-alive",
-        "content-type": "application/json",
-        "server": "uvicorn",
-        "transfer-encoding": "chunked",
-        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
-      }
-    }
-  },
-  "407c9eae19e4763e292d1bf6f3b67ac76c0042091fbe85758d526d08f8c55eb1": {
-    "url": "https://api-inference.huggingface.co/models/google/vit-base-patch16-224",
-    "init": {
-      "headers": {
-        "Content-Type": "application/json"
-      },
-      "method": "POST",
-      "body": "{\"inputs\":{}}"
-    },
-    "response": {
-      "body": "{\"error\":[\"Error in `inputs`: Invalid image: {}\"]}",
-      "status": 400,
-      "statusText": "Bad Request",
-      "headers": {
-        "access-control-allow-credentials": "true",
-        "connection": "keep-alive",
-        "content-type": "application/json",
-        "server": "uvicorn",
-        "transfer-encoding": "chunked",
-        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
-      }
-    }
-  },
-  "63a14c4db8cb2c34ed3fabd4d65eaa9657e844368fea8990b4cbeee198db2133": {
-    "url": "https://api-inference.huggingface.co/models/facebook/detr-resnet-50",
-    "init": {
-      "headers": {
-        "Content-Type": "application/json",
-        "X-Wait-For-Model": "true"
-      },
-      "method": "POST",
-      "body": "{\"inputs\":{}}"
-    },
-    "response": {
-      "body": "{\"error\":\"Please log in or use a HF access token\"}",
-      "status": 429,
-      "statusText": "Too Many Requests",
-      "headers": {
-        "access-control-allow-credentials": "true",
-        "connection": "keep-alive",
-        "content-type": "application/json",
-        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
-      }
-    }
-  },
-  "4b27a9c8870792397aee3df4876be9ebc507c3a2fc9e828e13bb81c40bf7cd84": {
-    "url": "https://api-inference.huggingface.co/models/speechbrain/sepformer-wham",
-    "init": {
-      "headers": {
-        "Content-Type": "application/json",
-        "X-Wait-For-Model": "true"
-      },
-      "method": "POST",
-      "body": "{\"inputs\":{}}"
-    },
-    "response": {
-      "body": "{\"error\":\"Malformed soundfile\"}",
-      "status": 400,
-      "statusText": "Bad Request",
-      "headers": {
-        "access-control-allow-credentials": "true",
-        "connection": "keep-alive",
-        "content-type": "application/json",
-        "server": "uvicorn",
-        "transfer-encoding": "chunked",
-        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
-      }
-    }
-  },
-  "0388b6333e7c6df163ac27e69352400261ee87ee8a692fe80d0f8896698d6e7c": {
-    "url": "https://api-inference.huggingface.co/models/facebook/detr-resnet-50-panoptic",
-    "init": {
-      "headers": {
-        "Content-Type": "application/json",
-        "X-Wait-For-Model": "true"
-      },
-      "method": "POST",
-      "body": "{\"inputs\":{}}"
-    },
-    "response": {
-      "body": "{\"error\":[\"Error in `inputs`: Invalid image: {}\"]}",
-      "status": 400,
-      "statusText": "Bad Request",
-      "headers": {
-        "access-control-allow-credentials": "true",
-        "connection": "keep-alive",
-        "content-type": "application/json",
-        "server": "uvicorn",
-        "transfer-encoding": "chunked",
-        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
-      }
-    }
-  },
-  "97b2e862f687bc824468e7a93e9f87b1b8a995642d3f6f5769c06e6ccd6f5b4c": {
-    "url": "https://api-inference.huggingface.co/models/nlpconnect/vit-gpt2-image-captioning",
-    "init": {
-      "headers": {
-        "Content-Type": "application/json"
-      },
-      "method": "POST",
-      "body": "{\"inputs\":{}}"
-    },
-    "response": {
-      "body": "{\"error\":[\"Error in `inputs`: Invalid image: {}\"]}",
-      "status": 400,
-      "statusText": "Bad Request",
-      "headers": {
-        "access-control-allow-credentials": "true",
-        "connection": "keep-alive",
-        "content-type": "application/json",
-        "server": "uvicorn",
-        "transfer-encoding": "chunked",
-        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
-      }
-    }
-  },
-  "1d5c927a794ec10ea1fc7fb4e729047cf0282799c0a434bce9d929660488a0f2": {
-    "url": "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2",
-    "init": {
-      "headers": {
-        "Content-Type": "application/json"
-      },
-      "method": "POST",
-      "body": "{\"inputs\":\"award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]\",\"parameters\":{\"negative_prompt\":[\"blurry\"],\"width\":512,\"height\":128,\"num_inference_steps\":10}}"
-    },
-    "response": {
-      "body": "{\"error\":\"`negative_prompt` should be the same type to `prompt`, but got <class 'list'> != <class 'str'>.\"}",
-      "status": 400,
-      "statusText": "Bad Request",
-      "headers": {
-        "access-control-allow-credentials": "true",
-        "access-control-expose-headers": "x-compute-type, x-compute-time",
-        "connection": "keep-alive",
-        "content-type": "application/json",
-        "server": "uvicorn",
-        "transfer-encoding": "chunked",
-        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
-      }
-    }
-  },
-  "9f068aceef2b0ad23973913eb1a18782be87daf7e8345c57fb68a7eb575de20e": {
-    "url": "https://api-inference.huggingface.co/models/facebook/wav2vec2-large-960h-lv60-self",
-    "init": {
-      "headers": {
-        "Content-Type": "application/json",
-        "X-Wait-For-Model": "true"
-      },
-      "method": "POST",
-      "body": "{\"inputs\":{}}"
-    },
-    "response": {
-      "body": "{\"error\":[\"Error in `inputs`: Malformed soundfile\"]}",
-      "status": 400,
-      "statusText": "Bad Request",
-      "headers": {
-        "access-control-allow-credentials": "true",
-        "connection": "keep-alive",
-        "content-type": "application/json",
-        "server": "uvicorn",
-        "transfer-encoding": "chunked",
-        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
-      }
-    }
-  },
-  "201e762da947b645abe67e466af800afb936ec116a51a03e9b89343faaf7bc01": {
-    "url": "https://api-inference.huggingface.co/models/superb/hubert-large-superb-er",
-    "init": {
-      "headers": {
-        "Content-Type": "application/json",
-        "X-Wait-For-Model": "true"
-      },
-      "method": "POST",
-      "body": "{\"inputs\":{}}"
-    },
-    "response": {
-      "body": "{\"error\":[\"Error in `inputs`: Malformed soundfile\"]}",
-      "status": 400,
-      "statusText": "Bad Request",
-      "headers": {
-        "access-control-allow-credentials": "true",
-        "connection": "keep-alive",
-        "content-type": "application/json",
-        "server": "uvicorn",
-        "transfer-encoding": "chunked",
-        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
-      }
-    }
-  },
-  "41d6b86bf2438eb25338b4572ad63cc23319154c9e44c23f53a079fbc48862f2": {
-    "url": "https://api-inference.huggingface.co/models/sentence-transformers/paraphrase-xlm-r-multilingual-v1",
-    "init": {
-      "headers": {
-        "Content-Type": "application/json",
-        "X-Wait-For-Model": "true"
-      },
-      "method": "POST",
-      "body": "{\"inputs\":{\"sourceSentence\":\"That is a happy person\",\"sentences\":[\"That is a happy dog\",\"That is a very happy person\",\"Today is a sunny day\"]}}"
-    },
-    "response": {
-      "body": "{\"error\":[\"Field required: received `source_sentence` in `parameters`\"]}",
-      "status": 400,
-      "statusText": "Bad Request",
-      "headers": {
-        "access-control-allow-credentials": "true",
-        "connection": "keep-alive",
-        "content-type": "application/json",
-        "server": "uvicorn",
-        "transfer-encoding": "chunked",
-        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
-      }
-    }
-  },
-  "80ef172601f7da76a98276d2a1af8b603caf29350fc981b3de7d327c87e0126c": {
-    "url": "https://api-inference.huggingface.co/models/google/tapas-base-finetuned-wtq",
-    "init": {
-      "headers": {
-        "Content-Type": "application/json",
-        "X-Wait-For-Model": "true"
-      },
-      "method": "POST",
-      "body": "{\"inputs\":{\"question\":\"How many stars does the transformers repository have?\",\"table\":{\"Repository\":[\"Transformers\",\"Datasets\",\"Tokenizers\"],\"Stars\":[\"36542\",\"4512\",\"3934\"],\"Contributors\":[\"651\",\"77\",\"34\"],\"Programming language\":[\"Python\",\"Python\",\"Rust, Python and NodeJS\"]}}}"
-    },
-    "response": {
-      "body": "{\"error\":\"Invalid input. Keyword argument `table` should be either of type `dict` or `list`, but is <class 'dict'>)\",\"warnings\":[\"There was an inference error: Invalid input. Keyword argument `table` should be either of type `dict` or `list`, but is <class 'dict'>)\"]}",
-      "status": 400,
-      "statusText": "Bad Request",
-      "headers": {
-        "access-control-allow-credentials": "true",
-        "access-control-expose-headers": "x-compute-type, x-compute-time",
-        "connection": "keep-alive",
-        "content-type": "application/json",
-        "server": "uvicorn",
-        "transfer-encoding": "chunked",
-        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
-      }
-    }
-  },
-  "cc7951fc493e082384f8839058a329eabaa7a13830bdf1eb03d87bc73b3fc327": {
-    "url": "https://api-inference.huggingface.co/models/sentence-transformers/paraphrase-xlm-r-multilingual-v1",
-    "init": {
-      "headers": {
-        "Content-Type": "application/json",
-        "X-Wait-For-Model": "true"
-      },
-      "method": "POST",
-      "body": "{\"inputs\":{\"sourceSentence\":\"That is a happy person\",\"sentences\":[\"That is a happy dog\",\"That is a very happy person\",\"Today is a sunny day\"],\"source_sentence\":\"That is a happy person\"}}"
-    },
-    "response": {
-      "body": "[0.6623499989509583,0.9382342100143433,0.2296333760023117]",
-      "status": 200,
-      "statusText": "OK",
-      "headers": {
-        "access-control-allow-credentials": "true",
-        "access-control-expose-headers": "x-compute-type, x-compute-time",
-        "connection": "keep-alive",
-        "content-type": "application/json",
-        "server": "uvicorn",
-        "transfer-encoding": "chunked",
-        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+        "cache-control": "public,max-age=3600",
+        "cache-id": "PAR-31976c84",
+        "cache-status": "miss",
+        "content-type": "audio/x-wav",
+        "etag": "\"f118ce7abd9171ff463e1319fd4c27cc\"",
+        "last-modified": "Mon, 20 Jan 2025 16:20:02 GMT",
+        "server": "UploadServer"
       }
     }
   },
@@ -4580,7 +4347,7 @@
       "body": "{\"prompt\":\"black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot\",\"response_format\":\"base64\"}"
     },
     "response": {
-      "body": "{\"images\":[{\"url\":\"https://fal.media/files/rabbit/oq94iUr2TOJTS7oT_NX27.png\",\"width\":1024,\"height\":768,\"content_type\":\"image/jpeg\"}],\"timings\":{\"inference\":0.3473736699670553},\"seed\":961394545,\"has_nsfw_concepts\":[false],\"prompt\":\"black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot\"}",
+      "body": "{\"images\":[{\"url\":\"https://fal.media/files/lion/diFpxNG0A6E45szVv6Zee.png\",\"width\":1024,\"height\":768,\"content_type\":\"image/jpeg\"}],\"timings\":{\"inference\":0.3554951280821115},\"seed\":288907632,\"has_nsfw_concepts\":[false],\"prompt\":\"black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot\"}",
       "status": 200,
       "statusText": "OK",
       "headers": {
@@ -4590,8 +4357,8 @@
       }
     }
   },
-  "193e46b3d59b3c99dd1e75f33b140eafa529972cd5f9919b539f961dda2a9f21": {
-    "url": "https://fal.media/files/rabbit/oq94iUr2TOJTS7oT_NX27.png",
+  "7f69e94a720f6c2c4702c164c1004dd035606c8b53bf31beb27f497c60c834cd": {
+    "url": "https://fal.media/files/lion/diFpxNG0A6E45szVv6Zee.png",
     "init": {},
     "response": {
       "body": "",
@@ -4602,7 +4369,7 @@
         "access-control-allow-methods": "*",
         "access-control-allow-origin": "*",
         "access-control-max-age": "86400",
-        "cf-ray": "90510f76a82cd696-CDG",
+        "cf-ray": "90506d1b8b2a6981-CDG",
         "connection": "keep-alive",
         "content-type": "image/jpeg",
         "server": "cloudflare",
@@ -4620,18 +4387,18 @@
       "body": "{\"prompt\":\"award winning high resolution photo of a giant tortoise\",\"response_format\":\"base64\",\"model\":\"stabilityai/stable-diffusion-xl-base-1.0\"}"
     },
     "response": {
-      "body": "{\"id\":\"90510f7d49ae006f-CDG\",\"model\":\"stabilityai/stable-diffusion-xl-base-1.0\",\"object\":\"list\",\"data\":[{\"timings\":{\"inference\":4447},\"index\":0,\"b64_json\":\"/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAQABAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDmBPsXIoXV9nVcj1qqpBTHpUbLuyCOfepsZmzDqsMw27gG9GqtqSxyRl/MYEc9ePyrEdSjZBxTZHaZApOPc5xRYCpPJl+GY47kYpiBGX5ic1YnsXRN4YOMZ4zVQEqf6VQxrDB4NAOKesJk5JA+pppXDYPWmBPExyKuxE46iqUK\"}]}",
+      "body": "{\"id\":\"90506d280b7b2298-CDG\",\"model\":\"stabilityai/stable-diffusion-xl-base-1.0\",\"object\":\"list\",\"data\":[{\"timings\":{\"inference\":4469},\"index\":0,\"b64_json\":\"/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAQABAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDlh2OKQkZ4pi5MZPcGnDOK5Ch4XceeKcBzTd22kUkmgC0hVRk09JfmOMY9Kr/Me5P409I3ZsDINKwxztzTVRnyw6euQKVouM5Jp65WMDB9qAGIdpPJJHel83PakDDkY/M0wjJ4ppgS7u9OU/8A66iBx6U7dQBOAMc05cE4qAMa\"}]}",
       "status": 200,
       "statusText": "OK",
       "headers": {
         "access-control-allow-origin": "*",
         "alt-svc": "h3=\":443\"; ma=86400",
         "cf-cache-status": "DYNAMIC",
-        "cf-ray": "90510f7d49ae006f-CDG",
+        "cf-ray": "90506d280b7b2298-CDG",
         "connection": "keep-alive",
         "content-encoding": "gzip",
         "content-type": "application/json; charset=utf-8",
-        "etag": "W/\"2872f-NGi81NT7Dqn2r2C0juJO/wtH8+A\"",
+        "etag": "W/\"1e79b-iMsh29xGKx5YyNetamSki3RBjcM\"",
         "retry-after": "2",
         "server": "cloudflare",
         "strict-transport-security": "max-age=15552000; includeSubDomains",
@@ -4639,8 +4406,8 @@
       }
     }
   },
-  "d945928c64e9312ce2e915dab66f2e4e047d99cac0f8fcf7c5fec7c724c371b1": {
-    "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAQABAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDmBPsXIoXV9nVcj1qqpBTHpUbLuyCOfepsZmzDqsMw27gG9GqtqSxyRl/MYEc9ePyrEdSjZBxTZHaZApOPc5xRYCpPJl+GY47kYpiBGX5ic1YnsXRN4YOMZ4zVQEqf6VQxrDB4NAOKesJk5JA+pppXDYPWmBPExyKuxE46iqUK",
+  "45fbd4bfe447bc77eb34c8638a144658ed90fcd6d8163f907228a4bdff595518": {
+    "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAQABAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDlh2OKQkZ4pi5MZPcGnDOK5Ch4XceeKcBzTd22kUkmgC0hVRk09JfmOMY9Kr/Me5P409I3ZsDINKwxztzTVRnyw6euQKVouM5Jp65WMDB9qAGIdpPJJHel83PakDDkY/M0wjJ4ppgS7u9OU/8A66iBx6U7dQBOAMc05cE4qAMa",
     "init": {},
     "response": {
       "body": "",
@@ -4648,59 +4415,6 @@
       "statusText": "OK",
       "headers": {
         "content-type": "image/jpeg"
-      }
-    }
-  },
-  "0588849bd8db5bca4bbb36916af37a03031b04788867d0db6634ff93cf19ded0": {
-    "url": "https://api.replicate.com/v1/predictions",
-    "init": {
-      "headers": {
-        "Content-Type": "application/json",
-        "Prefer": "wait"
-      },
-      "method": "POST",
-      "body": "{\"input\":{\"inputs\":\"OuteTTS is a frontier TTS model for its size of 1 Billion parameters\"},\"version\":\"39a59319327b27327fa3095149c5a746e7f2aee18c75055c3368237a6503cd26\"}"
-    },
-    "response": {
-      "body": "{\"id\":\"91g3v0rcv9rme0cmgksrmsygtc\",\"model\":\"jbilcke/oute-tts\",\"version\":\"39a59319327b27327fa3095149c5a746e7f2aee18c75055c3368237a6503cd26\",\"input\":{\"inputs\":\"OuteTTS is a frontier TTS model for its size of 1 Billion parameters\"},\"logs\":\"\",\"output\":\"https://replicate.delivery/xezq/Walbi1xsiJpnOpaRoIZanwV2wDznhRtSqL3a0yekv0wgMiDKA/output.wav\",\"data_removed\":false,\"error\":null,\"status\":\"processing\",\"created_at\":\"2025-01-20T18:21:48.634Z\",\"urls\":{\"cancel\":\"https://api.replicate.com/v1/predictions/91g3v0rcv9rme0cmgksrmsygtc/cancel\",\"get\":\"https://api.replicate.com/v1/predictions/91g3v0rcv9rme0cmgksrmsygtc\",\"stream\":\"https://stream.replicate.com/v1/files/bcwr-k266snnkiye47r7hrf7itzwfjqeoeyk3w4zvrkagx4am3mf2w2vq\"}}",
-      "status": 201,
-      "statusText": "Created",
-      "headers": {
-        "alt-svc": "h3=\":443\"; ma=86400",
-        "cf-cache-status": "DYNAMIC",
-        "cf-ray": "905116195e7df09f-CDG",
-        "connection": "keep-alive",
-        "content-type": "application/json; charset=UTF-8",
-        "nel": "{\"success_fraction\":0,\"report_to\":\"cf-nel\",\"max_age\":604800}",
-        "preference-applied": "wait=60",
-        "ratelimit-remaining": "599",
-        "ratelimit-reset": "1",
-        "report-to": "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report\\/v4?s=V8mPG5cIfa7uPl7uQKItykjChzevVXF2yID2y%2B5CZTTly8CmMtKV8uccLALG7nzl0UQ7%2B7EBCazWBPFmxACoq6iyZThU5MLkOs8VfWF8fzJrX0sCq6TpfaoHvcK56bjzQjxj\"}],\"group\":\"cf-nel\",\"max_age\":604800}",
-        "server": "cloudflare",
-        "server-timing": "cfL4;desc=\"?proto=TCP&rtt=6405&min_rtt=6145&rtt_var=2490&sent=4&recv=5&lost=0&retrans=0&sent_bytes=2848&recv_bytes=982&delivery_rate=471277&cwnd=233&unsent_bytes=0&cid=60e9a77fe6f4b108&ts=5471&x=0\"",
-        "strict-transport-security": "max-age=15552000",
-        "vary": "Accept-Encoding"
-      }
-    }
-  },
-  "37bbea66468f59310614e1cc5b028a8d1eb7c9288cbf86c40cc15fba4fbeb317": {
-    "url": "https://replicate.delivery/xezq/Walbi1xsiJpnOpaRoIZanwV2wDznhRtSqL3a0yekv0wgMiDKA/output.wav",
-    "init": {},
-    "response": {
-      "body": "",
-      "status": 200,
-      "statusText": "OK",
-      "headers": {
-        "accept-ranges": "bytes",
-        "access-control-allow-origin": "*",
-        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
-        "cache-control": "public,max-age=3600",
-        "cache-id": "PAR-31976c84",
-        "cache-status": "miss",
-        "content-type": "audio/x-wav",
-        "etag": "\"89805c92016393f733fd73b259cdc5a6\"",
-        "last-modified": "Mon, 20 Jan 2025 18:21:53 GMT",
-        "server": "UploadServer"
       }
     }
   }
