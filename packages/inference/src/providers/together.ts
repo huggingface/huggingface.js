@@ -21,6 +21,7 @@ export const TOGETHER_SUPPORTED_MODEL_IDS: ProviderMapping<TogetherId> = {
 	},
 	conversational: {
 		"databricks/dbrx-instruct": "databricks/dbrx-instruct",
+		"deepseek-ai/DeepSeek-R1": "deepseek-ai/DeepSeek-R1",
 		"deepseek-ai/deepseek-llm-67b-chat": "deepseek-ai/deepseek-llm-67b-chat",
 		"google/gemma-2-9b-it": "google/gemma-2-9b-it",
 		"google/gemma-2b-it": "google/gemma-2-27b-it",
