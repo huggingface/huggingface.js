@@ -50,6 +50,7 @@ export const TOGETHER_SUPPORTED_MODEL_IDS: ProviderMapping<TogetherId> = {
 		"Qwen/QwQ-32B-Preview": "Qwen/QwQ-32B-Preview",
 		"scb10x/llama-3-typhoon-v1.5-8b-instruct": "scb10x/scb10x-llama3-typhoon-v1-5-8b-instruct",
 		"scb10x/llama-3-typhoon-v1.5x-70b-instruct-awq": "scb10x/scb10x-llama3-typhoon-v1-5x-4f316",
+		"deepseek-ai/DeepSeek-R1": "deepseek-ai/DeepSeek-R1",
 	},
 	"text-generation": {
 		"meta-llama/Meta-Llama-3-8B": "meta-llama/Meta-Llama-3-8B",
