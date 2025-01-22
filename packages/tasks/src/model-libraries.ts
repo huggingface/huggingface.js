@@ -780,6 +780,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "TabPFN",
 		repoUrl: "https://github.com/PriorLabs/TabPFN",
 	},
+	terratorch: {
+		prettyLabel: "TerraTorch",
+		repoName: "TerraTorch",
+		repoUrl: "https://github.com/IBM/terratorch",
+		docsUrl: "https://ibm.github.io/terratorch/",
+		filter: false,
+		countDownloads: `path_extension:"pt" OR path_extension:"ckpt"`,
+		snippets: snippets.terratorch,
+	},
 	"tic-clip": {
 		prettyLabel: "TiC-CLIP",
 		repoName: "TiC-CLIP",
