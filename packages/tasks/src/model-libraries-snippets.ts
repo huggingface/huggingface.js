@@ -879,11 +879,28 @@ export const transformers = (model: ModelData): string[] => {
 		const pipelineSnippet = ["# Use a pipeline as a high-level helper", "from transformers import pipeline", ""];
 
 		if (model.tags.includes("conversational") && model.config?.tokenizer_config?.chat_template) {
-			pipelineSnippet.push("messages = [", '    {"role": "user", "content": "Who are you?"},', "]");
+			if (model.pipeline_tag === "text-generation") {
+				pipelineSnippet.push("messages = [", '    {"role": "user", "content": "Who are you?"},', "]\n");
+			} else if (model.pipeline_tag === "image-text-to-text") {
+				pipelineSnippet.push(
+					`image_ny = "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg"`,
+					`image_chicago = "https://cdn.britannica.com/59/94459-050-DBA42467/Skyline-Chicago.jpg"`,
+					"\n"
+				);
+			}
 		}
 		pipelineSnippet.push(`pipe = pipeline("${model.pipeline_tag}", model="${model.id}"` + remote_code_snippet + ")");
 		if (model.tags.includes("conversational") && model.config?.tokenizer_config?.chat_template) {
-			pipelineSnippet.push("pipe(messages)");
+			if (model.pipeline_tag === "text-generation") {
+				pipelineSnippet.push("pipe(messages)");
+			} else if (model.pipeline_tag === "image-text-to-text") {
+				pipelineSnippet.push(
+					"pipe(",
+					"    images=[image_ny, image_chicago],",
+					`    text="<image> <image> Are these the same cities? If not what cities are these?",`,
+					")\n"
+				);
+			}
 		}
 
 		return [pipelineSnippet.join("\n"), autoSnippet];
