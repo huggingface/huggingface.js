@@ -429,7 +429,7 @@ const _keras_hub_image_classifier = (modelId: string): string => `
 import keras_hub
 
 # Load ImageClassifier model
-text_classifier = keras_hub.models.ImageClassifier.from_preset(${modelId})
+image_classifier = keras_hub.models.ImageClassifier.from_preset(${modelId})
 
 # Classify image
 image_classifier.predict(keras.ops.ones((1, 64, 64, 3)))
