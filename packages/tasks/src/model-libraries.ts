@@ -546,7 +546,10 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/mlfoundations/open_clip",
 		snippets: snippets.open_clip,
 		filter: true,
-		countDownloads: `path_extension:"bin" AND path_filename:*pytorch_model`,
+		countDownloads: `path:"open_clip_model.safetensors"
+			OR path:"model.safetensors"
+			OR path:"open_clip_pytorch_model.bin"
+			OR path:"pytorch_model.bin"`,
 	},
 	paddlenlp: {
 		prettyLabel: "paddlenlp",
