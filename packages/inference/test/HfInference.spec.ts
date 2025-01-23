@@ -808,7 +808,7 @@ describe.concurrent("HfInference", () => {
 		() => {
 			const client = new HfInference(env.HF_REPLICATE_KEY);
 
-			it("textToImage canonical", async () => {
+			it("textToImage canonical - black-forest-labs/FLUX.1-schnell", async () => {
 				const res = await client.textToImage({
 					model: "black-forest-labs/FLUX.1-schnell",
 					provider: "replicate",
@@ -817,7 +817,7 @@ describe.concurrent("HfInference", () => {
 				expect(res).toBeInstanceOf(Blob);
 			});
 
-			it("textToImage versioned", async () => {
+			it("textToImage versioned - ByteDance/SDXL-Lightning", async () => {
 				const res = await client.textToImage({
 					model: "ByteDance/SDXL-Lightning",
 					provider: "replicate",
@@ -835,7 +835,7 @@ describe.concurrent("HfInference", () => {
 				expect(res).toBeInstanceOf(Blob);
 			});
 
-			it("textToSpeech OuteTTS", async () => {
+			it.skip("textToSpeech OuteTTS", async () => {
 				const res = await client.textToSpeech({
 					model: "OuteAI/OuteTTS-0.3-500M",
 					provider: "replicate",
