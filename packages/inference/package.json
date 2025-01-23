@@ -49,7 +49,6 @@
 		"prepublishOnly": "pnpm run build",
 		"test": "vitest run --config vitest.config.mts",
 		"test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest.config.mts",
-		"test:replicate": "vitest run --config vitest.config.mts -t \"Replicate\"",
 		"check": "tsc"
 	},
 	"dependencies": {
