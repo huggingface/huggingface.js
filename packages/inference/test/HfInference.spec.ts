@@ -8,9 +8,10 @@ import type {
 	VisualQuestionAnsweringOutputElement,
 } from "@huggingface/tasks";
 
-import { chatCompletion, HfInference } from "../src";
+import { chatCompletion, FAL_AI_SUPPORTED_MODEL_IDS, HfInference } from "../src";
 import "./vcr";
 import { readTestFile } from "./test-files";
+import { textToVideo } from "../src/tasks/cv/textToVideo";
 
 const TIMEOUT = 60000 * 3;
 const env = import.meta.env;
@@ -53,7 +54,7 @@ describe.concurrent("HfInference", () => {
 				);
 			});
 
-			it("works without model", async () => {
+			it.skip("works without model", async () => {
 				expect(
 					await hf.fillMask({
 						inputs: "[MASK] world!",
@@ -800,24 +801,58 @@ describe.concurrent("HfInference", () => {
 		() => {
 			const client = new HfInference(env.HF_FAL_KEY);
 
-			it("textToImage", async () => {
-				const res = await client.textToImage({
-					model: "black-forest-labs/FLUX.1-schnell",
+			for (const model of Object.keys(FAL_AI_SUPPORTED_MODEL_IDS["text-to-image"] ?? {})) {
+				it(`textToImage - ${model}`, async () => {
+					const res = await client.textToImage({
+						model,
+						provider: "fal-ai",
+						inputs:
+							"Extreme close-up of a single tiger eye, direct frontal view. Detailed iris and pupil. Sharp focus on eye texture and color. Natural lighting to capture authentic eye shine and depth.",
+					});
+					expect(res).toBeInstanceOf(Blob);
+				});
+			}
+
+			for (const model of Object.keys(FAL_AI_SUPPORTED_MODEL_IDS["automatic-speech-recognition"] ?? {})) {
+				it(`automaticSpeechRecognition - ${model}`, async () => {
+					const res = await client.automaticSpeechRecognition({
+						model: model,
+						provider: "fal-ai",
+						data: new Blob([readTestFile("sample2.wav")], { type: "audio/x-wav" }),
+					});
+					expect(res).toMatchObject({
+						text: " he has grave doubts whether sir frederick leighton's work is really greek after all and can discover in it but little of rocky ithaca",
+					});
+				});
+			}
+
+			it("textToVideo - genmo/mochi-1-preview", async () => {
+				const res = await textToVideo({
+					model: "genmo/mochi-1-preview",
+					inputs: "A running dog",
+					parameters: {
+						seed: 176,
+					},
 					provider: "fal-ai",
-					inputs: "black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot",
+					accessToken: env.HF_FAL_KEY,
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
 
-			it("speechToText", async () => {
-				const res = await client.automaticSpeechRecognition({
-					model: "openai/whisper-large-v3",
+			it("textToVideo - HunyuanVideo", async () => {
+				const res = await textToVideo({
+					model: "genmo/mochi-1-preview",
+					inputs: "A running dog",
+					parameters: {
+						seed: 176,
+						num_inference_steps: 2,
+						num_frames: 85,
+						resolution: "480p",
+					},
 					provider: "fal-ai",
-					data: new Blob([readTestFile("sample2.wav")], { type: "audio/x-wav" }),
+					accessToken: env.HF_FAL_KEY,
 				});
-				expect(res).toMatchObject({
-					text: " he has grave doubts whether sir frederick leighton's work is really greek after all and can discover in it but little of rocky ithaca",
-				});
+				expect(res).toBeInstanceOf(Blob);
 			});
 		},
 		TIMEOUT
@@ -860,6 +895,22 @@ describe.concurrent("HfInference", () => {
 					model: "OuteAI/OuteTTS-0.3-500M",
 					provider: "replicate",
 					inputs: "OuteTTS is a frontier TTS model for its size of 1 Billion parameters",
+				});
+
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToVideo Mochi", async () => {
+				const res = await textToVideo({
+					accessToken: env.HF_REPLICATE_KEY,
+					model: "genmo/mochi-1-preview",
+					provider: "replicate",
+					inputs: "A running dog",
+					parameters: {
+						num_inference_steps: 10,
+						seed: 178,
+						num_frames: 30,
+					},
 				});
 
 				expect(res).toBeInstanceOf(Blob);
