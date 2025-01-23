@@ -20,7 +20,7 @@ export type DocumentQuestionAnsweringArgs = BaseArgs &
 export async function documentQuestionAnswering(
 	args: DocumentQuestionAnsweringArgs,
 	options?: Options
-): Promise<DocumentQuestionAnsweringOutput> {
+): Promise<DocumentQuestionAnsweringOutput[number]> {
 	const reqArgs: RequestArgs = {
 		...args,
 		inputs: {
@@ -51,5 +51,5 @@ export async function documentQuestionAnswering(
 		throw new InferenceOutputError("Expected Array<{answer: string, end?: number, score?: number, start?: number}>");
 	}
 
-	return res;
+	return res[0];
 }

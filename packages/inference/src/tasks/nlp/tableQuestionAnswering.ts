@@ -11,7 +11,7 @@ export type TableQuestionAnsweringArgs = BaseArgs & TableQuestionAnsweringInput;
 export async function tableQuestionAnswering(
 	args: TableQuestionAnsweringArgs,
 	options?: Options
-): Promise<TableQuestionAnsweringOutput> {
+): Promise<TableQuestionAnsweringOutput[number]> {
 	const res = await request<TableQuestionAnsweringOutput | TableQuestionAnsweringOutput[number]>(args, {
 		...options,
 		taskHint: "table-question-answering",
@@ -22,7 +22,7 @@ export async function tableQuestionAnswering(
 			"Expected {aggregator: string, answer: string, cells: string[], coordinates: number[][]}"
 		);
 	}
-	return Array.isArray(res) ? res : [res];
+	return Array.isArray(res) ? res[0] : res;
 }
 
 function validate(elem: unknown): elem is TableQuestionAnsweringOutput[number] {

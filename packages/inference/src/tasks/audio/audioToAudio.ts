@@ -6,11 +6,11 @@ import { preparePayload } from "./utils";
 
 export type AudioToAudioArgs =
 	| (BaseArgs & {
-			/**
-			 * Binary audio data
-			 */
-			inputs: Blob;
-	  })
+		/**
+		 * Binary audio data
+		 */
+		inputs: Blob;
+	})
 	| LegacyAudioInput;
 
 export interface AudioToAudioOutputElem {
@@ -25,9 +25,7 @@ export interface AudioToAudioOutputElem {
 	audio: Blob;
 }
 
-export type AudioToAudioOutput = AudioToAudioOutputElem[];
-
-interface LegacyOutput {
+export interface AudioToAudioOutput {
 	blob: string;
 	"content-type": string;
 	label: string;
@@ -37,9 +35,9 @@ interface LegacyOutput {
  * This task reads some audio input and outputs one or multiple audio files.
  * Example model: speechbrain/sepformer-wham does audio source separation.
  */
-export async function audioToAudio(args: AudioToAudioArgs, options?: Options): Promise<AudioToAudioOutput> {
+export async function audioToAudio(args: AudioToAudioArgs, options?: Options): Promise<AudioToAudioOutput[]> {
 	const payload = preparePayload(args);
-	const res = await request<AudioToAudioOutput | LegacyOutput[]>(payload, {
+	const res = await request<AudioToAudioOutput>(payload, {
 		...options,
 		taskHint: "audio-to-audio",
 	});
@@ -47,26 +45,12 @@ export async function audioToAudio(args: AudioToAudioArgs, options?: Options): P
 	return validateOutput(res);
 }
 
-function validateOutput(output: unknown): AudioToAudioOutput {
+function validateOutput(output: unknown): AudioToAudioOutput[] {
 	if (!Array.isArray(output)) {
 		throw new InferenceOutputError("Expected Array");
 	}
 	if (
-		output.every((elem): elem is AudioToAudioOutputElem => {
-			return (
-				typeof elem === "object" &&
-				elem &&
-				"label" in elem &&
-				typeof elem.label === "string" &&
-				"audio" in elem &&
-				elem.audio instanceof Blob
-			);
-		})
-	) {
-		return output;
-	}
-	if (
-		output.every((elem): elem is LegacyOutput => {
+		!output.every((elem): elem is AudioToAudioOutput => {
 			return (
 				typeof elem === "object" &&
 				elem &&
@@ -79,10 +63,7 @@ function validateOutput(output: unknown): AudioToAudioOutput {
 			);
 		})
 	) {
-		return output.map((elem) => ({
-			label: elem.label,
-			audio: new Blob([elem.blob], { type: elem["content-type"] }),
-		}));
+		throw new InferenceOutputError("Expected Array<{label: string, audio: Blob}>");
 	}
-	throw new InferenceOutputError("Expected Array<{label: string, audio: Blob}>");
+	return output
 }

@@ -18,7 +18,7 @@ export type VisualQuestionAnsweringArgs = BaseArgs &
 export async function visualQuestionAnswering(
 	args: VisualQuestionAnsweringArgs,
 	options?: Options
-): Promise<VisualQuestionAnsweringOutput> {
+): Promise<VisualQuestionAnsweringOutput[number]> {
 	const reqArgs: RequestArgs = {
 		...args,
 		inputs: {
@@ -39,5 +39,5 @@ export async function visualQuestionAnswering(
 	if (!isValidOutput) {
 		throw new InferenceOutputError("Expected Array<{answer: string, score: number}>");
 	}
-	return res;
+	return res[0];
 }
