@@ -851,7 +851,8 @@ describe.concurrent("HfInference", () => {
 				const res = await client.textToImage({
 					model: "black-forest-labs/FLUX.1-dev",
 					provider: "replicate",
-					inputs: "A tiny laboratory deep in the Black Forest where squirrels in lab coats experiment with mixing chocolate and pine cones",
+					inputs:
+						"A tiny laboratory deep in the Black Forest where squirrels in lab coats experiment with mixing chocolate and pine cones",
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
@@ -868,7 +869,7 @@ describe.concurrent("HfInference", () => {
 			it("textToImage versioned - ByteDance/SDXL-Lightning", async () => {
 				const res = await client.textToImage({
 					model: "ByteDance/SDXL-Lightning",
-					provider: "replicate", 
+					provider: "replicate",
 					inputs: "A grumpy storm cloud wearing sunglasses and throwing tiny lightning bolts like confetti",
 				});
 				expect(res).toBeInstanceOf(Blob);
@@ -877,7 +878,7 @@ describe.concurrent("HfInference", () => {
 			it("textToImage versioned - ByteDance/Hyper-SD", async () => {
 				const res = await client.textToImage({
 					model: "ByteDance/Hyper-SD",
-					provider: "replicate", 
+					provider: "replicate",
 					inputs: "A group of dancing bytes wearing tiny party hats doing the macarena in cyberspace",
 				});
 				expect(res).toBeInstanceOf(Blob);
@@ -895,7 +896,7 @@ describe.concurrent("HfInference", () => {
 			it("textToImage versioned - stabilityai/stable-diffusion-xl-base-1.0", async () => {
 				const res = await client.textToImage({
 					model: "stabilityai/stable-diffusion-xl-base-1.0",
-					provider: "replicate", 
+					provider: "replicate",
 					inputs: "An octopus juggling watermelons underwater while wearing scuba gear",
 				});
 				expect(res).toBeInstanceOf(Blob);
