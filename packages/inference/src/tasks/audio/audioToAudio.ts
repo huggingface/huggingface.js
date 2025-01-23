@@ -6,11 +6,11 @@ import { preparePayload } from "./utils";
 
 export type AudioToAudioArgs =
 	| (BaseArgs & {
-		/**
-		 * Binary audio data
-		 */
-		inputs: Blob;
-	})
+			/**
+			 * Binary audio data
+			 */
+			inputs: Blob;
+	  })
 	| LegacyAudioInput;
 
 export interface AudioToAudioOutputElem {
@@ -65,5 +65,5 @@ function validateOutput(output: unknown): AudioToAudioOutput[] {
 	) {
 		throw new InferenceOutputError("Expected Array<{label: string, audio: Blob}>");
 	}
-	return output
+	return output;
 }
