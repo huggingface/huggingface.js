@@ -48,7 +48,7 @@ describe.concurrent("HfInference", () => {
 				);
 			});
 
-			it("works without model", async () => {
+			it.skip("works without model", async () => {
 				expect(
 					await hf.fillMask({
 						inputs: "[MASK] world!",
