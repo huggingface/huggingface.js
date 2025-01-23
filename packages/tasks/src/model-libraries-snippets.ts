@@ -394,32 +394,103 @@ model = keras.saving.load_model("hf://${model.id}")
 `,
 ];
 
-export const keras_nlp = (model: ModelData): string[] => [
-	`# Available backend options are: "jax", "torch", "tensorflow".
-import os
-os.environ["KERAS_BACKEND"] = "jax"
-
-import keras_nlp
-
-tokenizer = keras_nlp.models.Tokenizer.from_preset("hf://${model.id}")
-backbone = keras_nlp.models.Backbone.from_preset("hf://${model.id}")
-`,
-];
-
-export const keras_hub = (model: ModelData): string[] => [
-	`# Available backend options are: "jax", "torch", "tensorflow".
-import os
-os.environ["KERAS_BACKEND"] = "jax"
-
+const _keras_hub_causal_lm = (modelId: string): string => `
 import keras_hub
 
-# Load a task-specific model (*replace CausalLM with your task*)
-model = keras_hub.models.CausalLM.from_preset("hf://${model.id}", dtype="bfloat16")
+# Load CausalLM model (optional: use half precision for inference)
+causal_lm = keras_hub.models.CausalLM.from_preset(${modelId}, dtype="bfloat16")
+causal_lm.compile(sampler="greedy")  # (optional) specify a sampler
 
-# Possible tasks are CausalLM, TextToImage, ImageClassifier, ...
-# full list here: https://keras.io/api/keras_hub/models/#api-documentation
-`,
-];
+# Generate text
+causal_lm.generate("Keras: deep learning for", max_length=64)
+`;
+
+const _keras_hub_text_to_image = (modelId: string): string => `
+import keras_hub
+
+# Load TextToImage model (optional: use half precision for inference)
+text_to_image = keras_hub.models.TextToImage.from_preset(${modelId}, dtype="bfloat16")
+
+# Generate images with a TextToImage model.
+text_to_image.generate("Astronaut in a jungle")
+`;
+
+const _keras_hub_text_classifier = (modelId: string): string => `
+import keras_hub
+
+# Load TextClassifier model
+text_classifier = keras_hub.models.TextClassifier.from_preset(
+    ${modelId},
+    num_classes=2,
+)
+# Fine-tune
+text_classifier.fit(x=["Thilling adventure!", "Total snoozefest."], y=[1, 0])
+# Classify text
+text_classifier.predict(["Not my cup of tea."])
+`;
+
+const _keras_hub_image_classifier = (modelId: string): string => `
+import keras_hub
+import keras
+
+# Load ImageClassifier model
+image_classifier = keras_hub.models.ImageClassifier.from_preset(
+    ${modelId},
+    num_classes=2,
+)
+# Fine-tune
+image_classifier.fit(
+    x=keras.random.randint((32, 64, 64, 3), 0, 256),
+    y=keras.random.randint((32, 1), 0, 2),
+)
+# Classify image
+image_classifier.predict(keras.random.randint((1, 64, 64, 3), 0, 256))
+`;
+
+const _keras_hub_tasks_with_example = {
+	CausalLM: _keras_hub_causal_lm,
+	TextToImage: _keras_hub_text_to_image,
+	TextClassifier: _keras_hub_text_classifier,
+	ImageClassifier: _keras_hub_image_classifier,
+};
+
+const _keras_hub_task_without_example = (task: string, modelId: string): string => `
+import keras_hub
+
+# Create a ${task} model
+task = keras_hub.models.${task}.from_preset(${modelId})
+`;
+
+const _keras_hub_generic_backbone = (modelId: string): string => `
+import keras_hub
+
+# Create a Backbone model unspecialized for any task
+backbone = keras_hub.models.Backbone.from_preset(${modelId})
+`;
+
+export const keras_hub = (model: ModelData): string[] => {
+	const modelId = model.id;
+	const tasks = model.config?.keras_hub?.tasks ?? [];
+
+	const snippets: string[] = [];
+
+	// First, generate tasks with examples
+	for (const [task, snippet] of Object.entries(_keras_hub_tasks_with_example)) {
+		if (tasks.includes(task)) {
+			snippets.push(snippet(modelId));
+		}
+	}
+	// Then, add remaining tasks
+	for (const task in tasks) {
+		if (!Object.keys(_keras_hub_tasks_with_example).includes(task)) {
+			snippets.push(_keras_hub_task_without_example(task, modelId));
+		}
+	}
+	// Finally, add generic backbone snippet
+	snippets.push(_keras_hub_generic_backbone(modelId));
+
+	return snippets;
+};
 
 export const llama_cpp_python = (model: ModelData): string[] => {
 	const snippets = [

@@ -404,13 +404,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.tf_keras,
 		countDownloads: `path:"saved_model.pb"`,
 	},
-	"keras-nlp": {
-		prettyLabel: "KerasNLP",
-		repoName: "KerasNLP",
-		repoUrl: "https://github.com/keras-team/keras-nlp",
-		docsUrl: "https://keras.io/keras_nlp/",
-		snippets: snippets.keras_nlp,
-	},
 	"keras-hub": {
 		prettyLabel: "KerasHub",
 		repoName: "KerasHub",
