@@ -159,8 +159,8 @@ export function getCurlInferenceSnippet(
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
 	return model.pipeline_tag && model.pipeline_tag in curlSnippets
-		? curlSnippets[model.pipeline_tag]?.(model, accessToken, provider, opts) ?? []
-		: [];
+		? curlSnippets[model.pipeline_tag]?.(model, accessToken, provider, opts) ?? [{ content: "" }]
+		: [{ content: "" }];
 }
 
 export function hasCurlInferenceSnippet(model: Pick<ModelDataMinimal, "pipeline_tag">): boolean {
