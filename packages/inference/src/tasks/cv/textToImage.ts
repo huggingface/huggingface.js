@@ -1,5 +1,6 @@
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
+import { omit } from "../../utils/omit";
 import { request } from "../custom/request";
 
 export type TextToImageArgs = BaseArgs & {
@@ -57,15 +58,16 @@ interface OutputUrlImageGeneration {
  * Recommended model: stabilityai/stable-diffusion-2
  */
 export async function textToImage(args: TextToImageArgs, options?: Options): Promise<TextToImageOutput> {
-	if (args.provider === "together" || args.provider === "fal-ai") {
-		args.prompt = args.inputs;
-		delete (args as unknown as { inputs: unknown }).inputs;
-		args.response_format = "base64";
-	} else if (args.provider === "replicate") {
-		args.prompt = args.inputs;
-		delete (args as unknown as { inputs: unknown }).inputs;
-	}
-	const res = await request<TextToImageOutput | Base64ImageGeneration | OutputUrlImageGeneration>(args, {
+	const payload =
+		args.provider === "together" || args.provider === "fal-ai" || args.provider === "replicate"
+			? {
+					...omit(args, ["inputs", "parameters"]),
+					...args.parameters,
+					...(args.provider !== "replicate" ? { response_format: "base64" } : undefined),
+					prompt: args.inputs,
+			  }
+			: args;
+	const res = await request<TextToImageOutput | Base64ImageGeneration | OutputUrlImageGeneration>(payload, {
 		...options,
 		taskHint: "text-to-image",
 	});
