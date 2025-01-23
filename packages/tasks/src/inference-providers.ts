@@ -2,7 +2,7 @@ export const INFERENCE_PROVIDERS = ["hf-inference", "fal-ai", "replicate", "samb
 
 export type InferenceProvider = (typeof INFERENCE_PROVIDERS)[number];
 
-const HF_HUB_INFERENCE_PROXY_TEMPLATE = `https://huggingface.co/api/inference-proxy/{{PROVIDER}}`;
+export const HF_HUB_INFERENCE_PROXY_TEMPLATE = `https://huggingface.co/api/inference-proxy/{{PROVIDER}}`;
 
 /**
  * URL to set as baseUrl in the OpenAI SDK.
