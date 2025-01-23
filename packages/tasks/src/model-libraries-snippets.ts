@@ -95,7 +95,7 @@ export const bm25s = (model: ModelData): string[] => [
 retriever = BM25HF.load_from_hub("${model.id}")`,
 ];
 
-export const cxr_foundation = (model: ModelData): string[] => [
+export const cxr_foundation = (): string[] => [
 	`!git clone https://github.com/Google-Health/cxr-foundation.git
 import tensorflow as tf, sys, requests
 sys.path.append('cxr-foundation/python/')
@@ -191,7 +191,7 @@ focallength_px = prediction["focallength_px"]`;
 	return [installSnippet, inferenceSnippet];
 };
 
-export const derm_foundation = (model: ModelData): string[] => [
+export const derm_foundation = (): string[] => [
 	`from huggingface_hub import from_pretrained_keras
 import tensorflow as tf, requests
 
