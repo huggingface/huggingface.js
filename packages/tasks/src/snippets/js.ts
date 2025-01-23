@@ -1,4 +1,4 @@
-import type { InferenceProvider } from "../inference-providers.js";
+import { HF_HUB_INFERENCE_PROXY_TEMPLATE, type InferenceProvider } from "../inference-providers.js";
 import type { PipelineType } from "../pipelines.js";
 import type { ChatCompletionInputMessage, GenerationParameters } from "../tasks/index.js";
 import { stringifyGenerationConfig, stringifyMessages } from "./common.js";
@@ -51,6 +51,11 @@ export const snippetTextGeneration = (
 		top_p?: GenerationParameters["top_p"];
 	}
 ): InferenceSnippet[] => {
+	const openAIbaseUrl =
+		provider === "hf-inference"
+			? "https://api-inference.huggingface.co/v1/"
+			: HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", provider);
+
 	if (model.tags.includes("conversational")) {
 		// Conversational model detected, so we display a code snippet that features the Messages API
 		const streaming = opts?.streaming ?? true;
@@ -93,15 +98,13 @@ for await (const chunk of stream) {
 	}  
 }`,
 				},
-				...(provider === "hf-inference"
-					? [
-						{
-							client: "openai",
-							content: `import { OpenAI } from "openai";
+				{
+					client: "openai",
+					content: `import { OpenAI } from "openai";
 
 const client = new OpenAI({
-	baseURL: "https://api-inference.huggingface.co/v1/",
-    apiKey: "${accessToken || `{API_TOKEN}`}"
+	baseURL: "${openAIbaseUrl}",
+	apiKey: "${accessToken || `{API_TOKEN}`}"
 });
 
 let out = "";
@@ -120,9 +123,7 @@ for await (const chunk of stream) {
 		console.log(newContent);
 	}  
 }`,
-						},
-					]
-					: []),
+				},
 			];
 		} else {
 			return [
@@ -141,15 +142,13 @@ const chatCompletion = await client.chatCompletion({
 
 console.log(chatCompletion.choices[0].message);`,
 				},
-				...(provider === "hf-inference"
-					? [
-						{
-							client: "openai",
-							content: `import { OpenAI } from "openai";
+				{
+					client: "openai",
+					content: `import { OpenAI } from "openai";
 
 const client = new OpenAI({
-    baseURL: "https://api-inference.huggingface.co/v1/",
-    apiKey: "${accessToken || `{API_TOKEN}`}"
+	baseURL: "${openAIbaseUrl}",
+	apiKey: "${accessToken || `{API_TOKEN}`}"
 });
 
 const chatCompletion = await client.chat.completions.create({
@@ -159,9 +158,7 @@ const chatCompletion = await client.chat.completions.create({
 });
 
 console.log(chatCompletion.choices[0].message);`,
-						},
-					]
-					: []),
+				},
 			];
 		}
 	} else {
@@ -227,9 +224,9 @@ infer(${getModelInputSnippet(model)}, { num_inference_steps: 5 }).then((image) =
 		},
 		...(provider === "hf-inference"
 			? [
-				{
-					client: "fetch",
-					content: `async function query(data) {
+					{
+						client: "fetch",
+						content: `async function query(data) {
 	const response = await fetch(
 		"https://api-inference.huggingface.co/models/${model.id}",
 		{
@@ -247,8 +244,8 @@ infer(${getModelInputSnippet(model)}, { num_inference_steps: 5 }).then((image) =
 query({"inputs": ${getModelInputSnippet(model)}}).then((response) => {
 	// Use image
 });`,
-				},
-			]
+					},
+			  ]
 			: []),
 	];
 };
@@ -385,7 +382,7 @@ export const jsSnippets: Partial<
 		) => InferenceSnippet[]
 	>
 > = {
-	// Same order as in src/pipelines.ts
+	// Same order as in tasks/src/pipelines.ts
 	"text-classification": snippetBasic,
 	"token-classification": snippetBasic,
 	"table-question-answering": snippetBasic,

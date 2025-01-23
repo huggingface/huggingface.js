@@ -1,3 +1,4 @@
+import type { InferenceProvider } from "../inference-providers.js";
 import type { PipelineType } from "../pipelines.js";
 import type { ChatCompletionInputMessage, GenerationParameters } from "../tasks/index.js";
 import { stringifyGenerationConfig, stringifyMessages } from "./common.js";
@@ -79,7 +80,7 @@ export const curlSnippets: Partial<
 		(model: ModelDataMinimal, accessToken: string, opts?: Record<string, unknown>) => InferenceSnippet
 	>
 > = {
-	// Same order as in js/src/lib/interfaces/Types.ts
+	// Same order as in tasks/src/pipelines.ts
 	"text-classification": snippetBasic,
 	"token-classification": snippetBasic,
 	"table-question-answering": snippetBasic,
@@ -108,11 +109,14 @@ export const curlSnippets: Partial<
 export function getCurlInferenceSnippet(
 	model: ModelDataMinimal,
 	accessToken: string,
+	provider: InferenceProvider,
 	opts?: Record<string, unknown>
-): InferenceSnippet {
-	return model.pipeline_tag && model.pipeline_tag in curlSnippets
-		? curlSnippets[model.pipeline_tag]?.(model, accessToken, opts) ?? { content: "" }
-		: { content: "" };
+): InferenceSnippet[] {
+	const snippets =
+		model.pipeline_tag && model.pipeline_tag in curlSnippets
+			? curlSnippets[model.pipeline_tag]?.(model, accessToken, opts) ?? [{ content: "" }]
+			: [{ content: "" }];
+	return Array.isArray(snippets) ? snippets : [snippets];
 }
 
 export function hasCurlInferenceSnippet(model: Pick<ModelDataMinimal, "pipeline_tag">): boolean {

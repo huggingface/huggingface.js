@@ -1,3 +1,4 @@
+import type { InferenceProvider } from "../inference-providers.js";
 import type { PipelineType } from "../pipelines.js";
 import type { ChatCompletionInputMessage, GenerationParameters } from "../tasks/index.js";
 import { stringifyGenerationConfig, stringifyMessages } from "./common.js";
@@ -287,16 +288,17 @@ export const pythonSnippets: Partial<
 export function getPythonInferenceSnippet(
 	model: ModelDataMinimal,
 	accessToken: string,
+	provider: InferenceProvider,
 	opts?: Record<string, unknown>
-): InferenceSnippet | InferenceSnippet[] {
+): InferenceSnippet[] {
 	if (model.tags.includes("conversational")) {
 		// Conversational model detected, so we display a code snippet that features the Messages API
 		return snippetConversational(model, accessToken, opts);
 	} else {
 		let snippets =
 			model.pipeline_tag && model.pipeline_tag in pythonSnippets
-				? pythonSnippets[model.pipeline_tag]?.(model, accessToken) ?? { content: "" }
-				: { content: "" };
+				? pythonSnippets[model.pipeline_tag]?.(model, accessToken) ?? [{ content: "" }]
+				: [{ content: "" }];
 
 		snippets = Array.isArray(snippets) ? snippets : [snippets];
 
