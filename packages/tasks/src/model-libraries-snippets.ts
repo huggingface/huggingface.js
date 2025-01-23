@@ -961,6 +961,12 @@ model.${speechbrainMethod}("file.wav")`,
 	];
 };
 
+export const terratorch = (model: ModelData): string[] => [
+	`from terratorch.registry import BACKBONE_REGISTRY
+
+model = BACKBONE_REGISTRY.build("${model.id}")`,
+];
+
 export const transformers = (model: ModelData): string[] => {
 	const info = model.transformersInfo;
 	if (!info) {
