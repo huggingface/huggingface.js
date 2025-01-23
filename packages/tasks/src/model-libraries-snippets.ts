@@ -419,20 +419,32 @@ const _keras_hub_text_classifier = (modelId: string): string => `
 import keras_hub
 
 # Load TextClassifier model
-text_classifier = keras_hub.models.TextClassifier.from_preset(${modelId})
-
+text_classifier = keras_hub.models.TextClassifier.from_preset(
+    ${modelId},
+    num_classes=2,
+)
+# Fine-tune
+text_classifier.fit(x=["Thilling adventure!", "Total snoozefest."], y=[1, 0])
 # Classify text
-text_classifier.predict("Keras is a multi-backend ML framework.")
+text_classifier.predict(["Not my cup of tea."])
 `;
 
 const _keras_hub_image_classifier = (modelId: string): string => `
 import keras_hub
+import keras
 
 # Load ImageClassifier model
-image_classifier = keras_hub.models.ImageClassifier.from_preset(${modelId})
-
+image_classifier = keras_hub.models.ImageClassifier.from_preset(
+    ${modelId},
+    num_classes=2,
+)
+# Fine-tune
+image_classifier.fit(
+    x=keras.random.randint((32, 64, 64, 3), 0, 256),
+    y=keras.random.randint((32, 1), 0, 2),
+)
 # Classify image
-image_classifier.predict(keras.ops.ones((1, 64, 64, 3)))
+image_classifier.predict(keras.random.randint((1, 64, 64, 3), 0, 256))
 `;
 
 const _keras_hub_tasks_with_example = {
