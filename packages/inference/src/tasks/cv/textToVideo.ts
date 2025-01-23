@@ -54,6 +54,8 @@ export async function textToVideo(args: TextToVideoArgs, options?: Options): Pro
 		const urlResponse = await fetch(res.video.url);
 		return await urlResponse.blob();
 	} else {
+		/// TODO: Replicate: handle the case where the generation request "times out" / is async (ie output is null)
+		/// https://replicate.com/docs/topics/predictions/create-a-prediction
 		const isValidOutput =
 			typeof res === "object" && !!res && "output" in res && typeof res.output === "string" && isUrl(res.output);
 		if (!isValidOutput) {
