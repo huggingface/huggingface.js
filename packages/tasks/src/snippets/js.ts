@@ -208,7 +208,7 @@ async function infer(prompt, parameters) {
 		parameters,
 		model: "${model.id}",
 		provider: "${provider}",
-		accessToken: "${accessToken}
+		accessToken: "${accessToken}",
 	});
 }
 
