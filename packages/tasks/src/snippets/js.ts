@@ -385,7 +385,7 @@ export const jsSnippets: Partial<
 		) => InferenceSnippet[]
 	>
 > = {
-	// Same order as in js/src/lib/interfaces/Types.ts
+	// Same order as in src/pipelines.ts
 	"text-classification": snippetBasic,
 	"token-classification": snippetBasic,
 	"table-question-answering": snippetBasic,
