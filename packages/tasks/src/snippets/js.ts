@@ -1,4 +1,4 @@
-import { HF_HUB_INFERENCE_PROXY_TEMPLATE, type InferenceProvider } from "../inference-providers.js";
+import { HF_HUB_INFERENCE_PROXY_TEMPLATE, openAIbaseUrl, type InferenceProvider } from "../inference-providers.js";
 import type { PipelineType } from "../pipelines.js";
 import type { ChatCompletionInputMessage, GenerationParameters } from "../tasks/index.js";
 import { stringifyGenerationConfig, stringifyMessages } from "./common.js";
@@ -51,11 +51,6 @@ export const snippetTextGeneration = (
 		top_p?: GenerationParameters["top_p"];
 	}
 ): InferenceSnippet[] => {
-	const openAIbaseUrl =
-		provider === "hf-inference"
-			? "https://api-inference.huggingface.co/v1/"
-			: HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", provider);
-
 	if (model.tags.includes("conversational")) {
 		// Conversational model detected, so we display a code snippet that features the Messages API
 		const streaming = opts?.streaming ?? true;
@@ -103,7 +98,7 @@ for await (const chunk of stream) {
 					content: `import { OpenAI } from "openai";
 
 const client = new OpenAI({
-	baseURL: "${openAIbaseUrl}",
+	baseURL: "${openAIbaseUrl(provider)}",
 	apiKey: "${accessToken || `{API_TOKEN}`}"
 });
 
@@ -147,7 +142,7 @@ console.log(chatCompletion.choices[0].message);`,
 					content: `import { OpenAI } from "openai";
 
 const client = new OpenAI({
-	baseURL: "${openAIbaseUrl}",
+	baseURL: "${openAIbaseUrl(provider)}",
 	apiKey: "${accessToken || `{API_TOKEN}`}"
 });
 
@@ -187,8 +182,8 @@ export const snippetZeroShotClassification = (model: ModelDataMinimal, accessTok
 		}
 		
 		query({"inputs": ${getModelInputSnippet(
-				model
-			)}, "parameters": {"candidate_labels": ["refund", "legal", "faq"]}}).then((response) => {
+			model
+		)}, "parameters": {"candidate_labels": ["refund", "legal", "faq"]}}).then((response) => {
 			console.log(JSON.stringify(response));
 		});`,
 		},
