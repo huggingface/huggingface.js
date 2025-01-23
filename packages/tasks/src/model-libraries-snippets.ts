@@ -95,6 +95,29 @@ export const bm25s = (model: ModelData): string[] => [
 retriever = BM25HF.load_from_hub("${model.id}")`,
 ];
 
+export const cxr_foundation = (model: ModelData): string[] => [
+	`!git clone https://github.com/Google-Health/cxr-foundation.git
+import tensorflow as tf, sys, requests
+sys.path.append('cxr-foundation/python/')
+
+# Install dependencies
+major_version = tf.__version__.rsplit(".", 1)[0]
+!pip install tensorflow-text=={major_version} pypng && pip install --no-deps pydicom hcls_imaging_ml_toolkit retrying
+
+# Load image (Stillwaterising, CC0, via Wikimedia Commons)
+from PIL import Image
+from io import BytesIO
+image_url = "https://upload.wikimedia.org/wikipedia/commons/c/c8/Chest_Xray_PA_3-8-2010.png"
+response = requests.get(image_url, headers={'User-Agent': 'Demo'}, stream=True)
+response.raw.decode_content = True # Ensure correct decoding
+img = Image.open(BytesIO(response.content)).convert('L') # Convert to grayscale
+
+# Run inference
+from clientside.clients import make_hugging_face_client
+cxr_client = make_hugging_face_client('cxr_model')
+print(cxr_client.get_image_embeddings_from_images([img]))`,
+];
+
 export const depth_anything_v2 = (model: ModelData): string[] => {
 	let encoder: string;
 	let features: string;
@@ -167,6 +190,28 @@ focallength_px = prediction["focallength_px"]`;
 
 	return [installSnippet, inferenceSnippet];
 };
+
+export const derm_foundation = (model: ModelData): string[] => [
+	`from huggingface_hub import from_pretrained_keras
+import tensorflow as tf, requests
+
+# Load and format input
+IMAGE_URL = "https://storage.googleapis.com/dx-scin-public-data/dataset/images/3445096909671059178.png"
+input_tensor = tf.train.Example(
+    features=tf.train.Features(
+        feature={
+            "image/encoded": tf.train.Feature(
+                bytes_list=tf.train.BytesList(value=[requests.get(IMAGE_URL, stream=True).content])
+            )
+        }
+    )
+).SerializeToString()
+
+# Load model and run inference
+loaded_model = from_pretrained_keras("google/derm-foundation")
+infer = loaded_model.signatures["serving_default"]
+print(infer(inputs=tf.constant([input_tensor])))`,
+];
 
 const diffusersDefaultPrompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
 
@@ -394,32 +439,103 @@ model = keras.saving.load_model("hf://${model.id}")
 `,
 ];
 
-export const keras_nlp = (model: ModelData): string[] => [
-	`# Available backend options are: "jax", "torch", "tensorflow".
-import os
-os.environ["KERAS_BACKEND"] = "jax"
-
-import keras_nlp
-
-tokenizer = keras_nlp.models.Tokenizer.from_preset("hf://${model.id}")
-backbone = keras_nlp.models.Backbone.from_preset("hf://${model.id}")
-`,
-];
-
-export const keras_hub = (model: ModelData): string[] => [
-	`# Available backend options are: "jax", "torch", "tensorflow".
-import os
-os.environ["KERAS_BACKEND"] = "jax"
-
+const _keras_hub_causal_lm = (modelId: string): string => `
 import keras_hub
 
-# Load a task-specific model (*replace CausalLM with your task*)
-model = keras_hub.models.CausalLM.from_preset("hf://${model.id}", dtype="bfloat16")
+# Load CausalLM model (optional: use half precision for inference)
+causal_lm = keras_hub.models.CausalLM.from_preset(${modelId}, dtype="bfloat16")
+causal_lm.compile(sampler="greedy")  # (optional) specify a sampler
 
-# Possible tasks are CausalLM, TextToImage, ImageClassifier, ...
-# full list here: https://keras.io/api/keras_hub/models/#api-documentation
-`,
-];
+# Generate text
+causal_lm.generate("Keras: deep learning for", max_length=64)
+`;
+
+const _keras_hub_text_to_image = (modelId: string): string => `
+import keras_hub
+
+# Load TextToImage model (optional: use half precision for inference)
+text_to_image = keras_hub.models.TextToImage.from_preset(${modelId}, dtype="bfloat16")
+
+# Generate images with a TextToImage model.
+text_to_image.generate("Astronaut in a jungle")
+`;
+
+const _keras_hub_text_classifier = (modelId: string): string => `
+import keras_hub
+
+# Load TextClassifier model
+text_classifier = keras_hub.models.TextClassifier.from_preset(
+    ${modelId},
+    num_classes=2,
+)
+# Fine-tune
+text_classifier.fit(x=["Thilling adventure!", "Total snoozefest."], y=[1, 0])
+# Classify text
+text_classifier.predict(["Not my cup of tea."])
+`;
+
+const _keras_hub_image_classifier = (modelId: string): string => `
+import keras_hub
+import keras
+
+# Load ImageClassifier model
+image_classifier = keras_hub.models.ImageClassifier.from_preset(
+    ${modelId},
+    num_classes=2,
+)
+# Fine-tune
+image_classifier.fit(
+    x=keras.random.randint((32, 64, 64, 3), 0, 256),
+    y=keras.random.randint((32, 1), 0, 2),
+)
+# Classify image
+image_classifier.predict(keras.random.randint((1, 64, 64, 3), 0, 256))
+`;
+
+const _keras_hub_tasks_with_example = {
+	CausalLM: _keras_hub_causal_lm,
+	TextToImage: _keras_hub_text_to_image,
+	TextClassifier: _keras_hub_text_classifier,
+	ImageClassifier: _keras_hub_image_classifier,
+};
+
+const _keras_hub_task_without_example = (task: string, modelId: string): string => `
+import keras_hub
+
+# Create a ${task} model
+task = keras_hub.models.${task}.from_preset(${modelId})
+`;
+
+const _keras_hub_generic_backbone = (modelId: string): string => `
+import keras_hub
+
+# Create a Backbone model unspecialized for any task
+backbone = keras_hub.models.Backbone.from_preset(${modelId})
+`;
+
+export const keras_hub = (model: ModelData): string[] => {
+	const modelId = model.id;
+	const tasks = model.config?.keras_hub?.tasks ?? [];
+
+	const snippets: string[] = [];
+
+	// First, generate tasks with examples
+	for (const [task, snippet] of Object.entries(_keras_hub_tasks_with_example)) {
+		if (tasks.includes(task)) {
+			snippets.push(snippet(modelId));
+		}
+	}
+	// Then, add remaining tasks
+	for (const task in tasks) {
+		if (!Object.keys(_keras_hub_tasks_with_example).includes(task)) {
+			snippets.push(_keras_hub_task_without_example(task, modelId));
+		}
+	}
+	// Finally, add generic backbone snippet
+	snippets.push(_keras_hub_generic_backbone(modelId));
+
+	return snippets;
+};
 
 export const llama_cpp_python = (model: ModelData): string[] => {
 	const snippets = [
@@ -844,6 +960,12 @@ model = ${speechbrainInterface}.from_hparams(
 model.${speechbrainMethod}("file.wav")`,
 	];
 };
+
+export const terratorch = (model: ModelData): string[] => [
+	`from terratorch.registry import BACKBONE_REGISTRY
+
+model = BACKBONE_REGISTRY.build("${model.id}")`,
+];
 
 export const transformers = (model: ModelData): string[] => {
 	const info = model.transformersInfo;

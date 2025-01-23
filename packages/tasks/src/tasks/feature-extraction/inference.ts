@@ -3,9 +3,7 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 export type FeatureExtractionOutput = Array<number[]>;
-
 /**
  * Feature Extraction Input.
  *
@@ -36,5 +34,4 @@ export interface FeatureExtractionInput {
 	truncation_direction?: FeatureExtractionInputTruncationDirection;
 	[property: string]: unknown;
 }
-
 export type FeatureExtractionInputTruncationDirection = "Left" | "Right";

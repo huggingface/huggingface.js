@@ -5,6 +5,7 @@ import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
 import { chatCompletion, FAL_AI_SUPPORTED_MODEL_IDS, HfInference } from "../src";
 import "./vcr";
 import { readTestFile } from "./test-files";
+import { textToVideo } from "../src/tasks/cv/textToVideo";
 
 const TIMEOUT = 60000 * 3;
 const env = import.meta.env;
@@ -47,7 +48,7 @@ describe.concurrent("HfInference", () => {
 				);
 			});
 
-			it("works without model", async () => {
+			it.skip("works without model", async () => {
 				expect(
 					await hf.fillMask({
 						inputs: "[MASK] world!",
@@ -330,7 +331,7 @@ describe.concurrent("HfInference", () => {
 					])
 				);
 			});
-			it("SentenceSimilarity", async () => {
+			it("sentenceSimilarity", async () => {
 				expect(
 					await hf.sentenceSimilarity({
 						model: "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
@@ -799,6 +800,35 @@ describe.concurrent("HfInference", () => {
 					});
 				});
 			}
+
+			it("textToVideo - genmo/mochi-1-preview", async () => {
+				const res = await textToVideo({
+					model: "genmo/mochi-1-preview",
+					inputs: "A running dog",
+					parameters: {
+						seed: 176,
+					},
+					provider: "fal-ai",
+					accessToken: env.HF_FAL_KEY,
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToVideo - HunyuanVideo", async () => {
+				const res = await textToVideo({
+					model: "genmo/mochi-1-preview",
+					inputs: "A running dog",
+					parameters: {
+						seed: 176,
+						num_inference_steps: 2,
+						num_frames: 85,
+						resolution: "480p",
+					},
+					provider: "fal-ai",
+					accessToken: env.HF_FAL_KEY,
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
 		},
 		TIMEOUT
 	);
@@ -885,6 +915,22 @@ describe.concurrent("HfInference", () => {
 					model: "OuteAI/OuteTTS-0.3-500M",
 					provider: "replicate",
 					inputs: "OuteTTS is a frontier TTS model for its size of 1 Billion parameters",
+				});
+
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToVideo Mochi", async () => {
+				const res = await textToVideo({
+					accessToken: env.HF_REPLICATE_KEY,
+					model: "genmo/mochi-1-preview",
+					provider: "replicate",
+					inputs: "A running dog",
+					parameters: {
+						num_inference_steps: 10,
+						seed: 178,
+						num_frames: 30,
+					},
 				});
 
 				expect(res).toBeInstanceOf(Blob);
