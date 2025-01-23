@@ -95,6 +95,29 @@ export const bm25s = (model: ModelData): string[] => [
 retriever = BM25HF.load_from_hub("${model.id}")`,
 ];
 
+export const cxr_foundation = (model: ModelData): string[] => [
+	`!git clone https://github.com/Google-Health/cxr-foundation.git
+import tensorflow as tf, sys, requests
+sys.path.append('cxr-foundation/python/')
+
+# Install dependencies
+major_version = tf.__version__.rsplit(".", 1)[0]
+!pip install tensorflow-text=={major_version} pypng && pip install --no-deps pydicom hcls_imaging_ml_toolkit retrying
+
+# Load image (Stillwaterising, CC0, via Wikimedia Commons)
+from PIL import Image
+from io import BytesIO
+image_url = "https://upload.wikimedia.org/wikipedia/commons/c/c8/Chest_Xray_PA_3-8-2010.png"
+response = requests.get(image_url, headers={'User-Agent': 'Demo'}, stream=True)
+response.raw.decode_content = True # Ensure correct decoding
+img = Image.open(BytesIO(response.content)).convert('L') # Convert to grayscale
+
+# Run inference
+from clientside.clients import make_hugging_face_client
+cxr_client = make_hugging_face_client('cxr_model')
+print(cxr_client.get_image_embeddings_from_images([img]))`,
+];
+
 export const depth_anything_v2 = (model: ModelData): string[] => {
 	let encoder: string;
 	let features: string;
@@ -167,6 +190,28 @@ focallength_px = prediction["focallength_px"]`;
 
 	return [installSnippet, inferenceSnippet];
 };
+
+export const derm_foundation = (model: ModelData): string[] => [
+	`from huggingface_hub import from_pretrained_keras
+import tensorflow as tf, requests
+
+# Load and format input
+IMAGE_URL = "https://storage.googleapis.com/dx-scin-public-data/dataset/images/3445096909671059178.png"
+input_tensor = tf.train.Example(
+    features=tf.train.Features(
+        feature={
+            "image/encoded": tf.train.Feature(
+                bytes_list=tf.train.BytesList(value=[requests.get(IMAGE_URL, stream=True).content])
+            )
+        }
+    )
+).SerializeToString()
+
+# Load model and run inference
+loaded_model = from_pretrained_keras("google/derm-foundation")
+infer = loaded_model.signatures["serving_default"]
+print(infer(inputs=tf.constant([input_tensor])))`,
+]
 
 const diffusersDefaultPrompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
 
