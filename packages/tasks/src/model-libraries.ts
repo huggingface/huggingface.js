@@ -176,6 +176,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "CXR Foundation",
 		repoName: "cxr-foundation",
 		repoUrl: "https://github.com/google-health/cxr-foundation",
+		snippets: snippets.cxr_foundation,
 		filter: false,
 		countDownloads: `path:"precomputed_embeddings/embeddings.npz" OR path:"pax-elixr-b-text/saved_model.pb"`,
 	},
@@ -206,6 +207,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "Derm Foundation",
 		repoName: "derm-foundation",
 		repoUrl: "https://github.com/google-health/derm-foundation",
+		snippets: snippets.derm_foundation,
 		filter: false,
 		countDownloads: `path:"scin_dataset_precomputed_embeddings.npz" OR path:"saved_model.pb"`,
 	},
@@ -404,13 +406,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.tf_keras,
 		countDownloads: `path:"saved_model.pb"`,
 	},
-	"keras-nlp": {
-		prettyLabel: "KerasNLP",
-		repoName: "KerasNLP",
-		repoUrl: "https://github.com/keras-team/keras-nlp",
-		docsUrl: "https://keras.io/keras_nlp/",
-		snippets: snippets.keras_nlp,
-	},
 	"keras-hub": {
 		prettyLabel: "KerasHub",
 		repoName: "KerasHub",
@@ -544,7 +539,10 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/mlfoundations/open_clip",
 		snippets: snippets.open_clip,
 		filter: true,
-		countDownloads: `path_extension:"bin" AND path_filename:*pytorch_model`,
+		countDownloads: `path:"open_clip_model.safetensors"
+			OR path:"model.safetensors"
+			OR path:"open_clip_pytorch_model.bin"
+			OR path:"pytorch_model.bin"`,
 	},
 	paddlenlp: {
 		prettyLabel: "paddlenlp",
@@ -779,6 +777,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "TabPFN",
 		repoName: "TabPFN",
 		repoUrl: "https://github.com/PriorLabs/TabPFN",
+	},
+	terratorch: {
+		prettyLabel: "TerraTorch",
+		repoName: "TerraTorch",
+		repoUrl: "https://github.com/IBM/terratorch",
+		docsUrl: "https://ibm.github.io/terratorch/",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+		snippets: snippets.terratorch,
 	},
 	"tic-clip": {
 		prettyLabel: "TiC-CLIP",
