@@ -145,7 +145,13 @@ async function generateBinaryInputTypes(
 				return;
 			}
 			const propName = propSignature.name.getText(tsSource);
-			const propIsMedia = !!spec["properties"]?.[propName]?.["comment"]?.includes("type=binary");
+
+			const propIsMedia =
+				typeof spec["properties"] !== "string" &&
+				typeof spec["properties"]?.[propName] !== "string" &&
+				typeof spec["properties"]?.[propName]?.["comment"] === "string"
+					? !!spec["properties"]?.[propName]?.["comment"]?.includes("type=binary")
+					: false;
 			if (!propIsMedia) {
 				return;
 			}
