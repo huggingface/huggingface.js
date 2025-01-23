@@ -5230,5 +5230,30 @@
         "server": "UploadServer"
       }
     }
+  },
+  "6cce6c346a50f52438b1c3b401b2db9f8ba3a39ebebf19bf94750bddf6f7c894": {
+    "url": "https://api-inference.huggingface.co/models/sentence-transformers/paraphrase-xlm-r-multilingual-v1",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Wait-For-Model": "true"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":{\"source_sentence\":\"That is a happy person\",\"sentences\":[\"That is a happy dog\",\"That is a very happy person\",\"Today is a sunny day\"]},\"parameters\":{}}"
+    },
+    "response": {
+      "body": "[0.6623499989509583,0.9382342100143433,0.2296333760023117]",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-expose-headers": "x-compute-type, x-compute-time",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "server": "uvicorn",
+        "transfer-encoding": "chunked",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers, origin, access-control-request-method, access-control-request-headers"
+      }
+    }
   }
 }

@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Inputs for Text To Video inference
  */
@@ -18,7 +17,6 @@ export interface TextToVideoInput {
 	parameters?: TextToVideoParameters;
 	[property: string]: unknown;
 }
-
 /**
  * Additional inference parameters for Text To Video
  */
@@ -47,7 +45,6 @@ export interface TextToVideoParameters {
 	seed?: number;
 	[property: string]: unknown;
 }
-
 /**
  * Outputs of inference for the Text To Video task
  */

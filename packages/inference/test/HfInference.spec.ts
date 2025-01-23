@@ -331,7 +331,7 @@ describe.concurrent("HfInference", () => {
 					])
 				);
 			});
-			it("SentenceSimilarity", async () => {
+			it("sentenceSimilarity", async () => {
 				expect(
 					await hf.sentenceSimilarity({
 						model: "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
