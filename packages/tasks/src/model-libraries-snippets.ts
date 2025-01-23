@@ -211,7 +211,7 @@ input_tensor = tf.train.Example(
 loaded_model = from_pretrained_keras("google/derm-foundation")
 infer = loaded_model.signatures["serving_default"]
 print(infer(inputs=tf.constant([input_tensor])))`,
-]
+];
 
 const diffusersDefaultPrompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
 
