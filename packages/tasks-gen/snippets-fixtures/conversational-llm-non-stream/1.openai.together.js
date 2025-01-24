@@ -1,7 +1,7 @@
 import { OpenAI } from "openai";
 
 const client = new OpenAI({
-	baseURL: "https://huggingface.co/api/inference-proxy/replicate",
+	baseURL: "https://huggingface.co/api/inference-proxy/together",
 	apiKey: "api_token"
 });
 

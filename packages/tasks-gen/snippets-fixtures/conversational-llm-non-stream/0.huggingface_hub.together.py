@@ -1,7 +1,7 @@
 from huggingface_hub import InferenceClient
 
 client = InferenceClient(
-	provider="replicate",
+	provider="together",
 	api_key="api_token"
 )
 

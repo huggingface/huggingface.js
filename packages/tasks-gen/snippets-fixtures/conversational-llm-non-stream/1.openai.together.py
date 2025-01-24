@@ -1,7 +1,7 @@
 from openai import OpenAI
 
 client = OpenAI(
-	base_url="https://huggingface.co/api/inference-proxy/replicate",
+	base_url="https://huggingface.co/api/inference-proxy/together",
 	api_key="api_token"
 )
 

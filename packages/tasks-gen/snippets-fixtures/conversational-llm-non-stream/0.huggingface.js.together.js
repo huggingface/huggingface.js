@@ -10,7 +10,7 @@ const chatCompletion = await client.chatCompletion({
 			content: "What is the capital of France?"
 		}
 	],
-	provider: "replicate",
+	provider: "together",
 	max_tokens: 500
 });
 
