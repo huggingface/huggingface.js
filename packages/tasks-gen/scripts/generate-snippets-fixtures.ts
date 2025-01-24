@@ -40,7 +40,7 @@ const TEST_CASES: {
 			inference: "",
 		},
 		languages: ["sh", "js", "py"],
-		providers: ["hf-inference", "replicate"],
+		providers: ["hf-inference", "together"],
 		opts: { streaming: false },
 	},
 	{
