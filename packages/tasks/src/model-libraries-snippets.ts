@@ -526,7 +526,7 @@ export const keras_hub = (model: ModelData): string[] => {
 		}
 	}
 	// Then, add remaining tasks
-	for (const task in tasks) {
+	for (const task of tasks) {
 		if (!Object.keys(_keras_hub_tasks_with_example).includes(task)) {
 			snippets.push(_keras_hub_task_without_example(task, modelId));
 		}
