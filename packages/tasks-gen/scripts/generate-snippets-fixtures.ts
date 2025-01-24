@@ -138,7 +138,7 @@ async function getExpectedInferenceSnippet(
 	for (const file of files.filter((file) => file.endsWith("." + language) && file.includes(`.${provider}.`)).sort()) {
 		const client = path.basename(file).split(".").slice(1, -2).join("."); // e.g. '0.huggingface.js.replicate.js' => "huggingface.js"
 		const content = await fs.readFile(path.join(fixtureFolder, file), { encoding: "utf-8" });
-		expectedSnippets.push(client === "default" ? { content } : { client, content });
+		expectedSnippets.push({ client, content });
 	}
 	return expectedSnippets;
 }
