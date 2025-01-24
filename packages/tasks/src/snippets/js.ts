@@ -200,21 +200,17 @@ export const snippetTextToImage = (
 			client: "huggingface.js",
 			setup: "npm install @huggingface/inference",
 			content: `\
-import { textToImage } from "@huggingface/inference";
+import { HfInference } from "@huggingface/inference";
 
-async function infer(prompt, parameters) {
-	return await textToImage({
-		inputs: prompt,
-		parameters,
-		model: "${model.id}",
-		provider: "${provider}",
-		accessToken: "${accessToken}",
-	});
-}
+const client = new HfInference("${accessToken || `{API_TOKEN}`}");
 
-infer(${getModelInputSnippet(model)}, { num_inference_steps: 5 }).then((image) => {
-	/// Use the generated image (it's a Blob)
+const image = await client.textToImage({
+	model: "${model.id}",
+	inputs: ${getModelInputSnippet(model)},
+	parameters: { num_inference_steps: 5 },
+	provider: "${provider}",
 });
+/// Use the generated image (it's a Blob)
 `,
 		},
 		...(provider === "hf-inference"
@@ -412,8 +408,4 @@ export function getJsInferenceSnippet(
 	return model.pipeline_tag && model.pipeline_tag in jsSnippets
 		? jsSnippets[model.pipeline_tag]?.(model, accessToken, provider, opts) ?? [{ content: "" }]
 		: [{ content: "" }];
-}
-
-export function hasJsInferenceSnippet(model: ModelDataMinimal): boolean {
-	return !!model.pipeline_tag && model.pipeline_tag in jsSnippets;
 }

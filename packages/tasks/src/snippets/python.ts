@@ -5,10 +5,14 @@ import { stringifyGenerationConfig, stringifyMessages } from "./common.js";
 import { getModelInputSnippet } from "./inputs.js";
 import type { InferenceSnippet, ModelDataMinimal } from "./types.js";
 
-const snippetImportInferenceClient = (model: ModelDataMinimal, accessToken: string): string =>
-	`from huggingface_hub import InferenceClient
-	foobar = 3
-	client = InferenceClient("${model.id}", token="${accessToken || "{API_TOKEN}"}")
+const snippetImportInferenceClient = (accessToken: string, provider: InferenceProvider): string =>
+	`\
+from huggingface_hub import InferenceClient
+
+client = InferenceClient(
+	provider="${provider}",
+	api_key="${accessToken || "{API_TOKEN}"}"
+)
 `;
 
 export const snippetConversational = (
@@ -193,15 +197,41 @@ export const snippetTextToImage = (
 	return [
 		{
 			client: "huggingface_hub",
-			content: `${snippetImportInferenceClient(model, accessToken)}
+			content: `${snippetImportInferenceClient(accessToken, provider)}
 # output is a PIL.Image object
-image = client.text_to_image(${getModelInputSnippet(model)})`,
+image = client.text_to_image(
+	${getModelInputSnippet(model)},
+	model="${model.id}"
+)`,
 		},
-		{
-			client: "requests",
-			content: `def query(payload):
+		...(provider === "fal-ai"
+			? [
+					{
+						client: "fal-client",
+						content: `\
+import fal_client
+
+result = fal_client.subscribe(
+	# replace with correct id from fal.ai
+	"fal-ai/${model.id}",
+	arguments={
+		"prompt": ${getModelInputSnippet(model)},
+	},
+)
+print(result)
+`,
+					},
+			  ]
+			: []),
+		...(provider === "hf-inference"
+			? [
+					{
+						client: "requests",
+						content: `\
+def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.content
+
 image_bytes = query({
 	"inputs": ${getModelInputSnippet(model)},
 })
@@ -210,7 +240,9 @@ image_bytes = query({
 import io
 from PIL import Image
 image = Image.open(io.BytesIO(image_bytes))`,
-		},
+					},
+			  ]
+			: []),
 	];
 };
 
@@ -355,8 +387,4 @@ ${snippet.content}`
 			};
 		});
 	}
-}
-
-export function hasPythonInferenceSnippet(model: ModelDataMinimal): boolean {
-	return !!model.pipeline_tag && model.pipeline_tag in pythonSnippets;
 }
