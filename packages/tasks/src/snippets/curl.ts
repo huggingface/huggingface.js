@@ -15,6 +15,7 @@ export const snippetBasic = (
 	}
 	return [
 		{
+			client: "curl",
 			content: `\
 curl https://api-inference.huggingface.co/models/${model.id} \\
 	-X POST \\
@@ -55,6 +56,7 @@ export const snippetTextGeneration = (
 		};
 		return [
 			{
+				client: "curl",
 				content: `curl '${baseUrl}' \\
 -H 'Authorization: Bearer ${accessToken || `{API_TOKEN}`}' \\
 -H 'Content-Type: application/json' \\
@@ -89,6 +91,7 @@ export const snippetZeroShotClassification = (
 	}
 	return [
 		{
+			client: "curl",
 			content: `curl https://api-inference.huggingface.co/models/${model.id} \\
 	-X POST \\
 	-d '{"inputs": ${getModelInputSnippet(model, true)}, "parameters": {"candidate_labels": ["refund", "legal", "faq"]}}' \\
@@ -108,6 +111,7 @@ export const snippetFile = (
 	}
 	return [
 		{
+			client: "curl",
 			content: `curl https://api-inference.huggingface.co/models/${model.id} \\
 	-X POST \\
 	--data-binary '@${getModelInputSnippet(model, true, true)}' \\

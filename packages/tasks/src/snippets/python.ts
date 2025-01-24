@@ -1,4 +1,4 @@
-import { openAIbaseUrl, type InferenceProvider } from "../inference-providers.js";
+import { HF_HUB_INFERENCE_PROXY_TEMPLATE, openAIbaseUrl, type InferenceProvider } from "../inference-providers.js";
 import type { PipelineType } from "../pipelines.js";
 import type { ChatCompletionInputMessage, GenerationParameters } from "../tasks/index.js";
 import { stringifyGenerationConfig, stringifyMessages } from "./common.js";
@@ -125,6 +125,7 @@ print(completion.choices[0].message)`,
 export const snippetZeroShotClassification = (model: ModelDataMinimal): InferenceSnippet[] => {
 	return [
 		{
+			client: "requests",
 			content: `def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.json()
@@ -140,6 +141,7 @@ output = query({
 export const snippetZeroShotImageClassification = (model: ModelDataMinimal): InferenceSnippet[] => {
 	return [
 		{
+			client: "requests",
 			content: `def query(data):
 	with open(data["image_path"], "rb") as f:
 		img = f.read()
@@ -161,6 +163,7 @@ output = query({
 export const snippetBasic = (model: ModelDataMinimal): InferenceSnippet[] => {
 	return [
 		{
+			client: "requests",
 			content: `def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.json()
@@ -175,6 +178,7 @@ output = query({
 export const snippetFile = (model: ModelDataMinimal): InferenceSnippet[] => {
 	return [
 		{
+			client: "requests",
 			content: `def query(filename):
 		with open(filename, "rb") as f:
 			data = f.read()
@@ -248,6 +252,7 @@ image = Image.open(io.BytesIO(image_bytes))`,
 export const snippetTabular = (model: ModelDataMinimal): InferenceSnippet[] => {
 	return [
 		{
+			client: "requests",
 			content: `def query(payload):
 		response = requests.post(API_URL, headers=headers, json=payload)
 		return response.content
@@ -258,17 +263,14 @@ export const snippetTabular = (model: ModelDataMinimal): InferenceSnippet[] => {
 	];
 };
 
-export const snippetTextToAudio = (
-	model: ModelDataMinimal,
-	accessToken: string,
-	provider: InferenceProvider
-): InferenceSnippet[] => {
+export const snippetTextToAudio = (model: ModelDataMinimal): InferenceSnippet[] => {
 	// Transformers TTS pipeline and api-inference-community (AIC) pipeline outputs are diverged
 	// with the latest update to inference-api (IA).
 	// Transformers IA returns a byte object (wav file), whereas AIC returns wav and sampling_rate.
 	if (model.library_name === "transformers") {
 		return [
 			{
+				client: "requests",
 				content: `def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.content
@@ -284,6 +286,7 @@ Audio(audio_bytes)`,
 	} else {
 		return [
 			{
+				client: "requests",
 				content: `def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.json()
@@ -302,6 +305,7 @@ Audio(audio, rate=sampling_rate)`,
 export const snippetDocumentQuestionAnswering = (model: ModelDataMinimal): InferenceSnippet[] => {
 	return [
 		{
+			client: "requests",
 			content: `def query(payload):
  	with open(payload["image"], "rb") as f:
   		img = f.read()
@@ -372,17 +376,24 @@ export function getPythonInferenceSnippet(
 				? pythonSnippets[model.pipeline_tag]?.(model, accessToken, provider) ?? []
 				: [];
 
+		const baseUrl =
+			provider === "hf-inference"
+				? `https://api-inference.huggingface.co/models/${model.id}`
+				: HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", provider);
+
 		return snippets.map((snippet) => {
 			return {
 				...snippet,
-				content: snippet.content.includes("requests")
-					? `import requests
+				content:
+					snippet.client === "requests"
+						? `\
+import requests
 
-API_URL = "https://api-inference.huggingface.co/models/${model.id}"
+API_URL = "${baseUrl}"
 headers = {"Authorization": ${accessToken ? `"Bearer ${accessToken}"` : `f"Bearer {API_TOKEN}"`}}
 
 ${snippet.content}`
-					: snippet.content,
+						: snippet.content,
 			};
 		});
 	}

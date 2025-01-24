@@ -5,36 +5,66 @@ import { stringifyGenerationConfig, stringifyMessages } from "./common.js";
 import { getModelInputSnippet } from "./inputs.js";
 import type { InferenceSnippet, ModelDataMinimal } from "./types.js";
 
+const HFJS_METHODS: Record<string, string> = {
+	"text-classification": "textClassification",
+	"token-classification": "tokenClassification",
+	"table-question-answering": "tableQuestionAnswering",
+	"question-answering": "questionAnswering",
+	translation: "translation",
+	summarization: "summarization",
+	"feature-extraction": "featureExtraction",
+	"text-generation": "textGeneration",
+	"text2text-generation": "textGeneration",
+	"fill-mask": "fillMask",
+	"sentence-similarity": "sentenceSimilarity",
+};
+
 export const snippetBasic = (
 	model: ModelDataMinimal,
 	accessToken: string,
 	provider: InferenceProvider
 ): InferenceSnippet[] => {
-	if (provider !== "hf-inference") {
-		return [];
-	}
 	return [
+		...(model.pipeline_tag && model.pipeline_tag in HFJS_METHODS
+			? [
+					{
+						client: "huggingface.js",
+						content: `\
+import { HfInference } from "@huggingface/inference";
+
+const client = new HfInference("${accessToken || `{API_TOKEN}`}");
+
+const image = await client.${HFJS_METHODS[model.pipeline_tag]}({
+	model: "${model.id}",
+	inputs: ${getModelInputSnippet(model)},
+	provider: "${provider}",
+});
+`,
+					},
+			  ]
+			: []),
 		{
 			client: "fetch",
-			content: `async function query(data) {
-			const response = await fetch(
-				"https://api-inference.huggingface.co/models/${model.id}",
-				{
-					headers: {
-						Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
-						"Content-Type": "application/json",
-					},
-					method: "POST",
-					body: JSON.stringify(data),
-				}
-			);
-			const result = await response.json();
-			return result;
+			content: `\
+async function query(data) {
+	const response = await fetch(
+		"https://api-inference.huggingface.co/models/${model.id}",
+		{
+			headers: {
+				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
+				"Content-Type": "application/json",
+			},
+			method: "POST",
+			body: JSON.stringify(data),
 		}
-		
-		query({"inputs": ${getModelInputSnippet(model)}}).then((response) => {
-			console.log(JSON.stringify(response));
-		});`,
+	);
+	const result = await response.json();
+	return result;
+}
+
+query({"inputs": ${getModelInputSnippet(model)}}).then((response) => {
+	console.log(JSON.stringify(response));
+});`,
 		},
 	];
 };
