@@ -24,7 +24,7 @@ messages = [
 ]
 
 stream = client.chat.completions.create(
-    model="meta-llama/Llama-3.2-11B-Vision-Instruct", 
+	model="meta-llama/Llama-3.2-11B-Vision-Instruct", 
 	messages=messages, 
 	max_tokens=500,
 	stream=True
