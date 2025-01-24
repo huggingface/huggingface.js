@@ -27,21 +27,23 @@ export const snippetBasic = (
 	return [
 		...(model.pipeline_tag && model.pipeline_tag in HFJS_METHODS
 			? [
-					{
-						client: "huggingface.js",
-						content: `\
+				{
+					client: "huggingface.js",
+					content: `\
 import { HfInference } from "@huggingface/inference";
 
 const client = new HfInference("${accessToken || `{API_TOKEN}`}");
 
-const image = await client.${HFJS_METHODS[model.pipeline_tag]}({
+const output = await client.${HFJS_METHODS[model.pipeline_tag]}({
 	model: "${model.id}",
 	inputs: ${getModelInputSnippet(model)},
 	provider: "${provider}",
 });
+
+console.log(output)
 `,
-					},
-			  ]
+				},
+			]
 			: []),
 		{
 			client: "fetch",
@@ -212,8 +214,8 @@ export const snippetZeroShotClassification = (model: ModelDataMinimal, accessTok
 		}
 		
 		query({"inputs": ${getModelInputSnippet(
-			model
-		)}, "parameters": {"candidate_labels": ["refund", "legal", "faq"]}}).then((response) => {
+				model
+			)}, "parameters": {"candidate_labels": ["refund", "legal", "faq"]}}).then((response) => {
 			console.log(JSON.stringify(response));
 		});`,
 		},
@@ -240,14 +242,15 @@ const image = await client.textToImage({
 	parameters: { num_inference_steps: 5 },
 	provider: "${provider}",
 });
+
 /// Use the generated image (it's a Blob)
 `,
 		},
 		...(provider === "hf-inference"
 			? [
-					{
-						client: "fetch",
-						content: `async function query(data) {
+				{
+					client: "fetch",
+					content: `async function query(data) {
 	const response = await fetch(
 		"https://api-inference.huggingface.co/models/${model.id}",
 		{
@@ -265,8 +268,8 @@ const image = await client.textToImage({
 query({"inputs": ${getModelInputSnippet(model)}}).then((response) => {
 	// Use image
 });`,
-					},
-			  ]
+				},
+			]
 			: []),
 	];
 };
@@ -335,22 +338,19 @@ export const snippetAutomaticSpeechRecognition = (
 			client: "huggingface.js",
 			setup: `npm install @huggingface/inference`,
 			content: `\
-import { automaticSpeechRecognition } from "@huggingface/inference";
+import { HfInference } from "@huggingface/inference";
 
-async function infer(filename, parameters) {
-	const data = fs.readFileSync(filename);
-	return await automaticSpeechRecognition({
-		data,
-		parameters,
-		model: "${model.id}",
-		provider: "${provider}",
-		accessToken: "${accessToken}",
-	});
-}
+const client = new HfInference("${accessToken || `{API_TOKEN}`}");
 
-infer(${getModelInputSnippet(model)}).then((output) => {
-	console.log("Transcription: ", output.text);
+const data = fs.readFileSync(${getModelInputSnippet(model)});
+
+const output = await client.automaticSpeechRecognition({
+	data,
+	model: "${model.id}",
+	provider: "${provider}",
 });
+
+console.log(output);
 `,
 		},
 		...(provider === "hf-inference" ? snippetFile(model, accessToken, provider) : []),
