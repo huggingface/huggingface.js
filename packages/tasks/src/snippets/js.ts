@@ -406,6 +406,6 @@ export function getJsInferenceSnippet(
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
 	return model.pipeline_tag && model.pipeline_tag in jsSnippets
-		? jsSnippets[model.pipeline_tag]?.(model, accessToken, provider, opts) ?? [{ content: "" }]
-		: [{ content: "" }];
+		? jsSnippets[model.pipeline_tag]?.(model, accessToken, provider, opts) ?? []
+		: [];
 }

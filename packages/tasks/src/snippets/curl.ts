@@ -160,6 +160,6 @@ export function getCurlInferenceSnippet(
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
 	return model.pipeline_tag && model.pipeline_tag in curlSnippets
-		? curlSnippets[model.pipeline_tag]?.(model, accessToken, provider, opts) ?? [{ content: "" }]
-		: [{ content: "" }];
+		? curlSnippets[model.pipeline_tag]?.(model, accessToken, provider, opts) ?? []
+		: [];
 }

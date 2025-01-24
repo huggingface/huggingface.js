@@ -1,4 +1,4 @@
-import type { InferenceProvider } from "../inference-providers.js";
+import { openAIbaseUrl, type InferenceProvider } from "../inference-providers.js";
 import type { PipelineType } from "../pipelines.js";
 import type { ChatCompletionInputMessage, GenerationParameters } from "../tasks/index.js";
 import { stringifyGenerationConfig, stringifyMessages } from "./common.js";
@@ -12,8 +12,7 @@ from huggingface_hub import InferenceClient
 client = InferenceClient(
 	provider="${provider}",
 	api_key="${accessToken || "{API_TOKEN}"}"
-)
-`;
+)`;
 
 export const snippetConversational = (
 	model: ModelDataMinimal,
@@ -46,9 +45,8 @@ export const snippetConversational = (
 		return [
 			{
 				client: "huggingface_hub",
-				content: `from huggingface_hub import InferenceClient
-
-client = InferenceClient(api_key="${accessToken || "{API_TOKEN}"}")
+				content: `\
+${snippetImportInferenceClient(accessToken, provider)}
 
 messages = ${messagesStr}
 
@@ -67,7 +65,7 @@ for chunk in stream:
 				content: `from openai import OpenAI
 
 client = OpenAI(
-	base_url="https://api-inference.huggingface.co/v1/",
+	base_url="${openAIbaseUrl(provider)}",
 	api_key="${accessToken || "{API_TOKEN}"}"
 )
 
@@ -88,9 +86,8 @@ for chunk in stream:
 		return [
 			{
 				client: "huggingface_hub",
-				content: `from huggingface_hub import InferenceClient
-
-client = InferenceClient(api_key="${accessToken || "{API_TOKEN}"}")
+				content: `\
+${snippetImportInferenceClient(accessToken, provider)}
 
 messages = ${messagesStr}
 
@@ -107,7 +104,7 @@ print(completion.choices[0].message)`,
 				content: `from openai import OpenAI
 
 client = OpenAI(
-	base_url="https://api-inference.huggingface.co/v1/",
+	base_url="${openAIbaseUrl(provider)}",
 	api_key="${accessToken || "{API_TOKEN}"}"
 )
 
@@ -197,7 +194,9 @@ export const snippetTextToImage = (
 	return [
 		{
 			client: "huggingface_hub",
-			content: `${snippetImportInferenceClient(accessToken, provider)}
+			content: `\
+${snippetImportInferenceClient(accessToken, provider)}
+
 # output is a PIL.Image object
 image = client.text_to_image(
 	${getModelInputSnippet(model)},
@@ -370,8 +369,8 @@ export function getPythonInferenceSnippet(
 	} else {
 		const snippets =
 			model.pipeline_tag && model.pipeline_tag in pythonSnippets
-				? pythonSnippets[model.pipeline_tag]?.(model, accessToken, provider) ?? [{ content: "" }]
-				: [{ content: "" }];
+				? pythonSnippets[model.pipeline_tag]?.(model, accessToken, provider) ?? []
+				: [];
 
 		return snippets.map((snippet) => {
 			return {
