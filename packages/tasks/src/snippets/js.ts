@@ -230,7 +230,6 @@ export const snippetTextToImage = (
 	return [
 		{
 			client: "huggingface.js",
-			setup: "npm install @huggingface/inference",
 			content: `\
 import { HfInference } from "@huggingface/inference";
 
@@ -336,7 +335,6 @@ export const snippetAutomaticSpeechRecognition = (
 	return [
 		{
 			client: "huggingface.js",
-			setup: `npm install @huggingface/inference`,
 			content: `\
 import { HfInference } from "@huggingface/inference";
 
