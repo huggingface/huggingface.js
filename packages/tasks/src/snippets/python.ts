@@ -51,7 +51,7 @@ ${snippetImportInferenceClient(accessToken, provider)}
 messages = ${messagesStr}
 
 stream = client.chat.completions.create(
-    model="${model.id}", 
+	model="${model.id}", 
 	messages=messages, 
 	${configStr},
 	stream=True
@@ -62,7 +62,8 @@ for chunk in stream:
 			},
 			{
 				client: "openai",
-				content: `from openai import OpenAI
+				content: `\
+from openai import OpenAI
 
 client = OpenAI(
 	base_url="${openAIbaseUrl(provider)}",
@@ -79,7 +80,7 @@ stream = client.chat.completions.create(
 )
 
 for chunk in stream:
-    print(chunk.choices[0].delta.content, end="")`,
+	print(chunk.choices[0].delta.content, end="")`,
 			},
 		];
 	} else {
@@ -101,7 +102,8 @@ print(completion.choices[0].message)`,
 			},
 			{
 				client: "openai",
-				content: `from openai import OpenAI
+				content: `\
+from openai import OpenAI
 
 client = OpenAI(
 	base_url="${openAIbaseUrl(provider)}",
@@ -111,7 +113,7 @@ client = OpenAI(
 messages = ${messagesStr}
 
 completion = client.chat.completions.create(
-    model="${model.id}", 
+	model="${model.id}", 
 	messages=messages, 
 	${configStr}
 )
@@ -126,7 +128,8 @@ export const snippetZeroShotClassification = (model: ModelDataMinimal): Inferenc
 	return [
 		{
 			client: "requests",
-			content: `def query(payload):
+			content: `\
+def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.json()
 
@@ -142,7 +145,8 @@ export const snippetZeroShotImageClassification = (model: ModelDataMinimal): Inf
 	return [
 		{
 			client: "requests",
-			content: `def query(data):
+			content: `\
+def query(data):
 	with open(data["image_path"], "rb") as f:
 		img = f.read()
 	payload={
@@ -153,8 +157,8 @@ export const snippetZeroShotImageClassification = (model: ModelDataMinimal): Inf
 	return response.json()
 
 output = query({
-    "image_path": ${getModelInputSnippet(model)},
-    "parameters": {"candidate_labels": ["cat", "dog", "llama"]},
+	"image_path": ${getModelInputSnippet(model)},
+	"parameters": {"candidate_labels": ["cat", "dog", "llama"]},
 })`,
 		},
 	];
@@ -164,7 +168,8 @@ export const snippetBasic = (model: ModelDataMinimal): InferenceSnippet[] => {
 	return [
 		{
 			client: "requests",
-			content: `def query(payload):
+			content: `\
+def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.json()
 	
@@ -179,13 +184,14 @@ export const snippetFile = (model: ModelDataMinimal): InferenceSnippet[] => {
 	return [
 		{
 			client: "requests",
-			content: `def query(filename):
-		with open(filename, "rb") as f:
-			data = f.read()
-		response = requests.post(API_URL, headers=headers, data=data)
-		return response.json()
-	
-	output = query(${getModelInputSnippet(model)})`,
+			content: `\
+def query(filename):
+	with open(filename, "rb") as f:
+		data = f.read()
+	response = requests.post(API_URL, headers=headers, data=data)
+	return response.json()
+
+output = query(${getModelInputSnippet(model)})`,
 		},
 	];
 };
@@ -253,12 +259,14 @@ export const snippetTabular = (model: ModelDataMinimal): InferenceSnippet[] => {
 	return [
 		{
 			client: "requests",
-			content: `def query(payload):
-		response = requests.post(API_URL, headers=headers, json=payload)
-		return response.content
-	response = query({
-		"inputs": {"data": ${getModelInputSnippet(model)}},
-	})`,
+			content: `\
+def query(payload):
+	response = requests.post(API_URL, headers=headers, json=payload)
+	return response.content
+
+response = query({
+	"inputs": {"data": ${getModelInputSnippet(model)}},
+})`,
 		},
 	];
 };
@@ -271,7 +279,8 @@ export const snippetTextToAudio = (model: ModelDataMinimal): InferenceSnippet[] 
 		return [
 			{
 				client: "requests",
-				content: `def query(payload):
+				content: `\
+def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.content
 
@@ -287,7 +296,8 @@ Audio(audio_bytes)`,
 		return [
 			{
 				client: "requests",
-				content: `def query(payload):
+				content: `\
+def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.json()
 	
@@ -306,9 +316,10 @@ export const snippetDocumentQuestionAnswering = (model: ModelDataMinimal): Infer
 	return [
 		{
 			client: "requests",
-			content: `def query(payload):
- 	with open(payload["image"], "rb") as f:
-  		img = f.read()
+			content: `\
+def query(payload):
+	with open(payload["image"], "rb") as f:
+		img = f.read()
 		payload["image"] = base64.b64encode(img).decode("utf-8")  
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.json()
