@@ -1,47 +1,10 @@
+import type { TextToImageInput, TextToImageOutput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
+import { omit } from "../../utils/omit";
 import { request } from "../custom/request";
 
-export type TextToImageArgs = BaseArgs & {
-	/**
-	 * The text to generate an image from
-	 */
-	inputs: string;
-
-	/**
-	 * Same param but for external providers like Together, Replicate
-	 */
-	prompt?: string;
-	response_format?: "base64";
-	input?: {
-		prompt: string;
-	};
-
-	parameters?: {
-		/**
-		 * An optional negative prompt for the image generation
-		 */
-		negative_prompt?: string;
-		/**
-		 * The height in pixels of the generated image
-		 */
-		height?: number;
-		/**
-		 * The width in pixels of the generated image
-		 */
-		width?: number;
-		/**
-		 * The number of denoising steps. More denoising steps usually lead to a higher quality image at the expense of slower inference.
-		 */
-		num_inference_steps?: number;
-		/**
-		 * Guidance scale: Higher guidance scale encourages to generate images that are closely linked to the text `prompt`, usually at the expense of lower image quality.
-		 */
-		guidance_scale?: number;
-	};
-};
-
-export type TextToImageOutput = Blob;
+export type TextToImageArgs = BaseArgs & TextToImageInput;
 
 interface Base64ImageGeneration {
 	data: Array<{
@@ -56,16 +19,17 @@ interface OutputUrlImageGeneration {
  * This task reads some text input and outputs an image.
  * Recommended model: stabilityai/stable-diffusion-2
  */
-export async function textToImage(args: TextToImageArgs, options?: Options): Promise<TextToImageOutput> {
-	if (args.provider === "together" || args.provider === "fal-ai") {
-		args.prompt = args.inputs;
-		delete (args as unknown as { inputs: unknown }).inputs;
-		args.response_format = "base64";
-	} else if (args.provider === "replicate") {
-		args.prompt = args.inputs;
-		delete (args as unknown as { inputs: unknown }).inputs;
-	}
-	const res = await request<TextToImageOutput | Base64ImageGeneration | OutputUrlImageGeneration>(args, {
+export async function textToImage(args: TextToImageArgs, options?: Options): Promise<Blob> {
+	const payload =
+		args.provider === "together" || args.provider === "fal-ai" || args.provider === "replicate"
+			? {
+					...omit(args, ["inputs", "parameters"]),
+					...args.parameters,
+					...(args.provider !== "replicate" ? { response_format: "base64" } : undefined),
+					prompt: args.inputs,
+			  }
+			: args;
+	const res = await request<TextToImageOutput | Base64ImageGeneration | OutputUrlImageGeneration>(payload, {
 		...options,
 		taskHint: "text-to-image",
 	});

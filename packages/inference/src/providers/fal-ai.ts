@@ -20,4 +20,8 @@ export const FAL_AI_SUPPORTED_MODEL_IDS: ProviderMapping<FalAiId> = {
 	"automatic-speech-recognition": {
 		"openai/whisper-large-v3": "fal-ai/whisper",
 	},
+	"text-to-video": {
+		"genmo/mochi-1-preview": "fal-ai/mochi-v1",
+		"tencent/HunyuanVideo": "fal-ai/hunyuan-video",
+	},
 };
