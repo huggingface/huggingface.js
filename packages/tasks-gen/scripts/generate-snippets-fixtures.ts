@@ -19,7 +19,7 @@ import { existsSync as pathExists } from "node:fs";
 import * as fs from "node:fs/promises";
 import * as path from "node:path/posix";
 
-import type { InferenceSnippet } from "@huggingface/tasks";
+import type { InferenceProvider, InferenceSnippet } from "@huggingface/tasks";
 import { snippets } from "@huggingface/tasks";
 
 type LANGUAGE = "sh" | "js" | "py";
@@ -28,6 +28,7 @@ const TEST_CASES: {
 	testName: string;
 	model: snippets.ModelDataMinimal;
 	languages: LANGUAGE[];
+	providers: InferenceProvider[];
 	opts?: Record<string, unknown>;
 }[] = [
 	{
@@ -39,6 +40,7 @@ const TEST_CASES: {
 			inference: "",
 		},
 		languages: ["sh", "js", "py"],
+		providers: ["hf-inference", "replicate"],
 		opts: { streaming: false },
 	},
 	{
@@ -50,6 +52,7 @@ const TEST_CASES: {
 			inference: "",
 		},
 		languages: ["sh", "js", "py"],
+		providers: ["hf-inference"],
 		opts: { streaming: true },
 	},
 	{
@@ -61,6 +64,7 @@ const TEST_CASES: {
 			inference: "",
 		},
 		languages: ["sh", "js", "py"],
+		providers: ["hf-inference"],
 		opts: { streaming: false },
 	},
 	{
@@ -72,6 +76,7 @@ const TEST_CASES: {
 			inference: "",
 		},
 		languages: ["sh", "js", "py"],
+		providers: ["hf-inference"],
 		opts: { streaming: true },
 	},
 	{
@@ -82,6 +87,7 @@ const TEST_CASES: {
 			tags: [],
 			inference: "",
 		},
+		providers: ["hf-inference"],
 		languages: ["sh", "js", "py"],
 	},
 ] as const;
@@ -113,31 +119,41 @@ function getFixtureFolder(testName: string): string {
 function generateInferenceSnippet(
 	model: snippets.ModelDataMinimal,
 	language: LANGUAGE,
+	provider: InferenceProvider,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
-	const generatedSnippets = GET_SNIPPET_FN[language](model, "api_token", opts);
+	const generatedSnippets = GET_SNIPPET_FN[language](model, "api_token", provider, opts);
 	return Array.isArray(generatedSnippets) ? generatedSnippets : [generatedSnippets];
 }
 
-async function getExpectedInferenceSnippet(testName: string, language: LANGUAGE): Promise<InferenceSnippet[]> {
+async function getExpectedInferenceSnippet(
+	testName: string,
+	language: LANGUAGE,
+	provider: InferenceProvider
+): Promise<InferenceSnippet[]> {
 	const fixtureFolder = getFixtureFolder(testName);
 	const files = await fs.readdir(fixtureFolder);
 
 	const expectedSnippets: InferenceSnippet[] = [];
-	for (const file of files.filter((file) => file.endsWith("." + language)).sort()) {
-		const client = path.basename(file).split(".").slice(1, -1).join("."); // e.g. '0.huggingface.js.js' => "huggingface.js"
+	for (const file of files.filter((file) => file.endsWith("." + language) && file.includes(`.${provider}.`)).sort()) {
+		const client = path.basename(file).split(".").slice(1, -2).join("."); // e.g. '0.huggingface.js.replicate.js' => "huggingface.js"
 		const content = await fs.readFile(path.join(fixtureFolder, file), { encoding: "utf-8" });
 		expectedSnippets.push(client === "default" ? { content } : { client, content });
 	}
 	return expectedSnippets;
 }
 
-async function saveExpectedInferenceSnippet(testName: string, language: LANGUAGE, snippets: InferenceSnippet[]) {
+async function saveExpectedInferenceSnippet(
+	testName: string,
+	language: LANGUAGE,
+	provider: InferenceProvider,
+	snippets: InferenceSnippet[]
+) {
 	const fixtureFolder = getFixtureFolder(testName);
 	await fs.mkdir(fixtureFolder, { recursive: true });
 
 	for (const [index, snippet] of snippets.entries()) {
-		const file = path.join(fixtureFolder, `${index}.${snippet.client ?? "default"}.${language}`);
+		const file = path.join(fixtureFolder, `${index}.${snippet.client ?? "default"}.${provider}.${language}`);
 		await fs.writeFile(file, snippet.content);
 	}
 }
@@ -147,13 +163,15 @@ if (import.meta.vitest) {
 	const { describe, expect, it } = import.meta.vitest;
 
 	describe("inference API snippets", () => {
-		TEST_CASES.forEach(({ testName, model, languages, opts }) => {
+		TEST_CASES.forEach(({ testName, model, languages, providers, opts }) => {
 			describe(testName, () => {
 				languages.forEach((language) => {
-					it(language, async () => {
-						const generatedSnippets = generateInferenceSnippet(model, language, opts);
-						const expectedSnippets = await getExpectedInferenceSnippet(testName, language);
-						expect(generatedSnippets).toEqual(expectedSnippets);
+					providers.forEach((provider) => {
+						it(language, async () => {
+							const generatedSnippets = generateInferenceSnippet(model, language, provider, opts);
+							const expectedSnippets = await getExpectedInferenceSnippet(testName, language, provider);
+							expect(generatedSnippets).toEqual(expectedSnippets);
+						});
 					});
 				});
 			});
@@ -166,11 +184,13 @@ if (import.meta.vitest) {
 	await fs.rm(path.join(rootDirFinder(), "snippets-fixtures"), { recursive: true, force: true });
 
 	console.debug("  🏭 Generating new fixtures...");
-	TEST_CASES.forEach(({ testName, model, languages, opts }) => {
-		console.debug(`      ${testName} (${languages.join(", ")})`);
+	TEST_CASES.forEach(({ testName, model, languages, providers, opts }) => {
+		console.debug(`      ${testName} (${languages.join(", ")}) (${providers.join(", ")})`);
 		languages.forEach(async (language) => {
-			const generatedSnippets = generateInferenceSnippet(model, language, opts);
-			await saveExpectedInferenceSnippet(testName, language, generatedSnippets);
+			providers.forEach(async (provider) => {
+				const generatedSnippets = generateInferenceSnippet(model, language, provider, opts);
+				await saveExpectedInferenceSnippet(testName, language, provider, generatedSnippets);
+			});
 		});
 	});
 	console.log("✅ All done!");

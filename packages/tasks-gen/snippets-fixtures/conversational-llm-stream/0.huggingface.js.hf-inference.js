@@ -1,13 +1,10 @@
-import { OpenAI } from "openai";
+import { HfInference } from "@huggingface/inference";
 
-const client = new OpenAI({
-	baseURL: "https://api-inference.huggingface.co/v1/",
-    apiKey: "api_token"
-});
+const client = new HfInference("api_token");
 
 let out = "";
 
-const stream = await client.chat.completions.create({
+const stream = client.chatCompletionStream({
 	model: "meta-llama/Llama-3.1-8B-Instruct",
 	messages: [
 		{
@@ -15,8 +12,8 @@ const stream = await client.chat.completions.create({
 			content: "What is the capital of France?"
 		}
 	],
-	max_tokens: 500,
-	stream: true,
+	provider: "hf-inference",
+	max_tokens: 500
 });
 
 for await (const chunk of stream) {

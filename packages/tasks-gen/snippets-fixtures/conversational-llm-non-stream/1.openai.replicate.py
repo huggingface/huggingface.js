@@ -1,6 +1,9 @@
-from huggingface_hub import InferenceClient
+from openai import OpenAI
 
-client = InferenceClient(api_key="api_token")
+client = OpenAI(
+	base_url="https://huggingface.co/api/inference-proxy/replicate",
+	api_key="api_token"
+)
 
 messages = [
 	{

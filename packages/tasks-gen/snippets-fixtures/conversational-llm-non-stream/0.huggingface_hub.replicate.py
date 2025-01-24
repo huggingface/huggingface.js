@@ -1,6 +1,9 @@
 from huggingface_hub import InferenceClient
 
-client = InferenceClient(api_key="api_token")
+client = InferenceClient(
+	provider="replicate",
+	api_key="api_token"
+)
 
 messages = [
 	{
@@ -9,12 +12,10 @@ messages = [
 	}
 ]
 
-stream = client.chat.completions.create(
+completion = client.chat.completions.create(
     model="meta-llama/Llama-3.1-8B-Instruct", 
 	messages=messages, 
-	max_tokens=500,
-	stream=True
+	max_tokens=500
 )
 
-for chunk in stream:
-    print(chunk.choices[0].delta.content, end="")
+print(completion.choices[0].message)
