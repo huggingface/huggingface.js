@@ -147,10 +147,10 @@ async function generateBinaryInputTypes(
 			const propName = propSignature.name.getText(tsSource);
 
 			const propIsMedia =
-				typeof spec["properties"] !== "string" &&
-				typeof spec["properties"]?.[propName] !== "string" &&
-				typeof spec["properties"]?.[propName]?.["comment"] === "string"
-					? !!spec["properties"]?.[propName]?.["comment"]?.includes("type=binary")
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				typeof (spec as any)["properties"]?.[propName]?.["comment"] === "string"
+					? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+					  !!(spec as any)["properties"][propName]["comment"].includes("type=binary")
 					: false;
 			if (!propIsMedia) {
 				return;
