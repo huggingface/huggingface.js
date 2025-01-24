@@ -15,11 +15,12 @@ export const snippetBasic = (
 	}
 	return [
 		{
-			content: `curl https://api-inference.huggingface.co/models/${model.id} \\
-				-X POST \\
-				-d '{"inputs": ${getModelInputSnippet(model, true)}}' \\
-				-H 'Content-Type: application/json' \\
-				-H 'Authorization: Bearer ${accessToken || `{API_TOKEN}`}'`,
+			content: `\
+curl https://api-inference.huggingface.co/models/${model.id} \\
+	-X POST \\
+	-d '{"inputs": ${getModelInputSnippet(model, true)}}' \\
+	-H 'Content-Type: application/json' \\
+	-H 'Authorization: Bearer ${accessToken || `{API_TOKEN}`}'`,
 		},
 	];
 };
