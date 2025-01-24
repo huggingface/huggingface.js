@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@huggingface/inference':
+    specifier: workspace:^
+    version: link:../inference
   '@huggingface/tasks':
     specifier: workspace:^
     version: link:../tasks

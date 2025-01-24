@@ -1,6 +1,9 @@
 from huggingface_hub import InferenceClient
 
-client = InferenceClient(api_key="api_token")
+client = InferenceClient(
+	provider="hf-inference",
+	api_key="api_token"
+)
 
 messages = [
 	{
