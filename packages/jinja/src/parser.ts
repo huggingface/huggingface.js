@@ -343,7 +343,7 @@ export function parse(tokens: Token[]): Program {
 	function parseCallMemberExpression(): Statement {
 		// Handle member expressions recursively
 
-		const member = parseMemberExpression(); // foo.x
+		const member = parseMemberExpression(parsePrimaryExpression()); // foo.x
 
 		if (is(TOKEN_TYPES.OpenParen)) {
 			// foo.x()
@@ -352,15 +352,17 @@ export function parse(tokens: Token[]): Program {
 		return member;
 	}
 
-	function parseCallExpression(callee: Statement): CallExpression {
-		let callExpression = new CallExpression(callee, parseArgs());
+	function parseCallExpression(callee: Statement): Statement {
+		let expression: Statement = new CallExpression(callee, parseArgs());
+
+		expression = parseMemberExpression(expression); // foo.x().y
 
 		if (is(TOKEN_TYPES.OpenParen)) {
 			// foo.x()()
-			callExpression = parseCallExpression(callExpression);
+			expression = parseCallExpression(expression);
 		}
 
-		return callExpression;
+		return expression;
 	}
 
 	function parseArgs(): Statement[] {
@@ -433,9 +435,7 @@ export function parse(tokens: Token[]): Program {
 		return slices[0] as Statement; // normal member expression
 	}
 
-	function parseMemberExpression(): Statement {
-		let object = parsePrimaryExpression();
-
+	function parseMemberExpression(object: Statement): Statement {
 		while (is(TOKEN_TYPES.Dot) || is(TOKEN_TYPES.OpenSquareBracket)) {
 			const operator = tokens[current]; // . or [
 			++current;
