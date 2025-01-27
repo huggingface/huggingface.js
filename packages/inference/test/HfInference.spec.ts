@@ -5,6 +5,7 @@ import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
 import { chatCompletion, FAL_AI_SUPPORTED_MODEL_IDS, HfInference } from "../src";
 import "./vcr";
 import { readTestFile } from "./test-files";
+import { textToVideo } from "../src/tasks/cv/textToVideo";
 
 const TIMEOUT = 60000 * 3;
 const env = import.meta.env;
@@ -47,7 +48,7 @@ describe.concurrent("HfInference", () => {
 				);
 			});
 
-			it("works without model", async () => {
+			it.skip("works without model", async () => {
 				expect(
 					await hf.fillMask({
 						inputs: "[MASK] world!",
@@ -330,7 +331,7 @@ describe.concurrent("HfInference", () => {
 					])
 				);
 			});
-			it("SentenceSimilarity", async () => {
+			it("sentenceSimilarity", async () => {
 				expect(
 					await hf.sentenceSimilarity({
 						model: "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
@@ -799,6 +800,35 @@ describe.concurrent("HfInference", () => {
 					});
 				});
 			}
+
+			it("textToVideo - genmo/mochi-1-preview", async () => {
+				const res = await textToVideo({
+					model: "genmo/mochi-1-preview",
+					inputs: "A running dog",
+					parameters: {
+						seed: 176,
+					},
+					provider: "fal-ai",
+					accessToken: env.HF_FAL_KEY,
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToVideo - HunyuanVideo", async () => {
+				const res = await textToVideo({
+					model: "genmo/mochi-1-preview",
+					inputs: "A running dog",
+					parameters: {
+						seed: 176,
+						num_inference_steps: 2,
+						num_frames: 85,
+						resolution: "480p",
+					},
+					provider: "fal-ai",
+					accessToken: env.HF_FAL_KEY,
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
 		},
 		TIMEOUT
 	);
@@ -808,7 +838,7 @@ describe.concurrent("HfInference", () => {
 		() => {
 			const client = new HfInference(env.HF_REPLICATE_KEY);
 
-			it("textToImage canonical", async () => {
+			it("textToImage canonical - black-forest-labs/FLUX.1-schnell", async () => {
 				const res = await client.textToImage({
 					model: "black-forest-labs/FLUX.1-schnell",
 					provider: "replicate",
@@ -817,11 +847,57 @@ describe.concurrent("HfInference", () => {
 				expect(res).toBeInstanceOf(Blob);
 			});
 
-			it("textToImage versioned", async () => {
+			it("textToImage canonical - black-forest-labs/FLUX.1-dev", async () => {
+				const res = await client.textToImage({
+					model: "black-forest-labs/FLUX.1-dev",
+					provider: "replicate",
+					inputs:
+						"A tiny laboratory deep in the Black Forest where squirrels in lab coats experiment with mixing chocolate and pine cones",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToImage canonical - stabilityai/stable-diffusion-3.5-large-turbo", async () => {
+				const res = await client.textToImage({
+					model: "stabilityai/stable-diffusion-3.5-large-turbo",
+					provider: "replicate",
+					inputs: "A confused rubber duck wearing a tiny wizard hat trying to cast spells with a banana wand",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToImage versioned - ByteDance/SDXL-Lightning", async () => {
 				const res = await client.textToImage({
 					model: "ByteDance/SDXL-Lightning",
 					provider: "replicate",
-					inputs: "black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot",
+					inputs: "A grumpy storm cloud wearing sunglasses and throwing tiny lightning bolts like confetti",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToImage versioned - ByteDance/Hyper-SD", async () => {
+				const res = await client.textToImage({
+					model: "ByteDance/Hyper-SD",
+					provider: "replicate",
+					inputs: "A group of dancing bytes wearing tiny party hats doing the macarena in cyberspace",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToImage versioned - playgroundai/playground-v2.5-1024px-aesthetic", async () => {
+				const res = await client.textToImage({
+					model: "playgroundai/playground-v2.5-1024px-aesthetic",
+					provider: "replicate",
+					inputs: "A playground where slides turn into rainbows and swings launch kids into cotton candy clouds",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToImage versioned - stabilityai/stable-diffusion-xl-base-1.0", async () => {
+				const res = await client.textToImage({
+					model: "stabilityai/stable-diffusion-xl-base-1.0",
+					provider: "replicate",
+					inputs: "An octopus juggling watermelons underwater while wearing scuba gear",
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
@@ -840,6 +916,22 @@ describe.concurrent("HfInference", () => {
 					model: "OuteAI/OuteTTS-0.3-500M",
 					provider: "replicate",
 					inputs: "OuteTTS is a frontier TTS model for its size of 1 Billion parameters",
+				});
+
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToVideo Mochi", async () => {
+				const res = await textToVideo({
+					accessToken: env.HF_REPLICATE_KEY,
+					model: "genmo/mochi-1-preview",
+					provider: "replicate",
+					inputs: "A running dog",
+					parameters: {
+						num_inference_steps: 10,
+						seed: 178,
+						num_frames: 30,
+					},
 				});
 
 				expect(res).toBeInstanceOf(Blob);

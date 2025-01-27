@@ -11,7 +11,8 @@
 			"title": "DocumentQuestionAnsweringInputData",
 			"properties": {
 				"image": {
-					"description": "The image on which the question is asked"
+					"description": "The image on which the question is asked",
+					"comment": "type=binary"
 				},
 				"question": {
 					"type": "string",
