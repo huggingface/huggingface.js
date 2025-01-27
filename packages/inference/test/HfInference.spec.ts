@@ -911,7 +911,7 @@ describe.concurrent("HfInference", () => {
 				expect(res).toBeInstanceOf(Blob);
 			});
 
-			it.skip("textToSpeech OuteTTS", async () => {
+			it("textToSpeech OuteTTS", async () => {
 				const res = await client.textToSpeech({
 					model: "OuteAI/OuteTTS-0.3-500M",
 					provider: "replicate",
