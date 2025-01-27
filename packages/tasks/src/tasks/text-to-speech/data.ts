@@ -12,7 +12,7 @@ const taskData: TaskDataCustom = {
 			id: "mythicinfinity/libritts_r",
 		},
 		{
-			description: "Mulit-lingual dataset.",
+			description: "Multi-lingual dataset.",
 			id: "facebook/multilingual_librispeech",
 		},
 	],
@@ -48,26 +48,25 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "A massively multi-lingual TTS model.",
-			id: "coqui/XTTS-v2",
+			id: "fishaudio/fish-speech-1.5",
 		},
 		{
 			description: "A powerful TTS model.",
-			id: "amphion/MaskGCT",
+			id: "OuteAI/OuteTTS-0.1-350M",
 		},
 		{
-			description: "A Llama based TTS model.",
-			id: "OuteAI/OuteTTS-0.1-350M",
+			description: "Small yet powerful TTS model.",
+			id: "hexgrad/Kokoro-82M",
 		},
 	],
 	spaces: [
 		{
-			description: "An application for generate highly realistic, multilingual speech.",
-			id: "suno/bark",
+			description: "An application for generate high quality speech in different languages.",
+			id: "hexgrad/Kokoro-TTS",
 		},
 		{
-			description:
-				"An application on XTTS, a voice generation model that lets you clone voices into different languages.",
-			id: "coqui/xtts",
+			description: "A multilingual text-to-speech application.",
+			id: "fishaudio/fish-speech-1",
 		},
 		{
 			description: "An application that generates speech in different styles in English and Chinese.",

@@ -31,6 +31,10 @@ const taskData: TaskDataCustom = {
 			description: "Strong keypoint detection model used to detect human pose.",
 			id: "facebook/sapiens-pose-1b",
 		},
+		{
+			description: "Powerful keypoint detection model used to detect human pose.",
+			id: "usyd-community/vitpose-plus-base",
+		},
 	],
 	spaces: [
 		{

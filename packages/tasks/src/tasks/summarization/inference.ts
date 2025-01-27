@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Inputs for Summarization inference
  */
@@ -18,7 +17,6 @@ export interface SummarizationInput {
 	parameters?: SummarizationParameters;
 	[property: string]: unknown;
 }
-
 /**
  * Additional inference parameters for summarization.
  */
@@ -30,19 +28,19 @@ export interface SummarizationParameters {
 	/**
 	 * Additional parametrization of the text generation algorithm.
 	 */
-	generate_parameters?: { [key: string]: unknown };
+	generate_parameters?: {
+		[key: string]: unknown;
+	};
 	/**
 	 * The truncation strategy to use.
 	 */
 	truncation?: SummarizationTruncationStrategy;
 	[property: string]: unknown;
 }
-
 /**
  * The truncation strategy to use.
  */
 export type SummarizationTruncationStrategy = "do_not_truncate" | "longest_first" | "only_first" | "only_second";
-
 /**
  * Outputs of inference for the Summarization task
  */

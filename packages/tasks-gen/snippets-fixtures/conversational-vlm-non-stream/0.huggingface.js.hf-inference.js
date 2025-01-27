@@ -1,11 +1,8 @@
-import { OpenAI } from "openai";
+import { HfInference } from "@huggingface/inference";
 
-const client = new OpenAI({
-    baseURL: "https://api-inference.huggingface.co/v1/",
-    apiKey: "api_token"
-});
+const client = new HfInference("api_token");
 
-const chatCompletion = await client.chat.completions.create({
+const chatCompletion = await client.chatCompletion({
 	model: "meta-llama/Llama-3.2-11B-Vision-Instruct",
 	messages: [
 		{
@@ -24,6 +21,7 @@ const chatCompletion = await client.chat.completions.create({
 			]
 		}
 	],
+	provider: "hf-inference",
 	max_tokens: 500
 });
 

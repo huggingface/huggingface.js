@@ -7,8 +7,8 @@ const taskData: TaskDataCustom = {
 			id: "liuhaotian/LLaVA-Instruct-150K",
 		},
 		{
-			description: "Conversation turns where questions involve image and text.",
-			id: "liuhaotian/LLaVA-Pretrain",
+			description: "Collection of image-text pairs on scientific topics.",
+			id: "DAMO-NLP-SG/multimodal_textbook",
 		},
 		{
 			description: "A collection of datasets made for model fine-tuning.",
@@ -43,11 +43,15 @@ const taskData: TaskDataCustom = {
 	metrics: [],
 	models: [
 		{
-			description: "Powerful vision language model with great visual understanding and reasoning capabilities.",
-			id: "meta-llama/Llama-3.2-11B-Vision-Instruct",
+			description: "Small and efficient yet powerful vision language model.",
+			id: "HuggingFaceTB/SmolVLM-Instruct",
 		},
 		{
-			description: "Cutting-edge vision language models.",
+			description: "A screenshot understanding model used to control computers.",
+			id: "showlab/ShowUI-2B",
+		},
+		{
+			description: "Cutting-edge vision language model.",
 			id: "allenai/Molmo-7B-D-0924",
 		},
 		{
@@ -59,8 +63,8 @@ const taskData: TaskDataCustom = {
 			id: "Qwen/Qwen2-VL-7B-Instruct",
 		},
 		{
-			description: "Strong image-text-to-text model.",
-			id: "mistralai/Pixtral-12B-2409",
+			description: "Image-text-to-text model with reasoning capabilities.",
+			id: "Qwen/QVQ-72B-Preview",
 		},
 		{
 			description: "Strong image-text-to-text model focused on documents.",
@@ -85,12 +89,16 @@ const taskData: TaskDataCustom = {
 			id: "stepfun-ai/GOT_official_online_demo",
 		},
 		{
-			description: "An application to compare outputs of different vision language models.",
-			id: "merve/compare_VLMs",
-		},
-		{
 			description: "An application for chatting with an image-text-to-text model.",
 			id: "GanymedeNil/Qwen2-VL-7B",
+		},
+		{
+			description: "An application that parses screenshots into actions.",
+			id: "showlab/ShowUI",
+		},
+		{
+			description: "An application that detects gaze.",
+			id: "smoondream/gaze-demo",
 		},
 	],
 	summary:

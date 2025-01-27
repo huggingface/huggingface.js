@@ -28,7 +28,7 @@ export interface VisualQuestionAnsweringInputData {
 	/**
 	 * The question to answer based on the image.
 	 */
-	question: unknown;
+	question: string;
 	[property: string]: unknown;
 }
 /**

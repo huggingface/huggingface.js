@@ -1,27 +1,11 @@
+import type { AudioClassificationInput, AudioClassificationOutput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
+import type { LegacyAudioInput } from "./utils";
+import { preparePayload } from "./utils";
 
-export type AudioClassificationArgs = BaseArgs & {
-	/**
-	 * Binary audio data
-	 */
-	data: Blob | ArrayBuffer;
-};
-
-export interface AudioClassificationOutputValue {
-	/**
-	 * The label for the class (model specific)
-	 */
-	label: string;
-
-	/**
-	 * A float that represents how likely it is that the audio file belongs to this class.
-	 */
-	score: number;
-}
-
-export type AudioClassificationReturn = AudioClassificationOutputValue[];
+export type AudioClassificationArgs = BaseArgs & (AudioClassificationInput | LegacyAudioInput);
 
 /**
  * This task reads some audio input and outputs the likelihood of classes.
@@ -30,8 +14,9 @@ export type AudioClassificationReturn = AudioClassificationOutputValue[];
 export async function audioClassification(
 	args: AudioClassificationArgs,
 	options?: Options
-): Promise<AudioClassificationReturn> {
-	const res = await request<AudioClassificationReturn>(args, {
+): Promise<AudioClassificationOutput> {
+	const payload = preparePayload(args);
+	const res = await request<AudioClassificationOutput>(payload, {
 		...options,
 		taskHint: "audio-classification",
 	});

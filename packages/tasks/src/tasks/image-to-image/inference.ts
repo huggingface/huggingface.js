@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Inputs for Image To Image inference
  */
@@ -12,14 +11,13 @@ export interface ImageToImageInput {
 	 * The input image data as a base64-encoded string. If no `parameters` are provided, you can
 	 * also provide the image data as a raw bytes payload.
 	 */
-	inputs: string;
+	inputs: Blob;
 	/**
 	 * Additional inference parameters for Image To Image
 	 */
 	parameters?: ImageToImageParameters;
 	[property: string]: unknown;
 }
-
 /**
  * Additional inference parameters for Image To Image
  */
@@ -30,9 +28,9 @@ export interface ImageToImageParameters {
 	 */
 	guidance_scale?: number;
 	/**
-	 * One or several prompt to guide what NOT to include in image generation.
+	 * One prompt to guide what NOT to include in image generation.
 	 */
-	negative_prompt?: string[];
+	negative_prompt?: string;
 	/**
 	 * For diffusion models. The number of denoising steps. More denoising steps usually lead to
 	 * a higher quality image at the expense of slower inference.
@@ -44,7 +42,6 @@ export interface ImageToImageParameters {
 	target_size?: TargetSize;
 	[property: string]: unknown;
 }
-
 /**
  * The size in pixel of the output image.
  */
@@ -53,7 +50,6 @@ export interface TargetSize {
 	width: number;
 	[property: string]: unknown;
 }
-
 /**
  * Outputs of inference for the Image To Image task
  */

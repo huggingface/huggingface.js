@@ -4,37 +4,15 @@ import { request } from "../custom/request";
 import type { RequestArgs } from "../../types";
 import { toArray } from "../../utils/toArray";
 import { base64FromBytes } from "../../utils/base64FromBytes";
+import type {
+	DocumentQuestionAnsweringInput,
+	DocumentQuestionAnsweringInputData,
+	DocumentQuestionAnsweringOutput,
+} from "@huggingface/tasks";
 
-export type DocumentQuestionAnsweringArgs = BaseArgs & {
-	inputs: {
-		/**
-		 * Raw image
-		 *
-		 * You can use native `File` in browsers, or `new Blob([buffer])` in node, or for a base64 image `new Blob([btoa(base64String)])`, or even `await (await fetch('...)).blob()`
-		 **/
-		image: Blob | ArrayBuffer;
-		question: string;
-	};
-};
-
-export interface DocumentQuestionAnsweringOutput {
-	/**
-	 * A string that’s the answer within the document.
-	 */
-	answer: string;
-	/**
-	 * ?
-	 */
-	end?: number;
-	/**
-	 * A float that represents how likely that the answer is correct
-	 */
-	score?: number;
-	/**
-	 * ?
-	 */
-	start?: number;
-}
+/// Override the type to properly set inputs.image as Blob
+export type DocumentQuestionAnsweringArgs = BaseArgs &
+	DocumentQuestionAnsweringInput & { inputs: DocumentQuestionAnsweringInputData & { image: Blob } };
 
 /**
  * Answers a question on a document image. Recommended model: impira/layoutlm-document-qa.
@@ -42,32 +20,36 @@ export interface DocumentQuestionAnsweringOutput {
 export async function documentQuestionAnswering(
 	args: DocumentQuestionAnsweringArgs,
 	options?: Options
-): Promise<DocumentQuestionAnsweringOutput> {
+): Promise<DocumentQuestionAnsweringOutput[number]> {
 	const reqArgs: RequestArgs = {
 		...args,
 		inputs: {
 			question: args.inputs.question,
 			// convert Blob or ArrayBuffer to base64
-			image: base64FromBytes(
-				new Uint8Array(
-					args.inputs.image instanceof ArrayBuffer ? args.inputs.image : await args.inputs.image.arrayBuffer()
-				)
-			),
+			image: base64FromBytes(new Uint8Array(await args.inputs.image.arrayBuffer())),
 		},
 	} as RequestArgs;
 	const res = toArray(
-		await request<[DocumentQuestionAnsweringOutput] | DocumentQuestionAnsweringOutput>(reqArgs, {
+		await request<DocumentQuestionAnsweringOutput | DocumentQuestionAnsweringOutput[number]>(reqArgs, {
 			...options,
 			taskHint: "document-question-answering",
 		})
-	)?.[0];
+	);
+
 	const isValidOutput =
-		typeof res?.answer === "string" &&
-		(typeof res.end === "number" || typeof res.end === "undefined") &&
-		(typeof res.score === "number" || typeof res.score === "undefined") &&
-		(typeof res.start === "number" || typeof res.start === "undefined");
+		Array.isArray(res) &&
+		res.every(
+			(elem) =>
+				typeof elem === "object" &&
+				!!elem &&
+				typeof elem?.answer === "string" &&
+				(typeof elem.end === "number" || typeof elem.end === "undefined") &&
+				(typeof elem.score === "number" || typeof elem.score === "undefined") &&
+				(typeof elem.start === "number" || typeof elem.start === "undefined")
+		);
 	if (!isValidOutput) {
 		throw new InferenceOutputError("Expected Array<{answer: string, end?: number, score?: number, start?: number}>");
 	}
-	return res;
+
+	return res[0];
 }

@@ -24,11 +24,15 @@ Vision language models trained on image-text pairs can be used for visual questi
 
 ### Document Question Answering and Retrieval
 
-Documents often consist of different layouts, charts, tables, images, and more. Vision language models trained on formatted documents can extract information from them. This is an OCR-free approach; the inputs skip OCR, and documents are directly fed to vision language models.
+Documents often consist of different layouts, charts, tables, images, and more. Vision language models trained on formatted documents can extract information from them. This is an OCR-free approach; the inputs skip OCR, and documents are directly fed to vision language models. To find the relevant documents to be fed, models like [ColPali](https://huggingface.co/blog/manu/colpali) are used. An example workflow can be found [here](https://github.com/merveenoyan/smol-vision/blob/main/ColPali_%2B_Qwen2_VL.ipynb).
 
 ### Image Recognition with Instructions
 
 Vision language models can recognize images through descriptions. When given detailed descriptions of specific entities, it can classify the entities in an image.
+
+### Computer Use
+
+Image-text-to-text models can be used to control computers with agentic workflows. Models like [ShowUI](https://huggingface.co/showlab/ShowUI-2B) and [OmniParser](https://huggingface.co/microsoft/OmniParser) are used to parse screenshots to later take actions on the computer autonomously.
 
 ## Inference
 
@@ -82,7 +86,8 @@ curl https://api-inference.huggingface.co/models/meta-llama/Llama-3.2-11B-Vision
 ## Useful Resources
 
 - [Vision Language Models Explained](https://huggingface.co/blog/vlms)
-- [Open-source Multimodality and How to Achieve it using Hugging Face](https://www.youtube.com/watch?v=IoGaGfU1CIg&t=601s)
-- [Introducing Idefics2: A Powerful 8B Vision-Language Model for the community](https://huggingface.co/blog/idefics2)
+- [Welcome PaliGemma 2 – New vision language models by Google](https://huggingface.co/blog/paligemma2)
+- [SmolVLM - small yet mighty Vision Language Model](https://huggingface.co/blog/smolvlm)
+- [Multimodal RAG using ColPali and Qwen2-VL](https://github.com/merveenoyan/smol-vision/blob/main/ColPali_%2B_Qwen2_VL.ipynb)
 - [Image-text-to-text task guide](https://huggingface.co/tasks/image-text-to-text)
 - [Preference Optimization for Vision Language Models with TRL](https://huggingface.co/blog/dpo_vlm)

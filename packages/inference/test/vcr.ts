@@ -1,5 +1,5 @@
 import { omit } from "../src/utils/omit";
-import { HF_HUB_URL } from "../src/lib/getDefaultTask";
+import { HF_HUB_URL } from "../src/config";
 import { isBackend } from "../src/utils/isBackend";
 import { isFrontend } from "../src/utils/isFrontend";
 

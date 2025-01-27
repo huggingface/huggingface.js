@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Text Generation Input.
  *
@@ -17,7 +16,6 @@ export interface TextGenerationInput {
 	stream?: boolean;
 	[property: string]: unknown;
 }
-
 export interface TextGenerationInputGenerateParameters {
 	/**
 	 * Lora adapter id
@@ -100,7 +98,6 @@ export interface TextGenerationInputGenerateParameters {
 	watermark?: boolean;
 	[property: string]: unknown;
 }
-
 export interface TextGenerationInputGrammarType {
 	type: Type;
 	/**
@@ -112,9 +109,7 @@ export interface TextGenerationInputGrammarType {
 	value: unknown;
 	[property: string]: unknown;
 }
-
 export type Type = "json" | "regex";
-
 /**
  * Text Generation Output.
  *
@@ -127,7 +122,6 @@ export interface TextGenerationOutput {
 	generated_text: string;
 	[property: string]: unknown;
 }
-
 export interface TextGenerationOutputDetails {
 	best_of_sequences?: TextGenerationOutputBestOfSequence[];
 	finish_reason: TextGenerationOutputFinishReason;
@@ -138,7 +132,6 @@ export interface TextGenerationOutputDetails {
 	top_tokens?: Array<TextGenerationOutputToken[]>;
 	[property: string]: unknown;
 }
-
 export interface TextGenerationOutputBestOfSequence {
 	finish_reason: TextGenerationOutputFinishReason;
 	generated_text: string;
@@ -149,16 +142,13 @@ export interface TextGenerationOutputBestOfSequence {
 	top_tokens?: Array<TextGenerationOutputToken[]>;
 	[property: string]: unknown;
 }
-
 export type TextGenerationOutputFinishReason = "length" | "eos_token" | "stop_sequence";
-
 export interface TextGenerationOutputPrefillToken {
 	id: number;
 	logprob: number;
 	text: string;
 	[property: string]: unknown;
 }
-
 export interface TextGenerationOutputToken {
 	id: number;
 	logprob: number;
@@ -166,7 +156,6 @@ export interface TextGenerationOutputToken {
 	text: string;
 	[property: string]: unknown;
 }
-
 /**
  * Text Generation Stream Output.
  *
@@ -182,7 +171,6 @@ export interface TextGenerationStreamOutput {
 	top_tokens?: TextGenerationStreamOutputToken[];
 	[property: string]: unknown;
 }
-
 export interface TextGenerationStreamOutputStreamDetails {
 	finish_reason: TextGenerationOutputFinishReason;
 	generated_tokens: number;
@@ -190,7 +178,6 @@ export interface TextGenerationStreamOutputStreamDetails {
 	seed?: number;
 	[property: string]: unknown;
 }
-
 export interface TextGenerationStreamOutputToken {
 	id: number;
 	logprob: number;

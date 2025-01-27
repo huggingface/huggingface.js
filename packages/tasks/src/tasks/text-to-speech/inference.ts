@@ -1,9 +1,22 @@
 /**
+ * Outputs of inference for the Text To Speech task
+ */
+export interface TextToSpeechOutput {
+	/**
+	 * The generated audio
+	 */
+	audio: Blob;
+	/**
+	 * The sampling rate of the generated audio waveform.
+	 */
+	sampling_rate?: number;
+	[property: string]: unknown;
+}
+/**
  * Inference code generated from the JSON schema spec in ./spec
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Inputs for Text To Speech inference
  */
@@ -18,7 +31,6 @@ export interface TextToSpeechInput {
 	parameters?: TextToSpeechParameters;
 	[property: string]: unknown;
 }
-
 /**
  * Additional inference parameters for Text To Speech
  */
@@ -29,7 +41,6 @@ export interface TextToSpeechParameters {
 	generation_parameters?: GenerationParameters;
 	[property: string]: unknown;
 }
-
 /**
  * Parametrization of the text generation process
  */
@@ -116,26 +127,7 @@ export interface GenerationParameters {
 	use_cache?: boolean;
 	[property: string]: unknown;
 }
-
 /**
  * Controls the stopping condition for beam-based methods.
  */
 export type EarlyStoppingUnion = boolean | "never";
-
-/**
- * Outputs for Text to Speech inference
- *
- * Outputs of inference for the Text To Audio task
- */
-export interface TextToSpeechOutput {
-	/**
-	 * The generated audio waveform.
-	 */
-	audio: unknown;
-	samplingRate: unknown;
-	/**
-	 * The sampling rate of the generated audio waveform.
-	 */
-	sampling_rate?: number;
-	[property: string]: unknown;
-}

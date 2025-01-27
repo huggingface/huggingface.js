@@ -39,10 +39,6 @@ const taskData: TaskDataCustom = {
 	],
 	models: [
 		{
-			description: "A solid model of audio source separation.",
-			id: "speechbrain/sepformer-wham",
-		},
-		{
 			description: "A speech enhancement model.",
 			id: "ResembleAI/resemble-enhance",
 		},

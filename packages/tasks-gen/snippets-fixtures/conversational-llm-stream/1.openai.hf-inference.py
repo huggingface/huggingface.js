@@ -20,4 +20,4 @@ stream = client.chat.completions.create(
 )
 
 for chunk in stream:
-    print(chunk.choices[0].delta.content, end="")
+	print(chunk.choices[0].delta.content, end="")

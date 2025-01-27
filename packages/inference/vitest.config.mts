@@ -7,6 +7,7 @@ const testFilesToPreload = [
 	"cheetah.png",
 	"cats.png",
 	"sample1.flac",
+	"sample2.wav",
 	"invoice.png",
 	"stormtrooper_depth.png",
 	"bird_canny.png",
