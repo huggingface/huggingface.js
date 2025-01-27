@@ -25,18 +25,18 @@
 				},
 				"guidance_scale": {
 					"type": "number",
-					"description": "A higher guidance scale value encourages the model to generate images closely linked to the text prompt, but values too high may cause saturation and other artifacts."
+					"description": "A higher guidance scale value encourages the model to generate videos closely linked to the text prompt, but values too high may cause saturation and other artifacts."
 				},
 				"negative_prompt": {
 					"type": "array",
 					"items": {
 						"type": "string"
 					},
-					"description": "One or several prompt to guide what NOT to include in image generation."
+					"description": "One or several prompt to guide what NOT to include in video generation."
 				},
 				"num_inference_steps": {
 					"type": "integer",
-					"description": "The number of denoising steps. More denoising steps usually lead to a higher quality image at the expense of slower inference."
+					"description": "The number of denoising steps. More denoising steps usually lead to a higher quality video at the expense of slower inference."
 				},
 				"seed": {
 					"type": "integer",
