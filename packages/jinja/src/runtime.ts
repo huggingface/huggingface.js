@@ -117,6 +117,64 @@ export class StringValue extends RuntimeValue<string> {
 				return new StringValue(this.value.trimStart());
 			}),
 		],
+		[
+			"split",
+			// follows Python's `str.split(sep=None, maxsplit=-1)` function behavior
+			// https://docs.python.org/3.13/library/stdtypes.html#str.split
+			new FunctionValue((args) => {
+				const sepArg = args[0];
+				if (sepArg != null && !(sepArg instanceof StringValue) && !(sepArg instanceof NullValue)) {
+					throw new Error("sep argument must be a string or null");
+				}
+				const useDefaultSeparator = sepArg == null || sepArg instanceof NullValue;
+				const separator = useDefaultSeparator
+					? " "
+					: sepArg.value;
+
+				if (separator === "") {
+					throw new Error("empty separator");
+				}
+
+				const maxsplitArg = args[1];
+				if (maxsplitArg != null && !(maxsplitArg instanceof NumericValue)) {
+					throw new Error("maxsplit argument must be a number");
+				}
+				const maxSplit = maxsplitArg == null
+					? -1
+					: maxsplitArg.value;
+
+
+				let parts = this.value.split(separator);
+
+				// when maxSplit is specified, and `useDefaultSeparator` is `true`,
+				// squash the strings starting at index `maxSplit`, ignoring the indexes that their value is an empty string
+				if (maxSplit >= 0 && parts.length > maxSplit + 1) {
+					for (let i = 0, splitIndex = 0; i < parts.length; i++) {
+						const part = parts[i];
+
+						if (part === "" && useDefaultSeparator) {
+							continue;
+						}
+
+						if (splitIndex >= maxSplit) {
+							const squashedParts = parts.splice(i, parts.length - i);
+							parts.push(squashedParts.join(separator));
+							break;
+						}
+
+						splitIndex++;
+					}
+				}
+
+				if (useDefaultSeparator) {
+					parts = parts.filter((x) => x !== "");
+				}
+
+				return new ArrayValue(
+					parts.map((part) => new StringValue(part))
+				);
+			}),
+		],
 	]);
 }
 

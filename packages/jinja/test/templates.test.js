@@ -36,6 +36,7 @@ const TEST_STRINGS = {
 
 	// Set variables
 	VARIABLES: `{% set x = 'Hello' %}{% set y = 'World' %}{{ x + ' ' + y }}`,
+	VARIABLES_2: `{% set x = 'Hello'.split('el')[-1] %}{{ x }}`,
 
 	// Numbers
 	NUMBERS: `|{{ 5 }}|{{ -5 }}|{{ add(3, -1) }}|{{ (3 - 1) + (a - 5) - (a + 5)}}|`,
@@ -154,6 +155,10 @@ const TEST_STRINGS = {
 	RSTRIP: `{{ "   test it  ".rstrip() }}`,
 	//lstrip
 	LSTRIP: `{{ "   test it  ".lstrip() }}`,
+	//split
+	SPLIT: `{% for item in "   test it  ".split() %}|{{ item }}{% endfor %}|`,
+	SPLIT_2: `{% for item in "   test it  ".split(" ") %}|{{ item }}{% endfor %}|`,
+	SPLIT_3: `{% for item in "   test it  ".split(" ", 4) %}|{{ item }}{% endfor %}|`,
 };
 
 const TEST_PARSED = {
@@ -676,6 +681,25 @@ const TEST_PARSED = {
 		{ value: " ", type: "StringLiteral" },
 		{ value: "+", type: "AdditiveBinaryOperator" },
 		{ value: "y", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	VARIABLES_2: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Set" },
+		{ value: "x", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "Hello", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "el", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "-1", type: "NumericLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "x", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
 
@@ -2798,6 +2822,70 @@ const TEST_PARSED = {
 		{ value: ")", type: "CloseParen" },
 		{ value: "}}", type: "CloseExpression" },
 	],
+	SPLIT: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "for", type: "For" },
+		{ value: "item", type: "Identifier" },
+		{ value: "in", type: "In" },
+		{ value: "   test it  ", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "item", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endfor", type: "EndFor" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "|", type: "Text" },
+	],
+	SPLIT_2: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "for", type: "For" },
+		{ value: "item", type: "Identifier" },
+		{ value: "in", type: "In" },
+		{ value: "   test it  ", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: " ", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "item", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endfor", type: "EndFor" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "|", type: "Text" },
+	],
+	SPLIT_3: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "for", type: "For" },
+		{ value: "item", type: "Identifier" },
+		{ value: "in", type: "In" },
+		{ value: "   test it  ", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: " ", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "4", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "item", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endfor", type: "EndFor" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "|", type: "Text" },
+	],
 };
 
 const TEST_CONTEXT = {
@@ -2838,6 +2926,7 @@ const TEST_CONTEXT = {
 
 	// Set variables
 	VARIABLES: {},
+	VARIABLES_2: {},
 
 	// Numbers
 	NUMBERS: {
@@ -3055,9 +3144,14 @@ const TEST_CONTEXT = {
 	MACROS_1: {},
 	MACROS_2: {},
 
-	//STRIP
+	// Strip
 	RSTRIP: {},
 	LSTRIP: {},
+
+	// Split
+	SPLIT: {},
+	SPLIT_2: {},
+	SPLIT_3: {},
 };
 
 const EXPECTED_OUTPUTS = {
@@ -3092,6 +3186,7 @@ const EXPECTED_OUTPUTS = {
 
 	// Set variables
 	VARIABLES: "Hello World",
+	VARIABLES_2: "lo",
 
 	// Numbers
 	NUMBERS: "|5|-5|2|-8|",
@@ -3209,6 +3304,11 @@ const EXPECTED_OUTPUTS = {
 	// RSTRIP/LSTRIP
 	RSTRIP: `   test it`,
 	LSTRIP: `test it  `,
+
+	// Split
+	SPLIT: `|test|it|`,
+	SPLIT_2: `||||test|it|||`,
+	SPLIT_3: `||||test|it  |`,
 };
 
 describe("Templates", () => {
