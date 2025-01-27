@@ -816,13 +816,41 @@ describe.concurrent("HfInference", () => {
 
 			it("textToVideo - HunyuanVideo", async () => {
 				const res = await textToVideo({
-					model: "genmo/mochi-1-preview",
+					model: "tencent/HunyuanVideo",
 					inputs: "A running dog",
 					parameters: {
 						seed: 176,
 						num_inference_steps: 2,
 						num_frames: 85,
 						resolution: "480p",
+					},
+					provider: "fal-ai",
+					accessToken: env.HF_FAL_KEY,
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToVideo - CogVideoX-5b", async () => {
+				const res = await textToVideo({
+					model: "THUDM/CogVideoX-5b",
+					inputs: "A running dog",
+					parameters: {
+						seed: 176,
+						num_frames: 2,
+					},
+					provider: "fal-ai",
+					accessToken: env.HF_FAL_KEY,
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToVideo - LTX-Video", async () => {
+				const res = await textToVideo({
+					model: "Lightricks/LTX-Video",
+					inputs: "A running dog",
+					parameters: {
+						seed: 176,
+						num_inference_steps: 2,
 					},
 					provider: "fal-ai",
 					accessToken: env.HF_FAL_KEY,
