@@ -212,6 +212,10 @@ export const SKUS = {
 				tflops: 8.2, // float32 (GPU does not support native float16)
 				memory: [8],
 			},
+			"GTX 1060": {
+				tflops: 3.9, // float32 (GPU does not support native float16)
+				memory: [3, 6],
+			},
 			"RTX Titan": {
 				tflops: 32.62,
 				memory: [24],
