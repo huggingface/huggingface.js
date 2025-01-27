@@ -22,12 +22,12 @@ export interface TextToVideoInput {
  */
 export interface TextToVideoParameters {
 	/**
-	 * A higher guidance scale value encourages the model to generate images closely linked to
+	 * A higher guidance scale value encourages the model to generate videos closely linked to
 	 * the text prompt, but values too high may cause saturation and other artifacts.
 	 */
 	guidance_scale?: number;
 	/**
-	 * One or several prompt to guide what NOT to include in image generation.
+	 * One or several prompt to guide what NOT to include in video generation.
 	 */
 	negative_prompt?: string[];
 	/**
@@ -36,7 +36,7 @@ export interface TextToVideoParameters {
 	num_frames?: number;
 	/**
 	 * The number of denoising steps. More denoising steps usually lead to a higher quality
-	 * image at the expense of slower inference.
+	 * video at the expense of slower inference.
 	 */
 	num_inference_steps?: number;
 	/**
