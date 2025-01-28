@@ -1,6 +1,6 @@
 import { Template as JinjaTemplate } from "@huggingface/jinja";
 import { OLLAMA_CHAT_TEMPLATE_MAPPING } from "./chat-template-automap";
-import { GGUFParsedInfo, OllamaCustomMappedTemplate, OllamaChatTemplateMapEntry } from "./types";
+import type { GGUFParsedInfo, OllamaCustomMappedTemplate, OllamaChatTemplateMapEntry } from "./types";
 
 // regex for finding special tokens inside chat template
 const RE_SPECIAL_TOKEN = /<[|_A-Za-z0-9]+>|\[[A-Z]+\]|<\uFF5C[\u2581A-Za-z]+\uFF5C>/g;
@@ -224,7 +224,7 @@ function convertJinjaToGoTemplate(gguf: NonNullable<GGUFParsedInfo>):
 			const formattedUserContent = formattedUser.replace("{{ .Prompt }}", "{{ .Content }}");
 			const formattedRespContent = formattedResp.replace("{{ .Response }}", "{{ .Content }}");
 			const addedAssistantPrompt = formattedResp.split("{{ .Response }}")[0];
-			goTmpl = `${formattedSystem}{{- range .Messages }}{{- if eq .Role \"user\" }}${formattedUserContent}{{- else if eq .Role \"assistant\" }}${formattedRespContent}{{- end }}{{- end }}${addedAssistantPrompt}`;
+			goTmpl = `${formattedSystem}{{- range .Messages }}{{- if eq .Role "user" }}${formattedUserContent}{{- else if eq .Role "assistant" }}${formattedRespContent}{{- end }}{{- end }}${addedAssistantPrompt}`;
 		}
 
 		// we get the stop token by only keeping the first part of formattedResp

@@ -17,6 +17,7 @@ export interface OllamaChatTemplateMapEntry {
 		tokens: string[];
 		params?: {
 			stop?: string[];
+			// eslint-disable-next-line
 			[key: string]: any;
 		};
 	};
