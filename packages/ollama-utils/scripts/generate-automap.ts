@@ -3,12 +3,20 @@
  * The source data is taken from llama.cpp
  */
 
+import type { GGUFParseOutput } from "../../gguf/src/gguf";
 import { gguf } from "../../gguf/src/gguf";
-import { appendFileSync, writeFileSync } from "node:fs";
+import { appendFileSync, writeFileSync, existsSync } from "node:fs";
+import path from "node:path";
 
+const DEBUG = process.env.DEBUG;
 const RE_SPECIAL_TOKEN = /<[|_A-Za-z0-9]+>|\[[A-Z]+\]|<\uFF5C[\u2581A-Za-z]+\uFF5C>/g;
 const MAX_NUMBER_OF_TAGS_PER_MODEL = 5;
 const N_WORKERS = 16;
+const OUTPUT_FILE = path.join(__dirname, "../src/chat-template-automap.ts");
+const BLACKLISTED_MODELS = (model: string, tag: string) => {
+	// some models are know to give ServiceUnavailable
+	return model === "library/deepseek-r1" && tag === "7b";
+};
 
 interface OutputItem {
 	model: string;
@@ -16,8 +24,19 @@ interface OutputItem {
 	ollama: {
 		template: string;
 		tokens: string[];
+		// eslint-disable-next-line
 		params?: any;
 	};
+}
+
+interface OllamaManifestLayer {
+	digest: string;
+	mediaType: string;
+	size: number;
+}
+
+interface OllamaManifest {
+	layers: OllamaManifestLayer[];
 }
 
 const getSpecialTokens = (tmpl: string): string[] => {
@@ -27,7 +46,7 @@ const getSpecialTokens = (tmpl: string): string[] => {
 };
 
 (async () => {
-	writeFileSync("ollama_tmp.jsonl", ""); // clear the file
+	if (DEBUG) writeFileSync("ollama_tmp.jsonl", ""); // clear the file
 
 	const models: string[] = [];
 	const output: OutputItem[] = [];
@@ -73,11 +92,21 @@ const getSpecialTokens = (tmpl: string): string[] => {
 	);
 	console.log({ modelsWithTag });
 
+	//////// merging with old file if necessary ////////
+
+	const seenGGUFTemplate = new Set<string>();
+	if (existsSync(OUTPUT_FILE)) {
+		const oldOutput = await import(OUTPUT_FILE);
+		oldOutput.OLLAMA_CHAT_TEMPLATE_MAPPING.forEach((item: OutputItem) => {
+			seenGGUFTemplate.add(item.gguf);
+			output.push(item);
+		});
+	}
+
 	//////// Get template ////////
 
 	nDoing = 0;
 	nAll = modelsWithTag.length;
-	let seenTemplate = new Set();
 	const workerGetTemplate = async () => {
 		while (true) {
 			const modelWithTag = modelsWithTag.shift();
@@ -86,22 +115,39 @@ const getSpecialTokens = (tmpl: string): string[] => {
 			nDoing++;
 			const [model, tag] = modelWithTag.split(":");
 			console.log(`Fetch template ${nDoing} / ${nAll} | model=${model} tag=${tag}`);
-			const getBlobUrl = (digest) => `https://registry.ollama.com/v2/${model}/blobs/${digest}`;
-			const manifest = await (await fetch(`https://registry.ollama.com/v2/${model}/manifests/${tag}`)).json();
+			const getBlobUrl = (digest: string) => `https://registry.ollama.com/v2/${model}/blobs/${digest}`;
+			const manifest: OllamaManifest = await (
+				await fetch(`https://registry.ollama.com/v2/${model}/manifests/${tag}`)
+			).json();
 			if (!manifest.layers) {
 				console.log(" --> [X] No layers");
 				continue;
 			}
-			const modelUrl = getBlobUrl(manifest.layers.find((l) => l.mediaType.match(/\.model/)).digest);
-			const ggufData = await gguf(modelUrl);
+			const layerModelUrl = manifest.layers.find((l) => l.mediaType.match(/\.model/));
+			if (!layerModelUrl) {
+				console.log(" --> [X] No model is found");
+				continue;
+			}
+			const modelUrl = getBlobUrl(layerModelUrl.digest);
+			let ggufData: GGUFParseOutput;
+			if (BLACKLISTED_MODELS(model, tag)) {
+				console.log(" --> [X] Blacklisted model, skip");
+				continue;
+			}
+			try {
+				ggufData = await gguf(modelUrl);
+			} catch (e) {
+				console.log(" --> [X] FATAL: GGUF error", { model, tag, modelUrl });
+				throw e; // rethrow
+			}
 			const { metadata } = ggufData;
 			const ggufTmpl = metadata["tokenizer.chat_template"];
 			if (ggufTmpl) {
-				if (seenTemplate.has(ggufTmpl)) {
+				if (seenGGUFTemplate.has(ggufTmpl)) {
 					console.log(" --> Already seen this GGUF template, skip...");
 					continue;
 				}
-				seenTemplate.add(ggufTmpl);
+				seenGGUFTemplate.add(ggufTmpl);
 				console.log(" --> GGUF chat template OK");
 				const tmplBlob = manifest.layers.find((l) => l.mediaType.match(/\.template/));
 				if (!tmplBlob) continue;
@@ -128,7 +174,7 @@ const getSpecialTokens = (tmpl: string): string[] => {
 					record.ollama.params = await (await fetch(ollamaParamsUrl)).json();
 				}
 				output.push(record);
-				appendFileSync("ollama_tmp.jsonl", JSON.stringify(record) + "\n");
+				if (DEBUG) appendFileSync("ollama_tmp.jsonl", JSON.stringify(record) + "\n");
 			} else {
 				console.log(" --> [X] No GGUF template");
 				continue;
@@ -148,7 +194,7 @@ const getSpecialTokens = (tmpl: string): string[] => {
 	output.sort((a, b) => a.model.localeCompare(b.model));
 
 	writeFileSync(
-		"./src/chat-template-automap.ts",
+		OUTPUT_FILE,
 		`
 // This file is auto generated, please do not modify manually
 // To update it, run "pnpm run build:automap"

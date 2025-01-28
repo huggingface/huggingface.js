@@ -33,7 +33,7 @@
 		"format:check": "prettier --check .",
 		"prepublishOnly": "pnpm run build",
 		"build": "tsup src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
-		"build:automap": "tsx scripts/generate-automap.ts",
+		"build:automap": "tsx scripts/generate-automap.ts && prettier --write ./src/chat-template-automap.ts",
 		"test": "vitest run",
 		"check": "tsc"
 	},
