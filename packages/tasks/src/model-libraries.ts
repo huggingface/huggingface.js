@@ -185,7 +185,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "deepforest",
 		docsUrl: "https://deepforest.readthedocs.io/en/latest/",
 		repoUrl: "https://github.com/weecology/DeepForest",
-		countDownloads: `path_extension:"pt" OR path_extension:"pl"`,
 	},
 	"depth-anything-v2": {
 		prettyLabel: "DepthAnythingV2",
