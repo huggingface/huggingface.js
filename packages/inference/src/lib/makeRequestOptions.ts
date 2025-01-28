@@ -7,6 +7,7 @@ import { TOGETHER_API_BASE_URL, TOGETHER_SUPPORTED_MODEL_IDS } from "../provider
 import type { InferenceProvider } from "../types";
 import type { InferenceTask, Options, RequestArgs } from "../types";
 import { isUrl } from "./isUrl";
+import { version as packageVersion, name as packageName } from "../../package.json" assert { type: "json" };
 
 const HF_HUB_INFERENCE_PROXY_TEMPLATE = `${HF_HUB_URL}/api/inference-proxy/{{PROVIDER}}`;
 
@@ -88,6 +89,9 @@ export async function makeRequestOptions(
 		headers["Authorization"] =
 			provider === "fal-ai" && authMethod === "provider-key" ? `Key ${accessToken}` : `Bearer ${accessToken}`;
 	}
+
+	// e.g. @huggingface/inference@3.1.3
+	headers["User-Agent"] = `${packageName}@${packageVersion}`;
 
 	const binary = "data" in args && !!args.data;
 
