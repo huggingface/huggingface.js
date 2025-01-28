@@ -15,6 +15,8 @@ export const FAL_AI_SUPPORTED_MODEL_IDS: ProviderMapping<FalAiId> = {
 		"Warlord-K/Sana-1024": "fal-ai/sana",
 		"fal/AuraFlow-v0.2": "fal-ai/aura-flow",
 		"stabilityai/stable-diffusion-3.5-large": "fal-ai/stable-diffusion-v35-large",
+		"stabilityai/stable-diffusion-3.5-large-turbo": "fal-ai/stable-diffusion-v35-large/turbo",
+		"stabilityai/stable-diffusion-3.5-medium": "fal-ai/stable-diffusion-v35-medium",
 		"Kwai-Kolors/Kolors": "fal-ai/kolors",
 	},
 	"automatic-speech-recognition": {
@@ -23,5 +25,7 @@ export const FAL_AI_SUPPORTED_MODEL_IDS: ProviderMapping<FalAiId> = {
 	"text-to-video": {
 		"genmo/mochi-1-preview": "fal-ai/mochi-v1",
 		"tencent/HunyuanVideo": "fal-ai/hunyuan-video",
+		"THUDM/CogVideoX-5b": "fal-ai/cogvideox-5b",
+		"Lightricks/LTX-Video": "fal-ai/ltx-video",
 	},
 };
