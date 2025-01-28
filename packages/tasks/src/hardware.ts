@@ -14,7 +14,7 @@ export const TFLOPS_THRESHOLD_EU_AI_ACT_MODEL_TRAINING_TOTAL = 10 ** 13;
 
 export interface HardwareSpec {
 	/**
-	 * Approximate value, in FP16 whenever possible.
+	 * Approximate value, in FP16 whenever possible for GPUs and FP32 for CPUs.
 	 * This is only approximate/theoretical and shouldn't be taken too seriously.
 	 * Currently the CPU values are from cpu-monkey.com
 	 * while the GPU values are from techpowerup.com
@@ -72,9 +72,17 @@ export const SKUS = {
 				tflops: 12.0,
 				memory: [16],
 			},
+			"RTX A6000": {
+				tflops: 38.7,
+				memory: [48],
+			},
 			"RTX A4000": {
 				tflops: 19.2,
 				memory: [16],
+			},
+			"RTX A2000": {
+				tflops: 7.987,
+				memory: [8, 12],
 			},
 			A100: {
 				tflops: 77.97,
@@ -204,6 +212,10 @@ export const SKUS = {
 				tflops: 8.2, // float32 (GPU does not support native float16)
 				memory: [8],
 			},
+			"GTX 1060": {
+				tflops: 3.9, // float32 (GPU does not support native float16)
+				memory: [3, 6],
+			},
 			"RTX Titan": {
 				tflops: 32.62,
 				memory: [24],
@@ -303,6 +315,24 @@ export const SKUS = {
 				memory: [16],
 			},
 		},
+		INTEL: {
+			"Arc A750": {
+				tflops: 34.41,
+				memory: [8],
+			},
+			"Arc A770": {
+				tflops: 39.32,
+				memory: [8, 16],
+			},
+			"Arc B570": {
+				tflops: 23.04,
+				memory: [10],
+			},
+			"Arc B580": {
+				tflops: 27.34,
+				memory: [12],
+			},
+		},
 		QUALCOMM: {
 			"Snapdragon X Elite X1E-00-1DE": {
 				tflops: 4.6,
@@ -394,6 +424,9 @@ export const SKUS = {
 			"EPYC 1st Generation (Naples)": {
 				tflops: 0.6,
 			},
+			"Ryzen Zen 4 7000 (Threadripper)": {
+				tflops: 10.0,
+			},
 			"Ryzen Zen4 7000 (Ryzen 9)": {
 				tflops: 0.56,
 			},
@@ -481,7 +514,7 @@ export const SKUS = {
 			},
 			"Apple M4 Pro": {
 				tflops: 9.2,
-				memory: [24, 48],
+				memory: [24, 48, 64],
 			},
 			"Apple M4 Max": {
 				tflops: 18.4,

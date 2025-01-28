@@ -166,10 +166,17 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"adapter_config.json"`,
 	},
+	cosmos: {
+		prettyLabel: "Cosmos",
+		repoName: "Cosmos",
+		repoUrl: "https://github.com/NVIDIA/Cosmos",
+		countDownloads: `path:"config.json" OR path_extension:"pt"`,
+	},
 	"cxr-foundation": {
 		prettyLabel: "CXR Foundation",
 		repoName: "cxr-foundation",
 		repoUrl: "https://github.com/google-health/cxr-foundation",
+		snippets: snippets.cxr_foundation,
 		filter: false,
 		countDownloads: `path:"precomputed_embeddings/embeddings.npz" OR path:"pax-elixr-b-text/saved_model.pb"`,
 	},
@@ -178,7 +185,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "deepforest",
 		docsUrl: "https://deepforest.readthedocs.io/en/latest/",
 		repoUrl: "https://github.com/weecology/DeepForest",
-		countDownloads: `path_extension:"pt" OR path_extension:"pl"`,
 	},
 	"depth-anything-v2": {
 		prettyLabel: "DepthAnythingV2",
@@ -200,6 +206,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "Derm Foundation",
 		repoName: "derm-foundation",
 		repoUrl: "https://github.com/google-health/derm-foundation",
+		snippets: snippets.derm_foundation,
 		filter: false,
 		countDownloads: `path:"scin_dataset_precomputed_embeddings.npz" OR path:"saved_model.pb"`,
 	},
@@ -248,6 +255,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/Lewington-pitsos/clipscope",
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
+	},
+	cosyvoice: {
+		prettyLabel: "CosyVoice",
+		repoName: "CosyVoice",
+		repoUrl: "https://github.com/FunAudioLLM/CosyVoice",
+		filter: false,
+		countDownloads: `path_extension:"onnx" OR path_extension:"pt"`,
 	},
 	cotracker: {
 		prettyLabel: "CoTracker",
@@ -391,13 +405,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.tf_keras,
 		countDownloads: `path:"saved_model.pb"`,
 	},
-	"keras-nlp": {
-		prettyLabel: "KerasNLP",
-		repoName: "KerasNLP",
-		repoUrl: "https://github.com/keras-team/keras-nlp",
-		docsUrl: "https://keras.io/keras_nlp/",
-		snippets: snippets.keras_nlp,
-	},
 	"keras-hub": {
 		prettyLabel: "KerasHub",
 		repoName: "KerasHub",
@@ -457,6 +464,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"MeshAnything_350m.pth"`,
 		snippets: snippets.mesh_anything,
+	},
+	mitie: {
+		prettyLabel: "MITIE",
+		repoName: "MITIE",
+		repoUrl: "https://github.com/mit-nlp/MITIE",
+		countDownloads: `path_filename:"total_word_feature_extractor"`,
 	},
 	"ml-agents": {
 		prettyLabel: "ml-agents",
@@ -525,7 +538,10 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/mlfoundations/open_clip",
 		snippets: snippets.open_clip,
 		filter: true,
-		countDownloads: `path_extension:"bin" AND path_filename:*pytorch_model`,
+		countDownloads: `path:"open_clip_model.safetensors"
+			OR path:"model.safetensors"
+			OR path:"open_clip_pytorch_model.bin"
+			OR path:"pytorch_model.bin"`,
 	},
 	paddlenlp: {
 		prettyLabel: "paddlenlp",
@@ -756,6 +772,20 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/TensorSpeech/TensorFlowTTS",
 		snippets: snippets.tensorflowtts,
 	},
+	tabpfn: {
+		prettyLabel: "TabPFN",
+		repoName: "TabPFN",
+		repoUrl: "https://github.com/PriorLabs/TabPFN",
+	},
+	terratorch: {
+		prettyLabel: "TerraTorch",
+		repoName: "TerraTorch",
+		repoUrl: "https://github.com/IBM/terratorch",
+		docsUrl: "https://ibm.github.io/terratorch/",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+		snippets: snippets.terratorch,
+	},
 	"tic-clip": {
 		prettyLabel: "TiC-CLIP",
 		repoName: "TiC-CLIP",
@@ -795,11 +825,20 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.transformersJS,
 		filter: true,
 	},
-	"trellis": {
+	trellis: {
 		prettyLabel: "Trellis",
 		repoName: "Trellis",
 		repoUrl: "https://github.com/microsoft/TRELLIS",
 		countDownloads: `path_extension:"safetensors"`,
+	},
+	ultralytics: {
+		prettyLabel: "ultralytics",
+		repoName: "ultralytics",
+		repoUrl: "https://github.com/ultralytics/ultralytics",
+		docsUrl: "https://github.com/ultralytics/ultralytics",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+		snippets: snippets.ultralytics,
 	},
 	"unity-sentis": {
 		prettyLabel: "unity-sentis",
@@ -830,13 +869,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://github.com/jasonppy/VoiceCraft",
 		snippets: snippets.voicecraft,
 	},
-	yolov10: {
-		prettyLabel: "YOLOv10",
-		repoName: "yolov10",
-		repoUrl: "https://github.com/THU-MIG/yolov10",
-		docsUrl: "https://github.com/THU-MIG/yolov10",
-		snippets: snippets.yolov10,
-	},
 	whisperkit: {
 		prettyLabel: "WhisperKit",
 		repoName: "WhisperKit",
@@ -844,6 +876,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://github.com/argmaxinc/WhisperKit?tab=readme-ov-file#homebrew",
 		snippets: snippets.whisperkit,
 		countDownloads: `path_filename:"model" AND path_extension:"mil" AND _exists_:"path_prefix"`,
+	},
+	yolov10: {
+		// YOLOv10 is a fork of ultraLytics. Code snippets and download count are the same but the repo is different.
+		prettyLabel: "YOLOv10",
+		repoName: "YOLOv10",
+		repoUrl: "https://github.com/THU-MIG/yolov10",
+		docsUrl: "https://github.com/THU-MIG/yolov10",
+		countDownloads: `path_extension:"pt"`,
+		snippets: snippets.ultralytics,
 	},
 	"3dtopia-xl": {
 		prettyLabel: "3DTopia-XL",

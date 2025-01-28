@@ -1,6 +1,9 @@
-from huggingface_hub import InferenceClient
+from openai import OpenAI
 
-client = InferenceClient(api_key="api_token")
+client = OpenAI(
+	base_url="https://huggingface.co/api/inference-proxy/together",
+	api_key="api_token"
+)
 
 messages = [
 	{
@@ -10,7 +13,7 @@ messages = [
 ]
 
 completion = client.chat.completions.create(
-    model="meta-llama/Llama-3.1-8B-Instruct", 
+	model="meta-llama/Llama-3.1-8B-Instruct", 
 	messages=messages, 
 	max_tokens=500
 )
