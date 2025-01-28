@@ -28,4 +28,7 @@ export const FAL_AI_SUPPORTED_MODEL_IDS: ProviderMapping<FalAiId> = {
 		"THUDM/CogVideoX-5b": "fal-ai/cogvideox-5b",
 		"Lightricks/LTX-Video": "fal-ai/ltx-video",
 	},
+	"text-to-audio": {
+		"m-a-p/YuE-s1-7B-anneal-en-cot": "fal-ai/yue"
+	}
 };
