@@ -53,7 +53,6 @@ export const TOGETHER_SUPPORTED_MODEL_IDS: ProviderMapping<TogetherId> = {
 	},
 	"text-generation": {
 		"meta-llama/Llama-2-70b-hf": "meta-llama/Llama-2-70b-hf",
-		"meta-llama/Meta-Llama-3-8B": "meta-llama/Meta-Llama-3-8B",
 		"mistralai/Mixtral-8x7B-v0.1": "mistralai/Mixtral-8x7B-v0.1",
 	},
 };
