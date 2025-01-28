@@ -15,6 +15,15 @@ interface OutputUrlImageGeneration {
 	output: string[];
 }
 
+async function getResponseFormatArg(provider: string) {
+	if (provider == "replicate") {
+		return undefined;
+	} else if (provider === "fal-ai") {
+		return { sync_mode: true };
+	}
+	return { response_format: "base64" };
+}
+
 /**
  * This task reads some text input and outputs an image.
  * Recommended model: stabilityai/stable-diffusion-2
@@ -25,7 +34,7 @@ export async function textToImage(args: TextToImageArgs, options?: Options): Pro
 			? {
 					...omit(args, ["inputs", "parameters"]),
 					...args.parameters,
-					...(args.provider !== "replicate" ? { response_format: "base64" } : undefined),
+					...(await getResponseFormatArg(args.provider)),
 					prompt: args.inputs,
 			  }
 			: args;
@@ -33,6 +42,7 @@ export async function textToImage(args: TextToImageArgs, options?: Options): Pro
 		...options,
 		taskHint: "text-to-image",
 	});
+
 	if (res && typeof res === "object") {
 		if (args.provider === "fal-ai" && "images" in res && Array.isArray(res.images) && res.images[0].url) {
 			const image = await fetch(res.images[0].url);
