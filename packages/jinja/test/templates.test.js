@@ -159,6 +159,8 @@ const TEST_STRINGS = {
 	SPLIT: `{% for item in "   test it  ".split() %}|{{ item }}{% endfor %}|`,
 	SPLIT_2: `{% for item in "   test it  ".split(" ") %}|{{ item }}{% endfor %}|`,
 	SPLIT_3: `{% for item in "   test it  ".split(" ", 4) %}|{{ item }}{% endfor %}|`,
+	SPLIT_4: `|{{ "  1 2  3   ".split() | tojson }}|{{ "babbaccabbb".split("b") | tojson }}|{{ "babbaccabbb".split("b", 2) | tojson }}|`,
+	SPLIT_5: `|{{ " 1 2 3 4 5 ".split(none, 0) | join(",") }}|{{ " 1 2 3 4 5 ".split(none, 3) | join(",") }}|{{ " 1 2 3 4 5 ".split(" ", 0) | join(",") }}|{{ " 1 2 3 4 5 ".split(" ", 3) | join(",") }}|{{ " 1 2 3 4 5 ".split(" ", 10) | join(",") }}|`,
 };
 
 const TEST_PARSED = {
@@ -2886,6 +2888,369 @@ const TEST_PARSED = {
 		{ value: "%}", type: "CloseStatement" },
 		{ value: "|", type: "Text" },
 	],
+	SPLIT_4: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "  1 2  3   ", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "tojson", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "babbaccabbb", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "b", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "tojson", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "babbaccabbb", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "b", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "tojson", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
+	SPLIT_5: [
+		{
+			type: "Text",
+			value: "|",
+		},
+		{
+			type: "OpenExpression",
+			value: "{{",
+		},
+		{
+			type: "StringLiteral",
+			value: " 1 2 3 4 5 ",
+		},
+		{
+			type: "Dot",
+			value: ".",
+		},
+		{
+			type: "Identifier",
+			value: "split",
+		},
+		{
+			type: "OpenParen",
+			value: "(",
+		},
+		{
+			type: "NullLiteral",
+			value: "none",
+		},
+		{
+			type: "Comma",
+			value: ",",
+		},
+		{
+			type: "NumericLiteral",
+			value: "0",
+		},
+		{
+			type: "CloseParen",
+			value: ")",
+		},
+		{
+			type: "Pipe",
+			value: "|",
+		},
+		{
+			type: "Identifier",
+			value: "join",
+		},
+		{
+			type: "OpenParen",
+			value: "(",
+		},
+		{
+			type: "StringLiteral",
+			value: ",",
+		},
+		{
+			type: "CloseParen",
+			value: ")",
+		},
+		{
+			type: "CloseExpression",
+			value: "}}",
+		},
+		{
+			type: "Text",
+			value: "|",
+		},
+		{
+			type: "OpenExpression",
+			value: "{{",
+		},
+		{
+			type: "StringLiteral",
+			value: " 1 2 3 4 5 ",
+		},
+		{
+			type: "Dot",
+			value: ".",
+		},
+		{
+			type: "Identifier",
+			value: "split",
+		},
+		{
+			type: "OpenParen",
+			value: "(",
+		},
+		{
+			type: "NullLiteral",
+			value: "none",
+		},
+		{
+			type: "Comma",
+			value: ",",
+		},
+		{
+			type: "NumericLiteral",
+			value: "3",
+		},
+		{
+			type: "CloseParen",
+			value: ")",
+		},
+		{
+			type: "Pipe",
+			value: "|",
+		},
+		{
+			type: "Identifier",
+			value: "join",
+		},
+		{
+			type: "OpenParen",
+			value: "(",
+		},
+		{
+			type: "StringLiteral",
+			value: ",",
+		},
+		{
+			type: "CloseParen",
+			value: ")",
+		},
+		{
+			type: "CloseExpression",
+			value: "}}",
+		},
+		{
+			type: "Text",
+			value: "|",
+		},
+		{
+			type: "OpenExpression",
+			value: "{{",
+		},
+		{
+			type: "StringLiteral",
+			value: " 1 2 3 4 5 ",
+		},
+		{
+			type: "Dot",
+			value: ".",
+		},
+		{
+			type: "Identifier",
+			value: "split",
+		},
+		{
+			type: "OpenParen",
+			value: "(",
+		},
+		{
+			type: "StringLiteral",
+			value: " ",
+		},
+		{
+			type: "Comma",
+			value: ",",
+		},
+		{
+			type: "NumericLiteral",
+			value: "0",
+		},
+		{
+			type: "CloseParen",
+			value: ")",
+		},
+		{
+			type: "Pipe",
+			value: "|",
+		},
+		{
+			type: "Identifier",
+			value: "join",
+		},
+		{
+			type: "OpenParen",
+			value: "(",
+		},
+		{
+			type: "StringLiteral",
+			value: ",",
+		},
+		{
+			type: "CloseParen",
+			value: ")",
+		},
+		{
+			type: "CloseExpression",
+			value: "}}",
+		},
+		{
+			type: "Text",
+			value: "|",
+		},
+		{
+			type: "OpenExpression",
+			value: "{{",
+		},
+		{
+			type: "StringLiteral",
+			value: " 1 2 3 4 5 ",
+		},
+		{
+			type: "Dot",
+			value: ".",
+		},
+		{
+			type: "Identifier",
+			value: "split",
+		},
+		{
+			type: "OpenParen",
+			value: "(",
+		},
+		{
+			type: "StringLiteral",
+			value: " ",
+		},
+		{
+			type: "Comma",
+			value: ",",
+		},
+		{
+			type: "NumericLiteral",
+			value: "3",
+		},
+		{
+			type: "CloseParen",
+			value: ")",
+		},
+		{
+			type: "Pipe",
+			value: "|",
+		},
+		{
+			type: "Identifier",
+			value: "join",
+		},
+		{
+			type: "OpenParen",
+			value: "(",
+		},
+		{
+			type: "StringLiteral",
+			value: ",",
+		},
+		{
+			type: "CloseParen",
+			value: ")",
+		},
+		{
+			type: "CloseExpression",
+			value: "}}",
+		},
+		{
+			type: "Text",
+			value: "|",
+		},
+		{
+			type: "OpenExpression",
+			value: "{{",
+		},
+		{
+			type: "StringLiteral",
+			value: " 1 2 3 4 5 ",
+		},
+		{
+			type: "Dot",
+			value: ".",
+		},
+		{
+			type: "Identifier",
+			value: "split",
+		},
+		{
+			type: "OpenParen",
+			value: "(",
+		},
+		{
+			type: "StringLiteral",
+			value: " ",
+		},
+		{
+			type: "Comma",
+			value: ",",
+		},
+		{
+			type: "NumericLiteral",
+			value: "10",
+		},
+		{
+			type: "CloseParen",
+			value: ")",
+		},
+		{
+			type: "Pipe",
+			value: "|",
+		},
+		{
+			type: "Identifier",
+			value: "join",
+		},
+		{
+			type: "OpenParen",
+			value: "(",
+		},
+		{
+			type: "StringLiteral",
+			value: ",",
+		},
+		{
+			type: "CloseParen",
+			value: ")",
+		},
+		{
+			type: "CloseExpression",
+			value: "}}",
+		},
+		{
+			type: "Text",
+			value: "|",
+		},
+	],
 };
 
 const TEST_CONTEXT = {
@@ -3152,6 +3517,8 @@ const TEST_CONTEXT = {
 	SPLIT: {},
 	SPLIT_2: {},
 	SPLIT_3: {},
+	SPLIT_4: {},
+	SPLIT_5: {},
 };
 
 const EXPECTED_OUTPUTS = {
@@ -3309,11 +3676,13 @@ const EXPECTED_OUTPUTS = {
 	SPLIT: `|test|it|`,
 	SPLIT_2: `||||test|it|||`,
 	SPLIT_3: `||||test|it  |`,
+	SPLIT_4: `|["1", "2", "3"]|["", "a", "", "acca", "", "", ""]|["", "a", "baccabbb"]|`,
+	SPLIT_5: `|1 2 3 4 5 |1,2,3,4 5 | 1 2 3 4 5 |,1,2,3 4 5 |,1,2,3,4,5,|`,
 };
 
 describe("Templates", () => {
 	describe("Lexing", () => {
-		it("should tokenize an input string", () => {
+		describe("should tokenize an input string", () => {
 			for (const [name, text] of Object.entries(TEST_STRINGS)) {
 				const tokens = tokenize(text);
 
@@ -3321,11 +3690,12 @@ describe("Templates", () => {
 					throw new Error(`Test case "${name}" not found`);
 				}
 
-				if (tokens.length !== TEST_PARSED[name].length) {
-					console.log(tokens);
-				}
-				// console.log(tokens);
-				expect(tokens).toMatchObject(TEST_PARSED[name]);
+				it(name, () => {
+					if (tokens.length !== TEST_PARSED[name].length) {
+						console.error(tokens);
+					}
+					expect(tokens).toMatchObject(TEST_PARSED[name]);
+				});
 			}
 		});
 
@@ -3333,35 +3703,28 @@ describe("Templates", () => {
 	});
 
 	describe("Parsing and intepretation", () => {
-		const AST_CACHE = new Map();
-		it("should generate an AST", () => {
-			// NOTE: In this test case, we just check that no error occurs
+		describe("should interpret an AST", () => {
 			for (const [name, text] of Object.entries(TEST_PARSED)) {
 				const ast = parse(text);
-				AST_CACHE.set(name, ast);
-			}
-		});
-
-		it("should interpret an AST", () => {
-			for (const [name, ast] of AST_CACHE.entries()) {
 				if (TEST_CONTEXT[name] === undefined || EXPECTED_OUTPUTS[name] === undefined) {
 					console.warn(`Skipping test case "${name}" due to missing context or expected output`);
 					continue;
 				}
+				it(name, () => {
+					const env = new Environment();
+					// Declare global variables
+					env.set("false", false);
+					env.set("true", true);
 
-				const env = new Environment();
-				// Declare global variables
-				env.set("false", false);
-				env.set("true", true);
+					// Add user-defined variables
+					for (const [key, value] of Object.entries(TEST_CONTEXT[name])) {
+						env.set(key, value);
+					}
 
-				// Add user-defined variables
-				for (const [key, value] of Object.entries(TEST_CONTEXT[name])) {
-					env.set(key, value);
-				}
-
-				const interpreter = new Interpreter(env);
-				const result = interpreter.run(ast);
-				expect(result.value).toEqual(EXPECTED_OUTPUTS[name]);
+					const interpreter = new Interpreter(env);
+					const result = interpreter.run(ast);
+					expect(result.value).toEqual(EXPECTED_OUTPUTS[name]);
+				});
 			}
 		});
 	});
