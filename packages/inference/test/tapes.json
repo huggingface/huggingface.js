@@ -5776,5 +5776,29 @@
         "vary": "Accept-Encoding"
       }
     }
+  },
+  "e9ce30eb3ef182e09ee9344b43950114e79e003713c94f4556ee0d9085b884e8": {
+    "url": "https://huggingface.co/api/inference-proxy/hf-inference/models/lllyasviel/sd-controlnet-canny",
+    "init": {
+      "headers": {},
+      "method": "POST"
+    },
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-allow-origin": "https://huggingface.co",
+        "access-control-expose-headers": "x-compute-type, x-compute-time",
+        "connection": "keep-alive",
+        "content-type": "image/jpeg",
+        "cross-origin-opener-policy": "same-origin",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "server": "uvicorn",
+        "transfer-encoding": "chunked",
+        "vary": "Accept-Encoding, Origin, Access-Control-Request-Method, Access-Control-Request-Headers, origin, access-control-request-method, access-control-request-headers"
+      }
+    }
   }
 }

@@ -117,7 +117,9 @@ async function vcr(
 
 	const { default: tapes } = await import(TAPES_FILE);
 
-	if (VCR_MODE === MODE.PLAYBACK && !url.startsWith(HF_HUB_URL)) {
+	const cacheCandidate = !url.startsWith(HF_HUB_URL) || url.startsWith("https://huggingface.co/api/inference-proxy/")
+
+	if (VCR_MODE === MODE.PLAYBACK && cacheCandidate) {
 		if (!tapes[hash]) {
 			throw new Error(`Tape not found: ${hash} (${url})`);
 		}
@@ -135,7 +137,7 @@ async function vcr(
 
 	const response = await originalFetch(input, init);
 
-	if (url.startsWith(HF_HUB_URL)) {
+	if (!cacheCandidate) {
 		return response;
 	}
 
