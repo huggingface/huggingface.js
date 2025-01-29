@@ -135,7 +135,7 @@ export class StringValue extends RuntimeValue<string> {
 				if (sep instanceof NullValue) {
 					// If sep is not specified or is None, runs of consecutive whitespace are regarded as a single separator, and the
 					// result will contain no empty strings at the start or end if the string has leading or trailing whitespace.
-					// Trailing whitespace may be present when maxsplit is specified and there are sufficient matches in the string.
+					// Trailing whitespace may be present when maxsplit is specified and there aren't sufficient matches in the string.
 					const text = this.value.trimStart();
 					for (const { 0: match, index } of text.matchAll(/\S+/g)) {
 						if (maxsplit.value !== -1 && result.length >= maxsplit.value) {
