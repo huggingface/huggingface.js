@@ -122,57 +122,41 @@ export class StringValue extends RuntimeValue<string> {
 			// follows Python's `str.split(sep=None, maxsplit=-1)` function behavior
 			// https://docs.python.org/3.13/library/stdtypes.html#str.split
 			new FunctionValue((args) => {
-				const sepArg = args[0];
-				if (sepArg != null && !(sepArg instanceof StringValue) && !(sepArg instanceof NullValue)) {
+				const sep = args[0] ?? new NullValue();
+				if (!(sep instanceof StringValue || sep instanceof NullValue)) {
 					throw new Error("sep argument must be a string or null");
 				}
-				const useDefaultSeparator = sepArg == null || sepArg instanceof NullValue;
-				const separator = useDefaultSeparator
-					? " "
-					: sepArg.value;
-
-				if (separator === "") {
-					throw new Error("empty separator");
-				}
-
-				const maxsplitArg = args[1];
-				if (maxsplitArg != null && !(maxsplitArg instanceof NumericValue)) {
+				const maxsplit = args[1] ?? new NumericValue(-1);
+				if (!(maxsplit instanceof NumericValue)) {
 					throw new Error("maxsplit argument must be a number");
 				}
-				const maxSplit = maxsplitArg == null
-					? -1
-					: maxsplitArg.value;
 
-
-				let parts = this.value.split(separator);
-
-				// when maxSplit is specified, and `useDefaultSeparator` is `true`,
-				// squash the strings starting at index `maxSplit`, ignoring the indexes that their value is an empty string
-				if (maxSplit >= 0 && parts.length > maxSplit + 1) {
-					for (let i = 0, splitIndex = 0; i < parts.length; i++) {
-						const part = parts[i];
-
-						if (part === "" && useDefaultSeparator) {
-							continue;
-						}
-
-						if (splitIndex >= maxSplit) {
-							const squashedParts = parts.splice(i, parts.length - i);
-							parts.push(squashedParts.join(separator));
+				let result = [];
+				if (sep instanceof NullValue) {
+					// If sep is not specified or is None, runs of consecutive whitespace are regarded as a single separator, and the
+					// result will contain no empty strings at the start or end if the string has leading or trailing whitespace.
+					// Trailing whitespace may be present when maxsplit is specified and there are sufficient matches in the string.
+					const text = this.value.trimStart();
+					for (const { 0: match, index } of text.matchAll(/\S+/g)) {
+						if (maxsplit.value !== -1 && result.length >= maxsplit.value) {
+							result.push(match + text.slice(index + match.length));
 							break;
 						}
-
-						splitIndex++;
+						result.push(match);
+					}
+				} else {
+					// If sep is specified, consecutive delimiters are not grouped together and are deemed to delimit empty strings.
+					if (sep.value === "") {
+						throw new Error("empty separator");
+					}
+					result = this.value.split(sep.value);
+					if (maxsplit.value !== -1 && result.length > maxsplit.value) {
+						// Follow Python's behavior: If maxsplit is given, at most maxsplit splits are done,
+						// with any remaining text returned as the final element of the list.
+						result.push(result.splice(maxsplit.value).join(sep.value));
 					}
 				}
-
-				if (useDefaultSeparator) {
-					parts = parts.filter((x) => x !== "");
-				}
-
-				return new ArrayValue(
-					parts.map((part) => new StringValue(part))
-				);
+				return new ArrayValue(result.map((part) => new StringValue(part)));
 			}),
 		],
 	]);
@@ -601,6 +585,8 @@ export class Interpreter {
 								}
 							})
 						);
+					case "join":
+						return new StringValue(operand.value.map((x) => x.value).join(""));
 					default:
 						throw new Error(`Unknown ArrayValue filter: ${filter.value}`);
 				}
@@ -628,6 +614,7 @@ export class Interpreter {
 								)
 								.join("\n")
 						);
+					case "join":
 					case "string":
 						return operand; // no-op
 					default:
@@ -668,6 +655,24 @@ export class Interpreter {
 					throw new Error("If set, indent must be a number");
 				}
 				return new StringValue(toJSON(operand, indent.value));
+			} else if (filterName === "join") {
+				let value;
+				if (operand instanceof StringValue) {
+					// NOTE: string.split('') breaks for unicode characters
+					value = Array.from(operand.value);
+				} else if (operand instanceof ArrayValue) {
+					value = operand.value.map((x) => x.value);
+				} else {
+					throw new Error(`Cannot apply filter "${filterName}" to type: ${operand.type}`);
+				}
+				const [args, kwargs] = this.evaluateArguments(filter.args, environment);
+
+				const separator = args.at(0) ?? kwargs.get("separator") ?? new StringValue("");
+				if (!(separator instanceof StringValue)) {
+					throw new Error("separator must be a string");
+				}
+
+				return new StringValue(value.join(separator.value));
 			}
 
 			if (operand instanceof ArrayValue) {
