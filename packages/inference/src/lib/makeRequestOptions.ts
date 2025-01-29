@@ -90,7 +90,7 @@ export async function makeRequestOptions(
 			provider === "fal-ai" && authMethod === "provider-key" ? `Key ${accessToken}` : `Bearer ${accessToken}`;
 	}
 
-	// e.g. @huggingface/inference@3.1.3
+	// e.g. @huggingface/inference/3.1.3
 	const ownUserAgent = `${packageName}/${packageVersion}`;
 	headers["User-Agent"] = [ownUserAgent, typeof navigator !== "undefined" ? navigator.userAgent : undefined]
 		.filter((x) => x !== undefined)
