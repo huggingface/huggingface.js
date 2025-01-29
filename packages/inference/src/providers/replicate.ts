@@ -5,6 +5,9 @@ export const REPLICATE_API_BASE_URL = "https://api.replicate.com";
 type ReplicateId = string;
 
 export const REPLICATE_SUPPORTED_MODEL_IDS: ProviderMapping<ReplicateId> = {
+	conversational: {
+		"deepseek-ai/DeepSeek-R1": "deepseek-ai/deepseek-r1",
+	},
 	"text-to-image": {
 		"black-forest-labs/FLUX.1-dev": "black-forest-labs/flux-dev",
 		"black-forest-labs/FLUX.1-schnell": "black-forest-labs/flux-schnell",
