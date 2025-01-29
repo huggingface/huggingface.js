@@ -7,7 +7,7 @@ import { TOGETHER_API_BASE_URL, TOGETHER_SUPPORTED_MODEL_IDS } from "../provider
 import type { InferenceProvider } from "../types";
 import type { InferenceTask, Options, RequestArgs } from "../types";
 import { isUrl } from "./isUrl";
-import { version as packageVersion, name as packageName } from "../../package.json" assert { type: "json" };
+import { version as packageVersion, name as packageName } from "../../package.json";
 
 const HF_HUB_INFERENCE_PROXY_TEMPLATE = `${HF_HUB_URL}/api/inference-proxy/{{PROVIDER}}`;
 
