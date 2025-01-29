@@ -68,21 +68,21 @@ export async function makeRequestOptions(
 			? "hf-token"
 			: "provider-key"
 		: includeCredentials === "include"
-			? "credentials-include"
-			: "none";
+		  ? "credentials-include"
+		  : "none";
 
 	const url = endpointUrl
 		? chatCompletion
 			? endpointUrl + `/v1/chat/completions`
 			: endpointUrl
 		: makeUrl({
-			authMethod,
-			chatCompletion: chatCompletion ?? false,
-			forceTask,
-			model,
-			provider: provider ?? "hf-inference",
-			taskHint,
-		});
+				authMethod,
+				chatCompletion: chatCompletion ?? false,
+				forceTask,
+				model,
+				provider: provider ?? "hf-inference",
+				taskHint,
+		  });
 
 	const headers: Record<string, string> = {};
 	if (accessToken) {
@@ -143,9 +143,9 @@ export async function makeRequestOptions(
 		body: binary
 			? args.data
 			: JSON.stringify({
-				...otherArgs,
-				...(chatCompletion || provider === "together" ? { model } : undefined),
-			}),
+					...otherArgs,
+					...(chatCompletion || provider === "together" ? { model } : undefined),
+			  }),
 		...(credentials ? { credentials } : undefined),
 		signal: options?.signal,
 	};
@@ -244,7 +244,7 @@ function makeUrl(params: {
 			return baseUrl;
 		}
 		default: {
-			const baseUrl = HF_HUB_INFERENCE_PROXY_TEMPLATE.replaceAll("{{PROVIDER}}", "hf-inference")
+			const baseUrl = HF_HUB_INFERENCE_PROXY_TEMPLATE.replaceAll("{{PROVIDER}}", "hf-inference");
 			const url = params.forceTask
 				? `${baseUrl}/pipeline/${params.forceTask}/${params.model}`
 				: `${baseUrl}/models/${params.model}`;
