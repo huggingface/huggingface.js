@@ -27,7 +27,7 @@ describe.concurrent("HfInference", () => {
 						model: "this-model-does-not-exist-123",
 						inputs: "[MASK] world!",
 					})
-				).rejects.toThrowError("Model this-model-does-not-exist-123 does not exist");
+				).rejects.toThrowError("Not Found: Model not found");
 			});
 
 			it("fillMask", async () => {
