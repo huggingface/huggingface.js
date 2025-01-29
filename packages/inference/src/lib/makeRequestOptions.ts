@@ -91,7 +91,10 @@ export async function makeRequestOptions(
 	}
 
 	// e.g. @huggingface/inference@3.1.3
-	headers["User-Agent"] = `${packageName}@${packageVersion}`;
+	const ownUserAgent = `${packageName}/${packageVersion}`;
+	headers["User-Agent"] = [ownUserAgent, typeof navigator !== "undefined" ? navigator.userAgent : undefined]
+		.filter((x) => x !== undefined)
+		.join(";");
 
 	const binary = "data" in args && !!args.data;
 
