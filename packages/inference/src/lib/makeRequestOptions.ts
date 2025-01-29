@@ -1,5 +1,5 @@
 import type { WidgetType } from "@huggingface/tasks";
-import { HF_HUB_URL, HF_INFERENCE_API_URL } from "../config";
+import { HF_HUB_URL } from "../config";
 import { FAL_AI_API_BASE_URL, FAL_AI_SUPPORTED_MODEL_IDS } from "../providers/fal-ai";
 import { REPLICATE_API_BASE_URL, REPLICATE_SUPPORTED_MODEL_IDS } from "../providers/replicate";
 import { SAMBANOVA_API_BASE_URL, SAMBANOVA_SUPPORTED_MODEL_IDS } from "../providers/sambanova";
@@ -68,21 +68,21 @@ export async function makeRequestOptions(
 			? "hf-token"
 			: "provider-key"
 		: includeCredentials === "include"
-		  ? "credentials-include"
-		  : "none";
+			? "credentials-include"
+			: "none";
 
 	const url = endpointUrl
 		? chatCompletion
 			? endpointUrl + `/v1/chat/completions`
 			: endpointUrl
 		: makeUrl({
-				authMethod,
-				chatCompletion: chatCompletion ?? false,
-				forceTask,
-				model,
-				provider: provider ?? "hf-inference",
-				taskHint,
-		  });
+			authMethod,
+			chatCompletion: chatCompletion ?? false,
+			forceTask,
+			model,
+			provider: provider ?? "hf-inference",
+			taskHint,
+		});
 
 	const headers: Record<string, string> = {};
 	if (accessToken) {
@@ -143,9 +143,9 @@ export async function makeRequestOptions(
 		body: binary
 			? args.data
 			: JSON.stringify({
-					...otherArgs,
-					...(chatCompletion || provider === "together" ? { model } : undefined),
-			  }),
+				...otherArgs,
+				...(chatCompletion || provider === "together" ? { model } : undefined),
+			}),
 		...(credentials ? { credentials } : undefined),
 		signal: options?.signal,
 	};
@@ -244,9 +244,10 @@ function makeUrl(params: {
 			return baseUrl;
 		}
 		default: {
+			const baseUrl = HF_HUB_INFERENCE_PROXY_TEMPLATE.replaceAll("{{PROVIDER}}", "hf-inference")
 			const url = params.forceTask
-				? `${HF_INFERENCE_API_URL}/pipeline/${params.forceTask}/${params.model}`
-				: `${HF_INFERENCE_API_URL}/models/${params.model}`;
+				? `${baseUrl}/pipeline/${params.forceTask}/${params.model}`
+				: `${baseUrl}/models/${params.model}`;
 			if (params.taskHint === "text-generation" && params.chatCompletion) {
 				return url + `/v1/chat/completions`;
 			}
