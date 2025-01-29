@@ -949,6 +949,16 @@ describe.concurrent("HfInference", () => {
 				expect(res).toBeInstanceOf(Blob);
 			});
 
+			it("textToSpeech Kokoro", async () => {
+				const res = await client.textToSpeech({
+					model: "hexgrad/Kokoro-82M",
+					provider: "replicate",
+					inputs: "Kokoro is a frontier TTS model for its size of 1 Billion parameters",
+				});
+
+				expect(res).toBeInstanceOf(Blob);
+			});
+
 			it("textToVideo Mochi", async () => {
 				const res = await textToVideo({
 					accessToken: env.HF_REPLICATE_KEY,
