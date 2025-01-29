@@ -155,6 +155,7 @@ const TEST_STRINGS = {
 	RSTRIP: `{{ "   test it  ".rstrip() }}`,
 	//lstrip
 	LSTRIP: `{{ "   test it  ".lstrip() }}`,
+
 	//split
 	SPLIT: `{% for item in "   test it  ".split() %}|{{ item }}{% endfor %}|`,
 	SPLIT_2: `{% for item in "   test it  ".split(" ") %}|{{ item }}{% endfor %}|`,
