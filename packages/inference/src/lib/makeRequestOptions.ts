@@ -94,7 +94,7 @@ export async function makeRequestOptions(
 	const ownUserAgent = `${packageName}/${packageVersion}`;
 	headers["User-Agent"] = [ownUserAgent, typeof navigator !== "undefined" ? navigator.userAgent : undefined]
 		.filter((x) => x !== undefined)
-		.join(";");
+		.join(" ");
 
 	const binary = "data" in args && !!args.data;
 
