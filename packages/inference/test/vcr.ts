@@ -179,7 +179,7 @@ async function vcr(
 		const tape: Tape = {
 			url,
 			init: {
-				headers: init.headers && omit(init.headers as Record<string, string>, "Authorization"),
+				headers: init.headers && omit(init.headers as Record<string, string>, ["Authorization", "User-Agent"]),
 				method: init.method,
 				body: typeof init.body === "string" && init.body.length < 1_000 ? init.body : undefined,
 			},
