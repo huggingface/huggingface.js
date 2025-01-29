@@ -138,7 +138,7 @@ export class StringValue extends RuntimeValue<string> {
 					// Trailing whitespace may be present when maxsplit is specified and there aren't sufficient matches in the string.
 					const text = this.value.trimStart();
 					for (const { 0: match, index } of text.matchAll(/\S+/g)) {
-						if (maxsplit.value !== -1 && result.length >= maxsplit.value) {
+						if (maxsplit.value !== -1 && result.length >= maxsplit.value && index !== undefined) {
 							result.push(match + text.slice(index + match.length));
 							break;
 						}
