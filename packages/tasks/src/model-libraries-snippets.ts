@@ -1183,6 +1183,12 @@ from models.birefnet import BiRefNet
 model = BiRefNet.from_pretrained("${model.id}")`,
 ];
 
+export const swarmformer = (model: ModelData): string[] => [
+	`from swarmformer import SwarmFormerModel
+model = SwarmFormerModel.from_pretrained("${model.id}", trust_remote_code=True)
+`,
+];
+
 export const mlx = (model: ModelData): string[] => [
 	`pip install huggingface_hub hf_transfer
 

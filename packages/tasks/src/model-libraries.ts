@@ -752,6 +752,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"models/default.zip"`,
 	},
+	swarmformer: {
+		prettyLabel: "SwarmFormer",
+		repoName: "SwarmFormer",
+		repoUrl: "https://github.com/takara-ai/SwarmFormer",
+		snippets: snippets.swarmformer,
+		filter: false,
+	},
 	"f5-tts": {
 		prettyLabel: "F5-TTS",
 		repoName: "F5-TTS",
