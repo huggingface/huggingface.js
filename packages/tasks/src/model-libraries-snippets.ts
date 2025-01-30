@@ -1192,7 +1192,7 @@ model = SwarmFormerModel.from_pretrained("${model.id}", trust_remote_code=True)
 export const mlx = (model: ModelData): string[] => [
 	`pip install huggingface_hub hf_transfer
 
-export HF_HUB_ENABLE_HF_TRANS: string[]FER=1
+export HF_HUB_ENABLE_HF_TRANSFER=1
 huggingface-cli download --local-dir ${nameWithoutNamespace(model.id)} ${model.id}`,
 ];
 
