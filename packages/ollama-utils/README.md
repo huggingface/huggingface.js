@@ -46,11 +46,11 @@ Most templates will be converted automatically. You can debug the output templat
 - And this space to apply the Go template into a list of messages: https://huggingface.co/spaces/ngxson/ollama_template_test
 
 Please only add a new template only when the conversion above is not successful. Cases that are acceptable to add a custom handler:
-- The covnerted template is wrong
+- The converted template is wrong
 - The Jinja template is not compatible with `@huggingface/jinja`
-- The Jinja template is not "linear"
+- The Jinja template is not "linear," meaning it can modify the content of other messages or append dynamic postfixes. For instance, the DeepSeek template removes `<think>...</think>` from previous messages in a conversation, making it non-linear. Another example is a template that adds the EOS token `</s>` when `add_generation_prompt=False`.
 
 To add a new custom handler:
 1. Edit the list of `CUSTOM_TEMPLATE_MAPPING` inside `chat-template.ts`
 2. Add a new test case in `chat-template.spec.ts`
-3. hen push your change into new PR.
+3. Push your change into new PR.
