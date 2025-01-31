@@ -333,6 +333,13 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isLlamaCppGgufModel,
 		deeplink: (model) => new URL(`jan://models/huggingface/${model.id}`),
 	},
+	nidum: {
+		prettyLabel: "Nidum",
+		docsUrl: "https://nidum.ai",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		deeplink: (model) => new URL(`nidum://models/huggingface/${model.id}`),
+	},
 	backyard: {
 		prettyLabel: "Backyard AI",
 		docsUrl: "https://backyard.ai",
