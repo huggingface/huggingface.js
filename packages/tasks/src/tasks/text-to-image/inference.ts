@@ -27,6 +27,10 @@ export interface TextToImageParameters {
 	 */
 	guidance_scale?: number;
 	/**
+	 * The height in pixels of the output image
+	 */
+	height?: number;
+	/**
 	 * One prompt to guide what NOT to include in image generation.
 	 */
 	negative_prompt?: string;
@@ -44,13 +48,17 @@ export interface TextToImageParameters {
 	 */
 	seed?: number;
 	/**
-	 * The size in pixel of the output image
+	 * @deprecated use {@link width} and {@link height} instead
 	 */
 	target_size?: TargetSize;
+	/**
+	 * The width in pixels of the output image
+	 */
+	width?: number;
 	[property: string]: unknown;
 }
 /**
- * The size in pixel of the output image
+ * @deprecated use {@link width} and {@link height} instead
  */
 export interface TargetSize {
 	height: number;
