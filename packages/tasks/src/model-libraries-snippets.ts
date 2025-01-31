@@ -1185,6 +1185,7 @@ model = BiRefNet.from_pretrained("${model.id}")`,
 
 export const swarmformer = (model: ModelData): string[] => [
 	`from swarmformer import SwarmFormerModel
+
 model = SwarmFormerModel.from_pretrained("${model.id}", trust_remote_code=True)
 `,
 ];
