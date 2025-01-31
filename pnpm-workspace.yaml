@@ -11,3 +11,4 @@ packages:
   - "packages/gguf"
   - "packages/jinja"
   - "packages/space-header"
+  - "packages/ollama-utils"
