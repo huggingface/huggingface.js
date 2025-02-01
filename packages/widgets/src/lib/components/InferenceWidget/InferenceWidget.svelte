@@ -6,6 +6,7 @@
 	import AudioToAudioWidget from "./widgets/AudioToAudioWidget/AudioToAudioWidget.svelte";
 	import AutomaticSpeechRecognitionWidget from "./widgets/AutomaticSpeechRecognitionWidget/AutomaticSpeechRecognitionWidget.svelte";
 	import ConversationalWidget from "./widgets/ConversationalWidget/ConversationalWidget.svelte";
+	import DephthEstimationWidget from "./widgets/DephthEstimationWidget/DephthEstimationWidget.svelte";
 	import FeatureExtractionWidget from "./widgets/FeatureExtractionWidget/FeatureExtractionWidget.svelte";
 	import FillMaskWidget from "./widgets/FillMaskWidget/FillMaskWidget.svelte";
 	import ImageClassificationWidget from "./widgets/ImageClassificationWidget/ImageClassificationWidget.svelte";
@@ -51,6 +52,7 @@
 		"audio-classification": AudioClassificationWidget,
 		"automatic-speech-recognition": AutomaticSpeechRecognitionWidget,
 		conversational: ConversationalWidget,
+		"depth-estimation": DephthEstimationWidget,
 		"feature-extraction": FeatureExtractionWidget,
 		"fill-mask": FillMaskWidget,
 		"image-classification": ImageClassificationWidget,
