@@ -86,7 +86,7 @@ const taskData: TaskDataCustom = {
 			id: "Qwen/Qwen2.5-Coder-32B-Instruct",
 		},
 		{
-			description: "One of the most powerful large language models.",
+			description: "Powerful reasoning based open large language model.",
 			id: "deepseek-ai/DeepSeek-R1",
 		},
 	],
