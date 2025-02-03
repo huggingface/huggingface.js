@@ -39,20 +39,6 @@
 					"type": "integer",
 					"description": "The height in pixels of the output image"
 				},
-
-				"target_size": {
-					"type": "object",
-					"description": "@deprecated use {@link width} and {@link height} instead",
-					"properties": {
-						"width": {
-							"type": "integer"
-						},
-						"height": {
-							"type": "integer"
-						}
-					},
-					"required": ["width", "height"]
-				},
 				"scheduler": {
 					"type": "string",
 					"description": "Override the scheduler with a compatible one."

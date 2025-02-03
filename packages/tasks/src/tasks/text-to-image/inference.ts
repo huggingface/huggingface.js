@@ -48,21 +48,9 @@ export interface TextToImageParameters {
 	 */
 	seed?: number;
 	/**
-	 * @deprecated use {@link width} and {@link height} instead
-	 */
-	target_size?: TargetSize;
-	/**
 	 * The width in pixels of the output image
 	 */
 	width?: number;
-	[property: string]: unknown;
-}
-/**
- * @deprecated use {@link width} and {@link height} instead
- */
-export interface TargetSize {
-	height: number;
-	width: number;
 	[property: string]: unknown;
 }
 /**
