@@ -28,6 +28,11 @@ jobs:
           PR_REF: ${{  github.event.pull_request.head.ref }}
           SHA: ${{ github.sha }}
 
+      - name: Remove + reinstall Corepack
+        run: |
+        npm uninstall -g corepack
+        npm install -g corepack
+
       - name: Debug Corepack Keys
         run: |
           corepack prepare pnpm@latest --activate
