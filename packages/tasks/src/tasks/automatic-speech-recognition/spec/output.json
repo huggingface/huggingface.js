@@ -30,7 +30,7 @@
 						"maxLength": 2
 					}
 				},
-				"required": ["text", "timestamps"]
+				"required": ["text", "timestamp"]
 			}
 		}
 	},

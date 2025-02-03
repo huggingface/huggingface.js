@@ -145,7 +145,6 @@ export interface AutomaticSpeechRecognitionOutputChunk {
 	/**
 	 * The start and end timestamps corresponding with the text
 	 */
-	timestamp?: number[];
-	timestamps: unknown;
+	timestamp: number[];
 	[property: string]: unknown;
 }
