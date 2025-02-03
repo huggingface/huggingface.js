@@ -28,6 +28,10 @@ jobs:
           PR_REF: ${{  github.event.pull_request.head.ref }}
           SHA: ${{ github.sha }}
 
+      - name: Debug Corepack Keys
+        run: |
+          corepack prepare pnpm@latest --activate
+          corepack hydrate
       - run: corepack enable
 
       - uses: actions/setup-node@v3
