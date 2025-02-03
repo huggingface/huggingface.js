@@ -16,7 +16,7 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "A reasoning dataset.",
-			id: "open-thoughts/OpenThoughts-114k",
+			id: "open-r1/OpenThoughts-114k-math",
 		},
 		{
 			description: "A multilingual instruction dataset with preference ratings on responses.",
