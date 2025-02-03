@@ -74,9 +74,8 @@ const taskData: TaskDataCustom = {
 	],
 	spaces: [
 		{
-			// TO DO: write description
-			description: "An application that classifies what a given image is about.",
-			id: "nielsr/perceiver-image-classification",
+			description: "A leaderboard to evaluate different image classification models.",
+			id: "timm/leaderboard",
 		},
 	],
 	summary:

@@ -27,7 +27,7 @@ await uploadFile({
   }
 });
 
-// Use Inference API
+// Use HF Inference API, or external Inference Providers!
 
 await inference.chatCompletion({
   model: "meta-llama/Llama-3.1-8B-Instruct",
@@ -39,6 +39,7 @@ await inference.chatCompletion({
   ],
   max_tokens: 512,
   temperature: 0.5,
+  provider: "sambanova", // or together, fal-ai, replicate, …
 });
 
 await inference.textToImage({
@@ -53,7 +54,7 @@ await inference.textToImage({
 
 This is a collection of JS libraries to interact with the Hugging Face API, with TS types included.
 
-- [@huggingface/inference](packages/inference/README.md): Use Inference API (serverless) and Inference Endpoints (dedicated) to make calls to 100,000+ Machine Learning models
+- [@huggingface/inference](packages/inference/README.md): Use Inference API (serverless), Inference Endpoints (dedicated) and third-party Inference providers to make calls to 100,000+ Machine Learning models
 - [@huggingface/hub](packages/hub/README.md): Interact with huggingface.co to create or delete repos and commit / download files
 - [@huggingface/agents](packages/agents/README.md): Interact with HF models through a natural language interface
 - [@huggingface/gguf](packages/gguf/README.md): A GGUF parser that works on remotely hosted files.
@@ -94,7 +95,7 @@ You can run our packages with vanilla JS, without any bundler, by using a CDN or
 
 ```html
 <script type="module">
-    import { HfInference } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@2.8.1/+esm';
+    import { HfInference } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@3.1.5/+esm';
     import { createRepo, commit, deleteRepo, listFiles } from "https://cdn.jsdelivr.net/npm/@huggingface/hub@1.0.0/+esm";
 </script>
 ```
@@ -144,6 +145,22 @@ for await (const chunk of inference.chatCompletionStream({
   console.log(chunk.choices[0].delta.content);
 }
 
+/// Using a third-party provider: 
+await inference.chatCompletion({
+  model: "meta-llama/Llama-3.1-8B-Instruct",
+  messages: [{ role: "user", content: "Hello, nice to meet you!" }],
+  max_tokens: 512,
+  provider: "sambanova", // or together, fal-ai, replicate, …
+})
+
+await inference.textToImage({
+  model: "black-forest-labs/FLUX.1-dev",
+  inputs: "a picture of a green bird",
+  provider: "fal-ai",
+})
+
+
+
 // You can also omit "model" to use the recommended model for the task
 await inference.translation({
   inputs: "My name is Wolfgang and I live in Amsterdam",
@@ -153,14 +170,10 @@ await inference.translation({
   },
 });
 
-await inference.textToImage({
-  model: 'black-forest-labs/FLUX.1-dev',
-  inputs: 'a picture of a green bird',
-})
-
+// pass multimodal files or URLs as inputs
 await inference.imageToText({
+  model: 'nlpconnect/vit-gpt2-image-captioning',
   data: await (await fetch('https://picsum.photos/300/300')).blob(),
-  model: 'nlpconnect/vit-gpt2-image-captioning',  
 })
 
 // Using your own dedicated inference endpoint: https://hf.co/docs/inference-endpoints/
@@ -172,9 +185,9 @@ const llamaEndpoint = inference.endpoint(
  "https://api-inference.huggingface.co/models/meta-llama/Llama-3.1-8B-Instruct"
 );
 const out = await llamaEndpoint.chatCompletion({
- model: "meta-llama/Llama-3.1-8B-Instruct",
- messages: [{ role: "user", content: "Hello, nice to meet you!" }],
- max_tokens: 512,
+  model: "meta-llama/Llama-3.1-8B-Instruct",
+  messages: [{ role: "user", content: "Hello, nice to meet you!" }],
+  max_tokens: 512,
 });
 console.log(out.choices[0].message);
 ```

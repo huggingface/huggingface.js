@@ -1,5 +1,5 @@
 import { omit } from "../src/utils/omit";
-import { HF_HUB_URL } from "../src/lib/getDefaultTask";
+import { HF_HUB_URL } from "../src/config";
 import { isBackend } from "../src/utils/isBackend";
 import { isFrontend } from "../src/utils/isFrontend";
 
@@ -117,7 +117,9 @@ async function vcr(
 
 	const { default: tapes } = await import(TAPES_FILE);
 
-	if (VCR_MODE === MODE.PLAYBACK && !url.startsWith(HF_HUB_URL)) {
+	const cacheCandidate = !url.startsWith(HF_HUB_URL) || url.startsWith("https://huggingface.co/api/inference-proxy/");
+
+	if (VCR_MODE === MODE.PLAYBACK && cacheCandidate) {
 		if (!tapes[hash]) {
 			throw new Error(`Tape not found: ${hash} (${url})`);
 		}
@@ -135,7 +137,7 @@ async function vcr(
 
 	const response = await originalFetch(input, init);
 
-	if (url.startsWith(HF_HUB_URL)) {
+	if (!cacheCandidate) {
 		return response;
 	}
 
@@ -179,7 +181,7 @@ async function vcr(
 		const tape: Tape = {
 			url,
 			init: {
-				headers: init.headers && omit(init.headers as Record<string, string>, "Authorization"),
+				headers: init.headers && omit(init.headers as Record<string, string>, ["Authorization", "User-Agent"]),
 				method: init.method,
 				body: typeof init.body === "string" && init.body.length < 1_000 ? init.body : undefined,
 			},

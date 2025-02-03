@@ -73,6 +73,7 @@ export type * from "./sentence-similarity/inference.js";
 export type * from "./summarization/inference.js";
 export type * from "./table-question-answering/inference.js";
 export type { TextToImageInput, TextToImageOutput, TextToImageParameters } from "./text-to-image/inference.js";
+export type { TextToVideoParameters, TextToVideoOutput, TextToVideoInput } from "./text-to-video/inference.js";
 export type { TextToSpeechParameters, TextToSpeechInput, TextToSpeechOutput } from "./text-to-speech/inference.js";
 export type * from "./token-classification/inference.js";
 export type { TranslationInput, TranslationOutput } from "./translation/inference.js";
@@ -132,7 +133,7 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	"video-classification": ["transformers"],
 	"mask-generation": ["transformers"],
 	"multiple-choice": ["transformers"],
-	"object-detection": ["transformers", "transformers.js"],
+	"object-detection": ["transformers", "transformers.js", "ultralytics"],
 	other: [],
 	"question-answering": ["adapter-transformers", "allennlp", "transformers", "transformers.js"],
 	robotics: [],

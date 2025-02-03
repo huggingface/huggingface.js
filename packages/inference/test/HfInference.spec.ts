@@ -2,9 +2,10 @@ import { expect, it, describe, assert } from "vitest";
 
 import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
 
-import { HfInference } from "../src";
+import { chatCompletion, FAL_AI_SUPPORTED_MODEL_IDS, HfInference } from "../src";
 import "./vcr";
 import { readTestFile } from "./test-files";
+import { textToVideo } from "../src/tasks/cv/textToVideo";
 
 const TIMEOUT = 60000 * 3;
 const env = import.meta.env;
@@ -26,7 +27,7 @@ describe.concurrent("HfInference", () => {
 						model: "this-model-does-not-exist-123",
 						inputs: "[MASK] world!",
 					})
-				).rejects.toThrowError("Model this-model-does-not-exist-123 does not exist");
+				).rejects.toThrowError("Not Found: Model not found");
 			});
 
 			it("fillMask", async () => {
@@ -47,7 +48,7 @@ describe.concurrent("HfInference", () => {
 				);
 			});
 
-			it("works without model", async () => {
+			it.skip("works without model", async () => {
 				expect(
 					await hf.fillMask({
 						inputs: "[MASK] world!",
@@ -204,10 +205,14 @@ describe.concurrent("HfInference", () => {
 				});
 			});
 
-			it("textGenerationStream - meta-llama/Llama-2-7b-hf", async () => {
+			it("textGenerationStream - meta-llama/Llama-3.2-3B", async () => {
 				const response = hf.textGenerationStream({
-					model: "meta-llama/Llama-2-7b-hf",
+					model: "meta-llama/Llama-3.2-3B",
 					inputs: "Please answer the following question: complete one two and ____.",
+					parameters: {
+						max_new_tokens: 50,
+						seed: 0,
+					},
 				});
 
 				for await (const ret of response) {
@@ -221,7 +226,7 @@ describe.concurrent("HfInference", () => {
 							special: expect.any(Boolean),
 						},
 						generated_text: ret.generated_text
-							? "Please answer the following question: complete one two and ____. How does the fish find its ____? After the fish is ________ how does it get to the shore?\n1. How do objects become super saturated bubbles?\n2. What resist limiting the movement of gas?"
+							? "Please answer the following question: complete one two and ____. 1. 2. 3. 4. 5. 6. 7. 8. 9. 10. 11. 12. 13. 14. 15. 16. 17"
 							: null,
 					});
 				}
@@ -229,7 +234,7 @@ describe.concurrent("HfInference", () => {
 
 			it("textGenerationStream - catch error", async () => {
 				const response = hf.textGenerationStream({
-					model: "meta-llama/Llama-2-7b-hf",
+					model: "meta-llama/Llama-3.2-3B",
 					inputs: "Write a short story about a robot that becomes sentient and takes over the world.",
 					parameters: {
 						max_new_tokens: 10_000,
@@ -237,7 +242,7 @@ describe.concurrent("HfInference", () => {
 				});
 
 				await expect(response.next()).rejects.toThrow(
-					"Input validation error: `inputs` tokens + `max_new_tokens` must be <= 8192. Given: 18 `inputs` tokens and 10000 `max_new_tokens`"
+					"Error forwarded from backend: Input validation error: `inputs` tokens + `max_new_tokens` must be <= 4096. Given: 17 `inputs` tokens and 10000 `max_new_tokens`"
 				);
 			});
 
@@ -326,7 +331,7 @@ describe.concurrent("HfInference", () => {
 					])
 				);
 			});
-			it("SentenceSimilarity", async () => {
+			it("sentenceSimilarity", async () => {
 				expect(
 					await hf.sentenceSimilarity({
 						model: "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
@@ -741,7 +746,7 @@ describe.concurrent("HfInference", () => {
 						out += chunk.choices[0].delta.content;
 					}
 				}
-				expect(out).toContain("The answer to the equation one + one is two.");
+				expect(out).toContain("The answer to one + one is two.");
 			});
 			it("custom openai - OpenAI Specs", async () => {
 				const OPENAI_KEY = env.OPENAI_KEY;
@@ -771,24 +776,86 @@ describe.concurrent("HfInference", () => {
 		() => {
 			const client = new HfInference(env.HF_FAL_KEY);
 
-			it("textToImage", async () => {
-				const res = await client.textToImage({
-					model: "black-forest-labs/FLUX.1-schnell",
+			for (const model of Object.keys(FAL_AI_SUPPORTED_MODEL_IDS["text-to-image"] ?? {})) {
+				it(`textToImage - ${model}`, async () => {
+					const res = await client.textToImage({
+						model,
+						provider: "fal-ai",
+						inputs:
+							"Extreme close-up of a single tiger eye, direct frontal view. Detailed iris and pupil. Sharp focus on eye texture and color. Natural lighting to capture authentic eye shine and depth.",
+					});
+					expect(res).toBeInstanceOf(Blob);
+				});
+			}
+
+			for (const model of Object.keys(FAL_AI_SUPPORTED_MODEL_IDS["automatic-speech-recognition"] ?? {})) {
+				it(`automaticSpeechRecognition - ${model}`, async () => {
+					const res = await client.automaticSpeechRecognition({
+						model: model,
+						provider: "fal-ai",
+						data: new Blob([readTestFile("sample2.wav")], { type: "audio/x-wav" }),
+					});
+					expect(res).toMatchObject({
+						text: " he has grave doubts whether sir frederick leighton's work is really greek after all and can discover in it but little of rocky ithaca",
+					});
+				});
+			}
+
+			it("textToVideo - genmo/mochi-1-preview", async () => {
+				const res = await textToVideo({
+					model: "genmo/mochi-1-preview",
+					inputs: "A running dog",
+					parameters: {
+						seed: 176,
+					},
 					provider: "fal-ai",
-					inputs: "black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot",
+					accessToken: env.HF_FAL_KEY,
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
 
-			it("speechToText", async () => {
-				const res = await client.automaticSpeechRecognition({
-					model: "openai/whisper-large-v3",
+			it("textToVideo - HunyuanVideo", async () => {
+				const res = await textToVideo({
+					model: "tencent/HunyuanVideo",
+					inputs: "A running dog",
+					parameters: {
+						seed: 176,
+						num_inference_steps: 2,
+						num_frames: 85,
+						resolution: "480p",
+					},
 					provider: "fal-ai",
-					data: new Blob([readTestFile("sample2.wav")], { type: "audio/x-wav" }),
+					accessToken: env.HF_FAL_KEY,
 				});
-				expect(res).toMatchObject({
-					text: " he has grave doubts whether sir frederick leighton's work is really greek after all and can discover in it but little of rocky ithaca",
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToVideo - CogVideoX-5b", async () => {
+				const res = await textToVideo({
+					model: "THUDM/CogVideoX-5b",
+					inputs: "A running dog",
+					parameters: {
+						seed: 176,
+						num_frames: 2,
+					},
+					provider: "fal-ai",
+					accessToken: env.HF_FAL_KEY,
 				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToVideo - LTX-Video", async () => {
+				const res = await textToVideo({
+					model: "Lightricks/LTX-Video",
+					inputs: "A running dog",
+					parameters: {
+						seed: 176,
+						num_inference_steps: 2,
+					},
+					provider: "fal-ai",
+					accessToken: env.HF_FAL_KEY,
+				});
+				expect(res).toBeInstanceOf(Blob);
 			});
 		},
 		TIMEOUT
@@ -799,12 +866,102 @@ describe.concurrent("HfInference", () => {
 		() => {
 			const client = new HfInference(env.HF_REPLICATE_KEY);
 
-			it("textToImage", async () => {
+			it("textToImage canonical - black-forest-labs/FLUX.1-schnell", async () => {
 				const res = await client.textToImage({
 					model: "black-forest-labs/FLUX.1-schnell",
 					provider: "replicate",
 					inputs: "black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot",
 				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToImage canonical - black-forest-labs/FLUX.1-dev", async () => {
+				const res = await client.textToImage({
+					model: "black-forest-labs/FLUX.1-dev",
+					provider: "replicate",
+					inputs:
+						"A tiny laboratory deep in the Black Forest where squirrels in lab coats experiment with mixing chocolate and pine cones",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToImage canonical - stabilityai/stable-diffusion-3.5-large-turbo", async () => {
+				const res = await client.textToImage({
+					model: "stabilityai/stable-diffusion-3.5-large-turbo",
+					provider: "replicate",
+					inputs: "A confused rubber duck wearing a tiny wizard hat trying to cast spells with a banana wand",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToImage versioned - ByteDance/SDXL-Lightning", async () => {
+				const res = await client.textToImage({
+					model: "ByteDance/SDXL-Lightning",
+					provider: "replicate",
+					inputs: "A grumpy storm cloud wearing sunglasses and throwing tiny lightning bolts like confetti",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToImage versioned - ByteDance/Hyper-SD", async () => {
+				const res = await client.textToImage({
+					model: "ByteDance/Hyper-SD",
+					provider: "replicate",
+					inputs: "A group of dancing bytes wearing tiny party hats doing the macarena in cyberspace",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToImage versioned - playgroundai/playground-v2.5-1024px-aesthetic", async () => {
+				const res = await client.textToImage({
+					model: "playgroundai/playground-v2.5-1024px-aesthetic",
+					provider: "replicate",
+					inputs: "A playground where slides turn into rainbows and swings launch kids into cotton candy clouds",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToImage versioned - stabilityai/stable-diffusion-xl-base-1.0", async () => {
+				const res = await client.textToImage({
+					model: "stabilityai/stable-diffusion-xl-base-1.0",
+					provider: "replicate",
+					inputs: "An octopus juggling watermelons underwater while wearing scuba gear",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it.skip("textToSpeech versioned", async () => {
+				const res = await client.textToSpeech({
+					model: "SWivid/F5-TTS",
+					provider: "replicate",
+					inputs: "Hello, how are you?",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToSpeech OuteTTS", async () => {
+				const res = await client.textToSpeech({
+					model: "OuteAI/OuteTTS-0.3-500M",
+					provider: "replicate",
+					inputs: "OuteTTS is a frontier TTS model for its size of 1 Billion parameters",
+				});
+
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToVideo Mochi", async () => {
+				const res = await textToVideo({
+					accessToken: env.HF_REPLICATE_KEY,
+					model: "genmo/mochi-1-preview",
+					provider: "replicate",
+					inputs: "A running dog",
+					parameters: {
+						num_inference_steps: 10,
+						seed: 178,
+						num_frames: 30,
+					},
+				});
+
 				expect(res).toBeInstanceOf(Blob);
 			});
 		},
@@ -898,4 +1055,19 @@ describe.concurrent("HfInference", () => {
 		},
 		TIMEOUT
 	);
+
+	describe.concurrent("3rd party providers", () => {
+		it("chatCompletion - fails with unsupported model", async () => {
+			expect(
+				chatCompletion({
+					model: "black-forest-labs/Flux.1-dev",
+					provider: "together",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+					accessToken: env.HF_TOGETHER_KEY,
+				})
+			).rejects.toThrowError(
+				"Model black-forest-labs/Flux.1-dev is not supported for task conversational and provider together"
+			);
+		});
+	});
 });

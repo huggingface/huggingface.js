@@ -48,16 +48,20 @@ const taskData: TaskDataCustom = {
 	],
 	models: [
 		{
-			description: "Robust image classification model trained on publicly available image-caption data.",
-			id: "openai/clip-vit-base-patch16",
+			description: "Multilingual image classification model for 80 languages.",
+			id: "visheratin/mexma-siglip",
 		},
 		{
 			description: "Strong zero-shot image classification model.",
 			id: "google/siglip-so400m-patch14-224",
 		},
 		{
-			description: "Small yet powerful zero-shot image classification model that can run on edge devices.",
-			id: "apple/MobileCLIP-S1-OpenCLIP",
+			description: "Robust zero-shot image classification model.",
+			id: "microsoft/LLM2CLIP-EVA02-L-14-336",
+		},
+		{
+			description: "Powerful zero-shot image classification model supporting 94 languages.",
+			id: "jinaai/jina-clip-v2",
 		},
 		{
 			description: "Strong image classification model for biomedical domain.",

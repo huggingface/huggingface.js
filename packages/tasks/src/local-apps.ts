@@ -95,17 +95,17 @@ function isMlxModel(model: ModelData) {
 }
 
 const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	let tagName = "";
+	if (filepath) {
+		const quantLabel = parseGGUFQuantLabel(filepath);
+		tagName = quantLabel ? `:${quantLabel}` : "";
+	}
 	const command = (binary: string) => {
-		const snippet = [
-			"# Load and run the model:",
-			`${binary} \\`,
-			`  --hf-repo "${model.id}" \\`,
-			`  --hf-file ${filepath ?? "{{GGUF_FILE}}"} \\`,
-			`  -p "${model.tags.includes("conversational") ? "You are a helpful assistant" : "Once upon a time,"}"`,
-		];
-		if (model.tags.includes("conversational")) {
+		const snippet = ["# Load and run the model:", `${binary} -hf ${model.id}${tagName}`];
+		if (!model.tags.includes("conversational")) {
+			// for non-conversational models, add a prompt
 			snippet[snippet.length - 1] += " \\";
-			snippet.push("  --conversation");
+			snippet.push('  -p "Once upon a time,"');
 		}
 		return snippet.join("\n");
 	};

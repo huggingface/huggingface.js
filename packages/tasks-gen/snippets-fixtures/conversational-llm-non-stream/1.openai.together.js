@@ -1,8 +1,8 @@
 import { OpenAI } from "openai";
 
 const client = new OpenAI({
-    baseURL: "https://api-inference.huggingface.co/v1/",
-    apiKey: "api_token"
+	baseURL: "https://huggingface.co/api/inference-proxy/together",
+	apiKey: "api_token"
 });
 
 const chatCompletion = await client.chat.completions.create({

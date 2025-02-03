@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Inputs for Automatic Speech Recognition inference
  */
@@ -12,14 +11,13 @@ export interface AutomaticSpeechRecognitionInput {
 	 * The input audio data as a base64-encoded string. If no `parameters` are provided, you can
 	 * also provide the audio data as a raw bytes payload.
 	 */
-	inputs: string;
+	inputs: Blob;
 	/**
 	 * Additional inference parameters for Automatic Speech Recognition
 	 */
 	parameters?: AutomaticSpeechRecognitionParameters;
 	[property: string]: unknown;
 }
-
 /**
  * Additional inference parameters for Automatic Speech Recognition
  */
@@ -34,7 +32,6 @@ export interface AutomaticSpeechRecognitionParameters {
 	return_timestamps?: boolean;
 	[property: string]: unknown;
 }
-
 /**
  * Parametrization of the text generation process
  */
@@ -121,12 +118,10 @@ export interface GenerationParameters {
 	use_cache?: boolean;
 	[property: string]: unknown;
 }
-
 /**
  * Controls the stopping condition for beam-based methods.
  */
 export type EarlyStoppingUnion = boolean | "never";
-
 /**
  * Outputs of inference for the Automatic Speech Recognition task
  */
@@ -142,7 +137,6 @@ export interface AutomaticSpeechRecognitionOutput {
 	text: string;
 	[property: string]: unknown;
 }
-
 export interface AutomaticSpeechRecognitionOutputChunk {
 	/**
 	 * A chunk of text identified by the model

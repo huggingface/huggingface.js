@@ -10,7 +10,7 @@ export interface ZeroShotObjectDetectionInput {
 	/**
 	 * The input image data as a base64-encoded string.
 	 */
-	inputs: string;
+	inputs: Blob;
 	/**
 	 * Additional inference parameters for Zero Shot Object Detection
 	 */

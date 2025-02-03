@@ -68,15 +68,15 @@ const taskData: TaskDataCustom = {
 	models: [
 		{
 			description: "A strong model for consistent video generation.",
-			id: "rain1011/pyramid-flow-sd3",
+			id: "tencent/HunyuanVideo",
 		},
 		{
-			description: "A robust model for text-to-video generation.",
-			id: "VideoCrafter/VideoCrafter2",
+			description: "A text-to-video model with high fidelity motion and strong prompt adherence.",
+			id: "Lightricks/LTX-Video",
 		},
 		{
-			description: "A cutting-edge text-to-video generation model.",
-			id: "TIGER-Lab/T2V-Turbo-V2",
+			description: "A text-to-video model focusing on physics-aware applications like robotics.",
+			id: "nvidia/Cosmos-1.0-Diffusion-7B-Text2World",
 		},
 	],
 	spaces: [

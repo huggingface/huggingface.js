@@ -54,6 +54,10 @@ const taskData: TaskDataCustom = {
 			description: "Fast and accurate object detection model trained on COCO and Object365 datasets.",
 			id: "PekingU/rtdetr_r18vd_coco_o365",
 		},
+		{
+			description: "Object detection model for low-lying objects.",
+			id: "StephanST/WALDO30",
+		},
 	],
 	spaces: [
 		{
@@ -65,8 +69,8 @@ const taskData: TaskDataCustom = {
 			id: "Gradio-Blocks/Object-Detection-With-DETR-and-YOLOS",
 		},
 		{
-			description: "An application that shows multiple cutting edge techniques for object detection and tracking.",
-			id: "kadirnar/torchyolo",
+			description: "A cutting-edge object detection application.",
+			id: "Ultralytics/YOLO11",
 		},
 		{
 			description: "An object tracking, segmentation and inpainting application.",
