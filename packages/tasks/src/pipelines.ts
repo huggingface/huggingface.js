@@ -676,8 +676,8 @@ export const PIPELINE_DATA = {
 		color: "red",
 		hideInDatasets: true,
 	},
-	"document-retrieval": {
-		name: "Document Retrieval",
+	"visual-document-retrieval": {
+		name: "Visual Document Retrieval",
 		modality: "multimodal",
 		color: "yellow",
 		hideInDatasets: true,
