@@ -939,7 +939,7 @@ describe.concurrent("HfInference", () => {
 				expect(res).toBeInstanceOf(Blob);
 			});
 
-			it.skip("textToSpeech OuteTTS - Needs to update the param name in jbilcke/oute-tts Replicate model to text instead of inputs", async () => {
+			it.skip("textToSpeech OuteTTS -  usually Cold", async () => {
 				const res = await client.textToSpeech({
 					model: "OuteAI/OuteTTS-0.3-500M",
 					provider: "replicate",
