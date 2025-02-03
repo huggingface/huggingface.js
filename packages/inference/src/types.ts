@@ -1,5 +1,4 @@
-import type { PipelineType } from "@huggingface/tasks";
-import type { ChatCompletionInput } from "@huggingface/tasks";
+import type { ChatCompletionInput, PipelineType } from "@huggingface/tasks";
 
 /**
  * HF model id, like "meta-llama/Llama-3.3-70B-Instruct"
@@ -88,6 +87,7 @@ export type RequestArgs = BaseArgs &
 		| { data: Blob | ArrayBuffer }
 		| { inputs: unknown }
 		| { prompt: string }
+		| { text: string }
 		| { audio_url: string }
 		| ChatCompletionInput
 	) & {

@@ -22,13 +22,13 @@ export interface TextToSpeechOutput {
  */
 export interface TextToSpeechInput {
 	/**
+	 * The input text data
+	 */
+	inputs: string;
+	/**
 	 * Additional inference parameters for Text To Speech
 	 */
 	parameters?: TextToSpeechParameters;
-	/**
-	 * The input text data
-	 */
-	text: string;
 	[property: string]: unknown;
 }
 /**

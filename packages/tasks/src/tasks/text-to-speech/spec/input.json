@@ -5,7 +5,7 @@
 	"title": "TextToSpeechInput",
 	"type": "object",
 	"properties": {
-		"text": {
+		"inputs": {
 			"description": "The input text data",
 			"type": "string"
 		},
@@ -26,5 +26,5 @@
 			}
 		}
 	},
-	"required": ["text"]
+	"required": ["inputs"]
 }
