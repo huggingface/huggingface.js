@@ -680,6 +680,7 @@ export const PIPELINE_DATA = {
 		name: "Document Retrieval",
 		modality: "multimodal",
 		color: "yellow",
+		hideInDatasets: true,
 	},
 	"any-to-any": {
 		name: "Any-to-Any",
