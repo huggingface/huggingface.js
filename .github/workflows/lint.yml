@@ -1,4 +1,5 @@
 name: Lint
+
 on:
   pull_request:
   push:
@@ -30,8 +31,8 @@ jobs:
 
       - name: Remove + reinstall Corepack
         run: |
-        npm uninstall -g corepack
-        npm install -g corepack
+          npm uninstall -g corepack
+          npm install -g corepack
 
       - name: Debug Corepack Keys
         run: |
