@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@huggingface/hub':
+    specifier: workspace:^
+    version: link:../hub
   '@huggingface/tasks':
     specifier: workspace:^
     version: link:../tasks

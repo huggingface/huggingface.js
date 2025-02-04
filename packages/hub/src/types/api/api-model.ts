@@ -18,6 +18,10 @@ export interface ApiModelInfo {
 	downloadsAllTime: number;
 	files: string[];
 	gitalyUid: string;
+	inferenceProviderMapping: Record<
+		string,
+		{ providerId: string; status: "prod" | "staging"; task: PipelineType | "conversational" }
+	>;
 	lastAuthor: { email: string; user?: string };
 	lastModified: string; // convert to date
 	library_name?: ModelLibraryKey;

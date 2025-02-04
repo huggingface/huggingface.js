@@ -25,6 +25,7 @@ export const MODEL_EXPANDABLE_KEYS = [
 	"downloadsAllTime",
 	"gated",
 	"gitalyUid",
+	"inferenceProviderMapping",
 	"lastModified",
 	"library_name",
 	"likes",
