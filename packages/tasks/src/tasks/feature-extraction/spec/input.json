@@ -7,8 +7,12 @@
 	"required": ["inputs"],
 	"properties": {
 		"inputs": {
-			"type": "string",
-			"description": "The text to embed."
+			"title": "FeatureExtractionInputs",
+			"oneOf": [
+				{ "type": "string" },
+				{ "type": "array", "items": { "type": "string" } }
+			],
+			"description": "The text or list of texts to embed."
 		},
 		"normalize": {
 			"type": "boolean",
