@@ -443,7 +443,7 @@ const _keras_hub_causal_lm = (modelId: string): string => `
 import keras_hub
 
 # Load CausalLM model (optional: use half precision for inference)
-causal_lm = keras_hub.models.CausalLM.from_preset(${modelId}, dtype="bfloat16")
+causal_lm = keras_hub.models.CausalLM.from_preset("${modelId}", dtype="bfloat16")
 causal_lm.compile(sampler="greedy")  # (optional) specify a sampler
 
 # Generate text
@@ -454,7 +454,7 @@ const _keras_hub_text_to_image = (modelId: string): string => `
 import keras_hub
 
 # Load TextToImage model (optional: use half precision for inference)
-text_to_image = keras_hub.models.TextToImage.from_preset(${modelId}, dtype="bfloat16")
+text_to_image = keras_hub.models.TextToImage.from_preset("${modelId}", dtype="bfloat16")
 
 # Generate images with a TextToImage model.
 text_to_image.generate("Astronaut in a jungle")
@@ -465,7 +465,7 @@ import keras_hub
 
 # Load TextClassifier model
 text_classifier = keras_hub.models.TextClassifier.from_preset(
-    ${modelId},
+    "${modelId}",
     num_classes=2,
 )
 # Fine-tune
@@ -480,7 +480,7 @@ import keras
 
 # Load ImageClassifier model
 image_classifier = keras_hub.models.ImageClassifier.from_preset(
-    ${modelId},
+    "${modelId}",
     num_classes=2,
 )
 # Fine-tune
@@ -503,14 +503,14 @@ const _keras_hub_task_without_example = (task: string, modelId: string): string 
 import keras_hub
 
 # Create a ${task} model
-task = keras_hub.models.${task}.from_preset(${modelId})
+task = keras_hub.models.${task}.from_preset("${modelId}")
 `;
 
 const _keras_hub_generic_backbone = (modelId: string): string => `
 import keras_hub
 
 # Create a Backbone model unspecialized for any task
-backbone = keras_hub.models.Backbone.from_preset(${modelId})
+backbone = keras_hub.models.Backbone.from_preset("${modelId}")
 `;
 
 export const keras_hub = (model: ModelData): string[] => {
@@ -1183,10 +1183,17 @@ from models.birefnet import BiRefNet
 model = BiRefNet.from_pretrained("${model.id}")`,
 ];
 
+export const swarmformer = (model: ModelData): string[] => [
+	`from swarmformer import SwarmFormerModel
+
+model = SwarmFormerModel.from_pretrained("${model.id}")
+`,
+];
+
 export const mlx = (model: ModelData): string[] => [
 	`pip install huggingface_hub hf_transfer
 
-export HF_HUB_ENABLE_HF_TRANS: string[]FER=1
+export HF_HUB_ENABLE_HF_TRANSFER=1
 huggingface-cli download --local-dir ${nameWithoutNamespace(model.id)} ${model.id}`,
 ];
 
