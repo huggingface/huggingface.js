@@ -46,7 +46,7 @@ Your access token should be kept private. If you need to protect it in front-end
 
 You can send inference requests to third-party providers with the inference client.
 
-Currently, we support the following providers: [Fal.ai](https://fal.ai), [Replicate](https://replicate.com), [Together](https://together.xyz) and [Sambanova](https://sambanova.ai).
+Currently, we support the following providers: [Fal.ai](https://fal.ai), [Replicate](https://replicate.com), [Together](https://together.xyz), [Sambanova](https://sambanova.ai), and [Fireworks AI](https://fireworks.ai).
 
 To send requests to a third-party provider, you have to pass the `provider` parameter to the inference function. Make sure your request is authenticated with an access token.
 ```ts
@@ -68,6 +68,7 @@ Only a subset of models are supported when requesting third-party providers. You
 - [Replicate supported models](./src/providers/replicate.ts)
 - [Sambanova supported models](./src/providers/sambanova.ts)
 - [Together supported models](./src/providers/together.ts)
+- [Fireworks AI supported models](./src/providers/fireworks-ai.ts)
 - [HF Inference API (serverless)](https://huggingface.co/models?inference=warm&sort=trending)
 
 ❗**Important note:** To be compatible, the third-party API must adhere to the "standard" shape API we expect on HF model pages for each pipeline task type. 

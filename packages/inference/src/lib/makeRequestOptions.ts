@@ -208,6 +208,15 @@ function makeUrl(params: {
 			}
 			return baseUrl;
 		}
+		case "fireworks-ai": {
+			const baseUrl = shouldProxy
+				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
+				: FIREWORKS_AI_API_BASE_URL;
+			if (params.taskHint === "text-generation" && params.chatCompletion) {
+				return `${baseUrl}/v1/chat/completions`;
+			}
+			return baseUrl;
+		}
 		default: {
 			const baseUrl = HF_HUB_INFERENCE_PROXY_TEMPLATE.replaceAll("{{PROVIDER}}", "hf-inference");
 			const url = params.forceTask
