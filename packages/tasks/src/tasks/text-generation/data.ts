@@ -15,6 +15,10 @@ const taskData: TaskDataCustom = {
 			id: "HuggingFaceH4/ultrachat_200k",
 		},
 		{
+			description: "A reasoning dataset.",
+			id: "open-r1/OpenThoughts-114k-math",
+		},
+		{
 			description: "A multilingual instruction dataset with preference ratings on responses.",
 			id: "allenai/tulu-3-sft-mixture",
 		},
@@ -57,9 +61,12 @@ const taskData: TaskDataCustom = {
 		},
 	],
 	models: [
-		{
-			description: "A text-generation model trained to follow instructions.",
+		{	description: "A text-generation model trained to follow instructions.",
 			id: "google/gemma-2-2b-it",
+		},
+		{
+			description: "Smaller variant of one of the most powerful models.",
+			id: "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
 		},
 		{
 			description: "Very powerful text generation model trained to follow instructions.",
@@ -74,12 +81,16 @@ const taskData: TaskDataCustom = {
 			id: "PowerInfer/SmallThinker-3B-Preview",
 		},
 		{
-			description: "Strong text generation model to follow instructions.",
-			id: "Qwen/Qwen2.5-7B-Instruct",
+			description: "Strong conversational model that supports very long instructions.",
+			id: "Qwen/Qwen2.5-7B-Instruct-1M",
 		},
 		{
 			description: "Text generation model used to write code.",
 			id: "Qwen/Qwen2.5-Coder-32B-Instruct",
+		},
+		{
+			description: "Powerful reasoning based open large language model.",
+			id: "deepseek-ai/DeepSeek-R1",
 		},
 	],
 	spaces: [
