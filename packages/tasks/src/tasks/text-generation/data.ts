@@ -81,7 +81,7 @@ const taskData: TaskDataCustom = {
 			id: "PowerInfer/SmallThinker-3B-Preview",
 		},
 		{
-			description: "Strong text generation model to follow instructions that can take long text input.",
+			description: "Strong conversational model that supports very long instructions.",
 			id: "Qwen/Qwen2.5-7B-Instruct-1M",
 		},
 		{
