@@ -6704,5 +6704,90 @@
         "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers, origin, access-control-request-method, access-control-request-headers"
       }
     }
+  },
+  "53a03fdaf09d15dc3aa0cb176c23953cb4272717a45aa2af72cd765074dd8307": {
+    "url": "https://api.replicate.com/v1/predictions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json",
+        "Prefer": "wait"
+      },
+      "method": "POST",
+      "body": "{\"input\":{},\"version\":\"dfdf537ba482b029e0a761699e6f55e9162cfd159270bfe0e44857caa5f275a6\"}"
+    },
+    "response": {
+      "body": "{\"detail\":\"- input: text is required\\n\",\"status\":422,\"title\":\"Input validation failed\",\"invalid_fields\":[{\"type\":\"required\",\"field\":\"input\",\"description\":\"text is required\"}]}",
+      "status": 422,
+      "statusText": "Unprocessable Entity",
+      "headers": {
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "90cbb24fdb639efc-CDG",
+        "connection": "keep-alive",
+        "content-type": "application/problem+json",
+        "nel": "{\"success_fraction\":0,\"report_to\":\"cf-nel\",\"max_age\":604800}",
+        "preference-applied": "wait=60",
+        "ratelimit-remaining": "599",
+        "ratelimit-reset": "1",
+        "report-to": "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report\\/v4?s=%2BHmQD3krBculotRlBfBNCOqe1fZv1q1xIGFcai2MgNGaHbsvf7WgsJB%2Bjo%2FsKKvuTDY%2B4jJJZDNL6wmqk7q5zkX6%2BwXvBMBV0R5JMvBoacf73wLlPh%2FrRDKy7SABmZsa%2Boy9T%2B44GEwxyWSt%2F7kA\"}],\"group\":\"cf-nel\",\"max_age\":604800}",
+        "server": "cloudflare",
+        "server-timing": "cfL4;desc=\"?proto=TCP&rtt=5448&min_rtt=5445&rtt_var=2044&sent=5&recv=5&lost=0&retrans=0&sent_bytes=2846&recv_bytes=934&delivery_rate=742699&cwnd=252&unsent_bytes=0&cid=3f4b267ce20e25a5&ts=287&x=0\"",
+        "strict-transport-security": "max-age=15552000",
+        "vary": "Accept-Encoding"
+      }
+    }
+  },
+  "0320313a3118d664b91484ca2de601db4b10e24f6da34091c3c27a354aead2d6": {
+    "url": "https://api.replicate.com/v1/predictions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json",
+        "Prefer": "wait"
+      },
+      "method": "POST",
+      "body": "{\"input\":{\"text\":\"Kokoro is a frontier TTS model for its size of 1 Billion parameters\"},\"version\":\"dfdf537ba482b029e0a761699e6f55e9162cfd159270bfe0e44857caa5f275a6\"}"
+    },
+    "response": {
+      "body": "{\"id\":\"j9092etjmxrge0cmt6atga3h9c\",\"model\":\"jaaari/kokoro-82m\",\"version\":\"dfdf537ba482b029e0a761699e6f55e9162cfd159270bfe0e44857caa5f275a6\",\"input\":{\"text\":\"Kokoro is a frontier TTS model for its size of 1 Billion parameters\"},\"logs\":\"\",\"output\":\"https://replicate.delivery/czjl/jdiXdCIYKRp1L16FEzVzzeIU68neGs6ksVRLfiUW5Intl8XoA/output.wav\",\"data_removed\":false,\"error\":null,\"status\":\"processing\",\"created_at\":\"2025-02-04T15:30:11.751Z\",\"urls\":{\"cancel\":\"https://api.replicate.com/v1/predictions/j9092etjmxrge0cmt6atga3h9c/cancel\",\"get\":\"https://api.replicate.com/v1/predictions/j9092etjmxrge0cmt6atga3h9c\",\"stream\":\"https://stream.replicate.com/v1/files/fddq-bkkoai3wems6tlkt2nz74bz42gfgpkwmrqje3gjwzmwntbbxhmnq\"}}",
+      "status": 201,
+      "statusText": "Created",
+      "headers": {
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "90cbb355c98d3cb0-CDG",
+        "connection": "keep-alive",
+        "content-type": "application/json; charset=UTF-8",
+        "nel": "{\"success_fraction\":0,\"report_to\":\"cf-nel\",\"max_age\":604800}",
+        "preference-applied": "wait=60",
+        "ratelimit-remaining": "599",
+        "ratelimit-reset": "1",
+        "report-to": "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report\\/v4?s=oZpu2RT9ZeCKT4skQeoJfYxjRdjQ5%2BIHO7dbg8d%2FSF7oKn%2BQnKevVIlAy1kDCFWm29%2BFMcI0pUh4lCne0xpd2UMeunyb8rDojMHu%2B64g5O4TEhhwXYCD6U7Jtn9sdPkj5ui2dVJANyJNoNbVEMbS\"}],\"group\":\"cf-nel\",\"max_age\":604800}",
+        "server": "cloudflare",
+        "server-timing": "cfL4;desc=\"?proto=TCP&rtt=7078&min_rtt=5485&rtt_var=3195&sent=5&recv=5&lost=0&retrans=0&sent_bytes=2847&recv_bytes=1011&delivery_rate=737283&cwnd=252&unsent_bytes=0&cid=af23c66a04a91d95&ts=51330&x=0\"",
+        "strict-transport-security": "max-age=15552000",
+        "vary": "Accept-Encoding"
+      }
+    }
+  },
+  "257dcdb986bca986b9549147d46765318828a716d699a8766853798ecc49f4f9": {
+    "url": "https://replicate.delivery/czjl/jdiXdCIYKRp1L16FEzVzzeIU68neGs6ksVRLfiUW5Intl8XoA/output.wav",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+        "cache-control": "public,max-age=3600",
+        "cache-id": "PAR-8ec5b013",
+        "cache-status": "miss",
+        "content-type": "audio/x-wav",
+        "etag": "\"242683fd0194f7f98aa5337b5c97d0c1\"",
+        "last-modified": "Tue, 04 Feb 2025 15:31:02 GMT",
+        "server": "UploadServer"
+      }
+    }
   }
 }
