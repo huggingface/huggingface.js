@@ -943,7 +943,7 @@ describe.concurrent("HfInference", () => {
 				const res = await client.textToSpeech({
 					model: "OuteAI/OuteTTS-0.3-500M",
 					provider: "replicate",
-					text: "OuteTTS is a frontier TTS model for its size of 1 Billion parameters",
+					inputs: "OuteTTS is a frontier TTS model for its size of 1 Billion parameters",
 				});
 
 				expect(res).toBeInstanceOf(Blob);
@@ -953,7 +953,7 @@ describe.concurrent("HfInference", () => {
 				const res = await client.textToSpeech({
 					model: "hexgrad/Kokoro-82M",
 					provider: "replicate",
-					text: "Kokoro is a frontier TTS model for its size of 1 Billion parameters",
+					inputs: "Kokoro is a frontier TTS model for its size of 1 Billion parameters",
 				});
 
 				expect(res).toBeInstanceOf(Blob);
