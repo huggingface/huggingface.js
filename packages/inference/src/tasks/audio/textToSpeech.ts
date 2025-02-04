@@ -1,8 +1,8 @@
 import type { TextToSpeechInput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
+import { omit } from "../../utils/omit";
 import { request } from "../custom/request";
-
 type TextToSpeechArgs = BaseArgs & TextToSpeechInput;
 
 interface OutputUrlTextToSpeechGeneration {
@@ -13,7 +13,16 @@ interface OutputUrlTextToSpeechGeneration {
  * Recommended model: espnet/kan-bayashi_ljspeech_vits
  */
 export async function textToSpeech(args: TextToSpeechArgs, options?: Options): Promise<Blob> {
-	const res = await request<Blob | OutputUrlTextToSpeechGeneration>(args, {
+	// Replicate models expects "text" instead of "inputs"
+	const payload =
+		args.provider === "replicate"
+			? {
+					...omit(args, ["inputs", "parameters"]),
+					...args.parameters,
+					text: args.inputs,
+			  }
+			: args;
+	const res = await request<Blob | OutputUrlTextToSpeechGeneration>(payload, {
 		...options,
 		taskHint: "text-to-speech",
 	});
