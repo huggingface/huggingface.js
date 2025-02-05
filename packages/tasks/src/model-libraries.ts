@@ -109,6 +109,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pth"`,
 		snippets: snippets.audioseal,
 	},
+	ben2: {
+		prettyLabel: "BEN2",
+		repoName: "BEN2",
+		repoUrl: "https://github.com/PramaLLC/BEN2",
+		snippets: snippets.ben2,
+		filter: false,
+	},
 	bertopic: {
 		prettyLabel: "BERTopic",
 		repoName: "BERTopic",
