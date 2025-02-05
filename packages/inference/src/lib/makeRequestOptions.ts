@@ -172,36 +172,36 @@ async function mapModel(params: {
 	const task: WidgetType =
 		params.taskHint === "text-generation" && params.chatCompletion ? "conversational" : params.taskHint;
 
-	// If provider not listed => check the hard-coded mapping
-	if (!(params.provider in info.inferenceProviderMapping)) {
-		const modelFromMapping = (() => {
-			switch (params.provider) {
-				case "fal-ai":
-					return FAL_AI_SUPPORTED_MODEL_IDS[task]?.[params.model];
-				case "replicate":
-					return REPLICATE_SUPPORTED_MODEL_IDS[task]?.[params.model];
-				case "sambanova":
-					return SAMBANOVA_SUPPORTED_MODEL_IDS[task]?.[params.model];
-				case "together":
-					return TOGETHER_SUPPORTED_MODEL_IDS[task]?.[params.model];
-			}
-		})();
-		if (!modelFromMapping) {
-			throw new Error(`Model ${params.model} is not supported for task ${task} and provider ${params.provider}.`);
+	// If provider listed => takes precedence over hard-coded mapping
+	if (params.provider in info.inferenceProviderMapping) {
+		const inferenceProviderMapping = info.inferenceProviderMapping[params.provider];
+		if (inferenceProviderMapping.task !== task) {
+			throw new Error(
+				`Model ${params.model} is not supported for task ${task} and provider ${params.provider}. Supported task: ${inferenceProviderMapping.task}.`
+			);
 		}
-		return modelFromMapping;
+		// TODO: how is it handled server-side if model has multiple tasks (e.g. `text-generation` + `conversational`)?
+		// TODO: do something with info.inferenceProviderMapping.status? ("prod"/"staging")
+		return inferenceProviderMapping.providerId;
 	}
 
-	const inferenceProviderMapping = info.inferenceProviderMapping[params.provider];
-	if (inferenceProviderMapping.task !== task) {
-		throw new Error(
-			`Model ${params.model} is not supported for task ${task} and provider ${params.provider}. Supported task: ${inferenceProviderMapping.task}.`
-		);
+	// Otherwise, default to hard-coded mapping
+	const modelFromMapping = (() => {
+		switch (params.provider) {
+			case "fal-ai":
+				return FAL_AI_SUPPORTED_MODEL_IDS[task]?.[params.model];
+			case "replicate":
+				return REPLICATE_SUPPORTED_MODEL_IDS[task]?.[params.model];
+			case "sambanova":
+				return SAMBANOVA_SUPPORTED_MODEL_IDS[task]?.[params.model];
+			case "together":
+				return TOGETHER_SUPPORTED_MODEL_IDS[task]?.[params.model];
+		}
+	})();
+	if (!modelFromMapping) {
+		throw new Error(`Model ${params.model} is not supported for task ${task} and provider ${params.provider}.`);
 	}
-
-	// TODO: how is it handled server-side if model has multiple tasks (e.g. `text-generation` + `conversational`)?
-	// TODO: do something with info.inferenceProviderMapping.status? ("prod"/"staging")
-	return inferenceProviderMapping.providerId;
+	return modelFromMapping;
 }
 
 function makeUrl(params: {
