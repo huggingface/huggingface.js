@@ -19,7 +19,7 @@ import { existsSync as pathExists } from "node:fs";
 import * as fs from "node:fs/promises";
 import * as path from "node:path/posix";
 
-import type { InferenceProvider, InferenceSnippet } from "@huggingface/tasks";
+import type { SnippetInferenceProvider, InferenceSnippet } from "@huggingface/tasks";
 import { snippets } from "@huggingface/tasks";
 
 type LANGUAGE = "sh" | "js" | "py";
@@ -28,7 +28,7 @@ const TEST_CASES: {
 	testName: string;
 	model: snippets.ModelDataMinimal;
 	languages: LANGUAGE[];
-	providers: InferenceProvider[];
+	providers: SnippetInferenceProvider[];
 	opts?: Record<string, unknown>;
 }[] = [
 	{
