@@ -86,7 +86,14 @@ function get_prompt_from_diffusers_model(model: ModelData): string | undefined {
 export const ben2 = (model: ModelData): string[] => [
 	`from ben2 import AutoModel
 
+import requests
+from PIL import Image
+url = "https://upload.wikimedia.org/wikipedia/commons/b/b6/Felis_catus-cat_on_snow.jpg"
+image = Image.open(requests.get(url, stream=True).raw)
+
 model = AutoModel.from_pretrained("${model.id}")
+model.to("cuda").eval()
+foreground = model.inference(image)
 `,
 ];
 
