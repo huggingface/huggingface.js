@@ -13,9 +13,9 @@ export type FeatureExtractionOutput = Array<number[]>;
  */
 export interface FeatureExtractionInput {
 	/**
-	 * The text or list of texts to embed.
+	 * The text to embed.
 	 */
-	inputs: FeatureExtractionInputs;
+	inputs: string;
 	normalize?: boolean;
 	/**
 	 * The name of the prompt that should be used by for encoding. If not set, no prompt
@@ -34,8 +34,4 @@ export interface FeatureExtractionInput {
 	truncation_direction?: FeatureExtractionInputTruncationDirection;
 	[property: string]: unknown;
 }
-/**
- * The text or list of texts to embed.
- */
-export type FeatureExtractionInputs = string[] | string;
 export type FeatureExtractionInputTruncationDirection = "Left" | "Right";
