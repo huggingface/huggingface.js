@@ -180,8 +180,12 @@ async function mapModel(params: {
 				`Model ${params.model} is not supported for task ${task} and provider ${params.provider}. Supported task: ${inferenceProviderMapping.task}.`
 			);
 		}
+		if (inferenceProviderMapping.status === "staging") {
+			console.warn(
+				`Model ${params.model} is in staging for provider ${params.provider}. Use it only for test purposes.`
+			);
+		}
 		// TODO: how is it handled server-side if model has multiple tasks (e.g. `text-generation` + `conversational`)?
-		// TODO: do something with info.inferenceProviderMapping.status? ("prod"/"staging")
 		return inferenceProviderMapping.providerId;
 	}
 
