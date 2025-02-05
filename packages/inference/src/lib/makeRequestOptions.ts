@@ -1,13 +1,14 @@
 import type { WidgetType } from "@huggingface/tasks";
 import { HF_HUB_URL } from "../config";
-import { FAL_AI_API_BASE_URL, FAL_AI_SUPPORTED_MODEL_IDS } from "../providers/fal-ai";
-import { REPLICATE_API_BASE_URL, REPLICATE_SUPPORTED_MODEL_IDS } from "../providers/replicate";
-import { SAMBANOVA_API_BASE_URL, SAMBANOVA_EXTRA_SUPPORTED_MODEL_IDS } from "../providers/sambanova";
-import { TOGETHER_API_BASE_URL, TOGETHER_SUPPORTED_MODEL_IDS } from "../providers/together";
+import { FAL_AI_API_BASE_URL } from "../providers/fal-ai";
+import { REPLICATE_API_BASE_URL } from "../providers/replicate";
+import { SAMBANOVA_API_BASE_URL } from "../providers/sambanova";
+import { TOGETHER_API_BASE_URL } from "../providers/together";
 import type { InferenceProvider } from "../types";
 import type { InferenceTask, Options, RequestArgs } from "../types";
 import { isUrl } from "./isUrl";
 import { version as packageVersion, name as packageName } from "../../package.json";
+import { HARDCODED_MODEL_ID_MAPPING } from "../providers/consts";
 
 const HF_HUB_INFERENCE_PROXY_TEMPLATE = `${HF_HUB_URL}/api/inference-proxy/{{PROVIDER}}`;
 
@@ -178,6 +179,11 @@ async function mapModel(
 	const task: WidgetType =
 		options.taskHint === "text-generation" && options.chatCompletion ? "conversational" : options.taskHint;
 
+	// A dict called HARDCODED_MODEL_ID_MAPPING takes precedence in all cases (useful for dev purposes)
+	if (HARDCODED_MODEL_ID_MAPPING[params.model]) {
+		return HARDCODED_MODEL_ID_MAPPING[params.model];
+	}
+
 	// TODO: cache this call
 	const inferenceProviderMapping = await (options?.fetch ?? fetch)(
 		`${HF_HUB_URL}/api/models/${params.model}?expand[]=inferenceProviderMapping`,
@@ -206,23 +212,7 @@ async function mapModel(
 		return providerMapping.providerId;
 	}
 
-	// Otherwise, default to hard-coded mapping
-	const modelFromMapping = (() => {
-		switch (params.provider) {
-			case "fal-ai":
-				return FAL_AI_SUPPORTED_MODEL_IDS[task]?.[params.model];
-			case "replicate":
-				return REPLICATE_SUPPORTED_MODEL_IDS[task]?.[params.model];
-			case "sambanova":
-				return SAMBANOVA_EXTRA_SUPPORTED_MODEL_IDS[task]?.[params.model];
-			case "together":
-				return TOGETHER_SUPPORTED_MODEL_IDS[task]?.[params.model];
-		}
-	})();
-	if (!modelFromMapping) {
-		throw new Error(`Model ${params.model} is not supported for task ${task} and provider ${params.provider}.`);
-	}
-	return modelFromMapping;
+	throw new Error(`Model ${params.model} is not supported for task ${task} and provider ${params.provider}.`);
 }
 
 function makeUrl(params: {
