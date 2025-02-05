@@ -63,8 +63,9 @@ async function _extractAndAdapt(task: string, mainComponentName: string, type: "
 					// but not Union[List[Union[List[int], int, str]], str]
 					// data.delete(key);
 					delete data[key];
-					data["type"] = "string";
-					data["description"] = "The text to embed.";
+					data["title"] = "FeatureExtractionInputs";
+					data["description"] = "The text or list of texts to embed.";
+					data["oneOf"] = [{ type: "string" }, { type: "array", items: { type: "string" } }];
 				} else if (key === "$ref" && typeof data[key] === "string") {
 					// Verify reference exists
 					const ref = (data[key] as string).split("/").pop() ?? "";
