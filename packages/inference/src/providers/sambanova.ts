@@ -14,7 +14,7 @@ export const SAMBANOVA_API_BASE_URL = "https://api.sambanova.ai";
  * The dictionary is keyed by model task type (ie. "conversational" for LLMs, "text-to-image" for Flux, etc)
  */
 
-export const SAMBANOVA_SUPPORTED_MODEL_IDS: ProviderMapping = {
+export const SAMBANOVA_EXTRA_SUPPORTED_MODEL_IDS: ProviderMapping = {
 	conversational: {
 		// "Qwen/Qwen2.5-Coder-32B-Instruct": "Qwen2.5-Coder-32B-Instruct",
 	},

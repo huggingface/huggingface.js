@@ -3,7 +3,7 @@ import type { WidgetType } from "@huggingface/tasks";
 import { HF_HUB_URL } from "../config";
 import { FAL_AI_API_BASE_URL, FAL_AI_SUPPORTED_MODEL_IDS } from "../providers/fal-ai";
 import { REPLICATE_API_BASE_URL, REPLICATE_SUPPORTED_MODEL_IDS } from "../providers/replicate";
-import { SAMBANOVA_API_BASE_URL, SAMBANOVA_SUPPORTED_MODEL_IDS } from "../providers/sambanova";
+import { SAMBANOVA_API_BASE_URL, SAMBANOVA_EXTRA_SUPPORTED_MODEL_IDS } from "../providers/sambanova";
 import { TOGETHER_API_BASE_URL, TOGETHER_SUPPORTED_MODEL_IDS } from "../providers/together";
 import type { InferenceProvider } from "../types";
 import type { InferenceTask, Options, RequestArgs } from "../types";
@@ -197,7 +197,7 @@ async function mapModel(params: {
 			case "replicate":
 				return REPLICATE_SUPPORTED_MODEL_IDS[task]?.[params.model];
 			case "sambanova":
-				return SAMBANOVA_SUPPORTED_MODEL_IDS[task]?.[params.model];
+				return SAMBANOVA_EXTRA_SUPPORTED_MODEL_IDS[task]?.[params.model];
 			case "together":
 				return TOGETHER_SUPPORTED_MODEL_IDS[task]?.[params.model];
 		}
