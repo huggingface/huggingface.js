@@ -22,7 +22,7 @@ You can infer with Passage Ranking models using [Inference Endpoints](https://hu
 import json
 import requests
 
-API_URL = "https://api-inference.huggingface.co/models/sentence-transformers/msmarco-distilbert-base-tas-b"
+API_URL = "https://router.huggingface.co/hf-inference/models/sentence-transformers/msmarco-distilbert-base-tas-b"
 headers = {"Authorization": f"Bearer {api_token}"}
 
 def query(payload):
@@ -51,7 +51,7 @@ Semantic Textual Similarity is the task of evaluating how similar two texts are 
 import json
 import requests
 
-API_URL = "https://api-inference.huggingface.co/models/sentence-transformers/all-MiniLM-L6-v2"
+API_URL = "https://router.huggingface.co/hf-inference/models/sentence-transformers/all-MiniLM-L6-v2"
 headers = {"Authorization": f"Bearer {api_token}"}
 
 def query(payload):

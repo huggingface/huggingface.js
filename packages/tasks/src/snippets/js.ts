@@ -50,7 +50,7 @@ console.log(output);
 			content: `\
 async function query(data) {
 	const response = await fetch(
-		"https://api-inference.huggingface.co/models/${model.id}",
+		"https://router.huggingface.co/hf-inference/models/${model.id}",
 		{
 			headers: {
 				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
@@ -199,7 +199,7 @@ export const snippetZeroShotClassification = (model: ModelDataMinimal, accessTok
 			client: "fetch",
 			content: `async function query(data) {
 			const response = await fetch(
-				"https://api-inference.huggingface.co/models/${model.id}",
+				"https://router.huggingface.co/hf-inference/models/${model.id}",
 				{
 					headers: {
 						Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
@@ -250,7 +250,7 @@ const image = await client.textToImage({
 						client: "fetch",
 						content: `async function query(data) {
 	const response = await fetch(
-		"https://api-inference.huggingface.co/models/${model.id}",
+		"https://router.huggingface.co/hf-inference/models/${model.id}",
 		{
 			headers: {
 				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
@@ -282,7 +282,7 @@ export const snippetTextToAudio = (
 	}
 	const commonSnippet = `async function query(data) {
 		const response = await fetch(
-			"https://api-inference.huggingface.co/models/${model.id}",
+			"https://router.huggingface.co/hf-inference/models/${model.id}",
 			{
 				headers: {
 					Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
@@ -368,7 +368,7 @@ export const snippetFile = (
 			content: `async function query(filename) {
 	const data = fs.readFileSync(filename);
 	const response = await fetch(
-		"https://api-inference.huggingface.co/models/${model.id}",
+		"https://router.huggingface.co/hf-inference/models/${model.id}",
 		{
 			headers: {
 				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
