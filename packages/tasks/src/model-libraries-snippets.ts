@@ -83,6 +83,20 @@ function get_prompt_from_diffusers_model(model: ModelData): string | undefined {
 	}
 }
 
+export const ben2 = (model: ModelData): string[] => [
+	`import requests
+from PIL import Image
+from ben2 import AutoModel
+
+url = "https://huggingface.co/datasets/mishig/sample_images/resolve/main/teapot.jpg"
+image = Image.open(requests.get(url, stream=True).raw)
+
+model = AutoModel.from_pretrained("${model.id}")
+model.to("cuda").eval()
+foreground = model.inference(image)
+`,
+];
+
 export const bertopic = (model: ModelData): string[] => [
 	`from bertopic import BERTopic
 

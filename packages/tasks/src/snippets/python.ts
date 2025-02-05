@@ -1,11 +1,15 @@
-import { HF_HUB_INFERENCE_PROXY_TEMPLATE, openAIbaseUrl, type InferenceProvider } from "../inference-providers.js";
+import {
+	HF_HUB_INFERENCE_PROXY_TEMPLATE,
+	openAIbaseUrl,
+	type SnippetInferenceProvider,
+} from "../inference-providers.js";
 import type { PipelineType } from "../pipelines.js";
 import type { ChatCompletionInputMessage, GenerationParameters } from "../tasks/index.js";
 import { stringifyGenerationConfig, stringifyMessages } from "./common.js";
 import { getModelInputSnippet } from "./inputs.js";
 import type { InferenceSnippet, ModelDataMinimal } from "./types.js";
 
-const snippetImportInferenceClient = (accessToken: string, provider: InferenceProvider): string =>
+const snippetImportInferenceClient = (accessToken: string, provider: SnippetInferenceProvider): string =>
 	`\
 from huggingface_hub import InferenceClient
 
@@ -17,7 +21,7 @@ client = InferenceClient(
 export const snippetConversational = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: InferenceProvider,
+	provider: SnippetInferenceProvider,
 	opts?: {
 		streaming?: boolean;
 		messages?: ChatCompletionInputMessage[];
@@ -199,7 +203,7 @@ output = query(${getModelInputSnippet(model)})`,
 export const snippetTextToImage = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: InferenceProvider
+	provider: SnippetInferenceProvider
 ): InferenceSnippet[] => {
 	return [
 		{
@@ -337,7 +341,7 @@ export const pythonSnippets: Partial<
 		(
 			model: ModelDataMinimal,
 			accessToken: string,
-			provider: InferenceProvider,
+			provider: SnippetInferenceProvider,
 			opts?: Record<string, unknown>
 		) => InferenceSnippet[]
 	>
@@ -375,7 +379,7 @@ export const pythonSnippets: Partial<
 export function getPythonInferenceSnippet(
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: InferenceProvider,
+	provider: SnippetInferenceProvider,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
 	if (model.tags.includes("conversational")) {
