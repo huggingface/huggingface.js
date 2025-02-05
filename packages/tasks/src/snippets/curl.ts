@@ -1,4 +1,4 @@
-import { HF_HUB_INFERENCE_PROXY_TEMPLATE, type InferenceProvider } from "../inference-providers.js";
+import { HF_HUB_INFERENCE_PROXY_TEMPLATE, type SnippetInferenceProvider } from "../inference-providers.js";
 import type { PipelineType } from "../pipelines.js";
 import type { ChatCompletionInputMessage, GenerationParameters } from "../tasks/index.js";
 import { stringifyGenerationConfig, stringifyMessages } from "./common.js";
@@ -8,7 +8,7 @@ import type { InferenceSnippet, ModelDataMinimal } from "./types.js";
 export const snippetBasic = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: InferenceProvider
+	provider: SnippetInferenceProvider
 ): InferenceSnippet[] => {
 	if (provider !== "hf-inference") {
 		return [];
@@ -29,7 +29,7 @@ curl https://api-inference.huggingface.co/models/${model.id} \\
 export const snippetTextGeneration = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: InferenceProvider,
+	provider: SnippetInferenceProvider,
 	opts?: {
 		streaming?: boolean;
 		messages?: ChatCompletionInputMessage[];
@@ -84,7 +84,7 @@ export const snippetTextGeneration = (
 export const snippetZeroShotClassification = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: InferenceProvider
+	provider: SnippetInferenceProvider
 ): InferenceSnippet[] => {
 	if (provider !== "hf-inference") {
 		return [];
@@ -104,7 +104,7 @@ export const snippetZeroShotClassification = (
 export const snippetFile = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: InferenceProvider
+	provider: SnippetInferenceProvider
 ): InferenceSnippet[] => {
 	if (provider !== "hf-inference") {
 		return [];
@@ -126,7 +126,7 @@ export const curlSnippets: Partial<
 		(
 			model: ModelDataMinimal,
 			accessToken: string,
-			provider: InferenceProvider,
+			provider: SnippetInferenceProvider,
 			opts?: Record<string, unknown>
 		) => InferenceSnippet[]
 	>
@@ -160,7 +160,7 @@ export const curlSnippets: Partial<
 export function getCurlInferenceSnippet(
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: InferenceProvider,
+	provider: SnippetInferenceProvider,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
 	return model.pipeline_tag && model.pipeline_tag in curlSnippets
