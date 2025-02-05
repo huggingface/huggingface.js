@@ -45,6 +45,7 @@
 	import IconVideoTextToText from "../Icons/IconVideoTextToText.svelte";
 	import IconAnyToAny from "../Icons/IconAnyToAny.svelte";
 	import IconKeypointDetection from "../Icons/IconKeypointDetection.svelte";
+	import IconVisualDocumentRetrieval from "../IconsVisualDocumentRetrieval.svelte";
 	import type { WidgetType } from "@huggingface/tasks";
 
 	export let classNames = "";
@@ -101,6 +102,7 @@
 		"video-text-to-text": IconVideoTextToText,
 		"any-to-any": IconAnyToAny,
 		"keypoint-detection": IconKeypointDetection,
+		"visual-document-retrieval": IconVisualDocumentRetrieval,
 	};
 
 	$: iconComponent =
