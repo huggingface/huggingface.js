@@ -163,11 +163,6 @@ async function mapModel(params: {
 	// TODO: cache this call
 	const info = await modelInfo({ name: params.model, additionalFields: ["inferenceProviderMapping"] });
 
-	// If provider not listed => model not supported
-	if (!(params.provider in info.inferenceProviderMapping)) {
-		throw new Error(`Model ${params.model} is not supported by provider ${params.provider}`);
-	}
-
 	if (params.provider === "hf-inference") {
 		return params.model;
 	}
@@ -176,6 +171,26 @@ async function mapModel(params: {
 	}
 	const task: WidgetType =
 		params.taskHint === "text-generation" && params.chatCompletion ? "conversational" : params.taskHint;
+
+	// If provider not listed => check the hard-coded mapping
+	if (!(params.provider in info.inferenceProviderMapping)) {
+		const modelFromMapping = (() => {
+			switch (params.provider) {
+				case "fal-ai":
+					return FAL_AI_SUPPORTED_MODEL_IDS[task]?.[params.model];
+				case "replicate":
+					return REPLICATE_SUPPORTED_MODEL_IDS[task]?.[params.model];
+				case "sambanova":
+					return SAMBANOVA_SUPPORTED_MODEL_IDS[task]?.[params.model];
+				case "together":
+					return TOGETHER_SUPPORTED_MODEL_IDS[task]?.[params.model];
+			}
+		})();
+		if (!modelFromMapping) {
+			throw new Error(`Model ${params.model} is not supported for task ${task} and provider ${params.provider}.`);
+		}
+		return modelFromMapping;
+	}
 
 	const inferenceProviderMapping = info.inferenceProviderMapping[params.provider];
 	if (inferenceProviderMapping.task !== task) {
