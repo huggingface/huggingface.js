@@ -182,7 +182,7 @@ async function mapModel(params: {
 		}
 		if (inferenceProviderMapping.status === "staging") {
 			console.warn(
-				`Model ${params.model} is in staging for provider ${params.provider}. Use it only for test purposes.`
+				`Model ${params.model} is in staging mode for provider ${params.provider}. Meant for test purposes only.`
 			);
 		}
 		// TODO: how is it handled server-side if model has multiple tasks (e.g. `text-generation` + `conversational`)?
