@@ -87,6 +87,7 @@ export const ben2 = (model: ModelData): string[] => [
 	`import requests
 from PIL import Image
 from ben2 import AutoModel
+
 url = "https://upload.wikimedia.org/wikipedia/commons/b/b6/Felis_catus-cat_on_snow.jpg"
 image = Image.open(requests.get(url, stream=True).raw)
 
