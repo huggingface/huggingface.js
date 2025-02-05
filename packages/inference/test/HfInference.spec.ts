@@ -2,7 +2,7 @@ import { assert, describe, expect, it } from "vitest";
 
 import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
 
-import { chatCompletion, HfInference } from "../src";
+import { chatCompletion, FAL_AI_SUPPORTED_MODEL_IDS, HfInference } from "../src";
 import { textToVideo } from "../src/tasks/cv/textToVideo";
 import { readTestFile } from "./test-files";
 import "./vcr";
@@ -13,27 +13,6 @@ const env = import.meta.env;
 if (!env.HF_TOKEN) {
 	console.warn("Set HF_TOKEN in the env to run the tests for better rate limits");
 }
-
-// TODO: automate this?
-const FAL_AI_TESTED_MODEL_IDS = {
-	"text-to-image": {
-		"black-forest-labs/FLUX.1-schnell": "fal-ai/flux/schnell",
-		"black-forest-labs/FLUX.1-dev": "fal-ai/flux/dev",
-		"playgroundai/playground-v2.5-1024px-aesthetic": "fal-ai/playground-v25",
-		"ByteDance/SDXL-Lightning": "fal-ai/lightning-models",
-		"PixArt-alpha/PixArt-Sigma-XL-2-1024-MS": "fal-ai/pixart-sigma",
-		"stabilityai/stable-diffusion-3-medium": "fal-ai/stable-diffusion-v3-medium",
-		"Warlord-K/Sana-1024": "fal-ai/sana",
-		"fal/AuraFlow-v0.2": "fal-ai/aura-flow",
-		"stabilityai/stable-diffusion-3.5-large": "fal-ai/stable-diffusion-v35-large",
-		"stabilityai/stable-diffusion-3.5-large-turbo": "fal-ai/stable-diffusion-v35-large/turbo",
-		"stabilityai/stable-diffusion-3.5-medium": "fal-ai/stable-diffusion-v35-medium",
-		"Kwai-Kolors/Kolors": "fal-ai/kolors",
-	},
-	"automatic-speech-recognition": {
-		"openai/whisper-large-v3": "fal-ai/whisper",
-	},
-};
 
 describe.concurrent("HfInference", () => {
 	// Individual tests can be ran without providing an api key, however running all tests without an api key will result in rate limiting error.
@@ -797,7 +776,7 @@ describe.concurrent("HfInference", () => {
 		() => {
 			const client = new HfInference(env.HF_FAL_KEY);
 
-			for (const model of Object.keys(FAL_AI_TESTED_MODEL_IDS["text-to-image"] ?? {})) {
+			for (const model of Object.keys(FAL_AI_SUPPORTED_MODEL_IDS["text-to-image"] ?? {})) {
 				it(`textToImage - ${model}`, async () => {
 					const res = await client.textToImage({
 						model,
@@ -809,7 +788,7 @@ describe.concurrent("HfInference", () => {
 				});
 			}
 
-			for (const model of Object.keys(FAL_AI_TESTED_MODEL_IDS["automatic-speech-recognition"] ?? {})) {
+			for (const model of Object.keys(FAL_AI_SUPPORTED_MODEL_IDS["automatic-speech-recognition"] ?? {})) {
 				it(`automaticSpeechRecognition - ${model}`, async () => {
 					const res = await client.automaticSpeechRecognition({
 						model: model,
