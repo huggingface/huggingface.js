@@ -31,18 +31,13 @@
 					"type": "integer",
 					"description": "The number of denoising steps. More denoising steps usually lead to a higher quality image at the expense of slower inference."
 				},
-				"target_size": {
-					"type": "object",
-					"description": "The size in pixel of the output image",
-					"properties": {
-						"width": {
-							"type": "integer"
-						},
-						"height": {
-							"type": "integer"
-						}
-					},
-					"required": ["width", "height"]
+				"width": {
+					"type": "integer",
+					"description": "The width in pixels of the output image"
+				},
+				"height": {
+					"type": "integer",
+					"description": "The height in pixels of the output image"
 				},
 				"scheduler": {
 					"type": "string",

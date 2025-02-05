@@ -1,11 +1,11 @@
-import { expect, it, describe, assert } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
 
 import { chatCompletion, FAL_AI_SUPPORTED_MODEL_IDS, HfInference } from "../src";
-import "./vcr";
-import { readTestFile } from "./test-files";
 import { textToVideo } from "../src/tasks/cv/textToVideo";
+import { readTestFile } from "./test-files";
+import "./vcr";
 
 const TIMEOUT = 60000 * 3;
 const env = import.meta.env;
@@ -27,7 +27,7 @@ describe.concurrent("HfInference", () => {
 						model: "this-model-does-not-exist-123",
 						inputs: "[MASK] world!",
 					})
-				).rejects.toThrowError("Model this-model-does-not-exist-123 does not exist");
+				).rejects.toThrowError("Not Found: Model not found");
 			});
 
 			it("fillMask", async () => {
@@ -939,11 +939,21 @@ describe.concurrent("HfInference", () => {
 				expect(res).toBeInstanceOf(Blob);
 			});
 
-			it("textToSpeech OuteTTS", async () => {
+			it.skip("textToSpeech OuteTTS -  usually Cold", async () => {
 				const res = await client.textToSpeech({
 					model: "OuteAI/OuteTTS-0.3-500M",
 					provider: "replicate",
 					inputs: "OuteTTS is a frontier TTS model for its size of 1 Billion parameters",
+				});
+
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToSpeech Kokoro", async () => {
+				const res = await client.textToSpeech({
+					model: "hexgrad/Kokoro-82M",
+					provider: "replicate",
+					inputs: "Kokoro is a frontier TTS model for its size of 1 Billion parameters",
 				});
 
 				expect(res).toBeInstanceOf(Blob);

@@ -1,5 +1,5 @@
 import type { WidgetType } from "@huggingface/tasks";
-import { HF_HUB_URL, HF_INFERENCE_API_URL } from "../config";
+import { HF_HUB_URL } from "../config";
 import { FAL_AI_API_BASE_URL, FAL_AI_SUPPORTED_MODEL_IDS } from "../providers/fal-ai";
 import { REPLICATE_API_BASE_URL, REPLICATE_SUPPORTED_MODEL_IDS } from "../providers/replicate";
 import { SAMBANOVA_API_BASE_URL, SAMBANOVA_SUPPORTED_MODEL_IDS } from "../providers/sambanova";
@@ -7,6 +7,7 @@ import { TOGETHER_API_BASE_URL, TOGETHER_SUPPORTED_MODEL_IDS } from "../provider
 import type { InferenceProvider } from "../types";
 import type { InferenceTask, Options, RequestArgs } from "../types";
 import { isUrl } from "./isUrl";
+import { version as packageVersion, name as packageName } from "../../package.json";
 
 const HF_HUB_INFERENCE_PROXY_TEMPLATE = `${HF_HUB_URL}/api/inference-proxy/{{PROVIDER}}`;
 
@@ -88,6 +89,12 @@ export async function makeRequestOptions(
 		headers["Authorization"] =
 			provider === "fal-ai" && authMethod === "provider-key" ? `Key ${accessToken}` : `Bearer ${accessToken}`;
 	}
+
+	// e.g. @huggingface/inference/3.1.3
+	const ownUserAgent = `${packageName}/${packageVersion}`;
+	headers["User-Agent"] = [ownUserAgent, typeof navigator !== "undefined" ? navigator.userAgent : undefined]
+		.filter((x) => x !== undefined)
+		.join(" ");
 
 	const binary = "data" in args && !!args.data;
 
@@ -237,9 +244,10 @@ function makeUrl(params: {
 			return baseUrl;
 		}
 		default: {
+			const baseUrl = HF_HUB_INFERENCE_PROXY_TEMPLATE.replaceAll("{{PROVIDER}}", "hf-inference");
 			const url = params.forceTask
-				? `${HF_INFERENCE_API_URL}/pipeline/${params.forceTask}/${params.model}`
-				: `${HF_INFERENCE_API_URL}/models/${params.model}`;
+				? `${baseUrl}/pipeline/${params.forceTask}/${params.model}`
+				: `${baseUrl}/models/${params.model}`;
 			if (params.taskHint === "text-generation" && params.chatCompletion) {
 				return url + `/v1/chat/completions`;
 			}
