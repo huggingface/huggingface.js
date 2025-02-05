@@ -1,4 +1,3 @@
-import { modelInfo } from "@huggingface/hub";
 import type { WidgetType } from "@huggingface/tasks";
 import { HF_HUB_URL } from "../config";
 import { FAL_AI_API_BASE_URL, FAL_AI_SUPPORTED_MODEL_IDS } from "../providers/fal-ai";
@@ -54,13 +53,17 @@ export async function makeRequestOptions(
 	let model: string;
 	if (!maybeModel) {
 		if (taskHint) {
-			model = await mapModel({ model: await loadDefaultModel(taskHint), provider, taskHint, chatCompletion });
+			model = await mapModel({ model: await loadDefaultModel(taskHint), provider }, args, {
+				taskHint,
+				chatCompletion,
+				fetch: options?.fetch,
+			});
 		} else {
 			throw new Error("No model provided, and no default model found for this task");
 			/// TODO : change error message ^
 		}
 	} else {
-		model = await mapModel({ model: maybeModel, provider, taskHint, chatCompletion });
+		model = await mapModel({ model: maybeModel, provider }, args, { taskHint, chatCompletion, fetch: options?.fetch });
 	}
 
 	/// If accessToken is passed, it should take precedence over includeCredentials
@@ -154,39 +157,53 @@ export async function makeRequestOptions(
 	return { url, info };
 }
 
-async function mapModel(params: {
-	model: string;
-	provider: InferenceProvider;
-	taskHint: InferenceTask | undefined;
-	chatCompletion: boolean | undefined;
-}): Promise<string> {
+async function mapModel(
+	params: {
+		model: string;
+		provider: InferenceProvider;
+	},
+	args: RequestArgs,
+	options: {
+		taskHint?: InferenceTask;
+		chatCompletion?: boolean;
+		fetch?: Options["fetch"];
+	} = {}
+): Promise<string> {
 	if (params.provider === "hf-inference") {
 		return params.model;
 	}
-	if (!params.taskHint) {
+	if (!options.taskHint) {
 		throw new Error("taskHint must be specified when using a third-party provider");
 	}
 	const task: WidgetType =
-		params.taskHint === "text-generation" && params.chatCompletion ? "conversational" : params.taskHint;
+		options.taskHint === "text-generation" && options.chatCompletion ? "conversational" : options.taskHint;
 
 	// TODO: cache this call
-	const info = await modelInfo({ name: params.model, additionalFields: ["inferenceProviderMapping"] });
+	const inferenceProviderMapping = await (options?.fetch ?? fetch)(
+		`${HF_HUB_URL}/api/models/${params.model}?expand[]=inferenceProviderMapping`,
+		{
+			headers: args.accessToken?.startsWith("hf_") ? { Authorization: `Bearer ${args.accessToken}` } : {},
+		}
+	)
+		.then((resp) => resp.json())
+		.then((json) => json.inferenceProviderMapping)
+		.catch(() => null);
 
-	const inferenceProviderMapping = info.inferenceProviderMapping[params.provider];
+	const providerMapping = inferenceProviderMapping[params.provider];
 	// If provider listed => takes precedence over hard-coded mapping
-	if (inferenceProviderMapping) {
-		if (inferenceProviderMapping.task !== task) {
+	if (providerMapping) {
+		if (providerMapping.task !== task) {
 			throw new Error(
 				`Model ${params.model} is not supported for task ${task} and provider ${params.provider}. Supported task: ${inferenceProviderMapping.task}.`
 			);
 		}
-		if (inferenceProviderMapping.status === "staging") {
+		if (providerMapping.status === "staging") {
 			console.warn(
 				`Model ${params.model} is in staging mode for provider ${params.provider}. Meant for test purposes only.`
 			);
 		}
 		// TODO: how is it handled server-side if model has multiple tasks (e.g. `text-generation` + `conversational`)?
-		return inferenceProviderMapping.providerId;
+		return providerMapping.providerId;
 	}
 
 	// Otherwise, default to hard-coded mapping

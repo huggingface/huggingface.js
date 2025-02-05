@@ -52,7 +52,6 @@
 		"check": "tsc"
 	},
 	"dependencies": {
-		"@huggingface/hub": "workspace:^",
 		"@huggingface/tasks": "workspace:^"
 	},
 	"devDependencies": {
