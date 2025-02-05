@@ -160,9 +160,6 @@ async function mapModel(params: {
 	taskHint: InferenceTask | undefined;
 	chatCompletion: boolean | undefined;
 }): Promise<string> {
-	// TODO: cache this call
-	const info = await modelInfo({ name: params.model, additionalFields: ["inferenceProviderMapping"] });
-
 	if (params.provider === "hf-inference") {
 		return params.model;
 	}
@@ -171,6 +168,9 @@ async function mapModel(params: {
 	}
 	const task: WidgetType =
 		params.taskHint === "text-generation" && params.chatCompletion ? "conversational" : params.taskHint;
+
+	// TODO: cache this call
+	const info = await modelInfo({ name: params.model, additionalFields: ["inferenceProviderMapping"] });
 
 	// If provider listed => takes precedence over hard-coded mapping
 	if (params.provider in info.inferenceProviderMapping) {
