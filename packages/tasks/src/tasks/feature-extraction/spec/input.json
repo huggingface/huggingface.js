@@ -8,11 +8,18 @@
 	"properties": {
 		"inputs": {
 			"title": "FeatureExtractionInputs",
+			"description": "The text or list of texts to embed.",
 			"oneOf": [
-				{ "type": "string" },
-				{ "type": "array", "items": { "type": "string" } }
-			],
-			"description": "The text or list of texts to embed."
+				{
+					"type": "string"
+				},
+				{
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			]
 		},
 		"normalize": {
 			"type": "boolean",
