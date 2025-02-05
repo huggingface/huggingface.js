@@ -14,5 +14,8 @@
 	},
 	"cSpell.words": ["huggingface"],
 	"deno.enablePaths": ["./e2e/deno"],
+	"search.exclude": {
+		"**/dist": true
+	},
 	"typescript.tsdk": "node_modules/typescript/lib"
 }
