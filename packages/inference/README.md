@@ -49,6 +49,7 @@ You can send inference requests to third-party providers with the inference clie
 Currently, we support the following providers:
 - [Fal.ai](https://fal.ai)
 - [Fireworks AI](https://fireworks.ai)
+- [Hyperbolic](https://hyperbolic.xyz)
 - [Nebius](https://studio.nebius.ai)
 - [Replicate](https://replicate.com)
 - [Sambanova](https://sambanova.ai)
@@ -72,6 +73,7 @@ When authenticated with a third-party provider key, the request is made directly
 Only a subset of models are supported when requesting third-party providers. You can check the list of supported models per pipeline tasks here:
 - [Fal.ai supported models](https://huggingface.co/api/partners/fal-ai/models)
 - [Fireworks AI supported models](https://huggingface.co/api/partners/fireworks-ai/models)
+- [Hyperbolic supported models](https://huggingface.co/api/partners/hyperbolic/models)
 - [Nebius supported models](https://huggingface.co/api/partners/nebius/models)
 - [Replicate supported models](https://huggingface.co/api/partners/replicate/models)
 - [Sambanova supported models](https://huggingface.co/api/partners/sambanova/models)

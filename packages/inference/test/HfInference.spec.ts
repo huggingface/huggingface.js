@@ -1175,4 +1175,69 @@ describe.concurrent("HfInference", () => {
 		},
 		TIMEOUT
 	);
+
+	describe.concurrent(
+		"Hyperbolic",
+		() => {
+			const client = new HfInference(env.HF_HYPERBOLIC_KEY);
+
+			it("chatCompletion - hyperbolic", async () => {
+				const res = await client.chatCompletion({
+					model: "meta-llama/Llama-3.2-3B-Instruct",
+					provider: "hyperbolic",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+					temperature: 0.1,
+				});
+
+				expect(res).toBeDefined();
+				expect(res.choices).toBeDefined();
+				expect(res.choices?.length).toBeGreaterThan(0);
+
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toBeDefined();
+					expect(typeof completion).toBe("string");
+					expect(completion).toContain("two");
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "meta-llama/Llama-3.3-70B-Instruct",
+					provider: "hyperbolic",
+					messages: [{ role: "user", content: "Complete the equation 1 + 1 = , just the answer" }],
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+				let out = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						out += chunk.choices[0].delta.content;
+					}
+				}
+				expect(out).toContain("2");
+			});
+
+			it("textToImage", async () => {
+				const res = await client.textToImage({
+					model: "stabilityai/stable-diffusion-2",
+					provider: "hyperbolic",
+					inputs: "award winning high resolution photo of a giant tortoise",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textGeneration", async () => {
+				const res = await client.textGeneration({
+					model: "meta-llama/Llama-3.1-405B-BASE-FP8",
+					provider: "hyperbolic",
+					inputs: "Paris is",
+					parameters: {
+						temperature: 0,
+						max_tokens: 10,
+					},
+				});
+				expect(res).toMatchObject({ generated_text: " city of love" });
+			});
+		},
+		TIMEOUT
+	);
 });

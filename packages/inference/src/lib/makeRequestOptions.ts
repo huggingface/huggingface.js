@@ -5,6 +5,8 @@ import { REPLICATE_API_BASE_URL } from "../providers/replicate";
 import { SAMBANOVA_API_BASE_URL } from "../providers/sambanova";
 import { TOGETHER_API_BASE_URL } from "../providers/together";
 import { FIREWORKS_AI_API_BASE_URL } from "../providers/fireworks-ai";
+import { HYPERBOLIC_API_BASE_URL } from "../providers/hyperbolic";
+
 import type { InferenceProvider } from "../types";
 import type { InferenceTask, Options, RequestArgs } from "../types";
 import { isUrl } from "./isUrl";
@@ -234,6 +236,11 @@ function makeUrl(params: {
 				return `${baseUrl}/v1/chat/completions`;
 			}
 			return baseUrl;
+		case "hyperbolic": {
+			const baseUrl = shouldProxy
+				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
+				: HYPERBOLIC_API_BASE_URL;
+			return `${baseUrl}/v1/chat/completions`;
 		}
 		default: {
 			const baseUrl = HF_HUB_INFERENCE_PROXY_TEMPLATE.replaceAll("{{PROVIDER}}", "hf-inference");
