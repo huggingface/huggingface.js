@@ -14,6 +14,7 @@ export const FAL_AI_SUPPORTED_MODEL_IDS: ProviderMapping<FalAiId> = {
 		"stabilityai/stable-diffusion-3-medium": "fal-ai/stable-diffusion-v3-medium",
 		"Warlord-K/Sana-1024": "fal-ai/sana",
 		"fal/AuraFlow-v0.2": "fal-ai/aura-flow",
+		"stabilityai/stable-diffusion-xl-base-1.0": "fal-ai/fast-sdxl",
 		"stabilityai/stable-diffusion-3.5-large": "fal-ai/stable-diffusion-v35-large",
 		"stabilityai/stable-diffusion-3.5-large-turbo": "fal-ai/stable-diffusion-v35-large/turbo",
 		"stabilityai/stable-diffusion-3.5-medium": "fal-ai/stable-diffusion-v35-medium",
