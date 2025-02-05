@@ -7,7 +7,7 @@ type SambanovaId = string;
 export const SAMBANOVA_SUPPORTED_MODEL_IDS: ProviderMapping<SambanovaId> = {
 	/** Chat completion / conversational */
 	conversational: {
-		"deepseek-ai/DeepSeek-Distill-R1-Llama-70B": "DeepSeek-Distill-R1-Llama-70B",
+		"deepseek-ai/DeepSeek-R1-Distill-Llama-70B": "DeepSeek-R1-Distill-Llama-70B",
 		"Qwen/Qwen2.5-Coder-32B-Instruct": "Qwen2.5-Coder-32B-Instruct",
 		"Qwen/Qwen2.5-72B-Instruct": "Qwen2.5-72B-Instruct",
 		"Qwen/QwQ-32B-Preview": "QwQ-32B-Preview",
