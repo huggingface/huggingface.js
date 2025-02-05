@@ -6789,5 +6789,45 @@
         "server": "UploadServer"
       }
     }
+  },
+  "efa2b5ab7171e43629fef33886a32583919f4dfe814ae07a44db19257ee123ae": {
+    "url": "https://fal.run/fal-ai/fast-sdxl",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"response_format\":\"base64\",\"prompt\":\"Extreme close-up of a single tiger eye, direct frontal view. Detailed iris and pupil. Sharp focus on eye texture and color. Natural lighting to capture authentic eye shine and depth.\"}"
+    },
+    "response": {
+      "body": "{\"images\":[{\"url\":\"https://fal.media/files/monkey/t28MYvYK21vq9nIypBm0P.jpeg\",\"width\":1024,\"height\":1024,\"content_type\":\"image/jpeg\"}],\"timings\":{\"inference\":2.1236871778964996},\"seed\":15619174981588513000,\"has_nsfw_concepts\":[false],\"prompt\":\"Extreme close-up of a single tiger eye, direct frontal view. Detailed iris and pupil. Sharp focus on eye texture and color. Natural lighting to capture authentic eye shine and depth.\"}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "strict-transport-security": "max-age=31536000; includeSubDomains"
+      }
+    }
+  },
+  "374890ec5b45788656310c21999957168f47242bd379c91da86d00eab7b9b218": {
+    "url": "https://fal.media/files/monkey/t28MYvYK21vq9nIypBm0P.jpeg",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-headers": "*",
+        "access-control-allow-methods": "*",
+        "access-control-allow-origin": "*",
+        "access-control-max-age": "86400",
+        "cf-ray": "90d404087de9999f-CDG",
+        "connection": "keep-alive",
+        "content-type": "image/jpeg",
+        "server": "cloudflare",
+        "vary": "Accept-Encoding"
+      }
+    }
   }
 }
