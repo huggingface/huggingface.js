@@ -61,9 +61,7 @@ const taskData: TaskDataCustom = {
 		},
 	],
 	models: [
-		{	description: "A text-generation model trained to follow instructions.",
-			id: "google/gemma-2-2b-it",
-		},
+		{ description: "A text-generation model trained to follow instructions.", id: "google/gemma-2-2b-it" },
 		{
 			description: "Smaller variant of one of the most powerful models.",
 			id: "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
