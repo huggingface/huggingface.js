@@ -60,7 +60,7 @@ export async function getProviderModelId(
 	if (providerMapping) {
 		if (providerMapping.task !== task) {
 			throw new Error(
-				`Model ${params.model} is not supported for task ${task} and provider ${params.provider}. Supported task: ${inferenceProviderMapping.task}.`
+				`Model ${params.model} is not supported for task ${task} and provider ${params.provider}. Supported task: ${providerMapping.task}.`
 			);
 		}
 		if (providerMapping.status === "staging") {
