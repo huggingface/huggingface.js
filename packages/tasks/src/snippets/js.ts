@@ -1,11 +1,11 @@
 import { openAIbaseUrl, type SnippetInferenceProvider } from "../inference-providers.js";
-import type { PipelineType } from "../pipelines.js";
+import type { PipelineType, WidgetType } from "../pipelines.js";
 import type { ChatCompletionInputMessage, GenerationParameters } from "../tasks/index.js";
 import { stringifyGenerationConfig, stringifyMessages } from "./common.js";
 import { getModelInputSnippet } from "./inputs.js";
 import type { InferenceSnippet, ModelDataMinimal } from "./types.js";
 
-const HFJS_METHODS: Record<string, string> = {
+const HFJS_METHODS: Partial<Record<WidgetType, string>> = {
 	"text-classification": "textClassification",
 	"token-classification": "tokenClassification",
 	"table-question-answering": "tableQuestionAnswering",
@@ -40,7 +40,7 @@ const output = await client.${HFJS_METHODS[model.pipeline_tag]}({
 	provider: "${provider}",
 });
 
-console.log(output)
+console.log(output);
 `,
 					},
 			  ]
