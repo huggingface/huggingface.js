@@ -19,7 +19,7 @@ export interface ApiModelInfo {
 	files: string[];
 	gitalyUid: string;
 	inferenceProviderMapping: Partial<
-		Record<string, { providerId: string; status: "prod" | "staging"; task: WidgetType }>
+		Record<string, { providerId: string; status: "live" | "staging"; task: WidgetType }>
 	>;
 	lastAuthor: { email: string; user?: string };
 	lastModified: string; // convert to date
