@@ -1,4 +1,4 @@
-import type { ModelLibraryKey, TransformersInfo } from "@huggingface/tasks";
+import type { ModelLibraryKey, TransformersInfo, WidgetType } from "@huggingface/tasks";
 import type { License, PipelineType } from "../public";
 
 export interface ApiModelInfo {
@@ -18,9 +18,8 @@ export interface ApiModelInfo {
 	downloadsAllTime: number;
 	files: string[];
 	gitalyUid: string;
-	inferenceProviderMapping: Record<
-		string,
-		{ providerId: string; status: "prod" | "staging"; task: PipelineType | "conversational" }
+	inferenceProviderMapping: Partial<
+		Record<string, { providerId: string; status: "prod" | "staging"; task: WidgetType }>
 	>;
 	lastAuthor: { email: string; user?: string };
 	lastModified: string; // convert to date

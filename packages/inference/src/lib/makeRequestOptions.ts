@@ -172,9 +172,9 @@ async function mapModel(params: {
 	// TODO: cache this call
 	const info = await modelInfo({ name: params.model, additionalFields: ["inferenceProviderMapping"] });
 
+	const inferenceProviderMapping = info.inferenceProviderMapping[params.provider];
 	// If provider listed => takes precedence over hard-coded mapping
-	if (params.provider in info.inferenceProviderMapping) {
-		const inferenceProviderMapping = info.inferenceProviderMapping[params.provider];
+	if (inferenceProviderMapping) {
 		if (inferenceProviderMapping.task !== task) {
 			throw new Error(
 				`Model ${params.model} is not supported for task ${task} and provider ${params.provider}. Supported task: ${inferenceProviderMapping.task}.`
