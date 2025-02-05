@@ -83,6 +83,13 @@ function get_prompt_from_diffusers_model(model: ModelData): string | undefined {
 	}
 }
 
+export const ben2 = (model: ModelData): string[] => [
+	`from ben2 import AutoModel
+
+model = AutoModel.from_pretrained("${model.id}")
+`,
+];
+
 export const bertopic = (model: ModelData): string[] => [
 	`from bertopic import BERTopic
 
