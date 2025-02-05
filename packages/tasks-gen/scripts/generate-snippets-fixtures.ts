@@ -90,6 +90,17 @@ const TEST_CASES: {
 		providers: ["hf-inference"],
 		languages: ["sh", "js", "py"],
 	},
+	{
+		testName: "text-classification",
+		model: {
+			id: "distilbert/distilbert-base-uncased-finetuned-sst-2-english",
+			pipeline_tag: "text-classification",
+			tags: [],
+			inference: "",
+		},
+		providers: ["hf-inference"],
+		languages: ["sh", "js", "py"],
+	},
 ] as const;
 
 const GET_SNIPPET_FN = {
@@ -119,7 +130,7 @@ function getFixtureFolder(testName: string): string {
 function generateInferenceSnippet(
 	model: snippets.ModelDataMinimal,
 	language: LANGUAGE,
-	provider: InferenceProvider,
+	provider: SnippetInferenceProvider,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
 	const generatedSnippets = GET_SNIPPET_FN[language](model, "api_token", provider, opts);
@@ -129,7 +140,7 @@ function generateInferenceSnippet(
 async function getExpectedInferenceSnippet(
 	testName: string,
 	language: LANGUAGE,
-	provider: InferenceProvider
+	provider: SnippetInferenceProvider
 ): Promise<InferenceSnippet[]> {
 	const fixtureFolder = getFixtureFolder(testName);
 	const files = await fs.readdir(fixtureFolder);
@@ -146,7 +157,7 @@ async function getExpectedInferenceSnippet(
 async function saveExpectedInferenceSnippet(
 	testName: string,
 	language: LANGUAGE,
-	provider: InferenceProvider,
+	provider: SnippetInferenceProvider,
 	snippets: InferenceSnippet[]
 ) {
 	const fixtureFolder = getFixtureFolder(testName);
