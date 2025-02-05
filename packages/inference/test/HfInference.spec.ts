@@ -930,6 +930,19 @@ describe.concurrent("HfInference", () => {
 				expect(res).toBeInstanceOf(Blob);
 			});
 
+			it("conversational unversioned", async () => {
+				const res = await client.chatCompletion({
+					model: "deepseek-ai/DeepSeek-R1",
+					provider: "replicate",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				expect(res.choices).toBeDefined();
+				expect(res.choices?.length).toBeGreaterThan(0);
+				expect(res.choices?.[0].message?.content).toBeDefined();
+				const completion = res.choices[0].message?.content;
+				expect(completion).toContain("two");
+			});
+
 			it.skip("textToSpeech versioned", async () => {
 				const res = await client.textToSpeech({
 					model: "SWivid/F5-TTS",
