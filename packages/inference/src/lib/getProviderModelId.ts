@@ -1,8 +1,8 @@
 import type { WidgetType } from "@huggingface/tasks";
+import type { InferenceProvider, InferenceTask, ModelId, Options, RequestArgs } from "../types";
 import { HF_HUB_URL } from "../config";
 import { HARDCODED_MODEL_ID_MAPPING } from "../providers/consts";
-import type { ModelId } from "../types";
-import { type InferenceProvider, type InferenceTask, type Options, type RequestArgs } from "../types";
+import { typedInclude } from "../utils/typedInclude";
 
 type InferenceProviderMapping = Partial<
 	Record<InferenceProvider, { providerId: string; status: "live" | "staging"; task: WidgetType }>
@@ -56,7 +56,6 @@ export async function getProviderModelId(
 	}
 
 	const providerMapping = inferenceProviderMapping[params.provider];
-	// If provider listed => takes precedence over hard-coded mapping
 	if (providerMapping) {
 		if (providerMapping.task !== task) {
 			throw new Error(
@@ -72,5 +71,5 @@ export async function getProviderModelId(
 		return providerMapping.providerId;
 	}
 
-	throw new Error(`Model ${params.model} is not supported for task ${task} and provider ${params.provider}.`);
+	throw new Error(`Model ${params.model} is not supported provider ${params.provider}.`);
 }
