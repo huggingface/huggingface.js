@@ -2,7 +2,6 @@ import type { WidgetType } from "@huggingface/tasks";
 import type { InferenceProvider, InferenceTask, ModelId, Options, RequestArgs } from "../types";
 import { HF_HUB_URL } from "../config";
 import { HARDCODED_MODEL_ID_MAPPING } from "../providers/consts";
-import { typedInclude } from "../utils/typedInclude";
 
 type InferenceProviderMapping = Partial<
 	Record<InferenceProvider, { providerId: string; status: "live" | "staging"; task: WidgetType }>
