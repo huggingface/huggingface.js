@@ -3,6 +3,7 @@ import { FAL_AI_API_BASE_URL } from "../providers/fal-ai";
 import { REPLICATE_API_BASE_URL } from "../providers/replicate";
 import { SAMBANOVA_API_BASE_URL } from "../providers/sambanova";
 import { TOGETHER_API_BASE_URL } from "../providers/together";
+import { FIREWORKS_AI_API_BASE_URL } from "../providers/fireworks-ai";
 import type { InferenceProvider } from "../types";
 import type { InferenceTask, Options, RequestArgs } from "../types";
 import { isUrl } from "./isUrl";
