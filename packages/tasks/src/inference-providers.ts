@@ -20,5 +20,6 @@ export const HF_HUB_INFERENCE_PROXY_TEMPLATE = `https://router.huggingface.co/{{
  * TODO(Expose this from HfInference in the future?)
  */
 export function openAIbaseUrl(provider: SnippetInferenceProvider): string {
-	return HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", provider);
+	const url = HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", provider);
+	return provider === "hf-inference" ? `${url}/v1` : url;
 }

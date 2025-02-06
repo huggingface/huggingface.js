@@ -1,7 +1,7 @@
 import { OpenAI } from "openai";
 
 const client = new OpenAI({
-	baseURL: "https://router.huggingface.co/hf-inference",
+	baseURL: "https://router.huggingface.co/hf-inference/v1",
 	apiKey: "api_token"
 });
 
