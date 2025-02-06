@@ -10,14 +10,13 @@
 			"type": "string"
 		},
 		"parameters": {
-			"description": "Additional inference parameters",
+			"description": "Additional inference parameters for Text To Image",
 			"$ref": "#/$defs/TextToImageParameters"
 		}
 	},
 	"$defs": {
 		"TextToImageParameters": {
 			"title": "TextToImageParameters",
-			"description": "Additional inference parameters for Text To Image",
 			"type": "object",
 			"properties": {
 				"guidance_scale": {
@@ -25,28 +24,20 @@
 					"description": "A higher guidance scale value encourages the model to generate images closely linked to the text prompt, but values too high may cause saturation and other artifacts."
 				},
 				"negative_prompt": {
-					"type": "array",
-					"items": {
-						"type": "string"
-					},
-					"description": "One or several prompt to guide what NOT to include in image generation."
+					"type": "string",
+					"description": "One prompt to guide what NOT to include in image generation."
 				},
 				"num_inference_steps": {
 					"type": "integer",
 					"description": "The number of denoising steps. More denoising steps usually lead to a higher quality image at the expense of slower inference."
 				},
-				"target_size": {
-					"type": "object",
-					"description": "The size in pixel of the output image",
-					"properties": {
-						"width": {
-							"type": "integer"
-						},
-						"height": {
-							"type": "integer"
-						}
-					},
-					"required": ["width", "height"]
+				"width": {
+					"type": "integer",
+					"description": "The width in pixels of the output image"
+				},
+				"height": {
+					"type": "integer",
+					"description": "The height in pixels of the output image"
 				},
 				"scheduler": {
 					"type": "string",

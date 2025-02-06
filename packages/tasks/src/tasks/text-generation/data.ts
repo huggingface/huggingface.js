@@ -1,27 +1,34 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	datasets: [
 		{
-			description: "A large multilingual dataset of text crawled from the web.",
-			id: "mc4",
+			description: "Multilingual dataset used to evaluate text generation models.",
+			id: "CohereForAI/Global-MMLU",
 		},
 		{
-			description:
-				"Diverse open-source data consisting of 22 smaller high-quality datasets. It was used to train GPT-Neo.",
-			id: "the_pile",
+			description: "High quality multilingual data used to train text-generation models.",
+			id: "HuggingFaceFW/fineweb-2",
 		},
 		{
 			description: "Truly open-source, curated and cleaned dialogue dataset.",
 			id: "HuggingFaceH4/ultrachat_200k",
 		},
 		{
-			description: "An instruction dataset with preference ratings on responses.",
-			id: "openbmb/UltraFeedback",
+			description: "A reasoning dataset.",
+			id: "open-r1/OpenThoughts-114k-math",
+		},
+		{
+			description: "A multilingual instruction dataset with preference ratings on responses.",
+			id: "allenai/tulu-3-sft-mixture",
 		},
 		{
 			description: "A large synthetic dataset for alignment of text generation models.",
-			id: "argilla/magpie-ultra-v0.1",
+			id: "HuggingFaceTB/smoltalk",
+		},
+		{
+			description: "A dataset made for training text generation models solving math questions.",
+			id: "HuggingFaceTB/finemath",
 		},
 	],
 	demo: {
@@ -54,39 +61,44 @@ const taskData: TaskDataCustom = {
 		},
 	],
 	models: [
+		{ description: "A text-generation model trained to follow instructions.", id: "google/gemma-2-2b-it" },
 		{
-			description: "A text-generation model trained to follow instructions.",
-			id: "google/gemma-2-2b-it",
-		},
-		{
-			description: "A code generation model that can generate code in 80+ languages.",
-			id: "bigcode/starcoder",
+			description: "Smaller variant of one of the most powerful models.",
+			id: "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
 		},
 		{
 			description: "Very powerful text generation model trained to follow instructions.",
 			id: "meta-llama/Meta-Llama-3.1-8B-Instruct",
 		},
 		{
-			description: "Small yet powerful text generation model.",
-			id: "microsoft/Phi-3-mini-4k-instruct",
+			description: "Powerful text generation model by Microsoft.",
+			id: "microsoft/phi-4",
 		},
 		{
-			description: "A very powerful model that can solve mathematical problems.",
-			id: "AI-MO/NuminaMath-7B-TIR",
+			description: "A very powerful model with reasoning capabilities.",
+			id: "PowerInfer/SmallThinker-3B-Preview",
 		},
 		{
-			description: "Strong coding assistant model.",
-			id: "HuggingFaceH4/starchat2-15b-v0.1",
+			description: "Strong conversational model that supports very long instructions.",
+			id: "Qwen/Qwen2.5-7B-Instruct-1M",
 		},
 		{
-			description: "Very strong open-source large language model.",
-			id: "mistralai/Mistral-Nemo-Instruct-2407",
+			description: "Text generation model used to write code.",
+			id: "Qwen/Qwen2.5-Coder-32B-Instruct",
+		},
+		{
+			description: "Powerful reasoning based open large language model.",
+			id: "deepseek-ai/DeepSeek-R1",
 		},
 	],
 	spaces: [
 		{
 			description: "A leaderboard to compare different open-source text generation models based on various benchmarks.",
 			id: "open-llm-leaderboard/open_llm_leaderboard",
+		},
+		{
+			description: "A leaderboard for comparing chain-of-thought performance of models.",
+			id: "logikon/open_cot_leaderboard",
 		},
 		{
 			description: "An text generation based application based on a very powerful LLaMA2 model.",

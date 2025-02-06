@@ -4,7 +4,7 @@
   isExpanded: true
   sections:
     - local: inference/README
-      title: Use Inference Endpoints
+      title: Use Inference Client
     - local: inference/modules
       title: API reference
 - title: "@huggingface/hub"

@@ -13,13 +13,13 @@
 // Programatically interact with the Hub
 
 await createRepo({
-  repo: {type: "model", name: "my-user/nlp-model"},
-  credentials: {accessToken: HF_TOKEN}
+  repo: { type: "model", name: "my-user/nlp-model" },
+  accessToken: HF_TOKEN
 });
 
 await uploadFile({
   repo: "my-user/nlp-model",
-  credentials: {accessToken: HF_TOKEN},
+  accessToken: HF_TOKEN,
   // Can work with native File in browsers
   file: {
     path: "pytorch_model.bin",
@@ -27,20 +27,25 @@ await uploadFile({
   }
 });
 
-// Use hosted inference
+// Use HF Inference API, or external Inference Providers!
 
-await inference.translation({
-  model: 't5-base',
-  inputs: 'My name is Wolfgang and I live in Berlin'
-})
+await inference.chatCompletion({
+  model: "meta-llama/Llama-3.1-8B-Instruct",
+  messages: [
+    {
+      role: "user",
+      content: "Hello, nice to meet you!",
+    },
+  ],
+  max_tokens: 512,
+  temperature: 0.5,
+  provider: "sambanova", // or together, fal-ai, replicate, …
+});
 
 await inference.textToImage({
-  model: 'stabilityai/stable-diffusion-2',
-  inputs: 'award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]',
-  parameters: {
-    negative_prompt: 'blurry',
-  }
-})
+  model: "black-forest-labs/FLUX.1-dev",
+  inputs: "a picture of a green bird",
+});
 
 // and much more…
 ```
@@ -49,11 +54,13 @@ await inference.textToImage({
 
 This is a collection of JS libraries to interact with the Hugging Face API, with TS types included.
 
-- [@huggingface/inference](packages/inference/README.md): Use Inference Endpoints (dedicated) and Inference API (serverless) to make calls to 100,000+ Machine Learning models
+- [@huggingface/inference](packages/inference/README.md): Use HF Inference API (serverless), Inference Endpoints (dedicated) and third-party Inference Providers to make calls to 100,000+ Machine Learning models
 - [@huggingface/hub](packages/hub/README.md): Interact with huggingface.co to create or delete repos and commit / download files
 - [@huggingface/agents](packages/agents/README.md): Interact with HF models through a natural language interface
 - [@huggingface/gguf](packages/gguf/README.md): A GGUF parser that works on remotely hosted files.
+- [@huggingface/dduf](packages/dduf/README.md): Similar package for DDUF (DDUF Diffusers Unified Format)
 - [@huggingface/tasks](packages/tasks/README.md): The definition files and source-of-truth for the Hub's main primitives like pipeline tasks, model libraries, etc.
+- [@huggingface/jinja](packages/jinja/README.md): A minimalistic JS implementation of the Jinja templating engine, to be used for ML chat templates.
 - [@huggingface/space-header](packages/space-header/README.md): Use the Space `mini_header` outside Hugging Face
 
 
@@ -79,7 +86,7 @@ Then import the libraries in your code:
 import { HfInference } from "@huggingface/inference";
 import { HfAgent } from "@huggingface/agents";
 import { createRepo, commit, deleteRepo, listFiles } from "@huggingface/hub";
-import type { RepoId, Credentials } from "@huggingface/hub";
+import type { RepoId } from "@huggingface/hub";
 ```
 
 ### From CDN or Static hosting
@@ -88,8 +95,8 @@ You can run our packages with vanilla JS, without any bundler, by using a CDN or
 
 ```html
 <script type="module">
-    import { HfInference } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@2.8.0/+esm';
-    import { createRepo, commit, deleteRepo, listFiles } from "https://cdn.jsdelivr.net/npm/@huggingface/hub@0.15.2/+esm";
+    import { HfInference } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@3.1.6/+esm';
+    import { createRepo, commit, deleteRepo, listFiles } from "https://cdn.jsdelivr.net/npm/@huggingface/hub@1.0.0/+esm";
 </script>
 ```
 
@@ -123,52 +130,64 @@ const inference = new HfInference(HF_TOKEN);
 
 // Chat completion API
 const out = await inference.chatCompletion({
-  model: "mistralai/Mistral-7B-Instruct-v0.2",
-  messages: [{ role: "user", content: "Complete the this sentence with words one plus one is equal " }],
-  max_tokens: 100
+  model: "meta-llama/Llama-3.1-8B-Instruct",
+  messages: [{ role: "user", content: "Hello, nice to meet you!" }],
+  max_tokens: 512
 });
 console.log(out.choices[0].message);
 
 // Streaming chat completion API
 for await (const chunk of inference.chatCompletionStream({
-  model: "mistralai/Mistral-7B-Instruct-v0.2",
-  messages: [{ role: "user", content: "Complete the this sentence with words one plus one is equal " }],
-  max_tokens: 100
+  model: "meta-llama/Llama-3.1-8B-Instruct",
+  messages: [{ role: "user", content: "Hello, nice to meet you!" }],
+  max_tokens: 512
 })) {
   console.log(chunk.choices[0].delta.content);
 }
 
-// You can also omit "model" to use the recommended model for the task
-await inference.translation({
-  model: 't5-base',
-  inputs: 'My name is Wolfgang and I live in Amsterdam'
+/// Using a third-party provider: 
+await inference.chatCompletion({
+  model: "meta-llama/Llama-3.1-8B-Instruct",
+  messages: [{ role: "user", content: "Hello, nice to meet you!" }],
+  max_tokens: 512,
+  provider: "sambanova", // or together, fal-ai, replicate, …
 })
 
 await inference.textToImage({
-  model: 'stabilityai/stable-diffusion-2',
-  inputs: 'award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]',
-  parameters: {
-    negative_prompt: 'blurry',
-  }
+  model: "black-forest-labs/FLUX.1-dev",
+  inputs: "a picture of a green bird",
+  provider: "fal-ai",
 })
 
+
+
+// You can also omit "model" to use the recommended model for the task
+await inference.translation({
+  inputs: "My name is Wolfgang and I live in Amsterdam",
+  parameters: {
+    src_lang: "en",
+    tgt_lang: "fr",
+  },
+});
+
+// pass multimodal files or URLs as inputs
 await inference.imageToText({
+  model: 'nlpconnect/vit-gpt2-image-captioning',
   data: await (await fetch('https://picsum.photos/300/300')).blob(),
-  model: 'nlpconnect/vit-gpt2-image-captioning',  
 })
 
 // Using your own dedicated inference endpoint: https://hf.co/docs/inference-endpoints/
 const gpt2 = inference.endpoint('https://xyz.eu-west-1.aws.endpoints.huggingface.cloud/gpt2');
 const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the universe is'});
 
-//Chat Completion
-const mistal = inference.endpoint(
- "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2"
+// Chat Completion
+const llamaEndpoint = inference.endpoint(
+ "https://api-inference.huggingface.co/models/meta-llama/Llama-3.1-8B-Instruct"
 );
-const out = await mistal.chatCompletion({
- model: "mistralai/Mistral-7B-Instruct-v0.2",
- messages: [{ role: "user", content: "Complete the this sentence with words one plus one is equal " }],
- max_tokens: 100,
+const out = await llamaEndpoint.chatCompletion({
+  model: "meta-llama/Llama-3.1-8B-Instruct",
+  messages: [{ role: "user", content: "Hello, nice to meet you!" }],
+  max_tokens: 512,
 });
 console.log(out.choices[0].message);
 ```
@@ -181,13 +200,13 @@ import { createRepo, uploadFile, deleteFiles } from "@huggingface/hub";
 const HF_TOKEN = "hf_...";
 
 await createRepo({
-  repo: "my-user/nlp-model", // or {type: "model", name: "my-user/nlp-test"},
-  credentials: {accessToken: HF_TOKEN}
+  repo: "my-user/nlp-model", // or { type: "model", name: "my-user/nlp-test" },
+  accessToken: HF_TOKEN
 });
 
 await uploadFile({
   repo: "my-user/nlp-model",
-  credentials: {accessToken: HF_TOKEN},
+  accessToken: HF_TOKEN,
   // Can work with native File in browsers
   file: {
     path: "pytorch_model.bin",
@@ -196,8 +215,8 @@ await uploadFile({
 });
 
 await deleteFiles({
-  repo: {type: "space", name: "my-user/my-space"}, // or "spaces/my-user/my-space"
-  credentials: {accessToken: HF_TOKEN},
+  repo: { type: "space", name: "my-user/my-space" }, // or "spaces/my-user/my-space"
+  accessToken: HF_TOKEN,
   paths: ["README.md", ".gitattributes"]
 });
 ```
@@ -205,7 +224,7 @@ await deleteFiles({
 ### @huggingface/agents example
 
 ```ts
-import {HfAgent, LLMFromHub, defaultTools} from '@huggingface/agents';
+import { HfAgent, LLMFromHub, defaultTools } from '@huggingface/agents';
 
 const HF_TOKEN = "hf_...";
 

@@ -25,9 +25,7 @@ describe("commit", () => {
 		};
 
 		await createRepo({
-			credentials: {
-				accessToken: TEST_ACCESS_TOKEN,
-			},
+			accessToken: TEST_ACCESS_TOKEN,
 			hubUrl: TEST_HUB_URL,
 			repo,
 			license: "mit",
@@ -50,9 +48,7 @@ describe("commit", () => {
 			await commit({
 				repo,
 				title: "Some commit",
-				credentials: {
-					accessToken: TEST_ACCESS_TOKEN,
-				},
+				accessToken: TEST_ACCESS_TOKEN,
 				hubUrl: TEST_HUB_URL,
 				operations: [
 					{
@@ -135,9 +131,7 @@ size ${lfsContent.length}
 		};
 
 		await createRepo({
-			credentials: {
-				accessToken: TEST_ACCESS_TOKEN,
-			},
+			accessToken: TEST_ACCESS_TOKEN,
 			repo,
 			hubUrl: TEST_HUB_URL,
 		});
@@ -163,9 +157,7 @@ size ${lfsContent.length}
 			);
 			await commit({
 				repo,
-				credentials: {
-					accessToken: TEST_ACCESS_TOKEN,
-				},
+				accessToken: TEST_ACCESS_TOKEN,
 				hubUrl: TEST_HUB_URL,
 				title: "upload model",
 				operations,

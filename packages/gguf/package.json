@@ -1,7 +1,7 @@
 {
 	"name": "@huggingface/gguf",
 	"packageManager": "pnpm@8.10.5",
-	"version": "0.1.10",
+	"version": "0.1.12",
 	"description": "a GGUF parser that works on remotely hosted files",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {
@@ -49,6 +49,9 @@
 	],
 	"author": "Hugging Face",
 	"license": "MIT",
+	"dependencies": {
+		"@huggingface/tasks": "workspace:^"
+	},
 	"devDependencies": {
 		"@types/node": "^20.12.8"
 	}

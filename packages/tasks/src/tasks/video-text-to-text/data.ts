@@ -1,4 +1,4 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	datasets: [
@@ -9,6 +9,10 @@ const taskData: TaskDataCustom = {
 		{
 			description: "A dataset of instructions and question-answer pairs about videos.",
 			id: "lmms-lab/VideoChatGPT",
+		},
+		{
+			description: "Large video understanding dataset.",
+			id: "HuggingFaceFV/finevideo",
 		},
 	],
 	demo: {
@@ -35,18 +39,22 @@ const taskData: TaskDataCustom = {
 	metrics: [],
 	models: [
 		{
-			description: "A robust video-text-to-text model that can take in image and video inputs.",
-			id: "llava-hf/llava-onevision-qwen2-72b-ov-hf",
+			description: "A robust video-text-to-text model.",
+			id: "Vision-CAIR/LongVU_Qwen2_7B",
 		},
 		{
-			description: "Large and powerful video-text-to-text model that can take in image and video inputs.",
-			id: "llava-hf/LLaVA-NeXT-Video-34B-hf",
+			description: "Strong video-text-to-text model with reasoning capabilities.",
+			id: "GoodiesHere/Apollo-LMMs-Apollo-7B-t32",
 		},
 	],
 	spaces: [
 		{
 			description: "An application to chat with a video-text-to-text model.",
 			id: "llava-hf/video-llava",
+		},
+		{
+			description: "A leaderboard for various video-text-to-text models.",
+			id: "opencompass/openvlm_video_leaderboard",
 		},
 	],
 	summary:

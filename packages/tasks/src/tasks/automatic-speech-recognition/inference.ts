@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Inputs for Automatic Speech Recognition inference
  */
@@ -12,35 +11,29 @@ export interface AutomaticSpeechRecognitionInput {
 	 * The input audio data as a base64-encoded string. If no `parameters` are provided, you can
 	 * also provide the audio data as a raw bytes payload.
 	 */
-	inputs: string;
+	inputs: Blob;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Automatic Speech Recognition
 	 */
 	parameters?: AutomaticSpeechRecognitionParameters;
 	[property: string]: unknown;
 }
-
 /**
- * Additional inference parameters
- *
  * Additional inference parameters for Automatic Speech Recognition
  */
 export interface AutomaticSpeechRecognitionParameters {
 	/**
 	 * Parametrization of the text generation process
 	 */
-	generate?: GenerationParameters;
+	generation_parameters?: GenerationParameters;
 	/**
 	 * Whether to output corresponding timestamps with the generated text
 	 */
 	return_timestamps?: boolean;
 	[property: string]: unknown;
 }
-
 /**
  * Parametrization of the text generation process
- *
- * Ad-hoc parametrization of the text generation process
  */
 export interface GenerationParameters {
 	/**
@@ -73,7 +66,7 @@ export interface GenerationParameters {
 	 */
 	max_length?: number;
 	/**
-	 * The maximum number of tokens to generate. Takes precedence over maxLength.
+	 * The maximum number of tokens to generate. Takes precedence over max_length.
 	 */
 	max_new_tokens?: number;
 	/**
@@ -81,7 +74,7 @@ export interface GenerationParameters {
 	 */
 	min_length?: number;
 	/**
-	 * The minimum number of tokens to generate. Takes precedence over maxLength.
+	 * The minimum number of tokens to generate. Takes precedence over min_length.
 	 */
 	min_new_tokens?: number;
 	/**
@@ -125,12 +118,10 @@ export interface GenerationParameters {
 	use_cache?: boolean;
 	[property: string]: unknown;
 }
-
 /**
  * Controls the stopping condition for beam-based methods.
  */
 export type EarlyStoppingUnion = boolean | "never";
-
 /**
  * Outputs of inference for the Automatic Speech Recognition task
  */
@@ -146,7 +137,6 @@ export interface AutomaticSpeechRecognitionOutput {
 	text: string;
 	[property: string]: unknown;
 }
-
 export interface AutomaticSpeechRecognitionOutputChunk {
 	/**
 	 * A chunk of text identified by the model
@@ -155,6 +145,6 @@ export interface AutomaticSpeechRecognitionOutputChunk {
 	/**
 	 * The start and end timestamps corresponding with the text
 	 */
-	timestamps: number[];
+	timestamp: number[];
 	[property: string]: unknown;
 }

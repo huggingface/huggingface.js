@@ -1,6 +1,6 @@
 /**
- * Biden AI Executive Order
- * https://www.whitehouse.gov/briefing-room/presidential-actions/2023/10/30/executive-order-on-the-safe-secure-and-trustworthy-development-and-use-of-artificial-intelligence/
+ * Biden AI Executive Order (since revoked by President Trump):
+ * https://web.archive.org/web/20250105222429/https://www.whitehouse.gov/briefing-room/presidential-actions/2023/10/30/executive-order-on-the-safe-secure-and-trustworthy-development-and-use-of-artificial-intelligence/
  */
 export const TFLOPS_THRESHOLD_WHITE_HOUSE_MODEL_TRAINING_TOTAL = 10 ** 14;
 export const TFLOPS_THRESHOLD_WHITE_HOUSE_MODEL_TRAINING_TOTAL_BIOLOGY = 10 ** 11;
@@ -14,7 +14,7 @@ export const TFLOPS_THRESHOLD_EU_AI_ACT_MODEL_TRAINING_TOTAL = 10 ** 13;
 
 export interface HardwareSpec {
 	/**
-	 * Approximate value, in FP16 whenever possible.
+	 * Approximate value, in FP16 whenever possible for GPUs and FP32 for CPUs.
 	 * This is only approximate/theoretical and shouldn't be taken too seriously.
 	 * Currently the CPU values are from cpu-monkey.com
 	 * while the GPU values are from techpowerup.com
@@ -72,9 +72,17 @@ export const SKUS = {
 				tflops: 12.0,
 				memory: [16],
 			},
+			"RTX A6000": {
+				tflops: 38.7,
+				memory: [48],
+			},
 			"RTX A4000": {
 				tflops: 19.2,
 				memory: [16],
+			},
+			"RTX A2000": {
+				tflops: 7.987,
+				memory: [8, 12],
 			},
 			A100: {
 				tflops: 77.97,
@@ -87,6 +95,10 @@ export const SKUS = {
 			A10: {
 				tflops: 31.24,
 				memory: [24],
+			},
+			A2: {
+				tflops: 4.531, // source: https://www.techpowerup.com/gpu-specs/a2.c3848
+				memory: [16],
 			},
 			"RTX 4090": {
 				tflops: 82.58,
@@ -184,6 +196,10 @@ export const SKUS = {
 				tflops: 18.12,
 				memory: [8],
 			},
+			"RTX 3060 Mobile": {
+				tflops: 10.94,
+				memory: [6],
+			},
 			"RTX 3050 Mobile": {
 				tflops: 7.639,
 				memory: [6],
@@ -199,6 +215,10 @@ export const SKUS = {
 			"GTX 1070 Ti": {
 				tflops: 8.2, // float32 (GPU does not support native float16)
 				memory: [8],
+			},
+			"GTX 1060": {
+				tflops: 3.9, // float32 (GPU does not support native float16)
+				memory: [3, 6],
 			},
 			"RTX Titan": {
 				tflops: 32.62,
@@ -246,6 +266,14 @@ export const SKUS = {
 				tflops: 184.6,
 				memory: [32],
 			},
+			MI60: {
+				tflops: 29.5,
+				memory: [32],
+			},
+			MI50: {
+				tflops: 26.5,
+				memory: [16],
+			},
 			"RX 7900 XTX": {
 				tflops: 122.8,
 				memory: [24],
@@ -278,9 +306,35 @@ export const SKUS = {
 				tflops: 32.33,
 				memory: [16],
 			},
+			"RX 6700 XT": {
+				tflops: 26.43,
+				memory: [12],
+			},
+			"RX 6700": {
+				tflops: 22.58,
+				memory: [10],
+			},
 			"Radeon Pro VII": {
 				tflops: 26.11,
 				memory: [16],
+			},
+		},
+		INTEL: {
+			"Arc A750": {
+				tflops: 34.41,
+				memory: [8],
+			},
+			"Arc A770": {
+				tflops: 39.32,
+				memory: [8, 16],
+			},
+			"Arc B570": {
+				tflops: 23.04,
+				memory: [10],
+			},
+			"Arc B580": {
+				tflops: 27.34,
+				memory: [12],
 			},
 		},
 		QUALCOMM: {
@@ -374,6 +428,9 @@ export const SKUS = {
 			"EPYC 1st Generation (Naples)": {
 				tflops: 0.6,
 			},
+			"Ryzen Zen 4 7000 (Threadripper)": {
+				tflops: 10.0,
+			},
 			"Ryzen Zen4 7000 (Ryzen 9)": {
 				tflops: 0.56,
 			},
@@ -432,7 +489,7 @@ export const SKUS = {
 				memory: [8, 16, 24],
 			},
 			"Apple M2 Pro": {
-				tflops: 13.6,
+				tflops: 6.8,
 				memory: [16, 24, 32],
 			},
 			"Apple M2 Max": {
@@ -444,16 +501,28 @@ export const SKUS = {
 				memory: [64, 96, 128, 192],
 			},
 			"Apple M3": {
-				tflops: 2.84,
+				tflops: 4.1,
 				memory: [8, 16, 24],
 			},
 			"Apple M3 Pro": {
-				tflops: 14,
+				tflops: 7.4,
 				memory: [18, 36],
 			},
 			"Apple M3 Max": {
 				tflops: 14.2,
 				memory: [36, 48, 64, 96, 128],
+			},
+			"Apple M4": {
+				tflops: 4.6,
+				memory: [16, 24, 32],
+			},
+			"Apple M4 Pro": {
+				tflops: 9.2,
+				memory: [24, 48, 64],
+			},
+			"Apple M4 Max": {
+				tflops: 18.4,
+				memory: [36, 48, 64, 128],
 			},
 		},
 	},

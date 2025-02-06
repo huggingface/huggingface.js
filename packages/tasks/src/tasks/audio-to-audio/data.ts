@@ -1,4 +1,4 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	datasets: [
@@ -38,10 +38,6 @@ const taskData: TaskDataCustom = {
 		},
 	],
 	models: [
-		{
-			description: "A solid model of audio source separation.",
-			id: "speechbrain/sepformer-wham",
-		},
 		{
 			description: "A speech enhancement model.",
 			id: "ResembleAI/resemble-enhance",

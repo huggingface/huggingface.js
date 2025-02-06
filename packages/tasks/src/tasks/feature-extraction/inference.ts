@@ -3,9 +3,7 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 export type FeatureExtractionOutput = Array<number[]>;
-
 /**
  * Feature Extraction Input.
  *
@@ -15,15 +13,15 @@ export type FeatureExtractionOutput = Array<number[]>;
  */
 export interface FeatureExtractionInput {
 	/**
-	 * The text to embed.
+	 * The text or list of texts to embed.
 	 */
-	inputs: string;
+	inputs: FeatureExtractionInputs;
 	normalize?: boolean;
 	/**
 	 * The name of the prompt that should be used by for encoding. If not set, no prompt
 	 * will be applied.
 	 *
-	 * Must be a key in the `Sentence Transformers` configuration `prompts` dictionary.
+	 * Must be a key in the `sentence-transformers` configuration `prompts` dictionary.
 	 *
 	 * For example if ``prompt_name`` is "query" and the ``prompts`` is {"query": "query: ",
 	 * ...},
@@ -36,5 +34,8 @@ export interface FeatureExtractionInput {
 	truncation_direction?: FeatureExtractionInputTruncationDirection;
 	[property: string]: unknown;
 }
-
+/**
+ * The text or list of texts to embed.
+ */
+export type FeatureExtractionInputs = string[] | string;
 export type FeatureExtractionInputTruncationDirection = "Left" | "Right";

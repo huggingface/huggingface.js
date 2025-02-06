@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+dependencies:
+  '@huggingface/tasks':
+    specifier: workspace:^
+    version: link:../tasks
+
 devDependencies:
   '@types/node':
     specifier: ^20.12.8

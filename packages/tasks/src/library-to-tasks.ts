@@ -1,5 +1,5 @@
-import type { ModelLibraryKey } from "./model-libraries";
-import type { PipelineType } from "./pipelines";
+import type { ModelLibraryKey } from "./model-libraries.js";
+import type { PipelineType } from "./pipelines.js";
 
 /**
  * Mapping from library name to its supported tasks.
@@ -43,7 +43,7 @@ export const LIBRARY_TASK_MAPPING: Partial<Record<ModelLibraryKey, PipelineType[
 		"text2text-generation",
 	],
 	stanza: ["token-classification"],
-	timm: ["image-classification"],
+	timm: ["image-classification", "image-feature-extraction"],
 	transformers: [
 		"audio-classification",
 		"automatic-speech-recognition",
@@ -52,9 +52,12 @@ export const LIBRARY_TASK_MAPPING: Partial<Record<ModelLibraryKey, PipelineType[
 		"feature-extraction",
 		"fill-mask",
 		"image-classification",
+		"image-feature-extraction",
 		"image-segmentation",
 		"image-to-image",
 		"image-to-text",
+		"image-text-to-text",
+		"mask-generation",
 		"object-detection",
 		"question-answering",
 		"summarization",

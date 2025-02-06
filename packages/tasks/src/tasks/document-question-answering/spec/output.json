@@ -22,15 +22,8 @@
 			"end": {
 				"type": "integer",
 				"description": "The end word index of the answer (in the OCR\u2019d version of the input or provided word boxes)."
-			},
-			"words": {
-				"type": "array",
-				"items": {
-					"type": "integer"
-				},
-				"description": "The index of each word/box pair that is in the answer"
 			}
 		},
-		"required": ["answer", "score", "start", "end", "words"]
+		"required": ["answer", "score", "start", "end"]
 	}
 }

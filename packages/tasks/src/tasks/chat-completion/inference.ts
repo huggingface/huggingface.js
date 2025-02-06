@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Chat Completion Input.
  *
@@ -49,7 +48,7 @@ export interface ChatCompletionInput {
 	 * [UNUSED] ID of the model to use. See the model endpoint compatibility table for details
 	 * on which models work with the Chat API.
 	 */
-	model: string;
+	model?: string;
 	/**
 	 * UNUSED
 	 * How many chat completion choices to generate for each input message. Note that you will
@@ -63,12 +62,14 @@ export interface ChatCompletionInput {
 	 * increasing the model's likelihood to talk about new topics
 	 */
 	presence_penalty?: number;
+	response_format?: ChatCompletionInputGrammarType;
 	seed?: number;
 	/**
 	 * Up to 4 sequences where the API will stop generating further tokens.
 	 */
 	stop?: string[];
 	stream?: boolean;
+	stream_options?: ChatCompletionInputStreamOptions;
 	/**
 	 * What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the
 	 * output more random, while
@@ -77,7 +78,7 @@ export interface ChatCompletionInput {
 	 * We generally recommend altering this or `top_p` but not both.
 	 */
 	temperature?: number;
-	tool_choice?: ChatCompletionInputToolType;
+	tool_choice?: ChatCompletionInputToolChoice;
 	/**
 	 * A prompt to be appended before the tools
 	 */
@@ -103,42 +104,78 @@ export interface ChatCompletionInput {
 	top_p?: number;
 	[property: string]: unknown;
 }
-
 export interface ChatCompletionInputMessage {
-	content?: string;
+	content: ChatCompletionInputMessageContent;
 	name?: string;
 	role: string;
-	tool_calls?: ChatCompletionInputToolCall[];
 	[property: string]: unknown;
 }
-
-export interface ChatCompletionInputToolCall {
+export type ChatCompletionInputMessageContent = ChatCompletionInputMessageChunk[] | string;
+export interface ChatCompletionInputMessageChunk {
+	image_url?: ChatCompletionInputURL;
+	text?: string;
+	type: ChatCompletionInputMessageChunkType;
+	[property: string]: unknown;
+}
+export interface ChatCompletionInputURL {
+	url: string;
+	[property: string]: unknown;
+}
+export type ChatCompletionInputMessageChunkType = "text" | "image_url";
+export interface ChatCompletionInputGrammarType {
+	type: ChatCompletionInputGrammarTypeType;
+	/**
+	 * A string that represents a [JSON Schema](https://json-schema.org/).
+	 *
+	 * JSON Schema is a declarative language that allows to annotate JSON documents
+	 * with types and descriptions.
+	 */
+	value: unknown;
+	[property: string]: unknown;
+}
+export type ChatCompletionInputGrammarTypeType = "json" | "regex";
+export interface ChatCompletionInputStreamOptions {
+	/**
+	 * If set, an additional chunk will be streamed before the data: [DONE] message. The usage
+	 * field on this chunk shows the token usage statistics for the entire request, and the
+	 * choices field will always be an empty array. All other chunks will also include a usage
+	 * field, but with a null value.
+	 */
+	include_usage: boolean;
+	[property: string]: unknown;
+}
+/**
+ *
+ * <https://platform.openai.com/docs/guides/function-calling/configuring-function-calling-behavior-using-the-tool_choice-parameter>
+ */
+export type ChatCompletionInputToolChoice = ChatCompletionInputToolChoiceEnum | ChatCompletionInputToolChoiceObject;
+/**
+ * Means the model can pick between generating a message or calling one or more tools.
+ *
+ * Means the model will not call any tool and instead generates a message.
+ *
+ * Means the model must call one or more tools.
+ */
+export type ChatCompletionInputToolChoiceEnum = "auto" | "none" | "required";
+export interface ChatCompletionInputToolChoiceObject {
+	function: ChatCompletionInputFunctionName;
+	[property: string]: unknown;
+}
+export interface ChatCompletionInputFunctionName {
+	name: string;
+	[property: string]: unknown;
+}
+export interface ChatCompletionInputTool {
 	function: ChatCompletionInputFunctionDefinition;
-	id: number;
 	type: string;
 	[property: string]: unknown;
 }
-
 export interface ChatCompletionInputFunctionDefinition {
 	arguments: unknown;
 	description?: string;
 	name: string;
 	[property: string]: unknown;
 }
-
-export type ChatCompletionInputToolType = "OneOf" | ChatCompletionInputToolTypeObject;
-
-export interface ChatCompletionInputToolTypeObject {
-	FunctionName: string;
-	[property: string]: unknown;
-}
-
-export interface ChatCompletionInputTool {
-	function: ChatCompletionInputFunctionDefinition;
-	type: string;
-	[property: string]: unknown;
-}
-
 /**
  * Chat Completion Output.
  *
@@ -151,12 +188,10 @@ export interface ChatCompletionOutput {
 	created: number;
 	id: string;
 	model: string;
-	object: string;
 	system_fingerprint: string;
 	usage: ChatCompletionOutputUsage;
 	[property: string]: unknown;
 }
-
 export interface ChatCompletionOutputComplete {
 	finish_reason: string;
 	index: number;
@@ -164,54 +199,45 @@ export interface ChatCompletionOutputComplete {
 	message: ChatCompletionOutputMessage;
 	[property: string]: unknown;
 }
-
 export interface ChatCompletionOutputLogprobs {
 	content: ChatCompletionOutputLogprob[];
 	[property: string]: unknown;
 }
-
 export interface ChatCompletionOutputLogprob {
 	logprob: number;
 	token: string;
 	top_logprobs: ChatCompletionOutputTopLogprob[];
 	[property: string]: unknown;
 }
-
 export interface ChatCompletionOutputTopLogprob {
 	logprob: number;
 	token: string;
 	[property: string]: unknown;
 }
-
 export interface ChatCompletionOutputMessage {
 	content?: string;
-	name?: string;
 	role: string;
 	tool_calls?: ChatCompletionOutputToolCall[];
 	[property: string]: unknown;
 }
-
 export interface ChatCompletionOutputToolCall {
 	function: ChatCompletionOutputFunctionDefinition;
-	id: number;
+	id: string;
 	type: string;
 	[property: string]: unknown;
 }
-
 export interface ChatCompletionOutputFunctionDefinition {
 	arguments: unknown;
 	description?: string;
 	name: string;
 	[property: string]: unknown;
 }
-
 export interface ChatCompletionOutputUsage {
 	completion_tokens: number;
 	prompt_tokens: number;
 	total_tokens: number;
 	[property: string]: unknown;
 }
-
 /**
  * Chat Completion Stream Output.
  *
@@ -224,11 +250,10 @@ export interface ChatCompletionStreamOutput {
 	created: number;
 	id: string;
 	model: string;
-	object: string;
 	system_fingerprint: string;
+	usage?: ChatCompletionStreamOutputUsage;
 	[property: string]: unknown;
 }
-
 export interface ChatCompletionStreamOutputChoice {
 	delta: ChatCompletionStreamOutputDelta;
 	finish_reason?: string;
@@ -236,14 +261,12 @@ export interface ChatCompletionStreamOutputChoice {
 	logprobs?: ChatCompletionStreamOutputLogprobs;
 	[property: string]: unknown;
 }
-
 export interface ChatCompletionStreamOutputDelta {
 	content?: string;
 	role: string;
 	tool_calls?: ChatCompletionStreamOutputDeltaToolCall;
 	[property: string]: unknown;
 }
-
 export interface ChatCompletionStreamOutputDeltaToolCall {
 	function: ChatCompletionStreamOutputFunction;
 	id: string;
@@ -251,27 +274,29 @@ export interface ChatCompletionStreamOutputDeltaToolCall {
 	type: string;
 	[property: string]: unknown;
 }
-
 export interface ChatCompletionStreamOutputFunction {
 	arguments: string;
 	name?: string;
 	[property: string]: unknown;
 }
-
 export interface ChatCompletionStreamOutputLogprobs {
 	content: ChatCompletionStreamOutputLogprob[];
 	[property: string]: unknown;
 }
-
 export interface ChatCompletionStreamOutputLogprob {
 	logprob: number;
 	token: string;
 	top_logprobs: ChatCompletionStreamOutputTopLogprob[];
 	[property: string]: unknown;
 }
-
 export interface ChatCompletionStreamOutputTopLogprob {
 	logprob: number;
 	token: string;
+	[property: string]: unknown;
+}
+export interface ChatCompletionStreamOutputUsage {
+	completion_tokens: number;
+	prompt_tokens: number;
+	total_tokens: number;
 	[property: string]: unknown;
 }

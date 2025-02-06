@@ -26,7 +26,6 @@
 		},
 		"GenerationParameters": {
 			"title": "GenerationParameters",
-			"description": "Ad-hoc parametrization of the text generation process",
 			"type": "object",
 			"properties": {
 				"temperature": {
@@ -59,7 +58,7 @@
 				},
 				"max_new_tokens": {
 					"type": "integer",
-					"description": "The maximum number of tokens to generate. Takes precedence over maxLength."
+					"description": "The maximum number of tokens to generate. Takes precedence over max_length."
 				},
 				"min_length": {
 					"type": "integer",
@@ -67,7 +66,7 @@
 				},
 				"min_new_tokens": {
 					"type": "integer",
-					"description": "The minimum number of tokens to generate. Takes precedence over maxLength."
+					"description": "The minimum number of tokens to generate. Takes precedence over min_length."
 				},
 				"do_sample": {
 					"type": "boolean",

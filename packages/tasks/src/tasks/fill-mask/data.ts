@@ -1,4 +1,4 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	datasets: [
@@ -61,8 +61,8 @@ const taskData: TaskDataCustom = {
 	],
 	models: [
 		{
-			description: "The famous BERT model.",
-			id: "google-bert/bert-base-uncased",
+			description: "State-of-the-art masked language model.",
+			id: "answerdotai/ModernBERT-large",
 		},
 		{
 			description: "A multilingual model trained on 100 languages.",

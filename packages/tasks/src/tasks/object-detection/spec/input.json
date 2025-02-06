@@ -7,17 +7,17 @@
 	"properties": {
 		"inputs": {
 			"type": "string",
-			"description": "The input image data as a base64-encoded string. If no `parameters` are provided, you can also provide the image data as a raw bytes payload."
+			"description": "The input image data as a base64-encoded string. If no `parameters` are provided, you can also provide the image data as a raw bytes payload.",
+			"comment": "type=binary"
 		},
 		"parameters": {
-			"description": "Additional inference parameters",
+			"description": "Additional inference parameters for Object Detection",
 			"$ref": "#/$defs/ObjectDetectionParameters"
 		}
 	},
 	"$defs": {
 		"ObjectDetectionParameters": {
 			"title": "ObjectDetectionParameters",
-			"description": "Additional inference parameters for Object Detection",
 			"type": "object",
 			"properties": {
 				"threshold": {

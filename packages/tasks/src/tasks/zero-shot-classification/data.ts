@@ -1,4 +1,4 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	datasets: [
@@ -57,8 +57,8 @@ const taskData: TaskDataCustom = {
 			id: "facebook/bart-large-mnli",
 		},
 		{
-			description: "Powerful zero-shot multilingual text classification model that can accomplish multiple tasks.",
-			id: "MoritzLaurer/mDeBERTa-v3-base-xnli-multilingual-nli-2mil7",
+			description: "Cutting-edge zero-shot multilingual text classification model.",
+			id: "MoritzLaurer/ModernBERT-large-zeroshot-v2.0",
 		},
 	],
 	spaces: [],

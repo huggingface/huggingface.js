@@ -1,5 +1,9 @@
-import type { ModelData } from "./model-data";
-import type { PipelineType } from "./pipelines";
+import { parseGGUFQuantLabel } from "./gguf.js";
+import type { ModelData } from "./model-data.js";
+import type { PipelineType } from "./pipelines.js";
+import { stringifyMessages } from "./snippets/common.js";
+import { getModelInputSnippet } from "./snippets/inputs.js";
+import type { ChatCompletionInputMessage } from "./tasks/index.js";
 
 export interface LocalAppSnippet {
 	/**
@@ -13,7 +17,7 @@ export interface LocalAppSnippet {
 	/**
 	 * Content (or command) to be run
 	 */
-	content: string;
+	content: string | string[];
 }
 
 /**
@@ -53,14 +57,11 @@ export type LocalApp = {
 			/**
 			 * And if not (mostly llama.cpp), snippet to copy/paste in your terminal
 			 * Support the placeholder {{GGUF_FILE}} that will be replaced by the gguf file path or the list of available files.
+			 * Support the placeholder {{OLLAMA_TAG}} that will be replaced by the list of available quant tags or will be removed if there are no multiple quant files in a same repo.
 			 */
 			snippet: (model: ModelData, filepath?: string) => string | string[] | LocalAppSnippet | LocalAppSnippet[];
 	  }
 );
-
-function isGgufModel(model: ModelData): boolean {
-	return model.tags.includes("gguf");
-}
 
 function isAwqModel(model: ModelData): boolean {
 	return model.config?.quantization_config?.quant_method === "awq";
@@ -81,21 +82,33 @@ function isMarlinModel(model: ModelData): boolean {
 function isTransformersModel(model: ModelData): boolean {
 	return model.tags.includes("transformers");
 }
+function isTgiModel(model: ModelData): boolean {
+	return model.tags.includes("text-generation-inference");
+}
 
 function isLlamaCppGgufModel(model: ModelData) {
 	return !!model.gguf?.context_length;
 }
 
+function isMlxModel(model: ModelData) {
+	return model.tags.includes("mlx");
+}
+
 const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
-	const command = (binary: string) =>
-		[
-			"# Load and run the model:",
-			`${binary} \\`,
-			`  --hf-repo "${model.id}" \\`,
-			`  --hf-file ${filepath ?? "{{GGUF_FILE}}"} \\`,
-			'  -p "You are a helpful assistant" \\',
-			"  --conversation",
-		].join("\n");
+	let tagName = "";
+	if (filepath) {
+		const quantLabel = parseGGUFQuantLabel(filepath);
+		tagName = quantLabel ? `:${quantLabel}` : "";
+	}
+	const command = (binary: string) => {
+		const snippet = ["# Load and run the model:", `${binary} -hf ${model.id}${tagName}`];
+		if (!model.tags.includes("conversational")) {
+			// for non-conversational models, add a prompt
+			snippet[snippet.length - 1] += " \\";
+			snippet.push('  -p "Once upon a time,"');
+		}
+		return snippet.join("\n");
+	};
 	return [
 		{
 			title: "Install from brew",
@@ -116,11 +129,38 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 			setup: [
 				"git clone https://github.com/ggerganov/llama.cpp.git",
 				"cd llama.cpp",
-				"LLAMA_CURL=1 make llama-cli",
+				"cmake -B build -DLLAMA_CURL=ON",
+				"cmake --build build -j --target llama-cli",
 			].join("\n"),
-			content: command("./llama-cli"),
+			content: command("./build/bin/llama-cli"),
 		},
 	];
+};
+
+const snippetNodeLlamaCppCli = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	return [
+		{
+			title: "Chat with the model",
+			content: [
+				`npx -y node-llama-cpp chat \\`,
+				`  --model "hf:${model.id}/${filepath ?? "{{GGUF_FILE}}"}" \\`,
+				`  --prompt 'Hi there!'`,
+			].join("\n"),
+		},
+		{
+			title: "Estimate the model compatibility with your hardware",
+			content: `npx -y node-llama-cpp inspect estimate "hf:${model.id}/${filepath ?? "{{GGUF_FILE}}"}"`,
+		},
+	];
+};
+
+const snippetOllama = (model: ModelData, filepath?: string): string => {
+	if (filepath) {
+		const quantLabel = parseGGUFQuantLabel(filepath);
+		const ollamatag = quantLabel ? `:${quantLabel}` : "";
+		return `ollama run hf.co/${model.id}${ollamatag}`;
+	}
+	return `ollama run hf.co/${model.id}{{OLLAMA_TAG}}`;
 };
 
 const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
@@ -147,23 +187,33 @@ const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] 
 };
 
 const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
-	const runCommand = [
-		"",
-		"# Call the server using curl:",
-		`curl -X POST "http://localhost:8000/v1/chat/completions" \\ `,
-		`	-H "Content-Type: application/json" \\ `,
-		`	--data '{`,
-		`		"model": "${model.id}"`,
-		`		"messages": [`,
-		`			{"role": "user", "content": "Hello!"}`,
-		`		]`,
-		`	}'`,
-	];
+	const messages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
+	const runCommandInstruct = `# Call the server using curl:
+curl -X POST "http://localhost:8000/v1/chat/completions" \\
+	-H "Content-Type: application/json" \\
+	--data '{
+		"model": "${model.id}",
+		"messages": ${stringifyMessages(messages, {
+			indent: "\t\t",
+			attributeKeyQuotes: true,
+			customContentEscaper: (str) => str.replace(/'/g, "'\\''"),
+		})}
+	}'`;
+	const runCommandNonInstruct = `# Call the server using curl:
+curl -X POST "http://localhost:8000/v1/completions" \\
+	-H "Content-Type: application/json" \\
+	--data '{
+		"model": "${model.id}",
+		"prompt": "Once upon a time,",
+		"max_tokens": 512,
+		"temperature": 0.5
+	}'`;
+	const runCommand = model.tags.includes("conversational") ? runCommandInstruct : runCommandNonInstruct;
 	return [
 		{
 			title: "Install from pip",
 			setup: ["# Install vLLM from pip:", "pip install vllm"].join("\n"),
-			content: ["# Load and run the model:", `vllm serve "${model.id}"`, ...runCommand].join("\n"),
+			content: [`# Load and run the model:\nvllm serve "${model.id}"`, runCommand],
 		},
 		{
 			title: "Use Docker images",
@@ -179,10 +229,37 @@ const snippetVllm = (model: ModelData): LocalAppSnippet[] => {
 				`	--model ${model.id}`,
 			].join("\n"),
 			content: [
-				"# Load and run the model:",
-				`docker exec -it my_vllm_container bash -c "vllm serve ${model.id}"`,
-				...runCommand,
+				`# Load and run the model:\ndocker exec -it my_vllm_container bash -c "vllm serve ${model.id}"`,
+				runCommand,
+			],
+		},
+	];
+};
+const snippetTgi = (model: ModelData): LocalAppSnippet[] => {
+	const runCommand = [
+		"# Call the server using curl:",
+		`curl -X POST "http://localhost:8000/v1/chat/completions" \\`,
+		`	-H "Content-Type: application/json" \\`,
+		`	--data '{`,
+		`		"model": "${model.id}",`,
+		`		"messages": [`,
+		`			{"role": "user", "content": "What is the capital of France?"}`,
+		`		]`,
+		`	}'`,
+	];
+	return [
+		{
+			title: "Use Docker images",
+			setup: [
+				"# Deploy with docker on Linux:",
+				`docker run --gpus all \\`,
+				`	-v ~/.cache/huggingface:/root/.cache/huggingface \\`,
+				` 	-e HF_TOKEN="<secret>" \\`,
+				`	-p 8000:80 \\`,
+				`	ghcr.io/huggingface/text-generation-inference:latest \\`,
+				`	--model-id ${model.id}`,
 			].join("\n"),
+			content: [runCommand.join("\n")],
 		},
 	];
 };
@@ -206,24 +283,39 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetLlamacpp,
 	},
+	"node-llama-cpp": {
+		prettyLabel: "node-llama-cpp",
+		docsUrl: "https://node-llama-cpp.withcat.ai",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		snippet: snippetNodeLlamaCppCli,
+	},
 	vllm: {
 		prettyLabel: "vLLM",
 		docsUrl: "https://docs.vllm.ai",
 		mainTask: "text-generation",
 		displayOnModelPage: (model: ModelData) =>
-			isAwqModel(model) ||
-			isGptqModel(model) ||
-			isAqlmModel(model) ||
-			isMarlinModel(model) ||
-			isGgufModel(model) ||
-			isTransformersModel(model),
+			(isAwqModel(model) ||
+				isGptqModel(model) ||
+				isAqlmModel(model) ||
+				isMarlinModel(model) ||
+				isLlamaCppGgufModel(model) ||
+				isTransformersModel(model)) &&
+			(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text"),
 		snippet: snippetVllm,
+	},
+	tgi: {
+		prettyLabel: "TGI",
+		docsUrl: "https://huggingface.co/docs/text-generation-inference/",
+		mainTask: "text-generation",
+		displayOnModelPage: isTgiModel,
+		snippet: snippetTgi,
 	},
 	lmstudio: {
 		prettyLabel: "LM Studio",
 		docsUrl: "https://lmstudio.ai",
 		mainTask: "text-generation",
-		displayOnModelPage: isLlamaCppGgufModel,
+		displayOnModelPage: (model) => isLlamaCppGgufModel(model) || isMlxModel(model),
 		deeplink: (model, filepath) =>
 			new URL(`lmstudio://open_from_hf?model=${model.id}${filepath ? `&file=${filepath}` : ""}`),
 	},
@@ -327,6 +419,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-to-image",
 		displayOnModelPage: (model) => model.library_name === "diffusers" && model.pipeline_tag === "text-to-image",
 		deeplink: (model) => new URL(`https://models.invoke.ai/huggingface/${model.id}`),
+	},
+	ollama: {
+		prettyLabel: "Ollama",
+		docsUrl: "https://ollama.com",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		snippet: snippetOllama,
 	},
 } satisfies Record<string, LocalApp>;
 

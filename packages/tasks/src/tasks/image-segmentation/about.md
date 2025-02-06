@@ -48,7 +48,7 @@ import { HfInference } from "@huggingface/inference";
 const inference = new HfInference(HF_TOKEN);
 await inference.imageSegmentation({
 	data: await (await fetch("https://picsum.photos/300/300")).blob(),
-	model: "facebook/detr-resnet-50-panoptic",
+	model: "facebook/mask2former-swin-base-coco-panoptic",
 });
 ```
 

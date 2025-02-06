@@ -3,21 +3,20 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 export type SentenceSimilarityOutput = number[];
-
 /**
  * Inputs for Sentence similarity inference
  */
 export interface SentenceSimilarityInput {
 	inputs: SentenceSimilarityInputData;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Sentence Similarity
 	 */
-	parameters?: { [key: string]: unknown };
+	parameters?: {
+		[key: string]: unknown;
+	};
 	[property: string]: unknown;
 }
-
 export interface SentenceSimilarityInputData {
 	/**
 	 * A list of strings which will be compared against the source_sentence.

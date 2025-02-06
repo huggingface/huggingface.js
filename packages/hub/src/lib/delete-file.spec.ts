@@ -12,13 +12,10 @@ describe("deleteFile", () => {
 	it("should delete a file", async () => {
 		const repoName = `${TEST_USER}/TEST-${insecureRandomString()}`;
 		const repo = { type: "model", name: repoName } satisfies RepoId;
-		const credentials = {
-			accessToken: TEST_ACCESS_TOKEN,
-		};
 
 		try {
 			const result = await createRepo({
-				credentials,
+				accessToken: TEST_ACCESS_TOKEN,
 				hubUrl: TEST_HUB_URL,
 				repo,
 				files: [
@@ -39,7 +36,7 @@ describe("deleteFile", () => {
 
 			assert.strictEqual(await content?.text(), "file1");
 
-			await deleteFile({ path: "file1", repo, credentials, hubUrl: TEST_HUB_URL });
+			await deleteFile({ path: "file1", repo, accessToken: TEST_ACCESS_TOKEN, hubUrl: TEST_HUB_URL });
 
 			content = await downloadFile({
 				repo,
@@ -59,7 +56,7 @@ describe("deleteFile", () => {
 		} finally {
 			await deleteRepo({
 				repo,
-				credentials,
+				accessToken: TEST_ACCESS_TOKEN,
 				hubUrl: TEST_HUB_URL,
 			});
 		}

@@ -2,7 +2,7 @@
  * See default-widget-inputs.ts for the default widget inputs, this files only contains the types
  */
 
-import type { ChatCompletionInputMessage } from "./tasks";
+import type { ChatCompletionInputMessage } from "./tasks/index.js";
 
 type TableData = Record<string, (string | number)[]>;
 

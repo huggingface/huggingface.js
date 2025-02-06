@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Inputs for Translation inference
  */
@@ -13,15 +12,12 @@ export interface TranslationInput {
 	 */
 	inputs: string;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Translation
 	 */
 	parameters?: TranslationParameters;
 	[property: string]: unknown;
 }
-
 /**
- * Additional inference parameters
- *
  * Additional inference parameters for Translation
  */
 export interface TranslationParameters {
@@ -32,7 +28,9 @@ export interface TranslationParameters {
 	/**
 	 * Additional parametrization of the text generation algorithm.
 	 */
-	generate_parameters?: { [key: string]: unknown };
+	generate_parameters?: {
+		[key: string]: unknown;
+	};
 	/**
 	 * The source language of the text. Required for models that can translate from multiple
 	 * languages.
@@ -49,12 +47,10 @@ export interface TranslationParameters {
 	truncation?: TranslationTruncationStrategy;
 	[property: string]: unknown;
 }
-
 /**
  * The truncation strategy to use.
  */
 export type TranslationTruncationStrategy = "do_not_truncate" | "longest_first" | "only_first" | "only_second";
-
 /**
  * Outputs of inference for the Translation task
  */

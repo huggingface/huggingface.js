@@ -1,13 +1,24 @@
 /**
+ * Outputs of inference for the Text To Speech task
+ */
+export interface TextToSpeechOutput {
+	/**
+	 * The generated audio
+	 */
+	audio: Blob;
+	/**
+	 * The sampling rate of the generated audio waveform.
+	 */
+	sampling_rate?: number;
+	[property: string]: unknown;
+}
+/**
  * Inference code generated from the JSON schema spec in ./spec
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
- * Inputs for Text to Speech inference
- *
- * Inputs for Text To Audio inference
+ * Inputs for Text To Speech inference
  */
 export interface TextToSpeechInput {
 	/**
@@ -15,29 +26,23 @@ export interface TextToSpeechInput {
 	 */
 	inputs: string;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Text To Speech
 	 */
-	parameters?: TextToAudioParameters;
+	parameters?: TextToSpeechParameters;
 	[property: string]: unknown;
 }
-
 /**
- * Additional inference parameters
- *
- * Additional inference parameters for Text To Audio
+ * Additional inference parameters for Text To Speech
  */
-export interface TextToAudioParameters {
+export interface TextToSpeechParameters {
 	/**
 	 * Parametrization of the text generation process
 	 */
-	generate?: GenerationParameters;
+	generation_parameters?: GenerationParameters;
 	[property: string]: unknown;
 }
-
 /**
  * Parametrization of the text generation process
- *
- * Ad-hoc parametrization of the text generation process
  */
 export interface GenerationParameters {
 	/**
@@ -70,7 +75,7 @@ export interface GenerationParameters {
 	 */
 	max_length?: number;
 	/**
-	 * The maximum number of tokens to generate. Takes precedence over maxLength.
+	 * The maximum number of tokens to generate. Takes precedence over max_length.
 	 */
 	max_new_tokens?: number;
 	/**
@@ -78,7 +83,7 @@ export interface GenerationParameters {
 	 */
 	min_length?: number;
 	/**
-	 * The minimum number of tokens to generate. Takes precedence over maxLength.
+	 * The minimum number of tokens to generate. Takes precedence over min_length.
 	 */
 	min_new_tokens?: number;
 	/**
@@ -122,26 +127,7 @@ export interface GenerationParameters {
 	use_cache?: boolean;
 	[property: string]: unknown;
 }
-
 /**
  * Controls the stopping condition for beam-based methods.
  */
 export type EarlyStoppingUnion = boolean | "never";
-
-/**
- * Outputs for Text to Speech inference
- *
- * Outputs of inference for the Text To Audio task
- */
-export interface TextToSpeechOutput {
-	/**
-	 * The generated audio waveform.
-	 */
-	audio: unknown;
-	samplingRate: unknown;
-	/**
-	 * The sampling rate of the generated audio waveform.
-	 */
-	sampling_rate?: number;
-	[property: string]: unknown;
-}

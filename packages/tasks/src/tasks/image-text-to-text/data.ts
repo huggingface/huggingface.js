@@ -1,4 +1,4 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	datasets: [
@@ -7,8 +7,8 @@ const taskData: TaskDataCustom = {
 			id: "liuhaotian/LLaVA-Instruct-150K",
 		},
 		{
-			description: "Conversation turns where questions involve image and text.",
-			id: "liuhaotian/LLaVA-Pretrain",
+			description: "Collection of image-text pairs on scientific topics.",
+			id: "DAMO-NLP-SG/multimodal_textbook",
 		},
 		{
 			description: "A collection of datasets made for model fine-tuning.",
@@ -43,24 +43,32 @@ const taskData: TaskDataCustom = {
 	metrics: [],
 	models: [
 		{
-			description: "Cutting-edge vision language model that can take multiple image inputs.",
-			id: "facebook/chameleon-7b",
+			description: "Small and efficient yet powerful vision language model.",
+			id: "HuggingFaceTB/SmolVLM-Instruct",
 		},
 		{
-			description: "Cutting-edge conversational vision language model that can take multiple image inputs.",
-			id: "HuggingFaceM4/idefics2-8b-chatty",
+			description: "A screenshot understanding model used to control computers.",
+			id: "showlab/ShowUI-2B",
+		},
+		{
+			description: "Cutting-edge vision language model.",
+			id: "allenai/Molmo-7B-D-0924",
 		},
 		{
 			description: "Small yet powerful model.",
 			id: "vikhyatk/moondream2",
 		},
 		{
-			description: "Strong image-text-to-text model made to understand documents.",
-			id: "mPLUG/DocOwl1.5",
+			description: "Strong image-text-to-text model.",
+			id: "Qwen/Qwen2.5-VL-7B-Instruct",
 		},
 		{
-			description: "Strong image-text-to-text model.",
-			id: "microsoft/Phi-3.5-vision-instruct",
+			description: "Image-text-to-text model with reasoning capabilities.",
+			id: "Qwen/QVQ-72B-Preview",
+		},
+		{
+			description: "Strong image-text-to-text model focused on documents.",
+			id: "stepfun-ai/GOT-OCR2_0",
 		},
 	],
 	spaces: [
@@ -74,20 +82,28 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "Powerful vision-language model assistant.",
-			id: "liuhaotian/LLaVA-1.6",
+			id: "akhaliq/Molmo-7B-D-0924",
 		},
 		{
-			description: "An application to compare outputs of different vision language models.",
-			id: "merve/compare_VLMs",
+			description: "An image-text-to-text application focused on documents.",
+			id: "stepfun-ai/GOT_official_online_demo",
 		},
 		{
-			description: "An application for document vision language tasks.",
-			id: "mPLUG/DocOwl",
+			description: "An application for chatting with an image-text-to-text model.",
+			id: "GanymedeNil/Qwen2-VL-7B",
+		},
+		{
+			description: "An application that parses screenshots into actions.",
+			id: "showlab/ShowUI",
+		},
+		{
+			description: "An application that detects gaze.",
+			id: "moondream/gaze-demo",
 		},
 	],
 	summary:
 		"Image-text-to-text models take in an image and text prompt and output text. These models are also called vision-language models, or VLMs. The difference from image-to-text models is that these models take an additional text input, not restricting the model to certain use cases like image captioning, and may also be trained to accept a conversation as input.",
-	widgetModels: ["microsoft/kosmos-2-patch14-224"],
+	widgetModels: ["Qwen/Qwen2-VL-7B-Instruct"],
 	youtubeId: "IoGaGfU1CIg",
 };
 

@@ -1,4 +1,4 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	datasets: [
@@ -69,8 +69,12 @@ const taskData: TaskDataCustom = {
 			id: "sentence-transformers/all-mpnet-base-v2",
 		},
 		{
-			description: "A multilingual robust sentence similarity model..",
+			description: "A multilingual robust sentence similarity model.",
 			id: "BAAI/bge-m3",
+		},
+		{
+			description: "A robust sentence similarity model.",
+			id: "HIT-TMG/KaLM-embedding-multilingual-mini-instruct-v1.5",
 		},
 	],
 	spaces: [

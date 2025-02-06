@@ -12,14 +12,12 @@ export interface TokenClassificationInput {
 	 */
 	inputs: string;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Token Classification
 	 */
 	parameters?: TokenClassificationParameters;
 	[property: string]: unknown;
 }
 /**
- * Additional inference parameters
- *
  * Additional inference parameters for Token Classification
  */
 export interface TokenClassificationParameters {
@@ -60,12 +58,15 @@ export interface TokenClassificationOutputElement {
 	/**
 	 * The character position in the input where this group ends.
 	 */
-	end?: number;
+	end: number;
 	/**
-	 * The predicted label for that group of tokens
+	 * The predicted label for a single token
+	 */
+	entity?: string;
+	/**
+	 * The predicted label for a group of one or more tokens
 	 */
 	entity_group?: string;
-	label: unknown;
 	/**
 	 * The associated score / probability
 	 */
@@ -73,10 +74,10 @@ export interface TokenClassificationOutputElement {
 	/**
 	 * The character position in the input where this group begins.
 	 */
-	start?: number;
+	start: number;
 	/**
 	 * The corresponding text
 	 */
-	word?: string;
+	word: string;
 	[property: string]: unknown;
 }

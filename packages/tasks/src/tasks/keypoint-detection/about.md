@@ -36,16 +36,14 @@ model = SuperPointForKeypointDetection.from_pretrained("magic-leap-community/sup
 inputs = processor(image, return_tensors="pt").to(model.device, model.dtype)
 outputs = model(**inputs)
 
-# visualize the output
+# postprocess
+image_sizes = [(image.size[1], image.size[0])]
+outputs = processor.post_process_keypoint_detection(model_outputs, image_sizes)
+keypoints = outputs[0]["keypoints"].detach().numpy()
+scores = outputs[0]["scores"].detach().numpy()
 image_width, image_height = image.size
-image_mask = outputs.mask
-image_indices = torch.nonzero(image_mask).squeeze()
 
-image_scores = outputs.scores.squeeze()
-image_keypoints = outputs.keypoints.squeeze()
-keypoints = image_keypoints.detach().numpy()
-scores = image_scores.detach().numpy()
-
+# plot
 plt.axis('off')
 plt.imshow(image)
 plt.scatter(

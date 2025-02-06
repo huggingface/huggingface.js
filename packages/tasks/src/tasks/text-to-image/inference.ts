@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Inputs for Text To Image inference
  */
@@ -13,15 +12,12 @@ export interface TextToImageInput {
 	 */
 	inputs: string;
 	/**
-	 * Additional inference parameters
+	 * Additional inference parameters for Text To Image
 	 */
 	parameters?: TextToImageParameters;
 	[property: string]: unknown;
 }
-
 /**
- * Additional inference parameters
- *
  * Additional inference parameters for Text To Image
  */
 export interface TextToImageParameters {
@@ -31,9 +27,13 @@ export interface TextToImageParameters {
 	 */
 	guidance_scale?: number;
 	/**
-	 * One or several prompt to guide what NOT to include in image generation.
+	 * The height in pixels of the output image
 	 */
-	negative_prompt?: string[];
+	height?: number;
+	/**
+	 * One prompt to guide what NOT to include in image generation.
+	 */
+	negative_prompt?: string;
 	/**
 	 * The number of denoising steps. More denoising steps usually lead to a higher quality
 	 * image at the expense of slower inference.
@@ -48,21 +48,11 @@ export interface TextToImageParameters {
 	 */
 	seed?: number;
 	/**
-	 * The size in pixel of the output image
+	 * The width in pixels of the output image
 	 */
-	target_size?: TargetSize;
+	width?: number;
 	[property: string]: unknown;
 }
-
-/**
- * The size in pixel of the output image
- */
-export interface TargetSize {
-	height: number;
-	width: number;
-	[property: string]: unknown;
-}
-
 /**
  * Outputs of inference for the Text To Image task
  */

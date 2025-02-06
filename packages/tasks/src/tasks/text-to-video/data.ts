@@ -1,4 +1,4 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	datasets: [
@@ -67,30 +67,30 @@ const taskData: TaskDataCustom = {
 	],
 	models: [
 		{
-			description: "A strong model for video generation.",
-			id: "Vchitect/LaVie",
+			description: "A strong model for consistent video generation.",
+			id: "tencent/HunyuanVideo",
 		},
 		{
-			description: "A robust model for text-to-video generation.",
-			id: "damo-vilab/text-to-video-ms-1.7b",
+			description: "A text-to-video model with high fidelity motion and strong prompt adherence.",
+			id: "Lightricks/LTX-Video",
 		},
 		{
-			description: "A text-to-video generation model with high quality and smooth outputs.",
-			id: "hotshotco/Hotshot-XL",
+			description: "A text-to-video model focusing on physics-aware applications like robotics.",
+			id: "nvidia/Cosmos-1.0-Diffusion-7B-Text2World",
 		},
 	],
 	spaces: [
 		{
 			description: "An application that generates video from text.",
-			id: "fffiloni/zeroscope",
+			id: "VideoCrafter/VideoCrafter",
 		},
 		{
-			description: "An application that generates video from image and text.",
-			id: "Vchitect/LaVie",
+			description: "Consistent video generation application.",
+			id: "TIGER-Lab/T2V-Turbo-V2",
 		},
 		{
-			description: "An application that generates videos from text and provides multi-model support.",
-			id: "ArtGAN/Video-Diffusion-WebUI",
+			description: "A cutting edge video generation application.",
+			id: "Pyramid-Flow/pyramid-flow",
 		},
 	],
 	summary:

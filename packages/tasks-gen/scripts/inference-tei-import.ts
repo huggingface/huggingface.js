@@ -24,7 +24,7 @@ const rootDirFinder = function (): string {
 	return "/";
 };
 
-const rootDir = rootDirFinder();
+const rootDir = path.join(rootDirFinder(), "..", "tasks");
 const tasksDir = path.join(rootDir, "src", "tasks");
 
 function toCamelCase(str: string, joiner = "") {
@@ -63,8 +63,9 @@ async function _extractAndAdapt(task: string, mainComponentName: string, type: "
 					// but not Union[List[Union[List[int], int, str]], str]
 					// data.delete(key);
 					delete data[key];
-					data["type"] = "string";
-					data["description"] = "The text to embed.";
+					data["title"] = "FeatureExtractionInputs";
+					data["description"] = "The text or list of texts to embed.";
+					data["oneOf"] = [{ type: "string" }, { type: "array", items: { type: "string" } }];
 				} else if (key === "$ref" && typeof data[key] === "string") {
 					// Verify reference exists
 					const ref = (data[key] as string).split("/").pop() ?? "";
@@ -73,7 +74,9 @@ async function _extractAndAdapt(task: string, mainComponentName: string, type: "
 					}
 
 					// Add reference to components to export (and scan it too)
-					const newRef = camelFullName + ref.replace(camelName, "");
+					let newRef = camelFullName + ref.replace(camelName, "");
+					// remove duplicated InputInput or OutputOutput in naming
+					newRef = newRef.replace("InputInput", "Input").replace("OutputOutput", "Output");
 					if (!filteredComponents[newRef]) {
 						components[ref]["title"] = newRef; // Rename title to avoid conflicts
 						filteredComponents[newRef] = components[ref];
