@@ -1,6 +1,6 @@
 import requests
 
-API_URL = "https://router.huggingface.co/hf-inference"
+API_URL = "https://router.huggingface.co/hf-inference/v1"
 headers = {"Authorization": "Bearer api_token"}
 
 def query(payload):

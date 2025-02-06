@@ -271,9 +271,9 @@ image = client.text_to_image(
 		},
 		...(provider === "fal-ai"
 			? [
-				{
-					client: "fal-client",
-					content: `\
+					{
+						client: "fal-client",
+						content: `\
 import fal_client
 
 result = fal_client.subscribe(
@@ -285,14 +285,14 @@ result = fal_client.subscribe(
 )
 print(result)
 `,
-				},
-			]
+					},
+			  ]
 			: []),
 		...(provider === "hf-inference"
 			? [
-				{
-					client: "requests",
-					content: `\
+					{
+						client: "requests",
+						content: `\
 def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.content
@@ -305,8 +305,8 @@ image_bytes = query({
 import io
 from PIL import Image
 image = Image.open(io.BytesIO(image_bytes))`,
-				},
-			]
+					},
+			  ]
 			: []),
 	];
 };
@@ -443,8 +443,6 @@ export function getPythonInferenceSnippet(
 				? pythonSnippets[model.pipeline_tag]?.(model, accessToken, provider) ?? []
 				: [];
 
-		const baseUrl = HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", provider);
-
 		return snippets.map((snippet) => {
 			return {
 				...snippet,
@@ -453,7 +451,7 @@ export function getPythonInferenceSnippet(
 						? `\
 import requests
 
-API_URL = "${baseUrl}"
+API_URL = "${openAIbaseUrl(provider)}"
 headers = {"Authorization": ${accessToken ? `"Bearer ${accessToken}"` : `f"Bearer {API_TOKEN}"`}}
 
 ${snippet.content}`

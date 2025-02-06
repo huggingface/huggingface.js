@@ -133,8 +133,7 @@ function generateInferenceSnippet(
 	provider: SnippetInferenceProvider,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
-	const generatedSnippets = GET_SNIPPET_FN[language](model, "api_token", provider, opts);
-	return Array.isArray(generatedSnippets) ? generatedSnippets : [generatedSnippets];
+	return GET_SNIPPET_FN[language](model, "api_token", provider, opts);
 }
 
 async function getExpectedInferenceSnippet(
