@@ -1081,7 +1081,7 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Fireworks",
 		() => {
-			const client = new HfInference(env.HF_FIREWORKS_AI_KEY);
+			const client = new HfInference(env.HF_FIREWORKS_KEY);
 
 			it("chatCompletion", async () => {
 				const res = await client.chatCompletion({
@@ -1093,14 +1093,14 @@ describe.concurrent("HfInference", () => {
 					const completion = res.choices[0].message?.content;
 					expect(completion).toContain("two");
 				}
-			});		
+			});
 
 			it("chatCompletion stream", async () => {
 				const stream = client.chatCompletionStream({
 					model: "deepseek-ai/DeepSeek-R1",
 					provider: "fireworks-ai",
 					messages: [{ role: "user", content: "Say this is a test" }],
-					stream: true
+					stream: true,
 				}) as AsyncGenerator<ChatCompletionStreamOutput>;
 
 				let fullResponse = "";
@@ -1112,7 +1112,7 @@ describe.concurrent("HfInference", () => {
 						}
 					}
 				}
-				
+
 				// Verify we got a meaningful response
 				expect(fullResponse).toBeTruthy();
 				expect(fullResponse.length).toBeGreaterThan(0);
