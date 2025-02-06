@@ -1,30 +1,18 @@
-import type { ProviderMapping } from "./types";
-
 export const REPLICATE_API_BASE_URL = "https://api.replicate.com";
 
-type ReplicateId = string;
-
-export const REPLICATE_SUPPORTED_MODEL_IDS: ProviderMapping<ReplicateId> = {
-	"text-to-image": {
-		"black-forest-labs/FLUX.1-dev": "black-forest-labs/flux-dev",
-		"black-forest-labs/FLUX.1-schnell": "black-forest-labs/flux-schnell",
-		"ByteDance/Hyper-SD":
-			"bytedance/hyper-flux-16step:382cf8959fb0f0d665b26e7e80b8d6dc3faaef1510f14ce017e8c732bb3d1eb7",
-		"ByteDance/SDXL-Lightning":
-			"bytedance/sdxl-lightning-4step:5599ed30703defd1d160a25a63321b4dec97101d98b4674bcc56e41f62f35637",
-		"playgroundai/playground-v2.5-1024px-aesthetic":
-			"playgroundai/playground-v2.5-1024px-aesthetic:a45f82a1382bed5c7aeb861dac7c7d191b0fdf74d8d57c4a0e6ed7d4d0bf7d24",
-		"stabilityai/stable-diffusion-3.5-large-turbo": "stability-ai/stable-diffusion-3.5-large-turbo",
-		"stabilityai/stable-diffusion-3.5-large": "stability-ai/stable-diffusion-3.5-large",
-		"stabilityai/stable-diffusion-3.5-medium": "stability-ai/stable-diffusion-3.5-medium",
-		"stabilityai/stable-diffusion-xl-base-1.0":
-			"stability-ai/sdxl:7762fd07cf82c948538e41f63f77d685e02b063e37e496e96eefd46c929f9bdc",
-	},
-	"text-to-speech": {
-		"OuteAI/OuteTTS-0.3-500M": "jbilcke/oute-tts:3c645149db020c85d080e2f8cfe482a0e68189a922cde964fa9e80fb179191f3",
-		"hexgrad/Kokoro-82M": "jaaari/kokoro-82m:dfdf537ba482b029e0a761699e6f55e9162cfd159270bfe0e44857caa5f275a6",
-	},
-	"text-to-video": {
-		"genmo/mochi-1-preview": "genmoai/mochi-1:1944af04d098ef69bed7f9d335d102e652203f268ec4aaa2d836f6217217e460",
-	},
-};
+/**
+ * See the registered mapping of HF model ID => Replicate model ID here:
+ *
+ * https://huggingface.co/api/partners/replicate/models
+ *
+ * This is a publicly available mapping.
+ *
+ * If you want to try to run inference for a new model locally before it's registered on huggingface.co,
+ * you can add it to the dictionary "HARDCODED_MODEL_ID_MAPPING" in consts.ts, for dev purposes.
+ *
+ * - If you work at Replicate and want to update this mapping, please use the model mapping API we provide on huggingface.co
+ * - If you're a community member and want to add a new supported HF model to Replicate, please open an issue on the present repo
+ * and we will tag Replicate team members.
+ *
+ * Thanks!
+ */

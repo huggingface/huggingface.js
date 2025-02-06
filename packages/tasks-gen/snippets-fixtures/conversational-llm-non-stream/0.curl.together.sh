@@ -1,4 +1,4 @@
-curl 'https://huggingface.co/api/inference-proxy/together/v1/chat/completions' \
+curl 'https://router.huggingface.co/together/v1/chat/completions' \
 -H 'Authorization: Bearer api_token' \
 -H 'Content-Type: application/json' \
 --data '{

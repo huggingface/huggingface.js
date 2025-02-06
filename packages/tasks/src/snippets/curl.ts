@@ -63,15 +63,15 @@ export const snippetTextGeneration = (
 --data '{
     "model": "${model.id}",
     "messages": ${stringifyMessages(messages, {
-			indent: "\t",
-			attributeKeyQuotes: true,
-			customContentEscaper: (str) => str.replace(/'/g, "'\\''"),
-		})},
+					indent: "\t",
+					attributeKeyQuotes: true,
+					customContentEscaper: (str) => str.replace(/'/g, "'\\''"),
+				})},
     ${stringifyGenerationConfig(config, {
-			indent: "\n    ",
-			attributeKeyQuotes: true,
-			attributeValueConnector: ": ",
-		})},
+					indent: "\n    ",
+					attributeKeyQuotes: true,
+					attributeValueConnector: ": ",
+				})}
     "stream": ${!!streaming}
 }'`,
 			},
