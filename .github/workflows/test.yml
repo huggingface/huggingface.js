@@ -42,6 +42,7 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           HF_FAL_KEY: dummy
+          HF_NEBIUS_KEY: dummy
           HF_REPLICATE_KEY: dummy
           HF_SAMBANOVA_KEY: dummy
           HF_TOGETHER_KEY: dummy
@@ -82,6 +83,7 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           HF_FAL_KEY: dummy
+          HF_NEBIUS_KEY: dummy
           HF_REPLICATE_KEY: dummy
           HF_SAMBANOVA_KEY: dummy
           HF_TOGETHER_KEY: dummy
@@ -149,6 +151,7 @@ jobs:
           NPM_CONFIG_REGISTRY: http://localhost:4874/
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           HF_FAL_KEY: dummy
+          HF_NEBIUS_KEY: dummy
           HF_REPLICATE_KEY: dummy
           HF_SAMBANOVA_KEY: dummy
           HF_TOGETHER_KEY: dummy
