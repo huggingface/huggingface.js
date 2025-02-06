@@ -117,7 +117,7 @@ async function vcr(
 
 	const { default: tapes } = await import(TAPES_FILE);
 
-	const cacheCandidate = !url.startsWith(HF_HUB_URL);
+	const cacheCandidate = !url.startsWith(HF_HUB_URL) || url.startsWith(`${HF_HUB_URL}/api/inference-proxy/`);
 
 	if (VCR_MODE === MODE.PLAYBACK && cacheCandidate) {
 		if (!tapes[hash]) {

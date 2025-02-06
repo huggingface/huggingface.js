@@ -2,7 +2,7 @@ import { OpenAI } from "openai";
 
 const client = new OpenAI({
 	baseURL: "https://router.huggingface.co/hf-inference/v1",
-	apiKey: "api_token"
+	apiKey: "api_token",
 });
 
 let out = "";
@@ -12,8 +12,8 @@ const stream = await client.chat.completions.create({
 	messages: [
 		{
 			role: "user",
-			content: "What is the capital of France?"
-		}
+			content: "What is the capital of France?",
+		},
 	],
 	max_tokens: 500,
 	stream: true,
@@ -24,5 +24,5 @@ for await (const chunk of stream) {
 		const newContent = chunk.choices[0].delta.content;
 		out += newContent;
 		console.log(newContent);
-	}  
+	}
 }
