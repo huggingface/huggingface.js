@@ -13,7 +13,7 @@ const stream = client.chatCompletionStream({
 		}
 	],
 	provider: "hf-inference",
-	max_tokens: 500,
+	max_tokens: 500
 });
 
 for await (const chunk of stream) {

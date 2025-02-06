@@ -11,7 +11,7 @@ const chatCompletion = await client.chatCompletion({
 		}
 	],
 	provider: "hf-inference",
-	max_tokens: 500,
+	max_tokens: 500
 });
 
 console.log(chatCompletion.choices[0].message);
