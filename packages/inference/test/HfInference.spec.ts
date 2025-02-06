@@ -6,6 +6,7 @@ import { chatCompletion, HfInference } from "../src";
 import { textToVideo } from "../src/tasks/cv/textToVideo";
 import { readTestFile } from "./test-files";
 import "./vcr";
+import { HARDCODED_MODEL_ID_MAPPING } from "../src/providers/consts";
 
 const TIMEOUT = 60000 * 3;
 const env = import.meta.env;
@@ -1082,6 +1083,10 @@ describe.concurrent("HfInference", () => {
 		"Fireworks",
 		() => {
 			const client = new HfInference(env.HF_FIREWORKS_KEY);
+
+			HARDCODED_MODEL_ID_MAPPING["fireworks-ai"] = {
+				"deepseek-ai/DeepSeek-R1": "accounts/fireworks/models/deepseek-r1",
+			};
 
 			it("chatCompletion", async () => {
 				const res = await client.chatCompletion({
