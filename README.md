@@ -183,7 +183,7 @@ const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the
 
 // Chat Completion
 const llamaEndpoint = inference.endpoint(
-  "https://router.huggingface.co/together/models/meta-llama/Llama-3.1-8B-Instruct"
+  "https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.1-8B-Instruct"
 );
 const out = await llamaEndpoint.chatCompletion({
   model: "meta-llama/Llama-3.1-8B-Instruct",
