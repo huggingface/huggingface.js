@@ -1,5 +1,5 @@
 {
-	"8636fe9560a75039480e6e675f0439b52a13f3c274d9ea5e019b8070cc8a5608": {
+	"223f3b06e5c671d42268c7f3d02dd810a28793d3865bc10615b50ce61ab5092b": {
 		"url": "https://router.huggingface.co/hf-inference/models/distilbert-base-uncased-finetuned-sst-2-english",
 		"init": {
 			"headers": {
@@ -251,7 +251,7 @@
 			}
 		}
 	},
-	"45d0b01267b465f464cb9e208b877ee1c7d9986fa4594e03b8b918dc04568d2c": {
+	"06fb436e5cb0f02e9152958681bc2a03746d65aa1b8cdd26286c590c857d7eb7": {
 		"url": "https://router.huggingface.co/hf-inference/models/google/vit-base-patch16-224",
 		"init": {
 			"headers": {},
@@ -269,7 +269,7 @@
 			}
 		}
 	},
-	"e4f68d60d76c3d45ce42d10399be7d13a7a1a9a7eea5cd0aed5212337864e862": {
+	"9fe84ea3771cccad43a2805df5b17c93b1c59476b44bd0c9ea2043efaf6dfb0a": {
 		"url": "https://router.huggingface.co/hf-inference/models/facebook/wav2vec2-large-960h-lv60-self",
 		"init": {
 			"headers": {},
@@ -287,7 +287,7 @@
 			}
 		}
 	},
-	"741f4bc66664a45c59af4ca4251b0604c297cd8927ea66d7fa138d5f6799c61e": {
+	"2bd46ca62e5d94215cc786fcd8bf2b27697b7f8dc19ce1eeef4846c9fd136365": {
 		"url": "https://router.huggingface.co/hf-inference/models/superb/hubert-large-superb-er",
 		"init": {
 			"headers": {},
@@ -305,7 +305,7 @@
 			}
 		}
 	},
-	"3b863bfae80be2a1b9b77479b51b87cfd2e185075b1743107249a4f1484f52b7": {
+	"0c4b97c07f3d9af9a63b43e8892cb26e3875667f815781fa6347682b257dc690": {
 		"url": "https://router.huggingface.co/hf-inference/models/stabilityai/stable-diffusion-2",
 		"init": {
 			"headers": {
@@ -364,7 +364,7 @@
 			}
 		}
 	},
-	"53221439c8337814ef5345c16337b323f9e0b3a86e9d9636e8617606f8a9edf3": {
+	"c85a76e02d604694ecb9f79354f9e8817d4294ac1824159c125b925a06b62c58": {
 		"url": "https://router.huggingface.co/hf-inference/models/facebook/detr-resnet-50-panoptic",
 		"init": {
 			"headers": {},
@@ -503,7 +503,7 @@
 			}
 		}
 	},
-	"3eb8944d3ab5f0a7dc5d4985eaa72c86e8e01c3c12840e1966780711a48c0ce6": {
+	"d43005f18160b15aa47a6a0ef272dbcd8b2a09fad4d06582e5693dda1a8856e3": {
 		"url": "https://router.huggingface.co/hf-inference/models/stabilityai/stable-diffusion-2",
 		"init": {
 			"headers": {
@@ -565,7 +565,7 @@
 			}
 		}
 	},
-	"30b6ce7465d396930170cc734393bf189ed87249347543743995e8cc351406d9": {
+	"983b472abeea34c2817f15d569c25c64ae122f2d929131e975d7fc5f972e9f4f": {
 		"url": "https://router.huggingface.co/hf-inference/models/dandelin/vilt-b32-finetuned-vqa",
 		"init": {
 			"headers": {
@@ -650,7 +650,7 @@
 			}
 		}
 	},
-	"7b7c5e8c4271b8d18b231153b16949ffae6efe591e00caba3c1f28d994fb97bd": {
+	"5cef5424ea4a0864e8376d6a9d9c385d21c089e66196f4ac89991adf375bbac1": {
 		"url": "https://router.huggingface.co/hf-inference/models/lllyasviel/sd-controlnet-canny",
 		"init": {
 			"headers": {},
@@ -778,7 +778,7 @@
 			}
 		}
 	},
-	"e84857f5779f6e671ccba07255190b5b416ea2a1f2ff7186af97280ac7c71133": {
+	"dac893bf4697bca0f8ee6207d44d36b624d677d6e8f6a5e69c49e8fd0005b3c8": {
 		"url": "https://router.huggingface.co/hf-inference/models/speechbrain/sepformer-wham",
 		"init": {
 			"headers": {},
@@ -799,7 +799,7 @@
 			}
 		}
 	},
-	"bcf4dc29668a4b71e7eb0144f7886ef52e251d911740084557a85b952d0ec0cd": {
+	"798d8955b065f735a410085726a1f0467aef25824fbf95e451844cd23cf428e9": {
 		"url": "https://router.huggingface.co/hf-inference/models/openai/clip-vit-large-patch14-336",
 		"init": {
 			"headers": {
@@ -964,7 +964,7 @@
 			}
 		}
 	},
-	"13836a786554355b11650fc61a63731b61041df104df85c7acffdd5780835d09": {
+	"ead272eb5ffd9ff2bd88efefc533e6f71b088c051c9d8b8df7262597f6ce7845": {
 		"url": "https://router.huggingface.co/hf-inference/models/deepset/roberta-base-squad2",
 		"init": {
 			"headers": {
@@ -1006,7 +1006,7 @@
 			}
 		}
 	},
-	"99a4fcd7371b51433c5f1990839178e0a46389d96e97e215677ca74759bb7033": {
+	"52c5cac7ab8c3a4dc39428bd641d1c96023edb2b2eb67340f8a203a57fa0c1a9": {
 		"url": "https://router.huggingface.co/hf-inference/models/google/tapas-base-finetuned-wtq",
 		"init": {
 			"headers": {
@@ -1048,7 +1048,7 @@
 			}
 		}
 	},
-	"0203979ecfdf4513c7d2e8c64de31d8d8f7fc8b2ed72e009cda2ed5d23b9feb8": {
+	"b9018e85072bc0f72b2618f0f1afaed2c822241c73f395e62cced41c379ce242": {
 		"url": "https://router.huggingface.co/hf-inference/models/gpt2",
 		"init": {
 			"headers": {
@@ -1320,7 +1320,7 @@
 			}
 		}
 	},
-	"52b1c51e1f7afebc769713ab835d1a433359546acbb0d01f0013d6952b7b484e": {
+	"bbc9c0db6cf9a176249153f3c50757ac506671862cee2946709afd681c73f200": {
 		"url": "https://router.huggingface.co/hf-inference/models/espnet/kan-bayashi_ljspeech_vits",
 		"init": {
 			"headers": {
@@ -1383,7 +1383,7 @@
 			}
 		}
 	},
-	"5c11b0eb3026fd22b05e58e02bfbe368082273076863c3b40d275f137cc94a0a": {
+	"5644ae129186cd9b5eee6d2e481bbf8110c0f294402700a1b57c3d88af8c5fa7": {
 		"url": "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
 		"init": {
 			"headers": {
@@ -1424,7 +1424,7 @@
 			}
 		}
 	},
-	"40bb6c07679cfeed07a64ddc52eb73e495903273a11ed4ffcfc70f7c5a598210": {
+	"e1218ba647f9fc29e3f8579d28b4718b127699a498b449a4ab4f7cab1187aa73": {
 		"url": "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
 		"init": {
 			"headers": {
@@ -1465,7 +1465,7 @@
 			}
 		}
 	},
-	"25ef48521272dfc4ce08e17e358ba8a2784bd02b1d06581549b60c2596da9549": {
+	"455be0eb4e66ff3cd5ead379d78db1fd6ed52dbc86344c2e6102702c974707bc": {
 		"url": "https://router.huggingface.co/hf-inference/models/impira/layoutlm-document-qa",
 		"init": {
 			"headers": {
@@ -1489,17 +1489,17 @@
 			}
 		}
 	},
-	"e9d288837214f44e5e385f96383391e964133f5c3703b276f934224d0773197e": {
-		"url": "https://router.huggingface.co/hf-inference/models/this-model-does-not-exist-123",
+	"0f8ba3099ee73a5870b49a0ec3b8c07d3adb987e1a1ca751576cc0d3a6def86e": {
+		"url": "https://router.huggingface.co/hf-inference/models/this-model/does-not-exist-123",
 		"init": {
 			"headers": {
 				"Content-Type": "application/json"
 			},
 			"method": "POST",
-			"body": "{\"model\":\"this-model-does-not-exist-123\",\"inputs\":\"[MASK] world!\"}"
+			"body": "{\"model\":\"this-model/does-not-exist-123\",\"inputs\":\"[MASK] world!\"}"
 		},
 		"response": {
-			"body": "{\"error\":\"Model this-model-does-not-exist-123 does not exist\"}",
+			"body": "{\"error\":\"Model this-model/does-not-exist-123 does not exist\"}",
 			"status": 404,
 			"statusText": "Not Found",
 			"headers": {
@@ -1510,7 +1510,7 @@
 			}
 		}
 	},
-	"019076ba5053a777d40c12f9e9704f99252d5fb81923fde871f6114a9a4ef0c3": {
+	"e0155d48287fa7ee80be622757b2eeffd1a0492e8b7d757f62b4d9b15107eabb": {
 		"url": "https://router.huggingface.co/hf-inference/models/openai-community/gpt2",
 		"init": {
 			"headers": {
@@ -3133,7 +3133,7 @@
 			}
 		}
 	},
-	"2e5dd0fd4bd22bd586b53223f79a22c3634d8a80f85604487b8db4fc205e188c": {
+	"426762b2497f068d05c91e45c8681a425eeb210c2e5968a9c070528c812fb48d": {
 		"url": "https://router.huggingface.co/hf-inference/models/google/pegasus-xsum",
 		"init": {
 			"headers": {
@@ -4171,7 +4171,7 @@
 			}
 		}
 	},
-	"d8cd08fccaebe4f241895e20cbd06407089c701d0f2faa48cda37aaea9321255": {
+	"38ecb3cece3e724f6626bad0b7a4e5e55c52bde674eccb2f047fab9935c7d04b": {
 		"url": "https://router.huggingface.co/hf-inference/models/lllyasviel/sd-controlnet-depth",
 		"init": {
 			"headers": {
@@ -4242,7 +4242,7 @@
 			}
 		}
 	},
-	"0c2f29860e5efd5135180215fdd5da54aaa7b77d73d30ac2849914b9e2a1345d": {
+	"5a02b89bab2c6e0f50e41071cd62125a61d06c8b401f7ec110162a7c0e065595": {
 		"url": "https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.2-3B",
 		"init": {
 			"headers": {
