@@ -617,7 +617,7 @@ const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the
 
 // Chat Completion Example
 const ep = hf.endpoint(
-  "https://router.huggingface.co/together/models/meta-llama/Llama-3.1-8B-Instruct"
+  "https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.1-8B-Instruct"
 );
 const stream = ep.chatCompletionStream({
   model: "tgi",

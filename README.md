@@ -96,8 +96,8 @@ You can run our packages with vanilla JS, without any bundler, by using a CDN or
 
 ```html
 <script type="module">
-    import { HfInference } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@3.1.6/+esm';
-    import { createRepo, commit, deleteRepo, listFiles } from "https://cdn.jsdelivr.net/npm/@huggingface/hub@1.0.0/+esm";
+    import { HfInference } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@3.2.0/+esm';
+    import { createRepo, commit, deleteRepo, listFiles } from "https://cdn.jsdelivr.net/npm/@huggingface/hub@1.0.1/+esm";
 </script>
 ```
 
@@ -183,7 +183,7 @@ const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the
 
 // Chat Completion
 const llamaEndpoint = inference.endpoint(
-  "https://router.huggingface.co/together/models/meta-llama/Llama-3.1-8B-Instruct"
+  "https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.1-8B-Instruct"
 );
 const out = await llamaEndpoint.chatCompletion({
   model: "meta-llama/Llama-3.1-8B-Instruct",
