@@ -19,7 +19,7 @@ import json
 import requests
 
 headers = {"Authorization": f"Bearer {API_TOKEN}"}
-API_URL = "https://api-inference.huggingface.co/models/microsoft/speecht5_tts"
+API_URL = "https://router.huggingface.co/hf-inference/models/microsoft/speecht5_tts"
 
 def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)

@@ -3,11 +3,41 @@ import {
 	openAIbaseUrl,
 	type SnippetInferenceProvider,
 } from "../inference-providers.js";
-import type { PipelineType } from "../pipelines.js";
+import type { PipelineType, WidgetType } from "../pipelines.js";
 import type { ChatCompletionInputMessage, GenerationParameters } from "../tasks/index.js";
 import { stringifyGenerationConfig, stringifyMessages } from "./common.js";
 import { getModelInputSnippet } from "./inputs.js";
 import type { InferenceSnippet, ModelDataMinimal } from "./types.js";
+
+const HFH_INFERENCE_CLIENT_METHODS: Partial<Record<WidgetType, string>> = {
+	"audio-classification": "audio_classification",
+	"audio-to-audio": "audio_to_audio",
+	"automatic-speech-recognition": "automatic_speech_recognition",
+	"text-to-speech": "text_to_speech",
+	"image-classification": "image_classification",
+	"image-segmentation": "image_segmentation",
+	"image-to-image": "image_to_image",
+	"image-to-text": "image_to_text",
+	"object-detection": "object_detection",
+	"text-to-image": "text_to_image",
+	"text-to-video": "text_to_video",
+	"zero-shot-image-classification": "zero_shot_image_classification",
+	"document-question-answering": "document_question_answering",
+	"visual-question-answering": "visual_question_answering",
+	"feature-extraction": "feature_extraction",
+	"fill-mask": "fill_mask",
+	"question-answering": "question_answering",
+	"sentence-similarity": "sentence_similarity",
+	summarization: "summarization",
+	"table-question-answering": "table_question_answering",
+	"text-classification": "text_classification",
+	"text-generation": "text_generation",
+	"token-classification": "token_classification",
+	translation: "translation",
+	"zero-shot-classification": "zero_shot_classification",
+	"tabular-classification": "tabular_classification",
+	"tabular-regression": "tabular_regression",
+};
 
 const snippetImportInferenceClient = (accessToken: string, provider: SnippetInferenceProvider): string =>
 	`\
@@ -168,8 +198,30 @@ output = query({
 	];
 };
 
-export const snippetBasic = (model: ModelDataMinimal): InferenceSnippet[] => {
+export const snippetBasic = (
+	model: ModelDataMinimal,
+	accessToken: string,
+	provider: SnippetInferenceProvider
+): InferenceSnippet[] => {
 	return [
+		...(model.pipeline_tag && model.pipeline_tag in HFH_INFERENCE_CLIENT_METHODS
+			? [
+					{
+						client: "huggingface_hub",
+						content: `\
+${snippetImportInferenceClient(accessToken, provider)}
+
+result = client.${HFH_INFERENCE_CLIENT_METHODS[model.pipeline_tag]}(
+	model="${model.id}",
+	inputs=${getModelInputSnippet(model)},
+	provider="${provider}",
+)
+
+print(result)
+`,
+					},
+			  ]
+			: []),
 		{
 			client: "requests",
 			content: `\
@@ -219,9 +271,9 @@ image = client.text_to_image(
 		},
 		...(provider === "fal-ai"
 			? [
-				{
-					client: "fal-client",
-					content: `\
+					{
+						client: "fal-client",
+						content: `\
 import fal_client
 
 result = fal_client.subscribe(
@@ -233,14 +285,14 @@ result = fal_client.subscribe(
 )
 print(result)
 `,
-				},
-			]
+					},
+			  ]
 			: []),
 		...(provider === "hf-inference"
 			? [
-				{
-					client: "requests",
-					content: `\
+					{
+						client: "requests",
+						content: `\
 def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.content
@@ -253,8 +305,8 @@ image_bytes = query({
 import io
 from PIL import Image
 image = Image.open(io.BytesIO(image_bytes))`,
-				},
-			]
+					},
+			  ]
 			: []),
 	];
 };
@@ -391,11 +443,6 @@ export function getPythonInferenceSnippet(
 				? pythonSnippets[model.pipeline_tag]?.(model, accessToken, provider) ?? []
 				: [];
 
-		const baseUrl =
-			provider === "hf-inference"
-				? `https://api-inference.huggingface.co/models/${model.id}`
-				: HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", provider);
-
 		return snippets.map((snippet) => {
 			return {
 				...snippet,
@@ -404,7 +451,7 @@ export function getPythonInferenceSnippet(
 						? `\
 import requests
 
-API_URL = "${baseUrl}"
+API_URL = "${openAIbaseUrl(provider)}"
 headers = {"Authorization": ${accessToken ? `"Bearer ${accessToken}"` : `f"Bearer {API_TOKEN}"`}}
 
 ${snippet.content}`

@@ -1,11 +1,11 @@
 import { openAIbaseUrl, type SnippetInferenceProvider } from "../inference-providers.js";
-import type { PipelineType } from "../pipelines.js";
+import type { PipelineType, WidgetType } from "../pipelines.js";
 import type { ChatCompletionInputMessage, GenerationParameters } from "../tasks/index.js";
 import { stringifyGenerationConfig, stringifyMessages } from "./common.js";
 import { getModelInputSnippet } from "./inputs.js";
 import type { InferenceSnippet, ModelDataMinimal } from "./types.js";
 
-const HFJS_METHODS: Record<string, string> = {
+const HFJS_METHODS: Partial<Record<WidgetType, string>> = {
 	"text-classification": "textClassification",
 	"token-classification": "tokenClassification",
 	"table-question-answering": "tableQuestionAnswering",
@@ -27,9 +27,9 @@ export const snippetBasic = (
 	return [
 		...(model.pipeline_tag && model.pipeline_tag in HFJS_METHODS
 			? [
-				{
-					client: "huggingface.js",
-					content: `\
+					{
+						client: "huggingface.js",
+						content: `\
 import { HfInference } from "@huggingface/inference";
 
 const client = new HfInference("${accessToken || `{API_TOKEN}`}");
@@ -40,17 +40,17 @@ const output = await client.${HFJS_METHODS[model.pipeline_tag]}({
 	provider: "${provider}",
 });
 
-console.log(output)
+console.log(output);
 `,
-				},
-			]
+					},
+			  ]
 			: []),
 		{
 			client: "fetch",
 			content: `\
 async function query(data) {
 	const response = await fetch(
-		"https://api-inference.huggingface.co/models/${model.id}",
+		"https://router.huggingface.co/hf-inference/models/${model.id}",
 		{
 			headers: {
 				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
@@ -201,7 +201,7 @@ export const snippetZeroShotClassification = (model: ModelDataMinimal, accessTok
 			client: "fetch",
 			content: `async function query(data) {
 			const response = await fetch(
-				"https://api-inference.huggingface.co/models/${model.id}",
+				"https://router.huggingface.co/hf-inference/models/${model.id}",
 				{
 					headers: {
 						Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
@@ -216,8 +216,8 @@ export const snippetZeroShotClassification = (model: ModelDataMinimal, accessTok
 		}
 		
 		query({"inputs": ${getModelInputSnippet(
-				model
-			)}, "parameters": {"candidate_labels": ["refund", "legal", "faq"]}}).then((response) => {
+			model
+		)}, "parameters": {"candidate_labels": ["refund", "legal", "faq"]}}).then((response) => {
 			console.log(JSON.stringify(response));
 		});`,
 		},
@@ -248,11 +248,11 @@ const image = await client.textToImage({
 		},
 		...(provider === "hf-inference"
 			? [
-				{
-					client: "fetch",
-					content: `async function query(data) {
+					{
+						client: "fetch",
+						content: `async function query(data) {
 	const response = await fetch(
-		"https://api-inference.huggingface.co/models/${model.id}",
+		"https://router.huggingface.co/hf-inference/models/${model.id}",
 		{
 			headers: {
 				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
@@ -268,8 +268,8 @@ const image = await client.textToImage({
 query({"inputs": ${getModelInputSnippet(model)}}).then((response) => {
 	// Use image
 });`,
-				},
-			]
+					},
+			  ]
 			: []),
 	];
 };
@@ -284,7 +284,7 @@ export const snippetTextToAudio = (
 	}
 	const commonSnippet = `async function query(data) {
 		const response = await fetch(
-			"https://api-inference.huggingface.co/models/${model.id}",
+			"https://router.huggingface.co/hf-inference/models/${model.id}",
 			{
 				headers: {
 					Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
@@ -370,7 +370,7 @@ export const snippetFile = (
 			content: `async function query(filename) {
 	const data = fs.readFileSync(filename);
 	const response = await fetch(
-		"https://api-inference.huggingface.co/models/${model.id}",
+		"https://router.huggingface.co/hf-inference/models/${model.id}",
 		{
 			headers: {
 				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",

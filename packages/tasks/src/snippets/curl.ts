@@ -17,7 +17,7 @@ export const snippetBasic = (
 		{
 			client: "curl",
 			content: `\
-curl https://api-inference.huggingface.co/models/${model.id} \\
+curl https://router.huggingface.co/hf-inference/models/${model.id} \\
 	-X POST \\
 	-d '{"inputs": ${getModelInputSnippet(model, true)}}' \\
 	-H 'Content-Type: application/json' \\
@@ -41,7 +41,7 @@ export const snippetTextGeneration = (
 	if (model.tags.includes("conversational")) {
 		const baseUrl =
 			provider === "hf-inference"
-				? `https://api-inference.huggingface.co/models/${model.id}/v1/chat/completions`
+				? `https://router.huggingface.co/hf-inference/models/${model.id}/v1/chat/completions`
 				: HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", provider) + "/v1/chat/completions";
 
 		// Conversational model detected, so we display a code snippet that features the Messages API
@@ -92,7 +92,7 @@ export const snippetZeroShotClassification = (
 	return [
 		{
 			client: "curl",
-			content: `curl https://api-inference.huggingface.co/models/${model.id} \\
+			content: `curl https://router.huggingface.co/hf-inference/models/${model.id} \\
 	-X POST \\
 	-d '{"inputs": ${getModelInputSnippet(model, true)}, "parameters": {"candidate_labels": ["refund", "legal", "faq"]}}' \\
 	-H 'Content-Type: application/json' \\
@@ -112,7 +112,7 @@ export const snippetFile = (
 	return [
 		{
 			client: "curl",
-			content: `curl https://api-inference.huggingface.co/models/${model.id} \\
+			content: `curl https://router.huggingface.co/hf-inference/models/${model.id} \\
 	-X POST \\
 	--data-binary '@${getModelInputSnippet(model, true, true)}' \\
 	-H 'Authorization: Bearer ${accessToken || `{API_TOKEN}`}'`,

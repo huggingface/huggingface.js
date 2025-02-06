@@ -25,7 +25,7 @@ import json
 import requests
 
 headers = {"Authorization": f"Bearer {API_TOKEN}"}
-API_URL = "https://api-inference.huggingface.co/models/openai/whisper-large-v3"
+API_URL = "https://router.huggingface.co/hf-inference/models/openai/whisper-large-v3"
 
 def query(filename):
     with open(filename, "rb") as f:
