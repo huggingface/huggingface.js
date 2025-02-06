@@ -117,7 +117,7 @@ for await (const output of hf.textGenerationStream({
 
 ### Text Generation (Chat Completion API Compatible)
 
-Using the `chatCompletion` method, you can generate text with models compatible with the OpenAI Chat Completion API. All models served by [TGI](https://api-inference.huggingface.co/framework/text-generation-inference) on Hugging Face support Messages API.
+Using the `chatCompletion` method, you can generate text with models compatible with the OpenAI Chat Completion API. All models served by [TGI](https://huggingface.co/docs/text-generation-inference/) on Hugging Face support Messages API.
 
 [Demo](https://huggingface.co/spaces/huggingfacejs/streaming-chat-completion)
 
@@ -611,7 +611,7 @@ const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the
 
 // Chat Completion Example
 const ep = hf.endpoint(
-  "https://api-inference.huggingface.co/models/meta-llama/Llama-3.1-8B-Instruct"
+  "https://router.huggingface.co/together/models/meta-llama/Llama-3.1-8B-Instruct"
 );
 const stream = ep.chatCompletionStream({
   model: "tgi",
