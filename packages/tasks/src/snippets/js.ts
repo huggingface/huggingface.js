@@ -1,4 +1,4 @@
-import { openAIbaseUrl, type InferenceProvider } from "../inference-providers.js";
+import { openAIbaseUrl, type SnippetInferenceProvider } from "../inference-providers.js";
 import type { PipelineType } from "../pipelines.js";
 import type { ChatCompletionInputMessage, GenerationParameters } from "../tasks/index.js";
 import { stringifyGenerationConfig, stringifyMessages } from "./common.js";
@@ -22,7 +22,7 @@ const HFJS_METHODS: Record<string, string> = {
 export const snippetBasic = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: InferenceProvider
+	provider: SnippetInferenceProvider
 ): InferenceSnippet[] => {
 	return [
 		...(model.pipeline_tag && model.pipeline_tag in HFJS_METHODS
@@ -74,7 +74,7 @@ query({"inputs": ${getModelInputSnippet(model)}}).then((response) => {
 export const snippetTextGeneration = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: InferenceProvider,
+	provider: SnippetInferenceProvider,
 	opts?: {
 		streaming?: boolean;
 		messages?: ChatCompletionInputMessage[];
@@ -225,7 +225,7 @@ export const snippetZeroShotClassification = (model: ModelDataMinimal, accessTok
 export const snippetTextToImage = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: InferenceProvider
+	provider: SnippetInferenceProvider
 ): InferenceSnippet[] => {
 	return [
 		{
@@ -275,7 +275,7 @@ query({"inputs": ${getModelInputSnippet(model)}}).then((response) => {
 export const snippetTextToAudio = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: InferenceProvider
+	provider: SnippetInferenceProvider
 ): InferenceSnippet[] => {
 	if (provider !== "hf-inference") {
 		return [];
@@ -329,7 +329,7 @@ export const snippetTextToAudio = (
 export const snippetAutomaticSpeechRecognition = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: InferenceProvider
+	provider: SnippetInferenceProvider
 ): InferenceSnippet[] => {
 	return [
 		{
@@ -357,7 +357,7 @@ console.log(output);
 export const snippetFile = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: InferenceProvider
+	provider: SnippetInferenceProvider
 ): InferenceSnippet[] => {
 	if (provider !== "hf-inference") {
 		return [];
@@ -395,7 +395,7 @@ export const jsSnippets: Partial<
 		(
 			model: ModelDataMinimal,
 			accessToken: string,
-			provider: InferenceProvider,
+			provider: SnippetInferenceProvider,
 			opts?: Record<string, unknown>
 		) => InferenceSnippet[]
 	>
@@ -429,7 +429,7 @@ export const jsSnippets: Partial<
 export function getJsInferenceSnippet(
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: InferenceProvider,
+	provider: SnippetInferenceProvider,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
 	return model.pipeline_tag && model.pipeline_tag in jsSnippets
