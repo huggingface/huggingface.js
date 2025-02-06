@@ -1,7 +1,7 @@
 import { OpenAI } from "openai";
 
 const client = new OpenAI({
-	baseURL: "https://api-inference.huggingface.co/v1/",
+	baseURL: "https://router.huggingface.co/hf-inference",
 	apiKey: "api_token"
 });
 
@@ -24,7 +24,7 @@ const chatCompletion = await client.chat.completions.create({
 			]
 		}
 	],
-	max_tokens: 500
+	max_tokens: 500,
 });
 
 console.log(chatCompletion.choices[0].message);
