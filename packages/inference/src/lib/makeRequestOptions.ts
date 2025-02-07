@@ -3,6 +3,7 @@ import { FAL_AI_API_BASE_URL } from "../providers/fal-ai";
 import { REPLICATE_API_BASE_URL } from "../providers/replicate";
 import { SAMBANOVA_API_BASE_URL } from "../providers/sambanova";
 import { TOGETHER_API_BASE_URL } from "../providers/together";
+import { NOVITA_API_BASE_URL } from "../providers/novita";
 import type { InferenceProvider } from "../types";
 import type { InferenceTask, Options, RequestArgs } from "../types";
 import { isUrl } from "./isUrl";
@@ -205,6 +206,19 @@ function makeUrl(params: {
 					return `${baseUrl}/v1/chat/completions`;
 				}
 				return `${baseUrl}/v1/completions`;
+			}
+			return baseUrl;
+		}
+		case "novita": {
+			const baseUrl = shouldProxy
+				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
+				: NOVITA_API_BASE_URL;
+			/// Novita API matches OpenAI-like APIs: model is defined in the request body
+			if (params.taskHint === "text-generation") {
+				if (params.chatCompletion) {
+					return `${baseUrl}/chat/completions`;
+				}
+				return `${baseUrl}/completions`;
 			}
 			return baseUrl;
 		}

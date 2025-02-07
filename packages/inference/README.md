@@ -46,7 +46,12 @@ Your access token should be kept private. If you need to protect it in front-end
 
 You can send inference requests to third-party providers with the inference client.
 
-Currently, we support the following providers: [Fal.ai](https://fal.ai), [Replicate](https://replicate.com), [Together](https://together.xyz) and [Sambanova](https://sambanova.ai).
+Currently, we support the following providers:
+- [Fal.ai](https://fal.ai)
+- [Replicate](https://replicate.com)
+- [Sambanova](https://sambanova.ai)
+- [Together](https://together.xyz)
+- [Novita](https://novita.ai/?utm_source=github_huggingface&utm_medium=github_readme&utm_campaign=link)
 
 To send requests to a third-party provider, you have to pass the `provider` parameter to the inference function. Make sure your request is authenticated with an access token.
 ```ts
