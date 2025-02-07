@@ -1069,9 +1069,15 @@ describe.concurrent("HfInference", () => {
 		() => {
 			const client = new HfInference(env.HF_NEBIUS_KEY);
 
+			HARDCODED_MODEL_ID_MAPPING.nebius = {
+				"meta-llama/Llama-3.1-8B-Instruct": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+				"meta-llama/Llama-3.1-70B-Instruct": "meta-llama/Meta-Llama-3.1-70B-Instruct",
+				"black-forest-labs/FLUX.1-schnell": "black-forest-labs/flux-schnell",
+			};
+
 			it("chatCompletion", async () => {
 				const res = await client.chatCompletion({
-					model: "meta-llama/Meta-Llama-3.1-8B-Instruct",
+					model: "meta-llama/Llama-3.1-8B-Instruct",
 					provider: "nebius",
 					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
 				});
@@ -1083,7 +1089,7 @@ describe.concurrent("HfInference", () => {
 
 			it("chatCompletion stream", async () => {
 				const stream = client.chatCompletionStream({
-					model: "meta-llama/Meta-Llama-3.1-70B-Instruct",
+					model: "meta-llama/Llama-3.1-70B-Instruct",
 					provider: "nebius",
 					messages: [{ role: "user", content: "Complete the equation 1 + 1 = , just the answer" }],
 				}) as AsyncGenerator<ChatCompletionStreamOutput>;
@@ -1098,7 +1104,7 @@ describe.concurrent("HfInference", () => {
 
 			it("textToImage", async () => {
 				const res = await client.textToImage({
-					model: "black-forest-labs/flux-schnell",
+					model: "black-forest-labs/FLUX.1-schnell",
 					provider: "nebius",
 					inputs: "award winning high resolution photo of a giant tortoise",
 				});
