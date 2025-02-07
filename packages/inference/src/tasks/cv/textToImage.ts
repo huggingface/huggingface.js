@@ -21,11 +21,15 @@ interface OutputUrlImageGeneration {
  */
 export async function textToImage(args: TextToImageArgs, options?: Options): Promise<Blob> {
 	const payload =
-		args.provider === "together" || args.provider === "fal-ai" || args.provider === "replicate"
+		args.provider === "together" ||
+		args.provider === "fal-ai" ||
+		args.provider === "replicate" ||
+		args.provider === "nebius"
 			? {
 					...omit(args, ["inputs", "parameters"]),
 					...args.parameters,
 					...(args.provider !== "replicate" ? { response_format: "base64" } : undefined),
+					...(args.provider === "nebius" ? { response_format: "b64_json" } : undefined),
 					prompt: args.inputs,
 			  }
 			: args;

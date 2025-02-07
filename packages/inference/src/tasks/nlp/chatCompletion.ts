@@ -15,14 +15,17 @@ export async function chatCompletion(
 		taskHint: "text-generation",
 		chatCompletion: true,
 	});
+
 	const isValidOutput =
 		typeof res === "object" &&
 		Array.isArray(res?.choices) &&
 		typeof res?.created === "number" &&
 		typeof res?.id === "string" &&
 		typeof res?.model === "string" &&
-		/// Together.ai does not output a system_fingerprint
-		(res.system_fingerprint === undefined || typeof res.system_fingerprint === "string") &&
+		/// Together.ai and Nebius do not output a system_fingerprint
+		(res.system_fingerprint === undefined ||
+			res.system_fingerprint === null ||
+			typeof res.system_fingerprint === "string") &&
 		typeof res?.usage === "object";
 
 	if (!isValidOutput) {
