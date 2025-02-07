@@ -1067,7 +1067,7 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Nebius",
 		() => {
-			const client = new HfInference(env.NEBIUS_API_KEY);
+			const client = new HfInference(env.HF_NEBIUS_KEY);
 
 			it("chatCompletion", async () => {
 				const res = await client.chatCompletion({
