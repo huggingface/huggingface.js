@@ -6,6 +6,7 @@ import { chatCompletion, HfInference } from "../src";
 import { textToVideo } from "../src/tasks/cv/textToVideo";
 import { readTestFile } from "./test-files";
 import "./vcr";
+import { HARDCODED_MODEL_ID_MAPPING } from "../src/providers/consts";
 
 const TIMEOUT = 60000 * 3;
 const env = import.meta.env;
@@ -1121,4 +1122,51 @@ describe.concurrent("HfInference", () => {
 			);
 		});
 	});
+
+	describe.concurrent(
+		"Fireworks",
+		() => {
+			const client = new HfInference(env.HF_FIREWORKS_KEY);
+
+			HARDCODED_MODEL_ID_MAPPING["fireworks-ai"] = {
+				"deepseek-ai/DeepSeek-R1": "accounts/fireworks/models/deepseek-r1",
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "deepseek-ai/DeepSeek-R1",
+					provider: "fireworks-ai",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toContain("two");
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "deepseek-ai/DeepSeek-R1",
+					provider: "fireworks-ai",
+					messages: [{ role: "user", content: "Say this is a test" }],
+					stream: true,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+		},
+		TIMEOUT
+	);
 });

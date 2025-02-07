@@ -4,6 +4,7 @@ import { NEBIUS_API_BASE_URL } from "../providers/nebius";
 import { REPLICATE_API_BASE_URL } from "../providers/replicate";
 import { SAMBANOVA_API_BASE_URL } from "../providers/sambanova";
 import { TOGETHER_API_BASE_URL } from "../providers/together";
+import { FIREWORKS_AI_API_BASE_URL } from "../providers/fireworks-ai";
 import type { InferenceProvider } from "../types";
 import type { InferenceTask, Options, RequestArgs } from "../types";
 import { isUrl } from "./isUrl";
@@ -223,6 +224,15 @@ function makeUrl(params: {
 					return `${baseUrl}/v1/chat/completions`;
 				}
 				return `${baseUrl}/v1/completions`;
+			}
+			return baseUrl;
+		}
+		case "fireworks-ai": {
+			const baseUrl = shouldProxy
+				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
+				: FIREWORKS_AI_API_BASE_URL;
+			if (params.taskHint === "text-generation" && params.chatCompletion) {
+				return `${baseUrl}/v1/chat/completions`;
 			}
 			return baseUrl;
 		}

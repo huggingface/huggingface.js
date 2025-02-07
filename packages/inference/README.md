@@ -48,6 +48,7 @@ You can send inference requests to third-party providers with the inference clie
 
 Currently, we support the following providers:
 - [Fal.ai](https://fal.ai)
+- [Fireworks AI](https://fireworks.ai)
 - [Nebius](https://studio.nebius.ai)
 - [Replicate](https://replicate.com)
 - [Sambanova](https://sambanova.ai)
@@ -69,11 +70,12 @@ When authenticated with a Hugging Face access token, the request is routed throu
 When authenticated with a third-party provider key, the request is made directly against that provider's inference API.
 
 Only a subset of models are supported when requesting third-party providers. You can check the list of supported models per pipeline tasks here:
-- [Fal.ai supported models](./src/providers/fal-ai.ts)
-- [Nebius supported models](./src/providers/nebius.ts)
-- [Replicate supported models](./src/providers/replicate.ts)
-- [Sambanova supported models](./src/providers/sambanova.ts)
-- [Together supported models](./src/providers/together.ts)
+- [Fal.ai supported models](https://huggingface.co/api/partners/fal-ai/models)
+- [Fireworks AI supported models](https://huggingface.co/api/partners/fireworks-ai/models)
+- [Nebius supported models](https://huggingface.co/api/partners/nebius/models)
+- [Replicate supported models](https://huggingface.co/api/partners/replicate/models)
+- [Sambanova supported models](https://huggingface.co/api/partners/sambanova/models)
+- [Together supported models](https://huggingface.co/api/partners/together/models)
 - [HF Inference API (serverless)](https://huggingface.co/models?inference=warm&sort=trending)
 
 ❗**Important note:** To be compatible, the third-party API must adhere to the "standard" shape API we expect on HF model pages for each pipeline task type.
