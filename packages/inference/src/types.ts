@@ -51,6 +51,7 @@ export const INFERENCE_PROVIDERS = [
 	"replicate",
 	"sambanova",
 	"together",
+	"blackforestlabs-ai",
 ] as const;
 export type InferenceProvider = (typeof INFERENCE_PROVIDERS)[number];
 

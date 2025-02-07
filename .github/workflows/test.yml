@@ -46,6 +46,7 @@ jobs:
           HF_SAMBANOVA_KEY: dummy
           HF_TOGETHER_KEY: dummy
           HF_FIREWORKS_KEY: dummy
+          HF_BLACKFORESTLABS_KEY: dummy
 
   browser:
     runs-on: ubuntu-latest
@@ -87,6 +88,7 @@ jobs:
           HF_SAMBANOVA_KEY: dummy
           HF_TOGETHER_KEY: dummy
           HF_FIREWORKS_KEY: dummy
+          HF_BLACKFORESTLABS_KEY: dummy
 
   e2e:
     runs-on: ubuntu-latest
@@ -155,3 +157,4 @@ jobs:
           HF_SAMBANOVA_KEY: dummy
           HF_TOGETHER_KEY: dummy
           HF_FIREWORKS_KEY: dummy
+          HF_BLACKFORESTLABS_KEY: dummy
