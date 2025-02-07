@@ -47,7 +47,7 @@ export type InferenceTask = Exclude<PipelineType, "other">;
 export const INFERENCE_PROVIDERS = [
 	"fal-ai",
 	"fireworks-ai",
-  "nebius", 
+	"nebius",
 	"hf-inference",
 	"replicate",
 	"sambanova",

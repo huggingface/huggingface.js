@@ -144,8 +144,7 @@ export async function makeRequestOptions(
 			? args.data
 			: JSON.stringify({
 					...otherArgs,
-					...(chatCompletion || provider === "together" ? { model } : undefined),
-					...(provider === "nebius" ? { model } : {}),
+					...(chatCompletion || provider === "together" || provider === "nebius" ? { model } : undefined),
 			  }),
 		...(credentials ? { credentials } : undefined),
 		signal: options?.signal,
