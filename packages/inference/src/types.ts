@@ -44,7 +44,14 @@ export interface Options {
 
 export type InferenceTask = Exclude<PipelineType, "other">;
 
-export const INFERENCE_PROVIDERS = ["fal-ai", "replicate", "sambanova", "together", "hf-inference"] as const;
+export const INFERENCE_PROVIDERS = [
+	"fal-ai",
+	"fireworks-ai",
+	"hf-inference",
+	"replicate",
+	"sambanova",
+	"together",
+] as const;
 export type InferenceProvider = (typeof INFERENCE_PROVIDERS)[number];
 
 export interface BaseArgs {

@@ -30,8 +30,8 @@ export async function getProviderModelId(
 		options.taskHint === "text-generation" && options.chatCompletion ? "conversational" : options.taskHint;
 
 	// A dict called HARDCODED_MODEL_ID_MAPPING takes precedence in all cases (useful for dev purposes)
-	if (HARDCODED_MODEL_ID_MAPPING[params.model]) {
-		return HARDCODED_MODEL_ID_MAPPING[params.model];
+	if (HARDCODED_MODEL_ID_MAPPING[params.provider]?.[params.model]) {
+		return HARDCODED_MODEL_ID_MAPPING[params.provider][params.model];
 	}
 
 	let inferenceProviderMapping: InferenceProviderMapping | null;
