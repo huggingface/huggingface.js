@@ -19,6 +19,7 @@ export const HARDCODED_MODEL_ID_MAPPING: Record<InferenceProvider, Record<ModelI
 	"fal-ai": {},
 	"fireworks-ai": {},
 	"hf-inference": {},
+	nebius: {},
 	replicate: {},
 	sambanova: {},
 	together: {},

@@ -6920,5 +6920,78 @@
         "vary": "Accept-Encoding"
       }
     }
+  },
+  "90dc791157e9ec8ed109eaf07946d878e9208ed6eee79af8dd52a56ef7d40371": {
+    "url": "https://api.studio.nebius.ai/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Complete this sentence with words, one plus one is equal \"}],\"model\":\"meta-llama/Meta-Llama-3.1-8B-Instruct\"}"
+    },
+    "response": {
+      "body": "{\"id\":\"chatcmpl-89392f51529b4d1c82c3d58b210735c5\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"logprobs\":null,\"message\":{\"content\":\"Two\",\"refusal\":null,\"role\":\"assistant\",\"audio\":null,\"function_call\":null,\"tool_calls\":[]},\"stop_reason\":null}],\"created\":1738968734,\"model\":\"meta-llama/Meta-Llama-3.1-8B-Instruct\",\"object\":\"chat.completion\",\"service_tier\":null,\"system_fingerprint\":null,\"usage\":{\"completion_tokens\":2,\"prompt_tokens\":21,\"total_tokens\":23,\"completion_tokens_details\":null,\"prompt_tokens_details\":null},\"prompt_logprobs\":null}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "strict-transport-security": "max-age=15724800; includeSubDomains"
+      }
+    }
+  },
+  "2b75bf387ea5775a8172608df8a1bf7d652b1c5e10f0263e39456ec56e20eedf": {
+    "url": "https://api.studio.nebius.ai/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Complete the equation 1 + 1 = , just the answer\"}],\"stream\":true,\"model\":\"meta-llama/Meta-Llama-3.1-70B-Instruct\"}"
+    },
+    "response": {
+      "body": "data: {\"id\":\"chatcmpl-2ef2941399e74965a2705410b42b4a3f\",\"choices\":[{\"delta\":{\"content\":\"\",\"role\":\"assistant\"},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1738968734,\"model\":\"meta-llama/Meta-Llama-3.1-70B-Instruct\",\"object\":\"chat.completion.chunk\"}\n\ndata: {\"id\":\"chatcmpl-2ef2941399e74965a2705410b42b4a3f\",\"choices\":[{\"delta\":{\"content\":\"2\"},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1738968734,\"model\":\"meta-llama/Meta-Llama-3.1-70B-Instruct\",\"object\":\"chat.completion.chunk\"}\n\ndata: {\"id\":\"chatcmpl-2ef2941399e74965a2705410b42b4a3f\",\"choices\":[{\"delta\":{\"content\":\".\"},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1738968734,\"model\":\"meta-llama/Meta-Llama-3.1-70B-Instruct\",\"object\":\"chat.completion.chunk\"}\n\ndata: {\"id\":\"chatcmpl-2ef2941399e74965a2705410b42b4a3f\",\"choices\":[{\"delta\":{\"content\":\"\"},\"finish_reason\":\"stop\",\"index\":0,\"logprobs\":null,\"stop_reason\":null}],\"created\":1738968734,\"model\":\"meta-llama/Meta-Llama-3.1-70B-Instruct\",\"object\":\"chat.completion.chunk\"}\n\ndata: [DONE]\n\n",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "text/event-stream; charset=utf-8",
+        "strict-transport-security": "max-age=15724800; includeSubDomains",
+        "transfer-encoding": "chunked"
+      }
+    }
+  },
+  "b4345ef6e7eb30328b2bf84508cdfc172ecb697d8506c51cc7e447adc7323658": {
+    "url": "https://api.studio.nebius.ai/v1/images/generations",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"response_format\":\"b64_json\",\"prompt\":\"award winning high resolution photo of a giant tortoise\",\"model\":\"black-forest-labs/flux-schnell\"}"
+    },
+    "response": {
+      "body": "{\"data\":[{\"b64_json\":\"UklGRujgAQBXRUJQVlA4INzgAQAQegOdASoAAgACPhkIg0EhBgtzgAQAYSli6wABWWhZqn6p9Jvqf8h+z35S/JFxn1Heo/uH+X/4X+F/cz5b/+7/Ofkd2G9bf+n/PejR0Z/4v8l/r/26+YH+c/9H+m/2nwh/RH/d/y/79/QP+qv/G/un+g/b36Df8n9z/eR/dv+P+VPwW/rX+t/+X+y/4P//+Yj/tfub7uv8F/0/3K+An+1f77//f8TtPf309hD97/V6/8/7wf9P5YP7R/0P3K/7fyNf1L/R//b/Xf8H4AP//7fPMjwf+OH5r8lPM38Z+Yft39u/yf+W/t//2/2f2FfcX+P/ivDf6j/N/7n/J/5/2D/jv3C/Ff3b/Lf8X+9fu98l/6j/FfuT/jfUX8t/af8//i/8//x/8Z+7n2F/i38o/t39q/yv+j/uP7f/RB8j/tf8//qP/d/rfQt1r/D/6T/If4//j/v/9CPrj88/vv9w/yH+2/u/7n+3v/if5b/Qf+X3s/Uv8V/uf81+Rn2Bfyv+gf6D+7/5H/r/4n///+D7F/1H/U/1P+o/7nqWfav8z/1v87/q/2k+wH+Yf1L/Uf3z/L/+n/J////+/it/Mf8b/I/6H/xf5j///+j4s/nv9z/3H+K/zv/i/yv///9f6BfyD+d/4/+4/5H/n/4H///+P7pv+l+fPzu/Zf/ofnr9F/6r/7P86f3//9ifCC7lwK/mrcqzl7KswpK6fOxHeXWMQ66NvfdMdbfPjryRxBoK7Cl7y7JAFFu+4OPy3T0UhWdetGanczWNDZ6hP3af/YD7nH0cZyq5Rr2pdXTLcRWW0tONLzyK/1DKAvE1aKmARq2bjActrCWJBr1gAZAvPvwGN4dsjAz3pJhhhc2fNHYEWcUa+pJs9szFbKPCJXckqc+4Kf8bf84MsgozZo6FC7tto7W2DY7Nk6+pZzpRA+1qY81hRqJMTXVSduE+HlovvQL0CDxW2x2qSkGNulpY\"}],\"id\":\"text2img-b743e941-3756-4fb8-aeca-2883ab029516\"}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "strict-transport-security": "max-age=15724800; includeSubDomains"
+      }
+    }
+  },
+  "76e27a0a58b167b19f3a059ab499955365e64ca8b816440ec321764b0f14fd98": {
+    "url": "data:image/jpeg;base64,UklGRujgAQBXRUJQVlA4INzgAQAQegOdASoAAgACPhkIg0EhBgtzgAQAYSli6wABWWhZqn6p9Jvqf8h+z35S/JFxn1Heo/uH+X/4X+F/cz5b/+7/Ofkd2G9bf+n/PejR0Z/4v8l/r/26+YH+c/9H+m/2nwh/RH/d/y/79/QP+qv/G/un+g/b36Df8n9z/eR/dv+P+VPwW/rX+t/+X+y/4P//+Yj/tfub7uv8F/0/3K+An+1f77//f8TtPf309hD97/V6/8/7wf9P5YP7R/0P3K/7fyNf1L/R//b/Xf8H4AP//7fPMjwf+OH5r8lPM38Z+Yft39u/yf+W/t//2/2f2FfcX+P/ivDf6j/N/7n/J/5/2D/jv3C/Ff3b/Lf8X+9fu98l/6j/FfuT/jfUX8t/af8//i/8//x/8Z+7n2F/i38o/t39q/yv+j/uP7f/RB8j/tf8//qP/d/rfQt1r/D/6T/If4//j/v/9CPrj88/vv9w/yH+2/u/7n+3v/if5b/Qf+X3s/Uv8V/uf81+Rn2Bfyv+gf6D+7/5H/r/4n///+D7F/1H/U/1P+o/7nqWfav8z/1v87/q/2k+wH+Yf1L/Uf3z/L/+n/J////+/it/Mf8b/I/6H/xf5j///+j4s/nv9z/3H+K/zv/i/yv///9f6BfyD+d/4/+4/5H/n/4H///+P7pv+l+fPzu/Zf/ofnr9F/6r/7P86f3//9ifCC7lwK/mrcqzl7KswpK6fOxHeXWMQ66NvfdMdbfPjryRxBoK7Cl7y7JAFFu+4OPy3T0UhWdetGanczWNDZ6hP3af/YD7nH0cZyq5Rr2pdXTLcRWW0tONLzyK/1DKAvE1aKmARq2bjActrCWJBr1gAZAvPvwGN4dsjAz3pJhhhc2fNHYEWcUa+pJs9szFbKPCJXckqc+4Kf8bf84MsgozZo6FC7tto7W2DY7Nk6+pZzpRA+1qY81hRqJMTXVSduE+HlovvQL0CDxW2x2qSkGNulpY",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "content-type": "image/jpeg"
+      }
+    }
   }
 }
