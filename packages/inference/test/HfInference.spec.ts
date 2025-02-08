@@ -1131,6 +1131,10 @@ describe.concurrent("HfInference", () => {
 		() => {
 			const client = new HfInference(env.HF_NOVITA_KEY);
 
+			HARDCODED_MODEL_ID_MAPPING["novita"] = {
+				"meta-llama/llama-3.1-8b-instruct": "meta-llama/llama-3.1-8b-instruct",
+			};
+
 			it("chatCompletion", async () => {
 				const res = await client.chatCompletion({
 					model: "meta-llama/llama-3.1-8b-instruct",
