@@ -1,6 +1,6 @@
 import type { TextToImageInput, TextToImageOutput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
-import type { BaseArgs, Options } from "../../types";
+import type { BaseArgs, InferenceProvider, Options } from "../../types";
 import { omit } from "../../utils/omit";
 import { request } from "../custom/request";
 
@@ -15,28 +15,40 @@ interface OutputUrlImageGeneration {
 	output: string[];
 }
 
+function getResponseFormatArg(provider: InferenceProvider) {
+	switch (provider) {
+		case "fal-ai":
+			return { sync_mode: true };
+		case "nebius":
+			return { response_format: "b64_json" };
+		case "replicate":
+			return undefined;
+		case "together":
+			return { response_format: "base64" };
+		default:
+			return undefined;
+	}
+}
+
 /**
  * This task reads some text input and outputs an image.
  * Recommended model: stabilityai/stable-diffusion-2
  */
 export async function textToImage(args: TextToImageArgs, options?: Options): Promise<Blob> {
 	const payload =
-		args.provider === "together" ||
-		args.provider === "fal-ai" ||
-		args.provider === "replicate" ||
-		args.provider === "nebius"
-			? {
-					...omit(args, ["inputs", "parameters"]),
-					...args.parameters,
-					...(args.provider !== "replicate" ? { response_format: "base64" } : undefined),
-					...(args.provider === "nebius" ? { response_format: "b64_json" } : undefined),
-					prompt: args.inputs,
-			  }
-			: args;
+		!args.provider || args.provider === "hf-inference" || args.provider === "sambanova"
+			? args
+			: {
+				...omit(args, ["inputs", "parameters"]),
+				...args.parameters,
+				...getResponseFormatArg(args.provider),
+				prompt: args.inputs,
+			};
 	const res = await request<TextToImageOutput | Base64ImageGeneration | OutputUrlImageGeneration>(payload, {
 		...options,
 		taskHint: "text-to-image",
 	});
+
 	if (res && typeof res === "object") {
 		if (args.provider === "fal-ai" && "images" in res && Array.isArray(res.images) && res.images[0].url) {
 			const image = await fetch(res.images[0].url);
