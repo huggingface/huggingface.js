@@ -1,5 +1,5 @@
 import { omit } from "../src/utils/omit";
-import { HF_HUB_URL, HF_ROUTER_URL } from "../src/config";
+import { HF_HUB_URL } from "../src/config";
 import { isBackend } from "../src/utils/isBackend";
 import { isFrontend } from "../src/utils/isFrontend";
 
@@ -117,7 +117,7 @@ async function vcr(
 
 	const { default: tapes } = await import(TAPES_FILE);
 
-	const cacheCandidate = !url.startsWith(HF_HUB_URL) || url.startsWith(HF_ROUTER_URL);
+	const cacheCandidate = !url.startsWith(HF_HUB_URL) || url.startsWith(`${HF_HUB_URL}/api/inference-proxy/`);
 
 	if (VCR_MODE === MODE.PLAYBACK && cacheCandidate) {
 		if (!tapes[hash]) {

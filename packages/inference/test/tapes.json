@@ -1,6 +1,6 @@
 {
-  "223f3b06e5c671d42268c7f3d02dd810a28793d3865bc10615b50ce61ab5092b": {
-    "url": "https://router.huggingface.co/hf-inference/models/distilbert-base-uncased-finetuned-sst-2-english",
+  "8636fe9560a75039480e6e675f0439b52a13f3c274d9ea5e019b8070cc8a5608": {
+    "url": "https://api-inference.huggingface.co/models/distilbert-base-uncased-finetuned-sst-2-english",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -21,7 +21,7 @@
     }
   },
   "b0164e2ea675bb23b819db63fa15801017eb17722d5ed6662addf51b572cfd3f": {
-    "url": "https://router.huggingface.co/hf-inference/models/this-model-does-not-exist-123",
+    "url": "https://api-inference.huggingface.co/models/this-model-does-not-exist-123",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -42,7 +42,7 @@
     }
   },
   "9cb0ae5365e9a8c840dcdca26396206d709f11fe4f74c75a082f0967fc3228f7": {
-    "url": "https://router.huggingface.co/hf-inference/models/google/tapas-base-finetuned-wtq",
+    "url": "https://api-inference.huggingface.co/models/google/tapas-base-finetuned-wtq",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -63,7 +63,7 @@
     }
   },
   "de7a4c1e38920018ac0b8ae3991860b77424b75a3e6b1b1b478d5856238992aa": {
-    "url": "https://router.huggingface.co/hf-inference/models/gpt2",
+    "url": "https://api-inference.huggingface.co/models/gpt2",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -84,7 +84,7 @@
     }
   },
   "f0b8a1564bf8af1e9d1765b40eb2fef049762e07d3e0c5701c8f81004936a670": {
-    "url": "https://router.huggingface.co/hf-inference/models/google-bert/bert-base-uncased",
+    "url": "https://api-inference.huggingface.co/models/google-bert/bert-base-uncased",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -105,7 +105,7 @@
     }
   },
   "d3136476ceb8461d9305f2213dc36c33e1858728b3f53a8c722133aef3143748": {
-    "url": "https://router.huggingface.co/hf-inference/models/google/flan-t5-xxl",
+    "url": "https://api-inference.huggingface.co/models/google/flan-t5-xxl",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -126,7 +126,7 @@
     }
   },
   "9462a1568bcda88294ed747f0afccac28e53e5353b825da0072d4259efcd0e4a": {
-    "url": "https://router.huggingface.co/hf-inference/models/dbmdz/bert-large-cased-finetuned-conll03-english",
+    "url": "https://api-inference.huggingface.co/models/dbmdz/bert-large-cased-finetuned-conll03-english",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -147,7 +147,7 @@
     }
   },
   "53b3d8a7d76e3e3e35344d0a2347b3cf0f529abcc7125a1c3b4a8a017aa2c529": {
-    "url": "https://router.huggingface.co/hf-inference/models/deepset/roberta-base-squad2",
+    "url": "https://api-inference.huggingface.co/models/deepset/roberta-base-squad2",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -168,7 +168,7 @@
     }
   },
   "c3683605e73e918e150f425af328edc2f5e79c63e7d6bc64c6a3d3cde46f5432": {
-    "url": "https://router.huggingface.co/hf-inference/models/t5-base",
+    "url": "https://api-inference.huggingface.co/models/t5-base",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -189,7 +189,7 @@
     }
   },
   "2f189a5a254e5897d026c8dbc0bc9fe82fcc4b8edfa2ad558d4ae62f881bfb1b": {
-    "url": "https://router.huggingface.co/hf-inference/models/microsoft/DialoGPT-large",
+    "url": "https://api-inference.huggingface.co/models/microsoft/DialoGPT-large",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -210,7 +210,7 @@
     }
   },
   "01e7762dd21ffa84ebd55d43b6ba44cc80d592783c25c9bbc5fc2c38ee711968": {
-    "url": "https://router.huggingface.co/hf-inference/models/facebook/bart-large-mnli",
+    "url": "https://api-inference.huggingface.co/models/facebook/bart-large-mnli",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -230,8 +230,8 @@
       }
     }
   },
-  "6cba2a3c671c5b41b9a15cde8fdd8d39ad6328c0009fef2e1ffb34a9f8ca5fee": {
-    "url": "https://router.huggingface.co/hf-inference/models/sentence-transformers/paraphrase-xlm-r-multilingual-v1",
+  "6796ae2695c685c4811e2c9e8cff2d794f3813676e4779246e9670767da2e735": {
+    "url": "https://api-inference.huggingface.co/models/sentence-transformers/paraphrase-xlm-r-multilingual-v1",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -251,8 +251,8 @@
       }
     }
   },
-  "06fb436e5cb0f02e9152958681bc2a03746d65aa1b8cdd26286c590c857d7eb7": {
-    "url": "https://router.huggingface.co/hf-inference/models/google/vit-base-patch16-224",
+  "45d0b01267b465f464cb9e208b877ee1c7d9986fa4594e03b8b918dc04568d2c": {
+    "url": "https://api-inference.huggingface.co/models/google/vit-base-patch16-224",
     "init": {
       "headers": {},
       "method": "POST"
@@ -269,8 +269,8 @@
       }
     }
   },
-  "9fe84ea3771cccad43a2805df5b17c93b1c59476b44bd0c9ea2043efaf6dfb0a": {
-    "url": "https://router.huggingface.co/hf-inference/models/facebook/wav2vec2-large-960h-lv60-self",
+  "e4f68d60d76c3d45ce42d10399be7d13a7a1a9a7eea5cd0aed5212337864e862": {
+    "url": "https://api-inference.huggingface.co/models/facebook/wav2vec2-large-960h-lv60-self",
     "init": {
       "headers": {},
       "method": "POST"
@@ -287,8 +287,8 @@
       }
     }
   },
-  "2bd46ca62e5d94215cc786fcd8bf2b27697b7f8dc19ce1eeef4846c9fd136365": {
-    "url": "https://router.huggingface.co/hf-inference/models/superb/hubert-large-superb-er",
+  "741f4bc66664a45c59af4ca4251b0604c297cd8927ea66d7fa138d5f6799c61e": {
+    "url": "https://api-inference.huggingface.co/models/superb/hubert-large-superb-er",
     "init": {
       "headers": {},
       "method": "POST"
@@ -305,8 +305,8 @@
       }
     }
   },
-  "0c4b97c07f3d9af9a63b43e8892cb26e3875667f815781fa6347682b257dc690": {
-    "url": "https://router.huggingface.co/hf-inference/models/stabilityai/stable-diffusion-2",
+  "3b863bfae80be2a1b9b77479b51b87cfd2e185075b1743107249a4f1484f52b7": {
+    "url": "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -325,8 +325,8 @@
       }
     }
   },
-  "980370904c2337dcf0a6d2d46de54dda26050842048cd363cb8df7e3fd769cc1": {
-    "url": "https://router.huggingface.co/hf-inference/models/facebook/detr-resnet-50",
+  "a729f3dac6bea9d866bf4064cc7cb773d20646e685dbff6010b7470d2920d35d": {
+    "url": "https://api-inference.huggingface.co/models/facebook/detr-resnet-50",
     "init": {
       "headers": {},
       "method": "POST"
@@ -344,7 +344,7 @@
     }
   },
   "b209d4986f060b0cf1738f142434210f0050683f648895b66b5087f428b3415c": {
-    "url": "https://router.huggingface.co/hf-inference/models/facebook/bart-large-cnn",
+    "url": "https://api-inference.huggingface.co/models/facebook/bart-large-cnn",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -364,8 +364,8 @@
       }
     }
   },
-  "c85a76e02d604694ecb9f79354f9e8817d4294ac1824159c125b925a06b62c58": {
-    "url": "https://router.huggingface.co/hf-inference/models/facebook/detr-resnet-50-panoptic",
+  "53221439c8337814ef5345c16337b323f9e0b3a86e9d9636e8617606f8a9edf3": {
+    "url": "https://api-inference.huggingface.co/models/facebook/detr-resnet-50-panoptic",
     "init": {
       "headers": {},
       "method": "POST"
@@ -383,7 +383,7 @@
     }
   },
   "3694ddcced223eadefa057b24fdff06b3e19e6ff24bfd546513f5b70c056bea2": {
-    "url": "https://router.huggingface.co/hf-inference/models/google/flan-t5-xxl",
+    "url": "https://api-inference.huggingface.co/models/google/flan-t5-xxl",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -404,7 +404,7 @@
     }
   },
   "5d075f1b72a1944d61597a7bc7c3251c3d6b7f3b4deadce4fb6de54964bfeb74": {
-    "url": "https://router.huggingface.co/hf-inference/models/stabilityai/stable-diffusion-2",
+    "url": "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -424,7 +424,7 @@
     }
   },
   "9f9b1e0f1931cca2a77f4f39284fd1ca2e598b393d0c7ed36f05e66897cb762d": {
-    "url": "https://router.huggingface.co/hf-inference/models/stabilityai/stable-diffusion-2",
+    "url": "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -443,8 +443,8 @@
       }
     }
   },
-  "c67a299acb993959a747cb08491e496f9cd8cbf0b8bbbc064bce47e0cbb6ef67": {
-    "url": "https://router.huggingface.co/hf-inference/models/nlpconnect/vit-gpt2-image-captioning",
+  "789205591192088e182cb48dfef4b7a95c6c7193478b15236dee4733361b8dc1": {
+    "url": "https://api-inference.huggingface.co/models/nlpconnect/vit-gpt2-image-captioning",
     "init": {
       "headers": {},
       "method": "POST"
@@ -462,7 +462,7 @@
     }
   },
   "e64d5b8d2371f0706f29b4e27cac68b3f1e9fe3b10013a7f008ddbe005d7eb8f": {
-    "url": "https://router.huggingface.co/hf-inference/models/google/flan-t5-xxl",
+    "url": "https://api-inference.huggingface.co/models/google/flan-t5-xxl",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -483,7 +483,7 @@
     }
   },
   "7364916c1dcc1aaf643027e0c86abcf22e3b963dd5876fce23ffa7604465899e": {
-    "url": "https://router.huggingface.co/hf-inference/models/sentence-transformers/distilbert-base-nli-mean-tokens",
+    "url": "https://api-inference.huggingface.co/models/sentence-transformers/distilbert-base-nli-mean-tokens",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -503,8 +503,8 @@
       }
     }
   },
-  "d43005f18160b15aa47a6a0ef272dbcd8b2a09fad4d06582e5693dda1a8856e3": {
-    "url": "https://router.huggingface.co/hf-inference/models/stabilityai/stable-diffusion-2",
+  "3eb8944d3ab5f0a7dc5d4985eaa72c86e8e01c3c12840e1966780711a48c0ce6": {
+    "url": "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -525,7 +525,7 @@
     }
   },
   "448f6f45c1e702614bb012fa58f69b3094c0595d917de1e242ac39b9022668e1": {
-    "url": "https://router.huggingface.co/hf-inference/models/stabilityai/stable-diffusion-2",
+    "url": "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -546,7 +546,7 @@
     }
   },
   "c4745d72b1178be30244fda4673b4e4cbcefee29ad8f5f0f439acfdaeeeaaa01": {
-    "url": "https://router.huggingface.co/hf-inference/models/impira/layoutlm-document-qa",
+    "url": "https://api-inference.huggingface.co/models/impira/layoutlm-document-qa",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -565,8 +565,8 @@
       }
     }
   },
-  "983b472abeea34c2817f15d569c25c64ae122f2d929131e975d7fc5f972e9f4f": {
-    "url": "https://router.huggingface.co/hf-inference/models/dandelin/vilt-b32-finetuned-vqa",
+  "30b6ce7465d396930170cc734393bf189ed87249347543743995e8cc351406d9": {
+    "url": "https://api-inference.huggingface.co/models/dandelin/vilt-b32-finetuned-vqa",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -586,7 +586,7 @@
     }
   },
   "7cb3c977ef2fc3e8b8ac2c56796f635bb3f4cff839cef4d3d5b83a9c59ae642a": {
-    "url": "https://router.huggingface.co/hf-inference/models/naver-clova-ix/donut-base-finetuned-docvqa",
+    "url": "https://api-inference.huggingface.co/models/naver-clova-ix/donut-base-finetuned-docvqa",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -606,7 +606,7 @@
     }
   },
   "fedb289665ec1890b722566764b838adcb7516d1bd5b18c0d777b8ed21e16034": {
-    "url": "https://router.huggingface.co/hf-inference/models/espnet/kan-bayashi_ljspeech_vits",
+    "url": "https://api-inference.huggingface.co/models/espnet/kan-bayashi_ljspeech_vits",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -630,7 +630,7 @@
     }
   },
   "c858038f8450c4651519e2de6a475393c6919bd944727400c836ff70ae9a77c0": {
-    "url": "https://router.huggingface.co/hf-inference/models/scikit-learn/Fish-Weight",
+    "url": "https://api-inference.huggingface.co/models/scikit-learn/Fish-Weight",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -650,8 +650,8 @@
       }
     }
   },
-  "5cef5424ea4a0864e8376d6a9d9c385d21c089e66196f4ac89991adf375bbac1": {
-    "url": "https://router.huggingface.co/hf-inference/models/lllyasviel/sd-controlnet-canny",
+  "7b7c5e8c4271b8d18b231153b16949ffae6efe591e00caba3c1f28d994fb97bd": {
+    "url": "https://api-inference.huggingface.co/models/lllyasviel/sd-controlnet-canny",
     "init": {
       "headers": {},
       "method": "POST"
@@ -669,7 +669,7 @@
     }
   },
   "a7453227017f6bfb69905e66f6820293dbf88c2a56baa9be7f31b63ce9783c05": {
-    "url": "https://router.huggingface.co/hf-inference/models/lllyasviel/sd-controlnet-depth",
+    "url": "https://api-inference.huggingface.co/models/lllyasviel/sd-controlnet-depth",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -689,7 +689,7 @@
     }
   },
   "e2beb1bdc27df52519dbef36e6435e1d3b8001e62c9b511d706962314bd766d7": {
-    "url": "https://router.huggingface.co/hf-inference/models/facebook/bart-base",
+    "url": "https://api-inference.huggingface.co/models/facebook/bart-base",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -710,7 +710,7 @@
     }
   },
   "c6cc0728596096c42dd973d663209341763a3a47c2a03b99a817c39ff0c43bbe": {
-    "url": "https://router.huggingface.co/hf-inference/models/vvmnnnkv/wine-quality",
+    "url": "https://api-inference.huggingface.co/models/vvmnnnkv/wine-quality",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -731,7 +731,7 @@
     }
   },
   "5dfb672429f62697191179e5adc0834524425b203f791920564f1426c6b11f84": {
-    "url": "https://router.huggingface.co/hf-inference/models/facebook/bart-base",
+    "url": "https://api-inference.huggingface.co/models/facebook/bart-base",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -755,7 +755,7 @@
     }
   },
   "e9fc55386e8e5146072ba6967963ec8973ae0b0b566c769ec4056957d5a2416d": {
-    "url": "https://router.huggingface.co/hf-inference/models/OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5",
+    "url": "https://api-inference.huggingface.co/models/OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -778,8 +778,8 @@
       }
     }
   },
-  "dac893bf4697bca0f8ee6207d44d36b624d677d6e8f6a5e69c49e8fd0005b3c8": {
-    "url": "https://router.huggingface.co/hf-inference/models/speechbrain/sepformer-wham",
+  "e84857f5779f6e671ccba07255190b5b416ea2a1f2ff7186af97280ac7c71133": {
+    "url": "https://api-inference.huggingface.co/models/speechbrain/sepformer-wham",
     "init": {
       "headers": {},
       "method": "POST"
@@ -799,8 +799,8 @@
       }
     }
   },
-  "798d8955b065f735a410085726a1f0467aef25824fbf95e451844cd23cf428e9": {
-    "url": "https://router.huggingface.co/hf-inference/models/openai/clip-vit-large-patch14-336",
+  "bcf4dc29668a4b71e7eb0144f7886ef52e251d911740084557a85b952d0ec0cd": {
+    "url": "https://api-inference.huggingface.co/models/openai/clip-vit-large-patch14-336",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -880,8 +880,8 @@
       }
     }
   },
-  "4c045393fd665f83e9e89624aa718b90e3512566305a8825a2a6af0507547b6d": {
-    "url": "https://router.huggingface.co/hf-inference/pipeline/feature-extraction/sentence-transformers/paraphrase-xlm-r-multilingual-v1",
+  "48fb6da438c1ef813e41e8c2dfbea842f497e9d122cfa5f4d5603e89d6a5589b": {
+    "url": "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/paraphrase-xlm-r-multilingual-v1",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -901,8 +901,8 @@
       }
     }
   },
-  "0084272974d1d36f9a37ab4670f3459480946b6f61ff0560c4fd8800bc60559b": {
-    "url": "https://router.huggingface.co/hf-inference/models/facebook/bart-base",
+  "63f412fa3700827e5d9595f6efa30a9a9d37b32035dd39d7e74006db225e5227": {
+    "url": "https://api-inference.huggingface.co/models/facebook/bart-base",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -923,7 +923,7 @@
     }
   },
   "c9f0ebc2c17239e04cdc21cc0aced65924f490001d909dfc5cedc18ba82ea529": {
-    "url": "https://router.huggingface.co/hf-inference/models/distilbert-base-uncased",
+    "url": "https://api-inference.huggingface.co/models/distilbert-base-uncased",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -944,7 +944,7 @@
     }
   },
   "f7b0286fa03058c95425a91aa758f949ce7772fbe7bd52f2b777e636251a2b8e": {
-    "url": "https://router.huggingface.co/hf-inference/models/t5-base",
+    "url": "https://api-inference.huggingface.co/models/t5-base",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -964,8 +964,8 @@
       }
     }
   },
-  "ead272eb5ffd9ff2bd88efefc533e6f71b088c051c9d8b8df7262597f6ce7845": {
-    "url": "https://router.huggingface.co/hf-inference/models/deepset/roberta-base-squad2",
+  "13836a786554355b11650fc61a63731b61041df104df85c7acffdd5780835d09": {
+    "url": "https://api-inference.huggingface.co/models/deepset/roberta-base-squad2",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -985,8 +985,8 @@
       }
     }
   },
-  "d04d133cd31d944cffd14129c401ae02ac49861edc8396dcff6c7ea8ce32036a": {
-    "url": "https://router.huggingface.co/hf-inference/models/bert-base-uncased",
+  "7af3b25b6ab5433dd63aabbc16ead2a57ee2490763b8a27873b161d1bec910c3": {
+    "url": "https://api-inference.huggingface.co/models/bert-base-uncased",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1006,8 +1006,8 @@
       }
     }
   },
-  "52c5cac7ab8c3a4dc39428bd641d1c96023edb2b2eb67340f8a203a57fa0c1a9": {
-    "url": "https://router.huggingface.co/hf-inference/models/google/tapas-base-finetuned-wtq",
+  "99a4fcd7371b51433c5f1990839178e0a46389d96e97e215677ca74759bb7033": {
+    "url": "https://api-inference.huggingface.co/models/google/tapas-base-finetuned-wtq",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1028,7 +1028,7 @@
     }
   },
   "e966d5b7abdaff7fe7f0bbe8d9295d9ffa4c282adf27de61a118fafaeb526ece": {
-    "url": "https://router.huggingface.co/hf-inference/models/distilbert-base-uncased-finetuned-sst-2-english",
+    "url": "https://api-inference.huggingface.co/models/distilbert-base-uncased-finetuned-sst-2-english",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1048,8 +1048,8 @@
       }
     }
   },
-  "b9018e85072bc0f72b2618f0f1afaed2c822241c73f395e62cced41c379ce242": {
-    "url": "https://router.huggingface.co/hf-inference/models/gpt2",
+  "0203979ecfdf4513c7d2e8c64de31d8d8f7fc8b2ed72e009cda2ed5d23b9feb8": {
+    "url": "https://api-inference.huggingface.co/models/gpt2",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1070,7 +1070,7 @@
     }
   },
   "f6441d0fead06ec862cdb9acaeca8e6772ee0ae5bade51e778447923f34cbecc": {
-    "url": "https://router.huggingface.co/hf-inference/models/google/pegasus-xsum",
+    "url": "https://api-inference.huggingface.co/models/google/pegasus-xsum",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1091,7 +1091,7 @@
     }
   },
   "762306773c722983edb61e585013fc9b4eb5244a13cd0cbaaf3a0391ba7e5719": {
-    "url": "https://router.huggingface.co/hf-inference/models/distilbert-base-uncased",
+    "url": "https://api-inference.huggingface.co/models/distilbert-base-uncased",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1111,8 +1111,8 @@
       }
     }
   },
-  "8367c24a6967e1ddd789b718eb68b805a721e1723eb3113e38caced4fc4630b6": {
-    "url": "https://router.huggingface.co/hf-inference/models/dbmdz/bert-large-cased-finetuned-conll03-english",
+  "8b229e9df7a48202ec26dc0042204f341cda72b749c66fa9ec585bba62c0110a": {
+    "url": "https://api-inference.huggingface.co/models/dbmdz/bert-large-cased-finetuned-conll03-english",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1133,7 +1133,7 @@
     }
   },
   "7ac9612baee40d9d1b917bd9719b6f34e5cd3a6027544b8a682c91fc33fa6a6a": {
-    "url": "https://router.huggingface.co/hf-inference/models/facebook/bart-large-mnli",
+    "url": "https://api-inference.huggingface.co/models/facebook/bart-large-mnli",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1154,7 +1154,7 @@
     }
   },
   "cfb97942104eef0fc922dc2eac01ed376f32eb3a8417ed91c0e941a2a09231a3": {
-    "url": "https://router.huggingface.co/hf-inference/models/sentence-transformers/paraphrase-xlm-r-multilingual-v1",
+    "url": "https://api-inference.huggingface.co/models/sentence-transformers/paraphrase-xlm-r-multilingual-v1",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1174,8 +1174,8 @@
       }
     }
   },
-  "98875468f806b1a1795095b9730cdfbd18bb223135141c2ee517a730fd861007": {
-    "url": "https://router.huggingface.co/hf-inference/models/t5-base",
+  "806b2d5427da110008d5317cf6b6f3081a711b155219a35e5adc33ad5a02899b": {
+    "url": "https://api-inference.huggingface.co/models/t5-base",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1195,8 +1195,8 @@
       }
     }
   },
-  "6b9b2e94cb3ed723dfe7167680d25a779b53036f39f31954237c546ba5784a63": {
-    "url": "https://router.huggingface.co/hf-inference/models/t5-base",
+  "908fa80526a4157634721bbe995bf2561cd96428b43c227af3e85639e1a94f93": {
+    "url": "https://api-inference.huggingface.co/models/t5-base",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1217,7 +1217,7 @@
     }
   },
   "8e3a4c7387049775cca0a5151b60ba8a26e76a21d8fce87eebb2dd580e2397d6": {
-    "url": "https://router.huggingface.co/hf-inference/models/sentence-transformers/distilbert-base-nli-mean-tokens",
+    "url": "https://api-inference.huggingface.co/models/sentence-transformers/distilbert-base-nli-mean-tokens",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1238,7 +1238,7 @@
     }
   },
   "90c18a5f038be31703d86e2137ef1ad95cc69c71e6a313da37f1d5f8df79cc36": {
-    "url": "https://router.huggingface.co/hf-inference/pipeline/feature-extraction/sentence-transformers/paraphrase-xlm-r-multilingual-v1",
+    "url": "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/paraphrase-xlm-r-multilingual-v1",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1259,7 +1259,7 @@
     }
   },
   "049c9c43c10c787bfdf1607df19693d1fc89adbfb37959ca3db01fd9f1258550": {
-    "url": "https://router.huggingface.co/hf-inference/models/dandelin/vilt-b32-finetuned-vqa",
+    "url": "https://api-inference.huggingface.co/models/dandelin/vilt-b32-finetuned-vqa",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1279,7 +1279,7 @@
     }
   },
   "96767734eb46ce745e73321533be8384c4a67ff6d30682da24c4456bcbb6355c": {
-    "url": "https://router.huggingface.co/hf-inference/models/facebook/bart-base",
+    "url": "https://api-inference.huggingface.co/models/facebook/bart-base",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1300,7 +1300,7 @@
     }
   },
   "98fa35cb6523d19d3b853bbcad016f7ec5618903d24fdfcd9009507808e88971": {
-    "url": "https://router.huggingface.co/hf-inference/models/facebook/bart-base",
+    "url": "https://api-inference.huggingface.co/models/facebook/bart-base",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1320,8 +1320,8 @@
       }
     }
   },
-  "bbc9c0db6cf9a176249153f3c50757ac506671862cee2946709afd681c73f200": {
-    "url": "https://router.huggingface.co/hf-inference/models/espnet/kan-bayashi_ljspeech_vits",
+  "52b1c51e1f7afebc769713ab835d1a433359546acbb0d01f0013d6952b7b484e": {
+    "url": "https://api-inference.huggingface.co/models/espnet/kan-bayashi_ljspeech_vits",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1342,7 +1342,7 @@
     }
   },
   "bb2cc1439483efa5736aed7a23277c9895896e2df7a708af9d2c9f1e0476a00d": {
-    "url": "https://router.huggingface.co/hf-inference/models/stabilityai/stable-diffusion-2",
+    "url": "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1363,7 +1363,7 @@
     }
   },
   "88742b27b29905305c951e4d92c2634b7aaf496883f8593efcfb4bc46f0930ff": {
-    "url": "https://router.huggingface.co/hf-inference/models/stabilityai/stable-diffusion-2",
+    "url": "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1383,8 +1383,8 @@
       }
     }
   },
-  "5644ae129186cd9b5eee6d2e481bbf8110c0f294402700a1b57c3d88af8c5fa7": {
-    "url": "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
+  "5c11b0eb3026fd22b05e58e02bfbe368082273076863c3b40d275f137cc94a0a": {
+    "url": "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1405,7 +1405,7 @@
     }
   },
   "229374c7fe31894b88c001c0aa2e2bc3881a0e0e2a877bc9b52f83f5f20645c5": {
-    "url": "https://router.huggingface.co/hf-inference/models/lllyasviel/sd-controlnet-depth",
+    "url": "https://api-inference.huggingface.co/models/lllyasviel/sd-controlnet-depth",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1424,8 +1424,8 @@
       }
     }
   },
-  "e1218ba647f9fc29e3f8579d28b4718b127699a498b449a4ab4f7cab1187aa73": {
-    "url": "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
+  "40bb6c07679cfeed07a64ddc52eb73e495903273a11ed4ffcfc70f7c5a598210": {
+    "url": "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1446,7 +1446,7 @@
     }
   },
   "48f4b5138f13bd41a825611cc84d8440d241fe4182cf6672a36cddd6876130fa": {
-    "url": "https://router.huggingface.co/hf-inference/models/openai/clip-vit-large-patch14-336",
+    "url": "https://api-inference.huggingface.co/models/openai/clip-vit-large-patch14-336",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1465,8 +1465,8 @@
       }
     }
   },
-  "455be0eb4e66ff3cd5ead379d78db1fd6ed52dbc86344c2e6102702c974707bc": {
-    "url": "https://router.huggingface.co/hf-inference/models/impira/layoutlm-document-qa",
+  "25ef48521272dfc4ce08e17e358ba8a2784bd02b1d06581549b60c2596da9549": {
+    "url": "https://api-inference.huggingface.co/models/impira/layoutlm-document-qa",
     "init": {
       "headers": {
         "Content-Type": "application/json",
@@ -1489,17 +1489,17 @@
       }
     }
   },
-  "0f8ba3099ee73a5870b49a0ec3b8c07d3adb987e1a1ca751576cc0d3a6def86e": {
-    "url": "https://router.huggingface.co/hf-inference/models/this-model/does-not-exist-123",
+  "e9d288837214f44e5e385f96383391e964133f5c3703b276f934224d0773197e": {
+    "url": "https://api-inference.huggingface.co/models/this-model-does-not-exist-123",
     "init": {
       "headers": {
         "Content-Type": "application/json"
       },
       "method": "POST",
-      "body": "{\"model\":\"this-model/does-not-exist-123\",\"inputs\":\"[MASK] world!\"}"
+      "body": "{\"model\":\"this-model-does-not-exist-123\",\"inputs\":\"[MASK] world!\"}"
     },
     "response": {
-      "body": "{\"error\":\"Model this-model/does-not-exist-123 does not exist\"}",
+      "body": "{\"error\":\"Model this-model-does-not-exist-123 does not exist\"}",
       "status": 404,
       "statusText": "Not Found",
       "headers": {
@@ -1510,8 +1510,8 @@
       }
     }
   },
-  "e0155d48287fa7ee80be622757b2eeffd1a0492e8b7d757f62b4d9b15107eabb": {
-    "url": "https://router.huggingface.co/hf-inference/models/openai-community/gpt2",
+  "019076ba5053a777d40c12f9e9704f99252d5fb81923fde871f6114a9a4ef0c3": {
+    "url": "https://api-inference.huggingface.co/models/openai-community/gpt2",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1535,7 +1535,7 @@
     }
   },
   "646b00bf2fa0764b27263b302acc7e41d5ede0f899b9038a9fbf302091d1d1a6": {
-    "url": "https://router.huggingface.co/hf-inference/models/openai-community/gpt2",
+    "url": "https://api-inference.huggingface.co/models/openai-community/gpt2",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1555,8 +1555,8 @@
       }
     }
   },
-  "0c8c1538476ad850bb126bc90cf9260106c0a6718a1e83e2032a02a91e6df3fb": {
-    "url": "https://router.huggingface.co/hf-inference/models/openai-community/gpt2",
+  "3a538290d262572e91ccb1a335fa049e84699b4f72a71c0bc6c7bd823d3cfd2d": {
+    "url": "https://api-inference.huggingface.co/models/openai-community/gpt2",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1565,7 +1565,7 @@
       "body": "{\"model\":\"openai-community/gpt2\",\"inputs\":\"one plus two equals\"}"
     },
     "response": {
-      "body": "[{\"generated_text\":\"one plus two equals three and the fourth is called the \\\"discovery\\\" (see above).\\n\\nLet's call this Dividend.\\n\\nDividend is the same as:\\n\\ndividend(2)*divid\"}]",
+      "body": "[{\"generated_text\":\"one plus two equals four) and the fourth is called the \\\"discovery\\\" (see above).\\n\\nLet's call this Dividend.\\n\\nDividend is the same as:\\n\\ndividend(2)*divid\"}]",
       "status": 200,
       "statusText": "OK",
       "headers": {
@@ -1577,7 +1577,7 @@
     }
   },
   "2cc5a8d9d908313353f52ec6f46e58f19018131e44fc571542848170606d7bf5": {
-    "url": "https://router.huggingface.co/hf-inference/models/meta-llama/Llama-2-7b-hf",
+    "url": "https://api-inference.huggingface.co/models/meta-llama/Llama-2-7b-hf",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1601,7 +1601,7 @@
     }
   },
   "18af437e8c96b914c5570e1220915ab3b33713708d3959e9eb839b282d4c8538": {
-    "url": "https://router.huggingface.co/hf-inference/models/meta-llama/Llama-2-7b-hf",
+    "url": "https://api-inference.huggingface.co/models/meta-llama/Llama-2-7b-hf",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1682,7 +1682,7 @@
     }
   },
   "7d0e6c6136230080b08d437e7f4ae4d3f1525536f79d5eb2e46009d334bcc511": {
-    "url": "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
+    "url": "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1703,7 +1703,7 @@
     }
   },
   "916f0fc5de9eee4e863dafc1ac4bef51bf5122572d2f750a9f093e00f1218df3": {
-    "url": "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
+    "url": "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1724,7 +1724,7 @@
     }
   },
   "f47947550ea143dea6795c16f5ecc4f21ae69f8153bf09bbd6440efe679e48e8": {
-    "url": "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
+    "url": "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1745,7 +1745,7 @@
     }
   },
   "5192532a227d1b7fe18597c444f639257871ca43ef7de9017e555c218cb3ae9f": {
-    "url": "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
+    "url": "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1766,7 +1766,7 @@
     }
   },
   "3bc1c8fa82b66f19e765b705851e809ddd922e8be790fa71bdeb130813ec1d9b": {
-    "url": "https://router.huggingface.co/hf-inference/models/google/gemma-2b/v1/chat/completions",
+    "url": "https://api-inference.huggingface.co/models/google/gemma-2b/v1/chat/completions",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1789,7 +1789,7 @@
     }
   },
   "2e0134943b323aef66526c21e25d45857f62a28a9fbd5d96f4b909bb9dc06b19": {
-    "url": "https://router.huggingface.co/hf-inference/models/google/gemma-2b/v1/chat/completions",
+    "url": "https://api-inference.huggingface.co/models/google/gemma-2b/v1/chat/completions",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1812,7 +1812,7 @@
     }
   },
   "b8b84748ca5b3cbb020bafc0bbd892f01b5ae2a265f38db7993d63befa6c74d7": {
-    "url": "https://router.huggingface.co/hf-inference/models/HuggingFaceH4/zephyr-7b-beta/v1/chat/completions",
+    "url": "https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta/v1/chat/completions",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1834,8 +1834,8 @@
       }
     }
   },
-  "7b37a6972ce86f8adb674d9527b5f594aba9190d5e8d19586eadcdc525482397": {
-    "url": "https://router.huggingface.co/hf-inference/models/HuggingFaceH4/zephyr-7b-beta/v1/chat/completions",
+  "e8dd59a21327599691bdab476721ba40aa97b369605e43b080cbce091277abed": {
+    "url": "https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta/v1/chat/completions",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1858,7 +1858,7 @@
     }
   },
   "ea7f34cdc99ef4025e07440f1e04453511f23c21cc5934fa979952b339e19a02": {
-    "url": "https://router.huggingface.co/hf-inference/models/google/gemma-2b/v1/chat/completions",
+    "url": "https://api-inference.huggingface.co/models/google/gemma-2b/v1/chat/completions",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1881,7 +1881,7 @@
     }
   },
   "e3a5739aab13df14486aacdb890a350c33ff1abd4aaacf02f6d51e6d2e5608f3": {
-    "url": "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
+    "url": "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1902,7 +1902,7 @@
     }
   },
   "b2b10cdcc23802a5fcd225d619582e856c1b79bb38380ce7656c8de2b4a5f780": {
-    "url": "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
+    "url": "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1923,7 +1923,7 @@
     }
   },
   "df65224f37b4adeb6431f80680ae6f824ac146efa05f61101bdf698463dd00bd": {
-    "url": "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
+    "url": "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1944,7 +1944,7 @@
     }
   },
   "2ddc6776724c91bc03feca7e6007f784fa55e42c141e2f2530894f691ef16d0d": {
-    "url": "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
+    "url": "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1965,7 +1965,7 @@
     }
   },
   "dfe6f37476f25b3e66895258a10654456c072ee9eedc152bc0676a13ae336816": {
-    "url": "https://router.huggingface.co/hf-inference/models/google/gemma-2b/v1/chat/completions",
+    "url": "https://api-inference.huggingface.co/models/google/gemma-2b/v1/chat/completions",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -1988,7 +1988,7 @@
     }
   },
   "e433aa7d0cbb7a35881644a86b8a1b4736578875c758fc02a6588e24fa77f335": {
-    "url": "https://router.huggingface.co/hf-inference/models/google/gemma-2b/v1/chat/completions",
+    "url": "https://api-inference.huggingface.co/models/google/gemma-2b/v1/chat/completions",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -2011,7 +2011,7 @@
     }
   },
   "02fd98933cbfb1c01ed45a113b482f4c561c8d909c3b8b92ddc87d0ec1bdb96c": {
-    "url": "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
+    "url": "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -2035,7 +2035,7 @@
     }
   },
   "25a4a8c6b86f022f05a66083095cf579187d0560b612ab10bd6f7ca9f472054f": {
-    "url": "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
+    "url": "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -2058,7 +2058,7 @@
     }
   },
   "a032702acd76527b2786d6aa76bc59e4b19965d334987c70c6f442139590efad": {
-    "url": "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
+    "url": "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -2082,7 +2082,7 @@
     }
   },
   "08fa71a976c8e3992e638f98fd9db64b32a4d319eea7f1680e0380f384d31fd2": {
-    "url": "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
+    "url": "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -2407,7 +2407,7 @@
     }
   },
   "d79e1a71ebadb66a1a4c5d7603d09aae99d5fa9bb9593b87d2bc9de5a4f33fa6": {
-    "url": "https://router.huggingface.co/hf-inference/models/google-bert/bert-base-uncased",
+    "url": "https://api-inference.huggingface.co/models/google-bert/bert-base-uncased",
     "init": {
       "headers": {
         "Content-Type": "application/json",
@@ -2432,7 +2432,7 @@
     }
   },
   "c1f092dac90fd551c3178c80c6f15974f5522e012d077539e6fae1b7cbd94ff3": {
-    "url": "https://router.huggingface.co/hf-inference/models/openai-community/gpt2",
+    "url": "https://api-inference.huggingface.co/models/openai-community/gpt2",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -2631,7 +2631,7 @@
     }
   },
   "6599cf0a520ac64d0a81b78cc9a7850f76888e6534e95bffc8b5bf50e83959c4": {
-    "url": "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2",
+    "url": "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -2654,7 +2654,7 @@
     }
   },
   "3a539df7031359c639567b94ff3081b8d4aeca37aa3f52ca9756574cd1277d62": {
-    "url": "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2",
+    "url": "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -2971,7 +2971,7 @@
     }
   },
   "073012b67be4e435cb890b08e2aea650f11466153c2e2784bbaa0a7ef434d17c": {
-    "url": "https://router.huggingface.co/hf-inference/models/deepset/roberta-base-squad2",
+    "url": "https://api-inference.huggingface.co/models/deepset/roberta-base-squad2",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -2995,7 +2995,7 @@
     }
   },
   "3bc9049ff5424343814dcbf97e4155a50ea01ac98410158b0790ee0ae559ff73": {
-    "url": "https://router.huggingface.co/hf-inference/models/this-model-does-not-exist-123",
+    "url": "https://api-inference.huggingface.co/models/this-model-does-not-exist-123",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -3016,7 +3016,7 @@
     }
   },
   "a7e092c7a148bdc625f96ce4751364dcf17e096088a042daef963dc1025726f6": {
-    "url": "https://router.huggingface.co/hf-inference/models/google/tapas-base-finetuned-wtq",
+    "url": "https://api-inference.huggingface.co/models/google/tapas-base-finetuned-wtq",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -3037,7 +3037,7 @@
     }
   },
   "0e121562eb9da084dd14f5510543cbd1cf83ca4d4c89ae2bfaa89689956732fc": {
-    "url": "https://router.huggingface.co/hf-inference/models/distilbert-base-uncased-finetuned-sst-2-english",
+    "url": "https://api-inference.huggingface.co/models/distilbert-base-uncased-finetuned-sst-2-english",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -3061,7 +3061,7 @@
     }
   },
   "b2b179b754f22283f7ec6e446be4cecd1248b811af901c43ae850158039835d0": {
-    "url": "https://router.huggingface.co/hf-inference/models/impira/layoutlm-document-qa",
+    "url": "https://api-inference.huggingface.co/models/impira/layoutlm-document-qa",
     "init": {
       "headers": {
         "Content-Type": "application/json",
@@ -3085,7 +3085,7 @@
     }
   },
   "45ef0de3b4c3b8f41c2157ce834c8e321ad20d1a7d7243467da6eb974114b027": {
-    "url": "https://router.huggingface.co/hf-inference/models/dandelin/vilt-b32-finetuned-vqa",
+    "url": "https://api-inference.huggingface.co/models/dandelin/vilt-b32-finetuned-vqa",
     "init": {
       "headers": {
         "Content-Type": "application/json",
@@ -3109,7 +3109,7 @@
     }
   },
   "8d574ef8c2193c70d2142a4f19c7a1964feb54b9de3bc4abf0abfd97178b3df3": {
-    "url": "https://router.huggingface.co/hf-inference/models/bert-base-uncased",
+    "url": "https://api-inference.huggingface.co/models/bert-base-uncased",
     "init": {
       "headers": {
         "Content-Type": "application/json",
@@ -3133,8 +3133,8 @@
       }
     }
   },
-  "426762b2497f068d05c91e45c8681a425eeb210c2e5968a9c070528c812fb48d": {
-    "url": "https://router.huggingface.co/hf-inference/models/google/pegasus-xsum",
+  "2e5dd0fd4bd22bd586b53223f79a22c3634d8a80f85604487b8db4fc205e188c": {
+    "url": "https://api-inference.huggingface.co/models/google/pegasus-xsum",
     "init": {
       "headers": {
         "Content-Type": "application/json",
@@ -3159,7 +3159,7 @@
     }
   },
   "35bb2cb212c39fa2fdc677309a665120521d43a9a902c2c325376b1ad24de648": {
-    "url": "https://router.huggingface.co/hf-inference/models/dbmdz/bert-large-cased-finetuned-conll03-english",
+    "url": "https://api-inference.huggingface.co/models/dbmdz/bert-large-cased-finetuned-conll03-english",
     "init": {
       "headers": {
         "Content-Type": "application/json",
@@ -3184,7 +3184,7 @@
     }
   },
   "bbbd554022d3d20348dd193310aa30a4cdab17bd69ab37e8b8450dc107f59a5c": {
-    "url": "https://router.huggingface.co/hf-inference/models/gpt2",
+    "url": "https://api-inference.huggingface.co/models/gpt2",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -3207,7 +3207,7 @@
     }
   },
   "b51321318717885861f62e04f48301d90e87d79a871e7d34d7ea16115cd5f003": {
-    "url": "https://router.huggingface.co/hf-inference/models/openai-community/gpt2",
+    "url": "https://api-inference.huggingface.co/models/openai-community/gpt2",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -3228,7 +3228,7 @@
     }
   },
   "dfc16af91a1a6aea1b64e173cb7e8586d4565add75a3a41ed0bc18786649e866": {
-    "url": "https://router.huggingface.co/hf-inference/models/t5-base",
+    "url": "https://api-inference.huggingface.co/models/t5-base",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -3249,7 +3249,7 @@
     }
   },
   "e43a6386a7128ec008754c6bab1ee2b2acbcfdeafb5538dc755899940f5f03ed": {
-    "url": "https://router.huggingface.co/hf-inference/models/t5-base",
+    "url": "https://api-inference.huggingface.co/models/t5-base",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -3273,7 +3273,7 @@
     }
   },
   "bdcfff8edd96441568888be0790c685fea93096dd0dcf47f0153631d3300b1e5": {
-    "url": "https://router.huggingface.co/hf-inference/models/stabilityai/stable-diffusion-2",
+    "url": "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -3297,7 +3297,7 @@
     }
   },
   "159beb841eca39805a22c7d3f379514042310878acb24ba06f8983f7373511be": {
-    "url": "https://router.huggingface.co/hf-inference/models/stabilityai/stable-diffusion-2",
+    "url": "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -3622,7 +3622,7 @@
     }
   },
   "4f7b840f242c19c79c3e3b008f2abd1a52e20c09b73209a4f8480ec65b6ae04d": {
-    "url": "https://router.huggingface.co/hf-inference/models/sentence-transformers/paraphrase-xlm-r-multilingual-v1",
+    "url": "https://api-inference.huggingface.co/models/sentence-transformers/paraphrase-xlm-r-multilingual-v1",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -3642,8 +3642,8 @@
       }
     }
   },
-  "4ea9b77c2f9a8c30a0f32964373bec961ebfc9c9f73b33f43a1bbeb5c1b19d54": {
-    "url": "https://router.huggingface.co/hf-inference/models/facebook/bart-large-mnli",
+  "34cf117a2d5a49ece9fe4a2d41fbfa0badd0f4ced4943b397e6a6ff86552eee9": {
+    "url": "https://api-inference.huggingface.co/models/facebook/bart-large-mnli",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -3663,8 +3663,8 @@
       }
     }
   },
-  "fbd5471881388e2c65096457fe3dc9bd0b648612e4c04da621d3e407d415d747": {
-    "url": "https://router.huggingface.co/hf-inference/models/sentence-transformers/distilbert-base-nli-mean-tokens",
+  "5ef39319ab26c1dee32d633e5d991991120994c4f2d6d4d5d310a066c97fbed3": {
+    "url": "https://api-inference.huggingface.co/models/sentence-transformers/distilbert-base-nli-mean-tokens",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -3684,8 +3684,8 @@
       }
     }
   },
-  "dae2915a691fef72ce0f0c227998e06e822137206b01609ba17117982ed2b62f": {
-    "url": "https://router.huggingface.co/hf-inference/models/facebook/bart-base",
+  "bf395a15d67acd62eb2c27f8cca6c21220b450767bf971f1f119dd313eb2437a": {
+    "url": "https://api-inference.huggingface.co/models/facebook/bart-base",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -3709,7 +3709,7 @@
     }
   },
   "9d52f5ffa68cb3aeabcf42ab3a39c1d10545cb626a88cfed8a0c523d102bf0b1": {
-    "url": "https://router.huggingface.co/hf-inference/models/facebook/bart-base",
+    "url": "https://api-inference.huggingface.co/models/facebook/bart-base",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -3733,7 +3733,7 @@
     }
   },
   "b09342278dc9cc41bc508dcc18f68a03d2c8482141302e3ccb6d305c73360ba8": {
-    "url": "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
+    "url": "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -3756,7 +3756,7 @@
     }
   },
   "39c32cbc7b6b21a8a574ead49ebfe8a1243262ec22cb8aefcaa89e7b12cfdaae": {
-    "url": "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
+    "url": "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -3780,7 +3780,7 @@
     }
   },
   "a568a8ed7117e4e24e7bc5eb85f9b5b7106b5ffef144fa9334b9a7f36c4c1823": {
-    "url": "https://router.huggingface.co/hf-inference/models/google/gemma-2b/v1/chat/completions",
+    "url": "https://api-inference.huggingface.co/models/google/gemma-2b/v1/chat/completions",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -3803,7 +3803,7 @@
     }
   },
   "d2fc8d1d90f591db5d17f29eeaa08594d712df2a848abcb367fc0db2f6ea515f": {
-    "url": "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2",
+    "url": "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -3824,7 +3824,7 @@
     }
   },
   "b094997b7e86046df4e1d22dbbcb06a41e6493cc157d951183a53e22c289decd": {
-    "url": "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2",
+    "url": "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -3845,7 +3845,7 @@
     }
   },
   "3e0accb0526e839ae877c1a4ac1696da2ec49f8de191848a0b806950f2094f38": {
-    "url": "https://router.huggingface.co/hf-inference/models/espnet/kan-bayashi_ljspeech_vits",
+    "url": "https://api-inference.huggingface.co/models/espnet/kan-bayashi_ljspeech_vits",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -3920,7 +3920,7 @@
     }
   },
   "8aae8e61dedcdb5f36ca47e1127b7c8d323b774845eba17843c46a29801c182c": {
-    "url": "https://router.huggingface.co/hf-inference/models/openai/clip-vit-large-patch14-336",
+    "url": "https://api-inference.huggingface.co/models/openai/clip-vit-large-patch14-336",
     "init": {
       "headers": {
         "Content-Type": "application/json",
@@ -3944,7 +3944,7 @@
     }
   },
   "6e460f92b66625baf212a1c5775417e9479ed7b1ba33b080f9f67d10615dc2f5": {
-    "url": "https://router.huggingface.co/hf-inference/pipeline/feature-extraction/sentence-transformers/paraphrase-xlm-r-multilingual-v1",
+    "url": "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/paraphrase-xlm-r-multilingual-v1",
     "init": {
       "headers": {
         "Content-Type": "application/json",
@@ -4049,7 +4049,7 @@
     }
   },
   "dc0ac921bce9b1d04e7adb466bcc8e7dccc08c8030b9101df12bca1b5c54c0dc": {
-    "url": "https://router.huggingface.co/hf-inference/models/google/gemma-2b/v1/chat/completions",
+    "url": "https://api-inference.huggingface.co/models/google/gemma-2b/v1/chat/completions",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -4072,7 +4072,7 @@
     }
   },
   "bfba6072ef42808c80fe80369f44c06c3b04dc339318a591a5a7862d1e01d58e": {
-    "url": "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
+    "url": "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -4095,7 +4095,7 @@
     }
   },
   "6ef48e216c87fa84686678b42188c63a0ca9e85ced50e16a70a653b51c4b8c57": {
-    "url": "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
+    "url": "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -4118,7 +4118,7 @@
     }
   },
   "4304afb3c72615350cc66f87a5ab8ed5046ebccad33c3f1b9e22be19d2061a18": {
-    "url": "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
+    "url": "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -4171,8 +4171,8 @@
       }
     }
   },
-  "38ecb3cece3e724f6626bad0b7a4e5e55c52bde674eccb2f047fab9935c7d04b": {
-    "url": "https://router.huggingface.co/hf-inference/models/lllyasviel/sd-controlnet-depth",
+  "d8cd08fccaebe4f241895e20cbd06407089c701d0f2faa48cda37aaea9321255": {
+    "url": "https://api-inference.huggingface.co/models/lllyasviel/sd-controlnet-depth",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -4191,8 +4191,8 @@
       }
     }
   },
-  "34b6121b765297975b3367c462e1b28060dd4523e6618b0064e5b6204139d5fa": {
-    "url": "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
+  "b3ff8e2aae41049583fdf49230710cb45eccab7ee3f38f490391bfc415555156": {
+    "url": "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -4242,8 +4242,8 @@
       }
     }
   },
-  "55d57dc676cb80319c017fd011b4a6c269ee947188b7229460a0301f11c2f9cb": {
-    "url": "https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.2-3B",
+  "0c2f29860e5efd5135180215fdd5da54aaa7b77d73d30ac2849914b9e2a1345d": {
+    "url": "https://api-inference.huggingface.co/models/meta-llama/Llama-3.2-3B",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -4263,8 +4263,8 @@
       }
     }
   },
-  "5a02b89bab2c6e0f50e41071cd62125a61d06c8b401f7ec110162a7c0e065595": {
-    "url": "https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.2-3B",
+  "367892fc6a75780030736e287eadae212049f0ccf758b2d313ab3ef160f5cc7b": {
+    "url": "https://api-inference.huggingface.co/models/meta-llama/Llama-3.2-3B",
     "init": {
       "headers": {
         "Content-Type": "application/json"
@@ -5232,7 +5232,7 @@
     }
   },
   "6cce6c346a50f52438b1c3b401b2db9f8ba3a39ebebf19bf94750bddf6f7c894": {
-    "url": "https://router.huggingface.co/hf-inference/models/sentence-transformers/paraphrase-xlm-r-multilingual-v1",
+    "url": "https://api-inference.huggingface.co/models/sentence-transformers/paraphrase-xlm-r-multilingual-v1",
     "init": {
       "headers": {
         "Content-Type": "application/json",

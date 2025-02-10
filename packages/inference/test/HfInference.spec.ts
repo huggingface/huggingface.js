@@ -22,14 +22,13 @@ describe.concurrent("HfInference", () => {
 		"HF Inference",
 		() => {
 			const hf = new HfInference(env.HF_TOKEN);
-
 			it("throws error if model does not exist", () => {
 				expect(
 					hf.fillMask({
-						model: "this-model/does-not-exist-123",
+						model: "this-model-does-not-exist-123",
 						inputs: "[MASK] world!",
 					})
-				).rejects.toThrowError("Model this-model/does-not-exist-123 does not exist");
+				).rejects.toThrowError("Not Found: Model not found");
 			});
 
 			it("fillMask", async () => {
@@ -649,7 +648,7 @@ describe.concurrent("HfInference", () => {
 			});
 
 			it("endpoint - makes request to specified endpoint", async () => {
-				const ep = hf.endpoint("https://router.huggingface.co/hf-inference/models/openai-community/gpt2");
+				const ep = hf.endpoint("https://api-inference.huggingface.co/models/openai-community/gpt2");
 				const { generated_text } = await ep.textGeneration({
 					inputs: "one plus two equals",
 				});
@@ -687,7 +686,7 @@ describe.concurrent("HfInference", () => {
 				expect(out).toContain("2");
 			});
 
-			it.skip("chatCompletionStream modelId Fail - OpenAI Specs", async () => {
+			it("chatCompletionStream modelId Fail - OpenAI Specs", async () => {
 				expect(
 					hf
 						.chatCompletionStream({
@@ -704,7 +703,7 @@ describe.concurrent("HfInference", () => {
 			});
 
 			it("chatCompletion - OpenAI Specs", async () => {
-				const ep = hf.endpoint("https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2");
+				const ep = hf.endpoint("https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2");
 				const res = await ep.chatCompletion({
 					model: "tgi",
 					messages: [{ role: "user", content: "Complete the this sentence with words one plus one is equal " }],
@@ -718,7 +717,7 @@ describe.concurrent("HfInference", () => {
 				}
 			});
 			it("chatCompletionStream - OpenAI Specs", async () => {
-				const ep = hf.endpoint("https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2");
+				const ep = hf.endpoint("https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2");
 				const stream = ep.chatCompletionStream({
 					model: "tgi",
 					messages: [{ role: "user", content: "Complete the equation 1+1= ,just the answer" }],
