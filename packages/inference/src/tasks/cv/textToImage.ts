@@ -15,7 +15,7 @@ interface OutputUrlImageGeneration {
 	output: string[];
 }
 
-async function getResponseFormatArg(provider: InferenceProvider) {
+function getResponseFormatArg(provider: InferenceProvider) {
 	switch (provider) {
 		case "fal-ai":
 			return { sync_mode: true };
@@ -39,11 +39,11 @@ export async function textToImage(args: TextToImageArgs, options?: Options): Pro
 		!args.provider || args.provider === "hf-inference" || args.provider === "sambanova"
 			? args
 			: {
-					...omit(args, ["inputs", "parameters"]),
-					...args.parameters,
-					...(await getResponseFormatArg(args.provider)),
-					prompt: args.inputs,
-			  };
+				...omit(args, ["inputs", "parameters"]),
+				...args.parameters,
+				...getResponseFormatArg(args.provider),
+				prompt: args.inputs,
+			};
 	const res = await request<TextToImageOutput | Base64ImageGeneration | OutputUrlImageGeneration>(payload, {
 		...options,
 		taskHint: "text-to-image",
