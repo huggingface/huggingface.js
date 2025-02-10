@@ -39,8 +39,7 @@ export async function makeRequestOptions(
 	let otherArgs = remainingArgs;
 	const provider = maybeProvider ?? "hf-inference";
 
-	const { forceTask, includeCredentials, taskHint, wait_for_model, use_cache, dont_load_model, chatCompletion } =
-		options ?? {};
+	const { forceTask, includeCredentials, taskHint, chatCompletion } = options ?? {};
 
 	if (endpointUrl && provider !== "hf-inference") {
 		throw new Error(`Cannot use endpointUrl with a third-party provider.`);
@@ -100,18 +99,6 @@ export async function makeRequestOptions(
 
 	if (!binary) {
 		headers["Content-Type"] = "application/json";
-	}
-
-	if (provider === "hf-inference") {
-		if (wait_for_model) {
-			headers["X-Wait-For-Model"] = "true";
-		}
-		if (use_cache === false) {
-			headers["X-Use-Cache"] = "false";
-		}
-		if (dont_load_model) {
-			headers["X-Load-Model"] = "0";
-		}
 	}
 
 	if (provider === "replicate") {
