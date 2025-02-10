@@ -24,11 +24,10 @@ async function getResponseFormatArg(provider: InferenceProvider) {
 		case "replicate":
 			return undefined;
 		case "together":
-			return { response_format: "base64" }
+			return { response_format: "base64" };
 		default:
-			return undefined
+			return undefined;
 	}
-
 }
 
 /**
@@ -37,16 +36,14 @@ async function getResponseFormatArg(provider: InferenceProvider) {
  */
 export async function textToImage(args: TextToImageArgs, options?: Options): Promise<Blob> {
 	const payload =
-		!args.provider ||
-			args.provider === "hf-inference" ||
-			args.provider === "sambanova"
+		!args.provider || args.provider === "hf-inference" || args.provider === "sambanova"
 			? args
 			: {
-				...omit(args, ["inputs", "parameters"]),
-				...args.parameters,
-				...(await getResponseFormatArg(args.provider)),
-				prompt: args.inputs,
-			};
+					...omit(args, ["inputs", "parameters"]),
+					...args.parameters,
+					...(await getResponseFormatArg(args.provider)),
+					prompt: args.inputs,
+			  };
 	const res = await request<TextToImageOutput | Base64ImageGeneration | OutputUrlImageGeneration>(payload, {
 		...options,
 		taskHint: "text-to-image",
