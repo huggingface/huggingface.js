@@ -1,7 +1,7 @@
 from openai import OpenAI
 
 client = OpenAI(
-	base_url="https://api-inference.huggingface.co/v1/",
+	base_url="https://router.huggingface.co/hf-inference/v1",
 	api_key="api_token"
 )
 

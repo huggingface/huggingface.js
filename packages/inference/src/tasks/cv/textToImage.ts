@@ -1,6 +1,6 @@
 import type { TextToImageInput, TextToImageOutput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
-import type { BaseArgs, Options } from "../../types";
+import type { BaseArgs, InferenceProvider, Options } from "../../types";
 import { omit } from "../../utils/omit";
 import { request } from "../custom/request";
 
@@ -15,13 +15,20 @@ interface OutputUrlImageGeneration {
 	output: string[];
 }
 
-async function getResponseFormatArg(provider: string) {
-	if (provider == "replicate") {
-		return undefined;
-	} else if (provider === "fal-ai") {
-		return { sync_mode: true };
+async function getResponseFormatArg(provider: InferenceProvider) {
+	switch (provider) {
+		case "fal-ai":
+			return { sync_mode: true };
+		case "nebius":
+			return { response_format: "b64_json" };
+		case "replicate":
+			return undefined;
+		case "together":
+			return { response_format: "base64" }
+		default:
+			return undefined
 	}
-	return { response_format: "base64" };
+
 }
 
 /**
@@ -30,14 +37,16 @@ async function getResponseFormatArg(provider: string) {
  */
 export async function textToImage(args: TextToImageArgs, options?: Options): Promise<Blob> {
 	const payload =
-		args.provider === "together" || args.provider === "fal-ai" || args.provider === "replicate"
-			? {
-					...omit(args, ["inputs", "parameters"]),
-					...args.parameters,
-					...(await getResponseFormatArg(args.provider)),
-					prompt: args.inputs,
-			  }
-			: args;
+		!args.provider ||
+			args.provider === "hf-inference" ||
+			args.provider === "sambanova"
+			? args
+			: {
+				...omit(args, ["inputs", "parameters"]),
+				...args.parameters,
+				...(await getResponseFormatArg(args.provider)),
+				prompt: args.inputs,
+			};
 	const res = await request<TextToImageOutput | Base64ImageGeneration | OutputUrlImageGeneration>(payload, {
 		...options,
 		taskHint: "text-to-image",

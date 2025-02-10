@@ -1,4 +1,4 @@
-import { HF_HUB_INFERENCE_PROXY_TEMPLATE, type InferenceProvider } from "../inference-providers.js";
+import { HF_HUB_INFERENCE_PROXY_TEMPLATE, type SnippetInferenceProvider } from "../inference-providers.js";
 import type { PipelineType } from "../pipelines.js";
 import type { ChatCompletionInputMessage, GenerationParameters } from "../tasks/index.js";
 import { stringifyGenerationConfig, stringifyMessages } from "./common.js";
@@ -8,7 +8,7 @@ import type { InferenceSnippet, ModelDataMinimal } from "./types.js";
 export const snippetBasic = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: InferenceProvider
+	provider: SnippetInferenceProvider
 ): InferenceSnippet[] => {
 	if (provider !== "hf-inference") {
 		return [];
@@ -17,7 +17,7 @@ export const snippetBasic = (
 		{
 			client: "curl",
 			content: `\
-curl https://api-inference.huggingface.co/models/${model.id} \\
+curl https://router.huggingface.co/hf-inference/models/${model.id} \\
 	-X POST \\
 	-d '{"inputs": ${getModelInputSnippet(model, true)}}' \\
 	-H 'Content-Type: application/json' \\
@@ -29,7 +29,7 @@ curl https://api-inference.huggingface.co/models/${model.id} \\
 export const snippetTextGeneration = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: InferenceProvider,
+	provider: SnippetInferenceProvider,
 	opts?: {
 		streaming?: boolean;
 		messages?: ChatCompletionInputMessage[];
@@ -41,7 +41,7 @@ export const snippetTextGeneration = (
 	if (model.tags.includes("conversational")) {
 		const baseUrl =
 			provider === "hf-inference"
-				? `https://api-inference.huggingface.co/models/${model.id}/v1/chat/completions`
+				? `https://router.huggingface.co/hf-inference/models/${model.id}/v1/chat/completions`
 				: HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", provider) + "/v1/chat/completions";
 
 		// Conversational model detected, so we display a code snippet that features the Messages API
@@ -63,15 +63,15 @@ export const snippetTextGeneration = (
 --data '{
     "model": "${model.id}",
     "messages": ${stringifyMessages(messages, {
-			indent: "\t",
-			attributeKeyQuotes: true,
-			customContentEscaper: (str) => str.replace(/'/g, "'\\''"),
-		})},
+					indent: "\t",
+					attributeKeyQuotes: true,
+					customContentEscaper: (str) => str.replace(/'/g, "'\\''"),
+				})},
     ${stringifyGenerationConfig(config, {
-			indent: "\n    ",
-			attributeKeyQuotes: true,
-			attributeValueConnector: ": ",
-		})},
+					indent: "\n    ",
+					attributeKeyQuotes: true,
+					attributeValueConnector: ": ",
+				})}
     "stream": ${!!streaming}
 }'`,
 			},
@@ -84,7 +84,7 @@ export const snippetTextGeneration = (
 export const snippetZeroShotClassification = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: InferenceProvider
+	provider: SnippetInferenceProvider
 ): InferenceSnippet[] => {
 	if (provider !== "hf-inference") {
 		return [];
@@ -92,7 +92,7 @@ export const snippetZeroShotClassification = (
 	return [
 		{
 			client: "curl",
-			content: `curl https://api-inference.huggingface.co/models/${model.id} \\
+			content: `curl https://router.huggingface.co/hf-inference/models/${model.id} \\
 	-X POST \\
 	-d '{"inputs": ${getModelInputSnippet(model, true)}, "parameters": {"candidate_labels": ["refund", "legal", "faq"]}}' \\
 	-H 'Content-Type: application/json' \\
@@ -104,7 +104,7 @@ export const snippetZeroShotClassification = (
 export const snippetFile = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: InferenceProvider
+	provider: SnippetInferenceProvider
 ): InferenceSnippet[] => {
 	if (provider !== "hf-inference") {
 		return [];
@@ -112,7 +112,7 @@ export const snippetFile = (
 	return [
 		{
 			client: "curl",
-			content: `curl https://api-inference.huggingface.co/models/${model.id} \\
+			content: `curl https://router.huggingface.co/hf-inference/models/${model.id} \\
 	-X POST \\
 	--data-binary '@${getModelInputSnippet(model, true, true)}' \\
 	-H 'Authorization: Bearer ${accessToken || `{API_TOKEN}`}'`,
@@ -126,7 +126,7 @@ export const curlSnippets: Partial<
 		(
 			model: ModelDataMinimal,
 			accessToken: string,
-			provider: InferenceProvider,
+			provider: SnippetInferenceProvider,
 			opts?: Record<string, unknown>
 		) => InferenceSnippet[]
 	>
@@ -160,7 +160,7 @@ export const curlSnippets: Partial<
 export function getCurlInferenceSnippet(
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: InferenceProvider,
+	provider: SnippetInferenceProvider,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
 	return model.pipeline_tag && model.pipeline_tag in curlSnippets

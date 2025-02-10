@@ -20,7 +20,7 @@
 						"type": "string",
 						"description": "A chunk of text identified by the model"
 					},
-					"timestamps": {
+					"timestamp": {
 						"type": "array",
 						"description": "The start and end timestamps corresponding with the text",
 						"items": {
@@ -30,7 +30,7 @@
 						"maxLength": 2
 					}
 				},
-				"required": ["text", "timestamps"]
+				"required": ["text", "timestamp"]
 			}
 		}
 	},

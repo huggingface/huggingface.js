@@ -1,5 +1,4 @@
-import type { PipelineType } from "@huggingface/tasks";
-import type { ChatCompletionInput } from "@huggingface/tasks";
+import type { ChatCompletionInput, PipelineType } from "@huggingface/tasks";
 
 /**
  * HF model id, like "meta-llama/Llama-3.3-70B-Instruct"
@@ -45,7 +44,15 @@ export interface Options {
 
 export type InferenceTask = Exclude<PipelineType, "other">;
 
-export const INFERENCE_PROVIDERS = ["fal-ai", "replicate", "sambanova", "together", "hf-inference"] as const;
+export const INFERENCE_PROVIDERS = [
+	"fal-ai",
+	"fireworks-ai",
+	"nebius",
+	"hf-inference",
+	"replicate",
+	"sambanova",
+	"together",
+] as const;
 export type InferenceProvider = (typeof INFERENCE_PROVIDERS)[number];
 
 export interface BaseArgs {
@@ -88,6 +95,7 @@ export type RequestArgs = BaseArgs &
 		| { data: Blob | ArrayBuffer }
 		| { inputs: unknown }
 		| { prompt: string }
+		| { text: string }
 		| { audio_url: string }
 		| ChatCompletionInput
 	) & {

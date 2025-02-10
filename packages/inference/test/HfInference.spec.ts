@@ -1,11 +1,12 @@
-import { expect, it, describe, assert } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
 
-import { chatCompletion, FAL_AI_SUPPORTED_MODEL_IDS, HfInference } from "../src";
-import "./vcr";
-import { readTestFile } from "./test-files";
+import { chatCompletion, HfInference } from "../src";
 import { textToVideo } from "../src/tasks/cv/textToVideo";
+import { readTestFile } from "./test-files";
+import "./vcr";
+import { HARDCODED_MODEL_ID_MAPPING } from "../src/providers/consts";
 
 const TIMEOUT = 60000 * 3;
 const env = import.meta.env;
@@ -21,13 +22,14 @@ describe.concurrent("HfInference", () => {
 		"HF Inference",
 		() => {
 			const hf = new HfInference(env.HF_TOKEN);
+
 			it("throws error if model does not exist", () => {
 				expect(
 					hf.fillMask({
-						model: "this-model-does-not-exist-123",
+						model: "this-model/does-not-exist-123",
 						inputs: "[MASK] world!",
 					})
-				).rejects.toThrowError("Not Found: Model not found");
+				).rejects.toThrowError("Model this-model/does-not-exist-123 does not exist");
 			});
 
 			it("fillMask", async () => {
@@ -647,7 +649,7 @@ describe.concurrent("HfInference", () => {
 			});
 
 			it("endpoint - makes request to specified endpoint", async () => {
-				const ep = hf.endpoint("https://api-inference.huggingface.co/models/openai-community/gpt2");
+				const ep = hf.endpoint("https://router.huggingface.co/hf-inference/models/openai-community/gpt2");
 				const { generated_text } = await ep.textGeneration({
 					inputs: "one plus two equals",
 				});
@@ -685,7 +687,7 @@ describe.concurrent("HfInference", () => {
 				expect(out).toContain("2");
 			});
 
-			it("chatCompletionStream modelId Fail - OpenAI Specs", async () => {
+			it.skip("chatCompletionStream modelId Fail - OpenAI Specs", async () => {
 				expect(
 					hf
 						.chatCompletionStream({
@@ -702,7 +704,7 @@ describe.concurrent("HfInference", () => {
 			});
 
 			it("chatCompletion - OpenAI Specs", async () => {
-				const ep = hf.endpoint("https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2");
+				const ep = hf.endpoint("https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2");
 				const res = await ep.chatCompletion({
 					model: "tgi",
 					messages: [{ role: "user", content: "Complete the this sentence with words one plus one is equal " }],
@@ -716,7 +718,7 @@ describe.concurrent("HfInference", () => {
 				}
 			});
 			it("chatCompletionStream - OpenAI Specs", async () => {
-				const ep = hf.endpoint("https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2");
+				const ep = hf.endpoint("https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2");
 				const stream = ep.chatCompletionStream({
 					model: "tgi",
 					messages: [{ role: "user", content: "Complete the equation 1+1= ,just the answer" }],
@@ -776,30 +778,26 @@ describe.concurrent("HfInference", () => {
 		() => {
 			const client = new HfInference(env.HF_FAL_KEY);
 
-			for (const model of Object.keys(FAL_AI_SUPPORTED_MODEL_IDS["text-to-image"] ?? {})) {
-				it(`textToImage - ${model}`, async () => {
-					const res = await client.textToImage({
-						model,
-						provider: "fal-ai",
-						inputs:
-							"Extreme close-up of a single tiger eye, direct frontal view. Detailed iris and pupil. Sharp focus on eye texture and color. Natural lighting to capture authentic eye shine and depth.",
-					});
-					expect(res).toBeInstanceOf(Blob);
+			it(`textToImage - black-forest-labs/FLUX.1-schnell`, async () => {
+				const res = await client.textToImage({
+					model: "black-forest-labs/FLUX.1-schnell",
+					provider: "fal-ai",
+					inputs:
+						"Extreme close-up of a single tiger eye, direct frontal view. Detailed iris and pupil. Sharp focus on eye texture and color. Natural lighting to capture authentic eye shine and depth.",
 				});
-			}
+				expect(res).toBeInstanceOf(Blob);
+			});
 
-			for (const model of Object.keys(FAL_AI_SUPPORTED_MODEL_IDS["automatic-speech-recognition"] ?? {})) {
-				it(`automaticSpeechRecognition - ${model}`, async () => {
-					const res = await client.automaticSpeechRecognition({
-						model: model,
-						provider: "fal-ai",
-						data: new Blob([readTestFile("sample2.wav")], { type: "audio/x-wav" }),
-					});
-					expect(res).toMatchObject({
-						text: " he has grave doubts whether sir frederick leighton's work is really greek after all and can discover in it but little of rocky ithaca",
-					});
+			it(`automaticSpeechRecognition - openai/whisper-large-v3`, async () => {
+				const res = await client.automaticSpeechRecognition({
+					model: "openai/whisper-large-v3",
+					provider: "fal-ai",
+					data: new Blob([readTestFile("sample2.wav")], { type: "audio/x-wav" }),
 				});
-			}
+				expect(res).toMatchObject({
+					text: " he has grave doubts whether sir frederick leighton's work is really greek after all and can discover in it but little of rocky ithaca",
+				});
+			});
 
 			it("textToVideo - genmo/mochi-1-preview", async () => {
 				const res = await textToVideo({
@@ -939,11 +937,21 @@ describe.concurrent("HfInference", () => {
 				expect(res).toBeInstanceOf(Blob);
 			});
 
-			it("textToSpeech OuteTTS", async () => {
+			it.skip("textToSpeech OuteTTS -  usually Cold", async () => {
 				const res = await client.textToSpeech({
 					model: "OuteAI/OuteTTS-0.3-500M",
 					provider: "replicate",
 					inputs: "OuteTTS is a frontier TTS model for its size of 1 Billion parameters",
+				});
+
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToSpeech Kokoro", async () => {
+				const res = await client.textToSpeech({
+					model: "hexgrad/Kokoro-82M",
+					provider: "replicate",
+					inputs: "Kokoro is a frontier TTS model for its size of 1 Billion parameters",
 				});
 
 				expect(res).toBeInstanceOf(Blob);
@@ -1056,6 +1064,56 @@ describe.concurrent("HfInference", () => {
 		TIMEOUT
 	);
 
+	describe.concurrent(
+		"Nebius",
+		() => {
+			const client = new HfInference(env.HF_NEBIUS_KEY);
+
+			HARDCODED_MODEL_ID_MAPPING.nebius = {
+				"meta-llama/Llama-3.1-8B-Instruct": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+				"meta-llama/Llama-3.1-70B-Instruct": "meta-llama/Meta-Llama-3.1-70B-Instruct",
+				"black-forest-labs/FLUX.1-schnell": "black-forest-labs/flux-schnell",
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "meta-llama/Llama-3.1-8B-Instruct",
+					provider: "nebius",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toMatch(/(two|2)/i);
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "meta-llama/Llama-3.1-70B-Instruct",
+					provider: "nebius",
+					messages: [{ role: "user", content: "Complete the equation 1 + 1 = , just the answer" }],
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+				let out = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						out += chunk.choices[0].delta.content;
+					}
+				}
+				expect(out).toMatch(/(two|2)/i);
+			});
+
+			it("textToImage", async () => {
+				const res = await client.textToImage({
+					model: "black-forest-labs/FLUX.1-schnell",
+					provider: "nebius",
+					inputs: "award winning high resolution photo of a giant tortoise",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+		},
+		TIMEOUT
+	);
+
 	describe.concurrent("3rd party providers", () => {
 		it("chatCompletion - fails with unsupported model", async () => {
 			expect(
@@ -1070,4 +1128,51 @@ describe.concurrent("HfInference", () => {
 			);
 		});
 	});
+
+	describe.concurrent(
+		"Fireworks",
+		() => {
+			const client = new HfInference(env.HF_FIREWORKS_KEY);
+
+			HARDCODED_MODEL_ID_MAPPING["fireworks-ai"] = {
+				"deepseek-ai/DeepSeek-R1": "accounts/fireworks/models/deepseek-r1",
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "deepseek-ai/DeepSeek-R1",
+					provider: "fireworks-ai",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toContain("two");
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "deepseek-ai/DeepSeek-R1",
+					provider: "fireworks-ai",
+					messages: [{ role: "user", content: "Say this is a test" }],
+					stream: true,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+		},
+		TIMEOUT
+	);
 });

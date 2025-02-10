@@ -25,7 +25,7 @@ jobs:
             echo "SINCE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} ${{ github.sha }})" >> $GITHUB_OUTPUT
           fi
 
-      - run: corepack enable
+      - run: npm install -g corepack@latest && corepack enable
 
       - uses: actions/setup-node@v3
         with:
@@ -42,9 +42,11 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           HF_FAL_KEY: dummy
+          HF_NEBIUS_KEY: dummy
           HF_REPLICATE_KEY: dummy
           HF_SAMBANOVA_KEY: dummy
           HF_TOGETHER_KEY: dummy
+          HF_FIREWORKS_KEY: dummy
 
   browser:
     runs-on: ubuntu-latest
@@ -65,7 +67,7 @@ jobs:
             echo "SINCE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} ${{ github.sha }})" >> $GITHUB_OUTPUT
           fi
 
-      - run: corepack enable
+      - run: npm install -g corepack@latest && corepack enable
 
       - uses: actions/setup-node@v3
         with:
@@ -82,9 +84,11 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           HF_FAL_KEY: dummy
+          HF_NEBIUS_KEY: dummy
           HF_REPLICATE_KEY: dummy
           HF_SAMBANOVA_KEY: dummy
           HF_TOGETHER_KEY: dummy
+          HF_FIREWORKS_KEY: dummy
 
   e2e:
     runs-on: ubuntu-latest
@@ -93,7 +97,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - run: corepack enable
+      - run: npm install -g corepack@latest && corepack enable
 
       - uses: actions/setup-node@v3
         with:
@@ -149,6 +153,8 @@ jobs:
           NPM_CONFIG_REGISTRY: http://localhost:4874/
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           HF_FAL_KEY: dummy
+          HF_NEBIUS_KEY: dummy
           HF_REPLICATE_KEY: dummy
           HF_SAMBANOVA_KEY: dummy
           HF_TOGETHER_KEY: dummy
+          HF_FIREWORKS_KEY: dummy
