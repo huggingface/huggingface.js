@@ -6993,5 +6993,96 @@
         "content-type": "image/jpeg"
       }
     }
+  },
+  "a1cac7bcd25e9f0521c867a5ec0259fbcccf5a36b909ed76e1548dca0d9f9bc4": {
+    "url": "https://api.hyperbolic.xyz/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"award winning high resolution photo of a giant tortoise\"}]}"
+    },
+    "response": {
+      "body": "{\"object\":\"error\",\"message\":\"Only Qwen/Qwen2.5-72B-Instruct && Qwen/Qwen2-VL-72B-Instruct && meta-llama/Meta-Llama-3-70B-Instruct && meta-llama/Meta-Llama-3.1-70B-Instruct && meta-llama/Meta-Llama-3.1-405B-FP8 && meta-llama/Meta-Llama-3.1-405B-Instruct && deepseek-ai/DeepSeek-V3 && Qwen/QwQ-32B-Preview && Qwen/Qwen2-VL-7B-Instruct && meta-llama/Llama-3.3-70B-Instruct && NousResearch/Hermes-3-Llama-3.1-70B && meta-llama/Meta-Llama-3.1-405B && meta-llama/Llama-3.2-3B-Instruct && FLUX.1-dev && mistralai/Pixtral-12B-2409 && StableDiffusion && meta-llama/Meta-Llama-3.1-8B-Instruct && Qwen/Qwen2.5-Coder-32B-Instruct && TTS && deepseek-ai/DeepSeek-R1-Zero && deepseek-ai/DeepSeek-V2.5 && test && meta-llama/Meta-Llama-3.1-405B-Instruct-Virtuals && deepseek-ai/DeepSeek-R1 allowed now, your model mistralai/Mixtral-8x7B-Instruct-v0.1\",\"type\":\"\",\"param\":null,\"code\":40301}",
+      "status": 400,
+      "statusText": "Bad Request",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "910172b36aa37ea5-LAX",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "server": "cloudflare"
+      }
+    }
+  },
+  "10f86d757e0af0147df39651db831eade03fe35cf6ee2e45215f8c1c669a335f": {
+    "url": "https://api.hyperbolic.xyz/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Complete this sentence with words, one plus one is equal \"}],\"temperature\":0.1,\"model\":\"meta-llama/Llama-3.2-3B-Instruct\"}"
+    },
+    "response": {
+      "body": "{\"id\":\"chat-f48be60e95664e319ac27b6b9d77b9fa\",\"object\":\"chat.completion\",\"created\":1739246595,\"model\":\"meta-llama/Llama-3.2-3B-Instruct\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"...two.\"},\"finish_reason\":\"stop\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":46,\"total_tokens\":50,\"completion_tokens\":4}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "910172b36bd52ae0-LAX",
+        "connection": "keep-alive",
+        "content-encoding": "gzip",
+        "content-type": "application/json",
+        "server": "cloudflare",
+        "transfer-encoding": "chunked"
+      }
+    }
+  },
+  "69ced1ac246b195b512034ec57f26f29d69f669398293ac03ee12eee1623d743": {
+    "url": "https://api.hyperbolic.xyz/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Complete the equation 1 + 1 = , just the answer\"}],\"stream\":true,\"model\":\"meta-llama/Llama-3.3-70B-Instruct\"}"
+    },
+    "response": {
+      "body": "data: {\"id\": \"chatcmpl-2cc0cf3c62234788a582bdab42a61588\", \"object\": \"chat.completion.chunk\", \"created\": 1739246595, \"model\": \"meta-llama/Llama-3.3-70B-Instruct\", \"choices\": [{\"index\": 0, \"delta\": {\"role\": \"assistant\", \"content\": \"\"}, \"logprobs\": null, \"finish_reason\": null}], \"usage\": {\"prompt_tokens\": 48, \"total_tokens\": 49, \"completion_tokens\": 1}}\n\ndata: {\"id\": \"chatcmpl-2cc0cf3c62234788a582bdab42a61588\", \"object\": \"chat.completion.chunk\", \"created\": 1739246595, \"model\": \"meta-llama/Llama-3.3-70B-Instruct\", \"choices\": [{\"index\": 0, \"delta\": {\"content\": \"2\"}, \"logprobs\": null, \"finish_reason\": null}], \"usage\": {\"prompt_tokens\": 48, \"total_tokens\": 50, \"completion_tokens\": 2}}\n\ndata: {\"id\": \"chatcmpl-2cc0cf3c62234788a582bdab42a61588\", \"object\": \"chat.completion.chunk\", \"created\": 1739246595, \"model\": \"meta-llama/Llama-3.3-70B-Instruct\", \"choices\": [{\"index\": 0, \"delta\": {\"content\": \"\"}, \"logprobs\": null, \"finish_reason\": \"stop\", \"stop_reason\": null}], \"usage\": {\"prompt_tokens\": 48, \"total_tokens\": 51, \"completion_tokens\": 3}}\n\ndata: [DONE]\n\n",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "910172b35bcd7c3d-LAX",
+        "connection": "keep-alive",
+        "content-type": "text/event-stream; charset=utf-8",
+        "server": "cloudflare",
+        "transfer-encoding": "chunked"
+      }
+    }
+  },
+  "0e1553844a5a2020097c6d34b4bc4a5a113020b6da9e4f2b40468afbe0eaff5a": {
+    "url": "https://api.hyperbolic.xyz/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Paris is\"}],\"temperature\":0,\"max_tokens\":10}"
+    },
+    "response": {
+      "body": "{\"object\":\"error\",\"message\":\"Only Qwen/Qwen2.5-72B-Instruct && Qwen/Qwen2-VL-72B-Instruct && meta-llama/Meta-Llama-3-70B-Instruct && meta-llama/Meta-Llama-3.1-70B-Instruct && meta-llama/Meta-Llama-3.1-405B-FP8 && meta-llama/Meta-Llama-3.1-405B-Instruct && deepseek-ai/DeepSeek-V3 && Qwen/QwQ-32B-Preview && Qwen/Qwen2-VL-7B-Instruct && meta-llama/Llama-3.3-70B-Instruct && NousResearch/Hermes-3-Llama-3.1-70B && meta-llama/Meta-Llama-3.1-405B && meta-llama/Llama-3.2-3B-Instruct && FLUX.1-dev && mistralai/Pixtral-12B-2409 && StableDiffusion && meta-llama/Meta-Llama-3.1-8B-Instruct && Qwen/Qwen2.5-Coder-32B-Instruct && TTS && deepseek-ai/DeepSeek-R1-Zero && deepseek-ai/DeepSeek-V2.5 && test && meta-llama/Meta-Llama-3.1-405B-Instruct-Virtuals && deepseek-ai/DeepSeek-R1 allowed now, your model mistralai/Mixtral-8x7B-Instruct-v0.1\",\"type\":\"\",\"param\":null,\"code\":40301}",
+      "status": 400,
+      "statusText": "Bad Request",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "910172b37e2e2f40-LAX",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "server": "cloudflare"
+      }
+    }
   }
 }
