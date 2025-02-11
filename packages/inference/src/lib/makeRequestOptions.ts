@@ -1,4 +1,4 @@
-import { HF_HUB_URL } from "../config";
+import { HF_HUB_URL, HF_ROUTER_URL } from "../config";
 import { FAL_AI_API_BASE_URL } from "../providers/fal-ai";
 import { NEBIUS_API_BASE_URL } from "../providers/nebius";
 import { REPLICATE_API_BASE_URL } from "../providers/replicate";
@@ -11,7 +11,7 @@ import { isUrl } from "./isUrl";
 import { version as packageVersion, name as packageName } from "../../package.json";
 import { getProviderModelId } from "./getProviderModelId";
 
-const HF_HUB_INFERENCE_PROXY_TEMPLATE = `${HF_HUB_URL}/api/inference-proxy/{{PROVIDER}}`;
+const HF_HUB_INFERENCE_PROXY_TEMPLATE = `${HF_ROUTER_URL}/{{PROVIDER}}`;
 
 /**
  * Lazy-loaded from huggingface.co/api/tasks when needed
