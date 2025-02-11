@@ -1185,7 +1185,7 @@ describe.concurrent("HfInference", () => {
 				"meta-llama/Llama-3.2-3B-Instruct": "meta-llama/Llama-3.2-3B-Instruct",
 				"meta-llama/Llama-3.3-70B-Instruct": "meta-llama/Llama-3.3-70B-Instruct",
 				"stabilityai/stable-diffusion-2": "stabilityai/stable-diffusion-2",
-				"meta-llama/Llama-3.1-405B-BASE-FP8": "meta-llama/Llama-3.1-405B-BASE-FP8",
+				"meta-llama/Llama-3.1-405B": "meta-llama/Llama-3.1-405B",
 			};
 
 			it("chatCompletion - hyperbolic", async () => {
@@ -1227,20 +1227,18 @@ describe.concurrent("HfInference", () => {
 				const res = await client.textToImage({
 					model: "stabilityai/stable-diffusion-2",
 					provider: "hyperbolic",
-					inputs: "award winning high resolution photo of a giant tortoise",
+					messages: [{ role: "user", content: "award winning high resolution photo of a giant tortoise" }],
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
 
 			it("textGeneration", async () => {
 				const res = await client.textGeneration({
-					model: "meta-llama/Llama-3.1-405B-BASE-FP8",
+					model: "meta-llama/Llama-3.1-405B",
 					provider: "hyperbolic",
-					inputs: "Paris is",
-					parameters: {
-						temperature: 0,
-						max_tokens: 10,
-					},
+					messages: [{ role: "user", content: "Paris is" }],
+					temperature: 0,
+					max_tokens: 10,
 				});
 				expect(res).toMatchObject({ generated_text: " city of love" });
 			});
