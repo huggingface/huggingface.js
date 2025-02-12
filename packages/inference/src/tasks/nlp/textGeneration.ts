@@ -21,6 +21,12 @@ interface TogeteherTextCompletionOutput extends Omit<ChatCompletionOutput, "choi
 	}>;
 }
 
+interface HyperbolicTextCompletionOutput extends Omit<ChatCompletionOutput, "choices"> {
+	choices: Array<{
+		message: { content: string };
+	}>;
+}
+
 /**
  * Use to continue text from a prompt. This is a very generic task. Recommended model: gpt2 (it’s a simple model, but fun to play with).
  */
@@ -42,6 +48,21 @@ export async function textGeneration(
 		const completion = raw.choices[0];
 		return {
 			generated_text: completion.text,
+		};
+	} else if (args.provider === "hyperbolic") {
+		args.prompt = args.inputs;
+		const raw = await request<HyperbolicTextCompletionOutput>(args, {
+			...options,
+			taskHint: "text-generation",
+		});
+		const isValidOutput =
+			typeof raw === "object" && "choices" in raw && Array.isArray(raw?.choices) && typeof raw?.model === "string";
+		if (!isValidOutput) {
+			throw new InferenceOutputError("Expected ChatCompletionOutput");
+		}
+		const completion = raw.choices[0];
+		return {
+			generated_text: completion.message.content,
 		};
 	} else {
 		const res = toArray(

@@ -1186,7 +1186,7 @@ describe.concurrent("HfInference", () => {
 				"meta-llama/Llama-3.2-3B-Instruct": "meta-llama/Llama-3.2-3B-Instruct",
 				"meta-llama/Llama-3.3-70B-Instruct": "meta-llama/Llama-3.3-70B-Instruct",
 				"stabilityai/stable-diffusion-2": "stabilityai/stable-diffusion-2",
-				"meta-llama/Llama-3.1-405B": "meta-llama/Llama-3.1-405B",
+				"meta-llama/Llama-3.1-405B": "meta-llama/Meta-Llama-3.1-405B-Instruct",
 			};
 
 			it("chatCompletion - hyperbolic", async () => {
@@ -1244,9 +1244,10 @@ describe.concurrent("HfInference", () => {
 					provider: "hyperbolic",
 					messages: [{ role: "user", content: "Paris is" }],
 					temperature: 0,
+					top_p: 0.01,
 					max_tokens: 10,
 				});
-				expect(res).toMatchObject({ generated_text: " city of love" });
+				expect(res).toMatchObject({ generated_text: "...the capital and most populous city of France," });
 			});
 		},
 		TIMEOUT
