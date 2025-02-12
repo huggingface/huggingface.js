@@ -49,6 +49,7 @@ You can send inference requests to third-party providers with the inference clie
 Currently, we support the following providers:
 - [Fal.ai](https://fal.ai)
 - [Fireworks AI](https://fireworks.ai)
+- [Nebius](https://studio.nebius.ai)
 - [Replicate](https://replicate.com)
 - [Sambanova](https://sambanova.ai)
 - [Together](https://together.xyz)
@@ -72,12 +73,13 @@ When authenticated with a third-party provider key, the request is made directly
 Only a subset of models are supported when requesting third-party providers. You can check the list of supported models per pipeline tasks here:
 - [Fal.ai supported models](https://huggingface.co/api/partners/fal-ai/models)
 - [Fireworks AI supported models](https://huggingface.co/api/partners/fireworks-ai/models)
+- [Nebius supported models](https://huggingface.co/api/partners/nebius/models)
 - [Replicate supported models](https://huggingface.co/api/partners/replicate/models)
 - [Sambanova supported models](https://huggingface.co/api/partners/sambanova/models)
 - [Together supported models](https://huggingface.co/api/partners/together/models)
 - [HF Inference API (serverless)](https://huggingface.co/models?inference=warm&sort=trending)
 
-❗**Important note:** To be compatible, the third-party API must adhere to the "standard" shape API we expect on HF model pages for each pipeline task type. 
+❗**Important note:** To be compatible, the third-party API must adhere to the "standard" shape API we expect on HF model pages for each pipeline task type.
 This is not an issue for LLMs as everyone converged on the OpenAI API anyways, but can be more tricky for other tasks like "text-to-image" or "automatic-speech-recognition" where there exists no standard API. Let us know if any help is needed or if we can make things easier for you!
 
 👋**Want to add another provider?** Get in touch if you'd like to add support for another Inference provider, and/or request it on https://huggingface.co/spaces/huggingface/HuggingDiscussions/discussions/49
@@ -464,7 +466,7 @@ await hf.zeroShotImageClassification({
   model: 'openai/clip-vit-large-patch14-336',
   inputs: {
     image: await (await fetch('https://placekitten.com/300/300')).blob()
-  },  
+  },
   parameters: {
     candidate_labels: ['cat', 'dog']
   }

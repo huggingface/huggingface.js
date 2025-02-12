@@ -1,5 +1,6 @@
 import { HF_HUB_URL, HF_ROUTER_URL } from "../config";
 import { FAL_AI_API_BASE_URL } from "../providers/fal-ai";
+import { NEBIUS_API_BASE_URL } from "../providers/nebius";
 import { REPLICATE_API_BASE_URL } from "../providers/replicate";
 import { SAMBANOVA_API_BASE_URL } from "../providers/sambanova";
 import { TOGETHER_API_BASE_URL } from "../providers/together";
@@ -39,8 +40,7 @@ export async function makeRequestOptions(
 	let otherArgs = remainingArgs;
 	const provider = maybeProvider ?? "hf-inference";
 
-	const { forceTask, includeCredentials, taskHint, wait_for_model, use_cache, dont_load_model, chatCompletion } =
-		options ?? {};
+	const { forceTask, includeCredentials, taskHint, chatCompletion } = options ?? {};
 
 	if (endpointUrl && provider !== "hf-inference") {
 		throw new Error(`Cannot use endpointUrl with a third-party provider.`);
@@ -107,18 +107,6 @@ export async function makeRequestOptions(
 		headers["Content-Type"] = "application/json";
 	}
 
-	if (provider === "hf-inference") {
-		if (wait_for_model) {
-			headers["X-Wait-For-Model"] = "true";
-		}
-		if (use_cache === false) {
-			headers["X-Use-Cache"] = "false";
-		}
-		if (dont_load_model) {
-			headers["X-Load-Model"] = "0";
-		}
-	}
-
 	if (provider === "replicate") {
 		headers["Prefer"] = "wait";
 	}
@@ -149,7 +137,7 @@ export async function makeRequestOptions(
 			? args.data
 			: JSON.stringify({
 					...otherArgs,
-					...(chatCompletion || provider === "together" ? { model } : undefined),
+					...(chatCompletion || provider === "together" || provider === "nebius" ? { model } : undefined),
 			  }),
 		...(credentials ? { credentials } : undefined),
 		signal: options?.signal,
@@ -183,6 +171,22 @@ function makeUrl(params: {
 				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
 				: FAL_AI_API_BASE_URL;
 			return `${baseUrl}/${params.model}`;
+		}
+		case "nebius": {
+			const baseUrl = shouldProxy
+				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
+				: NEBIUS_API_BASE_URL;
+
+			if (params.taskHint === "text-to-image") {
+				return `${baseUrl}/v1/images/generations`;
+			}
+			if (params.taskHint === "text-generation") {
+				if (params.chatCompletion) {
+					return `${baseUrl}/v1/chat/completions`;
+				}
+				return `${baseUrl}/v1/completions`;
+			}
+			return baseUrl;
 		}
 		case "replicate": {
 			const baseUrl = shouldProxy
