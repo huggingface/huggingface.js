@@ -80,4 +80,18 @@ describe("listModels", () => {
 
 		expect(count).to.equal(10);
 	});
+
+	it("should search model by inference provider", async () => {
+		let count = 0;
+		for await (const entry of listModels({
+			search: { inferenceProvider: "together" },
+			additionalFields: ["inferenceProviderMapping"],
+			limit: 10,
+		})) {
+			count++;
+			expect(Object.keys(entry.inferenceProviderMapping)).includes("together");
+		}
+
+		expect(count).to.equal(10);
+	});
 });

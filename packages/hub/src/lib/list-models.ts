@@ -63,6 +63,7 @@ export async function* listModels<
 			owner?: string;
 			task?: PipelineType;
 			tags?: string[];
+			inferenceProvider?: string;
 		};
 		hubUrl?: string;
 		additionalFields?: T[];
@@ -84,6 +85,7 @@ export async function* listModels<
 			...(params?.search?.owner ? { author: params.search.owner } : undefined),
 			...(params?.search?.task ? { pipeline_tag: params.search.task } : undefined),
 			...(params?.search?.query ? { search: params.search.query } : undefined),
+			...(params?.search?.inferenceProvider ? { inference_provider: params.search.inferenceProvider } : undefined),
 		}),
 		...(params?.search?.tags?.map((tag) => ["filter", tag]) ?? []),
 		...MODEL_EXPAND_KEYS.map((val) => ["expand", val] satisfies [string, string]),
