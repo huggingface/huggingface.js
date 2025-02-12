@@ -1129,7 +1129,6 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Black Forest Labs",
 		() => {
-
 			HARDCODED_MODEL_ID_MAPPING["black-forest-labs"] = {
 				"black-forest-labs/FLUX.1-dev": "flux-dev",
 				// "black-forest-labs/FLUX.1-schnell": "flux-pro",
@@ -1146,11 +1145,10 @@ describe.concurrent("HfInference", () => {
 						width: 256,
 						num_inference_steps: 4,
 						seed: 8817,
-					}
+					},
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
-
 		},
 		TIMEOUT
 	);

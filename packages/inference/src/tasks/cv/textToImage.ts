@@ -27,15 +27,20 @@ interface BlackForestLabsResponse {
  */
 export async function textToImage(args: TextToImageArgs, options?: Options): Promise<Blob> {
 	const payload =
-		args.provider === "together" || args.provider === "fal-ai" || args.provider === "replicate" || args.provider === "black-forest-labs"
+		args.provider === "together" ||
+		args.provider === "fal-ai" ||
+		args.provider === "replicate" ||
+		args.provider === "black-forest-labs"
 			? {
-				...omit(args, ["inputs", "parameters"]),
-				...args.parameters,
-				...(args.provider !== "replicate" ? { response_format: "base64" } : undefined),
-				prompt: args.inputs,
-			}
+					...omit(args, ["inputs", "parameters"]),
+					...args.parameters,
+					...(args.provider !== "replicate" ? { response_format: "base64" } : undefined),
+					prompt: args.inputs,
+			  }
 			: args;
-	const res = await request<TextToImageOutput | Base64ImageGeneration | OutputUrlImageGeneration | BlackForestLabsResponse>(payload, {
+	const res = await request<
+		TextToImageOutput | Base64ImageGeneration | OutputUrlImageGeneration | BlackForestLabsResponse
+	>(payload, {
 		...options,
 		taskHint: "text-to-image",
 	});
@@ -77,11 +82,21 @@ async function pollBflResponse(url: string): Promise<Blob> {
 			throw new InferenceOutputError("Failed to fetch result from black forest labs API");
 		}
 		const payload = await resp.json();
-		if (typeof payload === "object" && payload && "status" in payload && typeof payload.status === "string" && payload.status === "Ready" && "result" in payload && typeof payload.result === "object" && payload.result && "sample" in payload.result && typeof payload.result.sample === "string") {
+		if (
+			typeof payload === "object" &&
+			payload &&
+			"status" in payload &&
+			typeof payload.status === "string" &&
+			payload.status === "Ready" &&
+			"result" in payload &&
+			typeof payload.result === "object" &&
+			payload.result &&
+			"sample" in payload.result &&
+			typeof payload.result.sample === "string"
+		) {
 			const image = await fetch(payload.result.sample);
 			return await image.blob();
 		}
 	}
 	throw new InferenceOutputError("Failed to fetch result from black forest labs API");
 }
-
