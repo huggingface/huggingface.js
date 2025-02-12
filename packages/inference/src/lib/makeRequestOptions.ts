@@ -240,6 +240,13 @@ function makeUrl(params: {
 			const baseUrl = shouldProxy
 				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
 				: HYPERBOLIC_API_BASE_URL;
+
+			if (params.taskHint === "text-generation") {
+				return `${baseUrl}/v1/chat/completions`;
+			}
+			if (params.taskHint === "text-to-image") {
+				return `${baseUrl}/v1/images/generations`;
+			}
 			return `${baseUrl}/v1/chat/completions`;
 		}
 		default: {

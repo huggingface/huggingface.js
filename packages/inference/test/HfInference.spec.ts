@@ -2,6 +2,7 @@ import { assert, describe, expect, it } from "vitest";
 
 import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
 
+import type { TextToImageArgs } from "../src";
 import { chatCompletion, HfInference } from "../src";
 import { textToVideo } from "../src/tasks/cv/textToVideo";
 import { readTestFile } from "./test-files";
@@ -1227,8 +1228,13 @@ describe.concurrent("HfInference", () => {
 				const res = await client.textToImage({
 					model: "stabilityai/stable-diffusion-2",
 					provider: "hyperbolic",
-					messages: [{ role: "user", content: "award winning high resolution photo of a giant tortoise" }],
-				});
+					inputs: "award winning high resolution photo of a giant tortoise",
+					parameters: {
+						model_name: "SD2",
+						height: 1024,
+						width: 1024,
+					},
+				} satisfies TextToImageArgs);
 				expect(res).toBeInstanceOf(Blob);
 			});
 
