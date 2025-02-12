@@ -18,11 +18,8 @@ export async function request<T>(
 	const { url, info } = await makeRequestOptions(args, options);
 	const response = await (options?.fetch ?? fetch)(url, info);
 
-	if (options?.retry_on_error !== false && response.status === 503 && !options?.wait_for_model) {
-		return request(args, {
-			...options,
-			wait_for_model: true,
-		});
+	if (options?.retry_on_error !== false && response.status === 503) {
+		return request(args, options);
 	}
 
 	if (!response.ok) {
