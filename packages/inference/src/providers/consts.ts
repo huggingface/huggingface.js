@@ -16,6 +16,7 @@ export const HARDCODED_MODEL_ID_MAPPING: Record<InferenceProvider, Record<ModelI
 	 * Example:
 	 * "Qwen/Qwen2.5-Coder-32B-Instruct": "Qwen2.5-Coder-32B-Instruct",
 	 */
+	"black-forest-labs": {},
 	"fal-ai": {},
 	"fireworks-ai": {},
 	"hf-inference": {},

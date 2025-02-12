@@ -1,4 +1,4 @@
-export const BLACKFORESTLABS_AI_API_BASE_URL = "https://api.us1.bfl.ai/v1/";
+export const BLACKFORESTLABS_AI_API_BASE_URL = "https://api.us1.bfl.ai/v1";
 
 /**
  * See the registered mapping of HF model ID => Black Forest Labs model ID here:

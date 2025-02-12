@@ -4,7 +4,7 @@ import { REPLICATE_API_BASE_URL } from "../providers/replicate";
 import { SAMBANOVA_API_BASE_URL } from "../providers/sambanova";
 import { TOGETHER_API_BASE_URL } from "../providers/together";
 import { FIREWORKS_AI_API_BASE_URL } from "../providers/fireworks-ai";
-import { BLACKFORESTLABS_AI_API_BASE_URL } from "../providers/blackforestlabs-ai";
+import { BLACKFORESTLABS_AI_API_BASE_URL } from "../providers/black-forest-labs";
 import type { InferenceProvider } from "../types";
 import type { InferenceTask, Options, RequestArgs } from "../types";
 import { isUrl } from "./isUrl";
@@ -68,26 +68,31 @@ export async function makeRequestOptions(
 			? "hf-token"
 			: "provider-key"
 		: includeCredentials === "include"
-		  ? "credentials-include"
-		  : "none";
+			? "credentials-include"
+			: "none";
 
 	const url = endpointUrl
 		? chatCompletion
 			? endpointUrl + `/v1/chat/completions`
 			: endpointUrl
 		: makeUrl({
-				authMethod,
-				chatCompletion: chatCompletion ?? false,
-				forceTask,
-				model,
-				provider: provider ?? "hf-inference",
-				taskHint,
-		  });
+			authMethod,
+			chatCompletion: chatCompletion ?? false,
+			forceTask,
+			model,
+			provider: provider ?? "hf-inference",
+			taskHint,
+		});
 
 	const headers: Record<string, string> = {};
 	if (accessToken) {
-		headers["Authorization"] =
-			provider === "fal-ai" && authMethod === "provider-key" ? `Key ${accessToken}` : `Bearer ${accessToken}`;
+		if (provider === "fal-ai" && authMethod === "provider-key") {
+			headers["Authorization"] = `Key ${accessToken}`;
+		} else if (provider === "black-forest-labs" && authMethod === "provider-key") {
+			headers["X-Key"] = accessToken;
+		} else {
+			headers["Authorization"] = `Bearer ${accessToken}`;
+		}
 	}
 
 	// e.g. @huggingface/inference/3.1.3
@@ -143,9 +148,9 @@ export async function makeRequestOptions(
 		body: binary
 			? args.data
 			: JSON.stringify({
-					...otherArgs,
-					...(chatCompletion || provider === "together" ? { model } : undefined),
-			  }),
+				...otherArgs,
+				...(chatCompletion || provider === "together" ? { model } : undefined),
+			}),
 		...(credentials ? { credentials } : undefined),
 		signal: options?.signal,
 	};
@@ -167,6 +172,12 @@ function makeUrl(params: {
 
 	const shouldProxy = params.provider !== "hf-inference" && params.authMethod !== "provider-key";
 	switch (params.provider) {
+		case "black-forest-labs": {
+			const baseUrl = shouldProxy
+				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
+				: BLACKFORESTLABS_AI_API_BASE_URL;
+			return `${baseUrl}/${params.model}`
+		}
 		case "fal-ai": {
 			const baseUrl = shouldProxy
 				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
