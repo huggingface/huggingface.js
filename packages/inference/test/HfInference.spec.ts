@@ -1231,8 +1231,8 @@ describe.concurrent("HfInference", () => {
 					inputs: "award winning high resolution photo of a giant tortoise",
 					parameters: {
 						model_name: "SD2",
-						height: 1024,
-						width: 1024,
+						height: 128,
+						width: 128,
 					},
 				} satisfies TextToImageArgs);
 				expect(res).toBeInstanceOf(Blob);
