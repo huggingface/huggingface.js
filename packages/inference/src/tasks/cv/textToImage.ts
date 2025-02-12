@@ -45,11 +45,11 @@ export async function textToImage(args: TextToImageArgs, options?: Options): Pro
 		!args.provider || args.provider === "hf-inference" || args.provider === "sambanova"
 			? args
 			: {
-					...omit(args, ["inputs", "parameters"]),
-					...args.parameters,
-					...getResponseFormatArg(args.provider),
-					prompt: args.inputs,
-			  };
+				...omit(args, ["inputs", "parameters"]),
+				...args.parameters,
+				...getResponseFormatArg(args.provider),
+				prompt: args.inputs,
+			};
 	const res = await request<
 		TextToImageOutput | Base64ImageGeneration | OutputUrlImageGeneration | BlackForestLabsResponse
 	>(payload, {
@@ -89,7 +89,7 @@ async function pollBflResponse(url: string): Promise<Blob> {
 	for (let step = 0; step < 5; step++) {
 		await delay(1000);
 		console.debug(`Polling Black Forest Labs API for the result... ${step + 1}/5`);
-		urlObj.searchParams.set("uuid", randomUUID());
+		urlObj.searchParams.set("attempt", step.toString(10));
 		const resp = await fetch(urlObj, { headers: { "Content-Type": "application/json" } });
 		if (!resp.ok) {
 			throw new InferenceOutputError("Failed to fetch result from black forest labs API");
