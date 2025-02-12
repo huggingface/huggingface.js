@@ -7036,12 +7036,12 @@
       "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Complete the equation 1 + 1 = , just the answer\"}],\"stream\":true,\"model\":\"meta-llama/Llama-3.3-70B-Instruct\"}"
     },
     "response": {
-      "body": "data: {\"id\": \"chatcmpl-e0c3f39f3e7c4384a2a225c6f960b2fb\", \"object\": \"chat.completion.chunk\", \"created\": 1739398501, \"model\": \"meta-llama/Llama-3.3-70B-Instruct\", \"choices\": [{\"index\": 0, \"delta\": {\"role\": \"assistant\", \"content\": \"\"}, \"logprobs\": null, \"finish_reason\": null}], \"usage\": {\"prompt_tokens\": 48, \"total_tokens\": 49, \"completion_tokens\": 1}}\n\ndata: {\"id\": \"chatcmpl-e0c3f39f3e7c4384a2a225c6f960b2fb\", \"object\": \"chat.completion.chunk\", \"created\": 1739398501, \"model\": \"meta-llama/Llama-3.3-70B-Instruct\", \"choices\": [{\"index\": 0, \"delta\": {\"content\": \"2\"}, \"logprobs\": null, \"finish_reason\": null}], \"usage\": {\"prompt_tokens\": 48, \"total_tokens\": 50, \"completion_tokens\": 2}}\n\ndata: {\"id\": \"chatcmpl-e0c3f39f3e7c4384a2a225c6f960b2fb\", \"object\": \"chat.completion.chunk\", \"created\": 1739398501, \"model\": \"meta-llama/Llama-3.3-70B-Instruct\", \"choices\": [{\"index\": 0, \"delta\": {\"content\": \"\"}, \"logprobs\": null, \"finish_reason\": \"stop\", \"stop_reason\": null}], \"usage\": {\"prompt_tokens\": 48, \"total_tokens\": 51, \"completion_tokens\": 3}}\n\ndata: [DONE]\n\n",
+      "body": "data: {\"id\": \"chatcmpl-cfeddabb083647fb9b929248b855eb72\", \"object\": \"chat.completion.chunk\", \"created\": 1739398762, \"model\": \"meta-llama/Llama-3.3-70B-Instruct\", \"choices\": [{\"index\": 0, \"delta\": {\"role\": \"assistant\", \"content\": \"\"}, \"logprobs\": null, \"finish_reason\": null}], \"usage\": {\"prompt_tokens\": 48, \"total_tokens\": 49, \"completion_tokens\": 1}}\n\ndata: {\"id\": \"chatcmpl-cfeddabb083647fb9b929248b855eb72\", \"object\": \"chat.completion.chunk\", \"created\": 1739398762, \"model\": \"meta-llama/Llama-3.3-70B-Instruct\", \"choices\": [{\"index\": 0, \"delta\": {\"content\": \"2\"}, \"logprobs\": null, \"finish_reason\": null}], \"usage\": {\"prompt_tokens\": 48, \"total_tokens\": 50, \"completion_tokens\": 2}}\n\ndata: {\"id\": \"chatcmpl-cfeddabb083647fb9b929248b855eb72\", \"object\": \"chat.completion.chunk\", \"created\": 1739398762, \"model\": \"meta-llama/Llama-3.3-70B-Instruct\", \"choices\": [{\"index\": 0, \"delta\": {\"content\": \"\"}, \"logprobs\": null, \"finish_reason\": \"stop\", \"stop_reason\": null}], \"usage\": {\"prompt_tokens\": 48, \"total_tokens\": 51, \"completion_tokens\": 3}}\n\ndata: [DONE]\n\n",
       "status": 200,
       "statusText": "OK",
       "headers": {
         "cf-cache-status": "DYNAMIC",
-        "cf-ray": "910fef54ddca4382-EWR",
+        "cf-ray": "910ff5b65b1e4238-EWR",
         "connection": "keep-alive",
         "content-type": "text/event-stream; charset=utf-8",
         "server": "cloudflare",
@@ -7059,12 +7059,12 @@
       "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Complete this sentence with words, one plus one is equal \"}],\"temperature\":0.1,\"model\":\"meta-llama/Llama-3.2-3B-Instruct\"}"
     },
     "response": {
-      "body": "{\"id\":\"chat-1d4a9d83e3d24770b7de169ba3b2fa9f\",\"object\":\"chat.completion\",\"created\":1739398501,\"model\":\"meta-llama/Llama-3.2-3B-Instruct\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"...two.\"},\"finish_reason\":\"stop\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":46,\"total_tokens\":50,\"completion_tokens\":4}}",
+      "body": "{\"id\":\"chat-76a5f657a1bc4d29838014209a8483f3\",\"object\":\"chat.completion\",\"created\":1739398762,\"model\":\"meta-llama/Llama-3.2-3B-Instruct\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"...two.\"},\"finish_reason\":\"stop\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":46,\"total_tokens\":50,\"completion_tokens\":4}}",
       "status": 200,
       "statusText": "OK",
       "headers": {
         "cf-cache-status": "DYNAMIC",
-        "cf-ray": "910fef54cc7f42f7-EWR",
+        "cf-ray": "910ff5b65fc58c87-EWR",
         "connection": "keep-alive",
         "content-encoding": "gzip",
         "content-type": "application/json",
@@ -7083,12 +7083,12 @@
       "body": "{\"model_name\":\"SD2\",\"height\":128,\"width\":128,\"prompt\":\"award winning high resolution photo of a giant tortoise\",\"model\":\"stabilityai/stable-diffusion-2\"}"
     },
     "response": {
-      "body": "{\"images\":[{\"index\":0,\"image\":\"iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAB3yUlEQVR4nJT9Z7NkSXrnif3cjx99QkdcfVNXVmXp6m6gATR6AAxmdlbQdkhbI2lG26XxI/ED0Ixm3DdUxrXlDncksGg0GugGuru0SJ1586q4ocXRx4/zRdyozhbgDh8LS6vKm/dEhD/uj/w/fxf/9f/+/zBbrGercl0WmZZGWrWxdI3vee1256C/e7h/sN/td/zQlbYy0mipC5Os0zhJi6JAGNdRjhtIx6+FrAyFrrNCF0WVZ7rKKwcr9Pxmsx00mnj+sjRny/XJfPZivpwnqQZlKdu1pEJYWktZSlVg5VpWWJVwsQPbbwfNdqMdNTtEDXwfz8FV2BJLIGoci0DRidhr0FbIgviK8fN89Px0+Oo0mU6U1s1GOOg1o1bLCoPaUpUxudZFWVS6rIw2aGFqW+HbTjMIumGjGUWR59lSyrrSeV4mqzJe5em6SuOiLIqiyMqyKHVeVEVRlllVF5UshVsSaRGUxi1KUZZ1pStEIdzCDfOwUwSNzLZTTFIVRbnQctp0lyrN9HSWX82S0TJelcIICwMaFUV7WeCH1p5sRe3jvXY/Up6Vk63LRbZO43k5F3mhpC290FN2W9GwbLdEUlW5LkpdpGmus1JhSdUM5KDpdIRPYVEneqFH58n4arlCgms7xrKtWoi8QBdGgqK2qS2kj9ei7s1c5Ws6hpagYRHa+BaORBqMwTYUClsRO0Qejo0VojwXblhFLVPLFXUomr5oObJX1b6WdqGrVBdZlRVVUWpdm8zUhW0JHfiBbjlOuxXQaeJZ1IWV48axZ0pVpbJOpSxzq66sSqONqWpdFGVW1hl2ZdlaNnF7lWhUhcyKMi9iQ2J5sWlLZ2BMp5ReWem4XBd6ZnRbmgtVGZXUcprmy3VKUVJLbIV0K0uVni+jpttut3b6g939tuNYOfGoUJWj57VRFGjhqMD1XbtpuU2cQEgrL7Wpcm2l\",\"random_seed\":8661100561820985000}],\"inference_time\":0.8740417957305908}",
+      "body": "{\"images\":[{\"index\":0,\"image\":\"iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAB4mklEQVR4nJT9Z7NsSZamhz3u27cOHXG0uFqlLF091dMCQIMKsCHMxmDkB4IwEuS/4D/ihxkCJAwkZ9CFFjPorqqurFT3Zl59jz6hY2vlzg9xIjNL9MzQ7dg1u0dE7FjLffkS73qX+G/+r/9lWqWV7eK7RtKUVR6l2WJVLiOdxMSp0lUgRafj9futznDQGW353aHX6dphywlCpfxaqCwtJ/Poery8Hs/H8+hqla9qY9rb7Vu3h+89GT1+vHVnvzfqdkPpKywBUENlKGuyvCpXeTpfxuNFej2prsd6Nm5mk3JylY4v89l1Hq2qIlHKeJ7jeI5ju4ETOsoXRtVVkyZZmq7yZJ4WRdkIy3Hdbicctu2WrR0Px7fcdre7M9w62N66vb11sLO13/I6VUG8rK8vovH5ZHo5Wc2mdZ4bbSxhW8p1vNBzXWnqcrFanV6mF9dHxvvxvfd/9v4PHz/Z7+9BHwKoWM64uuDtKe9Oi3dX8+tlXFpOOBwEw5a2SZoqqovENJkxaVPVMnfC0lK5EpEvk7a3CpqJysus1I3xRC3I67rI8ngVZ9N5OZ2xWAZF5mkjfVzht7ymq4OWqNue8lue1+25nZ7y2qVWq0USx8bUUb4qZ9fJ1SxZ1EJsD4vdAGso/R270/d6dMAFFyyoIBXUNsa2c2UnTTvOwjxWjWs0eZXP00UWX05W15fRbF7VqW01UiKUspXfCvutcOiqjq5MGidZPMuS84iyQoLnp3Wojd8EVs9GNp4nhOW3nBGd43Dr3ugw3GpRV1ycMlu0E925XHnjqR1PJ0Vaeo7TGwyH27vabZVZOj97ff75Sa2LHl7Y696y9/s92IEOKNB0wY/IBdepW13vzq5WpXRN7bbbOA65tqvcXqbMSpalsULd9y2LtEqvArE0wm2aWhVC145VOyaT9aKI43iZRcsmXjhF2hbNlsNQyZFn+p7p\",\"random_seed\":14347831717069525000}],\"inference_time\":0.8673977851867676}",
       "status": 200,
       "statusText": "OK",
       "headers": {
         "cf-cache-status": "DYNAMIC",
-        "cf-ray": "910fef54cbeb8c06-EWR",
+        "cf-ray": "910ff5b64aeb4294-EWR",
         "connection": "keep-alive",
         "content-encoding": "gzip",
         "content-type": "application/json",
@@ -7119,17 +7119,29 @@
       "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Paris is\"}],\"temperature\":0,\"top_p\":0.01,\"max_tokens\":10,\"model\":\"meta-llama/Meta-Llama-3.1-405B-Instruct\"}"
     },
     "response": {
-      "body": "{\"id\":\"chatcmpl-ab2ecc5e1e3c494c9704bea74aba9f02\",\"object\":\"chat.completion\",\"created\":1739398500,\"model\":\"meta-llama/Meta-Llama-3.1-405B-Instruct\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"...the capital and most populous city of France,\"},\"finish_reason\":\"length\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":37,\"total_tokens\":47,\"completion_tokens\":10}}",
+      "body": "{\"id\":\"chatcmpl-c899e5da00414cb4884ad3febdf1f3dd\",\"object\":\"chat.completion\",\"created\":1739398764,\"model\":\"meta-llama/Meta-Llama-3.1-405B-Instruct\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"...the capital and most populous city of France,\"},\"finish_reason\":\"length\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":37,\"total_tokens\":47,\"completion_tokens\":10}}",
       "status": 200,
       "statusText": "OK",
       "headers": {
         "cf-cache-status": "DYNAMIC",
-        "cf-ray": "910fef54d8e94294-EWR",
+        "cf-ray": "910ff5b6592d430f-EWR",
         "connection": "keep-alive",
         "content-encoding": "gzip",
         "content-type": "application/json",
         "server": "cloudflare",
         "transfer-encoding": "chunked"
+      }
+    }
+  },
+  "f41652de3ab7348381eb814c6af682d21ab9e93ddf36488c50eacc28a5cdc212": {
+    "url": "data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAB4mklEQVR4nJT9Z7NsSZamhz3u27cOHXG0uFqlLF091dMCQIMKsCHMxmDkB4IwEuS/4D/ihxkCJAwkZ9CFFjPorqqurFT3Zl59jz6hY2vlzg9xIjNL9MzQ7dg1u0dE7FjLffkS73qX+G/+r/9lWqWV7eK7RtKUVR6l2WJVLiOdxMSp0lUgRafj9futznDQGW353aHX6dphywlCpfxaqCwtJ/Poery8Hs/H8+hqla9qY9rb7Vu3h+89GT1+vHVnvzfqdkPpKywBUENlKGuyvCpXeTpfxuNFej2prsd6Nm5mk3JylY4v89l1Hq2qIlHKeJ7jeI5ju4ETOsoXRtVVkyZZmq7yZJ4WRdkIy3Hdbicctu2WrR0Px7fcdre7M9w62N66vb11sLO13/I6VUG8rK8vovH5ZHo5Wc2mdZ4bbSxhW8p1vNBzXWnqcrFanV6mF9dHxvvxvfd/9v4PHz/Z7+9BHwKoWM64uuDtKe9Oi3dX8+tlXFpOOBwEw5a2SZoqqovENJkxaVPVMnfC0lK5EpEvk7a3CpqJysus1I3xRC3I67rI8ngVZ9N5OZ2xWAZF5mkjfVzht7ymq4OWqNue8lue1+25nZ7y2qVWq0USx8bUUb4qZ9fJ1SxZ1EJsD4vdAGso/R270/d6dMAFFyyoIBXUNsa2c2UnTTvOwjxWjWs0eZXP00UWX05W15fRbF7VqW01UiKUspXfCvutcOiqjq5MGidZPMuS84iyQoLnp3Wojd8EVs9GNp4nhOW3nBGd43Dr3ugw3GpRV1ycMlu0E925XHnjqR1PJ0Vaeo7TGwyH27vabZVZOj97ff75Sa2LHl7Y696y9/s92IEOKNB0wY/IBdepW13vzq5WpXRN7bbbOA65tqvcXqbMSpalsULd9y2LtEqvArE0wm2aWhVC145VOyaT9aKI43iZRcsmXjhF2hbNlsNQyZFn+p7p",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "content-type": "image/jpeg"
       }
     }
   }

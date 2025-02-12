@@ -33,10 +33,8 @@ export async function request<T>(
 			}
 			if (output.error || output.detail) {
 				throw new Error(JSON.stringify(output.error ?? output.detail));
-			} else if (typeof output === "object") {
-				throw new Error(JSON.stringify(output));
 			} else {
-				throw new Error(String(output));
+				throw new Error(output);
 			}
 		}
 		const message = contentType?.startsWith("text/plain;") ? await response.text() : undefined;
