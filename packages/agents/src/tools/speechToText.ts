@@ -15,12 +15,9 @@ export const speechToTextTool: Tool = {
 		if (typeof data === "string") throw "Input must be a blob.";
 
 		return (
-			await inference.automaticSpeechRecognition(
-				{
-					data,
-				},
-				{ wait_for_model: true }
-			)
+			await inference.automaticSpeechRecognition({
+				data,
+			})
 		).text;
 	},
 };

@@ -20,11 +20,8 @@ export async function* streamingRequest<T>(
 	const { url, info } = await makeRequestOptions({ ...args, stream: true }, options);
 	const response = await (options?.fetch ?? fetch)(url, info);
 
-	if (options?.retry_on_error !== false && response.status === 503 && !options?.wait_for_model) {
-		return yield* streamingRequest(args, {
-			...options,
-			wait_for_model: true,
-		});
+	if (options?.retry_on_error !== false && response.status === 503) {
+		return yield* streamingRequest(args, options);
 	}
 	if (!response.ok) {
 		if (response.headers.get("Content-Type")?.startsWith("application/json")) {

@@ -15,12 +15,9 @@ export const imageToTextTool: Tool = {
 		if (typeof data === "string") throw "Input must be a blob.";
 
 		return (
-			await inference.imageToText(
-				{
-					data,
-				},
-				{ wait_for_model: true }
-			)
+			await inference.imageToText({
+				data,
+			})
 		).generated_text;
 	},
 };
