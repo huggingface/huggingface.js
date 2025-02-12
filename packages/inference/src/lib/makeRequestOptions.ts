@@ -28,8 +28,6 @@ export async function makeRequestOptions(
 		stream?: boolean;
 	},
 	options?: Options & {
-		/** When a model can be used for multiple tasks, and we want to run a non-default task */
-		forceTask?: string | InferenceTask;
 		/** To load default model if needed */
 		taskHint?: InferenceTask;
 		chatCompletion?: boolean;
@@ -39,13 +37,10 @@ export async function makeRequestOptions(
 	let otherArgs = remainingArgs;
 	const provider = maybeProvider ?? "hf-inference";
 
-	const { forceTask, includeCredentials, taskHint, chatCompletion } = options ?? {};
+	const { includeCredentials, taskHint, chatCompletion } = options ?? {};
 
 	if (endpointUrl && provider !== "hf-inference") {
 		throw new Error(`Cannot use endpointUrl with a third-party provider.`);
-	}
-	if (forceTask && provider !== "hf-inference") {
-		throw new Error(`Cannot use forceTask with a third-party provider.`);
 	}
 	if (maybeModel && isUrl(maybeModel)) {
 		throw new Error(`Model URLs are no longer supported. Use endpointUrl instead.`);
@@ -77,7 +72,6 @@ export async function makeRequestOptions(
 		: makeUrl({
 				authMethod,
 				chatCompletion: chatCompletion ?? false,
-				forceTask,
 				model,
 				provider: provider ?? "hf-inference",
 				taskHint,
@@ -146,7 +140,6 @@ function makeUrl(params: {
 	model: string;
 	provider: InferenceProvider;
 	taskHint: InferenceTask | undefined;
-	forceTask?: string | InferenceTask;
 }): string {
 	if (params.authMethod === "none" && params.provider !== "hf-inference") {
 		throw new Error("Authentication is required when requesting a third-party provider. Please provide accessToken");
@@ -224,13 +217,10 @@ function makeUrl(params: {
 		}
 		default: {
 			const baseUrl = HF_HUB_INFERENCE_PROXY_TEMPLATE.replaceAll("{{PROVIDER}}", "hf-inference");
-			const url = params.forceTask
-				? `${baseUrl}/pipeline/${params.forceTask}/${params.model}`
-				: `${baseUrl}/models/${params.model}`;
 			if (params.taskHint === "text-generation" && params.chatCompletion) {
-				return url + `/v1/chat/completions`;
+				return `${baseUrl}/models/${params.model}/v1/chat/completions`;
 			}
-			return url;
+			return `${baseUrl}/models/${params.model}`;
 		}
 	}
 }

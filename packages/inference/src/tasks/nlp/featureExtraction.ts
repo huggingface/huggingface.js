@@ -1,5 +1,4 @@
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
-import { getDefaultTask } from "../../lib/getDefaultTask";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
@@ -25,12 +24,9 @@ export async function featureExtraction(
 	args: FeatureExtractionArgs,
 	options?: Options
 ): Promise<FeatureExtractionOutput> {
-	const defaultTask = args.model ? await getDefaultTask(args.model, args.accessToken, options) : undefined;
-
 	const res = await request<FeatureExtractionOutput>(args, {
 		...options,
 		taskHint: "feature-extraction",
-		...(defaultTask === "sentence-similarity" && { forceTask: "feature-extraction" }),
 	});
 	let isValidOutput = true;
 
