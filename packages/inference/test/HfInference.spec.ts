@@ -1183,6 +1183,7 @@ describe.concurrent("HfInference", () => {
 
 			HARDCODED_MODEL_ID_MAPPING["novita"] = {
 				"meta-llama/llama-3.1-8b-instruct": "meta-llama/llama-3.1-8b-instruct",
+				"deepseek/deepseek-r1-distill-qwen-14b": "deepseek/deepseek-r1-distill-qwen-14b",
 			};
 
 			it("chatCompletion", async () => {
@@ -1199,7 +1200,7 @@ describe.concurrent("HfInference", () => {
 
 			it("chatCompletion stream", async () => {
 				const stream = client.chatCompletionStream({
-					model: "meta-llama/llama-3.1-8b-instruct",
+					model: "deepseek/deepseek-r1-distill-qwen-14b",
 					provider: "novita",
 					messages: [{ role: "user", content: "Say this is a test" }],
 					stream: true,

@@ -50,10 +50,10 @@ Currently, we support the following providers:
 - [Fal.ai](https://fal.ai)
 - [Fireworks AI](https://fireworks.ai)
 - [Nebius](https://studio.nebius.ai)
+- [Novita](https://novita.ai/?utm_source=github_huggingface&utm_medium=github_readme&utm_campaign=link)
 - [Replicate](https://replicate.com)
 - [Sambanova](https://sambanova.ai)
 - [Together](https://together.xyz)
-- [Novita](https://novita.ai/?utm_source=github_huggingface&utm_medium=github_readme&utm_campaign=link)
 
 To send requests to a third-party provider, you have to pass the `provider` parameter to the inference function. Make sure your request is authenticated with an access token.
 ```ts
