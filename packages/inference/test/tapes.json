@@ -7026,12 +7026,12 @@
       "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Complete this sentence with words, one plus one is equal \"}],\"temperature\":0.1,\"model\":\"meta-llama/Llama-3.2-3B-Instruct\"}"
     },
     "response": {
-      "body": "{\"id\":\"chat-f48be60e95664e319ac27b6b9d77b9fa\",\"object\":\"chat.completion\",\"created\":1739246595,\"model\":\"meta-llama/Llama-3.2-3B-Instruct\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"...two.\"},\"finish_reason\":\"stop\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":46,\"total_tokens\":50,\"completion_tokens\":4}}",
+      "body": "{\"id\":\"chat-a6f0f805be5e431a998b1066d6ba4ed9\",\"object\":\"chat.completion\",\"created\":1739397446,\"model\":\"meta-llama/Llama-3.2-3B-Instruct\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"...two.\"},\"finish_reason\":\"stop\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":46,\"total_tokens\":50,\"completion_tokens\":4}}",
       "status": 200,
       "statusText": "OK",
       "headers": {
         "cf-cache-status": "DYNAMIC",
-        "cf-ray": "910172b36bd52ae0-LAX",
+        "cf-ray": "910fd594f8a843e0-EWR",
         "connection": "keep-alive",
         "content-encoding": "gzip",
         "content-type": "application/json",
@@ -7050,12 +7050,12 @@
       "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Complete the equation 1 + 1 = , just the answer\"}],\"stream\":true,\"model\":\"meta-llama/Llama-3.3-70B-Instruct\"}"
     },
     "response": {
-      "body": "data: {\"id\": \"chatcmpl-2cc0cf3c62234788a582bdab42a61588\", \"object\": \"chat.completion.chunk\", \"created\": 1739246595, \"model\": \"meta-llama/Llama-3.3-70B-Instruct\", \"choices\": [{\"index\": 0, \"delta\": {\"role\": \"assistant\", \"content\": \"\"}, \"logprobs\": null, \"finish_reason\": null}], \"usage\": {\"prompt_tokens\": 48, \"total_tokens\": 49, \"completion_tokens\": 1}}\n\ndata: {\"id\": \"chatcmpl-2cc0cf3c62234788a582bdab42a61588\", \"object\": \"chat.completion.chunk\", \"created\": 1739246595, \"model\": \"meta-llama/Llama-3.3-70B-Instruct\", \"choices\": [{\"index\": 0, \"delta\": {\"content\": \"2\"}, \"logprobs\": null, \"finish_reason\": null}], \"usage\": {\"prompt_tokens\": 48, \"total_tokens\": 50, \"completion_tokens\": 2}}\n\ndata: {\"id\": \"chatcmpl-2cc0cf3c62234788a582bdab42a61588\", \"object\": \"chat.completion.chunk\", \"created\": 1739246595, \"model\": \"meta-llama/Llama-3.3-70B-Instruct\", \"choices\": [{\"index\": 0, \"delta\": {\"content\": \"\"}, \"logprobs\": null, \"finish_reason\": \"stop\", \"stop_reason\": null}], \"usage\": {\"prompt_tokens\": 48, \"total_tokens\": 51, \"completion_tokens\": 3}}\n\ndata: [DONE]\n\n",
+      "body": "data: {\"id\": \"chatcmpl-efb9d67a23644192b6ae79184ec1c95a\", \"object\": \"chat.completion.chunk\", \"created\": 1739397446, \"model\": \"meta-llama/Llama-3.3-70B-Instruct\", \"choices\": [{\"index\": 0, \"delta\": {\"role\": \"assistant\", \"content\": \"\"}, \"logprobs\": null, \"finish_reason\": null}], \"usage\": {\"prompt_tokens\": 48, \"total_tokens\": 49, \"completion_tokens\": 1}}\n\ndata: {\"id\": \"chatcmpl-efb9d67a23644192b6ae79184ec1c95a\", \"object\": \"chat.completion.chunk\", \"created\": 1739397446, \"model\": \"meta-llama/Llama-3.3-70B-Instruct\", \"choices\": [{\"index\": 0, \"delta\": {\"content\": \"2\"}, \"logprobs\": null, \"finish_reason\": null}], \"usage\": {\"prompt_tokens\": 48, \"total_tokens\": 50, \"completion_tokens\": 2}}\n\ndata: {\"id\": \"chatcmpl-efb9d67a23644192b6ae79184ec1c95a\", \"object\": \"chat.completion.chunk\", \"created\": 1739397446, \"model\": \"meta-llama/Llama-3.3-70B-Instruct\", \"choices\": [{\"index\": 0, \"delta\": {\"content\": \"\"}, \"logprobs\": null, \"finish_reason\": \"stop\", \"stop_reason\": null}], \"usage\": {\"prompt_tokens\": 48, \"total_tokens\": 51, \"completion_tokens\": 3}}\n\ndata: [DONE]\n\n",
       "status": 200,
       "statusText": "OK",
       "headers": {
         "cf-cache-status": "DYNAMIC",
-        "cf-ray": "910172b35bcd7c3d-LAX",
+        "cf-ray": "910fd594eb77423f-EWR",
         "connection": "keep-alive",
         "content-type": "text/event-stream; charset=utf-8",
         "server": "cloudflare",
@@ -7073,15 +7073,411 @@
       "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Paris is\"}],\"temperature\":0,\"max_tokens\":10}"
     },
     "response": {
-      "body": "{\"object\":\"error\",\"message\":\"Only Qwen/Qwen2.5-72B-Instruct && Qwen/Qwen2-VL-72B-Instruct && meta-llama/Meta-Llama-3-70B-Instruct && meta-llama/Meta-Llama-3.1-70B-Instruct && meta-llama/Meta-Llama-3.1-405B-FP8 && meta-llama/Meta-Llama-3.1-405B-Instruct && deepseek-ai/DeepSeek-V3 && Qwen/QwQ-32B-Preview && Qwen/Qwen2-VL-7B-Instruct && meta-llama/Llama-3.3-70B-Instruct && NousResearch/Hermes-3-Llama-3.1-70B && meta-llama/Meta-Llama-3.1-405B && meta-llama/Llama-3.2-3B-Instruct && FLUX.1-dev && mistralai/Pixtral-12B-2409 && StableDiffusion && meta-llama/Meta-Llama-3.1-8B-Instruct && Qwen/Qwen2.5-Coder-32B-Instruct && TTS && deepseek-ai/DeepSeek-R1-Zero && deepseek-ai/DeepSeek-V2.5 && test && meta-llama/Meta-Llama-3.1-405B-Instruct-Virtuals && deepseek-ai/DeepSeek-R1 allowed now, your model mistralai/Mixtral-8x7B-Instruct-v0.1\",\"type\":\"\",\"param\":null,\"code\":40301}",
+      "body": "{\"object\":\"error\",\"message\":\"Only Qwen/Qwen2.5-72B-Instruct && meta-llama/Llama-3.2-3B-Instruct && FLUX.1-dev && mistralai/Pixtral-12B-2409 && StableDiffusion && Qwen/Qwen2-VL-72B-Instruct && meta-llama/Meta-Llama-3-70B-Instruct && meta-llama/Meta-Llama-3.1-70B-Instruct && meta-llama/Meta-Llama-3.1-8B-Instruct && Qwen/Qwen2.5-Coder-32B-Instruct && meta-llama/Meta-Llama-3.1-405B-FP8 && TTS && meta-llama/Meta-Llama-3.1-405B-Instruct && deepseek-ai/DeepSeek-R1-Zero && deepseek-ai/DeepSeek-V3 && Qwen/QwQ-32B-Preview && Qwen/Qwen2-VL-7B-Instruct && deepseek-ai/DeepSeek-V2.5 && meta-llama/Llama-3.3-70B-Instruct && NousResearch/Hermes-3-Llama-3.1-70B && test && meta-llama/Meta-Llama-3.1-405B && meta-llama/Meta-Llama-3.1-405B-Instruct-Virtuals && deepseek-ai/DeepSeek-R1 allowed now, your model mistralai/Mixtral-8x7B-Instruct-v0.1\",\"type\":\"\",\"param\":null,\"code\":40301}",
       "status": 400,
       "statusText": "Bad Request",
       "headers": {
         "cf-cache-status": "DYNAMIC",
-        "cf-ray": "910172b37e2e2f40-LAX",
+        "cf-ray": "910f98f87e664285-EWR",
         "connection": "keep-alive",
         "content-type": "application/json",
         "server": "cloudflare"
+      }
+    }
+  },
+  "7c78d646eb40f2e470ff3d58a25fef13557336add7c30e8fb8b18a7d7dfc91c0": {
+    "url": "https://api.hyperbolic.xyz/v1/images/generations",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"response_format\":\"base64\",\"prompt\":\"award winning high resolution photo of a giant tortoise\"}"
+    },
+    "response": {
+      "body": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"model_name\"],\"msg\":\"Field required\",\"input\":{\"response_format\":\"base64\",\"prompt\":\"award winning high resolution photo of a giant tortoise\"}},{\"type\":\"missing\",\"loc\":[\"body\",\"height\"],\"msg\":\"Field required\",\"input\":{\"response_format\":\"base64\",\"prompt\":\"award winning high resolution photo of a giant tortoise\"}},{\"type\":\"missing\",\"loc\":[\"body\",\"width\"],\"msg\":\"Field required\",\"input\":{\"response_format\":\"base64\",\"prompt\":\"award winning high resolution photo of a giant tortoise\"}}]}",
+      "status": 422,
+      "statusText": "Unprocessable Entity",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "910f379179cc4382-EWR",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "server": "cloudflare"
+      }
+    }
+  },
+  "126658363a9742d9bbdb048589699c89df703a968167aed145ab7c447119bf8d": {
+    "url": "https://api.hyperbolic.xyz/v1/images/generations",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"height\":1024,\"width\":1024,\"response_format\":\"base64\",\"prompt\":\"award winning high resolution photo of a giant tortoise\"}"
+    },
+    "response": {
+      "body": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"model_name\"],\"msg\":\"Field required\",\"input\":{\"height\":1024,\"width\":1024,\"response_format\":\"base64\",\"prompt\":\"award winning high resolution photo of a giant tortoise\"}}]}",
+      "status": 422,
+      "statusText": "Unprocessable Entity",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "910f39a76f150f6c-EWR",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "server": "cloudflare"
+      }
+    }
+  },
+  "ca54fa9f3eaa4cdff436734fa3cab034fee7434329856fcc996ab48f8ea32ae4": {
+    "url": "https://api.hyperbolic.xyz/v1/images/generations",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"model_name\":\"stabilityai/stable-diffusion-2\",\"height\":1024,\"width\":1024,\"response_format\":\"base64\",\"prompt\":\"award winning high resolution photo of a giant tortoise\"}"
+    },
+    "response": {
+      "body": "{\"object\":\"error\",\"message\":\"stabilityai/stable-diffusion-2 is not supported for now. Available model list: ['SDXL1.0-base', 'SD1.5', 'SD2', 'SSD', 'SDXL-turbo', 'SD1.5-ControlNet', 'SDXL-ControlNet', 'playground-v2.5', 'Fluently-XL-v4', 'Fluently-XL-Final', 'PixArt-Sigma-XL-2-1024-MS', 'dreamshaper-xl-lightning', 'FLUX.1-dev']\",\"type\":\"\",\"param\":null,\"code\":40301}",
+      "status": 400,
+      "statusText": "Bad Request",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "910f3a25bb1043f2-EWR",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "server": "cloudflare"
+      }
+    }
+  },
+  "914881a7a3a1d64bbf88223dd68d1beff9e189a57870c8649ee12ffcf9328501": {
+    "url": "https://api.hyperbolic.xyz/v1/images/generations",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"model_name\":\"SD2\",\"height\":1024,\"width\":1024,\"response_format\":\"base64\",\"prompt\":\"award winning high resolution photo of a giant tortoise\"}"
+    },
+    "response": {
+      "body": "{\"images\":[{\"index\":0,\"image\":\"iVBORw0KGgoAAAANSUhEUgAABAAAAAQACAIAAADwf7zUAAEAAElEQVR4nFT9WZJkSZIkCCIS8RNVM/M1tszsgpkrzQXmJHPjaYCprsoId1OVx0Q4H0gsFu0JFeVupovIE16IcCP+v/8//6/NWxQVARAQKAFqBiSAkEBC3SQAwv8JERQgAC0QJAg0gBaDBACCkASAAAkJLflv/I8gf6U0/xJBf41AEeGv8jdIiNd3NiMkBdkCeX6Of7gEUhLI81JwfrHI86cAMF8ioAESQfol+x29vhMkILUi/aj81hT0c/BPEf2u/W792/x382Nf713Q/G4KIP0m1Xq9Nv+J/0PnSUEg6P9isFs8z6Yl8PVoSTAAnY/gx5Pxw3m9fT9NzUv2FwUJqLr9rkGoIbaIRgFqtNBeIqvevjx++uu3//qvv/0//+O3//G3n/7x27e//Pzt169fvr6/fblWXplBECHJn1F1dzeAXepGlSTN0prHhOr251DV/ijVkFASGd2Qn7aUiSQzdKXe367rESsZ6aeO7m7/XgkN9TxXwatJrZ5HIAEhoVt7t8ju7uoWqnR3P+9b3eqKYERmREaC2cJ9166qqu4SROgKXalr4boiIwB2Yxd3VTfu3Z+3qlG7SuizSwC0H4faLwxSNapw31VSVVejyg+wg0hmZkbwyvzyliuZQQm71ECTrXre+65uoTVvkK/FEIxMCFXFDKnVHUwygoyIAFodwciAfnxSkPyQg4wg/A3UvHxAjSq1tHdXqVoNzBvrVncEMxizqpHJDEi7u0F0oyS1dvcutLw+AyADKoHIQAQzkwxCkUkw/u2lEyIjI1/bnBQhBklEcEVASpLBoIJUt9DAHIQgIxeB7mpJEsM7FVWoDSBarFZECt1oQOFjAKCUgZUIcq2E9zH9MuaEbAGt6m6gGl1zaopoYZdAtkSAzBZaTTAi/MEBQFd3IQLiXSXxPGqCBPpKfXng5y/rt6/rl2/XL1+vLxcSfT/vXXxW\",\"random_seed\":5475410721026164000}],\"inference_time\":2.5882935523986816}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "910f49a979e38c27-EWR",
+        "connection": "keep-alive",
+        "content-encoding": "gzip",
+        "content-type": "application/json",
+        "server": "cloudflare",
+        "transfer-encoding": "chunked"
+      }
+    }
+  },
+  "800422f514de63172328077b80acd522e3cb4a9b65adadc982dc6e399fe9ac98": {
+    "url": "data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAABAAAAAQACAIAAADwf7zUAAEAAElEQVR4nFz9y7IkWZIkiDGLHFWz+3D3eGXkozIrqzHTTTSDBQh/hwU+dRYzhMUMujIzItz9XjNVPSKMhYiaRyOyKMrD/F4zNdXzYGFm4cP/9//rf15eD65YzMfiY9gYbmbuNAIkjTQCAIX65/H/JaRSkpQhQBlKKVOSMgEg6wdSEARQrPeiSNBoNEIACBjqRwSpf14hCQAy+qWUoP6UyPzdxykiM5WCUjEzhXlEQnNGhGZEptRvrwTB/jQACaQySUAJCQIhJuy8NAcoOuEwAx11Z+jwYWZ0pznN6UZ3M6MZSZrV/RP57fsDAuqboa7n8U8mMpWZ6j/UHYay7wrrCZCQQNjv3hFAfS0IYN1VgfUT9UVZNzT7Z+th9N+T9cakgQSBvnjWP0aYmRmdMOMgnH13CIA0pEDw/JT6yqmsq5MSVPZ3V98Efvszif5hon7m/CsQAtWXiiT7zetTyBpF9eLvbgf/h3vNvnf9qXUv1Y9c/Uvq+1l3gLR6fwNo1i+CNPbdxbc7BPG8Etr5SyTYE6ku1KD+BYggsm4DjKyrqkuRkKjBnvm4bpDnlMBjXGSk+r/1bV6iXqj5p9S3gZY65xzEusU1La1u/XmzejpC6sfa/6vxxR5fYI3Lx33vX5dqtNaUQ4oZQv8ZJGoo0ETWE69HeV5MP4fzYf5uGP9uqLOHOQiKoCBCKYDnBHt8lXNE1HigodYeCcaeT4+P4+9Gy+Of/obnvP12gTp/vW7f+WE8f4Q6r1+PS6j3OV8730e//4jHy/WGqufweHb1NfrTH7fh29VaDxr87nU+7q3w//8Vv33M/3DflI935jnCzs/PvtT6mboJ9XD5uwlct+Xxyu/vKs+/tVp9aoaQgEiq3gsCUv/DTFePRP1+Ja1lmxIyzxst5KzLM0VdAJGQkAGICPWfgQwhkZISKap2EwG1SGV9cdY8Symzn2qe",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "content-type": "image/jpeg"
+      }
+    }
+  },
+  "2680d7c0cb9134c0b7c0a1e4f959ba43828e464c3a395863e8d592e5d6d58111": {
+    "url": "data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAABAAAAAQACAIAAADwf7zUAAEAAElEQVR4nFT9WZJkSZIkCCIS8RNVM/M1tszsgpkrzQXmJHPjaYCprsoId1OVx0Q4H0gsFu0JFeVupovIE16IcCP+v/8//6/NWxQVARAQKAFqBiSAkEBC3SQAwv8JERQgAC0QJAg0gBaDBACCkASAAAkJLflv/I8gf6U0/xJBf41AEeGv8jdIiNd3NiMkBdkCeX6Of7gEUhLI81JwfrHI86cAMF8ioAESQfol+x29vhMkILUi/aj81hT0c/BPEf2u/W792/x382Nf713Q/G4KIP0m1Xq9Nv+J/0PnSUEg6P9isFs8z6Yl8PVoSTAAnY/gx5Pxw3m9fT9NzUv2FwUJqLr9rkGoIbaIRgFqtNBeIqvevjx++uu3//qvv/0//+O3//G3n/7x27e//Pzt169fvr6/fblWXplBECHJn1F1dzeAXepGlSTN0prHhOr251DV/ijVkFASGd2Qn7aUiSQzdKXe367rESsZ6aeO7m7/XgkN9TxXwatJrZ5HIAEhoVt7t8ju7uoWqnR3P+9b3eqKYERmREaC2cJ9166qqu4SROgKXalr4boiIwB2Yxd3VTfu3Z+3qlG7SuizSwC0H4faLwxSNapw31VSVVejyg+wg0hmZkbwyvzyliuZQQm71ECTrXre+65uoTVvkK/FEIxMCFXFDKnVHUwygoyIAFodwciAfnxSkPyQg4wg/A3UvHxAjSq1tHdXqVoNzBvrVncEMxizqpHJDEi7u0F0oyS1dvcutLw+AyADKoHIQAQzkwxCkUkw/u2lEyIjI1/bnBQhBklEcEVASpLBoIJUt9DAHIQgIxeB7mpJEsM7FVWoDSBarFZECt1oQOFjAKCUgZUIcq2E9zH9MuaEbAGt6m6gGl1zaopoYZdAtkSAzBZaTTAi/MEBQFd3IQLiXSXxPGqCBPpKfXng5y/rt6/rl2/XL1+vLxcSfT/vXXxW",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "content-type": "image/jpeg"
+      }
+    }
+  },
+  "3d7682559dc2959a470b034b4c31d4c997a0c28fa53ad24528183b298f938e25": {
+    "url": "https://api.hyperbolic.xyz/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"What can I do in SF?\"}],\"model\":\"meta-llama/Meta-Llama-3.1-405B-Instruct\",\"max_tokens\":2048,\"temperature\":0.7,\"top_p\":0.9}"
+    },
+    "response": {
+      "body": "{\"id\":\"chatcmpl-23dc3d520e0040bda13141a911acf671\",\"object\":\"chat.completion\",\"created\":1739395044,\"model\":\"meta-llama/Meta-Llama-3.1-405B-Instruct\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"San Francisco! There are countless things to do in this vibrant and eclectic city. Here are some ideas to get you started:\\n\\n**Landmarks and Attractions:**\\n\\n1. **Golden Gate Bridge**: Take a walk or bike ride across the iconic bridge for spectacular views of the city and the bay.\\n2. **Alcatraz Island**: Visit the former prison turned national park for a glimpse into the city's infamous past.\\n3. **Fisherman's Wharf**: Explore the bustling waterfront district, sample fresh seafood, and take in the street performers.\\n4. **Chinatown**: Wander through the colorful streets and alleys of one of the largest Chinese communities outside of Asia.\\n5. **Lombard Street**: Known as the \\\"crookedest street in the world,\\\" this scenic street offers stunning views of the city.\\n\\n**Museums and Galleries:**\\n\\n1. **de Young Museum**: Discover art and cultural exhibitions from around the world in this stunning museum.\\n2. **San Francisco Museum of Modern Art (SFMOMA)**: Explore an extensive collection of modern and contemporary art.\\n3. **California Palace of the Legion of Honor**: Visit this beautiful museum in Lincoln Park, featuring European art and stunning views of the Golden Gate Bridge.\\n4. **Exploratorium**: Engage in interactive science exhibits and experiments for all ages.\\n\\n**Neighborhoods and Shopping:**\\n\\n1. **Haight-Ashbury**: Visit the epicenter of the 1960s counterculture movement and browse the vintage shops and cafes.\\n2. **Castro District**: Explore the vibrant LGBTQ+ community and enjoy the lively nightlife.\\n3. **Union Square**: Shop and dine in this bustling downtown area, featuring iconic department stores and theaters.\\n4. **North Beach**: Discover the charming Italian-American neighborhood, known for its delicious food, coffee, and lively atmosphere.\\n\\n**Outdoor Activities:**\\n\\n1. **Golden Gate Park**: Escape the city in this sprawling urban park, featuring gardens, lakes, and walking trails.\\n2. **Presidio**: Explore the former military base turned national park, offering hiking trails, scenic overlooks, and historic sites.\\n3. **Ocean Beach**: Enjoy the sunset and the Pacific Ocean views at this popular beach.\\n4. **Mount Tamalpais**: Take a day trip to the nearby mountain, offering stunning views of the Bay Area and hiking trails.\\n\\n**Food and Drink:**\\n\\n1. **Try a classic San Francisco sourdough bread** at Fisherman's Wharf or a local bakery.\\n2. **Sample the fresh seafood** at the Ferry Building Marketplace or a seafood restaurant.\\n3. **Explore the food trucks** at the SoMa StrEat Food Park or other locations around the city.\\n4. **Visit a local brewery** or winery, such as Anchor Brewing Company or Bluxome Street Winery.\\n\\nThese are just a few of the many things to do in San Francisco. With so much to see and do, you're sure to have an unforgettable experience in this vibrant city!\"},\"finish_reason\":\"stop\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":42,\"total_tokens\":658,\"completion_tokens\":616}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "910f9aef9e40424d-EWR",
+        "connection": "keep-alive",
+        "content-encoding": "gzip",
+        "content-type": "application/json",
+        "server": "cloudflare",
+        "transfer-encoding": "chunked"
+      }
+    }
+  },
+  "8f1f6ec586c4611480c80a99430baf7be7d7f53aaf2f420199b74e4328bde9db": {
+    "url": "https://api.hyperbolic.xyz/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Paris is\"}],\"temperature\":0,\"max_tokens\":10,\"model\":\"meta-llama/Llama-3.1-405B\"}"
+    },
+    "response": {
+      "body": "{\"object\":\"error\",\"message\":\"Only Qwen/Qwen2.5-72B-Instruct && meta-llama/Llama-3.2-3B-Instruct && FLUX.1-dev && mistralai/Pixtral-12B-2409 && StableDiffusion && Qwen/Qwen2-VL-72B-Instruct && meta-llama/Meta-Llama-3-70B-Instruct && meta-llama/Meta-Llama-3.1-70B-Instruct && meta-llama/Meta-Llama-3.1-8B-Instruct && Qwen/Qwen2.5-Coder-32B-Instruct && meta-llama/Meta-Llama-3.1-405B-FP8 && TTS && meta-llama/Meta-Llama-3.1-405B-Instruct && deepseek-ai/DeepSeek-R1-Zero && deepseek-ai/DeepSeek-V3 && Qwen/QwQ-32B-Preview && Qwen/Qwen2-VL-7B-Instruct && deepseek-ai/DeepSeek-V2.5 && meta-llama/Llama-3.3-70B-Instruct && NousResearch/Hermes-3-Llama-3.1-70B && test && meta-llama/Meta-Llama-3.1-405B && meta-llama/Meta-Llama-3.1-405B-Instruct-Virtuals && deepseek-ai/DeepSeek-R1 allowed now, your model meta-llama/Llama-3.1-405B\",\"type\":\"\",\"param\":null,\"code\":40301}",
+      "status": 400,
+      "statusText": "Bad Request",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "910fa443ffb6433f-EWR",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "server": "cloudflare"
+      }
+    }
+  },
+  "803d41b03075a68306064ff1b8ff7c47ff0a8605452c4f735b38b77e9c95ef1e": {
+    "url": "https://api.hyperbolic.xyz/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"What can I do in SF?\"}],\"model\":\"meta-llama/Meta-Llama-3.1-405B-Instruct\",\"max_tokens\":10,\"temperature\":0,\"top_p\":0.9}"
+    },
+    "response": {
+      "body": "{\"id\":\"chatcmpl-010e6d5eaec94c8fae49d74222b2cb3e\",\"object\":\"chat.completion\",\"created\":1739395489,\"model\":\"meta-llama/Meta-Llama-3.1-405B-Instruct\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"San Francisco! There are countless things to do in\"},\"finish_reason\":\"length\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":42,\"total_tokens\":52,\"completion_tokens\":10}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "910fa5cdcc548c30-EWR",
+        "connection": "keep-alive",
+        "content-encoding": "gzip",
+        "content-type": "application/json",
+        "server": "cloudflare",
+        "transfer-encoding": "chunked"
+      }
+    }
+  },
+  "939d9a1b647f58493859ba0bdc9c7ebc70664f549f48a00e595dd756795d35fa": {
+    "url": "https://api.hyperbolic.xyz/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Paris is\"}],\"temperature\":0,\"top_p\":0,\"max_tokens\":10,\"model\":\"meta-llama/Llama-3.1-405B\"}"
+    },
+    "response": {
+      "body": "{\"object\":\"error\",\"message\":\"Only Qwen/Qwen2.5-72B-Instruct && meta-llama/Llama-3.2-3B-Instruct && FLUX.1-dev && mistralai/Pixtral-12B-2409 && StableDiffusion && Qwen/Qwen2-VL-72B-Instruct && meta-llama/Meta-Llama-3-70B-Instruct && meta-llama/Meta-Llama-3.1-70B-Instruct && meta-llama/Meta-Llama-3.1-8B-Instruct && Qwen/Qwen2.5-Coder-32B-Instruct && meta-llama/Meta-Llama-3.1-405B-FP8 && TTS && meta-llama/Meta-Llama-3.1-405B-Instruct && deepseek-ai/DeepSeek-R1-Zero && deepseek-ai/DeepSeek-V3 && Qwen/QwQ-32B-Preview && Qwen/Qwen2-VL-7B-Instruct && deepseek-ai/DeepSeek-V2.5 && meta-llama/Llama-3.3-70B-Instruct && NousResearch/Hermes-3-Llama-3.1-70B && test && meta-llama/Meta-Llama-3.1-405B && meta-llama/Meta-Llama-3.1-405B-Instruct-Virtuals && deepseek-ai/DeepSeek-R1 allowed now, your model meta-llama/Llama-3.1-405B\",\"type\":\"\",\"param\":null,\"code\":40301}",
+      "status": 400,
+      "statusText": "Bad Request",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "910fa8f1efa81a1b-EWR",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "server": "cloudflare"
+      }
+    }
+  },
+  "f6de107e7dda46264da349a892ece8070ef9f02fa57224f570e81f29955722f3": {
+    "url": "https://api.hyperbolic.xyz/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Paris is\"}],\"temperature\":0,\"top_p\":0,\"max_tokens\":10,\"model\":\"meta-llama/Llama-3.1-405B-Instruct\"}"
+    },
+    "response": {
+      "body": "{\"object\":\"error\",\"message\":\"Only Qwen/Qwen2.5-72B-Instruct && meta-llama/Llama-3.2-3B-Instruct && FLUX.1-dev && mistralai/Pixtral-12B-2409 && StableDiffusion && Qwen/Qwen2-VL-72B-Instruct && meta-llama/Meta-Llama-3-70B-Instruct && meta-llama/Meta-Llama-3.1-70B-Instruct && meta-llama/Meta-Llama-3.1-8B-Instruct && Qwen/Qwen2.5-Coder-32B-Instruct && meta-llama/Meta-Llama-3.1-405B-FP8 && TTS && meta-llama/Meta-Llama-3.1-405B-Instruct && deepseek-ai/DeepSeek-R1-Zero && deepseek-ai/DeepSeek-V3 && Qwen/QwQ-32B-Preview && Qwen/Qwen2-VL-7B-Instruct && deepseek-ai/DeepSeek-V2.5 && meta-llama/Llama-3.3-70B-Instruct && NousResearch/Hermes-3-Llama-3.1-70B && test && meta-llama/Meta-Llama-3.1-405B && meta-llama/Meta-Llama-3.1-405B-Instruct-Virtuals && deepseek-ai/DeepSeek-R1 allowed now, your model meta-llama/Llama-3.1-405B-Instruct\",\"type\":\"\",\"param\":null,\"code\":40301}",
+      "status": 400,
+      "statusText": "Bad Request",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "910fbb70cd7a43da-EWR",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "server": "cloudflare"
+      }
+    }
+  },
+  "dd7c796275e86e412a71ce7f972c14ff8f7040fd8cc41c35c4a99772d8e5d9a3": {
+    "url": "https://api.hyperbolic.xyz/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Paris is\"}],\"temperature\":0,\"top_p\":0.1,\"max_tokens\":10,\"model\":\"meta-llama/Meta-Llama-3.1-405B-Instruct\"}"
+    },
+    "response": {
+      "body": "{\"id\":\"chatcmpl-0d83df308e904a6e857a0acc4affc274\",\"object\":\"chat.completion\",\"created\":1739397309,\"model\":\"meta-llama/Meta-Llama-3.1-405B-Instruct\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"...the capital and most populous city of France,\"},\"finish_reason\":\"length\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":37,\"total_tokens\":47,\"completion_tokens\":10}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "910fd23c2c6d4345-EWR",
+        "connection": "keep-alive",
+        "content-encoding": "gzip",
+        "content-type": "application/json",
+        "server": "cloudflare",
+        "transfer-encoding": "chunked"
+      }
+    }
+  },
+  "2e3e229f493358a2398d1ac549683e5691681ae78bae11506b803b9024051dd3": {
+    "url": "https://api.hyperbolic.xyz/v1/images/generations",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"model_name\":\"SD2\",\"height\":1024,\"width\":1024,\"response_format\":\"base64\",\"prompt\":\"award winning high resolution photo of a giant tortoise\",\"model\":\"stabilityai/stable-diffusion-2\"}"
+    },
+    "response": {
+      "body": "{\"images\":[{\"index\":0,\"image\":\"iVBORw0KGgoAAAANSUhEUgAABAAAAAQACAIAAADwf7zUAAEAAElEQVR4nEz927Ik2Y0sgLk7VmRVz5H+RY/6/++RSSadM9O1cwHuekAUJZJG6yar986MCxbgN/D/9n//v3798xNPI869BgrhzAi0CQCUxHgKShBEBEQnIMiQAMFiGGhwkgIP+KA+SOH5hfMPzi98fun3L/3zX7//+ee/fn/+6/fzf/n9+a86/xR/k6f4iCVUwDoHICIHYnp+rv/90//7//Pf/4//89//z//+n/99/3z7T/eFv8Fw/zMGIgxjJMmAEFQU3QMkAUulw6LOUUklUQQoPo8iGJAoRQypOOecU3xKVYoDpMTPp35/TkkskRRTAsgJyAhBJokNhYpy4W/cmQYmvhb0/Zk4ABNgrOLcoQpUuJ+DAExAwqSemsTAuG+P43G3/efn256x2wMxQBKdUolVv//5X79///Pr13/9r3/+L//1+5//9c9//fPrn9/Pr39+//7n1+9T53OOxJLO85SqqFNVEimCIhi05+v79fdP//e/3//z7/f//X/+5//15+d/f+//3J9//+e//4/nEph2f8dO3/n5dxx0o5tuIJyGwRknCNiGnTj2AAEFgCSKYEBDoEiRhzyUUA8pssRiEc+vJ4REwiRVEiFKpac+5zzCIapUoIBiIUYiEzPtGWRI9DRiFkCSJpEkDIjAjrEPOxEQBkVCRWRCKhHAGCBiJ5k49r3XM2nfe327O77ITTq+9kU6vnSYm1OFQfGUnnoe6Kk6Ykqijk6dUzqsKjJVRVIHoQJQCSawM4kDh4YyThIwVCEgETpwapJrOLIxyde4UNsdTRAg7g4jUUKSElRAADEIAQYgGY7ZTYIxE/Y3NjycwTQzsNFjG3ECegBn77VjSRQQ6JAMGSBF/DoiI6keAS4BBIUS6nD/KTHnKEQRVQQgyY4DIG13/O1x3Pbt/WCYwRgeuAGjv5gGBr7IwF8wtIEQE5kCEzDFoFgE\",\"random_seed\":12557793529147683000}],\"inference_time\":2.590954303741455}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "910fd594ff3b9dff-EWR",
+        "connection": "keep-alive",
+        "content-encoding": "gzip",
+        "content-type": "application/json",
+        "server": "cloudflare",
+        "transfer-encoding": "chunked"
+      }
+    }
+  },
+  "46c216b28d81ab0ebf7c3eff3670078384c223d7cda25f022439f394ba6d1c03": {
+    "url": "data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAABAAAAAQACAIAAADwf7zUAAEAAElEQVR4nEz9S9Ycyc4kCIoI1Jy3cthL6R73rPa/mq6Tl24ApAeizj9jECceJD93M30A8gL/v//3/8v1tzFSsShAIKtmx7uUAJQkqd8m2LMEYO76/Q6hGQMEMO/sWKcAgiJhW0XA9RQISSqpJLHy90cUVSWxRB2qJLqOWNRRFe1VAYJKpA3bq+LuAl6vvYB3vbs7Y3tmdwZwv2NjFza2l8Yu8os9ZhXs/g4lAyQIrA27Dm2A9C7JGZvK19yxDQD5KCIJ2iYpcg1JIqpI8DyHBomqKtU5j85DVNUhq84h8oNEkRTFmanSeGETe56ad0ESLBFkzwLOt/Yu1vaS3F75926AeQfwvMP8MhtklQiTYhEGaRGUQIJE/mRYxZ2p0nq3p0okScCsEkCJpMD7xWGwRBLQ2hRJvjNLUgBpeOEFQYKu0u6CVLHEJe8fCavkBQiSJZH0cpGvX6Rsbu9RmdglASxgmAAEY2ZE1ikg7wnrlcq2qsi8Z5i4bxQ2loRh0HbneXiHBGUCzHrzAkthseO22x7Urme2Z3oxzuLafd8FAeJ9522TtPm+64VBQFgAWgP5IMtdk4Kxm9VwqCqVWKXsQj2nbLNEAQAF2OJKNGxb+XJEnk72IUkbsIkspd2ddTZDr7OmTUBiZUdKglQEJFHMb2VeTRY/CCobIc8aBmw774QGPOu1Tfx+A/ML7PxXAFjDxNgL7E7WKnF/G6m7IvIB8glIACCzvwBRpJEDhaBA6YiFZalEEcQSojsrAMjJsBCA3c3XsGFU0bsmvXZ3iesldj27A5gwPCTgNe4n8hqwJJBz/9z7ZBderLHrtQA6T2JhCcQ9MiUg75cAsTZoYO374fLW8vecA15TnFkAu2PAY5teA3ADS1FgeVgqosgSRIgogOQj1alHLOaloigREA1g974rY4ElbezM5D3bu7ue7MP1eL39HS92dma3",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "content-type": "image/jpeg"
+      }
+    }
+  },
+  "0cd3e7326e9fa0055dd69b4ec9e8ef958b34c1634ee38321ff067ab7ed9c51ca": {
+    "url": "https://api.hyperbolic.xyz/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"...the capital and most populous city of France,\"}],\"temperature\":0,\"top_p\":0.1,\"max_tokens\":10,\"model\":\"meta-llama/Meta-Llama-3.1-405B-Instruct\"}"
+    },
+    "response": {
+      "body": "{\"id\":\"chatcmpl-d2080d2cc2dc416c906cebca115bd8bc\",\"object\":\"chat.completion\",\"created\":1739397369,\"model\":\"meta-llama/Meta-Llama-3.1-405B-Instruct\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"...is Paris.\"},\"finish_reason\":\"stop\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":45,\"total_tokens\":50,\"completion_tokens\":5}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "910fd3af7c0143dd-EWR",
+        "connection": "keep-alive",
+        "content-encoding": "gzip",
+        "content-type": "application/json",
+        "server": "cloudflare",
+        "transfer-encoding": "chunked"
+      }
+    }
+  },
+  "5931449dcfc2e19677481d1ce65dc348c07d2b7ca58a7250b18e2fd9337b4f1f": {
+    "url": "data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAABAAAAAQACAIAAADwf7zUAAEAAElEQVR4nEz927Ik2Y0sgLk7VmRVz5H+RY/6/++RSSadM9O1cwHuekAUJZJG6yar986MCxbgN/D/9n//v3798xNPI869BgrhzAi0CQCUxHgKShBEBEQnIMiQAMFiGGhwkgIP+KA+SOH5hfMPzi98fun3L/3zX7//+ee/fn/+6/fzf/n9+a86/xR/k6f4iCVUwDoHICIHYnp+rv/90//7//Pf/4//89//z//+n/99/3z7T/eFv8Fw/zMGIgxjJMmAEFQU3QMkAUulw6LOUUklUQQoPo8iGJAoRQypOOecU3xKVYoDpMTPp35/TkkskRRTAsgJyAhBJokNhYpy4W/cmQYmvhb0/Zk4ABNgrOLcoQpUuJ+DAExAwqSemsTAuG+P43G3/efn256x2wMxQBKdUolVv//5X79///Pr13/9r3/+L//1+5//9c9//fPrn9/Pr39+//7n1+9T53OOxJLO85SqqFNVEimCIhi05+v79fdP//e/3//z7/f//X/+5//15+d/f+//3J9//+e//4/nEph2f8dO3/n5dxx0o5tuIJyGwRknCNiGnTj2AAEFgCSKYEBDoEiRhzyUUA8pssRiEc+vJ4REwiRVEiFKpac+5zzCIapUoIBiIUYiEzPtGWRI9DRiFkCSJpEkDIjAjrEPOxEQBkVCRWRCKhHAGCBiJ5k49r3XM2nfe327O77ITTq+9kU6vnSYm1OFQfGUnnoe6Kk6Ykqijk6dUzqsKjJVRVIHoQJQCSawM4kDh4YyThIwVCEgETpwapJrOLIxyde4UNsdTRAg7g4jUUKSElRAADEIAQYgGY7ZTYIxE/Y3NjycwTQzsNFjG3ECegBn77VjSRQQ6JAMGSBF/DoiI6keAS4BBIUS6nD/KTHnKEQRVQQgyY4DIG13/O1x3Pbt/WCYwRgeuAGjv5gGBr7IwF8wtIEQE5kCEzDFoFgE",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "content-type": "image/jpeg"
+      }
+    }
+  },
+  "18f60e0613350c2f609c595eb0069427e1b1bd5c0d373651f414d9e0721e0476": {
+    "url": "https://api.hyperbolic.xyz/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"...the capital and most populous city of France,\"}],\"temperature\":0,\"max_tokens\":10,\"model\":\"meta-llama/Meta-Llama-3.1-405B-Instruct\"}"
+    },
+    "response": {
+      "body": "{\"id\":\"chatcmpl-7734e79990cf4c749889ee1d226ff55d\",\"object\":\"chat.completion\",\"created\":1739397457,\"model\":\"meta-llama/Meta-Llama-3.1-405B-Instruct\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"...is Paris.\"},\"finish_reason\":\"stop\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":45,\"total_tokens\":50,\"completion_tokens\":5}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "910fd5db2ed0421b-EWR",
+        "connection": "keep-alive",
+        "content-encoding": "gzip",
+        "content-type": "application/json",
+        "server": "cloudflare",
+        "transfer-encoding": "chunked"
+      }
+    }
+  },
+  "7e898c424826abe8d4da67e7ec022778d94bec2d9f83b3c5fedc3135146c6422": {
+    "url": "https://api.hyperbolic.xyz/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Paris is\"}],\"temperature\":0,\"max_tokens\":10,\"model\":\"meta-llama/Meta-Llama-3.1-405B-Instruct\"}"
+    },
+    "response": {
+      "body": "{\"id\":\"chatcmpl-4d52a18d8e12469da7aa06cd78ddd9f4\",\"object\":\"chat.completion\",\"created\":1739397576,\"model\":\"meta-llama/Meta-Llama-3.1-405B-Instruct\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"...the capital and most populous city of France,\"},\"finish_reason\":\"length\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":37,\"total_tokens\":47,\"completion_tokens\":10}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "910fd8c55e1218b8-EWR",
+        "connection": "keep-alive",
+        "content-encoding": "gzip",
+        "content-type": "application/json",
+        "server": "cloudflare",
+        "transfer-encoding": "chunked"
+      }
+    }
+  },
+  "97116dbb4b9e072d2b2484e64d1fb3872961cfe5bc011769f746b9d1cbcee900": {
+    "url": "https://api.hyperbolic.xyz/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Paris is\"}],\"temperature\":0,\"top_p\":0.01,\"max_tokens\":10,\"model\":\"meta-llama/Meta-Llama-3.1-405B-Instruct\"}"
+    },
+    "response": {
+      "body": "{\"id\":\"chatcmpl-63d1495b60b44e9489477c65126b8746\",\"object\":\"chat.completion\",\"created\":1739397703,\"model\":\"meta-llama/Meta-Llama-3.1-405B-Instruct\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"...the capital and most populous city of France,\"},\"finish_reason\":\"length\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":37,\"total_tokens\":47,\"completion_tokens\":10}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "910fdbd8daf82363-EWR",
+        "connection": "keep-alive",
+        "content-encoding": "gzip",
+        "content-type": "application/json",
+        "server": "cloudflare",
+        "transfer-encoding": "chunked"
       }
     }
   }
