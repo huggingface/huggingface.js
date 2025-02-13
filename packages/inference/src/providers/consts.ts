@@ -24,4 +24,5 @@ export const HARDCODED_MODEL_ID_MAPPING: Record<InferenceProvider, Record<ModelI
 	replicate: {},
 	sambanova: {},
 	together: {},
+	novita: {},
 };

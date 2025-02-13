@@ -29,15 +29,17 @@ export interface Options {
 export type InferenceTask = Exclude<PipelineType, "other">;
 
 export const INFERENCE_PROVIDERS = [
+	"black-forest-labs",
 	"fal-ai",
 	"fireworks-ai",
-	"nebius",
 	"hf-inference",
+	"nebius",
+	"novita",
 	"replicate",
 	"sambanova",
 	"together",
-	"black-forest-labs",
 ] as const;
+
 export type InferenceProvider = (typeof INFERENCE_PROVIDERS)[number];
 
 export interface BaseArgs {
