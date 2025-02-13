@@ -63,7 +63,10 @@ export async function* listModels<
 			owner?: string;
 			task?: PipelineType;
 			tags?: string[];
-			inferenceProvider?: string[];
+			/**
+			 * Will search for models that have one of the inference providers in the list.
+			 */
+			inferenceProviders?: string[];
 		};
 		hubUrl?: string;
 		additionalFields?: T[];
@@ -85,11 +88,13 @@ export async function* listModels<
 			...(params?.search?.owner ? { author: params.search.owner } : undefined),
 			...(params?.search?.task ? { pipeline_tag: params.search.task } : undefined),
 			...(params?.search?.query ? { search: params.search.query } : undefined),
+			...(params?.search?.inferenceProviders
+				? { inference_provider: params.search.inferenceProviders.join(",") }
+				: undefined),
 		}),
 		...(params?.search?.tags?.map((tag) => ["filter", tag]) ?? []),
 		...MODEL_EXPAND_KEYS.map((val) => ["expand", val] satisfies [string, string]),
 		...(params?.additionalFields?.map((val) => ["expand", val] satisfies [string, string]) ?? []),
-		...(params?.search?.inferenceProvider?.map((val) => ["inference_provider", val]) ?? []),
 	]).toString();
 	let url: string | undefined = `${params?.hubUrl || HUB_URL}/api/models?${search}`;
 
