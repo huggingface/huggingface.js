@@ -6,6 +6,7 @@ import { SAMBANOVA_API_BASE_URL } from "../providers/sambanova";
 import { TOGETHER_API_BASE_URL } from "../providers/together";
 import { NOVITA_API_BASE_URL } from "../providers/novita";
 import { FIREWORKS_AI_API_BASE_URL } from "../providers/fireworks-ai";
+import { BLACKFORESTLABS_AI_API_BASE_URL } from "../providers/black-forest-labs";
 import type { InferenceProvider } from "../types";
 import type { InferenceTask, Options, RequestArgs } from "../types";
 import { isUrl } from "./isUrl";
@@ -80,8 +81,13 @@ export async function makeRequestOptions(
 
 	const headers: Record<string, string> = {};
 	if (accessToken) {
-		headers["Authorization"] =
-			provider === "fal-ai" && authMethod === "provider-key" ? `Key ${accessToken}` : `Bearer ${accessToken}`;
+		if (provider === "fal-ai" && authMethod === "provider-key") {
+			headers["Authorization"] = `Key ${accessToken}`;
+		} else if (provider === "black-forest-labs" && authMethod === "provider-key") {
+			headers["X-Key"] = accessToken;
+		} else {
+			headers["Authorization"] = `Bearer ${accessToken}`;
+		}
 	}
 
 	// e.g. @huggingface/inference/3.1.3
@@ -148,6 +154,12 @@ function makeUrl(params: {
 
 	const shouldProxy = params.provider !== "hf-inference" && params.authMethod !== "provider-key";
 	switch (params.provider) {
+		case "black-forest-labs": {
+			const baseUrl = shouldProxy
+				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
+				: BLACKFORESTLABS_AI_API_BASE_URL;
+			return `${baseUrl}/${params.model}`;
+		}
 		case "fal-ai": {
 			const baseUrl = shouldProxy
 				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)

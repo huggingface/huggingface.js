@@ -6994,5 +6994,80 @@
         "transfer-encoding": "chunked"
       }
     }
+  },
+  "b320223c78e20541a47c961d89d24f507b0b0257224d91cd05744c93f2d67d2c": {
+    "url": "https://api.us1.bfl.ai/v1/flux-dev",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"height\":256,\"width\":256,\"num_inference_steps\":4,\"seed\":8817,\"prompt\":\"A raccoon driving a truck\"}"
+    },
+    "response": {
+      "body": "{\"id\":\"dd8b1c92-587b-428c-9095-d8c12a641160\",\"polling_url\":\"https://api.us1.bfl.ai/v1/get_result?id=dd8b1c92-587b-428c-9095-d8c12a641160\"}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "strict-transport-security": "max-age=31536000; includeSubDomains"
+      }
+    }
+  },
+  "23eefbade142f7a1e33d50dd6bfaf56e7b959689f7990025db1b353214890a03": {
+    "url": "https://api.us1.bfl.ai/v1/get_result?id=dd8b1c92-587b-428c-9095-d8c12a641160&attempt=0",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      }
+    },
+    "response": {
+      "body": "{\"id\":\"dd8b1c92-587b-428c-9095-d8c12a641160\",\"status\":\"Pending\",\"result\":null,\"progress\":0.6}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "retry-after": "1",
+        "strict-transport-security": "max-age=31536000; includeSubDomains"
+      }
+    }
+  },
+  "5803254b4092ae6ac445292c617480002607bb30cce9ba8dc37ce9bb2754f94b": {
+    "url": "https://api.us1.bfl.ai/v1/get_result?id=dd8b1c92-587b-428c-9095-d8c12a641160&attempt=1",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      }
+    },
+    "response": {
+      "body": "{\"id\":\"dd8b1c92-587b-428c-9095-d8c12a641160\",\"status\":\"Ready\",\"result\":{\"sample\":\"https://delivery-us1.bfl.ai/results/aa7ab8da64b946dca070d455854a0c3e/sample.jpeg?se=2025-02-13T16%3A12%3A37Z&sp=r&sv=2024-11-04&sr=b&rsct=image/jpeg&sig=u0wzLXKBr8dCMnk9US51zQs7Ma/x/l0lEJvEM3pMUrA%3D\",\"prompt\":\"A raccoon driving a truck\",\"seed\":8817,\"start_time\":1739462555.336884,\"end_time\":1739462557.9051642,\"duration\":2.5682802200317383},\"progress\":null}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "retry-after": "1",
+        "strict-transport-security": "max-age=31536000; includeSubDomains"
+      }
+    }
+  },
+  "548ead8522302cb1123833c27e33d193a8fd619633271414bd2d84e1a71469f0": {
+    "url": "https://delivery-us1.bfl.ai/results/aa7ab8da64b946dca070d455854a0c3e/sample.jpeg?se=2025-02-13T16%3A12%3A37Z&sp=r&sv=2024-11-04&sr=b&rsct=image/jpeg&sig=u0wzLXKBr8dCMnk9US51zQs7Ma/x/l0lEJvEM3pMUrA%3D",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "accept-ranges": "bytes",
+        "connection": "keep-alive",
+        "content-md5": "RRVPlYWCAb46mkS5lSs7RQ==",
+        "content-type": "image/jpeg",
+        "etag": "\"0x8DD4C47D65702E7\"",
+        "last-modified": "Thu, 13 Feb 2025 16:02:37 GMT"
+      }
+    }
   }
 }

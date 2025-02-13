@@ -2,7 +2,7 @@ import { assert, describe, expect, it } from "vitest";
 
 import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
 
-import { chatCompletion, HfInference } from "../src";
+import { chatCompletion, HfInference, textToImage } from "../src";
 import { textToVideo } from "../src/tasks/cv/textToVideo";
 import { readTestFile } from "./test-files";
 import "./vcr";
@@ -1210,6 +1210,32 @@ describe.concurrent("HfInference", () => {
 				// Verify we got a meaningful response
 				expect(fullResponse).toBeTruthy();
 				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+		},
+		TIMEOUT
+	);
+	describe.concurrent(
+		"Black Forest Labs",
+		() => {
+			HARDCODED_MODEL_ID_MAPPING["black-forest-labs"] = {
+				"black-forest-labs/FLUX.1-dev": "flux-dev",
+				// "black-forest-labs/FLUX.1-schnell": "flux-pro",
+			};
+
+			it("textToImage", async () => {
+				const res = await textToImage({
+					model: "black-forest-labs/FLUX.1-dev",
+					provider: "black-forest-labs",
+					accessToken: env.HF_BLACK_FOREST_LABS_KEY,
+					inputs: "A raccoon driving a truck",
+					parameters: {
+						height: 256,
+						width: 256,
+						num_inference_steps: 4,
+						seed: 8817,
+					},
+				});
+				expect(res).toBeInstanceOf(Blob);
 			});
 		},
 		TIMEOUT
