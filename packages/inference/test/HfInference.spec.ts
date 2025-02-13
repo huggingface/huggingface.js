@@ -1183,7 +1183,7 @@ describe.concurrent("HfInference", () => {
 			HARDCODED_MODEL_ID_MAPPING.hyperbolic = {
 				"meta-llama/Llama-3.2-3B-Instruct": "meta-llama/Llama-3.2-3B-Instruct",
 				"meta-llama/Llama-3.3-70B-Instruct": "meta-llama/Llama-3.3-70B-Instruct",
-				"stabilityai/stable-diffusion-2": "stabilityai/stable-diffusion-2",
+				"stabilityai/stable-diffusion-2": "SD2",
 				"meta-llama/Llama-3.1-405B": "meta-llama/Meta-Llama-3.1-405B-Instruct",
 			};
 
