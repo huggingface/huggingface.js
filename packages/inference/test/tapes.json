@@ -230,8 +230,8 @@
       }
     }
   },
-  "6cba2a3c671c5b41b9a15cde8fdd8d39ad6328c0009fef2e1ffb34a9f8ca5fee": {
-    "url": "https://router.huggingface.co/hf-inference/models/sentence-transformers/paraphrase-xlm-r-multilingual-v1",
+  "f4b07044d6800a8bd137a965dc8a7d5b9b29529d66dacc437394eedc5796be9a": {
+    "url": "https://router.huggingface.co/hf-inference/pipeline/sentence-similarity/sentence-transformers/paraphrase-xlm-r-multilingual-v1",
     "init": {
       "headers": {
         "Content-Type": "application/json"
