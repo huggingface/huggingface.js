@@ -84,12 +84,32 @@ describe("listModels", () => {
 	it("should search model by inference provider", async () => {
 		let count = 0;
 		for await (const entry of listModels({
-			search: { inferenceProvider: "together" },
+			search: { inferenceProvider: ["together"] },
 			additionalFields: ["inferenceProviderMapping"],
 			limit: 10,
 		})) {
 			count++;
-			expect(Object.keys(entry.inferenceProviderMapping)).includes("together");
+			if (Array.isArray(entry.inferenceProviderMapping)) {
+				expect(entry.inferenceProviderMapping.map(({ provider }) => provider)).to.include("together");
+			}
+		}
+
+		expect(count).to.equal(10);
+	});
+
+	it("should search model by several inference providers", async () => {
+		let count = 0;
+		for await (const entry of listModels({
+			search: { inferenceProvider: ["together", "replicate"] },
+			additionalFields: ["inferenceProviderMapping"],
+			limit: 10,
+		})) {
+			count++;
+			if (Array.isArray(entry.inferenceProviderMapping)) {
+				const providerNames = entry.inferenceProviderMapping.map(({ provider }) => provider);
+				expect(providerNames).to.include("together");
+				expect(providerNames).to.include("replicate");
+			}
 		}
 
 		expect(count).to.equal(10);
