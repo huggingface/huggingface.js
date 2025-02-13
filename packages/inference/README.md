@@ -50,6 +50,7 @@ Currently, we support the following providers:
 - [Fal.ai](https://fal.ai)
 - [Fireworks AI](https://fireworks.ai)
 - [Nebius](https://studio.nebius.ai)
+- [Novita](https://novita.ai/?utm_source=github_huggingface&utm_medium=github_readme&utm_campaign=link)
 - [Replicate](https://replicate.com)
 - [Sambanova](https://sambanova.ai)
 - [Together](https://together.xyz)

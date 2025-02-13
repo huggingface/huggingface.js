@@ -36,7 +36,9 @@ export const INFERENCE_PROVIDERS = [
 	"replicate",
 	"sambanova",
 	"together",
+	"novita",
 ] as const;
+
 export type InferenceProvider = (typeof INFERENCE_PROVIDERS)[number];
 
 export interface BaseArgs {

@@ -46,6 +46,7 @@ jobs:
           HF_REPLICATE_KEY: dummy
           HF_SAMBANOVA_KEY: dummy
           HF_TOGETHER_KEY: dummy
+          HF_NOVITA_KEY: dummy
           HF_FIREWORKS_KEY: dummy
 
   browser:
@@ -88,6 +89,7 @@ jobs:
           HF_REPLICATE_KEY: dummy
           HF_SAMBANOVA_KEY: dummy
           HF_TOGETHER_KEY: dummy
+          HF_NOVITA_KEY: dummy
           HF_FIREWORKS_KEY: dummy
 
   e2e:
@@ -157,4 +159,5 @@ jobs:
           HF_REPLICATE_KEY: dummy
           HF_SAMBANOVA_KEY: dummy
           HF_TOGETHER_KEY: dummy
+          HF_NOVITA_KEY: dummy
           HF_FIREWORKS_KEY: dummy
