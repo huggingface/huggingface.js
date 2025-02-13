@@ -14,6 +14,9 @@ interface Base64ImageGeneration {
 interface OutputUrlImageGeneration {
 	output: string[];
 }
+interface HyperbolicTextToImageOutput {
+	images: Array<{ image: string }>
+}
 
 function getResponseFormatArg(provider: InferenceProvider) {
 	switch (provider) {
@@ -39,12 +42,12 @@ export async function textToImage(args: TextToImageArgs, options?: Options): Pro
 		!args.provider || args.provider === "hf-inference" || args.provider === "sambanova"
 			? args
 			: {
-					...omit(args, ["inputs", "parameters"]),
-					...args.parameters,
-					...getResponseFormatArg(args.provider),
-					prompt: args.inputs,
-			  };
-	const res = await request<TextToImageOutput | Base64ImageGeneration | OutputUrlImageGeneration>(payload, {
+				...omit(args, ["inputs", "parameters"]),
+				...args.parameters,
+				...getResponseFormatArg(args.provider),
+				prompt: args.inputs,
+			};
+	const res = await request<TextToImageOutput | Base64ImageGeneration | OutputUrlImageGeneration | HyperbolicTextToImageOutput>(payload, {
 		...options,
 		taskHint: "text-to-image",
 	});
@@ -54,7 +57,7 @@ export async function textToImage(args: TextToImageArgs, options?: Options): Pro
 			const image = await fetch(res.images[0].url);
 			return await image.blob();
 		}
-		if (args.provider === "hyperbolic" && "images" in res && Array.isArray(res.images) && res.images[0].image) {
+		if (args.provider === "hyperbolic" && "images" in res && Array.isArray(res.images) && res.images[0] && typeof res.images[0].image === "string") {
 			const base64Response = await fetch(`data:image/jpeg;base64,${res.images[0].image}`);
 			const blob = await base64Response.blob();
 			return blob;
