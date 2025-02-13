@@ -1248,7 +1248,7 @@ describe.concurrent("HfInference", () => {
 						temperature: 0,
 						top_p: 0.01,
 						max_new_tokens: 10,
-					}
+					},
 				});
 				expect(res).toMatchObject({ generated_text: "...the capital and most populous city of France," });
 			});
