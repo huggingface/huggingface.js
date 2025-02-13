@@ -4,7 +4,6 @@ import type { BaseArgs, InferenceProvider, Options } from "../../types";
 import { omit } from "../../utils/omit";
 import { request } from "../custom/request";
 import { delay } from "../../utils/delay";
-import { randomUUID } from "crypto";
 
 export type TextToImageArgs = BaseArgs & TextToImageInput;
 
@@ -45,11 +44,11 @@ export async function textToImage(args: TextToImageArgs, options?: Options): Pro
 		!args.provider || args.provider === "hf-inference" || args.provider === "sambanova"
 			? args
 			: {
-				...omit(args, ["inputs", "parameters"]),
-				...args.parameters,
-				...getResponseFormatArg(args.provider),
-				prompt: args.inputs,
-			};
+					...omit(args, ["inputs", "parameters"]),
+					...args.parameters,
+					...getResponseFormatArg(args.provider),
+					prompt: args.inputs,
+			  };
 	const res = await request<
 		TextToImageOutput | Base64ImageGeneration | OutputUrlImageGeneration | BlackForestLabsResponse
 	>(payload, {
