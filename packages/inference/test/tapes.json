@@ -7316,5 +7316,63 @@
         "transfer-encoding": "chunked"
       }
     }
+  },
+  "340a2a0cae0688dfb5b0cf1d5cac1004fbf9c411ac28e420b7d098a1a1a33437": {
+    "url": "https://api.hyperbolic.xyz/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"content\":\"Paris is\",\"role\":\"user\"}],\"max_tokens\":10,\"temperature\":0,\"top_p\":0.01}"
+    },
+    "response": {
+      "body": "{\"object\":\"error\",\"message\":\"Only Qwen/Qwen2.5-72B-Instruct && meta-llama/Llama-3.2-3B-Instruct && FLUX.1-dev && mistralai/Pixtral-12B-2409 && StableDiffusion && Qwen/Qwen2-VL-72B-Instruct && meta-llama/Meta-Llama-3-70B-Instruct && meta-llama/Meta-Llama-3.1-70B-Instruct && meta-llama/Meta-Llama-3.1-8B-Instruct && Qwen/Qwen2.5-Coder-32B-Instruct && meta-llama/Meta-Llama-3.1-405B-FP8 && TTS && meta-llama/Meta-Llama-3.1-405B-Instruct && deepseek-ai/DeepSeek-R1-Zero && deepseek-ai/DeepSeek-V3 && Qwen/QwQ-32B-Preview && Qwen/Qwen2-VL-7B-Instruct && meta-llama/Llama-3.3-70B-Instruct && NousResearch/Hermes-3-Llama-3.1-70B && meta-llama/Meta-Llama-3.1-405B && meta-llama/Meta-Llama-3.1-405B-Instruct-Virtuals && deepseek-ai/DeepSeek-R1 allowed now, your model mistralai/Mixtral-8x7B-Instruct-v0.1\",\"type\":\"\",\"param\":null,\"code\":40301}",
+      "status": 400,
+      "statusText": "Bad Request",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "911c837d7d61d60d-CDG",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "server": "cloudflare"
+      }
+    }
+  },
+  "5940db1cee26d8858daa54a789c34dab857a02dc095d7d8a81dcc07262cc4e4b": {
+    "url": "https://api.hyperbolic.xyz/v1/images/generations",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"height\":128,\"width\":128,\"prompt\":\"award winning high resolution photo of a giant tortoise\",\"model_name\":\"SD2\"}"
+    },
+    "response": {
+      "body": "{\"images\":[{\"index\":0,\"image\":\"iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAB1/UlEQVR4nJz9ybNkSZbeif1Ur97Z5umN7v58Co85MiMjh6pCoaqAAtCNbkqTQiEFpLQIhUv+O9xxRy7J5oLSzQaaBCCFoVCVWZkZGXP47G+ebL5250m5sGcRHhmRAJoqtnBxNze7dlT16NHvfOc74v/0f/6/hMqKtAornWRlkiRRlESLZbSYp8EyC1ZllJBnIkt1FhIHRHOyFd8MCQ40oY/b91ujZmfYHozag35nNOh3u91eq9tpdTqNjmvZSlNGcTCeLc4vZ2cX6WySLgIKbRq2Y7tCirIywrRM0lpg2Z7T8Fu275quKy2ztKzKcWvHxbIqw8xLneZ5EierZRgFqyTKqrzWeVXnaZXHmnhrYN5/c/jo7e29g35n1DRcT6NijHP0aVa8mGYn8/Rymi8mSTApwuukCqXKpEgNmck6lkZlKe1bdtdxR5bTVVZLGpaQqqx0mpVxUoZxkaY5GiyF79A0rZ7rjnxvaNk9y+vitHBdLAvDQhooiWmgJBToFWI2ra5O20fnqvDauWqmWkWliEWR6HhVJJFSK+qqrMgq0pq01llJDGFJlfD6qCGGGiSJGSVukvlxlsR1WQpp2J7b6RvOdrfd2e3TclA5kdu9QGTxary6XKSzo2SVuaZLo+m5vhCeUWJWhpTC0bYltJKyrkVeibQk16awG1azaXpNS4osjrPxNFgk07iIZnGRlmUc58GqSpauVzRbLeG0h7vGnTutLfoSJ0VPYEye29V8KM+1OE71IoCiIi2JqGJJZBBoMpvSwvSt9nau9m1rm7xVC1lrypIkKYswI8xICoTAMSkthJU3zLxiqTFNfBfPx2vgmBg2NpjggAWVIpfIvF8FMpSpqvx2abUqjKo2qqyqLaeWsS6rOi1IS5KKrKYU5DWYYIDkB0cNKUT1YhGszCBUwdxcLcVqquOxzLdVMWoMGniCJKpXSxElelVU\",\"random_seed\":11489413745290867000}],\"inference_time\":0.8995649814605713}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "911c837d8fbb6ee4-CDG",
+        "connection": "keep-alive",
+        "content-encoding": "gzip",
+        "content-type": "application/json",
+        "server": "cloudflare",
+        "transfer-encoding": "chunked"
+      }
+    }
+  },
+  "d2ca6c5690c9c4dd012d7038606c80dd388ea776f364e7395ee8196d5b1f9849": {
+    "url": "data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAB1/UlEQVR4nJz9ybNkSZbeif1Ur97Z5umN7v58Co85MiMjh6pCoaqAAtCNbkqTQiEFpLQIhUv+O9xxRy7J5oLSzQaaBCCFoVCVWZkZGXP47G+ebL5250m5sGcRHhmRAJoqtnBxNze7dlT16NHvfOc74v/0f/6/hMqKtAornWRlkiRRlESLZbSYp8EyC1ZllJBnIkt1FhIHRHOyFd8MCQ40oY/b91ujZmfYHozag35nNOh3u91eq9tpdTqNjmvZSlNGcTCeLc4vZ2cX6WySLgIKbRq2Y7tCirIywrRM0lpg2Z7T8Fu275quKy2ztKzKcWvHxbIqw8xLneZ5EierZRgFqyTKqrzWeVXnaZXHmnhrYN5/c/jo7e29g35n1DRcT6NijHP0aVa8mGYn8/Rymi8mSTApwuukCqXKpEgNmck6lkZlKe1bdtdxR5bTVVZLGpaQqqx0mpVxUoZxkaY5GiyF79A0rZ7rjnxvaNk9y+vitHBdLAvDQhooiWmgJBToFWI2ra5O20fnqvDauWqmWkWliEWR6HhVJJFSK+qqrMgq0pq01llJDGFJlfD6qCGGGiSJGSVukvlxlsR1WQpp2J7b6RvOdrfd2e3TclA5kdu9QGTxary6XKSzo2SVuaZLo+m5vhCeUWJWhpTC0bYltJKyrkVeibQk16awG1azaXpNS4osjrPxNFgk07iIZnGRlmUc58GqSpauVzRbLeG0h7vGnTutLfoSJ0VPYEye29V8KM+1OE71IoCiIi2JqGJJZBBoMpvSwvSt9nau9m1rm7xVC1lrypIkKYswI8xICoTAMSkthJU3zLxiqTFNfBfPx2vgmBg2NpjggAWVIpfIvF8FMpSpqvx2abUqjKo2qqyqLaeWsS6rOi1IS5KKrKYU5DWYYIDkB0cNKUT1YhGszCBUwdxcLcVqquOxzLdVMWoMGniCJKpXSxElelVU",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "content-type": "image/jpeg"
+      }
+    }
   }
 }

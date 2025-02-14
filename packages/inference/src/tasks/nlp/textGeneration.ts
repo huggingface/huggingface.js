@@ -53,12 +53,14 @@ export async function textGeneration(
 	} else if (args.provider === "hyperbolic") {
 		const payload = {
 			messages: [{ content: args.inputs, role: "user" }],
-			...(args.parameters ? {
-				max_tokens: args.parameters.max_new_tokens,
-				...omit(args.parameters, "max_new_tokens"),
-			} : undefined),
+			...(args.parameters
+				? {
+						max_tokens: args.parameters.max_new_tokens,
+						...omit(args.parameters, "max_new_tokens"),
+				  }
+				: undefined),
 			...omit(args, ["inputs", "parameters"]),
-		}
+		};
 		const raw = await request<HyperbolicTextCompletionOutput>(payload, {
 			...options,
 			taskHint: "text-generation",
