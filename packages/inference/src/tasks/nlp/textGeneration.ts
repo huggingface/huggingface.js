@@ -8,6 +8,7 @@ import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { toArray } from "../../utils/toArray";
 import { request } from "../custom/request";
+import { omit } from "../../utils/omit";
 
 export type { TextGenerationInput, TextGenerationOutput };
 
@@ -50,8 +51,15 @@ export async function textGeneration(
 			generated_text: completion.text,
 		};
 	} else if (args.provider === "hyperbolic") {
-		args.prompt = args.inputs;
-		const raw = await request<HyperbolicTextCompletionOutput>(args, {
+		const payload = {
+			messages: [{ content: args.inputs, role: "user" }],
+			...(args.parameters ? {
+				max_tokens: args.parameters.max_new_tokens,
+				...omit(args.parameters, "max_new_tokens"),
+			} : undefined),
+			...omit(args, ["inputs", "parameters"]),
+		}
+		const raw = await request<HyperbolicTextCompletionOutput>(payload, {
 			...options,
 			taskHint: "text-generation",
 		});

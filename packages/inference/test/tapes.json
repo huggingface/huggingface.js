@@ -7268,5 +7268,53 @@
         "server": "cloudflare"
       }
     }
+  },
+  "5ffb543765bb5fb2c759321a62828095eda7608939187ce57197ae1a618336ae": {
+    "url": "https://api.hyperbolic.xyz/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"content\":\"Paris is\",\"role\":\"user\"}],\"temperature\":0,\"top_p\":0.01,\"max_new_tokens\":10,\"model\":\"meta-llama/Meta-Llama-3.1-405B-Instruct\"}"
+    },
+    "response": {
+      "body": "{\"id\":\"chatcmpl-a583deb706944d9796d405f87cb28c8c\",\"object\":\"chat.completion\",\"created\":1739528712,\"model\":\"meta-llama/Meta-Llama-3.1-405B-Instruct\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"...the capital and most populous city of France, known for its stunning architecture, art museums, fashion, and romantic atmosphere. It's often called the \\\"City of Light\\\" (La Ville Lumière) and is famous for its iconic landmarks such as the Eiffel Tower, Notre-Dame Cathedral, and the Louvre Museum.\"},\"finish_reason\":\"stop\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":37,\"total_tokens\":105,\"completion_tokens\":68}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "911c5a4dee0c78fe-CDG",
+        "connection": "keep-alive",
+        "content-encoding": "gzip",
+        "content-type": "application/json",
+        "server": "cloudflare",
+        "transfer-encoding": "chunked"
+      }
+    }
+  },
+  "949ba2dd449c32f12183e7caf5a79f67db7531a2e77961d2aacc04d4a456d88c": {
+    "url": "https://api.hyperbolic.xyz/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"content\":\"Paris is\",\"role\":\"user\"}],\"max_tokens\":10,\"temperature\":0,\"top_p\":0.01,\"model\":\"meta-llama/Meta-Llama-3.1-405B-Instruct\"}"
+    },
+    "response": {
+      "body": "{\"id\":\"chatcmpl-02699e2a1ea24037a2f1d6622a849f1f\",\"object\":\"chat.completion\",\"created\":1739528880,\"model\":\"meta-llama/Meta-Llama-3.1-405B-Instruct\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"...the capital and most populous city of France,\"},\"finish_reason\":\"length\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":37,\"total_tokens\":47,\"completion_tokens\":10}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "911c5e690de9d706-CDG",
+        "connection": "keep-alive",
+        "content-encoding": "gzip",
+        "content-type": "application/json",
+        "server": "cloudflare",
+        "transfer-encoding": "chunked"
+      }
+    }
   }
 }
