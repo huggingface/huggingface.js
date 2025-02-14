@@ -7177,5 +7177,202 @@
         "vary": "Accept-Encoding, Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
+  },
+  "cf350b7b8318fc99a88a75b2f30ae80eb99acdbc91e3507d8170a2e16f31bd52": {
+    "url": "https://api.hyperbolic.xyz/v1/images/generations",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"height\":128,\"width\":128,\"prompt\":\"award winning high resolution photo of a giant tortoise\",\"model\":\"SD2\"}"
+    },
+    "response": {
+      "body": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"model_name\"],\"msg\":\"Field required\",\"input\":{\"height\":128,\"width\":128,\"prompt\":\"award winning high resolution photo of a giant tortoise\",\"model\":\"SD2\"}}]}",
+      "status": 422,
+      "statusText": "Unprocessable Entity",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "911c432b8b660209-CDG",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "server": "cloudflare"
+      }
+    }
+  },
+  "69ced1ac246b195b512034ec57f26f29d69f669398293ac03ee12eee1623d743": {
+    "url": "https://api.hyperbolic.xyz/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Complete the equation 1 + 1 = , just the answer\"}],\"stream\":true,\"model\":\"meta-llama/Llama-3.3-70B-Instruct\"}"
+    },
+    "response": {
+      "body": "data: {\"id\": \"chatcmpl-384eff9930a94a08a35564ff77a93d1d\", \"object\": \"chat.completion.chunk\", \"created\": 1739527763, \"model\": \"meta-llama/Llama-3.3-70B-Instruct\", \"choices\": [{\"index\": 0, \"delta\": {\"role\": \"assistant\", \"content\": \"\"}, \"logprobs\": null, \"finish_reason\": null}], \"usage\": {\"prompt_tokens\": 48, \"total_tokens\": 49, \"completion_tokens\": 1}}\n\ndata: {\"id\": \"chatcmpl-384eff9930a94a08a35564ff77a93d1d\", \"object\": \"chat.completion.chunk\", \"created\": 1739527763, \"model\": \"meta-llama/Llama-3.3-70B-Instruct\", \"choices\": [{\"index\": 0, \"delta\": {\"content\": \"2\"}, \"logprobs\": null, \"finish_reason\": null}], \"usage\": {\"prompt_tokens\": 48, \"total_tokens\": 50, \"completion_tokens\": 2}}\n\ndata: {\"id\": \"chatcmpl-384eff9930a94a08a35564ff77a93d1d\", \"object\": \"chat.completion.chunk\", \"created\": 1739527763, \"model\": \"meta-llama/Llama-3.3-70B-Instruct\", \"choices\": [{\"index\": 0, \"delta\": {\"content\": \"\"}, \"logprobs\": null, \"finish_reason\": \"stop\", \"stop_reason\": null}], \"usage\": {\"prompt_tokens\": 48, \"total_tokens\": 51, \"completion_tokens\": 3}}\n\ndata: [DONE]\n\n",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "911c432b88366f13-CDG",
+        "connection": "keep-alive",
+        "content-type": "text/event-stream; charset=utf-8",
+        "server": "cloudflare",
+        "transfer-encoding": "chunked"
+      }
+    }
+  },
+  "10f86d757e0af0147df39651db831eade03fe35cf6ee2e45215f8c1c669a335f": {
+    "url": "https://api.hyperbolic.xyz/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Complete this sentence with words, one plus one is equal \"}],\"temperature\":0.1,\"model\":\"meta-llama/Llama-3.2-3B-Instruct\"}"
+    },
+    "response": {
+      "body": "{\"id\":\"chat-1da8aa70d8a047769b2561108ea3eb3d\",\"object\":\"chat.completion\",\"created\":1739527764,\"model\":\"meta-llama/Llama-3.2-3B-Instruct\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"...two.\"},\"finish_reason\":\"stop\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":46,\"total_tokens\":50,\"completion_tokens\":4}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "911c432b8896702b-CDG",
+        "connection": "keep-alive",
+        "content-encoding": "gzip",
+        "content-type": "application/json",
+        "server": "cloudflare",
+        "transfer-encoding": "chunked"
+      }
+    }
+  },
+  "63ed3f76e28a4f6d6aece430a994d249b13f883ab2cbcf0ff13acb7005b7625d": {
+    "url": "https://api.hyperbolic.xyz/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":\"Paris is\",\"parameters\":{\"temperature\":0,\"top_p\":0.01,\"max_new_tokens\":10},\"prompt\":\"Paris is\",\"model\":\"meta-llama/Meta-Llama-3.1-405B-Instruct\"}"
+    },
+    "response": {
+      "body": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"messages\"],\"msg\":\"Field required\",\"input\":{\"inputs\":\"Paris is\",\"parameters\":{\"temperature\":0,\"top_p\":0.01,\"max_new_tokens\":10},\"prompt\":\"Paris is\",\"model\":\"meta-llama/Meta-Llama-3.1-405B-Instruct\"}}]}",
+      "status": 422,
+      "statusText": "Unprocessable Entity",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "911c432b8cd8018e-CDG",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "server": "cloudflare"
+      }
+    }
+  },
+  "5ffb543765bb5fb2c759321a62828095eda7608939187ce57197ae1a618336ae": {
+    "url": "https://api.hyperbolic.xyz/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"content\":\"Paris is\",\"role\":\"user\"}],\"temperature\":0,\"top_p\":0.01,\"max_new_tokens\":10,\"model\":\"meta-llama/Meta-Llama-3.1-405B-Instruct\"}"
+    },
+    "response": {
+      "body": "{\"id\":\"chatcmpl-a583deb706944d9796d405f87cb28c8c\",\"object\":\"chat.completion\",\"created\":1739528712,\"model\":\"meta-llama/Meta-Llama-3.1-405B-Instruct\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"...the capital and most populous city of France, known for its stunning architecture, art museums, fashion, and romantic atmosphere. It's often called the \\\"City of Light\\\" (La Ville Lumière) and is famous for its iconic landmarks such as the Eiffel Tower, Notre-Dame Cathedral, and the Louvre Museum.\"},\"finish_reason\":\"stop\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":37,\"total_tokens\":105,\"completion_tokens\":68}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "911c5a4dee0c78fe-CDG",
+        "connection": "keep-alive",
+        "content-encoding": "gzip",
+        "content-type": "application/json",
+        "server": "cloudflare",
+        "transfer-encoding": "chunked"
+      }
+    }
+  },
+  "949ba2dd449c32f12183e7caf5a79f67db7531a2e77961d2aacc04d4a456d88c": {
+    "url": "https://api.hyperbolic.xyz/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"content\":\"Paris is\",\"role\":\"user\"}],\"max_tokens\":10,\"temperature\":0,\"top_p\":0.01,\"model\":\"meta-llama/Meta-Llama-3.1-405B-Instruct\"}"
+    },
+    "response": {
+      "body": "{\"id\":\"chatcmpl-02699e2a1ea24037a2f1d6622a849f1f\",\"object\":\"chat.completion\",\"created\":1739528880,\"model\":\"meta-llama/Meta-Llama-3.1-405B-Instruct\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"...the capital and most populous city of France,\"},\"finish_reason\":\"length\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":37,\"total_tokens\":47,\"completion_tokens\":10}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "911c5e690de9d706-CDG",
+        "connection": "keep-alive",
+        "content-encoding": "gzip",
+        "content-type": "application/json",
+        "server": "cloudflare",
+        "transfer-encoding": "chunked"
+      }
+    }
+  },
+  "340a2a0cae0688dfb5b0cf1d5cac1004fbf9c411ac28e420b7d098a1a1a33437": {
+    "url": "https://api.hyperbolic.xyz/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"content\":\"Paris is\",\"role\":\"user\"}],\"max_tokens\":10,\"temperature\":0,\"top_p\":0.01}"
+    },
+    "response": {
+      "body": "{\"object\":\"error\",\"message\":\"Only Qwen/Qwen2.5-72B-Instruct && meta-llama/Llama-3.2-3B-Instruct && FLUX.1-dev && mistralai/Pixtral-12B-2409 && StableDiffusion && Qwen/Qwen2-VL-72B-Instruct && meta-llama/Meta-Llama-3-70B-Instruct && meta-llama/Meta-Llama-3.1-70B-Instruct && meta-llama/Meta-Llama-3.1-8B-Instruct && Qwen/Qwen2.5-Coder-32B-Instruct && meta-llama/Meta-Llama-3.1-405B-FP8 && TTS && meta-llama/Meta-Llama-3.1-405B-Instruct && deepseek-ai/DeepSeek-R1-Zero && deepseek-ai/DeepSeek-V3 && Qwen/QwQ-32B-Preview && Qwen/Qwen2-VL-7B-Instruct && meta-llama/Llama-3.3-70B-Instruct && NousResearch/Hermes-3-Llama-3.1-70B && meta-llama/Meta-Llama-3.1-405B && meta-llama/Meta-Llama-3.1-405B-Instruct-Virtuals && deepseek-ai/DeepSeek-R1 allowed now, your model mistralai/Mixtral-8x7B-Instruct-v0.1\",\"type\":\"\",\"param\":null,\"code\":40301}",
+      "status": 400,
+      "statusText": "Bad Request",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "911c837d7d61d60d-CDG",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "server": "cloudflare"
+      }
+    }
+  },
+  "5940db1cee26d8858daa54a789c34dab857a02dc095d7d8a81dcc07262cc4e4b": {
+    "url": "https://api.hyperbolic.xyz/v1/images/generations",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"height\":128,\"width\":128,\"prompt\":\"award winning high resolution photo of a giant tortoise\",\"model_name\":\"SD2\"}"
+    },
+    "response": {
+      "body": "{\"images\":[{\"index\":0,\"image\":\"iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAB1/UlEQVR4nJz9ybNkSZbeif1Ur97Z5umN7v58Co85MiMjh6pCoaqAAtCNbkqTQiEFpLQIhUv+O9xxRy7J5oLSzQaaBCCFoVCVWZkZGXP47G+ebL5250m5sGcRHhmRAJoqtnBxNze7dlT16NHvfOc74v/0f/6/hMqKtAornWRlkiRRlESLZbSYp8EyC1ZllJBnIkt1FhIHRHOyFd8MCQ40oY/b91ujZmfYHozag35nNOh3u91eq9tpdTqNjmvZSlNGcTCeLc4vZ2cX6WySLgIKbRq2Y7tCirIywrRM0lpg2Z7T8Fu275quKy2ztKzKcWvHxbIqw8xLneZ5EierZRgFqyTKqrzWeVXnaZXHmnhrYN5/c/jo7e29g35n1DRcT6NijHP0aVa8mGYn8/Rymi8mSTApwuukCqXKpEgNmck6lkZlKe1bdtdxR5bTVVZLGpaQqqx0mpVxUoZxkaY5GiyF79A0rZ7rjnxvaNk9y+vitHBdLAvDQhooiWmgJBToFWI2ra5O20fnqvDauWqmWkWliEWR6HhVJJFSK+qqrMgq0pq01llJDGFJlfD6qCGGGiSJGSVukvlxlsR1WQpp2J7b6RvOdrfd2e3TclA5kdu9QGTxary6XKSzo2SVuaZLo+m5vhCeUWJWhpTC0bYltJKyrkVeibQk16awG1azaXpNS4osjrPxNFgk07iIZnGRlmUc58GqSpauVzRbLeG0h7vGnTutLfoSJ0VPYEye29V8KM+1OE71IoCiIi2JqGJJZBBoMpvSwvSt9nau9m1rm7xVC1lrypIkKYswI8xICoTAMSkthJU3zLxiqTFNfBfPx2vgmBg2NpjggAWVIpfIvF8FMpSpqvx2abUqjKo2qqyqLaeWsS6rOi1IS5KKrKYU5DWYYIDkB0cNKUT1YhGszCBUwdxcLcVqquOxzLdVMWoMGniCJKpXSxElelVU\",\"random_seed\":11489413745290867000}],\"inference_time\":0.8995649814605713}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "911c837d8fbb6ee4-CDG",
+        "connection": "keep-alive",
+        "content-encoding": "gzip",
+        "content-type": "application/json",
+        "server": "cloudflare",
+        "transfer-encoding": "chunked"
+      }
+    }
+  },
+  "d2ca6c5690c9c4dd012d7038606c80dd388ea776f364e7395ee8196d5b1f9849": {
+    "url": "data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAB1/UlEQVR4nJz9ybNkSZbeif1Ur97Z5umN7v58Co85MiMjh6pCoaqAAtCNbkqTQiEFpLQIhUv+O9xxRy7J5oLSzQaaBCCFoVCVWZkZGXP47G+ebL5250m5sGcRHhmRAJoqtnBxNze7dlT16NHvfOc74v/0f/6/hMqKtAornWRlkiRRlESLZbSYp8EyC1ZllJBnIkt1FhIHRHOyFd8MCQ40oY/b91ujZmfYHozag35nNOh3u91eq9tpdTqNjmvZSlNGcTCeLc4vZ2cX6WySLgIKbRq2Y7tCirIywrRM0lpg2Z7T8Fu275quKy2ztKzKcWvHxbIqw8xLneZ5EierZRgFqyTKqrzWeVXnaZXHmnhrYN5/c/jo7e29g35n1DRcT6NijHP0aVa8mGYn8/Rymi8mSTApwuukCqXKpEgNmck6lkZlKe1bdtdxR5bTVVZLGpaQqqx0mpVxUoZxkaY5GiyF79A0rZ7rjnxvaNk9y+vitHBdLAvDQhooiWmgJBToFWI2ra5O20fnqvDauWqmWkWliEWR6HhVJJFSK+qqrMgq0pq01llJDGFJlfD6qCGGGiSJGSVukvlxlsR1WQpp2J7b6RvOdrfd2e3TclA5kdu9QGTxary6XKSzo2SVuaZLo+m5vhCeUWJWhpTC0bYltJKyrkVeibQk16awG1azaXpNS4osjrPxNFgk07iIZnGRlmUc58GqSpauVzRbLeG0h7vGnTutLfoSJ0VPYEye29V8KM+1OE71IoCiIi2JqGJJZBBoMpvSwvSt9nau9m1rm7xVC1lrypIkKYswI8xICoTAMSkthJU3zLxiqTFNfBfPx2vgmBg2NpjggAWVIpfIvF8FMpSpqvx2abUqjKo2qqyqLaeWsS6rOi1IS5KKrKYU5DWYYIDkB0cNKUT1YhGszCBUwdxcLcVqquOxzLdVMWoMGniCJKpXSxElelVU",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "content-type": "image/jpeg"
+      }
+    }
   }
 }

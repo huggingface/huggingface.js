@@ -33,6 +33,7 @@ export const INFERENCE_PROVIDERS = [
 	"fal-ai",
 	"fireworks-ai",
 	"hf-inference",
+	"hyperbolic",
 	"nebius",
 	"novita",
 	"replicate",

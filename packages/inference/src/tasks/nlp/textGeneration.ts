@@ -8,6 +8,7 @@ import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { toArray } from "../../utils/toArray";
 import { request } from "../custom/request";
+import { omit } from "../../utils/omit";
 
 export type { TextGenerationInput, TextGenerationOutput };
 
@@ -18,6 +19,12 @@ interface TogeteherTextCompletionOutput extends Omit<ChatCompletionOutput, "choi
 		seed: number;
 		logprobs: unknown;
 		index: number;
+	}>;
+}
+
+interface HyperbolicTextCompletionOutput extends Omit<ChatCompletionOutput, "choices"> {
+	choices: Array<{
+		message: { content: string };
 	}>;
 }
 
@@ -42,6 +49,30 @@ export async function textGeneration(
 		const completion = raw.choices[0];
 		return {
 			generated_text: completion.text,
+		};
+	} else if (args.provider === "hyperbolic") {
+		const payload = {
+			messages: [{ content: args.inputs, role: "user" }],
+			...(args.parameters
+				? {
+						max_tokens: args.parameters.max_new_tokens,
+						...omit(args.parameters, "max_new_tokens"),
+				  }
+				: undefined),
+			...omit(args, ["inputs", "parameters"]),
+		};
+		const raw = await request<HyperbolicTextCompletionOutput>(payload, {
+			...options,
+			taskHint: "text-generation",
+		});
+		const isValidOutput =
+			typeof raw === "object" && "choices" in raw && Array.isArray(raw?.choices) && typeof raw?.model === "string";
+		if (!isValidOutput) {
+			throw new InferenceOutputError("Expected ChatCompletionOutput");
+		}
+		const completion = raw.choices[0];
+		return {
+			generated_text: completion.message.content,
 		};
 	} else {
 		const res = toArray(

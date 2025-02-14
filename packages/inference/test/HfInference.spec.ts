@@ -2,7 +2,8 @@ import { assert, describe, expect, it } from "vitest";
 
 import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
 
-import { chatCompletion, HfInference, textToImage } from "../src";
+import type { TextToImageArgs } from "../src";
+import { chatCompletion, chatCompletionStream, HfInference, textGeneration, textToImage } from "../src";
 import { textToVideo } from "../src/tasks/cv/textToVideo";
 import { readTestFile } from "./test-files";
 import "./vcr";
@@ -1171,6 +1172,85 @@ describe.concurrent("HfInference", () => {
 				// Verify we got a meaningful response
 				expect(fullResponse).toBeTruthy();
 				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+		},
+		TIMEOUT
+	);
+
+	describe.concurrent(
+		"Hyperbolic",
+		() => {
+			HARDCODED_MODEL_ID_MAPPING.hyperbolic = {
+				"meta-llama/Llama-3.2-3B-Instruct": "meta-llama/Llama-3.2-3B-Instruct",
+				"meta-llama/Llama-3.3-70B-Instruct": "meta-llama/Llama-3.3-70B-Instruct",
+				"stabilityai/stable-diffusion-2": "SD2",
+				"meta-llama/Llama-3.1-405B": "meta-llama/Meta-Llama-3.1-405B-Instruct",
+			};
+
+			it("chatCompletion - hyperbolic", async () => {
+				const res = await chatCompletion({
+					accessToken: env.HF_HYPERBOLIC_KEY,
+					model: "meta-llama/Llama-3.2-3B-Instruct",
+					provider: "hyperbolic",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+					temperature: 0.1,
+				});
+
+				expect(res).toBeDefined();
+				expect(res.choices).toBeDefined();
+				expect(res.choices?.length).toBeGreaterThan(0);
+
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toBeDefined();
+					expect(typeof completion).toBe("string");
+					expect(completion).toContain("two");
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = chatCompletionStream({
+					accessToken: env.HF_HYPERBOLIC_KEY,
+					model: "meta-llama/Llama-3.3-70B-Instruct",
+					provider: "hyperbolic",
+					messages: [{ role: "user", content: "Complete the equation 1 + 1 = , just the answer" }],
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+				let out = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						out += chunk.choices[0].delta.content;
+					}
+				}
+				expect(out).toContain("2");
+			});
+
+			it("textToImage", async () => {
+				const res = await textToImage({
+					accessToken: env.HF_HYPERBOLIC_KEY,
+					model: "stabilityai/stable-diffusion-2",
+					provider: "hyperbolic",
+					inputs: "award winning high resolution photo of a giant tortoise",
+					parameters: {
+						height: 128,
+						width: 128,
+					},
+				} satisfies TextToImageArgs);
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textGeneration", async () => {
+				const res = await textGeneration({
+					accessToken: env.HF_HYPERBOLIC_KEY,
+					model: "meta-llama/Llama-3.1-405B",
+					provider: "hyperbolic",
+					inputs: "Paris is",
+					parameters: {
+						temperature: 0,
+						top_p: 0.01,
+						max_new_tokens: 10,
+					},
+				});
+				expect(res).toMatchObject({ generated_text: "...the capital and most populous city of France," });
 			});
 		},
 		TIMEOUT

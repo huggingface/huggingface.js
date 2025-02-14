@@ -15,6 +15,10 @@ interface Base64ImageGeneration {
 interface OutputUrlImageGeneration {
 	output: string[];
 }
+interface HyperbolicTextToImageOutput {
+	images: Array<{ image: string }>;
+}
+
 interface BlackForestLabsResponse {
 	id: string;
 	polling_url: string;
@@ -50,7 +54,11 @@ export async function textToImage(args: TextToImageArgs, options?: Options): Pro
 					prompt: args.inputs,
 			  };
 	const res = await request<
-		TextToImageOutput | Base64ImageGeneration | OutputUrlImageGeneration | BlackForestLabsResponse
+		| TextToImageOutput
+		| Base64ImageGeneration
+		| OutputUrlImageGeneration
+		| BlackForestLabsResponse
+		| HyperbolicTextToImageOutput
 	>(payload, {
 		...options,
 		taskHint: "text-to-image",
@@ -63,6 +71,17 @@ export async function textToImage(args: TextToImageArgs, options?: Options): Pro
 		if (args.provider === "fal-ai" && "images" in res && Array.isArray(res.images) && res.images[0].url) {
 			const image = await fetch(res.images[0].url);
 			return await image.blob();
+		}
+		if (
+			args.provider === "hyperbolic" &&
+			"images" in res &&
+			Array.isArray(res.images) &&
+			res.images[0] &&
+			typeof res.images[0].image === "string"
+		) {
+			const base64Response = await fetch(`data:image/jpeg;base64,${res.images[0].image}`);
+			const blob = await base64Response.blob();
+			return blob;
 		}
 		if ("data" in res && Array.isArray(res.data) && res.data[0].b64_json) {
 			const base64Data = res.data[0].b64_json;

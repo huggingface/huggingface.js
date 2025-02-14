@@ -6,6 +6,7 @@ import { SAMBANOVA_API_BASE_URL } from "../providers/sambanova";
 import { TOGETHER_API_BASE_URL } from "../providers/together";
 import { NOVITA_API_BASE_URL } from "../providers/novita";
 import { FIREWORKS_AI_API_BASE_URL } from "../providers/fireworks-ai";
+import { HYPERBOLIC_API_BASE_URL } from "../providers/hyperbolic";
 import { BLACKFORESTLABS_AI_API_BASE_URL } from "../providers/black-forest-labs";
 import type { InferenceProvider } from "../types";
 import type { InferenceTask, Options, RequestArgs } from "../types";
@@ -132,7 +133,11 @@ export async function makeRequestOptions(
 			? args.data
 			: JSON.stringify({
 					...otherArgs,
-					...(chatCompletion || provider === "together" || provider === "nebius" ? { model } : undefined),
+					...(taskHint === "text-to-image" && provider === "hyperbolic"
+						? { model_name: model }
+						: chatCompletion || provider === "together" || provider === "nebius" || provider === "hyperbolic"
+						  ? { model }
+						  : undefined),
 			  }),
 		...(credentials ? { credentials } : undefined),
 		signal: options?.signal,
@@ -228,6 +233,16 @@ function makeUrl(params: {
 				return `${baseUrl}/v1/chat/completions`;
 			}
 			return baseUrl;
+		}
+		case "hyperbolic": {
+			const baseUrl = shouldProxy
+				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
+				: HYPERBOLIC_API_BASE_URL;
+
+			if (params.taskHint === "text-to-image") {
+				return `${baseUrl}/v1/images/generations`;
+			}
+			return `${baseUrl}/v1/chat/completions`;
 		}
 		case "novita": {
 			const baseUrl = shouldProxy
