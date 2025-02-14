@@ -4,8 +4,10 @@ import { NEBIUS_API_BASE_URL } from "../providers/nebius";
 import { REPLICATE_API_BASE_URL } from "../providers/replicate";
 import { SAMBANOVA_API_BASE_URL } from "../providers/sambanova";
 import { TOGETHER_API_BASE_URL } from "../providers/together";
+import { NOVITA_API_BASE_URL } from "../providers/novita";
 import { FIREWORKS_AI_API_BASE_URL } from "../providers/fireworks-ai";
 import { HYPERBOLIC_API_BASE_URL } from "../providers/hyperbolic";
+import { BLACKFORESTLABS_AI_API_BASE_URL } from "../providers/black-forest-labs";
 import type { InferenceProvider } from "../types";
 import type { InferenceTask, Options, RequestArgs } from "../types";
 import { isUrl } from "./isUrl";
@@ -29,8 +31,6 @@ export async function makeRequestOptions(
 		stream?: boolean;
 	},
 	options?: Options & {
-		/** When a model can be used for multiple tasks, and we want to run a non-default task */
-		forceTask?: string | InferenceTask;
 		/** To load default model if needed */
 		taskHint?: InferenceTask;
 		chatCompletion?: boolean;
@@ -40,13 +40,10 @@ export async function makeRequestOptions(
 	let otherArgs = remainingArgs;
 	const provider = maybeProvider ?? "hf-inference";
 
-	const { forceTask, includeCredentials, taskHint, chatCompletion } = options ?? {};
+	const { includeCredentials, taskHint, chatCompletion } = options ?? {};
 
 	if (endpointUrl && provider !== "hf-inference") {
 		throw new Error(`Cannot use endpointUrl with a third-party provider.`);
-	}
-	if (forceTask && provider !== "hf-inference") {
-		throw new Error(`Cannot use forceTask with a third-party provider.`);
 	}
 	if (maybeModel && isUrl(maybeModel)) {
 		throw new Error(`Model URLs are no longer supported. Use endpointUrl instead.`);
@@ -78,7 +75,6 @@ export async function makeRequestOptions(
 		: makeUrl({
 				authMethod,
 				chatCompletion: chatCompletion ?? false,
-				forceTask,
 				model,
 				provider: provider ?? "hf-inference",
 				taskHint,
@@ -86,8 +82,13 @@ export async function makeRequestOptions(
 
 	const headers: Record<string, string> = {};
 	if (accessToken) {
-		headers["Authorization"] =
-			provider === "fal-ai" && authMethod === "provider-key" ? `Key ${accessToken}` : `Bearer ${accessToken}`;
+		if (provider === "fal-ai" && authMethod === "provider-key") {
+			headers["Authorization"] = `Key ${accessToken}`;
+		} else if (provider === "black-forest-labs" && authMethod === "provider-key") {
+			headers["X-Key"] = accessToken;
+		} else {
+			headers["Authorization"] = `Bearer ${accessToken}`;
+		}
 	}
 
 	// e.g. @huggingface/inference/3.1.3
@@ -149,7 +150,6 @@ function makeUrl(params: {
 	model: string;
 	provider: InferenceProvider;
 	taskHint: InferenceTask | undefined;
-	forceTask?: string | InferenceTask;
 }): string {
 	if (params.authMethod === "none" && params.provider !== "hf-inference") {
 		throw new Error("Authentication is required when requesting a third-party provider. Please provide accessToken");
@@ -157,6 +157,12 @@ function makeUrl(params: {
 
 	const shouldProxy = params.provider !== "hf-inference" && params.authMethod !== "provider-key";
 	switch (params.provider) {
+		case "black-forest-labs": {
+			const baseUrl = shouldProxy
+				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
+				: BLACKFORESTLABS_AI_API_BASE_URL;
+			return `${baseUrl}/${params.model}`;
+		}
 		case "fal-ai": {
 			const baseUrl = shouldProxy
 				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
@@ -216,6 +222,7 @@ function makeUrl(params: {
 			}
 			return baseUrl;
 		}
+
 		case "fireworks-ai": {
 			const baseUrl = shouldProxy
 				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
@@ -235,15 +242,28 @@ function makeUrl(params: {
 			}
 			return `${baseUrl}/v1/chat/completions`;
 		}
+		case "novita": {
+			const baseUrl = shouldProxy
+				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
+				: NOVITA_API_BASE_URL;
+			if (params.taskHint === "text-generation") {
+				if (params.chatCompletion) {
+					return `${baseUrl}/chat/completions`;
+				}
+				return `${baseUrl}/completions`;
+			}
+			return baseUrl;
+		}
 		default: {
 			const baseUrl = HF_HUB_INFERENCE_PROXY_TEMPLATE.replaceAll("{{PROVIDER}}", "hf-inference");
-			const url = params.forceTask
-				? `${baseUrl}/pipeline/${params.forceTask}/${params.model}`
-				: `${baseUrl}/models/${params.model}`;
-			if (params.taskHint === "text-generation" && params.chatCompletion) {
-				return url + `/v1/chat/completions`;
+			if (params.taskHint && ["feature-extraction", "sentence-similarity"].includes(params.taskHint)) {
+				/// when deployed on hf-inference, those two tasks are automatically compatible with one another.
+				return `${baseUrl}/pipeline/${params.taskHint}/${params.model}`;
 			}
-			return url;
+			if (params.taskHint === "text-generation" && params.chatCompletion) {
+				return `${baseUrl}/models/${params.model}/v1/chat/completions`;
+			}
+			return `${baseUrl}/models/${params.model}`;
 		}
 	}
 }

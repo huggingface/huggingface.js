@@ -352,7 +352,7 @@ describe.concurrent("HfInference", () => {
 				});
 				expect(response).toEqual(expect.arrayContaining([expect.any(Number)]));
 			});
-			it("FeatureExtraction - same model as sentence similarity", async () => {
+			it("FeatureExtraction - auto-compatibility sentence similarity", async () => {
 				const response = await hf.featureExtraction({
 					model: "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
 					inputs: "That is a happy person",
@@ -1251,6 +1251,80 @@ describe.concurrent("HfInference", () => {
 					},
 				});
 				expect(res).toMatchObject({ generated_text: "...the capital and most populous city of France," });
+			});
+		},
+		TIMEOUT
+	);
+
+	describe.concurrent(
+		"Novita",
+		() => {
+			const client = new HfInference(env.HF_NOVITA_KEY);
+
+			HARDCODED_MODEL_ID_MAPPING["novita"] = {
+				"meta-llama/llama-3.1-8b-instruct": "meta-llama/llama-3.1-8b-instruct",
+				"deepseek/deepseek-r1-distill-qwen-14b": "deepseek/deepseek-r1-distill-qwen-14b",
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "meta-llama/llama-3.1-8b-instruct",
+					provider: "novita",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toContain("two");
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "deepseek/deepseek-r1-distill-qwen-14b",
+					provider: "novita",
+					messages: [{ role: "user", content: "Say this is a test" }],
+					stream: true,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+		},
+		TIMEOUT
+	);
+	describe.concurrent(
+		"Black Forest Labs",
+		() => {
+			HARDCODED_MODEL_ID_MAPPING["black-forest-labs"] = {
+				"black-forest-labs/FLUX.1-dev": "flux-dev",
+				// "black-forest-labs/FLUX.1-schnell": "flux-pro",
+			};
+
+			it("textToImage", async () => {
+				const res = await textToImage({
+					model: "black-forest-labs/FLUX.1-dev",
+					provider: "black-forest-labs",
+					accessToken: env.HF_BLACK_FOREST_LABS_KEY,
+					inputs: "A raccoon driving a truck",
+					parameters: {
+						height: 256,
+						width: 256,
+						num_inference_steps: 4,
+						seed: 8817,
+					},
+				});
+				expect(res).toBeInstanceOf(Blob);
 			});
 		},
 		TIMEOUT
