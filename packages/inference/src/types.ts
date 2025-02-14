@@ -30,6 +30,7 @@ export type InferenceTask = Exclude<PipelineType, "other">;
 
 export const INFERENCE_PROVIDERS = [
 	"black-forest-labs",
+	"cohere",
 	"fal-ai",
 	"fireworks-ai",
 	"hf-inference",
