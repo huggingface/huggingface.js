@@ -1184,7 +1184,7 @@ describe.concurrent("HfInference", () => {
 				"meta-llama/Llama-3.2-3B-Instruct": "meta-llama/Llama-3.2-3B-Instruct",
 				"meta-llama/Llama-3.3-70B-Instruct": "meta-llama/Llama-3.3-70B-Instruct",
 				"stabilityai/stable-diffusion-2": "SD2",
-				"meta-llama/Llama-3.1-405B": "meta-llama/Meta-Llama-3.1-405B-Instruct",
+				"meta-llama/Llama-3.1-405B-FP8": "meta-llama/Llama-3.1-405B-FP8",
 			};
 
 			it("chatCompletion - hyperbolic", async () => {
