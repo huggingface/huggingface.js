@@ -351,6 +351,15 @@ describe.concurrent("HfInference", () => {
 				});
 				expect(response).toEqual(expect.arrayContaining([expect.any(Number)]));
 			});
+			it("FeatureExtraction - auto-compatibility sentence similarity", async () => {
+				const response = await hf.featureExtraction({
+					model: "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
+					inputs: "That is a happy person",
+				});
+
+				expect(response.length).toBeGreaterThan(10);
+				expect(response).toEqual(expect.arrayContaining([expect.any(Number)]));
+			});
 			it("FeatureExtraction - facebook/bart-base", async () => {
 				const response = await hf.featureExtraction({
 					model: "facebook/bart-base",

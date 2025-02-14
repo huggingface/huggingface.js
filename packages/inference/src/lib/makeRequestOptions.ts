@@ -243,6 +243,10 @@ function makeUrl(params: {
 		}
 		default: {
 			const baseUrl = HF_HUB_INFERENCE_PROXY_TEMPLATE.replaceAll("{{PROVIDER}}", "hf-inference");
+			if (params.taskHint && ["feature-extraction", "sentence-similarity"].includes(params.taskHint)) {
+				/// when deployed on hf-inference, those two tasks are automatically compatible with one another.
+				return `${baseUrl}/pipeline/${params.taskHint}/${params.model}`;
+			}
 			if (params.taskHint === "text-generation" && params.chatCompletion) {
 				return `${baseUrl}/models/${params.model}/v1/chat/completions`;
 			}
