@@ -61,7 +61,7 @@ export async function textToImage(args: TextToImageArgs, options?: Options): Pro
 		| HyperbolicTextToImageOutput
 	>(payload, {
 		...options,
-		taskHint: "text-to-image",
+		task: "text-to-image",
 	});
 
 	if (res && typeof res === "object") {

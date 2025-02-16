@@ -39,7 +39,7 @@ export async function audioToAudio(args: AudioToAudioArgs, options?: Options): P
 	const payload = preparePayload(args);
 	const res = await request<AudioToAudioOutput>(payload, {
 		...options,
-		taskHint: "audio-to-audio",
+		task: "audio-to-audio",
 	});
 
 	return validateOutput(res);
