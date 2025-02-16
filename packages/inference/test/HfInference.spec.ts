@@ -754,9 +754,9 @@ describe.concurrent("HfInference", () => {
 			it("custom openai - OpenAI Specs", async () => {
 				const OPENAI_KEY = env.OPENAI_KEY;
 				const hf = new HfInference(OPENAI_KEY);
-				const ep = hf.endpoint("https://api.openai.com");
-				const stream = ep.chatCompletionStream({
-					model: "gpt-3.5-turbo",
+				const stream = hf.chatCompletionStream({
+					provider: "openai",
+					model: "openai/gpt-3.5-turbo",
 					messages: [{ role: "user", content: "Complete the equation one + one =" }],
 				}) as AsyncGenerator<ChatCompletionStreamOutput>;
 				let out = "";
