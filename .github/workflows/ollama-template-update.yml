@@ -33,7 +33,8 @@ jobs:
       - name: Run update script
         run: |
           cd packages/ollama-utils
-          pnpm run build:automap
+          # pnpm run build:automap
+          echo test > ./test
 
       - name: Check for changed files
         id: changes
@@ -49,8 +50,8 @@ jobs:
             echo "${modified_files}"
             git add -A
             git commit -m "ollama update ${CURRENT_DATE}"
-            git checkout -b "ollama/${CURRENT_DATE}"
-            git push origin "ollama/${CURRENT_DATE}"
+            git checkout -b "ollama-${CURRENT_DATE}"
+            git push origin "ollama-${CURRENT_DATE}"
             echo "HAS_CHANGES=true" >> $GITHUB_OUTPUT
           else
             echo "No files changed, skipping..."
