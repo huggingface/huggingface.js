@@ -48,7 +48,7 @@ jobs:
         run: |
           set -x
 
-          FILE_TO_ADD="packages/ollama-utils/chat-template-automap.ts"
+          FILE_TO_ADD="packages/ollama-utils/src/chat-template-automap.ts"
 
           git status
           modified_files="$(git status -s)"
