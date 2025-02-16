@@ -23,10 +23,14 @@ jobs:
           CURRENT_DATE=$(date -u +"%Y-%m-%d")
           echo "CURRENT_DATE=$CURRENT_DATE" >> $GITHUB_ENV
 
-      - name: Run update script
+      - name: Install dependencies
         run: |
           cd packages/ollama-utils
           pnpm install --frozen-lockfile
+
+      - name: Run update script
+        run: |
+          cd packages/ollama-utils
           pnpm run build:automap
 
       - name: Check for changed files

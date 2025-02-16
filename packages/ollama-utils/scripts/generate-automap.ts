@@ -137,44 +137,49 @@ const getSpecialTokens = (tmpl: string): string[] => {
 			try {
 				ggufData = await gguf(modelUrl);
 			} catch (e) {
-				console.log(" --> [X] FATAL: GGUF error", { model, tag, modelUrl });
-				throw e; // rethrow
+				console.log(` --> [X] Skipping ${modelWithTag} due to error while calling gguf()`, e);
+				continue;
 			}
 			const { metadata } = ggufData;
 			const ggufTmpl = metadata["tokenizer.chat_template"];
 			if (ggufTmpl) {
-				if (seenGGUFTemplate.has(ggufTmpl)) {
-					console.log(" --> Already seen this GGUF template, skip...");
+				try {
+					if (seenGGUFTemplate.has(ggufTmpl)) {
+						console.log(" --> Already seen this GGUF template, skip...");
+						continue;
+					}
+					seenGGUFTemplate.add(ggufTmpl);
+					console.log(" --> GGUF chat template OK");
+					const tmplBlob = manifest.layers.find((l) => l.mediaType.match(/\.template/));
+					if (!tmplBlob) continue;
+					const ollamaTmplUrl = getBlobUrl(tmplBlob.digest);
+					if (!ollamaTmplUrl) {
+						console.log(" --> [X] No ollama template");
+						continue;
+					}
+					const ollamaTmpl = await (await fetch(ollamaTmplUrl)).text();
+					console.log(" --> All OK");
+					const record: OutputItem = {
+						model: modelWithTag,
+						gguf: ggufTmpl,
+						ollama: {
+							template: ollamaTmpl,
+							tokens: getSpecialTokens(ggufTmpl),
+						},
+					};
+					// get params
+					const ollamaParamsBlob = manifest.layers.find((l) => l.mediaType.match(/\.params/));
+					const ollamaParamsUrl = ollamaParamsBlob ? getBlobUrl(ollamaParamsBlob.digest) : null;
+					if (ollamaParamsUrl) {
+						console.log(" --> Got params");
+						record.ollama.params = await (await fetch(ollamaParamsUrl)).json();
+					}
+					output.push(record);
+					if (DEBUG) appendFileSync("ollama_tmp.jsonl", JSON.stringify(record) + "\n");
+				} catch (e) {
+					console.log(` --> [X] Skipping ${modelWithTag} due to error`, e);
 					continue;
 				}
-				seenGGUFTemplate.add(ggufTmpl);
-				console.log(" --> GGUF chat template OK");
-				const tmplBlob = manifest.layers.find((l) => l.mediaType.match(/\.template/));
-				if (!tmplBlob) continue;
-				const ollamaTmplUrl = getBlobUrl(tmplBlob.digest);
-				if (!ollamaTmplUrl) {
-					console.log(" --> [X] No ollama template");
-					continue;
-				}
-				const ollamaTmpl = await (await fetch(ollamaTmplUrl)).text();
-				console.log(" --> All OK");
-				const record: OutputItem = {
-					model: modelWithTag,
-					gguf: ggufTmpl,
-					ollama: {
-						template: ollamaTmpl,
-						tokens: getSpecialTokens(ggufTmpl),
-					},
-				};
-				// get params
-				const ollamaParamsBlob = manifest.layers.find((l) => l.mediaType.match(/\.params/));
-				const ollamaParamsUrl = ollamaParamsBlob ? getBlobUrl(ollamaParamsBlob.digest) : null;
-				if (ollamaParamsUrl) {
-					console.log(" --> Got params");
-					record.ollama.params = await (await fetch(ollamaParamsUrl)).json();
-				}
-				output.push(record);
-				if (DEBUG) appendFileSync("ollama_tmp.jsonl", JSON.stringify(record) + "\n");
 			} else {
 				console.log(" --> [X] No GGUF template");
 				continue;
