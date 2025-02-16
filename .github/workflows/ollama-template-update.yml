@@ -20,8 +20,8 @@ jobs:
         id: prepare
         shell: bash
         run: |
-          git config --global user.email "son@huggingface.co"
-          git config --global user.name "Xuan-Son Nguyen"
+          git config --global user.name machineuser
+          git config --global user.email infra+machineuser@huggingface.co
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           npm install -g pnpm
           CURRENT_DATE=$(date -u +"%Y-%m-%d")
