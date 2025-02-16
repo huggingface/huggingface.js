@@ -38,8 +38,7 @@ jobs:
         shell: bash
         run: |
           cd packages/ollama-utils
-          # pnpm run build:automap
-          echo test > ./test
+          pnpm run build:automap
 
       - name: Check for changed files
         id: changes
@@ -48,6 +47,9 @@ jobs:
           CURRENT_DATE: ${{ steps.prepare.outputs.CURRENT_DATE }}
         run: |
           set -x
+
+          FILE_TO_ADD="packages/ollama-utils/chat-template-automap.ts"
+
           git status
           modified_files="$(git status -s)"
           echo "Modified files: ${modified_files}"
@@ -56,7 +58,7 @@ jobs:
             echo "NEW_BRANCH=${NEW_BRANCH}"
             echo "Changes detected, will create a new branch:"
             echo "${modified_files}"
-            git add -A
+            git add "${FILE_TO_ADD}"
             git commit -m "ollama update ${CURRENT_DATE}"
             git checkout -b "${NEW_BRANCH}"
             git push -f origin "${NEW_BRANCH}"
