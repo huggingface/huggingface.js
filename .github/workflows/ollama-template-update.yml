@@ -11,7 +11,7 @@ permissions:
   contents: write # for git push new branch
 
 jobs:
-  create-pull-request:
+  update-ollama-templates:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
