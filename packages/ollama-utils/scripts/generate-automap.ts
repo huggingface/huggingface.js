@@ -107,6 +107,9 @@ const getSpecialTokens = (tmpl: string): string[] => {
 
 	nDoing = 0;
 	nAll = modelsWithTag.length;
+	const addedModels: string[] = [];
+	const skippedModelsDueToErr: string[] = [];
+
 	const workerGetTemplate = async () => {
 		while (true) {
 			const modelWithTag = modelsWithTag.shift();
@@ -138,6 +141,7 @@ const getSpecialTokens = (tmpl: string): string[] => {
 				ggufData = await gguf(modelUrl);
 			} catch (e) {
 				console.log(` --> [X] Skipping ${modelWithTag} due to error while calling gguf()`, e);
+				skippedModelsDueToErr.push(modelWithTag);
 				continue;
 			}
 			const { metadata } = ggufData;
@@ -175,9 +179,11 @@ const getSpecialTokens = (tmpl: string): string[] => {
 						record.ollama.params = await (await fetch(ollamaParamsUrl)).json();
 					}
 					output.push(record);
+					addedModels.push(modelWithTag);
 					if (DEBUG) appendFileSync("ollama_tmp.jsonl", JSON.stringify(record) + "\n");
 				} catch (e) {
 					console.log(` --> [X] Skipping ${modelWithTag} due to error`, e);
+					skippedModelsDueToErr.push(modelWithTag);
 					continue;
 				}
 			} else {
@@ -195,7 +201,13 @@ const getSpecialTokens = (tmpl: string): string[] => {
 			.map(() => workerGetTemplate())
 	);
 
+	console.log("====================================");
 	console.log("DONE");
+	console.log("Added templates for:");
+	console.log(addedModels.join("\n"));
+	console.log("Skipped these models due to error:");
+	console.log(skippedModelsDueToErr.join("\n"));
+
 	output.sort((a, b) => a.model.localeCompare(b.model));
 
 	writeFileSync(
@@ -205,6 +217,11 @@ const getSpecialTokens = (tmpl: string): string[] => {
 // To update it, run "pnpm run build:automap"
 
 import { OllamaChatTemplateMapEntry } from "./types";
+
+/**
+ * Skipped these models due to error:
+${skippedModelsDueToErr.map((m) => ` * - ${m}`).join("\n")}
+ */
 
 export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = ${JSON.stringify(output, null, "\t")};
   `.trim()
