@@ -59,7 +59,7 @@ jobs:
             git add -A
             git commit -m "ollama update ${CURRENT_DATE}"
             git checkout -b "${NEW_BRANCH}"
-            git push origin "${NEW_BRANCH}"
+            git push -f origin "${NEW_BRANCH}"
             echo "HAS_CHANGES=true" >> $GITHUB_OUTPUT
             echo "NEW_BRANCH=${NEW_BRANCH}" >> $GITHUB_OUTPUT
           else
@@ -72,7 +72,7 @@ jobs:
         uses: actions/github-script@v6
         env:
           CURRENT_DATE: ${{ steps.prepare.outputs.CURRENT_DATE }}
-          NEW_BRANCH: ${{ steps.prepare.outputs.NEW_BRANCH }}
+          NEW_BRANCH: ${{ steps.changes.outputs.NEW_BRANCH }}
         with:
           script: |
             const { repo, owner } = context.repo;
