@@ -26,7 +26,7 @@ jobs:
           npm install -g pnpm
           CURRENT_DATE=$(date -u +"%Y-%m-%d")
           echo "CURRENT_DATE=$CURRENT_DATE"
-          echo "CURRENT_DATE=$CURRENT_DATE" >> $GITHUB_ENV
+          echo "CURRENT_DATE=$CURRENT_DATE" >> $GITHUB_OUTPUT
 
       - name: Install dependencies
         shell: bash
