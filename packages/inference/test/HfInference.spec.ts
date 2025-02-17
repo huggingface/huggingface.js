@@ -8,6 +8,7 @@ import { textToVideo } from "../src/tasks/cv/textToVideo";
 import { readTestFile } from "./test-files";
 import "./vcr";
 import { HARDCODED_MODEL_ID_MAPPING } from "../src/providers/consts";
+import { isUrl } from "../src/lib/isUrl";
 
 const TIMEOUT = 60000 * 3;
 const env = import.meta.env;
@@ -1325,6 +1326,26 @@ describe.concurrent("HfInference", () => {
 					},
 				});
 				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToImage URL", async () => {
+				const res = await textToImage(
+					{
+						model: "black-forest-labs/FLUX.1-dev",
+						provider: "black-forest-labs",
+						accessToken: env.HF_BLACK_FOREST_LABS_KEY,
+						inputs: "A raccoon driving a truck",
+						parameters: {
+							height: 256,
+							width: 256,
+							num_inference_steps: 4,
+							seed: 8817,
+						},
+					},
+					{ outputType: "url" }
+				);
+				expect(res).toBeTypeOf("string");
+				expect(isUrl(res)).toBeTruthy();
 			});
 		},
 		TIMEOUT
