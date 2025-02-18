@@ -3,9 +3,9 @@ import { NEBIUS_API_BASE_URL } from "../providers/nebius";
 import { SAMBANOVA_API_BASE_URL } from "../providers/sambanova";
 import { TOGETHER_API_BASE_URL } from "../providers/together";
 import { NOVITA_API_BASE_URL } from "../providers/novita";
-import { FIREWORKS_AI_API_BASE_URL } from "../providers/fireworks-ai";
 import { blackForestLabsConfig } from "../providers/black-forest-labs";
 import { falAiConfig } from "../providers/fal-ai";
+import { fireworksAiConfig } from "../providers/fireworks-ai";
 import { hyperbolicConfig } from "../providers/hyperbolic";
 import { replicateConfig } from "../providers/replicate";
 import type { InferenceProvider, InferenceTask, Options, ProviderConfig, RequestArgs } from "../types";
@@ -27,6 +27,7 @@ let tasks: Record<string, { models: { id: string }[] }> | null = null;
 const providerConfigs: Partial<Record<InferenceProvider, ProviderConfig>> = {
 	"black-forest-labs": blackForestLabsConfig,
 	"fal-ai": falAiConfig,
+	"fireworks-ai": fireworksAiConfig,
 	hyperbolic: hyperbolicConfig,
 	replicate: replicateConfig,
 	// TODO: add them all + remove the "partial" type
@@ -352,7 +353,7 @@ function makeUrlLegacy(params: {
 		case "fireworks-ai": {
 			const baseUrl = shouldProxy
 				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
-				: FIREWORKS_AI_API_BASE_URL;
+				: fireworksAiConfig.baseUrl;
 			if (params.taskHint === "text-generation" && params.chatCompletion) {
 				return `${baseUrl}/v1/chat/completions`;
 			}
