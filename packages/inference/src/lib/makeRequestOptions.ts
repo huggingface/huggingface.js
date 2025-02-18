@@ -2,6 +2,7 @@ import { HF_HUB_URL, HF_ROUTER_URL } from "../config";
 import { blackForestLabsConfig } from "../providers/black-forest-labs";
 import { falAiConfig } from "../providers/fal-ai";
 import { fireworksAiConfig } from "../providers/fireworks-ai";
+import { hfInferenceConfig } from "../providers/hf-inference";
 import { hyperbolicConfig } from "../providers/hyperbolic";
 import { nebiusConfig } from "../providers/nebius";
 import { novitaConfig } from "../providers/novita";
@@ -24,17 +25,17 @@ let tasks: Record<string, { models: { id: string }[] }> | null = null;
 /**
  * Config to define how to serialize requests for each provider
  */
-const providerConfigs: Partial<Record<InferenceProvider, ProviderConfig>> = {
+const providerConfigs: Record<InferenceProvider, ProviderConfig> = {
 	"black-forest-labs": blackForestLabsConfig,
 	"fal-ai": falAiConfig,
 	"fireworks-ai": fireworksAiConfig,
+	"hf-inference": hfInferenceConfig,
 	hyperbolic: hyperbolicConfig,
 	nebius: nebiusConfig,
 	novita: novitaConfig,
 	replicate: replicateConfig,
 	sambanova: sambanovaConfig,
 	together: togetherConfig,
-	// TODO: add them all + remove the "partial" type
 };
 
 /**
