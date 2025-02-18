@@ -18,13 +18,16 @@ import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../typ
 
 const FIREWORKS_AI_API_BASE_URL = "https://api.fireworks.ai/inference";
 
-const makeBody = ({ args }: BodyParams): unknown => {
-	return args;
+const makeBody = ({ args, chatCompletion, model }: BodyParams): unknown => {
+	return {
+		...args,
+		...(chatCompletion ? { model } : undefined),
+	};
 };
 
-const makeHeaders = ({ accessToken, authMethod }: HeaderParams): Record<string, string> => {
+const makeHeaders = ({ accessToken }: HeaderParams): Record<string, string> => {
 	return {
-		Authorization: authMethod === "provider-key" ? `Key ${accessToken}` : `Bearer ${accessToken}`,
+		Authorization: `Bearer ${accessToken}`,
 	};
 };
 
