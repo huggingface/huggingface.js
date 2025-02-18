@@ -5,7 +5,7 @@ import { SAMBANOVA_API_BASE_URL } from "../providers/sambanova";
 import { TOGETHER_API_BASE_URL } from "../providers/together";
 import { NOVITA_API_BASE_URL } from "../providers/novita";
 import { FIREWORKS_AI_API_BASE_URL } from "../providers/fireworks-ai";
-import { BLACKFORESTLABS_AI_API_BASE_URL } from "../providers/black-forest-labs";
+import { blackForestLabsConfig } from "../providers/black-forest-labs";
 import { hyperbolicConfig } from "../providers/hyperbolic";
 import { replicateConfig } from "../providers/replicate";
 import type { InferenceProvider, InferenceTask, Options, ProviderConfig, RequestArgs } from "../types";
@@ -25,6 +25,7 @@ let tasks: Record<string, { models: { id: string }[] }> | null = null;
  * Config to define how to serialize requests for each provider
  */
 const providerConfigs: Partial<Record<InferenceProvider, ProviderConfig>> = {
+	"black-forest-labs": blackForestLabsConfig,
 	hyperbolic: hyperbolicConfig,
 	replicate: replicateConfig,
 	// TODO: add them all + remove the "partial" type
@@ -280,7 +281,7 @@ function makeUrlLegacy(params: {
 		case "black-forest-labs": {
 			const baseUrl = shouldProxy
 				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
-				: BLACKFORESTLABS_AI_API_BASE_URL;
+				: blackForestLabsConfig.baseUrl;
 			return `${baseUrl}/${params.model}`;
 		}
 		case "fal-ai": {
