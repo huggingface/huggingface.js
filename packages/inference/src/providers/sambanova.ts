@@ -18,7 +18,7 @@ import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../typ
 
 const SAMBANOVA_API_BASE_URL = "https://api.sambanova.ai";
 
-const makeBody = ({ args, chatCompletion, model }: BodyParams): unknown => {
+const makeBody = ({ args, chatCompletion, model }: BodyParams): Record<string, unknown> => {
 	return {
 		...args,
 		...(chatCompletion ? { model } : undefined),

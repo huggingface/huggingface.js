@@ -18,7 +18,7 @@ import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../typ
 
 const BLACKFORESTLABS_AI_API_BASE_URL = "https://api.us1.bfl.ai/v1";
 
-const makeBody = ({ args }: BodyParams): unknown => {
+const makeBody = ({ args }: BodyParams): Record<string, unknown> => {
 	return args;
 };
 

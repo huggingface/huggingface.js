@@ -18,7 +18,7 @@ import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../typ
 
 const HYPERBOLIC_API_BASE_URL = "https://api.hyperbolic.xyz";
 
-const makeBody = ({ args, model, taskHint }: BodyParams): unknown => {
+const makeBody = ({ args, model, taskHint }: BodyParams): Record<string, unknown> => {
 	return {
 		...args,
 		...(taskHint === "text-to-image" ? { model_name: model } : { model }),

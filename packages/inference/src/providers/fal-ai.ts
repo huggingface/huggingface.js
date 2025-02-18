@@ -18,7 +18,7 @@ import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../typ
 
 const FAL_AI_API_BASE_URL = "https://fal.run";
 
-const makeBody = ({ args }: BodyParams): unknown => {
+const makeBody = ({ args }: BodyParams): Record<string, unknown> => {
 	return args;
 };
 

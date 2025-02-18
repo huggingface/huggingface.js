@@ -18,7 +18,7 @@ import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../typ
 
 const TOGETHER_API_BASE_URL = "https://api.together.xyz";
 
-const makeBody = ({ args, model }: BodyParams): unknown => {
+const makeBody = ({ args, model }: BodyParams): Record<string, unknown> => {
 	return {
 		...args,
 		model,

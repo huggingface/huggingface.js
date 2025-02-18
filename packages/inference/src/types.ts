@@ -93,7 +93,7 @@ export type RequestArgs = BaseArgs &
 
 export interface ProviderConfig {
 	baseUrl: string;
-	makeBody: (params: BodyParams) => unknown;
+	makeBody: (params: BodyParams) => Record<string, unknown>;
 	makeHeaders: (params: HeaderParams) => Record<string, string>;
 	makeUrl: (params: UrlParams) => string;
 }

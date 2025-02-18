@@ -18,7 +18,7 @@ import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../typ
 
 export const REPLICATE_API_BASE_URL = "https://api.replicate.com";
 
-const makeBody = ({ args, model }: BodyParams): unknown => {
+const makeBody = ({ args, model }: BodyParams): Record<string, unknown> => {
 	// const version =
 	return {
 		input: args,

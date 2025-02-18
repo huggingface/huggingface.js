@@ -18,7 +18,7 @@ import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../typ
 
 const NEBIUS_API_BASE_URL = "https://api.studio.nebius.ai";
 
-const makeBody = ({ args, model }: BodyParams): unknown => {
+const makeBody = ({ args, model }: BodyParams): Record<string, unknown> => {
 	return {
 		...args,
 		model,

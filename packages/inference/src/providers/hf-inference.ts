@@ -13,7 +13,7 @@
 import { HF_ROUTER_URL } from "../config";
 import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../types";
 
-const makeBody = ({ args, chatCompletion, model }: BodyParams): unknown => {
+const makeBody = ({ args, chatCompletion, model }: BodyParams): Record<string, unknown> => {
 	return {
 		...args,
 		...(chatCompletion ? { model } : undefined),
