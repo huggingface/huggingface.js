@@ -18,12 +18,11 @@ import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../typ
 
 export const REPLICATE_API_BASE_URL = "https://api.replicate.com";
 
-const makeBody = ({ args, model, taskHint }: BodyParams): unknown => {
+const makeBody = ({ args, model }: BodyParams): unknown => {
 	// const version =
 	return {
 		input: args,
 		version: model.includes(":") ? model.split(":")[1] : undefined,
-		...(taskHint === "text-to-image" ? { model_name: model } : { model }),
 	};
 };
 const makeHeaders = ({ accessToken }: HeaderParams): Record<string, string> => {
