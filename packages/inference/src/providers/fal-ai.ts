@@ -24,7 +24,6 @@ const makeBody = ({ args }: BodyParams): unknown => {
 
 const makeHeaders = ({ accessToken, authMethod }: HeaderParams): Record<string, string> => {
 	return {
-		"Content-Type": "application/json",
 		Authorization: authMethod === "provider-key" ? `Key ${accessToken}` : `Bearer ${accessToken}`,
 	};
 };

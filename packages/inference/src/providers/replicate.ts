@@ -28,7 +28,6 @@ const makeBody = ({ args, model }: BodyParams): unknown => {
 const makeHeaders = ({ accessToken }: HeaderParams): Record<string, string> => {
 	return {
 		Authorization: `Bearer ${accessToken}`,
-		"Content-Type": "application/json",
 		Prefer: "Wait",
 	};
 };

@@ -101,8 +101,12 @@ export async function makeRequestOptions(
 	const headers = providerConfig.makeHeaders({
 		accessToken,
 		authMethod,
-		binary,
 	});
+
+	// Add content-type to headers
+	if (!binary) {
+		headers["Content-Type"] = "application/json";
+	}
 
 	// Add user-agent to headers
 	// e.g. @huggingface/inference/3.1.3

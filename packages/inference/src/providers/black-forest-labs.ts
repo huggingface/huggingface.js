@@ -23,15 +23,11 @@ const makeBody = ({ args }: BodyParams): unknown => {
 };
 
 const makeHeaders = ({ accessToken, authMethod }: HeaderParams): Record<string, string> => {
-	const headers: Record<string, string> = {
-		"Content-Type": "application/json",
-	};
 	if (authMethod === "provider-key") {
-		headers["X-Key"] = `${accessToken}`;
+		return { "X-Key": `${accessToken}` };
 	} else {
-		headers["Authorization"] = `Bearer ${accessToken}`;
+		return { Authorization: `Bearer ${accessToken}` };
 	}
-	return headers;
 };
 
 const makeUrl = ({ baseUrl, model }: UrlParams): string => {

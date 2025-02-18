@@ -101,7 +101,6 @@ export interface ProviderConfig {
 export interface HeaderParams {
 	accessToken?: string;
 	authMethod: "none" | "hf-token" | "credentials-include" | "provider-key";
-	binary: boolean;
 }
 
 export interface UrlParams {
