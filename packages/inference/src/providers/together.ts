@@ -1,5 +1,3 @@
-export const TOGETHER_API_BASE_URL = "https://api.together.xyz";
-
 /**
  * See the registered mapping of HF model ID => Together model ID here:
  *
@@ -16,3 +14,39 @@ export const TOGETHER_API_BASE_URL = "https://api.together.xyz";
  *
  * Thanks!
  */
+import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../types";
+
+const TOGETHER_API_BASE_URL = "https://api.together.xyz";
+
+const makeBody = ({ args, model }: BodyParams): unknown => {
+	return {
+		...args,
+		model,
+	};
+};
+
+const makeHeaders = ({ accessToken }: HeaderParams): Record<string, string> => {
+	return {
+		Authorization: `Bearer ${accessToken}`,
+	};
+};
+
+const makeUrl = ({ baseUrl, taskHint, chatCompletion }: UrlParams): string => {
+	if (taskHint === "text-to-image") {
+		return `${baseUrl}/v1/images/generations`;
+	}
+	if (taskHint === "text-generation") {
+		if (chatCompletion) {
+			return `${baseUrl}/v1/chat/completions`;
+		}
+		return `${baseUrl}/v1/completions`;
+	}
+	return baseUrl;
+};
+
+export const togetherConfig: ProviderConfig = {
+	baseUrl: TOGETHER_API_BASE_URL,
+	makeBody,
+	makeHeaders,
+	makeUrl,
+};

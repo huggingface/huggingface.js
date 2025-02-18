@@ -1,6 +1,4 @@
 import { HF_HUB_URL, HF_ROUTER_URL } from "../config";
-import { SAMBANOVA_API_BASE_URL } from "../providers/sambanova";
-import { TOGETHER_API_BASE_URL } from "../providers/together";
 import { blackForestLabsConfig } from "../providers/black-forest-labs";
 import { falAiConfig } from "../providers/fal-ai";
 import { fireworksAiConfig } from "../providers/fireworks-ai";
@@ -8,6 +6,8 @@ import { hyperbolicConfig } from "../providers/hyperbolic";
 import { nebiusConfig } from "../providers/nebius";
 import { novitaConfig } from "../providers/novita";
 import { replicateConfig } from "../providers/replicate";
+import { sambanovaConfig } from "../providers/sambanova";
+import { togetherConfig } from "../providers/together";
 import type { InferenceProvider, InferenceTask, Options, ProviderConfig, RequestArgs } from "../types";
 import { isUrl } from "./isUrl";
 import { version as packageVersion, name as packageName } from "../../package.json";
@@ -32,6 +32,8 @@ const providerConfigs: Partial<Record<InferenceProvider, ProviderConfig>> = {
 	nebius: nebiusConfig,
 	novita: novitaConfig,
 	replicate: replicateConfig,
+	sambanova: sambanovaConfig,
+	together: togetherConfig,
 	// TODO: add them all + remove the "partial" type
 };
 
@@ -328,7 +330,7 @@ function makeUrlLegacy(params: {
 		case "sambanova": {
 			const baseUrl = shouldProxy
 				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
-				: SAMBANOVA_API_BASE_URL;
+				: sambanovaConfig.baseUrl;
 			/// Sambanova API matches OpenAI-like APIs: model is defined in the request body
 			if (params.taskHint === "text-generation" && params.chatCompletion) {
 				return `${baseUrl}/v1/chat/completions`;
@@ -338,7 +340,7 @@ function makeUrlLegacy(params: {
 		case "together": {
 			const baseUrl = shouldProxy
 				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
-				: TOGETHER_API_BASE_URL;
+				: togetherConfig.baseUrl;
 			/// Together API matches OpenAI-like APIs: model is defined in the request body
 			if (params.taskHint === "text-to-image") {
 				return `${baseUrl}/v1/images/generations`;
