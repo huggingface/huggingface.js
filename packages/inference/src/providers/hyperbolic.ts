@@ -24,9 +24,11 @@ const makeBody = ({ args, model, taskHint }: BodyParams): unknown => {
 		...(taskHint === "text-to-image" ? { model_name: model } : { model }),
 	};
 };
+
 const makeHeaders = ({ accessToken }: HeaderParams): Record<string, string> => {
 	return { Authorization: `Bearer ${accessToken}` };
 };
+
 const makeUrl = ({ baseUrl, taskHint }: UrlParams): string => {
 	if (taskHint === "text-to-image") {
 		return `${baseUrl}/v1/images/generations`;

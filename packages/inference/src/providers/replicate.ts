@@ -25,12 +25,11 @@ const makeBody = ({ args, model }: BodyParams): unknown => {
 		version: model.includes(":") ? model.split(":")[1] : undefined,
 	};
 };
+
 const makeHeaders = ({ accessToken }: HeaderParams): Record<string, string> => {
-	return {
-		Authorization: `Bearer ${accessToken}`,
-		Prefer: "Wait",
-	};
+	return { Authorization: `Bearer ${accessToken}` };
 };
+
 const makeUrl = ({ baseUrl, model }: UrlParams): string => {
 	if (model.includes(":")) {
 		/// Versioned model

@@ -26,9 +26,7 @@ const makeBody = ({ args, model }: BodyParams): unknown => {
 };
 
 const makeHeaders = ({ accessToken }: HeaderParams): Record<string, string> => {
-	return {
-		Authorization: `Bearer ${accessToken}`,
-	};
+	return { Authorization: `Bearer ${accessToken}` };
 };
 
 const makeUrl = ({ baseUrl, taskHint, chatCompletion }: UrlParams): string => {
