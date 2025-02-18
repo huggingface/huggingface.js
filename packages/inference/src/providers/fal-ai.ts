@@ -1,5 +1,3 @@
-export const FAL_AI_API_BASE_URL = "https://fal.run";
-
 /**
  * See the registered mapping of HF model ID => Fal model ID here:
  *
@@ -16,3 +14,28 @@ export const FAL_AI_API_BASE_URL = "https://fal.run";
  *
  * Thanks!
  */
+import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../types";
+
+const FAL_AI_API_BASE_URL = "https://fal.run";
+
+const makeBody = ({ args }: BodyParams): unknown => {
+	return args;
+};
+
+const makeHeaders = ({ accessToken, authMethod }: HeaderParams): Record<string, string> => {
+	return {
+		"Content-Type": "application/json",
+		Authorization: authMethod === "provider-key" ? `Key ${accessToken}` : `Bearer ${accessToken}`,
+	};
+};
+
+const makeUrl = ({ baseUrl, model }: UrlParams): string => {
+	return `${baseUrl}/${model}`;
+};
+
+export const falAiConfig: ProviderConfig = {
+	baseUrl: FAL_AI_API_BASE_URL,
+	makeBody,
+	makeHeaders,
+	makeUrl,
+};
