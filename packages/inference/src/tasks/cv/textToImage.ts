@@ -60,11 +60,11 @@ export async function textToImage(args: TextToImageArgs, options?: TextToImageOp
 		!args.provider || args.provider === "hf-inference" || args.provider === "sambanova"
 			? args
 			: {
-				...omit(args, ["inputs", "parameters"]),
-				...args.parameters,
-				...getResponseFormatArg(args.provider),
-				prompt: args.inputs,
-			};
+					...omit(args, ["inputs", "parameters"]),
+					...args.parameters,
+					...getResponseFormatArg(args.provider),
+					prompt: args.inputs,
+			  };
 	const res = await request<
 		| TextToImageOutput
 		| Base64ImageGeneration
