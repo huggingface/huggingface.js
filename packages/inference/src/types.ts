@@ -90,3 +90,30 @@ export type RequestArgs = BaseArgs &
 		parameters?: Record<string, unknown>;
 		accessToken?: string;
 	};
+
+export interface ProviderConfig {
+	baseUrl: string;
+	makeBody: (params: BodyParams) => unknown;
+	makeHeaders: (params: HeaderParams) => Record<string, string>;
+	makeUrl: (params: UrlParams) => string;
+}
+
+export interface HeaderParams {
+	accessToken?: string;
+	authMethod: "none" | "hf-token" | "credentials-include" | "provider-key";
+	binary: boolean;
+}
+
+export interface UrlParams {
+	baseUrl: string;
+	model: string;
+	taskHint?: InferenceTask;
+	chatCompletion?: boolean;
+}
+
+export interface BodyParams {
+	args: Record<string, unknown>;
+	model: string;
+	taskHint?: InferenceTask;
+	chatCompletion?: boolean;
+}

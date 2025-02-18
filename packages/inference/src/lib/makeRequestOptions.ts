@@ -1,15 +1,14 @@
 import { HF_HUB_URL, HF_ROUTER_URL } from "../config";
 import { FAL_AI_API_BASE_URL } from "../providers/fal-ai";
 import { NEBIUS_API_BASE_URL } from "../providers/nebius";
-import { REPLICATE_API_BASE_URL } from "../providers/replicate";
 import { SAMBANOVA_API_BASE_URL } from "../providers/sambanova";
 import { TOGETHER_API_BASE_URL } from "../providers/together";
 import { NOVITA_API_BASE_URL } from "../providers/novita";
 import { FIREWORKS_AI_API_BASE_URL } from "../providers/fireworks-ai";
-import { HYPERBOLIC_API_BASE_URL } from "../providers/hyperbolic";
 import { BLACKFORESTLABS_AI_API_BASE_URL } from "../providers/black-forest-labs";
-import type { InferenceProvider } from "../types";
-import type { InferenceTask, Options, RequestArgs } from "../types";
+import { hyperbolicConfig } from "../providers/hyperbolic";
+import { replicateConfig } from "../providers/replicate";
+import type { InferenceProvider, InferenceTask, Options, ProviderConfig, RequestArgs } from "../types";
 import { isUrl } from "./isUrl";
 import { version as packageVersion, name as packageName } from "../../package.json";
 import { getProviderModelId } from "./getProviderModelId";
@@ -23,9 +22,128 @@ const HF_HUB_INFERENCE_PROXY_TEMPLATE = `${HF_ROUTER_URL}/{{PROVIDER}}`;
 let tasks: Record<string, { models: { id: string }[] }> | null = null;
 
 /**
+ * Config to define how to serialize requests for each provider
+ */
+const providerConfigs: Partial<Record<InferenceProvider, ProviderConfig>> = {
+	hyperbolic: hyperbolicConfig,
+	replicate: replicateConfig,
+	// TODO: add them all + remove the "partial" type
+};
+
+/**
  * Helper that prepares request arguments
  */
 export async function makeRequestOptions(
+	args: RequestArgs & {
+		data?: Blob | ArrayBuffer;
+		stream?: boolean;
+	},
+	options?: Options & {
+		/** To load default model if needed */
+		taskHint?: InferenceTask;
+		chatCompletion?: boolean;
+	}
+): Promise<{ url: string; info: RequestInit }> {
+	const { accessToken, endpointUrl, provider: maybeProvider, model: maybeModel, ...remainingArgs } = args;
+	const provider = maybeProvider ?? "hf-inference";
+	const providerConfig = providerConfigs[provider];
+
+	const { includeCredentials, taskHint, chatCompletion, signal } = options ?? {};
+
+	if (endpointUrl && provider !== "hf-inference") {
+		throw new Error(`Cannot use endpointUrl with a third-party provider.`);
+	}
+	if (maybeModel && isUrl(maybeModel)) {
+		throw new Error(`Model URLs are no longer supported. Use endpointUrl instead.`);
+	}
+	if (!maybeModel && !taskHint) {
+		throw new Error("No model provided, and no task has been specified.");
+	}
+	if (!providerConfig) {
+		throw new Error(`No provider config found for provider ${provider}`);
+	}
+	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+	const hfModel = maybeModel ?? (await loadDefaultModel(taskHint!));
+	const model = await getProviderModelId({ model: hfModel, provider }, args, {
+		taskHint,
+		chatCompletion,
+		fetch: options?.fetch,
+	});
+
+	/// If accessToken is passed, it should take precedence over includeCredentials
+	const authMethod = accessToken
+		? accessToken.startsWith("hf_")
+			? "hf-token"
+			: "provider-key"
+		: includeCredentials === "include"
+		  ? "credentials-include"
+		  : "none";
+
+	// Make URL
+	const url = endpointUrl
+		? chatCompletion
+			? endpointUrl + `/v1/chat/completions`
+			: endpointUrl
+		: providerConfig.makeUrl({
+				baseUrl:
+					authMethod !== "provider-key"
+						? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", provider)
+						: providerConfig.baseUrl,
+				model,
+				taskHint,
+				chatCompletion,
+		  });
+
+	// Make headers
+	const binary = "data" in args && !!args.data;
+	const headers = providerConfig.makeHeaders({
+		accessToken,
+		authMethod,
+		binary,
+	});
+
+	// Add user-agent to headers
+	// e.g. @huggingface/inference/3.1.3
+	const ownUserAgent = `${packageName}/${packageVersion}`;
+	const userAgent = [ownUserAgent, typeof navigator !== "undefined" ? navigator.userAgent : undefined]
+		.filter((x) => x !== undefined)
+		.join(" ");
+	headers["User-Agent"] = userAgent;
+
+	// Make body
+	const body = binary
+		? args.data
+		: JSON.stringify(
+				providerConfig.makeBody({
+					args: remainingArgs as Record<string, unknown>,
+					model,
+					taskHint,
+					chatCompletion,
+				})
+		  );
+
+	/**
+	 * For edge runtimes, leave 'credentials' undefined, otherwise cloudflare workers will error
+	 */
+	let credentials: RequestCredentials | undefined;
+	if (typeof includeCredentials === "string") {
+		credentials = includeCredentials as RequestCredentials;
+	} else if (includeCredentials === true) {
+		credentials = "include";
+	}
+
+	const info: RequestInit = {
+		headers,
+		method: "POST",
+		body,
+		...(credentials ? { credentials } : undefined),
+		signal,
+	};
+
+	return { url, info };
+}
+
+export async function makeRequestOptionsLegacy(
 	args: RequestArgs & {
 		data?: Blob | ArrayBuffer;
 		stream?: boolean;
@@ -72,7 +190,7 @@ export async function makeRequestOptions(
 		? chatCompletion
 			? endpointUrl + `/v1/chat/completions`
 			: endpointUrl
-		: makeUrl({
+		: makeUrlLegacy({
 				authMethod,
 				chatCompletion: chatCompletion ?? false,
 				model,
@@ -146,7 +264,7 @@ export async function makeRequestOptions(
 	return { url, info };
 }
 
-function makeUrl(params: {
+function makeUrlLegacy(params: {
 	authMethod: "none" | "hf-token" | "credentials-include" | "provider-key";
 	chatCompletion: boolean;
 	model: string;
@@ -190,7 +308,7 @@ function makeUrl(params: {
 		case "replicate": {
 			const baseUrl = shouldProxy
 				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
-				: REPLICATE_API_BASE_URL;
+				: replicateConfig.baseUrl;
 			if (params.model.includes(":")) {
 				/// Versioned model
 				return `${baseUrl}/v1/predictions`;
@@ -237,7 +355,7 @@ function makeUrl(params: {
 		case "hyperbolic": {
 			const baseUrl = shouldProxy
 				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
-				: HYPERBOLIC_API_BASE_URL;
+				: hyperbolicConfig.baseUrl;
 
 			if (params.taskHint === "text-to-image") {
 				return `${baseUrl}/v1/images/generations`;

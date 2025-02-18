@@ -1,3 +1,6 @@
+Copy-paste this snippet in a new module and start implementing custom logic for the new provider.
+
+```ts
 /**
  * See the registered mapping of HF model ID => Hyperbolic model ID here:
  *
@@ -43,3 +46,4 @@ export const hyperbolicConfig: ProviderConfig = {
 	makeHeaders,
 	makeUrl,
 };
+```
