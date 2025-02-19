@@ -28,7 +28,7 @@ export async function imageToImage(args: ImageToImageArgs, options?: Options): P
 	}
 	const res = await request<Blob>(reqArgs, {
 		...options,
-		taskHint: "image-to-image",
+		task: "image-to-image",
 	});
 	const isValidOutput = res && res instanceof Blob;
 	if (!isValidOutput) {

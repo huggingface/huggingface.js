@@ -11,7 +11,7 @@ export type SummarizationArgs = BaseArgs & SummarizationInput;
 export async function summarization(args: SummarizationArgs, options?: Options): Promise<SummarizationOutput> {
 	const res = await request<SummarizationOutput[]>(args, {
 		...options,
-		taskHint: "summarization",
+		task: "summarization",
 	});
 	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x?.summary_text === "string");
 	if (!isValidOutput) {

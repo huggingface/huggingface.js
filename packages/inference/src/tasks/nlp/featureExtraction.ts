@@ -26,7 +26,7 @@ export async function featureExtraction(
 ): Promise<FeatureExtractionOutput> {
 	const res = await request<FeatureExtractionOutput>(args, {
 		...options,
-		taskHint: "feature-extraction",
+		task: "feature-extraction",
 	});
 	let isValidOutput = true;
 

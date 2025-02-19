@@ -19,7 +19,7 @@ export async function automaticSpeechRecognition(
 	const payload = await buildPayload(args);
 	const res = await request<AutomaticSpeechRecognitionOutput>(payload, {
 		...options,
-		taskHint: "automatic-speech-recognition",
+		task: "automatic-speech-recognition",
 	});
 	const isValidOutput = typeof res?.text === "string";
 	if (!isValidOutput) {

@@ -7,10 +7,8 @@ import { makeRequestOptions } from "../../lib/makeRequestOptions";
 export async function request<T>(
 	args: RequestArgs,
 	options?: Options & {
-		/** When a model can be used for multiple tasks, and we want to run a non-default task */
-		task?: string | InferenceTask;
-		/** To load default model if needed */
-		taskHint?: InferenceTask;
+		/** In most cases (unless we pass a endpointUrl) we know the task */
+		task?: InferenceTask;
 		/** Is chat completion compatible */
 		chatCompletion?: boolean;
 	}

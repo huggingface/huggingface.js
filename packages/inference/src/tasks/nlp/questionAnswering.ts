@@ -14,7 +14,7 @@ export async function questionAnswering(
 ): Promise<QuestionAnsweringOutput[number]> {
 	const res = await request<QuestionAnsweringOutput | QuestionAnsweringOutput[number]>(args, {
 		...options,
-		taskHint: "question-answering",
+		task: "question-answering",
 	});
 	const isValidOutput = Array.isArray(res)
 		? res.every(

@@ -17,7 +17,7 @@ export async function imageSegmentation(
 	const payload = preparePayload(args);
 	const res = await request<ImageSegmentationOutput>(payload, {
 		...options,
-		taskHint: "image-segmentation",
+		task: "image-segmentation",
 	});
 	const isValidOutput =
 		Array.isArray(res) &&

@@ -14,7 +14,7 @@ export async function tableQuestionAnswering(
 ): Promise<TableQuestionAnsweringOutput[number]> {
 	const res = await request<TableQuestionAnsweringOutput | TableQuestionAnsweringOutput[number]>(args, {
 		...options,
-		taskHint: "table-question-answering",
+		task: "table-question-answering",
 	});
 	const isValidOutput = Array.isArray(res) ? res.every((elem) => validate(elem)) : validate(res);
 	if (!isValidOutput) {

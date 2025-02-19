@@ -11,7 +11,7 @@ export async function* chatCompletionStream(
 ): AsyncGenerator<ChatCompletionStreamOutput> {
 	yield* streamingRequest<ChatCompletionStreamOutput>(args, {
 		...options,
-		taskHint: "text-generation",
+		task: "text-generation",
 		chatCompletion: true,
 	});
 }

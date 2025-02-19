@@ -14,7 +14,7 @@ export async function imageToText(args: ImageToTextArgs, options?: Options): Pro
 	const res = (
 		await request<[ImageToTextOutput]>(payload, {
 			...options,
-			taskHint: "image-to-text",
+			task: "image-to-text",
 		})
 	)?.[0];
 

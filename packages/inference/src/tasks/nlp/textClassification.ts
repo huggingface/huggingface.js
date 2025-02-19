@@ -15,7 +15,7 @@ export async function textClassification(
 	const res = (
 		await request<TextClassificationOutput>(args, {
 			...options,
-			taskHint: "text-classification",
+			task: "text-classification",
 		})
 	)?.[0];
 	const isValidOutput =

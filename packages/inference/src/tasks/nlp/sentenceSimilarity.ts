@@ -15,7 +15,7 @@ export async function sentenceSimilarity(
 ): Promise<SentenceSimilarityOutput> {
 	const res = await request<SentenceSimilarityOutput>(prepareInput(args), {
 		...options,
-		taskHint: "sentence-similarity",
+		task: "sentence-similarity",
 	});
 
 	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x === "number");

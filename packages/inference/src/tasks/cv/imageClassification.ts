@@ -17,7 +17,7 @@ export async function imageClassification(
 	const payload = preparePayload(args);
 	const res = await request<ImageClassificationOutput>(payload, {
 		...options,
-		taskHint: "image-classification",
+		task: "image-classification",
 	});
 	const isValidOutput =
 		Array.isArray(res) && res.every((x) => typeof x.label === "string" && typeof x.score === "number");

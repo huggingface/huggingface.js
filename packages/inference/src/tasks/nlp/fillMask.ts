@@ -11,7 +11,7 @@ export type FillMaskArgs = BaseArgs & FillMaskInput;
 export async function fillMask(args: FillMaskArgs, options?: Options): Promise<FillMaskOutput> {
 	const res = await request<FillMaskOutput>(args, {
 		...options,
-		taskHint: "fill-mask",
+		task: "fill-mask",
 	});
 	const isValidOutput =
 		Array.isArray(res) &&

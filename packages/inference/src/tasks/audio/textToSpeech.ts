@@ -24,7 +24,7 @@ export async function textToSpeech(args: TextToSpeechArgs, options?: Options): P
 			: args;
 	const res = await request<Blob | OutputUrlTextToSpeechGeneration>(payload, {
 		...options,
-		taskHint: "text-to-speech",
+		task: "text-to-speech",
 	});
 	if (res instanceof Blob) {
 		return res;

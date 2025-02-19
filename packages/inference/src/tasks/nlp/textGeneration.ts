@@ -39,7 +39,7 @@ export async function textGeneration(
 		args.prompt = args.inputs;
 		const raw = await request<TogeteherTextCompletionOutput>(args, {
 			...options,
-			taskHint: "text-generation",
+			task: "text-generation",
 		});
 		const isValidOutput =
 			typeof raw === "object" && "choices" in raw && Array.isArray(raw?.choices) && typeof raw?.model === "string";
@@ -63,7 +63,7 @@ export async function textGeneration(
 		};
 		const raw = await request<HyperbolicTextCompletionOutput>(payload, {
 			...options,
-			taskHint: "text-generation",
+			task: "text-generation",
 		});
 		const isValidOutput =
 			typeof raw === "object" && "choices" in raw && Array.isArray(raw?.choices) && typeof raw?.model === "string";
@@ -78,7 +78,7 @@ export async function textGeneration(
 		const res = toArray(
 			await request<TextGenerationOutput | TextGenerationOutput[]>(args, {
 				...options,
-				taskHint: "text-generation",
+				task: "text-generation",
 			})
 		);
 

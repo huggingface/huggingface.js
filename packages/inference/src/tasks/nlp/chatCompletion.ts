@@ -12,7 +12,7 @@ export async function chatCompletion(
 ): Promise<ChatCompletionOutput> {
 	const res = await request<ChatCompletionOutput>(args, {
 		...options,
-		taskHint: "text-generation",
+		task: "text-generation",
 		chatCompletion: true,
 	});
 

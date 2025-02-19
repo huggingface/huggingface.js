@@ -27,7 +27,7 @@ export async function tabularRegression(
 ): Promise<TabularRegressionOutput> {
 	const res = await request<TabularRegressionOutput>(args, {
 		...options,
-		taskHint: "tabular-regression",
+		task: "tabular-regression",
 	});
 	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x === "number");
 	if (!isValidOutput) {
