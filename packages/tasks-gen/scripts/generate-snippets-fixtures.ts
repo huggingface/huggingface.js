@@ -133,7 +133,8 @@ function generateInferenceSnippet(
 	provider: SnippetInferenceProvider,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
-	return GET_SNIPPET_FN[language](model, "api_token", provider, opts);
+	const providerModelId = provider === "hf-inference" ? model.id : `<${provider} alias for ${model.id}>`;
+	return GET_SNIPPET_FN[language](model, "api_token", provider, providerModelId, opts);
 }
 
 async function getExpectedInferenceSnippet(

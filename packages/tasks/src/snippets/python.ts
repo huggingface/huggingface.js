@@ -52,6 +52,7 @@ export const snippetConversational = (
 	model: ModelDataMinimal,
 	accessToken: string,
 	provider: SnippetInferenceProvider,
+	providerModelId?: string,
 	opts?: {
 		streaming?: boolean;
 		messages?: ChatCompletionInputMessage[];
@@ -394,6 +395,7 @@ export const pythonSnippets: Partial<
 			model: ModelDataMinimal,
 			accessToken: string,
 			provider: SnippetInferenceProvider,
+			providerModelId?: string,
 			opts?: Record<string, unknown>
 		) => InferenceSnippet[]
 	>
@@ -432,15 +434,16 @@ export function getPythonInferenceSnippet(
 	model: ModelDataMinimal,
 	accessToken: string,
 	provider: SnippetInferenceProvider,
+	providerModelId?: string,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
 	if (model.tags.includes("conversational")) {
 		// Conversational model detected, so we display a code snippet that features the Messages API
-		return snippetConversational(model, accessToken, provider, opts);
+		return snippetConversational(model, accessToken, provider, providerModelId, opts);
 	} else {
 		const snippets =
 			model.pipeline_tag && model.pipeline_tag in pythonSnippets
-				? pythonSnippets[model.pipeline_tag]?.(model, accessToken, provider) ?? []
+				? pythonSnippets[model.pipeline_tag]?.(model, accessToken, provider, providerModelId) ?? []
 				: [];
 
 		return snippets.map((snippet) => {
