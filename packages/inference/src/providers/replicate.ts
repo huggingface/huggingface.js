@@ -18,24 +18,24 @@ import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../typ
 
 export const REPLICATE_API_BASE_URL = "https://api.replicate.com";
 
-const makeBody = ({ args, model }: BodyParams): Record<string, unknown> => {
+const makeBody = (params: BodyParams): Record<string, unknown> => {
 	return {
-		input: args,
-		version: model.includes(":") ? model.split(":")[1] : undefined,
+		input: params.args,
+		version: params.model.includes(":") ? params.model.split(":")[1] : undefined,
 	};
 };
 
-const makeHeaders = ({ accessToken }: HeaderParams): Record<string, string> => {
-	return { Authorization: `Bearer ${accessToken}` };
+const makeHeaders = (params: HeaderParams): Record<string, string> => {
+	return { Authorization: `Bearer ${params.accessToken}` };
 };
 
-const makeUrl = ({ baseUrl, model }: UrlParams): string => {
-	if (model.includes(":")) {
+const makeUrl = (params: UrlParams): string => {
+	if (params.model.includes(":")) {
 		/// Versioned model
-		return `${baseUrl}/v1/predictions`;
+		return `${params.baseUrl}/v1/predictions`;
 	}
 	/// Evergreen / Canonical model
-	return `${baseUrl}/v1/models/${model}/predictions`;
+	return `${params.baseUrl}/v1/models/${params.model}/predictions`;
 };
 
 export const REPLICATE_CONFIG: ProviderConfig = {

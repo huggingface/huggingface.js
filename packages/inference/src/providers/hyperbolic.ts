@@ -18,22 +18,22 @@ import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../typ
 
 const HYPERBOLIC_API_BASE_URL = "https://api.hyperbolic.xyz";
 
-const makeBody = ({ args, model, taskHint }: BodyParams): Record<string, unknown> => {
+const makeBody = (params: BodyParams): Record<string, unknown> => {
 	return {
-		...args,
-		...(taskHint === "text-to-image" ? { model_name: model } : { model }),
+		...params.args,
+		...(params.taskHint === "text-to-image" ? { model_name: params.model } : { model: params.model }),
 	};
 };
 
-const makeHeaders = ({ accessToken }: HeaderParams): Record<string, string> => {
-	return { Authorization: `Bearer ${accessToken}` };
+const makeHeaders = (params: HeaderParams): Record<string, string> => {
+	return { Authorization: `Bearer ${params.accessToken}` };
 };
 
-const makeUrl = ({ baseUrl, taskHint }: UrlParams): string => {
-	if (taskHint === "text-to-image") {
-		return `${baseUrl}/v1/images/generations`;
+const makeUrl = (params: UrlParams): string => {
+	if (params.taskHint === "text-to-image") {
+		return `${params.baseUrl}/v1/images/generations`;
 	}
-	return `${baseUrl}/v1/chat/completions`;
+	return `${params.baseUrl}/v1/chat/completions`;
 };
 
 export const HYPERBOLIC_CONFIG: ProviderConfig = {

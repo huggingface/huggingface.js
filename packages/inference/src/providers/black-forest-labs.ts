@@ -18,20 +18,20 @@ import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../typ
 
 const BLACK_FOREST_LABS_AI_API_BASE_URL = "https://api.us1.bfl.ai/v1";
 
-const makeBody = ({ args }: BodyParams): Record<string, unknown> => {
-	return args;
+const makeBody = (params: BodyParams): Record<string, unknown> => {
+	return params.args;
 };
 
-const makeHeaders = ({ accessToken, authMethod }: HeaderParams): Record<string, string> => {
-	if (authMethod === "provider-key") {
-		return { "X-Key": `${accessToken}` };
+const makeHeaders = (params: HeaderParams): Record<string, string> => {
+	if (params.authMethod === "provider-key") {
+		return { "X-Key": `${params.accessToken}` };
 	} else {
-		return { Authorization: `Bearer ${accessToken}` };
+		return { Authorization: `Bearer ${params.accessToken}` };
 	}
 };
 
-const makeUrl = ({ baseUrl, model }: UrlParams): string => {
-	return `${baseUrl}/${model}`;
+const makeUrl = (params: UrlParams): string => {
+	return `${params.baseUrl}/${params.model}`;
 };
 
 export const BLACK_FOREST_LABS_CONFIG: ProviderConfig = {

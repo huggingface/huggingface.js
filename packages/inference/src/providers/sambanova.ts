@@ -18,22 +18,22 @@ import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../typ
 
 const SAMBANOVA_API_BASE_URL = "https://api.sambanova.ai";
 
-const makeBody = ({ args, chatCompletion, model }: BodyParams): Record<string, unknown> => {
+const makeBody = (params: BodyParams): Record<string, unknown> => {
 	return {
-		...args,
-		...(chatCompletion ? { model } : undefined),
+		...params.args,
+		...(params.chatCompletion ? { model: params.model } : undefined),
 	};
 };
 
-const makeHeaders = ({ accessToken }: HeaderParams): Record<string, string> => {
-	return { Authorization: `Bearer ${accessToken}` };
+const makeHeaders = (params: HeaderParams): Record<string, string> => {
+	return { Authorization: `Bearer ${params.accessToken}` };
 };
 
-const makeUrl = ({ baseUrl, taskHint, chatCompletion }: UrlParams): string => {
-	if (taskHint === "text-generation" && chatCompletion) {
-		return `${baseUrl}/v1/chat/completions`;
+const makeUrl = (params: UrlParams): string => {
+	if (params.taskHint === "text-generation" && params.chatCompletion) {
+		return `${params.baseUrl}/v1/chat/completions`;
 	}
-	return baseUrl;
+	return params.baseUrl;
 };
 
 export const SAMBANOVA_CONFIG: ProviderConfig = {

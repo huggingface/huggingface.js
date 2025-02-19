@@ -18,28 +18,28 @@ import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../typ
 
 const NEBIUS_API_BASE_URL = "https://api.studio.nebius.ai";
 
-const makeBody = ({ args, model }: BodyParams): Record<string, unknown> => {
+const makeBody = (params: BodyParams): Record<string, unknown> => {
 	return {
-		...args,
-		model,
+		...params.args,
+		model: params.model,
 	};
 };
 
-const makeHeaders = ({ accessToken }: HeaderParams): Record<string, string> => {
-	return { Authorization: `Bearer ${accessToken}` };
+const makeHeaders = (params: HeaderParams): Record<string, string> => {
+	return { Authorization: `Bearer ${params.accessToken}` };
 };
 
-const makeUrl = ({ baseUrl, taskHint, chatCompletion }: UrlParams): string => {
-	if (taskHint === "text-to-image") {
-		return `${baseUrl}/v1/images/generations`;
+const makeUrl = (params: UrlParams): string => {
+	if (params.taskHint === "text-to-image") {
+		return `${params.baseUrl}/v1/images/generations`;
 	}
-	if (taskHint === "text-generation") {
-		if (chatCompletion) {
-			return `${baseUrl}/v1/chat/completions`;
+	if (params.taskHint === "text-generation") {
+		if (params.chatCompletion) {
+			return `${params.baseUrl}/v1/chat/completions`;
 		}
-		return `${baseUrl}/v1/completions`;
+		return `${params.baseUrl}/v1/completions`;
 	}
-	return baseUrl;
+	return params.baseUrl;
 };
 
 export const NEBIUS_CONFIG: ProviderConfig = {

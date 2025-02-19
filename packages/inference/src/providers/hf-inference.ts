@@ -13,26 +13,26 @@
 import { HF_ROUTER_URL } from "../config";
 import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../types";
 
-const makeBody = ({ args, chatCompletion, model }: BodyParams): Record<string, unknown> => {
+const makeBody = (params: BodyParams): Record<string, unknown> => {
 	return {
-		...args,
-		...(chatCompletion ? { model } : undefined),
+		...params.args,
+		...(params.chatCompletion ? { model: params.model } : undefined),
 	};
 };
 
-const makeHeaders = ({ accessToken }: HeaderParams): Record<string, string> => {
-	return { Authorization: `Bearer ${accessToken}` };
+const makeHeaders = (params: HeaderParams): Record<string, string> => {
+	return { Authorization: `Bearer ${params.accessToken}` };
 };
 
-const makeUrl = ({ baseUrl, chatCompletion, model, taskHint }: UrlParams): string => {
-	if (taskHint && ["feature-extraction", "sentence-similarity"].includes(taskHint)) {
+const makeUrl = (params: UrlParams): string => {
+	if (params.taskHint && ["feature-extraction", "sentence-similarity"].includes(params.taskHint)) {
 		/// when deployed on hf-inference, those two tasks are automatically compatible with one another.
-		return `${baseUrl}/pipeline/${taskHint}/${model}`;
+		return `${params.baseUrl}/pipeline/${params.taskHint}/${params.model}`;
 	}
-	if (taskHint === "text-generation" && chatCompletion) {
-		return `${baseUrl}/models/${model}/v1/chat/completions`;
+	if (params.taskHint === "text-generation" && params.chatCompletion) {
+		return `${params.baseUrl}/models/${params.model}/v1/chat/completions`;
 	}
-	return `${baseUrl}/models/${model}`;
+	return `${params.baseUrl}/models/${params.model}`;
 };
 
 export const HF_INFERENCE_CONFIG: ProviderConfig = {
