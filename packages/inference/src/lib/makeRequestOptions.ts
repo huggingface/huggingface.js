@@ -1,14 +1,14 @@
 import { HF_HUB_URL, HF_ROUTER_URL } from "../config";
-import { blackForestLabsConfig } from "../providers/black-forest-labs";
-import { falAiConfig } from "../providers/fal-ai";
-import { fireworksAiConfig } from "../providers/fireworks-ai";
-import { hfInferenceConfig } from "../providers/hf-inference";
-import { hyperbolicConfig } from "../providers/hyperbolic";
-import { nebiusConfig } from "../providers/nebius";
-import { novitaConfig } from "../providers/novita";
-import { replicateConfig } from "../providers/replicate";
-import { sambanovaConfig } from "../providers/sambanova";
-import { togetherConfig } from "../providers/together";
+import { BLACK_FOREST_LABS_CONFIG } from "../providers/black-forest-labs";
+import { FAL_AI_CONFIG } from "../providers/fal-ai";
+import { FIREWORKS_AI_CONFIG } from "../providers/fireworks-ai";
+import { HF_INFERENCE_CONFIG } from "../providers/hf-inference";
+import { HYPERBOLIC_CONFIG } from "../providers/hyperbolic";
+import { NEBIUS_CONFIG } from "../providers/nebius";
+import { NOVITA_CONFIG } from "../providers/novita";
+import { REPLICATE_CONFIG } from "../providers/replicate";
+import { SAMBANOVA_CONFIG } from "../providers/sambanova";
+import { TOGETHER_CONFIG } from "../providers/together";
 import type { InferenceProvider, InferenceTask, Options, ProviderConfig, RequestArgs } from "../types";
 import { isUrl } from "./isUrl";
 import { version as packageVersion, name as packageName } from "../../package.json";
@@ -26,16 +26,16 @@ let tasks: Record<string, { models: { id: string }[] }> | null = null;
  * Config to define how to serialize requests for each provider
  */
 const providerConfigs: Record<InferenceProvider, ProviderConfig> = {
-	"black-forest-labs": blackForestLabsConfig,
-	"fal-ai": falAiConfig,
-	"fireworks-ai": fireworksAiConfig,
-	"hf-inference": hfInferenceConfig,
-	hyperbolic: hyperbolicConfig,
-	nebius: nebiusConfig,
-	novita: novitaConfig,
-	replicate: replicateConfig,
-	sambanova: sambanovaConfig,
-	together: togetherConfig,
+	"black-forest-labs": BLACK_FOREST_LABS_CONFIG,
+	"fal-ai": FAL_AI_CONFIG,
+	"fireworks-ai": FIREWORKS_AI_CONFIG,
+	"hf-inference": HF_INFERENCE_CONFIG,
+	hyperbolic: HYPERBOLIC_CONFIG,
+	nebius: NEBIUS_CONFIG,
+	novita: NOVITA_CONFIG,
+	replicate: REPLICATE_CONFIG,
+	sambanova: SAMBANOVA_CONFIG,
+	together: TOGETHER_CONFIG,
 };
 
 /**

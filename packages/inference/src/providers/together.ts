@@ -42,7 +42,7 @@ const makeUrl = ({ baseUrl, taskHint, chatCompletion }: UrlParams): string => {
 	return baseUrl;
 };
 
-export const togetherConfig: ProviderConfig = {
+export const TOGETHER_CONFIG: ProviderConfig = {
 	baseUrl: TOGETHER_API_BASE_URL,
 	makeBody,
 	makeHeaders,

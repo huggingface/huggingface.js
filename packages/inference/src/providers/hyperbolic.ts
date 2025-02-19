@@ -36,7 +36,7 @@ const makeUrl = ({ baseUrl, taskHint }: UrlParams): string => {
 	return `${baseUrl}/v1/chat/completions`;
 };
 
-export const hyperbolicConfig: ProviderConfig = {
+export const HYPERBOLIC_CONFIG: ProviderConfig = {
 	baseUrl: HYPERBOLIC_API_BASE_URL,
 	makeBody,
 	makeHeaders,

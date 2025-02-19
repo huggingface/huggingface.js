@@ -39,7 +39,7 @@ const makeUrl = ({ baseUrl, taskHint, chatCompletion }: UrlParams): string => {
 	return baseUrl;
 };
 
-export const novitaConfig: ProviderConfig = {
+export const NOVITA_CONFIG: ProviderConfig = {
 	baseUrl: NOVITA_API_BASE_URL,
 	makeBody,
 	makeHeaders,

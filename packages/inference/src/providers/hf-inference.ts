@@ -35,7 +35,7 @@ const makeUrl = ({ baseUrl, chatCompletion, model, taskHint }: UrlParams): strin
 	return `${baseUrl}/models/${model}`;
 };
 
-export const hfInferenceConfig: ProviderConfig = {
+export const HF_INFERENCE_CONFIG: ProviderConfig = {
 	baseUrl: `${HF_ROUTER_URL}/hf-inference`,
 	makeBody,
 	makeHeaders,

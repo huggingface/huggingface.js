@@ -42,7 +42,7 @@ const makeUrl = ({ baseUrl, taskHint, chatCompletion }: UrlParams): string => {
 	return baseUrl;
 };
 
-export const nebiusConfig: ProviderConfig = {
+export const NEBIUS_CONFIG: ProviderConfig = {
 	baseUrl: NEBIUS_API_BASE_URL,
 	makeBody,
 	makeHeaders,

@@ -36,7 +36,7 @@ const makeUrl = ({ baseUrl, taskHint, chatCompletion }: UrlParams): string => {
 	return baseUrl;
 };
 
-export const fireworksAiConfig: ProviderConfig = {
+export const FIREWORKS_AI_CONFIG: ProviderConfig = {
 	baseUrl: FIREWORKS_AI_API_BASE_URL,
 	makeBody,
 	makeHeaders,

@@ -36,7 +36,7 @@ const makeUrl = ({ baseUrl, taskHint, chatCompletion }: UrlParams): string => {
 	return baseUrl;
 };
 
-export const sambanovaConfig: ProviderConfig = {
+export const SAMBANOVA_CONFIG: ProviderConfig = {
 	baseUrl: SAMBANOVA_API_BASE_URL,
 	makeBody,
 	makeHeaders,

@@ -19,7 +19,6 @@ import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../typ
 export const REPLICATE_API_BASE_URL = "https://api.replicate.com";
 
 const makeBody = ({ args, model }: BodyParams): Record<string, unknown> => {
-	// const version =
 	return {
 		input: args,
 		version: model.includes(":") ? model.split(":")[1] : undefined,
@@ -39,7 +38,7 @@ const makeUrl = ({ baseUrl, model }: UrlParams): string => {
 	return `${baseUrl}/v1/models/${model}/predictions`;
 };
 
-export const replicateConfig: ProviderConfig = {
+export const REPLICATE_CONFIG: ProviderConfig = {
 	baseUrl: REPLICATE_API_BASE_URL,
 	makeBody,
 	makeHeaders,

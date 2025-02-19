@@ -32,7 +32,7 @@ const makeUrl = ({ baseUrl, model }: UrlParams): string => {
 	return `${baseUrl}/${model}`;
 };
 
-export const falAiConfig: ProviderConfig = {
+export const FAL_AI_CONFIG: ProviderConfig = {
 	baseUrl: FAL_AI_API_BASE_URL,
 	makeBody,
 	makeHeaders,
