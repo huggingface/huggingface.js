@@ -140,6 +140,26 @@ export const SKUS = {
 				tflops: 22.06,
 				memory: [8, 16],
 			},
+			"RTX 4090 LAPTOP": {
+				tflops: 38.9,
+				memory: [16],
+			},
+			"RTX 4080 LAPTOP": {
+				tflops: 33.8,
+				memory: [12],
+			},
+			"RTX 4070 LAPTOP": {
+				tflops: 20.0,
+				memory: [8],
+			},
+			"RTX 4060 LAPTOP": {
+				tflops: 14.6,
+				memory: [8],
+			},
+			"RTX 4050 LAPTOP": {
+				tflops: 12.1,
+				memory: [6],
+			},
 			"RTX 3090": {
 				tflops: 35.58,
 				memory: [24],
