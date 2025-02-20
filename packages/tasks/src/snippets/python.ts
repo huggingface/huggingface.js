@@ -278,8 +278,7 @@ image = client.text_to_image(
 import fal_client
 
 result = fal_client.subscribe(
-	# replace with correct id from fal.ai
-	"fal-ai/${providerModelId ?? model.id}",
+	"${providerModelId ?? model.id}",
 	arguments={
 		"prompt": ${getModelInputSnippet(model)},
 	},
