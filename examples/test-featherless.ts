@@ -1,4 +1,3 @@
-import { access } from "fs";
 import { HfInference } from "../packages/inference/dist";
 import * as dotenv from "dotenv";
 
