@@ -5,7 +5,9 @@ const client = new OpenAI({
 	apiKey: "api_token"
 });
 
-const chatCompletion = await client.chat.completions.create({
+let out = "";
+
+const stream = await client.chat.completions.create({
 	model: "<together alias for meta-llama/Llama-3.1-8B-Instruct>",
 	messages: [
 		{
@@ -14,6 +16,13 @@ const chatCompletion = await client.chat.completions.create({
 		}
 	],
 	max_tokens: 500,
+	stream: true,
 });
 
-console.log(chatCompletion.choices[0].message);
+for await (const chunk of stream) {
+	if (chunk.choices && chunk.choices.length > 0) {
+		const newContent = chunk.choices[0].delta.content;
+		out += newContent;
+		console.log(newContent);
+	}  
+}
