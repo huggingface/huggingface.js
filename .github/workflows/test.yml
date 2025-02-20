@@ -50,6 +50,7 @@ jobs:
           HF_REPLICATE_KEY: dummy
           HF_SAMBANOVA_KEY: dummy
           HF_TOGETHER_KEY: dummy
+          HF_FEATHERLESS_KEY: dummy
 
   browser:
     runs-on: ubuntu-latest

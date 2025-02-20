@@ -8,6 +8,7 @@ const INFERENCE_PROVIDERS = [
 	"replicate",
 	"sambanova",
 	"together",
+	"featherless",
 ] as const;
 
 export type SnippetInferenceProvider = (typeof INFERENCE_PROVIDERS)[number] | string;
