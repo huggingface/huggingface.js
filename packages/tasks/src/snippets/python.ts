@@ -1,5 +1,4 @@
 import {
-	HF_HUB_INFERENCE_PROXY_TEMPLATE,
 	openAIbaseUrl,
 	type SnippetInferenceProvider,
 } from "../inference-providers.js";
@@ -108,7 +107,7 @@ client = OpenAI(
 messages = ${messagesStr}
 
 stream = client.chat.completions.create(
-    model="${model.id}", 
+    model="${providerModelId ?? model.id}", 
 	messages=messages, 
 	${configStr}
 	stream=True
@@ -148,7 +147,7 @@ client = OpenAI(
 messages = ${messagesStr}
 
 completion = client.chat.completions.create(
-	model="${model.id}", 
+	model="${providerModelId ?? model.id}", 
 	messages=messages, 
 	${configStr}
 )
@@ -207,9 +206,9 @@ export const snippetBasic = (
 	return [
 		...(model.pipeline_tag && model.pipeline_tag in HFH_INFERENCE_CLIENT_METHODS
 			? [
-					{
-						client: "huggingface_hub",
-						content: `\
+				{
+					client: "huggingface_hub",
+					content: `\
 ${snippetImportInferenceClient(accessToken, provider)}
 
 result = client.${HFH_INFERENCE_CLIENT_METHODS[model.pipeline_tag]}(
@@ -220,8 +219,8 @@ result = client.${HFH_INFERENCE_CLIENT_METHODS[model.pipeline_tag]}(
 
 print(result)
 `,
-					},
-			  ]
+				},
+			]
 			: []),
 		{
 			client: "requests",
@@ -256,7 +255,8 @@ output = query(${getModelInputSnippet(model)})`,
 export const snippetTextToImage = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: SnippetInferenceProvider
+	provider: SnippetInferenceProvider,
+	providerModelId?: string,
 ): InferenceSnippet[] => {
 	return [
 		{
@@ -272,28 +272,28 @@ image = client.text_to_image(
 		},
 		...(provider === "fal-ai"
 			? [
-					{
-						client: "fal-client",
-						content: `\
+				{
+					client: "fal-client",
+					content: `\
 import fal_client
 
 result = fal_client.subscribe(
 	# replace with correct id from fal.ai
-	"fal-ai/${model.id}",
+	"fal-ai/${providerModelId ?? model.id}",
 	arguments={
 		"prompt": ${getModelInputSnippet(model)},
 	},
 )
 print(result)
 `,
-					},
-			  ]
+				},
+			]
 			: []),
 		...(provider === "hf-inference"
 			? [
-					{
-						client: "requests",
-						content: `\
+				{
+					client: "requests",
+					content: `\
 def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.content
@@ -306,8 +306,8 @@ image_bytes = query({
 import io
 from PIL import Image
 image = Image.open(io.BytesIO(image_bytes))`,
-					},
-			  ]
+				},
+			]
 			: []),
 	];
 };
