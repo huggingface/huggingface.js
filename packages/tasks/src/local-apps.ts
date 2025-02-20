@@ -138,18 +138,21 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 };
 
 const snippetNodeLlamaCppCli = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	let tagName = "{{OLLAMA_TAG}}";
+
+	if (filepath) {
+		const quantLabel = parseGGUFQuantLabel(filepath);
+		tagName = quantLabel ? `:${quantLabel}` : tagName;
+	}
+
 	return [
 		{
 			title: "Chat with the model",
-			content: [
-				`npx -y node-llama-cpp chat \\`,
-				`  --model "hf:${model.id}/${filepath ?? "{{GGUF_FILE}}"}" \\`,
-				`  --prompt 'Hi there!'`,
-			].join("\n"),
+			content: `npx -y node-llama-cpp chat hf:${model.id}${tagName}`,
 		},
 		{
 			title: "Estimate the model compatibility with your hardware",
-			content: `npx -y node-llama-cpp inspect estimate "hf:${model.id}/${filepath ?? "{{GGUF_FILE}}"}"`,
+			content: `npx -y node-llama-cpp inspect estimate hf:${model.id}${tagName}`,
 		},
 	];
 };
