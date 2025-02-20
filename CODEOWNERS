@@ -23,4 +23,9 @@
 /packages/gguf @mishig25 @ngxson @julien-c
 
 # Ownership for the space-header Package
+
 /packages/space-header @enzostvs
+
+# Ownership for the ollama-utils Package
+
+/packages/ollama-utils @ngxson
