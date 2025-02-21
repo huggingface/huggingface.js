@@ -8,6 +8,7 @@ import { NOVITA_API_BASE_URL } from "../providers/novita";
 import { FIREWORKS_AI_API_BASE_URL } from "../providers/fireworks-ai";
 import { HYPERBOLIC_API_BASE_URL } from "../providers/hyperbolic";
 import { BLACKFORESTLABS_AI_API_BASE_URL } from "../providers/black-forest-labs";
+import { COHERE_API_BASE_URL } from "../providers/cohere";
 import type { InferenceProvider } from "../types";
 import type { InferenceTask, Options, RequestArgs } from "../types";
 import { isUrl } from "./isUrl";
@@ -253,6 +254,15 @@ function makeUrl(params: {
 					return `${baseUrl}/chat/completions`;
 				}
 				return `${baseUrl}/completions`;
+			}
+			return baseUrl;
+		}
+		case "cohere": {
+			const baseUrl = shouldProxy
+				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
+				: COHERE_API_BASE_URL;
+			if (params.taskHint === "text-generation") {
+				return `${baseUrl}/v2/chat`;
 			}
 			return baseUrl;
 		}
