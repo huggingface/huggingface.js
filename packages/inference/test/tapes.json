@@ -7386,5 +7386,58 @@
         "content-type": "image/jpeg"
       }
     }
+  },
+  "772e481d98640490fca3aab8e7fed5b771ea213f2b76b2f8858ce7bc90acb16b": {
+    "url": "https://api.cohere.com/v2/chat",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Say 'this is a test'\"}],\"stream\":true,\"model\":\"command-r7b-12-2024\"}"
+    },
+    "response": {
+      "body": "event: message-start\ndata: {\"id\":\"b9c2d3f2-4532-473d-a8a1-9236d159ab26\",\"type\":\"message-start\",\"delta\":{\"message\":{\"role\":\"assistant\",\"content\":[],\"tool_plan\":\"\",\"tool_calls\":[],\"citations\":[]}}}\n\nevent: content-start\ndata: {\"type\":\"content-start\",\"index\":0,\"delta\":{\"message\":{\"content\":{\"type\":\"text\",\"text\":\"\"}}}}\n\nevent: content-delta\ndata: {\"type\":\"content-delta\",\"index\":0,\"delta\":{\"message\":{\"content\":{\"text\":\"This\"}}}}\n\nevent: content-delta\ndata: {\"type\":\"content-delta\",\"index\":0,\"delta\":{\"message\":{\"content\":{\"text\":\" is\"}}}}\n\nevent: content-delta\ndata: {\"type\":\"content-delta\",\"index\":0,\"delta\":{\"message\":{\"content\":{\"text\":\" a\"}}}}\n\nevent: content-delta\ndata: {\"type\":\"content-delta\",\"index\":0,\"delta\":{\"message\":{\"content\":{\"text\":\" test\"}}}}\n\nevent: content-delta\ndata: {\"type\":\"content-delta\",\"index\":0,\"delta\":{\"message\":{\"content\":{\"text\":\".\"}}}}\n\nevent: content-end\ndata: {\"type\":\"content-end\",\"index\":0}\n\nevent: message-end\ndata: {\"type\":\"message-end\",\"delta\":{\"finish_reason\":\"COMPLETE\",\"usage\":{\"billed_units\":{\"input_tokens\":7,\"output_tokens\":5},\"tokens\":{\"input_tokens\":502,\"output_tokens\":7}}}}\n\ndata: [DONE]\n\n",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-expose-headers": "X-Debug-Trace-ID",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+        "cache-control": "no-cache, no-store, no-transform, must-revalidate, private, max-age=0",
+        "content-type": "text/event-stream",
+        "expires": "Thu, 01 Jan 1970 00:00:00 UTC",
+        "pragma": "no-cache",
+        "server": "envoy",
+        "transfer-encoding": "chunked",
+        "vary": "Origin"
+      }
+    }
+  },
+  "545bf4e8393bc07dedb7c66d13846ff8264a49e909117c3c93ae35e30e705cbb": {
+    "url": "https://api.cohere.com/v2/chat",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Complete this sentence with words, one plus one is equal \"}],\"model\":\"command-r7b-12-2024\"}"
+    },
+    "response": {
+      "body": "{\"id\":\"cd9a6a0f-5e4c-411f-9604-fd4bdffc3052\",\"message\":{\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"One plus one is equal to two.\"}]},\"finish_reason\":\"COMPLETE\",\"usage\":{\"billed_units\":{\"input_tokens\":11,\"output_tokens\":8},\"tokens\":{\"input_tokens\":507,\"output_tokens\":10}}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-expose-headers": "X-Debug-Trace-ID",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+        "cache-control": "no-cache, no-store, no-transform, must-revalidate, private, max-age=0",
+        "content-type": "application/json",
+        "expires": "Thu, 01 Jan 1970 00:00:00 UTC",
+        "num_chars": "2635",
+        "num_tokens": "19",
+        "pragma": "no-cache",
+        "server": "envoy",
+        "vary": "Origin"
+      }
+    }
   }
 }

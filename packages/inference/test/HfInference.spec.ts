@@ -1355,21 +1355,22 @@ describe.concurrent("HfInference", () => {
 		() => {
 			const client = new HfInference(env.HF_COHERE_KEY);
 
-			(HARDCODED_MODEL_ID_MAPPING["cohere"] = {
+			HARDCODED_MODEL_ID_MAPPING["cohere"] = {
 				"CohereForAI/c4ai-command-r7b-12-2024": "command-r7b-12-2024",
 				"CohereForAI/aya-expanse-8b": "c4ai-aya-expanse-8b",
-			}),
-				it("chatCompletion", async () => {
-					const res = await client.chatCompletion({
-						model: "CohereForAI/c4ai-command-r7b-12-2024",
-						provider: "cohere",
-						messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
-					});
-					if (res.choices && res.choices.length > 0) {
-						const completion = res.choices[0].message?.content;
-						expect(completion).toContain("two");
-					}
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "CohereForAI/c4ai-command-r7b-12-2024",
+					provider: "cohere",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
 				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toContain("two");
+				}
+			});
 
 			it("chatCompletion stream", async () => {
 				const stream = client.chatCompletionStream({
