@@ -53,7 +53,10 @@ export async function getDefaultTask(
 		taskCache.set(key, { task: modelTask, date: new Date() });
 
 		if (taskCache.size > MAX_CACHE_ITEMS) {
-			taskCache.delete(taskCache.keys().next().value);
+			const firstKey = taskCache.keys().next().value;
+			if (firstKey !== undefined) {
+				taskCache.delete(firstKey);
+			}
 		}
 	}
 

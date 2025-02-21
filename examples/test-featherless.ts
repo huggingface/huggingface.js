@@ -1,3 +1,4 @@
+import { access } from "fs";
 import { HfInference } from "../packages/inference/dist";
 import * as dotenv from "dotenv";
 
@@ -8,11 +9,15 @@ async function main() {
 
 	try {
 		// Test text generation
-		console.log("Testing text generation...");
 		const response = await inference.textGeneration({
-			model: "featherless/mixtral-8x7b",
+			model: "ChenWeiLi/MedLlama-3-8B_DARE",
 			provider: "featherless",
-			inputs: "Paris is",
+			messages: [
+				{
+					role: "user",
+					content: "Paris is",
+				},
+			],
 			parameters: {
 				temperature: 0,
 				max_tokens: 10,
@@ -23,9 +28,14 @@ async function main() {
 		// Test streaming
 		console.log("\nTesting streaming...");
 		const stream = await inference.textGenerationStream({
-			model: "featherless/mixtral-8x7b",
+			model: "ChenWeiLi/MedLlama-3-8B_DARE",
 			provider: "featherless",
-			inputs: "Paris is",
+			messages: [
+				{
+					role: "user",
+					content: "Paris is",
+				},
+			],
 			parameters: {
 				temperature: 0,
 				max_tokens: 10,

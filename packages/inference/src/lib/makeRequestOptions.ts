@@ -262,7 +262,7 @@ function makeUrl(params: {
 				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
 				: FEATHERLESS_API_BASE_URL;
 			if (params.taskHint === "text-generation") {
-				return `${baseUrl}/v1/chat/completions`;
+				return `${baseUrl}/models/${params.model}/v1/chat/completions`;
 			}
 			return baseUrl;
 		}

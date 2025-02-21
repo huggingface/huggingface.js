@@ -50,14 +50,14 @@ export async function textGeneration(
 		return {
 			generated_text: completion.text,
 		};
-	} else if (args.provider === "hyperbolic") {
+	} else if (args.provider === "hyperbolic" || args.provider === "featherless") {
 		const payload = {
 			messages: [{ content: args.inputs, role: "user" }],
 			...(args.parameters
 				? {
 						max_tokens: args.parameters.max_new_tokens,
 						...omit(args.parameters, "max_new_tokens"),
-				  }
+					}
 				: undefined),
 			...omit(args, ["inputs", "parameters"]),
 		};
