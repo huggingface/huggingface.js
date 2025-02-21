@@ -54,7 +54,7 @@ export const GGUF_QUANT_DESCRIPTIONS: Record<GGMLQuantizationType, { txt: string
 		src_url: "https://github.com/ggerganov/llama.cpp/pull/1684#issue-1739619305",
 	},
 	[GGMLQuantizationType.Q2_K]: {
-		txt: `2-bit quantization (q). Super-blocks with 16 blocks, each block has 16 weight. Weight formula: w = q * block_scale(4-bit) + block_min(4-bit), resulting in 2.5625 bits-per-weight.`,
+		txt: `2-bit quantization (q). Super-blocks with 16 blocks, each block has 16 weight. Weight formula: w = q * block_scale(4-bit) + block_min(4-bit), resulting in 2.625 bits-per-weight.`,
 		src_url: "https://github.com/ggerganov/llama.cpp/pull/1684#issue-1739619305",
 	},
 	[GGMLQuantizationType.IQ4_XS]: {
