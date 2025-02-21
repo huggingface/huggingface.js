@@ -1,9 +1,5 @@
 /**
- * See the registered mapping of HF model ID => Fireworks model ID here:
- *
- * https://huggingface.co/api/partners/fireworks/models
- *
- * This is a publicly available mapping.
+ * HF-Inference do not have a mapping since all models use IDs from the Hub.
  *
  * If you want to try to run inference for a new model locally before it's registered on huggingface.co,
  * you can add it to the dictionary "HARDCODED_MODEL_ID_MAPPING" in consts.ts, for dev purposes.
@@ -14,9 +10,8 @@
  *
  * Thanks!
  */
+import { HF_ROUTER_URL } from "../config";
 import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../types";
-
-const FIREWORKS_AI_API_BASE_URL = "https://api.fireworks.ai/inference";
 
 const makeBody = (params: BodyParams): Record<string, unknown> => {
 	return {
@@ -30,14 +25,18 @@ const makeHeaders = (params: HeaderParams): Record<string, string> => {
 };
 
 const makeUrl = (params: UrlParams): string => {
-	if (params.taskHint === "text-generation" && params.chatCompletion) {
-		return `${params.baseUrl}/v1/chat/completions`;
+	if (params.taskHint && ["feature-extraction", "sentence-similarity"].includes(params.taskHint)) {
+		/// when deployed on hf-inference, those two tasks are automatically compatible with one another.
+		return `${params.baseUrl}/pipeline/${params.taskHint}/${params.model}`;
 	}
-	return params.baseUrl;
+	if (params.taskHint === "text-generation" && params.chatCompletion) {
+		return `${params.baseUrl}/models/${params.model}/v1/chat/completions`;
+	}
+	return `${params.baseUrl}/models/${params.model}`;
 };
 
-export const FIREWORKS_AI_CONFIG: ProviderConfig = {
-	baseUrl: FIREWORKS_AI_API_BASE_URL,
+export const HF_INFERENCE_CONFIG: ProviderConfig = {
+	baseUrl: `${HF_ROUTER_URL}/hf-inference`,
 	makeBody,
 	makeHeaders,
 	makeUrl,
