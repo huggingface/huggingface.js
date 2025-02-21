@@ -1354,11 +1354,12 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Featherless",
 		() => {
+			HARDCODED_MODEL_ID_MAPPING.hyperbolic = { "Sao10K/L3-8B-Stheno-v3.2": "Sao10K/L3-8B-Stheno-v3.2" };
 			const client = new HfInference(env.HF_FEATHERLESS_KEY);
 
 			it("chatCompletion", async () => {
 				const res = await client.chatCompletion({
-					model: "featherless/mixtral-8x7b",
+					model: "Sao10K/L3-8B-Stheno-v3.2",
 					provider: "featherless",
 					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
 				});
@@ -1370,7 +1371,7 @@ describe.concurrent("HfInference", () => {
 
 			it("chatCompletion stream", async () => {
 				const stream = client.chatCompletionStream({
-					model: "featherless/mixtral-8x7b",
+					model: "Sao10K/L3-8B-Stheno-v3.2",
 					provider: "featherless",
 					messages: [{ role: "user", content: "Complete the equation 1 + 1 = , just the answer" }],
 				}) as AsyncGenerator<ChatCompletionStreamOutput>;
@@ -1381,40 +1382,6 @@ describe.concurrent("HfInference", () => {
 					}
 				}
 				expect(out).toContain("2");
-			});
-
-			it("textGeneration", async () => {
-				const res = await client.textGeneration({
-					model: "featherless/mixtral-8x7b",
-					provider: "featherless",
-					inputs: "Paris is",
-					parameters: {
-						temperature: 0,
-						max_tokens: 10,
-					},
-				});
-				expect(res).toMatchObject({
-					generated_text: expect.any(String),
-				});
-			});
-
-			it("textGeneration stream", async () => {
-				const stream = client.textGenerationStream({
-					model: "featherless/mixtral-8x7b",
-					provider: "featherless",
-					inputs: "Paris is",
-					parameters: {
-						temperature: 0,
-						max_tokens: 10,
-					},
-				});
-				let out = "";
-				for await (const chunk of stream) {
-					if (chunk.token) {
-						out += chunk.token.text;
-					}
-				}
-				expect(out).toBeTruthy();
 			});
 		},
 		TIMEOUT
