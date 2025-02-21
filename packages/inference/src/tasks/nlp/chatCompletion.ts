@@ -1,63 +1,24 @@
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import type { CohereTextGenerationOutputFinishReason, CohereMessage, CohereLogprob } from "../../providers/cohere";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 import type { ChatCompletionInput, ChatCompletionOutput } from "@huggingface/tasks";
-
-export type CohereTextGenerationOutputFinishReason =
-	| "COMPLETE"
-	| "STOP_SEQUENCE"
-	| "MAX_TOKENS"
-	| "TOOL_CALL"
-	| "ERROR";
 
 interface CohereChatCompletionOutput {
 	id: string;
 	finish_reason: CohereTextGenerationOutputFinishReason;
 	message: CohereMessage;
-	usage: CohereChatCompletionOutputUsage;
+	usage: {
+		billed_units: {
+			input_tokens: number;
+			output_tokens: number;
+		};
+		tokens: {
+			input_tokens: number;
+			output_tokens: number;
+		};
+	};
 	logprobs?: CohereLogprob[]; // Optional field for log probabilities
-}
-
-interface CohereMessage {
-	role: string;
-	content: Array<{
-		type: string;
-		text: string;
-	}>;
-	tool_calls?: CohereToolCall[]; // Optional field for tool calls
-}
-
-interface CohereChatCompletionOutputUsage {
-	billed_units: CohereInputOutputTokens;
-	tokens: CohereInputOutputTokens;
-}
-
-interface CohereInputOutputTokens {
-	input_tokens: number;
-	output_tokens: number;
-}
-
-interface CohereLogprob {
-	logprob: number;
-	token: string;
-	top_logprobs: CohereTopLogprob[];
-}
-
-interface CohereTopLogprob {
-	logprob: number;
-	token: string;
-}
-
-interface CohereToolCall {
-	function: CohereFunctionDefinition;
-	id: string;
-	type: string;
-}
-
-interface CohereFunctionDefinition {
-	arguments: unknown;
-	description?: string;
-	name: string;
 }
 
 function convertCohereToChatCompletionOutput(res: CohereChatCompletionOutput): ChatCompletionOutput {

@@ -16,3 +16,49 @@ export const COHERE_API_BASE_URL = "https://api.cohere.com";
  *
  * Thanks!
  */
+
+export type CohereTextGenerationOutputFinishReason =
+	| "COMPLETE"
+	| "STOP_SEQUENCE"
+	| "MAX_TOKENS"
+	| "TOOL_CALL"
+	| "ERROR";
+
+export interface CohereMessageDelta {
+	role: string;
+	content: {
+		type: string;
+		text: string;
+	};
+	tool_calls?: CohereToolCall[]; // Optional field for tool calls
+}
+
+export interface CohereMessage {
+	role: string;
+	content: Array<{
+		type: string;
+		text: string;
+	}>;
+	tool_calls?: CohereToolCall[]; // Optional field for tool calls
+}
+
+interface CohereToolCall {
+	function: {
+		arguments: unknown;
+		description?: string;
+		name: string;
+	};
+	id: string;
+	type: string;
+}
+
+export interface CohereLogprob {
+	logprob: number;
+	token: string;
+	top_logprobs: CohereTopLogprob[];
+}
+
+interface CohereTopLogprob {
+	logprob: number;
+	token: string;
+}

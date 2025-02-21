@@ -1,66 +1,25 @@
+import type { CohereLogprob, CohereMessageDelta, CohereTextGenerationOutputFinishReason } from "../../providers/cohere";
 import type { BaseArgs, Options } from "../../types";
 import { streamingRequest } from "../custom/streamingRequest";
 import type { ChatCompletionInput, ChatCompletionStreamOutput } from "@huggingface/tasks";
 
-export type CohereTextGenerationOutputFinishReason =
-	| "COMPLETE"
-	| "STOP_SEQUENCE"
-	| "MAX_TOKENS"
-	| "TOOL_CALL"
-	| "ERROR";
-
 interface CohereChatCompletionStreamOutput {
 	id: string;
 	finish_reason?: CohereTextGenerationOutputFinishReason;
-	delta: CohereMessageDelta;
-	usage?: CohereChatCompletionOutputUsage;
-	logprobs?: CohereLogprob[];
-}
-
-interface CohereMessage {
-	role: string;
-	content: {
-		type: string;
-		text: string;
+	delta: {
+		message: CohereMessageDelta;
 	};
-	tool_calls?: CohereToolCall[];
-}
-
-interface CohereMessageDelta {
-	message: CohereMessage;
-}
-
-interface CohereChatCompletionOutputUsage {
-	billed_units: CohereInputOutputTokens;
-	tokens: CohereInputOutputTokens;
-}
-
-interface CohereInputOutputTokens {
-	input_tokens: number;
-	output_tokens: number;
-}
-
-interface CohereLogprob {
-	logprob: number;
-	token: string;
-	top_logprobs: CohereTopLogprob[];
-}
-
-interface CohereTopLogprob {
-	logprob: number;
-	token: string;
-}
-
-interface CohereToolCall {
-	function: CohereFunctionDefinition;
-	id: string;
-	type: string;
-}
-
-interface CohereFunctionDefinition {
-	arguments: unknown;
-	description?: string;
-	name: string;
+	usage?: {
+		billed_units: {
+			input_tokens: number;
+			output_tokens: number;
+		};
+		tokens: {
+			input_tokens: number;
+			output_tokens: number;
+		};
+	};
+	logprobs?: CohereLogprob[];
 }
 
 function convertCohereToChatCompletionStreamOutput(res: CohereChatCompletionStreamOutput): ChatCompletionStreamOutput {
