@@ -29,7 +29,7 @@ export async function visualQuestionAnswering(
 	} as RequestArgs;
 	const res = await request<VisualQuestionAnsweringOutput>(reqArgs, {
 		...options,
-		taskHint: "visual-question-answering",
+		task: "visual-question-answering",
 	});
 	const isValidOutput =
 		Array.isArray(res) &&

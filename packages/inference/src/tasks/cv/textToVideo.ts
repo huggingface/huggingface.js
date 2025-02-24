@@ -35,7 +35,7 @@ export async function textToVideo(args: TextToVideoArgs, options?: Options): Pro
 			: args;
 	const res = await request<FalAiOutput | ReplicateOutput>(payload, {
 		...options,
-		taskHint: "text-to-video",
+		task: "text-to-video",
 	});
 
 	if (args.provider === "fal-ai") {
