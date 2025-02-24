@@ -10,5 +10,5 @@ curl 'https://router.huggingface.co/together/v1/chat/completions' \
 		}
 	],
     "max_tokens": 500,
-    "stream": false
+    "stream": true
 }'

@@ -12,10 +12,12 @@ messages = [
 	}
 ]
 
-completion = client.chat.completions.create(
-	model="<together alias for meta-llama/Llama-3.1-8B-Instruct>", 
+stream = client.chat.completions.create(
+    model="<together alias for meta-llama/Llama-3.1-8B-Instruct>", 
 	messages=messages, 
 	max_tokens=500,
+	stream=True
 )
 
-print(completion.choices[0].message)
+for chunk in stream:
+	print(chunk.choices[0].delta.content, end="")
