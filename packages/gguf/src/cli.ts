@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { GGMLQuantizationType, gguf, GGUFParseOutput } from ".";
+import { GGMLQuantizationType, gguf, ggufAllShards, GGUFParseOutput } from ".";
 import { GGML_QUANT_SIZES } from "./quant-descriptions";
 
 interface PrintColumnHeader {
@@ -40,9 +40,15 @@ async function main() {
 		showHelp(1);
 	}
 
-	const { metadata, tensorInfos } = await gguf(ggufPath, {
+	const { shards } = await ggufAllShards(ggufPath, {
 		allowLocalFile: true,
 	});
+	const { metadata, tensorInfos } = shards[0];
+
+	// merge all metadata
+	for (let i = 1; i < shards.length; i++) {
+		tensorInfos.push(...shards[i].tensorInfos);
+	}
 
 	// TODO: print info about endianess
 	console.log(`* Dumping ${Object.keys(metadata).length} key/value pair(s)`);
@@ -71,7 +77,7 @@ async function main() {
 	);
 
 	console.log();
-	console.log(`* Memory usage estimation (with ${nCtx} tokens in context)`);
+	console.log(`* Memory usage estimation (with context length of ${nCtx} tokens)`);
 	const kvUsage = calcMemoryUsage(metadata as GGUFParseOutput<{ strict: false }>["metadata"], nCtx);
 	let modelWeightInBytes = 0;
 	for (const tensorInfo of tensorInfos) {
