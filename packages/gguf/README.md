@@ -102,6 +102,9 @@ This package provides a CLI equivalent to [`gguf_dump.py`](https://github.com/gg
 
 ```bash
 npx @huggingface/gguf my_model.gguf
+
+# or, with a remote GGUF file:
+# npx @huggingface/gguf https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF/resolve/main/Llama-3.2-1B-Instruct-Q4_K_M.gguf
 ```
 
 Example for the output:
