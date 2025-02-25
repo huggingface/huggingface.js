@@ -88,7 +88,6 @@ export type RequestArgs = BaseArgs &
 		| ChatCompletionInput
 	) & {
 		parameters?: Record<string, unknown>;
-		accessToken?: string;
 	};
 
 export interface ProviderConfig {
