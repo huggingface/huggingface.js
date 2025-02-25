@@ -76,7 +76,7 @@ export async function makeRequestOptions(
 	const hfModel = maybeModel ?? (await loadDefaultModel(task!));
 	const model = providerConfig.closedSource
 		? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		  maybeModel! //For closed-models API providers, one needs to pass the model ID directly
+		  maybeModel! // For closed-models API providers, one needs to pass the model ID directly (e.g. "gpt-3.5-turbo")
 		: await getProviderModelId({ model: hfModel, provider }, args, {
 				task,
 				chatCompletion,
