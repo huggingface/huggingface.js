@@ -9,6 +9,7 @@ import { NOVITA_CONFIG } from "../providers/novita";
 import { REPLICATE_CONFIG } from "../providers/replicate";
 import { SAMBANOVA_CONFIG } from "../providers/sambanova";
 import { TOGETHER_CONFIG } from "../providers/together";
+import { OPENAI_CONFIG } from "../providers/openai";
 import type { InferenceProvider, InferenceTask, Options, ProviderConfig, RequestArgs } from "../types";
 import { isUrl } from "./isUrl";
 import { version as packageVersion, name as packageName } from "../../package.json";
@@ -31,6 +32,7 @@ const providerConfigs: Record<InferenceProvider, ProviderConfig> = {
 	"fireworks-ai": FIREWORKS_AI_CONFIG,
 	"hf-inference": HF_INFERENCE_CONFIG,
 	hyperbolic: HYPERBOLIC_CONFIG,
+	openai: OPENAI_CONFIG,
 	nebius: NEBIUS_CONFIG,
 	novita: NOVITA_CONFIG,
 	replicate: REPLICATE_CONFIG,
@@ -72,20 +74,26 @@ export async function makeRequestOptions(
 	}
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const hfModel = maybeModel ?? (await loadDefaultModel(task!));
-	const model = await getProviderModelId({ model: hfModel, provider }, args, {
-		task,
-		chatCompletion,
-		fetch: options?.fetch,
-	});
+	const model = providerConfig.closedSource
+		? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		  maybeModel! //For closed-models API providers, one needs to pass the model ID directly
+		: await getProviderModelId({ model: hfModel, provider }, args, {
+				task,
+				chatCompletion,
+				fetch: options?.fetch,
+		  });
 
-	/// If accessToken is passed, it should take precedence over includeCredentials
-	const authMethod = accessToken
-		? accessToken.startsWith("hf_")
-			? "hf-token"
-			: "provider-key"
-		: includeCredentials === "include"
-		  ? "credentials-include"
-		  : "none";
+	// If accessToken is passed, it should take precedence over includeCredentials
+	// Closed-source providers require an accessToken (cannot be routed).
+	const authMethod = providerConfig.closedSource
+		? "provider-key"
+		: accessToken
+		  ? accessToken.startsWith("hf_")
+				? "hf-token"
+				: "provider-key"
+		  : includeCredentials === "include"
+		    ? "credentials-include"
+		    : "none";
 
 	// Make URL
 	const url = endpointUrl
