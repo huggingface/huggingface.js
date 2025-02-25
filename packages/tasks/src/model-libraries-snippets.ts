@@ -109,7 +109,7 @@ export const bm25s = (model: ModelData): string[] => [
 retriever = BM25HF.load_from_hub("${model.id}")`,
 ];
 
-export const cxr_foundation = (model: ModelData): string[] => [
+export const cxr_foundation = (): string[] => [
 	`!pip install git+https://github.com/Google-Health/cxr-foundation.git@master#subdirectory=python
 
 # Load image as grayscale (Stillwaterising, CC0, via Wikimedia Commons)
