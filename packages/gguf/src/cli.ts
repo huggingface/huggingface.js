@@ -11,20 +11,33 @@ interface PrintColumnHeader {
 
 const mapDtypeToName = Object.fromEntries(Object.entries(GGMLQuantizationType).map(([name, value]) => [value, name]));
 
+function showHelp(exitCode: number) {
+	console.error("Usage: gguf-view [--help|-h] [--show-tensor] [--context|-c N] <path/to/gguf>");
+	console.error("  --help, -h        Show this help message");
+	console.error("  --show-tensor     Show tensor information");
+	console.error("  --context, -c N   Number of tokens in context (default: 4096)");
+	process.exit(exitCode);
+}
+
 async function main() {
 	let ggufPath = "";
 	let showTensors = false;
+	let nCtx = 4096;
 	for (let i = 2; i < process.argv.length; i++) {
-		if (process.argv[i] === "--show-tensor") {
+		if (process.argv[i] === "--help" || process.argv[i] === "-h") {
+			showHelp(0);
+		} else if (process.argv[i] === "--show-tensor") {
 			showTensors = true;
+		} else if (process.argv[i] === "--context" || process.argv[i] === "-c") {
+			nCtx = Number(process.argv[++i]);
 		} else {
 			ggufPath = process.argv[i];
 		}
 	}
 
 	if (!ggufPath.length) {
-		console.error("Usage: gguf-view [--show-tensor] <path/to/gguf>");
-		process.exit(1);
+		console.error("Error: Missing path to gguf file");
+		showHelp(1);
 	}
 
 	const { metadata, tensorInfos } = await gguf(ggufPath, {
@@ -58,8 +71,8 @@ async function main() {
 	);
 
 	console.log();
-	console.log(`* Memory usage estimation`);
-	const kvUsage = calcMemoryUsage(metadata as GGUFParseOutput<{ strict: false }>["metadata"], 4096);
+	console.log(`* Memory usage estimation (with ${nCtx} tokens in context)`);
+	const kvUsage = calcMemoryUsage(metadata as GGUFParseOutput<{ strict: false }>["metadata"], nCtx);
 	let modelWeightInBytes = 0;
 	for (const tensorInfo of tensorInfos) {
 		const nElem = Number(tensorInfo.shape.reduce((a, b) => a * b, 1n));
