@@ -41,15 +41,6 @@ jobs:
         run: VCR_MODE=playback pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          HF_BLACK_FOREST_LABS_KEY: dummy
-          HF_FAL_KEY: dummy
-          HF_FIREWORKS_KEY: dummy
-          HF_HYPERBOLIC_KEY: dummy
-          HF_NEBIUS_KEY: dummy
-          HF_NOVITA_KEY: dummy
-          HF_REPLICATE_KEY: dummy
-          HF_SAMBANOVA_KEY: dummy
-          HF_TOGETHER_KEY: dummy
 
   browser:
     runs-on: ubuntu-latest
@@ -86,15 +77,6 @@ jobs:
         run: VCR_MODE=playback pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test:browser
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          HF_BLACK_FOREST_LABS_KEY: dummy
-          HF_FAL_KEY: dummy
-          HF_FIREWORKS_KEY: dummy
-          HF_HYPERBOLIC_KEY: dummy
-          HF_NEBIUS_KEY: dummy
-          HF_NOVITA_KEY: dummy
-          HF_REPLICATE_KEY: dummy
-          HF_SAMBANOVA_KEY: dummy
-          HF_TOGETHER_KEY: dummy
 
   e2e:
     runs-on: ubuntu-latest
@@ -158,12 +140,3 @@ jobs:
         env:
           NPM_CONFIG_REGISTRY: http://localhost:4874/
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          HF_BLACK_FOREST_LABS_KEY: dummy
-          HF_FAL_KEY: dummy
-          HF_FIREWORKS_KEY: dummy
-          HF_HYPERBOLIC_KEY: dummy
-          HF_NEBIUS_KEY: dummy
-          HF_NOVITA_KEY: dummy
-          HF_REPLICATE_KEY: dummy
-          HF_SAMBANOVA_KEY: dummy
-          HF_TOGETHER_KEY: dummy
