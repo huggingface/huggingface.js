@@ -31,8 +31,8 @@ export async function makeRequestOptions(
 		stream?: boolean;
 	},
 	options?: Options & {
-		/** To load default model if needed */
-		taskHint?: InferenceTask;
+		/** In most cases (unless we pass a endpointUrl) we know the task */
+		task?: InferenceTask;
 		chatCompletion?: boolean;
 	}
 ): Promise<{ url: string; info: RequestInit }> {
@@ -40,7 +40,7 @@ export async function makeRequestOptions(
 	let otherArgs = remainingArgs;
 	const provider = maybeProvider ?? "hf-inference";
 
-	const { includeCredentials, taskHint, chatCompletion } = options ?? {};
+	const { includeCredentials, task, chatCompletion } = options ?? {};
 
 	if (endpointUrl && provider !== "hf-inference") {
 		throw new Error(`Cannot use endpointUrl with a third-party provider.`);
@@ -48,13 +48,13 @@ export async function makeRequestOptions(
 	if (maybeModel && isUrl(maybeModel)) {
 		throw new Error(`Model URLs are no longer supported. Use endpointUrl instead.`);
 	}
-	if (!maybeModel && !taskHint) {
+	if (!maybeModel && !task) {
 		throw new Error("No model provided, and no task has been specified.");
 	}
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-	const hfModel = maybeModel ?? (await loadDefaultModel(taskHint!));
+	const hfModel = maybeModel ?? (await loadDefaultModel(task!));
 	const model = await getProviderModelId({ model: hfModel, provider }, args, {
-		taskHint,
+		task,
 		chatCompletion,
 		fetch: options?.fetch,
 	});
@@ -77,7 +77,7 @@ export async function makeRequestOptions(
 				chatCompletion: chatCompletion ?? false,
 				model,
 				provider: provider ?? "hf-inference",
-				taskHint,
+				task,
 		  });
 
 	const headers: Record<string, string> = {};
@@ -133,7 +133,7 @@ export async function makeRequestOptions(
 			? args.data
 			: JSON.stringify({
 					...otherArgs,
-					...(taskHint === "text-to-image" && provider === "hyperbolic"
+					...(task === "text-to-image" && provider === "hyperbolic"
 						? { model_name: model }
 						: chatCompletion || provider === "together" || provider === "nebius" || provider === "hyperbolic"
 						  ? { model }
@@ -151,7 +151,7 @@ function makeUrl(params: {
 	chatCompletion: boolean;
 	model: string;
 	provider: InferenceProvider;
-	taskHint: InferenceTask | undefined;
+	task: InferenceTask | undefined;
 }): string {
 	if (params.authMethod === "none" && params.provider !== "hf-inference") {
 		throw new Error("Authentication is required when requesting a third-party provider. Please provide accessToken");
@@ -176,10 +176,10 @@ function makeUrl(params: {
 				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
 				: NEBIUS_API_BASE_URL;
 
-			if (params.taskHint === "text-to-image") {
+			if (params.task === "text-to-image") {
 				return `${baseUrl}/v1/images/generations`;
 			}
-			if (params.taskHint === "text-generation") {
+			if (params.task === "text-generation") {
 				if (params.chatCompletion) {
 					return `${baseUrl}/v1/chat/completions`;
 				}
@@ -203,7 +203,7 @@ function makeUrl(params: {
 				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
 				: SAMBANOVA_API_BASE_URL;
 			/// Sambanova API matches OpenAI-like APIs: model is defined in the request body
-			if (params.taskHint === "text-generation" && params.chatCompletion) {
+			if (params.task === "text-generation" && params.chatCompletion) {
 				return `${baseUrl}/v1/chat/completions`;
 			}
 			return baseUrl;
@@ -213,10 +213,10 @@ function makeUrl(params: {
 				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
 				: TOGETHER_API_BASE_URL;
 			/// Together API matches OpenAI-like APIs: model is defined in the request body
-			if (params.taskHint === "text-to-image") {
+			if (params.task === "text-to-image") {
 				return `${baseUrl}/v1/images/generations`;
 			}
-			if (params.taskHint === "text-generation") {
+			if (params.task === "text-generation") {
 				if (params.chatCompletion) {
 					return `${baseUrl}/v1/chat/completions`;
 				}
@@ -229,7 +229,7 @@ function makeUrl(params: {
 			const baseUrl = shouldProxy
 				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
 				: FIREWORKS_AI_API_BASE_URL;
-			if (params.taskHint === "text-generation" && params.chatCompletion) {
+			if (params.task === "text-generation" && params.chatCompletion) {
 				return `${baseUrl}/v1/chat/completions`;
 			}
 			return baseUrl;
@@ -239,7 +239,7 @@ function makeUrl(params: {
 				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
 				: HYPERBOLIC_API_BASE_URL;
 
-			if (params.taskHint === "text-to-image") {
+			if (params.task === "text-to-image") {
 				return `${baseUrl}/v1/images/generations`;
 			}
 			return `${baseUrl}/v1/chat/completions`;
@@ -248,7 +248,7 @@ function makeUrl(params: {
 			const baseUrl = shouldProxy
 				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
 				: NOVITA_API_BASE_URL;
-			if (params.taskHint === "text-generation") {
+			if (params.task === "text-generation") {
 				if (params.chatCompletion) {
 					return `${baseUrl}/chat/completions`;
 				}
@@ -258,11 +258,11 @@ function makeUrl(params: {
 		}
 		default: {
 			const baseUrl = HF_HUB_INFERENCE_PROXY_TEMPLATE.replaceAll("{{PROVIDER}}", "hf-inference");
-			if (params.taskHint && ["feature-extraction", "sentence-similarity"].includes(params.taskHint)) {
+			if (params.task && ["feature-extraction", "sentence-similarity"].includes(params.task)) {
 				/// when deployed on hf-inference, those two tasks are automatically compatible with one another.
-				return `${baseUrl}/pipeline/${params.taskHint}/${params.model}`;
+				return `${baseUrl}/pipeline/${params.task}/${params.model}`;
 			}
-			if (params.taskHint === "text-generation" && params.chatCompletion) {
+			if (params.task === "text-generation" && params.chatCompletion) {
 				return `${baseUrl}/models/${params.model}/v1/chat/completions`;
 			}
 			return `${baseUrl}/models/${params.model}`;

@@ -16,7 +16,7 @@ export async function zeroShotClassification(
 	const res = toArray(
 		await request<ZeroShotClassificationOutput[number] | ZeroShotClassificationOutput>(args, {
 			...options,
-			taskHint: "zero-shot-classification",
+			task: "zero-shot-classification",
 		})
 	);
 	const isValidOutput =

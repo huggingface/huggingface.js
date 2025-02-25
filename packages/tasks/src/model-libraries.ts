@@ -897,7 +897,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "YOLOv10",
 		repoUrl: "https://github.com/THU-MIG/yolov10",
 		docsUrl: "https://github.com/THU-MIG/yolov10",
-		countDownloads: `path_extension:"pt"`,
+		countDownloads: `path_extension:"pt" OR path_extension:"safetensors"`,
 		snippets: snippets.ultralytics,
 	},
 	"3dtopia-xl": {
