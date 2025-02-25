@@ -11,7 +11,7 @@
 	"module": "./dist/index.mjs",
 	"types": "./dist/index.d.ts",
 	"bin": {
-		"gguf-dump": "./dist/cli.js"
+		"gguf-view": "./dist/cli.js"
 	},
 	"exports": {
 		".": {

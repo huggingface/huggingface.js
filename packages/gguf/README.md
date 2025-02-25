@@ -132,6 +132,13 @@ Example for the output:
 [truncated]
 ```
 
+Alternatively, you can install this package as global, which will provide the `gguf-view` command:
+
+```bash
+npm i -g @huggingface/gguf
+gguf-view my_model.gguf
+```
+
 ## Hugging Face Hub
 
 The Hub supports all file formats and has built-in features for GGUF format. 
