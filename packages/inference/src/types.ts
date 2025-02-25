@@ -96,7 +96,7 @@ export interface ProviderConfig {
 	makeBody: (params: BodyParams) => Record<string, unknown>;
 	makeHeaders: (params: HeaderParams) => Record<string, string>;
 	makeUrl: (params: UrlParams) => string;
-	closedSource?: boolean;
+	clientSideRoutingOnly?: boolean;
 }
 
 export interface HeaderParams {

@@ -31,5 +31,5 @@ export const OPENAI_CONFIG: ProviderConfig = {
 	makeBody,
 	makeHeaders,
 	makeUrl,
-	closedSource: true,
+	clientSideRoutingOnly: true,
 };

@@ -72,9 +72,12 @@ export async function makeRequestOptions(
 	if (!providerConfig) {
 		throw new Error(`No provider config found for provider ${provider}`);
 	}
+	if (providerConfig.clientSideRoutingOnly && !maybeModel) {
+		throw new Error(`Provider ${provider} requires a model ID to be passed directly.`);
+	}
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const hfModel = maybeModel ?? (await loadDefaultModel(task!));
-	const model = providerConfig.closedSource
+	const model = providerConfig.clientSideRoutingOnly
 		? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		  maybeModel! // For closed-models API providers, one needs to pass the model ID directly (e.g. "gpt-3.5-turbo")
 		: await getProviderModelId({ model: hfModel, provider }, args, {
@@ -84,7 +87,7 @@ export async function makeRequestOptions(
 		  });
 
 	const authMethod = (() => {
-		if (providerConfig.closedSource) {
+		if (providerConfig.clientSideRoutingOnly) {
 			// Closed-source providers require an accessToken (cannot be routed).
 			if (accessToken && accessToken.startsWith("hf_")) {
 				throw new Error(`Provider ${provider} is closed-source and does not support HF tokens.`);
