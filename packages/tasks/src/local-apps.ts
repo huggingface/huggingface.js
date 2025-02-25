@@ -265,15 +265,63 @@ const snippetTgi = (model: ModelData): LocalAppSnippet[] => {
 };
 
 /**
- * Add your new local app here.
- *
- * This is open to new suggestions and awesome upcoming apps.
- *
- * /!\ IMPORTANT
- *
- * If possible, you need to support deeplinks and be as cross-platform as possible.
- *
- * Ping the HF team if we can help with anything!
+UTM: 
+For some Mac people out there running certain hardware.
+
+	const snippetulm = (model: ModelData): LocalAppSnippet[] => {
+	const messages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
+	const runCommandInstruct = `# Call the server using curl:
+curl -X POST "http://localhost:8000/v1/chat/completions" \\
+	-H "Content-Type: application/json" \\
+	--data '{
+		"model": "${model.id}",
+		"messages": ${stringifyMessages(messages, {
+			indent: "\t\t",
+			attributeKeyQuotes: true,
+			customContentEscaper: (str) => str.replace(/'/g, "'\\''"),
+		})}
+		
+		
+			return [
+		{
+			title: "Install from pip",
+			setup: ["# Install UTM from pip:", "pip install UTM"].join("\n"),
+			content: [`# Load and run the model:\nUTM serve "${model.id}"`, runCommand],
+		},
+		{
+			title: "Use Docker images",
+			setup: [
+				"# Deploy with docker on Linux:",
+				`docker run --runtime nvidia --gpus all \\`,
+				`	--name my_UTM_container \\`,
+				`	-v ~/.cache/huggingface:/root/.cache/huggingface \\`,
+				` 	--env "HUGGING_FACE_HUB_TOKEN=<secret>" \\`,
+				`	-p 8000:8000 \\`,
+				`	--ipc=host \\`,
+				`	UTM/UTM-openai:latest \\`,
+				`	--model ${model.id}`,
+			].join("\n"),
+			content: [
+				`# Load and run the model:\ndocker exec -it my_UTM_container bash -c "UTM serve ${model.id}"`,
+				runCommand,
+			],
+		},
+	];
+	
+		UTM: {
+		prettyLabel: "UTM",
+		docsUrl: "https://docs.getutm.app",
+		mainTask: "text-generation",
+		displayOnModelPage: (model: ModelData) =>
+			(isAwqModel(model) ||
+				isGptqModel(model) ||
+				isAqlmModel(model) ||
+				isMarlinModel(model) ||
+				isLlamaCppGgufModel(model) ||
+				isTransformersModel(model)) &&
+			(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text"),
+		snippet: snippetUTM,
+	},
  */
 export const LOCAL_APPS = {
 	"llama.cpp": {
