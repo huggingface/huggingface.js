@@ -6,8 +6,8 @@
 import { writeFileSync } from "node:fs";
 
 const SOURCE_CPP_URLS = [
-	"https://raw.githubusercontent.com/ggerganov/llama.cpp/master/src/llama-arch.cpp",
-	"https://raw.githubusercontent.com/ggerganov/llama.cpp/master/src/llama-model.cpp",
+	"https://raw.githubusercontent.com/ggml-org/llama.cpp/master/src/llama-arch.cpp",
+	"https://raw.githubusercontent.com/ggml-org/llama.cpp/master/src/llama-model.cpp",
 ];
 const DEST_FILE_PATH = "./src/transformer-llm.ts";
 const DEST_COMMON_SOURCE = `
