@@ -36,6 +36,7 @@ const TEST_STRINGS = {
 
 	// Set variables
 	VARIABLES: `{% set x = 'Hello' %}{% set y = 'World' %}{{ x + ' ' + y }}`,
+	VARIABLES_2: `{% set x = 'Hello'.split('el')[-1] %}{{ x }}`,
 
 	// Numbers
 	NUMBERS: `|{{ 5 }}|{{ -5 }}|{{ add(3, -1) }}|{{ (3 - 1) + (a - 5) - (a + 5)}}|`,
@@ -154,6 +155,13 @@ const TEST_STRINGS = {
 	RSTRIP: `{{ "   test it  ".rstrip() }}`,
 	//lstrip
 	LSTRIP: `{{ "   test it  ".lstrip() }}`,
+
+	//split
+	SPLIT: `|{{ "   test it  ".split() | join("|") }}|`,
+	SPLIT_2: `|{{ "   test it  ".split(" ") | join("|") }}|`,
+	SPLIT_3: `|{{ "   test it  ".split(" ", 4) | join("|") }}|`,
+	SPLIT_4: `|{{ "  1 2  3   ".split() | tojson }}|{{ "babbaccabbb".split("b") | tojson }}|{{ "babbaccabbb".split("b", 2) | tojson }}|`,
+	SPLIT_5: `|{{ " 1 2 3 4 5 ".split(none, 0) | join(",") }}|{{ " 1 2 3 4 5 ".split(none, 3) | join(",") }}|{{ " 1 2 3 4 5 ".split(" ", 0) | join(",") }}|{{ " 1 2 3 4 5 ".split(" ", 3) | join(",") }}|{{ " 1 2 3 4 5 ".split(" ", 10) | join(",") }}|`,
 };
 
 const TEST_PARSED = {
@@ -676,6 +684,25 @@ const TEST_PARSED = {
 		{ value: " ", type: "StringLiteral" },
 		{ value: "+", type: "AdditiveBinaryOperator" },
 		{ value: "y", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	VARIABLES_2: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Set" },
+		{ value: "x", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "Hello", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "el", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "-1", type: "NumericLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "x", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
 
@@ -2798,6 +2825,178 @@ const TEST_PARSED = {
 		{ value: ")", type: "CloseParen" },
 		{ value: "}}", type: "CloseExpression" },
 	],
+	SPLIT: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "   test it  ", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "join", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "|", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
+	SPLIT_2: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "   test it  ", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: " ", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "join", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "|", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
+	SPLIT_3: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "   test it  ", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: " ", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "4", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "join", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "|", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
+	SPLIT_4: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "  1 2  3   ", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "tojson", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "babbaccabbb", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "b", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "tojson", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "babbaccabbb", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "b", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "tojson", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
+	SPLIT_5: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: " 1 2 3 4 5 ", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "none", type: "NullLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "0", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "join", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ",", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: " 1 2 3 4 5 ", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "none", type: "NullLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "join", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ",", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: " 1 2 3 4 5 ", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: " ", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "0", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "join", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ",", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: " 1 2 3 4 5 ", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: " ", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "join", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ",", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: " 1 2 3 4 5 ", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: " ", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "10", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "join", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ",", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
 };
 
 const TEST_CONTEXT = {
@@ -2838,6 +3037,7 @@ const TEST_CONTEXT = {
 
 	// Set variables
 	VARIABLES: {},
+	VARIABLES_2: {},
 
 	// Numbers
 	NUMBERS: {
@@ -3055,9 +3255,16 @@ const TEST_CONTEXT = {
 	MACROS_1: {},
 	MACROS_2: {},
 
-	//STRIP
+	// Strip
 	RSTRIP: {},
 	LSTRIP: {},
+
+	// Split
+	SPLIT: {},
+	SPLIT_2: {},
+	SPLIT_3: {},
+	SPLIT_4: {},
+	SPLIT_5: {},
 };
 
 const EXPECTED_OUTPUTS = {
@@ -3092,6 +3299,7 @@ const EXPECTED_OUTPUTS = {
 
 	// Set variables
 	VARIABLES: "Hello World",
+	VARIABLES_2: "lo",
 
 	// Numbers
 	NUMBERS: "|5|-5|2|-8|",
@@ -3209,11 +3417,18 @@ const EXPECTED_OUTPUTS = {
 	// RSTRIP/LSTRIP
 	RSTRIP: `   test it`,
 	LSTRIP: `test it  `,
+
+	// Split
+	SPLIT: `|test|it|`,
+	SPLIT_2: `||||test|it|||`,
+	SPLIT_3: `||||test|it  |`,
+	SPLIT_4: `|["1", "2", "3"]|["", "a", "", "acca", "", "", ""]|["", "a", "baccabbb"]|`,
+	SPLIT_5: `|1 2 3 4 5 |1,2,3,4 5 | 1 2 3 4 5 |,1,2,3 4 5 |,1,2,3,4,5,|`,
 };
 
 describe("Templates", () => {
 	describe("Lexing", () => {
-		it("should tokenize an input string", () => {
+		describe("should tokenize an input string", () => {
 			for (const [name, text] of Object.entries(TEST_STRINGS)) {
 				const tokens = tokenize(text);
 
@@ -3221,11 +3436,12 @@ describe("Templates", () => {
 					throw new Error(`Test case "${name}" not found`);
 				}
 
-				if (tokens.length !== TEST_PARSED[name].length) {
-					console.log(tokens);
-				}
-				// console.log(tokens);
-				expect(tokens).toMatchObject(TEST_PARSED[name]);
+				it(name, () => {
+					if (tokens.length !== TEST_PARSED[name].length) {
+						console.error(tokens);
+					}
+					expect(tokens).toMatchObject(TEST_PARSED[name]);
+				});
 			}
 		});
 
@@ -3233,35 +3449,28 @@ describe("Templates", () => {
 	});
 
 	describe("Parsing and intepretation", () => {
-		const AST_CACHE = new Map();
-		it("should generate an AST", () => {
-			// NOTE: In this test case, we just check that no error occurs
+		describe("should interpret an AST", () => {
 			for (const [name, text] of Object.entries(TEST_PARSED)) {
 				const ast = parse(text);
-				AST_CACHE.set(name, ast);
-			}
-		});
-
-		it("should interpret an AST", () => {
-			for (const [name, ast] of AST_CACHE.entries()) {
 				if (TEST_CONTEXT[name] === undefined || EXPECTED_OUTPUTS[name] === undefined) {
 					console.warn(`Skipping test case "${name}" due to missing context or expected output`);
 					continue;
 				}
+				it(name, () => {
+					const env = new Environment();
+					// Declare global variables
+					env.set("false", false);
+					env.set("true", true);
 
-				const env = new Environment();
-				// Declare global variables
-				env.set("false", false);
-				env.set("true", true);
+					// Add user-defined variables
+					for (const [key, value] of Object.entries(TEST_CONTEXT[name])) {
+						env.set(key, value);
+					}
 
-				// Add user-defined variables
-				for (const [key, value] of Object.entries(TEST_CONTEXT[name])) {
-					env.set(key, value);
-				}
-
-				const interpreter = new Interpreter(env);
-				const result = interpreter.run(ast);
-				expect(result.value).toEqual(EXPECTED_OUTPUTS[name]);
+					const interpreter = new Interpreter(env);
+					const result = interpreter.run(ast);
+					expect(result.value).toEqual(EXPECTED_OUTPUTS[name]);
+				});
 			}
 		});
 	});

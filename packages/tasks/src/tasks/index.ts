@@ -73,6 +73,7 @@ export type * from "./sentence-similarity/inference.js";
 export type * from "./summarization/inference.js";
 export type * from "./table-question-answering/inference.js";
 export type { TextToImageInput, TextToImageOutput, TextToImageParameters } from "./text-to-image/inference.js";
+export type { TextToVideoParameters, TextToVideoOutput, TextToVideoInput } from "./text-to-video/inference.js";
 export type { TextToSpeechParameters, TextToSpeechInput, TextToSpeechOutput } from "./text-to-speech/inference.js";
 export type * from "./token-classification/inference.js";
 export type { TranslationInput, TranslationOutput } from "./translation/inference.js";
@@ -173,6 +174,7 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	"text-to-3d": ["diffusers"],
 	"image-to-3d": ["diffusers"],
 	"any-to-any": ["transformers"],
+	"visual-document-retrieval": ["transformers"],
 };
 
 /**
@@ -201,6 +203,7 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"automatic-speech-recognition": getData("automatic-speech-recognition", automaticSpeechRecognition),
 	"depth-estimation": getData("depth-estimation", depthEstimation),
 	"document-question-answering": getData("document-question-answering", documentQuestionAnswering),
+	"visual-document-retrieval": getData("visual-document-retrieval", placeholder),
 	"feature-extraction": getData("feature-extraction", featureExtraction),
 	"fill-mask": getData("fill-mask", fillMask),
 	"graph-ml": undefined,

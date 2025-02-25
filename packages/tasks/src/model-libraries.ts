@@ -109,6 +109,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pth"`,
 		snippets: snippets.audioseal,
 	},
+	ben2: {
+		prettyLabel: "BEN2",
+		repoName: "BEN2",
+		repoUrl: "https://github.com/PramaLLC/BEN2",
+		snippets: snippets.ben2,
+		filter: false,
+	},
 	bertopic: {
 		prettyLabel: "BERTopic",
 		repoName: "BERTopic",
@@ -185,7 +192,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "deepforest",
 		docsUrl: "https://deepforest.readthedocs.io/en/latest/",
 		repoUrl: "https://github.com/weecology/DeepForest",
-		countDownloads: `path_extension:"pt" OR path_extension:"pl"`,
 	},
 	"depth-anything-v2": {
 		prettyLabel: "DepthAnythingV2",
@@ -405,13 +411,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://huggingface.co/docs/hub/tf-keras",
 		snippets: snippets.tf_keras,
 		countDownloads: `path:"saved_model.pb"`,
-	},
-	"keras-nlp": {
-		prettyLabel: "KerasNLP",
-		repoName: "KerasNLP",
-		repoUrl: "https://github.com/keras-team/keras-nlp",
-		docsUrl: "https://keras.io/keras_nlp/",
-		snippets: snippets.keras_nlp,
 	},
 	"keras-hub": {
 		prettyLabel: "KerasHub",
@@ -760,6 +759,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"models/default.zip"`,
 	},
+	swarmformer: {
+		prettyLabel: "SwarmFormer",
+		repoName: "SwarmFormer",
+		repoUrl: "https://github.com/takara-ai/SwarmFormer",
+		snippets: snippets.swarmformer,
+		filter: false,
+	},
 	"f5-tts": {
 		prettyLabel: "F5-TTS",
 		repoName: "F5-TTS",
@@ -784,6 +790,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "TabPFN",
 		repoName: "TabPFN",
 		repoUrl: "https://github.com/PriorLabs/TabPFN",
+	},
+	terratorch: {
+		prettyLabel: "TerraTorch",
+		repoName: "TerraTorch",
+		repoUrl: "https://github.com/IBM/terratorch",
+		docsUrl: "https://ibm.github.io/terratorch/",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+		snippets: snippets.terratorch,
 	},
 	"tic-clip": {
 		prettyLabel: "TiC-CLIP",

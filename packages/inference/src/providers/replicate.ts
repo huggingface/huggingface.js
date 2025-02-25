@@ -1,16 +1,18 @@
-import type { ProviderMapping } from "./types";
-
 export const REPLICATE_API_BASE_URL = "https://api.replicate.com";
 
-type ReplicateId = string;
-
-export const REPLICATE_SUPPORTED_MODEL_IDS: ProviderMapping<ReplicateId> = {
-	"text-to-image": {
-		"black-forest-labs/FLUX.1-schnell": "black-forest-labs/flux-schnell",
-		"ByteDance/SDXL-Lightning":
-			"bytedance/sdxl-lightning-4step:5599ed30703defd1d160a25a63321b4dec97101d98b4674bcc56e41f62f35637",
-	},
-	"text-to-speech": {
-		"OuteAI/OuteTTS-0.3-500M": "jbilcke/oute-tts:39a59319327b27327fa3095149c5a746e7f2aee18c75055c3368237a6503cd26",
-	},
-};
+/**
+ * See the registered mapping of HF model ID => Replicate model ID here:
+ *
+ * https://huggingface.co/api/partners/replicate/models
+ *
+ * This is a publicly available mapping.
+ *
+ * If you want to try to run inference for a new model locally before it's registered on huggingface.co,
+ * you can add it to the dictionary "HARDCODED_MODEL_ID_MAPPING" in consts.ts, for dev purposes.
+ *
+ * - If you work at Replicate and want to update this mapping, please use the model mapping API we provide on huggingface.co
+ * - If you're a community member and want to add a new supported HF model to Replicate, please open an issue on the present repo
+ * and we will tag Replicate team members.
+ *
+ * Thanks!
+ */

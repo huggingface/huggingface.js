@@ -1,6 +1,6 @@
 /**
- * Biden AI Executive Order
- * https://www.whitehouse.gov/briefing-room/presidential-actions/2023/10/30/executive-order-on-the-safe-secure-and-trustworthy-development-and-use-of-artificial-intelligence/
+ * Biden AI Executive Order (since revoked by President Trump):
+ * https://web.archive.org/web/20250105222429/https://www.whitehouse.gov/briefing-room/presidential-actions/2023/10/30/executive-order-on-the-safe-secure-and-trustworthy-development-and-use-of-artificial-intelligence/
  */
 export const TFLOPS_THRESHOLD_WHITE_HOUSE_MODEL_TRAINING_TOTAL = 10 ** 14;
 export const TFLOPS_THRESHOLD_WHITE_HOUSE_MODEL_TRAINING_TOTAL_BIOLOGY = 10 ** 11;
@@ -196,6 +196,10 @@ export const SKUS = {
 				tflops: 18.12,
 				memory: [8],
 			},
+			"RTX 3060 Mobile": {
+				tflops: 10.94,
+				memory: [6],
+			},
 			"RTX 3050 Mobile": {
 				tflops: 7.639,
 				memory: [6],
@@ -211,6 +215,10 @@ export const SKUS = {
 			"GTX 1070 Ti": {
 				tflops: 8.2, // float32 (GPU does not support native float16)
 				memory: [8],
+			},
+			"GTX 1060": {
+				tflops: 3.9, // float32 (GPU does not support native float16)
+				memory: [3, 6],
 			},
 			"RTX Titan": {
 				tflops: 32.62,

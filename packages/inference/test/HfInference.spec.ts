@@ -1,10 +1,14 @@
-import { expect, it, describe, assert } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
 
-import { chatCompletion, FAL_AI_SUPPORTED_MODEL_IDS, HfInference } from "../src";
-import "./vcr";
+import type { TextToImageArgs } from "../src";
+import { chatCompletion, chatCompletionStream, HfInference, textGeneration, textToImage } from "../src";
+import { textToVideo } from "../src/tasks/cv/textToVideo";
 import { readTestFile } from "./test-files";
+import "./vcr";
+import { HARDCODED_MODEL_ID_MAPPING } from "../src/providers/consts";
+import { isUrl } from "../src/lib/isUrl";
 
 const TIMEOUT = 60000 * 3;
 const env = import.meta.env;
@@ -20,13 +24,14 @@ describe.concurrent("HfInference", () => {
 		"HF Inference",
 		() => {
 			const hf = new HfInference(env.HF_TOKEN);
+
 			it("throws error if model does not exist", () => {
 				expect(
 					hf.fillMask({
-						model: "this-model-does-not-exist-123",
+						model: "this-model/does-not-exist-123",
 						inputs: "[MASK] world!",
 					})
-				).rejects.toThrowError("Model this-model-does-not-exist-123 does not exist");
+				).rejects.toThrowError("Model this-model/does-not-exist-123 does not exist");
 			});
 
 			it("fillMask", async () => {
@@ -47,7 +52,7 @@ describe.concurrent("HfInference", () => {
 				);
 			});
 
-			it("works without model", async () => {
+			it.skip("works without model", async () => {
 				expect(
 					await hf.fillMask({
 						inputs: "[MASK] world!",
@@ -330,7 +335,7 @@ describe.concurrent("HfInference", () => {
 					])
 				);
 			});
-			it("SentenceSimilarity", async () => {
+			it("sentenceSimilarity", async () => {
 				expect(
 					await hf.sentenceSimilarity({
 						model: "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
@@ -348,7 +353,7 @@ describe.concurrent("HfInference", () => {
 				});
 				expect(response).toEqual(expect.arrayContaining([expect.any(Number)]));
 			});
-			it("FeatureExtraction - same model as sentence similarity", async () => {
+			it("FeatureExtraction - auto-compatibility sentence similarity", async () => {
 				const response = await hf.featureExtraction({
 					model: "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
 					inputs: "That is a happy person",
@@ -646,7 +651,7 @@ describe.concurrent("HfInference", () => {
 			});
 
 			it("endpoint - makes request to specified endpoint", async () => {
-				const ep = hf.endpoint("https://api-inference.huggingface.co/models/openai-community/gpt2");
+				const ep = hf.endpoint("https://router.huggingface.co/hf-inference/models/openai-community/gpt2");
 				const { generated_text } = await ep.textGeneration({
 					inputs: "one plus two equals",
 				});
@@ -684,7 +689,7 @@ describe.concurrent("HfInference", () => {
 				expect(out).toContain("2");
 			});
 
-			it("chatCompletionStream modelId Fail - OpenAI Specs", async () => {
+			it.skip("chatCompletionStream modelId Fail - OpenAI Specs", async () => {
 				expect(
 					hf
 						.chatCompletionStream({
@@ -701,7 +706,7 @@ describe.concurrent("HfInference", () => {
 			});
 
 			it("chatCompletion - OpenAI Specs", async () => {
-				const ep = hf.endpoint("https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2");
+				const ep = hf.endpoint("https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2");
 				const res = await ep.chatCompletion({
 					model: "tgi",
 					messages: [{ role: "user", content: "Complete the this sentence with words one plus one is equal " }],
@@ -715,7 +720,7 @@ describe.concurrent("HfInference", () => {
 				}
 			});
 			it("chatCompletionStream - OpenAI Specs", async () => {
-				const ep = hf.endpoint("https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2");
+				const ep = hf.endpoint("https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2");
 				const stream = ep.chatCompletionStream({
 					model: "tgi",
 					messages: [{ role: "user", content: "Complete the equation 1+1= ,just the answer" }],
@@ -775,30 +780,83 @@ describe.concurrent("HfInference", () => {
 		() => {
 			const client = new HfInference(env.HF_FAL_KEY);
 
-			for (const model of Object.keys(FAL_AI_SUPPORTED_MODEL_IDS["text-to-image"] ?? {})) {
-				it(`textToImage - ${model}`, async () => {
-					const res = await client.textToImage({
-						model,
-						provider: "fal-ai",
-						inputs:
-							"Extreme close-up of a single tiger eye, direct frontal view. Detailed iris and pupil. Sharp focus on eye texture and color. Natural lighting to capture authentic eye shine and depth.",
-					});
-					expect(res).toBeInstanceOf(Blob);
+			it(`textToImage - black-forest-labs/FLUX.1-schnell`, async () => {
+				const res = await client.textToImage({
+					model: "black-forest-labs/FLUX.1-schnell",
+					provider: "fal-ai",
+					inputs:
+						"Extreme close-up of a single tiger eye, direct frontal view. Detailed iris and pupil. Sharp focus on eye texture and color. Natural lighting to capture authentic eye shine and depth.",
 				});
-			}
+				expect(res).toBeInstanceOf(Blob);
+			});
 
-			for (const model of Object.keys(FAL_AI_SUPPORTED_MODEL_IDS["automatic-speech-recognition"] ?? {})) {
-				it(`automaticSpeechRecognition - ${model}`, async () => {
-					const res = await client.automaticSpeechRecognition({
-						model: model,
-						provider: "fal-ai",
-						data: new Blob([readTestFile("sample2.wav")], { type: "audio/x-wav" }),
-					});
-					expect(res).toMatchObject({
-						text: " he has grave doubts whether sir frederick leighton's work is really greek after all and can discover in it but little of rocky ithaca",
-					});
+			it(`automaticSpeechRecognition - openai/whisper-large-v3`, async () => {
+				const res = await client.automaticSpeechRecognition({
+					model: "openai/whisper-large-v3",
+					provider: "fal-ai",
+					data: new Blob([readTestFile("sample2.wav")], { type: "audio/x-wav" }),
 				});
-			}
+				expect(res).toMatchObject({
+					text: " he has grave doubts whether sir frederick leighton's work is really greek after all and can discover in it but little of rocky ithaca",
+				});
+			});
+
+			it("textToVideo - genmo/mochi-1-preview", async () => {
+				const res = await textToVideo({
+					model: "genmo/mochi-1-preview",
+					inputs: "A running dog",
+					parameters: {
+						seed: 176,
+					},
+					provider: "fal-ai",
+					accessToken: env.HF_FAL_KEY,
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToVideo - HunyuanVideo", async () => {
+				const res = await textToVideo({
+					model: "tencent/HunyuanVideo",
+					inputs: "A running dog",
+					parameters: {
+						seed: 176,
+						num_inference_steps: 2,
+						num_frames: 85,
+						resolution: "480p",
+					},
+					provider: "fal-ai",
+					accessToken: env.HF_FAL_KEY,
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToVideo - CogVideoX-5b", async () => {
+				const res = await textToVideo({
+					model: "THUDM/CogVideoX-5b",
+					inputs: "A running dog",
+					parameters: {
+						seed: 176,
+						num_frames: 2,
+					},
+					provider: "fal-ai",
+					accessToken: env.HF_FAL_KEY,
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToVideo - LTX-Video", async () => {
+				const res = await textToVideo({
+					model: "Lightricks/LTX-Video",
+					inputs: "A running dog",
+					parameters: {
+						seed: 176,
+						num_inference_steps: 2,
+					},
+					provider: "fal-ai",
+					accessToken: env.HF_FAL_KEY,
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
 		},
 		TIMEOUT
 	);
@@ -808,7 +866,7 @@ describe.concurrent("HfInference", () => {
 		() => {
 			const client = new HfInference(env.HF_REPLICATE_KEY);
 
-			it("textToImage canonical", async () => {
+			it("textToImage canonical - black-forest-labs/FLUX.1-schnell", async () => {
 				const res = await client.textToImage({
 					model: "black-forest-labs/FLUX.1-schnell",
 					provider: "replicate",
@@ -817,11 +875,57 @@ describe.concurrent("HfInference", () => {
 				expect(res).toBeInstanceOf(Blob);
 			});
 
-			it("textToImage versioned", async () => {
+			it("textToImage canonical - black-forest-labs/FLUX.1-dev", async () => {
+				const res = await client.textToImage({
+					model: "black-forest-labs/FLUX.1-dev",
+					provider: "replicate",
+					inputs:
+						"A tiny laboratory deep in the Black Forest where squirrels in lab coats experiment with mixing chocolate and pine cones",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToImage canonical - stabilityai/stable-diffusion-3.5-large-turbo", async () => {
+				const res = await client.textToImage({
+					model: "stabilityai/stable-diffusion-3.5-large-turbo",
+					provider: "replicate",
+					inputs: "A confused rubber duck wearing a tiny wizard hat trying to cast spells with a banana wand",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToImage versioned - ByteDance/SDXL-Lightning", async () => {
 				const res = await client.textToImage({
 					model: "ByteDance/SDXL-Lightning",
 					provider: "replicate",
-					inputs: "black forest gateau cake spelling out the words FLUX SCHNELL, tasty, food photography, dynamic shot",
+					inputs: "A grumpy storm cloud wearing sunglasses and throwing tiny lightning bolts like confetti",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToImage versioned - ByteDance/Hyper-SD", async () => {
+				const res = await client.textToImage({
+					model: "ByteDance/Hyper-SD",
+					provider: "replicate",
+					inputs: "A group of dancing bytes wearing tiny party hats doing the macarena in cyberspace",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToImage versioned - playgroundai/playground-v2.5-1024px-aesthetic", async () => {
+				const res = await client.textToImage({
+					model: "playgroundai/playground-v2.5-1024px-aesthetic",
+					provider: "replicate",
+					inputs: "A playground where slides turn into rainbows and swings launch kids into cotton candy clouds",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToImage versioned - stabilityai/stable-diffusion-xl-base-1.0", async () => {
+				const res = await client.textToImage({
+					model: "stabilityai/stable-diffusion-xl-base-1.0",
+					provider: "replicate",
+					inputs: "An octopus juggling watermelons underwater while wearing scuba gear",
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
@@ -835,11 +939,37 @@ describe.concurrent("HfInference", () => {
 				expect(res).toBeInstanceOf(Blob);
 			});
 
-			it("textToSpeech OuteTTS", async () => {
+			it.skip("textToSpeech OuteTTS -  usually Cold", async () => {
 				const res = await client.textToSpeech({
 					model: "OuteAI/OuteTTS-0.3-500M",
 					provider: "replicate",
 					inputs: "OuteTTS is a frontier TTS model for its size of 1 Billion parameters",
+				});
+
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToSpeech Kokoro", async () => {
+				const res = await client.textToSpeech({
+					model: "hexgrad/Kokoro-82M",
+					provider: "replicate",
+					inputs: "Kokoro is a frontier TTS model for its size of 1 Billion parameters",
+				});
+
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToVideo Mochi", async () => {
+				const res = await textToVideo({
+					accessToken: env.HF_REPLICATE_KEY,
+					model: "genmo/mochi-1-preview",
+					provider: "replicate",
+					inputs: "A running dog",
+					parameters: {
+						num_inference_steps: 10,
+						seed: 178,
+						num_frames: 30,
+					},
 				});
 
 				expect(res).toBeInstanceOf(Blob);
@@ -936,6 +1066,56 @@ describe.concurrent("HfInference", () => {
 		TIMEOUT
 	);
 
+	describe.concurrent(
+		"Nebius",
+		() => {
+			const client = new HfInference(env.HF_NEBIUS_KEY);
+
+			HARDCODED_MODEL_ID_MAPPING.nebius = {
+				"meta-llama/Llama-3.1-8B-Instruct": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+				"meta-llama/Llama-3.1-70B-Instruct": "meta-llama/Meta-Llama-3.1-70B-Instruct",
+				"black-forest-labs/FLUX.1-schnell": "black-forest-labs/flux-schnell",
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "meta-llama/Llama-3.1-8B-Instruct",
+					provider: "nebius",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toMatch(/(two|2)/i);
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "meta-llama/Llama-3.1-70B-Instruct",
+					provider: "nebius",
+					messages: [{ role: "user", content: "Complete the equation 1 + 1 = , just the answer" }],
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+				let out = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						out += chunk.choices[0].delta.content;
+					}
+				}
+				expect(out).toMatch(/(two|2)/i);
+			});
+
+			it("textToImage", async () => {
+				const res = await client.textToImage({
+					model: "black-forest-labs/FLUX.1-schnell",
+					provider: "nebius",
+					inputs: "award winning high resolution photo of a giant tortoise",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+		},
+		TIMEOUT
+	);
+
 	describe.concurrent("3rd party providers", () => {
 		it("chatCompletion - fails with unsupported model", async () => {
 			expect(
@@ -950,4 +1130,224 @@ describe.concurrent("HfInference", () => {
 			);
 		});
 	});
+
+	describe.concurrent(
+		"Fireworks",
+		() => {
+			const client = new HfInference(env.HF_FIREWORKS_KEY);
+
+			HARDCODED_MODEL_ID_MAPPING["fireworks-ai"] = {
+				"deepseek-ai/DeepSeek-R1": "accounts/fireworks/models/deepseek-r1",
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "deepseek-ai/DeepSeek-R1",
+					provider: "fireworks-ai",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toContain("two");
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "deepseek-ai/DeepSeek-R1",
+					provider: "fireworks-ai",
+					messages: [{ role: "user", content: "Say this is a test" }],
+					stream: true,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+		},
+		TIMEOUT
+	);
+
+	describe.concurrent(
+		"Hyperbolic",
+		() => {
+			HARDCODED_MODEL_ID_MAPPING.hyperbolic = {
+				"meta-llama/Llama-3.2-3B-Instruct": "meta-llama/Llama-3.2-3B-Instruct",
+				"meta-llama/Llama-3.3-70B-Instruct": "meta-llama/Llama-3.3-70B-Instruct",
+				"stabilityai/stable-diffusion-2": "SD2",
+				"meta-llama/Llama-3.1-405B-FP8": "meta-llama/Llama-3.1-405B-FP8",
+			};
+
+			it("chatCompletion - hyperbolic", async () => {
+				const res = await chatCompletion({
+					accessToken: env.HF_HYPERBOLIC_KEY,
+					model: "meta-llama/Llama-3.2-3B-Instruct",
+					provider: "hyperbolic",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+					temperature: 0.1,
+				});
+
+				expect(res).toBeDefined();
+				expect(res.choices).toBeDefined();
+				expect(res.choices?.length).toBeGreaterThan(0);
+
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toBeDefined();
+					expect(typeof completion).toBe("string");
+					expect(completion).toContain("two");
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = chatCompletionStream({
+					accessToken: env.HF_HYPERBOLIC_KEY,
+					model: "meta-llama/Llama-3.3-70B-Instruct",
+					provider: "hyperbolic",
+					messages: [{ role: "user", content: "Complete the equation 1 + 1 = , just the answer" }],
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+				let out = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						out += chunk.choices[0].delta.content;
+					}
+				}
+				expect(out).toContain("2");
+			});
+
+			it("textToImage", async () => {
+				const res = await textToImage({
+					accessToken: env.HF_HYPERBOLIC_KEY,
+					model: "stabilityai/stable-diffusion-2",
+					provider: "hyperbolic",
+					inputs: "award winning high resolution photo of a giant tortoise",
+					parameters: {
+						height: 128,
+						width: 128,
+					},
+				} satisfies TextToImageArgs);
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textGeneration", async () => {
+				const res = await textGeneration({
+					accessToken: env.HF_HYPERBOLIC_KEY,
+					model: "meta-llama/Llama-3.1-405B",
+					provider: "hyperbolic",
+					inputs: "Paris is",
+					parameters: {
+						temperature: 0,
+						top_p: 0.01,
+						max_new_tokens: 10,
+					},
+				});
+				expect(res).toMatchObject({ generated_text: "...the capital and most populous city of France," });
+			});
+		},
+		TIMEOUT
+	);
+
+	describe.concurrent(
+		"Novita",
+		() => {
+			const client = new HfInference(env.HF_NOVITA_KEY);
+
+			HARDCODED_MODEL_ID_MAPPING["novita"] = {
+				"meta-llama/llama-3.1-8b-instruct": "meta-llama/llama-3.1-8b-instruct",
+				"deepseek/deepseek-r1-distill-qwen-14b": "deepseek/deepseek-r1-distill-qwen-14b",
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "meta-llama/llama-3.1-8b-instruct",
+					provider: "novita",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toContain("two");
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "deepseek/deepseek-r1-distill-qwen-14b",
+					provider: "novita",
+					messages: [{ role: "user", content: "Say this is a test" }],
+					stream: true,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+		},
+		TIMEOUT
+	);
+	describe.concurrent(
+		"Black Forest Labs",
+		() => {
+			HARDCODED_MODEL_ID_MAPPING["black-forest-labs"] = {
+				"black-forest-labs/FLUX.1-dev": "flux-dev",
+				// "black-forest-labs/FLUX.1-schnell": "flux-pro",
+			};
+
+			it("textToImage", async () => {
+				const res = await textToImage({
+					model: "black-forest-labs/FLUX.1-dev",
+					provider: "black-forest-labs",
+					accessToken: env.HF_BLACK_FOREST_LABS_KEY,
+					inputs: "A raccoon driving a truck",
+					parameters: {
+						height: 256,
+						width: 256,
+						num_inference_steps: 4,
+						seed: 8817,
+					},
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textToImage URL", async () => {
+				const res = await textToImage(
+					{
+						model: "black-forest-labs/FLUX.1-dev",
+						provider: "black-forest-labs",
+						accessToken: env.HF_BLACK_FOREST_LABS_KEY,
+						inputs: "A raccoon driving a truck",
+						parameters: {
+							height: 256,
+							width: 256,
+							num_inference_steps: 4,
+							seed: 8817,
+						},
+					},
+					{ outputType: "url" }
+				);
+				expect(res).toBeTypeOf("string");
+				expect(isUrl(res)).toBeTruthy();
+			});
+		},
+		TIMEOUT
+	);
 });

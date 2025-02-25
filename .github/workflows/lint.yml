@@ -28,7 +28,7 @@ jobs:
           PR_REF: ${{  github.event.pull_request.head.ref }}
           SHA: ${{ github.sha }}
 
-      - run: corepack enable
+      - run: npm install -g corepack@latest && corepack enable
 
       - uses: actions/setup-node@v3
         with:
