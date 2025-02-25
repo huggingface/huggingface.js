@@ -347,6 +347,14 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isLlamaCppGgufModel,
 		deeplink: (model) => new URL(`sanctum://open_from_hf?model=${model.id}`),
 	},
+	aibrow: {
+		prettyLabel: "AiBrow",
+		docsUrl: "https://aibrow.ai",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		deeplink: (model, filepath) =>
+			new URL(`https://aibrow.ai/huggingface.html?id=${model.id}` + filepath ? `&file=${filepath}` : ""),
+	},
 	jellybox: {
 		prettyLabel: "Jellybox",
 		docsUrl: "https://jellybox.com",
