@@ -6,6 +6,7 @@ import { SAMBANOVA_API_BASE_URL } from "../providers/sambanova";
 import { TOGETHER_API_BASE_URL } from "../providers/together";
 import { NOVITA_API_BASE_URL } from "../providers/novita";
 import { FIREWORKS_AI_API_BASE_URL } from "../providers/fireworks-ai";
+import { FEATHERLESS_API_BASE_URL } from "../providers/featherless";
 import { HYPERBOLIC_API_BASE_URL } from "../providers/hyperbolic";
 import { BLACKFORESTLABS_AI_API_BASE_URL } from "../providers/black-forest-labs";
 import type { InferenceProvider } from "../types";
@@ -65,8 +66,8 @@ export async function makeRequestOptions(
 			? "hf-token"
 			: "provider-key"
 		: includeCredentials === "include"
-		  ? "credentials-include"
-		  : "none";
+			? "credentials-include"
+			: "none";
 
 	const url = endpointUrl
 		? chatCompletion
@@ -77,8 +78,9 @@ export async function makeRequestOptions(
 				chatCompletion: chatCompletion ?? false,
 				model,
 				provider: provider ?? "hf-inference",
-				task,
-		  });
+  featherless-provider
+				taskHint,
+			});
 
 	const headers: Record<string, string> = {};
 	if (accessToken) {
@@ -136,9 +138,9 @@ export async function makeRequestOptions(
 					...(task === "text-to-image" && provider === "hyperbolic"
 						? { model_name: model }
 						: chatCompletion || provider === "together" || provider === "nebius" || provider === "hyperbolic"
-						  ? { model }
-						  : undefined),
-			  }),
+							? { model }
+							: undefined),
+				}),
 		...(credentials ? { credentials } : undefined),
 		signal: options?.signal,
 	};
@@ -253,6 +255,15 @@ function makeUrl(params: {
 					return `${baseUrl}/chat/completions`;
 				}
 				return `${baseUrl}/completions`;
+			}
+			return baseUrl;
+		}
+		case "featherless": {
+			const baseUrl = shouldProxy
+				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
+				: FEATHERLESS_API_BASE_URL;
+			if (params.taskHint === "text-generation") {
+				return `${baseUrl}/models/${params.model}/v1/chat/completions`;
 			}
 			return baseUrl;
 		}

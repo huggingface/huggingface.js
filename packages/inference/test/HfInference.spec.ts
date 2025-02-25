@@ -1350,4 +1350,40 @@ describe.concurrent("HfInference", () => {
 		},
 		TIMEOUT
 	);
+
+	describe.concurrent(
+		"Featherless",
+		() => {
+			HARDCODED_MODEL_ID_MAPPING.hyperbolic = { "Sao10K/L3-8B-Stheno-v3.2": "Sao10K/L3-8B-Stheno-v3.2" };
+			const client = new HfInference(env.HF_FEATHERLESS_KEY);
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "Sao10K/L3-8B-Stheno-v3.2",
+					provider: "featherless",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toContain("two");
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "Sao10K/L3-8B-Stheno-v3.2",
+					provider: "featherless",
+					messages: [{ role: "user", content: "Complete the equation 1 + 1 = , just the answer" }],
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+				let out = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						out += chunk.choices[0].delta.content;
+					}
+				}
+				expect(out).toContain("2");
+			});
+		},
+		TIMEOUT
+	);
 });
