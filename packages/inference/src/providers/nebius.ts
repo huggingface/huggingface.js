@@ -30,10 +30,10 @@ const makeHeaders = (params: HeaderParams): Record<string, string> => {
 };
 
 const makeUrl = (params: UrlParams): string => {
-	if (params.taskHint === "text-to-image") {
+	if (params.task === "text-to-image") {
 		return `${params.baseUrl}/v1/images/generations`;
 	}
-	if (params.taskHint === "text-generation") {
+	if (params.task === "text-generation") {
 		if (params.chatCompletion) {
 			return `${params.baseUrl}/v1/chat/completions`;
 		}

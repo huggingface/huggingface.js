@@ -30,7 +30,7 @@ const makeHeaders = (params: HeaderParams): Record<string, string> => {
 };
 
 const makeUrl = (params: UrlParams): string => {
-	if (params.taskHint === "text-generation" && params.chatCompletion) {
+	if (params.task === "text-generation" && params.chatCompletion) {
 		return `${params.baseUrl}/v1/chat/completions`;
 	}
 	return params.baseUrl;

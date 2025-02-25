@@ -73,15 +73,12 @@ export async function textToImage(args: TextToImageArgs, options?: TextToImageOp
 		| HyperbolicTextToImageOutput
 	>(payload, {
 		...options,
-		taskHint: "text-to-image",
+		task: "text-to-image",
 	});
 
 	if (res && typeof res === "object") {
 		if (args.provider === "black-forest-labs" && "polling_url" in res && typeof res.polling_url === "string") {
-			if (options?.outputType === "url") {
-				return res.polling_url;
-			}
-			return await pollBflResponse(res.polling_url);
+			return await pollBflResponse(res.polling_url, options?.outputType);
 		}
 		if (args.provider === "fal-ai" && "images" in res && Array.isArray(res.images) && res.images[0].url) {
 			if (options?.outputType === "url") {
@@ -132,7 +129,7 @@ export async function textToImage(args: TextToImageArgs, options?: TextToImageOp
 	return res;
 }
 
-async function pollBflResponse(url: string): Promise<Blob> {
+async function pollBflResponse(url: string, outputType?: "url" | "blob"): Promise<Blob> {
 	const urlObj = new URL(url);
 	for (let step = 0; step < 5; step++) {
 		await delay(1000);
@@ -155,6 +152,9 @@ async function pollBflResponse(url: string): Promise<Blob> {
 			"sample" in payload.result &&
 			typeof payload.result.sample === "string"
 		) {
+			if (outputType === "url") {
+				return payload.result.sample;
+			}
 			const image = await fetch(payload.result.sample);
 			return await image.blob();
 		}

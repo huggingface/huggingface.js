@@ -106,7 +106,7 @@ export interface HeaderParams {
 export interface UrlParams {
 	baseUrl: string;
 	model: string;
-	taskHint?: InferenceTask;
+	task?: InferenceTask;
 	chatCompletion?: boolean;
 }
 
@@ -114,5 +114,5 @@ export interface BodyParams {
 	args: Record<string, unknown>;
 	chatCompletion?: boolean;
 	model: string;
-	taskHint?: InferenceTask;
+	task?: InferenceTask;
 }

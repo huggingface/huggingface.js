@@ -21,7 +21,7 @@ const HYPERBOLIC_API_BASE_URL = "https://api.hyperbolic.xyz";
 const makeBody = (params: BodyParams): Record<string, unknown> => {
 	return {
 		...params.args,
-		...(params.taskHint === "text-to-image" ? { model_name: params.model } : { model: params.model }),
+		...(params.task === "text-to-image" ? { model_name: params.model } : { model: params.model }),
 	};
 };
 
@@ -30,7 +30,7 @@ const makeHeaders = (params: HeaderParams): Record<string, string> => {
 };
 
 const makeUrl = (params: UrlParams): string => {
-	if (params.taskHint === "text-to-image") {
+	if (params.task === "text-to-image") {
 		return `${params.baseUrl}/v1/images/generations`;
 	}
 	return `${params.baseUrl}/v1/chat/completions`;

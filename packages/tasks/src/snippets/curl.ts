@@ -30,6 +30,7 @@ export const snippetTextGeneration = (
 	model: ModelDataMinimal,
 	accessToken: string,
 	provider: SnippetInferenceProvider,
+	providerModelId?: string,
 	opts?: {
 		streaming?: boolean;
 		messages?: ChatCompletionInputMessage[];
@@ -43,6 +44,7 @@ export const snippetTextGeneration = (
 			provider === "hf-inference"
 				? `https://router.huggingface.co/hf-inference/models/${model.id}/v1/chat/completions`
 				: HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", provider) + "/v1/chat/completions";
+		const modelId = providerModelId ?? model.id;
 
 		// Conversational model detected, so we display a code snippet that features the Messages API
 		const streaming = opts?.streaming ?? true;
@@ -61,17 +63,17 @@ export const snippetTextGeneration = (
 -H 'Authorization: Bearer ${accessToken || `{API_TOKEN}`}' \\
 -H 'Content-Type: application/json' \\
 --data '{
-    "model": "${model.id}",
+    "model": "${modelId}",
     "messages": ${stringifyMessages(messages, {
-					indent: "\t",
-					attributeKeyQuotes: true,
-					customContentEscaper: (str) => str.replace(/'/g, "'\\''"),
-				})},
+			indent: "\t",
+			attributeKeyQuotes: true,
+			customContentEscaper: (str) => str.replace(/'/g, "'\\''"),
+		})},
     ${stringifyGenerationConfig(config, {
-					indent: "\n    ",
-					attributeKeyQuotes: true,
-					attributeValueConnector: ": ",
-				})}
+			indent: "\n    ",
+			attributeKeyQuotes: true,
+			attributeValueConnector: ": ",
+		})}
     "stream": ${!!streaming}
 }'`,
 			},
@@ -127,6 +129,7 @@ export const curlSnippets: Partial<
 			model: ModelDataMinimal,
 			accessToken: string,
 			provider: SnippetInferenceProvider,
+			providerModelId?: string,
 			opts?: Record<string, unknown>
 		) => InferenceSnippet[]
 	>
@@ -161,9 +164,10 @@ export function getCurlInferenceSnippet(
 	model: ModelDataMinimal,
 	accessToken: string,
 	provider: SnippetInferenceProvider,
+	providerModelId?: string,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
 	return model.pipeline_tag && model.pipeline_tag in curlSnippets
-		? curlSnippets[model.pipeline_tag]?.(model, accessToken, provider, opts) ?? []
+		? curlSnippets[model.pipeline_tag]?.(model, accessToken, provider, providerModelId, opts) ?? []
 		: [];
 }

@@ -47,8 +47,8 @@ export async function makeRequestOptions(
 		stream?: boolean;
 	},
 	options?: Options & {
-		/** To load default model if needed */
-		taskHint?: InferenceTask;
+		/** In most cases (unless we pass a endpointUrl) we know the task */
+		task?: InferenceTask;
 		chatCompletion?: boolean;
 	}
 ): Promise<{ url: string; info: RequestInit }> {
@@ -56,7 +56,7 @@ export async function makeRequestOptions(
 	const provider = maybeProvider ?? "hf-inference";
 	const providerConfig = providerConfigs[provider];
 
-	const { includeCredentials, taskHint, chatCompletion, signal } = options ?? {};
+	const { includeCredentials, task, chatCompletion, signal } = options ?? {};
 
 	if (endpointUrl && provider !== "hf-inference") {
 		throw new Error(`Cannot use endpointUrl with a third-party provider.`);
@@ -64,16 +64,16 @@ export async function makeRequestOptions(
 	if (maybeModel && isUrl(maybeModel)) {
 		throw new Error(`Model URLs are no longer supported. Use endpointUrl instead.`);
 	}
-	if (!maybeModel && !taskHint) {
+	if (!maybeModel && !task) {
 		throw new Error("No model provided, and no task has been specified.");
 	}
 	if (!providerConfig) {
 		throw new Error(`No provider config found for provider ${provider}`);
 	}
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-	const hfModel = maybeModel ?? (await loadDefaultModel(taskHint!));
+	const hfModel = maybeModel ?? (await loadDefaultModel(task!));
 	const model = await getProviderModelId({ model: hfModel, provider }, args, {
-		taskHint,
+		task,
 		chatCompletion,
 		fetch: options?.fetch,
 	});
@@ -98,8 +98,8 @@ export async function makeRequestOptions(
 						? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", provider)
 						: providerConfig.baseUrl,
 				model,
-				taskHint,
 				chatCompletion,
+				task,
 		  });
 
 	// Make headers
@@ -129,7 +129,7 @@ export async function makeRequestOptions(
 				providerConfig.makeBody({
 					args: remainingArgs as Record<string, unknown>,
 					model,
-					taskHint,
+					task,
 					chatCompletion,
 				})
 		  );

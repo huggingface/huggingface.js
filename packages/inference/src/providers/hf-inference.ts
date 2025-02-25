@@ -25,11 +25,11 @@ const makeHeaders = (params: HeaderParams): Record<string, string> => {
 };
 
 const makeUrl = (params: UrlParams): string => {
-	if (params.taskHint && ["feature-extraction", "sentence-similarity"].includes(params.taskHint)) {
+	if (params.task && ["feature-extraction", "sentence-similarity"].includes(params.task)) {
 		/// when deployed on hf-inference, those two tasks are automatically compatible with one another.
-		return `${params.baseUrl}/pipeline/${params.taskHint}/${params.model}`;
+		return `${params.baseUrl}/pipeline/${params.task}/${params.model}`;
 	}
-	if (params.taskHint === "text-generation" && params.chatCompletion) {
+	if (params.task === "text-generation" && params.chatCompletion) {
 		return `${params.baseUrl}/models/${params.model}/v1/chat/completions`;
 	}
 	return `${params.baseUrl}/models/${params.model}`;
