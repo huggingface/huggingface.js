@@ -83,17 +83,23 @@ export async function makeRequestOptions(
 				fetch: options?.fetch,
 		  });
 
-	// If accessToken is passed, it should take precedence over includeCredentials
-	// Closed-source providers require an accessToken (cannot be routed).
-	const authMethod = providerConfig.closedSource
-		? "provider-key"
-		: accessToken
-		  ? accessToken.startsWith("hf_")
-				? "hf-token"
-				: "provider-key"
-		  : includeCredentials === "include"
-		    ? "credentials-include"
-		    : "none";
+	const authMethod = (() => {
+		if (providerConfig.closedSource) {
+			// Closed-source providers require an accessToken (cannot be routed).
+			if (accessToken && accessToken.startsWith("hf_")) {
+				throw new Error(`Provider ${provider} is closed-source and does not support HF tokens.`);
+			}
+			return "provider-key";
+		}
+		if (accessToken) {
+			return accessToken.startsWith("hf_") ? "hf-token" : "provider-key";
+		}
+		if (includeCredentials === "include") {
+			// If accessToken is passed, it should take precedence over includeCredentials
+			return "credentials-include";
+		}
+		return "none";
+	})();
 
 	// Make URL
 	const url = endpointUrl
