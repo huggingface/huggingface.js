@@ -1,8 +1,4 @@
-import {
-	HF_HUB_INFERENCE_PROXY_TEMPLATE,
-	openAIbaseUrl,
-	type SnippetInferenceProvider,
-} from "../inference-providers.js";
+import { openAIbaseUrl, type SnippetInferenceProvider } from "../inference-providers.js";
 import type { PipelineType, WidgetType } from "../pipelines.js";
 import type { ChatCompletionInputMessage, GenerationParameters } from "../tasks/index.js";
 import { stringifyGenerationConfig, stringifyMessages } from "./common.js";
@@ -52,6 +48,7 @@ export const snippetConversational = (
 	model: ModelDataMinimal,
 	accessToken: string,
 	provider: SnippetInferenceProvider,
+	providerModelId?: string,
 	opts?: {
 		streaming?: boolean;
 		messages?: ChatCompletionInputMessage[];
@@ -107,7 +104,7 @@ client = OpenAI(
 messages = ${messagesStr}
 
 stream = client.chat.completions.create(
-    model="${model.id}", 
+    model="${providerModelId ?? model.id}", 
 	messages=messages, 
 	${configStr}
 	stream=True
@@ -147,7 +144,7 @@ client = OpenAI(
 messages = ${messagesStr}
 
 completion = client.chat.completions.create(
-	model="${model.id}", 
+	model="${providerModelId ?? model.id}", 
 	messages=messages, 
 	${configStr}
 )
@@ -255,7 +252,8 @@ output = query(${getModelInputSnippet(model)})`,
 export const snippetTextToImage = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: SnippetInferenceProvider
+	provider: SnippetInferenceProvider,
+	providerModelId?: string
 ): InferenceSnippet[] => {
 	return [
 		{
@@ -277,8 +275,7 @@ image = client.text_to_image(
 import fal_client
 
 result = fal_client.subscribe(
-	# replace with correct id from fal.ai
-	"fal-ai/${model.id}",
+	"${providerModelId ?? model.id}",
 	arguments={
 		"prompt": ${getModelInputSnippet(model)},
 	},
@@ -394,6 +391,7 @@ export const pythonSnippets: Partial<
 			model: ModelDataMinimal,
 			accessToken: string,
 			provider: SnippetInferenceProvider,
+			providerModelId?: string,
 			opts?: Record<string, unknown>
 		) => InferenceSnippet[]
 	>
@@ -432,15 +430,16 @@ export function getPythonInferenceSnippet(
 	model: ModelDataMinimal,
 	accessToken: string,
 	provider: SnippetInferenceProvider,
+	providerModelId?: string,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
 	if (model.tags.includes("conversational")) {
 		// Conversational model detected, so we display a code snippet that features the Messages API
-		return snippetConversational(model, accessToken, provider, opts);
+		return snippetConversational(model, accessToken, provider, providerModelId, opts);
 	} else {
 		const snippets =
 			model.pipeline_tag && model.pipeline_tag in pythonSnippets
-				? pythonSnippets[model.pipeline_tag]?.(model, accessToken, provider) ?? []
+				? pythonSnippets[model.pipeline_tag]?.(model, accessToken, provider, providerModelId) ?? []
 				: [];
 
 		return snippets.map((snippet) => {

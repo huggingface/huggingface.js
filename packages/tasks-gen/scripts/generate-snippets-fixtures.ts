@@ -52,7 +52,7 @@ const TEST_CASES: {
 			inference: "",
 		},
 		languages: ["sh", "js", "py"],
-		providers: ["hf-inference"],
+		providers: ["hf-inference", "together"],
 		opts: { streaming: true },
 	},
 	{
@@ -64,7 +64,7 @@ const TEST_CASES: {
 			inference: "",
 		},
 		languages: ["sh", "js", "py"],
-		providers: ["hf-inference"],
+		providers: ["hf-inference", "fireworks-ai"],
 		opts: { streaming: false },
 	},
 	{
@@ -76,7 +76,7 @@ const TEST_CASES: {
 			inference: "",
 		},
 		languages: ["sh", "js", "py"],
-		providers: ["hf-inference"],
+		providers: ["hf-inference", "fireworks-ai"],
 		opts: { streaming: true },
 	},
 	{
@@ -87,7 +87,7 @@ const TEST_CASES: {
 			tags: [],
 			inference: "",
 		},
-		providers: ["hf-inference"],
+		providers: ["hf-inference", "fal-ai"],
 		languages: ["sh", "js", "py"],
 	},
 	{
@@ -133,7 +133,8 @@ function generateInferenceSnippet(
 	provider: SnippetInferenceProvider,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
-	return GET_SNIPPET_FN[language](model, "api_token", provider, opts);
+	const providerModelId = provider === "hf-inference" ? model.id : `<${provider} alias for ${model.id}>`;
+	return GET_SNIPPET_FN[language](model, "api_token", provider, providerModelId, opts);
 }
 
 async function getExpectedInferenceSnippet(

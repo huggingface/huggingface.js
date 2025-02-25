@@ -10,7 +10,7 @@ export type TranslationArgs = BaseArgs & TranslationInput;
 export async function translation(args: TranslationArgs, options?: Options): Promise<TranslationOutput> {
 	const res = await request<TranslationOutput>(args, {
 		...options,
-		taskHint: "translation",
+		task: "translation",
 	});
 	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x?.translation_text === "string");
 	if (!isValidOutput) {

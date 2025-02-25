@@ -75,6 +75,7 @@ export const snippetTextGeneration = (
 	model: ModelDataMinimal,
 	accessToken: string,
 	provider: SnippetInferenceProvider,
+	providerModelId?: string,
 	opts?: {
 		streaming?: boolean;
 		messages?: ChatCompletionInputMessage[];
@@ -137,7 +138,7 @@ const client = new OpenAI({
 let out = "";
 
 const stream = await client.chat.completions.create({
-	model: "${model.id}",
+	model: "${providerModelId ?? model.id}",
 	messages: ${messagesStr},
 	${configStr}
 	stream: true,
@@ -180,7 +181,7 @@ const client = new OpenAI({
 });
 
 const chatCompletion = await client.chat.completions.create({
-	model: "${model.id}",
+	model: "${providerModelId ?? model.id}",
 	messages: ${messagesStr},
 	${configStr}
 });
@@ -398,6 +399,7 @@ export const jsSnippets: Partial<
 			model: ModelDataMinimal,
 			accessToken: string,
 			provider: SnippetInferenceProvider,
+			providerModelId?: string,
 			opts?: Record<string, unknown>
 		) => InferenceSnippet[]
 	>
@@ -432,9 +434,10 @@ export function getJsInferenceSnippet(
 	model: ModelDataMinimal,
 	accessToken: string,
 	provider: SnippetInferenceProvider,
+	providerModelId?: string,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
 	return model.pipeline_tag && model.pipeline_tag in jsSnippets
-		? jsSnippets[model.pipeline_tag]?.(model, accessToken, provider, opts) ?? []
+		? jsSnippets[model.pipeline_tag]?.(model, accessToken, provider, providerModelId, opts) ?? []
 		: [];
 }
