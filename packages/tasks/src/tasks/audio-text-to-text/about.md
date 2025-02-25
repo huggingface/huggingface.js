@@ -1,6 +1,6 @@
 ## Different Types of Audio-Text-to-Text Models
 
-Audio-text-to-text models can be categorized into three main types:
+Audio-text-to-text models can be categorized into two main types:
 
 - **Base:**  
   Pre-trained models that extract rich audio features using techniques such as Wav2Vec, HuBERT, or Whisper. These models serve as the backbone for various downstream tasks. An example is the [Qwen2-Audio-7b](https://huggingface.co/Qwen/Qwen2-Audio-7B), which can be further fine-tuned.
