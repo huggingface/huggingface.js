@@ -108,8 +108,6 @@ export interface SpaceResourceConfig {
 
 export type License =
 	| "apache-2.0"
-	| "apple-ascl"
-	| "apple-amlr"
 	| "mit"
 	| "openrail"
 	| "bigscience-openrail-m"
@@ -179,5 +177,7 @@ export type License =
 	| "llama3.1"
 	| "llama3.2"
 	| "gemma"
+	| "apple-ascl"
+	| "apple-amlr"
 	| "unknown"
 	| "other";
