@@ -60,6 +60,18 @@ describe("WebBlob", () => {
 		expect(await webBlob.slice(10, 22).text()).toBe("__metadata__");
 	});
 
+	it("should lazy load a Xet file hosted on Hugging Face", async () => {
+		const stableDiffusionUrl =
+			"https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/unet/diffusion_pytorch_model.fp16.safetensors";
+		const url = new URL(stableDiffusionUrl);
+		const webBlob = await WebBlob.create(url);
+
+		expect(webBlob.size).toBe(5_135_149_760);
+		expect(webBlob).toBeInstanceOf(WebBlob);
+		expect(webBlob).toMatchObject({ url });
+		expect(await webBlob.slice(10, 22).text()).toBe("__metadata__");
+	});
+
 	it("should create a slice on the file", async () => {
 		const expectedText = fullText.slice(10, 20);
 
