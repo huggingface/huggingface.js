@@ -27,9 +27,9 @@ export const snippetBasic = (
 	return [
 		...(model.pipeline_tag && model.pipeline_tag in HFJS_METHODS
 			? [
-				{
-					client: "huggingface.js",
-					content: `\
+					{
+						client: "huggingface.js",
+						content: `\
 import { HfInference } from "@huggingface/inference";
 
 const client = new HfInference("${accessToken || `{API_TOKEN}`}");
@@ -42,8 +42,8 @@ const output = await client.${HFJS_METHODS[model.pipeline_tag]}({
 
 console.log(output);
 `,
-				},
-			]
+					},
+			  ]
 			: []),
 		{
 			client: "fetch",
@@ -217,8 +217,8 @@ export const snippetZeroShotClassification = (model: ModelDataMinimal, accessTok
 		}
 		
 		query({"inputs": ${getModelInputSnippet(
-				model
-			)}, "parameters": {"candidate_labels": ["refund", "legal", "faq"]}}).then((response) => {
+			model
+		)}, "parameters": {"candidate_labels": ["refund", "legal", "faq"]}}).then((response) => {
 			console.log(JSON.stringify(response));
 		});`,
 		},
@@ -249,9 +249,9 @@ const image = await client.textToImage({
 		},
 		...(provider === "hf-inference"
 			? [
-				{
-					client: "fetch",
-					content: `async function query(data) {
+					{
+						client: "fetch",
+						content: `async function query(data) {
 	const response = await fetch(
 		"https://router.huggingface.co/hf-inference/models/${model.id}",
 		{
@@ -269,8 +269,8 @@ const image = await client.textToImage({
 query({"inputs": ${getModelInputSnippet(model)}}).then((response) => {
 	// Use image
 });`,
-				},
-			]
+					},
+			  ]
 			: []),
 	];
 };

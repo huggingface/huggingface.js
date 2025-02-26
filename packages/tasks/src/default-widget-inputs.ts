@@ -96,9 +96,9 @@ const MAPPING_EN: PerLanguageMapping = new Map([
 		"conversational",
 		[
 			`Hi, what can you help me with?`,
-			`Hey, let's have a conversation!`,
-			`Hello there!`,
-			`Hey my name is Clara! How are you?`,
+			`What is 84 * 3 / 2?`,
+			`Tell me an interesting fact about the universe!`,
+			`Explain quantum computing in simple terms.`,
 		],
 	],
 	[
