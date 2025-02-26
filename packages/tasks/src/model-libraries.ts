@@ -177,7 +177,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "COMET",
 		repoName: "COMET",
 		repoUrl: "https://github.com/Unbabel/COMET/",
-		countDownloads: `path:"hparams.yaml",
+		countDownloads: `path:"hparams.yaml"`,
 	},
 	cosmos: {
 		prettyLabel: "Cosmos",
