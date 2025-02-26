@@ -21,7 +21,7 @@ export class WebBlob extends Blob {
 		const customFetch = opts?.fetch ?? fetch;
 		const response = await customFetch(url, { method: "HEAD" });
 
-		const size = Number(response.headers.get("x-linked-size") ?? response.headers.get("content-length"));
+		const size = Number(response.headers.get("content-length"));
 		const contentType = response.headers.get("content-type") || "";
 		const supportRange = response.headers.get("accept-ranges") === "bytes";
 
