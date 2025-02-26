@@ -1,7 +1,4 @@
-import {
-	openAIbaseUrl,
-	type SnippetInferenceProvider,
-} from "../inference-providers.js";
+import { openAIbaseUrl, type SnippetInferenceProvider } from "../inference-providers.js";
 import type { PipelineType, WidgetType } from "../pipelines.js";
 import type { ChatCompletionInputMessage, GenerationParameters } from "../tasks/index.js";
 import { stringifyGenerationConfig, stringifyMessages } from "./common.js";
@@ -206,9 +203,9 @@ export const snippetBasic = (
 	return [
 		...(model.pipeline_tag && model.pipeline_tag in HFH_INFERENCE_CLIENT_METHODS
 			? [
-				{
-					client: "huggingface_hub",
-					content: `\
+					{
+						client: "huggingface_hub",
+						content: `\
 ${snippetImportInferenceClient(accessToken, provider)}
 
 result = client.${HFH_INFERENCE_CLIENT_METHODS[model.pipeline_tag]}(
@@ -219,8 +216,8 @@ result = client.${HFH_INFERENCE_CLIENT_METHODS[model.pipeline_tag]}(
 
 print(result)
 `,
-				},
-			]
+					},
+			  ]
 			: []),
 		{
 			client: "requests",
@@ -256,7 +253,7 @@ export const snippetTextToImage = (
 	model: ModelDataMinimal,
 	accessToken: string,
 	provider: SnippetInferenceProvider,
-	providerModelId?: string,
+	providerModelId?: string
 ): InferenceSnippet[] => {
 	return [
 		{
@@ -272,9 +269,9 @@ image = client.text_to_image(
 		},
 		...(provider === "fal-ai"
 			? [
-				{
-					client: "fal-client",
-					content: `\
+					{
+						client: "fal-client",
+						content: `\
 import fal_client
 
 result = fal_client.subscribe(
@@ -285,14 +282,14 @@ result = fal_client.subscribe(
 )
 print(result)
 `,
-				},
-			]
+					},
+			  ]
 			: []),
 		...(provider === "hf-inference"
 			? [
-				{
-					client: "requests",
-					content: `\
+					{
+						client: "requests",
+						content: `\
 def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.content
@@ -305,8 +302,8 @@ image_bytes = query({
 import io
 from PIL import Image
 image = Image.open(io.BytesIO(image_bytes))`,
-				},
-			]
+					},
+			  ]
 			: []),
 	];
 };

@@ -1,5 +1,3 @@
-export const HYPERBOLIC_API_BASE_URL = "https://api.hyperbolic.xyz";
-
 /**
  * See the registered mapping of HF model ID => Hyperbolic model ID here:
  *
@@ -16,3 +14,31 @@ export const HYPERBOLIC_API_BASE_URL = "https://api.hyperbolic.xyz";
  *
  * Thanks!
  */
+import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../types";
+
+const HYPERBOLIC_API_BASE_URL = "https://api.hyperbolic.xyz";
+
+const makeBody = (params: BodyParams): Record<string, unknown> => {
+	return {
+		...params.args,
+		...(params.task === "text-to-image" ? { model_name: params.model } : { model: params.model }),
+	};
+};
+
+const makeHeaders = (params: HeaderParams): Record<string, string> => {
+	return { Authorization: `Bearer ${params.accessToken}` };
+};
+
+const makeUrl = (params: UrlParams): string => {
+	if (params.task === "text-to-image") {
+		return `${params.baseUrl}/v1/images/generations`;
+	}
+	return `${params.baseUrl}/v1/chat/completions`;
+};
+
+export const HYPERBOLIC_CONFIG: ProviderConfig = {
+	baseUrl: HYPERBOLIC_API_BASE_URL,
+	makeBody,
+	makeHeaders,
+	makeUrl,
+};

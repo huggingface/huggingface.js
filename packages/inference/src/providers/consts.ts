@@ -22,8 +22,8 @@ export const HARDCODED_MODEL_ID_MAPPING: Record<InferenceProvider, Record<ModelI
 	"hf-inference": {},
 	hyperbolic: {},
 	nebius: {},
+	novita: {},
 	replicate: {},
 	sambanova: {},
 	together: {},
-	novita: {},
 };
