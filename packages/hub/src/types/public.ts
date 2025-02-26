@@ -108,6 +108,8 @@ export interface SpaceResourceConfig {
 
 export type License =
 	| "apache-2.0"
+	| "apple-ascl"
+	| "apple-amlr"
 	| "mit"
 	| "openrail"
 	| "bigscience-openrail-m"
