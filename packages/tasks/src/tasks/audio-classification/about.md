@@ -33,7 +33,7 @@ import json
 import requests
 
 headers = {"Authorization": f"Bearer {API_TOKEN}"}
-API_URL = "https://api-inference.huggingface.co/models/superb/hubert-large-superb-er"
+API_URL = "https://router.huggingface.co/hf-inference/models/superb/hubert-large-superb-er"
 
 def query(filename):
     with open(filename, "rb") as f:

@@ -1,11 +1,11 @@
-import { openAIbaseUrl, type InferenceProvider } from "../inference-providers.js";
-import type { PipelineType } from "../pipelines.js";
+import { openAIbaseUrl, type SnippetInferenceProvider } from "../inference-providers.js";
+import type { PipelineType, WidgetType } from "../pipelines.js";
 import type { ChatCompletionInputMessage, GenerationParameters } from "../tasks/index.js";
 import { stringifyGenerationConfig, stringifyMessages } from "./common.js";
 import { getModelInputSnippet } from "./inputs.js";
 import type { InferenceSnippet, ModelDataMinimal } from "./types.js";
 
-const HFJS_METHODS: Record<string, string> = {
+const HFJS_METHODS: Partial<Record<WidgetType, string>> = {
 	"text-classification": "textClassification",
 	"token-classification": "tokenClassification",
 	"table-question-answering": "tableQuestionAnswering",
@@ -22,7 +22,7 @@ const HFJS_METHODS: Record<string, string> = {
 export const snippetBasic = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: InferenceProvider
+	provider: SnippetInferenceProvider
 ): InferenceSnippet[] => {
 	return [
 		...(model.pipeline_tag && model.pipeline_tag in HFJS_METHODS
@@ -40,7 +40,7 @@ const output = await client.${HFJS_METHODS[model.pipeline_tag]}({
 	provider: "${provider}",
 });
 
-console.log(output)
+console.log(output);
 `,
 					},
 			  ]
@@ -50,7 +50,7 @@ console.log(output)
 			content: `\
 async function query(data) {
 	const response = await fetch(
-		"https://api-inference.huggingface.co/models/${model.id}",
+		"https://router.huggingface.co/hf-inference/models/${model.id}",
 		{
 			headers: {
 				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
@@ -74,7 +74,8 @@ query({"inputs": ${getModelInputSnippet(model)}}).then((response) => {
 export const snippetTextGeneration = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: InferenceProvider,
+	provider: SnippetInferenceProvider,
+	providerModelId?: string,
 	opts?: {
 		streaming?: boolean;
 		messages?: ChatCompletionInputMessage[];
@@ -137,9 +138,9 @@ const client = new OpenAI({
 let out = "";
 
 const stream = await client.chat.completions.create({
-	model: "${model.id}",
+	model: "${providerModelId ?? model.id}",
 	messages: ${messagesStr},
-	${configStr},
+	${configStr}
 	stream: true,
 });
 
@@ -167,7 +168,8 @@ const chatCompletion = await client.chatCompletion({
 	${configStr}
 });
 
-console.log(chatCompletion.choices[0].message);`,
+console.log(chatCompletion.choices[0].message);
+`,
 				},
 				{
 					client: "openai",
@@ -179,12 +181,13 @@ const client = new OpenAI({
 });
 
 const chatCompletion = await client.chat.completions.create({
-	model: "${model.id}",
+	model: "${providerModelId ?? model.id}",
 	messages: ${messagesStr},
 	${configStr}
 });
 
-console.log(chatCompletion.choices[0].message);`,
+console.log(chatCompletion.choices[0].message);
+`,
 				},
 			];
 		}
@@ -199,7 +202,7 @@ export const snippetZeroShotClassification = (model: ModelDataMinimal, accessTok
 			client: "fetch",
 			content: `async function query(data) {
 			const response = await fetch(
-				"https://api-inference.huggingface.co/models/${model.id}",
+				"https://router.huggingface.co/hf-inference/models/${model.id}",
 				{
 					headers: {
 						Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
@@ -225,7 +228,7 @@ export const snippetZeroShotClassification = (model: ModelDataMinimal, accessTok
 export const snippetTextToImage = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: InferenceProvider
+	provider: SnippetInferenceProvider
 ): InferenceSnippet[] => {
 	return [
 		{
@@ -250,7 +253,7 @@ const image = await client.textToImage({
 						client: "fetch",
 						content: `async function query(data) {
 	const response = await fetch(
-		"https://api-inference.huggingface.co/models/${model.id}",
+		"https://router.huggingface.co/hf-inference/models/${model.id}",
 		{
 			headers: {
 				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
@@ -275,14 +278,14 @@ query({"inputs": ${getModelInputSnippet(model)}}).then((response) => {
 export const snippetTextToAudio = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: InferenceProvider
+	provider: SnippetInferenceProvider
 ): InferenceSnippet[] => {
 	if (provider !== "hf-inference") {
 		return [];
 	}
 	const commonSnippet = `async function query(data) {
 		const response = await fetch(
-			"https://api-inference.huggingface.co/models/${model.id}",
+			"https://router.huggingface.co/hf-inference/models/${model.id}",
 			{
 				headers: {
 					Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
@@ -329,7 +332,7 @@ export const snippetTextToAudio = (
 export const snippetAutomaticSpeechRecognition = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: InferenceProvider
+	provider: SnippetInferenceProvider
 ): InferenceSnippet[] => {
 	return [
 		{
@@ -357,7 +360,7 @@ console.log(output);
 export const snippetFile = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: InferenceProvider
+	provider: SnippetInferenceProvider
 ): InferenceSnippet[] => {
 	if (provider !== "hf-inference") {
 		return [];
@@ -368,7 +371,7 @@ export const snippetFile = (
 			content: `async function query(filename) {
 	const data = fs.readFileSync(filename);
 	const response = await fetch(
-		"https://api-inference.huggingface.co/models/${model.id}",
+		"https://router.huggingface.co/hf-inference/models/${model.id}",
 		{
 			headers: {
 				Authorization: "Bearer ${accessToken || `{API_TOKEN}`}",
@@ -395,7 +398,8 @@ export const jsSnippets: Partial<
 		(
 			model: ModelDataMinimal,
 			accessToken: string,
-			provider: InferenceProvider,
+			provider: SnippetInferenceProvider,
+			providerModelId?: string,
 			opts?: Record<string, unknown>
 		) => InferenceSnippet[]
 	>
@@ -429,10 +433,11 @@ export const jsSnippets: Partial<
 export function getJsInferenceSnippet(
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: InferenceProvider,
+	provider: SnippetInferenceProvider,
+	providerModelId?: string,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
 	return model.pipeline_tag && model.pipeline_tag in jsSnippets
-		? jsSnippets[model.pipeline_tag]?.(model, accessToken, provider, opts) ?? []
+		? jsSnippets[model.pipeline_tag]?.(model, accessToken, provider, providerModelId, opts) ?? []
 		: [];
 }

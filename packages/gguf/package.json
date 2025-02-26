@@ -1,7 +1,7 @@
 {
 	"name": "@huggingface/gguf",
 	"packageManager": "pnpm@8.10.5",
-	"version": "0.1.12",
+	"version": "0.1.13",
 	"description": "a GGUF parser that works on remotely hosted files",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {
@@ -10,6 +10,9 @@
 	"main": "./dist/index.js",
 	"module": "./dist/index.mjs",
 	"types": "./dist/index.d.ts",
+	"bin": {
+		"gguf-view": "./dist/cli.js"
+	},
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
@@ -18,6 +21,7 @@
 		}
 	},
 	"browser": {
+		"./src/cli.ts": false,
 		"./src/utils/FileBlob.ts": false,
 		"./dist/index.js": "./dist/browser/index.js",
 		"./dist/index.mjs": "./dist/browser/index.mjs"
@@ -32,7 +36,7 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"prepublishOnly": "pnpm run build",
-		"build": "tsup src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
+		"build": "tsup src/index.ts src/cli.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
 		"build:llm": "tsx scripts/generate-llm.ts && pnpm run format",
 		"test": "vitest run",
 		"check": "tsc"

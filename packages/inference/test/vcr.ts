@@ -1,5 +1,5 @@
 import { omit } from "../src/utils/omit";
-import { HF_HUB_URL } from "../src/config";
+import { HF_HUB_URL, HF_ROUTER_URL } from "../src/config";
 import { isBackend } from "../src/utils/isBackend";
 import { isFrontend } from "../src/utils/isFrontend";
 
@@ -117,7 +117,7 @@ async function vcr(
 
 	const { default: tapes } = await import(TAPES_FILE);
 
-	const cacheCandidate = !url.startsWith(HF_HUB_URL) || url.startsWith("https://huggingface.co/api/inference-proxy/");
+	const cacheCandidate = !url.startsWith(HF_HUB_URL) || url.startsWith(HF_ROUTER_URL);
 
 	if (VCR_MODE === MODE.PLAYBACK && cacheCandidate) {
 		if (!tapes[hash]) {
@@ -181,7 +181,7 @@ async function vcr(
 		const tape: Tape = {
 			url,
 			init: {
-				headers: init.headers && omit(init.headers as Record<string, string>, ["Authorization", "User-Agent"]),
+				headers: init.headers && omit(init.headers as Record<string, string>, ["Authorization", "User-Agent", "X-Key"]),
 				method: init.method,
 				body: typeof init.body === "string" && init.body.length < 1_000 ? init.body : undefined,
 			},

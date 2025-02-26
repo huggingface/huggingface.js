@@ -1,24 +1,44 @@
-import type { ProviderMapping } from "./types";
+/**
+ * See the registered mapping of HF model ID => Sambanova model ID here:
+ *
+ * https://huggingface.co/api/partners/sambanova/models
+ *
+ * This is a publicly available mapping.
+ *
+ * If you want to try to run inference for a new model locally before it's registered on huggingface.co,
+ * you can add it to the dictionary "HARDCODED_MODEL_ID_MAPPING" in consts.ts, for dev purposes.
+ *
+ * - If you work at Sambanova and want to update this mapping, please use the model mapping API we provide on huggingface.co
+ * - If you're a community member and want to add a new supported HF model to Sambanova, please open an issue on the present repo
+ * and we will tag Sambanova team members.
+ *
+ * Thanks!
+ */
+import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../types";
 
-export const SAMBANOVA_API_BASE_URL = "https://api.sambanova.ai";
+const SAMBANOVA_API_BASE_URL = "https://api.sambanova.ai";
 
-type SambanovaId = string;
+const makeBody = (params: BodyParams): Record<string, unknown> => {
+	return {
+		...params.args,
+		...(params.chatCompletion ? { model: params.model } : undefined),
+	};
+};
 
-export const SAMBANOVA_SUPPORTED_MODEL_IDS: ProviderMapping<SambanovaId> = {
-	/** Chat completion / conversational */
-	conversational: {
-		"deepseek-ai/DeepSeek-Distill-R1-Llama-70B": "DeepSeek-Distill-R1-Llama-70B",
-		"Qwen/Qwen2.5-Coder-32B-Instruct": "Qwen2.5-Coder-32B-Instruct",
-		"Qwen/Qwen2.5-72B-Instruct": "Qwen2.5-72B-Instruct",
-		"Qwen/QwQ-32B-Preview": "QwQ-32B-Preview",
-		"meta-llama/Llama-3.3-70B-Instruct": "Meta-Llama-3.3-70B-Instruct",
-		"meta-llama/Llama-3.2-1B-Instruct": "Meta-Llama-3.2-1B-Instruct",
-		"meta-llama/Llama-3.2-3B-Instruct": "Meta-Llama-3.2-3B-Instruct",
-		"meta-llama/Llama-3.2-11B-Vision-Instruct": "Llama-3.2-11B-Vision-Instruct",
-		"meta-llama/Llama-3.2-90B-Vision-Instruct": "Llama-3.2-90B-Vision-Instruct",
-		"meta-llama/Llama-3.1-8B-Instruct": "Meta-Llama-3.1-8B-Instruct",
-		"meta-llama/Llama-3.1-70B-Instruct": "Meta-Llama-3.1-70B-Instruct",
-		"meta-llama/Llama-3.1-405B-Instruct": "Meta-Llama-3.1-405B-Instruct",
-		"meta-llama/Llama-Guard-3-8B": "Meta-Llama-Guard-3-8B",
-	},
+const makeHeaders = (params: HeaderParams): Record<string, string> => {
+	return { Authorization: `Bearer ${params.accessToken}` };
+};
+
+const makeUrl = (params: UrlParams): string => {
+	if (params.task === "text-generation" && params.chatCompletion) {
+		return `${params.baseUrl}/v1/chat/completions`;
+	}
+	return params.baseUrl;
+};
+
+export const SAMBANOVA_CONFIG: ProviderConfig = {
+	baseUrl: SAMBANOVA_API_BASE_URL,
+	makeBody,
+	makeHeaders,
+	makeUrl,
 };
