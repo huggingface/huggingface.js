@@ -71,6 +71,10 @@ const taskData: TaskDataCustom = {
 			id: "tencent/HunyuanVideo",
 		},
 		{
+			description: "A robust model for video generation.",
+			id: "Wan-AI/Wan2.1-T2V-1.3B",
+		},
+		{
 			description: "A text-to-video model with high fidelity motion and strong prompt adherence.",
 			id: "Lightricks/LTX-Video",
 		},
@@ -86,7 +90,7 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "Consistent video generation application.",
-			id: "TIGER-Lab/T2V-Turbo-V2",
+			id: "Wan-AI/Wan2.1",
 		},
 		{
 			description: "A cutting edge video generation application.",

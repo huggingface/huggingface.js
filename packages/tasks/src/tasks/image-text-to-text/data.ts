@@ -48,7 +48,7 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "A screenshot understanding model used to control computers.",
-			id: "showlab/ShowUI-2B",
+			id: "microsoft/OmniParser-v2.0",
 		},
 		{
 			description: "Cutting-edge vision language model.",
@@ -60,15 +60,15 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "Strong image-text-to-text model.",
-			id: "Qwen/Qwen2-VL-7B-Instruct",
+			id: "Qwen/Qwen2.5-VL-7B-Instruct",
 		},
 		{
 			description: "Image-text-to-text model with reasoning capabilities.",
-			id: "Qwen/QVQ-72B-Preview",
+			id: "microsoft/Magma-8B",
 		},
 		{
 			description: "Strong image-text-to-text model focused on documents.",
-			id: "stepfun-ai/GOT-OCR2_0",
+			id: "allenai/olmOCR-7B-0225-preview",
 		},
 	],
 	spaces: [
@@ -97,8 +97,8 @@ const taskData: TaskDataCustom = {
 			id: "showlab/ShowUI",
 		},
 		{
-			description: "An application that detects gaze.",
-			id: "smoondream/gaze-demo",
+			description: "Powerful vision language assistant that can understand multiple images.",
+			id: "HuggingFaceTB/SmolVLM2",
 		},
 	],
 	summary:

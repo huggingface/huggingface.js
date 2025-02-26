@@ -57,6 +57,10 @@ const taskData: TaskDataCustom = {
 			id: "facebook/bart-large-mnli",
 		},
 		{
+			description: "Zero-shot text classification model that can be used for topic and sentiment classification.",
+			id: "knowledgator/gliclass-modern-base-v2.0-init",
+		},
+		{
 			description: "Cutting-edge zero-shot multilingual text classification model.",
 			id: "MoritzLaurer/ModernBERT-large-zeroshot-v2.0",
 		},
