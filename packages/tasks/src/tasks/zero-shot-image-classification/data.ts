@@ -53,11 +53,11 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "Strong zero-shot image classification model.",
-			id: "google/siglip-so400m-patch14-224",
+			id: "google/siglip2-base-patch16-224",
 		},
 		{
 			description: "Robust zero-shot image classification model.",
-			id: "microsoft/LLM2CLIP-EVA02-L-14-336",
+			id: "intfloat/mmE5-mllama-11b-instruct",
 		},
 		{
 			description: "Powerful zero-shot image classification model supporting 94 languages.",
