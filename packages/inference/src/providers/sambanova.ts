@@ -1,32 +1,18 @@
-import type { ModelId } from "../types";
-
 export const SAMBANOVA_API_BASE_URL = "https://api.sambanova.ai";
 
 /**
- * Note for reviewers: our goal would be to ask Sambanova to support
- * our model ids too, so we don't have to define a mapping
- * or keep it up-to-date.
+ * See the registered mapping of HF model ID => Sambanova model ID here:
  *
- * As a fallback, if the above is not possible, ask Sambanova to
- * provide the mapping as an fetchable API.
+ * https://huggingface.co/api/partners/sambanova/models
+ *
+ * This is a publicly available mapping.
+ *
+ * If you want to try to run inference for a new model locally before it's registered on huggingface.co,
+ * you can add it to the dictionary "HARDCODED_MODEL_ID_MAPPING" in consts.ts, for dev purposes.
+ *
+ * - If you work at Sambanova and want to update this mapping, please use the model mapping API we provide on huggingface.co
+ * - If you're a community member and want to add a new supported HF model to Sambanova, please open an issue on the present repo
+ * and we will tag Sambanova team members.
+ *
+ * Thanks!
  */
-type SambanovaId = string;
-
-/**
- * https://community.sambanova.ai/t/supported-models/193
- */
-export const SAMBANOVA_MODEL_IDS: Record<ModelId, SambanovaId> = {
-	/** Chat completion / conversational */
-	"Qwen/Qwen2.5-Coder-32B-Instruct": "Qwen2.5-Coder-32B-Instruct",
-	"Qwen/Qwen2.5-72B-Instruct": "Qwen2.5-72B-Instruct",
-	"Qwen/QwQ-32B-Preview": "QwQ-32B-Preview",
-	"meta-llama/Llama-3.3-70B-Instruct": "Meta-Llama-3.3-70B-Instruct",
-	"meta-llama/Llama-3.2-1B": "Meta-Llama-3.2-1B-Instruct",
-	"meta-llama/Llama-3.2-3B": "Meta-Llama-3.2-3B-Instruct",
-	"meta-llama/Llama-3.2-11B-Vision-Instruct": "Llama-3.2-11B-Vision-Instruct",
-	"meta-llama/Llama-3.2-90B-Vision-Instruct": "Llama-3.2-90B-Vision-Instruct",
-	"meta-llama/Llama-3.1-8B-Instruct": "Meta-Llama-3.1-8B-Instruct",
-	"meta-llama/Llama-3.1-70B-Instruct": "Meta-Llama-3.1-70B-Instruct",
-	"meta-llama/Llama-3.1-405B-Instruct": "Meta-Llama-3.1-405B-Instruct",
-	"meta-llama/Llama-Guard-3-8B": "Meta-Llama-Guard-3-8B",
-};

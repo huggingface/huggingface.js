@@ -1,6 +1,6 @@
-# 🤗 Hugging Face Inference Endpoints
+# 🤗 Hugging Face Inference
 
-A Typescript powered wrapper for the Hugging Face Inference API (serverless), Inference Endpoints (dedicated), and third-party Inference Providers.
+A Typescript powered wrapper for the HF Inference API (serverless), Inference Endpoints (dedicated), and third-party Inference Providers.
 It works with [Inference API (serverless)](https://huggingface.co/docs/api-inference/index) and [Inference Endpoints (dedicated)](https://huggingface.co/docs/inference-endpoints/index), and even with supported third-party Inference Providers.
 
 Check out the [full documentation](https://huggingface.co/docs/huggingface.js/inference/README).
@@ -42,7 +42,52 @@ const hf = new HfInference('your access token')
 
 Your access token should be kept private. If you need to protect it in front-end applications, we suggest setting up a proxy server that stores the access token.
 
-#### Tree-shaking
+### Third-party inference providers
+
+You can send inference requests to third-party providers with the inference client.
+
+Currently, we support the following providers:
+- [Fal.ai](https://fal.ai)
+- [Fireworks AI](https://fireworks.ai)
+- [Hyperbolic](https://hyperbolic.xyz)
+- [Nebius](https://studio.nebius.ai)
+- [Novita](https://novita.ai/?utm_source=github_huggingface&utm_medium=github_readme&utm_campaign=link)
+- [Replicate](https://replicate.com)
+- [Sambanova](https://sambanova.ai)
+- [Together](https://together.xyz)
+- [Blackforestlabs](https://blackforestlabs.ai)
+
+To send requests to a third-party provider, you have to pass the `provider` parameter to the inference function. Make sure your request is authenticated with an access token.
+```ts
+const accessToken = "hf_..."; // Either a HF access token, or an API key from the third-party provider (Replicate in this example)
+
+const client = new HfInference(accessToken);
+await client.textToImage({
+  provider: "replicate",
+  model:"black-forest-labs/Flux.1-dev",
+  inputs: "A black forest cake"
+})
+```
+
+When authenticated with a Hugging Face access token, the request is routed through https://huggingface.co.
+When authenticated with a third-party provider key, the request is made directly against that provider's inference API.
+
+Only a subset of models are supported when requesting third-party providers. You can check the list of supported models per pipeline tasks here:
+- [Fal.ai supported models](https://huggingface.co/api/partners/fal-ai/models)
+- [Fireworks AI supported models](https://huggingface.co/api/partners/fireworks-ai/models)
+- [Hyperbolic supported models](https://huggingface.co/api/partners/hyperbolic/models)
+- [Nebius supported models](https://huggingface.co/api/partners/nebius/models)
+- [Replicate supported models](https://huggingface.co/api/partners/replicate/models)
+- [Sambanova supported models](https://huggingface.co/api/partners/sambanova/models)
+- [Together supported models](https://huggingface.co/api/partners/together/models)
+- [HF Inference API (serverless)](https://huggingface.co/models?inference=warm&sort=trending)
+
+❗**Important note:** To be compatible, the third-party API must adhere to the "standard" shape API we expect on HF model pages for each pipeline task type.
+This is not an issue for LLMs as everyone converged on the OpenAI API anyways, but can be more tricky for other tasks like "text-to-image" or "automatic-speech-recognition" where there exists no standard API. Let us know if any help is needed or if we can make things easier for you!
+
+👋**Want to add another provider?** Get in touch if you'd like to add support for another Inference provider, and/or request it on https://huggingface.co/spaces/huggingface/HuggingDiscussions/discussions/49
+
+### Tree-shaking
 
 You can import the functions you need directly from the module instead of using the `HfInference` class.
 
@@ -84,7 +129,7 @@ for await (const output of hf.textGenerationStream({
 
 ### Text Generation (Chat Completion API Compatible)
 
-Using the `chatCompletion` method, you can generate text with models compatible with the OpenAI Chat Completion API. All models served by [TGI](https://api-inference.huggingface.co/framework/text-generation-inference) on Hugging Face support Messages API.
+Using the `chatCompletion` method, you can generate text with models compatible with the OpenAI Chat Completion API. All models served by [TGI](https://huggingface.co/docs/text-generation-inference/) on Hugging Face support Messages API.
 
 [Demo](https://huggingface.co/spaces/huggingfacejs/streaming-chat-completion)
 
@@ -424,7 +469,7 @@ await hf.zeroShotImageClassification({
   model: 'openai/clip-vit-large-patch14-336',
   inputs: {
     image: await (await fetch('https://placekitten.com/300/300')).blob()
-  },  
+  },
   parameters: {
     candidate_labels: ['cat', 'dog']
   }
@@ -578,7 +623,7 @@ const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the
 
 // Chat Completion Example
 const ep = hf.endpoint(
-  "https://api-inference.huggingface.co/models/meta-llama/Llama-3.1-8B-Instruct"
+  "https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.1-8B-Instruct"
 );
 const stream = ep.chatCompletionStream({
   model: "tgi",

@@ -1,13 +1,20 @@
-import { FAL_AI_API_BASE_URL, FAL_AI_MODEL_IDS } from "../providers/fal-ai";
-import { REPLICATE_API_BASE_URL, REPLICATE_MODEL_IDS } from "../providers/replicate";
-import { SAMBANOVA_API_BASE_URL, SAMBANOVA_MODEL_IDS } from "../providers/sambanova";
-import { TOGETHER_API_BASE_URL, TOGETHER_MODEL_IDS } from "../providers/together";
-import { INFERENCE_PROVIDERS, type InferenceTask, type Options, type RequestArgs } from "../types";
-import { omit } from "../utils/omit";
-import { HF_HUB_URL } from "./getDefaultTask";
+import { HF_HUB_URL, HF_ROUTER_URL } from "../config";
+import { FAL_AI_API_BASE_URL } from "../providers/fal-ai";
+import { NEBIUS_API_BASE_URL } from "../providers/nebius";
+import { REPLICATE_API_BASE_URL } from "../providers/replicate";
+import { SAMBANOVA_API_BASE_URL } from "../providers/sambanova";
+import { TOGETHER_API_BASE_URL } from "../providers/together";
+import { NOVITA_API_BASE_URL } from "../providers/novita";
+import { FIREWORKS_AI_API_BASE_URL } from "../providers/fireworks-ai";
+import { HYPERBOLIC_API_BASE_URL } from "../providers/hyperbolic";
+import { BLACKFORESTLABS_AI_API_BASE_URL } from "../providers/black-forest-labs";
+import type { InferenceProvider } from "../types";
+import type { InferenceTask, Options, RequestArgs } from "../types";
 import { isUrl } from "./isUrl";
+import { version as packageVersion, name as packageName } from "../../package.json";
+import { getProviderModelId } from "./getProviderModelId";
 
-const HF_INFERENCE_API_BASE_URL = "https://api-inference.huggingface.co";
+const HF_HUB_INFERENCE_PROXY_TEMPLATE = `${HF_ROUTER_URL}/{{PROVIDER}}`;
 
 /**
  * Lazy-loaded from huggingface.co/api/tasks when needed
@@ -24,70 +31,71 @@ export async function makeRequestOptions(
 		stream?: boolean;
 	},
 	options?: Options & {
-		/** When a model can be used for multiple tasks, and we want to run a non-default task */
-		forceTask?: string | InferenceTask;
-		/** To load default model if needed */
-		taskHint?: InferenceTask;
+		/** In most cases (unless we pass a endpointUrl) we know the task */
+		task?: InferenceTask;
 		chatCompletion?: boolean;
 	}
 ): Promise<{ url: string; info: RequestInit }> {
-	const { accessToken, endpointUrl, provider, ...otherArgs } = args;
-	let { model } = args;
-	const { forceTask, includeCredentials, taskHint, wait_for_model, use_cache, dont_load_model, chatCompletion } =
-		options ?? {};
+	const { accessToken, endpointUrl, provider: maybeProvider, model: maybeModel, ...remainingArgs } = args;
+	let otherArgs = remainingArgs;
+	const provider = maybeProvider ?? "hf-inference";
+
+	const { includeCredentials, task, chatCompletion } = options ?? {};
+
+	if (endpointUrl && provider !== "hf-inference") {
+		throw new Error(`Cannot use endpointUrl with a third-party provider.`);
+	}
+	if (maybeModel && isUrl(maybeModel)) {
+		throw new Error(`Model URLs are no longer supported. Use endpointUrl instead.`);
+	}
+	if (!maybeModel && !task) {
+		throw new Error("No model provided, and no task has been specified.");
+	}
+	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+	const hfModel = maybeModel ?? (await loadDefaultModel(task!));
+	const model = await getProviderModelId({ model: hfModel, provider }, args, {
+		task,
+		chatCompletion,
+		fetch: options?.fetch,
+	});
+
+	/// If accessToken is passed, it should take precedence over includeCredentials
+	const authMethod = accessToken
+		? accessToken.startsWith("hf_")
+			? "hf-token"
+			: "provider-key"
+		: includeCredentials === "include"
+		  ? "credentials-include"
+		  : "none";
+
+	const url = endpointUrl
+		? chatCompletion
+			? endpointUrl + `/v1/chat/completions`
+			: endpointUrl
+		: makeUrl({
+				authMethod,
+				chatCompletion: chatCompletion ?? false,
+				model,
+				provider: provider ?? "hf-inference",
+				task,
+		  });
 
 	const headers: Record<string, string> = {};
 	if (accessToken) {
-		headers["Authorization"] = provider === "fal-ai" ? `Key ${accessToken}` : `Bearer ${accessToken}`;
-	}
-
-	if (!model && !tasks && taskHint) {
-		const res = await fetch(`${HF_HUB_URL}/api/tasks`);
-
-		if (res.ok) {
-			tasks = await res.json();
+		if (provider === "fal-ai" && authMethod === "provider-key") {
+			headers["Authorization"] = `Key ${accessToken}`;
+		} else if (provider === "black-forest-labs" && authMethod === "provider-key") {
+			headers["X-Key"] = accessToken;
+		} else {
+			headers["Authorization"] = `Bearer ${accessToken}`;
 		}
 	}
 
-	if (!model && tasks && taskHint) {
-		const taskInfo = tasks[taskHint];
-		if (taskInfo) {
-			model = taskInfo.models[0].id;
-		}
-	}
-
-	if (!model) {
-		throw new Error("No model provided, and no default model found for this task");
-	}
-	if (provider) {
-		if (!INFERENCE_PROVIDERS.includes(provider)) {
-			throw new Error("Unknown Inference provider");
-		}
-		if (!accessToken) {
-			throw new Error("Specifying an Inference provider requires an accessToken");
-		}
-
-		const modelId = (() => {
-			switch (provider) {
-				case "replicate":
-					return REPLICATE_MODEL_IDS[model];
-				case "sambanova":
-					return SAMBANOVA_MODEL_IDS[model];
-				case "together":
-					return TOGETHER_MODEL_IDS[model]?.id;
-				case "fal-ai":
-					return FAL_AI_MODEL_IDS[model];
-				default:
-					return model;
-			}
-		})();
-
-		if (!modelId) {
-			throw new Error(`Model ${model} is not supported for provider ${provider}`);
-		}
-
-		model = modelId;
-	}
+	// e.g. @huggingface/inference/3.1.3
+	const ownUserAgent = `${packageName}/${packageVersion}`;
+	headers["User-Agent"] = [ownUserAgent, typeof navigator !== "undefined" ? navigator.userAgent : undefined]
+		.filter((x) => x !== undefined)
+		.join(" ");
 
 	const binary = "data" in args && !!args.data;
 
@@ -95,67 +103,8 @@ export async function makeRequestOptions(
 		headers["Content-Type"] = "application/json";
 	}
 
-	if (wait_for_model) {
-		headers["X-Wait-For-Model"] = "true";
-	}
-	if (use_cache === false) {
-		headers["X-Use-Cache"] = "false";
-	}
-	if (dont_load_model) {
-		headers["X-Load-Model"] = "0";
-	}
 	if (provider === "replicate") {
 		headers["Prefer"] = "wait";
-	}
-
-	let url = (() => {
-		if (endpointUrl && isUrl(model)) {
-			throw new TypeError("Both model and endpointUrl cannot be URLs");
-		}
-		if (isUrl(model)) {
-			console.warn("Using a model URL is deprecated, please use the `endpointUrl` parameter instead");
-			return model;
-		}
-		if (endpointUrl) {
-			return endpointUrl;
-		}
-		if (forceTask) {
-			return `${HF_INFERENCE_API_BASE_URL}/pipeline/${forceTask}/${model}`;
-		}
-		if (provider) {
-			if (!accessToken) {
-				throw new Error("Specifying an Inference provider requires an accessToken");
-			}
-			if (accessToken.startsWith("hf_")) {
-				/// TODO we wil proxy the request server-side (using our own keys) and handle billing for it on the user's HF account.
-				throw new Error("Inference proxying is not implemented yet");
-			} else {
-				switch (provider) {
-					case "fal-ai":
-						return `${FAL_AI_API_BASE_URL}/${model}`;
-					case "replicate":
-						return `${REPLICATE_API_BASE_URL}/v1/models/${model}/predictions`;
-					case "sambanova":
-						return SAMBANOVA_API_BASE_URL;
-					case "together":
-						if (taskHint === "text-to-image") {
-							return `${TOGETHER_API_BASE_URL}/v1/images/generations`;
-						}
-						return TOGETHER_API_BASE_URL;
-					default:
-						break;
-				}
-			}
-		}
-
-		return `${HF_INFERENCE_API_BASE_URL}/models/${model}`;
-	})();
-
-	if (chatCompletion && !url.endsWith("/chat/completions")) {
-		url += "/v1/chat/completions";
-	}
-	if (provider === "together" && taskHint === "text-generation" && !chatCompletion) {
-		url += "/v1/completions";
 	}
 
 	/**
@@ -168,19 +117,174 @@ export async function makeRequestOptions(
 		credentials = "include";
 	}
 
+	/**
+	 * Replicate models wrap all inputs inside { input: ... }
+	 * Versioned Replicate models in the format `owner/model:version` expect the version in the body
+	 */
+	if (provider === "replicate") {
+		const version = model.includes(":") ? model.split(":")[1] : undefined;
+		(otherArgs as unknown) = { input: otherArgs, version };
+	}
+
 	const info: RequestInit = {
 		headers,
 		method: "POST",
 		body: binary
 			? args.data
 			: JSON.stringify({
-					...((otherArgs.model && isUrl(otherArgs.model)) || provider === "replicate" || provider === "fal-ai"
-						? omit(otherArgs, "model")
-						: { ...otherArgs, model }),
+					...otherArgs,
+					...(task === "text-to-image" && provider === "hyperbolic"
+						? { model_name: model }
+						: chatCompletion || provider === "together" || provider === "nebius" || provider === "hyperbolic"
+						  ? { model }
+						  : undefined),
 			  }),
 		...(credentials ? { credentials } : undefined),
 		signal: options?.signal,
 	};
 
 	return { url, info };
+}
+
+function makeUrl(params: {
+	authMethod: "none" | "hf-token" | "credentials-include" | "provider-key";
+	chatCompletion: boolean;
+	model: string;
+	provider: InferenceProvider;
+	task: InferenceTask | undefined;
+}): string {
+	if (params.authMethod === "none" && params.provider !== "hf-inference") {
+		throw new Error("Authentication is required when requesting a third-party provider. Please provide accessToken");
+	}
+
+	const shouldProxy = params.provider !== "hf-inference" && params.authMethod !== "provider-key";
+	switch (params.provider) {
+		case "black-forest-labs": {
+			const baseUrl = shouldProxy
+				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
+				: BLACKFORESTLABS_AI_API_BASE_URL;
+			return `${baseUrl}/${params.model}`;
+		}
+		case "fal-ai": {
+			const baseUrl = shouldProxy
+				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
+				: FAL_AI_API_BASE_URL;
+			return `${baseUrl}/${params.model}`;
+		}
+		case "nebius": {
+			const baseUrl = shouldProxy
+				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
+				: NEBIUS_API_BASE_URL;
+
+			if (params.task === "text-to-image") {
+				return `${baseUrl}/v1/images/generations`;
+			}
+			if (params.task === "text-generation") {
+				if (params.chatCompletion) {
+					return `${baseUrl}/v1/chat/completions`;
+				}
+				return `${baseUrl}/v1/completions`;
+			}
+			return baseUrl;
+		}
+		case "replicate": {
+			const baseUrl = shouldProxy
+				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
+				: REPLICATE_API_BASE_URL;
+			if (params.model.includes(":")) {
+				/// Versioned model
+				return `${baseUrl}/v1/predictions`;
+			}
+			/// Evergreen / Canonical model
+			return `${baseUrl}/v1/models/${params.model}/predictions`;
+		}
+		case "sambanova": {
+			const baseUrl = shouldProxy
+				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
+				: SAMBANOVA_API_BASE_URL;
+			/// Sambanova API matches OpenAI-like APIs: model is defined in the request body
+			if (params.task === "text-generation" && params.chatCompletion) {
+				return `${baseUrl}/v1/chat/completions`;
+			}
+			return baseUrl;
+		}
+		case "together": {
+			const baseUrl = shouldProxy
+				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
+				: TOGETHER_API_BASE_URL;
+			/// Together API matches OpenAI-like APIs: model is defined in the request body
+			if (params.task === "text-to-image") {
+				return `${baseUrl}/v1/images/generations`;
+			}
+			if (params.task === "text-generation") {
+				if (params.chatCompletion) {
+					return `${baseUrl}/v1/chat/completions`;
+				}
+				return `${baseUrl}/v1/completions`;
+			}
+			return baseUrl;
+		}
+
+		case "fireworks-ai": {
+			const baseUrl = shouldProxy
+				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
+				: FIREWORKS_AI_API_BASE_URL;
+			if (params.task === "text-generation" && params.chatCompletion) {
+				return `${baseUrl}/v1/chat/completions`;
+			}
+			return baseUrl;
+		}
+		case "hyperbolic": {
+			const baseUrl = shouldProxy
+				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
+				: HYPERBOLIC_API_BASE_URL;
+
+			if (params.task === "text-to-image") {
+				return `${baseUrl}/v1/images/generations`;
+			}
+			return `${baseUrl}/v1/chat/completions`;
+		}
+		case "novita": {
+			const baseUrl = shouldProxy
+				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", params.provider)
+				: NOVITA_API_BASE_URL;
+			if (params.task === "text-generation") {
+				if (params.chatCompletion) {
+					return `${baseUrl}/chat/completions`;
+				}
+				return `${baseUrl}/completions`;
+			}
+			return baseUrl;
+		}
+		default: {
+			const baseUrl = HF_HUB_INFERENCE_PROXY_TEMPLATE.replaceAll("{{PROVIDER}}", "hf-inference");
+			if (params.task && ["feature-extraction", "sentence-similarity"].includes(params.task)) {
+				/// when deployed on hf-inference, those two tasks are automatically compatible with one another.
+				return `${baseUrl}/pipeline/${params.task}/${params.model}`;
+			}
+			if (params.task === "text-generation" && params.chatCompletion) {
+				return `${baseUrl}/models/${params.model}/v1/chat/completions`;
+			}
+			return `${baseUrl}/models/${params.model}`;
+		}
+	}
+}
+async function loadDefaultModel(task: InferenceTask): Promise<string> {
+	if (!tasks) {
+		tasks = await loadTaskInfo();
+	}
+	const taskInfo = tasks[task];
+	if ((taskInfo?.models.length ?? 0) <= 0) {
+		throw new Error(`No default model defined for task ${task}, please define the model explicitly.`);
+	}
+	return taskInfo.models[0].id;
+}
+
+async function loadTaskInfo(): Promise<Record<string, { models: { id: string }[] }>> {
+	const res = await fetch(`${HF_HUB_URL}/api/tasks`);
+
+	if (!res.ok) {
+		throw new Error("Failed to load tasks definitions from Hugging Face Hub.");
+	}
+	return await res.json();
 }

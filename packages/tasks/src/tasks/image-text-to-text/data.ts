@@ -103,7 +103,7 @@ const taskData: TaskDataCustom = {
 	],
 	summary:
 		"Image-text-to-text models take in an image and text prompt and output text. These models are also called vision-language models, or VLMs. The difference from image-to-text models is that these models take an additional text input, not restricting the model to certain use cases like image captioning, and may also be trained to accept a conversation as input.",
-	widgetModels: ["meta-llama/Llama-3.2-11B-Vision-Instruct"],
+	widgetModels: ["Qwen/Qwen2-VL-7B-Instruct"],
 	youtubeId: "IoGaGfU1CIg",
 };
 

@@ -7,10 +7,8 @@ import { makeRequestOptions } from "../../lib/makeRequestOptions";
 export async function request<T>(
 	args: RequestArgs,
 	options?: Options & {
-		/** When a model can be used for multiple tasks, and we want to run a non-default task */
-		task?: string | InferenceTask;
-		/** To load default model if needed */
-		taskHint?: InferenceTask;
+		/** In most cases (unless we pass a endpointUrl) we know the task */
+		task?: InferenceTask;
 		/** Is chat completion compatible */
 		chatCompletion?: boolean;
 	}
@@ -18,11 +16,8 @@ export async function request<T>(
 	const { url, info } = await makeRequestOptions(args, options);
 	const response = await (options?.fetch ?? fetch)(url, info);
 
-	if (options?.retry_on_error !== false && response.status === 503 && !options?.wait_for_model) {
-		return request(args, {
-			...options,
-			wait_for_model: true,
-		});
+	if (options?.retry_on_error !== false && response.status === 503) {
+		return request(args, options);
 	}
 
 	if (!response.ok) {

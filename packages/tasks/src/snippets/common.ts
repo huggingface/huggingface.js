@@ -34,6 +34,6 @@ export function stringifyGenerationConfig(
 	const quote = opts.attributeKeyQuotes ? `"` : "";
 
 	return Object.entries(config)
-		.map(([key, val]) => `${quote}${key}${quote}${opts.attributeValueConnector}${val}`)
-		.join(`,${opts.indent}`);
+		.map(([key, val]) => `${quote}${key}${quote}${opts.attributeValueConnector}${val},`)
+		.join(`${opts.indent}`);
 }

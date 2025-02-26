@@ -58,6 +58,10 @@ const taskData: TaskDataCustom = {
 			description: "Object detection model for low-lying objects.",
 			id: "StephanST/WALDO30",
 		},
+		{
+			description: "Object detection model for low-lying objects.",
+			id: "StephanST/WALDO30",
+		},
 	],
 	spaces: [
 		{

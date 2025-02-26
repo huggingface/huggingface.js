@@ -19,12 +19,9 @@ export const textToSpeechTool: Tool = {
 		const data = await input;
 		if (typeof data !== "string") throw "Input must be a string.";
 
-		return inference.textToSpeech(
-			{
-				inputs: data,
-				model: "espnet/kan-bayashi_ljspeech_vits",
-			},
-			{ wait_for_model: true }
-		);
+		return inference.textToSpeech({
+			inputs: data,
+			model: "espnet/kan-bayashi_ljspeech_vits",
+		});
 	},
 };

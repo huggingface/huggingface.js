@@ -57,9 +57,10 @@ const taskData: TaskDataCustom = {
 		},
 	],
 	models: [
+		{ description: "A text-generation model trained to follow instructions.", id: "google/gemma-2-2b-it" },
 		{
-			description: "A text-generation model trained to follow instructions.",
-			id: "google/gemma-2-2b-it",
+			description: "Smaller variant of one of the most powerful models.",
+			id: "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
 		},
 		{
 			description: "Very powerful text generation model trained to follow instructions.",
@@ -74,8 +75,8 @@ const taskData: TaskDataCustom = {
 			id: "qihoo360/TinyR1-32B-Preview",
 		},
 		{
-			description: "Strong text generation model to follow instructions.",
-			id: "Qwen/Qwen2.5-7B-Instruct",
+			description: "Strong conversational model that supports very long instructions.",
+			id: "Qwen/Qwen2.5-7B-Instruct-1M",
 		},
 		{
 			description: "Text generation model used to write code.",
