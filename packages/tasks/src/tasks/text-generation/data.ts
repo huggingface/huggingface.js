@@ -76,7 +76,7 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "A very powerful model with reasoning capabilities.",
-			id: "PowerInfer/SmallThinker-3B-Preview",
+			id: "qihoo360/TinyR1-32B-Preview",
 		},
 		{
 			description: "Strong conversational model that supports very long instructions.",
