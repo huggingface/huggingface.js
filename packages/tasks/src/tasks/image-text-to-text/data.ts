@@ -70,6 +70,10 @@ const taskData: TaskDataCustom = {
 			description: "Strong image-text-to-text model focused on documents.",
 			id: "allenai/olmOCR-7B-0225-preview",
 		},
+		{
+			description: "Small yet strong image-text-to-text model.",
+			id: "ibm-granite/granite-vision-3.2-2b",
+		},
 	],
 	spaces: [
 		{
