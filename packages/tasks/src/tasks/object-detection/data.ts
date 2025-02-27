@@ -51,7 +51,7 @@ const taskData: TaskDataCustom = {
 			id: "IDEA-Research/dab-detr-resnet-50",
 		},
 		{
-			description: "Fast and accurate open-source object detection model.",
+			description: "Fast and accurate object detection model.",
 			id: "PekingU/rtdetr_v2_r50vd",
 		},
 		{
