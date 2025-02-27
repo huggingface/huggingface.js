@@ -150,7 +150,7 @@ export const SKUS = {
 			},
 			"RTX 4090 Mobile": {
 				tflops: 32.98,
-				memory: [16]
+				memory: [16],
 			},
 			"RTX 4080 SUPER": {
 				tflops: 52.2,
@@ -162,7 +162,7 @@ export const SKUS = {
 			},
 			"RTX 4080 Mobile": {
 				tflops: 24.72,
-				memory: [12]
+				memory: [12],
 			},
 			"RTX 4070": {
 				tflops: 29.15,
@@ -170,7 +170,7 @@ export const SKUS = {
 			},
 			"RTX 4070 Mobile": {
 				tflops: 15.62,
-				memory: [8]
+				memory: [8],
 			},
 			"RTX 4070 Ti": {
 				tflops: 40.09,
@@ -194,7 +194,7 @@ export const SKUS = {
 			},
 			"RTX 4060 Mobile": {
 				tflops: 11.61,
-				memory: [8]
+				memory: [8],
 			},
 			"RTX 3090": {
 				tflops: 35.58,
@@ -214,7 +214,7 @@ export const SKUS = {
 			},
 			"RTX 3080 Mobile": {
 				tflops: 18.98,
-				memory: [8]
+				memory: [8],
 			},
 			"RTX 3070": {
 				tflops: 20.31,
@@ -282,7 +282,7 @@ export const SKUS = {
 			},
 			"GTX 1050 Ti": {
 				tflops: 2.1, // float32 (GPU does not support native float16)
-				memory: [4]
+				memory: [4],
 			},
 			"RTX Titan": {
 				tflops: 32.62,
