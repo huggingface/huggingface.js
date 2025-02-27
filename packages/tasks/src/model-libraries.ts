@@ -483,7 +483,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "Merlin",
 		repoUrl: "https://github.com/StanfordMIMI/Merlin",
 		filter: false,
-		countDownloads: `path_filename:"i3_resnet_clinical_longformer_best_clip_04-02-2024_23-21-36_epoch_99.pt"`,
+		countDownloads: `path_extension:"pt"`,
 	},
 	mitie: {
 		prettyLabel: "MITIE",
