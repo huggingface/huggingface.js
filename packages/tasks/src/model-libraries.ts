@@ -173,6 +173,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"adapter_config.json"`,
 	},
+	comet: {
+		prettyLabel: "COMET",
+		repoName: "COMET",
+		repoUrl: "https://github.com/Unbabel/COMET/",
+		countDownloads: `path:"hparams.yaml"`,
+	},
 	cosmos: {
 		prettyLabel: "Cosmos",
 		repoName: "Cosmos",
