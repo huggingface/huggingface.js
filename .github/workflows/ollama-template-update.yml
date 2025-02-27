@@ -81,6 +81,7 @@ jobs:
           CURRENT_DATE: ${{ steps.prepare.outputs.CURRENT_DATE }}
           NEW_BRANCH: ${{ steps.changes.outputs.NEW_BRANCH }}
         with:
+          github-token: ${{ secrets.HUGGINGFACE_JS_AUTOMATIC_PR }}
           script: |
             const { repo, owner } = context.repo;
             const currDate = process.env.CURRENT_DATE;
