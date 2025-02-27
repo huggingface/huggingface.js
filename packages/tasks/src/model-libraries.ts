@@ -478,6 +478,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"MeshAnything_350m.pth"`,
 		snippets: snippets.mesh_anything,
 	},
+	"merlin": {
+		prettyLabel: "Merlin",
+		repoName: "merlin",
+		repoUrl: "https://github.com/StanfordMIMI/Merlin",
+		filter: false,
+		countDownloads: `path_filename:"i3_resnet_clinical_longformer_best_clip_04-02-2024_23-21-36_epoch_99.pt"`,
+	},
 	mitie: {
 		prettyLabel: "MITIE",
 		repoName: "MITIE",
