@@ -28,7 +28,7 @@ let tasks: Record<string, { models: { id: string }[] }> | null = null;
  */
 const providerConfigs: Record<InferenceProvider, ProviderConfig> = {
 	"black-forest-labs": BLACK_FOREST_LABS_CONFIG,
-	"cohere": COHERE_CONFIG,
+	cohere: COHERE_CONFIG,
 	"fal-ai": FAL_AI_CONFIG,
 	"fireworks-ai": FIREWORKS_AI_CONFIG,
 	"hf-inference": HF_INFERENCE_CONFIG,
