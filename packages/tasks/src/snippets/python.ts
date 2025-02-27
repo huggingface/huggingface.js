@@ -308,6 +308,24 @@ image = Image.open(io.BytesIO(image_bytes))`,
 	];
 };
 
+export const snippetTextToVideo = (
+	model: ModelDataMinimal,
+	accessToken: string,
+	provider: SnippetInferenceProvider,
+): InferenceSnippet[] => {
+	return [
+		...(["fal-ai", "replicate"].includes(provider) ? [{
+			client: "huggingface_hub",
+			content: `\
+${snippetImportInferenceClient(accessToken, provider)}
+
+video = client.text_to_video(
+	${getModelInputSnippet(model)},
+	model="${model.id}"
+)`,
+		}] : [])];
+};
+
 export const snippetTabular = (model: ModelDataMinimal): InferenceSnippet[] => {
 	return [
 		{
@@ -412,6 +430,7 @@ export const pythonSnippets: Partial<
 	"sentence-similarity": snippetBasic,
 	"automatic-speech-recognition": snippetFile,
 	"text-to-image": snippetTextToImage,
+	"text-to-video": snippetTextToVideo,
 	"text-to-speech": snippetTextToAudio,
 	"text-to-audio": snippetTextToAudio,
 	"audio-to-audio": snippetFile,
