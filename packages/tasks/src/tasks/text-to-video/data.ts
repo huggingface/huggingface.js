@@ -95,7 +95,7 @@ const taskData: TaskDataCustom = {
 	],
 	summary:
 		"Text-to-video models can be used in any application that requires generating consistent sequence of images from text. ",
-    widgetModels: ["tencent/HunyuanVideo"],
+	widgetModels: ["tencent/HunyuanVideo"],
 	youtubeId: undefined,
 };
 
