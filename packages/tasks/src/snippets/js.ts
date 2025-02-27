@@ -43,7 +43,7 @@ const output = await client.${HFJS_METHODS[model.pipeline_tag]}({
 console.log(output);
 `,
 					},
-			  ]
+				]
 			: []),
 		{
 			client: "fetch",
@@ -270,7 +270,7 @@ query({"inputs": ${getModelInputSnippet(model)}}).then((response) => {
 	// Use image
 });`,
 					},
-			  ]
+				]
 			: []),
 	];
 };
@@ -280,9 +280,11 @@ export const snippetTextToVideo = (
 	accessToken: string,
 	provider: SnippetInferenceProvider
 ): InferenceSnippet[] => {
-	return [...(["fal-ai", "replicate"].includes(provider) ? [{
-		client: "huggingface.js",
-		content: `\
+	return ["fal-ai", "replicate"].includes(provider)
+		? [
+				{
+					client: "huggingface.js",
+					content: `\
 import { HfInference } from "@huggingface/inference";
 
 const client = new HfInference("${accessToken || `{API_TOKEN}`}");
@@ -295,7 +297,9 @@ const video = await client.textToVideo({
 });
 // Use the generated video (it's a Blob)
 `,
-	}] : [])];
+				},
+			]
+		: [];
 };
 
 export const snippetTextToAudio = (

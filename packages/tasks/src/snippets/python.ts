@@ -217,7 +217,7 @@ result = client.${HFH_INFERENCE_CLIENT_METHODS[model.pipeline_tag]}(
 print(result)
 `,
 					},
-			  ]
+				]
 			: []),
 		{
 			client: "requests",
@@ -283,7 +283,7 @@ result = fal_client.subscribe(
 print(result)
 `,
 					},
-			  ]
+				]
 			: []),
 		...(provider === "hf-inference"
 			? [
@@ -303,7 +303,7 @@ import io
 from PIL import Image
 image = Image.open(io.BytesIO(image_bytes))`,
 					},
-			  ]
+				]
 			: []),
 	];
 };
@@ -311,19 +311,22 @@ image = Image.open(io.BytesIO(image_bytes))`,
 export const snippetTextToVideo = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: SnippetInferenceProvider,
+	provider: SnippetInferenceProvider
 ): InferenceSnippet[] => {
-	return [
-		...(["fal-ai", "replicate"].includes(provider) ? [{
-			client: "huggingface_hub",
-			content: `\
+	return ["fal-ai", "replicate"].includes(provider)
+		? [
+				{
+					client: "huggingface_hub",
+					content: `\
 ${snippetImportInferenceClient(accessToken, provider)}
 
 video = client.text_to_video(
-	${getModelInputSnippet(model)},
-	model="${model.id}"
+${getModelInputSnippet(model)},
+model="${model.id}"
 )`,
-		}] : [])];
+				},
+			]
+		: [];
 };
 
 export const snippetTabular = (model: ModelDataMinimal): InferenceSnippet[] => {
