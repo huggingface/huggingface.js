@@ -43,7 +43,7 @@ const output = await client.${HFJS_METHODS[model.pipeline_tag]}({
 console.log(output);
 `,
 					},
-				]
+			  ]
 			: []),
 		{
 			client: "fetch",
@@ -270,7 +270,7 @@ query({"inputs": ${getModelInputSnippet(model)}}).then((response) => {
 	// Use image
 });`,
 					},
-				]
+			  ]
 			: []),
 	];
 };
@@ -298,7 +298,7 @@ const video = await client.textToVideo({
 // Use the generated video (it's a Blob)
 `,
 				},
-			]
+		  ]
 		: [];
 };
 

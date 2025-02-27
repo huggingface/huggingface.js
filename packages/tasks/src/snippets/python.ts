@@ -217,7 +217,7 @@ result = client.${HFH_INFERENCE_CLIENT_METHODS[model.pipeline_tag]}(
 print(result)
 `,
 					},
-				]
+			  ]
 			: []),
 		{
 			client: "requests",
@@ -283,7 +283,7 @@ result = fal_client.subscribe(
 print(result)
 `,
 					},
-				]
+			  ]
 			: []),
 		...(provider === "hf-inference"
 			? [
@@ -303,7 +303,7 @@ import io
 from PIL import Image
 image = Image.open(io.BytesIO(image_bytes))`,
 					},
-				]
+			  ]
 			: []),
 	];
 };
@@ -325,7 +325,7 @@ ${getModelInputSnippet(model)},
 model="${model.id}"
 )`,
 				},
-			]
+		  ]
 		: [];
 };
 
