@@ -28,7 +28,7 @@ const taskData: TaskDataCustom = {
 			id: "magic-leap-community/superpoint",
 		},
 		{
-			description: "A robust keypoint feature matching model.",
+			description: "A robust keypoint matching model.",
 			id: "magic-leap-community/superglue_outdoor",
 		},
 		{
