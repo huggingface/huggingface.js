@@ -478,7 +478,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"MeshAnything_350m.pth"`,
 		snippets: snippets.mesh_anything,
 	},
-	"merlin": {
+	merlin: {
 		prettyLabel: "Merlin",
 		repoName: "Merlin",
 		repoUrl: "https://github.com/StanfordMIMI/Merlin",
