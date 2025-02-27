@@ -7386,5 +7386,36 @@
         "content-type": "image/jpeg"
       }
     }
+  },
+  "ad463aeaa0a4222600cd3fe0ad34ec1bbee5f4fa9a12beeb40fac29922c7e6a5": {
+    "url": "https://api.openai.com/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Complete this sentence with words, one plus one is equal \"}],\"model\":\"gpt-3.5-turbo\"}"
+    },
+    "response": {
+      "body": "{\"id\":\"chatcmpl-B5Ybe7M1V7N9aqQtrjTGfSWGebrrb\",\"object\":\"chat.completion\",\"created\":1740664366,\"model\":\"gpt-3.5-turbo-0125\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"to two.\",\"refusal\":null},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":19,\"completion_tokens\":4,\"total_tokens\":23,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"audio_tokens\":0,\"accepted_prediction_tokens\":0,\"rejected_prediction_tokens\":0}},\"service_tier\":\"default\",\"system_fingerprint\":null}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-expose-headers": "X-Request-ID",
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "9188a84109a36f48-CDG",
+        "connection": "keep-alive",
+        "content-encoding": "br",
+        "content-type": "application/json",
+        "openai-organization": "user-b0yxwesrrz0borhxlqfmuwqf",
+        "openai-processing-ms": "249",
+        "openai-version": "2020-10-01",
+        "server": "cloudflare",
+        "set-cookie": "_cfuvid=PTKpHnf8DDZxJ.gVO5N_KdQ0qmMr8idtxlnmeGX05kw-1740664366628-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "transfer-encoding": "chunked"
+      }
+    }
   }
 }

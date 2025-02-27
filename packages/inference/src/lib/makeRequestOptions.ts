@@ -79,8 +79,9 @@ export async function makeRequestOptions(
 	const hfModel = maybeModel ?? (await loadDefaultModel(task!));
 	const model = providerConfig.clientSideRoutingOnly
 		? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		  maybeModel! // For closed-models API providers, one needs to pass the model ID directly (e.g. "gpt-3.5-turbo")
-		: await getProviderModelId({ model: hfModel, provider }, args, {
+		  removeProviderPrefix(maybeModel!, provider)
+		: // For closed-models API providers, one needs to pass the model ID directly (e.g. "gpt-3.5-turbo")
+		  await getProviderModelId({ model: hfModel, provider }, args, {
 				task,
 				chatCompletion,
 				fetch: options?.fetch,
@@ -190,4 +191,11 @@ async function loadTaskInfo(): Promise<Record<string, { models: { id: string }[]
 		throw new Error("Failed to load tasks definitions from Hugging Face Hub.");
 	}
 	return await res.json();
+}
+
+function removeProviderPrefix(model: string, provider: string): string {
+	if (!model.startsWith(`${provider}/`)) {
+		throw new Error(`Models from ${provider} must be prefixed by "${provider}/". Got "${model}".`);
+	}
+	return model.slice(provider.length + 1);
 }

@@ -1350,4 +1350,33 @@ describe.concurrent("HfInference", () => {
 		},
 		TIMEOUT
 	);
+	describe.concurrent(
+		"OpenAI API-only provider",
+		() => {
+			const client = new HfInference(env.HF_OPENAI_KEY ?? "dummy");
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "openai/gpt-3.5-turbo",
+					provider: "openai",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toContain("two");
+				}
+			});
+
+			it("model should have provider as prefix", async () => {
+				await expect(
+					client.chatCompletion({
+						model: "gpt-3.5-turbo", // must be "openai/gpt-3.5-turbo"
+						provider: "openai",
+						messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+					})
+				).rejects.toThrowError(`Models from openai must be prefixed by "openai/". Got "gpt-3.5-turbo".`);
+			});
+		},
+		TIMEOUT
+	);
 });
