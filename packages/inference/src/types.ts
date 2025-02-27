@@ -1,4 +1,4 @@
-import type { ChatCompletionInput, PipelineType } from "@huggingface/tasks";
+import type { ChatCompletionInput, FeatureExtractionInput, PipelineType } from "@huggingface/tasks";
 
 /**
  * HF model id, like "meta-llama/Llama-3.3-70B-Instruct"
@@ -30,6 +30,7 @@ export type InferenceTask = Exclude<PipelineType, "other">;
 
 export const INFERENCE_PROVIDERS = [
 	"black-forest-labs",
+	"cohere",
 	"fal-ai",
 	"fireworks-ai",
 	"hf-inference",
@@ -86,6 +87,7 @@ export type RequestArgs = BaseArgs &
 		| { text: string }
 		| { audio_url: string }
 		| ChatCompletionInput
+		| FeatureExtractionInput
 	) & {
 		parameters?: Record<string, unknown>;
 	};
