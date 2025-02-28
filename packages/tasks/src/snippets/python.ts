@@ -321,8 +321,8 @@ export const snippetTextToVideo = (
 ${snippetImportInferenceClient(accessToken, provider)}
 
 video = client.text_to_video(
-${getModelInputSnippet(model)},
-model="${model.id}"
+	${getModelInputSnippet(model)},
+	model="${model.id}"
 )`,
 				},
 		  ]
