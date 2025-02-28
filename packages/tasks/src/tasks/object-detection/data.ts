@@ -47,12 +47,12 @@ const taskData: TaskDataCustom = {
 			id: "facebook/detr-resnet-50",
 		},
 		{
-			description: "Real-time and accurate object detection model.",
-			id: "jameslahm/yolov10x",
+			description: "Accurate object detection model.",
+			id: "IDEA-Research/dab-detr-resnet-50",
 		},
 		{
-			description: "Fast and accurate object detection model trained on COCO and Object365 datasets.",
-			id: "PekingU/rtdetr_r18vd_coco_o365",
+			description: "Fast and accurate object detection model.",
+			id: "PekingU/rtdetr_v2_r50vd",
 		},
 		{
 			description: "Object detection model for low-lying objects.",
@@ -70,7 +70,7 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "A cutting-edge object detection application.",
-			id: "Ultralytics/YOLO11",
+			id: "sunsmarterjieleaf/yolov12",
 		},
 		{
 			description: "An object tracking, segmentation and inpainting application.",
