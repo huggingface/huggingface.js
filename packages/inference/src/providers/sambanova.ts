@@ -1,5 +1,3 @@
-export const SAMBANOVA_API_BASE_URL = "https://api.sambanova.ai";
-
 /**
  * See the registered mapping of HF model ID => Sambanova model ID here:
  *
@@ -16,3 +14,31 @@ export const SAMBANOVA_API_BASE_URL = "https://api.sambanova.ai";
  *
  * Thanks!
  */
+import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../types";
+
+const SAMBANOVA_API_BASE_URL = "https://api.sambanova.ai";
+
+const makeBody = (params: BodyParams): Record<string, unknown> => {
+	return {
+		...params.args,
+		...(params.chatCompletion ? { model: params.model } : undefined),
+	};
+};
+
+const makeHeaders = (params: HeaderParams): Record<string, string> => {
+	return { Authorization: `Bearer ${params.accessToken}` };
+};
+
+const makeUrl = (params: UrlParams): string => {
+	if (params.task === "text-generation" && params.chatCompletion) {
+		return `${params.baseUrl}/v1/chat/completions`;
+	}
+	return params.baseUrl;
+};
+
+export const SAMBANOVA_CONFIG: ProviderConfig = {
+	baseUrl: SAMBANOVA_API_BASE_URL,
+	makeBody,
+	makeHeaders,
+	makeUrl,
+};

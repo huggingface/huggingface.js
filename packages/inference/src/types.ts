@@ -30,6 +30,7 @@ export type InferenceTask = Exclude<PipelineType, "other">;
 
 export const INFERENCE_PROVIDERS = [
 	"black-forest-labs",
+	"cohere",
 	"fal-ai",
 	"fireworks-ai",
 	"hf-inference",
@@ -88,5 +89,30 @@ export type RequestArgs = BaseArgs &
 		| ChatCompletionInput
 	) & {
 		parameters?: Record<string, unknown>;
-		accessToken?: string;
 	};
+
+export interface ProviderConfig {
+	baseUrl: string;
+	makeBody: (params: BodyParams) => Record<string, unknown>;
+	makeHeaders: (params: HeaderParams) => Record<string, string>;
+	makeUrl: (params: UrlParams) => string;
+}
+
+export interface HeaderParams {
+	accessToken?: string;
+	authMethod: "none" | "hf-token" | "credentials-include" | "provider-key";
+}
+
+export interface UrlParams {
+	baseUrl: string;
+	model: string;
+	task?: InferenceTask;
+	chatCompletion?: boolean;
+}
+
+export interface BodyParams {
+	args: Record<string, unknown>;
+	chatCompletion?: boolean;
+	model: string;
+	task?: InferenceTask;
+}

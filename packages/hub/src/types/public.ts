@@ -176,6 +176,9 @@ export type License =
 	| "llama3"
 	| "llama3.1"
 	| "llama3.2"
+	| "llama3.3"
 	| "gemma"
+	| "apple-ascl"
+	| "apple-amlr"
 	| "unknown"
 	| "other";

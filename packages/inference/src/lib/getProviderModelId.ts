@@ -15,7 +15,7 @@ export async function getProviderModelId(
 	},
 	args: RequestArgs,
 	options: {
-		taskHint?: InferenceTask;
+		task?: InferenceTask;
 		chatCompletion?: boolean;
 		fetch?: Options["fetch"];
 	} = {}
@@ -23,11 +23,11 @@ export async function getProviderModelId(
 	if (params.provider === "hf-inference") {
 		return params.model;
 	}
-	if (!options.taskHint) {
-		throw new Error("taskHint must be specified when using a third-party provider");
+	if (!options.task) {
+		throw new Error("task must be specified when using a third-party provider");
 	}
 	const task: WidgetType =
-		options.taskHint === "text-generation" && options.chatCompletion ? "conversational" : options.taskHint;
+		options.task === "text-generation" && options.chatCompletion ? "conversational" : options.task;
 
 	// A dict called HARDCODED_MODEL_ID_MAPPING takes precedence in all cases (useful for dev purposes)
 	if (HARDCODED_MODEL_ID_MAPPING[params.provider]?.[params.model]) {
