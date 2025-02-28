@@ -41,7 +41,7 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "A robust depth estimation model.",
-			id: "apple/DepthPro",
+			id: "apple/DepthPro-hf",
 		},
 	],
 	spaces: [

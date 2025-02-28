@@ -23,7 +23,7 @@ await uploadFile({
   // Can work with native File in browsers
   file: {
     path: "pytorch_model.bin",
-    content: new Blob(...) 
+    content: new Blob(...)
   }
 });
 
@@ -39,7 +39,7 @@ await inference.chatCompletion({
   ],
   max_tokens: 512,
   temperature: 0.5,
-  provider: "sambanova", // or together, fal-ai, replicate, …
+  provider: "sambanova", // or together, fal-ai, replicate, cohere …
 });
 
 await inference.textToImage({
@@ -96,7 +96,7 @@ You can run our packages with vanilla JS, without any bundler, by using a CDN or
 
 ```html
 <script type="module">
-    import { HfInference } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@3.3.7/+esm';
+    import { HfInference } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@3.4.1/+esm';
     import { createRepo, commit, deleteRepo, listFiles } from "https://cdn.jsdelivr.net/npm/@huggingface/hub@1.0.1/+esm";
 </script>
 ```
@@ -146,12 +146,12 @@ for await (const chunk of inference.chatCompletionStream({
   console.log(chunk.choices[0].delta.content);
 }
 
-/// Using a third-party provider: 
+/// Using a third-party provider:
 await inference.chatCompletion({
   model: "meta-llama/Llama-3.1-8B-Instruct",
   messages: [{ role: "user", content: "Hello, nice to meet you!" }],
   max_tokens: 512,
-  provider: "sambanova", // or together, fal-ai, replicate, …
+  provider: "sambanova", // or together, fal-ai, replicate, cohere …
 })
 
 await inference.textToImage({
@@ -211,7 +211,7 @@ await uploadFile({
   // Can work with native File in browsers
   file: {
     path: "pytorch_model.bin",
-    content: new Blob(...) 
+    content: new Blob(...)
   }
 });
 
@@ -244,7 +244,7 @@ console.log(messages); // contains the data
 
 // or you can run the code directly, however you can't check that the code is safe to execute this way, use at your own risk.
 const messages = await agent.run("Draw a picture of a cat wearing a top hat. Then caption the picture and read it out loud.")
-console.log(messages); 
+console.log(messages);
 ```
 
 There are more features of course, check each library's README!
