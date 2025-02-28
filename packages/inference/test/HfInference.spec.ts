@@ -755,9 +755,9 @@ describe.concurrent("HfInference", () => {
 			it("custom openai - OpenAI Specs", async () => {
 				const OPENAI_KEY = env.OPENAI_KEY;
 				const hf = new HfInference(OPENAI_KEY);
-				const ep = hf.endpoint("https://api.openai.com");
-				const stream = ep.chatCompletionStream({
-					model: "gpt-3.5-turbo",
+				const stream = hf.chatCompletionStream({
+					provider: "openai",
+					model: "openai/gpt-3.5-turbo",
 					messages: [{ role: "user", content: "Complete the equation one + one =" }],
 				}) as AsyncGenerator<ChatCompletionStreamOutput>;
 				let out = "";
@@ -767,6 +767,15 @@ describe.concurrent("HfInference", () => {
 					}
 				}
 				expect(out).toContain("two");
+			});
+			it("OpenAI client side routing - model should have provider as prefix", async () => {
+				await expect(
+					new HfInference("dummy_token").chatCompletion({
+						model: "gpt-3.5-turbo", // must be "openai/gpt-3.5-turbo"
+						provider: "openai",
+						messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+					})
+				).rejects.toThrowError(`Models from openai must be prefixed by "openai/". Got "gpt-3.5-turbo".`);
 			});
 		},
 		TIMEOUT
