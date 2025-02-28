@@ -1412,7 +1412,6 @@ describe.concurrent("HfInference", () => {
 					provider: "cerebras",
 					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
 				});
-				console.log(res);
 				if (res.choices && res.choices.length > 0) {
 					const completion = res.choices[0].message?.content;
 					expect(completion).toContain("two");
@@ -1438,7 +1437,6 @@ describe.concurrent("HfInference", () => {
 				}
 
 				// Verify we got a meaningful response
-				console.log(fullResponse);
 				expect(fullResponse).toBeTruthy();
 				expect(fullResponse.length).toBeGreaterThan(0);
 			});
