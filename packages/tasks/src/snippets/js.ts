@@ -291,9 +291,9 @@ const client = new HfInference("${accessToken || `{API_TOKEN}`}");
 
 const video = await client.textToVideo({
 	model: "${model.id}",
+	provider: "${provider}",
 	inputs: ${getModelInputSnippet(model)},
 	parameters: { num_inference_steps: 5 },
-	provider: "${provider}",
 });
 // Use the generated video (it's a Blob)
 `,
