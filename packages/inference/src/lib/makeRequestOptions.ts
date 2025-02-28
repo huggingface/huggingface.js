@@ -1,5 +1,6 @@
 import { HF_HUB_URL, HF_ROUTER_URL } from "../config";
 import { BLACK_FOREST_LABS_CONFIG } from "../providers/black-forest-labs";
+import { CEREBRAS_CONFIG } from "../providers/cerebras";
 import { COHERE_CONFIG } from "../providers/cohere";
 import { FAL_AI_CONFIG } from "../providers/fal-ai";
 import { FIREWORKS_AI_CONFIG } from "../providers/fireworks-ai";
@@ -28,6 +29,7 @@ let tasks: Record<string, { models: { id: string }[] }> | null = null;
  */
 const providerConfigs: Record<InferenceProvider, ProviderConfig> = {
 	"black-forest-labs": BLACK_FOREST_LABS_CONFIG,
+	cerebras: CEREBRAS_CONFIG,
 	cohere: COHERE_CONFIG,
 	"fal-ai": FAL_AI_CONFIG,
 	"fireworks-ai": FIREWORKS_AI_CONFIG,
