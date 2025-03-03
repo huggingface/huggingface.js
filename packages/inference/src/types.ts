@@ -30,12 +30,14 @@ export type InferenceTask = Exclude<PipelineType, "other">;
 
 export const INFERENCE_PROVIDERS = [
 	"black-forest-labs",
+	"cohere",
 	"fal-ai",
 	"fireworks-ai",
 	"hf-inference",
 	"hyperbolic",
 	"nebius",
 	"novita",
+	"openai",
 	"replicate",
 	"sambanova",
 	"together",
@@ -95,6 +97,7 @@ export interface ProviderConfig {
 	makeBody: (params: BodyParams) => Record<string, unknown>;
 	makeHeaders: (params: HeaderParams) => Record<string, string>;
 	makeUrl: (params: UrlParams) => string;
+	clientSideRoutingOnly?: boolean;
 }
 
 export interface HeaderParams {

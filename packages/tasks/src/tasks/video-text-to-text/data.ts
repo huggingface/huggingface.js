@@ -46,6 +46,10 @@ const taskData: TaskDataCustom = {
 			description: "Strong video-text-to-text model with reasoning capabilities.",
 			id: "GoodiesHere/Apollo-LMMs-Apollo-7B-t32",
 		},
+		{
+			description: "Strong video-text-to-text model.",
+			id: "HuggingFaceTB/SmolVLM2-2.2B-Instruct",
+		},
 	],
 	spaces: [
 		{
@@ -55,6 +59,10 @@ const taskData: TaskDataCustom = {
 		{
 			description: "A leaderboard for various video-text-to-text models.",
 			id: "opencompass/openvlm_video_leaderboard",
+		},
+		{
+			description: "An application to generate highlights from a video.",
+			id: "HuggingFaceTB/SmolVLM2-HighlightGenerator",
 		},
 	],
 	summary:
