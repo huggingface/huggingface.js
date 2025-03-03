@@ -91,6 +91,17 @@ const TEST_CASES: {
 		languages: ["sh", "js", "py"],
 	},
 	{
+		testName: "text-to-video",
+		model: {
+			id: "tencent/HunyuanVideo",
+			pipeline_tag: "text-to-video",
+			tags: [],
+			inference: "",
+		},
+		providers: ["replicate", "fal-ai"],
+		languages: ["js", "py"],
+	},
+	{
 		testName: "text-classification",
 		model: {
 			id: "distilbert/distilbert-base-uncased-finetuned-sst-2-english",
