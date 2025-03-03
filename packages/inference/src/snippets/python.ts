@@ -1,9 +1,13 @@
-import { openAIbaseUrl, type SnippetInferenceProvider } from "../inference-providers.js";
-import type { PipelineType, WidgetType } from "../pipelines.js";
-import type { ChatCompletionInputMessage, GenerationParameters } from "../tasks/index.js";
-import { stringifyGenerationConfig, stringifyMessages } from "./common.js";
-import { getModelInputSnippet } from "./inputs.js";
-import type { InferenceSnippet, ModelDataMinimal } from "./types.js";
+import { openAIbaseUrl, type SnippetInferenceProvider } from "@huggingface/tasks";
+import type { PipelineType, WidgetType } from "@huggingface/tasks/src/pipelines.js";
+import type { ChatCompletionInputMessage, GenerationParameters } from "@huggingface/tasks/src/tasks/index.js";
+import {
+	type InferenceSnippet,
+	type ModelDataMinimal,
+	getModelInputSnippet,
+	stringifyGenerationConfig,
+	stringifyMessages,
+} from "@huggingface/tasks";
 
 const HFH_INFERENCE_CLIENT_METHODS: Partial<Record<WidgetType, string>> = {
 	"audio-classification": "audio_classification",

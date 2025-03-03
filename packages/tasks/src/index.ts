@@ -45,11 +45,15 @@ export type {
 } from "./widget-example.js";
 export { SPECIAL_TOKENS_ATTRIBUTES } from "./tokenizer-data.js";
 
-import * as snippets from "./snippets/index.js";
 export * from "./gguf.js";
 
-export { snippets };
-export type { InferenceSnippet } from "./snippets/index.js";
+export {
+	type InferenceSnippet,
+	type ModelDataMinimal,
+	stringifyGenerationConfig,
+	stringifyMessages,
+	getModelInputSnippet,
+} from "./snippets/index.js";
 
 export { SKUS, DEFAULT_MEMORY_OPTIONS } from "./hardware.js";
 export type { HardwareSpec, SkuType } from "./hardware.js";
