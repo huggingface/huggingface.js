@@ -496,7 +496,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "MedVAE",
 		repoUrl: "https://github.com/StanfordMIMI/MedVAE",
 		filter: false,
-		countDownloads: `path_extension:"yaml" OR path_extension:"ckpt"`,
+		countDownloads: `path_extension:"ckpt"`,
 	},
 	mitie: {
 		prettyLabel: "MITIE",
