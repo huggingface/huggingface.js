@@ -5,8 +5,9 @@ import { OllamaChatTemplateMapEntry } from "./types";
 
 /**
  * Skipped these models due to error:
- * - library/llama3-groq-tool-use:70b
- * - library/athene-v2:72b
+ * - library/llama3.3:70b
+ * - library/qwen2.5-coder:0.5b
+ * - library/deepscaler:1.5b
  */
 
 export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
