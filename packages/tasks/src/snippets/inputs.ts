@@ -158,7 +158,7 @@ export function getModelInputSnippet(
 					result = result.replace(/(?:(?:\r?\n|\r)\t*)|\t+/g, " ");
 				}
 				if (noQuotes) {
-					const REGEX_QUOTES = /^"([\s\S]+)"$/;
+					const REGEX_QUOTES = /^"(.+)"$/s;
 					const match = result.match(REGEX_QUOTES);
 					result = match ? match[1] : result;
 				}

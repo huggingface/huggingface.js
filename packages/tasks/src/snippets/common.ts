@@ -10,7 +10,7 @@ export function stringifyMessages(
 ): string {
 	let messagesStr = JSON.stringify(messages, null, "\t");
 	if (opts?.indent) {
-		messagesStr = messagesStr.replace(/\n/g, `\n${opts.indent}`);
+		messagesStr = messagesStr.replaceAll("\n", `\n${opts.indent}`);
 	}
 	if (!opts?.attributeKeyQuotes) {
 		messagesStr = messagesStr.replace(/"([^"]+)":/g, "$1:");

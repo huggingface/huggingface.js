@@ -351,7 +351,7 @@ for text in model.generate(
 ];
 
 export const edsnlp = (model: ModelData): string[] => {
-	const packageName = nameWithoutNamespace(model.id).replace(/-/g, "_");
+	const packageName = nameWithoutNamespace(model.id).replaceAll("-", "_");
 	return [
 		`# Load it from the Hub directly
 import edsnlp
