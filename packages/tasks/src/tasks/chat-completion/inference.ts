@@ -105,9 +105,10 @@ export interface ChatCompletionInput {
 	[property: string]: unknown;
 }
 export interface ChatCompletionInputMessage {
-	content: ChatCompletionInputMessageContent;
+	content?: ChatCompletionInputMessageContent;
 	name?: string;
 	role: string;
+	tool_calls?: ChatCompletionInputToolCall[];
 	[property: string]: unknown;
 }
 export type ChatCompletionInputMessageContent = ChatCompletionInputMessageChunk[] | string;
@@ -122,6 +123,18 @@ export interface ChatCompletionInputURL {
 	[property: string]: unknown;
 }
 export type ChatCompletionInputMessageChunkType = "text" | "image_url";
+export interface ChatCompletionInputToolCall {
+	function: ChatCompletionInputFunctionDefinition;
+	id: string;
+	type: string;
+	[property: string]: unknown;
+}
+export interface ChatCompletionInputFunctionDefinition {
+	arguments: unknown;
+	description?: string;
+	name: string;
+	[property: string]: unknown;
+}
 export interface ChatCompletionInputGrammarType {
 	type: ChatCompletionInputGrammarTypeType;
 	/**
@@ -170,12 +183,6 @@ export interface ChatCompletionInputTool {
 	type: string;
 	[property: string]: unknown;
 }
-export interface ChatCompletionInputFunctionDefinition {
-	arguments: unknown;
-	description?: string;
-	name: string;
-	[property: string]: unknown;
-}
 /**
  * Chat Completion Output.
  *
@@ -217,6 +224,7 @@ export interface ChatCompletionOutputTopLogprob {
 export interface ChatCompletionOutputMessage {
 	content?: string;
 	role: string;
+	tool_call_id?: string;
 	tool_calls?: ChatCompletionOutputToolCall[];
 	[property: string]: unknown;
 }
@@ -264,6 +272,7 @@ export interface ChatCompletionStreamOutputChoice {
 export interface ChatCompletionStreamOutputDelta {
 	content?: string;
 	role: string;
+	tool_call_id?: string;
 	tool_calls?: ChatCompletionStreamOutputDeltaToolCall;
 	[property: string]: unknown;
 }
