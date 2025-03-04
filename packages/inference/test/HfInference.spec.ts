@@ -1409,7 +1409,7 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Cerebras",
 		() => {
-			const client = new HfInference(env.HF_CEREBRAS_KEY);
+			const client = new HfInference(env.HF_CEREBRAS_KEY ?? "dummy");
 
 			HARDCODED_MODEL_ID_MAPPING["cerebras"] = {
 				"meta-llama/llama-3.1-8b-instruct": "llama3.1-8b",
