@@ -1,5 +1,6 @@
 import { HF_HUB_URL, HF_ROUTER_URL } from "../config";
 import { BLACK_FOREST_LABS_CONFIG } from "../providers/black-forest-labs";
+import { COHERE_CONFIG } from "../providers/cohere";
 import { FAL_AI_CONFIG } from "../providers/fal-ai";
 import { FIREWORKS_AI_CONFIG } from "../providers/fireworks-ai";
 import { HF_INFERENCE_CONFIG } from "../providers/hf-inference";
@@ -9,6 +10,7 @@ import { NOVITA_CONFIG } from "../providers/novita";
 import { REPLICATE_CONFIG } from "../providers/replicate";
 import { SAMBANOVA_CONFIG } from "../providers/sambanova";
 import { TOGETHER_CONFIG } from "../providers/together";
+import { OPENAI_CONFIG } from "../providers/openai";
 import type { InferenceProvider, InferenceTask, Options, ProviderConfig, RequestArgs } from "../types";
 import { isUrl } from "./isUrl";
 import { version as packageVersion, name as packageName } from "../../package.json";
@@ -27,10 +29,12 @@ let tasks: Record<string, { models: { id: string }[] }> | null = null;
  */
 const providerConfigs: Record<InferenceProvider, ProviderConfig> = {
 	"black-forest-labs": BLACK_FOREST_LABS_CONFIG,
+	cohere: COHERE_CONFIG,
 	"fal-ai": FAL_AI_CONFIG,
 	"fireworks-ai": FIREWORKS_AI_CONFIG,
 	"hf-inference": HF_INFERENCE_CONFIG,
 	hyperbolic: HYPERBOLIC_CONFIG,
+	openai: OPENAI_CONFIG,
 	nebius: NEBIUS_CONFIG,
 	novita: NOVITA_CONFIG,
 	replicate: REPLICATE_CONFIG,
@@ -70,22 +74,38 @@ export async function makeRequestOptions(
 	if (!providerConfig) {
 		throw new Error(`No provider config found for provider ${provider}`);
 	}
+	if (providerConfig.clientSideRoutingOnly && !maybeModel) {
+		throw new Error(`Provider ${provider} requires a model ID to be passed directly.`);
+	}
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const hfModel = maybeModel ?? (await loadDefaultModel(task!));
-	const model = await getProviderModelId({ model: hfModel, provider }, args, {
-		task,
-		chatCompletion,
-		fetch: options?.fetch,
-	});
+	const model = providerConfig.clientSideRoutingOnly
+		? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		  removeProviderPrefix(maybeModel!, provider)
+		: // For closed-models API providers, one needs to pass the model ID directly (e.g. "gpt-3.5-turbo")
+		  await getProviderModelId({ model: hfModel, provider }, args, {
+				task,
+				chatCompletion,
+				fetch: options?.fetch,
+		  });
 
-	/// If accessToken is passed, it should take precedence over includeCredentials
-	const authMethod = accessToken
-		? accessToken.startsWith("hf_")
-			? "hf-token"
-			: "provider-key"
-		: includeCredentials === "include"
-		  ? "credentials-include"
-		  : "none";
+	const authMethod = (() => {
+		if (providerConfig.clientSideRoutingOnly) {
+			// Closed-source providers require an accessToken (cannot be routed).
+			if (accessToken && accessToken.startsWith("hf_")) {
+				throw new Error(`Provider ${provider} is closed-source and does not support HF tokens.`);
+			}
+			return "provider-key";
+		}
+		if (accessToken) {
+			return accessToken.startsWith("hf_") ? "hf-token" : "provider-key";
+		}
+		if (includeCredentials === "include") {
+			// If accessToken is passed, it should take precedence over includeCredentials
+			return "credentials-include";
+		}
+		return "none";
+	})();
 
 	// Make URL
 	const url = endpointUrl
@@ -173,4 +193,11 @@ async function loadTaskInfo(): Promise<Record<string, { models: { id: string }[]
 		throw new Error("Failed to load tasks definitions from Hugging Face Hub.");
 	}
 	return await res.json();
+}
+
+function removeProviderPrefix(model: string, provider: string): string {
+	if (!model.startsWith(`${provider}/`)) {
+		throw new Error(`Models from ${provider} must be prefixed by "${provider}/". Got "${model}".`);
+	}
+	return model.slice(provider.length + 1);
 }

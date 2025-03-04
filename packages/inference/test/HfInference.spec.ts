@@ -755,9 +755,9 @@ describe.concurrent("HfInference", () => {
 			it("custom openai - OpenAI Specs", async () => {
 				const OPENAI_KEY = env.OPENAI_KEY;
 				const hf = new HfInference(OPENAI_KEY);
-				const ep = hf.endpoint("https://api.openai.com");
-				const stream = ep.chatCompletionStream({
-					model: "gpt-3.5-turbo",
+				const stream = hf.chatCompletionStream({
+					provider: "openai",
+					model: "openai/gpt-3.5-turbo",
 					messages: [{ role: "user", content: "Complete the equation one + one =" }],
 				}) as AsyncGenerator<ChatCompletionStreamOutput>;
 				let out = "";
@@ -767,6 +767,15 @@ describe.concurrent("HfInference", () => {
 					}
 				}
 				expect(out).toContain("two");
+			});
+			it("OpenAI client side routing - model should have provider as prefix", async () => {
+				await expect(
+					new HfInference("dummy_token").chatCompletion({
+						model: "gpt-3.5-turbo", // must be "openai/gpt-3.5-turbo"
+						provider: "openai",
+						messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+					})
+				).rejects.toThrowError(`Models from openai must be prefixed by "openai/". Got "gpt-3.5-turbo".`);
 			});
 		},
 		TIMEOUT
@@ -1346,6 +1355,53 @@ describe.concurrent("HfInference", () => {
 				);
 				expect(res).toBeTypeOf("string");
 				expect(isUrl(res)).toBeTruthy();
+			});
+		},
+		TIMEOUT
+	);
+	describe.concurrent(
+		"Cohere",
+		() => {
+			const client = new HfInference(env.HF_COHERE_KEY ?? "dummy");
+
+			HARDCODED_MODEL_ID_MAPPING["cohere"] = {
+				"CohereForAI/c4ai-command-r7b-12-2024": "command-r7b-12-2024",
+				"CohereForAI/aya-expanse-8b": "c4ai-aya-expanse-8b",
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "CohereForAI/c4ai-command-r7b-12-2024",
+					provider: "cohere",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toContain("two");
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "CohereForAI/c4ai-command-r7b-12-2024",
+					provider: "cohere",
+					messages: [{ role: "user", content: "Say 'this is a test'" }],
+					stream: true,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
 			});
 		},
 		TIMEOUT
