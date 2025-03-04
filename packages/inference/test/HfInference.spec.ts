@@ -787,7 +787,7 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Fal AI",
 		() => {
-			const client = new HfInference(env.HF_FAL_KEY);
+			const client = new HfInference(env.HF_FAL_KEY ?? "dummy");
 
 			it(`textToImage - black-forest-labs/FLUX.1-schnell`, async () => {
 				const res = await client.textToImage({
@@ -818,7 +818,7 @@ describe.concurrent("HfInference", () => {
 						seed: 176,
 					},
 					provider: "fal-ai",
-					accessToken: env.HF_FAL_KEY,
+					accessToken: env.HF_FAL_KEY ?? "dummy",
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
@@ -834,7 +834,7 @@ describe.concurrent("HfInference", () => {
 						resolution: "480p",
 					},
 					provider: "fal-ai",
-					accessToken: env.HF_FAL_KEY,
+					accessToken: env.HF_FAL_KEY ?? "dummy",
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
@@ -848,7 +848,7 @@ describe.concurrent("HfInference", () => {
 						num_frames: 2,
 					},
 					provider: "fal-ai",
-					accessToken: env.HF_FAL_KEY,
+					accessToken: env.HF_FAL_KEY ?? "dummy",
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
@@ -862,7 +862,7 @@ describe.concurrent("HfInference", () => {
 						num_inference_steps: 2,
 					},
 					provider: "fal-ai",
-					accessToken: env.HF_FAL_KEY,
+					accessToken: env.HF_FAL_KEY ?? "dummy",
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
@@ -873,7 +873,7 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Replicate",
 		() => {
-			const client = new HfInference(env.HF_REPLICATE_KEY);
+			const client = new HfInference(env.HF_REPLICATE_KEY ?? "dummy");
 
 			it("textToImage canonical - black-forest-labs/FLUX.1-schnell", async () => {
 				const res = await client.textToImage({
@@ -970,7 +970,7 @@ describe.concurrent("HfInference", () => {
 
 			it("textToVideo Mochi", async () => {
 				const res = await textToVideo({
-					accessToken: env.HF_REPLICATE_KEY,
+					accessToken: env.HF_REPLICATE_KEY ?? "dummy",
 					model: "genmo/mochi-1-preview",
 					provider: "replicate",
 					inputs: "A running dog",
@@ -989,7 +989,7 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"SambaNova",
 		() => {
-			const client = new HfInference(env.HF_SAMBANOVA_KEY);
+			const client = new HfInference(env.HF_SAMBANOVA_KEY ?? "dummy");
 
 			it("chatCompletion", async () => {
 				const res = await client.chatCompletion({
@@ -1023,7 +1023,7 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Together",
 		() => {
-			const client = new HfInference(env.HF_TOGETHER_KEY);
+			const client = new HfInference(env.HF_TOGETHER_KEY ?? "dummy");
 
 			it("chatCompletion", async () => {
 				const res = await client.chatCompletion({
@@ -1078,7 +1078,7 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Nebius",
 		() => {
-			const client = new HfInference(env.HF_NEBIUS_KEY);
+			const client = new HfInference(env.HF_NEBIUS_KEY ?? "dummy");
 
 			HARDCODED_MODEL_ID_MAPPING.nebius = {
 				"meta-llama/Llama-3.1-8B-Instruct": "meta-llama/Meta-Llama-3.1-8B-Instruct",
@@ -1132,7 +1132,7 @@ describe.concurrent("HfInference", () => {
 					model: "black-forest-labs/Flux.1-dev",
 					provider: "together",
 					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
-					accessToken: env.HF_TOGETHER_KEY,
+					accessToken: env.HF_TOGETHER_KEY ?? "dummy",
 				})
 			).rejects.toThrowError(
 				"Model black-forest-labs/Flux.1-dev is not supported for task conversational and provider together"
@@ -1143,7 +1143,7 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Fireworks",
 		() => {
-			const client = new HfInference(env.HF_FIREWORKS_KEY);
+			const client = new HfInference(env.HF_FIREWORKS_KEY ?? "dummy");
 
 			HARDCODED_MODEL_ID_MAPPING["fireworks-ai"] = {
 				"deepseek-ai/DeepSeek-R1": "accounts/fireworks/models/deepseek-r1",
@@ -1199,7 +1199,7 @@ describe.concurrent("HfInference", () => {
 
 			it("chatCompletion - hyperbolic", async () => {
 				const res = await chatCompletion({
-					accessToken: env.HF_HYPERBOLIC_KEY,
+					accessToken: env.HF_HYPERBOLIC_KEY ?? "dummy",
 					model: "meta-llama/Llama-3.2-3B-Instruct",
 					provider: "hyperbolic",
 					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
@@ -1220,7 +1220,7 @@ describe.concurrent("HfInference", () => {
 
 			it("chatCompletion stream", async () => {
 				const stream = chatCompletionStream({
-					accessToken: env.HF_HYPERBOLIC_KEY,
+					accessToken: env.HF_HYPERBOLIC_KEY ?? "dummy",
 					model: "meta-llama/Llama-3.3-70B-Instruct",
 					provider: "hyperbolic",
 					messages: [{ role: "user", content: "Complete the equation 1 + 1 = , just the answer" }],
@@ -1236,7 +1236,7 @@ describe.concurrent("HfInference", () => {
 
 			it("textToImage", async () => {
 				const res = await textToImage({
-					accessToken: env.HF_HYPERBOLIC_KEY,
+					accessToken: env.HF_HYPERBOLIC_KEY ?? "dummy",
 					model: "stabilityai/stable-diffusion-2",
 					provider: "hyperbolic",
 					inputs: "award winning high resolution photo of a giant tortoise",
@@ -1250,7 +1250,7 @@ describe.concurrent("HfInference", () => {
 
 			it("textGeneration", async () => {
 				const res = await textGeneration({
-					accessToken: env.HF_HYPERBOLIC_KEY,
+					accessToken: env.HF_HYPERBOLIC_KEY ?? "dummy",
 					model: "meta-llama/Llama-3.1-405B",
 					provider: "hyperbolic",
 					inputs: "Paris is",
@@ -1269,7 +1269,7 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Novita",
 		() => {
-			const client = new HfInference(env.HF_NOVITA_KEY);
+			const client = new HfInference(env.HF_NOVITA_KEY ?? "dummy");
 
 			HARDCODED_MODEL_ID_MAPPING["novita"] = {
 				"meta-llama/llama-3.1-8b-instruct": "meta-llama/llama-3.1-8b-instruct",
@@ -1325,7 +1325,7 @@ describe.concurrent("HfInference", () => {
 				const res = await textToImage({
 					model: "black-forest-labs/FLUX.1-dev",
 					provider: "black-forest-labs",
-					accessToken: env.HF_BLACK_FOREST_LABS_KEY,
+					accessToken: env.HF_BLACK_FOREST_LABS_KEY ?? "dummy",
 					inputs: "A raccoon driving a truck",
 					parameters: {
 						height: 256,
@@ -1342,7 +1342,7 @@ describe.concurrent("HfInference", () => {
 					{
 						model: "black-forest-labs/FLUX.1-dev",
 						provider: "black-forest-labs",
-						accessToken: env.HF_BLACK_FOREST_LABS_KEY,
+						accessToken: env.HF_BLACK_FOREST_LABS_KEY ?? "dummy",
 						inputs: "A raccoon driving a truck",
 						parameters: {
 							height: 256,
@@ -1362,7 +1362,7 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Cohere",
 		() => {
-			const client = new HfInference(env.HF_COHERE_KEY);
+			const client = new HfInference(env.HF_COHERE_KEY ?? "dummy");
 
 			HARDCODED_MODEL_ID_MAPPING["cohere"] = {
 				"CohereForAI/c4ai-command-r7b-12-2024": "command-r7b-12-2024",
