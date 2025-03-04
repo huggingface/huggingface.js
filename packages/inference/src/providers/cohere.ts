@@ -18,7 +18,6 @@ import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../typ
 
 const COHERE_API_BASE_URL = "https://api.cohere.com";
 
-
 const makeBody = (params: BodyParams): Record<string, unknown> => {
 	return {
 		...params.args,
