@@ -26,7 +26,7 @@ const makeBody = (params: BodyParams): Record<string, unknown> => {
 };
 
 const makeHeaders = (params: HeaderParams): Record<string, string> => {
-	return { Authorization: `Bearer ${params.accessToken}` };
+	return { Authorization: `Bearer ${params.accessToken}`, Prefer: "wait" };
 };
 
 const makeUrl = (params: UrlParams): string => {
