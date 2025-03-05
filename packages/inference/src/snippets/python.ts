@@ -39,14 +39,23 @@ const HFH_INFERENCE_CLIENT_METHODS: Partial<Record<WidgetType, string>> = {
 	"tabular-regression": "tabular_regression",
 };
 
-const snippetImportInferenceClient = (accessToken: string, provider: SnippetInferenceProvider): string =>
-	`\
+const snippetImportInferenceClient = (
+	accessToken: string,
+	provider: SnippetInferenceProvider,
+	model?: string
+): string => {
+	let snippet = `\
 from huggingface_hub import InferenceClient
 
 client = InferenceClient(
-	provider="${provider}",
-	api_key="${accessToken || "{API_TOKEN}"}"
-)`;
+    provider="${provider}",
+    api_key="${accessToken || "{API_TOKEN}"}",`;
+	if (model) {
+		snippet += `\n    model="${model}",`;
+	}
+	snippet += "\n)";
+	return snippet;
+};
 
 export const snippetConversational = (
 	model: ModelDataMinimal,
@@ -180,7 +189,8 @@ export const snippetZeroShotImageClassification = (model: ModelDataMinimal): Inf
 	return [
 		{
 			client: "requests",
-			content: `\
+			content: `import base64
+
 def query(data):
 	with open(data["image_path"], "rb") as f:
 		img = f.read()
@@ -210,10 +220,9 @@ export const snippetBasic = (
 					{
 						client: "huggingface_hub",
 						content: `\
-${snippetImportInferenceClient(accessToken, provider)}
+${snippetImportInferenceClient(accessToken, provider, model.id)}
 
 result = client.${HFH_INFERENCE_CLIENT_METHODS[model.pipeline_tag]}(
-	model="${model.id}",
 	inputs=${getModelInputSnippet(model)},
 	provider="${provider}",
 )
@@ -263,12 +272,11 @@ export const snippetTextToImage = (
 		{
 			client: "huggingface_hub",
 			content: `\
-${snippetImportInferenceClient(accessToken, provider)}
+${snippetImportInferenceClient(accessToken, provider, model.id)}
 
 # output is a PIL.Image object
 image = client.text_to_image(
-	${getModelInputSnippet(model)},
-	model="${model.id}"
+	${getModelInputSnippet(model)}
 )`,
 		},
 		...(provider === "fal-ai"
@@ -322,11 +330,10 @@ export const snippetTextToVideo = (
 				{
 					client: "huggingface_hub",
 					content: `\
-${snippetImportInferenceClient(accessToken, provider)}
+${snippetImportInferenceClient(accessToken, provider, model.id)}
 
 video = client.text_to_video(
-	${getModelInputSnippet(model)},
-	model="${model.id}"
+	${getModelInputSnippet(model)}
 )`,
 				},
 		  ]
@@ -374,8 +381,7 @@ Audio(audio_bytes)`,
 		return [
 			{
 				client: "requests",
-				content: `\
-def query(payload):
+				content: `def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.json()
 	
@@ -398,8 +404,8 @@ const snippetAutomaticSpeechRecognition = (
 	return [
 		{
 			client: "huggingface_hub",
-			content: `${snippetImportInferenceClient(accessToken, provider)}
-output = client.automatic_speech_recognition(${getModelInputSnippet(model)}, model="${model.id}")`,
+			content: `${snippetImportInferenceClient(accessToken, provider, model.id)}
+output = client.automatic_speech_recognition(${getModelInputSnippet(model)})`,
 		},
 		snippetFile(model)[0],
 	];
@@ -416,21 +422,23 @@ const snippetDocumentQuestionAnswering = (
 	return [
 		{
 			client: "huggingface_hub",
-			content: `${snippetImportInferenceClient(accessToken, provider)}
+			content: `${snippetImportInferenceClient(accessToken, provider, model.id)}
 output = client.document_question_answering(
     "${inputsAsObj.image}",
 	question="${inputsAsObj.question}",
-    model="${model.id}",
 )`,
 		},
 		{
 			client: "requests",
-			content: `def query(payload):
+			content: `import base64
+
+def query(payload):
 	with open(payload["image"], "rb") as f:
 		img = f.read()
 		payload["image"] = base64.b64encode(img).decode("utf-8")
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.json()
+
 output = query({
     "inputs": ${inputsAsStr},
 })`,

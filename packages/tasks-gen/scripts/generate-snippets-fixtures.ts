@@ -40,6 +40,7 @@ const TEST_CASES: {
 			inference: "",
 		},
 		languages: ["py"],
+		providers: ["hf-inference"],
 	},
 	{
 		testName: "conversational-llm-non-stream",
@@ -98,6 +99,7 @@ const TEST_CASES: {
 			inference: "",
 		},
 		languages: ["py"],
+		providers: ["hf-inference"],
 	},
 	{
 		testName: "image-to-image",
@@ -108,6 +110,7 @@ const TEST_CASES: {
 			inference: "",
 		},
 		languages: ["py"],
+		providers: ["hf-inference"],
 	},
 	{
 		testName: "text-to-image",

@@ -1,8 +1,9 @@
-import base64
 import requests
 
-API_URL = "https://api-inference.huggingface.co/models/impira/layoutlm-invoices"
+API_URL = "https://router.huggingface.co/hf-inference/v1"
 headers = {"Authorization": "Bearer api_token"}
+
+import base64
 
 def query(payload):
 	with open(payload["image"], "rb") as f:
