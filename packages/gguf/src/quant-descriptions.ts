@@ -131,6 +131,7 @@ const calcBPW = (blockSize: number, typeSize: number) => {
 	return (typeSize * 8) / blockSize;
 };
 
+// copied from https://github.com/ggml-org/llama.cpp/tree/master/gguf-py/gguf/constants.py
 // map quantization type to element size in bits per weight (example: Q4_K -> 4.5 bpw)
 export const GGML_QUANT_SIZES = {
 	[GGMLQuantizationType.F32]: calcBPW(1, 4),

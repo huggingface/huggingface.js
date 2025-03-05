@@ -78,28 +78,32 @@ async function main() {
 
 	console.log();
 	console.log(`* Memory usage estimation (with context length of ${nCtx} tokens)`);
-	const kvUsage = calcMemoryUsage(metadata as GGUFParseOutput<{ strict: false }>["metadata"], nCtx);
-	let modelWeightInBytes = 0;
-	for (const tensorInfo of tensorInfos) {
-		const nElem = Number(tensorInfo.shape.reduce((a, b) => a * b, 1n));
-		const tensorSizeInBytes = nElem * (GGML_QUANT_SIZES[tensorInfo.dtype] / 8);
-		modelWeightInBytes += tensorSizeInBytes;
+	try {
+		const kvUsage = calcMemoryUsage(metadata as GGUFParseOutput<{ strict: false }>["metadata"], nCtx);
+		let modelWeightInBytes = 0;
+		for (const tensorInfo of tensorInfos) {
+			const nElem = Number(tensorInfo.shape.reduce((a, b) => a * b, 1n));
+			const tensorSizeInBytes = nElem * (GGML_QUANT_SIZES[tensorInfo.dtype] / 8);
+			modelWeightInBytes += tensorSizeInBytes;
+		}
+		const overhead =
+			calcMemoryUsage(metadata as GGUFParseOutput<{ strict: false }>["metadata"], 256).totalBytes +
+			modelWeightInBytes * 0.05;
+		const totalMemoryUsage = kvUsage.totalBytes + overhead + modelWeightInBytes;
+		printTable(
+			[{ name: "Item" }, { name: "Memory usage", alignRight: true }],
+			[
+				["K cache", (kvUsage.totalBytesK / 1e9).toFixed(2) + " GB"],
+				["V cache", (kvUsage.totalBytesV / 1e9).toFixed(2) + " GB"],
+				["Weight", (modelWeightInBytes / 1e9).toFixed(2) + " GB"],
+				["Overhead", (overhead / 1e9).toFixed(2) + " GB"],
+				["", "---"],
+				["TOTAL", (totalMemoryUsage / 1e9).toFixed(2) + " GB"],
+			]
+		);
+	} catch (e) {
+		console.error(`Error: ${(e as Error).message}`);
 	}
-	const overhead =
-		calcMemoryUsage(metadata as GGUFParseOutput<{ strict: false }>["metadata"], 256).totalBytes +
-		modelWeightInBytes * 0.05;
-	const totalMemoryUsage = kvUsage.totalBytes + overhead + modelWeightInBytes;
-	printTable(
-		[{ name: "Item" }, { name: "Memory usage", alignRight: true }],
-		[
-			["K cache", (kvUsage.totalBytesK / 1e9).toFixed(2) + " GB"],
-			["V cache", (kvUsage.totalBytesV / 1e9).toFixed(2) + " GB"],
-			["Weight", (modelWeightInBytes / 1e9).toFixed(2) + " GB"],
-			["Overhead", (overhead / 1e9).toFixed(2) + " GB"],
-			["", "---"],
-			["TOTAL", (totalMemoryUsage / 1e9).toFixed(2) + " GB"],
-		]
-	);
 
 	if (showTensors) {
 		console.log();
@@ -145,6 +149,10 @@ function calcMemoryUsage(
 	const n_embd_head_v = (metadata[`${arch}.attention.value_length`] as number) ?? n_embd / n_head;
 	const n_head_kv = (metadata[`${arch}.attention.head_count_kv`] as number[] | number) ?? [];
 	const n_layer = (metadata[`${arch}.block_count`] as number) ?? 0;
+
+	if (arch.startsWith("mamba") || arch.startsWith("rwkv")) {
+		throw new Error(`Memory usage estimation for arch "${arch}" is not supported`);
+	}
 
 	const n_head_kv_arr = Array(n_layer).fill(n_head);
 	if (Array.isArray(n_head_kv)) {
