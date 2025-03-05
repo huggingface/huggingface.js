@@ -390,25 +390,38 @@ Audio(audio, rate=sampling_rate)`,
 	}
 };
 
-export const snippetDocumentQuestionAnswering = (model: ModelDataMinimal): InferenceSnippet[] => {
+const snippetDocumentQuestionAnswering = (
+	model: ModelDataMinimal,
+	accessToken: string,
+	provider: SnippetInferenceProvider
+): InferenceSnippet[] => {
+	const inputsAsStr = getModelInputSnippet(model) as string;
+	const inputsAsObj = JSON.parse(inputsAsStr);
+
 	return [
 		{
+			client: "huggingface_hub",
+			content: `${snippetImportInferenceClient(accessToken, provider)}
+output = client.document_question_answering(
+    "${inputsAsObj.image}",
+	question="${inputsAsObj.question}",
+    model="${model.id}",
+)`,
+		},
+		{
 			client: "requests",
-			content: `\
-def query(payload):
+			content: `def query(payload):
 	with open(payload["image"], "rb") as f:
 		img = f.read()
-		payload["image"] = base64.b64encode(img).decode("utf-8")  
+		payload["image"] = base64.b64encode(img).decode("utf-8")
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.json()
-
 output = query({
-    "inputs": ${getModelInputSnippet(model)},
+    "inputs": ${inputsAsStr},
 })`,
 		},
 	];
 };
-
 export const pythonSnippets: Partial<
 	Record<
 		PipelineType,
