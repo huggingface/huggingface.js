@@ -3,7 +3,7 @@ on:
   # push: # for debugging
   workflow_dispatch:
   schedule:
-    - cron: '0 7 * * 1'  # every monday at 7am, so I'll review it after having a 🥐
+    - cron: "0 7 * * 1" # every monday at 7am, so I'll review it after having a 🥐
 
 permissions:
   pull-requests: write # for creating PR
@@ -81,6 +81,7 @@ jobs:
           CURRENT_DATE: ${{ steps.prepare.outputs.CURRENT_DATE }}
           NEW_BRANCH: ${{ steps.changes.outputs.NEW_BRANCH }}
         with:
+          github-token: ${{ secrets.HUGGINGFACE_JS_AUTOMATIC_PR }}
           script: |
             const { repo, owner } = context.repo;
             const currDate = process.env.CURRENT_DATE;

@@ -1,6 +1,8 @@
 /// This list is for illustration purposes only.
 /// in the `tasks` sub-package, we do not need actual strong typing of the inference providers.
 const INFERENCE_PROVIDERS = [
+	"cerebras",
+	"cohere",
 	"fal-ai",
 	"fireworks-ai",
 	"hf-inference",

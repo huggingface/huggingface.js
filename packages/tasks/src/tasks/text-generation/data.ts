@@ -76,7 +76,7 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "A very powerful model with reasoning capabilities.",
-			id: "PowerInfer/SmallThinker-3B-Preview",
+			id: "simplescaling/s1.1-32B",
 		},
 		{
 			description: "Strong conversational model that supports very long instructions.",
