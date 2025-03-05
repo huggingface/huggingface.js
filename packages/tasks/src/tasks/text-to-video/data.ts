@@ -99,7 +99,7 @@ const taskData: TaskDataCustom = {
 	],
 	summary:
 		"Text-to-video models can be used in any application that requires generating consistent sequence of images from text. ",
-	widgetModels: [],
+	widgetModels: ["Wan-AI/Wan2.1-T2V-14B"],
 	youtubeId: undefined,
 };
 

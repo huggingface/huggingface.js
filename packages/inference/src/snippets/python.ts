@@ -1,9 +1,13 @@
-import { openAIbaseUrl, type SnippetInferenceProvider } from "../inference-providers.js";
-import type { PipelineType, WidgetType } from "../pipelines.js";
-import type { ChatCompletionInputMessage, GenerationParameters } from "../tasks/index.js";
-import { stringifyGenerationConfig, stringifyMessages } from "./common.js";
-import { getModelInputSnippet } from "./inputs.js";
-import type { InferenceSnippet, ModelDataMinimal } from "./types.js";
+import { openAIbaseUrl, type SnippetInferenceProvider } from "@huggingface/tasks";
+import type { PipelineType, WidgetType } from "@huggingface/tasks/src/pipelines.js";
+import type { ChatCompletionInputMessage, GenerationParameters } from "@huggingface/tasks/src/tasks/index.js";
+import {
+	type InferenceSnippet,
+	type ModelDataMinimal,
+	getModelInputSnippet,
+	stringifyGenerationConfig,
+	stringifyMessages,
+} from "@huggingface/tasks";
 
 const HFH_INFERENCE_CLIENT_METHODS: Partial<Record<WidgetType, string>> = {
 	"audio-classification": "audio_classification",
@@ -308,6 +312,27 @@ image = Image.open(io.BytesIO(image_bytes))`,
 	];
 };
 
+export const snippetTextToVideo = (
+	model: ModelDataMinimal,
+	accessToken: string,
+	provider: SnippetInferenceProvider
+): InferenceSnippet[] => {
+	return ["fal-ai", "replicate"].includes(provider)
+		? [
+				{
+					client: "huggingface_hub",
+					content: `\
+${snippetImportInferenceClient(accessToken, provider)}
+
+video = client.text_to_video(
+	${getModelInputSnippet(model)},
+	model="${model.id}"
+)`,
+				},
+		  ]
+		: [];
+};
+
 export const snippetTabular = (model: ModelDataMinimal): InferenceSnippet[] => {
 	return [
 		{
@@ -412,6 +437,7 @@ export const pythonSnippets: Partial<
 	"sentence-similarity": snippetBasic,
 	"automatic-speech-recognition": snippetFile,
 	"text-to-image": snippetTextToImage,
+	"text-to-video": snippetTextToVideo,
 	"text-to-speech": snippetTextToAudio,
 	"text-to-audio": snippetTextToAudio,
 	"audio-to-audio": snippetFile,

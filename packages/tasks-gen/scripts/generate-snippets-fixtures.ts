@@ -19,14 +19,14 @@ import { existsSync as pathExists } from "node:fs";
 import * as fs from "node:fs/promises";
 import * as path from "node:path/posix";
 
-import type { SnippetInferenceProvider, InferenceSnippet } from "@huggingface/tasks";
-import { snippets } from "@huggingface/tasks";
+import { snippets } from "@huggingface/inference";
+import type { SnippetInferenceProvider, InferenceSnippet, ModelDataMinimal } from "@huggingface/tasks";
 
 type LANGUAGE = "sh" | "js" | "py";
 
 const TEST_CASES: {
 	testName: string;
-	model: snippets.ModelDataMinimal;
+	model: ModelDataMinimal;
 	languages: LANGUAGE[];
 	providers: SnippetInferenceProvider[];
 	opts?: Record<string, unknown>;
@@ -89,6 +89,17 @@ const TEST_CASES: {
 		},
 		providers: ["hf-inference", "fal-ai"],
 		languages: ["sh", "js", "py"],
+	},
+	{
+		testName: "text-to-video",
+		model: {
+			id: "tencent/HunyuanVideo",
+			pipeline_tag: "text-to-video",
+			tags: [],
+			inference: "",
+		},
+		providers: ["replicate", "fal-ai"],
+		languages: ["js", "py"],
 	},
 	{
 		testName: "text-classification",

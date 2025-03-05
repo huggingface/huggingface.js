@@ -191,9 +191,15 @@ async function vcr(
 				statusText: response.statusText,
 				headers: Object.fromEntries(
 					// Remove varying headers as much as possible
-					[...response.headers.entries()].filter(
-						([key]) => key !== "date" && key !== "content-length" && !key.startsWith("x-") && key !== "via"
-					)
+					(() => {
+						const entries: [string, string][] = [];
+						response.headers.forEach((value, key) => {
+							if (key !== "date" && key !== "content-length" && !key.startsWith("x-") && key !== "via") {
+								entries.push([key, value]);
+							}
+						});
+						return entries;
+					})()
 				),
 			},
 		};
