@@ -56,13 +56,15 @@ export async function makeRequestOptions(
 		/** In most cases (unless we pass a endpointUrl) we know the task */
 		task?: InferenceTask;
 		chatCompletion?: boolean;
+		/* Used internally to generate inference snippets (in which case model mapping is done separately) */
+		__skipModelIdResolution?: boolean;
 	}
 ): Promise<{ url: string; info: RequestInit }> {
 	const { accessToken, endpointUrl, provider: maybeProvider, model: maybeModel, ...remainingArgs } = args;
 	const provider = maybeProvider ?? "hf-inference";
 	const providerConfig = providerConfigs[provider];
 
-	const { includeCredentials, task, chatCompletion, signal } = options ?? {};
+	const { includeCredentials, task, chatCompletion, signal, __skipModelIdResolution } = options ?? {};
 
 	if (endpointUrl && provider !== "hf-inference") {
 		throw new Error(`Cannot use endpointUrl with a third-party provider.`);
@@ -81,15 +83,17 @@ export async function makeRequestOptions(
 	}
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const hfModel = maybeModel ?? (await loadDefaultModel(task!));
-	const model = providerConfig.clientSideRoutingOnly
-		? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		  removeProviderPrefix(maybeModel!, provider)
-		: // For closed-models API providers, one needs to pass the model ID directly (e.g. "gpt-3.5-turbo")
-		  await getProviderModelId({ model: hfModel, provider }, args, {
-				task,
-				chatCompletion,
-				fetch: options?.fetch,
-		  });
+	const model = __skipModelIdResolution
+		? hfModel
+		: providerConfig.clientSideRoutingOnly
+		  ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		    removeProviderPrefix(maybeModel!, provider)
+		  : // For closed-models API providers, one needs to pass the model ID directly (e.g. "gpt-3.5-turbo")
+		    await getProviderModelId({ model: hfModel, provider }, args, {
+					task,
+					chatCompletion,
+					fetch: options?.fetch,
+		    });
 
 	const authMethod = (() => {
 		if (providerConfig.clientSideRoutingOnly) {

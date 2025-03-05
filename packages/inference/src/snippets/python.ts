@@ -1,13 +1,15 @@
-import { openAIbaseUrl, type SnippetInferenceProvider } from "@huggingface/tasks";
 import type { PipelineType, WidgetType } from "@huggingface/tasks/src/pipelines.js";
 import type { ChatCompletionInputMessage, GenerationParameters } from "@huggingface/tasks/src/tasks/index.js";
 import {
+	openAIbaseUrl,
 	type InferenceSnippet,
 	type ModelDataMinimal,
 	getModelInputSnippet,
 	stringifyGenerationConfig,
 	stringifyMessages,
 } from "@huggingface/tasks";
+import { makeRequestOptions } from "../lib/makeRequestOptions";
+import type { InferenceProvider } from "../types";
 
 const HFH_INFERENCE_CLIENT_METHODS: Partial<Record<WidgetType, string>> = {
 	"audio-classification": "audio_classification",
@@ -39,7 +41,7 @@ const HFH_INFERENCE_CLIENT_METHODS: Partial<Record<WidgetType, string>> = {
 	"tabular-regression": "tabular_regression",
 };
 
-const snippetImportInferenceClient = (accessToken: string, provider: SnippetInferenceProvider): string =>
+const snippetImportInferenceClient = (accessToken: string, provider: InferenceProvider): string =>
 	`\
 from huggingface_hub import InferenceClient
 
@@ -51,7 +53,7 @@ client = InferenceClient(
 const snippetConversational = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: SnippetInferenceProvider,
+	provider: InferenceProvider,
 	providerModelId?: string,
 	opts?: {
 		streaming?: boolean;
@@ -75,6 +77,20 @@ const snippetConversational = (
 		indent: "\n\t",
 		attributeValueConnector: "=",
 	});
+
+	makeRequestOptions(
+		{
+			messages,
+			model: providerModelId,
+			accessToken,
+			provider,
+		},
+		{
+			task: "text-generation",
+			chatCompletion: true,
+			__skipModelIdResolution: true,
+		}
+	).then((res) => console.log(res));
 
 	if (streaming) {
 		return [
@@ -165,8 +181,8 @@ const snippetZeroShotClassification = (model: ModelDataMinimal): InferenceSnippe
 			client: "requests",
 			content: `\
 def query(payload):
-	response = requests.post(API_URL, headers=headers, json=payload)
-	return response.json()
+    response = requests.post(API_URL, headers=headers, json=payload)
+    return response.json()
 
 output = query({
     "inputs": ${getModelInputSnippet(model)},
@@ -201,7 +217,7 @@ output = query({
 const snippetBasic = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: SnippetInferenceProvider
+	provider: InferenceProvider
 ): InferenceSnippet[] => {
 	return [
 		...(model.pipeline_tag && model.pipeline_tag in HFH_INFERENCE_CLIENT_METHODS
@@ -254,7 +270,7 @@ output = query(${getModelInputSnippet(model)})`,
 const snippetTextToImage = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: SnippetInferenceProvider,
+	provider: InferenceProvider,
 	providerModelId?: string
 ): InferenceSnippet[] => {
 	return [
@@ -313,7 +329,7 @@ image = Image.open(io.BytesIO(image_bytes))`,
 const snippetTextToVideo = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: SnippetInferenceProvider
+	provider: InferenceProvider
 ): InferenceSnippet[] => {
 	return ["fal-ai", "replicate"].includes(provider)
 		? [
@@ -390,7 +406,7 @@ Audio(audio, rate=sampling_rate)`,
 const snippetAutomaticSpeechRecognition = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: SnippetInferenceProvider
+	provider: InferenceProvider
 ): InferenceSnippet[] => {
 	return [
 		{
@@ -405,7 +421,7 @@ output = client.automatic_speech_recognition(${getModelInputSnippet(model)}, mod
 const snippetDocumentQuestionAnswering = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: SnippetInferenceProvider
+	provider: InferenceProvider
 ): InferenceSnippet[] => {
 	const inputsAsStr = getModelInputSnippet(model) as string;
 	const inputsAsObj = JSON.parse(inputsAsStr);
@@ -439,7 +455,7 @@ output = query({
 const snippetImageToImage = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: SnippetInferenceProvider
+	provider: InferenceProvider
 ): InferenceSnippet[] => {
 	const inputsAsStr = getModelInputSnippet(model) as string;
 	const inputsAsObj = JSON.parse(inputsAsStr);
@@ -483,7 +499,7 @@ const pythonSnippets: Partial<
 		(
 			model: ModelDataMinimal,
 			accessToken: string,
-			provider: SnippetInferenceProvider,
+			provider: InferenceProvider,
 			providerModelId?: string,
 			opts?: Record<string, unknown>
 		) => InferenceSnippet[]
@@ -524,7 +540,7 @@ const pythonSnippets: Partial<
 export function getPythonInferenceSnippet(
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: SnippetInferenceProvider,
+	provider: InferenceProvider,
 	providerModelId?: string,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
