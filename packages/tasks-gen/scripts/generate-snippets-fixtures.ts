@@ -139,7 +139,7 @@ function getFixtureFolder(testName: string): string {
 }
 
 function generateInferenceSnippet(
-	model: snippets.ModelDataMinimal,
+	model: ModelDataMinimal,
 	language: LANGUAGE,
 	provider: SnippetInferenceProvider,
 	opts?: Record<string, unknown>
