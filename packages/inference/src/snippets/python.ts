@@ -87,7 +87,7 @@ messages = ${messagesStr}
 
 stream = client.chat.completions.create(
 	model="${model.id}", 
-	messages=messages, 
+	messages=messages,
 	${configStr}
 	stream=True,
 )
