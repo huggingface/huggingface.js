@@ -96,6 +96,8 @@ const inputsAudioClassification = () => `"sample1.flac"`;
 
 const inputsTextToImage = () => `"Astronaut riding a horse"`;
 
+const inputsTextToVideo = () => `"A young man walking on the street"`;
+
 const inputsTextToSpeech = () => `"The answer to the universe is 42"`;
 
 const inputsTextToAudio = () => `"liquid drum and bass, atmospheric synths, airy sounds"`;
@@ -130,6 +132,7 @@ const modelInputSnippets: {
 	"text-generation": inputsTextGeneration,
 	"image-text-to-text": inputsTextGeneration,
 	"text-to-image": inputsTextToImage,
+	"text-to-video": inputsTextToVideo,
 	"text-to-speech": inputsTextToSpeech,
 	"text-to-audio": inputsTextToAudio,
 	"text2text-generation": inputsText2TextGeneration,

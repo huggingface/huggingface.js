@@ -151,23 +151,53 @@
 	},
 	"$defs": {
 		"ChatCompletionInputMessage": {
-			"type": "object",
-			"required": ["role", "content"],
-			"properties": {
-				"content": {
-					"$ref": "#/$defs/ChatCompletionInputMessageContent"
+			"allOf": [
+				{
+					"$ref": "#/$defs/ChatCompletionInputMessageBody"
 				},
-				"name": {
-					"type": "string",
-					"example": "\"David\"",
-					"nullable": true
-				},
-				"role": {
-					"type": "string",
-					"example": "user"
+				{
+					"type": "object",
+					"required": ["role"],
+					"properties": {
+						"name": {
+							"type": "string",
+							"example": "\"David\"",
+							"nullable": true
+						},
+						"role": {
+							"type": "string",
+							"example": "user"
+						}
+					}
 				}
-			},
+			],
 			"title": "ChatCompletionInputMessage"
+		},
+		"ChatCompletionInputMessageBody": {
+			"oneOf": [
+				{
+					"type": "object",
+					"required": ["content"],
+					"properties": {
+						"content": {
+							"$ref": "#/$defs/ChatCompletionInputMessageContent"
+						}
+					}
+				},
+				{
+					"type": "object",
+					"required": ["tool_calls"],
+					"properties": {
+						"tool_calls": {
+							"type": "array",
+							"items": {
+								"$ref": "#/$defs/ChatCompletionInputToolCall"
+							}
+						}
+					}
+				}
+			],
+			"title": "ChatCompletionInputMessageBody"
 		},
 		"ChatCompletionInputMessageContent": {
 			"oneOf": [
@@ -226,6 +256,37 @@
 				}
 			},
 			"title": "ChatCompletionInputUrl"
+		},
+		"ChatCompletionInputToolCall": {
+			"type": "object",
+			"required": ["id", "type", "function"],
+			"properties": {
+				"function": {
+					"$ref": "#/$defs/ChatCompletionInputFunctionDefinition"
+				},
+				"id": {
+					"type": "string"
+				},
+				"type": {
+					"type": "string"
+				}
+			},
+			"title": "ChatCompletionInputToolCall"
+		},
+		"ChatCompletionInputFunctionDefinition": {
+			"type": "object",
+			"required": ["name", "arguments"],
+			"properties": {
+				"arguments": {},
+				"description": {
+					"type": "string",
+					"nullable": true
+				},
+				"name": {
+					"type": "string"
+				}
+			},
+			"title": "ChatCompletionInputFunctionDefinition"
 		},
 		"ChatCompletionInputGrammarType": {
 			"oneOf": [
@@ -326,21 +387,6 @@
 				}
 			},
 			"title": "ChatCompletionInputTool"
-		},
-		"ChatCompletionInputFunctionDefinition": {
-			"type": "object",
-			"required": ["name", "arguments"],
-			"properties": {
-				"arguments": {},
-				"description": {
-					"type": "string",
-					"nullable": true
-				},
-				"name": {
-					"type": "string"
-				}
-			},
-			"title": "ChatCompletionInputFunctionDefinition"
 		}
 	}
 }

@@ -48,7 +48,7 @@ export async function zeroShotImageClassification(
 	const payload = await preparePayload(args);
 	const res = await request<ZeroShotImageClassificationOutput>(payload, {
 		...options,
-		taskHint: "zero-shot-image-classification",
+		task: "zero-shot-image-classification",
 	});
 	const isValidOutput =
 		Array.isArray(res) && res.every((x) => typeof x.label === "string" && typeof x.score === "number");

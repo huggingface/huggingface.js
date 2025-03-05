@@ -16,7 +16,7 @@ export async function tokenClassification(
 	const res = toArray(
 		await request<TokenClassificationOutput[number] | TokenClassificationOutput>(args, {
 			...options,
-			taskHint: "token-classification",
+			task: "token-classification",
 		})
 	);
 	const isValidOutput =

@@ -32,7 +32,7 @@ export async function documentQuestionAnswering(
 	const res = toArray(
 		await request<DocumentQuestionAnsweringOutput | DocumentQuestionAnsweringOutput[number]>(reqArgs, {
 			...options,
-			taskHint: "document-question-answering",
+			task: "document-question-answering",
 		})
 	);
 

@@ -110,21 +110,14 @@ retriever = BM25HF.load_from_hub("${model.id}")`,
 ];
 
 export const cxr_foundation = (): string[] => [
-	`!git clone https://github.com/Google-Health/cxr-foundation.git
-import tensorflow as tf, sys, requests
-sys.path.append('cxr-foundation/python/')
+	`# pip install git+https://github.com/Google-Health/cxr-foundation.git#subdirectory=python
 
-# Install dependencies
-major_version = tf.__version__.rsplit(".", 1)[0]
-!pip install tensorflow-text=={major_version} pypng && pip install --no-deps pydicom hcls_imaging_ml_toolkit retrying
-
-# Load image (Stillwaterising, CC0, via Wikimedia Commons)
+# Load image as grayscale (Stillwaterising, CC0, via Wikimedia Commons)
+import requests
 from PIL import Image
 from io import BytesIO
 image_url = "https://upload.wikimedia.org/wikipedia/commons/c/c8/Chest_Xray_PA_3-8-2010.png"
-response = requests.get(image_url, headers={'User-Agent': 'Demo'}, stream=True)
-response.raw.decode_content = True # Ensure correct decoding
-img = Image.open(BytesIO(response.content)).convert('L') # Convert to grayscale
+img = Image.open(requests.get(image_url, headers={'User-Agent': 'Demo'}, stream=True).raw).convert('L')
 
 # Run inference
 from clientside.clients import make_hugging_face_client

@@ -173,6 +173,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"adapter_config.json"`,
 	},
+	comet: {
+		prettyLabel: "COMET",
+		repoName: "COMET",
+		repoUrl: "https://github.com/Unbabel/COMET/",
+		countDownloads: `path:"hparams.yaml"`,
+	},
 	cosmos: {
 		prettyLabel: "Cosmos",
 		repoName: "Cosmos",
@@ -388,6 +394,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/Tencent/HunyuanDiT",
 		countDownloads: `path:"pytorch_model_ema.pt" OR path:"pytorch_model_distill.pt"`,
 	},
+	"hunyuan3d-2": {
+		prettyLabel: "Hunyuan3D-2",
+		repoName: "Hunyuan3D-2",
+		repoUrl: "https://github.com/Tencent/Hunyuan3D-2",
+		countDownloads: `path:"model_index.json" OR path:"config.yaml"`,
+	},
 	imstoucan: {
 		prettyLabel: "IMS Toucan",
 		repoName: "IMS-Toucan",
@@ -471,6 +483,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"MeshAnything_350m.pth"`,
 		snippets: snippets.mesh_anything,
+	},
+	merlin: {
+		prettyLabel: "Merlin",
+		repoName: "Merlin",
+		repoUrl: "https://github.com/StanfordMIMI/Merlin",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
 	},
 	mitie: {
 		prettyLabel: "MITIE",
@@ -904,7 +923,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "YOLOv10",
 		repoUrl: "https://github.com/THU-MIG/yolov10",
 		docsUrl: "https://github.com/THU-MIG/yolov10",
-		countDownloads: `path_extension:"pt"`,
+		countDownloads: `path_extension:"pt" OR path_extension:"safetensors"`,
 		snippets: snippets.ultralytics,
 	},
 	"3dtopia-xl": {
