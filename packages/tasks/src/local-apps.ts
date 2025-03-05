@@ -95,17 +95,17 @@ function isMlxModel(model: ModelData) {
 }
 
 const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	let tagName = "";
+	if (filepath) {
+		const quantLabel = parseGGUFQuantLabel(filepath);
+		tagName = quantLabel ? `:${quantLabel}` : "";
+	}
 	const command = (binary: string) => {
-		const snippet = [
-			"# Load and run the model:",
-			`${binary} \\`,
-			`  --hf-repo "${model.id}" \\`,
-			`  --hf-file ${filepath ?? "{{GGUF_FILE}}"} \\`,
-			`  -p "${model.tags.includes("conversational") ? "You are a helpful assistant" : "Once upon a time,"}"`,
-		];
-		if (model.tags.includes("conversational")) {
+		const snippet = ["# Load and run the model:", `${binary} -hf ${model.id}${tagName}`];
+		if (!model.tags.includes("conversational")) {
+			// for non-conversational models, add a prompt
 			snippet[snippet.length - 1] += " \\";
-			snippet.push("  --conversation");
+			snippet.push('  -p "Once upon a time,"');
 		}
 		return snippet.join("\n");
 	};
@@ -129,26 +129,30 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 			setup: [
 				"git clone https://github.com/ggerganov/llama.cpp.git",
 				"cd llama.cpp",
-				"LLAMA_CURL=1 make llama-cli",
+				"cmake -B build -DLLAMA_CURL=ON",
+				"cmake --build build -j --target llama-cli",
 			].join("\n"),
-			content: command("./llama-cli"),
+			content: command("./build/bin/llama-cli"),
 		},
 	];
 };
 
 const snippetNodeLlamaCppCli = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	let tagName = "{{OLLAMA_TAG}}";
+
+	if (filepath) {
+		const quantLabel = parseGGUFQuantLabel(filepath);
+		tagName = quantLabel ? `:${quantLabel}` : tagName;
+	}
+
 	return [
 		{
 			title: "Chat with the model",
-			content: [
-				`npx -y node-llama-cpp chat \\`,
-				`  --model "hf:${model.id}/${filepath ?? "{{GGUF_FILE}}"}" \\`,
-				`  --prompt 'Hi there!'`,
-			].join("\n"),
+			content: `npx -y node-llama-cpp chat hf:${model.id}${tagName}`,
 		},
 		{
 			title: "Estimate the model compatibility with your hardware",
-			content: `npx -y node-llama-cpp inspect estimate "hf:${model.id}/${filepath ?? "{{GGUF_FILE}}"}"`,
+			content: `npx -y node-llama-cpp inspect estimate hf:${model.id}${tagName}`,
 		},
 	];
 };

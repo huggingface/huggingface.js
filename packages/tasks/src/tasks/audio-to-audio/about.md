@@ -19,7 +19,7 @@ import json
 import requests
 
 headers = {"Authorization": f"Bearer {API_TOKEN}"}
-API_URL = "https://api-inference.huggingface.co/models/speechbrain/mtl-mimic-voicebank"
+API_URL = "https://router.huggingface.co/hf-inference/models/speechbrain/mtl-mimic-voicebank"
 
 def query(filename):
     with open(filename, "rb") as f:

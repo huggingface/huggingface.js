@@ -3,7 +3,6 @@
  *
  * Using src/scripts/inference-codegen
  */
-
 /**
  * Inputs for Depth Estimation inference
  */
@@ -15,10 +14,11 @@ export interface DepthEstimationInput {
 	/**
 	 * Additional inference parameters for Depth Estimation
 	 */
-	parameters?: { [key: string]: unknown };
+	parameters?: {
+		[key: string]: unknown;
+	};
 	[property: string]: unknown;
 }
-
 /**
  * Outputs of inference for the Depth Estimation task
  */

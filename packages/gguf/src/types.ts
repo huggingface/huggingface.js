@@ -155,4 +155,5 @@ export interface GGUFTensorInfo {
 export interface GGUFParseOutput<Options extends GGUFMetadataOptions = { strict: true }> {
 	metadata: GGUFMetadata<Options>;
 	tensorInfos: GGUFTensorInfo[];
+	tensorDataOffset: bigint;
 }

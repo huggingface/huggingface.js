@@ -14,6 +14,7 @@ pnpm generate-snippets-fixtures
 ```
 
 If some logic has been updated, you should see the result with a
+
 ```
 git diff
 # the diff has to be committed if correct
@@ -64,4 +65,3 @@ To update the specs manually, run:
 ```
 pnpm inference-tgi-import
 ```
-

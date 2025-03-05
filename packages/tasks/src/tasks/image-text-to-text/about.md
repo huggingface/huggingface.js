@@ -24,53 +24,70 @@ Vision language models trained on image-text pairs can be used for visual questi
 
 ### Document Question Answering and Retrieval
 
-Documents often consist of different layouts, charts, tables, images, and more. Vision language models trained on formatted documents can extract information from them. This is an OCR-free approach; the inputs skip OCR, and documents are directly fed to vision language models.
+Documents often consist of different layouts, charts, tables, images, and more. Vision language models trained on formatted documents can extract information from them. This is an OCR-free approach; the inputs skip OCR, and documents are directly fed to vision language models. To find the relevant documents to be fed, models like [ColPali](https://huggingface.co/blog/manu/colpali) are used. An example workflow can be found [here](https://github.com/merveenoyan/smol-vision/blob/main/ColPali_%2B_Qwen2_VL.ipynb).
 
 ### Image Recognition with Instructions
 
 Vision language models can recognize images through descriptions. When given detailed descriptions of specific entities, it can classify the entities in an image.
 
+### Computer Use
+
+Image-text-to-text models can be used to control computers with agentic workflows. Models like [ShowUI](https://huggingface.co/showlab/ShowUI-2B) and [OmniParser](https://huggingface.co/microsoft/OmniParser) are used to parse screenshots to later take actions on the computer autonomously.
+
 ## Inference
 
-You can use the Transformers library to interact with vision-language models. You can load the model like below.
+You can use the Transformers library to interact with [vision-language models](https://huggingface.co/models?pipeline_tag=image-text-to-text&transformers). Specifically, `pipeline` makes it easy to infer models.
+
+Initialize the pipeline first.
 
 ```python
-from transformers import LlavaNextProcessor, LlavaNextForConditionalGeneration
-import torch
+from transformers import pipeline
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-processor = LlavaNextProcessor.from_pretrained("llava-hf/llava-v1.6-mistral-7b-hf")
-model = LlavaNextForConditionalGeneration.from_pretrained(
-    "llava-hf/llava-v1.6-mistral-7b-hf",
-    torch_dtype=torch.float16
-)
-model.to(device)
+pipe = pipeline("image-text-to-text", model="llava-hf/llava-interleave-qwen-0.5b-hf")
 ```
 
-We can infer by passing image and text dialogues.
+The model's built-in chat template will be used to format the conversational input. We can pass the image as an URL in the `content` part of the user message:
 
 ```python
-from PIL import Image
-import requests
+messages = [
+     {
+         "role": "user",
+         "content": [
+             {
+                 "type": "image",
+                 "image": "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/bee.jpg",
+             },
+             {"type": "text", "text": "Describe this image."},
+         ],
+     }
+ ]
 
-# image of a radar chart
-url = "https://github.com/haotian-liu/LLaVA/blob/1a91fc274d7c35a9b50b3cb29c4247ae5837ce39/images/llava_v1_5_radar.jpg?raw=true"
-image = Image.open(requests.get(url, stream=True).raw)
-prompt = "[INST] <image>\nWhat is shown in this image? [/INST]"
+```
 
-inputs = processor(prompt, image, return_tensors="pt").to(device)
-output = model.generate(**inputs, max_new_tokens=100)
+We can now directly pass in the messages to the pipeline to infer. The `return_full_text` flag is used to return the full prompt in the response, including the user input. Here we pass `False` to only return the generated text.
 
-print(processor.decode(output[0], skip_special_tokens=True))
-# The image appears to be a radar chart, which is a type of multivariate chart that displays values for multiple variables represented on axes
-# starting from the same point. This particular radar chart is showing the performance of different models or systems across various metrics.
-# The axes represent different metrics or benchmarks, such as MM-Vet, MM-Vet, MM-Vet, MM-Vet, MM-Vet, MM-V
+```python
+outputs = pipe(text=messages, max_new_tokens=60, return_full_text=False)
+
+outputs[0]["generated_text"]
+# The image captures a moment of tranquility in nature. At the center of the frame, a pink flower with a yellow center is in full bloom. The flower is surrounded by a cluster of red flowers, their vibrant color contrasting with the pink of the flower. \n\nA black and yellow bee is per
+```
+
+You can also use the Inference API to test image-text-to-text models. You need to use a [Hugging Face token](https://huggingface.co/settings/tokens) for authentication.
+
+```bash
+curl https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.2-11B-Vision-Instruct \
+	-X POST \
+	-d '{"messages": [{"role": "user","content": [{"type": "image"}, {"type": "text", "text": "Can you describe the image?"}]}]}' \
+	-H "Content-Type: application/json" \
+	-H "Authorization: Bearer hf_***"
 ```
 
 ## Useful Resources
 
 - [Vision Language Models Explained](https://huggingface.co/blog/vlms)
-- [Open-source Multimodality and How to Achieve it using Hugging Face](https://www.youtube.com/watch?v=IoGaGfU1CIg&t=601s)
-- [Introducing Idefics2: A Powerful 8B Vision-Language Model for the community](https://huggingface.co/blog/idefics2)
+- [Welcome PaliGemma 2 – New vision language models by Google](https://huggingface.co/blog/paligemma2)
+- [SmolVLM - small yet mighty Vision Language Model](https://huggingface.co/blog/smolvlm)
+- [Multimodal RAG using ColPali and Qwen2-VL](https://github.com/merveenoyan/smol-vision/blob/main/ColPali_%2B_Qwen2_VL.ipynb)
 - [Image-text-to-text task guide](https://huggingface.co/tasks/image-text-to-text)
 - [Preference Optimization for Vision Language Models with TRL](https://huggingface.co/blog/dpo_vlm)

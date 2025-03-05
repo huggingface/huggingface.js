@@ -16,8 +16,8 @@ describe("pathsInfo", () => {
 		expect(result).toHaveLength(1);
 
 		const modelPathInfo = result[0];
-		expect(modelPathInfo.path).toBe('tf_model.h5');
-		expect(modelPathInfo.type).toBe('file');
+		expect(modelPathInfo.path).toBe("tf_model.h5");
+		expect(modelPathInfo.type).toBe("file");
 		// lfs pointer, therefore lfs should be defined
 		expect(modelPathInfo?.lfs).toBeDefined();
 		expect(modelPathInfo?.lfs?.oid).toBe("a7a17d6d844b5de815ccab5f42cad6d24496db3850a2a43d8258221018ce87d2");
@@ -31,8 +31,8 @@ describe("pathsInfo", () => {
 
 	it("expand parmas should fetch lastCommit and securityFileStatus", async () => {
 		const result: (PathInfo & {
-			lastCommit: CommitInfo,
-			securityFileStatus: SecurityFileStatus,
+			lastCommit: CommitInfo;
+			securityFileStatus: SecurityFileStatus;
 		})[] = await pathsInfo({
 			repo: {
 				name: "bert-base-uncased",
@@ -57,7 +57,7 @@ describe("pathsInfo", () => {
 	});
 
 	it("non-LFS pointer should have lfs undefined", async () => {
-		const result: (PathInfo)[] = await pathsInfo({
+		const result: PathInfo[] = await pathsInfo({
 			repo: {
 				name: "bert-base-uncased",
 				type: "model",

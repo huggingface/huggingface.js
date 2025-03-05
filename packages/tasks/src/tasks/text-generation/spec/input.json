@@ -76,7 +76,7 @@
 					"type": "integer",
 					"format": "int32",
 					"description": "Maximum number of tokens to generate.",
-					"default": "100",
+					"default": "1024",
 					"example": "20",
 					"nullable": true,
 					"minimum": 0

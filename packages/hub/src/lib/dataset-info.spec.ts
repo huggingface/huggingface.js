@@ -20,9 +20,9 @@ describe("datasetInfo", () => {
 	});
 
 	it("should return the dataset info with author", async () => {
-		const info: DatasetEntry & Pick<ApiDatasetInfo, 'author'> = await datasetInfo({
+		const info: DatasetEntry & Pick<ApiDatasetInfo, "author"> = await datasetInfo({
 			name: "nyu-mll/glue",
-			additionalFields: ['author'],
+			additionalFields: ["author"],
 		});
 		expect(info).toEqual({
 			id: "621ffdd236468d709f181e3f",
@@ -32,12 +32,12 @@ describe("datasetInfo", () => {
 			updatedAt: expect.any(Date),
 			likes: expect.any(Number),
 			private: false,
-			author: 'nyu-mll'
+			author: "nyu-mll",
 		});
 	});
 
 	it("should return the dataset info for a specific revision", async () => {
-		const info: DatasetEntry & Pick<ApiDatasetInfo, 'sha'> = await datasetInfo({
+		const info: DatasetEntry & Pick<ApiDatasetInfo, "sha"> = await datasetInfo({
 			name: "nyu-mll/glue",
 			revision: "cb2099c76426ff97da7aa591cbd317d91fb5fcb7",
 			additionalFields: ["sha"],
@@ -50,7 +50,7 @@ describe("datasetInfo", () => {
 			updatedAt: expect.any(Date),
 			likes: expect.any(Number),
 			private: false,
-			sha: 'cb2099c76426ff97da7aa591cbd317d91fb5fcb7'
+			sha: "cb2099c76426ff97da7aa591cbd317d91fb5fcb7",
 		});
 	});
 });

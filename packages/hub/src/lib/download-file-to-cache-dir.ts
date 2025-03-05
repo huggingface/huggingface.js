@@ -21,7 +21,7 @@ function getFilePointer(storageFolder: string, revision: string, relativeFilenam
  */
 async function exists(path: string, followSymlinks?: boolean): Promise<boolean> {
 	try {
-		if(followSymlinks) {
+		if (followSymlinks) {
 			await stat(path);
 		} else {
 			await lstat(path);
@@ -54,7 +54,7 @@ export async function downloadFileToCacheDir(
 		 */
 		revision?: string;
 		hubUrl?: string;
-		cacheDir?: string,
+		cacheDir?: string;
 		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */

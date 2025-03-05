@@ -8,46 +8,52 @@ import { getHFHubCachePath, getRepoFolderName } from "./cache-management";
 import { toRepoId } from "../utils/toRepoId";
 import { downloadFileToCacheDir } from "./download-file-to-cache-dir";
 
-vi.mock('node:fs/promises', () => ({
+vi.mock("node:fs/promises", () => ({
 	writeFile: vi.fn(),
 	rename: vi.fn(),
 	symlink: vi.fn(),
 	lstat: vi.fn(),
 	mkdir: vi.fn(),
-	stat: vi.fn()
+	stat: vi.fn(),
 }));
 
-vi.mock('./paths-info', () => ({
+vi.mock("./paths-info", () => ({
 	pathsInfo: vi.fn(),
 }));
 
 const DUMMY_REPO: RepoId = {
-	name: 'hello-world',
-	type: 'model',
+	name: "hello-world",
+	type: "model",
 };
 
 const DUMMY_ETAG = "dummy-etag";
 
 // utility test method to get blob file path
-function _getBlobFile(params:  {
+function _getBlobFile(params: {
 	repo: RepoDesignation;
 	etag: string;
-	cacheDir?: string, // default to {@link getHFHubCache}
+	cacheDir?: string; // default to {@link getHFHubCache}
 }) {
 	return join(params.cacheDir ?? getHFHubCachePath(), getRepoFolderName(toRepoId(params.repo)), "blobs", params.etag);
 }
 
 // utility test method to get snapshot file path
-function _getSnapshotFile(params:  {
+function _getSnapshotFile(params: {
 	repo: RepoDesignation;
 	path: string;
-	revision : string;
-	cacheDir?: string, // default to {@link getHFHubCache}
+	revision: string;
+	cacheDir?: string; // default to {@link getHFHubCache}
 }) {
-	return join(params.cacheDir ?? getHFHubCachePath(), getRepoFolderName(toRepoId(params.repo)), "snapshots", params.revision, params.path);
+	return join(
+		params.cacheDir ?? getHFHubCachePath(),
+		getRepoFolderName(toRepoId(params.repo)),
+		"snapshots",
+		params.revision,
+		params.path
+	);
 }
 
-describe('downloadFileToCacheDir', () => {
+describe("downloadFileToCacheDir", () => {
 	const fetchMock: typeof fetch = vi.fn();
 	beforeEach(() => {
 		vi.resetAllMocks();
@@ -55,43 +61,45 @@ describe('downloadFileToCacheDir', () => {
 		vi.mocked(fetchMock).mockResolvedValue({
 			status: 200,
 			ok: true,
-			body: 'dummy-body'
+			body: "dummy-body",
 		} as unknown as Response);
 
 		// prevent to use caching
-		vi.mocked(stat).mockRejectedValue(new Error('Do not exists'));
-		vi.mocked(lstat).mockRejectedValue(new Error('Do not exists'));
+		vi.mocked(stat).mockRejectedValue(new Error("Do not exists"));
+		vi.mocked(lstat).mockRejectedValue(new Error("Do not exists"));
 	});
 
-	test('should throw an error if fileDownloadInfo return nothing', async () => {
+	test("should throw an error if fileDownloadInfo return nothing", async () => {
 		await expect(async () => {
 			await downloadFileToCacheDir({
 				repo: DUMMY_REPO,
-				path: '/README.md',
+				path: "/README.md",
 				fetch: fetchMock,
 			});
-		}).rejects.toThrowError('cannot get path info for /README.md');
+		}).rejects.toThrowError("cannot get path info for /README.md");
 
-		expect(pathsInfo).toHaveBeenCalledWith(expect.objectContaining({
-			repo: DUMMY_REPO,
-			paths: ['/README.md'],
-			fetch: fetchMock,
-		}));
+		expect(pathsInfo).toHaveBeenCalledWith(
+			expect.objectContaining({
+				repo: DUMMY_REPO,
+				paths: ["/README.md"],
+				fetch: fetchMock,
+			})
+		);
 	});
 
-	test('existing symlinked and blob should not re-download it', async () => {
+	test("existing symlinked and blob should not re-download it", async () => {
 		// <cache>/<repo>/<revision>/snapshots/README.md
 		const expectPointer = _getSnapshotFile({
 			repo: DUMMY_REPO,
-			path: '/README.md',
+			path: "/README.md",
 			revision: "dd4bc8b21efa05ec961e3efc4ee5e3832a3679c7",
 		});
 		// stat ensure a symlink and the pointed file exists
-		vi.mocked(stat).mockResolvedValue({} as Stats) // prevent default mocked reject
+		vi.mocked(stat).mockResolvedValue({} as Stats); // prevent default mocked reject
 
 		const output = await downloadFileToCacheDir({
 			repo: DUMMY_REPO,
-			path: '/README.md',
+			path: "/README.md",
 			fetch: fetchMock,
 			revision: "dd4bc8b21efa05ec961e3efc4ee5e3832a3679c7",
 		});
@@ -100,17 +108,17 @@ describe('downloadFileToCacheDir', () => {
 		// Get call argument for stat
 		const starArg = vi.mocked(stat).mock.calls[0][0];
 
-		expect(starArg).toBe(expectPointer)
+		expect(starArg).toBe(expectPointer);
 		expect(fetchMock).not.toHaveBeenCalledWith();
 
 		expect(output).toBe(expectPointer);
 	});
 
-	test('existing blob should only create the symlink', async () => {
+	test("existing blob should only create the symlink", async () => {
 		// <cache>/<repo>/<revision>/snapshots/README.md
 		const expectPointer = _getSnapshotFile({
 			repo: DUMMY_REPO,
-			path: '/README.md',
+			path: "/README.md",
 			revision: "dummy-commit-hash",
 		});
 		// <cache>/<repo>/blobs/<etag>
@@ -122,21 +130,23 @@ describe('downloadFileToCacheDir', () => {
 		// mock existing blob only no symlink
 		vi.mocked(lstat).mockResolvedValue({} as Stats);
 		// mock pathsInfo resolve content
-		vi.mocked(pathsInfo).mockResolvedValue([{
-			oid: DUMMY_ETAG,
-			size: 55,
-			path: 'README.md',
-			type: 'file',
-			lastCommit: {
-				date: new Date(),
-				id: 'dummy-commit-hash',
-				title: 'Commit msg',
+		vi.mocked(pathsInfo).mockResolvedValue([
+			{
+				oid: DUMMY_ETAG,
+				size: 55,
+				path: "README.md",
+				type: "file",
+				lastCommit: {
+					date: new Date(),
+					id: "dummy-commit-hash",
+					title: "Commit msg",
+				},
 			},
-		}]);
+		]);
 
 		const output = await downloadFileToCacheDir({
 			repo: DUMMY_REPO,
-			path: '/README.md',
+			path: "/README.md",
 			fetch: fetchMock,
 		});
 
@@ -153,11 +163,11 @@ describe('downloadFileToCacheDir', () => {
 		expect(output).toBe(expectPointer);
 	});
 
-	test('expect resolve value to be the pointer path of downloaded file', async () => {
+	test("expect resolve value to be the pointer path of downloaded file", async () => {
 		// <cache>/<repo>/<revision>/snapshots/README.md
 		const expectPointer = _getSnapshotFile({
 			repo: DUMMY_REPO,
-			path: '/README.md',
+			path: "/README.md",
 			revision: "dummy-commit-hash",
 		});
 		// <cache>/<repo>/blobs/<etag>
@@ -166,21 +176,23 @@ describe('downloadFileToCacheDir', () => {
 			etag: DUMMY_ETAG,
 		});
 
-		vi.mocked(pathsInfo).mockResolvedValue([{
-			oid: DUMMY_ETAG,
-			size: 55,
-			path: 'README.md',
-			type: 'file',
-			lastCommit: {
-				date: new Date(),
-				id: 'dummy-commit-hash',
-				title: 'Commit msg',
+		vi.mocked(pathsInfo).mockResolvedValue([
+			{
+				oid: DUMMY_ETAG,
+				size: 55,
+				path: "README.md",
+				type: "file",
+				lastCommit: {
+					date: new Date(),
+					id: "dummy-commit-hash",
+					title: "Commit msg",
+				},
 			},
-		}]);
+		]);
 
 		const output = await downloadFileToCacheDir({
 			repo: DUMMY_REPO,
-			path: '/README.md',
+			path: "/README.md",
 			fetch: fetchMock,
 		});
 
@@ -191,11 +203,11 @@ describe('downloadFileToCacheDir', () => {
 		expect(output).toBe(expectPointer);
 	});
 
-	test('should write fetch response to blob', async () => {
+	test("should write fetch response to blob", async () => {
 		// <cache>/<repo>/<revision>/snapshots/README.md
 		const expectPointer = _getSnapshotFile({
 			repo: DUMMY_REPO,
-			path: '/README.md',
+			path: "/README.md",
 			revision: "dummy-commit-hash",
 		});
 		// <cache>/<repo>/blobs/<etag>
@@ -205,27 +217,29 @@ describe('downloadFileToCacheDir', () => {
 		});
 
 		// mock pathsInfo resolve content
-		vi.mocked(pathsInfo).mockResolvedValue([{
-			oid: DUMMY_ETAG,
-			size: 55,
-			path: 'README.md',
-			type: 'file',
-			lastCommit: {
-				date: new Date(),
-				id: 'dummy-commit-hash',
-				title: 'Commit msg',
+		vi.mocked(pathsInfo).mockResolvedValue([
+			{
+				oid: DUMMY_ETAG,
+				size: 55,
+				path: "README.md",
+				type: "file",
+				lastCommit: {
+					date: new Date(),
+					id: "dummy-commit-hash",
+					title: "Commit msg",
+				},
 			},
-		}]);
+		]);
 
 		await downloadFileToCacheDir({
 			repo: DUMMY_REPO,
-			path: '/README.md',
+			path: "/README.md",
 			fetch: fetchMock,
 		});
 
 		const incomplete = `${expectedBlob}.incomplete`;
 		// 1. should write fetch#response#body to incomplete file
-		expect(writeFile).toHaveBeenCalledWith(incomplete, 'dummy-body');
+		expect(writeFile).toHaveBeenCalledWith(incomplete, "dummy-body");
 		// 2. should rename the incomplete to the blob expected name
 		expect(rename).toHaveBeenCalledWith(incomplete, expectedBlob);
 		// 3. should create symlink pointing to blob

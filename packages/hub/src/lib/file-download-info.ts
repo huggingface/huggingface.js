@@ -50,7 +50,7 @@ export async function fileDownloadInfo(
 	const resp = await (params.fetch ?? fetch)(url, {
 		method: "GET",
 		headers: {
-			...(params.credentials && {
+			...(accessToken && {
 				Authorization: `Bearer ${accessToken}`,
 			}),
 			Range: "bytes=0-0",

@@ -31,7 +31,9 @@ export async function modelInfo<
 	]).toString();
 
 	const response = await (params.fetch || fetch)(
-		`${params?.hubUrl || HUB_URL}/api/models/${params.name}/revision/${encodeURIComponent(params.revision ?? "HEAD")}?${search.toString()}`,
+		`${params?.hubUrl || HUB_URL}/api/models/${params.name}/revision/${encodeURIComponent(
+			params.revision ?? "HEAD"
+		)}?${search.toString()}`,
 		{
 			headers: {
 				...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),

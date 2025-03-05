@@ -3,8 +3,8 @@ import { downloadFile } from "./download-file";
 import type { RepoId } from "../types/public";
 
 const DUMMY_REPO: RepoId = {
-	name: 'hello-world',
-	type: 'model',
+	name: "hello-world",
+	type: "model",
 };
 
 describe("downloadFile", () => {
@@ -17,12 +17,12 @@ describe("downloadFile", () => {
 
 		await downloadFile({
 			repo: DUMMY_REPO,
-			path: '/README.md',
-			hubUrl: 'http://dummy-hub',
+			path: "/README.md",
+			hubUrl: "http://dummy-hub",
 			fetch: fetchMock,
 		});
 
-		expect(fetchMock).toHaveBeenCalledWith('http://dummy-hub/hello-world/resolve/main//README.md', expect.anything());
+		expect(fetchMock).toHaveBeenCalledWith("http://dummy-hub/hello-world/resolve/main//README.md", expect.anything());
 	});
 
 	test("raw params should use raw url", async () => {
@@ -34,12 +34,12 @@ describe("downloadFile", () => {
 
 		await downloadFile({
 			repo: DUMMY_REPO,
-			path: 'README.md',
+			path: "README.md",
 			raw: true,
 			fetch: fetchMock,
 		});
 
-		expect(fetchMock).toHaveBeenCalledWith('https://huggingface.co/hello-world/raw/main/README.md', expect.anything());
+		expect(fetchMock).toHaveBeenCalledWith("https://huggingface.co/hello-world/raw/main/README.md", expect.anything());
 	});
 
 	test("internal server error should propagate the error", async () => {
@@ -49,17 +49,17 @@ describe("downloadFile", () => {
 			ok: false,
 			headers: new Map<string, string>([["Content-Type", "application/json"]]),
 			json: () => ({
-				error: 'Dummy internal error',
+				error: "Dummy internal error",
 			}),
 		} as unknown as Response);
 
 		await expect(async () => {
 			await downloadFile({
 				repo: DUMMY_REPO,
-				path: 'README.md',
+				path: "README.md",
 				raw: true,
 				fetch: fetchMock,
 			});
-		}).rejects.toThrowError('Dummy internal error');
+		}).rejects.toThrowError("Dummy internal error");
 	});
 });

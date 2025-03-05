@@ -1,6 +1,6 @@
 # Ownership for the Inference Package
 
-/packages/inference/ @vvmnnnkv @radames
+/packages/inference/ @julien-c @hanouticelina @SBrandeis @coyotte508
 
 # Ownership for the Tasks Package
 
@@ -23,4 +23,9 @@
 /packages/gguf @mishig25 @ngxson @julien-c
 
 # Ownership for the space-header Package
+
 /packages/space-header @enzostvs
+
+# Ownership for the ollama-utils Package
+
+/packages/ollama-utils @ngxson

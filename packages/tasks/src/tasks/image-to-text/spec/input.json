@@ -6,7 +6,8 @@
 	"type": "object",
 	"properties": {
 		"inputs": {
-			"description": "The input image data"
+			"description": "The input image data",
+			"comment": "type=binary"
 		},
 		"parameters": {
 			"description": "Additional inference parameters for Image To Text",
