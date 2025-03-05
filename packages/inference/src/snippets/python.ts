@@ -390,6 +390,21 @@ Audio(audio, rate=sampling_rate)`,
 	}
 };
 
+const snippetAutomaticSpeechRecognition = (
+	model: ModelDataMinimal,
+	accessToken: string,
+	provider: SnippetInferenceProvider
+): InferenceSnippet[] => {
+	return [
+		{
+			client: "huggingface_hub",
+			content: `${snippetImportInferenceClient(accessToken, provider)}
+output = client.automatic_speech_recognition(${getModelInputSnippet(model)}, model="${model.id}")`,
+		},
+		snippetFile(model)[0],
+	];
+};
+
 const snippetDocumentQuestionAnswering = (
 	model: ModelDataMinimal,
 	accessToken: string,
@@ -448,7 +463,7 @@ export const pythonSnippets: Partial<
 	"image-text-to-text": snippetConversational,
 	"fill-mask": snippetBasic,
 	"sentence-similarity": snippetBasic,
-	"automatic-speech-recognition": snippetFile,
+	"automatic-speech-recognition": snippetAutomaticSpeechRecognition,
 	"text-to-image": snippetTextToImage,
 	"text-to-video": snippetTextToVideo,
 	"text-to-speech": snippetTextToAudio,
