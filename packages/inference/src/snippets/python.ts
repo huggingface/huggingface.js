@@ -39,23 +39,14 @@ const HFH_INFERENCE_CLIENT_METHODS: Partial<Record<WidgetType, string>> = {
 	"tabular-regression": "tabular_regression",
 };
 
-const snippetImportInferenceClient = (
-	accessToken: string,
-	provider: SnippetInferenceProvider,
-	model?: string
-): string => {
-	let snippet = `\
+const snippetImportInferenceClient = (accessToken: string, provider: SnippetInferenceProvider): string =>
+	`\
 from huggingface_hub import InferenceClient
 
 client = InferenceClient(
     provider="${provider}",
-    api_key="${accessToken || "{API_TOKEN}"}",`;
-	if (model) {
-		snippet += `\n    model="${model}",`;
-	}
-	snippet += "\n)";
-	return snippet;
-};
+    api_key="${accessToken || "{API_TOKEN}"}",
+)`;
 
 const snippetConversational = (
 	model: ModelDataMinimal,
@@ -98,7 +89,7 @@ stream = client.chat.completions.create(
 	model="${model.id}", 
 	messages=messages, 
 	${configStr}
-	stream=True
+	stream=True,
 )
 
 for chunk in stream:
@@ -218,11 +209,11 @@ const snippetBasic = (
 					{
 						client: "huggingface_hub",
 						content: `\
-${snippetImportInferenceClient(accessToken, provider, model.id)}
+${snippetImportInferenceClient(accessToken, provider)}
 
 result = client.${HFH_INFERENCE_CLIENT_METHODS[model.pipeline_tag]}(
 	inputs=${getModelInputSnippet(model)},
-	provider="${provider}",
+	model="${model.id}",
 )
 
 print(result)
@@ -270,11 +261,12 @@ const snippetTextToImage = (
 		{
 			client: "huggingface_hub",
 			content: `\
-${snippetImportInferenceClient(accessToken, provider, model.id)}
+${snippetImportInferenceClient(accessToken, provider)}
 
 # output is a PIL.Image object
 image = client.text_to_image(
-	${getModelInputSnippet(model)}
+	${getModelInputSnippet(model)},
+	model="${model.id}",
 )`,
 		},
 		...(provider === "fal-ai"
@@ -328,10 +320,11 @@ const snippetTextToVideo = (
 				{
 					client: "huggingface_hub",
 					content: `\
-${snippetImportInferenceClient(accessToken, provider, model.id)}
+${snippetImportInferenceClient(accessToken, provider)}
 
 video = client.text_to_video(
-	${getModelInputSnippet(model)}
+	${getModelInputSnippet(model)},
+	model="${model.id}",
 )`,
 				},
 		  ]
@@ -402,8 +395,8 @@ const snippetAutomaticSpeechRecognition = (
 	return [
 		{
 			client: "huggingface_hub",
-			content: `${snippetImportInferenceClient(accessToken, provider, model.id)}
-output = client.automatic_speech_recognition(${getModelInputSnippet(model)})`,
+			content: `${snippetImportInferenceClient(accessToken, provider)}
+output = client.automatic_speech_recognition(${getModelInputSnippet(model)}, model="${model.id}")`,
 		},
 		snippetFile(model)[0],
 	];
@@ -420,10 +413,11 @@ const snippetDocumentQuestionAnswering = (
 	return [
 		{
 			client: "huggingface_hub",
-			content: `${snippetImportInferenceClient(accessToken, provider, model.id)}
+			content: `${snippetImportInferenceClient(accessToken, provider)}
 output = client.document_question_answering(
     "${inputsAsObj.image}",
 	question="${inputsAsObj.question}",
+	model="${model.id}",
 )`,
 		},
 		{
@@ -453,9 +447,13 @@ const snippetImageToImage = (
 	return [
 		{
 			client: "huggingface_hub",
-			content: `${snippetImportInferenceClient(accessToken, provider, model.id)}
+			content: `${snippetImportInferenceClient(accessToken, provider)}
 # output is a PIL.Image object
-image = client.image_to_image("${inputsAsObj.image}", prompt="${inputsAsObj.prompt}")`,
+image = client.image_to_image(
+    "${inputsAsObj.image}",
+    prompt="${inputsAsObj.prompt}",
+    model="${model.id}",
+)`,
 		},
 		{
 			client: "requests",

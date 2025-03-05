@@ -16,7 +16,7 @@ stream = client.chat.completions.create(
 	model="meta-llama/Llama-3.1-8B-Instruct", 
 	messages=messages, 
 	max_tokens=500,
-	stream=True
+	stream=True,
 )
 
 for chunk in stream:
