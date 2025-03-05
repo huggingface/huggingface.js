@@ -57,7 +57,7 @@ client = InferenceClient(
 	return snippet;
 };
 
-export const snippetConversational = (
+const snippetConversational = (
 	model: ModelDataMinimal,
 	accessToken: string,
 	provider: SnippetInferenceProvider,
@@ -168,7 +168,7 @@ print(completion.choices[0].message)`,
 	}
 };
 
-export const snippetZeroShotClassification = (model: ModelDataMinimal): InferenceSnippet[] => {
+const snippetZeroShotClassification = (model: ModelDataMinimal): InferenceSnippet[] => {
 	return [
 		{
 			client: "requests",
@@ -185,13 +185,11 @@ output = query({
 	];
 };
 
-export const snippetZeroShotImageClassification = (model: ModelDataMinimal): InferenceSnippet[] => {
+const snippetZeroShotImageClassification = (model: ModelDataMinimal): InferenceSnippet[] => {
 	return [
 		{
 			client: "requests",
-			content: `import base64
-
-def query(data):
+			content: `def query(data):
 	with open(data["image_path"], "rb") as f:
 		img = f.read()
 	payload={
@@ -209,7 +207,7 @@ output = query({
 	];
 };
 
-export const snippetBasic = (
+const snippetBasic = (
 	model: ModelDataMinimal,
 	accessToken: string,
 	provider: SnippetInferenceProvider
@@ -246,7 +244,7 @@ output = query({
 	];
 };
 
-export const snippetFile = (model: ModelDataMinimal): InferenceSnippet[] => {
+const snippetFile = (model: ModelDataMinimal): InferenceSnippet[] => {
 	return [
 		{
 			client: "requests",
@@ -262,7 +260,7 @@ output = query(${getModelInputSnippet(model)})`,
 	];
 };
 
-export const snippetTextToImage = (
+const snippetTextToImage = (
 	model: ModelDataMinimal,
 	accessToken: string,
 	provider: SnippetInferenceProvider,
@@ -320,7 +318,7 @@ image = Image.open(io.BytesIO(image_bytes))`,
 	];
 };
 
-export const snippetTextToVideo = (
+const snippetTextToVideo = (
 	model: ModelDataMinimal,
 	accessToken: string,
 	provider: SnippetInferenceProvider
@@ -340,7 +338,7 @@ video = client.text_to_video(
 		: [];
 };
 
-export const snippetTabular = (model: ModelDataMinimal): InferenceSnippet[] => {
+const snippetTabular = (model: ModelDataMinimal): InferenceSnippet[] => {
 	return [
 		{
 			client: "requests",
@@ -356,7 +354,7 @@ response = query({
 	];
 };
 
-export const snippetTextToAudio = (model: ModelDataMinimal): InferenceSnippet[] => {
+const snippetTextToAudio = (model: ModelDataMinimal): InferenceSnippet[] => {
 	// Transformers TTS pipeline and api-inference-community (AIC) pipeline outputs are diverged
 	// with the latest update to inference-api (IA).
 	// Transformers IA returns a byte object (wav file), whereas AIC returns wav and sampling_rate.
@@ -430,9 +428,7 @@ output = client.document_question_answering(
 		},
 		{
 			client: "requests",
-			content: `import base64
-
-def query(payload):
+			content: `def query(payload):
 	with open(payload["image"], "rb") as f:
 		img = f.read()
 		payload["image"] = base64.b64encode(img).decode("utf-8")
@@ -445,7 +441,45 @@ output = query({
 		},
 	];
 };
-export const pythonSnippets: Partial<
+
+const snippetImageToImage = (
+	model: ModelDataMinimal,
+	accessToken: string,
+	provider: SnippetInferenceProvider
+): InferenceSnippet[] => {
+	const inputsAsStr = getModelInputSnippet(model) as string;
+	const inputsAsObj = JSON.parse(inputsAsStr);
+
+	return [
+		{
+			client: "huggingface_hub",
+			content: `${snippetImportInferenceClient(accessToken, provider, model.id)}
+# output is a PIL.Image object
+image = client.image_to_image("${inputsAsObj.image}", prompt="${inputsAsObj.prompt}")`,
+		},
+		{
+			client: "requests",
+			content: `def query(payload):
+	with open(payload["inputs"], "rb") as f:
+		img = f.read()
+		payload["inputs"] = base64.b64encode(img).decode("utf-8")
+	response = requests.post(API_URL, headers=headers, json=payload)
+	return response.content
+
+image_bytes = query({
+	"inputs": "${inputsAsObj.image}",
+	"parameters": {"prompt": "${inputsAsObj.prompt}"},
+})
+
+# You can access the image with PIL.Image for example
+import io
+from PIL import Image
+image = Image.open(io.BytesIO(image_bytes))`,
+		},
+	];
+};
+
+const pythonSnippets: Partial<
 	Record<
 		PipelineType,
 		(
@@ -485,6 +519,7 @@ export const pythonSnippets: Partial<
 	"image-segmentation": snippetFile,
 	"document-question-answering": snippetDocumentQuestionAnswering,
 	"image-to-text": snippetFile,
+	"image-to-image": snippetImageToImage,
 	"zero-shot-image-classification": snippetZeroShotImageClassification,
 };
 
@@ -507,17 +542,24 @@ export function getPythonInferenceSnippet(
 		return snippets.map((snippet) => {
 			return {
 				...snippet,
-				content:
-					snippet.client === "requests"
-						? `\
-import requests
-
-API_URL = "${openAIbaseUrl(provider)}"
-headers = {"Authorization": ${accessToken ? `"Bearer ${accessToken}"` : `f"Bearer {API_TOKEN}"`}}
-
-${snippet.content}`
-						: snippet.content,
+				content: addImportsToSnippet(snippet.content, model, accessToken),
 			};
 		});
 	}
 }
+
+const addImportsToSnippet = (snippet: string, model: ModelDataMinimal, accessToken: string): string => {
+	if (snippet.includes("requests")) {
+		snippet = `import requests
+
+API_URL = "https://router.huggingface.co/hf-inference/models/${model.id}"
+headers = {"Authorization": ${accessToken ? `"Bearer ${accessToken}"` : `f"Bearer {API_TOKEN}"`}}
+
+${snippet}`;
+	}
+	if (snippet.includes("base64")) {
+		snippet = `import base64
+${snippet}`;
+	}
+	return snippet;
+};
