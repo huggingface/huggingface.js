@@ -1452,4 +1452,27 @@ describe.concurrent("HfInference", () => {
 		},
 		TIMEOUT
 	);
+	describe.concurrent(
+		"Nscale",
+		() => {
+			const client = new HfInference(env.HF_NSCALE_KEY ?? "dummy");
+		
+			HARDCODED_MODEL_ID_MAPPING["nscale"] = {
+				"meta-llama/Llama-3.1-8B-Instruct": "meta-llama/Llama-3.1-8B-Instruct",
+			};
+			// Test 1: Text-to-text with Llama-3.1-8B-Instruct
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "meta-llama/Llama-3.1-8B-Instruct",
+					provider: "nscale",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toContain("two");
+				}
+			});
+		},
+		TIMEOUT
+	);
 });

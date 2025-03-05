@@ -16,6 +16,7 @@ import type { InferenceProvider, InferenceTask, Options, ProviderConfig, Request
 import { isUrl } from "./isUrl";
 import { version as packageVersion, name as packageName } from "../../package.json";
 import { getProviderModelId } from "./getProviderModelId";
+import { NSCALE_CONFIG } from "../providers/nscale";
 
 const HF_HUB_INFERENCE_PROXY_TEMPLATE = `${HF_ROUTER_URL}/{{PROVIDER}}`;
 
@@ -38,6 +39,7 @@ const providerConfigs: Record<InferenceProvider, ProviderConfig> = {
 	hyperbolic: HYPERBOLIC_CONFIG,
 	openai: OPENAI_CONFIG,
 	nebius: NEBIUS_CONFIG,
+	nscale: NSCALE_CONFIG,
 	novita: NOVITA_CONFIG,
 	replicate: REPLICATE_CONFIG,
 	sambanova: SAMBANOVA_CONFIG,

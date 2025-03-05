@@ -37,6 +37,7 @@ export const INFERENCE_PROVIDERS = [
 	"hf-inference",
 	"hyperbolic",
 	"nebius",
+	"nscale",
 	"novita",
 	"openai",
 	"replicate",
