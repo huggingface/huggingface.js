@@ -28,6 +28,10 @@ const taskData: TaskDataCustom = {
 			id: "magic-leap-community/superpoint",
 		},
 		{
+			description: "A robust keypoint matching model.",
+			id: "magic-leap-community/superglue_outdoor",
+		},
+		{
 			description: "Strong keypoint detection model used to detect human pose.",
 			id: "facebook/sapiens-pose-1b",
 		},

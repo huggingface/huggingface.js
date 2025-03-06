@@ -87,6 +87,10 @@
 				"role": {
 					"type": "string",
 					"example": "user"
+				},
+				"tool_call_id": {
+					"type": "string",
+					"nullable": true
 				}
 			},
 			"title": "ChatCompletionStreamOutputTextMessage"

@@ -1,8 +1,8 @@
 from huggingface_hub import InferenceClient
 
 client = InferenceClient(
-	provider="hf-inference",
-	api_key="api_token"
+    provider="hf-inference",
+    api_key="api_token",
 )
 
 messages = [
@@ -16,7 +16,7 @@ stream = client.chat.completions.create(
 	model="meta-llama/Llama-3.1-8B-Instruct", 
 	messages=messages, 
 	max_tokens=500,
-	stream=True
+	stream=True,
 )
 
 for chunk in stream:

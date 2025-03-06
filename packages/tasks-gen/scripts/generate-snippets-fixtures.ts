@@ -19,18 +19,29 @@ import { existsSync as pathExists } from "node:fs";
 import * as fs from "node:fs/promises";
 import * as path from "node:path/posix";
 
-import type { SnippetInferenceProvider, InferenceSnippet } from "@huggingface/tasks";
-import { snippets } from "@huggingface/tasks";
+import { snippets } from "@huggingface/inference";
+import type { SnippetInferenceProvider, InferenceSnippet, ModelDataMinimal } from "@huggingface/tasks";
 
 type LANGUAGE = "sh" | "js" | "py";
 
 const TEST_CASES: {
 	testName: string;
-	model: snippets.ModelDataMinimal;
+	model: ModelDataMinimal;
 	languages: LANGUAGE[];
 	providers: SnippetInferenceProvider[];
 	opts?: Record<string, unknown>;
 }[] = [
+	{
+		testName: "automatic-speech-recognition",
+		model: {
+			id: "openai/whisper-large-v3-turbo",
+			pipeline_tag: "automatic-speech-recognition",
+			tags: [],
+			inference: "",
+		},
+		languages: ["py"],
+		providers: ["hf-inference"],
+	},
 	{
 		testName: "conversational-llm-non-stream",
 		model: {
@@ -80,6 +91,28 @@ const TEST_CASES: {
 		opts: { streaming: true },
 	},
 	{
+		testName: "document-question-answering",
+		model: {
+			id: "impira/layoutlm-invoices",
+			pipeline_tag: "document-question-answering",
+			tags: [],
+			inference: "",
+		},
+		languages: ["py"],
+		providers: ["hf-inference"],
+	},
+	{
+		testName: "image-to-image",
+		model: {
+			id: "stabilityai/stable-diffusion-xl-refiner-1.0",
+			pipeline_tag: "image-to-image",
+			tags: [],
+			inference: "",
+		},
+		languages: ["py"],
+		providers: ["hf-inference"],
+	},
+	{
 		testName: "text-to-image",
 		model: {
 			id: "black-forest-labs/FLUX.1-schnell",
@@ -89,6 +122,17 @@ const TEST_CASES: {
 		},
 		providers: ["hf-inference", "fal-ai"],
 		languages: ["sh", "js", "py"],
+	},
+	{
+		testName: "text-to-video",
+		model: {
+			id: "tencent/HunyuanVideo",
+			pipeline_tag: "text-to-video",
+			tags: [],
+			inference: "",
+		},
+		providers: ["replicate", "fal-ai"],
+		languages: ["js", "py"],
 	},
 	{
 		testName: "text-classification",
@@ -128,7 +172,7 @@ function getFixtureFolder(testName: string): string {
 }
 
 function generateInferenceSnippet(
-	model: snippets.ModelDataMinimal,
+	model: ModelDataMinimal,
 	language: LANGUAGE,
 	provider: SnippetInferenceProvider,
 	opts?: Record<string, unknown>

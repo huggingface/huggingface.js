@@ -755,9 +755,9 @@ describe.concurrent("HfInference", () => {
 			it("custom openai - OpenAI Specs", async () => {
 				const OPENAI_KEY = env.OPENAI_KEY;
 				const hf = new HfInference(OPENAI_KEY);
-				const ep = hf.endpoint("https://api.openai.com");
-				const stream = ep.chatCompletionStream({
-					model: "gpt-3.5-turbo",
+				const stream = hf.chatCompletionStream({
+					provider: "openai",
+					model: "openai/gpt-3.5-turbo",
 					messages: [{ role: "user", content: "Complete the equation one + one =" }],
 				}) as AsyncGenerator<ChatCompletionStreamOutput>;
 				let out = "";
@@ -767,6 +767,15 @@ describe.concurrent("HfInference", () => {
 					}
 				}
 				expect(out).toContain("two");
+			});
+			it("OpenAI client side routing - model should have provider as prefix", async () => {
+				await expect(
+					new HfInference("dummy_token").chatCompletion({
+						model: "gpt-3.5-turbo", // must be "openai/gpt-3.5-turbo"
+						provider: "openai",
+						messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+					})
+				).rejects.toThrowError(`Models from openai must be prefixed by "openai/". Got "gpt-3.5-turbo".`);
 			});
 		},
 		TIMEOUT
@@ -778,7 +787,7 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Fal AI",
 		() => {
-			const client = new HfInference(env.HF_FAL_KEY);
+			const client = new HfInference(env.HF_FAL_KEY ?? "dummy");
 
 			it(`textToImage - black-forest-labs/FLUX.1-schnell`, async () => {
 				const res = await client.textToImage({
@@ -809,7 +818,7 @@ describe.concurrent("HfInference", () => {
 						seed: 176,
 					},
 					provider: "fal-ai",
-					accessToken: env.HF_FAL_KEY,
+					accessToken: env.HF_FAL_KEY ?? "dummy",
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
@@ -825,7 +834,7 @@ describe.concurrent("HfInference", () => {
 						resolution: "480p",
 					},
 					provider: "fal-ai",
-					accessToken: env.HF_FAL_KEY,
+					accessToken: env.HF_FAL_KEY ?? "dummy",
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
@@ -839,7 +848,7 @@ describe.concurrent("HfInference", () => {
 						num_frames: 2,
 					},
 					provider: "fal-ai",
-					accessToken: env.HF_FAL_KEY,
+					accessToken: env.HF_FAL_KEY ?? "dummy",
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
@@ -853,7 +862,7 @@ describe.concurrent("HfInference", () => {
 						num_inference_steps: 2,
 					},
 					provider: "fal-ai",
-					accessToken: env.HF_FAL_KEY,
+					accessToken: env.HF_FAL_KEY ?? "dummy",
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
@@ -864,7 +873,7 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Replicate",
 		() => {
-			const client = new HfInference(env.HF_REPLICATE_KEY);
+			const client = new HfInference(env.HF_REPLICATE_KEY ?? "dummy");
 
 			it("textToImage canonical - black-forest-labs/FLUX.1-schnell", async () => {
 				const res = await client.textToImage({
@@ -961,7 +970,7 @@ describe.concurrent("HfInference", () => {
 
 			it("textToVideo Mochi", async () => {
 				const res = await textToVideo({
-					accessToken: env.HF_REPLICATE_KEY,
+					accessToken: env.HF_REPLICATE_KEY ?? "dummy",
 					model: "genmo/mochi-1-preview",
 					provider: "replicate",
 					inputs: "A running dog",
@@ -980,7 +989,7 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"SambaNova",
 		() => {
-			const client = new HfInference(env.HF_SAMBANOVA_KEY);
+			const client = new HfInference(env.HF_SAMBANOVA_KEY ?? "dummy");
 
 			it("chatCompletion", async () => {
 				const res = await client.chatCompletion({
@@ -1014,7 +1023,7 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Together",
 		() => {
-			const client = new HfInference(env.HF_TOGETHER_KEY);
+			const client = new HfInference(env.HF_TOGETHER_KEY ?? "dummy");
 
 			it("chatCompletion", async () => {
 				const res = await client.chatCompletion({
@@ -1069,7 +1078,7 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Nebius",
 		() => {
-			const client = new HfInference(env.HF_NEBIUS_KEY);
+			const client = new HfInference(env.HF_NEBIUS_KEY ?? "dummy");
 
 			HARDCODED_MODEL_ID_MAPPING.nebius = {
 				"meta-llama/Llama-3.1-8B-Instruct": "meta-llama/Meta-Llama-3.1-8B-Instruct",
@@ -1123,7 +1132,7 @@ describe.concurrent("HfInference", () => {
 					model: "black-forest-labs/Flux.1-dev",
 					provider: "together",
 					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
-					accessToken: env.HF_TOGETHER_KEY,
+					accessToken: env.HF_TOGETHER_KEY ?? "dummy",
 				})
 			).rejects.toThrowError(
 				"Model black-forest-labs/Flux.1-dev is not supported for task conversational and provider together"
@@ -1134,7 +1143,7 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Fireworks",
 		() => {
-			const client = new HfInference(env.HF_FIREWORKS_KEY);
+			const client = new HfInference(env.HF_FIREWORKS_KEY ?? "dummy");
 
 			HARDCODED_MODEL_ID_MAPPING["fireworks-ai"] = {
 				"deepseek-ai/DeepSeek-R1": "accounts/fireworks/models/deepseek-r1",
@@ -1190,7 +1199,7 @@ describe.concurrent("HfInference", () => {
 
 			it("chatCompletion - hyperbolic", async () => {
 				const res = await chatCompletion({
-					accessToken: env.HF_HYPERBOLIC_KEY,
+					accessToken: env.HF_HYPERBOLIC_KEY ?? "dummy",
 					model: "meta-llama/Llama-3.2-3B-Instruct",
 					provider: "hyperbolic",
 					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
@@ -1211,7 +1220,7 @@ describe.concurrent("HfInference", () => {
 
 			it("chatCompletion stream", async () => {
 				const stream = chatCompletionStream({
-					accessToken: env.HF_HYPERBOLIC_KEY,
+					accessToken: env.HF_HYPERBOLIC_KEY ?? "dummy",
 					model: "meta-llama/Llama-3.3-70B-Instruct",
 					provider: "hyperbolic",
 					messages: [{ role: "user", content: "Complete the equation 1 + 1 = , just the answer" }],
@@ -1227,7 +1236,7 @@ describe.concurrent("HfInference", () => {
 
 			it("textToImage", async () => {
 				const res = await textToImage({
-					accessToken: env.HF_HYPERBOLIC_KEY,
+					accessToken: env.HF_HYPERBOLIC_KEY ?? "dummy",
 					model: "stabilityai/stable-diffusion-2",
 					provider: "hyperbolic",
 					inputs: "award winning high resolution photo of a giant tortoise",
@@ -1241,7 +1250,7 @@ describe.concurrent("HfInference", () => {
 
 			it("textGeneration", async () => {
 				const res = await textGeneration({
-					accessToken: env.HF_HYPERBOLIC_KEY,
+					accessToken: env.HF_HYPERBOLIC_KEY ?? "dummy",
 					model: "meta-llama/Llama-3.1-405B",
 					provider: "hyperbolic",
 					inputs: "Paris is",
@@ -1260,7 +1269,7 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Novita",
 		() => {
-			const client = new HfInference(env.HF_NOVITA_KEY);
+			const client = new HfInference(env.HF_NOVITA_KEY ?? "dummy");
 
 			HARDCODED_MODEL_ID_MAPPING["novita"] = {
 				"meta-llama/llama-3.1-8b-instruct": "meta-llama/llama-3.1-8b-instruct",
@@ -1316,7 +1325,7 @@ describe.concurrent("HfInference", () => {
 				const res = await textToImage({
 					model: "black-forest-labs/FLUX.1-dev",
 					provider: "black-forest-labs",
-					accessToken: env.HF_BLACK_FOREST_LABS_KEY,
+					accessToken: env.HF_BLACK_FOREST_LABS_KEY ?? "dummy",
 					inputs: "A raccoon driving a truck",
 					parameters: {
 						height: 256,
@@ -1333,7 +1342,7 @@ describe.concurrent("HfInference", () => {
 					{
 						model: "black-forest-labs/FLUX.1-dev",
 						provider: "black-forest-labs",
-						accessToken: env.HF_BLACK_FOREST_LABS_KEY,
+						accessToken: env.HF_BLACK_FOREST_LABS_KEY ?? "dummy",
 						inputs: "A raccoon driving a truck",
 						parameters: {
 							height: 256,
@@ -1346,6 +1355,99 @@ describe.concurrent("HfInference", () => {
 				);
 				expect(res).toBeTypeOf("string");
 				expect(isUrl(res)).toBeTruthy();
+			});
+		},
+		TIMEOUT
+	);
+	describe.concurrent(
+		"Cohere",
+		() => {
+			const client = new HfInference(env.HF_COHERE_KEY ?? "dummy");
+
+			HARDCODED_MODEL_ID_MAPPING["cohere"] = {
+				"CohereForAI/c4ai-command-r7b-12-2024": "command-r7b-12-2024",
+				"CohereForAI/aya-expanse-8b": "c4ai-aya-expanse-8b",
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "CohereForAI/c4ai-command-r7b-12-2024",
+					provider: "cohere",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toContain("two");
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "CohereForAI/c4ai-command-r7b-12-2024",
+					provider: "cohere",
+					messages: [{ role: "user", content: "Say 'this is a test'" }],
+					stream: true,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+		},
+		TIMEOUT
+	);
+	describe.concurrent(
+		"Cerebras",
+		() => {
+			const client = new HfInference(env.HF_CEREBRAS_KEY ?? "dummy");
+
+			HARDCODED_MODEL_ID_MAPPING["cerebras"] = {
+				"meta-llama/llama-3.1-8b-instruct": "llama3.1-8b",
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "meta-llama/llama-3.1-8b-instruct",
+					provider: "cerebras",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toContain("two");
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "meta-llama/llama-3.1-8b-instruct",
+					provider: "cerebras",
+					messages: [{ role: "user", content: "Say 'this is a test'" }],
+					stream: true,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
 			});
 		},
 		TIMEOUT

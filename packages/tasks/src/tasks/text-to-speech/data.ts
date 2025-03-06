@@ -76,6 +76,10 @@ const taskData: TaskDataCustom = {
 			description: "An application that synthesizes emotional speech for diverse speaker prompts.",
 			id: "parler-tts/parler-tts-expresso",
 		},
+		{
+			description: "An application that generates podcast episodes.",
+			id: "ngxson/kokoro-podcast-generator",
+		},
 	],
 	summary:
 		"Text-to-Speech (TTS) is the task of generating natural sounding speech given text input. TTS models can be extended to have a single model that generates speech for multiple speakers and multiple languages.",
