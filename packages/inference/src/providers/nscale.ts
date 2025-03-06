@@ -14,10 +14,10 @@ const makeHeaders = (params: HeaderParams): Record<string, string> => {
 };
 
 const makeUrl = (params: UrlParams): string => {
-    if (params.task === "text-to-image") {
+	if (params.task === "text-to-image") {
 		return `${params.baseUrl}/v1/images/generations`;
 	}
-    if (params.task === "text-generation") {
+	if (params.task === "text-generation") {
 		return `${params.baseUrl}/v1/chat/completions`;
 	}
 	return `${params.baseUrl}/v1/chat/completions`;

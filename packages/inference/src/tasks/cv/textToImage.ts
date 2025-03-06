@@ -38,6 +38,8 @@ function getResponseFormatArg(provider: InferenceProvider) {
 			return undefined;
 		case "together":
 			return { response_format: "base64" };
+		case "nscale":
+			return { response_format: "b64_json" };
 		default:
 			return undefined;
 	}

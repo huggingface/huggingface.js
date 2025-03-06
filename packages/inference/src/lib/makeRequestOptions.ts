@@ -8,6 +8,7 @@ import { HF_INFERENCE_CONFIG } from "../providers/hf-inference";
 import { HYPERBOLIC_CONFIG } from "../providers/hyperbolic";
 import { NEBIUS_CONFIG } from "../providers/nebius";
 import { NOVITA_CONFIG } from "../providers/novita";
+import { NSCALE_CONFIG } from "../providers/nscale";
 import { REPLICATE_CONFIG } from "../providers/replicate";
 import { SAMBANOVA_CONFIG } from "../providers/sambanova";
 import { TOGETHER_CONFIG } from "../providers/together";
@@ -16,7 +17,6 @@ import type { InferenceProvider, InferenceTask, Options, ProviderConfig, Request
 import { isUrl } from "./isUrl";
 import { version as packageVersion, name as packageName } from "../../package.json";
 import { getProviderModelId } from "./getProviderModelId";
-import { NSCALE_CONFIG } from "../providers/nscale";
 
 const HF_HUB_INFERENCE_PROXY_TEMPLATE = `${HF_ROUTER_URL}/{{PROVIDER}}`;
 
@@ -39,8 +39,8 @@ const providerConfigs: Record<InferenceProvider, ProviderConfig> = {
 	hyperbolic: HYPERBOLIC_CONFIG,
 	openai: OPENAI_CONFIG,
 	nebius: NEBIUS_CONFIG,
-	nscale: NSCALE_CONFIG,
 	novita: NOVITA_CONFIG,
+	nscale: NSCALE_CONFIG,
 	replicate: REPLICATE_CONFIG,
 	sambanova: SAMBANOVA_CONFIG,
 	together: TOGETHER_CONFIG,

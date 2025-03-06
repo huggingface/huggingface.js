@@ -17,6 +17,7 @@ if (!env.HF_TOKEN) {
 	console.warn("Set HF_TOKEN in the env to run the tests for better rate limits");
 }
 
+// add skip on all tests that are not nscale
 describe.concurrent("HfInference", () => {
 	// Individual tests can be ran without providing an api key, however running all tests without an api key will result in rate limiting error.
 
@@ -1456,11 +1457,13 @@ describe.concurrent("HfInference", () => {
 		"Nscale",
 		() => {
 			const client = new HfInference(env.HF_NSCALE_KEY ?? "dummy");
-		
+
 			HARDCODED_MODEL_ID_MAPPING["nscale"] = {
 				"meta-llama/Llama-3.1-8B-Instruct": "meta-llama/Llama-3.1-8B-Instruct",
+				"meta-llama/Llama-3.2-11B-Vision-Instruct": "meta-llama/Llama-3.2-11B-Vision-Instruct",
+				"black-forest-labs/FLUX.1-schnell": "black-forest-labs/FLUX.1-schnell",
 			};
-			// Test 1: Text-to-text with Llama-3.1-8B-Instruct
+
 			it("chatCompletion", async () => {
 				const res = await client.chatCompletion({
 					model: "meta-llama/Llama-3.1-8B-Instruct",
@@ -1470,6 +1473,69 @@ describe.concurrent("HfInference", () => {
 				if (res.choices && res.choices.length > 0) {
 					const completion = res.choices[0].message?.content;
 					expect(completion).toContain("two");
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "meta-llama/Llama-3.1-8B-Instruct",
+					provider: "nscale",
+					messages: [{ role: "user", content: "Say this is a test" }],
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+
+			it("textToImage", async () => {
+				const res = await client.textToImage({
+					model: "black-forest-labs/FLUX.1-schnell",
+					provider: "nscale",
+					inputs: "A raccoon driving a truck through a forest at sunset",
+					parameters: {
+						height: 512,
+						width: 512,
+						num_inference_steps: 20,
+						seed: 42,
+						response_format: "url",
+					},
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("vision capabilities", async () => {
+				const res = await client.chatCompletion({
+					model: "meta-llama/Llama-3.2-11B-Vision-Instruct",
+					provider: "nscale",
+					messages: [
+						{
+							role: "user",
+							content: [
+								{ type: "text", text: "What's in this image?" },
+								{
+									type: "image_url",
+									image_url: {
+										url: `data:image/png;base64,${Buffer.from(readTestFile("invoice.png")).toString("base64")}`,
+									},
+								},
+							],
+						},
+					],
+				});
+
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toBeTruthy();
+					expect(typeof completion).toBe("string");
 				}
 			});
 		},
