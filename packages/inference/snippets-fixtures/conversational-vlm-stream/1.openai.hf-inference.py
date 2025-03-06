@@ -1,8 +1,8 @@
 from openai import OpenAI
 
 client = OpenAI(
-	base_url="https://router.huggingface.co/hf-inference/v1",
-	api_key="api_token"
+    base_url="",
+    api_key="api_token"
 )
 
 messages = [
@@ -24,11 +24,11 @@ messages = [
 ]
 
 stream = client.chat.completions.create(
-    model="meta-llama/Llama-3.2-11B-Vision-Instruct", 
-	messages=messages, 
-	max_tokens=500,
-	stream=True
+    model="meta-llama/Llama-3.2-11B-Vision-Instruct",
+    messages=messages,
+    max_tokens=500,
+    stream=True
 )
 
 for chunk in stream:
-	print(chunk.choices[0].delta.content, end="")
+    print(chunk.choices[0].delta.content, end="")
