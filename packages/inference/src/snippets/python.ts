@@ -27,14 +27,18 @@ interface TemplateParams {
 
 interface SnippetTemplateParams {
 	accessToken: string;
-	baseUrl: string;
+	baseUrl?: string;
 	inputs: string | object;
-	modelId: string;
+	model: ModelDataMinimal;
 	provider: InferenceProvider;
 	providerModelId: string;
 }
 
-const TOOLS = ["huggingface_hub", "requests", "fal_ai", "openai"];
+const TOOLS = ["huggingface_hub", "requests", "fal_client", "openai"];
+
+Handlebars.registerHelper("equals", function (value1, value2) {
+	return value1 === value2;
+});
 
 const rootDirFinder = (): string => {
 	let currentPath = path.normalize(import.meta.url).replace("file:", "");
@@ -98,26 +102,7 @@ const HFH_INFERENCE_CLIENT_METHODS: Partial<Record<WidgetType, string>> = {
 };
 
 const snippetImportInferenceClient = loadTemplate("huggingface_hub", "importInferenceClient");
-const snippetInferenceClientAutomaticSpeechRecognition = loadTemplate("huggingface_hub", "automaticSpeechRecognition");
-const snippetInferenceClientBasic = loadTemplate("huggingface_hub", "basic");
-const snippetInferenceClientImageToImage = loadTemplate("huggingface_hub", "imageToImage");
-const snippetInferenceClientTextToImage = loadTemplate("huggingface_hub", "textToImage");
-const snippetInferenceClientTextToVideo = loadTemplate("huggingface_hub", "textToVideo");
-const snippetInferenceClientDocumentQuestionAnswering = loadTemplate("huggingface_hub", "documentQuestionAnswering");
-
-const snippetFalAITextToImage = loadTemplate("fal_ai", "textToImage");
-
 const snippetImportRequests = loadTemplate("requests", "importRequests");
-const snippetRequestsBasic = loadTemplate("requests", "basic");
-const snippetRequestsBasicFile = loadTemplate("requests", "basicFile");
-const snippetRequestsDocumentQuestionAnswering = loadTemplate("requests", "documentQuestionAnswering");
-const snippetRequestsImageToImage = loadTemplate("requests", "imageToImage");
-const snippetRequestsTabular = loadTemplate("requests", "tabular");
-const snippetRequestsTextToImage = loadTemplate("requests", "textToImage");
-const snippetRequestsTextToAudioOther = loadTemplate("requests", "textToAudioOther");
-const snippetRequestsTextToAudioTransformers = loadTemplate("requests", "textToAudioTransformers");
-const snippetRequestZeroShotClassification = loadTemplate("requests", "zeroShotClassification");
-const snippetRequestZeroShotImageClassification = loadTemplate("requests", "zeroShotImageClassification");
 
 const generateSnippets = (templateName: string, params: SnippetTemplateParams): InferenceSnippet[] => {
 	return TOOLS.map((tool) => {
@@ -125,11 +110,20 @@ const generateSnippets = (templateName: string, params: SnippetTemplateParams): 
 		if (!template) {
 			return;
 		}
+		if (tool === "huggingface_hub" && templateName === "basic") {
+			if (!(params.model.pipeline_tag && params.model.pipeline_tag in HFH_INFERENCE_CLIENT_METHODS)) {
+				return;
+			}
+			return {
+				client: tool,
+				content: template({ ...params, methodName: HFH_INFERENCE_CLIENT_METHODS[params.model.pipeline_tag] }),
+			};
+		}
 		return {
 			client: tool,
 			content: template(params),
 		};
-	}).filter((snippet) => snippet !== undefined) as InferenceSnippet[];
+	}).filter((snippet) => snippet !== undefined && snippet.content.trim()) as InferenceSnippet[];
 };
 
 const snippetConversational = (
@@ -164,7 +158,7 @@ const snippetConversational = (
 				attributeValueConnector: "=",
 			}),
 		},
-		modelId: model.id,
+		model,
 		provider,
 		providerModelId: providerModelId ?? model.id,
 	};
@@ -172,60 +166,64 @@ const snippetConversational = (
 	return generateSnippets(templateName, params);
 };
 
-const snippetZeroShotClassification = (model: ModelDataMinimal): InferenceSnippet[] => {
-	return [
-		{
-			client: "requests",
-			content: snippetRequestZeroShotClassification({
-				inputs: getModelInputSnippet(model),
-			}),
-		},
-	];
+const snippetZeroShotClassification = (
+	model: ModelDataMinimal,
+	accessToken: string,
+	provider: InferenceProvider,
+	providerModelId?: string
+): InferenceSnippet[] => {
+	return generateSnippets("zeroShotClassification", {
+		accessToken: accessToken,
+		inputs: getModelInputSnippet(model),
+		model: model,
+		provider: provider,
+		providerModelId: providerModelId ?? model.id,
+	});
 };
 
-const snippetZeroShotImageClassification = (model: ModelDataMinimal): InferenceSnippet[] => {
-	return [
-		{
-			client: "requests",
-			content: snippetRequestZeroShotImageClassification({
-				inputs: getModelInputSnippet(model),
-			}),
-		},
-	];
+const snippetZeroShotImageClassification = (
+	model: ModelDataMinimal,
+	accessToken: string,
+	provider: InferenceProvider,
+	providerModelId?: string
+): InferenceSnippet[] => {
+	return generateSnippets("zeroShotImageClassification", {
+		accessToken: accessToken,
+		inputs: getModelInputSnippet(model),
+		model: model,
+		provider: provider,
+		providerModelId: providerModelId ?? model.id,
+	});
 };
 
-const snippetBasic = (model: ModelDataMinimal): InferenceSnippet[] => {
-	return [
-		...(model.pipeline_tag && model.pipeline_tag in HFH_INFERENCE_CLIENT_METHODS
-			? [
-					{
-						client: "huggingface_hub",
-						content: snippetInferenceClientBasic({
-							inputs: getModelInputSnippet(model),
-							modelId: model.id,
-							methodName: HFH_INFERENCE_CLIENT_METHODS[model.pipeline_tag],
-						}),
-					},
-			  ]
-			: []),
-		{
-			client: "requests",
-			content: snippetRequestsBasic({
-				inputs: getModelInputSnippet(model),
-			}),
-		},
-	];
+const snippetBasic = (
+	model: ModelDataMinimal,
+	accessToken: string,
+	provider: InferenceProvider,
+	providerModelId?: string
+): InferenceSnippet[] => {
+	return generateSnippets("basic", {
+		accessToken: accessToken,
+		inputs: getModelInputSnippet(model),
+		model: model,
+		provider: provider,
+		providerModelId: providerModelId ?? model.id,
+	});
 };
 
-const snippetFile = (model: ModelDataMinimal): InferenceSnippet[] => {
-	return [
-		{
-			client: "requests",
-			content: snippetRequestsBasicFile({
-				inputs: getModelInputSnippet(model),
-			}),
-		},
-	];
+const snippetFile = (
+	model: ModelDataMinimal,
+	accessToken: string,
+	provider: InferenceProvider,
+	providerModelId?: string
+): InferenceSnippet[] => {
+	return generateSnippets("basicFile", {
+		accessToken: accessToken,
+		inputs: getModelInputSnippet(model),
+		model: model,
+		provider: provider,
+		providerModelId: providerModelId ?? model.id,
+	});
 };
 
 const snippetTextToImage = (
@@ -234,145 +232,105 @@ const snippetTextToImage = (
 	provider: InferenceProvider,
 	providerModelId?: string
 ): InferenceSnippet[] => {
-	return [
-		{
-			client: "huggingface_hub",
-			content: snippetInferenceClientTextToImage({
-				inputs: getModelInputSnippet(model),
-				modelId: model.id,
-			}),
-		},
-		...(provider === "fal-ai"
-			? [
-					{
-						client: "fal-client",
-						content: snippetFalAITextToImage({
-							modelId: providerModelId ?? model.id,
-							inputs: getModelInputSnippet(model),
-						}),
-					},
-			  ]
-			: []),
-		...(provider === "hf-inference"
-			? [
-					{
-						client: "requests",
-						content: snippetRequestsTextToImage({
-							inputs: getModelInputSnippet(model),
-						}),
-					},
-			  ]
-			: []),
-	];
+	return generateSnippets("textToImage", {
+		accessToken: accessToken,
+		inputs: getModelInputSnippet(model),
+		model: model,
+		provider: provider,
+		providerModelId: providerModelId ?? model.id,
+	});
 };
 
 const snippetTextToVideo = (
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: InferenceProvider
+	provider: InferenceProvider,
+	providerModelId?: string
 ): InferenceSnippet[] => {
-	return ["fal-ai", "replicate"].includes(provider)
-		? [
-				{
-					client: "huggingface_hub",
-					content: snippetInferenceClientTextToVideo({
-						inputs: getModelInputSnippet(model),
-						modelId: model.id,
-					}),
-				},
-		  ]
-		: [];
+	return generateSnippets("textToVideo", {
+		accessToken: accessToken,
+		inputs: getModelInputSnippet(model),
+		model: model,
+		provider: provider,
+		providerModelId: providerModelId ?? model.id,
+	});
 };
 
-const snippetTabular = (model: ModelDataMinimal): InferenceSnippet[] => {
-	return [
-		{
-			client: "requests",
-			content: snippetRequestsTabular({
-				inputs: getModelInputSnippet(model),
-			}),
-		},
-	];
+const snippetTabular = (
+	model: ModelDataMinimal,
+	accessToken: string,
+	provider: InferenceProvider,
+	providerModelId?: string
+): InferenceSnippet[] => {
+	return generateSnippets("tabular", {
+		accessToken: accessToken,
+		inputs: getModelInputSnippet(model),
+		model: model,
+		provider: provider,
+		providerModelId: providerModelId ?? model.id,
+	});
 };
 
-const snippetTextToAudio = (model: ModelDataMinimal): InferenceSnippet[] => {
-	// Transformers TTS pipeline and api-inference-community (AIC) pipeline outputs are diverged
-	// with the latest update to inference-api (IA).
-	// Transformers IA returns a byte object (wav file), whereas AIC returns wav and sampling_rate.
-	if (model.library_name === "transformers") {
-		return [
-			{
-				client: "requests",
-				content: snippetRequestsTextToAudioTransformers({
-					inputs: getModelInputSnippet(model),
-				}),
-			},
-		];
-	} else {
-		return [
-			{
-				client: "requests",
-				content: snippetRequestsTextToAudioOther({
-					inputs: getModelInputSnippet(model),
-				}),
-			},
-		];
-	}
+const snippetTextToAudio = (
+	model: ModelDataMinimal,
+	accessToken: string,
+	provider: InferenceProvider,
+	providerModelId?: string
+): InferenceSnippet[] => {
+	return generateSnippets("textToAudio", {
+		accessToken: accessToken,
+		inputs: getModelInputSnippet(model),
+		model: model,
+		provider: provider,
+		providerModelId: providerModelId ?? model.id,
+	});
 };
 
-const snippetAutomaticSpeechRecognition = (model: ModelDataMinimal): InferenceSnippet[] => {
-	return [
-		{
-			client: "huggingface_hub",
-			content: snippetInferenceClientAutomaticSpeechRecognition({
-				inputs: getModelInputSnippet(model),
-				modelId: model.id,
-			}),
-		},
-		snippetFile(model)[0],
-	];
+const snippetAutomaticSpeechRecognition = (
+	model: ModelDataMinimal,
+	accessToken: string,
+	provider: InferenceProvider,
+	providerModelId?: string
+): InferenceSnippet[] => {
+	return generateSnippets("automaticSpeechRecognition", {
+		accessToken: accessToken,
+		inputs: getModelInputSnippet(model),
+		model: model,
+		provider: provider,
+		providerModelId: providerModelId ?? model.id,
+	});
 };
 
-const snippetDocumentQuestionAnswering = (model: ModelDataMinimal): InferenceSnippet[] => {
+const snippetDocumentQuestionAnswering = (
+	model: ModelDataMinimal,
+	accessToken: string,
+	provider: InferenceProvider,
+	providerModelId?: string
+): InferenceSnippet[] => {
 	const inputsAsStr = getModelInputSnippet(model) as string;
 	const inputsAsObj = JSON.parse(inputsAsStr);
-
-	return [
-		{
-			client: "huggingface_hub",
-			content: snippetInferenceClientDocumentQuestionAnswering({
-				inputs: inputsAsObj,
-				modelId: model.id,
-			}),
-		},
-		{
-			client: "requests",
-			content: snippetRequestsDocumentQuestionAnswering({
-				inputs: inputsAsStr,
-			}),
-		},
-	];
+	return generateSnippets("documentQuestionAnswering", {
+		accessToken: accessToken,
+		inputs: { asObj: inputsAsObj, asStr: inputsAsStr },
+		model: model,
+		provider: provider,
+		providerModelId: providerModelId ?? model.id,
+	});
 };
 
-const snippetImageToImage = (model: ModelDataMinimal): InferenceSnippet[] => {
-	const inputsAsStr = getModelInputSnippet(model) as string;
-	const inputsAsObj = JSON.parse(inputsAsStr);
-
-	return [
-		{
-			client: "huggingface_hub",
-			content: snippetInferenceClientImageToImage({
-				inputs: inputsAsObj,
-				modelId: model.id,
-			}),
-		},
-		{
-			client: "requests",
-			content: snippetRequestsImageToImage({
-				inputs: inputsAsObj,
-			}),
-		},
-	];
+const snippetImageToImage = (
+	model: ModelDataMinimal,
+	accessToken: string,
+	provider: InferenceProvider,
+	providerModelId?: string
+): InferenceSnippet[] => {
+	return generateSnippets("imageToImage", {
+		accessToken: accessToken,
+		inputs: JSON.parse(getModelInputSnippet(model) as string),
+		model: model,
+		provider: provider,
+		providerModelId: providerModelId ?? model.id,
+	});
 };
 
 const pythonSnippets: Partial<

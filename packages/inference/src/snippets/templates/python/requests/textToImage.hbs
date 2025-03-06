@@ -1,3 +1,4 @@
+{{#if (equals provider "hf-inference")}}
 def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
 	return response.content
@@ -10,3 +11,4 @@ image_bytes = query({
 import io
 from PIL import Image
 image = Image.open(io.BytesIO(image_bytes))
+{{/if}}
