@@ -1,9 +1,9 @@
 def query(payload):
-	response = requests.post(API_URL, headers=headers, json=payload)
-	return response.content
+    response = requests.post(API_URL, headers=headers, json=payload)
+    return response.content
 
 response = query({
-	"inputs": {
-		"data": {{{inputs}}}
-	},
+    "inputs": {
+        "data": {{{inputs}}}
+    },
 })

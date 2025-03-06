@@ -1,10 +1,10 @@
 {{#if (equals provider "hf-inference")}}
 def query(payload):
-	response = requests.post(API_URL, headers=headers, json=payload)
-	return response.content
+    response = requests.post(API_URL, headers=headers, json=payload)
+    return response.content
 
 image_bytes = query({
-	"inputs": {{{inputs}}},
+    "inputs": {{{inputs}}},
 })
 
 # You can access the image with PIL.Image for example
