@@ -100,6 +100,9 @@ export async function downloadFileToCacheDir(
 	await mkdir(dirname(blobPath), { recursive: true });
 	await mkdir(dirname(pointerPath), { recursive: true });
 
+	// if we have the pointer file, we can shortcut the download
+	if (await exists(pointerPath, true)) return pointerPath;
+
 	// We might already have the blob but not the pointer
 	// shortcut the download if needed
 	if (await exists(blobPath)) {
