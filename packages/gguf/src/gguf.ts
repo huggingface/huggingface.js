@@ -410,6 +410,7 @@ export async function ggufAllShards(
 		fetch?: typeof fetch;
 		additionalFetchHeaders?: Record<string, string>;
 		parallelDownloads?: number;
+		allowLocalFile?: boolean;
 	}
 ): Promise<{ shards: GGUFParseOutput[]; parameterCount: number }> {
 	const parallelDownloads = params?.parallelDownloads ?? PARALLEL_DOWNLOADS;

@@ -125,3 +125,44 @@ export const GGUF_QUANT_DESCRIPTIONS: Record<GGMLQuantizationType, { txt: string
 		src_url: "https://en.wikipedia.org/wiki/Bfloat16_floating-point_format",
 	},
 };
+
+const QK_K = 256;
+const calcBPW = (blockSize: number, typeSize: number) => {
+	return (typeSize * 8) / blockSize;
+};
+
+// copied from https://github.com/ggml-org/llama.cpp/tree/master/gguf-py/gguf/constants.py
+// map quantization type to element size in bits per weight (example: Q4_K -> 4.5 bpw)
+export const GGML_QUANT_SIZES = {
+	[GGMLQuantizationType.F32]: calcBPW(1, 4),
+	[GGMLQuantizationType.F16]: calcBPW(1, 2),
+	[GGMLQuantizationType.Q4_0]: calcBPW(32, 2 + 16),
+	[GGMLQuantizationType.Q4_1]: calcBPW(32, 2 + 2 + 16),
+	[GGMLQuantizationType.Q5_0]: calcBPW(32, 2 + 4 + 16),
+	[GGMLQuantizationType.Q5_1]: calcBPW(32, 2 + 2 + 4 + 16),
+	[GGMLQuantizationType.Q8_0]: calcBPW(32, 2 + 32),
+	[GGMLQuantizationType.Q8_1]: calcBPW(32, 4 + 4 + 32),
+	[GGMLQuantizationType.Q2_K]: calcBPW(256, 2 + 2 + QK_K / 16 + QK_K / 4),
+	[GGMLQuantizationType.Q3_K]: calcBPW(256, 2 + QK_K / 4 + QK_K / 8 + 12),
+	[GGMLQuantizationType.Q4_K]: calcBPW(256, 2 + 2 + QK_K / 2 + 12),
+	[GGMLQuantizationType.Q5_K]: calcBPW(256, 2 + 2 + QK_K / 2 + QK_K / 8 + 12),
+	[GGMLQuantizationType.Q6_K]: calcBPW(256, 2 + QK_K / 2 + QK_K / 4 + QK_K / 16),
+	[GGMLQuantizationType.Q8_K]: calcBPW(256, 4 + QK_K + QK_K / 8),
+	[GGMLQuantizationType.IQ2_XXS]: calcBPW(256, 2 + QK_K / 4),
+	[GGMLQuantizationType.IQ2_XS]: calcBPW(256, 2 + QK_K / 4 + QK_K / 32),
+	[GGMLQuantizationType.IQ3_XXS]: calcBPW(256, 2 + QK_K / 4 + QK_K / 8),
+	[GGMLQuantizationType.IQ1_S]: calcBPW(256, 2 + QK_K / 8 + QK_K / 16),
+	[GGMLQuantizationType.IQ4_NL]: calcBPW(32, 2 + 16),
+	[GGMLQuantizationType.IQ3_S]: calcBPW(256, 2 + QK_K / 4 + QK_K / 8 + QK_K / 32 + 4),
+	[GGMLQuantizationType.IQ2_S]: calcBPW(256, 2 + QK_K / 4 + QK_K / 16),
+	[GGMLQuantizationType.IQ4_XS]: calcBPW(256, 2 + 2 + QK_K / 2 + QK_K / 64),
+	[GGMLQuantizationType.I8]: calcBPW(1, 1),
+	[GGMLQuantizationType.I16]: calcBPW(1, 2),
+	[GGMLQuantizationType.I32]: calcBPW(1, 4),
+	[GGMLQuantizationType.I64]: calcBPW(1, 8),
+	[GGMLQuantizationType.F64]: calcBPW(1, 8),
+	[GGMLQuantizationType.IQ1_M]: calcBPW(256, QK_K / 8 + QK_K / 16 + QK_K / 32),
+	[GGMLQuantizationType.BF16]: calcBPW(1, 2),
+	// [GGMLQuantizationType.TQ1_0]:   calcBPW(256, 2 + 4 * 13),
+	// [GGMLQuantizationType.TQ2_0]:   calcBPW(256, 2 + 64),
+};
