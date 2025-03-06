@@ -8,8 +8,50 @@ import {
 	stringifyGenerationConfig,
 	stringifyMessages,
 } from "@huggingface/tasks";
-import { makeRequestOptions } from "../lib/makeRequestOptions";
 import type { InferenceProvider } from "../types";
+import fs from "fs";
+import Handlebars from "handlebars";
+import path from "path";
+import { existsSync as pathExists } from "node:fs";
+
+interface TemplateParams {
+	accessToken?: string;
+	provider?: InferenceProvider;
+	modelId?: string;
+	importInferenceClient?: string;
+	messagesStr?: string;
+	configStr?: string;
+	baseUrl?: string;
+	inputs?: string | ChatCompletionInputMessage[];
+}
+
+const rootDirFinder = (): string => {
+	let currentPath = path.normalize(import.meta.url).replace("file:", "");
+
+	while (currentPath !== "/") {
+		if (pathExists(path.join(currentPath, "package.json"))) {
+			return currentPath;
+		}
+
+		currentPath = path.normalize(path.join(currentPath, ".."));
+	}
+
+	return "/";
+};
+
+const loadTemplate = (language: string, tool: string, templateName: string): ((data: TemplateParams) => string) => {
+	const templatePath = path.join(
+		rootDirFinder(),
+		"src",
+		"snippets",
+		"templates",
+		language,
+		tool,
+		`${templateName}.hbs`
+	);
+	const template = fs.readFileSync(templatePath, "utf8");
+	return Handlebars.compile<TemplateParams>(template);
+};
 
 const HFH_INFERENCE_CLIENT_METHODS: Partial<Record<WidgetType, string>> = {
 	"audio-classification": "audio_classification",
@@ -41,14 +83,13 @@ const HFH_INFERENCE_CLIENT_METHODS: Partial<Record<WidgetType, string>> = {
 	"tabular-regression": "tabular_regression",
 };
 
-const snippetImportInferenceClient = (accessToken: string, provider: InferenceProvider): string =>
-	`\
-from huggingface_hub import InferenceClient
-
-client = InferenceClient(
-    provider="${provider}",
-    api_key="${accessToken || "{API_TOKEN}"}",
-)`;
+const snippetImportInferenceClient = loadTemplate("python", "huggingface_hub", "importInferenceClient");
+const snippetOpenAIConversational = loadTemplate("python", "openai", "conversational");
+const snippetOpenAIConversationalStream = loadTemplate("python", "openai", "conversationalStream");
+const snippetInferenceClientConversational = loadTemplate("python", "huggingface_hub", "conversational");
+const snippetInferenceClientConversationalStream = loadTemplate("python", "huggingface_hub", "conversationalStream");
+const snippetRequestZeroShotClassification = loadTemplate("python", "requests", "zeroShotClassification");
+const snippetRequestZeroShotImageClassification = loadTemplate("python", "requests", "zeroShotImageClassification");
 
 const snippetConversational = (
 	model: ModelDataMinimal,
@@ -78,98 +119,54 @@ const snippetConversational = (
 		attributeValueConnector: "=",
 	});
 
-	makeRequestOptions(
-		{
-			messages,
-			model: providerModelId,
-			accessToken,
-			provider,
-		},
-		{
-			task: "text-generation",
-			chatCompletion: true,
-			__skipModelIdResolution: true,
-		}
-	).then((res) => console.log(res));
-
 	if (streaming) {
 		return [
 			{
 				client: "huggingface_hub",
-				content: `\
-${snippetImportInferenceClient(accessToken, provider)}
-
-messages = ${messagesStr}
-
-stream = client.chat.completions.create(
-	model="${model.id}", 
-	messages=messages,
-	${configStr}
-	stream=True,
-)
-
-for chunk in stream:
-    print(chunk.choices[0].delta.content, end="")`,
+				content: snippetInferenceClientConversationalStream({
+					accessToken,
+					provider,
+					modelId: model.id,
+					importInferenceClient: snippetImportInferenceClient({ accessToken, provider }),
+					messagesStr,
+					configStr,
+				}),
 			},
 			{
 				client: "openai",
-				content: `\
-from openai import OpenAI
-
-client = OpenAI(
-	base_url="${openAIbaseUrl(provider)}",
-	api_key="${accessToken || "{API_TOKEN}"}"
-)
-
-messages = ${messagesStr}
-
-stream = client.chat.completions.create(
-    model="${providerModelId ?? model.id}", 
-	messages=messages, 
-	${configStr}
-	stream=True
-)
-
-for chunk in stream:
-	print(chunk.choices[0].delta.content, end="")`,
+				content: snippetOpenAIConversationalStream({
+					accessToken,
+					provider,
+					modelId: providerModelId ?? model.id,
+					importInferenceClient: snippetImportInferenceClient({ accessToken, provider }),
+					messagesStr,
+					configStr,
+				}),
 			},
 		];
 	} else {
 		return [
 			{
 				client: "huggingface_hub",
-				content: `\
-${snippetImportInferenceClient(accessToken, provider)}
-
-messages = ${messagesStr}
-
-completion = client.chat.completions.create(
-    model="${model.id}", 
-	messages=messages, 
-	${configStr}
-)
-
-print(completion.choices[0].message)`,
+				content: snippetInferenceClientConversational({
+					accessToken,
+					provider,
+					modelId: model.id,
+					importInferenceClient: snippetImportInferenceClient({ accessToken, provider }),
+					messagesStr,
+					configStr,
+				}),
 			},
 			{
 				client: "openai",
-				content: `\
-from openai import OpenAI
-
-client = OpenAI(
-	base_url="${openAIbaseUrl(provider)}",
-	api_key="${accessToken || "{API_TOKEN}"}"
-)
-
-messages = ${messagesStr}
-
-completion = client.chat.completions.create(
-	model="${providerModelId ?? model.id}", 
-	messages=messages, 
-	${configStr}
-)
-
-print(completion.choices[0].message)`,
+				content: snippetOpenAIConversational({
+					accessToken,
+					provider,
+					modelId: providerModelId ?? model.id,
+					messagesStr,
+					configStr,
+					baseUrl: openAIbaseUrl(provider),
+				}),
 			},
 		];
 	}
@@ -179,15 +176,9 @@ const snippetZeroShotClassification = (model: ModelDataMinimal): InferenceSnippe
 	return [
 		{
 			client: "requests",
-			content: `\
-def query(payload):
-    response = requests.post(API_URL, headers=headers, json=payload)
-    return response.json()
-
-output = query({
-    "inputs": ${getModelInputSnippet(model)},
-    "parameters": {"candidate_labels": ["refund", "legal", "faq"]},
-})`,
+			content: snippetRequestZeroShotClassification({
+				inputs: getModelInputSnippet(model),
+			}),
 		},
 	];
 };
@@ -196,20 +187,9 @@ const snippetZeroShotImageClassification = (model: ModelDataMinimal): InferenceS
 	return [
 		{
 			client: "requests",
-			content: `def query(data):
-	with open(data["image_path"], "rb") as f:
-		img = f.read()
-	payload={
-		"parameters": data["parameters"],
-		"inputs": base64.b64encode(img).decode("utf-8")
-	}
-	response = requests.post(API_URL, headers=headers, json=payload)
-	return response.json()
-
-output = query({
-	"image_path": ${getModelInputSnippet(model)},
-	"parameters": {"candidate_labels": ["cat", "dog", "llama"]},
-})`,
+			content: snippetRequestZeroShotImageClassification({
+				inputs: getModelInputSnippet(model),
+			}),
 		},
 	];
 };
@@ -225,7 +205,7 @@ const snippetBasic = (
 					{
 						client: "huggingface_hub",
 						content: `\
-${snippetImportInferenceClient(accessToken, provider)}
+${snippetImportInferenceClient({ accessToken, provider })}
 
 result = client.${HFH_INFERENCE_CLIENT_METHODS[model.pipeline_tag]}(
 	inputs=${getModelInputSnippet(model)},
@@ -277,7 +257,7 @@ const snippetTextToImage = (
 		{
 			client: "huggingface_hub",
 			content: `\
-${snippetImportInferenceClient(accessToken, provider)}
+${snippetImportInferenceClient({ accessToken, provider })}
 
 # output is a PIL.Image object
 image = client.text_to_image(
@@ -336,7 +316,7 @@ const snippetTextToVideo = (
 				{
 					client: "huggingface_hub",
 					content: `\
-${snippetImportInferenceClient(accessToken, provider)}
+${snippetImportInferenceClient({ accessToken, provider })}
 
 video = client.text_to_video(
 	${getModelInputSnippet(model)},
@@ -411,7 +391,7 @@ const snippetAutomaticSpeechRecognition = (
 	return [
 		{
 			client: "huggingface_hub",
-			content: `${snippetImportInferenceClient(accessToken, provider)}
+			content: `${snippetImportInferenceClient({ accessToken, provider })}
 output = client.automatic_speech_recognition(${getModelInputSnippet(model)}, model="${model.id}")`,
 		},
 		snippetFile(model)[0],
@@ -429,7 +409,7 @@ const snippetDocumentQuestionAnswering = (
 	return [
 		{
 			client: "huggingface_hub",
-			content: `${snippetImportInferenceClient(accessToken, provider)}
+			content: `${snippetImportInferenceClient({ accessToken, provider })}
 output = client.document_question_answering(
     "${inputsAsObj.image}",
 	question="${inputsAsObj.question}",
@@ -463,7 +443,7 @@ const snippetImageToImage = (
 	return [
 		{
 			client: "huggingface_hub",
-			content: `${snippetImportInferenceClient(accessToken, provider)}
+			content: `${snippetImportInferenceClient({ accessToken, provider })}
 # output is a PIL.Image object
 image = client.image_to_image(
     "${inputsAsObj.image}",

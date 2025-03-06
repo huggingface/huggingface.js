@@ -1,0 +1,13 @@
+{{{importInferenceClient}}}
+
+messages = {{{messagesStr}}}
+
+stream = client.chat.completions.create(
+	model="{{{modelId}}}",
+	messages=messages,
+	{{{configStr}}}
+	stream=True,
+)
+
+for chunk in stream:
+    print(chunk.choices[0].delta.content, end="")

@@ -1,0 +1,11 @@
+{{{importInferenceClient}}}
+
+messages = {{{messagesStr}}}
+
+completion = client.chat.completions.create(
+    model="{{{modelId}}}",
+    messages=messages,
+    {{{configStr}}}
+)
+
+print(completion.choices[0].message)

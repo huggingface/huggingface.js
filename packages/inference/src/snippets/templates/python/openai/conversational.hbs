@@ -1,0 +1,16 @@
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="{{{baseUrl}}}",
+    api_key="{{{accessToken}}}"
+)
+
+messages = {{{messagesStr}}}
+
+completion = client.chat.completions.create(
+    model="{{{modelId}}}",
+    messages=messages,
+    {{{configStr}}}
+)
+
+print(completion.choices[0].message)
