@@ -1,8 +1,8 @@
 from huggingface_hub import InferenceClient
 
 client = InferenceClient(
-	provider="fireworks-ai",
-	api_key="api_token"
+    provider="fireworks-ai",
+    api_key="api_token",
 )
 
 messages = [
