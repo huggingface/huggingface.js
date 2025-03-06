@@ -49,8 +49,7 @@
 		"prepublishOnly": "pnpm run build",
 		"test": "vitest run --config vitest.config.mts",
 		"test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest.config.mts",
-		"check": "tsc",
-		"generate": "tsup src/index.ts --format cjs,esm --clean && tsx scripts/tmp_gen.ts"
+		"check": "tsc"
 	},
 	"dependencies": {
 		"@huggingface/tasks": "workspace:^",
