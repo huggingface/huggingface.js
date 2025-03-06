@@ -114,6 +114,47 @@ describe("downloadFileToCacheDir", () => {
 		expect(output).toBe(expectPointer);
 	});
 
+	test("existing symlinked and blob with default revision should not re-download it", async () => {
+		// <cache>/<repo>/<revision>/snapshots/README.md
+		const expectPointer = _getSnapshotFile({
+			repo: DUMMY_REPO,
+			path: "/README.md",
+			revision: "main",
+		});
+		// stat ensure a symlink and the pointed file exists
+		vi.mocked(stat).mockResolvedValue({} as Stats); // prevent default mocked reject
+		vi.mocked(lstat).mockResolvedValue({} as Stats);
+		vi.mocked(pathsInfo).mockResolvedValue([
+			{
+				oid: DUMMY_ETAG,
+				size: 55,
+				path: "README.md",
+				type: "file",
+				lastCommit: {
+					date: new Date(),
+					id: "main",
+					title: "Commit msg",
+				},
+			},
+		]);
+
+		const output = await downloadFileToCacheDir({
+			repo: DUMMY_REPO,
+			path: "/README.md",
+			fetch: fetchMock,
+		});
+
+		expect(stat).toHaveBeenCalledOnce();
+		expect(symlink).not.toHaveBeenCalledOnce();
+		// Get call argument for stat
+		const starArg = vi.mocked(stat).mock.calls[0][0];
+
+		expect(starArg).toBe(expectPointer);
+		expect(fetchMock).not.toHaveBeenCalledWith();
+
+		expect(output).toBe(expectPointer);
+	});
+
 	test("existing blob should only create the symlink", async () => {
 		// <cache>/<repo>/<revision>/snapshots/README.md
 		const expectPointer = _getSnapshotFile({
@@ -150,7 +191,6 @@ describe("downloadFileToCacheDir", () => {
 			fetch: fetchMock,
 		});
 
-		expect(stat).not.toHaveBeenCalled();
 		// should have check for the blob
 		expect(lstat).toHaveBeenCalled();
 		expect(vi.mocked(lstat).mock.calls[0][0]).toBe(expectedBlob);
