@@ -1,5 +1,4 @@
 import base64
-
 import requests
 
 API_URL = "https://router.huggingface.co/hf-inference/models/openai/clip-vit-large-patch14"

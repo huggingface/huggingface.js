@@ -1,0 +1,9 @@
+import fal_client
+
+result = fal_client.subscribe(
+	"{{{modelId}}}",
+	arguments={
+		"prompt": {{{inputs}}},
+	},
+)
+print(result)

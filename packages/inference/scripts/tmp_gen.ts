@@ -146,6 +146,17 @@ const TEST_CASES: {
 		languages: ["sh", "js", "py"],
 	},
 	{
+		testName: "basic-snippet--token-classification",
+		model: {
+			id: "FacebookAI/xlm-roberta-large-finetuned-conll03-english",
+			pipeline_tag: "token-classification",
+			tags: [],
+			inference: "",
+		},
+		providers: ["hf-inference"],
+		languages: ["py"],
+	},
+	{
 		testName: "zero-shot-classification",
 		model: {
 			id: "facebook/bart-large-mnli",

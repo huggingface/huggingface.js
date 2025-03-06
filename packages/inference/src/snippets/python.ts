@@ -16,13 +16,14 @@ import { existsSync as pathExists } from "node:fs";
 
 interface TemplateParams {
 	accessToken?: string;
-	provider?: InferenceProvider;
-	modelId?: string;
-	importInferenceClient?: string;
-	messagesStr?: string;
-	configStr?: string;
 	baseUrl?: string;
+	configStr?: string;
+	importInferenceClient?: string;
 	inputs?: string | ChatCompletionInputMessage[];
+	messagesStr?: string;
+	methodName?: string;
+	modelId?: string;
+	provider?: InferenceProvider;
 }
 
 const rootDirFinder = (): string => {
@@ -84,10 +85,18 @@ const HFH_INFERENCE_CLIENT_METHODS: Partial<Record<WidgetType, string>> = {
 };
 
 const snippetImportInferenceClient = loadTemplate("python", "huggingface_hub", "importInferenceClient");
-const snippetOpenAIConversational = loadTemplate("python", "openai", "conversational");
-const snippetOpenAIConversationalStream = loadTemplate("python", "openai", "conversationalStream");
+const snippetInferenceClientBasic = loadTemplate("python", "huggingface_hub", "basic");
+const snippetInferenceClientTextToImage = loadTemplate("python", "huggingface_hub", "textToImage");
 const snippetInferenceClientConversational = loadTemplate("python", "huggingface_hub", "conversational");
 const snippetInferenceClientConversationalStream = loadTemplate("python", "huggingface_hub", "conversationalStream");
+
+const snippetFalAITextToImage = loadTemplate("python", "fal_ai", "textToImage");
+
+const snippetOpenAIConversational = loadTemplate("python", "openai", "conversational");
+const snippetOpenAIConversationalStream = loadTemplate("python", "openai", "conversationalStream");
+
+const snippetRequestsBasic = loadTemplate("python", "requests", "basic");
+const snippetRequestsBasicFile = loadTemplate("python", "requests", "basicFile");
 const snippetRequestZeroShotClassification = loadTemplate("python", "requests", "zeroShotClassification");
 const snippetRequestZeroShotImageClassification = loadTemplate("python", "requests", "zeroShotImageClassification");
 
@@ -204,29 +213,20 @@ const snippetBasic = (
 			? [
 					{
 						client: "huggingface_hub",
-						content: `\
-${snippetImportInferenceClient({ accessToken, provider })}
-
-result = client.${HFH_INFERENCE_CLIENT_METHODS[model.pipeline_tag]}(
-	inputs=${getModelInputSnippet(model)},
-	model="${model.id}",
-)
-
-print(result)
-`,
+						content: snippetInferenceClientBasic({
+							inputs: getModelInputSnippet(model),
+							modelId: model.id,
+							importInferenceClient: snippetImportInferenceClient({ accessToken, provider }),
+							methodName: HFH_INFERENCE_CLIENT_METHODS[model.pipeline_tag],
+						}),
 					},
 			  ]
 			: []),
 		{
 			client: "requests",
-			content: `\
-def query(payload):
-	response = requests.post(API_URL, headers=headers, json=payload)
-	return response.json()
-	
-output = query({
-	"inputs": ${getModelInputSnippet(model)},
-})`,
+			content: snippetRequestsBasic({
+				inputs: getModelInputSnippet(model),
+			}),
 		},
 	];
 };
@@ -235,14 +235,9 @@ const snippetFile = (model: ModelDataMinimal): InferenceSnippet[] => {
 	return [
 		{
 			client: "requests",
-			content: `\
-def query(filename):
-	with open(filename, "rb") as f:
-		data = f.read()
-	response = requests.post(API_URL, headers=headers, data=data)
-	return response.json()
-
-output = query(${getModelInputSnippet(model)})`,
+			content: snippetRequestsBasicFile({
+				inputs: getModelInputSnippet(model),
+			}),
 		},
 	];
 };
@@ -256,30 +251,20 @@ const snippetTextToImage = (
 	return [
 		{
 			client: "huggingface_hub",
-			content: `\
-${snippetImportInferenceClient({ accessToken, provider })}
-
-# output is a PIL.Image object
-image = client.text_to_image(
-	${getModelInputSnippet(model)},
-	model="${model.id}",
-)`,
+			content: snippetInferenceClientTextToImage({
+				importInferenceClient: snippetImportInferenceClient({ accessToken, provider }),
+				inputs: getModelInputSnippet(model),
+				modelId: model.id,
+			}),
 		},
 		...(provider === "fal-ai"
 			? [
 					{
 						client: "fal-client",
-						content: `\
-import fal_client
-
-result = fal_client.subscribe(
-	"${providerModelId ?? model.id}",
-	arguments={
-		"prompt": ${getModelInputSnippet(model)},
-	},
-)
-print(result)
-`,
+						content: snippetFalAITextToImage({
+							modelId: providerModelId ?? model.id,
+							inputs: getModelInputSnippet(model),
+						}),
 					},
 			  ]
 			: []),
