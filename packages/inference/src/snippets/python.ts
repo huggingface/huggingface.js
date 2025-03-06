@@ -17,16 +17,24 @@ import { existsSync as pathExists } from "node:fs";
 interface TemplateParams {
 	accessToken?: string;
 	baseUrl?: string;
-	configStr?: string;
-	importInferenceClient?: string;
-	inputs?: string | ChatCompletionInputMessage[];
-	messagesStr?: string;
-	methodName?: string;
+	inputs?: string | object;
 	modelId?: string;
 	provider?: InferenceProvider;
-	question?: string;
-	importBase64?: boolean;
+	providerModelId?: string;
+	methodName?: string; // specific to snippetBasic
+	importBase64?: boolean; // specific to snippetImportRequests
 }
+
+interface SnippetTemplateParams {
+	accessToken: string;
+	baseUrl: string;
+	inputs: string | object;
+	modelId: string;
+	provider: InferenceProvider;
+	providerModelId: string;
+}
+
+const TOOLS = ["huggingface_hub", "requests", "fal_ai", "openai"];
 
 const rootDirFinder = (): string => {
 	let currentPath = path.normalize(import.meta.url).replace("file:", "");
@@ -42,16 +50,19 @@ const rootDirFinder = (): string => {
 	return "/";
 };
 
-const loadTemplate = (language: string, tool: string, templateName: string): ((data: TemplateParams) => string) => {
+const loadTemplate = (tool: string, templateName: string): ((data: TemplateParams) => string) | undefined => {
 	const templatePath = path.join(
 		rootDirFinder(),
 		"src",
 		"snippets",
 		"templates",
-		language,
+		"python",
 		tool,
 		`${templateName}.hbs`
 	);
+	if (!pathExists(templatePath)) {
+		return;
+	}
 	const template = fs.readFileSync(templatePath, "utf8");
 	return Handlebars.compile<TemplateParams>(template);
 };
@@ -86,40 +97,40 @@ const HFH_INFERENCE_CLIENT_METHODS: Partial<Record<WidgetType, string>> = {
 	"tabular-regression": "tabular_regression",
 };
 
-const snippetImportInferenceClient = loadTemplate("python", "huggingface_hub", "importInferenceClient");
-const snippetInferenceClientAutomaticSpeechRecognition = loadTemplate(
-	"python",
-	"huggingface_hub",
-	"automaticSpeechRecognition"
-);
-const snippetInferenceClientBasic = loadTemplate("python", "huggingface_hub", "basic");
-const snippetInferenceClientImageToImage = loadTemplate("python", "huggingface_hub", "imageToImage");
-const snippetInferenceClientTextToImage = loadTemplate("python", "huggingface_hub", "textToImage");
-const snippetInferenceClientTextToVideo = loadTemplate("python", "huggingface_hub", "textToVideo");
-const snippetInferenceClientConversational = loadTemplate("python", "huggingface_hub", "conversational");
-const snippetInferenceClientConversationalStream = loadTemplate("python", "huggingface_hub", "conversationalStream");
-const snippetInferenceClientDocumentQuestionAnswering = loadTemplate(
-	"python",
-	"huggingface_hub",
-	"documentQuestionAnswering"
-);
+const snippetImportInferenceClient = loadTemplate("huggingface_hub", "importInferenceClient");
+const snippetInferenceClientAutomaticSpeechRecognition = loadTemplate("huggingface_hub", "automaticSpeechRecognition");
+const snippetInferenceClientBasic = loadTemplate("huggingface_hub", "basic");
+const snippetInferenceClientImageToImage = loadTemplate("huggingface_hub", "imageToImage");
+const snippetInferenceClientTextToImage = loadTemplate("huggingface_hub", "textToImage");
+const snippetInferenceClientTextToVideo = loadTemplate("huggingface_hub", "textToVideo");
+const snippetInferenceClientDocumentQuestionAnswering = loadTemplate("huggingface_hub", "documentQuestionAnswering");
 
-const snippetFalAITextToImage = loadTemplate("python", "fal_ai", "textToImage");
+const snippetFalAITextToImage = loadTemplate("fal_ai", "textToImage");
 
-const snippetOpenAIConversational = loadTemplate("python", "openai", "conversational");
-const snippetOpenAIConversationalStream = loadTemplate("python", "openai", "conversationalStream");
+const snippetImportRequests = loadTemplate("requests", "importRequests");
+const snippetRequestsBasic = loadTemplate("requests", "basic");
+const snippetRequestsBasicFile = loadTemplate("requests", "basicFile");
+const snippetRequestsDocumentQuestionAnswering = loadTemplate("requests", "documentQuestionAnswering");
+const snippetRequestsImageToImage = loadTemplate("requests", "imageToImage");
+const snippetRequestsTabular = loadTemplate("requests", "tabular");
+const snippetRequestsTextToImage = loadTemplate("requests", "textToImage");
+const snippetRequestsTextToAudioOther = loadTemplate("requests", "textToAudioOther");
+const snippetRequestsTextToAudioTransformers = loadTemplate("requests", "textToAudioTransformers");
+const snippetRequestZeroShotClassification = loadTemplate("requests", "zeroShotClassification");
+const snippetRequestZeroShotImageClassification = loadTemplate("requests", "zeroShotImageClassification");
 
-const snippetImportRequests = loadTemplate("python", "requests", "importRequests");
-const snippetRequestsBasic = loadTemplate("python", "requests", "basic");
-const snippetRequestsBasicFile = loadTemplate("python", "requests", "basicFile");
-const snippetRequestsDocumentQuestionAnswering = loadTemplate("python", "requests", "documentQuestionAnswering");
-const snippetRequestsImageToImage = loadTemplate("python", "requests", "imageToImage");
-const snippetRequestsTabular = loadTemplate("python", "requests", "tabular");
-const snippetRequestsTextToImage = loadTemplate("python", "requests", "textToImage");
-const snippetRequestsTextToAudioOther = loadTemplate("python", "requests", "textToAudioOther");
-const snippetRequestsTextToAudioTransformers = loadTemplate("python", "requests", "textToAudioTransformers");
-const snippetRequestZeroShotClassification = loadTemplate("python", "requests", "zeroShotClassification");
-const snippetRequestZeroShotImageClassification = loadTemplate("python", "requests", "zeroShotImageClassification");
+const generateSnippets = (templateName: string, params: SnippetTemplateParams): InferenceSnippet[] => {
+	return TOOLS.map((tool) => {
+		const template = loadTemplate(tool, templateName);
+		if (!template) {
+			return;
+		}
+		return {
+			client: tool,
+			content: template(params),
+		};
+	}).filter((snippet) => snippet !== undefined) as InferenceSnippet[];
+};
 
 const snippetConversational = (
 	model: ModelDataMinimal,
@@ -137,67 +148,28 @@ const snippetConversational = (
 	const streaming = opts?.streaming ?? true;
 	const exampleMessages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
 	const messages = opts?.messages ?? exampleMessages;
-	const messagesStr = stringifyMessages(messages, { attributeKeyQuotes: true });
-
 	const config = {
 		...(opts?.temperature ? { temperature: opts.temperature } : undefined),
 		max_tokens: opts?.max_tokens ?? 500,
 		...(opts?.top_p ? { top_p: opts.top_p } : undefined),
 	};
-	const configStr = stringifyGenerationConfig(config, {
-		indent: "\n\t",
-		attributeValueConnector: "=",
-	});
 
-	if (streaming) {
-		return [
-			{
-				client: "huggingface_hub",
-				content: snippetInferenceClientConversationalStream({
-					accessToken,
-					provider,
-					modelId: model.id,
-					messagesStr,
-					configStr,
-				}),
-			},
-			{
-				client: "openai",
-				content: snippetOpenAIConversationalStream({
-					accessToken,
-					provider,
-					modelId: providerModelId ?? model.id,
-					messagesStr,
-					configStr,
-					baseUrl: openAIbaseUrl(provider),
-				}),
-			},
-		];
-	} else {
-		return [
-			{
-				client: "huggingface_hub",
-				content: snippetInferenceClientConversational({
-					accessToken,
-					provider,
-					modelId: model.id,
-					messagesStr,
-					configStr,
-				}),
-			},
-			{
-				client: "openai",
-				content: snippetOpenAIConversational({
-					accessToken,
-					provider,
-					modelId: providerModelId ?? model.id,
-					messagesStr,
-					configStr,
-					baseUrl: openAIbaseUrl(provider),
-				}),
-			},
-		];
-	}
+	const params: SnippetTemplateParams = {
+		accessToken,
+		baseUrl: openAIbaseUrl(provider),
+		inputs: {
+			messagesStr: stringifyMessages(messages, { attributeKeyQuotes: true }),
+			configStr: stringifyGenerationConfig(config, {
+				indent: "\n\t",
+				attributeValueConnector: "=",
+			}),
+		},
+		modelId: model.id,
+		provider,
+		providerModelId: providerModelId ?? model.id,
+	};
+	const templateName = streaming ? "conversationalStream" : "conversational";
+	return generateSnippets(templateName, params);
 };
 
 const snippetZeroShotClassification = (model: ModelDataMinimal): InferenceSnippet[] => {
@@ -369,8 +341,7 @@ const snippetDocumentQuestionAnswering = (model: ModelDataMinimal): InferenceSni
 		{
 			client: "huggingface_hub",
 			content: snippetInferenceClientDocumentQuestionAnswering({
-				inputs: inputsAsObj.image,
-				question: inputsAsObj.question,
+				inputs: inputsAsObj,
 				modelId: model.id,
 			}),
 		},
