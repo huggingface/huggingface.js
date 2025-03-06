@@ -32,6 +32,8 @@ Handlebars.registerHelper("equals", function (value1, value2) {
 	return value1 === value2;
 });
 
+// Helpers to find + load templates
+
 const rootDirFinder = (): string => {
 	let currentPath = path.normalize(import.meta.url).replace("file:", "");
 
@@ -54,6 +56,11 @@ const loadTemplate = (tool: string, templateName: string): ((data: TemplateParam
 	const template = fs.readFileSync(templatePath(tool, templateName), "utf8");
 	return Handlebars.compile<TemplateParams>(template);
 };
+
+const snippetImportInferenceClient = loadTemplate("huggingface_hub", "importInferenceClient");
+const snippetImportRequests = loadTemplate("requests", "importRequests");
+
+// Needed for huggingface_hub basic snippets
 
 const HFH_INFERENCE_CLIENT_METHODS: Partial<Record<WidgetType, string>> = {
 	"audio-classification": "audio_classification",
@@ -85,9 +92,7 @@ const HFH_INFERENCE_CLIENT_METHODS: Partial<Record<WidgetType, string>> = {
 	"tabular-regression": "tabular_regression",
 };
 
-const snippetImportInferenceClient = loadTemplate("huggingface_hub", "importInferenceClient");
-const snippetImportRequests = loadTemplate("requests", "importRequests");
-
+// Snippet generators
 const snippetGenerator = (templateName: string, inputPreparationFn?: InputPreparationFn) => {
 	return (
 		model: ModelDataMinimal,
@@ -125,7 +130,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 	};
 };
 
-// Specialized input preparation functions
+// Input preparation functions (required for a few tasks)
 const prepareConversationalInput = (
 	model: ModelDataMinimal,
 	opts?: {
