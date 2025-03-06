@@ -1,7 +1,7 @@
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="",
+    base_url="https://router.huggingface.co/fireworks-ai",
     api_key="api_token"
 )
 

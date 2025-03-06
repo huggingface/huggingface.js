@@ -169,6 +169,7 @@ const snippetConversational = (
 					modelId: providerModelId ?? model.id,
 					messagesStr,
 					configStr,
+					baseUrl: openAIbaseUrl(provider),
 				}),
 			},
 		];
@@ -221,11 +222,7 @@ const snippetZeroShotImageClassification = (model: ModelDataMinimal): InferenceS
 	];
 };
 
-const snippetBasic = (
-	model: ModelDataMinimal,
-	accessToken: string,
-	provider: InferenceProvider
-): InferenceSnippet[] => {
+const snippetBasic = (model: ModelDataMinimal): InferenceSnippet[] => {
 	return [
 		...(model.pipeline_tag && model.pipeline_tag in HFH_INFERENCE_CLIENT_METHODS
 			? [
@@ -351,11 +348,7 @@ const snippetTextToAudio = (model: ModelDataMinimal): InferenceSnippet[] => {
 	}
 };
 
-const snippetAutomaticSpeechRecognition = (
-	model: ModelDataMinimal,
-	accessToken: string,
-	provider: InferenceProvider
-): InferenceSnippet[] => {
+const snippetAutomaticSpeechRecognition = (model: ModelDataMinimal): InferenceSnippet[] => {
 	return [
 		{
 			client: "huggingface_hub",
@@ -368,11 +361,7 @@ const snippetAutomaticSpeechRecognition = (
 	];
 };
 
-const snippetDocumentQuestionAnswering = (
-	model: ModelDataMinimal,
-	accessToken: string,
-	provider: InferenceProvider
-): InferenceSnippet[] => {
+const snippetDocumentQuestionAnswering = (model: ModelDataMinimal): InferenceSnippet[] => {
 	const inputsAsStr = getModelInputSnippet(model) as string;
 	const inputsAsObj = JSON.parse(inputsAsStr);
 
@@ -394,11 +383,7 @@ const snippetDocumentQuestionAnswering = (
 	];
 };
 
-const snippetImageToImage = (
-	model: ModelDataMinimal,
-	accessToken: string,
-	provider: InferenceProvider
-): InferenceSnippet[] => {
+const snippetImageToImage = (model: ModelDataMinimal): InferenceSnippet[] => {
 	const inputsAsStr = getModelInputSnippet(model) as string;
 	const inputsAsObj = JSON.parse(inputsAsStr);
 

@@ -1,7 +1,7 @@
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="",
+    base_url="https://router.huggingface.co/together",
     api_key="api_token"
 )
 
