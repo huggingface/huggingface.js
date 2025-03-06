@@ -14,27 +14,19 @@ import Handlebars from "handlebars";
 import path from "path";
 import { existsSync as pathExists } from "node:fs";
 
+const TOOLS = ["huggingface_hub", "requests", "fal_client", "openai"];
+
+type InputPreparationFn = (model: ModelDataMinimal, opts?: Record<string, unknown>) => string | object;
 interface TemplateParams {
 	accessToken?: string;
 	baseUrl?: string;
 	inputs?: string | object;
-	modelId?: string;
+	model?: ModelDataMinimal;
 	provider?: InferenceProvider;
 	providerModelId?: string;
 	methodName?: string; // specific to snippetBasic
 	importBase64?: boolean; // specific to snippetImportRequests
 }
-
-interface SnippetTemplateParams {
-	accessToken: string;
-	baseUrl?: string;
-	inputs: string | object;
-	model: ModelDataMinimal;
-	provider: InferenceProvider;
-	providerModelId: string;
-}
-
-const TOOLS = ["huggingface_hub", "requests", "fal_client", "openai"];
 
 Handlebars.registerHelper("equals", function (value1, value2) {
 	return value1 === value2;
@@ -54,20 +46,12 @@ const rootDirFinder = (): string => {
 	return "/";
 };
 
-const loadTemplate = (tool: string, templateName: string): ((data: TemplateParams) => string) | undefined => {
-	const templatePath = path.join(
-		rootDirFinder(),
-		"src",
-		"snippets",
-		"templates",
-		"python",
-		tool,
-		`${templateName}.hbs`
-	);
-	if (!pathExists(templatePath)) {
-		return;
-	}
-	const template = fs.readFileSync(templatePath, "utf8");
+const templatePath = (tool: string, templateName: string): string =>
+	path.join(rootDirFinder(), "src", "snippets", "templates", "python", tool, `${templateName}.hbs`);
+const hasTemplate = (tool: string, templateName: string): boolean => pathExists(templatePath(tool, templateName));
+
+const loadTemplate = (tool: string, templateName: string): ((data: TemplateParams) => string) => {
+	const template = fs.readFileSync(templatePath(tool, templateName), "utf8");
 	return Handlebars.compile<TemplateParams>(template);
 };
 
@@ -104,26 +88,79 @@ const HFH_INFERENCE_CLIENT_METHODS: Partial<Record<WidgetType, string>> = {
 const snippetImportInferenceClient = loadTemplate("huggingface_hub", "importInferenceClient");
 const snippetImportRequests = loadTemplate("requests", "importRequests");
 
-const generateSnippets = (templateName: string, params: SnippetTemplateParams): InferenceSnippet[] => {
-	return TOOLS.map((tool) => {
-		const template = loadTemplate(tool, templateName);
-		if (!template) {
-			return;
-		}
-		if (tool === "huggingface_hub" && templateName === "basic") {
-			if (!(params.model.pipeline_tag && params.model.pipeline_tag in HFH_INFERENCE_CLIENT_METHODS)) {
+const snippetGenerator = (templateName: string, inputPreparationFn?: InputPreparationFn) => {
+	return (
+		model: ModelDataMinimal,
+		accessToken: string,
+		provider: InferenceProvider,
+		providerModelId?: string,
+		opts?: Record<string, unknown>
+	): InferenceSnippet[] => {
+		const params: TemplateParams = {
+			accessToken,
+			baseUrl: templateName.includes("conversational") ? openAIbaseUrl(provider) : undefined,
+			inputs: inputPreparationFn ? inputPreparationFn(model, opts) : getModelInputSnippet(model),
+			model,
+			provider,
+			providerModelId: providerModelId ?? model.id,
+		};
+
+		// Iterate over tools => check if a snippet exists => generate
+		return TOOLS.map((tool) => {
+			if (!hasTemplate(tool, templateName)) {
 				return;
+			}
+			const template = loadTemplate(tool, templateName);
+			if (tool === "huggingface_hub" && templateName === "basic") {
+				if (!(model.pipeline_tag && model.pipeline_tag in HFH_INFERENCE_CLIENT_METHODS)) {
+					return;
+				}
+				params["methodName"] = HFH_INFERENCE_CLIENT_METHODS[model.pipeline_tag];
 			}
 			return {
 				client: tool,
-				content: template({ ...params, methodName: HFH_INFERENCE_CLIENT_METHODS[params.model.pipeline_tag] }),
+				content: template(params).trim(),
 			};
-		}
-		return {
-			client: tool,
-			content: template(params),
-		};
-	}).filter((snippet) => snippet !== undefined && snippet.content.trim()) as InferenceSnippet[];
+		}).filter((snippet) => snippet !== undefined && snippet.content) as InferenceSnippet[];
+	};
+};
+
+// Specialized input preparation functions
+const prepareConversationalInput = (
+	model: ModelDataMinimal,
+	opts?: {
+		streaming?: boolean;
+		messages?: ChatCompletionInputMessage[];
+		temperature?: GenerationParameters["temperature"];
+		max_tokens?: GenerationParameters["max_tokens"];
+		top_p?: GenerationParameters["top_p"];
+	}
+): object => {
+	const exampleMessages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
+	const messages = opts?.messages ?? exampleMessages;
+	const config = {
+		...(opts?.temperature ? { temperature: opts?.temperature } : undefined),
+		max_tokens: opts?.max_tokens ?? 500,
+		...(opts?.top_p ? { top_p: opts?.top_p } : undefined),
+	};
+
+	return {
+		messagesStr: stringifyMessages(messages, { attributeKeyQuotes: true }),
+		configStr: stringifyGenerationConfig(config, {
+			indent: "\n\t",
+			attributeValueConnector: "=",
+		}),
+	};
+};
+
+const prepareDocumentQuestionAnsweringInput = (model: ModelDataMinimal): object => {
+	const inputsAsStr = getModelInputSnippet(model) as string;
+	const inputsAsObj = JSON.parse(inputsAsStr);
+	return { asObj: inputsAsObj, asStr: inputsAsStr };
+};
+
+const prepareImageToImageInput = (model: ModelDataMinimal): object => {
+	return JSON.parse(getModelInputSnippet(model) as string);
 };
 
 const snippetConversational = (
@@ -140,196 +177,10 @@ const snippetConversational = (
 	}
 ): InferenceSnippet[] => {
 	const streaming = opts?.streaming ?? true;
-	const exampleMessages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
-	const messages = opts?.messages ?? exampleMessages;
-	const config = {
-		...(opts?.temperature ? { temperature: opts.temperature } : undefined),
-		max_tokens: opts?.max_tokens ?? 500,
-		...(opts?.top_p ? { top_p: opts.top_p } : undefined),
-	};
-
-	const params: SnippetTemplateParams = {
-		accessToken,
-		baseUrl: openAIbaseUrl(provider),
-		inputs: {
-			messagesStr: stringifyMessages(messages, { attributeKeyQuotes: true }),
-			configStr: stringifyGenerationConfig(config, {
-				indent: "\n\t",
-				attributeValueConnector: "=",
-			}),
-		},
-		model,
-		provider,
-		providerModelId: providerModelId ?? model.id,
-	};
 	const templateName = streaming ? "conversationalStream" : "conversational";
-	return generateSnippets(templateName, params);
-};
-
-const snippetZeroShotClassification = (
-	model: ModelDataMinimal,
-	accessToken: string,
-	provider: InferenceProvider,
-	providerModelId?: string
-): InferenceSnippet[] => {
-	return generateSnippets("zeroShotClassification", {
-		accessToken: accessToken,
-		inputs: getModelInputSnippet(model),
-		model: model,
-		provider: provider,
-		providerModelId: providerModelId ?? model.id,
-	});
-};
-
-const snippetZeroShotImageClassification = (
-	model: ModelDataMinimal,
-	accessToken: string,
-	provider: InferenceProvider,
-	providerModelId?: string
-): InferenceSnippet[] => {
-	return generateSnippets("zeroShotImageClassification", {
-		accessToken: accessToken,
-		inputs: getModelInputSnippet(model),
-		model: model,
-		provider: provider,
-		providerModelId: providerModelId ?? model.id,
-	});
-};
-
-const snippetBasic = (
-	model: ModelDataMinimal,
-	accessToken: string,
-	provider: InferenceProvider,
-	providerModelId?: string
-): InferenceSnippet[] => {
-	return generateSnippets("basic", {
-		accessToken: accessToken,
-		inputs: getModelInputSnippet(model),
-		model: model,
-		provider: provider,
-		providerModelId: providerModelId ?? model.id,
-	});
-};
-
-const snippetFile = (
-	model: ModelDataMinimal,
-	accessToken: string,
-	provider: InferenceProvider,
-	providerModelId?: string
-): InferenceSnippet[] => {
-	return generateSnippets("basicFile", {
-		accessToken: accessToken,
-		inputs: getModelInputSnippet(model),
-		model: model,
-		provider: provider,
-		providerModelId: providerModelId ?? model.id,
-	});
-};
-
-const snippetTextToImage = (
-	model: ModelDataMinimal,
-	accessToken: string,
-	provider: InferenceProvider,
-	providerModelId?: string
-): InferenceSnippet[] => {
-	return generateSnippets("textToImage", {
-		accessToken: accessToken,
-		inputs: getModelInputSnippet(model),
-		model: model,
-		provider: provider,
-		providerModelId: providerModelId ?? model.id,
-	});
-};
-
-const snippetTextToVideo = (
-	model: ModelDataMinimal,
-	accessToken: string,
-	provider: InferenceProvider,
-	providerModelId?: string
-): InferenceSnippet[] => {
-	return generateSnippets("textToVideo", {
-		accessToken: accessToken,
-		inputs: getModelInputSnippet(model),
-		model: model,
-		provider: provider,
-		providerModelId: providerModelId ?? model.id,
-	});
-};
-
-const snippetTabular = (
-	model: ModelDataMinimal,
-	accessToken: string,
-	provider: InferenceProvider,
-	providerModelId?: string
-): InferenceSnippet[] => {
-	return generateSnippets("tabular", {
-		accessToken: accessToken,
-		inputs: getModelInputSnippet(model),
-		model: model,
-		provider: provider,
-		providerModelId: providerModelId ?? model.id,
-	});
-};
-
-const snippetTextToAudio = (
-	model: ModelDataMinimal,
-	accessToken: string,
-	provider: InferenceProvider,
-	providerModelId?: string
-): InferenceSnippet[] => {
-	return generateSnippets("textToAudio", {
-		accessToken: accessToken,
-		inputs: getModelInputSnippet(model),
-		model: model,
-		provider: provider,
-		providerModelId: providerModelId ?? model.id,
-	});
-};
-
-const snippetAutomaticSpeechRecognition = (
-	model: ModelDataMinimal,
-	accessToken: string,
-	provider: InferenceProvider,
-	providerModelId?: string
-): InferenceSnippet[] => {
-	return generateSnippets("automaticSpeechRecognition", {
-		accessToken: accessToken,
-		inputs: getModelInputSnippet(model),
-		model: model,
-		provider: provider,
-		providerModelId: providerModelId ?? model.id,
-	});
-};
-
-const snippetDocumentQuestionAnswering = (
-	model: ModelDataMinimal,
-	accessToken: string,
-	provider: InferenceProvider,
-	providerModelId?: string
-): InferenceSnippet[] => {
-	const inputsAsStr = getModelInputSnippet(model) as string;
-	const inputsAsObj = JSON.parse(inputsAsStr);
-	return generateSnippets("documentQuestionAnswering", {
-		accessToken: accessToken,
-		inputs: { asObj: inputsAsObj, asStr: inputsAsStr },
-		model: model,
-		provider: provider,
-		providerModelId: providerModelId ?? model.id,
-	});
-};
-
-const snippetImageToImage = (
-	model: ModelDataMinimal,
-	accessToken: string,
-	provider: InferenceProvider,
-	providerModelId?: string
-): InferenceSnippet[] => {
-	return generateSnippets("imageToImage", {
-		accessToken: accessToken,
-		inputs: JSON.parse(getModelInputSnippet(model) as string),
-		model: model,
-		provider: provider,
-		providerModelId: providerModelId ?? model.id,
+	return snippetGenerator(templateName, prepareConversationalInput)(model, accessToken, provider, providerModelId, {
+		...opts,
+		streaming,
 	});
 };
 
@@ -345,36 +196,35 @@ const pythonSnippets: Partial<
 		) => InferenceSnippet[]
 	>
 > = {
-	// Same order as in tasks/src/pipelines.ts
-	"text-classification": snippetBasic,
-	"token-classification": snippetBasic,
-	"table-question-answering": snippetBasic,
-	"question-answering": snippetBasic,
-	"zero-shot-classification": snippetZeroShotClassification,
-	translation: snippetBasic,
-	summarization: snippetBasic,
-	"feature-extraction": snippetBasic,
-	"text-generation": snippetBasic,
-	"text2text-generation": snippetBasic,
+	"text-classification": snippetGenerator("basic"),
+	"token-classification": snippetGenerator("basic"),
+	"table-question-answering": snippetGenerator("basic"),
+	"question-answering": snippetGenerator("basic"),
+	"zero-shot-classification": snippetGenerator("zeroShotClassification"),
+	translation: snippetGenerator("basic"),
+	summarization: snippetGenerator("basic"),
+	"feature-extraction": snippetGenerator("basic"),
+	"text-generation": snippetGenerator("basic"),
+	"text2text-generation": snippetGenerator("basic"),
 	"image-text-to-text": snippetConversational,
-	"fill-mask": snippetBasic,
-	"sentence-similarity": snippetBasic,
-	"automatic-speech-recognition": snippetAutomaticSpeechRecognition,
-	"text-to-image": snippetTextToImage,
-	"text-to-video": snippetTextToVideo,
-	"text-to-speech": snippetTextToAudio,
-	"text-to-audio": snippetTextToAudio,
-	"audio-to-audio": snippetFile,
-	"audio-classification": snippetFile,
-	"image-classification": snippetFile,
-	"tabular-regression": snippetTabular,
-	"tabular-classification": snippetTabular,
-	"object-detection": snippetFile,
-	"image-segmentation": snippetFile,
-	"document-question-answering": snippetDocumentQuestionAnswering,
-	"image-to-text": snippetFile,
-	"image-to-image": snippetImageToImage,
-	"zero-shot-image-classification": snippetZeroShotImageClassification,
+	"fill-mask": snippetGenerator("basic"),
+	"sentence-similarity": snippetGenerator("basic"),
+	"automatic-speech-recognition": snippetGenerator("automaticSpeechRecognition"),
+	"text-to-image": snippetGenerator("textToImage"),
+	"text-to-video": snippetGenerator("textToVideo"),
+	"text-to-speech": snippetGenerator("textToAudio"),
+	"text-to-audio": snippetGenerator("textToAudio"),
+	"audio-to-audio": snippetGenerator("basicFile"),
+	"audio-classification": snippetGenerator("basicFile"),
+	"image-classification": snippetGenerator("basicFile"),
+	"tabular-regression": snippetGenerator("tabular"),
+	"tabular-classification": snippetGenerator("tabular"),
+	"object-detection": snippetGenerator("basicFile"),
+	"image-segmentation": snippetGenerator("basicFile"),
+	"document-question-answering": snippetGenerator("documentQuestionAnswering", prepareDocumentQuestionAnsweringInput),
+	"image-to-text": snippetGenerator("basicFile"),
+	"image-to-image": snippetGenerator("imageToImage", prepareImageToImageInput),
+	"zero-shot-image-classification": snippetGenerator("zeroShotImageClassification"),
 };
 
 export function getPythonInferenceSnippet(
@@ -405,7 +255,7 @@ const addImportsToSnippet = (
 	} else if (snippet.content.includes("requests")) {
 		importSection = snippetImportRequests({
 			accessToken,
-			modelId: model.id,
+			model: model,
 			provider,
 			importBase64: snippet.content.includes("base64"),
 		});
