@@ -66,3 +66,8 @@ export class InferenceClientEndpoint {
 export interface InferenceClient extends TaskWithNoAccessToken {}
 
 export interface InferenceClientEndpoint extends TaskWithNoAccessTokenNoEndpointUrl {}
+
+/**
+ * For backward compatibility only.
+ */
+export class HfInference extends InferenceClient {}

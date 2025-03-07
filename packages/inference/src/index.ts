@@ -1,4 +1,4 @@
-export { InferenceClient, InferenceClientEndpoint } from "./InferenceClient";
+export { InferenceClient, InferenceClientEndpoint, HfInference } from "./InferenceClient";
 export { InferenceOutputError } from "./lib/InferenceOutputError";
 export * from "./types";
 export * from "./tasks";

@@ -3,7 +3,14 @@ import { assert, describe, expect, it } from "vitest";
 import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
 
 import type { TextToImageArgs } from "../src";
-import { chatCompletion, chatCompletionStream, InferenceClient, textGeneration, textToImage } from "../src";
+import {
+	chatCompletion,
+	chatCompletionStream,
+	InferenceClient,
+	textGeneration,
+	textToImage,
+	HfInference,
+} from "../src";
 import { textToVideo } from "../src/tasks/cv/textToVideo";
 import { readTestFile } from "./test-files";
 import "./vcr";
@@ -19,6 +26,13 @@ if (!env.HF_TOKEN) {
 
 describe.concurrent("InferenceClient", () => {
 	// Individual tests can be ran without providing an api key, however running all tests without an api key will result in rate limiting error.
+
+	describe("backward compatibility", () => {
+		it("works with old HfInference name", async () => {
+			const hf = new HfInference(env.HF_TOKEN);
+			expect("fillMask" in hf).toBe(true);
+		});
+	});
 
 	describe.concurrent(
 		"HF Inference",
