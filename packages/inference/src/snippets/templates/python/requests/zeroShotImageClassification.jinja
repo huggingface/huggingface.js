@@ -9,6 +9,6 @@ def query(data):
     return response.json()
 
 output = query({
-    "image_path": {{{inputs}}},
+    "image_path": {{ inputs }},
     "parameters": {"candidate_labels": ["cat", "dog", "llama"]},
-})
+}) 

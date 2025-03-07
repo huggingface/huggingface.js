@@ -3,5 +3,6 @@ def query(payload):
     return response.json()
 
 output = query({
-    "inputs": {{{inputs}}},
-})
+    "inputs": {{ inputs }},
+    "parameters": {"candidate_labels": ["refund", "legal", "faq"]},
+}) 

@@ -9,8 +9,8 @@ import {
 	stringifyMessages,
 } from "@huggingface/tasks";
 import type { InferenceProvider } from "../types";
+import { Template } from "@huggingface/jinja";
 import fs from "fs";
-import Handlebars from "handlebars";
 import path from "path";
 import { existsSync as pathExists } from "node:fs";
 
@@ -27,10 +27,6 @@ interface TemplateParams {
 	methodName?: string; // specific to snippetBasic
 	importBase64?: boolean; // specific to snippetImportRequests
 }
-
-Handlebars.registerHelper("equals", function (value1, value2) {
-	return value1 === value2;
-});
 
 // Helpers to find + load templates
 
@@ -49,12 +45,12 @@ const rootDirFinder = (): string => {
 };
 
 const templatePath = (tool: string, templateName: string): string =>
-	path.join(rootDirFinder(), "src", "snippets", "templates", "python", tool, `${templateName}.hbs`);
+	path.join(rootDirFinder(), "src", "snippets", "templates", "python", tool, `${templateName}.jinja`);
 const hasTemplate = (tool: string, templateName: string): boolean => pathExists(templatePath(tool, templateName));
 
 const loadTemplate = (tool: string, templateName: string): ((data: TemplateParams) => string) => {
 	const template = fs.readFileSync(templatePath(tool, templateName), "utf8");
-	return Handlebars.compile<TemplateParams>(template);
+	return (data: TemplateParams) => new Template(template).render({ ...data });
 };
 
 const snippetImportInferenceClient = loadTemplate("huggingface_hub", "importInferenceClient");

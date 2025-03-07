@@ -6,11 +6,11 @@ def query(payload):
     return response.content
 
 image_bytes = query({
-    "inputs": "{{{inputs.image}}}",
-    "parameters": {"prompt": "{{{inputs.prompt}}}"},
+    "inputs": "{{ inputs.image }}",
+    "parameters": {"prompt": "{{ inputs.prompt }}"},
 })
 
 # You can access the image with PIL.Image for example
 import io
 from PIL import Image
-image = Image.open(io.BytesIO(image_bytes))
+image = Image.open(io.BytesIO(image_bytes)) 
