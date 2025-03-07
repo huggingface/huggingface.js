@@ -1,6 +1,6 @@
 import requests
 
-API_URL = "https://router.huggingface.co/hf-inference/v1"
+API_URL = "https://router.huggingface.co/hf-inference/models/distilbert/distilbert-base-uncased-finetuned-sst-2-english"
 headers = {"Authorization": "Bearer api_token"}
 
 def query(payload):

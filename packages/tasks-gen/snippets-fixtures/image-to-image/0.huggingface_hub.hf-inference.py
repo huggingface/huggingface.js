@@ -4,9 +4,9 @@ client = InferenceClient(
     provider="hf-inference",
     api_key="api_token",
 )
-
 # output is a PIL.Image object
-image = client.text_to_image(
-	"Astronaut riding a horse",
-	model="black-forest-labs/FLUX.1-schnell",
+image = client.image_to_image(
+    "cat.png",
+    prompt="Turn the cat into a tiger.",
+    model="stabilityai/stable-diffusion-xl-refiner-1.0",
 )

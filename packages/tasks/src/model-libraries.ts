@@ -398,7 +398,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "Hunyuan3D-2",
 		repoName: "Hunyuan3D-2",
 		repoUrl: "https://github.com/Tencent/Hunyuan3D-2",
-		countDownloads: `path:"model_index.json" OR path:"config.yaml"`,
+		countDownloads: `path_filename:"model_index" OR path_filename:"config"`,
 	},
 	imstoucan: {
 		prettyLabel: "IMS Toucan",
@@ -490,6 +490,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/StanfordMIMI/Merlin",
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
+	},
+	medvae: {
+		prettyLabel: "MedVAE",
+		repoName: "MedVAE",
+		repoUrl: "https://github.com/StanfordMIMI/MedVAE",
+		filter: false,
+		countDownloads: `path_extension:"ckpt"`,
 	},
 	mitie: {
 		prettyLabel: "MITIE",
