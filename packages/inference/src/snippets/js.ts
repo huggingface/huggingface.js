@@ -34,9 +34,9 @@ export const snippetBasic = (
 					{
 						client: "huggingface.js",
 						content: `\
-import { HfInference } from "@huggingface/inference";
+import { InferenceClient } from "@huggingface/inference";
 
-const client = new HfInference("${accessToken || `{API_TOKEN}`}");
+const client = new InferenceClient("${accessToken || `{API_TOKEN}`}");
 
 const output = await client.${HFJS_METHODS[model.pipeline_tag]}({
 	model: "${model.id}",
@@ -109,9 +109,9 @@ export const snippetTextGeneration = (
 			return [
 				{
 					client: "huggingface.js",
-					content: `import { HfInference } from "@huggingface/inference";
+					content: `import { InferenceClient } from "@huggingface/inference";
 
-const client = new HfInference("${accessToken || `{API_TOKEN}`}");
+const client = new InferenceClient("${accessToken || `{API_TOKEN}`}");
 
 let out = "";
 
@@ -161,9 +161,9 @@ for await (const chunk of stream) {
 			return [
 				{
 					client: "huggingface.js",
-					content: `import { HfInference } from "@huggingface/inference";
+					content: `import { InferenceClient } from "@huggingface/inference";
 
-const client = new HfInference("${accessToken || `{API_TOKEN}`}");
+const client = new InferenceClient("${accessToken || `{API_TOKEN}`}");
 
 const chatCompletion = await client.chatCompletion({
 	model: "${model.id}",
@@ -238,9 +238,9 @@ export const snippetTextToImage = (
 		{
 			client: "huggingface.js",
 			content: `\
-import { HfInference } from "@huggingface/inference";
+import { InferenceClient } from "@huggingface/inference";
 
-const client = new HfInference("${accessToken || `{API_TOKEN}`}");
+const client = new InferenceClient("${accessToken || `{API_TOKEN}`}");
 
 const image = await client.textToImage({
 	model: "${model.id}",
@@ -289,9 +289,9 @@ export const snippetTextToVideo = (
 				{
 					client: "huggingface.js",
 					content: `\
-import { HfInference } from "@huggingface/inference";
+import { InferenceClient } from "@huggingface/inference";
 
-const client = new HfInference("${accessToken || `{API_TOKEN}`}");
+const client = new InferenceClient("${accessToken || `{API_TOKEN}`}");
 
 const video = await client.textToVideo({
 	model: "${model.id}",
@@ -369,9 +369,9 @@ export const snippetAutomaticSpeechRecognition = (
 		{
 			client: "huggingface.js",
 			content: `\
-import { HfInference } from "@huggingface/inference";
+import { InferenceClient } from "@huggingface/inference";
 
-const client = new HfInference("${accessToken || `{API_TOKEN}`}");
+const client = new InferenceClient("${accessToken || `{API_TOKEN}`}");
 
 const data = fs.readFileSync(${getModelInputSnippet(model)});
 
