@@ -57,14 +57,14 @@ export async function makeRequestOptions(
 		task?: InferenceTask;
 		chatCompletion?: boolean;
 		/* Used internally to generate inference snippets (in which case model mapping is done separately) */
-		__skipModelIdResolution?: boolean;
+		skipModelIdResolution?: boolean;
 	}
 ): Promise<{ url: string; info: RequestInit }> {
 	const { accessToken, endpointUrl, provider: maybeProvider, model: maybeModel, ...remainingArgs } = args;
 	const provider = maybeProvider ?? "hf-inference";
 	const providerConfig = providerConfigs[provider];
 
-	const { includeCredentials, task, chatCompletion, signal, __skipModelIdResolution } = options ?? {};
+	const { includeCredentials, task, chatCompletion, signal, skipModelIdResolution } = options ?? {};
 
 	if (endpointUrl && provider !== "hf-inference") {
 		throw new Error(`Cannot use endpointUrl with a third-party provider.`);
@@ -83,7 +83,7 @@ export async function makeRequestOptions(
 	}
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const hfModel = maybeModel ?? (await loadDefaultModel(task!));
-	const model = __skipModelIdResolution
+	const model = skipModelIdResolution
 		? hfModel
 		: providerConfig.clientSideRoutingOnly
 		  ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
