@@ -96,6 +96,9 @@ export async function downloadFileToCacheDir(
 	const pointerPath = getFilePointer(storageFolder, commitHash ?? pathsInformation[0].lastCommit.id, params.path);
 	const blobPath = join(storageFolder, "blobs", etag);
 
+	// if we have the pointer file, we can shortcut the download
+	if (await exists(pointerPath, true)) return pointerPath;
+
 	// mkdir blob and pointer path parent directory
 	await mkdir(dirname(blobPath), { recursive: true });
 	await mkdir(dirname(pointerPath), { recursive: true });

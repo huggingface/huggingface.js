@@ -104,7 +104,10 @@
 					"example": "assistant"
 				},
 				"tool_calls": {
-					"$ref": "#/$defs/ChatCompletionStreamOutputDeltaToolCall"
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/ChatCompletionStreamOutputDeltaToolCall"
+					}
 				}
 			},
 			"title": "ChatCompletionStreamOutputToolCallDelta"

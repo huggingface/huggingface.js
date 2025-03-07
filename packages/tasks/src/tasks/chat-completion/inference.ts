@@ -273,7 +273,7 @@ export interface ChatCompletionStreamOutputDelta {
 	content?: string;
 	role: string;
 	tool_call_id?: string;
-	tool_calls?: ChatCompletionStreamOutputDeltaToolCall;
+	tool_calls?: ChatCompletionStreamOutputDeltaToolCall[];
 	[property: string]: unknown;
 }
 export interface ChatCompletionStreamOutputDeltaToolCall {
