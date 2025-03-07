@@ -7,8 +7,8 @@ const chatCompletion = await client.chatCompletion({
 	messages: [
 		{
 			role: "user",
-			content: "What is the capital of France?",
-		},
+			content: "What is the capital of France?"
+		}
 	],
 	provider: "together",
 	max_tokens: 500,

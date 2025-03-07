@@ -9,8 +9,8 @@ const stream = client.chatCompletionStream({
 	messages: [
 		{
 			role: "user",
-			content: "What is the capital of France?",
-		},
+			content: "What is the capital of France?"
+		}
 	],
 	provider: "hf-inference",
 	max_tokens: 500,
@@ -21,5 +21,5 @@ for await (const chunk of stream) {
 		const newContent = chunk.choices[0].delta.content;
 		out += newContent;
 		console.log(newContent);
-	}
+	}  
 }
