@@ -4,11 +4,11 @@ API_URL = "https://router.huggingface.co/hf-inference/models/black-forest-labs/F
 headers = {"Authorization": "Bearer api_token"}
 
 def query(payload):
-	response = requests.post(API_URL, headers=headers, json=payload)
-	return response.content
+    response = requests.post(API_URL, headers=headers, json=payload)
+    return response.content
 
 image_bytes = query({
-	"inputs": "Astronaut riding a horse",
+    "inputs": "Astronaut riding a horse",
 })
 
 # You can access the image with PIL.Image for example

@@ -113,6 +113,28 @@ const TEST_CASES: {
 		providers: ["hf-inference"],
 	},
 	{
+		testName: "tabular",
+		model: {
+			id: "templates/tabular-classification",
+			pipeline_tag: "tabular-classification",
+			tags: [],
+			inference: "",
+		},
+		providers: ["hf-inference"],
+		languages: ["py"],
+	},
+	{
+		testName: "text-to-audio-transformers",
+		model: {
+			id: "facebook/musicgen-small",
+			pipeline_tag: "text-to-audio",
+			tags: ["transformers"],
+			inference: "",
+		},
+		providers: ["hf-inference"],
+		languages: ["py"],
+	},
+	{
 		testName: "text-to-image",
 		model: {
 			id: "black-forest-labs/FLUX.1-schnell",
@@ -144,6 +166,39 @@ const TEST_CASES: {
 		},
 		providers: ["hf-inference"],
 		languages: ["sh", "js", "py"],
+	},
+	{
+		testName: "basic-snippet--token-classification",
+		model: {
+			id: "FacebookAI/xlm-roberta-large-finetuned-conll03-english",
+			pipeline_tag: "token-classification",
+			tags: [],
+			inference: "",
+		},
+		providers: ["hf-inference"],
+		languages: ["py"],
+	},
+	{
+		testName: "zero-shot-classification",
+		model: {
+			id: "facebook/bart-large-mnli",
+			pipeline_tag: "zero-shot-classification",
+			tags: [],
+			inference: "",
+		},
+		providers: ["hf-inference"],
+		languages: ["py"],
+	},
+	{
+		testName: "zero-shot-image-classification",
+		model: {
+			id: "openai/clip-vit-large-patch14",
+			pipeline_tag: "zero-shot-image-classification",
+			tags: [],
+			inference: "",
+		},
+		providers: ["hf-inference"],
+		languages: ["py"],
 	},
 ] as const;
 

@@ -1,0 +1,11 @@
+{% if provider == "fal-ai" %}
+import fal_client
+
+result = fal_client.subscribe(
+    "{{ providerModelId }}",
+    arguments={
+        "prompt": {{ inputs }},
+    },
+)
+print(result)
+{% endif %} 

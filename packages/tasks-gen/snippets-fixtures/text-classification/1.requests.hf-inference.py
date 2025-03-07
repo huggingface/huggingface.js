@@ -4,9 +4,9 @@ API_URL = "https://router.huggingface.co/hf-inference/models/distilbert/distilbe
 headers = {"Authorization": "Bearer api_token"}
 
 def query(payload):
-	response = requests.post(API_URL, headers=headers, json=payload)
-	return response.json()
-	
+    response = requests.post(API_URL, headers=headers, json=payload)
+    return response.json()
+
 output = query({
-	"inputs": "I like you. I love you",
+    "inputs": "I like you. I love you",
 })

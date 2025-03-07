@@ -1,0 +1,8 @@
+def query(payload):
+    response = requests.post(API_URL, headers=headers, json=payload)
+    return response.json()
+
+output = query({
+    "inputs": {{ inputs }},
+    "parameters": {"candidate_labels": ["refund", "legal", "faq"]},
+}) 
