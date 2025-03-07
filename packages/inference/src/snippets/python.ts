@@ -10,10 +10,6 @@ import {
 } from "@huggingface/tasks";
 import type { InferenceProvider } from "../types";
 import { Template } from "@huggingface/jinja";
-import fs from "fs";
-import path from "path";
-import { existsSync as pathExists } from "node:fs";
-import { isNode, SnippetEnvironmentError } from "../utils/environment";
 
 const TOOLS = ["huggingface_hub", "requests", "fal_client", "openai"];
 
@@ -30,8 +26,25 @@ interface TemplateParams {
 }
 
 // Helpers to find + load templates
+function isNode(): boolean {
+	return typeof process !== "undefined" && process.versions != null && process.versions.node != null;
+}
+
+function loadNodeModules() {
+	if (!isNode()) {
+		throw new Error("Inference snippet generation is only available in Node.js environment");
+	}
+	// eslint-disable-next-line @typescript-eslint/no-var-requires
+	const fs = require("fs");
+	// eslint-disable-next-line @typescript-eslint/no-var-requires
+	const path = require("path");
+	// eslint-disable-next-line @typescript-eslint/no-var-requires
+	const pathExists = require("fs").existsSync;
+	return { fs, path, pathExists };
+}
 
 const rootDirFinder = (): string => {
+	const { path, pathExists } = loadNodeModules();
 	let currentPath = path.normalize(import.meta.url).replace("file:", "");
 
 	while (currentPath !== "/") {
@@ -45,11 +58,17 @@ const rootDirFinder = (): string => {
 	return "/";
 };
 
-const templatePath = (tool: string, templateName: string): string =>
-	path.join(rootDirFinder(), "src", "snippets", "templates", "python", tool, `${templateName}.jinja`);
-const hasTemplate = (tool: string, templateName: string): boolean => pathExists(templatePath(tool, templateName));
+const templatePath = (tool: string, templateName: string): string => {
+	const { path } = loadNodeModules();
+	return path.join(rootDirFinder(), "src", "snippets", "templates", "python", tool, `${templateName}.jinja`);
+};
+const hasTemplate = (tool: string, templateName: string): boolean => {
+	const { pathExists } = loadNodeModules();
+	return pathExists(templatePath(tool, templateName));
+};
 
 const loadTemplate = (tool: string, templateName: string): ((data: TemplateParams) => string) => {
+	const { fs } = loadNodeModules();
 	const template = fs.readFileSync(templatePath(tool, templateName), "utf8");
 	return (data: TemplateParams) => new Template(template).render({ ...data });
 };
@@ -235,10 +254,6 @@ export function getPythonInferenceSnippet(
 	providerModelId?: string,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
-	if (!isNode()) {
-		throw new SnippetEnvironmentError("Python snippet generation is only available in Node.js environment");
-	}
-
 	const snippets = model.tags.includes("conversational")
 		? snippetConversational(model, accessToken, provider, providerModelId, opts)
 		: model.pipeline_tag && model.pipeline_tag in pythonSnippets
