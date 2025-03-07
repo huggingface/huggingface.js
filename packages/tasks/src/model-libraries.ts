@@ -909,6 +909,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://github.com/jasonppy/VoiceCraft",
 		snippets: snippets.voicecraft,
 	},
+	wham: {
+		prettyLabel: "WHAM",
+		repoName: "wham",
+		repoUrl: "https://huggingface.co/microsoft/wham",
+		docsUrl: "https://huggingface.co/microsoft/wham/blob/main/README.md",
+		countDownloads: `path_extension:"ckpt"`,
+	},
 	whisperkit: {
 		prettyLabel: "WhisperKit",
 		repoName: "WhisperKit",
