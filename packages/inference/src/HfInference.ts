@@ -21,7 +21,7 @@ type TaskWithNoAccessTokenNoEndpointUrl = {
 	) => ReturnType<Task[key]>;
 };
 
-export class HfInference {
+export class InferenceClient {
 	private readonly accessToken: string;
 	private readonly defaultOptions: Options;
 
@@ -40,14 +40,14 @@ export class HfInference {
 	}
 
 	/**
-	 * Returns copy of HfInference tied to a specified endpoint.
+	 * Returns copy of InferenceClient tied to a specified endpoint.
 	 */
-	public endpoint(endpointUrl: string): HfInferenceEndpoint {
-		return new HfInferenceEndpoint(endpointUrl, this.accessToken, this.defaultOptions);
+	public endpoint(endpointUrl: string): InferenceClientEndpoint {
+		return new InferenceClientEndpoint(endpointUrl, this.accessToken, this.defaultOptions);
 	}
 }
 
-export class HfInferenceEndpoint {
+export class InferenceClientEndpoint {
 	constructor(endpointUrl: string, accessToken = "", defaultOptions: Options = {}) {
 		accessToken;
 		defaultOptions;
@@ -63,6 +63,6 @@ export class HfInferenceEndpoint {
 	}
 }
 
-export interface HfInference extends TaskWithNoAccessToken {}
+export interface InferenceClient extends TaskWithNoAccessToken {}
 
-export interface HfInferenceEndpoint extends TaskWithNoAccessTokenNoEndpointUrl {}
+export interface InferenceClientEndpoint extends TaskWithNoAccessTokenNoEndpointUrl {}

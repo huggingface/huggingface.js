@@ -61,12 +61,12 @@ for (const dir of dirs) {
 
 appendFileSync(
 	"./dist/index.d.ts",
-	`export class HfInference {
+	`export class InferenceClient {
 \tconstructor(accessToken?: string, defaultOptions?: Options);
 \t/**
-\t * Returns copy of HfInference tied to a specified endpoint.
+\t * Returns copy of InferenceClient tied to a specified endpoint.
 \t */
-\tendpoint(endpointUrl: string): HfInferenceEndpoint;
+\tendpoint(endpointUrl: string): InferenceClientEndpoint;
 ` +
 		fns
 			.map(
@@ -84,7 +84,7 @@ appendFileSync(
 
 appendFileSync(
 	"./dist/index.d.ts",
-	`export class HfInferenceEndpoint {\n\tconstructor(endpointUrl: string, accessToken?: string, defaultOptions?: Options);\n` +
+	`export class InferenceClientEndpoint {\n\tconstructor(endpointUrl: string, accessToken?: string, defaultOptions?: Options);\n` +
 		fns
 			.map(
 				(fn) =>

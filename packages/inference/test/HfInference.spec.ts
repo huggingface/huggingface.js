@@ -3,7 +3,7 @@ import { assert, describe, expect, it } from "vitest";
 import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
 
 import type { TextToImageArgs } from "../src";
-import { chatCompletion, chatCompletionStream, HfInference, textGeneration, textToImage } from "../src";
+import { chatCompletion, chatCompletionStream, InferenceClient, textGeneration, textToImage } from "../src";
 import { textToVideo } from "../src/tasks/cv/textToVideo";
 import { readTestFile } from "./test-files";
 import "./vcr";
@@ -17,13 +17,13 @@ if (!env.HF_TOKEN) {
 	console.warn("Set HF_TOKEN in the env to run the tests for better rate limits");
 }
 
-describe.concurrent("HfInference", () => {
+describe.concurrent("InferenceClient", () => {
 	// Individual tests can be ran without providing an api key, however running all tests without an api key will result in rate limiting error.
 
 	describe.concurrent(
 		"HF Inference",
 		() => {
-			const hf = new HfInference(env.HF_TOKEN);
+			const hf = new InferenceClient(env.HF_TOKEN);
 
 			it("throws error if model does not exist", () => {
 				expect(
@@ -738,7 +738,7 @@ describe.concurrent("HfInference", () => {
 			});
 			it("custom mistral - OpenAI Specs", async () => {
 				const MISTRAL_KEY = env.MISTRAL_KEY;
-				const hf = new HfInference(MISTRAL_KEY);
+				const hf = new InferenceClient(MISTRAL_KEY);
 				const ep = hf.endpoint("https://api.mistral.ai");
 				const stream = ep.chatCompletionStream({
 					model: "mistral-tiny",
@@ -754,7 +754,7 @@ describe.concurrent("HfInference", () => {
 			});
 			it("custom openai - OpenAI Specs", async () => {
 				const OPENAI_KEY = env.OPENAI_KEY;
-				const hf = new HfInference(OPENAI_KEY);
+				const hf = new InferenceClient(OPENAI_KEY);
 				const stream = hf.chatCompletionStream({
 					provider: "openai",
 					model: "openai/gpt-3.5-turbo",
@@ -770,7 +770,7 @@ describe.concurrent("HfInference", () => {
 			});
 			it("OpenAI client side routing - model should have provider as prefix", async () => {
 				await expect(
-					new HfInference("dummy_token").chatCompletion({
+					new InferenceClient("dummy_token").chatCompletion({
 						model: "gpt-3.5-turbo", // must be "openai/gpt-3.5-turbo"
 						provider: "openai",
 						messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
@@ -787,7 +787,7 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Fal AI",
 		() => {
-			const client = new HfInference(env.HF_FAL_KEY ?? "dummy");
+			const client = new InferenceClient(env.HF_FAL_KEY ?? "dummy");
 
 			it(`textToImage - black-forest-labs/FLUX.1-schnell`, async () => {
 				const res = await client.textToImage({
@@ -873,7 +873,7 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Replicate",
 		() => {
-			const client = new HfInference(env.HF_REPLICATE_KEY ?? "dummy");
+			const client = new InferenceClient(env.HF_REPLICATE_KEY ?? "dummy");
 
 			it("textToImage canonical - black-forest-labs/FLUX.1-schnell", async () => {
 				const res = await client.textToImage({
@@ -989,7 +989,7 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"SambaNova",
 		() => {
-			const client = new HfInference(env.HF_SAMBANOVA_KEY ?? "dummy");
+			const client = new InferenceClient(env.HF_SAMBANOVA_KEY ?? "dummy");
 
 			it("chatCompletion", async () => {
 				const res = await client.chatCompletion({
@@ -1023,7 +1023,7 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Together",
 		() => {
-			const client = new HfInference(env.HF_TOGETHER_KEY ?? "dummy");
+			const client = new InferenceClient(env.HF_TOGETHER_KEY ?? "dummy");
 
 			it("chatCompletion", async () => {
 				const res = await client.chatCompletion({
@@ -1078,7 +1078,7 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Nebius",
 		() => {
-			const client = new HfInference(env.HF_NEBIUS_KEY ?? "dummy");
+			const client = new InferenceClient(env.HF_NEBIUS_KEY ?? "dummy");
 
 			HARDCODED_MODEL_ID_MAPPING.nebius = {
 				"meta-llama/Llama-3.1-8B-Instruct": "meta-llama/Meta-Llama-3.1-8B-Instruct",
@@ -1143,7 +1143,7 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Fireworks",
 		() => {
-			const client = new HfInference(env.HF_FIREWORKS_KEY ?? "dummy");
+			const client = new InferenceClient(env.HF_FIREWORKS_KEY ?? "dummy");
 
 			HARDCODED_MODEL_ID_MAPPING["fireworks-ai"] = {
 				"deepseek-ai/DeepSeek-R1": "accounts/fireworks/models/deepseek-r1",
@@ -1269,7 +1269,7 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Novita",
 		() => {
-			const client = new HfInference(env.HF_NOVITA_KEY ?? "dummy");
+			const client = new InferenceClient(env.HF_NOVITA_KEY ?? "dummy");
 
 			HARDCODED_MODEL_ID_MAPPING["novita"] = {
 				"meta-llama/llama-3.1-8b-instruct": "meta-llama/llama-3.1-8b-instruct",
@@ -1362,7 +1362,7 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Cohere",
 		() => {
-			const client = new HfInference(env.HF_COHERE_KEY ?? "dummy");
+			const client = new InferenceClient(env.HF_COHERE_KEY ?? "dummy");
 
 			HARDCODED_MODEL_ID_MAPPING["cohere"] = {
 				"CohereForAI/c4ai-command-r7b-12-2024": "command-r7b-12-2024",
@@ -1409,7 +1409,7 @@ describe.concurrent("HfInference", () => {
 	describe.concurrent(
 		"Cerebras",
 		() => {
-			const client = new HfInference(env.HF_CEREBRAS_KEY ?? "dummy");
+			const client = new InferenceClient(env.HF_CEREBRAS_KEY ?? "dummy");
 
 			HARDCODED_MODEL_ID_MAPPING["cerebras"] = {
 				"meta-llama/llama-3.1-8b-instruct": "llama3.1-8b",

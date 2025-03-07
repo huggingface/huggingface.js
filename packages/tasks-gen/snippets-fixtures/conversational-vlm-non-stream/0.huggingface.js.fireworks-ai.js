@@ -1,6 +1,6 @@
-import { HfInference } from "@huggingface/inference";
+import { InferenceClient } from "@huggingface/inference";
 
-const client = new HfInference("api_token");
+const client = new InferenceClient("api_token");
 
 const chatCompletion = await client.chatCompletion({
 	model: "meta-llama/Llama-3.2-11B-Vision-Instruct",
@@ -10,16 +10,16 @@ const chatCompletion = await client.chatCompletion({
 			content: [
 				{
 					type: "text",
-					text: "Describe this image in one sentence."
+					text: "Describe this image in one sentence.",
 				},
 				{
 					type: "image_url",
 					image_url: {
-						url: "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg"
-					}
-				}
-			]
-		}
+						url: "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg",
+					},
+				},
+			],
+		},
 	],
 	provider: "fireworks-ai",
 	max_tokens: 500,

@@ -85,7 +85,7 @@ npm install @huggingface/agents
 Then import the libraries in your code:
 
 ```ts
-import { HfInference } from "@huggingface/inference";
+import { InferenceClient } from "@huggingface/inference";
 import { HfAgent } from "@huggingface/agents";
 import { createRepo, commit, deleteRepo, listFiles } from "@huggingface/hub";
 import type { RepoId } from "@huggingface/hub";
@@ -97,7 +97,7 @@ You can run our packages with vanilla JS, without any bundler, by using a CDN or
 
 ```html
 <script type="module">
-    import { HfInference } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@3.5.1/+esm';
+    import { InferenceClient } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@3.5.1/+esm';
     import { createRepo, commit, deleteRepo, listFiles } from "https://cdn.jsdelivr.net/npm/@huggingface/hub@1.0.2/+esm";
 </script>
 ```
@@ -106,12 +106,12 @@ You can run our packages with vanilla JS, without any bundler, by using a CDN or
 
 ```ts
 // esm.sh
-import { HfInference } from "https://esm.sh/@huggingface/inference"
+import { InferenceClient } from "https://esm.sh/@huggingface/inference"
 import { HfAgent } from "https://esm.sh/@huggingface/agents";
 
 import { createRepo, commit, deleteRepo, listFiles } from "https://esm.sh/@huggingface/hub"
 // or npm:
-import { HfInference } from "npm:@huggingface/inference"
+import { InferenceClient } from "npm:@huggingface/inference"
 import { HfAgent } from "npm:@huggingface/agents";
 
 import { createRepo, commit, deleteRepo, listFiles } from "npm:@huggingface/hub"
@@ -124,11 +124,11 @@ Get your HF access token in your [account settings](https://huggingface.co/setti
 ### @huggingface/inference examples
 
 ```ts
-import { HfInference } from "@huggingface/inference";
+import { InferenceClient } from "@huggingface/inference";
 
 const HF_TOKEN = "hf_...";
 
-const inference = new HfInference(HF_TOKEN);
+const inference = new InferenceClient(HF_TOKEN);
 
 // Chat completion API
 const out = await inference.chatCompletion({

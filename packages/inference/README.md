@@ -25,17 +25,17 @@ yarn add @huggingface/inference
 
 ```ts
 // esm.sh
-import { HfInference } from "https://esm.sh/@huggingface/inference"
+import { InferenceClient } from "https://esm.sh/@huggingface/inference"
 // or npm:
-import { HfInference } from "npm:@huggingface/inference"
+import { InferenceClient } from "npm:@huggingface/inference"
 ```
 
 ### Initialize
 
 ```typescript
-import { HfInference } from '@huggingface/inference'
+import { InferenceClient } from '@huggingface/inference'
 
-const hf = new HfInference('your access token')
+const hf = new InferenceClient('your access token')
 ```
 
 ❗**Important note:** Using an access token is optional to get started, however you will be rate limited eventually. Join [Hugging Face](https://huggingface.co/join) and then visit [access tokens](https://huggingface.co/settings/tokens) to generate your access token for **free**.
@@ -63,7 +63,7 @@ To send requests to a third-party provider, you have to pass the `provider` para
 ```ts
 const accessToken = "hf_..."; // Either a HF access token, or an API key from the third-party provider (Replicate in this example)
 
-const client = new HfInference(accessToken);
+const client = new InferenceClient(accessToken);
 await client.textToImage({
   provider: "replicate",
   model:"black-forest-labs/Flux.1-dev",
@@ -93,7 +93,7 @@ This is not an issue for LLMs as everyone converged on the OpenAI API anyways, b
 
 ### Tree-shaking
 
-You can import the functions you need directly from the module instead of using the `HfInference` class.
+You can import the functions you need directly from the module instead of using the `InferenceClient` class.
 
 ```ts
 import { textGeneration } from "@huggingface/inference";
@@ -165,7 +165,7 @@ for await (const chunk of hf.chatCompletionStream({
 It's also possible to call Mistral or OpenAI endpoints directly:
 
 ```typescript
-const openai = new HfInference(OPENAI_TOKEN).endpoint("https://api.openai.com");
+const openai = new InferenceClient(OPENAI_TOKEN).endpoint("https://api.openai.com");
 
 let out = "";
 for await (const chunk of openai.chatCompletionStream({
@@ -602,7 +602,7 @@ You can use any Chat Completion API-compatible provider with the `chatCompletion
 ```typescript
 // Chat Completion Example
 const MISTRAL_KEY = process.env.MISTRAL_KEY;
-const hf = new HfInference(MISTRAL_KEY);
+const hf = new InferenceClient(MISTRAL_KEY);
 const ep = hf.endpoint("https://api.mistral.ai");
 const stream = ep.chatCompletionStream({
   model: "mistral-tiny",
