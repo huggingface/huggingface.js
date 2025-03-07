@@ -31,6 +31,7 @@ await uploadFile({
 
 await inference.chatCompletion({
   model: "meta-llama/Llama-3.1-8B-Instruct",
+  provider: "sambanova", // or together, fal-ai, replicate, cohere …
   messages: [
     {
       role: "user",
@@ -39,11 +40,11 @@ await inference.chatCompletion({
   ],
   max_tokens: 512,
   temperature: 0.5,
-  provider: "sambanova", // or together, fal-ai, replicate, cohere …
 });
 
 await inference.textToImage({
   model: "black-forest-labs/FLUX.1-dev",
+  provider: "replicate",
   inputs: "a picture of a green bird",
 });
 
@@ -54,7 +55,7 @@ await inference.textToImage({
 
 This is a collection of JS libraries to interact with the Hugging Face API, with TS types included.
 
-- [@huggingface/inference](packages/inference/README.md): Use HF Inference API (serverless), Inference Endpoints (dedicated) and third-party Inference Providers to make calls to 100,000+ Machine Learning models
+- [@huggingface/inference](packages/inference/README.md): Use HF Inference API (serverless), Inference Endpoints (dedicated) and all supported Inference Providers to make calls to 100,000+ Machine Learning models
 - [@huggingface/hub](packages/hub/README.md): Interact with huggingface.co to create or delete repos and commit / download files
 - [@huggingface/agents](packages/agents/README.md): Interact with HF models through a natural language interface
 - [@huggingface/gguf](packages/gguf/README.md): A GGUF parser that works on remotely hosted files.
