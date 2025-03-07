@@ -1506,7 +1506,6 @@ describe.concurrent("HfInference", () => {
 						width: 512,
 						num_inference_steps: 20,
 						seed: 42,
-						response_format: "url",
 					},
 				});
 				expect(res).toBeInstanceOf(Blob);
