@@ -7506,5 +7506,98 @@
 				"content-type": "text/event-stream"
 			}
 		}
+	},
+	"0fb086d4e10baa1a1faa65605858c8c3dc83a43e986a2f7f6c0846ac13c43991": {
+		"url": "https://inference.api.nscale.com/v1/chat/completions",
+		"init": {
+			"headers": {
+				"Content-Type": "application/json"
+			},
+			"method": "POST",
+			"body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Complete this sentence with words, one plus one is equal \"}],\"model\":\"meta-llama/Llama-3.1-8B-Instruct\"}"
+		},
+		"response": {
+			"body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"logprobs\":null,\"message\":{\"content\":\"two.\",\"role\":\"assistant\"},\"stop_reason\":null}],\"created\":1741357679,\"id\":\"chatcmpl-bf2bbbcf768e4c77b418b8e000787724\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion\",\"prompt_logprobs\":null,\"usage\":{\"completion_tokens\":3,\"prompt_tokens\":46,\"total_tokens\":49}}",
+			"status": 200,
+			"statusText": "OK",
+			"headers": {
+				"connection": "keep-alive",
+				"content-type": "application/json; charset=utf-8",
+				"strict-transport-security": "max-age=31536000; includeSubDomains"
+			}
+		}
+	},
+	"dccea7f673bedaacc3a600dbe436fb5507a2803183709397c6d0ec9670322cd9": {
+		"url": "https://inference.api.nscale.com/v1/chat/completions",
+		"init": {
+			"headers": {
+				"Content-Type": "application/json"
+			},
+      	"method": "POST",
+      	"body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Say this is a test\"}],\"stream\":true,\"model\":\"meta-llama/Llama-3.1-8B-Instruct\"}"
+    	},
+    	"response": {
+      		"body": "data: {\"choices\":[{\"delta\":{\"content\":\"\",\"role\":\"assistant\"},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1741357679,\"id\":\"chatcmpl-776ebc38646e4fe892b018c1e978e6e9\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":null}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\"It\",\"role\":null},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1741357679,\"id\":\"chatcmpl-776ebc38646e4fe892b018c1e978e6e9\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":null}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\" looks\",\"role\":null},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1741357679,\"id\":\"chatcmpl-776ebc38646e4fe892b018c1e978e6e9\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":null}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\" like\",\"role\":null},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1741357679,\"id\":\"chatcmpl-776ebc38646e4fe892b018c1e978e6e9\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":null}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\" we\",\"role\":null},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1741357679,\"id\":\"chatcmpl-776ebc38646e4fe892b018c1e978e6e9\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":null}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\"'re\",\"role\":null},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1741357679,\"id\":\"chatcmpl-776ebc38646e4fe892b018c1e978e6e9\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":null}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\" starting\",\"role\":null},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1741357679,\"id\":\"chatcmpl-776ebc38646e4fe892b018c1e978e6e9\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":null}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\" a\",\"role\":null},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1741357679,\"id\":\"chatcmpl-776ebc38646e4fe892b018c1e978e6e9\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":null}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\" test\",\"role\":null},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1741357679,\"id\":\"chatcmpl-776ebc38646e4fe892b018c1e978e6e9\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":null}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\".\",\"role\":null},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1741357679,\"id\":\"chatcmpl-776ebc38646e4fe892b018c1e978e6e9\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":null}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\" What\",\"role\":null},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1741357679,\"id\":\"chatcmpl-776ebc38646e4fe892b018c1e978e6e9\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":null}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\"'s\",\"role\":null},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1741357679,\"id\":\"chatcmpl-776ebc38646e4fe892b018c1e978e6e9\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":null}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\" the\",\"role\":null},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1741357679,\"id\":\"chatcmpl-776ebc38646e4fe892b018c1e978e6e9\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":null}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\" topic\",\"role\":null},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1741357679,\"id\":\"chatcmpl-776ebc38646e4fe892b018c1e978e6e9\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":null}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\" or\",\"role\":null},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1741357679,\"id\":\"chatcmpl-776ebc38646e4fe892b018c1e978e6e9\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":null}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\" subject\",\"role\":null},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1741357679,\"id\":\"chatcmpl-776ebc38646e4fe892b018c1e978e6e9\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":null}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\" we\",\"role\":null},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1741357679,\"id\":\"chatcmpl-776ebc38646e4fe892b018c1e978e6e9\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":null}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\"'ll\",\"role\":null},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1741357679,\"id\":\"chatcmpl-776ebc38646e4fe892b018c1e978e6e9\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":null}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\" be\",\"role\":null},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1741357679,\"id\":\"chatcmpl-776ebc38646e4fe892b018c1e978e6e9\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":null}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\" covering\",\"role\":null},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1741357679,\"id\":\"chatcmpl-776ebc38646e4fe892b018c1e978e6e9\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":null}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\"?\",\"role\":null},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1741357679,\"id\":\"chatcmpl-776ebc38646e4fe892b018c1e978e6e9\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":null}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\"\",\"role\":null},\"finish_reason\":\"stop\",\"index\":0,\"logprobs\":null}],\"created\":1741357679,\"id\":\"chatcmpl-776ebc38646e4fe892b018c1e978e6e9\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":null}\n\ndata: {\"choices\":[],\"created\":1741357679,\"id\":\"chatcmpl-776ebc38646e4fe892b018c1e978e6e9\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":{\"completion_tokens\":21,\"prompt_tokens\":40,\"total_tokens\":61}}\n\n",
+			"status": 201,
+			"statusText": "Created",
+			"headers": {
+				"cache-control": "no-cache",
+				"connection": "keep-alive",
+				"content-type": "text/event-stream",
+				"strict-transport-security": "max-age=31536000; includeSubDomains",
+				"transfer-encoding": "chunked"
+			}
+		}
+	},
+	"76d4cb544d24088d04f2c296e29a9364b20e542e31cbe6f1992377a07b2312f4": {
+		"url": "https://inference.api.nscale.com/v1/images/generations",
+		"init": {
+			"headers": {
+				"Content-Type": "application/json"
+			},
+			"method": "POST",
+			"body": "{\"height\":512,\"width\":512,\"num_inference_steps\":20,\"seed\":42,\"response_format\":\"base64\",\"prompt\":\"A raccoon driving a truck through a forest at sunset\",\"model\":\"black-forest-labs/FLUX.1-schnell\"}"
+		},
+    	"response": {
+      		"body": "{\"created\":1741357681,\"data\":[{\"b64_json\":\"iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAIAAAB7GkOtAAAHFnRFWHRwcm9tcHQAeyI1IjogeyJpbnB1dHMiOiB7IndpZHRoIjogNTEyLCAiaGVpZ2h0IjogNTEyLCAiYmF0Y2hfc2l6ZSI6IDF9LCAiY2xhc3NfdHlwZSI6ICJFbXB0eUxhdGVudEltYWdlIiwgIl9tZXRhIjogeyJ0aXRsZSI6ICJFbXB0eSBMYXRlbnQgSW1hZ2UifX0sICI2IjogeyJpbnB1dHMiOiB7InRleHQiOiAicGhvdG9yZWFsaXN0aWMsIHJlYWxpc20sIG5hdHVyYWwgcGljdHVyZSwgQSByYWNjb29uIGRyaXZpbmcgYSB0cnVjayB0aHJvdWdoIGEgZm9yZXN0IGF0IHN1bnNldCIsICJjbGlwIjogWyIxMSIsIDBdfSwgImNsYXNzX3R5cGUiOiAiQ0xJUFRleHRFbmNvZGUiLCAiX21ldGEiOiB7InRpdGxlIjogIkNMSVAgVGV4dCBFbmNvZGUgKFByb21wdCkifX0sICI4IjogeyJpbnB1dHMiOiB7InNhbXBsZXMiOiBbIjEzIiwgMF0sICJ2YWUiOiBbIjEwIiwgMF19LCAiY2xhc3NfdHlwZSI6ICJWQUVEZWNvZGUiLCAiX21ldGEiOiB7InRpdGxlIjogIlZBRSBEZWNvZGUifX0sICI5IjogeyJpbnB1dHMiOiB7ImZpbGVuYW1lX3ByZWZpeCI6ICJDb21meVVJIiwgImltYWdlcyI6IFsiOCIsIDBdfSwgImNsYXNzX3R5cGUiOiAiU2F2ZUltYWdlIiwgIl9tZXRhIjogeyJ0aXRsZSI6ICJTYXZlIEltYWdlIn19LCAiMTAiOiB7ImlucHV0cyI6IHsidmFlX25hbWUiOiAiYWUuc2FmZXRlbnNvcnMifSwgImNsYXNzX3R5cGUiOiAiVkFFTG9hZGVyIiwgIl9tZXRhIjog\"}]}",
+			"status": 200,
+			"statusText": "OK",
+			"headers": {
+				"connection": "keep-alive",
+				"content-type": "application/json; charset=utf-8",
+				"strict-transport-security": "max-age=31536000; includeSubDomains"
+			}
+		}
+	},
+  	"efb94ad406c96e2c29f59376033e98475882e8184b9512b53f36542ab05699c3": {
+    	"url": "data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAIAAAB7GkOtAAAHFnRFWHRwcm9tcHQAeyI1IjogeyJpbnB1dHMiOiB7IndpZHRoIjogNTEyLCAiaGVpZ2h0IjogNTEyLCAiYmF0Y2hfc2l6ZSI6IDF9LCAiY2xhc3NfdHlwZSI6ICJFbXB0eUxhdGVudEltYWdlIiwgIl9tZXRhIjogeyJ0aXRsZSI6ICJFbXB0eSBMYXRlbnQgSW1hZ2UifX0sICI2IjogeyJpbnB1dHMiOiB7InRleHQiOiAicGhvdG9yZWFsaXN0aWMsIHJlYWxpc20sIG5hdHVyYWwgcGljdHVyZSwgQSByYWNjb29uIGRyaXZpbmcgYSB0cnVjayB0aHJvdWdoIGEgZm9yZXN0IGF0IHN1bnNldCIsICJjbGlwIjogWyIxMSIsIDBdfSwgImNsYXNzX3R5cGUiOiAiQ0xJUFRleHRFbmNvZGUiLCAiX21ldGEiOiB7InRpdGxlIjogIkNMSVAgVGV4dCBFbmNvZGUgKFByb21wdCkifX0sICI4IjogeyJpbnB1dHMiOiB7InNhbXBsZXMiOiBbIjEzIiwgMF0sICJ2YWUiOiBbIjEwIiwgMF19LCAiY2xhc3NfdHlwZSI6ICJWQUVEZWNvZGUiLCAiX21ldGEiOiB7InRpdGxlIjogIlZBRSBEZWNvZGUifX0sICI5IjogeyJpbnB1dHMiOiB7ImZpbGVuYW1lX3ByZWZpeCI6ICJDb21meVVJIiwgImltYWdlcyI6IFsiOCIsIDBdfSwgImNsYXNzX3R5cGUiOiAiU2F2ZUltYWdlIiwgIl9tZXRhIjogeyJ0aXRsZSI6ICJTYXZlIEltYWdlIn19LCAiMTAiOiB7ImlucHV0cyI6IHsidmFlX25hbWUiOiAiYWUuc2FmZXRlbnNvcnMifSwgImNsYXNzX3R5cGUiOiAiVkFFTG9hZGVyIiwgIl9tZXRhIjog",
+    	"init": {},
+    	"response": {
+      		"body": "",
+      		"status": 200,
+      		"statusText": "OK",
+			"headers": {
+				"content-type": "image/jpeg"
+			}
+		}
+	},
+  	"eb93c03197c7c9333f52727837ce23b15520423ef1c38507ab3976d994576ba2": {
+    	"url": "https://inference.api.nscale.com/v1/chat/completions",
+    	"init": {
+      		"headers": {
+				"Content-Type": "application/json"
+			},
+      		"method": "POST"
+    	},
+    	"response": {
+      		"body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"logprobs\":null,\"message\":{\"content\":\"This invoice is from East Repair Inc. to John Smith, located at 1912 Harvest Lane, New York, NY 12210. The bill is for 100 front and rear brake cables at $100, 15 new sets of pedal arms at $30, and 3 labor hours at $15, totaling $154.06. The due date is 26/02/2019, and the invoice number is US-001. The address for the bill to is 2 Court Square, New York, NY 12210. The shipment was sent to John Smith at 3787 Pineview Drive, Cambridge, MA 12210. The invoice includes a signature from John Smith, indicating receipt. The invoice is written in black text on a white background, with a gray circle in the top-right corner containing the word \\\"LOGO.\\\" The bottom of the invoice features a \\\"Thank you\\\" message and a note stating that the payment is due within 15 days. The invoice also includes a note that checks should be made payable to East Repair Inc.\",\"role\":\"assistant\"},\"stop_reason\":null}],\"created\":1741357679,\"id\":\"chatcmpl-49715391e7f04c7d96277d857857484d\",\"model\":\"meta-llama/Llama-3.2-11B-Vision-Instruct\",\"object\":\"chat.completion\",\"prompt_logprobs\":null,\"usage\":{\"completion_tokens\":216,\"prompt_tokens\":6421,\"total_tokens\":6637}}",
+      		"status": 200,
+      		"statusText": "OK",
+			"headers": {
+				"connection": "keep-alive",
+				"content-type": "application/json; charset=utf-8",
+				"strict-transport-security": "max-age=31536000; includeSubDomains"
+			}
+		}
 	}
 }

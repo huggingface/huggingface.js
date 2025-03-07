@@ -1452,4 +1452,91 @@ describe.concurrent("HfInference", () => {
 		},
 		TIMEOUT
 	);
+	describe.concurrent(
+		"Nscale",
+		() => {
+			const client = new HfInference(env.HF_NSCALE_KEY ?? "dummy");
+
+			HARDCODED_MODEL_ID_MAPPING["nscale-cloud"] = {
+				"meta-llama/Llama-3.1-8B-Instruct": "meta-llama/Llama-3.1-8B-Instruct",
+				"meta-llama/Llama-3.2-11B-Vision-Instruct": "meta-llama/Llama-3.2-11B-Vision-Instruct",
+				"black-forest-labs/FLUX.1-schnell": "black-forest-labs/FLUX.1-schnell",
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "meta-llama/Llama-3.1-8B-Instruct",
+					provider: "nscale-cloud",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toContain("two");
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "meta-llama/Llama-3.1-8B-Instruct",
+					provider: "nscale-cloud",
+					messages: [{ role: "user", content: "Say this is a test" }],
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+
+			it("textToImage", async () => {
+				const res = await client.textToImage({
+					model: "black-forest-labs/FLUX.1-schnell",
+					provider: "nscale-cloud",
+					inputs: "A raccoon driving a truck through a forest at sunset",
+					parameters: {
+						height: 512,
+						width: 512,
+						num_inference_steps: 20,
+						seed: 42,
+					},
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("vision capabilities", async () => {
+				const res = await client.chatCompletion({
+					model: "meta-llama/Llama-3.2-11B-Vision-Instruct",
+					provider: "nscale-cloud",
+					messages: [
+						{
+							role: "user",
+							content: [
+								{ type: "text", text: "What's in this image?" },
+								{
+									type: "image_url",
+									image_url: {
+										url: `data:image/png;base64,${Buffer.from(readTestFile("invoice.png")).toString("base64")}`,
+									},
+								},
+							],
+						},
+					],
+				});
+
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toBeTruthy();
+					expect(typeof completion).toBe("string");
+				}
+			});
+		},
+		TIMEOUT
+	);
 });

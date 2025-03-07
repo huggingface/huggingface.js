@@ -8,6 +8,7 @@ import { HF_INFERENCE_CONFIG } from "../providers/hf-inference";
 import { HYPERBOLIC_CONFIG } from "../providers/hyperbolic";
 import { NEBIUS_CONFIG } from "../providers/nebius";
 import { NOVITA_CONFIG } from "../providers/novita";
+import { NSCALE_CONFIG } from "../providers/nscale-cloud";
 import { REPLICATE_CONFIG } from "../providers/replicate";
 import { SAMBANOVA_CONFIG } from "../providers/sambanova";
 import { TOGETHER_CONFIG } from "../providers/together";
@@ -39,6 +40,7 @@ const providerConfigs: Record<InferenceProvider, ProviderConfig> = {
 	openai: OPENAI_CONFIG,
 	nebius: NEBIUS_CONFIG,
 	novita: NOVITA_CONFIG,
+	"nscale-cloud": NSCALE_CONFIG,
 	replicate: REPLICATE_CONFIG,
 	sambanova: SAMBANOVA_CONFIG,
 	together: TOGETHER_CONFIG,
