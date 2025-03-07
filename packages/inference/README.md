@@ -1,7 +1,7 @@
 # 🤗 Hugging Face Inference
 
-A Typescript powered wrapper for the HF Inference API (serverless), Inference Endpoints (dedicated), and third-party Inference Providers.
-It works with [Inference API (serverless)](https://huggingface.co/docs/api-inference/index) and [Inference Endpoints (dedicated)](https://huggingface.co/docs/inference-endpoints/index), and even with supported third-party Inference Providers.
+A Typescript powered wrapper for the HF Inference API (serverless), Inference Endpoints (dedicated), and all supported Inference Providers.
+It works with [Inference API (serverless)](https://huggingface.co/docs/api-inference/index) and [Inference Endpoints (dedicated)](https://huggingface.co/docs/inference-endpoints/index), and even with all supported third-party Inference Providers.
 
 Check out the [full documentation](https://huggingface.co/docs/huggingface.js/inference/README).
 
@@ -42,7 +42,7 @@ const hf = new InferenceClient('your access token')
 
 Your access token should be kept private. If you need to protect it in front-end applications, we suggest setting up a proxy server that stores the access token.
 
-### Third-party inference providers
+### All supported inference providers
 
 You can send inference requests to third-party providers with the inference client.
 
