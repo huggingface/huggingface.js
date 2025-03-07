@@ -13,6 +13,7 @@ import { Template } from "@huggingface/jinja";
 import fs from "fs";
 import path from "path";
 import { existsSync as pathExists } from "node:fs";
+import { isNode, SnippetEnvironmentError } from "../utils/environment";
 
 const TOOLS = ["huggingface_hub", "requests", "fal_client", "openai"];
 
@@ -234,6 +235,10 @@ export function getPythonInferenceSnippet(
 	providerModelId?: string,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
+	if (!isNode()) {
+		throw new SnippetEnvironmentError("Python snippet generation is only available in Node.js environment");
+	}
+
 	const snippets = model.tags.includes("conversational")
 		? snippetConversational(model, accessToken, provider, providerModelId, opts)
 		: model.pipeline_tag && model.pipeline_tag in pythonSnippets
