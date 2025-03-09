@@ -19,17 +19,29 @@ import { existsSync as pathExists } from "node:fs";
 import * as fs from "node:fs/promises";
 import * as path from "node:path/posix";
 
-import type { InferenceSnippet } from "@huggingface/tasks";
-import { snippets } from "@huggingface/tasks";
+import { snippets } from "@huggingface/inference";
+import type { SnippetInferenceProvider, InferenceSnippet, ModelDataMinimal } from "@huggingface/tasks";
 
 type LANGUAGE = "sh" | "js" | "py";
 
 const TEST_CASES: {
 	testName: string;
-	model: snippets.ModelDataMinimal;
+	model: ModelDataMinimal;
 	languages: LANGUAGE[];
+	providers: SnippetInferenceProvider[];
 	opts?: Record<string, unknown>;
 }[] = [
+	{
+		testName: "automatic-speech-recognition",
+		model: {
+			id: "openai/whisper-large-v3-turbo",
+			pipeline_tag: "automatic-speech-recognition",
+			tags: [],
+			inference: "",
+		},
+		languages: ["py"],
+		providers: ["hf-inference"],
+	},
 	{
 		testName: "conversational-llm-non-stream",
 		model: {
@@ -39,6 +51,7 @@ const TEST_CASES: {
 			inference: "",
 		},
 		languages: ["sh", "js", "py"],
+		providers: ["hf-inference", "together"],
 		opts: { streaming: false },
 	},
 	{
@@ -50,6 +63,7 @@ const TEST_CASES: {
 			inference: "",
 		},
 		languages: ["sh", "js", "py"],
+		providers: ["hf-inference", "together"],
 		opts: { streaming: true },
 	},
 	{
@@ -61,6 +75,7 @@ const TEST_CASES: {
 			inference: "",
 		},
 		languages: ["sh", "js", "py"],
+		providers: ["hf-inference", "fireworks-ai"],
 		opts: { streaming: false },
 	},
 	{
@@ -72,7 +87,30 @@ const TEST_CASES: {
 			inference: "",
 		},
 		languages: ["sh", "js", "py"],
+		providers: ["hf-inference", "fireworks-ai"],
 		opts: { streaming: true },
+	},
+	{
+		testName: "document-question-answering",
+		model: {
+			id: "impira/layoutlm-invoices",
+			pipeline_tag: "document-question-answering",
+			tags: [],
+			inference: "",
+		},
+		languages: ["py"],
+		providers: ["hf-inference"],
+	},
+	{
+		testName: "image-to-image",
+		model: {
+			id: "stabilityai/stable-diffusion-xl-refiner-1.0",
+			pipeline_tag: "image-to-image",
+			tags: [],
+			inference: "",
+		},
+		languages: ["py"],
+		providers: ["hf-inference"],
 	},
 	{
 		testName: "text-to-image",
@@ -82,6 +120,29 @@ const TEST_CASES: {
 			tags: [],
 			inference: "",
 		},
+		providers: ["hf-inference", "fal-ai"],
+		languages: ["sh", "js", "py"],
+	},
+	{
+		testName: "text-to-video",
+		model: {
+			id: "tencent/HunyuanVideo",
+			pipeline_tag: "text-to-video",
+			tags: [],
+			inference: "",
+		},
+		providers: ["replicate", "fal-ai"],
+		languages: ["js", "py"],
+	},
+	{
+		testName: "text-classification",
+		model: {
+			id: "distilbert/distilbert-base-uncased-finetuned-sst-2-english",
+			pipeline_tag: "text-classification",
+			tags: [],
+			inference: "",
+		},
+		providers: ["hf-inference"],
 		languages: ["sh", "js", "py"],
 	},
 ] as const;
@@ -111,33 +172,43 @@ function getFixtureFolder(testName: string): string {
 }
 
 function generateInferenceSnippet(
-	model: snippets.ModelDataMinimal,
+	model: ModelDataMinimal,
 	language: LANGUAGE,
+	provider: SnippetInferenceProvider,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
-	const generatedSnippets = GET_SNIPPET_FN[language](model, "api_token", opts);
-	return Array.isArray(generatedSnippets) ? generatedSnippets : [generatedSnippets];
+	const providerModelId = provider === "hf-inference" ? model.id : `<${provider} alias for ${model.id}>`;
+	return GET_SNIPPET_FN[language](model, "api_token", provider, providerModelId, opts);
 }
 
-async function getExpectedInferenceSnippet(testName: string, language: LANGUAGE): Promise<InferenceSnippet[]> {
+async function getExpectedInferenceSnippet(
+	testName: string,
+	language: LANGUAGE,
+	provider: SnippetInferenceProvider
+): Promise<InferenceSnippet[]> {
 	const fixtureFolder = getFixtureFolder(testName);
 	const files = await fs.readdir(fixtureFolder);
 
 	const expectedSnippets: InferenceSnippet[] = [];
-	for (const file of files.filter((file) => file.endsWith("." + language)).sort()) {
-		const client = path.basename(file).split(".").slice(1, -1).join("."); // e.g. '0.huggingface.js.js' => "huggingface.js"
+	for (const file of files.filter((file) => file.endsWith("." + language) && file.includes(`.${provider}.`)).sort()) {
+		const client = path.basename(file).split(".").slice(1, -2).join("."); // e.g. '0.huggingface.js.replicate.js' => "huggingface.js"
 		const content = await fs.readFile(path.join(fixtureFolder, file), { encoding: "utf-8" });
-		expectedSnippets.push(client === "default" ? { content } : { client, content });
+		expectedSnippets.push({ client, content });
 	}
 	return expectedSnippets;
 }
 
-async function saveExpectedInferenceSnippet(testName: string, language: LANGUAGE, snippets: InferenceSnippet[]) {
+async function saveExpectedInferenceSnippet(
+	testName: string,
+	language: LANGUAGE,
+	provider: SnippetInferenceProvider,
+	snippets: InferenceSnippet[]
+) {
 	const fixtureFolder = getFixtureFolder(testName);
 	await fs.mkdir(fixtureFolder, { recursive: true });
 
 	for (const [index, snippet] of snippets.entries()) {
-		const file = path.join(fixtureFolder, `${index}.${snippet.client ?? "default"}.${language}`);
+		const file = path.join(fixtureFolder, `${index}.${snippet.client ?? "default"}.${provider}.${language}`);
 		await fs.writeFile(file, snippet.content);
 	}
 }
@@ -147,13 +218,15 @@ if (import.meta.vitest) {
 	const { describe, expect, it } = import.meta.vitest;
 
 	describe("inference API snippets", () => {
-		TEST_CASES.forEach(({ testName, model, languages, opts }) => {
+		TEST_CASES.forEach(({ testName, model, languages, providers, opts }) => {
 			describe(testName, () => {
 				languages.forEach((language) => {
-					it(language, async () => {
-						const generatedSnippets = generateInferenceSnippet(model, language, opts);
-						const expectedSnippets = await getExpectedInferenceSnippet(testName, language);
-						expect(generatedSnippets).toEqual(expectedSnippets);
+					providers.forEach((provider) => {
+						it(language, async () => {
+							const generatedSnippets = generateInferenceSnippet(model, language, provider, opts);
+							const expectedSnippets = await getExpectedInferenceSnippet(testName, language, provider);
+							expect(generatedSnippets).toEqual(expectedSnippets);
+						});
 					});
 				});
 			});
@@ -166,11 +239,13 @@ if (import.meta.vitest) {
 	await fs.rm(path.join(rootDirFinder(), "snippets-fixtures"), { recursive: true, force: true });
 
 	console.debug("  🏭 Generating new fixtures...");
-	TEST_CASES.forEach(({ testName, model, languages, opts }) => {
-		console.debug(`      ${testName} (${languages.join(", ")})`);
+	TEST_CASES.forEach(({ testName, model, languages, providers, opts }) => {
+		console.debug(`      ${testName} (${languages.join(", ")}) (${providers.join(", ")})`);
 		languages.forEach(async (language) => {
-			const generatedSnippets = generateInferenceSnippet(model, language, opts);
-			await saveExpectedInferenceSnippet(testName, language, generatedSnippets);
+			providers.forEach(async (provider) => {
+				const generatedSnippets = generateInferenceSnippet(model, language, provider, opts);
+				await saveExpectedInferenceSnippet(testName, language, provider, generatedSnippets);
+			});
 		});
 	});
 	console.log("✅ All done!");

@@ -10,6 +10,10 @@ const taskData: TaskDataCustom = {
 			description: "Conceptual Captions is a dataset consisting of ~3.3M images annotated with captions.",
 			id: "conceptual_captions",
 		},
+		{
+			description: "12M image-caption pairs.",
+			id: "Spawning/PD12M",
+		},
 	],
 	demo: {
 		inputs: [

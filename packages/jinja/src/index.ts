@@ -31,7 +31,7 @@ export class Template {
 		this.parsed = parse(tokens);
 	}
 
-	render(items: Record<string, unknown>): string {
+	render(items?: Record<string, unknown>): string {
 		// Create a new environment for this template
 		const env = new Environment();
 
@@ -44,8 +44,10 @@ export class Template {
 		env.set("range", range);
 
 		// Add user-defined variables
-		for (const [key, value] of Object.entries(items)) {
-			env.set(key, value);
+		if (items) {
+			for (const [key, value] of Object.entries(items)) {
+				env.set(key, value);
+			}
 		}
 
 		const interpreter = new Interpreter(env);

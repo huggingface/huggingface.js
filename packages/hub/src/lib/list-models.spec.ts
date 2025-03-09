@@ -80,4 +80,39 @@ describe("listModels", () => {
 
 		expect(count).to.equal(10);
 	});
+
+	it("should search model by inference provider", async () => {
+		let count = 0;
+		for await (const entry of listModels({
+			search: { inferenceProviders: ["together"] },
+			additionalFields: ["inferenceProviderMapping"],
+			limit: 10,
+		})) {
+			count++;
+			if (Array.isArray(entry.inferenceProviderMapping)) {
+				expect(entry.inferenceProviderMapping.map(({ provider }) => provider)).to.include("together");
+			}
+		}
+
+		expect(count).to.equal(10);
+	});
+
+	it("should search model by several inference providers", async () => {
+		let count = 0;
+		const inferenceProviders = ["together", "replicate"];
+		for await (const entry of listModels({
+			search: { inferenceProviders },
+			additionalFields: ["inferenceProviderMapping"],
+			limit: 10,
+		})) {
+			count++;
+			if (Array.isArray(entry.inferenceProviderMapping)) {
+				expect(
+					entry.inferenceProviderMapping.filter(({ provider }) => inferenceProviders.includes(provider)).length
+				).toBeGreaterThan(0);
+			}
+		}
+
+		expect(count).to.equal(10);
+	});
 });

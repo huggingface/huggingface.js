@@ -41,8 +41,8 @@ const taskData: TaskDataCustom = {
 			id: "hwjiang/Real3D",
 		},
 		{
-			description: "Generative 3D gaussian splatting model.",
-			id: "ashawkey/LGM",
+			description: "Consistent image-to-3d generation model.",
+			id: "stabilityai/stable-point-aware-3d",
 		},
 	],
 	spaces: [
@@ -55,8 +55,8 @@ const taskData: TaskDataCustom = {
 			id: "TencentARC/InstantMesh",
 		},
 		{
-			description: "Image-to-3D demo with mesh outputs.",
-			id: "stabilityai/TripoSR",
+			description: "Image-to-3D demo.",
+			id: "stabilityai/stable-point-aware-3d",
 		},
 		{
 			description: "Image-to-3D demo with mesh outputs.",

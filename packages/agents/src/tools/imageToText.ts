@@ -15,12 +15,12 @@ export const imageToTextTool: Tool = {
 		if (typeof data === "string") throw "Input must be a blob.";
 
 		return (
-			await inference.imageToText(
-				{
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			(
+				await inference.imageToText({
 					data,
-				},
-				{ wait_for_model: true }
-			)
-		).generated_text;
+				})
+			).generated_text!
+		);
 	},
 };

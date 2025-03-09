@@ -27,9 +27,9 @@ const inputsTableQuestionAnswering = () =>
 
 const inputsVisualQuestionAnswering = () =>
 	`{
-	"image": "cat.png",
-	"question": "What is in this image?"
-}`;
+		"image": "cat.png",
+		"question": "What is in this image?"
+	}`;
 
 const inputsQuestionAnswering = () =>
 	`{
@@ -86,6 +86,11 @@ const inputsImageClassification = () => `"cats.jpg"`;
 
 const inputsImageToText = () => `"cats.jpg"`;
 
+const inputsImageToImage = () => `{
+	"image": "cat.png",
+	"prompt": "Turn the cat into a tiger."
+}`;
+
 const inputsImageSegmentation = () => `"cats.jpg"`;
 
 const inputsObjectDetection = () => `"cats.jpg"`;
@@ -95,6 +100,8 @@ const inputsAudioToAudio = () => `"sample1.flac"`;
 const inputsAudioClassification = () => `"sample1.flac"`;
 
 const inputsTextToImage = () => `"Astronaut riding a horse"`;
+
+const inputsTextToVideo = () => `"A young man walking on the street"`;
 
 const inputsTextToSpeech = () => `"The answer to the universe is 42"`;
 
@@ -118,6 +125,7 @@ const modelInputSnippets: {
 	"fill-mask": inputsFillMask,
 	"image-classification": inputsImageClassification,
 	"image-to-text": inputsImageToText,
+	"image-to-image": inputsImageToImage,
 	"image-segmentation": inputsImageSegmentation,
 	"object-detection": inputsObjectDetection,
 	"question-answering": inputsQuestionAnswering,
@@ -130,6 +138,7 @@ const modelInputSnippets: {
 	"text-generation": inputsTextGeneration,
 	"image-text-to-text": inputsTextGeneration,
 	"text-to-image": inputsTextToImage,
+	"text-to-video": inputsTextToVideo,
 	"text-to-speech": inputsTextToSpeech,
 	"text-to-audio": inputsTextToAudio,
 	"text2text-generation": inputsText2TextGeneration,

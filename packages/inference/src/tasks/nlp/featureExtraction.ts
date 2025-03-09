@@ -1,17 +1,9 @@
+import type { FeatureExtractionInput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
-import { getDefaultTask } from "../../lib/getDefaultTask";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
-export type FeatureExtractionArgs = BaseArgs & {
-	/**
-	 *  The inputs is a string or a list of strings to get the features from.
-	 *
-	 *  inputs: "That is a happy person",
-	 *
-	 */
-	inputs: string | string[];
-};
+export type FeatureExtractionArgs = BaseArgs & FeatureExtractionInput;
 
 /**
  * Returned values are a multidimensional array of floats (dimension depending on if you sent a string or a list of string, and if the automatic reduction, usually mean_pooling for instance was applied for you or not. This should be explained on the model's README).
@@ -25,12 +17,9 @@ export async function featureExtraction(
 	args: FeatureExtractionArgs,
 	options?: Options
 ): Promise<FeatureExtractionOutput> {
-	const defaultTask = args.model ? await getDefaultTask(args.model, args.accessToken, options) : undefined;
-
 	const res = await request<FeatureExtractionOutput>(args, {
 		...options,
-		taskHint: "feature-extraction",
-		...(defaultTask === "sentence-similarity" && { forceTask: "feature-extraction" }),
+		task: "feature-extraction",
 	});
 	let isValidOutput = true;
 

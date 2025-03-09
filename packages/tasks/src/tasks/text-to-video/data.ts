@@ -68,15 +68,19 @@ const taskData: TaskDataCustom = {
 	models: [
 		{
 			description: "A strong model for consistent video generation.",
-			id: "rain1011/pyramid-flow-sd3",
+			id: "tencent/HunyuanVideo",
 		},
 		{
-			description: "A robust model for text-to-video generation.",
-			id: "VideoCrafter/VideoCrafter2",
+			description: "A text-to-video model with high fidelity motion and strong prompt adherence.",
+			id: "Lightricks/LTX-Video",
 		},
 		{
-			description: "A cutting-edge text-to-video generation model.",
-			id: "TIGER-Lab/T2V-Turbo-V2",
+			description: "A text-to-video model focusing on physics-aware applications like robotics.",
+			id: "nvidia/Cosmos-1.0-Diffusion-7B-Text2World",
+		},
+		{
+			description: "A robust model for video generation.",
+			id: "Wan-AI/Wan2.1-T2V-1.3B",
 		},
 	],
 	spaces: [
@@ -86,7 +90,7 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description: "Consistent video generation application.",
-			id: "TIGER-Lab/T2V-Turbo-V2",
+			id: "Wan-AI/Wan2.1",
 		},
 		{
 			description: "A cutting edge video generation application.",
@@ -95,7 +99,7 @@ const taskData: TaskDataCustom = {
 	],
 	summary:
 		"Text-to-video models can be used in any application that requires generating consistent sequence of images from text. ",
-	widgetModels: [],
+	widgetModels: ["Wan-AI/Wan2.1-T2V-14B"],
 	youtubeId: undefined,
 };
 

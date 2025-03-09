@@ -1,6 +1,6 @@
 /**
- * Biden AI Executive Order
- * https://www.whitehouse.gov/briefing-room/presidential-actions/2023/10/30/executive-order-on-the-safe-secure-and-trustworthy-development-and-use-of-artificial-intelligence/
+ * Biden AI Executive Order (since revoked by President Trump):
+ * https://web.archive.org/web/20250105222429/https://www.whitehouse.gov/briefing-room/presidential-actions/2023/10/30/executive-order-on-the-safe-secure-and-trustworthy-development-and-use-of-artificial-intelligence/
  */
 export const TFLOPS_THRESHOLD_WHITE_HOUSE_MODEL_TRAINING_TOTAL = 10 ** 14;
 export const TFLOPS_THRESHOLD_WHITE_HOUSE_MODEL_TRAINING_TOTAL_BIOLOGY = 10 ** 11;
@@ -14,7 +14,7 @@ export const TFLOPS_THRESHOLD_EU_AI_ACT_MODEL_TRAINING_TOTAL = 10 ** 13;
 
 export interface HardwareSpec {
 	/**
-	 * Approximate value, in FP16 whenever possible.
+	 * Approximate value, in FP16 whenever possible for GPUs and FP32 for CPUs.
 	 * This is only approximate/theoretical and shouldn't be taken too seriously.
 	 * Currently the CPU values are from cpu-monkey.com
 	 * while the GPU values are from techpowerup.com
@@ -36,13 +36,29 @@ export const DEFAULT_MEMORY_OPTIONS = [8, 16, 24, 32, 40, 48, 64, 80, 96, 128, 2
 export const SKUS = {
 	GPU: {
 		NVIDIA: {
+			H200: {
+				tflops: 241.3,
+				memory: [141],
+			},
 			H100: {
 				tflops: 267.6,
 				memory: [80],
 			},
+			L40s: {
+				tflops: 91.61,
+				memory: [48],
+			},
 			L40: {
 				tflops: 90.52,
 				memory: [48],
+			},
+			L20: {
+				tflops: 59.35,
+				memory: [48],
+			},
+			L4: {
+				tflops: 30.29,
+				memory: [24],
 			},
 			"RTX 6000 Ada": {
 				tflops: 91.1,
@@ -72,6 +88,10 @@ export const SKUS = {
 				tflops: 12.0,
 				memory: [16],
 			},
+			"RTX A6000": {
+				tflops: 38.7,
+				memory: [48],
+			},
 			"RTX A4000": {
 				tflops: 19.2,
 				memory: [16],
@@ -96,6 +116,30 @@ export const SKUS = {
 				tflops: 4.531, // source: https://www.techpowerup.com/gpu-specs/a2.c3848
 				memory: [16],
 			},
+			"RTX 5090": {
+				tflops: 104.8,
+				memory: [32],
+			},
+			"RTX 5090 D": {
+				tflops: 104.8,
+				memory: [32],
+			},
+			"RTX 5080": {
+				tflops: 56.28,
+				memory: [16],
+			},
+			"RTX 5080 Mobile": {
+				tflops: 24.58,
+				memory: [16],
+			},
+			"RTX 5070": {
+				tflops: 30.84,
+				memory: [12],
+			},
+			"RTX 5070 Mobile": {
+				tflops: 23.22,
+				memory: [8],
+			},
 			"RTX 4090": {
 				tflops: 82.58,
 				memory: [24],
@@ -103,6 +147,10 @@ export const SKUS = {
 			"RTX 4090D": {
 				tflops: 79.49,
 				memory: [24],
+			},
+			"RTX 4090 Mobile": {
+				tflops: 32.98,
+				memory: [16],
 			},
 			"RTX 4080 SUPER": {
 				tflops: 52.2,
@@ -112,9 +160,17 @@ export const SKUS = {
 				tflops: 48.7,
 				memory: [16],
 			},
+			"RTX 4080 Mobile": {
+				tflops: 24.72,
+				memory: [12],
+			},
 			"RTX 4070": {
 				tflops: 29.15,
 				memory: [12],
+			},
+			"RTX 4070 Mobile": {
+				tflops: 15.62,
+				memory: [8],
 			},
 			"RTX 4070 Ti": {
 				tflops: 40.09,
@@ -136,6 +192,10 @@ export const SKUS = {
 				tflops: 22.06,
 				memory: [8, 16],
 			},
+			"RTX 4060 Mobile": {
+				tflops: 11.61,
+				memory: [8],
+			},
 			"RTX 3090": {
 				tflops: 35.58,
 				memory: [24],
@@ -152,6 +212,10 @@ export const SKUS = {
 				tflops: 34.1,
 				memory: [12],
 			},
+			"RTX 3080 Mobile": {
+				tflops: 18.98,
+				memory: [8],
+			},
 			"RTX 3070": {
 				tflops: 20.31,
 				memory: [8],
@@ -160,7 +224,7 @@ export const SKUS = {
 				tflops: 21.75,
 				memory: [8],
 			},
-			"RTX 3070 Ti Laptop": {
+			"RTX 3070 Ti Mobile": {
 				tflops: 16.6,
 				memory: [8],
 			},
@@ -192,6 +256,10 @@ export const SKUS = {
 				tflops: 18.12,
 				memory: [8],
 			},
+			"RTX 3060 Mobile": {
+				tflops: 10.94,
+				memory: [6],
+			},
 			"RTX 3050 Mobile": {
 				tflops: 7.639,
 				memory: [6],
@@ -207,6 +275,14 @@ export const SKUS = {
 			"GTX 1070 Ti": {
 				tflops: 8.2, // float32 (GPU does not support native float16)
 				memory: [8],
+			},
+			"GTX 1060": {
+				tflops: 3.9, // float32 (GPU does not support native float16)
+				memory: [3, 6],
+			},
+			"GTX 1050 Ti": {
+				tflops: 2.1, // float32 (GPU does not support native float16)
+				memory: [4],
 			},
 			"RTX Titan": {
 				tflops: 32.62,
@@ -235,6 +311,10 @@ export const SKUS = {
 			P40: {
 				tflops: 11.76, // float32 (GPU does not support native float16)
 				memory: [24],
+			},
+			P100: {
+				tflops: 19.05,
+				memory: [16],
 			},
 		},
 		AMD: {
@@ -415,6 +495,9 @@ export const SKUS = {
 			},
 			"EPYC 1st Generation (Naples)": {
 				tflops: 0.6,
+			},
+			"Ryzen Zen 4 7000 (Threadripper)": {
+				tflops: 10.0,
 			},
 			"Ryzen Zen4 7000 (Ryzen 9)": {
 				tflops: 0.56,

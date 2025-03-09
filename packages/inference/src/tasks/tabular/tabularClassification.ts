@@ -27,7 +27,7 @@ export async function tabularClassification(
 ): Promise<TabularClassificationOutput> {
 	const res = await request<TabularClassificationOutput>(args, {
 		...options,
-		taskHint: "tabular-classification",
+		task: "tabular-classification",
 	});
 	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x === "number");
 	if (!isValidOutput) {

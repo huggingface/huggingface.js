@@ -26,6 +26,7 @@
 		"type-fest": "^3.13.1"
 	},
 	"dependencies": {
-		"@huggingface/tasks": "workspace:^"
+		"@huggingface/tasks": "workspace:^",
+		"@huggingface/inference": "workspace:^"
 	}
 }
