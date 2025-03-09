@@ -25,7 +25,7 @@ jobs:
             echo "SINCE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} ${{ github.sha }})" >> $GITHUB_OUTPUT
           fi
 
-      - run: corepack enable
+      - run: npm install -g corepack@latest && corepack enable
 
       - uses: actions/setup-node@v3
         with:
@@ -61,7 +61,7 @@ jobs:
             echo "SINCE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} ${{ github.sha }})" >> $GITHUB_OUTPUT
           fi
 
-      - run: corepack enable
+      - run: npm install -g corepack@latest && corepack enable
 
       - uses: actions/setup-node@v3
         with:
@@ -85,7 +85,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - run: corepack enable
+      - run: npm install -g corepack@latest && corepack enable
 
       - uses: actions/setup-node@v3
         with:
@@ -104,7 +104,7 @@ jobs:
         working-directory: e2e
         run: |
           sleep 3
-          pnpm i --filter root --filter inference... --filter hub... --frozen-lockfile
+          pnpm i --filter root --filter inference... --filter hub... --filter tasks-gen --frozen-lockfile
           pnpm --filter inference --filter hub --filter tasks publish --force --no-git-checks --registry http://localhost:4874/
 
       - name: E2E test - test yarn install

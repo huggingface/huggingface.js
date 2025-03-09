@@ -36,6 +36,7 @@ const TEST_STRINGS = {
 
 	// Set variables
 	VARIABLES: `{% set x = 'Hello' %}{% set y = 'World' %}{{ x + ' ' + y }}`,
+	VARIABLES_2: `{% set x = 'Hello'.split('el')[-1] %}{{ x }}`,
 
 	// Numbers
 	NUMBERS: `|{{ 5 }}|{{ -5 }}|{{ add(3, -1) }}|{{ (3 - 1) + (a - 5) - (a + 5)}}|`,
@@ -87,6 +88,8 @@ const TEST_STRINGS = {
 	FILTER_OPERATOR_8: `{{ obj | tojson(indent=2) }}`,
 	FILTER_OPERATOR_9: `{{ data | map(attribute='val') | list | tojson }}`,
 	FILTER_OPERATOR_10: `|{{ " 1 \n 2 \n 3 \n\n " | indent }}|{{ " 1 \n 2 \n 3 \n\n " | indent(2) }}|{{ " 1 \n 2 \n 3 \n\n " | indent(first=True) }}|{{ " 1 \n 2 \n 3 \n\n " | indent(blank=True) }}|{{ " 1 \n 2 \n 3 \n\n " | indent(4, first=True) }}|`,
+	FILTER_OPERATOR_11: `{{ items | rejectattr('key') | length }}`,
+	FILTER_OPERATOR_12: `{{ messages | rejectattr('role', 'equalto', 'system') | length }}`,
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: `|{{ 1 and 2 }}|{{ 1 and 0 }}|{{ 0 and 1 }}|{{ 0 and 0 }}|{{ 1 or 2 }}|{{ 1 or 0 }}|{{ 0 or 1 }}|{{ 0 or 0 }}|{{ not 1 }}|{{ not 0 }}|`,
@@ -101,6 +104,7 @@ const TEST_STRINGS = {
 	IS_OPERATOR_3: `|{{ 1 is odd }}|{{ 2 is odd }}|{{ 1 is even }}|{{ 2 is even }}|{{ 2 is number }}|{{ '2' is number }}|{{ 2 is integer }}|{{ '2' is integer }}|`,
 	IS_OPERATOR_4: `|{{ func is callable }}|{{ 2 is callable }}|{{ 1 is iterable }}|{{ 'hello' is iterable }}|`,
 	IS_OPERATOR_5: `|{{ 'a' is lower }}|{{ 'A' is lower }}|{{ 'a' is upper }}|{{ 'A' is upper }}|`,
+	IS_OPERATOR_6: `|{{ string is mapping }}|{{ number is mapping }}|{{ array is mapping }}|{{ dict is mapping }}|`,
 
 	// Short-circuit evaluation
 	SHORT_CIRCUIT: `{{ false and raise_exception('This should not be printed') }}`,
@@ -124,6 +128,9 @@ const TEST_STRINGS = {
 	UNDEFINED_VARIABLES: `{{ undefined_variable }}`,
 	UNDEFINED_ACCESS: `{{ object.undefined_attribute }}`,
 
+	// Null
+	NULL_VARIABLE: `{% if not null_val is defined %}{% set null_val = none %}{% endif %}{% if null_val is not none %}{{ 'fail' }}{% else %}{{ 'pass' }}{% endif %}`,
+
 	// Ternary operator
 	TERNARY_OPERATOR: `|{{ 'a' if true else 'b' }}|{{ 'a' if false else 'b' }}|{{ 'a' if 1 + 1 == 2 else 'b' }}|{{ 'a' if 1 + 1 == 3 or 1 * 2 == 3 else 'b' }}|`,
 
@@ -143,6 +150,18 @@ const TEST_STRINGS = {
 	MACROS: `{% macro hello(name) %}{{ 'Hello ' + name }}{% endmacro %}|{{ hello('Bob') }}|{{ hello('Alice') }}|`,
 	MACROS_1: `{% macro hello(name, suffix='.') %}{{ 'Hello ' + name + suffix }}{% endmacro %}|{{ hello('A') }}|{{ hello('B', '!') }}|{{ hello('C', suffix='?') }}|`,
 	MACROS_2: `{% macro fn(x, y=2, z=3) %}{{ x + ',' + y + ',' + z }}{% endmacro %}|{{ fn(1) }}|{{ fn(1, 0) }}|{{ fn(1, 0, -1) }}|{{ fn(1, y=0, z=-1) }}|{{ fn(1, z=0) }}|`,
+
+	//rstrip
+	RSTRIP: `{{ "   test it  ".rstrip() }}`,
+	//lstrip
+	LSTRIP: `{{ "   test it  ".lstrip() }}`,
+
+	//split
+	SPLIT: `|{{ "   test it  ".split() | join("|") }}|`,
+	SPLIT_2: `|{{ "   test it  ".split(" ") | join("|") }}|`,
+	SPLIT_3: `|{{ "   test it  ".split(" ", 4) | join("|") }}|`,
+	SPLIT_4: `|{{ "  1 2  3   ".split() | tojson }}|{{ "babbaccabbb".split("b") | tojson }}|{{ "babbaccabbb".split("b", 2) | tojson }}|`,
+	SPLIT_5: `|{{ " 1 2 3 4 5 ".split(none, 0) | join(",") }}|{{ " 1 2 3 4 5 ".split(none, 3) | join(",") }}|{{ " 1 2 3 4 5 ".split(" ", 0) | join(",") }}|{{ " 1 2 3 4 5 ".split(" ", 3) | join(",") }}|{{ " 1 2 3 4 5 ".split(" ", 10) | join(",") }}|`,
 };
 
 const TEST_PARSED = {
@@ -665,6 +684,25 @@ const TEST_PARSED = {
 		{ value: " ", type: "StringLiteral" },
 		{ value: "+", type: "AdditiveBinaryOperator" },
 		{ value: "y", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	VARIABLES_2: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Set" },
+		{ value: "x", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "Hello", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "el", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "-1", type: "NumericLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "x", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
 
@@ -1616,6 +1654,34 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 	],
+	FILTER_OPERATOR_11: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "items", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "rejectattr", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "key", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "length", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	FILTER_OPERATOR_12: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "messages", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "rejectattr", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "role", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "equalto", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "system", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "length", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: [
@@ -2065,6 +2131,33 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 	],
+	IS_OPERATOR_6: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "string", type: "Identifier" },
+		{ value: "is", type: "Is" },
+		{ value: "mapping", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "number", type: "Identifier" },
+		{ value: "is", type: "Is" },
+		{ value: "mapping", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "array", type: "Identifier" },
+		{ value: "is", type: "Is" },
+		{ value: "mapping", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "dict", type: "Identifier" },
+		{ value: "is", type: "Is" },
+		{ value: "mapping", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
 
 	// Short-circuit evaluation
 	SHORT_CIRCUIT: [
@@ -2210,7 +2303,7 @@ const TEST_PARSED = {
 		{ value: "unknown", type: "StringLiteral" },
 		{ value: ")", type: "CloseParen" },
 		{ value: "is", type: "Is" },
-		{ value: "none", type: "Identifier" },
+		{ value: "none", type: "NullLiteral" },
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 		{ value: "{{", type: "OpenExpression" },
@@ -2353,6 +2446,45 @@ const TEST_PARSED = {
 		{ value: ".", type: "Dot" },
 		{ value: "undefined_attribute", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
+	],
+
+	// Null
+	NULL_VARIABLE: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "if", type: "If" },
+		{ value: "not", type: "UnaryOperator" },
+		{ value: "null_val", type: "Identifier" },
+		{ value: "is", type: "Is" },
+		{ value: "defined", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Set" },
+		{ value: "null_val", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "none", type: "NullLiteral" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endif", type: "EndIf" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "if", type: "If" },
+		{ value: "null_val", type: "Identifier" },
+		{ value: "is", type: "Is" },
+		{ value: "not", type: "UnaryOperator" },
+		{ value: "none", type: "NullLiteral" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "fail", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "else", type: "Else" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "pass", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endif", type: "EndIf" },
+		{ value: "%}", type: "CloseStatement" },
 	],
 
 	// Ternary operator
@@ -2674,6 +2806,197 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 	],
+
+	RSTRIP: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "   test it  ", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "rstrip", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	LSTRIP: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "   test it  ", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "lstrip", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	SPLIT: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "   test it  ", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "join", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "|", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
+	SPLIT_2: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "   test it  ", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: " ", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "join", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "|", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
+	SPLIT_3: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "   test it  ", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: " ", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "4", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "join", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "|", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
+	SPLIT_4: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "  1 2  3   ", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "tojson", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "babbaccabbb", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "b", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "tojson", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "babbaccabbb", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "b", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "tojson", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
+	SPLIT_5: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: " 1 2 3 4 5 ", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "none", type: "NullLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "0", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "join", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ",", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: " 1 2 3 4 5 ", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "none", type: "NullLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "join", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ",", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: " 1 2 3 4 5 ", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: " ", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "0", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "join", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ",", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: " 1 2 3 4 5 ", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: " ", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "join", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ",", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: " 1 2 3 4 5 ", type: "StringLiteral" },
+		{ value: ".", type: "Dot" },
+		{ value: "split", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: " ", type: "StringLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "10", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "join", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ",", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
 };
 
 const TEST_CONTEXT = {
@@ -2714,6 +3037,7 @@ const TEST_CONTEXT = {
 
 	// Set variables
 	VARIABLES: {},
+	VARIABLES_2: {},
 
 	// Numbers
 	NUMBERS: {
@@ -2843,6 +3167,12 @@ const TEST_CONTEXT = {
 		data: [{ val: 1 }, { val: 2 }, { val: 3 }],
 	},
 	FILTER_OPERATOR_10: {},
+	FILTER_OPERATOR_11: {
+		items: [{ key: "a" }, { key: 0 }, { key: 1 }, {}, { key: false }],
+	},
+	FILTER_OPERATOR_12: {
+		messages: [{ role: "system" }, { role: "user" }, { role: "assistant" }],
+	},
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: {},
@@ -2861,6 +3191,12 @@ const TEST_CONTEXT = {
 		func: () => {},
 	},
 	IS_OPERATOR_5: {},
+	IS_OPERATOR_6: {
+		string: "hello",
+		number: 1,
+		array: [1, 2, 3],
+		dict: { a: 1 },
+	},
 
 	// Short-circuit evaluation
 	SHORT_CIRCUIT: {},
@@ -2894,6 +3230,9 @@ const TEST_CONTEXT = {
 	UNDEFINED_VARIABLES: {},
 	UNDEFINED_ACCESS: { object: {} },
 
+	// Null
+	NULL_VARIABLE: { a: null },
+
 	// Ternary operator
 	TERNARY_OPERATOR: {},
 
@@ -2915,6 +3254,17 @@ const TEST_CONTEXT = {
 	MACROS: {},
 	MACROS_1: {},
 	MACROS_2: {},
+
+	// Strip
+	RSTRIP: {},
+	LSTRIP: {},
+
+	// Split
+	SPLIT: {},
+	SPLIT_2: {},
+	SPLIT_3: {},
+	SPLIT_4: {},
+	SPLIT_5: {},
 };
 
 const EXPECTED_OUTPUTS = {
@@ -2949,6 +3299,7 @@ const EXPECTED_OUTPUTS = {
 
 	// Set variables
 	VARIABLES: "Hello World",
+	VARIABLES_2: "lo",
 
 	// Numbers
 	NUMBERS: "|5|-5|2|-8|",
@@ -3000,6 +3351,8 @@ const EXPECTED_OUTPUTS = {
 	FILTER_OPERATOR_8: `{\n  "a": [\n    1,\n    2,\n    3\n  ],\n  "b": 1,\n  "c": {\n    "d": 2,\n    "e": {\n      "f": 3,\n      "g": {\n        "h": 4,\n        "i": [\n          1,\n          2,\n          3\n        ]\n      }\n    }\n  }\n}`,
 	FILTER_OPERATOR_9: `[1, 2, 3]`,
 	FILTER_OPERATOR_10: `| 1 \n     2 \n     3 \n\n     | 1 \n   2 \n   3 \n\n   |     1 \n     2 \n     3 \n\n     | 1 \n     2 \n     3 \n    \n     |     1 \n     2 \n     3 \n\n     |`,
+	FILTER_OPERATOR_11: `3`,
+	FILTER_OPERATOR_12: `2`,
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: `|2|0|0|0|1|1|1|0|false|true|`,
@@ -3014,6 +3367,7 @@ const EXPECTED_OUTPUTS = {
 	IS_OPERATOR_3: `|true|false|false|true|true|false|true|false|`,
 	IS_OPERATOR_4: `|true|false|false|true|`,
 	IS_OPERATOR_5: `|true|false|false|true|`,
+	IS_OPERATOR_6: `|false|false|false|true|`,
 
 	// Short-circuit evaluation
 	SHORT_CIRCUIT: `false`,
@@ -3037,6 +3391,9 @@ const EXPECTED_OUTPUTS = {
 	UNDEFINED_VARIABLES: ``,
 	UNDEFINED_ACCESS: ``,
 
+	// Null
+	NULL_VARIABLE: `pass`,
+
 	// Ternary operator
 	TERNARY_OPERATOR: `|a|b|a|b|`,
 
@@ -3056,11 +3413,22 @@ const EXPECTED_OUTPUTS = {
 	MACROS: `|Hello Bob|Hello Alice|`,
 	MACROS_1: `|Hello A.|Hello B!|Hello C?|`,
 	MACROS_2: `|1,2,3|1,0,3|1,0,-1|1,0,-1|1,2,0|`,
+
+	// RSTRIP/LSTRIP
+	RSTRIP: `   test it`,
+	LSTRIP: `test it  `,
+
+	// Split
+	SPLIT: `|test|it|`,
+	SPLIT_2: `||||test|it|||`,
+	SPLIT_3: `||||test|it  |`,
+	SPLIT_4: `|["1", "2", "3"]|["", "a", "", "acca", "", "", ""]|["", "a", "baccabbb"]|`,
+	SPLIT_5: `|1 2 3 4 5 |1,2,3,4 5 | 1 2 3 4 5 |,1,2,3 4 5 |,1,2,3,4,5,|`,
 };
 
 describe("Templates", () => {
 	describe("Lexing", () => {
-		it("should tokenize an input string", () => {
+		describe("should tokenize an input string", () => {
 			for (const [name, text] of Object.entries(TEST_STRINGS)) {
 				const tokens = tokenize(text);
 
@@ -3068,11 +3436,12 @@ describe("Templates", () => {
 					throw new Error(`Test case "${name}" not found`);
 				}
 
-				if (tokens.length !== TEST_PARSED[name].length) {
-					console.log(tokens);
-				}
-				// console.log(tokens);
-				expect(tokens).toMatchObject(TEST_PARSED[name]);
+				it(name, () => {
+					if (tokens.length !== TEST_PARSED[name].length) {
+						console.error(tokens);
+					}
+					expect(tokens).toMatchObject(TEST_PARSED[name]);
+				});
 			}
 		});
 
@@ -3080,35 +3449,28 @@ describe("Templates", () => {
 	});
 
 	describe("Parsing and intepretation", () => {
-		const AST_CACHE = new Map();
-		it("should generate an AST", () => {
-			// NOTE: In this test case, we just check that no error occurs
+		describe("should interpret an AST", () => {
 			for (const [name, text] of Object.entries(TEST_PARSED)) {
 				const ast = parse(text);
-				AST_CACHE.set(name, ast);
-			}
-		});
-
-		it("should interpret an AST", () => {
-			for (const [name, ast] of AST_CACHE.entries()) {
 				if (TEST_CONTEXT[name] === undefined || EXPECTED_OUTPUTS[name] === undefined) {
 					console.warn(`Skipping test case "${name}" due to missing context or expected output`);
 					continue;
 				}
+				it(name, () => {
+					const env = new Environment();
+					// Declare global variables
+					env.set("false", false);
+					env.set("true", true);
 
-				const env = new Environment();
-				// Declare global variables
-				env.set("false", false);
-				env.set("true", true);
+					// Add user-defined variables
+					for (const [key, value] of Object.entries(TEST_CONTEXT[name])) {
+						env.set(key, value);
+					}
 
-				// Add user-defined variables
-				for (const [key, value] of Object.entries(TEST_CONTEXT[name])) {
-					env.set(key, value);
-				}
-
-				const interpreter = new Interpreter(env);
-				const result = interpreter.run(ast);
-				expect(result.value).toEqual(EXPECTED_OUTPUTS[name]);
+					const interpreter = new Interpreter(env);
+					const result = interpreter.run(ast);
+					expect(result.value).toEqual(EXPECTED_OUTPUTS[name]);
+				});
 			}
 		});
 	});

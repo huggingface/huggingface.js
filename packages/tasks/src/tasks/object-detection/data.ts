@@ -1,4 +1,4 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	datasets: [
@@ -43,16 +43,20 @@ const taskData: TaskDataCustom = {
 	],
 	models: [
 		{
-			description: "Solid object detection model trained on the benchmark dataset COCO 2017.",
+			description: "Solid object detection model pre-trained on the COCO 2017 dataset.",
 			id: "facebook/detr-resnet-50",
 		},
 		{
-			description: "Strong object detection model trained on ImageNet-21k dataset.",
-			id: "microsoft/beit-base-patch16-224-pt22k-ft22k",
+			description: "Accurate object detection model.",
+			id: "IDEA-Research/dab-detr-resnet-50",
 		},
 		{
-			description: "Fast and accurate object detection model trained on COCO dataset.",
-			id: "PekingU/rtdetr_r18vd_coco_o365",
+			description: "Fast and accurate object detection model.",
+			id: "PekingU/rtdetr_v2_r50vd",
+		},
+		{
+			description: "Object detection model for low-lying objects.",
+			id: "StephanST/WALDO30",
 		},
 	],
 	spaces: [
@@ -65,8 +69,8 @@ const taskData: TaskDataCustom = {
 			id: "Gradio-Blocks/Object-Detection-With-DETR-and-YOLOS",
 		},
 		{
-			description: "An application that shows multiple cutting edge techniques for object detection and tracking.",
-			id: "kadirnar/torchyolo",
+			description: "A cutting-edge object detection application.",
+			id: "sunsmarterjieleaf/yolov12",
 		},
 		{
 			description: "An object tracking, segmentation and inpainting application.",

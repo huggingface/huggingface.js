@@ -1,4 +1,4 @@
-export const MODALITIES = ["cv", "nlp", "audio", "tabular", "multimodal", "rl", "other"] as const;
+export const MODALITIES = ["multimodal", "nlp", "cv", "audio", "tabular", "rl", "other"] as const;
 
 export type Modality = (typeof MODALITIES)[number];
 
@@ -355,6 +355,12 @@ export const PIPELINE_DATA = {
 		modality: "audio",
 		color: "green",
 	},
+	"audio-text-to-text": {
+		name: "Audio-Text-to-Text",
+		modality: "multimodal",
+		color: "red",
+		hideInDatasets: true,
+	},
 	"voice-activity-detection": {
 		name: "Voice Activity Detection",
 		modality: "audio",
@@ -656,6 +662,30 @@ export const PIPELINE_DATA = {
 		name: "Video-Text-to-Text",
 		modality: "multimodal",
 		color: "blue",
+		hideInDatasets: false,
+	},
+	"keypoint-detection": {
+		name: "Keypoint Detection",
+		subtasks: [
+			{
+				type: "pose-estimation",
+				name: "Pose Estimation",
+			},
+		],
+		modality: "cv",
+		color: "red",
+		hideInDatasets: true,
+	},
+	"visual-document-retrieval": {
+		name: "Visual Document Retrieval",
+		modality: "multimodal",
+		color: "yellow",
+		hideInDatasets: true,
+	},
+	"any-to-any": {
+		name: "Any-to-Any",
+		modality: "multimodal",
+		color: "yellow",
 		hideInDatasets: true,
 	},
 	other: {

@@ -12,6 +12,7 @@ import {
 	NumericLiteral,
 	StringLiteral,
 	BooleanLiteral,
+	NullLiteral,
 	ArrayLiteral,
 	ObjectLiteral,
 	BinaryExpression,
@@ -342,7 +343,7 @@ export function parse(tokens: Token[]): Program {
 	function parseCallMemberExpression(): Statement {
 		// Handle member expressions recursively
 
-		const member = parseMemberExpression(); // foo.x
+		const member = parseMemberExpression(parsePrimaryExpression()); // foo.x
 
 		if (is(TOKEN_TYPES.OpenParen)) {
 			// foo.x()
@@ -351,15 +352,17 @@ export function parse(tokens: Token[]): Program {
 		return member;
 	}
 
-	function parseCallExpression(callee: Statement): CallExpression {
-		let callExpression = new CallExpression(callee, parseArgs());
+	function parseCallExpression(callee: Statement): Statement {
+		let expression: Statement = new CallExpression(callee, parseArgs());
+
+		expression = parseMemberExpression(expression); // foo.x().y
 
 		if (is(TOKEN_TYPES.OpenParen)) {
 			// foo.x()()
-			callExpression = parseCallExpression(callExpression);
+			expression = parseCallExpression(expression);
 		}
 
-		return callExpression;
+		return expression;
 	}
 
 	function parseArgs(): Statement[] {
@@ -432,9 +435,7 @@ export function parse(tokens: Token[]): Program {
 		return slices[0] as Statement; // normal member expression
 	}
 
-	function parseMemberExpression(): Statement {
-		let object = parsePrimaryExpression();
-
+	function parseMemberExpression(object: Statement): Statement {
 		while (is(TOKEN_TYPES.Dot) || is(TOKEN_TYPES.OpenSquareBracket)) {
 			const operator = tokens[current]; // . or [
 			++current;
@@ -486,6 +487,8 @@ export function parse(tokens: Token[]): Program {
 			if (filter instanceof BooleanLiteral) {
 				// Special case: treat boolean literals as identifiers
 				filter = new Identifier(filter.value.toString());
+			} else if (filter instanceof NullLiteral) {
+				filter = new Identifier("none");
 			}
 			if (!(filter instanceof Identifier)) {
 				throw new SyntaxError(`Expected identifier for the test`);
@@ -527,6 +530,9 @@ export function parse(tokens: Token[]): Program {
 			case TOKEN_TYPES.BooleanLiteral:
 				++current;
 				return new BooleanLiteral(token.value.toLowerCase() === "true");
+			case TOKEN_TYPES.NullLiteral:
+				++current;
+				return new NullLiteral(null);
 			case TOKEN_TYPES.Identifier:
 				++current;
 				return new Identifier(token.value);

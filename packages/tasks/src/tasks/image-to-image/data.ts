@@ -1,4 +1,4 @@
-import type { TaskDataCustom } from "..";
+import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
 	datasets: [
@@ -9,6 +9,10 @@ const taskData: TaskDataCustom = {
 		{
 			description: "Multiple images of celebrities, used for facial expression translation",
 			id: "huggan/CelebA-faces",
+		},
+		{
+			description: "12M image-caption pairs.",
+			id: "Spawning/PD12M",
 		},
 	],
 	demo: {
@@ -53,17 +57,20 @@ const taskData: TaskDataCustom = {
 			id: "keras-io/super-resolution",
 		},
 		{
-			description:
-				"A model that creates a set of variations of the input image in the style of DALL-E using Stable Diffusion.",
-			id: "lambdalabs/sd-image-variations-diffusers",
+			description: "A model for applying edits to images through image controls.",
+			id: "Yuanshi/OminiControl",
 		},
 		{
 			description: "A model that generates images based on segments in the input image and the text prompt.",
 			id: "mfidabel/controlnet-segment-anything",
 		},
 		{
-			description: "A model that takes an image and an instruction to edit the image.",
-			id: "timbrooks/instruct-pix2pix",
+			description: "Strong model for inpainting and outpainting.",
+			id: "black-forest-labs/FLUX.1-Fill-dev",
+		},
+		{
+			description: "Strong model for image editing using depth maps.",
+			id: "black-forest-labs/FLUX.1-Depth-dev-lora",
 		},
 	],
 	spaces: [
@@ -93,8 +100,8 @@ const taskData: TaskDataCustom = {
 		},
 	],
 	summary:
-		"Image-to-image is the task of transforming a source image to match the characteristics of a target image or a target image domain. Any image manipulation and enhancement is possible with image to image models.",
-	widgetModels: ["lllyasviel/sd-controlnet-canny"],
+		"Image-to-image is the task of transforming an input image through a variety of possible manipulations and enhancements, such as super-resolution, image inpainting, colorization, and more.",
+	widgetModels: ["stabilityai/stable-diffusion-2-inpainting"],
 	youtubeId: "",
 };
 

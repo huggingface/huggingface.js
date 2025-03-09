@@ -11,23 +11,24 @@
 			"title": "VisualQuestionAnsweringInputData",
 			"properties": {
 				"image": {
-					"description": "The image."
+					"description": "The image.",
+					"comment": "type=binary"
 				},
 				"question": {
-					"description": "The question to answer based on the image."
+					"description": "The question to answer based on the image.",
+					"type": "string"
 				}
 			},
 			"required": ["question", "image"]
 		},
 		"parameters": {
-			"description": "Additional inference parameters",
+			"description": "Additional inference parameters for Visual Question Answering",
 			"$ref": "#/$defs/VisualQuestionAnsweringParameters"
 		}
 	},
 	"$defs": {
 		"VisualQuestionAnsweringParameters": {
 			"title": "VisualQuestionAnsweringParameters",
-			"description": "Additional inference parameters for Visual Question Answering",
 			"type": "object",
 			"properties": {
 				"top_k": {

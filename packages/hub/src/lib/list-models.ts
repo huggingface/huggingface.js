@@ -1,12 +1,12 @@
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
 import type { ApiModelInfo } from "../types/api/api-model";
-import type { Credentials, PipelineType } from "../types/public";
+import type { CredentialsParams, PipelineType } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
 import { pick } from "../utils/pick";
 
-const EXPAND_KEYS = [
+export const MODEL_EXPAND_KEYS = [
 	"pipeline_tag",
 	"private",
 	"gated",
@@ -15,7 +15,7 @@ const EXPAND_KEYS = [
 	"lastModified",
 ] as const satisfies readonly (keyof ApiModelInfo)[];
 
-const EXPANDABLE_KEYS = [
+export const MODEL_EXPANDABLE_KEYS = [
 	"author",
 	"cardData",
 	"config",
@@ -25,6 +25,7 @@ const EXPANDABLE_KEYS = [
 	"downloadsAllTime",
 	"gated",
 	"gitalyUid",
+	"inferenceProviderMapping",
 	"lastModified",
 	"library_name",
 	"likes",
@@ -51,30 +52,35 @@ export interface ModelEntry {
 }
 
 export async function* listModels<
-	const T extends Exclude<(typeof EXPANDABLE_KEYS)[number], (typeof EXPAND_KEYS)[number]> = never,
->(params?: {
-	search?: {
+	const T extends Exclude<(typeof MODEL_EXPANDABLE_KEYS)[number], (typeof MODEL_EXPAND_KEYS)[number]> = never,
+>(
+	params?: {
+		search?: {
+			/**
+			 * Will search in the model name for matches
+			 */
+			query?: string;
+			owner?: string;
+			task?: PipelineType;
+			tags?: string[];
+			/**
+			 * Will search for models that have one of the inference providers in the list.
+			 */
+			inferenceProviders?: string[];
+		};
+		hubUrl?: string;
+		additionalFields?: T[];
 		/**
-		 * Will search in the model name for matches
+		 * Set to limit the number of models returned.
 		 */
-		query?: string;
-		owner?: string;
-		task?: PipelineType;
-		tags?: string[];
-	};
-	credentials?: Credentials;
-	hubUrl?: string;
-	additionalFields?: T[];
-	/**
-	 * Set to limit the number of models returned.
-	 */
-	limit?: number;
-	/**
-	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
-	 */
-	fetch?: typeof fetch;
-}): AsyncGenerator<ModelEntry & Pick<ApiModelInfo, T>> {
-	checkCredentials(params?.credentials);
+		limit?: number;
+		/**
+		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+		 */
+		fetch?: typeof fetch;
+	} & Partial<CredentialsParams>
+): AsyncGenerator<ModelEntry & Pick<ApiModelInfo, T>> {
+	const accessToken = params && checkCredentials(params);
 	let totalToFetch = params?.limit ?? Infinity;
 	const search = new URLSearchParams([
 		...Object.entries({
@@ -82,9 +88,12 @@ export async function* listModels<
 			...(params?.search?.owner ? { author: params.search.owner } : undefined),
 			...(params?.search?.task ? { pipeline_tag: params.search.task } : undefined),
 			...(params?.search?.query ? { search: params.search.query } : undefined),
+			...(params?.search?.inferenceProviders
+				? { inference_provider: params.search.inferenceProviders.join(",") }
+				: undefined),
 		}),
 		...(params?.search?.tags?.map((tag) => ["filter", tag]) ?? []),
-		...EXPAND_KEYS.map((val) => ["expand", val] satisfies [string, string]),
+		...MODEL_EXPAND_KEYS.map((val) => ["expand", val] satisfies [string, string]),
 		...(params?.additionalFields?.map((val) => ["expand", val] satisfies [string, string]) ?? []),
 	]).toString();
 	let url: string | undefined = `${params?.hubUrl || HUB_URL}/api/models?${search}`;
@@ -93,7 +102,7 @@ export async function* listModels<
 		const res: Response = await (params?.fetch ?? fetch)(url, {
 			headers: {
 				accept: "application/json",
-				...(params?.credentials ? { Authorization: `Bearer ${params.credentials.accessToken}` } : undefined),
+				...(accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined),
 			},
 		});
 

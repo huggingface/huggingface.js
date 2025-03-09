@@ -1,11 +1,18 @@
-import type { Credentials } from "../types/public";
+import type { CredentialsParams } from "../types/public";
 
-export function checkCredentials(credentials?: Credentials): void {
-	if (!credentials || credentials.accessToken === undefined || credentials.accessToken === null) {
-		return;
-	}
-
-	if (!credentials.accessToken.startsWith("hf_")) {
+export function checkAccessToken(accessToken: string): void {
+	if (!accessToken.startsWith("hf_")) {
 		throw new TypeError("Your access token must start with 'hf_'");
+	}
+}
+
+export function checkCredentials(params: Partial<CredentialsParams>): string | undefined {
+	if (params.accessToken) {
+		checkAccessToken(params.accessToken);
+		return params.accessToken;
+	}
+	if (params.credentials?.accessToken) {
+		checkAccessToken(params.credentials.accessToken);
+		return params.credentials.accessToken;
 	}
 }

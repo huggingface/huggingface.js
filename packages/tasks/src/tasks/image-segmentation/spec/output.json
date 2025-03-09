@@ -10,14 +10,15 @@
 		"properties": {
 			"label": {
 				"type": "string",
-				"description": "The label of the predicted segment"
+				"description": "The label of the predicted segment."
 			},
 			"mask": {
-				"description": "The corresponding mask as a black-and-white image"
+				"type": "string",
+				"description": "The corresponding mask as a black-and-white image (base64-encoded)."
 			},
 			"score": {
 				"type": "number",
-				"description": "The score or confidence degreee the model has"
+				"description": "The score or confidence degree the model has."
 			}
 		},
 		"required": ["label", "mask"]

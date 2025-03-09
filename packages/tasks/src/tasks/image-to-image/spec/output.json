@@ -6,7 +6,7 @@
 	"type": "object",
 	"properties": {
 		"image": {
-			"description": "The output image"
+			"description": "The output image returned as raw bytes in the payload."
 		}
 	}
 }

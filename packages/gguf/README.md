@@ -96,6 +96,52 @@ In case you want to use your own GGUF metadata structure, you can disable strict
 const { metadata, tensorInfos }: GGUFParseOutput<{ strict: false }> = await gguf(URL_LLAMA);
 ```
 
+## Command line interface
+
+This package provides a CLI equivalent to [`gguf_dump.py`](https://github.com/ggml-org/llama.cpp/blob/7a2c913e66353362d7f28d612fd3c9d51a831eda/gguf-py/gguf/scripts/gguf_dump.py) script. You can dump GGUF metadata and list of tensors using this command:
+
+```bash
+npx @huggingface/gguf my_model.gguf
+
+# or, with a remote GGUF file:
+# npx @huggingface/gguf https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF/resolve/main/Llama-3.2-1B-Instruct-Q4_K_M.gguf
+```
+
+Example for the output:
+
+```
+* Dumping 36 key/value pair(s)
+  Idx | Count  | Value                                                                            
+  ----|--------|----------------------------------------------------------------------------------
+    1 |      1 | version = 3                                                                      
+    2 |      1 | tensor_count = 292                                                               
+    3 |      1 | kv_count = 33                                                                    
+    4 |      1 | general.architecture = "llama"                                                   
+    5 |      1 | general.type = "model"                                                           
+    6 |      1 | general.name = "Meta Llama 3.1 8B Instruct"                                      
+    7 |      1 | general.finetune = "Instruct"                                                    
+    8 |      1 | general.basename = "Meta-Llama-3.1"                                                   
+
+[truncated]
+
+* Dumping 292 tensor(s)
+  Idx | Num Elements | Shape                          | Data Type | Name                     
+  ----|--------------|--------------------------------|-----------|--------------------------
+    1 |           64 |     64,      1,      1,      1 | F32       | rope_freqs.weight        
+    2 |    525336576 |   4096, 128256,      1,      1 | Q4_K      | token_embd.weight        
+    3 |         4096 |   4096,      1,      1,      1 | F32       | blk.0.attn_norm.weight   
+    4 |     58720256 |  14336,   4096,      1,      1 | Q6_K      | blk.0.ffn_down.weight
+
+[truncated]
+```
+
+Alternatively, you can install this package as global, which will provide the `gguf-view` command:
+
+```bash
+npm i -g @huggingface/gguf
+gguf-view my_model.gguf
+```
+
 ## Hugging Face Hub
 
 The Hub supports all file formats and has built-in features for GGUF format. 

@@ -6,7 +6,7 @@
 	"type": "object",
 	"properties": {
 		"image": {
-			"description": "The generated image"
+			"description": "The generated image returned as raw bytes in the payload."
 		}
 	},
 	"required": ["image"]

@@ -24,14 +24,13 @@
 			"required": ["sourceSentence", "sentences"]
 		},
 		"parameters": {
-			"description": "Additional inference parameters",
+			"description": "Additional inference parameters for Sentence Similarity",
 			"$ref": "#/$defs/SentenceSimilarityParameters"
 		}
 	},
 	"$defs": {
 		"SentenceSimilarityParameters": {
 			"title": "SentenceSimilarityParameters",
-			"description": "Additional inference parameters for Sentence Similarity",
 			"type": "object",
 			"properties": {}
 		}

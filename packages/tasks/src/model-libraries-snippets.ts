@@ -1,5 +1,9 @@
-import type { ModelData } from "./model-data";
-import { LIBRARY_TASK_MAPPING } from "./library-to-tasks";
+import type { ModelData } from "./model-data.js";
+import type { WidgetExampleTextInput, WidgetExampleSentenceSimilarityInput } from "./widget-example.js";
+import { LIBRARY_TASK_MAPPING } from "./library-to-tasks.js";
+import { getModelInputSnippet } from "./snippets/inputs.js";
+import type { ChatCompletionInputMessage } from "./tasks/index.js";
+import { stringifyMessages } from "./snippets/common.js";
 
 const TAG_CUSTOM_CODE = "custom_code";
 
@@ -7,6 +11,8 @@ function nameWithoutNamespace(modelId: string): string {
 	const splitted = modelId.split("/");
 	return splitted.length === 1 ? splitted[0] : splitted[1];
 }
+
+const escapeStringForJson = (str: string): string => JSON.stringify(str).slice(1, -1); // slice is needed to remove surrounding quotes added by JSON.stringify
 
 //#region snippets
 
@@ -70,6 +76,27 @@ function get_base_diffusers_model(model: ModelData): string {
 	return model.cardData?.base_model?.toString() ?? "fill-in-base-model";
 }
 
+function get_prompt_from_diffusers_model(model: ModelData): string | undefined {
+	const prompt = (model.widgetData?.[0] as WidgetExampleTextInput | undefined)?.text ?? model.cardData?.instance_prompt;
+	if (prompt) {
+		return escapeStringForJson(prompt);
+	}
+}
+
+export const ben2 = (model: ModelData): string[] => [
+	`import requests
+from PIL import Image
+from ben2 import AutoModel
+
+url = "https://huggingface.co/datasets/mishig/sample_images/resolve/main/teapot.jpg"
+image = Image.open(requests.get(url, stream=True).raw)
+
+model = AutoModel.from_pretrained("${model.id}")
+model.to("cuda").eval()
+foreground = model.inference(image)
+`,
+];
+
 export const bertopic = (model: ModelData): string[] => [
 	`from bertopic import BERTopic
 
@@ -80,6 +107,22 @@ export const bm25s = (model: ModelData): string[] => [
 	`from bm25s.hf import BM25HF
 
 retriever = BM25HF.load_from_hub("${model.id}")`,
+];
+
+export const cxr_foundation = (): string[] => [
+	`# pip install git+https://github.com/Google-Health/cxr-foundation.git#subdirectory=python
+
+# Load image as grayscale (Stillwaterising, CC0, via Wikimedia Commons)
+import requests
+from PIL import Image
+from io import BytesIO
+image_url = "https://upload.wikimedia.org/wikipedia/commons/c/c8/Chest_Xray_PA_3-8-2010.png"
+img = Image.open(requests.get(image_url, headers={'User-Agent': 'Demo'}, stream=True).raw).convert('L')
+
+# Run inference
+from clientside.clients import make_hugging_face_client
+cxr_client = make_hugging_face_client('cxr_model')
+print(cxr_client.get_image_embeddings_from_images([img]))`,
 ];
 
 export const depth_anything_v2 = (model: ModelData): string[] => {
@@ -129,17 +172,70 @@ depth = model.infer_image(raw_img) # HxW raw depth map in numpy
 	];
 };
 
+export const depth_pro = (model: ModelData): string[] => {
+	const installSnippet = `# Download checkpoint
+pip install huggingface-hub
+huggingface-cli download --local-dir checkpoints ${model.id}`;
+
+	const inferenceSnippet = `import depth_pro
+
+# Load model and preprocessing transform
+model, transform = depth_pro.create_model_and_transforms()
+model.eval()
+
+# Load and preprocess an image.
+image, _, f_px = depth_pro.load_rgb("example.png")
+image = transform(image)
+
+# Run inference.
+prediction = model.infer(image, f_px=f_px)
+
+# Results: 1. Depth in meters
+depth = prediction["depth"]
+# Results: 2. Focal length in pixels
+focallength_px = prediction["focallength_px"]`;
+
+	return [installSnippet, inferenceSnippet];
+};
+
+export const derm_foundation = (): string[] => [
+	`from huggingface_hub import from_pretrained_keras
+import tensorflow as tf, requests
+
+# Load and format input
+IMAGE_URL = "https://storage.googleapis.com/dx-scin-public-data/dataset/images/3445096909671059178.png"
+input_tensor = tf.train.Example(
+    features=tf.train.Features(
+        feature={
+            "image/encoded": tf.train.Feature(
+                bytes_list=tf.train.BytesList(value=[requests.get(IMAGE_URL, stream=True).content])
+            )
+        }
+    )
+).SerializeToString()
+
+# Load model and run inference
+loaded_model = from_pretrained_keras("google/derm-foundation")
+infer = loaded_model.signatures["serving_default"]
+print(infer(inputs=tf.constant([input_tensor])))`,
+];
+
+const diffusersDefaultPrompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
+
 const diffusers_default = (model: ModelData) => [
 	`from diffusers import DiffusionPipeline
 
-pipeline = DiffusionPipeline.from_pretrained("${model.id}")`,
+pipe = DiffusionPipeline.from_pretrained("${model.id}")
+
+prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersDefaultPrompt}"
+image = pipe(prompt).images[0]`,
 ];
 
 const diffusers_controlnet = (model: ModelData) => [
 	`from diffusers import ControlNetModel, StableDiffusionControlNetPipeline
 
 controlnet = ControlNetModel.from_pretrained("${model.id}")
-pipeline = StableDiffusionControlNetPipeline.from_pretrained(
+pipe = StableDiffusionControlNetPipeline.from_pretrained(
 	"${get_base_diffusers_model(model)}", controlnet=controlnet
 )`,
 ];
@@ -147,15 +243,18 @@ pipeline = StableDiffusionControlNetPipeline.from_pretrained(
 const diffusers_lora = (model: ModelData) => [
 	`from diffusers import DiffusionPipeline
 
-pipeline = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
-pipeline.load_lora_weights("${model.id}")`,
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
+pipe.load_lora_weights("${model.id}")
+
+prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersDefaultPrompt}"
+image = pipe(prompt).images[0]`,
 ];
 
 const diffusers_textual_inversion = (model: ModelData) => [
 	`from diffusers import DiffusionPipeline
 
-pipeline = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
-pipeline.load_textual_inversion("${model.id}")`,
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
+pipe.load_textual_inversion("${model.id}")`,
 ];
 
 export const diffusers = (model: ModelData): string[] => {
@@ -169,6 +268,87 @@ export const diffusers = (model: ModelData): string[] => {
 		return diffusers_default(model);
 	}
 };
+
+export const diffusionkit = (model: ModelData): string[] => {
+	const sd3Snippet = `# Pipeline for Stable Diffusion 3
+from diffusionkit.mlx import DiffusionPipeline
+
+pipeline = DiffusionPipeline(
+	shift=3.0,
+	use_t5=False,
+	model_version=${model.id},
+	low_memory_mode=True,
+	a16=True,
+	w16=True,
+)`;
+
+	const fluxSnippet = `# Pipeline for Flux
+from diffusionkit.mlx import FluxPipeline
+
+pipeline = FluxPipeline(
+  shift=1.0,
+  model_version=${model.id},
+  low_memory_mode=True,
+  a16=True,
+  w16=True,
+)`;
+
+	const generateSnippet = `# Image Generation
+HEIGHT = 512
+WIDTH = 512
+NUM_STEPS = ${model.tags.includes("flux") ? 4 : 50}
+CFG_WEIGHT = ${model.tags.includes("flux") ? 0 : 5}
+
+image, _ = pipeline.generate_image(
+  "a photo of a cat",
+  cfg_weight=CFG_WEIGHT,
+  num_steps=NUM_STEPS,
+  latent_size=(HEIGHT // 8, WIDTH // 8),
+)`;
+
+	const pipelineSnippet = model.tags.includes("flux") ? fluxSnippet : sd3Snippet;
+
+	return [pipelineSnippet, generateSnippet];
+};
+
+export const cartesia_pytorch = (model: ModelData): string[] => [
+	`# pip install --no-binary :all: cartesia-pytorch
+from cartesia_pytorch import ReneLMHeadModel
+from transformers import AutoTokenizer
+
+model = ReneLMHeadModel.from_pretrained("${model.id}")
+tokenizer = AutoTokenizer.from_pretrained("allenai/OLMo-1B-hf")
+
+in_message = ["Rene Descartes was"]
+inputs = tokenizer(in_message, return_tensors="pt")
+
+outputs = model.generate(inputs.input_ids, max_length=50, top_k=100, top_p=0.99)
+out_message = tokenizer.batch_decode(outputs, skip_special_tokens=True)[0]
+
+print(out_message)
+)`,
+];
+
+export const cartesia_mlx = (model: ModelData): string[] => [
+	`import mlx.core as mx
+import cartesia_mlx as cmx
+
+model = cmx.from_pretrained("${model.id}")
+model.set_dtype(mx.float32)   
+
+prompt = "Rene Descartes was"
+
+for text in model.generate(
+    prompt,
+    max_tokens=500,
+    eval_every_n=5,
+    verbose=True,
+    top_p=0.99,
+    temperature=0.85,
+):
+    print(text, end="", flush=True)
+`,
+];
 
 export const edsnlp = (model: ModelData): string[] => {
 	const packageName = nameWithoutNamespace(model.id).replaceAll("-", "_");
@@ -238,10 +418,27 @@ export const gliner = (model: ModelData): string[] => [
 model = GLiNER.from_pretrained("${model.id}")`,
 ];
 
+export const htrflow = (model: ModelData): string[] => [
+	`# CLI usage
+# see docs: https://ai-riksarkivet.github.io/htrflow/latest/getting_started/quick_start.html
+htrflow pipeline <path/to/pipeline.yaml> <path/to/image>`,
+	`# Python usage
+from htrflow.pipeline.pipeline import Pipeline
+from htrflow.pipeline.steps import Task
+from htrflow.models.framework.model import ModelClass
+
+pipeline = Pipeline(
+    [
+        Task(
+            ModelClass, {"model": "${model.id}"}, {}
+        ),
+    ])`,
+];
+
 export const keras = (model: ModelData): string[] => [
-	`# Available backend options are: "jax", "tensorflow", "torch".
+	`# Available backend options are: "jax", "torch", "tensorflow".
 import os
-os.environ["KERAS_BACKEND"] = "tensorflow"
+os.environ["KERAS_BACKEND"] = "jax"
 	
 import keras
 
@@ -249,35 +446,131 @@ model = keras.saving.load_model("hf://${model.id}")
 `,
 ];
 
-export const keras_nlp = (model: ModelData): string[] => [
-	`# Available backend options are: "jax", "tensorflow", "torch".
-import os
-os.environ["KERAS_BACKEND"] = "tensorflow"
+const _keras_hub_causal_lm = (modelId: string): string => `
+import keras_hub
 
-import keras_nlp
+# Load CausalLM model (optional: use half precision for inference)
+causal_lm = keras_hub.models.CausalLM.from_preset("hf://${modelId}", dtype="bfloat16")
+causal_lm.compile(sampler="greedy")  # (optional) specify a sampler
 
-tokenizer = keras_nlp.models.Tokenizer.from_preset("hf://${model.id}")
-backbone = keras_nlp.models.Backbone.from_preset("hf://${model.id}")
-`,
-];
+# Generate text
+causal_lm.generate("Keras: deep learning for", max_length=64)
+`;
 
-export const llama_cpp_python = (model: ModelData): string[] => [
-	`from llama_cpp import Llama
+const _keras_hub_text_to_image = (modelId: string): string => `
+import keras_hub
+
+# Load TextToImage model (optional: use half precision for inference)
+text_to_image = keras_hub.models.TextToImage.from_preset("hf://${modelId}", dtype="bfloat16")
+
+# Generate images with a TextToImage model.
+text_to_image.generate("Astronaut in a jungle")
+`;
+
+const _keras_hub_text_classifier = (modelId: string): string => `
+import keras_hub
+
+# Load TextClassifier model
+text_classifier = keras_hub.models.TextClassifier.from_preset(
+    "hf://${modelId}",
+    num_classes=2,
+)
+# Fine-tune
+text_classifier.fit(x=["Thilling adventure!", "Total snoozefest."], y=[1, 0])
+# Classify text
+text_classifier.predict(["Not my cup of tea."])
+`;
+
+const _keras_hub_image_classifier = (modelId: string): string => `
+import keras_hub
+import keras
+
+# Load ImageClassifier model
+image_classifier = keras_hub.models.ImageClassifier.from_preset(
+    "hf://${modelId}",
+    num_classes=2,
+)
+# Fine-tune
+image_classifier.fit(
+    x=keras.random.randint((32, 64, 64, 3), 0, 256),
+    y=keras.random.randint((32, 1), 0, 2),
+)
+# Classify image
+image_classifier.predict(keras.random.randint((1, 64, 64, 3), 0, 256))
+`;
+
+const _keras_hub_tasks_with_example = {
+	CausalLM: _keras_hub_causal_lm,
+	TextToImage: _keras_hub_text_to_image,
+	TextClassifier: _keras_hub_text_classifier,
+	ImageClassifier: _keras_hub_image_classifier,
+};
+
+const _keras_hub_task_without_example = (task: string, modelId: string): string => `
+import keras_hub
+
+# Create a ${task} model
+task = keras_hub.models.${task}.from_preset("hf://${modelId}")
+`;
+
+const _keras_hub_generic_backbone = (modelId: string): string => `
+import keras_hub
+
+# Create a Backbone model unspecialized for any task
+backbone = keras_hub.models.Backbone.from_preset("hf://${modelId}")
+`;
+
+export const keras_hub = (model: ModelData): string[] => {
+	const modelId = model.id;
+	const tasks = model.config?.keras_hub?.tasks ?? [];
+
+	const snippets: string[] = [];
+
+	// First, generate tasks with examples
+	for (const [task, snippet] of Object.entries(_keras_hub_tasks_with_example)) {
+		if (tasks.includes(task)) {
+			snippets.push(snippet(modelId));
+		}
+	}
+	// Then, add remaining tasks
+	for (const task of tasks) {
+		if (!Object.keys(_keras_hub_tasks_with_example).includes(task)) {
+			snippets.push(_keras_hub_task_without_example(task, modelId));
+		}
+	}
+	// Finally, add generic backbone snippet
+	snippets.push(_keras_hub_generic_backbone(modelId));
+
+	return snippets;
+};
+
+export const llama_cpp_python = (model: ModelData): string[] => {
+	const snippets = [
+		`from llama_cpp import Llama
 
 llm = Llama.from_pretrained(
 	repo_id="${model.id}",
 	filename="{{GGUF_FILE}}",
 )
+`,
+	];
 
-llm.create_chat_completion(
-	messages = [
-		{
-			"role": "user",
-			"content": "What is the capital of France?"
-		}
-	]
-)`,
-];
+	if (model.tags.includes("conversational")) {
+		const messages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
+		snippets.push(`llm.create_chat_completion(
+	messages = ${stringifyMessages(messages, { attributeKeyQuotes: true, indent: "\t" })}
+)`);
+	} else {
+		snippets.push(`output = llm(
+	"Once upon a time,",
+	max_tokens=512,
+	echo=True
+)
+print(output)`);
+	}
+
+	return snippets;
+};
 
 export const tf_keras = (model: ModelData): string[] => [
 	`# Note: 'keras<3.x' or 'tf_keras' must be installed (legacy)
@@ -579,11 +872,34 @@ export const sampleFactory = (model: ModelData): string[] => [
 	`python -m sample_factory.huggingface.load_from_hub -r ${model.id} -d ./train_dir`,
 ];
 
-export const sentenceTransformers = (model: ModelData): string[] => [
-	`from sentence_transformers import SentenceTransformer
+function get_widget_examples_from_st_model(model: ModelData): string[] | undefined {
+	const widgetExample = model.widgetData?.[0] as WidgetExampleSentenceSimilarityInput | undefined;
+	if (widgetExample) {
+		return [widgetExample.source_sentence, ...widgetExample.sentences];
+	}
+}
 
-model = SentenceTransformer("${model.id}")`,
-];
+export const sentenceTransformers = (model: ModelData): string[] => {
+	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
+	const exampleSentences = get_widget_examples_from_st_model(model) ?? [
+		"The weather is lovely today.",
+		"It's so sunny outside!",
+		"He drove to the stadium.",
+	];
+
+	return [
+		`from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer("${model.id}"${remote_code_snippet})
+
+sentences = ${JSON.stringify(exampleSentences, null, 4)}
+embeddings = model.encode(sentences)
+
+similarities = model.similarity(embeddings, embeddings)
+print(similarities.shape)
+# [${exampleSentences.length}, ${exampleSentences.length}]`,
+	];
+};
 
 export const setfit = (model: ModelData): string[] => [
 	`from setfit import SetFitModel
@@ -652,6 +968,12 @@ model.${speechbrainMethod}("file.wav")`,
 	];
 };
 
+export const terratorch = (model: ModelData): string[] => [
+	`from terratorch.registry import BACKBONE_REGISTRY
+
+model = BACKBONE_REGISTRY.build("${model.id}")`,
+];
+
 export const transformers = (model: ModelData): string[] => {
 	const info = model.transformersInfo;
 	if (!info) {
@@ -703,7 +1025,7 @@ export const transformersJS = (model: ModelData): string[] => {
 		return [`// ⚠️ Unknown pipeline tag`];
 	}
 
-	const libName = "@xenova/transformers";
+	const libName = "@huggingface/transformers";
 
 	return [
 		`// npm i ${libName}
@@ -740,10 +1062,9 @@ export const peft = (model: ModelData): string[] => {
 	}
 
 	return [
-		`from peft import PeftModel, PeftConfig
+		`from peft import PeftModel
 from transformers import AutoModelFor${pefttask}
 
-config = PeftConfig.from_pretrained("${model.id}")
 base_model = AutoModelFor${pefttask}.from_pretrained("${peftBaseModel}")
 model = PeftModel.from_pretrained(base_model, "${model.id}")`,
 	];
@@ -790,6 +1111,32 @@ IWorker engine = WorkerFactory.CreateWorker(BackendType.GPUCompute, model);
 `,
 ];
 
+export const sana = (model: ModelData): string[] => [
+	`
+# Load the model and infer image from text
+import torch
+from app.sana_pipeline import SanaPipeline
+from torchvision.utils import save_image
+
+sana = SanaPipeline("configs/sana_config/1024ms/Sana_1600M_img1024.yaml")
+sana.from_pretrained("hf://${model.id}")
+
+image = sana(
+    prompt='a cyberpunk cat with a neon sign that says "Sana"',
+    height=1024,
+    width=1024,
+    guidance_scale=5.0,
+    pag_guidance_scale=2.0,
+    num_inference_steps=18,
+) `,
+];
+
+export const vfimamba = (model: ModelData): string[] => [
+	`from Trainer_finetune import Model
+
+model = Model.from_pretrained("${model.id}")`,
+];
+
 export const voicecraft = (model: ModelData): string[] => [
 	`from voicecraft import VoiceCraft
 
@@ -810,6 +1157,25 @@ wavs = chat.infer(texts, )
 torchaudio.save("output1.wav", torch.from_numpy(wavs[0]), 24000)`,
 ];
 
+export const ultralytics = (model: ModelData): string[] => {
+	// ultralytics models must have a version tag (e.g. `yolov8`)
+	const versionTag = model.tags.find((tag) => tag.match(/^yolov\d+$/));
+
+	const className = versionTag ? `YOLOv${versionTag.slice(4)}` : "YOLOvXX";
+	const prefix = versionTag
+		? ""
+		: `# Couldn't find a valid YOLO version tag.\n# Replace XX with the correct version.\n`;
+
+	return [
+		prefix +
+			`from ultralytics import ${className}
+
+model = ${className}.from_pretrained("${model.id}")
+source = 'http://images.cocodataset.org/val2017/000000039769.jpg'
+model.predict(source=source, save=True)`,
+	];
+};
+
 export const birefnet = (model: ModelData): string[] => [
 	`# Option 1: use with transformers
 
@@ -824,10 +1190,17 @@ from models.birefnet import BiRefNet
 model = BiRefNet.from_pretrained("${model.id}")`,
 ];
 
+export const swarmformer = (model: ModelData): string[] => [
+	`from swarmformer import SwarmFormerModel
+
+model = SwarmFormerModel.from_pretrained("${model.id}")
+`,
+];
+
 export const mlx = (model: ModelData): string[] => [
 	`pip install huggingface_hub hf_transfer
 
-export HF_HUB_ENABLE_HF_TRANS: string[]FER=1
+export HF_HUB_ENABLE_HF_TRANSFER=1
 huggingface-cli download --local-dir ${nameWithoutNamespace(model.id)} ${model.id}`,
 ];
 
@@ -835,6 +1208,12 @@ export const mlxim = (model: ModelData): string[] => [
 	`from mlxim.model import create_model
 
 model = create_model(${model.id})`,
+];
+
+export const model2vec = (model: ModelData): string[] => [
+	`from model2vec import StaticModel
+
+model = StaticModel.from_pretrained("${model.id}")`,
 ];
 
 export const nemo = (model: ModelData): string[] => {
@@ -846,6 +1225,12 @@ export const nemo = (model: ModelData): string[] => {
 
 	return command ?? [`# tag did not correspond to a valid NeMo domain.`];
 };
+
+export const pxia = (model: ModelData): string[] => [
+	`from pxia import AutoModel
+
+model = AutoModel.from_pretrained("${model.id}")`,
+];
 
 export const pythae = (model: ModelData): string[] => [
 	`from pythae.models import AutoModel
@@ -879,6 +1264,14 @@ model.set_generation_params(duration=5)  # generate 5 seconds.
 descriptions = ['dog barking', 'sirene of an emergency vehicle', 'footsteps in a corridor']
 wav = model.generate(descriptions)  # generates 3 samples.`,
 ];
+export const anemoi = (model: ModelData): string[] => [
+	`from anemoi.inference.runners.default import DefaultRunner
+from anemoi.inference.config import Configuration
+# Create Configuration
+config = Configuration(checkpoint = {"huggingface":{"repo_id":"${model.id}"}})
+# Load Runner
+runner = DefaultRunner(config)`,
+];
 
 export const audiocraft = (model: ModelData): string[] => {
 	if (model.tags.includes("musicgen")) {
@@ -904,5 +1297,18 @@ whisperkit-cli transcribe --audio-path /path/to/audio.mp3
 
 # Or use your preferred model variant
 whisperkit-cli transcribe --model "large-v3" --model-prefix "distil" --audio-path /path/to/audio.mp3 --verbose`,
+];
+
+export const threedtopia_xl = (model: ModelData): string[] => [
+	`from threedtopia_xl.models import threedtopia_xl
+
+model = threedtopia_xl.from_pretrained("${model.id}")
+model.generate(cond="path/to/image.png")`,
+];
+
+export const hezar = (model: ModelData): string[] => [
+	`from hezar import Model
+
+model = Model.load("${model.id}")`,
 ];
 //#endregion

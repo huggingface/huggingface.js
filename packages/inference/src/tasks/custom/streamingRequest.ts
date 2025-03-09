@@ -9,10 +9,8 @@ import { getLines, getMessages } from "../../vendor/fetch-event-source/parse";
 export async function* streamingRequest<T>(
 	args: RequestArgs,
 	options?: Options & {
-		/** When a model can be used for multiple tasks, and we want to run a non-default task */
-		task?: string | InferenceTask;
-		/** To load default model if needed */
-		taskHint?: InferenceTask;
+		/** In most cases (unless we pass a endpointUrl) we know the task */
+		task?: InferenceTask;
 		/** Is chat completion compatible */
 		chatCompletion?: boolean;
 	}
@@ -20,11 +18,8 @@ export async function* streamingRequest<T>(
 	const { url, info } = await makeRequestOptions({ ...args, stream: true }, options);
 	const response = await (options?.fetch ?? fetch)(url, info);
 
-	if (options?.retry_on_error !== false && response.status === 503 && !options?.wait_for_model) {
-		return yield* streamingRequest(args, {
-			...options,
-			wait_for_model: true,
-		});
+	if (options?.retry_on_error !== false && response.status === 503) {
+		return yield* streamingRequest(args, options);
 	}
 	if (!response.ok) {
 		if (response.headers.get("Content-Type")?.startsWith("application/json")) {
@@ -32,8 +27,12 @@ export async function* streamingRequest<T>(
 			if ([400, 422, 404, 500].includes(response.status) && options?.chatCompletion) {
 				throw new Error(`Server ${args.model} does not seem to support chat completion. Error: ${output.error}`);
 			}
-			if (output.error) {
+			if (typeof output.error === "string") {
 				throw new Error(output.error);
+			}
+			if (output.error && "message" in output.error && typeof output.error.message === "string") {
+				/// OpenAI errors
+				throw new Error(output.error.message);
 			}
 		}
 
@@ -68,7 +67,9 @@ export async function* streamingRequest<T>(
 	try {
 		while (true) {
 			const { done, value } = await reader.read();
-			if (done) return;
+			if (done) {
+				return;
+			}
 			onChunk(value);
 			for (const event of events) {
 				if (event.data.length > 0) {
@@ -77,7 +78,16 @@ export async function* streamingRequest<T>(
 					}
 					const data = JSON.parse(event.data);
 					if (typeof data === "object" && data !== null && "error" in data) {
-						throw new Error(data.error);
+						const errorStr =
+							typeof data.error === "string"
+								? data.error
+								: typeof data.error === "object" &&
+								    data.error &&
+								    "message" in data.error &&
+								    typeof data.error.message === "string"
+								  ? data.error.message
+								  : JSON.stringify(data.error);
+						throw new Error(`Error forwarded from backend: ` + errorStr);
 					}
 					yield data as T;
 				}

@@ -5,6 +5,7 @@
 	"description": "Outputs for Audio Classification inference",
 	"type": "array",
 	"items": {
+		"type": "object",
 		"$ref": "/inference/schemas/common-definitions.json#/definitions/ClassificationOutput"
 	}
 }

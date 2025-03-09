@@ -11,9 +11,7 @@ describe("createRepo", () => {
 		const repoName = `${TEST_USER}/TEST-${insecureRandomString()}`;
 
 		const result = await createRepo({
-			credentials: {
-				accessToken: TEST_ACCESS_TOKEN,
-			},
+			accessToken: TEST_ACCESS_TOKEN,
 			repo: {
 				name: repoName,
 				type: "model",
@@ -62,9 +60,7 @@ describe("createRepo", () => {
 		const repoName = `${TEST_USER}/TEST-${insecureRandomString()}`;
 
 		const result = await createRepo({
-			credentials: {
-				accessToken: TEST_ACCESS_TOKEN,
-			},
+			accessToken: TEST_ACCESS_TOKEN,
 			hubUrl: TEST_HUB_URL,
 			repo: repoName,
 			files: [{ path: ".gitattributes", content: new Blob(["*.html filter=lfs diff=lfs merge=lfs -text"]) }],
@@ -88,9 +84,7 @@ describe("createRepo", () => {
 		const repoName = `datasets/${TEST_USER}/TEST-${insecureRandomString()}`;
 
 		const result = await createRepo({
-			credentials: {
-				accessToken: TEST_ACCESS_TOKEN,
-			},
+			accessToken: TEST_ACCESS_TOKEN,
 			hubUrl: TEST_HUB_URL,
 			repo: repoName,
 			files: [{ path: ".gitattributes", content: new Blob(["*.html filter=lfs diff=lfs merge=lfs -text"]) }],

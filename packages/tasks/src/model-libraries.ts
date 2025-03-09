@@ -1,6 +1,6 @@
-import * as snippets from "./model-libraries-snippets";
-import type { ModelData } from "./model-data";
-import type { ElasticSearchQuery } from "./model-libraries-downloads";
+import * as snippets from "./model-libraries-snippets.js";
+import type { ModelData } from "./model-data.js";
+import type { ElasticSearchQuery } from "./model-libraries-downloads.js";
 
 /**
  * Elements configurable by a model library.
@@ -75,6 +75,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.allennlp,
 		filter: true,
 	},
+	anemoi: {
+		prettyLabel: "AnemoI",
+		repoName: "AnemoI",
+		repoUrl: "https://github.com/ecmwf/anemoi-inference",
+		docsUrl: "https://anemoi-docs.readthedocs.io/en/latest/",
+		filter: false,
+		countDownloads: `path_extension:"ckpt"`,
+		snippets: snippets.anemoi,
+	},
 	asteroid: {
 		prettyLabel: "Asteroid",
 		repoName: "Asteroid",
@@ -100,6 +109,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pth"`,
 		snippets: snippets.audioseal,
 	},
+	ben2: {
+		prettyLabel: "BEN2",
+		repoName: "BEN2",
+		repoUrl: "https://github.com/PramaLLC/BEN2",
+		snippets: snippets.ben2,
+		filter: false,
+	},
 	bertopic: {
 		prettyLabel: "BERTopic",
 		repoName: "BERTopic",
@@ -113,6 +129,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/google-research/big_vision",
 		filter: false,
 		countDownloads: `path_extension:"npz"`,
+	},
+	birder: {
+		prettyLabel: "Birder",
+		repoName: "Birder",
+		repoUrl: "https://gitlab.com/birder/birder",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
 	},
 	birefnet: {
 		prettyLabel: "BiRefNet",
@@ -150,6 +173,32 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"adapter_config.json"`,
 	},
+	comet: {
+		prettyLabel: "COMET",
+		repoName: "COMET",
+		repoUrl: "https://github.com/Unbabel/COMET/",
+		countDownloads: `path:"hparams.yaml"`,
+	},
+	cosmos: {
+		prettyLabel: "Cosmos",
+		repoName: "Cosmos",
+		repoUrl: "https://github.com/NVIDIA/Cosmos",
+		countDownloads: `path:"config.json" OR path_extension:"pt"`,
+	},
+	"cxr-foundation": {
+		prettyLabel: "CXR Foundation",
+		repoName: "cxr-foundation",
+		repoUrl: "https://github.com/google-health/cxr-foundation",
+		snippets: snippets.cxr_foundation,
+		filter: false,
+		countDownloads: `path:"precomputed_embeddings/embeddings.npz" OR path:"pax-elixr-b-text/saved_model.pb"`,
+	},
+	deepforest: {
+		prettyLabel: "DeepForest",
+		repoName: "deepforest",
+		docsUrl: "https://deepforest.readthedocs.io/en/latest/",
+		repoUrl: "https://github.com/weecology/DeepForest",
+	},
 	"depth-anything-v2": {
 		prettyLabel: "DepthAnythingV2",
 		repoName: "Depth Anything V2",
@@ -157,6 +206,22 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.depth_anything_v2,
 		filter: false,
 		countDownloads: `path_extension:"pth"`,
+	},
+	"depth-pro": {
+		prettyLabel: "Depth Pro",
+		repoName: "Depth Pro",
+		repoUrl: "https://github.com/apple/ml-depth-pro",
+		countDownloads: `path_extension:"pt"`,
+		snippets: snippets.depth_pro,
+		filter: false,
+	},
+	"derm-foundation": {
+		prettyLabel: "Derm Foundation",
+		repoName: "derm-foundation",
+		repoUrl: "https://github.com/google-health/derm-foundation",
+		snippets: snippets.derm_foundation,
+		filter: false,
+		countDownloads: `path:"scin_dataset_precomputed_embeddings.npz" OR path:"saved_model.pb"`,
 	},
 	diffree: {
 		prettyLabel: "Diffree",
@@ -174,10 +239,49 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		/// diffusers has its own more complex "countDownloads" query
 	},
+	diffusionkit: {
+		prettyLabel: "DiffusionKit",
+		repoName: "DiffusionKit",
+		repoUrl: "https://github.com/argmaxinc/DiffusionKit",
+		snippets: snippets.diffusionkit,
+	},
 	doctr: {
 		prettyLabel: "docTR",
 		repoName: "doctr",
 		repoUrl: "https://github.com/mindee/doctr",
+	},
+	cartesia_pytorch: {
+		prettyLabel: "Cartesia Pytorch",
+		repoName: "Cartesia Pytorch",
+		repoUrl: "https://github.com/cartesia-ai/cartesia_pytorch",
+		snippets: snippets.cartesia_pytorch,
+	},
+	cartesia_mlx: {
+		prettyLabel: "Cartesia MLX",
+		repoName: "Cartesia MLX",
+		repoUrl: "https://github.com/cartesia-ai/cartesia_mlx",
+		snippets: snippets.cartesia_mlx,
+	},
+	clipscope: {
+		prettyLabel: "clipscope",
+		repoName: "clipscope",
+		repoUrl: "https://github.com/Lewington-pitsos/clipscope",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
+	cosyvoice: {
+		prettyLabel: "CosyVoice",
+		repoName: "CosyVoice",
+		repoUrl: "https://github.com/FunAudioLLM/CosyVoice",
+		filter: false,
+		countDownloads: `path_extension:"onnx" OR path_extension:"pt"`,
+	},
+	cotracker: {
+		prettyLabel: "CoTracker",
+		repoName: "CoTracker",
+		repoUrl: "https://github.com/facebookresearch/co-tracker",
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
 	},
 	edsnlp: {
 		prettyLabel: "EDS-NLP",
@@ -270,11 +374,37 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/fudan-generative-vision/hallo",
 		countDownloads: `path:"hallo/net.pth"`,
 	},
+	hezar: {
+		prettyLabel: "Hezar",
+		repoName: "Hezar",
+		repoUrl: "https://github.com/hezarai/hezar",
+		docsUrl: "https://hezarai.github.io/hezar",
+		countDownloads: `path:"model_config.yaml" OR path:"embedding/embedding_config.yaml"`,
+	},
+	htrflow: {
+		prettyLabel: "HTRflow",
+		repoName: "HTRflow",
+		repoUrl: "https://github.com/AI-Riksarkivet/htrflow",
+		docsUrl: "https://ai-riksarkivet.github.io/htrflow",
+		snippets: snippets.htrflow,
+	},
 	"hunyuan-dit": {
 		prettyLabel: "HunyuanDiT",
 		repoName: "HunyuanDiT",
 		repoUrl: "https://github.com/Tencent/HunyuanDiT",
 		countDownloads: `path:"pytorch_model_ema.pt" OR path:"pytorch_model_distill.pt"`,
+	},
+	"hunyuan3d-2": {
+		prettyLabel: "Hunyuan3D-2",
+		repoName: "Hunyuan3D-2",
+		repoUrl: "https://github.com/Tencent/Hunyuan3D-2",
+		countDownloads: `path_filename:"model_index" OR path_filename:"config"`,
+	},
+	imstoucan: {
+		prettyLabel: "IMS Toucan",
+		repoName: "IMS-Toucan",
+		repoUrl: "https://github.com/DigitalPhonetics/IMS-Toucan",
+		countDownloads: `path:"embedding_gan.pt" OR path:"Vocoder.pt" OR path:"ToucanTTS.pt"`,
 	},
 	keras: {
 		prettyLabel: "Keras",
@@ -292,15 +422,15 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/keras-team/tf-keras",
 		docsUrl: "https://huggingface.co/docs/hub/tf-keras",
 		snippets: snippets.tf_keras,
-		filter: true,
 		countDownloads: `path:"saved_model.pb"`,
 	},
-	"keras-nlp": {
-		prettyLabel: "KerasNLP",
-		repoName: "KerasNLP",
-		repoUrl: "https://keras.io/keras_nlp/",
-		docsUrl: "https://github.com/keras-team/keras-nlp",
-		snippets: snippets.keras_nlp,
+	"keras-hub": {
+		prettyLabel: "KerasHub",
+		repoName: "KerasHub",
+		repoUrl: "https://github.com/keras-team/keras-hub",
+		docsUrl: "https://keras.io/keras_hub/",
+		snippets: snippets.keras_hub,
+		filter: true,
 	},
 	k2: {
 		prettyLabel: "K2",
@@ -319,6 +449,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "llama-cpp-python",
 		repoUrl: "https://github.com/abetlen/llama-cpp-python",
 		snippets: snippets.llama_cpp_python,
+	},
+	"mini-omni2": {
+		prettyLabel: "Mini-Omni2",
+		repoName: "Mini-Omni2",
+		repoUrl: "https://github.com/gpt-omni/mini-omni2",
+		countDownloads: `path:"model_config.yaml"`,
 	},
 	mindspore: {
 		prettyLabel: "MindSpore",
@@ -347,6 +483,26 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"MeshAnything_350m.pth"`,
 		snippets: snippets.mesh_anything,
+	},
+	merlin: {
+		prettyLabel: "Merlin",
+		repoName: "Merlin",
+		repoUrl: "https://github.com/StanfordMIMI/Merlin",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
+	medvae: {
+		prettyLabel: "MedVAE",
+		repoName: "MedVAE",
+		repoUrl: "https://github.com/StanfordMIMI/MedVAE",
+		filter: false,
+		countDownloads: `path_extension:"ckpt"`,
+	},
+	mitie: {
+		prettyLabel: "MITIE",
+		repoName: "MITIE",
+		repoUrl: "https://github.com/mit-nlp/MITIE",
+		countDownloads: `path_filename:"total_word_feature_extractor"`,
 	},
 	"ml-agents": {
 		prettyLabel: "ml-agents",
@@ -381,6 +537,20 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"mlc-chat-config.json"`,
 	},
+	model2vec: {
+		prettyLabel: "Model2Vec",
+		repoName: "model2vec",
+		repoUrl: "https://github.com/MinishLab/model2vec",
+		snippets: snippets.model2vec,
+		filter: false,
+	},
+	moshi: {
+		prettyLabel: "Moshi",
+		repoName: "Moshi",
+		repoUrl: "https://github.com/kyutai-labs/moshi",
+		filter: false,
+		countDownloads: `path:"tokenizer-e351c8d8-checkpoint125.safetensors"`,
+	},
 	nemo: {
 		prettyLabel: "NeMo",
 		repoName: "NeMo",
@@ -389,13 +559,22 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path_extension:"nemo" OR path:"model_config.yaml"`,
 	},
+	"open-oasis": {
+		prettyLabel: "open-oasis",
+		repoName: "open-oasis",
+		repoUrl: "https://github.com/etched-ai/open-oasis",
+		countDownloads: `path:"oasis500m.safetensors"`,
+	},
 	open_clip: {
 		prettyLabel: "OpenCLIP",
 		repoName: "OpenCLIP",
 		repoUrl: "https://github.com/mlfoundations/open_clip",
 		snippets: snippets.open_clip,
 		filter: true,
-		countDownloads: `path_extension:"bin" AND path_filename:*pytorch_model`,
+		countDownloads: `path:"open_clip_model.safetensors"
+			OR path:"model.safetensors"
+			OR path:"open_clip_pytorch_model.bin"
+			OR path:"pytorch_model.bin"`,
 	},
 	paddlenlp: {
 		prettyLabel: "paddlenlp",
@@ -414,6 +593,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"adapter_config.json"`,
 	},
+	pxia: {
+		prettyLabel: "pxia",
+		repoName: "pxia",
+		repoUrl: "https://github.com/not-lain/pxia",
+		snippets: snippets.pxia,
+		filter: false,
+	},
 	"pyannote-audio": {
 		prettyLabel: "pyannote.audio",
 		repoName: "pyannote-audio",
@@ -421,12 +607,19 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.pyannote_audio,
 		filter: true,
 	},
+	"py-feat": {
+		prettyLabel: "Py-Feat",
+		repoName: "Py-Feat",
+		repoUrl: "https://github.com/cosanlab/py-feat",
+		docsUrl: "https://py-feat.org/",
+		filter: false,
+	},
 	pythae: {
 		prettyLabel: "pythae",
 		repoName: "pythae",
 		repoUrl: "https://github.com/clementchadebec/benchmark_VAE",
 		snippets: snippets.pythae,
-		filter: true,
+		filter: false,
 	},
 	recurrentgemma: {
 		prettyLabel: "RecurrentGemma",
@@ -449,6 +642,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://refine.rs/",
 		filter: false,
 		countDownloads: `path:"model.safetensors"`,
+	},
+	reverb: {
+		prettyLabel: "Reverb",
+		repoName: "Reverb",
+		repoUrl: "https://github.com/revdotcom/reverb",
+		filter: false,
 	},
 	saelens: {
 		prettyLabel: "SAELens",
@@ -473,6 +672,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.sampleFactory,
 		filter: true,
 		countDownloads: `path:"cfg.json"`,
+	},
+	sapiens: {
+		prettyLabel: "sapiens",
+		repoName: "sapiens",
+		repoUrl: "https://github.com/facebookresearch/sapiens",
+		filter: false,
+		countDownloads: `path_extension:"pt2" OR path_extension:"pth" OR path_extension:"onnx"`,
 	},
 	"sentence-transformers": {
 		prettyLabel: "sentence-transformers",
@@ -524,6 +730,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"hyperparams.yaml"`,
 	},
+	"ssr-speech": {
+		prettyLabel: "SSR-Speech",
+		repoName: "SSR-Speech",
+		repoUrl: "https://github.com/WangHelin1997/SSR-Speech",
+		filter: false,
+		countDownloads: `path_extension:".pth"`,
+	},
 	"stable-audio-tools": {
 		prettyLabel: "Stable Audio Tools",
 		repoName: "stable-audio-tools",
@@ -547,6 +760,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"cvlm_llama2_tokenizer/tokenizer.model"`,
 		snippets: snippets.seed_story,
 	},
+	soloaudio: {
+		prettyLabel: "SoloAudio",
+		repoName: "SoloAudio",
+		repoUrl: "https://github.com/WangHelin1997/SoloAudio",
+		filter: false,
+		countDownloads: `path:"soloaudio_v2.pt"`,
+	},
 	"stable-baselines3": {
 		prettyLabel: "stable-baselines3",
 		repoName: "stable-baselines3",
@@ -565,11 +785,46 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"models/default.zip"`,
 	},
+	swarmformer: {
+		prettyLabel: "SwarmFormer",
+		repoName: "SwarmFormer",
+		repoUrl: "https://github.com/takara-ai/SwarmFormer",
+		snippets: snippets.swarmformer,
+		filter: false,
+	},
+	"f5-tts": {
+		prettyLabel: "F5-TTS",
+		repoName: "F5-TTS",
+		repoUrl: "https://github.com/SWivid/F5-TTS",
+		filter: false,
+		countDownloads: `path_extension:"safetensors" OR path_extension:"pt"`,
+	},
+	genmo: {
+		prettyLabel: "Genmo",
+		repoName: "Genmo",
+		repoUrl: "https://github.com/genmoai/models",
+		filter: false,
+		countDownloads: `path:"vae_stats.json"`,
+	},
 	tensorflowtts: {
 		prettyLabel: "TensorFlowTTS",
 		repoName: "TensorFlowTTS",
 		repoUrl: "https://github.com/TensorSpeech/TensorFlowTTS",
 		snippets: snippets.tensorflowtts,
+	},
+	tabpfn: {
+		prettyLabel: "TabPFN",
+		repoName: "TabPFN",
+		repoUrl: "https://github.com/PriorLabs/TabPFN",
+	},
+	terratorch: {
+		prettyLabel: "TerraTorch",
+		repoName: "TerraTorch",
+		repoUrl: "https://github.com/IBM/terratorch",
+		docsUrl: "https://ibm.github.io/terratorch/",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+		snippets: snippets.terratorch,
 	},
 	"tic-clip": {
 		prettyLabel: "TiC-CLIP",
@@ -605,10 +860,25 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	"transformers.js": {
 		prettyLabel: "Transformers.js",
 		repoName: "transformers.js",
-		repoUrl: "https://github.com/xenova/transformers.js",
+		repoUrl: "https://github.com/huggingface/transformers.js",
 		docsUrl: "https://huggingface.co/docs/hub/transformers-js",
 		snippets: snippets.transformersJS,
 		filter: true,
+	},
+	trellis: {
+		prettyLabel: "Trellis",
+		repoName: "Trellis",
+		repoUrl: "https://github.com/microsoft/TRELLIS",
+		countDownloads: `path_extension:"safetensors"`,
+	},
+	ultralytics: {
+		prettyLabel: "ultralytics",
+		repoName: "ultralytics",
+		repoUrl: "https://github.com/ultralytics/ultralytics",
+		docsUrl: "https://github.com/ultralytics/ultralytics",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+		snippets: snippets.ultralytics,
 	},
 	"unity-sentis": {
 		prettyLabel: "unity-sentis",
@@ -618,12 +888,33 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path_extension:"sentis"`,
 	},
+	sana: {
+		prettyLabel: "Sana",
+		repoName: "Sana",
+		repoUrl: "https://github.com/NVlabs/Sana",
+		countDownloads: `path_extension:"pth"`,
+		snippets: snippets.sana,
+	},
+	"vfi-mamba": {
+		prettyLabel: "VFIMamba",
+		repoName: "VFIMamba",
+		repoUrl: "https://github.com/MCG-NJU/VFIMamba",
+		countDownloads: `path_extension:"pkl"`,
+		snippets: snippets.vfimamba,
+	},
 	voicecraft: {
 		prettyLabel: "VoiceCraft",
 		repoName: "VoiceCraft",
 		repoUrl: "https://github.com/jasonppy/VoiceCraft",
 		docsUrl: "https://github.com/jasonppy/VoiceCraft",
 		snippets: snippets.voicecraft,
+	},
+	wham: {
+		prettyLabel: "WHAM",
+		repoName: "wham",
+		repoUrl: "https://huggingface.co/microsoft/wham",
+		docsUrl: "https://huggingface.co/microsoft/wham/blob/main/README.md",
+		countDownloads: `path_extension:"ckpt"`,
 	},
 	whisperkit: {
 		prettyLabel: "WhisperKit",
@@ -632,6 +923,23 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://github.com/argmaxinc/WhisperKit?tab=readme-ov-file#homebrew",
 		snippets: snippets.whisperkit,
 		countDownloads: `path_filename:"model" AND path_extension:"mil" AND _exists_:"path_prefix"`,
+	},
+	yolov10: {
+		// YOLOv10 is a fork of ultraLytics. Code snippets and download count are the same but the repo is different.
+		prettyLabel: "YOLOv10",
+		repoName: "YOLOv10",
+		repoUrl: "https://github.com/THU-MIG/yolov10",
+		docsUrl: "https://github.com/THU-MIG/yolov10",
+		countDownloads: `path_extension:"pt" OR path_extension:"safetensors"`,
+		snippets: snippets.ultralytics,
+	},
+	"3dtopia-xl": {
+		prettyLabel: "3DTopia-XL",
+		repoName: "3DTopia-XL",
+		repoUrl: "https://github.com/3DTopia/3DTopia-XL",
+		filter: false,
+		countDownloads: `path:"model_vae_fp16.pt"`,
+		snippets: snippets.threedtopia_xl,
 	},
 } satisfies Record<string, LibraryUiElement>;
 

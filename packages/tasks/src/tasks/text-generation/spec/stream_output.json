@@ -39,12 +39,18 @@
 	"$defs": {
 		"TextGenerationStreamOutputStreamDetails": {
 			"type": "object",
-			"required": ["finish_reason", "generated_tokens"],
+			"required": ["finish_reason", "generated_tokens", "input_length"],
 			"properties": {
 				"finish_reason": {
 					"$ref": "#/$defs/TextGenerationStreamOutputFinishReason"
 				},
 				"generated_tokens": {
+					"type": "integer",
+					"format": "int32",
+					"example": 1,
+					"minimum": 0
+				},
+				"input_length": {
 					"type": "integer",
 					"format": "int32",
 					"example": 1,

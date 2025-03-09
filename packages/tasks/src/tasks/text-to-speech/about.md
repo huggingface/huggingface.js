@@ -19,7 +19,7 @@ import json
 import requests
 
 headers = {"Authorization": f"Bearer {API_TOKEN}"}
-API_URL = "https://api-inference.huggingface.co/models/microsoft/speecht5_tts"
+API_URL = "https://router.huggingface.co/hf-inference/models/microsoft/speecht5_tts"
 
 def query(payload):
 	response = requests.post(API_URL, headers=headers, json=payload)
@@ -45,9 +45,9 @@ synthesizer("Look I am generating speech in three lines of code!")
 You can use [huggingface.js](https://github.com/huggingface/huggingface.js) to infer summarization models on Hugging Face Hub.
 
 ```javascript
-import { HfInference } from "@huggingface/inference";
+import { InferenceClient } from "@huggingface/inference";
 
-const inference = new HfInference(HF_TOKEN);
+const inference = new InferenceClient(HF_TOKEN);
 await inference.textToSpeech({
 	model: "facebook/mms-tts",
 	inputs: "text to generate speech from",
