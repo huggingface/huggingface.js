@@ -476,6 +476,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"mars5_ar.safetensors"`,
 		snippets: snippets.mars5_tts,
 	},
+	matanyone: {
+		prettyLabel: "MatAnyone",
+		repoName: "MatAnyone",
+		repoUrl: "https://github.com/pq-yang/MatAnyone",
+		snippets: snippets.matanyone,
+		filter: false,
+	},
 	"mesh-anything": {
 		prettyLabel: "MeshAnything",
 		repoName: "MeshAnything",
