@@ -1,8 +1,8 @@
 <script>
 	import { whoAmI, listFiles } from "@huggingface/hub";
-	import { HfInference } from "@huggingface/inference";
+	import { InferenceClient } from "@huggingface/inference";
 
-	const hf = new HfInference();
+	const hf = new InferenceClient();
 
 	const test = async () => {
 		const info = await whoAmI({ credentials: { accessToken: "hf_hub.js" }, hubUrl: "https://hub-ci.huggingface.co" });

@@ -1,6 +1,6 @@
-import { HfInference } from "@huggingface/inference";
+import { InferenceClient } from "@huggingface/inference";
 
-const client = new HfInference("api_token");
+const client = new InferenceClient("api_token");
 
 const video = await client.textToVideo({
 	model: "tencent/HunyuanVideo",

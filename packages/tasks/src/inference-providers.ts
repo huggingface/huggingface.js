@@ -19,7 +19,7 @@ export const HF_HUB_INFERENCE_PROXY_TEMPLATE = `https://router.huggingface.co/{{
 /**
  * URL to set as baseUrl in the OpenAI SDK.
  *
- * TODO(Expose this from HfInference in the future?)
+ * TODO(Expose this from InferenceClient in the future?)
  */
 export function openAIbaseUrl(provider: SnippetInferenceProvider): string {
 	const url = HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", provider);

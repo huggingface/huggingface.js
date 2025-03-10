@@ -1,6 +1,6 @@
-import { HfInference } from "@huggingface/inference";
+import { InferenceClient } from "@huggingface/inference";
 
-const client = new HfInference("api_token");
+const client = new InferenceClient("api_token");
 
 const image = await client.textToImage({
 	model: "black-forest-labs/FLUX.1-schnell",
