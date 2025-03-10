@@ -29,6 +29,7 @@ interface TemplateParams {
 }
 
 // Helpers to find + load templates
+
 const rootDirFinder = (): string => {
 	let currentPath = path.normalize(import.meta.url).replace("file:", "");
 
