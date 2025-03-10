@@ -37,11 +37,6 @@
 			"types": "./dist/src/index.d.ts",
 			"require": "./dist/index.cjs",
 			"import": "./dist/index.js"
-		},
-		"./snippets": {
-			"types": "./dist/snippets/index.d.ts",
-			"require": "./dist/snippets/index.cjs",
-			"import": "./dist/snippets/index.js"
 		}
 	},
 	"browser": {
