@@ -46,6 +46,12 @@ export const allennlp = (model: ModelData): string[] => {
 	return allennlpUnknown(model);
 };
 
+export const araclip = (model: ModelData): string[] => [
+	`from araclip import AraClip
+
+model = AraClip.from_pretrained("${model.id}")`,
+];
+
 export const asteroid = (model: ModelData): string[] => [
 	`from asteroid.models import BaseModel
 

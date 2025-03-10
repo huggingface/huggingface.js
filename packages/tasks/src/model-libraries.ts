@@ -84,6 +84,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"ckpt"`,
 		snippets: snippets.anemoi,
 	},
+	araclip: {
+		prettyLabel: "AraClip",
+		repoName: "AraClip",
+		repoUrl: "https://huggingface.co/Arabic-Clip/araclip",
+		filter: false,
+		snippets: snippets.araclip,
+	},
 	asteroid: {
 		prettyLabel: "Asteroid",
 		repoName: "Asteroid",
