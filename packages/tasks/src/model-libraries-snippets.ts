@@ -594,6 +594,13 @@ from inference import Mars5TTS
 mars5 = Mars5TTS.from_pretrained("${model.id}")`,
 ];
 
+export const matanyone = (model: ModelData): string[] => [
+	`# Install from https://github.com/pq-yang/MatAnyone.git
+
+from matanyone.model.matanyone import MatAnyone
+model = MatAnyone.from_pretrained("${model.id}")`,
+];
+
 export const mesh_anything = (): string[] => [
 	`# Install from https://github.com/buaacyw/MeshAnything.git
 
