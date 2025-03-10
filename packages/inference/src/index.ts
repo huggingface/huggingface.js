@@ -3,5 +3,8 @@ export { InferenceOutputError } from "./lib/InferenceOutputError";
 export * from "./types";
 export * from "./tasks";
 
-import * as snippets from "./snippets/index.js";
+let snippets = {};
+if (typeof window === "undefined") {
+	snippets = import("./snippets").then((mod) => mod.default);
+}
 export { snippets };

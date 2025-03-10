@@ -19,7 +19,7 @@ import { existsSync as pathExists } from "node:fs";
 import * as fs from "node:fs/promises";
 import * as path from "node:path/posix";
 
-import { snippets } from "@huggingface/inference";
+import { snippets } from "@huggingface/inference/snippets";
 import type { SnippetInferenceProvider, InferenceSnippet, ModelDataMinimal } from "@huggingface/tasks";
 
 type LANGUAGE = "sh" | "js" | "py";
