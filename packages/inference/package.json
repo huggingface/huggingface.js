@@ -33,9 +33,16 @@
 	"main": "./dist/index.cjs",
 	"module": "./dist/index.js",
 	"exports": {
-		"types": "./dist/src/index.d.ts",
-		"require": "./dist/index.cjs",
-		"import": "./dist/index.js"
+		".": {
+			"types": "./dist/src/index.d.ts",
+			"require": "./dist/index.cjs",
+			"import": "./dist/index.js"
+		}
+	},
+	"browser": {
+		"./src/snippets": false,
+		"./dist/index.js": "./dist/browser/index.js",
+		"./dist/index.mjs": "./dist/browser/index.mjs"
 	},
 	"type": "module",
 	"scripts": {
