@@ -56,6 +56,6 @@
 		"@types/node": "^18.13.0"
 	},
 	"dependencies": {
-		"@huggingface/inference": "^2.6.1"
+		"@huggingface/inference": "workspace:^"
 	}
 }

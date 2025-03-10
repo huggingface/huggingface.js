@@ -74,9 +74,9 @@ text2text_generator("translate from English to French: I'm very happy")
 You can use [huggingface.js](https://github.com/huggingface/huggingface.js) to infer text classification models on Hugging Face Hub.
 
 ```javascript
-import { HfInference } from "@huggingface/inference";
+import { InferenceClient } from "@huggingface/inference";
 
-const inference = new HfInference(HF_TOKEN);
+const inference = new InferenceClient(HF_TOKEN);
 await inference.conversational({
 	model: "distilbert-base-uncased-finetuned-sst-2-english",
 	inputs: "I love this movie!",

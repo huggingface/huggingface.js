@@ -46,6 +46,12 @@ export const allennlp = (model: ModelData): string[] => {
 	return allennlpUnknown(model);
 };
 
+export const araclip = (model: ModelData): string[] => [
+	`from araclip import AraClip
+
+model = AraClip.from_pretrained("${model.id}")`,
+];
+
 export const asteroid = (model: ModelData): string[] => [
 	`from asteroid.models import BaseModel
 
@@ -592,6 +598,13 @@ export const mars5_tts = (model: ModelData): string[] => [
 
 from inference import Mars5TTS
 mars5 = Mars5TTS.from_pretrained("${model.id}")`,
+];
+
+export const matanyone = (model: ModelData): string[] => [
+	`# Install from https://github.com/pq-yang/MatAnyone.git
+
+from matanyone.model.matanyone import MatAnyone
+model = MatAnyone.from_pretrained("${model.id}")`,
 ];
 
 export const mesh_anything = (): string[] => [
