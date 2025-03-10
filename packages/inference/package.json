@@ -40,7 +40,7 @@
 		}
 	},
 	"browser": {
-		"./src/snippets": false,
+		"./src/snippets/index.js": false,
 		"./dist/index.js": "./dist/browser/index.js",
 		"./dist/index.mjs": "./dist/browser/index.mjs"
 	},
