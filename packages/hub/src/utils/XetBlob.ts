@@ -14,6 +14,7 @@ type XetBlobCreateOptions = {
 	repo: RepoDesignation;
 	hash: string;
 	hubUrl?: string;
+	size: number;
 } & Partial<CredentialsParams>;
 
 /**
@@ -24,6 +25,9 @@ export class XetBlob extends Blob {
 	accessToken?: string;
 	repoId: RepoId;
 	hubUrl: string;
+	hash: string;
+	start = 0;
+	end = 0;
 
 	constructor(params: XetBlobCreateOptions) {
 		super([]);
@@ -32,6 +36,41 @@ export class XetBlob extends Blob {
 		this.accessToken = checkCredentials(params);
 		this.repoId = toRepoId(params.repo);
 		this.hubUrl = params.hubUrl ?? HUB_URL;
+		this.end = params.size;
+		this.hash = params.hash;
+		this.hubUrl;
+	}
+
+	override get size(): number {
+		return this.end - this.start;
+	}
+
+	#clone() {
+		const blob = new XetBlob({
+			fetch: this.fetch,
+			repo: this.repoId,
+			hash: this.hash,
+			hubUrl: this.hubUrl,
+			size: this.size,
+		});
+
+		blob.accessToken = this.accessToken;
+		blob.start = this.start;
+		blob.end = this.end;
+
+		return blob;
+	}
+
+	override slice(start = 0, end = this.size): XetBlob {
+		if (start < 0 || end < 0) {
+			new TypeError("Unsupported negative start/end on XetBlob.slice");
+		}
+
+		const slice = this.#clone();
+		slice.start = this.start + start;
+		slice.end = Math.min(this.start + end, this.end);
+
+		return slice;
 	}
 }
 
