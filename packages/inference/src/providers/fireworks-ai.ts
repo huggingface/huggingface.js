@@ -16,7 +16,7 @@
  */
 import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../types";
 
-const FIREWORKS_AI_API_BASE_URL = "https://api.fireworks.ai/inference";
+const FIREWORKS_AI_API_BASE_URL = "https://api.fireworks.ai";
 
 const makeBody = (params: BodyParams): Record<string, unknown> => {
 	return {
@@ -31,9 +31,9 @@ const makeHeaders = (params: HeaderParams): Record<string, string> => {
 
 const makeUrl = (params: UrlParams): string => {
 	if (params.task === "text-generation" && params.chatCompletion) {
-		return `${params.baseUrl}/v1/chat/completions`;
+		return `${params.baseUrl}/inference/v1/chat/completions`;
 	}
-	return params.baseUrl;
+	return `${params.baseUrl}/inference`;
 };
 
 export const FIREWORKS_AI_CONFIG: ProviderConfig = {
