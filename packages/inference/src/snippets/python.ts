@@ -31,7 +31,10 @@ interface TemplateParams {
 // Helpers to find + load templates
 
 const rootDirFinder = (): string => {
-	let currentPath = path.normalize(import.meta.url).replace("file:", "");
+	let currentPath =
+		typeof import.meta !== "undefined" && import.meta.url
+			? path.normalize(new URL(import.meta.url).pathname) /// for ESM
+			: __dirname; /// for CJS
 
 	while (currentPath !== "/") {
 		if (pathExists(path.join(currentPath, "package.json"))) {
