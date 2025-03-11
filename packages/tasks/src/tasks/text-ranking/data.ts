@@ -83,7 +83,7 @@ const taskData: TaskDataCustom = {
 	],
 	spaces: [],
 	summary:
-		"Sentence Ranking is the task of ranking a set of texts based on their relevance to a query. Text ranking models are trained on large datasets of queries and relevant documents to learn how to rank documents based on their relevance to the query. This task is particularly useful for search engines and information retrieval systems.",
+		"Text Ranking is the task of ranking a set of texts based on their relevance to a query. Text ranking models are trained on large datasets of queries and relevant documents to learn how to rank documents based on their relevance to the query. This task is particularly useful for search engines and information retrieval systems.",
 	widgetModels: ["cross-encoder/ms-marco-MiniLM-L6-v2"],
 	youtubeId: "",
 };

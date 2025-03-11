@@ -2,7 +2,7 @@
 
 ### Information Retrieval
 
-You can improve Information Retrieval search stacks by applying a Sentence Ranking model as a Reranker in the common "[Retrieve and Rerank pipeline](https://sbert.net/examples/applications/retrieve_rerank/README.html)". First, you can use a [Sentence Similarity](https://huggingface.co/tasks/sentence-similarity) model as a Retriever to find the (for example) 100 most relevant documents for a query. Afterwards, you can rerank each of these 100 documents with a Sentence Ranking model to select an updated top 10. Often times, this results in improved retrieval performance than only using a Retriever model.
+You can improve Information Retrieval search stacks by applying a Text Ranking model as a Reranker in the common "[Retrieve and Rerank pipeline](https://sbert.net/examples/applications/retrieve_rerank/README.html)". First, you can use a [Sentence Similarity](https://huggingface.co/tasks/sentence-similarity) model as a Retriever to find the (for example) 100 most relevant documents for a query. Afterwards, you can rerank each of these 100 documents with a Text Ranking model to select an updated top 10. Often times, this results in improved retrieval performance than only using a Retriever model.
 
 ## The Sentence Transformers library
 
@@ -68,6 +68,6 @@ Query: How many people live in Berlin?
 
 ## Useful Resources
 
-Would you like to learn more about Sentence Ranking? Here is a curated resource that you may find helpful!
+Would you like to learn more about Text Ranking? Here is a curated resource that you may find helpful!
 
 - [Sentence Transformers > Cross Encoder Documentation](https://www.sbert.net/docs/cross_encoder/usage/usage.html)

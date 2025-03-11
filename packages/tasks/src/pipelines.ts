@@ -551,7 +551,7 @@ export const PIPELINE_DATA = {
 		hideInModels: true,
 	},
 	"text-ranking": {
-		name: "Sentence Ranking",
+		name: "Text Ranking",
 		modality: "nlp",
 		color: "red",
 	},
