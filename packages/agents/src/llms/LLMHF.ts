@@ -1,8 +1,8 @@
 import type { LLM } from "../types";
-import { HfInference } from "@huggingface/inference";
+import { InferenceClient } from "@huggingface/inference";
 
 export function LLMFromHub(accessToken?: string, model?: string): LLM {
-	const inference = new HfInference(accessToken);
+	const inference = new InferenceClient(accessToken);
 
 	return async (prompt: string): Promise<string> => {
 		const formattedPrompt = "<|user|>" + prompt + "<|end|><|assistant|>";
@@ -20,7 +20,7 @@ export function LLMFromHub(accessToken?: string, model?: string): LLM {
 }
 
 export function LLMFromEndpoint(accessToken: string, endpoint: string): LLM {
-	const inference = new HfInference(accessToken).endpoint(endpoint);
+	const inference = new InferenceClient(accessToken).endpoint(endpoint);
 	return async (prompt: string): Promise<string> => {
 		const formattedPrompt = "<|user|>" + prompt + "<|end|><|assistant|>";
 

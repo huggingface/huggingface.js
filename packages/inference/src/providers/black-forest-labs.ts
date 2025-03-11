@@ -16,7 +16,7 @@
  */
 import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../types";
 
-const BLACK_FOREST_LABS_AI_API_BASE_URL = "https://api.us1.bfl.ai/v1";
+const BLACK_FOREST_LABS_AI_API_BASE_URL = "https://api.us1.bfl.ai";
 
 const makeBody = (params: BodyParams): Record<string, unknown> => {
 	return params.args;
@@ -31,7 +31,7 @@ const makeHeaders = (params: HeaderParams): Record<string, string> => {
 };
 
 const makeUrl = (params: UrlParams): string => {
-	return `${params.baseUrl}/${params.model}`;
+	return `${params.baseUrl}/v1/${params.model}`;
 };
 
 export const BLACK_FOREST_LABS_CONFIG: ProviderConfig = {

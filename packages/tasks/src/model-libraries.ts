@@ -84,6 +84,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"ckpt"`,
 		snippets: snippets.anemoi,
 	},
+	araclip: {
+		prettyLabel: "AraClip",
+		repoName: "AraClip",
+		repoUrl: "https://huggingface.co/Arabic-Clip/araclip",
+		filter: false,
+		snippets: snippets.araclip,
+	},
 	asteroid: {
 		prettyLabel: "Asteroid",
 		repoName: "Asteroid",
@@ -475,6 +482,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"mars5_ar.safetensors"`,
 		snippets: snippets.mars5_tts,
+	},
+	matanyone: {
+		prettyLabel: "MatAnyone",
+		repoName: "MatAnyone",
+		repoUrl: "https://github.com/pq-yang/MatAnyone",
+		snippets: snippets.matanyone,
+		filter: false,
 	},
 	"mesh-anything": {
 		prettyLabel: "MeshAnything",
@@ -908,6 +922,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/jasonppy/VoiceCraft",
 		docsUrl: "https://github.com/jasonppy/VoiceCraft",
 		snippets: snippets.voicecraft,
+	},
+	wham: {
+		prettyLabel: "WHAM",
+		repoName: "wham",
+		repoUrl: "https://huggingface.co/microsoft/wham",
+		docsUrl: "https://huggingface.co/microsoft/wham/blob/main/README.md",
+		countDownloads: `path_extension:"ckpt"`,
 	},
 	whisperkit: {
 		prettyLabel: "WhisperKit",
