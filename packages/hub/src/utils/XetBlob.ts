@@ -96,6 +96,36 @@ export class XetBlob extends Blob {
 
 		// Refetch the token if it's expired
 		connParams = await getAccessToken(this.repoId, this.accessToken, this.fetch, this.hubUrl);
+
+		throw new Error("Reconstruction not implemented: " + JSON.stringify(this.reconstructionInfo));
+	}
+
+	override async arrayBuffer(): Promise<ArrayBuffer> {
+		const result = await this.#fetch();
+
+		return new Response(result).arrayBuffer();
+	}
+
+	override async text(): Promise<string> {
+		const result = await this.#fetch();
+
+		return new Response(result).text();
+	}
+
+	async response(): Promise<Response> {
+		const result = await this.#fetch();
+
+		return new Response(result);
+	}
+
+	override stream(): ReturnType<Blob["stream"]> {
+		const stream = new TransformStream();
+
+		this.#fetch()
+			.then((response) => response.pipeThrough(stream))
+			.catch((error) => stream.writable.abort(error.message));
+
+		return stream.readable;
 	}
 }
 
