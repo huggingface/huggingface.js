@@ -26,7 +26,7 @@ interface NovitaOutput {
 	};
 }
 
-const SUPPORTED_PROVIDERS = ["fal-ai", "replicate", "novita"] as const satisfies readonly InferenceProvider[];
+const SUPPORTED_PROVIDERS = ["fal-ai", "novita", "replicate"] as const satisfies readonly InferenceProvider[];
 
 export async function textToVideo(args: TextToVideoArgs, options?: Options): Promise<TextToVideoOutput> {
 	if (!args.provider || !typedInclude(SUPPORTED_PROVIDERS, args.provider)) {
