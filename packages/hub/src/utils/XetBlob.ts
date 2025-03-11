@@ -1,4 +1,5 @@
 import { HUB_URL } from "../consts";
+import { createApiError } from "../error";
 import type { CredentialsParams, RepoDesignation, RepoId } from "../types/public";
 import { checkCredentials } from "./checkCredentials";
 import { toRepoId } from "./toRepoId";
@@ -28,6 +29,7 @@ export class XetBlob extends Blob {
 	hash: string;
 	start = 0;
 	end = 0;
+	reconstructionInfo: { terms: unknown[]; fetch_info: unknown } | undefined;
 
 	constructor(params: XetBlobCreateOptions) {
 		super([]);
@@ -57,6 +59,7 @@ export class XetBlob extends Blob {
 		blob.accessToken = this.accessToken;
 		blob.start = this.start;
 		blob.end = this.end;
+		blob.reconstructionInfo = this.reconstructionInfo;
 
 		return blob;
 	}
@@ -71,6 +74,28 @@ export class XetBlob extends Blob {
 		slice.end = Math.min(this.start + end, this.end);
 
 		return slice;
+	}
+
+	async #fetch(): Promise<ReadableStream<Uint8Array>> {
+		let connParams = await getAccessToken(this.repoId, this.accessToken, this.fetch, this.hubUrl);
+
+		if (!this.reconstructionInfo) {
+			const resp = await this.fetch(`${connParams.casUrl}/reconstruction/${this.hash}`, {
+				headers: {
+					Authorization: `Bearer ${connParams.accessToken}`,
+				},
+			});
+
+			if (!resp.ok) {
+				throw await createApiError(resp);
+			}
+
+			this.reconstructionInfo = await resp.json();
+			console.log("reconstruction info", this.reconstructionInfo);
+		}
+
+		// Refetch the token if it's expired
+		connParams = await getAccessToken(this.repoId, this.accessToken, this.fetch, this.hubUrl);
 	}
 }
 
