@@ -1,7 +1,7 @@
 import type { PipelineType, WidgetType } from "@huggingface/tasks/src/pipelines.js";
 import type { ChatCompletionInputMessage, GenerationParameters } from "@huggingface/tasks/src/tasks/index.js";
 import { type InferenceSnippet, type ModelDataMinimal, getModelInputSnippet } from "@huggingface/tasks";
-import type { InferenceProvider } from "../types";
+import type { InferenceProvider, InferenceTask, RequestArgs } from "../types";
 import { Template } from "@huggingface/jinja";
 import { makeRequestOptionsFromResolvedModel } from "../lib/makeRequestOptions";
 import fs from "fs";
@@ -110,14 +110,14 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		const inputs = inputPreparationFn ? inputPreparationFn(model, opts) : { inputs: getModelInputSnippet(model) };
 		const request = makeRequestOptionsFromResolvedModel(
 			providerModelId ?? model.id,
-			{ accessToken: accessToken, model: providerModelId, provider: provider, ...inputs },
-			{ chatCompletion: templateName.includes("conversational"), task: model.pipeline_tag }
+			{ accessToken: accessToken, model: providerModelId, provider: provider, ...inputs } as RequestArgs,
+			{ chatCompletion: templateName.includes("conversational"), task: model.pipeline_tag as InferenceTask }
 		);
 
 		/// Prepare template injection data
 		const params: TemplateParams = {
 			accessToken,
-			authorizationHeader: request.info.headers?.Authorization!,
+			authorizationHeader: (request.info.headers as Record<string, string>)?.Authorization,
 			baseUrl: removeSuffix(request.url, "/chat/completions"),
 			fullUrl: request.url,
 			inputs: {
