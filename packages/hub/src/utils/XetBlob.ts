@@ -26,7 +26,7 @@ interface ReconstructionInfo {
 	terms: Array<{
 		/** Hash of the CAS block */
 		hash: string;
-		/** Total uncompressed length of the CAS block */
+		/** Total uncompressed length of data of the chunks from range.start to range.end - 1 */
 		unpacked_length: number;
 		/** Chunks. Eg start: 10, end: 100 = chunks 10-99 */
 		range: { start: number; end: number };
