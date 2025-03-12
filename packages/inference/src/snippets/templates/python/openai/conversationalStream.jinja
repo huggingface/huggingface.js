@@ -5,13 +5,9 @@ client = OpenAI(
     api_key="{{ accessToken }}"
 )
 
-messages = {{ inputs.messagesStr }}
-
 stream = client.chat.completions.create(
     model="{{ providerModelId }}",
-    messages=messages,
-    {{ inputs.configStr }}
-    stream=True
+{{ inputs.asPythonString }}
 )
 
 for chunk in stream:

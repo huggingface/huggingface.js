@@ -3,5 +3,5 @@ import base64
 {% endif %}
 import requests
 
-API_URL = "https://router.huggingface.co/{{ provider }}/models/{{ model.id }}"
-headers = {"Authorization": "Bearer {{ accessToken }}"}
+API_URL = "{{ fullUrl }}"
+headers = {"Authorization": "{{ authorizationHeader }}"}
