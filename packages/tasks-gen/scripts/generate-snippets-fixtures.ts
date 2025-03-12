@@ -66,30 +66,30 @@ const TEST_CASES: {
 		providers: ["hf-inference", "together"],
 		opts: { streaming: true },
 	},
-	// {
-	// 	testName: "conversational-vlm-non-stream",
-	// 	model: {
-	// 		id: "meta-llama/Llama-3.2-11B-Vision-Instruct",
-	// 		pipeline_tag: "image-text-to-text",
-	// 		tags: ["conversational"],
-	// 		inference: "",
-	// 	},
-	// 	languages: ["sh", "js", "py"],
-	// 	providers: ["hf-inference", "fireworks-ai"],
-	// 	opts: { streaming: false },
-	// },
-	// {
-	// 	testName: "conversational-vlm-stream",
-	// 	model: {
-	// 		id: "meta-llama/Llama-3.2-11B-Vision-Instruct",
-	// 		pipeline_tag: "image-text-to-text",
-	// 		tags: ["conversational"],
-	// 		inference: "",
-	// 	},
-	// 	languages: ["sh", "js", "py"],
-	// 	providers: ["hf-inference", "fireworks-ai"],
-	// 	opts: { streaming: true },
-	// },
+	{
+		testName: "conversational-vlm-non-stream",
+		model: {
+			id: "meta-llama/Llama-3.2-11B-Vision-Instruct",
+			pipeline_tag: "image-text-to-text",
+			tags: ["conversational"],
+			inference: "",
+		},
+		languages: ["sh", "js", "py"],
+		providers: ["hf-inference", "fireworks-ai"],
+		opts: { streaming: false },
+	},
+	{
+		testName: "conversational-vlm-stream",
+		model: {
+			id: "meta-llama/Llama-3.2-11B-Vision-Instruct",
+			pipeline_tag: "image-text-to-text",
+			tags: ["conversational"],
+			inference: "",
+		},
+		languages: ["sh", "js", "py"],
+		providers: ["hf-inference", "fireworks-ai"],
+		opts: { streaming: true },
+	},
 	// {
 	// 	testName: "document-question-answering",
 	// 	model: {
