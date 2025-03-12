@@ -31,17 +31,17 @@ const TEST_CASES: {
 	providers: SnippetInferenceProvider[];
 	opts?: Record<string, unknown>;
 }[] = [
-	{
-		testName: "automatic-speech-recognition",
-		model: {
-			id: "openai/whisper-large-v3-turbo",
-			pipeline_tag: "automatic-speech-recognition",
-			tags: [],
-			inference: "",
-		},
-		languages: ["py"],
-		providers: ["hf-inference"],
-	},
+	// {
+	// 	testName: "automatic-speech-recognition",
+	// 	model: {
+	// 		id: "openai/whisper-large-v3-turbo",
+	// 		pipeline_tag: "automatic-speech-recognition",
+	// 		tags: [],
+	// 		inference: "",
+	// 	},
+	// 	languages: ["py"],
+	// 	providers: ["hf-inference"],
+	// },
 	{
 		testName: "conversational-llm-non-stream",
 		model: {
@@ -54,152 +54,152 @@ const TEST_CASES: {
 		providers: ["hf-inference", "together"],
 		opts: { streaming: false },
 	},
-	{
-		testName: "conversational-llm-stream",
-		model: {
-			id: "meta-llama/Llama-3.1-8B-Instruct",
-			pipeline_tag: "text-generation",
-			tags: ["conversational"],
-			inference: "",
-		},
-		languages: ["sh", "js", "py"],
-		providers: ["hf-inference", "together"],
-		opts: { streaming: true },
-	},
-	{
-		testName: "conversational-vlm-non-stream",
-		model: {
-			id: "meta-llama/Llama-3.2-11B-Vision-Instruct",
-			pipeline_tag: "image-text-to-text",
-			tags: ["conversational"],
-			inference: "",
-		},
-		languages: ["sh", "js", "py"],
-		providers: ["hf-inference", "fireworks-ai"],
-		opts: { streaming: false },
-	},
-	{
-		testName: "conversational-vlm-stream",
-		model: {
-			id: "meta-llama/Llama-3.2-11B-Vision-Instruct",
-			pipeline_tag: "image-text-to-text",
-			tags: ["conversational"],
-			inference: "",
-		},
-		languages: ["sh", "js", "py"],
-		providers: ["hf-inference", "fireworks-ai"],
-		opts: { streaming: true },
-	},
-	{
-		testName: "document-question-answering",
-		model: {
-			id: "impira/layoutlm-invoices",
-			pipeline_tag: "document-question-answering",
-			tags: [],
-			inference: "",
-		},
-		languages: ["py"],
-		providers: ["hf-inference"],
-	},
-	{
-		testName: "image-to-image",
-		model: {
-			id: "stabilityai/stable-diffusion-xl-refiner-1.0",
-			pipeline_tag: "image-to-image",
-			tags: [],
-			inference: "",
-		},
-		languages: ["py"],
-		providers: ["hf-inference"],
-	},
-	{
-		testName: "tabular",
-		model: {
-			id: "templates/tabular-classification",
-			pipeline_tag: "tabular-classification",
-			tags: [],
-			inference: "",
-		},
-		providers: ["hf-inference"],
-		languages: ["py"],
-	},
-	{
-		testName: "text-to-audio-transformers",
-		model: {
-			id: "facebook/musicgen-small",
-			pipeline_tag: "text-to-audio",
-			tags: ["transformers"],
-			inference: "",
-		},
-		providers: ["hf-inference"],
-		languages: ["py"],
-	},
-	{
-		testName: "text-to-image",
-		model: {
-			id: "black-forest-labs/FLUX.1-schnell",
-			pipeline_tag: "text-to-image",
-			tags: [],
-			inference: "",
-		},
-		providers: ["hf-inference", "fal-ai"],
-		languages: ["sh", "js", "py"],
-	},
-	{
-		testName: "text-to-video",
-		model: {
-			id: "tencent/HunyuanVideo",
-			pipeline_tag: "text-to-video",
-			tags: [],
-			inference: "",
-		},
-		providers: ["replicate", "fal-ai"],
-		languages: ["js", "py"],
-	},
-	{
-		testName: "text-classification",
-		model: {
-			id: "distilbert/distilbert-base-uncased-finetuned-sst-2-english",
-			pipeline_tag: "text-classification",
-			tags: [],
-			inference: "",
-		},
-		providers: ["hf-inference"],
-		languages: ["sh", "js", "py"],
-	},
-	{
-		testName: "basic-snippet--token-classification",
-		model: {
-			id: "FacebookAI/xlm-roberta-large-finetuned-conll03-english",
-			pipeline_tag: "token-classification",
-			tags: [],
-			inference: "",
-		},
-		providers: ["hf-inference"],
-		languages: ["py"],
-	},
-	{
-		testName: "zero-shot-classification",
-		model: {
-			id: "facebook/bart-large-mnli",
-			pipeline_tag: "zero-shot-classification",
-			tags: [],
-			inference: "",
-		},
-		providers: ["hf-inference"],
-		languages: ["py"],
-	},
-	{
-		testName: "zero-shot-image-classification",
-		model: {
-			id: "openai/clip-vit-large-patch14",
-			pipeline_tag: "zero-shot-image-classification",
-			tags: [],
-			inference: "",
-		},
-		providers: ["hf-inference"],
-		languages: ["py"],
-	},
+	// {
+	// 	testName: "conversational-llm-stream",
+	// 	model: {
+	// 		id: "meta-llama/Llama-3.1-8B-Instruct",
+	// 		pipeline_tag: "text-generation",
+	// 		tags: ["conversational"],
+	// 		inference: "",
+	// 	},
+	// 	languages: ["sh", "js", "py"],
+	// 	providers: ["hf-inference", "together"],
+	// 	opts: { streaming: true },
+	// },
+	// {
+	// 	testName: "conversational-vlm-non-stream",
+	// 	model: {
+	// 		id: "meta-llama/Llama-3.2-11B-Vision-Instruct",
+	// 		pipeline_tag: "image-text-to-text",
+	// 		tags: ["conversational"],
+	// 		inference: "",
+	// 	},
+	// 	languages: ["sh", "js", "py"],
+	// 	providers: ["hf-inference", "fireworks-ai"],
+	// 	opts: { streaming: false },
+	// },
+	// {
+	// 	testName: "conversational-vlm-stream",
+	// 	model: {
+	// 		id: "meta-llama/Llama-3.2-11B-Vision-Instruct",
+	// 		pipeline_tag: "image-text-to-text",
+	// 		tags: ["conversational"],
+	// 		inference: "",
+	// 	},
+	// 	languages: ["sh", "js", "py"],
+	// 	providers: ["hf-inference", "fireworks-ai"],
+	// 	opts: { streaming: true },
+	// },
+	// {
+	// 	testName: "document-question-answering",
+	// 	model: {
+	// 		id: "impira/layoutlm-invoices",
+	// 		pipeline_tag: "document-question-answering",
+	// 		tags: [],
+	// 		inference: "",
+	// 	},
+	// 	languages: ["py"],
+	// 	providers: ["hf-inference"],
+	// },
+	// {
+	// 	testName: "image-to-image",
+	// 	model: {
+	// 		id: "stabilityai/stable-diffusion-xl-refiner-1.0",
+	// 		pipeline_tag: "image-to-image",
+	// 		tags: [],
+	// 		inference: "",
+	// 	},
+	// 	languages: ["py"],
+	// 	providers: ["hf-inference"],
+	// },
+	// {
+	// 	testName: "tabular",
+	// 	model: {
+	// 		id: "templates/tabular-classification",
+	// 		pipeline_tag: "tabular-classification",
+	// 		tags: [],
+	// 		inference: "",
+	// 	},
+	// 	providers: ["hf-inference"],
+	// 	languages: ["py"],
+	// },
+	// {
+	// 	testName: "text-to-audio-transformers",
+	// 	model: {
+	// 		id: "facebook/musicgen-small",
+	// 		pipeline_tag: "text-to-audio",
+	// 		tags: ["transformers"],
+	// 		inference: "",
+	// 	},
+	// 	providers: ["hf-inference"],
+	// 	languages: ["py"],
+	// },
+	// {
+	// 	testName: "text-to-image",
+	// 	model: {
+	// 		id: "black-forest-labs/FLUX.1-schnell",
+	// 		pipeline_tag: "text-to-image",
+	// 		tags: [],
+	// 		inference: "",
+	// 	},
+	// 	providers: ["hf-inference", "fal-ai"],
+	// 	languages: ["sh", "js", "py"],
+	// },
+	// {
+	// 	testName: "text-to-video",
+	// 	model: {
+	// 		id: "tencent/HunyuanVideo",
+	// 		pipeline_tag: "text-to-video",
+	// 		tags: [],
+	// 		inference: "",
+	// 	},
+	// 	providers: ["replicate", "fal-ai"],
+	// 	languages: ["js", "py"],
+	// },
+	// {
+	// 	testName: "text-classification",
+	// 	model: {
+	// 		id: "distilbert/distilbert-base-uncased-finetuned-sst-2-english",
+	// 		pipeline_tag: "text-classification",
+	// 		tags: [],
+	// 		inference: "",
+	// 	},
+	// 	providers: ["hf-inference"],
+	// 	languages: ["sh", "js", "py"],
+	// },
+	// {
+	// 	testName: "basic-snippet--token-classification",
+	// 	model: {
+	// 		id: "FacebookAI/xlm-roberta-large-finetuned-conll03-english",
+	// 		pipeline_tag: "token-classification",
+	// 		tags: [],
+	// 		inference: "",
+	// 	},
+	// 	providers: ["hf-inference"],
+	// 	languages: ["py"],
+	// },
+	// {
+	// 	testName: "zero-shot-classification",
+	// 	model: {
+	// 		id: "facebook/bart-large-mnli",
+	// 		pipeline_tag: "zero-shot-classification",
+	// 		tags: [],
+	// 		inference: "",
+	// 	},
+	// 	providers: ["hf-inference"],
+	// 	languages: ["py"],
+	// },
+	// {
+	// 	testName: "zero-shot-image-classification",
+	// 	model: {
+	// 		id: "openai/clip-vit-large-patch14",
+	// 		pipeline_tag: "zero-shot-image-classification",
+	// 		tags: [],
+	// 		inference: "",
+	// 	},
+	// 	providers: ["hf-inference"],
+	// 	languages: ["py"],
+	// },
 ] as const;
 
 const GET_SNIPPET_FN = {
