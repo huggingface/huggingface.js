@@ -145,17 +145,17 @@ const TEST_CASES: {
 		providers: ["hf-inference", "fal-ai"],
 		languages: ["sh", "js", "py"],
 	},
-	// {
-	// 	testName: "text-to-video",
-	// 	model: {
-	// 		id: "tencent/HunyuanVideo",
-	// 		pipeline_tag: "text-to-video",
-	// 		tags: [],
-	// 		inference: "",
-	// 	},
-	// 	providers: ["replicate", "fal-ai"],
-	// 	languages: ["js", "py"],
-	// },
+	{
+		testName: "text-to-video",
+		model: {
+			id: "tencent/HunyuanVideo",
+			pipeline_tag: "text-to-video",
+			tags: [],
+			inference: "",
+		},
+		providers: ["replicate", "fal-ai"],
+		languages: ["js", "py"],
+	},
 	// {
 	// 	testName: "text-classification",
 	// 	model: {
