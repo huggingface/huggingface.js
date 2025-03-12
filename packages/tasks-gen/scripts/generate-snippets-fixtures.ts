@@ -178,17 +178,17 @@ const TEST_CASES: {
 		providers: ["hf-inference"],
 		languages: ["py"],
 	},
-	// {
-	// 	testName: "zero-shot-classification",
-	// 	model: {
-	// 		id: "facebook/bart-large-mnli",
-	// 		pipeline_tag: "zero-shot-classification",
-	// 		tags: [],
-	// 		inference: "",
-	// 	},
-	// 	providers: ["hf-inference"],
-	// 	languages: ["py"],
-	// },
+	{
+		testName: "zero-shot-classification",
+		model: {
+			id: "facebook/bart-large-mnli",
+			pipeline_tag: "zero-shot-classification",
+			tags: [],
+			inference: "",
+		},
+		providers: ["hf-inference"],
+		languages: ["py"],
+	},
 	// {
 	// 	testName: "zero-shot-image-classification",
 	// 	model: {
