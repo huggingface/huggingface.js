@@ -156,17 +156,17 @@ const TEST_CASES: {
 		providers: ["replicate", "fal-ai"],
 		languages: ["js", "py"],
 	},
-	// {
-	// 	testName: "text-classification",
-	// 	model: {
-	// 		id: "distilbert/distilbert-base-uncased-finetuned-sst-2-english",
-	// 		pipeline_tag: "text-classification",
-	// 		tags: [],
-	// 		inference: "",
-	// 	},
-	// 	providers: ["hf-inference"],
-	// 	languages: ["sh", "js", "py"],
-	// },
+	{
+		testName: "text-classification",
+		model: {
+			id: "distilbert/distilbert-base-uncased-finetuned-sst-2-english",
+			pipeline_tag: "text-classification",
+			tags: [],
+			inference: "",
+		},
+		providers: ["hf-inference"],
+		languages: ["sh", "js", "py"],
+	},
 	// {
 	// 	testName: "basic-snippet--token-classification",
 	// 	model: {
