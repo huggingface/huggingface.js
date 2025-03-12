@@ -8,6 +8,7 @@ client = OpenAI(
 stream = client.chat.completions.create(
     model="{{ providerModelId }}",
 {{ inputs.asPythonString }}
+    stream=True,
 )
 
 for chunk in stream:

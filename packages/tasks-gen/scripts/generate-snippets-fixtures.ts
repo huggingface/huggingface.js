@@ -54,18 +54,18 @@ const TEST_CASES: {
 		providers: ["hf-inference", "together"],
 		opts: { streaming: false },
 	},
-	// {
-	// 	testName: "conversational-llm-stream",
-	// 	model: {
-	// 		id: "meta-llama/Llama-3.1-8B-Instruct",
-	// 		pipeline_tag: "text-generation",
-	// 		tags: ["conversational"],
-	// 		inference: "",
-	// 	},
-	// 	languages: ["sh", "js", "py"],
-	// 	providers: ["hf-inference", "together"],
-	// 	opts: { streaming: true },
-	// },
+	{
+		testName: "conversational-llm-stream",
+		model: {
+			id: "meta-llama/Llama-3.1-8B-Instruct",
+			pipeline_tag: "text-generation",
+			tags: ["conversational"],
+			inference: "",
+		},
+		languages: ["sh", "js", "py"],
+		providers: ["hf-inference", "together"],
+		opts: { streaming: true },
+	},
 	// {
 	// 	testName: "conversational-vlm-non-stream",
 	// 	model: {
