@@ -112,17 +112,17 @@ const TEST_CASES: {
 		languages: ["py"],
 		providers: ["hf-inference"],
 	},
-	// {
-	// 	testName: "tabular",
-	// 	model: {
-	// 		id: "templates/tabular-classification",
-	// 		pipeline_tag: "tabular-classification",
-	// 		tags: [],
-	// 		inference: "",
-	// 	},
-	// 	providers: ["hf-inference"],
-	// 	languages: ["py"],
-	// },
+	{
+		testName: "tabular",
+		model: {
+			id: "templates/tabular-classification",
+			pipeline_tag: "tabular-classification",
+			tags: [],
+			inference: "",
+		},
+		providers: ["hf-inference"],
+		languages: ["py"],
+	},
 	// {
 	// 	testName: "text-to-audio-transformers",
 	// 	model: {
