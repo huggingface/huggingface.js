@@ -101,17 +101,17 @@ const TEST_CASES: {
 		languages: ["py"],
 		providers: ["hf-inference"],
 	},
-	// {
-	// 	testName: "image-to-image",
-	// 	model: {
-	// 		id: "stabilityai/stable-diffusion-xl-refiner-1.0",
-	// 		pipeline_tag: "image-to-image",
-	// 		tags: [],
-	// 		inference: "",
-	// 	},
-	// 	languages: ["py"],
-	// 	providers: ["hf-inference"],
-	// },
+	{
+		testName: "image-to-image",
+		model: {
+			id: "stabilityai/stable-diffusion-xl-refiner-1.0",
+			pipeline_tag: "image-to-image",
+			tags: [],
+			inference: "",
+		},
+		languages: ["py"],
+		providers: ["hf-inference"],
+	},
 	// {
 	// 	testName: "tabular",
 	// 	model: {

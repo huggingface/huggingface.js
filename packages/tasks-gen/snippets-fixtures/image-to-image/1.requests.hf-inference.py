@@ -1,3 +1,9 @@
+import base64
+import requests
+
+API_URL = "https://router.huggingface.co/hf-inference/models/stabilityai/stable-diffusion-xl-refiner-1.0"
+headers = {"Authorization": "Bearer api_token"}
+
 def query(payload):
     with open(payload["inputs"], "rb") as f:
         img = f.read()
@@ -6,10 +12,13 @@ def query(payload):
     return response.content
 
 image_bytes = query({
-{{ inputs.asJsonString }}
+    "inputs": "cat.png",
+    "parameters": {
+        "prompt": "Turn the cat into a tiger."
+    }
 })
 
 # You can access the image with PIL.Image for example
 import io
 from PIL import Image
-image = Image.open(io.BytesIO(image_bytes)) 
+image = Image.open(io.BytesIO(image_bytes))

@@ -167,7 +167,8 @@ const prepareDocumentQuestionAnsweringInput = (model: ModelDataMinimal): object 
 };
 
 const prepareImageToImageInput = (model: ModelDataMinimal): object => {
-	return JSON.parse(getModelInputSnippet(model) as string);
+	const data = JSON.parse(getModelInputSnippet(model) as string);
+	return { inputs: data.image, parameters: { prompt: data.prompt } };
 };
 
 const prepareConversationalInput = (
