@@ -6,6 +6,6 @@ client = InferenceClient(
 )
 
 video = client.text_to_video(
-	"A young man walking on the street",
-	model="tencent/HunyuanVideo",
+    "A young man walking on the street",
+    model="tencent/HunyuanVideo",
 )

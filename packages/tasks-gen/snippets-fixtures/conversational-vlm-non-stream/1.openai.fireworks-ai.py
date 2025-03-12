@@ -1,8 +1,8 @@
 from openai import OpenAI
 
 client = OpenAI(
-	base_url="https://router.huggingface.co/fireworks-ai",
-	api_key="api_token"
+    base_url="https://router.huggingface.co/fireworks-ai",
+    api_key="api_token"
 )
 
 messages = [
@@ -24,9 +24,9 @@ messages = [
 ]
 
 completion = client.chat.completions.create(
-	model="<fireworks-ai alias for meta-llama/Llama-3.2-11B-Vision-Instruct>", 
-	messages=messages, 
-	max_tokens=500,
+    model="<fireworks-ai alias for meta-llama/Llama-3.2-11B-Vision-Instruct>",
+    messages=messages,
+    max_tokens=500,
 )
 
 print(completion.choices[0].message)
