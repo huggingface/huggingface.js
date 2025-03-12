@@ -134,17 +134,17 @@ const TEST_CASES: {
 		providers: ["hf-inference"],
 		languages: ["py"],
 	},
-	// {
-	// 	testName: "text-to-image",
-	// 	model: {
-	// 		id: "black-forest-labs/FLUX.1-schnell",
-	// 		pipeline_tag: "text-to-image",
-	// 		tags: [],
-	// 		inference: "",
-	// 	},
-	// 	providers: ["hf-inference", "fal-ai"],
-	// 	languages: ["sh", "js", "py"],
-	// },
+	{
+		testName: "text-to-image",
+		model: {
+			id: "black-forest-labs/FLUX.1-schnell",
+			pipeline_tag: "text-to-image",
+			tags: [],
+			inference: "",
+		},
+		providers: ["hf-inference", "fal-ai"],
+		languages: ["sh", "js", "py"],
+	},
 	// {
 	// 	testName: "text-to-video",
 	// 	model: {

@@ -143,8 +143,13 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 				params["methodName"] = HFH_INFERENCE_CLIENT_METHODS[model.pipeline_tag];
 			}
 
-			/// Handle import section separately
+			/// Generate snippet
 			let snippet = template(params).trim();
+			if (!snippet) {
+				return;
+			}
+
+			/// Add import section separately
 			if (tool === "huggingface_hub") {
 				const importSection = snippetImportInferenceClient({ ...params });
 				snippet = `${importSection}\n\n${snippet}`;
