@@ -46,7 +46,7 @@ interface ReconstructionInfo {
 		}>
 	>;
 	/**
-	 * When doing a range request, the offset into the first range
+	 * When doing a range request, the offset into the term's uncompressed data. Can be multiple chunks' worth of data.
 	 */
 	offset_into_first_range: number;
 }
