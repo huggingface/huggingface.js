@@ -31,17 +31,17 @@ const TEST_CASES: {
 	providers: SnippetInferenceProvider[];
 	opts?: Record<string, unknown>;
 }[] = [
-	// {
-	// 	testName: "automatic-speech-recognition",
-	// 	model: {
-	// 		id: "openai/whisper-large-v3-turbo",
-	// 		pipeline_tag: "automatic-speech-recognition",
-	// 		tags: [],
-	// 		inference: "",
-	// 	},
-	// 	languages: ["py"],
-	// 	providers: ["hf-inference"],
-	// },
+	{
+		testName: "automatic-speech-recognition",
+		model: {
+			id: "openai/whisper-large-v3-turbo",
+			pipeline_tag: "automatic-speech-recognition",
+			tags: [],
+			inference: "",
+		},
+		languages: ["py"],
+		providers: ["hf-inference"],
+	},
 	{
 		testName: "conversational-llm-non-stream",
 		model: {
