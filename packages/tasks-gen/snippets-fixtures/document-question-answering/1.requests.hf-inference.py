@@ -1,3 +1,9 @@
+import base64
+import requests
+
+API_URL = "https://router.huggingface.co/hf-inference/models/impira/layoutlm-invoices"
+headers = {"Authorization": "Bearer api_token"}
+
 def query(payload):
     with open(payload["image"], "rb") as f:
         img = f.read()
@@ -6,5 +12,6 @@ def query(payload):
     return response.json()
 
 output = query({
-{{ inputs.asJsonString }},
-}) 
+    "image": "cat.png",
+    "question": "What is in this image?",
+})

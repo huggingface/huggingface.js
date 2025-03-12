@@ -163,9 +163,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 };
 
 const prepareDocumentQuestionAnsweringInput = (model: ModelDataMinimal): object => {
-	const inputsAsStr = getModelInputSnippet(model) as string;
-	const inputsAsObj = JSON.parse(inputsAsStr);
-	return { asObj: inputsAsObj, asStr: inputsAsStr };
+	return JSON.parse(getModelInputSnippet(model) as string);
 };
 
 const prepareImageToImageInput = (model: ModelDataMinimal): object => {

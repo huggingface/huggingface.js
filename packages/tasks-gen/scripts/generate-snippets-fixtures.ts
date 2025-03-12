@@ -90,17 +90,17 @@ const TEST_CASES: {
 		providers: ["hf-inference", "fireworks-ai"],
 		opts: { streaming: true },
 	},
-	// {
-	// 	testName: "document-question-answering",
-	// 	model: {
-	// 		id: "impira/layoutlm-invoices",
-	// 		pipeline_tag: "document-question-answering",
-	// 		tags: [],
-	// 		inference: "",
-	// 	},
-	// 	languages: ["py"],
-	// 	providers: ["hf-inference"],
-	// },
+	{
+		testName: "document-question-answering",
+		model: {
+			id: "impira/layoutlm-invoices",
+			pipeline_tag: "document-question-answering",
+			tags: [],
+			inference: "",
+		},
+		languages: ["py"],
+		providers: ["hf-inference"],
+	},
 	// {
 	// 	testName: "image-to-image",
 	// 	model: {
