@@ -6,10 +6,10 @@ settings:
 
 dependencies:
   '@huggingface/inference':
-    specifier: workspace:*
+    specifier: workspace:^
     version: link:../inference
   '@huggingface/tasks':
-    specifier: workspace:*
+    specifier: workspace:^
     version: link:../tasks
 
 devDependencies:
