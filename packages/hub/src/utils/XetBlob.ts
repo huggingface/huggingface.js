@@ -50,6 +50,25 @@ interface ReconstructionInfo {
 	offset_into_first_range: number;
 }
 
+enum CompressionScheme {
+	None = 0,
+	LZ4 = 1,
+	ByteGroupingLZ4 = 2,
+}
+
+const compressionSchemeLabels: Record<CompressionScheme, string> = {
+	[CompressionScheme.None]: "None",
+	[CompressionScheme.LZ4]: "LZ4",
+	[CompressionScheme.ByteGroupingLZ4]: "ByteGroupingLZ4",
+};
+
+interface ChunkHeader {
+	version: number; // u8, 1 byte
+	compressed_length: number; // 3 * u8, 3 bytes
+	compression_scheme: CompressionScheme; // u8, 1 byte
+	uncompressed_length: number; // 3 * u8, 3 bytes
+}
+
 /**
  * XetBlob is a blob implementation that fetches data directly from the Xet storage
  */
@@ -169,12 +188,87 @@ export class XetBlob extends Blob {
 				// todo: handle chunk ranges
 				let done = false;
 				let isFirstChunk = true;
-				while (!done) {
-					const { value, done: doneValue } = await reader.read();
-					done = doneValue;
-					if (value) {
-						yield isFirstChunk ? value.slice(reconstructionInfo.offset_into_first_range) : value;
-						isFirstChunk = false;
+				let chunksToSkip = term.range.start - fetchInfo.range.start;
+				let chunksToRead = term.range.end - term.range.start;
+				let bytesToSkip = 0;
+				let bytesToRead = 0;
+
+				let leftoverBytes: Uint8Array | undefined = undefined;
+
+				readChunks: while (!done) {
+					const result = await reader.read();
+					done = result.done;
+					if (result.value) {
+						while (1) {
+							if (bytesToSkip) {
+								if (bytesToSkip >= result.value.length) {
+									bytesToSkip -= result.value.length;
+									continue readChunks;
+								}
+								result.value = result.value.slice(bytesToSkip);
+							}
+							if (bytesToRead) {
+								if (bytesToRead >= result.value.length) {
+									yield result.value;
+									bytesToRead -= result.value.length;
+									continue readChunks;
+								}
+								yield result.value.slice(0, bytesToRead);
+								result.value = result.value.slice(bytesToRead);
+								bytesToRead = 0;
+							}
+							if (leftoverBytes) {
+								result.value = new Uint8Array([...leftoverBytes, ...result.value]);
+								leftoverBytes = undefined;
+							}
+
+							if (result.value.length < 8) {
+								// We need 8 bytes to parse the chunk header
+								leftoverBytes = result.value;
+								continue readChunks;
+							}
+
+							const header = new DataView(result.value.buffer, result.value.byteOffset, 8);
+							const chunkHeader: ChunkHeader = {
+								version: header.getUint8(0),
+								compressed_length: header.getUint8(1) | (header.getUint8(2) << 8) | (header.getUint8(3) << 16),
+								compression_scheme: header.getUint8(4),
+								uncompressed_length: header.getUint8(5) | (header.getUint8(6) << 8) | (header.getUint8(7) << 16),
+							};
+
+							if (chunkHeader.version !== 0) {
+								throw new Error(`Unsupported chunk version ${chunkHeader.version}`);
+							}
+
+							if (chunkHeader.compression_scheme !== CompressionScheme.None) {
+								throw new Error(
+									`Unsupported compression scheme ${
+										compressionSchemeLabels[chunkHeader.compression_scheme] ?? chunkHeader.compression_scheme
+									}`
+								);
+							}
+
+							result.value = result.value.slice(8);
+
+							if (chunksToSkip) {
+								chunksToSkip--;
+								bytesToSkip = chunkHeader.compressed_length;
+								continue;
+							}
+							if (chunksToRead) {
+								if (isFirstChunk) {
+									bytesToSkip = reconstructionInfo.offset_into_first_range;
+									bytesToRead = chunkHeader.uncompressed_length - reconstructionInfo.offset_into_first_range;
+									isFirstChunk = false;
+								} else {
+									bytesToRead = chunkHeader.uncompressed_length;
+								}
+								chunksToRead--;
+								continue;
+							}
+
+							break;
+						}
 					}
 				}
 			}
@@ -206,7 +300,7 @@ export class XetBlob extends Blob {
 			},
 			// todo : use ByteLengthQueuingStrategy when there's good support for it
 			{
-				highWaterMark: 1_000, // 1_000 chunks of 1_000 bytes, for 1MB of RAM
+				highWaterMark: 1_000, // 1_000 chunks for ~1MB of RAM
 			}
 		);
 	}
