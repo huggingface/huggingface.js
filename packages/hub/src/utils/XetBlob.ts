@@ -158,8 +158,13 @@ export class XetBlob extends Blob {
 		// Refetch the token if it's expired
 		connParams = await getAccessToken(this.repoId, this.accessToken, this.fetch, this.hubUrl);
 
-		async function* readData(reconstructionInfo: ReconstructionInfo, customFetch: typeof fetch) {
+		async function* readData(reconstructionInfo: ReconstructionInfo, customFetch: typeof fetch, maxBytes: number) {
+			let totalBytesRead = 0;
+
 			for (const term of reconstructionInfo.terms) {
+				if (totalBytesRead >= maxBytes) {
+					break;
+				}
 				const fetchInfo = reconstructionInfo.fetch_info[term.hash].find(
 					(info) => info.range.start <= term.range.start && info.range.end >= term.range.end
 				);
@@ -195,11 +200,11 @@ export class XetBlob extends Blob {
 
 				let leftoverBytes: Uint8Array | undefined = undefined;
 
-				readChunks: while (!done) {
+				readChunks: while (!done && totalBytesRead < maxBytes) {
 					const result = await reader.read();
 					done = result.done;
 					if (result.value) {
-						while (1) {
+						while (totalBytesRead < maxBytes) {
 							if (bytesToSkip) {
 								if (bytesToSkip >= result.value.length) {
 									bytesToSkip -= result.value.length;
@@ -211,10 +216,12 @@ export class XetBlob extends Blob {
 								if (bytesToRead >= result.value.length) {
 									yield result.value;
 									bytesToRead -= result.value.length;
+									totalBytesRead += result.value.length;
 									continue readChunks;
 								}
 								yield result.value.slice(0, bytesToRead);
 								result.value = result.value.slice(bytesToRead);
+								totalBytesRead += bytesToRead;
 								bytesToRead = 0;
 							}
 							if (leftoverBytes) {
@@ -263,6 +270,7 @@ export class XetBlob extends Blob {
 								} else {
 									bytesToRead = chunkHeader.uncompressed_length;
 								}
+								bytesToRead = Math.min(bytesToRead, maxBytes - totalBytesRead);
 								chunksToRead--;
 								continue;
 							}
@@ -274,7 +282,7 @@ export class XetBlob extends Blob {
 			}
 		}
 
-		const iterator = readData(reconstructionInfo, this.fetch);
+		const iterator = readData(reconstructionInfo, this.fetch, this.end - this.start);
 
 		// todo: when Chrome/Safari support it, use ReadableStream.from(readData)
 		return new ReadableStream<Uint8Array>(
