@@ -123,17 +123,17 @@ const TEST_CASES: {
 		providers: ["hf-inference"],
 		languages: ["py"],
 	},
-	// {
-	// 	testName: "text-to-audio-transformers",
-	// 	model: {
-	// 		id: "facebook/musicgen-small",
-	// 		pipeline_tag: "text-to-audio",
-	// 		tags: ["transformers"],
-	// 		inference: "",
-	// 	},
-	// 	providers: ["hf-inference"],
-	// 	languages: ["py"],
-	// },
+	{
+		testName: "text-to-audio-transformers",
+		model: {
+			id: "facebook/musicgen-small",
+			pipeline_tag: "text-to-audio",
+			tags: ["transformers"],
+			inference: "",
+		},
+		providers: ["hf-inference"],
+		languages: ["py"],
+	},
 	// {
 	// 	testName: "text-to-image",
 	// 	model: {
