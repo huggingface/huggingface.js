@@ -112,6 +112,8 @@ export function makeRequestOptionsFromResolvedModel(
 	}
 ): { url: string; info: RequestInit } {
 	const { accessToken, endpointUrl, provider: maybeProvider, ...remainingArgs } = args;
+	delete remainingArgs.model; // Remove model from remainingArgs to avoid duplication
+
 	const provider = maybeProvider ?? "hf-inference";
 	const providerConfig = providerConfigs[provider];
 
