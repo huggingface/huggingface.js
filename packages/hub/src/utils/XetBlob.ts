@@ -18,6 +18,38 @@ type XetBlobCreateOptions = {
 	size: number;
 } & Partial<CredentialsParams>;
 
+interface ReconstructionInfo {
+	/**
+	 * List of CAS blocks
+	 */
+	terms: Array<{
+		/** Hash of the CAS block */
+		hash: string;
+		/** Total uncompressed length of the CAS block */
+		unpacked_length: number;
+		/** Chunks. Eg start: 10, end: 100 = chunks 10-99 */
+		range: { start: number; end: number };
+	}>;
+
+	/**
+	 * Dictionnary of CAS block hash => list of ranges in the block + url to fetch it
+	 */
+	fetch_info: Record<
+		string,
+		Array<{
+			url: string;
+			/** Chunk range */
+			range: { start: number; end: number };
+			/** Byte range, when making the call to the URL */
+			url_range: { start: number; end: number };
+		}>
+	>;
+	/**
+	 * When doing a range request, the offset into the first range
+	 */
+	offset_into_first_range: number;
+}
+
 /**
  * XetBlob is a blob implementation that fetches data directly from the Xet storage
  */
@@ -29,7 +61,7 @@ export class XetBlob extends Blob {
 	hash: string;
 	start = 0;
 	end = 0;
-	reconstructionInfo: { terms: unknown[]; fetch_info: unknown } | undefined;
+	reconstructionInfo: ReconstructionInfo | undefined;
 
 	constructor(params: XetBlobCreateOptions) {
 		super([]);
@@ -70,8 +102,13 @@ export class XetBlob extends Blob {
 		}
 
 		const slice = this.#clone();
+
 		slice.start = this.start + start;
 		slice.end = Math.min(this.start + end, this.end);
+
+		if (slice.start !== this.start || slice.end !== this.end) {
+			slice.reconstructionInfo = undefined;
+		}
 
 		return slice;
 	}
@@ -79,10 +116,15 @@ export class XetBlob extends Blob {
 	async #fetch(): Promise<ReadableStream<Uint8Array>> {
 		let connParams = await getAccessToken(this.repoId, this.accessToken, this.fetch, this.hubUrl);
 
-		if (!this.reconstructionInfo) {
+		let reconstructionInfo = this.reconstructionInfo;
+		if (!reconstructionInfo) {
+			// console.log(
+			// 	`curl '${connParams.casUrl}/reconstruction/${this.hash}' -H 'Authorization: Bearer ${connParams.accessToken}'`
+			// );
 			const resp = await this.fetch(`${connParams.casUrl}/reconstruction/${this.hash}`, {
 				headers: {
 					Authorization: `Bearer ${connParams.accessToken}`,
+					Range: `bytes=${this.start}-${this.end - 1}`,
 				},
 			});
 
@@ -90,14 +132,83 @@ export class XetBlob extends Blob {
 				throw await createApiError(resp);
 			}
 
-			this.reconstructionInfo = await resp.json();
-			console.log("reconstruction info", this.reconstructionInfo);
+			this.reconstructionInfo = reconstructionInfo = (await resp.json()) as ReconstructionInfo;
 		}
+		// todo: also refresh reconstruction info if it's expired, (and avoid concurrent requests when doing so)
 
 		// Refetch the token if it's expired
 		connParams = await getAccessToken(this.repoId, this.accessToken, this.fetch, this.hubUrl);
 
-		throw new Error("Reconstruction not implemented: " + JSON.stringify(this.reconstructionInfo));
+		async function* readData(reconstructionInfo: ReconstructionInfo, customFetch: typeof fetch) {
+			for (const term of reconstructionInfo.terms) {
+				const fetchInfo = reconstructionInfo.fetch_info[term.hash].find(
+					(info) => info.range.start <= term.range.start && info.range.end >= term.range.end
+				);
+
+				if (!fetchInfo) {
+					throw new Error(
+						`Failed to find fetch info for term ${term.hash} and range ${term.range.start}-${term.range.end}`
+					);
+				}
+
+				const resp = await customFetch(fetchInfo.url, {
+					headers: {
+						Range: `bytes=${fetchInfo.url_range.start}-${fetchInfo.url_range.end}`,
+					},
+				});
+
+				if (!resp.ok) {
+					throw await createApiError(resp);
+				}
+
+				const reader = resp.body?.getReader();
+				if (!reader) {
+					throw new Error("Failed to get reader from response body");
+				}
+
+				// todo: handle chunk ranges
+				let done = false;
+				let isFirstChunk = true;
+				while (!done) {
+					const { value, done: doneValue } = await reader.read();
+					done = doneValue;
+					if (value) {
+						yield isFirstChunk ? value.slice(reconstructionInfo.offset_into_first_range) : value;
+						isFirstChunk = false;
+					}
+				}
+			}
+		}
+
+		const iterator = readData(reconstructionInfo, this.fetch);
+
+		// todo: when Chrome/Safari support it, use ReadableStream.from(readData)
+		return new ReadableStream<Uint8Array>(
+			{
+				// todo: when Safari supports it, type controller as ReadableByteStreamController
+				async pull(controller) {
+					const result = await iterator.next();
+
+					if (result.value) {
+						// Split into chunks of 1000 bytes since `ByteLengthQueuingStrategy` fails in Node.js due to size being a function
+						const chunkSize = 1_000;
+						for (let i = 0; i < result.value.length; i += chunkSize) {
+							controller.enqueue(result.value.slice(i, i + chunkSize));
+						}
+					}
+
+					if (result.done) {
+						controller.close();
+					}
+				},
+				type: "bytes",
+				// todo: when Safari supports it, add autoAllocateChunkSize param
+			},
+			// todo : use ByteLengthQueuingStrategy when there's good support for it
+			{
+				highWaterMark: 1_000, // 1_000 chunks of 1_000 bytes, for 1MB of RAM
+			}
+		);
 	}
 
 	override async arrayBuffer(): Promise<ArrayBuffer> {
@@ -182,10 +293,10 @@ async function getAccessToken(
 			throw new Error(`Failed to get JWT token: ${resp.status} ${await resp.text()}`);
 		}
 
-		const json = await resp.json();
+		const json: { accessToken: string; casUrl: string; exp: number } = await resp.json();
 		const jwt = {
 			repoId,
-			accessToken: json.token,
+			accessToken: json.accessToken,
 			expiresAt: new Date(json.exp * 1000),
 			initialAccessToken,
 			hubUrl,
@@ -209,7 +320,10 @@ async function getAccessToken(
 		}
 		jwts.set(key, jwt);
 
-		return jwt.accessToken;
+		return {
+			accessToken: json.accessToken,
+			casUrl: json.casUrl,
+		};
 	})();
 
 	jwtPromises.set(repoId.name, promise);

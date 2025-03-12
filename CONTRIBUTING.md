@@ -18,7 +18,9 @@ It's not a hard requirement, but please consider using an icon from [Gitmoji](ht
 
 ## Tests
 
-If you want to run only specific tests, you can do `pnpm test -- -t "test name"`
+If you want to run only specific tests, you can do `pnpm test -- -t "test name"`.
+
+You can also do `npx vitest ./packages/hub/src/utils/XetBlob.spec.ts` to run a specific test file.
 
 ## Adding a package
 
