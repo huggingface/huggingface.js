@@ -88,7 +88,7 @@ export class XetBlob extends Blob {
 	constructor(params: XetBlobCreateOptions) {
 		super([]);
 
-		this.fetch = params.fetch ?? fetch;
+		this.fetch = params.fetch ?? fetch.bind(globalThis);
 		this.accessToken = checkCredentials(params);
 		this.repoId = toRepoId(params.repo);
 		this.hubUrl = params.hubUrl ?? HUB_URL;
@@ -163,7 +163,7 @@ export class XetBlob extends Blob {
 
 		async function* readData(reconstructionInfo: ReconstructionInfo, customFetch: typeof fetch, maxBytes: number) {
 			let totalBytesRead = 0;
-			let isFirstChunk = true;
+			let readBytesToSkip = reconstructionInfo.offset_into_first_range;
 
 			for (const term of reconstructionInfo.terms) {
 				if (totalBytesRead >= maxBytes) {
@@ -254,6 +254,14 @@ export class XetBlob extends Blob {
 								continue;
 							}
 
+							if (readBytesToSkip >= chunkHeader.uncompressed_length) {
+								readBytesToSkip -= chunkHeader.uncompressed_length;
+								leftoverBytes = result.value.slice(CHUNK_HEADER_BYTES);
+								bytesToSkip = chunkHeader.compressed_length;
+								chunksToRead--;
+								continue;
+							}
+
 							if (result.value.length < chunkHeader.compressed_length + CHUNK_HEADER_BYTES) {
 								// We need more data to read the full chunk
 								leftoverBytes = result.value;
@@ -270,16 +278,13 @@ export class XetBlob extends Blob {
 									  )
 									: result.value.slice(0, chunkHeader.compressed_length);
 
-							if (isFirstChunk) {
+							if (readBytesToSkip) {
 								yield uncompressed.slice(
-									reconstructionInfo.offset_into_first_range,
-									Math.min(uncompressed.length, reconstructionInfo.offset_into_first_range + maxBytes - totalBytesRead)
+									readBytesToSkip,
+									Math.min(uncompressed.length, readBytesToSkip + maxBytes - totalBytesRead)
 								);
-								totalBytesRead += Math.min(
-									uncompressed.length,
-									reconstructionInfo.offset_into_first_range + maxBytes - totalBytesRead
-								);
-								isFirstChunk = false;
+								totalBytesRead += Math.min(uncompressed.length, readBytesToSkip + maxBytes - totalBytesRead);
+								readBytesToSkip = 0;
 							} else {
 								yield uncompressed.slice(0, Math.min(uncompressed.length, maxBytes - totalBytesRead));
 								totalBytesRead += Math.min(uncompressed.length, maxBytes - totalBytesRead);
