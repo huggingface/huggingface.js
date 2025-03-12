@@ -56,7 +56,7 @@ export async function textToVideo(args: TextToVideoArgs, options?: Options): Pro
 		if (!isValidOutput) {
 			throw new InferenceOutputError("Expected { video: { url: string } }");
 		}
-		const urlResponse = await fetch(res.video.url);
+		const urlResponse = await fetch((res as FalAiOutput).video.url);
 		return await urlResponse.blob();
 	} else if (args.provider === "novita") {
 		const isValidOutput =
@@ -71,7 +71,7 @@ export async function textToVideo(args: TextToVideoArgs, options?: Options): Pro
 		if (!isValidOutput) {
 			throw new InferenceOutputError("Expected { video: { video_url: string } }");
 		}
-		const urlResponse = await fetch(res.video.video_url);
+		const urlResponse = await fetch((res as NovitaOutput).video.video_url);
 		return await urlResponse.blob();
 	} else {
 		/// TODO: Replicate: handle the case where the generation request "times out" / is async (ie output is null)
