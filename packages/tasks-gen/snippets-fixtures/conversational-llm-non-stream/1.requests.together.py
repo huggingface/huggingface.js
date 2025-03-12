@@ -1,7 +1,7 @@
 import requests
 
-API_URL = "https://router.huggingface.co/together/v1/chat/completions"
-headers = {"Authorization": "Bearer hf_token"}
+API_URL = "https://api.together.xyz/v1/chat/completions"
+headers = {"Authorization": "Bearer api_token"}
 
 def query(payload):
     response = requests.post(API_URL, headers=headers, json=payload)

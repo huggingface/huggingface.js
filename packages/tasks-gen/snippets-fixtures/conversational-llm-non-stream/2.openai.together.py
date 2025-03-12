@@ -1,8 +1,8 @@
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://router.huggingface.co/together/v1",
-    api_key="hf_token"
+    base_url="https://api.together.xyz/v1",
+    api_key="api_token"
 )
 
 completion = client.chat.completions.create(

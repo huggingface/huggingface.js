@@ -1,13 +1,6 @@
 import type { PipelineType, WidgetType } from "@huggingface/tasks/src/pipelines.js";
 import type { ChatCompletionInputMessage, GenerationParameters } from "@huggingface/tasks/src/tasks/index.js";
-import {
-	openAIbaseUrl,
-	type InferenceSnippet,
-	type ModelDataMinimal,
-	getModelInputSnippet,
-	stringifyGenerationConfig,
-	stringifyMessages,
-} from "@huggingface/tasks";
+import { type InferenceSnippet, type ModelDataMinimal, getModelInputSnippet } from "@huggingface/tasks";
 import type { InferenceProvider } from "../types";
 import { Template } from "@huggingface/jinja";
 import { makeRequestOptionsFromResolvedModel } from "../lib/makeRequestOptions";

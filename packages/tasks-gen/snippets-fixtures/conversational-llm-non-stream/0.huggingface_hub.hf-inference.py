@@ -2,7 +2,7 @@ from huggingface_hub import InferenceClient
 
 client = InferenceClient(
     provider="hf-inference",
-    api_key="hf_token",
+    api_key="api_token",
 )
 
 completion = client.chat.completions.create(
