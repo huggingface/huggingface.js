@@ -284,11 +284,7 @@ export class XetBlob extends Blob {
 					const result = await iterator.next();
 
 					if (result.value) {
-						// Split into chunks of 1000 bytes since `ByteLengthQueuingStrategy` fails in Node.js due to size being a function
-						const chunkSize = 1_000;
-						for (let i = 0; i < result.value.length; i += chunkSize) {
-							controller.enqueue(result.value.slice(i, i + chunkSize));
-						}
+						controller.enqueue(result.value);
 					}
 
 					if (result.done) {
@@ -298,7 +294,7 @@ export class XetBlob extends Blob {
 				type: "bytes",
 				// todo: when Safari supports it, add autoAllocateChunkSize param
 			},
-			// todo : use ByteLengthQueuingStrategy when there's good support for it
+			// todo : use ByteLengthQueuingStrategy when there's good support for it, currently in Node.js it fails due to size being a function
 			{
 				highWaterMark: 1_000, // 1_000 chunks for ~1MB of RAM
 			}
