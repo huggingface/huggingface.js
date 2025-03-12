@@ -189,17 +189,17 @@ const TEST_CASES: {
 		providers: ["hf-inference"],
 		languages: ["py"],
 	},
-	// {
-	// 	testName: "zero-shot-image-classification",
-	// 	model: {
-	// 		id: "openai/clip-vit-large-patch14",
-	// 		pipeline_tag: "zero-shot-image-classification",
-	// 		tags: [],
-	// 		inference: "",
-	// 	},
-	// 	providers: ["hf-inference"],
-	// 	languages: ["py"],
-	// },
+	{
+		testName: "zero-shot-image-classification",
+		model: {
+			id: "openai/clip-vit-large-patch14",
+			pipeline_tag: "zero-shot-image-classification",
+			tags: [],
+			inference: "",
+		},
+		providers: ["hf-inference"],
+		languages: ["py"],
+	},
 ] as const;
 
 const GET_SNIPPET_FN = {
