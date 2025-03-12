@@ -1,0 +1,5 @@
+output = client.document_question_answering(
+    "{{ inputs.asObj.image }}",
+    question="{{ inputs.asObj.question }}",
+    model="{{ model.id }}",
+) 

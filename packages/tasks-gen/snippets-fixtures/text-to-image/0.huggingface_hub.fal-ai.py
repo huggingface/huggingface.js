@@ -7,6 +7,6 @@ client = InferenceClient(
 
 # output is a PIL.Image object
 image = client.text_to_image(
-	"Astronaut riding a horse",
-	model="black-forest-labs/FLUX.1-schnell",
+    "Astronaut riding a horse",
+    model="black-forest-labs/FLUX.1-schnell",
 )
