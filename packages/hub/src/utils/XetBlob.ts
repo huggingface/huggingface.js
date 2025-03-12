@@ -3,6 +3,7 @@ import { createApiError } from "../error";
 import type { CredentialsParams, RepoDesignation, RepoId } from "../types/public";
 import { checkCredentials } from "./checkCredentials";
 import { toRepoId } from "./toRepoId";
+import lz4 from "lz4js";
 
 const JWT_SAFETY_PERIOD = 60_000;
 const JWT_CACHE_SIZE = 1_000;
@@ -68,6 +69,8 @@ interface ChunkHeader {
 	compression_scheme: CompressionScheme; // u8, 1 byte
 	uncompressed_length: number; // 3 * u8, 3 bytes
 }
+
+const CHUNK_HEADER_BYTES = 8;
 
 /**
  * XetBlob is a blob implementation that fetches data directly from the Xet storage
@@ -160,6 +163,7 @@ export class XetBlob extends Blob {
 
 		async function* readData(reconstructionInfo: ReconstructionInfo, customFetch: typeof fetch, maxBytes: number) {
 			let totalBytesRead = 0;
+			let isFirstChunk = true;
 
 			for (const term of reconstructionInfo.terms) {
 				if (totalBytesRead >= maxBytes) {
@@ -190,13 +194,10 @@ export class XetBlob extends Blob {
 					throw new Error("Failed to get reader from response body");
 				}
 
-				// todo: handle chunk ranges
 				let done = false;
-				let isFirstChunk = true;
 				let chunksToSkip = term.range.start - fetchInfo.range.start;
 				let chunksToRead = term.range.end - term.range.start;
 				let bytesToSkip = 0;
-				let bytesToRead = 0;
 
 				let leftoverBytes: Uint8Array | undefined = undefined;
 
@@ -204,25 +205,13 @@ export class XetBlob extends Blob {
 					const result = await reader.read();
 					done = result.done;
 					if (result.value) {
-						while (totalBytesRead < maxBytes) {
+						while (totalBytesRead < maxBytes && chunksToRead) {
 							if (bytesToSkip) {
 								if (bytesToSkip >= result.value.length) {
 									bytesToSkip -= result.value.length;
 									continue readChunks;
 								}
 								result.value = result.value.slice(bytesToSkip);
-							}
-							if (bytesToRead) {
-								if (bytesToRead >= result.value.length) {
-									yield result.value;
-									bytesToRead -= result.value.length;
-									totalBytesRead += result.value.length;
-									continue readChunks;
-								}
-								yield result.value.slice(0, bytesToRead);
-								result.value = result.value.slice(bytesToRead);
-								totalBytesRead += bytesToRead;
-								bytesToRead = 0;
 							}
 							if (leftoverBytes) {
 								result.value = new Uint8Array([...leftoverBytes, ...result.value]);
@@ -235,7 +224,7 @@ export class XetBlob extends Blob {
 								continue readChunks;
 							}
 
-							const header = new DataView(result.value.buffer, result.value.byteOffset, 8);
+							const header = new DataView(result.value.buffer, result.value.byteOffset, CHUNK_HEADER_BYTES);
 							const chunkHeader: ChunkHeader = {
 								version: header.getUint8(0),
 								compressed_length: header.getUint8(1) | (header.getUint8(2) << 8) | (header.getUint8(3) << 16),
@@ -247,7 +236,10 @@ export class XetBlob extends Blob {
 								throw new Error(`Unsupported chunk version ${chunkHeader.version}`);
 							}
 
-							if (chunkHeader.compression_scheme !== CompressionScheme.None) {
+							if (
+								chunkHeader.compression_scheme !== CompressionScheme.None &&
+								chunkHeader.compression_scheme !== CompressionScheme.LZ4
+							) {
 								throw new Error(
 									`Unsupported compression scheme ${
 										compressionSchemeLabels[chunkHeader.compression_scheme] ?? chunkHeader.compression_scheme
@@ -255,27 +247,44 @@ export class XetBlob extends Blob {
 								);
 							}
 
-							result.value = result.value.slice(8);
-
 							if (chunksToSkip) {
 								chunksToSkip--;
+								leftoverBytes = result.value.slice(CHUNK_HEADER_BYTES);
 								bytesToSkip = chunkHeader.compressed_length;
 								continue;
 							}
-							if (chunksToRead) {
-								if (isFirstChunk) {
-									bytesToSkip = reconstructionInfo.offset_into_first_range;
-									bytesToRead = chunkHeader.uncompressed_length - reconstructionInfo.offset_into_first_range;
-									isFirstChunk = false;
-								} else {
-									bytesToRead = chunkHeader.uncompressed_length;
-								}
-								bytesToRead = Math.min(bytesToRead, maxBytes - totalBytesRead);
-								chunksToRead--;
-								continue;
+
+							if (result.value.length < chunkHeader.compressed_length + CHUNK_HEADER_BYTES) {
+								// We need more data to read the full chunk
+								leftoverBytes = result.value;
+								continue readChunks;
 							}
 
-							break;
+							result.value = result.value.slice(CHUNK_HEADER_BYTES);
+
+							const uncompressed =
+								chunkHeader.compression_scheme === CompressionScheme.LZ4
+									? lz4.decompress(
+											result.value.slice(0, chunkHeader.compressed_length),
+											chunkHeader.uncompressed_length
+									  )
+									: result.value.slice(0, chunkHeader.compressed_length);
+
+							if (isFirstChunk) {
+								yield uncompressed.slice(
+									reconstructionInfo.offset_into_first_range,
+									Math.min(uncompressed.length, reconstructionInfo.offset_into_first_range + maxBytes - totalBytesRead)
+								);
+								totalBytesRead += Math.min(
+									uncompressed.length,
+									reconstructionInfo.offset_into_first_range + maxBytes - totalBytesRead
+								);
+								isFirstChunk = false;
+							} else {
+								yield uncompressed.slice(0, Math.min(uncompressed.length, maxBytes - totalBytesRead));
+								totalBytesRead += Math.min(uncompressed.length, maxBytes - totalBytesRead);
+							}
+							chunksToRead--;
 						}
 					}
 				}
