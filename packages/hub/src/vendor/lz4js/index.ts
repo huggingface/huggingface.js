@@ -16,8 +16,8 @@ import * as util from "./util.js";
 
 // Compression format parameters/constants.
 const minMatch = 4;
-const minLength = 13;
-const searchLimit = 5;
+const matchSearchLimit = 12;
+const minTrailingLitterals = 5;
 const skipTrigger = 6;
 const hashSize = 1 << 16;
 
@@ -47,7 +47,7 @@ const bsUncompressed = 0x80000000;
 const bsDefault = 7;
 const bsShift = 4;
 const bsMask = 7;
-const bsMap = {
+const bsMap: Record<number, number> = {
 	4: 0x10000,
 	5: 0x40000,
 	6: 0x100000,
@@ -73,14 +73,14 @@ function makeHashTable() {
 }
 
 // Clear hashtable.
-function clearHashTable(table: typeof hashTable) {
+function clearHashTable(table: Uint32Array | number[]) {
 	for (let i = 0; i < hashSize; i++) {
 		table[i] = 0;
 	}
 }
 
 // Makes a byte buffer. On older browsers, may return a plain array.
-export function makeBuffer(size: number): Uint8Array {
+function makeBuffer(size: number) {
 	return new Uint8Array(size);
 }
 
@@ -92,12 +92,12 @@ function sliceArray(array: Uint8Array, start: number, end: number) {
 // --
 
 // Calculates an upper bound for lz4 compression.
-export function compressBound(n: number): number {
+export function compressBound(n: number) {
 	return (n + n / 255 + 16) | 0;
 }
 
 // Calculates an upper bound for lz4 decompression, by reading the data.
-export function decompressBound(src: Uint8Array): number {
+export function decompressBound(src: Uint8Array) {
 	let sIndex = 0;
 
 	// Read magic number
@@ -122,11 +122,11 @@ export function decompressBound(src: Uint8Array): number {
 	// Read block size
 	const bsIdx = (src[sIndex++] >> bsShift) & bsMask;
 
-	if (!(bsIdx in bsMap)) {
+	if (bsMap[bsIdx] === undefined) {
 		throw new Error("invalid block size " + bsIdx);
 	}
 
-	const maxBlockSize = bsMap[bsIdx as keyof typeof bsMap];
+	const maxBlockSize = bsMap[bsIdx];
 
 	// Get content size
 	if (useContentSize) {
@@ -145,7 +145,7 @@ export function decompressBound(src: Uint8Array): number {
 		if (blockSize & bsUncompressed) {
 			blockSize &= ~bsUncompressed;
 			maxSize += blockSize;
-		} else {
+		} else if (blockSize > 0) {
 			maxSize += maxBlockSize;
 		}
 
@@ -162,17 +162,12 @@ export function decompressBound(src: Uint8Array): number {
 }
 
 // Decompresses a block of Lz4.
-export function decompressBlock(
-	src: Uint8Array,
-	dst: Uint8Array,
-	sIndex: number,
-	sLength: number,
-	dIndex: number
-): number {
-	let mLength: number, mOffset: number, n: number, i: number;
+export function decompressBlock(src: Uint8Array, dst: Uint8Array, sIndex: number, sLength: number, dIndex: number) {
+	let mLength, mOffset, sEnd, n, i;
+	const hasCopyWithin = dst.copyWithin !== undefined && dst.fill !== undefined;
 
 	// Setup initial state.
-	const sEnd = sIndex + sLength;
+	sEnd = sIndex + sLength;
 
 	// Consume entire input block.
 	while (sIndex < sEnd) {
@@ -219,9 +214,21 @@ export function decompressBlock(
 
 		mLength += minMatch;
 
-		// Copy match.
-		for (i = dIndex - mOffset, n = i + mLength; i < n; ) {
-			dst[dIndex++] = dst[i++] | 0;
+		// Copy match
+		// prefer to use typedarray.copyWithin for larger matches
+		// NOTE: copyWithin doesn't work as required by LZ4 for overlapping sequences
+		// e.g. mOffset=1, mLength=30 (repeach char 30 times)
+		// we special case the repeat char w/ array.fill
+		if (hasCopyWithin && mOffset === 1) {
+			dst.fill(dst[dIndex - 1] | 0, dIndex, dIndex + mLength);
+			dIndex += mLength;
+		} else if (hasCopyWithin && mOffset > mLength && mLength > 31) {
+			dst.copyWithin(dIndex, dIndex - mOffset, dIndex - mOffset + mLength);
+			dIndex += mLength;
+		} else {
+			for (i = dIndex - mOffset, n = i + mLength; i < n; ) {
+				dst[dIndex++] = dst[i++] | 0;
+			}
 		}
 	}
 
@@ -235,92 +242,90 @@ export function compressBlock(
 	sIndex: number,
 	sLength: number,
 	hashTable: Uint32Array | number[]
-): number {
-	let mIndex: number, mAnchor: number, mLength: number, mOffset: number, mStep: number;
-	let literalCount: number, dIndex: number, n: number;
+) {
+	let mIndex, mAnchor, mLength, mOffset, mStep;
+	let literalCount, dIndex, sEnd, n;
 
 	// Setup initial state.
 	dIndex = 0;
-	const sEnd = sLength + sIndex;
+	sEnd = sLength + sIndex;
 	mAnchor = sIndex;
 
-	// Process only if block is large enough.
-	if (sLength >= minLength) {
-		let searchMatchCount = (1 << skipTrigger) + 3;
+	let searchMatchCount = (1 << skipTrigger) + 3;
 
-		// Consume until last n literals (Lz4 spec limitation.)
-		while (sIndex + minMatch < sEnd - searchLimit) {
-			const seq = util.readU32(src, sIndex);
-			let hash = util.hashU32(seq) >>> 0;
+	// Search for matches with a limit of matchSearchLimit bytes
+	// before the end of block (Lz4 spec limitation.)
+	while (sIndex <= sEnd - matchSearchLimit) {
+		const seq = util.readU32(src, sIndex);
+		let hash = util.hashU32(seq) >>> 0;
 
-			// Crush hash to 16 bits.
-			hash = (((hash >> 16) ^ hash) >>> 0) & 0xffff;
+		// Crush hash to 16 bits.
+		hash = (((hash >> 16) ^ hash) >>> 0) & 0xffff;
 
-			// Look for a match in the hashtable. NOTE: remove one; see below.
-			mIndex = hashTable[hash] - 1;
+		// Look for a match in the hashtable. NOTE: remove one; see below.
+		mIndex = hashTable[hash] - 1;
 
-			// Put pos in hash table. NOTE: add one so that zero = invalid.
-			hashTable[hash] = sIndex + 1;
+		// Put pos in hash table. NOTE: add one so that zero = invalid.
+		hashTable[hash] = sIndex + 1;
 
-			// Determine if there is a match (within range.)
-			if (mIndex < 0 || (sIndex - mIndex) >>> 16 > 0 || util.readU32(src, mIndex) !== seq) {
-				mStep = searchMatchCount++ >> skipTrigger;
-				sIndex += mStep;
-				continue;
-			}
-
-			searchMatchCount = (1 << skipTrigger) + 3;
-
-			// Calculate literal count and offset.
-			literalCount = sIndex - mAnchor;
-			mOffset = sIndex - mIndex;
-
-			// We've already matched one word, so get that out of the way.
-			sIndex += minMatch;
-			mIndex += minMatch;
-
-			// Determine match length.
-			// N.B.: mLength does not include minMatch, Lz4 adds it back
-			// in decoding.
-			mLength = sIndex;
-			while (sIndex < sEnd - searchLimit && src[sIndex] === src[mIndex]) {
-				sIndex++;
-				mIndex++;
-			}
-			mLength = sIndex - mLength;
-
-			// Write token + literal count.
-			const token = mLength < mlMask ? mLength : mlMask;
-			if (literalCount >= runMask) {
-				dst[dIndex++] = (runMask << mlBits) + token;
-				for (n = literalCount - runMask; n >= 0xff; n -= 0xff) {
-					dst[dIndex++] = 0xff;
-				}
-				dst[dIndex++] = n;
-			} else {
-				dst[dIndex++] = (literalCount << mlBits) + token;
-			}
-
-			// Write literals.
-			for (let i = 0; i < literalCount; i++) {
-				dst[dIndex++] = src[mAnchor + i];
-			}
-
-			// Write offset.
-			dst[dIndex++] = mOffset;
-			dst[dIndex++] = mOffset >> 8;
-
-			// Write match length.
-			if (mLength >= mlMask) {
-				for (n = mLength - mlMask; n >= 0xff; n -= 0xff) {
-					dst[dIndex++] = 0xff;
-				}
-				dst[dIndex++] = n;
-			}
-
-			// Move the anchor.
-			mAnchor = sIndex;
+		// Determine if there is a match (within range.)
+		if (mIndex < 0 || (sIndex - mIndex) >>> 16 > 0 || util.readU32(src, mIndex) !== seq) {
+			mStep = searchMatchCount++ >> skipTrigger;
+			sIndex += mStep;
+			continue;
 		}
+
+		searchMatchCount = (1 << skipTrigger) + 3;
+
+		// Calculate literal count and offset.
+		literalCount = sIndex - mAnchor;
+		mOffset = sIndex - mIndex;
+
+		// We've already matched one word, so get that out of the way.
+		sIndex += minMatch;
+		mIndex += minMatch;
+
+		// Determine match length.
+		// N.B.: mLength does not include minMatch, Lz4 adds it back
+		// in decoding.
+		mLength = sIndex;
+		while (sIndex < sEnd - minTrailingLitterals && src[sIndex] === src[mIndex]) {
+			sIndex++;
+			mIndex++;
+		}
+		mLength = sIndex - mLength;
+
+		// Write token + literal count.
+		const token = mLength < mlMask ? mLength : mlMask;
+		if (literalCount >= runMask) {
+			dst[dIndex++] = (runMask << mlBits) + token;
+			for (n = literalCount - runMask; n >= 0xff; n -= 0xff) {
+				dst[dIndex++] = 0xff;
+			}
+			dst[dIndex++] = n;
+		} else {
+			dst[dIndex++] = (literalCount << mlBits) + token;
+		}
+
+		// Write literals.
+		for (let i = 0; i < literalCount; i++) {
+			dst[dIndex++] = src[mAnchor + i];
+		}
+
+		// Write offset.
+		dst[dIndex++] = mOffset;
+		dst[dIndex++] = mOffset >> 8;
+
+		// Write match length.
+		if (mLength >= mlMask) {
+			for (n = mLength - mlMask; n >= 0xff; n -= 0xff) {
+				dst[dIndex++] = 0xff;
+			}
+			dst[dIndex++] = n;
+		}
+
+		// Move the anchor.
+		mAnchor = sIndex;
 	}
 
 	// Nothing was encoded.
@@ -351,7 +356,8 @@ export function compressBlock(
 }
 
 // Decompresses a frame of Lz4 data.
-export function decompressFrame(src: Uint8Array, dst: Uint8Array): number {
+export function decompressFrame(src: Uint8Array, dst: Uint8Array) {
+	let useBlockSum, useContentSum, useContentSize, descriptor;
 	let sIndex = 0;
 	let dIndex = 0;
 
@@ -363,7 +369,7 @@ export function decompressFrame(src: Uint8Array, dst: Uint8Array): number {
 	sIndex += 4;
 
 	// Read descriptor
-	const descriptor = src[sIndex++];
+	descriptor = src[sIndex++];
 
 	// Check version
 	if ((descriptor & fdVersionMask) !== fdVersion) {
@@ -371,14 +377,14 @@ export function decompressFrame(src: Uint8Array, dst: Uint8Array): number {
 	}
 
 	// Read flags
-	const useBlockSum = (descriptor & fdBlockChksum) !== 0;
-	const useContentSum = (descriptor & fdContentChksum) !== 0;
-	const useContentSize = (descriptor & fdContentSize) !== 0;
+	useBlockSum = (descriptor & fdBlockChksum) !== 0;
+	useContentSum = (descriptor & fdContentChksum) !== 0;
+	useContentSize = (descriptor & fdContentSize) !== 0;
 
 	// Read block size
 	const bsIdx = (src[sIndex++] >> bsShift) & bsMask;
 
-	if (!(bsIdx in bsMap)) {
+	if (bsMap[bsIdx] === undefined) {
 		throw new Error("invalid block size");
 	}
 
@@ -391,7 +397,9 @@ export function decompressFrame(src: Uint8Array, dst: Uint8Array): number {
 
 	// Read blocks.
 	while (true) {
-		let compSize = util.readU32(src, sIndex);
+		var compSize;
+
+		compSize = util.readU32(src, sIndex);
 		sIndex += 4;
 
 		if (compSize === 0) {
@@ -428,7 +436,7 @@ export function decompressFrame(src: Uint8Array, dst: Uint8Array): number {
 }
 
 // Compresses data to an Lz4 frame.
-export function compressFrame(src: Uint8Array, dst: Uint8Array): number {
+export function compressFrame(src: Uint8Array, dst: Uint8Array) {
 	let dIndex = 0;
 
 	// Write magic number.
@@ -492,15 +500,14 @@ export function compressFrame(src: Uint8Array, dst: Uint8Array): number {
 // Decompresses a buffer containing an Lz4 frame. maxSize is optional; if not
 // provided, a maximum size will be determined by examining the data. The
 // buffer returned will always be perfectly-sized.
-export function decompress(src: Uint8Array, maxSize: number): Uint8Array {
-	let dst;
+export function decompress(src: Uint8Array, maxSize: number) {
+	let dst, size;
 
 	if (maxSize === undefined) {
 		maxSize = decompressBound(src);
 	}
-
 	dst = makeBuffer(maxSize);
-	const size = decompressFrame(src, dst);
+	size = decompressFrame(src, dst);
 
 	if (size !== maxSize) {
 		dst = sliceArray(dst, 0, size);
@@ -512,15 +519,15 @@ export function decompress(src: Uint8Array, maxSize: number): Uint8Array {
 // Compresses a buffer to an Lz4 frame. maxSize is optional; if not provided,
 // a buffer will be created based on the theoretical worst output size for a
 // given input size. The buffer returned will always be perfectly-sized.
-export function compress(src: Uint8Array, maxSize: number): Uint8Array {
-	let dst;
+export function compress(src: Uint8Array, maxSize: number) {
+	let dst, size;
 
 	if (maxSize === undefined) {
 		maxSize = compressBound(src.length);
 	}
 
 	dst = makeBuffer(maxSize);
-	const size = compressFrame(src, dst);
+	size = compressFrame(src, dst);
 
 	if (size !== maxSize) {
 		dst = sliceArray(dst, 0, size);
