@@ -3,7 +3,7 @@ import { createApiError } from "../error";
 import type { CredentialsParams, RepoDesignation, RepoId } from "../types/public";
 import { checkCredentials } from "./checkCredentials";
 import { toRepoId } from "./toRepoId";
-import { decompress as lz4Decompress } from "../vendor/lz4js";
+import { decompress as lz4_decompress } from "../vendor/lz4js";
 
 const JWT_SAFETY_PERIOD = 60_000;
 const JWT_CACHE_SIZE = 1_000;
@@ -265,7 +265,8 @@ export class XetBlob extends Blob {
 
 							if (
 								chunkHeader.compression_scheme !== CompressionScheme.None &&
-								chunkHeader.compression_scheme !== CompressionScheme.LZ4
+								chunkHeader.compression_scheme !== CompressionScheme.LZ4 &&
+								chunkHeader.compression_scheme !== CompressionScheme.ByteGroupingLZ4
 							) {
 								throw new Error(
 									`Unsupported compression scheme ${
@@ -299,8 +300,18 @@ export class XetBlob extends Blob {
 
 							const uncompressed =
 								chunkHeader.compression_scheme === CompressionScheme.LZ4
-									? lz4Decompress(result.value.slice(0, chunkHeader.compressed_length), chunkHeader.uncompressed_length)
-									: result.value.slice(0, chunkHeader.compressed_length);
+									? lz4_decompress(
+											result.value.slice(0, chunkHeader.compressed_length),
+											chunkHeader.uncompressed_length
+									  )
+									: chunkHeader.compression_scheme === CompressionScheme.ByteGroupingLZ4
+									  ? bg4_regoup_bytes(
+												lz4_decompress(
+													result.value.slice(0, chunkHeader.compressed_length),
+													chunkHeader.uncompressed_length
+												)
+									    )
+									  : result.value.slice(0, chunkHeader.compressed_length);
 
 							if (readBytesToSkip) {
 								yield uncompressed.slice(
@@ -400,6 +411,51 @@ const jwts: Map<
 
 function cacheKey(params: { repoId: RepoId; initialAccessToken: string | undefined }): string {
 	return `${params.repoId.type}:${params.repoId.name}:${params.initialAccessToken}`;
+}
+
+// exported for testing purposes
+export function bg4_regoup_bytes(bytes: Uint8Array): Uint8Array {
+	// python code
+
+	// split = len(x) // 4
+	// rem = len(x) % 4
+	// g1_pos = split + (1 if rem >= 1 else 0)
+	// g2_pos = g1_pos + split + (1 if rem >= 2 else 0)
+	// g3_pos = g2_pos + split + (1 if rem == 3 else 0)
+	// ret = bytearray(len(x))
+	// ret[0::4] = x[:g1_pos]
+	// ret[1::4] = x[g1_pos:g2_pos]
+	// ret[2::4] = x[g2_pos:g3_pos]
+	// ret[3::4] = x[g3_pos:]
+
+	// todo: optimize to do it in-place
+
+	const split = Math.floor(bytes.length / 4);
+	const rem = bytes.length % 4;
+	const g1_pos = split + (rem >= 1 ? 1 : 0);
+	const g2_pos = g1_pos + split + (rem >= 2 ? 1 : 0);
+	const g3_pos = g2_pos + split + (rem == 3 ? 1 : 0);
+
+	const ret = new Uint8Array(bytes.length);
+	for (let i = 0; i < bytes.length - 3; i += 4) {
+		ret[i] = bytes[i / 4];
+		ret[i + 1] = bytes[g1_pos + i / 4];
+		ret[i + 2] = bytes[g2_pos + i / 4];
+		ret[i + 3] = bytes[g3_pos + i / 4];
+	}
+
+	if (rem === 1) {
+		ret[bytes.length - 1] = bytes[g1_pos - 1];
+	} else if (rem === 2) {
+		ret[bytes.length - 2] = bytes[g1_pos - 1];
+		ret[bytes.length - 1] = bytes[g2_pos - 1];
+	} else if (rem === 3) {
+		ret[bytes.length - 3] = bytes[g1_pos - 1];
+		ret[bytes.length - 2] = bytes[g2_pos - 1];
+		ret[bytes.length - 1] = bytes[g3_pos - 1];
+	}
+
+	return ret;
 }
 
 async function getAccessToken(
