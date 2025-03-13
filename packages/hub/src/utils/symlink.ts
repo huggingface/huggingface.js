@@ -20,8 +20,9 @@ function expandUser(path: string): string {
 	return path;
 }
 
-function commonPath(paths: string[]): string {
-	if (!paths.length) return "";
+function commonPath(...paths: [string, ...string[]]): string {
+	// Normalize paths
+	paths = paths.map((p) => path.resolve(p)) as [string, ...string[]];
 
 	const parts = paths.map((p) => p.split(path.sep));
 	const common = parts[0];
@@ -141,7 +142,7 @@ export async function createSymlink(dst: string, src: string, new_blob?: boolean
 
 	let _support_symlink: boolean;
 	try {
-		const common_path = commonPath([abs_src, abs_dst]);
+		const common_path = commonPath(abs_src, abs_dst);
 		_support_symlink = await areSymlinksSupported(common_path);
 	} catch (_e: unknown) {
 		_support_symlink = false;
