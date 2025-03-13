@@ -135,14 +135,20 @@ export class XetBlob extends Blob {
 		return slice;
 	}
 
-	async #fetch(): Promise<ReadableStream<Uint8Array>> {
-		let connParams = await getAccessToken(this.repoId, this.accessToken, this.fetch, this.hubUrl);
+	#reconstructionInfoPromise?: Promise<ReconstructionInfo>;
 
-		let reconstructionInfo = this.reconstructionInfo;
-		if (!reconstructionInfo) {
+	#loadReconstructionInfo() {
+		if (this.#reconstructionInfoPromise) {
+			return this.#reconstructionInfoPromise;
+		}
+
+		this.#reconstructionInfoPromise = (async () => {
+			const connParams = await getAccessToken(this.repoId, this.accessToken, this.fetch, this.hubUrl);
+
 			// console.log(
 			// 	`curl '${connParams.casUrl}/reconstruction/${this.hash}' -H 'Authorization: Bearer ${connParams.accessToken}'`
 			// );
+
 			const resp = await this.fetch(`${connParams.casUrl}/reconstruction/${this.hash}`, {
 				headers: {
 					Authorization: `Bearer ${connParams.accessToken}`,
@@ -154,14 +160,25 @@ export class XetBlob extends Blob {
 				throw await createApiError(resp);
 			}
 
-			this.reconstructionInfo = reconstructionInfo = (await resp.json()) as ReconstructionInfo;
+			this.reconstructionInfo = (await resp.json()) as ReconstructionInfo;
+
+			return this.reconstructionInfo;
+		})().finally(() => (this.#reconstructionInfoPromise = undefined));
+
+		return this.#reconstructionInfoPromise;
+	}
+
+	async #fetch(): Promise<ReadableStream<Uint8Array>> {
+		if (!this.reconstructionInfo) {
+			await this.#loadReconstructionInfo();
 		}
-		// todo: also refresh reconstruction info if it's expired, (and avoid concurrent requests when doing so)
 
-		// Refetch the token if it's expired
-		connParams = await getAccessToken(this.repoId, this.accessToken, this.fetch, this.hubUrl);
-
-		async function* readData(reconstructionInfo: ReconstructionInfo, customFetch: typeof fetch, maxBytes: number) {
+		async function* readData(
+			reconstructionInfo: ReconstructionInfo,
+			customFetch: typeof fetch,
+			maxBytes: number,
+			reloadReconstructionInfo: () => Promise<ReconstructionInfo>
+		) {
 			let totalBytesRead = 0;
 			let readBytesToSkip = reconstructionInfo.offset_into_first_range;
 
@@ -179,11 +196,21 @@ export class XetBlob extends Blob {
 					);
 				}
 
-				const resp = await customFetch(fetchInfo.url, {
+				let resp = await customFetch(fetchInfo.url, {
 					headers: {
 						Range: `bytes=${fetchInfo.url_range.start}-${fetchInfo.url_range.end}`,
 					},
 				});
+
+				if (resp.status === 403) {
+					// In case it's expired
+					reconstructionInfo = await reloadReconstructionInfo();
+					resp = await customFetch(fetchInfo.url, {
+						headers: {
+							Range: `bytes=${fetchInfo.url_range.start}-${fetchInfo.url_range.end}`,
+						},
+					});
+				}
 
 				if (!resp.ok) {
 					throw await createApiError(resp);
@@ -293,7 +320,16 @@ export class XetBlob extends Blob {
 			}
 		}
 
-		const iterator = readData(reconstructionInfo, this.fetch, this.end - this.start);
+		if (!this.reconstructionInfo) {
+			throw new Error("Failed to load reconstruction info");
+		}
+
+		const iterator = readData(
+			this.reconstructionInfo,
+			this.fetch,
+			this.end - this.start,
+			this.#loadReconstructionInfo.bind(this)
+		);
 
 		// todo: when Chrome/Safari support it, use ReadableStream.from(readData)
 		return new ReadableStream<Uint8Array>(
