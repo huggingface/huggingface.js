@@ -1,0 +1,21 @@
+{
+	"$id": "/inference/schemas/visual-document-retrieval/output.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Outputs of inference for the Visual Document Retrieval task",
+	"title": "VisualDocumentRetrievalOutput",
+	"type": "array",
+	"items": {
+		"type": "object",
+		"properties": {
+			"page_index": {
+				"type": "integer",
+				"description": "The page index of the document"
+			},
+			"score": {
+				"type": "number",
+				"description": "The associated score / probability"
+			}
+		},
+		"required": ["score", "page_index"]
+	}
+}
