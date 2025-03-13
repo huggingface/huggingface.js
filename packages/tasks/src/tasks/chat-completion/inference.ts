@@ -154,7 +154,7 @@ export interface ChatCompletionInputStreamOptions {
 	 * choices field will always be an empty array. All other chunks will also include a usage
 	 * field, but with a null value.
 	 */
-	include_usage: boolean;
+	include_usage?: boolean;
 	[property: string]: unknown;
 }
 /**
@@ -273,7 +273,7 @@ export interface ChatCompletionStreamOutputDelta {
 	content?: string;
 	role: string;
 	tool_call_id?: string;
-	tool_calls?: ChatCompletionStreamOutputDeltaToolCall;
+	tool_calls?: ChatCompletionStreamOutputDeltaToolCall[];
 	[property: string]: unknown;
 }
 export interface ChatCompletionStreamOutputDeltaToolCall {

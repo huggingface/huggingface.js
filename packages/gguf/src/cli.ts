@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-import { GGMLQuantizationType, gguf, ggufAllShards, GGUFParseOutput } from ".";
+import type { GGUFParseOutput } from ".";
+import { GGMLQuantizationType, ggufAllShards } from ".";
 import { GGML_QUANT_SIZES } from "./quant-descriptions";
 
 interface PrintColumnHeader {
