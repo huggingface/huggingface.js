@@ -7,9 +7,11 @@ def query(payload):
             return
         yield json.loads(line.decode("utf-8").lstrip("data:").rstrip("/n"))
 
-for chunk in query({
+chunks = query({
     "model": "{{ providerModelId }}",
 {{ inputs.asJsonString }},
     "stream": True,
-}):
+})
+
+for chunk in chunks:
     print(chunk["choices"][0]["delta"]["content"], end="")

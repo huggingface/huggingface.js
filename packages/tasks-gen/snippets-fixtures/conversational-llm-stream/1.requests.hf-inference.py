@@ -13,7 +13,7 @@ def query(payload):
             return
         yield json.loads(line.decode("utf-8").lstrip("data:").rstrip("/n"))
 
-for chunk in query({
+chunks = query({
     "model": "meta-llama/Llama-3.1-8B-Instruct",
     "messages": [
         {
@@ -23,5 +23,7 @@ for chunk in query({
     ],
     "max_tokens": 500,
     "stream": True,
-}):
+})
+
+for chunk in chunks:
     print(chunk["choices"][0]["delta"]["content"], end="")
