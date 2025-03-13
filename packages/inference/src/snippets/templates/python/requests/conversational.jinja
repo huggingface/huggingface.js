@@ -1,0 +1,10 @@
+def query(payload):
+    response = requests.post(API_URL, headers=headers, json=payload)
+    return response.json()
+
+response = query({
+    "model": "{{ providerModelId }}",
+{{ inputs.asJsonString }}
+})
+
+print(response["choices"][0]["message"]) 
