@@ -550,6 +550,11 @@ export const PIPELINE_DATA = {
 		color: "blue",
 		hideInModels: true,
 	},
+	"text-ranking": {
+		name: "Text Ranking",
+		modality: "nlp",
+		color: "red",
+	},
 	"text-retrieval": {
 		name: "Text Retrieval",
 		subtasks: [
