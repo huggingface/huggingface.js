@@ -15,7 +15,7 @@ describe("XetBlob", () => {
 		expect(await blob.slice(10, 22).text()).toBe("__metadata__");
 	}, 30_000);
 
-	describe.only("bg4_regoup_bytes", () => {
+	describe("bg4_regoup_bytes", () => {
 		it("should regroup bytes when the array is %4 length", () => {
 			expect(bg4_regoup_bytes(new Uint8Array([1, 5, 2, 6, 3, 7, 4, 8]))).toEqual(
 				new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
