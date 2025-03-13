@@ -3,8 +3,7 @@ def query(payload):
     return response.json()
 
 response = query({
-    "model": "{{ providerModelId }}",
-{{ inputs.asJsonString }}
+{{ providerInputs.asJsonString }}
 })
 
 print(response["choices"][0]["message"])

@@ -14,7 +14,6 @@ def query(payload):
         yield json.loads(line.decode("utf-8").lstrip("data:").rstrip("/n"))
 
 chunks = query({
-    "model": "<together alias for meta-llama/Llama-3.1-8B-Instruct>",
     "messages": [
         {
             "role": "user",
@@ -22,6 +21,7 @@ chunks = query({
         }
     ],
     "max_tokens": 500,
+    "model": "<together alias for meta-llama/Llama-3.1-8B-Instruct>",
     "stream": True,
 })
 

@@ -8,14 +8,14 @@ def query(payload):
     return response.json()
 
 response = query({
-    "model": "meta-llama/Llama-3.1-8B-Instruct",
     "messages": [
         {
             "role": "user",
             "content": "What is the capital of France?"
         }
     ],
-    "max_tokens": 500
+    "max_tokens": 500,
+    "model": "meta-llama/Llama-3.1-8B-Instruct"
 })
 
 print(response["choices"][0]["message"])

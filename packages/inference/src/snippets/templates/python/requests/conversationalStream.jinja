@@ -8,8 +8,7 @@ def query(payload):
         yield json.loads(line.decode("utf-8").lstrip("data:").rstrip("/n"))
 
 chunks = query({
-    "model": "{{ providerModelId }}",
-{{ inputs.asJsonString }},
+{{ providerInputs.asJsonString }},
     "stream": True,
 })
 

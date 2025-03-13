@@ -6,7 +6,7 @@ def query(payload):
     return response.content
 
 image_bytes = query({
-{{ inputs.asJsonString }}
+{{ providerInputs.asJsonString }}
 })
 
 # You can access the image with PIL.Image for example

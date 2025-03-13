@@ -4,7 +4,7 @@ def query(payload):
     return response.content
 
 audio_bytes = query({
-    "inputs": {{ inputs.asObj.inputs }},
+    "inputs": {{ providerInputs.asObj.inputs }},
 })
 # You can access the audio with IPython.display for example
 from IPython.display import Audio
@@ -15,7 +15,7 @@ def query(payload):
     return response.json()
 
 audio, sampling_rate = query({
-    "inputs": {{ inputs.asObj.inputs }},
+    "inputs": {{ providerInputs.asObj.inputs }},
 })
 # You can access the audio with IPython.display for example
 from IPython.display import Audio

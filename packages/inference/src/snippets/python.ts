@@ -17,6 +17,7 @@ interface TemplateParams {
 	baseUrl?: string;
 	fullUrl?: string;
 	inputs?: object;
+	providerInputs?: object;
 	model?: ModelDataMinimal;
 	provider?: InferenceProvider;
 	providerModelId?: string;
@@ -115,6 +116,18 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 			{ chatCompletion: templateName.includes("conversational"), task: model.pipeline_tag as InferenceTask }
 		);
 
+		/// Parse request.info.body if not a binary.
+		/// This is the body sent to the provider. Important for snippets with raw payload (e.g curl, requests, etc.)
+		let providerInputs = inputs;
+		const bodyAsObj = request.info.body;
+		if (typeof bodyAsObj === "string") {
+			try {
+				providerInputs = JSON.parse(bodyAsObj);
+			} catch (e) {
+				console.error("Failed to parse body as JSON", e);
+			}
+		}
+
 		/// Prepare template injection data
 		const params: TemplateParams = {
 			accessToken,
@@ -125,6 +138,11 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 				asObj: inputs,
 				asJsonString: formatBody(inputs, "json"),
 				asPythonString: indentString(formatBody(inputs, "python"), 4),
+			},
+			providerInputs: {
+				asObj: providerInputs,
+				asJsonString: formatBody(providerInputs, "json"),
+				asPythonString: indentString(formatBody(providerInputs, "python"), 4),
 			},
 			model,
 			provider,

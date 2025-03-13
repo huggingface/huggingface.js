@@ -8,7 +8,6 @@ def query(payload):
     return response.json()
 
 response = query({
-    "model": "<fireworks-ai alias for meta-llama/Llama-3.2-11B-Vision-Instruct>",
     "messages": [
         {
             "role": "user",
@@ -26,7 +25,8 @@ response = query({
             ]
         }
     ],
-    "max_tokens": 500
+    "max_tokens": 500,
+    "model": "<fireworks-ai alias for meta-llama/Llama-3.2-11B-Vision-Instruct>"
 })
 
 print(response["choices"][0]["message"])

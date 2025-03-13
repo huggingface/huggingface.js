@@ -14,7 +14,6 @@ def query(payload):
         yield json.loads(line.decode("utf-8").lstrip("data:").rstrip("/n"))
 
 chunks = query({
-    "model": "<fireworks-ai alias for meta-llama/Llama-3.2-11B-Vision-Instruct>",
     "messages": [
         {
             "role": "user",
@@ -33,6 +32,7 @@ chunks = query({
         }
     ],
     "max_tokens": 500,
+    "model": "<fireworks-ai alias for meta-llama/Llama-3.2-11B-Vision-Instruct>",
     "stream": True,
 })
 
