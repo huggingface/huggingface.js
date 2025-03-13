@@ -183,6 +183,7 @@ export class XetBlob extends Blob {
 			let readBytesToSkip = reconstructionInfo.offset_into_first_range;
 
 			for (const term of reconstructionInfo.terms) {
+				// console.log("term", term, readBytesToSkip, totalBytesRead);
 				if (totalBytesRead >= maxBytes) {
 					break;
 				}
@@ -277,14 +278,14 @@ export class XetBlob extends Blob {
 
 							if (chunksToSkip) {
 								chunksToSkip--;
-								leftoverBytes = result.value.slice(CHUNK_HEADER_BYTES);
+								result.value = result.value.slice(CHUNK_HEADER_BYTES);
 								bytesToSkip = chunkHeader.compressed_length;
 								continue;
 							}
 
 							if (readBytesToSkip >= chunkHeader.uncompressed_length) {
 								readBytesToSkip -= chunkHeader.uncompressed_length;
-								leftoverBytes = result.value.slice(CHUNK_HEADER_BYTES);
+								result.value = result.value.slice(CHUNK_HEADER_BYTES);
 								bytesToSkip = chunkHeader.compressed_length;
 								chunksToRead--;
 								continue;
