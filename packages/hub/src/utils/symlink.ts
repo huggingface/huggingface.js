@@ -1,3 +1,7 @@
+/**
+ * Heavily inspired by https://github.com/huggingface/huggingface_hub/blob/fcfd14361bd03f23f82efced1aa65a7cbfa4b922/src/huggingface_hub/file_download.py#L517
+ */
+
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import { getHFHubCachePath } from "../lib";
@@ -54,7 +58,9 @@ async function areSymlinksSupported(cache_dir: string | undefined): Promise<bool
 				await fs.symlink(dst_path, relative_src);
 			} catch (_e: unknown) {
 				_are_symlinks_supported_in_dir.set(cache_dir, false);
-				let message = `
+
+				if (!process.env.HF_HUB_DISABLE_SYMLINKS_WARNING) {
+					let message = `
 					\`huggingface_hub\` cache-system uses symlinks by default to
 					efficiently store duplicated files but your machine does not
 					support them in ${cache_dir}. Caching files will still work
@@ -64,16 +70,17 @@ async function areSymlinksSupported(cache_dir: string | undefined): Promise<bool
 					more details, see
 					https://huggingface.co/docs/huggingface_hub/how-to-cache#limitations.
 					`;
-				if (os.platform() === "win32") {
-					message += `
+					if (os.platform() === "win32") {
+						message += `
 						\nTo support symlinks on Windows, you either need to
 						activate Developer Mode or to run Python as an
 						administrator. In order to activate developer mode,
 						see this article:
 						https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development
 						`;
+					}
+					console.warn(message);
 				}
-				console.warn(message);
 			}
 		} finally {
 			await fs.rm(tmp_dir, { recursive: true });
