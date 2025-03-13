@@ -22,6 +22,7 @@ interface TemplateParams {
 	providerModelId?: string;
 	methodName?: string; // specific to snippetBasic
 	importBase64?: boolean; // specific to snippetImportRequests
+	importJson?: boolean; // specific to snippetImportRequests
 }
 
 // Helpers to find + load templates
@@ -157,6 +158,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 				const importSection = snippetImportRequests({
 					...params,
 					importBase64: snippet.includes("base64"),
+					importJson: snippet.includes("json."),
 				});
 				snippet = `${importSection}\n\n${snippet}`;
 			}
