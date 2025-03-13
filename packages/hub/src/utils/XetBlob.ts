@@ -3,7 +3,7 @@ import { createApiError } from "../error";
 import type { CredentialsParams, RepoDesignation, RepoId } from "../types/public";
 import { checkCredentials } from "./checkCredentials";
 import { toRepoId } from "./toRepoId";
-import lz4 from "lz4js";
+import { decompress as lz4Decompress } from "../vendor/lz4js";
 
 const JWT_SAFETY_PERIOD = 60_000;
 const JWT_CACHE_SIZE = 1_000;
@@ -272,10 +272,7 @@ export class XetBlob extends Blob {
 
 							const uncompressed =
 								chunkHeader.compression_scheme === CompressionScheme.LZ4
-									? lz4.decompress(
-											result.value.slice(0, chunkHeader.compressed_length),
-											chunkHeader.uncompressed_length
-									  )
+									? lz4Decompress(result.value.slice(0, chunkHeader.compressed_length), chunkHeader.uncompressed_length)
 									: result.value.slice(0, chunkHeader.compressed_length);
 
 							if (readBytesToSkip) {

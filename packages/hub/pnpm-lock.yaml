@@ -8,33 +8,19 @@ dependencies:
   '@huggingface/tasks':
     specifier: workspace:^
     version: link:../tasks
-  lz4js:
-    specifier: ^0.2.0
-    version: 0.2.0
 
 devDependencies:
-  '@types/lz4js':
-    specifier: ^0.2.1
-    version: 0.2.1
   '@types/node':
     specifier: ^20.11.28
     version: 20.11.28
 
 packages:
 
-  /@types/lz4js@0.2.1:
-    resolution: {integrity: sha512-aAnbA4uKPNqZqu0XK1QAwKP0Wskb4Oa7ZFqxW5CMIyGgqYQKFgBxTfK3m3KODXoOLv5t14VregzgrEak13uGQA==}
-    dev: true
-
   /@types/node@20.11.28:
     resolution: {integrity: sha512-M/GPWVS2wLkSkNHVeLkrF2fD5Lx5UC4PxA0uZcKc6QqbIQUJyW1jVjueJYi1z8n0I5PxYrtpnPnWglE+y9A0KA==}
     dependencies:
       undici-types: 5.26.5
     dev: true
-
-  /lz4js@0.2.0:
-    resolution: {integrity: sha512-gY2Ia9Lm7Ep8qMiuGRhvUq0Q7qUereeldZPP1PMEJxPtEWHJLqw9pgX68oHajBH0nzJK4MaZEA/YNV3jT8u8Bg==}
-    dev: false
 
   /undici-types@5.26.5:
     resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}

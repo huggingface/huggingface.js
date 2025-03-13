@@ -59,11 +59,9 @@
 	"author": "Hugging Face",
 	"license": "MIT",
 	"devDependencies": {
-		"@types/lz4js": "^0.2.1",
 		"@types/node": "^20.11.28"
 	},
 	"dependencies": {
-		"@huggingface/tasks": "workspace:^",
-		"lz4js": "^0.2.0"
+		"@huggingface/tasks": "workspace:^"
 	}
 }
