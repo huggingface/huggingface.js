@@ -437,25 +437,42 @@ export function bg4_regoup_bytes(bytes: Uint8Array): Uint8Array {
 	const g3_pos = g2_pos + split + (rem == 3 ? 1 : 0);
 
 	const ret = new Uint8Array(bytes.length);
-	for (let i = 0; i < bytes.length - 3; i += 4) {
-		ret[i] = bytes[i / 4];
-		ret[i + 1] = bytes[g1_pos + i / 4];
-		ret[i + 2] = bytes[g2_pos + i / 4];
-		ret[i + 3] = bytes[g3_pos + i / 4];
+	for (let i = 0, j = 0; i < bytes.length; i += 4, j++) {
+		ret[i] = bytes[j];
 	}
 
-	if (rem === 1) {
-		ret[bytes.length - 1] = bytes[g1_pos - 1];
-	} else if (rem === 2) {
-		ret[bytes.length - 2] = bytes[g1_pos - 1];
-		ret[bytes.length - 1] = bytes[g2_pos - 1];
-	} else if (rem === 3) {
-		ret[bytes.length - 3] = bytes[g1_pos - 1];
-		ret[bytes.length - 2] = bytes[g2_pos - 1];
-		ret[bytes.length - 1] = bytes[g3_pos - 1];
+	for (let i = 1, j = g1_pos; i < bytes.length; i += 4, j++) {
+		ret[i] = bytes[j];
+	}
+
+	for (let i = 2, j = g2_pos; i < bytes.length; i += 4, j++) {
+		ret[i] = bytes[j];
+	}
+
+	for (let i = 3, j = g3_pos; i < bytes.length; i += 4, j++) {
+		ret[i] = bytes[j];
 	}
 
 	return ret;
+
+	// alternative implementation (to benchmark which one is faster)
+	// for (let i = 0; i < bytes.length - 3; i += 4) {
+	// 	ret[i] = bytes[i / 4];
+	// 	ret[i + 1] = bytes[g1_pos + i / 4];
+	// 	ret[i + 2] = bytes[g2_pos + i / 4];
+	// 	ret[i + 3] = bytes[g3_pos + i / 4];
+	// }
+
+	// if (rem === 1) {
+	// 	ret[bytes.length - 1] = bytes[g1_pos - 1];
+	// } else if (rem === 2) {
+	// 	ret[bytes.length - 2] = bytes[g1_pos - 1];
+	// 	ret[bytes.length - 1] = bytes[g2_pos - 1];
+	// } else if (rem === 3) {
+	// 	ret[bytes.length - 3] = bytes[g1_pos - 1];
+	// 	ret[bytes.length - 2] = bytes[g2_pos - 1];
+	// 	ret[bytes.length - 1] = bytes[g3_pos - 1];
+	// }
 }
 
 async function getAccessToken(
