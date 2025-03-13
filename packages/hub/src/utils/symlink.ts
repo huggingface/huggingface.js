@@ -7,6 +7,7 @@ import * as path from "node:path";
 import { getHFHubCachePath } from "../lib";
 import * as os from "node:os";
 
+const MAX_CACHE_SIZE = 1000;
 const _are_symlinks_supported_in_dir = new Map<string, boolean>();
 
 export function reset(): void {
@@ -91,6 +92,13 @@ async function areSymlinksSupported(cache_dir: string | undefined): Promise<bool
 			}
 		} finally {
 			await fs.rm(tmp_dir, { recursive: true });
+
+			if (_are_symlinks_supported_in_dir.size > MAX_CACHE_SIZE) {
+				const key = _are_symlinks_supported_in_dir.keys().next().value;
+				if (key) {
+					_are_symlinks_supported_in_dir.delete(key);
+				}
+			}
 		}
 	}
 	return _are_symlinks_supported_in_dir.get(cache_dir) ?? false;
