@@ -94,5 +94,5 @@ describe("uploadFile", () => {
 				hubUrl: TEST_HUB_URL,
 			});
 		}
-	});
+	}, 30_000);
 });
