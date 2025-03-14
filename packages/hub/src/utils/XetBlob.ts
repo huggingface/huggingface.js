@@ -183,10 +183,10 @@ export class XetBlob extends Blob {
 			let readBytesToSkip = reconstructionInfo.offset_into_first_range;
 
 			for (const term of reconstructionInfo.terms) {
-				// console.log("term", term, readBytesToSkip, totalBytesRead);
 				if (totalBytesRead >= maxBytes) {
 					break;
 				}
+
 				const fetchInfo = reconstructionInfo.fetch_info[term.hash].find(
 					(info) => info.range.start <= term.range.start && info.range.end >= term.range.end
 				);
@@ -240,6 +240,7 @@ export class XetBlob extends Blob {
 									continue readChunks;
 								}
 								result.value = result.value.slice(bytesToSkip);
+								bytesToSkip = 0;
 							}
 							if (leftoverBytes) {
 								result.value = new Uint8Array([...leftoverBytes, ...result.value]);
@@ -314,21 +315,26 @@ export class XetBlob extends Blob {
 									    )
 									  : result.value.slice(0, chunkHeader.compressed_length);
 
+							let bytesToYield: Uint8Array;
 							if (readBytesToSkip) {
-								yield uncompressed.slice(
-									readBytesToSkip,
-									Math.min(uncompressed.length, readBytesToSkip + maxBytes - totalBytesRead)
-								);
-								totalBytesRead += Math.min(uncompressed.length, readBytesToSkip + maxBytes - totalBytesRead);
+								const remainingBytes = Math.min(uncompressed.length - readBytesToSkip, maxBytes - totalBytesRead);
+								bytesToYield = uncompressed.slice(readBytesToSkip, readBytesToSkip + remainingBytes);
 								readBytesToSkip = 0;
 							} else {
-								yield uncompressed.slice(0, Math.min(uncompressed.length, maxBytes - totalBytesRead));
-								totalBytesRead += Math.min(uncompressed.length, maxBytes - totalBytesRead);
+								bytesToYield = uncompressed.slice(0, Math.min(uncompressed.length, maxBytes - totalBytesRead));
 							}
+
+							totalBytesRead += bytesToYield.length;
+							yield bytesToYield;
 							chunksToRead--;
+
+							result.value = result.value.slice(chunkHeader.compressed_length);
 						}
 					}
 				}
+
+				// Release the reader
+				await reader.cancel();
 			}
 		}
 

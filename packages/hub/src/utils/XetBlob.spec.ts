@@ -93,13 +93,13 @@ describe("XetBlob", () => {
 			"https://huggingface.co/celinah/xet-experiments/resolve/main/model5GB.safetensors",
 			{
 				headers: {
-					Range: "bytes=10000000-10100000",
+					Range: "bytes=10000000-10099999",
 				},
 			}
 		).then((res) => res.arrayBuffer());
 
 		expect(new Uint8Array(xetDownload)).toEqual(new Uint8Array(bridgeDownload));
-	});
+	}, 30_000);
 
 	it("should load text correctly when offset_into_range starts in a chunk further than the first", async () => {
 		const blob = new XetBlob({
@@ -147,8 +147,9 @@ describe("XetBlob", () => {
 			},
 		}).then((res) => res.text());
 
+		console.log("xet", text.length, "bridge", bridgeDownload.length);
 		expect(text.length).toBe(bridgeDownload.length);
-	});
+	}, 30_000);
 
 	describe("bg4_regoup_bytes", () => {
 		it("should regroup bytes when the array is %4 length", () => {
