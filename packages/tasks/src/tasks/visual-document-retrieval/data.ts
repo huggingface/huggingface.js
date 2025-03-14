@@ -48,8 +48,12 @@ const taskData: TaskDataCustom = {
     ],
     models: [
         {
-            description: "A visual question answering model trained to convert charts and plots to text.",
-            id: "google/deplot",
+            description: "Very accurate visual document retrieval model for multilingual queries and documents.",
+            id: "vidore/colqwen2-v1.0",
+        },
+        {
+            description: "Very fast and efficient visual document retrieval model that works on five languages.",
+            id: "marco/mcdse-2b-v1",
         },
     ],
     spaces: [
