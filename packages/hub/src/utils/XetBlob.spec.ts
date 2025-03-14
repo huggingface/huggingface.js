@@ -98,6 +98,7 @@ describe("XetBlob", () => {
 			}
 		).then((res) => res.arrayBuffer());
 
+		console.log("xet", xetDownload.byteLength, "bridge", bridgeDownload.byteLength);
 		expect(new Uint8Array(xetDownload)).toEqual(new Uint8Array(bridgeDownload));
 	}, 30_000);
 
