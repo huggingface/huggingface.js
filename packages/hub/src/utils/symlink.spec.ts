@@ -1,8 +1,8 @@
 import { describe, test, expect, vi, beforeEach } from "vitest";
 import * as fs from "node:fs/promises";
-import { createSymlink, reset } from "./symlink";
+import { createSymlink } from "./symlink";
 import * as path from "node:path";
-import { FileHandle } from "node:fs/promises";
+import type { FileHandle } from "node:fs/promises";
 
 vi.mock("node:fs/promises", () => ({
 	rm: vi.fn(),
@@ -26,7 +26,6 @@ describe("createSymlink", () => {
 		vi.resetAllMocks();
 		vi.mocked(fs.mkdtemp).mockImplementation(async (prefix) => `${prefix}/temp`);
 		vi.mocked(fs.open).mockResolvedValue({ close: vi.fn() } as unknown as FileHandle);
-		reset();
 	});
 
 	test("should remove existing destination", async () => {
@@ -53,12 +52,12 @@ describe("createSymlink", () => {
 	describe("symlink supported", () => {
 		test("should symlink", async () => {
 			await createSymlink(dst, src);
-			expect(fs.symlink).toHaveBeenCalledWith(path.resolve(dst), "src");
+			expect(fs.symlink).toHaveBeenCalledWith(path.resolve(dst), path.resolve(src));
 		});
 
 		test("should symlink if new_blob is true", async () => {
 			await createSymlink(dst, src, true);
-			expect(fs.symlink).toHaveBeenCalledWith(path.resolve(dst), "src");
+			expect(fs.symlink).toHaveBeenCalledWith(path.resolve(dst), path.resolve(src));
 		});
 	});
 });
