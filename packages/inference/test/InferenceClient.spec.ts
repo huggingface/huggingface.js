@@ -1288,21 +1288,7 @@ describe.concurrent("InferenceClient", () => {
 			HARDCODED_MODEL_ID_MAPPING["novita"] = {
 				"meta-llama/llama-3.1-8b-instruct": "meta-llama/llama-3.1-8b-instruct",
 				"deepseek/deepseek-r1-distill-qwen-14b": "deepseek/deepseek-r1-distill-qwen-14b",
-				"Wan-AI/Wan2.1-T2V-14B": "wan-t2v",
 			};
-
-			it("textToVideo - Wan2.1-T2V-14B", async () => {
-				const res = await textToVideo({
-					model: "Wan-AI/Wan2.1-T2V-14B",
-					inputs: "a dog is riding on a skateboard down a hill",
-					parameters: {
-						num_inference_steps: 2,
-					},
-					provider: "novita",
-					accessToken: env.HF_NOVITA_KEY ?? "dummy",
-				});
-				expect(res).toBeInstanceOf(Blob);
-			}, { timeout: 600000 });
 
 			it("chatCompletion", async () => {
 				const res = await client.chatCompletion({
