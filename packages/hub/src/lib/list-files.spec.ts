@@ -60,7 +60,7 @@ describe("listFiles", () => {
 				type: "file",
 			},
 		]);
-	});
+	}, 30_000);
 
 	it("should fetch the list of files from the repo, including last commit", async () => {
 		const cursor = listFiles({
@@ -146,7 +146,7 @@ describe("listFiles", () => {
 				type: "file",
 			},
 		]);
-	});
+	}, 30_000);
 
 	it("should fetch the list of files from the repo, including subfolders", async () => {
 		const cursor = listFiles({
@@ -165,5 +165,5 @@ describe("listFiles", () => {
 		}
 
 		assert(files.some((file) => file.path === "data/XSUM-EMNLP18-Summary-Data-Original.tar.gz"));
-	});
+	}, 30_000);
 });
