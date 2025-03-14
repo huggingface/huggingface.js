@@ -29,7 +29,7 @@ const makeUrl = (params: UrlParams): string => {
 		/// when deployed on hf-inference, those two tasks are automatically compatible with one another.
 		return `${params.baseUrl}/pipeline/${params.task}/${params.model}`;
 	}
-	if (params.task === "text-generation" && params.chatCompletion) {
+	if (params.chatCompletion) {
 		return `${params.baseUrl}/models/${params.model}/v1/chat/completions`;
 	}
 	return `${params.baseUrl}/models/${params.model}`;

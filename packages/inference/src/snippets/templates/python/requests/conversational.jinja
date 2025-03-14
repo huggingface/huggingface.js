@@ -2,6 +2,8 @@ def query(payload):
     response = requests.post(API_URL, headers=headers, json=payload)
     return response.json()
 
-output = query({
-    "inputs": {{ providerInputs.asObj.inputs }},
-}) 
+response = query({
+{{ providerInputs.asJsonString }}
+})
+
+print(response["choices"][0]["message"])

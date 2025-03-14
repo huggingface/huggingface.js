@@ -4,7 +4,7 @@ import fal_client
 result = fal_client.subscribe(
     "{{ providerModelId }}",
     arguments={
-        "prompt": {{ inputs }},
+        "prompt": {{ inputs.asObj.inputs }},
     },
 )
 print(result)

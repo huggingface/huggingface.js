@@ -1,31 +1,29 @@
 import type { PipelineType, WidgetType } from "@huggingface/tasks/src/pipelines.js";
 import type { ChatCompletionInputMessage, GenerationParameters } from "@huggingface/tasks/src/tasks/index.js";
-import {
-	openAIbaseUrl,
-	type InferenceSnippet,
-	type ModelDataMinimal,
-	getModelInputSnippet,
-	stringifyGenerationConfig,
-	stringifyMessages,
-} from "@huggingface/tasks";
-import type { InferenceProvider } from "../types";
+import { type InferenceSnippet, type ModelDataMinimal, getModelInputSnippet } from "@huggingface/tasks";
+import type { InferenceProvider, InferenceTask, RequestArgs } from "../types";
 import { Template } from "@huggingface/jinja";
+import { makeRequestOptionsFromResolvedModel } from "../lib/makeRequestOptions";
 import fs from "fs";
 import path from "path";
 import { existsSync as pathExists } from "node:fs";
 
 const TOOLS = ["huggingface_hub", "requests", "fal_client", "openai"];
 
-type InputPreparationFn = (model: ModelDataMinimal, opts?: Record<string, unknown>) => string | object;
+type InputPreparationFn = (model: ModelDataMinimal, opts?: Record<string, unknown>) => object;
 interface TemplateParams {
 	accessToken?: string;
+	authorizationHeader?: string;
 	baseUrl?: string;
-	inputs?: string | object;
+	fullUrl?: string;
+	inputs?: object;
+	providerInputs?: object;
 	model?: ModelDataMinimal;
 	provider?: InferenceProvider;
 	providerModelId?: string;
 	methodName?: string; // specific to snippetBasic
 	importBase64?: boolean; // specific to snippetImportRequests
+	importJson?: boolean; // specific to snippetImportRequests
 }
 
 // Helpers to find + load templates
@@ -100,16 +98,58 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		providerModelId?: string,
 		opts?: Record<string, unknown>
 	): InferenceSnippet[] => {
+		/// Hacky: hard-code conversational templates here
+		if (
+			model.pipeline_tag &&
+			["text-generation", "image-text-to-text"].includes(model.pipeline_tag) &&
+			model.tags.includes("conversational")
+		) {
+			templateName = opts?.streaming ? "conversationalStream" : "conversational";
+			inputPreparationFn = prepareConversationalInput;
+		}
+
+		/// Prepare inputs + make request
+		const inputs = inputPreparationFn ? inputPreparationFn(model, opts) : { inputs: getModelInputSnippet(model) };
+		const request = makeRequestOptionsFromResolvedModel(
+			providerModelId ?? model.id,
+			{ accessToken: accessToken, model: providerModelId, provider: provider, ...inputs } as RequestArgs,
+			{ chatCompletion: templateName.includes("conversational"), task: model.pipeline_tag as InferenceTask }
+		);
+
+		/// Parse request.info.body if not a binary.
+		/// This is the body sent to the provider. Important for snippets with raw payload (e.g curl, requests, etc.)
+		let providerInputs = inputs;
+		const bodyAsObj = request.info.body;
+		if (typeof bodyAsObj === "string") {
+			try {
+				providerInputs = JSON.parse(bodyAsObj);
+			} catch (e) {
+				console.error("Failed to parse body as JSON", e);
+			}
+		}
+
+		/// Prepare template injection data
 		const params: TemplateParams = {
 			accessToken,
-			baseUrl: templateName.includes("conversational") ? openAIbaseUrl(provider) : undefined,
-			inputs: inputPreparationFn ? inputPreparationFn(model, opts) : getModelInputSnippet(model),
+			authorizationHeader: (request.info.headers as Record<string, string>)?.Authorization,
+			baseUrl: removeSuffix(request.url, "/chat/completions"),
+			fullUrl: request.url,
+			inputs: {
+				asObj: inputs,
+				asJsonString: formatBody(inputs, "json"),
+				asPythonString: indentString(formatBody(inputs, "python"), 4),
+			},
+			providerInputs: {
+				asObj: providerInputs,
+				asJsonString: formatBody(providerInputs, "json"),
+				asPythonString: indentString(formatBody(providerInputs, "python"), 4),
+			},
 			model,
 			provider,
 			providerModelId: providerModelId ?? model.id,
 		};
 
-		// Iterate over tools => check if a snippet exists => generate
+		/// Iterate over tools => check if a snippet exists => generate
 		return TOOLS.map((tool) => {
 			if (!hasTemplate(tool, templateName)) {
 				return;
@@ -121,71 +161,57 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 				}
 				params["methodName"] = HFH_INFERENCE_CLIENT_METHODS[model.pipeline_tag];
 			}
-			return {
-				client: tool,
-				content: template(params).trim(),
-			};
+
+			/// Generate snippet
+			let snippet = template(params).trim();
+			if (!snippet) {
+				return;
+			}
+
+			/// Add import section separately
+			if (tool === "huggingface_hub") {
+				const importSection = snippetImportInferenceClient({ ...params });
+				snippet = `${importSection}\n\n${snippet}`;
+			} else if (tool === "requests") {
+				const importSection = snippetImportRequests({
+					...params,
+					importBase64: snippet.includes("base64"),
+					importJson: snippet.includes("json."),
+				});
+				snippet = `${importSection}\n\n${snippet}`;
+			}
+
+			/// Snippet is ready!
+			return { client: tool, content: snippet };
 		}).filter((snippet) => snippet !== undefined && snippet.content) as InferenceSnippet[];
 	};
 };
 
-// Input preparation functions (required for a few tasks)
+const prepareDocumentQuestionAnsweringInput = (model: ModelDataMinimal): object => {
+	return JSON.parse(getModelInputSnippet(model) as string);
+};
+
+const prepareImageToImageInput = (model: ModelDataMinimal): object => {
+	const data = JSON.parse(getModelInputSnippet(model) as string);
+	return { inputs: data.image, parameters: { prompt: data.prompt } };
+};
+
 const prepareConversationalInput = (
 	model: ModelDataMinimal,
 	opts?: {
 		streaming?: boolean;
 		messages?: ChatCompletionInputMessage[];
 		temperature?: GenerationParameters["temperature"];
-		max_tokens?: GenerationParameters["max_tokens"];
+		max_tokens?: GenerationParameters["max_new_tokens"];
 		top_p?: GenerationParameters["top_p"];
 	}
 ): object => {
-	const exampleMessages = getModelInputSnippet(model) as ChatCompletionInputMessage[];
-	const messages = opts?.messages ?? exampleMessages;
-	const config = {
+	return {
+		messages: opts?.messages ?? getModelInputSnippet(model),
 		...(opts?.temperature ? { temperature: opts?.temperature } : undefined),
 		max_tokens: opts?.max_tokens ?? 500,
 		...(opts?.top_p ? { top_p: opts?.top_p } : undefined),
 	};
-
-	return {
-		messagesStr: stringifyMessages(messages, { attributeKeyQuotes: true }),
-		configStr: stringifyGenerationConfig(config, {
-			indent: "\n\t",
-			attributeValueConnector: "=",
-		}),
-	};
-};
-
-const prepareDocumentQuestionAnsweringInput = (model: ModelDataMinimal): object => {
-	const inputsAsStr = getModelInputSnippet(model) as string;
-	const inputsAsObj = JSON.parse(inputsAsStr);
-	return { asObj: inputsAsObj, asStr: inputsAsStr };
-};
-
-const prepareImageToImageInput = (model: ModelDataMinimal): object => {
-	return JSON.parse(getModelInputSnippet(model) as string);
-};
-
-const snippetConversational = (
-	model: ModelDataMinimal,
-	accessToken: string,
-	provider: InferenceProvider,
-	providerModelId?: string,
-	opts?: {
-		streaming?: boolean;
-		messages?: ChatCompletionInputMessage[];
-		temperature?: GenerationParameters["temperature"];
-		max_tokens?: GenerationParameters["max_tokens"];
-		top_p?: GenerationParameters["top_p"];
-	}
-): InferenceSnippet[] => {
-	const streaming = opts?.streaming ?? true;
-	const templateName = streaming ? "conversationalStream" : "conversational";
-	return snippetGenerator(templateName, prepareConversationalInput)(model, accessToken, provider, providerModelId, {
-		...opts,
-		streaming,
-	});
 };
 
 const pythonSnippets: Partial<
@@ -208,7 +234,7 @@ const pythonSnippets: Partial<
 	"fill-mask": snippetGenerator("basic"),
 	"image-classification": snippetGenerator("basicFile"),
 	"image-segmentation": snippetGenerator("basicFile"),
-	"image-text-to-text": snippetConversational,
+	"image-text-to-text": snippetGenerator("conversational"),
 	"image-to-image": snippetGenerator("imageToImage", prepareImageToImageInput),
 	"image-to-text": snippetGenerator("basicFile"),
 	"object-detection": snippetGenerator("basicFile"),
@@ -237,34 +263,44 @@ export function getPythonInferenceSnippet(
 	providerModelId?: string,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
-	const snippets = model.tags.includes("conversational")
-		? snippetConversational(model, accessToken, provider, providerModelId, opts)
-		: model.pipeline_tag && model.pipeline_tag in pythonSnippets
-		  ? pythonSnippets[model.pipeline_tag]?.(model, accessToken, provider, providerModelId) ?? []
-		  : [];
-
-	return snippets.map((snippet) => addImportsToSnippet(snippet, model, accessToken, provider));
+	return model.pipeline_tag && model.pipeline_tag in pythonSnippets
+		? pythonSnippets[model.pipeline_tag]?.(model, accessToken, provider, providerModelId, opts) ?? []
+		: [];
 }
 
-const addImportsToSnippet = (
-	snippet: InferenceSnippet,
-	model: ModelDataMinimal,
-	accessToken: string,
-	provider: InferenceProvider
-): InferenceSnippet => {
-	let importSection: string | undefined = undefined;
-	if (snippet.client === "huggingface_hub") {
-		importSection = snippetImportInferenceClient({ accessToken, provider });
-	} else if (snippet.content.includes("requests")) {
-		importSection = snippetImportRequests({
-			accessToken,
-			model: model,
-			provider,
-			importBase64: snippet.content.includes("base64"),
-		});
+function formatBody(obj: object, format: "python" | "json" | "js" | "curl"): string {
+	if (format === "python") {
+		return Object.entries(obj)
+			.map(([key, value]) => {
+				const formattedValue = JSON.stringify(value, null, 4).replace(/"/g, '"');
+				return `${key}=${formattedValue},`;
+			})
+			.join("\n");
 	}
-	return {
-		...snippet,
-		content: importSection ? `${importSection}\n\n${snippet.content}` : snippet.content,
-	};
-};
+
+	if (format === "js") {
+		return JSON.stringify({ provider: "together", ...obj }, null, 4).replace(/"([^(")]+)":/g, "$1:");
+	}
+
+	if (format === "json") {
+		/// Hacky: remove outer brackets
+		return JSON.stringify(obj, null, 4).split("\n").slice(1, -1).join("\n");
+	}
+
+	if (format === "curl") {
+		return `'${JSON.stringify(obj, null, 4)}'`;
+	}
+
+	throw new Error("Unsupported format");
+}
+
+function indentString(str: string, indent: number): string {
+	return str
+		.split("\n")
+		.map((line) => " ".repeat(indent) + line)
+		.join("\n");
+}
+
+function removeSuffix(str: string, suffix: string) {
+	return str.endsWith(suffix) ? str.slice(0, -suffix.length) : str;
+}

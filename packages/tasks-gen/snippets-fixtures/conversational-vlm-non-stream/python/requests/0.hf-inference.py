@@ -1,13 +1,14 @@
-from openai import OpenAI
+import requests
 
-client = OpenAI(
-    base_url="https://api.fireworks.ai/inference/v1",
-    api_key="api_token"
-)
+API_URL = "https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.2-11B-Vision-Instruct/v1/chat/completions"
+headers = {"Authorization": "Bearer api_token"}
 
-stream = client.chat.completions.create(
-    model="<fireworks-ai alias for meta-llama/Llama-3.2-11B-Vision-Instruct>",
-    messages=[
+def query(payload):
+    response = requests.post(API_URL, headers=headers, json=payload)
+    return response.json()
+
+response = query({
+    "messages": [
         {
             "role": "user",
             "content": [
@@ -24,9 +25,8 @@ stream = client.chat.completions.create(
             ]
         }
     ],
-    max_tokens=500,
-    stream=True,
-)
+    "max_tokens": 500,
+    "model": "meta-llama/Llama-3.2-11B-Vision-Instruct"
+})
 
-for chunk in stream:
-    print(chunk.choices[0].delta.content, end="")
+print(response["choices"][0]["message"])
