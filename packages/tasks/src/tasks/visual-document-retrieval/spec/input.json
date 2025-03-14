@@ -1,0 +1,41 @@
+{
+	"$id": "/inference/schemas/visual-document-retrieval/input.json",
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"description": "Inputs for Visual Document Retrieval inference",
+	"title": "VisualDocumentRetrievalInput",
+	"type": "object",
+	"properties": {
+		"inputs": {
+			"description": "The query or list of queries to",
+			"title": "VisualDocumentRetrievalInputData",
+			"oneOf": [
+				{
+					"type": "string"
+				},
+				{
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			]
+		},
+		"parameters": {
+			"description": "Additional inference parameters for Visual Document Retrieval",
+			"$ref": "#/$defs/VisualDocumentRetrievalParameters"
+		}
+	},
+	"$defs": {
+		"VisualDocumentRetrievalParameters": {
+			"title": "VisualDocumentRetrievalParameters",
+			"type": "object",
+			"properties": {
+				"top_k": {
+					"type": "integer",
+					"description": "The number of answers to return (will be chosen by order of likelihood). Note that we return less than topk answers if there are not enough options available within the context."
+				}
+			}
+		}
+	},
+	"required": ["inputs"]
+}

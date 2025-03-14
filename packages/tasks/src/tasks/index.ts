@@ -33,6 +33,7 @@ import textGeneration from "./text-generation/data.js";
 import textToVideo from "./text-to-video/data.js";
 import unconditionalImageGeneration from "./unconditional-image-generation/data.js";
 import videoClassification from "./video-classification/data.js";
+import visualDocumentRetrieval from "./visual-document-retrieval/data.js";
 import visualQuestionAnswering from "./visual-question-answering/data.js";
 import zeroShotClassification from "./zero-shot-classification/data.js";
 import zeroShotImageClassification from "./zero-shot-image-classification/data.js";
@@ -243,6 +244,7 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	translation: getData("translation", translation),
 	"unconditional-image-generation": getData("unconditional-image-generation", unconditionalImageGeneration),
 	"video-text-to-text": getData("video-text-to-text", videoTextToText),
+	"visual-document-retrieval": getData("visual-document-retrieval", visualDocumentRetrieval),
 	"visual-question-answering": getData("visual-question-answering", visualQuestionAnswering),
 	"voice-activity-detection": undefined,
 	"zero-shot-classification": getData("zero-shot-classification", zeroShotClassification),
