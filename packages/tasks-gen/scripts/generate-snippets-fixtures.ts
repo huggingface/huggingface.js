@@ -268,11 +268,12 @@ async function saveExpectedInferenceSnippet(
 
 	const indexPerClient = new Map<string, number>();
 	for (const snippet of snippets) {
+		const extension = EXTENSIONS[language];
 		const client = snippet.client;
 		const index = indexPerClient.get(client) ?? 0;
 		indexPerClient.set(client, index + 1);
 
-		const file = path.join(fixtureFolder, language, snippet.client, `${index}.${provider}.${language}`);
+		const file = path.join(fixtureFolder, language, snippet.client, `${index}.${provider}.${extension}`);
 		await fs.mkdir(path.dirname(file), { recursive: true });
 		await fs.writeFile(file, snippet.content);
 	}
