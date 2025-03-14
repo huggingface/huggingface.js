@@ -22,12 +22,14 @@ import * as path from "node:path/posix";
 import { snippets } from "@huggingface/inference";
 import type { SnippetInferenceProvider, InferenceSnippet, ModelDataMinimal } from "@huggingface/tasks";
 
-type LANGUAGE = "sh" | "js" | "py";
+const LANGUAGES = ["sh", "js", "python"] as const;
+type Language = (typeof LANGUAGES)[number];
+const EXTENSIONS: Record<Language, string> = { sh: "sh", js: "js", python: "py" };
 
 const TEST_CASES: {
 	testName: string;
 	model: ModelDataMinimal;
-	languages: LANGUAGE[];
+	languages: Language[];
 	providers: SnippetInferenceProvider[];
 	opts?: Record<string, unknown>;
 }[] = [
@@ -39,7 +41,7 @@ const TEST_CASES: {
 			tags: [],
 			inference: "",
 		},
-		languages: ["py"],
+		languages: ["python"],
 		providers: ["hf-inference"],
 	},
 	{
@@ -50,7 +52,7 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-		languages: ["sh", "js", "py"],
+		languages: ["sh", "js", "python"],
 		providers: ["hf-inference", "together"],
 		opts: { streaming: false },
 	},
@@ -62,7 +64,7 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-		languages: ["sh", "js", "py"],
+		languages: ["sh", "js", "python"],
 		providers: ["hf-inference", "together"],
 		opts: { streaming: true },
 	},
@@ -74,7 +76,7 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-		languages: ["sh", "js", "py"],
+		languages: ["sh", "js", "python"],
 		providers: ["hf-inference", "fireworks-ai"],
 		opts: { streaming: false },
 	},
@@ -86,7 +88,7 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-		languages: ["sh", "js", "py"],
+		languages: ["sh", "js", "python"],
 		providers: ["hf-inference", "fireworks-ai"],
 		opts: { streaming: true },
 	},
@@ -98,7 +100,7 @@ const TEST_CASES: {
 			tags: [],
 			inference: "",
 		},
-		languages: ["py"],
+		languages: ["python"],
 		providers: ["hf-inference"],
 	},
 	{
@@ -109,7 +111,7 @@ const TEST_CASES: {
 			tags: [],
 			inference: "",
 		},
-		languages: ["py"],
+		languages: ["python"],
 		providers: ["hf-inference"],
 	},
 	{
@@ -121,7 +123,7 @@ const TEST_CASES: {
 			inference: "",
 		},
 		providers: ["hf-inference"],
-		languages: ["py"],
+		languages: ["python"],
 	},
 	{
 		testName: "text-to-audio-transformers",
@@ -132,7 +134,7 @@ const TEST_CASES: {
 			inference: "",
 		},
 		providers: ["hf-inference"],
-		languages: ["py"],
+		languages: ["python"],
 	},
 	{
 		testName: "text-to-image",
@@ -143,7 +145,7 @@ const TEST_CASES: {
 			inference: "",
 		},
 		providers: ["hf-inference", "fal-ai"],
-		languages: ["sh", "js", "py"],
+		languages: ["sh", "js", "python"],
 	},
 	{
 		testName: "text-to-video",
@@ -154,7 +156,7 @@ const TEST_CASES: {
 			inference: "",
 		},
 		providers: ["replicate", "fal-ai"],
-		languages: ["js", "py"],
+		languages: ["js", "python"],
 	},
 	{
 		testName: "text-classification",
@@ -165,7 +167,7 @@ const TEST_CASES: {
 			inference: "",
 		},
 		providers: ["hf-inference"],
-		languages: ["sh", "js", "py"],
+		languages: ["sh", "js", "python"],
 	},
 	{
 		testName: "basic-snippet--token-classification",
@@ -176,7 +178,7 @@ const TEST_CASES: {
 			inference: "",
 		},
 		providers: ["hf-inference"],
-		languages: ["py"],
+		languages: ["python"],
 	},
 	{
 		testName: "zero-shot-classification",
@@ -187,7 +189,7 @@ const TEST_CASES: {
 			inference: "",
 		},
 		providers: ["hf-inference"],
-		languages: ["py"],
+		languages: ["python"],
 	},
 	{
 		testName: "zero-shot-image-classification",
@@ -198,14 +200,14 @@ const TEST_CASES: {
 			inference: "",
 		},
 		providers: ["hf-inference"],
-		languages: ["py"],
+		languages: ["python"],
 	},
 ] as const;
 
 const GET_SNIPPET_FN = {
 	sh: snippets.curl.getCurlInferenceSnippet,
 	js: snippets.js.getJsInferenceSnippet,
-	py: snippets.python.getPythonInferenceSnippet,
+	python: snippets.python.getPythonInferenceSnippet,
 } as const;
 
 const rootDirFinder = (): string => {
@@ -228,26 +230,28 @@ function getFixtureFolder(testName: string): string {
 
 function generateInferenceSnippet(
 	model: ModelDataMinimal,
-	language: LANGUAGE,
+	language: Language,
 	provider: SnippetInferenceProvider,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
 	const providerModelId = provider === "hf-inference" ? model.id : `<${provider} alias for ${model.id}>`;
-	return GET_SNIPPET_FN[language](model, "api_token", provider, providerModelId, opts);
+	const snippets = GET_SNIPPET_FN[language](model, "api_token", provider, providerModelId, opts) as InferenceSnippet[];
+	return snippets.sort((snippetA, snippetB) => snippetA.client.localeCompare(snippetB.client));
 }
 
 async function getExpectedInferenceSnippet(
 	testName: string,
-	language: LANGUAGE,
+	language: Language,
 	provider: SnippetInferenceProvider
 ): Promise<InferenceSnippet[]> {
 	const fixtureFolder = getFixtureFolder(testName);
-	const files = await fs.readdir(fixtureFolder);
+	const languageFolder = path.join(fixtureFolder, language);
+	const files = await fs.readdir(languageFolder, { recursive: true });
 
 	const expectedSnippets: InferenceSnippet[] = [];
-	for (const file of files.filter((file) => file.endsWith("." + language) && file.includes(`.${provider}.`)).sort()) {
-		const client = path.basename(file).split(".").slice(1, -2).join("."); // e.g. '0.huggingface.js.replicate.js' => "huggingface.js"
-		const content = await fs.readFile(path.join(fixtureFolder, file), { encoding: "utf-8" });
+	for (const file of files.filter((file) => file.includes(`.${provider}.`)).sort()) {
+		const client = file.split("/")[0]; // e.g. fal_client/1.fal-ai.python => fal_client
+		const content = await fs.readFile(path.join(languageFolder, file), { encoding: "utf-8" });
 		expectedSnippets.push({ client, content });
 	}
 	return expectedSnippets;
@@ -255,15 +259,21 @@ async function getExpectedInferenceSnippet(
 
 async function saveExpectedInferenceSnippet(
 	testName: string,
-	language: LANGUAGE,
+	language: Language,
 	provider: SnippetInferenceProvider,
 	snippets: InferenceSnippet[]
 ) {
 	const fixtureFolder = getFixtureFolder(testName);
 	await fs.mkdir(fixtureFolder, { recursive: true });
 
-	for (const [index, snippet] of snippets.entries()) {
-		const file = path.join(fixtureFolder, `${index}.${snippet.client ?? "default"}.${provider}.${language}`);
+	const indexPerClient = new Map<string, number>();
+	for (const snippet of snippets) {
+		const client = snippet.client;
+		const index = indexPerClient.get(client) ?? 0;
+		indexPerClient.set(client, index + 1);
+
+		const file = path.join(fixtureFolder, language, snippet.client, `${index}.${provider}.${language}`);
+		await fs.mkdir(path.dirname(file), { recursive: true });
 		await fs.writeFile(file, snippet.content);
 	}
 }
