@@ -8,7 +8,19 @@ import fs from "fs";
 import path from "path";
 import { existsSync as pathExists } from "node:fs";
 
-const TOOLS = ["fal_client", "huggingface_hub", "openai", "requests"];
+const LANGUAGES = ["js", "python", "sh"];
+const PYTHON_CLIENTS = ["huggingface_hub", "fal_client", "requests", "openai"];
+const JS_CLIENTS = ["fetch", "huggingface.js"];
+const SH_TOOLS = ["curl"];
+
+type Language = (typeof LANGUAGES)[number];
+type Client = (typeof SH_TOOLS)[number] | (typeof PYTHON_CLIENTS)[number] | (typeof JS_CLIENTS)[number];
+
+const CLIENTS: Record<Language, Client[]> = {
+	js: JS_CLIENTS,
+	python: PYTHON_CLIENTS,
+	sh: SH_TOOLS,
+};
 
 type InputPreparationFn = (model: ModelDataMinimal, opts?: Record<string, unknown>) => object;
 interface TemplateParams {
@@ -45,17 +57,18 @@ const rootDirFinder = (): string => {
 	return "/";
 };
 
-const templatePath = (tool: string, templateName: string): string =>
-	path.join(rootDirFinder(), "src", "snippets", "templates", "python", tool, `${templateName}.jinja`);
-const hasTemplate = (tool: string, templateName: string): boolean => pathExists(templatePath(tool, templateName));
+const templatePath = (language: Language, client: Client, templateName: string): string =>
+	path.join(rootDirFinder(), "src", "snippets", "templates", language, client, `${templateName}.jinja`);
+const hasTemplate = (language: Language, client: Client, templateName: string): boolean =>
+	pathExists(templatePath(language, client, templateName));
 
-const loadTemplate = (tool: string, templateName: string): ((data: TemplateParams) => string) => {
-	const template = fs.readFileSync(templatePath(tool, templateName), "utf8");
+const loadTemplate = (language: Language, client: Client, templateName: string): ((data: TemplateParams) => string) => {
+	const template = fs.readFileSync(templatePath(language, client, templateName), "utf8");
 	return (data: TemplateParams) => new Template(template).render({ ...data });
 };
 
-const snippetImportInferenceClient = loadTemplate("huggingface_hub", "importInferenceClient");
-const snippetImportRequests = loadTemplate("requests", "importRequests");
+const snippetImportInferenceClient = loadTemplate("python", "huggingface_hub", "importInferenceClient");
+const snippetImportRequests = loadTemplate("python", "requests", "importRequests");
 
 // Needed for huggingface_hub basic snippets
 
@@ -149,41 +162,45 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 			providerModelId: providerModelId ?? model.id,
 		};
 
-		/// Iterate over tools => check if a snippet exists => generate
-		return TOOLS.map((tool) => {
-			if (!hasTemplate(tool, templateName)) {
-				return;
-			}
-			const template = loadTemplate(tool, templateName);
-			if (tool === "huggingface_hub" && templateName === "basic") {
-				if (!(model.pipeline_tag && model.pipeline_tag in HFH_INFERENCE_CLIENT_METHODS)) {
-					return;
-				}
-				params["methodName"] = HFH_INFERENCE_CLIENT_METHODS[model.pipeline_tag];
-			}
+		/// Iterate over clients => check if a snippet exists => generate
+		return LANGUAGES.map((language) => {
+			return CLIENTS[language]
+				.map((client) => {
+					if (!hasTemplate(language, client, templateName)) {
+						return;
+					}
+					const template = loadTemplate(language, client, templateName);
+					if (client === "huggingface_hub" && templateName === "basic") {
+						if (!(model.pipeline_tag && model.pipeline_tag in HFH_INFERENCE_CLIENT_METHODS)) {
+							return;
+						}
+						params["methodName"] = HFH_INFERENCE_CLIENT_METHODS[model.pipeline_tag];
+					}
 
-			/// Generate snippet
-			let snippet = template(params).trim();
-			if (!snippet) {
-				return;
-			}
+					/// Generate snippet
+					let snippet = template(params).trim();
+					if (!snippet) {
+						return;
+					}
 
-			/// Add import section separately
-			if (tool === "huggingface_hub") {
-				const importSection = snippetImportInferenceClient({ ...params });
-				snippet = `${importSection}\n\n${snippet}`;
-			} else if (tool === "requests") {
-				const importSection = snippetImportRequests({
-					...params,
-					importBase64: snippet.includes("base64"),
-					importJson: snippet.includes("json."),
-				});
-				snippet = `${importSection}\n\n${snippet}`;
-			}
+					/// Add import section separately
+					if (client === "huggingface_hub") {
+						const importSection = snippetImportInferenceClient({ ...params });
+						snippet = `${importSection}\n\n${snippet}`;
+					} else if (client === "requests") {
+						const importSection = snippetImportRequests({
+							...params,
+							importBase64: snippet.includes("base64"),
+							importJson: snippet.includes("json."),
+						});
+						snippet = `${importSection}\n\n${snippet}`;
+					}
 
-			/// Snippet is ready!
-			return { client: tool, content: snippet };
-		}).filter((snippet) => snippet !== undefined && snippet.content) as InferenceSnippet[];
+					/// Snippet is ready!
+					return { language: language, client: client, content: snippet };
+				})
+				.filter((snippet) => snippet !== undefined && snippet.content) as InferenceSnippet[];
+		}).flat();
 	};
 };
 
@@ -214,7 +231,7 @@ const prepareConversationalInput = (
 	};
 };
 
-const pythonSnippets: Partial<
+const snippets: Partial<
 	Record<
 		PipelineType,
 		(
@@ -256,15 +273,15 @@ const pythonSnippets: Partial<
 	"zero-shot-classification": snippetGenerator("zeroShotClassification"),
 	"zero-shot-image-classification": snippetGenerator("zeroShotImageClassification"),
 };
-export function getPythonInferenceSnippet(
+export function getInferenceSnippet(
 	model: ModelDataMinimal,
 	accessToken: string,
 	provider: InferenceProvider,
 	providerModelId?: string,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
-	return model.pipeline_tag && model.pipeline_tag in pythonSnippets
-		? pythonSnippets[model.pipeline_tag]?.(model, accessToken, provider, providerModelId, opts) ?? []
+	return model.pipeline_tag && model.pipeline_tag in snippets
+		? snippets[model.pipeline_tag]?.(model, accessToken, provider, providerModelId, opts) ?? []
 		: [];
 }
 

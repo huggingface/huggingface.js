@@ -11,6 +11,7 @@ export type ModelDataMinimal = Pick<
 >;
 
 export interface InferenceSnippet {
+	language?: string; // e.g. `python`, `curl`, `js`
+	client: string; // e.g. `huggingface_hub`, `openai`, `fetch`, etc.
 	content: string;
-	client: string; // for instance: `client` could be `huggingface_hub` or `openai` client for Python snippets
 }

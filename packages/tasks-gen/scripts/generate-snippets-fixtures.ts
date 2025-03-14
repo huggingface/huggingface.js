@@ -189,7 +189,7 @@ const TEST_CASES: {
 			inference: "",
 		},
 		providers: ["hf-inference"],
-		languages: ["python"],
+		languages: ["sh", "python"],
 	},
 	{
 		testName: "zero-shot-image-classification",
@@ -203,12 +203,6 @@ const TEST_CASES: {
 		languages: ["python"],
 	},
 ] as const;
-
-const GET_SNIPPET_FN = {
-	sh: snippets.curl.getCurlInferenceSnippet,
-	js: snippets.js.getJsInferenceSnippet,
-	python: snippets.python.getPythonInferenceSnippet,
-} as const;
 
 const rootDirFinder = (): string => {
 	let currentPath = path.normalize(import.meta.url).replace("file:", "");
@@ -235,8 +229,13 @@ function generateInferenceSnippet(
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
 	const providerModelId = provider === "hf-inference" ? model.id : `<${provider} alias for ${model.id}>`;
-	const snippets = GET_SNIPPET_FN[language](model, "api_token", provider, providerModelId, opts) as InferenceSnippet[];
-	return snippets.sort((snippetA, snippetB) => snippetA.client.localeCompare(snippetB.client));
+
+	const allSnippets = snippets.getInferenceSnippet(model, "api_token", provider, providerModelId, opts);
+
+	// const snippets = GET_SNIPPET_FN[language](model, "api_token", provider, providerModelId, opts) as InferenceSnippet[];
+	return allSnippets
+		.filter((snippet) => snippet.language == language)
+		.sort((snippetA, snippetB) => snippetA.client.localeCompare(snippetB.client));
 }
 
 async function getExpectedInferenceSnippet(
