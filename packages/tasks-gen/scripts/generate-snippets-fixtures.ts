@@ -20,6 +20,7 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path/posix";
 
 import { snippets } from "@huggingface/inference";
+import { inferenceSnippetLanguages } from "@huggingface/tasks";
 import type { SnippetInferenceProvider, InferenceSnippet, ModelDataMinimal } from "@huggingface/tasks";
 
 const LANGUAGES = ["js", "python", "sh"] as const;
@@ -29,7 +30,6 @@ const EXTENSIONS: Record<Language, string> = { sh: "sh", js: "js", python: "py" 
 const TEST_CASES: {
 	testName: string;
 	model: ModelDataMinimal;
-	languages: Language[];
 	providers: SnippetInferenceProvider[];
 	opts?: Record<string, unknown>;
 }[] = [
@@ -41,7 +41,7 @@ const TEST_CASES: {
 			tags: [],
 			inference: "",
 		},
-		languages: ["js", "python", "sh"],
+
 		providers: ["hf-inference"],
 	},
 	{
@@ -52,7 +52,7 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-		languages: ["js", "python", "sh"],
+
 		providers: ["hf-inference", "together"],
 		opts: { streaming: false },
 	},
@@ -64,7 +64,7 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-		languages: ["js", "python", "sh"],
+
 		providers: ["hf-inference", "together"],
 		opts: { streaming: true },
 	},
@@ -76,7 +76,7 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-		languages: ["js", "python", "sh"],
+
 		providers: ["hf-inference", "fireworks-ai"],
 		opts: { streaming: false },
 	},
@@ -88,7 +88,7 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-		languages: ["js", "python", "sh"],
+
 		providers: ["hf-inference", "fireworks-ai"],
 		opts: { streaming: true },
 	},
@@ -100,7 +100,7 @@ const TEST_CASES: {
 			tags: [],
 			inference: "",
 		},
-		languages: ["python"],
+
 		providers: ["hf-inference"],
 	},
 	{
@@ -111,7 +111,7 @@ const TEST_CASES: {
 			tags: [],
 			inference: "",
 		},
-		languages: ["js", "python", "sh"],
+
 		providers: ["hf-inference"],
 	},
 	{
@@ -122,7 +122,7 @@ const TEST_CASES: {
 			tags: [],
 			inference: "",
 		},
-		languages: ["python"],
+
 		providers: ["hf-inference"],
 	},
 	{
@@ -134,7 +134,6 @@ const TEST_CASES: {
 			inference: "",
 		},
 		providers: ["hf-inference"],
-		languages: ["python"],
 	},
 	{
 		testName: "text-to-audio-transformers",
@@ -145,7 +144,6 @@ const TEST_CASES: {
 			inference: "",
 		},
 		providers: ["hf-inference"],
-		languages: ["js", "python", "sh"],
 	},
 	{
 		testName: "text-to-image",
@@ -156,7 +154,6 @@ const TEST_CASES: {
 			inference: "",
 		},
 		providers: ["hf-inference", "fal-ai"],
-		languages: ["js", "python", "sh"],
 	},
 	{
 		testName: "text-to-video",
@@ -167,7 +164,6 @@ const TEST_CASES: {
 			inference: "",
 		},
 		providers: ["replicate", "fal-ai"],
-		languages: ["js", "python", "sh"],
 	},
 	{
 		testName: "text-classification",
@@ -178,7 +174,6 @@ const TEST_CASES: {
 			inference: "",
 		},
 		providers: ["hf-inference"],
-		languages: ["js", "python", "sh"],
 	},
 	{
 		testName: "basic-snippet--token-classification",
@@ -189,7 +184,6 @@ const TEST_CASES: {
 			inference: "",
 		},
 		providers: ["hf-inference"],
-		languages: ["python"],
 	},
 	{
 		testName: "zero-shot-classification",
@@ -200,7 +194,6 @@ const TEST_CASES: {
 			inference: "",
 		},
 		providers: ["hf-inference"],
-		languages: ["js", "python", "sh"],
 	},
 	{
 		testName: "zero-shot-image-classification",
@@ -211,7 +204,6 @@ const TEST_CASES: {
 			inference: "",
 		},
 		providers: ["hf-inference"],
-		languages: ["python"],
 	},
 ] as const;
 
@@ -294,9 +286,9 @@ if (import.meta.vitest) {
 	const { describe, expect, it } = import.meta.vitest;
 
 	describe("inference API snippets", () => {
-		TEST_CASES.forEach(({ testName, model, languages, providers, opts }) => {
+		TEST_CASES.forEach(({ testName, model, providers, opts }) => {
 			describe(testName, () => {
-				languages.forEach((language) => {
+				inferenceSnippetLanguages.forEach((language) => {
 					providers.forEach((provider) => {
 						it(language, async () => {
 							const generatedSnippets = generateInferenceSnippet(model, language, provider, opts);
@@ -315,9 +307,9 @@ if (import.meta.vitest) {
 	await fs.rm(path.join(rootDirFinder(), "snippets-fixtures"), { recursive: true, force: true });
 
 	console.debug("  🏭 Generating new fixtures...");
-	TEST_CASES.forEach(({ testName, model, languages, providers, opts }) => {
-		console.debug(`      ${testName} (${languages.join(", ")}) (${providers.join(", ")})`);
-		languages.forEach(async (language) => {
+	TEST_CASES.forEach(({ testName, model, providers, opts }) => {
+		console.debug(`      ${testName} (${providers.join(", ")})`);
+		inferenceSnippetLanguages.forEach(async (language) => {
 			providers.forEach(async (provider) => {
 				const generatedSnippets = generateInferenceSnippet(model, language, provider, opts);
 				await saveExpectedInferenceSnippet(testName, language, provider, generatedSnippets);
