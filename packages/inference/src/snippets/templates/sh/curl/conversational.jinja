@@ -1,7 +1,7 @@
 curl {{ fullUrl }} \
-    -X POST \
     -H 'Authorization: {{ authorizationHeader }}' \
     -H 'Content-Type: application/json' \
     -d '{
-{{ providerInputs.asCurlString }}
+{{ providerInputs.asCurlString }},
+        "stream": false
     }'

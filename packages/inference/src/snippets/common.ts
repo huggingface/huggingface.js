@@ -151,13 +151,13 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 				asObj: inputs,
 				asCurlString: formatBody(inputs, "curl"),
 				asJsonString: formatBody(inputs, "json"),
-				asPythonString: indentString(formatBody(inputs, "python"), 4),
+				asPythonString: formatBody(inputs, "python"),
 			},
 			providerInputs: {
 				asObj: providerInputs,
 				asCurlString: formatBody(providerInputs, "curl"),
 				asJsonString: formatBody(providerInputs, "json"),
-				asPythonString: indentString(formatBody(providerInputs, "python"), 4),
+				asPythonString: formatBody(providerInputs, "python"),
 			},
 			model,
 			provider,
@@ -287,36 +287,34 @@ export function getInferenceSnippet(
 		: [];
 }
 
-function formatBody(obj: object, format: "python" | "json" | "js" | "curl"): string {
-	if (format === "python") {
-		return Object.entries(obj)
-			.map(([key, value]) => {
-				const formattedValue = JSON.stringify(value, null, 4).replace(/"/g, '"');
-				return `${key}=${formattedValue},`;
-			})
-			.join("\n");
-	}
+function formatBody(obj: object, format: "python" | "json" | "curl"): string {
+	switch (format) {
+		case "python":
+			return indentString(
+				Object.entries(obj)
+					.map(([key, value]) => {
+						const formattedValue = JSON.stringify(value, null, 4).replace(/"/g, '"');
+						return `${key}=${formattedValue},`;
+					})
+					.join("\n")
+			);
 
-	if (format === "js") {
-		return JSON.stringify({ provider: "together", ...obj }, null, 4).replace(/"([^(")]+)":/g, "$1:");
-	}
+		case "json":
+			/// Hacky: remove outer brackets to make is extendable in templates
+			return JSON.stringify(obj, null, 4).split("\n").slice(1, -1).join("\n");
 
-	if (format === "json") {
-		/// Hacky: remove outer brackets
-		return JSON.stringify(obj, null, 4).split("\n").slice(1, -1).join("\n");
-	}
+		case "curl":
+			return indentString(formatBody(obj, "json"));
 
-	if (format === "curl") {
-		return `'${JSON.stringify(obj, null, 4)}'`;
+		default:
+			throw new Error(`Unsupported format: ${format}`);
 	}
-
-	throw new Error("Unsupported format");
 }
 
-function indentString(str: string, indent: number): string {
+function indentString(str: string): string {
 	return str
 		.split("\n")
-		.map((line) => " ".repeat(indent) + line)
+		.map((line) => " ".repeat(4) + line)
 		.join("\n");
 }
 
