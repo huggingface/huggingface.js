@@ -14,9 +14,13 @@
  *
  * Thanks!
  */
-import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../types";
+import type { BodyParams, HeaderParams, InferenceTask, ProviderConfig, UrlParams } from "../types";
 
 export const REPLICATE_API_BASE_URL = "https://api.replicate.com";
+
+const makeBaseUrl = (task?: InferenceTask): string => {
+	return REPLICATE_API_BASE_URL;
+};
 
 const makeBody = (params: BodyParams): Record<string, unknown> => {
 	return {
@@ -39,7 +43,7 @@ const makeUrl = (params: UrlParams): string => {
 };
 
 export const REPLICATE_CONFIG: ProviderConfig = {
-	baseUrl: REPLICATE_API_BASE_URL,
+	makeBaseUrl,
 	makeBody,
 	makeHeaders,
 	makeUrl,

@@ -14,9 +14,14 @@
  *
  * Thanks!
  */
-import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../types";
+import type { BodyParams, HeaderParams, InferenceTask, ProviderConfig, UrlParams } from "../types";
 
 const FAL_AI_API_BASE_URL = "https://fal.run";
+const FAL_AI_API_BASE_URL_QUEUE = "https://fal.run/queue";
+
+const makeBaseUrl = (task?: InferenceTask): string => {
+	return task === "text-to-video" ? FAL_AI_API_BASE_URL_QUEUE : FAL_AI_API_BASE_URL;
+};
 
 const makeBody = (params: BodyParams): Record<string, unknown> => {
 	return params.args;
@@ -29,11 +34,16 @@ const makeHeaders = (params: HeaderParams): Record<string, string> => {
 };
 
 const makeUrl = (params: UrlParams): string => {
-	return `${params.baseUrl}/${params.model}`;
+	const baseUrl = `${params.baseUrl}/${params.model}`;
+	if (params.authMethod !== "provider-key" && params.task === "text-to-video") {
+		return `${baseUrl}?_subdomain=queue`;
+	}
+	console.log("baseUrl", baseUrl);
+	return baseUrl;
 };
 
 export const FAL_AI_CONFIG: ProviderConfig = {
-	baseUrl: FAL_AI_API_BASE_URL,
+	makeBaseUrl,
 	makeBody,
 	makeHeaders,
 	makeUrl,

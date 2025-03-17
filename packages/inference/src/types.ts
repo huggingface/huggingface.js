@@ -94,7 +94,7 @@ export type RequestArgs = BaseArgs &
 	};
 
 export interface ProviderConfig {
-	baseUrl: string;
+	makeBaseUrl: (task?: InferenceTask) => string;
 	makeBody: (params: BodyParams) => Record<string, unknown>;
 	makeHeaders: (params: HeaderParams) => Record<string, string>;
 	makeUrl: (params: UrlParams) => string;
@@ -107,6 +107,7 @@ export interface HeaderParams {
 }
 
 export interface UrlParams {
+	authMethod: "none" | "hf-token" | "credentials-include" | "provider-key";
 	baseUrl: string;
 	model: string;
 	task?: InferenceTask;

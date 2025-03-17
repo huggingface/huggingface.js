@@ -11,7 +11,11 @@
  * Thanks!
  */
 import { HF_ROUTER_URL } from "../config";
-import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../types";
+import type { BodyParams, HeaderParams, InferenceTask, ProviderConfig, UrlParams } from "../types";
+
+const makeBaseUrl = (task?: InferenceTask): string => {
+	return `${HF_ROUTER_URL}/hf-inference`;
+};
 
 const makeBody = (params: BodyParams): Record<string, unknown> => {
 	return {
@@ -36,7 +40,7 @@ const makeUrl = (params: UrlParams): string => {
 };
 
 export const HF_INFERENCE_CONFIG: ProviderConfig = {
-	baseUrl: `${HF_ROUTER_URL}/hf-inference`,
+	makeBaseUrl,
 	makeBody,
 	makeHeaders,
 	makeUrl,

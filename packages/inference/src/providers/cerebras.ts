@@ -14,9 +14,13 @@
  *
  * Thanks!
  */
-import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../types";
+import type { BodyParams, HeaderParams, InferenceTask, ProviderConfig, UrlParams } from "../types";
 
 const CEREBRAS_API_BASE_URL = "https://api.cerebras.ai";
+
+const makeBaseUrl = (task?: InferenceTask): string => {
+	return CEREBRAS_API_BASE_URL;
+};
 
 const makeBody = (params: BodyParams): Record<string, unknown> => {
 	return {
@@ -34,7 +38,7 @@ const makeUrl = (params: UrlParams): string => {
 };
 
 export const CEREBRAS_CONFIG: ProviderConfig = {
-	baseUrl: CEREBRAS_API_BASE_URL,
+	makeBaseUrl,
 	makeBody,
 	makeHeaders,
 	makeUrl,

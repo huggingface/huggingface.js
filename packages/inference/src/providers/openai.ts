@@ -1,9 +1,13 @@
 /**
  * Special case: provider configuration for a private models provider (OpenAI in this case).
  */
-import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../types";
+import type { BodyParams, HeaderParams, InferenceTask, ProviderConfig, UrlParams } from "../types";
 
 const OPENAI_API_BASE_URL = "https://api.openai.com";
+
+const makeBaseUrl = (task?: InferenceTask): string => {
+	return OPENAI_API_BASE_URL;
+};
 
 const makeBody = (params: BodyParams): Record<string, unknown> => {
 	if (!params.chatCompletion) {
@@ -27,7 +31,7 @@ const makeUrl = (params: UrlParams): string => {
 };
 
 export const OPENAI_CONFIG: ProviderConfig = {
-	baseUrl: OPENAI_API_BASE_URL,
+	makeBaseUrl,
 	makeBody,
 	makeHeaders,
 	makeUrl,
