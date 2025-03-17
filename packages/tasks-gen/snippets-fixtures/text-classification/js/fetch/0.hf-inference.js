@@ -15,5 +15,5 @@ async function query(data) {
 }
 
 query({ inputs: "I like you. I love you" }).then((response) => {
-	console.log(JSON.stringify(response));
+    console.log(JSON.stringify(response));
 });

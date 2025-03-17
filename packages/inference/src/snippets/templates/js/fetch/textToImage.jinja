@@ -1,3 +1,4 @@
+{% if provider == "hf-inference" %}
 async function query(data) {
 	const response = await fetch(
 		"{{ fullUrl }}",
@@ -10,10 +11,11 @@ async function query(data) {
 			body: JSON.stringify(data),
 		}
 	);
-	const result = await response.json();
+	const result = await response.blob();
 	return result;
 }
 
 query({ inputs: {{ providerInputs.asObj.inputs }} }).then((response) => {
-    console.log(JSON.stringify(response));
+    // Use image
 });
+{% endif %}
