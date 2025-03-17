@@ -41,7 +41,6 @@ const TEST_CASES: {
 			tags: [],
 			inference: "",
 		},
-
 		providers: ["hf-inference"],
 	},
 	{
@@ -52,7 +51,6 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-
 		providers: ["hf-inference", "together"],
 		opts: { streaming: false },
 	},
@@ -64,7 +62,6 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-
 		providers: ["hf-inference", "together"],
 		opts: { streaming: true },
 	},
@@ -76,7 +73,6 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-
 		providers: ["hf-inference", "fireworks-ai"],
 		opts: { streaming: false },
 	},
@@ -88,7 +84,6 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-
 		providers: ["hf-inference", "fireworks-ai"],
 		opts: { streaming: true },
 	},
@@ -100,7 +95,6 @@ const TEST_CASES: {
 			tags: [],
 			inference: "",
 		},
-
 		providers: ["hf-inference"],
 	},
 	{
@@ -111,7 +105,6 @@ const TEST_CASES: {
 			tags: [],
 			inference: "",
 		},
-
 		providers: ["hf-inference"],
 	},
 	{
@@ -122,7 +115,6 @@ const TEST_CASES: {
 			tags: [],
 			inference: "",
 		},
-
 		providers: ["hf-inference"],
 	},
 	{
@@ -248,13 +240,16 @@ async function getExpectedInferenceSnippet(
 ): Promise<InferenceSnippet[]> {
 	const fixtureFolder = getFixtureFolder(testName);
 	const languageFolder = path.join(fixtureFolder, language);
+	if (!pathExists(languageFolder)) {
+		return [];
+	}
 	const files = await fs.readdir(languageFolder, { recursive: true });
 
 	const expectedSnippets: InferenceSnippet[] = [];
 	for (const file of files.filter((file) => file.includes(`.${provider}.`)).sort()) {
 		const client = file.split("/")[0]; // e.g. fal_client/1.fal-ai.python => fal_client
 		const content = await fs.readFile(path.join(languageFolder, file), { encoding: "utf-8" });
-		expectedSnippets.push({ client, content });
+		expectedSnippets.push({ language, client, content });
 	}
 	return expectedSnippets;
 }
