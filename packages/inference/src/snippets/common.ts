@@ -168,12 +168,14 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 				asCurlString: formatBody(inputs, "curl"),
 				asJsonString: formatBody(inputs, "json"),
 				asPythonString: formatBody(inputs, "python"),
+				asTsString: formatBody(inputs, "ts"),
 			},
 			providerInputs: {
 				asObj: providerInputs,
 				asCurlString: formatBody(providerInputs, "curl"),
 				asJsonString: formatBody(providerInputs, "json"),
 				asPythonString: formatBody(providerInputs, "python"),
+				asTsString: formatBody(providerInputs, "ts"),
 			},
 			model,
 			provider,
@@ -310,8 +312,15 @@ export function getInferenceSnippet(
 		: [];
 }
 
-function formatBody(obj: object, format: "python" | "json" | "curl"): string {
+function formatBody(obj: object, format: "curl" | "json" | "python" | "ts"): string {
 	switch (format) {
+		case "curl":
+			return indentString(formatBody(obj, "json"));
+
+		case "json":
+			/// Hacky: remove outer brackets to make is extendable in templates
+			return JSON.stringify(obj, null, 4).split("\n").slice(1, -1).join("\n");
+
 		case "python":
 			return indentString(
 				Object.entries(obj)
@@ -322,16 +331,44 @@ function formatBody(obj: object, format: "python" | "json" | "curl"): string {
 					.join("\n")
 			);
 
-		case "json":
+		case "ts":
 			/// Hacky: remove outer brackets to make is extendable in templates
-			return JSON.stringify(obj, null, 4).split("\n").slice(1, -1).join("\n");
-
-		case "curl":
-			return indentString(formatBody(obj, "json"));
+			return formatTsObject(obj).split("\n").slice(1, -1).join("\n");
 
 		default:
 			throw new Error(`Unsupported format: ${format}`);
 	}
+}
+
+function formatTsObject(obj: unknown, depth?: number): string {
+	depth = depth ?? 0;
+
+	/// Case int, boolean, string, etc.
+	if (typeof obj !== "object" || obj === null) {
+		return JSON.stringify(obj);
+	}
+
+	/// Case array
+	if (Array.isArray(obj)) {
+		const items = obj
+			.map((item) => {
+				const formatted = formatTsObject(item, depth + 1);
+				return `${" ".repeat(4 * (depth + 1))}${formatted},`;
+			})
+			.join("\n");
+		return `[\n${items}\n${" ".repeat(4 * depth)}]`;
+	}
+
+	/// Case mapping
+	const entries = Object.entries(obj);
+	const lines = entries
+		.map(([key, value]) => {
+			const formattedValue = formatTsObject(value, depth + 1);
+			const keyStr = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(key) ? key : `"${key}"`;
+			return `${" ".repeat(4 * (depth + 1))}${keyStr}: ${formattedValue},`;
+		})
+		.join("\n");
+	return `{\n${lines}\n${" ".repeat(4 * depth)}}`;
 }
 
 function indentString(str: string): string {
