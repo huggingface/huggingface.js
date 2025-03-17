@@ -200,7 +200,7 @@ const TEST_CASES: {
 			inference: "",
 		},
 		providers: ["hf-inference"],
-		languages: ["sh", "python"],
+		languages: ["js", "python", "sh"],
 	},
 	{
 		testName: "zero-shot-image-classification",
