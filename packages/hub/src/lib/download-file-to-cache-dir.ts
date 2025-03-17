@@ -1,11 +1,12 @@
 import { getHFHubCachePath, getRepoFolderName } from "./cache-management";
 import { dirname, join } from "node:path";
-import { writeFile, rename, symlink, lstat, mkdir, stat } from "node:fs/promises";
+import { writeFile, rename, lstat, mkdir, stat } from "node:fs/promises";
 import type { CommitInfo, PathInfo } from "./paths-info";
 import { pathsInfo } from "./paths-info";
 import type { CredentialsParams, RepoDesignation } from "../types/public";
 import { toRepoId } from "../utils/toRepoId";
 import { downloadFile } from "./download-file";
+import { createSymlink } from "../utils/symlink";
 
 export const REGEX_COMMIT_HASH: RegExp = new RegExp("^[0-9a-f]{40}$");
 
@@ -107,7 +108,7 @@ export async function downloadFileToCacheDir(
 	// shortcut the download if needed
 	if (await exists(blobPath)) {
 		// create symlinks in snapshot folder to blob object
-		await symlink(blobPath, pointerPath);
+		await createSymlink(blobPath, pointerPath);
 		return pointerPath;
 	}
 
@@ -127,6 +128,6 @@ export async function downloadFileToCacheDir(
 	// rename .incomplete file to expect blob
 	await rename(incomplete, blobPath);
 	// create symlinks in snapshot folder to blob object
-	await symlink(blobPath, pointerPath);
+	await createSymlink(blobPath, pointerPath);
 	return pointerPath;
 }
