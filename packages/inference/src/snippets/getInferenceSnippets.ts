@@ -67,7 +67,7 @@ const loadTemplate = (language: Language, client: Client, templateName: string):
 	return (data: TemplateParams) => new Template(template).render({ ...data });
 };
 
-const snippetImportInferenceClient = loadTemplate("python", "huggingface_hub", "importInferenceClient");
+const snippetImportPythonInferenceClient = loadTemplate("python", "huggingface_hub", "importInferenceClient");
 const snippetImportRequests = loadTemplate("python", "requests", "importRequests");
 
 // Needed for huggingface_hub basic snippets
@@ -214,7 +214,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 
 					/// Add import section separately
 					if (client === "huggingface_hub") {
-						const importSection = snippetImportInferenceClient({ ...params });
+						const importSection = snippetImportPythonInferenceClient({ ...params });
 						snippet = `${importSection}\n\n${snippet}`;
 					} else if (client === "requests") {
 						const importSection = snippetImportRequests({
@@ -302,7 +302,8 @@ const snippets: Partial<
 	"zero-shot-classification": snippetGenerator("zeroShotClassification"),
 	"zero-shot-image-classification": snippetGenerator("zeroShotImageClassification"),
 };
-export function getInferenceSnippet(
+
+export function getInferenceSnippets(
 	model: ModelDataMinimal,
 	accessToken: string,
 	provider: InferenceProvider,
@@ -313,6 +314,8 @@ export function getInferenceSnippet(
 		? snippets[model.pipeline_tag]?.(model, accessToken, provider, providerModelId, opts) ?? []
 		: [];
 }
+
+// String manipulation helpers
 
 function formatBody(obj: object, format: "curl" | "json" | "python" | "ts"): string {
 	switch (format) {

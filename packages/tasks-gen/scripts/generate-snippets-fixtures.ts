@@ -241,7 +241,7 @@ function generateInferenceSnippet(
 ): InferenceSnippet[] {
 	const providerModelId = provider === "hf-inference" ? model.id : `<${provider} alias for ${model.id}>`;
 
-	const allSnippets = snippets.getInferenceSnippet(model, "api_token", provider, providerModelId, opts);
+	const allSnippets = snippets.getInferenceSnippets(model, "api_token", provider, providerModelId, opts);
 
 	// const snippets = GET_SNIPPET_FN[language](model, "api_token", provider, providerModelId, opts) as InferenceSnippet[];
 	return allSnippets
