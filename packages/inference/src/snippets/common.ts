@@ -172,7 +172,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 						return;
 					}
 					const template = loadTemplate(language, client, templateName);
-					if (client === "huggingface_hub" && templateName === "basic") {
+					if (client === "huggingface_hub" && templateName.includes("basic")) {
 						if (!(model.pipeline_tag && model.pipeline_tag in HFH_INFERENCE_CLIENT_METHODS)) {
 							return;
 						}
@@ -245,18 +245,18 @@ const snippets: Partial<
 		) => InferenceSnippet[]
 	>
 > = {
-	"audio-classification": snippetGenerator("basicFile"),
-	"audio-to-audio": snippetGenerator("basicFile"),
-	"automatic-speech-recognition": snippetGenerator("automaticSpeechRecognition"),
+	"audio-classification": snippetGenerator("basicAudio"),
+	"audio-to-audio": snippetGenerator("basicAudio"),
+	"automatic-speech-recognition": snippetGenerator("basicAudio"),
 	"document-question-answering": snippetGenerator("documentQuestionAnswering", prepareDocumentQuestionAnsweringInput),
 	"feature-extraction": snippetGenerator("basic"),
 	"fill-mask": snippetGenerator("basic"),
-	"image-classification": snippetGenerator("basicFile"),
-	"image-segmentation": snippetGenerator("basicFile"),
+	"image-classification": snippetGenerator("basicImage"),
+	"image-segmentation": snippetGenerator("basicImage"),
 	"image-text-to-text": snippetGenerator("conversational"),
 	"image-to-image": snippetGenerator("imageToImage", prepareImageToImageInput),
-	"image-to-text": snippetGenerator("basicFile"),
-	"object-detection": snippetGenerator("basicFile"),
+	"image-to-text": snippetGenerator("basicImage"),
+	"object-detection": snippetGenerator("basicImage"),
 	"question-answering": snippetGenerator("basic"),
 	"sentence-similarity": snippetGenerator("basic"),
 	summarization: snippetGenerator("basic"),

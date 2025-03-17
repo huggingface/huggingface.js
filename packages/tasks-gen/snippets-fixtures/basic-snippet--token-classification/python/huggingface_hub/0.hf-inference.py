@@ -9,5 +9,3 @@ result = client.token_classification(
     inputs="My name is Sarah Jessica Parker but you can call me Jessica",
     model="FacebookAI/xlm-roberta-large-finetuned-conll03-english",
 )
-
-print(result)

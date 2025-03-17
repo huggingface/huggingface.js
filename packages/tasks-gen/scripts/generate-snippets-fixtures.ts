@@ -22,7 +22,7 @@ import * as path from "node:path/posix";
 import { snippets } from "@huggingface/inference";
 import type { SnippetInferenceProvider, InferenceSnippet, ModelDataMinimal } from "@huggingface/tasks";
 
-const LANGUAGES = ["sh", "js", "python"] as const;
+const LANGUAGES = ["js", "python", "sh"] as const;
 type Language = (typeof LANGUAGES)[number];
 const EXTENSIONS: Record<Language, string> = { sh: "sh", js: "js", python: "py" };
 
@@ -41,7 +41,7 @@ const TEST_CASES: {
 			tags: [],
 			inference: "",
 		},
-		languages: ["python"],
+		languages: ["js", "python", "sh"],
 		providers: ["hf-inference"],
 	},
 	{
@@ -52,7 +52,7 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-		languages: ["sh", "js", "python"],
+		languages: ["js", "python", "sh"],
 		providers: ["hf-inference", "together"],
 		opts: { streaming: false },
 	},
@@ -64,7 +64,7 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-		languages: ["sh", "js", "python"],
+		languages: ["js", "python", "sh"],
 		providers: ["hf-inference", "together"],
 		opts: { streaming: true },
 	},
@@ -76,7 +76,7 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-		languages: ["sh", "js", "python"],
+		languages: ["js", "python", "sh"],
 		providers: ["hf-inference", "fireworks-ai"],
 		opts: { streaming: false },
 	},
@@ -88,7 +88,7 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-		languages: ["sh", "js", "python"],
+		languages: ["js", "python", "sh"],
 		providers: ["hf-inference", "fireworks-ai"],
 		opts: { streaming: true },
 	},
@@ -101,6 +101,17 @@ const TEST_CASES: {
 			inference: "",
 		},
 		languages: ["python"],
+		providers: ["hf-inference"],
+	},
+	{
+		testName: "image-classification",
+		model: {
+			id: "Falconsai/nsfw_image_detection",
+			pipeline_tag: "image-classification",
+			tags: [],
+			inference: "",
+		},
+		languages: ["js", "python", "sh"],
 		providers: ["hf-inference"],
 	},
 	{
@@ -145,7 +156,7 @@ const TEST_CASES: {
 			inference: "",
 		},
 		providers: ["hf-inference", "fal-ai"],
-		languages: ["sh", "js", "python"],
+		languages: ["js", "python", "sh"],
 	},
 	{
 		testName: "text-to-video",
@@ -167,7 +178,7 @@ const TEST_CASES: {
 			inference: "",
 		},
 		providers: ["hf-inference"],
-		languages: ["sh", "js", "python"],
+		languages: ["js", "python", "sh"],
 	},
 	{
 		testName: "basic-snippet--token-classification",
