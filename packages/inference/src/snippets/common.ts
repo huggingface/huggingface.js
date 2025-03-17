@@ -10,7 +10,7 @@ import { existsSync as pathExists } from "node:fs";
 
 const LANGUAGES = ["js", "python", "sh"];
 const PYTHON_CLIENTS = ["huggingface_hub", "fal_client", "requests", "openai"];
-const JS_CLIENTS = ["fetch", "huggingface.js"];
+const JS_CLIENTS = ["fetch", "huggingface.js", "openai"];
 const SH_TOOLS = ["curl"];
 
 type Language = (typeof LANGUAGES)[number];
