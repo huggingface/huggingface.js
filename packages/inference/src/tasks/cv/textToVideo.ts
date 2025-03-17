@@ -20,7 +20,13 @@ interface ReplicateOutput {
 	output: string;
 }
 
-const SUPPORTED_PROVIDERS = ["fal-ai", "replicate"] as const satisfies readonly InferenceProvider[];
+interface NovitaOutput {
+	video: {
+		video_url: string;
+	};
+}
+
+const SUPPORTED_PROVIDERS = ["fal-ai", "novita", "replicate"] as const satisfies readonly InferenceProvider[];
 
 export async function textToVideo(args: TextToVideoArgs, options?: Options): Promise<TextToVideoOutput> {
 	if (!args.provider || !typedInclude(SUPPORTED_PROVIDERS, args.provider)) {
@@ -30,14 +36,13 @@ export async function textToVideo(args: TextToVideoArgs, options?: Options): Pro
 	}
 
 	const payload =
-		args.provider === "fal-ai" || args.provider === "replicate"
+		args.provider === "fal-ai" || args.provider === "replicate" || args.provider === "novita"
 			? { ...omit(args, ["inputs", "parameters"]), ...args.parameters, prompt: args.inputs }
 			: args;
-	const res = await request<FalAiOutput | ReplicateOutput>(payload, {
+	const res = await request<FalAiOutput | ReplicateOutput | NovitaOutput>(payload, {
 		...options,
 		task: "text-to-video",
 	});
-
 	if (args.provider === "fal-ai") {
 		const isValidOutput =
 			typeof res === "object" &&
@@ -51,7 +56,22 @@ export async function textToVideo(args: TextToVideoArgs, options?: Options): Pro
 		if (!isValidOutput) {
 			throw new InferenceOutputError("Expected { video: { url: string } }");
 		}
-		const urlResponse = await fetch(res.video.url);
+		const urlResponse = await fetch((res as FalAiOutput).video.url);
+		return await urlResponse.blob();
+	} else if (args.provider === "novita") {
+		const isValidOutput =
+			typeof res === "object" &&
+			!!res &&
+			"video" in res &&
+			typeof res.video === "object" &&
+			!!res.video &&
+			"video_url" in res.video &&
+			typeof res.video.video_url === "string" &&
+			isUrl(res.video.video_url);
+		if (!isValidOutput) {
+			throw new InferenceOutputError("Expected { video: { video_url: string } }");
+		}
+		const urlResponse = await fetch((res as NovitaOutput).video.video_url);
 		return await urlResponse.blob();
 	} else {
 		/// TODO: Replicate: handle the case where the generation request "times out" / is async (ie output is null)
