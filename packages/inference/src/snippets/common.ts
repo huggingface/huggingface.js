@@ -106,17 +106,18 @@ const HF_PYTHON_METHODS: Partial<Record<WidgetType, string>> = {
 
 const HF_JS_METHODS: Partial<Record<WidgetType, string>> = {
 	"automatic-speech-recognition": "automaticSpeechRecognition",
-	"text-classification": "textClassification",
-	"token-classification": "tokenClassification",
-	"table-question-answering": "tableQuestionAnswering",
-	"question-answering": "questionAnswering",
-	translation: "translation",
-	summarization: "summarization",
 	"feature-extraction": "featureExtraction",
+	"fill-mask": "fillMask",
+	"image-classification": "imageClassification",
+	"question-answering": "questionAnswering",
+	"sentence-similarity": "sentenceSimilarity",
+	summarization: "summarization",
+	"table-question-answering": "tableQuestionAnswering",
+	"text-classification": "textClassification",
 	"text-generation": "textGeneration",
 	"text2text-generation": "textGeneration",
-	"fill-mask": "fillMask",
-	"sentence-similarity": "sentenceSimilarity",
+	"token-classification": "tokenClassification",
+	translation: "translation",
 };
 
 // Snippet generators
