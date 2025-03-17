@@ -13,9 +13,8 @@ export type TextToVideoArgs = BaseArgs & TextToVideoInput;
 export type TextToVideoOutput = Blob;
 
 interface FalAiOutput {
-	video: {
-		url: string;
-	};
+	requestId: string;
+	status: string;
 }
 
 interface ReplicateOutput {
@@ -46,7 +45,7 @@ export async function textToVideo(args: TextToVideoArgs, options?: Options): Pro
 		task: "text-to-video",
 	});
 	if (args.provider === "fal-ai") {
-		return await pollFalResponse(res, args, options);
+		return await pollFalResponse(res as FalAiOutput, args, options);
 	} else if (args.provider === "novita") {
 		const isValidOutput =
 			typeof res === "object" &&
@@ -75,11 +74,12 @@ export async function textToVideo(args: TextToVideoArgs, options?: Options): Pro
 	}
 }
 
-async function pollFalResponse(res: any, args: TextToVideoArgs, options?: Options): Promise<Blob> {
-	const requestId = res.request_id;
+async function pollFalResponse(res: FalAiOutput, args: TextToVideoArgs, options?: Options): Promise<Blob> {
+	const requestId = res.requestId;
 	if (!requestId) {
 		throw new InferenceOutputError("No request ID found in the response");
 	}
+	let status = res.status;
 	const { url, info } = await makeRequestOptions(args, { ...options, task: "text-to-video" });
 	const baseUrl = url?.split("?")[0] || "";
 	const query = url?.includes("_subdomain=queue") ? "?_subdomain=queue" : "";
@@ -87,7 +87,6 @@ async function pollFalResponse(res: any, args: TextToVideoArgs, options?: Option
 	const statusUrl = `${baseUrl}/requests/${requestId}/status${query}`;
 	const resultUrl = `${baseUrl}/requests/${requestId}${query}`;
 
-	let status = res.status;
 	while (status !== "COMPLETED") {
 		await delay(1000);
 		const statusResponse = await fetch(statusUrl, { headers: info.headers });
