@@ -2,8 +2,10 @@ import { InferenceClient } from "@huggingface/inference";
 
 const client = new InferenceClient("api_token");
 
-const chatCompletion = await client.chatCompletion({
-    provider: "fireworks-ai",
+let out = "";
+
+const stream = await client.chatCompletionStream({
+    provider: "hf-inference",
     model: "meta-llama/Llama-3.2-11B-Vision-Instruct",
     messages: [
         {
@@ -25,4 +27,10 @@ const chatCompletion = await client.chatCompletion({
     max_tokens: 500,
 });
 
-console.log(chatCompletion.choices[0].message);
+for await (const chunk of stream) {
+	if (chunk.choices && chunk.choices.length > 0) {
+		const newContent = chunk.choices[0].delta.content;
+		out += newContent;
+		console.log(newContent);
+	}  
+}
