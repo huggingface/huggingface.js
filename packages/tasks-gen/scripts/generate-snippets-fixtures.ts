@@ -145,7 +145,7 @@ const TEST_CASES: {
 			inference: "",
 		},
 		providers: ["hf-inference"],
-		languages: ["python"],
+		languages: ["js", "python", "sh"],
 	},
 	{
 		testName: "text-to-image",
@@ -167,7 +167,7 @@ const TEST_CASES: {
 			inference: "",
 		},
 		providers: ["replicate", "fal-ai"],
-		languages: ["js", "python"],
+		languages: ["js", "python", "sh"],
 	},
 	{
 		testName: "text-classification",
