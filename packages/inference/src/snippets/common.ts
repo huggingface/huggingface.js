@@ -149,11 +149,13 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 			fullUrl: request.url,
 			inputs: {
 				asObj: inputs,
+				asCurlString: formatBody(inputs, "curl"),
 				asJsonString: formatBody(inputs, "json"),
 				asPythonString: indentString(formatBody(inputs, "python"), 4),
 			},
 			providerInputs: {
 				asObj: providerInputs,
+				asCurlString: formatBody(providerInputs, "curl"),
 				asJsonString: formatBody(providerInputs, "json"),
 				asPythonString: indentString(formatBody(providerInputs, "python"), 4),
 			},

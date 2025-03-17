@@ -1,0 +1,5 @@
+curl {{ fullUrl }} \
+	-X POST \
+	-d {{ providerInputs.asCurlString }} \
+	-H 'Content-Type: application/json' \
+	-H 'Authorization: {{ authorizationHeader }}'
