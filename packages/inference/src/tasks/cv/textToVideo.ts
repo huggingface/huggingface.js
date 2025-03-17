@@ -13,7 +13,7 @@ export type TextToVideoArgs = BaseArgs & TextToVideoInput;
 export type TextToVideoOutput = Blob;
 
 interface FalAiOutput {
-	requestId: string;
+	request_id: string;
 	status: string;
 }
 
@@ -75,7 +75,7 @@ export async function textToVideo(args: TextToVideoArgs, options?: Options): Pro
 }
 
 async function pollFalResponse(res: FalAiOutput, args: TextToVideoArgs, options?: Options): Promise<Blob> {
-	const requestId = res.requestId;
+	const requestId = res.request_id;
 	if (!requestId) {
 		throw new InferenceOutputError("No request ID found in the response");
 	}
