@@ -591,11 +591,11 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			OR path:"pytorch_model.bin"`,
 	},
 	"open-sora": {
-		prettyLabel: "OpenSora",
-		repoName: "OpenSora",
+		prettyLabel: "Open-Sora",
+		repoName: "Open-Sora",
 		repoUrl: "https://github.com/hpcaitech/Open-Sora",
 		filter: false,
-		countDownloads: `path:"model.safetensors"`,
+		countDownloads: `path:"Open_Sora_v2.safetensors"`,
 	},
 	paddlenlp: {
 		prettyLabel: "paddlenlp",
