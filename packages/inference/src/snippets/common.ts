@@ -105,6 +105,7 @@ const HF_PYTHON_METHODS: Partial<Record<WidgetType, string>> = {
 // Needed for huggingface.js basic snippets
 
 const HF_JS_METHODS: Partial<Record<WidgetType, string>> = {
+	"automatic-speech-recognition": "automaticSpeechRecognition",
 	"text-classification": "textClassification",
 	"token-classification": "tokenClassification",
 	"table-question-answering": "tableQuestionAnswering",
