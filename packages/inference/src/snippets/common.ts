@@ -72,7 +72,7 @@ const snippetImportRequests = loadTemplate("python", "requests", "importRequests
 
 // Needed for huggingface_hub basic snippets
 
-const HFH_INFERENCE_CLIENT_METHODS: Partial<Record<WidgetType, string>> = {
+const HF_PYTHON_METHODS: Partial<Record<WidgetType, string>> = {
 	"audio-classification": "audio_classification",
 	"audio-to-audio": "audio_to_audio",
 	"automatic-speech-recognition": "automatic_speech_recognition",
@@ -100,6 +100,22 @@ const HFH_INFERENCE_CLIENT_METHODS: Partial<Record<WidgetType, string>> = {
 	"visual-question-answering": "visual_question_answering",
 	"zero-shot-classification": "zero_shot_classification",
 	"zero-shot-image-classification": "zero_shot_image_classification",
+};
+
+// Needed for huggingface.js basic snippets
+
+const HF_JS_METHODS: Partial<Record<WidgetType, string>> = {
+	"text-classification": "textClassification",
+	"token-classification": "tokenClassification",
+	"table-question-answering": "tableQuestionAnswering",
+	"question-answering": "questionAnswering",
+	translation: "translation",
+	summarization: "summarization",
+	"feature-extraction": "featureExtraction",
+	"text-generation": "textGeneration",
+	"text2text-generation": "textGeneration",
+	"fill-mask": "fillMask",
+	"sentence-similarity": "sentenceSimilarity",
 };
 
 // Snippet generators
@@ -173,10 +189,17 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 					}
 					const template = loadTemplate(language, client, templateName);
 					if (client === "huggingface_hub" && templateName.includes("basic")) {
-						if (!(model.pipeline_tag && model.pipeline_tag in HFH_INFERENCE_CLIENT_METHODS)) {
+						if (!(model.pipeline_tag && model.pipeline_tag in HF_PYTHON_METHODS)) {
 							return;
 						}
-						params["methodName"] = HFH_INFERENCE_CLIENT_METHODS[model.pipeline_tag];
+						params["methodName"] = HF_PYTHON_METHODS[model.pipeline_tag];
+					}
+
+					if (client === "huggingface.js" && templateName.includes("basic")) {
+						if (!(model.pipeline_tag && model.pipeline_tag in HF_JS_METHODS)) {
+							return;
+						}
+						params["methodName"] = HF_JS_METHODS[model.pipeline_tag];
 					}
 
 					/// Generate snippet
