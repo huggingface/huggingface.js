@@ -1,9 +1,9 @@
 async function query(data) {
 	const response = await fetch(
-		"{{ fullUrl }}",
+		"https://fal.run/<fal-ai alias for black-forest-labs/FLUX.1-schnell>",
 		{
 			headers: {
-				Authorization: "{{ authorizationHeader }}",
+				Authorization: "Key api_token",
 				"Content-Type": "application/json",
 			},
 			method: "POST",
@@ -14,6 +14,6 @@ async function query(data) {
 	return result;
 }
 
-query({ inputs: {{ providerInputs.asObj.inputs }} }).then((response) => {
+query({ inputs: "Astronaut riding a horse" }).then((response) => {
     // Use image
 });
