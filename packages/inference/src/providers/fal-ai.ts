@@ -17,7 +17,7 @@
 import type { BodyParams, HeaderParams, InferenceTask, ProviderConfig, UrlParams } from "../types";
 
 const FAL_AI_API_BASE_URL = "https://fal.run";
-const FAL_AI_API_BASE_URL_QUEUE = "https://fal.run/queue";
+const FAL_AI_API_BASE_URL_QUEUE = "https://queue.fal.run";
 
 const makeBaseUrl = (task?: InferenceTask): string => {
 	return task === "text-to-video" ? FAL_AI_API_BASE_URL_QUEUE : FAL_AI_API_BASE_URL;
