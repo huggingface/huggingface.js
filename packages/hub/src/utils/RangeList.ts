@@ -16,7 +16,7 @@
  * I want to be able to associate data to each range. And I want to be able to get the ranges inside boundaries. For example , with [1, 30], [30, 50] * 2, [50, 100] configuration
  *
  * - getting [30, 100] => I receive [30, 50] * 2, [50, 100], and I can get / modify the data assocaited to each range by accessing their data prop. Note the "*2" is just the ref counter, there is onlly one range object for the interval returned
- * - getting [2, 50] => error because "2" is not a boundary
+ * - getting [2, 50] => I get [30, 50] * 2
  *
  * ----
  *
@@ -45,7 +45,7 @@ export class RangeList<T> {
 		const overlappingRanges: { index: number; range: Range<T> }[] = [];
 		for (let i = 0; i < this.ranges.length; i++) {
 			const range = this.ranges[i];
-			if (start <= range.end && end >= range.start) {
+			if (start < range.end && end > range.start) {
 				overlappingRanges.push({ index: i, range });
 			}
 			if (range.data !== null) {
@@ -134,7 +134,7 @@ export class RangeList<T> {
 		const affectedRanges: { index: number; range: Range<T> }[] = [];
 		for (let i = 0; i < this.ranges.length; i++) {
 			const range = this.ranges[i];
-			if (start <= range.end && end >= range.start) {
+			if (start < range.end && end > range.start) {
 				affectedRanges.push({ index: i, range });
 			}
 		}
@@ -167,15 +167,7 @@ export class RangeList<T> {
 			throw new TypeError("End must be greater than start");
 		}
 
-		// Find ranges that overlap with the requested boundaries
-		const result: Range<T>[] = [];
-		for (const range of this.ranges) {
-			if (start <= range.end && end >= range.start) {
-				result.push(range);
-			}
-		}
-
-		return result;
+		return this.ranges.filter((range) => start < range.end && end > range.start);
 	}
 
 	/**
