@@ -92,7 +92,7 @@ async function pollFalResponse(res: FalAiOutput, args: TextToVideoArgs, options?
 		const statusResponse = await fetch(statusUrl, { headers: info.headers });
 
 		if (!statusResponse.ok) {
-			throw new Error(`HTTP error! status: ${statusResponse.status}`);
+			throw new InferenceOutputError(`HTTP error! status: ${statusResponse.status}`);
 		}
 		status = (await statusResponse.json()).status;
 	}
