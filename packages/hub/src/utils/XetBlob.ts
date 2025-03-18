@@ -293,7 +293,7 @@ export class XetBlob extends Blob {
 						leftoverBytes = undefined;
 					}
 
-					while (totalBytesRead < maxBytes) {
+					while (totalBytesRead < maxBytes && result.value.length) {
 						if (result.value.length < 8) {
 							// We need 8 bytes to parse the chunk header
 							leftoverBytes = result.value;
