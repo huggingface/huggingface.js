@@ -279,7 +279,7 @@ export class XetBlob extends Blob {
 					const result = await reader.read();
 					done = result.done;
 
-					console.log("read", result.value?.length, "bytes");
+					console.log("read", result.value?.length, "bytes", "total read", totalBytesRead);
 
 					if (!result.value) {
 						continue;
