@@ -14,11 +14,11 @@
  *
  * Thanks!
  */
-import type { BodyParams, HeaderParams, InferenceTask, ProviderConfig, UrlParams } from "../types";
+import type { BodyParams, HeaderParams, ProviderConfig, UrlParams } from "../types";
 
 const SAMBANOVA_API_BASE_URL = "https://api.sambanova.ai";
 
-const makeBaseUrl = (task?: InferenceTask): string => {
+const makeBaseUrl = (): string => {
 	return SAMBANOVA_API_BASE_URL;
 };
 

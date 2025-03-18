@@ -14,11 +14,11 @@
  *
  * Thanks!
  */
-import type { BodyParams, HeaderParams, InferenceTask, ProviderConfig, UrlParams } from "../types";
+import type { BodyParams, HeaderParams, ProviderConfig, UrlParams } from "../types";
 
 const FIREWORKS_AI_API_BASE_URL = "https://api.fireworks.ai";
 
-const makeBaseUrl = (task?: InferenceTask): string => {
+const makeBaseUrl = (): string => {
 	return FIREWORKS_AI_API_BASE_URL;
 };
 

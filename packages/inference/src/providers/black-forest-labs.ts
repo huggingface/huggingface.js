@@ -14,11 +14,11 @@
  *
  * Thanks!
  */
-import type { BodyParams, HeaderParams, InferenceTask, ProviderConfig, UrlParams } from "../types";
+import type { BodyParams, HeaderParams, ProviderConfig, UrlParams } from "../types";
 
 const BLACK_FOREST_LABS_AI_API_BASE_URL = "https://api.us1.bfl.ai";
 
-const makeBaseUrl = (task?: InferenceTask): string => {
+const makeBaseUrl = (): string => {
 	return BLACK_FOREST_LABS_AI_API_BASE_URL;
 };
 

@@ -94,7 +94,7 @@ export type RequestArgs = BaseArgs &
 	};
 
 export interface ProviderConfig {
-	makeBaseUrl: (task?: InferenceTask) => string;
+	makeBaseUrl: ((task?: InferenceTask) => string) | (() => string);
 	makeBody: (params: BodyParams) => Record<string, unknown>;
 	makeHeaders: (params: HeaderParams) => Record<string, string>;
 	makeUrl: (params: UrlParams) => string;

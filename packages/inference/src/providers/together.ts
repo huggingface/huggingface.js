@@ -14,11 +14,11 @@
  *
  * Thanks!
  */
-import type { BodyParams, HeaderParams, InferenceTask, ProviderConfig, UrlParams } from "../types";
+import type { BodyParams, HeaderParams, ProviderConfig, UrlParams } from "../types";
 
 const TOGETHER_API_BASE_URL = "https://api.together.xyz";
 
-const makeBaseUrl = (task?: InferenceTask): string => {
+const makeBaseUrl = (): string => {
 	return TOGETHER_API_BASE_URL;
 };
 

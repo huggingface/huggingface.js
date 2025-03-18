@@ -14,11 +14,11 @@
  *
  * Thanks!
  */
-import type { BodyParams, HeaderParams, InferenceTask, ProviderConfig, UrlParams } from "../types";
+import type { BodyParams, HeaderParams, ProviderConfig, UrlParams } from "../types";
 
 const NEBIUS_API_BASE_URL = "https://api.studio.nebius.ai";
 
-const makeBaseUrl = (task?: InferenceTask): string => {
+const makeBaseUrl = (): string => {
 	return NEBIUS_API_BASE_URL;
 };
 

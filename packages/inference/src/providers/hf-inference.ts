@@ -11,9 +11,9 @@
  * Thanks!
  */
 import { HF_ROUTER_URL } from "../config";
-import type { BodyParams, HeaderParams, InferenceTask, ProviderConfig, UrlParams } from "../types";
+import type { BodyParams, HeaderParams, ProviderConfig, UrlParams } from "../types";
 
-const makeBaseUrl = (task?: InferenceTask): string => {
+const makeBaseUrl = (): string => {
 	return `${HF_ROUTER_URL}/hf-inference`;
 };
 

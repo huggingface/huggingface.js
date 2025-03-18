@@ -14,11 +14,11 @@
  *
  * Thanks!
  */
-import type { BodyParams, HeaderParams, InferenceTask, ProviderConfig, UrlParams } from "../types";
+import type { BodyParams, HeaderParams, ProviderConfig, UrlParams } from "../types";
 
 const NOVITA_API_BASE_URL = "https://api.novita.ai";
 
-const makeBaseUrl = (task?: InferenceTask): string => {
+const makeBaseUrl = (): string => {
 	return NOVITA_API_BASE_URL;
 };
 const makeBody = (params: BodyParams): Record<string, unknown> => {

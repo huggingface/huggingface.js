@@ -1,11 +1,11 @@
 /**
  * Special case: provider configuration for a private models provider (OpenAI in this case).
  */
-import type { BodyParams, HeaderParams, InferenceTask, ProviderConfig, UrlParams } from "../types";
+import type { BodyParams, HeaderParams, ProviderConfig, UrlParams } from "../types";
 
 const OPENAI_API_BASE_URL = "https://api.openai.com";
 
-const makeBaseUrl = (task?: InferenceTask): string => {
+const makeBaseUrl = (): string => {
 	return OPENAI_API_BASE_URL;
 };
 
