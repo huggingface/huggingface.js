@@ -12,6 +12,8 @@ def query(payload):
     return response.json()
 
 output = query({
-    "image": "cat.png",
-    "question": "What is in this image?",
+    "inputs": {
+        "image": "cat.png",
+        "question": "What is in this image?",
+    },
 })
