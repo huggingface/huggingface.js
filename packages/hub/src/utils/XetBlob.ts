@@ -383,15 +383,7 @@ export class XetBlob extends Blob {
 								debug("yield", uncompressed.length, "bytes", result.value.length, "total read", totalBytesRead, stored);
 								totalBytesRead += uncompressed.length;
 								yield stored ? uncompressed.slice() : uncompressed;
-								debug(
-									"yielded",
-									uncompressed.length,
-									"bytes",
-									result.value.length,
-									"total read",
-									totalBytesRead,
-									stored
-								);
+								debug("yielded", uncompressed.length, "bytes", result.value.length, "total read", totalBytesRead);
 							}
 						}
 
