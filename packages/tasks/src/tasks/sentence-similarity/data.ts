@@ -4,7 +4,7 @@ const taskData: TaskDataCustom = {
 	datasets: [
 		{
 			description: "Bing queries with relevant passages from various web sources.",
-			id: "ms_marco",
+			id: "microsoft/ms_marco",
 		},
 	],
 	demo: {
