@@ -13,7 +13,7 @@ describe("XetBlob", () => {
 		});
 
 		expect(await blob.slice(10, 22).text()).toBe("__metadata__");
-	}, 30_000);
+	});
 
 	it("should load the first chunk correctly", async () => {
 		let xorbCount = 0;
@@ -44,7 +44,7 @@ describe("XetBlob", () => {
 
 		expect(new Uint8Array(xetDownload)).toEqual(new Uint8Array(bridgeDownload));
 		expect(xorbCount).toBe(1);
-	}, 30_000);
+	});
 
 	it("should load just past the first chunk correctly", async () => {
 		let xorbCount = 0;
@@ -135,9 +135,9 @@ describe("XetBlob", () => {
 		console.log("xet", xetDownload.byteLength, "bridge", bridgeDownload.byteLength);
 		expect(new Uint8Array(xetDownload).length).toEqual(100_000);
 		expect(new Uint8Array(xetDownload)).toEqual(new Uint8Array(bridgeDownload));
-	}, 30_000);
+	});
 
-	it.only("should load text correctly when offset_into_range starts in a chunk further than the first", async () => {
+	it("should load text correctly when offset_into_range starts in a chunk further than the first", async () => {
 		const blob = new XetBlob({
 			repo: {
 				type: "model",
@@ -185,7 +185,7 @@ describe("XetBlob", () => {
 
 		console.log("xet", text.length, "bridge", bridgeDownload.length);
 		expect(text.length).toBe(bridgeDownload.length);
-	}, 30_000);
+	});
 
 	describe("bg4_regoup_bytes", () => {
 		it("should regroup bytes when the array is %4 length", () => {

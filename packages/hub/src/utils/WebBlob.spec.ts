@@ -58,7 +58,7 @@ describe("WebBlob", () => {
 		expect(webBlob).toBeInstanceOf(WebBlob);
 		expect(webBlob).toMatchObject({ url });
 		expect(await webBlob.slice(10, 22).text()).toBe("__metadata__");
-	}, 30_000);
+	});
 
 	it("should lazy load a Xet file hosted on Hugging Face", async () => {
 		const stableDiffusionUrl =
@@ -70,7 +70,7 @@ describe("WebBlob", () => {
 		expect(webBlob).toBeInstanceOf(WebBlob);
 		expect(webBlob).toMatchObject({ url });
 		expect(await webBlob.slice(10, 22).text()).toBe("__metadata__");
-	}, 30_000);
+	});
 
 	it("should create a slice on the file", async () => {
 		const expectedText = fullText.slice(10, 20);
