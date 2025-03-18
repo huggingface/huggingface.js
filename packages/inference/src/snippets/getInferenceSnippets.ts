@@ -21,9 +21,9 @@ const SH_CLIENTS = ["curl"] as const;
 type Client = (typeof SH_CLIENTS)[number] | (typeof PYTHON_CLIENTS)[number] | (typeof JS_CLIENTS)[number];
 
 const CLIENTS: Record<InferenceSnippetLanguage, Client[]> = {
-	js: JS_CLIENTS,
-	python: PYTHON_CLIENTS,
-	sh: SH_CLIENTS,
+	js: [...JS_CLIENTS],
+	python: [...PYTHON_CLIENTS],
+	sh: [...SH_CLIENTS],
 };
 
 type InputPreparationFn = (model: ModelDataMinimal, opts?: Record<string, unknown>) => object;
