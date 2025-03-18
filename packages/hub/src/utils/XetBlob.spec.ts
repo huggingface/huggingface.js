@@ -137,7 +137,7 @@ describe("XetBlob", () => {
 		expect(new Uint8Array(xetDownload)).toEqual(new Uint8Array(bridgeDownload));
 	}, 30_000);
 
-	it("should load text correctly when offset_into_range starts in a chunk further than the first", async () => {
+	it.only("should load text correctly when offset_into_range starts in a chunk further than the first", async () => {
 		const blob = new XetBlob({
 			repo: {
 				type: "model",

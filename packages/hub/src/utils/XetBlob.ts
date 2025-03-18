@@ -217,7 +217,7 @@ export class XetBlob extends Blob {
 					const termRanges = rangeList.getRanges(term.range.start, term.range.end);
 
 					if (termRanges.every((range) => range.data)) {
-						for (const range of termRanges) {
+						rangeLoop: for (const range of termRanges) {
 							// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 							for (let chunk of range.data!) {
 								if (chunk.length > maxBytes - totalBytesRead) {
@@ -227,6 +227,10 @@ export class XetBlob extends Blob {
 								// The stream consumer can decide to transfer ownership of the chunk, so we need to return a clone
 								// if there's more than one range for the same term
 								yield range.refCount > 1 ? chunk.slice() : chunk;
+
+								if (totalBytesRead >= maxBytes) {
+									break rangeLoop;
+								}
 							}
 						}
 						rangeList.remove(term.range.start, term.range.end);
