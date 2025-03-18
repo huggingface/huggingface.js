@@ -32,9 +32,7 @@ const makeHeaders = (params: HeaderParams): Record<string, string> => {
 const makeUrl = (params: UrlParams): string => {
 	if (params.chatCompletion) {
 		return `${params.baseUrl}/v3/openai/chat/completions`;
-	}
-	if (params.task === "text-generation") {
-		}
+	} else if (params.task === "text-generation") {
 		return `${params.baseUrl}/v3/openai/completions`;
 	} else if (params.task === "text-to-video") {
 		return `${params.baseUrl}/v3/hf/${params.model}`;
