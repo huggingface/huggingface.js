@@ -244,6 +244,9 @@ export class XetBlob extends Blob {
 					);
 				}
 
+				console.log("term", term);
+				console.log("fetchinfo", fetchInfo);
+
 				let resp = await customFetch(fetchInfo.url, {
 					headers: {
 						Range: `bytes=${fetchInfo.url_range.start}-${fetchInfo.url_range.end}`,
