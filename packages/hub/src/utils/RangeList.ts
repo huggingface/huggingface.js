@@ -160,7 +160,7 @@ export class RangeList<T> {
 	}
 
 	/**
-	 * Get all ranges within the specified boundaries. The boundaries must match existing ones.
+	 * Get all ranges within the specified boundaries.
 	 */
 	getRanges(start: number, end: number): Range<T>[] {
 		if (end <= start) {
@@ -174,13 +174,6 @@ export class RangeList<T> {
 				result.push(range);
 			}
 		}
-
-		// Verify boundaries match
-		if (result.length === 0 || result[0].start !== start || result[result.length - 1].end !== end) {
-			throw new Error("Range boundaries must match existing boundaries");
-		}
-
-		// Todo: also check if there's a gap in the middle but it should not happen with our usage
 
 		return result;
 	}

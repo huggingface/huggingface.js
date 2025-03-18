@@ -4,6 +4,7 @@ import type { CredentialsParams, RepoDesignation, RepoId } from "../types/public
 import { checkCredentials } from "./checkCredentials";
 import { toRepoId } from "./toRepoId";
 import { decompress as lz4_decompress } from "../vendor/lz4js";
+import { RangeList } from "./RangeList";
 
 const JWT_SAFETY_PERIOD = 60_000;
 const JWT_CACHE_SIZE = 1_000;
@@ -41,7 +42,11 @@ interface ReconstructionInfo {
 			url: string;
 			/** Chunk range */
 			range: { start: number; end: number };
-			/** Byte range, when making the call to the URL */
+			/**
+			 * Byte range, when making the call to the URL.
+			 *
+			 * We assume that we're given non-overlapping ranges for each hash
+			 */
 			url_range: { start: number; end: number };
 		}>
 	>;
@@ -173,6 +178,22 @@ export class XetBlob extends Blob {
 			await this.#loadReconstructionInfo();
 		}
 
+		const rangeLists = new Map<string, RangeList<Uint8Array[]>>();
+
+		if (!this.reconstructionInfo) {
+			throw new Error("Failed to load reconstruction info");
+		}
+
+		for (const term of this.reconstructionInfo.terms) {
+			let rangeList = rangeLists.get(term.hash);
+			if (!rangeList) {
+				rangeList = new RangeList<Uint8Array[]>();
+				rangeLists.set(term.hash, rangeList);
+			}
+
+			rangeList.add(term.range.start, term.range.end);
+		}
+
 		async function* readData(
 			reconstructionInfo: ReconstructionInfo,
 			customFetch: typeof fetch,
@@ -185,6 +206,31 @@ export class XetBlob extends Blob {
 			for (const term of reconstructionInfo.terms) {
 				if (totalBytesRead >= maxBytes) {
 					break;
+				}
+
+				const rangeList = rangeLists.get(term.hash);
+				if (!rangeList) {
+					throw new Error(`Failed to find range list for term ${term.hash}`);
+				}
+
+				{
+					const termRanges = rangeList.getRanges(term.range.start, term.range.end);
+
+					if (termRanges.every((range) => range.data)) {
+						for (const range of termRanges) {
+							for (let chunk of range.data!) {
+								if (chunk.length > maxBytes - totalBytesRead) {
+									chunk = chunk.slice(0, maxBytes - totalBytesRead);
+								}
+								totalBytesRead += chunk.length;
+								// The stream consumer can decide to transfer ownership of the chunk, so we need to return a clone
+								// if there's more than one range for the same term
+								yield range.refCount > 1 ? chunk.slice() : chunk;
+							}
+						}
+						rangeList.remove(term.range.start, term.range.end);
+						continue;
+					}
 				}
 
 				const fetchInfo = reconstructionInfo.fetch_info[term.hash].find(
@@ -223,123 +269,110 @@ export class XetBlob extends Blob {
 				}
 
 				let done = false;
-				let chunksToSkip = term.range.start - fetchInfo.range.start;
-				let chunksToRead = term.range.end - term.range.start;
-				let bytesToSkip = 0;
+				let chunkIndex = fetchInfo.range.start;
+				const ranges = rangeList.getRanges(fetchInfo.range.start, fetchInfo.range.end);
 
 				let leftoverBytes: Uint8Array | undefined = undefined;
 
-				readChunks: while (!done && totalBytesRead < maxBytes) {
+				while (!done) {
 					const result = await reader.read();
 					done = result.done;
-					if (result.value) {
-						while (totalBytesRead < maxBytes && chunksToRead) {
-							if (bytesToSkip) {
-								if (bytesToSkip >= result.value.length) {
-									bytesToSkip -= result.value.length;
-									continue readChunks;
-								}
-								result.value = result.value.slice(bytesToSkip);
-								bytesToSkip = 0;
-							}
-							if (leftoverBytes) {
-								result.value = new Uint8Array([...leftoverBytes, ...result.value]);
-								leftoverBytes = undefined;
-							}
 
-							if (result.value.length < 8) {
-								// We need 8 bytes to parse the chunk header
-								leftoverBytes = result.value;
-								continue readChunks;
-							}
+					if (!result.value) {
+						continue;
+					}
 
-							const header = new DataView(result.value.buffer, result.value.byteOffset, CHUNK_HEADER_BYTES);
-							const chunkHeader: ChunkHeader = {
-								version: header.getUint8(0),
-								compressed_length: header.getUint8(1) | (header.getUint8(2) << 8) | (header.getUint8(3) << 16),
-								compression_scheme: header.getUint8(4),
-								uncompressed_length: header.getUint8(5) | (header.getUint8(6) << 8) | (header.getUint8(7) << 16),
-							};
+					if (leftoverBytes) {
+						result.value = new Uint8Array([...leftoverBytes, ...result.value]);
+						leftoverBytes = undefined;
+					}
 
-							if (chunkHeader.version !== 0) {
-								throw new Error(`Unsupported chunk version ${chunkHeader.version}`);
-							}
+					if (result.value.length < 8) {
+						// We need 8 bytes to parse the chunk header
+						leftoverBytes = result.value;
+						continue;
+					}
 
-							if (
-								chunkHeader.compression_scheme !== CompressionScheme.None &&
-								chunkHeader.compression_scheme !== CompressionScheme.LZ4 &&
-								chunkHeader.compression_scheme !== CompressionScheme.ByteGroupingLZ4
-							) {
-								throw new Error(
-									`Unsupported compression scheme ${
-										compressionSchemeLabels[chunkHeader.compression_scheme] ?? chunkHeader.compression_scheme
-									}`
-								);
-							}
+					const header = new DataView(result.value.buffer, result.value.byteOffset, CHUNK_HEADER_BYTES);
+					const chunkHeader: ChunkHeader = {
+						version: header.getUint8(0),
+						compressed_length: header.getUint8(1) | (header.getUint8(2) << 8) | (header.getUint8(3) << 16),
+						compression_scheme: header.getUint8(4),
+						uncompressed_length: header.getUint8(5) | (header.getUint8(6) << 8) | (header.getUint8(7) << 16),
+					};
 
-							if (chunksToSkip) {
-								chunksToSkip--;
-								result.value = result.value.slice(CHUNK_HEADER_BYTES);
-								bytesToSkip = chunkHeader.compressed_length;
-								continue;
-							}
+					if (chunkHeader.version !== 0) {
+						throw new Error(`Unsupported chunk version ${chunkHeader.version}`);
+					}
 
-							if (readBytesToSkip >= chunkHeader.uncompressed_length) {
-								readBytesToSkip -= chunkHeader.uncompressed_length;
-								result.value = result.value.slice(CHUNK_HEADER_BYTES);
-								bytesToSkip = chunkHeader.compressed_length;
-								chunksToRead--;
-								continue;
-							}
+					if (
+						chunkHeader.compression_scheme !== CompressionScheme.None &&
+						chunkHeader.compression_scheme !== CompressionScheme.LZ4 &&
+						chunkHeader.compression_scheme !== CompressionScheme.ByteGroupingLZ4
+					) {
+						throw new Error(
+							`Unsupported compression scheme ${
+								compressionSchemeLabels[chunkHeader.compression_scheme] ?? chunkHeader.compression_scheme
+							}`
+						);
+					}
 
-							if (result.value.length < chunkHeader.compressed_length + CHUNK_HEADER_BYTES) {
-								// We need more data to read the full chunk
-								leftoverBytes = result.value;
-								continue readChunks;
-							}
+					if (result.value.length < chunkHeader.compressed_length + CHUNK_HEADER_BYTES) {
+						// We need more data to read the full chunk
+						leftoverBytes = result.value;
+						continue;
+					}
 
-							result.value = result.value.slice(CHUNK_HEADER_BYTES);
+					result.value = result.value.slice(CHUNK_HEADER_BYTES);
 
-							const uncompressed =
-								chunkHeader.compression_scheme === CompressionScheme.LZ4
-									? lz4_decompress(
+					let uncompressed =
+						chunkHeader.compression_scheme === CompressionScheme.LZ4
+							? lz4_decompress(result.value.slice(0, chunkHeader.compressed_length), chunkHeader.uncompressed_length)
+							: chunkHeader.compression_scheme === CompressionScheme.ByteGroupingLZ4
+							  ? bg4_regoup_bytes(
+										lz4_decompress(
 											result.value.slice(0, chunkHeader.compressed_length),
 											chunkHeader.uncompressed_length
-									  )
-									: chunkHeader.compression_scheme === CompressionScheme.ByteGroupingLZ4
-									  ? bg4_regoup_bytes(
-												lz4_decompress(
-													result.value.slice(0, chunkHeader.compressed_length),
-													chunkHeader.uncompressed_length
-												)
-									    )
-									  : result.value.slice(0, chunkHeader.compressed_length);
+										)
+							    )
+							  : result.value.slice(0, chunkHeader.compressed_length);
 
-							let bytesToYield: Uint8Array;
-							if (readBytesToSkip) {
-								const remainingBytes = Math.min(uncompressed.length - readBytesToSkip, maxBytes - totalBytesRead);
-								bytesToYield = uncompressed.slice(readBytesToSkip, readBytesToSkip + remainingBytes);
-								readBytesToSkip = 0;
-							} else {
-								bytesToYield = uncompressed.slice(0, Math.min(uncompressed.length, maxBytes - totalBytesRead));
-							}
+					const range = ranges.find((range) => chunkIndex >= range.start && chunkIndex < range.end);
+					const shouldYield = chunkIndex >= term.range.start && chunkIndex < term.range.end;
+					const minRefCountToStore = shouldYield ? 2 : 1;
+					let stored = false;
 
-							totalBytesRead += bytesToYield.length;
-							yield bytesToYield;
-							chunksToRead--;
+					// Assuming non-overlapping fetch_info ranges for the same hash
+					if (range && range.refCount >= minRefCountToStore) {
+						range.data ??= [];
+						range.data.push(uncompressed);
+						stored = true;
+					}
 
-							result.value = result.value.slice(chunkHeader.compressed_length);
+					if (shouldYield) {
+						if (readBytesToSkip) {
+							const skipped = Math.min(readBytesToSkip, uncompressed.length);
+							uncompressed = uncompressed.slice(readBytesToSkip);
+							readBytesToSkip -= skipped;
+						}
+
+						if (uncompressed.length > maxBytes - totalBytesRead) {
+							uncompressed = uncompressed.slice(0, maxBytes - totalBytesRead);
+						}
+
+						if (uncompressed.length) {
+							totalBytesRead += uncompressed.length;
+							yield stored ? uncompressed.slice() : uncompressed;
 						}
 					}
+
+					chunkIndex++;
+					result.value = result.value.slice(chunkHeader.compressed_length);
 				}
 
 				// Release the reader
 				await reader.cancel();
 			}
-		}
-
-		if (!this.reconstructionInfo) {
-			throw new Error("Failed to load reconstruction info");
 		}
 
 		const iterator = readData(
