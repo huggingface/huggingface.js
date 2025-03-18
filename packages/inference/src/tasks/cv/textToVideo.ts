@@ -1,12 +1,13 @@
-import type { TextToVideoInput } from "@huggingface/tasks";
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
-import { isUrl } from "../../lib/isUrl";
-import { makeRequestOptions } from "../../lib/makeRequestOptions";
-import { FalAiOutput, pollFalResponse } from "../../providers/fal-ai";
 import type { BaseArgs, InferenceProvider, Options } from "../../types";
-import { omit } from "../../utils/omit";
-import { typedInclude } from "../../utils/typedInclude";
+import type { TextToVideoInput } from "@huggingface/tasks";
 import { request } from "../custom/request";
+import { omit } from "../../utils/omit";
+import { isUrl } from "../../lib/isUrl";
+import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { typedInclude } from "../../utils/typedInclude";
+import { makeRequestOptions } from "../../lib/makeRequestOptions";
+import { pollFalResponse, FalAiOutput } from "../../providers/fal-ai";
+
 export type TextToVideoArgs = BaseArgs & TextToVideoInput;
 
 export type TextToVideoOutput = Blob;
