@@ -14,9 +14,9 @@ import fs from "fs";
 import path from "path";
 import { existsSync as pathExists } from "node:fs";
 
-const PYTHON_CLIENTS = ["huggingface_hub", "fal_client", "requests", "openai"];
-const JS_CLIENTS = ["fetch", "huggingface.js", "openai"];
-const SH_TOOLS = ["curl"];
+const PYTHON_CLIENTS = ["huggingface_hub", "fal_client", "requests", "openai"] as const;
+const JS_CLIENTS = ["fetch", "huggingface.js", "openai"] as const;
+const SH_TOOLS = ["curl"] as const;
 
 type Client = (typeof SH_TOOLS)[number] | (typeof PYTHON_CLIENTS)[number] | (typeof JS_CLIENTS)[number];
 
