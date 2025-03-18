@@ -279,6 +279,8 @@ export class XetBlob extends Blob {
 					const result = await reader.read();
 					done = result.done;
 
+					console.log("read", result.value?.length, "bytes");
+
 					if (!result.value) {
 						continue;
 					}
@@ -362,8 +364,10 @@ export class XetBlob extends Blob {
 						}
 
 						if (uncompressed.length) {
+							console.log("yield", uncompressed.length, "bytes", result.value.length, "total read", totalBytesRead);
 							totalBytesRead += uncompressed.length;
 							yield stored ? uncompressed.slice() : uncompressed;
+							console.log("yielded", uncompressed.length, "bytes", result.value.length, "total read", totalBytesRead);
 						}
 					}
 
