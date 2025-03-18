@@ -1,0 +1,5 @@
+curl {{ fullUrl }} \
+    -X POST \
+    -H 'Authorization: {{ authorizationHeader }}' \
+    -H 'Content-Type: audio/flac' \
+    --data-binary @{{ providerInputs.asObj.inputs }}
