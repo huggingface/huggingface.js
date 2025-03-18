@@ -14,7 +14,10 @@
  *
  * Thanks!
  */
+import { InferenceOutputError } from "../lib/InferenceOutputError";
+import { isUrl } from "../lib/isUrl";
 import type { BodyParams, HeaderParams, InferenceTask, ProviderConfig, UrlParams } from "../types";
+import { delay } from "../utils/delay";
 
 const FAL_AI_API_BASE_URL = "https://fal.run";
 const FAL_AI_API_BASE_URL_QUEUE = "https://queue.fal.run";
@@ -47,3 +50,58 @@ export const FAL_AI_CONFIG: ProviderConfig = {
 	makeHeaders,
 	makeUrl,
 };
+
+export interface FalAiOutput {
+	request_id: string;
+	status: string;
+}
+
+export async function pollFalResponse(res: FalAiOutput, url: string, headers: Record<string, string>): Promise<Blob> {
+	const requestId = res.request_id;
+	if (!requestId) {
+		throw new InferenceOutputError("No request ID found in the response");
+	}
+	let status = res.status;
+
+	const parsedUrl = new URL(url);
+	const baseRequestUrl = `${parsedUrl.origin}${parsedUrl.pathname}/requests/${requestId}`;
+
+	const statusUrl = `${baseRequestUrl}/status${parsedUrl.search}`;
+	const resultUrl = `${baseRequestUrl}${parsedUrl.search}`;
+
+	while (status !== "COMPLETED") {
+		await delay(1000);
+		const statusResponse = await fetch(statusUrl, { headers: headers });
+
+		if (!statusResponse.ok) {
+			throw new InferenceOutputError(`HTTP error! status: ${statusResponse.status}`);
+		}
+		try {
+			status = (await statusResponse.json()).status;
+		} catch (error) {
+			throw error;
+		}
+	}
+
+	const resultResponse = await fetch(resultUrl, { headers: headers });
+	let result;
+	try {
+		result = await resultResponse.json();
+	} catch (error) {
+		throw error;
+	}
+	const isValidOutput =
+		typeof result === "object" &&
+		!!result &&
+		"video" in result &&
+		typeof result.video === "object" &&
+		!!result.video &&
+		"url" in result.video &&
+		typeof result.video.url === "string" &&
+		isUrl(result.video.url);
+	if (!isValidOutput) {
+		throw new InferenceOutputError("Expected { video: { url: string } }");
+	}
+	const urlResponse = await fetch(result.video.url);
+	return await urlResponse.blob();
+}

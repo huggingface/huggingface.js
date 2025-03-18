@@ -1,21 +1,15 @@
-import type { BaseArgs, InferenceProvider, Options } from "../../types";
 import type { TextToVideoInput } from "@huggingface/tasks";
-import { request } from "../custom/request";
-import { omit } from "../../utils/omit";
-import { isUrl } from "../../lib/isUrl";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
-import { typedInclude } from "../../utils/typedInclude";
+import { isUrl } from "../../lib/isUrl";
 import { makeRequestOptions } from "../../lib/makeRequestOptions";
-import { delay } from "../../utils/delay";
-
+import { FalAiOutput, pollFalResponse } from "../../providers/fal-ai";
+import type { BaseArgs, InferenceProvider, Options } from "../../types";
+import { omit } from "../../utils/omit";
+import { typedInclude } from "../../utils/typedInclude";
+import { request } from "../custom/request";
 export type TextToVideoArgs = BaseArgs & TextToVideoInput;
 
 export type TextToVideoOutput = Blob;
-
-interface FalAiOutput {
-	request_id: string;
-	status: string;
-}
 
 interface ReplicateOutput {
 	output: string;
@@ -45,7 +39,8 @@ export async function textToVideo(args: TextToVideoArgs, options?: Options): Pro
 		task: "text-to-video",
 	});
 	if (args.provider === "fal-ai") {
-		return await pollFalResponse(res as FalAiOutput, args, options);
+		const { url, info } = await makeRequestOptions(args, { ...options, task: "text-to-video" });
+		return await pollFalResponse(res as FalAiOutput, url, info.headers as Record<string, string>);
 	} else if (args.provider === "novita") {
 		const isValidOutput =
 			typeof res === "object" &&
@@ -72,45 +67,4 @@ export async function textToVideo(args: TextToVideoArgs, options?: Options): Pro
 		const urlResponse = await fetch(res.output);
 		return await urlResponse.blob();
 	}
-}
-
-async function pollFalResponse(res: FalAiOutput, args: TextToVideoArgs, options?: Options): Promise<Blob> {
-	const requestId = res.request_id;
-	if (!requestId) {
-		throw new InferenceOutputError("No request ID found in the response");
-	}
-	let status = res.status;
-	const { url, info } = await makeRequestOptions(args, { ...options, task: "text-to-video" });
-	const baseUrl = url?.split("?")[0] || "";
-	const query = url?.includes("_subdomain=queue") ? "?_subdomain=queue" : "";
-
-	const statusUrl = `${baseUrl}/requests/${requestId}/status${query}`;
-	const resultUrl = `${baseUrl}/requests/${requestId}${query}`;
-
-	while (status !== "COMPLETED") {
-		await delay(1000);
-		const statusResponse = await fetch(statusUrl, { headers: info.headers });
-
-		if (!statusResponse.ok) {
-			throw new InferenceOutputError(`HTTP error! status: ${statusResponse.status}`);
-		}
-		status = (await statusResponse.json()).status;
-	}
-
-	const resultResponse = await fetch(resultUrl, { headers: info.headers });
-	const result = await resultResponse.json();
-	const isValidOutput =
-		typeof result === "object" &&
-		!!result &&
-		"video" in result &&
-		typeof result.video === "object" &&
-		!!result.video &&
-		"url" in result.video &&
-		typeof result.video.url === "string" &&
-		isUrl(result.video.url);
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected { video: { url: string } }");
-	}
-	const urlResponse = await fetch(result.video.url);
-	return await urlResponse.blob();
 }
