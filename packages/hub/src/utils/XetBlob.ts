@@ -304,6 +304,8 @@ export class XetBlob extends Blob {
 						uncompressed_length: header.getUint8(5) | (header.getUint8(6) << 8) | (header.getUint8(7) << 16),
 					};
 
+					console.log("chunk header", chunkHeader);
+
 					if (chunkHeader.version !== 0) {
 						throw new Error(`Unsupported chunk version ${chunkHeader.version}`);
 					}
@@ -390,6 +392,8 @@ export class XetBlob extends Blob {
 					chunkIndex++;
 					leftoverBytes = result.value.slice(chunkHeader.compressed_length);
 				}
+
+				console.log("done", done, "total read", totalBytesRead);
 
 				// Release the reader
 				await reader.cancel();
