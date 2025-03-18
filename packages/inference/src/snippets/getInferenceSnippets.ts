@@ -235,9 +235,9 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 						}
 
 						/// Snippet is ready!
-						return { language, client, content: snippet };
+						return { language, client: client as string, content: snippet };
 					})
-					.filter((snippet): snippet is InferenceSnippet => snippet);
+					.filter((snippet): snippet is InferenceSnippet => snippet !== undefined);
 			})
 			.flat();
 	};
