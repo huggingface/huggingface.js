@@ -218,6 +218,7 @@ export class XetBlob extends Blob {
 
 					if (termRanges.every((range) => range.data)) {
 						for (const range of termRanges) {
+							// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 							for (let chunk of range.data!) {
 								if (chunk.length > maxBytes - totalBytesRead) {
 									chunk = chunk.slice(0, maxBytes - totalBytesRead);
@@ -274,7 +275,7 @@ export class XetBlob extends Blob {
 
 				let leftoverBytes: Uint8Array | undefined = undefined;
 
-				while (!done) {
+				while (!done && totalBytesRead < maxBytes) {
 					const result = await reader.read();
 					done = result.done;
 
@@ -367,7 +368,7 @@ export class XetBlob extends Blob {
 					}
 
 					chunkIndex++;
-					result.value = result.value.slice(chunkHeader.compressed_length);
+					leftoverBytes = result.value.slice(chunkHeader.compressed_length);
 				}
 
 				// Release the reader
