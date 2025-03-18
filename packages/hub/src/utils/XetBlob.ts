@@ -217,6 +217,7 @@ export class XetBlob extends Blob {
 					const termRanges = rangeList.getRanges(term.range.start, term.range.end);
 
 					if (termRanges.every((range) => range.data)) {
+						console.log("all data available for term", term.hash, readBytesToSkip);
 						rangeLoop: for (const range of termRanges) {
 							// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 							for (let chunk of range.data!) {
@@ -224,6 +225,7 @@ export class XetBlob extends Blob {
 									chunk = chunk.slice(0, maxBytes - totalBytesRead);
 								}
 								totalBytesRead += chunk.length;
+								console.log("yield", chunk.length, "bytes", "total read", totalBytesRead);
 								// The stream consumer can decide to transfer ownership of the chunk, so we need to return a clone
 								// if there's more than one range for the same term
 								yield range.refCount > 1 ? chunk.slice() : chunk;
@@ -250,6 +252,7 @@ export class XetBlob extends Blob {
 
 				console.log("term", term);
 				console.log("fetchinfo", fetchInfo);
+				console.log("readBytesToSkip", readBytesToSkip);
 
 				let resp = await customFetch(fetchInfo.url, {
 					headers: {
@@ -286,7 +289,7 @@ export class XetBlob extends Blob {
 					const result = await reader.read();
 					done = result.done;
 
-					console.log("read", result.value?.length, "bytes", "total read", totalBytesRead);
+					console.log("read", result.value?.length, "bytes", "total read", totalBytesRead, "toSkip", readBytesToSkip);
 
 					if (!result.value) {
 						continue;
@@ -312,7 +315,7 @@ export class XetBlob extends Blob {
 							uncompressed_length: header.getUint8(5) | (header.getUint8(6) << 8) | (header.getUint8(7) << 16),
 						};
 
-						console.log("chunk header", chunkHeader);
+						console.log("chunk header", chunkHeader, "to skip", readBytesToSkip);
 
 						if (chunkHeader.version !== 0) {
 							throw new Error(`Unsupported chunk version ${chunkHeader.version}`);
