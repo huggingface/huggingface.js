@@ -5,17 +5,8 @@ import { OllamaChatTemplateMapEntry } from "./types";
 
 /**
  * Skipped these models due to error:
- * - library/nous-hermes2:34b
- * - library/stablelm2:12b
- * - library/deepseek-v2:16b
- * - library/wizard-math:13b
  * - library/neural-chat:7b
- * - library/stable-code:3b
- * - library/wizard-math:70b
- * - library/dolphin-phi:2.7b
- * - library/firefunction-v2:70b
- * - library/granite3.2:8b
- * - library/r1-1776:671b
+ * - library/phi4-mini:3.8b
  */
 
 export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
