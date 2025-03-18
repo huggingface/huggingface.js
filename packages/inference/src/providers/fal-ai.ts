@@ -51,12 +51,16 @@ export const FAL_AI_CONFIG: ProviderConfig = {
 	makeUrl,
 };
 
-export interface FalAiOutput {
+export interface FalAiQueueOutput {
 	request_id: string;
 	status: string;
 }
 
-export async function pollFalResponse(res: FalAiOutput, url: string, headers: Record<string, string>): Promise<Blob> {
+export async function pollFalResponse(
+	res: FalAiQueueOutput,
+	url: string,
+	headers: Record<string, string>
+): Promise<Blob> {
 	const requestId = res.request_id;
 	if (!requestId) {
 		throw new InferenceOutputError("No request ID found in the response");
@@ -70,7 +74,7 @@ export async function pollFalResponse(res: FalAiOutput, url: string, headers: Re
 	const resultUrl = `${baseRequestUrl}${parsedUrl.search}`;
 
 	while (status !== "COMPLETED") {
-		await delay(1000);
+		await delay(500);
 		const statusResponse = await fetch(statusUrl, { headers: headers });
 
 		if (!statusResponse.ok) {

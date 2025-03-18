@@ -6,7 +6,7 @@ import { isUrl } from "../../lib/isUrl";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import { typedInclude } from "../../utils/typedInclude";
 import { makeRequestOptions } from "../../lib/makeRequestOptions";
-import { pollFalResponse, FalAiOutput } from "../../providers/fal-ai";
+import { pollFalResponse, FalAiQueueOutput } from "../../providers/fal-ai";
 
 export type TextToVideoArgs = BaseArgs & TextToVideoInput;
 
@@ -35,13 +35,13 @@ export async function textToVideo(args: TextToVideoArgs, options?: Options): Pro
 		args.provider === "fal-ai" || args.provider === "replicate" || args.provider === "novita"
 			? { ...omit(args, ["inputs", "parameters"]), ...args.parameters, prompt: args.inputs }
 			: args;
-	const res = await request<FalAiOutput | ReplicateOutput | NovitaOutput>(payload, {
+	const res = await request<FalAiQueueOutput | ReplicateOutput | NovitaOutput>(payload, {
 		...options,
 		task: "text-to-video",
 	});
 	if (args.provider === "fal-ai") {
 		const { url, info } = await makeRequestOptions(args, { ...options, task: "text-to-video" });
-		return await pollFalResponse(res as FalAiOutput, url, info.headers as Record<string, string>);
+		return await pollFalResponse(res as FalAiQueueOutput, url, info.headers as Record<string, string>);
 	} else if (args.provider === "novita") {
 		const isValidOutput =
 			typeof res === "object" &&
