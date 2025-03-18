@@ -16,14 +16,14 @@ import { existsSync as pathExists } from "node:fs";
 
 const PYTHON_CLIENTS = ["huggingface_hub", "fal_client", "requests", "openai"];
 const JS_CLIENTS = ["fetch", "huggingface.js", "openai"];
-const SH_TOOLS = ["curl"];
+const SH_CLIENTS = ["curl"];
 
-type Client = (typeof SH_TOOLS)[number] | (typeof PYTHON_CLIENTS)[number] | (typeof JS_CLIENTS)[number];
+type Client = (typeof SH_CLIENTS)[number] | (typeof PYTHON_CLIENTS)[number] | (typeof JS_CLIENTS)[number];
 
 const CLIENTS: Record<InferenceSnippetLanguage, Client[]> = {
 	js: JS_CLIENTS,
 	python: PYTHON_CLIENTS,
-	sh: SH_TOOLS,
+	sh: SH_CLIENTS,
 };
 
 type InputPreparationFn = (model: ModelDataMinimal, opts?: Record<string, unknown>) => object;
