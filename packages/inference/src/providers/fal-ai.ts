@@ -38,7 +38,6 @@ const makeUrl = (params: UrlParams): string => {
 	if (params.authMethod !== "provider-key" && params.task === "text-to-video") {
 		return `${baseUrl}?_subdomain=queue`;
 	}
-	console.log("baseUrl", baseUrl);
 	return baseUrl;
 };
 
