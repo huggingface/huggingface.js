@@ -364,10 +364,26 @@ export class XetBlob extends Blob {
 						}
 
 						if (uncompressed.length) {
-							console.log("yield", uncompressed.length, "bytes", result.value.length, "total read", totalBytesRead);
+							console.log(
+								"yield",
+								uncompressed.length,
+								"bytes",
+								result.value.length,
+								"total read",
+								totalBytesRead,
+								stored
+							);
 							totalBytesRead += uncompressed.length;
 							yield stored ? uncompressed.slice() : uncompressed;
-							console.log("yielded", uncompressed.length, "bytes", result.value.length, "total read", totalBytesRead);
+							console.log(
+								"yielded",
+								uncompressed.length,
+								"bytes",
+								result.value.length,
+								"total read",
+								totalBytesRead,
+								stored
+							);
 						}
 					}
 

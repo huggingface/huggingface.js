@@ -133,7 +133,8 @@ describe("XetBlob", () => {
 		).then((res) => res.arrayBuffer());
 
 		console.log("xet", xetDownload.byteLength, "bridge", bridgeDownload.byteLength);
-		expect(new Uint8Array(xetDownload)).toEqual(100_000);
+		expect(new Uint8Array(xetDownload).length).toEqual(100_000);
+		expect(new Uint8Array(xetDownload)).toEqual(new Uint8Array(bridgeDownload));
 	}, 30_000);
 
 	it("should load text correctly when offset_into_range starts in a chunk further than the first", async () => {
