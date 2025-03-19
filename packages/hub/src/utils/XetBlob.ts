@@ -18,9 +18,13 @@ type XetBlobCreateOptions = {
 	hash: string;
 	hubUrl?: string;
 	size: number;
+	/**
+	 * For intenral tests
+	 */
+	debug?: (arg: { event: "read" }) => void;
 } & Partial<CredentialsParams>;
 
-interface ReconstructionInfo {
+export interface ReconstructionInfo {
 	/**
 	 * List of CAS blocks
 	 */
@@ -91,6 +95,7 @@ export class XetBlob extends Blob {
 	start = 0;
 	end = 0;
 	reconstructionInfo: ReconstructionInfo | undefined;
+	debug: XetBlobCreateOptions["debug"];
 
 	constructor(params: XetBlobCreateOptions) {
 		super([]);
@@ -101,6 +106,7 @@ export class XetBlob extends Blob {
 		this.hubUrl = params.hubUrl ?? HUB_URL;
 		this.end = params.size;
 		this.hash = params.hash;
+		this.debug = params.debug;
 		this.hubUrl;
 	}
 
@@ -121,6 +127,7 @@ export class XetBlob extends Blob {
 		blob.start = this.start;
 		blob.end = this.end;
 		blob.reconstructionInfo = this.reconstructionInfo;
+		blob.debug = this.debug;
 
 		return blob;
 	}
@@ -194,6 +201,7 @@ export class XetBlob extends Blob {
 
 			rangeList.add(term.range.start, term.range.end);
 		}
+		const debug = this.debug;
 
 		async function* readData(
 			reconstructionInfo: ReconstructionInfo,
@@ -221,6 +229,14 @@ export class XetBlob extends Blob {
 						rangeLoop: for (const range of termRanges) {
 							// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 							for (let chunk of range.data!) {
+								if (readBytesToSkip) {
+									const skipped = Math.min(readBytesToSkip, chunk.length);
+									chunk = chunk.slice(skipped);
+									readBytesToSkip -= skipped;
+									if (!chunk.length) {
+										continue;
+									}
+								}
 								if (chunk.length > maxBytes - totalBytesRead) {
 									chunk = chunk.slice(0, maxBytes - totalBytesRead);
 								}
@@ -283,6 +299,8 @@ export class XetBlob extends Blob {
 
 				fetchData: while (!done && totalBytesRead < maxBytes) {
 					const result = await reader.read();
+					debug?.({ event: "read" });
+
 					done = result.done;
 
 					if (!result.value) {
