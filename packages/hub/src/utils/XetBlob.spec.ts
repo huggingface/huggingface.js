@@ -418,6 +418,109 @@ describe("XetBlob", () => {
 			});
 		});
 
+		describe("loading at 29 bytes intervals", () => {
+			it("should load different slices", async () => {
+				const chunk1Content = "hello";
+				const chunk2Content = "world!";
+				const debugged: Array<{ event: "read" }> = [];
+
+				const chunks = Array(1000)
+					.fill(0)
+					.flatMap(() => [makeChunk(chunk1Content), makeChunk(chunk2Content)]);
+				const mergedChunks = await new Blob(chunks).arrayBuffer();
+				const splitChunks = splitChunk(new Uint8Array(mergedChunks), 29);
+
+				const totalChunkLength = sum(chunks.map((x) => x.byteLength));
+				const wholeText = (chunk1Content + chunk2Content).repeat(1000);
+
+				const totalSize = wholeText.length;
+				let fetchCount = 0;
+
+				const blob = new XetBlob({
+					hash: "test",
+					repo: {
+						name: "test",
+						type: "model",
+					},
+					size: totalSize,
+					hubUrl: "https://huggingface.co",
+					debug: (e) => debugged.push(e),
+					fetch: async function (_url, opts) {
+						const url = new URL(_url as string);
+						const headers = opts?.headers as Record<string, string> | undefined;
+
+						switch (url.hostname) {
+							case "huggingface.co": {
+								// This is a token
+								return new Response(
+									JSON.stringify({
+										casUrl: "https://cas.co",
+										accessToken: "boo",
+										exp: 1_000_000,
+									})
+								);
+							}
+							case "cas.co": {
+								// This is the reconstruction info
+								const range = headers?.["Range"]?.slice("bytes=".length).split("-").map(Number);
+
+								const start = range?.[0] ?? 0;
+								// const end = range?.[1] ?? (totalSize - 1);
+
+								return new Response(
+									JSON.stringify({
+										terms: Array(1000)
+											.fill(0)
+											.map(() => ({
+												hash: "test",
+												range: {
+													start: 0,
+													end: 2,
+												},
+												unpacked_length: chunk1Content.length + chunk2Content.length,
+											})),
+										fetch_info: {
+											test: [
+												{
+													url: "https://fetch.co",
+													range: { start: 0, end: 2 },
+													url_range: {
+														start: 0,
+														end: totalChunkLength - 1,
+													},
+												},
+											],
+										},
+										offset_into_first_range: start,
+									} satisfies ReconstructionInfo)
+								);
+							}
+							case "fetch.co": {
+								fetchCount++;
+								return new Response(new Blob(splitChunks));
+							}
+							default:
+								throw new Error("Unhandled URL");
+						}
+					},
+				});
+
+				const startIndexes = [0, 5, 11, 6, 12, 100, 2000, totalSize - 12, totalSize - 2];
+
+				for (const index of startIndexes) {
+					console.log("slice", index);
+					const content = await blob.slice(index).text();
+					expect(content.length).toBe(wholeText.length - index);
+					expect(content.slice(0, 1000)).toEqual(wholeText.slice(index).slice(0, 1000));
+					expect(debugged.filter((e) => e.event === "read").length).toBe(Math.ceil(totalChunkLength / 29) + 1); // 1 read for each chunk + 1 undefined
+					expect(fetchCount).toEqual(1);
+
+					fetchCount = 0;
+					debugged.length = 0;
+				}
+			});
+		});
+
 		describe("loading one byte at a time", () => {
 			it("should load different slices", async () => {
 				const chunk1Content = "hello";
@@ -427,7 +530,7 @@ describe("XetBlob", () => {
 				const chunks = Array(1000)
 					.fill(0)
 					.flatMap(() => [makeChunk(chunk1Content), makeChunk(chunk2Content)])
-					.flatMap(splitChunk);
+					.flatMap((x) => splitChunk(x, 1));
 
 				const totalChunkLength = sum(chunks.map((x) => x.byteLength));
 				const wholeText = (chunk1Content + chunk2Content).repeat(1000);
@@ -542,11 +645,14 @@ function makeChunk(content: string) {
 	return array;
 }
 
-function splitChunk(chunk: Uint8Array): Uint8Array[] {
+function splitChunk(chunk: Uint8Array, toLength: number): Uint8Array[] {
 	const dataView = new DataView(chunk.buffer);
-	return new Array(chunk.byteLength).fill(0).map((_, i) => {
-		const array = new Uint8Array(1);
-		array[0] = dataView.getUint8(i);
+	return new Array(Math.ceil(chunk.byteLength / toLength)).fill(0).map((_, i) => {
+		const array = new Uint8Array(Math.min(toLength, chunk.byteLength - i * toLength));
+
+		for (let j = 0; j < array.byteLength; j++) {
+			array[j] = dataView.getUint8(i * toLength + j);
+		}
 		return array;
 	});
 }
