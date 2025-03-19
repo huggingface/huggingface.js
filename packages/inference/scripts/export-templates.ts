@@ -1,9 +1,13 @@
+/* Script that export all jinja files from packages/inference/src/snippets/templates into a TS module.
+
+Templates are exported in packages/inference/src/snippets/templates.exported.ts.
+*/
 import { readFileSync, writeFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 
 const TEMPLATES_DIR = path.join(process.cwd(), "src", "snippets", "templates");
 
-function generateTemplatesCode(): string {
+function exportTemplatesAsCode(): string {
 	/// language -> client -> templateName -> templateContent
 	const templates: Record<string, Record<string, Record<string, string>>> = {};
 
@@ -44,7 +48,7 @@ export const templates: Record<string, Record<string, Record<string, string>>> =
 }
 
 // Generate and write the templates file
-const output = generateTemplatesCode();
-const outputPath = path.join(process.cwd(), "src", "snippets", "templates.generated.ts")
+const output = exportTemplatesAsCode();
+const outputPath = path.join(process.cwd(), "src", "snippets", "templates.exported.ts");
 writeFileSync(outputPath, output);
-console.log("Templates generated successfully! 🚀");
+console.log("Templates exported successfully! 🚀");

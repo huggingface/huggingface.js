@@ -10,7 +10,7 @@ import {
 import type { InferenceProvider, InferenceTask, RequestArgs } from "../types";
 import { Template } from "@huggingface/jinja";
 import { makeRequestOptionsFromResolvedModel } from "../lib/makeRequestOptions";
-import { templates } from "./templates.generated";
+import { templates } from "./templates.exported";
 
 const PYTHON_CLIENTS = ["huggingface_hub", "fal_client", "requests", "openai"] as const;
 const JS_CLIENTS = ["fetch", "huggingface.js", "openai"] as const;
