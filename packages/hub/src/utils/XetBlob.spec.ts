@@ -215,7 +215,7 @@ describe("XetBlob", () => {
 		});
 	});
 
-	describe.only("when mocked", () => {
+	describe("when mocked", () => {
 		describe("loading many chunks every read", () => {
 			it("should load different slices", async () => {
 				const chunk1Content = "hello";
