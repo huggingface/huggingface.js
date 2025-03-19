@@ -10,9 +10,7 @@ import {
 import type { InferenceProvider, InferenceTask, RequestArgs } from "../types";
 import { Template } from "@huggingface/jinja";
 import { makeRequestOptionsFromResolvedModel } from "../lib/makeRequestOptions";
-import fs from "fs";
-import path from "path";
-import { existsSync as pathExists } from "node:fs";
+import { templates } from "./templates.generated";
 
 const PYTHON_CLIENTS = ["huggingface_hub", "fal_client", "requests", "openai"] as const;
 const JS_CLIENTS = ["fetch", "huggingface.js", "openai"] as const;
@@ -44,34 +42,18 @@ interface TemplateParams {
 
 // Helpers to find + load templates
 
-const rootDirFinder = (): string => {
-	let currentPath =
-		typeof import.meta !== "undefined" && import.meta.url
-			? path.normalize(new URL(import.meta.url).pathname) /// for ESM
-			: __dirname; /// for CJS
-
-	while (currentPath !== "/") {
-		if (pathExists(path.join(currentPath, "package.json"))) {
-			return currentPath;
-		}
-
-		currentPath = path.normalize(path.join(currentPath, ".."));
-	}
-
-	return "/";
-};
-
-const templatePath = (language: InferenceSnippetLanguage, client: Client, templateName: string): string =>
-	path.join(rootDirFinder(), "src", "snippets", "templates", language, client, `${templateName}.jinja`);
 const hasTemplate = (language: InferenceSnippetLanguage, client: Client, templateName: string): boolean =>
-	pathExists(templatePath(language, client, templateName));
+	templates[language]?.[client]?.[templateName] !== undefined;
 
 const loadTemplate = (
 	language: InferenceSnippetLanguage,
 	client: Client,
 	templateName: string
 ): ((data: TemplateParams) => string) => {
-	const template = fs.readFileSync(templatePath(language, client, templateName), "utf8");
+	const template = templates[language]?.[client]?.[templateName];
+	if (!template) {
+		throw new Error(`Template not found: ${language}/${client}/${templateName}`);
+	}
 	return (data: TemplateParams) => new Template(template).render({ ...data });
 };
 
