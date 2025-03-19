@@ -3,5 +3,5 @@ def query(payload):
     return response.json()
 
 output = query({
-    "inputs": {{ inputs }},
+    "inputs": {{ providerInputs.asObj.inputs }},
 }) 

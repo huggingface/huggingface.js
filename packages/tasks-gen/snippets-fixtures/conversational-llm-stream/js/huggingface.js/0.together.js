@@ -4,16 +4,16 @@ const client = new InferenceClient("api_token");
 
 let out = "";
 
-const stream = client.chatCompletionStream({
-	model: "meta-llama/Llama-3.1-8B-Instruct",
-	messages: [
-		{
-			role: "user",
-			content: "What is the capital of France?"
-		}
-	],
-	provider: "together",
-	max_tokens: 500,
+const stream = await client.chatCompletionStream({
+    provider: "together",
+    model: "meta-llama/Llama-3.1-8B-Instruct",
+    messages: [
+        {
+            role: "user",
+            content: "What is the capital of France?",
+        },
+    ],
+    max_tokens: 500,
 });
 
 for await (const chunk of stream) {

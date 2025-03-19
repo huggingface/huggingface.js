@@ -1,0 +1,13 @@
+import { InferenceClient } from "@huggingface/inference";
+
+const client = new InferenceClient("{{ accessToken }}");
+
+const data = fs.readFileSync({{inputs.asObj.inputs}});
+
+const output = await client.{{ methodName }}({
+	data,
+	model: "{{ model.id }}",
+	provider: "{{ provider }}",
+});
+
+console.log(output);

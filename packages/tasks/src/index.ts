@@ -49,7 +49,9 @@ export * from "./gguf.js";
 
 export {
 	type InferenceSnippet,
+	type InferenceSnippetLanguage,
 	type ModelDataMinimal,
+	inferenceSnippetLanguages,
 	stringifyGenerationConfig,
 	stringifyMessages,
 	getModelInputSnippet,
