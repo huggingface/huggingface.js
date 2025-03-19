@@ -24,6 +24,14 @@ export interface Options {
 	 * (Default: "same-origin"). String | Boolean. Credentials to use for the request. If this is a string, it will be passed straight on. If it's a boolean, true will be "include" and false will not send credentials at all.
 	 */
 	includeCredentials?: string | boolean;
+
+	/**
+	 * The billing account to use for the requests.
+	 *
+	 * By default the requests are billed on the user's account.
+	 * Requests can be billed to any organization the user is a member of as long as billing is enabled for that organization.
+	 */
+	billTo?: string;
 }
 
 export type InferenceTask = Exclude<PipelineType, "other">;

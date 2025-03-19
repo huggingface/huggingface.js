@@ -1,4 +1,4 @@
-import { HF_HUB_URL, HF_ROUTER_URL } from "../config";
+import { HF_HUB_URL, HF_ROUTER_URL, HF_HEADER_X_BILL_TO } from "../config";
 import { BLACK_FOREST_LABS_CONFIG } from "../providers/black-forest-labs";
 import { CEREBRAS_CONFIG } from "../providers/cerebras";
 import { COHERE_CONFIG } from "../providers/cohere";
@@ -116,7 +116,7 @@ export function makeRequestOptionsFromResolvedModel(
 	const provider = maybeProvider ?? "hf-inference";
 	const providerConfig = providerConfigs[provider];
 
-	const { includeCredentials, task, chatCompletion, signal } = options ?? {};
+	const { includeCredentials, task, chatCompletion, signal, billTo } = options ?? {};
 
 	const authMethod = (() => {
 		if (providerConfig.clientSideRoutingOnly) {
@@ -157,6 +157,9 @@ export function makeRequestOptionsFromResolvedModel(
 		accessToken,
 		authMethod,
 	});
+	if (billTo) {
+		headers[HF_HEADER_X_BILL_TO] = billTo;
+	}
 
 	// Add content-type to headers
 	if (!binary) {
