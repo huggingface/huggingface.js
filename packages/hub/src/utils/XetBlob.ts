@@ -82,7 +82,7 @@ interface ChunkHeader {
 const CHUNK_HEADER_BYTES = 8;
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const debug = (...args: unknown[]) => {};
+const log = (...args: unknown[]) => {};
 
 /**
  * XetBlob is a blob implementation that fetches data directly from the Xet storage
@@ -228,7 +228,7 @@ export class XetBlob extends Blob {
 					const termRanges = rangeList.getRanges(term.range.start, term.range.end);
 
 					if (termRanges.every((range) => range.data)) {
-						debug("all data available for term", term.hash, readBytesToSkip);
+						log("all data available for term", term.hash, readBytesToSkip);
 						rangeLoop: for (const range of termRanges) {
 							// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 							for (let chunk of range.data!) {
@@ -244,7 +244,7 @@ export class XetBlob extends Blob {
 									chunk = chunk.slice(0, maxBytes - totalBytesRead);
 								}
 								totalBytesRead += chunk.length;
-								debug("yield", chunk.length, "bytes", "total read", totalBytesRead);
+								log("yield", chunk.length, "bytes", "total read", totalBytesRead);
 								// The stream consumer can decide to transfer ownership of the chunk, so we need to return a clone
 								// if there's more than one range for the same term
 								yield range.refCount > 1 ? chunk.slice() : chunk;
@@ -269,9 +269,9 @@ export class XetBlob extends Blob {
 					);
 				}
 
-				debug("term", term);
-				debug("fetchinfo", fetchInfo);
-				debug("readBytesToSkip", readBytesToSkip);
+				log("term", term);
+				log("fetchinfo", fetchInfo);
+				log("readBytesToSkip", readBytesToSkip);
 
 				let resp = await customFetch(fetchInfo.url, {
 					headers: {
@@ -310,7 +310,7 @@ export class XetBlob extends Blob {
 
 					done = result.done;
 
-					debug("read", result.value?.length, "bytes", "total read", totalBytesRead, "toSkip", readBytesToSkip);
+					log("read", result.value?.length, "bytes", "total read", totalBytesRead, "toSkip", readBytesToSkip);
 
 					if (!result.value) {
 						continue;
@@ -336,7 +336,7 @@ export class XetBlob extends Blob {
 							uncompressed_length: header.getUint8(5) | (header.getUint8(6) << 8) | (header.getUint8(7) << 16),
 						};
 
-						debug("chunk header", chunkHeader, "to skip", readBytesToSkip);
+						log("chunk header", chunkHeader, "to skip", readBytesToSkip);
 
 						if (chunkHeader.version !== 0) {
 							throw new Error(`Unsupported chunk version ${chunkHeader.version}`);
@@ -398,10 +398,10 @@ export class XetBlob extends Blob {
 							}
 
 							if (uncompressed.length) {
-								debug("yield", uncompressed.length, "bytes", result.value.length, "total read", totalBytesRead, stored);
+								log("yield", uncompressed.length, "bytes", result.value.length, "total read", totalBytesRead, stored);
 								totalBytesRead += uncompressed.length;
 								yield stored ? uncompressed.slice() : uncompressed;
-								debug("yielded", uncompressed.length, "bytes", result.value.length, "total read", totalBytesRead);
+								log("yielded", uncompressed.length, "bytes", result.value.length, "total read", totalBytesRead);
 							}
 						}
 
@@ -410,7 +410,7 @@ export class XetBlob extends Blob {
 					}
 				}
 
-				debug("done", done, "total read", totalBytesRead);
+				log("done", done, "total read", totalBytesRead);
 
 				// Release the reader
 				await reader.cancel();
