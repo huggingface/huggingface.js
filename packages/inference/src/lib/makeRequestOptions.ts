@@ -112,6 +112,7 @@ export function makeRequestOptionsFromResolvedModel(
 	}
 ): { url: string; info: RequestInit } {
 	const { accessToken, endpointUrl, provider: maybeProvider, model, ...remainingArgs } = args;
+	void model;
 
 	const provider = maybeProvider ?? "hf-inference";
 	const providerConfig = providerConfigs[provider];
