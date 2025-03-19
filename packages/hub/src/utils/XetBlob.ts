@@ -81,8 +81,9 @@ interface ChunkHeader {
 
 const CHUNK_HEADER_BYTES = 8;
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const log = (...args: unknown[]) => {};
+const log = (...args: unknown[]) => {
+	console.log(...args);
+};
 
 /**
  * XetBlob is a blob implementation that fetches data directly from the Xet storage
