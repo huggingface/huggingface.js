@@ -29,7 +29,7 @@ export interface Options {
 	 * The billing account to use for the requests.
 	 *
 	 * By default the requests are billed on the user's account.
-	 * Requests can only be billed to an organization the user is a member of, and the billing should be enabled for that organization.
+	 * Requests can only be billed to an organization the user is a member of, and billing should be enabled for that organization.
 	 */
 	billTo?: string;
 }
