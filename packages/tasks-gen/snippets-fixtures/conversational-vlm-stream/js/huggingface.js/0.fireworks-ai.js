@@ -4,27 +4,27 @@ const client = new InferenceClient("api_token");
 
 let out = "";
 
-const stream = client.chatCompletionStream({
-	model: "meta-llama/Llama-3.2-11B-Vision-Instruct",
-	messages: [
-		{
-			role: "user",
-			content: [
-				{
-					type: "text",
-					text: "Describe this image in one sentence."
-				},
-				{
-					type: "image_url",
-					image_url: {
-						url: "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg"
-					}
-				}
-			]
-		}
-	],
-	provider: "fireworks-ai",
-	max_tokens: 500,
+const stream = await client.chatCompletionStream({
+    provider: "fireworks-ai",
+    model: "meta-llama/Llama-3.2-11B-Vision-Instruct",
+    messages: [
+        {
+            role: "user",
+            content: [
+                {
+                    type: "text",
+                    text: "Describe this image in one sentence.",
+                },
+                {
+                    type: "image_url",
+                    image_url: {
+                        url: "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg",
+                    },
+                },
+            ],
+        },
+    ],
+    max_tokens: 500,
 });
 
 for await (const chunk of stream) {

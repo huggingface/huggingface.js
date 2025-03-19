@@ -1,22 +1,20 @@
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://router.huggingface.co/hf-inference/v1",
+    base_url="https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.1-8B-Instruct/v1",
     api_key="api_token"
 )
 
-messages = [
-	{
-		"role": "user",
-		"content": "What is the capital of France?"
-	}
-]
-
 stream = client.chat.completions.create(
     model="meta-llama/Llama-3.1-8B-Instruct",
-    messages=messages,
+    messages=[
+        {
+            "role": "user",
+            "content": "What is the capital of France?"
+        }
+    ],
     max_tokens=500,
-    stream=True
+    stream=True,
 )
 
 for chunk in stream:

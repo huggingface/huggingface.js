@@ -6,7 +6,7 @@ headers = {"Authorization": "Bearer api_token"}
 def query(filename):
     with open(filename, "rb") as f:
         data = f.read()
-    response = requests.post(API_URL, headers=headers, data=data)
+    response = requests.post(API_URL, headers={"Content-Type": "audio/flac", **headers}, data=data)
     return response.json()
 
 output = query("sample1.flac")

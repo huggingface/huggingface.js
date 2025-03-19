@@ -1,9 +1,6 @@
-messages = {{ inputs.messagesStr }}
-
 stream = client.chat.completions.create(
     model="{{ model.id }}",
-    messages=messages,
-    {{ inputs.configStr }}
+{{ inputs.asPythonString }}
     stream=True,
 )
 

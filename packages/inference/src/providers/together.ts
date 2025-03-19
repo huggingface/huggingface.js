@@ -33,10 +33,10 @@ const makeUrl = (params: UrlParams): string => {
 	if (params.task === "text-to-image") {
 		return `${params.baseUrl}/v1/images/generations`;
 	}
+	if (params.chatCompletion) {
+		return `${params.baseUrl}/v1/chat/completions`;
+	}
 	if (params.task === "text-generation") {
-		if (params.chatCompletion) {
-			return `${params.baseUrl}/v1/chat/completions`;
-		}
 		return `${params.baseUrl}/v1/completions`;
 	}
 	return params.baseUrl;

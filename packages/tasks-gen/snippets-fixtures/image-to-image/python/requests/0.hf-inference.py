@@ -13,7 +13,9 @@ def query(payload):
 
 image_bytes = query({
     "inputs": "cat.png",
-    "parameters": {"prompt": "Turn the cat into a tiger."},
+    "parameters": {
+        "prompt": "Turn the cat into a tiger."
+    }
 })
 
 # You can access the image with PIL.Image for example

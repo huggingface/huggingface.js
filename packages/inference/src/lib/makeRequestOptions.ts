@@ -45,7 +45,8 @@ const providerConfigs: Record<InferenceProvider, ProviderConfig> = {
 };
 
 /**
- * Helper that prepares request arguments
+ * Helper that prepares request arguments.
+ * This async version handle the model ID resolution step.
  */
 export async function makeRequestOptions(
 	args: RequestArgs & {
@@ -56,17 +57,15 @@ export async function makeRequestOptions(
 		/** In most cases (unless we pass a endpointUrl) we know the task */
 		task?: InferenceTask;
 		chatCompletion?: boolean;
-		/* Used internally to generate inference snippets (in which case model mapping is done separately) */
-		skipModelIdResolution?: boolean;
 	}
 ): Promise<{ url: string; info: RequestInit }> {
-	const { accessToken, endpointUrl, provider: maybeProvider, model: maybeModel, ...remainingArgs } = args;
+	const { provider: maybeProvider, model: maybeModel } = args;
 	const provider = maybeProvider ?? "hf-inference";
 	const providerConfig = providerConfigs[provider];
+	const { task, chatCompletion } = options ?? {};
 
-	const { includeCredentials, task, chatCompletion, signal, skipModelIdResolution } = options ?? {};
-
-	if (endpointUrl && provider !== "hf-inference") {
+	// Validate inputs
+	if (args.endpointUrl && provider !== "hf-inference") {
 		throw new Error(`Cannot use endpointUrl with a third-party provider.`);
 	}
 	if (maybeModel && isUrl(maybeModel)) {
@@ -81,19 +80,43 @@ export async function makeRequestOptions(
 	if (providerConfig.clientSideRoutingOnly && !maybeModel) {
 		throw new Error(`Provider ${provider} requires a model ID to be passed directly.`);
 	}
+
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const hfModel = maybeModel ?? (await loadDefaultModel(task!));
-	const model = skipModelIdResolution
-		? hfModel
-		: providerConfig.clientSideRoutingOnly
-		  ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		    removeProviderPrefix(maybeModel!, provider)
-		  : // For closed-models API providers, one needs to pass the model ID directly (e.g. "gpt-3.5-turbo")
-		    await getProviderModelId({ model: hfModel, provider }, args, {
-					task,
-					chatCompletion,
-					fetch: options?.fetch,
-		    });
+	const resolvedModel = providerConfig.clientSideRoutingOnly
+		? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		  removeProviderPrefix(maybeModel!, provider)
+		: await getProviderModelId({ model: hfModel, provider }, args, {
+				task,
+				chatCompletion,
+				fetch: options?.fetch,
+		  });
+
+	// Use the sync version with the resolved model
+	return makeRequestOptionsFromResolvedModel(resolvedModel, args, options);
+}
+
+/**
+ * Helper that prepares request arguments. - for internal use only
+ * This sync version skips the model ID resolution step
+ */
+export function makeRequestOptionsFromResolvedModel(
+	resolvedModel: string,
+	args: RequestArgs & {
+		data?: Blob | ArrayBuffer;
+		stream?: boolean;
+	},
+	options?: Options & {
+		task?: InferenceTask;
+		chatCompletion?: boolean;
+	}
+): { url: string; info: RequestInit } {
+	const { accessToken, endpointUrl, provider: maybeProvider, model, ...remainingArgs } = args;
+
+	const provider = maybeProvider ?? "hf-inference";
+	const providerConfig = providerConfigs[provider];
+
+	const { includeCredentials, task, chatCompletion, signal } = options ?? {};
 
 	const authMethod = (() => {
 		if (providerConfig.clientSideRoutingOnly) {
@@ -123,7 +146,7 @@ export async function makeRequestOptions(
 					authMethod !== "provider-key"
 						? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", provider)
 						: providerConfig.baseUrl,
-				model,
+				model: resolvedModel,
 				chatCompletion,
 				task,
 		  });
@@ -154,7 +177,7 @@ export async function makeRequestOptions(
 		: JSON.stringify(
 				providerConfig.makeBody({
 					args: remainingArgs as Record<string, unknown>,
-					model,
+					model: resolvedModel,
 					task,
 					chatCompletion,
 				})

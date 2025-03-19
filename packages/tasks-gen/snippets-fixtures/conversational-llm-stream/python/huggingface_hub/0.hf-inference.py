@@ -5,16 +5,14 @@ client = InferenceClient(
     api_key="api_token",
 )
 
-messages = [
-	{
-		"role": "user",
-		"content": "What is the capital of France?"
-	}
-]
-
 stream = client.chat.completions.create(
     model="meta-llama/Llama-3.1-8B-Instruct",
-    messages=messages,
+    messages=[
+        {
+            "role": "user",
+            "content": "What is the capital of France?"
+        }
+    ],
     max_tokens=500,
     stream=True,
 )

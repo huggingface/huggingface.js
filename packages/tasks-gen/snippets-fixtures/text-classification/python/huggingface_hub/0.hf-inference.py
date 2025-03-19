@@ -9,5 +9,3 @@ result = client.text_classification(
     inputs="I like you. I love you",
     model="distilbert/distilbert-base-uncased-finetuned-sst-2-english",
 )
-
-print(result)

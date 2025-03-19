@@ -1,0 +1,13 @@
+import { OpenAI } from "openai";
+
+const client = new OpenAI({
+	baseURL: "{{ baseUrl }}",
+	apiKey: "{{ accessToken }}",
+});
+
+const chatCompletion = await client.chat.completions.create({
+	model: "{{ providerModelId }}",
+{{ inputs.asTsString }}
+});
+
+console.log(chatCompletion.choices[0].message);

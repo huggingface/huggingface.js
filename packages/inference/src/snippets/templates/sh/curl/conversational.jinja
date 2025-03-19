@@ -1,0 +1,7 @@
+curl {{ fullUrl }} \
+    -H 'Authorization: {{ authorizationHeader }}' \
+    -H 'Content-Type: application/json' \
+    -d '{
+{{ providerInputs.asCurlString }},
+        "stream": false
+    }'
