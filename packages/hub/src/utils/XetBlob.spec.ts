@@ -285,7 +285,7 @@ describe("XetBlob", () => {
 														range: { start: 0, end: 2 },
 														url_range: {
 															start: 0,
-															end: mergedChunks.byteLength - 1,
+															end: mergedChunks.byteLength / 1000 - 1,
 														},
 													},
 												],
@@ -313,6 +313,115 @@ describe("XetBlob", () => {
 						expect(content.slice(0, 1000)).toEqual(wholeText.slice(index).slice(0, 1000));
 						expect(debugged.filter((e) => e.event === "read").length).toBe(2); // 1 read + 1 undefined
 						expect(fetchCount).toEqual(1);
+
+						fetchCount = 0;
+						debugged.length = 0;
+					}
+				});
+
+				it("should load different slices when working with different XORBS", async () => {
+					const chunk1Content = "hello";
+					const chunk2Content = "world!";
+					const debugged: Array<{ event: "read" }> = [];
+
+					const chunks = Array(1000)
+						.fill(0)
+						.flatMap(() => [makeChunk(chunk1Content), makeChunk(chunk2Content)]);
+
+					const mergedChunks = await new Blob(chunks).arrayBuffer();
+					const wholeText = (chunk1Content + chunk2Content).repeat(1000);
+
+					const totalSize = wholeText.length;
+					let fetchCount = 0;
+
+					const blob = new XetBlob({
+						hash: "test",
+						repo: {
+							name: "test",
+							type: "model",
+						},
+						size: totalSize,
+						hubUrl: "https://huggingface.co",
+						debug: (e) => debugged.push(e),
+						fetch: async function (_url, opts) {
+							const url = new URL(_url as string);
+							const headers = opts?.headers as Record<string, string> | undefined;
+
+							switch (url.hostname) {
+								case "huggingface.co": {
+									// This is a token
+									return new Response(
+										JSON.stringify({
+											casUrl: "https://cas.co",
+											accessToken: "boo",
+											exp: 1_000_000,
+										})
+									);
+								}
+								case "cas.co": {
+									// This is the reconstruction info
+									const range = headers?.["Range"]?.slice("bytes=".length).split("-").map(Number);
+
+									const start = range?.[0] ?? 0;
+									// const end = range?.[1] ?? (totalSize - 1);
+
+									return new Response(
+										JSON.stringify({
+											terms: Array(1000)
+												.fill(0)
+												.map((_, i) => ({
+													hash: "test" + (i % 2),
+													range: {
+														start: 0,
+														end: 2,
+													},
+													unpacked_length: chunk1Content.length + chunk2Content.length,
+												})),
+											fetch_info: {
+												test0: [
+													{
+														url: "https://fetch.co",
+														range: { start: 0, end: 2 },
+														url_range: {
+															start: 0,
+															end: mergedChunks.byteLength - 1,
+														},
+													},
+												],
+												test1: [
+													{
+														url: "https://fetch.co",
+														range: { start: 0, end: 2 },
+														url_range: {
+															start: 0,
+															end: mergedChunks.byteLength - 1,
+														},
+													},
+												],
+											},
+											offset_into_first_range: start,
+										} satisfies ReconstructionInfo)
+									);
+								}
+								case "fetch.co": {
+									fetchCount++;
+									return new Response(mergedChunks);
+								}
+								default:
+									throw new Error("Unhandled URL");
+							}
+						},
+					});
+
+					const startIndexes = [0, 5, 11, 6, 12, 100, 2000, totalSize - 12, totalSize - 2];
+
+					for (const index of startIndexes) {
+						console.log("slice", index);
+						const content = await blob.slice(index).text();
+						expect(content.length).toBe(wholeText.length - index);
+						expect(content.slice(0, 1000)).toEqual(wholeText.slice(index).slice(0, 1000));
+						expect(debugged.filter((e) => e.event === "read").length).toBe(4); // 1 read + 1 undefined
+						expect(fetchCount).toEqual(2);
 
 						fetchCount = 0;
 						debugged.length = 0;
