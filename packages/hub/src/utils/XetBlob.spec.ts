@@ -95,6 +95,7 @@ describe("XetBlob", () => {
 				}
 				return fetch(url, opts);
 			},
+			internalLogging: true,
 		});
 
 		const xetDownload = await blob.slice(0, 200_000).arrayBuffer();
@@ -122,6 +123,7 @@ describe("XetBlob", () => {
 			},
 			hash: "7b3b6d07673a88cf467e67c1f7edef1a8c268cbf66e9dd9b0366322d4ab56d9b",
 			size: 5_234_139_343,
+			internalLogging: true,
 		});
 
 		const xetDownload = await blob.slice(10_000_000, 10_100_000).arrayBuffer();
@@ -296,7 +298,15 @@ describe("XetBlob", () => {
 								}
 								case "fetch.co": {
 									fetchCount++;
-									return new Response(mergedChunks);
+									return new Response(
+										// new ReadableStream({
+										// 	pull(controller) {
+										// 		controller.enqueue(mergedChunks);
+										// 		controller.close();
+										// 	},
+										// })
+										mergedChunks
+									);
 								}
 								default:
 									throw new Error("Unhandled URL");

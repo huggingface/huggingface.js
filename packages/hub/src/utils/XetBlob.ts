@@ -22,6 +22,7 @@ type XetBlobCreateOptions = {
 	 * For intenral tests
 	 */
 	debug?: (arg: { event: "read" }) => void;
+	internalLogging?: boolean;
 } & Partial<CredentialsParams>;
 
 export interface ReconstructionInfo {
@@ -81,10 +82,6 @@ interface ChunkHeader {
 
 const CHUNK_HEADER_BYTES = 8;
 
-const log = (...args: unknown[]) => {
-	console.log(...args);
-};
-
 /**
  * XetBlob is a blob implementation that fetches data directly from the Xet storage
  */
@@ -96,6 +93,7 @@ export class XetBlob extends Blob {
 	hash: string;
 	start = 0;
 	end = 0;
+	internalLogging = false;
 	reconstructionInfo: ReconstructionInfo | undefined;
 	debug: XetBlobCreateOptions["debug"];
 
@@ -109,6 +107,7 @@ export class XetBlob extends Blob {
 		this.end = params.size;
 		this.hash = params.hash;
 		this.debug = params.debug;
+		this.internalLogging = params.internalLogging ?? false;
 		this.hubUrl;
 	}
 
@@ -130,6 +129,7 @@ export class XetBlob extends Blob {
 		blob.end = this.end;
 		blob.reconstructionInfo = this.reconstructionInfo;
 		blob.debug = this.debug;
+		blob.internalLogging = this.internalLogging;
 
 		return blob;
 	}
@@ -205,6 +205,7 @@ export class XetBlob extends Blob {
 			rangeList.add(term.range.start, term.range.end);
 		}
 		const debug = this.debug;
+		const log = this.internalLogging ? console.log : () => {};
 
 		async function* readData(
 			reconstructionInfo: ReconstructionInfo,
