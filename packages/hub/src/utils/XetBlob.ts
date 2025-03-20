@@ -235,18 +235,18 @@ export class XetBlob extends Blob {
 							// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 							for (let chunk of range.data!) {
 								if (readBytesToSkip) {
-									const skipped = Math.min(readBytesToSkip, chunk.length);
+									const skipped = Math.min(readBytesToSkip, chunk.byteLength);
 									chunk = chunk.slice(skipped);
 									readBytesToSkip -= skipped;
-									if (!chunk.length) {
+									if (!chunk.byteLength) {
 										continue;
 									}
 								}
-								if (chunk.length > maxBytes - totalBytesRead) {
+								if (chunk.byteLength > maxBytes - totalBytesRead) {
 									chunk = chunk.slice(0, maxBytes - totalBytesRead);
 								}
-								totalBytesRead += chunk.length;
-								log("yield", chunk.length, "bytes", "total read", totalBytesRead);
+								totalBytesRead += chunk.byteLength;
+								log("yield", chunk.byteLength, "bytes", "total read", totalBytesRead);
 								// The stream consumer can decide to transfer ownership of the chunk, so we need to return a clone
 								// if there's more than one range for the same term
 								yield range.refCount > 1 ? chunk.slice() : chunk;
@@ -305,6 +305,7 @@ export class XetBlob extends Blob {
 				const ranges = rangeList.getRanges(fetchInfo.range.start, fetchInfo.range.end);
 
 				let leftoverBytes: Uint8Array | undefined = undefined;
+				let totalFetchBytes = 0;
 
 				fetchData: while (!done && totalBytesRead < maxBytes) {
 					const result = await reader.read();
@@ -312,19 +313,21 @@ export class XetBlob extends Blob {
 
 					done = result.done;
 
-					log("read", result.value?.length, "bytes", "total read", totalBytesRead, "toSkip", readBytesToSkip);
+					log("read", result.value?.byteLength, "bytes", "total read", totalBytesRead, "toSkip", readBytesToSkip);
 
 					if (!result.value) {
 						continue;
 					}
+
+					totalFetchBytes += result.value.byteLength;
 
 					if (leftoverBytes) {
 						result.value = new Uint8Array([...leftoverBytes, ...result.value]);
 						leftoverBytes = undefined;
 					}
 
-					while (totalBytesRead < maxBytes && result.value.length) {
-						if (result.value.length < 8) {
+					while (totalBytesRead < maxBytes && result.value.byteLength) {
+						if (result.value.byteLength < 8) {
 							// We need 8 bytes to parse the chunk header
 							leftoverBytes = result.value;
 							continue fetchData;
@@ -356,7 +359,7 @@ export class XetBlob extends Blob {
 							);
 						}
 
-						if (result.value.length < chunkHeader.compressed_length + CHUNK_HEADER_BYTES) {
+						if (result.value.byteLength < chunkHeader.compressed_length + CHUNK_HEADER_BYTES) {
 							// We need more data to read the full chunk
 							leftoverBytes = result.value;
 							continue fetchData;
@@ -390,20 +393,28 @@ export class XetBlob extends Blob {
 
 						if (shouldYield) {
 							if (readBytesToSkip) {
-								const skipped = Math.min(readBytesToSkip, uncompressed.length);
+								const skipped = Math.min(readBytesToSkip, uncompressed.byteLength);
 								uncompressed = uncompressed.slice(readBytesToSkip);
 								readBytesToSkip -= skipped;
 							}
 
-							if (uncompressed.length > maxBytes - totalBytesRead) {
+							if (uncompressed.byteLength > maxBytes - totalBytesRead) {
 								uncompressed = uncompressed.slice(0, maxBytes - totalBytesRead);
 							}
 
-							if (uncompressed.length) {
-								log("yield", uncompressed.length, "bytes", result.value.length, "total read", totalBytesRead, stored);
-								totalBytesRead += uncompressed.length;
+							if (uncompressed.byteLength) {
+								log(
+									"yield",
+									uncompressed.byteLength,
+									"bytes",
+									result.value.byteLength,
+									"total read",
+									totalBytesRead,
+									stored
+								);
+								totalBytesRead += uncompressed.byteLength;
 								yield stored ? uncompressed.slice() : uncompressed;
-								log("yielded", uncompressed.length, "bytes", result.value.length, "total read", totalBytesRead);
+								log("yielded", uncompressed.byteLength, "bytes", result.value.byteLength, "total read", totalBytesRead);
 							}
 						}
 
@@ -412,7 +423,19 @@ export class XetBlob extends Blob {
 					}
 				}
 
-				log("done", done, "total read", totalBytesRead);
+				if (
+					done &&
+					totalBytesRead < maxBytes &&
+					totalFetchBytes < fetchInfo.url_range.end - fetchInfo.url_range.start + 1
+				) {
+					throw new Error(
+						`Failed to fetch all data for term ${term.hash}, fetched ${totalFetchBytes} bytes out of ${
+							fetchInfo.url_range.end - fetchInfo.url_range.start + 1
+						}`
+					);
+				}
+
+				log("done", done, "total read", totalBytesRead, maxBytes, totalFetchBytes);
 
 				// Release the reader
 				await reader.cancel();
@@ -514,33 +537,33 @@ export function bg4_regoup_bytes(bytes: Uint8Array): Uint8Array {
 
 	// todo: optimize to do it in-place
 
-	const split = Math.floor(bytes.length / 4);
-	const rem = bytes.length % 4;
+	const split = Math.floor(bytes.byteLength / 4);
+	const rem = bytes.byteLength % 4;
 	const g1_pos = split + (rem >= 1 ? 1 : 0);
 	const g2_pos = g1_pos + split + (rem >= 2 ? 1 : 0);
 	const g3_pos = g2_pos + split + (rem == 3 ? 1 : 0);
 
-	const ret = new Uint8Array(bytes.length);
-	for (let i = 0, j = 0; i < bytes.length; i += 4, j++) {
+	const ret = new Uint8Array(bytes.byteLength);
+	for (let i = 0, j = 0; i < bytes.byteLength; i += 4, j++) {
 		ret[i] = bytes[j];
 	}
 
-	for (let i = 1, j = g1_pos; i < bytes.length; i += 4, j++) {
+	for (let i = 1, j = g1_pos; i < bytes.byteLength; i += 4, j++) {
 		ret[i] = bytes[j];
 	}
 
-	for (let i = 2, j = g2_pos; i < bytes.length; i += 4, j++) {
+	for (let i = 2, j = g2_pos; i < bytes.byteLength; i += 4, j++) {
 		ret[i] = bytes[j];
 	}
 
-	for (let i = 3, j = g3_pos; i < bytes.length; i += 4, j++) {
+	for (let i = 3, j = g3_pos; i < bytes.byteLength; i += 4, j++) {
 		ret[i] = bytes[j];
 	}
 
 	return ret;
 
 	// alternative implementation (to benchmark which one is faster)
-	// for (let i = 0; i < bytes.length - 3; i += 4) {
+	// for (let i = 0; i < bytes.byteLength - 3; i += 4) {
 	// 	ret[i] = bytes[i / 4];
 	// 	ret[i + 1] = bytes[g1_pos + i / 4];
 	// 	ret[i + 2] = bytes[g2_pos + i / 4];
@@ -548,14 +571,14 @@ export function bg4_regoup_bytes(bytes: Uint8Array): Uint8Array {
 	// }
 
 	// if (rem === 1) {
-	// 	ret[bytes.length - 1] = bytes[g1_pos - 1];
+	// 	ret[bytes.byteLength - 1] = bytes[g1_pos - 1];
 	// } else if (rem === 2) {
-	// 	ret[bytes.length - 2] = bytes[g1_pos - 1];
-	// 	ret[bytes.length - 1] = bytes[g2_pos - 1];
+	// 	ret[bytes.byteLength - 2] = bytes[g1_pos - 1];
+	// 	ret[bytes.byteLength - 1] = bytes[g2_pos - 1];
 	// } else if (rem === 3) {
-	// 	ret[bytes.length - 3] = bytes[g1_pos - 1];
-	// 	ret[bytes.length - 2] = bytes[g2_pos - 1];
-	// 	ret[bytes.length - 1] = bytes[g3_pos - 1];
+	// 	ret[bytes.byteLength - 3] = bytes[g1_pos - 1];
+	// 	ret[bytes.byteLength - 2] = bytes[g2_pos - 1];
+	// 	ret[bytes.byteLength - 1] = bytes[g3_pos - 1];
 	// }
 }
 
