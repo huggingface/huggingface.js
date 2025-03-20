@@ -40,12 +40,12 @@ describe("createSymlink", () => {
 
 		test("should copyfile", async () => {
 			await createSymlink(dst, src);
-			expect(fs.copyFile).toHaveBeenCalledWith(path.resolve(src), path.resolve(dst));
+			expect(fs.copyFile).toHaveBeenCalledWith(path.resolve(dst), path.resolve(src));
 		});
 
 		test("should rename file if new_blob is true", async () => {
 			await createSymlink(dst, src, true);
-			expect(fs.rename).toHaveBeenCalledWith(path.resolve(src), path.resolve(dst));
+			expect(fs.rename).toHaveBeenCalledWith(path.resolve(dst), path.resolve(src));
 		});
 	});
 
