@@ -429,6 +429,8 @@ export class XetBlob extends Blob {
 					totalBytesRead < maxBytes &&
 					totalFetchBytes < fetchInfo.url_range.end - fetchInfo.url_range.start + 1
 				) {
+					log("done", done, "total read", totalBytesRead, maxBytes, totalFetchBytes);
+					log("failed to fetch all data for term", term.hash);
 					throw new Error(
 						`Failed to fetch all data for term ${term.hash}, fetched ${totalFetchBytes} bytes out of ${
 							fetchInfo.url_range.end - fetchInfo.url_range.start + 1
