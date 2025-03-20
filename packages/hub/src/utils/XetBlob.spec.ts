@@ -80,66 +80,68 @@ describe("XetBlob", () => {
 		expect(xorbCount).toBe(2);
 	});
 
-	it("should load the first 200kB correctly", async () => {
-		let xorbCount = 0;
-		const blob = new XetBlob({
-			repo: {
-				type: "model",
-				name: "celinah/xet-experiments",
-			},
-			hash: "7b3b6d07673a88cf467e67c1f7edef1a8c268cbf66e9dd9b0366322d4ab56d9b",
-			size: 5_234_139_343,
-			fetch: async (url, opts) => {
-				if (typeof url === "string" && url.includes("/xorbs/")) {
-					xorbCount++;
+	// Doesn't work in chrome due to caching issues, it caches the partial output when the
+	// fetch is interrupted in the previous test and then uses that cached output in this test (that requires more data)
+	if (typeof window === "undefined") {
+		it("should load the first 200kB correctly", async () => {
+			let xorbCount = 0;
+			const blob = new XetBlob({
+				repo: {
+					type: "model",
+					name: "celinah/xet-experiments",
+				},
+				hash: "7b3b6d07673a88cf467e67c1f7edef1a8c268cbf66e9dd9b0366322d4ab56d9b",
+				size: 5_234_139_343,
+				fetch: async (url, opts) => {
+					if (typeof url === "string" && url.includes("/xorbs/")) {
+						xorbCount++;
+					}
+					return fetch(url, opts);
+				},
+				internalLogging: true,
+			});
+
+			const xetDownload = await blob.slice(0, 200_000).arrayBuffer();
+			const bridgeDownload = await fetch(
+				"https://huggingface.co/celinah/xet-experiments/resolve/main/model5GB.safetensors",
+				{
+					headers: {
+						Range: "bytes=0-199999",
+					},
 				}
-				return fetch(url, opts);
-			},
-			internalLogging: true,
-		});
+			).then((res) => res.arrayBuffer());
 
-		const xetDownload = await blob.slice(0, 200_000).arrayBuffer();
-		const bridgeDownload = await fetch(
-			"https://huggingface.co/celinah/xet-experiments/resolve/main/model5GB.safetensors",
-			{
-				headers: {
-					Range: "bytes=0-199999",
+			expect(xetDownload.byteLength).toBe(200_000);
+			expect(new Uint8Array(xetDownload)).toEqual(new Uint8Array(bridgeDownload));
+			expect(xorbCount).toBe(2);
+		}, 60_000);
+
+		it("should load correctly when loading far into a chunk range", async () => {
+			const blob = new XetBlob({
+				repo: {
+					type: "model",
+					name: "celinah/xet-experiments",
 				},
-			}
-		).then((res) => res.arrayBuffer());
+				hash: "7b3b6d07673a88cf467e67c1f7edef1a8c268cbf66e9dd9b0366322d4ab56d9b",
+				size: 5_234_139_343,
+				internalLogging: true,
+			});
 
-		expect(xetDownload.byteLength).toBe(200_000);
-		expect(new Uint8Array(xetDownload)).toEqual(new Uint8Array(bridgeDownload));
-		expect(xorbCount).toBe(2);
-	}, 60_000);
+			const xetDownload = await blob.slice(10_000_000, 10_100_000).arrayBuffer();
+			const bridgeDownload = await fetch(
+				"https://huggingface.co/celinah/xet-experiments/resolve/main/model5GB.safetensors",
+				{
+					headers: {
+						Range: "bytes=10000000-10099999",
+					},
+				}
+			).then((res) => res.arrayBuffer());
 
-	// In github actions, this test doesn't work inside the browser, but it works locally
-	// inside both chrome and chromium browsers
-	it("should load correctly when loading far into a chunk range", async () => {
-		const blob = new XetBlob({
-			repo: {
-				type: "model",
-				name: "celinah/xet-experiments",
-			},
-			hash: "7b3b6d07673a88cf467e67c1f7edef1a8c268cbf66e9dd9b0366322d4ab56d9b",
-			size: 5_234_139_343,
-			internalLogging: true,
+			console.log("xet", xetDownload.byteLength, "bridge", bridgeDownload.byteLength);
+			expect(new Uint8Array(xetDownload).length).toEqual(100_000);
+			expect(new Uint8Array(xetDownload)).toEqual(new Uint8Array(bridgeDownload));
 		});
-
-		const xetDownload = await blob.slice(10_000_000, 10_100_000).arrayBuffer();
-		const bridgeDownload = await fetch(
-			"https://huggingface.co/celinah/xet-experiments/resolve/main/model5GB.safetensors",
-			{
-				headers: {
-					Range: "bytes=10000000-10099999",
-				},
-			}
-		).then((res) => res.arrayBuffer());
-
-		console.log("xet", xetDownload.byteLength, "bridge", bridgeDownload.byteLength);
-		expect(new Uint8Array(xetDownload).length).toEqual(100_000);
-		expect(new Uint8Array(xetDownload)).toEqual(new Uint8Array(bridgeDownload));
-	});
+	}
 
 	it("should load text correctly when offset_into_range starts in a chunk further than the first", async () => {
 		const blob = new XetBlob({
@@ -445,6 +447,120 @@ describe("XetBlob", () => {
 		});
 
 		describe("loading one chunk at a time", () => {
+			it("should load different slices but not till the end", async () => {
+				const chunk1Content = "hello";
+				const chunk2Content = "world!";
+				const debugged: Array<{ event: "read" | string } & Record<string, unknown>> = [];
+
+				const chunks = Array(1000)
+					.fill(0)
+					.flatMap(() => [makeChunk(chunk1Content), makeChunk(chunk2Content)]);
+
+				const totalChunkLength = sum(chunks.map((x) => x.byteLength));
+				const wholeText = (chunk1Content + chunk2Content).repeat(1000);
+
+				const totalSize = wholeText.length;
+				let fetchCount = 0;
+
+				const blob = new XetBlob({
+					hash: "test",
+					repo: {
+						name: "test",
+						type: "model",
+					},
+					size: totalSize,
+					hubUrl: "https://huggingface.co",
+					listener: (e) => debugged.push(e),
+					fetch: async function (_url, opts) {
+						const url = new URL(_url as string);
+						const headers = opts?.headers as Record<string, string> | undefined;
+
+						switch (url.hostname) {
+							case "huggingface.co": {
+								// This is a token
+								return new Response(
+									JSON.stringify({
+										casUrl: "https://cas.co",
+										accessToken: "boo",
+										exp: 1_000_000,
+									})
+								);
+							}
+							case "cas.co": {
+								// This is the reconstruction info
+								const range = headers?.["Range"]?.slice("bytes=".length).split("-").map(Number);
+
+								const start = range?.[0] ?? 0;
+								// const end = range?.[1] ?? (totalSize - 1);
+
+								return new Response(
+									JSON.stringify({
+										terms: [
+											{
+												hash: "test",
+												range: {
+													start: 0,
+													end: 2000,
+												},
+												unpacked_length: chunk1Content.length + chunk2Content.length,
+											},
+										],
+										fetch_info: {
+											test: [
+												{
+													url: "https://fetch.co",
+													range: { start: 0, end: 2000 },
+													url_range: {
+														start: 0,
+														end: totalChunkLength - 1,
+													},
+												},
+											],
+										},
+										offset_into_first_range: start,
+									} satisfies ReconstructionInfo)
+								);
+							}
+							case "fetch.co": {
+								fetchCount++;
+								return new Response(
+									new ReadableStream({
+										pull(controller) {
+											for (const chunk of chunks) {
+												controller.enqueue(chunk);
+											}
+											controller.close();
+										},
+									}),
+									{
+										headers: {
+											"Content-Range": `bytes 0-${totalChunkLength - 1}/${totalChunkLength}`,
+											ETag: `"test"`,
+											"Content-Length": `${totalChunkLength}`,
+										},
+									}
+								);
+							}
+							default:
+								throw new Error("Unhandled URL");
+						}
+					},
+				});
+
+				const startIndexes = [0, 5, 11, 6, 12, 100, 2000];
+
+				for (const index of startIndexes) {
+					console.log("slice", index);
+					const content = await blob.slice(index, 4000).text();
+					expect(content.length).toBe(4000 - index);
+					expect(content.slice(0, 1000)).toEqual(wholeText.slice(index).slice(0, 1000));
+					expect(fetchCount).toEqual(1);
+
+					fetchCount = 0;
+					debugged.length = 0;
+				}
+			});
+
 			it("should load different slices", async () => {
 				const chunk1Content = "hello";
 				const chunk2Content = "world!";
