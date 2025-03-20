@@ -202,7 +202,7 @@ export class XetBlob extends Blob {
 			rangeList.add(term.range.start, term.range.end);
 		}
 		const listener = this.listener;
-		const log = this.internalLogging ? (...args: unknown[]) => console.log(new Date(), ...args) : () => {};
+		const log = this.internalLogging ? (...args: unknown[]) => console.log(...args) : () => {};
 
 		async function* readData(
 			reconstructionInfo: ReconstructionInfo,
