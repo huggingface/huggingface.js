@@ -205,7 +205,7 @@ export class XetBlob extends Blob {
 			rangeList.add(term.range.start, term.range.end);
 		}
 		const debug = this.debug;
-		const log = this.internalLogging ? console.log : () => {};
+		const log = this.internalLogging ? (...args: unknown[]) => console.log(new Date(), ...args) : () => {};
 
 		async function* readData(
 			reconstructionInfo: ReconstructionInfo,
