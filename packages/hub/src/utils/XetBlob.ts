@@ -420,7 +420,7 @@ export class XetBlob extends Blob {
 								);
 								totalBytesRead += uncompressed.byteLength;
 								yield stored ? uncompressed.slice() : uncompressed;
-								log("yielded", uncompressed.byteLength, "bytes", result.value.byteLength, "total read", totalBytesRead);
+								listener?.({ event: "progress", progress: { read: totalBytesRead, total: maxBytes } });
 							}
 						}
 
