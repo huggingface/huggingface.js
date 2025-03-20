@@ -20,16 +20,16 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path/posix";
 
 import { snippets } from "@huggingface/inference";
+import { inferenceSnippetLanguages } from "@huggingface/tasks";
 import type { SnippetInferenceProvider, InferenceSnippet, ModelDataMinimal } from "@huggingface/tasks";
 
-const LANGUAGES = ["sh", "js", "python"] as const;
+const LANGUAGES = ["js", "python", "sh"] as const;
 type Language = (typeof LANGUAGES)[number];
 const EXTENSIONS: Record<Language, string> = { sh: "sh", js: "js", python: "py" };
 
 const TEST_CASES: {
 	testName: string;
 	model: ModelDataMinimal;
-	languages: Language[];
 	providers: SnippetInferenceProvider[];
 	opts?: Record<string, unknown>;
 }[] = [
@@ -41,7 +41,6 @@ const TEST_CASES: {
 			tags: [],
 			inference: "",
 		},
-		languages: ["python"],
 		providers: ["hf-inference"],
 	},
 	{
@@ -52,7 +51,6 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-		languages: ["sh", "js", "python"],
 		providers: ["hf-inference", "together"],
 		opts: { streaming: false },
 	},
@@ -64,7 +62,6 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-		languages: ["sh", "js", "python"],
 		providers: ["hf-inference", "together"],
 		opts: { streaming: true },
 	},
@@ -76,7 +73,6 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-		languages: ["sh", "js", "python"],
 		providers: ["hf-inference", "fireworks-ai"],
 		opts: { streaming: false },
 	},
@@ -88,7 +84,6 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-		languages: ["sh", "js", "python"],
 		providers: ["hf-inference", "fireworks-ai"],
 		opts: { streaming: true },
 	},
@@ -100,7 +95,16 @@ const TEST_CASES: {
 			tags: [],
 			inference: "",
 		},
-		languages: ["python"],
+		providers: ["hf-inference"],
+	},
+	{
+		testName: "image-classification",
+		model: {
+			id: "Falconsai/nsfw_image_detection",
+			pipeline_tag: "image-classification",
+			tags: [],
+			inference: "",
+		},
 		providers: ["hf-inference"],
 	},
 	{
@@ -111,7 +115,6 @@ const TEST_CASES: {
 			tags: [],
 			inference: "",
 		},
-		languages: ["python"],
 		providers: ["hf-inference"],
 	},
 	{
@@ -123,7 +126,6 @@ const TEST_CASES: {
 			inference: "",
 		},
 		providers: ["hf-inference"],
-		languages: ["python"],
 	},
 	{
 		testName: "text-to-audio-transformers",
@@ -134,7 +136,6 @@ const TEST_CASES: {
 			inference: "",
 		},
 		providers: ["hf-inference"],
-		languages: ["python"],
 	},
 	{
 		testName: "text-to-image",
@@ -145,7 +146,6 @@ const TEST_CASES: {
 			inference: "",
 		},
 		providers: ["hf-inference", "fal-ai"],
-		languages: ["sh", "js", "python"],
 	},
 	{
 		testName: "text-to-video",
@@ -156,7 +156,6 @@ const TEST_CASES: {
 			inference: "",
 		},
 		providers: ["replicate", "fal-ai"],
-		languages: ["js", "python"],
 	},
 	{
 		testName: "text-classification",
@@ -167,7 +166,6 @@ const TEST_CASES: {
 			inference: "",
 		},
 		providers: ["hf-inference"],
-		languages: ["sh", "js", "python"],
 	},
 	{
 		testName: "basic-snippet--token-classification",
@@ -178,7 +176,6 @@ const TEST_CASES: {
 			inference: "",
 		},
 		providers: ["hf-inference"],
-		languages: ["python"],
 	},
 	{
 		testName: "zero-shot-classification",
@@ -189,7 +186,6 @@ const TEST_CASES: {
 			inference: "",
 		},
 		providers: ["hf-inference"],
-		languages: ["python"],
 	},
 	{
 		testName: "zero-shot-image-classification",
@@ -200,15 +196,8 @@ const TEST_CASES: {
 			inference: "",
 		},
 		providers: ["hf-inference"],
-		languages: ["python"],
 	},
 ] as const;
-
-const GET_SNIPPET_FN = {
-	sh: snippets.curl.getCurlInferenceSnippet,
-	js: snippets.js.getJsInferenceSnippet,
-	python: snippets.python.getPythonInferenceSnippet,
-} as const;
 
 const rootDirFinder = (): string => {
 	let currentPath = path.normalize(import.meta.url).replace("file:", "");
@@ -235,8 +224,10 @@ function generateInferenceSnippet(
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
 	const providerModelId = provider === "hf-inference" ? model.id : `<${provider} alias for ${model.id}>`;
-	const snippets = GET_SNIPPET_FN[language](model, "api_token", provider, providerModelId, opts) as InferenceSnippet[];
-	return snippets.sort((snippetA, snippetB) => snippetA.client.localeCompare(snippetB.client));
+	const allSnippets = snippets.getInferenceSnippets(model, "api_token", provider, providerModelId, opts);
+	return allSnippets
+		.filter((snippet) => snippet.language == language)
+		.sort((snippetA, snippetB) => snippetA.client.localeCompare(snippetB.client));
 }
 
 async function getExpectedInferenceSnippet(
@@ -246,13 +237,16 @@ async function getExpectedInferenceSnippet(
 ): Promise<InferenceSnippet[]> {
 	const fixtureFolder = getFixtureFolder(testName);
 	const languageFolder = path.join(fixtureFolder, language);
+	if (!pathExists(languageFolder)) {
+		return [];
+	}
 	const files = await fs.readdir(languageFolder, { recursive: true });
 
 	const expectedSnippets: InferenceSnippet[] = [];
 	for (const file of files.filter((file) => file.includes(`.${provider}.`)).sort()) {
 		const client = file.split("/")[0]; // e.g. fal_client/1.fal-ai.python => fal_client
 		const content = await fs.readFile(path.join(languageFolder, file), { encoding: "utf-8" });
-		expectedSnippets.push({ client, content });
+		expectedSnippets.push({ language, client, content });
 	}
 	return expectedSnippets;
 }
@@ -284,9 +278,9 @@ if (import.meta.vitest) {
 	const { describe, expect, it } = import.meta.vitest;
 
 	describe("inference API snippets", () => {
-		TEST_CASES.forEach(({ testName, model, languages, providers, opts }) => {
+		TEST_CASES.forEach(({ testName, model, providers, opts }) => {
 			describe(testName, () => {
-				languages.forEach((language) => {
+				inferenceSnippetLanguages.forEach((language) => {
 					providers.forEach((provider) => {
 						it(language, async () => {
 							const generatedSnippets = generateInferenceSnippet(model, language, provider, opts);
@@ -305,9 +299,9 @@ if (import.meta.vitest) {
 	await fs.rm(path.join(rootDirFinder(), "snippets-fixtures"), { recursive: true, force: true });
 
 	console.debug("  🏭 Generating new fixtures...");
-	TEST_CASES.forEach(({ testName, model, languages, providers, opts }) => {
-		console.debug(`      ${testName} (${languages.join(", ")}) (${providers.join(", ")})`);
-		languages.forEach(async (language) => {
+	TEST_CASES.forEach(({ testName, model, providers, opts }) => {
+		console.debug(`      ${testName} (${providers.join(", ")})`);
+		inferenceSnippetLanguages.forEach(async (language) => {
 			providers.forEach(async (provider) => {
 				const generatedSnippets = generateInferenceSnippet(model, language, provider, opts);
 				await saveExpectedInferenceSnippet(testName, language, provider, generatedSnippets);

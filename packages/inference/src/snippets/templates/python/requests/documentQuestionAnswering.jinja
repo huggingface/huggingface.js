@@ -6,5 +6,8 @@ def query(payload):
     return response.json()
 
 output = query({
-    "inputs": {{ inputs.asStr }},
+    "inputs": {
+        "image": "{{ inputs.asObj.image }}",
+        "question": "{{ inputs.asObj.question }}",
+    },
 }) 

@@ -13,6 +13,7 @@ async function query(data) {
 	const result = await response.blob();
 	return result;
 }
-query({"inputs": "Astronaut riding a horse"}).then((response) => {
-	// Use image
+
+query({ inputs: "Astronaut riding a horse" }).then((response) => {
+    // Use image
 });

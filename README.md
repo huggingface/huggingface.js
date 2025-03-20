@@ -97,8 +97,8 @@ You can run our packages with vanilla JS, without any bundler, by using a CDN or
 
 ```html
 <script type="module">
-    import { InferenceClient } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@3.5.2/+esm';
-    import { createRepo, commit, deleteRepo, listFiles } from "https://cdn.jsdelivr.net/npm/@huggingface/hub@1.1.0/+esm";
+    import { InferenceClient } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@3.6.1/+esm';
+    import { createRepo, commit, deleteRepo, listFiles } from "https://cdn.jsdelivr.net/npm/@huggingface/hub@1.1.1/+esm";
 </script>
 ```
 

@@ -5,12 +5,9 @@ client = OpenAI(
     api_key="{{ accessToken }}"
 )
 
-messages = {{ inputs.messagesStr }}
-
 completion = client.chat.completions.create(
     model="{{ providerModelId }}",
-    messages=messages,
-    {{ inputs.configStr }}
+{{ inputs.asPythonString }}
 )
 
 print(completion.choices[0].message) 

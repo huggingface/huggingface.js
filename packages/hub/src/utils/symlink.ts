@@ -54,10 +54,10 @@ export async function createSymlink(dst: string, src: string, new_blob?: boolean
 	} catch (_e: unknown) {
 		if (new_blob) {
 			console.info(`Symlink not supported. Moving file from ${abs_src} to ${abs_dst}`);
-			await fs.rename(abs_src, abs_dst);
+			await fs.rename(abs_dst, abs_src);
 		} else {
 			console.info(`Symlink not supported. Copying file from ${abs_src} to ${abs_dst}`);
-			await fs.copyFile(abs_src, abs_dst);
+			await fs.copyFile(abs_dst, abs_src);
 		}
 	}
 }

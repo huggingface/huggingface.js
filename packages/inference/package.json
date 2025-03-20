@@ -1,6 +1,6 @@
 {
 	"name": "@huggingface/inference",
-	"version": "3.5.2",
+	"version": "3.6.1",
 	"packageManager": "pnpm@8.10.5",
 	"license": "MIT",
 	"author": "Hugging Face and Tim Mikeladze <tim.mikeladze@gmail.com>",
@@ -26,27 +26,21 @@
 	},
 	"files": [
 		"dist",
-		"src"
+		"src",
+		"!src/snippets/templates/**/*.jinja"
 	],
 	"source": "src/index.ts",
 	"types": "./dist/src/index.d.ts",
 	"main": "./dist/index.cjs",
 	"module": "./dist/index.js",
 	"exports": {
-		".": {
-			"types": "./dist/src/index.d.ts",
-			"require": "./dist/index.cjs",
-			"import": "./dist/index.js"
-		}
-	},
-	"browser": {
-		"./src/snippets/index.js": false,
-		"./dist/index.js": "./dist/browser/index.js",
-		"./dist/index.mjs": "./dist/browser/index.mjs"
+		"types": "./dist/src/index.d.ts",
+		"require": "./dist/index.cjs",
+		"import": "./dist/index.js"
 	},
 	"type": "module",
 	"scripts": {
-		"build": "tsup src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
+		"build": "pnpm run export-templates && tsup src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
 		"dts": "tsx scripts/generate-dts.ts && tsc --noEmit dist/index.d.ts",
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
@@ -56,7 +50,9 @@
 		"prepublishOnly": "pnpm run build",
 		"test": "vitest run --config vitest.config.mts",
 		"test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest.config.mts",
-		"check": "tsc"
+		"check": "tsc",
+		"dev": "pnpm run export-templates && tsup src/index.ts --format cjs,esm --watch",
+		"export-templates": "tsx scripts/export-templates.ts"
 	},
 	"dependencies": {
 		"@huggingface/tasks": "workspace:^",

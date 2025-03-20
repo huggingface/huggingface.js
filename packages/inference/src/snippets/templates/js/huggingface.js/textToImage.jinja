@@ -1,0 +1,11 @@
+import { InferenceClient } from "@huggingface/inference";
+
+const client = new InferenceClient("{{ accessToken }}");
+
+const image = await client.textToImage({
+    provider: "{{ provider }}",
+    model: "{{ model.id }}",
+	inputs: {{ inputs.asObj.inputs }},
+	parameters: { num_inference_steps: 5 },
+});
+/// Use the generated image (it's a Blob)

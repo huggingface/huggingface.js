@@ -13,7 +13,7 @@ def query(payload):
 
 output = query({
     "inputs": {
-		"image": "cat.png",
-		"question": "What is in this image?"
-	},
+        "image": "cat.png",
+        "question": "What is in this image?",
+    },
 })

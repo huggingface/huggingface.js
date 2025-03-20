@@ -1,9 +1,6 @@
-messages = {{ inputs.messagesStr }}
-
 completion = client.chat.completions.create(
     model="{{ model.id }}",
-    messages=messages,
-    {{ inputs.configStr }}
+{{ inputs.asPythonString }}
 )
 
 print(completion.choices[0].message) 
