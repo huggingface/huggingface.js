@@ -30,6 +30,7 @@ import tokenClassification from "./token-classification/data.js";
 import translation from "./translation/data.js";
 import textClassification from "./text-classification/data.js";
 import textGeneration from "./text-generation/data.js";
+import textRanking from "./text-ranking/data.js";
 import textToVideo from "./text-to-video/data.js";
 import unconditionalImageGeneration from "./unconditional-image-generation/data.js";
 import videoClassification from "./video-classification/data.js";
@@ -233,7 +234,7 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"tabular-to-text": undefined,
 	"text-classification": getData("text-classification", textClassification),
 	"text-generation": getData("text-generation", textGeneration),
-	"text-ranking": getData("text-ranking", placeholder),
+	"text-ranking": getData("text-ranking", textRanking),
 	"text-retrieval": undefined,
 	"text-to-image": getData("text-to-image", textToImage),
 	"text-to-speech": getData("text-to-speech", textToSpeech),
