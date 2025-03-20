@@ -316,6 +316,7 @@ export class XetBlob extends Blob {
 					log("read", result.value?.byteLength, "bytes", "total read", totalBytesRead, "toSkip", readBytesToSkip);
 
 					if (!result.value) {
+						log("no data in result, cancelled", result);
 						continue;
 					}
 
@@ -438,6 +439,7 @@ export class XetBlob extends Blob {
 				log("done", done, "total read", totalBytesRead, maxBytes, totalFetchBytes);
 
 				// Release the reader
+				log("cancel reader");
 				await reader.cancel();
 			}
 		}
