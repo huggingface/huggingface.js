@@ -54,6 +54,7 @@ export const FAL_AI_CONFIG: ProviderConfig = {
 export interface FalAiQueueOutput {
 	request_id: string;
 	status: string;
+	response_url: string;
 }
 
 export async function pollFalResponse(
@@ -68,22 +69,29 @@ export async function pollFalResponse(
 	let status = res.status;
 
 	const parsedUrl = new URL(url);
-	const baseRequestUrl = `${parsedUrl.origin}${parsedUrl.pathname}/requests/${requestId}`;
+	const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}${
+		parsedUrl.host === "router.huggingface.co" ? "/fal-ai" : ""
+	}`;
 
-	const statusUrl = `${baseRequestUrl}/status${parsedUrl.search}`;
-	const resultUrl = `${baseRequestUrl}${parsedUrl.search}`;
+	// extracting the provider model id for status and result urls
+	// from the response as it might be different from the mapped model in `url`
+	const modelId = new URL(res.response_url).pathname;
+	const queryParams = parsedUrl.search;
+
+	const statusUrl = `${baseUrl}${modelId}/status${queryParams}`;
+	const resultUrl = `${baseUrl}${modelId}${queryParams}`;
 
 	while (status !== "COMPLETED") {
 		await delay(500);
 		const statusResponse = await fetch(statusUrl, { headers: headers });
 
 		if (!statusResponse.ok) {
-			throw new InferenceOutputError(`HTTP error! status: ${statusResponse.status}`);
+			throw new InferenceOutputError("Failed to fetch response status from fal-ai API");
 		}
 		try {
 			status = (await statusResponse.json()).status;
 		} catch (error) {
-			throw error;
+			throw new InferenceOutputError("Failed to parse status response from fal-ai API");
 		}
 	}
 
@@ -92,7 +100,7 @@ export async function pollFalResponse(
 	try {
 		result = await resultResponse.json();
 	} catch (error) {
-		throw error;
+		throw new InferenceOutputError("Failed to parse result response from fal-ai API");
 	}
 	const isValidOutput =
 		typeof result === "object" &&
@@ -104,7 +112,9 @@ export async function pollFalResponse(
 		typeof result.video.url === "string" &&
 		isUrl(result.video.url);
 	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected { video: { url: string } }");
+		throw new InferenceOutputError(
+			"Expected { video: { url: string } } result format, got instead: " + JSON.stringify(result)
+		);
 	}
 	const urlResponse = await fetch(result.video.url);
 	return await urlResponse.blob();
