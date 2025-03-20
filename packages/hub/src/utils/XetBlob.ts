@@ -292,6 +292,14 @@ export class XetBlob extends Blob {
 					throw await createApiError(resp);
 				}
 
+				log(
+					"expected content length",
+					resp.headers.get("content-length"),
+					"range",
+					fetchInfo.url_range,
+					resp.headers.get("content-range")
+				);
+
 				const reader = resp.body?.getReader();
 				if (!reader) {
 					throw new Error("Failed to get reader from response body");
