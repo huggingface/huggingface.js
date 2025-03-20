@@ -222,7 +222,7 @@ describe("XetBlob", () => {
 			it("should load different slices", async () => {
 				const chunk1Content = "hello";
 				const chunk2Content = "world!";
-				const debugged: Array<{ event: "read" }> = [];
+				const debugged: Array<{ event: "read" | string } & Record<string, unknown>> = [];
 
 				const chunks = Array(1000)
 					.fill(0)
@@ -242,7 +242,7 @@ describe("XetBlob", () => {
 					},
 					size: totalSize,
 					hubUrl: "https://huggingface.co",
-					debug: (e) => debugged.push(e),
+					listener: (e) => debugged.push(e),
 					fetch: async function (_url, opts) {
 						const url = new URL(_url as string);
 						const headers = opts?.headers as Record<string, string> | undefined;
@@ -329,7 +329,7 @@ describe("XetBlob", () => {
 			it("should load different slices when working with different XORBS", async () => {
 				const chunk1Content = "hello";
 				const chunk2Content = "world!";
-				const debugged: Array<{ event: "read" }> = [];
+				const debugged: Array<{ event: "read" | string } & Record<string, unknown>> = [];
 
 				const chunks = Array(1000)
 					.fill(0)
@@ -349,7 +349,7 @@ describe("XetBlob", () => {
 					},
 					size: totalSize,
 					hubUrl: "https://huggingface.co",
-					debug: (e) => debugged.push(e),
+					listener: (e) => debugged.push(e),
 					fetch: async function (_url, opts) {
 						const url = new URL(_url as string);
 						const headers = opts?.headers as Record<string, string> | undefined;
@@ -448,7 +448,7 @@ describe("XetBlob", () => {
 			it("should load different slices", async () => {
 				const chunk1Content = "hello";
 				const chunk2Content = "world!";
-				const debugged: Array<{ event: "read" }> = [];
+				const debugged: Array<{ event: "read" | string } & Record<string, unknown>> = [];
 
 				const chunks = Array(1000)
 					.fill(0)
@@ -468,7 +468,7 @@ describe("XetBlob", () => {
 					},
 					size: totalSize,
 					hubUrl: "https://huggingface.co",
-					debug: (e) => debugged.push(e),
+					listener: (e) => debugged.push(e),
 					fetch: async function (_url, opts) {
 						const url = new URL(_url as string);
 						const headers = opts?.headers as Record<string, string> | undefined;
@@ -558,7 +558,7 @@ describe("XetBlob", () => {
 			it("should load different slices", async () => {
 				const chunk1Content = "hello";
 				const chunk2Content = "world!";
-				const debugged: Array<{ event: "read" }> = [];
+				const debugged: Array<{ event: "read" | string } & Record<string, unknown>> = [];
 
 				const chunks = Array(1000)
 					.fill(0)
@@ -580,7 +580,7 @@ describe("XetBlob", () => {
 					},
 					size: totalSize,
 					hubUrl: "https://huggingface.co",
-					debug: (e) => debugged.push(e),
+					listener: (e) => debugged.push(e),
 					fetch: async function (_url, opts) {
 						const url = new URL(_url as string);
 						const headers = opts?.headers as Record<string, string> | undefined;
@@ -670,7 +670,7 @@ describe("XetBlob", () => {
 			it("should load different slices", async () => {
 				const chunk1Content = "hello";
 				const chunk2Content = "world!";
-				const debugged: Array<{ event: "read" }> = [];
+				const debugged: Array<{ event: "read" | string } & Record<string, unknown>> = [];
 
 				const chunks = Array(100)
 					.fill(0)
@@ -691,7 +691,7 @@ describe("XetBlob", () => {
 					},
 					size: totalSize,
 					hubUrl: "https://huggingface.co",
-					debug: (e) => debugged.push(e),
+					listener: (e) => debugged.push(e),
 					fetch: async function (_url, opts) {
 						const url = new URL(_url as string);
 						const headers = opts?.headers as Record<string, string> | undefined;

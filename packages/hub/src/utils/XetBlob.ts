@@ -18,10 +18,7 @@ type XetBlobCreateOptions = {
 	hash: string;
 	hubUrl?: string;
 	size: number;
-	/**
-	 * For intenral tests
-	 */
-	debug?: (arg: { event: "read" }) => void;
+	listener?: (arg: { event: "read" } | { event: "progress"; progress: { read: number; total: number } }) => void;
 	internalLogging?: boolean;
 } & Partial<CredentialsParams>;
 
@@ -95,7 +92,7 @@ export class XetBlob extends Blob {
 	end = 0;
 	internalLogging = false;
 	reconstructionInfo: ReconstructionInfo | undefined;
-	debug: XetBlobCreateOptions["debug"];
+	listener: XetBlobCreateOptions["listener"];
 
 	constructor(params: XetBlobCreateOptions) {
 		super([]);
@@ -106,7 +103,7 @@ export class XetBlob extends Blob {
 		this.hubUrl = params.hubUrl ?? HUB_URL;
 		this.end = params.size;
 		this.hash = params.hash;
-		this.debug = params.debug;
+		this.listener = params.listener;
 		this.internalLogging = params.internalLogging ?? false;
 		this.hubUrl;
 	}
@@ -128,7 +125,7 @@ export class XetBlob extends Blob {
 		blob.start = this.start;
 		blob.end = this.end;
 		blob.reconstructionInfo = this.reconstructionInfo;
-		blob.debug = this.debug;
+		blob.listener = this.listener;
 		blob.internalLogging = this.internalLogging;
 
 		return blob;
@@ -204,7 +201,7 @@ export class XetBlob extends Blob {
 
 			rangeList.add(term.range.start, term.range.end);
 		}
-		const debug = this.debug;
+		const listener = this.listener;
 		const log = this.internalLogging ? (...args: unknown[]) => console.log(new Date(), ...args) : () => {};
 
 		async function* readData(
@@ -246,10 +243,10 @@ export class XetBlob extends Blob {
 									chunk = chunk.slice(0, maxBytes - totalBytesRead);
 								}
 								totalBytesRead += chunk.byteLength;
-								log("yield", chunk.byteLength, "bytes", "total read", totalBytesRead);
 								// The stream consumer can decide to transfer ownership of the chunk, so we need to return a clone
 								// if there's more than one range for the same term
 								yield range.refCount > 1 ? chunk.slice() : chunk;
+								listener?.({ event: "progress", progress: { read: totalBytesRead, total: maxBytes } });
 
 								if (totalBytesRead >= maxBytes) {
 									break rangeLoop;
@@ -309,7 +306,7 @@ export class XetBlob extends Blob {
 
 				fetchData: while (!done && totalBytesRead < maxBytes) {
 					const result = await reader.read();
-					debug?.({ event: "read" });
+					listener?.({ event: "read" });
 
 					done = result.done;
 
