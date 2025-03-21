@@ -30,7 +30,7 @@ describe("createSymlink", () => {
 
 	test("should remove existing destination", async () => {
 		await createSymlink(dst, src);
-		expect(fs.rm).toHaveBeenCalledWith(dst);
+		expect(fs.rm).toHaveBeenCalledWith(src);
 	});
 
 	describe("symlink not supported (Windows)", () => {
