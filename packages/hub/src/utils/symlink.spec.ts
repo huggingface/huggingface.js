@@ -1,63 +1,21 @@
-import { describe, test, expect, vi, beforeEach } from "vitest";
-import * as fs from "node:fs/promises";
+import { describe, expect, it } from "vitest";
 import { createSymlink } from "./symlink";
-import * as path from "node:path";
-import type { FileHandle } from "node:fs/promises";
+import { readFileSync, writeFileSync } from "node:fs";
+import { lstat } from "node:fs/promises";
 
-vi.mock("node:fs/promises", () => ({
-	rm: vi.fn(),
-	symlink: vi.fn(),
-	rename: vi.fn(),
-	copyFile: vi.fn(),
-	mkdir: vi.fn(),
-	mkdtemp: vi.fn(),
-	open: vi.fn(),
-}));
-
-vi.mock("node:os", () => ({
-	platform: vi.fn(),
-}));
-
-describe("createSymlink", () => {
-	const src = "/path/to/src";
-	const dst = "/path/to/dst";
-
-	beforeEach(() => {
-		vi.resetAllMocks();
-		vi.mocked(fs.mkdtemp).mockImplementation(async (prefix) => `${prefix}/temp`);
-		vi.mocked(fs.open).mockResolvedValue({ close: vi.fn() } as unknown as FileHandle);
-	});
-
-	test("should remove existing destination", async () => {
-		await createSymlink(dst, src);
-		expect(fs.rm).toHaveBeenCalledWith(dst);
-	});
-
-	describe("symlink not supported (Windows)", () => {
-		beforeEach(() => {
-			vi.mocked(fs.symlink).mockRejectedValue(new Error("Symlink not supported"));
+describe("utils/symlink", () => {
+	it("should create a symlink", async () => {
+		writeFileSync("/tmp/test.txt", "hello world");
+		await createSymlink({
+			sourcePath: "/tmp/test.txt",
+			finalPath: "/tmp/test-symlink.txt",
 		});
 
-		test("should copyfile", async () => {
-			await createSymlink(dst, src);
-			expect(fs.copyFile).toHaveBeenCalledWith(path.resolve(dst), path.resolve(src));
-		});
+		const stats = await lstat("/tmp/test-symlink.txt");
+		expect(stats.isSymbolicLink()).toBe(true);
 
-		test("should rename file if new_blob is true", async () => {
-			await createSymlink(dst, src, true);
-			expect(fs.rename).toHaveBeenCalledWith(path.resolve(dst), path.resolve(src));
-		});
-	});
-
-	describe("symlink supported", () => {
-		test("should symlink", async () => {
-			await createSymlink(dst, src);
-			expect(fs.symlink).toHaveBeenCalledWith(path.resolve(dst), path.resolve(src));
-		});
-
-		test("should symlink if new_blob is true", async () => {
-			await createSymlink(dst, src, true);
-			expect(fs.symlink).toHaveBeenCalledWith(path.resolve(dst), path.resolve(src));
-		});
+		// Test file content
+		const content = readFileSync("/tmp/test-symlink.txt", "utf8");
+		expect(content).toBe("hello world");
 	});
 });

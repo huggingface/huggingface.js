@@ -36,28 +36,30 @@ function expandUser(path: string): string {
  * having the actual file in `dst`. If it is a new file (`new_blob=True`), we move it to `dst`. If it is not a new file
  * (`new_blob=False`), we don't know if the blob file is already referenced elsewhere. To avoid breaking existing
  * cache, the file is duplicated on the disk.
- *
- * In case symlinks are not supported, a warning message is displayed to the user once when loading `huggingface_hub`.
- * The warning message can be disabled with the `HF_HUB_DISABLE_SYMLINKS_WARNING` environment variable.
  */
-export async function createSymlink(dst: string, src: string, new_blob?: boolean): Promise<void> {
-	try {
-		await fs.rm(dst);
-	} catch (_e: unknown) {
-		/* empty */
-	}
-	const abs_src = path.resolve(expandUser(src));
-	const abs_dst = path.resolve(expandUser(dst));
+export async function createSymlink(params: {
+	/**
+	 * The path to the symlink.
+	 */
+	finalPath: string;
+	/**
+	 * The path the symlink should point to.
+	 */
+	sourcePath: string;
+}): Promise<void> {
+	const abs_src = path.resolve(expandUser(params.sourcePath));
+	const abs_dst = path.resolve(expandUser(params.finalPath));
 
 	try {
-		await fs.symlink(abs_dst, abs_src);
-	} catch (_e: unknown) {
-		if (new_blob) {
-			console.info(`Symlink not supported. Moving file from ${abs_src} to ${abs_dst}`);
-			await fs.rename(abs_dst, abs_src);
-		} else {
-			console.info(`Symlink not supported. Copying file from ${abs_src} to ${abs_dst}`);
-			await fs.copyFile(abs_dst, abs_src);
-		}
+		await fs.rm(abs_dst);
+	} catch {
+		// ignore
+	}
+
+	try {
+		await fs.symlink(abs_src, abs_dst);
+	} catch {
+		console.info(`Symlink not supported. Copying file from ${abs_src} to ${abs_dst}`);
+		await fs.copyFile(abs_src, abs_dst);
 	}
 }
