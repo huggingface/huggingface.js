@@ -14,9 +14,13 @@
  *
  * Thanks!
  */
-import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../types";
+import type { BodyParams, HeaderParams, ProviderConfig, UrlParams } from "../types";
 
 const BLACK_FOREST_LABS_AI_API_BASE_URL = "https://api.us1.bfl.ai";
+
+const makeBaseUrl = (): string => {
+	return BLACK_FOREST_LABS_AI_API_BASE_URL;
+};
 
 const makeBody = (params: BodyParams): Record<string, unknown> => {
 	return params.args;
@@ -35,7 +39,7 @@ const makeUrl = (params: UrlParams): string => {
 };
 
 export const BLACK_FOREST_LABS_CONFIG: ProviderConfig = {
-	baseUrl: BLACK_FOREST_LABS_AI_API_BASE_URL,
+	makeBaseUrl,
 	makeBody,
 	makeHeaders,
 	makeUrl,

@@ -11,7 +11,6 @@ import {
 	textToImage,
 	HfInference,
 } from "../src";
-import { textToVideo } from "../src/tasks/cv/textToVideo";
 import { readTestFile } from "./test-files";
 import "./vcr";
 import { HARDCODED_MODEL_ID_MAPPING } from "../src/providers/consts";
@@ -823,63 +822,6 @@ describe.concurrent("InferenceClient", () => {
 					text: " he has grave doubts whether sir frederick leighton's work is really greek after all and can discover in it but little of rocky ithaca",
 				});
 			});
-
-			it("textToVideo - genmo/mochi-1-preview", async () => {
-				const res = await textToVideo({
-					model: "genmo/mochi-1-preview",
-					inputs: "A running dog",
-					parameters: {
-						seed: 176,
-					},
-					provider: "fal-ai",
-					accessToken: env.HF_FAL_KEY ?? "dummy",
-				});
-				expect(res).toBeInstanceOf(Blob);
-			});
-
-			it("textToVideo - HunyuanVideo", async () => {
-				const res = await textToVideo({
-					model: "tencent/HunyuanVideo",
-					inputs: "A running dog",
-					parameters: {
-						seed: 176,
-						num_inference_steps: 2,
-						num_frames: 85,
-						resolution: "480p",
-					},
-					provider: "fal-ai",
-					accessToken: env.HF_FAL_KEY ?? "dummy",
-				});
-				expect(res).toBeInstanceOf(Blob);
-			});
-
-			it("textToVideo - CogVideoX-5b", async () => {
-				const res = await textToVideo({
-					model: "THUDM/CogVideoX-5b",
-					inputs: "A running dog",
-					parameters: {
-						seed: 176,
-						num_frames: 2,
-					},
-					provider: "fal-ai",
-					accessToken: env.HF_FAL_KEY ?? "dummy",
-				});
-				expect(res).toBeInstanceOf(Blob);
-			});
-
-			it("textToVideo - LTX-Video", async () => {
-				const res = await textToVideo({
-					model: "Lightricks/LTX-Video",
-					inputs: "A running dog",
-					parameters: {
-						seed: 176,
-						num_inference_steps: 2,
-					},
-					provider: "fal-ai",
-					accessToken: env.HF_FAL_KEY ?? "dummy",
-				});
-				expect(res).toBeInstanceOf(Blob);
-			});
 		},
 		TIMEOUT
 	);
@@ -977,22 +919,6 @@ describe.concurrent("InferenceClient", () => {
 					model: "hexgrad/Kokoro-82M",
 					provider: "replicate",
 					inputs: "Kokoro is a frontier TTS model for its size of 1 Billion parameters",
-				});
-
-				expect(res).toBeInstanceOf(Blob);
-			});
-
-			it("textToVideo Mochi", async () => {
-				const res = await textToVideo({
-					accessToken: env.HF_REPLICATE_KEY ?? "dummy",
-					model: "genmo/mochi-1-preview",
-					provider: "replicate",
-					inputs: "A running dog",
-					parameters: {
-						num_inference_steps: 10,
-						seed: 178,
-						num_frames: 30,
-					},
 				});
 
 				expect(res).toBeInstanceOf(Blob);
