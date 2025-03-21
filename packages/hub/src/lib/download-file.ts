@@ -1,8 +1,8 @@
-import { HUB_URL } from "../consts";
-import { createApiError } from "../error";
 import type { CredentialsParams, RepoDesignation } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
-import { toRepoId } from "../utils/toRepoId";
+import { WebBlob } from "../utils/WebBlob";
+import { XetBlob } from "../utils/XetBlob";
+import { fileDownloadInfo } from "./file-download-info";
 
 /**
  * @returns null when the file doesn't exist
@@ -33,33 +33,30 @@ export async function downloadFile(
 		 */
 		fetch?: typeof fetch;
 	} & Partial<CredentialsParams>
-): Promise<Response | null> {
+): Promise<Blob | null> {
 	const accessToken = checkCredentials(params);
-	const repoId = toRepoId(params.repo);
-	const url = `${params.hubUrl ?? HUB_URL}/${repoId.type === "model" ? "" : `${repoId.type}s/`}${repoId.name}/${
-		params.raw ? "raw" : "resolve"
-	}/${encodeURIComponent(params.revision ?? "main")}/${params.path}`;
-
-	const resp = await (params.fetch ?? fetch)(url, {
-		headers: {
-			...(accessToken
-				? {
-						Authorization: `Bearer ${accessToken}`,
-				  }
-				: {}),
-			...(params.range
-				? {
-						Range: `bytes=${params.range[0]}-${params.range[1]}`,
-				  }
-				: {}),
-		},
+	const info = await fileDownloadInfo({
+		repo: params.repo,
+		path: params.path,
+		revision: params.revision,
+		hubUrl: params.hubUrl,
+		fetch: params.fetch,
+		raw: params.raw,
 	});
 
-	if (resp.status === 404 && resp.headers.get("X-Error-Code") === "EntryNotFound") {
+	if (!info) {
 		return null;
-	} else if (!resp.ok) {
-		throw await createApiError(resp);
 	}
 
-	return resp;
+	if (info.xet) {
+		return new XetBlob({
+			hash: info.xet.hash,
+			refreshUrl: info.xet.refreshUrl,
+			fetch: params.fetch,
+			accessToken,
+			size: info.size,
+		});
+	}
+
+	return new WebBlob(new URL(info.url), 0, info.size, "", true, params.fetch ?? fetch);
 }

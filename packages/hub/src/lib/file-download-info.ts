@@ -4,13 +4,20 @@ import type { CredentialsParams, RepoDesignation } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { toRepoId } from "../utils/toRepoId";
 
+interface XetInfo {
+	hash: string;
+	refreshUrl: string;
+}
+
 export interface FileDownloadInfoOutput {
 	size: number;
 	etag: string;
-	/**
-	 * In case of LFS file, link to download directly from cloud provider
-	 */
-	downloadLink: string | null;
+	xet?: {
+		hash: string;
+		refreshUrl: string;
+	};
+	// URL to fetch (with the access token if private file)
+	url: string;
 }
 /**
  * @returns null when the file doesn't exist
@@ -54,6 +61,7 @@ export async function fileDownloadInfo(
 				Authorization: `Bearer ${accessToken}`,
 			}),
 			Range: "bytes=0-0",
+			Accept: "application/vnd.xet-fileinfo+json, */*",
 		},
 	});
 
@@ -84,9 +92,24 @@ export async function fileDownloadInfo(
 		throw new InvalidApiResponseFormatError("Invalid file size received");
 	}
 
+	let xetInfo: XetInfo | undefined;
+	if (resp.headers.get("Content-Type") === "application/vnd.xet-fileinfo+json") {
+		const json: { casUrl: string; hash: string; refreshUrl: string } = await resp.json();
+
+		xetInfo = {
+			hash: json.hash,
+			refreshUrl: json.refreshUrl,
+		};
+	}
+
 	return {
 		etag,
 		size,
-		downloadLink: new URL(resp.url).hostname !== new URL(hubUrl).hostname ? resp.url : null,
+		xet: xetInfo,
+		// Cannot use resp.url in case it's a S3 url and the user adds an Authorization header to it.
+		url:
+			new URL(resp.url).hostname === new URL(hubUrl).hostname || resp.headers.get("X-Cache")?.endsWith(" cloudfront")
+				? resp.url
+				: url,
 	};
 }

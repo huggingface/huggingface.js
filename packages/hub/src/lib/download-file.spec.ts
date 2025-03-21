@@ -62,4 +62,17 @@ describe("downloadFile", () => {
 			});
 		}).rejects.toThrowError("Dummy internal error");
 	});
+
+	test("should downoad xet file", async () => {
+		const blob = await downloadFile({
+			repo: {
+				type: "model",
+				name: "celinah/xet-experiments",
+			},
+			path: "large_text.txt",
+		});
+
+		const text = await blob?.slice(0, 100).text();
+		expect(text).toMatch("this is a text file.".repeat(10).slice(0, 100));
+	});
 });

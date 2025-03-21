@@ -1,8 +1,6 @@
-import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
-import type { CredentialsParams, RepoDesignation, RepoId } from "../types/public";
+import type { CredentialsParams } from "../types/public";
 import { checkCredentials } from "./checkCredentials";
-import { toRepoId } from "./toRepoId";
 import { decompress as lz4_decompress } from "../vendor/lz4js";
 import { RangeList } from "./RangeList";
 
@@ -14,9 +12,9 @@ type XetBlobCreateOptions = {
 	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 	 */
 	fetch?: typeof fetch;
-	repo: RepoDesignation;
 	hash: string;
-	hubUrl?: string;
+	// URL to get the access token from
+	refreshUrl: string;
 	size: number;
 	listener?: (arg: { event: "read" } | { event: "progress"; progress: { read: number; total: number } }) => void;
 	internalLogging?: boolean;
@@ -85,8 +83,7 @@ const CHUNK_HEADER_BYTES = 8;
 export class XetBlob extends Blob {
 	fetch: typeof fetch;
 	accessToken?: string;
-	repoId: RepoId;
-	hubUrl: string;
+	refreshUrl: string;
 	hash: string;
 	start = 0;
 	end = 0;
@@ -99,13 +96,12 @@ export class XetBlob extends Blob {
 
 		this.fetch = params.fetch ?? fetch.bind(globalThis);
 		this.accessToken = checkCredentials(params);
-		this.repoId = toRepoId(params.repo);
-		this.hubUrl = params.hubUrl ?? HUB_URL;
+		this.refreshUrl = params.refreshUrl;
 		this.end = params.size;
 		this.hash = params.hash;
 		this.listener = params.listener;
 		this.internalLogging = params.internalLogging ?? false;
-		this.hubUrl;
+		this.refreshUrl;
 	}
 
 	override get size(): number {
@@ -115,9 +111,8 @@ export class XetBlob extends Blob {
 	#clone() {
 		const blob = new XetBlob({
 			fetch: this.fetch,
-			repo: this.repoId,
 			hash: this.hash,
-			hubUrl: this.hubUrl,
+			refreshUrl: this.refreshUrl,
 			size: this.size,
 		});
 
@@ -156,7 +151,7 @@ export class XetBlob extends Blob {
 		}
 
 		this.#reconstructionInfoPromise = (async () => {
-			const connParams = await getAccessToken(this.repoId, this.accessToken, this.fetch, this.hubUrl);
+			const connParams = await getAccessToken(this.accessToken, this.fetch, this.refreshUrl);
 
 			// debug(
 			// 	`curl '${connParams.casUrl}/reconstruction/${this.hash}' -H 'Authorization: Bearer ${connParams.accessToken}'`
@@ -489,6 +484,12 @@ export class XetBlob extends Blob {
 		return new Response(result).arrayBuffer();
 	}
 
+	override async bytes(): Promise<Uint8Array> {
+		const result = await this.#fetch();
+
+		return new Uint8Array(await new Response(result).arrayBuffer());
+	}
+
 	override async text(): Promise<string> {
 		const result = await this.#fetch();
 
@@ -525,8 +526,8 @@ const jwts: Map<
 	}
 > = new Map();
 
-function cacheKey(params: { repoId: RepoId; initialAccessToken: string | undefined }): string {
-	return `${params.repoId.type}:${params.repoId.name}:${params.initialAccessToken}`;
+function cacheKey(params: { refreshUrl: string; initialAccessToken: string | undefined }): string {
+	return JSON.stringify([params.refreshUrl, params.initialAccessToken]);
 }
 
 // exported for testing purposes
@@ -592,12 +593,11 @@ export function bg4_regoup_bytes(bytes: Uint8Array): Uint8Array {
 }
 
 async function getAccessToken(
-	repoId: RepoId,
 	initialAccessToken: string | undefined,
 	customFetch: typeof fetch,
-	hubUrl: string
+	refreshUrl: string
 ): Promise<{ accessToken: string; casUrl: string }> {
-	const key = cacheKey({ repoId, initialAccessToken });
+	const key = cacheKey({ refreshUrl, initialAccessToken });
 
 	const jwt = jwts.get(key);
 
@@ -612,8 +612,7 @@ async function getAccessToken(
 	}
 
 	const promise = (async () => {
-		const url = `${hubUrl}/api/${repoId.type}s/${repoId.name}/xet-read-token/main`;
-		const resp = await customFetch(url, {
+		const resp = await customFetch(refreshUrl, {
 			headers: {
 				...(initialAccessToken
 					? {
@@ -629,11 +628,10 @@ async function getAccessToken(
 
 		const json: { accessToken: string; casUrl: string; exp: number } = await resp.json();
 		const jwt = {
-			repoId,
 			accessToken: json.accessToken,
 			expiresAt: new Date(json.exp * 1000),
 			initialAccessToken,
-			hubUrl,
+			refreshUrl,
 			casUrl: json.casUrl,
 		};
 
@@ -660,7 +658,7 @@ async function getAccessToken(
 		};
 	})();
 
-	jwtPromises.set(repoId.name, promise);
+	jwtPromises.set(key, promise);
 
 	return promise;
 }
