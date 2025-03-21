@@ -484,12 +484,6 @@ export class XetBlob extends Blob {
 		return new Response(result).arrayBuffer();
 	}
 
-	override async bytes(): Promise<Uint8Array> {
-		const result = await this.#fetch();
-
-		return new Uint8Array(await new Response(result).arrayBuffer());
-	}
-
 	override async text(): Promise<string> {
 		const result = await this.#fetch();
 

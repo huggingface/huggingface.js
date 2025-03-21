@@ -23,10 +23,6 @@ export async function downloadFile(
 		 * @default "main"
 		 */
 		revision?: string;
-		/**
-		 * Fetch only a specific part of the file
-		 */
-		range?: [number, number];
 		hubUrl?: string;
 		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.

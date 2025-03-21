@@ -87,12 +87,6 @@ export class WebBlob extends Blob {
 		return result.text();
 	}
 
-	override async bytes(): Promise<Uint8Array> {
-		const result = await this.fetchRange();
-
-		return new Uint8Array(await result.arrayBuffer());
-	}
-
 	override stream(): ReturnType<Blob["stream"]> {
 		const stream = new TransformStream();
 
