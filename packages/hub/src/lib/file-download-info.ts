@@ -73,33 +73,40 @@ export async function fileDownloadInfo(
 		throw await createApiError(resp);
 	}
 
-	const etag = resp.headers.get("ETag");
-
-	if (!etag) {
-		throw new InvalidApiResponseFormatError("Expected ETag");
-	}
-
-	const contentRangeHeader = resp.headers.get("content-range");
-
-	if (!contentRangeHeader) {
-		throw new InvalidApiResponseFormatError("Expected size information");
-	}
-
-	const [, parsedSize] = contentRangeHeader.split("/");
-	const size = parseInt(parsedSize);
-
-	if (isNaN(size)) {
-		throw new InvalidApiResponseFormatError("Invalid file size received");
-	}
-
+	let etag: string | undefined;
+	let size: number | undefined;
 	let xetInfo: XetInfo | undefined;
 	if (resp.headers.get("Content-Type") === "application/vnd.xet-fileinfo+json") {
-		const json: { casUrl: string; hash: string; refreshUrl: string } = await resp.json();
+		const json: { casUrl: string; hash: string; refreshUrl: string; size: string; etag: string } = await resp.json();
 
 		xetInfo = {
 			hash: json.hash,
 			refreshUrl: json.refreshUrl,
 		};
+
+		etag = json.etag;
+		size = parseInt(json.size);
+	}
+
+	etag ??= resp.headers.get("ETag") ?? undefined;
+
+	if (!etag) {
+		throw new InvalidApiResponseFormatError("Expected ETag");
+	}
+
+	if (size === undefined || isNaN(size)) {
+		const contentRangeHeader = resp.headers.get("content-range");
+
+		if (!contentRangeHeader) {
+			throw new InvalidApiResponseFormatError("Expected size information");
+		}
+
+		const [, parsedSize] = contentRangeHeader.split("/");
+		size = parseInt(parsedSize);
+
+		if (isNaN(size)) {
+			throw new InvalidApiResponseFormatError("Invalid file size received");
+		}
 	}
 
 	return {
