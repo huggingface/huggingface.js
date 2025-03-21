@@ -4,6 +4,7 @@ import type { CredentialsParams, RepoDesignation, RepoId } from "../types/public
 import { checkCredentials } from "./checkCredentials";
 import { toRepoId } from "./toRepoId";
 import { decompress as lz4_decompress } from "../vendor/lz4js";
+import { RangeList } from "./RangeList";
 
 const JWT_SAFETY_PERIOD = 60_000;
 const JWT_CACHE_SIZE = 1_000;
@@ -17,9 +18,11 @@ type XetBlobCreateOptions = {
 	hash: string;
 	hubUrl?: string;
 	size: number;
+	listener?: (arg: { event: "read" } | { event: "progress"; progress: { read: number; total: number } }) => void;
+	internalLogging?: boolean;
 } & Partial<CredentialsParams>;
 
-interface ReconstructionInfo {
+export interface ReconstructionInfo {
 	/**
 	 * List of CAS blocks
 	 */
@@ -41,7 +44,11 @@ interface ReconstructionInfo {
 			url: string;
 			/** Chunk range */
 			range: { start: number; end: number };
-			/** Byte range, when making the call to the URL */
+			/**
+			 * Byte range, when making the call to the URL.
+			 *
+			 * We assume that we're given non-overlapping ranges for each hash
+			 */
 			url_range: { start: number; end: number };
 		}>
 	>;
@@ -83,7 +90,9 @@ export class XetBlob extends Blob {
 	hash: string;
 	start = 0;
 	end = 0;
+	internalLogging = false;
 	reconstructionInfo: ReconstructionInfo | undefined;
+	listener: XetBlobCreateOptions["listener"];
 
 	constructor(params: XetBlobCreateOptions) {
 		super([]);
@@ -94,6 +103,8 @@ export class XetBlob extends Blob {
 		this.hubUrl = params.hubUrl ?? HUB_URL;
 		this.end = params.size;
 		this.hash = params.hash;
+		this.listener = params.listener;
+		this.internalLogging = params.internalLogging ?? false;
 		this.hubUrl;
 	}
 
@@ -114,6 +125,8 @@ export class XetBlob extends Blob {
 		blob.start = this.start;
 		blob.end = this.end;
 		blob.reconstructionInfo = this.reconstructionInfo;
+		blob.listener = this.listener;
+		blob.internalLogging = this.internalLogging;
 
 		return blob;
 	}
@@ -145,7 +158,7 @@ export class XetBlob extends Blob {
 		this.#reconstructionInfoPromise = (async () => {
 			const connParams = await getAccessToken(this.repoId, this.accessToken, this.fetch, this.hubUrl);
 
-			// console.log(
+			// debug(
 			// 	`curl '${connParams.casUrl}/reconstruction/${this.hash}' -H 'Authorization: Bearer ${connParams.accessToken}'`
 			// );
 
@@ -173,6 +186,24 @@ export class XetBlob extends Blob {
 			await this.#loadReconstructionInfo();
 		}
 
+		const rangeLists = new Map<string, RangeList<Uint8Array[]>>();
+
+		if (!this.reconstructionInfo) {
+			throw new Error("Failed to load reconstruction info");
+		}
+
+		for (const term of this.reconstructionInfo.terms) {
+			let rangeList = rangeLists.get(term.hash);
+			if (!rangeList) {
+				rangeList = new RangeList<Uint8Array[]>();
+				rangeLists.set(term.hash, rangeList);
+			}
+
+			rangeList.add(term.range.start, term.range.end);
+		}
+		const listener = this.listener;
+		const log = this.internalLogging ? (...args: unknown[]) => console.log(...args) : () => {};
+
 		async function* readData(
 			reconstructionInfo: ReconstructionInfo,
 			customFetch: typeof fetch,
@@ -187,6 +218,46 @@ export class XetBlob extends Blob {
 					break;
 				}
 
+				const rangeList = rangeLists.get(term.hash);
+				if (!rangeList) {
+					throw new Error(`Failed to find range list for term ${term.hash}`);
+				}
+
+				{
+					const termRanges = rangeList.getRanges(term.range.start, term.range.end);
+
+					if (termRanges.every((range) => range.data)) {
+						log("all data available for term", term.hash, readBytesToSkip);
+						rangeLoop: for (const range of termRanges) {
+							// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+							for (let chunk of range.data!) {
+								if (readBytesToSkip) {
+									const skipped = Math.min(readBytesToSkip, chunk.byteLength);
+									chunk = chunk.slice(skipped);
+									readBytesToSkip -= skipped;
+									if (!chunk.byteLength) {
+										continue;
+									}
+								}
+								if (chunk.byteLength > maxBytes - totalBytesRead) {
+									chunk = chunk.slice(0, maxBytes - totalBytesRead);
+								}
+								totalBytesRead += chunk.byteLength;
+								// The stream consumer can decide to transfer ownership of the chunk, so we need to return a clone
+								// if there's more than one range for the same term
+								yield range.refCount > 1 ? chunk.slice() : chunk;
+								listener?.({ event: "progress", progress: { read: totalBytesRead, total: maxBytes } });
+
+								if (totalBytesRead >= maxBytes) {
+									break rangeLoop;
+								}
+							}
+						}
+						rangeList.remove(term.range.start, term.range.end);
+						continue;
+					}
+				}
+
 				const fetchInfo = reconstructionInfo.fetch_info[term.hash].find(
 					(info) => info.range.start <= term.range.start && info.range.end >= term.range.end
 				);
@@ -196,6 +267,10 @@ export class XetBlob extends Blob {
 						`Failed to find fetch info for term ${term.hash} and range ${term.range.start}-${term.range.end}`
 					);
 				}
+
+				log("term", term);
+				log("fetchinfo", fetchInfo);
+				log("readBytesToSkip", readBytesToSkip);
 
 				let resp = await customFetch(fetchInfo.url, {
 					headers: {
@@ -217,129 +292,163 @@ export class XetBlob extends Blob {
 					throw await createApiError(resp);
 				}
 
+				log(
+					"expected content length",
+					resp.headers.get("content-length"),
+					"range",
+					fetchInfo.url_range,
+					resp.headers.get("content-range")
+				);
+
 				const reader = resp.body?.getReader();
 				if (!reader) {
 					throw new Error("Failed to get reader from response body");
 				}
 
 				let done = false;
-				let chunksToSkip = term.range.start - fetchInfo.range.start;
-				let chunksToRead = term.range.end - term.range.start;
-				let bytesToSkip = 0;
+				let chunkIndex = fetchInfo.range.start;
+				const ranges = rangeList.getRanges(fetchInfo.range.start, fetchInfo.range.end);
 
 				let leftoverBytes: Uint8Array | undefined = undefined;
+				let totalFetchBytes = 0;
 
-				readChunks: while (!done && totalBytesRead < maxBytes) {
+				fetchData: while (!done && totalBytesRead < maxBytes) {
 					const result = await reader.read();
+					listener?.({ event: "read" });
+
 					done = result.done;
-					if (result.value) {
-						while (totalBytesRead < maxBytes && chunksToRead) {
-							if (bytesToSkip) {
-								if (bytesToSkip >= result.value.length) {
-									bytesToSkip -= result.value.length;
-									continue readChunks;
-								}
-								result.value = result.value.slice(bytesToSkip);
-								bytesToSkip = 0;
-							}
-							if (leftoverBytes) {
-								result.value = new Uint8Array([...leftoverBytes, ...result.value]);
-								leftoverBytes = undefined;
-							}
 
-							if (result.value.length < 8) {
-								// We need 8 bytes to parse the chunk header
-								leftoverBytes = result.value;
-								continue readChunks;
-							}
+					log("read", result.value?.byteLength, "bytes", "total read", totalBytesRead, "toSkip", readBytesToSkip);
 
-							const header = new DataView(result.value.buffer, result.value.byteOffset, CHUNK_HEADER_BYTES);
-							const chunkHeader: ChunkHeader = {
-								version: header.getUint8(0),
-								compressed_length: header.getUint8(1) | (header.getUint8(2) << 8) | (header.getUint8(3) << 16),
-								compression_scheme: header.getUint8(4),
-								uncompressed_length: header.getUint8(5) | (header.getUint8(6) << 8) | (header.getUint8(7) << 16),
-							};
+					if (!result.value) {
+						log("no data in result, cancelled", result);
+						continue;
+					}
 
-							if (chunkHeader.version !== 0) {
-								throw new Error(`Unsupported chunk version ${chunkHeader.version}`);
-							}
+					totalFetchBytes += result.value.byteLength;
 
-							if (
-								chunkHeader.compression_scheme !== CompressionScheme.None &&
-								chunkHeader.compression_scheme !== CompressionScheme.LZ4 &&
-								chunkHeader.compression_scheme !== CompressionScheme.ByteGroupingLZ4
-							) {
-								throw new Error(
-									`Unsupported compression scheme ${
-										compressionSchemeLabels[chunkHeader.compression_scheme] ?? chunkHeader.compression_scheme
-									}`
-								);
-							}
+					if (leftoverBytes) {
+						result.value = new Uint8Array([...leftoverBytes, ...result.value]);
+						leftoverBytes = undefined;
+					}
 
-							if (chunksToSkip) {
-								chunksToSkip--;
-								result.value = result.value.slice(CHUNK_HEADER_BYTES);
-								bytesToSkip = chunkHeader.compressed_length;
-								continue;
-							}
-
-							if (readBytesToSkip >= chunkHeader.uncompressed_length) {
-								readBytesToSkip -= chunkHeader.uncompressed_length;
-								result.value = result.value.slice(CHUNK_HEADER_BYTES);
-								bytesToSkip = chunkHeader.compressed_length;
-								chunksToRead--;
-								continue;
-							}
-
-							if (result.value.length < chunkHeader.compressed_length + CHUNK_HEADER_BYTES) {
-								// We need more data to read the full chunk
-								leftoverBytes = result.value;
-								continue readChunks;
-							}
-
-							result.value = result.value.slice(CHUNK_HEADER_BYTES);
-
-							const uncompressed =
-								chunkHeader.compression_scheme === CompressionScheme.LZ4
-									? lz4_decompress(
-											result.value.slice(0, chunkHeader.compressed_length),
-											chunkHeader.uncompressed_length
-									  )
-									: chunkHeader.compression_scheme === CompressionScheme.ByteGroupingLZ4
-									  ? bg4_regoup_bytes(
-												lz4_decompress(
-													result.value.slice(0, chunkHeader.compressed_length),
-													chunkHeader.uncompressed_length
-												)
-									    )
-									  : result.value.slice(0, chunkHeader.compressed_length);
-
-							let bytesToYield: Uint8Array;
-							if (readBytesToSkip) {
-								const remainingBytes = Math.min(uncompressed.length - readBytesToSkip, maxBytes - totalBytesRead);
-								bytesToYield = uncompressed.slice(readBytesToSkip, readBytesToSkip + remainingBytes);
-								readBytesToSkip = 0;
-							} else {
-								bytesToYield = uncompressed.slice(0, Math.min(uncompressed.length, maxBytes - totalBytesRead));
-							}
-
-							totalBytesRead += bytesToYield.length;
-							yield bytesToYield;
-							chunksToRead--;
-
-							result.value = result.value.slice(chunkHeader.compressed_length);
+					while (totalBytesRead < maxBytes && result.value.byteLength) {
+						if (result.value.byteLength < 8) {
+							// We need 8 bytes to parse the chunk header
+							leftoverBytes = result.value;
+							continue fetchData;
 						}
+
+						const header = new DataView(result.value.buffer, result.value.byteOffset, CHUNK_HEADER_BYTES);
+						const chunkHeader: ChunkHeader = {
+							version: header.getUint8(0),
+							compressed_length: header.getUint8(1) | (header.getUint8(2) << 8) | (header.getUint8(3) << 16),
+							compression_scheme: header.getUint8(4),
+							uncompressed_length: header.getUint8(5) | (header.getUint8(6) << 8) | (header.getUint8(7) << 16),
+						};
+
+						log("chunk header", chunkHeader, "to skip", readBytesToSkip);
+
+						if (chunkHeader.version !== 0) {
+							throw new Error(`Unsupported chunk version ${chunkHeader.version}`);
+						}
+
+						if (
+							chunkHeader.compression_scheme !== CompressionScheme.None &&
+							chunkHeader.compression_scheme !== CompressionScheme.LZ4 &&
+							chunkHeader.compression_scheme !== CompressionScheme.ByteGroupingLZ4
+						) {
+							throw new Error(
+								`Unsupported compression scheme ${
+									compressionSchemeLabels[chunkHeader.compression_scheme] ?? chunkHeader.compression_scheme
+								}`
+							);
+						}
+
+						if (result.value.byteLength < chunkHeader.compressed_length + CHUNK_HEADER_BYTES) {
+							// We need more data to read the full chunk
+							leftoverBytes = result.value;
+							continue fetchData;
+						}
+
+						result.value = result.value.slice(CHUNK_HEADER_BYTES);
+
+						let uncompressed =
+							chunkHeader.compression_scheme === CompressionScheme.LZ4
+								? lz4_decompress(result.value.slice(0, chunkHeader.compressed_length), chunkHeader.uncompressed_length)
+								: chunkHeader.compression_scheme === CompressionScheme.ByteGroupingLZ4
+								  ? bg4_regoup_bytes(
+											lz4_decompress(
+												result.value.slice(0, chunkHeader.compressed_length),
+												chunkHeader.uncompressed_length
+											)
+								    )
+								  : result.value.slice(0, chunkHeader.compressed_length);
+
+						const range = ranges.find((range) => chunkIndex >= range.start && chunkIndex < range.end);
+						const shouldYield = chunkIndex >= term.range.start && chunkIndex < term.range.end;
+						const minRefCountToStore = shouldYield ? 2 : 1;
+						let stored = false;
+
+						// Assuming non-overlapping fetch_info ranges for the same hash
+						if (range && range.refCount >= minRefCountToStore) {
+							range.data ??= [];
+							range.data.push(uncompressed);
+							stored = true;
+						}
+
+						if (shouldYield) {
+							if (readBytesToSkip) {
+								const skipped = Math.min(readBytesToSkip, uncompressed.byteLength);
+								uncompressed = uncompressed.slice(readBytesToSkip);
+								readBytesToSkip -= skipped;
+							}
+
+							if (uncompressed.byteLength > maxBytes - totalBytesRead) {
+								uncompressed = uncompressed.slice(0, maxBytes - totalBytesRead);
+							}
+
+							if (uncompressed.byteLength) {
+								log(
+									"yield",
+									uncompressed.byteLength,
+									"bytes",
+									result.value.byteLength,
+									"total read",
+									totalBytesRead,
+									stored
+								);
+								totalBytesRead += uncompressed.byteLength;
+								yield stored ? uncompressed.slice() : uncompressed;
+								listener?.({ event: "progress", progress: { read: totalBytesRead, total: maxBytes } });
+							}
+						}
+
+						chunkIndex++;
+						result.value = result.value.slice(chunkHeader.compressed_length);
 					}
 				}
 
+				if (
+					done &&
+					totalBytesRead < maxBytes &&
+					totalFetchBytes < fetchInfo.url_range.end - fetchInfo.url_range.start + 1
+				) {
+					log("done", done, "total read", totalBytesRead, maxBytes, totalFetchBytes);
+					log("failed to fetch all data for term", term.hash);
+					throw new Error(
+						`Failed to fetch all data for term ${term.hash}, fetched ${totalFetchBytes} bytes out of ${
+							fetchInfo.url_range.end - fetchInfo.url_range.start + 1
+						}`
+					);
+				}
+
+				log("done", done, "total read", totalBytesRead, maxBytes, totalFetchBytes);
+
 				// Release the reader
+				log("cancel reader");
 				await reader.cancel();
 			}
-		}
-
-		if (!this.reconstructionInfo) {
-			throw new Error("Failed to load reconstruction info");
 		}
 
 		const iterator = readData(
@@ -437,33 +546,33 @@ export function bg4_regoup_bytes(bytes: Uint8Array): Uint8Array {
 
 	// todo: optimize to do it in-place
 
-	const split = Math.floor(bytes.length / 4);
-	const rem = bytes.length % 4;
+	const split = Math.floor(bytes.byteLength / 4);
+	const rem = bytes.byteLength % 4;
 	const g1_pos = split + (rem >= 1 ? 1 : 0);
 	const g2_pos = g1_pos + split + (rem >= 2 ? 1 : 0);
 	const g3_pos = g2_pos + split + (rem == 3 ? 1 : 0);
 
-	const ret = new Uint8Array(bytes.length);
-	for (let i = 0, j = 0; i < bytes.length; i += 4, j++) {
+	const ret = new Uint8Array(bytes.byteLength);
+	for (let i = 0, j = 0; i < bytes.byteLength; i += 4, j++) {
 		ret[i] = bytes[j];
 	}
 
-	for (let i = 1, j = g1_pos; i < bytes.length; i += 4, j++) {
+	for (let i = 1, j = g1_pos; i < bytes.byteLength; i += 4, j++) {
 		ret[i] = bytes[j];
 	}
 
-	for (let i = 2, j = g2_pos; i < bytes.length; i += 4, j++) {
+	for (let i = 2, j = g2_pos; i < bytes.byteLength; i += 4, j++) {
 		ret[i] = bytes[j];
 	}
 
-	for (let i = 3, j = g3_pos; i < bytes.length; i += 4, j++) {
+	for (let i = 3, j = g3_pos; i < bytes.byteLength; i += 4, j++) {
 		ret[i] = bytes[j];
 	}
 
 	return ret;
 
 	// alternative implementation (to benchmark which one is faster)
-	// for (let i = 0; i < bytes.length - 3; i += 4) {
+	// for (let i = 0; i < bytes.byteLength - 3; i += 4) {
 	// 	ret[i] = bytes[i / 4];
 	// 	ret[i + 1] = bytes[g1_pos + i / 4];
 	// 	ret[i + 2] = bytes[g2_pos + i / 4];
@@ -471,14 +580,14 @@ export function bg4_regoup_bytes(bytes: Uint8Array): Uint8Array {
 	// }
 
 	// if (rem === 1) {
-	// 	ret[bytes.length - 1] = bytes[g1_pos - 1];
+	// 	ret[bytes.byteLength - 1] = bytes[g1_pos - 1];
 	// } else if (rem === 2) {
-	// 	ret[bytes.length - 2] = bytes[g1_pos - 1];
-	// 	ret[bytes.length - 1] = bytes[g2_pos - 1];
+	// 	ret[bytes.byteLength - 2] = bytes[g1_pos - 1];
+	// 	ret[bytes.byteLength - 1] = bytes[g2_pos - 1];
 	// } else if (rem === 3) {
-	// 	ret[bytes.length - 3] = bytes[g1_pos - 1];
-	// 	ret[bytes.length - 2] = bytes[g2_pos - 1];
-	// 	ret[bytes.length - 1] = bytes[g3_pos - 1];
+	// 	ret[bytes.byteLength - 3] = bytes[g1_pos - 1];
+	// 	ret[bytes.byteLength - 2] = bytes[g2_pos - 1];
+	// 	ret[bytes.byteLength - 1] = bytes[g3_pos - 1];
 	// }
 }
 
