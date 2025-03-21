@@ -962,6 +962,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"model_vae_fp16.pt"`,
 		snippets: snippets.threedtopia_xl,
 	},
+	"uni-3dar": {
+		prettyLabel: "Uni-3DAR",
+		repoName: "Uni-3DAR",
+		repoUrl: "https://github.com/dptech-corp/Uni-3DAR",
+		docsUrl: "https://github.com/dptech-corp/Uni-3DAR",
+		countDownloads: `path_extension:"pt"`,
+		snippets: snippets.uni3dar,
+	},
 } satisfies Record<string, LibraryUiElement>;
 
 export type ModelLibraryKey = keyof typeof MODEL_LIBRARIES_UI_ELEMENTS;
