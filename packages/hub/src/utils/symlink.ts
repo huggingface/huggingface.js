@@ -57,7 +57,7 @@ export async function createSymlink(params: {
 	}
 
 	try {
-		await fs.symlink(abs_src, abs_dst);
+		await fs.symlink(path.relative(path.dirname(abs_dst), abs_src), abs_dst);
 	} catch {
 		console.info(`Symlink not supported. Copying file from ${abs_src} to ${abs_dst}`);
 		await fs.copyFile(abs_src, abs_dst);
