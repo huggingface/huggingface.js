@@ -12,6 +12,7 @@ import { REPLICATE_CONFIG } from "../providers/replicate";
 import { SAMBANOVA_CONFIG } from "../providers/sambanova";
 import { TOGETHER_CONFIG } from "../providers/together";
 import { OPENAI_CONFIG } from "../providers/openai";
+import { OVHCLOUD_CONFIG } from "../providers/ovhcloud";
 import type { InferenceProvider, InferenceTask, Options, ProviderConfig, RequestArgs } from "../types";
 import { isUrl } from "./isUrl";
 import { version as packageVersion, name as packageName } from "../../package.json";
@@ -42,6 +43,7 @@ const providerConfigs: Record<InferenceProvider, ProviderConfig> = {
 	replicate: REPLICATE_CONFIG,
 	sambanova: SAMBANOVA_CONFIG,
 	together: TOGETHER_CONFIG,
+	ovhcloud: OVHCLOUD_CONFIG,
 };
 
 /**

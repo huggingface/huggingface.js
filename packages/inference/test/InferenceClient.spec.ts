@@ -1466,4 +1466,60 @@ describe.concurrent("InferenceClient", () => {
 		},
 		TIMEOUT
 	);
+	describe.concurrent(
+		"OVHcloud",
+		() => {
+			const client = new HfInference(env.HF_OVHCLOUD_KEY ?? "dummy");
+
+			HARDCODED_MODEL_ID_MAPPING["ovhcloud"] = {
+				"meta-llama/llama-3.1-8b-instruct": "Meta-Llama-3-8B-Instruct",
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "meta-llama/llama-3.1-8b-instruct",
+					provider: "ovhcloud",
+					messages: [{ role: "user", content: "Complete the sequence: A, B, " }],
+					parameters: {
+						temperature: 0,
+						top_p: 0.01,
+						max_new_tokens: 1,
+					},
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toContain("C");
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "meta-llama/llama-3.1-8b-instruct",
+					provider: "ovhcloud",
+					messages: [{ role: "user", content: "Complete the sequence: A, B, " }],
+					stream: true,
+					parameters: {
+						temperature: 0,
+						top_p: 0.01,
+						max_new_tokens: 1,
+					},
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse).toContain("C");
+			});
+		},
+		TIMEOUT
+	);
 });
