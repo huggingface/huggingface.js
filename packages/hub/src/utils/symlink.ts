@@ -42,7 +42,7 @@ function expandUser(path: string): string {
  */
 export async function createSymlink(dst: string, src: string, new_blob?: boolean): Promise<void> {
 	try {
-		await fs.rm(dst);
+		await fs.rm(src);
 	} catch (_e: unknown) {
 		/* empty */
 	}
