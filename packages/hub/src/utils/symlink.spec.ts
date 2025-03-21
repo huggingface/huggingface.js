@@ -30,7 +30,7 @@ describe("utils/symlink", () => {
 		});
 
 		const stats = await lstat(join(tmpdir(), "test-symlink.txt"));
-		expect(stats.isSymbolicLink()).toBe(true);
+		expect(stats.isSymbolicLink()).toBe(process.platform !== "win32");
 
 		// Test file content
 		const content = readFileSync(join(tmpdir(), "test-symlink.txt"), "utf8");
@@ -54,7 +54,7 @@ describe("utils/symlink", () => {
 		});
 
 		const stats = await lstat(join(tmpdir(), "test-symlink.txt"));
-		expect(stats.isSymbolicLink()).toBe(true);
+		expect(stats.isSymbolicLink()).toBe(process.platform !== "win32");
 
 		// Test file content
 		const content = readFileSync(join(tmpdir(), "test-symlink.txt"), "utf8");
