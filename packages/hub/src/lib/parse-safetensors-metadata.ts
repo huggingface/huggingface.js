@@ -89,17 +89,13 @@ async function parseSingleFile(
 		fetch?: typeof fetch;
 	} & Partial<CredentialsParams>
 ): Promise<SafetensorsFileHeader> {
-	const firstResp = await downloadFile({
-		...params,
-		path,
-		range: [0, 7],
-	});
+	const blob = await downloadFile({ ...params, path });
 
-	if (!firstResp) {
+	if (!blob) {
 		throw new SafetensorParseError(`Failed to parse file ${path}: failed to fetch safetensors header length.`);
 	}
 
-	const bufLengthOfHeaderLE = await firstResp.arrayBuffer();
+	const bufLengthOfHeaderLE = await blob.slice(0, 8).arrayBuffer();
 	const lengthOfHeader = new DataView(bufLengthOfHeaderLE).getBigUint64(0, true);
 	// ^little-endian
 	if (lengthOfHeader <= 0) {
@@ -111,15 +107,9 @@ async function parseSingleFile(
 		);
 	}
 
-	const secondResp = await downloadFile({ ...params, path, range: [8, 7 + Number(lengthOfHeader)] });
-
-	if (!secondResp) {
-		throw new SafetensorParseError(`Failed to parse file ${path}: failed to fetch safetensors header.`);
-	}
-
 	try {
 		// no validation for now, we assume it's a valid FileHeader.
-		const header: SafetensorsFileHeader = await secondResp.json();
+		const header: SafetensorsFileHeader = JSON.parse(await blob.slice(8, 8 + Number(lengthOfHeader)).text());
 		return header;
 	} catch (err) {
 		throw new SafetensorParseError(`Failed to parse file ${path}: safetensors header is not valid JSON.`);
@@ -138,20 +128,19 @@ async function parseShardedIndex(
 		fetch?: typeof fetch;
 	} & Partial<CredentialsParams>
 ): Promise<{ index: SafetensorsIndexJson; headers: SafetensorsShardedHeaders }> {
-	const indexResp = await downloadFile({
+	const indexBlob = await downloadFile({
 		...params,
 		path,
-		range: [0, 10_000_000],
 	});
 
-	if (!indexResp) {
+	if (!indexBlob) {
 		throw new SafetensorParseError(`Failed to parse file ${path}: failed to fetch safetensors index.`);
 	}
 
 	// no validation for now, we assume it's a valid IndexJson.
 	let index: SafetensorsIndexJson;
 	try {
-		index = await indexResp.json();
+		index = JSON.parse(await indexBlob.slice(0, 10_000_000).text());
 	} catch (error) {
 		throw new SafetensorParseError(`Failed to parse file ${path}: not a valid JSON.`);
 	}
