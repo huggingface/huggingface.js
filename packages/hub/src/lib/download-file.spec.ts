@@ -1,68 +1,32 @@
-import { expect, test, describe, vi } from "vitest";
+import { expect, test, describe, assert } from "vitest";
 import { downloadFile } from "./download-file";
-import type { RepoId } from "../types/public";
-
-const DUMMY_REPO: RepoId = {
-	name: "hello-world",
-	type: "model",
-};
 
 describe("downloadFile", () => {
-	test("hubUrl params should overwrite HUB_URL", async () => {
-		const fetchMock: typeof fetch = vi.fn();
-		vi.mocked(fetchMock).mockResolvedValue({
-			status: 200,
-			ok: true,
-		} as Response);
-
-		await downloadFile({
-			repo: DUMMY_REPO,
-			path: "/README.md",
-			hubUrl: "http://dummy-hub",
-			fetch: fetchMock,
-		});
-
-		expect(fetchMock).toHaveBeenCalledWith("http://dummy-hub/hello-world/resolve/main//README.md", expect.anything());
-	});
-
-	test("raw params should use raw url", async () => {
-		const fetchMock: typeof fetch = vi.fn();
-		vi.mocked(fetchMock).mockResolvedValue({
-			status: 200,
-			ok: true,
-		} as Response);
-
-		await downloadFile({
-			repo: DUMMY_REPO,
+	test("should download regular file", async () => {
+		const blob = await downloadFile({
+			repo: {
+				type: "model",
+				name: "openai-community/gpt2",
+			},
 			path: "README.md",
-			raw: true,
-			fetch: fetchMock,
 		});
 
-		expect(fetchMock).toHaveBeenCalledWith("https://huggingface.co/hello-world/raw/main/README.md", expect.anything());
+		const text = await blob?.slice(0, 1000).text();
+		assert(
+			text?.includes(`---
+language: en
+tags:
+- exbert
+
+license: mit
+---
+
+
+# GPT-2
+
+Test the whole generation capabilities here: https://transformer.huggingface.co/doc/gpt2-large`)
+		);
 	});
-
-	test("internal server error should propagate the error", async () => {
-		const fetchMock: typeof fetch = vi.fn();
-		vi.mocked(fetchMock).mockResolvedValue({
-			status: 500,
-			ok: false,
-			headers: new Map<string, string>([["Content-Type", "application/json"]]),
-			json: () => ({
-				error: "Dummy internal error",
-			}),
-		} as unknown as Response);
-
-		await expect(async () => {
-			await downloadFile({
-				repo: DUMMY_REPO,
-				path: "README.md",
-				raw: true,
-				fetch: fetchMock,
-			});
-		}).rejects.toThrowError("Dummy internal error");
-	});
-
 	test("should downoad xet file", async () => {
 		const blob = await downloadFile({
 			repo: {

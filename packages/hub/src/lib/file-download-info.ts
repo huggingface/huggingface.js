@@ -6,16 +6,13 @@ import { toRepoId } from "../utils/toRepoId";
 
 interface XetInfo {
 	hash: string;
-	refreshUrl: string;
+	refreshUrl: URL;
 }
 
 export interface FileDownloadInfoOutput {
 	size: number;
 	etag: string;
-	xet?: {
-		hash: string;
-		refreshUrl: string;
-	};
+	xet?: XetInfo;
 	// URL to fetch (with the access token if private file)
 	url: string;
 }
@@ -81,7 +78,7 @@ export async function fileDownloadInfo(
 
 		xetInfo = {
 			hash: json.hash,
-			refreshUrl: json.refreshUrl,
+			refreshUrl: new URL(json.refreshUrl, hubUrl),
 		};
 
 		etag = json.etag;
