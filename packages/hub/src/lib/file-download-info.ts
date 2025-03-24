@@ -76,7 +76,7 @@ export async function fileDownloadInfo(
 	let etag: string | undefined;
 	let size: number | undefined;
 	let xetInfo: XetInfo | undefined;
-	if (resp.headers.get("Content-Type") === "application/vnd.xet-fileinfo+json") {
+	if (resp.headers.get("Content-Type")?.includes("application/vnd.xet-fileinfo+json")) {
 		const json: { casUrl: string; hash: string; refreshUrl: string; size: string; etag: string } = await resp.json();
 
 		xetInfo = {

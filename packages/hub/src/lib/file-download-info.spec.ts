@@ -54,6 +54,6 @@ describe("fileDownloadInfo", () => {
 			path: "large_text.txt",
 		});
 		assert.strictEqual(info?.size, 62914580);
-		assert.strictEqual(info?.etag, '"	c27f98578d9363b27db0bc1cbd9c692f8e6e90ae98c38cee7bc0a88829debd17"');
+		assert.strictEqual(info?.etag, '"c27f98578d9363b27db0bc1cbd9c692f8e6e90ae98c38cee7bc0a88829debd17"');
 	});
 });
