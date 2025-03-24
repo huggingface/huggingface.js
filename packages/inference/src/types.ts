@@ -101,13 +101,15 @@ export interface ProviderConfig {
 	clientSideRoutingOnly?: boolean;
 }
 
+export type AuthMethod = "none" | "hf-token" | "credentials-include" | "provider-key";
+
 export interface HeaderParams {
 	accessToken?: string;
-	authMethod: "none" | "hf-token" | "credentials-include" | "provider-key";
+	authMethod: AuthMethod;
 }
 
 export interface UrlParams {
-	authMethod: "none" | "hf-token" | "credentials-include" | "provider-key";
+	authMethod: AuthMethod;
 	baseUrl: string;
 	model: string;
 	task?: InferenceTask;

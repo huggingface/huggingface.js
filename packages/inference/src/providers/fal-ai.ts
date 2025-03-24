@@ -83,7 +83,7 @@ export async function pollFalResponse(
 
 	while (status !== "COMPLETED") {
 		await delay(500);
-		const statusResponse = await fetch(statusUrl, { headers: headers });
+		const statusResponse = await fetch(statusUrl, { headers });
 
 		if (!statusResponse.ok) {
 			throw new InferenceOutputError("Failed to fetch response status from fal-ai API");
@@ -95,14 +95,14 @@ export async function pollFalResponse(
 		}
 	}
 
-	const resultResponse = await fetch(resultUrl, { headers: headers });
-	let result;
+	const resultResponse = await fetch(resultUrl, { headers });
+	let result: unknown;
 	try {
 		result = await resultResponse.json();
 	} catch (error) {
 		throw new InferenceOutputError("Failed to parse result response from fal-ai API");
 	}
-	const isValidOutput =
+	if (
 		typeof result === "object" &&
 		!!result &&
 		"video" in result &&
@@ -110,12 +110,13 @@ export async function pollFalResponse(
 		!!result.video &&
 		"url" in result.video &&
 		typeof result.video.url === "string" &&
-		isUrl(result.video.url);
-	if (!isValidOutput) {
+		isUrl(result.video.url)
+	) {
+		const urlResponse = await fetch(result.video.url);
+		return await urlResponse.blob();
+	} else {
 		throw new InferenceOutputError(
 			"Expected { video: { url: string } } result format, got instead: " + JSON.stringify(result)
 		);
 	}
-	const urlResponse = await fetch(result.video.url);
-	return await urlResponse.blob();
 }

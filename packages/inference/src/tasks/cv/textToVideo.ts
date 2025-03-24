@@ -6,7 +6,7 @@ import { isUrl } from "../../lib/isUrl";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import { typedInclude } from "../../utils/typedInclude";
 import { makeRequestOptions } from "../../lib/makeRequestOptions";
-import { pollFalResponse, FalAiQueueOutput } from "../../providers/fal-ai";
+import { pollFalResponse, type FalAiQueueOutput } from "../../providers/fal-ai";
 
 export type TextToVideoArgs = BaseArgs & TextToVideoInput;
 
