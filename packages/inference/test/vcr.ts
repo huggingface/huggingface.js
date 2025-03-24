@@ -66,8 +66,8 @@ async function tapeToResponse(tape: Tape) {
 }
 
 /**
- * Headers are volontarily skipped for now. They are not useful to distinguish requests
- * but bring more complexity because some of them are not deterministics like "date"
+ * Headers are voluntarily skipped for now. They are not useful to distinguish requests
+ * but bring more complexity because some of them are not deterministic like "date"
  * and it's complex to handle all the formats they can be given in.
  */
 async function hashRequest(url: string, init: RequestInit): Promise<string> {
@@ -93,7 +93,7 @@ async function hashRequest(url: string, init: RequestInit): Promise<string> {
 }
 
 /**
- * This function behavior change according to the value of the VCR_MODE environment variable:
+ * This function behavior changes according to the value of the VCR_MODE environment variable:
  *   - record: requests will be made to the external API and responses will be saved in files
  *   - playback: answers will be read from the filesystem, if they don't have been recorded before then an error will be thrown
  *   - cache: same as playback but if the response is not found in the filesystem then it will be recorded
@@ -208,7 +208,7 @@ async function vcr(
 		const { writeFileSync } = await import("node:fs");
 		writeFileSync(`./test/${TAPES_FILE}`, JSON.stringify(tapes, null, 2));
 
-		// Return a new response with an unconsummed body
+		// Return a new response with an unconsumed body
 		return tapeToResponse(tape);
 	}
 

@@ -10,7 +10,7 @@
 </p>
 
 ```ts
-// Programatically interact with the Hub
+// Programmatically interact with the Hub
 
 await createRepo({
   repo: { type: "model", name: "my-user/nlp-model" },
