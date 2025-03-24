@@ -968,7 +968,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/dptech-corp/Uni-3DAR",
 		docsUrl: "https://github.com/dptech-corp/Uni-3DAR",
 		countDownloads: `path_extension:"pt"`,
-		snippets: snippets.uni3dar,
 	},
 } satisfies Record<string, LibraryUiElement>;
 
