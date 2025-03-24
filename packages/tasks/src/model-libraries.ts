@@ -901,6 +901,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pt"`,
 		snippets: snippets.ultralytics,
 	},
+	"uni-3dar": {
+		prettyLabel: "Uni-3DAR",
+		repoName: "Uni-3DAR",
+		repoUrl: "https://github.com/dptech-corp/Uni-3DAR",
+		docsUrl: "https://github.com/dptech-corp/Uni-3DAR",
+		countDownloads: `path_extension:"pt"`,
+	},
 	"unity-sentis": {
 		prettyLabel: "unity-sentis",
 		repoName: "unity-sentis",
@@ -961,13 +968,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"model_vae_fp16.pt"`,
 		snippets: snippets.threedtopia_xl,
-	},
-	"uni-3dar": {
-		prettyLabel: "Uni-3DAR",
-		repoName: "Uni-3DAR",
-		repoUrl: "https://github.com/dptech-corp/Uni-3DAR",
-		docsUrl: "https://github.com/dptech-corp/Uni-3DAR",
-		countDownloads: `path_extension:"pt"`,
 	},
 } satisfies Record<string, LibraryUiElement>;
 
