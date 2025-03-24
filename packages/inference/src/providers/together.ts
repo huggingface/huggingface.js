@@ -14,9 +14,13 @@
  *
  * Thanks!
  */
-import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../types";
+import type { BodyParams, HeaderParams, ProviderConfig, UrlParams } from "../types";
 
 const TOGETHER_API_BASE_URL = "https://api.together.xyz";
+
+const makeBaseUrl = (): string => {
+	return TOGETHER_API_BASE_URL;
+};
 
 const makeBody = (params: BodyParams): Record<string, unknown> => {
 	return {
@@ -43,7 +47,7 @@ const makeUrl = (params: UrlParams): string => {
 };
 
 export const TOGETHER_CONFIG: ProviderConfig = {
-	baseUrl: TOGETHER_API_BASE_URL,
+	makeBaseUrl,
 	makeBody,
 	makeHeaders,
 	makeUrl,

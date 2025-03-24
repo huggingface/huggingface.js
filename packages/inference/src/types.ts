@@ -94,19 +94,22 @@ export type RequestArgs = BaseArgs &
 	};
 
 export interface ProviderConfig {
-	baseUrl: string;
+	makeBaseUrl: ((task?: InferenceTask) => string) | (() => string);
 	makeBody: (params: BodyParams) => Record<string, unknown>;
 	makeHeaders: (params: HeaderParams) => Record<string, string>;
 	makeUrl: (params: UrlParams) => string;
 	clientSideRoutingOnly?: boolean;
 }
 
+export type AuthMethod = "none" | "hf-token" | "credentials-include" | "provider-key";
+
 export interface HeaderParams {
 	accessToken?: string;
-	authMethod: "none" | "hf-token" | "credentials-include" | "provider-key";
+	authMethod: AuthMethod;
 }
 
 export interface UrlParams {
+	authMethod: AuthMethod;
 	baseUrl: string;
 	model: string;
 	task?: InferenceTask;
