@@ -14,9 +14,13 @@
  *
  * Thanks!
  */
-import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../types";
+import type { BodyParams, HeaderParams, ProviderConfig, UrlParams } from "../types";
 
 const COHERE_API_BASE_URL = "https://api.cohere.com";
+
+const makeBaseUrl = (): string => {
+	return COHERE_API_BASE_URL;
+};
 
 const makeBody = (params: BodyParams): Record<string, unknown> => {
 	return {
@@ -34,7 +38,7 @@ const makeUrl = (params: UrlParams): string => {
 };
 
 export const COHERE_CONFIG: ProviderConfig = {
-	baseUrl: COHERE_API_BASE_URL,
+	makeBaseUrl,
 	makeBody,
 	makeHeaders,
 	makeUrl,

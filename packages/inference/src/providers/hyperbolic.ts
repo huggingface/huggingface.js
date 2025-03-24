@@ -14,9 +14,13 @@
  *
  * Thanks!
  */
-import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../types";
+import type { BodyParams, HeaderParams, ProviderConfig, UrlParams } from "../types";
 
 const HYPERBOLIC_API_BASE_URL = "https://api.hyperbolic.xyz";
+
+const makeBaseUrl = (): string => {
+	return HYPERBOLIC_API_BASE_URL;
+};
 
 const makeBody = (params: BodyParams): Record<string, unknown> => {
 	return {
@@ -37,7 +41,7 @@ const makeUrl = (params: UrlParams): string => {
 };
 
 export const HYPERBOLIC_CONFIG: ProviderConfig = {
-	baseUrl: HYPERBOLIC_API_BASE_URL,
+	makeBaseUrl,
 	makeBody,
 	makeHeaders,
 	makeUrl,
