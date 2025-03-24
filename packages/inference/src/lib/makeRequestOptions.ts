@@ -3,6 +3,7 @@ import { BLACK_FOREST_LABS_CONFIG } from "../providers/black-forest-labs";
 import { CEREBRAS_CONFIG } from "../providers/cerebras";
 import { COHERE_CONFIG } from "../providers/cohere";
 import { FAL_AI_CONFIG } from "../providers/fal-ai";
+import { FEATHERLESS_AI_CONFIG } from "../providers/featherless-ai";
 import { FIREWORKS_AI_CONFIG } from "../providers/fireworks-ai";
 import { HF_INFERENCE_CONFIG } from "../providers/hf-inference";
 import { HYPERBOLIC_CONFIG } from "../providers/hyperbolic";
@@ -33,6 +34,7 @@ const providerConfigs: Record<InferenceProvider, ProviderConfig> = {
 	cerebras: CEREBRAS_CONFIG,
 	cohere: COHERE_CONFIG,
 	"fal-ai": FAL_AI_CONFIG,
+	"featherless-ai": FEATHERLESS_AI_CONFIG,
 	"fireworks-ai": FIREWORKS_AI_CONFIG,
 	"hf-inference": HF_INFERENCE_CONFIG,
 	hyperbolic: HYPERBOLIC_CONFIG,

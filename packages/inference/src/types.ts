@@ -33,6 +33,7 @@ export const INFERENCE_PROVIDERS = [
 	"cerebras",
 	"cohere",
 	"fal-ai",
+	"featherless-ai",
 	"fireworks-ai",
 	"hf-inference",
 	"hyperbolic",
