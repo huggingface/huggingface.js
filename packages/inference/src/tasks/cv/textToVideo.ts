@@ -1,12 +1,11 @@
-import type { BaseArgs, InferenceProvider, Options } from "../../types";
 import type { TextToVideoInput } from "@huggingface/tasks";
-import { request } from "../custom/request";
-import { omit } from "../../utils/omit";
-import { isUrl } from "../../lib/isUrl";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
-import { typedInclude } from "../../utils/typedInclude";
-import { makeRequestOptions } from "../../lib/makeRequestOptions";
+import { isUrl } from "../../lib/isUrl";
 import { pollFalResponse, type FalAiQueueOutput } from "../../providers/fal-ai";
+import type { BaseArgs, InferenceProvider, Options } from "../../types";
+import { omit } from "../../utils/omit";
+import { typedInclude } from "../../utils/typedInclude";
+import { request, type ResponseWrapper } from "../custom/request";
 
 export type TextToVideoArgs = BaseArgs & TextToVideoInput;
 
@@ -35,13 +34,15 @@ export async function textToVideo(args: TextToVideoArgs, options?: Options): Pro
 		args.provider === "fal-ai" || args.provider === "replicate" || args.provider === "novita"
 			? { ...omit(args, ["inputs", "parameters"]), ...args.parameters, prompt: args.inputs }
 			: args;
-	const res = await request<FalAiQueueOutput | ReplicateOutput | NovitaOutput>(payload, {
+	const response = await request<ResponseWrapper<FalAiQueueOutput | ReplicateOutput | NovitaOutput>>(payload, {
 		...options,
 		task: "text-to-video",
+		withRequestContext: true,
 	});
+
+	const { data: res, requestContext } = response;
 	if (args.provider === "fal-ai") {
-		const { url, info } = await makeRequestOptions(args, { ...options, task: "text-to-video" });
-		return await pollFalResponse(res as FalAiQueueOutput, url, info.headers as Record<string, string>);
+		return await pollFalResponse(res as FalAiQueueOutput, requestContext.url, requestContext.headers);
 	} else if (args.provider === "novita") {
 		const isValidOutput =
 			typeof res === "object" &&
