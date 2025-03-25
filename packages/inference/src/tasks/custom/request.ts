@@ -1,5 +1,13 @@
-import type { InferenceTask, Options, RequestArgs } from "../../types";
 import { makeRequestOptions } from "../../lib/makeRequestOptions";
+import type { InferenceTask, Options, RequestArgs } from "../../types";
+
+export interface ResponseWrapper<T> {
+	data: T;
+	requestContext: {
+		url: string;
+		headers: Record<string, string>;
+	};
+}
 
 /**
  * Primitive to make custom calls to the inference provider
@@ -11,8 +19,10 @@ export async function request<T>(
 		task?: InferenceTask;
 		/** Is chat completion compatible */
 		chatCompletion?: boolean;
+		/** Whether to include request context in the response */
+		withRequestContext?: boolean;
 	}
-): Promise<T> {
+): Promise<Options extends { withRequestContext: true } ? ResponseWrapper<T> : T> {
 	const { url, info } = await makeRequestOptions(args, options);
 	const response = await (options?.fetch ?? fetch)(url, info);
 
@@ -39,9 +49,13 @@ export async function request<T>(
 		throw new Error(message ?? "An error occurred while fetching the blob");
 	}
 
+	const requestContext = { url, headers: info.headers as Record<string, string> };
+
 	if (response.headers.get("Content-Type")?.startsWith("application/json")) {
-		return await response.json();
+		const data = await response.json();
+		return options?.withRequestContext ? ({ data, requestContext } as unknown as T) : (data as T);
 	}
 
-	return (await response.blob()) as T;
+	const blob = await response.blob();
+	return options?.withRequestContext ? ({ data: blob, requestContext } as unknown as T) : (blob as T);
 }
