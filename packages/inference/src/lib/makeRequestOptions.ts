@@ -1,21 +1,9 @@
+import { name as packageName, version as packageVersion } from "../../package.json";
 import { HF_HUB_URL, HF_ROUTER_URL } from "../config";
-import { BLACK_FOREST_LABS_CONFIG } from "../providers/black-forest-labs";
-import { CEREBRAS_CONFIG } from "../providers/cerebras";
-import { COHERE_CONFIG } from "../providers/cohere";
-import { FAL_AI_CONFIG } from "../providers/fal-ai";
-import { FIREWORKS_AI_CONFIG } from "../providers/fireworks-ai";
-import { HF_INFERENCE_CONFIG } from "../providers/hf-inference";
-import { HYPERBOLIC_CONFIG } from "../providers/hyperbolic";
-import { NEBIUS_CONFIG } from "../providers/nebius";
-import { NOVITA_CONFIG } from "../providers/novita";
-import { REPLICATE_CONFIG } from "../providers/replicate";
-import { SAMBANOVA_CONFIG } from "../providers/sambanova";
-import { TOGETHER_CONFIG } from "../providers/together";
-import { OPENAI_CONFIG } from "../providers/openai";
-import type { InferenceProvider, InferenceTask, Options, ProviderConfig, RequestArgs } from "../types";
-import { isUrl } from "./isUrl";
-import { version as packageVersion, name as packageName } from "../../package.json";
+import type { InferenceTask, Options, RequestArgs } from "../types";
+import { getProviderHelper } from "./getProviderHelper";
 import { getProviderModelId } from "./getProviderModelId";
+import { isUrl } from "./isUrl";
 
 const HF_HUB_INFERENCE_PROXY_TEMPLATE = `${HF_ROUTER_URL}/{{PROVIDER}}`;
 
@@ -24,25 +12,6 @@ const HF_HUB_INFERENCE_PROXY_TEMPLATE = `${HF_ROUTER_URL}/{{PROVIDER}}`;
  * Used to determine the default model to use when it's not user defined
  */
 let tasks: Record<string, { models: { id: string }[] }> | null = null;
-
-/**
- * Config to define how to serialize requests for each provider
- */
-const providerConfigs: Record<InferenceProvider, ProviderConfig> = {
-	"black-forest-labs": BLACK_FOREST_LABS_CONFIG,
-	cerebras: CEREBRAS_CONFIG,
-	cohere: COHERE_CONFIG,
-	"fal-ai": FAL_AI_CONFIG,
-	"fireworks-ai": FIREWORKS_AI_CONFIG,
-	"hf-inference": HF_INFERENCE_CONFIG,
-	hyperbolic: HYPERBOLIC_CONFIG,
-	openai: OPENAI_CONFIG,
-	nebius: NEBIUS_CONFIG,
-	novita: NOVITA_CONFIG,
-	replicate: REPLICATE_CONFIG,
-	sambanova: SAMBANOVA_CONFIG,
-	together: TOGETHER_CONFIG,
-};
 
 /**
  * Helper that prepares request arguments.
@@ -61,9 +30,8 @@ export async function makeRequestOptions(
 ): Promise<{ url: string; info: RequestInit }> {
 	const { provider: maybeProvider, model: maybeModel } = args;
 	const provider = maybeProvider ?? "hf-inference";
-	const providerConfig = providerConfigs[provider];
 	const { task, chatCompletion } = options ?? {};
-
+	const providerHelper = getProviderHelper(provider, task);
 	// Validate inputs
 	if (args.endpointUrl && provider !== "hf-inference") {
 		throw new Error(`Cannot use endpointUrl with a third-party provider.`);
@@ -74,16 +42,16 @@ export async function makeRequestOptions(
 	if (!maybeModel && !task) {
 		throw new Error("No model provided, and no task has been specified.");
 	}
-	if (!providerConfig) {
-		throw new Error(`No provider config found for provider ${provider}`);
+	if (!providerHelper) {
+		throw new Error(`No provider helper found for provider ${provider}`);
 	}
-	if (providerConfig.clientSideRoutingOnly && !maybeModel) {
+	if (providerHelper.clientSideRoutingOnly && !maybeModel) {
 		throw new Error(`Provider ${provider} requires a model ID to be passed directly.`);
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const hfModel = maybeModel ?? (await loadDefaultModel(task!));
-	const resolvedModel = providerConfig.clientSideRoutingOnly
+	const resolvedModel = providerHelper.clientSideRoutingOnly
 		? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		  removeProviderPrefix(maybeModel!, provider)
 		: await getProviderModelId({ model: hfModel, provider }, args, {
@@ -115,12 +83,10 @@ export function makeRequestOptionsFromResolvedModel(
 	void model;
 
 	const provider = maybeProvider ?? "hf-inference";
-	const providerConfig = providerConfigs[provider];
-
 	const { includeCredentials, task, chatCompletion, signal } = options ?? {};
-
+	const providerHelper = getProviderHelper(provider, task);
 	const authMethod = (() => {
-		if (providerConfig.clientSideRoutingOnly) {
+		if (providerHelper.clientSideRoutingOnly) {
 			// Closed-source providers require an accessToken (cannot be routed).
 			if (accessToken && accessToken.startsWith("hf_")) {
 				throw new Error(`Provider ${provider} is closed-source and does not support HF tokens.`);
@@ -142,24 +108,22 @@ export function makeRequestOptionsFromResolvedModel(
 		? chatCompletion
 			? endpointUrl + `/v1/chat/completions`
 			: endpointUrl
-		: providerConfig.makeUrl({
+		: providerHelper.makeUrl({
 				authMethod,
 				baseUrl:
 					authMethod !== "provider-key"
 						? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", provider)
-						: providerConfig.makeBaseUrl(task),
+						: providerHelper.makeBaseUrl(),
 				model: resolvedModel,
 				chatCompletion,
 				task,
 		  });
-
 	// Make headers
 	const binary = "data" in args && !!args.data;
-	const headers = providerConfig.makeHeaders({
+	const headers = providerHelper.prepareHeaders({
 		accessToken,
 		authMethod,
 	});
-
 	// Add content-type to headers
 	if (!binary) {
 		headers["Content-Type"] = "application/json";
@@ -177,14 +141,13 @@ export function makeRequestOptionsFromResolvedModel(
 	const body = binary
 		? args.data
 		: JSON.stringify(
-				providerConfig.makeBody({
+				providerHelper.makeBody({
 					args: remainingArgs as Record<string, unknown>,
 					model: resolvedModel,
 					task,
 					chatCompletion,
 				})
 		  );
-
 	/**
 	 * For edge runtimes, leave 'credentials' undefined, otherwise cloudflare workers will error
 	 */
@@ -202,7 +165,6 @@ export function makeRequestOptionsFromResolvedModel(
 		...(credentials ? { credentials } : undefined),
 		signal,
 	};
-
 	return { url, info };
 }
 

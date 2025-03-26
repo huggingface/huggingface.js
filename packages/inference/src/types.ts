@@ -26,7 +26,7 @@ export interface Options {
 	includeCredentials?: string | boolean;
 }
 
-export type InferenceTask = Exclude<PipelineType, "other">;
+export type InferenceTask = Exclude<PipelineType, "other"> | "conversational";
 
 export const INFERENCE_PROVIDERS = [
 	"black-forest-labs",

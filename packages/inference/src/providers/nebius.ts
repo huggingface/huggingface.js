@@ -14,41 +14,60 @@
  *
  * Thanks!
  */
-import type { BodyParams, HeaderParams, ProviderConfig, UrlParams } from "../types";
+import { InferenceOutputError } from "../lib/InferenceOutputError";
+import type { BodyParams, UrlParams } from "../types";
+import { omit } from "../utils/omit";
+import { TaskProviderHelper } from "./providerHelper";
 
 const NEBIUS_API_BASE_URL = "https://api.studio.nebius.ai";
 
-const makeBaseUrl = (): string => {
-	return NEBIUS_API_BASE_URL;
-};
+interface NebiusBase64ImageGeneration {
+	data: Array<{
+		b64_json: string;
+	}>;
+}
 
-const makeBody = (params: BodyParams): Record<string, unknown> => {
-	return {
-		...params.args,
-		model: params.model,
-	};
-};
-
-const makeHeaders = (params: HeaderParams): Record<string, string> => {
-	return { Authorization: `Bearer ${params.accessToken}` };
-};
-
-const makeUrl = (params: UrlParams): string => {
-	if (params.task === "text-to-image") {
-		return `${params.baseUrl}/v1/images/generations`;
+export class NebiusTextToImageTask extends TaskProviderHelper {
+	constructor() {
+		super("nebius", NEBIUS_API_BASE_URL, "text-to-image");
 	}
-	if (params.chatCompletion) {
-		return `${params.baseUrl}/v1/chat/completions`;
-	}
-	if (params.task === "text-generation") {
-		return `${params.baseUrl}/v1/completions`;
-	}
-	return params.baseUrl;
-};
 
-export const NEBIUS_CONFIG: ProviderConfig = {
-	makeBaseUrl,
-	makeBody,
-	makeHeaders,
-	makeUrl,
-};
+	override makeBody(params: BodyParams): Record<string, unknown> {
+		return {
+			...omit(params.args, ["inputs", "parameters"]),
+			...(params.args.parameters as Record<string, unknown>),
+			prompt: params.args.inputs,
+			model: params.args.model,
+			response_format: "b64_json",
+		};
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	override makeRoute(params: UrlParams): string {
+		return `/v1/images/generations`;
+	}
+
+	getResponse(
+		response: NebiusBase64ImageGeneration,
+		url?: string,
+		headers?: Record<string, string>,
+		outputType?: "url" | "blob"
+	): string | Promise<Blob> {
+		if (
+			typeof response === "object" &&
+			"data" in response &&
+			Array.isArray(response.data) &&
+			response.data.length > 0 &&
+			"b64_json" in response.data[0] &&
+			typeof response.data[0].b64_json === "string"
+		) {
+			const base64Data = response.data[0].b64_json;
+			if (outputType === "url") {
+				return `data:image/jpeg;base64,${base64Data}`;
+			}
+			return fetch(`data:image/jpeg;base64,${base64Data}`).then((res) => res.blob());
+		}
+
+		throw new InferenceOutputError("Expected Nebius text-to-image response format");
+	}
+}

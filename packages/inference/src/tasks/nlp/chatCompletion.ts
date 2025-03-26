@@ -1,7 +1,7 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import type { ChatCompletionInput, ChatCompletionOutput } from "@huggingface/tasks";
+import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
-import type { ChatCompletionInput, ChatCompletionOutput } from "@huggingface/tasks";
 
 /**
  * Use the chat completion endpoint to generate a response to a prompt, using OpenAI message completion API no stream
@@ -10,26 +10,14 @@ export async function chatCompletion(
 	args: BaseArgs & ChatCompletionInput,
 	options?: Options
 ): Promise<ChatCompletionOutput> {
+	if (!args.provider) {
+		throw new Error(`you must provide a provider for chatCompletion inference`);
+	}
+	const providerHelper = getProviderHelper(args.provider, "conversational");
 	const res = await request<ChatCompletionOutput>(args, {
 		...options,
-		task: "text-generation",
+		task: "conversational",
 		chatCompletion: true,
 	});
-
-	const isValidOutput =
-		typeof res === "object" &&
-		Array.isArray(res?.choices) &&
-		typeof res?.created === "number" &&
-		typeof res?.id === "string" &&
-		typeof res?.model === "string" &&
-		/// Together.ai and Nebius do not output a system_fingerprint
-		(res.system_fingerprint === undefined ||
-			res.system_fingerprint === null ||
-			typeof res.system_fingerprint === "string") &&
-		typeof res?.usage === "object";
-
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected ChatCompletionOutput");
-	}
-	return res;
+	return providerHelper.getResponse(res) as ChatCompletionOutput;
 }

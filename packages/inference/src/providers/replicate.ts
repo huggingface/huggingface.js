@@ -14,37 +14,105 @@
  *
  * Thanks!
  */
-import type { BodyParams, HeaderParams, ProviderConfig, UrlParams } from "../types";
+import { InferenceOutputError } from "../lib/InferenceOutputError";
+import type { BodyParams, HeaderParams, InferenceTask, UrlParams } from "../types";
+import { omit } from "../utils/omit";
+import { TaskProviderHelper } from "./providerHelper";
 
-export const REPLICATE_API_BASE_URL = "https://api.replicate.com";
-
-const makeBaseUrl = (): string => {
-	return REPLICATE_API_BASE_URL;
-};
-
-const makeBody = (params: BodyParams): Record<string, unknown> => {
-	return {
-		input: params.args,
-		version: params.model.includes(":") ? params.model.split(":")[1] : undefined,
-	};
-};
-
-const makeHeaders = (params: HeaderParams): Record<string, string> => {
-	return { Authorization: `Bearer ${params.accessToken}`, Prefer: "wait" };
-};
-
-const makeUrl = (params: UrlParams): string => {
-	if (params.model.includes(":")) {
-		/// Versioned model
-		return `${params.baseUrl}/v1/predictions`;
+interface ReplicateResponse {
+	output?: string | string[];
+}
+export class ReplicateTask extends TaskProviderHelper {
+	constructor(task: InferenceTask, url?: string) {
+		super("replicate", url || "https://api.replicate.com", task);
 	}
-	/// Evergreen / Canonical model
-	return `${params.baseUrl}/v1/models/${params.model}/predictions`;
-};
 
-export const REPLICATE_CONFIG: ProviderConfig = {
-	makeBaseUrl,
-	makeBody,
-	makeHeaders,
-	makeUrl,
-};
+	override makeRoute(params: UrlParams): string {
+		if (params.model.includes(":")) {
+			return "v1/predictions";
+		}
+		return `v1/models/${params.model}/predictions`;
+	}
+	override makeBody(params: BodyParams): Record<string, unknown> {
+		return params.args;
+	}
+	override prepareHeaders(params: HeaderParams): Record<string, string> {
+		return { Authorization: `Bearer ${params.accessToken}`, Prefer: "wait" };
+	}
+
+	override makeUrl(params: UrlParams): string {
+		if (params.model.includes(":")) {
+			return `${params.baseUrl}/v1/predictions`;
+		}
+		return `${params.baseUrl}/v1/models/${params.model}/predictions`;
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	override getResponse(response: unknown, url?: string, headers?: Record<string, string>): unknown {
+		throw new Error("Method not implemented.");
+	}
+}
+
+export class ReplicateTextToImageTask extends ReplicateTask {
+	constructor() {
+		super("text-to-image");
+	}
+	override makeBody(params: BodyParams): Record<string, unknown> {
+		return {
+			...omit(params.args, ["inputs", "parameters"]),
+			input: {
+				prompt: params.args.inputs,
+				...(params.args.parameters as Record<string, unknown>),
+			},
+			version:
+				params.args.model && (params.args.model as string).includes(":")
+					? (params.args.model as string).split(":")[1]
+					: undefined,
+		};
+	}
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	override async getResponse(
+		res: ReplicateResponse | Blob,
+		url?: string,
+		headers?: Record<string, string>,
+		outputType?: "url" | "blob"
+	): Promise<string | Blob> {
+		if (
+			typeof res === "object" &&
+			"output" in res &&
+			Array.isArray(res.output) &&
+			res.output.length > 0 &&
+			typeof res.output[0] === "string"
+		) {
+			if (outputType === "url") {
+				return res.output[0];
+			}
+			const urlResponse = await fetch(res.output[0]);
+			return await urlResponse.blob();
+		}
+
+		throw new InferenceOutputError("Expected Replicate text-to-image response format");
+	}
+}
+
+export class ReplicateTextToSpeechTask extends ReplicateTask {
+	constructor() {
+		super("text-to-speech");
+	}
+	// TODO: Implement this
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	override async getResponse(res: ReplicateResponse, url?: string, headers?: Record<string, string>): Promise<unknown> {
+		throw new Error("Method not implemented yet.");
+	}
+}
+
+export class ReplicateTextToVideoTask extends ReplicateTask {
+	constructor() {
+		super("text-to-video");
+	}
+	// TODO: Implement this
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	override async getResponse(res: ReplicateResponse, url?: string, headers?: Record<string, string>): Promise<unknown> {
+		throw new Error("Method not implemented yet.");
+	}
+}
