@@ -86,9 +86,5 @@ export function getProviderHelper(provider: InferenceProvider, task: InferenceTa
 			`Task '${task}' not supported for provider '${provider}'. Available tasks: ${Object.keys(providerTasks ?? {})}`
 		);
 	}
-	const helper = providerTasks[task];
-	if (!helper) {
-		throw new Error(`Internal error: Helper for task '${task}' and provider '${provider}' resolved to undefined.`);
-	}
-	return helper;
+	return providerTasks[task] as TaskProviderHelper;
 }
