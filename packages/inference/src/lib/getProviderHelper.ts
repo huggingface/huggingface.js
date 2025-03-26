@@ -15,8 +15,6 @@ import { ReplicateTextToImageTask, ReplicateTextToSpeechTask, ReplicateTextToVid
 import { TogetherConversationalTask, TogetherTextGenerationTask, TogetherTextToImageTask } from "../providers/together";
 import type { InferenceProvider, InferenceTask } from "../types";
 
-// ... existing code ...
-
 export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, TaskProviderHelper>>> = {
 	"black-forest-labs": {
 		"text-to-image": new BlackForestLabsTextToImageTask(),
