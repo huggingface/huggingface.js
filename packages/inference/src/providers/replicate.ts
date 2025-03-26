@@ -19,7 +19,7 @@ import type { BodyParams, HeaderParams, InferenceTask, UrlParams } from "../type
 import { omit } from "../utils/omit";
 import { TaskProviderHelper } from "./providerHelper";
 
-interface ReplicateResponse {
+export interface ReplicateOutput {
 	output?: string | string[];
 }
 export class ReplicateTask extends TaskProviderHelper {
@@ -72,7 +72,7 @@ export class ReplicateTextToImageTask extends ReplicateTask {
 	}
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	override async getResponse(
-		res: ReplicateResponse | Blob,
+		res: ReplicateOutput | Blob,
 		url?: string,
 		headers?: Record<string, string>,
 		outputType?: "url" | "blob"
@@ -101,7 +101,7 @@ export class ReplicateTextToSpeechTask extends ReplicateTask {
 	}
 	// TODO: Implement this
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	override async getResponse(res: ReplicateResponse, url?: string, headers?: Record<string, string>): Promise<unknown> {
+	override async getResponse(res: ReplicateOutput, url?: string, headers?: Record<string, string>): Promise<unknown> {
 		throw new Error("Method not implemented yet.");
 	}
 }
@@ -112,7 +112,7 @@ export class ReplicateTextToVideoTask extends ReplicateTask {
 	}
 	// TODO: Implement this
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	override async getResponse(res: ReplicateResponse, url?: string, headers?: Record<string, string>): Promise<unknown> {
+	override async getResponse(res: ReplicateOutput, url?: string, headers?: Record<string, string>): Promise<unknown> {
 		throw new Error("Method not implemented yet.");
 	}
 }

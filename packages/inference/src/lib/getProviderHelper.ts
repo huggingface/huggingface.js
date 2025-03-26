@@ -77,7 +77,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
  */
 export function getProviderHelper(provider: InferenceProvider, task: InferenceTask | undefined): TaskProviderHelper {
 	if (!task) {
-		throw new Error("Task is required");
+		throw new Error("you need to provide a task name, e.g. 'text-to-image'");
 	}
 	if (!(provider in PROVIDERS)) {
 		throw new Error(`Provider '${provider}' not supported. Available providers: ${Object.keys(PROVIDERS)}`);

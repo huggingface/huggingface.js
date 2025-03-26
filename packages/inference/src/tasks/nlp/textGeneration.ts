@@ -14,7 +14,7 @@ export async function textGeneration(
 	options?: Options
 ): Promise<TextGenerationOutput> {
 	if (!args.provider) {
-		throw new Error("Provider is required");
+		throw new Error("you need to provide a provider that supports text-generation inference");
 	}
 	const providerHelper = getProviderHelper(args.provider, "text-generation");
 	const raw = await request<HyperbolicTextCompletionOutput | TextGenerationOutput | TextGenerationOutput[]>(args, {

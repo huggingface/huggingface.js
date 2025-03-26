@@ -23,7 +23,7 @@ export async function textToImage(
 ): Promise<Blob>;
 export async function textToImage(args: TextToImageArgs, options?: TextToImageOptions): Promise<Blob | string> {
 	if (!args.provider) {
-		throw new Error("Provider is required");
+		throw new Error("You need to provide a provider that supports text-to-image inference");
 	}
 
 	const providerHelper = getProviderHelper(args.provider, "text-to-image");

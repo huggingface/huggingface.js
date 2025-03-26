@@ -11,7 +11,7 @@ export async function chatCompletion(
 	options?: Options
 ): Promise<ChatCompletionOutput> {
 	if (!args.provider) {
-		throw new Error(`you must provide a provider for chatCompletion inference`);
+		throw new Error("you need to provide a provider that supports chatCompletion inference");
 	}
 	const providerHelper = getProviderHelper(args.provider, "conversational");
 	const res = await request<ChatCompletionOutput>(args, {
