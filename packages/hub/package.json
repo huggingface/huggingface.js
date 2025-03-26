@@ -18,7 +18,7 @@
 		}
 	},
 	"browser": {
-		"./src/utils/sha256-node.ts": false,
+		"./src/utils/sha-node.ts": false,
 		"./src/utils/FileBlob.ts": false,
 		"./src/lib/cache-management.ts": false,
 		"./src/lib/download-file-to-cache-dir.ts": false,
