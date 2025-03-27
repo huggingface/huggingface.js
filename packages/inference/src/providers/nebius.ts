@@ -17,7 +17,7 @@
 import { InferenceOutputError } from "../lib/InferenceOutputError";
 import type { BodyParams, UrlParams } from "../types";
 import { omit } from "../utils/omit";
-import { TaskProviderHelper } from "./providerHelper";
+import { BaseConversationalTask, BaseTextGenerationTask, TaskProviderHelper } from "./providerHelper";
 
 const NEBIUS_API_BASE_URL = "https://api.studio.nebius.ai";
 
@@ -25,6 +25,18 @@ interface NebiusBase64ImageGeneration {
 	data: Array<{
 		b64_json: string;
 	}>;
+}
+
+export class NebiusConversationalTask extends BaseConversationalTask {
+	constructor() {
+		super("nebius", NEBIUS_API_BASE_URL);
+	}
+}
+
+export class NebiusTextGenerationTask extends BaseTextGenerationTask {
+	constructor() {
+		super("nebius", NEBIUS_API_BASE_URL);
+	}
 }
 
 export class NebiusTextToImageTask extends TaskProviderHelper {

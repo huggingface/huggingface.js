@@ -1,4 +1,6 @@
 import { BlackForestLabsTextToImageTask } from "../providers/black-forest-labs";
+import { CerebrasConversationalTask } from "../providers/cerebras";
+import { CohereConversationalTask } from "../providers/cohere";
 import { FalAITask, FalAITextToImageTask, FalAITextToVideoTask } from "../providers/fal-ai";
 import { FireworksConversationalTask } from "../providers/fireworks-ai";
 import {
@@ -6,12 +8,12 @@ import {
 	HyperbolicTextGenerationTask,
 	HyperbolicTextToImageTask,
 } from "../providers/hyperbolic";
-import { NebiusTextToImageTask } from "../providers/nebius";
+import { NebiusConversationalTask, NebiusTextGenerationTask, NebiusTextToImageTask } from "../providers/nebius";
 import { NovitaConversationalTask, NovitaTextGenerationTask } from "../providers/novita";
 import { OpenAIConversationalTask } from "../providers/openai";
 import type { TaskProviderHelper } from "../providers/providerHelper";
-import { BaseConversationalTask, BaseTextGenerationTask } from "../providers/providerHelper";
 import { ReplicateTextToImageTask, ReplicateTextToSpeechTask, ReplicateTextToVideoTask } from "../providers/replicate";
+import { SambanovaConversationalTask } from "../providers/sambanova";
 import { TogetherConversationalTask, TogetherTextGenerationTask, TogetherTextToImageTask } from "../providers/together";
 import type { InferenceProvider, InferenceTask } from "../types";
 
@@ -20,10 +22,10 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-to-image": new BlackForestLabsTextToImageTask(),
 	},
 	cerebras: {
-		conversational: new BaseConversationalTask("cerebras", "https://api.cerebras.ai"),
+		conversational: new CerebrasConversationalTask(),
 	},
 	cohere: {
-		conversational: new BaseConversationalTask("cohere", "https://api.cohere.ai"),
+		conversational: new CohereConversationalTask(),
 	},
 	"fal-ai": {
 		// TODO: Add automatic-speech-recognition task helper
@@ -45,8 +47,8 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	nebius: {
 		"text-to-image": new NebiusTextToImageTask(),
-		conversational: new BaseConversationalTask("nebius", "https://api.nebius.ai"),
-		"text-generation": new BaseTextGenerationTask("nebius", "https://api.nebius.ai"),
+		conversational: new NebiusConversationalTask(),
+		"text-generation": new NebiusTextGenerationTask(),
 	},
 	novita: {
 		"text-generation": new NovitaTextGenerationTask(),
@@ -61,7 +63,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-to-video": new ReplicateTextToVideoTask(),
 	},
 	sambanova: {
-		conversational: new BaseConversationalTask("sambanova", "https://api.sambanova.ai"),
+		conversational: new SambanovaConversationalTask(),
 	},
 	together: {
 		"text-to-image": new TogetherTextToImageTask(),
