@@ -581,7 +581,7 @@ export const SKUS = {
 				memory: [36, 48, 64, 96, 128],
 			},
 			"Apple M3 Ultra": {
-				tflops: 21.3,
+				tflops: 28.4,
 				memory: [96, 256, 512],
 			},
 			"Apple M4": {
