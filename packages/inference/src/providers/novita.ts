@@ -31,8 +31,8 @@ export class NovitaTextGenerationTask extends BaseTextGenerationTask {
 		super("novita", NOVITA_API_BASE_URL);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	override makeRoute(params: UrlParams): string {
+		void params;
 		return "/v3/openai/chat/completions";
 	}
 }
@@ -42,8 +42,8 @@ export class NovitaConversationalTask extends BaseConversationalTask {
 		super("novita", NOVITA_API_BASE_URL);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	override makeRoute(params: UrlParams): string {
+		void params;
 		return "/v3/openai/chat/completions";
 	}
 }
@@ -63,22 +63,22 @@ export class NovitaTextToVideoTask extends TaskProviderHelper {
 			prompt: params.args.inputs,
 		};
 	}
-	override async getResponse(res: NovitaOutput): Promise<Blob> {
+	override async getResponse(response: NovitaOutput): Promise<Blob> {
 		const isValidOutput =
-			typeof res === "object" &&
-			!!res &&
-			"video" in res &&
-			typeof res.video === "object" &&
-			!!res.video &&
-			"video_url" in res.video &&
-			typeof res.video.video_url === "string" &&
-			isUrl(res.video.video_url);
+			typeof response === "object" &&
+			!!response &&
+			"video" in response &&
+			typeof response.video === "object" &&
+			!!response.video &&
+			"video_url" in response.video &&
+			typeof response.video.video_url === "string" &&
+			isUrl(response.video.video_url);
 
 		if (!isValidOutput) {
 			throw new InferenceOutputError("Expected { video: { video_url: string } }");
 		}
 
-		const urlResponse = await fetch(res.video.video_url);
+		const urlResponse = await fetch(response.video.video_url);
 		return await urlResponse.blob();
 	}
 }

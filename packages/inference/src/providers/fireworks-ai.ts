@@ -21,8 +21,8 @@ export class FireworksConversationalTask extends BaseConversationalTask {
 	constructor() {
 		super("fireworks-ai", "https://api.fireworks.ai");
 	}
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	override makeRoute(params?: UrlParams): string {
+	override makeRoute(params: UrlParams): string {
+		void params;
 		return "/inference/v1/chat/completions";
 	}
 }

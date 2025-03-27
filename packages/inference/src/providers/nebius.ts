@@ -42,17 +42,12 @@ export class NebiusTextToImageTask extends TaskProviderHelper {
 		};
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	override makeRoute(params: UrlParams): string {
+		void params;
 		return `/v1/images/generations`;
 	}
 
-	getResponse(
-		response: NebiusBase64ImageGeneration,
-		url?: string,
-		headers?: Record<string, string>,
-		outputType?: "url" | "blob"
-	): string | Promise<Blob> {
+	getResponse(response: NebiusBase64ImageGeneration, outputType?: "url" | "blob"): string | Promise<Blob> {
 		if (
 			typeof response === "object" &&
 			"data" in response &&

@@ -43,8 +43,8 @@ export class HyperbolicTextGenerationTask extends BaseTextGenerationTask {
 		super("hyperbolic", HYPERBOLIC_API_BASE_URL);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	override makeRoute(params: UrlParams): string {
+		void params;
 		return "v1/chat/completions";
 	}
 
@@ -83,8 +83,8 @@ export class HyperbolicTextToImageTask extends TaskProviderHelper {
 		super("hyperbolic", HYPERBOLIC_API_BASE_URL, "text-to-image");
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	override makeRoute(params?: UrlParams): string {
+	override makeRoute(params: UrlParams): string {
+		void params;
 		return `/v1/images/generations`;
 	}
 
@@ -97,12 +97,7 @@ export class HyperbolicTextToImageTask extends TaskProviderHelper {
 		};
 	}
 
-	getResponse(
-		response: HyperbolicTextToImageOutput,
-		url?: string,
-		headers?: Record<string, string>,
-		outputType?: "url" | "blob"
-	): Promise<Blob> | string {
+	getResponse(response: HyperbolicTextToImageOutput, outputType?: "url" | "blob"): Promise<Blob> | string {
 		if (
 			typeof response === "object" &&
 			"images" in response &&

@@ -50,10 +50,16 @@ export class FalAITask extends TaskProviderHelper {
 				params.authMethod === "provider-key" ? `Key ${params.accessToken}` : `Bearer ${params.accessToken}`,
 		};
 	}
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	override getResponse(response: unknown, url?: string, headers?: Record<string, string>): unknown {
-		return response;
+	/* eslint-disable @typescript-eslint/no-unused-vars */
+	override getResponse(
+		response: unknown,
+		url?: string,
+		headers?: Record<string, string>,
+		outputType?: "url" | "blob"
+	): unknown {
+		throw new Error("Method not implemented");
 	}
+	/* eslint-enable @typescript-eslint/no-unused-vars */
 }
 
 export class FalAITextToImageTask extends FalAITask {
@@ -69,20 +75,20 @@ export class FalAITextToImageTask extends FalAITask {
 		};
 	}
 
-	override async getResponse(res: FalAITextToImageOutput, outputType?: "url" | "blob"): Promise<string | Blob> {
+	override async getResponse(response: FalAITextToImageOutput, outputType?: "url" | "blob"): Promise<string | Blob> {
 		if (
-			typeof res === "object" &&
-			"images" in res &&
-			Array.isArray(res.images) &&
-			res.images.length > 0 &&
-			"url" in res.images[0] &&
-			typeof res.images[0].url === "string"
+			typeof response === "object" &&
+			"images" in response &&
+			Array.isArray(response.images) &&
+			response.images.length > 0 &&
+			"url" in response.images[0] &&
+			typeof response.images[0].url === "string"
 		) {
 			if (outputType === "url") {
-				return res.images[0].url;
+				return response.images[0].url;
 			}
-			const response = await fetch(res.images[0].url);
-			return await response.blob();
+			const urlResponse = await fetch(response.images[0].url);
+			return await urlResponse.blob();
 		}
 
 		throw new InferenceOutputError("Expected Fal.ai text-to-image response format");
@@ -107,15 +113,19 @@ export class FalAITextToVideoTask extends FalAITask {
 		};
 	}
 
-	override async getResponse(res: FalAiQueueOutput, url?: string, headers?: Record<string, string>): Promise<Blob> {
+	override async getResponse(
+		response: FalAiQueueOutput,
+		url?: string,
+		headers?: Record<string, string>
+	): Promise<Blob> {
 		if (!url || !headers) {
 			throw new InferenceOutputError("URL and headers are required for text-to-video task");
 		}
-		const requestId = res.request_id;
+		const requestId = response.request_id;
 		if (!requestId) {
 			throw new InferenceOutputError("No request ID found in the response");
 		}
-		let status = res.status;
+		let status = response.status;
 
 		const parsedUrl = new URL(url);
 		const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}${
@@ -124,7 +134,7 @@ export class FalAITextToVideoTask extends FalAITask {
 
 		// extracting the provider model id for status and result urls
 		// from the response as it might be different from the mapped model in `url`
-		const modelId = new URL(res.response_url).pathname;
+		const modelId = new URL(response.response_url).pathname;
 		const queryParams = parsedUrl.search;
 
 		const statusUrl = `${baseUrl}${modelId}/status${queryParams}`;

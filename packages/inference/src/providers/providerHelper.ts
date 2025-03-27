@@ -47,7 +47,7 @@ export abstract class TaskProviderHelper {
 	/**
 	 * Prepare the route for the request
 	 */
-	abstract makeRoute(params?: UrlParams): string;
+	abstract makeRoute(params: UrlParams): string;
 
 	/**
 	 * Prepare the URL for the request
@@ -67,7 +67,12 @@ export abstract class TaskProviderHelper {
 	/**
 	 * Return the response in the expected format
 	 */
-	abstract getResponse(response: unknown, url?: string, headers?: Record<string, string>): unknown;
+	abstract getResponse(
+		response: unknown,
+		url?: string,
+		headers?: Record<string, string>,
+		outputType?: "url" | "blob"
+	): unknown;
 }
 
 export class BaseConversationalTask extends TaskProviderHelper {
@@ -75,8 +80,8 @@ export class BaseConversationalTask extends TaskProviderHelper {
 		super(provider, baseUrl, "conversational", clientSideRoutingOnly);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	override makeRoute(params?: UrlParams): string {
+	override makeRoute(params: UrlParams): string {
+		void params;
 		return "v1/chat/completions";
 	}
 
@@ -87,8 +92,7 @@ export class BaseConversationalTask extends TaskProviderHelper {
 		};
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	getResponse(response: ChatCompletionOutput, url?: string, headers?: Record<string, string>): ChatCompletionOutput {
+	getResponse(response: ChatCompletionOutput): ChatCompletionOutput {
 		if (
 			typeof response === "object" &&
 			Array.isArray(response?.choices) &&
@@ -118,8 +122,8 @@ export class BaseTextGenerationTask extends TaskProviderHelper {
 			model: params.model,
 		};
 	}
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	override makeRoute(params: UrlParams): string {
+		void params;
 		return "v1/completions";
 	}
 

@@ -43,19 +43,14 @@ export class BlackForestLabsTextToImageTask extends TaskProviderHelper {
 		}
 	}
 
-	override makeRoute(params?: UrlParams): string {
+	override makeRoute(params: UrlParams): string {
 		if (!params) {
 			throw new Error("Params are required");
 		}
 		return `/v1/${params.model}`;
 	}
 
-	async getResponse(
-		res: Response,
-		url?: string,
-		headers?: Record<string, string>,
-		outputType?: "url" | "blob"
-	): Promise<string | Blob> {
+	async getResponse(res: Response, outputType?: "url" | "blob"): Promise<string | Blob> {
 		const urlObj = new URL(res.url);
 		for (let step = 0; step < 5; step++) {
 			await delay(1000);

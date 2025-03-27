@@ -77,8 +77,8 @@ export class TogetherTextToImageTask extends TaskProviderHelper {
 		super("together", TOGETHER_API_BASE_URL, "text-to-image");
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	override makeRoute(params: UrlParams): string {
+		void params;
 		return `/v1/images/generations`;
 	}
 
@@ -91,12 +91,7 @@ export class TogetherTextToImageTask extends TaskProviderHelper {
 		};
 	}
 
-	getResponse(
-		response: TogetherBase64ImageGeneration,
-		url?: string,
-		headers?: Record<string, string>,
-		outputType?: "url" | "blob"
-	): string | Promise<Blob> {
+	getResponse(response: TogetherBase64ImageGeneration, outputType?: "url" | "blob"): string | Promise<Blob> {
 		if (
 			typeof response === "object" &&
 			"data" in response &&

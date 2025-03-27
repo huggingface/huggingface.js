@@ -14,10 +14,10 @@ export async function chatCompletion(
 		throw new Error("you need to provide a provider that supports chatCompletion inference");
 	}
 	const providerHelper = getProviderHelper(args.provider, "conversational");
-	const res = await request<ChatCompletionOutput>(args, {
+	const response = await request<ChatCompletionOutput>(args, {
 		...options,
 		task: "conversational",
 		chatCompletion: true,
 	});
-	return providerHelper.getResponse(res) as ChatCompletionOutput;
+	return providerHelper.getResponse(response) as ChatCompletionOutput;
 }

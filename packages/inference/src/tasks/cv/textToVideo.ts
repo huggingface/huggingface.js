@@ -16,10 +16,10 @@ export async function textToVideo(args: TextToVideoArgs, options?: Options): Pro
 		throw new Error("you need to provide a provider that supports text-to-video inference");
 	}
 	const providerHelper = getProviderHelper(args.provider, "text-to-video");
-	const res = await request<FalAiQueueOutput | ReplicateOutput | NovitaOutput>(args, {
+	const response = await request<FalAiQueueOutput | ReplicateOutput | NovitaOutput>(args, {
 		...options,
 		task: "text-to-video",
 	});
 	const { url, info } = await makeRequestOptions(args, { ...options, task: "text-to-video" });
-	return (await providerHelper.getResponse(res, url, info.headers as Record<string, string>)) as TextToVideoOutput;
+	return (await providerHelper.getResponse(response, url, info.headers as Record<string, string>)) as TextToVideoOutput;
 }

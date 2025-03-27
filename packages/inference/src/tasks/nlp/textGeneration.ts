@@ -17,9 +17,9 @@ export async function textGeneration(
 		throw new Error("you need to provide a provider that supports text-generation inference");
 	}
 	const providerHelper = getProviderHelper(args.provider, "text-generation");
-	const raw = await request<HyperbolicTextCompletionOutput | TextGenerationOutput | TextGenerationOutput[]>(args, {
+	const response = await request<HyperbolicTextCompletionOutput | TextGenerationOutput | TextGenerationOutput[]>(args, {
 		...options,
 		task: "text-generation",
 	});
-	return providerHelper.getResponse(raw) as TextGenerationOutput;
+	return providerHelper.getResponse(response) as TextGenerationOutput;
 }

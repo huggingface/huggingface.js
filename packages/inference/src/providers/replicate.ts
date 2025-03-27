@@ -47,8 +47,8 @@ export class ReplicateTask extends TaskProviderHelper {
 		return `${params.baseUrl}/v1/models/${params.model}/predictions`;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	override getResponse(response: unknown, url?: string, headers?: Record<string, string>): unknown {
+	override getResponse(response: unknown): unknown {
+		void response;
 		throw new Error("Method not implemented.");
 	}
 }
@@ -70,13 +70,14 @@ export class ReplicateTextToImageTask extends ReplicateTask {
 					: undefined,
 		};
 	}
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	override async getResponse(
 		res: ReplicateOutput | Blob,
 		url?: string,
 		headers?: Record<string, string>,
 		outputType?: "url" | "blob"
 	): Promise<string | Blob> {
+		void url;
+		void headers;
 		if (
 			typeof res === "object" &&
 			"output" in res &&
@@ -101,7 +102,7 @@ export class ReplicateTextToSpeechTask extends ReplicateTask {
 	}
 	// TODO: Implement this
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	override async getResponse(res: ReplicateOutput, url?: string, headers?: Record<string, string>): Promise<unknown> {
+	override async getResponse(response: ReplicateOutput): Promise<unknown> {
 		throw new Error("Method not implemented yet.");
 	}
 }
@@ -112,7 +113,7 @@ export class ReplicateTextToVideoTask extends ReplicateTask {
 	}
 	// TODO: Implement this
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	override async getResponse(res: ReplicateOutput, url?: string, headers?: Record<string, string>): Promise<unknown> {
+	override async getResponse(response: ReplicateOutput): Promise<unknown> {
 		throw new Error("Method not implemented yet.");
 	}
 }
