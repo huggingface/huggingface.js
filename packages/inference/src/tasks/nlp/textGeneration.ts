@@ -13,10 +13,8 @@ export async function textGeneration(
 	args: BaseArgs & TextGenerationInput,
 	options?: Options
 ): Promise<TextGenerationOutput> {
-	if (!args.provider) {
-		throw new Error("you need to provide a provider that supports text-generation inference");
-	}
-	const providerHelper = getProviderHelper(args.provider, "text-generation");
+	const provider = args.provider ?? "hf-inference";
+	const providerHelper = getProviderHelper(provider, "text-generation");
 	const response = await request<HyperbolicTextCompletionOutput | TextGenerationOutput | TextGenerationOutput[]>(args, {
 		...options,
 		task: "text-generation",

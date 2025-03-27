@@ -11,37 +11,50 @@
  * Thanks!
  */
 import { HF_ROUTER_URL } from "../config";
-import type { BodyParams, HeaderParams, ProviderConfig, UrlParams } from "../types";
+import type { BodyParams, InferenceTask, UrlParams } from "../types";
+import { TaskProviderHelper } from "./providerHelper";
 
-const makeBaseUrl = (): string => {
-	return `${HF_ROUTER_URL}/hf-inference`;
-};
-
-const makeBody = (params: BodyParams): Record<string, unknown> => {
-	return {
-		...params.args,
-		...(params.chatCompletion ? { model: params.model } : undefined),
-	};
-};
-
-const makeHeaders = (params: HeaderParams): Record<string, string> => {
-	return { Authorization: `Bearer ${params.accessToken}` };
-};
-
-const makeUrl = (params: UrlParams): string => {
-	if (params.task && ["feature-extraction", "sentence-similarity"].includes(params.task)) {
-		/// when deployed on hf-inference, those two tasks are automatically compatible with one another.
-		return `${params.baseUrl}/pipeline/${params.task}/${params.model}`;
+export class HFInferenceTask extends TaskProviderHelper {
+	constructor(task: InferenceTask) {
+		super("hf-inference", `${HF_ROUTER_URL}/hf-inference`, task);
 	}
-	if (params.chatCompletion) {
-		return `${params.baseUrl}/models/${params.model}/v1/chat/completions`;
-	}
-	return `${params.baseUrl}/models/${params.model}`;
-};
 
-export const HF_INFERENCE_CONFIG: ProviderConfig = {
-	makeBaseUrl,
-	makeBody,
-	makeHeaders,
-	makeUrl,
-};
+	override makeBody(params: BodyParams): Record<string, unknown> {
+		return params.args;
+	}
+
+	override makeRoute(params: UrlParams): string {
+		if (params.task && ["feature-extraction", "sentence-similarity"].includes(params.task)) {
+			// when deployed on hf-inference, those two tasks are automatically compatible with one another.
+			return `pipeline/${params.task}/${params.model}`;
+		}
+		return `models/${params.model}`;
+	}
+
+	override getResponse(response: unknown): unknown {
+		return response;
+	}
+}
+
+export class HFInferenceBinaryInputTask extends HFInferenceTask {
+	constructor(task: InferenceTask) {
+		super(task);
+	}
+}
+
+export class HFInferenceConversationalTask extends HFInferenceTask {
+	constructor() {
+		super("conversational");
+	}
+
+	override makeRoute(params: UrlParams): string {
+		return `models/${params.model}/v1/chat/completions`;
+	}
+
+	override makeBody(params: BodyParams): Record<string, unknown> {
+		return {
+			...params.args,
+			model: params.model,
+		};
+	}
+}

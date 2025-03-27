@@ -22,11 +22,8 @@ export async function textToImage(
 	options?: TextToImageOptions & { outputType?: undefined | "blob" }
 ): Promise<Blob>;
 export async function textToImage(args: TextToImageArgs, options?: TextToImageOptions): Promise<Blob | string> {
-	if (!args.provider) {
-		throw new Error("You need to provide a provider that supports text-to-image inference");
-	}
-
-	const providerHelper = getProviderHelper(args.provider, "text-to-image");
+	const provider = args.provider ?? "hf-inference";
+	const providerHelper = getProviderHelper(provider, "text-to-image");
 	const res = await request<Record<string, unknown>>(args, {
 		...options,
 		task: "text-to-image",

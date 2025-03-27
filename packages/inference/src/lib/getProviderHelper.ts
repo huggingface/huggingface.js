@@ -3,6 +3,7 @@ import { CerebrasConversationalTask } from "../providers/cerebras";
 import { CohereConversationalTask } from "../providers/cohere";
 import { FalAITask, FalAITextToImageTask, FalAITextToVideoTask } from "../providers/fal-ai";
 import { FireworksConversationalTask } from "../providers/fireworks-ai";
+import { HFInferenceBinaryInputTask, HFInferenceConversationalTask, HFInferenceTask } from "../providers/hf-inference";
 import {
 	HyperbolicConversationalTask,
 	HyperbolicTextGenerationTask,
@@ -38,7 +39,32 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		conversational: new FireworksConversationalTask(),
 	},
 	"hf-inference": {
-		//TODO: Add the correct provider helpers for hf-inference
+		"text-to-image": new HFInferenceTask("text-to-image"),
+		conversational: new HFInferenceConversationalTask(),
+		"text-generation": new HFInferenceTask("text-generation"),
+		"text-classification": new HFInferenceTask("text-classification"),
+		"question-answering": new HFInferenceTask("question-answering"),
+		"audio-classification": new HFInferenceBinaryInputTask("audio-classification"),
+		"automatic-speech-recognition": new HFInferenceBinaryInputTask("automatic-speech-recognition"),
+		"fill-mask": new HFInferenceTask("fill-mask"),
+		"feature-extraction": new HFInferenceTask("feature-extraction"),
+		"image-classification": new HFInferenceBinaryInputTask("image-classification"),
+		"image-segmentation": new HFInferenceBinaryInputTask("image-segmentation"),
+		"document-question-answering": new HFInferenceTask("document-question-answering"),
+		"image-to-text": new HFInferenceBinaryInputTask("image-to-text"),
+		"object-detection": new HFInferenceBinaryInputTask("object-detection"),
+		"audio-to-audio": new HFInferenceBinaryInputTask("audio-to-audio"),
+		"zero-shot-image-classification": new HFInferenceBinaryInputTask("zero-shot-image-classification"),
+		"zero-shot-classification": new HFInferenceTask("zero-shot-classification"),
+		"image-to-image": new HFInferenceBinaryInputTask("image-to-image"),
+		"sentence-similarity": new HFInferenceTask("sentence-similarity"),
+		"table-question-answering": new HFInferenceTask("table-question-answering"),
+		"tabular-classification": new HFInferenceTask("tabular-classification"),
+		"text-to-speech": new HFInferenceTask("text-to-speech"),
+		"token-classification": new HFInferenceTask("token-classification"),
+		translation: new HFInferenceTask("translation"),
+		summarization: new HFInferenceTask("summarization"),
+		"visual-question-answering": new HFInferenceBinaryInputTask("visual-question-answering"),
 	},
 	hyperbolic: {
 		"text-to-image": new HyperbolicTextToImageTask(),

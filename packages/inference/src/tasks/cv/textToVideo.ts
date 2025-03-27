@@ -12,10 +12,8 @@ export type TextToVideoArgs = BaseArgs & TextToVideoInput;
 export type TextToVideoOutput = Blob;
 
 export async function textToVideo(args: TextToVideoArgs, options?: Options): Promise<TextToVideoOutput> {
-	if (!args.provider) {
-		throw new Error("you need to provide a provider that supports text-to-video inference");
-	}
-	const providerHelper = getProviderHelper(args.provider, "text-to-video");
+	const provider = args.provider ?? "hf-inference";
+	const providerHelper = getProviderHelper(provider, "text-to-video");
 	const response = await request<FalAiQueueOutput | ReplicateOutput | NovitaOutput>(args, {
 		...options,
 		task: "text-to-video",
