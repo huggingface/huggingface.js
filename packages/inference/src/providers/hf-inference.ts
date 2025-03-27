@@ -44,9 +44,9 @@ export class HFInferenceTask extends TaskProviderHelper {
 	}
 }
 
-export class HFInferenceBinaryInputTask extends HFInferenceTask {
-	constructor(task: InferenceTask) {
-		super(task);
+export class HFInferenceTextToImageTask extends HFInferenceTask {
+	constructor() {
+		super("text-to-image");
 	}
 
 	override async getResponse(
