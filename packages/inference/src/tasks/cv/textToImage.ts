@@ -1,5 +1,6 @@
 import type { TextToImageInput } from "@huggingface/tasks";
 import { getProviderHelper } from "../../lib/getProviderHelper";
+import { makeRequestOptions } from "../../lib/makeRequestOptions";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
 
@@ -28,7 +29,7 @@ export async function textToImage(args: TextToImageArgs, options?: TextToImageOp
 		...options,
 		task: "text-to-image",
 	});
-
+	const { url, info } = await makeRequestOptions(args, { ...options, task: "text-to-image" });
 	// @ts-expect-error - Provider-specific implementations accept the outputType parameter
-	return providerHelper.getResponse(res, undefined, undefined, options?.outputType);
+	return providerHelper.getResponse(res, url, info.headers as Record<string, string>, options?.outputType);
 }

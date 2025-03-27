@@ -14,6 +14,14 @@ import { HF_ROUTER_URL } from "../config";
 import type { BodyParams, InferenceTask, UrlParams } from "../types";
 import { TaskProviderHelper } from "./providerHelper";
 
+interface Base64ImageGeneration {
+	data: Array<{
+		b64_json: string;
+	}>;
+}
+interface OutputUrlImageGeneration {
+	output: string[];
+}
 export class HFInferenceTask extends TaskProviderHelper {
 	constructor(task: InferenceTask) {
 		super("hf-inference", `${HF_ROUTER_URL}/hf-inference`, task);
@@ -39,6 +47,28 @@ export class HFInferenceTask extends TaskProviderHelper {
 export class HFInferenceBinaryInputTask extends HFInferenceTask {
 	constructor(task: InferenceTask) {
 		super(task);
+	}
+
+	override async getResponse(
+		response: Base64ImageGeneration | OutputUrlImageGeneration,
+		outputType?: "url" | "blob"
+	): Promise<unknown> {
+		if ("data" in response && Array.isArray(response.data) && response.data[0].b64_json) {
+			const base64Data = response.data[0].b64_json;
+			if (outputType === "url") {
+				return `data:image/jpeg;base64,${base64Data}`;
+			}
+			const base64Response = await fetch(`data:image/jpeg;base64,${base64Data}`);
+			return await base64Response.blob();
+		}
+		if ("output" in response && Array.isArray(response.output)) {
+			if (outputType === "url") {
+				return response.output[0];
+			}
+			const urlResponse = await fetch(response.output[0]);
+			const blob = await urlResponse.blob();
+			return blob;
+		}
 	}
 }
 
