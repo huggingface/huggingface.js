@@ -5,17 +5,13 @@ import type { OllamaChatTemplateMapEntry } from "./types";
 
 /**
  * Skipped these models due to error:
- * - library/nous-hermes2:34b
- * - library/stablelm2:12b
- * - library/deepseek-v2:16b
- * - library/wizard-math:13b
- * - library/neural-chat:7b
- * - library/stable-code:3b
- * - library/wizard-math:70b
- * - library/dolphin-phi:2.7b
- * - library/firefunction-v2:70b
- * - library/granite3.2:8b
- * - library/r1-1776:671b
+ * - library/gemma3:1b
+ * - library/qwen2.5:3b
+ * - library/qwen:7b
+ * - library/llama3.2-vision:11b
+ * - library/starcoder2:3b
+ * - library/everythinglm:13b
+ * - library/falcon3:7b
  */
 
 export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
@@ -320,6 +316,36 @@ export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
 			tokens: ["<|im_start|>", "<|im_end|>"],
 			params: {
 				stop: ["<|im_start|>", "<|im_end|>"],
+			},
+		},
+	},
+	{
+		model: "library/exaone-deep:2.4b",
+		gguf: "{% for message in messages %}{% if loop.first and message['role'] != 'system' %}{{ '[|system|][|endofturn|]\\n' }}{% endif %}{% set content = message['content'] %}{% if '</thought>' in content %}{% set content = content.split('</thought>')[-1].lstrip('\\n') %}{% endif %}{{ '[|' + message['role'] + '|]' + content }}{% if not message['role'] == 'user' %}{{ '[|endofturn|]' }}{% endif %}{% if not loop.last %}{{ '\\n' }}{% endif %}{% endfor %}{% if add_generation_prompt %}{{ '\\n[|assistant|]<thought>\\n' }}{% endif %}",
+		ollama: {
+			template:
+				'{{- range $i, $_ := .Messages }}\n{{- $last := eq (len (slice $.Messages $i)) 1 -}}\n{{ if eq .Role "system" }}[|system|]{{ .Content }}[|endofturn|]\n{{ continue }}\n{{ else if eq .Role "user" }}[|user|]{{ .Content }}\n{{ else if eq .Role "assistant" }}[|assistant|]{{ .Content }}[|endofturn|]\n{{ end }}\n{{- if and (ne .Role "assistant") $last }}[|assistant|]{{ end }}\n{{- end -}}',
+			tokens: ["<thought>"],
+			params: {
+				repeat_penalty: 1,
+				stop: ["[|endofturn|]"],
+				temperature: 0.6,
+				top_p: 0.95,
+			},
+		},
+	},
+	{
+		model: "library/exaone-deep:32b",
+		gguf: "{% for message in messages %}{% if loop.first and message['role'] != 'system' %}{{ '[|system|][|endofturn|]\n' }}{% endif %}{% set content = message['content'] %}{% if '</thought>' in content %}{% set content = content.split('</thought>')[-1].lstrip('\\n') %}{% endif %}{{ '[|' + message['role'] + '|]' + content }}{% if not message['role'] == 'user' %}{{ '[|endofturn|]' }}{% endif %}{% if not loop.last %}{{ '\n' }}{% endif %}{% endfor %}{% if add_generation_prompt %}{{ '\n[|assistant|]<thought>\n' }}{% endif %}",
+		ollama: {
+			template:
+				'{{- range $i, $_ := .Messages }}\n{{- $last := eq (len (slice $.Messages $i)) 1 -}}\n{{ if eq .Role "system" }}[|system|]{{ .Content }}[|endofturn|]\n{{ continue }}\n{{ else if eq .Role "user" }}[|user|]{{ .Content }}\n{{ else if eq .Role "assistant" }}[|assistant|]{{ .Content }}[|endofturn|]\n{{ end }}\n{{- if and (ne .Role "assistant") $last }}[|assistant|]{{ end }}\n{{- end -}}',
+			tokens: ["<thought>"],
+			params: {
+				repeat_penalty: 1,
+				stop: ["[|endofturn|]"],
+				temperature: 0.6,
+				top_p: 0.95,
 			},
 		},
 	},

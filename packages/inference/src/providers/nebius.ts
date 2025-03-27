@@ -14,9 +14,13 @@
  *
  * Thanks!
  */
-import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../types";
+import type { BodyParams, HeaderParams, ProviderConfig, UrlParams } from "../types";
 
 const NEBIUS_API_BASE_URL = "https://api.studio.nebius.ai";
+
+const makeBaseUrl = (): string => {
+	return NEBIUS_API_BASE_URL;
+};
 
 const makeBody = (params: BodyParams): Record<string, unknown> => {
 	return {
@@ -43,7 +47,7 @@ const makeUrl = (params: UrlParams): string => {
 };
 
 export const NEBIUS_CONFIG: ProviderConfig = {
-	baseUrl: NEBIUS_API_BASE_URL,
+	makeBaseUrl,
 	makeBody,
 	makeHeaders,
 	makeUrl,

@@ -109,12 +109,12 @@ export async function oauthLoginUrl(opts?: {
 	if (opts?.localStorage) {
 		if (opts.localStorage.codeVerifier !== undefined && opts.localStorage.codeVerifier !== null) {
 			throw new Error(
-				"localStorage.codeVerifier must be a initially set to null or undefined, and will be filled by oauthLoginUrl"
+				"localStorage.codeVerifier must be initially set to null or undefined, and will be filled by oauthLoginUrl"
 			);
 		}
 		if (opts.localStorage.nonce !== undefined && opts.localStorage.nonce !== null) {
 			throw new Error(
-				"localStorage.nonce must be a initially set to null or undefined, and will be filled by oauthLoginUrl"
+				"localStorage.nonce must be initially set to null or undefined, and will be filled by oauthLoginUrl"
 			);
 		}
 		opts.localStorage.codeVerifier = newCodeVerifier;

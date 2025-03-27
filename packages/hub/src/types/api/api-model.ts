@@ -117,7 +117,7 @@ Also encode config params into the name if relevant.
 						[x: string]: string;
 				  };
 			/**
-			 * [Automatically computed, do not set] Dynamically overriden by huggingface in API calls to indicate if it was verified by Hugging Face.
+			 * [Automatically computed, do not set] Dynamically overridden by huggingface in API calls to indicate if it was verified by Hugging Face.
 			 */
 			verified?: boolean;
 			/**

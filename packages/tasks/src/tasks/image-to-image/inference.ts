@@ -37,6 +37,10 @@ export interface ImageToImageParameters {
 	 */
 	num_inference_steps?: number;
 	/**
+	 * The text prompt to guide the image generation.
+	 */
+	prompt?: string;
+	/**
 	 * The size in pixel of the output image.
 	 */
 	target_size?: TargetSize;

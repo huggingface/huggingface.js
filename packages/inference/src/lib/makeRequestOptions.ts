@@ -145,10 +145,11 @@ export function makeRequestOptionsFromResolvedModel(
 			? endpointUrl + `/v1/chat/completions`
 			: endpointUrl
 		: providerConfig.makeUrl({
+				authMethod,
 				baseUrl:
 					authMethod !== "provider-key"
 						? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", provider)
-						: providerConfig.baseUrl,
+						: providerConfig.makeBaseUrl(task),
 				model: resolvedModel,
 				chatCompletion,
 				task,
