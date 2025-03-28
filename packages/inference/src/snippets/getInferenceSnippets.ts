@@ -134,12 +134,11 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		const providerHelper = getProviderHelper(provider, task);
 		/// Prepare inputs + make request
 		const inputs = inputPreparationFn ? inputPreparationFn(model, opts) : { inputs: getModelInputSnippet(model) };
-		const request = makeRequestOptionsFromResolvedModel(
-			providerModelId ?? model.id,
-			providerHelper,
-			{ accessToken: accessToken, provider: provider, ...inputs } as RequestArgs,
-			{ chatCompletion: templateName.includes("conversational"), task: model.pipeline_tag as InferenceTask }
-		);
+		const request = makeRequestOptionsFromResolvedModel(providerModelId ?? model.id, providerHelper, {
+			accessToken: accessToken,
+			provider: provider,
+			...inputs,
+		} as RequestArgs);
 
 		/// Parse request.info.body if not a binary.
 		/// This is the body sent to the provider. Important for snippets with raw payload (e.g curl, requests, etc.)
