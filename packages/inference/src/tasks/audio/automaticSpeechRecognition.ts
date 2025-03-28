@@ -1,12 +1,12 @@
 import type { AutomaticSpeechRecognitionInput, AutomaticSpeechRecognitionOutput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { FAL_AI_SUPPORTED_BLOB_TYPES } from "../../providers/fal-ai";
 import type { BaseArgs, Options, RequestArgs } from "../../types";
 import { base64FromBytes } from "../../utils/base64FromBytes";
+import { omit } from "../../utils/omit";
 import { request } from "../custom/request";
 import type { LegacyAudioInput } from "./utils";
 import { preparePayload } from "./utils";
-import { omit } from "../../utils/omit";
-
 export type AutomaticSpeechRecognitionArgs = BaseArgs & (AutomaticSpeechRecognitionInput | LegacyAudioInput);
 /**
  * This task reads some audio input and outputs the said words within the audio files.
@@ -27,8 +27,6 @@ export async function automaticSpeechRecognition(
 	}
 	return res;
 }
-
-const FAL_AI_SUPPORTED_BLOB_TYPES = ["audio/mpeg", "audio/mp4", "audio/wav", "audio/x-wav"];
 
 async function buildPayload(args: AutomaticSpeechRecognitionArgs): Promise<RequestArgs> {
 	if (args.provider === "fal-ai") {

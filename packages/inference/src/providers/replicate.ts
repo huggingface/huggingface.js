@@ -14,37 +14,142 @@
  *
  * Thanks!
  */
-import type { BodyParams, HeaderParams, ProviderConfig, UrlParams } from "../types";
+import { InferenceOutputError } from "../lib/InferenceOutputError";
+import { isUrl } from "../lib/isUrl";
+import type { BodyParams, HeaderParams, InferenceTask, UrlParams } from "../types";
+import { omit } from "../utils/omit";
+import { TaskProviderHelper } from "./providerHelper";
 
-export const REPLICATE_API_BASE_URL = "https://api.replicate.com";
+export interface ReplicateOutput {
+	output?: string | string[];
+}
 
-const makeBaseUrl = (): string => {
-	return REPLICATE_API_BASE_URL;
-};
-
-const makeBody = (params: BodyParams): Record<string, unknown> => {
-	return {
-		input: params.args,
-		version: params.model.includes(":") ? params.model.split(":")[1] : undefined,
-	};
-};
-
-const makeHeaders = (params: HeaderParams): Record<string, string> => {
-	return { Authorization: `Bearer ${params.accessToken}`, Prefer: "wait" };
-};
-
-const makeUrl = (params: UrlParams): string => {
-	if (params.model.includes(":")) {
-		/// Versioned model
-		return `${params.baseUrl}/v1/predictions`;
+export class ReplicateTask extends TaskProviderHelper {
+	constructor(task: InferenceTask, url?: string) {
+		super("replicate", url || "https://api.replicate.com", task);
 	}
-	/// Evergreen / Canonical model
-	return `${params.baseUrl}/v1/models/${params.model}/predictions`;
-};
 
-export const REPLICATE_CONFIG: ProviderConfig = {
-	makeBaseUrl,
-	makeBody,
-	makeHeaders,
-	makeUrl,
-};
+	override makeRoute(params: UrlParams): string {
+		if (params.model.includes(":")) {
+			return "v1/predictions";
+		}
+		return `v1/models/${params.model}/predictions`;
+	}
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		return {
+			input: {
+				...omit(params.args, ["inputs", "parameters"]),
+				...(params.args.parameters as Record<string, unknown>),
+				prompt: params.args.inputs,
+			},
+			version: params.model.includes(":") ? params.model.split(":")[1] : undefined,
+		};
+	}
+	override prepareHeaders(params: HeaderParams, binary: boolean): Record<string, string> {
+		const headers: Record<string, string> = { Authorization: `Bearer ${params.accessToken}`, Prefer: "wait" };
+		if (!binary) {
+			headers["Content-Type"] = "application/json";
+		}
+		return headers;
+	}
+
+	override makeUrl(params: UrlParams): string {
+		if (params.model.includes(":")) {
+			return `${params.baseUrl}/v1/predictions`;
+		}
+		return `${params.baseUrl}/v1/models/${params.model}/predictions`;
+	}
+
+	override getResponse(response: unknown): unknown {
+		void response;
+		throw new Error("Method not implemented.");
+	}
+}
+
+export class ReplicateTextToImageTask extends ReplicateTask {
+	constructor() {
+		super("text-to-image");
+	}
+	override async getResponse(
+		res: ReplicateOutput | Blob,
+		url?: string,
+		headers?: Record<string, string>,
+		outputType?: "url" | "blob"
+	): Promise<string | Blob> {
+		void url;
+		void headers;
+		if (
+			typeof res === "object" &&
+			"output" in res &&
+			Array.isArray(res.output) &&
+			res.output.length > 0 &&
+			typeof res.output[0] === "string"
+		) {
+			if (outputType === "url") {
+				return res.output[0];
+			}
+			const urlResponse = await fetch(res.output[0]);
+			return await urlResponse.blob();
+		}
+
+		throw new InferenceOutputError("Expected Replicate text-to-image response format");
+	}
+}
+
+export class ReplicateTextToSpeechTask extends ReplicateTask {
+	constructor() {
+		super("text-to-speech");
+	}
+
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		const payload = super.preparePayload(params);
+
+		const input = payload["input"];
+		if (typeof input === "object" && input !== null && "prompt" in input) {
+			const inputObj = input as Record<string, unknown>;
+			inputObj["text"] = inputObj["prompt"];
+			delete inputObj["prompt"];
+		}
+
+		return payload;
+	}
+
+	override async getResponse(response: ReplicateOutput): Promise<Blob> {
+		if (response instanceof Blob) {
+			return response;
+		}
+		if (response && typeof response === "object") {
+			if ("output" in response) {
+				if (typeof response.output === "string") {
+					const urlResponse = await fetch(response.output);
+					return await urlResponse.blob();
+				} else if (Array.isArray(response.output)) {
+					const urlResponse = await fetch(response.output[0]);
+					return await urlResponse.blob();
+				}
+			}
+		}
+		throw new InferenceOutputError("Expected Blob or object with output");
+	}
+}
+
+export class ReplicateTextToVideoTask extends ReplicateTask {
+	constructor() {
+		super("text-to-video");
+	}
+
+	override async getResponse(response: ReplicateOutput): Promise<Blob> {
+		if (
+			typeof response === "object" &&
+			!!response &&
+			"output" in response &&
+			typeof response.output === "string" &&
+			isUrl(response.output)
+		) {
+			const urlResponse = await fetch(response.output);
+			return await urlResponse.blob();
+		}
+
+		throw new InferenceOutputError("Expected { output: string }");
+	}
+}

@@ -1,5 +1,5 @@
-import type { InferenceTask, Options, RequestArgs } from "../../types";
 import { makeRequestOptions } from "../../lib/makeRequestOptions";
+import type { InferenceTask, Options, RequestArgs } from "../../types";
 import type { EventSourceMessage } from "../../vendor/fetch-event-source/parse";
 import { getLines, getMessages } from "../../vendor/fetch-event-source/parse";
 
@@ -11,8 +11,6 @@ export async function* streamingRequest<T>(
 	options?: Options & {
 		/** In most cases (unless we pass a endpointUrl) we know the task */
 		task?: InferenceTask;
-		/** Is chat completion compatible */
-		chatCompletion?: boolean;
 	}
 ): AsyncGenerator<T> {
 	const { url, info } = await makeRequestOptions({ ...args, stream: true }, options);
@@ -24,7 +22,7 @@ export async function* streamingRequest<T>(
 	if (!response.ok) {
 		if (response.headers.get("Content-Type")?.startsWith("application/json")) {
 			const output = await response.json();
-			if ([400, 422, 404, 500].includes(response.status) && options?.chatCompletion) {
+			if ([400, 422, 404, 500].includes(response.status) && options?.task === "conversational") {
 				throw new Error(`Server ${args.model} does not seem to support chat completion. Error: ${output.error}`);
 			}
 			if (typeof output.error === "string") {
