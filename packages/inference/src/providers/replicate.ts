@@ -22,6 +22,7 @@ import { TaskProviderHelper } from "./providerHelper";
 export interface ReplicateOutput {
 	output?: string | string[];
 }
+
 export class ReplicateTask extends TaskProviderHelper {
 	constructor(task: InferenceTask, url?: string) {
 		super("replicate", url || "https://api.replicate.com", task);

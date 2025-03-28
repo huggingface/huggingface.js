@@ -40,12 +40,10 @@ export class BlackForestLabsTextToImageTask extends TaskProviderHelper {
 	}
 
 	override prepareHeaders(params: HeaderParams, binary: boolean): Record<string, string> {
-		let headers: Record<string, string> = {};
-		if (params.authMethod !== "provider-key") {
-			headers = { Authorization: `Bearer ${params.accessToken}` };
-		} else {
-			headers = { "X-Key": `${params.accessToken}` };
-		}
+		const headers: Record<string, string> = {
+			Authorization:
+				params.authMethod !== "provider-key" ? `Bearer ${params.accessToken}` : `X-Key ${params.accessToken}`,
+		};
 		if (!binary) {
 			headers["Content-Type"] = "application/json";
 		}

@@ -15,14 +15,17 @@ import { InferenceOutputError } from "../lib/InferenceOutputError";
 import type { BodyParams, InferenceTask, UrlParams } from "../types";
 import { toArray } from "../utils/toArray";
 import { TaskProviderHelper } from "./providerHelper";
+
 interface Base64ImageGeneration {
 	data: Array<{
 		b64_json: string;
 	}>;
 }
+
 interface OutputUrlImageGeneration {
 	output: string[];
 }
+
 export class HFInferenceTask extends TaskProviderHelper {
 	constructor(task?: InferenceTask) {
 		super("hf-inference", `${HF_ROUTER_URL}/hf-inference`, task);
@@ -122,6 +125,7 @@ export class HFInferenceConversationalTask extends HFInferenceTask {
 		};
 	}
 }
+
 export class HFInferenceTextGenerationTask extends HFInferenceTask {
 	constructor() {
 		super("text-generation");

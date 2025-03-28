@@ -6,24 +6,12 @@ import { toArray } from "../utils/toArray";
  * Base class for task-specific provider helpers
  */
 export abstract class TaskProviderHelper {
-	private provider: string;
-	private task?: string;
-	private baseUrl: string;
-	private _clientSideRoutingOnly: boolean;
-
-	constructor(provider: string, baseUrl: string, task?: string, clientSideRoutingOnly: boolean = false) {
-		this.provider = provider;
-		this.task = task;
-		this.baseUrl = baseUrl;
-		this._clientSideRoutingOnly = clientSideRoutingOnly;
-	}
-
-	/**
-	 * Whether the provider can only be used with client-side routing
-	 */
-	get clientSideRoutingOnly(): boolean {
-		return this._clientSideRoutingOnly;
-	}
+	constructor(
+		private provider: string,
+		private baseUrl: string,
+		private task?: string,
+		readonly clientSideRoutingOnly: boolean = false
+	) {}
 
 	/**
 	 * Prepare the base URL for the request
