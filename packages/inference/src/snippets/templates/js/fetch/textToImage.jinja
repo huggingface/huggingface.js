@@ -14,6 +14,16 @@ async function query(data) {
 	return result;
 }
 
-query({ inputs: {{ providerInputs.asObj.inputs }} }).then((response) => {
+query({
+{% set input_items = providerInputs.asObj.items() | list %}
+{% if input_items %}
+{% for key, value in input_items %}
+    {%- if not loop.first %}{{ '\n    ' }}{% else %}{{ '    ' }}{% endif %}
+    {{- key | tojson }}: {{ value | tojson }}
+    {%- if not loop.last %},{% endif %}
+{% endfor %}
+{% if input_items | length > 0 %}{{ '\n' }}{% endif %}
+{% endif %} {# End input_items check #}
+}).then((response) => {
     // Use image
 });
