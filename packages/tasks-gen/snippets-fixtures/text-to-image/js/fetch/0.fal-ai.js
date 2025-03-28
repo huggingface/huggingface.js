@@ -16,6 +16,6 @@ async function query(data) {
 
 query({
     "inputs": "\"Astronaut riding a horse\""
- }).then((response) => {
+}).then((response) => {
     // Use image
 });
