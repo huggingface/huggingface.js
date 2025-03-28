@@ -44,19 +44,19 @@ export class NebiusTextToImageTask extends TaskProviderHelper {
 		super("nebius", NEBIUS_API_BASE_URL, "text-to-image");
 	}
 
-	override makeBody(params: BodyParams): Record<string, unknown> {
+	override preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),
-			prompt: params.args.inputs,
-			model: params.args.model,
 			response_format: "b64_json",
+			prompt: params.args.inputs,
+			model: params.model,
 		};
 	}
 
 	override makeRoute(params: UrlParams): string {
 		void params;
-		return `/v1/images/generations`;
+		return "v1/images/generations";
 	}
 
 	getResponse(response: NebiusBase64ImageGeneration, outputType?: "url" | "blob"): string | Promise<Blob> {

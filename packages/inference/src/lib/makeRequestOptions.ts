@@ -1,5 +1,6 @@
 import { name as packageName, version as packageVersion } from "../../package.json";
 import { HF_HUB_URL, HF_ROUTER_URL } from "../config";
+import type { TaskProviderHelper } from "../providers/providerHelper";
 import type { InferenceTask, Options, RequestArgs } from "../types";
 import { getProviderHelper } from "./getProviderHelper";
 import { getProviderModelId } from "./getProviderModelId";
@@ -31,7 +32,6 @@ export async function makeRequestOptions(
 	const { provider: maybeProvider, model: maybeModel } = args;
 	const provider = maybeProvider ?? "hf-inference";
 	const { task, chatCompletion } = options ?? {};
-	const providerHelper = getProviderHelper(provider, task);
 	// Validate inputs
 	if (args.endpointUrl && provider !== "hf-inference") {
 		throw new Error(`Cannot use endpointUrl with a third-party provider.`);
@@ -42,6 +42,10 @@ export async function makeRequestOptions(
 	if (!maybeModel && !task) {
 		throw new Error("No model provided, and no task has been specified.");
 	}
+
+	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+	const hfModel = maybeModel ?? (await loadDefaultModel(task!));
+	const providerHelper = getProviderHelper(provider, task);
 	if (!providerHelper) {
 		throw new Error(`No provider helper found for provider ${provider}`);
 	}
@@ -49,8 +53,6 @@ export async function makeRequestOptions(
 		throw new Error(`Provider ${provider} requires a model ID to be passed directly.`);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-	const hfModel = maybeModel ?? (await loadDefaultModel(task!));
 	const resolvedModel = providerHelper.clientSideRoutingOnly
 		? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		  removeProviderPrefix(maybeModel!, provider)
@@ -61,15 +63,16 @@ export async function makeRequestOptions(
 		  });
 
 	// Use the sync version with the resolved model
-	return makeRequestOptionsFromResolvedModel(resolvedModel, args, options);
+	return makeRequestOptionsFromResolvedModel(resolvedModel, providerHelper, args, options);
 }
 
 /**
  * Helper that prepares request arguments. - for internal use only
  * This sync version skips the model ID resolution step
  */
-export function makeRequestOptionsFromResolvedModel(
+export async function makeRequestOptionsFromResolvedModel(
 	resolvedModel: string,
+	providerHelper: TaskProviderHelper,
 	args: RequestArgs & {
 		data?: Blob | ArrayBuffer;
 		stream?: boolean;
@@ -78,13 +81,12 @@ export function makeRequestOptionsFromResolvedModel(
 		task?: InferenceTask;
 		chatCompletion?: boolean;
 	}
-): { url: string; info: RequestInit } {
+): Promise<{ url: string; info: RequestInit }> {
 	const { accessToken, endpointUrl, provider: maybeProvider, model, ...remainingArgs } = args;
 	void model;
 
 	const provider = maybeProvider ?? "hf-inference";
 	const { includeCredentials, task, chatCompletion, signal } = options ?? {};
-	const providerHelper = getProviderHelper(provider, task);
 	const authMethod = (() => {
 		if (providerHelper.clientSideRoutingOnly) {
 			// Closed-source providers require an accessToken (cannot be routed).
@@ -104,30 +106,26 @@ export function makeRequestOptionsFromResolvedModel(
 	})();
 
 	// Make URL
-	const url = endpointUrl
-		? chatCompletion
-			? endpointUrl + `/v1/chat/completions`
-			: endpointUrl
-		: providerHelper.makeUrl({
-				authMethod,
-				baseUrl:
-					authMethod !== "provider-key"
-						? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", provider)
-						: providerHelper.makeBaseUrl(),
-				model: resolvedModel,
-				chatCompletion,
-				task,
-		  });
-	// Make headers
-	const binary = "data" in args && !!args.data;
-	const headers = providerHelper.prepareHeaders({
-		accessToken,
+
+	const modelId = endpointUrl ? endpointUrl : resolvedModel;
+	const url = providerHelper.makeUrl({
 		authMethod,
+		baseUrl:
+			authMethod !== "provider-key"
+				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", provider)
+				: providerHelper.makeBaseUrl(),
+		model: modelId,
+		chatCompletion,
+		task,
 	});
-	// Add content-type to headers
-	if (!binary) {
-		headers["Content-Type"] = "application/json";
-	}
+	// Make headers
+	const headers = providerHelper.prepareHeaders(
+		{
+			accessToken,
+			authMethod,
+		},
+		"data" in args && !!args.data
+	);
 
 	// Add user-agent to headers
 	// e.g. @huggingface/inference/3.1.3
@@ -138,16 +136,12 @@ export function makeRequestOptionsFromResolvedModel(
 	headers["User-Agent"] = userAgent;
 
 	// Make body
-	const body = binary
-		? args.data
-		: JSON.stringify(
-				providerHelper.makeBody({
-					args: remainingArgs as Record<string, unknown>,
-					model: resolvedModel,
-					task,
-					chatCompletion,
-				})
-		  );
+	const body = await providerHelper.makeBody({
+		args: remainingArgs as Record<string, unknown>,
+		model: resolvedModel,
+		task,
+		chatCompletion,
+	});
 	/**
 	 * For edge runtimes, leave 'credentials' undefined, otherwise cloudflare workers will error
 	 */
@@ -161,7 +155,7 @@ export function makeRequestOptionsFromResolvedModel(
 	const info: RequestInit = {
 		headers,
 		method: "POST",
-		body,
+		body: body as BodyInit,
 		...(credentials ? { credentials } : undefined),
 		signal,
 	};

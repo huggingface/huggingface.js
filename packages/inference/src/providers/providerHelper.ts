@@ -7,11 +7,11 @@ import { toArray } from "../utils/toArray";
  */
 export abstract class TaskProviderHelper {
 	private provider: string;
-	private task: string;
+	private task?: string;
 	private baseUrl: string;
 	private _clientSideRoutingOnly: boolean;
 
-	constructor(provider: string, baseUrl: string, task: string, clientSideRoutingOnly: boolean = false) {
+	constructor(provider: string, baseUrl: string, task?: string, clientSideRoutingOnly: boolean = false) {
 		this.provider = provider;
 		this.task = task;
 		this.baseUrl = baseUrl;
@@ -35,15 +35,25 @@ export abstract class TaskProviderHelper {
 	/**
 	 * Prepare the headers for the request
 	 */
-	prepareHeaders(params: HeaderParams): Record<string, string> {
-		return { Authorization: `Bearer ${params.accessToken}` };
+	prepareHeaders(params: HeaderParams, binary: boolean): Record<string, string> {
+		const headers: Record<string, string> = { Authorization: `Bearer ${params.accessToken}` };
+		if (!binary) {
+			headers["Content-Type"] = "application/json";
+		}
+		return headers;
+	}
+
+	async makeBody(params: BodyParams): Promise<unknown> {
+		if ("data" in params.args && !!params.args.data) {
+			return params.args.data;
+		}
+		return JSON.stringify(this.preparePayload(params));
 	}
 
 	/**
 	 * Prepare the body for the request
 	 */
-	abstract makeBody(params: BodyParams): Record<string, unknown>;
-
+	abstract preparePayload(params: BodyParams): unknown;
 	/**
 	 * Prepare the route for the request
 	 */
@@ -85,7 +95,7 @@ export class BaseConversationalTask extends TaskProviderHelper {
 		return "v1/chat/completions";
 	}
 
-	override makeBody(params: BodyParams): Record<string, unknown> {
+	override preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
 			...params.args,
 			model: params.model,
@@ -116,7 +126,7 @@ export class BaseTextGenerationTask extends TaskProviderHelper {
 	constructor(provider: string, baseUrl: string, clientSideRoutingOnly: boolean = false) {
 		super(provider, baseUrl, "text-generation", clientSideRoutingOnly);
 	}
-	override makeBody(params: BodyParams): Record<string, unknown> {
+	override preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
 			...params.args,
 			model: params.model,

@@ -21,13 +21,17 @@ import { omit } from "../utils/omit";
 import { TaskProviderHelper } from "./providerHelper";
 
 const BLACK_FOREST_LABS_AI_API_BASE_URL = "https://api.us1.bfl.ai";
+interface BlackForestLabsResponse {
+	id: string;
+	polling_url: string;
+}
 
 export class BlackForestLabsTextToImageTask extends TaskProviderHelper {
 	constructor() {
 		super("black-forest-labs", BLACK_FOREST_LABS_AI_API_BASE_URL, "text-to-image");
 	}
 
-	override makeBody(params: BodyParams): Record<string, unknown> {
+	override preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),
@@ -35,12 +39,17 @@ export class BlackForestLabsTextToImageTask extends TaskProviderHelper {
 		};
 	}
 
-	override prepareHeaders(params: HeaderParams): Record<string, string> {
+	override prepareHeaders(params: HeaderParams, binary: boolean): Record<string, string> {
+		let headers: Record<string, string> = {};
 		if (params.authMethod !== "provider-key") {
-			return { Authorization: `Bearer ${params.accessToken}` };
+			headers = { Authorization: `Bearer ${params.accessToken}` };
 		} else {
-			return { "X-Key": `${params.accessToken}` };
+			headers = { "X-Key": `${params.accessToken}` };
 		}
+		if (!binary) {
+			headers["Content-Type"] = "application/json";
+		}
+		return headers;
 	}
 
 	override makeRoute(params: UrlParams): string {
@@ -50,8 +59,13 @@ export class BlackForestLabsTextToImageTask extends TaskProviderHelper {
 		return `/v1/${params.model}`;
 	}
 
-	async getResponse(res: Response, outputType?: "url" | "blob"): Promise<string | Blob> {
-		const urlObj = new URL(res.url);
+	async getResponse(
+		response: BlackForestLabsResponse,
+		url: string,
+		headers: Record<string, string>,
+		outputType?: "url" | "blob"
+	): Promise<string | Blob> {
+		const urlObj = new URL(response.polling_url);
 		for (let step = 0; step < 5; step++) {
 			await delay(1000);
 			console.debug(`Polling Black Forest Labs API for the result... ${step + 1}/5`);

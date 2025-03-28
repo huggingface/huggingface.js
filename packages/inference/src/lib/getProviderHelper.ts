@@ -1,9 +1,19 @@
 import { BlackForestLabsTextToImageTask } from "../providers/black-forest-labs";
 import { CerebrasConversationalTask } from "../providers/cerebras";
 import { CohereConversationalTask } from "../providers/cohere";
-import { FalAITask, FalAITextToImageTask, FalAITextToVideoTask } from "../providers/fal-ai";
+import {
+	FalAIAutomaticSpeechRecognitionTask,
+	FalAITextToImageTask,
+	FalAITextToSpeechTask,
+	FalAITextToVideoTask,
+} from "../providers/fal-ai";
 import { FireworksConversationalTask } from "../providers/fireworks-ai";
-import { HFInferenceConversationalTask, HFInferenceTask, HFInferenceTextToImageTask } from "../providers/hf-inference";
+import {
+	HFInferenceConversationalTask,
+	HFInferenceTask,
+	HFInferenceTextGenerationTask,
+	HFInferenceTextToImageTask,
+} from "../providers/hf-inference";
 import {
 	HyperbolicConversationalTask,
 	HyperbolicTextGenerationTask,
@@ -29,10 +39,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		conversational: new CohereConversationalTask(),
 	},
 	"fal-ai": {
-		// TODO: Add automatic-speech-recognition task helper
-		// "automatic-speech-recognition": new FalAIAutomaticSpeechRecognitionTask(),
+		"automatic-speech-recognition": new FalAIAutomaticSpeechRecognitionTask(),
 		"text-to-image": new FalAITextToImageTask(),
-		"text-to-speech": new FalAITask("text-to-speech"),
+		"text-to-speech": new FalAITextToSpeechTask(),
 		"text-to-video": new FalAITextToVideoTask(),
 	},
 	"fireworks-ai": {
@@ -41,7 +50,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	"hf-inference": {
 		"text-to-image": new HFInferenceTextToImageTask(),
 		conversational: new HFInferenceConversationalTask(),
-		"text-generation": new HFInferenceTask("text-generation"),
+		"text-generation": new HFInferenceTextGenerationTask(),
 		"text-classification": new HFInferenceTask("text-classification"),
 		"question-answering": new HFInferenceTask("question-answering"),
 		"audio-classification": new HFInferenceTask("audio-classification"),
@@ -102,8 +111,14 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
  * Get provider helper instance by name and task
  */
 export function getProviderHelper(provider: InferenceProvider, task: InferenceTask | undefined): TaskProviderHelper {
+	// special case for hf-inference, where the task is optional
+	if (provider === "hf-inference") {
+		if (!task) {
+			return new HFInferenceTask();
+		}
+	}
 	if (!task) {
-		throw new Error("you need to provide a task name, e.g. 'text-to-image'");
+		throw new Error("you need to provide a task name when using an external provider, e.g. 'text-to-image'");
 	}
 	if (!(provider in PROVIDERS)) {
 		throw new Error(`Provider '${provider}' not supported. Available providers: ${Object.keys(PROVIDERS)}`);

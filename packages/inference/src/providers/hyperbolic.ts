@@ -48,7 +48,7 @@ export class HyperbolicTextGenerationTask extends BaseTextGenerationTask {
 		return "v1/chat/completions";
 	}
 
-	override makeBody(params: BodyParams): Record<string, unknown> {
+	override preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
 			messages: [{ content: params.args.inputs, role: "user" }],
 			...(params.args.parameters
@@ -58,6 +58,7 @@ export class HyperbolicTextGenerationTask extends BaseTextGenerationTask {
 				  }
 				: undefined),
 			...omit(params.args, ["inputs", "parameters"]),
+			model: params.model,
 		};
 	}
 
@@ -88,12 +89,12 @@ export class HyperbolicTextToImageTask extends TaskProviderHelper {
 		return `/v1/images/generations`;
 	}
 
-	override makeBody(params: BodyParams): Record<string, unknown> {
+	override preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),
 			prompt: params.args.inputs,
-			model_name: params.args.model,
+			model_name: params.model,
 		};
 	}
 

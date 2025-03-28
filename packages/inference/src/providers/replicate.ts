@@ -33,11 +33,22 @@ export class ReplicateTask extends TaskProviderHelper {
 		}
 		return `v1/models/${params.model}/predictions`;
 	}
-	override makeBody(params: BodyParams): Record<string, unknown> {
-		return params.args;
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		return {
+			input: {
+				...omit(params.args, ["inputs", "parameters"]),
+				...(params.args.parameters as Record<string, unknown>),
+				prompt: params.args.inputs,
+			},
+			version: params.model.includes(":") ? params.model.split(":")[1] : undefined,
+		};
 	}
-	override prepareHeaders(params: HeaderParams): Record<string, string> {
-		return { Authorization: `Bearer ${params.accessToken}`, Prefer: "wait" };
+	override prepareHeaders(params: HeaderParams, binary: boolean): Record<string, string> {
+		const headers: Record<string, string> = { Authorization: `Bearer ${params.accessToken}`, Prefer: "wait" };
+		if (!binary) {
+			headers["Content-Type"] = "application/json";
+		}
+		return headers;
 	}
 
 	override makeUrl(params: UrlParams): string {
@@ -56,19 +67,6 @@ export class ReplicateTask extends TaskProviderHelper {
 export class ReplicateTextToImageTask extends ReplicateTask {
 	constructor() {
 		super("text-to-image");
-	}
-	override makeBody(params: BodyParams): Record<string, unknown> {
-		return {
-			...omit(params.args, ["inputs", "parameters"]),
-			input: {
-				prompt: params.args.inputs,
-				...(params.args.parameters as Record<string, unknown>),
-			},
-			version:
-				params.args.model && (params.args.model as string).includes(":")
-					? (params.args.model as string).split(":")[1]
-					: undefined,
-		};
 	}
 	override async getResponse(
 		res: ReplicateOutput | Blob,

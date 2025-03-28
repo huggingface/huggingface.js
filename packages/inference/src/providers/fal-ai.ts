@@ -14,9 +14,12 @@
  *
  * Thanks!
  */
+import type { AutomaticSpeechRecognitionOutput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../lib/InferenceOutputError";
 import { isUrl } from "../lib/isUrl";
+import { type AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition";
 import type { BodyParams, HeaderParams, InferenceTask, UrlParams } from "../types";
+import { base64FromBytes } from "../utils/base64FromBytes";
 import { delay } from "../utils/delay";
 import { omit } from "../utils/omit";
 import { TaskProviderHelper } from "./providerHelper";
@@ -33,22 +36,40 @@ interface FalAITextToImageOutput {
 	}>;
 }
 
+interface FalAIAutomaticSpeechRecognitionOutput {
+	text: string;
+}
+
+interface FalAITextToSpeechOutput {
+	audio: {
+		url: string;
+		content_type: string;
+	};
+}
+const FAL_AI_SUPPORTED_BLOB_TYPES = ["audio/mpeg", "audio/mp4", "audio/wav", "audio/x-wav"];
+
 export class FalAITask extends TaskProviderHelper {
 	constructor(task: InferenceTask, url?: string) {
 		super("fal-ai", url || "https://fal.run", task);
 	}
 
-	override makeBody(params: BodyParams): Record<string, unknown> {
+	override preparePayload(params: BodyParams): Record<string, unknown> | Promise<Record<string, unknown>> {
 		return params.args;
 	}
 	override makeRoute(params: UrlParams): string {
 		return `/${params.model}`;
 	}
-	override prepareHeaders(params: HeaderParams): Record<string, string> {
-		return {
-			Authorization:
-				params.authMethod === "provider-key" ? `Key ${params.accessToken}` : `Bearer ${params.accessToken}`,
-		};
+	override prepareHeaders(params: HeaderParams, binary: boolean): Record<string, string> {
+		let headers: Record<string, string> = {};
+		if (params.authMethod !== "provider-key") {
+			headers = { Authorization: `Bearer ${params.accessToken}` };
+		} else {
+			headers = { Authorization: `Key ${params.accessToken}` };
+		}
+		if (!binary) {
+			headers["Content-Type"] = "application/json";
+		}
+		return headers;
 	}
 	/* eslint-disable @typescript-eslint/no-unused-vars */
 	override getResponse(
@@ -66,12 +87,12 @@ export class FalAITextToImageTask extends FalAITask {
 	constructor() {
 		super("text-to-image");
 	}
-	override makeBody(params: BodyParams): Record<string, unknown> {
+	override preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),
-			prompt: params.args.inputs,
 			sync_mode: true,
+			prompt: params.args.inputs,
 		};
 	}
 
@@ -105,7 +126,7 @@ export class FalAITextToVideoTask extends FalAITask {
 		}
 		return `/${params.model}`;
 	}
-	override makeBody(params: BodyParams): Record<string, unknown> {
+	override preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),
@@ -176,6 +197,87 @@ export class FalAITextToVideoTask extends FalAITask {
 		} else {
 			throw new InferenceOutputError(
 				"Expected { video: { url: string } } result format, got instead: " + JSON.stringify(result)
+			);
+		}
+	}
+}
+
+export class FalAIAutomaticSpeechRecognitionTask extends FalAITask {
+	constructor() {
+		super("automatic-speech-recognition");
+	}
+	override prepareHeaders(params: HeaderParams, binary: boolean): Record<string, string> {
+		const headers = super.prepareHeaders(params, binary);
+		headers["Content-Type"] = "application/json";
+		return headers;
+	}
+	override async makeBody(params: BodyParams): Promise<unknown> {
+		const args = params.args as AutomaticSpeechRecognitionArgs;
+		const blob = "data" in args && args.data instanceof Blob ? args.data : "inputs" in args ? args.inputs : undefined;
+		const contentType = blob?.type;
+		if (!contentType) {
+			throw new Error(
+				`Unable to determine the input's content-type. Make sure your are passing a Blob when using provider fal-ai.`
+			);
+		}
+		if (!FAL_AI_SUPPORTED_BLOB_TYPES.includes(contentType)) {
+			throw new Error(
+				`Provider fal-ai does not support blob type ${contentType} - supported content types are: ${FAL_AI_SUPPORTED_BLOB_TYPES.join(
+					", "
+				)}`
+			);
+		}
+		const base64audio = base64FromBytes(new Uint8Array(await blob.arrayBuffer()));
+
+		const payload = {
+			...("data" in args ? omit(args, "data") : omit(args, "inputs")),
+			audio_url: `data:${contentType};base64,${base64audio}`,
+		};
+		return JSON.stringify(payload);
+	}
+
+	override getResponse(response: unknown): AutomaticSpeechRecognitionOutput {
+		const res = response as FalAIAutomaticSpeechRecognitionOutput;
+		if (typeof res?.text !== "string") {
+			throw new InferenceOutputError(
+				`Expected { text: string } format from Fal.ai Automatic Speech Recognition, got: ${JSON.stringify(response)}`
+			);
+		}
+		return { text: res.text };
+	}
+}
+
+export class FalAITextToSpeechTask extends FalAITask {
+	constructor() {
+		super("text-to-speech");
+	}
+
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		return {
+			...omit(params.args, ["inputs", "parameters"]),
+			...(params.args.parameters as Record<string, unknown>),
+			lyrics: params.args.inputs,
+		};
+	}
+
+	override async getResponse(response: unknown): Promise<Blob> {
+		const res = response as FalAITextToSpeechOutput;
+		if (typeof res?.audio?.url !== "string") {
+			throw new InferenceOutputError(
+				`Expected { audio: { url: string } } format from Fal.ai Text-to-Speech, got: ${JSON.stringify(response)}`
+			);
+		}
+		try {
+			const urlResponse = await fetch(res.audio.url);
+			if (!urlResponse.ok) {
+				throw new Error(`Failed to fetch audio from ${res.audio.url}: ${urlResponse.statusText}`);
+			}
+			return await urlResponse.blob();
+		} catch (error) {
+			throw new InferenceOutputError(
+				`Error fetching or processing audio from Fal.ai Text-to-Speech URL: ${res.audio.url}. ${
+					error instanceof Error ? error.message : String(error)
+				}`
 			);
 		}
 	}

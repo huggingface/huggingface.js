@@ -43,16 +43,17 @@ export class TogetherConversationalTask extends BaseConversationalTask {
 		super("together", TOGETHER_API_BASE_URL);
 	}
 }
+
 export class TogetherTextGenerationTask extends BaseTextGenerationTask {
 	constructor() {
 		super("together", TOGETHER_API_BASE_URL);
 	}
 
-	override makeBody(params: BodyParams): Record<string, unknown> {
+	override preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
+			model: params.model,
 			...params.args,
 			prompt: params.args.inputs,
-			model: params.args.model,
 		};
 	}
 
@@ -79,15 +80,16 @@ export class TogetherTextToImageTask extends TaskProviderHelper {
 
 	override makeRoute(params: UrlParams): string {
 		void params;
-		return `/v1/images/generations`;
+		return "v1/images/generations";
 	}
 
-	override makeBody(params: BodyParams): Record<string, unknown> {
+	override preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),
 			prompt: params.args.inputs,
 			response_format: "base64",
+			model: params.model,
 		};
 	}
 
