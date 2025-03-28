@@ -70,7 +70,7 @@ export async function makeRequestOptions(
  * Helper that prepares request arguments. - for internal use only
  * This sync version skips the model ID resolution step
  */
-export async function makeRequestOptionsFromResolvedModel(
+export function makeRequestOptionsFromResolvedModel(
 	resolvedModel: string,
 	providerHelper: TaskProviderHelper,
 	args: RequestArgs & {
@@ -81,7 +81,7 @@ export async function makeRequestOptionsFromResolvedModel(
 		task?: InferenceTask;
 		chatCompletion?: boolean;
 	}
-): Promise<{ url: string; info: RequestInit }> {
+): { url: string; info: RequestInit } {
 	const { accessToken, endpointUrl, provider: maybeProvider, model, ...remainingArgs } = args;
 	void model;
 
@@ -140,7 +140,7 @@ export async function makeRequestOptionsFromResolvedModel(
 	headers["User-Agent"] = userAgent;
 
 	// Make body
-	const body = await providerHelper.makeBody({
+	const body = providerHelper.makeBody({
 		args: remainingArgs as Record<string, unknown>,
 		model: resolvedModel,
 		task,

@@ -56,7 +56,7 @@ export class NovitaTextToVideoTask extends TaskProviderHelper {
 		return `/v3/hf/${params.model}`;
 	}
 
-	override makeBody(params: BodyParams): Record<string, unknown> {
+	override preparePayload(params: BodyParams): unknown {
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),

@@ -43,7 +43,7 @@ export abstract class TaskProviderHelper {
 		return headers;
 	}
 
-	async makeBody(params: BodyParams): Promise<unknown> {
+	makeBody(params: BodyParams): unknown {
 		if ("data" in params.args && !!params.args.data) {
 			return params.args.data;
 		}
