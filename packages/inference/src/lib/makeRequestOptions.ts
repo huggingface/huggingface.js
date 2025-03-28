@@ -1,5 +1,5 @@
 import { name as packageName, version as packageVersion } from "../../package.json";
-import { HF_HUB_URL, HF_ROUTER_URL } from "../config";
+import { HF_HEADER_X_BILL_TO, HF_HUB_URL, HF_ROUTER_URL } from "../config";
 import type { TaskProviderHelper } from "../providers/providerHelper";
 import type { InferenceTask, Options, RequestArgs } from "../types";
 import { getProviderHelper } from "./getProviderHelper";
@@ -86,7 +86,8 @@ export async function makeRequestOptionsFromResolvedModel(
 	void model;
 
 	const provider = maybeProvider ?? "hf-inference";
-	const { includeCredentials, task, chatCompletion, signal } = options ?? {};
+	const { includeCredentials, task, chatCompletion, signal, billTo } = options ?? {};
+
 	const authMethod = (() => {
 		if (providerHelper.clientSideRoutingOnly) {
 			// Closed-source providers require an accessToken (cannot be routed).
@@ -126,6 +127,9 @@ export async function makeRequestOptionsFromResolvedModel(
 		},
 		"data" in args && !!args.data
 	);
+	if (billTo) {
+		headers[HF_HEADER_X_BILL_TO] = billTo;
+	}
 
 	// Add user-agent to headers
 	// e.g. @huggingface/inference/3.1.3
