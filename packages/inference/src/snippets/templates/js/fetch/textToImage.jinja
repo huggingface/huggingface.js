@@ -14,16 +14,7 @@ async function query(data) {
 	return result;
 }
 
-query({
-{% set input_items = providerInputs.asObj.items() | list %}
-{% if input_items %}
-{% for key, value in input_items %}
-    {%- if not loop.first %}{{ '\n    ' }}{% else %}{{ '    ' }}{% endif %}
-    {{- key | tojson }}: {{ value | tojson }}
-    {%- if not loop.last %},{% endif %}
-{% endfor %}
-{% if input_items | length > 0 %}{{ '\n' }}{% endif %}
-{% endif %}
-}).then((response) => {
+
+query({ {{ providerInputs.asTsString }} }).then((response) => {
     // Use image
 });
