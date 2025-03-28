@@ -12,7 +12,7 @@ import { omit } from "../../utils/omit";
 
 export type { TextGenerationInput, TextGenerationOutput };
 
-interface TogeteherTextCompletionOutput extends Omit<ChatCompletionOutput, "choices"> {
+interface OpenAICompatibleTextCompletion extends Omit<ChatCompletionOutput, "choices"> {
 	choices: Array<{
 		text: string;
 		finish_reason: TextGenerationOutputFinishReason;
@@ -35,9 +35,9 @@ export async function textGeneration(
 	args: BaseArgs & TextGenerationInput,
 	options?: Options
 ): Promise<TextGenerationOutput> {
-	if (args.provider === "together") {
+	if (args.provider === "together" || args.provider === "featherless-ai") {
 		args.prompt = args.inputs;
-		const raw = await request<TogeteherTextCompletionOutput>(args, {
+		const raw = await request<OpenAICompatibleTextCompletion>(args, {
 			...options,
 			task: "text-generation",
 		});
