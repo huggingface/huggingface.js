@@ -101,14 +101,6 @@ export type RequestArgs = BaseArgs &
 		parameters?: Record<string, unknown>;
 	};
 
-export interface ProviderConfig {
-	makeBaseUrl: ((task?: InferenceTask) => string) | (() => string);
-	makeBody: (params: BodyParams) => Record<string, unknown>;
-	makeHeaders: (params: HeaderParams) => Record<string, string>;
-	makeUrl: (params: UrlParams) => string;
-	clientSideRoutingOnly?: boolean;
-}
-
 export type AuthMethod = "none" | "hf-token" | "credentials-include" | "provider-key";
 
 export interface HeaderParams {
@@ -121,12 +113,10 @@ export interface UrlParams {
 	baseUrl: string;
 	model: string;
 	task?: InferenceTask;
-	chatCompletion?: boolean;
 }
 
 export interface BodyParams {
 	args: Record<string, unknown>;
-	chatCompletion?: boolean;
 	model: string;
 	task?: InferenceTask;
 }

@@ -15,6 +15,7 @@
  * Thanks!
  */
 import { InferenceOutputError } from "../lib/InferenceOutputError";
+import { isUrl } from "../lib/isUrl";
 import type { BodyParams, HeaderParams, InferenceTask, UrlParams } from "../types";
 import { omit } from "../utils/omit";
 import { TaskProviderHelper } from "./providerHelper";
@@ -99,10 +100,36 @@ export class ReplicateTextToSpeechTask extends ReplicateTask {
 	constructor() {
 		super("text-to-speech");
 	}
-	// TODO: Implement this
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	override async getResponse(response: ReplicateOutput): Promise<unknown> {
-		throw new Error("Method not implemented yet.");
+
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		const payload = super.preparePayload(params);
+
+		const input = payload["input"];
+		if (typeof input === "object" && input !== null && "prompt" in input) {
+			const inputObj = input as Record<string, unknown>;
+			inputObj["text"] = inputObj["prompt"];
+			delete inputObj["prompt"];
+		}
+
+		return payload;
+	}
+
+	override async getResponse(response: ReplicateOutput): Promise<Blob> {
+		if (response instanceof Blob) {
+			return response;
+		}
+		if (response && typeof response === "object") {
+			if ("output" in response) {
+				if (typeof response.output === "string") {
+					const urlResponse = await fetch(response.output);
+					return await urlResponse.blob();
+				} else if (Array.isArray(response.output)) {
+					const urlResponse = await fetch(response.output[0]);
+					return await urlResponse.blob();
+				}
+			}
+		}
+		throw new InferenceOutputError("Expected Blob or object with output");
 	}
 }
 
@@ -110,9 +137,19 @@ export class ReplicateTextToVideoTask extends ReplicateTask {
 	constructor() {
 		super("text-to-video");
 	}
-	// TODO: Implement this
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	override async getResponse(response: ReplicateOutput): Promise<unknown> {
-		throw new Error("Method not implemented yet.");
+
+	override async getResponse(response: ReplicateOutput): Promise<Blob> {
+		if (
+			typeof response === "object" &&
+			!!response &&
+			"output" in response &&
+			typeof response.output === "string" &&
+			isUrl(response.output)
+		) {
+			const urlResponse = await fetch(response.output);
+			return await urlResponse.blob();
+		}
+
+		throw new InferenceOutputError("Expected { output: string }");
 	}
 }

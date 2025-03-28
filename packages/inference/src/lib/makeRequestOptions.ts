@@ -26,12 +26,11 @@ export async function makeRequestOptions(
 	options?: Options & {
 		/** In most cases (unless we pass a endpointUrl) we know the task */
 		task?: InferenceTask;
-		chatCompletion?: boolean;
 	}
 ): Promise<{ url: string; info: RequestInit }> {
 	const { provider: maybeProvider, model: maybeModel } = args;
 	const provider = maybeProvider ?? "hf-inference";
-	const { task, chatCompletion } = options ?? {};
+	const { task } = options ?? {};
 	// Validate inputs
 	if (args.endpointUrl && provider !== "hf-inference") {
 		throw new Error(`Cannot use endpointUrl with a third-party provider.`);
@@ -58,7 +57,6 @@ export async function makeRequestOptions(
 		  removeProviderPrefix(maybeModel!, provider)
 		: await getProviderModelId({ model: hfModel, provider }, args, {
 				task,
-				chatCompletion,
 				fetch: options?.fetch,
 		  });
 
@@ -79,14 +77,13 @@ export function makeRequestOptionsFromResolvedModel(
 	},
 	options?: Options & {
 		task?: InferenceTask;
-		chatCompletion?: boolean;
 	}
 ): { url: string; info: RequestInit } {
 	const { accessToken, endpointUrl, provider: maybeProvider, model, ...remainingArgs } = args;
 	void model;
 
 	const provider = maybeProvider ?? "hf-inference";
-	const { includeCredentials, task, chatCompletion, signal, billTo } = options ?? {};
+	const { includeCredentials, task, signal, billTo } = options ?? {};
 
 	const authMethod = (() => {
 		if (providerHelper.clientSideRoutingOnly) {
@@ -116,7 +113,6 @@ export function makeRequestOptionsFromResolvedModel(
 				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", provider)
 				: providerHelper.makeBaseUrl(),
 		model: modelId,
-		chatCompletion,
 		task,
 	});
 	// Make headers
@@ -144,7 +140,6 @@ export function makeRequestOptionsFromResolvedModel(
 		args: remainingArgs as Record<string, unknown>,
 		model: resolvedModel,
 		task,
-		chatCompletion,
 	});
 	/**
 	 * For edge runtimes, leave 'credentials' undefined, otherwise cloudflare workers will error

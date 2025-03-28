@@ -1,5 +1,5 @@
-import type { InferenceTask, Options, RequestArgs } from "../../types";
 import { makeRequestOptions } from "../../lib/makeRequestOptions";
+import type { InferenceTask, Options, RequestArgs } from "../../types";
 
 /**
  * Primitive to make custom calls to the inference provider
@@ -9,8 +9,6 @@ export async function request<T>(
 	options?: Options & {
 		/** In most cases (unless we pass a endpointUrl) we know the task */
 		task?: InferenceTask;
-		/** Is chat completion compatible */
-		chatCompletion?: boolean;
 	}
 ): Promise<T> {
 	const { url, info } = await makeRequestOptions(args, options);
@@ -24,7 +22,7 @@ export async function request<T>(
 		const contentType = response.headers.get("Content-Type");
 		if (["application/json", "application/problem+json"].some((ct) => contentType?.startsWith(ct))) {
 			const output = await response.json();
-			if ([400, 422, 404, 500].includes(response.status) && options?.chatCompletion) {
+			if ([400, 422, 404, 500].includes(response.status) && options?.task === "conversational") {
 				throw new Error(
 					`Server ${args.model} does not seem to support chat completion. Error: ${JSON.stringify(output.error)}`
 				);

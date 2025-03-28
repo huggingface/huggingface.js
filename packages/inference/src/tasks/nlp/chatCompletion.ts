@@ -15,7 +15,6 @@ export async function chatCompletion(
 	const response = await request<ChatCompletionOutput>(args, {
 		...options,
 		task: "conversational",
-		chatCompletion: true,
 	});
 	return providerHelper.getResponse(response) as ChatCompletionOutput;
 }
