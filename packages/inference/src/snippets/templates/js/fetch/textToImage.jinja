@@ -23,7 +23,7 @@ query({
     {%- if not loop.last %},{% endif %}
 {% endfor %}
 {% if input_items | length > 0 %}{{ '\n' }}{% endif %}
-{% endif %} {# End input_items check #}
+{% endif %}
 }).then((response) => {
     // Use image
 });
