@@ -581,7 +581,7 @@ model = BiEncoderModule("${model.id}")
 # model = CrossEncoderModule("${model.id}")
 
 model.score("query", ["doc1", "doc2", "doc3"])`,
-];
+	];
 };
 
 export const llama_cpp_python = (model: ModelData): string[] => {
