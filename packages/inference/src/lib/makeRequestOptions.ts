@@ -81,19 +81,35 @@ export async function makeRequestOptions(
 		throw new Error(`Provider ${provider} requires a model ID to be passed directly.`);
 	}
 
+	if (args.endpointUrl) {
+		return makeRequestOptionsFromResolvedModel(
+			{ endpointUrl: args.endpointUrl, resolvedModel: maybeModel },
+			args,
+			options
+		);
+	}
+
+	if (providerConfig.clientSideRoutingOnly) {
+		if (!maybeModel) {
+			throw new Error(`Provider ${provider} requires a model ID to be passed directly.`);
+		}
+		return makeRequestOptionsFromResolvedModel(
+			{ resolvedModel: removeProviderPrefix(maybeModel, provider) },
+			args,
+			options
+		);
+	}
+
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const hfModel = maybeModel ?? (await loadDefaultModel(task!));
-	const resolvedModel = providerConfig.clientSideRoutingOnly
-		? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		  removeProviderPrefix(maybeModel!, provider)
-		: await getProviderModelId({ model: hfModel, provider }, args, {
-				task,
-				chatCompletion,
-				fetch: options?.fetch,
-		  });
+	const resolvedModel = await getProviderModelId({ model: hfModel, provider }, args, {
+		task,
+		chatCompletion,
+		fetch: options?.fetch,
+	});
 
 	// Use the sync version with the resolved model
-	return makeRequestOptionsFromResolvedModel(resolvedModel, args, options);
+	return makeRequestOptionsFromResolvedModel({ resolvedModel }, args, options);
 }
 
 /**
@@ -101,7 +117,10 @@ export async function makeRequestOptions(
  * This sync version skips the model ID resolution step
  */
 export function makeRequestOptionsFromResolvedModel(
-	resolvedModel: string,
+	/**
+	 * Should only be undefined if the endpointUrl is provided
+	 */
+	input: { endpointUrl: string; resolvedModel?: string } | { endpointUrl?: undefined; resolvedModel: string },
 	args: RequestArgs & {
 		data?: Blob | ArrayBuffer;
 		stream?: boolean;
@@ -113,6 +132,7 @@ export function makeRequestOptionsFromResolvedModel(
 ): { url: string; info: RequestInit } {
 	const { accessToken, endpointUrl, provider: maybeProvider, model, ...remainingArgs } = args;
 	void model;
+	void endpointUrl;
 
 	const provider = maybeProvider ?? "hf-inference";
 	const providerConfig = providerConfigs[provider];
@@ -138,20 +158,25 @@ export function makeRequestOptionsFromResolvedModel(
 	})();
 
 	// Make URL
-	const url = endpointUrl
-		? chatCompletion
-			? endpointUrl + `/v1/chat/completions`
-			: endpointUrl
-		: providerConfig.makeUrl({
-				authMethod,
-				baseUrl:
-					authMethod !== "provider-key"
-						? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", provider)
-						: providerConfig.makeBaseUrl(task),
-				model: resolvedModel,
-				chatCompletion,
-				task,
-		  });
+	const url = (() => {
+		if (input.endpointUrl !== undefined) {
+			if (chatCompletion) {
+				return `${input.endpointUrl}/v1/chat/completions`;
+			}
+			return input.endpointUrl;
+		}
+
+		return providerConfig.makeUrl({
+			authMethod,
+			baseUrl:
+				authMethod !== "provider-key"
+					? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", provider)
+					: providerConfig.makeBaseUrl(task),
+			model: input.resolvedModel,
+			chatCompletion,
+			task,
+		});
+	})();
 
 	// Make headers
 	const binary = "data" in args && !!args.data;
@@ -182,7 +207,7 @@ export function makeRequestOptionsFromResolvedModel(
 		: JSON.stringify(
 				providerConfig.makeBody({
 					args: remainingArgs as Record<string, unknown>,
-					model: resolvedModel,
+					model: input.resolvedModel,
 					task,
 					chatCompletion,
 				})

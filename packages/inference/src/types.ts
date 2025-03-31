@@ -127,6 +127,6 @@ export interface UrlParams {
 export interface BodyParams {
 	args: Record<string, unknown>;
 	chatCompletion?: boolean;
-	model: string;
+	model?: string;
 	task?: InferenceTask;
 }
