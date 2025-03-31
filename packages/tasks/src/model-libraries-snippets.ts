@@ -560,8 +560,7 @@ model = BiEncoderModule("${model.id}")
 
 model.score("query", ["doc1", "doc2", "doc3"])`,
 		];
-	} 
-	else if (model.tags.includes("cross-encoder")) {
+	} else if (model.tags.includes("cross-encoder")) {
 		return [
 			`#install from https://github.com/webis-de/lightning-ir
 
