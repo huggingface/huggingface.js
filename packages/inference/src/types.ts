@@ -72,7 +72,7 @@ export interface BaseArgs {
 	model?: ModelId;
 
 	/**
-	 * The URL of the endpoint to use. If not specified, will call huggingface.co/api/tasks to get the default endpoint for the task.
+	 * The URL of the endpoint to use.
 	 *
 	 * If specified, will use this URL instead of the default one.
 	 */
