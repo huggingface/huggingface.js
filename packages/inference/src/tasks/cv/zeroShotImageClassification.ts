@@ -1,9 +1,8 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
-import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
-import type { RequestArgs } from "../../types";
-import { base64FromBytes } from "../../utils/base64FromBytes";
 import type { ZeroShotImageClassificationInput, ZeroShotImageClassificationOutput } from "@huggingface/tasks";
+import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import type { BaseArgs, Options, RequestArgs } from "../../types";
+import { base64FromBytes } from "../../utils/base64FromBytes";
+import { innerRequest } from "../../utils/request";
 
 /**
  * @deprecated
@@ -46,10 +45,12 @@ export async function zeroShotImageClassification(
 	options?: Options
 ): Promise<ZeroShotImageClassificationOutput> {
 	const payload = await preparePayload(args);
-	const res = await request<ZeroShotImageClassificationOutput>(payload, {
-		...options,
-		task: "zero-shot-image-classification",
-	});
+	const res = (
+		await innerRequest<ZeroShotImageClassificationOutput>(payload, {
+			...options,
+			task: "zero-shot-image-classification",
+		})
+	).data;
 	const isValidOutput =
 		Array.isArray(res) && res.every((x) => typeof x.label === "string" && typeof x.score === "number");
 	if (!isValidOutput) {

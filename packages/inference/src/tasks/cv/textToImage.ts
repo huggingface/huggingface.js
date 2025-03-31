@@ -1,9 +1,9 @@
 import type { TextToImageInput, TextToImageOutput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, InferenceProvider, Options } from "../../types";
-import { omit } from "../../utils/omit";
-import { request } from "../custom/request";
 import { delay } from "../../utils/delay";
+import { omit } from "../../utils/omit";
+import { innerRequest } from "../../utils/request";
 
 export type TextToImageArgs = BaseArgs & TextToImageInput;
 
@@ -65,16 +65,18 @@ export async function textToImage(args: TextToImageArgs, options?: TextToImageOp
 					...getResponseFormatArg(args.provider),
 					prompt: args.inputs,
 			  };
-	const res = await request<
-		| TextToImageOutput
-		| Base64ImageGeneration
-		| OutputUrlImageGeneration
-		| BlackForestLabsResponse
-		| HyperbolicTextToImageOutput
-	>(payload, {
-		...options,
-		task: "text-to-image",
-	});
+	const res = (
+		await innerRequest<
+			| TextToImageOutput
+			| Base64ImageGeneration
+			| OutputUrlImageGeneration
+			| BlackForestLabsResponse
+			| HyperbolicTextToImageOutput
+		>(payload, {
+			...options,
+			task: "text-to-image",
+		})
+	).data;
 
 	if (res && typeof res === "object") {
 		if (args.provider === "black-forest-labs" && "polling_url" in res && typeof res.polling_url === "string") {

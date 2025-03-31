@@ -1,7 +1,7 @@
-import { request } from "../custom/request";
-import type { BaseArgs, Options } from "../../types";
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { ObjectDetectionInput, ObjectDetectionOutput } from "@huggingface/tasks";
+import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import type { BaseArgs, Options } from "../../types";
+import { innerRequest } from "../../utils/request";
 import { preparePayload, type LegacyImageInput } from "./utils";
 
 export type ObjectDetectionArgs = BaseArgs & (ObjectDetectionInput | LegacyImageInput);
@@ -12,10 +12,12 @@ export type ObjectDetectionArgs = BaseArgs & (ObjectDetectionInput | LegacyImage
  */
 export async function objectDetection(args: ObjectDetectionArgs, options?: Options): Promise<ObjectDetectionOutput> {
 	const payload = preparePayload(args);
-	const res = await request<ObjectDetectionOutput>(payload, {
-		...options,
-		task: "object-detection",
-	});
+	const res = (
+		await innerRequest<ObjectDetectionOutput>(payload, {
+			...options,
+			task: "object-detection",
+		})
+	).data;
 	const isValidOutput =
 		Array.isArray(res) &&
 		res.every(

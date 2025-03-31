@@ -2,10 +2,10 @@ import type { AutomaticSpeechRecognitionInput, AutomaticSpeechRecognitionOutput 
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options, RequestArgs } from "../../types";
 import { base64FromBytes } from "../../utils/base64FromBytes";
-import { request } from "../custom/request";
+import { omit } from "../../utils/omit";
+import { innerRequest } from "../../utils/request";
 import type { LegacyAudioInput } from "./utils";
 import { preparePayload } from "./utils";
-import { omit } from "../../utils/omit";
 
 export type AutomaticSpeechRecognitionArgs = BaseArgs & (AutomaticSpeechRecognitionInput | LegacyAudioInput);
 /**
@@ -17,10 +17,12 @@ export async function automaticSpeechRecognition(
 	options?: Options
 ): Promise<AutomaticSpeechRecognitionOutput> {
 	const payload = await buildPayload(args);
-	const res = await request<AutomaticSpeechRecognitionOutput>(payload, {
-		...options,
-		task: "automatic-speech-recognition",
-	});
+	const res = (
+		await innerRequest<AutomaticSpeechRecognitionOutput>(payload, {
+			...options,
+			task: "automatic-speech-recognition",
+		})
+	).data;
 	const isValidOutput = typeof res?.text === "string";
 	if (!isValidOutput) {
 		throw new InferenceOutputError("Expected {text: string}");

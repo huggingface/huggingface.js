@@ -1,6 +1,6 @@
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
+import { innerRequest } from "../../utils/request";
 
 export type TabularRegressionArgs = BaseArgs & {
 	inputs: {
@@ -25,10 +25,12 @@ export async function tabularRegression(
 	args: TabularRegressionArgs,
 	options?: Options
 ): Promise<TabularRegressionOutput> {
-	const res = await request<TabularRegressionOutput>(args, {
-		...options,
-		task: "tabular-regression",
-	});
+	const res = (
+		await innerRequest<TabularRegressionOutput>(args, {
+			...options,
+			task: "tabular-regression",
+		})
+	).data;
 	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x === "number");
 	if (!isValidOutput) {
 		throw new InferenceOutputError("Expected number[]");

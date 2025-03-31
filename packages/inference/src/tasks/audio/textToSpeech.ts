@@ -2,7 +2,7 @@ import type { TextToSpeechInput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { omit } from "../../utils/omit";
-import { request } from "../custom/request";
+import { innerRequest } from "../../utils/request";
 type TextToSpeechArgs = BaseArgs & TextToSpeechInput;
 
 interface OutputUrlTextToSpeechGeneration {
@@ -22,10 +22,12 @@ export async function textToSpeech(args: TextToSpeechArgs, options?: Options): P
 					text: args.inputs,
 			  }
 			: args;
-	const res = await request<Blob | OutputUrlTextToSpeechGeneration>(payload, {
-		...options,
-		task: "text-to-speech",
-	});
+	const res = (
+		await innerRequest<Blob | OutputUrlTextToSpeechGeneration>(payload, {
+			...options,
+			task: "text-to-speech",
+		})
+	).data;
 	if (res instanceof Blob) {
 		return res;
 	}

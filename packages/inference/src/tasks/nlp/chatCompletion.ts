@@ -1,7 +1,7 @@
+import type { ChatCompletionInput, ChatCompletionOutput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
-import type { ChatCompletionInput, ChatCompletionOutput } from "@huggingface/tasks";
+import { innerRequest } from "../../utils/request";
 
 /**
  * Use the chat completion endpoint to generate a response to a prompt, using OpenAI message completion API no stream
@@ -10,12 +10,13 @@ export async function chatCompletion(
 	args: BaseArgs & ChatCompletionInput,
 	options?: Options
 ): Promise<ChatCompletionOutput> {
-	const res = await request<ChatCompletionOutput>(args, {
-		...options,
-		task: "text-generation",
-		chatCompletion: true,
-	});
-
+	const res = (
+		await innerRequest<ChatCompletionOutput>(args, {
+			...options,
+			task: "text-generation",
+			chatCompletion: true,
+		})
+	).data;
 	const isValidOutput =
 		typeof res === "object" &&
 		Array.isArray(res?.choices) &&

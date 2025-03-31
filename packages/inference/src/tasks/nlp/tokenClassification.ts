@@ -1,8 +1,8 @@
 import type { TokenClassificationInput, TokenClassificationOutput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
+import { innerRequest } from "../../utils/request";
 import { toArray } from "../../utils/toArray";
-import { request } from "../custom/request";
 
 export type TokenClassificationArgs = BaseArgs & TokenClassificationInput;
 
@@ -14,10 +14,12 @@ export async function tokenClassification(
 	options?: Options
 ): Promise<TokenClassificationOutput> {
 	const res = toArray(
-		await request<TokenClassificationOutput[number] | TokenClassificationOutput>(args, {
-			...options,
-			task: "token-classification",
-		})
+		(
+			await innerRequest<TokenClassificationOutput[number] | TokenClassificationOutput>(args, {
+				...options,
+				task: "token-classification",
+			})
+		).data
 	);
 	const isValidOutput =
 		Array.isArray(res) &&

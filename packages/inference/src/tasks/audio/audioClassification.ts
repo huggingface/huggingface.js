@@ -1,7 +1,7 @@
 import type { AudioClassificationInput, AudioClassificationOutput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
+import { innerRequest } from "../../utils/request";
 import type { LegacyAudioInput } from "./utils";
 import { preparePayload } from "./utils";
 
@@ -16,10 +16,12 @@ export async function audioClassification(
 	options?: Options
 ): Promise<AudioClassificationOutput> {
 	const payload = preparePayload(args);
-	const res = await request<AudioClassificationOutput>(payload, {
-		...options,
-		task: "audio-classification",
-	});
+	const res = (
+		await innerRequest<AudioClassificationOutput>(payload, {
+			...options,
+			task: "audio-classification",
+		})
+	).data;
 	const isValidOutput =
 		Array.isArray(res) && res.every((x) => typeof x.label === "string" && typeof x.score === "number");
 	if (!isValidOutput) {

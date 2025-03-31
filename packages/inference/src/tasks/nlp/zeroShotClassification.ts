@@ -1,8 +1,8 @@
 import type { ZeroShotClassificationInput, ZeroShotClassificationOutput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
+import { innerRequest } from "../../utils/request";
 import { toArray } from "../../utils/toArray";
-import { request } from "../custom/request";
 
 export type ZeroShotClassificationArgs = BaseArgs & ZeroShotClassificationInput;
 
@@ -14,10 +14,12 @@ export async function zeroShotClassification(
 	options?: Options
 ): Promise<ZeroShotClassificationOutput> {
 	const res = toArray(
-		await request<ZeroShotClassificationOutput[number] | ZeroShotClassificationOutput>(args, {
-			...options,
-			task: "zero-shot-classification",
-		})
+		(
+			await innerRequest<ZeroShotClassificationOutput[number] | ZeroShotClassificationOutput>(args, {
+				...options,
+				task: "zero-shot-classification",
+			})
+		).data
 	);
 	const isValidOutput =
 		Array.isArray(res) &&

@@ -572,31 +572,6 @@ await hf.tabularClassification({
 })
 ```
 
-## Custom Calls
-
-For models with custom parameters / outputs.
-
-```typescript
-await hf.request({
-  model: 'my-custom-model',
-  inputs: 'hello world',
-  parameters: {
-    custom_param: 'some magic',
-  }
-})
-
-// Custom streaming call, for models with custom parameters / outputs
-for await (const output of hf.streamingRequest({
-  model: 'my-custom-model',
-  inputs: 'hello world',
-  parameters: {
-    custom_param: 'some magic',
-  }
-})) {
-  ...
-}
-```
-
 You can use any Chat Completion API-compatible provider with the `chatCompletion` method.
 
 ```typescript

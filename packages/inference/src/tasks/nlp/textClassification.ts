@@ -1,7 +1,7 @@
 import type { TextClassificationInput, TextClassificationOutput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
+import { innerRequest } from "../../utils/request";
 
 export type TextClassificationArgs = BaseArgs & TextClassificationInput;
 
@@ -13,11 +13,11 @@ export async function textClassification(
 	options?: Options
 ): Promise<TextClassificationOutput> {
 	const res = (
-		await request<TextClassificationOutput>(args, {
+		await innerRequest<TextClassificationOutput>(args, {
 			...options,
 			task: "text-classification",
 		})
-	)?.[0];
+	).data?.[0];
 	const isValidOutput =
 		Array.isArray(res) && res.every((x) => typeof x?.label === "string" && typeof x.score === "number");
 	if (!isValidOutput) {

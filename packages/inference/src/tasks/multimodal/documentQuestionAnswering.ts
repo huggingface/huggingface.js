@@ -1,14 +1,13 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
-import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
-import type { RequestArgs } from "../../types";
-import { toArray } from "../../utils/toArray";
-import { base64FromBytes } from "../../utils/base64FromBytes";
 import type {
 	DocumentQuestionAnsweringInput,
 	DocumentQuestionAnsweringInputData,
 	DocumentQuestionAnsweringOutput,
 } from "@huggingface/tasks";
+import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import type { BaseArgs, Options, RequestArgs } from "../../types";
+import { base64FromBytes } from "../../utils/base64FromBytes";
+import { innerRequest } from "../../utils/request";
+import { toArray } from "../../utils/toArray";
 
 /// Override the type to properly set inputs.image as Blob
 export type DocumentQuestionAnsweringArgs = BaseArgs &
@@ -30,12 +29,13 @@ export async function documentQuestionAnswering(
 		},
 	} as RequestArgs;
 	const res = toArray(
-		await request<DocumentQuestionAnsweringOutput | DocumentQuestionAnsweringOutput[number]>(reqArgs, {
-			...options,
-			task: "document-question-answering",
-		})
+		(
+			await innerRequest<DocumentQuestionAnsweringOutput | DocumentQuestionAnsweringOutput[number]>(reqArgs, {
+				...options,
+				task: "document-question-answering",
+			})
+		).data
 	);
-
 	const isValidOutput =
 		Array.isArray(res) &&
 		res.every(
