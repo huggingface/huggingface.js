@@ -67,10 +67,7 @@ export interface BaseArgs {
 	/**
 	 * The HF model to use.
 	 *
-	 * If not specified, will call huggingface.co/api/tasks to get the default model for the task.
-	 *
-	 * /!\ Legacy behavior allows this to be an URL, but this is deprecated and will be removed in the future.
-	 * Use the `endpointUrl` parameter instead.
+	 * If not specified and `endpointUrl` is not specified either, will call huggingface.co/api/tasks to get the default model for the task.
 	 */
 	model?: ModelId;
 
