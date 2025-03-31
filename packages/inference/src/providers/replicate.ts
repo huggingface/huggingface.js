@@ -25,7 +25,7 @@ const makeBaseUrl = (): string => {
 const makeBody = (params: BodyParams): Record<string, unknown> => {
 	return {
 		input: params.args,
-		version: params.model.includes(":") ? params.model.split(":")[1] : undefined,
+		version: params.model?.includes(":") ? params.model.split(":")[1] : undefined,
 	};
 };
 
