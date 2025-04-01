@@ -43,12 +43,12 @@ export class HyperbolicTextGenerationTask extends BaseTextGenerationTask {
 		super("hyperbolic", HYPERBOLIC_API_BASE_URL);
 	}
 
-	makeRoute(params: UrlParams): string {
+	override makeRoute(params: UrlParams): string {
 		void params;
 		return "v1/chat/completions";
 	}
 
-	preparePayload(params: BodyParams): Record<string, unknown> {
+	override preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
 			messages: [{ content: params.args.inputs, role: "user" }],
 			...(params.args.parameters

@@ -31,7 +31,7 @@ export class NovitaTextGenerationTask extends BaseTextGenerationTask {
 		super("novita", NOVITA_API_BASE_URL);
 	}
 
-	makeRoute(params: UrlParams): string {
+	override makeRoute(params: UrlParams): string {
 		void params;
 		return "/v3/openai/chat/completions";
 	}
@@ -42,7 +42,7 @@ export class NovitaConversationalTask extends BaseConversationalTask {
 		super("novita", NOVITA_API_BASE_URL);
 	}
 
-	makeRoute(params: UrlParams): string {
+	override makeRoute(params: UrlParams): string {
 		void params;
 		return "/v3/openai/chat/completions";
 	}

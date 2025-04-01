@@ -49,7 +49,7 @@ export class TogetherTextGenerationTask extends BaseTextGenerationTask {
 		super("together", TOGETHER_API_BASE_URL);
 	}
 
-	preparePayload(params: BodyParams): Record<string, unknown> {
+	override preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
 			model: params.model,
 			...params.args,

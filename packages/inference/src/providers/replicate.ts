@@ -101,7 +101,7 @@ export class ReplicateTextToSpeechTask extends ReplicateTask {
 		super("text-to-speech");
 	}
 
-	preparePayload(params: BodyParams): Record<string, unknown> {
+	override preparePayload(params: BodyParams): Record<string, unknown> {
 		const payload = super.preparePayload(params);
 
 		const input = payload["input"];
