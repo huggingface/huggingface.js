@@ -44,7 +44,7 @@ export class NebiusTextToImageTask extends TaskProviderHelper {
 		super("nebius", NEBIUS_API_BASE_URL, "text-to-image");
 	}
 
-	override preparePayload(params: BodyParams): Record<string, unknown> {
+	preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),
@@ -54,7 +54,7 @@ export class NebiusTextToImageTask extends TaskProviderHelper {
 		};
 	}
 
-	override makeRoute(params: UrlParams): string {
+	makeRoute(params: UrlParams): string {
 		void params;
 		return "v1/images/generations";
 	}

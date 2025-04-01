@@ -31,7 +31,7 @@ export class NovitaTextGenerationTask extends BaseTextGenerationTask {
 		super("novita", NOVITA_API_BASE_URL);
 	}
 
-	override makeRoute(params: UrlParams): string {
+	makeRoute(params: UrlParams): string {
 		void params;
 		return "/v3/openai/chat/completions";
 	}
@@ -42,7 +42,7 @@ export class NovitaConversationalTask extends BaseConversationalTask {
 		super("novita", NOVITA_API_BASE_URL);
 	}
 
-	override makeRoute(params: UrlParams): string {
+	makeRoute(params: UrlParams): string {
 		void params;
 		return "/v3/openai/chat/completions";
 	}
@@ -52,11 +52,11 @@ export class NovitaTextToVideoTask extends TaskProviderHelper {
 		super("novita", NOVITA_API_BASE_URL, "text-to-video");
 	}
 
-	override makeRoute(params: UrlParams): string {
+	makeRoute(params: UrlParams): string {
 		return `/v3/hf/${params.model}`;
 	}
 
-	override preparePayload(params: BodyParams): unknown {
+	preparePayload(params: BodyParams): unknown {
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),

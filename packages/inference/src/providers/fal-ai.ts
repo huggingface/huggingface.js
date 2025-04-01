@@ -51,10 +51,10 @@ export class FalAITask extends TaskProviderHelper {
 		super("fal-ai", url || "https://fal.run", task);
 	}
 
-	override preparePayload(params: BodyParams): Record<string, unknown> | Promise<Record<string, unknown>> {
+	preparePayload(params: BodyParams): Record<string, unknown> | Promise<Record<string, unknown>> {
 		return params.args;
 	}
-	override makeRoute(params: UrlParams): string {
+	makeRoute(params: UrlParams): string {
 		return `/${params.model}`;
 	}
 	override prepareHeaders(params: HeaderParams, binary: boolean): Record<string, string> {

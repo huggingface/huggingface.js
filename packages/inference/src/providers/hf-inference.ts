@@ -30,7 +30,7 @@ export class HFInferenceTask extends TaskProviderHelper {
 	constructor(task?: InferenceTask) {
 		super("hf-inference", `${HF_ROUTER_URL}/hf-inference`, task);
 	}
-	override preparePayload(params: BodyParams): Record<string, unknown> {
+	preparePayload(params: BodyParams): Record<string, unknown> {
 		return params.args;
 	}
 	override makeUrl(params: UrlParams): string {
@@ -40,7 +40,7 @@ export class HFInferenceTask extends TaskProviderHelper {
 		return super.makeUrl(params);
 	}
 
-	override makeRoute(params: UrlParams): string {
+	makeRoute(params: UrlParams): string {
 		if (params.task && ["feature-extraction", "sentence-similarity"].includes(params.task)) {
 			// when deployed on hf-inference, those two tasks are automatically compatible with one another.
 			return `pipeline/${params.task}/${params.model}`;

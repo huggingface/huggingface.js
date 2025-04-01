@@ -31,7 +31,7 @@ export class BlackForestLabsTextToImageTask extends TaskProviderHelper {
 		super("black-forest-labs", BLACK_FOREST_LABS_AI_API_BASE_URL, "text-to-image");
 	}
 
-	override preparePayload(params: BodyParams): Record<string, unknown> {
+	preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),
@@ -50,7 +50,7 @@ export class BlackForestLabsTextToImageTask extends TaskProviderHelper {
 		return headers;
 	}
 
-	override makeRoute(params: UrlParams): string {
+	makeRoute(params: UrlParams): string {
 		if (!params) {
 			throw new Error("Params are required");
 		}

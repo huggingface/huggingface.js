@@ -14,21 +14,21 @@ export abstract class TaskProviderHelper {
 	) {}
 
 	/**
+	 * Return the response in the expected format.
+	 * Needs to be implemented in the subclasses.
+	 */
+	abstract getResponse(
+		response: unknown,
+		url?: string,
+		headers?: Record<string, string>,
+		outputType?: "url" | "blob"
+	): unknown;
+
+	/**
 	 * Prepare the base URL for the request
 	 */
 	makeBaseUrl(): string {
 		return this.baseUrl;
-	}
-
-	/**
-	 * Prepare the headers for the request
-	 */
-	prepareHeaders(params: HeaderParams, binary: boolean): Record<string, string> {
-		const headers: Record<string, string> = { Authorization: `Bearer ${params.accessToken}` };
-		if (!binary) {
-			headers["Content-Type"] = "application/json";
-		}
-		return headers;
 	}
 
 	/**
@@ -42,15 +42,6 @@ export abstract class TaskProviderHelper {
 	}
 
 	/**
-	 * Prepare the payload for the request
-	 */
-	abstract preparePayload(params: BodyParams): unknown;
-	/**
-	 * Prepare the route for the request
-	 */
-	abstract makeRoute(params: UrlParams): string;
-
-	/**
 	 * Prepare the URL for the request
 	 */
 	makeUrl(params: UrlParams): string {
@@ -59,14 +50,27 @@ export abstract class TaskProviderHelper {
 	}
 
 	/**
-	 * Return the response in the expected format
+	 * Prepare the route for the request
+	 * Needs to be implemented in the subclasses.
 	 */
-	abstract getResponse(
-		response: unknown,
-		url?: string,
-		headers?: Record<string, string>,
-		outputType?: "url" | "blob"
-	): unknown;
+	abstract makeRoute(params: UrlParams): string;
+
+	/**
+	 * Prepare the headers for the request
+	 */
+	prepareHeaders(params: HeaderParams, binary: boolean): Record<string, string> {
+		const headers: Record<string, string> = { Authorization: `Bearer ${params.accessToken}` };
+		if (!binary) {
+			headers["Content-Type"] = "application/json";
+		}
+		return headers;
+	}
+
+	/**
+	 * Prepare the payload for the request
+	 * Needs to be implemented in the subclasses.
+	 */
+	abstract preparePayload(params: BodyParams): unknown;
 }
 
 export class BaseConversationalTask extends TaskProviderHelper {
@@ -74,12 +78,12 @@ export class BaseConversationalTask extends TaskProviderHelper {
 		super(provider, baseUrl, "conversational", clientSideRoutingOnly);
 	}
 
-	override makeRoute(params: UrlParams): string {
+	makeRoute(params: UrlParams): string {
 		void params;
 		return "v1/chat/completions";
 	}
 
-	override preparePayload(params: BodyParams): Record<string, unknown> {
+	preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
 			...params.args,
 			model: params.model,
@@ -110,13 +114,13 @@ export class BaseTextGenerationTask extends TaskProviderHelper {
 	constructor(provider: string, baseUrl: string, clientSideRoutingOnly: boolean = false) {
 		super(provider, baseUrl, "text-generation", clientSideRoutingOnly);
 	}
-	override preparePayload(params: BodyParams): Record<string, unknown> {
+	preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
 			...params.args,
 			model: params.model,
 		};
 	}
-	override makeRoute(params: UrlParams): string {
+	makeRoute(params: UrlParams): string {
 		void params;
 		return "v1/completions";
 	}

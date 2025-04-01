@@ -49,7 +49,7 @@ export class TogetherTextGenerationTask extends BaseTextGenerationTask {
 		super("together", TOGETHER_API_BASE_URL);
 	}
 
-	override preparePayload(params: BodyParams): Record<string, unknown> {
+	preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
 			model: params.model,
 			...params.args,
@@ -78,12 +78,12 @@ export class TogetherTextToImageTask extends TaskProviderHelper {
 		super("together", TOGETHER_API_BASE_URL, "text-to-image");
 	}
 
-	override makeRoute(params: UrlParams): string {
+	makeRoute(params: UrlParams): string {
 		void params;
 		return "v1/images/generations";
 	}
 
-	override preparePayload(params: BodyParams): Record<string, unknown> {
+	preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),

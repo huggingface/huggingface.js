@@ -29,13 +29,13 @@ export class ReplicateTask extends TaskProviderHelper {
 		super("replicate", url || "https://api.replicate.com", task);
 	}
 
-	override makeRoute(params: UrlParams): string {
+	makeRoute(params: UrlParams): string {
 		if (params.model.includes(":")) {
 			return "v1/predictions";
 		}
 		return `v1/models/${params.model}/predictions`;
 	}
-	override preparePayload(params: BodyParams): Record<string, unknown> {
+	preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
 			input: {
 				...omit(params.args, ["inputs", "parameters"]),
@@ -101,7 +101,7 @@ export class ReplicateTextToSpeechTask extends ReplicateTask {
 		super("text-to-speech");
 	}
 
-	override preparePayload(params: BodyParams): Record<string, unknown> {
+	preparePayload(params: BodyParams): Record<string, unknown> {
 		const payload = super.preparePayload(params);
 
 		const input = payload["input"];

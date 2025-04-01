@@ -43,12 +43,12 @@ export class HyperbolicTextGenerationTask extends BaseTextGenerationTask {
 		super("hyperbolic", HYPERBOLIC_API_BASE_URL);
 	}
 
-	override makeRoute(params: UrlParams): string {
+	makeRoute(params: UrlParams): string {
 		void params;
 		return "v1/chat/completions";
 	}
 
-	override preparePayload(params: BodyParams): Record<string, unknown> {
+	preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
 			messages: [{ content: params.args.inputs, role: "user" }],
 			...(params.args.parameters
@@ -84,12 +84,12 @@ export class HyperbolicTextToImageTask extends TaskProviderHelper {
 		super("hyperbolic", HYPERBOLIC_API_BASE_URL, "text-to-image");
 	}
 
-	override makeRoute(params: UrlParams): string {
+	makeRoute(params: UrlParams): string {
 		void params;
 		return `/v1/images/generations`;
 	}
 
-	override preparePayload(params: BodyParams): Record<string, unknown> {
+	preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),

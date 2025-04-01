@@ -21,7 +21,7 @@ export class CohereConversationalTask extends BaseConversationalTask {
 	constructor() {
 		super("cohere", "https://api.cohere.com");
 	}
-	override makeRoute(params: UrlParams): string {
+	makeRoute(params: UrlParams): string {
 		void params;
 		return "/compatibility/v1/chat/completions";
 	}
