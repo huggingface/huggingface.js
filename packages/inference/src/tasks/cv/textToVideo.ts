@@ -39,37 +39,37 @@ export async function textToVideo(args: TextToVideoArgs, options?: Options): Pro
 		task: "text-to-video",
 	});
 
-	const { data: res, requestContext } = response;
+	const { data, requestContext } = response;
 	if (args.provider === "fal-ai") {
 		return await pollFalResponse(
-			res as FalAiQueueOutput,
+			data as FalAiQueueOutput,
 			requestContext.url,
 			requestContext.info.headers as Record<string, string>
 		);
 	} else if (args.provider === "novita") {
 		const isValidOutput =
-			typeof res === "object" &&
-			!!res &&
-			"video" in res &&
-			typeof res.video === "object" &&
-			!!res.video &&
-			"video_url" in res.video &&
-			typeof res.video.video_url === "string" &&
-			isUrl(res.video.video_url);
+			typeof data === "object" &&
+			!!data &&
+			"video" in data &&
+			typeof data.video === "object" &&
+			!!data.video &&
+			"video_url" in data.video &&
+			typeof data.video.video_url === "string" &&
+			isUrl(data.video.video_url);
 		if (!isValidOutput) {
 			throw new InferenceOutputError("Expected { video: { video_url: string } }");
 		}
-		const urlResponse = await fetch((res as NovitaOutput).video.video_url);
+		const urlResponse = await fetch((data as NovitaOutput).video.video_url);
 		return await urlResponse.blob();
 	} else {
 		/// TODO: Replicate: handle the case where the generation request "times out" / is async (ie output is null)
 		/// https://replicate.com/docs/topics/predictions/create-a-prediction
 		const isValidOutput =
-			typeof res === "object" && !!res && "output" in res && typeof res.output === "string" && isUrl(res.output);
+			typeof data === "object" && !!data && "output" in data && typeof data.output === "string" && isUrl(data.output);
 		if (!isValidOutput) {
 			throw new InferenceOutputError("Expected { output: string }");
 		}
-		const urlResponse = await fetch(res.output);
+		const urlResponse = await fetch(data.output);
 		return await urlResponse.blob();
 	}
 }
