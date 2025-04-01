@@ -24,18 +24,29 @@ export interface Options {
 	 * (Default: "same-origin"). String | Boolean. Credentials to use for the request. If this is a string, it will be passed straight on. If it's a boolean, true will be "include" and false will not send credentials at all.
 	 */
 	includeCredentials?: string | boolean;
+
+	/**
+	 * The billing account to use for the requests.
+	 *
+	 * By default the requests are billed on the user's account.
+	 * Requests can only be billed to an organization the user is a member of, and which has subscribed to Enterprise Hub.
+	 */
+	billTo?: string;
 }
 
 export type InferenceTask = Exclude<PipelineType, "other">;
 
 export const INFERENCE_PROVIDERS = [
 	"black-forest-labs",
+	"cerebras",
+	"cohere",
 	"fal-ai",
 	"fireworks-ai",
 	"hf-inference",
 	"hyperbolic",
 	"nebius",
 	"novita",
+	"openai",
 	"replicate",
 	"sambanova",
 	"together",
@@ -88,5 +99,34 @@ export type RequestArgs = BaseArgs &
 		| ChatCompletionInput
 	) & {
 		parameters?: Record<string, unknown>;
-		accessToken?: string;
 	};
+
+export interface ProviderConfig {
+	makeBaseUrl: ((task?: InferenceTask) => string) | (() => string);
+	makeBody: (params: BodyParams) => Record<string, unknown>;
+	makeHeaders: (params: HeaderParams) => Record<string, string>;
+	makeUrl: (params: UrlParams) => string;
+	clientSideRoutingOnly?: boolean;
+}
+
+export type AuthMethod = "none" | "hf-token" | "credentials-include" | "provider-key";
+
+export interface HeaderParams {
+	accessToken?: string;
+	authMethod: AuthMethod;
+}
+
+export interface UrlParams {
+	authMethod: AuthMethod;
+	baseUrl: string;
+	model: string;
+	task?: InferenceTask;
+	chatCompletion?: boolean;
+}
+
+export interface BodyParams {
+	args: Record<string, unknown>;
+	chatCompletion?: boolean;
+	model: string;
+	task?: InferenceTask;
+}

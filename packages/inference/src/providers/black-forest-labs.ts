@@ -1,5 +1,3 @@
-export const BLACKFORESTLABS_AI_API_BASE_URL = "https://api.us1.bfl.ai/v1";
-
 /**
  * See the registered mapping of HF model ID => Black Forest Labs model ID here:
  *
@@ -16,3 +14,33 @@ export const BLACKFORESTLABS_AI_API_BASE_URL = "https://api.us1.bfl.ai/v1";
  *
  * Thanks!
  */
+import type { BodyParams, HeaderParams, ProviderConfig, UrlParams } from "../types";
+
+const BLACK_FOREST_LABS_AI_API_BASE_URL = "https://api.us1.bfl.ai";
+
+const makeBaseUrl = (): string => {
+	return BLACK_FOREST_LABS_AI_API_BASE_URL;
+};
+
+const makeBody = (params: BodyParams): Record<string, unknown> => {
+	return params.args;
+};
+
+const makeHeaders = (params: HeaderParams): Record<string, string> => {
+	if (params.authMethod === "provider-key") {
+		return { "X-Key": `${params.accessToken}` };
+	} else {
+		return { Authorization: `Bearer ${params.accessToken}` };
+	}
+};
+
+const makeUrl = (params: UrlParams): string => {
+	return `${params.baseUrl}/v1/${params.model}`;
+};
+
+export const BLACK_FOREST_LABS_CONFIG: ProviderConfig = {
+	makeBaseUrl,
+	makeBody,
+	makeHeaders,
+	makeUrl,
+};

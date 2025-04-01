@@ -2,7 +2,6 @@ import type { SentenceSimilarityInput, SentenceSimilarityOutput } from "@hugging
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
 import { request } from "../custom/request";
-import { omit } from "../../utils/omit";
 
 export type SentenceSimilarityArgs = BaseArgs & SentenceSimilarityInput;
 
@@ -13,9 +12,9 @@ export async function sentenceSimilarity(
 	args: SentenceSimilarityArgs,
 	options?: Options
 ): Promise<SentenceSimilarityOutput> {
-	const res = await request<SentenceSimilarityOutput>(prepareInput(args), {
+	const res = await request<SentenceSimilarityOutput>(args, {
 		...options,
-		taskHint: "sentence-similarity",
+		task: "sentence-similarity",
 	});
 
 	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x === "number");
@@ -23,12 +22,4 @@ export async function sentenceSimilarity(
 		throw new InferenceOutputError("Expected number[]");
 	}
 	return res;
-}
-
-function prepareInput(args: SentenceSimilarityArgs) {
-	return {
-		...omit(args, ["inputs", "parameters"]),
-		inputs: { ...omit(args.inputs, "sourceSentence") },
-		parameters: { source_sentence: args.inputs.sourceSentence, ...args.parameters },
-	};
 }

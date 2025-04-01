@@ -4351,179 +4351,6 @@
       }
     }
   },
-  "a6b19a8094fe66f4851ebc649a3df322318b25b99637176107f850384618e1c6": {
-    "url": "https://fal.run/fal-ai/mochi-v1",
-    "init": {
-      "headers": {
-        "Content-Type": "application/json"
-      },
-      "method": "POST",
-      "body": "{\"parameters\":{\"seed\":176},\"prompt\":\"A running dog\"}"
-    },
-    "response": {
-      "body": "{\"video\":{\"url\":\"https://fal.media/files/zebra/hag_CGmcxZTwm4b6RS2Ld_output_1737457748.mp4\",\"content_type\":\"application/octet-stream\",\"file_name\":\"output_1737457748.mp4\",\"file_size\":874855}}",
-      "status": 200,
-      "statusText": "OK",
-      "headers": {
-        "connection": "keep-alive",
-        "content-type": "application/json",
-        "strict-transport-security": "max-age=31536000; includeSubDomains"
-      }
-    }
-  },
-  "7419f8d5dd1d1975a75b0e91a6871b8ae894b1a4ea64e1fb247ed0b1791d6e85": {
-    "url": "https://fal.media/files/zebra/hag_CGmcxZTwm4b6RS2Ld_output_1737457748.mp4",
-    "init": {},
-    "response": {
-      "body": "",
-      "status": 200,
-      "statusText": "OK",
-      "headers": {
-        "access-control-allow-headers": "*",
-        "access-control-allow-methods": "*",
-        "access-control-allow-origin": "*",
-        "access-control-max-age": "86400",
-        "cf-ray": "9056da183f7cf196-CDG",
-        "connection": "keep-alive",
-        "content-type": "application/octet-stream",
-        "server": "cloudflare",
-        "vary": "Accept-Encoding"
-      }
-    }
-  },
-  "5e581059d2855d93ea50aa8b842dcc34bc0a4844fc54b4716da42dfad1b4b3a0": {
-    "url": "https://fal.run/fal-ai/mochi-v1",
-    "init": {
-      "headers": {
-        "Content-Type": "application/json"
-      },
-      "method": "POST",
-      "body": "{\"prompt\":\"A running dog\",\"seed\":176,\"num_inference_steps\":2,\"num_frames\":85,\"resolution\":\"480p\"}"
-    },
-    "response": {
-      "body": "{\"video\":{\"url\":\"https://fal.media/files/penguin/otohzMrhAzJqJihM1SZbk_output_1737461997.mp4\",\"content_type\":\"application/octet-stream\",\"file_name\":\"output_1737461997.mp4\",\"file_size\":938434}}",
-      "status": 200,
-      "statusText": "OK",
-      "headers": {
-        "connection": "keep-alive",
-        "content-type": "application/json",
-        "strict-transport-security": "max-age=31536000; includeSubDomains"
-      }
-    }
-  },
-  "e556343a30fe1c0cb35c68f38deefc4c0e6e5494418936ed97b89196c52d0069": {
-    "url": "https://fal.media/files/penguin/otohzMrhAzJqJihM1SZbk_output_1737461997.mp4",
-    "init": {},
-    "response": {
-      "body": "",
-      "status": 200,
-      "statusText": "OK",
-      "headers": {
-        "access-control-allow-headers": "*",
-        "access-control-allow-methods": "*",
-        "access-control-allow-origin": "*",
-        "access-control-max-age": "86400",
-        "cf-ray": "905741eb9d0e0350-CDG",
-        "connection": "keep-alive",
-        "content-type": "application/octet-stream",
-        "server": "cloudflare",
-        "vary": "Accept-Encoding"
-      }
-    }
-  },
-  "e77a83e0190b4506c10ff4a9ca01d0514f3fa6e9bce63c016209ee122abaf9e7": {
-    "url": "https://fal.run/fal-ai/mochi-v1",
-    "init": {
-      "headers": {
-        "Content-Type": "application/json"
-      },
-      "method": "POST",
-      "body": "{\"prompt\":\"A running dog\",\"seed\":176}"
-    },
-    "response": {
-      "body": "{\"video\":{\"url\":\"https://fal.media/files/kangaroo/03FLlitj0sw_SksFU5Ws1_output_1737462178.mp4\",\"content_type\":\"application/octet-stream\",\"file_name\":\"output_1737462178.mp4\",\"file_size\":1097757}}",
-      "status": 200,
-      "statusText": "OK",
-      "headers": {
-        "connection": "keep-alive",
-        "content-type": "application/json",
-        "strict-transport-security": "max-age=31536000; includeSubDomains"
-      }
-    }
-  },
-  "13f836971b1fa11dcb7ba358e46ea0bfd874762dadaff826bab503faa8b81f6b": {
-    "url": "https://fal.media/files/kangaroo/03FLlitj0sw_SksFU5Ws1_output_1737462178.mp4",
-    "init": {},
-    "response": {
-      "body": "",
-      "status": 200,
-      "statusText": "OK",
-      "headers": {
-        "access-control-allow-headers": "*",
-        "access-control-allow-methods": "*",
-        "access-control-allow-origin": "*",
-        "access-control-max-age": "86400",
-        "cf-ray": "905746692bf3d652-CDG",
-        "connection": "keep-alive",
-        "content-type": "application/octet-stream",
-        "server": "cloudflare",
-        "vary": "Accept-Encoding"
-      }
-    }
-  },
-  "91172a3ea2588a3cb7d0888bcd5fe19e9461d273b05baf98fc7b98468227662d": {
-    "url": "https://api.replicate.com/v1/predictions",
-    "init": {
-      "headers": {
-        "Content-Type": "application/json",
-        "Prefer": "wait"
-      },
-      "method": "POST",
-      "body": "{\"input\":{\"num_inference_steps\":10,\"seed\":178,\"num_frames\":30,\"prompt\":\"A running dog\"},\"version\":\"1944af04d098ef69bed7f9d335d102e652203f268ec4aaa2d836f6217217e460\"}"
-    },
-    "response": {
-      "body": "{\"id\":\"v48356wb8srme0cmjfdrd0kmzm\",\"model\":\"genmoai/mochi-1\",\"version\":\"1944af04d098ef69bed7f9d335d102e652203f268ec4aaa2d836f6217217e460\",\"input\":{\"num_frames\":30,\"num_inference_steps\":10,\"prompt\":\"A running dog\",\"seed\":178},\"logs\":\"\",\"output\":\"https://replicate.delivery/xezq/kbgNy0QZ6bIFMJB84rMEuoD28JrnjyPfw5ZxUyaiMSkuuAEKA/output.mp4\",\"data_removed\":false,\"error\":null,\"status\":\"processing\",\"created_at\":\"2025-01-23T15:50:26.374Z\",\"urls\":{\"cancel\":\"https://api.replicate.com/v1/predictions/v48356wb8srme0cmjfdrd0kmzm/cancel\",\"get\":\"https://api.replicate.com/v1/predictions/v48356wb8srme0cmjfdrd0kmzm\",\"stream\":\"https://stream.replicate.com/v1/files/bcwr-fph2og2nch62esxtzv6ue3ohvbyai74fgqx5ylj7kvaja7fssxka\"}}",
-      "status": 201,
-      "statusText": "Created",
-      "headers": {
-        "alt-svc": "h3=\":443\"; ma=86400",
-        "cf-cache-status": "DYNAMIC",
-        "cf-ray": "9068f07e6cd82a5f-CDG",
-        "connection": "keep-alive",
-        "content-type": "application/json; charset=UTF-8",
-        "nel": "{\"success_fraction\":0,\"report_to\":\"cf-nel\",\"max_age\":604800}",
-        "preference-applied": "wait=60",
-        "ratelimit-remaining": "599",
-        "ratelimit-reset": "1",
-        "report-to": "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report\\/v4?s=V5tXh9%2BYCF7rlqoc%2Bf%2F5Gsgmy7tRtT2Fusf%2FkQSuv7FPObfndoAZud92KeTq9ihNhh9DvY3rMpwgJo7vo30ccxVIdfXGg8WDkz9qftjILvOSceHuUk8KE4gWUgyzrEmMa2e8\"}],\"group\":\"cf-nel\",\"max_age\":604800}",
-        "server": "cloudflare",
-        "server-timing": "cfL4;desc=\"?proto=TCP&rtt=3956&min_rtt=3730&rtt_var=1560&sent=4&recv=5&lost=0&retrans=0&sent_bytes=2849&recv_bytes=979&delivery_rate=776407&cwnd=227&unsent_bytes=0&cid=148a4e2ec5c1cb4b&ts=27590&x=0\"",
-        "strict-transport-security": "max-age=15552000",
-        "vary": "Accept-Encoding"
-      }
-    }
-  },
-  "3c111adf9405a2d0cd8396d0cbf053e7718f56128de0d1c6f06448825ba6a150": {
-    "url": "https://replicate.delivery/xezq/l8ZjGvxNM0ofNCs7g3on55wS1PsYp8lGlCcHNOyFfXJQmUHUA/output.mp4",
-    "init": {},
-    "response": {
-      "body": "",
-      "status": 200,
-      "statusText": "OK",
-      "headers": {
-        "accept-ranges": "bytes",
-        "access-control-allow-origin": "*",
-        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
-        "cache-control": "public,max-age=3600",
-        "cache-id": "PAR-8ec5b013",
-        "cache-status": "miss",
-        "content-type": "video/mp4",
-        "etag": "\"4f3e69b2139f01c08a1f7a301223e967\"",
-        "last-modified": "Tue, 21 Jan 2025 12:48:16 GMT",
-        "server": "UploadServer"
-      }
-    }
-  },
   "2422845812e6f1c0ddc454c0a917a3694049edaaa12d602212a7d3dea82350e8": {
     "url": "https://fal.run/fal-ai/flux/schnell",
     "init": {
@@ -4559,46 +4386,6 @@
         "cf-ray": "90578134a8e4d14d-CDG",
         "connection": "keep-alive",
         "content-type": "image/jpeg",
-        "server": "cloudflare",
-        "vary": "Accept-Encoding"
-      }
-    }
-  },
-  "e026782aca942c2ad149dce0163299aac5af863924cae3e0b5a1c464ea591506": {
-    "url": "https://fal.run/fal-ai/mochi-v1",
-    "init": {
-      "headers": {
-        "Content-Type": "application/json"
-      },
-      "method": "POST",
-      "body": "{\"seed\":176,\"num_inference_steps\":2,\"num_frames\":85,\"resolution\":\"480p\",\"prompt\":\"A running dog\"}"
-    },
-    "response": {
-      "body": "{\"video\":{\"url\":\"https://fal.media/files/monkey/LE5tfnsuui-CHRI53J2_G_output_1737464726.mp4\",\"content_type\":\"application/octet-stream\",\"file_name\":\"output_1737464726.mp4\",\"file_size\":570756}}",
-      "status": 200,
-      "statusText": "OK",
-      "headers": {
-        "connection": "keep-alive",
-        "content-type": "application/json",
-        "strict-transport-security": "max-age=31536000; includeSubDomains"
-      }
-    }
-  },
-  "7fe6560d50ca91805967420d558fd497b43eda54500c657e039b37ccb785146b": {
-    "url": "https://fal.media/files/monkey/LE5tfnsuui-CHRI53J2_G_output_1737464726.mp4",
-    "init": {},
-    "response": {
-      "body": "",
-      "status": 200,
-      "statusText": "OK",
-      "headers": {
-        "access-control-allow-headers": "*",
-        "access-control-allow-methods": "*",
-        "access-control-allow-origin": "*",
-        "access-control-max-age": "86400",
-        "cf-ray": "905784a69c3803ff-CDG",
-        "connection": "keep-alive",
-        "content-type": "application/octet-stream",
         "server": "cloudflare",
         "vary": "Accept-Encoding"
       }
@@ -4642,46 +4429,6 @@
       "statusText": "OK",
       "headers": {
         "content-type": "image/jpeg"
-      }
-    }
-  },
-  "c5044b473b3f8833f20875e9efcd93b965f04dcd4b0a04a460464f7abda64cac": {
-    "url": "https://fal.run/fal-ai/mochi-v1",
-    "init": {
-      "headers": {
-        "Content-Type": "application/json"
-      },
-      "method": "POST",
-      "body": "{\"seed\":176,\"prompt\":\"A running dog\"}"
-    },
-    "response": {
-      "body": "{\"video\":{\"url\":\"https://fal.media/files/rabbit/dukHPBkQTdV2ZFuylnDwY_output_1737465066.mp4\",\"content_type\":\"application/octet-stream\",\"file_name\":\"output_1737465066.mp4\",\"file_size\":1041071}}",
-      "status": 200,
-      "statusText": "OK",
-      "headers": {
-        "connection": "keep-alive",
-        "content-type": "application/json",
-        "strict-transport-security": "max-age=31536000; includeSubDomains"
-      }
-    }
-  },
-  "318d866b234e6bec7665ed63395f2ccba1342d71df214a74125a9b551abf57b8": {
-    "url": "https://fal.media/files/rabbit/dukHPBkQTdV2ZFuylnDwY_output_1737465066.mp4",
-    "init": {},
-    "response": {
-      "body": "",
-      "status": 200,
-      "statusText": "OK",
-      "headers": {
-        "access-control-allow-headers": "*",
-        "access-control-allow-methods": "*",
-        "access-control-allow-origin": "*",
-        "access-control-max-age": "86400",
-        "cf-ray": "90578cdf0e34d400-CDG",
-        "connection": "keep-alive",
-        "content-type": "application/octet-stream",
-        "server": "cloudflare",
-        "vary": "Accept-Encoding"
       }
     }
   },
@@ -5582,129 +5329,6 @@
         "cf-ray": "908ff3512eaa3ccb-CDG",
         "connection": "keep-alive",
         "content-type": "image/jpeg",
-        "server": "cloudflare",
-        "vary": "Accept-Encoding"
-      }
-    }
-  },
-  "8e5cd052a79581ad4c5002962c93746ffb9587cff4c55ae8b33f85e0bb6a2fdd": {
-    "url": "https://fal.run/fal-ai/ltx-video",
-    "init": {
-      "headers": {
-        "Content-Type": "application/json"
-      },
-      "method": "POST",
-      "body": "{\"seed\":176,\"num_inference_steps\":2,\"prompt\":\"A running dog\"}"
-    },
-    "response": {
-      "body": "{\"video\":{\"url\":\"https://v3.fal.media/files/kangaroo/IZn0hEJxd5OoapfNX6rSq_tmpfperp_j6.mp4\",\"content_type\":\"application/octet-stream\",\"file_name\":\"tmpfperp_j6.mp4\",\"file_size\":9669497},\"seed\":176}",
-      "status": 200,
-      "statusText": "OK",
-      "headers": {
-        "connection": "keep-alive",
-        "content-type": "application/json",
-        "strict-transport-security": "max-age=31536000; includeSubDomains"
-      }
-    }
-  },
-  "4788fdd7d1d4311ec83fa1208de829b16e6b044607ecb4a7838eebc72114a921": {
-    "url": "https://v3.fal.media/files/kangaroo/IZn0hEJxd5OoapfNX6rSq_tmpfperp_j6.mp4",
-    "init": {},
-    "response": {
-      "body": "",
-      "status": 200,
-      "statusText": "OK",
-      "headers": {
-        "accept-ranges": "bytes",
-        "access-control-allow-headers": "*",
-        "access-control-allow-methods": "*",
-        "access-control-allow-origin": "*",
-        "access-control-max-age": "86400",
-        "cf-ray": "908ff376b8aff120-CDG",
-        "connection": "keep-alive",
-        "content-type": "application/octet-stream",
-        "server": "cloudflare",
-        "vary": "Accept-Encoding"
-      }
-    }
-  },
-  "e4c01272acc7b4b098731e451e96b8d0b087d4c72543f1a8b97cdf1834aabe27": {
-    "url": "https://fal.run/fal-ai/cogvideox-5b",
-    "init": {
-      "headers": {
-        "Content-Type": "application/json"
-      },
-      "method": "POST",
-      "body": "{\"seed\":176,\"num_frames\":2,\"prompt\":\"A running dog\"}"
-    },
-    "response": {
-      "body": "{\"video\":{\"url\":\"https://v3.fal.media/files/penguin/YvilKeP7JL45cNmlJW8hP_tmp.mp4\",\"content_type\":\"application/octet-stream\",\"file_name\":\"tmp.mp4\",\"file_size\":4156439},\"timings\":{\"inference\":58.29187552398071},\"seed\":176,\"prompt\":\"A running dog\"}",
-      "status": 200,
-      "statusText": "OK",
-      "headers": {
-        "connection": "keep-alive",
-        "content-type": "application/json",
-        "strict-transport-security": "max-age=31536000; includeSubDomains"
-      }
-    }
-  },
-  "df62590fb03c7398302c98c0b5d5d1a7d75f77941a9b92be1682b94111e7344a": {
-    "url": "https://v3.fal.media/files/penguin/YvilKeP7JL45cNmlJW8hP_tmp.mp4",
-    "init": {},
-    "response": {
-      "body": "",
-      "status": 200,
-      "statusText": "OK",
-      "headers": {
-        "accept-ranges": "bytes",
-        "access-control-allow-headers": "*",
-        "access-control-allow-methods": "*",
-        "access-control-allow-origin": "*",
-        "access-control-max-age": "86400",
-        "cf-ray": "908ff4b64b0cd156-CDG",
-        "connection": "keep-alive",
-        "content-type": "application/octet-stream",
-        "server": "cloudflare",
-        "vary": "Accept-Encoding"
-      }
-    }
-  },
-  "0abfddc21aaed8b0b716c10a867e23fd10a779863512f2bcf10d2d97b47e8c31": {
-    "url": "https://fal.run/fal-ai/hunyuan-video",
-    "init": {
-      "headers": {
-        "Content-Type": "application/json"
-      },
-      "method": "POST",
-      "body": "{\"seed\":176,\"num_inference_steps\":2,\"num_frames\":85,\"resolution\":\"480p\",\"prompt\":\"A running dog\"}"
-    },
-    "response": {
-      "body": "{\"video\":{\"url\":\"https://v3.fal.media/files/rabbit/L6wJQvUds5HsTUGLZe9Bp_video-1738056610.mp4\",\"content_type\":\"application/octet-stream\",\"file_name\":\"video-1738056610.mp4\",\"file_size\":216048},\"seed\":176}",
-      "status": 200,
-      "statusText": "OK",
-      "headers": {
-        "connection": "keep-alive",
-        "content-type": "application/json",
-        "strict-transport-security": "max-age=31536000; includeSubDomains"
-      }
-    }
-  },
-  "b1b02865c69c8ae30637b72442f9c8f21d15f6d2af0081e5de5d59fbfd3d2d41": {
-    "url": "https://v3.fal.media/files/rabbit/L6wJQvUds5HsTUGLZe9Bp_video-1738056610.mp4",
-    "init": {},
-    "response": {
-      "body": "",
-      "status": 200,
-      "statusText": "OK",
-      "headers": {
-        "accept-ranges": "bytes",
-        "access-control-allow-headers": "*",
-        "access-control-allow-methods": "*",
-        "access-control-allow-origin": "*",
-        "access-control-max-age": "86400",
-        "cf-ray": "908ff665ca2d2a03-CDG",
-        "connection": "keep-alive",
-        "content-type": "application/octet-stream",
         "server": "cloudflare",
         "vary": "Accept-Encoding"
       }
@@ -7210,12 +6834,12 @@
       "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Complete the equation 1 + 1 = , just the answer\"}],\"stream\":true,\"model\":\"meta-llama/Llama-3.3-70B-Instruct\"}"
     },
     "response": {
-      "body": "data: {\"id\": \"chatcmpl-384eff9930a94a08a35564ff77a93d1d\", \"object\": \"chat.completion.chunk\", \"created\": 1739527763, \"model\": \"meta-llama/Llama-3.3-70B-Instruct\", \"choices\": [{\"index\": 0, \"delta\": {\"role\": \"assistant\", \"content\": \"\"}, \"logprobs\": null, \"finish_reason\": null}], \"usage\": {\"prompt_tokens\": 48, \"total_tokens\": 49, \"completion_tokens\": 1}}\n\ndata: {\"id\": \"chatcmpl-384eff9930a94a08a35564ff77a93d1d\", \"object\": \"chat.completion.chunk\", \"created\": 1739527763, \"model\": \"meta-llama/Llama-3.3-70B-Instruct\", \"choices\": [{\"index\": 0, \"delta\": {\"content\": \"2\"}, \"logprobs\": null, \"finish_reason\": null}], \"usage\": {\"prompt_tokens\": 48, \"total_tokens\": 50, \"completion_tokens\": 2}}\n\ndata: {\"id\": \"chatcmpl-384eff9930a94a08a35564ff77a93d1d\", \"object\": \"chat.completion.chunk\", \"created\": 1739527763, \"model\": \"meta-llama/Llama-3.3-70B-Instruct\", \"choices\": [{\"index\": 0, \"delta\": {\"content\": \"\"}, \"logprobs\": null, \"finish_reason\": \"stop\", \"stop_reason\": null}], \"usage\": {\"prompt_tokens\": 48, \"total_tokens\": 51, \"completion_tokens\": 3}}\n\ndata: [DONE]\n\n",
+      "body": "data: {\"id\": \"chatcmpl-f0d655c647b046f183f1c55005f7b447\", \"object\": \"chat.completion.chunk\", \"created\": 1739565096, \"model\": \"meta-llama/Llama-3.3-70B-Instruct\", \"choices\": [{\"index\": 0, \"delta\": {\"role\": \"assistant\", \"content\": \"\"}, \"logprobs\": null, \"finish_reason\": null}], \"usage\": {\"prompt_tokens\": 48, \"total_tokens\": 49, \"completion_tokens\": 1}}\n\ndata: {\"id\": \"chatcmpl-f0d655c647b046f183f1c55005f7b447\", \"object\": \"chat.completion.chunk\", \"created\": 1739565096, \"model\": \"meta-llama/Llama-3.3-70B-Instruct\", \"choices\": [{\"index\": 0, \"delta\": {\"content\": \"2\"}, \"logprobs\": null, \"finish_reason\": null}], \"usage\": {\"prompt_tokens\": 48, \"total_tokens\": 50, \"completion_tokens\": 2}}\n\ndata: {\"id\": \"chatcmpl-f0d655c647b046f183f1c55005f7b447\", \"object\": \"chat.completion.chunk\", \"created\": 1739565096, \"model\": \"meta-llama/Llama-3.3-70B-Instruct\", \"choices\": [{\"index\": 0, \"delta\": {\"content\": \"\"}, \"logprobs\": null, \"finish_reason\": \"stop\", \"stop_reason\": null}], \"usage\": {\"prompt_tokens\": 48, \"total_tokens\": 51, \"completion_tokens\": 3}}\n\ndata: [DONE]\n\n",
       "status": 200,
       "statusText": "OK",
       "headers": {
         "cf-cache-status": "DYNAMIC",
-        "cf-ray": "911c432b88366f13-CDG",
+        "cf-ray": "911fd29d6f2af98f-SJC",
         "connection": "keep-alive",
         "content-type": "text/event-stream; charset=utf-8",
         "server": "cloudflare",
@@ -7233,12 +6857,12 @@
       "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Complete this sentence with words, one plus one is equal \"}],\"temperature\":0.1,\"model\":\"meta-llama/Llama-3.2-3B-Instruct\"}"
     },
     "response": {
-      "body": "{\"id\":\"chat-1da8aa70d8a047769b2561108ea3eb3d\",\"object\":\"chat.completion\",\"created\":1739527764,\"model\":\"meta-llama/Llama-3.2-3B-Instruct\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"...two.\"},\"finish_reason\":\"stop\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":46,\"total_tokens\":50,\"completion_tokens\":4}}",
+      "body": "{\"id\":\"chat-0e6cbe7acf544f339d471512a7456f7f\",\"object\":\"chat.completion\",\"created\":1739565096,\"model\":\"meta-llama/Llama-3.2-3B-Instruct\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"...two.\"},\"finish_reason\":\"stop\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":46,\"total_tokens\":50,\"completion_tokens\":4}}",
       "status": 200,
       "statusText": "OK",
       "headers": {
         "cf-cache-status": "DYNAMIC",
-        "cf-ray": "911c432b8896702b-CDG",
+        "cf-ray": "911fd29d6d43fa9e-SJC",
         "connection": "keep-alive",
         "content-encoding": "gzip",
         "content-type": "application/json",
@@ -7303,12 +6927,12 @@
       "body": "{\"messages\":[{\"content\":\"Paris is\",\"role\":\"user\"}],\"max_tokens\":10,\"temperature\":0,\"top_p\":0.01,\"model\":\"meta-llama/Meta-Llama-3.1-405B-Instruct\"}"
     },
     "response": {
-      "body": "{\"id\":\"chatcmpl-02699e2a1ea24037a2f1d6622a849f1f\",\"object\":\"chat.completion\",\"created\":1739528880,\"model\":\"meta-llama/Meta-Llama-3.1-405B-Instruct\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"...the capital and most populous city of France,\"},\"finish_reason\":\"length\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":37,\"total_tokens\":47,\"completion_tokens\":10}}",
+      "body": "{\"id\":\"chatcmpl-1d7dffa19de042469d18df31a03e9bcf\",\"object\":\"chat.completion\",\"created\":1739565097,\"model\":\"meta-llama/Meta-Llama-3.1-405B-Instruct\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"...the capital and most populous city of France,\"},\"finish_reason\":\"length\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":37,\"total_tokens\":47,\"completion_tokens\":10}}",
       "status": 200,
       "statusText": "OK",
       "headers": {
         "cf-cache-status": "DYNAMIC",
-        "cf-ray": "911c5e690de9d706-CDG",
+        "cf-ray": "911fd2a05f8cfa9e-SJC",
         "connection": "keep-alive",
         "content-encoding": "gzip",
         "content-type": "application/json",
@@ -7349,12 +6973,12 @@
       "body": "{\"height\":128,\"width\":128,\"prompt\":\"award winning high resolution photo of a giant tortoise\",\"model_name\":\"SD2\"}"
     },
     "response": {
-      "body": "{\"images\":[{\"index\":0,\"image\":\"iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAB1/UlEQVR4nJz9ybNkSZbeif1Ur97Z5umN7v58Co85MiMjh6pCoaqAAtCNbkqTQiEFpLQIhUv+O9xxRy7J5oLSzQaaBCCFoVCVWZkZGXP47G+ebL5250m5sGcRHhmRAJoqtnBxNze7dlT16NHvfOc74v/0f/6/hMqKtAornWRlkiRRlESLZbSYp8EyC1ZllJBnIkt1FhIHRHOyFd8MCQ40oY/b91ujZmfYHozag35nNOh3u91eq9tpdTqNjmvZSlNGcTCeLc4vZ2cX6WySLgIKbRq2Y7tCirIywrRM0lpg2Z7T8Fu275quKy2ztKzKcWvHxbIqw8xLneZ5EierZRgFqyTKqrzWeVXnaZXHmnhrYN5/c/jo7e29g35n1DRcT6NijHP0aVa8mGYn8/Rymi8mSTApwuukCqXKpEgNmck6lkZlKe1bdtdxR5bTVVZLGpaQqqx0mpVxUoZxkaY5GiyF79A0rZ7rjnxvaNk9y+vitHBdLAvDQhooiWmgJBToFWI2ra5O20fnqvDauWqmWkWliEWR6HhVJJFSK+qqrMgq0pq01llJDGFJlfD6qCGGGiSJGSVukvlxlsR1WQpp2J7b6RvOdrfd2e3TclA5kdu9QGTxary6XKSzo2SVuaZLo+m5vhCeUWJWhpTC0bYltJKyrkVeibQk16awG1azaXpNS4osjrPxNFgk07iIZnGRlmUc58GqSpauVzRbLeG0h7vGnTutLfoSJ0VPYEye29V8KM+1OE71IoCiIi2JqGJJZBBoMpvSwvSt9nau9m1rm7xVC1lrypIkKYswI8xICoTAMSkthJU3zLxiqTFNfBfPx2vgmBg2NpjggAWVIpfIvF8FMpSpqvx2abUqjKo2qqyqLaeWsS6rOi1IS5KKrKYU5DWYYIDkB0cNKUT1YhGszCBUwdxcLcVqquOxzLdVMWoMGniCJKpXSxElelVU\",\"random_seed\":11489413745290867000}],\"inference_time\":0.8995649814605713}",
+      "body": "{\"images\":[{\"index\":0,\"image\":\"iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAB0a0lEQVR4nLT995NlWZLfiX3Ovefq+7QIrVKL0lWtMD09AmoALHZBGPgbbY3G3/gX8TcabY1mS+Pa7hIkFrbADmYGM4PunuquLp1aRGTop9XV4vCHFy87q7q6G7s0uoWlWUZG5LvXjx8/7v79uh/xf/5nP5mcH6fzzLJlo930GxXd1k1bdz3TMaSrYZVoUZzOFsF4Np+HWaZpnu91u9XNdWe9K5vN0vdy044MYy6MRaktCjVLVJgUaVrmSaqCWItjEaVGltsqN1Wi65lKZov5cD4ajM/PZZjc8rw/fufeD+++06qtpfPo4sXL58+ePHn16llvNAzySGmllLE0El1X0tAtU1qW4TpW1fdqtUqtUqnWq36z7jfblU7VrdtOTZheJpwEM1d6XGhxpqKkCJMiSYswLZMsT9OyyJUqNSV0TZNSmtI2Hde0HUNaUhqaUORFnsbRYjYLJsNwMkhm/Swc5YtRGgyieS+Z9/NkqovCtq1Kxa806o1Wo9ZpVbttr9Fwq1XL8wzbNUxLM000PVd6kpWLMJqMx6N+Pxj3i2Tqqkwmk9nsbFhmOPVaRbqdalP4Zmli2JpvGVVNWVFGGIVBlI1m9iQ0NMs0qg3Nc+26XW2qWj117VSasdADYc4LfVyoWcmiKOK8LIk1NC0XItXtOMzKvCpBqSJNZvP52en52dNDMVWddsVd29/6oM2ND+xJWO0lYvr49OUoDwZTSKHEzoWVmHZhlCouMAojKRyhIy3Tcj1HaNgVWV/zN9Zq67VqW5jVWNOmGWFCWDBP0ASFIsspijJNszhVea4ohUCTmqEhNIWuYzu4PtICRZTIQtmlaCRFI0orcWzFExWPFvE4jybzfDEsipFFITzPyzXd8A1PGJk0CtMUril926qatm9armlbumGWwo5ShBaEoaNEGWdxOIviMpFZMC/j2ND1qu+11rvt/S3RcCI9\",\"random_seed\":9079746362513132000}],\"inference_time\":0.9107239246368408}",
       "status": 200,
       "statusText": "OK",
       "headers": {
         "cf-cache-status": "DYNAMIC",
-        "cf-ray": "911c837d8fbb6ee4-CDG",
+        "cf-ray": "911fd29d787b67a5-SJC",
         "connection": "keep-alive",
         "content-encoding": "gzip",
         "content-type": "application/json",
@@ -7372,6 +6996,163 @@
       "statusText": "OK",
       "headers": {
         "content-type": "image/jpeg"
+      }
+    }
+  },
+  "bfdf8d779d6eca448ee6f3c85fa3a19a1568e1978e228f920d5f55a51fc4deab": {
+    "url": "data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAB0a0lEQVR4nLT995NlWZLfiX3Ovefq+7QIrVKL0lWtMD09AmoALHZBGPgbbY3G3/gX8TcabY1mS+Pa7hIkFrbADmYGM4PunuquLp1aRGTop9XV4vCHFy87q7q6G7s0uoWlWUZG5LvXjx8/7v79uh/xf/5nP5mcH6fzzLJlo930GxXd1k1bdz3TMaSrYZVoUZzOFsF4Np+HWaZpnu91u9XNdWe9K5vN0vdy044MYy6MRaktCjVLVJgUaVrmSaqCWItjEaVGltsqN1Wi65lKZov5cD4ajM/PZZjc8rw/fufeD+++06qtpfPo4sXL58+ePHn16llvNAzySGmllLE0El1X0tAtU1qW4TpW1fdqtUqtUqnWq36z7jfblU7VrdtOTZheJpwEM1d6XGhxpqKkCJMiSYswLZMsT9OyyJUqNSV0TZNSmtI2Hde0HUNaUhqaUORFnsbRYjYLJsNwMkhm/Swc5YtRGgyieS+Z9/NkqovCtq1Kxa806o1Wo9ZpVbttr9Fwq1XL8wzbNUxLM000PVd6kpWLMJqMx6N+Pxj3i2Tqqkwmk9nsbFhmOPVaRbqdalP4Zmli2JpvGVVNWVFGGIVBlI1m9iQ0NMs0qg3Nc+26XW2qWj117VSasdADYc4LfVyoWcmiKOK8LIk1NC0XItXtOMzKvCpBqSJNZvP52en52dNDMVWddsVd29/6oM2ND+xJWO0lYvr49OUoDwZTSKHEzoWVmHZhlCouMAojKRyhIy3Tcj1HaNgVWV/zN9Zq67VqW5jVWNOmGWFCWDBP0ASFIsspijJNszhVea4ohUCTmqEhNIWuYzu4PtICRZTIQtmlaCRFI0orcWzFExWPFvE4jybzfDEsipFFITzPyzXd8A1PGJk0CtMUril926qatm9armlbumGWwo5ShBaEoaNEGWdxOIviMpFZMC/j2ND1qu+11rvt/S3RcCI9",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "content-type": "image/jpeg"
+      }
+    }
+  },
+  "ad463aeaa0a4222600cd3fe0ad34ec1bbee5f4fa9a12beeb40fac29922c7e6a5": {
+    "url": "https://api.openai.com/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Complete this sentence with words, one plus one is equal \"}],\"model\":\"gpt-3.5-turbo\"}"
+    },
+    "response": {
+      "body": "{\"id\":\"chatcmpl-B5Ybe7M1V7N9aqQtrjTGfSWGebrrb\",\"object\":\"chat.completion\",\"created\":1740664366,\"model\":\"gpt-3.5-turbo-0125\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"to two.\",\"refusal\":null},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":19,\"completion_tokens\":4,\"total_tokens\":23,\"prompt_tokens_details\":{\"cached_tokens\":0,\"audio_tokens\":0},\"completion_tokens_details\":{\"reasoning_tokens\":0,\"audio_tokens\":0,\"accepted_prediction_tokens\":0,\"rejected_prediction_tokens\":0}},\"service_tier\":\"default\",\"system_fingerprint\":null}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-expose-headers": "X-Request-ID",
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "9188a84109a36f48-CDG",
+        "connection": "keep-alive",
+        "content-encoding": "br",
+        "content-type": "application/json",
+        "openai-organization": "user-b0yxwesrrz0borhxlqfmuwqf",
+        "openai-processing-ms": "249",
+        "openai-version": "2020-10-01",
+        "server": "cloudflare",
+        "set-cookie": "_cfuvid=PTKpHnf8DDZxJ.gVO5N_KdQ0qmMr8idtxlnmeGX05kw-1740664366628-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None",
+        "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+        "transfer-encoding": "chunked"
+      }
+    }
+  },
+  "cb34d07934bd210fd64da207415c49fc6e2870d3564164a2a5d541f713227fbf": {
+    "url": "https://api.cohere.com/compatibility/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Say 'this is a test'\"}],\"stream\":true,\"model\":\"command-r7b-12-2024\"}"
+    },
+    "response": {
+      "body": "data: {\"id\":\"3178eb0c-d523-4504-bb82-01b8f02da6da\",\"choices\":[{\"index\":0,\"finish_reason\":null,\"delta\":{\"content\":\"\",\"role\":\"assistant\"}}],\"created\":1740652112,\"model\":\"command-r7b-12-2024\",\"object\":\"chat.completion.chunk\"}\n\ndata: {\"id\":\"3178eb0c-d523-4504-bb82-01b8f02da6da\",\"choices\":[{\"index\":0,\"finish_reason\":null,\"delta\":{\"content\":\"This\"}}],\"created\":1740652112,\"model\":\"command-r7b-12-2024\",\"object\":\"chat.completion.chunk\"}\n\ndata: {\"id\":\"3178eb0c-d523-4504-bb82-01b8f02da6da\",\"choices\":[{\"index\":0,\"finish_reason\":null,\"delta\":{\"content\":\" is\"}}],\"created\":1740652112,\"model\":\"command-r7b-12-2024\",\"object\":\"chat.completion.chunk\"}\n\ndata: {\"id\":\"3178eb0c-d523-4504-bb82-01b8f02da6da\",\"choices\":[{\"index\":0,\"finish_reason\":null,\"delta\":{\"content\":\" a\"}}],\"created\":1740652112,\"model\":\"command-r7b-12-2024\",\"object\":\"chat.completion.chunk\"}\n\ndata: {\"id\":\"3178eb0c-d523-4504-bb82-01b8f02da6da\",\"choices\":[{\"index\":0,\"finish_reason\":null,\"delta\":{\"content\":\" test\"}}],\"created\":1740652112,\"model\":\"command-r7b-12-2024\",\"object\":\"chat.completion.chunk\"}\n\ndata: {\"id\":\"3178eb0c-d523-4504-bb82-01b8f02da6da\",\"choices\":[{\"index\":0,\"finish_reason\":null,\"delta\":{\"content\":\".\"}}],\"created\":1740652112,\"model\":\"command-r7b-12-2024\",\"object\":\"chat.completion.chunk\"}\n\ndata: {\"id\":\"3178eb0c-d523-4504-bb82-01b8f02da6da\",\"choices\":[{\"index\":0,\"finish_reason\":\"stop\",\"delta\":{}}],\"created\":1740652112,\"model\":\"command-r7b-12-2024\",\"object\":\"chat.completion.chunk\",\"usage\":{\"prompt_tokens\":7,\"completion_tokens\":5,\"total_tokens\":12}}\n\ndata: [DONE]\n\n",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-expose-headers": "X-Debug-Trace-ID",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+        "cache-control": "no-cache, no-store, no-transform, must-revalidate, private, max-age=0",
+        "content-type": "text/event-stream",
+        "expires": "Thu, 01 Jan 1970 00:00:00 UTC",
+        "pragma": "no-cache",
+        "server": "envoy",
+        "transfer-encoding": "chunked",
+        "vary": "Origin"
+      }
+    }
+  },
+  "8c6ffbc794573c463ed5666e3b560e5966cd975c2893c901c18adb696ba54a6a": {
+    "url": "https://api.cohere.com/compatibility/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Complete this sentence with words, one plus one is equal \"}],\"model\":\"command-r7b-12-2024\"}"
+    },
+    "response": {
+      "body": "{\"id\":\"f8bf661b-c600-44e5-8412-df37c9dcd985\",\"choices\":[{\"index\":0,\"finish_reason\":\"stop\",\"message\":{\"role\":\"assistant\",\"content\":\"One plus one is equal to two.\"}}],\"created\":1740652112,\"model\":\"command-r7b-12-2024\",\"object\":\"chat.completion\",\"usage\":{\"prompt_tokens\":11,\"completion_tokens\":8,\"total_tokens\":19}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-expose-headers": "X-Debug-Trace-ID",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+        "cache-control": "no-cache, no-store, no-transform, must-revalidate, private, max-age=0",
+        "content-type": "application/json",
+        "expires": "Thu, 01 Jan 1970 00:00:00 UTC",
+        "num_chars": "2635",
+        "num_tokens": "19",
+        "pragma": "no-cache",
+        "server": "envoy",
+        "vary": "Origin"
+      }
+    }
+  },
+  "10bec4daddf2346c7a9f864941e1867cd523b44640476be3ce44740823f8e115": {
+    "url": "https://api.cerebras.ai/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Complete this sentence with words, one plus one is equal \"}],\"model\":\"llama3.1-8b\"}"
+    },
+    "response": {
+      "body": "{\"id\":\"chatcmpl-081dc230-a18f-4c4a-b2b0-efe6a5d8767d\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"two.\",\"role\":\"assistant\"}}],\"created\":1740721365,\"model\":\"llama3.1-8b\",\"system_fingerprint\":\"fp_d0e90c449e\",\"object\":\"chat.completion\",\"usage\":{\"prompt_tokens\":46,\"completion_tokens\":3,\"total_tokens\":49},\"time_info\":{\"queue_time\":0.000080831,\"prompt_time\":0.002364294,\"completion_time\":0.001345785,\"total_time\":0.005622386932373047,\"created\":1740721365}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "content-type": "application/json"
+      }
+    }
+  },
+  "b3cad22ff43c9ca503ba3ec2cf3301e935679652e5512d942d12ae060465d2dd": {
+    "url": "https://api.cerebras.ai/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Say 'this is a test'\"}],\"stream\":true,\"model\":\"llama3.1-8b\"}"
+    },
+    "response": {
+      "body": "data: {\"id\":\"chatcmpl-f75a0132-920e-4700-b366-bfe92b75f3d6\",\"choices\":[{\"delta\":{\"role\":\"assistant\"},\"index\":0}],\"created\":1740751481,\"model\":\"llama3.1-8b\",\"system_fingerprint\":\"fp_d0e90c449e\",\"object\":\"chat.completion.chunk\"}\n\ndata: {\"id\":\"chatcmpl-f75a0132-920e-4700-b366-bfe92b75f3d6\",\"choices\":[{\"delta\":{\"content\":\"This\"},\"index\":0}],\"created\":1740751481,\"model\":\"llama3.1-8b\",\"system_fingerprint\":\"fp_d0e90c449e\",\"object\":\"chat.completion.chunk\"}\n\ndata: {\"id\":\"chatcmpl-f75a0132-920e-4700-b366-bfe92b75f3d6\",\"choices\":[{\"delta\":{\"content\":\" is\"},\"index\":0}],\"created\":1740751481,\"model\":\"llama3.1-8b\",\"system_fingerprint\":\"fp_d0e90c449e\",\"object\":\"chat.completion.chunk\"}\n\ndata: {\"id\":\"chatcmpl-f75a0132-920e-4700-b366-bfe92b75f3d6\",\"choices\":[{\"delta\":{\"content\":\" a\"},\"index\":0}],\"created\":1740751481,\"model\":\"llama3.1-8b\",\"system_fingerprint\":\"fp_d0e90c449e\",\"object\":\"chat.completion.chunk\"}\n\ndata: {\"id\":\"chatcmpl-f75a0132-920e-4700-b366-bfe92b75f3d6\",\"choices\":[{\"delta\":{\"content\":\" test\"},\"index\":0}],\"created\":1740751481,\"model\":\"llama3.1-8b\",\"system_fingerprint\":\"fp_d0e90c449e\",\"object\":\"chat.completion.chunk\"}\n\ndata: {\"id\":\"chatcmpl-f75a0132-920e-4700-b366-bfe92b75f3d6\",\"choices\":[{\"delta\":{\"content\":\".\"},\"index\":0}],\"created\":1740751481,\"model\":\"llama3.1-8b\",\"system_fingerprint\":\"fp_d0e90c449e\",\"object\":\"chat.completion.chunk\"}\n\ndata: {\"id\":\"chatcmpl-f75a0132-920e-4700-b366-bfe92b75f3d6\",\"choices\":[{\"delta\":{},\"index\":0}],\"created\":1740751481,\"model\":\"llama3.1-8b\",\"system_fingerprint\":\"fp_d0e90c449e\",\"object\":\"chat.completion.chunk\"}\n\ndata: {\"id\":\"chatcmpl-f75a0132-920e-4700-b366-bfe92b75f3d6\",\"choices\":[{\"delta\":{},\"finish_reason\":\"stop\",\"index\":0}],\"created\":1740751481,\"model\":\"llama3.1-8b\",\"system_fingerprint\":\"fp_d0e90c449e\",\"object\":\"chat.completion.chunk\",\"usage\":{\"prompt_tokens\":42,\"completion_tokens\":6,\"total_tokens\":48},\"time_info\":{\"queue_time\":0.000093189,\"prompt_time\":0.002155987,\"completion_time\":0.002688504,\"total_time\":0.0070416927337646484,\"created\":1740751481}}\"",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "content-type": "text/event-stream"
+      }
+    }
+  },
+  "e1d5d3aee2e02bca51a9816dd617878afbbb1e5f7e8d27000251804d386a705d": {
+    "url": "https://router.huggingface.co/hf-inference/pipeline/sentence-similarity/sentence-transformers/paraphrase-xlm-r-multilingual-v1",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":{\"source_sentence\":\"That is a happy person\",\"sentences\":[\"That is a happy dog\",\"That is a very happy person\",\"Today is a sunny day\"]}}"
+    },
+    "response": {
+      "body": "[0.6623499989509583,0.9382342100143433,0.22963330149650574]",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-allow-origin": "*",
+        "access-control-expose-headers": "X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Xet-Access-Token,X-Xet-Token-Expiration,X-Xet-Refresh-Route,X-Xet-Cas-Url,X-Xet-Hash",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "cross-origin-opener-policy": "same-origin",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
   }

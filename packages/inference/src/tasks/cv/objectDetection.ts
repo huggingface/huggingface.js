@@ -14,7 +14,7 @@ export async function objectDetection(args: ObjectDetectionArgs, options?: Optio
 	const payload = preparePayload(args);
 	const res = await request<ObjectDetectionOutput>(payload, {
 		...options,
-		taskHint: "object-detection",
+		task: "object-detection",
 	});
 	const isValidOutput =
 		Array.isArray(res) &&

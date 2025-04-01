@@ -22,3 +22,4 @@ export { HubApiError, InvalidApiResponseFormatError } from "./error";
  * Only exported for E2Es convenience
  */
 export { sha256 as __internal_sha256 } from "./utils/sha256";
+export { XetBlob as __internal_XetBlob } from "./utils/XetBlob";

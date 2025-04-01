@@ -1,5 +1,3 @@
-export const NEBIUS_API_BASE_URL = "https://api.studio.nebius.ai";
-
 /**
  * See the registered mapping of HF model ID => Nebius model ID here:
  *
@@ -16,3 +14,41 @@ export const NEBIUS_API_BASE_URL = "https://api.studio.nebius.ai";
  *
  * Thanks!
  */
+import type { BodyParams, HeaderParams, ProviderConfig, UrlParams } from "../types";
+
+const NEBIUS_API_BASE_URL = "https://api.studio.nebius.ai";
+
+const makeBaseUrl = (): string => {
+	return NEBIUS_API_BASE_URL;
+};
+
+const makeBody = (params: BodyParams): Record<string, unknown> => {
+	return {
+		...params.args,
+		model: params.model,
+	};
+};
+
+const makeHeaders = (params: HeaderParams): Record<string, string> => {
+	return { Authorization: `Bearer ${params.accessToken}` };
+};
+
+const makeUrl = (params: UrlParams): string => {
+	if (params.task === "text-to-image") {
+		return `${params.baseUrl}/v1/images/generations`;
+	}
+	if (params.chatCompletion) {
+		return `${params.baseUrl}/v1/chat/completions`;
+	}
+	if (params.task === "text-generation") {
+		return `${params.baseUrl}/v1/completions`;
+	}
+	return params.baseUrl;
+};
+
+export const NEBIUS_CONFIG: ProviderConfig = {
+	makeBaseUrl,
+	makeBody,
+	makeHeaders,
+	makeUrl,
+};

@@ -1,5 +1,3 @@
-export const NOVITA_API_BASE_URL = "https://api.novita.ai/v3/openai";
-
 /**
  * See the registered mapping of HF model ID => Novita model ID here:
  *
@@ -16,3 +14,38 @@ export const NOVITA_API_BASE_URL = "https://api.novita.ai/v3/openai";
  *
  * Thanks!
  */
+import type { BodyParams, HeaderParams, ProviderConfig, UrlParams } from "../types";
+
+const NOVITA_API_BASE_URL = "https://api.novita.ai";
+
+const makeBaseUrl = (): string => {
+	return NOVITA_API_BASE_URL;
+};
+const makeBody = (params: BodyParams): Record<string, unknown> => {
+	return {
+		...params.args,
+		...(params.chatCompletion ? { model: params.model } : undefined),
+	};
+};
+
+const makeHeaders = (params: HeaderParams): Record<string, string> => {
+	return { Authorization: `Bearer ${params.accessToken}` };
+};
+
+const makeUrl = (params: UrlParams): string => {
+	if (params.chatCompletion) {
+		return `${params.baseUrl}/v3/openai/chat/completions`;
+	} else if (params.task === "text-generation") {
+		return `${params.baseUrl}/v3/openai/completions`;
+	} else if (params.task === "text-to-video") {
+		return `${params.baseUrl}/v3/hf/${params.model}`;
+	}
+	return params.baseUrl;
+};
+
+export const NOVITA_CONFIG: ProviderConfig = {
+	makeBaseUrl,
+	makeBody,
+	makeHeaders,
+	makeUrl,
+};

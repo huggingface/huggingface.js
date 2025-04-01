@@ -49,6 +49,18 @@ describe("WebBlob", () => {
 	});
 
 	it("should lazy load a LFS file hosted on Hugging Face", async () => {
+		const zephyrUrl =
+			"https://huggingface.co/HuggingFaceH4/zephyr-7b-alpha/resolve/main/model-00001-of-00008.safetensors";
+		const url = new URL(zephyrUrl);
+		const webBlob = await WebBlob.create(url);
+
+		expect(webBlob.size).toBe(1_889_587_040);
+		expect(webBlob).toBeInstanceOf(WebBlob);
+		expect(webBlob).toMatchObject({ url });
+		expect(await webBlob.slice(10, 22).text()).toBe("__metadata__");
+	});
+
+	it("should lazy load a Xet file hosted on Hugging Face", async () => {
 		const stableDiffusionUrl =
 			"https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/unet/diffusion_pytorch_model.fp16.safetensors";
 		const url = new URL(stableDiffusionUrl);

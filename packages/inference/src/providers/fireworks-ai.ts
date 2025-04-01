@@ -1,5 +1,3 @@
-export const FIREWORKS_AI_API_BASE_URL = "https://api.fireworks.ai/inference";
-
 /**
  * See the registered mapping of HF model ID => Fireworks model ID here:
  *
@@ -16,3 +14,35 @@ export const FIREWORKS_AI_API_BASE_URL = "https://api.fireworks.ai/inference";
  *
  * Thanks!
  */
+import type { BodyParams, HeaderParams, ProviderConfig, UrlParams } from "../types";
+
+const FIREWORKS_AI_API_BASE_URL = "https://api.fireworks.ai";
+
+const makeBaseUrl = (): string => {
+	return FIREWORKS_AI_API_BASE_URL;
+};
+
+const makeBody = (params: BodyParams): Record<string, unknown> => {
+	return {
+		...params.args,
+		...(params.chatCompletion ? { model: params.model } : undefined),
+	};
+};
+
+const makeHeaders = (params: HeaderParams): Record<string, string> => {
+	return { Authorization: `Bearer ${params.accessToken}` };
+};
+
+const makeUrl = (params: UrlParams): string => {
+	if (params.chatCompletion) {
+		return `${params.baseUrl}/inference/v1/chat/completions`;
+	}
+	return `${params.baseUrl}/inference`;
+};
+
+export const FIREWORKS_AI_CONFIG: ProviderConfig = {
+	makeBaseUrl,
+	makeBody,
+	makeHeaders,
+	makeUrl,
+};

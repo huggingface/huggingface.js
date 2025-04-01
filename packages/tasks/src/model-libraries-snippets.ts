@@ -46,6 +46,12 @@ export const allennlp = (model: ModelData): string[] => {
 	return allennlpUnknown(model);
 };
 
+export const araclip = (model: ModelData): string[] => [
+	`from araclip import AraClip
+
+model = AraClip.from_pretrained("${model.id}")`,
+];
+
 export const asteroid = (model: ModelData): string[] => [
 	`from asteroid.models import BaseModel
 
@@ -110,21 +116,14 @@ retriever = BM25HF.load_from_hub("${model.id}")`,
 ];
 
 export const cxr_foundation = (): string[] => [
-	`!git clone https://github.com/Google-Health/cxr-foundation.git
-import tensorflow as tf, sys, requests
-sys.path.append('cxr-foundation/python/')
+	`# pip install git+https://github.com/Google-Health/cxr-foundation.git#subdirectory=python
 
-# Install dependencies
-major_version = tf.__version__.rsplit(".", 1)[0]
-!pip install tensorflow-text=={major_version} pypng && pip install --no-deps pydicom hcls_imaging_ml_toolkit retrying
-
-# Load image (Stillwaterising, CC0, via Wikimedia Commons)
+# Load image as grayscale (Stillwaterising, CC0, via Wikimedia Commons)
+import requests
 from PIL import Image
 from io import BytesIO
 image_url = "https://upload.wikimedia.org/wikipedia/commons/c/c8/Chest_Xray_PA_3-8-2010.png"
-response = requests.get(image_url, headers={'User-Agent': 'Demo'}, stream=True)
-response.raw.decode_content = True # Ensure correct decoding
-img = Image.open(BytesIO(response.content)).convert('L') # Convert to grayscale
+img = Image.open(requests.get(image_url, headers={'User-Agent': 'Demo'}, stream=True).raw).convert('L')
 
 # Run inference
 from clientside.clients import make_hugging_face_client
@@ -551,6 +550,39 @@ export const keras_hub = (model: ModelData): string[] => {
 	return snippets;
 };
 
+export const lightning_ir = (model: ModelData): string[] => {
+	if (model.tags.includes("bi-encoder")) {
+		return [
+			`#install from https://github.com/webis-de/lightning-ir
+
+from lightning_ir import BiEncoderModule
+model = BiEncoderModule("${model.id}")
+
+model.score("query", ["doc1", "doc2", "doc3"])`,
+		];
+	} else if (model.tags.includes("cross-encoder")) {
+		return [
+			`#install from https://github.com/webis-de/lightning-ir
+
+from lightning_ir import CrossEncoderModule
+model = CrossEncoderModule("${model.id}")
+
+model.score("query", ["doc1", "doc2", "doc3"])`,
+		];
+	}
+	return [
+		`#install from https://github.com/webis-de/lightning-ir
+
+from lightning_ir import BiEncoderModule, CrossEncoderModule
+
+# depending on the model type, use either BiEncoderModule or CrossEncoderModule
+model = BiEncoderModule("${model.id}") 
+# model = CrossEncoderModule("${model.id}")
+
+model.score("query", ["doc1", "doc2", "doc3"])`,
+	];
+};
+
 export const llama_cpp_python = (model: ModelData): string[] => {
 	const snippets = [
 		`from llama_cpp import Llama
@@ -599,6 +631,13 @@ export const mars5_tts = (model: ModelData): string[] => [
 
 from inference import Mars5TTS
 mars5 = Mars5TTS.from_pretrained("${model.id}")`,
+];
+
+export const matanyone = (model: ModelData): string[] => [
+	`# Install from https://github.com/pq-yang/MatAnyone.git
+
+from matanyone.model.matanyone import MatAnyone
+model = MatAnyone.from_pretrained("${model.id}")`,
 ];
 
 export const mesh_anything = (): string[] => [

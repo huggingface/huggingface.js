@@ -1,5 +1,3 @@
-export const REPLICATE_API_BASE_URL = "https://api.replicate.com";
-
 /**
  * See the registered mapping of HF model ID => Replicate model ID here:
  *
@@ -16,3 +14,37 @@ export const REPLICATE_API_BASE_URL = "https://api.replicate.com";
  *
  * Thanks!
  */
+import type { BodyParams, HeaderParams, ProviderConfig, UrlParams } from "../types";
+
+export const REPLICATE_API_BASE_URL = "https://api.replicate.com";
+
+const makeBaseUrl = (): string => {
+	return REPLICATE_API_BASE_URL;
+};
+
+const makeBody = (params: BodyParams): Record<string, unknown> => {
+	return {
+		input: params.args,
+		version: params.model.includes(":") ? params.model.split(":")[1] : undefined,
+	};
+};
+
+const makeHeaders = (params: HeaderParams): Record<string, string> => {
+	return { Authorization: `Bearer ${params.accessToken}`, Prefer: "wait" };
+};
+
+const makeUrl = (params: UrlParams): string => {
+	if (params.model.includes(":")) {
+		/// Versioned model
+		return `${params.baseUrl}/v1/predictions`;
+	}
+	/// Evergreen / Canonical model
+	return `${params.baseUrl}/v1/models/${params.model}/predictions`;
+};
+
+export const REPLICATE_CONFIG: ProviderConfig = {
+	makeBaseUrl,
+	makeBody,
+	makeHeaders,
+	makeUrl,
+};

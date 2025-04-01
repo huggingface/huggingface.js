@@ -1,0 +1,23 @@
+{% if model.library_name == "transformers" %}
+def query(payload):
+    response = requests.post(API_URL, headers=headers, json=payload)
+    return response.content
+
+audio_bytes = query({
+    "inputs": {{ providerInputs.asObj.inputs }},
+})
+# You can access the audio with IPython.display for example
+from IPython.display import Audio
+Audio(audio_bytes)
+{% else %}
+def query(payload):
+    response = requests.post(API_URL, headers=headers, json=payload)
+    return response.json()
+
+audio, sampling_rate = query({
+    "inputs": {{ providerInputs.asObj.inputs }},
+})
+# You can access the audio with IPython.display for example
+from IPython.display import Audio
+Audio(audio, rate=sampling_rate)
+{% endif %} 

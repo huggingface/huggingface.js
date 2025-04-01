@@ -5,22 +5,24 @@ import { omit } from "../../utils/omit";
 import { isUrl } from "../../lib/isUrl";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import { typedInclude } from "../../utils/typedInclude";
+import { makeRequestOptions } from "../../lib/makeRequestOptions";
+import { pollFalResponse, type FalAiQueueOutput } from "../../providers/fal-ai";
 
 export type TextToVideoArgs = BaseArgs & TextToVideoInput;
 
 export type TextToVideoOutput = Blob;
 
-interface FalAiOutput {
-	video: {
-		url: string;
-	};
-}
-
 interface ReplicateOutput {
 	output: string;
 }
 
-const SUPPORTED_PROVIDERS = ["fal-ai", "replicate"] as const satisfies readonly InferenceProvider[];
+interface NovitaOutput {
+	video: {
+		video_url: string;
+	};
+}
+
+const SUPPORTED_PROVIDERS = ["fal-ai", "novita", "replicate"] as const satisfies readonly InferenceProvider[];
 
 export async function textToVideo(args: TextToVideoArgs, options?: Options): Promise<TextToVideoOutput> {
 	if (!args.provider || !typedInclude(SUPPORTED_PROVIDERS, args.provider)) {
@@ -30,28 +32,30 @@ export async function textToVideo(args: TextToVideoArgs, options?: Options): Pro
 	}
 
 	const payload =
-		args.provider === "fal-ai" || args.provider === "replicate"
+		args.provider === "fal-ai" || args.provider === "replicate" || args.provider === "novita"
 			? { ...omit(args, ["inputs", "parameters"]), ...args.parameters, prompt: args.inputs }
 			: args;
-	const res = await request<FalAiOutput | ReplicateOutput>(payload, {
+	const res = await request<FalAiQueueOutput | ReplicateOutput | NovitaOutput>(payload, {
 		...options,
-		taskHint: "text-to-video",
+		task: "text-to-video",
 	});
-
 	if (args.provider === "fal-ai") {
+		const { url, info } = await makeRequestOptions(args, { ...options, task: "text-to-video" });
+		return await pollFalResponse(res as FalAiQueueOutput, url, info.headers as Record<string, string>);
+	} else if (args.provider === "novita") {
 		const isValidOutput =
 			typeof res === "object" &&
 			!!res &&
 			"video" in res &&
 			typeof res.video === "object" &&
 			!!res.video &&
-			"url" in res.video &&
-			typeof res.video.url === "string" &&
-			isUrl(res.video.url);
+			"video_url" in res.video &&
+			typeof res.video.video_url === "string" &&
+			isUrl(res.video.video_url);
 		if (!isValidOutput) {
-			throw new InferenceOutputError("Expected { video: { url: string } }");
+			throw new InferenceOutputError("Expected { video: { video_url: string } }");
 		}
-		const urlResponse = await fetch(res.video.url);
+		const urlResponse = await fetch((res as NovitaOutput).video.video_url);
 		return await urlResponse.blob();
 	} else {
 		/// TODO: Replicate: handle the case where the generation request "times out" / is async (ie output is null)

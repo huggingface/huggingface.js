@@ -1,0 +1,8 @@
+stream = client.chat.completions.create(
+    model="{{ model.id }}",
+{{ inputs.asPythonString }}
+    stream=True,
+)
+
+for chunk in stream:
+    print(chunk.choices[0].delta.content, end="") 

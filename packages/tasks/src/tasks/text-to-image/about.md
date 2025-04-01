@@ -57,9 +57,9 @@ image = pipe(prompt).images[0]
 You can use [huggingface.js](https://github.com/huggingface/huggingface.js) to infer text-to-image models on Hugging Face Hub.
 
 ```javascript
-import { HfInference } from "@huggingface/inference";
+import { InferenceClient } from "@huggingface/inference";
 
-const inference = new HfInference(HF_TOKEN);
+const inference = new InferenceClient(HF_TOKEN);
 await inference.textToImage({
 	model: "stabilityai/stable-diffusion-2",
 	inputs: "award winning high resolution photo of a giant tortoise/((ladybird)) hybrid, [trending on artstation]",

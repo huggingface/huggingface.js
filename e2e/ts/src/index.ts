@@ -1,9 +1,9 @@
-import { HfInference } from "@huggingface/inference";
+import { InferenceClient } from "@huggingface/inference";
 import { whoAmI } from "@huggingface/hub";
 
 const hfToken = process.env.token;
 
-const hf = new HfInference(hfToken);
+const hf = new InferenceClient(hfToken);
 
 (async () => {
 	const info = await whoAmI({ credentials: { accessToken: "hf_hub.js" }, hubUrl: "https://hub-ci.huggingface.co" });
