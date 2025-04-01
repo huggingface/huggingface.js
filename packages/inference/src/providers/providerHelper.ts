@@ -31,6 +31,9 @@ export abstract class TaskProviderHelper {
 		return headers;
 	}
 
+	/**
+	 * Prepare the body for the request
+	 */
 	makeBody(params: BodyParams): unknown {
 		if ("data" in params.args && !!params.args.data) {
 			return params.args.data;
@@ -39,7 +42,7 @@ export abstract class TaskProviderHelper {
 	}
 
 	/**
-	 * Prepare the body for the request
+	 * Prepare the payload for the request
 	 */
 	abstract preparePayload(params: BodyParams): unknown;
 	/**
@@ -55,13 +58,6 @@ export abstract class TaskProviderHelper {
 		return `${params.baseUrl}/${route}`;
 	}
 
-	/**
-	 * Prepare the request to be sent to the provider :
-	 * TODO: this is currently not used, the aim is to prepare/make the request in the task file instead of doing it in `makeRequestOptions`.
-	 */
-	prepareRequest(args: unknown): unknown {
-		return args;
-	}
 	/**
 	 * Return the response in the expected format
 	 */
