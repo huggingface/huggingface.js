@@ -24,7 +24,7 @@ export interface ReplicateOutput {
 	output?: string | string[];
 }
 
-export class ReplicateTask extends TaskProviderHelper {
+abstract class ReplicateTask extends TaskProviderHelper {
 	constructor(task: InferenceTask, url?: string) {
 		super("replicate", url || "https://api.replicate.com", task);
 	}
@@ -58,11 +58,6 @@ export class ReplicateTask extends TaskProviderHelper {
 			return `${params.baseUrl}/v1/predictions`;
 		}
 		return `${params.baseUrl}/v1/models/${params.model}/predictions`;
-	}
-
-	override getResponse(response: unknown): unknown {
-		void response;
-		throw new Error("Method not implemented.");
 	}
 }
 

@@ -1,4 +1,5 @@
 import type { AutomaticSpeechRecognitionInput, AutomaticSpeechRecognitionOutput } from "@huggingface/tasks";
+import { getProviderHelper } from "../../lib/getProviderHelper";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import { FAL_AI_SUPPORTED_BLOB_TYPES } from "../../providers/fal-ai";
 import type { BaseArgs, Options, RequestArgs } from "../../types";
@@ -16,6 +17,7 @@ export async function automaticSpeechRecognition(
 	args: AutomaticSpeechRecognitionArgs,
 	options?: Options
 ): Promise<AutomaticSpeechRecognitionOutput> {
+	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "automatic-speech-recognition");
 	const payload = await buildPayload(args);
 	const res = await request<AutomaticSpeechRecognitionOutput>(payload, {
 		...options,
@@ -25,7 +27,7 @@ export async function automaticSpeechRecognition(
 	if (!isValidOutput) {
 		throw new InferenceOutputError("Expected {text: string}");
 	}
-	return res;
+	return providerHelper.getResponse(res) as AutomaticSpeechRecognitionOutput;
 }
 
 async function buildPayload(args: AutomaticSpeechRecognitionArgs): Promise<RequestArgs> {

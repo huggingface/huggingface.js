@@ -46,7 +46,7 @@ interface FalAITextToSpeechOutput {
 }
 export const FAL_AI_SUPPORTED_BLOB_TYPES = ["audio/mpeg", "audio/mp4", "audio/wav", "audio/x-wav"];
 
-export class FalAITask extends TaskProviderHelper {
+abstract class FalAITask extends TaskProviderHelper {
 	constructor(task: InferenceTask, url?: string) {
 		super("fal-ai", url || "https://fal.run", task);
 	}
@@ -67,16 +67,6 @@ export class FalAITask extends TaskProviderHelper {
 		}
 		return headers;
 	}
-	/* eslint-disable @typescript-eslint/no-unused-vars */
-	override getResponse(
-		response: unknown,
-		url?: string,
-		headers?: Record<string, string>,
-		outputType?: "url" | "blob"
-	): unknown {
-		throw new Error("Method not implemented");
-	}
-	/* eslint-enable @typescript-eslint/no-unused-vars */
 }
 
 export class FalAITextToImageTask extends FalAITask {

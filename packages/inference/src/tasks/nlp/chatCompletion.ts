@@ -10,8 +10,7 @@ export async function chatCompletion(
 	args: BaseArgs & ChatCompletionInput,
 	options?: Options
 ): Promise<ChatCompletionOutput> {
-	const provider = args.provider ?? "hf-inference";
-	const providerHelper = getProviderHelper(provider, "conversational");
+	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "conversational");
 	const response = await request<ChatCompletionOutput>(args, {
 		...options,
 		task: "conversational",
