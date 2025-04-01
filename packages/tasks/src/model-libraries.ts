@@ -444,6 +444,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "k2",
 		repoUrl: "https://github.com/k2-fsa/k2",
 	},
+	"lightning-ir": {
+		prettyLabel: "Lightning IR",
+		repoName: "Lightning IR",
+		repoUrl: "https://github.com/webis-de/lightning-ir",
+		snippets: snippets.lightning_ir,
+	},
 	liveportrait: {
 		prettyLabel: "LivePortrait",
 		repoName: "LivePortrait",
