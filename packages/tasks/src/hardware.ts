@@ -149,7 +149,7 @@ export const SKUS = {
 				memory: [8],
 			},
 			"RTX 5070 Ti": {
-				tflops: 43.9,
+				tflops: 43.94,
 				memory: [16],
 			},
 			"RTX 4090": {
