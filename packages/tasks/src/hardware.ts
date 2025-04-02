@@ -60,6 +60,14 @@ export const SKUS = {
 				tflops: 30.29,
 				memory: [24],
 			},
+			"RTX PRO 6000 WS": {
+				tflops: 126,
+				memory: [96],
+			},
+			"RTX PRO 6000 Max-Q": {
+				tflops: 116,
+				memory: [96],
+			},
 			"RTX 6000 Ada": {
 				tflops: 91.1,
 				memory: [48],
