@@ -110,7 +110,6 @@ export interface HeaderParams {
 
 export interface UrlParams {
 	authMethod: AuthMethod;
-	baseUrl: string;
 	model: string;
 	task?: InferenceTask;
 }

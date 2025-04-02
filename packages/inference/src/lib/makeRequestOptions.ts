@@ -1,11 +1,9 @@
 import { name as packageName, version as packageVersion } from "../../package.json";
-import { HF_HEADER_X_BILL_TO, HF_HUB_URL, HF_ROUTER_URL } from "../config";
+import { HF_HEADER_X_BILL_TO, HF_HUB_URL } from "../config";
 import type { InferenceTask, Options, RequestArgs } from "../types";
 import { getProviderHelper } from "./getProviderHelper";
 import { getProviderModelId } from "./getProviderModelId";
 import { isUrl } from "./isUrl";
-
-const HF_HUB_INFERENCE_PROXY_TEMPLATE = `${HF_ROUTER_URL}/{{PROVIDER}}`;
 
 /**
  * Lazy-loaded from huggingface.co/api/tasks when needed
@@ -102,13 +100,9 @@ export function makeRequestOptionsFromResolvedModel(
 
 	// Make URL
 
-	const modelId = endpointUrl ? endpointUrl : resolvedModel;
+	const modelId = endpointUrl ?? resolvedModel;
 	const url = providerHelper.makeUrl({
 		authMethod,
-		baseUrl:
-			authMethod !== "provider-key"
-				? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", provider)
-				: providerHelper.makeBaseUrl(),
 		model: modelId,
 		task,
 	});
@@ -151,7 +145,7 @@ export function makeRequestOptionsFromResolvedModel(
 	const info: RequestInit = {
 		headers,
 		method: "POST",
-		body: body as BodyInit,
+		body: body,
 		...(credentials ? { credentials } : undefined),
 		signal,
 	};

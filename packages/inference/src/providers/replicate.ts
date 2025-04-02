@@ -54,10 +54,11 @@ abstract class ReplicateTask extends TaskProviderHelper {
 	}
 
 	override makeUrl(params: UrlParams): string {
+		const baseUrl = this.makeBaseUrl(params);
 		if (params.model.includes(":")) {
-			return `${params.baseUrl}/v1/predictions`;
+			return `${baseUrl}/v1/predictions`;
 		}
-		return `${params.baseUrl}/v1/models/${params.model}/predictions`;
+		return `${baseUrl}/v1/models/${params.model}/predictions`;
 	}
 }
 

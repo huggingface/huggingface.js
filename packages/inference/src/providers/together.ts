@@ -16,7 +16,7 @@
  */
 import type { ChatCompletionOutput, TextGenerationOutput, TextGenerationOutputFinishReason } from "@huggingface/tasks";
 import { InferenceOutputError } from "../lib/InferenceOutputError";
-import type { BodyParams, UrlParams } from "../types";
+import type { BodyParams } from "../types";
 import { omit } from "../utils/omit";
 import { BaseConversationalTask, BaseTextGenerationTask, TaskProviderHelper } from "./providerHelper";
 
@@ -78,8 +78,7 @@ export class TogetherTextToImageTask extends TaskProviderHelper {
 		super("together", TOGETHER_API_BASE_URL, "text-to-image");
 	}
 
-	makeRoute(params: UrlParams): string {
-		void params;
+	makeRoute(): string {
 		return "v1/images/generations";
 	}
 

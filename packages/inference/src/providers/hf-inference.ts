@@ -105,7 +105,7 @@ export class HFInferenceConversationalTask extends HFInferenceTask {
 		if (params.model.startsWith("http://") || params.model.startsWith("https://")) {
 			url = params.model.trim();
 		} else {
-			url = `${this.makeBaseUrl()}/models/${params.model}`;
+			url = `${this.makeBaseUrl(params)}/models/${params.model}`;
 		}
 
 		url = url.replace(/\/+$/, "");

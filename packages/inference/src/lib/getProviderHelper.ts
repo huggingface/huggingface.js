@@ -121,14 +121,11 @@ export function getProviderHelper(provider: InferenceProvider, task: InferenceTa
 	if (!task) {
 		throw new Error("you need to provide a task name when using an external provider, e.g. 'text-to-image'");
 	}
-	if (!(provider in PROVIDERS)) {
-		throw new Error(`Provider '${provider}' not supported. Available providers: ${Object.keys(PROVIDERS)}`);
-	}
-	const providerTasks = PROVIDERS[provider];
-	if (!providerTasks || !(task in providerTasks)) {
+	const helper = PROVIDERS[provider][task];
+	if (!helper) {
 		throw new Error(
-			`Task '${task}' not supported for provider '${provider}'. Available tasks: ${Object.keys(providerTasks ?? {})}`
+			`Task '${task}' not supported for provider '${provider}'. Available tasks: ${Object.keys(PROVIDERS[provider])}`
 		);
 	}
-	return providerTasks[task] as TaskProviderHelper;
+	return helper;
 }

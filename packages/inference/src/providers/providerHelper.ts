@@ -1,7 +1,9 @@
 import type { ChatCompletionOutput, TextGenerationOutput } from "@huggingface/tasks";
+import { HF_ROUTER_URL } from "../config";
 import { InferenceOutputError } from "../lib/InferenceOutputError";
 import type { BodyParams, HeaderParams, UrlParams } from "../types";
 import { toArray } from "../utils/toArray";
+
 /**
  * Base class for task-specific provider helpers
  */
@@ -27,16 +29,16 @@ export abstract class TaskProviderHelper {
 	/**
 	 * Prepare the base URL for the request
 	 */
-	makeBaseUrl(): string {
-		return this.baseUrl;
+	makeBaseUrl(params: UrlParams): string {
+		return params.authMethod !== "provider-key" ? `${HF_ROUTER_URL}/${this.provider}` : this.baseUrl;
 	}
 
 	/**
 	 * Prepare the body for the request
 	 */
-	makeBody(params: BodyParams): unknown {
+	makeBody(params: BodyParams): BodyInit {
 		if ("data" in params.args && !!params.args.data) {
-			return params.args.data;
+			return params.args.data as BodyInit;
 		}
 		return JSON.stringify(this.preparePayload(params));
 	}
@@ -45,8 +47,9 @@ export abstract class TaskProviderHelper {
 	 * Prepare the URL for the request
 	 */
 	makeUrl(params: UrlParams): string {
+		const baseUrl = this.makeBaseUrl(params);
 		const route = this.makeRoute(params).replace(/^\/+/, "");
-		return `${params.baseUrl}/${route}`;
+		return `${baseUrl}/${route}`;
 	}
 
 	/**
@@ -58,9 +61,9 @@ export abstract class TaskProviderHelper {
 	/**
 	 * Prepare the headers for the request
 	 */
-	prepareHeaders(params: HeaderParams, binary: boolean): Record<string, string> {
+	prepareHeaders(params: HeaderParams, isBinary: boolean): Record<string, string> {
 		const headers: Record<string, string> = { Authorization: `Bearer ${params.accessToken}` };
-		if (!binary) {
+		if (!isBinary) {
 			headers["Content-Type"] = "application/json";
 		}
 		return headers;
