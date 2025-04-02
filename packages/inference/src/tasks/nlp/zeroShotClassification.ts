@@ -1,8 +1,8 @@
 import type { ZeroShotClassificationInput, ZeroShotClassificationOutput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
+import { innerRequest } from "../../utils/request";
 import { toArray } from "../../utils/toArray";
-import { request } from "../custom/request";
 
 export type ZeroShotClassificationArgs = BaseArgs & ZeroShotClassificationInput;
 
@@ -13,15 +13,14 @@ export async function zeroShotClassification(
 	args: ZeroShotClassificationArgs,
 	options?: Options
 ): Promise<ZeroShotClassificationOutput> {
-	const res = toArray(
-		await request<ZeroShotClassificationOutput[number] | ZeroShotClassificationOutput>(args, {
-			...options,
-			task: "zero-shot-classification",
-		})
-	);
+	const { data: res } = await innerRequest<ZeroShotClassificationOutput[number] | ZeroShotClassificationOutput>(args, {
+		...options,
+		task: "zero-shot-classification",
+	});
+	const output = toArray(res);
 	const isValidOutput =
-		Array.isArray(res) &&
-		res.every(
+		Array.isArray(output) &&
+		output.every(
 			(x) =>
 				Array.isArray(x.labels) &&
 				x.labels.every((_label) => typeof _label === "string") &&
@@ -32,5 +31,5 @@ export async function zeroShotClassification(
 	if (!isValidOutput) {
 		throw new InferenceOutputError("Expected Array<{labels: string[], scores: number[], sequence: string}>");
 	}
-	return res;
+	return output;
 }
