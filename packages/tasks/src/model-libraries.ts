@@ -159,6 +159,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"params.index.json"`,
 	},
+	infinite_you: {
+		prettyLabel: "Infinite You",
+		repoName: "Infinite You",
+		repoUrl: "https://github.com/bytedance/InfiniteYou",
+		filter: false,
+		countDownloads: `path_extension:"bin" OR path_extension:"safetensors"`,
+	},
 	champ: {
 		prettyLabel: "Champ",
 		repoName: "Champ",
