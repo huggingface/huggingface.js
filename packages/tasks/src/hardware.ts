@@ -442,6 +442,9 @@ export const SKUS = {
 			"Xeon 2th Generation (Cascade Lake)": {
 				tflops: 0.55,
 			},
+			"Intel Core Ultra 7 265KF": {
+				tflops: 1.53,
+			},
 			"Intel Core 13th Generation (i9)": {
 				tflops: 0.85,
 			},
