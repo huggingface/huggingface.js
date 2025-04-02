@@ -159,13 +159,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"params.index.json"`,
 	},
-	infinite_you: {
-		prettyLabel: "InfiniteYou",
-		repoName: "InfiniteYou",
-		repoUrl: "https://github.com/bytedance/InfiniteYou",
-		filter: false,
-		countDownloads: `path_extension:"bin" OR path_extension:"safetensors"`,
-	},
 	champ: {
 		prettyLabel: "Champ",
 		repoName: "Champ",
@@ -419,6 +412,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "IMS-Toucan",
 		repoUrl: "https://github.com/DigitalPhonetics/IMS-Toucan",
 		countDownloads: `path:"embedding_gan.pt" OR path:"Vocoder.pt" OR path:"ToucanTTS.pt"`,
+	},
+	"infinite-you": {
+		prettyLabel: "InfiniteYou",
+		repoName: "InfiniteYou",
+		repoUrl: "https://github.com/bytedance/InfiniteYou",
+		filter: false,
+		countDownloads: `path_extension:"bin" OR path_extension:"safetensors"`,
 	},
 	keras: {
 		prettyLabel: "Keras",
