@@ -1,7 +1,7 @@
 import type { QuestionAnsweringInput, QuestionAnsweringOutput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
+import { innerRequest } from "../../utils/request";
 
 export type QuestionAnsweringArgs = BaseArgs & QuestionAnsweringInput;
 
@@ -12,10 +12,11 @@ export async function questionAnswering(
 	args: QuestionAnsweringArgs,
 	options?: Options
 ): Promise<QuestionAnsweringOutput[number]> {
-	const res = await request<QuestionAnsweringOutput | QuestionAnsweringOutput[number]>(args, {
+	const { data: res } = await innerRequest<QuestionAnsweringOutput | QuestionAnsweringOutput[number]>(args, {
 		...options,
 		task: "question-answering",
 	});
+
 	const isValidOutput = Array.isArray(res)
 		? res.every(
 				(elem) =>

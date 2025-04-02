@@ -60,6 +60,14 @@ export const SKUS = {
 				tflops: 30.29,
 				memory: [24],
 			},
+			"RTX PRO 6000 WS": {
+				tflops: 126,
+				memory: [96],
+			},
+			"RTX PRO 6000 Max-Q": {
+				tflops: 116,
+				memory: [96],
+			},
 			"RTX 6000 Ada": {
 				tflops: 91.1,
 				memory: [48],
@@ -139,6 +147,10 @@ export const SKUS = {
 			"RTX 5070 Mobile": {
 				tflops: 23.22,
 				memory: [8],
+			},
+			"RTX 5070 Ti": {
+				tflops: 43.94,
+				memory: [16],
 			},
 			"RTX 4090": {
 				tflops: 82.58,
@@ -433,6 +445,9 @@ export const SKUS = {
 			},
 			"Xeon 2th Generation (Cascade Lake)": {
 				tflops: 0.55,
+			},
+			"Intel Core Ultra 7 265KF": {
+				tflops: 1.53,
 			},
 			"Intel Core 13th Generation (i9)": {
 				tflops: 0.85,

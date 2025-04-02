@@ -1,9 +1,9 @@
 import type { TextToImageInput, TextToImageOutput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, InferenceProvider, Options } from "../../types";
-import { omit } from "../../utils/omit";
-import { request } from "../custom/request";
 import { delay } from "../../utils/delay";
+import { omit } from "../../utils/omit";
+import { innerRequest } from "../../utils/request";
 
 export type TextToImageArgs = BaseArgs & TextToImageInput;
 
@@ -65,7 +65,7 @@ export async function textToImage(args: TextToImageArgs, options?: TextToImageOp
 					...getResponseFormatArg(args.provider),
 					prompt: args.inputs,
 			  };
-	const res = await request<
+	const { data: res } = await innerRequest<
 		| TextToImageOutput
 		| Base64ImageGeneration
 		| OutputUrlImageGeneration
