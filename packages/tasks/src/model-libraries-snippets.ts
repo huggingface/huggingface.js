@@ -550,6 +550,39 @@ export const keras_hub = (model: ModelData): string[] => {
 	return snippets;
 };
 
+export const lightning_ir = (model: ModelData): string[] => {
+	if (model.tags.includes("bi-encoder")) {
+		return [
+			`#install from https://github.com/webis-de/lightning-ir
+
+from lightning_ir import BiEncoderModule
+model = BiEncoderModule("${model.id}")
+
+model.score("query", ["doc1", "doc2", "doc3"])`,
+		];
+	} else if (model.tags.includes("cross-encoder")) {
+		return [
+			`#install from https://github.com/webis-de/lightning-ir
+
+from lightning_ir import CrossEncoderModule
+model = CrossEncoderModule("${model.id}")
+
+model.score("query", ["doc1", "doc2", "doc3"])`,
+		];
+	}
+	return [
+		`#install from https://github.com/webis-de/lightning-ir
+
+from lightning_ir import BiEncoderModule, CrossEncoderModule
+
+# depending on the model type, use either BiEncoderModule or CrossEncoderModule
+model = BiEncoderModule("${model.id}") 
+# model = CrossEncoderModule("${model.id}")
+
+model.score("query", ["doc1", "doc2", "doc3"])`,
+	];
+};
+
 export const llama_cpp_python = (model: ModelData): string[] => {
 	const snippets = [
 		`from llama_cpp import Llama
