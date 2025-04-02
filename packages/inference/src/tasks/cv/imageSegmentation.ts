@@ -1,7 +1,7 @@
 import type { ImageSegmentationInput, ImageSegmentationOutput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
+import { innerRequest } from "../../utils/request";
 import { preparePayload, type LegacyImageInput } from "./utils";
 
 export type ImageSegmentationArgs = BaseArgs & (ImageSegmentationInput | LegacyImageInput);
@@ -15,7 +15,7 @@ export async function imageSegmentation(
 	options?: Options
 ): Promise<ImageSegmentationOutput> {
 	const payload = preparePayload(args);
-	const res = await request<ImageSegmentationOutput>(payload, {
+	const { data: res } = await innerRequest<ImageSegmentationOutput>(payload, {
 		...options,
 		task: "image-segmentation",
 	});

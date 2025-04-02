@@ -1,7 +1,7 @@
 import type { ImageToTextInput, ImageToTextOutput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
+import { innerRequest } from "../../utils/request";
 import type { LegacyImageInput } from "./utils";
 import { preparePayload } from "./utils";
 
@@ -11,16 +11,14 @@ export type ImageToTextArgs = BaseArgs & (ImageToTextInput | LegacyImageInput);
  */
 export async function imageToText(args: ImageToTextArgs, options?: Options): Promise<ImageToTextOutput> {
 	const payload = preparePayload(args);
-	const res = (
-		await request<[ImageToTextOutput]>(payload, {
-			...options,
-			task: "image-to-text",
-		})
-	)?.[0];
+	const { data: res } = await innerRequest<[ImageToTextOutput]>(payload, {
+		...options,
+		task: "image-to-text",
+	});
 
-	if (typeof res?.generated_text !== "string") {
+	if (typeof res?.[0]?.generated_text !== "string") {
 		throw new InferenceOutputError("Expected {generated_text: string}");
 	}
 
-	return res;
+	return res?.[0];
 }
