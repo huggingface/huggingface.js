@@ -27,6 +27,17 @@ export abstract class TaskProviderHelper {
 	): unknown;
 
 	/**
+	 * Prepare the route for the request
+	 * Needs to be implemented in the subclasses.
+	 */
+	abstract makeRoute(params: UrlParams): string;
+	/**
+	 * Prepare the payload for the request
+	 * Needs to be implemented in the subclasses.
+	 */
+	abstract preparePayload(params: BodyParams): unknown;
+
+	/**
 	 * Prepare the base URL for the request
 	 */
 	makeBaseUrl(params: UrlParams): string {
@@ -53,12 +64,6 @@ export abstract class TaskProviderHelper {
 	}
 
 	/**
-	 * Prepare the route for the request
-	 * Needs to be implemented in the subclasses.
-	 */
-	abstract makeRoute(params: UrlParams): string;
-
-	/**
 	 * Prepare the headers for the request
 	 */
 	prepareHeaders(params: HeaderParams, isBinary: boolean): Record<string, string> {
@@ -68,12 +73,6 @@ export abstract class TaskProviderHelper {
 		}
 		return headers;
 	}
-
-	/**
-	 * Prepare the payload for the request
-	 * Needs to be implemented in the subclasses.
-	 */
-	abstract preparePayload(params: BodyParams): unknown;
 }
 
 export class BaseConversationalTask extends TaskProviderHelper {
