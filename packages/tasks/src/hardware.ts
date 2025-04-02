@@ -328,43 +328,43 @@ export const SKUS = {
 				tflops: 19.05,
 				memory: [16],
 			},
-			"AGX Orin 64GB": {
+			"Jetson AGX Orin 64GB": {
 				tflops: 10.65,
 				memory: [64],
 			},
-			"AGX Orin 32GB": {
+			"Jetson AGX Orin 32GB": {
 				tflops: 6.66,
 				memory: [32],
 			},
-			"Orin NX 16GB": {
+			"Jetson Orin NX 16GB": {
 				tflops: 3.76,
 				memory: [16],
 			},
-			"Orin NX 8GB": {
+			"Jetson Orin NX 8GB": {
 				tflops: 3.13,
 				memory: [8],
 			},
-			"Orin Nano 8GB": {
+			"Jetson Orin Nano 8GB": {
 				tflops: 2.56,
 				memory: [8],
 			},
-			"Orin Nano 4GB": {
+			"Jetson Orin Nano 4GB": {
 				tflops: 1.28,
 				memory: [4],
 			},
-			"AGX Xavier": {
+			"Jetson AGX Xavier": {
 				tflops: 2.82,
 				memory: [32, 64],
 			},
-			"Xavier NX": {
+			"Jetson Xavier NX": {
 				tflops: 1.69,
 				memory: [8, 16],
 			},
-			TX2: {
+			"Jetson TX2": {
 				tflops: 1.33,
 				memory: [4, 8],
 			},
-			Nano: {
+			"Jetson Nano": {
 				tflops: 0.47,
 				memory: [4],
 			},
