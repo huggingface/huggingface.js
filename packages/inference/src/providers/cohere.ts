@@ -14,30 +14,30 @@
  *
  * Thanks!
  */
-import type { InferenceProvider } from "../types";
+import type { InferenceProviderTypes } from "./types";
 
 const COHERE_API_BASE_URL = "https://api.cohere.com";
 
-const makeBaseUrl: InferenceProvider.MakeBaseUrl = () => {
+const makeBaseUrl: InferenceProviderTypes.MakeBaseUrl = () => {
 	return COHERE_API_BASE_URL;
 };
 
-const makeBody: InferenceProvider.MakeBody = (params) => {
+const makeBody: InferenceProviderTypes.MakeBody = (params) => {
 	return {
 		...params.args,
 		model: params.model,
 	};
 };
 
-const makeHeaders: InferenceProvider.MakeHeaders = (params) => {
+const makeHeaders: InferenceProviderTypes.MakeHeaders = (params) => {
 	return { Authorization: `Bearer ${params.accessToken}` };
 };
 
-const makeUrl: InferenceProvider.MakeUrl = (params) => {
+const makeUrl: InferenceProviderTypes.MakeUrl = (params) => {
 	return `${params.baseUrl}/compatibility/v1/chat/completions`;
 };
 
-export const COHERE_CONFIG: InferenceProvider.Config = {
+export const COHERE_CONFIG: InferenceProviderTypes.Config = {
 	makeBaseUrl,
 	makeBody,
 	makeHeaders,

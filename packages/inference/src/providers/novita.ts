@@ -14,26 +14,26 @@
  *
  * Thanks!
  */
-import type { InferenceProvider } from "../types";
+import type { InferenceProviderTypes } from "./types";
 
 const NOVITA_API_BASE_URL = "https://api.novita.ai";
 
-const makeBaseUrl: InferenceProvider.MakeBaseUrl = () => {
+const makeBaseUrl: InferenceProviderTypes.MakeBaseUrl = () => {
 	return NOVITA_API_BASE_URL;
 };
 
-const makeBody: InferenceProvider.MakeBody = (params) => {
+const makeBody: InferenceProviderTypes.MakeBody = (params) => {
 	return {
 		...params.args,
 		...(params.chatCompletion ? { model: params.model } : undefined),
 	};
 };
 
-const makeHeaders: InferenceProvider.MakeHeaders = (params) => {
+const makeHeaders: InferenceProviderTypes.MakeHeaders = (params) => {
 	return { Authorization: `Bearer ${params.accessToken}` };
 };
 
-const makeUrl: InferenceProvider.MakeUrl = (params) => {
+const makeUrl: InferenceProviderTypes.MakeUrl = (params) => {
 	if (params.chatCompletion) {
 		return `${params.baseUrl}/v3/openai/chat/completions`;
 	} else if (params.task === "text-generation") {
@@ -44,7 +44,7 @@ const makeUrl: InferenceProvider.MakeUrl = (params) => {
 	return params.baseUrl;
 };
 
-export const NOVITA_CONFIG: InferenceProvider.Config = {
+export const NOVITA_CONFIG: InferenceProviderTypes.Config = {
 	makeBaseUrl,
 	makeBody,
 	makeHeaders,

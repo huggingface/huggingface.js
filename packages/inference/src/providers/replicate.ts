@@ -14,26 +14,26 @@
  *
  * Thanks!
  */
-import type { InferenceProvider } from "../types";
+import type { InferenceProviderTypes } from "./types";
 
 export const REPLICATE_API_BASE_URL = "https://api.replicate.com";
 
-const makeBaseUrl: InferenceProvider.MakeBaseUrl = () => {
+const makeBaseUrl: InferenceProviderTypes.MakeBaseUrl = () => {
 	return REPLICATE_API_BASE_URL;
 };
 
-const makeBody: InferenceProvider.MakeBody = (params) => {
+const makeBody: InferenceProviderTypes.MakeBody = (params) => {
 	return {
 		input: params.args,
 		version: params.model?.includes(":") ? params.model.split(":")[1] : undefined,
 	};
 };
 
-const makeHeaders: InferenceProvider.MakeHeaders = (params) => {
+const makeHeaders: InferenceProviderTypes.MakeHeaders = (params) => {
 	return { Authorization: `Bearer ${params.accessToken}`, Prefer: "wait" };
 };
 
-const makeUrl: InferenceProvider.MakeUrl = (params) => {
+const makeUrl: InferenceProviderTypes.MakeUrl = (params) => {
 	if (params.model.includes(":")) {
 		// Versioned model
 		return `${params.baseUrl}/v1/predictions`;
@@ -42,7 +42,7 @@ const makeUrl: InferenceProvider.MakeUrl = (params) => {
 	return `${params.baseUrl}/v1/models/${params.model}/predictions`;
 };
 
-export const REPLICATE_CONFIG: InferenceProvider.Config = {
+export const REPLICATE_CONFIG: InferenceProviderTypes.Config = {
 	makeBaseUrl,
 	makeBody,
 	makeHeaders,

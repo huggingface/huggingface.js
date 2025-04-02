@@ -14,19 +14,19 @@
  *
  * Thanks!
  */
-import type { InferenceProvider } from "../types";
+import type { InferenceProviderTypes } from "./types";
 
 const BLACK_FOREST_LABS_AI_API_BASE_URL = "https://api.us1.bfl.ai";
 
-const makeBaseUrl: InferenceProvider.MakeBaseUrl = () => {
+const makeBaseUrl: InferenceProviderTypes.MakeBaseUrl = () => {
 	return BLACK_FOREST_LABS_AI_API_BASE_URL;
 };
 
-const makeBody: InferenceProvider.MakeBody = (params) => {
+const makeBody: InferenceProviderTypes.MakeBody = (params) => {
 	return params.args;
 };
 
-const makeHeaders: InferenceProvider.MakeHeaders = (params) => {
+const makeHeaders: InferenceProviderTypes.MakeHeaders = (params) => {
 	if (params.authMethod === "provider-key") {
 		return { "X-Key": `${params.accessToken}` };
 	} else {
@@ -34,11 +34,11 @@ const makeHeaders: InferenceProvider.MakeHeaders = (params) => {
 	}
 };
 
-const makeUrl: InferenceProvider.MakeUrl = (params) => {
+const makeUrl: InferenceProviderTypes.MakeUrl = (params) => {
 	return `${params.baseUrl}/v1/${params.model}`;
 };
 
-export const BLACK_FOREST_LABS_CONFIG: InferenceProvider.Config = {
+export const BLACK_FOREST_LABS_CONFIG: InferenceProviderTypes.Config = {
 	makeBaseUrl,
 	makeBody,
 	makeHeaders,

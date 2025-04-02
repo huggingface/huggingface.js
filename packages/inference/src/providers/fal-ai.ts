@@ -16,27 +16,27 @@
  */
 import { InferenceOutputError } from "../lib/InferenceOutputError";
 import { isUrl } from "../lib/isUrl";
-import type { InferenceProvider } from "../types";
+import type { InferenceProviderTypes } from "./types";
 import { delay } from "../utils/delay";
 
 const FAL_AI_API_BASE_URL = "https://fal.run";
 const FAL_AI_API_BASE_URL_QUEUE = "https://queue.fal.run";
 
-const makeBaseUrl: InferenceProvider.MakeBaseUrl = (task) => {
+const makeBaseUrl: InferenceProviderTypes.MakeBaseUrl = (task) => {
 	return task === "text-to-video" ? FAL_AI_API_BASE_URL_QUEUE : FAL_AI_API_BASE_URL;
 };
 
-const makeBody: InferenceProvider.MakeBody = (params) => {
+const makeBody: InferenceProviderTypes.MakeBody = (params) => {
 	return params.args;
 };
 
-const makeHeaders: InferenceProvider.MakeHeaders = (params) => {
+const makeHeaders: InferenceProviderTypes.MakeHeaders = (params) => {
 	return {
 		Authorization: params.authMethod === "provider-key" ? `Key ${params.accessToken}` : `Bearer ${params.accessToken}`,
 	};
 };
 
-const makeUrl: InferenceProvider.MakeUrl = (params) => {
+const makeUrl: InferenceProviderTypes.MakeUrl = (params) => {
 	const baseUrl = `${params.baseUrl}/${params.model}`;
 	if (params.authMethod !== "provider-key" && params.task === "text-to-video") {
 		return `${baseUrl}?_subdomain=queue`;
@@ -44,7 +44,7 @@ const makeUrl: InferenceProvider.MakeUrl = (params) => {
 	return baseUrl;
 };
 
-export const FAL_AI_CONFIG: InferenceProvider.Config = {
+export const FAL_AI_CONFIG: InferenceProviderTypes.Config = {
 	makeBaseUrl,
 	makeBody,
 	makeHeaders,

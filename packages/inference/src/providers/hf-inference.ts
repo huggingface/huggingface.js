@@ -11,24 +11,24 @@
  * Thanks!
  */
 import { HF_ROUTER_URL } from "../config";
-import type { InferenceProvider } from "../types";
+import type { InferenceProviderTypes } from "./types";
 
-const makeBaseUrl: InferenceProvider.MakeBaseUrl = () => {
+const makeBaseUrl: InferenceProviderTypes.MakeBaseUrl = () => {
 	return `${HF_ROUTER_URL}/hf-inference`;
 };
 
-const makeBody: InferenceProvider.MakeBody = (params) => {
+const makeBody: InferenceProviderTypes.MakeBody = (params) => {
 	return {
 		...params.args,
 		...(params.chatCompletion ? { model: params.model } : undefined),
 	};
 };
 
-const makeHeaders: InferenceProvider.MakeHeaders = (params) => {
+const makeHeaders: InferenceProviderTypes.MakeHeaders = (params) => {
 	return { Authorization: `Bearer ${params.accessToken}` };
 };
 
-const makeUrl: InferenceProvider.MakeUrl = (params) => {
+const makeUrl: InferenceProviderTypes.MakeUrl = (params) => {
 	if (params.task && ["feature-extraction", "sentence-similarity"].includes(params.task)) {
 		// When deployed on hf-inference, these two tasks are automatically compatible with one another.
 		return `${params.baseUrl}/pipeline/${params.task}/${params.model}`;
@@ -39,7 +39,7 @@ const makeUrl: InferenceProvider.MakeUrl = (params) => {
 	return `${params.baseUrl}/models/${params.model}`;
 };
 
-export const HF_INFERENCE_CONFIG: InferenceProvider.Config = {
+export const HF_INFERENCE_CONFIG: InferenceProviderTypes.Config = {
 	makeBaseUrl,
 	makeBody,
 	makeHeaders,

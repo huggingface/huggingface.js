@@ -14,26 +14,26 @@
  *
  * Thanks!
  */
-import type { InferenceProvider } from "../types";
+import type { InferenceProviderTypes } from "./types";
 
 const TOGETHER_API_BASE_URL = "https://api.together.xyz";
 
-const makeBaseUrl: InferenceProvider.MakeBaseUrl = () => {
+const makeBaseUrl: InferenceProviderTypes.MakeBaseUrl = () => {
 	return TOGETHER_API_BASE_URL;
 };
 
-const makeBody: InferenceProvider.MakeBody = (params) => {
+const makeBody: InferenceProviderTypes.MakeBody = (params) => {
 	return {
 		...params.args,
 		model: params.model,
 	};
 };
 
-const makeHeaders: InferenceProvider.MakeHeaders = (params) => {
+const makeHeaders: InferenceProviderTypes.MakeHeaders = (params) => {
 	return { Authorization: `Bearer ${params.accessToken}` };
 };
 
-const makeUrl: InferenceProvider.MakeUrl = (params) => {
+const makeUrl: InferenceProviderTypes.MakeUrl = (params) => {
 	if (params.task === "text-to-image") {
 		return `${params.baseUrl}/v1/images/generations`;
 	}
@@ -46,7 +46,7 @@ const makeUrl: InferenceProvider.MakeUrl = (params) => {
 	return params.baseUrl;
 };
 
-export const TOGETHER_CONFIG: InferenceProvider.Config = {
+export const TOGETHER_CONFIG: InferenceProviderTypes.Config = {
 	makeBaseUrl,
 	makeBody,
 	makeHeaders,

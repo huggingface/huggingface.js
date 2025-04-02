@@ -14,33 +14,33 @@
  *
  * Thanks!
  */
-import type { InferenceProvider } from "../types";
+import type { InferenceProviderTypes } from "./types";
 
 const FIREWORKS_AI_API_BASE_URL = "https://api.fireworks.ai";
 
-const makeBaseUrl: InferenceProvider.MakeBaseUrl = () => {
+const makeBaseUrl: InferenceProviderTypes.MakeBaseUrl = () => {
 	return FIREWORKS_AI_API_BASE_URL;
 };
 
-const makeBody: InferenceProvider.MakeBody = (params) => {
+const makeBody: InferenceProviderTypes.MakeBody = (params) => {
 	return {
 		...params.args,
 		...(params.chatCompletion ? { model: params.model } : undefined),
 	};
 };
 
-const makeHeaders: InferenceProvider.MakeHeaders = (params) => {
+const makeHeaders: InferenceProviderTypes.MakeHeaders = (params) => {
 	return { Authorization: `Bearer ${params.accessToken}` };
 };
 
-const makeUrl: InferenceProvider.MakeUrl = (params) => {
+const makeUrl: InferenceProviderTypes.MakeUrl = (params) => {
 	if (params.chatCompletion) {
 		return `${params.baseUrl}/inference/v1/chat/completions`;
 	}
 	return `${params.baseUrl}/inference`;
 };
 
-export const FIREWORKS_AI_CONFIG: InferenceProvider.Config = {
+export const FIREWORKS_AI_CONFIG: InferenceProviderTypes.Config = {
 	makeBaseUrl,
 	makeBody,
 	makeHeaders,
