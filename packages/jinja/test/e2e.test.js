@@ -716,12 +716,11 @@ describe("End-to-end tests", () => {
 
 	it("should parse a chat template from the Hugging Face Hub", async () => {
 		const repo = "TheBloke/Mistral-7B-Instruct-v0.1-GPTQ";
-		const tokenizerConfig = await (
-			await downloadFile({
-				repo,
-				path: "tokenizer_config.json",
-			})
-		).json();
+		const blob = await downloadFile({
+			repo,
+			path: "tokenizer_config.json",
+		});
+		const tokenizerConfig = JSON.parse(await blob.text());
 
 		const template = new Template(tokenizerConfig.chat_template);
 		const result = template.render(TEST_CUSTOM_TEMPLATES[repo].data);

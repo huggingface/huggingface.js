@@ -4,13 +4,17 @@ import type { CredentialsParams, RepoDesignation } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { toRepoId } from "../utils/toRepoId";
 
+interface XetInfo {
+	hash: string;
+	refreshUrl: URL;
+}
+
 export interface FileDownloadInfoOutput {
 	size: number;
 	etag: string;
-	/**
-	 * In case of LFS file, link to download directly from cloud provider
-	 */
-	downloadLink: string | null;
+	xet?: XetInfo;
+	// URL to fetch (with the access token if private file)
+	url: string;
 }
 /**
  * @returns null when the file doesn't exist
@@ -54,6 +58,7 @@ export async function fileDownloadInfo(
 				Authorization: `Bearer ${accessToken}`,
 			}),
 			Range: "bytes=0-0",
+			Accept: "application/vnd.xet-fileinfo+json, */*",
 		},
 	});
 
@@ -65,28 +70,51 @@ export async function fileDownloadInfo(
 		throw await createApiError(resp);
 	}
 
-	const etag = resp.headers.get("ETag");
+	let etag: string | undefined;
+	let size: number | undefined;
+	let xetInfo: XetInfo | undefined;
+	if (resp.headers.get("Content-Type")?.includes("application/vnd.xet-fileinfo+json")) {
+		const json: { casUrl: string; hash: string; refreshUrl: string; size: string; etag: string } = await resp.json();
+
+		xetInfo = {
+			hash: json.hash,
+			refreshUrl: new URL(json.refreshUrl, hubUrl),
+		};
+
+		etag = json.etag;
+		size = parseInt(json.size);
+	}
+
+	etag ??= resp.headers.get("ETag") ?? undefined;
 
 	if (!etag) {
 		throw new InvalidApiResponseFormatError("Expected ETag");
 	}
 
-	const contentRangeHeader = resp.headers.get("content-range");
+	if (size === undefined || isNaN(size)) {
+		const contentRangeHeader = resp.headers.get("content-range");
 
-	if (!contentRangeHeader) {
-		throw new InvalidApiResponseFormatError("Expected size information");
-	}
+		if (!contentRangeHeader) {
+			throw new InvalidApiResponseFormatError("Expected size information");
+		}
 
-	const [, parsedSize] = contentRangeHeader.split("/");
-	const size = parseInt(parsedSize);
+		const [, parsedSize] = contentRangeHeader.split("/");
+		size = parseInt(parsedSize);
 
-	if (isNaN(size)) {
-		throw new InvalidApiResponseFormatError("Invalid file size received");
+		if (isNaN(size)) {
+			throw new InvalidApiResponseFormatError("Invalid file size received");
+		}
 	}
 
 	return {
 		etag,
 		size,
-		downloadLink: new URL(resp.url).hostname !== new URL(hubUrl).hostname ? resp.url : null,
+		xet: xetInfo,
+		// Cannot use resp.url in case it's a S3 url and the user adds an Authorization header to it.
+		url:
+			resp.url &&
+			(new URL(resp.url).hostname === new URL(hubUrl).hostname || resp.headers.get("X-Cache")?.endsWith(" cloudfront"))
+				? resp.url
+				: url,
 	};
 }
