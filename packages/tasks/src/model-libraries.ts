@@ -160,8 +160,8 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"params.index.json"`,
 	},
 	infinite_you: {
-		prettyLabel: "Infinite You",
-		repoName: "Infinite You",
+		prettyLabel: "InfiniteYou",
+		repoName: "InfiniteYou",
 		repoUrl: "https://github.com/bytedance/InfiniteYou",
 		filter: false,
 		countDownloads: `path_extension:"bin" OR path_extension:"safetensors"`,
