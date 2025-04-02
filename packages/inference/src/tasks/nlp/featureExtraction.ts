@@ -1,7 +1,7 @@
 import type { FeatureExtractionInput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
+import { innerRequest } from "../../utils/request";
 
 export type FeatureExtractionArgs = BaseArgs & FeatureExtractionInput;
 
@@ -17,7 +17,7 @@ export async function featureExtraction(
 	args: FeatureExtractionArgs,
 	options?: Options
 ): Promise<FeatureExtractionOutput> {
-	const res = await request<FeatureExtractionOutput>(args, {
+	const { data: res } = await innerRequest<FeatureExtractionOutput>(args, {
 		...options,
 		task: "feature-extraction",
 	});

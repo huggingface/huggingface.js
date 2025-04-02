@@ -1,7 +1,7 @@
 import type { SentenceSimilarityInput, SentenceSimilarityOutput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
+import { innerRequest } from "../../utils/request";
 
 export type SentenceSimilarityArgs = BaseArgs & SentenceSimilarityInput;
 
@@ -12,7 +12,7 @@ export async function sentenceSimilarity(
 	args: SentenceSimilarityArgs,
 	options?: Options
 ): Promise<SentenceSimilarityOutput> {
-	const res = await request<SentenceSimilarityOutput>(args, {
+	const { data: res } = await innerRequest<SentenceSimilarityOutput>(args, {
 		...options,
 		task: "sentence-similarity",
 	});
