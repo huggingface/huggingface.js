@@ -34,6 +34,9 @@ export async function* streamingRequest<T>(
 				/// OpenAI errors
 				throw new Error(output.error.message);
 			}
+			if (typeof output.message === "string") {
+				throw new Error(output.message);
+			}
 		}
 
 		throw new Error(`Server response contains error: ${response.status}`);
