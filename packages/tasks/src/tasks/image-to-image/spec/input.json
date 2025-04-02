@@ -20,6 +20,10 @@
 			"title": "ImageToImageParameters",
 			"type": "object",
 			"properties": {
+				"prompt": {
+					"type": "string",
+					"description": "The text prompt to guide the image generation."
+				},
 				"guidance_scale": {
 					"type": "number",
 					"description": "For diffusion models. A higher guidance scale value encourages the model to generate images closely linked to the text prompt at the expense of lower image quality."
