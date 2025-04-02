@@ -98,32 +98,40 @@ export type RequestArgs = BaseArgs &
 		parameters?: Record<string, unknown>;
 	};
 
-export interface ProviderConfig {
-	makeBaseUrl: ((task?: InferenceTask) => string) | (() => string);
-	makeBody: (params: BodyParams) => Record<string, unknown>;
-	makeHeaders: (params: HeaderParams) => Record<string, string>;
-	makeUrl: (params: UrlParams) => string;
-	clientSideRoutingOnly?: boolean;
-}
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export namespace InferenceProvider {
+	export type AuthMethod = "none" | "hf-token" | "credentials-include" | "provider-key";
 
-export type AuthMethod = "none" | "hf-token" | "credentials-include" | "provider-key";
+	export interface Config {
+		makeBaseUrl: MakeBaseUrl;
+		makeBody: MakeBody;
+		makeHeaders: MakeHeaders;
+		makeUrl: MakeUrl;
+		clientSideRoutingOnly?: boolean;
+	}
 
-export interface HeaderParams {
-	accessToken?: string;
-	authMethod: AuthMethod;
-}
+	export type MakeBody = (params: BodyParams) => Record<string, unknown>;
+	export type MakeHeaders = (params: HeaderParams) => Record<string, string | undefined>;
+	export type MakeUrl = (params: UrlParams) => string;
+	export type MakeBaseUrl = (() => string) | ((task?: InferenceTask) => string);
 
-export interface UrlParams {
-	authMethod: AuthMethod;
-	baseUrl: string;
-	model: string;
-	task?: InferenceTask;
-	chatCompletion?: boolean;
-}
+	export interface HeaderParams {
+		accessToken?: string;
+		authMethod: AuthMethod;
+	}
 
-export interface BodyParams {
-	args: Record<string, unknown>;
-	chatCompletion?: boolean;
-	model?: string;
-	task?: InferenceTask;
+	export interface UrlParams {
+		authMethod: AuthMethod;
+		baseUrl: string;
+		model: string;
+		task?: InferenceTask;
+		chatCompletion?: boolean;
+	}
+
+	export interface BodyParams {
+		args: Record<string, unknown>;
+		chatCompletion?: boolean;
+		model?: string;
+		task?: InferenceTask;
+	}
 }

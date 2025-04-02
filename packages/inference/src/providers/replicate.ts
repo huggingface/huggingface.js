@@ -14,35 +14,35 @@
  *
  * Thanks!
  */
-import type { BodyParams, HeaderParams, ProviderConfig, UrlParams } from "../types";
+import type { InferenceProvider } from "../types";
 
 export const REPLICATE_API_BASE_URL = "https://api.replicate.com";
 
-const makeBaseUrl = (): string => {
+const makeBaseUrl: InferenceProvider.MakeBaseUrl = () => {
 	return REPLICATE_API_BASE_URL;
 };
 
-const makeBody = (params: BodyParams): Record<string, unknown> => {
+const makeBody: InferenceProvider.MakeBody = (params) => {
 	return {
 		input: params.args,
 		version: params.model?.includes(":") ? params.model.split(":")[1] : undefined,
 	};
 };
 
-const makeHeaders = (params: HeaderParams): Record<string, string> => {
+const makeHeaders: InferenceProvider.MakeHeaders = (params) => {
 	return { Authorization: `Bearer ${params.accessToken}`, Prefer: "wait" };
 };
 
-const makeUrl = (params: UrlParams): string => {
+const makeUrl: InferenceProvider.MakeUrl = (params) => {
 	if (params.model.includes(":")) {
-		/// Versioned model
+		// Versioned model
 		return `${params.baseUrl}/v1/predictions`;
 	}
-	/// Evergreen / Canonical model
+	// Evergreen / Canonical model
 	return `${params.baseUrl}/v1/models/${params.model}/predictions`;
 };
 
-export const REPLICATE_CONFIG: ProviderConfig = {
+export const REPLICATE_CONFIG: InferenceProvider.Config = {
 	makeBaseUrl,
 	makeBody,
 	makeHeaders,
