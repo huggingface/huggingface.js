@@ -1,7 +1,8 @@
-import type { ChatCompletionOutput, TextGenerationOutput } from "@huggingface/tasks";
+import type { ChatCompletionOutput, TextGenerationInput, TextGenerationOutput, TextToImageInput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../lib/InferenceOutputError";
-import type { BodyParams, HeaderParams, UrlParams } from "../types";
+import type { BaseArgs, BodyParams, HeaderParams, UrlParams } from "../types";
 import { toArray } from "../utils/toArray";
+import type { ChatCompletionInput } from "@huggingface/tasks/src/tasks";
 /**
  * Base class for task-specific provider helpers
  */
@@ -11,7 +12,7 @@ export abstract class TaskProviderHelper {
 		private baseUrl: string,
 		private task?: string,
 		readonly clientSideRoutingOnly: boolean = false
-	) {}
+	) { }
 
 	/**
 	 * Return the response in the expected format.
@@ -20,9 +21,9 @@ export abstract class TaskProviderHelper {
 	abstract getResponse(
 		response: unknown,
 		url?: string,
-		headers?: Record<string, string>,
+		headers?: HeadersInit,
 		outputType?: "url" | "blob"
-	): unknown;
+	): Promise<unknown>;
 
 	/**
 	 * Prepare the base URL for the request
@@ -73,7 +74,36 @@ export abstract class TaskProviderHelper {
 	abstract preparePayload(params: BodyParams): unknown;
 }
 
-export class BaseConversationalTask extends TaskProviderHelper {
+export interface TextToImageTaskHelper {
+	getResponse(response: unknown,
+		url?: string,
+		headers?: HeadersInit,
+		outputType?: "url" | "blob"
+	): Promise<string | Blob>;
+
+	preparePayload(params: BodyParams<TextToImageInput & BaseArgs>): Record<string, unknown>;
+}
+
+export interface TextGenerationTaskHelper {
+	getResponse(response: unknown,
+		url?: string,
+		headers?: HeadersInit,
+	): Promise<TextGenerationOutput>;
+
+	preparePayload(params: BodyParams<TextGenerationInput & BaseArgs>): Record<string, unknown>;
+
+}
+
+export interface ConversationalTaskHelper {
+	getResponse(response: unknown,
+		url?: string,
+		headers?: HeadersInit,
+	): Promise<ChatCompletionOutput>;
+
+	preparePayload(params: BodyParams<ChatCompletionInput & BaseArgs>): Record<string, unknown>;
+}
+
+export class BaseConversationalTask extends TaskProviderHelper implements ConversationalTaskHelper {
 	constructor(provider: string, baseUrl: string, clientSideRoutingOnly: boolean = false) {
 		super(provider, baseUrl, "conversational", clientSideRoutingOnly);
 	}
@@ -83,14 +113,14 @@ export class BaseConversationalTask extends TaskProviderHelper {
 		return "v1/chat/completions";
 	}
 
-	preparePayload(params: BodyParams): Record<string, unknown> {
+	preparePayload(params: BodyParams<ChatCompletionInput & BaseArgs>): Record<string, unknown> {
 		return {
 			...params.args,
 			model: params.model,
 		};
 	}
 
-	getResponse(response: ChatCompletionOutput): ChatCompletionOutput {
+	async getResponse(response: ChatCompletionOutput): Promise<ChatCompletionOutput> {
 		if (
 			typeof response === "object" &&
 			Array.isArray(response?.choices) &&
@@ -110,7 +140,7 @@ export class BaseConversationalTask extends TaskProviderHelper {
 	}
 }
 
-export class BaseTextGenerationTask extends TaskProviderHelper {
+export class BaseTextGenerationTask extends TaskProviderHelper implements TextGenerationTaskHelper {
 	constructor(provider: string, baseUrl: string, clientSideRoutingOnly: boolean = false) {
 		super(provider, baseUrl, "text-generation", clientSideRoutingOnly);
 	}
@@ -125,7 +155,7 @@ export class BaseTextGenerationTask extends TaskProviderHelper {
 		return "v1/completions";
 	}
 
-	getResponse(response: unknown): TextGenerationOutput {
+	async getResponse(response: unknown): Promise<TextGenerationOutput> {
 		const res = toArray(response);
 		// @ts-expect-error - We need to check properties on unknown type
 		if (Array.isArray(res) && res.every((x) => "generated_text" in x && typeof x?.generated_text === "string")) {

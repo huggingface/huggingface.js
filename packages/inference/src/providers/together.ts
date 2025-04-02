@@ -18,6 +18,7 @@ import type { ChatCompletionOutput, TextGenerationOutput, TextGenerationOutputFi
 import { InferenceOutputError } from "../lib/InferenceOutputError";
 import type { BodyParams, UrlParams } from "../types";
 import { omit } from "../utils/omit";
+import type { TextToImageTaskHelper } from "./providerHelper";
 import { BaseConversationalTask, BaseTextGenerationTask, TaskProviderHelper } from "./providerHelper";
 
 const TOGETHER_API_BASE_URL = "https://api.together.xyz";
@@ -57,7 +58,7 @@ export class TogetherTextGenerationTask extends BaseTextGenerationTask {
 		};
 	}
 
-	override getResponse(response: TogeteherTextCompletionOutput): TextGenerationOutput {
+	override async getResponse(response: TogeteherTextCompletionOutput): Promise<TextGenerationOutput> {
 		if (
 			typeof response === "object" &&
 			"choices" in response &&
@@ -73,7 +74,7 @@ export class TogetherTextGenerationTask extends BaseTextGenerationTask {
 	}
 }
 
-export class TogetherTextToImageTask extends TaskProviderHelper {
+export class TogetherTextToImageTask extends TaskProviderHelper implements TextToImageTaskHelper {
 	constructor() {
 		super("together", TOGETHER_API_BASE_URL, "text-to-image");
 	}
@@ -93,7 +94,7 @@ export class TogetherTextToImageTask extends TaskProviderHelper {
 		};
 	}
 
-	getResponse(response: TogetherBase64ImageGeneration, outputType?: "url" | "blob"): string | Promise<Blob> {
+	async getResponse(response: TogetherBase64ImageGeneration, outputType?: "url" | "blob"): Promise<string | Blob> {
 		if (
 			typeof response === "object" &&
 			"data" in response &&

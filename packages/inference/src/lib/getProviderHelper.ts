@@ -22,14 +22,62 @@ import {
 import { NebiusConversationalTask, NebiusTextGenerationTask, NebiusTextToImageTask } from "../providers/nebius";
 import { NovitaConversationalTask, NovitaTextGenerationTask } from "../providers/novita";
 import { OpenAIConversationalTask } from "../providers/openai";
-import type { TaskProviderHelper } from "../providers/providerHelper";
+import type { TaskProviderHelper, TextGenerationTaskHelper, TextToImageTaskHelper } from "../providers/providerHelper";
 import { ReplicateTextToImageTask, ReplicateTextToSpeechTask, ReplicateTextToVideoTask } from "../providers/replicate";
 import { SambanovaConversationalTask } from "../providers/sambanova";
 import { TogetherConversationalTask, TogetherTextGenerationTask, TogetherTextToImageTask } from "../providers/together";
 import type { InferenceProvider, InferenceTask } from "../types";
+import { typedIn } from "../utils/typedIn";
+import { typedInclude } from "../utils/typedInclude";
+import { typedKeys } from "../utils/typedKeys";
 
-export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, TaskProviderHelper>>> = {
-	"black-forest-labs": {
+export const HELPERS = {
+	"text-to-image": {
+		"black-forest-labs": new BlackForestLabsTextToImageTask(),
+		"fal-ai": new FalAITextToImageTask(),
+		"hf-inference": new HFInferenceTextToImageTask(),
+		hyperbolic: new HyperbolicTextToImageTask(),
+		nebius: new NebiusTextToImageTask(),
+		together: new TogetherTextToImageTask(),
+	} satisfies Partial<Record<InferenceProvider, TextToImageTaskHelper>>,
+	// "text-to-speech": {
+	// 	"fal-ai": new FalAITextToSpeechTask(),
+	// 	"hf-inference": new HFInferenceTask("text-to-speech"),
+	// 	replicate: new ReplicateTextToSpeechTask(),
+	// } satisfies Partial<Record<InferenceProvider, TextToSpeechTaskHelper>>,
+	// "text-to-video": {
+	// 	"fal-ai": new FalAITextToVideoTask(),
+	// 	replicate: new ReplicateTextToVideoTask(),
+	// } satisfies Partial<Record<InferenceProvider, TextToVideoTaskHelper>>,
+	// "automatic-speech-recognition": {
+	// 	"fal-ai": new FalAIAutomaticSpeechRecognitionTask(),
+	// 	"hf-inference": new HFInferenceTask("automatic-speech-recognition"),
+	// } satisfies Partial<Record<InferenceProvider, AutomaticSpeechRecognitionTaskHelper>>,
+	// "text-generation": {
+	// 	"hf-inference": new HFInferenceTextGenerationTask(),
+	// 	"hyperbolic": new HyperbolicTextGenerationTask(),
+	// 	nebius: new NebiusTextGenerationTask(),
+	// 	"novita": new NovitaTextGenerationTask(),
+	// 	"together": new TogetherTextGenerationTask(),
+	// } satisfies Partial<Record<InferenceProvider, TextGenerationTaskHelper>>,
+	// "conversational": {
+	// 	cerebras: new CerebrasConversationalTask(),
+	// 	cohere: new CohereConversationalTask(),
+	// 	"fireworks-ai": new FireworksConversationalTask(),
+	// 	"hf-inference": new HFInferenceConversationalTask(),
+	// 	hyperbolic: new HyperbolicConversationalTask(),
+	// 	nebius: new NebiusConversationalTask(),
+	// 	novita: new NovitaConversationalTask(),
+	// 	openai: new OpenAIConversationalTask(),
+	// 	replicate: new ReplicateTextToImageTask(),
+	// 	sambanova: new SambanovaConversationalTask(),
+	// 	together: new TogetherConversationalTask(),
+	// } satisfies Partial<Record<InferenceProvider, ConversationalTaskHelper>>,
+} satisfies Partial<Record<InferenceTask, Partial<Record<InferenceProvider, TaskProviderHelper>>>>;
+
+export const SUPPORTED_TASKS = typedKeys(HELPERS);
+/**
+"black-forest-labs": {
 		"text-to-image": new BlackForestLabsTextToImageTask(),
 	},
 	cerebras: {
@@ -106,11 +154,13 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-generation": new TogetherTextGenerationTask(),
 		conversational: new TogetherConversationalTask(),
 	},
-};
+} 
+ */
 
 /**
  * Get provider helper instance by name and task
  */
+export function getProviderHelper(provider: InferenceProvider, task: "text-to-image"): TextToImageTaskHelper & TaskProviderHelper;
 export function getProviderHelper(provider: InferenceProvider, task: InferenceTask | undefined): TaskProviderHelper {
 	// special case for hf-inference, where the task is optional
 	if (provider === "hf-inference") {
@@ -121,14 +171,17 @@ export function getProviderHelper(provider: InferenceProvider, task: InferenceTa
 	if (!task) {
 		throw new Error("you need to provide a task name when using an external provider, e.g. 'text-to-image'");
 	}
-	if (!(provider in PROVIDERS)) {
-		throw new Error(`Provider '${provider}' not supported. Available providers: ${Object.keys(PROVIDERS)}`);
+	if (!typedInclude(SUPPORTED_TASKS, task)) {
+		throw new Error(`Task '${task}' not supported. Available tasks: ${Object.keys(HELPERS)}`);
 	}
-	const providerTasks = PROVIDERS[provider];
-	if (!providerTasks || !(task in providerTasks)) {
-		throw new Error(
-			`Task '${task}' not supported for provider '${provider}'. Available tasks: ${Object.keys(providerTasks ?? {})}`
-		);
+	switch (task) {
+		case "text-to-image": {
+			if (!typedIn(HELPERS["text-to-image"], provider)) {
+				throw new Error(
+					`Provider '${provider}' not supported for task '${task}'. Available providers: ${Object.keys(HELPERS["text-to-image"] ?? {})}`
+				);
+			}
+			return HELPERS["text-to-image"][provider];
+		}
 	}
-	return providerTasks[task] as TaskProviderHelper;
 }

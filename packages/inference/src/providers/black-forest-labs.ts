@@ -18,7 +18,7 @@ import { InferenceOutputError } from "../lib/InferenceOutputError";
 import type { BodyParams, HeaderParams, UrlParams } from "../types";
 import { delay } from "../utils/delay";
 import { omit } from "../utils/omit";
-import { TaskProviderHelper } from "./providerHelper";
+import { TaskProviderHelper, type TextToImageTaskHelper } from "./providerHelper";
 
 const BLACK_FOREST_LABS_AI_API_BASE_URL = "https://api.us1.bfl.ai";
 interface BlackForestLabsResponse {
@@ -26,7 +26,7 @@ interface BlackForestLabsResponse {
 	polling_url: string;
 }
 
-export class BlackForestLabsTextToImageTask extends TaskProviderHelper {
+export class BlackForestLabsTextToImageTask extends TaskProviderHelper implements TextToImageTaskHelper {
 	constructor() {
 		super("black-forest-labs", BLACK_FOREST_LABS_AI_API_BASE_URL, "text-to-image");
 	}

@@ -14,6 +14,7 @@ import { HF_ROUTER_URL } from "../config";
 import { InferenceOutputError } from "../lib/InferenceOutputError";
 import type { BodyParams, InferenceTask, UrlParams } from "../types";
 import { toArray } from "../utils/toArray";
+import type { TextToImageTaskHelper } from "./providerHelper";
 import { TaskProviderHelper } from "./providerHelper";
 
 interface Base64ImageGeneration {
@@ -53,7 +54,7 @@ export class HFInferenceTask extends TaskProviderHelper {
 	}
 }
 
-export class HFInferenceTextToImageTask extends HFInferenceTask {
+export class HFInferenceTextToImageTask extends HFInferenceTask implements TextToImageTaskHelper {
 	constructor() {
 		super("text-to-image");
 	}
@@ -63,7 +64,7 @@ export class HFInferenceTextToImageTask extends HFInferenceTask {
 		url?: string,
 		headers?: Record<string, string>,
 		outputType?: "url" | "blob"
-	): Promise<unknown> {
+	): Promise<string | Blob> {
 		if (!response) {
 			throw new InferenceOutputError("response is undefined");
 		}

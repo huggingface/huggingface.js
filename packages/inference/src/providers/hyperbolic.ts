@@ -18,6 +18,7 @@ import type { ChatCompletionOutput, TextGenerationOutput } from "@huggingface/ta
 import { InferenceOutputError } from "../lib/InferenceOutputError";
 import type { BodyParams, UrlParams } from "../types";
 import { omit } from "../utils/omit";
+import type { TextGenerationTaskHelper, TextToImageTaskHelper } from "./providerHelper";
 import { BaseConversationalTask, BaseTextGenerationTask, TaskProviderHelper } from "./providerHelper";
 
 const HYPERBOLIC_API_BASE_URL = "https://api.hyperbolic.xyz";
@@ -38,7 +39,7 @@ export class HyperbolicConversationalTask extends BaseConversationalTask {
 	}
 }
 
-export class HyperbolicTextGenerationTask extends BaseTextGenerationTask {
+export class HyperbolicTextGenerationTask extends BaseTextGenerationTask implements TextGenerationTaskHelper {
 	constructor() {
 		super("hyperbolic", HYPERBOLIC_API_BASE_URL);
 	}
@@ -53,16 +54,16 @@ export class HyperbolicTextGenerationTask extends BaseTextGenerationTask {
 			messages: [{ content: params.args.inputs, role: "user" }],
 			...(params.args.parameters
 				? {
-						max_tokens: (params.args.parameters as Record<string, unknown>).max_new_tokens,
-						...omit(params.args.parameters as Record<string, unknown>, "max_new_tokens"),
-				  }
+					max_tokens: (params.args.parameters as Record<string, unknown>).max_new_tokens,
+					...omit(params.args.parameters as Record<string, unknown>, "max_new_tokens"),
+				}
 				: undefined),
 			...omit(params.args, ["inputs", "parameters"]),
 			model: params.model,
 		};
 	}
 
-	override getResponse(response: HyperbolicTextCompletionOutput): TextGenerationOutput {
+	override async getResponse(response: HyperbolicTextCompletionOutput): Promise<TextGenerationOutput> {
 		if (
 			typeof response === "object" &&
 			"choices" in response &&
@@ -79,7 +80,7 @@ export class HyperbolicTextGenerationTask extends BaseTextGenerationTask {
 	}
 }
 
-export class HyperbolicTextToImageTask extends TaskProviderHelper {
+export class HyperbolicTextToImageTask extends TaskProviderHelper implements TextToImageTaskHelper {
 	constructor() {
 		super("hyperbolic", HYPERBOLIC_API_BASE_URL, "text-to-image");
 	}
@@ -98,7 +99,7 @@ export class HyperbolicTextToImageTask extends TaskProviderHelper {
 		};
 	}
 
-	getResponse(response: HyperbolicTextToImageOutput, outputType?: "url" | "blob"): Promise<Blob> | string {
+	async getResponse(response: HyperbolicTextToImageOutput, outputType?: "url" | "blob"): Promise<Blob | string> {
 		if (
 			typeof response === "object" &&
 			"images" in response &&

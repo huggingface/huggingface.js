@@ -25,11 +25,10 @@ export async function textToImage(
 export async function textToImage(args: TextToImageArgs, options?: TextToImageOptions): Promise<Blob | string> {
 	const provider = args.provider ?? "hf-inference";
 	const providerHelper = getProviderHelper(provider, "text-to-image");
-	const res = await request<Record<string, unknown>>(args, {
+	const res = await request(args, {
 		...options,
 		task: "text-to-image",
 	});
 	const { url, info } = await makeRequestOptions(args, { ...options, task: "text-to-image" });
-	// @ts-expect-error - Provider-specific implementations accept the outputType parameter
-	return providerHelper.getResponse(res, url, info.headers as Record<string, string>, options?.outputType);
+	return await providerHelper.getResponse(res, url, info.headers, options?.outputType);
 }
