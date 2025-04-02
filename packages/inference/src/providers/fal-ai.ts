@@ -51,7 +51,7 @@ abstract class FalAITask extends TaskProviderHelper {
 		super("fal-ai", url || "https://fal.run", task);
 	}
 
-	preparePayload(params: BodyParams): Record<string, unknown> | Promise<Record<string, unknown>> {
+	preparePayload(params: BodyParams): Record<string, unknown> {
 		return params.args;
 	}
 	makeRoute(params: UrlParams): string {

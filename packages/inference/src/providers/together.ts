@@ -22,7 +22,7 @@ import { BaseConversationalTask, BaseTextGenerationTask, TaskProviderHelper } fr
 
 const TOGETHER_API_BASE_URL = "https://api.together.xyz";
 
-interface TogeteherTextCompletionOutput extends Omit<ChatCompletionOutput, "choices"> {
+interface TogetherTextCompletionOutput extends Omit<ChatCompletionOutput, "choices"> {
 	choices: Array<{
 		text: string;
 		finish_reason: TextGenerationOutputFinishReason;
@@ -57,7 +57,7 @@ export class TogetherTextGenerationTask extends BaseTextGenerationTask {
 		};
 	}
 
-	override getResponse(response: TogeteherTextCompletionOutput): TextGenerationOutput {
+	override getResponse(response: TogetherTextCompletionOutput): TextGenerationOutput {
 		if (
 			typeof response === "object" &&
 			"choices" in response &&

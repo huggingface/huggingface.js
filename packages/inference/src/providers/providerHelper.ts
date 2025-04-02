@@ -81,8 +81,7 @@ export class BaseConversationalTask extends TaskProviderHelper {
 		super(provider, baseUrl, "conversational", clientSideRoutingOnly);
 	}
 
-	makeRoute(params: UrlParams): string {
-		void params;
+	makeRoute(): string {
 		return "v1/chat/completions";
 	}
 
@@ -123,8 +122,7 @@ export class BaseTextGenerationTask extends TaskProviderHelper {
 			model: params.model,
 		};
 	}
-	makeRoute(params: UrlParams): string {
-		void params;
+	makeRoute(): string {
 		return "v1/completions";
 	}
 
