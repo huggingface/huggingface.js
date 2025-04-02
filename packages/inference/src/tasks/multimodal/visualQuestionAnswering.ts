@@ -28,12 +28,10 @@ export async function visualQuestionAnswering(
 		},
 	} as RequestArgs;
 
-	const res = (
-		await innerRequest<VisualQuestionAnsweringOutput>(reqArgs, {
-			...options,
-			task: "visual-question-answering",
-		})
-	).data;
+	const { data: res } = await innerRequest<VisualQuestionAnsweringOutput>(reqArgs, {
+		...options,
+		task: "visual-question-answering",
+	});
 
 	const isValidOutput =
 		Array.isArray(res) &&

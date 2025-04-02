@@ -17,12 +17,10 @@ export async function automaticSpeechRecognition(
 	options?: Options
 ): Promise<AutomaticSpeechRecognitionOutput> {
 	const payload = await buildPayload(args);
-	const res = (
-		await innerRequest<AutomaticSpeechRecognitionOutput>(payload, {
-			...options,
-			task: "automatic-speech-recognition",
-		})
-	).data;
+	const { data: res } = await innerRequest<AutomaticSpeechRecognitionOutput>(payload, {
+		...options,
+		task: "automatic-speech-recognition",
+	});
 	const isValidOutput = typeof res?.text === "string";
 	if (!isValidOutput) {
 		throw new InferenceOutputError("Expected {text: string}");

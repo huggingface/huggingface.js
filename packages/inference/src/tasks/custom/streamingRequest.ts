@@ -13,5 +13,8 @@ export async function* streamingRequest<T>(
 		chatCompletion?: boolean;
 	}
 ): AsyncGenerator<T> {
+	console.warn(
+		"The streamingRequest method is deprecated and will be removed in a future version of huggingface.js. Use specific task functions instead."
+	);
 	yield* innerStreamingRequest(args, options);
 }

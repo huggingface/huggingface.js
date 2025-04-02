@@ -16,12 +16,10 @@ export async function audioClassification(
 	options?: Options
 ): Promise<AudioClassificationOutput> {
 	const payload = preparePayload(args);
-	const res = (
-		await innerRequest<AudioClassificationOutput>(payload, {
-			...options,
-			task: "audio-classification",
-		})
-	).data;
+	const { data: res } = await innerRequest<AudioClassificationOutput>(payload, {
+		...options,
+		task: "audio-classification",
+	});
 	const isValidOutput =
 		Array.isArray(res) && res.every((x) => typeof x.label === "string" && typeof x.score === "number");
 	if (!isValidOutput) {

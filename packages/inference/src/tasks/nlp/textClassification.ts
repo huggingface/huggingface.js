@@ -12,16 +12,15 @@ export async function textClassification(
 	args: TextClassificationArgs,
 	options?: Options
 ): Promise<TextClassificationOutput> {
-	const res = (
-		await innerRequest<TextClassificationOutput>(args, {
-			...options,
-			task: "text-classification",
-		})
-	).data?.[0];
+	const { data: res } = await innerRequest<TextClassificationOutput>(args, {
+		...options,
+		task: "text-classification",
+	});
+	const output = res?.[0];
 	const isValidOutput =
-		Array.isArray(res) && res.every((x) => typeof x?.label === "string" && typeof x.score === "number");
+		Array.isArray(output) && output.every((x) => typeof x?.label === "string" && typeof x.score === "number");
 	if (!isValidOutput) {
 		throw new InferenceOutputError("Expected Array<{label: string, score: number}>");
 	}
-	return res;
+	return output;
 }

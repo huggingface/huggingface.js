@@ -65,18 +65,16 @@ export async function textToImage(args: TextToImageArgs, options?: TextToImageOp
 					...getResponseFormatArg(args.provider),
 					prompt: args.inputs,
 			  };
-	const res = (
-		await innerRequest<
-			| TextToImageOutput
-			| Base64ImageGeneration
-			| OutputUrlImageGeneration
-			| BlackForestLabsResponse
-			| HyperbolicTextToImageOutput
-		>(payload, {
-			...options,
-			task: "text-to-image",
-		})
-	).data;
+	const { data: res } = await innerRequest<
+		| TextToImageOutput
+		| Base64ImageGeneration
+		| OutputUrlImageGeneration
+		| BlackForestLabsResponse
+		| HyperbolicTextToImageOutput
+	>(payload, {
+		...options,
+		task: "text-to-image",
+	});
 
 	if (res && typeof res === "object") {
 		if (args.provider === "black-forest-labs" && "polling_url" in res && typeof res.polling_url === "string") {

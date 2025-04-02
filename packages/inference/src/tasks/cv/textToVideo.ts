@@ -34,12 +34,11 @@ export async function textToVideo(args: TextToVideoArgs, options?: Options): Pro
 		args.provider === "fal-ai" || args.provider === "replicate" || args.provider === "novita"
 			? { ...omit(args, ["inputs", "parameters"]), ...args.parameters, prompt: args.inputs }
 			: args;
-	const response = await innerRequest<FalAiQueueOutput | ReplicateOutput | NovitaOutput>(payload, {
+	const { data, requestContext } = await innerRequest<FalAiQueueOutput | ReplicateOutput | NovitaOutput>(payload, {
 		...options,
 		task: "text-to-video",
 	});
 
-	const { data, requestContext } = response;
 	if (args.provider === "fal-ai") {
 		return await pollFalResponse(
 			data as FalAiQueueOutput,

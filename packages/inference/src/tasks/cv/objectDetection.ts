@@ -12,12 +12,10 @@ export type ObjectDetectionArgs = BaseArgs & (ObjectDetectionInput | LegacyImage
  */
 export async function objectDetection(args: ObjectDetectionArgs, options?: Options): Promise<ObjectDetectionOutput> {
 	const payload = preparePayload(args);
-	const res = (
-		await innerRequest<ObjectDetectionOutput>(payload, {
-			...options,
-			task: "object-detection",
-		})
-	).data;
+	const { data: res } = await innerRequest<ObjectDetectionOutput>(payload, {
+		...options,
+		task: "object-detection",
+	});
 	const isValidOutput =
 		Array.isArray(res) &&
 		res.every(

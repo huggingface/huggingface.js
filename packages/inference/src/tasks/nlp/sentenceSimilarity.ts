@@ -12,12 +12,10 @@ export async function sentenceSimilarity(
 	args: SentenceSimilarityArgs,
 	options?: Options
 ): Promise<SentenceSimilarityOutput> {
-	const res = (
-		await innerRequest<SentenceSimilarityOutput>(args, {
-			...options,
-			task: "sentence-similarity",
-		})
-	).data;
+	const { data: res } = await innerRequest<SentenceSimilarityOutput>(args, {
+		...options,
+		task: "sentence-similarity",
+	});
 
 	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x === "number");
 	if (!isValidOutput) {

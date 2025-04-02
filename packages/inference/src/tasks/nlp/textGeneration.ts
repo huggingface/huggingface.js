@@ -37,12 +37,10 @@ export async function textGeneration(
 ): Promise<TextGenerationOutput> {
 	if (args.provider === "together") {
 		args.prompt = args.inputs;
-		const raw = (
-			await innerRequest<TogeteherTextCompletionOutput>(args, {
-				...options,
-				task: "text-generation",
-			})
-		).data;
+		const { data: raw } = await innerRequest<TogeteherTextCompletionOutput>(args, {
+			...options,
+			task: "text-generation",
+		});
 		const isValidOutput =
 			typeof raw === "object" && "choices" in raw && Array.isArray(raw?.choices) && typeof raw?.model === "string";
 		if (!isValidOutput) {
@@ -79,20 +77,16 @@ export async function textGeneration(
 			generated_text: completion.message.content,
 		};
 	} else {
-		const res = toArray(
-			(
-				await innerRequest<TextGenerationOutput | TextGenerationOutput[]>(args, {
-					...options,
-					task: "text-generation",
-				})
-			).data
-		);
-
+		const { data: res } = await innerRequest<TextGenerationOutput | TextGenerationOutput[]>(args, {
+			...options,
+			task: "text-generation",
+		});
+		const output = toArray(res);
 		const isValidOutput =
-			Array.isArray(res) && res.every((x) => "generated_text" in x && typeof x?.generated_text === "string");
+			Array.isArray(output) && output.every((x) => "generated_text" in x && typeof x?.generated_text === "string");
 		if (!isValidOutput) {
 			throw new InferenceOutputError("Expected Array<{generated_text: string}>");
 		}
-		return (res as TextGenerationOutput[])?.[0];
+		return (output as TextGenerationOutput[])?.[0];
 	}
 }

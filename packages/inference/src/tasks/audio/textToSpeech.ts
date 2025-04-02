@@ -22,12 +22,10 @@ export async function textToSpeech(args: TextToSpeechArgs, options?: Options): P
 					text: args.inputs,
 			  }
 			: args;
-	const res = (
-		await innerRequest<Blob | OutputUrlTextToSpeechGeneration>(payload, {
-			...options,
-			task: "text-to-speech",
-		})
-	).data;
+	const { data: res } = await innerRequest<Blob | OutputUrlTextToSpeechGeneration>(payload, {
+		...options,
+		task: "text-to-speech",
+	});
 	if (res instanceof Blob) {
 		return res;
 	}

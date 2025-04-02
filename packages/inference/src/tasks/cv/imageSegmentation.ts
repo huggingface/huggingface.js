@@ -15,12 +15,10 @@ export async function imageSegmentation(
 	options?: Options
 ): Promise<ImageSegmentationOutput> {
 	const payload = preparePayload(args);
-	const res = (
-		await innerRequest<ImageSegmentationOutput>(payload, {
-			...options,
-			task: "image-segmentation",
-		})
-	).data;
+	const { data: res } = await innerRequest<ImageSegmentationOutput>(payload, {
+		...options,
+		task: "image-segmentation",
+	});
 	const isValidOutput =
 		Array.isArray(res) &&
 		res.every((x) => typeof x.label === "string" && typeof x.mask === "string" && typeof x.score === "number");

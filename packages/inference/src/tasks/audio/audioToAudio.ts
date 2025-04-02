@@ -37,12 +37,10 @@ export interface AudioToAudioOutput {
  */
 export async function audioToAudio(args: AudioToAudioArgs, options?: Options): Promise<AudioToAudioOutput[]> {
 	const payload = preparePayload(args);
-	const res = (
-		await innerRequest<AudioToAudioOutput>(payload, {
-			...options,
-			task: "audio-to-audio",
-		})
-	).data;
+	const { data: res } = await innerRequest<AudioToAudioOutput>(payload, {
+		...options,
+		task: "audio-to-audio",
+	});
 
 	return validateOutput(res);
 }

@@ -13,17 +13,14 @@ export async function zeroShotClassification(
 	args: ZeroShotClassificationArgs,
 	options?: Options
 ): Promise<ZeroShotClassificationOutput> {
-	const res = toArray(
-		(
-			await innerRequest<ZeroShotClassificationOutput[number] | ZeroShotClassificationOutput>(args, {
-				...options,
-				task: "zero-shot-classification",
-			})
-		).data
-	);
+	const { data: res } = await innerRequest<ZeroShotClassificationOutput[number] | ZeroShotClassificationOutput>(args, {
+		...options,
+		task: "zero-shot-classification",
+	});
+	const output = toArray(res);
 	const isValidOutput =
-		Array.isArray(res) &&
-		res.every(
+		Array.isArray(output) &&
+		output.every(
 			(x) =>
 				Array.isArray(x.labels) &&
 				x.labels.every((_label) => typeof _label === "string") &&
@@ -34,5 +31,5 @@ export async function zeroShotClassification(
 	if (!isValidOutput) {
 		throw new InferenceOutputError("Expected Array<{labels: string[], scores: number[], sequence: string}>");
 	}
-	return res;
+	return output;
 }

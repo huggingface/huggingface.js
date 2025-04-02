@@ -17,12 +17,10 @@ export async function featureExtraction(
 	args: FeatureExtractionArgs,
 	options?: Options
 ): Promise<FeatureExtractionOutput> {
-	const res = (
-		await innerRequest<FeatureExtractionOutput>(args, {
-			...options,
-			task: "feature-extraction",
-		})
-	).data;
+	const { data: res } = await innerRequest<FeatureExtractionOutput>(args, {
+		...options,
+		task: "feature-extraction",
+	});
 	let isValidOutput = true;
 
 	const isNumArrayRec = (arr: unknown[], maxDepth: number, curDepth = 0): boolean => {

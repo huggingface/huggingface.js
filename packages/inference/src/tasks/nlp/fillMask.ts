@@ -9,12 +9,10 @@ export type FillMaskArgs = BaseArgs & FillMaskInput;
  * Tries to fill in a hole with a missing word (token to be precise). That’s the base task for BERT models.
  */
 export async function fillMask(args: FillMaskArgs, options?: Options): Promise<FillMaskOutput> {
-	const res = (
-		await innerRequest<FillMaskOutput>(args, {
-			...options,
-			task: "fill-mask",
-		})
-	).data;
+	const { data: res } = await innerRequest<FillMaskOutput>(args, {
+		...options,
+		task: "fill-mask",
+	});
 	const isValidOutput =
 		Array.isArray(res) &&
 		res.every(

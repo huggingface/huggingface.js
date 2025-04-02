@@ -15,12 +15,10 @@ export async function imageClassification(
 	options?: Options
 ): Promise<ImageClassificationOutput> {
 	const payload = preparePayload(args);
-	const res = (
-		await innerRequest<ImageClassificationOutput>(payload, {
-			...options,
-			task: "image-classification",
-		})
-	).data;
+	const { data: res } = await innerRequest<ImageClassificationOutput>(payload, {
+		...options,
+		task: "image-classification",
+	});
 	const isValidOutput =
 		Array.isArray(res) && res.every((x) => typeof x.label === "string" && typeof x.score === "number");
 	if (!isValidOutput) {

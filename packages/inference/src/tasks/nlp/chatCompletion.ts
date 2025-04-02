@@ -10,13 +10,11 @@ export async function chatCompletion(
 	args: BaseArgs & ChatCompletionInput,
 	options?: Options
 ): Promise<ChatCompletionOutput> {
-	const res = (
-		await innerRequest<ChatCompletionOutput>(args, {
-			...options,
-			task: "text-generation",
-			chatCompletion: true,
-		})
-	).data;
+	const { data: res } = await innerRequest<ChatCompletionOutput>(args, {
+		...options,
+		task: "text-generation",
+		chatCompletion: true,
+	});
 	const isValidOutput =
 		typeof res === "object" &&
 		Array.isArray(res?.choices) &&

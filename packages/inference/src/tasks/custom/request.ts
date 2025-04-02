@@ -14,6 +14,9 @@ export async function request<T>(
 		chatCompletion?: boolean;
 	}
 ): Promise<T> {
+	console.warn(
+		"The request method is deprecated and will be removed in a future version of huggingface.js. Use specific task functions instead."
+	);
 	const result = await innerRequest<T>(args, options);
 	return result.data;
 }

@@ -12,12 +12,10 @@ export async function questionAnswering(
 	args: QuestionAnsweringArgs,
 	options?: Options
 ): Promise<QuestionAnsweringOutput[number]> {
-	const res = (
-		await innerRequest<QuestionAnsweringOutput | QuestionAnsweringOutput[number]>(args, {
-			...options,
-			task: "question-answering",
-		})
-	).data;
+	const { data: res } = await innerRequest<QuestionAnsweringOutput | QuestionAnsweringOutput[number]>(args, {
+		...options,
+		task: "question-answering",
+	});
 
 	const isValidOutput = Array.isArray(res)
 		? res.every(

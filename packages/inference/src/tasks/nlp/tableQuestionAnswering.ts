@@ -12,12 +12,10 @@ export async function tableQuestionAnswering(
 	args: TableQuestionAnsweringArgs,
 	options?: Options
 ): Promise<TableQuestionAnsweringOutput[number]> {
-	const res = (
-		await innerRequest<TableQuestionAnsweringOutput | TableQuestionAnsweringOutput[number]>(args, {
-			...options,
-			task: "table-question-answering",
-		})
-	).data;
+	const { data: res } = await innerRequest<TableQuestionAnsweringOutput | TableQuestionAnsweringOutput[number]>(args, {
+		...options,
+		task: "table-question-answering",
+	});
 	const isValidOutput = Array.isArray(res) ? res.every((elem) => validate(elem)) : validate(res);
 	if (!isValidOutput) {
 		throw new InferenceOutputError(

@@ -45,12 +45,10 @@ export async function zeroShotImageClassification(
 	options?: Options
 ): Promise<ZeroShotImageClassificationOutput> {
 	const payload = await preparePayload(args);
-	const res = (
-		await innerRequest<ZeroShotImageClassificationOutput>(payload, {
-			...options,
-			task: "zero-shot-image-classification",
-		})
-	).data;
+	const { data: res } = await innerRequest<ZeroShotImageClassificationOutput>(payload, {
+		...options,
+		task: "zero-shot-image-classification",
+	});
 	const isValidOutput =
 		Array.isArray(res) && res.every((x) => typeof x.label === "string" && typeof x.score === "number");
 	if (!isValidOutput) {
