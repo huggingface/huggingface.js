@@ -17,8 +17,15 @@ export namespace InferenceProviderTypes {
 		clientSideRoutingOnly?: boolean;
 	}
 
+	export interface ConfigWithOptionalModel extends Config {
+		makeBody: MakeBodyWithOptionalModel;
+	}
+
 	export type MakeBody = (params: BodyParams) => Record<string, unknown>;
-	export type MakeHeaders = (params: HeaderParams) => Record<string, string | undefined>;
+	export type MakeBodyWithOptionalModel = (
+		params: Omit<BodyParams, "model"> & { model?: string }
+	) => Record<string, unknown>;
+	export type MakeHeaders = (params: HeaderParams) => Record<string, string>;
 	export type MakeUrl = (params: UrlParams) => string;
 	export type MakeBaseUrl = (() => string) | ((task?: InferenceTask) => string);
 
@@ -38,7 +45,7 @@ export namespace InferenceProviderTypes {
 	export interface BodyParams {
 		args: Record<string, unknown>;
 		chatCompletion?: boolean;
-		model?: string;
+		model: string;
 		task?: InferenceTask;
 	}
 }

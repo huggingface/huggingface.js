@@ -12,10 +12,11 @@ import { REPLICATE_CONFIG } from "../providers/replicate";
 import { SAMBANOVA_CONFIG } from "../providers/sambanova";
 import { TOGETHER_CONFIG } from "../providers/together";
 import { OPENAI_CONFIG } from "../providers/openai";
-import type { InferenceProvider, InferenceTask, Options, ProviderConfig, RequestArgs } from "../types";
+import type { InferenceProvider, InferenceTask, Options, RequestArgs } from "../types";
 import { isUrl } from "./isUrl";
 import { version as packageVersion, name as packageName } from "../../package.json";
 import { getProviderModelId } from "./getProviderModelId";
+import type { InferenceProviderTypes } from "../providers/types";
 
 const HF_HUB_INFERENCE_PROXY_TEMPLATE = `${HF_ROUTER_URL}/{{PROVIDER}}`;
 
@@ -28,7 +29,7 @@ let tasks: Record<string, { models: { id: string }[] }> | null = null;
 /**
  * Config to define how to serialize requests for each provider
  */
-const providerConfigs: Record<InferenceProvider, ProviderConfig> = {
+const providerConfigs = {
 	"black-forest-labs": BLACK_FOREST_LABS_CONFIG,
 	cerebras: CEREBRAS_CONFIG,
 	cohere: COHERE_CONFIG,
@@ -42,7 +43,8 @@ const providerConfigs: Record<InferenceProvider, ProviderConfig> = {
 	replicate: REPLICATE_CONFIG,
 	sambanova: SAMBANOVA_CONFIG,
 	together: TOGETHER_CONFIG,
-};
+} satisfies Record<Exclude<InferenceProvider, "hf-inference">, InferenceProviderTypes.Config> &
+	Record<Extract<InferenceProvider, "hf-inference">, InferenceProviderTypes.ConfigWithOptionalModel>;
 
 /**
  * Helper that prepares request arguments.
@@ -82,8 +84,11 @@ export async function makeRequestOptions(
 	}
 
 	if (args.endpointUrl) {
+		if (provider !== "hf-inference") {
+			throw new Error(`Cannot use endpointUrl with a third-party provider.`);
+		}
 		return makeRequestOptionsFromResolvedModel(
-			{ endpointUrl: args.endpointUrl, resolvedModel: maybeModel },
+			{ endpointUrl: args.endpointUrl, resolvedModel: maybeModel, provider },
 			args,
 			options
 		);
@@ -94,7 +99,7 @@ export async function makeRequestOptions(
 			throw new Error(`Provider ${provider} requires a model ID to be passed directly.`);
 		}
 		return makeRequestOptionsFromResolvedModel(
-			{ resolvedModel: removeProviderPrefix(maybeModel, provider) },
+			{ resolvedModel: removeProviderPrefix(maybeModel, provider), provider },
 			args,
 			options
 		);
@@ -109,7 +114,7 @@ export async function makeRequestOptions(
 	});
 
 	// Use the sync version with the resolved model
-	return makeRequestOptionsFromResolvedModel({ resolvedModel }, args, options);
+	return makeRequestOptionsFromResolvedModel({ resolvedModel, provider }, args, options);
 }
 
 /**
@@ -120,7 +125,9 @@ export function makeRequestOptionsFromResolvedModel(
 	/**
 	 * Should only be undefined if the endpointUrl is provided
 	 */
-	input: { endpointUrl: string; resolvedModel?: string } | { endpointUrl?: undefined; resolvedModel: string },
+	input:
+		| { endpointUrl: string; resolvedModel?: string; provider: Extract<InferenceProvider, "hf-inference"> }
+		| { endpointUrl?: undefined; resolvedModel: string; provider: InferenceProvider },
 	args: RequestArgs & {
 		data?: Blob | ArrayBuffer;
 		stream?: boolean;
@@ -133,9 +140,9 @@ export function makeRequestOptionsFromResolvedModel(
 	const { accessToken, endpointUrl, provider: maybeProvider, model, ...remainingArgs } = args;
 	void model;
 	void endpointUrl;
+	void maybeProvider;
 
-	const provider = maybeProvider ?? "hf-inference";
-	const providerConfig = providerConfigs[provider];
+	const providerConfig = providerConfigs[input.provider];
 
 	const { includeCredentials, task, chatCompletion, signal, billTo } = options ?? {};
 
@@ -143,7 +150,7 @@ export function makeRequestOptionsFromResolvedModel(
 		if (providerConfig.clientSideRoutingOnly) {
 			// Closed-source providers require an accessToken (cannot be routed).
 			if (accessToken && accessToken.startsWith("hf_")) {
-				throw new Error(`Provider ${provider} is closed-source and does not support HF tokens.`);
+				throw new Error(`Provider ${input.provider} is closed-source and does not support HF tokens.`);
 			}
 			return "provider-key";
 		}
@@ -170,7 +177,7 @@ export function makeRequestOptionsFromResolvedModel(
 			authMethod,
 			baseUrl:
 				authMethod !== "provider-key"
-					? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", provider)
+					? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", input.provider)
 					: providerConfig.makeBaseUrl(task),
 			model: input.resolvedModel,
 			chatCompletion,
@@ -205,12 +212,19 @@ export function makeRequestOptionsFromResolvedModel(
 	const body = binary
 		? args.data
 		: JSON.stringify(
-				providerConfig.makeBody({
-					args: remainingArgs as Record<string, unknown>,
-					model: input.resolvedModel,
-					task,
-					chatCompletion,
-				})
+				input.provider === "hf-inference"
+					? providerConfigs[input.provider].makeBody({
+							args: remainingArgs as Record<string, unknown>,
+							model: input.resolvedModel,
+							task,
+							chatCompletion,
+					  })
+					: providerConfig.makeBody({
+							args: remainingArgs as Record<string, unknown>,
+							model: input.resolvedModel,
+							task,
+							chatCompletion,
+					  })
 		  );
 
 	/**

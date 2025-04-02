@@ -26,7 +26,7 @@ const makeBody: InferenceProviderTypes.MakeBody = (params) => {
 	return params.args;
 };
 
-const makeHeaders: InferenceProviderTypes.MakeHeaders = (params) => {
+const makeHeaders: InferenceProviderTypes.MakeHeaders = (params): Record<string, string> => {
 	if (params.authMethod === "provider-key") {
 		return { "X-Key": `${params.accessToken}` };
 	} else {

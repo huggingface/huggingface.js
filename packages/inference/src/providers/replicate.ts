@@ -25,7 +25,7 @@ const makeBaseUrl: InferenceProviderTypes.MakeBaseUrl = () => {
 const makeBody: InferenceProviderTypes.MakeBody = (params) => {
 	return {
 		input: params.args,
-		version: params.model?.includes(":") ? params.model.split(":")[1] : undefined,
+		version: params.model.includes(":") ? params.model.split(":")[1] : undefined,
 	};
 };
 

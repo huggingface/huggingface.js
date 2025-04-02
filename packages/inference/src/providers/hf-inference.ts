@@ -17,7 +17,7 @@ const makeBaseUrl: InferenceProviderTypes.MakeBaseUrl = () => {
 	return `${HF_ROUTER_URL}/hf-inference`;
 };
 
-const makeBody: InferenceProviderTypes.MakeBody = (params) => {
+const makeBody: InferenceProviderTypes.MakeBodyWithOptionalModel = (params) => {
 	return {
 		...params.args,
 		...(params.chatCompletion ? { model: params.model } : undefined),
@@ -39,7 +39,7 @@ const makeUrl: InferenceProviderTypes.MakeUrl = (params) => {
 	return `${params.baseUrl}/models/${params.model}`;
 };
 
-export const HF_INFERENCE_CONFIG: InferenceProviderTypes.Config = {
+export const HF_INFERENCE_CONFIG: InferenceProviderTypes.ConfigWithOptionalModel = {
 	makeBaseUrl,
 	makeBody,
 	makeHeaders,
