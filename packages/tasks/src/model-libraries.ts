@@ -357,7 +357,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "GeometryCrafter",
 		repoName: "GeometryCrafter",
 		repoUrl: "https://github.com/TencentARC/GeometryCrafter",
-		countDownloads: `path:"point_map_vae/diffusion_pytorch_model"`,
+		countDownloads: `path:"point_map_vae/diffusion_pytorch_model.safetensors"`,
 	},
 	gliner: {
 		prettyLabel: "GLiNER",
