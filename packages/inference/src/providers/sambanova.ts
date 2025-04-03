@@ -14,33 +14,33 @@
  *
  * Thanks!
  */
-import type { BodyParams, HeaderParams, ProviderConfig, UrlParams } from "../types";
+import type { InferenceProviderTypes } from "./types";
 
 const SAMBANOVA_API_BASE_URL = "https://api.sambanova.ai";
 
-const makeBaseUrl = (): string => {
+const makeBaseUrl: InferenceProviderTypes.MakeBaseUrl = () => {
 	return SAMBANOVA_API_BASE_URL;
 };
 
-const makeBody = (params: BodyParams): Record<string, unknown> => {
+const makeBody: InferenceProviderTypes.MakeBody = (params) => {
 	return {
 		...params.args,
 		...(params.chatCompletion ? { model: params.model } : undefined),
 	};
 };
 
-const makeHeaders = (params: HeaderParams): Record<string, string> => {
+const makeHeaders: InferenceProviderTypes.MakeHeaders = (params) => {
 	return { Authorization: `Bearer ${params.accessToken}` };
 };
 
-const makeUrl = (params: UrlParams): string => {
+const makeUrl: InferenceProviderTypes.MakeUrl = (params) => {
 	if (params.chatCompletion) {
 		return `${params.baseUrl}/v1/chat/completions`;
 	}
 	return params.baseUrl;
 };
 
-export const SAMBANOVA_CONFIG: ProviderConfig = {
+export const SAMBANOVA_CONFIG: InferenceProviderTypes.Config = {
 	makeBaseUrl,
 	makeBody,
 	makeHeaders,

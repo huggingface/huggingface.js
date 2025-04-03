@@ -14,7 +14,7 @@
  *
  * Thanks!
  */
-import type { BodyParams, HeaderParams, ProviderConfig, UrlParams } from "../types";
+import type { InferenceProviderTypes } from "./types";
 
 const CEREBRAS_API_BASE_URL = "https://api.cerebras.ai";
 
@@ -22,22 +22,22 @@ const makeBaseUrl = (): string => {
 	return CEREBRAS_API_BASE_URL;
 };
 
-const makeBody = (params: BodyParams): Record<string, unknown> => {
+const makeBody: InferenceProviderTypes.MakeBody = (params) => {
 	return {
 		...params.args,
 		model: params.model,
 	};
 };
 
-const makeHeaders = (params: HeaderParams): Record<string, string> => {
+const makeHeaders: InferenceProviderTypes.MakeHeaders = (params) => {
 	return { Authorization: `Bearer ${params.accessToken}` };
 };
 
-const makeUrl = (params: UrlParams): string => {
+const makeUrl: InferenceProviderTypes.MakeUrl = (params) => {
 	return `${params.baseUrl}/v1/chat/completions`;
 };
 
-export const CEREBRAS_CONFIG: ProviderConfig = {
+export const CEREBRAS_CONFIG: InferenceProviderTypes.Config = {
 	makeBaseUrl,
 	makeBody,
 	makeHeaders,

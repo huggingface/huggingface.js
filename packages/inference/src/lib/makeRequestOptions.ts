@@ -12,10 +12,11 @@ import { REPLICATE_CONFIG } from "../providers/replicate";
 import { SAMBANOVA_CONFIG } from "../providers/sambanova";
 import { TOGETHER_CONFIG } from "../providers/together";
 import { OPENAI_CONFIG } from "../providers/openai";
-import type { InferenceProvider, InferenceTask, Options, ProviderConfig, RequestArgs } from "../types";
+import type { InferenceProvider, InferenceTask, Options, RequestArgs } from "../types";
 import { isUrl } from "./isUrl";
 import { version as packageVersion, name as packageName } from "../../package.json";
 import { getProviderModelId } from "./getProviderModelId";
+import type { InferenceProviderTypes } from "../providers/types";
 
 const HF_HUB_INFERENCE_PROXY_TEMPLATE = `${HF_ROUTER_URL}/{{PROVIDER}}`;
 
@@ -28,7 +29,7 @@ let tasks: Record<string, { models: { id: string }[] }> | null = null;
 /**
  * Config to define how to serialize requests for each provider
  */
-const providerConfigs: Record<InferenceProvider, ProviderConfig> = {
+const providerConfigs = {
 	"black-forest-labs": BLACK_FOREST_LABS_CONFIG,
 	cerebras: CEREBRAS_CONFIG,
 	cohere: COHERE_CONFIG,
@@ -42,7 +43,8 @@ const providerConfigs: Record<InferenceProvider, ProviderConfig> = {
 	replicate: REPLICATE_CONFIG,
 	sambanova: SAMBANOVA_CONFIG,
 	together: TOGETHER_CONFIG,
-};
+} satisfies Record<Exclude<InferenceProvider, "hf-inference">, InferenceProviderTypes.Config> &
+	Record<Extract<InferenceProvider, "hf-inference">, InferenceProviderTypes.ConfigWithOptionalModel>;
 
 /**
  * Helper that prepares request arguments.
@@ -81,19 +83,38 @@ export async function makeRequestOptions(
 		throw new Error(`Provider ${provider} requires a model ID to be passed directly.`);
 	}
 
+	if (args.endpointUrl) {
+		if (provider !== "hf-inference") {
+			throw new Error(`Cannot use endpointUrl with a third-party provider.`);
+		}
+		return makeRequestOptionsFromResolvedModel(
+			{ endpointUrl: args.endpointUrl, resolvedModel: maybeModel, provider },
+			args,
+			options
+		);
+	}
+
+	if (providerConfig.clientSideRoutingOnly) {
+		if (!maybeModel) {
+			throw new Error(`Provider ${provider} requires a model ID to be passed directly.`);
+		}
+		return makeRequestOptionsFromResolvedModel(
+			{ resolvedModel: removeProviderPrefix(maybeModel, provider), provider },
+			args,
+			options
+		);
+	}
+
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const hfModel = maybeModel ?? (await loadDefaultModel(task!));
-	const resolvedModel = providerConfig.clientSideRoutingOnly
-		? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		  removeProviderPrefix(maybeModel!, provider)
-		: await getProviderModelId({ model: hfModel, provider }, args, {
-				task,
-				chatCompletion,
-				fetch: options?.fetch,
-		  });
+	const resolvedModel = await getProviderModelId({ model: hfModel, provider }, args, {
+		task,
+		chatCompletion,
+		fetch: options?.fetch,
+	});
 
 	// Use the sync version with the resolved model
-	return makeRequestOptionsFromResolvedModel(resolvedModel, args, options);
+	return makeRequestOptionsFromResolvedModel({ resolvedModel, provider }, args, options);
 }
 
 /**
@@ -101,7 +122,12 @@ export async function makeRequestOptions(
  * This sync version skips the model ID resolution step
  */
 export function makeRequestOptionsFromResolvedModel(
-	resolvedModel: string,
+	/**
+	 * Should only be undefined if the endpointUrl is provided
+	 */
+	input:
+		| { endpointUrl: string; resolvedModel?: string; provider: Extract<InferenceProvider, "hf-inference"> }
+		| { endpointUrl?: undefined; resolvedModel: string; provider: InferenceProvider },
 	args: RequestArgs & {
 		data?: Blob | ArrayBuffer;
 		stream?: boolean;
@@ -113,9 +139,10 @@ export function makeRequestOptionsFromResolvedModel(
 ): { url: string; info: RequestInit } {
 	const { accessToken, endpointUrl, provider: maybeProvider, model, ...remainingArgs } = args;
 	void model;
+	void endpointUrl;
+	void maybeProvider;
 
-	const provider = maybeProvider ?? "hf-inference";
-	const providerConfig = providerConfigs[provider];
+	const providerConfig = providerConfigs[input.provider];
 
 	const { includeCredentials, task, chatCompletion, signal, billTo } = options ?? {};
 
@@ -123,7 +150,7 @@ export function makeRequestOptionsFromResolvedModel(
 		if (providerConfig.clientSideRoutingOnly) {
 			// Closed-source providers require an accessToken (cannot be routed).
 			if (accessToken && accessToken.startsWith("hf_")) {
-				throw new Error(`Provider ${provider} is closed-source and does not support HF tokens.`);
+				throw new Error(`Provider ${input.provider} is closed-source and does not support HF tokens.`);
 			}
 			return "provider-key";
 		}
@@ -138,20 +165,25 @@ export function makeRequestOptionsFromResolvedModel(
 	})();
 
 	// Make URL
-	const url = endpointUrl
-		? chatCompletion
-			? endpointUrl + `/v1/chat/completions`
-			: endpointUrl
-		: providerConfig.makeUrl({
-				authMethod,
-				baseUrl:
-					authMethod !== "provider-key"
-						? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", provider)
-						: providerConfig.makeBaseUrl(task),
-				model: resolvedModel,
-				chatCompletion,
-				task,
-		  });
+	const url = (() => {
+		if (input.endpointUrl !== undefined) {
+			if (chatCompletion) {
+				return `${input.endpointUrl}/v1/chat/completions`;
+			}
+			return input.endpointUrl;
+		}
+
+		return providerConfig.makeUrl({
+			authMethod,
+			baseUrl:
+				authMethod !== "provider-key"
+					? HF_HUB_INFERENCE_PROXY_TEMPLATE.replace("{{PROVIDER}}", input.provider)
+					: providerConfig.makeBaseUrl(task),
+			model: input.resolvedModel,
+			chatCompletion,
+			task,
+		});
+	})();
 
 	// Make headers
 	const binary = "data" in args && !!args.data;
@@ -180,12 +212,19 @@ export function makeRequestOptionsFromResolvedModel(
 	const body = binary
 		? args.data
 		: JSON.stringify(
-				providerConfig.makeBody({
-					args: remainingArgs as Record<string, unknown>,
-					model: resolvedModel,
-					task,
-					chatCompletion,
-				})
+				input.provider === "hf-inference"
+					? providerConfigs[input.provider].makeBody({
+							args: remainingArgs as Record<string, unknown>,
+							model: input.resolvedModel,
+							task,
+							chatCompletion,
+					  })
+					: providerConfig.makeBody({
+							args: remainingArgs as Record<string, unknown>,
+							model: input.resolvedModel,
+							task,
+							chatCompletion,
+					  })
 		  );
 
 	/**

@@ -67,15 +67,12 @@ export interface BaseArgs {
 	/**
 	 * The HF model to use.
 	 *
-	 * If not specified, will call huggingface.co/api/tasks to get the default model for the task.
-	 *
-	 * /!\ Legacy behavior allows this to be an URL, but this is deprecated and will be removed in the future.
-	 * Use the `endpointUrl` parameter instead.
+	 * If not specified and `endpointUrl` is not specified either, will call huggingface.co/api/tasks to get the default model for the task.
 	 */
 	model?: ModelId;
 
 	/**
-	 * The URL of the endpoint to use. If not specified, will call huggingface.co/api/tasks to get the default endpoint for the task.
+	 * The URL of the endpoint to use.
 	 *
 	 * If specified, will use this URL instead of the default one.
 	 */
@@ -100,33 +97,3 @@ export type RequestArgs = BaseArgs &
 	) & {
 		parameters?: Record<string, unknown>;
 	};
-
-export interface ProviderConfig {
-	makeBaseUrl: ((task?: InferenceTask) => string) | (() => string);
-	makeBody: (params: BodyParams) => Record<string, unknown>;
-	makeHeaders: (params: HeaderParams) => Record<string, string>;
-	makeUrl: (params: UrlParams) => string;
-	clientSideRoutingOnly?: boolean;
-}
-
-export type AuthMethod = "none" | "hf-token" | "credentials-include" | "provider-key";
-
-export interface HeaderParams {
-	accessToken?: string;
-	authMethod: AuthMethod;
-}
-
-export interface UrlParams {
-	authMethod: AuthMethod;
-	baseUrl: string;
-	model: string;
-	task?: InferenceTask;
-	chatCompletion?: boolean;
-}
-
-export interface BodyParams {
-	args: Record<string, unknown>;
-	chatCompletion?: boolean;
-	model: string;
-	task?: InferenceTask;
-}

@@ -14,33 +14,33 @@
  *
  * Thanks!
  */
-import type { BodyParams, HeaderParams, ProviderConfig, UrlParams } from "../types";
+import type { InferenceProviderTypes } from "./types";
 
 const HYPERBOLIC_API_BASE_URL = "https://api.hyperbolic.xyz";
 
-const makeBaseUrl = (): string => {
+const makeBaseUrl: InferenceProviderTypes.MakeBaseUrl = () => {
 	return HYPERBOLIC_API_BASE_URL;
 };
 
-const makeBody = (params: BodyParams): Record<string, unknown> => {
+const makeBody: InferenceProviderTypes.MakeBody = (params) => {
 	return {
 		...params.args,
 		...(params.task === "text-to-image" ? { model_name: params.model } : { model: params.model }),
 	};
 };
 
-const makeHeaders = (params: HeaderParams): Record<string, string> => {
+const makeHeaders: InferenceProviderTypes.MakeHeaders = (params) => {
 	return { Authorization: `Bearer ${params.accessToken}` };
 };
 
-const makeUrl = (params: UrlParams): string => {
+const makeUrl: InferenceProviderTypes.MakeUrl = (params) => {
 	if (params.task === "text-to-image") {
 		return `${params.baseUrl}/v1/images/generations`;
 	}
 	return `${params.baseUrl}/v1/chat/completions`;
 };
 
-export const HYPERBOLIC_CONFIG: ProviderConfig = {
+export const HYPERBOLIC_CONFIG: InferenceProviderTypes.Config = {
 	makeBaseUrl,
 	makeBody,
 	makeHeaders,

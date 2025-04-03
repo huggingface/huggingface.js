@@ -1,15 +1,15 @@
 /**
  * Special case: provider configuration for a private models provider (OpenAI in this case).
  */
-import type { BodyParams, HeaderParams, ProviderConfig, UrlParams } from "../types";
+import type { InferenceProviderTypes } from "./types";
 
 const OPENAI_API_BASE_URL = "https://api.openai.com";
 
-const makeBaseUrl = (): string => {
+const makeBaseUrl: InferenceProviderTypes.MakeBaseUrl = () => {
 	return OPENAI_API_BASE_URL;
 };
 
-const makeBody = (params: BodyParams): Record<string, unknown> => {
+const makeBody: InferenceProviderTypes.MakeBody = (params) => {
 	if (!params.chatCompletion) {
 		throw new Error("OpenAI only supports chat completions.");
 	}
@@ -19,18 +19,18 @@ const makeBody = (params: BodyParams): Record<string, unknown> => {
 	};
 };
 
-const makeHeaders = (params: HeaderParams): Record<string, string> => {
+const makeHeaders: InferenceProviderTypes.MakeHeaders = (params) => {
 	return { Authorization: `Bearer ${params.accessToken}` };
 };
 
-const makeUrl = (params: UrlParams): string => {
+const makeUrl: InferenceProviderTypes.MakeUrl = (params) => {
 	if (!params.chatCompletion) {
 		throw new Error("OpenAI only supports chat completions.");
 	}
 	return `${params.baseUrl}/v1/chat/completions`;
 };
 
-export const OPENAI_CONFIG: ProviderConfig = {
+export const OPENAI_CONFIG: InferenceProviderTypes.Config = {
 	makeBaseUrl,
 	makeBody,
 	makeHeaders,

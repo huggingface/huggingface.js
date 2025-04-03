@@ -132,7 +132,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		/// Prepare inputs + make request
 		const inputs = inputPreparationFn ? inputPreparationFn(model, opts) : { inputs: getModelInputSnippet(model) };
 		const request = makeRequestOptionsFromResolvedModel(
-			providerModelId ?? model.id,
+			{ resolvedModel: providerModelId ?? model.id, provider },
 			{ accessToken: accessToken, provider: provider, ...inputs } as RequestArgs,
 			{ chatCompletion: templateName.includes("conversational"), task: model.pipeline_tag as InferenceTask }
 		);
