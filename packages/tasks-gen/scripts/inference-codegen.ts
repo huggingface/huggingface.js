@@ -317,4 +317,49 @@ for (const { task, dirPath } of allTasks) {
 		});
 	}
 }
+
+
+console.debug("   📝 Generating combined JSON file");
+await generateJSON(allTasks, tasksDir);
+
+async function generateJSON(
+	tasks: Array<{ task: string; dirPath: string }>,
+	tasksDir: string
+): Promise<void> {
+	const tasksData: Record<string, { input: unknown; output: unknown }> = {};
+
+	for (const { task, dirPath } of tasks) {
+		const taskSpecDir = path.join(dirPath, "spec");
+		
+		// Skip if input/output specs don't exist
+		if (
+			!(
+				pathExists(path.join(taskSpecDir, "input.json")) ||
+				pathExists(path.join(taskSpecDir, "output.json"))
+			)
+		) {
+			continue;
+		}
+
+		// Read and parse the specs
+		const input = JSON.parse(
+			await fs.readFile(path.join(taskSpecDir, "input.json"), { encoding: "utf-8" })
+		);
+		const output = JSON.parse(
+			await fs.readFile(path.join(taskSpecDir, "output.json"), { encoding: "utf-8" })
+		);
+
+		tasksData[task] = { input, output };
+	}
+
+	// Write the combined JSON file
+	const jsonPath = path.join(tasksDir, "tasks.json");
+	await fs.writeFile(
+		jsonPath,
+		JSON.stringify(tasksData, null, 2),
+		{ encoding: "utf-8" }
+	);
+}
+
+
 console.debug("✅ All done!");
