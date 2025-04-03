@@ -418,7 +418,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "InfiniteYou",
 		repoUrl: "https://github.com/bytedance/InfiniteYou",
 		filter: false,
-		countDownloads: `path_extension:"bin" OR path_extension:"safetensors"`,
+		countDownloads: `path_extension:"bin"`,
 	},
 	keras: {
 		prettyLabel: "Keras",
