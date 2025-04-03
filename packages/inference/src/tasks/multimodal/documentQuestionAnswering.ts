@@ -1,14 +1,13 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
-import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
-import type { RequestArgs } from "../../types";
-import { toArray } from "../../utils/toArray";
-import { base64FromBytes } from "../../utils/base64FromBytes";
 import type {
 	DocumentQuestionAnsweringInput,
 	DocumentQuestionAnsweringInputData,
 	DocumentQuestionAnsweringOutput,
 } from "@huggingface/tasks";
+import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import type { BaseArgs, Options, RequestArgs } from "../../types";
+import { base64FromBytes } from "../../utils/base64FromBytes";
+import { innerRequest } from "../../utils/request";
+import { toArray } from "../../utils/toArray";
 
 /// Override the type to properly set inputs.image as Blob
 export type DocumentQuestionAnsweringArgs = BaseArgs &
@@ -29,16 +28,17 @@ export async function documentQuestionAnswering(
 			image: base64FromBytes(new Uint8Array(await args.inputs.image.arrayBuffer())),
 		},
 	} as RequestArgs;
-	const res = toArray(
-		await request<DocumentQuestionAnsweringOutput | DocumentQuestionAnsweringOutput[number]>(reqArgs, {
+	const { data: res } = await innerRequest<DocumentQuestionAnsweringOutput | DocumentQuestionAnsweringOutput[number]>(
+		reqArgs,
+		{
 			...options,
 			task: "document-question-answering",
-		})
+		}
 	);
-
+	const output = toArray(res);
 	const isValidOutput =
-		Array.isArray(res) &&
-		res.every(
+		Array.isArray(output) &&
+		output.every(
 			(elem) =>
 				typeof elem === "object" &&
 				!!elem &&
@@ -51,5 +51,5 @@ export async function documentQuestionAnswering(
 		throw new InferenceOutputError("Expected Array<{answer: string, end?: number, score?: number, start?: number}>");
 	}
 
-	return res[0];
+	return output[0];
 }

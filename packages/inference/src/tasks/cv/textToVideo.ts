@@ -1,12 +1,11 @@
-import type { BaseArgs, InferenceProvider, Options } from "../../types";
 import type { TextToVideoInput } from "@huggingface/tasks";
-import { request } from "../custom/request";
-import { omit } from "../../utils/omit";
-import { isUrl } from "../../lib/isUrl";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
-import { typedInclude } from "../../utils/typedInclude";
-import { makeRequestOptions } from "../../lib/makeRequestOptions";
+import { isUrl } from "../../lib/isUrl";
 import { pollFalResponse, type FalAiQueueOutput } from "../../providers/fal-ai";
+import type { BaseArgs, InferenceProvider, Options } from "../../types";
+import { omit } from "../../utils/omit";
+import { innerRequest } from "../../utils/request";
+import { typedInclude } from "../../utils/typedInclude";
 
 export type TextToVideoArgs = BaseArgs & TextToVideoInput;
 
@@ -35,37 +34,41 @@ export async function textToVideo(args: TextToVideoArgs, options?: Options): Pro
 		args.provider === "fal-ai" || args.provider === "replicate" || args.provider === "novita"
 			? { ...omit(args, ["inputs", "parameters"]), ...args.parameters, prompt: args.inputs }
 			: args;
-	const res = await request<FalAiQueueOutput | ReplicateOutput | NovitaOutput>(payload, {
+	const { data, requestContext } = await innerRequest<FalAiQueueOutput | ReplicateOutput | NovitaOutput>(payload, {
 		...options,
 		task: "text-to-video",
 	});
+
 	if (args.provider === "fal-ai") {
-		const { url, info } = await makeRequestOptions(args, { ...options, task: "text-to-video" });
-		return await pollFalResponse(res as FalAiQueueOutput, url, info.headers as Record<string, string>);
+		return await pollFalResponse(
+			data as FalAiQueueOutput,
+			requestContext.url,
+			requestContext.info.headers as Record<string, string>
+		);
 	} else if (args.provider === "novita") {
 		const isValidOutput =
-			typeof res === "object" &&
-			!!res &&
-			"video" in res &&
-			typeof res.video === "object" &&
-			!!res.video &&
-			"video_url" in res.video &&
-			typeof res.video.video_url === "string" &&
-			isUrl(res.video.video_url);
+			typeof data === "object" &&
+			!!data &&
+			"video" in data &&
+			typeof data.video === "object" &&
+			!!data.video &&
+			"video_url" in data.video &&
+			typeof data.video.video_url === "string" &&
+			isUrl(data.video.video_url);
 		if (!isValidOutput) {
 			throw new InferenceOutputError("Expected { video: { video_url: string } }");
 		}
-		const urlResponse = await fetch((res as NovitaOutput).video.video_url);
+		const urlResponse = await fetch((data as NovitaOutput).video.video_url);
 		return await urlResponse.blob();
 	} else {
 		/// TODO: Replicate: handle the case where the generation request "times out" / is async (ie output is null)
 		/// https://replicate.com/docs/topics/predictions/create-a-prediction
 		const isValidOutput =
-			typeof res === "object" && !!res && "output" in res && typeof res.output === "string" && isUrl(res.output);
+			typeof data === "object" && !!data && "output" in data && typeof data.output === "string" && isUrl(data.output);
 		if (!isValidOutput) {
 			throw new InferenceOutputError("Expected { output: string }");
 		}
-		const urlResponse = await fetch(res.output);
+		const urlResponse = await fetch(data.output);
 		return await urlResponse.blob();
 	}
 }

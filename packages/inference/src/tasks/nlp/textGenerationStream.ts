@@ -1,6 +1,6 @@
 import type { TextGenerationInput } from "@huggingface/tasks";
 import type { BaseArgs, Options } from "../../types";
-import { streamingRequest } from "../custom/streamingRequest";
+import { innerStreamingRequest } from "../../utils/request";
 
 export interface TextGenerationStreamToken {
 	/** Token ID from the model tokenizer */
@@ -89,7 +89,7 @@ export async function* textGenerationStream(
 	args: BaseArgs & TextGenerationInput,
 	options?: Options
 ): AsyncGenerator<TextGenerationStreamOutput> {
-	yield* streamingRequest<TextGenerationStreamOutput>(args, {
+	yield* innerStreamingRequest<TextGenerationStreamOutput>(args, {
 		...options,
 		task: "text-generation",
 	});
