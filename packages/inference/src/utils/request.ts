@@ -91,6 +91,10 @@ export async function* innerStreamingRequest<T>(
 				/// OpenAI errors
 				throw new Error(output.error.message);
 			}
+			// Sambanova errors
+			if (typeof output.message === "string") {
+				throw new Error(output.message);
+			}
 		}
 
 		throw new Error(`Server response contains error: ${response.status}`);
