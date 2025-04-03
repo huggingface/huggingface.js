@@ -353,6 +353,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"sbs"`,
 	},
+	"geometry-crafter": {
+		prettyLabel: "GeometryCrafter",
+		repoName: "GeometryCrafter",
+		repoUrl: "https://github.com/TencentARC/GeometryCrafter",
+		countDownloads: `path:"point_map_vae/diffusion_pytorch_model.safetensors"`,
+	},
 	gliner: {
 		prettyLabel: "GLiNER",
 		repoName: "GLiNER",
