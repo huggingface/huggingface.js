@@ -47,6 +47,7 @@ export const INFERENCE_PROVIDERS = [
 	"nebius",
 	"novita",
 	"openai",
+	"ovhcloud",
 	"replicate",
 	"sambanova",
 	"together",
