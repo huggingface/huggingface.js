@@ -148,6 +148,10 @@ export const SKUS = {
 				tflops: 23.22,
 				memory: [8],
 			},
+			"RTX 5070 Ti": {
+				tflops: 43.94,
+				memory: [16],
+			},
 			"RTX 4090": {
 				tflops: 82.58,
 				memory: [24],
@@ -324,6 +328,46 @@ export const SKUS = {
 				tflops: 19.05,
 				memory: [16],
 			},
+			"Jetson AGX Orin 64GB": {
+				tflops: 10.65,
+				memory: [64],
+			},
+			"Jetson AGX Orin 32GB": {
+				tflops: 6.66,
+				memory: [32],
+			},
+			"Jetson Orin NX 16GB": {
+				tflops: 3.76,
+				memory: [16],
+			},
+			"Jetson Orin NX 8GB": {
+				tflops: 3.13,
+				memory: [8],
+			},
+			"Jetson Orin Nano 8GB": {
+				tflops: 2.56,
+				memory: [8],
+			},
+			"Jetson Orin Nano 4GB": {
+				tflops: 1.28,
+				memory: [4],
+			},
+			"Jetson AGX Xavier": {
+				tflops: 2.82,
+				memory: [32, 64],
+			},
+			"Jetson Xavier NX": {
+				tflops: 1.69,
+				memory: [8, 16],
+			},
+			"Jetson TX2": {
+				tflops: 1.33,
+				memory: [4, 8],
+			},
+			"Jetson Nano": {
+				tflops: 0.47,
+				memory: [4],
+			},
 		},
 		AMD: {
 			MI300: {
@@ -441,6 +485,9 @@ export const SKUS = {
 			},
 			"Xeon 2th Generation (Cascade Lake)": {
 				tflops: 0.55,
+			},
+			"Intel Core Ultra 7 265KF": {
+				tflops: 1.53,
 			},
 			"Intel Core 13th Generation (i9)": {
 				tflops: 0.85,

@@ -6,9 +6,9 @@ import type {
 } from "@huggingface/tasks";
 import { InferenceOutputError } from "../../lib/InferenceOutputError";
 import type { BaseArgs, Options } from "../../types";
-import { toArray } from "../../utils/toArray";
-import { request } from "../custom/request";
 import { omit } from "../../utils/omit";
+import { innerRequest } from "../../utils/request";
+import { toArray } from "../../utils/toArray";
 
 export type { TextGenerationInput, TextGenerationOutput };
 
@@ -37,7 +37,7 @@ export async function textGeneration(
 ): Promise<TextGenerationOutput> {
 	if (args.provider === "together") {
 		args.prompt = args.inputs;
-		const raw = await request<TogeteherTextCompletionOutput>(args, {
+		const { data: raw } = await innerRequest<TogeteherTextCompletionOutput>(args, {
 			...options,
 			task: "text-generation",
 		});
@@ -61,10 +61,12 @@ export async function textGeneration(
 				: undefined),
 			...omit(args, ["inputs", "parameters"]),
 		};
-		const raw = await request<HyperbolicTextCompletionOutput>(payload, {
-			...options,
-			task: "text-generation",
-		});
+		const raw = (
+			await innerRequest<HyperbolicTextCompletionOutput>(payload, {
+				...options,
+				task: "text-generation",
+			})
+		).data;
 		const isValidOutput =
 			typeof raw === "object" && "choices" in raw && Array.isArray(raw?.choices) && typeof raw?.model === "string";
 		if (!isValidOutput) {
@@ -75,18 +77,16 @@ export async function textGeneration(
 			generated_text: completion.message.content,
 		};
 	} else {
-		const res = toArray(
-			await request<TextGenerationOutput | TextGenerationOutput[]>(args, {
-				...options,
-				task: "text-generation",
-			})
-		);
-
+		const { data: res } = await innerRequest<TextGenerationOutput | TextGenerationOutput[]>(args, {
+			...options,
+			task: "text-generation",
+		});
+		const output = toArray(res);
 		const isValidOutput =
-			Array.isArray(res) && res.every((x) => "generated_text" in x && typeof x?.generated_text === "string");
+			Array.isArray(output) && output.every((x) => "generated_text" in x && typeof x?.generated_text === "string");
 		if (!isValidOutput) {
 			throw new InferenceOutputError("Expected Array<{generated_text: string}>");
 		}
-		return (res as TextGenerationOutput[])?.[0];
+		return (output as TextGenerationOutput[])?.[0];
 	}
 }
