@@ -927,10 +927,7 @@ function get_widget_examples_from_st_model(model: ModelData): string[] | undefin
 
 export const sentenceTransformers = (model: ModelData): string[] => {
 	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
-	if (
-		model.tags.includes("cross-encoder") ||
-		["text-classification", "text-ranking", "zero-shot-classification"].includes(model.pipeline_tag || "")
-	) {
+	if (model.tags.includes("cross-encoder") || model.pipeline_tag == "text-ranking") {
 		return [
 			`from sentence_transformers import CrossEncoder
 
