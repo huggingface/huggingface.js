@@ -58,9 +58,9 @@ export abstract class TaskProviderHelper {
 	constructor(
 		private provider: string,
 		private baseUrl: string,
-		private task?: string,
 		readonly clientSideRoutingOnly: boolean = false
-	) {}
+	) { }
+
 
 	/**
 	 * Return the response in the expected format.
@@ -281,7 +281,7 @@ export interface TabularRegressionTaskHelper {
 
 export class BaseConversationalTask extends TaskProviderHelper implements ConversationalTaskHelper {
 	constructor(provider: string, baseUrl: string, clientSideRoutingOnly: boolean = false) {
-		super(provider, baseUrl, "conversational", clientSideRoutingOnly);
+		super(provider, baseUrl, clientSideRoutingOnly);
 	}
 
 	makeRoute(): string {
@@ -317,7 +317,7 @@ export class BaseConversationalTask extends TaskProviderHelper implements Conver
 
 export class BaseTextGenerationTask extends TaskProviderHelper implements TextGenerationTaskHelper {
 	constructor(provider: string, baseUrl: string, clientSideRoutingOnly: boolean = false) {
-		super(provider, baseUrl, "text-generation", clientSideRoutingOnly);
+		super(provider, baseUrl, clientSideRoutingOnly);
 	}
 
 	preparePayload(params: BodyParams): Record<string, unknown> {

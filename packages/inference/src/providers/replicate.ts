@@ -16,7 +16,7 @@
  */
 import { InferenceOutputError } from "../lib/InferenceOutputError";
 import { isUrl } from "../lib/isUrl";
-import type { BodyParams, HeaderParams, InferenceTask, UrlParams } from "../types";
+import type { BodyParams, HeaderParams, UrlParams } from "../types";
 import { omit } from "../utils/omit";
 import { TaskProviderHelper, type TextToImageTaskHelper, type TextToVideoTaskHelper } from "./providerHelper";
 
@@ -25,8 +25,8 @@ export interface ReplicateOutput {
 }
 
 abstract class ReplicateTask extends TaskProviderHelper {
-	constructor(task: InferenceTask, url?: string) {
-		super("replicate", url || "https://api.replicate.com", task);
+	constructor(url?: string) {
+		super("replicate", url || "https://api.replicate.com");
 	}
 
 	makeRoute(params: UrlParams): string {
@@ -63,9 +63,6 @@ abstract class ReplicateTask extends TaskProviderHelper {
 }
 
 export class ReplicateTextToImageTask extends ReplicateTask implements TextToImageTaskHelper {
-	constructor() {
-		super("text-to-image");
-	}
 	override async getResponse(
 		res: ReplicateOutput | Blob,
 		url?: string,
@@ -93,10 +90,6 @@ export class ReplicateTextToImageTask extends ReplicateTask implements TextToIma
 }
 
 export class ReplicateTextToSpeechTask extends ReplicateTask {
-	constructor() {
-		super("text-to-speech");
-	}
-
 	override preparePayload(params: BodyParams): Record<string, unknown> {
 		const payload = super.preparePayload(params);
 
@@ -130,10 +123,6 @@ export class ReplicateTextToSpeechTask extends ReplicateTask {
 }
 
 export class ReplicateTextToVideoTask extends ReplicateTask implements TextToVideoTaskHelper {
-	constructor() {
-		super("text-to-video");
-	}
-
 	override async getResponse(response: ReplicateOutput): Promise<Blob> {
 		if (
 			typeof response === "object" &&

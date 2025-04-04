@@ -80,7 +80,7 @@ export class TogetherTextGenerationTask extends BaseTextGenerationTask {
 
 export class TogetherTextToImageTask extends TaskProviderHelper implements TextToImageTaskHelper {
 	constructor() {
-		super("together", TOGETHER_API_BASE_URL, "text-to-image");
+		super("together", TOGETHER_API_BASE_URL);
 	}
 
 	makeRoute(): string {

@@ -52,7 +52,7 @@ export class NovitaConversationalTask extends BaseConversationalTask {
 }
 export class NovitaTextToVideoTask extends TaskProviderHelper implements TextToVideoTaskHelper {
 	constructor() {
-		super("novita", NOVITA_API_BASE_URL, "text-to-video");
+		super("novita", NOVITA_API_BASE_URL);
 	}
 
 	makeRoute(params: UrlParams): string {

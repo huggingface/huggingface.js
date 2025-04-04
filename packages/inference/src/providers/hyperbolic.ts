@@ -57,9 +57,9 @@ export class HyperbolicTextGenerationTask extends BaseTextGenerationTask {
 			messages: [{ content: params.args.inputs, role: "user" }],
 			...(params.args.parameters
 				? {
-						max_tokens: (params.args.parameters as Record<string, unknown>).max_new_tokens,
-						...omit(params.args.parameters as Record<string, unknown>, "max_new_tokens"),
-				  }
+					max_tokens: (params.args.parameters as Record<string, unknown>).max_new_tokens,
+					...omit(params.args.parameters as Record<string, unknown>, "max_new_tokens"),
+				}
 				: undefined),
 			...omit(params.args, ["inputs", "parameters"]),
 			model: params.model,
@@ -85,7 +85,7 @@ export class HyperbolicTextGenerationTask extends BaseTextGenerationTask {
 
 export class HyperbolicTextToImageTask extends TaskProviderHelper implements TextToImageTaskHelper {
 	constructor() {
-		super("hyperbolic", HYPERBOLIC_API_BASE_URL, "text-to-image");
+		super("hyperbolic", HYPERBOLIC_API_BASE_URL);
 	}
 
 	makeRoute(params: UrlParams): string {

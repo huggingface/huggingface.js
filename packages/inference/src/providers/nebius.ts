@@ -46,7 +46,7 @@ export class NebiusTextGenerationTask extends BaseTextGenerationTask {
 
 export class NebiusTextToImageTask extends TaskProviderHelper implements TextToImageTaskHelper {
 	constructor() {
-		super("nebius", NEBIUS_API_BASE_URL, "text-to-image");
+		super("nebius", NEBIUS_API_BASE_URL);
 	}
 
 	preparePayload(params: BodyParams): Record<string, unknown> {
