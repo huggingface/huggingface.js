@@ -267,6 +267,32 @@ const snippetTgi = (model: ModelData): LocalAppSnippet[] => {
 	];
 };
 
+const snippetLlamafile = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const modelFile = filepath ?? "{{GGUF_FILE}}";
+	const command = (binary: string) => {
+		const snippet = ["# Load and run the model:", `${binary} -m ${modelFile}`];
+		if (!model.tags.includes("conversational")) {
+			snippet.push('-p "Once upon a time,"');
+		}
+		return snippet.join("\n");
+	};
+
+	return [
+		{
+			title: "Use pre-built binary",
+			setup: [
+				"# Download llamafile binary and rename it to llamafile.exe from:",
+				"# https://github.com/Mozilla-Ocho/llamafile/releases/latest",
+				"# Make the binary executable:",
+				"chmod +x ./llamafile.exe",
+				"# Download the model:",
+				`wget https://huggingface.co/${model.id}/resolve/main/${modelFile}`,
+			].join("\n"),
+			content: command("./llamafile.exe"),
+		},
+	];
+};
+
 /**
  * Add your new local app here.
  *
@@ -429,6 +455,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetOllama,
+	},
+	llamafile: {
+		prettyLabel: "llamafile",
+		docsUrl: "https://github.com/Mozilla-Ocho/llamafile",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		snippet: snippetLlamafile,
 	},
 } satisfies Record<string, LocalApp>;
 
