@@ -28,7 +28,7 @@ interface BlackForestLabsResponse {
 
 export class BlackForestLabsTextToImageTask extends TaskProviderHelper implements TextToImageTaskHelper {
 	constructor() {
-		super("black-forest-labs", BLACK_FOREST_LABS_AI_API_BASE_URL, "text-to-image");
+		super("black-forest-labs", BLACK_FOREST_LABS_AI_API_BASE_URL);
 	}
 
 	preparePayload(params: BodyParams): Record<string, unknown> {

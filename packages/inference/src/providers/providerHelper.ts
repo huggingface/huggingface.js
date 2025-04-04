@@ -59,8 +59,7 @@ export abstract class TaskProviderHelper {
 		private provider: InferenceProvider,
 		private baseUrl: string,
 		readonly clientSideRoutingOnly: boolean = false
-	) { }
-
+	) {}
 
 	/**
 	 * Return the response in the expected format.
@@ -333,8 +332,13 @@ export class BaseTextGenerationTask extends TaskProviderHelper implements TextGe
 
 	async getResponse(response: unknown): Promise<TextGenerationOutput> {
 		const res = toArray(response);
-		// @ts-expect-error - We need to check properties on unknown type
-		if (Array.isArray(res) && res.length > 0 && res.every((x): x is { generated_text: string } => !!x && "generated_text" in x && typeof x.generated_text === "string")) {
+		if (
+			Array.isArray(res) &&
+			res.length > 0 &&
+			res.every(
+				(x): x is { generated_text: string } => !!x && "generated_text" in x && typeof x.generated_text === "string"
+			)
+		) {
 			return res[0];
 		}
 

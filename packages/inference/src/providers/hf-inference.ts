@@ -113,8 +113,6 @@ export class HFInferenceTask extends TaskProviderHelper {
 }
 
 export class HFInferenceTextToImageTask extends HFInferenceTask implements TextToImageTaskHelper {
-
-
 	override async getResponse(
 		response: Base64ImageGeneration | OutputUrlImageGeneration,
 		url?: string,
@@ -154,7 +152,6 @@ export class HFInferenceTextToImageTask extends HFInferenceTask implements TextT
 }
 
 export class HFInferenceConversationalTask extends HFInferenceTask implements ConversationalTaskHelper {
-
 	override makeUrl(params: UrlParams): string {
 		let url: string;
 		if (params.model.startsWith("http://") || params.model.startsWith("https://")) {
@@ -186,8 +183,6 @@ export class HFInferenceConversationalTask extends HFInferenceTask implements Co
 }
 
 export class HFInferenceTextGenerationTask extends HFInferenceTask implements TextGenerationTaskHelper {
-
-
 	override async getResponse(response: TextGenerationOutput | TextGenerationOutput[]): Promise<TextGenerationOutput> {
 		const res = toArray(response);
 		if (Array.isArray(res) && res.every((x) => "generated_text" in x && typeof x?.generated_text === "string")) {
@@ -198,7 +193,6 @@ export class HFInferenceTextGenerationTask extends HFInferenceTask implements Te
 }
 
 export class HFInferenceAudioClassificationTask extends HFInferenceTask implements AudioClassificationTaskHelper {
-
 	override async getResponse(response: unknown): Promise<AudioClassificationOutput> {
 		// Add type checking/validation for the 'unknown' input
 		if (
@@ -218,14 +212,13 @@ export class HFInferenceAudioClassificationTask extends HFInferenceTask implemen
 
 export class HFInferenceAutomaticSpeechRecognitionTask
 	extends HFInferenceTask
-	implements AutomaticSpeechRecognitionTaskHelper {
-
+	implements AutomaticSpeechRecognitionTaskHelper
+{
 	override async getResponse(response: AutomaticSpeechRecognitionOutput): Promise<AutomaticSpeechRecognitionOutput> {
 		return response;
 	}
 }
 export class HFInferenceAudioToAudioTask extends HFInferenceTask implements AudioToAudioTaskHelper {
-
 	override async getResponse(response: AudioToAudioOutput[]): Promise<AudioToAudioOutput[]> {
 		if (!Array.isArray(response)) {
 			throw new InferenceOutputError("Expected Array");
@@ -251,8 +244,8 @@ export class HFInferenceAudioToAudioTask extends HFInferenceTask implements Audi
 }
 export class HFInferenceDocumentQuestionAnsweringTask
 	extends HFInferenceTask
-	implements DocumentQuestionAnsweringTaskHelper {
-
+	implements DocumentQuestionAnsweringTaskHelper
+{
 	override async getResponse(
 		response: DocumentQuestionAnsweringOutput
 	): Promise<DocumentQuestionAnsweringOutput[number]> {
@@ -275,7 +268,6 @@ export class HFInferenceDocumentQuestionAnsweringTask
 }
 
 export class HFInferenceFeatureExtractionTask extends HFInferenceTask implements FeatureExtractionTaskHelper {
-
 	override async getResponse(response: FeatureExtractionOutput): Promise<FeatureExtractionOutput> {
 		const isNumArrayRec = (arr: unknown[], maxDepth: number, curDepth = 0): boolean => {
 			if (curDepth > maxDepth) return false;
@@ -293,7 +285,6 @@ export class HFInferenceFeatureExtractionTask extends HFInferenceTask implements
 }
 
 export class HFInferenceImageClassificationTask extends HFInferenceTask implements ImageClassificationTaskHelper {
-
 	override async getResponse(response: ImageClassificationOutput): Promise<ImageClassificationOutput> {
 		if (Array.isArray(response) && response.every((x) => typeof x.label === "string" && typeof x.score === "number")) {
 			return response;
@@ -303,7 +294,6 @@ export class HFInferenceImageClassificationTask extends HFInferenceTask implemen
 }
 
 export class HFInferenceImageSegmentationTask extends HFInferenceTask implements ImageSegmentationTaskHelper {
-
 	override async getResponse(response: ImageSegmentationOutput): Promise<ImageSegmentationOutput> {
 		if (
 			Array.isArray(response) &&
@@ -316,7 +306,6 @@ export class HFInferenceImageSegmentationTask extends HFInferenceTask implements
 }
 
 export class HFInferenceImageToTextTask extends HFInferenceTask implements ImageToTextTaskHelper {
-
 	override async getResponse(response: ImageToTextOutput): Promise<ImageToTextOutput> {
 		if (typeof response?.generated_text !== "string") {
 			throw new InferenceOutputError("Expected {generated_text: string}");
@@ -326,7 +315,6 @@ export class HFInferenceImageToTextTask extends HFInferenceTask implements Image
 }
 
 export class HFInferenceImageToImageTask extends HFInferenceTask implements ImageToImageTaskHelper {
-
 	override async getResponse(response: Blob): Promise<Blob> {
 		if (response instanceof Blob) {
 			return response;
@@ -336,7 +324,6 @@ export class HFInferenceImageToImageTask extends HFInferenceTask implements Imag
 }
 
 export class HFInferenceObjectDetectionTask extends HFInferenceTask implements ObjectDetectionTaskHelper {
-
 	override async getResponse(response: ObjectDetectionOutput): Promise<ObjectDetectionOutput> {
 		if (
 			Array.isArray(response) &&
@@ -360,8 +347,8 @@ export class HFInferenceObjectDetectionTask extends HFInferenceTask implements O
 
 export class HFInferenceZeroShotImageClassificationTask
 	extends HFInferenceTask
-	implements ZeroShotImageClassificationTaskHelper {
-
+	implements ZeroShotImageClassificationTaskHelper
+{
 	override async getResponse(response: ZeroShotImageClassificationOutput): Promise<ZeroShotImageClassificationOutput> {
 		if (Array.isArray(response) && response.every((x) => typeof x.label === "string" && typeof x.score === "number")) {
 			return response;
@@ -371,7 +358,6 @@ export class HFInferenceZeroShotImageClassificationTask
 }
 
 export class HFInferenceTextClassificationTask extends HFInferenceTask implements TextClassificationTaskHelper {
-
 	override async getResponse(response: TextClassificationOutput): Promise<TextClassificationOutput> {
 		if (Array.isArray(response) && response.every((x) => typeof x?.label === "string" && typeof x.score === "number")) {
 			return response;
@@ -381,27 +367,26 @@ export class HFInferenceTextClassificationTask extends HFInferenceTask implement
 }
 
 export class HFInferenceQuestionAnsweringTask extends HFInferenceTask implements QuestionAnsweringTaskHelper {
-
 	override async getResponse(
 		response: QuestionAnsweringOutput | QuestionAnsweringOutput[number]
 	): Promise<QuestionAnsweringOutput[number]> {
 		if (
 			Array.isArray(response)
 				? response.every(
-					(elem) =>
-						typeof elem === "object" &&
-						!!elem &&
-						typeof elem.answer === "string" &&
-						typeof elem.end === "number" &&
-						typeof elem.score === "number" &&
-						typeof elem.start === "number"
-				)
+						(elem) =>
+							typeof elem === "object" &&
+							!!elem &&
+							typeof elem.answer === "string" &&
+							typeof elem.end === "number" &&
+							typeof elem.score === "number" &&
+							typeof elem.start === "number"
+				  )
 				: typeof response === "object" &&
-				!!response &&
-				typeof response.answer === "string" &&
-				typeof response.end === "number" &&
-				typeof response.score === "number" &&
-				typeof response.start === "number"
+				  !!response &&
+				  typeof response.answer === "string" &&
+				  typeof response.end === "number" &&
+				  typeof response.score === "number" &&
+				  typeof response.start === "number"
 		) {
 			return Array.isArray(response) ? response[0] : response;
 		}
@@ -410,7 +395,6 @@ export class HFInferenceQuestionAnsweringTask extends HFInferenceTask implements
 }
 
 export class HFInferenceFillMaskTask extends HFInferenceTask implements FillMaskTaskHelper {
-
 	override async getResponse(response: FillMaskOutput): Promise<FillMaskOutput> {
 		if (
 			Array.isArray(response) &&
@@ -431,7 +415,6 @@ export class HFInferenceFillMaskTask extends HFInferenceTask implements FillMask
 }
 
 export class HFInferenceZeroShotClassificationTask extends HFInferenceTask implements ZeroShotClassificationTaskHelper {
-
 	override async getResponse(response: ZeroShotClassificationOutput): Promise<ZeroShotClassificationOutput> {
 		if (
 			Array.isArray(response) &&
@@ -451,7 +434,6 @@ export class HFInferenceZeroShotClassificationTask extends HFInferenceTask imple
 }
 
 export class HFInferenceSentenceSimilarityTask extends HFInferenceTask implements SentenceSimilarityTaskHelper {
-
 	override async getResponse(response: SentenceSimilarityOutput): Promise<SentenceSimilarityOutput> {
 		if (Array.isArray(response) && response.every((x) => typeof x === "number")) {
 			return response;
@@ -461,7 +443,6 @@ export class HFInferenceSentenceSimilarityTask extends HFInferenceTask implement
 }
 
 export class HFInferenceTableQuestionAnsweringTask extends HFInferenceTask implements TableQuestionAnsweringTaskHelper {
-
 	static validate(elem: unknown): elem is TableQuestionAnsweringOutput[number] {
 		return (
 			typeof elem === "object" &&
@@ -495,7 +476,6 @@ export class HFInferenceTableQuestionAnsweringTask extends HFInferenceTask imple
 }
 
 export class HFInferenceTokenClassificationTask extends HFInferenceTask implements TokenClassificationTaskHelper {
-
 	override async getResponse(response: TokenClassificationOutput): Promise<TokenClassificationOutput> {
 		if (
 			Array.isArray(response) &&
@@ -517,7 +497,6 @@ export class HFInferenceTokenClassificationTask extends HFInferenceTask implemen
 }
 
 export class HFInferenceTranslationTask extends HFInferenceTask implements TranslationTaskHelper {
-
 	override async getResponse(response: TranslationOutput): Promise<TranslationOutput> {
 		if (Array.isArray(response) && response.every((x) => typeof x?.translation_text === "string")) {
 			return response?.length === 1 ? response?.[0] : response;
@@ -527,7 +506,6 @@ export class HFInferenceTranslationTask extends HFInferenceTask implements Trans
 }
 
 export class HFInferenceSummarizationTask extends HFInferenceTask implements SummarizationTaskHelper {
-
 	override async getResponse(response: SummarizationOutput): Promise<SummarizationOutput> {
 		if (Array.isArray(response) && response.every((x) => typeof x?.summary_text === "string")) {
 			return response?.[0];
@@ -537,14 +515,12 @@ export class HFInferenceSummarizationTask extends HFInferenceTask implements Sum
 }
 
 export class HFInferenceTextToSpeechTask extends HFInferenceTask implements TextToSpeechTaskHelper {
-
 	override async getResponse(response: Blob): Promise<Blob> {
 		return response;
 	}
 }
 
 export class HFInferenceTabularClassificationTask extends HFInferenceTask implements TabularClassificationTaskHelper {
-
 	override async getResponse(response: TabularClassificationOutput): Promise<TabularClassificationOutput> {
 		if (Array.isArray(response) && response.every((x) => typeof x === "number")) {
 			return response;
@@ -555,8 +531,8 @@ export class HFInferenceTabularClassificationTask extends HFInferenceTask implem
 
 export class HFInferenceVisualQuestionAnsweringTask
 	extends HFInferenceTask
-	implements VisualQuestionAnsweringTaskHelper {
-
+	implements VisualQuestionAnsweringTaskHelper
+{
 	override async getResponse(response: VisualQuestionAnsweringOutput): Promise<VisualQuestionAnsweringOutput[number]> {
 		if (
 			Array.isArray(response) &&
@@ -572,7 +548,6 @@ export class HFInferenceVisualQuestionAnsweringTask
 }
 
 export class HFInferenceTabularRegressionTask extends HFInferenceTask implements TabularRegressionTaskHelper {
-
 	override async getResponse(response: number[]): Promise<number[]> {
 		if (Array.isArray(response) && response.every((x) => typeof x === "number")) {
 			return response;

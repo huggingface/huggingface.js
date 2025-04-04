@@ -75,9 +75,6 @@ abstract class FalAITask extends TaskProviderHelper {
 }
 
 export class FalAITextToImageTask extends FalAITask implements TextToImageTaskHelper {
-	constructor() {
-		super();
-	}
 	override preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
@@ -140,7 +137,9 @@ export class FalAITextToVideoTask extends FalAITask implements TextToVideoTaskHe
 		let status = response.status;
 
 		const parsedUrl = new URL(url);
-		const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}${parsedUrl.host === "router.huggingface.co" ? "/fal-ai" : ""}`;
+		const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}${
+			parsedUrl.host === "router.huggingface.co" ? "/fal-ai" : ""
+		}`;
 
 		// extracting the provider model id for status and result urls
 		// from the response as it might be different from the mapped model in `url`
@@ -232,7 +231,8 @@ export class FalAITextToSpeechTask extends FalAITask {
 			return await urlResponse.blob();
 		} catch (error) {
 			throw new InferenceOutputError(
-				`Error fetching or processing audio from Fal.ai Text-to-Speech URL: ${res.audio.url}. ${error instanceof Error ? error.message : String(error)
+				`Error fetching or processing audio from Fal.ai Text-to-Speech URL: ${res.audio.url}. ${
+					error instanceof Error ? error.message : String(error)
 				}`
 			);
 		}
