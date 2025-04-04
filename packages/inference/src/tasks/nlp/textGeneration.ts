@@ -19,5 +19,5 @@ export async function textGeneration(
 		...options,
 		task: "text-generation",
 	});
-	return providerHelper.getResponse(response) as TextGenerationOutput;
+	return providerHelper.getResponse(response);
 }

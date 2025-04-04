@@ -18,7 +18,12 @@ import { InferenceOutputError } from "../lib/InferenceOutputError";
 import { isUrl } from "../lib/isUrl";
 import type { BodyParams, UrlParams } from "../types";
 import { omit } from "../utils/omit";
-import { BaseConversationalTask, BaseTextGenerationTask, TaskProviderHelper } from "./providerHelper";
+import {
+	BaseConversationalTask,
+	BaseTextGenerationTask,
+	TaskProviderHelper,
+	type TextToVideoTaskHelper,
+} from "./providerHelper";
 
 const NOVITA_API_BASE_URL = "https://api.novita.ai";
 export interface NovitaOutput {
@@ -31,8 +36,7 @@ export class NovitaTextGenerationTask extends BaseTextGenerationTask {
 		super("novita", NOVITA_API_BASE_URL);
 	}
 
-	override makeRoute(params: UrlParams): string {
-		void params;
+	override makeRoute(): string {
 		return "/v3/openai/chat/completions";
 	}
 }
@@ -42,21 +46,20 @@ export class NovitaConversationalTask extends BaseConversationalTask {
 		super("novita", NOVITA_API_BASE_URL);
 	}
 
-	override makeRoute(params: UrlParams): string {
-		void params;
+	override makeRoute(): string {
 		return "/v3/openai/chat/completions";
 	}
 }
-export class NovitaTextToVideoTask extends TaskProviderHelper {
+export class NovitaTextToVideoTask extends TaskProviderHelper implements TextToVideoTaskHelper {
 	constructor() {
-		super("novita", NOVITA_API_BASE_URL, "text-to-video");
+		super("novita", NOVITA_API_BASE_URL);
 	}
 
 	makeRoute(params: UrlParams): string {
 		return `/v3/hf/${params.model}`;
 	}
 
-	preparePayload(params: BodyParams): unknown {
+	preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),

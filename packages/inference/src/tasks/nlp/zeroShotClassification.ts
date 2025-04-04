@@ -1,5 +1,5 @@
 import type { ZeroShotClassificationInput, ZeroShotClassificationOutput } from "@huggingface/tasks";
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
 import { toArray } from "../../utils/toArray";
 import { request } from "../custom/request";
@@ -13,24 +13,12 @@ export async function zeroShotClassification(
 	args: ZeroShotClassificationArgs,
 	options?: Options
 ): Promise<ZeroShotClassificationOutput> {
+	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "zero-shot-classification");
 	const res = toArray(
 		await request<ZeroShotClassificationOutput[number] | ZeroShotClassificationOutput>(args, {
 			...options,
 			task: "zero-shot-classification",
 		})
 	);
-	const isValidOutput =
-		Array.isArray(res) &&
-		res.every(
-			(x) =>
-				Array.isArray(x.labels) &&
-				x.labels.every((_label) => typeof _label === "string") &&
-				Array.isArray(x.scores) &&
-				x.scores.every((_score) => typeof _score === "number") &&
-				typeof x.sequence === "string"
-		);
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<{labels: string[], scores: number[], sequence: string}>");
-	}
-	return res;
+	return providerHelper.getResponse(res);
 }

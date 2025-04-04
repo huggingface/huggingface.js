@@ -30,6 +30,5 @@ export async function textToImage(args: TextToImageArgs, options?: TextToImageOp
 		task: "text-to-image",
 	});
 	const { url, info } = await makeRequestOptions(args, { ...options, task: "text-to-image" });
-	// @ts-expect-error - Provider-specific implementations accept the outputType parameter
 	return providerHelper.getResponse(res, url, info.headers as Record<string, string>, options?.outputType);
 }
