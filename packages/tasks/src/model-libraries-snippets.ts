@@ -927,6 +927,28 @@ function get_widget_examples_from_st_model(model: ModelData): string[] | undefin
 
 export const sentenceTransformers = (model: ModelData): string[] => {
 	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
+	if (
+		model.tags.includes("cross-encoder") ||
+		["text-classification", "text-ranking", "zero-shot-classification"].includes(model.pipeline_tag || "")
+	) {
+		return [
+			`from sentence_transformers import CrossEncoder
+
+model = CrossEncoder("${model.id}"${remote_code_snippet})
+
+query = "Which planet is known as the Red Planet?"
+passages = [
+	"Venus is often called Earth's twin because of its similar size and proximity.",
+	"Mars, known for its reddish appearance, is often referred to as the Red Planet.",
+	"Jupiter, the largest planet in our solar system, has a prominent red spot.",
+	"Saturn, famous for its rings, is sometimes mistaken for the Red Planet."
+]
+
+scores = model.predict([(query, passage) for passage in passages])
+print(scores)`,
+		];
+	}
+
 	const exampleSentences = get_widget_examples_from_st_model(model) ?? [
 		"The weather is lovely today.",
 		"It's so sunny outside!",
