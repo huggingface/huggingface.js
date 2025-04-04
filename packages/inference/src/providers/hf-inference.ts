@@ -80,6 +80,7 @@ interface Base64ImageGeneration {
 interface OutputUrlImageGeneration {
 	output: string[];
 }
+
 interface AudioToAudioOutput {
 	blob: string;
 	"content-type": string;
@@ -219,6 +220,7 @@ export class HFInferenceAutomaticSpeechRecognitionTask
 		return response;
 	}
 }
+
 export class HFInferenceAudioToAudioTask extends HFInferenceTask implements AudioToAudioTaskHelper {
 	override async getResponse(response: AudioToAudioOutput[]): Promise<AudioToAudioOutput[]> {
 		if (!Array.isArray(response)) {
@@ -243,6 +245,7 @@ export class HFInferenceAudioToAudioTask extends HFInferenceTask implements Audi
 		return response;
 	}
 }
+
 export class HFInferenceDocumentQuestionAnsweringTask
 	extends HFInferenceTask
 	implements DocumentQuestionAnsweringTaskHelper
