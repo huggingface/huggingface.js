@@ -48,7 +48,7 @@ import type {
 import { HF_ROUTER_URL } from "../config";
 import { InferenceOutputError } from "../lib/InferenceOutputError";
 import type { AudioToAudioOutput } from "../tasks/audio/audioToAudio";
-import type { BaseArgs, BodyParams, HeaderParams, UrlParams } from "../types";
+import type { BaseArgs, BodyParams, HeaderParams, InferenceProvider, UrlParams } from "../types";
 import { toArray } from "../utils/toArray";
 
 /**
@@ -56,7 +56,7 @@ import { toArray } from "../utils/toArray";
  */
 export abstract class TaskProviderHelper {
 	constructor(
-		private provider: string,
+		private provider: InferenceProvider,
 		private baseUrl: string,
 		readonly clientSideRoutingOnly: boolean = false
 	) { }
@@ -280,7 +280,7 @@ export interface TabularRegressionTaskHelper {
 // BASE IMPLEMENTATIONS FOR COMMON PATTERNS
 
 export class BaseConversationalTask extends TaskProviderHelper implements ConversationalTaskHelper {
-	constructor(provider: string, baseUrl: string, clientSideRoutingOnly: boolean = false) {
+	constructor(provider: InferenceProvider, baseUrl: string, clientSideRoutingOnly: boolean = false) {
 		super(provider, baseUrl, clientSideRoutingOnly);
 	}
 
@@ -316,7 +316,7 @@ export class BaseConversationalTask extends TaskProviderHelper implements Conver
 }
 
 export class BaseTextGenerationTask extends TaskProviderHelper implements TextGenerationTaskHelper {
-	constructor(provider: string, baseUrl: string, clientSideRoutingOnly: boolean = false) {
+	constructor(provider: InferenceProvider, baseUrl: string, clientSideRoutingOnly: boolean = false) {
 		super(provider, baseUrl, clientSideRoutingOnly);
 	}
 
