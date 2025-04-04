@@ -1,7 +1,7 @@
 import type { AudioClassificationInput, AudioClassificationOutput } from "@huggingface/tasks";
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
+import { innerRequest } from "../../utils/request";
 import type { LegacyAudioInput } from "./utils";
 import { preparePayload } from "./utils";
 
@@ -17,7 +17,7 @@ export async function audioClassification(
 ): Promise<AudioClassificationOutput> {
 	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "audio-classification");
 	const payload = preparePayload(args);
-	const res = await request(payload, {
+	const { data: res } = await innerRequest<AudioClassificationOutput>(payload, {
 		...options,
 		task: "audio-classification",
 	});

@@ -1,6 +1,6 @@
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
+import { innerRequest } from "../../utils/request";
 import type { LegacyAudioInput } from "./utils";
 import { preparePayload } from "./utils";
 
@@ -38,7 +38,7 @@ export interface AudioToAudioOutput {
 export async function audioToAudio(args: AudioToAudioArgs, options?: Options): Promise<AudioToAudioOutput[]> {
 	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "audio-to-audio");
 	const payload = preparePayload(args);
-	const res = await request<AudioToAudioOutput>(payload, {
+	const { data: res } = await innerRequest<AudioToAudioOutput>(payload, {
 		...options,
 		task: "audio-to-audio",
 	});

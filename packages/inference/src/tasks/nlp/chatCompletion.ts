@@ -1,7 +1,7 @@
 import type { ChatCompletionInput, ChatCompletionOutput } from "@huggingface/tasks";
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
+import { innerRequest } from "../../utils/request";
 
 /**
  * Use the chat completion endpoint to generate a response to a prompt, using OpenAI message completion API no stream
@@ -11,7 +11,7 @@ export async function chatCompletion(
 	options?: Options
 ): Promise<ChatCompletionOutput> {
 	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "conversational");
-	const response = await request<ChatCompletionOutput>(args, {
+	const { data: response } = await innerRequest<ChatCompletionOutput>(args, {
 		...options,
 		task: "conversational",
 	});

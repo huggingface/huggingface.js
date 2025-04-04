@@ -1,7 +1,7 @@
 import type { ObjectDetectionInput, ObjectDetectionOutput } from "@huggingface/tasks";
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
+import { innerRequest } from "../../utils/request";
 import { preparePayload, type LegacyImageInput } from "./utils";
 
 export type ObjectDetectionArgs = BaseArgs & (ObjectDetectionInput | LegacyImageInput);
@@ -13,7 +13,7 @@ export type ObjectDetectionArgs = BaseArgs & (ObjectDetectionInput | LegacyImage
 export async function objectDetection(args: ObjectDetectionArgs, options?: Options): Promise<ObjectDetectionOutput> {
 	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "object-detection");
 	const payload = preparePayload(args);
-	const res = await request<ObjectDetectionOutput>(payload, {
+	const { data: res } = await innerRequest<ObjectDetectionOutput>(payload, {
 		...options,
 		task: "object-detection",
 	});

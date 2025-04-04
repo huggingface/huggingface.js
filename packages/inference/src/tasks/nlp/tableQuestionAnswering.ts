@@ -1,7 +1,7 @@
 import type { TableQuestionAnsweringInput, TableQuestionAnsweringOutput } from "@huggingface/tasks";
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
+import { innerRequest } from "../../utils/request";
 
 export type TableQuestionAnsweringArgs = BaseArgs & TableQuestionAnsweringInput;
 
@@ -13,7 +13,7 @@ export async function tableQuestionAnswering(
 	options?: Options
 ): Promise<TableQuestionAnsweringOutput[number]> {
 	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "table-question-answering");
-	const res = await request<TableQuestionAnsweringOutput | TableQuestionAnsweringOutput[number]>(args, {
+	const { data: res } = await innerRequest<TableQuestionAnsweringOutput | TableQuestionAnsweringOutput[number]>(args, {
 		...options,
 		task: "table-question-answering",
 	});

@@ -1,8 +1,8 @@
 import type { TokenClassificationInput, TokenClassificationOutput } from "@huggingface/tasks";
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
+import { innerRequest } from "../../utils/request";
 import { toArray } from "../../utils/toArray";
-import { request } from "../custom/request";
 
 export type TokenClassificationArgs = BaseArgs & TokenClassificationInput;
 
@@ -14,11 +14,9 @@ export async function tokenClassification(
 	options?: Options
 ): Promise<TokenClassificationOutput> {
 	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "token-classification");
-	const res = toArray(
-		await request<TokenClassificationOutput[number] | TokenClassificationOutput>(args, {
-			...options,
-			task: "token-classification",
-		})
-	);
+	const { data: res } = await innerRequest<TokenClassificationOutput[number] | TokenClassificationOutput>(args, {
+		...options,
+		task: "token-classification",
+	});
 	return providerHelper.getResponse(res);
 }

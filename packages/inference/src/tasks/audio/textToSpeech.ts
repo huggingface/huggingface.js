@@ -1,7 +1,7 @@
 import type { TextToSpeechInput } from "@huggingface/tasks";
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
+import { innerRequest } from "../../utils/request";
 type TextToSpeechArgs = BaseArgs & TextToSpeechInput;
 
 interface OutputUrlTextToSpeechGeneration {
@@ -14,7 +14,7 @@ interface OutputUrlTextToSpeechGeneration {
 export async function textToSpeech(args: TextToSpeechArgs, options?: Options): Promise<Blob> {
 	const provider = args.provider ?? "hf-inference";
 	const providerHelper = getProviderHelper(provider, "text-to-speech");
-	const res = await request<Blob | OutputUrlTextToSpeechGeneration>(args, {
+	const { data: res } = await innerRequest<Blob | OutputUrlTextToSpeechGeneration>(args, {
 		...options,
 		task: "text-to-speech",
 	});

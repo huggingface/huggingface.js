@@ -6,7 +6,7 @@ import type {
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options, RequestArgs } from "../../types";
 import { base64FromBytes } from "../../utils/base64FromBytes";
-import { request } from "../custom/request";
+import { innerRequest } from "../../utils/request";
 
 /// Override the type to properly set inputs.image as Blob
 export type VisualQuestionAnsweringArgs = BaseArgs &
@@ -28,7 +28,8 @@ export async function visualQuestionAnswering(
 			image: base64FromBytes(new Uint8Array(await args.inputs.image.arrayBuffer())),
 		},
 	} as RequestArgs;
-	const res = await request<VisualQuestionAnsweringOutput>(reqArgs, {
+
+	const { data: res } = await innerRequest<VisualQuestionAnsweringOutput>(reqArgs, {
 		...options,
 		task: "visual-question-answering",
 	});

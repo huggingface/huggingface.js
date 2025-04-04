@@ -6,8 +6,7 @@ import type {
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options, RequestArgs } from "../../types";
 import { base64FromBytes } from "../../utils/base64FromBytes";
-import { toArray } from "../../utils/toArray";
-import { request } from "../custom/request";
+import { innerRequest } from "../../utils/request";
 
 /// Override the type to properly set inputs.image as Blob
 export type DocumentQuestionAnsweringArgs = BaseArgs &
@@ -29,11 +28,12 @@ export async function documentQuestionAnswering(
 			image: base64FromBytes(new Uint8Array(await args.inputs.image.arrayBuffer())),
 		},
 	} as RequestArgs;
-	const res = toArray(
-		await request<DocumentQuestionAnsweringOutput | DocumentQuestionAnsweringOutput[number]>(reqArgs, {
+	const { data: res } = await innerRequest<DocumentQuestionAnsweringOutput | DocumentQuestionAnsweringOutput[number]>(
+		reqArgs,
+		{
 			...options,
 			task: "document-question-answering",
-		})
+		}
 	);
 	return providerHelper.getResponse(res);
 }

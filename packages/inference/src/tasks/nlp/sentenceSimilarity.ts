@@ -1,7 +1,7 @@
 import type { SentenceSimilarityInput, SentenceSimilarityOutput } from "@huggingface/tasks";
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
+import { innerRequest } from "../../utils/request";
 
 export type SentenceSimilarityArgs = BaseArgs & SentenceSimilarityInput;
 
@@ -13,7 +13,7 @@ export async function sentenceSimilarity(
 	options?: Options
 ): Promise<SentenceSimilarityOutput> {
 	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "sentence-similarity");
-	const res = await request<SentenceSimilarityOutput>(args, {
+	const { data: res } = await innerRequest<SentenceSimilarityOutput>(args, {
 		...options,
 		task: "sentence-similarity",
 	});

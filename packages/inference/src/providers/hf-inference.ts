@@ -360,8 +360,9 @@ export class HFInferenceZeroShotImageClassificationTask
 
 export class HFInferenceTextClassificationTask extends HFInferenceTask implements TextClassificationTaskHelper {
 	override async getResponse(response: TextClassificationOutput): Promise<TextClassificationOutput> {
-		if (Array.isArray(response) && response.every((x) => typeof x?.label === "string" && typeof x.score === "number")) {
-			return response;
+		const output = response?.[0];
+		if (Array.isArray(output) && output.every((x) => typeof x?.label === "string" && typeof x.score === "number")) {
+			return output;
 		}
 		throw new InferenceOutputError("Expected Array<{label: string, score: number}>");
 	}

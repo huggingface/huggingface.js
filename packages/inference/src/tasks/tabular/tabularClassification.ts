@@ -1,6 +1,6 @@
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
+import { innerRequest } from "../../utils/request";
 
 export type TabularClassificationArgs = BaseArgs & {
 	inputs: {
@@ -26,7 +26,7 @@ export async function tabularClassification(
 	options?: Options
 ): Promise<TabularClassificationOutput> {
 	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "tabular-classification");
-	const res = await request<TabularClassificationOutput>(args, {
+	const { data: res } = await innerRequest<TabularClassificationOutput>(args, {
 		...options,
 		task: "tabular-classification",
 	});

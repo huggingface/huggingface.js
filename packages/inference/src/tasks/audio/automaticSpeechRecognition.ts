@@ -5,9 +5,10 @@ import { FAL_AI_SUPPORTED_BLOB_TYPES } from "../../providers/fal-ai";
 import type { BaseArgs, Options, RequestArgs } from "../../types";
 import { base64FromBytes } from "../../utils/base64FromBytes";
 import { omit } from "../../utils/omit";
-import { request } from "../custom/request";
+import { innerRequest } from "../../utils/request";
 import type { LegacyAudioInput } from "./utils";
 import { preparePayload } from "./utils";
+
 export type AutomaticSpeechRecognitionArgs = BaseArgs & (AutomaticSpeechRecognitionInput | LegacyAudioInput);
 /**
  * This task reads some audio input and outputs the said words within the audio files.
@@ -19,7 +20,7 @@ export async function automaticSpeechRecognition(
 ): Promise<AutomaticSpeechRecognitionOutput> {
 	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "automatic-speech-recognition");
 	const payload = await buildPayload(args);
-	const res = await request<AutomaticSpeechRecognitionOutput>(payload, {
+	const { data: res } = await innerRequest<AutomaticSpeechRecognitionOutput>(payload, {
 		...options,
 		task: "automatic-speech-recognition",
 	});

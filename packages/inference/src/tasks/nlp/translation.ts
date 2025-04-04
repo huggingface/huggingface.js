@@ -1,7 +1,7 @@
 import type { TranslationInput, TranslationOutput } from "@huggingface/tasks";
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
+import { innerRequest } from "../../utils/request";
 
 export type TranslationArgs = BaseArgs & TranslationInput;
 /**
@@ -9,7 +9,7 @@ export type TranslationArgs = BaseArgs & TranslationInput;
  */
 export async function translation(args: TranslationArgs, options?: Options): Promise<TranslationOutput> {
 	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "translation");
-	const res = await request<TranslationOutput>(args, {
+	const { data: res } = await innerRequest<TranslationOutput>(args, {
 		...options,
 		task: "translation",
 	});

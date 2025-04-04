@@ -2,7 +2,7 @@ import type { ZeroShotImageClassificationInput, ZeroShotImageClassificationOutpu
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options, RequestArgs } from "../../types";
 import { base64FromBytes } from "../../utils/base64FromBytes";
-import { request } from "../custom/request";
+import { innerRequest } from "../../utils/request";
 
 /**
  * @deprecated
@@ -46,7 +46,7 @@ export async function zeroShotImageClassification(
 ): Promise<ZeroShotImageClassificationOutput> {
 	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "zero-shot-image-classification");
 	const payload = await preparePayload(args);
-	const res = await request<ZeroShotImageClassificationOutput>(payload, {
+	const { data: res } = await innerRequest<ZeroShotImageClassificationOutput>(payload, {
 		...options,
 		task: "zero-shot-image-classification",
 	});

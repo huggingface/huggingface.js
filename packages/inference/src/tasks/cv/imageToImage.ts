@@ -2,7 +2,7 @@ import type { ImageToImageInput } from "@huggingface/tasks";
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options, RequestArgs } from "../../types";
 import { base64FromBytes } from "../../utils/base64FromBytes";
-import { request } from "../custom/request";
+import { innerRequest } from "../../utils/request";
 
 export type ImageToImageArgs = BaseArgs & ImageToImageInput;
 
@@ -27,7 +27,7 @@ export async function imageToImage(args: ImageToImageArgs, options?: Options): P
 			),
 		};
 	}
-	const res = await request<Blob>(reqArgs, {
+	const { data: res } = await innerRequest<Blob>(reqArgs, {
 		...options,
 		task: "image-to-image",
 	});
