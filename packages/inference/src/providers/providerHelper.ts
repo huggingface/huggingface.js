@@ -1,7 +1,54 @@
-import type { ChatCompletionOutput, TextGenerationOutput } from "@huggingface/tasks";
+import type {
+	AudioClassificationInput,
+	AudioClassificationOutput,
+	AutomaticSpeechRecognitionInput,
+	AutomaticSpeechRecognitionOutput,
+	ChatCompletionInput,
+	ChatCompletionOutput,
+	DocumentQuestionAnsweringInput,
+	DocumentQuestionAnsweringOutput,
+	FeatureExtractionInput,
+	FeatureExtractionOutput,
+	FillMaskInput,
+	FillMaskOutput,
+	ImageClassificationInput,
+	ImageClassificationOutput,
+	ImageSegmentationInput,
+	ImageSegmentationOutput,
+	ImageToImageInput,
+	ImageToTextInput,
+	ImageToTextOutput,
+	ObjectDetectionInput,
+	ObjectDetectionOutput,
+	QuestionAnsweringInput,
+	QuestionAnsweringOutput,
+	SentenceSimilarityInput,
+	SentenceSimilarityOutput,
+	SummarizationInput,
+	SummarizationOutput,
+	TableQuestionAnsweringInput,
+	TableQuestionAnsweringOutput,
+	TextClassificationOutput,
+	TextGenerationInput,
+	TextGenerationOutput,
+	TextToImageInput,
+	TextToSpeechInput,
+	TextToVideoInput,
+	TokenClassificationInput,
+	TokenClassificationOutput,
+	TranslationInput,
+	TranslationOutput,
+	VisualQuestionAnsweringInput,
+	VisualQuestionAnsweringOutput,
+	ZeroShotClassificationInput,
+	ZeroShotClassificationOutput,
+	ZeroShotImageClassificationInput,
+	ZeroShotImageClassificationOutput,
+} from "@huggingface/tasks";
 import { HF_ROUTER_URL } from "../config";
 import { InferenceOutputError } from "../lib/InferenceOutputError";
-import type { BodyParams, HeaderParams, UrlParams } from "../types";
+import type { AudioToAudioOutput } from "../tasks/audio/audioToAudio";
+import type { BaseArgs, BodyParams, HeaderParams, UrlParams } from "../types";
 import { toArray } from "../utils/toArray";
 
 /**
@@ -22,9 +69,9 @@ export abstract class TaskProviderHelper {
 	abstract getResponse(
 		response: unknown,
 		url?: string,
-		headers?: Record<string, string>,
+		headers?: HeadersInit,
 		outputType?: "url" | "blob"
-	): unknown;
+	): Promise<unknown>;
 
 	/**
 	 * Prepare the route for the request
@@ -75,7 +122,164 @@ export abstract class TaskProviderHelper {
 	}
 }
 
-export class BaseConversationalTask extends TaskProviderHelper {
+// PER-TASK PROVIDER HELPER INTERFACES
+
+// CV Tasks
+export interface TextToImageTaskHelper {
+	getResponse(
+		response: unknown,
+		url?: string,
+		headers?: HeadersInit,
+		outputType?: "url" | "blob"
+	): Promise<string | Blob>;
+	preparePayload(params: BodyParams<TextToImageInput & BaseArgs>): Record<string, unknown>;
+}
+
+export interface TextToVideoTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: Record<string, string>): Promise<Blob>;
+	preparePayload(params: BodyParams<TextToVideoInput & BaseArgs>): Record<string, unknown>;
+}
+
+export interface ImageToImageTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<Blob>;
+	preparePayload(params: BodyParams<ImageToImageInput & BaseArgs>): Record<string, unknown>;
+}
+
+export interface ImageSegmentationTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<ImageSegmentationOutput>;
+	preparePayload(params: BodyParams<ImageSegmentationInput & BaseArgs>): Record<string, unknown> | BodyInit;
+}
+
+export interface ImageClassificationTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<ImageClassificationOutput>;
+	preparePayload(params: BodyParams<ImageClassificationInput & BaseArgs>): Record<string, unknown> | BodyInit;
+}
+
+export interface ObjectDetectionTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<ObjectDetectionOutput>;
+	preparePayload(params: BodyParams<ObjectDetectionInput & BaseArgs>): Record<string, unknown> | BodyInit;
+}
+
+export interface ImageToTextTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<ImageToTextOutput>;
+	preparePayload(params: BodyParams<ImageToTextInput & BaseArgs>): Record<string, unknown> | BodyInit;
+}
+
+export interface ZeroShotImageClassificationTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<ZeroShotImageClassificationOutput>;
+	preparePayload(params: BodyParams<ZeroShotImageClassificationInput & BaseArgs>): Record<string, unknown> | BodyInit;
+}
+
+// NLP Tasks
+export interface TextGenerationTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<TextGenerationOutput>;
+	preparePayload(params: BodyParams<TextGenerationInput & BaseArgs>): Record<string, unknown>;
+}
+
+export interface ConversationalTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<ChatCompletionOutput>;
+	preparePayload(params: BodyParams<ChatCompletionInput & BaseArgs>): Record<string, unknown>;
+}
+
+export interface TextClassificationTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<TextClassificationOutput>;
+	preparePayload(params: BodyParams<ZeroShotClassificationInput & BaseArgs>): Record<string, unknown>;
+}
+
+export interface QuestionAnsweringTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<QuestionAnsweringOutput[number]>;
+	preparePayload(params: BodyParams<QuestionAnsweringInput & BaseArgs>): Record<string, unknown>;
+}
+
+export interface FillMaskTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<FillMaskOutput>;
+	preparePayload(params: BodyParams<FillMaskInput & BaseArgs>): Record<string, unknown>;
+}
+
+export interface ZeroShotClassificationTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<ZeroShotClassificationOutput>;
+	preparePayload(params: BodyParams<ZeroShotClassificationInput & BaseArgs>): Record<string, unknown>;
+}
+
+export interface SentenceSimilarityTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<SentenceSimilarityOutput>;
+	preparePayload(params: BodyParams<SentenceSimilarityInput & BaseArgs>): Record<string, unknown>;
+}
+
+export interface TableQuestionAnsweringTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<TableQuestionAnsweringOutput[number]>;
+	preparePayload(params: BodyParams<TableQuestionAnsweringInput & BaseArgs>): Record<string, unknown>;
+}
+
+export interface TokenClassificationTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<TokenClassificationOutput>;
+	preparePayload(params: BodyParams<TokenClassificationInput & BaseArgs>): Record<string, unknown>;
+}
+
+export interface TranslationTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<TranslationOutput>;
+	preparePayload(params: BodyParams<TranslationInput & BaseArgs>): Record<string, unknown>;
+}
+
+export interface SummarizationTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<SummarizationOutput>;
+	preparePayload(params: BodyParams<SummarizationInput & BaseArgs>): Record<string, unknown>;
+}
+
+// Audio Tasks
+export interface TextToSpeechTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<Blob>;
+	preparePayload(params: BodyParams<TextToSpeechInput & BaseArgs>): Record<string, unknown>;
+}
+export interface AudioToAudioTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<AudioToAudioOutput[]>;
+	preparePayload(
+		params: BodyParams<BaseArgs & { inputs: Blob } & Record<string, unknown>>
+	): Record<string, unknown> | BodyInit;
+}
+export interface AutomaticSpeechRecognitionTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<AutomaticSpeechRecognitionOutput>;
+	preparePayload(params: BodyParams<AutomaticSpeechRecognitionInput & BaseArgs>): Record<string, unknown> | BodyInit;
+}
+
+export interface AudioClassificationTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<AudioClassificationOutput>;
+	preparePayload(params: BodyParams<AudioClassificationInput & BaseArgs>): Record<string, unknown> | BodyInit;
+}
+
+// Multimodal Tasks
+export interface DocumentQuestionAnsweringTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<DocumentQuestionAnsweringOutput[number]>;
+	preparePayload(params: BodyParams<DocumentQuestionAnsweringInput & BaseArgs>): Record<string, unknown> | BodyInit;
+}
+
+export interface FeatureExtractionTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<FeatureExtractionOutput>;
+	preparePayload(params: BodyParams<FeatureExtractionInput & BaseArgs>): Record<string, unknown>;
+}
+
+export interface VisualQuestionAnsweringTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<VisualQuestionAnsweringOutput[number]>;
+	preparePayload(params: BodyParams<VisualQuestionAnsweringInput & BaseArgs>): Record<string, unknown> | BodyInit;
+}
+
+export interface TabularClassificationTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<number[]>;
+	preparePayload(
+		params: BodyParams<BaseArgs & { inputs: { data: Record<string, string[]> } } & Record<string, unknown>>
+	): Record<string, unknown> | BodyInit;
+}
+
+export interface TabularRegressionTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<number[]>;
+	preparePayload(
+		params: BodyParams<BaseArgs & { inputs: { data: Record<string, string[]> } } & Record<string, unknown>>
+	): Record<string, unknown> | BodyInit;
+}
+
+// BASE IMPLEMENTATIONS FOR COMMON PATTERNS
+
+export class BaseConversationalTask extends TaskProviderHelper implements ConversationalTaskHelper {
 	constructor(provider: string, baseUrl: string, clientSideRoutingOnly: boolean = false) {
 		super(provider, baseUrl, "conversational", clientSideRoutingOnly);
 	}
@@ -91,7 +295,7 @@ export class BaseConversationalTask extends TaskProviderHelper {
 		};
 	}
 
-	getResponse(response: ChatCompletionOutput): ChatCompletionOutput {
+	async getResponse(response: ChatCompletionOutput): Promise<ChatCompletionOutput> {
 		if (
 			typeof response === "object" &&
 			Array.isArray(response?.choices) &&
@@ -111,21 +315,23 @@ export class BaseConversationalTask extends TaskProviderHelper {
 	}
 }
 
-export class BaseTextGenerationTask extends TaskProviderHelper {
+export class BaseTextGenerationTask extends TaskProviderHelper implements TextGenerationTaskHelper {
 	constructor(provider: string, baseUrl: string, clientSideRoutingOnly: boolean = false) {
 		super(provider, baseUrl, "text-generation", clientSideRoutingOnly);
 	}
+
 	preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
 			...params.args,
 			model: params.model,
 		};
 	}
+
 	makeRoute(): string {
 		return "v1/completions";
 	}
 
-	getResponse(response: unknown): TextGenerationOutput {
+	async getResponse(response: unknown): Promise<TextGenerationOutput> {
 		const res = toArray(response);
 		// @ts-expect-error - We need to check properties on unknown type
 		if (Array.isArray(res) && res.every((x) => "generated_text" in x && typeof x?.generated_text === "string")) {

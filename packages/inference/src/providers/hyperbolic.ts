@@ -18,7 +18,12 @@ import type { ChatCompletionOutput, TextGenerationOutput } from "@huggingface/ta
 import { InferenceOutputError } from "../lib/InferenceOutputError";
 import type { BodyParams, UrlParams } from "../types";
 import { omit } from "../utils/omit";
-import { BaseConversationalTask, BaseTextGenerationTask, TaskProviderHelper } from "./providerHelper";
+import {
+	BaseConversationalTask,
+	BaseTextGenerationTask,
+	TaskProviderHelper,
+	type TextToImageTaskHelper,
+} from "./providerHelper";
 
 const HYPERBOLIC_API_BASE_URL = "https://api.hyperbolic.xyz";
 
@@ -43,8 +48,7 @@ export class HyperbolicTextGenerationTask extends BaseTextGenerationTask {
 		super("hyperbolic", HYPERBOLIC_API_BASE_URL);
 	}
 
-	override makeRoute(params: UrlParams): string {
-		void params;
+	override makeRoute(): string {
 		return "v1/chat/completions";
 	}
 
@@ -62,7 +66,7 @@ export class HyperbolicTextGenerationTask extends BaseTextGenerationTask {
 		};
 	}
 
-	override getResponse(response: HyperbolicTextCompletionOutput): TextGenerationOutput {
+	override async getResponse(response: HyperbolicTextCompletionOutput): Promise<TextGenerationOutput> {
 		if (
 			typeof response === "object" &&
 			"choices" in response &&
@@ -79,7 +83,7 @@ export class HyperbolicTextGenerationTask extends BaseTextGenerationTask {
 	}
 }
 
-export class HyperbolicTextToImageTask extends TaskProviderHelper {
+export class HyperbolicTextToImageTask extends TaskProviderHelper implements TextToImageTaskHelper {
 	constructor() {
 		super("hyperbolic", HYPERBOLIC_API_BASE_URL, "text-to-image");
 	}
@@ -98,7 +102,12 @@ export class HyperbolicTextToImageTask extends TaskProviderHelper {
 		};
 	}
 
-	getResponse(response: HyperbolicTextToImageOutput, outputType?: "url" | "blob"): Promise<Blob> | string {
+	async getResponse(
+		response: HyperbolicTextToImageOutput,
+		url?: string,
+		headers?: HeadersInit,
+		outputType?: "url" | "blob"
+	): Promise<string | Blob> {
 		if (
 			typeof response === "object" &&
 			"images" in response &&

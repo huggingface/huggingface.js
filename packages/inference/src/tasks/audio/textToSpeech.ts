@@ -18,5 +18,5 @@ export async function textToSpeech(args: TextToSpeechArgs, options?: Options): P
 		...options,
 		task: "text-to-speech",
 	});
-	return providerHelper.getResponse(res) as Promise<Blob>;
+	return providerHelper.getResponse(res);
 }

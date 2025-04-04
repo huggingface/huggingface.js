@@ -114,8 +114,8 @@ export interface UrlParams {
 	task?: InferenceTask;
 }
 
-export interface BodyParams {
-	args: Record<string, unknown>;
+export interface BodyParams<T extends Record<string, unknown> = Record<string, unknown>> {
+	args: T;
 	model: string;
 	task?: InferenceTask;
 }

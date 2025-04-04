@@ -20,7 +20,12 @@ import { isUrl } from "../lib/isUrl";
 import type { BodyParams, HeaderParams, InferenceTask, UrlParams } from "../types";
 import { delay } from "../utils/delay";
 import { omit } from "../utils/omit";
-import { TaskProviderHelper } from "./providerHelper";
+import {
+	type AutomaticSpeechRecognitionTaskHelper,
+	TaskProviderHelper,
+	type TextToImageTaskHelper,
+	type TextToVideoTaskHelper,
+} from "./providerHelper";
 
 export interface FalAiQueueOutput {
 	request_id: string;
@@ -69,7 +74,7 @@ abstract class FalAITask extends TaskProviderHelper {
 	}
 }
 
-export class FalAITextToImageTask extends FalAITask {
+export class FalAITextToImageTask extends FalAITask implements TextToImageTaskHelper {
 	constructor() {
 		super("text-to-image");
 	}
@@ -102,7 +107,7 @@ export class FalAITextToImageTask extends FalAITask {
 	}
 }
 
-export class FalAITextToVideoTask extends FalAITask {
+export class FalAITextToVideoTask extends FalAITask implements TextToVideoTaskHelper {
 	constructor() {
 		super("text-to-video", "https://queue.fal.run");
 	}
@@ -188,7 +193,7 @@ export class FalAITextToVideoTask extends FalAITask {
 	}
 }
 
-export class FalAIAutomaticSpeechRecognitionTask extends FalAITask {
+export class FalAIAutomaticSpeechRecognitionTask extends FalAITask implements AutomaticSpeechRecognitionTaskHelper {
 	constructor() {
 		super("automatic-speech-recognition");
 	}
@@ -197,7 +202,7 @@ export class FalAIAutomaticSpeechRecognitionTask extends FalAITask {
 		headers["Content-Type"] = "application/json";
 		return headers;
 	}
-	override getResponse(response: unknown): AutomaticSpeechRecognitionOutput {
+	override async getResponse(response: unknown): Promise<AutomaticSpeechRecognitionOutput> {
 		const res = response as FalAIAutomaticSpeechRecognitionOutput;
 		if (typeof res?.text !== "string") {
 			throw new InferenceOutputError(

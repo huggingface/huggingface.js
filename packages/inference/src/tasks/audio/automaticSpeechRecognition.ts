@@ -27,7 +27,7 @@ export async function automaticSpeechRecognition(
 	if (!isValidOutput) {
 		throw new InferenceOutputError("Expected {text: string}");
 	}
-	return providerHelper.getResponse(res) as AutomaticSpeechRecognitionOutput;
+	return providerHelper.getResponse(res);
 }
 
 async function buildPayload(args: AutomaticSpeechRecognitionArgs): Promise<RequestArgs> {

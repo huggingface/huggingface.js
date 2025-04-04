@@ -17,7 +17,12 @@
 import { InferenceOutputError } from "../lib/InferenceOutputError";
 import type { BodyParams, UrlParams } from "../types";
 import { omit } from "../utils/omit";
-import { BaseConversationalTask, BaseTextGenerationTask, TaskProviderHelper } from "./providerHelper";
+import {
+	BaseConversationalTask,
+	BaseTextGenerationTask,
+	TaskProviderHelper,
+	type TextToImageTaskHelper,
+} from "./providerHelper";
 
 const NEBIUS_API_BASE_URL = "https://api.studio.nebius.ai";
 
@@ -39,7 +44,7 @@ export class NebiusTextGenerationTask extends BaseTextGenerationTask {
 	}
 }
 
-export class NebiusTextToImageTask extends TaskProviderHelper {
+export class NebiusTextToImageTask extends TaskProviderHelper implements TextToImageTaskHelper {
 	constructor() {
 		super("nebius", NEBIUS_API_BASE_URL, "text-to-image");
 	}
@@ -59,7 +64,12 @@ export class NebiusTextToImageTask extends TaskProviderHelper {
 		return "v1/images/generations";
 	}
 
-	getResponse(response: NebiusBase64ImageGeneration, outputType?: "url" | "blob"): string | Promise<Blob> {
+	async getResponse(
+		response: NebiusBase64ImageGeneration,
+		url?: string,
+		headers?: HeadersInit,
+		outputType?: "url" | "blob"
+	): Promise<string | Blob> {
 		if (
 			typeof response === "object" &&
 			"data" in response &&

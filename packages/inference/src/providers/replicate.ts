@@ -18,7 +18,7 @@ import { InferenceOutputError } from "../lib/InferenceOutputError";
 import { isUrl } from "../lib/isUrl";
 import type { BodyParams, HeaderParams, InferenceTask, UrlParams } from "../types";
 import { omit } from "../utils/omit";
-import { TaskProviderHelper } from "./providerHelper";
+import { TaskProviderHelper, type TextToImageTaskHelper, type TextToVideoTaskHelper } from "./providerHelper";
 
 export interface ReplicateOutput {
 	output?: string | string[];
@@ -62,7 +62,7 @@ abstract class ReplicateTask extends TaskProviderHelper {
 	}
 }
 
-export class ReplicateTextToImageTask extends ReplicateTask {
+export class ReplicateTextToImageTask extends ReplicateTask implements TextToImageTaskHelper {
 	constructor() {
 		super("text-to-image");
 	}
@@ -129,7 +129,7 @@ export class ReplicateTextToSpeechTask extends ReplicateTask {
 	}
 }
 
-export class ReplicateTextToVideoTask extends ReplicateTask {
+export class ReplicateTextToVideoTask extends ReplicateTask implements TextToVideoTaskHelper {
 	constructor() {
 		super("text-to-video");
 	}

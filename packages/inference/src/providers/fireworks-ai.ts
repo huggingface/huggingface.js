@@ -14,15 +14,14 @@
  *
  * Thanks!
  */
-import type { UrlParams } from "../types";
 import { BaseConversationalTask } from "./providerHelper";
 
 export class FireworksConversationalTask extends BaseConversationalTask {
 	constructor() {
 		super("fireworks-ai", "https://api.fireworks.ai");
 	}
-	override makeRoute(params: UrlParams): string {
-		void params;
+
+	override makeRoute(): string {
 		return "/inference/v1/chat/completions";
 	}
 }

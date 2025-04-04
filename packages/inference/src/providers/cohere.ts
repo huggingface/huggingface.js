@@ -14,15 +14,14 @@
  *
  * Thanks!
  */
-import type { UrlParams } from "../types";
 import { BaseConversationalTask } from "./providerHelper";
 
 export class CohereConversationalTask extends BaseConversationalTask {
 	constructor() {
 		super("cohere", "https://api.cohere.com");
 	}
-	override makeRoute(params: UrlParams): string {
-		void params;
+
+	override makeRoute(): string {
 		return "/compatibility/v1/chat/completions";
 	}
 }

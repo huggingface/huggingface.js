@@ -15,5 +15,5 @@ export async function chatCompletion(
 		...options,
 		task: "conversational",
 	});
-	return providerHelper.getResponse(response) as ChatCompletionOutput;
+	return providerHelper.getResponse(response);
 }
