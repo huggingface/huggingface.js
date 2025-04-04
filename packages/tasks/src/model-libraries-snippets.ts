@@ -920,7 +920,7 @@ export const sampleFactory = (model: ModelData): string[] => [
 
 function get_widget_examples_from_st_model(model: ModelData): string[] | undefined {
 	const widgetExample = model.widgetData?.[0] as WidgetExampleSentenceSimilarityInput | undefined;
-	if (widgetExample) {
+	if (widgetExample?.source_sentence && widgetExample?.sentences?.length) {
 		return [widgetExample.source_sentence, ...widgetExample.sentences];
 	}
 }
