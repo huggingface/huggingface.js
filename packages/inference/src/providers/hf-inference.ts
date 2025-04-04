@@ -59,6 +59,7 @@ import type {
 	TabularRegressionTaskHelper,
 	TextClassificationTaskHelper,
 	TextGenerationTaskHelper,
+	TextToAudioTaskHelper,
 	TextToImageTaskHelper,
 	TextToSpeechTaskHelper,
 	TokenClassificationTaskHelper,
@@ -380,13 +381,13 @@ export class HFInferenceQuestionAnsweringTask extends HFInferenceTask implements
 							typeof elem.end === "number" &&
 							typeof elem.score === "number" &&
 							typeof elem.start === "number"
-				  )
+					)
 				: typeof response === "object" &&
-				  !!response &&
-				  typeof response.answer === "string" &&
-				  typeof response.end === "number" &&
-				  typeof response.score === "number" &&
-				  typeof response.start === "number"
+					!!response &&
+					typeof response.answer === "string" &&
+					typeof response.end === "number" &&
+					typeof response.score === "number" &&
+					typeof response.start === "number"
 		) {
 			return Array.isArray(response) ? response[0] : response;
 		}
@@ -553,5 +554,11 @@ export class HFInferenceTabularRegressionTask extends HFInferenceTask implements
 			return response;
 		}
 		throw new InferenceOutputError("Expected Array<number>");
+	}
+}
+
+export class HFInferenceTextToAudioTask extends HFInferenceTask implements TextToAudioTaskHelper {
+	override async getResponse(response: Blob): Promise<Blob> {
+		return response;
 	}
 }

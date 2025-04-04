@@ -9,7 +9,7 @@ import {
 import type { PipelineType, WidgetType } from "@huggingface/tasks/src/pipelines.js";
 import type { ChatCompletionInputMessage, GenerationParameters } from "@huggingface/tasks/src/tasks/index.js";
 import { makeRequestOptionsFromResolvedModel } from "../lib/makeRequestOptions";
-import type { InferenceProvider, RequestArgs } from "../types";
+import type { InferenceProvider, InferenceTask, RequestArgs } from "../types";
 import { templates } from "./templates.exported";
 
 const PYTHON_CLIENTS = ["huggingface_hub", "fal_client", "requests", "openai"] as const;
@@ -120,6 +120,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		opts?: Record<string, unknown>
 	): InferenceSnippet[] => {
 		/// Hacky: hard-code conversational templates here
+		let task = model.pipeline_tag as InferenceTask;
 		if (
 			model.pipeline_tag &&
 			["text-generation", "image-text-to-text"].includes(model.pipeline_tag) &&
@@ -127,14 +128,21 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		) {
 			templateName = opts?.streaming ? "conversationalStream" : "conversational";
 			inputPreparationFn = prepareConversationalInput;
+			task = "conversational";
 		}
 		/// Prepare inputs + make request
 		const inputs = inputPreparationFn ? inputPreparationFn(model, opts) : { inputs: getModelInputSnippet(model) };
-		const request = makeRequestOptionsFromResolvedModel(providerModelId ?? model.id, {
-			accessToken: accessToken,
-			provider: provider,
-			...inputs,
-		} as RequestArgs);
+		const request = makeRequestOptionsFromResolvedModel(
+			providerModelId ?? model.id,
+			{
+				accessToken: accessToken,
+				provider: provider,
+				...inputs,
+			} as RequestArgs,
+			{
+				task: task,
+			}
+		);
 
 		/// Parse request.info.body if not a binary.
 		/// This is the body sent to the provider. Important for snippets with raw payload (e.g curl, requests, etc.)

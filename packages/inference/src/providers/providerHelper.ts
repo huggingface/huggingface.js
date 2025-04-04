@@ -230,6 +230,12 @@ export interface TextToSpeechTaskHelper {
 	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<Blob>;
 	preparePayload(params: BodyParams<TextToSpeechInput & BaseArgs>): Record<string, unknown>;
 }
+
+export interface TextToAudioTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<Blob>;
+	preparePayload(params: BodyParams<Record<string, unknown> & BaseArgs>): Record<string, unknown>;
+}
+
 export interface AudioToAudioTaskHelper {
 	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<AudioToAudioOutput[]>;
 	preparePayload(

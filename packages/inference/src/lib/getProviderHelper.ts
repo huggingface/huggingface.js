@@ -31,6 +31,7 @@ import type {
 	TaskProviderHelper,
 	TextClassificationTaskHelper,
 	TextGenerationTaskHelper,
+	TextToAudioTaskHelper,
 	TextToImageTaskHelper,
 	TextToSpeechTaskHelper,
 	TextToVideoTaskHelper,
@@ -89,6 +90,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		summarization: new HFInference.HFInferenceSummarizationTask(),
 		"visual-question-answering": new HFInference.HFInferenceVisualQuestionAnsweringTask(),
 		"tabular-regression": new HFInference.HFInferenceTabularRegressionTask(),
+		"text-to-audio": new HFInference.HFInferenceTextToAudioTask(),
 	},
 	"fireworks-ai": {
 		conversational: new Fireworks.FireworksConversationalTask(),
@@ -144,6 +146,10 @@ export function getProviderHelper(
 	provider: InferenceProvider,
 	task: "text-to-speech"
 ): TextToSpeechTaskHelper & TaskProviderHelper;
+export function getProviderHelper(
+	provider: InferenceProvider,
+	task: "text-to-audio"
+): TextToAudioTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProvider,
 	task: "automatic-speech-recognition"
