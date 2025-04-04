@@ -336,7 +336,8 @@ export class BaseTextGenerationTask extends TaskProviderHelper implements TextGe
 			Array.isArray(res) &&
 			res.length > 0 &&
 			res.every(
-				(x): x is { generated_text: string } => !!x && "generated_text" in x && typeof x.generated_text === "string"
+				(x): x is { generated_text: string } =>
+					typeof x === "object" && !!x && "generated_text" in x && typeof x.generated_text === "string"
 			)
 		) {
 			return res[0];
