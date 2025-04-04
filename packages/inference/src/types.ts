@@ -34,7 +34,7 @@ export interface Options {
 	billTo?: string;
 }
 
-export type InferenceTask = Exclude<PipelineType, "other">;
+export type InferenceTask = Exclude<PipelineType, "other"> | "conversational";
 
 export const INFERENCE_PROVIDERS = [
 	"black-forest-labs",
@@ -101,14 +101,6 @@ export type RequestArgs = BaseArgs &
 		parameters?: Record<string, unknown>;
 	};
 
-export interface ProviderConfig {
-	makeBaseUrl: ((task?: InferenceTask) => string) | (() => string);
-	makeBody: (params: BodyParams) => Record<string, unknown>;
-	makeHeaders: (params: HeaderParams) => Record<string, string>;
-	makeUrl: (params: UrlParams) => string;
-	clientSideRoutingOnly?: boolean;
-}
-
 export type AuthMethod = "none" | "hf-token" | "credentials-include" | "provider-key";
 
 export interface HeaderParams {
@@ -118,15 +110,12 @@ export interface HeaderParams {
 
 export interface UrlParams {
 	authMethod: AuthMethod;
-	baseUrl: string;
 	model: string;
 	task?: InferenceTask;
-	chatCompletion?: boolean;
 }
 
-export interface BodyParams {
-	args: Record<string, unknown>;
-	chatCompletion?: boolean;
+export interface BodyParams<T extends Record<string, unknown> = Record<string, unknown>> {
+	args: T;
 	model: string;
 	task?: InferenceTask;
 }

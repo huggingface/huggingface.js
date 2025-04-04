@@ -15,6 +15,7 @@ async function query(data) {
 }
 
 
-query({     inputs: "\"Astronaut riding a horse\"", }).then((response) => {
+query({     sync_mode: true,
+    prompt: "\"Astronaut riding a horse\"", }).then((response) => {
     // Use image
 });

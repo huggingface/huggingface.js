@@ -1,4 +1,4 @@
-import type { BaseArgs, RequestArgs } from "../../types";
+import type { BaseArgs, InferenceProvider, RequestArgs } from "../../types";
 import { omit } from "../../utils/omit";
 
 /**
@@ -6,6 +6,7 @@ import { omit } from "../../utils/omit";
  */
 export interface LegacyAudioInput {
 	data: Blob | ArrayBuffer;
+	provider?: InferenceProvider;
 }
 
 export function preparePayload(args: BaseArgs & ({ inputs: Blob } | LegacyAudioInput)): RequestArgs {

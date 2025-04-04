@@ -1,5 +1,5 @@
 import type { TextClassificationInput, TextClassificationOutput } from "@huggingface/tasks";
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
 import { innerRequest } from "../../utils/request";
 
@@ -12,15 +12,10 @@ export async function textClassification(
 	args: TextClassificationArgs,
 	options?: Options
 ): Promise<TextClassificationOutput> {
+	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "text-classification");
 	const { data: res } = await innerRequest<TextClassificationOutput>(args, {
 		...options,
 		task: "text-classification",
 	});
-	const output = res?.[0];
-	const isValidOutput =
-		Array.isArray(output) && output.every((x) => typeof x?.label === "string" && typeof x.score === "number");
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<{label: string, score: number}>");
-	}
-	return output;
+	return providerHelper.getResponse(res);
 }

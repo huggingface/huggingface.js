@@ -1,5 +1,5 @@
 import type { ZeroShotImageClassificationInput, ZeroShotImageClassificationOutput } from "@huggingface/tasks";
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options, RequestArgs } from "../../types";
 import { base64FromBytes } from "../../utils/base64FromBytes";
 import { innerRequest } from "../../utils/request";
@@ -44,15 +44,11 @@ export async function zeroShotImageClassification(
 	args: ZeroShotImageClassificationArgs,
 	options?: Options
 ): Promise<ZeroShotImageClassificationOutput> {
+	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "zero-shot-image-classification");
 	const payload = await preparePayload(args);
 	const { data: res } = await innerRequest<ZeroShotImageClassificationOutput>(payload, {
 		...options,
 		task: "zero-shot-image-classification",
 	});
-	const isValidOutput =
-		Array.isArray(res) && res.every((x) => typeof x.label === "string" && typeof x.score === "number");
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<{label: string, score: number}>");
-	}
-	return res;
+	return providerHelper.getResponse(res);
 }
