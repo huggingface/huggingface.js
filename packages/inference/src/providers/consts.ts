@@ -26,6 +26,7 @@ export const HARDCODED_MODEL_ID_MAPPING: Record<InferenceProvider, Record<ModelI
 	nebius: {},
 	novita: {},
 	openai: {},
+	ovhcloud: {},
 	replicate: {},
 	sambanova: {},
 	together: {},
