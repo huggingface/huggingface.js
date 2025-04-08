@@ -131,11 +131,27 @@ export function parse(tokens: Token[]): Program {
 
 		if (is(TOKEN_TYPES.Equals)) {
 			++current;
-			const value = parseSetStatement();
+			const value = parseExpression();
 
-			return new SetStatement(left, value);
+			return new SetStatement(left, value, []);
+		} else {
+			// parsing multiline set here
+			const body: Statement[] = [];
+			expect(TOKEN_TYPES.CloseStatement, "Expected %} token");
+			while (
+				!(
+					tokens[current]?.type === TOKEN_TYPES.OpenStatement &&
+					tokens[current + 1]?.type === TOKEN_TYPES.EndSet
+				)
+			) {
+				const another = parseAny()
+				body.push(another);
+			}
+			expect(TOKEN_TYPES.OpenStatement, "Expected {% token");
+			expect(TOKEN_TYPES.EndSet, "Expected endset token");
+
+			return new SetStatement(left, null, body);
 		}
-		return left;
 	}
 
 	function parseIfStatement(): If {
