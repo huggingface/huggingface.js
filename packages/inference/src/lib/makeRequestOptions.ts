@@ -38,7 +38,7 @@ export async function makeRequestOptions(
 
 	if (args.endpointUrl) {
 		// No need to have maybeModel, or to load default model for a task
-		return makeRequestOptionsFromResolvedModel(args.endpointUrl, args, options);
+		return makeRequestOptionsFromResolvedModel(maybeModel ?? args.endpointUrl, args, options);
 	}
 
 	if (!maybeModel && !task) {
