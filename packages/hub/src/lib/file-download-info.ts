@@ -77,6 +77,18 @@ export async function fileDownloadInfo(
 	let size: number | undefined;
 	let xetInfo: XetFileInfo | undefined;
 
+	if (resp.headers.get("Content-Type")?.includes("application/vnd.xet-fileinfo+json")) {
+		const json: { casUrl: string; hash: string; refreshUrl: string; size: string; etag: string } = await resp.json();
+
+		xetInfo = {
+			hash: json.hash,
+			refreshUrl: new URL(json.refreshUrl, hubUrl),
+		};
+
+		etag = json.etag;
+		size = parseInt(json.size);
+	}
+
 	if (size === undefined || isNaN(size)) {
 		const contentRangeHeader = resp.headers.get("content-range");
 
@@ -90,18 +102,6 @@ export async function fileDownloadInfo(
 		if (isNaN(size)) {
 			throw new InvalidApiResponseFormatError("Invalid file size received");
 		}
-	}
-
-	if (resp.headers.get("Content-Type")?.includes("application/vnd.xet-fileinfo+json")) {
-		const json: { casUrl: string; hash: string; refreshUrl: string; size: string; etag: string } = await resp.json();
-
-		xetInfo = {
-			hash: json.hash,
-			refreshUrl: new URL(json.refreshUrl, hubUrl),
-		};
-
-		etag = json.etag;
-		size = parseInt(json.size);
 	}
 
 	etag ??= resp.headers.get("ETag") ?? undefined;
