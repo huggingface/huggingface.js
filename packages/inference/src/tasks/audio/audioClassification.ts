@@ -1,5 +1,5 @@
 import type { AudioClassificationInput, AudioClassificationOutput } from "@huggingface/tasks";
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
 import { innerRequest } from "../../utils/request";
 import type { LegacyAudioInput } from "./utils";
@@ -15,15 +15,12 @@ export async function audioClassification(
 	args: AudioClassificationArgs,
 	options?: Options
 ): Promise<AudioClassificationOutput> {
+	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "audio-classification");
 	const payload = preparePayload(args);
 	const { data: res } = await innerRequest<AudioClassificationOutput>(payload, {
 		...options,
 		task: "audio-classification",
 	});
-	const isValidOutput =
-		Array.isArray(res) && res.every((x) => typeof x.label === "string" && typeof x.score === "number");
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<{label: string, score: number}>");
-	}
-	return res;
+
+	return providerHelper.getResponse(res);
 }

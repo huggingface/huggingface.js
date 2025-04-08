@@ -1,5 +1,5 @@
 import type { FeatureExtractionInput } from "@huggingface/tasks";
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
 import { innerRequest } from "../../utils/request";
 
@@ -17,25 +17,10 @@ export async function featureExtraction(
 	args: FeatureExtractionArgs,
 	options?: Options
 ): Promise<FeatureExtractionOutput> {
+	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "feature-extraction");
 	const { data: res } = await innerRequest<FeatureExtractionOutput>(args, {
 		...options,
 		task: "feature-extraction",
 	});
-	let isValidOutput = true;
-
-	const isNumArrayRec = (arr: unknown[], maxDepth: number, curDepth = 0): boolean => {
-		if (curDepth > maxDepth) return false;
-		if (arr.every((x) => Array.isArray(x))) {
-			return arr.every((x) => isNumArrayRec(x as unknown[], maxDepth, curDepth + 1));
-		} else {
-			return arr.every((x) => typeof x === "number");
-		}
-	};
-
-	isValidOutput = Array.isArray(res) && isNumArrayRec(res, 3, 0);
-
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<number[][][] | number[][] | number[] | number>");
-	}
-	return res;
+	return providerHelper.getResponse(res);
 }

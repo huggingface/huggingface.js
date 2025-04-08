@@ -9,8 +9,6 @@ export async function* streamingRequest<T>(
 	options?: Options & {
 		/** In most cases (unless we pass a endpointUrl) we know the task */
 		task?: InferenceTask;
-		/** Is chat completion compatible */
-		chatCompletion?: boolean;
 	}
 ): AsyncGenerator<T> {
 	console.warn(

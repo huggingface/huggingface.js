@@ -1,4 +1,4 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
 import { innerRequest } from "../../utils/request";
 
@@ -25,13 +25,10 @@ export async function tabularClassification(
 	args: TabularClassificationArgs,
 	options?: Options
 ): Promise<TabularClassificationOutput> {
+	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "tabular-classification");
 	const { data: res } = await innerRequest<TabularClassificationOutput>(args, {
 		...options,
 		task: "tabular-classification",
 	});
-	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x === "number");
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected number[]");
-	}
-	return res;
+	return providerHelper.getResponse(res);
 }

@@ -10,8 +10,6 @@ export async function request<T>(
 	options?: Options & {
 		/** In most cases (unless we pass a endpointUrl) we know the task */
 		task?: InferenceTask;
-		/** Is chat completion compatible */
-		chatCompletion?: boolean;
 	}
 ): Promise<T> {
 	console.warn(

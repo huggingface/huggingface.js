@@ -1,5 +1,5 @@
 import type { ImageClassificationInput, ImageClassificationOutput } from "@huggingface/tasks";
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
 import { innerRequest } from "../../utils/request";
 import { preparePayload, type LegacyImageInput } from "./utils";
@@ -14,15 +14,11 @@ export async function imageClassification(
 	args: ImageClassificationArgs,
 	options?: Options
 ): Promise<ImageClassificationOutput> {
+	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "image-classification");
 	const payload = preparePayload(args);
 	const { data: res } = await innerRequest<ImageClassificationOutput>(payload, {
 		...options,
 		task: "image-classification",
 	});
-	const isValidOutput =
-		Array.isArray(res) && res.every((x) => typeof x.label === "string" && typeof x.score === "number");
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<{label: string, score: number}>");
-	}
-	return res;
+	return providerHelper.getResponse(res);
 }
