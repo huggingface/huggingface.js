@@ -61,7 +61,7 @@ Test the whole generation capabilities here: https://transformer.huggingface.co/
 
 		try {
 			const blob = await downloadFile({
-				repo: { type: "dataset", name: repoName },
+				repo: repoName,
 				path: ".gitattributes",
 				hubUrl: TEST_HUB_URL,
 				accessToken: TEST_ACCESS_TOKEN,
@@ -75,7 +75,7 @@ Test the whole generation capabilities here: https://transformer.huggingface.co/
 			await deleteRepo({
 				repo: repoName,
 				hubUrl: TEST_HUB_URL,
-				credentials: { accessToken: TEST_ACCESS_TOKEN },
+				accessToken: TEST_ACCESS_TOKEN,
 			});
 		}
 	});

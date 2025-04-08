@@ -2,6 +2,8 @@
  * WebBlob is a Blob implementation for web resources that supports range requests.
  */
 
+import { createApiError } from "../error";
+
 interface WebBlobCreateOptions {
 	/**
 	 * @default 1_000_000
@@ -119,13 +121,13 @@ export class WebBlob extends Blob {
 	private fetchRange(): Promise<Response> {
 		const fetch = this.fetch; // to avoid this.fetch() which is bound to the instance instead of globalThis
 		if (this.full) {
-			return fetch(this.url);
+			return fetch(this.url).then((resp) => (resp.ok ? resp : createApiError(resp)));
 		}
 		return fetch(this.url, {
 			headers: {
 				Range: `bytes=${this.start}-${this.end - 1}`,
 				...(this.accessToken && { Authorization: `Bearer ${this.accessToken}` }),
 			},
-		});
+		}).then((resp) => (resp.ok ? resp : createApiError(resp)));
 	}
 }
