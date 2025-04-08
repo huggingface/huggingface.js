@@ -14,12 +14,20 @@ interface WebBlobCreateOptions {
 	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 	 */
 	fetch?: typeof fetch;
+	accessToken: string | undefined;
 }
 
 export class WebBlob extends Blob {
 	static async create(url: URL, opts?: WebBlobCreateOptions): Promise<Blob> {
 		const customFetch = opts?.fetch ?? fetch;
-		const response = await customFetch(url, { method: "HEAD" });
+		const response = await customFetch(url, {
+			method: "HEAD",
+			...(opts?.accessToken && {
+				headers: {
+					Authorization: `Bearer ${opts.accessToken}`,
+				},
+			}),
+		});
 
 		const size = Number(response.headers.get("content-length"));
 		const contentType = response.headers.get("content-type") || "";
@@ -29,7 +37,7 @@ export class WebBlob extends Blob {
 			return await (await customFetch(url)).blob();
 		}
 
-		return new WebBlob(url, 0, size, contentType, true, customFetch);
+		return new WebBlob(url, 0, size, contentType, true, customFetch, opts?.accessToken);
 	}
 
 	private url: URL;
@@ -38,8 +46,17 @@ export class WebBlob extends Blob {
 	private contentType: string;
 	private full: boolean;
 	private fetch: typeof fetch;
+	private accessToken: string | undefined;
 
-	constructor(url: URL, start: number, end: number, contentType: string, full: boolean, customFetch: typeof fetch) {
+	constructor(
+		url: URL,
+		start: number,
+		end: number,
+		contentType: string,
+		full: boolean,
+		customFetch: typeof fetch,
+		accessToken: string | undefined
+	) {
 		super([]);
 
 		this.url = url;
@@ -48,6 +65,7 @@ export class WebBlob extends Blob {
 		this.contentType = contentType;
 		this.full = full;
 		this.fetch = customFetch;
+		this.accessToken = accessToken;
 	}
 
 	override get size(): number {
@@ -69,7 +87,8 @@ export class WebBlob extends Blob {
 			Math.min(this.start + end, this.end),
 			this.contentType,
 			start === 0 && end === this.size ? this.full : false,
-			this.fetch
+			this.fetch,
+			this.accessToken
 		);
 
 		return slice;
@@ -105,6 +124,7 @@ export class WebBlob extends Blob {
 		return fetch(this.url, {
 			headers: {
 				Range: `bytes=${this.start}-${this.end - 1}`,
+				...(this.accessToken && { Authorization: `Bearer ${this.accessToken}` }),
 			},
 		});
 	}

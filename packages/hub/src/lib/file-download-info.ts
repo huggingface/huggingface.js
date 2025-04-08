@@ -4,15 +4,18 @@ import type { CredentialsParams, RepoDesignation } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { toRepoId } from "../utils/toRepoId";
 
-interface XetInfo {
+export interface XetFileInfo {
 	hash: string;
 	refreshUrl: URL;
+	/**
+	 * Later, there will also be a `reconstructionUrl` that can be directly used instead of with the hash.
+	 */
 }
 
 export interface FileDownloadInfoOutput {
 	size: number;
 	etag: string;
-	xet?: XetInfo;
+	xet?: XetFileInfo;
 	// URL to fetch (with the access token if private file)
 	url: string;
 }
@@ -72,7 +75,23 @@ export async function fileDownloadInfo(
 
 	let etag: string | undefined;
 	let size: number | undefined;
-	let xetInfo: XetInfo | undefined;
+	let xetInfo: XetFileInfo | undefined;
+
+	if (size === undefined || isNaN(size)) {
+		const contentRangeHeader = resp.headers.get("content-range");
+
+		if (!contentRangeHeader) {
+			throw new InvalidApiResponseFormatError("Expected size information");
+		}
+
+		const [, parsedSize] = contentRangeHeader.split("/");
+		size = parseInt(parsedSize);
+
+		if (isNaN(size)) {
+			throw new InvalidApiResponseFormatError("Invalid file size received");
+		}
+	}
+
 	if (resp.headers.get("Content-Type")?.includes("application/vnd.xet-fileinfo+json")) {
 		const json: { casUrl: string; hash: string; refreshUrl: string; size: string; etag: string } = await resp.json();
 
@@ -89,21 +108,6 @@ export async function fileDownloadInfo(
 
 	if (!etag) {
 		throw new InvalidApiResponseFormatError("Expected ETag");
-	}
-
-	if (size === undefined || isNaN(size)) {
-		const contentRangeHeader = resp.headers.get("content-range");
-
-		if (!contentRangeHeader) {
-			throw new InvalidApiResponseFormatError("Expected size information");
-		}
-
-		const [, parsedSize] = contentRangeHeader.split("/");
-		size = parseInt(parsedSize);
-
-		if (isNaN(size)) {
-			throw new InvalidApiResponseFormatError("Invalid file size received");
-		}
 	}
 
 	return {
