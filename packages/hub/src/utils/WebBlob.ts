@@ -121,7 +121,13 @@ export class WebBlob extends Blob {
 	private fetchRange(): Promise<Response> {
 		const fetch = this.fetch; // to avoid this.fetch() which is bound to the instance instead of globalThis
 		if (this.full) {
-			return fetch(this.url).then((resp) => (resp.ok ? resp : createApiError(resp)));
+			return fetch(this.url, {
+				...(this.accessToken && {
+					headers: {
+						Authorization: `Bearer ${this.accessToken}`,
+					},
+				}),
+			}).then((resp) => (resp.ok ? resp : createApiError(resp)));
 		}
 		return fetch(this.url, {
 			headers: {
