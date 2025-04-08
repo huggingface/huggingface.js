@@ -35,6 +35,12 @@ export async function makeRequestOptions(
 	if (maybeModel && isUrl(maybeModel)) {
 		throw new Error(`Model URLs are no longer supported. Use endpointUrl instead.`);
 	}
+
+	if (args.endpointUrl) {
+		// No need to have maybeModel, or to load default model for a task
+		return makeRequestOptionsFromResolvedModel(args.endpointUrl, args, options);
+	}
+
 	if (!maybeModel && !task) {
 		throw new Error("No model provided, and no task has been specified.");
 	}
