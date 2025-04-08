@@ -353,6 +353,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"sbs"`,
 	},
+	"geometry-crafter": {
+		prettyLabel: "GeometryCrafter",
+		repoName: "GeometryCrafter",
+		repoUrl: "https://github.com/TencentARC/GeometryCrafter",
+		countDownloads: `path:"point_map_vae/diffusion_pytorch_model.safetensors"`,
+	},
 	gliner: {
 		prettyLabel: "GLiNER",
 		repoName: "GLiNER",
@@ -412,6 +418,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "IMS-Toucan",
 		repoUrl: "https://github.com/DigitalPhonetics/IMS-Toucan",
 		countDownloads: `path:"embedding_gan.pt" OR path:"Vocoder.pt" OR path:"ToucanTTS.pt"`,
+	},
+	"infinite-you": {
+		prettyLabel: "InfiniteYou",
+		repoName: "InfiniteYou",
+		repoUrl: "https://github.com/bytedance/InfiniteYou",
+		filter: false,
+		countDownloads: `path:"infu_flux_v1.0/sim_stage1/image_proj_model.bin" OR path:"infu_flux_v1.0/aes_stage2/image_proj_model.bin"`,
 	},
 	keras: {
 		prettyLabel: "Keras",
