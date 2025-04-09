@@ -38,17 +38,6 @@ export class NscaleCloudConversationalTask extends BaseConversationalTask {
 	}
 }
 
-export class NscaleCloudTextGenerationTask extends BaseTextGenerationTask {
-	constructor() {
-		super("nscale-cloud", NSCALE_API_BASE_URL);
-	}
-
-	override makeRoute(): string {
-		return "v1/chat/completions";
-	}
-	
-}
-
 export class NscaleCloudTextToImageTask extends TaskProviderHelper implements TextToImageTaskHelper {
 	constructor() {
 		super("nscale-cloud", NSCALE_API_BASE_URL);
