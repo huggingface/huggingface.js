@@ -5,8 +5,6 @@ const client = new OpenAI({
 	apiKey: "api_token",
 });
 
-let out = "";
-
 const stream = await client.chat.completions.create({
     model: "<fireworks-ai alias for meta-llama/Llama-3.2-11B-Vision-Instruct>",
     messages: [

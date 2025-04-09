@@ -5,8 +5,6 @@ const client = new OpenAI({
 	apiKey: "api_token",
 });
 
-let out = "";
-
 const stream = await client.chat.completions.create({
     model: "meta-llama/Llama-3.1-8B-Instruct",
     messages: [
