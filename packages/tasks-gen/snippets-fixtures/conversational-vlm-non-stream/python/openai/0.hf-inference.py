@@ -24,7 +24,7 @@ completion = client.chat.completions.create(
             ]
         }
     ],
-    max_tokens=500,
+    max_tokens=512,
 )
 
 print(completion.choices[0].message)
