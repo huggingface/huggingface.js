@@ -1,7 +1,7 @@
 import type { ImageSegmentationInput, ImageSegmentationOutput } from "@huggingface/tasks";
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
+import { innerRequest } from "../../utils/request";
 import { preparePayload, type LegacyImageInput } from "./utils";
 
 export type ImageSegmentationArgs = BaseArgs & (ImageSegmentationInput | LegacyImageInput);
@@ -14,16 +14,11 @@ export async function imageSegmentation(
 	args: ImageSegmentationArgs,
 	options?: Options
 ): Promise<ImageSegmentationOutput> {
+	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "image-segmentation");
 	const payload = preparePayload(args);
-	const res = await request<ImageSegmentationOutput>(payload, {
+	const { data: res } = await innerRequest<ImageSegmentationOutput>(payload, {
 		...options,
 		task: "image-segmentation",
 	});
-	const isValidOutput =
-		Array.isArray(res) &&
-		res.every((x) => typeof x.label === "string" && typeof x.mask === "string" && typeof x.score === "number");
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<{label: string, mask: string, score: number}>");
-	}
-	return res;
+	return providerHelper.getResponse(res);
 }

@@ -10,7 +10,7 @@
 </p>
 
 ```ts
-// Programatically interact with the Hub
+// Programmatically interact with the Hub
 
 await createRepo({
   repo: { type: "model", name: "my-user/nlp-model" },
@@ -31,6 +31,7 @@ await uploadFile({
 
 await inference.chatCompletion({
   model: "meta-llama/Llama-3.1-8B-Instruct",
+  provider: "sambanova", // or together, fal-ai, replicate, cohere …
   messages: [
     {
       role: "user",
@@ -39,11 +40,11 @@ await inference.chatCompletion({
   ],
   max_tokens: 512,
   temperature: 0.5,
-  provider: "sambanova", // or together, fal-ai, replicate, cohere …
 });
 
 await inference.textToImage({
   model: "black-forest-labs/FLUX.1-dev",
+  provider: "replicate",
   inputs: "a picture of a green bird",
 });
 
@@ -54,7 +55,7 @@ await inference.textToImage({
 
 This is a collection of JS libraries to interact with the Hugging Face API, with TS types included.
 
-- [@huggingface/inference](packages/inference/README.md): Use HF Inference API (serverless), Inference Endpoints (dedicated) and third-party Inference Providers to make calls to 100,000+ Machine Learning models
+- [@huggingface/inference](packages/inference/README.md): Use HF Inference API (serverless), Inference Endpoints (dedicated) and all supported Inference Providers to make calls to 100,000+ Machine Learning models
 - [@huggingface/hub](packages/hub/README.md): Interact with huggingface.co to create or delete repos and commit / download files
 - [@huggingface/agents](packages/agents/README.md): Interact with HF models through a natural language interface
 - [@huggingface/gguf](packages/gguf/README.md): A GGUF parser that works on remotely hosted files.
@@ -84,7 +85,7 @@ npm install @huggingface/agents
 Then import the libraries in your code:
 
 ```ts
-import { HfInference } from "@huggingface/inference";
+import { InferenceClient } from "@huggingface/inference";
 import { HfAgent } from "@huggingface/agents";
 import { createRepo, commit, deleteRepo, listFiles } from "@huggingface/hub";
 import type { RepoId } from "@huggingface/hub";
@@ -96,8 +97,8 @@ You can run our packages with vanilla JS, without any bundler, by using a CDN or
 
 ```html
 <script type="module">
-    import { HfInference } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@3.5.1/+esm';
-    import { createRepo, commit, deleteRepo, listFiles } from "https://cdn.jsdelivr.net/npm/@huggingface/hub@1.0.2/+esm";
+    import { InferenceClient } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@3.7.0/+esm';
+    import { createRepo, commit, deleteRepo, listFiles } from "https://cdn.jsdelivr.net/npm/@huggingface/hub@1.1.2/+esm";
 </script>
 ```
 
@@ -105,12 +106,12 @@ You can run our packages with vanilla JS, without any bundler, by using a CDN or
 
 ```ts
 // esm.sh
-import { HfInference } from "https://esm.sh/@huggingface/inference"
+import { InferenceClient } from "https://esm.sh/@huggingface/inference"
 import { HfAgent } from "https://esm.sh/@huggingface/agents";
 
 import { createRepo, commit, deleteRepo, listFiles } from "https://esm.sh/@huggingface/hub"
 // or npm:
-import { HfInference } from "npm:@huggingface/inference"
+import { InferenceClient } from "npm:@huggingface/inference"
 import { HfAgent } from "npm:@huggingface/agents";
 
 import { createRepo, commit, deleteRepo, listFiles } from "npm:@huggingface/hub"
@@ -123,11 +124,11 @@ Get your HF access token in your [account settings](https://huggingface.co/setti
 ### @huggingface/inference examples
 
 ```ts
-import { HfInference } from "@huggingface/inference";
+import { InferenceClient } from "@huggingface/inference";
 
 const HF_TOKEN = "hf_...";
 
-const inference = new HfInference(HF_TOKEN);
+const inference = new InferenceClient(HF_TOKEN);
 
 // Chat completion API
 const out = await inference.chatCompletion({
@@ -179,7 +180,7 @@ await inference.imageToText({
 
 // Using your own dedicated inference endpoint: https://hf.co/docs/inference-endpoints/
 const gpt2 = inference.endpoint('https://xyz.eu-west-1.aws.endpoints.huggingface.cloud/gpt2');
-const { generated_text } = await gpt2.textGeneration({inputs: 'The answer to the universe is'});
+const { generated_text } = await gpt2.textGeneration({ inputs: 'The answer to the universe is' });
 
 // Chat Completion
 const llamaEndpoint = inference.endpoint(

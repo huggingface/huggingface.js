@@ -1,0 +1,6 @@
+completion = client.chat.completions.create(
+    model="{{ model.id }}",
+{{ inputs.asPythonString }}
+)
+
+print(completion.choices[0].message) 

@@ -7,6 +7,7 @@ import type { Stats } from "node:fs";
 import { getHFHubCachePath, getRepoFolderName } from "./cache-management";
 import { toRepoId } from "../utils/toRepoId";
 import { downloadFileToCacheDir } from "./download-file-to-cache-dir";
+import { createSymlink } from "../utils/symlink";
 
 vi.mock("node:fs/promises", () => ({
 	writeFile: vi.fn(),
@@ -19,6 +20,10 @@ vi.mock("node:fs/promises", () => ({
 
 vi.mock("./paths-info", () => ({
 	pathsInfo: vi.fn(),
+}));
+
+vi.mock("../utils/symlink", () => ({
+	createSymlink: vi.fn(),
 }));
 
 const DUMMY_REPO: RepoId = {
@@ -196,7 +201,7 @@ describe("downloadFileToCacheDir", () => {
 		expect(vi.mocked(lstat).mock.calls[0][0]).toBe(expectedBlob);
 
 		// symlink should have been created
-		expect(symlink).toHaveBeenCalledOnce();
+		expect(createSymlink).toHaveBeenCalledOnce();
 		// no download done
 		expect(fetchMock).not.toHaveBeenCalled();
 
@@ -283,6 +288,6 @@ describe("downloadFileToCacheDir", () => {
 		// 2. should rename the incomplete to the blob expected name
 		expect(rename).toHaveBeenCalledWith(incomplete, expectedBlob);
 		// 3. should create symlink pointing to blob
-		expect(symlink).toHaveBeenCalledWith(expectedBlob, expectPointer);
+		expect(createSymlink).toHaveBeenCalledWith({ sourcePath: expectedBlob, finalPath: expectPointer });
 	});
 });

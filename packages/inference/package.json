@@ -1,10 +1,10 @@
 {
 	"name": "@huggingface/inference",
-	"version": "3.5.1",
+	"version": "3.7.0",
 	"packageManager": "pnpm@8.10.5",
 	"license": "MIT",
-	"author": "Tim Mikeladze <tim.mikeladze@gmail.com>",
-	"description": "Typescript wrapper for the Hugging Face Inference Endpoints & Inference API",
+	"author": "Hugging Face and Tim Mikeladze <tim.mikeladze@gmail.com>",
+	"description": "Typescript client for the Hugging Face Inference Providers and Inference Endpoints",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/huggingface/huggingface.js.git"
@@ -26,7 +26,8 @@
 	},
 	"files": [
 		"dist",
-		"src"
+		"src",
+		"!src/snippets/templates/**/*.jinja"
 	],
 	"source": "src/index.ts",
 	"types": "./dist/src/index.d.ts",
@@ -39,7 +40,7 @@
 	},
 	"type": "module",
 	"scripts": {
-		"build": "tsup src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
+		"build": "pnpm run export-templates && tsup src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
 		"dts": "tsx scripts/generate-dts.ts && tsc --noEmit dist/index.d.ts",
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
@@ -49,10 +50,13 @@
 		"prepublishOnly": "pnpm run build",
 		"test": "vitest run --config vitest.config.mts",
 		"test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest.config.mts",
-		"check": "tsc"
+		"check": "tsc",
+		"dev": "pnpm run export-templates && tsup src/index.ts --format cjs,esm --watch",
+		"export-templates": "tsx scripts/export-templates.ts"
 	},
 	"dependencies": {
-		"@huggingface/tasks": "workspace:^"
+		"@huggingface/tasks": "workspace:^",
+		"@huggingface/jinja": "workspace:^"
 	},
 	"devDependencies": {
 		"@types/node": "18.13.0"

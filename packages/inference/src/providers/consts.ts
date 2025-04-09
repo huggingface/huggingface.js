@@ -25,7 +25,7 @@ export const HARDCODED_MODEL_ID_MAPPING: Record<InferenceProvider, Record<ModelI
 	hyperbolic: {},
 	nebius: {},
 	novita: {},
-	nscale: {},
+	"nscale-cloud": {"meta-llama/Llama-3.1-8B-Instruct": "meta-llama/Llama-3.1-8B-Instruct", "black-forest-labs/FLUX.1-schnell": "black-forest-labs/FLUX.1-schnell"},
 	openai: {},
 	replicate: {},
 	sambanova: {},

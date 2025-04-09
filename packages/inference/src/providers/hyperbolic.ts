@@ -14,31 +14,113 @@
  *
  * Thanks!
  */
-import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../types";
+import type { ChatCompletionOutput, TextGenerationOutput } from "@huggingface/tasks";
+import { InferenceOutputError } from "../lib/InferenceOutputError";
+import type { BodyParams, UrlParams } from "../types";
+import { omit } from "../utils/omit";
+import {
+	BaseConversationalTask,
+	BaseTextGenerationTask,
+	TaskProviderHelper,
+	type TextToImageTaskHelper,
+} from "./providerHelper";
 
 const HYPERBOLIC_API_BASE_URL = "https://api.hyperbolic.xyz";
 
-const makeBody = (params: BodyParams): Record<string, unknown> => {
-	return {
-		...params.args,
-		...(params.task === "text-to-image" ? { model_name: params.model } : { model: params.model }),
-	};
-};
+export interface HyperbolicTextCompletionOutput extends Omit<ChatCompletionOutput, "choices"> {
+	choices: Array<{
+		message: { content: string };
+	}>;
+}
 
-const makeHeaders = (params: HeaderParams): Record<string, string> => {
-	return { Authorization: `Bearer ${params.accessToken}` };
-};
+interface HyperbolicTextToImageOutput {
+	images: Array<{ image: string }>;
+}
 
-const makeUrl = (params: UrlParams): string => {
-	if (params.task === "text-to-image") {
-		return `${params.baseUrl}/v1/images/generations`;
+export class HyperbolicConversationalTask extends BaseConversationalTask {
+	constructor() {
+		super("hyperbolic", HYPERBOLIC_API_BASE_URL);
 	}
-	return `${params.baseUrl}/v1/chat/completions`;
-};
+}
 
-export const HYPERBOLIC_CONFIG: ProviderConfig = {
-	baseUrl: HYPERBOLIC_API_BASE_URL,
-	makeBody,
-	makeHeaders,
-	makeUrl,
-};
+export class HyperbolicTextGenerationTask extends BaseTextGenerationTask {
+	constructor() {
+		super("hyperbolic", HYPERBOLIC_API_BASE_URL);
+	}
+
+	override makeRoute(): string {
+		return "v1/chat/completions";
+	}
+
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		return {
+			messages: [{ content: params.args.inputs, role: "user" }],
+			...(params.args.parameters
+				? {
+						max_tokens: (params.args.parameters as Record<string, unknown>).max_new_tokens,
+						...omit(params.args.parameters as Record<string, unknown>, "max_new_tokens"),
+				  }
+				: undefined),
+			...omit(params.args, ["inputs", "parameters"]),
+			model: params.model,
+		};
+	}
+
+	override async getResponse(response: HyperbolicTextCompletionOutput): Promise<TextGenerationOutput> {
+		if (
+			typeof response === "object" &&
+			"choices" in response &&
+			Array.isArray(response?.choices) &&
+			typeof response?.model === "string"
+		) {
+			const completion = response.choices[0];
+			return {
+				generated_text: completion.message.content,
+			};
+		}
+
+		throw new InferenceOutputError("Expected Hyperbolic text generation response format");
+	}
+}
+
+export class HyperbolicTextToImageTask extends TaskProviderHelper implements TextToImageTaskHelper {
+	constructor() {
+		super("hyperbolic", HYPERBOLIC_API_BASE_URL);
+	}
+
+	makeRoute(params: UrlParams): string {
+		void params;
+		return `/v1/images/generations`;
+	}
+
+	preparePayload(params: BodyParams): Record<string, unknown> {
+		return {
+			...omit(params.args, ["inputs", "parameters"]),
+			...(params.args.parameters as Record<string, unknown>),
+			prompt: params.args.inputs,
+			model_name: params.model,
+		};
+	}
+
+	async getResponse(
+		response: HyperbolicTextToImageOutput,
+		url?: string,
+		headers?: HeadersInit,
+		outputType?: "url" | "blob"
+	): Promise<string | Blob> {
+		if (
+			typeof response === "object" &&
+			"images" in response &&
+			Array.isArray(response.images) &&
+			response.images[0] &&
+			typeof response.images[0].image === "string"
+		) {
+			if (outputType === "url") {
+				return `data:image/jpeg;base64,${response.images[0].image}`;
+			}
+			return fetch(`data:image/jpeg;base64,${response.images[0].image}`).then((res) => res.blob());
+		}
+
+		throw new InferenceOutputError("Expected Hyperbolic text-to-image response format");
+	}
+}

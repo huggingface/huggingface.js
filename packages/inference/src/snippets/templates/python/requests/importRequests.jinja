@@ -1,0 +1,10 @@
+{% if importBase64 %}
+import base64
+{% endif %}
+{% if importJson %}
+import json
+{% endif %}
+import requests
+
+API_URL = "{{ fullUrl }}"
+headers = {"Authorization": "{{ authorizationHeader }}"}
