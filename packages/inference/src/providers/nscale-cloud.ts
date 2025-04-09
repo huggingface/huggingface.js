@@ -1,7 +1,7 @@
 /**
  * See the registered mapping of HF model ID => Nscale model ID here:
  *
- * https://huggingface.co/api/partners/nscale/models
+ * https://huggingface.co/api/partners/nscale-cloud/models
  *
  * This is a publicly available mapping.
  *
