@@ -1395,9 +1395,9 @@ describe.concurrent("InferenceClient", () => {
 	describe.concurrent(
 		"Nscale",
 		() => {
-			const client = new InferenceClient(env.HF_NSCALE_CLOUD_KEY ?? "dummy");
+			const client = new InferenceClient(env.HF_NSCALE_KEY ?? "dummy");
 
-			HARDCODED_MODEL_ID_MAPPING["nscale-cloud"] = {
+			HARDCODED_MODEL_ID_MAPPING["nscale"] = {
 				"meta-llama/Llama-3.1-8B-Instruct": "meta-llama/Llama-3.1-8B-Instruct",
 				"black-forest-labs/FLUX.1-schnell": "black-forest-labs/FLUX.1-schnell",
 			};
@@ -1405,7 +1405,7 @@ describe.concurrent("InferenceClient", () => {
 			it("chatCompletion", async () => {
 				const res = await client.chatCompletion({
 					model: "meta-llama/Llama-3.1-8B-Instruct",
-					provider: "nscale-cloud",
+					provider: "nscale",
 					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
 				});
 				if (res.choices && res.choices.length > 0) {
@@ -1416,7 +1416,7 @@ describe.concurrent("InferenceClient", () => {
 			it("chatCompletion stream", async () => {
 				const stream = client.chatCompletionStream({
 					model: "meta-llama/Llama-3.1-8B-Instruct",
-					provider: "nscale-cloud",
+					provider: "nscale",
 					messages: [{ role: "user", content: "Say 'this is a test'" }],
 					stream: true,
 				}) as AsyncGenerator<ChatCompletionStreamOutput>;
@@ -1435,7 +1435,7 @@ describe.concurrent("InferenceClient", () => {
 			it("textToImage", async () => {
 				const res = await client.textToImage({
 					model: "black-forest-labs/FLUX.1-schnell",
-					provider: "nscale-cloud",
+					provider: "nscale",
 					inputs: "An astronaut riding a horse",
 				});
 				expect(res).toBeInstanceOf(Blob);

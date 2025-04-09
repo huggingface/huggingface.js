@@ -25,7 +25,7 @@ export const HARDCODED_MODEL_ID_MAPPING: Record<InferenceProvider, Record<ModelI
 	hyperbolic: {},
 	nebius: {},
 	novita: {},
-	"nscale-cloud": {},
+	nscale: {},
 	openai: {},
 	replicate: {},
 	sambanova: {},

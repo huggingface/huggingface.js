@@ -19,7 +19,6 @@ import type { BodyParams, UrlParams } from "../types";
 import { omit } from "../utils/omit";
 import {
 	BaseConversationalTask,
-	BaseTextGenerationTask,
 	TaskProviderHelper,
 	type TextToImageTaskHelper,
 } from "./providerHelper";
@@ -32,15 +31,15 @@ interface NscaleCloudBase64ImageGeneration {
 	}>;
 }
 
-export class NscaleCloudConversationalTask extends BaseConversationalTask {
+export class NscaleConversationalTask extends BaseConversationalTask {
 	constructor() {
-		super("nscale-cloud", NSCALE_API_BASE_URL);
+		super("nscale", NSCALE_API_BASE_URL);
 	}
 }
 
-export class NscaleCloudTextToImageTask extends TaskProviderHelper implements TextToImageTaskHelper {
+export class NscaleTextToImageTask extends TaskProviderHelper implements TextToImageTaskHelper {
 	constructor() {
-		super("nscale-cloud", NSCALE_API_BASE_URL);
+		super("nscale", NSCALE_API_BASE_URL);
 	}
 
 	preparePayload(params: BodyParams): Record<string, unknown> {
