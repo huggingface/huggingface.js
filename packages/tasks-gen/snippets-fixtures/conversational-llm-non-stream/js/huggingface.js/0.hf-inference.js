@@ -11,7 +11,7 @@ const chatCompletion = await client.chatCompletion({
             content: "What is the capital of France?",
         },
     ],
-    max_tokens: 500,
+    max_tokens: 512,
 });
 
 console.log(chatCompletion.choices[0].message);

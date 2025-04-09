@@ -19,7 +19,7 @@ curl https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.2-11B-
                 ]
             }
         ],
-        "max_tokens": 500,
+        "max_tokens": 512,
         "model": "meta-llama/Llama-3.2-11B-Vision-Instruct",
         "stream": true
     }'

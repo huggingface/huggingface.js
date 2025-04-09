@@ -13,7 +13,7 @@ stream = client.chat.completions.create(
             "content": "What is the capital of France?"
         }
     ],
-    max_tokens=500,
+    max_tokens=512,
     stream=True,
 )
 
