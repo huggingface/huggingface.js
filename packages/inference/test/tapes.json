@@ -7155,5 +7155,79 @@
         "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
+  },
+  "02f73b287b8500fe0103b36a7eaac523a994d628f1077e7e25595d570ace13e7": {
+    "url": "https://inference.api.nscale.com/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Say 'this is a test'\"}],\"stream\":true,\"model\":\"meta-llama/Llama-3.1-8B-Instruct\"}"
+    },
+    "response": {
+      "body": "data: {\"choices\":[{\"delta\":{\"content\":\"\",\"role\":\"assistant\"},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1744199718,\"id\":\"chatcmpl-147e143e-28d0-43de-96b4-c005351d6ada\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":null}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\"This\",\"role\":null},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1744199718,\"id\":\"chatcmpl-147e143e-28d0-43de-96b4-c005351d6ada\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":null}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\" is\",\"role\":null},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1744199718,\"id\":\"chatcmpl-147e143e-28d0-43de-96b4-c005351d6ada\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":null}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\" a\",\"role\":null},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1744199718,\"id\":\"chatcmpl-147e143e-28d0-43de-96b4-c005351d6ada\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":null}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\" test\",\"role\":null},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1744199718,\"id\":\"chatcmpl-147e143e-28d0-43de-96b4-c005351d6ada\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":null}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\".\",\"role\":null},\"finish_reason\":null,\"index\":0,\"logprobs\":null}],\"created\":1744199718,\"id\":\"chatcmpl-147e143e-28d0-43de-96b4-c005351d6ada\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":null}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\"\",\"role\":null},\"finish_reason\":\"stop\",\"index\":0,\"logprobs\":null}],\"created\":1744199718,\"id\":\"chatcmpl-147e143e-28d0-43de-96b4-c005351d6ada\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":null}\n\ndata: {\"choices\":[],\"created\":1744199718,\"id\":\"chatcmpl-147e143e-28d0-43de-96b4-c005351d6ada\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion.chunk\",\"usage\":{\"completion_tokens\":6,\"prompt_tokens\":42,\"total_tokens\":48}}\n\n",
+      "status": 201,
+      "statusText": "Created",
+      "headers": {
+        "cache-control": "no-cache",
+        "connection": "keep-alive",
+        "content-type": "text/event-stream",
+        "strict-transport-security": "max-age=31536000; includeSubDomains",
+        "transfer-encoding": "chunked"
+      }
+    }
+  },
+  "0fb086d4e10baa1a1faa65605858c8c3dc83a43e986a2f7f6c0846ac13c43991": {
+    "url": "https://inference.api.nscale.com/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Complete this sentence with words, one plus one is equal \"}],\"model\":\"meta-llama/Llama-3.1-8B-Instruct\"}"
+    },
+    "response": {
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"logprobs\":null,\"message\":{\"content\":\"...two. One plus one is equal to two.\",\"role\":\"assistant\"},\"stop_reason\":null}],\"created\":1744199718,\"id\":\"chatcmpl-cf0fc8ff-6e27-4c4c-8daa-f3ea8b8c0558\",\"model\":\"meta-llama/Llama-3.1-8B-Instruct\",\"object\":\"chat.completion\",\"prompt_logprobs\":null,\"usage\":{\"completion_tokens\":12,\"prompt_tokens\":46,\"total_tokens\":58}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "application/json; charset=utf-8",
+        "strict-transport-security": "max-age=31536000; includeSubDomains"
+      }
+    }
+  },
+  "ae0d3a9ca0e29820cd41575cb77fdabb1aa017ca5b9c6ae2febcafb876de1171": {
+    "url": "https://inference.api.nscale.com/v1/images/generations",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"response_format\":\"b64_json\",\"prompt\":\"An astronaut riding a horse\",\"model\":\"black-forest-labs/FLUX.1-schnell\"}"
+    },
+    "response": {
+      "body": "{\"created\":1744199720,\"data\":[{\"b64_json\":\"iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAIAAAB7GkOtAAAG/XRFWHRwcm9tcHQAeyI1IjogeyJpbnB1dHMiOiB7IndpZHRoIjogNTEyLCAiaGVpZ2h0IjogNTEyLCAiYmF0Y2hfc2l6ZSI6IDF9LCAiY2xhc3NfdHlwZSI6ICJFbXB0eUxhdGVudEltYWdlIiwgIl9tZXRhIjogeyJ0aXRsZSI6ICJFbXB0eSBMYXRlbnQgSW1hZ2UifX0sICI2IjogeyJpbnB1dHMiOiB7InRleHQiOiAicGhvdG9yZWFsaXN0aWMsIHJlYWxpc20sIG5hdHVyYWwgcGljdHVyZSwgQW4gYXN0cm9uYXV0IHJpZGluZyBhIGhvcnNlIiwgImNsaXAiOiBbIjExIiwgMF19LCAiY2xhc3NfdHlwZSI6ICJDTElQVGV4dEVuY29kZSIsICJfbWV0YSI6IHsidGl0bGUiOiAiQ0xJUCBUZXh0IEVuY29kZSAoUHJvbXB0KSJ9fSwgIjgiOiB7ImlucHV0cyI6IHsic2FtcGxlcyI6IFsiMTMiLCAwXSwgInZhZSI6IFsiMTAiLCAwXX0sICJjbGFzc190eXBlIjogIlZBRURlY29kZSIsICJfbWV0YSI6IHsidGl0bGUiOiAiVkFFIERlY29kZSJ9fSwgIjkiOiB7ImlucHV0cyI6IHsiZmlsZW5hbWVfcHJlZml4IjogIkNvbWZ5VUkiLCAiaW1hZ2VzIjogWyI4IiwgMF19LCAiY2xhc3NfdHlwZSI6ICJTYXZlSW1hZ2UiLCAiX21ldGEiOiB7InRpdGxlIjogIlNhdmUgSW1hZ2UifX0sICIxMCI6IHsiaW5wdXRzIjogeyJ2YWVfbmFtZSI6ICJhZS5zYWZldGVuc29ycyJ9LCAiY2xhc3NfdHlwZSI6ICJWQUVMb2FkZXIiLCAiX21ldGEiOiB7InRpdGxlIjogIkxvYWQgVkFFIn19LCAi\"}]}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "application/json; charset=utf-8",
+        "strict-transport-security": "max-age=31536000; includeSubDomains"
+      }
+    }
+  },
+  "517465310e43388100ec05182659dd72409b2bc64a58eee092a4c7a402d220a2": {
+    "url": "data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAIAAAB7GkOtAAAG/XRFWHRwcm9tcHQAeyI1IjogeyJpbnB1dHMiOiB7IndpZHRoIjogNTEyLCAiaGVpZ2h0IjogNTEyLCAiYmF0Y2hfc2l6ZSI6IDF9LCAiY2xhc3NfdHlwZSI6ICJFbXB0eUxhdGVudEltYWdlIiwgIl9tZXRhIjogeyJ0aXRsZSI6ICJFbXB0eSBMYXRlbnQgSW1hZ2UifX0sICI2IjogeyJpbnB1dHMiOiB7InRleHQiOiAicGhvdG9yZWFsaXN0aWMsIHJlYWxpc20sIG5hdHVyYWwgcGljdHVyZSwgQW4gYXN0cm9uYXV0IHJpZGluZyBhIGhvcnNlIiwgImNsaXAiOiBbIjExIiwgMF19LCAiY2xhc3NfdHlwZSI6ICJDTElQVGV4dEVuY29kZSIsICJfbWV0YSI6IHsidGl0bGUiOiAiQ0xJUCBUZXh0IEVuY29kZSAoUHJvbXB0KSJ9fSwgIjgiOiB7ImlucHV0cyI6IHsic2FtcGxlcyI6IFsiMTMiLCAwXSwgInZhZSI6IFsiMTAiLCAwXX0sICJjbGFzc190eXBlIjogIlZBRURlY29kZSIsICJfbWV0YSI6IHsidGl0bGUiOiAiVkFFIERlY29kZSJ9fSwgIjkiOiB7ImlucHV0cyI6IHsiZmlsZW5hbWVfcHJlZml4IjogIkNvbWZ5VUkiLCAiaW1hZ2VzIjogWyI4IiwgMF19LCAiY2xhc3NfdHlwZSI6ICJTYXZlSW1hZ2UiLCAiX21ldGEiOiB7InRpdGxlIjogIlNhdmUgSW1hZ2UifX0sICIxMCI6IHsiaW5wdXRzIjogeyJ2YWVfbmFtZSI6ICJhZS5zYWZldGVuc29ycyJ9LCAiY2xhc3NfdHlwZSI6ICJWQUVMb2FkZXIiLCAiX21ldGEiOiB7InRpdGxlIjogIkxvYWQgVkFFIn19LCAi",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "content-type": "image/jpeg"
+      }
+    }
   }
 }

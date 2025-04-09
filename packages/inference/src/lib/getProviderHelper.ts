@@ -8,6 +8,7 @@ import * as HFInference from "../providers/hf-inference";
 import * as Hyperbolic from "../providers/hyperbolic";
 import * as Nebius from "../providers/nebius";
 import * as Novita from "../providers/novita";
+import * as Nscale from "../providers/nscale-cloud";
 import * as OpenAI from "../providers/openai";
 import type {
 	AudioClassificationTaskHelper,
@@ -108,6 +109,10 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	novita: {
 		conversational: new Novita.NovitaConversationalTask(),
 		"text-generation": new Novita.NovitaTextGenerationTask(),
+	},
+	"nscale-cloud": {
+		"text-to-image": new Nscale.NscaleCloudTextToImageTask(),
+		conversational: new Nscale.NscaleCloudConversationalTask(),
 	},
 	openai: {
 		conversational: new OpenAI.OpenAIConversationalTask(),

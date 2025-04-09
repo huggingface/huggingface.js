@@ -1392,4 +1392,55 @@ describe.concurrent("InferenceClient", () => {
 		},
 		TIMEOUT
 	);
+	describe.concurrent(
+		"Nscale",
+		() => {
+			const client = new InferenceClient(env.HF_NSCALE_CLOUD_KEY ?? "dummy");
+
+			HARDCODED_MODEL_ID_MAPPING["nscale-cloud"] = {
+				"meta-llama/Llama-3.1-8B-Instruct": "meta-llama/Llama-3.1-8B-Instruct",
+				"black-forest-labs/FLUX.1-schnell": "black-forest-labs/FLUX.1-schnell",
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "meta-llama/Llama-3.1-8B-Instruct",
+					provider: "nscale-cloud",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toContain("two");
+				}
+			});
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "meta-llama/Llama-3.1-8B-Instruct",
+					provider: "nscale-cloud",
+					messages: [{ role: "user", content: "Say 'this is a test'" }],
+					stream: true,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+			it("textToImage", async () => {
+				const res = await client.textToImage({
+					model: "black-forest-labs/FLUX.1-schnell",
+					provider: "nscale-cloud",
+					inputs: "An astronaut riding a horse",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+		},
+		TIMEOUT
+	);
 });
