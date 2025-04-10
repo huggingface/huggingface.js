@@ -17,7 +17,7 @@
 import type { AutomaticSpeechRecognitionOutput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../lib/InferenceOutputError";
 import { isUrl } from "../lib/isUrl";
-import type { BodyParams, HeaderParams, UrlParams } from "../types";
+import type { BodyParams, HeaderParams, ModelId, UrlParams } from "../types";
 import { delay } from "../utils/delay";
 import { omit } from "../utils/omit";
 import {
@@ -26,6 +26,7 @@ import {
 	type TextToImageTaskHelper,
 	type TextToVideoTaskHelper,
 } from "./providerHelper";
+import { HF_HUB_URL } from "../config";
 
 export interface FalAiQueueOutput {
 	request_id: string;
@@ -74,6 +75,10 @@ abstract class FalAITask extends TaskProviderHelper {
 	}
 }
 
+async function buildLoraPath(modelId: ModelId, adapterWeightsPath: string): Promise<string> {
+	return `${HF_HUB_URL}/${modelId}/resolve/main/${adapterWeightsPath}`
+}
+
 export class FalAITextToImageTask extends FalAITask implements TextToImageTaskHelper {
 	override preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
@@ -81,6 +86,12 @@ export class FalAITextToImageTask extends FalAITask implements TextToImageTaskHe
 			...(params.args.parameters as Record<string, unknown>),
 			sync_mode: true,
 			prompt: params.args.inputs,
+			...(params.mapping?.adapter === "lora" && params.mapping.adapterWeightsPath ? {
+				loras: [{
+					path: buildLoraPath(params.mapping.hfModelId, params.mapping.adapterWeightsPath),
+					scale: 1
+				}]
+			} : undefined)
 		};
 	}
 
@@ -137,9 +148,8 @@ export class FalAITextToVideoTask extends FalAITask implements TextToVideoTaskHe
 		let status = response.status;
 
 		const parsedUrl = new URL(url);
-		const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}${
-			parsedUrl.host === "router.huggingface.co" ? "/fal-ai" : ""
-		}`;
+		const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}${parsedUrl.host === "router.huggingface.co" ? "/fal-ai" : ""
+			}`;
 
 		// extracting the provider model id for status and result urls
 		// from the response as it might be different from the mapped model in `url`
@@ -231,8 +241,7 @@ export class FalAITextToSpeechTask extends FalAITask {
 			return await urlResponse.blob();
 		} catch (error) {
 			throw new InferenceOutputError(
-				`Error fetching or processing audio from Fal.ai Text-to-Speech URL: ${res.audio.url}. ${
-					error instanceof Error ? error.message : String(error)
+				`Error fetching or processing audio from Fal.ai Text-to-Speech URL: ${res.audio.url}. ${error instanceof Error ? error.message : String(error)
 				}`
 			);
 		}

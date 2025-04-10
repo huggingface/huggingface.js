@@ -1,6 +1,8 @@
 import { name as packageName, version as packageVersion } from "../../package.json";
 import { HF_HEADER_X_BILL_TO, HF_HUB_URL } from "../config";
 import type { InferenceTask, Options, RequestArgs } from "../types";
+import type { MappingInfo } from "./getModelMapping";
+import { getInferenceProviderMapping } from "./getModelMapping";
 import { getProviderHelper } from "./getProviderHelper";
 import { getProviderModelId } from "./getProviderModelId";
 import { isUrl } from "./isUrl";
@@ -38,7 +40,7 @@ export async function makeRequestOptions(
 
 	if (args.endpointUrl) {
 		// No need to have maybeModel, or to load default model for a task
-		return makeRequestOptionsFromResolvedModel(maybeModel ?? args.endpointUrl, args, options);
+		return makeRequestOptionsFromResolvedModel(maybeModel ?? args.endpointUrl, args, undefined, options);
 	}
 
 	if (!maybeModel && !task) {
@@ -53,16 +55,27 @@ export async function makeRequestOptions(
 		throw new Error(`Provider ${provider} requires a model ID to be passed directly.`);
 	}
 
+	const inferenceProviderMapping = await getInferenceProviderMapping({
+		modelId: hfModel,
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		task: task!,
+		provider,
+		accessToken: args.accessToken,
+	}, { fetch: options?.fetch });
+	if (!inferenceProviderMapping) {
+		throw new Error(`We have not been able to find inference provider information for model ${hfModel}.`);
+	}
+
 	const resolvedModel = providerHelper.clientSideRoutingOnly
 		? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		  removeProviderPrefix(maybeModel!, provider)
-		: await getProviderModelId({ model: hfModel, provider }, args, {
-				task,
-				fetch: options?.fetch,
-		  });
+		removeProviderPrefix(maybeModel!, provider)
+		: await getProviderModelId({ model: hfModel, provider, mapping: inferenceProviderMapping }, {
+			task,
+			fetch: options?.fetch,
+		});
 
 	// Use the sync version with the resolved model
-	return makeRequestOptionsFromResolvedModel(resolvedModel, args, options);
+	return makeRequestOptionsFromResolvedModel(resolvedModel, args, inferenceProviderMapping, options);
 }
 
 /**
@@ -75,6 +88,7 @@ export function makeRequestOptionsFromResolvedModel(
 		data?: Blob | ArrayBuffer;
 		stream?: boolean;
 	},
+	mapping: MappingInfo | undefined,
 	options?: Options & {
 		task?: InferenceTask;
 	}
@@ -137,6 +151,7 @@ export function makeRequestOptionsFromResolvedModel(
 		args: remainingArgs as Record<string, unknown>,
 		model: resolvedModel,
 		task,
+		mapping,
 	});
 	/**
 	 * For edge runtimes, leave 'credentials' undefined, otherwise cloudflare workers will error
