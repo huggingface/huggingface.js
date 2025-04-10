@@ -1,7 +1,7 @@
 import { name as packageName, version as packageVersion } from "../../package.json";
 import { HF_HEADER_X_BILL_TO, HF_HUB_URL } from "../config";
 import type { InferenceTask, Options, RequestArgs } from "../types";
-import type { MappingInfo } from "./getInferenceProviderMapping";
+import type { InferenceProviderModelMapping } from "./getInferenceProviderMapping";
 import { getInferenceProviderMapping } from "./getInferenceProviderMapping";
 import { getProviderHelper } from "./getProviderHelper";
 import { isUrl } from "./isUrl";
@@ -63,7 +63,7 @@ export async function makeRequestOptions(
 			status: "live",
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			task: task!
-		} satisfies MappingInfo
+		} satisfies InferenceProviderModelMapping
 		: await getInferenceProviderMapping({
 			modelId: hfModel,
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -94,7 +94,7 @@ export function makeRequestOptionsFromResolvedModel(
 		data?: Blob | ArrayBuffer;
 		stream?: boolean;
 	},
-	mapping: MappingInfo | undefined,
+	mapping: InferenceProviderModelMapping | undefined,
 	options?: Options & {
 		task?: InferenceTask;
 	}

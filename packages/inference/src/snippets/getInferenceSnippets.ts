@@ -11,7 +11,7 @@ import type { ChatCompletionInputMessage, GenerationParameters } from "@huggingf
 import { makeRequestOptionsFromResolvedModel } from "../lib/makeRequestOptions";
 import type { InferenceProvider, InferenceTask, RequestArgs } from "../types";
 import { templates } from "./templates.exported";
-import type { MappingInfo } from "../lib/getInferenceProviderMapping";
+import type { InferenceProviderModelMapping } from "../lib/getInferenceProviderMapping";
 
 const PYTHON_CLIENTS = ["huggingface_hub", "fal_client", "requests", "openai"] as const;
 const JS_CLIENTS = ["fetch", "huggingface.js", "openai"] as const;
@@ -117,7 +117,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		model: ModelDataMinimal,
 		accessToken: string,
 		provider: InferenceProvider,
-		inferenceProviderMapping?: MappingInfo,
+		inferenceProviderMapping?: InferenceProviderModelMapping,
 		opts?: Record<string, unknown>
 	): InferenceSnippet[] => {
 		const providerModelId = inferenceProviderMapping?.providerId ?? model.id;
@@ -269,7 +269,7 @@ const snippets: Partial<
 			model: ModelDataMinimal,
 			accessToken: string,
 			provider: InferenceProvider,
-			inferenceProviderMapping?: MappingInfo,
+			inferenceProviderMapping?: InferenceProviderModelMapping,
 			opts?: Record<string, unknown>
 		) => InferenceSnippet[]
 	>
@@ -309,7 +309,7 @@ export function getInferenceSnippets(
 	model: ModelDataMinimal,
 	accessToken: string,
 	provider: InferenceProvider,
-	inferenceProviderMapping?: MappingInfo,
+	inferenceProviderMapping?: InferenceProviderModelMapping,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
 	return model.pipeline_tag && model.pipeline_tag in snippets

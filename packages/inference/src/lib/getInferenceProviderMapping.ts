@@ -9,10 +9,10 @@ import { typedInclude } from "../utils/typedInclude";
 export const inferenceProviderMappingCache = new Map<ModelId, InferenceProviderMapping>();
 
 export type InferenceProviderMapping = Partial<
-	Record<InferenceProvider, Omit<MappingInfo, "hfModelId" | "adapterWeightsPath">>
+	Record<InferenceProvider, Omit<InferenceProviderModelMapping, "hfModelId" | "adapterWeightsPath">>
 >;
 
-export interface MappingInfo {
+export interface InferenceProviderModelMapping {
 	adapter?: string;
 	adapterWeightsPath?: string;
 	hfModelId: ModelId;
@@ -31,7 +31,7 @@ export async function getInferenceProviderMapping(
 	options: {
 		fetch?: (input: RequestInfo, init?: RequestInit) => Promise<Response>
 	}
-): Promise<MappingInfo | null> {
+): Promise<InferenceProviderModelMapping | null> {
 	if (HARDCODED_MODEL_INFERENCE_MAPPING[params.provider][params.modelId]) {
 		return HARDCODED_MODEL_INFERENCE_MAPPING[params.provider][params.modelId];
 	}

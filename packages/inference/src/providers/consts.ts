@@ -1,4 +1,4 @@
-import type { MappingInfo } from "../lib/getInferenceProviderMapping";
+import type { InferenceProviderModelMapping } from "../lib/getInferenceProviderMapping";
 import type { InferenceProvider } from "../types";
 import { type ModelId } from "../types";
 
@@ -9,7 +9,7 @@ import { type ModelId } from "../types";
  *
  * We also inject into this dictionary from tests.
  */
-export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<InferenceProvider, Record<ModelId, MappingInfo>> = {
+export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<InferenceProvider, Record<ModelId, InferenceProviderModelMapping>> = {
 	/**
 	 * "HF model ID" => "Model ID on Inference Provider's side"
 	 *

@@ -1,5 +1,5 @@
 import type { ChatCompletionInput, PipelineType } from "@huggingface/tasks";
-import type { MappingInfo } from "./lib/getInferenceProviderMapping";
+import type { InferenceProviderModelMapping } from "./lib/getInferenceProviderMapping";
 
 /**
  * HF model id, like "meta-llama/Llama-3.3-70B-Instruct"
@@ -118,6 +118,6 @@ export interface UrlParams {
 export interface BodyParams<T extends Record<string, unknown> = Record<string, unknown>> {
 	args: T;
 	model: string;
-	mapping?: MappingInfo | undefined;
+	mapping?: InferenceProviderModelMapping | undefined;
 	task?: InferenceTask;
 }
