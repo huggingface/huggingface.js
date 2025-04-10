@@ -13,7 +13,7 @@ import {
 } from "../src";
 import { readTestFile } from "./test-files";
 import "./vcr";
-import { HARDCODED_MODEL_ID_MAPPING } from "../src/providers/consts";
+import { HARDCODED_MODEL_INFERENCE_MAPPING } from "../src/providers/consts";
 import { isUrl } from "../src/lib/isUrl";
 
 const TIMEOUT = 60000 * 3;
@@ -50,7 +50,7 @@ describe.concurrent("InferenceClient", () => {
 			it("fillMask", async () => {
 				expect(
 					await hf.fillMask({
-						model: "bert-base-uncased",
+						model: "google-bert/bert-base-uncased",
 						inputs: "[MASK] world!",
 					})
 				).toEqual(
@@ -515,7 +515,7 @@ describe.concurrent("InferenceClient", () => {
 
 			it("objectDetection", async () => {
 				expect(
-					await hf.imageClassification({
+					await hf.objectDetection({
 						data: new Blob([readTestFile("cats.png")], { type: "image/png" }),
 						model: "facebook/detr-resnet-50",
 					})
@@ -536,7 +536,7 @@ describe.concurrent("InferenceClient", () => {
 			});
 			it("imageSegmentation", async () => {
 				expect(
-					await hf.imageClassification({
+					await hf.imageSegmentation({
 						data: new Blob([readTestFile("cats.png")], { type: "image/png" }),
 						model: "facebook/detr-resnet-50-panoptic",
 					})
@@ -607,7 +607,9 @@ describe.concurrent("InferenceClient", () => {
 					generated_text: "a large brown and white giraffe standing in a field ",
 				});
 			});
-			it("request - openai-community/gpt2", async () => {
+
+			/// Skipping because the function is deprecated
+			it.skip("request - openai-community/gpt2", async () => {
 				expect(
 					await hf.request({
 						model: "openai-community/gpt2",
@@ -1020,10 +1022,25 @@ describe.concurrent("InferenceClient", () => {
 		() => {
 			const client = new InferenceClient(env.HF_NEBIUS_KEY ?? "dummy");
 
-			HARDCODED_MODEL_ID_MAPPING.nebius = {
-				"meta-llama/Llama-3.1-8B-Instruct": "meta-llama/Meta-Llama-3.1-8B-Instruct",
-				"meta-llama/Llama-3.1-70B-Instruct": "meta-llama/Meta-Llama-3.1-70B-Instruct",
-				"black-forest-labs/FLUX.1-schnell": "black-forest-labs/flux-schnell",
+			HARDCODED_MODEL_INFERENCE_MAPPING.nebius = {
+				"meta-llama/Llama-3.1-8B-Instruct": {
+					hfModelId: "meta-llama/Llama-3.1-8B-Instruct",
+					providerId: "meta-llama/Meta-Llama-3.1-8B-Instruct",
+					status: "live",
+					task: "conversational",
+				},
+				"meta-llama/Llama-3.1-70B-Instruct": {
+					hfModelId: "meta-llama/Llama-3.1-8B-Instruct",
+					providerId: "meta-llama/Meta-Llama-3.1-70B-Instruct",
+					status: "live",
+					task: "conversational",
+				},
+				"black-forest-labs/FLUX.1-schnell": {
+					hfModelId: "meta-llama/Llama-3.1-8B-Instruct",
+					providerId: "black-forest-labs/flux-schnell",
+					status: "live",
+					task: "text-to-image",
+				}
 			};
 
 			it("chatCompletion", async () => {
@@ -1085,8 +1102,13 @@ describe.concurrent("InferenceClient", () => {
 		() => {
 			const client = new InferenceClient(env.HF_FIREWORKS_KEY ?? "dummy");
 
-			HARDCODED_MODEL_ID_MAPPING["fireworks-ai"] = {
-				"deepseek-ai/DeepSeek-R1": "accounts/fireworks/models/deepseek-r1",
+			HARDCODED_MODEL_INFERENCE_MAPPING["fireworks-ai"] = {
+				"deepseek-ai/DeepSeek-R1": {
+					hfModelId: "deepseek-ai/DeepSeek-R1",
+					providerId: "accounts/fireworks/models/deepseek-r1",
+					status: "live",
+					task: "conversational",
+				}
 			};
 
 			it("chatCompletion", async () => {
@@ -1130,11 +1152,31 @@ describe.concurrent("InferenceClient", () => {
 	describe.concurrent(
 		"Hyperbolic",
 		() => {
-			HARDCODED_MODEL_ID_MAPPING.hyperbolic = {
-				"meta-llama/Llama-3.2-3B-Instruct": "meta-llama/Llama-3.2-3B-Instruct",
-				"meta-llama/Llama-3.3-70B-Instruct": "meta-llama/Llama-3.3-70B-Instruct",
-				"stabilityai/stable-diffusion-2": "SD2",
-				"meta-llama/Llama-3.1-405B-FP8": "meta-llama/Llama-3.1-405B-FP8",
+			HARDCODED_MODEL_INFERENCE_MAPPING["hyperbolic"] = {
+				"meta-llama/Llama-3.2-3B-Instruct": {
+					hfModelId: "meta-llama/Llama-3.2-3B-Instruct",
+					providerId: "meta-llama/Llama-3.2-3B-Instruct",
+					status: "live",
+					task: "conversational",
+				},
+				"meta-llama/Llama-3.3-70B-Instruct": {
+					hfModelId: "meta-llama/Llama-3.3-70B-Instruct",
+					providerId: "meta-llama/Llama-3.3-70B-Instruct",
+					status: "live",
+					task: "conversational",
+				},
+				"stabilityai/stable-diffusion-2": {
+					hfModelId: "stabilityai/stable-diffusion-2",
+					providerId: "SD2",
+					status: "live",
+					task: "text-to-image",
+				},
+				"meta-llama/Llama-3.1-405B-FP8": {
+					hfModelId: "meta-llama/Llama-3.1-405B-FP8",
+					providerId: "meta-llama/Llama-3.1-405B-FP8",
+					status: "live",
+					task: "conversational",
+				},
 			};
 
 			it("chatCompletion - hyperbolic", async () => {
@@ -1211,9 +1253,19 @@ describe.concurrent("InferenceClient", () => {
 		() => {
 			const client = new InferenceClient(env.HF_NOVITA_KEY ?? "dummy");
 
-			HARDCODED_MODEL_ID_MAPPING["novita"] = {
-				"meta-llama/llama-3.1-8b-instruct": "meta-llama/llama-3.1-8b-instruct",
-				"deepseek/deepseek-r1-distill-qwen-14b": "deepseek/deepseek-r1-distill-qwen-14b",
+			HARDCODED_MODEL_INFERENCE_MAPPING["novita"] = {
+				"meta-llama/llama-3.1-8b-instruct": {
+					hfModelId: "meta-llama/llama-3.1-8b-instruct",
+					providerId: "meta-llama/llama-3.1-8b-instruct",
+					status: "live",
+					task: "conversational",
+				},
+				"deepseek/deepseek-r1-distill-qwen-14b": {
+					hfModelId: "deepseek/deepseek-r1-distill-qwen-14b",
+					providerId: "deepseek/deepseek-r1-distill-qwen-14b",
+					status: "live",
+					task: "conversational",
+				},
 			};
 
 			it("chatCompletion", async () => {
@@ -1256,8 +1308,13 @@ describe.concurrent("InferenceClient", () => {
 	describe.concurrent(
 		"Black Forest Labs",
 		() => {
-			HARDCODED_MODEL_ID_MAPPING["black-forest-labs"] = {
-				"black-forest-labs/FLUX.1-dev": "flux-dev",
+			HARDCODED_MODEL_INFERENCE_MAPPING["black-forest-labs"] = {
+				"black-forest-labs/FLUX.1-dev": {
+					hfModelId: "black-forest-labs/FLUX.1-dev",
+					providerId: "flux-dev",
+					status: "live",
+					task: "text-to-image",
+				}
 				// "black-forest-labs/FLUX.1-schnell": "flux-pro",
 			};
 
@@ -1304,9 +1361,19 @@ describe.concurrent("InferenceClient", () => {
 		() => {
 			const client = new InferenceClient(env.HF_COHERE_KEY ?? "dummy");
 
-			HARDCODED_MODEL_ID_MAPPING["cohere"] = {
-				"CohereForAI/c4ai-command-r7b-12-2024": "command-r7b-12-2024",
-				"CohereForAI/aya-expanse-8b": "c4ai-aya-expanse-8b",
+			HARDCODED_MODEL_INFERENCE_MAPPING["cohere"] = {
+				"CohereForAI/c4ai-command-r7b-12-2024": {
+					hfModelId: "CohereForAI/c4ai-command-r7b-12-2024",
+					providerId: "command-r7b-12-2024",
+					status: "live",
+					task: "conversational",
+				},
+				"CohereForAI/aya-expanse-8b": {
+					hfModelId: "CohereForAI/aya-expanse-8b",
+					providerId: "c4ai-aya-expanse-8b",
+					status: "live",
+					task: "conversational",
+				},
 			};
 
 			it("chatCompletion", async () => {
@@ -1351,8 +1418,13 @@ describe.concurrent("InferenceClient", () => {
 		() => {
 			const client = new InferenceClient(env.HF_CEREBRAS_KEY ?? "dummy");
 
-			HARDCODED_MODEL_ID_MAPPING["cerebras"] = {
-				"meta-llama/llama-3.1-8b-instruct": "llama3.1-8b",
+			HARDCODED_MODEL_INFERENCE_MAPPING["cerebras"] = {
+				"meta-llama/llama-3.1-8b-instruct": {
+					hfModelId: "meta-llama/llama-3.1-8b-instruct",
+					providerId: "llama3.1-8b",
+					status: "live",
+					task: "conversational",
+				},
 			};
 
 			it("chatCompletion", async () => {

@@ -7155,5 +7155,113 @@
         "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
       }
     }
+  },
+  "d66986738656c7371d64f81a28f512df10da68fa9b1eb9a45bcfc1f71bebb6fd": {
+    "url": "https://router.huggingface.co/hf-inference/models/google-t5/t5-base",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":\"My name is Wolfgang and I live in Berlin\"}"
+    },
+    "response": {
+      "body": "[{\"translation_text\":\"Mein Name ist Wolfgang und ich lebe in Berlin\"}]",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-allow-origin": "*",
+        "access-control-expose-headers": "x-compute-type, x-compute-time",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "cross-origin-opener-policy": "same-origin",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "server": "uvicorn",
+        "transfer-encoding": "chunked",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "e64135d83f57d780280a2b4d50ae7c672e5a00eec22e7eb9a1769145aa663289": {
+    "url": "https://router.huggingface.co/hf-inference/models/google-t5/t5-base",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":[\"My name is Wolfgang and I live in Berlin\",\"I work as programmer\"]}"
+    },
+    "response": {
+      "body": "[{\"translation_text\":\"Mein Name ist Wolfgang und ich lebe in Berlin\"},{\"translation_text\":\"Ich arbeite als Programmierer\"}]",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-allow-origin": "*",
+        "access-control-expose-headers": "x-compute-type, x-compute-time",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "cross-origin-opener-policy": "same-origin",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "server": "uvicorn",
+        "transfer-encoding": "chunked",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "a83b175f9569925efe30daf8ace12ac6ea0283685fb77c4d71188daa0ae9e651": {
+    "url": "https://router.huggingface.co/hf-inference/models/distilbert/distilbert-base-uncased-finetuned-sst-2-english",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":\"I like you. I love you.\"}"
+    },
+    "response": {
+      "body": "[[{\"label\":\"POSITIVE\",\"score\":0.9998763799667358},{\"label\":\"NEGATIVE\",\"score\":0.00012365418660920113}]]",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-allow-origin": "*",
+        "access-control-expose-headers": "x-compute-type, x-compute-time",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "cross-origin-opener-policy": "same-origin",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "server": "uvicorn",
+        "transfer-encoding": "chunked",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
+  },
+  "1ec36bf6b2cf623e669a938cf7e69099e02a3482b444730118b3a4b3c795fba0": {
+    "url": "https://router.huggingface.co/hf-inference/models/google-bert/bert-base-uncased",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":\"[MASK] world!\"}"
+    },
+    "response": {
+      "body": "[{\"score\":0.291090190410614,\"token\":1996,\"token_str\":\"the\",\"sequence\":\"the world!\"},{\"score\":0.18091197311878204,\"token\":2026,\"token_str\":\"my\",\"sequence\":\"my world!\"},{\"score\":0.05239735543727875,\"token\":7592,\"token_str\":\"hello\",\"sequence\":\"hello world!\"},{\"score\":0.0424695760011673,\"token\":6919,\"token_str\":\"wonderful\",\"sequence\":\"wonderful world!\"},{\"score\":0.015912115573883057,\"token\":1037,\"token_str\":\"a\",\"sequence\":\"a world!\"}]",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-allow-origin": "*",
+        "access-control-expose-headers": "x-compute-type, x-compute-time",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "cross-origin-opener-policy": "same-origin",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "server": "uvicorn",
+        "transfer-encoding": "chunked",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
   }
 }

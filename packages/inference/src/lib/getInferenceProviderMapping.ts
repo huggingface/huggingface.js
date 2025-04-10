@@ -1,6 +1,9 @@
 import type { WidgetType } from "@huggingface/tasks";
 import type { InferenceProvider, ModelId } from "../types";
 import { HF_HUB_URL } from "../config";
+import { HARDCODED_MODEL_INFERENCE_MAPPING } from "../providers/consts";
+import { EQUIVALENT_SENTENCE_TRANSFORMERS_TASKS } from "../providers/hf-inference";
+import { typedInclude } from "../utils/typedInclude";
 
 
 export const inferenceProviderMappingCache = new Map<ModelId, InferenceProviderMapping>();
@@ -29,18 +32,24 @@ export async function getInferenceProviderMapping(
 		fetch?: (input: RequestInfo, init?: RequestInit) => Promise<Response>
 	}
 ): Promise<MappingInfo | null> {
+	if (HARDCODED_MODEL_INFERENCE_MAPPING[params.provider][params.modelId]) {
+		return HARDCODED_MODEL_INFERENCE_MAPPING[params.provider][params.modelId];
+	}
 	let inferenceProviderMapping: InferenceProviderMapping | null;
 	if (inferenceProviderMappingCache.has(params.modelId)) {
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		inferenceProviderMapping = inferenceProviderMappingCache.get(params.modelId)!;
 	} else {
-		inferenceProviderMapping = await (options?.fetch ?? fetch)(
+		const resp = await (options?.fetch ?? fetch)(
 			`${HF_HUB_URL}/api/models/${params.modelId}?expand[]=inferenceProviderMapping`,
 			{
 				headers: params.accessToken?.startsWith("hf_") ? { Authorization: `Bearer ${params.accessToken}` } : {},
 			}
-		)
-			.then((resp) => resp.json())
+		);
+		if (resp.status === 404) {
+			throw new Error(`Model ${params.modelId} does not exist`);
+		}
+		inferenceProviderMapping = await resp.json()
 			.then((json) => json.inferenceProviderMapping)
 			.catch(() => null);
 	}
@@ -51,7 +60,8 @@ export async function getInferenceProviderMapping(
 
 	const providerMapping = inferenceProviderMapping[params.provider];
 	if (providerMapping) {
-		if (providerMapping.task !== params.task) {
+		const equivalentTasks = params.provider === "hf-inference" && typedInclude(EQUIVALENT_SENTENCE_TRANSFORMERS_TASKS, params.task) ? EQUIVALENT_SENTENCE_TRANSFORMERS_TASKS : [params.task]
+		if (!typedInclude(equivalentTasks, providerMapping.task)) {
 			throw new Error(
 				`Model ${params.modelId} is not supported for task ${params.task} and provider ${params.provider}. Supported task: ${providerMapping.task}.`
 			);

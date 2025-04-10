@@ -11,7 +11,7 @@ import type { ChatCompletionInputMessage, GenerationParameters } from "@huggingf
 import { makeRequestOptionsFromResolvedModel } from "../lib/makeRequestOptions";
 import type { InferenceProvider, InferenceTask, RequestArgs } from "../types";
 import { templates } from "./templates.exported";
-import type { MappingInfo } from "../lib/getModelMapping";
+import type { MappingInfo } from "../lib/getInferenceProviderMapping";
 
 const PYTHON_CLIENTS = ["huggingface_hub", "fal_client", "requests", "openai"] as const;
 const JS_CLIENTS = ["fetch", "huggingface.js", "openai"] as const;

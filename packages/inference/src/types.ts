@@ -1,5 +1,5 @@
 import type { ChatCompletionInput, PipelineType } from "@huggingface/tasks";
-import type { MappingInfo } from "./lib/getModelMapping";
+import type { MappingInfo } from "./lib/getInferenceProviderMapping";
 
 /**
  * HF model id, like "meta-llama/Llama-3.3-70B-Instruct"
