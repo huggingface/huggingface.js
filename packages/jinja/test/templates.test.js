@@ -37,6 +37,7 @@ const TEST_STRINGS = {
 	// Set variables
 	VARIABLES: `{% set x = 'Hello' %}{% set y = 'World' %}{{ x + ' ' + y }}`,
 	VARIABLES_2: `{% set x = 'Hello'.split('el')[-1] %}{{ x }}`,
+	VARIABLES_BLOCK: `{% set x %}Hello!\nMultiline/block set!\n{% endset %}{{ x }}`,
 
 	// Numbers
 	NUMBERS: `|{{ 5 }}|{{ -5 }}|{{ add(3, -1) }}|{{ (3 - 1) + (a - 5) - (a + 5)}}|`,
@@ -700,6 +701,19 @@ const TEST_PARSED = {
 		{ value: "[", type: "OpenSquareBracket" },
 		{ value: "-1", type: "NumericLiteral" },
 		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "x", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	VARIABLES_BLOCK: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Set" },
+		{ value: "x", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: `Hello!\nMultiline/block set!\n`, type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endset", type: "EndSet" },
 		{ value: "%}", type: "CloseStatement" },
 		{ value: "{{", type: "OpenExpression" },
 		{ value: "x", type: "Identifier" },
@@ -3038,6 +3052,7 @@ const TEST_CONTEXT = {
 	// Set variables
 	VARIABLES: {},
 	VARIABLES_2: {},
+	VARIABLES_BLOCK: {},
 
 	// Numbers
 	NUMBERS: {
@@ -3300,6 +3315,7 @@ const EXPECTED_OUTPUTS = {
 	// Set variables
 	VARIABLES: "Hello World",
 	VARIABLES_2: "lo",
+	VARIABLES_BLOCK: "Hello!\nMultiline/block set!\n",
 
 	// Numbers
 	NUMBERS: "|5|-5|2|-8|",
