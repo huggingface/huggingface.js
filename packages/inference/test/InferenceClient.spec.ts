@@ -804,12 +804,33 @@ describe.concurrent("InferenceClient", () => {
 		() => {
 			const client = new InferenceClient(env.HF_FAL_KEY ?? "dummy");
 
+			HARDCODED_MODEL_INFERENCE_MAPPING["fal-ai"] = {
+				"openfree/flux-chatgpt-ghibli-lora": {
+					hfModelId: "openfree/flux-chatgpt-ghibli-lora",
+					providerId: "fal-ai/flux-lora",
+					status: "live",
+					task: "text-to-image",
+					adapter: "lora",
+					adapterWeightsPath: "flux-chatgpt-ghibli-lora.safetensors"
+				}
+			}
+
 			it(`textToImage - black-forest-labs/FLUX.1-schnell`, async () => {
 				const res = await client.textToImage({
 					model: "black-forest-labs/FLUX.1-schnell",
 					provider: "fal-ai",
 					inputs:
 						"Extreme close-up of a single tiger eye, direct frontal view. Detailed iris and pupil. Sharp focus on eye texture and color. Natural lighting to capture authentic eye shine and depth.",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it(`textToImage - Flux LoRAs`, async () => {
+				const res = await client.textToImage({
+					model: "openfree/flux-chatgpt-ghibli-lora",
+					provider: "fal-ai",
+					inputs:
+						"Ghibli style sky whale transport ship, its metallic skin adorned with traditional Japanese patterns, gliding through cotton candy clouds at sunrise. Small floating gardens hang from its sides, where workers in futuristic kimonos tend to glowing plants. Rainbow auroras shimmer in the background. [trigger]",
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});

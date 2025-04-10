@@ -75,7 +75,7 @@ abstract class FalAITask extends TaskProviderHelper {
 	}
 }
 
-async function buildLoraPath(modelId: ModelId, adapterWeightsPath: string): Promise<string> {
+function buildLoraPath(modelId: ModelId, adapterWeightsPath: string): string {
 	return `${HF_HUB_URL}/${modelId}/resolve/main/${adapterWeightsPath}`
 }
 
