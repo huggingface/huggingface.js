@@ -91,6 +91,7 @@ const TEST_STRINGS = {
 	FILTER_OPERATOR_10: `|{{ " 1 \n 2 \n 3 \n\n " | indent }}|{{ " 1 \n 2 \n 3 \n\n " | indent(2) }}|{{ " 1 \n 2 \n 3 \n\n " | indent(first=True) }}|{{ " 1 \n 2 \n 3 \n\n " | indent(blank=True) }}|{{ " 1 \n 2 \n 3 \n\n " | indent(4, first=True) }}|`,
 	FILTER_OPERATOR_11: `{{ items | rejectattr('key') | length }}`,
 	FILTER_OPERATOR_12: `{{ messages | rejectattr('role', 'equalto', 'system') | length }}`,
+	FILTER_OPERATOR_13: `{{ tools | string }}`,
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: `|{{ 1 and 2 }}|{{ 1 and 0 }}|{{ 0 and 1 }}|{{ 0 and 0 }}|{{ 1 or 2 }}|{{ 1 or 0 }}|{{ 0 or 1 }}|{{ 0 or 0 }}|{{ not 1 }}|{{ not 0 }}|`,
@@ -1696,6 +1697,13 @@ const TEST_PARSED = {
 		{ value: "length", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
+	FILTER_OPERATOR_13: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "tools", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "string", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: [
@@ -3188,6 +3196,9 @@ const TEST_CONTEXT = {
 	FILTER_OPERATOR_12: {
 		messages: [{ role: "system" }, { role: "user" }, { role: "assistant" }],
 	},
+	FILTER_OPERATOR_13: {
+		tools: [{ name: "some_tool", arguments: { some_name: "string" } }],
+	},
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: {},
@@ -3369,6 +3380,7 @@ const EXPECTED_OUTPUTS = {
 	FILTER_OPERATOR_10: `| 1 \n     2 \n     3 \n\n     | 1 \n   2 \n   3 \n\n   |     1 \n     2 \n     3 \n\n     | 1 \n     2 \n     3 \n    \n     |     1 \n     2 \n     3 \n\n     |`,
 	FILTER_OPERATOR_11: `3`,
 	FILTER_OPERATOR_12: `2`,
+	FILTER_OPERATOR_13: `[{"name": "some_tool", "arguments": {"some_name": "string"}}]`,
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: `|2|0|0|0|1|1|1|0|false|true|`,
