@@ -827,6 +827,69 @@ describe.concurrent("InferenceClient", () => {
 	);
 
 	describe.concurrent(
+		"Featherless",
+		() => {
+			HARDCODED_MODEL_ID_MAPPING['featherless-ai'] = {
+				"meta-llama/Llama-3.1-8B": "meta-llama/Meta-Llama-3.1-8B",
+				"meta-llama/Llama-3.1-8B-Instruct": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+			};
+
+			it("chatCompletion", async () => {
+				const res = await chatCompletion({
+					accessToken: env.HF_FEATHERLESS_KEY ?? "dummy",
+					model: "meta-llama/Llama-3.1-8B-Instruct",
+					provider: "featherless-ai",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+					temperature: 0.1,
+				});
+
+				expect(res).toBeDefined();
+				expect(res.choices).toBeDefined();
+				expect(res.choices?.length).toBeGreaterThan(0);
+
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toBeDefined();
+					expect(typeof completion).toBe("string");
+					expect(completion).toContain("two");
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = chatCompletionStream({
+					accessToken: env.HF_FEATHERLESS_KEY ?? "dummy",
+					model: "meta-llama/Llama-3.1-8B-Instruct",
+					provider: "featherless-ai",
+					messages: [{ role: "user", content: "Complete the equation 1 + 1 = , just the answer" }],
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+				let out = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						out += chunk.choices[0].delta.content;
+					}
+				}
+				expect(out).toContain("2");
+			});
+
+			it("textGeneration", async () => {
+				const res = await textGeneration({
+					accessToken: env.HF_FEATHERLESS_KEY ?? "dummy",
+					model: "meta-llama/Llama-3.1-8B",
+					provider: "featherless-ai",
+					inputs: "Paris is a city of ",
+					parameters: {
+						temperature: 0,
+						top_p: 0.01,
+						max_tokens: 10,
+					},
+				});
+				expect(res).toMatchObject({ generated_text: "2.2 million people, and it is the" });
+			});
+		},
+		TIMEOUT
+	);
+
+	describe.concurrent(
 		"Replicate",
 		() => {
 			const client = new InferenceClient(env.HF_REPLICATE_KEY ?? "dummy");
