@@ -6,12 +6,9 @@ import { sum } from "./sum";
 describe("XetBlob", () => {
 	it("should lazy load the first 22 bytes", async () => {
 		const blob = new XetBlob({
-			repo: {
-				type: "model",
-				name: "celinah/xet-experiments",
-			},
 			hash: "7b3b6d07673a88cf467e67c1f7edef1a8c268cbf66e9dd9b0366322d4ab56d9b",
 			size: 5_234_139_343,
+			refreshUrl: "https://huggingface.co/api/models/celinah/xet-experiments/xet-read-token/main",
 		});
 
 		expect(await blob.slice(10, 22).text()).toBe("__metadata__");
@@ -20,10 +17,7 @@ describe("XetBlob", () => {
 	it("should load the first chunk correctly", async () => {
 		let xorbCount = 0;
 		const blob = new XetBlob({
-			repo: {
-				type: "model",
-				name: "celinah/xet-experiments",
-			},
+			refreshUrl: "https://huggingface.co/api/models/celinah/xet-experiments/xet-read-token/main",
 			hash: "7b3b6d07673a88cf467e67c1f7edef1a8c268cbf66e9dd9b0366322d4ab56d9b",
 			size: 5_234_139_343,
 			fetch: async (url, opts) => {
@@ -51,10 +45,7 @@ describe("XetBlob", () => {
 	it("should load just past the first chunk correctly", async () => {
 		let xorbCount = 0;
 		const blob = new XetBlob({
-			repo: {
-				type: "model",
-				name: "celinah/xet-experiments",
-			},
+			refreshUrl: "https://huggingface.co/api/models/celinah/xet-experiments/xet-read-token/main",
 			hash: "7b3b6d07673a88cf467e67c1f7edef1a8c268cbf66e9dd9b0366322d4ab56d9b",
 			size: 5_234_139_343,
 			fetch: async (url, opts) => {
@@ -80,75 +71,62 @@ describe("XetBlob", () => {
 		expect(xorbCount).toBe(2);
 	});
 
-	// Doesn't work in chrome due to caching issues, it caches the partial output when the
-	// fetch is interrupted in the previous test and then uses that cached output in this test (that requires more data)
-	if (typeof window === "undefined") {
-		it("should load the first 200kB correctly", async () => {
-			let xorbCount = 0;
-			const blob = new XetBlob({
-				repo: {
-					type: "model",
-					name: "celinah/xet-experiments",
-				},
-				hash: "7b3b6d07673a88cf467e67c1f7edef1a8c268cbf66e9dd9b0366322d4ab56d9b",
-				size: 5_234_139_343,
-				fetch: async (url, opts) => {
-					if (typeof url === "string" && url.includes("/xorbs/")) {
-						xorbCount++;
-					}
-					return fetch(url, opts);
-				},
-				// internalLogging: true,
-			});
-
-			const xetDownload = await blob.slice(0, 200_000).arrayBuffer();
-			const bridgeDownload = await fetch(
-				"https://huggingface.co/celinah/xet-experiments/resolve/main/model5GB.safetensors",
-				{
-					headers: {
-						Range: "bytes=0-199999",
-					},
+	it("should load the first 200kB correctly", async () => {
+		let xorbCount = 0;
+		const blob = new XetBlob({
+			refreshUrl: "https://huggingface.co/api/models/celinah/xet-experiments/xet-read-token/main",
+			hash: "7b3b6d07673a88cf467e67c1f7edef1a8c268cbf66e9dd9b0366322d4ab56d9b",
+			size: 5_234_139_343,
+			fetch: async (url, opts) => {
+				if (typeof url === "string" && url.includes("/xorbs/")) {
+					xorbCount++;
 				}
-			).then((res) => res.arrayBuffer());
-
-			expect(xetDownload.byteLength).toBe(200_000);
-			expect(new Uint8Array(xetDownload)).toEqual(new Uint8Array(bridgeDownload));
-			expect(xorbCount).toBe(2);
-		}, 60_000);
-
-		it("should load correctly when loading far into a chunk range", async () => {
-			const blob = new XetBlob({
-				repo: {
-					type: "model",
-					name: "celinah/xet-experiments",
-				},
-				hash: "7b3b6d07673a88cf467e67c1f7edef1a8c268cbf66e9dd9b0366322d4ab56d9b",
-				size: 5_234_139_343,
-				// internalLogging: true,
-			});
-
-			const xetDownload = await blob.slice(10_000_000, 10_100_000).arrayBuffer();
-			const bridgeDownload = await fetch(
-				"https://huggingface.co/celinah/xet-experiments/resolve/main/model5GB.safetensors",
-				{
-					headers: {
-						Range: "bytes=10000000-10099999",
-					},
-				}
-			).then((res) => res.arrayBuffer());
-
-			console.log("xet", xetDownload.byteLength, "bridge", bridgeDownload.byteLength);
-			expect(new Uint8Array(xetDownload).length).toEqual(100_000);
-			expect(new Uint8Array(xetDownload)).toEqual(new Uint8Array(bridgeDownload));
+				return fetch(url, opts);
+			},
+			// internalLogging: true,
 		});
-	}
+
+		const xetDownload = await blob.slice(0, 200_000).arrayBuffer();
+		const bridgeDownload = await fetch(
+			"https://huggingface.co/celinah/xet-experiments/resolve/main/model5GB.safetensors",
+			{
+				headers: {
+					Range: "bytes=0-199999",
+				},
+			}
+		).then((res) => res.arrayBuffer());
+
+		expect(xetDownload.byteLength).toBe(200_000);
+		expect(new Uint8Array(xetDownload)).toEqual(new Uint8Array(bridgeDownload));
+		expect(xorbCount).toBe(2);
+	}, 60_000);
+
+	it("should load correctly when loading far into a chunk range", async () => {
+		const blob = new XetBlob({
+			refreshUrl: "https://huggingface.co/api/models/celinah/xet-experiments/xet-read-token/main",
+			hash: "7b3b6d07673a88cf467e67c1f7edef1a8c268cbf66e9dd9b0366322d4ab56d9b",
+			size: 5_234_139_343,
+			// internalLogging: true,
+		});
+
+		const xetDownload = await blob.slice(10_000_000, 10_100_000).arrayBuffer();
+		const bridgeDownload = await fetch(
+			"https://huggingface.co/celinah/xet-experiments/resolve/main/model5GB.safetensors",
+			{
+				headers: {
+					Range: "bytes=10000000-10099999",
+				},
+			}
+		).then((res) => res.arrayBuffer());
+
+		console.log("xet", xetDownload.byteLength, "bridge", bridgeDownload.byteLength);
+		expect(new Uint8Array(xetDownload).length).toEqual(100_000);
+		expect(new Uint8Array(xetDownload)).toEqual(new Uint8Array(bridgeDownload));
+	});
 
 	it("should load text correctly when offset_into_range starts in a chunk further than the first", async () => {
 		const blob = new XetBlob({
-			repo: {
-				type: "model",
-				name: "celinah/xet-experiments",
-			},
+			refreshUrl: "https://huggingface.co/api/models/celinah/xet-experiments/xet-read-token/main",
 			hash: "794efea76d8cb372bbe1385d9e51c3384555f3281e629903ecb6abeff7d54eec",
 			size: 62_914_580,
 		});
@@ -238,12 +216,8 @@ describe("XetBlob", () => {
 
 				const blob = new XetBlob({
 					hash: "test",
-					repo: {
-						name: "test",
-						type: "model",
-					},
 					size: totalSize,
-					hubUrl: "https://huggingface.co",
+					refreshUrl: "https://huggingface.co",
 					listener: (e) => debugged.push(e),
 					fetch: async function (_url, opts) {
 						const url = new URL(_url as string);
@@ -345,12 +319,8 @@ describe("XetBlob", () => {
 
 				const blob = new XetBlob({
 					hash: "test",
-					repo: {
-						name: "test",
-						type: "model",
-					},
 					size: totalSize,
-					hubUrl: "https://huggingface.co",
+					refreshUrl: "https://huggingface.co",
 					listener: (e) => debugged.push(e),
 					fetch: async function (_url, opts) {
 						const url = new URL(_url as string);
@@ -464,12 +434,8 @@ describe("XetBlob", () => {
 
 				const blob = new XetBlob({
 					hash: "test",
-					repo: {
-						name: "test",
-						type: "model",
-					},
 					size: totalSize,
-					hubUrl: "https://huggingface.co",
+					refreshUrl: "https://huggingface.co",
 					listener: (e) => debugged.push(e),
 					fetch: async function (_url, opts) {
 						const url = new URL(_url as string);
@@ -578,12 +544,8 @@ describe("XetBlob", () => {
 
 				const blob = new XetBlob({
 					hash: "test",
-					repo: {
-						name: "test",
-						type: "model",
-					},
 					size: totalSize,
-					hubUrl: "https://huggingface.co",
+					refreshUrl: "https://huggingface.co",
 					listener: (e) => debugged.push(e),
 					fetch: async function (_url, opts) {
 						const url = new URL(_url as string);
@@ -690,12 +652,8 @@ describe("XetBlob", () => {
 
 				const blob = new XetBlob({
 					hash: "test",
-					repo: {
-						name: "test",
-						type: "model",
-					},
 					size: totalSize,
-					hubUrl: "https://huggingface.co",
+					refreshUrl: "https://huggingface.co",
 					listener: (e) => debugged.push(e),
 					fetch: async function (_url, opts) {
 						const url = new URL(_url as string);
@@ -801,12 +759,8 @@ describe("XetBlob", () => {
 
 				const blob = new XetBlob({
 					hash: "test",
-					repo: {
-						name: "test",
-						type: "model",
-					},
 					size: totalSize,
-					hubUrl: "https://huggingface.co",
+					refreshUrl: "https://huggingface.co",
 					listener: (e) => debugged.push(e),
 					fetch: async function (_url, opts) {
 						const url = new URL(_url as string);

@@ -1,12 +1,16 @@
 import { getHFHubCachePath, getRepoFolderName } from "./cache-management";
 import { dirname, join } from "node:path";
-import { writeFile, rename, lstat, mkdir, stat } from "node:fs/promises";
+import { rename, lstat, mkdir, stat } from "node:fs/promises";
 import type { CommitInfo, PathInfo } from "./paths-info";
 import { pathsInfo } from "./paths-info";
 import type { CredentialsParams, RepoDesignation } from "../types/public";
 import { toRepoId } from "../utils/toRepoId";
 import { downloadFile } from "./download-file";
 import { createSymlink } from "../utils/symlink";
+import { Readable } from "node:stream";
+import type { ReadableStream } from "node:stream/web";
+import { pipeline } from "node:stream/promises";
+import { createWriteStream } from "node:fs";
 
 export const REGEX_COMMIT_HASH: RegExp = new RegExp("^[0-9a-f]{40}$");
 
@@ -115,15 +119,16 @@ export async function downloadFileToCacheDir(
 	const incomplete = `${blobPath}.incomplete`;
 	console.debug(`Downloading ${params.path} to ${incomplete}`);
 
-	const response: Response | null = await downloadFile({
+	const blob: Blob | null = await downloadFile({
 		...params,
 		revision: commitHash,
 	});
 
-	if (!response || !response.ok || !response.body) throw new Error(`invalid response for file ${params.path}`);
+	if (!blob) {
+		throw new Error(`invalid response for file ${params.path}`);
+	}
 
-	// @ts-expect-error resp.body is a Stream, but Stream in internal to node
-	await writeFile(incomplete, response.body);
+	await pipeline(Readable.fromWeb(blob.stream() as ReadableStream), createWriteStream(incomplete));
 
 	// rename .incomplete file to expect blob
 	await rename(incomplete, blobPath);
