@@ -587,6 +587,8 @@ export class Interpreter {
 						);
 					case "join":
 						return new StringValue(operand.value.map((x) => x.value).join(""));
+					case "string":
+						return new StringValue(toJSON(operand));
 					default:
 						throw new Error(`Unknown ArrayValue filter: ${filter.value}`);
 				}
@@ -916,7 +918,7 @@ export class Interpreter {
 	}
 
 	private evaluateSet(node: SetStatement, environment: Environment): NullValue {
-		const rhs = this.evaluate(node.value, environment);
+		const rhs = node.value ? this.evaluate(node.value, environment) : this.evaluateBlock(node.body, environment);
 		if (node.assignee.type === "Identifier") {
 			const variableName = (node.assignee as Identifier).value;
 			environment.setVariable(variableName, rhs);
