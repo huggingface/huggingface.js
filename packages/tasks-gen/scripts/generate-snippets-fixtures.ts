@@ -32,6 +32,7 @@ const TEST_CASES: {
 	task: WidgetType;
 	model: ModelDataMinimal;
 	providers: SnippetInferenceProvider[];
+	lora?: boolean;
 	opts?: Record<string, unknown>;
 }[] = [
 	{
@@ -214,6 +215,22 @@ const TEST_CASES: {
 		},
 		providers: ["hf-inference"],
 	},
+	{
+		testName: "text-to-image--lora",
+		task: "text-to-image",
+		model: {
+			id: "openfree/flux-chatgpt-ghibli-lora",
+			pipeline_tag: "text-to-image",
+			tags: [
+				"lora",
+				"base_model:adapter:black-forest-labs/FLUX.1-dev",
+				"base_model:black-forest-labs/FLUX.1-dev",
+			],
+			inference: "",
+		},
+		lora: true,
+		providers: ["fal-ai"],
+	},
 ] as const;
 
 const rootDirFinder = (): string => {
@@ -239,6 +256,7 @@ function generateInferenceSnippet(
 	language: Language,
 	provider: SnippetInferenceProvider,
 	task: WidgetType,
+	lora: boolean = false,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
 	const allSnippets = snippets.getInferenceSnippets(model, "api_token", provider, {
@@ -246,6 +264,10 @@ function generateInferenceSnippet(
 		providerId: provider === "hf-inference" ? model.id : `<${provider} alias for ${model.id}>`,
 		status: "live",
 		task,
+		...(lora && task === "text-to-image" ? {
+			adapter: "lora",
+			adapterWeightsPath: `<path to LoRA weights in .safetensors format>`
+		} : {}),
 	}, opts);
 	return allSnippets
 		.filter((snippet) => snippet.language == language)
@@ -300,12 +322,12 @@ if (import.meta.vitest) {
 	const { describe, expect, it } = import.meta.vitest;
 
 	describe("inference API snippets", () => {
-		TEST_CASES.forEach(({ testName, task, model, providers, opts }) => {
+		TEST_CASES.forEach(({ testName, task, model, providers, lora, opts }) => {
 			describe(testName, () => {
 				inferenceSnippetLanguages.forEach((language) => {
 					providers.forEach((provider) => {
 						it(language, async () => {
-							const generatedSnippets = generateInferenceSnippet(model, language, provider, task, opts);
+							const generatedSnippets = generateInferenceSnippet(model, language, provider, task, lora, opts);
 							const expectedSnippets = await getExpectedInferenceSnippet(testName, language, provider);
 							expect(generatedSnippets).toEqual(expectedSnippets);
 						});
@@ -321,11 +343,11 @@ if (import.meta.vitest) {
 	await fs.rm(path.join(rootDirFinder(), "snippets-fixtures"), { recursive: true, force: true });
 
 	console.debug("  🏭 Generating new fixtures...");
-	TEST_CASES.forEach(({ testName, task, model, providers, opts }) => {
+	TEST_CASES.forEach(({ testName, task, model, providers, lora, opts }) => {
 		console.debug(`      ${testName} (${providers.join(", ")})`);
 		inferenceSnippetLanguages.forEach(async (language) => {
 			providers.forEach(async (provider) => {
-				const generatedSnippets = generateInferenceSnippet(model, language, provider, task, opts);
+				const generatedSnippets = generateInferenceSnippet(model, language, provider, task, lora, opts);
 				await saveExpectedInferenceSnippet(testName, language, provider, generatedSnippets);
 			});
 		});
