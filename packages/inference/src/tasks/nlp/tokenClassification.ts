@@ -2,7 +2,6 @@ import type { TokenClassificationInput, TokenClassificationOutput } from "@huggi
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
 import { innerRequest } from "../../utils/request";
-import { toArray } from "../../utils/toArray";
 
 export type TokenClassificationArgs = BaseArgs & TokenClassificationInput;
 
