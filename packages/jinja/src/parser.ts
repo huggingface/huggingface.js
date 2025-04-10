@@ -139,12 +139,9 @@ export function parse(tokens: Token[]): Program {
 			const body: Statement[] = [];
 			expect(TOKEN_TYPES.CloseStatement, "Expected %} token");
 			while (
-				!(
-					tokens[current]?.type === TOKEN_TYPES.OpenStatement &&
-					tokens[current + 1]?.type === TOKEN_TYPES.EndSet
-				)
+				!(tokens[current]?.type === TOKEN_TYPES.OpenStatement && tokens[current + 1]?.type === TOKEN_TYPES.EndSet)
 			) {
-				const another = parseAny()
+				const another = parseAny();
 				body.push(another);
 			}
 			expect(TOKEN_TYPES.OpenStatement, "Expected {% token");
