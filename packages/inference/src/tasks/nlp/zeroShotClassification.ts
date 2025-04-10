@@ -2,7 +2,6 @@ import type { ZeroShotClassificationInput, ZeroShotClassificationOutput } from "
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
 import { innerRequest } from "../../utils/request";
-import { toArray } from "../../utils/toArray";
 
 export type ZeroShotClassificationArgs = BaseArgs & ZeroShotClassificationInput;
 
