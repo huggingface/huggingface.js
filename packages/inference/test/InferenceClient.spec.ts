@@ -812,6 +812,14 @@ describe.concurrent("InferenceClient", () => {
 					task: "text-to-image",
 					adapter: "lora",
 					adapterWeightsPath: "flux-chatgpt-ghibli-lora.safetensors"
+				},
+				"nerijs/pixel-art-xl": {
+					hfModelId: "nerijs/pixel-art-xl",
+					providerId: "fal-ai/lora",
+					status: "live",
+					task: "text-to-image",
+					adapter: "lora",
+					adapterWeightsPath: "pixel-art-xl.safetensors"
 				}
 			}
 
@@ -821,6 +829,20 @@ describe.concurrent("InferenceClient", () => {
 					provider: "fal-ai",
 					inputs:
 						"Extreme close-up of a single tiger eye, direct frontal view. Detailed iris and pupil. Sharp focus on eye texture and color. Natural lighting to capture authentic eye shine and depth.",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			/// Skipped: we need a way to pass the base model ID
+			it(`textToImage - SD LoRAs`, async () => {
+				const res = await client.textToImage({
+					model: "nerijs/pixel-art-xl",
+					provider: "fal-ai",
+					inputs:
+						"pixel, a cute corgi",
+					parameters: {
+						negative_prompt: "3d render, realistic"
+					}
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});

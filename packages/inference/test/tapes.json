@@ -7335,5 +7335,126 @@
         "content-type": "image/jpeg"
       }
     }
+  },
+  "5fef6f6bce544e72672c19dfec93834c40ed0e287402472c97ae9eee9fcfd927": {
+    "url": "https://fal.run/fal-ai/lora",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"negative_prompt\":\"3d render, realistic\",\"sync_mode\":true,\"prompt\":\"pixel, a cute corgi\",\"loras\":[{\"path\":\"https://huggingface.co/nerijs/pixel-art-xl/resolve/main/pixel-art-xl.safetensors\",\"scale\":1}]}"
+    },
+    "response": {
+      "body": "{\"detail\":[{\"loc\":[\"body\",\"model_name\"],\"msg\":\"field required\",\"type\":\"value_error.missing\"}]}",
+      "status": 422,
+      "statusText": "Unprocessable Entity",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "strict-transport-security": "max-age=31536000; includeSubDomains"
+      }
+    }
+  },
+  "85a89dd1106520aecd91ccfa28bae1be7d757e311a721f39b0890c1df2cebeb5": {
+    "url": "https://fal.run/fal-ai/lora",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"negative_prompt\":\"3d render, realistic\",\"sync_mode\":true,\"prompt\":\"pixel, a cute corgi\",\"loras\":[{\"path\":\"https://huggingface.co/nerijs/pixel-art-xl/resolve/main/pixel-art-xl.safetensors\",\"scale\":1}],\"model_name\":\"nerijs/pixel-art-xl\"}"
+    },
+    "response": {
+      "body": "{\"detail\":\"Model directory /data/models/hub/models--nerijs--pixel-art-xl/snapshots/8bf4a4d9ea283e00a51fafda8e0539f8248ea037 does not contain a config.json or model_index.json file.\"}",
+      "status": 422,
+      "statusText": "Unprocessable Entity",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "strict-transport-security": "max-age=31536000; includeSubDomains"
+      }
+    }
+  },
+  "ced2e2573f8bc275d7e9e3aa92ffc823d48345692c5d2d734922d532990fab6d": {
+    "url": "https://fal.run/fal-ai/lora",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"negative_prompt\":\"3d render, realistic\",\"sync_mode\":true,\"prompt\":\"pixel, a cute corgi\",\"loras\":[{\"path\":\"https://huggingface.co/nerijs/pixel-art-xl/resolve/main/pixel-art-xl.safetensors\",\"scale\":1}],\"model_name\":\"stabilityai/stable-diffusion-3.5-large\"}"
+    },
+    "response": {
+      "body": "{\"detail\":\"Pipeline <class 'text_to_image.pipeline.create_pipeline.<locals>.StableDiffusionXLControlNetPipeline'> expected {'vae', 'tokenizer', 'text_encoder', 'text_encoder_2', 'unet', 'tokenizer_2', 'scheduler', 'image_encoder', 'feature_extractor'}, but only {'vae', 'text_encoder', 'text_encoder_2', 'tokenizer', 'tokenizer_2', 'scheduler'} were passed.\"}",
+      "status": 422,
+      "statusText": "Unprocessable Entity",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "strict-transport-security": "max-age=31536000; includeSubDomains"
+      }
+    }
+  },
+  "25a434e9b46c441c744ed7fab976dd2ba1e69fbc1cb8e1510c9fe1e7980b99db": {
+    "url": "https://fal.run/fal-ai/lora",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"negative_prompt\":\"3d render, realistic\",\"sync_mode\":true,\"prompt\":\"pixel, a cute corgi\",\"loras\":[{\"path\":\"https://huggingface.co/nerijs/pixel-art-xl/resolve/main/pixel-art-xl.safetensors\",\"scale\":1}],\"model_name\":\"runwayml/stable-diffusion-v1-5\"}"
+    },
+    "response": {
+      "body": "{\"detail\":\"Target modules {'5.1.transformer_blocks.0.attn2.to_k', 'mid_block.1.proj_out', '3.1.transformer_blocks.0.attn1.to_v', '8.ff.net.2', '1.1.transformer_blocks.0.attn2.to_q', '5.1.transformer_blocks.0.attn1.to_k', '3.1.transformer_blocks.0.attn2.to_v', '4.1.transformer_blocks.0.attn2.to_q', '7.attn2.to_out.0', '3.1.transformer_blocks.0.ff.net.2', '9.ff.net.0.proj', '9.attn1.to_v', '6.attn1.to_q', '4.attn2.to_k', '2.1.transformer_blocks.0.attn2.to_k', '8.1.proj_in', '4.1.transformer_blocks.0.attn1.to_k', '6.attn2.to_k', '7.1.transformer_blocks.0.ff.net.2', '4.1.transformer_blocks.0.attn1.to_out.0', '7.1.proj_out', '3.1.proj_out', '5.1.proj_in', '9.attn2.to_v', '5.attn1.to_k', '7.1.transformer_blocks.0.attn2.to_v', '2.1.transformer_blocks.0.attn1.to_v', '4.1.transformer_blocks.0.ff.net.2', '6.attn2.to_q', '3.ff.net.2', '1.attn1.to_k', '7.1.transformer_blocks.0.ff.net.0.proj', '5.attn2.to_k', '7.1.transformer_blocks.0.attn2.to_q', '5.ff.net.2', '3.1.transformer_blocks.0.attn2.to_out.0', 'mid_block.1.transformer_blocks.0.attn2.to_out.0', '8.attn2.to_out.0', '5.1.transformer_blocks.0.attn1.to_out.0', '4.1.proj_out', '1.1.proj_in', '2.1.transformer_blocks.0.attn1.to_k', '0.1.transformer_blocks.0.attn2.to_k', '9.ff.net.2', '2.attn1.to_v', '8.attn1.to_q', '1.attn2.to_q', '2.attn2.to_k', '1.attn1.to_out.0', '2.1.proj_in', '4.1.transformer_blocks.0.attn1.to_q', '0.1.transformer_blocks.0.attn1.to_out.0', '5.attn2.to_q', '1.attn2.to_v', '2.1.transformer_blocks.0.ff.net.2', '3.1.proj_in', '0.1.transformer_blocks.0.attn2.to_q', '4.attn1.to_q', '1.1.proj_out', '4.1.transformer_blocks.0.attn2.to_k', '4.1.transformer_blocks.0.ff.net.0.proj', '4.1.proj_in', '7.1.transformer_blocks.0.attn2.to_out.0', '8.1.transformer_blocks.0.attn1.to_q', '7.1.transformer_blocks.0.attn1.to_out.0', 'mid_block.1.transformer_blocks.0.attn2.to_q', '2.attn1.to_q', '0.1.proj_out', '5.attn1.to_out.0', '7.1.proj_in', '8.1.transformer_blocks.0.attn1.to_v', '6.ff.net.0.proj', '3.attn2.to_v', '1.1.transformer_blocks.0.attn2.to_k', '8.attn2.to_v', '5.1.transformer_blocks.0.attn2.to_v', '4.attn2.to_v', 'mid_block.1.transformer_blocks.0.attn1.to_q', '1.attn2.to_k', '1.attn1.to_v', '8.1.transformer_blocks.0.attn2.to_v', '4.attn1.to_out.0', '5.1.transformer_blocks.0.ff.net.2', '0.1.transformer_blocks.0.attn1.to_v', '1.1.transformer_blocks.0.attn2.to_v', '3.attn1.to_out.0', '2.ff.net.2', '3.1.transformer_blocks.0.attn1.to_q', '0.1.transformer_blocks.0.attn2.to_v', '2.attn2.to_v', '2.attn1.to_k', '7.1.transformer_blocks.0.attn2.to_k', '4.ff.net.0.proj', '0.1.transformer_blocks.0.attn1.to_k', '1.1.transformer_blocks.0.ff.net.0.proj', '1.1.transformer_blocks.0.attn1.to_v', 'mid_block.1.proj_in', '3.attn1.to_k', '4.attn1.to_k', '1.ff.net.2', '4.ff.net.2', '5.1.transformer_blocks.0.ff.net.0.proj', '5.attn1.to_q', '2.1.transformer_blocks.0.attn2.to_v', '2.1.transformer_blocks.0.ff.net.0.proj', '8.1.proj_out', '5.1.transformer_blocks.0.attn1.to_q', '5.ff.net.0.proj', '8.attn2.to_q', '2.1.transformer_blocks.0.attn1.to_out.0', '1.1.transformer_blocks.0.attn1.to_q', '6.attn1.to_v', '2.attn2.to_q', '8.1.transformer_blocks.0.attn2.to_out.0', '3.1.transformer_blocks.0.attn1.to_out.0', '9.attn1.to_k', '4.attn2.to_q', '1.1.transformer_blocks.0.attn2.to_out.0', '4.attn1.to_v', '8.1.transformer_blocks.0.attn2.to_k', '1.ff.net.0.proj', '8.1.transformer_blocks.0.attn2.to_q', '5.attn2.to_out.0', '9.attn2.to_k', '7.attn1.to_k', '8.1.transformer_blocks.0.ff.net.2', '1.attn2.to_out.0', '8.1.transformer_blocks.0.ff.net.0.proj', '8.attn1.to_out.0', '3.attn2.to_k', '5.1.proj_out', '6.attn1.to_k', '5.1.transformer_blocks.0.attn2.to_out.0', '0.1.transformer_blocks.0.ff.net.0.proj', '7.attn1.to_q', '4.1.transformer_blocks.0.attn1.to_v', 'mid_block.1.transformer_blocks.0.ff.net.2', '1.1.transformer_blocks.0.attn1.to_out.0', '7.ff.net.0.proj', '7.1.transformer_blocks.0.attn1.to_k', '6.attn2.to_v', '2.attn1.to_out.0', '8.attn1.to_v', 'mid_block.1.transformer_blocks.0.ff.net.0.proj', 'mid_block.1.transformer_blocks.0.attn1.to_v', '5.1.transformer_blocks.0.attn1.to_v', '2.1.proj_out', '2.attn2.to_out.0', '7.1.transformer_blocks.0.attn1.to_q', '2.1.transformer_blocks.0.attn2.to_q', '3.attn1.to_q', '7.attn2.to_v', '3.1.transformer_blocks.0.attn2.to_k', '8.attn1.to_k', '1.attn1.to_q', '4.attn2.to_out.0', '2.1.transformer_blocks.0.attn1.to_q', '2.1.transformer_blocks.0.attn2.to_out.0', '7.attn1.to_out.0', '7.attn2.to_k', '9.attn1.to_out.0', '9.attn2.to_out.0', '8.ff.net.0.proj', '6.attn2.to_out.0', '3.1.transformer_blocks.0.attn1.to_k', 'mid_block.1.transformer_blocks.0.attn1.to_out.0', '0.1.transformer_blocks.0.attn1.to_q', '7.attn1.to_v', '5.1.transformer_blocks.0.attn2.to_q', '1.1.transformer_blocks.0.ff.net.2', '8.1.transformer_blocks.0.attn1.to_out.0', '3.ff.net.0.proj', '5.attn1.to_v', '5.attn2.to_v', '8.1.transformer_blocks.0.attn1.to_k', '7.ff.net.2', '0.1.proj_in', '2.ff.net.0.proj', 'mid_block.1.transformer_blocks.0.attn1.to_k', '0.1.transformer_blocks.0.ff.net.2', '8.attn2.to_k', '9.attn2.to_q', '7.1.transformer_blocks.0.attn1.to_v', 'mid_block.1.transformer_blocks.0.attn2.to_k', '6.ff.net.2', '3.attn1.to_v', '3.attn2.to_out.0', '0.1.transformer_blocks.0.attn2.to_out.0', 'mid_block.1.transformer_blocks.0.attn2.to_v', '9.attn1.to_q', '6.attn1.to_out.0', '3.1.transformer_blocks.0.attn2.to_q', '3.1.transformer_blocks.0.ff.net.0.proj', '7.attn2.to_q', '4.1.transformer_blocks.0.attn2.to_v', '4.1.transformer_blocks.0.attn2.to_out.0', '1.1.transformer_blocks.0.attn1.to_k', '3.attn2.to_q'} not found in the base model. Please check the target modules and try again.\"}",
+      "status": 422,
+      "statusText": "Unprocessable Entity",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "strict-transport-security": "max-age=31536000; includeSubDomains"
+      }
+    }
+  },
+  "39f5621936ac76ff5706d60c5db0b5ebf002fa098ce0c291e1e126cafbad4f66": {
+    "url": "https://fal.run/fal-ai/lora",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"negative_prompt\":\"3d render, realistic\",\"sync_mode\":true,\"prompt\":\"pixel, a cute corgi\",\"loras\":[{\"path\":\"https://huggingface.co/nerijs/pixel-art-xl/resolve/main/pixel-art-xl.safetensors\",\"scale\":1}],\"model_name\":\"stabilityai/stable-diffusion-xl-base-1.0\"}"
+    },
+    "response": {
+      "body": "{\"images\":[{\"url\":\"https://storage.googleapis.com/isolate-dev-hot-rooster_toolkit_bucket/github_110602490/070f98f0fd8b48a4830b5bf50db99c97_a353212eca494473a64bb8041df035b9.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=GOOG1EEBKROPDBU3DT4T2J7OT2WSRVO2Y7OAW7FKPOUVTV5DCK4QLAZC7YDAA%2F20250410%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250410T153534Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=0aa5b04468c961cd71b00c86f726fe90b81d6a2f5e57c719d75105667e887219\",\"content_type\":\"image/png\",\"file_name\":\"a353212eca494473a64bb8041df035b9.png\",\"file_size\":1011333,\"width\":1024,\"height\":1024}],\"seed\":5818982679236452000,\"has_nsfw_concepts\":[false],\"debug_latents\":null,\"debug_per_pass_latents\":null}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "strict-transport-security": "max-age=31536000; includeSubDomains"
+      }
+    }
+  },
+  "c05dd3b0e19ec126a16c8fc5a4a755353bb960821075affab663ce7b8af36c02": {
+    "url": "https://storage.googleapis.com/isolate-dev-hot-rooster_toolkit_bucket/github_110602490/070f98f0fd8b48a4830b5bf50db99c97_a353212eca494473a64bb8041df035b9.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=GOOG1EEBKROPDBU3DT4T2J7OT2WSRVO2Y7OAW7FKPOUVTV5DCK4QLAZC7YDAA%2F20250410%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250410T153534Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=0aa5b04468c961cd71b00c86f726fe90b81d6a2f5e57c719d75105667e887219",
+    "init": {},
+    "response": {
+      "body": "",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "access-control-expose-headers": "Content-Type, Access-Control-Allow-Origin, x-goog-resumable",
+        "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+        "cache-control": "private, max-age=0",
+        "content-type": "image/png",
+        "etag": "\"061e1ff1b817c77620f9433f47b51deb\"",
+        "expires": "Thu, 10 Apr 2025 15:35:35 GMT",
+        "last-modified": "Thu, 10 Apr 2025 15:35:34 GMT",
+        "server": "UploadServer"
+      }
+    }
   }
 }
