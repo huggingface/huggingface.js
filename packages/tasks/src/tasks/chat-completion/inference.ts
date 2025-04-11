@@ -130,7 +130,8 @@ export interface ChatCompletionInputToolCall {
 	[property: string]: unknown;
 }
 export interface ChatCompletionInputFunctionDefinition {
-	arguments: unknown;
+	/// TODO: fix upstream
+	parameters: unknown;
 	description?: string;
 	name: string;
 	[property: string]: unknown;
