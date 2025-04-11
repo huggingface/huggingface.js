@@ -14,10 +14,14 @@ export type TextToVideoOutput = Blob;
 export async function textToVideo(args: TextToVideoArgs, options?: Options): Promise<TextToVideoOutput> {
 	const provider = args.provider ?? "hf-inference";
 	const providerHelper = getProviderHelper(provider, "text-to-video");
-	const { data: response } = await innerRequest<FalAiQueueOutput | ReplicateOutput | NovitaOutput>(args, {
-		...options,
-		task: "text-to-video",
-	});
-	const { url, info } = await makeRequestOptions(args, { ...options, task: "text-to-video" });
+	const { data: response } = await innerRequest<FalAiQueueOutput | ReplicateOutput | NovitaOutput>(
+		args,
+		providerHelper,
+		{
+			...options,
+			task: "text-to-video",
+		}
+	);
+	const { url, info } = await makeRequestOptions(args, providerHelper, { ...options, task: "text-to-video" });
 	return providerHelper.getResponse(response, url, info.headers as Record<string, string>);
 }

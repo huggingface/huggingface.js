@@ -46,7 +46,7 @@ export async function zeroShotImageClassification(
 ): Promise<ZeroShotImageClassificationOutput> {
 	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "zero-shot-image-classification");
 	const payload = await preparePayload(args);
-	const { data: res } = await innerRequest<ZeroShotImageClassificationOutput>(payload, {
+	const { data: res } = await innerRequest<ZeroShotImageClassificationOutput>(payload, providerHelper, {
 		...options,
 		task: "zero-shot-image-classification",
 	});

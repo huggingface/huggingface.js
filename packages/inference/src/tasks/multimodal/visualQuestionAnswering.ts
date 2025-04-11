@@ -29,7 +29,7 @@ export async function visualQuestionAnswering(
 		},
 	} as RequestArgs;
 
-	const { data: res } = await innerRequest<VisualQuestionAnsweringOutput>(reqArgs, {
+	const { data: res } = await innerRequest<VisualQuestionAnsweringOutput>(reqArgs, providerHelper, {
 		...options,
 		task: "visual-question-answering",
 	});

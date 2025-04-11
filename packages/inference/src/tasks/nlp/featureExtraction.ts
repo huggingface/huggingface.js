@@ -18,7 +18,7 @@ export async function featureExtraction(
 	options?: Options
 ): Promise<FeatureExtractionOutput> {
 	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "feature-extraction");
-	const { data: res } = await innerRequest<FeatureExtractionOutput>(args, {
+	const { data: res } = await innerRequest<FeatureExtractionOutput>(args, providerHelper, {
 		...options,
 		task: "feature-extraction",
 	});

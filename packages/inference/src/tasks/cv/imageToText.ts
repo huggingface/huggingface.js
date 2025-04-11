@@ -12,7 +12,7 @@ export type ImageToTextArgs = BaseArgs & (ImageToTextInput | LegacyImageInput);
 export async function imageToText(args: ImageToTextArgs, options?: Options): Promise<ImageToTextOutput> {
 	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "image-to-text");
 	const payload = preparePayload(args);
-	const { data: res } = await innerRequest<[ImageToTextOutput]>(payload, {
+	const { data: res } = await innerRequest<[ImageToTextOutput]>(payload, providerHelper, {
 		...options,
 		task: "image-to-text",
 	});

@@ -13,9 +13,13 @@ export async function tableQuestionAnswering(
 	options?: Options
 ): Promise<TableQuestionAnsweringOutput[number]> {
 	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "table-question-answering");
-	const { data: res } = await innerRequest<TableQuestionAnsweringOutput | TableQuestionAnsweringOutput[number]>(args, {
-		...options,
-		task: "table-question-answering",
-	});
+	const { data: res } = await innerRequest<TableQuestionAnsweringOutput | TableQuestionAnsweringOutput[number]>(
+		args,
+		providerHelper,
+		{
+			...options,
+			task: "table-question-answering",
+		}
+	);
 	return providerHelper.getResponse(res);
 }

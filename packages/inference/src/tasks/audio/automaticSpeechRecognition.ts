@@ -20,7 +20,7 @@ export async function automaticSpeechRecognition(
 ): Promise<AutomaticSpeechRecognitionOutput> {
 	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "automatic-speech-recognition");
 	const payload = await buildPayload(args);
-	const { data: res } = await innerRequest<AutomaticSpeechRecognitionOutput>(payload, {
+	const { data: res } = await innerRequest<AutomaticSpeechRecognitionOutput>(payload, providerHelper, {
 		...options,
 		task: "automatic-speech-recognition",
 	});

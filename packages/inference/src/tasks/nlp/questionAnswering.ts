@@ -13,9 +13,13 @@ export async function questionAnswering(
 	options?: Options
 ): Promise<QuestionAnsweringOutput[number]> {
 	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "question-answering");
-	const { data: res } = await innerRequest<QuestionAnsweringOutput | QuestionAnsweringOutput[number]>(args, {
-		...options,
-		task: "question-answering",
-	});
+	const { data: res } = await innerRequest<QuestionAnsweringOutput | QuestionAnsweringOutput[number]>(
+		args,
+		providerHelper,
+		{
+			...options,
+			task: "question-answering",
+		}
+	);
 	return providerHelper.getResponse(res);
 }

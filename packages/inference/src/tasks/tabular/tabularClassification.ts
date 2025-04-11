@@ -26,7 +26,7 @@ export async function tabularClassification(
 	options?: Options
 ): Promise<TabularClassificationOutput> {
 	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "tabular-classification");
-	const { data: res } = await innerRequest<TabularClassificationOutput>(args, {
+	const { data: res } = await innerRequest<TabularClassificationOutput>(args, providerHelper, {
 		...options,
 		task: "tabular-classification",
 	});

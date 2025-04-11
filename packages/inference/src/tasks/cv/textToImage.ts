@@ -25,11 +25,11 @@ export async function textToImage(
 export async function textToImage(args: TextToImageArgs, options?: TextToImageOptions): Promise<Blob | string> {
 	const provider = args.provider ?? "hf-inference";
 	const providerHelper = getProviderHelper(provider, "text-to-image");
-	const { data: res } = await innerRequest<Record<string, unknown>>(args, {
+	const { data: res } = await innerRequest<Record<string, unknown>>(args, providerHelper, {
 		...options,
 		task: "text-to-image",
 	});
 
-	const { url, info } = await makeRequestOptions(args, { ...options, task: "text-to-image" });
+	const { url, info } = await makeRequestOptions(args, providerHelper, { ...options, task: "text-to-image" });
 	return providerHelper.getResponse(res, url, info.headers as Record<string, string>, options?.outputType);
 }

@@ -17,7 +17,7 @@ export async function audioClassification(
 ): Promise<AudioClassificationOutput> {
 	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "audio-classification");
 	const payload = preparePayload(args);
-	const { data: res } = await innerRequest<AudioClassificationOutput>(payload, {
+	const { data: res } = await innerRequest<AudioClassificationOutput>(payload, providerHelper, {
 		...options,
 		task: "audio-classification",
 	});
