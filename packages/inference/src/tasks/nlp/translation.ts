@@ -9,7 +9,7 @@ export type TranslationArgs = BaseArgs & TranslationInput;
  */
 export async function translation(args: TranslationArgs, options?: Options): Promise<TranslationOutput> {
 	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "translation");
-	const { data: res } = await innerRequest<TranslationOutput>(args, {
+	const { data: res } = await innerRequest<TranslationOutput>(args, providerHelper, {
 		...options,
 		task: "translation",
 	});

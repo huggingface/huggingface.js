@@ -17,7 +17,7 @@ export async function textGeneration(
 	const providerHelper = getProviderHelper(provider, "text-generation");
 	const { data: response } = await innerRequest<
 		HyperbolicTextCompletionOutput | TextGenerationOutput | TextGenerationOutput[]
-	>(args, {
+	>(args, providerHelper, {
 		...options,
 		task: "text-generation",
 	});
