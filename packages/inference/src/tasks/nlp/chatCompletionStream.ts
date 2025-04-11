@@ -13,5 +13,6 @@ export async function* chatCompletionStream(
 	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "conversational");
 	yield* innerStreamingRequest<ChatCompletionStreamOutput>(args, providerHelper, {
 		...options,
+		task: "conversational",
 	});
 }
