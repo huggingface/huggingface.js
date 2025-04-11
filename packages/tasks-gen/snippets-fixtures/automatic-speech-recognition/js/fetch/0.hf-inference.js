@@ -4,7 +4,7 @@ async function query(data) {
 		{
 			headers: {
 				Authorization: "Bearer api_token",
-				"Content-Type": "audio/flac"
+				"Content-Type": "audio/flac",
 			},
 			method: "POST",
 			body: JSON.stringify(data),

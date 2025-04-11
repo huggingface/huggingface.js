@@ -2,7 +2,9 @@ import base64
 import requests
 
 API_URL = "https://router.huggingface.co/hf-inference/models/openai/clip-vit-large-patch14"
-headers = {"Authorization": "Bearer api_token"}
+headers = {
+    "Authorization": "Bearer api_token",
+}
 
 def query(data):
     with open(data["image_path"], "rb") as f:
