@@ -33,6 +33,7 @@ const TEST_CASES: {
 	model: ModelDataMinimal;
 	providers: SnippetInferenceProvider[];
 	lora?: boolean;
+	billTo?: string;
 	opts?: Record<string, unknown>;
 }[] = [
 	{
@@ -221,15 +222,23 @@ const TEST_CASES: {
 		model: {
 			id: "openfree/flux-chatgpt-ghibli-lora",
 			pipeline_tag: "text-to-image",
-			tags: [
-				"lora",
-				"base_model:adapter:black-forest-labs/FLUX.1-dev",
-				"base_model:black-forest-labs/FLUX.1-dev",
-			],
+			tags: ["lora", "base_model:adapter:black-forest-labs/FLUX.1-dev", "base_model:black-forest-labs/FLUX.1-dev"],
 			inference: "",
 		},
 		lora: true,
 		providers: ["fal-ai"],
+	},
+	{
+		testName: "bill-to-param",
+		task: "conversational",
+		model: {
+			id: "meta-llama/Llama-3.1-8B-Instruct",
+			pipeline_tag: "text-generation",
+			tags: ["conversational"],
+			inference: "",
+		},
+		billTo: "huggingface",
+		providers: ["hf-inference"],
 	},
 ] as const;
 
@@ -257,18 +266,28 @@ function generateInferenceSnippet(
 	provider: SnippetInferenceProvider,
 	task: WidgetType,
 	lora: boolean = false,
+	billTo?: string,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
-	const allSnippets = snippets.getInferenceSnippets(model, "api_token", provider, {
-		hfModelId: model.id,
-		providerId: provider === "hf-inference" ? model.id : `<${provider} alias for ${model.id}>`,
-		status: "live",
-		task,
-		...(lora && task === "text-to-image" ? {
-			adapter: "lora",
-			adapterWeightsPath: `<path to LoRA weights in .safetensors format>`
-		} : {}),
-	}, opts);
+	const allSnippets = snippets.getInferenceSnippets(
+		model,
+		"api_token",
+		provider,
+		{
+			hfModelId: model.id,
+			providerId: provider === "hf-inference" ? model.id : `<${provider} alias for ${model.id}>`,
+			status: "live",
+			task,
+			...(lora && task === "text-to-image"
+				? {
+						adapter: "lora",
+						adapterWeightsPath: `<path to LoRA weights in .safetensors format>`,
+				  }
+				: {}),
+		},
+		billTo,
+		opts
+	);
 	return allSnippets
 		.filter((snippet) => snippet.language == language)
 		.sort((snippetA, snippetB) => snippetA.client.localeCompare(snippetB.client));
@@ -322,12 +341,12 @@ if (import.meta.vitest) {
 	const { describe, expect, it } = import.meta.vitest;
 
 	describe("inference API snippets", () => {
-		TEST_CASES.forEach(({ testName, task, model, providers, lora, opts }) => {
+		TEST_CASES.forEach(({ testName, task, model, providers, lora, billTo, opts }) => {
 			describe(testName, () => {
 				inferenceSnippetLanguages.forEach((language) => {
 					providers.forEach((provider) => {
 						it(language, async () => {
-							const generatedSnippets = generateInferenceSnippet(model, language, provider, task, lora, opts);
+							const generatedSnippets = generateInferenceSnippet(model, language, provider, task, lora, billTo, opts);
 							const expectedSnippets = await getExpectedInferenceSnippet(testName, language, provider);
 							expect(generatedSnippets).toEqual(expectedSnippets);
 						});
@@ -343,11 +362,11 @@ if (import.meta.vitest) {
 	await fs.rm(path.join(rootDirFinder(), "snippets-fixtures"), { recursive: true, force: true });
 
 	console.debug("  🏭 Generating new fixtures...");
-	TEST_CASES.forEach(({ testName, task, model, providers, lora, opts }) => {
+	TEST_CASES.forEach(({ testName, task, model, providers, lora, billTo, opts }) => {
 		console.debug(`      ${testName} (${providers.join(", ")})`);
 		inferenceSnippetLanguages.forEach(async (language) => {
 			providers.forEach(async (provider) => {
-				const generatedSnippets = generateInferenceSnippet(model, language, provider, task, lora, opts);
+				const generatedSnippets = generateInferenceSnippet(model, language, provider, task, lora, billTo, opts);
 				await saveExpectedInferenceSnippet(testName, language, provider, generatedSnippets);
 			});
 		});

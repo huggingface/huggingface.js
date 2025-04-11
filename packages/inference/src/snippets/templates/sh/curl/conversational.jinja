@@ -1,6 +1,9 @@
 curl {{ fullUrl }} \
     -H 'Authorization: {{ authorizationHeader }}' \
     -H 'Content-Type: application/json' \
+{% if billTo %}
+    -H 'X-HF-Bill-To: {{ billTo }}' \
+{% endif %}
     -d '{
 {{ providerInputs.asCurlString }},
         "stream": false
