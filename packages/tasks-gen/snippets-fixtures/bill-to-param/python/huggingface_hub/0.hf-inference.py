@@ -1,8 +1,9 @@
-from openai import OpenAI
+from huggingface_hub import InferenceClient
 
-client = OpenAI(
-    base_url="https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.1-8B-Instruct/v1",
+client = InferenceClient(
+    provider="hf-inference",
     api_key="api_token",
+    bill_to="huggingface",
 )
 
 completion = client.chat.completions.create(

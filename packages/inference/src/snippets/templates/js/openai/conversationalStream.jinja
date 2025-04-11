@@ -3,6 +3,11 @@ import { OpenAI } from "openai";
 const client = new OpenAI({
 	baseURL: "{{ baseUrl }}",
 	apiKey: "{{ accessToken }}",
+{% if billTo %}
+    defaultHeaders: {
+		"X-HF-Bill-To": "{{ billTo }}" 
+	}
+{% endif %}
 });
 
 const stream = await client.chat.completions.create({

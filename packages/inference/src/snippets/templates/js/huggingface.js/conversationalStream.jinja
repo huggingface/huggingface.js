@@ -8,7 +8,9 @@ const stream = await client.chatCompletionStream({
     provider: "{{ provider }}",
     model: "{{ model.id }}",
 {{ inputs.asTsString }}
-});
+}{% if billTo %}, {
+    billTo: "{{ billTo }}",
+}{% endif %});
 
 for await (const chunk of stream) {
 	if (chunk.choices && chunk.choices.length > 0) {

@@ -1,7 +1,9 @@
 import requests
 
 API_URL = "https://router.huggingface.co/hf-inference/models/templates/tabular-classification"
-headers = {"Authorization": "Bearer api_token"}
+headers = {
+    "Authorization": "Bearer api_token",
+}
 
 def query(payload):
     response = requests.post(API_URL, headers=headers, json=payload)

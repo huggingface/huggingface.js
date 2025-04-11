@@ -31,6 +31,7 @@ const TEST_CASES: {
 	testName: string;
 	model: ModelDataMinimal;
 	providers: SnippetInferenceProvider[];
+	billTo?: string;
 	opts?: Record<string, unknown>;
 }[] = [
 	{
@@ -197,6 +198,17 @@ const TEST_CASES: {
 		},
 		providers: ["hf-inference"],
 	},
+	{
+		testName: "bill-to-param",
+		model: {
+			id: "meta-llama/Llama-3.1-8B-Instruct",
+			pipeline_tag: "text-generation",
+			tags: ["conversational"],
+			inference: "",
+		},
+		billTo: "huggingface",
+		providers: ["hf-inference"],
+	},
 ] as const;
 
 const rootDirFinder = (): string => {
@@ -221,10 +233,11 @@ function generateInferenceSnippet(
 	model: ModelDataMinimal,
 	language: Language,
 	provider: SnippetInferenceProvider,
+	billTo?: string,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
 	const providerModelId = provider === "hf-inference" ? model.id : `<${provider} alias for ${model.id}>`;
-	const allSnippets = snippets.getInferenceSnippets(model, "api_token", provider, providerModelId, opts);
+	const allSnippets = snippets.getInferenceSnippets(model, "api_token", provider, providerModelId, billTo, opts);
 	return allSnippets
 		.filter((snippet) => snippet.language == language)
 		.sort((snippetA, snippetB) => snippetA.client.localeCompare(snippetB.client));
@@ -278,12 +291,12 @@ if (import.meta.vitest) {
 	const { describe, expect, it } = import.meta.vitest;
 
 	describe("inference API snippets", () => {
-		TEST_CASES.forEach(({ testName, model, providers, opts }) => {
+		TEST_CASES.forEach(({ testName, model, providers, billTo, opts }) => {
 			describe(testName, () => {
 				inferenceSnippetLanguages.forEach((language) => {
 					providers.forEach((provider) => {
 						it(language, async () => {
-							const generatedSnippets = generateInferenceSnippet(model, language, provider, opts);
+							const generatedSnippets = generateInferenceSnippet(model, language, provider, billTo, opts);
 							const expectedSnippets = await getExpectedInferenceSnippet(testName, language, provider);
 							expect(generatedSnippets).toEqual(expectedSnippets);
 						});
@@ -299,11 +312,11 @@ if (import.meta.vitest) {
 	await fs.rm(path.join(rootDirFinder(), "snippets-fixtures"), { recursive: true, force: true });
 
 	console.debug("  🏭 Generating new fixtures...");
-	TEST_CASES.forEach(({ testName, model, providers, opts }) => {
+	TEST_CASES.forEach(({ testName, model, providers, billTo, opts }) => {
 		console.debug(`      ${testName} (${providers.join(", ")})`);
 		inferenceSnippetLanguages.forEach(async (language) => {
 			providers.forEach(async (provider) => {
-				const generatedSnippets = generateInferenceSnippet(model, language, provider, opts);
+				const generatedSnippets = generateInferenceSnippet(model, language, provider, billTo, opts);
 				await saveExpectedInferenceSnippet(testName, language, provider, generatedSnippets);
 			});
 		});

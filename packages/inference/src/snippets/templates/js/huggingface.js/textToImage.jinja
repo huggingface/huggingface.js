@@ -7,5 +7,7 @@ const image = await client.textToImage({
     model: "{{ model.id }}",
 	inputs: {{ inputs.asObj.inputs }},
 	parameters: { num_inference_steps: 5 },
-});
+}{% if billTo %}, {
+    billTo: "{{ billTo }}",
+}{% endif %});
 /// Use the generated image (it's a Blob)

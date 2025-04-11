@@ -6,6 +6,8 @@ const chatCompletion = await client.chatCompletion({
     provider: "{{ provider }}",
     model: "{{ model.id }}",
 {{ inputs.asTsString }}
-});
+}{% if billTo %}, {
+    billTo: "{{ billTo }}",
+}{% endif %});
 
 console.log(chatCompletion.choices[0].message);
