@@ -5,6 +5,7 @@ import { homedir } from "os";
 import { join } from "path";
 import type { InferenceProvider } from "./types";
 import type {
+	ChatCompletionInputMessage,
 	ChatCompletionInputTool,
 	ChatCompletionOutput,
 } from "@huggingface/tasks/src/tasks/chat-completion/inference";
@@ -28,7 +29,7 @@ export class McpClient {
 		const transport = new StdioClientTransport({
 			command,
 			args,
-			env,
+			env: { ...env, PATH: process.env.PATH ?? "" },
 		});
 		const mcp = new Client({ name: "@huggingface/mcp-client", version: "1.0.0" });
 		await mcp.connect(transport);
@@ -58,7 +59,56 @@ export class McpClient {
 	}
 
 	async processQuery(query: string): Promise<ChatCompletionOutput> {
-		/// TODO
+		const messages: ChatCompletionInputMessage[] = [
+			{
+				role: "user",
+				content: query,
+			},
+		];
+
+		const response = await this.client.chatCompletion({
+			provider: this.provider,
+			model: this.model,
+			messages,
+			tools: this.availableTools,
+			tool_choice: "auto",
+		});
+
+		const toolCalls = response.choices[0].message.tool_calls;
+		if (!toolCalls || toolCalls.length === 0) {
+			return response;
+		}
+		for (const toolCall of toolCalls) {
+			const toolName = toolCall.function.name;
+			const toolArgs = JSON.parse(`${toolCall.function.arguments}`);
+
+			/// Get the appropriate session for this tool
+			const client = this.clients.get(toolName);
+			if (client) {
+				const result = await client.callTool({ name: toolName, arguments: toolArgs });
+				messages.push({
+					tool_call_id: toolCall.id,
+					role: "tool",
+					name: toolName,
+					content: (result.content as Array<{ text: string }>)[0].text,
+				});
+			} else {
+				messages.push({
+					tool_call_id: toolCall.id,
+					role: "tool",
+					name: toolName,
+					content: `Error: No session found for tool: ${toolName}`,
+				});
+			}
+		}
+
+		const enrichedResponse = await this.client.chatCompletion({
+			provider: this.provider,
+			model: this.model,
+			messages,
+		});
+
+		return enrichedResponse;
 	}
 
 	async cleanup(): Promise<void> {
@@ -99,6 +149,4 @@ async function main() {
 	}
 }
 
-if (require.main === module) {
-	main();
-}
+main();
