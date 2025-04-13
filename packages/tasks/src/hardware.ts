@@ -434,6 +434,18 @@ export const SKUS = {
 				tflops: 22.58,
 				memory: [10],
 			},
+			"RX 6650 XT": {
+				tflops: 21.59,
+				memory: [8],
+			},
+			"RX 6600 XT": {
+				tflops: 21.21,
+				memory: [8],
+			},
+			"RX 6600": {
+				tflops: 17.86,
+				memory: [8],
+			},
 			"Radeon Pro VII": {
 				tflops: 26.11,
 				memory: [16],
