@@ -489,6 +489,9 @@ export const SKUS = {
 			"Intel Core Ultra 7 265KF": {
 				tflops: 1.53,
 			},
+			"Intel Core 14th Generation (i7)": {
+				tflops: 1.13,
+			},
 			"Intel Core 13th Generation (i9)": {
 				tflops: 0.85,
 			},
