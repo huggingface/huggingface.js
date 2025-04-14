@@ -7580,5 +7580,32 @@
         "content-type": "image/jpeg"
       }
     }
+  },
+  "e1d5d3aee2e02bca51a9816dd617878afbbb1e5f7e8d27000251804d386a705d": {
+    "url": "https://router.huggingface.co/hf-inference/pipeline/sentence-similarity/sentence-transformers/paraphrase-xlm-r-multilingual-v1",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":{\"source_sentence\":\"That is a happy person\",\"sentences\":[\"That is a happy dog\",\"That is a very happy person\",\"Today is a sunny day\"]}}"
+    },
+    "response": {
+      "body": "[0.6623499989509583,0.9382342100143433,0.22963330149650574]",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-allow-origin": "*",
+        "access-control-expose-headers": "x-compute-type, x-compute-time",
+        "connection": "keep-alive",
+        "content-type": "application/json",
+        "cross-origin-opener-policy": "same-origin",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "server": "uvicorn",
+        "transfer-encoding": "chunked",
+        "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+      }
+    }
   }
 }
