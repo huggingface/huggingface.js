@@ -10,7 +10,7 @@ export type SummarizationArgs = BaseArgs & SummarizationInput;
  */
 export async function summarization(args: SummarizationArgs, options?: Options): Promise<SummarizationOutput> {
 	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "summarization");
-	const { data: res } = await innerRequest<SummarizationOutput[]>(args, {
+	const { data: res } = await innerRequest<SummarizationOutput[]>(args, providerHelper, {
 		...options,
 		task: "summarization",
 	});

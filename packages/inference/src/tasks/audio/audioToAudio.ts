@@ -38,7 +38,7 @@ export interface AudioToAudioOutput {
 export async function audioToAudio(args: AudioToAudioArgs, options?: Options): Promise<AudioToAudioOutput[]> {
 	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "audio-to-audio");
 	const payload = preparePayload(args);
-	const { data: res } = await innerRequest<AudioToAudioOutput>(payload, {
+	const { data: res } = await innerRequest<AudioToAudioOutput>(payload, providerHelper, {
 		...options,
 		task: "audio-to-audio",
 	});

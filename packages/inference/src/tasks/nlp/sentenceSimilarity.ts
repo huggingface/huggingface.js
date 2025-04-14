@@ -13,7 +13,7 @@ export async function sentenceSimilarity(
 	options?: Options
 ): Promise<SentenceSimilarityOutput> {
 	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "sentence-similarity");
-	const { data: res } = await innerRequest<SentenceSimilarityOutput>(args, {
+	const { data: res } = await innerRequest<SentenceSimilarityOutput>(args, providerHelper, {
 		...options,
 		task: "sentence-similarity",
 	});
