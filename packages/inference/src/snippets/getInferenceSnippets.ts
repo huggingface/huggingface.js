@@ -148,14 +148,14 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 			providerModelId,
 			providerHelper,
 			{
-				accessToken: accessToken,
-				provider: provider,
+				accessToken,
+				provider,
 				...inputs,
 			} as RequestArgs,
 			inferenceProviderMapping,
 			{
-				task: task,
-				billTo: billTo,
+				task,
+				billTo,
 			}
 		);
 
