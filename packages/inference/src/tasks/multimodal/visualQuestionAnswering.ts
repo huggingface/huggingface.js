@@ -3,10 +3,10 @@ import type {
 	VisualQuestionAnsweringInputData,
 	VisualQuestionAnsweringOutput,
 } from "@huggingface/tasks";
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options, RequestArgs } from "../../types";
 import { base64FromBytes } from "../../utils/base64FromBytes";
-import { request } from "../custom/request";
+import { innerRequest } from "../../utils/request";
 
 /// Override the type to properly set inputs.image as Blob
 export type VisualQuestionAnsweringArgs = BaseArgs &
@@ -19,6 +19,7 @@ export async function visualQuestionAnswering(
 	args: VisualQuestionAnsweringArgs,
 	options?: Options
 ): Promise<VisualQuestionAnsweringOutput[number]> {
+	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "visual-question-answering");
 	const reqArgs: RequestArgs = {
 		...args,
 		inputs: {
@@ -27,17 +28,10 @@ export async function visualQuestionAnswering(
 			image: base64FromBytes(new Uint8Array(await args.inputs.image.arrayBuffer())),
 		},
 	} as RequestArgs;
-	const res = await request<VisualQuestionAnsweringOutput>(reqArgs, {
+
+	const { data: res } = await innerRequest<VisualQuestionAnsweringOutput>(reqArgs, {
 		...options,
 		task: "visual-question-answering",
 	});
-	const isValidOutput =
-		Array.isArray(res) &&
-		res.every(
-			(elem) => typeof elem === "object" && !!elem && typeof elem?.answer === "string" && typeof elem.score === "number"
-		);
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected Array<{answer: string, score: number}>");
-	}
-	return res[0];
+	return providerHelper.getResponse(res);
 }

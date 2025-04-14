@@ -14,28 +14,13 @@
  *
  * Thanks!
  */
-import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../types";
+import { BaseConversationalTask } from "./providerHelper";
 
-const COHERE_API_BASE_URL = "https://api.cohere.com";
-
-const makeBody = (params: BodyParams): Record<string, unknown> => {
-	return {
-		...params.args,
-		model: params.model,
-	};
-};
-
-const makeHeaders = (params: HeaderParams): Record<string, string> => {
-	return { Authorization: `Bearer ${params.accessToken}` };
-};
-
-const makeUrl = (params: UrlParams): string => {
-	return `${params.baseUrl}/compatibility/v1/chat/completions`;
-};
-
-export const COHERE_CONFIG: ProviderConfig = {
-	baseUrl: COHERE_API_BASE_URL,
-	makeBody,
-	makeHeaders,
-	makeUrl,
-};
+export class CohereConversationalTask extends BaseConversationalTask {
+	constructor() {
+		super("cohere", "https://api.cohere.com");
+	}
+	override makeRoute(): string {
+		return "/compatibility/v1/chat/completions";
+	}
+}

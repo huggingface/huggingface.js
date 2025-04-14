@@ -18,6 +18,10 @@ export interface ListFileEntry {
 		pointerSize: number;
 	};
 	/**
+	 * Xet-backed hash, a new protocol replacing LFS for big files.
+	 */
+	xetHash?: string;
+	/**
 	 * Only fetched if `expand` is set to `true` in the `listFiles` call.
 	 */
 	lastCommit?: {

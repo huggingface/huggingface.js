@@ -14,35 +14,74 @@
  *
  * Thanks!
  */
-import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../types";
+import { InferenceOutputError } from "../lib/InferenceOutputError";
+import { isUrl } from "../lib/isUrl";
+import type { BodyParams, UrlParams } from "../types";
+import { omit } from "../utils/omit";
+import {
+	BaseConversationalTask,
+	BaseTextGenerationTask,
+	TaskProviderHelper,
+	type TextToVideoTaskHelper,
+} from "./providerHelper";
 
 const NOVITA_API_BASE_URL = "https://api.novita.ai";
-
-const makeBody = (params: BodyParams): Record<string, unknown> => {
-	return {
-		...params.args,
-		...(params.chatCompletion ? { model: params.model } : undefined),
+export interface NovitaOutput {
+	video: {
+		video_url: string;
 	};
-};
-
-const makeHeaders = (params: HeaderParams): Record<string, string> => {
-	return { Authorization: `Bearer ${params.accessToken}` };
-};
-
-const makeUrl = (params: UrlParams): string => {
-	if (params.chatCompletion) {
-		return `${params.baseUrl}/v3/openai/chat/completions`;
-	} else if (params.task === "text-generation") {
-		return `${params.baseUrl}/v3/openai/completions`;
-	} else if (params.task === "text-to-video") {
-		return `${params.baseUrl}/v3/hf/${params.model}`;
+}
+export class NovitaTextGenerationTask extends BaseTextGenerationTask {
+	constructor() {
+		super("novita", NOVITA_API_BASE_URL);
 	}
-	return params.baseUrl;
-};
 
-export const NOVITA_CONFIG: ProviderConfig = {
-	baseUrl: NOVITA_API_BASE_URL,
-	makeBody,
-	makeHeaders,
-	makeUrl,
-};
+	override makeRoute(): string {
+		return "/v3/openai/chat/completions";
+	}
+}
+
+export class NovitaConversationalTask extends BaseConversationalTask {
+	constructor() {
+		super("novita", NOVITA_API_BASE_URL);
+	}
+
+	override makeRoute(): string {
+		return "/v3/openai/chat/completions";
+	}
+}
+export class NovitaTextToVideoTask extends TaskProviderHelper implements TextToVideoTaskHelper {
+	constructor() {
+		super("novita", NOVITA_API_BASE_URL);
+	}
+
+	makeRoute(params: UrlParams): string {
+		return `/v3/hf/${params.model}`;
+	}
+
+	preparePayload(params: BodyParams): Record<string, unknown> {
+		return {
+			...omit(params.args, ["inputs", "parameters"]),
+			...(params.args.parameters as Record<string, unknown>),
+			prompt: params.args.inputs,
+		};
+	}
+	override async getResponse(response: NovitaOutput): Promise<Blob> {
+		const isValidOutput =
+			typeof response === "object" &&
+			!!response &&
+			"video" in response &&
+			typeof response.video === "object" &&
+			!!response.video &&
+			"video_url" in response.video &&
+			typeof response.video.video_url === "string" &&
+			isUrl(response.video.video_url);
+
+		if (!isValidOutput) {
+			throw new InferenceOutputError("Expected { video: { video_url: string } }");
+		}
+
+		const urlResponse = await fetch(response.video.video_url);
+		return await urlResponse.blob();
+	}
+}

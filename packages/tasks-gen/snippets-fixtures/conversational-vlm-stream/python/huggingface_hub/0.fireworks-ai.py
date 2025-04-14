@@ -24,7 +24,7 @@ stream = client.chat.completions.create(
             ]
         }
     ],
-    max_tokens=500,
+    max_tokens=512,
     stream=True,
 )
 

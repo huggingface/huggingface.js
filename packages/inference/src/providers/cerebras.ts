@@ -14,28 +14,11 @@
  *
  * Thanks!
  */
-import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../types";
 
-const CEREBRAS_API_BASE_URL = "https://api.cerebras.ai";
+import { BaseConversationalTask } from "./providerHelper";
 
-const makeBody = (params: BodyParams): Record<string, unknown> => {
-	return {
-		...params.args,
-		model: params.model,
-	};
-};
-
-const makeHeaders = (params: HeaderParams): Record<string, string> => {
-	return { Authorization: `Bearer ${params.accessToken}` };
-};
-
-const makeUrl = (params: UrlParams): string => {
-	return `${params.baseUrl}/v1/chat/completions`;
-};
-
-export const CEREBRAS_CONFIG: ProviderConfig = {
-	baseUrl: CEREBRAS_API_BASE_URL,
-	makeBody,
-	makeHeaders,
-	makeUrl,
-};
+export class CerebrasConversationalTask extends BaseConversationalTask {
+	constructor() {
+		super("cerebras", "https://api.cerebras.ai");
+	}
+}

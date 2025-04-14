@@ -14,31 +14,14 @@
  *
  * Thanks!
  */
-import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../types";
+import { BaseConversationalTask } from "./providerHelper";
 
-const FIREWORKS_AI_API_BASE_URL = "https://api.fireworks.ai";
-
-const makeBody = (params: BodyParams): Record<string, unknown> => {
-	return {
-		...params.args,
-		...(params.chatCompletion ? { model: params.model } : undefined),
-	};
-};
-
-const makeHeaders = (params: HeaderParams): Record<string, string> => {
-	return { Authorization: `Bearer ${params.accessToken}` };
-};
-
-const makeUrl = (params: UrlParams): string => {
-	if (params.chatCompletion) {
-		return `${params.baseUrl}/inference/v1/chat/completions`;
+export class FireworksConversationalTask extends BaseConversationalTask {
+	constructor() {
+		super("fireworks-ai", "https://api.fireworks.ai");
 	}
-	return `${params.baseUrl}/inference`;
-};
 
-export const FIREWORKS_AI_CONFIG: ProviderConfig = {
-	baseUrl: FIREWORKS_AI_API_BASE_URL,
-	makeBody,
-	makeHeaders,
-	makeUrl,
-};
+	override makeRoute(): string {
+		return "/inference/v1/chat/completions";
+	}
+}

@@ -1,8 +1,7 @@
 import type { SentenceSimilarityInput, SentenceSimilarityOutput } from "@huggingface/tasks";
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
-import { omit } from "../../utils/omit";
+import { innerRequest } from "../../utils/request";
 
 export type SentenceSimilarityArgs = BaseArgs & SentenceSimilarityInput;
 
@@ -13,22 +12,10 @@ export async function sentenceSimilarity(
 	args: SentenceSimilarityArgs,
 	options?: Options
 ): Promise<SentenceSimilarityOutput> {
-	const res = await request<SentenceSimilarityOutput>(prepareInput(args), {
+	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "sentence-similarity");
+	const { data: res } = await innerRequest<SentenceSimilarityOutput>(args, {
 		...options,
 		task: "sentence-similarity",
 	});
-
-	const isValidOutput = Array.isArray(res) && res.every((x) => typeof x === "number");
-	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected number[]");
-	}
-	return res;
-}
-
-function prepareInput(args: SentenceSimilarityArgs) {
-	return {
-		...omit(args, ["inputs", "parameters"]),
-		inputs: { ...omit(args.inputs, "sourceSentence") },
-		parameters: { source_sentence: args.inputs.sourceSentence, ...args.parameters },
-	};
+	return providerHelper.getResponse(res);
 }

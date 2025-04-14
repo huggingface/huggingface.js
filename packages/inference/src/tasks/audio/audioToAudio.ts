@@ -1,6 +1,6 @@
-import { InferenceOutputError } from "../../lib/InferenceOutputError";
+import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
-import { request } from "../custom/request";
+import { innerRequest } from "../../utils/request";
 import type { LegacyAudioInput } from "./utils";
 import { preparePayload } from "./utils";
 
@@ -36,34 +36,11 @@ export interface AudioToAudioOutput {
  * Example model: speechbrain/sepformer-wham does audio source separation.
  */
 export async function audioToAudio(args: AudioToAudioArgs, options?: Options): Promise<AudioToAudioOutput[]> {
+	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "audio-to-audio");
 	const payload = preparePayload(args);
-	const res = await request<AudioToAudioOutput>(payload, {
+	const { data: res } = await innerRequest<AudioToAudioOutput>(payload, {
 		...options,
 		task: "audio-to-audio",
 	});
-
-	return validateOutput(res);
-}
-
-function validateOutput(output: unknown): AudioToAudioOutput[] {
-	if (!Array.isArray(output)) {
-		throw new InferenceOutputError("Expected Array");
-	}
-	if (
-		!output.every((elem): elem is AudioToAudioOutput => {
-			return (
-				typeof elem === "object" &&
-				elem &&
-				"label" in elem &&
-				typeof elem.label === "string" &&
-				"content-type" in elem &&
-				typeof elem["content-type"] === "string" &&
-				"blob" in elem &&
-				typeof elem.blob === "string"
-			);
-		})
-	) {
-		throw new InferenceOutputError("Expected Array<{label: string, audio: Blob}>");
-	}
-	return output;
+	return providerHelper.getResponse(res);
 }

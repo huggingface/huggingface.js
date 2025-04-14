@@ -353,6 +353,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"sbs"`,
 	},
+	"geometry-crafter": {
+		prettyLabel: "GeometryCrafter",
+		repoName: "GeometryCrafter",
+		repoUrl: "https://github.com/TencentARC/GeometryCrafter",
+		countDownloads: `path:"point_map_vae/diffusion_pytorch_model.safetensors"`,
+	},
 	gliner: {
 		prettyLabel: "GLiNER",
 		repoName: "GLiNER",
@@ -413,6 +419,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/DigitalPhonetics/IMS-Toucan",
 		countDownloads: `path:"embedding_gan.pt" OR path:"Vocoder.pt" OR path:"ToucanTTS.pt"`,
 	},
+	"infinite-you": {
+		prettyLabel: "InfiniteYou",
+		repoName: "InfiniteYou",
+		repoUrl: "https://github.com/bytedance/InfiniteYou",
+		filter: false,
+		countDownloads: `path:"infu_flux_v1.0/sim_stage1/image_proj_model.bin" OR path:"infu_flux_v1.0/aes_stage2/image_proj_model.bin"`,
+	},
 	keras: {
 		prettyLabel: "Keras",
 		repoName: "Keras",
@@ -443,6 +456,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "K2",
 		repoName: "k2",
 		repoUrl: "https://github.com/k2-fsa/k2",
+	},
+	"lightning-ir": {
+		prettyLabel: "Lightning IR",
+		repoName: "Lightning IR",
+		repoUrl: "https://github.com/webis-de/lightning-ir",
+		snippets: snippets.lightning_ir,
 	},
 	liveportrait: {
 		prettyLabel: "LivePortrait",
@@ -900,6 +919,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
 		snippets: snippets.ultralytics,
+	},
+	"uni-3dar": {
+		prettyLabel: "Uni-3DAR",
+		repoName: "Uni-3DAR",
+		repoUrl: "https://github.com/dptech-corp/Uni-3DAR",
+		docsUrl: "https://github.com/dptech-corp/Uni-3DAR",
+		countDownloads: `path_extension:"pt"`,
 	},
 	"unity-sentis": {
 		prettyLabel: "unity-sentis",

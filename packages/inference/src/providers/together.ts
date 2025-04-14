@@ -14,37 +14,105 @@
  *
  * Thanks!
  */
-import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../types";
+import type { ChatCompletionOutput, TextGenerationOutput, TextGenerationOutputFinishReason } from "@huggingface/tasks";
+import { InferenceOutputError } from "../lib/InferenceOutputError";
+import type { BodyParams } from "../types";
+import { omit } from "../utils/omit";
+import {
+	BaseConversationalTask,
+	BaseTextGenerationTask,
+	TaskProviderHelper,
+	type TextToImageTaskHelper,
+} from "./providerHelper";
 
 const TOGETHER_API_BASE_URL = "https://api.together.xyz";
 
-const makeBody = (params: BodyParams): Record<string, unknown> => {
-	return {
-		...params.args,
-		model: params.model,
-	};
-};
+interface TogetherTextCompletionOutput extends Omit<ChatCompletionOutput, "choices"> {
+	choices: Array<{
+		text: string;
+		finish_reason: TextGenerationOutputFinishReason;
+		seed: number;
+		logprobs: unknown;
+		index: number;
+	}>;
+}
 
-const makeHeaders = (params: HeaderParams): Record<string, string> => {
-	return { Authorization: `Bearer ${params.accessToken}` };
-};
+interface TogetherBase64ImageGeneration {
+	data: Array<{
+		b64_json: string;
+	}>;
+}
 
-const makeUrl = (params: UrlParams): string => {
-	if (params.task === "text-to-image") {
-		return `${params.baseUrl}/v1/images/generations`;
+export class TogetherConversationalTask extends BaseConversationalTask {
+	constructor() {
+		super("together", TOGETHER_API_BASE_URL);
 	}
-	if (params.chatCompletion) {
-		return `${params.baseUrl}/v1/chat/completions`;
-	}
-	if (params.task === "text-generation") {
-		return `${params.baseUrl}/v1/completions`;
-	}
-	return params.baseUrl;
-};
+}
 
-export const TOGETHER_CONFIG: ProviderConfig = {
-	baseUrl: TOGETHER_API_BASE_URL,
-	makeBody,
-	makeHeaders,
-	makeUrl,
-};
+export class TogetherTextGenerationTask extends BaseTextGenerationTask {
+	constructor() {
+		super("together", TOGETHER_API_BASE_URL);
+	}
+
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		return {
+			model: params.model,
+			...params.args,
+			prompt: params.args.inputs,
+		};
+	}
+
+	override async getResponse(response: TogetherTextCompletionOutput): Promise<TextGenerationOutput> {
+		if (
+			typeof response === "object" &&
+			"choices" in response &&
+			Array.isArray(response?.choices) &&
+			typeof response?.model === "string"
+		) {
+			const completion = response.choices[0];
+			return {
+				generated_text: completion.text,
+			};
+		}
+		throw new InferenceOutputError("Expected Together text generation response format");
+	}
+}
+
+export class TogetherTextToImageTask extends TaskProviderHelper implements TextToImageTaskHelper {
+	constructor() {
+		super("together", TOGETHER_API_BASE_URL);
+	}
+
+	makeRoute(): string {
+		return "v1/images/generations";
+	}
+
+	preparePayload(params: BodyParams): Record<string, unknown> {
+		return {
+			...omit(params.args, ["inputs", "parameters"]),
+			...(params.args.parameters as Record<string, unknown>),
+			prompt: params.args.inputs,
+			response_format: "base64",
+			model: params.model,
+		};
+	}
+
+	async getResponse(response: TogetherBase64ImageGeneration, outputType?: "url" | "blob"): Promise<string | Blob> {
+		if (
+			typeof response === "object" &&
+			"data" in response &&
+			Array.isArray(response.data) &&
+			response.data.length > 0 &&
+			"b64_json" in response.data[0] &&
+			typeof response.data[0].b64_json === "string"
+		) {
+			const base64Data = response.data[0].b64_json;
+			if (outputType === "url") {
+				return `data:image/jpeg;base64,${base64Data}`;
+			}
+			return fetch(`data:image/jpeg;base64,${base64Data}`).then((res) => res.blob());
+		}
+
+		throw new InferenceOutputError("Expected Together text-to-image response format");
+	}
+}

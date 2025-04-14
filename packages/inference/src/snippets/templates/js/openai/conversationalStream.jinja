@@ -5,18 +5,12 @@ const client = new OpenAI({
 	apiKey: "{{ accessToken }}",
 });
 
-let out = "";
-
 const stream = await client.chat.completions.create({
-    provider: "{{ provider }}",
-    model: "{{ model.id }}",
+    model: "{{ providerModelId }}",
 {{ inputs.asTsString }}
+    stream: true,
 });
 
 for await (const chunk of stream) {
-	if (chunk.choices && chunk.choices.length > 0) {
-		const newContent = chunk.choices[0].delta.content;
-		out += newContent;
-		console.log(newContent);
-	}  
+    process.stdout.write(chunk.choices[0]?.delta?.content || "");
 }

@@ -14,28 +14,77 @@
  *
  * Thanks!
  */
-import type { ProviderConfig, UrlParams, HeaderParams, BodyParams } from "../types";
+
+import { BaseConversationalTask, BaseTextGenerationTask } from "./providerHelper";
+import type {
+	ChatCompletionOutput,
+	ChatCompletionStreamOutput,
+	TextGenerationOutput,
+	TextGenerationOutputFinishReason,
+} from "@huggingface/tasks";
+import { InferenceOutputError } from "../lib/InferenceOutputError";
+import type { BodyParams } from "../types";
+import { omit } from "../utils/omit";
 
 const OVHCLOUD_API_BASE_URL = "https://oai.endpoints.kepler.ai.cloud.ovh.net";
 
-const makeBody = (params: BodyParams): Record<string, unknown> => {
+function prepareBaseOvhCloudPayload(params: BodyParams): Record<string, unknown> {
 	return {
-		...params.args,
 		model: params.model,
+		...omit(params.args, ["inputs", "parameters"]),
+		...(params.args.parameters
+			? {
+				max_tokens: (params.args.parameters as Record<string, unknown>).max_new_tokens,
+				...omit(params.args.parameters as Record<string, unknown>, "max_new_tokens"),
+			}
+			: undefined),
+		prompt: params.args.inputs,
 	};
-};
+}
 
-const makeHeaders = (params: HeaderParams): Record<string, string> => {
-	return { Authorization: `Bearer ${params.accessToken}` };
-};
+interface OvhCloudTextCompletionOutput extends Omit<ChatCompletionOutput, "choices"> {
+	choices: Array<{
+		text: string;
+		finish_reason: TextGenerationOutputFinishReason;
+		logprobs: unknown;
+		index: number;
+	}>;
+}
 
-const makeUrl = (params: UrlParams): string => {
-	return `${params.baseUrl}/v1/chat/completions`;
-};
+export class OvhCloudConversationalTask extends BaseConversationalTask {
+	constructor() {
+		super("ovhcloud", OVHCLOUD_API_BASE_URL);
+	}
 
-export const OVHCLOUD_CONFIG: ProviderConfig = {
-	baseUrl: OVHCLOUD_API_BASE_URL,
-	makeBody,
-	makeHeaders,
-	makeUrl,
-};
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		return prepareBaseOvhCloudPayload(params);
+	}
+}
+
+export class OvhCloudTextGenerationTask extends BaseTextGenerationTask {
+	constructor() {
+		super("ovhcloud", OVHCLOUD_API_BASE_URL);
+	}
+
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		const payload = prepareBaseOvhCloudPayload(params);
+		payload.prompt = params.args.inputs;
+		return payload;
+	}
+
+	override async getResponse(response: OvhCloudTextCompletionOutput): Promise<TextGenerationOutput> {
+		if (
+			typeof response === "object" &&
+			"choices" in response &&
+			Array.isArray(response?.choices) &&
+			typeof response?.model === "string"
+		) {
+			const completion = response.choices[0];
+			return {
+				generated_text: completion.text,
+			};
+		}
+		throw new InferenceOutputError("Expected OVHcloud text generation response format");
+	}
+
+}
