@@ -17,11 +17,7 @@
 import { InferenceOutputError } from "../lib/InferenceOutputError";
 import type { BodyParams, UrlParams } from "../types";
 import { omit } from "../utils/omit";
-import {
-	BaseConversationalTask,
-	TaskProviderHelper,
-	type TextToImageTaskHelper,
-} from "./providerHelper";
+import { BaseConversationalTask, TaskProviderHelper, type TextToImageTaskHelper } from "./providerHelper";
 
 const NSCALE_API_BASE_URL = "https://inference.api.nscale.com";
 
