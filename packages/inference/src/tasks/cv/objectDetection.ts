@@ -13,7 +13,7 @@ export type ObjectDetectionArgs = BaseArgs & (ObjectDetectionInput | LegacyImage
 export async function objectDetection(args: ObjectDetectionArgs, options?: Options): Promise<ObjectDetectionOutput> {
 	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "object-detection");
 	const payload = preparePayload(args);
-	const { data: res } = await innerRequest<ObjectDetectionOutput>(payload, {
+	const { data: res } = await innerRequest<ObjectDetectionOutput>(payload, providerHelper, {
 		...options,
 		task: "object-detection",
 	});

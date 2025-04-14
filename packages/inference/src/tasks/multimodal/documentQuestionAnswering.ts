@@ -30,6 +30,7 @@ export async function documentQuestionAnswering(
 	} as RequestArgs;
 	const { data: res } = await innerRequest<DocumentQuestionAnsweringOutput | DocumentQuestionAnsweringOutput[number]>(
 		reqArgs,
+		providerHelper,
 		{
 			...options,
 			task: "document-question-answering",

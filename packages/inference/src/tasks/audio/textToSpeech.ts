@@ -14,7 +14,7 @@ interface OutputUrlTextToSpeechGeneration {
 export async function textToSpeech(args: TextToSpeechArgs, options?: Options): Promise<Blob> {
 	const provider = args.provider ?? "hf-inference";
 	const providerHelper = getProviderHelper(provider, "text-to-speech");
-	const { data: res } = await innerRequest<Blob | OutputUrlTextToSpeechGeneration>(args, {
+	const { data: res } = await innerRequest<Blob | OutputUrlTextToSpeechGeneration>(args, providerHelper, {
 		...options,
 		task: "text-to-speech",
 	});

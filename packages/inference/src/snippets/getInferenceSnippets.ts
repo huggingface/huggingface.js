@@ -11,6 +11,7 @@ import type { ChatCompletionInputMessage, GenerationParameters } from "@huggingf
 import { makeRequestOptionsFromResolvedModel } from "../lib/makeRequestOptions";
 import type { InferenceProvider, InferenceTask, RequestArgs } from "../types";
 import { templates } from "./templates.exported";
+import { getProviderHelper } from "../lib/getProviderHelper";
 
 const PYTHON_CLIENTS = ["huggingface_hub", "fal_client", "requests", "openai"] as const;
 const JS_CLIENTS = ["fetch", "huggingface.js", "openai"] as const;
@@ -130,10 +131,18 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 			inputPreparationFn = prepareConversationalInput;
 			task = "conversational";
 		}
+		let providerHelper: ReturnType<typeof getProviderHelper>;
+		try {
+			providerHelper = getProviderHelper(provider, task);
+		} catch (e) {
+			console.error(`Failed to get provider helper for ${provider} (${task})`, e);
+			return [];
+		}
 		/// Prepare inputs + make request
 		const inputs = inputPreparationFn ? inputPreparationFn(model, opts) : { inputs: getModelInputSnippet(model) };
 		const request = makeRequestOptionsFromResolvedModel(
 			providerModelId ?? model.id,
+			providerHelper,
 			{
 				accessToken: accessToken,
 				provider: provider,
