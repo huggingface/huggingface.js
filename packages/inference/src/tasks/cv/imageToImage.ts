@@ -27,7 +27,7 @@ export async function imageToImage(args: ImageToImageArgs, options?: Options): P
 			),
 		};
 	}
-	const { data: res } = await innerRequest<Blob>(reqArgs, {
+	const { data: res } = await innerRequest<Blob>(reqArgs, providerHelper, {
 		...options,
 		task: "image-to-image",
 	});
