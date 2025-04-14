@@ -11,7 +11,7 @@ export async function chatCompletion(
 	options?: Options
 ): Promise<ChatCompletionOutput> {
 	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "conversational");
-	const { data: response } = await innerRequest<ChatCompletionOutput>(args, {
+	const { data: response } = await innerRequest<ChatCompletionOutput>(args, providerHelper, {
 		...options,
 		task: "conversational",
 	});

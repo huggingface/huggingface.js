@@ -51,7 +51,8 @@ export class SetStatement extends Statement {
 	override type = "Set";
 	constructor(
 		public assignee: Expression,
-		public value: Expression
+		public value: Expression | null,
+		public body: Statement[]
 	) {
 		super();
 	}

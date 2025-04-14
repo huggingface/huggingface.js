@@ -26,7 +26,7 @@ export async function tabularRegression(
 	options?: Options
 ): Promise<TabularRegressionOutput> {
 	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "tabular-regression");
-	const { data: res } = await innerRequest<TabularRegressionOutput>(args, {
+	const { data: res } = await innerRequest<TabularRegressionOutput>(args, providerHelper, {
 		...options,
 		task: "tabular-regression",
 	});

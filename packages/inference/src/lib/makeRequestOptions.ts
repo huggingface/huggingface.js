@@ -3,7 +3,7 @@ import { HF_HEADER_X_BILL_TO, HF_HUB_URL } from "../config";
 import type { InferenceTask, Options, RequestArgs } from "../types";
 import type { InferenceProviderModelMapping } from "./getInferenceProviderMapping";
 import { getInferenceProviderMapping } from "./getInferenceProviderMapping";
-import { getProviderHelper } from "./getProviderHelper";
+import type { getProviderHelper } from "./getProviderHelper";
 import { isUrl } from "./isUrl";
 
 /**
@@ -21,6 +21,7 @@ export async function makeRequestOptions(
 		data?: Blob | ArrayBuffer;
 		stream?: boolean;
 	},
+	providerHelper: ReturnType<typeof getProviderHelper>,
 	options?: Options & {
 		/** In most cases (unless we pass a endpointUrl) we know the task */
 		task?: InferenceTask;
@@ -29,6 +30,7 @@ export async function makeRequestOptions(
 	const { provider: maybeProvider, model: maybeModel } = args;
 	const provider = maybeProvider ?? "hf-inference";
 	const { task } = options ?? {};
+
 	// Validate inputs
 	if (args.endpointUrl && provider !== "hf-inference") {
 		throw new Error(`Cannot use endpointUrl with a third-party provider.`);
@@ -39,7 +41,7 @@ export async function makeRequestOptions(
 
 	if (args.endpointUrl) {
 		// No need to have maybeModel, or to load default model for a task
-		return makeRequestOptionsFromResolvedModel(maybeModel ?? args.endpointUrl, args, undefined, options);
+		return makeRequestOptionsFromResolvedModel(maybeModel ?? args.endpointUrl, providerHelper, args, undefined, options);
 	}
 
 	if (!maybeModel && !task) {
@@ -48,7 +50,6 @@ export async function makeRequestOptions(
 
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const hfModel = maybeModel ?? (await loadDefaultModel(task!));
-	const providerHelper = getProviderHelper(provider, task);
 
 	if (providerHelper.clientSideRoutingOnly && !maybeModel) {
 		throw new Error(`Provider ${provider} requires a model ID to be passed directly.`);
@@ -81,7 +82,7 @@ export async function makeRequestOptions(
 		: inferenceProviderMapping.providerId;
 
 	// Use the sync version with the resolved model
-	return makeRequestOptionsFromResolvedModel(resolvedModel, args, inferenceProviderMapping, options);
+	return makeRequestOptionsFromResolvedModel(resolvedModel, providerHelper, args, inferenceProviderMapping, options);
 }
 
 /**
@@ -90,6 +91,7 @@ export async function makeRequestOptions(
  */
 export function makeRequestOptionsFromResolvedModel(
 	resolvedModel: string,
+	providerHelper: ReturnType<typeof getProviderHelper>,
 	args: RequestArgs & {
 		data?: Blob | ArrayBuffer;
 		stream?: boolean;
@@ -105,7 +107,6 @@ export function makeRequestOptionsFromResolvedModel(
 	const provider = maybeProvider ?? "hf-inference";
 
 	const { includeCredentials, task, signal, billTo } = options ?? {};
-	const providerHelper = getProviderHelper(provider, task);
 	const authMethod = (() => {
 		if (providerHelper.clientSideRoutingOnly) {
 			// Closed-source providers require an accessToken (cannot be routed).
