@@ -87,7 +87,6 @@ interface AudioToAudioOutput {
 	label: string;
 }
 
-
 export const EQUIVALENT_SENTENCE_TRANSFORMERS_TASKS = ["feature-extraction", "sentence-similarity"] as const;
 
 export class HFInferenceTask extends TaskProviderHelper {
@@ -217,7 +216,8 @@ export class HFInferenceAudioClassificationTask extends HFInferenceTask implemen
 
 export class HFInferenceAutomaticSpeechRecognitionTask
 	extends HFInferenceTask
-	implements AutomaticSpeechRecognitionTaskHelper {
+	implements AutomaticSpeechRecognitionTaskHelper
+{
 	override async getResponse(response: AutomaticSpeechRecognitionOutput): Promise<AutomaticSpeechRecognitionOutput> {
 		return response;
 	}
@@ -250,7 +250,8 @@ export class HFInferenceAudioToAudioTask extends HFInferenceTask implements Audi
 
 export class HFInferenceDocumentQuestionAnsweringTask
 	extends HFInferenceTask
-	implements DocumentQuestionAnsweringTaskHelper {
+	implements DocumentQuestionAnsweringTaskHelper
+{
 	override async getResponse(
 		response: DocumentQuestionAnsweringOutput
 	): Promise<DocumentQuestionAnsweringOutput[number]> {
@@ -352,7 +353,8 @@ export class HFInferenceObjectDetectionTask extends HFInferenceTask implements O
 
 export class HFInferenceZeroShotImageClassificationTask
 	extends HFInferenceTask
-	implements ZeroShotImageClassificationTaskHelper {
+	implements ZeroShotImageClassificationTaskHelper
+{
 	override async getResponse(response: ZeroShotImageClassificationOutput): Promise<ZeroShotImageClassificationOutput> {
 		if (Array.isArray(response) && response.every((x) => typeof x.label === "string" && typeof x.score === "number")) {
 			return response;
@@ -378,20 +380,20 @@ export class HFInferenceQuestionAnsweringTask extends HFInferenceTask implements
 		if (
 			Array.isArray(response)
 				? response.every(
-					(elem) =>
-						typeof elem === "object" &&
-						!!elem &&
-						typeof elem.answer === "string" &&
-						typeof elem.end === "number" &&
-						typeof elem.score === "number" &&
-						typeof elem.start === "number"
-				)
+						(elem) =>
+							typeof elem === "object" &&
+							!!elem &&
+							typeof elem.answer === "string" &&
+							typeof elem.end === "number" &&
+							typeof elem.score === "number" &&
+							typeof elem.start === "number"
+				  )
 				: typeof response === "object" &&
-				!!response &&
-				typeof response.answer === "string" &&
-				typeof response.end === "number" &&
-				typeof response.score === "number" &&
-				typeof response.start === "number"
+				  !!response &&
+				  typeof response.answer === "string" &&
+				  typeof response.end === "number" &&
+				  typeof response.score === "number" &&
+				  typeof response.start === "number"
 		) {
 			return Array.isArray(response) ? response[0] : response;
 		}
@@ -536,7 +538,8 @@ export class HFInferenceTabularClassificationTask extends HFInferenceTask implem
 
 export class HFInferenceVisualQuestionAnsweringTask
 	extends HFInferenceTask
-	implements VisualQuestionAnsweringTaskHelper {
+	implements VisualQuestionAnsweringTaskHelper
+{
 	override async getResponse(response: VisualQuestionAnsweringOutput): Promise<VisualQuestionAnsweringOutput[number]> {
 		if (
 			Array.isArray(response) &&
