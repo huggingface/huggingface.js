@@ -38,9 +38,17 @@ const taskData: TaskDataCustom = {
 			description: "Strong model that can take in video, audio, image, text and output text and natural speech.",
 			id: "Qwen/Qwen2.5-Omni-7B",
 		},
-        {
+		{
 			description: "Robust model that can take in image and text and generate image and text.",
 			id: "deepseek-ai/Janus-Pro-7B",
+		},
+		{
+			description: "Any-to-any model with speech, video, audio, image and text understanding capabilities.",
+			id: "openbmb/MiniCPM-o-2_6",
+		},
+		{
+			description: "An any-to-any model that can understand image and text and generate image and text.",
+			id: "EPFL-VILAB/4M-21_XL",
 		},
 	],
 	spaces: [
