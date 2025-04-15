@@ -1049,9 +1049,19 @@ describe.concurrent("InferenceClient", () => {
 	describe.concurrent(
 		"Featherless",
 		() => {
-			HARDCODED_MODEL_ID_MAPPING["featherless-ai"] = {
-				"meta-llama/Llama-3.1-8B": "meta-llama/Meta-Llama-3.1-8B",
-				"meta-llama/Llama-3.1-8B-Instruct": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+			HARDCODED_MODEL_INFERENCE_MAPPING["featherless-ai"] = {
+				"meta-llama/Llama-3.1-8B": {
+					providerId: "meta-llama/Meta-Llama-3.1-8B",
+					hfModelId: "meta-llama/Llama-3.1-8B",
+					task: "text-generation",
+					status: "live",
+				},
+				"meta-llama/Llama-3.1-8B-Instruct": {
+					providerId: "meta-llama/Meta-Llama-3.1-8B-Instruct",
+					hfModelId: "meta-llama/Llama-3.1-8B-Instruct",
+					task: "text-generation",
+					status: "live",
+				},
 			};
 
 			it("chatCompletion", async () => {
