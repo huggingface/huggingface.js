@@ -48,8 +48,7 @@ export class NscaleTextToImageTask extends TaskProviderHelper implements TextToI
 		};
 	}
 
-	makeRoute(params: UrlParams): string {
-		void params;
+	makeRoute(): string {
 		return "v1/images/generations";
 	}
 
