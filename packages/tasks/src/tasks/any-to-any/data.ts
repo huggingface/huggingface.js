@@ -45,7 +45,7 @@ const taskData: TaskDataCustom = {
 	],
 	spaces: [
 		{
-			description: "An application to chat with an any-to-any model.",
+			description: "An application to chat with an any-to-any (image & text) model.",
 			id: "deepseek-ai/Janus-Pro-7B",
 		},
 	],
