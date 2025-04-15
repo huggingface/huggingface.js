@@ -11,6 +11,7 @@ import type { ChatCompletionInputMessage, GenerationParameters } from "@huggingf
 import { makeRequestOptionsFromResolvedModel } from "../lib/makeRequestOptions";
 import type { InferenceProvider, InferenceTask, RequestArgs } from "../types";
 import { templates } from "./templates.exported";
+import type { InferenceProviderModelMapping } from "../lib/getInferenceProviderMapping";
 import { getProviderHelper } from "../lib/getProviderHelper";
 
 const PYTHON_CLIENTS = ["huggingface_hub", "fal_client", "requests", "openai"] as const;
@@ -117,9 +118,10 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		model: ModelDataMinimal,
 		accessToken: string,
 		provider: InferenceProvider,
-		providerModelId?: string,
+		inferenceProviderMapping?: InferenceProviderModelMapping,
 		opts?: Record<string, unknown>
 	): InferenceSnippet[] => {
+		const providerModelId = inferenceProviderMapping?.providerId ?? model.id;
 		/// Hacky: hard-code conversational templates here
 		let task = model.pipeline_tag as InferenceTask;
 		if (
@@ -141,13 +143,14 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		/// Prepare inputs + make request
 		const inputs = inputPreparationFn ? inputPreparationFn(model, opts) : { inputs: getModelInputSnippet(model) };
 		const request = makeRequestOptionsFromResolvedModel(
-			providerModelId ?? model.id,
+			providerModelId,
 			providerHelper,
 			{
 				accessToken: accessToken,
 				provider: provider,
 				...inputs,
 			} as RequestArgs,
+			inferenceProviderMapping,
 			{
 				task: task,
 			}
@@ -275,7 +278,7 @@ const snippets: Partial<
 			model: ModelDataMinimal,
 			accessToken: string,
 			provider: InferenceProvider,
-			providerModelId?: string,
+			inferenceProviderMapping?: InferenceProviderModelMapping,
 			opts?: Record<string, unknown>
 		) => InferenceSnippet[]
 	>
@@ -315,11 +318,11 @@ export function getInferenceSnippets(
 	model: ModelDataMinimal,
 	accessToken: string,
 	provider: InferenceProvider,
-	providerModelId?: string,
+	inferenceProviderMapping?: InferenceProviderModelMapping,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
 	return model.pipeline_tag && model.pipeline_tag in snippets
-		? snippets[model.pipeline_tag]?.(model, accessToken, provider, providerModelId, opts) ?? []
+		? snippets[model.pipeline_tag]?.(model, accessToken, provider, inferenceProviderMapping, opts) ?? []
 		: [];
 }
 
