@@ -1,6 +1,7 @@
 import { BaseConversationalTask, BaseTextGenerationTask } from "./providerHelper";
-import type { ChatCompletionOutput, TextGenerationOutputFinishReason } from "@huggingface/tasks";
+import type { ChatCompletionOutput, TextGenerationOutputFinishReason, TextGenerationOutput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../lib/InferenceOutputError";
+import type { BodyParams } from "../types";
 
 interface FeatherlessAITextCompletionOutput extends Omit<ChatCompletionOutput, "choices"> {
 	choices: Array<{
@@ -27,9 +28,9 @@ export class FeatherlessAITextGenerationTask extends BaseTextGenerationTask {
 
 	override preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
-			model: params.model,
 			...params.args,
-			...params.args.parameters,
+			...(params.args.parameters as Record<string, unknown>),
+			model: params.model,
 			prompt: params.args.inputs,
 		};
 	}
@@ -46,6 +47,6 @@ export class FeatherlessAITextGenerationTask extends BaseTextGenerationTask {
 				generated_text: completion.text,
 			};
 		}
-		throw new InferenceOutputError("Expected Together text generation response format");
+		throw new InferenceOutputError("Expected Featherless AI text generation response format");
 	}
 }
