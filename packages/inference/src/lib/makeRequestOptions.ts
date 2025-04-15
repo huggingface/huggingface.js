@@ -41,7 +41,13 @@ export async function makeRequestOptions(
 
 	if (args.endpointUrl) {
 		// No need to have maybeModel, or to load default model for a task
-		return makeRequestOptionsFromResolvedModel(maybeModel ?? args.endpointUrl, providerHelper, args, undefined, options);
+		return makeRequestOptionsFromResolvedModel(
+			maybeModel ?? args.endpointUrl,
+			providerHelper,
+			args,
+			undefined,
+			options
+		);
 	}
 
 	if (!maybeModel && !task) {
@@ -55,23 +61,26 @@ export async function makeRequestOptions(
 		throw new Error(`Provider ${provider} requires a model ID to be passed directly.`);
 	}
 
-	const inferenceProviderMapping = providerHelper.clientSideRoutingOnly ?
-		{
-			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			providerId: removeProviderPrefix(maybeModel!, provider),
-			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			hfModelId: maybeModel!,
-			status: "live",
-			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			task: task!
-		} satisfies InferenceProviderModelMapping
-		: await getInferenceProviderMapping({
-			modelId: hfModel,
-			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			task: task!,
-			provider,
-			accessToken: args.accessToken,
-		}, { fetch: options?.fetch });
+	const inferenceProviderMapping = providerHelper.clientSideRoutingOnly
+		? ({
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				providerId: removeProviderPrefix(maybeModel!, provider),
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				hfModelId: maybeModel!,
+				status: "live",
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				task: task!,
+		  } satisfies InferenceProviderModelMapping)
+		: await getInferenceProviderMapping(
+				{
+					modelId: hfModel,
+					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+					task: task!,
+					provider,
+					accessToken: args.accessToken,
+				},
+				{ fetch: options?.fetch }
+		  );
 	if (!inferenceProviderMapping) {
 		throw new Error(`We have not been able to find inference provider information for model ${hfModel}.`);
 	}
