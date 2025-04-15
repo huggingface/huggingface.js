@@ -14,8 +14,9 @@
  *
  * Thanks!
  */
+import type { TextToImageInput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../lib/InferenceOutputError";
-import type { BodyParams, UrlParams } from "../types";
+import type { BodyParams } from "../types";
 import { omit } from "../utils/omit";
 import { BaseConversationalTask, TaskProviderHelper, type TextToImageTaskHelper } from "./providerHelper";
 
@@ -38,10 +39,10 @@ export class NscaleTextToImageTask extends TaskProviderHelper implements TextToI
 		super("nscale", NSCALE_API_BASE_URL);
 	}
 
-	preparePayload(params: BodyParams): Record<string, unknown> {
+	preparePayload(params: BodyParams<TextToImageInput>): Record<string, unknown> {
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
-			...(params.args.parameters as Record<string, unknown>),
+			...params.args.parameters,
 			response_format: "b64_json",
 			prompt: params.args.inputs,
 			model: params.model,
