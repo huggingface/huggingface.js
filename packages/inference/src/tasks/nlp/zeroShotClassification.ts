@@ -2,7 +2,6 @@ import type { ZeroShotClassificationInput, ZeroShotClassificationOutput } from "
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
 import { innerRequest } from "../../utils/request";
-import { toArray } from "../../utils/toArray";
 
 export type ZeroShotClassificationArgs = BaseArgs & ZeroShotClassificationInput;
 
@@ -14,9 +13,13 @@ export async function zeroShotClassification(
 	options?: Options
 ): Promise<ZeroShotClassificationOutput> {
 	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "zero-shot-classification");
-	const { data: res } = await innerRequest<ZeroShotClassificationOutput[number] | ZeroShotClassificationOutput>(args, {
-		...options,
-		task: "zero-shot-classification",
-	});
+	const { data: res } = await innerRequest<ZeroShotClassificationOutput[number] | ZeroShotClassificationOutput>(
+		args,
+		providerHelper,
+		{
+			...options,
+			task: "zero-shot-classification",
+		}
+	);
 	return providerHelper.getResponse(res);
 }

@@ -1,3 +1,4 @@
+import type { getProviderHelper } from "../lib/getProviderHelper";
 import { makeRequestOptions } from "../lib/makeRequestOptions";
 import type { InferenceTask, Options, RequestArgs } from "../types";
 import type { EventSourceMessage } from "../vendor/fetch-event-source/parse";
@@ -16,6 +17,7 @@ export interface ResponseWrapper<T> {
  */
 export async function innerRequest<T>(
 	args: RequestArgs,
+	providerHelper: ReturnType<typeof getProviderHelper>,
 	options?: Options & {
 		/** In most cases (unless we pass a endpointUrl) we know the task */
 		task?: InferenceTask;
@@ -23,13 +25,13 @@ export async function innerRequest<T>(
 		chatCompletion?: boolean;
 	}
 ): Promise<ResponseWrapper<T>> {
-	const { url, info } = await makeRequestOptions(args, options);
+	const { url, info } = await makeRequestOptions(args, providerHelper, options);
 	const response = await (options?.fetch ?? fetch)(url, info);
 
 	const requestContext: ResponseWrapper<T>["requestContext"] = { url, info };
 
 	if (options?.retry_on_error !== false && response.status === 503) {
-		return innerRequest(args, options);
+		return innerRequest(args, providerHelper, options);
 	}
 
 	if (!response.ok) {
@@ -65,6 +67,7 @@ export async function innerRequest<T>(
  */
 export async function* innerStreamingRequest<T>(
 	args: RequestArgs,
+	providerHelper: ReturnType<typeof getProviderHelper>,
 	options?: Options & {
 		/** In most cases (unless we pass a endpointUrl) we know the task */
 		task?: InferenceTask;
@@ -72,11 +75,11 @@ export async function* innerStreamingRequest<T>(
 		chatCompletion?: boolean;
 	}
 ): AsyncGenerator<T> {
-	const { url, info } = await makeRequestOptions({ ...args, stream: true }, options);
+	const { url, info } = await makeRequestOptions({ ...args, stream: true }, providerHelper, options);
 	const response = await (options?.fetch ?? fetch)(url, info);
 
 	if (options?.retry_on_error !== false && response.status === 503) {
-		return yield* innerStreamingRequest(args, options);
+		return yield* innerStreamingRequest(args, providerHelper, options);
 	}
 	if (!response.ok) {
 		if (response.headers.get("Content-Type")?.startsWith("application/json")) {
