@@ -20,6 +20,7 @@ export const HARDCODED_MODEL_ID_MAPPING: Record<InferenceProvider, Record<ModelI
 	cerebras: {},
 	cohere: {},
 	"fal-ai": {},
+	"featherless-ai": {},
 	"fireworks-ai": {},
 	"hf-inference": {},
 	hyperbolic: {},
