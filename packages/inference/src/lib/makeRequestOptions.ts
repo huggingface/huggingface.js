@@ -76,13 +76,14 @@ export async function makeRequestOptions(
 		throw new Error(`We have not been able to find inference provider information for model ${hfModel}.`);
 	}
 
-	const resolvedModel = providerHelper.clientSideRoutingOnly
-		? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		removeProviderPrefix(maybeModel!, provider)
-		: inferenceProviderMapping.providerId;
-
 	// Use the sync version with the resolved model
-	return makeRequestOptionsFromResolvedModel(resolvedModel, providerHelper, args, inferenceProviderMapping, options);
+	return makeRequestOptionsFromResolvedModel(
+		inferenceProviderMapping.providerId,
+		providerHelper,
+		args,
+		inferenceProviderMapping,
+		options
+	);
 }
 
 /**
