@@ -811,7 +811,7 @@ describe.concurrent("InferenceClient", () => {
 					status: "live",
 					task: "text-to-image",
 					adapter: "lora",
-					adapterWeightsPath: "flux-chatgpt-ghibli-lora.safetensors"
+					adapterWeightsPath: "flux-chatgpt-ghibli-lora.safetensors",
 				},
 				"nerijs/pixel-art-xl": {
 					hfModelId: "nerijs/pixel-art-xl",
@@ -819,9 +819,9 @@ describe.concurrent("InferenceClient", () => {
 					status: "live",
 					task: "text-to-image",
 					adapter: "lora",
-					adapterWeightsPath: "pixel-art-xl.safetensors"
-				}
-			}
+					adapterWeightsPath: "pixel-art-xl.safetensors",
+				},
+			};
 
 			it(`textToImage - black-forest-labs/FLUX.1-schnell`, async () => {
 				const res = await client.textToImage({
@@ -838,11 +838,10 @@ describe.concurrent("InferenceClient", () => {
 				const res = await client.textToImage({
 					model: "nerijs/pixel-art-xl",
 					provider: "fal-ai",
-					inputs:
-						"pixel, a cute corgi",
+					inputs: "pixel, a cute corgi",
 					parameters: {
-						negative_prompt: "3d render, realistic"
-					}
+						negative_prompt: "3d render, realistic",
+					},
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
@@ -1083,7 +1082,7 @@ describe.concurrent("InferenceClient", () => {
 					providerId: "black-forest-labs/flux-schnell",
 					status: "live",
 					task: "text-to-image",
-				}
+				},
 			};
 
 			it("chatCompletion", async () => {
@@ -1151,7 +1150,7 @@ describe.concurrent("InferenceClient", () => {
 					providerId: "accounts/fireworks/models/deepseek-r1",
 					status: "live",
 					task: "conversational",
-				}
+				},
 			};
 
 			it("chatCompletion", async () => {
@@ -1357,7 +1356,7 @@ describe.concurrent("InferenceClient", () => {
 					providerId: "flux-dev",
 					status: "live",
 					task: "text-to-image",
-				}
+				},
 				// "black-forest-labs/FLUX.1-schnell": "flux-pro",
 			};
 

@@ -5,7 +5,6 @@ import { HARDCODED_MODEL_INFERENCE_MAPPING } from "../providers/consts";
 import { EQUIVALENT_SENTENCE_TRANSFORMERS_TASKS } from "../providers/hf-inference";
 import { typedInclude } from "../utils/typedInclude";
 
-
 export const inferenceProviderMappingCache = new Map<ModelId, InferenceProviderMapping>();
 
 export type InferenceProviderMapping = Partial<
@@ -24,12 +23,12 @@ export interface InferenceProviderModelMapping {
 export async function getInferenceProviderMapping(
 	params: {
 		accessToken?: string;
-		modelId: ModelId,
-		provider: InferenceProvider,
-		task: WidgetType
+		modelId: ModelId;
+		provider: InferenceProvider;
+		task: WidgetType;
 	},
 	options: {
-		fetch?: (input: RequestInfo, init?: RequestInit) => Promise<Response>
+		fetch?: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
 	}
 ): Promise<InferenceProviderModelMapping | null> {
 	if (HARDCODED_MODEL_INFERENCE_MAPPING[params.provider][params.modelId]) {
@@ -49,7 +48,8 @@ export async function getInferenceProviderMapping(
 		if (resp.status === 404) {
 			throw new Error(`Model ${params.modelId} does not exist`);
 		}
-		inferenceProviderMapping = await resp.json()
+		inferenceProviderMapping = await resp
+			.json()
 			.then((json) => json.inferenceProviderMapping)
 			.catch(() => null);
 	}
@@ -60,7 +60,10 @@ export async function getInferenceProviderMapping(
 
 	const providerMapping = inferenceProviderMapping[params.provider];
 	if (providerMapping) {
-		const equivalentTasks = params.provider === "hf-inference" && typedInclude(EQUIVALENT_SENTENCE_TRANSFORMERS_TASKS, params.task) ? EQUIVALENT_SENTENCE_TRANSFORMERS_TASKS : [params.task]
+		const equivalentTasks =
+			params.provider === "hf-inference" && typedInclude(EQUIVALENT_SENTENCE_TRANSFORMERS_TASKS, params.task)
+				? EQUIVALENT_SENTENCE_TRANSFORMERS_TASKS
+				: [params.task];
 		if (!typedInclude(equivalentTasks, providerMapping.task)) {
 			throw new Error(
 				`Model ${params.modelId} is not supported for task ${params.task} and provider ${params.provider}. Supported task: ${providerMapping.task}.`
@@ -76,7 +79,7 @@ export async function getInferenceProviderMapping(
 			if (!treeResp.ok) {
 				throw new Error(`Unable to fetch the model tree for ${params.modelId}.`);
 			}
-			const tree: Array<{ type: "file" | "directory"; path: string; }> = await treeResp.json();
+			const tree: Array<{ type: "file" | "directory"; path: string }> = await treeResp.json();
 			const adapterWeightsPath = tree.find(({ type, path }) => type === "file" && path.endsWith(".safetensors"))?.path;
 			if (!adapterWeightsPath) {
 				throw new Error(`No .safetensors file found in the model tree for ${params.modelId}.`);
@@ -85,7 +88,7 @@ export async function getInferenceProviderMapping(
 				...providerMapping,
 				hfModelId: params.modelId,
 				adapterWeightsPath,
-			}
+			};
 		}
 		return { ...providerMapping, hfModelId: params.modelId };
 	}
