@@ -37,6 +37,7 @@ interface TemplateParams {
 	model?: ModelDataMinimal;
 	provider?: InferenceProvider;
 	providerModelId?: string;
+	billTo?: string;
 	methodName?: string; // specific to snippetBasic
 	importBase64?: boolean; // specific to snippetImportRequests
 	importJson?: boolean; // specific to snippetImportRequests
@@ -119,6 +120,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		accessToken: string,
 		provider: InferenceProvider,
 		inferenceProviderMapping?: InferenceProviderModelMapping,
+		billTo?: string,
 		opts?: Record<string, unknown>
 	): InferenceSnippet[] => {
 		const providerModelId = inferenceProviderMapping?.providerId ?? model.id;
@@ -146,13 +148,14 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 			providerModelId,
 			providerHelper,
 			{
-				accessToken: accessToken,
-				provider: provider,
+				accessToken,
+				provider,
 				...inputs,
 			} as RequestArgs,
 			inferenceProviderMapping,
 			{
-				task: task,
+				task,
+				billTo,
 			}
 		);
 
@@ -191,6 +194,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 			model,
 			provider,
 			providerModelId: providerModelId ?? model.id,
+			billTo,
 		};
 
 		/// Iterate over clients => check if a snippet exists => generate
@@ -279,6 +283,7 @@ const snippets: Partial<
 			accessToken: string,
 			provider: InferenceProvider,
 			inferenceProviderMapping?: InferenceProviderModelMapping,
+			billTo?: string,
 			opts?: Record<string, unknown>
 		) => InferenceSnippet[]
 	>
@@ -319,10 +324,11 @@ export function getInferenceSnippets(
 	accessToken: string,
 	provider: InferenceProvider,
 	inferenceProviderMapping?: InferenceProviderModelMapping,
+	billTo?: string,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
 	return model.pipeline_tag && model.pipeline_tag in snippets
-		? snippets[model.pipeline_tag]?.(model, accessToken, provider, inferenceProviderMapping, opts) ?? []
+		? snippets[model.pipeline_tag]?.(model, accessToken, provider, inferenceProviderMapping, billTo, opts) ?? []
 		: [];
 }
 

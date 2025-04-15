@@ -3,6 +3,9 @@ from openai import OpenAI
 client = OpenAI(
     base_url="https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.1-8B-Instruct/v1",
     api_key="api_token",
+    default_headers={
+        "X-HF-Bill-To": "huggingface"
+    }
 )
 
 completion = client.chat.completions.create(
