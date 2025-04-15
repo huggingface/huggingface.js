@@ -47,7 +47,7 @@ const taskData: TaskDataCustom = {
 			id: "openbmb/MiniCPM-o-2_6",
 		},
 		{
-			description: "An any-to-any model that can understand image and text and generate image and text.",
+			description: "A model that can understand image and text and generate image and text.",
 			id: "EPFL-VILAB/4M-21_XL",
 		},
 	],
