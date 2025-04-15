@@ -33,8 +33,7 @@ const TEST_CASES: {
 	model: ModelDataMinimal;
 	providers: SnippetInferenceProvider[];
 	lora?: boolean;
-	billTo?: string;
-	opts?: Record<string, unknown>;
+	opts?: snippets.InferenceSnippetOptions;
 }[] = [
 	{
 		testName: "automatic-speech-recognition",
@@ -237,8 +236,8 @@ const TEST_CASES: {
 			tags: ["conversational"],
 			inference: "",
 		},
-		billTo: "huggingface",
 		providers: ["hf-inference"],
+		opts: { billTo: "huggingface" },
 	},
 ] as const;
 
@@ -266,7 +265,6 @@ function generateInferenceSnippet(
 	provider: SnippetInferenceProvider,
 	task: WidgetType,
 	lora: boolean = false,
-	billTo?: string,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
 	const allSnippets = snippets.getInferenceSnippets(
@@ -285,7 +283,6 @@ function generateInferenceSnippet(
 				  }
 				: {}),
 		},
-		billTo,
 		opts
 	);
 	return allSnippets
@@ -341,12 +338,12 @@ if (import.meta.vitest) {
 	const { describe, expect, it } = import.meta.vitest;
 
 	describe("inference API snippets", () => {
-		TEST_CASES.forEach(({ testName, task, model, providers, lora, billTo, opts }) => {
+		TEST_CASES.forEach(({ testName, task, model, providers, lora, opts }) => {
 			describe(testName, () => {
 				inferenceSnippetLanguages.forEach((language) => {
 					providers.forEach((provider) => {
 						it(language, async () => {
-							const generatedSnippets = generateInferenceSnippet(model, language, provider, task, lora, billTo, opts);
+							const generatedSnippets = generateInferenceSnippet(model, language, provider, task, lora, opts);
 							const expectedSnippets = await getExpectedInferenceSnippet(testName, language, provider);
 							expect(generatedSnippets).toEqual(expectedSnippets);
 						});
@@ -362,11 +359,11 @@ if (import.meta.vitest) {
 	await fs.rm(path.join(rootDirFinder(), "snippets-fixtures"), { recursive: true, force: true });
 
 	console.debug("  🏭 Generating new fixtures...");
-	TEST_CASES.forEach(({ testName, task, model, providers, lora, billTo, opts }) => {
+	TEST_CASES.forEach(({ testName, task, model, providers, lora, opts }) => {
 		console.debug(`      ${testName} (${providers.join(", ")})`);
 		inferenceSnippetLanguages.forEach(async (language) => {
 			providers.forEach(async (provider) => {
-				const generatedSnippets = generateInferenceSnippet(model, language, provider, task, lora, billTo, opts);
+				const generatedSnippets = generateInferenceSnippet(model, language, provider, task, lora, opts);
 				await saveExpectedInferenceSnippet(testName, language, provider, generatedSnippets);
 			});
 		});
