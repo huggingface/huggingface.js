@@ -72,7 +72,7 @@ export async function getInferenceProviderMapping(
 			);
 		}
 		if (providerMapping.adapter === "lora") {
-			const treeResp = await (options?.fetch ?? fetch)(`${HF_HUB_URL}/api/models/${params.modelId}/tree`);
+			const treeResp = await (options?.fetch ?? fetch)(`${HF_HUB_URL}/api/models/${params.modelId}/tree/main`);
 			if (!treeResp.ok) {
 				throw new Error(`Unable to fetch the model tree for ${params.modelId}.`);
 			}
