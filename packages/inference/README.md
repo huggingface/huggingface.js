@@ -80,7 +80,7 @@ Only a subset of models are supported when requesting third-party providers. You
 - [Fireworks AI supported models](https://huggingface.co/api/partners/fireworks-ai/models)
 - [Hyperbolic supported models](https://huggingface.co/api/partners/hyperbolic/models)
 - [Nebius supported models](https://huggingface.co/api/partners/nebius/models)
-- [Nscale supported models](https://huggingface.co/api/partners/nscale-cloud/models)
+- [Nscale supported models](https://huggingface.co/api/partners/nscale/models)
 - [Replicate supported models](https://huggingface.co/api/partners/replicate/models)
 - [Sambanova supported models](https://huggingface.co/api/partners/sambanova/models)
 - [Together supported models](https://huggingface.co/api/partners/together/models)
