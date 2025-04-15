@@ -14,6 +14,8 @@ import { templates } from "./templates.exported";
 import type { InferenceProviderModelMapping } from "../lib/getInferenceProviderMapping";
 import { getProviderHelper } from "../lib/getProviderHelper";
 
+export type InferenceSnippetOptions = { streaming?: boolean; billTo?: string } & Record<string, unknown>;
+
 const PYTHON_CLIENTS = ["huggingface_hub", "fal_client", "requests", "openai"] as const;
 const JS_CLIENTS = ["fetch", "huggingface.js", "openai"] as const;
 const SH_CLIENTS = ["curl"] as const;
@@ -120,8 +122,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		accessToken: string,
 		provider: InferenceProvider,
 		inferenceProviderMapping?: InferenceProviderModelMapping,
-		billTo?: string,
-		opts?: Record<string, unknown>
+		opts?: InferenceSnippetOptions
 	): InferenceSnippet[] => {
 		const providerModelId = inferenceProviderMapping?.providerId ?? model.id;
 		/// Hacky: hard-code conversational templates here
@@ -155,7 +156,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 			inferenceProviderMapping,
 			{
 				task,
-				billTo,
+				billTo: opts?.billTo,
 			}
 		);
 
@@ -194,7 +195,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 			model,
 			provider,
 			providerModelId: providerModelId ?? model.id,
-			billTo,
+			billTo: opts?.billTo,
 		};
 
 		/// Iterate over clients => check if a snippet exists => generate
@@ -283,8 +284,7 @@ const snippets: Partial<
 			accessToken: string,
 			provider: InferenceProvider,
 			inferenceProviderMapping?: InferenceProviderModelMapping,
-			billTo?: string,
-			opts?: Record<string, unknown>
+			opts?: InferenceSnippetOptions
 		) => InferenceSnippet[]
 	>
 > = {
@@ -324,11 +324,10 @@ export function getInferenceSnippets(
 	accessToken: string,
 	provider: InferenceProvider,
 	inferenceProviderMapping?: InferenceProviderModelMapping,
-	billTo?: string,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
 	return model.pipeline_tag && model.pipeline_tag in snippets
-		? snippets[model.pipeline_tag]?.(model, accessToken, provider, inferenceProviderMapping, billTo, opts) ?? []
+		? snippets[model.pipeline_tag]?.(model, accessToken, provider, inferenceProviderMapping, opts) ?? []
 		: [];
 }
 
