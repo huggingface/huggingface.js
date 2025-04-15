@@ -87,6 +87,8 @@ interface AudioToAudioOutput {
 	label: string;
 }
 
+export const EQUIVALENT_SENTENCE_TRANSFORMERS_TASKS = ["feature-extraction", "sentence-similarity"] as const;
+
 export class HFInferenceTask extends TaskProviderHelper {
 	constructor() {
 		super("hf-inference", `${HF_ROUTER_URL}/hf-inference`);
@@ -385,13 +387,13 @@ export class HFInferenceQuestionAnsweringTask extends HFInferenceTask implements
 							typeof elem.end === "number" &&
 							typeof elem.score === "number" &&
 							typeof elem.start === "number"
-					)
+				  )
 				: typeof response === "object" &&
-					!!response &&
-					typeof response.answer === "string" &&
-					typeof response.end === "number" &&
-					typeof response.score === "number" &&
-					typeof response.start === "number"
+				  !!response &&
+				  typeof response.answer === "string" &&
+				  typeof response.end === "number" &&
+				  typeof response.score === "number" &&
+				  typeof response.start === "number"
 		) {
 			return Array.isArray(response) ? response[0] : response;
 		}
