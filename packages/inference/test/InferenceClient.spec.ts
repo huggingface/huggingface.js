@@ -38,12 +38,6 @@ describe.concurrent("InferenceClient", () => {
 		() => {
 			const hf = new InferenceClient(env.HF_TOKEN);
 			HARDCODED_MODEL_INFERENCE_MAPPING["hf-inference"] = {
-				"openai-community/gpt2": {
-					providerId: "openai-community/gpt2",
-					hfModelId: "openai-community/gpt2",
-					task: "text-generation",
-					status: "live",
-				},
 				"google-bert/bert-base-uncased": {
 					providerId: "google-bert/bert-base-uncased",
 					hfModelId: "google-bert/bert-base-uncased",
@@ -206,6 +200,18 @@ describe.concurrent("InferenceClient", () => {
 					task: "visual-question-answering",
 					status: "live",
 				},
+				"dbmdz/bert-large-cased-finetuned-conll03-english": {
+					providerId: "dbmdz/bert-large-cased-finetuned-conll03-english",
+					hfModelId: "dbmdz/bert-large-cased-finetuned-conll03-english",
+					task: "token-classification",
+					status: "live",
+				},
+				"nlpconnect/vit-gpt2-image-captioning": {
+					providerId: "nlpconnect/vit-gpt2-image-captioning",
+					hfModelId: "nlpconnect/vit-gpt2-image-captioning",
+					task: "image-to-text",
+					status: "live",
+				}
 			}
 
 			it("throws error if model does not exist", () => {
