@@ -829,7 +829,7 @@ describe.concurrent("InferenceClient", () => {
 	describe.concurrent(
 		"Featherless",
 		() => {
-			HARDCODED_MODEL_ID_MAPPING['featherless-ai'] = {
+			HARDCODED_MODEL_ID_MAPPING["featherless-ai"] = {
 				"meta-llama/Llama-3.1-8B": "meta-llama/Meta-Llama-3.1-8B",
 				"meta-llama/Llama-3.1-8B-Instruct": "meta-llama/Meta-Llama-3.1-8B-Instruct",
 			};
