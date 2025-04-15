@@ -6,11 +6,11 @@ Any-to-any models can help embodied agents operate in multi-sensory environments
 
 ### Real-time Accessibility Systems
 
-Any-to-any model can be used aid visually impaired people. A real-time on-device any-to-any model can take a real-world video stream from wearable glasses, and describe the scene in audio (e.g., "A person in a red coat is walking toward you") or provide real-time closed captions and environmental sound cues.
+Vision-language based any-to-any models can be used aid visually impaired people. A real-time on-device any-to-any model can take a real-world video stream from wearable glasses, and describe the scene in audio (e.g., "A person in a red coat is walking toward you") or provide real-time closed captions and environmental sound cues.
 
 ### Multimodal Content Creation
 
-Any-to-any models can generate multimodal content. For example, given a video and an outline, the model can generate speech, better videos, or a descriptive blog post. Moreover, these models can sync narration timing with visual transitions.
+One can use any-to-any models to generate multimodal content. For example, given a video and an outline, the model can generate speech, better videos, or a descriptive blog post. Moreover, these models can sync narration timing with visual transitions.
 
 ## Inference
 
