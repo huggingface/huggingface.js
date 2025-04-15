@@ -37,6 +37,176 @@ describe.concurrent("InferenceClient", () => {
 		"HF Inference",
 		() => {
 			const hf = new InferenceClient(env.HF_TOKEN);
+			HARDCODED_MODEL_INFERENCE_MAPPING["hf-inference"] = {
+				"openai-community/gpt2": {
+					providerId: "openai-community/gpt2",
+					hfModelId: "openai-community/gpt2",
+					task: "text-generation",
+					status: "live",
+				},
+				"google-bert/bert-base-uncased": {
+					providerId: "google-bert/bert-base-uncased",
+					hfModelId: "google-bert/bert-base-uncased",
+					task: "fill-mask",
+					status: "live",
+				},
+				"google/pegasus-xsum": {
+					providerId: "google/pegasus-xsum",
+					hfModelId: "google/pegasus-xsum",
+					task: "summarization",
+					status: "live",
+				},
+				"deepset/roberta-base-squad2": {
+					providerId: "deepset/roberta-base-squad2",
+					hfModelId: "deepset/roberta-base-squad2",
+					task: "question-answering",
+					status: "live",
+				},
+				"google/tapas-base-finetuned-wtq": {
+					providerId: "google/tapas-base-finetuned-wtq",
+					hfModelId: "google/tapas-base-finetuned-wtq",
+					task: "table-question-answering",
+					status: "live",
+				},
+				"mistralai/Mistral-7B-Instruct-v0.2": {
+					providerId: "mistralai/Mistral-7B-Instruct-v0.2",
+					hfModelId: "mistralai/Mistral-7B-Instruct-v0.2",
+					task: "text-generation",
+					status: "live",
+				},
+				"impira/layoutlm-document-qa": {
+					providerId: "impira/layoutlm-document-qa",
+					hfModelId: "impira/layoutlm-document-qa",
+					task: "document-question-answering",
+					status: "live",
+				},
+				"naver-clova-ix/donut-base-finetuned-docvqa": {
+					providerId: "naver-clova-ix/donut-base-finetuned-docvqa",
+					hfModelId: "naver-clova-ix/donut-base-finetuned-docvqa",
+					task: "document-question-answering",
+					status: "live",
+				},
+				"google/tapas-large-finetuned-wtq": {
+					providerId: "google/tapas-large-finetuned-wtq",
+					hfModelId: "google/tapas-large-finetuned-wtq",
+					task: "table-question-answering",
+					status: "live",
+				},
+				"facebook/detr-resnet-50": {
+					providerId: "facebook/detr-resnet-50",
+					hfModelId: "facebook/detr-resnet-50",
+					task: "object-detection",
+					status: "live",
+				},
+				"facebook/detr-resnet-50-panoptic": {
+					providerId: "facebook/detr-resnet-50-panoptic",
+					hfModelId: "facebook/detr-resnet-50-panoptic",
+					task: "image-segmentation",
+					status: "live",
+				},
+				"facebook/wav2vec2-large-960h-lv60-self": {
+					providerId: "facebook/wav2vec2-large-960h-lv60-self",
+					hfModelId: "facebook/wav2vec2-large-960h-lv60-self",
+					task: "automatic-speech-recognition",
+					status: "live",
+				},
+				"superb/hubert-large-superb-er": {
+					providerId: "superb/hubert-large-superb-er",
+					hfModelId: "superb/hubert-large-superb-er",
+					task: "audio-classification",
+					status: "live",
+				},
+				"speechbrain/sepformer-wham": {
+					providerId: "speechbrain/sepformer-wham",
+					hfModelId: "speechbrain/sepformer-wham",
+					task: "audio-to-audio",
+					status: "live",
+				},
+				"espnet/kan-bayashi_ljspeech_vits": {
+					providerId: "espnet/kan-bayashi_ljspeech_vits",
+					hfModelId: "espnet/kan-bayashi_ljspeech_vits",
+					task: "text-to-speech",
+					status: "live",
+				},
+				"sentence-transformers/paraphrase-xlm-r-multilingual-v1": {
+					providerId: "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
+					hfModelId: "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
+					task: "sentence-similarity",
+					status: "live",
+				},
+				"sentence-transformers/distilbert-base-nli-mean-tokens": {
+					providerId: "sentence-transformers/distilbert-base-nli-mean-tokens",
+					hfModelId: "sentence-transformers/distilbert-base-nli-mean-tokens",
+					task: "feature-extraction",
+					status: "live",
+				},
+				"facebook/bart-base": {
+					providerId: "facebook/bart-base",
+					hfModelId: "facebook/bart-base",
+					task: "feature-extraction",
+					status: "live",
+				},
+				"facebook/bart-large-mnli": {
+					providerId: "facebook/bart-large-mnli",
+					hfModelId: "facebook/bart-large-mnli",
+					task: "zero-shot-classification",
+					status: "live",
+				},
+				"facebook/bart-large-cnn": {
+					providerId: "facebook/bart-large-cnn",
+					hfModelId: "facebook/bart-large-cnn",
+					task: "summarization",
+					status: "live",
+				},
+				"facebook/bart-large-xsum": {
+					providerId: "facebook/bart-large-xsum",
+					hfModelId: "facebook/bart-large-xsum",
+					task: "summarization",
+					status: "live",
+				},
+				"stabilityai/stable-diffusion-2": {
+					providerId: "stabilityai/stable-diffusion-2",
+					hfModelId: "stabilityai/stable-diffusion-2",
+					task: "text-to-image",
+					status: "live",
+				},
+				"lllyasviel/sd-controlnet-canny": {
+					providerId: "lllyasviel/sd-controlnet-canny",
+					hfModelId: "lllyasviel/sd-controlnet-canny",
+					task: "image-to-image",
+					status: "live",
+				},
+				"lllyasviel/sd-controlnet-depth": {
+					providerId: "lllyasviel/sd-controlnet-depth",
+					hfModelId: "lllyasviel/sd-controlnet-depth",
+					task: "image-to-image",
+					status: "live",
+				},
+				"t5-base": {
+					providerId: "t5-base",
+					hfModelId: "t5-base",
+					task: "translation",
+					status: "live",
+				},
+				"openai/clip-vit-large-patch14-336": {
+					providerId: "openai/clip-vit-large-patch14-336",
+					hfModelId: "openai/clip-vit-large-patch14-336",
+					task: "zero-shot-image-classification",
+					status: "live",
+				},
+				"google/vit-base-patch16-224": {
+					providerId: "google/vit-base-patch16-224",
+					hfModelId: "google/vit-base-patch16-224",
+					task: "image-classification",
+					status: "live",
+				},
+				"dandelin/vilt-b32-finetuned-vqa": {
+					providerId: "dandelin/vilt-b32-finetuned-vqa",
+					hfModelId: "dandelin/vilt-b32-finetuned-vqa",
+					task: "visual-question-answering",
+					status: "live",
+				},
+			}
 
 			it("throws error if model does not exist", () => {
 				expect(
