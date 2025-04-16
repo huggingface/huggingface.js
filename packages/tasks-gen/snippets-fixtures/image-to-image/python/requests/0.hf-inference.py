@@ -2,7 +2,9 @@ import base64
 import requests
 
 API_URL = "https://router.huggingface.co/hf-inference/models/stabilityai/stable-diffusion-xl-refiner-1.0"
-headers = {"Authorization": "Bearer api_token"}
+headers = {
+    "Authorization": "Bearer api_token",
+}
 
 def query(payload):
     with open(payload["inputs"], "rb") as f:

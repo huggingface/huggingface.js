@@ -6,5 +6,7 @@ const image = await client.textToVideo({
     provider: "{{ provider }}",
     model: "{{ model.id }}",
 	inputs: {{ inputs.asObj.inputs }},
-});
+}{% if billTo %}, {
+    billTo: "{{ billTo }}",
+}{% endif %});
 // Use the generated video (it's a Blob)

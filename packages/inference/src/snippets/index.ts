@@ -1,1 +1,1 @@
-export { getInferenceSnippets } from "./getInferenceSnippets.js";
+export { getInferenceSnippets, type InferenceSnippetOptions } from "./getInferenceSnippets.js";
