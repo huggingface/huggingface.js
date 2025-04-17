@@ -1687,8 +1687,13 @@ describe.concurrent("InferenceClient", () => {
 		() => {
 			const client = new InferenceClient(env.HF_GROQ_KEY ?? "dummy");
 
-			HARDCODED_MODEL_ID_MAPPING["groq"] = {
-				"meta-llama/Llama-3.3-70B-Instruct": "llama-3.3-70b-versatile",
+			HARDCODED_MODEL_INFERENCE_MAPPING["groq"] = {
+				"meta-llama/Llama-3.3-70B-Instruct": {
+					hfModelId: "meta-llama/Llama-3.3-70B-Instruct",
+					providerId: "llama-3.3-70b-versatile",
+					status: "live",
+					task: "conversational",
+				},
 			};
 
 			it("chatCompletion", async () => {
