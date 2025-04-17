@@ -9,6 +9,7 @@ import * as Hyperbolic from "../providers/hyperbolic";
 import * as Nebius from "../providers/nebius";
 import * as Novita from "../providers/novita";
 import * as OpenAI from "../providers/openai";
+import * as OvhCloud from "../providers/ovhcloud";
 import type {
 	AudioClassificationTaskHelper,
 	AudioToAudioTaskHelper,
@@ -111,6 +112,10 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	openai: {
 		conversational: new OpenAI.OpenAIConversationalTask(),
+	},
+	ovhcloud: {
+		conversational: new OvhCloud.OvhCloudConversationalTask(),
+		"text-generation": new OvhCloud.OvhCloudTextGenerationTask(),
 	},
 	replicate: {
 		"text-to-image": new Replicate.ReplicateTextToImageTask(),

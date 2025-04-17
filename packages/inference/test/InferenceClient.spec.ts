@@ -1,6 +1,6 @@
 import { assert, describe, expect, it } from "vitest";
 
-import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
+import type { ChatCompletionStreamOutput, TextGenerationStreamOutput } from "@huggingface/tasks";
 
 import type { TextToImageArgs } from "../src";
 import {
@@ -1678,6 +1678,108 @@ describe.concurrent("InferenceClient", () => {
 				// Verify we got a meaningful response
 				expect(fullResponse).toBeTruthy();
 				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+		},
+		TIMEOUT
+	);
+	describe.concurrent(
+		"OVHcloud",
+		() => {
+			const client = new HfInference(env.HF_OVHCLOUD_KEY ?? "dummy");
+
+			HARDCODED_MODEL_ID_MAPPING["ovhcloud"] = {
+				"meta-llama/llama-3.1-8b-instruct": "Llama-3.1-8B-Instruct",
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "meta-llama/llama-3.1-8b-instruct",
+					provider: "ovhcloud",
+					messages: [{ role: "user", content: "A, B, C, " }],
+					parameters: {
+						seed: 42,
+						temperature: 0,
+						top_p: 0.01,
+						max_new_tokens: 1,
+					},
+				});
+				expect(res.choices && res.choices.length > 0);
+				const completion = res.choices[0].message?.content;
+				expect(completion).toContain("D");
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "meta-llama/llama-3.1-8b-instruct",
+					provider: "ovhcloud",
+					messages: [{ role: "user", content: "A, B, C, " }],
+					stream: true,
+					parameters: {
+						seed: 42,
+						temperature: 0,
+						top_p: 0.01,
+						max_new_tokens: 1,
+					},
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse).toContain("D");
+			});
+
+			it("textGeneration", async () => {
+				const res = await client.textGeneration({
+					model: "meta-llama/llama-3.1-8b-instruct",
+					provider: "ovhcloud",
+					inputs: "A B C ",
+					parameters: {
+						seed: 42,
+						temperature: 0,
+						top_p: 0.01,
+						max_new_tokens: 1,
+					},
+				});
+				expect(res.generated_text.length > 0);
+				expect(res.generated_text).toContain("D");
+			});
+
+			it("textGeneration stream", async () => {
+				const stream = client.textGenerationStream({
+					model: "meta-llama/llama-3.1-8b-instruct",
+					provider: "ovhcloud",
+					inputs: "A B C ",
+					stream: true,
+					parameters: {
+						seed: 42,
+						temperature: 0,
+						top_p: 0.01,
+						max_new_tokens: 1,
+					},
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].text;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse).toContain("D");
 			});
 		},
 		TIMEOUT
