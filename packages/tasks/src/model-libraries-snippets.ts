@@ -1202,6 +1202,13 @@ export const vfimamba = (model: ModelData): string[] => [
 model = Model.from_pretrained("${model.id}")`,
 ];
 
+
+export const aimonhdm2 = (model: ModelData): string[] => [
+	`from hdm2 import HallucinationDetectionModel
+
+hdm_model = HallucinationDetectionModel()`,
+];
+
 export const voicecraft = (model: ModelData): string[] => [
 	`from voicecraft import VoiceCraft
 
