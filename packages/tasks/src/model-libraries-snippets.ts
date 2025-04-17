@@ -1376,4 +1376,22 @@ export const hezar = (model: ModelData): string[] => [
 
 model = Model.load("${model.id}")`,
 ];
+
+export const zonos = (model: ModelData): string[] => [
+	`import torchaudio
+from zonos.model import Zonos
+from zonos.conditioning import make_cond_dict
+
+model = Zonos.from_pretrained("${model.id}", device="cuda")
+
+wav, sr = torchaudio.load("speaker.wav")           # 5-10s reference clip
+speaker = model.make_speaker_embedding(wav, sr)
+
+cond  = make_cond_dict(text="Hello, world!", speaker=speaker, language="en-us")
+codes = model.generate(model.prepare_conditioning(cond))
+
+audio = model.autoencoder.decode(codes)[0].cpu()
+torchaudio.save("sample.wav", audio, model.autoencoder.sampling_rate)
+`,
+];
 //#endregion
