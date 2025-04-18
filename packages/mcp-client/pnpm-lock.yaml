@@ -15,11 +15,6 @@ dependencies:
     specifier: ^1.9.0
     version: 1.10.1
 
-devDependencies:
-  '@types/node':
-    specifier: ^22.14.1
-    version: 22.14.1
-
 packages:
 
   /@modelcontextprotocol/sdk@1.10.1:
@@ -39,12 +34,6 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: false
-
-  /@types/node@22.14.1:
-    resolution: {integrity: sha512-u0HuPQwe/dHrItgHHpmw3N2fYCR6x4ivMNbPHRkBVP4CvN+kiRrKHWk3i8tXiO/joPwXLMYvF9TTF0eqgHIuOw==}
-    dependencies:
-      undici-types: 6.21.0
-    dev: true
 
   /accepts@2.0.0:
     resolution: {integrity: sha512-5cvg6CtKwfgdmVqY1WIiXKc3Q1bkRqGLi+2W/6ao+6Y7gu/RCwRuAhGEzh5B4KlszSuTLgZYuqFqo5bImjNKng==}
@@ -587,10 +576,6 @@ packages:
       media-typer: 1.1.0
       mime-types: 3.0.1
     dev: false
-
-  /undici-types@6.21.0:
-    resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
-    dev: true
 
   /unpipe@1.0.0:
     resolution: {integrity: sha512-pjy2bYhSsufwWlKwPc+l3cN7+wuJlK6uz0YdJEOlQDbl6jo/YlPi4mb8agUkVC8BF7V8NuzeyPNqRksA3hztKQ==}
