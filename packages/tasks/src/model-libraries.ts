@@ -942,6 +942,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pth"`,
 		snippets: snippets.sana,
 	},
+	"hdm2": {
+		prettyLabel: "Hallucination Detection Model",
+		repoName: "hallucination-detection-model",
+		repoUrl: "https://github.com/aimonlabs/hallucination-detection-model",
+		countDownloads: `path_extension:"safetensors" OR path_extension:"pt"`,
+		snippets: snippets.aimonhdm2,
+	},
 	"vfi-mamba": {
 		prettyLabel: "VFIMamba",
 		repoName: "VFIMamba",
