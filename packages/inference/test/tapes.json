@@ -7456,5 +7456,97 @@
         "server": "UploadServer"
       }
     }
+  },
+  "114810cb7fc73df3a897d2100ff6d2aa61072ceacd2ac8419cd7d0301b5f2038": {
+    "url": "https://api.featherless.ai/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Complete this sentence with words, one plus one is equal \"}],\"temperature\":0.1,\"model\":\"meta-llama/Meta-Llama-3.1-8B-Instruct\"}"
+    },
+    "response": {
+      "body": "{\"id\":\"XA2hY8\",\"object\":\"chat.completion\",\"created\":1744738127375,\"model\":\"meta-llama/Meta-Llama-3.1-8B-Instruct\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"...to two.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"system_fingerprint\":\"\",\"usage\":{\"prompt_tokens\":17,\"completion_tokens\":4,\"total_tokens\":21}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "cache-control": "no-cache",
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "930d294a9afdaca5-YYZ",
+        "connection": "keep-alive",
+        "content-encoding": "br",
+        "content-type": "application/json",
+        "nel": "{\"success_fraction\":0,\"report_to\":\"cf-nel\",\"max_age\":604800}",
+        "report-to": "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report\\/v4?s=YgZmhbIzMEx2tnSIcGrXly33AJVRZLvogEbxvuKRW%2BywW%2FXtW2MjGmB7VQTK%2FnV6pP4tLAwxJ7L0856uiUvl8EamnWgFbIUky0%2BIsUklVJT6DVUmQm%2B3h0fJHq9qZgRT3eZWEw%3D%3D\"}],\"group\":\"cf-nel\",\"max_age\":604800}",
+        "server": "cloudflare",
+        "server-timing": "cfL4;desc=\"?proto=TCP&rtt=29041&min_rtt=23313&rtt_var=12834&sent=4&recv=5&lost=0&retrans=0&sent_bytes=2847&recv_bytes=1024&delivery_rate=124222&cwnd=218&unsent_bytes=0&cid=e073b0090fe1f02c&ts=2740&x=0\"",
+        "strict-transport-security": "max-age=15724800; includeSubDomains",
+        "transfer-encoding": "chunked",
+        "vary": "Origin"
+      }
+    }
+  },
+  "36395857d7dc0298b346b9b2755ac22dede1384a02249b01c22958e9b6dcc27d": {
+    "url": "https://api.featherless.ai/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Complete the equation 1 + 1 = , just the answer\"}],\"stream\":true,\"model\":\"meta-llama/Meta-Llama-3.1-8B-Instruct\"}"
+    },
+    "response": {
+      "body": ": FEATHERLESS PROCESSING\n: FEATHERLESS PROCESSING\ndata: {\"id\":\"T1R1ho\",\"object\":\"chat.completion.chunk\",\"created\":1744738127478,\"model\":\"meta-llama/Meta-Llama-3.1-8B-Instruct\",\"choices\":[{\"delta\":{\"role\":\"assistant\",\"content\":\"\"},\"index\":0,\"finish_reason\":null}]}\n\ndata: {\"id\":\"T1R1ho\",\"object\":\"chat.completion.chunk\",\"created\":1744738128780,\"model\":\"meta-llama/Meta-Llama-3.1-8B-Instruct\",\"choices\":[{\"delta\":{\"content\":\"\"},\"index\":0,\"finish_reason\":null}]}\n\ndata: {\"id\":\"T1R1ho\",\"object\":\"chat.completion.chunk\",\"created\":1744738129059,\"model\":\"meta-llama/Meta-Llama-3.1-8B-Instruct\",\"choices\":[{\"delta\":{\"content\":\"\"},\"index\":0,\"finish_reason\":null}]}\n\ndata: {\"id\":\"T1R1ho\",\"object\":\"chat.completion.chunk\",\"created\":1744738129092,\"model\":\"meta-llama/Meta-Llama-3.1-8B-Instruct\",\"choices\":[{\"delta\":{\"content\":\"2\"},\"index\":0,\"finish_reason\":null}]}\n\ndata: {\"id\":\"T1R1ho\",\"object\":\"text_completion\",\"created\":1744738129671,\"model\":\"meta-llama/Meta-Llama-3.1-8B-Instruct\",\"choices\":[{\"delta\":{},\"index\":0,\"logprobs\":null,\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "cache-control": "no-cache",
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "930d294aadf5eb61-ORD",
+        "connection": "keep-alive",
+        "content-type": "text/event-stream",
+        "nel": "{\"success_fraction\":0,\"report_to\":\"cf-nel\",\"max_age\":604800}",
+        "report-to": "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report\\/v4?s=7awdH7G%2FfIt%2F6A%2FCcVcyItEaJLW%2FzD5RcOVIIWM4wkWBqx6BV9BaI18U%2BTFlSiQfa5X5jEnLLmSTdgr7E7M%2B38UIxgNDezqK45dJvwzVF4pjFps1xPMG%2F2C0Vz5ylgIGs4ZxCA%3D%3D\"}],\"group\":\"cf-nel\",\"max_age\":604800}",
+        "server": "cloudflare",
+        "server-timing": "cfL4;desc=\"?proto=TCP&rtt=35139&min_rtt=32588&rtt_var=14043&sent=4&recv=5&lost=0&retrans=0&sent_bytes=2847&recv_bytes=1010&delivery_rate=88867&cwnd=222&unsent_bytes=0&cid=70e9c03ed3d0c745&ts=3251&x=0\"",
+        "strict-transport-security": "max-age=15724800; includeSubDomains",
+        "transfer-encoding": "chunked",
+        "vary": "Origin"
+      }
+    }
+  },
+  "9e6bef930cb9728402e4e3963ee107398bee0776948025369cc2036ba7ada176": {
+    "url": "https://api.featherless.ai/v1/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"inputs\":\"Paris is a city of \",\"parameters\":{\"temperature\":0,\"top_p\":0.01,\"max_tokens\":10},\"temperature\":0,\"top_p\":0.01,\"max_tokens\":10,\"model\":\"meta-llama/Meta-Llama-3.1-8B\",\"prompt\":\"Paris is a city of \"}"
+    },
+    "response": {
+      "body": "{\"id\":\"djPvCp\",\"object\":\"text_completion\",\"created\":1744738132411,\"model\":\"meta-llama/Meta-Llama-3.1-8B\",\"choices\":[{\"index\":0,\"text\":\"2.2 million people, and it is the\",\"logprobs\":null,\"finish_reason\":\"stop\"}],\"system_fingerprint\":\"\",\"usage\":{\"prompt_tokens\":6,\"completion_tokens\":10,\"total_tokens\":16}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "cache-control": "no-cache",
+        "cf-cache-status": "DYNAMIC",
+        "cf-ray": "930d294adddb7ca5-EWR",
+        "connection": "keep-alive",
+        "content-encoding": "br",
+        "content-type": "application/json",
+        "nel": "{\"success_fraction\":0,\"report_to\":\"cf-nel\",\"max_age\":604800}",
+        "report-to": "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report\\/v4?s=UDo4w4zRyJSxdhlgdtsAf%2BjJWPk%2FAigX2XxpJEdzRlxnbUe9RbZin%2FuOch0VxhRsjz8hCeqe1BShVb%2BzxblGyosdydMFFThBXM9uBlHs%2BwNmyOB5NYfB8jbsbpiuwClYHqT77w%3D%3D\"}],\"group\":\"cf-nel\",\"max_age\":604800}",
+        "server": "cloudflare",
+        "server-timing": "cfL4;desc=\"?proto=TCP&rtt=43135&min_rtt=40171&rtt_var=17181&sent=4&recv=5&lost=0&retrans=0&sent_bytes=2847&recv_bytes=1060&delivery_rate=72091&cwnd=251&unsent_bytes=0&cid=fc8be36f821730f7&ts=6031&x=0\"",
+        "strict-transport-security": "max-age=15724800; includeSubDomains",
+        "transfer-encoding": "chunked",
+        "vary": "Origin"
+      }
+    }
   }
 }
