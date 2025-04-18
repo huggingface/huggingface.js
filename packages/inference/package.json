@@ -55,9 +55,8 @@
 		"export-templates": "tsx scripts/export-templates.ts"
 	},
 	"dependencies": {
-		"@huggingface/jinja": "workspace:^",
 		"@huggingface/tasks": "workspace:^",
-		"@modelcontextprotocol/sdk": "^1.9.0"
+		"@huggingface/jinja": "workspace:^"
 	},
 	"devDependencies": {
 		"@types/node": "18.13.0"
