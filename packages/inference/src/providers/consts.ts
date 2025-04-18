@@ -24,6 +24,7 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	cohere: {},
 	"fal-ai": {},
 	"fireworks-ai": {},
+	groq: {},
 	"hf-inference": {},
 	hyperbolic: {},
 	nebius: {},

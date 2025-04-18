@@ -7456,5 +7456,56 @@
         "server": "UploadServer"
       }
     }
+  },
+  "5688b06e0eb91dd68eef47fad94783b8b38a56cceae637c57521a48d4711ff2d": {
+    "url": "https://api.groq.com/openai/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Say 'this is a test'\"}],\"stream\":true,\"model\":\"llama-3.3-70b-versatile\"}"
+    },
+    "response": {
+      "body": "data: {\"id\":\"chatcmpl-f3f09b15-5394-4b39-bd41-5b30c9ba741e\",\"object\":\"chat.completion.chunk\",\"created\":1744905321,\"model\":\"llama-3.3-70b-versatile\",\"system_fingerprint\":\"fp_3f3b593e33\",\"instance_id\":\"LLAMA-33-70B-DMM1-PROD2-1\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"\"},\"logprobs\":null,\"finish_reason\":null}],\"x_groq\":{\"id\":\"req_01js27cen2f5brg46sjpmn0z3m\"}}\n\ndata: {\"id\":\"chatcmpl-f3f09b15-5394-4b39-bd41-5b30c9ba741e\",\"object\":\"chat.completion.chunk\",\"created\":1744905321,\"model\":\"llama-3.3-70b-versatile\",\"system_fingerprint\":\"fp_3f3b593e33\",\"instance_id\":\"LLAMA-33-70B-DMM1-PROD2-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"This\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata: {\"id\":\"chatcmpl-f3f09b15-5394-4b39-bd41-5b30c9ba741e\",\"object\":\"chat.completion.chunk\",\"created\":1744905321,\"model\":\"llama-3.3-70b-versatile\",\"system_fingerprint\":\"fp_3f3b593e33\",\"instance_id\":\"LLAMA-33-70B-DMM1-PROD2-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" is\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata: {\"id\":\"chatcmpl-f3f09b15-5394-4b39-bd41-5b30c9ba741e\",\"object\":\"chat.completion.chunk\",\"created\":1744905321,\"model\":\"llama-3.3-70b-versatile\",\"system_fingerprint\":\"fp_3f3b593e33\",\"instance_id\":\"LLAMA-33-70B-DMM1-PROD2-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" a\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata: {\"id\":\"chatcmpl-f3f09b15-5394-4b39-bd41-5b30c9ba741e\",\"object\":\"chat.completion.chunk\",\"created\":1744905321,\"model\":\"llama-3.3-70b-versatile\",\"system_fingerprint\":\"fp_3f3b593e33\",\"instance_id\":\"LLAMA-33-70B-DMM1-PROD2-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\" test\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata: {\"id\":\"chatcmpl-f3f09b15-5394-4b39-bd41-5b30c9ba741e\",\"object\":\"chat.completion.chunk\",\"created\":1744905321,\"model\":\"llama-3.3-70b-versatile\",\"system_fingerprint\":\"fp_3f3b593e33\",\"instance_id\":\"LLAMA-33-70B-DMM1-PROD2-1\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\".\"},\"logprobs\":null,\"finish_reason\":null}]}\n\ndata: {\"id\":\"chatcmpl-f3f09b15-5394-4b39-bd41-5b30c9ba741e\",\"object\":\"chat.completion.chunk\",\"created\":1744905321,\"model\":\"llama-3.3-70b-versatile\",\"system_fingerprint\":\"fp_3f3b593e33\",\"instance_id\":\"LLAMA-33-70B-DMM1-PROD2-1\",\"choices\":[{\"index\":0,\"delta\":{},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"x_groq\":{\"id\":\"req_01js27cen2f5brg46sjpmn0z3m\",\"usage\":{\"queue_time\":0.220723924,\"prompt_tokens\":42,\"prompt_time\":0.010160524,\"completion_tokens\":6,\"completion_time\":0.021818182,\"total_tokens\":48,\"total_time\":0.031978706}}}\n\ndata: [DONE]\n\n",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cache-control": "no-cache",
+        "cf-cache-status": "DYNAMIC",
+        "connection": "keep-alive",
+        "content-type": "text/event-stream",
+        "server": "cloudflare",
+        "transfer-encoding": "chunked",
+        "vary": "Origin, Accept-Encoding"
+      }
+    }
+  },
+  "01cb4504b502c793085788df0984db81d4f72532cebe5862d9558b0cbf07519c": {
+    "url": "https://api.groq.com/openai/v1/chat/completions",
+    "init": {
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "method": "POST",
+      "body": "{\"messages\":[{\"role\":\"user\",\"content\":\"Complete this sentence with words, one plus one is equal \"}],\"model\":\"llama-3.3-70b-versatile\"}"
+    },
+    "response": {
+      "body": "{\"id\":\"chatcmpl-76a3744d-bc7c-4153-900b-99d189af3720\",\"object\":\"chat.completion\",\"created\":1744905321,\"model\":\"llama-3.3-70b-versatile\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"two.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.218711445,\"prompt_tokens\":47,\"prompt_time\":0.010602797,\"completion_tokens\":3,\"completion_time\":0.010909091,\"total_tokens\":50,\"total_time\":0.021511888},\"usage_breakdown\":{\"models\":null},\"system_fingerprint\":\"fp_3f3b593e33\",\"instance_id\":\"LLAMA-33-70B-DMM1-PROD2-1\",\"x_groq\":{\"id\":\"req_01js27cen0fafs6j9xp8w18nfm\"}}",
+      "status": 200,
+      "statusText": "OK",
+      "headers": {
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cache-control": "private, max-age=0, no-store, no-cache, must-revalidate",
+        "cf-cache-status": "DYNAMIC",
+        "connection": "keep-alive",
+        "content-encoding": "br",
+        "content-type": "application/json",
+        "server": "cloudflare",
+        "transfer-encoding": "chunked",
+        "vary": "Origin, Accept-Encoding"
+      }
+    }
   }
 }
