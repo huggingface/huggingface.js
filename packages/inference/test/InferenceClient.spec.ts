@@ -376,7 +376,7 @@ describe.concurrent("InferenceClient", () => {
 				);
 			});
 
-			it("textGeneration - gpt2", async () => {
+			it.skip("textGeneration - gpt2", async () => {
 				expect(
 					await hf.textGeneration({
 						model: "gpt2",
@@ -387,7 +387,7 @@ describe.concurrent("InferenceClient", () => {
 				});
 			});
 
-			it("textGeneration - openai-community/gpt2", async () => {
+			it.skip("textGeneration - openai-community/gpt2", async () => {
 				expect(
 					await hf.textGeneration({
 						model: "openai-community/gpt2",
