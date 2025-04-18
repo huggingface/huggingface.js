@@ -52,5 +52,6 @@
 		"@types/node": "^20.11.28"
 	},
 	"dependencies": {
+		"@modelcontextprotocol/sdk": "^1.9.0"
 	}
 }

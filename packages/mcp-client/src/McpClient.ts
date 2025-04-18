@@ -1,8 +1,8 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import { InferenceClient } from "./InferenceClient";
 import { homedir } from "os";
 import { join } from "path";
+import { InferenceClient } from "@huggingface/inference";
 import type { InferenceProvider } from "./types";
 import type {
 	ChatCompletionInputMessage,
