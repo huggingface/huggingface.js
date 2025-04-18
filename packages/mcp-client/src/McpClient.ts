@@ -80,7 +80,7 @@ export class McpClient {
 		}
 		for (const toolCall of toolCalls) {
 			const toolName = toolCall.function.name;
-			const toolArgs = JSON.parse(`${toolCall.function.arguments}`);
+			const toolArgs = JSON.parse(toolCall.function.arguments);
 
 			/// Get the appropriate session for this tool
 			const client = this.clients.get(toolName);

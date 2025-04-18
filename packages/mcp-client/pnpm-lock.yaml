@@ -8,6 +8,9 @@ dependencies:
   '@huggingface/inference':
     specifier: workspace:^
     version: link:../inference
+  '@huggingface/tasks':
+    specifier: workspace:^
+    version: link:../tasks
   '@modelcontextprotocol/sdk':
     specifier: ^1.9.0
     version: 1.10.1
