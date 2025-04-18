@@ -49,9 +49,10 @@
 	"author": "Hugging Face",
 	"license": "MIT",
 	"devDependencies": {
-		"@types/node": "^20.11.28"
+		"@types/node": "^22.14.1"
 	},
 	"dependencies": {
+		"@huggingface/inference": "workspace:^",
 		"@modelcontextprotocol/sdk": "^1.9.0"
 	}
 }

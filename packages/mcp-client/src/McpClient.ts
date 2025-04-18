@@ -3,7 +3,7 @@ import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js"
 import { homedir } from "os";
 import { join } from "path";
 import { InferenceClient } from "@huggingface/inference";
-import type { InferenceProvider } from "./types";
+import type { InferenceProvider } from "@huggingface/inference";
 import type {
 	ChatCompletionInputMessage,
 	ChatCompletionInputTool,
