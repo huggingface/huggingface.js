@@ -119,14 +119,15 @@ function formatFor(node: For, depth: number, indentStr: string): string {
 	} else {
 		formattedIterable = formatExpression(node.iterable);
 	}
-	let out = 
+	let out =
 		pad +
 		createStatement("for", formatExpression(node.loopvar), "in", formattedIterable) +
 		NEWLINE +
 		formatStatements(node.body, depth + 1, indentStr);
 
 	if (node.defaultBlock.length > 0) {
-		out += NEWLINE + pad + createStatement("else") + NEWLINE + formatStatements(node.defaultBlock, depth + 1, indentStr);
+		out +=
+			NEWLINE + pad + createStatement("else") + NEWLINE + formatStatements(node.defaultBlock, depth + 1, indentStr);
 	}
 
 	out += NEWLINE + pad + createStatement("endfor");
@@ -143,12 +144,7 @@ function formatSet(node: SetStatement, depth: number, indentStr: string): string
 		return value;
 	}
 	return (
-		value +
-		NEWLINE +
-		formatStatements(node.body, depth + 1, indentStr) +
-		NEWLINE +
-		pad +
-		createStatement("endset")
+		value + NEWLINE + formatStatements(node.body, depth + 1, indentStr) + NEWLINE + pad + createStatement("endset")
 	);
 }
 
@@ -180,8 +176,8 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 		case "BinaryExpression": {
 			const n = node as BinaryExpression;
 			const thisPrecedence = OPERATOR_PRECEDENCE[n.operator.type] ?? 0;
-			let left = formatExpression(n.left, thisPrecedence);
-			let right = formatExpression(n.right, thisPrecedence + 1);
+			const left = formatExpression(n.left, thisPrecedence);
+			const right = formatExpression(n.right, thisPrecedence + 1);
 			const expr = `${left} ${n.operator.value} ${right}`;
 			return thisPrecedence < parentPrec ? `(${expr})` : expr;
 		}
