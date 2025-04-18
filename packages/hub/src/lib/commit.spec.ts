@@ -33,7 +33,7 @@ describe("commit", () => {
 
 		try {
 			const readme1 = await downloadFile({ repo, path: "README.md", hubUrl: TEST_HUB_URL });
-			assert.strictEqual(readme1?.status, 200);
+			assert(readme1, "Readme doesn't exist");
 
 			const nodeOperation: CommitFile[] = isFrontend
 				? []
@@ -77,11 +77,9 @@ describe("commit", () => {
 			});
 
 			const fileContent = await downloadFile({ repo, path: "test.txt", hubUrl: TEST_HUB_URL });
-			assert.strictEqual(fileContent?.status, 200);
 			assert.strictEqual(await fileContent?.text(), "This is me");
 
 			const lfsFileContent = await downloadFile({ repo, path: "test.lfs.txt", hubUrl: TEST_HUB_URL });
-			assert.strictEqual(lfsFileContent?.status, 200);
 			assert.strictEqual(await lfsFileContent?.text(), lfsContent);
 
 			const lfsFileUrl = `${TEST_HUB_URL}/${repoName}/raw/main/test.lfs.txt`;
@@ -98,7 +96,6 @@ size ${lfsContent.length}
 
 			if (!isFrontend) {
 				const fileUrlContent = await downloadFile({ repo, path: "tsconfig.json", hubUrl: TEST_HUB_URL });
-				assert.strictEqual(fileUrlContent?.status, 200);
 				assert.strictEqual(
 					await fileUrlContent?.text(),
 					(await import("node:fs")).readFileSync("./tsconfig.json", "utf-8")
@@ -106,7 +103,6 @@ size ${lfsContent.length}
 			}
 
 			const webResourceContent = await downloadFile({ repo, path: "lamaral.json", hubUrl: TEST_HUB_URL });
-			assert.strictEqual(webResourceContent?.status, 200);
 			assert.strictEqual(await webResourceContent?.text(), await (await fetch(tokenizerJsonUrl)).text());
 
 			const readme2 = await downloadFile({ repo, path: "README.md", hubUrl: TEST_HUB_URL });

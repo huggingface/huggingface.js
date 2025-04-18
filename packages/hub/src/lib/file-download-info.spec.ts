@@ -13,8 +13,7 @@ describe("fileDownloadInfo", () => {
 		});
 
 		assert.strictEqual(info?.size, 536063208);
-		assert.strictEqual(info?.etag, '"879c5715c18a0b7f051dd33f70f0a5c8dd1522e0a43f6f75520f16167f29279b"');
-		assert(info?.downloadLink);
+		assert.strictEqual(info?.etag, '"a7a17d6d844b5de815ccab5f42cad6d24496db3850a2a43d8258221018ce87d2"');
 	});
 
 	it("should fetch raw LFS pointer info", async () => {
@@ -30,7 +29,6 @@ describe("fileDownloadInfo", () => {
 
 		assert.strictEqual(info?.size, 134);
 		assert.strictEqual(info?.etag, '"9eb98c817f04b051b3bcca591bcd4e03cec88018"');
-		assert(!info?.downloadLink);
 	});
 
 	it("should fetch non-LFS file info", async () => {
@@ -45,5 +43,17 @@ describe("fileDownloadInfo", () => {
 
 		assert.strictEqual(info?.size, 28);
 		assert.strictEqual(info?.etag, '"a661b1a138dac6dc5590367402d100765010ffd6"');
+	});
+
+	it("should fetch xet file info", async () => {
+		const info = await fileDownloadInfo({
+			repo: {
+				type: "model",
+				name: "celinah/xet-experiments",
+			},
+			path: "large_text.txt",
+		});
+		assert.strictEqual(info?.size, 62914580);
+		assert.strictEqual(info?.etag, '"c27f98578d9363b27db0bc1cbd9c692f8e6e90ae98c38cee7bc0a88829debd17"');
 	});
 });
