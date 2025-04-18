@@ -703,13 +703,22 @@ const TEST_CUSTOM_TEMPLATES = Object.freeze({
 	},
 });
 
+function render({ chat_template, data, target }) {
+	const template = new Template(chat_template);
+	const result = template.render(data);
+	expect(result).toEqual(target);
+
+	const formatted = template.format();
+	const formattedTemplate = new Template(formatted);
+	const formattedTemplateOutput = formattedTemplate.render(data);
+	expect(formattedTemplateOutput).toEqual(result);
+}
+
 describe("End-to-end tests", () => {
 	describe("Default templates", async () => {
 		for (const [model_type, test_data] of Object.entries(TEST_DEFAULT_TEMPLATES)) {
 			it(model_type, async () => {
-				const template = new Template(test_data.chat_template);
-				const result = template.render(test_data.data);
-				expect(result).toEqual(test_data.target);
+				render(test_data);
 			});
 		}
 	});
@@ -717,9 +726,7 @@ describe("End-to-end tests", () => {
 	describe("Custom templates", async () => {
 		for (const [model_type, test_data] of Object.entries(TEST_CUSTOM_TEMPLATES)) {
 			it(model_type, async () => {
-				const template = new Template(test_data.chat_template);
-				const result = template.render(test_data.data);
-				expect(result).toEqual(test_data.target);
+				render(test_data);
 			});
 		}
 	});
