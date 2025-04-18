@@ -49,8 +49,8 @@ jobs:
           git tag "mcp-client-v$BUMPED_VERSION"
 
       # Add checks for dependencies if needed, similar to hub-publish.yml
-      # - name: "Check Deps are published before publishing this package"
-      #   run: pnpm -w check-deps <dependency_name>
+      - name: "Check Deps are published before publishing this package"
+        run: pnpm -w check-deps inference && pnpm -w check-deps tasks
 
       - run: pnpm publish --no-git-checks .
         env:
