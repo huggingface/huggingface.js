@@ -4,13 +4,11 @@ import { join } from "node:path";
 import { homedir } from "node:os";
 import { Agent } from "./src";
 import type { StdioServerParameters } from "@modelcontextprotocol/sdk/client/stdio.js";
+import { ANSI } from "./src/utils";
+import type { InferenceProvider } from "@huggingface/inference";
 
-const ANSI = {
-	BLUE: "\x1b[34m",
-	GREEN: "\x1b[32m",
-	RED: "\x1b[31m",
-	RESET: "\x1b[0m",
-};
+const MODEL_ID = process.env.MODEL_ID ?? "Qwen/Qwen2.5-72B-Instruct";
+const PROVIDER = (process.env.PROVIDER as InferenceProvider) ?? "together";
 
 const SERVERS: StdioServerParameters[] = [
 	{
@@ -35,8 +33,8 @@ async function main() {
 	}
 
 	const agent = new Agent({
-		provider: "together",
-		model: "Qwen/Qwen2.5-72B-Instruct",
+		provider: PROVIDER,
+		model: MODEL_ID,
 		apiKey: process.env.HF_TOKEN,
 		servers: SERVERS,
 	});
@@ -58,7 +56,7 @@ async function main() {
 
 	while (true) {
 		const input = await rl.question("> ");
-		for await (const response of agent.processSingleTurn(input)) {
+		for await (const response of agent.run(input)) {
 			if ("choices" in response) {
 				stdout.write(response.choices[0].message.content ?? "");
 				stdout.write("\n\n");

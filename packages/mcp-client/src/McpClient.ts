@@ -70,7 +70,8 @@ export class McpClient {
 	}
 
 	async *processSingleTurnWithTools(
-		messages: ChatCompletionInputMessage[]
+		messages: ChatCompletionInputMessage[],
+		opts: { taskCompletionTool?: ChatCompletionInputTool } = {}
 	): AsyncGenerator<ChatCompletionOutput | ChatCompletionInputMessageTool> {
 		debug("start of single turn");
 
@@ -78,7 +79,7 @@ export class McpClient {
 			provider: this.provider,
 			model: this.model,
 			messages,
-			tools: this.availableTools,
+			tools: opts.taskCompletionTool ? [...this.availableTools, opts.taskCompletionTool] : this.availableTools,
 			tool_choice: "auto",
 		});
 
@@ -100,6 +101,10 @@ export class McpClient {
 				content: "",
 				name: toolName,
 			};
+			if (toolName === opts.taskCompletionTool?.function.name) {
+				messages.push(message);
+				return yield message;
+			}
 			/// Get the appropriate session for this tool
 			const client = this.clients.get(toolName);
 			if (client) {

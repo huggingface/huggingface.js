@@ -3,3 +3,10 @@ export function debug(...args: unknown[]): void {
 		console.debug(args);
 	}
 }
+
+export const ANSI = {
+	BLUE: "\x1b[34m",
+	GREEN: "\x1b[32m",
+	RED: "\x1b[31m",
+	RESET: "\x1b[0m",
+};
