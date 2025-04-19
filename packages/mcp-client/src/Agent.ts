@@ -30,6 +30,18 @@ const taskCompletionTool: ChatCompletionInputTool = {
 		},
 	},
 };
+const askQuestionTool: ChatCompletionInputTool = {
+	type: "function",
+	function: {
+		name: "ask_question",
+		description: "Ask a question to the user to get more info required to solve or clarify their problem.",
+		parameters: {
+			type: "object",
+			properties: {},
+		},
+	},
+};
+const exitLoopTools = [taskCompletionTool, askQuestionTool];
 
 export class Agent extends McpClient {
 	private readonly servers: StdioServerParameters[];
@@ -66,16 +78,31 @@ export class Agent extends McpClient {
 			content: input,
 		});
 
-		let i = 0;
-		while (
-			!(this.messages.at(-1)?.role === "tool" && this.messages.at(-1)?.name === taskCompletionTool.function.name) &&
-			i < MAX_NUM_TURNS
-		) {
+		let total = 0;
+		let nextShouldCallTools = true;
+		while (true) {
 			yield* this.processSingleTurnWithTools(this.messages, {
-				taskCompletionTool,
+				exitLoopTools,
+				exitIfNoTool: total > 0 && nextShouldCallTools,
 			});
-			i++;
-			debug("current role", this.messages.at(-1)?.role);
+			total++;
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			const currentLast = this.messages.at(-1)!;
+			debug("current role", currentLast.role);
+			if (
+				currentLast.role === "tool" &&
+				currentLast.name &&
+				exitLoopTools.map((t) => t.function.name).includes(currentLast.name)
+			) {
+				return;
+			}
+			if (currentLast.role !== "tool" && total > MAX_NUM_TURNS) {
+				return;
+			}
+			if (currentLast.role !== "tool" && nextShouldCallTools) {
+				return;
+			}
+			nextShouldCallTools = currentLast.role !== "tool";
 		}
 	}
 }

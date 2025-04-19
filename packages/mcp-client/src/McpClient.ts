@@ -71,7 +71,7 @@ export class McpClient {
 
 	async *processSingleTurnWithTools(
 		messages: ChatCompletionInputMessage[],
-		opts: { taskCompletionTool?: ChatCompletionInputTool } = {}
+		opts: { exitLoopTools?: ChatCompletionInputTool[]; exitIfNoTool?: boolean } = {}
 	): AsyncGenerator<ChatCompletionOutput | ChatCompletionInputMessageTool> {
 		debug("start of single turn");
 
@@ -79,12 +79,15 @@ export class McpClient {
 			provider: this.provider,
 			model: this.model,
 			messages,
-			tools: opts.taskCompletionTool ? [...this.availableTools, opts.taskCompletionTool] : this.availableTools,
+			tools: opts.exitLoopTools ? [...opts.exitLoopTools, ...this.availableTools] : this.availableTools,
 			tool_choice: "auto",
 		});
 
 		const toolCalls = response.choices[0].message.tool_calls;
 		if (!toolCalls || toolCalls.length === 0) {
+			if (opts.exitIfNoTool) {
+				return;
+			}
 			messages.push({
 				role: response.choices[0].message.role,
 				content: response.choices[0].message.content,
@@ -101,7 +104,7 @@ export class McpClient {
 				content: "",
 				name: toolName,
 			};
-			if (toolName === opts.taskCompletionTool?.function.name) {
+			if (opts.exitLoopTools?.map((t) => t.function.name).includes(toolName)) {
 				messages.push(message);
 				return yield message;
 			}
