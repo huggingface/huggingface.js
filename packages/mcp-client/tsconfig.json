@@ -13,8 +13,9 @@
 		"noImplicitOverride": true,
 		"outDir": "./dist",
 		"declaration": true,
-		"declarationMap": true
+		"declarationMap": true,
+		"resolveJsonModule": true
 	},
-	"include": ["src"],
+	"include": ["src", "test"],
 	"exclude": ["dist"]
 }

@@ -9,6 +9,7 @@ import type {
 	ChatCompletionInputTool,
 	ChatCompletionOutput,
 } from "@huggingface/tasks/src/tasks/chat-completion/inference";
+import { version as packageVersion } from "../package.json";
 
 type ToolName = string;
 
@@ -31,7 +32,7 @@ export class McpClient {
 			args,
 			env: { ...env, PATH: process.env.PATH ?? "" },
 		});
-		const mcp = new Client({ name: "@huggingface/mcp-client", version: "1.0.0" });
+		const mcp = new Client({ name: "@huggingface/mcp-client", version: packageVersion });
 		await mcp.connect(transport);
 
 		const toolsResult = await mcp.listTools();
