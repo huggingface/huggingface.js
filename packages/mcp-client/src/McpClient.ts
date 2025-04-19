@@ -13,10 +13,17 @@ import { debug } from "./utils";
 
 type ToolName = string;
 
+export interface ChatCompletionInputMessageTool extends ChatCompletionInputMessage {
+	role: "tool";
+	tool_call_id: string;
+	content: string;
+	name?: string;
+}
+
 export class McpClient {
-	private client: InferenceClient;
-	private provider: string;
-	private model: string;
+	protected client: InferenceClient;
+	protected provider: string;
+	protected model: string;
 	private clients: Map<ToolName, Client> = new Map();
 	public readonly availableTools: ChatCompletionInputTool[] = [];
 
@@ -62,13 +69,10 @@ export class McpClient {
 		);
 	}
 
-	async processQuery(query: string): Promise<ChatCompletionOutput> {
-		const messages: ChatCompletionInputMessage[] = [
-			{
-				role: "user",
-				content: query,
-			},
-		];
+	async *processSingleTurnWithTools(
+		messages: ChatCompletionInputMessage[]
+	): AsyncGenerator<ChatCompletionOutput | ChatCompletionInputMessageTool> {
+		debug("start of single turn");
 
 		const response = await this.client.chatCompletion({
 			provider: this.provider,
@@ -80,43 +84,41 @@ export class McpClient {
 
 		const toolCalls = response.choices[0].message.tool_calls;
 		if (!toolCalls || toolCalls.length === 0) {
-			return response;
+			messages.push({
+				role: response.choices[0].message.role,
+				content: response.choices[0].message.content,
+			});
+			return yield response;
 		}
 		for (const toolCall of toolCalls) {
 			const toolName = toolCall.function.name;
 			const toolArgs = JSON.parse(toolCall.function.arguments);
 
+			const message: ChatCompletionInputMessageTool = {
+				role: "tool",
+				tool_call_id: toolCall.id,
+				content: "",
+				name: toolName,
+			};
 			/// Get the appropriate session for this tool
 			const client = this.clients.get(toolName);
 			if (client) {
 				const result = await client.callTool({ name: toolName, arguments: toolArgs });
-				messages.push({
-					tool_call_id: toolCall.id,
-					role: "tool",
-					name: toolName,
-					content: (result.content as Array<{ text: string }>)[0].text,
-				});
+				message.content = (result.content as Array<{ text: string }>)[0].text;
 			} else {
-				messages.push({
-					tool_call_id: toolCall.id,
-					role: "tool",
-					name: toolName,
-					content: `Error: No session found for tool: ${toolName}`,
-				});
+				message.content = `Error: No session found for tool: ${toolName}`;
 			}
+			messages.push(message);
+			yield message;
 		}
-
-		const enrichedResponse = await this.client.chatCompletion({
-			provider: this.provider,
-			model: this.model,
-			messages,
-		});
-
-		return enrichedResponse;
 	}
 
 	async cleanup(): Promise<void> {
 		const clients = new Set(this.clients.values());
 		await Promise.all([...clients].map((client) => client.close()));
+	}
+
+	async [Symbol.dispose](): Promise<void> {
+		return this.cleanup();
 	}
 }

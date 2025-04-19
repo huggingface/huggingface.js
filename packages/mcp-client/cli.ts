@@ -5,15 +5,9 @@ import { homedir } from "node:os";
 import { Agent } from "./src";
 import type { StdioServerParameters } from "@modelcontextprotocol/sdk/client/stdio.js";
 
-async function* boboGenerator(message: string) {
-	for (let i = 0; i < 6; i++) {
-		yield "bobo ";
-		await new Promise((resolve) => setTimeout(resolve, 400));
-	}
-}
-
 const ANSI = {
 	BLUE: "\x1b[34m",
+	GREEN: "\x1b[32m",
 	RED: "\x1b[31m",
 	RESET: "\x1b[0m",
 };
@@ -64,8 +58,18 @@ async function main() {
 
 	while (true) {
 		const input = await rl.question("> ");
-		for await (const bobo of boboGenerator(input)) {
-			console.log(bobo);
+		for await (const response of agent.processSingleTurn(input)) {
+			if ("choices" in response) {
+				stdout.write(response.choices[0].message.content ?? "");
+				stdout.write("\n\n");
+			} else {
+				/// Tool call info
+				stdout.write(ANSI.GREEN);
+				stdout.write(`Tool[${response.name}] ${response.tool_call_id}\n`);
+				stdout.write(response.content);
+				stdout.write(ANSI.RESET);
+				stdout.write("\n\n");
+			}
 		}
 	}
 }

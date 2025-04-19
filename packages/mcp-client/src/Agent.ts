@@ -1,6 +1,7 @@
 import type { InferenceProvider } from "@huggingface/inference";
+import type { ChatCompletionInputMessageTool } from "./McpClient";
 import { McpClient } from "./McpClient";
-import type { ChatCompletionInputMessage } from "@huggingface/tasks";
+import type { ChatCompletionInputMessage, ChatCompletionOutput } from "@huggingface/tasks";
 import type { StdioServerParameters } from "@modelcontextprotocol/sdk/client/stdio";
 
 const DEFAULT_SYSTEM_PROMPT = `
@@ -40,18 +41,14 @@ export class Agent extends McpClient {
 		return this.addMcpServers(this.servers);
 	}
 
-	async processUserMessage(query: string) {
+	async *processSingleTurn(input: string): AsyncGenerator<ChatCompletionOutput | ChatCompletionInputMessageTool> {
 		this.messages.push({
 			role: "user",
-			content: query,
+			content: input,
 		});
 
-		const stream = await this.client.chatCompletionStream({
-			provider: this.provider,
-			model: this.model,
-			messages,
-			tools: this.availableTools,
-			tool_choice: "auto",
-		});
+		while (this.messages.at(-1)?.role !== "assistant") {
+			yield* this.processSingleTurnWithTools(this.messages);
+		}
 	}
 }
