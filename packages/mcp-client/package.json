@@ -30,7 +30,8 @@
 		"build": "tsup src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
 		"prepare": "pnpm run build",
 		"test": "vitest run",
-		"check": "tsc"
+		"check": "tsc",
+		"agent": "tsx cli.ts"
 	},
 	"files": [
 		"src",
