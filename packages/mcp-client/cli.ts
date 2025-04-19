@@ -49,7 +49,7 @@ async function main() {
 
 	const rl = readline.createInterface({ input: stdin, output: stdout });
 	rl.on("SIGINT", async () => {
-		await agent.client.cleanup();
+		await agent.cleanup();
 		stdout.write("\n");
 		rl.close();
 	});
@@ -57,14 +57,14 @@ async function main() {
 	await agent.loadTools();
 
 	stdout.write(ANSI.BLUE);
-	stdout.write(`Agent loaded with ${agent.client.availableTools.length} tools:\n`);
-	stdout.write(agent.client.availableTools.map((t) => `- ${t.function.name}`).join("\n"));
+	stdout.write(`Agent loaded with ${agent.availableTools.length} tools:\n`);
+	stdout.write(agent.availableTools.map((t) => `- ${t.function.name}`).join("\n"));
 	stdout.write(ANSI.RESET);
 	stdout.write("\n");
 
 	while (true) {
-		const message = await rl.question("> ");
-		for await (const bobo of boboGenerator(message)) {
+		const input = await rl.question("> ");
+		for await (const bobo of boboGenerator(input)) {
 			console.log(bobo);
 		}
 	}

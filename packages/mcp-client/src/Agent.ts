@@ -11,8 +11,7 @@ If you are not sure about anything pertaining to the user’s request, use your 
 You MUST plan extensively before each function call, and reflect extensively on the outcomes of the previous function calls. DO NOT do this entire process by making function calls only, as this can impair your ability to solve the problem and think insightfully.
 `.trim();
 
-export class Agent {
-	readonly client: McpClient;
+export class Agent extends McpClient {
 	private readonly servers: StdioServerParameters[];
 	protected messages: ChatCompletionInputMessage[];
 
@@ -27,7 +26,7 @@ export class Agent {
 		apiKey: string;
 		servers: StdioServerParameters[];
 	}) {
-		this.client = new McpClient({ provider, model, apiKey });
+		super({ provider, model, apiKey });
 		this.servers = servers;
 		this.messages = [
 			{
@@ -38,13 +37,21 @@ export class Agent {
 	}
 
 	async loadTools(): Promise<void> {
-		return this.client.addMcpServers(this.servers);
+		return this.addMcpServers(this.servers);
 	}
 
 	async processUserMessage(query: string) {
 		this.messages.push({
 			role: "user",
 			content: query,
+		});
+
+		const stream = await this.client.chatCompletionStream({
+			provider: this.provider,
+			model: this.model,
+			messages,
+			tools: this.availableTools,
+			tool_choice: "auto",
 		});
 	}
 }
