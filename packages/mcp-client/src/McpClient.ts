@@ -1,4 +1,5 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import type { StdioServerParameters } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { homedir } from "os";
 import { join } from "path";
@@ -26,11 +27,14 @@ export class McpClient {
 		this.model = model;
 	}
 
-	async addMcpServer(command: string, args: string[], env: Record<string, string>): Promise<void> {
+	async addMcpServers(servers: StdioServerParameters[]): Promise<void> {
+		await Promise.all(servers.map((s) => this.addMcpServer(s)));
+	}
+
+	async addMcpServer(server: StdioServerParameters): Promise<void> {
 		const transport = new StdioClientTransport({
-			command,
-			args,
-			env: { ...env, PATH: process.env.PATH ?? "" },
+			...server,
+			env: { ...server.env, PATH: process.env.PATH ?? "" },
 		});
 		const mcp = new Client({ name: "@huggingface/mcp-client", version: packageVersion });
 		await mcp.connect(transport);
@@ -131,13 +135,13 @@ async function main() {
 	});
 
 	try {
-		await client.addMcpServer(
-			"node",
-			["--disable-warning=ExperimentalWarning", join(homedir(), "Desktop/hf-mcp/index.ts")],
-			{
+		await client.addMcpServer({
+			command: "node",
+			args: ["--disable-warning=ExperimentalWarning", join(homedir(), "Desktop/hf-mcp/index.ts")],
+			env: {
 				HF_TOKEN: process.env.HF_TOKEN,
-			}
-		);
+			},
+		});
 
 		const response = await client.processQuery(`
 			find an app that generates 3D models from text,
