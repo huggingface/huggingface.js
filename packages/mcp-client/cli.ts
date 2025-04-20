@@ -17,14 +17,22 @@ const SERVERS: StdioServerParameters[] = [
 		args: ["-y", "@modelcontextprotocol/server-filesystem", join(homedir(), "Desktop")],
 	},
 	{
+		// Playwright MCP
+		command: "npx",
+		args: ["@playwright/mcp@latest"],
+	},
+];
+
+if (process.env.EXPERIMENTAL_HF_MCP_SERVER) {
+	SERVERS.push({
 		// Early version of a HF-MCP server
 		command: "node",
 		args: ["--disable-warning=ExperimentalWarning", join(homedir(), "Desktop/hf-mcp/index.ts")],
 		env: {
 			HF_TOKEN: process.env.HF_TOKEN ?? "",
 		},
-	},
-];
+	});
+}
 
 async function main() {
 	if (!process.env.HF_TOKEN) {
