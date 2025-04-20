@@ -2,7 +2,7 @@
 
 Client for the Model Context Protocol (MCP).
 
-This package provides a client implementation for interacting with MCP servers, built on top of our Inference Providers client, `@huggingface/inference`.
+This package provides a client implementation for interacting with MCP servers, built on top of our InferenceClient, `@huggingface/inference`.
 
 It includes an example CLI smol Agent that can leverage MCP tools.
 
