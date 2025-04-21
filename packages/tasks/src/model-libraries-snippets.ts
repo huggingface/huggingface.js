@@ -681,6 +681,23 @@ export const paddlenlp = (model: ModelData): string[] => {
 	}
 };
 
+export const perception_encoder = (model: ModelData): string[] => {
+	const clip_model = `# Use PE-Core models as CLIP models
+import core.vision_encoder.pe as pe
+
+model = pe.CLIP.from_config("${model.id}", pretrained=True)`;
+
+	const vision_encoder = `# Use any PE model as a vision encoder
+import core.vision_encoder.pe as pe
+
+model = pe.VisionTransformer.from_config("${model.id}", pretrained=True)`;
+	
+	if (model.includes("Core"))
+		return [clip_model, vision_encoder];
+	else
+		return [vision_encoder];
+};
+
 export const pyannote_audio_pipeline = (model: ModelData): string[] => [
 	`from pyannote.audio import Pipeline
   
