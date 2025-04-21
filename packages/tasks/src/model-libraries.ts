@@ -633,6 +633,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"adapter_config.json"`,
 	},
+	"perception-encoder": {
+		prettyLabel: "PerceptionEncoder",
+		repoName: "PerceptionModels",
+		repoUrl: "https://github.com/facebookresearch/perception_models",
+		filter: false,
+		snippets: snippets.perception_encoder,
+		countDownloads: `path_extension:"pt"`,
+	},
 	pxia: {
 		prettyLabel: "pxia",
 		repoName: "pxia",
