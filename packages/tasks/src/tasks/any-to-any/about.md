@@ -19,7 +19,6 @@ You can infer with any-to-any models using transformers. Below is an example tha
 ```python
 import soundfile as sf
 from transformers import Qwen2_5OmniForConditionalGeneration, Qwen2_5OmniProcessor
-from qwen_omni_utils import process_mm_info
 
 model = Qwen2_5OmniForConditionalGeneration.from_pretrained(
     "Qwen/Qwen2.5-Omni-7B",
