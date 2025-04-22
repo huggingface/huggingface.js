@@ -220,7 +220,7 @@ describe.concurrent("InferenceClient", () => {
 						model: "this-model/does-not-exist-123",
 						inputs: "[MASK] world!",
 					})
-				).rejects.toThrowError("Model this-model/does-not-exist-123 does not exist");
+				).rejects.toThrowError("We have not been able to find inference provider information for model this-model/does-not-exist-123.");
 			});
 
 			it("fillMask", async () => {
