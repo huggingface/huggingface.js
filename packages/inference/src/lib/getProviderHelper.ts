@@ -124,6 +124,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	sambanova: {
 		conversational: new Sambanova.SambanovaConversationalTask(),
+		"feature-extraction": new Sambanova.SambanovaFeatureExtractionTask(),
 	},
 	together: {
 		"text-to-image": new Together.TogetherTextToImageTask(),
