@@ -87,6 +87,8 @@ interface AudioToAudioOutput {
 	label: string;
 }
 
+export const EQUIVALENT_SENTENCE_TRANSFORMERS_TASKS = ["feature-extraction", "sentence-similarity"] as const;
+
 export class HFInferenceTask extends TaskProviderHelper {
 	constructor() {
 		super("hf-inference", `${HF_ROUTER_URL}/hf-inference`);
