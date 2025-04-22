@@ -987,23 +987,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pt" OR path_extension:"safetensors"`,
 		snippets: snippets.ultralytics,
 	},
-	zonos: {
-		prettyLabel: "Zonos",
-		repoName: "Zonos",
-		repoUrl: "https://github.com/Zyphra/Zonos",
-		docsUrl: "https://github.com/Zyphra/Zonos",
-		snippets: snippets.zonos,
-		filter: false,
-		countDownloads: `path:"model.safetensors"`,
-	},
-	"3dtopia-xl": {
-		prettyLabel: "3DTopia-XL",
-		repoName: "3DTopia-XL",
-		repoUrl: "https://github.com/3DTopia/3DTopia-XL",
-		filter: false,
-		countDownloads: `path:"model_vae_fp16.pt"`,
-		snippets: snippets.threedtopia_xl,
-	},
 } satisfies Record<string, LibraryUiElement>;
 
 export type ModelLibraryKey = keyof typeof MODEL_LIBRARIES_UI_ELEMENTS;
