@@ -36,13 +36,37 @@ export const DEFAULT_MEMORY_OPTIONS = [8, 16, 24, 32, 40, 48, 64, 80, 96, 128, 2
 export const SKUS = {
 	GPU: {
 		NVIDIA: {
+			H200: {
+				tflops: 241.3,
+				memory: [141],
+			},
 			H100: {
 				tflops: 267.6,
 				memory: [80],
 			},
+			L40s: {
+				tflops: 91.61,
+				memory: [48],
+			},
 			L40: {
 				tflops: 90.52,
 				memory: [48],
+			},
+			L20: {
+				tflops: 59.35,
+				memory: [48],
+			},
+			L4: {
+				tflops: 30.29,
+				memory: [24],
+			},
+			"RTX PRO 6000 WS": {
+				tflops: 126,
+				memory: [96],
+			},
+			"RTX PRO 6000 Max-Q": {
+				tflops: 116,
+				memory: [96],
 			},
 			"RTX 6000 Ada": {
 				tflops: 91.1,
@@ -100,6 +124,34 @@ export const SKUS = {
 				tflops: 4.531, // source: https://www.techpowerup.com/gpu-specs/a2.c3848
 				memory: [16],
 			},
+			"RTX 5090": {
+				tflops: 104.8,
+				memory: [32],
+			},
+			"RTX 5090 D": {
+				tflops: 104.8,
+				memory: [32],
+			},
+			"RTX 5080": {
+				tflops: 56.28,
+				memory: [16],
+			},
+			"RTX 5080 Mobile": {
+				tflops: 24.58,
+				memory: [16],
+			},
+			"RTX 5070": {
+				tflops: 30.84,
+				memory: [12],
+			},
+			"RTX 5070 Mobile": {
+				tflops: 23.22,
+				memory: [8],
+			},
+			"RTX 5070 Ti": {
+				tflops: 43.94,
+				memory: [16],
+			},
 			"RTX 4090": {
 				tflops: 82.58,
 				memory: [24],
@@ -107,6 +159,10 @@ export const SKUS = {
 			"RTX 4090D": {
 				tflops: 79.49,
 				memory: [24],
+			},
+			"RTX 4090 Mobile": {
+				tflops: 32.98,
+				memory: [16],
 			},
 			"RTX 4080 SUPER": {
 				tflops: 52.2,
@@ -116,9 +172,17 @@ export const SKUS = {
 				tflops: 48.7,
 				memory: [16],
 			},
+			"RTX 4080 Mobile": {
+				tflops: 24.72,
+				memory: [12],
+			},
 			"RTX 4070": {
 				tflops: 29.15,
 				memory: [12],
+			},
+			"RTX 4070 Mobile": {
+				tflops: 15.62,
+				memory: [8],
 			},
 			"RTX 4070 Ti": {
 				tflops: 40.09,
@@ -140,24 +204,24 @@ export const SKUS = {
 				tflops: 22.06,
 				memory: [8, 16],
 			},
-			"RTX 4090 LAPTOP": {
-				tflops: 38.9,
+			"RTX 4090 Laptop": {
+				tflops: 32.98,
 				memory: [16],
 			},
-			"RTX 4080 LAPTOP": {
-				tflops: 33.8,
+			"RTX 4080 Laptop": {
+				tflops: 24.72,
 				memory: [12],
 			},
-			"RTX 4070 LAPTOP": {
-				tflops: 20.0,
+			"RTX 4070 Laptop": {
+				tflops: 15.62,
 				memory: [8],
 			},
-			"RTX 4060 LAPTOP": {
-				tflops: 14.6,
+  		"RTX 4060 Laptop": {
+				tflops: 11.61,
 				memory: [8],
 			},
-			"RTX 4050 LAPTOP": {
-				tflops: 12.1,
+			"RTX 4050 Laptop": {
+				tflops: 8.9,
 				memory: [6],
 			},
 			"RTX 3090": {
@@ -176,6 +240,10 @@ export const SKUS = {
 				tflops: 34.1,
 				memory: [12],
 			},
+			"RTX 3080 Mobile": {
+				tflops: 18.98,
+				memory: [8],
+			},
 			"RTX 3070": {
 				tflops: 20.31,
 				memory: [8],
@@ -184,7 +252,7 @@ export const SKUS = {
 				tflops: 21.75,
 				memory: [8],
 			},
-			"RTX 3070 Ti Laptop": {
+			"RTX 3070 Ti Mobile": {
 				tflops: 16.6,
 				memory: [8],
 			},
@@ -240,6 +308,10 @@ export const SKUS = {
 				tflops: 3.9, // float32 (GPU does not support native float16)
 				memory: [3, 6],
 			},
+			"GTX 1050 Ti": {
+				tflops: 2.1, // float32 (GPU does not support native float16)
+				memory: [4],
+			},
 			"RTX Titan": {
 				tflops: 32.62,
 				memory: [24],
@@ -267,6 +339,50 @@ export const SKUS = {
 			P40: {
 				tflops: 11.76, // float32 (GPU does not support native float16)
 				memory: [24],
+			},
+			P100: {
+				tflops: 19.05,
+				memory: [16],
+			},
+			"Jetson AGX Orin 64GB": {
+				tflops: 10.65,
+				memory: [64],
+			},
+			"Jetson AGX Orin 32GB": {
+				tflops: 6.66,
+				memory: [32],
+			},
+			"Jetson Orin NX 16GB": {
+				tflops: 3.76,
+				memory: [16],
+			},
+			"Jetson Orin NX 8GB": {
+				tflops: 3.13,
+				memory: [8],
+			},
+			"Jetson Orin Nano 8GB": {
+				tflops: 2.56,
+				memory: [8],
+			},
+			"Jetson Orin Nano 4GB": {
+				tflops: 1.28,
+				memory: [4],
+			},
+			"Jetson AGX Xavier": {
+				tflops: 2.82,
+				memory: [32, 64],
+			},
+			"Jetson Xavier NX": {
+				tflops: 1.69,
+				memory: [8, 16],
+			},
+			"Jetson TX2": {
+				tflops: 1.33,
+				memory: [4, 8],
+			},
+			"Jetson Nano": {
+				tflops: 0.47,
+				memory: [4],
 			},
 		},
 		AMD: {
@@ -334,6 +450,18 @@ export const SKUS = {
 				tflops: 22.58,
 				memory: [10],
 			},
+			"RX 6650 XT": {
+				tflops: 21.59,
+				memory: [8],
+			},
+			"RX 6600 XT": {
+				tflops: 21.21,
+				memory: [8],
+			},
+			"RX 6600": {
+				tflops: 17.86,
+				memory: [8],
+			},
 			"Radeon Pro VII": {
 				tflops: 26.11,
 				memory: [16],
@@ -385,6 +513,9 @@ export const SKUS = {
 			},
 			"Xeon 2th Generation (Cascade Lake)": {
 				tflops: 0.55,
+			},
+			"Intel Core Ultra 7 265KF": {
+				tflops: 1.53,
 			},
 			"Intel Core 13th Generation (i9)": {
 				tflops: 0.85,
@@ -532,6 +663,10 @@ export const SKUS = {
 				tflops: 14.2,
 				memory: [36, 48, 64, 96, 128],
 			},
+			"Apple M3 Ultra": {
+				tflops: 28.4,
+				memory: [96, 256, 512],
+			},
 			"Apple M4": {
 				tflops: 4.6,
 				memory: [16, 24, 32],
@@ -542,7 +677,7 @@ export const SKUS = {
 			},
 			"Apple M4 Max": {
 				tflops: 18.4,
-				memory: [36, 48, 64, 128],
+				memory: [36, 48, 64, 96, 128, 256, 512],
 			},
 		},
 	},

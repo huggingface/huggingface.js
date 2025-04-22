@@ -1,6 +1,7 @@
 import type { PipelineType } from "../pipelines.js";
 import { PIPELINE_DATA } from "../pipelines.js";
 
+import anyToAny from "./any-to-any/data.js";
 import audioClassification from "./audio-classification/data.js";
 import audioToAudio from "./audio-to-audio/data.js";
 import automaticSpeechRecognition from "./automatic-speech-recognition/data.js";
@@ -30,6 +31,7 @@ import tokenClassification from "./token-classification/data.js";
 import translation from "./translation/data.js";
 import textClassification from "./text-classification/data.js";
 import textGeneration from "./text-generation/data.js";
+import textRanking from "./text-ranking/data.js";
 import textToVideo from "./text-to-video/data.js";
 import unconditionalImageGeneration from "./unconditional-image-generation/data.js";
 import videoClassification from "./video-classification/data.js";
@@ -147,6 +149,7 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	"tabular-to-text": ["transformers"],
 	"text-classification": ["adapter-transformers", "setfit", "spacy", "transformers", "transformers.js"],
 	"text-generation": ["transformers", "transformers.js"],
+	"text-ranking": ["sentence-transformers", "transformers"],
 	"text-retrieval": [],
 	"text-to-image": ["diffusers"],
 	"text-to-speech": ["espnet", "tensorflowtts", "transformers", "transformers.js"],
@@ -196,7 +199,7 @@ function getData(type: PipelineType, partialTaskData: TaskDataCustom = placehold
 // Tasks that call getData() without the second argument will
 // have a "placeholder" page.
 export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
-	"any-to-any": getData("any-to-any", placeholder),
+	"any-to-any": getData("any-to-any", anyToAny),
 	"audio-classification": getData("audio-classification", audioClassification),
 	"audio-to-audio": getData("audio-to-audio", audioToAudio),
 	"audio-text-to-text": getData("audio-text-to-text", placeholder),
@@ -232,6 +235,7 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"tabular-to-text": undefined,
 	"text-classification": getData("text-classification", textClassification),
 	"text-generation": getData("text-generation", textGeneration),
+	"text-ranking": getData("text-ranking", textRanking),
 	"text-retrieval": undefined,
 	"text-to-image": getData("text-to-image", textToImage),
 	"text-to-speech": getData("text-to-speech", textToSpeech),

@@ -84,6 +84,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"ckpt"`,
 		snippets: snippets.anemoi,
 	},
+	araclip: {
+		prettyLabel: "AraClip",
+		repoName: "AraClip",
+		repoUrl: "https://huggingface.co/Arabic-Clip/araclip",
+		filter: false,
+		snippets: snippets.araclip,
+	},
 	asteroid: {
 		prettyLabel: "Asteroid",
 		repoName: "Asteroid",
@@ -172,6 +179,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/ManuelFay/colpali",
 		filter: false,
 		countDownloads: `path:"adapter_config.json"`,
+	},
+	comet: {
+		prettyLabel: "COMET",
+		repoName: "COMET",
+		repoUrl: "https://github.com/Unbabel/COMET/",
+		countDownloads: `path:"hparams.yaml"`,
 	},
 	cosmos: {
 		prettyLabel: "Cosmos",
@@ -340,6 +353,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"sbs"`,
 	},
+	"geometry-crafter": {
+		prettyLabel: "GeometryCrafter",
+		repoName: "GeometryCrafter",
+		repoUrl: "https://github.com/TencentARC/GeometryCrafter",
+		countDownloads: `path:"point_map_vae/diffusion_pytorch_model.safetensors"`,
+	},
 	gliner: {
 		prettyLabel: "GLiNER",
 		repoName: "GLiNER",
@@ -388,11 +407,24 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/Tencent/HunyuanDiT",
 		countDownloads: `path:"pytorch_model_ema.pt" OR path:"pytorch_model_distill.pt"`,
 	},
+	"hunyuan3d-2": {
+		prettyLabel: "Hunyuan3D-2",
+		repoName: "Hunyuan3D-2",
+		repoUrl: "https://github.com/Tencent/Hunyuan3D-2",
+		countDownloads: `path_filename:"model_index" OR path_filename:"config"`,
+	},
 	imstoucan: {
 		prettyLabel: "IMS Toucan",
 		repoName: "IMS-Toucan",
 		repoUrl: "https://github.com/DigitalPhonetics/IMS-Toucan",
 		countDownloads: `path:"embedding_gan.pt" OR path:"Vocoder.pt" OR path:"ToucanTTS.pt"`,
+	},
+	"infinite-you": {
+		prettyLabel: "InfiniteYou",
+		repoName: "InfiniteYou",
+		repoUrl: "https://github.com/bytedance/InfiniteYou",
+		filter: false,
+		countDownloads: `path:"infu_flux_v1.0/sim_stage1/image_proj_model.bin" OR path:"infu_flux_v1.0/aes_stage2/image_proj_model.bin"`,
 	},
 	keras: {
 		prettyLabel: "Keras",
@@ -424,6 +456,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "K2",
 		repoName: "k2",
 		repoUrl: "https://github.com/k2-fsa/k2",
+	},
+	"lightning-ir": {
+		prettyLabel: "Lightning IR",
+		repoName: "Lightning IR",
+		repoUrl: "https://github.com/webis-de/lightning-ir",
+		snippets: snippets.lightning_ir,
 	},
 	liveportrait: {
 		prettyLabel: "LivePortrait",
@@ -464,6 +502,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"mars5_ar.safetensors"`,
 		snippets: snippets.mars5_tts,
 	},
+	matanyone: {
+		prettyLabel: "MatAnyone",
+		repoName: "MatAnyone",
+		repoUrl: "https://github.com/pq-yang/MatAnyone",
+		snippets: snippets.matanyone,
+		filter: false,
+	},
 	"mesh-anything": {
 		prettyLabel: "MeshAnything",
 		repoName: "MeshAnything",
@@ -471,6 +516,20 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"MeshAnything_350m.pth"`,
 		snippets: snippets.mesh_anything,
+	},
+	merlin: {
+		prettyLabel: "Merlin",
+		repoName: "Merlin",
+		repoUrl: "https://github.com/StanfordMIMI/Merlin",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
+	medvae: {
+		prettyLabel: "MedVAE",
+		repoName: "MedVAE",
+		repoUrl: "https://github.com/StanfordMIMI/MedVAE",
+		filter: false,
+		countDownloads: `path_extension:"ckpt"`,
 	},
 	mitie: {
 		prettyLabel: "MITIE",
@@ -549,6 +608,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 			OR path:"model.safetensors"
 			OR path:"open_clip_pytorch_model.bin"
 			OR path:"pytorch_model.bin"`,
+	},
+	"open-sora": {
+		prettyLabel: "Open-Sora",
+		repoName: "Open-Sora",
+		repoUrl: "https://github.com/hpcaitech/Open-Sora",
+		filter: false,
+		countDownloads: `path:"Open_Sora_v2.safetensors"`,
 	},
 	paddlenlp: {
 		prettyLabel: "paddlenlp",
@@ -854,6 +920,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pt"`,
 		snippets: snippets.ultralytics,
 	},
+	"uni-3dar": {
+		prettyLabel: "Uni-3DAR",
+		repoName: "Uni-3DAR",
+		repoUrl: "https://github.com/dptech-corp/Uni-3DAR",
+		docsUrl: "https://github.com/dptech-corp/Uni-3DAR",
+		countDownloads: `path_extension:"pt"`,
+	},
 	"unity-sentis": {
 		prettyLabel: "unity-sentis",
 		repoName: "unity-sentis",
@@ -883,6 +956,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://github.com/jasonppy/VoiceCraft",
 		snippets: snippets.voicecraft,
 	},
+	wham: {
+		prettyLabel: "WHAM",
+		repoName: "wham",
+		repoUrl: "https://huggingface.co/microsoft/wham",
+		docsUrl: "https://huggingface.co/microsoft/wham/blob/main/README.md",
+		countDownloads: `path_extension:"ckpt"`,
+	},
 	whisperkit: {
 		prettyLabel: "WhisperKit",
 		repoName: "WhisperKit",
@@ -897,7 +977,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "YOLOv10",
 		repoUrl: "https://github.com/THU-MIG/yolov10",
 		docsUrl: "https://github.com/THU-MIG/yolov10",
-		countDownloads: `path_extension:"pt"`,
+		countDownloads: `path_extension:"pt" OR path_extension:"safetensors"`,
 		snippets: snippets.ultralytics,
 	},
 	"3dtopia-xl": {

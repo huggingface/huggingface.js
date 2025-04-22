@@ -66,8 +66,8 @@ async function tapeToResponse(tape: Tape) {
 }
 
 /**
- * Headers are volontarily skipped for now. They are not useful to distinguish requests
- * but bring more complexity because some of them are not deterministics like "date"
+ * Headers are voluntarily skipped for now. They are not useful to distinguish requests
+ * but bring more complexity because some of them are not deterministic like "date"
  * and it's complex to handle all the formats they can be given in.
  */
 async function hashRequest(url: string, init: RequestInit): Promise<string> {
@@ -93,7 +93,7 @@ async function hashRequest(url: string, init: RequestInit): Promise<string> {
 }
 
 /**
- * This function behavior change according to the value of the VCR_MODE environment variable:
+ * This function behavior changes according to the value of the VCR_MODE environment variable:
  *   - record: requests will be made to the external API and responses will be saved in files
  *   - playback: answers will be read from the filesystem, if they don't have been recorded before then an error will be thrown
  *   - cache: same as playback but if the response is not found in the filesystem then it will be recorded
@@ -181,7 +181,7 @@ async function vcr(
 		const tape: Tape = {
 			url,
 			init: {
-				headers: init.headers && omit(init.headers as Record<string, string>, ["Authorization", "User-Agent"]),
+				headers: init.headers && omit(init.headers as Record<string, string>, ["Authorization", "User-Agent", "X-Key"]),
 				method: init.method,
 				body: typeof init.body === "string" && init.body.length < 1_000 ? init.body : undefined,
 			},
@@ -191,9 +191,15 @@ async function vcr(
 				statusText: response.statusText,
 				headers: Object.fromEntries(
 					// Remove varying headers as much as possible
-					[...response.headers.entries()].filter(
-						([key]) => key !== "date" && key !== "content-length" && !key.startsWith("x-") && key !== "via"
-					)
+					(() => {
+						const entries: [string, string][] = [];
+						response.headers.forEach((value, key) => {
+							if (key !== "date" && key !== "content-length" && !key.startsWith("x-") && key !== "via") {
+								entries.push([key, value]);
+							}
+						});
+						return entries;
+					})()
 				),
 			},
 		};
@@ -202,7 +208,7 @@ async function vcr(
 		const { writeFileSync } = await import("node:fs");
 		writeFileSync(`./test/${TAPES_FILE}`, JSON.stringify(tapes, null, 2));
 
-		// Return a new response with an unconsummed body
+		// Return a new response with an unconsumed body
 		return tapeToResponse(tape);
 	}
 

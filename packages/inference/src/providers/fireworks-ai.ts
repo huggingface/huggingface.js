@@ -1,5 +1,3 @@
-export const FIREWORKS_AI_API_BASE_URL = "https://api.fireworks.ai/inference";
-
 /**
  * See the registered mapping of HF model ID => Fireworks model ID here:
  *
@@ -16,3 +14,14 @@ export const FIREWORKS_AI_API_BASE_URL = "https://api.fireworks.ai/inference";
  *
  * Thanks!
  */
+import { BaseConversationalTask } from "./providerHelper";
+
+export class FireworksConversationalTask extends BaseConversationalTask {
+	constructor() {
+		super("fireworks-ai", "https://api.fireworks.ai");
+	}
+
+	override makeRoute(): string {
+		return "/inference/v1/chat/completions";
+	}
+}

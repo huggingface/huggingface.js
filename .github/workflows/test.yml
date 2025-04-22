@@ -41,12 +41,6 @@ jobs:
         run: VCR_MODE=playback pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          HF_FAL_KEY: dummy
-          HF_NEBIUS_KEY: dummy
-          HF_REPLICATE_KEY: dummy
-          HF_SAMBANOVA_KEY: dummy
-          HF_TOGETHER_KEY: dummy
-          HF_FIREWORKS_KEY: dummy
 
   browser:
     runs-on: ubuntu-latest
@@ -67,11 +61,13 @@ jobs:
             echo "SINCE=$(git merge-base origin/${{ github.event.pull_request.base.ref }} ${{ github.sha }})" >> $GITHUB_OUTPUT
           fi
 
+      - run: google-chrome --version
+
       - run: npm install -g corepack@latest && corepack enable
 
       - uses: actions/setup-node@v3
         with:
-          node-version: "20"
+          node-version: "22"
           cache: "pnpm"
           cache-dependency-path: "**/pnpm-lock.yaml"
       - run: |
@@ -83,12 +79,6 @@ jobs:
         run: VCR_MODE=playback pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test:browser
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          HF_FAL_KEY: dummy
-          HF_NEBIUS_KEY: dummy
-          HF_REPLICATE_KEY: dummy
-          HF_SAMBANOVA_KEY: dummy
-          HF_TOGETHER_KEY: dummy
-          HF_FIREWORKS_KEY: dummy
 
   e2e:
     runs-on: ubuntu-latest
@@ -117,7 +107,7 @@ jobs:
         run: |
           sleep 3
           pnpm i --filter root --filter inference... --filter hub... --filter tasks-gen --frozen-lockfile
-          pnpm --filter inference --filter hub --filter tasks publish --force --no-git-checks --registry http://localhost:4874/
+          pnpm --filter inference --filter hub --filter tasks --filter jinja publish --force --no-git-checks --registry http://localhost:4874/
 
       - name: E2E test - test yarn install
         working-directory: e2e/ts
@@ -148,13 +138,7 @@ jobs:
           deno-version: vx.x.x
       - name: E2E test - deno import from npm
         working-directory: e2e/deno
-        run: deno run --allow-net --allow-env=HF_TOKEN index.ts
+        run: deno run --allow-read --allow-net --allow-env=HF_TOKEN index.ts
         env:
           NPM_CONFIG_REGISTRY: http://localhost:4874/
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          HF_FAL_KEY: dummy
-          HF_NEBIUS_KEY: dummy
-          HF_REPLICATE_KEY: dummy
-          HF_SAMBANOVA_KEY: dummy
-          HF_TOGETHER_KEY: dummy
-          HF_FIREWORKS_KEY: dummy

@@ -81,6 +81,16 @@ const CUSTOM_TEMPLATE_MAPPING: ((ggufTmpl: string) => OllamaCustomMappedTemplate
 					stop: "<|END_OF_TURN_TOKEN|>",
 			  }
 			: undefined,
+	(ggufTmpl: string) =>
+		ggufTmpl.match(/Mistral Small 3/) && ggufTmpl.match(/2023-10-01/)
+			? {
+					// https://ollama.com/library/mistral-small
+					// (template is edited at some point, so we need manual map to make sure it works, ref commit: https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/commit/4b8dd8aae705887db5295fcbff4aedbb92d682eb)
+					ollamaTmpl:
+						'{{- range $index, $_ := .Messages }}\n{{- if eq .Role "system" }}[SYSTEM_PROMPT]{{ .Content }}[/SYSTEM_PROMPT]\n{{- else if eq .Role "user" }}\n{{- if and (le (len (slice $.Messages $index)) 2) $.Tools }}[AVAILABLE_TOOLS]{{ $.Tools }}[/AVAILABLE_TOOLS]\n{{- end }}[INST]{{ .Content }}[/INST]\n{{- else if eq .Role "assistant" }}\n{{- if .Content }}{{ .Content }}\n{{- if not (eq (len (slice $.Messages $index)) 1) }}</s>\n{{- end }}\n{{- else if .ToolCalls }}[TOOL_CALLS][\n{{- range .ToolCalls }}{"name": "{{ .Function.Name }}", "arguments": {{ .Function.Arguments }}}\n{{- end }}]</s>\n{{- end }}\n{{- else if eq .Role "tool" }}[TOOL_RESULTS]{"content": {{ .Content }}}[/TOOL_RESULTS]\n{{- end }}\n{{- end }}',
+					stop: "[INST]",
+			  }
+			: undefined,
 ];
 
 export function convertGGUFTemplateToOllama(

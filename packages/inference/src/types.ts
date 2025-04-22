@@ -1,4 +1,5 @@
 import type { ChatCompletionInput, PipelineType } from "@huggingface/tasks";
+import type { InferenceProviderModelMapping } from "./lib/getInferenceProviderMapping";
 
 /**
  * HF model id, like "meta-llama/Llama-3.3-70B-Instruct"
@@ -24,19 +25,34 @@ export interface Options {
 	 * (Default: "same-origin"). String | Boolean. Credentials to use for the request. If this is a string, it will be passed straight on. If it's a boolean, true will be "include" and false will not send credentials at all.
 	 */
 	includeCredentials?: string | boolean;
+
+	/**
+	 * The billing account to use for the requests.
+	 *
+	 * By default the requests are billed on the user's account.
+	 * Requests can only be billed to an organization the user is a member of, and which has subscribed to Enterprise Hub.
+	 */
+	billTo?: string;
 }
 
-export type InferenceTask = Exclude<PipelineType, "other">;
+export type InferenceTask = Exclude<PipelineType, "other"> | "conversational";
 
 export const INFERENCE_PROVIDERS = [
+	"black-forest-labs",
+	"cerebras",
+	"cohere",
 	"fal-ai",
 	"fireworks-ai",
-	"nebius",
 	"hf-inference",
+	"hyperbolic",
+	"nebius",
+	"novita",
+	"openai",
 	"replicate",
 	"sambanova",
 	"together",
 ] as const;
+
 export type InferenceProvider = (typeof INFERENCE_PROVIDERS)[number];
 
 export interface BaseArgs {
@@ -84,5 +100,24 @@ export type RequestArgs = BaseArgs &
 		| ChatCompletionInput
 	) & {
 		parameters?: Record<string, unknown>;
-		accessToken?: string;
 	};
+
+export type AuthMethod = "none" | "hf-token" | "credentials-include" | "provider-key";
+
+export interface HeaderParams {
+	accessToken?: string;
+	authMethod: AuthMethod;
+}
+
+export interface UrlParams {
+	authMethod: AuthMethod;
+	model: string;
+	task?: InferenceTask;
+}
+
+export interface BodyParams<T extends Record<string, unknown> = Record<string, unknown>> {
+	args: T;
+	model: string;
+	mapping?: InferenceProviderModelMapping | undefined;
+	task?: InferenceTask;
+}

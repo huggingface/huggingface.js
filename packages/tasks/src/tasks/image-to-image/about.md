@@ -45,9 +45,9 @@ make_image_grid([init_image, image], rows=1, cols=2)
 You can use [huggingface.js](https://github.com/huggingface/huggingface.js) to infer image-to-image models on Hugging Face Hub.
 
 ```javascript
-import { HfInference } from "@huggingface/inference";
+import { InferenceClient } from "@huggingface/inference";
 
-const inference = new HfInference(HF_TOKEN);
+const inference = new InferenceClient(HF_TOKEN);
 await inference.imageToImage({
 	data: await (await fetch("image")).blob(),
 	model: "timbrooks/instruct-pix2pix",
