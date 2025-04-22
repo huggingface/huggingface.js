@@ -216,7 +216,7 @@ export const SKUS = {
 				tflops: 15.62,
 				memory: [8],
 			},
-  		"RTX 4060 Laptop": {
+			"RTX 4060 Laptop": {
 				tflops: 11.61,
 				memory: [8],
 			},
