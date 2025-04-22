@@ -10,7 +10,7 @@ export type FillMaskArgs = BaseArgs & FillMaskInput;
  */
 export async function fillMask(args: FillMaskArgs, options?: Options): Promise<FillMaskOutput> {
 	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "fill-mask");
-	const { data: res } = await innerRequest<FillMaskOutput>(args, {
+	const { data: res } = await innerRequest<FillMaskOutput>(args, providerHelper, {
 		...options,
 		task: "fill-mask",
 	});

@@ -11,6 +11,10 @@ import type { ChatCompletionInputMessage, GenerationParameters } from "@huggingf
 import { makeRequestOptionsFromResolvedModel } from "../lib/makeRequestOptions";
 import type { InferenceProvider, InferenceTask, RequestArgs } from "../types";
 import { templates } from "./templates.exported";
+import type { InferenceProviderModelMapping } from "../lib/getInferenceProviderMapping";
+import { getProviderHelper } from "../lib/getProviderHelper";
+
+export type InferenceSnippetOptions = { streaming?: boolean; billTo?: string } & Record<string, unknown>;
 
 const PYTHON_CLIENTS = ["huggingface_hub", "fal_client", "requests", "openai"] as const;
 const JS_CLIENTS = ["fetch", "huggingface.js", "openai"] as const;
@@ -35,6 +39,7 @@ interface TemplateParams {
 	model?: ModelDataMinimal;
 	provider?: InferenceProvider;
 	providerModelId?: string;
+	billTo?: string;
 	methodName?: string; // specific to snippetBasic
 	importBase64?: boolean; // specific to snippetImportRequests
 	importJson?: boolean; // specific to snippetImportRequests
@@ -116,9 +121,10 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		model: ModelDataMinimal,
 		accessToken: string,
 		provider: InferenceProvider,
-		providerModelId?: string,
-		opts?: Record<string, unknown>
+		inferenceProviderMapping?: InferenceProviderModelMapping,
+		opts?: InferenceSnippetOptions
 	): InferenceSnippet[] => {
+		const providerModelId = inferenceProviderMapping?.providerId ?? model.id;
 		/// Hacky: hard-code conversational templates here
 		let task = model.pipeline_tag as InferenceTask;
 		if (
@@ -130,17 +136,27 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 			inputPreparationFn = prepareConversationalInput;
 			task = "conversational";
 		}
+		let providerHelper: ReturnType<typeof getProviderHelper>;
+		try {
+			providerHelper = getProviderHelper(provider, task);
+		} catch (e) {
+			console.error(`Failed to get provider helper for ${provider} (${task})`, e);
+			return [];
+		}
 		/// Prepare inputs + make request
 		const inputs = inputPreparationFn ? inputPreparationFn(model, opts) : { inputs: getModelInputSnippet(model) };
 		const request = makeRequestOptionsFromResolvedModel(
-			providerModelId ?? model.id,
+			providerModelId,
+			providerHelper,
 			{
-				accessToken: accessToken,
-				provider: provider,
+				accessToken,
+				provider,
 				...inputs,
 			} as RequestArgs,
+			inferenceProviderMapping,
 			{
-				task: task,
+				task,
+				billTo: opts?.billTo,
 			}
 		);
 
@@ -179,6 +195,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 			model,
 			provider,
 			providerModelId: providerModelId ?? model.id,
+			billTo: opts?.billTo,
 		};
 
 		/// Iterate over clients => check if a snippet exists => generate
@@ -266,8 +283,8 @@ const snippets: Partial<
 			model: ModelDataMinimal,
 			accessToken: string,
 			provider: InferenceProvider,
-			providerModelId?: string,
-			opts?: Record<string, unknown>
+			inferenceProviderMapping?: InferenceProviderModelMapping,
+			opts?: InferenceSnippetOptions
 		) => InferenceSnippet[]
 	>
 > = {
@@ -306,11 +323,11 @@ export function getInferenceSnippets(
 	model: ModelDataMinimal,
 	accessToken: string,
 	provider: InferenceProvider,
-	providerModelId?: string,
+	inferenceProviderMapping?: InferenceProviderModelMapping,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
 	return model.pipeline_tag && model.pipeline_tag in snippets
-		? snippets[model.pipeline_tag]?.(model, accessToken, provider, providerModelId, opts) ?? []
+		? snippets[model.pipeline_tag]?.(model, accessToken, provider, inferenceProviderMapping, opts) ?? []
 		: [];
 }
 

@@ -1,6 +1,7 @@
 import type { PipelineType } from "../pipelines.js";
 import { PIPELINE_DATA } from "../pipelines.js";
 
+import anyToAny from "./any-to-any/data.js";
 import audioClassification from "./audio-classification/data.js";
 import audioToAudio from "./audio-to-audio/data.js";
 import automaticSpeechRecognition from "./automatic-speech-recognition/data.js";
@@ -199,7 +200,7 @@ function getData(type: PipelineType, partialTaskData: TaskDataCustom = placehold
 // Tasks that call getData() without the second argument will
 // have a "placeholder" page.
 export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
-	"any-to-any": getData("any-to-any", placeholder),
+	"any-to-any": getData("any-to-any", anyToAny),
 	"audio-classification": getData("audio-classification", audioClassification),
 	"audio-to-audio": getData("audio-to-audio", audioToAudio),
 	"audio-text-to-text": getData("audio-text-to-text", placeholder),
