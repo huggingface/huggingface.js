@@ -94,14 +94,15 @@ function isMlxModel(model: ModelData) {
 	return model.tags.includes("mlx");
 }
 
-function getQuantTag(filepath: string | undefined): string {
-	let tagName = ":{{QUANT_TAG}}";
+function getQuantTag(filepath?: string): string {
+	const defaultTag = ":{{QUANT_TAG}}";
 
-	if (filepath) {
-		const quantLabel = parseGGUFQuantLabel(filepath);
-		tagName = quantLabel ? `:${quantLabel}` : tagName;
+	if (!filepath) {
+		return defaultTag;
 	}
-	return tagName;
+
+	const quantLabel = parseGGUFQuantLabel(filepath);
+	return quantLabel ? `:${quantLabel}` : defaultTag;
 }
 
 const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
