@@ -18,7 +18,6 @@
 import { BaseConversationalTask, BaseTextGenerationTask } from "./providerHelper";
 import type {
 	ChatCompletionOutput,
-	ChatCompletionStreamOutput,
 	TextGenerationOutput,
 	TextGenerationOutputFinishReason,
 } from "@huggingface/tasks";
