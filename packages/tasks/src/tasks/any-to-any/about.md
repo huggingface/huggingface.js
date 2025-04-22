@@ -6,7 +6,7 @@ Any-to-any models can help embodied agents operate in multi-sensory environments
 
 ### Real-time Accessibility Systems
 
-Vision-language based any-to-any models can be used aid visually impaired people. A real-time on-device any-to-any model can take a real-world video stream from wearable glasses, and describe the scene in audio (e.g., "A person in a red coat is walking toward you") or provide real-time closed captions and environmental sound cues.
+Vision-language based any-to-any models can be used to aid visually impaired people. A real-time on-device any-to-any model can take a real-world video stream from wearable glasses, and describe the scene in audio (e.g., "A person in a red coat is walking toward you"), or provide real-time closed captions and environmental sound cues.
 
 ### Multimodal Content Creation
 
@@ -14,39 +14,52 @@ One can use any-to-any models to generate multimodal content. For example, given
 
 ## Inference
 
-You can infer with any-to-any models using transformers. Below is an example to infer Qwen2.5-Omni-7B model, make sure to check the model you're inferring with.
+You can infer with any-to-any models using transformers. Below is an example that passes a video as part of a chat conversation to the Qwen2.5-Omni-7B model, and retrieves text and audio responses. Make sure to check the model you're inferring with.
 
 ```python
 import soundfile as sf
-from transformers import Qwen2_5OmniModel, Qwen2_5OmniProcessor
-from qwen_omni_utils import process_mm_info
+from transformers import Qwen2_5OmniForConditionalGeneration, Qwen2_5OmniProcessor
 
-model = Qwen2_5OmniModel.from_pretrained("Qwen/Qwen2.5-Omni-7B", torch_dtype="auto", device_map="auto")
-
+model = Qwen2_5OmniForConditionalGeneration.from_pretrained(
+    "Qwen/Qwen2.5-Omni-7B",
+    torch_dtype="auto",
+    device_map="auto",
+    attn_implementation="flash_attention_2",
+)
 processor = Qwen2_5OmniProcessor.from_pretrained("Qwen/Qwen2.5-Omni-7B")
 
 conversation = [
     {
         "role": "system",
-        "content": "You are Qwen, a virtual human developed by the Qwen Team, Alibaba Group, capable of perceiving auditory and visual inputs, as well as generating text and speech.",
+        "content": [
+            {"type": "text", "text": "You are Qwen, a virtual human developed by the Qwen Team, Alibaba Group, capable of perceiving auditory and visual inputs, as well as generating text and speech."}
+        ],
     },
     {
         "role": "user",
         "content": [
             {"type": "video", "video": "https://qianwen-res.oss-cn-beijing.aliyuncs.com/Qwen2.5-Omni/draw.mp4"},
+            {"type": "text", "text": "What can you hear and see in this video?"},
         ],
     },
 ]
 
-USE_AUDIO_IN_VIDEO = True
+inputs = processor.apply_chat_template(
+    conversation,
+    load_audio_from_video=True,
+    add_generation_prompt=True,
+    tokenize=True,
+    return_dict=True,
+    return_tensors="pt",
+    video_fps=2,
 
-text = processor.apply_chat_template(conversation, add_generation_prompt=True, tokenize=False)
-audios, images, videos = process_mm_info(conversation, use_audio_in_video=USE_AUDIO_IN_VIDEO)
-inputs = processor(text=text, audios=audios, images=images, videos=videos, return_tensors="pt", padding=True, use_audio_in_video=USE_AUDIO_IN_VIDEO)
-inputs = inputs.to(model.device).to(model.dtype)
+    # kwargs to be passed to `Qwen2-5-OmniProcessor`
+    padding=True,
+    use_audio_in_video=True,
+)
 
 # Inference: Generation of the output text and audio
-text_ids, audio = model.generate(**inputs, use_audio_in_video=USE_AUDIO_IN_VIDEO)
+text_ids, audio = model.generate(**inputs, use_audio_in_video=True)
 
 text = processor.batch_decode(text_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)
 print(text)
