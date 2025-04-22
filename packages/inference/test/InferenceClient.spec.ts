@@ -1,6 +1,6 @@
 import { assert, describe, expect, it } from "vitest";
 
-import type { ChatCompletionStreamOutput, TextGenerationStreamOutput } from "@huggingface/tasks";
+import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
 
 import type { TextToImageArgs } from "../src";
 import {
@@ -1696,8 +1696,13 @@ describe.concurrent("InferenceClient", () => {
 		() => {
 			const client = new HfInference(env.HF_OVHCLOUD_KEY ?? "dummy");
 
-			HARDCODED_MODEL_ID_MAPPING["ovhcloud"] = {
-				"meta-llama/llama-3.1-8b-instruct": "Llama-3.1-8B-Instruct",
+			HARDCODED_MODEL_INFERENCE_MAPPING["ovhcloud"] = {
+				"meta-llama/llama-3.1-8b-instruct": {
+					hfModelId: "meta-llama/llama-3.1-8b-instruct",
+					providerId: "Llama-3.1-8B-Instruct",
+					status: "live",
+					task: "conversational",
+				},
 			};
 
 			it("chatCompletion", async () => {
