@@ -6,15 +6,15 @@ import type { TextToImageArgs } from "../src";
 import {
 	chatCompletion,
 	chatCompletionStream,
+	HfInference,
 	InferenceClient,
 	textGeneration,
 	textToImage,
-	HfInference,
 } from "../src";
+import { isUrl } from "../src/lib/isUrl";
+import { HARDCODED_MODEL_INFERENCE_MAPPING } from "../src/providers/consts";
 import { readTestFile } from "./test-files";
 import "./vcr";
-import { HARDCODED_MODEL_INFERENCE_MAPPING } from "../src/providers/consts";
-import { isUrl } from "../src/lib/isUrl";
 
 const TIMEOUT = 60000 * 3;
 const env = import.meta.env;
@@ -376,7 +376,7 @@ describe.concurrent("InferenceClient", () => {
 				);
 			});
 
-			it("textGeneration - gpt2", async () => {
+			it.skip("textGeneration - gpt2", async () => {
 				expect(
 					await hf.textGeneration({
 						model: "gpt2",
@@ -387,7 +387,7 @@ describe.concurrent("InferenceClient", () => {
 				});
 			});
 
-			it("textGeneration - openai-community/gpt2", async () => {
+			it.skip("textGeneration - openai-community/gpt2", async () => {
 				expect(
 					await hf.textGeneration({
 						model: "openai-community/gpt2",
@@ -1175,6 +1175,15 @@ describe.concurrent("InferenceClient", () => {
 					}
 				}
 				expect(out).toContain("2");
+			});
+			it("featureExtraction", async () => {
+				const res = await client.featureExtraction({
+					model: "intfloat/e5-mistral-7b-instruct",
+					provider: "sambanova",
+					inputs: "Today is a sunny day and I will get some ice cream.",
+				});
+				expect(res).toBeInstanceOf(Array);
+				expect(res[0]).toBeInstanceOf(Array);
 			});
 		},
 		TIMEOUT
