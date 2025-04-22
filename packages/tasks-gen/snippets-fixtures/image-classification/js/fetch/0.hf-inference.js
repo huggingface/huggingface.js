@@ -4,7 +4,7 @@ async function query(data) {
 		{
 			headers: {
 				Authorization: "Bearer api_token",
-				"Content-Type": "image/jpeg"
+				"Content-Type": "image/jpeg",
 			},
 			method: "POST",
 			body: JSON.stringify(data),

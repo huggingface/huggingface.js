@@ -3,4 +3,7 @@ from huggingface_hub import InferenceClient
 client = InferenceClient(
     provider="{{ provider }}",
     api_key="{{ accessToken }}",
+{% if billTo %}
+    bill_to="{{ billTo }}",
+{% endif %}
 )
