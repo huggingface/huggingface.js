@@ -212,9 +212,25 @@ export const SKUS = {
 				tflops: 22.06,
 				memory: [8, 16],
 			},
-			"RTX 4060 Mobile": {
+			"RTX 4090 Laptop": {
+				tflops: 32.98,
+				memory: [16],
+			},
+			"RTX 4080 Laptop": {
+				tflops: 24.72,
+				memory: [12],
+			},
+			"RTX 4070 Laptop": {
+				tflops: 15.62,
+				memory: [8],
+			},
+			"RTX 4060 Laptop": {
 				tflops: 11.61,
 				memory: [8],
+			},
+			"RTX 4050 Laptop": {
+				tflops: 8.9,
+				memory: [6],
 			},
 			"RTX 3090": {
 				tflops: 35.58,
