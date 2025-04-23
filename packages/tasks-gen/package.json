@@ -15,13 +15,16 @@
 		"inference-codegen": "tsx scripts/inference-codegen.ts && prettier --write ../tasks/src/tasks/*/inference.ts",
 		"inference-tgi-import": "tsx scripts/inference-tgi-import.ts && prettier --write ../tasks/src/tasks/text-generation/spec/*.json && prettier --write ../tasks/src/tasks/chat-completion/spec/*.json",
 		"inference-tei-import": "tsx scripts/inference-tei-import.ts && prettier --write ../tasks/src/tasks/feature-extraction/spec/*.json",
+		"inference-oai-import": "tsx scripts/inference-oai-import.ts && prettier --write ../tasks/src/tasks/chat-completion/spec-oai/*.json",
 		"test": "vitest run"
 	},
 	"type": "module",
 	"author": "Hugging Face",
 	"license": "MIT",
 	"devDependencies": {
+		"@types/js-yaml": "^4.0.9",
 		"@types/node": "^20.11.5",
+		"js-yaml": "^4.1.0",
 		"quicktype-core": "https://github.com/huggingface/quicktype/raw/pack-18.0.17/packages/quicktype-core/quicktype-core-18.0.17.tgz",
 		"type-fest": "^3.13.1"
 	},
