@@ -24,7 +24,7 @@ model = ColPaliForRetrieval.from_pretrained(
     torch_dtype=torch.bfloat16,
 ).to(device)
 
-processor = ColPaliProcessor.from_pretrained(model_name)
+processor = ColPaliProcessor.from_pretrained("vidore/colpali-v1.2-hf")
 
 # Your inputs (replace dummy images with screenshots of your documents)
 images = [
