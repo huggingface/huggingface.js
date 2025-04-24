@@ -117,6 +117,9 @@ export class McpClient {
 				if (!finalToolCalls[toolCall.index]) {
 					finalToolCalls[toolCall.index] = toolCall;
 				}
+				if (finalToolCalls[toolCall.index].function.arguments === undefined) {
+					finalToolCalls[toolCall.index].function.arguments = "";
+				}
 				finalToolCalls[toolCall.index].function.arguments += toolCall.function.arguments;
 			}
 		}
@@ -124,9 +127,9 @@ export class McpClient {
 		messages.push(message);
 
 		for (const toolCall of Object.values(finalToolCalls)) {
-			const toolName = toolCall.function.name ?? "";
+			const toolName = toolCall.function.name ?? "unknown";
 			/// TODO(Fix upstream type so this is always a string)^
-			const toolArgs = JSON.parse(toolCall.function.arguments);
+			const toolArgs = toolCall.function.arguments === "" ? {} : JSON.parse(toolCall.function.arguments);
 
 			const toolMessage: ChatCompletionInputMessageTool = {
 				role: "tool",
