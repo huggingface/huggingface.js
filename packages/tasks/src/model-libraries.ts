@@ -419,7 +419,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/DigitalPhonetics/IMS-Toucan",
 		countDownloads: `path:"embedding_gan.pt" OR path:"Vocoder.pt" OR path:"ToucanTTS.pt"`,
 	},
-	index_tts: {
+	index-tts: {
 		prettyLabel: "IndexTTS",
 		repoName: "IndexTTS",
 		repoUrl: "https://github.com/index-tts/index-tts",
