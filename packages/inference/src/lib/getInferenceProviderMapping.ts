@@ -74,14 +74,6 @@ export async function getInferenceProviderMapping(
 				`Model ${params.modelId} is in staging mode for provider ${params.provider}. Meant for test purposes only.`
 			);
 		}
-		if (providerMapping.adapter === "lora") {
-			return {
-				...providerMapping,
-				hfModelId: params.modelId,
-				adapterWeightsPath: providerMapping.adapterWeightsPath,
-			};
-
-		}
 		return { ...providerMapping, hfModelId: params.modelId };
 	}
 	return null;
