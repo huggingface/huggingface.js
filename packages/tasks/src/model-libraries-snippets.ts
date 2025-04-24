@@ -226,6 +226,17 @@ infer = loaded_model.signatures["serving_default"]
 print(infer(inputs=tf.constant([input_tensor])))`,
 ];
 
+export const dia = (model: ModelData): string[] => [
+	`import soundfile as sf
+from dia.model import Dia
+
+model = Dia.from_pretrained("${model.id}")
+text = "[S1] Dia is an open weights text to dialogue model. [S2] You get full control over scripts and voices. [S1] Wow. Amazing. (laughs) [S2] Try it now on Git hub or Hugging Face."
+output = model.generate(text)
+
+sf.write("simple.mp3", output, 44100)`,
+];
+
 const diffusersDefaultPrompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
 
 const diffusers_default = (model: ModelData) => [
