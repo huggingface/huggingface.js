@@ -29,6 +29,7 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	hyperbolic: {},
 	nebius: {},
 	novita: {},
+	nscale: {},
 	openai: {},
 	replicate: {},
 	sambanova: {},
