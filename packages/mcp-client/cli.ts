@@ -75,10 +75,10 @@ async function main() {
 					stdout.write(ANSI.GRAY);
 					for (const deltaToolCall of delta.tool_calls) {
 						if (deltaToolCall.id) {
-							stdout.write(deltaToolCall.id);
+							stdout.write(`<Tool ${deltaToolCall.id}>\n`);
 						}
 						if (deltaToolCall.function.name) {
-							stdout.write(deltaToolCall.function.name);
+							stdout.write(deltaToolCall.function.name + " ");
 						}
 						if (deltaToolCall.function.arguments) {
 							stdout.write(deltaToolCall.function.arguments);
@@ -93,9 +93,10 @@ async function main() {
 				stdout.write(`Tool[${chunk.name}] ${chunk.tool_call_id}\n`);
 				stdout.write(chunk.content);
 				stdout.write(ANSI.RESET);
+				stdout.write("\n\n");
 			}
 		}
-		stdout.write("\n\n");
+		stdout.write("\n");
 	}
 }
 
