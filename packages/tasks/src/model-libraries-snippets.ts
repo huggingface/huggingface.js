@@ -425,10 +425,11 @@ model = GLiNER.from_pretrained("${model.id}")`,
 ];
 
 export const indextts = (model: ModelData): string[] => [
-	`# Download model files from ${model.id} into a 'checkpoints' directory
-# e.g., using: huggingface-cli download ${model.id} \
-  bigvgan_discriminator.pth bigvgan_generator.pth bpe.model dvae.pth gpt.pth unigram_12000.vocab \
-  --local-dir checkpoints
+	`# Download model
+from huggingface_hub import snapshot_download
+
+snapshot_download(${model.id}, local_dir="checkpoints")
+
 from indextts.infer import IndexTTS
 
 # Ensure config.yaml is present in the checkpoints directory
