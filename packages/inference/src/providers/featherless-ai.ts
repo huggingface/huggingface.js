@@ -1,7 +1,7 @@
-import { BaseConversationalTask, BaseTextGenerationTask } from "./providerHelper";
-import type { ChatCompletionOutput, TextGenerationOutputFinishReason, TextGenerationOutput } from "@huggingface/tasks";
+import type { ChatCompletionOutput, TextGenerationInput, TextGenerationOutput, TextGenerationOutputFinishReason } from "@huggingface/tasks";
 import { InferenceOutputError } from "../lib/InferenceOutputError";
 import type { BodyParams } from "../types";
+import { BaseConversationalTask, BaseTextGenerationTask } from "./providerHelper";
 
 interface FeatherlessAITextCompletionOutput extends Omit<ChatCompletionOutput, "choices"> {
 	choices: Array<{
@@ -26,10 +26,10 @@ export class FeatherlessAITextGenerationTask extends BaseTextGenerationTask {
 		super("featherless-ai", FEATHERLESS_API_BASE_URL);
 	}
 
-	override preparePayload(params: BodyParams): Record<string, unknown> {
+	override preparePayload(params: BodyParams<TextGenerationInput>): Record<string, unknown> {
 		return {
 			...params.args,
-			...(params.args.parameters as Record<string, unknown>),
+			...params.args.parameters,
 			model: params.model,
 			prompt: params.args.inputs,
 		};
