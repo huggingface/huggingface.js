@@ -94,6 +94,7 @@ export class McpClient {
 			return;
 		}
 		yield firstChunk;
+		debug(firstChunk.choices[0]);
 		const message = {
 			role: firstChunk.choices[0].delta.role,
 			content: firstChunk.choices[0].delta.content,
@@ -103,6 +104,7 @@ export class McpClient {
 
 		for await (const chunk of stream) {
 			yield chunk;
+			debug(chunk.choices[0]);
 			const delta = chunk.choices[0]?.delta;
 			if (!delta) {
 				continue;

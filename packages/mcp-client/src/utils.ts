@@ -1,6 +1,8 @@
+import { inspect } from "util";
+
 export function debug(...args: unknown[]): void {
 	if (process.env.DEBUG) {
-		console.debug(args);
+		console.debug(inspect(args, { depth: Infinity, colors: true }));
 	}
 }
 
