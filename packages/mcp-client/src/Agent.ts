@@ -72,7 +72,10 @@ export class Agent extends McpClient {
 		return this.addMcpServers(this.servers);
 	}
 
-	async *run(input: string): AsyncGenerator<ChatCompletionStreamOutput | ChatCompletionInputMessageTool> {
+	async *run(
+		input: string,
+		opts: { abortSignal?: AbortSignal } = {}
+	): AsyncGenerator<ChatCompletionStreamOutput | ChatCompletionInputMessageTool> {
 		this.messages.push({
 			role: "user",
 			content: input,
@@ -81,10 +84,18 @@ export class Agent extends McpClient {
 		let numOfTurns = 0;
 		let nextTurnShouldCallTools = true;
 		while (true) {
-			yield* this.processSingleTurnWithTools(this.messages, {
-				exitLoopTools,
-				exitIfFirstChunkNoTool: numOfTurns > 0 && nextTurnShouldCallTools,
-			});
+			try {
+				yield* this.processSingleTurnWithTools(this.messages, {
+					exitLoopTools,
+					exitIfFirstChunkNoTool: numOfTurns > 0 && nextTurnShouldCallTools,
+					abortSignal: opts.abortSignal,
+				});
+			} catch (err) {
+				if (err instanceof Error && err.message === "AbortError") {
+					return;
+				}
+				throw err;
+			}
 			numOfTurns++;
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			const currentLast = this.messages.at(-1)!;

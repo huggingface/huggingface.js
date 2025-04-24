@@ -72,7 +72,11 @@ export class McpClient {
 
 	async *processSingleTurnWithTools(
 		messages: ChatCompletionInputMessage[],
-		opts: { exitLoopTools?: ChatCompletionInputTool[]; exitIfFirstChunkNoTool?: boolean } = {}
+		opts: {
+			exitLoopTools?: ChatCompletionInputTool[];
+			exitIfFirstChunkNoTool?: boolean;
+			abortSignal?: AbortSignal;
+		} = {}
 	): AsyncGenerator<ChatCompletionStreamOutput | ChatCompletionInputMessageTool> {
 		debug("start of single turn");
 
@@ -82,6 +86,7 @@ export class McpClient {
 			messages,
 			tools: opts.exitLoopTools ? [...opts.exitLoopTools, ...this.availableTools] : this.availableTools,
 			tool_choice: "auto",
+			signal: opts.abortSignal,
 		});
 
 		const message = {
@@ -92,6 +97,9 @@ export class McpClient {
 		let numOfChunks = 0;
 
 		for await (const chunk of stream) {
+			if (opts.abortSignal?.aborted) {
+				throw new Error("AbortError");
+			}
 			yield chunk;
 			debug(chunk.choices[0]);
 			numOfChunks++;
@@ -143,7 +151,7 @@ export class McpClient {
 			/// Get the appropriate session for this tool
 			const client = this.clients.get(toolName);
 			if (client) {
-				const result = await client.callTool({ name: toolName, arguments: toolArgs });
+				const result = await client.callTool({ name: toolName, arguments: toolArgs, signal: opts.abortSignal });
 				toolMessage.content = (result.content as Array<{ text: string }>)[0].text;
 			} else {
 				toolMessage.content = `Error: No session found for tool: ${toolName}`;

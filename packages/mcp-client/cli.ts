@@ -35,10 +35,6 @@ if (process.env.EXPERIMENTAL_HF_MCP_SERVER) {
 	});
 }
 
-let SAMPLE_INPUT = process.env.USE_SAMPLE_INPUT
-	? `generate a haiku about Hugging Face and save it to a file name hf.txt on my Desktop`
-	: undefined;
-
 async function main() {
 	if (!process.env.HF_TOKEN) {
 		console.error(`a valid HF_TOKEN must be present in the env`);
@@ -53,14 +49,33 @@ async function main() {
 	});
 
 	const rl = readline.createInterface({ input: stdin, output: stdout });
+	let abortController = new AbortController();
+	let waitingForInput = false;
+	async function waitForInput() {
+		waitingForInput = true;
+		const input = await rl.question("> ");
+		waitingForInput = false;
+		return input;
+	}
 	rl.on("SIGINT", async () => {
-		await agent.cleanup();
-		stdout.write("\n");
-		rl.close();
+		if (waitingForInput) {
+			// close the whole process
+			await agent.cleanup();
+			stdout.write("\n");
+			rl.close();
+		} else {
+			// otherwise, it means a request is underway
+			abortController.abort();
+			abortController = new AbortController();
+			stdout.write(ANSI.GRAY);
+			stdout.write("Ctrl+C a second time to exit");
+			stdout.write(ANSI.RESET);
+		}
 	});
-	process.on("uncaughtException", () => {
+	process.on("uncaughtException", (err) => {
 		stdout.write("\n");
 		rl.close();
+		throw err;
 	});
 
 	await agent.loadTools();
@@ -72,8 +87,8 @@ async function main() {
 	stdout.write("\n");
 
 	while (true) {
-		const input = await rl.question("> ");
-		for await (const chunk of agent.run(input)) {
+		const input = await waitForInput();
+		for await (const chunk of agent.run(input, { abortSignal: abortController.signal })) {
 			if ("choices" in chunk) {
 				const delta = chunk.choices[0]?.delta;
 				if (delta.content) {
