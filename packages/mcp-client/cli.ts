@@ -26,6 +26,7 @@ const SERVERS: StdioServerParameters[] = [
 if (process.env.EXPERIMENTAL_HF_MCP_SERVER) {
 	SERVERS.push({
 		// Early version of a HF-MCP server
+		// you can download it from gist.github.com/julien-c/0500ba922e1b38f2dc30447fb81f7dc6
 		command: "node",
 		args: ["--disable-warning=ExperimentalWarning", join(homedir(), "Desktop/hf-mcp/index.ts")],
 		env: {
