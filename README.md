@@ -27,7 +27,7 @@ await uploadFile({
   }
 });
 
-// Use HF Inference API, or external Inference Providers!
+// Use all supported Inference Providers!
 
 await inference.chatCompletion({
   model: "meta-llama/Llama-3.1-8B-Instruct",
@@ -55,7 +55,7 @@ await inference.textToImage({
 
 This is a collection of JS libraries to interact with the Hugging Face API, with TS types included.
 
-- [@huggingface/inference](packages/inference/README.md): Use HF Inference API (serverless), Inference Endpoints (dedicated) and all supported Inference Providers to make calls to 100,000+ Machine Learning models
+- [@huggingface/inference](packages/inference/README.md): Use all supported (serverless) Inference Providers or switch to Inference Endpoints (dedicated) to make calls to 100,000+ Machine Learning models
 - [@huggingface/hub](packages/hub/README.md): Interact with huggingface.co to create or delete repos and commit / download files
 - [@huggingface/agents](packages/agents/README.md): Interact with HF models through a natural language interface
 - [@huggingface/gguf](packages/gguf/README.md): A GGUF parser that works on remotely hosted files.
@@ -97,7 +97,7 @@ You can run our packages with vanilla JS, without any bundler, by using a CDN or
 
 ```html
 <script type="module">
-    import { InferenceClient } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@3.8.0/+esm';
+    import { InferenceClient } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@3.8.2/+esm';
     import { createRepo, commit, deleteRepo, listFiles } from "https://cdn.jsdelivr.net/npm/@huggingface/hub@1.1.2/+esm";
 </script>
 ```
@@ -128,10 +128,10 @@ import { InferenceClient } from "@huggingface/inference";
 
 const HF_TOKEN = "hf_...";
 
-const inference = new InferenceClient(HF_TOKEN);
+const client = new InferenceClient(HF_TOKEN);
 
 // Chat completion API
-const out = await inference.chatCompletion({
+const out = await client.chatCompletion({
   model: "meta-llama/Llama-3.1-8B-Instruct",
   messages: [{ role: "user", content: "Hello, nice to meet you!" }],
   max_tokens: 512
@@ -139,7 +139,7 @@ const out = await inference.chatCompletion({
 console.log(out.choices[0].message);
 
 // Streaming chat completion API
-for await (const chunk of inference.chatCompletionStream({
+for await (const chunk of client.chatCompletionStream({
   model: "meta-llama/Llama-3.1-8B-Instruct",
   messages: [{ role: "user", content: "Hello, nice to meet you!" }],
   max_tokens: 512
@@ -148,14 +148,14 @@ for await (const chunk of inference.chatCompletionStream({
 }
 
 /// Using a third-party provider:
-await inference.chatCompletion({
+await client.chatCompletion({
   model: "meta-llama/Llama-3.1-8B-Instruct",
   messages: [{ role: "user", content: "Hello, nice to meet you!" }],
   max_tokens: 512,
   provider: "sambanova", // or together, fal-ai, replicate, cohere …
 })
 
-await inference.textToImage({
+await client.textToImage({
   model: "black-forest-labs/FLUX.1-dev",
   inputs: "a picture of a green bird",
   provider: "fal-ai",
@@ -164,7 +164,7 @@ await inference.textToImage({
 
 
 // You can also omit "model" to use the recommended model for the task
-await inference.translation({
+await client.translation({
   inputs: "My name is Wolfgang and I live in Amsterdam",
   parameters: {
     src_lang: "en",
@@ -173,17 +173,17 @@ await inference.translation({
 });
 
 // pass multimodal files or URLs as inputs
-await inference.imageToText({
+await client.imageToText({
   model: 'nlpconnect/vit-gpt2-image-captioning',
   data: await (await fetch('https://picsum.photos/300/300')).blob(),
 })
 
 // Using your own dedicated inference endpoint: https://hf.co/docs/inference-endpoints/
-const gpt2 = inference.endpoint('https://xyz.eu-west-1.aws.endpoints.huggingface.cloud/gpt2');
-const { generated_text } = await gpt2.textGeneration({ inputs: 'The answer to the universe is' });
+const gpt2Client = client.endpoint('https://xyz.eu-west-1.aws.endpoints.huggingface.cloud/gpt2');
+const { generated_text } = await gpt2Client.textGeneration({ inputs: 'The answer to the universe is' });
 
 // Chat Completion
-const llamaEndpoint = inference.endpoint(
+const llamaEndpoint = client.endpoint(
   "https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.1-8B-Instruct"
 );
 const out = await llamaEndpoint.chatCompletion({
