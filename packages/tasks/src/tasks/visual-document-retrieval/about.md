@@ -2,7 +2,7 @@
 
 ### Multimodal Document Retrieval
 
-Visual document retrieval models can be used to retrieve relevant documents when given a text query. One needs to index the documents first using a visual document retrieval model for once. After indexing is done, the retrieval model takes in a text query (question) and number of top-k documents to return, and returns top-k relevant documents. The index can be used repetitively for inference.
+Visual document retrieval models can be used to retrieve relevant documents when given a text query. One needs to index the documents first, which is a one-time operation. After indexing is done, the retrieval model takes in a text query (question) and number `k` of documents to return, and the model returns the top-k most relevant documents for the query. The index can be used repetitively for inference.
 
 ### Multimodal Retrieval Augmented Generation (RAG)
 
