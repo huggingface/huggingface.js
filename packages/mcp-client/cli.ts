@@ -67,9 +67,11 @@ async function main() {
 			// otherwise, it means a request is underway
 			abortController.abort();
 			abortController = new AbortController();
+			stdout.write("\n");
 			stdout.write(ANSI.GRAY);
 			stdout.write("Ctrl+C a second time to exit");
 			stdout.write(ANSI.RESET);
+			stdout.write("\n");
 		}
 	});
 	process.on("uncaughtException", (err) => {
