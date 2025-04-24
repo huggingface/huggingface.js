@@ -1,7 +1,7 @@
 import type { InferenceProvider } from "@huggingface/inference";
 import type { ChatCompletionInputMessageTool } from "./McpClient";
 import { McpClient } from "./McpClient";
-import type { ChatCompletionInputMessage, ChatCompletionOutput } from "@huggingface/tasks";
+import type { ChatCompletionInputMessage, ChatCompletionStreamOutput } from "@huggingface/tasks";
 import type { ChatCompletionInputTool } from "@huggingface/tasks/src/tasks/chat-completion/inference";
 import type { StdioServerParameters } from "@modelcontextprotocol/sdk/client/stdio";
 import { debug } from "./utils";
@@ -72,7 +72,7 @@ export class Agent extends McpClient {
 		return this.addMcpServers(this.servers);
 	}
 
-	async *run(input: string): AsyncGenerator<ChatCompletionOutput | ChatCompletionInputMessageTool> {
+	async *run(input: string): AsyncGenerator<ChatCompletionStreamOutput | ChatCompletionInputMessageTool> {
 		this.messages.push({
 			role: "user",
 			content: input,

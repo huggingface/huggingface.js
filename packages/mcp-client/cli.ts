@@ -65,15 +65,32 @@ async function main() {
 
 	while (true) {
 		const input = await rl.question("> ");
-		for await (const response of agent.run(input)) {
-			if ("choices" in response) {
-				stdout.write(response.choices[0].message.content ?? "");
-				stdout.write("\n\n");
+		for await (const chunk of agent.run(input)) {
+			if ("choices" in chunk) {
+				const delta = chunk.choices[0]?.delta;
+				if (delta.content) {
+					stdout.write(delta.content);
+				}
+				if (delta.tool_calls) {
+					stdout.write(ANSI.GRAY);
+					for (const deltaToolCall of delta.tool_calls) {
+						if (deltaToolCall.id) {
+							stdout.write(deltaToolCall.id);
+						}
+						if (deltaToolCall.function.name) {
+							stdout.write(deltaToolCall.function.name);
+						}
+						if (deltaToolCall.function.arguments) {
+							stdout.write(deltaToolCall.function.arguments);
+						}
+					}
+					stdout.write(ANSI.RESET);
+				}
 			} else {
 				/// Tool call info
 				stdout.write(ANSI.GREEN);
-				stdout.write(`Tool[${response.name}] ${response.tool_call_id}\n`);
-				stdout.write(response.content);
+				stdout.write(`Tool[${chunk.name}] ${chunk.tool_call_id}\n`);
+				stdout.write(chunk.content);
 				stdout.write(ANSI.RESET);
 				stdout.write("\n\n");
 			}

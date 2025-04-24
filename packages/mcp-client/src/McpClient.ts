@@ -6,7 +6,8 @@ import type { InferenceProvider } from "@huggingface/inference";
 import type {
 	ChatCompletionInputMessage,
 	ChatCompletionInputTool,
-	ChatCompletionOutput,
+	ChatCompletionStreamOutput,
+	ChatCompletionStreamOutputDeltaToolCall,
 } from "@huggingface/tasks/src/tasks/chat-completion/inference";
 import { version as packageVersion } from "../package.json";
 import { debug } from "./utils";
@@ -72,10 +73,10 @@ export class McpClient {
 	async *processSingleTurnWithTools(
 		messages: ChatCompletionInputMessage[],
 		opts: { exitLoopTools?: ChatCompletionInputTool[]; exitIfNoTool?: boolean } = {}
-	): AsyncGenerator<ChatCompletionOutput | ChatCompletionInputMessageTool> {
+	): AsyncGenerator<ChatCompletionStreamOutput | ChatCompletionInputMessageTool> {
 		debug("start of single turn");
 
-		const response = await this.client.chatCompletion({
+		const stream = this.client.chatCompletionStream({
 			provider: this.provider,
 			model: this.model,
 			messages,
@@ -83,41 +84,68 @@ export class McpClient {
 			tool_choice: "auto",
 		});
 
-		const toolCalls = response.choices[0].message.tool_calls;
-		if (!toolCalls || toolCalls.length === 0) {
-			if (opts.exitIfNoTool) {
-				return;
-			}
-			messages.push({
-				role: response.choices[0].message.role,
-				content: response.choices[0].message.content,
-			});
-			return yield response;
+		const firstChunkResult = await stream.next();
+		if (firstChunkResult.done) {
+			return;
 		}
-		for (const toolCall of toolCalls) {
-			const toolName = toolCall.function.name;
+		const firstChunk = firstChunkResult.value;
+		const firstToolCalls = firstChunk.choices[0]?.delta.tool_calls;
+		if ((!firstToolCalls || firstToolCalls.length === 0) && opts.exitIfNoTool) {
+			return;
+		}
+		yield firstChunk;
+		const message = {
+			role: firstChunk.choices[0].delta.role,
+			content: firstChunk.choices[0].delta.content,
+		} satisfies ChatCompletionInputMessage;
+
+		const finalToolCalls: Record<number, ChatCompletionStreamOutputDeltaToolCall> = {};
+
+		for await (const chunk of stream) {
+			yield chunk;
+			const delta = chunk.choices[0]?.delta;
+			if (!delta) {
+				continue;
+			}
+			if (delta.content) {
+				message.content += delta.content;
+			}
+			for (const toolCall of delta.tool_calls ?? []) {
+				// aggregating chunks into an encoded arguments JSON object
+				if (!finalToolCalls[toolCall.index]) {
+					finalToolCalls[toolCall.index] = toolCall;
+				}
+				finalToolCalls[toolCall.index].function.arguments += toolCall.function.arguments;
+			}
+		}
+
+		messages.push(message);
+
+		for (const toolCall of Object.values(finalToolCalls)) {
+			const toolName = toolCall.function.name ?? "";
+			/// TODO(Fix upstream type so this is always a string)^
 			const toolArgs = JSON.parse(toolCall.function.arguments);
 
-			const message: ChatCompletionInputMessageTool = {
+			const toolMessage: ChatCompletionInputMessageTool = {
 				role: "tool",
 				tool_call_id: toolCall.id,
 				content: "",
 				name: toolName,
 			};
 			if (opts.exitLoopTools?.map((t) => t.function.name).includes(toolName)) {
-				messages.push(message);
-				return yield message;
+				messages.push(toolMessage);
+				return yield toolMessage;
 			}
 			/// Get the appropriate session for this tool
 			const client = this.clients.get(toolName);
 			if (client) {
 				const result = await client.callTool({ name: toolName, arguments: toolArgs });
-				message.content = (result.content as Array<{ text: string }>)[0].text;
+				toolMessage.content = (result.content as Array<{ text: string }>)[0].text;
 			} else {
-				message.content = `Error: No session found for tool: ${toolName}`;
+				toolMessage.content = `Error: No session found for tool: ${toolName}`;
 			}
-			messages.push(message);
-			yield message;
+			messages.push(toolMessage);
+			yield toolMessage;
 		}
 	}
 
