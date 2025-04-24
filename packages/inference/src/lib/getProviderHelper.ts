@@ -3,6 +3,7 @@ import * as Cerebras from "../providers/cerebras";
 import * as Cohere from "../providers/cohere";
 import * as FalAI from "../providers/fal-ai";
 import * as Fireworks from "../providers/fireworks-ai";
+import * as Groq from "../providers/groq";
 import * as HFInference from "../providers/hf-inference";
 
 import * as Hyperbolic from "../providers/hyperbolic";
@@ -95,6 +96,10 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	"fireworks-ai": {
 		conversational: new Fireworks.FireworksConversationalTask(),
+	},
+	groq: {
+		conversational: new Groq.GroqConversationalTask(),
+		"text-generation": new Groq.GroqTextGenerationTask(),
 	},
 	hyperbolic: {
 		"text-to-image": new Hyperbolic.HyperbolicTextToImageTask(),

@@ -43,6 +43,7 @@ export const INFERENCE_PROVIDERS = [
 	"cohere",
 	"fal-ai",
 	"fireworks-ai",
+	"groq",
 	"hf-inference",
 	"hyperbolic",
 	"nebius",
