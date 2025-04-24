@@ -6,7 +6,7 @@ Visual document retrieval models can be used to retrieve relevant documents when
 
 ### Multimodal Retrieval Augmented Generation (RAG)
 
-Multimodal RAG is generating answers from documents when given a text query and a bunch of documents. These documents and the text query can be fed to [a vision language model](https://huggingface.co/tasks/image-text-to-text) to get the actual answer.
+Multimodal RAG is the task of generating answers from documents (texts or images) when given a text query and a bunch of documents. These documents and the text query can be fed to [a vision language model](https://huggingface.co/tasks/image-text-to-text) to get the actual answer.
 
 ## Inference
 
