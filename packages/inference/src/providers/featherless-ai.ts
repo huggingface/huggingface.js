@@ -1,4 +1,9 @@
-import type { ChatCompletionOutput, TextGenerationInput, TextGenerationOutput, TextGenerationOutputFinishReason } from "@huggingface/tasks";
+import type {
+	ChatCompletionOutput,
+	TextGenerationInput,
+	TextGenerationOutput,
+	TextGenerationOutputFinishReason,
+} from "@huggingface/tasks";
 import { InferenceOutputError } from "../lib/InferenceOutputError";
 import type { BodyParams } from "../types";
 import { BaseConversationalTask, BaseTextGenerationTask } from "./providerHelper";
