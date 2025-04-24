@@ -60,6 +60,7 @@ Currently, we support the following providers:
 - [Blackforestlabs](https://blackforestlabs.ai)
 - [Cohere](https://cohere.com)
 - [Cerebras](https://cerebras.ai/)
+- [Groq](https://groq.com)
 
 To send requests to a third-party provider, you have to pass the `provider` parameter to the inference function. Make sure your request is authenticated with an access token.
 ```ts
@@ -88,6 +89,7 @@ Only a subset of models are supported when requesting third-party providers. You
 - [Together supported models](https://huggingface.co/api/partners/together/models)
 - [Cohere supported models](https://huggingface.co/api/partners/cohere/models)
 - [Cerebras supported models](https://huggingface.co/api/partners/cerebras/models)
+- [Groq supported models](https://console.groq.com/docs/models)
 - [HF Inference API (serverless)](https://huggingface.co/models?inference=warm&sort=trending)
 
 ❗**Important note:** To be compatible, the third-party API must adhere to the "standard" shape API we expect on HF model pages for each pipeline task type.

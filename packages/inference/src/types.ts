@@ -44,6 +44,7 @@ export const INFERENCE_PROVIDERS = [
 	"fal-ai",
 	"featherless-ai",
 	"fireworks-ai",
+	"groq",
 	"hf-inference",
 	"hyperbolic",
 	"nebius",
