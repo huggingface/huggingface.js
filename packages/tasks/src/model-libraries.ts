@@ -617,8 +617,8 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"Open_Sora_v2.safetensors"`,
 	},
 	outetts: {
-		prettyLabel: "Outetts",
-		repoName: "Outetts",
+		prettyLabel: "OuteTTS",
+		repoName: "OuteTTS",
 		repoUrl: "https://github.com/edwko/OuteTTS",
 		snippets: snippets.outetts,
 		filter: false,
