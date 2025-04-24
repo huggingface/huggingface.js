@@ -63,7 +63,7 @@ const taskData: TaskDataCustom = {
 		},
 	],
 	summary:
-		"Visual document retrieval is the task of searching for relevant documents in form of PDFs. These models take a text query and multiple documents as input and return few most relevant documents and relevancy scores as output.",
+		"Visual document retrieval is the task of searching for relevant image-based documents, such as PDFs. These models take a text query and multiple documents as input and return the top-most relevant documents and relevancy scores as output.",
 	widgetModels: [""],
 	youtubeId: "",
 };
