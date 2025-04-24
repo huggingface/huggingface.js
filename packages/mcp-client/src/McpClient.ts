@@ -72,7 +72,7 @@ export class McpClient {
 
 	async *processSingleTurnWithTools(
 		messages: ChatCompletionInputMessage[],
-		opts: { exitLoopTools?: ChatCompletionInputTool[]; exitIfNoTool?: boolean } = {}
+		opts: { exitLoopTools?: ChatCompletionInputTool[]; exitIfFirstChunkNoTool?: boolean } = {}
 	): AsyncGenerator<ChatCompletionStreamOutput | ChatCompletionInputMessageTool> {
 		debug("start of single turn");
 
@@ -90,7 +90,7 @@ export class McpClient {
 		}
 		const firstChunk = firstChunkResult.value;
 		const firstToolCalls = firstChunk.choices[0]?.delta.tool_calls;
-		if ((!firstToolCalls || firstToolCalls.length === 0) && opts.exitIfNoTool) {
+		if ((!firstToolCalls || firstToolCalls.length === 0) && opts.exitIfFirstChunkNoTool) {
 			return;
 		}
 		yield firstChunk;
@@ -120,7 +120,9 @@ export class McpClient {
 				if (finalToolCalls[toolCall.index].function.arguments === undefined) {
 					finalToolCalls[toolCall.index].function.arguments = "";
 				}
-				finalToolCalls[toolCall.index].function.arguments += toolCall.function.arguments;
+				if (toolCall.function.arguments) {
+					finalToolCalls[toolCall.index].function.arguments += toolCall.function.arguments;
+				}
 			}
 		}
 

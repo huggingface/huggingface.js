@@ -79,11 +79,11 @@ export class Agent extends McpClient {
 		});
 
 		let numOfTurns = 0;
-		let nextShouldCallTools = true;
+		let nextTurnShouldCallTools = true;
 		while (true) {
 			yield* this.processSingleTurnWithTools(this.messages, {
 				exitLoopTools,
-				exitIfNoTool: numOfTurns > 0 && nextShouldCallTools,
+				exitIfFirstChunkNoTool: numOfTurns > 0 && nextTurnShouldCallTools,
 			});
 			numOfTurns++;
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -99,10 +99,14 @@ export class Agent extends McpClient {
 			if (currentLast.role !== "tool" && numOfTurns > MAX_NUM_TURNS) {
 				return;
 			}
-			if (currentLast.role !== "tool" && nextShouldCallTools) {
+			if (currentLast.role !== "tool" && nextTurnShouldCallTools) {
 				return;
 			}
-			nextShouldCallTools = currentLast.role !== "tool";
+			if (currentLast.role === "tool") {
+				nextTurnShouldCallTools = false;
+			} else {
+				nextTurnShouldCallTools = true;
+			}
 		}
 	}
 }
