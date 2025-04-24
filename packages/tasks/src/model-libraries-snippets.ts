@@ -226,6 +226,17 @@ infer = loaded_model.signatures["serving_default"]
 print(infer(inputs=tf.constant([input_tensor])))`,
 ];
 
+export const dia = (model: ModelData): string[] => [
+	`import soundfile as sf
+from dia.model import Dia
+
+model = Dia.from_pretrained("${model.id}")
+text = "[S1] Dia is an open weights text to dialogue model. [S2] You get full control over scripts and voices. [S1] Wow. Amazing. (laughs) [S2] Try it now on Git hub or Hugging Face."
+output = model.generate(text)
+
+sf.write("simple.mp3", output, 44100)`,
+];
+
 const diffusersDefaultPrompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
 
 const diffusers_default = (model: ModelData) => [
@@ -679,6 +690,23 @@ export const paddlenlp = (model: ModelData): string[] => {
 			].join("\n"),
 		];
 	}
+};
+
+export const perception_encoder = (model: ModelData): string[] => {
+	const clip_model = `# Use PE-Core models as CLIP models
+import core.vision_encoder.pe as pe
+
+model = pe.CLIP.from_config("${model.id}", pretrained=True)`;
+
+	const vision_encoder = `# Use any PE model as a vision encoder
+import core.vision_encoder.pe as pe
+
+model = pe.VisionTransformer.from_config("${model.id}", pretrained=True)`;
+	
+	if (model.id.includes("Core"))
+		return [clip_model, vision_encoder];
+	else
+		return [vision_encoder];
 };
 
 export const pyannote_audio_pipeline = (model: ModelData): string[] => [
