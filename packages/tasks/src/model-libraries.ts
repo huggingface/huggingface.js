@@ -987,7 +987,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://github.com/Zyphra/Zonos",
 		snippets: snippets.zonos,
 		filter: false,
-		countDownloads: `path:"model.safetensors"`,
 	},
 	"3dtopia-xl": {
 		prettyLabel: "3DTopia-XL",
