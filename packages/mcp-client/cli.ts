@@ -54,6 +54,10 @@ async function main() {
 		stdout.write("\n");
 		rl.close();
 	});
+	process.on("uncaughtException", () => {
+		stdout.write("\n");
+		rl.close();
+	});
 
 	await agent.loadTools();
 
