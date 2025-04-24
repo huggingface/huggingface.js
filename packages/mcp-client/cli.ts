@@ -8,7 +8,7 @@ import { ANSI } from "./src/utils";
 import type { InferenceProvider } from "@huggingface/inference";
 
 const MODEL_ID = process.env.MODEL_ID ?? "Qwen/Qwen2.5-72B-Instruct";
-const PROVIDER = (process.env.PROVIDER as InferenceProvider) ?? "together";
+const PROVIDER = (process.env.PROVIDER as InferenceProvider) ?? "nebius";
 
 const SERVERS: StdioServerParameters[] = [
 	{
@@ -88,13 +88,14 @@ async function main() {
 				}
 			} else {
 				/// Tool call info
+				stdout.write("\n\n");
 				stdout.write(ANSI.GREEN);
 				stdout.write(`Tool[${chunk.name}] ${chunk.tool_call_id}\n`);
 				stdout.write(chunk.content);
 				stdout.write(ANSI.RESET);
-				stdout.write("\n\n");
 			}
 		}
+		stdout.write("\n\n");
 	}
 }
 
