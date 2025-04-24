@@ -84,30 +84,23 @@ export class McpClient {
 			tool_choice: "auto",
 		});
 
-		const firstChunkResult = await stream.next();
-		if (firstChunkResult.done) {
-			return;
-		}
-		const firstChunk = firstChunkResult.value;
-		const firstToolCalls = firstChunk.choices[0]?.delta.tool_calls;
-		if ((!firstToolCalls || firstToolCalls.length === 0) && opts.exitIfFirstChunkNoTool) {
-			return;
-		}
-		yield firstChunk;
-		debug(firstChunk.choices[0]);
 		const message = {
-			role: firstChunk.choices[0].delta.role,
-			content: firstChunk.choices[0].delta.content,
+			role: "unknown",
+			content: "",
 		} satisfies ChatCompletionInputMessage;
-
 		const finalToolCalls: Record<number, ChatCompletionStreamOutputDeltaToolCall> = {};
+		let numOfChunks = 0;
 
 		for await (const chunk of stream) {
 			yield chunk;
 			debug(chunk.choices[0]);
+			numOfChunks++;
 			const delta = chunk.choices[0]?.delta;
 			if (!delta) {
 				continue;
+			}
+			if (delta.role) {
+				message.role = delta.role;
 			}
 			if (delta.content) {
 				message.content += delta.content;
@@ -123,6 +116,10 @@ export class McpClient {
 				if (toolCall.function.arguments) {
 					finalToolCalls[toolCall.index].function.arguments += toolCall.function.arguments;
 				}
+			}
+			if (opts.exitIfFirstChunkNoTool && numOfChunks <= 2 && Object.keys(finalToolCalls).length === 0) {
+				/// If no tool is present in chunk number 1 or 2, exit.
+				return;
 			}
 		}
 

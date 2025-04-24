@@ -35,6 +35,10 @@ if (process.env.EXPERIMENTAL_HF_MCP_SERVER) {
 	});
 }
 
+let SAMPLE_INPUT = process.env.USE_SAMPLE_INPUT
+	? `generate a haiku about Hugging Face and save it to a file name hf.txt on my Desktop`
+	: undefined;
+
 async function main() {
 	if (!process.env.HF_TOKEN) {
 		console.error(`a valid HF_TOKEN must be present in the env`);
