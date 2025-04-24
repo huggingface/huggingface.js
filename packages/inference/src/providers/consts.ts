@@ -23,6 +23,7 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	cerebras: {},
 	cohere: {},
 	"fal-ai": {},
+	"featherless-ai": {},
 	"fireworks-ai": {},
 	groq: {},
 	"hf-inference": {},

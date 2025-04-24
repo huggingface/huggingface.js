@@ -2,10 +2,10 @@ import * as BlackForestLabs from "../providers/black-forest-labs";
 import * as Cerebras from "../providers/cerebras";
 import * as Cohere from "../providers/cohere";
 import * as FalAI from "../providers/fal-ai";
+import * as FeatherlessAI from "../providers/featherless-ai";
 import * as Fireworks from "../providers/fireworks-ai";
 import * as Groq from "../providers/groq";
 import * as HFInference from "../providers/hf-inference";
-
 import * as Hyperbolic from "../providers/hyperbolic";
 import * as Nebius from "../providers/nebius";
 import * as Novita from "../providers/novita";
@@ -63,6 +63,10 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-to-speech": new FalAI.FalAITextToSpeechTask(),
 		"text-to-video": new FalAI.FalAITextToVideoTask(),
 		"automatic-speech-recognition": new FalAI.FalAIAutomaticSpeechRecognitionTask(),
+	},
+	"featherless-ai": {
+		conversational: new FeatherlessAI.FeatherlessAIConversationalTask(),
+		"text-generation": new FeatherlessAI.FeatherlessAITextGenerationTask(),
 	},
 	"hf-inference": {
 		"text-to-image": new HFInference.HFInferenceTextToImageTask(),
