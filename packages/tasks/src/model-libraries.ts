@@ -622,7 +622,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/edwko/OuteTTS",
 		snippets: snippets.outetts,
 		filter: false,
-		countDownloads: `path:"model.safetensors"`,
 	},
 	paddlenlp: {
 		prettyLabel: "paddlenlp",
