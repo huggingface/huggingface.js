@@ -38,7 +38,7 @@ jobs:
           pnpm --filter ...[${{ steps.since.outputs.SINCE }}]... build
 
       - name: Test
-        run: VCR_MODE=playback pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test
+        run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
@@ -76,7 +76,7 @@ jobs:
           pnpm --filter ...[${{ steps.since.outputs.SINCE }}]... build
 
       - name: Test in browser
-        run: VCR_MODE=playback pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test:browser
+        run: pnpm --filter ...[${{ steps.since.outputs.SINCE }}] test:browser
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 

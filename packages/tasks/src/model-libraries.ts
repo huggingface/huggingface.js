@@ -230,6 +230,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"scin_dataset_precomputed_embeddings.npz" OR path:"saved_model.pb"`,
 	},
+	dia: {
+		prettyLabel: "Dia",
+		repoName: "Dia",
+		repoUrl: "https://github.com/nari-labs/dia",
+		snippets: snippets.dia,
+		filter: false,
+	},
 	diffree: {
 		prettyLabel: "Diffree",
 		repoName: "Diffree",
@@ -632,6 +639,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.peft,
 		filter: true,
 		countDownloads: `path:"adapter_config.json"`,
+	},
+	"perception-encoder": {
+		prettyLabel: "PerceptionEncoder",
+		repoName: "PerceptionModels",
+		repoUrl: "https://github.com/facebookresearch/perception_models",
+		filter: false,
+		snippets: snippets.perception_encoder,
+		countDownloads: `path_extension:"pt"`,
 	},
 	pxia: {
 		prettyLabel: "pxia",
