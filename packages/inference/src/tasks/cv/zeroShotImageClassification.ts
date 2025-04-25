@@ -1,4 +1,5 @@
 import type { ZeroShotImageClassificationInput, ZeroShotImageClassificationOutput } from "@huggingface/tasks";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping";
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options, RequestArgs } from "../../types";
 import { base64FromBytes } from "../../utils/base64FromBytes";
@@ -44,7 +45,8 @@ export async function zeroShotImageClassification(
 	args: ZeroShotImageClassificationArgs,
 	options?: Options
 ): Promise<ZeroShotImageClassificationOutput> {
-	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "zero-shot-image-classification");
+	const provider = await resolveProvider(args.provider, args.model);
+	const providerHelper = getProviderHelper(provider, "zero-shot-image-classification");
 	const payload = await preparePayload(args);
 	const { data: res } = await innerRequest<ZeroShotImageClassificationOutput>(payload, providerHelper, {
 		...options,

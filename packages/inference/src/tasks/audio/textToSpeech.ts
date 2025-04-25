@@ -1,4 +1,5 @@
 import type { TextToSpeechInput } from "@huggingface/tasks";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping";
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
 import { innerRequest } from "../../utils/request";
@@ -12,7 +13,7 @@ interface OutputUrlTextToSpeechGeneration {
  * Recommended model: espnet/kan-bayashi_ljspeech_vits
  */
 export async function textToSpeech(args: TextToSpeechArgs, options?: Options): Promise<Blob> {
-	const provider = args.provider ?? "hf-inference";
+	const provider = await resolveProvider(args.provider, args.model);
 	const providerHelper = getProviderHelper(provider, "text-to-speech");
 	const { data: res } = await innerRequest<Blob | OutputUrlTextToSpeechGeneration>(args, providerHelper, {
 		...options,

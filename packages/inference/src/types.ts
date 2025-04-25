@@ -56,7 +56,11 @@ export const INFERENCE_PROVIDERS = [
 	"together",
 ] as const;
 
+export const PROVIDERS_OR_POLICIES = [...INFERENCE_PROVIDERS, "auto"] as const;
+
 export type InferenceProvider = (typeof INFERENCE_PROVIDERS)[number];
+
+export type InferenceProviderPolicy = (typeof PROVIDERS_OR_POLICIES)[number];
 
 export interface BaseArgs {
 	/**
@@ -90,7 +94,7 @@ export interface BaseArgs {
 	 *
 	 * Defaults to the first provider in your user settings that is compatible with this model.
 	 */
-	provider?: InferenceProvider;
+	provider?: InferenceProviderPolicy;
 }
 
 export type RequestArgs = BaseArgs &

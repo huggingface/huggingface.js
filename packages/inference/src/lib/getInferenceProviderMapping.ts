@@ -1,8 +1,8 @@
 import type { WidgetType } from "@huggingface/tasks";
-import type { InferenceProvider, ModelId } from "../types";
 import { HF_HUB_URL } from "../config";
 import { HARDCODED_MODEL_INFERENCE_MAPPING } from "../providers/consts";
 import { EQUIVALENT_SENTENCE_TRANSFORMERS_TASKS } from "../providers/hf-inference";
+import type { InferenceProvider, InferenceProviderPolicy, ModelId } from "../types";
 import { typedInclude } from "../utils/typedInclude";
 
 export const inferenceProviderMappingCache = new Map<ModelId, InferenceProviderMapping>();
@@ -20,6 +20,43 @@ export interface InferenceProviderModelMapping {
 	task: WidgetType;
 }
 
+export async function fetchInferenceProviderMappingForModel(
+	modelId: ModelId,
+	accessToken?: string,
+	options?: {
+		fetch?: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
+	}
+): Promise<InferenceProviderMapping> {
+	let inferenceProviderMapping: InferenceProviderMapping | null;
+	if (inferenceProviderMappingCache.has(modelId)) {
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		inferenceProviderMapping = inferenceProviderMappingCache.get(modelId)!;
+	} else {
+		const resp = await (options?.fetch ?? fetch)(
+			`${HF_HUB_URL}/api/models/${modelId}?expand[]=inferenceProviderMapping`,
+			{
+				headers: accessToken?.startsWith("hf_") ? { Authorization: `Bearer ${accessToken}` } : {},
+			}
+		);
+		if (resp.status === 404) {
+			throw new Error(`Model ${modelId} does not exist`);
+		}
+		inferenceProviderMapping = await resp
+			.json()
+			.then((json) => json.inferenceProviderMapping)
+			.catch(() => null);
+
+		if (inferenceProviderMapping) {
+			inferenceProviderMappingCache.set(modelId, inferenceProviderMapping);
+		}
+	}
+
+	if (!inferenceProviderMapping) {
+		throw new Error(`We have not been able to find inference provider information for model ${modelId}.`);
+	}
+	return inferenceProviderMapping;
+}
+
 export async function getInferenceProviderMapping(
 	params: {
 		accessToken?: string;
@@ -34,30 +71,11 @@ export async function getInferenceProviderMapping(
 	if (HARDCODED_MODEL_INFERENCE_MAPPING[params.provider][params.modelId]) {
 		return HARDCODED_MODEL_INFERENCE_MAPPING[params.provider][params.modelId];
 	}
-	let inferenceProviderMapping: InferenceProviderMapping | null;
-	if (inferenceProviderMappingCache.has(params.modelId)) {
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		inferenceProviderMapping = inferenceProviderMappingCache.get(params.modelId)!;
-	} else {
-		const resp = await (options?.fetch ?? fetch)(
-			`${HF_HUB_URL}/api/models/${params.modelId}?expand[]=inferenceProviderMapping`,
-			{
-				headers: params.accessToken?.startsWith("hf_") ? { Authorization: `Bearer ${params.accessToken}` } : {},
-			}
-		);
-		if (resp.status === 404) {
-			throw new Error(`Model ${params.modelId} does not exist`);
-		}
-		inferenceProviderMapping = await resp
-			.json()
-			.then((json) => json.inferenceProviderMapping)
-			.catch(() => null);
-	}
-
-	if (!inferenceProviderMapping) {
-		throw new Error(`We have not been able to find inference provider information for model ${params.modelId}.`);
-	}
-
+	const inferenceProviderMapping = await fetchInferenceProviderMappingForModel(
+		params.modelId,
+		params.accessToken,
+		options
+	);
 	const providerMapping = inferenceProviderMapping[params.provider];
 	if (providerMapping) {
 		const equivalentTasks =
@@ -93,4 +111,24 @@ export async function getInferenceProviderMapping(
 		return { ...providerMapping, hfModelId: params.modelId };
 	}
 	return null;
+}
+
+export async function resolveProvider(
+	provider?: InferenceProviderPolicy,
+	modelId?: string
+): Promise<InferenceProvider> {
+	if (!provider && !modelId) {
+		provider = "hf-inference";
+	}
+	if (!provider) {
+		provider = "auto";
+	}
+	if (provider === "auto") {
+		if (!modelId) {
+			throw new Error("Specifying a model is required when provider is 'auto'");
+		}
+		const inferenceProviderMapping = await fetchInferenceProviderMappingForModel(modelId);
+		provider = Object.keys(inferenceProviderMapping)[0] as InferenceProvider;
+	}
+	return provider;
 }

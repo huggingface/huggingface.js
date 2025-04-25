@@ -1,4 +1,5 @@
 import type { ImageToTextInput, ImageToTextOutput } from "@huggingface/tasks";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping";
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
 import { innerRequest } from "../../utils/request";
@@ -10,7 +11,8 @@ export type ImageToTextArgs = BaseArgs & (ImageToTextInput | LegacyImageInput);
  * This task reads some image input and outputs the text caption.
  */
 export async function imageToText(args: ImageToTextArgs, options?: Options): Promise<ImageToTextOutput> {
-	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "image-to-text");
+	const provider = await resolveProvider(args.provider, args.model);
+	const providerHelper = getProviderHelper(provider, "image-to-text");
 	const payload = preparePayload(args);
 	const { data: res } = await innerRequest<[ImageToTextOutput]>(payload, providerHelper, {
 		...options,

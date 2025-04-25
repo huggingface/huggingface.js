@@ -1,4 +1,5 @@
 import type { TextToImageInput } from "@huggingface/tasks";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping";
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import { makeRequestOptions } from "../../lib/makeRequestOptions";
 import type { BaseArgs, Options } from "../../types";
@@ -23,7 +24,7 @@ export async function textToImage(
 	options?: TextToImageOptions & { outputType?: undefined | "blob" }
 ): Promise<Blob>;
 export async function textToImage(args: TextToImageArgs, options?: TextToImageOptions): Promise<Blob | string> {
-	const provider = args.provider ?? "hf-inference";
+	const provider = await resolveProvider(args.provider, args.model);
 	const providerHelper = getProviderHelper(provider, "text-to-image");
 	const { data: res } = await innerRequest<Record<string, unknown>>(args, providerHelper, {
 		...options,

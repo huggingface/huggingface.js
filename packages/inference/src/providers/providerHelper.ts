@@ -56,7 +56,7 @@ import { toArray } from "../utils/toArray";
  */
 export abstract class TaskProviderHelper {
 	constructor(
-		private provider: InferenceProvider,
+		readonly provider: InferenceProvider,
 		private baseUrl: string,
 		readonly clientSideRoutingOnly: boolean = false
 	) {}
