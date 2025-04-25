@@ -3,10 +3,11 @@ import * as readline from "node:readline/promises";
 import { stdin, stdout } from "node:process";
 import { join } from "node:path";
 import { homedir } from "node:os";
-import { Agent } from "./src";
 import type { StdioServerParameters } from "@modelcontextprotocol/sdk/client/stdio.js";
-import { ANSI } from "./src/utils";
 import type { InferenceProvider } from "@huggingface/inference";
+import { ANSI } from "./src/utils";
+import { Agent } from "./src";
+import { version as packageVersion } from "./package.json";
 
 const MODEL_ID = process.env.MODEL_ID ?? "Qwen/Qwen2.5-72B-Instruct";
 const PROVIDER = (process.env.PROVIDER as InferenceProvider) ?? "nebius";
@@ -37,6 +38,11 @@ if (process.env.EXPERIMENTAL_HF_MCP_SERVER) {
 }
 
 async function main() {
+	if (process.argv.includes("--version")) {
+		console.log(packageVersion);
+		process.exit(0);
+	}
+
 	if (!process.env.HF_TOKEN) {
 		console.error(`a valid HF_TOKEN must be present in the env`);
 		process.exit(1);
