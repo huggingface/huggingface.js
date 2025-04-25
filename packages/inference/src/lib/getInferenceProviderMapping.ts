@@ -121,6 +121,9 @@ export async function resolveProvider(
 		provider = "hf-inference";
 	}
 	if (!provider) {
+		console.log(
+			"Defaulting to 'auto' which will select the first provider available for the model, sorted by the user's order in https://hf.co/settings/inference-providers."
+		);
 		provider = "auto";
 	}
 	if (provider === "auto") {
@@ -129,6 +132,7 @@ export async function resolveProvider(
 		}
 		const inferenceProviderMapping = await fetchInferenceProviderMappingForModel(modelId);
 		provider = Object.keys(inferenceProviderMapping)[0] as InferenceProvider;
+		console.log("Auto-selected provider:", provider);
 	}
 	return provider;
 }
