@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import * as readline from "node:readline/promises";
 import { stdin, stdout } from "node:process";
 import { join } from "node:path";
