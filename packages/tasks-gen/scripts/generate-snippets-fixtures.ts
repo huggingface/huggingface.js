@@ -20,8 +20,8 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path/posix";
 
 import { snippets } from "@huggingface/inference";
+import type { InferenceSnippet, ModelDataMinimal, SnippetInferenceProvider, WidgetType } from "@huggingface/tasks";
 import { inferenceSnippetLanguages } from "@huggingface/tasks";
-import type { SnippetInferenceProvider, InferenceSnippet, ModelDataMinimal, WidgetType } from "@huggingface/tasks";
 
 const LANGUAGES = ["js", "python", "sh"] as const;
 type Language = (typeof LANGUAGES)[number];
@@ -238,6 +238,17 @@ const TEST_CASES: {
 		},
 		providers: ["hf-inference"],
 		opts: { billTo: "huggingface" },
+	},
+	{
+		testName: "text-to-speech",
+		task: "text-to-speech",
+		model: {
+			id: "nari-labs/Dia-1.6B",
+			pipeline_tag: "text-to-speech",
+			tags: [],
+			inference: "",
+		},
+		providers: ["fal-ai"],
 	},
 ] as const;
 
