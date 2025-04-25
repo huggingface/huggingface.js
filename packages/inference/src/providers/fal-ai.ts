@@ -241,7 +241,7 @@ export class FalAITextToSpeechTask extends FalAITask {
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),
-			lyrics: params.args.inputs,
+			text: params.args.inputs,
 		};
 	}
 
