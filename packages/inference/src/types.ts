@@ -92,7 +92,7 @@ export interface BaseArgs {
 	/**
 	 * Set an Inference provider to run this model on.
 	 *
-	 * Defaults to the first provider in your user settings that is compatible with this model.
+	 * Defaults to "auto" i.e. the first of the providers available for the model, sorted by the user's order in https://hf.co/settings/inference-providers.
 	 */
 	provider?: InferenceProviderPolicy;
 }
