@@ -702,11 +702,12 @@ model = pe.CLIP.from_config("${model.id}", pretrained=True)`;
 import core.vision_encoder.pe as pe
 
 model = pe.VisionTransformer.from_config("${model.id}", pretrained=True)`;
-	
-	if (model.id.includes("Core"))
+
+	if (model.id.includes("Core")) {
 		return [clip_model, vision_encoder];
-	else
+	} else {
 		return [vision_encoder];
+	}
 };
 
 export const pyannote_audio_pipeline = (model: ModelData): string[] => [

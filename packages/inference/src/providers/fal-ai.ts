@@ -86,16 +86,6 @@ export class FalAITextToImageTask extends FalAITask implements TextToImageTaskHe
 			...(params.args.parameters as Record<string, unknown>),
 			sync_mode: true,
 			prompt: params.args.inputs,
-			...(params.mapping?.adapter === "lora" && params.mapping.adapterWeightsPath
-				? {
-						loras: [
-							{
-								path: buildLoraPath(params.mapping.hfModelId, params.mapping.adapterWeightsPath),
-								scale: 1,
-							},
-						],
-				  }
-				: undefined),
 		};
 
 		if (params.mapping?.adapter === "lora" && params.mapping.adapterWeightsPath) {
@@ -241,7 +231,7 @@ export class FalAITextToSpeechTask extends FalAITask {
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),
-			lyrics: params.args.inputs,
+			text: params.args.inputs,
 		};
 	}
 
