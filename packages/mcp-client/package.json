@@ -7,14 +7,17 @@
 	"publishConfig": {
 		"access": "public"
 	},
-	"main": "./dist/index.js",
-	"module": "./dist/index.mjs",
-	"types": "./dist/index.d.ts",
+	"main": "./dist/src/index.js",
+	"module": "./dist/src/index.mjs",
+	"types": "./dist/src/index.d.ts",
+	"bin": {
+		"tiny-agent": "./dist/cli.js"
+	},
 	"exports": {
 		".": {
-			"types": "./dist/index.d.ts",
-			"require": "./dist/index.js",
-			"import": "./dist/index.mjs"
+			"types": "./dist/src/index.d.ts",
+			"require": "./dist/src/index.js",
+			"import": "./dist/src/index.mjs"
 		}
 	},
 	"engines": {
@@ -27,7 +30,7 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"prepublishOnly": "pnpm run build",
-		"build": "tsup src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
+		"build": "tsup src/index.ts cli.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
 		"prepare": "pnpm run build",
 		"test": "vitest run",
 		"check": "tsc",
@@ -36,16 +39,16 @@
 	"files": [
 		"src",
 		"dist",
-		"index.ts",
+		"cli.ts",
 		"tsconfig.json"
 	],
 	"keywords": [
 		"huggingface",
-		"model context protocol",
 		"mcp",
+		"model context protocol",
 		"client",
-		"hugging",
-		"face"
+		"agent",
+		"tiny-agent"
 	],
 	"author": "Hugging Face",
 	"license": "MIT",
