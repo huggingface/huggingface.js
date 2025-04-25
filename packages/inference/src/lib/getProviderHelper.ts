@@ -1,5 +1,6 @@
 import * as BlackForestLabs from "../providers/black-forest-labs";
 import * as Cerebras from "../providers/cerebras";
+import * as CentML from "../providers/centml";
 import * as Cohere from "../providers/cohere";
 import * as FalAI from "../providers/fal-ai";
 import * as FeatherlessAI from "../providers/featherless-ai";
@@ -54,6 +55,10 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	cerebras: {
 		conversational: new Cerebras.CerebrasConversationalTask(),
+	},
+	centml: {
+		conversational: new CentML.CentMLConversationalTask(),
+		"text-generation": new CentML.CentMLTextGenerationTask(),
 	},
 	cohere: {
 		conversational: new Cohere.CohereConversationalTask(),
