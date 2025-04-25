@@ -52,18 +52,20 @@ export class Agent extends McpClient {
 		model,
 		apiKey,
 		servers,
+		prompt,
 	}: {
 		provider: InferenceProvider;
 		model: string;
 		apiKey: string;
 		servers: StdioServerParameters[];
+		prompt?: string;
 	}) {
 		super({ provider, model, apiKey });
 		this.servers = servers;
 		this.messages = [
 			{
 				role: "system",
-				content: DEFAULT_SYSTEM_PROMPT,
+				content: prompt ?? DEFAULT_SYSTEM_PROMPT,
 			},
 		];
 	}
