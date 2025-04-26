@@ -7,7 +7,7 @@ import { InferenceOutputError } from "../lib/InferenceOutputError";
 import type { BodyParams } from "../types";
 import { BaseConversationalTask, BaseTextGenerationTask } from "./providerHelper";
 
-const CENTML_API_BASE_URL = "https://api.centml.ai";
+const CENTML_API_BASE_URL = "https://api.centml.com";
 
 export class CentMLConversationalTask extends BaseConversationalTask {
     constructor() {
@@ -63,4 +63,4 @@ export class CentMLTextGenerationTask extends BaseTextGenerationTask {
 
         throw new InferenceOutputError("Expected TextGenerationOutput");
     }
-} 
+}
