@@ -21,6 +21,14 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	 */
 	"black-forest-labs": {},
 	cerebras: {},
+	centml: {
+		"meta-llama/Llama-3.2-3B-Instruct": {
+			hfModelId: "meta-llama/Llama-3.2-3B-Instruct",
+			providerId: "meta-llama/Llama-3.2-3B-Instruct",  // CentML expects same id
+			status: "live",          // or "staging" if you prefer the warning
+			task: "conversational"   // <-- WidgetType from @huggingface/tasks
+		}
+	},
 	cohere: {},
 	"fal-ai": {},
 	"featherless-ai": {},
