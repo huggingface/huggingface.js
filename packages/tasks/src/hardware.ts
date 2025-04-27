@@ -153,7 +153,7 @@ export const SKUS = {
 				memory: [16],
 			},
 			"RTX 5060 Ti": {
-				tflops: 23.70, // source https://www.techpowerup.com/gpu-specs/geforce-rtx-5060-ti.c4246
+				tflops: 23.7, // source https://www.techpowerup.com/gpu-specs/geforce-rtx-5060-ti.c4246
 				memory: [16, 8],
 			},
 			"RTX 5060": {

@@ -8,11 +8,11 @@ import {
 } from "@huggingface/tasks";
 import type { PipelineType, WidgetType } from "@huggingface/tasks/src/pipelines.js";
 import type { ChatCompletionInputMessage, GenerationParameters } from "@huggingface/tasks/src/tasks/index.js";
+import type { InferenceProviderModelMapping } from "../lib/getInferenceProviderMapping";
+import { getProviderHelper } from "../lib/getProviderHelper";
 import { makeRequestOptionsFromResolvedModel } from "../lib/makeRequestOptions";
 import type { InferenceProvider, InferenceTask, RequestArgs } from "../types";
 import { templates } from "./templates.exported";
-import type { InferenceProviderModelMapping } from "../lib/getInferenceProviderMapping";
-import { getProviderHelper } from "../lib/getProviderHelper";
 
 export type InferenceSnippetOptions = { streaming?: boolean; billTo?: string } & Record<string, unknown>;
 
@@ -112,6 +112,7 @@ const HF_JS_METHODS: Partial<Record<WidgetType, string>> = {
 	"text-generation": "textGeneration",
 	"text2text-generation": "textGeneration",
 	"token-classification": "tokenClassification",
+	"text-to-speech": "textToSpeech",
 	translation: "translation",
 };
 
@@ -310,7 +311,7 @@ const snippets: Partial<
 	"text-generation": snippetGenerator("basic"),
 	"text-to-audio": snippetGenerator("textToAudio"),
 	"text-to-image": snippetGenerator("textToImage"),
-	"text-to-speech": snippetGenerator("textToAudio"),
+	"text-to-speech": snippetGenerator("textToSpeech"),
 	"text-to-video": snippetGenerator("textToVideo"),
 	"text2text-generation": snippetGenerator("basic"),
 	"token-classification": snippetGenerator("basic"),
