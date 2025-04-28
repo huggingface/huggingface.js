@@ -154,13 +154,13 @@ export async function* sha256(
 	}
 
 	if (!cryptoModule) {
-		cryptoModule = await import("./sha256-node");
+		cryptoModule = await import("./sha-node");
 	}
 
 	return yield* cryptoModule.sha256Node(buffer, { abortSignal: opts?.abortSignal });
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-let cryptoModule: typeof import("./sha256-node");
+let cryptoModule: typeof import("./sha-node");
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 let wasmModule: typeof import("../vendor/hash-wasm/sha256-wrapper");
