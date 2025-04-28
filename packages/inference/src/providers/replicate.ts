@@ -19,7 +19,7 @@ import { isUrl } from "../lib/isUrl";
 import type { BodyParams, HeaderParams, UrlParams } from "../types";
 import { omit } from "../utils/omit";
 import { TaskProviderHelper, type TextToImageTaskHelper, type TextToVideoTaskHelper } from "./providerHelper";
-
+import { HF_HUB_URL } from "../config";
 export interface ReplicateOutput {
 	output?: string | string[];
 }
@@ -62,7 +62,22 @@ abstract class ReplicateTask extends TaskProviderHelper {
 	}
 }
 
+
+
 export class ReplicateTextToImageTask extends ReplicateTask implements TextToImageTaskHelper {
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		const payload = super.preparePayload(params);
+
+		// For Flux LoRAs, use black-forest-labs/flux-dev-lora
+		if (params.mapping?.adapter === "lora" && params.mapping.adapterWeightsPath) {
+			const input = payload.input as Record<string, unknown>;
+			input.model = "black-forest-labs/flux-dev-lora";
+			input.lora_weights = `${HF_HUB_URL}/${params.mapping.hfModelId}`;
+		}
+
+		return payload;
+	}
+
 	override async getResponse(
 		res: ReplicateOutput | Blob,
 		url?: string,

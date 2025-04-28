@@ -1142,6 +1142,17 @@ describe.skip("InferenceClient", () => {
 				expect(res).toBeInstanceOf(Blob);
 			});
 
+			// Runs black-forest-labs/flux-dev-lora under the hood 
+			// with fofr/flux-80s-cyberpunk as the LoRA weights
+			it("textToImage - all Flux LoRAs", async () => {
+				const res = await client.textToImage({
+					model: "fofr/flux-80s-cyberpunk",
+					provider: "replicate",
+					inputs: "style of 80s cyberpunk, a portrait photo",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
 			it("textToImage canonical - stabilityai/stable-diffusion-3.5-large-turbo", async () => {
 				const res = await client.textToImage({
 					model: "stabilityai/stable-diffusion-3.5-large-turbo",
