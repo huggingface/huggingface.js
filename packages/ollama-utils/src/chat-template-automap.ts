@@ -5,8 +5,20 @@ import type { OllamaChatTemplateMapEntry } from "./types";
 
 /**
  * Skipped these models due to error:
- * - library/llama3:70b
- * - library/mistrallite:7b
+ * - library/gemma3:12b
+ * - library/llama3.3:70b-instruct-fp16
+ * - library/llama3.3:70b
+ * - library/llama3.1:8b
+ * - library/llama3.1:70b
+ * - library/llama3.1:8b-instruct-fp16
+ * - library/llama3.2-vision:11b
+ * - library/mistral-nemo:12b-instruct-2407-q2_K
+ * - library/llava:34b
+ * - library/deepcoder:1.5b-preview-fp16
+ * - library/firefunction-v2:70b
+ * - library/yi-coder:1.5b-base-fp16
+ * - library/tulu3:70b
+ * - library/command-a:111b-03-2025-fp16
  */
 
 export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
@@ -753,6 +765,17 @@ export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
 			tokens: ["[INST]"],
 			params: {
 				temperature: 0.15,
+			},
+		},
+	},
+	{
+		model: "library/mistral:7b-instruct-fp16",
+		gguf: "{{ bos_token }}{% for message in messages %}{% if (message['role'] == 'user') != (loop.index0 % 2 == 0) %}{{ raise_exception('Conversation roles must alternate user/assistant/user/assistant/...') }}{% endif %}{% if message['role'] == 'user' %}{{ '[INST] ' + message['content'] + ' [/INST]' }}{% elif message['role'] == 'assistant' %}{{ message['content'] + eos_token + ' ' }}{% else %}{{ raise_exception('Only user and assistant roles are supported!') }}{% endif %}{% endfor %}",
+		ollama: {
+			template: "[INST] {{ .System }} {{ .Prompt }} [/INST]\n",
+			tokens: ["[INST]"],
+			params: {
+				stop: ["[INST]", "[/INST]"],
 			},
 		},
 	},
