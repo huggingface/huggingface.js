@@ -1,11 +1,21 @@
 {% if provider == "fal-ai" %}
 import fal_client
 
+{% if providerInputs.asObj.loras is defined and providerInputs.asObj.loras != none %}
+result = fal_client.subscribe(
+    "{{ providerModelId }}",
+    arguments={
+        "prompt": {{ inputs.asObj.inputs }},
+        "loras":{{ providerInputs.asObj.loras | tojson }},
+    },
+)
+{% else %}
 result = fal_client.subscribe(
     "{{ providerModelId }}",
     arguments={
         "prompt": {{ inputs.asObj.inputs }},
     },
 )
+{% endif %} 
 print(result)
 {% endif %} 
