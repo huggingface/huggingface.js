@@ -1,0 +1,12 @@
+import { InferenceClient } from "@huggingface/inference";
+
+const client = new InferenceClient("{{ accessToken }}");
+
+const audio = await client.textToSpeech({
+    provider: "{{ provider }}",
+    model: "{{ model.id }}",
+	inputs: {{ inputs.asObj.inputs }},
+}{% if billTo %}, {
+    billTo: "{{ billTo }}",
+}{% endif %});
+// Use the generated audio (it's a Blob)

@@ -14,6 +14,11 @@
       title: Interact with the Hub
     - local: hub/modules
       title: API Reference
+- title: "@huggingface/mcp-client"
+  isExpanded: true
+  sections:
+    - local: mcp-client/README
+      title: Simple MCP Client and smol Agent built on top of Inference Client
 - title: "@huggingface/agent"
   isExpanded: true
   sections:

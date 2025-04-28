@@ -230,6 +230,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"scin_dataset_precomputed_embeddings.npz" OR path:"saved_model.pb"`,
 	},
+	"dia-tts": {
+		prettyLabel: "Dia",
+		repoName: "Dia",
+		repoUrl: "https://github.com/nari-labs/dia",
+		snippets: snippets.dia,
+		filter: false,
+	},
 	diffree: {
 		prettyLabel: "Diffree",
 		repoName: "Diffree",
