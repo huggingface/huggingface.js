@@ -24,22 +24,9 @@ import type {
 import { InferenceOutputError } from "../lib/InferenceOutputError";
 import type { BodyParams } from "../types";
 import { omit } from "../utils/omit";
+import type { TextGenerationInput } from "@huggingface/tasks";
 
 const OVHCLOUD_API_BASE_URL = "https://oai.endpoints.kepler.ai.cloud.ovh.net";
-
-function prepareBaseOvhCloudPayload(params: BodyParams): Record<string, unknown> {
-	return {
-		model: params.model,
-		...omit(params.args, ["inputs", "parameters"]),
-		...(params.args.parameters
-			? {
-				max_tokens: (params.args.parameters as Record<string, unknown>).max_new_tokens,
-				...omit(params.args.parameters as Record<string, unknown>, "max_new_tokens"),
-			}
-			: undefined),
-		prompt: params.args.inputs,
-	};
-}
 
 interface OvhCloudTextCompletionOutput extends Omit<ChatCompletionOutput, "choices"> {
 	choices: Array<{
@@ -54,10 +41,6 @@ export class OvhCloudConversationalTask extends BaseConversationalTask {
 	constructor() {
 		super("ovhcloud", OVHCLOUD_API_BASE_URL);
 	}
-
-	override preparePayload(params: BodyParams): Record<string, unknown> {
-		return prepareBaseOvhCloudPayload(params);
-	}
 }
 
 export class OvhCloudTextGenerationTask extends BaseTextGenerationTask {
@@ -65,10 +48,18 @@ export class OvhCloudTextGenerationTask extends BaseTextGenerationTask {
 		super("ovhcloud", OVHCLOUD_API_BASE_URL);
 	}
 
-	override preparePayload(params: BodyParams): Record<string, unknown> {
-		const payload = prepareBaseOvhCloudPayload(params);
-		payload.prompt = params.args.inputs;
-		return payload;
+	override preparePayload(params: BodyParams<TextGenerationInput>): Record<string, unknown> {
+		return {
+			model: params.model,
+			...omit(params.args, ["inputs", "parameters"]),
+			...(params.args.parameters
+				? {
+					max_tokens: (params.args.parameters as Record<string, unknown>).max_new_tokens,
+					...omit(params.args.parameters as Record<string, unknown>, "max_new_tokens"),
+				}
+				: undefined),
+			prompt: params.args.inputs,
+		};
 	}
 
 	override async getResponse(response: OvhCloudTextCompletionOutput): Promise<TextGenerationOutput> {

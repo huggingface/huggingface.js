@@ -1710,12 +1710,10 @@ describe.concurrent("InferenceClient", () => {
 					model: "meta-llama/llama-3.1-8b-instruct",
 					provider: "ovhcloud",
 					messages: [{ role: "user", content: "A, B, C, " }],
-					parameters: {
-						seed: 42,
-						temperature: 0,
-						top_p: 0.01,
-						max_new_tokens: 1,
-					},
+					seed: 42,
+					temperature: 0,
+					top_p: 0.01,
+					max_tokens: 1,
 				});
 				expect(res.choices && res.choices.length > 0);
 				const completion = res.choices[0].message?.content;
@@ -1728,12 +1726,10 @@ describe.concurrent("InferenceClient", () => {
 					provider: "ovhcloud",
 					messages: [{ role: "user", content: "A, B, C, " }],
 					stream: true,
-					parameters: {
-						seed: 42,
-						temperature: 0,
-						top_p: 0.01,
-						max_new_tokens: 1,
-					},
+					seed: 42,
+					temperature: 0,
+					top_p: 0.01,
+					max_tokens: 1,
 				}) as AsyncGenerator<ChatCompletionStreamOutput>;
 
 				let fullResponse = "";
