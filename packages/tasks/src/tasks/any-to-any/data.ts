@@ -15,7 +15,7 @@ const taskData: TaskDataCustom = {
 			},
 			{
 				label: "Text Prompt",
-				content: "Describe the position of the bee in detail.",
+				content: "What is the significance of this place?",
 				type: "text",
 			},
 		],
