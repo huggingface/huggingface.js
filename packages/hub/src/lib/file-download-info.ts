@@ -78,7 +78,16 @@ export async function fileDownloadInfo(
 	let xetInfo: XetFileInfo | undefined;
 
 	if (resp.headers.get("Content-Type")?.includes("application/vnd.xet-fileinfo+json")) {
-		const json: { casUrl: string; hash: string; refreshUrl: string; size: string; etag: string } = await resp.json();
+		const text = await resp.text();
+		const json: { casUrl: string; hash: string; refreshUrl: string; size: string; etag: string } = (() => {
+			try {
+				return JSON.parse(text);
+			} catch (e) {
+				throw new InvalidApiResponseFormatError(
+					"Invalid JSON response: " + text + ", content-type: " + resp.headers.get("Content-Type")
+				);
+			}
+		})();
 
 		xetInfo = {
 			hash: json.hash,
