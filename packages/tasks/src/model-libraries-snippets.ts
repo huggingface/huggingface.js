@@ -1291,26 +1291,26 @@ model = SwarmFormerModel.from_pretrained("${model.id}")
 `,
 ];
 
-export const mlx_unknown = (model: ModelData): string[] => [
+const mlx_unknown = (model: ModelData): string[] => [
 	`pip install huggingface_hub hf_transfer
 
 export HF_HUB_ENABLE_HF_TRANSFER=1
 huggingface-cli download --local-dir ${nameWithoutNamespace(model.id)} ${model.id}`,
 ];
 
-export const mlxlm = (model: ModelData): string[] => [
+const mlxlm = (model: ModelData): string[] => [
 	`pip install --upgrade mlx-lm
 
 mlx_lm.generate --model ${model.id} --prompt "Hello"`,
 ];
 
-export const mlxchat = (model: ModelData): string[] => [
+const mlxchat = (model: ModelData): string[] => [
 	`pip install --upgrade mlx-lm
 
 mlx_lm.chat --model ${model.id}`,
 ];
 
-export const mlxvlm = (model: ModelData): string[] => [
+const mlxvlm = (model: ModelData): string[] => [
 	`pip install --upgrade mlx-vlm
 
 mlx_vlm.generate --model ${model.id} \\
