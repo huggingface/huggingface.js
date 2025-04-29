@@ -14,6 +14,7 @@ export function uploadFiles(
 		parentCommit?: CommitParams["parentCommit"];
 		fetch?: CommitParams["fetch"];
 		useWebWorkers?: CommitParams["useWebWorkers"];
+		maxFolderDepth?: CommitParams["maxFolderDepth"];
 		abortSignal?: CommitParams["abortSignal"];
 	} & Partial<CredentialsParams>
 ): Promise<CommitOutput> {

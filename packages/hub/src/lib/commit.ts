@@ -18,10 +18,10 @@ import { promisesQueueStreaming } from "../utils/promisesQueueStreaming";
 import { sha256 } from "../utils/sha256";
 import { toRepoId } from "../utils/toRepoId";
 import { WebBlob } from "../utils/WebBlob";
-import { createBlob } from "../utils/createBlob";
 import { eventToGenerator } from "../utils/eventToGenerator";
 import { base64FromBytes } from "../utils/base64FromBytes";
 import { isFrontend } from "../utils/isFrontend";
+import { createBlobs } from "../utils/createBlobs";
 
 const CONCURRENT_SHAS = 5;
 const CONCURRENT_LFS_UPLOADS = 5;
@@ -73,9 +73,15 @@ export type CommitParams = {
 	/**
 	 * Whether to use web workers to compute SHA256 hashes.
 	 *
-	 * We load hash-wasm from a CDN inside the web worker. Not sure how to do otherwise and still have a "clean" bundle.
+	 * @default false
 	 */
 	useWebWorkers?: boolean | { minSize?: number; poolSize?: number };
+	/**
+	 * Maximum depth of folders to upload. Files deeper than this will be ignored
+	 *
+	 * @default 5
+	 */
+	maxFolderDepth?: number;
 	/**
 	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 	 */
@@ -144,27 +150,32 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 	}
 
 	try {
-		const allOperations = await Promise.all(
-			params.operations.map(async (operation) => {
-				if (operation.operation !== "addOrUpdate") {
-					return operation;
-				}
+		const allOperations = (
+			await Promise.all(
+				params.operations.map(async (operation) => {
+					if (operation.operation !== "addOrUpdate") {
+						return operation;
+					}
 
-				if (!(operation.content instanceof URL)) {
-					/** TS trick to enforce `content` to be a `Blob` */
-					return { ...operation, content: operation.content };
-				}
+					if (!(operation.content instanceof URL)) {
+						/** TS trick to enforce `content` to be a `Blob` */
+						return { ...operation, content: operation.content };
+					}
 
-				const lazyBlob = await createBlob(operation.content, { fetch: params.fetch });
+					const lazyBlobs = await createBlobs(operation.content, {
+						fetch: params.fetch,
+						maxFolderDepth: params.maxFolderDepth,
+					});
 
-				abortSignal?.throwIfAborted();
+					abortSignal?.throwIfAborted();
 
-				return {
-					...operation,
-					content: lazyBlob,
-				};
-			})
-		);
+					return lazyBlobs.map((blob) => ({
+						...operation,
+						content: blob,
+					}));
+				})
+			)
+		).flat(1);
 
 		const gitAttributes = allOperations.filter(isFileOperation).find((op) => op.path === ".gitattributes")?.content;
 
