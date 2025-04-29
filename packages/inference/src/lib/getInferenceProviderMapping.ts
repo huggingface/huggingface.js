@@ -2,7 +2,7 @@ import type { WidgetType } from "@huggingface/tasks";
 import { HF_HUB_URL } from "../config";
 import { HARDCODED_MODEL_INFERENCE_MAPPING } from "../providers/consts";
 import { EQUIVALENT_SENTENCE_TRANSFORMERS_TASKS } from "../providers/hf-inference";
-import type { InferenceProvider, InferenceProviderPolicy, ModelId } from "../types";
+import type { InferenceProvider, InferenceProviderOrPolicy, ModelId } from "../types";
 import { typedInclude } from "../utils/typedInclude";
 
 export const inferenceProviderMappingCache = new Map<ModelId, InferenceProviderMapping>();
@@ -98,7 +98,7 @@ export async function getInferenceProviderMapping(
 }
 
 export async function resolveProvider(
-	provider?: InferenceProviderPolicy,
+	provider?: InferenceProviderOrPolicy,
 	modelId?: string
 ): Promise<InferenceProvider> {
 	if (!provider) {
