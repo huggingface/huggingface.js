@@ -16,11 +16,7 @@
  */
 
 import { BaseConversationalTask, BaseTextGenerationTask } from "./providerHelper";
-import type {
-	ChatCompletionOutput,
-	TextGenerationOutput,
-	TextGenerationOutputFinishReason,
-} from "@huggingface/tasks";
+import type { ChatCompletionOutput, TextGenerationOutput, TextGenerationOutputFinishReason } from "@huggingface/tasks";
 import { InferenceOutputError } from "../lib/InferenceOutputError";
 import type { BodyParams } from "../types";
 import { omit } from "../utils/omit";
@@ -54,9 +50,9 @@ export class OvhCloudTextGenerationTask extends BaseTextGenerationTask {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters
 				? {
-					max_tokens: (params.args.parameters as Record<string, unknown>).max_new_tokens,
-					...omit(params.args.parameters as Record<string, unknown>, "max_new_tokens"),
-				}
+						max_tokens: (params.args.parameters as Record<string, unknown>).max_new_tokens,
+						...omit(params.args.parameters as Record<string, unknown>, "max_new_tokens"),
+				  }
 				: undefined),
 			prompt: params.args.inputs,
 		};
@@ -76,5 +72,4 @@ export class OvhCloudTextGenerationTask extends BaseTextGenerationTask {
 		}
 		throw new InferenceOutputError("Expected OVHcloud text generation response format");
 	}
-
 }
