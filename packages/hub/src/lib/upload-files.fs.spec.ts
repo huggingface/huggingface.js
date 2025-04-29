@@ -41,7 +41,7 @@ describe("uploadFiles", () => {
 			await uploadFiles({
 				accessToken: TEST_ACCESS_TOKEN,
 				repo,
-				files: [pathToFileURL("test-folder")],
+				files: [pathToFileURL(`${tmpDir}/test-folder`)],
 				hubUrl: TEST_HUB_URL,
 			});
 
