@@ -15,13 +15,3 @@ export class CentMLConversationalTask extends BaseConversationalTask {
 		return "openai/v1/chat/completions";
 	}
 }
-
-export class CentMLTextGenerationTask extends BaseTextGenerationTask {
-	constructor() {
-		super("centml", CENTML_API_BASE_URL);
-	}
-
-	override makeRoute(): string {
-		return "openai/v1/completions";
-	}
-}

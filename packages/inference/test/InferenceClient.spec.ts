@@ -1888,12 +1888,6 @@ describe("InferenceClient", () => {
 					status: "live",
 					task: "conversational",
 				},
-				"meta-llama/Llama-3.2-3B": {
-					hfModelId: "meta-llama/Llama-3.2-3B",
-					providerId: "meta-llama/Llama-3.2-3B",
-					status: "live",
-					task: "text-generation",
-				},
 			};
 
 			describe("chat completions", () => {
@@ -1965,54 +1959,6 @@ describe("InferenceClient", () => {
 				});
 			});
 
-			describe("text generation", () => {
-				it("basic text generation", async () => {
-					const res = await client.textGeneration({
-						model: "meta-llama/Llama-3.2-3B",
-						provider: "centml",
-						inputs: "The capital of France is",
-					});
-					expect(res).toMatchObject({
-						generated_text: expect.stringContaining("Paris"),
-					});
-				});
-
-				it("text generation with parameters", async () => {
-					const res = await client.textGeneration({
-						model: "meta-llama/Llama-3.2-3B",
-						provider: "centml",
-						inputs: "Once upon a time",
-						parameters: {
-							max_new_tokens: 50,
-							temperature: 0.7,
-							top_p: 0.9,
-							do_sample: true,
-						},
-					});
-					expect(res).toMatchObject({
-						generated_text: expect.any(String),
-					});
-					expect(res.generated_text.length).toBeGreaterThan(0);
-				});
-
-				it("text generation stream", async () => {
-					const stream = client.textGenerationStream({
-						model: "meta-llama/Llama-3.2-3B",
-						provider: "centml",
-						inputs: "The future of AI is",
-					});
-
-					let fullResponse = "";
-					for await (const chunk of stream) {
-						if (chunk.token?.text) {
-							fullResponse += chunk.token.text;
-						}
-					}
-
-					expect(fullResponse).toBeTruthy();
-					expect(fullResponse.length).toBeGreaterThan(0);
-				});
-			});
 		},
 		TIMEOUT
 	);

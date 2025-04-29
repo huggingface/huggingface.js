@@ -58,7 +58,6 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	centml: {
 		conversational: new CentML.CentMLConversationalTask(),
-		"text-generation": new CentML.CentMLTextGenerationTask(),
 	},
 	cohere: {
 		conversational: new Cohere.CohereConversationalTask(),
