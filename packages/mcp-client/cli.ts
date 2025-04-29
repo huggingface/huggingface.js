@@ -30,6 +30,10 @@ const SERVERS: (ServerConfig|StdioServerParameters)[] = [
 		{
 			url: "https://abidlabs-mcp-tools.hf.space/gradio_api/mcp/sse",
 		}
+	},
+	{
+		command: "npx",
+		args: ["-y","@llmindset/mcp-hfspace","--work-dir",join(homedir(),"temp/hfspace/")]
 	}
 ];
 

@@ -15,6 +15,7 @@ import { ServerConfig } from "./types";
 import { Transport } from "@modelcontextprotocol/sdk/shared/transport";
 import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { ResultFormatter } from "./ResultFormatter.js";
 
 type ToolName = string;
 
@@ -37,9 +38,6 @@ export class McpClient {
 		this.provider = provider;
 		this.model = model;
 	}
-
-
-
 
 	async addMcpServers(servers: (ServerConfig | StdioServerParameters)[]): Promise<void> {
 		await Promise.all(servers.map((s) => this.addMcpServer(s)));
@@ -182,7 +180,7 @@ export class McpClient {
 			const client = this.clients.get(toolName);
 			if (client) {
 				const result = await client.callTool({ name: toolName, arguments: toolArgs, signal: opts.abortSignal });
-				toolMessage.content = (result.content as Array<{ text: string }>)[0].text;
+				toolMessage.content = (ResultFormatter.format(result));
 			} else {
 				toolMessage.content = `Error: No session found for tool: ${toolName}`;
 			}
