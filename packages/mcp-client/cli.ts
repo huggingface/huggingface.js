@@ -50,9 +50,9 @@ async function main() {
 	}
 
 	const agent = new Agent(
-		ENDPOINT_URL
+		BASE_URL
 			? {
-					baseUrl: ENDPOINT_URL,
+					baseUrl: BASE_URL,
 					model: MODEL_ID,
 					apiKey: process.env.HF_TOKEN,
 					servers: SERVERS,
