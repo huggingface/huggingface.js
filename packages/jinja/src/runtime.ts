@@ -118,6 +118,32 @@ export class StringValue extends RuntimeValue<string> {
 			}),
 		],
 		[
+			"startswith",
+			new FunctionValue((args) => {
+				if (args.length === 0) {
+					throw new Error("startswith() requires at least one argument");
+				}
+				const prefix = args[0];
+				if (!(prefix instanceof StringValue)) {
+					throw new Error("startswith() argument must be a string");
+				}
+				return new BooleanValue(this.value.startsWith(prefix.value));
+			}),
+		],
+		[
+			"endswith",
+			new FunctionValue((args) => {
+				if (args.length === 0) {
+					throw new Error("endswith() requires at least one argument");
+				}
+				const suffix = args[0];
+				if (!(suffix instanceof StringValue)) {
+					throw new Error("endswith() argument must be a string");
+				}
+				return new BooleanValue(this.value.endsWith(suffix.value));
+			}),
+		],
+		[
 			"split",
 			// follows Python's `str.split(sep=None, maxsplit=-1)` function behavior
 			// https://docs.python.org/3.13/library/stdtypes.html#str.split
