@@ -2,11 +2,11 @@ import { InferenceClient } from "@huggingface/inference";
 
 const client = new InferenceClient("{{ accessToken }}");
 
-const video = await client.textToVideo({
+const audio = await client.textToSpeech({
     provider: "{{ provider }}",
     model: "{{ model.id }}",
 	inputs: {{ inputs.asObj.inputs }},
 }{% if billTo %}, {
     billTo: "{{ billTo }}",
 }{% endif %});
-// Use the generated video (it's a Blob)
+// Use the generated audio (it's a Blob)
