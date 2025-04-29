@@ -10,16 +10,19 @@ import { uploadFiles } from "./upload-files";
 import { mkdir } from "fs/promises";
 import { writeFile } from "fs/promises";
 import { pathToFileURL } from "url";
+import { tmpdir } from "os";
 
 describe("uploadFiles", () => {
 	it("should upload local folder", async () => {
-		await mkdir("test-folder/sub", { recursive: true });
+		const tmpDir = tmpdir();
 
-		await writeFile("test-folder/sub/file1.txt", "file1");
-		await writeFile("test-folder/sub/file2.txt", "file2");
+		await mkdir(`${tmpDir}/test-folder/sub`, { recursive: true });
 
-		await writeFile("test-folder/file3.txt", "file3");
-		await writeFile("test-folder/file4.txt", "file4");
+		await writeFile(`${tmpDir}/test-folder/sub/file1.txt`, "file1");
+		await writeFile(`${tmpDir}/test-folder/sub/file2.txt`, "file2");
+
+		await writeFile(`${tmpDir}/test-folder/file3.txt`, "file3");
+		await writeFile(`${tmpDir}/test-folder/file4.txt`, "file4");
 
 		const repoName = `${TEST_USER}/TEST-${insecureRandomString()}`;
 		const repo = { type: "model", name: repoName } satisfies RepoId;
