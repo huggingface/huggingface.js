@@ -226,6 +226,17 @@ infer = loaded_model.signatures["serving_default"]
 print(infer(inputs=tf.constant([input_tensor])))`,
 ];
 
+export const dia = (model: ModelData): string[] => [
+	`import soundfile as sf
+from dia.model import Dia
+
+model = Dia.from_pretrained("${model.id}")
+text = "[S1] Dia is an open weights text to dialogue model. [S2] You get full control over scripts and voices. [S1] Wow. Amazing. (laughs) [S2] Try it now on Git hub or Hugging Face."
+output = model.generate(text)
+
+sf.write("simple.mp3", output, 44100)`,
+];
+
 const diffusersDefaultPrompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
 
 const diffusers_default = (model: ModelData) => [
@@ -422,6 +433,24 @@ export const gliner = (model: ModelData): string[] => [
 	`from gliner import GLiNER
 
 model = GLiNER.from_pretrained("${model.id}")`,
+];
+
+export const indextts = (model: ModelData): string[] => [
+	`# Download model
+from huggingface_hub import snapshot_download
+
+snapshot_download(${model.id}, local_dir="checkpoints")
+
+from indextts.infer import IndexTTS
+
+# Ensure config.yaml is present in the checkpoints directory
+tts = IndexTTS(model_dir="checkpoints", cfg_path="checkpoints/config.yaml")
+
+voice = "path/to/your/reference_voice.wav"  # Path to the voice reference audio file
+text = "Hello, how are you?"
+output_path = "output_index.wav"
+
+tts.infer(voice, text, output_path)`,
 ];
 
 export const htrflow = (model: ModelData): string[] => [
@@ -678,6 +707,24 @@ export const paddlenlp = (model: ModelData): string[] => {
 				`model = AutoModel.from_pretrained("${model.id}", from_hf_hub=True)`,
 			].join("\n"),
 		];
+	}
+};
+
+export const perception_encoder = (model: ModelData): string[] => {
+	const clip_model = `# Use PE-Core models as CLIP models
+import core.vision_encoder.pe as pe
+
+model = pe.CLIP.from_config("${model.id}", pretrained=True)`;
+
+	const vision_encoder = `# Use any PE model as a vision encoder
+import core.vision_encoder.pe as pe
+
+model = pe.VisionTransformer.from_config("${model.id}", pretrained=True)`;
+
+	if (model.id.includes("Core")) {
+		return [clip_model, vision_encoder];
+	} else {
+		return [vision_encoder];
 	}
 };
 
@@ -1290,6 +1337,29 @@ export const nemo = (model: ModelData): string[] => {
 
 	return command ?? [`# tag did not correspond to a valid NeMo domain.`];
 };
+
+export const outetts = (model: ModelData): string[] => {
+	// Don’t show this block on GGUF / ONNX mirrors
+	const t = model.tags ?? [];
+	if (t.includes("gguf") || t.includes("onnx")) return [];
+  
+	// v1.0 HF → minimal runnable snippet
+	return [`
+  import outetts
+  
+  enum = outetts.Models("${model.id}".split("/", 1)[1])       # VERSION_1_0_SIZE_1B
+  cfg  = outetts.ModelConfig.auto_config(enum, outetts.Backend.HF)
+  tts  = outetts.Interface(cfg)
+  
+  speaker = tts.load_default_speaker("EN-FEMALE-1-NEUTRAL")
+  tts.generate(
+	  outetts.GenerationConfig(
+		  text="Hello there, how are you doing?",
+		  speaker=speaker,
+	  )
+  ).save("output.wav")
+  `];
+  };
 
 export const pxia = (model: ModelData): string[] => [
 	`from pxia import AutoModel

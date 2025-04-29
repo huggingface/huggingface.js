@@ -1,7 +1,9 @@
 import requests
 
 API_URL = "https://api.together.xyz/v1/chat/completions"
-headers = {"Authorization": "Bearer api_token"}
+headers = {
+    "Authorization": "Bearer api_token",
+}
 
 def query(payload):
     response = requests.post(API_URL, headers=headers, json=payload)
@@ -14,7 +16,7 @@ response = query({
             "content": "What is the capital of France?"
         }
     ],
-    "max_tokens": 500,
+    "max_tokens": 512,
     "model": "<together alias for meta-llama/Llama-3.1-8B-Instruct>"
 })
 

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { Template } from "../src/index";
 import { tokenize } from "../src/lexer";
 import { parse } from "../src/parser";
 import { Environment, Interpreter } from "../src/runtime";
@@ -37,6 +38,7 @@ const TEST_STRINGS = {
 	// Set variables
 	VARIABLES: `{% set x = 'Hello' %}{% set y = 'World' %}{{ x + ' ' + y }}`,
 	VARIABLES_2: `{% set x = 'Hello'.split('el')[-1] %}{{ x }}`,
+	VARIABLES_BLOCK: `{% set x %}Hello!\nMultiline/block set!\n{% endset %}{{ x }}`,
 
 	// Numbers
 	NUMBERS: `|{{ 5 }}|{{ -5 }}|{{ add(3, -1) }}|{{ (3 - 1) + (a - 5) - (a + 5)}}|`,
@@ -90,6 +92,7 @@ const TEST_STRINGS = {
 	FILTER_OPERATOR_10: `|{{ " 1 \n 2 \n 3 \n\n " | indent }}|{{ " 1 \n 2 \n 3 \n\n " | indent(2) }}|{{ " 1 \n 2 \n 3 \n\n " | indent(first=True) }}|{{ " 1 \n 2 \n 3 \n\n " | indent(blank=True) }}|{{ " 1 \n 2 \n 3 \n\n " | indent(4, first=True) }}|`,
 	FILTER_OPERATOR_11: `{{ items | rejectattr('key') | length }}`,
 	FILTER_OPERATOR_12: `{{ messages | rejectattr('role', 'equalto', 'system') | length }}`,
+	FILTER_OPERATOR_13: `{{ tools | string }}`,
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: `|{{ 1 and 2 }}|{{ 1 and 0 }}|{{ 0 and 1 }}|{{ 0 and 0 }}|{{ 1 or 2 }}|{{ 1 or 0 }}|{{ 0 or 1 }}|{{ 0 or 0 }}|{{ not 1 }}|{{ not 0 }}|`,
@@ -133,6 +136,7 @@ const TEST_STRINGS = {
 
 	// Ternary operator
 	TERNARY_OPERATOR: `|{{ 'a' if true else 'b' }}|{{ 'a' if false else 'b' }}|{{ 'a' if 1 + 1 == 2 else 'b' }}|{{ 'a' if 1 + 1 == 3 or 1 * 2 == 3 else 'b' }}|`,
+	TERNARY_SET: `{% set x = 1 if True else 2 %}{{ x }}`,
 
 	// Array literals
 	ARRAY_LITERALS: `{{ [1, true, 'hello', [1, 2, 3, 4], var] | length }}`,
@@ -700,6 +704,19 @@ const TEST_PARSED = {
 		{ value: "[", type: "OpenSquareBracket" },
 		{ value: "-1", type: "NumericLiteral" },
 		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "x", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	VARIABLES_BLOCK: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Set" },
+		{ value: "x", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: `Hello!\nMultiline/block set!\n`, type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endset", type: "EndSet" },
 		{ value: "%}", type: "CloseStatement" },
 		{ value: "{{", type: "OpenExpression" },
 		{ value: "x", type: "Identifier" },
@@ -1682,6 +1699,13 @@ const TEST_PARSED = {
 		{ value: "length", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
+	FILTER_OPERATOR_13: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "tools", type: "Identifier" },
+		{ value: "|", type: "Pipe" },
+		{ value: "string", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: [
@@ -2537,6 +2561,21 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 	],
+	TERNARY_SET: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Set" },
+		{ value: "x", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: "if", type: "If" },
+		{ value: "True", type: "BooleanLiteral" },
+		{ value: "else", type: "Else" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "x", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
 
 	// Array literals
 	ARRAY_LITERALS: [
@@ -3038,6 +3077,7 @@ const TEST_CONTEXT = {
 	// Set variables
 	VARIABLES: {},
 	VARIABLES_2: {},
+	VARIABLES_BLOCK: {},
 
 	// Numbers
 	NUMBERS: {
@@ -3173,6 +3213,9 @@ const TEST_CONTEXT = {
 	FILTER_OPERATOR_12: {
 		messages: [{ role: "system" }, { role: "user" }, { role: "assistant" }],
 	},
+	FILTER_OPERATOR_13: {
+		tools: [{ name: "some_tool", arguments: { some_name: "string" } }],
+	},
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: {},
@@ -3235,6 +3278,7 @@ const TEST_CONTEXT = {
 
 	// Ternary operator
 	TERNARY_OPERATOR: {},
+	TERNARY_SET: {},
 
 	// Array literals
 	ARRAY_LITERALS: { var: true },
@@ -3300,6 +3344,7 @@ const EXPECTED_OUTPUTS = {
 	// Set variables
 	VARIABLES: "Hello World",
 	VARIABLES_2: "lo",
+	VARIABLES_BLOCK: "Hello!\nMultiline/block set!\n",
 
 	// Numbers
 	NUMBERS: "|5|-5|2|-8|",
@@ -3353,6 +3398,7 @@ const EXPECTED_OUTPUTS = {
 	FILTER_OPERATOR_10: `| 1 \n     2 \n     3 \n\n     | 1 \n   2 \n   3 \n\n   |     1 \n     2 \n     3 \n\n     | 1 \n     2 \n     3 \n    \n     |     1 \n     2 \n     3 \n\n     |`,
 	FILTER_OPERATOR_11: `3`,
 	FILTER_OPERATOR_12: `2`,
+	FILTER_OPERATOR_13: `[{"name": "some_tool", "arguments": {"some_name": "string"}}]`,
 
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: `|2|0|0|0|1|1|1|0|false|true|`,
@@ -3396,6 +3442,7 @@ const EXPECTED_OUTPUTS = {
 
 	// Ternary operator
 	TERNARY_OPERATOR: `|a|b|a|b|`,
+	TERNARY_SET: `1`,
 
 	// Array literals
 	ARRAY_LITERALS: `5`,
@@ -3470,6 +3517,25 @@ describe("Templates", () => {
 					const interpreter = new Interpreter(env);
 					const result = interpreter.run(ast);
 					expect(result.value).toEqual(EXPECTED_OUTPUTS[name]);
+				});
+			}
+		});
+	});
+
+	describe("Formatting", () => {
+		describe("formatting shouldn't change output", () => {
+			for (const [name, text] of Object.entries(TEST_STRINGS)) {
+				it(`formatting ${name}`, () => {
+					const context = TEST_CONTEXT[name];
+
+					const template = new Template(text);
+					const unformattedTemplateOutput = template.render(context);
+
+					const formatted = template.format();
+					const formattedTemplate = new Template(formatted);
+					const formattedTemplateOutput = formattedTemplate.render(context);
+
+					expect(formattedTemplateOutput).toEqual(unformattedTemplateOutput);
 				});
 			}
 		});

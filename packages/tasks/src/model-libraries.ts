@@ -230,6 +230,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"scin_dataset_precomputed_embeddings.npz" OR path:"saved_model.pb"`,
 	},
+	"dia-tts": {
+		prettyLabel: "Dia",
+		repoName: "Dia",
+		repoUrl: "https://github.com/nari-labs/dia",
+		snippets: snippets.dia,
+		filter: false,
+	},
 	diffree: {
 		prettyLabel: "Diffree",
 		repoName: "Diffree",
@@ -418,6 +425,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "IMS-Toucan",
 		repoUrl: "https://github.com/DigitalPhonetics/IMS-Toucan",
 		countDownloads: `path:"embedding_gan.pt" OR path:"Vocoder.pt" OR path:"ToucanTTS.pt"`,
+	},
+	"index-tts": {
+		prettyLabel: "IndexTTS",
+		repoName: "IndexTTS",
+		repoUrl: "https://github.com/index-tts/index-tts",
+		snippets: snippets.indextts,
+		filter: false,
 	},
 	"infinite-you": {
 		prettyLabel: "InfiniteYou",
@@ -616,6 +630,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"Open_Sora_v2.safetensors"`,
 	},
+	outetts: {
+		prettyLabel: "OuteTTS",
+		repoName: "OuteTTS",
+		repoUrl: "https://github.com/edwko/OuteTTS",
+		snippets: snippets.outetts,
+		filter: false,
+	},
 	paddlenlp: {
 		prettyLabel: "paddlenlp",
 		repoName: "PaddleNLP",
@@ -632,6 +653,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.peft,
 		filter: true,
 		countDownloads: `path:"adapter_config.json"`,
+	},
+	"perception-encoder": {
+		prettyLabel: "PerceptionEncoder",
+		repoName: "PerceptionModels",
+		repoUrl: "https://github.com/facebookresearch/perception_models",
+		filter: false,
+		snippets: snippets.perception_encoder,
+		countDownloads: `path_extension:"pt"`,
 	},
 	pxia: {
 		prettyLabel: "pxia",

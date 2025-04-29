@@ -8,6 +8,8 @@ const output = await client.{{ methodName }}({
 	data,
 	model: "{{ model.id }}",
 	provider: "{{ provider }}",
-});
+}{% if billTo %}, {
+	billTo: "{{ billTo }}",
+}{% endif %});
 
 console.log(output);

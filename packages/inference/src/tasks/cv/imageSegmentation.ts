@@ -16,7 +16,7 @@ export async function imageSegmentation(
 ): Promise<ImageSegmentationOutput> {
 	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "image-segmentation");
 	const payload = preparePayload(args);
-	const { data: res } = await innerRequest<ImageSegmentationOutput>(payload, {
+	const { data: res } = await innerRequest<ImageSegmentationOutput>(payload, providerHelper, {
 		...options,
 		task: "image-segmentation",
 	});

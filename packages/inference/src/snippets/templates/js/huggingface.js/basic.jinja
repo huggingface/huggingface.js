@@ -6,6 +6,8 @@ const output = await client.{{ methodName }}({
 	model: "{{ model.id }}",
 	inputs: {{ inputs.asObj.inputs }},
 	provider: "{{ provider }}",
-});
+}{% if billTo %}, {
+	billTo: "{{ billTo }}",
+}{% endif %});
 
 console.log(output);

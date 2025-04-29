@@ -1,4 +1,5 @@
 import type { TextGenerationInput } from "@huggingface/tasks";
+import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
 import { innerStreamingRequest } from "../../utils/request";
 
@@ -89,7 +90,8 @@ export async function* textGenerationStream(
 	args: BaseArgs & TextGenerationInput,
 	options?: Options
 ): AsyncGenerator<TextGenerationStreamOutput> {
-	yield* innerStreamingRequest<TextGenerationStreamOutput>(args, {
+	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "text-generation");
+	yield* innerStreamingRequest<TextGenerationStreamOutput>(args, providerHelper, {
 		...options,
 		task: "text-generation",
 	});

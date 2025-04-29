@@ -57,7 +57,7 @@ export type LocalApp = {
 			/**
 			 * And if not (mostly llama.cpp), snippet to copy/paste in your terminal
 			 * Support the placeholder {{GGUF_FILE}} that will be replaced by the gguf file path or the list of available files.
-			 * Support the placeholder {{OLLAMA_TAG}} that will be replaced by the list of available quant tags or will be removed if there are no multiple quant files in a same repo.
+			 * Support the placeholder {{QUANT_TAG}} that will be replaced by the list of available quant tags or will be removed if there are no multiple quant files in a same repo.
 			 */
 			snippet: (model: ModelData, filepath?: string) => string | string[] | LocalAppSnippet | LocalAppSnippet[];
 	  }
@@ -94,14 +94,20 @@ function isMlxModel(model: ModelData) {
 	return model.tags.includes("mlx");
 }
 
-const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
-	let tagName = "";
-	if (filepath) {
-		const quantLabel = parseGGUFQuantLabel(filepath);
-		tagName = quantLabel ? `:${quantLabel}` : "";
+function getQuantTag(filepath?: string): string {
+	const defaultTag = ":{{QUANT_TAG}}";
+
+	if (!filepath) {
+		return defaultTag;
 	}
+
+	const quantLabel = parseGGUFQuantLabel(filepath);
+	return quantLabel ? `:${quantLabel}` : defaultTag;
+}
+
+const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const command = (binary: string) => {
-		const snippet = ["# Load and run the model:", `${binary} -hf ${model.id}${tagName}`];
+		const snippet = ["# Load and run the model:", `${binary} -hf ${model.id}${getQuantTag(filepath)}`];
 		if (!model.tags.includes("conversational")) {
 			// for non-conversational models, add a prompt
 			snippet[snippet.length - 1] += " \\";
@@ -138,13 +144,7 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 };
 
 const snippetNodeLlamaCppCli = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
-	let tagName = "{{OLLAMA_TAG}}";
-
-	if (filepath) {
-		const quantLabel = parseGGUFQuantLabel(filepath);
-		tagName = quantLabel ? `:${quantLabel}` : tagName;
-	}
-
+	const tagName = getQuantTag(filepath);
 	return [
 		{
 			title: "Chat with the model",
@@ -158,12 +158,7 @@ const snippetNodeLlamaCppCli = (model: ModelData, filepath?: string): LocalAppSn
 };
 
 const snippetOllama = (model: ModelData, filepath?: string): string => {
-	if (filepath) {
-		const quantLabel = parseGGUFQuantLabel(filepath);
-		const ollamatag = quantLabel ? `:${quantLabel}` : "";
-		return `ollama run hf.co/${model.id}${ollamatag}`;
-	}
-	return `ollama run hf.co/${model.id}{{OLLAMA_TAG}}`;
+	return `ollama run hf.co/${model.id}${getQuantTag(filepath)}`;
 };
 
 const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] => {

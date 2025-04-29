@@ -2,7 +2,9 @@ import json
 import requests
 
 API_URL = "https://api.fireworks.ai/inference/v1/chat/completions"
-headers = {"Authorization": "Bearer api_token"}
+headers = {
+    "Authorization": "Bearer api_token",
+}
 
 def query(payload):
     response = requests.post(API_URL, headers=headers, json=payload, stream=True)
@@ -31,7 +33,7 @@ chunks = query({
             ]
         }
     ],
-    "max_tokens": 500,
+    "max_tokens": 512,
     "model": "<fireworks-ai alias for meta-llama/Llama-3.2-11B-Vision-Instruct>",
     "stream": True,
 })

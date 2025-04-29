@@ -5,11 +5,8 @@ const client = new OpenAI({
 	apiKey: "api_token",
 });
 
-let out = "";
-
 const stream = await client.chat.completions.create({
-    provider: "fireworks-ai",
-    model: "meta-llama/Llama-3.2-11B-Vision-Instruct",
+    model: "<fireworks-ai alias for meta-llama/Llama-3.2-11B-Vision-Instruct>",
     messages: [
         {
             role: "user",
@@ -27,13 +24,10 @@ const stream = await client.chat.completions.create({
             ],
         },
     ],
-    max_tokens: 500,
+    max_tokens: 512,
+    stream: true,
 });
 
 for await (const chunk of stream) {
-	if (chunk.choices && chunk.choices.length > 0) {
-		const newContent = chunk.choices[0].delta.content;
-		out += newContent;
-		console.log(newContent);
-	}  
+    process.stdout.write(chunk.choices[0]?.delta?.content || "");
 }
