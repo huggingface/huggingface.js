@@ -435,6 +435,24 @@ export const gliner = (model: ModelData): string[] => [
 model = GLiNER.from_pretrained("${model.id}")`,
 ];
 
+export const indextts = (model: ModelData): string[] => [
+	`# Download model
+from huggingface_hub import snapshot_download
+
+snapshot_download(${model.id}, local_dir="checkpoints")
+
+from indextts.infer import IndexTTS
+
+# Ensure config.yaml is present in the checkpoints directory
+tts = IndexTTS(model_dir="checkpoints", cfg_path="checkpoints/config.yaml")
+
+voice = "path/to/your/reference_voice.wav"  # Path to the voice reference audio file
+text = "Hello, how are you?"
+output_path = "output_index.wav"
+
+tts.infer(voice, text, output_path)`,
+];
+
 export const htrflow = (model: ModelData): string[] => [
 	`# CLI usage
 # see docs: https://ai-riksarkivet.github.io/htrflow/latest/getting_started/quick_start.html
@@ -1319,6 +1337,29 @@ export const nemo = (model: ModelData): string[] => {
 
 	return command ?? [`# tag did not correspond to a valid NeMo domain.`];
 };
+
+export const outetts = (model: ModelData): string[] => {
+	// Don’t show this block on GGUF / ONNX mirrors
+	const t = model.tags ?? [];
+	if (t.includes("gguf") || t.includes("onnx")) return [];
+  
+	// v1.0 HF → minimal runnable snippet
+	return [`
+  import outetts
+  
+  enum = outetts.Models("${model.id}".split("/", 1)[1])       # VERSION_1_0_SIZE_1B
+  cfg  = outetts.ModelConfig.auto_config(enum, outetts.Backend.HF)
+  tts  = outetts.Interface(cfg)
+  
+  speaker = tts.load_default_speaker("EN-FEMALE-1-NEUTRAL")
+  tts.generate(
+	  outetts.GenerationConfig(
+		  text="Hello there, how are you doing?",
+		  speaker=speaker,
+	  )
+  ).save("output.wav")
+  `];
+  };
 
 export const pxia = (model: ModelData): string[] => [
 	`from pxia import AutoModel
