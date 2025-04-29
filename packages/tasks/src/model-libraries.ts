@@ -623,6 +623,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"Open_Sora_v2.safetensors"`,
 	},
+	outetts: {
+		prettyLabel: "OuteTTS",
+		repoName: "OuteTTS",
+		repoUrl: "https://github.com/edwko/OuteTTS",
+		snippets: snippets.outetts,
+		filter: false,
+	},
 	paddlenlp: {
 		prettyLabel: "paddlenlp",
 		repoName: "PaddleNLP",
