@@ -12,3 +12,4 @@ packages:
   - "packages/jinja"
   - "packages/space-header"
   - "packages/ollama-utils"
+  - "packages/mcp-client"

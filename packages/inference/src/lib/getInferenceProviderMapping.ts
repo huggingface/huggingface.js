@@ -8,7 +8,7 @@ import { typedInclude } from "../utils/typedInclude";
 export const inferenceProviderMappingCache = new Map<ModelId, InferenceProviderMapping>();
 
 export type InferenceProviderMapping = Partial<
-	Record<InferenceProvider, Omit<InferenceProviderModelMapping, "hfModelId" | "adapterWeightsPath">>
+	Record<InferenceProvider, Omit<InferenceProviderModelMapping, "hfModelId">>
 >;
 
 export interface InferenceProviderModelMapping {
@@ -73,22 +73,6 @@ export async function getInferenceProviderMapping(
 			console.warn(
 				`Model ${params.modelId} is in staging mode for provider ${params.provider}. Meant for test purposes only.`
 			);
-		}
-		if (providerMapping.adapter === "lora") {
-			const treeResp = await (options?.fetch ?? fetch)(`${HF_HUB_URL}/api/models/${params.modelId}/tree/main`);
-			if (!treeResp.ok) {
-				throw new Error(`Unable to fetch the model tree for ${params.modelId}.`);
-			}
-			const tree: Array<{ type: "file" | "directory"; path: string }> = await treeResp.json();
-			const adapterWeightsPath = tree.find(({ type, path }) => type === "file" && path.endsWith(".safetensors"))?.path;
-			if (!adapterWeightsPath) {
-				throw new Error(`No .safetensors file found in the model tree for ${params.modelId}.`);
-			}
-			return {
-				...providerMapping,
-				hfModelId: params.modelId,
-				adapterWeightsPath,
-			};
 		}
 		return { ...providerMapping, hfModelId: params.modelId };
 	}

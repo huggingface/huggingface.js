@@ -2,7 +2,7 @@ import { InferenceClient } from "@huggingface/inference";
 
 const client = new InferenceClient("api_token");
 
-const image = await client.textToVideo({
+const video = await client.textToVideo({
     provider: "fal-ai",
     model: "tencent/HunyuanVideo",
 	inputs: "A young man walking on the street",
