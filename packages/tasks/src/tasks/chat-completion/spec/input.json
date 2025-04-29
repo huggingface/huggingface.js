@@ -275,9 +275,9 @@
 		},
 		"ChatCompletionInputFunctionDefinition": {
 			"type": "object",
-			"required": ["name", "arguments"],
+			"required": ["name", "parameters"],
 			"properties": {
-				"arguments": {},
+				"parameters": {},
 				"description": {
 					"type": "string",
 					"nullable": true

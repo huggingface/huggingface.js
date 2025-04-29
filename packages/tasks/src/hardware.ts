@@ -152,6 +152,14 @@ export const SKUS = {
 				tflops: 43.94,
 				memory: [16],
 			},
+			"RTX 5060 Ti": {
+				tflops: 23.7, // source https://www.techpowerup.com/gpu-specs/geforce-rtx-5060-ti.c4246
+				memory: [16, 8],
+			},
+			"RTX 5060": {
+				tflops: 19.18, // source https://www.techpowerup.com/gpu-specs/geforce-rtx-5060.c4219
+				memory: [8],
+			},
 			"RTX 4090": {
 				tflops: 82.58,
 				memory: [24],
@@ -204,9 +212,25 @@ export const SKUS = {
 				tflops: 22.06,
 				memory: [8, 16],
 			},
-			"RTX 4060 Mobile": {
+			"RTX 4090 Laptop": {
+				tflops: 32.98,
+				memory: [16],
+			},
+			"RTX 4080 Laptop": {
+				tflops: 24.72,
+				memory: [12],
+			},
+			"RTX 4070 Laptop": {
+				tflops: 15.62,
+				memory: [8],
+			},
+			"RTX 4060 Laptop": {
 				tflops: 11.61,
 				memory: [8],
+			},
+			"RTX 4050 Laptop": {
+				tflops: 8.9,
+				memory: [6],
 			},
 			"RTX 3090": {
 				tflops: 35.58,
@@ -433,6 +457,18 @@ export const SKUS = {
 			"RX 6700": {
 				tflops: 22.58,
 				memory: [10],
+			},
+			"RX 6650 XT": {
+				tflops: 21.59,
+				memory: [8],
+			},
+			"RX 6600 XT": {
+				tflops: 21.21,
+				memory: [8],
+			},
+			"RX 6600": {
+				tflops: 17.86,
+				memory: [8],
 			},
 			"Radeon Pro VII": {
 				tflops: 26.11,

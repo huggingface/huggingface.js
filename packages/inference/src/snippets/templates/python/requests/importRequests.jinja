@@ -7,4 +7,9 @@ import json
 import requests
 
 API_URL = "{{ fullUrl }}"
-headers = {"Authorization": "{{ authorizationHeader }}"}
+headers = {
+    "Authorization": "{{ authorizationHeader }}",
+{% if billTo %}
+    "X-HF-Bill-To": "{{ billTo }}"
+{% endif %}
+}

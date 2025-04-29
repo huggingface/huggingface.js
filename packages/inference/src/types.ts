@@ -1,4 +1,5 @@
 import type { ChatCompletionInput, PipelineType } from "@huggingface/tasks";
+import type { InferenceProviderModelMapping } from "./lib/getInferenceProviderMapping";
 
 /**
  * HF model id, like "meta-llama/Llama-3.3-70B-Instruct"
@@ -41,11 +42,14 @@ export const INFERENCE_PROVIDERS = [
 	"cerebras",
 	"cohere",
 	"fal-ai",
+	"featherless-ai",
 	"fireworks-ai",
+	"groq",
 	"hf-inference",
 	"hyperbolic",
 	"nebius",
 	"novita",
+	"nscale",
 	"openai",
 	"replicate",
 	"sambanova",
@@ -117,5 +121,6 @@ export interface UrlParams {
 export interface BodyParams<T extends Record<string, unknown> = Record<string, unknown>> {
 	args: T;
 	model: string;
+	mapping?: InferenceProviderModelMapping | undefined;
 	task?: InferenceTask;
 }

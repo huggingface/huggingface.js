@@ -8,10 +8,13 @@ import {
 } from "@huggingface/tasks";
 import type { PipelineType, WidgetType } from "@huggingface/tasks/src/pipelines.js";
 import type { ChatCompletionInputMessage, GenerationParameters } from "@huggingface/tasks/src/tasks/index.js";
+import type { InferenceProviderModelMapping } from "../lib/getInferenceProviderMapping";
+import { getProviderHelper } from "../lib/getProviderHelper";
 import { makeRequestOptionsFromResolvedModel } from "../lib/makeRequestOptions";
 import type { InferenceProvider, InferenceTask, RequestArgs } from "../types";
 import { templates } from "./templates.exported";
-import { getProviderHelper } from "../lib/getProviderHelper";
+
+export type InferenceSnippetOptions = { streaming?: boolean; billTo?: string } & Record<string, unknown>;
 
 const PYTHON_CLIENTS = ["huggingface_hub", "fal_client", "requests", "openai"] as const;
 const JS_CLIENTS = ["fetch", "huggingface.js", "openai"] as const;
@@ -36,6 +39,7 @@ interface TemplateParams {
 	model?: ModelDataMinimal;
 	provider?: InferenceProvider;
 	providerModelId?: string;
+	billTo?: string;
 	methodName?: string; // specific to snippetBasic
 	importBase64?: boolean; // specific to snippetImportRequests
 	importJson?: boolean; // specific to snippetImportRequests
@@ -108,6 +112,7 @@ const HF_JS_METHODS: Partial<Record<WidgetType, string>> = {
 	"text-generation": "textGeneration",
 	"text2text-generation": "textGeneration",
 	"token-classification": "tokenClassification",
+	"text-to-speech": "textToSpeech",
 	translation: "translation",
 };
 
@@ -117,9 +122,10 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		model: ModelDataMinimal,
 		accessToken: string,
 		provider: InferenceProvider,
-		providerModelId?: string,
-		opts?: Record<string, unknown>
+		inferenceProviderMapping?: InferenceProviderModelMapping,
+		opts?: InferenceSnippetOptions
 	): InferenceSnippet[] => {
+		const providerModelId = inferenceProviderMapping?.providerId ?? model.id;
 		/// Hacky: hard-code conversational templates here
 		let task = model.pipeline_tag as InferenceTask;
 		if (
@@ -141,15 +147,17 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		/// Prepare inputs + make request
 		const inputs = inputPreparationFn ? inputPreparationFn(model, opts) : { inputs: getModelInputSnippet(model) };
 		const request = makeRequestOptionsFromResolvedModel(
-			providerModelId ?? model.id,
+			providerModelId,
 			providerHelper,
 			{
-				accessToken: accessToken,
-				provider: provider,
+				accessToken,
+				provider,
 				...inputs,
 			} as RequestArgs,
+			inferenceProviderMapping,
 			{
-				task: task,
+				task,
+				billTo: opts?.billTo,
 			}
 		);
 
@@ -188,6 +196,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 			model,
 			provider,
 			providerModelId: providerModelId ?? model.id,
+			billTo: opts?.billTo,
 		};
 
 		/// Iterate over clients => check if a snippet exists => generate
@@ -275,8 +284,8 @@ const snippets: Partial<
 			model: ModelDataMinimal,
 			accessToken: string,
 			provider: InferenceProvider,
-			providerModelId?: string,
-			opts?: Record<string, unknown>
+			inferenceProviderMapping?: InferenceProviderModelMapping,
+			opts?: InferenceSnippetOptions
 		) => InferenceSnippet[]
 	>
 > = {
@@ -302,7 +311,7 @@ const snippets: Partial<
 	"text-generation": snippetGenerator("basic"),
 	"text-to-audio": snippetGenerator("textToAudio"),
 	"text-to-image": snippetGenerator("textToImage"),
-	"text-to-speech": snippetGenerator("textToAudio"),
+	"text-to-speech": snippetGenerator("textToSpeech"),
 	"text-to-video": snippetGenerator("textToVideo"),
 	"text2text-generation": snippetGenerator("basic"),
 	"token-classification": snippetGenerator("basic"),
@@ -315,11 +324,11 @@ export function getInferenceSnippets(
 	model: ModelDataMinimal,
 	accessToken: string,
 	provider: InferenceProvider,
-	providerModelId?: string,
+	inferenceProviderMapping?: InferenceProviderModelMapping,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
 	return model.pipeline_tag && model.pipeline_tag in snippets
-		? snippets[model.pipeline_tag]?.(model, accessToken, provider, providerModelId, opts) ?? []
+		? snippets[model.pipeline_tag]?.(model, accessToken, provider, inferenceProviderMapping, opts) ?? []
 		: [];
 }
 
