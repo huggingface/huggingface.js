@@ -7,9 +7,20 @@ import { createRepo } from "./create-repo";
 import { deleteRepo } from "./delete-repo";
 import { downloadFile } from "./download-file";
 import { uploadFiles } from "./upload-files";
+import { mkdir } from "fs/promises";
+import { writeFile } from "fs/promises";
+import { pathToFileURL } from "url";
 
 describe("uploadFiles", () => {
-	it("should upload files", async () => {
+	it("should upload local folder", async () => {
+		await mkdir("test-folder/sub", { recursive: true });
+
+		await writeFile("test-folder/sub/file1.txt", "file1");
+		await writeFile("test-folder/sub/file2.txt", "file2");
+
+		await writeFile("test-folder/file3.txt", "file3");
+		await writeFile("test-folder/file4.txt", "file4");
+
 		const repoName = `${TEST_USER}/TEST-${insecureRandomString()}`;
 		const repo = { type: "model", name: repoName } satisfies RepoId;
 
@@ -27,16 +38,13 @@ describe("uploadFiles", () => {
 			await uploadFiles({
 				accessToken: TEST_ACCESS_TOKEN,
 				repo,
-				files: [
-					{ content: new Blob(["file1"]), path: "file1" },
-					new URL("https://huggingface.co/gpt2/raw/main/config.json"),
-				],
+				files: [pathToFileURL("test-folder")],
 				hubUrl: TEST_HUB_URL,
 			});
 
 			let content = await downloadFile({
 				repo,
-				path: "file1",
+				path: "test-folder/sub/file1.txt",
 				hubUrl: TEST_HUB_URL,
 			});
 
@@ -44,46 +52,11 @@ describe("uploadFiles", () => {
 
 			content = await downloadFile({
 				repo,
-				path: "config.json",
+				path: "test-folder/file3.txt",
 				hubUrl: TEST_HUB_URL,
 			});
 
-			assert.strictEqual(
-				(await content?.text())?.trim(),
-				`
-{
-  "activation_function": "gelu_new",
-  "architectures": [
-    "GPT2LMHeadModel"
-  ],
-  "attn_pdrop": 0.1,
-  "bos_token_id": 50256,
-  "embd_pdrop": 0.1,
-  "eos_token_id": 50256,
-  "initializer_range": 0.02,
-  "layer_norm_epsilon": 1e-05,
-  "model_type": "gpt2",
-  "n_ctx": 1024,
-  "n_embd": 768,
-  "n_head": 12,
-  "n_layer": 12,
-  "n_positions": 1024,
-  "resid_pdrop": 0.1,
-  "summary_activation": null,
-  "summary_first_dropout": 0.1,
-  "summary_proj_to_labels": true,
-  "summary_type": "cls_index",
-  "summary_use_proj": true,
-  "task_specific_params": {
-    "text-generation": {
-      "do_sample": true,
-      "max_length": 50
-    }
-  },
-  "vocab_size": 50257
-}
-      `.trim()
-			);
+			assert.strictEqual(await content?.text(), `file3`);
 		} finally {
 			await deleteRepo({
 				repo,
