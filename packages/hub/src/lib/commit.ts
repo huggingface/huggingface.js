@@ -162,7 +162,7 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 						return { ...operation, content: operation.content };
 					}
 
-					const lazyBlobs = await createBlobs(operation.content, {
+					const lazyBlobs = await createBlobs(operation.content, operation.path, {
 						fetch: params.fetch,
 						maxFolderDepth: params.maxFolderDepth,
 					});
@@ -171,7 +171,8 @@ export async function* commitIter(params: CommitParams): AsyncGenerator<CommitPr
 
 					return lazyBlobs.map((blob) => ({
 						...operation,
-						content: blob,
+						content: blob.blob,
+						path: blob.path,
 					}));
 				})
 			)

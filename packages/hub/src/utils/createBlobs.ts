@@ -12,9 +12,14 @@ import { isFrontend } from "./isFrontend";
  * From the frontend:
  *   - support http resources with absolute or relative URLs
  */
-export async function createBlobs(url: URL, opts?: { fetch?: typeof fetch; maxFolderDepth?: number }): Promise<Blob[]> {
+export async function createBlobs(
+	url: URL,
+	destPath: string,
+	opts?: { fetch?: typeof fetch; maxFolderDepth?: number }
+): Promise<Array<{ path: string; blob: Blob }>> {
 	if (url.protocol === "http:" || url.protocol === "https:") {
-		return [await WebBlob.create(url, { fetch: opts?.fetch })];
+		const blob = await WebBlob.create(url, { fetch: opts?.fetch });
+		return [{ path: destPath, blob }];
 	}
 
 	if (isFrontend) {
@@ -26,7 +31,17 @@ export async function createBlobs(url: URL, opts?: { fetch?: typeof fetch; maxFo
 		const { subPaths } = await import("./sub-paths");
 		const paths = await subPaths(url, opts?.maxFolderDepth);
 
-		return Promise.all(paths.map((path) => FileBlob.create(path)));
+		if (paths.length === 1 && paths[0].relativePath === ".") {
+			const blob = await FileBlob.create(url);
+			return [{ path: destPath, blob }];
+		}
+
+		return Promise.all(
+			paths.map(async (path) => ({
+				path: `${destPath}/${path.relativePath}`.replace(/\/[.]$/, "").replaceAll("//", "/"),
+				blob: await FileBlob.create(new URL(path.path)),
+			}))
+		);
 	}
 
 	throw new TypeError(`Unsupported URL protocol "${url.protocol}"`);
