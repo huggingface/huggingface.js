@@ -701,6 +701,122 @@ const TEST_CUSTOM_TEMPLATES = Object.freeze({
 		},
 		target: `<|im_start|>system\nYou are a helpful assistant.<|im_end|>\n\n<|im_start|>user\n[BEGIN OF TASK INSTRUCTION]\nYou are a tool calling assistant. In order to complete the user\'s request, you need to select one or more appropriate tools from the following tools and fill in the correct values for the tool parameters. Your specific tasks are:\n1. Make one or more function/tool calls to meet the request based on the question.\n2. If none of the function can be used, point it out and refuse to answer.\n3. If the given question lacks the parameters required by the function, also point it out.\n\nThe following are characters that may interact with you\n1. user: Provides query or additional information.\n2. tool: Returns the results of the tool calling.\n\n[END OF TASK INSTRUCTION]\n\n[BEGIN OF AVAILABLE_TOOLS]\n[{\"type\": \"function\", \"function\": {\"name\": \"get_current_temperature\", \"description\": \"Get the current temperature at a location.\", \"parameters\": {\"type\": \"object\", \"properties\": {\"location\": {\"type\": \"string\", \"description\": \"The location to get the temperature for, in the format \\"City, Country\\"\"}, \"unit\": {\"type\": \"string\", \"enum\": [\"celsius\", \"fahrenheit\"], \"description\": \"The unit to return the temperature in.\"}}, \"required\": [\"location\", \"unit\"]}, \"return\": {\"type\": \"number\", \"description\": \"The current temperature at the specified location in the specified units, as a float.\"}}}, {\"type\": \"function\", \"function\": {\"name\": \"get_current_wind_speed\", \"description\": \"Get the current wind speed in km/h at a given location.\", \"parameters\": {\"type\": \"object\", \"properties\": {\"location\": {\"type\": \"string\", \"description\": \"The location to get the temperature for, in the format \\"City, Country\\"\"}}, \"required\": [\"location\"]}, \"return\": {\"type\": \"number\", \"description\": \"The current wind speed at the given location in km/h, as a float.\"}}}]\n[END OF AVAILABLE_TOOLS]\n\n\n[BEGIN OF TASK INSTRUCTION]\nThe output MUST strictly adhere to the following JSON format, and NO other text MUST be included.\nThe example format is as follows. Please make sure the parameter type is correct. If no function call is needed, please directly output an empty list \'[]\'\n\`\`\`\n[\n    {"name": "func_name1", "arguments": {"argument1": "value1", "argument2": "value2"}},\n    ... (more tool calls as required)\n]\n\`\`\`\n\n[END OF TASK INSTRUCTION]\n\n<|im_end|>\n<|im_start|>user\nWhat is current speed of wind?<|im_end|>\n<|im_start|>assistant\n`,
 	},
+	"Qwen/Qwen2.5-7B-Instruct": {
+		chat_template:
+			"{%- if tools %}\n    {{- '<|im_start|>system\\n' }}\n    {%- if messages[0]['role'] == 'system' %}\n        {{- messages[0]['content'] }}\n    {%- else %}\n        {{- 'You are Qwen, created by Alibaba Cloud. You are a helpful assistant.' }}\n    {%- endif %}\n    {{- \"\\n\\n# Tools\\n\\nYou may call one or more functions to assist with the user query.\\n\\nYou are provided with function signatures within <tools></tools> XML tags:\\n<tools>\" }}\n    {%- for tool in tools %}\n        {{- \"\\n\" }}\n        {{- tool | tojson }}\n    {%- endfor %}\n    {{- \"\\n</tools>\\n\\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\\n<tool_call>\\n{\\\"name\\\": <function-name>, \\\"arguments\\\": <args-json-object>}\\n</tool_call><|im_end|>\\n\" }}\n{%- else %}\n    {%- if messages[0]['role'] == 'system' %}\n        {{- '<|im_start|>system\\n' + messages[0]['content'] + '<|im_end|>\\n' }}\n    {%- else %}\n        {{- '<|im_start|>system\\nYou are Qwen, created by Alibaba Cloud. You are a helpful assistant.<|im_end|>\\n' }}\n    {%- endif %}\n{%- endif %}\n{%- for message in messages %}\n    {%- if (message.role == \"user\") or (message.role == \"system\" and not loop.first) or (message.role == \"assistant\" and not message.tool_calls) %}\n        {{- '<|im_start|>' + message.role + '\\n' + message.content + '<|im_end|>' + '\\n' }}\n    {%- elif message.role == \"assistant\" %}\n        {{- '<|im_start|>' + message.role }}\n        {%- if message.content %}\n            {{- '\\n' + message.content }}\n        {%- endif %}\n        {%- for tool_call in message.tool_calls %}\n            {%- if tool_call.function is defined %}\n                {%- set tool_call = tool_call.function %}\n            {%- endif %}\n            {{- '\\n<tool_call>\\n{\"name\": \"' }}\n            {{- tool_call.name }}\n            {{- '\", \"arguments\": ' }}\n            {{- tool_call.arguments | tojson }}\n            {{- '}\\n</tool_call>' }}\n        {%- endfor %}\n        {{- '<|im_end|>\\n' }}\n    {%- elif message.role == \"tool\" %}\n        {%- if (loop.index0 == 0) or (messages[loop.index0 - 1].role != \"tool\") %}\n            {{- '<|im_start|>user' }}\n        {%- endif %}\n        {{- '\\n<tool_response>\\n' }}\n        {{- message.content }}\n        {{- '\\n</tool_response>' }}\n        {%- if loop.last or (messages[loop.index0 + 1].role != \"tool\") %}\n            {{- '<|im_end|>\\n' }}\n        {%- endif %}\n    {%- endif %}\n{%- endfor %}\n{%- if add_generation_prompt %}\n    {{- '<|im_start|>assistant\\n' }}\n{%- endif %}\n",
+		data: {
+			// Example adapted from https://qwen.readthedocs.io/en/latest/framework/function_call.html
+			messages: [
+				{
+					role: "system",
+					content: "You are Qwen, created by Alibaba Cloud. You are a helpful assistant.\n\nCurrent Date: 2024-09-30",
+				},
+				{ role: "user", content: "What's the temperature in San Francisco now? How about tomorrow?" },
+				{
+					role: "assistant",
+					content: "",
+					tool_calls: [
+						{
+							type: "function",
+							function: { name: "get_current_temperature", arguments: { location: "San Francisco, CA, USA" } },
+						},
+						{
+							type: "function",
+							function: {
+								name: "get_temperature_date",
+								arguments: { location: "San Francisco, CA, USA", date: "2024-10-01" },
+							},
+						},
+					],
+				},
+				{
+					role: "tool",
+					name: "get_current_temperature",
+					content: '{"temperature": 26.1, "location": "San Francisco, CA, USA", "unit": "celsius"}',
+				},
+				{
+					role: "tool",
+					name: "get_temperature_date",
+					content:
+						'{"temperature": 25.9, "location": "San Francisco, CA, USA", "date": "2024-10-01", "unit": "celsius"}',
+				},
+			],
+			tools: [
+				{
+					type: "function",
+					function: {
+						name: "get_current_temperature",
+						description: "Get current temperature at a location.",
+						parameters: {
+							type: "object",
+							properties: {
+								location: {
+									type: "string",
+									description: 'The location to get the temperature for, in the format "City, State, Country".',
+								},
+								unit: {
+									type: "string",
+									enum: ["celsius", "fahrenheit"],
+									description: 'The unit to return the temperature in. Defaults to "celsius".',
+								},
+							},
+							required: ["location"],
+						},
+					},
+				},
+				{
+					type: "function",
+					function: {
+						name: "get_temperature_date",
+						description: "Get temperature at a location and date.",
+						parameters: {
+							type: "object",
+							properties: {
+								location: {
+									type: "string",
+									description: 'The location to get the temperature for, in the format "City, State, Country".',
+								},
+								date: {
+									type: "string",
+									description: 'The date to get the temperature for, in the format "Year-Month-Day".',
+								},
+								unit: {
+									type: "string",
+									enum: ["celsius", "fahrenheit"],
+									description: 'The unit to return the temperature in. Defaults to "celsius".',
+								},
+							},
+							required: ["location", "date"],
+						},
+					},
+				},
+			],
+		},
+		target:
+			'<|im_start|>system\nYou are Qwen, created by Alibaba Cloud. You are a helpful assistant.\n\nCurrent Date: 2024-09-30\n\n# Tools\n\nYou may call one or more functions to assist with the user query.\n\nYou are provided with function signatures within <tools></tools> XML tags:\n<tools>\n{"type": "function", "function": {"name": "get_current_temperature", "description": "Get current temperature at a location.", "parameters": {"type": "object", "properties": {"location": {"type": "string", "description": "The location to get the temperature for, in the format \\"City, State, Country\\"."}, "unit": {"type": "string", "enum": ["celsius", "fahrenheit"], "description": "The unit to return the temperature in. Defaults to \\"celsius\\"."}}, "required": ["location"]}}}\n{"type": "function", "function": {"name": "get_temperature_date", "description": "Get temperature at a location and date.", "parameters": {"type": "object", "properties": {"location": {"type": "string", "description": "The location to get the temperature for, in the format \\"City, State, Country\\"."}, "date": {"type": "string", "description": "The date to get the temperature for, in the format \\"Year-Month-Day\\"."}, "unit": {"type": "string", "enum": ["celsius", "fahrenheit"], "description": "The unit to return the temperature in. Defaults to \\"celsius\\"."}}, "required": ["location", "date"]}}}\n</tools>\n\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\n<tool_call>\n{"name": <function-name>, "arguments": <args-json-object>}\n</tool_call><|im_end|>\n<|im_start|>user\nWhat\'s the temperature in San Francisco now? How about tomorrow?<|im_end|>\n<|im_start|>assistant\n<tool_call>\n{"name": "get_current_temperature", "arguments": {"location": "San Francisco, CA, USA"}}\n</tool_call>\n<tool_call>\n{"name": "get_temperature_date", "arguments": {"location": "San Francisco, CA, USA", "date": "2024-10-01"}}\n</tool_call><|im_end|>\n<|im_start|>user\n<tool_response>\n{"temperature": 26.1, "location": "San Francisco, CA, USA", "unit": "celsius"}\n</tool_response>\n<tool_response>\n{"temperature": 25.9, "location": "San Francisco, CA, USA", "date": "2024-10-01", "unit": "celsius"}\n</tool_response><|im_end|>\n',
+	},
+	"Qwen/Qwen2.5-VL-7B-Instruct": {
+		chat_template:
+			"{% set image_count = namespace(value=0) %}{% set video_count = namespace(value=0) %}{% for message in messages %}{% if loop.first and message['role'] != 'system' %}<|im_start|>system\nYou are a helpful assistant.<|im_end|>\n{% endif %}<|im_start|>{{ message['role'] }}\n{% if message['content'] is string %}{{ message['content'] }}<|im_end|>\n{% else %}{% for content in message['content'] %}{% if content['type'] == 'image' or 'image' in content or 'image_url' in content %}{% set image_count.value = image_count.value + 1 %}{% if add_vision_id %}Picture {{ image_count.value }}: {% endif %}<|vision_start|><|image_pad|><|vision_end|>{% elif content['type'] == 'video' or 'video' in content %}{% set video_count.value = video_count.value + 1 %}{% if add_vision_id %}Video {{ video_count.value }}: {% endif %}<|vision_start|><|video_pad|><|vision_end|>{% elif 'text' in content %}{{ content['text'] }}{% endif %}{% endfor %}<|im_end|>\n{% endif %}{% endfor %}{% if add_generation_prompt %}<|im_start|>assistant\n{% endif %}",
+		data: {
+			// Example adapted from https://huggingface.co/Qwen/Qwen2.5-VL-7B-Instruct
+			messages: [
+				{
+					role: "user",
+					content: [
+						{
+							type: "image",
+							image: "https://qianwen-res.oss-cn-beijing.aliyuncs.com/Qwen-VL/assets/demo.jpeg",
+						},
+						{ type: "text", text: "Describe this image." },
+					],
+				},
+			],
+			add_generation_prompt: true,
+		},
+		target:
+			"<|im_start|>system\nYou are a helpful assistant.<|im_end|>\n<|im_start|>user\n<|vision_start|><|image_pad|><|vision_end|>Describe this image.<|im_end|>\n<|im_start|>assistant\n",
+	},
 });
 
 function render({ chat_template, data, target }) {
