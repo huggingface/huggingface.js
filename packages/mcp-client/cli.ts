@@ -4,6 +4,7 @@ import { stdin, stdout } from "node:process";
 import { join } from "node:path";
 import { homedir } from "node:os";
 import type { StdioServerParameters } from "@modelcontextprotocol/sdk/client/stdio.js";
+import type { ServerConfig } from "./src/types";
 import type { InferenceProvider } from "@huggingface/inference";
 import { ANSI } from "./src/utils";
 import { Agent } from "./src";
@@ -12,17 +13,24 @@ import { version as packageVersion } from "./package.json";
 const MODEL_ID = process.env.MODEL_ID ?? "Qwen/Qwen2.5-72B-Instruct";
 const PROVIDER = (process.env.PROVIDER as InferenceProvider) ?? "nebius";
 
-const SERVERS: StdioServerParameters[] = [
+const SERVERS: (ServerConfig|StdioServerParameters)[] = [
+	// {
+	// 	// Filesystem "official" mcp-server with access to your Desktop
+	// 	command: "npx",
+	// 	args: ["-y", "@modelcontextprotocol/server-filesystem", join(homedir(), "Desktop")],
+	// },
+	// {
+	// 	// Playwright MCP
+	// 	command: "npx",
+	// 	args: ["@playwright/mcp@latest"],
+	// },
 	{
-		// Filesystem "official" mcp-server with access to your Desktop
-		command: "npx",
-		args: ["-y", "@modelcontextprotocol/server-filesystem", join(homedir(), "Desktop")],
-	},
-	{
-		// Playwright MCP
-		command: "npx",
-		args: ["@playwright/mcp@latest"],
-	},
+		type:"sse",
+		config:
+		{
+			url: "https://abidlabs-mcp-tools.hf.space/gradio_api/mcp/sse",
+		}
+	}
 ];
 
 if (process.env.EXPERIMENTAL_HF_MCP_SERVER) {
