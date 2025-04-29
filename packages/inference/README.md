@@ -25,20 +25,20 @@ yarn add @huggingface/inference
 
 ```ts
 // esm.sh
-import { InferenceClient } from "https://esm.sh/@huggingface/inference"
+import { InferenceClient } from "https://esm.sh/@huggingface/inference";
 // or npm:
-import { InferenceClient } from "npm:@huggingface/inference"
+import { InferenceClient } from "npm:@huggingface/inference";
 ```
 
 ### Initialize
 
 ```typescript
-import { InferenceClient } from '@huggingface/inference'
+import { InferenceClient } from '@huggingface/inference';
 
-const hf = new InferenceClient('your access token')
+const hf = new InferenceClient('your access token');
 ```
 
-❗**Important note:** Using an access token is optional to get started, however you will be rate limited eventually. Join [Hugging Face](https://huggingface.co/join) and then visit [access tokens](https://huggingface.co/settings/tokens) to generate your access token for **free**.
+❗**Important note:** Always pass an access token. Join [Hugging Face](https://huggingface.co/join) and then visit [access tokens](https://huggingface.co/settings/tokens) to generate your access token for **free**.
 
 Your access token should be kept private. If you need to protect it in front-end applications, we suggest setting up a proxy server that stores the access token.
 
