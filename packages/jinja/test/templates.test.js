@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { Template } from "../src/index";
 import { tokenize } from "../src/lexer";
 import { parse } from "../src/parser";
 import { Environment, Interpreter } from "../src/runtime";
@@ -135,6 +136,7 @@ const TEST_STRINGS = {
 
 	// Ternary operator
 	TERNARY_OPERATOR: `|{{ 'a' if true else 'b' }}|{{ 'a' if false else 'b' }}|{{ 'a' if 1 + 1 == 2 else 'b' }}|{{ 'a' if 1 + 1 == 3 or 1 * 2 == 3 else 'b' }}|`,
+	TERNARY_SET: `{% set x = 1 if True else 2 %}{{ x }}`,
 
 	// Array literals
 	ARRAY_LITERALS: `{{ [1, true, 'hello', [1, 2, 3, 4], var] | length }}`,
@@ -2559,6 +2561,21 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 	],
+	TERNARY_SET: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Set" },
+		{ value: "x", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: "if", type: "If" },
+		{ value: "True", type: "BooleanLiteral" },
+		{ value: "else", type: "Else" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "x", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
 
 	// Array literals
 	ARRAY_LITERALS: [
@@ -3261,6 +3278,7 @@ const TEST_CONTEXT = {
 
 	// Ternary operator
 	TERNARY_OPERATOR: {},
+	TERNARY_SET: {},
 
 	// Array literals
 	ARRAY_LITERALS: { var: true },
@@ -3424,6 +3442,7 @@ const EXPECTED_OUTPUTS = {
 
 	// Ternary operator
 	TERNARY_OPERATOR: `|a|b|a|b|`,
+	TERNARY_SET: `1`,
 
 	// Array literals
 	ARRAY_LITERALS: `5`,
@@ -3498,6 +3517,25 @@ describe("Templates", () => {
 					const interpreter = new Interpreter(env);
 					const result = interpreter.run(ast);
 					expect(result.value).toEqual(EXPECTED_OUTPUTS[name]);
+				});
+			}
+		});
+	});
+
+	describe("Formatting", () => {
+		describe("formatting shouldn't change output", () => {
+			for (const [name, text] of Object.entries(TEST_STRINGS)) {
+				it(`formatting ${name}`, () => {
+					const context = TEST_CONTEXT[name];
+
+					const template = new Template(text);
+					const unformattedTemplateOutput = template.render(context);
+
+					const formatted = template.format();
+					const formattedTemplate = new Template(formatted);
+					const formattedTemplateOutput = formattedTemplate.render(context);
+
+					expect(formattedTemplateOutput).toEqual(unformattedTemplateOutput);
 				});
 			}
 		});

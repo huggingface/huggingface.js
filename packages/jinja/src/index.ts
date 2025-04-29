@@ -16,6 +16,7 @@ import { Environment, Interpreter } from "./runtime";
 import type { Program } from "./ast";
 import type { StringValue } from "./runtime";
 import { range } from "./utils";
+import { format } from "./format";
 
 export class Template {
 	parsed: Program;
@@ -54,6 +55,10 @@ export class Template {
 
 		const result = interpreter.run(this.parsed) as StringValue;
 		return result.value;
+	}
+
+	format(options?: { indent: string | number }): string {
+		return format(this.parsed, options?.indent || "\t");
 	}
 }
 
