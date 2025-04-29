@@ -1,4 +1,5 @@
 import { readdir, stat } from "node:fs/promises";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 /**
  * Recursively retrieves all sub-paths of a given directory up to a specified depth.
@@ -20,7 +21,7 @@ export async function subPaths(
 	const files = await readdir(path, { withFileTypes: true });
 	const ret: Array<{ path: URL; relativePath: string }> = [];
 	for (const file of files) {
-		const filePath = new URL(file.name, path);
+		const filePath = pathToFileURL(fileURLToPath(path) + "/" + file.name);
 		if (file.isDirectory()) {
 			ret.push(
 				...(await subPaths(filePath, maxDepth - 1)).map((subPath) => ({
