@@ -29,20 +29,25 @@ export async function makeRequestOptions(
 ): Promise<{ url: string; info: RequestInit }> {
 	const { model: maybeModel } = args;
 	const provider = providerHelper.provider;
-	const endpointUrl = args.endpointUrl ?? options?.endpointUrl;
 	const { task } = options ?? {};
 
 	// Validate inputs
-	if (endpointUrl && provider !== "hf-inference") {
+	if (args.endpointUrl && provider !== "hf-inference") {
 		throw new Error(`Cannot use endpointUrl with a third-party provider.`);
 	}
 	if (maybeModel && isUrl(maybeModel)) {
 		throw new Error(`Model URLs are no longer supported. Use endpointUrl instead.`);
 	}
 
-	if (endpointUrl) {
+	if (args.endpointUrl) {
 		// No need to have maybeModel, or to load default model for a task
-		return makeRequestOptionsFromResolvedModel(maybeModel ?? endpointUrl, providerHelper, args, undefined, options);
+		return makeRequestOptionsFromResolvedModel(
+			maybeModel ?? args.endpointUrl,
+			providerHelper,
+			args,
+			undefined,
+			options
+		);
 	}
 
 	if (!maybeModel && !task) {
