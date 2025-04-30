@@ -2,7 +2,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import type { StdioServerParameters } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { InferenceClient } from "@huggingface/inference";
-import type { InferenceClientEndpoint, InferenceProvider, InferenceProviderOrPolicy } from "@huggingface/inference";
+import type { InferenceClientEndpoint, InferenceProviderOrPolicy } from "@huggingface/inference";
 import type {
 	ChatCompletionInputMessage,
 	ChatCompletionInputTool,
@@ -36,13 +36,13 @@ export class McpClient {
 		apiKey,
 	}: (
 		| {
-			provider: InferenceProviderOrPolicy;
-			baseUrl?: undefined;
-		}
+				provider: InferenceProviderOrPolicy;
+				baseUrl?: undefined;
+		  }
 		| {
-			baseUrl: string;
-			provider?: undefined;
-		}
+				baseUrl: string;
+				provider?: undefined;
+		  }
 	) & {
 		model: string;
 		apiKey: string;
