@@ -87,10 +87,20 @@ export async function fileDownloadInfo(
 		const hash = resp.headers.get("X-Xet-Hash");
 		const links = parseLinkHeader(resp.headers.get("Link") ?? "");
 
-		const reconstructionUrl = URL.parse
-			? URL.parse(links["xet-reconstruction-info"])
-			: new URL(links["xet-reconstruction-info"]);
-		const refreshUrl = URL.parse ? URL.parse(links["xet-auth"]) : new URL(links["xet-auth"]);
+		const reconstructionUrl = (() => {
+			try {
+				return new URL(links["xet-reconstruction-info"]);
+			} catch {
+				return null;
+			}
+		})();
+		const refreshUrl = (() => {
+			try {
+				return new URL(links["xet-auth"]);
+			} catch {
+				return null;
+			}
+		})();
 
 		if (!hash) {
 			throw new InvalidApiResponseFormatError("No hash received in X-Xet-Hash header");
