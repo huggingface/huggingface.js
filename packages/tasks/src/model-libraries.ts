@@ -662,6 +662,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.perception_encoder,
 		countDownloads: `path_extension:"pt"`,
 	},
+	"phantom": {
+		prettyLabel: "phantom",
+		repoName: "phantom",
+		repoUrl: "https://github.com/Phantom-video/Phantom",
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
+	},
 	pxia: {
 		prettyLabel: "pxia",
 		repoName: "pxia",
