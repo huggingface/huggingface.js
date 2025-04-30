@@ -113,7 +113,6 @@ export async function resolveProvider(
 		}
 		const inferenceProviderMapping = await fetchInferenceProviderMappingForModel(modelId);
 		provider = Object.keys(inferenceProviderMapping)[0] as InferenceProvider;
-		console.log("Auto-selected provider:", provider);
 	}
 	return provider;
 }
