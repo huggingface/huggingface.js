@@ -33,7 +33,7 @@ export class InferenceClient {
 				value: (params: RequestArgs, options: Options) =>
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					fn({ endpointUrl: defaultOptions.endpointUrl, accessToken, ...params } as any, {
-						...defaultOptions,
+						...omit(defaultOptions, ["endpointUrl"]),
 						...options,
 					}),
 			});
