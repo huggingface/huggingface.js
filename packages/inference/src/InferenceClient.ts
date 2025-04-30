@@ -48,15 +48,15 @@ export class InferenceClient {
 	}
 }
 
-export interface InferenceClient extends Task { }
+export interface InferenceClient extends Task {}
 
 /**
  * For backward compatibility only, will remove soon.
  * @deprecated replace with InferenceClient
  */
-export class HfInference extends InferenceClient { }
+export class HfInference extends InferenceClient {}
 /**
  * For backward compatibility only, will remove soon.
  * @deprecated replace with InferenceClient
  */
-export class InferenceClientEndpoint extends InferenceClient { }
+export class InferenceClientEndpoint extends InferenceClient {}
