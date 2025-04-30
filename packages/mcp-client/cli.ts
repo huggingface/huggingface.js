@@ -3,6 +3,7 @@ import * as readline from "node:readline/promises";
 import { stdin, stdout } from "node:process";
 import { join } from "node:path";
 import { homedir } from "node:os";
+import { existsSync, mkdirSync } from "node:fs";
 import type { StdioServerParameters } from "@modelcontextprotocol/sdk/client/stdio.js";
 import type { InferenceProvider } from "@huggingface/inference";
 import { ANSI } from "./src/utils";
@@ -12,12 +13,13 @@ import { version as packageVersion } from "./package.json";
 const MODEL_ID = process.env.MODEL_ID ?? "Qwen/Qwen2.5-72B-Instruct";
 const PROVIDER = (process.env.PROVIDER as InferenceProvider) ?? "nebius";
 const BASE_URL = process.env.BASE_URL;
+const MCP_LOCAL_FOLDER = join(homedir(), ".mcp");
 
 const SERVERS: StdioServerParameters[] = [
 	{
 		// Filesystem "official" mcp-server with access to your Desktop
 		command: "npx",
-		args: ["-y", "@modelcontextprotocol/server-filesystem", join(homedir(), "Desktop")],
+		args: ["-y", "@modelcontextprotocol/server-filesystem", MCP_LOCAL_FOLDER],
 	},
 	{
 		// Playwright MCP
@@ -31,7 +33,7 @@ if (process.env.EXPERIMENTAL_HF_MCP_SERVER) {
 		// Early version of a HF-MCP server
 		// you can download it from gist.github.com/julien-c/0500ba922e1b38f2dc30447fb81f7dc6
 		command: "node",
-		args: ["--disable-warning=ExperimentalWarning", join(homedir(), "Desktop/hf-mcp/index.ts")],
+		args: ["--disable-warning=ExperimentalWarning", join(MCP_LOCAL_FOLDER, "/hf-mcp/index.ts")],
 		env: {
 			HF_TOKEN: process.env.HF_TOKEN ?? "",
 		},
@@ -47,6 +49,11 @@ async function main() {
 	if (!process.env.HF_TOKEN) {
 		console.error(`a valid HF_TOKEN must be present in the env`);
 		process.exit(1);
+	}
+
+	if(!existsSync(MCP_LOCAL_FOLDER)) {
+		mkdirSync(MCP_LOCAL_FOLDER);
+		console.info("created folder", MCP_LOCAL_FOLDER);
 	}
 
 	const agent = new Agent(
