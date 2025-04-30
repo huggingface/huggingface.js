@@ -727,6 +727,16 @@ model = pe.VisionTransformer.from_config("${model.id}", pretrained=True)`;
 		return [vision_encoder];
 	}
 };
+export const phantom = (model: ModelData): string[] => [
+	`huggingface-cli download --local-dir ${nameWithoutNamespace(model.id)} --local-dir ./${model.id} # in cli
+from phantom_wan import WANI2V, configs
+wan_i2v = WanI2V(
+            config=configs.WAN_CONFIGS['i2v-14B'],
+            checkpoint_dir=./${model.id}
+        )
+ video = wan_i2v.generate(text_prompt, image_prompt)
+`,
+];
 
 export const pyannote_audio_pipeline = (model: ModelData): string[] => [
 	`from pyannote.audio import Pipeline
