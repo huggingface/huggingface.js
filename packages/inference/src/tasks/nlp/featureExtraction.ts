@@ -1,4 +1,5 @@
 import type { FeatureExtractionInput } from "@huggingface/tasks";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping";
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
 import { innerRequest } from "../../utils/request";
@@ -22,7 +23,8 @@ export async function featureExtraction(
 	args: FeatureExtractionArgs,
 	options?: Options
 ): Promise<FeatureExtractionOutput> {
-	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "feature-extraction");
+	const provider = await resolveProvider(args.provider, args.model);
+	const providerHelper = getProviderHelper(provider, "feature-extraction");
 	const { data: res } = await innerRequest<FeatureExtractionOutput>(args, providerHelper, {
 		...options,
 		task: "feature-extraction",

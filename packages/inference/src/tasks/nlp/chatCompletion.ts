@@ -1,4 +1,5 @@
 import type { ChatCompletionInput, ChatCompletionOutput } from "@huggingface/tasks";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping";
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
 import { innerRequest } from "../../utils/request";
@@ -10,7 +11,8 @@ export async function chatCompletion(
 	args: BaseArgs & ChatCompletionInput,
 	options?: Options
 ): Promise<ChatCompletionOutput> {
-	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "conversational");
+	const provider = await resolveProvider(args.provider, args.model);
+	const providerHelper = getProviderHelper(provider, "conversational");
 	const { data: response } = await innerRequest<ChatCompletionOutput>(args, providerHelper, {
 		...options,
 		task: "conversational",
