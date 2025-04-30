@@ -1,6 +1,7 @@
 import * as tasks from "./tasks";
 import type { Options, RequestArgs } from "./types";
 import type { DistributiveOmit } from "./utils/distributive-omit";
+import { omit } from "./utils/omit";
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 /* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
