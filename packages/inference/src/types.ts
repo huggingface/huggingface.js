@@ -33,6 +33,11 @@ export interface Options {
 	 * Requests can only be billed to an organization the user is a member of, and which has subscribed to Enterprise Hub.
 	 */
 	billTo?: string;
+
+	/**
+	 * Optional: override the default router.huggingface.co Inference Providers endpoint with any baseURL.
+	 */
+	endpointUrl?: string;
 }
 
 export type InferenceTask = Exclude<PipelineType, "other"> | "conversational";
@@ -84,7 +89,7 @@ export interface BaseArgs {
 	model?: ModelId;
 
 	/**
-	 * The URL of the endpoint to use. If not specified, will call huggingface.co/api/tasks to get the default endpoint for the task.
+	 * The URL of the endpoint to use. If not specified, will call Inference Providers on huggingface.co.
 	 *
 	 * If specified, will use this URL instead of the default one.
 	 */
