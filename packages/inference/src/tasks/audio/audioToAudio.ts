@@ -1,3 +1,4 @@
+import { resolveProvider } from "../../lib/getInferenceProviderMapping";
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
 import { innerRequest } from "../../utils/request";
@@ -36,7 +37,9 @@ export interface AudioToAudioOutput {
  * Example model: speechbrain/sepformer-wham does audio source separation.
  */
 export async function audioToAudio(args: AudioToAudioArgs, options?: Options): Promise<AudioToAudioOutput[]> {
-	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "audio-to-audio");
+	const model = "inputs" in args ? args.model : undefined;
+	const provider = await resolveProvider(args.provider, model);
+	const providerHelper = getProviderHelper(provider, "audio-to-audio");
 	const payload = preparePayload(args);
 	const { data: res } = await innerRequest<AudioToAudioOutput>(payload, providerHelper, {
 		...options,

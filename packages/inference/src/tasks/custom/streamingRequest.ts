@@ -1,3 +1,4 @@
+import { resolveProvider } from "../../lib/getInferenceProviderMapping";
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { InferenceTask, Options, RequestArgs } from "../../types";
 import { innerStreamingRequest } from "../../utils/request";
@@ -16,6 +17,7 @@ export async function* streamingRequest<T>(
 	console.warn(
 		"The streamingRequest method is deprecated and will be removed in a future version of huggingface.js. Use specific task functions instead."
 	);
-	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", options?.task);
+	const provider = await resolveProvider(args.provider, args.model);
+	const providerHelper = getProviderHelper(provider, options?.task);
 	yield* innerStreamingRequest(args, providerHelper, options);
 }
