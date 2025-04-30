@@ -32,7 +32,7 @@ export async function makeRequestOptions(
 	const { task } = options ?? {};
 
 	// Validate inputs
-	if (args.endpointUrl && provider !== "hf-inference") {
+	if (args.endpointUrl && provider !== undefined) {
 		throw new Error(`Cannot use endpointUrl with a third-party provider.`);
 	}
 	if (maybeModel && isUrl(maybeModel)) {
