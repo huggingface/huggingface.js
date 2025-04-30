@@ -57,6 +57,9 @@
 		"hugging",
 		"face"
 	],
+	"bin": {
+		"@huggingface/hub": "./dist/cli.js"
+	},
 	"author": "Hugging Face",
 	"license": "MIT",
 	"devDependencies": {
