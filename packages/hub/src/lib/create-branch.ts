@@ -1,0 +1,50 @@
+import { HUB_URL } from "../consts";
+import { createApiError } from "../error";
+import type { AccessToken, RepoDesignation } from "../types/public";
+
+export async function createBranch(params: {
+	repo: RepoDesignation;
+	/**
+	 * Revision to create the branch from. Defaults to the default branch.
+	 *
+	 * Use empty: true to create an empty branch.
+	 */
+	revision?: string;
+	hubUrl?: string;
+	accessToken?: AccessToken;
+	fetch?: typeof fetch;
+	/**
+	 * The name of the branch to create
+	 */
+	branch: string;
+	/**
+	 * Use this to create an empty branch, with no commits.
+	 */
+	empty?: boolean;
+	/**
+	 * Use this to overwrite the branch if it already exists.
+	 */
+	overwrite?: boolean;
+}): Promise<void> {
+	const res = await (params.fetch ?? fetch)(
+		`${params.hubUrl ?? HUB_URL}/api/repos/${params.repo}/branch/${encodeURIComponent(params.branch)}`,
+		{
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				...(params.accessToken && {
+					Authorization: `Bearer ${params.accessToken}`,
+				}),
+			},
+			body: JSON.stringify({
+				startingPoint: params.revision,
+				...(params.empty && { emptyBranch: true }),
+				overwrite: params.overwrite,
+			}),
+		}
+	);
+
+	if (!res.ok) {
+		throw await createApiError(res);
+	}
+}
