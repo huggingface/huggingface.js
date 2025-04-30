@@ -33,13 +33,12 @@ export class InferenceClient {
 	}
 
 	/**
-	 * Returns instance of InferenceClient tied to a specified endpoint.
+	 * Returns a new instance of InferenceClient tied to a specified endpoint.
 	 *
 	 * For backward compatibility mostly.
 	 */
-	public endpoint(endpointUrl: string): this {
-		this.defaultOptions.endpointUrl = endpointUrl;
-		return this;
+	public endpoint(endpointUrl: string): InferenceClient {
+		return new InferenceClient(this.accessToken, { ...this.defaultOptions, endpointUrl });
 	}
 }
 
