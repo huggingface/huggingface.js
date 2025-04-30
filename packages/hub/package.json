@@ -59,9 +59,6 @@
 	],
 	"author": "Hugging Face",
 	"license": "MIT",
-	"devDependencies": {
-		"@types/node": "^20.11.28"
-	},
 	"dependencies": {
 		"@huggingface/tasks": "workspace:^"
 	}
