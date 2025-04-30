@@ -23,7 +23,7 @@ export interface ChatCompletionInputMessageTool extends ChatCompletionInputMessa
 
 export class McpClient {
 	protected client: InferenceClient | InferenceClientEndpoint;
-	protected provider: InferenceProviderOrPolicy;
+	protected provider: InferenceProviderOrPolicy | undefined;
 
 	protected model: string;
 	private clients: Map<ToolName, Client> = new Map();
@@ -36,19 +36,19 @@ export class McpClient {
 		apiKey,
 	}: (
 		| {
-				provider: InferenceProvider;
-				baseUrl?: undefined;
-		  }
+			provider: InferenceProviderOrPolicy;
+			baseUrl?: undefined;
+		}
 		| {
-				baseUrl: string;
-				provider?: undefined;
-		  }
+			baseUrl: string;
+			provider?: undefined;
+		}
 	) & {
 		model: string;
 		apiKey: string;
 	}) {
 		this.client = baseUrl ? new InferenceClient(apiKey).endpoint(baseUrl) : new InferenceClient(apiKey);
-		this.provider = provider ?? "auto";
+		this.provider = provider;
 		this.model = model;
 	}
 
