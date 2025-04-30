@@ -51,7 +51,7 @@ async function main() {
 		process.exit(1);
 	}
 
-	if(!existsSync(MCP_LOCAL_FOLDER)) {
+	if (!existsSync(MCP_LOCAL_FOLDER)) {
 		mkdirSync(MCP_LOCAL_FOLDER);
 		console.info("created folder", MCP_LOCAL_FOLDER);
 	}
