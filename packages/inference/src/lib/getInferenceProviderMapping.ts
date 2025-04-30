@@ -112,7 +112,10 @@ export async function resolveProvider(
 			throw new Error("Specifying a model is required when provider is 'auto'");
 		}
 		const inferenceProviderMapping = await fetchInferenceProviderMappingForModel(modelId);
-		provider = Object.keys(inferenceProviderMapping)[0] as InferenceProvider;
+		provider = Object.keys(inferenceProviderMapping)[0] as InferenceProvider | undefined;
+	}
+	if (!provider) {
+		provider = "hf-inference"
 	}
 	return provider;
 }
