@@ -426,6 +426,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/DigitalPhonetics/IMS-Toucan",
 		countDownloads: `path:"embedding_gan.pt" OR path:"Vocoder.pt" OR path:"ToucanTTS.pt"`,
 	},
+	"index-tts": {
+		prettyLabel: "IndexTTS",
+		repoName: "IndexTTS",
+		repoUrl: "https://github.com/index-tts/index-tts",
+		snippets: snippets.indextts,
+		filter: false,
+	},
 	"infinite-you": {
 		prettyLabel: "InfiniteYou",
 		repoName: "InfiniteYou",
@@ -622,6 +629,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/hpcaitech/Open-Sora",
 		filter: false,
 		countDownloads: `path:"Open_Sora_v2.safetensors"`,
+	},
+	outetts: {
+		prettyLabel: "OuteTTS",
+		repoName: "OuteTTS",
+		repoUrl: "https://github.com/edwko/OuteTTS",
+		snippets: snippets.outetts,
+		filter: false,
 	},
 	paddlenlp: {
 		prettyLabel: "paddlenlp",
