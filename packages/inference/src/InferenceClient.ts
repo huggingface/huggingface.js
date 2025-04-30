@@ -26,10 +26,13 @@ export class InferenceClient {
 				enumerable: false,
 				value: (params: Parameters<typeof fn>[0], options: Parameters<typeof fn>[1]) =>
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					(fn as any)({ endpointUrl: defaultOptions.endpointUrl, accessToken, ...params }, {
-						...omit(defaultOptions, ["endpointUrl"]),
-						...options,
-					}),
+					(fn as any)(
+						{ endpointUrl: defaultOptions.endpointUrl, accessToken, ...params },
+						{
+							...omit(defaultOptions, ["endpointUrl"]),
+							...options,
+						}
+					),
 				/// ^The cast of fn to any is necessary, otherwise TS can't compile because the generated union type is too complex
 			});
 		}
