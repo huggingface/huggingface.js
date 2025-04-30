@@ -16,7 +16,6 @@ response = query({
             "content": "What is the capital of France?"
         }
     ],
-    "max_tokens": 512,
     "model": "meta-llama/Llama-3.1-8B-Instruct"
 })
 

@@ -58,7 +58,11 @@ export const INFERENCE_PROVIDERS = [
 	"together",
 ] as const;
 
+export const PROVIDERS_OR_POLICIES = [...INFERENCE_PROVIDERS, "auto"] as const;
+
 export type InferenceProvider = (typeof INFERENCE_PROVIDERS)[number];
+
+export type InferenceProviderOrPolicy = (typeof PROVIDERS_OR_POLICIES)[number];
 
 export interface BaseArgs {
 	/**
@@ -90,9 +94,9 @@ export interface BaseArgs {
 	/**
 	 * Set an Inference provider to run this model on.
 	 *
-	 * Defaults to the first provider in your user settings that is compatible with this model.
+	 * Defaults to "auto" i.e. the first of the providers available for the model, sorted by the user's order in https://hf.co/settings/inference-providers.
 	 */
-	provider?: InferenceProvider;
+	provider?: InferenceProviderOrPolicy;
 }
 
 export type RequestArgs = BaseArgs &

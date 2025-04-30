@@ -16,7 +16,6 @@ completion = client.chat.completions.create(
             "content": "What is the capital of France?"
         }
     ],
-    max_tokens=512,
 )
 
 print(completion.choices[0].message)
