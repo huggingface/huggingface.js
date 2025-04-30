@@ -33,11 +33,6 @@ export interface Options {
 	 * Requests can only be billed to an organization the user is a member of, and which has subscribed to Enterprise Hub.
 	 */
 	billTo?: string;
-
-	/**
-	 * Optional: override the default router.huggingface.co Inference Providers endpoint with any baseURL.
-	 */
-	endpointUrl?: string;
 }
 
 export type InferenceTask = Exclude<PipelineType, "other"> | "conversational";

@@ -18,7 +18,12 @@ export class InferenceClient {
 	private readonly accessToken: string;
 	private readonly defaultOptions: Options;
 
-	constructor(accessToken = "", defaultOptions: Options = {}) {
+	constructor(
+		accessToken = "",
+		defaultOptions: Options & {
+			endpointUrl?: string;
+		} = {}
+	) {
 		this.accessToken = accessToken;
 		this.defaultOptions = defaultOptions;
 
@@ -27,7 +32,10 @@ export class InferenceClient {
 				enumerable: false,
 				value: (params: RequestArgs, options: Options) =>
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					fn({ ...params, accessToken } as any, { ...defaultOptions, ...options }),
+					fn({ endpointUrl: defaultOptions.endpointUrl, accessToken, ...params } as any, {
+						...defaultOptions,
+						...options,
+					}),
 			});
 		}
 	}
