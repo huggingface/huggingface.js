@@ -115,7 +115,7 @@ export async function resolveProvider(
 		provider = Object.keys(inferenceProviderMapping)[0] as InferenceProvider | undefined;
 	}
 	if (!provider) {
-		provider = "hf-inference";
+		throw new Error(`No Inference Provider available for model ${modelId}.`);
 	}
 	return provider;
 }
