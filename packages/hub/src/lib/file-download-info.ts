@@ -2,14 +2,16 @@ import { HUB_URL } from "../consts";
 import { createApiError, InvalidApiResponseFormatError } from "../error";
 import type { CredentialsParams, RepoDesignation } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
+import { parseLinkHeader } from "../utils/parseLinkHeader";
 import { toRepoId } from "../utils/toRepoId";
 
 export interface XetFileInfo {
 	hash: string;
 	refreshUrl: URL;
 	/**
-	 * Later, there will also be a `reconstructionUrl` that can be directly used instead of with the hash.
+	 * Can be directly used instead of the hash.
 	 */
+	reconstructionUrl: URL;
 }
 
 export interface FileDownloadInfoOutput {
@@ -73,29 +75,35 @@ export async function fileDownloadInfo(
 		throw await createApiError(resp);
 	}
 
-	let etag: string | undefined;
 	let size: number | undefined;
 	let xetInfo: XetFileInfo | undefined;
 
 	if (resp.headers.get("Content-Type")?.includes("application/vnd.xet-fileinfo+json")) {
-		const text = await resp.text();
-		const json: { casUrl: string; hash: string; refreshUrl: string; size: string; etag: string } = (() => {
-			try {
-				return JSON.parse(text);
-			} catch (e) {
-				throw new InvalidApiResponseFormatError(
-					"Invalid JSON response: " + text + ", content-type: " + resp.headers.get("Content-Type")
-				);
-			}
-		})();
+		size = parseInt(resp.headers.get("X-Linked-Size") ?? "invalid");
+		if (isNaN(size)) {
+			throw new InvalidApiResponseFormatError("Invalid file size received in X-Linked-Size header");
+		}
 
+		const hash = resp.headers.get("X-Xet-Hash");
+		const links = parseLinkHeader(resp.headers.get("Link") ?? "");
+
+		const reconstructionUrl = URL.parse
+			? URL.parse(links["xet-reconstruction-info"])
+			: new URL(links["xet-reconstruction-info"]);
+		const refreshUrl = URL.parse ? URL.parse(links["xet-auth"]) : new URL(links["xet-auth"]);
+
+		if (!hash) {
+			throw new InvalidApiResponseFormatError("No hash received in X-Xet-Hash header");
+		}
+
+		if (!reconstructionUrl || !refreshUrl) {
+			throw new InvalidApiResponseFormatError("No xet-reconstruction-info or xet-auth link header");
+		}
 		xetInfo = {
-			hash: json.hash,
-			refreshUrl: new URL(json.refreshUrl, hubUrl),
+			hash,
+			refreshUrl,
+			reconstructionUrl,
 		};
-
-		etag = json.etag;
-		size = parseInt(json.size);
 	}
 
 	if (size === undefined || isNaN(size)) {
@@ -113,7 +121,7 @@ export async function fileDownloadInfo(
 		}
 	}
 
-	etag ??= resp.headers.get("ETag") ?? undefined;
+	const etag = resp.headers.get("ETag") ?? undefined;
 
 	if (!etag) {
 		throw new InvalidApiResponseFormatError("Expected ETag");

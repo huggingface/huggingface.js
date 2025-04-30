@@ -12,13 +12,13 @@ type XetBlobCreateOptions = {
 	 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 	 */
 	fetch?: typeof fetch;
-	hash: string;
 	// URL to get the access token from
 	refreshUrl: string;
 	size: number;
 	listener?: (arg: { event: "read" } | { event: "progress"; progress: { read: number; total: number } }) => void;
 	internalLogging?: boolean;
-} & Partial<CredentialsParams>;
+} & ({ hash: string; reconstructionUrl?: string } | { hash?: string; reconstructionUrl: string }) &
+	Partial<CredentialsParams>;
 
 export interface ReconstructionInfo {
 	/**
@@ -84,7 +84,8 @@ export class XetBlob extends Blob {
 	fetch: typeof fetch;
 	accessToken?: string;
 	refreshUrl: string;
-	hash: string;
+	reconstructionUrl?: string;
+	hash?: string;
 	start = 0;
 	end = 0;
 	internalLogging = false;
@@ -98,6 +99,7 @@ export class XetBlob extends Blob {
 		this.accessToken = checkCredentials(params);
 		this.refreshUrl = params.refreshUrl;
 		this.end = params.size;
+		this.reconstructionUrl = params.reconstructionUrl;
 		this.hash = params.hash;
 		this.listener = params.listener;
 		this.internalLogging = params.internalLogging ?? false;
@@ -113,6 +115,8 @@ export class XetBlob extends Blob {
 			fetch: this.fetch,
 			hash: this.hash,
 			refreshUrl: this.refreshUrl,
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			reconstructionUrl: this.reconstructionUrl!,
 			size: this.size,
 		});
 
@@ -157,7 +161,7 @@ export class XetBlob extends Blob {
 			// 	`curl '${connParams.casUrl}/reconstruction/${this.hash}' -H 'Authorization: Bearer ${connParams.accessToken}'`
 			// );
 
-			const resp = await this.fetch(`${connParams.casUrl}/reconstruction/${this.hash}`, {
+			const resp = await this.fetch(this.reconstructionUrl ?? `${connParams.casUrl}/reconstruction/${this.hash}`, {
 				headers: {
 					Authorization: `Bearer ${connParams.accessToken}`,
 					Range: `bytes=${this.start}-${this.end - 1}`,

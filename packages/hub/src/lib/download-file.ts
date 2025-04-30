@@ -65,8 +65,8 @@ export async function downloadFile(
 
 	if (info.xet && params.xet) {
 		return new XetBlob({
-			hash: info.xet.hash,
 			refreshUrl: info.xet.refreshUrl.href,
+			reconstructionUrl: info.xet.reconstructionUrl.href,
 			fetch: params.fetch,
 			accessToken,
 			size: info.size,
