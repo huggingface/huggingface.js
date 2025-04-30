@@ -1,19 +1,12 @@
 import * as tasks from "./tasks";
-import type { Options, RequestArgs } from "./types";
-import type { DistributiveOmit } from "./utils/distributive-omit";
+import type { Options } from "./types";
 import { omit } from "./utils/omit";
+import { typedEntries } from "./utils/typedEntries";
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 /* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
 
 type Task = typeof tasks;
-
-type TaskWithNoAccessToken = {
-	[key in keyof Task]: (
-		args: DistributiveOmit<Parameters<Task[key]>[0], "accessToken">,
-		options?: Parameters<Task[key]>[1]
-	) => ReturnType<Task[key]>;
-};
 
 export class InferenceClient {
 	private readonly accessToken: string;
@@ -28,15 +21,16 @@ export class InferenceClient {
 		this.accessToken = accessToken;
 		this.defaultOptions = defaultOptions;
 
-		for (const [name, fn] of Object.entries(tasks)) {
+		for (const [name, fn] of typedEntries(tasks)) {
 			Object.defineProperty(this, name, {
 				enumerable: false,
-				value: (params: RequestArgs, options: Options) =>
+				value: (params: Parameters<typeof fn>[0], options: Parameters<typeof fn>[1]) =>
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					fn({ endpointUrl: defaultOptions.endpointUrl, accessToken, ...params } as any, {
+					(fn as any)({ endpointUrl: defaultOptions.endpointUrl, accessToken, ...params }, {
 						...omit(defaultOptions, ["endpointUrl"]),
 						...options,
 					}),
+				/// ^The cast of fn to any is necessary, otherwise TS can't compile because the generated union type is too complex
 			});
 		}
 	}
@@ -51,15 +45,15 @@ export class InferenceClient {
 	}
 }
 
-export interface InferenceClient extends TaskWithNoAccessToken {}
+export interface InferenceClient extends Task { }
 
 /**
  * For backward compatibility only, will remove soon.
  * @deprecated replace with InferenceClient
  */
-export class HfInference extends InferenceClient {}
+export class HfInference extends InferenceClient { }
 /**
  * For backward compatibility only, will remove soon.
  * @deprecated replace with InferenceClient
  */
-export class InferenceClientEndpoint extends InferenceClient {}
+export class InferenceClientEndpoint extends InferenceClient { }
