@@ -13,7 +13,6 @@ const stream = client.chatCompletionStream({
             content: "What is the capital of France?",
         },
     ],
-    max_tokens: 512,
 });
 
 for await (const chunk of stream) {

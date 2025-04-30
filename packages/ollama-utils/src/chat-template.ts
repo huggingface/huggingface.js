@@ -91,6 +91,23 @@ const CUSTOM_TEMPLATE_MAPPING: ((ggufTmpl: string) => OllamaCustomMappedTemplate
 					stop: "[INST]",
 			  }
 			: undefined,
+	(ggufTmpl: string) =>
+		ggufTmpl.match(/rwkv-world/)
+			? {
+					// ref: https://huggingface.co/BlinkDL/rwkv-5-world
+					ollamaTmpl: "{{ .System }}\nUser: {{ .Prompt }}\n\nAssistant:",
+					stop: "### Instruction:",
+			  }
+			: undefined,
+	(ggufTmpl: string) =>
+		(ggufTmpl.match(/\[gMASK\]<sop>/) && ggufTmpl.match(/<\|user\|>/)) || ggufTmpl.match(/chatglm4/)
+			? {
+					// ref: https://huggingface.co/THUDM/GLM-4-9B-0414
+					ollamaTmpl:
+						"[gMASK]<sop>{{ if .System }}<|system|>\n{{ .System }}{{ end }}{{ if .Prompt }}<|user|>\n{{ .Prompt }}{{ end }}<|assistant|>\n{{ .Response }}",
+					stop: "<|user|>",
+			  }
+			: undefined,
 ];
 
 export function convertGGUFTemplateToOllama(
@@ -103,6 +120,9 @@ export function convertGGUFTemplateToOllama(
 ): OllamaChatTemplateMapEntry | undefined {
 	if (!gguf.chat_template) {
 		return undefined;
+	}
+	if (gguf.chat_template.match(/outetts-\d/)) {
+		throw new Error("OuteTTS is not a text model");
 	}
 	// try matching by first 128 characters (allowing a bit of flexibility)
 	const truncatedGGUFTmpl = gguf.chat_template.substring(0, 128);
