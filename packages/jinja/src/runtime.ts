@@ -36,6 +36,10 @@ export type AnyRuntimeValue =
 	| NullValue
 	| UndefinedValue;
 
+// Control-flow exceptions for loop break/continue
+class BreakControl extends Error {}
+class ContinueControl extends Error {}
+
 /**
  * Abstract base class for all Runtime values.
  * Should not be instantiated directly.
@@ -1058,9 +1062,19 @@ export class Interpreter {
 			// Update scope for this iteration
 			scopeUpdateFunctions[i](scope);
 
-			// Evaluate the body of the for loop
-			const evaluated = this.evaluateBlock(node.body, scope);
-			result += evaluated.value;
+			try {
+				// Evaluate the body of the for loop
+				const evaluated = this.evaluateBlock(node.body, scope);
+				result += evaluated.value;
+			} catch (err) {
+				if (err instanceof ContinueControl) {
+					continue;
+				}
+				if (err instanceof BreakControl) {
+					break;
+				}
+				throw err;
+			}
 
 			// At least one iteration took place
 			noIteration = false;
@@ -1138,6 +1152,11 @@ export class Interpreter {
 				return this.evaluateFor(statement as For, environment);
 			case "Macro":
 				return this.evaluateMacro(statement as Macro, environment);
+
+			case "Break":
+				throw new BreakControl();
+			case "Continue":
+				throw new ContinueControl();
 
 			// Expressions
 			case "NumericLiteral":
