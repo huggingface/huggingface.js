@@ -50,18 +50,28 @@ export class Agent extends McpClient {
 
 	constructor({
 		provider,
+		baseUrl,
 		model,
 		apiKey,
 		servers,
 		prompt,
-	}: {
-		provider: InferenceProvider;
+	}: (
+		| {
+				provider: InferenceProvider;
+				baseUrl?: undefined;
+		  }
+		| {
+				baseUrl: string;
+				provider?: undefined;
+		  }
+	) & {
 		model: string;
 		apiKey: string;
 		servers: (ServerConfig|StdioServerParameters)[];
 		prompt?: string;
 	}) {
-		super({ provider, model, apiKey });
+		super(provider ? { provider, baseUrl, model, apiKey } : { provider, baseUrl, model, apiKey });
+		/// ^This shenanigan is just here to please an overzealous TS type-checker.
 		this.servers = servers;
 		this.messages = [
 			{
