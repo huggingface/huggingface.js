@@ -19,7 +19,6 @@ import { isUrl } from "../lib/isUrl";
 import type { BodyParams, HeaderParams, UrlParams } from "../types";
 import { omit } from "../utils/omit";
 import { TaskProviderHelper, type TextToImageTaskHelper, type TextToVideoTaskHelper } from "./providerHelper";
-import { HF_HUB_URL } from "../config";
 export interface ReplicateOutput {
 	output?: string | string[];
 }
@@ -70,7 +69,7 @@ export class ReplicateTextToImageTask extends ReplicateTask implements TextToIma
 
 		// For Flux LoRAs, use black-forest-labs/flux-dev-lora
 		if (params.mapping?.adapter === "lora" && params.mapping.adapterWeightsPath) {
-			payload.input.lora_weights = `${HF_HUB_URL}/${params.mapping.hfModelId}`;
+			payload.input.lora_weights = `https://huggingface.co/${params.mapping.hfModelId}`;
 		}
 
 		return payload;
