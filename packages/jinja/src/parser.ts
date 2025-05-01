@@ -5,6 +5,8 @@ import {
 	Program,
 	If,
 	For,
+	Break,
+	Continue,
 	SetStatement,
 	MemberExpression,
 	CallExpression,
@@ -107,6 +109,16 @@ export function parse(tokens: Token[]): Program {
 				expect(TOKEN_TYPES.OpenStatement, "Expected {% token");
 				expect(TOKEN_TYPES.EndFor, "Expected endfor token");
 				expect(TOKEN_TYPES.CloseStatement, "Expected %} token");
+				break;
+			case TOKEN_TYPES.Break:
+				++current;
+				expect(TOKEN_TYPES.CloseStatement, "Expected closing statement token");
+				result = new Break();
+				break;
+			case TOKEN_TYPES.Continue:
+				++current;
+				expect(TOKEN_TYPES.CloseStatement, "Expected closing statement token");
+				result = new Continue();
 				break;
 			default:
 				throw new SyntaxError(`Unknown statement type: ${tokens[current].type}`);
