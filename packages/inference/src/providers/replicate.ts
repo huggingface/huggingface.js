@@ -70,7 +70,6 @@ export class ReplicateTextToImageTask extends ReplicateTask implements TextToIma
 
 		// For Flux LoRAs, use black-forest-labs/flux-dev-lora
 		if (params.mapping?.adapter === "lora" && params.mapping.adapterWeightsPath) {
-			payload.input.model = "black-forest-labs/flux-dev-lora";
 			payload.input.lora_weights = `${HF_HUB_URL}/${params.mapping.hfModelId}`;
 		}
 
