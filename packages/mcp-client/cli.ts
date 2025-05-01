@@ -14,7 +14,7 @@ const MODEL_ID = process.env.MODEL_ID ?? "Qwen/Qwen2.5-72B-Instruct";
 const PROVIDER = (process.env.PROVIDER as InferenceProvider) ?? "nebius";
 const BASE_URL = process.env.BASE_URL;
 
-const SERVERS: (ServerConfig|StdioServerParameters)[] = [
+const SERVERS: (ServerConfig | StdioServerParameters)[] = [
 	// {
 	// 	// Filesystem "official" mcp-server with access to your Desktop
 	// 	command: "npx",
@@ -26,16 +26,33 @@ const SERVERS: (ServerConfig|StdioServerParameters)[] = [
 	// 	args: ["@playwright/mcp@latest"],
 	// },
 	{
-		type:"sse",
-		config:
-		{
-			url: "https://abidlabs-mcp-tools.hf.space/gradio_api/mcp/sse",
-		}
+		type: "sse",
+		config: {
+			url: "https://evalstate-flux1-schnell.hf.space/gradio_api/mcp/sse",
+			options: {
+				requestInit: {
+					headers: {
+						"Authorization": `Bearer ${process.env.HF_TOKEN || ""}`
+					}
+				},
+				// workaround for https://github.com/modelcontextprotocol/typescript-sdk/issues/436
+				eventSourceInit: {
+					fetch: (url, init) => {
+						const headers = new Headers(init?.headers || {});
+						headers.set("Authorization", `Bearer ${process.env.HF_TOKEN || ""}`);
+						return fetch(url, {
+							...init,
+							headers
+						});
+					}
+				},				
+			},
+		},
 	},
-	{
-		command: "npx",
-		args: ["-y","@llmindset/mcp-hfspace","--work-dir",join(homedir(),"temp/hfspace/")]
-	}
+	// {
+	// 	command: "npx",
+	// 	args: ["-y","@llmindset/mcp-hfspace","--work-dir",join(homedir(),"temp/hfspace/")]
+	// }
 ];
 
 if (process.env.EXPERIMENTAL_HF_MCP_SERVER) {
@@ -68,13 +85,13 @@ async function main() {
 					model: MODEL_ID,
 					apiKey: process.env.HF_TOKEN,
 					servers: SERVERS,
-			  }
+				}
 			: {
 					provider: PROVIDER,
 					model: MODEL_ID,
 					apiKey: process.env.HF_TOKEN,
 					servers: SERVERS,
-			  }
+				}
 	);
 
 	const rl = readline.createInterface({ input: stdin, output: stdout });
