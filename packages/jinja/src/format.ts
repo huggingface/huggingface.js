@@ -3,8 +3,6 @@ import type {
 	Statement,
 	If,
 	For,
-	Break,
-	Continue,
 	SetStatement,
 	Macro,
 	Expression,

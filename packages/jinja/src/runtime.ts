@@ -8,8 +8,6 @@ import type {
 	Program,
 	If,
 	For,
-	Break,
-	Continue,
 	SetStatement,
 	MemberExpression,
 	CallExpression,
