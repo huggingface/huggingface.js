@@ -3,6 +3,7 @@ import type {
 	DocumentQuestionAnsweringInputData,
 	DocumentQuestionAnsweringOutput,
 } from "@huggingface/tasks";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping";
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options, RequestArgs } from "../../types";
 import { base64FromBytes } from "../../utils/base64FromBytes";
@@ -19,7 +20,8 @@ export async function documentQuestionAnswering(
 	args: DocumentQuestionAnsweringArgs,
 	options?: Options
 ): Promise<DocumentQuestionAnsweringOutput[number]> {
-	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "document-question-answering");
+	const provider = await resolveProvider(args.provider, args.model);
+	const providerHelper = getProviderHelper(provider, "document-question-answering");
 	const reqArgs: RequestArgs = {
 		...args,
 		inputs: {

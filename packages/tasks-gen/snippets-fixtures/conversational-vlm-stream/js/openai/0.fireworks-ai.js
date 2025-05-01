@@ -24,7 +24,6 @@ const stream = await client.chat.completions.create({
             ],
         },
     ],
-    max_tokens: 512,
     stream: true,
 });
 

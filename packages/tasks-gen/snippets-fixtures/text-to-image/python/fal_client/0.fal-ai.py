@@ -6,4 +6,5 @@ result = fal_client.subscribe(
         "prompt": "Astronaut riding a horse",
     },
 )
+ 
 print(result)
