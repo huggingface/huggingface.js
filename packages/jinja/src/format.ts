@@ -3,6 +3,8 @@ import type {
 	Statement,
 	If,
 	For,
+	Break,
+	Continue,
 	SetStatement,
 	Macro,
 	Expression,
@@ -62,6 +64,10 @@ function formatStatement(node: Statement, depth: number, indentStr: string): str
 			return formatSet(node as SetStatement, depth, indentStr);
 		case "Macro":
 			return formatMacro(node as Macro, depth, indentStr);
+		case "Break":
+			return pad + createStatement("break");
+		case "Continue":
+			return pad + createStatement("continue");
 		default:
 			return pad + "{{- " + formatExpression(node as Expression) + " -}}";
 	}
