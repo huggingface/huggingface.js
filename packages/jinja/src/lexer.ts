@@ -24,7 +24,7 @@ export const TOKEN_TYPES = Object.freeze({
 	Pipe: "Pipe", // |
 
 	CallOperator: "CallOperator", // ()
-	AdditiveBinaryOperator: "AdditiveBinaryOperator", // + -
+	AdditiveBinaryOperator: "AdditiveBinaryOperator", // + - ~
 	MultiplicativeBinaryOperator: "MultiplicativeBinaryOperator", // * / %
 	ComparisonBinaryOperator: "ComparisonBinaryOperator", // < > <= >= == !=
 	UnaryOperator: "UnaryOperator", // ! - +
@@ -85,6 +85,7 @@ const ORDERED_MAPPING_TABLE: [string, TokenType][] = [
 	// Arithmetic operators
 	["+", TOKEN_TYPES.AdditiveBinaryOperator],
 	["-", TOKEN_TYPES.AdditiveBinaryOperator],
+	["~", TOKEN_TYPES.AdditiveBinaryOperator],
 	["*", TOKEN_TYPES.MultiplicativeBinaryOperator],
 	["/", TOKEN_TYPES.MultiplicativeBinaryOperator],
 	["%", TOKEN_TYPES.MultiplicativeBinaryOperator],
@@ -136,12 +137,18 @@ function preprocess(template: string, options: PreprocessOptions = {}): string {
 		template = template.replace(/([#%]})\n/g, "$1");
 	}
 
-	return template
-		.replace(/{##}/g, "") // Remove comments
-		.replace(/-%}\s*/g, "%}")
-		.replace(/\s*{%-/g, "{%")
-		.replace(/-}}\s*/g, "}}")
-		.replace(/\s*{{-/g, "{{");
+	return (
+		template
+			.replace(/{##}/g, "") // Remove comments
+			.replace(/-%}\s*/g, "%}")
+			.replace(/\s*{%-/g, "{%")
+			.replace(/-}}\s*/g, "}}")
+			.replace(/\s*{{-/g, "{{")
+
+			// Handle the custom transformers-specific `generation` tag.
+			// See https://github.com/huggingface/transformers/pull/30650 for more information.
+			.replace(/{%\s*generation\s*%}.+?{%\s*endgeneration\s*%}/gs, "")
+	);
 }
 
 /**
@@ -152,6 +159,7 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 	const src: string = preprocess(source, options);
 
 	let cursorPosition = 0;
+	let curlyBracketDepth = 0;
 
 	const consumeWhile = (predicate: (char: string) => boolean): string => {
 		let str = "";
@@ -244,11 +252,24 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 		}
 
 		// Try to match one of the tokens in the mapping table
-		for (const [char, token] of ORDERED_MAPPING_TABLE) {
-			const slice = src.slice(cursorPosition, cursorPosition + char.length);
-			if (slice === char) {
-				tokens.push(new Token(char, token));
-				cursorPosition += char.length;
+		for (const [seq, type] of ORDERED_MAPPING_TABLE) {
+			// inside an object literal, don't treat "}}" as expression-end
+			if (seq === "}}" && curlyBracketDepth > 0) {
+				continue;
+			}
+			const slice = src.slice(cursorPosition, cursorPosition + seq.length);
+			if (slice === seq) {
+				tokens.push(new Token(seq, type));
+
+				// possibly adjust the curly bracket depth
+				if (type === TOKEN_TYPES.OpenExpression) {
+					curlyBracketDepth = 0;
+				} else if (type === TOKEN_TYPES.OpenCurlyBracket) {
+					++curlyBracketDepth;
+				} else if (type === TOKEN_TYPES.CloseCurlyBracket) {
+					--curlyBracketDepth;
+				}
+				cursorPosition += seq.length;
 				continue main;
 			}
 		}
