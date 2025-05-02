@@ -47,6 +47,7 @@ const TEST_STRINGS = {
 
 	// Binary expressions
 	BINOP_EXPR: `{{ 1 % 2 }}{{ 1 < 2 }}{{ 1 > 2 }}{{ 1 >= 2 }}{{ 2 <= 2 }}{{ 2 == 2 }}{{ 2 != 3 }}{{ 2 + 3 }}`,
+	BINOP_EXPR_1: `{{ 1 ~ "+" ~ 2 ~ "=" ~ 3 ~ " is " ~ true }}`,
 
 	// Strings
 	STRINGS: `{{ 'Bye' }}{{ bos_token + '[INST] ' }}`,
@@ -884,6 +885,23 @@ const TEST_PARSED = {
 		{ value: "2", type: "NumericLiteral" },
 		{ value: "+", type: "AdditiveBinaryOperator" },
 		{ value: "3", type: "NumericLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	BINOP_EXPR_1: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: "~", type: "AdditiveBinaryOperator" },
+		{ value: "+", type: "StringLiteral" },
+		{ value: "~", type: "AdditiveBinaryOperator" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "~", type: "AdditiveBinaryOperator" },
+		{ value: "=", type: "StringLiteral" },
+		{ value: "~", type: "AdditiveBinaryOperator" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: "~", type: "AdditiveBinaryOperator" },
+		{ value: " is ", type: "StringLiteral" },
+		{ value: "~", type: "AdditiveBinaryOperator" },
+		{ value: "true", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
 
@@ -3388,6 +3406,7 @@ const TEST_CONTEXT = {
 
 	// Binary expressions
 	BINOP_EXPR: {},
+	BINOP_EXPR_1: {},
 
 	// Strings
 	STRINGS: {
@@ -3663,6 +3682,7 @@ const EXPECTED_OUTPUTS = {
 
 	// Binary expressions
 	BINOP_EXPR: "1truefalsefalsetruetruetrue5",
+	BINOP_EXPR_1: "1+2=3 is true",
 
 	// Strings
 	STRINGS: "Bye<s>[INST] ",
