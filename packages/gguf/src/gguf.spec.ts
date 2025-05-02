@@ -313,11 +313,7 @@ describe("gguf", () => {
 	});
 
 	it("should find the nearest quant (vision model)", () => {
-		const visionQuants = [
-			GGMLFileQuantizationType.Q8_0,
-			GGMLFileQuantizationType.F16,
-			GGMLFileQuantizationType.BF16,
-		];
+		const visionQuants = [GGMLFileQuantizationType.Q8_0, GGMLFileQuantizationType.F16, GGMLFileQuantizationType.BF16];
 		let nearestQuant;
 		// text = Q4_K_M
 		nearestQuant = findNearestQuantType(GGMLFileQuantizationType.Q4_K_M, visionQuants);
