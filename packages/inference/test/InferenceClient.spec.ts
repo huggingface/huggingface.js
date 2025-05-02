@@ -845,9 +845,23 @@ describe.skip("InferenceClient", () => {
 			it("endpoint - makes request to specified endpoint", async () => {
 				const ep = hf.endpoint("https://router.huggingface.co/hf-inference/models/openai-community/gpt2");
 				const { generated_text } = await ep.textGeneration({
-					inputs: "one plus two equals",
+					inputs: "one plus one is equal to",
+					parameters: {
+						max_new_tokens: 1,
+					}
 				});
-				assert.include(generated_text, "three");
+				assert.include(generated_text, "two");
+			});
+
+			it("endpoint - makes request to specified endpoint - alternative syntax", async () => {
+				const epClient = new InferenceClient(env.HF_TOKEN, { endpointUrl: "https://router.huggingface.co/hf-inference/models/openai-community/gpt2" });
+				const { generated_text } = await epClient.textGeneration({
+					inputs: "one plus one is equal to",
+					parameters: {
+						max_new_tokens: 1,
+					}
+				});
+				assert.include(generated_text, "two");
 			});
 
 			it("chatCompletion modelId - OpenAI Specs", async () => {
