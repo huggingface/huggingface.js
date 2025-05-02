@@ -484,6 +484,10 @@ export class Interpreter {
 		}
 
 		if (left instanceof UndefinedValue || right instanceof UndefinedValue) {
+			if (right instanceof UndefinedValue && ["in", "not in"].includes(node.operator.value)) {
+				// Special case: `anything in undefined` is `false` and `anything not in undefined` is `true`
+				return new BooleanValue(node.operator.value === "not in");
+			}
 			throw new Error("Cannot perform operation on undefined values");
 		} else if (left instanceof NullValue || right instanceof NullValue) {
 			throw new Error("Cannot perform operation on null values");
