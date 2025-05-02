@@ -294,7 +294,7 @@ describe.skip("InferenceClient", () => {
 					await hf.tableQuestionAnswering({
 						model: "google/tapas-base-finetuned-wtq",
 						inputs: {
-							query: "How many stars does the transformers repository have?",
+							question: "How many stars does the transformers repository have?",
 							table: {
 								Repository: ["Transformers", "Datasets", "Tokenizers"],
 								Stars: ["36542", "4512", "3934"],
@@ -488,7 +488,8 @@ describe.skip("InferenceClient", () => {
 				expect(
 					await hf.translation({
 						model: "t5-base",
-						inputs: ["My name is Wolfgang and I live in Berlin", "I work as programmer"],
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						inputs: ["My name is Wolfgang and I live in Berlin", "I work as programmer"] as any,
 					})
 				).toMatchObject([
 					{
@@ -505,7 +506,8 @@ describe.skip("InferenceClient", () => {
 						model: "facebook/bart-large-mnli",
 						inputs: [
 							"Hi, I recently bought a device from your company but it is not working as advertised and I would like to get reimbursed!",
-						],
+							// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						] as any,
 						parameters: { candidate_labels: ["refund", "legal", "faq"] },
 					})
 				).toEqual(
