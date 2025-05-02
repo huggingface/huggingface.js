@@ -1,4 +1,5 @@
 import type { TextToVideoInput } from "@huggingface/tasks";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping";
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import { makeRequestOptions } from "../../lib/makeRequestOptions";
 import type { FalAiQueueOutput } from "../../providers/fal-ai";
@@ -12,7 +13,7 @@ export type TextToVideoArgs = BaseArgs & TextToVideoInput;
 export type TextToVideoOutput = Blob;
 
 export async function textToVideo(args: TextToVideoArgs, options?: Options): Promise<TextToVideoOutput> {
-	const provider = args.provider ?? "hf-inference";
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "text-to-video");
 	const { data: response } = await innerRequest<FalAiQueueOutput | ReplicateOutput | NovitaOutput>(
 		args,

@@ -3,6 +3,7 @@ import type {
 	VisualQuestionAnsweringInputData,
 	VisualQuestionAnsweringOutput,
 } from "@huggingface/tasks";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping";
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options, RequestArgs } from "../../types";
 import { base64FromBytes } from "../../utils/base64FromBytes";
@@ -19,7 +20,8 @@ export async function visualQuestionAnswering(
 	args: VisualQuestionAnsweringArgs,
 	options?: Options
 ): Promise<VisualQuestionAnsweringOutput[number]> {
-	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "visual-question-answering");
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "visual-question-answering");
 	const reqArgs: RequestArgs = {
 		...args,
 		inputs: {

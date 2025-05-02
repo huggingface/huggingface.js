@@ -1,4 +1,5 @@
 import type { ObjectDetectionInput, ObjectDetectionOutput } from "@huggingface/tasks";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping";
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
 import { innerRequest } from "../../utils/request";
@@ -11,7 +12,8 @@ export type ObjectDetectionArgs = BaseArgs & (ObjectDetectionInput | LegacyImage
  * Recommended model: facebook/detr-resnet-50
  */
 export async function objectDetection(args: ObjectDetectionArgs, options?: Options): Promise<ObjectDetectionOutput> {
-	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "object-detection");
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "object-detection");
 	const payload = preparePayload(args);
 	const { data: res } = await innerRequest<ObjectDetectionOutput>(payload, providerHelper, {
 		...options,

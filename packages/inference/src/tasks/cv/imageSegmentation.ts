@@ -1,4 +1,5 @@
 import type { ImageSegmentationInput, ImageSegmentationOutput } from "@huggingface/tasks";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping";
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
 import { innerRequest } from "../../utils/request";
@@ -14,7 +15,8 @@ export async function imageSegmentation(
 	args: ImageSegmentationArgs,
 	options?: Options
 ): Promise<ImageSegmentationOutput> {
-	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "image-segmentation");
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "image-segmentation");
 	const payload = preparePayload(args);
 	const { data: res } = await innerRequest<ImageSegmentationOutput>(payload, providerHelper, {
 		...options,

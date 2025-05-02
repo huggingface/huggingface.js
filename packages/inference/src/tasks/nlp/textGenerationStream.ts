@@ -1,4 +1,5 @@
 import type { TextGenerationInput } from "@huggingface/tasks";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping";
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
 import { innerStreamingRequest } from "../../utils/request";
@@ -90,7 +91,8 @@ export async function* textGenerationStream(
 	args: BaseArgs & TextGenerationInput,
 	options?: Options
 ): AsyncGenerator<TextGenerationStreamOutput> {
-	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "text-generation");
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "text-generation");
 	yield* innerStreamingRequest<TextGenerationStreamOutput>(args, providerHelper, {
 		...options,
 		task: "text-generation",
