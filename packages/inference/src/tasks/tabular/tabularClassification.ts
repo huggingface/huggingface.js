@@ -26,7 +26,7 @@ export async function tabularClassification(
 	args: TabularClassificationArgs,
 	options?: Options
 ): Promise<TabularClassificationOutput> {
-	const provider = await resolveProvider(args.provider, args.model);
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "tabular-classification");
 	const { data: res } = await innerRequest<TabularClassificationOutput>(args, providerHelper, {
 		...options,

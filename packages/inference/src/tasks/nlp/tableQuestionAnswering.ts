@@ -13,7 +13,7 @@ export async function tableQuestionAnswering(
 	args: TableQuestionAnsweringArgs,
 	options?: Options
 ): Promise<TableQuestionAnsweringOutput[number]> {
-	const provider = await resolveProvider(args.provider, args.model);
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "table-question-answering");
 	const { data: res } = await innerRequest<TableQuestionAnsweringOutput | TableQuestionAnsweringOutput[number]>(
 		args,

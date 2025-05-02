@@ -13,7 +13,7 @@ export type TextToVideoArgs = BaseArgs & TextToVideoInput;
 export type TextToVideoOutput = Blob;
 
 export async function textToVideo(args: TextToVideoArgs, options?: Options): Promise<TextToVideoOutput> {
-	const provider = await resolveProvider(args.provider, args.model);
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "text-to-video");
 	const { data: response } = await innerRequest<FalAiQueueOutput | ReplicateOutput | NovitaOutput>(
 		args,

@@ -26,7 +26,7 @@ export async function tabularRegression(
 	args: TabularRegressionArgs,
 	options?: Options
 ): Promise<TabularRegressionOutput> {
-	const provider = await resolveProvider(args.provider, args.model);
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "tabular-regression");
 	const { data: res } = await innerRequest<TabularRegressionOutput>(args, providerHelper, {
 		...options,
