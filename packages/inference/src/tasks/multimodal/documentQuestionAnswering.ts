@@ -20,7 +20,7 @@ export async function documentQuestionAnswering(
 	args: DocumentQuestionAnsweringArgs,
 	options?: Options
 ): Promise<DocumentQuestionAnsweringOutput[number]> {
-	const provider = await resolveProvider(args.provider, args.model);
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "document-question-answering");
 	const reqArgs: RequestArgs = {
 		...args,

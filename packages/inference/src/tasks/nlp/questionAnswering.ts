@@ -14,7 +14,7 @@ export async function questionAnswering(
 	args: QuestionAnsweringArgs,
 	options?: Options
 ): Promise<QuestionAnsweringOutput[number]> {
-	const provider = await resolveProvider(args.provider, args.model);
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "question-answering");
 	const { data: res } = await innerRequest<QuestionAnsweringOutput | QuestionAnsweringOutput[number]>(
 		args,
