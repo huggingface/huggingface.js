@@ -81,6 +81,7 @@ const TEST_STRINGS = {
 	MEMBERSHIP: `|{{ 0 in arr }}|{{ 1 in arr }}|{{ true in arr }}|{{ false in arr }}|{{ 'a' in arr }}|{{ 'b' in arr }}|`,
 	MEMBERSHIP_NEGATION_1: `|{{ not 0 in arr }}|{{ not 1 in arr }}|{{ not true in arr }}|{{ not false in arr }}|{{ not 'a' in arr }}|{{ not 'b' in arr }}|`,
 	MEMBERSHIP_NEGATION_2: `|{{ 0 not in arr }}|{{ 1 not in arr }}|{{ true not in arr }}|{{ false not in arr }}|{{ 'a' not in arr }}|{{ 'b' not in arr }}|`,
+	MEMBERSHIP_UNDEFINED: `|{{ x is defined }}|{{ y is defined }}|{{ x in y }}|{{ y in x }}|{{ 1 in y }}|{{ 1 in x }}|`,
 
 	// Escaped characters
 	ESCAPED_CHARS: `{{ '\\n' }}{{ '\\t' }}{{ '\\'' }}{{ '\\"' }}{{ '\\\\' }}{{ '|\\n|\\t|\\'|\\"|\\\\|' }}`,
@@ -146,6 +147,7 @@ const TEST_STRINGS = {
 	// Ternary operator
 	TERNARY_OPERATOR: `|{{ 'a' if true else 'b' }}|{{ 'a' if false else 'b' }}|{{ 'a' if 1 + 1 == 2 else 'b' }}|{{ 'a' if 1 + 1 == 3 or 1 * 2 == 3 else 'b' }}|`,
 	TERNARY_SET: `{% set x = 1 if True else 2 %}{{ x }}`,
+	TERNARY_CONSECUTIVE: `{% set x = 1 if False else 2 if False else 3 %}{{ x }}`,
 
 	// Array literals
 	ARRAY_LITERALS: `{{ [1, true, 'hello', [1, 2, 3, 4], var] | length }}`,
@@ -1592,6 +1594,45 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 	],
+	MEMBERSHIP_UNDEFINED: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "x", type: "Identifier" },
+		{ value: "is", type: "Identifier" },
+		{ value: "defined", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "y", type: "Identifier" },
+		{ value: "is", type: "Identifier" },
+		{ value: "defined", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "x", type: "Identifier" },
+		{ value: "in", type: "Identifier" },
+		{ value: "y", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "y", type: "Identifier" },
+		{ value: "in", type: "Identifier" },
+		{ value: "x", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: "in", type: "Identifier" },
+		{ value: "y", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: "in", type: "Identifier" },
+		{ value: "x", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
 
 	// Escaped characters
 	ESCAPED_CHARS: [
@@ -2844,6 +2885,25 @@ const TEST_PARSED = {
 		{ value: "x", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
+	TERNARY_CONSECUTIVE: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Identifier" },
+		{ value: "x", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: "if", type: "Identifier" },
+		{ value: "False", type: "Identifier" },
+		{ value: "else", type: "Identifier" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "if", type: "Identifier" },
+		{ value: "False", type: "Identifier" },
+		{ value: "else", type: "Identifier" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "x", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
 
 	// Array literals
 	ARRAY_LITERALS: [
@@ -3291,6 +3351,7 @@ const TEST_CONTEXT = {
 	MEMBERSHIP_NEGATION_2: {
 		arr: [0, true, "a"],
 	},
+	MEMBERSHIP_UNDEFINED: {},
 
 	// Escaped characters
 	ESCAPED_CHARS: {},
@@ -3427,6 +3488,7 @@ const TEST_CONTEXT = {
 	// Ternary operator
 	TERNARY_OPERATOR: {},
 	TERNARY_SET: {},
+	TERNARY_CONSECUTIVE: {},
 
 	// Array literals
 	ARRAY_LITERALS: { var: true },
@@ -3528,6 +3590,7 @@ const EXPECTED_OUTPUTS = {
 	MEMBERSHIP: "|true|false|true|false|true|false|",
 	MEMBERSHIP_NEGATION_1: "|false|true|false|true|false|true|",
 	MEMBERSHIP_NEGATION_2: "|false|true|false|true|false|true|",
+	MEMBERSHIP_UNDEFINED: "|false|false|false|false|false|false|",
 
 	// Escaped characters
 	ESCAPED_CHARS: `\n\t'"\\|\n|\t|'|"|\\|`,
@@ -3593,6 +3656,7 @@ const EXPECTED_OUTPUTS = {
 	// Ternary operator
 	TERNARY_OPERATOR: `|a|b|a|b|`,
 	TERNARY_SET: `1`,
+	TERNARY_CONSECUTIVE: `3`,
 
 	// Array literals
 	ARRAY_LITERALS: `5`,
