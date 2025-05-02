@@ -67,7 +67,6 @@ export class ReplicateTextToImageTask extends ReplicateTask implements TextToIma
 	override preparePayload(params: BodyParams): Record<string, unknown> {
 		const payload = super.preparePayload(params);
 
-		// For Flux LoRAs, use black-forest-labs/flux-dev-lora
 		if (params.mapping?.adapter === "lora" && params.mapping.adapterWeightsPath) {
 			payload.input.lora_weights = `https://huggingface.co/${params.mapping.hfModelId}`;
 		}
