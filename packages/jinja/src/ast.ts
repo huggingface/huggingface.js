@@ -148,20 +148,6 @@ export class StringLiteral extends Literal<string> {
 }
 
 /**
- * Represents a boolean constant in the template.
- */
-export class BooleanLiteral extends Literal<boolean> {
-	override type = "BooleanLiteral";
-}
-
-/**
- * Represents null (none) in the template.
- */
-export class NullLiteral extends Literal<null> {
-	override type = "NullLiteral";
-}
-
-/**
  * Represents an array literal in the template.
  */
 export class ArrayLiteral extends Literal<Expression[]> {
