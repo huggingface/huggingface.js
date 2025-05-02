@@ -52,6 +52,7 @@ const TEST_STRINGS = {
 	STRINGS: `{{ 'Bye' }}{{ bos_token + '[INST] ' }}`,
 	STRINGS_1: `|{{ "test" }}|{{ "a" + 'b' + "c" }}|{{ '"' + "'" }}|{{ '\\'' }}|{{ "\\"" }}|`,
 	STRINGS_2: `|{{ "" | length }}|{{ "a" | length }}|{{ '' | length }}|{{ 'a' | length }}|`,
+	STRINGS_3: `|{{ '{{ "hi" }}' }}|{{ '{% if true %}{% endif %}' }}|`,
 
 	// Function calls
 	FUNCTIONS: `{{ func() }}{{ func(apple) }}{{ func(x, 'test', 2, false) }}`,
@@ -104,6 +105,9 @@ const TEST_STRINGS = {
 	FILTER_OPERATOR_12: `{{ messages | rejectattr('role', 'equalto', 'system') | length }}`,
 	FILTER_OPERATOR_13: `{{ tools | string }}`,
 
+	// Filter statements
+	FILTER_STATEMENTS: `{% filter upper %}text{% endfilter %}`,
+
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: `|{{ 1 and 2 }}|{{ 1 and 0 }}|{{ 0 and 1 }}|{{ 0 and 0 }}|{{ 1 or 2 }}|{{ 1 or 0 }}|{{ 0 or 1 }}|{{ 0 or 0 }}|{{ not 1 }}|{{ not 0 }}|`,
 	BOOLEAN_STRINGS: `|{{ 'a' and 'b' }}|{{ 'a' and '' }}|{{ '' and 'a' }}|{{ '' and '' }}|{{ 'a' or 'b' }}|{{ 'a' or '' }}|{{ '' or 'a' }}|{{ '' or '' }}|{{ not 'a' }}|{{ not '' }}|`,
@@ -148,6 +152,7 @@ const TEST_STRINGS = {
 	TERNARY_OPERATOR: `|{{ 'a' if true else 'b' }}|{{ 'a' if false else 'b' }}|{{ 'a' if 1 + 1 == 2 else 'b' }}|{{ 'a' if 1 + 1 == 3 or 1 * 2 == 3 else 'b' }}|`,
 	TERNARY_SET: `{% set x = 1 if True else 2 %}{{ x }}`,
 	TERNARY_CONSECUTIVE: `{% set x = 1 if False else 2 if False else 3 %}{{ x }}`,
+	TERNARY_SHORTCUT: `{{ 'foo' if false }}{{ 'bar' if true }}`,
 
 	// Array literals
 	ARRAY_LITERALS: `{{ [1, true, 'hello', [1, 2, 3, 4], var] | length }}`,
@@ -157,6 +162,7 @@ const TEST_STRINGS = {
 
 	// Object literals
 	OBJECT_LITERALS: `{{ { 'key': 'value', key: 'value2', "key3": [1, {'foo': 'bar'} ] }['key'] }}`,
+	OBJECT_LITERALS_1: `{{{'key': {'key': 'value'}}['key']['key']}}`,
 
 	// Array operators
 	ARRAY_OPERATORS: `{{ ([1, 2, 3] + [4, 5, 6]) | length }}`,
@@ -165,6 +171,7 @@ const TEST_STRINGS = {
 	MACROS: `{% macro hello(name) %}{{ 'Hello ' + name }}{% endmacro %}|{{ hello('Bob') }}|{{ hello('Alice') }}|`,
 	MACROS_1: `{% macro hello(name, suffix='.') %}{{ 'Hello ' + name + suffix }}{% endmacro %}|{{ hello('A') }}|{{ hello('B', '!') }}|{{ hello('C', suffix='?') }}|`,
 	MACROS_2: `{% macro fn(x, y=2, z=3) %}{{ x + ',' + y + ',' + z }}{% endmacro %}|{{ fn(1) }}|{{ fn(1, 0) }}|{{ fn(1, 0, -1) }}|{{ fn(1, y=0, z=-1) }}|{{ fn(1, z=0) }}|`,
+	MACROS_3: `{%- macro dummy(a, b='!') -%}{{ a }} {{ caller() }}{{ b }}{%- endmacro %}{%- call dummy('hello') -%}name{%- endcall -%}`,
 
 	// Context-specific keywords
 	CONTEXT_KEYWORDS: `{% if if in in %}a{% endif %}{% set if = "a" %}{% set in = "abc" %}{% if if in in %}b{% endif %}`,
@@ -944,6 +951,17 @@ const TEST_PARSED = {
 		{ value: "a", type: "StringLiteral" },
 		{ value: "|", type: "Pipe" },
 		{ value: "length", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
+	STRINGS_3: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: '{{ "hi" }}', type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "{% if true %}{% endif %}", type: "StringLiteral" },
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 	],
@@ -2014,6 +2032,18 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 	],
 
+	// Filter statements
+	FILTER_STATEMENTS: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "filter", type: "Identifier" },
+		{ value: "upper", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "text", type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endfilter", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+	],
+
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: [
 		{ value: "|", type: "Text" },
@@ -2904,6 +2934,18 @@ const TEST_PARSED = {
 		{ value: "x", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
 	],
+	TERNARY_SHORTCUT: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "foo", type: "StringLiteral" },
+		{ value: "if", type: "Identifier" },
+		{ value: "false", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "bar", type: "StringLiteral" },
+		{ value: "if", type: "Identifier" },
+		{ value: "true", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
 
 	// Array literals
 	ARRAY_LITERALS: [
@@ -2973,6 +3015,25 @@ const TEST_PARSED = {
 		{ value: "}", type: "CloseCurlyBracket" },
 		{ value: "]", type: "CloseSquareBracket" },
 		{ value: "}", type: "CloseCurlyBracket" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "key", type: "StringLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "}}", type: "CloseExpression" },
+	],
+	OBJECT_LITERALS_1: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "{", type: "OpenCurlyBracket" },
+		{ value: "key", type: "StringLiteral" },
+		{ value: ":", type: "Colon" },
+		{ value: "{", type: "OpenCurlyBracket" },
+		{ value: "key", type: "StringLiteral" },
+		{ value: ":", type: "Colon" },
+		{ value: "value", type: "StringLiteral" },
+		{ value: "}", type: "CloseCurlyBracket" },
+		{ value: "}", type: "CloseCurlyBracket" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "key", type: "StringLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
 		{ value: "[", type: "OpenSquareBracket" },
 		{ value: "key", type: "StringLiteral" },
 		{ value: "]", type: "CloseSquareBracket" },
@@ -3173,6 +3234,45 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 	],
+	MACROS_3: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "macro", type: "Identifier" },
+		{ value: "dummy", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "a", type: "Identifier" },
+		{ value: ",", type: "Comma" },
+		{ value: "b", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "!", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "a", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: " ", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "caller", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "b", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endmacro", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "call", type: "Identifier" },
+		{ value: "dummy", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "hello", type: "StringLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "name", type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endcall", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+	],
 
 	// Context-specific keywords
 	CONTEXT_KEYWORDS: [
@@ -3295,6 +3395,7 @@ const TEST_CONTEXT = {
 	},
 	STRINGS_1: {},
 	STRINGS_2: {},
+	STRINGS_3: {},
 
 	// Function calls
 	FUNCTIONS: {
@@ -3426,6 +3527,9 @@ const TEST_CONTEXT = {
 		tools: [{ name: "some_tool", arguments: { some_name: "string" } }],
 	},
 
+	// Filter statements
+	FILTER_STATEMENTS: {},
+
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: {},
 	BOOLEAN_STRINGS: {},
@@ -3489,6 +3593,7 @@ const TEST_CONTEXT = {
 	TERNARY_OPERATOR: {},
 	TERNARY_SET: {},
 	TERNARY_CONSECUTIVE: {},
+	TERNARY_SHORTCUT: {},
 
 	// Array literals
 	ARRAY_LITERALS: { var: true },
@@ -3500,6 +3605,7 @@ const TEST_CONTEXT = {
 	OBJECT_LITERALS: {
 		key: "key2",
 	},
+	OBJECT_LITERALS_1: {},
 
 	// Array operators
 	ARRAY_OPERATORS: {},
@@ -3508,6 +3614,7 @@ const TEST_CONTEXT = {
 	MACROS: {},
 	MACROS_1: {},
 	MACROS_2: {},
+	MACROS_3: {},
 
 	// Context-specific keywords
 	CONTEXT_KEYWORDS: {},
@@ -3561,6 +3668,7 @@ const EXPECTED_OUTPUTS = {
 	STRINGS: "Bye<s>[INST] ",
 	STRINGS_1: `|test|abc|"'|'|"|`,
 	STRINGS_2: `|0|1|0|1|`,
+	STRINGS_3: `|{{ "hi" }}|{% if true %}{% endif %}|`,
 
 	// Function calls
 	FUNCTIONS: "014",
@@ -3613,6 +3721,9 @@ const EXPECTED_OUTPUTS = {
 	FILTER_OPERATOR_12: `2`,
 	FILTER_OPERATOR_13: `[{"name": "some_tool", "arguments": {"some_name": "string"}}]`,
 
+	// Filter statements
+	FILTER_STATEMENTS: `TEXT`,
+
 	// Logical operators between non-Booleans
 	BOOLEAN_NUMERICAL: `|2|0|0|0|1|1|1|0|false|true|`,
 	BOOLEAN_STRINGS: `|b||||a|a|a||false|true|`,
@@ -3657,6 +3768,7 @@ const EXPECTED_OUTPUTS = {
 	TERNARY_OPERATOR: `|a|b|a|b|`,
 	TERNARY_SET: `1`,
 	TERNARY_CONSECUTIVE: `3`,
+	TERNARY_SHORTCUT: `bar`,
 
 	// Array literals
 	ARRAY_LITERALS: `5`,
@@ -3666,6 +3778,7 @@ const EXPECTED_OUTPUTS = {
 
 	// Object literals
 	OBJECT_LITERALS: `value`,
+	OBJECT_LITERALS_1: `value`,
 
 	// Array operators
 	ARRAY_OPERATORS: `6`,
@@ -3674,6 +3787,7 @@ const EXPECTED_OUTPUTS = {
 	MACROS: `|Hello Bob|Hello Alice|`,
 	MACROS_1: `|Hello A.|Hello B!|Hello C?|`,
 	MACROS_2: `|1,2,3|1,0,3|1,0,-1|1,0,-1|1,2,0|`,
+	MACROS_3: `hello name!`,
 
 	// Context-specific keywords
 	CONTEXT_KEYWORDS: `b`,
