@@ -7,6 +7,8 @@ import {
 	ggufAllShards,
 	parseGgufShardFilename,
 	parseGGUFQuantLabel,
+	GGUF_QUANT_ORDER,
+	findNearestQuantType,
 } from "./gguf";
 import fs from "node:fs";
 
@@ -46,7 +48,7 @@ describe("gguf", () => {
 			tensor_count: 291n,
 			kv_count: 19n,
 			"general.architecture": "llama",
-			"general.file_type": GGMLFileQuantizationType.MOSTLY_Q2_K,
+			"general.file_type": GGMLFileQuantizationType.Q2_K,
 			"general.name": "LLaMA v2",
 			"general.quantization_version": 2,
 			"llama.attention.head_count": 32,
@@ -105,7 +107,7 @@ describe("gguf", () => {
 			tensor_count: 291n,
 			kv_count: 24n,
 			"general.architecture": "llama",
-			"general.file_type": GGMLFileQuantizationType.MOSTLY_Q5_K_M,
+			"general.file_type": GGMLFileQuantizationType.Q5_K_M,
 			"general.name": "mistralai_mistral-7b-instruct-v0.2",
 			"general.quantization_version": 2,
 			"llama.attention.head_count": 32,
@@ -143,7 +145,7 @@ describe("gguf", () => {
 			tensor_count: 164n,
 			kv_count: 21n,
 			"general.architecture": "gemma",
-			"general.file_type": GGMLFileQuantizationType.MOSTLY_Q4_K_M,
+			"general.file_type": GGMLFileQuantizationType.Q4_K_M,
 			"general.name": "gemma-2b-it",
 			"general.quantization_version": 2,
 			"gemma.attention.head_count": 8,
@@ -180,7 +182,7 @@ describe("gguf", () => {
 			tensor_count: 197n,
 			kv_count: 23n,
 			"general.architecture": "bert",
-			"general.file_type": GGMLFileQuantizationType.MOSTLY_F16,
+			"general.file_type": GGMLFileQuantizationType.F16,
 			"general.name": "bge-small-en-v1.5",
 			"bert.attention.causal": false,
 			"bert.attention.head_count": 12,
@@ -280,12 +282,51 @@ describe("gguf", () => {
 		expect(parseGGUFQuantLabel("Codestral-22B-v0.1-Q2_K.gguf")).toEqual("Q2_K");
 		expect(parseGGUFQuantLabel("Codestral-22B-v0.1.gguf")).toEqual(undefined);
 		expect(parseGGUFQuantLabel("Codestral-22B-v0.1-F32-Q2_K.gguf")).toEqual("Q2_K"); // gguf name with two quant labels [F32, Q2_K]
-		expect(parseGGUFQuantLabel("Codestral-22B-v0.1-IQ3_XS.gguf")).toEqual(undefined); // TODO: investigate IQ3_XS
+		expect(parseGGUFQuantLabel("Codestral-22B-v0.1-IQ3_XS.gguf")).toEqual("IQ3_XS");
 		expect(parseGGUFQuantLabel("Codestral-22B-v0.1-Q4_0_4_4.gguf")).toEqual("Q4_0"); // TODO: investigate Q4_0_4_4
 	});
 
 	it("calculate tensor data offset", async () => {
 		const { tensorDataOffset } = await gguf(URL_LLAMA);
 		expect(tensorDataOffset).toEqual(741056n);
+	});
+
+	// Quantization handler
+
+	it("should have GGUF_QUANT_ORDER in sync with GGMLQuantizationType enum", () => {
+		const enumValues = Object.values(GGMLQuantizationType).filter((value) => typeof value === "number") as number[];
+		const checkValues = new Set(GGUF_QUANT_ORDER);
+		for (const value of enumValues) {
+			expect(checkValues).toContain(value);
+		}
+	});
+
+	it("should find the nearest quant", () => {
+		const quant = GGMLFileQuantizationType.IQ2_M;
+		const availableQuants = [
+			GGMLFileQuantizationType.Q2_K,
+			GGMLFileQuantizationType.Q4_K_M,
+			GGMLFileQuantizationType.Q8_0,
+		];
+		const nearestQuant = findNearestQuantType(quant, availableQuants);
+		expect(nearestQuant).toEqual(GGMLFileQuantizationType.Q2_K);
+	});
+
+	it("should find the nearest quant (vision model)", () => {
+		const visionQuants = [
+			GGMLFileQuantizationType.Q8_0,
+			GGMLFileQuantizationType.F16,
+			GGMLFileQuantizationType.BF16,
+		];
+		let nearestQuant;
+		// text = Q4_K_M
+		nearestQuant = findNearestQuantType(GGMLFileQuantizationType.Q4_K_M, visionQuants);
+		expect(nearestQuant).toEqual(GGMLFileQuantizationType.Q8_0);
+		// text = Q8_0
+		nearestQuant = findNearestQuantType(GGMLFileQuantizationType.Q8_0, visionQuants);
+		expect(nearestQuant).toEqual(GGMLFileQuantizationType.Q8_0);
+		// text = F16
+		nearestQuant = findNearestQuantType(GGMLFileQuantizationType.F16, visionQuants);
+		expect(nearestQuant).toEqual(GGMLFileQuantizationType.F16);
 	});
 });

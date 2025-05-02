@@ -124,6 +124,14 @@ export const GGUF_QUANT_DESCRIPTIONS: Record<GGMLQuantizationType, { txt: string
 		txt: "16-bit shortened version of the 32-bit IEEE 754 single-precision floating-point number.",
 		src_url: "https://en.wikipedia.org/wiki/Bfloat16_floating-point_format",
 	},
+	[GGMLQuantizationType.TQ1_0]: {
+		txt: "Ternary quantization.",
+		src_url: "https://github.com/ggml-org/llama.cpp/pull/8151",
+	},
+	[GGMLQuantizationType.TQ2_0]: {
+		txt: "Ternary quantization.",
+		src_url: "https://github.com/ggml-org/llama.cpp/pull/8151",
+	},
 };
 
 const QK_K = 256;

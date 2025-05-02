@@ -4,9 +4,9 @@ import { isBackend } from "./utils/isBackend";
 import { promisesQueue } from "./utils/promisesQueue";
 
 export type { MetadataBaseValue, MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
-export { GGUFValueType, GGMLFileQuantizationType, GGMLQuantizationType, Architecture } from "./types";
+export { GGUFValueType, GGMLQuantizationType, Architecture } from "./types";
 export { GGUF_QUANT_DESCRIPTIONS } from "./quant-descriptions";
-export { parseGGUFQuantLabel, GGUF_QUANT_RE, GGUF_QUANT_RE_GLOBAL } from "@huggingface/tasks";
+export { parseGGUFQuantLabel, GGUF_QUANT_RE, GGUF_QUANT_RE_GLOBAL, GGUF_QUANT_ORDER, findNearestQuantType, GGMLFileQuantizationType } from "@huggingface/tasks";
 
 export const RE_GGUF_FILE = /\.gguf$/;
 export const RE_GGUF_SHARD_FILE = /^(?<prefix>.*?)-(?<shard>\d{5})-of-(?<total>\d{5})\.gguf$/;
