@@ -5,10 +5,8 @@ export const TOKEN_TYPES = Object.freeze({
 	Text: "Text", // The text between Jinja statements or expressions
 
 	NumericLiteral: "NumericLiteral", // e.g., 123
-	BooleanLiteral: "BooleanLiteral", // true or false
-	NullLiteral: "NullLiteral", // none
 	StringLiteral: "StringLiteral", // 'string'
-	Identifier: "Identifier", // Variables, functions, etc.
+	Identifier: "Identifier", // Variables, functions, statements, booleans, etc.
 	Equals: "Equals", // =
 	OpenParen: "OpenParen", // (
 	CloseParen: "CloseParen", // )
@@ -30,66 +28,9 @@ export const TOKEN_TYPES = Object.freeze({
 	MultiplicativeBinaryOperator: "MultiplicativeBinaryOperator", // * / %
 	ComparisonBinaryOperator: "ComparisonBinaryOperator", // < > <= >= == !=
 	UnaryOperator: "UnaryOperator", // ! - +
-
-	// Keywords
-	Set: "Set",
-	If: "If",
-	For: "For",
-	In: "In",
-	Is: "Is",
-	NotIn: "NotIn",
-	Else: "Else",
-	EndSet: "EndSet",
-	EndIf: "EndIf",
-	ElseIf: "ElseIf",
-	EndFor: "EndFor",
-	And: "And",
-	Or: "Or",
-	Not: "UnaryOperator",
-	Macro: "Macro",
-	EndMacro: "EndMacro",
-	Break: "Break",
-	Continue: "Continue",
 });
 
 export type TokenType = keyof typeof TOKEN_TYPES;
-
-/**
- * Constant lookup for keywords and known identifiers + symbols.
- */
-const KEYWORDS = Object.freeze({
-	set: TOKEN_TYPES.Set,
-	for: TOKEN_TYPES.For,
-	in: TOKEN_TYPES.In,
-	is: TOKEN_TYPES.Is,
-	if: TOKEN_TYPES.If,
-	else: TOKEN_TYPES.Else,
-	endset: TOKEN_TYPES.EndSet,
-	endif: TOKEN_TYPES.EndIf,
-	elif: TOKEN_TYPES.ElseIf,
-	endfor: TOKEN_TYPES.EndFor,
-	and: TOKEN_TYPES.And,
-	or: TOKEN_TYPES.Or,
-	not: TOKEN_TYPES.Not,
-	"not in": TOKEN_TYPES.NotIn,
-	macro: TOKEN_TYPES.Macro,
-	endmacro: TOKEN_TYPES.EndMacro,
-	break: TOKEN_TYPES.Break,
-	continue: TOKEN_TYPES.Continue,
-
-	// Literals
-	true: TOKEN_TYPES.BooleanLiteral,
-	false: TOKEN_TYPES.BooleanLiteral,
-	none: TOKEN_TYPES.NullLiteral,
-
-	// NOTE: According to the Jinja docs: The special constants true, false, and none are indeed lowercase.
-	// Because that caused confusion in the past, (True used to expand to an undefined variable that was considered false),
-	// all three can now also be written in title case (True, False, and None). However, for consistency, (all Jinja identifiers are lowercase)
-	// you should use the lowercase versions.
-	True: TOKEN_TYPES.BooleanLiteral,
-	False: TOKEN_TYPES.BooleanLiteral,
-	None: TOKEN_TYPES.NullLiteral,
-});
 
 /**
  * Represents a single token in the template.
@@ -279,8 +220,6 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 			switch (lastTokenType) {
 				case TOKEN_TYPES.Identifier:
 				case TOKEN_TYPES.NumericLiteral:
-				case TOKEN_TYPES.BooleanLiteral:
-				case TOKEN_TYPES.NullLiteral:
 				case TOKEN_TYPES.StringLiteral:
 				case TOKEN_TYPES.CloseParen:
 				case TOKEN_TYPES.CloseSquareBracket:
@@ -328,22 +267,9 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 			continue;
 		}
 		if (isWord(char)) {
+			// consume any word characters and always classify as Identifier
 			const word = consumeWhile(isWord);
-
-			// Check for special/reserved keywords
-			// NOTE: We use Object.hasOwn() to avoid matching `.toString()` and other Object methods
-			const type = Object.hasOwn(KEYWORDS, word) ? KEYWORDS[word as keyof typeof KEYWORDS] : TOKEN_TYPES.Identifier;
-
-			// Special case of not in:
-			// If the previous token was a "not", and this token is "in"
-			// then we want to combine them into a single token
-			if (type === TOKEN_TYPES.In && tokens.at(-1)?.type === TOKEN_TYPES.Not) {
-				tokens.pop();
-				tokens.push(new Token("not in", TOKEN_TYPES.NotIn));
-			} else {
-				tokens.push(new Token(word, type));
-			}
-
+			tokens.push(new Token(word, TOKEN_TYPES.Identifier));
 			continue;
 		}
 

@@ -11,7 +11,6 @@ import type {
 	Identifier,
 	NumericLiteral,
 	StringLiteral,
-	BooleanLiteral,
 	ArrayLiteral,
 	TupleLiteral,
 	ObjectLiteral,
@@ -170,11 +169,8 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 	switch (node.type) {
 		case "Identifier":
 			return (node as Identifier).value;
-		case "NullLiteral":
-			return "none";
 		case "NumericLiteral":
-		case "BooleanLiteral":
-			return `${(node as NumericLiteral | BooleanLiteral).value}`;
+			return `${(node as NumericLiteral).value}`;
 		case "StringLiteral":
 			return JSON.stringify((node as StringLiteral).value);
 		case "BinaryExpression": {

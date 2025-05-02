@@ -1,8 +1,6 @@
 import type {
 	NumericLiteral,
 	StringLiteral,
-	BooleanLiteral,
-	NullLiteral,
 	ArrayLiteral,
 	Statement,
 	Program,
@@ -24,7 +22,7 @@ import type {
 	Expression,
 	SelectExpression,
 } from "./ast";
-import { slice, titleCase } from "./utils";
+import { range, slice, titleCase } from "./utils";
 
 export type AnyRuntimeValue =
 	| NumericValue
@@ -426,6 +424,25 @@ export class Environment {
 			return new UndefinedValue();
 		}
 	}
+}
+
+export function setupGlobals(env: Environment) {
+	// Declare global variables
+	env.set("false", false);
+	env.set("true", true);
+	env.set("none", null);
+	env.set("raise_exception", (args: string) => {
+		throw new Error(args);
+	});
+	env.set("range", range);
+
+	// NOTE: According to the Jinja docs: The special constants true, false, and none are indeed lowercase.
+	// Because that caused confusion in the past, (True used to expand to an undefined variable that was considered false),
+	// all three can now also be written in title case (True, False, and None). However, for consistency, (all Jinja identifiers are lowercase)
+	// you should use the lowercase versions.
+	env.set("True", true);
+	env.set("False", false);
+	env.set("None", null);
 }
 
 export class Interpreter {
@@ -1163,10 +1180,6 @@ export class Interpreter {
 				return new NumericValue(Number((statement as NumericLiteral).value));
 			case "StringLiteral":
 				return new StringValue((statement as StringLiteral).value);
-			case "BooleanLiteral":
-				return new BooleanValue((statement as BooleanLiteral).value);
-			case "NullLiteral":
-				return new NullValue((statement as NullLiteral).value);
 			case "ArrayLiteral":
 				return new ArrayValue((statement as ArrayLiteral).value.map((x) => this.evaluate(x, environment)));
 			case "TupleLiteral":
