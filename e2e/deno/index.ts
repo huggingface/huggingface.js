@@ -16,8 +16,8 @@ if (token) {
 	console.log(tokenInfo);
 
 	const result = await hf.chatCompletion({
-		model: "microsoft/Phi-3-mini-4k-instruct",
-		messages: [{ role: "user", content: "How high is the Eiffel Tower?" }],
+		model: "meta-llama/Llama-3.2-1B-Instruct",
+		messages: [{ role: "user", content: "Can you summarize the Eiffel Tower?" }],
 		max_tokens: 10,
 	});
 
