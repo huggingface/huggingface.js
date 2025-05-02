@@ -12,7 +12,7 @@ export type ImageToImageArgs = BaseArgs & ImageToImageInput;
  * Recommended model: lllyasviel/sd-controlnet-depth
  */
 export async function imageToImage(args: ImageToImageArgs, options?: Options): Promise<Blob> {
-	const provider = await resolveProvider(args.provider, args.model);
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "image-to-image");
 	let reqArgs: RequestArgs;
 	if (!args.parameters) {
