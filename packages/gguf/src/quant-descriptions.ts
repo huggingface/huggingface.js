@@ -171,6 +171,6 @@ export const GGML_QUANT_SIZES = {
 	[GGMLQuantizationType.F64]: calcBPW(1, 8),
 	[GGMLQuantizationType.IQ1_M]: calcBPW(256, QK_K / 8 + QK_K / 16 + QK_K / 32),
 	[GGMLQuantizationType.BF16]: calcBPW(1, 2),
-	// [GGMLQuantizationType.TQ1_0]:   calcBPW(256, 2 + 4 * 13),
-	// [GGMLQuantizationType.TQ2_0]:   calcBPW(256, 2 + 64),
+	[GGMLQuantizationType.TQ1_0]: calcBPW(256, 2 + 4 * 13),
+	[GGMLQuantizationType.TQ2_0]: calcBPW(256, 2 + 64),
 };
