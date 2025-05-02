@@ -163,6 +163,10 @@ const TEST_STRINGS = {
 	MACROS: `{% macro hello(name) %}{{ 'Hello ' + name }}{% endmacro %}|{{ hello('Bob') }}|{{ hello('Alice') }}|`,
 	MACROS_1: `{% macro hello(name, suffix='.') %}{{ 'Hello ' + name + suffix }}{% endmacro %}|{{ hello('A') }}|{{ hello('B', '!') }}|{{ hello('C', suffix='?') }}|`,
 	MACROS_2: `{% macro fn(x, y=2, z=3) %}{{ x + ',' + y + ',' + z }}{% endmacro %}|{{ fn(1) }}|{{ fn(1, 0) }}|{{ fn(1, 0, -1) }}|{{ fn(1, y=0, z=-1) }}|{{ fn(1, z=0) }}|`,
+
+	// Context-specific keywords
+	CONTEXT_KEYWORDS: `{% if if in in %}a{% endif %}{% set if = "a" %}{% set in = "abc" %}{% if if in in %}b{% endif %}`,
+	CONTEXT_KEYWORDS_1: `|{{ if }}|{% set if = 2 %}{% if if == 2 %}{{ if }}{% endif %}|`,
 };
 
 const TEST_PARSED = {
@@ -3109,6 +3113,68 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 	],
+
+	// Context-specific keywords
+	CONTEXT_KEYWORDS: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "if", type: "Identifier" },
+		{ value: "if", type: "Identifier" },
+		{ value: "in", type: "Identifier" },
+		{ value: "in", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "a", type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endif", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Identifier" },
+		{ value: "if", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "a", type: "StringLiteral" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Identifier" },
+		{ value: "in", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "abc", type: "StringLiteral" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "if", type: "Identifier" },
+		{ value: "if", type: "Identifier" },
+		{ value: "in", type: "Identifier" },
+		{ value: "in", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "b", type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endif", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+	],
+	CONTEXT_KEYWORDS_1: [
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "if", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Identifier" },
+		{ value: "if", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "if", type: "Identifier" },
+		{ value: "if", type: "Identifier" },
+		{ value: "==", type: "ComparisonBinaryOperator" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "if", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endif", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "|", type: "Text" },
+	],
 };
 
 const TEST_CONTEXT = {
@@ -3380,6 +3446,10 @@ const TEST_CONTEXT = {
 	MACROS: {},
 	MACROS_1: {},
 	MACROS_2: {},
+
+	// Context-specific keywords
+	CONTEXT_KEYWORDS: {},
+	CONTEXT_KEYWORDS_1: {},
 };
 
 const EXPECTED_OUTPUTS = {
@@ -3540,6 +3610,10 @@ const EXPECTED_OUTPUTS = {
 	MACROS: `|Hello Bob|Hello Alice|`,
 	MACROS_1: `|Hello A.|Hello B!|Hello C?|`,
 	MACROS_2: `|1,2,3|1,0,3|1,0,-1|1,0,-1|1,2,0|`,
+
+	// Context-specific keywords
+	CONTEXT_KEYWORDS: `b`,
+	CONTEXT_KEYWORDS_1: `||2|`,
 };
 
 describe("Templates", () => {
