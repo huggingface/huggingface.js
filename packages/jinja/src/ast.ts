@@ -200,15 +200,28 @@ export class FilterExpression extends Expression {
 	}
 }
 
+export class FilterStatement extends Statement {
+	override type = "FilterStatement";
+
+	constructor(
+		public filter: Identifier | CallExpression,
+		public body: Statement[]
+	) {
+		super();
+	}
+}
+
 /**
  * An operation which filters a sequence of objects by applying a test to each object,
  * and only selecting the objects with the test succeeding.
+ *
+ * It may also be used as a shortcut for a ternary operator.
  */
 export class SelectExpression extends Expression {
 	override type = "SelectExpression";
 
 	constructor(
-		public iterable: Expression,
+		public lhs: Expression,
 		public test: Expression
 	) {
 		super();
@@ -273,6 +286,18 @@ export class KeywordArgumentExpression extends Expression {
 	constructor(
 		public key: Identifier,
 		public value: Expression
+	) {
+		super();
+	}
+}
+
+export class CallStatement extends Statement {
+	override type = "CallStatement";
+
+	constructor(
+		public call: CallExpression,
+		public params: Expression[],
+		public body: Statement[]
 	) {
 		super();
 	}

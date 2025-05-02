@@ -21,6 +21,8 @@ import type {
 	Macro,
 	Expression,
 	SelectExpression,
+	CallStatement,
+	FilterStatement,
 } from "./ast";
 import { range, slice, titleCase } from "./utils";
 
@@ -491,6 +493,9 @@ export class Interpreter {
 			throw new Error("Cannot perform operation on undefined values");
 		} else if (left instanceof NullValue || right instanceof NullValue) {
 			throw new Error("Cannot perform operation on null values");
+		} else if (node.operator.value === "~") {
+			// toString and concatenation
+			return new StringValue(left.value.toString() + right.value.toString());
 		} else if (left instanceof NumericValue && right instanceof NumericValue) {
 			// Evaulate pure numeric operations with binary operators.
 			switch (node.operator.value) {
@@ -583,12 +588,7 @@ export class Interpreter {
 		return [positionalArguments, keywordArguments];
 	}
 
-	/**
-	 * Evaluates expressions following the filter operation type.
-	 */
-	private evaluateFilterExpression(node: FilterExpression, environment: Environment): AnyRuntimeValue {
-		const operand = this.evaluate(node.operand, environment);
-
+	private applyFilter(operand: AnyRuntimeValue, filterNode: Identifier | CallExpression, environment: Environment) {
 		// For now, we only support the built-in filters
 		// TODO: Add support for non-identifier filters
 		//   e.g., functions which return filters: {{ numbers | select("odd") }}
@@ -601,8 +601,8 @@ export class Interpreter {
 
 		// https://jinja.palletsprojects.com/en/3.0.x/templates/#list-of-builtin-filters
 
-		if (node.filter.type === "Identifier") {
-			const filter = node.filter as Identifier;
+		if (filterNode.type === "Identifier") {
+			const filter = filterNode as Identifier;
 
 			if (filter.value === "tojson") {
 				return new StringValue(toJSON(operand));
@@ -693,8 +693,8 @@ export class Interpreter {
 				}
 			}
 			throw new Error(`Cannot apply filter "${filter.value}" to type: ${operand.type}`);
-		} else if (node.filter.type === "CallExpression") {
-			const filter = node.filter as CallExpression;
+		} else if (filterNode.type === "CallExpression") {
+			const filter = filterNode as CallExpression;
 
 			if (filter.callee.type !== "Identifier") {
 				throw new Error(`Unknown filter: ${filter.callee.type}`);
@@ -821,7 +821,15 @@ export class Interpreter {
 				throw new Error(`Cannot apply filter "${filterName}" to type: ${operand.type}`);
 			}
 		}
-		throw new Error(`Unknown filter: ${node.filter.type}`);
+		throw new Error(`Unknown filter: ${filterNode.type}`);
+	}
+
+	/**
+	 * Evaluates expressions following the filter operation type.
+	 */
+	private evaluateFilterExpression(node: FilterExpression, environment: Environment): AnyRuntimeValue {
+		const operand = this.evaluate(node.operand, environment);
+		return this.applyFilter(operand, node.filter, environment);
 	}
 
 	/**
@@ -840,6 +848,17 @@ export class Interpreter {
 		}
 		const result = test(operand);
 		return new BooleanValue(node.negate ? !result : result);
+	}
+
+	/**
+	 * Evaluates expressions following the select operation type.
+	 */
+	private evaluateSelectExpression(node: SelectExpression, environment: Environment): AnyRuntimeValue {
+		const predicate = this.evaluate(node.test, environment);
+		if (!predicate.__bool__().value) {
+			return new UndefinedValue();
+		}
+		return this.evaluate(node.lhs, environment);
 	}
 
 	/**
@@ -1003,7 +1022,7 @@ export class Interpreter {
 		let test, iterable;
 		if (node.iterable.type === "SelectExpression") {
 			const select = node.iterable as SelectExpression;
-			iterable = this.evaluate(select.iterable, scope);
+			iterable = this.evaluate(select.lhs, scope);
 			test = select.test;
 		} else {
 			iterable = this.evaluate(node.iterable, scope);
@@ -1156,8 +1175,18 @@ export class Interpreter {
 		return new NullValue();
 	}
 
+	private evaluateCallStatement(node: CallStatement, environment: Environment): AnyRuntimeValue {
+		// TODO implement this
+		throw new Error("Call statements are not yet implemented");
+	}
+
+	private evaluateFilterStatement(node: FilterStatement, environment: Environment): AnyRuntimeValue {
+		const rendered = this.evaluateBlock(node.body, environment);
+		return this.applyFilter(rendered, node.filter, environment);
+	}
+
 	evaluate(statement: Statement | undefined, environment: Environment): AnyRuntimeValue {
-		if (statement === undefined) return new UndefinedValue();
+		if (!statement) return new UndefinedValue();
 
 		switch (statement.type) {
 			// Program
@@ -1173,6 +1202,8 @@ export class Interpreter {
 				return this.evaluateFor(statement as For, environment);
 			case "Macro":
 				return this.evaluateMacro(statement as Macro, environment);
+			case "CallStatement":
+				return this.evaluateCallStatement(statement as CallStatement, environment);
 
 			case "Break":
 				throw new BreakControl();
@@ -1212,9 +1243,12 @@ export class Interpreter {
 				return this.evaluateBinaryExpression(statement as BinaryExpression, environment);
 			case "FilterExpression":
 				return this.evaluateFilterExpression(statement as FilterExpression, environment);
+			case "FilterStatement":
+				return this.evaluateFilterStatement(statement as FilterStatement, environment);
 			case "TestExpression":
 				return this.evaluateTestExpression(statement as TestExpression, environment);
-
+			case "SelectExpression":
+				return this.evaluateSelectExpression(statement as SelectExpression, environment);
 			default:
 				throw new SyntaxError(`Unknown node type: ${statement.type}`);
 		}

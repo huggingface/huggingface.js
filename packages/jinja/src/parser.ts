@@ -24,6 +24,8 @@ import {
 	TupleLiteral,
 	Macro,
 	SelectExpression,
+	CallStatement,
+	FilterStatement,
 } from "./ast";
 
 /**
@@ -130,7 +132,8 @@ export function parse(tokens: Token[]): Program {
 				expectIdentifier("endfor");
 				expect(TOKEN_TYPES.CloseStatement, "Expected %} token");
 				break;
-
+			case "call":
+				throw new SyntaxError(`Call statements are not supported yet`);
 			case "break":
 				++current;
 				expect(TOKEN_TYPES.CloseStatement, "Expected closing statement token");
@@ -140,6 +143,22 @@ export function parse(tokens: Token[]): Program {
 				++current;
 				expect(TOKEN_TYPES.CloseStatement, "Expected closing statement token");
 				result = new Continue();
+				break;
+			case "filter":
+				++current; // consume 'filter'
+				let filterNode = parsePrimaryExpression();
+				if (filterNode instanceof Identifier && is(TOKEN_TYPES.OpenParen)) {
+					filterNode = parseCallExpression(filterNode);
+				}
+				expect(TOKEN_TYPES.CloseStatement, "Expected closing statement token");
+				const filterBody: Statement[] = [];
+				while (!isStatement("endfilter")) {
+					filterBody.push(parseAny());
+				}
+				expect(TOKEN_TYPES.OpenStatement, "Expected '{%'");
+				expectIdentifier("endfilter");
+				expect(TOKEN_TYPES.CloseStatement, "Expected '%}'");
+				result = new FilterStatement(filterNode as Identifier | CallExpression, filterBody);
 				break;
 			default:
 				throw new SyntaxError(`Unknown statement type: ${name}`);
@@ -296,16 +315,16 @@ export function parse(tokens: Token[]): Program {
 		if (isIdentifier("if")) {
 			// Ternary expression
 			++current; // consume 'if'
-			const predicate = parseLogicalOrExpression();
+			const test = parseLogicalOrExpression();
 
 			if (isIdentifier("else")) {
 				// Ternary expression with else
 				++current; // consume 'else'
-				const b = parseLogicalOrExpression();
-				return new If(predicate, [a], [b]);
+				const alternate = parseIfExpression(); // recurse to support chained ternaries
+				return new If(test, [a], [alternate]);
 			} else {
 				// Select expression on iterable
-				return new SelectExpression(a, predicate);
+				return new SelectExpression(a, test);
 			}
 		}
 		return a;

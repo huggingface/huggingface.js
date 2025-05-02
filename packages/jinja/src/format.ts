@@ -22,6 +22,8 @@ import type {
 	LogicalNegationExpression,
 	SliceExpression,
 	KeywordArgumentExpression,
+	CallStatement,
+	FilterStatement,
 } from "./ast";
 
 const NEWLINE = "\n";
@@ -65,6 +67,10 @@ function formatStatement(node: Statement, depth: number, indentStr: string): str
 			return pad + createStatement("break");
 		case "Continue":
 			return pad + createStatement("continue");
+		case "CallStatement":
+			return formatCallStatement(node as CallStatement, depth, indentStr);
+		case "FilterStatement":
+			return formatFilterStatement(node as FilterStatement, depth, indentStr);
 		default:
 			return pad + "{{- " + formatExpression(node as Expression) + " -}}";
 	}
@@ -118,7 +124,7 @@ function formatFor(node: For, depth: number, indentStr: string): string {
 	if (node.iterable.type === "SelectExpression") {
 		// Handle special case: e.g., `for x in [1, 2, 3] if x > 2`
 		const n = node.iterable as SelectExpression;
-		formattedIterable = `${formatExpression(n.iterable)} if ${formatExpression(n.test)}`;
+		formattedIterable = `${formatExpression(n.lhs)} if ${formatExpression(n.test)}`;
 	} else {
 		formattedIterable = formatExpression(node.iterable);
 	}
@@ -163,6 +169,28 @@ function formatMacro(node: Macro, depth: number, indentStr: string): string {
 		pad +
 		createStatement("endmacro")
 	);
+}
+
+function formatCallStatement(node: CallStatement, depth: number, indentStr: string): string {
+	const pad = indentStr.repeat(depth);
+	const params = node.params.length > 0 ? `(${node.params.map((p) => p.value).join(", ")})` : "";
+	const callExpr = formatExpression(node.call, -1);
+	let out = pad + createStatement(`call${params}`, callExpr) + NEWLINE;
+	out += formatStatements(node.body, depth + 1, indentStr) + NEWLINE;
+	out += pad + createStatement("endcall");
+	return out;
+}
+
+function formatFilterStatement(node: FilterStatement, depth: number, indentStr: string): string {
+	const pad = indentStr.repeat(depth);
+	const spec =
+		node.filter.type === "Identifier"
+			? (node.filter as Identifier).value
+			: formatExpression(node.filter as CallExpression, -1);
+	let out = pad + createStatement("filter", spec) + NEWLINE;
+	out += formatStatements(node.body, depth + 1, indentStr) + NEWLINE;
+	out += pad + createStatement("endfilter");
+	return out;
 }
 
 function formatExpression(node: Expression, parentPrec: number = -1): string {
@@ -215,7 +243,7 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 		}
 		case "SelectExpression": {
 			const n = node as SelectExpression;
-			return `${formatExpression(n.iterable, -1)} | select(${formatExpression(n.test, -1)})`;
+			return `${formatExpression(n.lhs, -1)} if ${formatExpression(n.test, -1)}`;
 		}
 		case "TestExpression": {
 			const n = node as TestExpression;
