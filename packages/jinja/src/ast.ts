@@ -296,7 +296,7 @@ export class CallStatement extends Statement {
 
 	constructor(
 		public call: CallExpression,
-		public params: Expression[],
+		public callerArgs: Expression[] | null,
 		public body: Statement[]
 	) {
 		super();

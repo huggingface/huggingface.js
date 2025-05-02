@@ -173,7 +173,8 @@ function formatMacro(node: Macro, depth: number, indentStr: string): string {
 
 function formatCallStatement(node: CallStatement, depth: number, indentStr: string): string {
 	const pad = indentStr.repeat(depth);
-	const params = node.params.length > 0 ? `(${node.params.map((p) => p.value).join(", ")})` : "";
+	const params =
+		node.callerArgs && node.callerArgs.length > 0 ? `(${node.callerArgs.map(formatExpression).join(", ")})` : "";
 	const callExpr = formatExpression(node.call, -1);
 	let out = pad + createStatement(`call${params}`, callExpr) + NEWLINE;
 	out += formatStatements(node.body, depth + 1, indentStr) + NEWLINE;

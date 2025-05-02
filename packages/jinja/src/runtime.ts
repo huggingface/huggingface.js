@@ -1176,8 +1176,29 @@ export class Interpreter {
 	}
 
 	private evaluateCallStatement(node: CallStatement, environment: Environment): AnyRuntimeValue {
-		// TODO implement this
-		throw new Error("Call statements are not yet implemented");
+		const callerFn = new FunctionValue((callerArgs: AnyRuntimeValue[], callerEnv: Environment) => {
+			const callBlockEnv = new Environment(callerEnv);
+			if (node.callerArgs) {
+				for (let i = 0; i < node.callerArgs.length; ++i) {
+					const param = node.callerArgs[i];
+					if (param.type !== "Identifier") {
+						throw new Error(`Caller parameter must be an identifier, got ${param.type}`);
+					}
+					callBlockEnv.setVariable((param as Identifier).value, callerArgs[i] ?? new UndefinedValue());
+				}
+			}
+			return this.evaluateBlock(node.body, callBlockEnv);
+		});
+
+		const [macroArgs, macroKwargs] = this.evaluateArguments(node.call.args, environment);
+		macroArgs.push(new KeywordArgumentsValue(macroKwargs));
+		const fn = this.evaluate(node.call.callee, environment);
+		if (fn.type !== "FunctionValue") {
+			throw new Error(`Cannot call something that is not a function: got ${fn.type}`);
+		}
+		const newEnv = new Environment(environment);
+		newEnv.setVariable("caller", callerFn);
+		return (fn as FunctionValue).value(macroArgs, newEnv);
 	}
 
 	private evaluateFilterStatement(node: FilterStatement, environment: Environment): AnyRuntimeValue {

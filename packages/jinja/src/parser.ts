@@ -133,7 +133,28 @@ export function parse(tokens: Token[]): Program {
 				expect(TOKEN_TYPES.CloseStatement, "Expected %} token");
 				break;
 			case "call":
-				throw new SyntaxError(`Call statements are not supported yet`);
+				++current; // consume 'call'
+				let callerArgs: Statement[] | null = null;
+				if (is(TOKEN_TYPES.OpenParen)) {
+					// Optional caller arguments, e.g. {% call(user) dump_users(...) %}
+					callerArgs = parseArgs();
+				}
+				const callee = parsePrimaryExpression();
+				if (callee.type !== "Identifier") {
+					throw new SyntaxError(`Expected identifier following call statement`);
+				}
+				const callArgs = parseArgs();
+				expect(TOKEN_TYPES.CloseStatement, "Expected closing statement token");
+				const body: Statement[] = [];
+				while (!isStatement("endcall")) {
+					body.push(parseAny());
+				}
+				expect(TOKEN_TYPES.OpenStatement, "Expected '{%'");
+				expectIdentifier("endcall");
+				expect(TOKEN_TYPES.CloseStatement, "Expected closing statement token");
+				const callExpr = new CallExpression(callee, callArgs);
+				result = new CallStatement(callExpr, callerArgs, body);
+				break;
 			case "break":
 				++current;
 				expect(TOKEN_TYPES.CloseStatement, "Expected closing statement token");
