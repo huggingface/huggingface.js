@@ -41,6 +41,7 @@ const TEST_STRINGS = {
 	VARIABLES: `{% set x = 'Hello' %}{% set y = 'World' %}{{ x + ' ' + y }}`,
 	VARIABLES_2: `{% set x = 'Hello'.split('el')[-1] %}{{ x }}`,
 	VARIABLES_BLOCK: `{% set x %}Hello!\nMultiline/block set!\n{% endset %}{{ x }}`,
+	VARIABLES_UNPACKING: `|{% set x, y = 1, 2 %}{{ x }}{{ y }}|{% set (x, y) = [1, 2] %}{{ x }}{{ y }}|`,
 
 	// Numbers
 	NUMBERS: `|{{ 5 }}|{{ -5 }}|{{ add(3, -1) }}|{{ (3 - 1) + (a - 5) - (a + 5)}}|`,
@@ -805,6 +806,47 @@ const TEST_PARSED = {
 		{ value: "{{", type: "OpenExpression" },
 		{ value: "x", type: "Identifier" },
 		{ value: "}}", type: "CloseExpression" },
+	],
+	VARIABLES_UNPACKING: [
+		{ value: "|", type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Identifier" },
+		{ value: "x", type: "Identifier" },
+		{ value: ",", type: "Comma" },
+		{ value: "y", type: "Identifier" },
+		{ value: "=", type: "Equals" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "x", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "y", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "set", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "x", type: "Identifier" },
+		{ value: ",", type: "Comma" },
+		{ value: "y", type: "Identifier" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "=", type: "Equals" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "x", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "y", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
 	],
 
 	// Numbers
@@ -3514,6 +3556,7 @@ const TEST_CONTEXT = {
 	VARIABLES: {},
 	VARIABLES_2: {},
 	VARIABLES_BLOCK: {},
+	VARIABLES_UNPACKING: {},
 
 	// Numbers
 	NUMBERS: {
@@ -3803,6 +3846,7 @@ const EXPECTED_OUTPUTS = {
 	VARIABLES: "Hello World",
 	VARIABLES_2: "lo",
 	VARIABLES_BLOCK: "Hello!\nMultiline/block set!\n",
+	VARIABLES_UNPACKING: "|12|12|",
 
 	// Numbers
 	NUMBERS: "|5|-5|2|-8|",

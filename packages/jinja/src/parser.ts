@@ -201,12 +201,12 @@ export function parse(tokens: Token[]): Program {
 
 	// NOTE: `set` acts as both declaration statement and assignment expression
 	function parseSetStatement(): Statement {
-		const left = parseExpression();
+		const left = parseExpressionSequence();
 		let value: Statement | null = null;
 		const body: Statement[] = [];
 		if (is(TOKEN_TYPES.Equals)) {
 			++current;
-			value = parseExpression();
+			value = parseExpressionSequence();
 		} else {
 			// parsing multiline set here
 			expect(TOKEN_TYPES.CloseStatement, "Expected %} token");

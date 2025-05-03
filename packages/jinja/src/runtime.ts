@@ -1003,6 +1003,22 @@ export class Interpreter {
 		if (node.assignee.type === "Identifier") {
 			const variableName = (node.assignee as Identifier).value;
 			environment.setVariable(variableName, rhs);
+		} else if (node.assignee.type === "TupleLiteral") {
+			const tuple = node.assignee as TupleLiteral;
+			if (!(rhs instanceof ArrayValue)) {
+				throw new Error(`Cannot unpack non-iterable type in set: ${rhs.type}`);
+			}
+			const arr = rhs.value;
+			if (arr.length !== tuple.value.length) {
+				throw new Error(`Too ${tuple.value.length > arr.length ? "few" : "many"} items to unpack in set`);
+			}
+			for (let i = 0; i < tuple.value.length; i++) {
+				const elem = tuple.value[i];
+				if (elem.type !== "Identifier") {
+					throw new Error(`Cannot unpack to non-identifier in set: ${elem.type}`);
+				}
+				environment.setVariable((elem as Identifier).value, arr[i]);
+			}
 		} else if (node.assignee.type === "MemberExpression") {
 			const member = node.assignee as MemberExpression;
 
