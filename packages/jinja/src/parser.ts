@@ -133,7 +133,7 @@ export function parse(tokens: Token[]): Program {
 				expectIdentifier("endfor");
 				expect(TOKEN_TYPES.CloseStatement, "Expected %} token");
 				break;
-			case "call":
+			case "call": {
 				++current; // consume 'call'
 				let callerArgs: Statement[] | null = null;
 				if (is(TOKEN_TYPES.OpenParen)) {
@@ -156,6 +156,7 @@ export function parse(tokens: Token[]): Program {
 				const callExpr = new CallExpression(callee, callArgs);
 				result = new CallStatement(callExpr, callerArgs, body);
 				break;
+			}
 			case "break":
 				++current;
 				expect(TOKEN_TYPES.CloseStatement, "Expected closing statement token");
@@ -166,7 +167,7 @@ export function parse(tokens: Token[]): Program {
 				expect(TOKEN_TYPES.CloseStatement, "Expected closing statement token");
 				result = new Continue();
 				break;
-			case "filter":
+			case "filter": {
 				++current; // consume 'filter'
 				let filterNode = parsePrimaryExpression();
 				if (filterNode instanceof Identifier && is(TOKEN_TYPES.OpenParen)) {
@@ -182,6 +183,7 @@ export function parse(tokens: Token[]): Program {
 				expect(TOKEN_TYPES.CloseStatement, "Expected '%}'");
 				result = new FilterStatement(filterNode as Identifier | CallExpression, filterBody);
 				break;
+			}
 			default:
 				throw new SyntaxError(`Unknown statement type: ${name}`);
 		}
@@ -571,7 +573,7 @@ export function parse(tokens: Token[]): Program {
 				++current; // consume not
 			}
 
-			let filter = parsePrimaryExpression();
+			const filter = parsePrimaryExpression();
 			if (!(filter instanceof Identifier)) {
 				throw new SyntaxError(`Expected identifier for the test`);
 			}
@@ -605,12 +607,13 @@ export function parse(tokens: Token[]): Program {
 		switch (token.type) {
 			case TOKEN_TYPES.NumericLiteral:
 				return new NumericLiteral(Number(token.value));
-			case TOKEN_TYPES.StringLiteral:
+			case TOKEN_TYPES.StringLiteral: {
 				let value = token.value;
 				while (is(TOKEN_TYPES.StringLiteral)) {
 					value += tokens[current++].value;
 				}
 				return new StringLiteral(value);
+			}
 			case TOKEN_TYPES.Identifier:
 				return new Identifier(token.value);
 			case TOKEN_TYPES.OpenParen: {

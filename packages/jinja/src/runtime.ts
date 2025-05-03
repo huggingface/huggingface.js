@@ -429,7 +429,7 @@ export class Environment {
 	}
 }
 
-export function setupGlobals(env: Environment) {
+export function setupGlobals(env: Environment): void {
 	// Declare global variables
 	env.set("false", false);
 	env.set("true", true);
