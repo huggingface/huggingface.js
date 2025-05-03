@@ -23,6 +23,7 @@ import type {
 	SelectExpression,
 	CallStatement,
 	FilterStatement,
+	SpreadExpression,
 } from "./ast";
 import { range, slice, titleCase } from "./utils";
 
@@ -571,11 +572,21 @@ export class Interpreter {
 		environment: Environment
 	): [AnyRuntimeValue[], Map<string, AnyRuntimeValue>] {
 		// Accumulate args and kwargs
-		const positionalArguments = [];
-		const keywordArguments = new Map();
+		const positionalArguments: AnyRuntimeValue[] = [];
+		const keywordArguments = new Map<string, AnyRuntimeValue>();
+
 		for (const argument of args) {
 			// TODO: Lazy evaluation of arguments
-			if (argument.type === "KeywordArgumentExpression") {
+			if (argument.type === "SpreadExpression") {
+				const spreadNode = argument as SpreadExpression;
+				const val = this.evaluate(spreadNode.argument, environment);
+				if (!(val instanceof ArrayValue)) {
+					throw new Error(`Cannot unpack non-iterable type: ${val.type}`);
+				}
+				for (const item of val.value) {
+					positionalArguments.push(item);
+				}
+			} else if (argument.type === "KeywordArgumentExpression") {
 				const kwarg = argument as KeywordArgumentExpression;
 				keywordArguments.set(kwarg.key.value, this.evaluate(kwarg.value, environment));
 			} else {

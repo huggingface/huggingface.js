@@ -26,6 +26,7 @@ import {
 	SelectExpression,
 	CallStatement,
 	FilterStatement,
+	SpreadExpression,
 } from "./ast";
 
 /**
@@ -459,17 +460,25 @@ export function parse(tokens: Token[]): Program {
 
 		const args = [];
 		while (!is(TOKEN_TYPES.CloseParen)) {
-			let argument = parseExpression();
+			let argument: Statement;
 
-			if (is(TOKEN_TYPES.Equals)) {
-				// keyword argument
-				// e.g., func(x = 5, y = a or b)
-				++current; // consume equals
-				if (!(argument instanceof Identifier)) {
-					throw new SyntaxError(`Expected identifier for keyword argument`);
+			// unpacking: *expr
+			if (tokens[current].type === TOKEN_TYPES.MultiplicativeBinaryOperator && tokens[current].value === "*") {
+				++current;
+				const expr = parseExpression();
+				argument = new SpreadExpression(expr);
+			} else {
+				argument = parseExpression();
+				if (is(TOKEN_TYPES.Equals)) {
+					// keyword argument
+					// e.g., func(x = 5, y = a or b)
+					++current; // consume equals
+					if (!(argument instanceof Identifier)) {
+						throw new SyntaxError(`Expected identifier for keyword argument`);
+					}
+					const value = parseExpression();
+					argument = new KeywordArgumentExpression(argument as Identifier, value);
 				}
-				const value = parseExpression();
-				argument = new KeywordArgumentExpression(argument, value);
 			}
 			args.push(argument);
 			if (is(TOKEN_TYPES.Comma)) {

@@ -179,6 +179,9 @@ const TEST_STRINGS = {
 	// Context-specific keywords
 	CONTEXT_KEYWORDS: `{% if if in in %}a{% endif %}{% set if = "a" %}{% set in = "abc" %}{% if if in in %}b{% endif %}`,
 	CONTEXT_KEYWORDS_1: `|{{ if }}|{% set if = 2 %}{% if if == 2 %}{{ if }}{% endif %}|`,
+
+	// Unpacking
+	UNPACKING: `{% macro mul(a, b, c) %}{{ a * b * c }}{% endmacro %}|{{ mul(1, 2, 3) }}|{{ mul(*[1, 2, 3]) }}|`,
 };
 
 const TEST_PARSED = {
@@ -986,12 +989,12 @@ const TEST_PARSED = {
 		{ value: "|", type: "Text" },
 	],
 	STRINGS_4: [
-		{ value: '{{', type: 'OpenExpression' },
-		{ value: 'a', type: 'StringLiteral' },
-		{ value: '+', type: 'AdditiveBinaryOperator' },
-		{ value: 'b', type: 'StringLiteral' },
-		{ value: 'c', type: 'StringLiteral' },
-		{ value: '}}', type: 'CloseExpression' }
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "a", type: "StringLiteral" },
+		{ value: "+", type: "AdditiveBinaryOperator" },
+		{ value: "b", type: "StringLiteral" },
+		{ value: "c", type: "StringLiteral" },
+		{ value: "}}", type: "CloseExpression" },
 	],
 
 	// Function calls
@@ -3416,6 +3419,57 @@ const TEST_PARSED = {
 		{ value: "%}", type: "CloseStatement" },
 		{ value: "|", type: "Text" },
 	],
+
+	// Unpacking
+	UNPACKING: [
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "macro", type: "Identifier" },
+		{ value: "mul", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "a", type: "Identifier" },
+		{ value: ",", type: "Comma" },
+		{ value: "b", type: "Identifier" },
+		{ value: ",", type: "Comma" },
+		{ value: "c", type: "Identifier" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "a", type: "Identifier" },
+		{ value: "*", type: "MultiplicativeBinaryOperator" },
+		{ value: "b", type: "Identifier" },
+		{ value: "*", type: "MultiplicativeBinaryOperator" },
+		{ value: "c", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "{%", type: "OpenStatement" },
+		{ value: "endmacro", type: "Identifier" },
+		{ value: "%}", type: "CloseStatement" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "mul", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "mul", type: "Identifier" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "*", type: "MultiplicativeBinaryOperator" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "1", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "2", type: "NumericLiteral" },
+		{ value: ",", type: "Comma" },
+		{ value: "3", type: "NumericLiteral" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "}}", type: "CloseExpression" },
+		{ value: "|", type: "Text" },
+	],
 };
 
 const TEST_CONTEXT = {
@@ -3708,6 +3762,9 @@ const TEST_CONTEXT = {
 	// Context-specific keywords
 	CONTEXT_KEYWORDS: {},
 	CONTEXT_KEYWORDS_1: {},
+
+	// Unpacking
+	UNPACKING: {},
 };
 
 const EXPECTED_OUTPUTS = {
@@ -3884,6 +3941,9 @@ const EXPECTED_OUTPUTS = {
 	// Context-specific keywords
 	CONTEXT_KEYWORDS: `b`,
 	CONTEXT_KEYWORDS_1: `||2|`,
+
+	// Unpacking
+	UNPACKING: `|6|6|`,
 };
 
 describe("Templates", () => {

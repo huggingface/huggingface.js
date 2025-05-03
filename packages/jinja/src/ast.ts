@@ -291,6 +291,14 @@ export class KeywordArgumentExpression extends Expression {
 	}
 }
 
+export class SpreadExpression extends Expression {
+	override type = "SpreadExpression";
+
+	constructor(public argument: Expression) {
+		super();
+	}
+}
+
 export class CallStatement extends Statement {
 	override type = "CallStatement";
 

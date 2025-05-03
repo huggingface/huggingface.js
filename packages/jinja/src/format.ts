@@ -24,6 +24,7 @@ import type {
 	KeywordArgumentExpression,
 	CallStatement,
 	FilterStatement,
+	SpreadExpression,
 } from "./ast";
 
 const NEWLINE = "\n";
@@ -196,6 +197,10 @@ function formatFilterStatement(node: FilterStatement, depth: number, indentStr: 
 
 function formatExpression(node: Expression, parentPrec: number = -1): string {
 	switch (node.type) {
+		case "SpreadExpression": {
+			const n = node as SpreadExpression;
+			return `*${formatExpression(n.argument, -1)}`;
+		}
 		case "Identifier":
 			return (node as Identifier).value;
 		case "NumericLiteral":
