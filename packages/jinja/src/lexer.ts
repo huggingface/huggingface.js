@@ -4,7 +4,7 @@
 export const TOKEN_TYPES = Object.freeze({
 	Text: "Text", // The text between Jinja statements or expressions
 
-	NumericLiteral: "NumericLiteral", // e.g., 123
+	NumericLiteral: "NumericLiteral", // e.g., 123, 1.0
 	StringLiteral: "StringLiteral", // 'string'
 	Identifier: "Identifier", // Variables, functions, statements, booleans, etc.
 	Equals: "Equals", // =
@@ -283,7 +283,14 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 		}
 
 		if (isInteger(char)) {
-			const num = consumeWhile(isInteger);
+			// Consume integer part
+			let num = consumeWhile(isInteger);
+			// Possibly, consume fractional part
+			if (src[cursorPosition] === "." && isInteger(src[cursorPosition + 1])) {
+				++cursorPosition; // consume '.'
+				const frac = consumeWhile(isInteger);
+				num = `${num}.${frac}`;
+			}
 			tokens.push(new Token(num, TOKEN_TYPES.NumericLiteral));
 			continue;
 		}
