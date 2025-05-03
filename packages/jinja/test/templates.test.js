@@ -54,6 +54,7 @@ const TEST_STRINGS = {
 	STRINGS_1: `|{{ "test" }}|{{ "a" + 'b' + "c" }}|{{ '"' + "'" }}|{{ '\\'' }}|{{ "\\"" }}|`,
 	STRINGS_2: `|{{ "" | length }}|{{ "a" | length }}|{{ '' | length }}|{{ 'a' | length }}|`,
 	STRINGS_3: `|{{ '{{ "hi" }}' }}|{{ '{% if true %}{% endif %}' }}|`,
+	STRINGS_4: `{{ 'a' + 'b' 'c' }}`,
 
 	// Function calls
 	FUNCTIONS: `{{ func() }}{{ func(apple) }}{{ func(x, 'test', 2, false) }}`,
@@ -983,6 +984,14 @@ const TEST_PARSED = {
 		{ value: "{% if true %}{% endif %}", type: "StringLiteral" },
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
+	],
+	STRINGS_4: [
+		{ value: '{{', type: 'OpenExpression' },
+		{ value: 'a', type: 'StringLiteral' },
+		{ value: '+', type: 'AdditiveBinaryOperator' },
+		{ value: 'b', type: 'StringLiteral' },
+		{ value: 'c', type: 'StringLiteral' },
+		{ value: '}}', type: 'CloseExpression' }
 	],
 
 	// Function calls
@@ -3469,6 +3478,7 @@ const TEST_CONTEXT = {
 	STRINGS_1: {},
 	STRINGS_2: {},
 	STRINGS_3: {},
+	STRINGS_4: {},
 
 	// Function calls
 	FUNCTIONS: {
@@ -3749,6 +3759,7 @@ const EXPECTED_OUTPUTS = {
 	STRINGS_1: `|test|abc|"'|'|"|`,
 	STRINGS_2: `|0|1|0|1|`,
 	STRINGS_3: `|{{ "hi" }}|{% if true %}{% endif %}|`,
+	STRINGS_4: `abc`,
 
 	// Function calls
 	FUNCTIONS: "014",

@@ -597,7 +597,11 @@ export function parse(tokens: Token[]): Program {
 			case TOKEN_TYPES.NumericLiteral:
 				return new NumericLiteral(Number(token.value));
 			case TOKEN_TYPES.StringLiteral:
-				return new StringLiteral(token.value);
+				let value = token.value;
+				while (is(TOKEN_TYPES.StringLiteral)) {
+					value += tokens[current++].value;
+				}
+				return new StringLiteral(value);
 			case TOKEN_TYPES.Identifier:
 				return new Identifier(token.value);
 			case TOKEN_TYPES.OpenParen: {
