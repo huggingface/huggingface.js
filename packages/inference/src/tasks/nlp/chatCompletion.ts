@@ -11,7 +11,7 @@ export async function chatCompletion(
 	args: BaseArgs & ChatCompletionInput,
 	options?: Options
 ): Promise<ChatCompletionOutput> {
-	const provider = await resolveProvider(args.provider, args.model);
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "conversational");
 	const { data: response } = await innerRequest<ChatCompletionOutput>(args, providerHelper, {
 		...options,

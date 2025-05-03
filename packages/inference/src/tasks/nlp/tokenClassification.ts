@@ -13,7 +13,7 @@ export async function tokenClassification(
 	args: TokenClassificationArgs,
 	options?: Options
 ): Promise<TokenClassificationOutput> {
-	const provider = await resolveProvider(args.provider, args.model);
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "token-classification");
 	const { data: res } = await innerRequest<TokenClassificationOutput[number] | TokenClassificationOutput>(
 		args,

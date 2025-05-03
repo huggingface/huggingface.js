@@ -23,7 +23,7 @@ export async function featureExtraction(
 	args: FeatureExtractionArgs,
 	options?: Options
 ): Promise<FeatureExtractionOutput> {
-	const provider = await resolveProvider(args.provider, args.model);
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "feature-extraction");
 	const { data: res } = await innerRequest<FeatureExtractionOutput>(args, providerHelper, {
 		...options,
