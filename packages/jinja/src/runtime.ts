@@ -681,6 +681,14 @@ export class Interpreter {
 					case "join":
 					case "string":
 						return operand; // no-op
+					case "int": {
+						const val = parseInt(operand.value, 10);
+						return new NumericValue(isNaN(val) ? 0 : val);
+					}
+					case "float": {
+						const val = parseFloat(operand.value);
+						return new NumericValue(isNaN(val) ? 0.0 : val);
+					}
 					default:
 						throw new Error(`Unknown StringValue filter: ${filter.value}`);
 				}
@@ -688,6 +696,10 @@ export class Interpreter {
 				switch (filter.value) {
 					case "abs":
 						return new NumericValue(Math.abs(operand.value));
+					case "int":
+						return new NumericValue(Math.floor(operand.value));
+					case "float":
+						return new NumericValue(operand.value);
 					default:
 						throw new Error(`Unknown NumericValue filter: ${filter.value}`);
 				}
@@ -701,6 +713,19 @@ export class Interpreter {
 						return new NumericValue(operand.value.size);
 					default:
 						throw new Error(`Unknown ObjectValue filter: ${filter.value}`);
+				}
+			} else if (operand instanceof BooleanValue) {
+				switch (filter.value) {
+					case "bool":
+						return new BooleanValue(operand.value);
+					case "int":
+						return new NumericValue(operand.value ? 1 : 0);
+					case "float":
+						return new NumericValue(operand.value ? 1.0 : 0.0);
+					case "string":
+						return new StringValue(operand.value ? "true" : "false");
+					default:
+						throw new Error(`Unknown BooleanValue filter: ${filter.value}`);
 				}
 			}
 			throw new Error(`Cannot apply filter "${filter.value}" to type: ${operand.type}`);
@@ -737,6 +762,23 @@ export class Interpreter {
 				}
 
 				return new StringValue(value.join(separator.value));
+			} else if (filterName === "int" || filterName === "float") {
+				const [args, kwargs] = this.evaluateArguments(filter.args, environment);
+				const defaultValue = args.at(0) ?? kwargs.get("default") ?? new NumericValue(0);
+
+				if (!(defaultValue instanceof NumericValue)) {
+					throw new Error("default must be a number");
+				}
+				if (operand instanceof StringValue) {
+					const val = filterName === "int" ? parseInt(operand.value, 10) : parseFloat(operand.value);
+					return new NumericValue(isNaN(val) ? defaultValue.value : val);
+				} else if (operand instanceof NumericValue) {
+					return new NumericValue(operand.value);
+				} else if (operand instanceof BooleanValue) {
+					return new NumericValue(operand.value ? 1 : 0);
+				} else {
+					throw new Error(`Cannot apply filter "${filterName}" to type: ${operand.type}`);
+				}
 			}
 
 			if (operand instanceof ArrayValue) {
