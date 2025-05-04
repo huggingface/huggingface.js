@@ -154,6 +154,7 @@ const TEST_STRINGS = {
 
 	// Ternary operator
 	TERNARY_OPERATOR: `|{{ 'a' if true else 'b' }}|{{ 'a' if false else 'b' }}|{{ 'a' if 1 + 1 == 2 else 'b' }}|{{ 'a' if 1 + 1 == 3 or 1 * 2 == 3 else 'b' }}|`,
+	TERNARY_OPERATOR_1: `{{ (x if true else []) | length }}`,
 	TERNARY_SET: `{% set x = 1 if True else 2 %}{{ x }}`,
 	TERNARY_CONSECUTIVE: `{% set x = 1 if False else 2 if False else 3 %}{{ x }}`,
 	TERNARY_SHORTCUT: `{{ 'foo' if false }}{{ 'bar' if true }}`,
@@ -3039,6 +3040,20 @@ const TEST_PARSED = {
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
 	],
+	TERNARY_OPERATOR_1: [
+		{ value: "{{", type: "OpenExpression" },
+		{ value: "(", type: "OpenParen" },
+		{ value: "x", type: "Identifier" },
+		{ value: "if", type: "Identifier" },
+		{ value: "true", type: "Identifier" },
+		{ value: "else", type: "Identifier" },
+		{ value: "[", type: "OpenSquareBracket" },
+		{ value: "]", type: "CloseSquareBracket" },
+		{ value: ")", type: "CloseParen" },
+		{ value: "|", type: "Pipe" },
+		{ value: "length", type: "Identifier" },
+		{ value: "}}", type: "CloseExpression" },
+	],
 	TERNARY_SET: [
 		{ value: "{%", type: "OpenStatement" },
 		{ value: "set", type: "Identifier" },
@@ -3838,6 +3853,9 @@ const TEST_CONTEXT = {
 
 	// Ternary operator
 	TERNARY_OPERATOR: {},
+	TERNARY_OPERATOR_1: {
+		x: [{}, {}, {}],
+	},
 	TERNARY_SET: {},
 	TERNARY_CONSECUTIVE: {},
 	TERNARY_SHORTCUT: {},
@@ -4026,6 +4044,7 @@ const EXPECTED_OUTPUTS = {
 
 	// Ternary operator
 	TERNARY_OPERATOR: `|a|b|a|b|`,
+	TERNARY_OPERATOR_1: `3`,
 	TERNARY_SET: `1`,
 	TERNARY_CONSECUTIVE: `3`,
 	TERNARY_SHORTCUT: `bar`,

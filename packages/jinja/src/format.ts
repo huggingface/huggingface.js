@@ -27,6 +27,7 @@ import type {
 	CallStatement,
 	FilterStatement,
 	SpreadExpression,
+	Ternary,
 } from "./ast";
 
 const NEWLINE = "\n";
@@ -37,6 +38,7 @@ const OPERATOR_PRECEDENCE: Record<string, number> = {
 	MultiplicativeBinaryOperator: 2,
 	AdditiveBinaryOperator: 1,
 	ComparisonBinaryOperator: 0,
+	Ternary: -1,
 };
 
 export function format(program: Program, indent: string | number = "\t"): string {
@@ -284,13 +286,13 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 			const n = node as KeywordArgumentExpression;
 			return `${n.key.value}=${formatExpression(n.value, -1)}`;
 		}
-		case "If": {
-			// Special case for ternary operator (If as an expression, not a statement)
-			const n = node as If;
-			const test = formatExpression(n.test, -1);
-			const body = formatExpression(n.body[0], 0); // Ternary operators have a single body and alternate
-			const alternate = formatExpression(n.alternate[0], -1);
-			return `${body} if ${test} else ${alternate}`;
+		case "Ternary": {
+			const n = node as Ternary;
+			const expr = `${formatExpression(n.trueExpr, OPERATOR_PRECEDENCE.Ternary)} if ${formatExpression(
+				n.condition,
+				OPERATOR_PRECEDENCE.Ternary
+			)} else ${formatExpression(n.falseExpr, OPERATOR_PRECEDENCE.Ternary)}`;
+			return OPERATOR_PRECEDENCE.Ternary < parentPrec ? `(${expr})` : expr;
 		}
 		default:
 			throw new Error(`Unknown expression type: ${node.type}`);

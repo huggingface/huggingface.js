@@ -24,6 +24,7 @@ import type {
 	SelectExpression,
 	CallStatement,
 	FilterStatement,
+	Ternary,
 	SpreadExpression,
 } from "./ast";
 import { range, slice, titleCase } from "./utils";
@@ -956,6 +957,13 @@ export class Interpreter {
 		}
 	}
 
+	private evaluateTernaryExpression(node: Ternary, environment: Environment): AnyRuntimeValue {
+		const cond = this.evaluate(node.condition, environment);
+		return cond.__bool__().value
+			? this.evaluate(node.trueExpr, environment)
+			: this.evaluate(node.falseExpr, environment);
+	}
+
 	private evalProgram(program: Program, environment: Environment): StringValue {
 		return this.evaluateBlock(program.body, environment);
 	}
@@ -1369,6 +1377,8 @@ export class Interpreter {
 				return this.evaluateTestExpression(statement as TestExpression, environment);
 			case "SelectExpression":
 				return this.evaluateSelectExpression(statement as SelectExpression, environment);
+			case "Ternary":
+				return this.evaluateTernaryExpression(statement as Ternary, environment);
 			case "Comment":
 				return new NullValue();
 			default:

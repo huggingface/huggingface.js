@@ -28,6 +28,7 @@ import {
 	SpreadExpression,
 	IntegerLiteral,
 	FloatLiteral,
+	Ternary,
 	Comment,
 } from "./ast";
 
@@ -348,8 +349,8 @@ export function parse(tokens: Token[]): Program {
 			if (isIdentifier("else")) {
 				// Ternary expression with else
 				++current; // consume 'else'
-				const alternate = parseIfExpression(); // recurse to support chained ternaries
-				return new If(test, [a], [alternate]);
+				const falseExpr = parseIfExpression(); // recurse to support chained ternaries
+				return new Ternary(test, a, falseExpr);
 			} else {
 				// Select expression on iterable
 				return new SelectExpression(a, test);

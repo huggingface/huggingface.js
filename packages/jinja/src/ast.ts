@@ -318,3 +318,14 @@ export class CallStatement extends Statement {
 		super();
 	}
 }
+
+export class Ternary extends Expression {
+	override type = "Ternary";
+	constructor(
+		public condition: Expression,
+		public trueExpr: Expression,
+		public falseExpr: Expression
+	) {
+		super();
+	}
+}
