@@ -133,11 +133,12 @@ abstract class Literal<T> extends Expression {
 	}
 }
 
-/**
- * Represents a numeric constant in the template.
- */
-export class NumericLiteral extends Literal<number> {
-	override type = "NumericLiteral";
+export class IntegerLiteral extends Literal<number> {
+	override type = "IntegerLiteral";
+}
+
+export class FloatLiteral extends Literal<number> {
+	override type = "FloatLiteral";
 }
 
 /**

@@ -107,7 +107,7 @@ const TEST_STRINGS = {
 	FILTER_OPERATOR_11: `{{ items | rejectattr('key') | length }}`,
 	FILTER_OPERATOR_12: `{{ messages | rejectattr('role', 'equalto', 'system') | length }}`,
 	FILTER_OPERATOR_13: `{{ tools | string }}`,
-	FILTER_OPERATOR_14: `|{{ "1" | int + 2 }}|{{ "invalid" | int }}|{{ "invalid" | int(-1) }}|{{ true | int }}|{{ false | int }}|{{ 1.5 | int }}|{{ "1.5" | float }}|{{ "invalid" | float }}|{{ "invalid" | float(2) }}|`,
+	FILTER_OPERATOR_14: `|{{ "1" | int + 2 }}|{{ "invalid" | int }}|{{ "invalid" | int(-1) }}|{{ true | int }}|{{ false | int }}|{{ 1.5 | int }}|{{ "1.5" | float }}|{{ "invalid" | float }}|{{ "invalid" | float("hello") }}|`,
 
 	// Filter statements
 	FILTER_STATEMENTS: `{% filter upper %}text{% endfilter %}`,
@@ -2165,7 +2165,7 @@ const TEST_PARSED = {
 		{ value: "|", type: "Pipe" },
 		{ value: "float", type: "Identifier" },
 		{ value: "(", type: "OpenParen" },
-		{ value: "2", type: "NumericLiteral" },
+		{ value: "hello", type: "StringLiteral" },
 		{ value: ")", type: "CloseParen" },
 		{ value: "}}", type: "CloseExpression" },
 		{ value: "|", type: "Text" },
@@ -3979,7 +3979,7 @@ const EXPECTED_OUTPUTS = {
 	FILTER_OPERATOR_11: `3`,
 	FILTER_OPERATOR_12: `2`,
 	FILTER_OPERATOR_13: `[{"name": "some_tool", "arguments": {"some_name": "string"}}]`,
-	FILTER_OPERATOR_14: `|3|0|-1|1|0|1|1.5|0.0|2|`,
+	FILTER_OPERATOR_14: `|3|0|-1|1|0|1|1.5|0.0|hello|`,
 
 	// Filter statements
 	FILTER_STATEMENTS: `TEXT`,

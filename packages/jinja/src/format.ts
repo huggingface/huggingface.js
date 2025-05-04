@@ -9,7 +9,8 @@ import type {
 	MemberExpression,
 	CallExpression,
 	Identifier,
-	NumericLiteral,
+	FloatLiteral,
+	IntegerLiteral,
 	StringLiteral,
 	ArrayLiteral,
 	TupleLiteral,
@@ -203,8 +204,10 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 		}
 		case "Identifier":
 			return (node as Identifier).value;
-		case "NumericLiteral":
-			return `${(node as NumericLiteral).value}`;
+		case "IntegerLiteral":
+			return `${(node as IntegerLiteral).value}`;
+		case "FloatLiteral":
+			return `${(node as FloatLiteral).value}`;
 		case "StringLiteral":
 			return JSON.stringify((node as StringLiteral).value);
 		case "BinaryExpression": {

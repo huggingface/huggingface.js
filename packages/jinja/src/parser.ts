@@ -11,7 +11,6 @@ import {
 	MemberExpression,
 	CallExpression,
 	Identifier,
-	NumericLiteral,
 	StringLiteral,
 	ArrayLiteral,
 	ObjectLiteral,
@@ -27,6 +26,8 @@ import {
 	CallStatement,
 	FilterStatement,
 	SpreadExpression,
+	IntegerLiteral,
+	FloatLiteral,
 } from "./ast";
 
 /**
@@ -605,8 +606,10 @@ export function parse(tokens: Token[]): Program {
 		// Primary expression: number, string, identifier, function call, parenthesized expression
 		const token = tokens[current++];
 		switch (token.type) {
-			case TOKEN_TYPES.NumericLiteral:
-				return new NumericLiteral(Number(token.value));
+			case TOKEN_TYPES.NumericLiteral: {
+				const num = token.value;
+				return num.includes(".") ? new FloatLiteral(Number(num)) : new IntegerLiteral(Number(num));
+			}
 			case TOKEN_TYPES.StringLiteral: {
 				let value = token.value;
 				while (is(TOKEN_TYPES.StringLiteral)) {
