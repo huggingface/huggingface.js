@@ -11,7 +11,7 @@ import { version as packageVersion } from "./package.json";
 
 const MODEL_ID = process.env.MODEL_ID ?? "Qwen/Qwen2.5-72B-Instruct";
 const PROVIDER = (process.env.PROVIDER as InferenceProvider) ?? "nebius";
-const BASE_URL = process.env.BASE_URL;
+const ENDPOINT_URL = process.env.ENDPOINT_URL ?? process.env.BASE_URL;
 
 const SERVERS: StdioServerParameters[] = [
 	{
@@ -50,9 +50,9 @@ async function main() {
 	}
 
 	const agent = new Agent(
-		BASE_URL
+		ENDPOINT_URL
 			? {
-					baseUrl: BASE_URL,
+					endpointUrl: ENDPOINT_URL,
 					model: MODEL_ID,
 					apiKey: process.env.HF_TOKEN,
 					servers: SERVERS,
