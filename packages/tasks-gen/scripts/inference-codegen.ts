@@ -1,8 +1,8 @@
-import type { SerializedRenderResult } from "quicktype-core";
-import { quicktype, InputData, JSONSchemaInput, FetchingJSONSchemaStore } from "quicktype-core";
-import * as fs from "node:fs/promises";
 import { existsSync as pathExists } from "node:fs";
+import * as fs from "node:fs/promises";
 import * as path from "node:path/posix";
+import type { SerializedRenderResult } from "quicktype-core";
+import { FetchingJSONSchemaStore, InputData, JSONSchemaInput, quicktype } from "quicktype-core";
 import ts from "typescript";
 
 const TYPESCRIPT_HEADER_FILE = `
@@ -272,15 +272,21 @@ const allTasks = await Promise.all(
 		.filter((entry) => entry.name !== "placeholder")
 		.map(async (entry) => ({ task: entry.name, dirPath: path.join(entry.path, entry.name) }))
 );
+//For DEMO purposes only: for chat-completion, let's use the specs in \spec-oai
 const allSpecFiles = [
 	path.join(tasksDir, "common-definitions.json"),
 	...allTasks
-		.flatMap(({ dirPath }) => [path.join(dirPath, "spec", "input.json"), path.join(dirPath, "spec", "output.json")])
+		.flatMap(({ task, dirPath }) => {
+			const specDirName = task === "chat-completion" ? "spec-oai" : "spec";
+			const specPath = path.join(dirPath, specDirName);
+			return [path.join(specPath, "input.json"), path.join(specPath, "output.json")];
+		})
 		.filter((filepath) => pathExists(filepath)),
 ];
 
 for (const { task, dirPath } of allTasks) {
-	const taskSpecDir = path.join(dirPath, "spec");
+	const specDirName = task === "chat-completion" ? "spec-oai" : "spec";
+	const taskSpecDir = path.join(dirPath, specDirName);
 	if (!(pathExists(path.join(taskSpecDir, "input.json")) && pathExists(path.join(taskSpecDir, "output.json")))) {
 		console.debug(`No spec found for task ${task} - skipping`);
 		continue;
