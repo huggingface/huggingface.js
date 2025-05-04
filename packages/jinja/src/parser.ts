@@ -28,6 +28,7 @@ import {
 	SpreadExpression,
 	IntegerLiteral,
 	FloatLiteral,
+	Comment,
 } from "./ast";
 
 /**
@@ -61,6 +62,8 @@ export function parse(tokens: Token[]): Program {
 
 	function parseAny(): Statement {
 		switch (tokens[current].type) {
+			case TOKEN_TYPES.Comment:
+				return new Comment(tokens[current++].value);
 			case TOKEN_TYPES.Text:
 				return parseText();
 			case TOKEN_TYPES.OpenStatement:

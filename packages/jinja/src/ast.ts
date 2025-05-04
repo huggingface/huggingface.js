@@ -77,6 +77,13 @@ export class Macro extends Statement {
 	}
 }
 
+export class Comment extends Statement {
+	override type = "Comment";
+	constructor(public value: string) {
+		super();
+	}
+}
+
 /**
  * Expressions will result in a value at runtime (unlike statements).
  */

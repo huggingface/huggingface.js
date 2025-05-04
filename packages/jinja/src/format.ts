@@ -1,6 +1,7 @@
 import type {
 	Program,
 	Statement,
+	Comment,
 	If,
 	For,
 	SetStatement,
@@ -73,6 +74,8 @@ function formatStatement(node: Statement, depth: number, indentStr: string): str
 			return formatCallStatement(node as CallStatement, depth, indentStr);
 		case "FilterStatement":
 			return formatFilterStatement(node as FilterStatement, depth, indentStr);
+		case "Comment":
+			return pad + "{# " + (node as Comment).value + " #}";
 		default:
 			return pad + "{{- " + formatExpression(node as Expression) + " -}}";
 	}

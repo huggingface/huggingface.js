@@ -1369,6 +1369,8 @@ export class Interpreter {
 				return this.evaluateTestExpression(statement as TestExpression, environment);
 			case "SelectExpression":
 				return this.evaluateSelectExpression(statement as SelectExpression, environment);
+			case "Comment":
+				return new NullValue();
 			default:
 				throw new SyntaxError(`Unknown node type: ${statement.type}`);
 		}

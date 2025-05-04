@@ -28,6 +28,7 @@ export const TOKEN_TYPES = Object.freeze({
 	MultiplicativeBinaryOperator: "MultiplicativeBinaryOperator", // * / %
 	ComparisonBinaryOperator: "ComparisonBinaryOperator", // < > <= >= == !=
 	UnaryOperator: "UnaryOperator", // ! - +
+	Comment: "Comment", // {# ... #}
 });
 
 export type TokenType = keyof typeof TOKEN_TYPES;
@@ -120,30 +121,27 @@ function preprocess(template: string, options: PreprocessOptions = {}): string {
 		template = template.slice(0, -1);
 	}
 
-	// Replace all comments with a placeholder
-	// This ensures that comments don't interfere with the following options
-	template = template.replace(/{#.*?#}/gs, "{##}");
-
 	if (options.lstrip_blocks) {
 		// The lstrip_blocks option can also be set to strip tabs and spaces from the
 		// beginning of a line to the start of a block. (Nothing will be stripped if
 		// there are other characters before the start of the block.)
-		template = template.replace(/^[ \t]*({[#%])/gm, "$1");
+		template = template.replace(/^[ \t]*({[#%-])/gm, "$1");
 	}
 
 	if (options.trim_blocks) {
 		// If an application configures Jinja to trim_blocks, the first newline after
 		// a template tag is removed automatically (like in PHP).
-		template = template.replace(/([#%]})\n/g, "$1");
+		template = template.replace(/([#%-]})\n/g, "$1");
 	}
 
 	return (
 		template
-			.replace(/{##}/g, "") // Remove comments
 			.replace(/-%}\s*/g, "%}")
 			.replace(/\s*{%-/g, "{%")
 			.replace(/-}}\s*/g, "}}")
 			.replace(/\s*{{-/g, "{{")
+			.replace(/-#}\s*/g, "#}")
+			.replace(/\s*{#-/g, "{#")
 
 			// Handle the custom transformers-specific `generation` tag.
 			// See https://github.com/huggingface/transformers/pull/30650 for more information.
@@ -194,13 +192,17 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 		if (
 			lastTokenType === undefined ||
 			lastTokenType === TOKEN_TYPES.CloseStatement ||
-			lastTokenType === TOKEN_TYPES.CloseExpression
+			lastTokenType === TOKEN_TYPES.CloseExpression ||
+			lastTokenType === TOKEN_TYPES.Comment
 		) {
 			let text = "";
 			while (
 				cursorPosition < src.length &&
 				// Keep going until we hit the next Jinja statement or expression
-				!(src[cursorPosition] === "{" && (src[cursorPosition + 1] === "%" || src[cursorPosition + 1] === "{"))
+				!(
+					src[cursorPosition] === "{" &&
+					(src[cursorPosition + 1] === "%" || src[cursorPosition + 1] === "{" || src[cursorPosition + 1] === "#")
+				)
 			) {
 				// Consume text
 				text += src[cursorPosition++];
@@ -211,6 +213,21 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 				tokens.push(new Token(text, TOKEN_TYPES.Text));
 				continue;
 			}
+		}
+
+		// Possibly consume a comment
+		if (src[cursorPosition] === "{" && src[cursorPosition + 1] === "#") {
+			cursorPosition += 2; // Skip the opening {#
+
+			let comment = "";
+			while (
+				cursorPosition < src.length &&
+				(src[cursorPosition] !== "#" || src[cursorPosition + 1] !== "}")) {
+				comment += src[cursorPosition++];
+			}
+			tokens.push(new Token(comment, TOKEN_TYPES.Comment));
+			cursorPosition += 2; // Skip the closing #}
+			continue;
 		}
 
 		// Consume (and ignore) all whitespace inside Jinja statements or expressions
