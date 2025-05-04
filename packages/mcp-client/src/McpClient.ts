@@ -31,23 +31,23 @@ export class McpClient {
 
 	constructor({
 		provider,
-		baseUrl,
+		endpointUrl,
 		model,
 		apiKey,
 	}: (
 		| {
 				provider: InferenceProviderOrPolicy;
-				baseUrl?: undefined;
+				endpointUrl?: undefined;
 		  }
 		| {
-				baseUrl: string;
+				endpointUrl: string;
 				provider?: undefined;
 		  }
 	) & {
 		model: string;
 		apiKey: string;
 	}) {
-		this.client = baseUrl ? new InferenceClient(apiKey, { endpointUrl: baseUrl }) : new InferenceClient(apiKey);
+		this.client = endpointUrl ? new InferenceClient(apiKey, { endpointUrl: endpointUrl }) : new InferenceClient(apiKey);
 		this.provider = provider;
 		this.model = model;
 	}
