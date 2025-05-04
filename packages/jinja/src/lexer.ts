@@ -220,9 +220,11 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 			cursorPosition += 2; // Skip the opening {#
 
 			let comment = "";
-			while (
-				cursorPosition < src.length &&
-				(src[cursorPosition] !== "#" || src[cursorPosition + 1] !== "}")) {
+			while (src[cursorPosition] !== "#" || src[cursorPosition + 1] !== "}") {
+				// Check for end of input
+				if (cursorPosition + 2 >= src.length) {
+					throw new SyntaxError("Missing end of comment tag");
+				}
 				comment += src[cursorPosition++];
 			}
 			tokens.push(new Token(comment, TOKEN_TYPES.Comment));
