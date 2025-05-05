@@ -55,6 +55,7 @@ export const INFERENCE_PROVIDERS = [
 	"replicate",
 	"sambanova",
 	"together",
+	"wavespeed-ai",
 ] as const;
 
 export const PROVIDERS_OR_POLICIES = [...INFERENCE_PROVIDERS, "auto"] as const;

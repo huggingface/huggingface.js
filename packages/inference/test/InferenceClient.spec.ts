@@ -1996,4 +1996,97 @@ describe.skip("InferenceClient", () => {
 		},
 		TIMEOUT
 	);
+	describe.concurrent(
+		"Wavespeed AI",
+		() => {
+			const client = new InferenceClient(env.HF_WAVESPEED_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["wavespeed-ai"] = {
+				"wavespeed-ai/flux-schnell": {
+					hfModelId: "wavespeed-ai/flux-schnell",
+					providerId: "wavespeed-ai/flux-schnell",
+					status: "live",
+					task: "text-to-image",
+				},
+				"wavespeed-ai/wan-2.1/t2v-480p": {
+					hfModelId: "wavespeed-ai/wan-2.1/t2v-480p",
+					providerId: "wavespeed-ai/wan-2.1/t2v-480p",
+					status: "live",
+					task: "text-to-video",
+				},
+				"wavespeed-ai/hidream-e1-full": {
+					hfModelId: "wavespeed-ai/hidream-e1-full",
+					providerId: "wavespeed-ai/hidream-e1-full",
+					status: "live",
+					task: "image-to-image",
+				},
+				"wavespeed-ai/wan-2.1/i2v-480p": {
+					hfModelId: "wavespeed-ai/wan-2.1/i2v-480p",
+					providerId: "wavespeed-ai/wan-2.1/i2v-480p",
+					status: "live",
+					task: "image-to-video",
+				},
+			};
+
+			it(`textToImage - wavespeed-ai/flux-schnell`, async () => {
+				const res = await client.textToImage({
+					model: "wavespeed-ai/flux-schnell",
+					provider: "wavespeed-ai",
+					inputs:
+						"Cute boy with a hat, exploring nature, holding a telescope, backpack, surrounded by flowers, cartoon style, vibrant colors.",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it(`textToVideo - wavespeed-ai/wan-2.1/t2v-480p`, async () => {
+				const res = await client.textToVideo({
+					model: "wavespeed-ai/wan-2.1/t2v-480p",
+					provider: "wavespeed-ai",
+					inputs:
+						"A cool street dancer, wearing a baggy hoodie and hip-hop pants, dancing in front of a graffiti wall, night neon background, quick camera cuts, urban trends.",
+					parameters: {
+						guidance_scale: 5,
+						num_inference_steps: 30,
+						seed: -1,
+					},
+					duration: 5,
+					enable_safety_checker: true,
+					flow_shift: 2.9,
+					size: "480*832",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it(`imageToImage - wavespeed-ai/hidream-e1-full`, async () => {
+				const res = await client.imageToImage({
+					model: "wavespeed-ai/hidream-e1-full",
+					provider: "wavespeed-ai",
+					inputs: new Blob([readTestFile("cheetah.png")], { type: "image / png" }),
+					parameters: {
+						prompt: "The leopard chases its prey",
+						guidance_scale: 5,
+						num_inference_steps: 30,
+						seed: -1,
+					},
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it(`imageToVideo - wavespeed-ai/wan-2.1/i2v-480p`, async () => {
+				const res = await client.imageToImage({
+					model: "wavespeed-ai/wan-2.1/i2v-480p",
+					provider: "wavespeed-ai",
+					inputs: new Blob([readTestFile("cheetah.png")], { type: "image / png" }),
+					parameters: {
+						prompt: "The leopard chases its prey",
+						guidance_scale: 5,
+						num_inference_steps: 30,
+						seed: -1,
+					},
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+		},
+		60000 * 5
+	);
 });

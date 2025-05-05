@@ -47,6 +47,7 @@ import type {
 import * as Replicate from "../providers/replicate";
 import * as Sambanova from "../providers/sambanova";
 import * as Together from "../providers/together";
+import * as WavesppedAI from "../providers/wavespeed-ai";
 import type { InferenceProvider, InferenceTask } from "../types";
 
 export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, TaskProviderHelper>>> = {
@@ -144,6 +145,12 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-to-image": new Together.TogetherTextToImageTask(),
 		conversational: new Together.TogetherConversationalTask(),
 		"text-generation": new Together.TogetherTextGenerationTask(),
+	},
+	"wavespeed-ai": {
+		"text-to-image": new WavesppedAI.WavespeedAITextToImageTask(),
+		"text-to-video": new WavesppedAI.WavespeedAITextToVideoTask(),
+		"image-to-image": new WavesppedAI.WavespeedAIImageToImageTask(),
+		"image-to-video": new WavesppedAI.WavespeedAIImageToVideoTask(),
 	},
 };
 
