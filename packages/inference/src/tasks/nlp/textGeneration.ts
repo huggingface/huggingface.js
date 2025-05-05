@@ -14,7 +14,7 @@ export async function textGeneration(
 	args: BaseArgs & TextGenerationInput,
 	options?: Options
 ): Promise<TextGenerationOutput> {
-	const provider = await resolveProvider(args.provider, args.model);
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "text-generation");
 	const { data: response } = await innerRequest<
 		HyperbolicTextCompletionOutput | TextGenerationOutput | TextGenerationOutput[]
