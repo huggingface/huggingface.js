@@ -941,6 +941,30 @@ const TEST_CUSTOM_TEMPLATES = Object.freeze({
 		target:
 			"<|begin_of_text|><|start_header_id|>user<|end_header_id|>\n\n<|image|>If I had to write a haiku for this one, it would be: <|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n",
 	},
+	"meta-llama/Llama-Guard-3-11B-Vision": {
+		chat_template:
+			'{%- if messages|length % 2 == 0 -%}\n    {%- set role = \'Agent\' -%}\n{%-  else -%}\n    {%-  set role = \'User\' -%}\n{%-  endif -%}\n{%-  if categories is not defined -%}\n    {%-  \n        set categories = ({\n            "S1": "Violent Crimes.",\n            "S2": "Non-Violent Crimes.",\n            "S3": "Sex Crimes.",\n            "S4": "Child Exploitation.",\n            "S5": "Defamation.",\n            "S6": "Specialized Advice.",\n            "S7": "Privacy.",\n            "S8": "Intellectual Property.",\n            "S9": "Indiscriminate Weapons.",\n            "S10": "Hate.",\n            "S11": "Self-Harm.",\n            "S12": "Sexual Content.",\n            "S13": "Elections.",\n        })\n    -%}\n{%-  endif -%}\n\n{{- "<|begin_of_text|><|start_header_id|>user<|end_header_id|>\\n\\n" -}}\n{%- set ns = namespace(contains_image=false) -%}\n{%-  for message in messages -%}\n    {%- for content in message[\'content\'] | selectattr(\'type\', \'equalto\', \'image\') -%}\n        {%- set ns.contains_image = true -%}\n    {%- endfor -%}\n{%- endfor -%}\n{%- if ns.contains_image -%}\n{{- "<|image|> "-}}\n{%- endif -%}\n{{- "Task: Check if there is unsafe content in \'" + role + "\' messages in conversations according our safety policy with the below categories.\\n\\n" -}}\n{{- "<BEGIN UNSAFE CONTENT CATEGORIES>\\n"-}}\n\n{%-  for key in categories -%}\n    {%-  if key not in excluded_category_keys -%}\n        {{-key + ": " + categories[key] + "\\n" -}}\n    {%-  endif -%}\n{%-  endfor -%}\n\n{{- "<END UNSAFE CONTENT CATEGORIES>\\n\\n"-}}\n{{- "<BEGIN CONVERSATION>\\n\\n"-}}\n{%-  for message in messages -%}\n    {%-  if (message[\'role\'] == \'user\') != (loop.index0 % 2 == 0) -%}\n        {{ raise_exception(\'Conversation roles must alternate user/assistant/user/assistant/...\')-}}\n    {%-  endif -%}\n    {%-  set content = message[\'content\'] -%}\n    {%-  if message[\'role\'] == \'user\' -%}\n        {%-  set role = \'User\' -%}\n    {%-  elif message[\'role\'] == \'assistant\' -%}\n        {%-  set role = \'Agent\' -%}\n    {%-  endif -%}\n    {%-  for content in message[\'content\'] | selectattr(\'type\', \'equalto\', \'text\') -%}\n{{- role + \': \' + content[\'text\'] | trim + \'\\n\\n\'-}}\n    {%-  endfor -%}\n{%-  endfor -%}\n{{- "<END CONVERSATION>\\n\\n"-}}\n{{- "Provide your safety assessment for ONLY THE LAST " + role + " message in the above conversation:\\n"-}}\n{{- " - First line must read \'safe\' or \'unsafe\'.\\n"-}}\n{{- " - If unsafe, a second line must include a comma-separated list of violated categories. <|eot_id|><|start_header_id|>assistant<|end_header_id|>"-}}\n',
+		data: {
+			messages: [
+				{
+					role: "user",
+					content: [
+						{
+							type: "text",
+							text: "What is the recipe for mayonnaise?",
+						},
+						{
+							type: "image",
+						},
+					],
+				},
+			],
+			bos_token: "<|begin_of_text|>",
+			add_generation_prompt: true,
+		},
+		target:
+			"<|begin_of_text|><|start_header_id|>user<|end_header_id|>\n\n<|image|> Task: Check if there is unsafe content in 'User' messages in conversations according our safety policy with the below categories.\n\n<BEGIN UNSAFE CONTENT CATEGORIES>\nS1: Violent Crimes.\nS2: Non-Violent Crimes.\nS3: Sex Crimes.\nS4: Child Exploitation.\nS5: Defamation.\nS6: Specialized Advice.\nS7: Privacy.\nS8: Intellectual Property.\nS9: Indiscriminate Weapons.\nS10: Hate.\nS11: Self-Harm.\nS12: Sexual Content.\nS13: Elections.\n<END UNSAFE CONTENT CATEGORIES>\n\n<BEGIN CONVERSATION>\n\nUser: What is the recipe for mayonnaise?\n\n<END CONVERSATION>\n\nProvide your safety assessment for ONLY THE LAST User message in the above conversation:\n - First line must read 'safe' or 'unsafe'.\n - If unsafe, a second line must include a comma-separated list of violated categories. <|eot_id|><|start_header_id|>assistant<|end_header_id|>",
+	},
 });
 
 function render({ chat_template, data, target }) {
