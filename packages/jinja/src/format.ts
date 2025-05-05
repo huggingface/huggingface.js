@@ -217,7 +217,10 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 			return JSON.stringify((node as StringLiteral).value);
 		case "BinaryExpression": {
 			const n = node as BinaryExpression;
-			const thisPrecedence = OPERATOR_PRECEDENCE[n.operator.type] ?? 0;
+			let thisPrecedence = OPERATOR_PRECEDENCE[n.operator.type] ?? 0;
+			if (n.operator.value === "or") {
+				thisPrecedence = -1;
+			}
 			const left = formatExpression(n.left, thisPrecedence);
 			const right = formatExpression(n.right, thisPrecedence + 1);
 			const expr = `${left} ${n.operator.value} ${right}`;
