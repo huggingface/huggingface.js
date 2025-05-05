@@ -131,7 +131,7 @@ export async function fileDownloadInfo(
 		}
 	}
 
-	const etag = resp.headers.get("ETag") ?? undefined;
+	const etag = resp.headers.get("X-Linked-ETag") ?? resp.headers.get("ETag") ?? undefined;
 
 	if (!etag) {
 		throw new InvalidApiResponseFormatError("Expected ETag");
