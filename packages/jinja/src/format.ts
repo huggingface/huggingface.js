@@ -34,12 +34,19 @@ const NEWLINE = "\n";
 const OPEN_STATEMENT = "{%- ";
 const CLOSE_STATEMENT = " -%}";
 
-const OPERATOR_PRECEDENCE: Record<string, number> = {
-	MultiplicativeBinaryOperator: 2,
-	AdditiveBinaryOperator: 1,
-	ComparisonBinaryOperator: 0,
-	Ternary: -1,
-};
+function getBinaryOperatorPrecedence(expr: BinaryExpression): number {
+	switch (expr.operator.type) {
+		case "MultiplicativeBinaryOperator":
+			return 4;
+		case "AdditiveBinaryOperator":
+			return 3;
+		case "ComparisonBinaryOperator":
+			return 2;
+		case "Identifier":
+			return expr.operator.value === "and" ? 1 : 0;
+	}
+	return 0;
+}
 
 export function format(program: Program, indent: string | number = "\t"): string {
 	const indentStr = typeof indent === "number" ? " ".repeat(indent) : indent;
@@ -182,7 +189,7 @@ function formatCallStatement(node: CallStatement, depth: number, indentStr: stri
 	const pad = indentStr.repeat(depth);
 	const params =
 		node.callerArgs && node.callerArgs.length > 0 ? `(${node.callerArgs.map(formatExpression).join(", ")})` : "";
-	const callExpr = formatExpression(node.call, -1);
+	const callExpr = formatExpression(node.call);
 	let out = pad + createStatement(`call${params}`, callExpr) + NEWLINE;
 	out += formatStatements(node.body, depth + 1, indentStr) + NEWLINE;
 	out += pad + createStatement("endcall");
@@ -194,7 +201,7 @@ function formatFilterStatement(node: FilterStatement, depth: number, indentStr: 
 	const spec =
 		node.filter.type === "Identifier"
 			? (node.filter as Identifier).value
-			: formatExpression(node.filter as CallExpression, -1);
+			: formatExpression(node.filter as CallExpression);
 	let out = pad + createStatement("filter", spec) + NEWLINE;
 	out += formatStatements(node.body, depth + 1, indentStr) + NEWLINE;
 	out += pad + createStatement("endfilter");
@@ -205,7 +212,7 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 	switch (node.type) {
 		case "SpreadExpression": {
 			const n = node as SpreadExpression;
-			return `*${formatExpression(n.argument, -1)}`;
+			return `*${formatExpression(n.argument)}`;
 		}
 		case "Identifier":
 			return (node as Identifier).value;
@@ -217,10 +224,7 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 			return JSON.stringify((node as StringLiteral).value);
 		case "BinaryExpression": {
 			const n = node as BinaryExpression;
-			let thisPrecedence = OPERATOR_PRECEDENCE[n.operator.type] ?? 0;
-			if (n.operator.value === "or") {
-				thisPrecedence = -1;
-			}
+			const thisPrecedence = getBinaryOperatorPrecedence(n);
 			const left = formatExpression(n.left, thisPrecedence);
 			const right = formatExpression(n.right, thisPrecedence + 1);
 			const expr = `${left} ${n.operator.value} ${right}`;
@@ -235,17 +239,17 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 			return `not ${formatExpression((node as LogicalNegationExpression).argument, Infinity)}`;
 		case "CallExpression": {
 			const n = node as CallExpression;
-			const args = n.args.map((a) => formatExpression(a, -1)).join(", ");
-			return `${formatExpression(n.callee, -1)}(${args})`;
+			const args = n.args.map(formatExpression).join(", ");
+			return `${formatExpression(n.callee)}(${args})`;
 		}
 		case "MemberExpression": {
 			const n = node as MemberExpression;
-			let obj = formatExpression(n.object, -1);
+			let obj = formatExpression(n.object);
 			// only wrap if it's not a simple or chained access/call
 			if (!["Identifier", "MemberExpression", "CallExpression"].includes(n.object.type)) {
 				obj = `(${obj})`;
 			}
-			let prop = formatExpression(n.property, -1);
+			let prop = formatExpression(n.property);
 			if (!n.computed && n.property.type !== "Identifier") {
 				prop = `(${prop})`;
 			}
@@ -255,48 +259,47 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 			const n = node as FilterExpression;
 			const operand = formatExpression(n.operand, Infinity);
 			if (n.filter.type === "CallExpression") {
-				return `${operand} | ${formatExpression(n.filter, -1)}`;
+				return `${operand} | ${formatExpression(n.filter)}`;
 			}
 			return `${operand} | ${(n.filter as Identifier).value}`;
 		}
 		case "SelectExpression": {
 			const n = node as SelectExpression;
-			return `${formatExpression(n.lhs, -1)} if ${formatExpression(n.test, -1)}`;
+			return `${formatExpression(n.lhs)} if ${formatExpression(n.test)}`;
 		}
 		case "TestExpression": {
 			const n = node as TestExpression;
-			return `${formatExpression(n.operand, -1)} is${n.negate ? " not" : ""} ${n.test.value}`;
+			return `${formatExpression(n.operand)} is${n.negate ? " not" : ""} ${n.test.value}`;
 		}
 		case "ArrayLiteral":
 		case "TupleLiteral": {
-			const elems = ((node as ArrayLiteral | TupleLiteral).value as Expression[]).map((e) => formatExpression(e, -1));
+			const elems = ((node as ArrayLiteral | TupleLiteral).value as Expression[]).map(formatExpression);
 			const brackets = node.type === "ArrayLiteral" ? "[]" : "()";
 			return `${brackets[0]}${elems.join(", ")}${brackets[1]}`;
 		}
 		case "ObjectLiteral": {
 			const entries = Array.from((node as ObjectLiteral).value.entries()).map(
-				([k, v]) => `${formatExpression(k, -1)}: ${formatExpression(v, -1)}`
+				([k, v]) => `${formatExpression(k)}: ${formatExpression(v)}`
 			);
 			return `{ ${entries.join(", ")} }`;
 		}
 		case "SliceExpression": {
 			const n = node as SliceExpression;
-			const s = n.start ? formatExpression(n.start, -1) : "";
-			const t = n.stop ? formatExpression(n.stop, -1) : "";
-			const st = n.step ? `:${formatExpression(n.step, -1)}` : "";
+			const s = n.start ? formatExpression(n.start) : "";
+			const t = n.stop ? formatExpression(n.stop) : "";
+			const st = n.step ? `:${formatExpression(n.step)}` : "";
 			return `${s}:${t}${st}`;
 		}
 		case "KeywordArgumentExpression": {
 			const n = node as KeywordArgumentExpression;
-			return `${n.key.value}=${formatExpression(n.value, -1)}`;
+			return `${n.key.value}=${formatExpression(n.value)}`;
 		}
 		case "Ternary": {
 			const n = node as Ternary;
-			const expr = `${formatExpression(n.trueExpr, OPERATOR_PRECEDENCE.Ternary)} if ${formatExpression(
-				n.condition,
-				OPERATOR_PRECEDENCE.Ternary
-			)} else ${formatExpression(n.falseExpr, OPERATOR_PRECEDENCE.Ternary)}`;
-			return OPERATOR_PRECEDENCE.Ternary < parentPrec ? `(${expr})` : expr;
+			const expr = `${formatExpression(n.trueExpr)} if ${formatExpression(n.condition)} else ${formatExpression(
+				n.falseExpr
+			)}`;
+			return parentPrec > -1 ? `(${expr})` : expr;
 		}
 		default:
 			throw new Error(`Unknown expression type: ${node.type}`);
