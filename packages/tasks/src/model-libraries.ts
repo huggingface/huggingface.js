@@ -232,7 +232,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	"describe-anything": {
 		prettyLabel: "Describe Anything",
-		repoName: "describe-anything",
+		repoName: "Describe Anything",
 		repoUrl: "https://github.com/NVlabs/describe-anything",
 		filter: false,
 	},
