@@ -21,7 +21,6 @@ import type {
 	SelectExpression,
 	TestExpression,
 	UnaryExpression,
-	LogicalNegationExpression,
 	SliceExpression,
 	KeywordArgumentExpression,
 	CallStatement,
@@ -43,7 +42,9 @@ function getBinaryOperatorPrecedence(expr: BinaryExpression): number {
 		case "ComparisonBinaryOperator":
 			return 2;
 		case "Identifier":
-			return expr.operator.value === "and" ? 1 : 0;
+			if (expr.operator.value === "and") return 1;
+			if (expr.operator.value === "in" || expr.operator.value === "not in") return 2;
+			return 0;
 	}
 	return 0;
 }
@@ -235,8 +236,6 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 			const val = n.operator.value + (n.operator.value === "not" ? " " : "") + formatExpression(n.argument, Infinity);
 			return val;
 		}
-		case "LogicalNegationExpression":
-			return `not ${formatExpression((node as LogicalNegationExpression).argument, Infinity)}`;
 		case "CallExpression": {
 			const n = node as CallExpression;
 			const args = n.args.map(formatExpression).join(", ");
@@ -246,17 +245,19 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 			const n = node as MemberExpression;
 			let obj = formatExpression(n.object);
 			// only wrap if it's not a simple or chained access/call
-			if (![
-				"Identifier",
-				"MemberExpression",
-				"CallExpression",
-				"StringLiteral",
-				"IntegerLiteral",
-				"FloatLiteral",
-				"ArrayLiteral",
-				"TupleLiteral",
-				"ObjectLiteral",
-			].includes(n.object.type)) {
+			if (
+				![
+					"Identifier",
+					"MemberExpression",
+					"CallExpression",
+					"StringLiteral",
+					"IntegerLiteral",
+					"FloatLiteral",
+					"ArrayLiteral",
+					"TupleLiteral",
+					"ObjectLiteral",
+				].includes(n.object.type)
+			) {
 				obj = `(${obj})`;
 			}
 			let prop = formatExpression(n.property);
@@ -306,7 +307,7 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 		}
 		case "Ternary": {
 			const n = node as Ternary;
-			const expr = `${formatExpression(n.trueExpr)} if ${formatExpression(n.condition)} else ${formatExpression(
+			const expr = `${formatExpression(n.trueExpr)} if ${formatExpression(n.condition, 0)} else ${formatExpression(
 				n.falseExpr
 			)}`;
 			return parentPrec > -1 ? `(${expr})` : expr;
