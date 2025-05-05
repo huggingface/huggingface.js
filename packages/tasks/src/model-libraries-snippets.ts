@@ -1376,9 +1376,10 @@ export const outetts = (model: ModelData): string[] => {
 	// Don’t show this block on GGUF / ONNX mirrors
 	const t = model.tags ?? [];
 	if (t.includes("gguf") || t.includes("onnx")) return [];
-  
+
 	// v1.0 HF → minimal runnable snippet
-	return [`
+	return [
+		`
   import outetts
   
   enum = outetts.Models("${model.id}".split("/", 1)[1])       # VERSION_1_0_SIZE_1B
@@ -1392,8 +1393,9 @@ export const outetts = (model: ModelData): string[] => {
 		  speaker=speaker,
 	  )
   ).save("output.wav")
-  `];
-  };
+  `,
+	];
+};
 
 export const pxia = (model: ModelData): string[] => [
 	`from pxia import AutoModel

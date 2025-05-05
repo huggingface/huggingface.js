@@ -57,6 +57,8 @@ await hub.uploadFiles({
     },
     // Local file URL
     pathToFileURL("./pytorch-model.bin"),
+    // Local folder URL
+    pathToFileURL("./models"),
     // Web URL
     new URL("https://huggingface.co/xlm-roberta-base/resolve/main/tokenizer.json"),
     // Path + Web URL

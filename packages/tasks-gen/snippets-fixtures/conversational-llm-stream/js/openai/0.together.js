@@ -13,7 +13,6 @@ const stream = await client.chat.completions.create({
             content: "What is the capital of France?",
         },
     ],
-    max_tokens: 512,
     stream: true,
 });
 
