@@ -234,6 +234,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "Describe Anything",
 		repoName: "Describe Anything",
 		repoUrl: "https://github.com/NVlabs/describe-anything",
+		snippets: snippets.describe_anything,
 		filter: false,
 	},
 	"dia-tts": {

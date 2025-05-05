@@ -237,6 +237,19 @@ output = model.generate(text)
 sf.write("simple.mp3", output, 44100)`,
 ];
 
+export const describe_anything = (model: ModelData): string[] => [
+	`from huggingface_hub import snapshot_download
+from dam import DescribeAnythingModel
+
+snapshot_download(${model.id}, local_dir="checkpoints")
+
+dam = DescribeAnythingModel(
+	model_path="checkpoints",
+	conv_mode="v1",
+	prompt_mode="focal_prompt",
+)`,
+];
+
 const diffusersDefaultPrompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
 
 const diffusers_default = (model: ModelData) => [
