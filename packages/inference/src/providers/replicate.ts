@@ -18,7 +18,7 @@ import { InferenceOutputError } from "../lib/InferenceOutputError";
 import { isUrl } from "../lib/isUrl";
 import type { BodyParams, HeaderParams, UrlParams } from "../types";
 import { omit } from "../utils/omit";
-import { TaskProviderHelper, type TextToImageTaskHelper, type TextToVideoTaskHelper } from "./providerHelper";
+import { TaskProviderHelper, type TextToImageTaskHelper, type TextToVideoTaskHelper, type ImageToImageTaskHelper } from "./providerHelper";
 export interface ReplicateOutput {
 	output?: string | string[];
 }
@@ -137,6 +137,23 @@ export class ReplicateTextToSpeechTask extends ReplicateTask {
 }
 
 export class ReplicateTextToVideoTask extends ReplicateTask implements TextToVideoTaskHelper {
+	override async getResponse(response: ReplicateOutput): Promise<Blob> {
+		if (
+			typeof response === "object" &&
+			!!response &&
+			"output" in response &&
+			typeof response.output === "string" &&
+			isUrl(response.output)
+		) {
+			const urlResponse = await fetch(response.output);
+			return await urlResponse.blob();
+		}
+
+		throw new InferenceOutputError("Expected { output: string }");
+	}
+}
+
+export class ReplicateImageToImageTask extends ReplicateTask implements ImageToImageTaskHelper {
 	override async getResponse(response: ReplicateOutput): Promise<Blob> {
 		if (
 			typeof response === "object" &&
