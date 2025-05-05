@@ -741,7 +741,7 @@ export class Interpreter {
 					case "string":
 						return new StringValue(toJSON(operand));
 					case "unique": {
-						const seen = new Set<any>();
+						const seen = new Set();
 						const output: AnyRuntimeValue[] = [];
 						for (const item of operand.value) {
 							if (!seen.has(item.value)) {
@@ -761,7 +761,7 @@ export class Interpreter {
 					case "upper":
 					case "lower":
 					case "title":
-					case "capitalize":
+					case "capitalize": {
 						const builtin = operand.builtins.get(filter.value);
 						if (builtin instanceof FunctionValue) {
 							return builtin.value(/* no arguments */ [], environment);
@@ -770,6 +770,7 @@ export class Interpreter {
 						} else {
 							throw new Error(`Unknown StringValue filter: ${filter.value}`);
 						}
+					}
 					case "trim":
 						return new StringValue(operand.value.trim());
 					case "indent":
