@@ -246,7 +246,17 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 			const n = node as MemberExpression;
 			let obj = formatExpression(n.object);
 			// only wrap if it's not a simple or chained access/call
-			if (!["Identifier", "MemberExpression", "CallExpression"].includes(n.object.type)) {
+			if (![
+				"Identifier",
+				"MemberExpression",
+				"CallExpression",
+				"StringLiteral",
+				"IntegerLiteral",
+				"FloatLiteral",
+				"ArrayLiteral",
+				"TupleLiteral",
+				"ObjectLiteral",
+			].includes(n.object.type)) {
 				obj = `(${obj})`;
 			}
 			let prop = formatExpression(n.property);
@@ -281,7 +291,7 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 			const entries = Array.from((node as ObjectLiteral).value.entries()).map(
 				([k, v]) => `${formatExpression(k)}: ${formatExpression(v)}`
 			);
-			return `{ ${entries.join(", ")} }`;
+			return `{${entries.join(", ")}}`;
 		}
 		case "SliceExpression": {
 			const n = node as SliceExpression;
