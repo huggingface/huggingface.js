@@ -11,6 +11,7 @@ import { version as packageVersion } from "./package.json";
 
 const MODEL_ID = process.env.MODEL_ID ?? "Qwen/Qwen2.5-72B-Instruct";
 const PROVIDER = (process.env.PROVIDER as InferenceProvider) ?? "nebius";
+const ENDPOINT_URL = process.env.ENDPOINT_URL ?? process.env.BASE_URL;
 
 const SERVERS: StdioServerParameters[] = [
 	{
@@ -48,12 +49,21 @@ async function main() {
 		process.exit(1);
 	}
 
-	const agent = new Agent({
-		provider: PROVIDER,
-		model: MODEL_ID,
-		apiKey: process.env.HF_TOKEN,
-		servers: SERVERS,
-	});
+	const agent = new Agent(
+		ENDPOINT_URL
+			? {
+					endpointUrl: ENDPOINT_URL,
+					model: MODEL_ID,
+					apiKey: process.env.HF_TOKEN,
+					servers: SERVERS,
+			  }
+			: {
+					provider: PROVIDER,
+					model: MODEL_ID,
+					apiKey: process.env.HF_TOKEN,
+					servers: SERVERS,
+			  }
+	);
 
 	const rl = readline.createInterface({ input: stdin, output: stdout });
 	let abortController = new AbortController();
