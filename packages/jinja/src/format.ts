@@ -241,7 +241,8 @@ function formatExpression(node: Expression, parentPrec: number = -1): string {
 		case "MemberExpression": {
 			const n = node as MemberExpression;
 			let obj = formatExpression(n.object, -1);
-			if (n.object.type !== "Identifier") {
+			// only wrap if it's not a simple or chained access/call
+			if (!["Identifier", "MemberExpression", "CallExpression"].includes(n.object.type)) {
 				obj = `(${obj})`;
 			}
 			let prop = formatExpression(n.property, -1);
