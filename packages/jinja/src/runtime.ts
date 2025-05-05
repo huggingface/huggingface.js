@@ -27,7 +27,7 @@ import type {
 	Ternary,
 	SpreadExpression,
 } from "./ast";
-import { range, slice, titleCase } from "./utils";
+import { range, replace, slice, strftime_now, titleCase } from "./utils";
 
 export type AnyRuntimeValue =
 	| IntegerValue
@@ -127,6 +127,12 @@ export class StringValue extends RuntimeValue<string> {
 				return new StringValue(titleCase(this.value));
 			}),
 		],
+		[
+			"capitalize",
+			new FunctionValue(() => {
+				return new StringValue(this.value.charAt(0).toUpperCase() + this.value.slice(1));
+			}),
+		],
 		["length", new IntegerValue(this.value.length)],
 		[
 			"rstrip",
@@ -146,11 +152,21 @@ export class StringValue extends RuntimeValue<string> {
 				if (args.length === 0) {
 					throw new Error("startswith() requires at least one argument");
 				}
-				const prefix = args[0];
-				if (!(prefix instanceof StringValue)) {
-					throw new Error("startswith() argument must be a string");
+				const pattern = args[0];
+				if (pattern instanceof StringValue) {
+					return new BooleanValue(this.value.startsWith(pattern.value));
+				} else if (pattern instanceof ArrayValue) {
+					for (const item of pattern.value) {
+						if (!(item instanceof StringValue)) {
+							throw new Error("startswith() tuple elements must be strings");
+						}
+						if (this.value.startsWith(item.value)) {
+							return new BooleanValue(true);
+						}
+					}
+					return new BooleanValue(false);
 				}
-				return new BooleanValue(this.value.startsWith(prefix.value));
+				throw new Error("startswith() argument must be a string or tuple of strings");
 			}),
 		],
 		[
@@ -159,11 +175,21 @@ export class StringValue extends RuntimeValue<string> {
 				if (args.length === 0) {
 					throw new Error("endswith() requires at least one argument");
 				}
-				const suffix = args[0];
-				if (!(suffix instanceof StringValue)) {
-					throw new Error("endswith() argument must be a string");
+				const pattern = args[0];
+				if (pattern instanceof StringValue) {
+					return new BooleanValue(this.value.endsWith(pattern.value));
+				} else if (pattern instanceof ArrayValue) {
+					for (const item of pattern.value) {
+						if (!(item instanceof StringValue)) {
+							throw new Error("endswith() tuple elements must be strings");
+						}
+						if (this.value.endsWith(item.value)) {
+							return new BooleanValue(true);
+						}
+					}
+					return new BooleanValue(false);
 				}
-				return new BooleanValue(this.value.endsWith(suffix.value));
+				throw new Error("endswith() argument must be a string or tuple of strings");
 			}),
 		],
 		[
@@ -208,6 +234,34 @@ export class StringValue extends RuntimeValue<string> {
 				return new ArrayValue(result.map((part) => new StringValue(part)));
 			}),
 		],
+		[
+			"replace",
+			new FunctionValue((args): StringValue => {
+				if (args.length < 2) {
+					throw new Error("replace() requires at least two arguments");
+				}
+				const oldValue = args[0];
+				const newValue = args[1];
+				if (!(oldValue instanceof StringValue && newValue instanceof StringValue)) {
+					throw new Error("replace() arguments must be strings");
+				}
+
+				let count: AnyRuntimeValue | undefined;
+				if (args.length > 2) {
+					if (args[2].type === "KeywordArgumentsValue") {
+						count = (args[2] as KeywordArgumentsValue).value.get("count") ?? new NullValue();
+					} else {
+						count = args[2];
+					}
+				} else {
+					count = new NullValue();
+				}
+				if (!(count instanceof IntegerValue || count instanceof NullValue)) {
+					throw new Error("replace() count argument must be a number or null");
+				}
+				return new StringValue(replace(this.value, oldValue.value, newValue.value, count.value));
+			}),
+		],
 	]);
 }
 
@@ -246,15 +300,22 @@ export class ObjectValue extends RuntimeValue<Map<string, AnyRuntimeValue>> {
 				return this.value.get(key.value) ?? defaultValue ?? new NullValue();
 			}),
 		],
-		[
-			"items",
-			new FunctionValue(() => {
-				return new ArrayValue(
-					Array.from(this.value.entries()).map(([key, value]) => new ArrayValue([new StringValue(key), value]))
-				);
-			}),
-		],
+		["items", new FunctionValue(() => this.items())],
+		["keys", new FunctionValue(() => this.keys())],
+		["values", new FunctionValue(() => this.values())],
 	]);
+
+	items(): ArrayValue {
+		return new ArrayValue(
+			Array.from(this.value.entries()).map(([key, value]) => new ArrayValue([new StringValue(key), value]))
+		);
+	}
+	keys(): ArrayValue {
+		return new ArrayValue(Array.from(this.value.keys()).map((key) => new StringValue(key)));
+	}
+	values(): ArrayValue {
+		return new ArrayValue(Array.from(this.value.values()));
+	}
 }
 
 /**
@@ -456,6 +517,7 @@ export function setupGlobals(env: Environment): void {
 		throw new Error(args);
 	});
 	env.set("range", range);
+	env.set("strftime_now", strftime_now);
 
 	// NOTE: According to the Jinja docs: The special constants true, false, and none are indeed lowercase.
 	// Because that caused confusion in the past, (True used to expand to an undefined variable that was considered false),
@@ -509,7 +571,7 @@ export class Interpreter {
 				// Special case: `anything in undefined` is `false` and `anything not in undefined` is `true`
 				return new BooleanValue(node.operator.value === "not in");
 			}
-			throw new Error("Cannot perform operation on undefined values");
+			throw new Error(`Cannot perform operation ${node.operator.value} on undefined values`);
 		} else if (left instanceof NullValue || right instanceof NullValue) {
 			throw new Error("Cannot perform operation on null values");
 		} else if (node.operator.value === "~") {
@@ -678,21 +740,36 @@ export class Interpreter {
 						return new StringValue(operand.value.map((x) => x.value).join(""));
 					case "string":
 						return new StringValue(toJSON(operand));
+					case "unique": {
+						const seen = new Set<any>();
+						const output: AnyRuntimeValue[] = [];
+						for (const item of operand.value) {
+							if (!seen.has(item.value)) {
+								seen.add(item.value);
+								output.push(item);
+							}
+						}
+						return new ArrayValue(output);
+					}
 					default:
 						throw new Error(`Unknown ArrayValue filter: ${filter.value}`);
 				}
 			} else if (operand instanceof StringValue) {
 				switch (filter.value) {
+					// Filters that are also built-in functions
 					case "length":
-						return new IntegerValue(operand.value.length);
 					case "upper":
-						return new StringValue(operand.value.toUpperCase());
 					case "lower":
-						return new StringValue(operand.value.toLowerCase());
 					case "title":
-						return new StringValue(titleCase(operand.value));
 					case "capitalize":
-						return new StringValue(operand.value.charAt(0).toUpperCase() + operand.value.slice(1));
+						const builtin = operand.builtins.get(filter.value);
+						if (builtin instanceof FunctionValue) {
+							return builtin.value(/* no arguments */ [], environment);
+						} else if (builtin instanceof IntegerValue) {
+							return builtin;
+						} else {
+							throw new Error(`Unknown StringValue filter: ${filter.value}`);
+						}
 					case "trim":
 						return new StringValue(operand.value.trim());
 					case "indent":
@@ -808,6 +885,17 @@ export class Interpreter {
 				} else {
 					throw new Error(`Cannot apply filter "${filterName}" to type: ${operand.type}`);
 				}
+			} else if (filterName === "default") {
+				const [args, kwargs] = this.evaluateArguments(filter.args, environment);
+				const defaultValue = args[0] ?? new StringValue("");
+				const booleanValue = args[1] ?? kwargs.get("boolean") ?? new BooleanValue(false);
+				if (!(booleanValue instanceof BooleanValue)) {
+					throw new Error("`default` filter flag must be a boolean");
+				}
+				if (operand instanceof UndefinedValue || (booleanValue.value && !operand.__bool__().value)) {
+					return defaultValue;
+				}
+				return operand;
 			}
 
 			if (operand instanceof ArrayValue) {
@@ -896,6 +984,14 @@ export class Interpreter {
 							(!first.value && i === 0) || (!blank.value && x.length === 0) ? x : indent + x
 						);
 						return new StringValue(indented.join("\n"));
+					}
+					case "replace": {
+						const replaceFn = operand.builtins.get("replace");
+						if (!(replaceFn instanceof FunctionValue)) {
+							throw new Error("replace filter not available");
+						}
+						const [args, kwargs] = this.evaluateArguments(filter.args, environment);
+						return replaceFn.value([...args, new KeywordArgumentsValue(kwargs)], environment);
 					}
 				}
 				throw new Error(`Unknown StringValue filter: ${filterName}`);
@@ -1133,8 +1229,12 @@ export class Interpreter {
 			iterable = this.evaluate(node.iterable, scope);
 		}
 
-		if (!(iterable instanceof ArrayValue)) {
-			throw new Error(`Expected iterable type in for loop: got ${iterable.type}`);
+		if (!(iterable instanceof ArrayValue || iterable instanceof ObjectValue)) {
+			throw new Error(`Expected iterable or object type in for loop: got ${iterable.type}`);
+		}
+
+		if (iterable instanceof ObjectValue) {
+			iterable = iterable.keys();
 		}
 
 		const items: Expression[] = [];
