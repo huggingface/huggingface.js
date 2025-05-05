@@ -61,17 +61,20 @@ abstract class ReplicateTask extends TaskProviderHelper {
 	}
 }
 
-
-
 export class ReplicateTextToImageTask extends ReplicateTask implements TextToImageTaskHelper {
 	override preparePayload(params: BodyParams): Record<string, unknown> {
-		const payload = super.preparePayload(params);
-
-		if (params.mapping?.adapter === "lora" && params.mapping.adapterWeightsPath) {
-			payload.input.lora_weights = `https://huggingface.co/${params.mapping.hfModelId}`;
-		}
-
-		return payload;
+		return {
+			input: {
+				...omit(params.args, ["inputs", "parameters"]),
+				...(params.args.parameters as Record<string, unknown>),
+				prompt: params.args.inputs,
+				lora_weights:
+					params.mapping?.adapter === "lora" && params.mapping.adapterWeightsPath
+						? `https://huggingface.co/${params.mapping.hfModelId}`
+						: undefined,
+			},
+			version: params.model.includes(":") ? params.model.split(":")[1] : undefined,
+		};
 	}
 
 	override async getResponse(

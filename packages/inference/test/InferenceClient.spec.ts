@@ -1160,7 +1160,7 @@ describe.skip("InferenceClient", () => {
 				expect(res).toBeInstanceOf(Blob);
 			});
 
-			// Runs black-forest-labs/flux-dev-lora under the hood 
+			// Runs black-forest-labs/flux-dev-lora under the hood
 			// with fofr/flux-80s-cyberpunk as the LoRA weights
 			it("textToImage - all Flux LoRAs", async () => {
 				const res = await client.textToImage({
