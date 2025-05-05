@@ -967,6 +967,37 @@ const TEST_CUSTOM_TEMPLATES = Object.freeze({
 	},
 });
 
+/**
+ * Formatting tests for custom templates.
+ */
+const TEST_CUSTOM_FORMATTING = Object.freeze({
+	"HuggingFaceTB/SmolVLM-Instruct": {
+		//https://huggingface.co/HuggingFaceTB/SmolVLM-Instruct?chat_template=default
+		chat_template: `<|im_start|>{% for message in messages %}{{message['role'] | capitalize}}{% if message['content'][0]['type'] == 'image' %}{{':'}}{% else %}{{': '}}{% endif %}{% for line in message['content'] %}{% if line['type'] == 'text' %}{{line['text']}}{% elif line['type'] == 'image' %}{{ '<image>' }}{% endif %}{% endfor %}<end_of_utterance>
+{% endfor %}{% if add_generation_prompt %}{{ 'Assistant:' }}{% endif %}`,
+		target: `{{- "<|im_start|>" -}}
+{%- for message in messages -%}
+    {{- message["role"] | capitalize -}}
+    {%- if message["content"][0]["type"] == "image" -%}
+        {{- ":" -}}
+    {%- else -%}
+        {{- ": " -}}
+    {%- endif -%}
+    {%- for line in message["content"] -%}
+        {%- if line["type"] == "text" -%}
+            {{- line["text"] -}}
+        {%- elif line["type"] == "image" -%}
+            {{- "<image>" -}}
+        {%- endif -%}
+    {%- endfor -%}
+    {{- "<end_of_utterance>\\n" -}}
+{%- endfor -%}
+{%- if add_generation_prompt -%}
+    {{- "Assistant:" -}}
+{%- endif -%}`,
+	},
+});
+
 function render({ chat_template, data, target }) {
 	const template = new Template(chat_template);
 	const result = template.render(data);
@@ -978,19 +1009,33 @@ function render({ chat_template, data, target }) {
 	expect(formattedTemplateOutput).toEqual(result);
 }
 
+function format({ chat_template, target }) {
+	const template = new Template(chat_template);
+	const formatted = template.format({ indent: 4 });
+	expect(formatted).toEqual(target);
+}
+
 describe("End-to-end tests", () => {
-	describe("Default templates", async () => {
+	describe("Default templates", () => {
 		for (const [model_type, test_data] of Object.entries(TEST_DEFAULT_TEMPLATES)) {
-			it(model_type, async () => {
+			it(model_type, () => {
 				render(test_data);
 			});
 		}
 	});
 
-	describe("Custom templates", async () => {
+	describe("Custom templates", () => {
 		for (const [model_type, test_data] of Object.entries(TEST_CUSTOM_TEMPLATES)) {
-			it(model_type, async () => {
+			it(model_type, () => {
 				render(test_data);
+			});
+		}
+	});
+
+	describe("Custom formatting", () => {
+		for (const [model_type, test_data] of Object.entries(TEST_CUSTOM_FORMATTING)) {
+			it(model_type, () => {
+				format(test_data);
 			});
 		}
 	});
