@@ -49,7 +49,7 @@ export class Agent extends McpClient {
 
 	constructor({
 		provider,
-		baseUrl,
+		endpointUrl,
 		model,
 		apiKey,
 		servers,
@@ -57,10 +57,10 @@ export class Agent extends McpClient {
 	}: (
 		| {
 				provider: InferenceProvider;
-				baseUrl?: undefined;
+				endpointUrl?: undefined;
 		  }
 		| {
-				baseUrl: string;
+				endpointUrl: string;
 				provider?: undefined;
 		  }
 	) & {
@@ -69,7 +69,7 @@ export class Agent extends McpClient {
 		servers: StdioServerParameters[];
 		prompt?: string;
 	}) {
-		super(provider ? { provider, baseUrl, model, apiKey } : { provider, baseUrl, model, apiKey });
+		super(provider ? { provider, endpointUrl, model, apiKey } : { provider, endpointUrl, model, apiKey });
 		/// ^This shenanigan is just here to please an overzealous TS type-checker.
 		this.servers = servers;
 		this.messages = [

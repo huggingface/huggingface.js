@@ -47,6 +47,13 @@ export class For extends Statement {
 	}
 }
 
+export class Break extends Statement {
+	override type = "Break";
+}
+export class Continue extends Statement {
+	override type = "Continue";
+}
+
 export class SetStatement extends Statement {
 	override type = "Set";
 	constructor(

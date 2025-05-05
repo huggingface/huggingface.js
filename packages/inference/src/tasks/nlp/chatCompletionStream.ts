@@ -11,7 +11,7 @@ export async function* chatCompletionStream(
 	args: BaseArgs & ChatCompletionInput,
 	options?: Options
 ): AsyncGenerator<ChatCompletionStreamOutput> {
-	const provider = await resolveProvider(args.provider, args.model);
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "conversational");
 	yield* innerStreamingRequest<ChatCompletionStreamOutput>(args, providerHelper, {
 		...options,
