@@ -63,7 +63,6 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 		return `/api/v2/${params.model}`;
 	}
 	preparePayload(params: BodyParams): Record<string, unknown> {
-		console.log("params", params);
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),
@@ -85,10 +84,6 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 		url?: string,
 		headers?: Record<string, string>
 	): Promise<Blob> {
-		console.log("getResponse headers", headers);
-		console.log("getResponse response", response);
-		console.log("getResponse url", url);
-
 		if (!headers && this.accessToken) {
 			headers = { Authorization: `Bearer ${this.accessToken}` };
 		}
@@ -97,7 +92,6 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 		}
 
 		const resultUrl = response.data.urls.get;
-		console.log("getResponse resultUrl", resultUrl);
 
 		// Poll for results until completion
 		while (true) {
@@ -166,11 +160,5 @@ export class WavespeedAIImageToImageTask extends WavespeedAITask implements Imag
 			...(params.args.parameters as Record<string, unknown>),
 			image: params.args.inputs,
 		};
-	}
-}
-
-export class WavespeedAIImageToVideoTask extends WavespeedAITask implements TextToVideoTaskHelper {
-	constructor() {
-		super(WAVESPEEDAI_API_BASE_URL);
 	}
 }

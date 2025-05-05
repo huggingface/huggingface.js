@@ -2071,21 +2071,6 @@ describe.skip("InferenceClient", () => {
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
-
-			it(`imageToVideo - wavespeed-ai/wan-2.1/i2v-480p`, async () => {
-				const res = await client.imageToImage({
-					model: "wavespeed-ai/wan-2.1/i2v-480p",
-					provider: "wavespeed-ai",
-					inputs: new Blob([readTestFile("cheetah.png")], { type: "image / png" }),
-					parameters: {
-						prompt: "The leopard chases its prey",
-						guidance_scale: 5,
-						num_inference_steps: 30,
-						seed: -1,
-					},
-				});
-				expect(res).toBeInstanceOf(Blob);
-			});
 		},
 		60000 * 5
 	);

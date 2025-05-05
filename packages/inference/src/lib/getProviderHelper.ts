@@ -150,7 +150,6 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-to-image": new WavesppedAI.WavespeedAITextToImageTask(),
 		"text-to-video": new WavesppedAI.WavespeedAITextToVideoTask(),
 		"image-to-image": new WavesppedAI.WavespeedAIImageToImageTask(),
-		"image-to-video": new WavesppedAI.WavespeedAIImageToVideoTask(),
 	},
 };
 
