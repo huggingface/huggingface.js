@@ -1187,7 +1187,7 @@ export class Interpreter {
 			if (arr.length !== tuple.value.length) {
 				throw new Error(`Too ${tuple.value.length > arr.length ? "few" : "many"} items to unpack in set`);
 			}
-			for (let i = 0; i < tuple.value.length; i++) {
+			for (let i = 0; i < tuple.value.length; ++i) {
 				const elem = tuple.value[i];
 				if (elem.type !== "Identifier") {
 					throw new Error(`Cannot unpack to non-identifier in set: ${elem.type}`);

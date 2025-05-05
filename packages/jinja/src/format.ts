@@ -113,7 +113,7 @@ function formatIf(node: If, depth: number, indentStr: string): string {
 		formatStatements(clauses[0].body, depth + 1, indentStr);
 
 	// ELIF(s)
-	for (let i = 1; i < clauses.length; i++) {
+	for (let i = 1; i < clauses.length; ++i) {
 		out +=
 			NEWLINE +
 			pad +
