@@ -462,7 +462,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	"kimi-audio": {
 		prettyLabel: "KimiAudio",
 		repoName: "KimiAudio",
-		repoUrl: "https://github.com/MoonshotAI/Kimi-Audio", // Replace with actual repo URL
+		repoUrl: "https://github.com/MoonshotAI/Kimi-Audio",
 		snippets: snippets.kimi_audio,
 		filter: false,
 	},
