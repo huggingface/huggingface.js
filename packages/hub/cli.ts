@@ -52,7 +52,6 @@ const commands = {
 			},
 			{
 				name: "repo-type" as const,
-				short: "t",
 				enum: ["dataset", "model", "space"],
 				default: "model",
 				description:
@@ -60,26 +59,22 @@ const commands = {
 			},
 			{
 				name: "revision" as const,
-				short: "r",
 				description: "The revision to upload to. Defaults to the main branch",
 				default: "main",
 			},
 			{
 				name: "from-revision" as const,
-				short: "c",
 				description:
 					"The revision to upload from. Defaults to the latest commit on main or on the branch if it exists.",
 			},
 			{
 				name: "from-empty" as const,
-				short: "e",
 				boolean: true,
 				description:
 					"This will create an empty branch and upload the files to it. This will erase all previous commits on the branch if it exists.",
 			},
 			{
 				name: "token" as const,
-				short: "k",
 				description:
 					"The access token to use for authentication. If not provided, the HF_TOKEN environment variable will be used.",
 				default: process.env.HF_TOKEN,
