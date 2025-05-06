@@ -93,6 +93,32 @@ for await (const fileInfo of hub.listFiles({repo})) {
 await hub.deleteRepo({ repo, accessToken: "hf_..." });
 ```
 
+## CLI usage
+
+You can use `@huggingface/hub` in CLI mode to upload files and folders to your repo. 
+
+```console
+npx @huggingface/hub upload coyotte508/test-model .
+npx @huggingface/hub upload datasets/coyotte508/test-dataset .
+# Same thing
+npx @huggingface/hub upload --repo-type dataset coyotte508/test-dataset .
+# Upload new data with 0 history in a separate branch
+npx @huggingface/hub upload coyotte508/test-model . --revision release --empty
+
+npx @huggingface/hub --help
+npx @huggingface/hub upload --help
+```
+
+You can also instal globally with `npm install -g @huggingface/hub`. Then you can do:
+
+```console
+hfx upload coyotte508/test-model .
+hfx upload --repo-type dataset coyotte508/test-dataset . --revision release --empty
+
+hfx --help
+hfx  upload --help
+```
+
 ## OAuth Login
 
 It's possible to login using OAuth (["Sign in with HF"](https://huggingface.co/docs/hub/oauth)).

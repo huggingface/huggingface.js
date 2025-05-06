@@ -23,6 +23,8 @@ export async function createBranch(params: {
 	empty?: boolean;
 	/**
 	 * Use this to overwrite the branch if it already exists.
+	 *
+	 * If you only specify `overwrite` and no `revision`/`empty`, and the branch already exists, it will be a no-op.
 	 */
 	overwrite?: boolean;
 }): Promise<void> {
