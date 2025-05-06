@@ -1118,12 +1118,34 @@ export const transformers = (model: ModelData): string[] => {
 
 	if (model.pipeline_tag && LIBRARY_TASK_MAPPING.transformers?.includes(model.pipeline_tag)) {
 		const pipelineSnippet = ["# Use a pipeline as a high-level helper", "from transformers import pipeline", ""];
+		let useMessagesSyntax = false;
 
-		if (model.tags.includes("conversational") && model.config?.tokenizer_config?.chat_template) {
-			pipelineSnippet.push("messages = [", '    {"role": "user", "content": "Who are you?"},', "]");
+		// Check if chat_template exists, as it's a prerequisite for the messages format
+		if (model.config?.tokenizer_config?.chat_template) {
+			if (model.tags.includes("image-text-to-text") && model.tags.includes("conversational")) {
+				pipelineSnippet.push(
+					"messages = [",
+					[
+						"    {",
+						'        "role": "user",',
+						'        "content": [',
+						'            {"type": "image", "url": "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/p-blog/candy.JPG"},',
+						'            {"type": "text", "text": "What animal is on the candy?"}',
+						"        ]",
+						"    },", // Trailing comma for the object, similar to the example
+					].join("\n"),
+					"]"
+				);
+				useMessagesSyntax = true;
+			} else if (model.tags.includes("conversational")) {
+				
+				useMessagesSyntax = true;
+			}
 		}
+
 		pipelineSnippet.push(`pipe = pipeline("${model.pipeline_tag}", model="${model.id}"` + remote_code_snippet + ")");
-		if (model.tags.includes("conversational") && model.config?.tokenizer_config?.chat_template) {
+
+		if (useMessagesSyntax) {
 			pipelineSnippet.push("pipe(messages)");
 		}
 
