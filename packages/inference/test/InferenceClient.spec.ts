@@ -1358,6 +1358,12 @@ describe.skip("InferenceClient", () => {
 					status: "live",
 					task: "text-to-image",
 				},
+				"BAAI/bge-multilingual-gemma2": {
+					providerId: "BAAI/bge-multilingual-gemma2",
+					hfModelId: "BAAI/bge-multilingual-gemma2",
+					status: "live",
+					task: "feature-extraction",
+				},
 			};
 
 			it("chatCompletion", async () => {
@@ -1394,6 +1400,16 @@ describe.skip("InferenceClient", () => {
 					inputs: "award winning high resolution photo of a giant tortoise",
 				});
 				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("featureExtraction", async () => {
+				const res = await client.featureExtraction({
+					model: "BAAI/bge-multilingual-gemma2",
+					inputs: "That is a happy person",
+				});
+
+				expect(res).toBeInstanceOf(Array);
+				expect(res[0]).toEqual(expect.arrayContaining([expect.any(Number)]));
 			});
 		},
 		TIMEOUT
