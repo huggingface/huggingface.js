@@ -1,6 +1,7 @@
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
 import type { AccessToken, RepoDesignation } from "../types/public";
+import { toRepoId } from "../utils/toRepoId";
 
 export async function deleteBranch(params: {
 	repo: RepoDesignation;
@@ -13,7 +14,7 @@ export async function deleteBranch(params: {
 	fetch?: typeof fetch;
 }): Promise<void> {
 	const res = await (params.fetch ?? fetch)(
-		`${params.hubUrl ?? HUB_URL}/api/repos/${params.repo}/branch/${encodeURIComponent(params.branch)}`,
+		`${params.hubUrl ?? HUB_URL}/api/repos/${toRepoId(params.repo)}/branch/${encodeURIComponent(params.branch)}`,
 		{
 			method: "DELETE",
 			headers: {
