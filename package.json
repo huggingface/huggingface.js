@@ -30,8 +30,5 @@
 		"vite": "^5.0.2",
 		"vitest": "^0.34.6",
 		"webdriverio": "^8.6.7"
-	},
-	"dependencies": {
-		"@huggingface/hub": "link:packages/hub"
 	}
 }
