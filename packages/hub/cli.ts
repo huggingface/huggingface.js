@@ -102,6 +102,8 @@ type Command = keyof typeof commands;
 
 async function run() {
 	switch (command) {
+		case undefined:
+		case "--help":
 		case "help": {
 			const positionals = parseArgs({ allowPositionals: true, args }).positionals;
 
@@ -117,11 +119,17 @@ async function run() {
 						.map(([name, { description }]) => `- ${usage(name)}: ${description}`)
 						.join("\n")
 			);
+
+			console.log("\nTo get help on a specific command, run `hfjs help <command>` or `hfjs <command> --help`");
+
+			if (command === undefined) {
+				process.exitCode = 1;
+			}
 			break;
 		}
 
 		case "upload": {
-			if (args[1] === "--help" || args[1] === "-h") {
+			if (args[0] === "--help" || args[0] === "-h") {
 				console.log(usage("upload"));
 				break;
 			}
@@ -171,7 +179,7 @@ function usage(commandName: Command) {
 			}
 			return `[--${arg.name} ${arg.enum ? `{${arg.enum.join(",")}}` : arg.name.toLocaleUpperCase()}]`;
 		})
-		.join("")}`.trim();
+		.join(" ")}`.trim();
 }
 
 function detailedUsage(commandName: Command) {
@@ -219,8 +227,9 @@ function advParseArgs<C extends Command>(
 				.map((arg) => {
 					const option = {
 						name: arg.name,
-						short: arg.short,
+						...(arg.short && { short: arg.short }),
 						type: arg.boolean ? "boolean" : "string",
+						default: typeof arg.default === "function" ? arg.default() : arg.default,
 					} as const;
 					return [arg.name, option];
 				})
