@@ -4,6 +4,7 @@ import { parseArgs } from "node:util";
 import { typedEntries } from "./src/utils/typedEntries";
 import { createBranch, uploadFilesWithProgress } from "./src";
 import { pathToFileURL } from "node:url";
+import { HUB_URL } from "./src/consts";
 
 // Didn't find the import from "node:util", so duplicated it here
 type OptionToken =
@@ -83,6 +84,13 @@ const commands = {
 					"The access token to use for authentication. If not provided, the HF_TOKEN environment variable will be used.",
 				default: process.env.HF_TOKEN,
 			},
+			{
+				name: "hub-url" as const,
+				description:
+					"The URL of the Hub to upload to. Defaults to https://huggingface.co. Use this to upload to a private Hub.",
+				hidden: true,
+				default: HUB_URL,
+			},
 		],
 	},
 } satisfies Record<
@@ -97,6 +105,7 @@ const commands = {
 			required?: boolean;
 			boolean?: boolean;
 			enum?: Array<string>;
+			hidden?: boolean;
 			default?: string | (() => string);
 		}>;
 	}
@@ -138,8 +147,18 @@ async function run() {
 				break;
 			}
 			const parsedArgs = advParseArgs(args, "upload");
-			const { repoName, localFolder, repoType, revision, fromEmpty, fromRevision, token, quiet, commitMessage } =
-				parsedArgs;
+			const {
+				repoName,
+				localFolder,
+				repoType,
+				revision,
+				fromEmpty,
+				fromRevision,
+				token,
+				quiet,
+				commitMessage,
+				hubUrl,
+			} = parsedArgs;
 
 			if (revision && (fromEmpty || fromRevision)) {
 				await createBranch({
@@ -149,6 +168,7 @@ async function run() {
 					revision: fromRevision,
 					empty: fromEmpty ? true : undefined,
 					overwrite: true,
+					hubUrl,
 				});
 			}
 
@@ -159,6 +179,7 @@ async function run() {
 				accessToken: token,
 				commitTitle: commitMessage?.trim().split("\n")[0],
 				commitDescription: commitMessage?.trim().split("\n").slice(1).join("\n").trim(),
+				hubUrl,
 			})) {
 				if (!quiet) {
 					console.log(event);
@@ -176,6 +197,7 @@ function usage(commandName: Command) {
 	const command = commands[commandName];
 
 	return `${commandName} ${(command.args || [])
+		.filter((arg) => !arg.hidden)
 		.map((arg) => {
 			if (arg.positional) {
 				if (arg.required) {
@@ -205,11 +227,11 @@ function detailedUsage(commandName: Command) {
 		ret += `\n`;
 	}
 
-	if (command.args.some((p) => !p.positional)) {
+	if (command.args.some((p) => !p.positional && !p.hidden)) {
 		ret += `Options:\n`;
 
 		for (const arg of command.args) {
-			if (!arg.positional) {
+			if (!arg.positional && !arg.hidden) {
 				ret += `  --${arg.name}${arg.short ? `, -${arg.short}` : ""}: ${arg.description}\n`;
 			}
 		}
