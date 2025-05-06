@@ -58,7 +58,7 @@
 		"face"
 	],
 	"bin": {
-		"hf": "./dist/cli.js"
+		"hfx": "./dist/cli.js"
 	},
 	"author": "Hugging Face",
 	"license": "MIT",
