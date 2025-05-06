@@ -459,6 +459,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.keras_hub,
 		filter: true,
 	},
+	"kimi-audio": {
+		prettyLabel: "KimiAudio",
+		repoName: "KimiAudio",
+		repoUrl: "https://github.com/MoonshotAI/Kimi-Audio", // Replace with actual repo URL
+		snippets: snippets.kimi_audio,
+		filter: false,
+	},
 	k2: {
 		prettyLabel: "K2",
 		repoName: "k2",

@@ -561,6 +561,37 @@ export const keras_hub = (model: ModelData): string[] => {
 	return snippets;
 };
 
+export const kimi_audio = (model: ModelData): string[] => [
+	`# Example usage for KimiAudio
+from kimia_infer.api.kimia import KimiAudio
+
+model = KimiAudio(model_path="${model.id}", load_detokenizer=True)
+
+sampling_params = {
+    "audio_temperature": 0.8,
+    "audio_top_k": 10,
+    "text_temperature": 0.0,
+    "text_top_k": 5,
+}
+
+# For ASR
+asr_audio = "asr_example.wav"
+messages_asr = [
+    {"role": "user", "message_type": "text", "content": "Please transcribe the following audio:"},
+    {"role": "user", "message_type": "audio", "content": asr_audio}
+]
+_, text = model.generate(messages_asr, **sampling_params, output_type="text")
+print(text)
+
+# For Q&A
+qa_audio = "qa_example.wav"
+messages_conv = [{"role": "user", "message_type": "audio", "content": qa_audio}]
+wav, text = model.generate(messages_conv, **sampling_params, output_type="both")
+sf.write("output_audio.wav", wav.cpu().view(-1).numpy(), 24000)
+print(text)
+`,
+];
+
 export const lightning_ir = (model: ModelData): string[] => {
 	if (model.tags.includes("bi-encoder")) {
 		return [
