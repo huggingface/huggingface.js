@@ -1,10 +1,13 @@
-lockfileVersion: '6.0'
+lockfileVersion: '9.0'
 
 settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-dependencies:
-  '@huggingface/tasks':
-    specifier: workspace:^
-    version: link:../tasks
+importers:
+
+  .:
+    dependencies:
+      '@huggingface/tasks':
+        specifier: workspace:^
+        version: link:../tasks
