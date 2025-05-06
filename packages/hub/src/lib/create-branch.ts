@@ -29,8 +29,9 @@ export async function createBranch(params: {
 	 */
 	overwrite?: boolean;
 }): Promise<void> {
+	const repoId = toRepoId(params.repo);
 	const res = await (params.fetch ?? fetch)(
-		`${params.hubUrl ?? HUB_URL}/api/repos/${toRepoId(params.repo)}/branch/${encodeURIComponent(params.branch)}`,
+		`${params.hubUrl ?? HUB_URL}/api/${repoId.type}s/${repoId.name}/branch/${encodeURIComponent(params.branch)}`,
 		{
 			method: "POST",
 			headers: {
