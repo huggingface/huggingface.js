@@ -1137,7 +1137,6 @@ export const transformers = (model: ModelData): string[] => {
 				);
 				useMessagesSyntax = true;
 			} else if (model.tags.includes("conversational")) {
-				
 				useMessagesSyntax = true;
 			}
 		}
