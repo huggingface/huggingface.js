@@ -112,11 +112,11 @@ npx @huggingface/hub upload --help
 You can also instal globally with `npm install -g @huggingface/hub`. Then you can do:
 
 ```console
-hfx upload coyotte508/test-model .
-hfx upload --repo-type dataset coyotte508/test-dataset . --revision release --empty
+hfjs upload coyotte508/test-model .
+hfjs upload --repo-type dataset coyotte508/test-dataset . --revision release --empty
 
-hfx --help
-hfx  upload --help
+hfjs --help
+hfjs  upload --help
 ```
 
 ## OAuth Login
