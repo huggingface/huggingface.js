@@ -1120,7 +1120,6 @@ export const transformers = (model: ModelData): string[] => {
 		const pipelineSnippet = ["# Use a pipeline as a high-level helper", "from transformers import pipeline", ""];
 		let useMessagesSyntax = false;
 
-		// Check if chat_template exists, as it's a prerequisite for the messages format
 		if (model.config?.tokenizer_config?.chat_template) {
 			if (model.tags.includes("image-text-to-text") && model.tags.includes("conversational")) {
 				pipelineSnippet.push(
@@ -1132,7 +1131,7 @@ export const transformers = (model: ModelData): string[] => {
 						'            {"type": "image", "url": "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/p-blog/candy.JPG"},',
 						'            {"type": "text", "text": "What animal is on the candy?"}',
 						"        ]",
-						"    },", // Trailing comma for the object, similar to the example
+						"    },",
 					].join("\n"),
 					"]"
 				);
