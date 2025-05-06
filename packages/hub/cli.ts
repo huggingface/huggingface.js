@@ -74,6 +74,10 @@ const commands = {
 					"This will create an empty branch and upload the files to it. This will erase all previous commits on the branch if it exists.",
 			},
 			{
+				name: "commit-message" as const,
+				description: "The commit message to use. Defaults to 'Add [x] files'",
+			},
+			{
 				name: "token" as const,
 				description:
 					"The access token to use for authentication. If not provided, the HF_TOKEN environment variable will be used.",
@@ -134,7 +138,8 @@ async function run() {
 				break;
 			}
 			const parsedArgs = advParseArgs(args, "upload");
-			const { repoName, localFolder, repoType, revision, fromEmpty, fromRevision, token, quiet } = parsedArgs;
+			const { repoName, localFolder, repoType, revision, fromEmpty, fromRevision, token, quiet, commitMessage } =
+				parsedArgs;
 
 			if (revision && (fromEmpty || fromRevision)) {
 				await createBranch({
@@ -152,6 +157,8 @@ async function run() {
 				files: [pathToFileURL(localFolder)],
 				branch: revision,
 				accessToken: token,
+				commitTitle: commitMessage?.trim().split("\n")[0],
+				commitDescription: commitMessage?.trim().split("\n").slice(1).join("\n").trim(),
 			})) {
 				if (!quiet) {
 					console.log(event);
@@ -272,12 +279,14 @@ function advParseArgs<C extends Command>(
 					throw new Error(`Unknown option: ${token.name}`);
 				}
 
-				if (!token.value) {
-					throw new Error(`Missing value for option: ${token.name}`);
-				}
+				if (!arg.boolean) {
+					if (!token.value) {
+						throw new Error(`Missing value for option: ${token.name}: ${JSON.stringify(token)}`);
+					}
 
-				if (arg.enum && !arg.enum.includes(token.value)) {
-					throw new Error(`Invalid value for option ${token.name}. Expected one of: ${arg.enum.join(", ")}`);
+					if (arg.enum && !arg.enum.includes(token.value)) {
+						throw new Error(`Invalid value for option ${token.name}. Expected one of: ${arg.enum.join(", ")}`);
+					}
 				}
 
 				return [arg.name, arg.boolean ? true : token.value];
