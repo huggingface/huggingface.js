@@ -160,7 +160,7 @@ async function run() {
 				hubUrl,
 			} = parsedArgs;
 
-			if (revision && (fromEmpty || fromRevision)) {
+			if (revision && revision !== "main") {
 				await createBranch({
 					branch: revision,
 					repo: repoType ? { type: repoType as "model" | "dataset" | "space", name: repoName } : repoName,
