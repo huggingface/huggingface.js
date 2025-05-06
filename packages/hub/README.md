@@ -103,7 +103,7 @@ npx @huggingface/hub upload datasets/coyotte508/test-dataset .
 # Same thing
 npx @huggingface/hub upload --repo-type dataset coyotte508/test-dataset .
 # Upload new data with 0 history in a separate branch
-npx @huggingface/hub upload coyotte508/test-model . --revision release --empty
+npx @huggingface/hub upload coyotte508/test-model . --revision release --from-empty
 
 npx @huggingface/hub --help
 npx @huggingface/hub upload --help
@@ -113,7 +113,7 @@ You can also instal globally with `npm install -g @huggingface/hub`. Then you ca
 
 ```console
 hfjs upload coyotte508/test-model .
-hfjs upload --repo-type dataset coyotte508/test-dataset . --revision release --empty
+hfjs upload --repo-type dataset coyotte508/test-dataset . --revision release --from-empty
 
 hfjs --help
 hfjs  upload --help
