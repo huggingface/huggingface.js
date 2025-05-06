@@ -238,7 +238,8 @@ sf.write("simple.mp3", output, 44100)`,
 ];
 
 export const describe_anything = (model: ModelData): string[] => [
-	`from huggingface_hub import snapshot_download
+	`# pip install git+https://github.com/NVlabs/describe-anything
+from huggingface_hub import snapshot_download
 from dam import DescribeAnythingModel
 
 snapshot_download(${model.id}, local_dir="checkpoints")
