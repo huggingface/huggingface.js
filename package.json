@@ -2,7 +2,7 @@
 	"private": true,
 	"name": "@huggingface/root",
 	"license": "MIT",
-	"packageManager": "pnpm@9.0.0",
+	"packageManager": "pnpm@10.10.0",
 	"scripts": {
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .eslintrc.cjs",
 		"lint:check": "eslint --ext .cjs,.ts .eslintrc.cjs",

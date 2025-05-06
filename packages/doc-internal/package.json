@@ -1,6 +1,6 @@
 {
 	"name": "@huggingface/doc-internal",
-	"packageManager": "pnpm@9.0.0",
+	"packageManager": "pnpm@10.10.0",
 	"version": "1.0.0",
 	"description": "Package to generate doc for other @huggingface packages",
 	"private": true,
