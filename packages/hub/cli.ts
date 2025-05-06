@@ -5,6 +5,18 @@ import { typedEntries } from "./src/utils/typedEntries";
 import { createBranch, uploadFilesWithProgress } from "./src";
 import { pathToFileURL } from "node:url";
 
+// Didn't find the import from "node:util", so duplicated it here
+type OptionToken =
+	| { kind: "option"; index: number; name: string; rawName: string; value: string; inlineValue: boolean }
+	| {
+			kind: "option";
+			index: number;
+			name: string;
+			rawName: string;
+			value: undefined;
+			inlineValue: undefined;
+	  };
+
 const command = process.argv[2];
 const args = process.argv.slice(3);
 
@@ -242,12 +254,14 @@ function advParseArgs<C extends Command>(
 	}
 
 	const positionals = Object.fromEntries(
-		tokens.filter((token) => token.kind === "positional").map((token, i) => [expectedPositionals[i].name, token.value])
+		tokens
+			.filter((token): token is { kind: "positional"; index: number; value: string } => token.kind === "positional")
+			.map((token, i) => [expectedPositionals[i].name, token.value])
 	);
 
 	const options = Object.fromEntries(
 		tokens
-			.filter((token) => token.kind === "option")
+			.filter((token): token is OptionToken => token.kind === "option")
 			.map((token) => {
 				const arg = command.args.find((arg) => arg.name === token.name || arg.short === token.name);
 				if (!arg) {
