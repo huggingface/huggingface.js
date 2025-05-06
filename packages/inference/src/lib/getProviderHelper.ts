@@ -132,6 +132,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-generation": new OvhCloud.OvhCloudTextGenerationTask(),
 	},
 	replicate: {
+		"image-to-image": new Replicate.ReplicateImageToImageTask(),
 		"text-to-image": new Replicate.ReplicateTextToImageTask(),
 		"text-to-speech": new Replicate.ReplicateTextToSpeechTask(),
 		"text-to-video": new Replicate.ReplicateTextToVideoTask(),
