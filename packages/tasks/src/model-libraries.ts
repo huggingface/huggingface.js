@@ -394,6 +394,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/fudan-generative-vision/hallo",
 		countDownloads: `path:"hallo/net.pth"`,
 	},
+        "hear-pytorch": {   
+                prettyLabel: "HeAR PyTorch",
+                repoName: "hear-pytorch",
+                repoUrl: "https://github.com/google-health/hear",
+                snippets: snippets.hear_pytorch,
+                filter: false,
+                countDownloads: `path:"pytorch_model.bin"`,
+        },
 	hezar: {
 		prettyLabel: "Hezar",
 		repoName: "Hezar",
