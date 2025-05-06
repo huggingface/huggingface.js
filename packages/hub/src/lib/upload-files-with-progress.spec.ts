@@ -164,5 +164,5 @@ describe("uploadFilesWithProgress", () => {
 				hubUrl: TEST_HUB_URL,
 			});
 		}
-	}, 60_000);
+	});
 });

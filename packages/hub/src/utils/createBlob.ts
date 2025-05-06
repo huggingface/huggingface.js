@@ -11,9 +11,9 @@ import { isFrontend } from "./isFrontend";
  * From the frontend:
  *   - support http resources with absolute or relative URLs
  */
-export async function createBlob(url: URL, opts?: { fetch?: typeof fetch }): Promise<Blob> {
+export async function createBlob(url: URL, opts?: { fetch?: typeof fetch; accessToken?: string }): Promise<Blob> {
 	if (url.protocol === "http:" || url.protocol === "https:") {
-		return WebBlob.create(url, { fetch: opts?.fetch });
+		return WebBlob.create(url, { fetch: opts?.fetch, accessToken: opts?.accessToken });
 	}
 
 	if (isFrontend) {

@@ -99,8 +99,16 @@ export async function getInferenceProviderMapping(
 
 export async function resolveProvider(
 	provider?: InferenceProviderOrPolicy,
-	modelId?: string
+	modelId?: string,
+	endpointUrl?: string
 ): Promise<InferenceProvider> {
+	if (endpointUrl) {
+		if (provider) {
+			throw new Error("Specifying both endpointUrl and provider is not supported.");
+		}
+		/// Defaulting to hf-inference helpers / API
+		return "hf-inference";
+	}
 	if (!provider) {
 		console.log(
 			"Defaulting to 'auto' which will select the first provider available for the model, sorted by the user's order in https://hf.co/settings/inference-providers."
@@ -112,7 +120,10 @@ export async function resolveProvider(
 			throw new Error("Specifying a model is required when provider is 'auto'");
 		}
 		const inferenceProviderMapping = await fetchInferenceProviderMappingForModel(modelId);
-		provider = Object.keys(inferenceProviderMapping)[0] as InferenceProvider;
+		provider = Object.keys(inferenceProviderMapping)[0] as InferenceProvider | undefined;
+	}
+	if (!provider) {
+		throw new Error(`No Inference Provider available for model ${modelId}.`);
 	}
 	return provider;
 }
