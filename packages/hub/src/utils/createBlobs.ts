@@ -15,10 +15,10 @@ import { isFrontend } from "./isFrontend";
 export async function createBlobs(
 	url: URL,
 	destPath: string,
-	opts?: { fetch?: typeof fetch; maxFolderDepth?: number }
+	opts?: { fetch?: typeof fetch; maxFolderDepth?: number; accessToken?: string }
 ): Promise<Array<{ path: string; blob: Blob }>> {
 	if (url.protocol === "http:" || url.protocol === "https:") {
-		const blob = await WebBlob.create(url, { fetch: opts?.fetch });
+		const blob = await WebBlob.create(url, { fetch: opts?.fetch, accessToken: opts?.accessToken });
 		return [{ path: destPath, blob }];
 	}
 
