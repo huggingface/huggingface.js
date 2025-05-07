@@ -122,6 +122,13 @@ const commands = {
 				description: "Create an empty branch. This will erase all previous commits on the branch if it exists.",
 			},
 			{
+				name: "force" as const,
+				short: "f",
+				boolean: true,
+				description:
+					"Overwrite the branch if it already exists. Otherwise, throws an error if the branch already exists. No-ops if no revision is provided and the branch exists.",
+			},
+			{
 				name: "token" as const,
 				description:
 					"The access token to use for authentication. If not provided, the HF_TOKEN environment variable will be used.",
@@ -206,7 +213,7 @@ async function run() {
 				break;
 			}
 			const parsedArgs = advParseArgs(args, "create-branch");
-			const { repoName, branch, revision, empty, repoType, token } = parsedArgs;
+			const { repoName, branch, revision, empty, repoType, token, force } = parsedArgs;
 
 			await createBranch({
 				repo: repoType ? { type: repoType as "model" | "dataset" | "space", name: repoName } : repoName,
@@ -214,6 +221,7 @@ async function run() {
 				accessToken: token,
 				revision,
 				empty: empty ? true : undefined,
+				overwrite: force ? true : undefined,
 				hubUrl: process.env.HF_ENDPOINT ?? HUB_URL,
 			});
 			break;
