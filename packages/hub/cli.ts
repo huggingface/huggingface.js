@@ -236,7 +236,9 @@ function usage(commandName: Command) {
 					return `[${arg.name}]`;
 				}
 			}
-			return `[--${arg.name} ${arg.enum ? `{${arg.enum.join(",")}}` : arg.name.toLocaleUpperCase()}]`;
+			return `[--${arg.name}${
+				arg.enum ? ` {${arg.enum.join(",")}}` : arg.boolean ? "" : " " + arg.name.toLocaleUpperCase()
+			}]`;
 		})
 		.join(" ")}`.trim();
 }
@@ -262,7 +264,9 @@ function detailedUsage(commandName: Command) {
 
 		for (const arg of command.args as ArgDef[]) {
 			if (!arg.positional) {
-				ret += `  --${arg.name}${arg.short ? `, -${arg.short}` : ""}: ${arg.description}\n`;
+				ret += `  --${arg.name}${arg.short ? `, -${arg.short}` : ""}${
+					arg.enum ? ` {${arg.enum.join(",")}}` : arg.boolean ? "" : " " + arg.name.toLocaleUpperCase()
+				}: ${arg.description}\n`;
 			}
 		}
 
