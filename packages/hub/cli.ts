@@ -114,7 +114,6 @@ const commands = {
 				name: "revision" as const,
 				description:
 					"The revision to create the branch from. Defaults to the main branch, or existing branch if it exists.",
-				default: "main",
 			},
 			{
 				name: "empty" as const,
