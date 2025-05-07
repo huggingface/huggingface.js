@@ -4,11 +4,9 @@
 export const TOKEN_TYPES = Object.freeze({
 	Text: "Text", // The text between Jinja statements or expressions
 
-	NumericLiteral: "NumericLiteral", // e.g., 123
-	BooleanLiteral: "BooleanLiteral", // true or false
-	NullLiteral: "NullLiteral", // none
+	NumericLiteral: "NumericLiteral", // e.g., 123, 1.0
 	StringLiteral: "StringLiteral", // 'string'
-	Identifier: "Identifier", // Variables, functions, etc.
+	Identifier: "Identifier", // Variables, functions, statements, booleans, etc.
 	Equals: "Equals", // =
 	OpenParen: "OpenParen", // (
 	CloseParen: "CloseParen", // )
@@ -26,66 +24,14 @@ export const TOKEN_TYPES = Object.freeze({
 	Pipe: "Pipe", // |
 
 	CallOperator: "CallOperator", // ()
-	AdditiveBinaryOperator: "AdditiveBinaryOperator", // + -
+	AdditiveBinaryOperator: "AdditiveBinaryOperator", // + - ~
 	MultiplicativeBinaryOperator: "MultiplicativeBinaryOperator", // * / %
 	ComparisonBinaryOperator: "ComparisonBinaryOperator", // < > <= >= == !=
 	UnaryOperator: "UnaryOperator", // ! - +
-
-	// Keywords
-	Set: "Set",
-	If: "If",
-	For: "For",
-	In: "In",
-	Is: "Is",
-	NotIn: "NotIn",
-	Else: "Else",
-	EndSet: "EndSet",
-	EndIf: "EndIf",
-	ElseIf: "ElseIf",
-	EndFor: "EndFor",
-	And: "And",
-	Or: "Or",
-	Not: "UnaryOperator",
-	Macro: "Macro",
-	EndMacro: "EndMacro",
+	Comment: "Comment", // {# ... #}
 });
 
 export type TokenType = keyof typeof TOKEN_TYPES;
-
-/**
- * Constant lookup for keywords and known identifiers + symbols.
- */
-const KEYWORDS = Object.freeze({
-	set: TOKEN_TYPES.Set,
-	for: TOKEN_TYPES.For,
-	in: TOKEN_TYPES.In,
-	is: TOKEN_TYPES.Is,
-	if: TOKEN_TYPES.If,
-	else: TOKEN_TYPES.Else,
-	endset: TOKEN_TYPES.EndSet,
-	endif: TOKEN_TYPES.EndIf,
-	elif: TOKEN_TYPES.ElseIf,
-	endfor: TOKEN_TYPES.EndFor,
-	and: TOKEN_TYPES.And,
-	or: TOKEN_TYPES.Or,
-	not: TOKEN_TYPES.Not,
-	"not in": TOKEN_TYPES.NotIn,
-	macro: TOKEN_TYPES.Macro,
-	endmacro: TOKEN_TYPES.EndMacro,
-
-	// Literals
-	true: TOKEN_TYPES.BooleanLiteral,
-	false: TOKEN_TYPES.BooleanLiteral,
-	none: TOKEN_TYPES.NullLiteral,
-
-	// NOTE: According to the Jinja docs: The special constants true, false, and none are indeed lowercase.
-	// Because that caused confusion in the past, (True used to expand to an undefined variable that was considered false),
-	// all three can now also be written in title case (True, False, and None). However, for consistency, (all Jinja identifiers are lowercase)
-	// you should use the lowercase versions.
-	True: TOKEN_TYPES.BooleanLiteral,
-	False: TOKEN_TYPES.BooleanLiteral,
-	None: TOKEN_TYPES.NullLiteral,
-});
 
 /**
  * Represents a single token in the template.
@@ -140,6 +86,7 @@ const ORDERED_MAPPING_TABLE: [string, TokenType][] = [
 	// Arithmetic operators
 	["+", TOKEN_TYPES.AdditiveBinaryOperator],
 	["-", TOKEN_TYPES.AdditiveBinaryOperator],
+	["~", TOKEN_TYPES.AdditiveBinaryOperator],
 	["*", TOKEN_TYPES.MultiplicativeBinaryOperator],
 	["/", TOKEN_TYPES.MultiplicativeBinaryOperator],
 	["%", TOKEN_TYPES.MultiplicativeBinaryOperator],
@@ -174,29 +121,32 @@ function preprocess(template: string, options: PreprocessOptions = {}): string {
 		template = template.slice(0, -1);
 	}
 
-	// Replace all comments with a placeholder
-	// This ensures that comments don't interfere with the following options
-	template = template.replace(/{#.*?#}/gs, "{##}");
-
 	if (options.lstrip_blocks) {
 		// The lstrip_blocks option can also be set to strip tabs and spaces from the
 		// beginning of a line to the start of a block. (Nothing will be stripped if
 		// there are other characters before the start of the block.)
-		template = template.replace(/^[ \t]*({[#%])/gm, "$1");
+		template = template.replace(/^[ \t]*({[#%-])/gm, "$1");
 	}
 
 	if (options.trim_blocks) {
 		// If an application configures Jinja to trim_blocks, the first newline after
 		// a template tag is removed automatically (like in PHP).
-		template = template.replace(/([#%]})\n/g, "$1");
+		template = template.replace(/([#%-]})\n/g, "$1");
 	}
 
-	return template
-		.replace(/{##}/g, "") // Remove comments
-		.replace(/-%}\s*/g, "%}")
-		.replace(/\s*{%-/g, "{%")
-		.replace(/-}}\s*/g, "}}")
-		.replace(/\s*{{-/g, "{{");
+	return (
+		template
+			.replace(/-%}\s*/g, "%}")
+			.replace(/\s*{%-/g, "{%")
+			.replace(/-}}\s*/g, "}}")
+			.replace(/\s*{{-/g, "{{")
+			.replace(/-#}\s*/g, "#}")
+			.replace(/\s*{#-/g, "{#")
+
+			// Handle the custom transformers-specific `generation` tag.
+			// See https://github.com/huggingface/transformers/pull/30650 for more information.
+			.replace(/{%\s*generation\s*%}.+?{%\s*endgeneration\s*%}/gs, "")
+	);
 }
 
 /**
@@ -207,6 +157,7 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 	const src: string = preprocess(source, options);
 
 	let cursorPosition = 0;
+	let curlyBracketDepth = 0;
 
 	const consumeWhile = (predicate: (char: string) => boolean): string => {
 		let str = "";
@@ -241,13 +192,17 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 		if (
 			lastTokenType === undefined ||
 			lastTokenType === TOKEN_TYPES.CloseStatement ||
-			lastTokenType === TOKEN_TYPES.CloseExpression
+			lastTokenType === TOKEN_TYPES.CloseExpression ||
+			lastTokenType === TOKEN_TYPES.Comment
 		) {
 			let text = "";
 			while (
 				cursorPosition < src.length &&
 				// Keep going until we hit the next Jinja statement or expression
-				!(src[cursorPosition] === "{" && (src[cursorPosition + 1] === "%" || src[cursorPosition + 1] === "{"))
+				!(
+					src[cursorPosition] === "{" &&
+					(src[cursorPosition + 1] === "%" || src[cursorPosition + 1] === "{" || src[cursorPosition + 1] === "#")
+				)
 			) {
 				// Consume text
 				text += src[cursorPosition++];
@@ -258,6 +213,23 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 				tokens.push(new Token(text, TOKEN_TYPES.Text));
 				continue;
 			}
+		}
+
+		// Possibly consume a comment
+		if (src[cursorPosition] === "{" && src[cursorPosition + 1] === "#") {
+			cursorPosition += 2; // Skip the opening {#
+
+			let comment = "";
+			while (src[cursorPosition] !== "#" || src[cursorPosition + 1] !== "}") {
+				// Check for end of input
+				if (cursorPosition + 2 >= src.length) {
+					throw new SyntaxError("Missing end of comment tag");
+				}
+				comment += src[cursorPosition++];
+			}
+			tokens.push(new Token(comment, TOKEN_TYPES.Comment));
+			cursorPosition += 2; // Skip the closing #}
+			continue;
 		}
 
 		// Consume (and ignore) all whitespace inside Jinja statements or expressions
@@ -275,8 +247,6 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 			switch (lastTokenType) {
 				case TOKEN_TYPES.Identifier:
 				case TOKEN_TYPES.NumericLiteral:
-				case TOKEN_TYPES.BooleanLiteral:
-				case TOKEN_TYPES.NullLiteral:
 				case TOKEN_TYPES.StringLiteral:
 				case TOKEN_TYPES.CloseParen:
 				case TOKEN_TYPES.CloseSquareBracket:
@@ -301,11 +271,24 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 		}
 
 		// Try to match one of the tokens in the mapping table
-		for (const [char, token] of ORDERED_MAPPING_TABLE) {
-			const slice = src.slice(cursorPosition, cursorPosition + char.length);
-			if (slice === char) {
-				tokens.push(new Token(char, token));
-				cursorPosition += char.length;
+		for (const [seq, type] of ORDERED_MAPPING_TABLE) {
+			// inside an object literal, don't treat "}}" as expression-end
+			if (seq === "}}" && curlyBracketDepth > 0) {
+				continue;
+			}
+			const slice = src.slice(cursorPosition, cursorPosition + seq.length);
+			if (slice === seq) {
+				tokens.push(new Token(seq, type));
+
+				// possibly adjust the curly bracket depth
+				if (type === TOKEN_TYPES.OpenExpression) {
+					curlyBracketDepth = 0;
+				} else if (type === TOKEN_TYPES.OpenCurlyBracket) {
+					++curlyBracketDepth;
+				} else if (type === TOKEN_TYPES.CloseCurlyBracket) {
+					--curlyBracketDepth;
+				}
+				cursorPosition += seq.length;
 				continue main;
 			}
 		}
@@ -319,27 +302,21 @@ export function tokenize(source: string, options: PreprocessOptions = {}): Token
 		}
 
 		if (isInteger(char)) {
-			const num = consumeWhile(isInteger);
+			// Consume integer part
+			let num = consumeWhile(isInteger);
+			// Possibly, consume fractional part
+			if (src[cursorPosition] === "." && isInteger(src[cursorPosition + 1])) {
+				++cursorPosition; // consume '.'
+				const frac = consumeWhile(isInteger);
+				num = `${num}.${frac}`;
+			}
 			tokens.push(new Token(num, TOKEN_TYPES.NumericLiteral));
 			continue;
 		}
 		if (isWord(char)) {
+			// consume any word characters and always classify as Identifier
 			const word = consumeWhile(isWord);
-
-			// Check for special/reserved keywords
-			// NOTE: We use Object.hasOwn() to avoid matching `.toString()` and other Object methods
-			const type = Object.hasOwn(KEYWORDS, word) ? KEYWORDS[word as keyof typeof KEYWORDS] : TOKEN_TYPES.Identifier;
-
-			// Special case of not in:
-			// If the previous token was a "not", and this token is "in"
-			// then we want to combine them into a single token
-			if (type === TOKEN_TYPES.In && tokens.at(-1)?.type === TOKEN_TYPES.Not) {
-				tokens.pop();
-				tokens.push(new Token("not in", TOKEN_TYPES.NotIn));
-			} else {
-				tokens.push(new Token(word, type));
-			}
-
+			tokens.push(new Token(word, TOKEN_TYPES.Identifier));
 			continue;
 		}
 

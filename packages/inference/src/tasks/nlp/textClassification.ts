@@ -13,7 +13,7 @@ export async function textClassification(
 	args: TextClassificationArgs,
 	options?: Options
 ): Promise<TextClassificationOutput> {
-	const provider = await resolveProvider(args.provider, args.model);
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "text-classification");
 	const { data: res } = await innerRequest<TextClassificationOutput>(args, providerHelper, {
 		...options,
