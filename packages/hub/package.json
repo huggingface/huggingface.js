@@ -1,7 +1,7 @@
 {
 	"name": "@huggingface/hub",
 	"packageManager": "pnpm@10.10.0",
-	"version": "2.0.0",
+	"version": "2.0.1",
 	"description": "Utilities to interact with the Hugging Face hub",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {
