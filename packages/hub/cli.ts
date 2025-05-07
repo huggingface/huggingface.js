@@ -4,9 +4,9 @@ import { parseArgs } from "node:util";
 import { typedEntries } from "./src/utils/typedEntries";
 import { createBranch, uploadFilesWithProgress } from "./src";
 import { pathToFileURL } from "node:url";
-import { HUB_URL } from "./src/consts";
 import { stat } from "node:fs/promises";
 import { basename, join } from "node:path";
+import { HUB_URL } from "./src/consts";
 
 // Didn't find the import from "node:util", so duplicated it here
 type OptionToken =
@@ -24,6 +24,17 @@ const command = process.argv[2];
 const args = process.argv.slice(3);
 
 type Camelize<T extends string> = T extends `${infer A}-${infer B}` ? `${A}${Camelize<Capitalize<B>>}` : T;
+
+interface ArgDef {
+	name: string;
+	short?: string;
+	positional?: boolean;
+	description?: string;
+	required?: boolean;
+	boolean?: boolean;
+	enum?: Array<string>;
+	default?: string | (() => string);
+}
 
 const commands = {
 	upload: {
@@ -66,17 +77,6 @@ const commands = {
 				default: "main",
 			},
 			{
-				name: "from-revision" as const,
-				description:
-					"The revision to upload from. Defaults to the latest commit on main or on the branch if it exists.",
-			},
-			{
-				name: "from-empty" as const,
-				boolean: true,
-				description:
-					"This will create an empty branch and upload the files to it. This will erase all previous commits on the branch if it exists.",
-			},
-			{
 				name: "commit-message" as const,
 				description: "The commit message to use. Defaults to 'Add [x] files'",
 			},
@@ -86,30 +86,48 @@ const commands = {
 					"The access token to use for authentication. If not provided, the HF_TOKEN environment variable will be used.",
 				default: process.env.HF_TOKEN,
 			},
-			{
-				name: "hub-url" as const,
-				description:
-					"The URL of the Hub to upload to. Defaults to https://huggingface.co. Use this to upload to a private Hub.",
-				hidden: true,
-				default: HUB_URL,
-			},
 		],
 	},
+	"create-branch": {
+		description: "Create a new branch in a repo, or update an existing one",
+		args: [
+			{
+				name: "repo-name" as const,
+				description: "The name of the repo to create",
+				positional: true,
+				required: true,
+			},
+			{
+				name: "branch" as const,
+				description: "The name of the branch to create",
+				positional: true,
+				required: true,
+			},
+			{
+				name: "repo-type" as const,
+				enum: ["dataset", "model", "space"],
+				default: "model",
+				description:
+					"The type of repo to create. Defaults to model. You can also prefix the repo name with the type, e.g. datasets/username/repo-name",
+			},
+			{
+				name: "revision" as const,
+				description:
+					"The revision to create the branch from. Defaults to the main branch, or existing branch if it exists.",
+				default: "main",
+			},
+			{
+				name: "empty" as const,
+				boolean: true,
+				description: "Create an empty branch. This will erase all previous commits on the branch if it exists.",
+			},
+		],
+	} as const,
 } satisfies Record<
 	string,
 	{
 		description: string;
-		args?: Array<{
-			name: string;
-			short?: string;
-			positional?: boolean;
-			description?: string;
-			required?: boolean;
-			boolean?: boolean;
-			enum?: Array<string>;
-			hidden?: boolean;
-			default?: string | (() => string);
-		}>;
+		args?: ArgDef[];
 	}
 >;
 
@@ -149,31 +167,7 @@ async function run() {
 				break;
 			}
 			const parsedArgs = advParseArgs(args, "upload");
-			const {
-				repoName,
-				localFolder,
-				repoType,
-				revision,
-				fromEmpty,
-				fromRevision,
-				token,
-				quiet,
-				commitMessage,
-				hubUrl,
-				pathInRepo,
-			} = parsedArgs;
-
-			if (revision && revision !== "main") {
-				await createBranch({
-					branch: revision,
-					repo: repoType ? { type: repoType as "model" | "dataset" | "space", name: repoName } : repoName,
-					accessToken: token,
-					revision: fromRevision,
-					empty: fromEmpty ? true : undefined,
-					overwrite: true,
-					hubUrl,
-				});
-			}
+			const { repoName, localFolder, repoType, revision, token, quiet, commitMessage, pathInRepo } = parsedArgs;
 
 			const isFile = (await stat(localFolder)).isFile();
 			const files = isFile
@@ -192,12 +186,30 @@ async function run() {
 				accessToken: token,
 				commitTitle: commitMessage?.trim().split("\n")[0],
 				commitDescription: commitMessage?.trim().split("\n").slice(1).join("\n").trim(),
-				hubUrl,
+				hubUrl: process.env.HF_ENDPOINT ?? HUB_URL,
 			})) {
 				if (!quiet) {
 					console.log(event);
 				}
 			}
+			break;
+		}
+		case "create-branch": {
+			if (args[0] === "--help" || args[0] === "-h") {
+				console.log(usage("create-branch"));
+				break;
+			}
+			const parsedArgs = advParseArgs(args, "create-branch");
+			const { repoName, branch, revision, empty, repoType } = parsedArgs;
+
+			await createBranch({
+				repo: repoType ? { type: repoType as "model" | "dataset" | "space", name: repoName } : repoName,
+				branch,
+				accessToken: process.env.HF_TOKEN,
+				revision,
+				empty: empty ? true : undefined,
+				hubUrl: process.env.HF_ENDPOINT ?? HUB_URL,
+			});
 			break;
 		}
 		default:
@@ -209,8 +221,7 @@ run();
 function usage(commandName: Command) {
 	const command = commands[commandName];
 
-	return `${commandName} ${(command.args || [])
-		.filter((arg) => !arg.hidden)
+	return `${commandName} ${((command.args as ArgDef[]) || [])
 		.map((arg) => {
 			if (arg.positional) {
 				if (arg.required) {
@@ -228,10 +239,10 @@ function detailedUsage(commandName: Command) {
 	let ret = `usage: ${usage(commandName)}\n\n`;
 	const command = commands[commandName];
 
-	if (command.args.some((p) => p.positional)) {
+	if ((command.args as ArgDef[]).some((p) => p.positional)) {
 		ret += `Positional arguments:\n`;
 
-		for (const arg of command.args) {
+		for (const arg of command.args as ArgDef[]) {
 			if (arg.positional) {
 				ret += `  ${arg.name}: ${arg.description}\n`;
 			}
@@ -240,11 +251,11 @@ function detailedUsage(commandName: Command) {
 		ret += `\n`;
 	}
 
-	if (command.args.some((p) => !p.positional && !p.hidden)) {
+	if ((command.args as ArgDef[]).some((p) => !p.positional)) {
 		ret += `Options:\n`;
 
-		for (const arg of command.args) {
-			if (!arg.positional && !arg.hidden) {
+		for (const arg of command.args as ArgDef[]) {
+			if (!arg.positional) {
 				ret += `  --${arg.name}${arg.short ? `, -${arg.short}` : ""}: ${arg.description}\n`;
 			}
 		}
@@ -264,7 +275,7 @@ function advParseArgs<C extends Command>(
 } {
 	const { tokens } = parseArgs({
 		options: Object.fromEntries(
-			commands[commandName].args
+			(commands[commandName].args as ArgDef[])
 				.filter((arg) => !arg.positional)
 				.map((arg) => {
 					const option = {
@@ -283,7 +294,7 @@ function advParseArgs<C extends Command>(
 	});
 
 	const command = commands[commandName];
-	const expectedPositionals = command.args.filter((arg) => arg.positional);
+	const expectedPositionals = (command.args as ArgDef[]).filter((arg) => arg.positional);
 	const requiredPositionals = expectedPositionals.filter((arg) => arg.required).length;
 	const providedPositionals = tokens.filter((token) => token.kind === "positional").length;
 
@@ -309,7 +320,7 @@ function advParseArgs<C extends Command>(
 		tokens
 			.filter((token): token is OptionToken => token.kind === "option")
 			.map((token) => {
-				const arg = command.args.find((arg) => arg.name === token.name || arg.short === token.name);
+				const arg = (command.args as ArgDef[]).find((arg) => arg.name === token.name || arg.short === token.name);
 				if (!arg) {
 					throw new Error(`Unknown option: ${token.name}`);
 				}
@@ -328,7 +339,7 @@ function advParseArgs<C extends Command>(
 			})
 	);
 	const defaults = Object.fromEntries(
-		command.args
+		(commands[commandName].args as ArgDef[])
 			.filter((arg) => arg.default)
 			.map((arg) => {
 				const value = typeof arg.default === "function" ? arg.default() : arg.default;
