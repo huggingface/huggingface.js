@@ -111,7 +111,7 @@ env = gym.make("LunarLander-v2")
 # Loading the saved model
 model = PPO.load("PPO-LunarLander-v2",env=env)
 
-# Initializating the evaluation environment
+# Initializing the evaluation environment
 eval_env = gym.make("LunarLander-v2")
 
 # Running the trained agent on eval_env for 10 time steps and getting the mean reward
