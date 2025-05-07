@@ -137,7 +137,7 @@ export function findNearestQuantType(
 	// This means finding the largest quantization that is smaller than or equal to the target.
 	for (const availableQuant of sortedAvailable) {
 		// We know the key exists due to the filter above.
-		const availableIndex = orderMap.get(availableQuant)!;
+		const availableIndex = orderMap.get(availableQuant) ?? 0;
 		if (availableIndex >= targetIndex) {
 			return availableQuant;
 		}
