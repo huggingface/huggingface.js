@@ -67,8 +67,7 @@ export class NebiusTextToImageTask extends TaskProviderHelper implements TextToI
 		};
 	}
 
-	makeRoute(params: UrlParams): string {
-		void params;
+	makeRoute(): string {
 		return "v1/images/generations";
 	}
 
@@ -109,8 +108,7 @@ export class NebiusFeatureExtractionTask extends TaskProviderHelper implements F
 		};
 	}
 
-	makeRoute(params: UrlParams): string {
-		void params;
+	makeRoute(): string {
 		return "v1/embeddings";
 	}
 
