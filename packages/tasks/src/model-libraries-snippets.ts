@@ -728,14 +728,15 @@ model = pe.VisionTransformer.from_config("${model.id}", pretrained=True)`;
 	}
 };
 export const phantom = (model: ModelData): string[] => [
-	`huggingface-cli download --local-dir ${nameWithoutNamespace(model.id)} --local-dir ./${model.id} # in cli
+	`from huggingface_hub import snapshot_download
 from phantom_wan import WANI2V, configs
+
+checkpoint_dir = snapshot_download("${model.id}")
 wan_i2v = WanI2V(
             config=configs.WAN_CONFIGS['i2v-14B'],
-            checkpoint_dir=./${model.id}
+            checkpoint_dir=checkpoint_dir,
         )
- video = wan_i2v.generate(text_prompt, image_prompt)
-`,
+ video = wan_i2v.generate(text_prompt, image_prompt)`
 ];
 
 export const pyannote_audio_pipeline = (model: ModelData): string[] => [
