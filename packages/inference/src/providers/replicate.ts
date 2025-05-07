@@ -18,7 +18,12 @@ import { InferenceOutputError } from "../lib/InferenceOutputError";
 import { isUrl } from "../lib/isUrl";
 import type { BodyParams, HeaderParams, UrlParams } from "../types";
 import { omit } from "../utils/omit";
-import { TaskProviderHelper, type TextToImageTaskHelper, type TextToVideoTaskHelper, type ImageToImageTaskHelper } from "./providerHelper";
+import {
+	TaskProviderHelper,
+	type TextToImageTaskHelper,
+	type TextToVideoTaskHelper,
+	type ImageToImageTaskHelper,
+} from "./providerHelper";
 export interface ReplicateOutput {
 	output?: string | string[];
 }
