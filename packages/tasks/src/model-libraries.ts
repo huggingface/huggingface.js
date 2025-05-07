@@ -662,11 +662,11 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.perception_encoder,
 		countDownloads: `path_extension:"pt"`,
 	},
-	phantom: {
+	phantom-wan: {
 		prettyLabel: "Phantom",
 		repoName: "Phantom",
 		repoUrl: "https://github.com/Phantom-video/Phantom",
-		snippets: snippets.phantom,
+		snippets: snippets.phantom_wan,
 		filter: false,
 		countDownloads: `path_extension:"pth"`,
 	},

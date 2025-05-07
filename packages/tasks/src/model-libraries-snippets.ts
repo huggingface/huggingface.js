@@ -727,7 +727,7 @@ model = pe.VisionTransformer.from_config("${model.id}", pretrained=True)`;
 		return [vision_encoder];
 	}
 };
-export const phantom = (model: ModelData): string[] => [
+export const phantom_wan = (model: ModelData): string[] => [
 	`from huggingface_hub import snapshot_download
 from phantom_wan import WANI2V, configs
 
