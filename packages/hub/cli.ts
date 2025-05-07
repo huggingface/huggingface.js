@@ -175,7 +175,7 @@ async function run() {
 
 		case "upload": {
 			if (args[0] === "--help" || args[0] === "-h") {
-				console.log(usage("upload"));
+				console.log(detailedUsage("upload"));
 				break;
 			}
 			const parsedArgs = advParseArgs(args, "upload");
@@ -208,7 +208,7 @@ async function run() {
 		}
 		case "create-branch": {
 			if (args[0] === "--help" || args[0] === "-h") {
-				console.log(usage("create-branch"));
+				console.log(detailedUsage("create-branch"));
 				break;
 			}
 			const parsedArgs = advParseArgs(args, "create-branch");
