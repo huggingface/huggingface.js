@@ -736,7 +736,7 @@ wan_i2v = WanI2V(
             config=configs.WAN_CONFIGS['i2v-14B'],
             checkpoint_dir=checkpoint_dir,
         )
- video = wan_i2v.generate(text_prompt, image_prompt)`
+ video = wan_i2v.generate(text_prompt, image_prompt)`,
 ];
 
 export const pyannote_audio_pipeline = (model: ModelData): string[] => [
