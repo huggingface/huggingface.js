@@ -1118,7 +1118,6 @@ export const transformers = (model: ModelData): string[] => {
 
 	if (model.pipeline_tag && LIBRARY_TASK_MAPPING.transformers?.includes(model.pipeline_tag)) {
 		const pipelineSnippet = ["# Use a pipeline as a high-level helper", "from transformers import pipeline", ""];
-		let useMessagesSyntax = false;
 
 		if (model.config?.tokenizer_config?.chat_template) {
 			if (model.tags.includes("image-text-to-text") && model.tags.includes("conversational")) {
@@ -1135,17 +1134,12 @@ export const transformers = (model: ModelData): string[] => {
 					].join("\n"),
 					"]"
 				);
-				useMessagesSyntax = true;
 			} else if (model.tags.includes("conversational")) {
-				useMessagesSyntax = true;
+				pipelineSnippet.push("messages = [", '    {"role": "user", "content": "Who are you?"},', "]");
 			}
 		}
-
 		pipelineSnippet.push(`pipe = pipeline("${model.pipeline_tag}", model="${model.id}"` + remote_code_snippet + ")");
-
-		if (useMessagesSyntax) {
-			pipelineSnippet.push("pipe(messages)");
-		}
+		pipelineSnippet.push("pipe(messages)");
 
 		return [pipelineSnippet.join("\n"), autoSnippet];
 	}
