@@ -5,6 +5,8 @@ import { typedEntries } from "./src/utils/typedEntries";
 import { createBranch, uploadFilesWithProgress } from "./src";
 import { pathToFileURL } from "node:url";
 import { HUB_URL } from "./src/consts";
+import { stat } from "node:fs/promises";
+import { basename, join } from "node:path";
 
 // Didn't find the import from "node:util", so duplicated it here
 type OptionToken =
@@ -39,12 +41,12 @@ const commands = {
 				positional: true,
 				default: () => process.cwd(),
 			},
-			// {
-			// 	name: "path-in-repo" as const,
-			// 	description: "The path in the repo to upload the folder to. Defaults to the root of the repo",
-			// 	positional: true,
-			// 	default: "/",
-			// },
+			{
+				name: "path-in-repo" as const,
+				description: "The path in the repo to upload the folder to. Defaults to the root of the repo",
+				positional: true,
+				default: ".",
+			},
 			{
 				name: "quiet" as const,
 				short: "q",
@@ -158,6 +160,7 @@ async function run() {
 				quiet,
 				commitMessage,
 				hubUrl,
+				pathInRepo,
 			} = parsedArgs;
 
 			if (revision && revision !== "main") {
@@ -172,9 +175,19 @@ async function run() {
 				});
 			}
 
+			const isFile = (await stat(localFolder)).isFile();
+			const files = isFile
+				? [
+						{
+							content: pathToFileURL(localFolder),
+							path: join(pathInRepo, `${basename(localFolder)}`).replace(/^[.]?\//, ""),
+						},
+				  ]
+				: [{ content: pathToFileURL(localFolder), path: pathInRepo.replace(/^[.]?\//, "") }];
+
 			for await (const event of uploadFilesWithProgress({
 				repo: repoType ? { type: repoType as "model" | "dataset" | "space", name: repoName } : repoName,
-				files: [pathToFileURL(localFolder)],
+				files,
 				branch: revision,
 				accessToken: token,
 				commitTitle: commitMessage?.trim().split("\n")[0],
