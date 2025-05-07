@@ -663,8 +663,8 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pt"`,
 	},
 	phantom: {
-		prettyLabel: "phantom",
-		repoName: "phantom",
+		prettyLabel: "Phantom",
+		repoName: "Phantom",
 		repoUrl: "https://github.com/Phantom-video/Phantom",
 		snippets: snippets.phantom,
 		filter: false,
