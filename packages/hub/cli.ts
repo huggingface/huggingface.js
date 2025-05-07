@@ -42,7 +42,7 @@ const commands = {
 		args: [
 			{
 				name: "repo-name" as const,
-				description: "The name of the repo to create",
+				description: "The name of the repo to upload to",
 				positional: true,
 				required: true,
 			},
@@ -93,7 +93,7 @@ const commands = {
 		args: [
 			{
 				name: "repo-name" as const,
-				description: "The name of the repo to create",
+				description: "The name of the repo to create the branch in",
 				positional: true,
 				required: true,
 			},
