@@ -230,6 +230,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"scin_dataset_precomputed_embeddings.npz" OR path:"saved_model.pb"`,
 	},
+	"describe-anything": {
+		prettyLabel: "Describe Anything",
+		repoName: "Describe Anything",
+		repoUrl: "https://github.com/NVlabs/describe-anything",
+		snippets: snippets.describe_anything,
+		filter: false,
+	},
 	"dia-tts": {
 		prettyLabel: "Dia",
 		repoName: "Dia",
