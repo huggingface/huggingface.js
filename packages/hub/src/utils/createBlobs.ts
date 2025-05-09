@@ -38,7 +38,10 @@ export async function createBlobs(
 
 		return Promise.all(
 			paths.map(async (path) => ({
-				path: `${destPath}/${path.relativePath}`.replace(/\/[.]$/, "").replaceAll("//", "/"),
+				path: `${destPath}/${path.relativePath}`
+					.replace(/\/[.]$/, "")
+					.replaceAll("//", "/")
+					.replace(/^[.]?\//, ""),
 				blob: await FileBlob.create(new URL(path.path)),
 			}))
 		);
