@@ -184,7 +184,7 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 /**
  * Return the whole TaskData object for a certain task.
  * If the partialTaskData argument is left undefined,
- * the default placholder data will be used.
+ * the default placeholder data will be used.
  */
 function getData(type: PipelineType, partialTaskData: TaskDataCustom = placeholder): TaskData {
 	return {

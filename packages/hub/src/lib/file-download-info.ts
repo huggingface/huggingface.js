@@ -144,7 +144,7 @@ export async function fileDownloadInfo(
 		// Cannot use resp.url in case it's a S3 url and the user adds an Authorization header to it.
 		url:
 			resp.url &&
-			(new URL(resp.url).hostname === new URL(hubUrl).hostname || resp.headers.get("X-Cache")?.endsWith(" cloudfront"))
+			(new URL(resp.url).origin === new URL(hubUrl).origin || resp.headers.get("X-Cache")?.endsWith(" cloudfront"))
 				? resp.url
 				: url,
 	};

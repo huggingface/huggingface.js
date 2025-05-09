@@ -116,6 +116,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-to-image": new Nebius.NebiusTextToImageTask(),
 		conversational: new Nebius.NebiusConversationalTask(),
 		"text-generation": new Nebius.NebiusTextGenerationTask(),
+		"feature-extraction": new Nebius.NebiusFeatureExtractionTask(),
 	},
 	novita: {
 		conversational: new Novita.NovitaConversationalTask(),
