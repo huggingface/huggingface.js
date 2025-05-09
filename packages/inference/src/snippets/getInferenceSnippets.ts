@@ -28,11 +28,9 @@ const CLIENTS: Record<InferenceSnippetLanguage, Client[]> = {
 	sh: [...SH_CLIENTS],
 };
 
-const LANGUAGE_CLIENTS_BY_POLICY: Record<"auto", Partial<Record<InferenceSnippetLanguage, Client[]>>> = {
-	auto: {
-		js: ["huggingface.js"],
-		python: ["huggingface_hub"],
-	},
+const CLIENTS_AUTO_POLICY: Partial<Record<InferenceSnippetLanguage, Client[]>> = {
+	js: ["huggingface.js"],
+	python: ["huggingface_hub"],
 };
 
 type InputPreparationFn = (model: ModelDataMinimal, opts?: Record<string, unknown>) => object;
@@ -207,7 +205,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		};
 
 		/// Iterate over clients => check if a snippet exists => generate
-		const clients = provider === "auto" ? LANGUAGE_CLIENTS_BY_POLICY.auto : CLIENTS;
+		const clients = provider === "auto" ? CLIENTS_AUTO_POLICY : CLIENTS;
 		return inferenceSnippetLanguages
 			.map((language) => {
 				const langClients = clients[language] ?? [];
