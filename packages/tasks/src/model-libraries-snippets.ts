@@ -237,6 +237,20 @@ output = model.generate(text)
 sf.write("simple.mp3", output, 44100)`,
 ];
 
+export const describe_anything = (model: ModelData): string[] => [
+	`# pip install git+https://github.com/NVlabs/describe-anything
+from huggingface_hub import snapshot_download
+from dam import DescribeAnythingModel
+
+snapshot_download(${model.id}, local_dir="checkpoints")
+
+dam = DescribeAnythingModel(
+	model_path="checkpoints",
+	conv_mode="v1",
+	prompt_mode="focal_prompt",
+)`,
+];
+
 const diffusersDefaultPrompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
 
 const diffusers_default = (model: ModelData) => [
@@ -727,6 +741,17 @@ model = pe.VisionTransformer.from_config("${model.id}", pretrained=True)`;
 		return [vision_encoder];
 	}
 };
+export const phantom_wan = (model: ModelData): string[] => [
+	`from huggingface_hub import snapshot_download
+from phantom_wan import WANI2V, configs
+
+checkpoint_dir = snapshot_download("${model.id}")
+wan_i2v = WanI2V(
+            config=configs.WAN_CONFIGS['i2v-14B'],
+            checkpoint_dir=checkpoint_dir,
+        )
+ video = wan_i2v.generate(text_prompt, image_prompt)`,
+];
 
 export const pyannote_audio_pipeline = (model: ModelData): string[] => [
 	`from pyannote.audio import Pipeline
@@ -1309,11 +1334,31 @@ model = SwarmFormerModel.from_pretrained("${model.id}")
 `,
 ];
 
-export const mlx = (model: ModelData): string[] => [
+const mlx_unknown = (model: ModelData): string[] => [
 	`pip install huggingface_hub hf_transfer
 
 export HF_HUB_ENABLE_HF_TRANSFER=1
 huggingface-cli download --local-dir ${nameWithoutNamespace(model.id)} ${model.id}`,
+];
+
+const mlxlm = (model: ModelData): string[] => [
+	`pip install --upgrade mlx-lm
+
+mlx_lm.generate --model ${model.id} --prompt "Hello"`,
+];
+
+const mlxchat = (model: ModelData): string[] => [
+	`pip install --upgrade mlx-lm
+
+mlx_lm.chat --model ${model.id}`,
+];
+
+const mlxvlm = (model: ModelData): string[] => [
+	`pip install --upgrade mlx-vlm
+
+mlx_vlm.generate --model ${model.id} \\
+	--prompt "Describe this image." \\
+	--image "https://huggingface.co/datasets/huggingface/documentation-images/resolve/0052a70beed5bf71b92610a43a52df6d286cd5f3/diffusers/rabbit.jpg"`,
 ];
 
 export const mlxim = (model: ModelData): string[] => [
@@ -1321,6 +1366,20 @@ export const mlxim = (model: ModelData): string[] => [
 
 model = create_model(${model.id})`,
 ];
+
+export const mlx = (model: ModelData): string[] => {
+	if (model.tags.includes("image-text-to-text")) {
+		return mlxvlm(model);
+	}
+	if (model.tags.includes("conversational")) {
+		if (model.config?.tokenizer_config?.chat_template) {
+			return mlxchat(model);
+		} else {
+			return mlxlm(model);
+		}
+	}
+	return mlx_unknown(model);
+};
 
 export const model2vec = (model: ModelData): string[] => [
 	`from model2vec import StaticModel

@@ -52,3 +52,62 @@ export function slice<T>(array: T[], start?: number, stop?: number, step = 1): T
 export function titleCase(value: string): string {
 	return value.replace(/\b\w/g, (c) => c.toUpperCase());
 }
+
+export function strftime_now(format: string): string {
+	return strftime(new Date(), format);
+}
+
+/**
+ * A minimalistic implementation of Python's strftime function.
+ */
+export function strftime(date: Date, format: string): string {
+	// Set locale to undefined to use the default locale
+	const monthFormatterLong = new Intl.DateTimeFormat(undefined, { month: "long" });
+	const monthFormatterShort = new Intl.DateTimeFormat(undefined, { month: "short" });
+
+	const pad2 = (n: number): string => (n < 10 ? "0" + n : n.toString());
+
+	return format.replace(/%[YmdbBHM%]/g, (token) => {
+		switch (token) {
+			case "%Y":
+				return date.getFullYear().toString();
+			case "%m":
+				return pad2(date.getMonth() + 1);
+			case "%d":
+				return pad2(date.getDate());
+			case "%b":
+				return monthFormatterShort.format(date);
+			case "%B":
+				return monthFormatterLong.format(date);
+			case "%H":
+				return pad2(date.getHours());
+			case "%M":
+				return pad2(date.getMinutes());
+			case "%%":
+				return "%";
+			default:
+				return token;
+		}
+	});
+}
+
+function escapeRegExp(s: string): string {
+	return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Function that mimics Python's string.replace() function.
+ */
+export function replace(str: string, oldvalue: string, newvalue: string, count?: number | null): string {
+	if (count === 0) return str;
+	let remaining = count == null || count < 0 ? Infinity : count;
+	// NB: Use a Unicode-aware global regex so unpaired surrogates won't match
+	const pattern = oldvalue.length === 0 ? new RegExp("(?=)", "gu") : new RegExp(escapeRegExp(oldvalue), "gu");
+	return str.replaceAll(pattern, (match) => {
+		if (remaining > 0) {
+			--remaining;
+			return newvalue;
+		}
+		return match;
+	});
+}
