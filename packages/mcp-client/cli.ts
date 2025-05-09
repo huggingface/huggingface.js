@@ -4,6 +4,7 @@ import { stdin, stdout } from "node:process";
 import { join } from "node:path";
 import { homedir } from "node:os";
 import type { StdioServerParameters } from "@modelcontextprotocol/sdk/client/stdio.js";
+import type { ServerConfig } from "./src/types";
 import type { InferenceProvider } from "@huggingface/inference";
 import { ANSI } from "./src/utils";
 import { Agent } from "./src";
@@ -13,17 +14,45 @@ const MODEL_ID = process.env.MODEL_ID ?? "Qwen/Qwen2.5-72B-Instruct";
 const PROVIDER = (process.env.PROVIDER as InferenceProvider) ?? "nebius";
 const ENDPOINT_URL = process.env.ENDPOINT_URL ?? process.env.BASE_URL;
 
-const SERVERS: StdioServerParameters[] = [
+const SERVERS: (ServerConfig | StdioServerParameters)[] = [
+	// {
+	// 	// Filesystem "official" mcp-server with access to your Desktop
+	// 	command: "npx",
+	// 	args: ["-y", "@modelcontextprotocol/server-filesystem", join(homedir(), "Desktop")],
+	// },
+	// {
+	// 	// Playwright MCP
+	// 	command: "npx",
+	// 	args: ["@playwright/mcp@latest"],
+	// },
 	{
-		// Filesystem "official" mcp-server with access to your Desktop
-		command: "npx",
-		args: ["-y", "@modelcontextprotocol/server-filesystem", join(homedir(), "Desktop")],
+		type: "sse",
+		config: {
+			url: "https://evalstate-flux1-schnell.hf.space/gradio_api/mcp/sse",
+			options: {
+				requestInit: {
+					headers: {
+						"Authorization": `Bearer ${process.env.HF_TOKEN || ""}`
+					}
+				},
+				// workaround for https://github.com/modelcontextprotocol/typescript-sdk/issues/436
+				eventSourceInit: {
+					fetch: (url, init) => {
+						const headers = new Headers(init?.headers || {});
+						headers.set("Authorization", `Bearer ${process.env.HF_TOKEN || ""}`);
+						return fetch(url, {
+							...init,
+							headers
+						});
+					}
+				},				
+			},
+		},
 	},
-	{
-		// Playwright MCP
-		command: "npx",
-		args: ["@playwright/mcp@latest"],
-	},
+	// {
+	// 	command: "npx",
+	// 	args: ["-y","@llmindset/mcp-hfspace","--work-dir",join(homedir(),"temp/hfspace/")]
+	// }
 ];
 
 if (process.env.EXPERIMENTAL_HF_MCP_SERVER) {
@@ -56,13 +85,13 @@ async function main() {
 					model: MODEL_ID,
 					apiKey: process.env.HF_TOKEN,
 					servers: SERVERS,
-			  }
+				}
 			: {
 					provider: PROVIDER,
 					model: MODEL_ID,
 					apiKey: process.env.HF_TOKEN,
 					servers: SERVERS,
-			  }
+				}
 	);
 
 	const rl = readline.createInterface({ input: stdin, output: stdout });
