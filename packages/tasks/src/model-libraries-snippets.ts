@@ -1450,7 +1450,8 @@ model = Model.load("${model.id}")`,
 ];
 
 export const zonos = (model: ModelData): string[] => [
-	`import torchaudio
+	`# pip install git+https://github.com/Zyphra/Zonos.git
+import torchaudio
 from zonos.model import Zonos
 from zonos.conditioning import make_cond_dict
 
