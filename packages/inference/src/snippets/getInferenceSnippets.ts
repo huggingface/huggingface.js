@@ -11,7 +11,7 @@ import type { ChatCompletionInputMessage, GenerationParameters } from "@huggingf
 import type { InferenceProviderModelMapping } from "../lib/getInferenceProviderMapping";
 import { getProviderHelper } from "../lib/getProviderHelper";
 import { makeRequestOptionsFromResolvedModel } from "../lib/makeRequestOptions";
-import type { InferenceProvider, InferenceTask, RequestArgs } from "../types";
+import type { InferenceProviderOrPolicy, InferenceTask, RequestArgs } from "../types";
 import { templates } from "./templates.exported";
 
 export type InferenceSnippetOptions = { streaming?: boolean; billTo?: string } & Record<string, unknown>;
@@ -28,6 +28,11 @@ const CLIENTS: Record<InferenceSnippetLanguage, Client[]> = {
 	sh: [...SH_CLIENTS],
 };
 
+const CLIENTS_AUTO_POLICY: Partial<Record<InferenceSnippetLanguage, Client[]>> = {
+	js: ["huggingface.js"],
+	python: ["huggingface_hub"],
+};
+
 type InputPreparationFn = (model: ModelDataMinimal, opts?: Record<string, unknown>) => object;
 interface TemplateParams {
 	accessToken?: string;
@@ -37,7 +42,7 @@ interface TemplateParams {
 	inputs?: object;
 	providerInputs?: object;
 	model?: ModelDataMinimal;
-	provider?: InferenceProvider;
+	provider?: InferenceProviderOrPolicy;
 	providerModelId?: string;
 	billTo?: string;
 	methodName?: string; // specific to snippetBasic
@@ -121,7 +126,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 	return (
 		model: ModelDataMinimal,
 		accessToken: string,
-		provider: InferenceProvider,
+		provider: InferenceProviderOrPolicy,
 		inferenceProviderMapping?: InferenceProviderModelMapping,
 		opts?: InferenceSnippetOptions
 	): InferenceSnippet[] => {
@@ -139,7 +144,8 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		}
 		let providerHelper: ReturnType<typeof getProviderHelper>;
 		try {
-			providerHelper = getProviderHelper(provider, task);
+			/// For the "auto" provider policy we use hf-inference snippets
+			providerHelper = getProviderHelper(provider === "auto" ? "hf-inference" : provider, task);
 		} catch (e) {
 			console.error(`Failed to get provider helper for ${provider} (${task})`, e);
 			return [];
@@ -200,9 +206,11 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		};
 
 		/// Iterate over clients => check if a snippet exists => generate
+		const clients = provider === "auto" ? CLIENTS_AUTO_POLICY : CLIENTS;
 		return inferenceSnippetLanguages
 			.map((language) => {
-				return CLIENTS[language]
+				const langClients = clients[language] ?? [];
+				return langClients
 					.map((client) => {
 						if (!hasTemplate(language, client, templateName)) {
 							return;
@@ -283,7 +291,7 @@ const snippets: Partial<
 		(
 			model: ModelDataMinimal,
 			accessToken: string,
-			provider: InferenceProvider,
+			provider: InferenceProviderOrPolicy,
 			inferenceProviderMapping?: InferenceProviderModelMapping,
 			opts?: InferenceSnippetOptions
 		) => InferenceSnippet[]
@@ -323,7 +331,7 @@ const snippets: Partial<
 export function getInferenceSnippets(
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	inferenceProviderMapping?: InferenceProviderModelMapping,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
