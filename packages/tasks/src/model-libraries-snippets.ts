@@ -1392,12 +1392,26 @@ text = generate(model, tokenizer, prompt=prompt, verbose=True)`,
 ];
 
 const mlxvlm = (model: ModelData): string[] => [
-	`# Make sure mlx-vlm is installed
-pip install --upgrade mlx-vlm
+	`from mlx_vlm import load, generate
+from mlx_vlm.prompt_utils import apply_chat_template
+from mlx_vlm.utils import load_config
 
-mlx_vlm.generate --model ${model.id} \\
-	--prompt "Describe this image." \\
-	--image "https://huggingface.co/datasets/huggingface/documentation-images/resolve/0052a70beed5bf71b92610a43a52df6d286cd5f3/diffusers/rabbit.jpg"`,
+# Load the model
+model, processor = load("${model.id}")
+config = load_config("${model.id}")
+
+# Prepare input
+image = ["http://images.cocodataset.org/val2017/000000039769.jpg"]
+prompt = "Describe this image."
+
+# Apply chat template
+formatted_prompt = apply_chat_template(
+    processor, config, prompt, num_images=1
+)
+
+# Generate output
+output = generate(model, processor, formatted_prompt, image)
+print(output)`,
 ];
 
 export const mlxim = (model: ModelData): string[] => [
