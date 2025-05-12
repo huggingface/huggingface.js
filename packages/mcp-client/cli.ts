@@ -13,19 +13,19 @@ import { version as packageVersion } from "./package.json";
 const MODEL_ID = process.env.MODEL_ID ?? "Qwen/Qwen2.5-72B-Instruct";
 const PROVIDER = (process.env.PROVIDER as InferenceProvider) ?? "nebius";
 const ENDPOINT_URL = process.env.ENDPOINT_URL ?? process.env.BASE_URL;
+const MCP_EXAMPLER_LOCAL_FOLDER = process.platform === "darwin" ? join(homedir(), "Desktop") : homedir();
 
 const SERVERS: (ServerConfig | StdioServerParameters)[] = [
-	// {
-	// 	// Filesystem "official" mcp-server with access to your Desktop
-	// 	command: "npx",
-	// 	args: ["-y", "@modelcontextprotocol/server-filesystem", join(homedir(), "Desktop")],
-	// },
-	// {
-	// 	// Playwright MCP
-	// 	command: "npx",
-	// 	args: ["@playwright/mcp@latest"],
-	// },
-	// now using "--url https://evalstate-flux1-schnell.hf.space/gradio_api/mcp/sse"
+	{
+		// Filesystem "official" mcp-server with access to your Desktop
+		command: "npx",
+		args: ["-y", "@modelcontextprotocol/server-filesystem", MCP_EXAMPLER_LOCAL_FOLDER],
+	},
+	{
+		// Playwright MCP
+		command: "npx",
+		args: ["@playwright/mcp@latest"],
+	},
 ];
 
 // Handle --url parameter: parse comma-separated URLs into ServerConfig objects
@@ -50,6 +50,7 @@ if (process.env.EXPERIMENTAL_HF_MCP_SERVER) {
 	SERVERS.push({
 		// Early version of a HF-MCP server
 		// you can download it from gist.github.com/julien-c/0500ba922e1b38f2dc30447fb81f7dc6
+		// and replace the local path below
 		command: "node",
 		args: ["--disable-warning=ExperimentalWarning", join(homedir(), "Desktop/hf-mcp/index.ts")],
 		env: {
