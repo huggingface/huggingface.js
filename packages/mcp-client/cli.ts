@@ -32,7 +32,7 @@ const SERVERS: (ServerConfig | StdioServerParameters)[] = [
 	},
 ];
 
-// Handle --url parameters: each URL will be parsed into a ServerConfig object
+// Handle --url parameters from command line: each URL will be parsed into a ServerConfig object
 const {
 	values: { url: urls },
 } = parseArgs({
