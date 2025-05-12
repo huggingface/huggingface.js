@@ -57,7 +57,7 @@ This is a collection of JS libraries to interact with the Hugging Face API, with
 
 - [@huggingface/inference](packages/inference/README.md): Use all supported (serverless) Inference Providers or switch to Inference Endpoints (dedicated) to make calls to 100,000+ Machine Learning models
 - [@huggingface/hub](packages/hub/README.md): Interact with huggingface.co to create or delete repos and commit / download files
-- [@huggingface/mcp-client](packages/mcp-client/README.md): A Model Context Protocol (MCP) and a tiny Agent library built on top of InferenceClient.
+- [@huggingface/mcp-client](packages/mcp-client/README.md): A Model Context Protocol (MCP) client, and a tiny Agent library, built on top of InferenceClient.
 - [@huggingface/gguf](packages/gguf/README.md): A GGUF parser that works on remotely hosted files.
 - [@huggingface/dduf](packages/dduf/README.md): Similar package for DDUF (DDUF Diffusers Unified Format)
 - [@huggingface/tasks](packages/tasks/README.md): The definition files and source-of-truth for the Hub's main primitives like pipeline tasks, model libraries, etc.
