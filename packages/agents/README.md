@@ -2,6 +2,10 @@
 
 A way to call Hugging Face models and Inference Endpoints from natural language, using an LLM.
 
+> [!WARNING]
+> `@huggingface/agents` is now deprecated, and a modern version, built on top of MCP, is [Tiny Agents](https://github.com/huggingface/huggingface.js/tree/main/packages/mcp-client).
+> Go checkout the `Tiny Agents` introduction blog [here](https://huggingface.co/blog/tiny-agents).
+
 ## Install
 
 ```console
