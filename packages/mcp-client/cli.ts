@@ -9,17 +9,21 @@ import type { InferenceProvider } from "@huggingface/inference";
 import { ANSI, urlToServerConfig } from "./src/utils";
 import { Agent } from "./src";
 import { version as packageVersion } from "./package.json";
+import { parseArgs } from "node:util";
 
 const MODEL_ID = process.env.MODEL_ID ?? "Qwen/Qwen2.5-72B-Instruct";
 const PROVIDER = (process.env.PROVIDER as InferenceProvider) ?? "nebius";
 const ENDPOINT_URL = process.env.ENDPOINT_URL ?? process.env.BASE_URL;
-const MCP_EXAMPLER_LOCAL_FOLDER = process.platform === "darwin" ? join(homedir(), "Desktop") : homedir();
 
 const SERVERS: (ServerConfig | StdioServerParameters)[] = [
 	{
 		// Filesystem "official" mcp-server with access to your Desktop
 		command: "npx",
-		args: ["-y", "@modelcontextprotocol/server-filesystem", MCP_EXAMPLER_LOCAL_FOLDER],
+		args: [
+			"-y",
+			"@modelcontextprotocol/server-filesystem",
+			process.platform === "darwin" ? join(homedir(), "Desktop") : homedir(),
+		],
 	},
 	{
 		// Playwright MCP
@@ -28,15 +32,21 @@ const SERVERS: (ServerConfig | StdioServerParameters)[] = [
 	},
 ];
 
-// Handle --url parameter: parse comma-separated URLs into ServerConfig objects
-const urlIndex = process.argv.indexOf("--url");
-if (urlIndex !== -1 && urlIndex + 1 < process.argv.length) {
-	const urlsArg = process.argv[urlIndex + 1];
-	const urls = urlsArg
-		.split(",")
-		.map((url) => url.trim())
-		.filter((url) => url.length > 0);
-
+// Handle --url parameters: each URL will be parsed into a ServerConfig object
+const {
+	values: { url: urls },
+} = parseArgs({
+	options: {
+		url: {
+			type: "string",
+			multiple: true,
+		},
+	},
+});
+if (urls?.length) {
+	while (SERVERS.length) {
+		SERVERS.pop();
+	}
 	for (const url of urls) {
 		try {
 			SERVERS.push(urlToServerConfig(url));
@@ -44,19 +54,6 @@ if (urlIndex !== -1 && urlIndex + 1 < process.argv.length) {
 			console.error(`Error adding server from URL "${url}": ${error.message}`);
 		}
 	}
-}
-
-if (process.env.EXPERIMENTAL_HF_MCP_SERVER) {
-	SERVERS.push({
-		// Early version of a HF-MCP server
-		// you can download it from gist.github.com/julien-c/0500ba922e1b38f2dc30447fb81f7dc6
-		// and replace the local path below
-		command: "node",
-		args: ["--disable-warning=ExperimentalWarning", join(homedir(), "Desktop/hf-mcp/index.ts")],
-		env: {
-			HF_TOKEN: process.env.HF_TOKEN ?? "",
-		},
-	});
 }
 
 async function main() {
