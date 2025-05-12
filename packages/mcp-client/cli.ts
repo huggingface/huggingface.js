@@ -6,7 +6,7 @@ import { homedir } from "node:os";
 import type { StdioServerParameters } from "@modelcontextprotocol/sdk/client/stdio.js";
 import type { ServerConfig } from "./src/types";
 import type { InferenceProvider } from "@huggingface/inference";
-import { ANSI } from "./src/utils";
+import { ANSI, urlToServerConfig } from "./src/utils";
 import { Agent } from "./src";
 import { version as packageVersion } from "./package.json";
 
@@ -20,40 +20,31 @@ const SERVERS: (ServerConfig | StdioServerParameters)[] = [
 	// 	command: "npx",
 	// 	args: ["-y", "@modelcontextprotocol/server-filesystem", join(homedir(), "Desktop")],
 	// },
+
 	// {
 	// 	// Playwright MCP
 	// 	command: "npx",
 	// 	args: ["@playwright/mcp@latest"],
 	// },
-	{
-		type: "sse",
-		config: {
-			url: "https://evalstate-flux1-schnell.hf.space/gradio_api/mcp/sse",
-			options: {
-				requestInit: {
-					headers: {
-						"Authorization": `Bearer ${process.env.HF_TOKEN || ""}`
-					}
-				},
-				// workaround for https://github.com/modelcontextprotocol/typescript-sdk/issues/436
-				eventSourceInit: {
-					fetch: (url, init) => {
-						const headers = new Headers(init?.headers || {});
-						headers.set("Authorization", `Bearer ${process.env.HF_TOKEN || ""}`);
-						return fetch(url, {
-							...init,
-							headers
-						});
-					}
-				},				
-			},
-		},
-	},
-	// {
-	// 	command: "npx",
-	// 	args: ["-y","@llmindset/mcp-hfspace","--work-dir",join(homedir(),"temp/hfspace/")]
-	// }
+
+	// now using "--url https://evalstate-flux1-schnell.hf.space/gradio_api/mcp/sse"
 ];
+
+  // Handle --url parameter: parse comma-separated URLs into ServerConfig objects
+  const urlIndex = process.argv.indexOf("--url");
+  if (urlIndex !== -1 && urlIndex + 1 < process.argv.length) {
+    const urlsArg = process.argv[urlIndex + 1];
+    const urls = urlsArg.split(",").map(url => url.trim()).filter(url => url.length > 0);
+    
+    for (const url of urls) {
+      try {
+        SERVERS.push(urlToServerConfig(url));
+      } catch (error) {
+        console.error(`Error adding server from URL "${url}": ${error.message}`);
+      }
+    }
+  }
+
 
 if (process.env.EXPERIMENTAL_HF_MCP_SERVER) {
 	SERVERS.push({
