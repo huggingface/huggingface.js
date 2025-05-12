@@ -285,6 +285,16 @@ const prepareConversationalInput = (
 	};
 };
 
+const prepareQuestionAnsweringInput = (model: ModelDataMinimal): object => {
+	const data = JSON.parse(getModelInputSnippet(model) as string);
+	return { question: data.question, context: data.context };
+};
+
+const prepareTableQuestionAnsweringInput = (model: ModelDataMinimal): object => {
+	const data = JSON.parse(getModelInputSnippet(model) as string);
+	return { query: data.query, table: JSON.stringify(data.table) };
+};
+
 const snippets: Partial<
 	Record<
 		PipelineType,
@@ -309,12 +319,12 @@ const snippets: Partial<
 	"image-to-image": snippetGenerator("imageToImage", prepareImageToImageInput),
 	"image-to-text": snippetGenerator("basicImage"),
 	"object-detection": snippetGenerator("basicImage"),
-	"question-answering": snippetGenerator("basic"),
+	"question-answering": snippetGenerator("questionAnswering", prepareQuestionAnsweringInput),
 	"sentence-similarity": snippetGenerator("basic"),
 	summarization: snippetGenerator("basic"),
 	"tabular-classification": snippetGenerator("tabular"),
 	"tabular-regression": snippetGenerator("tabular"),
-	"table-question-answering": snippetGenerator("basic"),
+	"table-question-answering": snippetGenerator("tableQuestionAnswering", prepareTableQuestionAnsweringInput),
 	"text-classification": snippetGenerator("basic"),
 	"text-generation": snippetGenerator("basic"),
 	"text-to-audio": snippetGenerator("textToAudio"),
