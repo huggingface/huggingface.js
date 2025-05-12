@@ -1160,6 +1160,17 @@ describe.skip("InferenceClient", () => {
 				expect(res).toBeInstanceOf(Blob);
 			});
 
+			// Runs black-forest-labs/flux-dev-lora under the hood
+			// with fofr/flux-80s-cyberpunk as the LoRA weights
+			it("textToImage - all Flux LoRAs", async () => {
+				const res = await client.textToImage({
+					model: "fofr/flux-80s-cyberpunk",
+					provider: "replicate",
+					inputs: "style of 80s cyberpunk, a portrait photo",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
 			it("textToImage canonical - stabilityai/stable-diffusion-3.5-large-turbo", async () => {
 				const res = await client.textToImage({
 					model: "stabilityai/stable-diffusion-3.5-large-turbo",
@@ -1358,6 +1369,12 @@ describe.skip("InferenceClient", () => {
 					status: "live",
 					task: "text-to-image",
 				},
+				"BAAI/bge-multilingual-gemma2": {
+					providerId: "BAAI/bge-multilingual-gemma2",
+					hfModelId: "BAAI/bge-multilingual-gemma2",
+					status: "live",
+					task: "feature-extraction",
+				},
 			};
 
 			it("chatCompletion", async () => {
@@ -1394,6 +1411,16 @@ describe.skip("InferenceClient", () => {
 					inputs: "award winning high resolution photo of a giant tortoise",
 				});
 				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("featureExtraction", async () => {
+				const res = await client.featureExtraction({
+					model: "BAAI/bge-multilingual-gemma2",
+					inputs: "That is a happy person",
+				});
+
+				expect(res).toBeInstanceOf(Array);
+				expect(res[0]).toEqual(expect.arrayContaining([expect.any(Number)]));
 			});
 		},
 		TIMEOUT

@@ -14,6 +14,7 @@
  *
  * Thanks!
  */
+import type { FeatureExtractionOutput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../lib/InferenceOutputError";
 import type { BodyParams, UrlParams } from "../types";
 import { omit } from "../utils/omit";
@@ -21,6 +22,7 @@ import {
 	BaseConversationalTask,
 	BaseTextGenerationTask,
 	TaskProviderHelper,
+	type FeatureExtractionTaskHelper,
 	type TextToImageTaskHelper,
 } from "./providerHelper";
 
@@ -29,6 +31,12 @@ const NEBIUS_API_BASE_URL = "https://api.studio.nebius.ai";
 interface NebiusBase64ImageGeneration {
 	data: Array<{
 		b64_json: string;
+	}>;
+}
+
+interface NebiusEmbeddingsResponse {
+	data: Array<{
+		embedding: number[];
 	}>;
 }
 
@@ -59,8 +67,7 @@ export class NebiusTextToImageTask extends TaskProviderHelper implements TextToI
 		};
 	}
 
-	makeRoute(params: UrlParams): string {
-		void params;
+	makeRoute(): string {
 		return "v1/images/generations";
 	}
 
@@ -86,5 +93,26 @@ export class NebiusTextToImageTask extends TaskProviderHelper implements TextToI
 		}
 
 		throw new InferenceOutputError("Expected Nebius text-to-image response format");
+	}
+}
+
+export class NebiusFeatureExtractionTask extends TaskProviderHelper implements FeatureExtractionTaskHelper {
+	constructor() {
+		super("nebius", NEBIUS_API_BASE_URL);
+	}
+
+	preparePayload(params: BodyParams): Record<string, unknown> {
+		return {
+			input: params.args.inputs,
+			model: params.model,
+		};
+	}
+
+	makeRoute(): string {
+		return "v1/embeddings";
+	}
+
+	async getResponse(response: NebiusEmbeddingsResponse): Promise<FeatureExtractionOutput> {
+		return response.data.map((item) => item.embedding);
 	}
 }

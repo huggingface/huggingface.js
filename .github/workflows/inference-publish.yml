@@ -11,6 +11,10 @@ on:
           - patch
           - minor
           - major
+      bypass_deps_check:
+        type: boolean
+        description: "Bypass dependency checking"
+        default: false
 
 concurrency:
   group: "push-to-main"
@@ -53,7 +57,8 @@ jobs:
           git commit -m "🔖 @huggingface/inference $BUMPED_VERSION"
           git tag "inference-v$BUMPED_VERSION"
 
-      - name: "Check Deps are published before publishing this package"
+      - if: ${{ !github.event.inputs.bypass_deps_check }}
+        name: "Check Deps are published before publishing this package"
         run: pnpm -w check-deps tasks
 
       - run: pnpm publish --no-git-checks .
