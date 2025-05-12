@@ -278,20 +278,18 @@ const snippetMlxLm = (model: ModelData): LocalAppSnippet[] => {
 	return [
 		{
 			title: "Generate or start a chat session",
-			setup: ["# Install MLX LM", "pip install mlx-lm"].join("\n"),
+			setup: ["# Install MLX LM", "uv tool install mlx-lm"].join("\n"),
 			content: [
-				"# One-shot generation",
-				`mlx_lm.generate --model "${model.id}" --prompt "Hello"`,
 				...(model.tags.includes("conversational")
 					? ["# Interactive chat REPL", `mlx_lm.chat --model "${model.id}"`]
-					: []),
+					: ["# One-shot generation", `mlx_lm.generate --model "${model.id}" --prompt "Hello"`]),
 			].join("\n"),
 		},
 		...(model.tags.includes("conversational")
 			? [
 					{
 						title: "Run an OpenAI-compatible server",
-						setup: ["# Install MLX LM", "pip install mlx-lm"].join("\n"),
+						setup: ["# Install MLX LM", "uv tool install mlx-lm"].join("\n"),
 						content: ["# Start the server", `mlx_lm.server --model "${model.id}"`, ...openaiCurl].join("\n"),
 					},
 			  ]
