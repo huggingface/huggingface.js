@@ -282,7 +282,7 @@ const snippetMlxLm = (model: ModelData): LocalAppSnippet[] => {
 			content: [
 				...(model.tags.includes("conversational")
 					? ["# Interactive chat REPL", `mlx_lm.chat --model "${model.id}"`]
-					: ["# One-shot generation", `mlx_lm.generate --model "${model.id}" --prompt "Hello"`]),
+					: ["# Generate some text", `mlx_lm.generate --model "${model.id}" --prompt "Once upon a time"`]),
 			].join("\n"),
 		},
 		...(model.tags.includes("conversational")
