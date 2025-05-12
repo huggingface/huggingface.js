@@ -16,7 +16,7 @@
  */
 import type { FeatureExtractionOutput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../lib/InferenceOutputError";
-import type { BodyParams, UrlParams } from "../types";
+import type { BodyParams } from "../types";
 import { omit } from "../utils/omit";
 import {
 	BaseConversationalTask,
