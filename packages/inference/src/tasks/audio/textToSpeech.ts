@@ -13,7 +13,7 @@ interface OutputUrlTextToSpeechGeneration {
  * Recommended model: espnet/kan-bayashi_ljspeech_vits
  */
 export async function textToSpeech(args: TextToSpeechArgs, options?: Options): Promise<Blob> {
-	const provider = await resolveProvider(args.provider, args.model);
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "text-to-speech");
 	const { data: res } = await innerRequest<Blob | OutputUrlTextToSpeechGeneration>(args, providerHelper, {
 		...options,

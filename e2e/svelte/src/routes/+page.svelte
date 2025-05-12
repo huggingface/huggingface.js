@@ -13,11 +13,9 @@
 		}
 
 		const result = await hf.chatCompletion({
-			model: "microsoft/Phi-3-mini-4k-instruct",
+			model: "meta-llama/Llama-3.2-1B-Instruct",
 			messages: [{ role: "user", content: "Can you summarize the Eiffel Tower?" }],
-			parameters: {
-				max_length: 100,
-			},
+			max_tokens: 10,
 		});
 
 		console.log(result);

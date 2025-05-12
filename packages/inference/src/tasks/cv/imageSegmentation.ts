@@ -15,7 +15,7 @@ export async function imageSegmentation(
 	args: ImageSegmentationArgs,
 	options?: Options
 ): Promise<ImageSegmentationOutput> {
-	const provider = await resolveProvider(args.provider, args.model);
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "image-segmentation");
 	const payload = preparePayload(args);
 	const { data: res } = await innerRequest<ImageSegmentationOutput>(payload, providerHelper, {
