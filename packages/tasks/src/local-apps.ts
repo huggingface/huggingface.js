@@ -343,7 +343,7 @@ export const LOCAL_APPS = {
 		prettyLabel: "MLX LM",
 		docsUrl: "https://github.com/ml-explore/mlx-lm",
 		mainTask: "text-generation",
-		displayOnModelPage: isMlxModel,
+		displayOnModelPage: (model) => model.pipeline_tag === "text-generation" && isMlxModel(model),
 		snippet: snippetMlxLm,
 	},
 	tgi: {
