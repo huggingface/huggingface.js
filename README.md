@@ -243,7 +243,7 @@ const agent = new Agent({
 
 
 await agent.loadTools();
-for await (const chunk of agent.run("Hello, how are you?")) {
+for await (const chunk of agent.run("Draw a picture of a cat wearing a top hat. Then caption the picture and read it out loud.")) {
   console.log(chunk);
 }
 ```
