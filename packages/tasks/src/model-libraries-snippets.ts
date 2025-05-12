@@ -1392,7 +1392,8 @@ text = generate(model, tokenizer, prompt=prompt, verbose=True)`,
 ];
 
 const mlxvlm = (model: ModelData): string[] => [
-	`from mlx_vlm import load, generate
+	`Make sure mlx-vlm is installed
+from mlx_vlm import load, generate
 from mlx_vlm.prompt_utils import apply_chat_template
 from mlx_vlm.utils import load_config
 
