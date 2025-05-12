@@ -9,23 +9,22 @@ import type { StreamableHTTPClientTransportOptions } from "@modelcontextprotocol
  * Configuration for an SSE MCP server
  */
 export interface SSEServerConfig {
-  url: string | URL;
-  options?: SSEClientTransportOptions;
+	url: string | URL;
+	options?: SSEClientTransportOptions;
 }
 
 /**
  * Configuration for a StreamableHTTP MCP server
  */
 export interface StreamableHTTPServerConfig {
-  url: string | URL;
-  options?: StreamableHTTPClientTransportOptions;
+	url: string | URL;
+	options?: StreamableHTTPClientTransportOptions;
 }
-
 
 /**
  * Discriminated union type for different MCP server types
  */
-export type ServerConfig = 
-  | { type: 'stdio'; config: StdioServerParameters }
-  | { type: 'sse'; config: SSEServerConfig }
-  | { type: 'streamableHttp'; config: StreamableHTTPServerConfig }
+export type ServerConfig =
+	| { type: "stdio"; config: StdioServerParameters }
+	| { type: "sse"; config: SSEServerConfig }
+	| { type: "streamableHttp"; config: StreamableHTTPServerConfig };

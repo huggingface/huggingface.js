@@ -20,31 +20,31 @@ const SERVERS: (ServerConfig | StdioServerParameters)[] = [
 	// 	command: "npx",
 	// 	args: ["-y", "@modelcontextprotocol/server-filesystem", join(homedir(), "Desktop")],
 	// },
-
 	// {
 	// 	// Playwright MCP
 	// 	command: "npx",
 	// 	args: ["@playwright/mcp@latest"],
 	// },
-
 	// now using "--url https://evalstate-flux1-schnell.hf.space/gradio_api/mcp/sse"
 ];
 
-  // Handle --url parameter: parse comma-separated URLs into ServerConfig objects
-  const urlIndex = process.argv.indexOf("--url");
-  if (urlIndex !== -1 && urlIndex + 1 < process.argv.length) {
-    const urlsArg = process.argv[urlIndex + 1];
-    const urls = urlsArg.split(",").map(url => url.trim()).filter(url => url.length > 0);
-    
-    for (const url of urls) {
-      try {
-        SERVERS.push(urlToServerConfig(url));
-      } catch (error) {
-        console.error(`Error adding server from URL "${url}": ${error.message}`);
-      }
-    }
-  }
+// Handle --url parameter: parse comma-separated URLs into ServerConfig objects
+const urlIndex = process.argv.indexOf("--url");
+if (urlIndex !== -1 && urlIndex + 1 < process.argv.length) {
+	const urlsArg = process.argv[urlIndex + 1];
+	const urls = urlsArg
+		.split(",")
+		.map((url) => url.trim())
+		.filter((url) => url.length > 0);
 
+	for (const url of urls) {
+		try {
+			SERVERS.push(urlToServerConfig(url));
+		} catch (error) {
+			console.error(`Error adding server from URL "${url}": ${error.message}`);
+		}
+	}
+}
 
 if (process.env.EXPERIMENTAL_HF_MCP_SERVER) {
 	SERVERS.push({
@@ -76,13 +76,13 @@ async function main() {
 					model: MODEL_ID,
 					apiKey: process.env.HF_TOKEN,
 					servers: SERVERS,
-				}
+			  }
 			: {
 					provider: PROVIDER,
 					model: MODEL_ID,
 					apiKey: process.env.HF_TOKEN,
 					servers: SERVERS,
-				}
+			  }
 	);
 
 	const rl = readline.createInterface({ input: stdin, output: stdout });

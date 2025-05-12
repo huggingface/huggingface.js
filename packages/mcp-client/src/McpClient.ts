@@ -11,12 +11,12 @@ import type {
 } from "@huggingface/tasks/src/tasks/chat-completion/inference";
 import { version as packageVersion } from "../package.json";
 import { debug } from "./utils";
-import { ServerConfig } from "./types";
-import { Transport } from "@modelcontextprotocol/sdk/shared/transport";
+import type { ServerConfig } from "./types";
+import type { Transport } from "@modelcontextprotocol/sdk/shared/transport";
 import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { ResultFormatter } from "./ResultFormatter.js";
-import { CallToolResult } from "@modelcontextprotocol/sdk/types";
+import type { CallToolResult } from "@modelcontextprotocol/sdk/types";
 
 type ToolName = string;
 
@@ -53,7 +53,7 @@ export class McpClient {
 		model: string;
 		apiKey: string;
 	}) {
-		const clientOptions = endpointUrl ? {endpointUrl} as Options & {endpointUrl: string} : undefined;
+		const clientOptions = endpointUrl ? ({ endpointUrl } as Options & { endpointUrl: string }) : undefined;
 		this.client = endpointUrl ? new InferenceClient(apiKey, clientOptions) : new InferenceClient(apiKey);
 		this.provider = provider;
 		this.model = model;
@@ -65,30 +65,29 @@ export class McpClient {
 	async addMcpServer(server: ServerConfig | StdioServerParameters): Promise<void> {
 		let transport: Transport;
 		const asUrl = (url: string | URL): URL => {
-			return typeof url === 'string' ? new URL(url) : url;
-		  };
+			return typeof url === "string" ? new URL(url) : url;
+		};
 
-		if(!("type" in server)){
+		if (!("type" in server)) {
 			transport = new StdioClientTransport({
 				...server,
 				env: { ...server.env, PATH: process.env.PATH ?? "" },
 			});
 		} else {
 			switch (server.type) {
-				case 'stdio':
+				case "stdio":
 					transport = new StdioClientTransport({
 						...server.config,
 						env: { ...server.config.env, PATH: process.env.PATH ?? "" },
 					});
 					break;
-				case 'sse':
+				case "sse":
 					transport = new SSEClientTransport(asUrl(server.config.url), server.config.options);
 					break;
-				case 'streamableHttp':
+				case "streamableHttp":
 					transport = new StreamableHTTPClientTransport(asUrl(server.config.url), server.config.options);
 					break;
-				}
-
+			}
 		}
 		const mcp = new Client({ name: "@huggingface/mcp-client", version: packageVersion });
 		await mcp.connect(transport);
