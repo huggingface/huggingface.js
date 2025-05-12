@@ -2,7 +2,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import type { StdioServerParameters } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { InferenceClient } from "@huggingface/inference";
-import type { InferenceProviderOrPolicy } from "@huggingface/inference";
+import type { InferenceProvider, Options } from "@huggingface/inference";
 import type {
 	ChatCompletionInputMessage,
 	ChatCompletionInputTool,
@@ -16,6 +16,7 @@ import { Transport } from "@modelcontextprotocol/sdk/shared/transport";
 import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { ResultFormatter } from "./ResultFormatter.js";
+import { CallToolResult } from "@modelcontextprotocol/sdk/types";
 
 type ToolName = string;
 
@@ -28,7 +29,7 @@ export interface ChatCompletionInputMessageTool extends ChatCompletionInputMessa
 
 export class McpClient {
 	protected client: InferenceClient;
-	protected provider: InferenceProviderOrPolicy | undefined;
+	protected provider: InferenceProvider | undefined;
 
 	protected model: string;
 	private clients: Map<ToolName, Client> = new Map();
@@ -41,7 +42,7 @@ export class McpClient {
 		apiKey,
 	}: (
 		| {
-				provider: InferenceProviderOrPolicy;
+				provider: InferenceProvider;
 				endpointUrl?: undefined;
 		  }
 		| {
@@ -52,11 +53,11 @@ export class McpClient {
 		model: string;
 		apiKey: string;
 	}) {
-		this.client = endpointUrl ? new InferenceClient(apiKey, { endpointUrl: endpointUrl }) : new InferenceClient(apiKey);
+		const clientOptions = endpointUrl ? {endpointUrl} as Options & {endpointUrl: string} : undefined;
+		this.client = endpointUrl ? new InferenceClient(apiKey, clientOptions) : new InferenceClient(apiKey);
 		this.provider = provider;
 		this.model = model;
 	}
-
 	async addMcpServers(servers: (ServerConfig | StdioServerParameters)[]): Promise<void> {
 		await Promise.all(servers.map((s) => this.addMcpServer(s)));
 	}
@@ -198,7 +199,7 @@ export class McpClient {
 			const client = this.clients.get(toolName);
 			if (client) {
 				const result = await client.callTool({ name: toolName, arguments: toolArgs, signal: opts.abortSignal });
-				toolMessage.content = (ResultFormatter.format(result));
+				toolMessage.content = ResultFormatter.format(result as CallToolResult);
 			} else {
 				toolMessage.content = `Error: No session found for tool: ${toolName}`;
 			}
