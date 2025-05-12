@@ -1,4 +1,4 @@
-import type { InferenceProvider } from "@huggingface/inference";
+import type { InferenceProviderOrPolicy } from "@huggingface/inference";
 import type { ChatCompletionInputMessageTool } from "./McpClient";
 import { McpClient } from "./McpClient";
 import type { ChatCompletionInputMessage, ChatCompletionStreamOutput } from "@huggingface/tasks";
@@ -57,7 +57,7 @@ export class Agent extends McpClient {
 		prompt,
 	}: (
 		| {
-				provider: InferenceProvider;
+				provider: InferenceProviderOrPolicy;
 				endpointUrl?: undefined;
 		  }
 		| {
