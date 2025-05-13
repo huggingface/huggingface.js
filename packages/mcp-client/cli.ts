@@ -20,7 +20,6 @@ const PROVIDER = (process.env.PROVIDER as InferenceProviderOrPolicy) ?? "nebius"
 const ENDPOINT_URL = process.env.ENDPOINT_URL ?? process.env.BASE_URL;
 
 const SERVERS: (ServerConfig | StdioServerParameters)[] = [
-const SERVERS: (ServerConfig | StdioServerParameters)[] = [
 	{
 		// Filesystem "official" mcp-server with access to your Desktop
 		command: "npx",
