@@ -4,7 +4,6 @@ import { stdin, stdout } from "node:process";
 import { join } from "node:path";
 import { homedir } from "node:os";
 import type { StdioServerParameters } from "@modelcontextprotocol/sdk/client/stdio.js";
-import type { ServerConfig } from "./src/types";
 import type { InferenceProviderOrPolicy } from "@huggingface/inference";
 import { ANSI, urlToServerConfig } from "./src/utils";
 import { Agent } from "./src";

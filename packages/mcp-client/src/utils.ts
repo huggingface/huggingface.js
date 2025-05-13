@@ -1,6 +1,5 @@
 import { inspect } from "util";
 import type { ServerConfig } from "./types";
-import type { ServerConfig } from "./types";
 
 export function debug(...args: unknown[]): void {
 	if (process.env.DEBUG) {
