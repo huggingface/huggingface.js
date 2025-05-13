@@ -74,7 +74,7 @@ export function urlToServerConfig(urlStr: string, token?: string): ServerConfig 
 							// workaround for https://github.com/modelcontextprotocol/typescript-sdk/issues/436
 							eventSourceInit: {
 								fetch: (url, init) => {
-									const reqHeaders = new Headers(init?.headers || {});
+									const reqHeaders = new Headers(init?.headers ?? {});
 									reqHeaders.set("Authorization", `Bearer ${authToken}`);
 									return fetch(url, {
 										...init,
