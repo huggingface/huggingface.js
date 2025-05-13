@@ -9,7 +9,7 @@ import { ANSI, urlToServerConfig } from "./src/utils";
 import { Agent } from "./src";
 import { version as packageVersion } from "./package.json";
 import { parseArgs } from "node:util";
-import { ServerConfig } from "./src/types";
+import type { ServerConfig } from "./src/types";
 
 const MODEL_ID = process.env.MODEL_ID ?? "Qwen/Qwen2.5-72B-Instruct";
 const PROVIDER = (process.env.PROVIDER as InferenceProviderOrPolicy) ?? "nebius";
