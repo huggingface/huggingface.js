@@ -2,7 +2,7 @@
 
 import { parseArgs } from "node:util";
 import { typedEntries } from "./src/utils/typedEntries";
-import { createBranch, deleteBranch, uploadFilesWithProgress } from "./src";
+import { createBranch, createRepo, deleteBranch, repoExists, uploadFilesWithProgress } from "./src";
 import { pathToFileURL } from "node:url";
 import { stat } from "node:fs/promises";
 import { basename, join } from "node:path";
@@ -219,7 +219,33 @@ async function run() {
 				break;
 			}
 			const parsedArgs = advParseArgs(args, "upload");
-			const { repoName, localFolder, repoType, revision, token, quiet, commitMessage, pathInRepo } = parsedArgs;
+			const {
+				repoName,
+				localFolder,
+				repoType,
+				revision,
+				token,
+				quiet,
+				commitMessage,
+				pathInRepo,
+				private: isPrivate,
+			} = parsedArgs;
+
+			const repoId = repoType ? { type: repoType as "model" | "dataset" | "space", name: repoName } : repoName;
+
+			if (
+				!(await repoExists({ repo: repoId, revision, accessToken: token, hubUrl: process.env.HF_ENDPOINT ?? HUB_URL }))
+			) {
+				if (!quiet) {
+					console.log(`Repo ${repoName} does not exist. Creating it...`);
+				}
+				await createRepo({
+					repo: repoId,
+					accessToken: token,
+					private: !!isPrivate,
+					hubUrl: process.env.HF_ENDPOINT ?? HUB_URL,
+				});
+			}
 
 			const isFile = (await stat(localFolder)).isFile();
 			const files = isFile
@@ -232,7 +258,7 @@ async function run() {
 				: [{ content: pathToFileURL(localFolder), path: pathInRepo.replace(/^[.]?\//, "") }];
 
 			for await (const event of uploadFilesWithProgress({
-				repo: repoType ? { type: repoType as "model" | "dataset" | "space", name: repoName } : repoName,
+				repo: repoId,
 				files,
 				branch: revision,
 				accessToken: token,
