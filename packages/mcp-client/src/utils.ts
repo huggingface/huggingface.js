@@ -15,7 +15,7 @@ export const ANSI = {
 	RESET: "\x1b[0m",
 };
 
-export function urlToServerConfig(urlStr: string, token?: string): ServerConfig {
+export function urlToServerConfig(urlStr: string, authToken?: string): ServerConfig {
 	if (!urlStr.startsWith("http:") && !urlStr.startsWith("https:")) {
 		throw new Error(`Unsupported URL format: ${urlStr}. Use http:// or https:// prefix.`);
 	}
@@ -34,7 +34,6 @@ export function urlToServerConfig(urlStr: string, token?: string): ServerConfig 
 	}
 
 	// Check if we should include the token
-	const authToken = token ?? process.env.HF_TOKEN;
 	const shouldIncludeToken =
 		!!authToken &&
 		(hostname.endsWith(".hf.space") ||

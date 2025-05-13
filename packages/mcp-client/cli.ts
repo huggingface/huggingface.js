@@ -4,12 +4,12 @@ import { stdin, stdout } from "node:process";
 import { join } from "node:path";
 import { homedir } from "node:os";
 import type { StdioServerParameters } from "@modelcontextprotocol/sdk/client/stdio.js";
-import type { ServerConfig } from "./src/types";
 import type { InferenceProviderOrPolicy } from "@huggingface/inference";
 import { ANSI, urlToServerConfig } from "./src/utils";
 import { Agent } from "./src";
 import { version as packageVersion } from "./package.json";
 import { parseArgs } from "node:util";
+import type { ServerConfig } from "./src/types";
 
 const MODEL_ID = process.env.MODEL_ID ?? "Qwen/Qwen2.5-72B-Instruct";
 const PROVIDER = (process.env.PROVIDER as InferenceProviderOrPolicy) ?? "nebius";
@@ -49,7 +49,7 @@ if (urls?.length) {
 	}
 	for (const url of urls) {
 		try {
-			SERVERS.push(urlToServerConfig(url));
+			SERVERS.push(urlToServerConfig(url, process.env.HF_TOKEN));
 		} catch (error) {
 			console.error(`Error adding server from URL "${url}": ${error.message}`);
 		}
