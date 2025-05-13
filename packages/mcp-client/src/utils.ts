@@ -34,7 +34,7 @@ export function urlToServerConfig(urlStr: string, token?: string): ServerConfig 
 	}
 
 	// Check if we should include the token
-	const authToken = token ?? process.env.HF_TOKEN;
+	const authToken = token;
 	const shouldIncludeToken =
 		!!authToken &&
 		(hostname.endsWith(".hf.space") ||

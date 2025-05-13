@@ -49,7 +49,7 @@ if (urls?.length) {
 	}
 	for (const url of urls) {
 		try {
-			SERVERS.push(urlToServerConfig(url));
+			SERVERS.push(urlToServerConfig(url, process.env.HF_TOKEN));
 		} catch (error) {
 			console.error(`Error adding server from URL "${url}": ${error.message}`);
 		}
