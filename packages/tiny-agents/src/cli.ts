@@ -1,15 +1,12 @@
 #!/usr/bin/env node
-import * as readline from "node:readline/promises";
-import { stdin, stdout } from "node:process";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
-import { z } from "zod";
-import type { InferenceProviderOrPolicy } from "@huggingface/inference";
-import { PROVIDERS_OR_POLICIES } from "@huggingface/inference";
-import { version as packageVersion } from "../package.json";
 import { readFile } from "node:fs/promises";
+import { z } from "zod";
+import { PROVIDERS_OR_POLICIES } from "@huggingface/inference";
+import { Agent } from "@huggingface/mcp-client";
 import type { ServerConfig } from "@huggingface/mcp-client";
+import { version as packageVersion } from "../package.json";
 
 const USAGE_HELP = `
 Usage:
@@ -34,6 +31,22 @@ function isValidCommand(command: string): command is (typeof CLI_COMMANDS)[numbe
 const FILENAME_CONFIG = "agent.json";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const FILENAME_PROMPT = "PROMPT.md";
+
+async function loadConfigFrom(loadFrom: string): Promise<string> {
+	try {
+		/// First try it as a local directory path, then we will try as a path inside the repo itself
+		return await readFile(loadFrom, { encoding: "utf8" });
+	} catch {
+		const srcDir = dirname(__filename);
+		const configPath = join(srcDir, "agents", loadFrom, FILENAME_CONFIG);
+		try {
+			return await readFile(configPath, { encoding: "utf8" });
+		} catch {
+			console.error(`Config file not found! Loading from the HF Hub is not implemented yet`);
+			process.exit(1);
+		}
+	}
+}
 
 async function main() {
 	const {
@@ -72,18 +85,11 @@ async function main() {
 		console.error(`Serve is not implemented yet, coming soon!`);
 		process.exit(1);
 	} else {
-		const srcDir = dirname(fileURLToPath(import.meta.url));
-		const configPath = join(srcDir, "agents", loadFrom, FILENAME_CONFIG);
-		let configJson: string;
-		try {
-			configJson = await readFile(configPath, { encoding: "utf8" });
-		} catch {
-			console.error(`Config file not found!`);
-			process.exit(1);
-		}
+		const configJson = await loadConfigFrom(loadFrom);
+
 		const ConfigSchema = z.object({
 			model: z.string(),
-			provider: z.enum<InferenceProviderOrPolicy>(PROVIDERS_OR_POLICIES),
+			provider: z.enum(PROVIDERS_OR_POLICIES),
 			servers: z.array(z.custom<ServerConfig>()),
 		});
 
@@ -98,10 +104,12 @@ async function main() {
 		const agent = new Agent({
 			provider: config.provider,
 			model: config.model,
-			apiKey: process.env.HF_TOKEN,
+			apiKey: process.env.HF_TOKEN ?? "",
 			servers: config.servers,
 		});
+
 		console.log(agent);
+
 		// TODO: hook main loop from mcp-client/cli.ts
 	}
 }

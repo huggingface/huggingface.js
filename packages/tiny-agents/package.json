@@ -24,7 +24,6 @@
 		"node": ">=18"
 	},
 	"source": "index.ts",
-	"type": "module",
 	"scripts": {
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
