@@ -1,4 +1,8 @@
-import type { CallToolResult, TextResourceContents, BlobResourceContents } from "@modelcontextprotocol/sdk/types";
+import type {
+	TextResourceContents,
+	BlobResourceContents,
+	CompatibilityCallToolResult,
+} from "@modelcontextprotocol/sdk/types";
 
 /**
  * A utility class for formatting CallToolResult contents into human-readable text.
@@ -13,7 +17,7 @@ export class ResultFormatter {
 	 * @param result The CallToolResult to format
 	 * @returns A human-readable string representation of the result contents
 	 */
-	static format(result: CallToolResult): string {
+	static format(result: CompatibilityCallToolResult): string {
 		if (!result.content || !Array.isArray(result.content) || result.content.length === 0) {
 			return "[No content]";
 		}

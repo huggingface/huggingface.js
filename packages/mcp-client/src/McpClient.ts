@@ -16,7 +16,6 @@ import type { Transport } from "@modelcontextprotocol/sdk/shared/transport";
 import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { ResultFormatter } from "./ResultFormatter.js";
-import type { CallToolResult } from "@modelcontextprotocol/sdk/types";
 
 type ToolName = string;
 
@@ -198,7 +197,7 @@ export class McpClient {
 			const client = this.clients.get(toolName);
 			if (client) {
 				const result = await client.callTool({ name: toolName, arguments: toolArgs, signal: opts.abortSignal });
-				toolMessage.content = ResultFormatter.format(result as CallToolResult);
+				toolMessage.content = ResultFormatter.format(result);
 			} else {
 				toolMessage.content = `Error: No session found for tool: ${toolName}`;
 			}
