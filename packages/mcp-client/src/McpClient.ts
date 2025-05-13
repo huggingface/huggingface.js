@@ -84,7 +84,7 @@ export class McpClient {
 				case "sse":
 					transport = new SSEClientTransport(asUrl(server.config.url), server.config.options);
 					break;
-				case "streamableHttp":
+				case "http":
 					transport = new StreamableHTTPClientTransport(asUrl(server.config.url), server.config.options);
 					break;
 			}

@@ -24,11 +24,11 @@ export function urlToServerConfig(urlStr: string, token?: string): ServerConfig 
 	const hostname = url.hostname;
 	const path = url.pathname;
 
-	let type: "streamableHttp" | "sse";
+	let type: "http" | "sse";
 	if (path.endsWith("/sse")) {
 		type = "sse";
 	} else if (path.endsWith("/mcp")) {
-		type = "streamableHttp";
+		type = "http";
 	} else {
 		throw new Error(`Unsupported endpoint: ${urlStr}. URL must end with /sse or /mcp`);
 	}
@@ -43,9 +43,9 @@ export function urlToServerConfig(urlStr: string, token?: string): ServerConfig 
 			hostname === "127.0.0.1");
 
 	// Create appropriate config based on type and authorization requirements
-	if (type === "streamableHttp") {
+	if (type === "http") {
 		return {
-			type: "streamableHttp",
+			type: "http",
 			config: {
 				url: urlStr,
 				options: shouldIncludeToken

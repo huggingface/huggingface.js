@@ -11,8 +11,8 @@ describe("urlToServerConfig", () => {
 
 			for (const url of urls) {
 				const config = urlToServerConfig(url, TOKEN);
-				expect(config.type).toBe("streamableHttp");
-				if (config.type === "streamableHttp") {
+				expect(config.type).toBe("http");
+				if (config.type === "http") {
 					expect(config.config.url).toBe(url);
 				}
 			}
@@ -46,7 +46,7 @@ describe("urlToServerConfig", () => {
 
 			for (const url of urls) {
 				const config = urlToServerConfig(url, TOKEN);
-				if (config.type === "streamableHttp") {
+				if (config.type === "http") {
 					const authHeader = config.config.options?.requestInit?.headers as Record<string, string> | undefined;
 					expect(authHeader?.Authorization).toBe(`Bearer ${TOKEN}`);
 				} else if (config.type === "sse") {
@@ -66,7 +66,7 @@ describe("urlToServerConfig", () => {
 
 			for (const url of urls) {
 				const config = urlToServerConfig(url, TOKEN);
-				if (config.type === "streamableHttp") {
+				if (config.type === "http") {
 					const authHeader = config.config.options?.requestInit?.headers as Record<string, string> | undefined;
 					expect(authHeader?.Authorization).toBe(`Bearer ${TOKEN}`);
 				} else if (config.type === "sse") {
@@ -86,7 +86,7 @@ describe("urlToServerConfig", () => {
 
 			for (const url of urls) {
 				const config = urlToServerConfig(url, TOKEN);
-				if (config.type === "streamableHttp" || config.type === "sse") {
+				if (config.type === "http" || config.type === "sse") {
 					expect(config.config.options).toBeUndefined();
 				}
 			}
@@ -97,7 +97,7 @@ describe("urlToServerConfig", () => {
 
 			for (const url of urls) {
 				const config = urlToServerConfig(url); // No token provided
-				if (config.type === "streamableHttp" || config.type === "sse") {
+				if (config.type === "http" || config.type === "sse") {
 					expect(config.config.options).toBeUndefined();
 				}
 			}

@@ -27,4 +27,4 @@ export interface StreamableHTTPServerConfig {
 export type ServerConfig =
 	| { type: "stdio"; config: StdioServerParameters }
 	| { type: "sse"; config: SSEServerConfig }
-	| { type: "streamableHttp"; config: StreamableHTTPServerConfig };
+	| { type: "http"; config: StreamableHTTPServerConfig };
