@@ -7,12 +7,8 @@ import type { StdioServerParameters } from "@modelcontextprotocol/sdk/client/std
 import type { ServerConfig } from "./src/types";
 import type { InferenceProviderOrPolicy } from "@huggingface/inference";
 import { ANSI, urlToServerConfig } from "./src/utils";
-import type { ServerConfig } from "./src/types";
-import type { InferenceProviderOrPolicy } from "@huggingface/inference";
-import { ANSI, urlToServerConfig } from "./src/utils";
 import { Agent } from "./src";
 import { version as packageVersion } from "./package.json";
-import { parseArgs } from "node:util";
 import { parseArgs } from "node:util";
 
 const MODEL_ID = process.env.MODEL_ID ?? "Qwen/Qwen2.5-72B-Instruct";
