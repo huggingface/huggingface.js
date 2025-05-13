@@ -7,8 +7,12 @@ import type { StdioServerParameters } from "@modelcontextprotocol/sdk/client/std
 import type { ServerConfig } from "./src/types";
 import type { InferenceProviderOrPolicy } from "@huggingface/inference";
 import { ANSI, urlToServerConfig } from "./src/utils";
+import type { ServerConfig } from "./src/types";
+import type { InferenceProviderOrPolicy } from "@huggingface/inference";
+import { ANSI, urlToServerConfig } from "./src/utils";
 import { Agent } from "./src";
 import { version as packageVersion } from "./package.json";
+import { parseArgs } from "node:util";
 import { parseArgs } from "node:util";
 
 const MODEL_ID = process.env.MODEL_ID ?? "Qwen/Qwen2.5-72B-Instruct";
@@ -16,9 +20,15 @@ const PROVIDER = (process.env.PROVIDER as InferenceProviderOrPolicy) ?? "nebius"
 const ENDPOINT_URL = process.env.ENDPOINT_URL ?? process.env.BASE_URL;
 
 const SERVERS: (ServerConfig | StdioServerParameters)[] = [
+const SERVERS: (ServerConfig | StdioServerParameters)[] = [
 	{
 		// Filesystem "official" mcp-server with access to your Desktop
 		command: "npx",
+		args: [
+			"-y",
+			"@modelcontextprotocol/server-filesystem",
+			process.platform === "darwin" ? join(homedir(), "Desktop") : homedir(),
+		],
 		args: [
 			"-y",
 			"@modelcontextprotocol/server-filesystem",
