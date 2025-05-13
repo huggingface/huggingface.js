@@ -17,7 +17,7 @@ export async function* streamingRequest<T>(
 	console.warn(
 		"The streamingRequest method is deprecated and will be removed in a future version of huggingface.js. Use specific task functions instead."
 	);
-	const provider = await resolveProvider(args.provider, args.model);
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, options?.task);
 	yield* innerStreamingRequest(args, providerHelper, options);
 }

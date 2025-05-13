@@ -2,7 +2,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import type { StdioServerParameters } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { InferenceClient } from "@huggingface/inference";
-import type { InferenceClientEndpoint, InferenceProvider } from "@huggingface/inference";
+import type { InferenceProviderOrPolicy } from "@huggingface/inference";
 import type {
 	ChatCompletionInputMessage,
 	ChatCompletionInputTool,
@@ -11,6 +11,11 @@ import type {
 } from "@huggingface/tasks/src/tasks/chat-completion/inference";
 import { version as packageVersion } from "../package.json";
 import { debug } from "./utils";
+import type { ServerConfig } from "./types";
+import type { Transport } from "@modelcontextprotocol/sdk/shared/transport";
+import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { ResultFormatter } from "./ResultFormatter.js";
 
 type ToolName = string;
 
@@ -22,8 +27,8 @@ export interface ChatCompletionInputMessageTool extends ChatCompletionInputMessa
 }
 
 export class McpClient {
-	protected client: InferenceClient | InferenceClientEndpoint;
-	protected provider: string | undefined;
+	protected client: InferenceClient;
+	protected provider: InferenceProviderOrPolicy | undefined;
 
 	protected model: string;
 	private clients: Map<ToolName, Client> = new Map();
@@ -31,36 +36,58 @@ export class McpClient {
 
 	constructor({
 		provider,
-		baseUrl,
+		endpointUrl,
 		model,
 		apiKey,
 	}: (
 		| {
-				provider: InferenceProvider;
-				baseUrl?: undefined;
+				provider: InferenceProviderOrPolicy;
+				endpointUrl?: undefined;
 		  }
 		| {
-				baseUrl: string;
+				endpointUrl: string;
 				provider?: undefined;
 		  }
 	) & {
 		model: string;
 		apiKey: string;
 	}) {
-		this.client = baseUrl ? new InferenceClient(apiKey).endpoint(baseUrl) : new InferenceClient(apiKey);
+		this.client = endpointUrl ? new InferenceClient(apiKey, { endpointUrl: endpointUrl }) : new InferenceClient(apiKey);
 		this.provider = provider;
 		this.model = model;
 	}
 
-	async addMcpServers(servers: StdioServerParameters[]): Promise<void> {
+	async addMcpServers(servers: (ServerConfig | StdioServerParameters)[]): Promise<void> {
 		await Promise.all(servers.map((s) => this.addMcpServer(s)));
 	}
 
-	async addMcpServer(server: StdioServerParameters): Promise<void> {
-		const transport = new StdioClientTransport({
-			...server,
-			env: { ...server.env, PATH: process.env.PATH ?? "" },
-		});
+	async addMcpServer(server: ServerConfig | StdioServerParameters): Promise<void> {
+		let transport: Transport;
+		const asUrl = (url: string | URL): URL => {
+			return typeof url === "string" ? new URL(url) : url;
+		};
+
+		if (!("type" in server)) {
+			transport = new StdioClientTransport({
+				...server,
+				env: { ...server.env, PATH: process.env.PATH ?? "" },
+			});
+		} else {
+			switch (server.type) {
+				case "stdio":
+					transport = new StdioClientTransport({
+						...server.config,
+						env: { ...server.config.env, PATH: process.env.PATH ?? "" },
+					});
+					break;
+				case "sse":
+					transport = new SSEClientTransport(asUrl(server.config.url), server.config.options);
+					break;
+				case "http":
+					transport = new StreamableHTTPClientTransport(asUrl(server.config.url), server.config.options);
+					break;
+			}
+		}
 		const mcp = new Client({ name: "@huggingface/mcp-client", version: packageVersion });
 		await mcp.connect(transport);
 
@@ -170,7 +197,7 @@ export class McpClient {
 			const client = this.clients.get(toolName);
 			if (client) {
 				const result = await client.callTool({ name: toolName, arguments: toolArgs, signal: opts.abortSignal });
-				toolMessage.content = (result.content as Array<{ text: string }>)[0].text;
+				toolMessage.content = ResultFormatter.format(result);
 			} else {
 				toolMessage.content = `Error: No session found for tool: ${toolName}`;
 			}
