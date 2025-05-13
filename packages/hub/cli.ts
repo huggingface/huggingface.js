@@ -2,11 +2,12 @@
 
 import { parseArgs } from "node:util";
 import { typedEntries } from "./src/utils/typedEntries";
-import { createBranch, uploadFilesWithProgress } from "./src";
+import { createBranch, deleteBranch, uploadFilesWithProgress } from "./src";
 import { pathToFileURL } from "node:url";
 import { stat } from "node:fs/promises";
 import { basename, join } from "node:path";
 import { HUB_URL } from "./src/consts";
+import { version } from "./package.json";
 
 // Didn't find the import from "node:util", so duplicated it here
 type OptionToken =
@@ -81,6 +82,11 @@ const commands = {
 				description: "The commit message to use. Defaults to 'Add [x] files'",
 			},
 			{
+				name: "private" as const,
+				description: "If creating a new repo, make it private",
+				boolean: true,
+			},
+			{
 				name: "token" as const,
 				description:
 					"The access token to use for authentication. If not provided, the HF_TOKEN environment variable will be used.",
@@ -135,6 +141,40 @@ const commands = {
 			},
 		],
 	} as const,
+	"delete-branch": {
+		description: "Delete a branch in a repo",
+		args: [
+			{
+				name: "repo-name" as const,
+				description: "The name of the repo to delete the branch from",
+				positional: true,
+				required: true,
+			},
+			{
+				name: "branch" as const,
+				description: "The name of the branch to delete",
+				positional: true,
+				required: true,
+			},
+			{
+				name: "repo-type" as const,
+				enum: ["dataset", "model", "space"],
+				default: "model",
+				description:
+					"The type of repo to delete the branch from. Defaults to model. You can also prefix the repo name with the type, e.g. datasets/username/repo-name",
+			},
+			{
+				name: "token" as const,
+				description:
+					"The access token to use for authentication. If not provided, the HF_TOKEN environment variable will be used.",
+				default: process.env.HF_TOKEN,
+			},
+		],
+	},
+	version: {
+		description: "Print the version of the CLI",
+		args: [],
+	},
 } satisfies Record<
 	string,
 	{
@@ -223,6 +263,30 @@ async function run() {
 				overwrite: force ? true : undefined,
 				hubUrl: process.env.HF_ENDPOINT ?? HUB_URL,
 			});
+			break;
+		}
+		case "delete-branch": {
+			if (args[0] === "--help" || args[0] === "-h") {
+				console.log(detailedUsage("delete-branch"));
+				break;
+			}
+			const parsedArgs = advParseArgs(args, "delete-branch");
+			const { repoName, branch, repoType, token } = parsedArgs;
+
+			await deleteBranch({
+				repo: repoType ? { type: repoType as "model" | "dataset" | "space", name: repoName } : repoName,
+				branch,
+				accessToken: token,
+				hubUrl: process.env.HF_ENDPOINT ?? HUB_URL,
+			});
+			break;
+		}
+		case "version": {
+			if (args[0] === "--help" || args[0] === "-h") {
+				console.log(detailedUsage("version"));
+				break;
+			}
+			console.log(`hfjs version: ${version}`);
 			break;
 		}
 		default:
