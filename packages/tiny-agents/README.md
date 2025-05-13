@@ -12,7 +12,26 @@ yarn add @huggingface/tiny-agents
 pnpm add @huggingface/tiny-agents
 ```
 
-## Usage
+## CLI Usage
+
+```bash
+npx @huggingface/tiny-agents [command] "agent/id"
+
+```
+
+```
+Usage:
+  tiny-agents [flags]
+  tiny-agents run   "agent/id"
+  tiny-agents serve "agent/id"
+
+Available Commands:
+  run         Run the Agent in command-line
+  serve       Run the Agent as an OpenAI-compatible HTTP server
+```
+
+
+## Programmatic Usage
 
 ```typescript
 import { Agent } from '@huggingface/tiny-agents';
@@ -46,11 +65,6 @@ for await (const chunk of agent.run("What are the top 5 trending models on Huggi
 }
 ```
 
-## CLI Usage
-
-```bash
-npx @huggingface/tiny-agents
-```
 
 ## License
 

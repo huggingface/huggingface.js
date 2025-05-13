@@ -24,6 +24,7 @@
 		"node": ">=18"
 	},
 	"source": "index.ts",
+	"type": "module",
 	"scripts": {
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
@@ -34,7 +35,7 @@
 		"prepare": "pnpm run build",
 		"test": "vitest run",
 		"check": "tsc",
-		"cli": "tsx cli.ts"
+		"cli": "tsx src/cli.ts"
 	},
 	"files": [
 		"src",
@@ -52,6 +53,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"@huggingface/inference": "workspace:^",
-		"@huggingface/mcp-client": "workspace:^"
+		"@huggingface/mcp-client": "workspace:^",
+		"zod": "^3.24.4"
 	}
 }
