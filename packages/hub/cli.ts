@@ -79,7 +79,8 @@ const commands = {
 			},
 			{
 				name: "commit-message" as const,
-				description: "The commit message to use. Defaults to 'Add [x] files'",
+				description: "The commit message to use. Defaults to 'Upload files using @huggingface/hub'",
+				default: "Upload files using @huggingface/hub",
 			},
 			{
 				name: "private" as const,
