@@ -57,7 +57,7 @@ This is a collection of JS libraries to interact with the Hugging Face API, with
 
 - [@huggingface/inference](packages/inference/README.md): Use all supported (serverless) Inference Providers or switch to Inference Endpoints (dedicated) to make calls to 100,000+ Machine Learning models
 - [@huggingface/hub](packages/hub/README.md): Interact with huggingface.co to create or delete repos and commit / download files
-- [@huggingface/agents](packages/agents/README.md): Interact with HF models through a natural language interface
+- [@huggingface/mcp-client](packages/mcp-client/README.md): A Model Context Protocol (MCP) client, and a tiny Agent library, built on top of InferenceClient.
 - [@huggingface/gguf](packages/gguf/README.md): A GGUF parser that works on remotely hosted files.
 - [@huggingface/dduf](packages/dduf/README.md): Similar package for DDUF (DDUF Diffusers Unified Format)
 - [@huggingface/tasks](packages/tasks/README.md): The definition files and source-of-truth for the Hub's main primitives like pipeline tasks, model libraries, etc.
@@ -79,15 +79,15 @@ To install via NPM, you can download the libraries as needed:
 ```bash
 npm install @huggingface/inference
 npm install @huggingface/hub
-npm install @huggingface/agents
+npm install @huggingface/mcp-client
 ```
 
 Then import the libraries in your code:
 
 ```ts
 import { InferenceClient } from "@huggingface/inference";
-import { HfAgent } from "@huggingface/agents";
 import { createRepo, commit, deleteRepo, listFiles } from "@huggingface/hub";
+import { McpClient } from "@huggingface/mcp-client";
 import type { RepoId } from "@huggingface/hub";
 ```
 
@@ -107,12 +107,10 @@ You can run our packages with vanilla JS, without any bundler, by using a CDN or
 ```ts
 // esm.sh
 import { InferenceClient } from "https://esm.sh/@huggingface/inference"
-import { HfAgent } from "https://esm.sh/@huggingface/agents";
 
 import { createRepo, commit, deleteRepo, listFiles } from "https://esm.sh/@huggingface/hub"
 // or npm:
 import { InferenceClient } from "npm:@huggingface/inference"
-import { HfAgent } from "npm:@huggingface/agents";
 
 import { createRepo, commit, deleteRepo, listFiles } from "npm:@huggingface/hub"
 ```
@@ -223,29 +221,36 @@ await deleteFiles({
 });
 ```
 
-### @huggingface/agents example
+### @huggingface/mcp-client example
 
 ```ts
-import { HfAgent, LLMFromHub, defaultTools } from '@huggingface/agents';
+import { Agent } from '@huggingface/mcp-client';
 
 const HF_TOKEN = "hf_...";
 
-const agent = new HfAgent(
-  HF_TOKEN,
-  LLMFromHub(HF_TOKEN),
-  [...defaultTools]
-);
+const agent = new Agent({
+  provider: "auto",
+  model: "Qwen/Qwen2.5-72B-Instruct",
+  apiKey: HF_TOKEN,
+  servers: [
+    {
+      // Playwright MCP
+      command: "npx",
+      args: ["@playwright/mcp@latest"],
+    },
+  ],
+});
 
 
-// you can generate the code, inspect it and then run it
-const code = await agent.generateCode("Draw a picture of a cat wearing a top hat. Then caption the picture and read it out loud.");
-console.log(code);
-const messages = await agent.evaluateCode(code)
-console.log(messages); // contains the data
-
-// or you can run the code directly, however you can't check that the code is safe to execute this way, use at your own risk.
-const messages = await agent.run("Draw a picture of a cat wearing a top hat. Then caption the picture and read it out loud.")
-console.log(messages);
+await agent.loadTools();
+for await (const chunk of agent.run("What are the top 5 trending models on Hugging Face?")) {
+    if ("choices" in chunk) {
+        const delta = chunk.choices[0]?.delta;
+        if (delta.content) {
+            console.log(delta.content);
+        }
+    }
+}
 ```
 
 There are more features of course, check each library's README!
