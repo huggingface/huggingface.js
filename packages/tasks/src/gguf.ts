@@ -75,6 +75,7 @@ export const GGUF_QUANT_ORDER: GGMLFileQuantizationType[] = [
 	GGMLFileQuantizationType.Q6_K,
 
 	// 5-bit quantizations
+	GGMLFileQuantizationType.Q5_K_XL,
 	GGMLFileQuantizationType.Q5_K_M,
 	GGMLFileQuantizationType.Q5_K_S,
 	GGMLFileQuantizationType.Q5_0,
