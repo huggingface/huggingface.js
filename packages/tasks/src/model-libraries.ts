@@ -230,6 +230,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"scin_dataset_precomputed_embeddings.npz" OR path:"saved_model.pb"`,
 	},
+	"describe-anything": {
+		prettyLabel: "Describe Anything",
+		repoName: "Describe Anything",
+		repoUrl: "https://github.com/NVlabs/describe-anything",
+		snippets: snippets.describe_anything,
+		filter: false,
+	},
 	"dia-tts": {
 		prettyLabel: "Dia",
 		repoName: "Dia",
@@ -1016,6 +1023,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://github.com/THU-MIG/yolov10",
 		countDownloads: `path_extension:"pt" OR path_extension:"safetensors"`,
 		snippets: snippets.ultralytics,
+	},
+	zonos: {
+		prettyLabel: "Zonos",
+		repoName: "Zonos",
+		repoUrl: "https://github.com/Zyphra/Zonos",
+		docsUrl: "https://github.com/Zyphra/Zonos",
+		snippets: snippets.zonos,
+		filter: false,
 	},
 	"3dtopia-xl": {
 		prettyLabel: "3DTopia-XL",

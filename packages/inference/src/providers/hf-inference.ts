@@ -315,7 +315,12 @@ export class HFInferenceImageSegmentationTask extends HFInferenceTask implements
 	override async getResponse(response: ImageSegmentationOutput): Promise<ImageSegmentationOutput> {
 		if (
 			Array.isArray(response) &&
-			response.every((x) => typeof x.label === "string" && typeof x.mask === "string" && typeof x.score === "number")
+			response.every(
+				(x) =>
+					typeof x.label === "string" &&
+					typeof x.mask === "string" &&
+					(x.score === undefined || typeof x.score === "number")
+			)
 		) {
 			return response;
 		}

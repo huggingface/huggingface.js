@@ -6,6 +6,6 @@ client = InferenceClient(
 )
 
 result = client.text_classification(
-    inputs="I like you. I love you",
+    "I like you. I love you",
     model="distilbert/distilbert-base-uncased-finetuned-sst-2-english",
 )
