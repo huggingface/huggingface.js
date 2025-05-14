@@ -11,6 +11,11 @@ import type {
 } from "@huggingface/tasks/src/tasks/chat-completion/inference";
 import { version as packageVersion } from "../package.json";
 import { debug } from "./utils";
+import type { ServerConfig } from "./types";
+import type { Transport } from "@modelcontextprotocol/sdk/shared/transport";
+import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { ResultFormatter } from "./ResultFormatter.js";
 
 type ToolName = string;
 
@@ -52,15 +57,37 @@ export class McpClient {
 		this.model = model;
 	}
 
-	async addMcpServers(servers: StdioServerParameters[]): Promise<void> {
+	async addMcpServers(servers: (ServerConfig | StdioServerParameters)[]): Promise<void> {
 		await Promise.all(servers.map((s) => this.addMcpServer(s)));
 	}
 
-	async addMcpServer(server: StdioServerParameters): Promise<void> {
-		const transport = new StdioClientTransport({
-			...server,
-			env: { ...server.env, PATH: process.env.PATH ?? "" },
-		});
+	async addMcpServer(server: ServerConfig | StdioServerParameters): Promise<void> {
+		let transport: Transport;
+		const asUrl = (url: string | URL): URL => {
+			return typeof url === "string" ? new URL(url) : url;
+		};
+
+		if (!("type" in server)) {
+			transport = new StdioClientTransport({
+				...server,
+				env: { ...server.env, PATH: process.env.PATH ?? "" },
+			});
+		} else {
+			switch (server.type) {
+				case "stdio":
+					transport = new StdioClientTransport({
+						...server.config,
+						env: { ...server.config.env, PATH: process.env.PATH ?? "" },
+					});
+					break;
+				case "sse":
+					transport = new SSEClientTransport(asUrl(server.config.url), server.config.options);
+					break;
+				case "http":
+					transport = new StreamableHTTPClientTransport(asUrl(server.config.url), server.config.options);
+					break;
+			}
+		}
 		const mcp = new Client({ name: "@huggingface/mcp-client", version: packageVersion });
 		await mcp.connect(transport);
 
@@ -170,7 +197,7 @@ export class McpClient {
 			const client = this.clients.get(toolName);
 			if (client) {
 				const result = await client.callTool({ name: toolName, arguments: toolArgs, signal: opts.abortSignal });
-				toolMessage.content = (result.content as Array<{ text: string }>)[0].text;
+				toolMessage.content = ResultFormatter.format(result);
 			} else {
 				toolMessage.content = `Error: No session found for tool: ${toolName}`;
 			}

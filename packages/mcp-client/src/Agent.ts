@@ -1,10 +1,11 @@
-import type { InferenceProvider } from "@huggingface/inference";
+import type { InferenceProviderOrPolicy } from "@huggingface/inference";
 import type { ChatCompletionInputMessageTool } from "./McpClient";
 import { McpClient } from "./McpClient";
 import type { ChatCompletionInputMessage, ChatCompletionStreamOutput } from "@huggingface/tasks";
 import type { ChatCompletionInputTool } from "@huggingface/tasks/src/tasks/chat-completion/inference";
 import type { StdioServerParameters } from "@modelcontextprotocol/sdk/client/stdio";
 import { debug } from "./utils";
+import type { ServerConfig } from "./types";
 
 const DEFAULT_SYSTEM_PROMPT = `
 You are an agent - please keep going until the user’s query is completely resolved, before ending your turn and yielding back to the user. Only terminate your turn when you are sure that the problem is solved, or if you need more info from the user to solve the problem.
@@ -44,7 +45,7 @@ const askQuestionTool: ChatCompletionInputTool = {
 const exitLoopTools = [taskCompletionTool, askQuestionTool];
 
 export class Agent extends McpClient {
-	private readonly servers: StdioServerParameters[];
+	private readonly servers: (ServerConfig | StdioServerParameters)[];
 	protected messages: ChatCompletionInputMessage[];
 
 	constructor({
@@ -56,7 +57,7 @@ export class Agent extends McpClient {
 		prompt,
 	}: (
 		| {
-				provider: InferenceProvider;
+				provider: InferenceProviderOrPolicy;
 				endpointUrl?: undefined;
 		  }
 		| {
@@ -66,7 +67,7 @@ export class Agent extends McpClient {
 	) & {
 		model: string;
 		apiKey: string;
-		servers: StdioServerParameters[];
+		servers: (ServerConfig | StdioServerParameters)[];
 		prompt?: string;
 	}) {
 		super(provider ? { provider, endpointUrl, model, apiKey } : { provider, endpointUrl, model, apiKey });
