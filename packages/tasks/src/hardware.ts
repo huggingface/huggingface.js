@@ -418,6 +418,14 @@ export const SKUS = {
 				tflops: 26.5,
 				memory: [16],
 			},
+			"RX 9070 XT": {
+				tflops: 97.32,
+				memory: [16],
+			},
+			"RX 9070": {
+				tflops: 72.25,
+				memory: [16],
+			},
 			"RX 7900 XTX": {
 				tflops: 122.8,
 				memory: [24],
@@ -589,6 +597,15 @@ export const SKUS = {
 			},
 			"Ryzen Zen 4 7000 (Threadripper)": {
 				tflops: 10.0,
+			},
+			"Ryzen Zen5 9000 (Ryzen 9)": {
+				tflops: 0.6,
+			},
+			"Ryzen Zen5 9000 (Ryzen 7)": {
+				tflops: 0.6,
+			},
+			"Ryzen Zen5 9000 (Ryzen 5)": {
+				tflops: 0.6,
 			},
 			"Ryzen Zen4 7000 (Ryzen 9)": {
 				tflops: 0.56,
