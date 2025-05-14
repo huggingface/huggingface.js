@@ -230,7 +230,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"scin_dataset_precomputed_embeddings.npz" OR path:"saved_model.pb"`,
 	},
-	dia: {
+	"describe-anything": {
+		prettyLabel: "Describe Anything",
+		repoName: "Describe Anything",
+		repoUrl: "https://github.com/NVlabs/describe-anything",
+		snippets: snippets.describe_anything,
+		filter: false,
+	},
+	"dia-tts": {
 		prettyLabel: "Dia",
 		repoName: "Dia",
 		repoUrl: "https://github.com/nari-labs/dia",
@@ -425,6 +432,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "IMS-Toucan",
 		repoUrl: "https://github.com/DigitalPhonetics/IMS-Toucan",
 		countDownloads: `path:"embedding_gan.pt" OR path:"Vocoder.pt" OR path:"ToucanTTS.pt"`,
+	},
+	"index-tts": {
+		prettyLabel: "IndexTTS",
+		repoName: "IndexTTS",
+		repoUrl: "https://github.com/index-tts/index-tts",
+		snippets: snippets.indextts,
+		filter: false,
 	},
 	"infinite-you": {
 		prettyLabel: "InfiniteYou",
@@ -630,6 +644,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"Open_Sora_v2.safetensors"`,
 	},
+	outetts: {
+		prettyLabel: "OuteTTS",
+		repoName: "OuteTTS",
+		repoUrl: "https://github.com/edwko/OuteTTS",
+		snippets: snippets.outetts,
+		filter: false,
+	},
 	paddlenlp: {
 		prettyLabel: "paddlenlp",
 		repoName: "PaddleNLP",
@@ -654,6 +675,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		snippets: snippets.perception_encoder,
 		countDownloads: `path_extension:"pt"`,
+	},
+	"phantom-wan": {
+		prettyLabel: "Phantom",
+		repoName: "Phantom",
+		repoUrl: "https://github.com/Phantom-video/Phantom",
+		snippets: snippets.phantom_wan,
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
 	},
 	pxia: {
 		prettyLabel: "pxia",
@@ -1001,6 +1030,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://github.com/THU-MIG/yolov10",
 		countDownloads: `path_extension:"pt" OR path_extension:"safetensors"`,
 		snippets: snippets.ultralytics,
+	},
+	zonos: {
+		prettyLabel: "Zonos",
+		repoName: "Zonos",
+		repoUrl: "https://github.com/Zyphra/Zonos",
+		docsUrl: "https://github.com/Zyphra/Zonos",
+		snippets: snippets.zonos,
+		filter: false,
 	},
 	"3dtopia-xl": {
 		prettyLabel: "3DTopia-XL",

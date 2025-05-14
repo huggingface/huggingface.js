@@ -22,7 +22,6 @@ const chatCompletion = await client.chatCompletion({
             ],
         },
     ],
-    max_tokens: 512,
 });
 
 console.log(chatCompletion.choices[0].message);

@@ -4,7 +4,7 @@ const client = new InferenceClient("api_token");
 
 let out = "";
 
-const stream = await client.chatCompletionStream({
+const stream = client.chatCompletionStream({
     provider: "fireworks-ai",
     model: "meta-llama/Llama-3.2-11B-Vision-Instruct",
     messages: [
@@ -24,7 +24,6 @@ const stream = await client.chatCompletionStream({
             ],
         },
     ],
-    max_tokens: 512,
 });
 
 for await (const chunk of stream) {
@@ -32,5 +31,5 @@ for await (const chunk of stream) {
 		const newContent = chunk.choices[0].delta.content;
 		out += newContent;
 		console.log(newContent);
-	}  
+	}
 }

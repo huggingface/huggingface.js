@@ -1,4 +1,5 @@
 import type { ImageToImageInput } from "@huggingface/tasks";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping";
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options, RequestArgs } from "../../types";
 import { base64FromBytes } from "../../utils/base64FromBytes";
@@ -11,7 +12,8 @@ export type ImageToImageArgs = BaseArgs & ImageToImageInput;
  * Recommended model: lllyasviel/sd-controlnet-depth
  */
 export async function imageToImage(args: ImageToImageArgs, options?: Options): Promise<Blob> {
-	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "image-to-image");
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "image-to-image");
 	let reqArgs: RequestArgs;
 	if (!args.parameters) {
 		reqArgs = {

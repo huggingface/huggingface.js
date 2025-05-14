@@ -2,13 +2,16 @@ import * as BlackForestLabs from "../providers/black-forest-labs";
 import * as Cerebras from "../providers/cerebras";
 import * as Cohere from "../providers/cohere";
 import * as FalAI from "../providers/fal-ai";
+import * as FeatherlessAI from "../providers/featherless-ai";
 import * as Fireworks from "../providers/fireworks-ai";
+import * as Groq from "../providers/groq";
 import * as HFInference from "../providers/hf-inference";
-
 import * as Hyperbolic from "../providers/hyperbolic";
 import * as Nebius from "../providers/nebius";
 import * as Novita from "../providers/novita";
+import * as Nscale from "../providers/nscale";
 import * as OpenAI from "../providers/openai";
+import * as OvhCloud from "../providers/ovhcloud";
 import type {
 	AudioClassificationTaskHelper,
 	AudioToAudioTaskHelper,
@@ -62,6 +65,10 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-to-video": new FalAI.FalAITextToVideoTask(),
 		"automatic-speech-recognition": new FalAI.FalAIAutomaticSpeechRecognitionTask(),
 	},
+	"featherless-ai": {
+		conversational: new FeatherlessAI.FeatherlessAIConversationalTask(),
+		"text-generation": new FeatherlessAI.FeatherlessAITextGenerationTask(),
+	},
 	"hf-inference": {
 		"text-to-image": new HFInference.HFInferenceTextToImageTask(),
 		conversational: new HFInference.HFInferenceConversationalTask(),
@@ -95,6 +102,10 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	"fireworks-ai": {
 		conversational: new Fireworks.FireworksConversationalTask(),
 	},
+	groq: {
+		conversational: new Groq.GroqConversationalTask(),
+		"text-generation": new Groq.GroqTextGenerationTask(),
+	},
 	hyperbolic: {
 		"text-to-image": new Hyperbolic.HyperbolicTextToImageTask(),
 		conversational: new Hyperbolic.HyperbolicConversationalTask(),
@@ -104,13 +115,22 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-to-image": new Nebius.NebiusTextToImageTask(),
 		conversational: new Nebius.NebiusConversationalTask(),
 		"text-generation": new Nebius.NebiusTextGenerationTask(),
+		"feature-extraction": new Nebius.NebiusFeatureExtractionTask(),
 	},
 	novita: {
 		conversational: new Novita.NovitaConversationalTask(),
 		"text-generation": new Novita.NovitaTextGenerationTask(),
 	},
+	nscale: {
+		"text-to-image": new Nscale.NscaleTextToImageTask(),
+		conversational: new Nscale.NscaleConversationalTask(),
+	},
 	openai: {
 		conversational: new OpenAI.OpenAIConversationalTask(),
+	},
+	ovhcloud: {
+		conversational: new OvhCloud.OvhCloudConversationalTask(),
+		"text-generation": new OvhCloud.OvhCloudTextGenerationTask(),
 	},
 	replicate: {
 		"text-to-image": new Replicate.ReplicateTextToImageTask(),

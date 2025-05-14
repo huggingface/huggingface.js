@@ -8,11 +8,11 @@ import {
 } from "@huggingface/tasks";
 import type { PipelineType, WidgetType } from "@huggingface/tasks/src/pipelines.js";
 import type { ChatCompletionInputMessage, GenerationParameters } from "@huggingface/tasks/src/tasks/index.js";
-import { makeRequestOptionsFromResolvedModel } from "../lib/makeRequestOptions";
-import type { InferenceProvider, InferenceTask, RequestArgs } from "../types";
-import { templates } from "./templates.exported";
 import type { InferenceProviderModelMapping } from "../lib/getInferenceProviderMapping";
 import { getProviderHelper } from "../lib/getProviderHelper";
+import { makeRequestOptionsFromResolvedModel } from "../lib/makeRequestOptions";
+import type { InferenceProviderOrPolicy, InferenceTask, RequestArgs } from "../types";
+import { templates } from "./templates.exported";
 
 export type InferenceSnippetOptions = { streaming?: boolean; billTo?: string } & Record<string, unknown>;
 
@@ -28,6 +28,11 @@ const CLIENTS: Record<InferenceSnippetLanguage, Client[]> = {
 	sh: [...SH_CLIENTS],
 };
 
+const CLIENTS_AUTO_POLICY: Partial<Record<InferenceSnippetLanguage, Client[]>> = {
+	js: ["huggingface.js"],
+	python: ["huggingface_hub"],
+};
+
 type InputPreparationFn = (model: ModelDataMinimal, opts?: Record<string, unknown>) => object;
 interface TemplateParams {
 	accessToken?: string;
@@ -37,7 +42,7 @@ interface TemplateParams {
 	inputs?: object;
 	providerInputs?: object;
 	model?: ModelDataMinimal;
-	provider?: InferenceProvider;
+	provider?: InferenceProviderOrPolicy;
 	providerModelId?: string;
 	billTo?: string;
 	methodName?: string; // specific to snippetBasic
@@ -112,6 +117,7 @@ const HF_JS_METHODS: Partial<Record<WidgetType, string>> = {
 	"text-generation": "textGeneration",
 	"text2text-generation": "textGeneration",
 	"token-classification": "tokenClassification",
+	"text-to-speech": "textToSpeech",
 	translation: "translation",
 };
 
@@ -120,7 +126,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 	return (
 		model: ModelDataMinimal,
 		accessToken: string,
-		provider: InferenceProvider,
+		provider: InferenceProviderOrPolicy,
 		inferenceProviderMapping?: InferenceProviderModelMapping,
 		opts?: InferenceSnippetOptions
 	): InferenceSnippet[] => {
@@ -138,7 +144,8 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		}
 		let providerHelper: ReturnType<typeof getProviderHelper>;
 		try {
-			providerHelper = getProviderHelper(provider, task);
+			/// For the "auto" provider policy we use hf-inference snippets
+			providerHelper = getProviderHelper(provider === "auto" ? "hf-inference" : provider, task);
 		} catch (e) {
 			console.error(`Failed to get provider helper for ${provider} (${task})`, e);
 			return [];
@@ -199,9 +206,11 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		};
 
 		/// Iterate over clients => check if a snippet exists => generate
+		const clients = provider === "auto" ? CLIENTS_AUTO_POLICY : CLIENTS;
 		return inferenceSnippetLanguages
 			.map((language) => {
-				return CLIENTS[language]
+				const langClients = clients[language] ?? [];
+				return langClients
 					.map((client) => {
 						if (!hasTemplate(language, client, templateName)) {
 							return;
@@ -271,9 +280,19 @@ const prepareConversationalInput = (
 	return {
 		messages: opts?.messages ?? getModelInputSnippet(model),
 		...(opts?.temperature ? { temperature: opts?.temperature } : undefined),
-		max_tokens: opts?.max_tokens ?? 512,
+		...(opts?.max_tokens ? { max_tokens: opts?.max_tokens } : undefined),
 		...(opts?.top_p ? { top_p: opts?.top_p } : undefined),
 	};
+};
+
+const prepareQuestionAnsweringInput = (model: ModelDataMinimal): object => {
+	const data = JSON.parse(getModelInputSnippet(model) as string);
+	return { question: data.question, context: data.context };
+};
+
+const prepareTableQuestionAnsweringInput = (model: ModelDataMinimal): object => {
+	const data = JSON.parse(getModelInputSnippet(model) as string);
+	return { query: data.query, table: JSON.stringify(data.table) };
 };
 
 const snippets: Partial<
@@ -282,7 +301,7 @@ const snippets: Partial<
 		(
 			model: ModelDataMinimal,
 			accessToken: string,
-			provider: InferenceProvider,
+			provider: InferenceProviderOrPolicy,
 			inferenceProviderMapping?: InferenceProviderModelMapping,
 			opts?: InferenceSnippetOptions
 		) => InferenceSnippet[]
@@ -300,17 +319,17 @@ const snippets: Partial<
 	"image-to-image": snippetGenerator("imageToImage", prepareImageToImageInput),
 	"image-to-text": snippetGenerator("basicImage"),
 	"object-detection": snippetGenerator("basicImage"),
-	"question-answering": snippetGenerator("basic"),
+	"question-answering": snippetGenerator("questionAnswering", prepareQuestionAnsweringInput),
 	"sentence-similarity": snippetGenerator("basic"),
 	summarization: snippetGenerator("basic"),
 	"tabular-classification": snippetGenerator("tabular"),
 	"tabular-regression": snippetGenerator("tabular"),
-	"table-question-answering": snippetGenerator("basic"),
+	"table-question-answering": snippetGenerator("tableQuestionAnswering", prepareTableQuestionAnsweringInput),
 	"text-classification": snippetGenerator("basic"),
 	"text-generation": snippetGenerator("basic"),
 	"text-to-audio": snippetGenerator("textToAudio"),
 	"text-to-image": snippetGenerator("textToImage"),
-	"text-to-speech": snippetGenerator("textToAudio"),
+	"text-to-speech": snippetGenerator("textToSpeech"),
 	"text-to-video": snippetGenerator("textToVideo"),
 	"text2text-generation": snippetGenerator("basic"),
 	"token-classification": snippetGenerator("basic"),
@@ -322,7 +341,7 @@ const snippets: Partial<
 export function getInferenceSnippets(
 	model: ModelDataMinimal,
 	accessToken: string,
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	inferenceProviderMapping?: InferenceProviderModelMapping,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {

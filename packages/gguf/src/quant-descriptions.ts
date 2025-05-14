@@ -124,6 +124,14 @@ export const GGUF_QUANT_DESCRIPTIONS: Record<GGMLQuantizationType, { txt: string
 		txt: "16-bit shortened version of the 32-bit IEEE 754 single-precision floating-point number.",
 		src_url: "https://en.wikipedia.org/wiki/Bfloat16_floating-point_format",
 	},
+	[GGMLQuantizationType.TQ1_0]: {
+		txt: "Ternary quantization.",
+		src_url: "https://github.com/ggml-org/llama.cpp/pull/8151",
+	},
+	[GGMLQuantizationType.TQ2_0]: {
+		txt: "Ternary quantization.",
+		src_url: "https://github.com/ggml-org/llama.cpp/pull/8151",
+	},
 };
 
 const QK_K = 256;
@@ -163,6 +171,6 @@ export const GGML_QUANT_SIZES = {
 	[GGMLQuantizationType.F64]: calcBPW(1, 8),
 	[GGMLQuantizationType.IQ1_M]: calcBPW(256, QK_K / 8 + QK_K / 16 + QK_K / 32),
 	[GGMLQuantizationType.BF16]: calcBPW(1, 2),
-	// [GGMLQuantizationType.TQ1_0]:   calcBPW(256, 2 + 4 * 13),
-	// [GGMLQuantizationType.TQ2_0]:   calcBPW(256, 2 + 64),
+	[GGMLQuantizationType.TQ1_0]: calcBPW(256, 2 + 4 * 13),
+	[GGMLQuantizationType.TQ2_0]: calcBPW(256, 2 + 64),
 };

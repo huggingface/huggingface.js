@@ -1,6 +1,6 @@
 {
 	"name": "@huggingface/tasks-gen",
-	"packageManager": "pnpm@8.10.5",
+	"packageManager": "pnpm@10.10.0",
 	"version": "0.13.1",
 	"description": "Utilities to generate files for @huggingface/tasks, and avoid unnecessary deps in the published package",
 	"repository": "https://github.com/huggingface/huggingface.js.git",

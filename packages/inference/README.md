@@ -1,7 +1,7 @@
 # 🤗 Hugging Face Inference
 
-A Typescript powered wrapper for the HF Inference API (serverless), Inference Endpoints (dedicated), and all supported Inference Providers.
-It works with [Inference API (serverless)](https://huggingface.co/docs/api-inference/index) and [Inference Endpoints (dedicated)](https://huggingface.co/docs/inference-endpoints/index), and even with all supported third-party Inference Providers.
+A Typescript powered wrapper for Inference Providers (serverless) and Inference Endpoints (dedicated).
+It works with [Inference Providers (serverless)](https://huggingface.co/docs/api-inference/index) – including all supported third-party Inference Providers – and [Inference Endpoints (dedicated)](https://huggingface.co/docs/inference-endpoints/index), and even with .
 
 Check out the [full documentation](https://huggingface.co/docs/huggingface.js/inference/README).
 
@@ -25,20 +25,20 @@ yarn add @huggingface/inference
 
 ```ts
 // esm.sh
-import { InferenceClient } from "https://esm.sh/@huggingface/inference"
+import { InferenceClient } from "https://esm.sh/@huggingface/inference";
 // or npm:
-import { InferenceClient } from "npm:@huggingface/inference"
+import { InferenceClient } from "npm:@huggingface/inference";
 ```
 
 ### Initialize
 
 ```typescript
-import { InferenceClient } from '@huggingface/inference'
+import { InferenceClient } from '@huggingface/inference';
 
-const hf = new InferenceClient('your access token')
+const hf = new InferenceClient('your access token');
 ```
 
-❗**Important note:** Using an access token is optional to get started, however you will be rate limited eventually. Join [Hugging Face](https://huggingface.co/join) and then visit [access tokens](https://huggingface.co/settings/tokens) to generate your access token for **free**.
+❗**Important note:** Always pass an access token. Join [Hugging Face](https://huggingface.co/join) and then visit [access tokens](https://huggingface.co/settings/tokens) to generate your access token for **free**.
 
 Your access token should be kept private. If you need to protect it in front-end applications, we suggest setting up a proxy server that stores the access token.
 
@@ -48,16 +48,20 @@ You can send inference requests to third-party providers with the inference clie
 
 Currently, we support the following providers:
 - [Fal.ai](https://fal.ai)
+- [Featherless AI](https://featherless.ai)
 - [Fireworks AI](https://fireworks.ai)
 - [Hyperbolic](https://hyperbolic.xyz)
 - [Nebius](https://studio.nebius.ai)
 - [Novita](https://novita.ai/?utm_source=github_huggingface&utm_medium=github_readme&utm_campaign=link)
+- [Nscale](https://nscale.com)
+- [OVHcloud](https://endpoints.ai.cloud.ovh.net/)
 - [Replicate](https://replicate.com)
 - [Sambanova](https://sambanova.ai)
 - [Together](https://together.xyz)
 - [Blackforestlabs](https://blackforestlabs.ai)
 - [Cohere](https://cohere.com)
 - [Cerebras](https://cerebras.ai/)
+- [Groq](https://groq.com)
 
 To send requests to a third-party provider, you have to pass the `provider` parameter to the inference function. Make sure your request is authenticated with an access token.
 ```ts
@@ -76,14 +80,18 @@ When authenticated with a third-party provider key, the request is made directly
 
 Only a subset of models are supported when requesting third-party providers. You can check the list of supported models per pipeline tasks here:
 - [Fal.ai supported models](https://huggingface.co/api/partners/fal-ai/models)
+- [Featherless AI supported models](https://huggingface.co/api/partners/featherless-ai/models)
 - [Fireworks AI supported models](https://huggingface.co/api/partners/fireworks-ai/models)
 - [Hyperbolic supported models](https://huggingface.co/api/partners/hyperbolic/models)
 - [Nebius supported models](https://huggingface.co/api/partners/nebius/models)
+- [Nscale supported models](https://huggingface.co/api/partners/nscale/models)
+- [OVHcloud supported models](https://huggingface.co/api/partners/ovhcloud/models)
 - [Replicate supported models](https://huggingface.co/api/partners/replicate/models)
 - [Sambanova supported models](https://huggingface.co/api/partners/sambanova/models)
 - [Together supported models](https://huggingface.co/api/partners/together/models)
 - [Cohere supported models](https://huggingface.co/api/partners/cohere/models)
 - [Cerebras supported models](https://huggingface.co/api/partners/cerebras/models)
+- [Groq supported models](https://console.groq.com/docs/models)
 - [HF Inference API (serverless)](https://huggingface.co/models?inference=warm&sort=trending)
 
 ❗**Important note:** To be compatible, the third-party API must adhere to the "standard" shape API we expect on HF model pages for each pipeline task type.

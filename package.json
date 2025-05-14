@@ -2,7 +2,7 @@
 	"private": true,
 	"name": "@huggingface/root",
 	"license": "MIT",
-	"packageManager": "pnpm@8.10.5",
+	"packageManager": "pnpm@10.10.0",
 	"scripts": {
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .eslintrc.cjs",
 		"lint:check": "eslint --ext .cjs,.ts .eslintrc.cjs",
@@ -11,9 +11,9 @@
 		"check-deps": "tsx scripts/check-deps.ts"
 	},
 	"devDependencies": {
+		"@types/node": "^22.14.1",
 		"@typescript-eslint/eslint-plugin": "^7.2.0",
 		"@typescript-eslint/parser": "^7.2.0",
-		"@types/node": "^18.16.1",
 		"@vitest/browser": "^0.34.6",
 		"eslint": "^8.57.0",
 		"eslint-config-prettier": "^9.0.0",
