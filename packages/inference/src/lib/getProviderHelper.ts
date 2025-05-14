@@ -47,6 +47,7 @@ import type {
 import * as Replicate from "../providers/replicate";
 import * as Sambanova from "../providers/sambanova";
 import * as Together from "../providers/together";
+import * as Dat1 from "../providers/dat1";
 import type { InferenceProvider, InferenceTask } from "../types";
 
 export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, TaskProviderHelper>>> = {
@@ -58,6 +59,11 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	cohere: {
 		conversational: new Cohere.CohereConversationalTask(),
+	},
+	dat1: {
+		"text-to-image": new Dat1.Dat1TextToImageTask(),
+		conversational: new Dat1.Dat1ConversationalTask(),
+		"text-generation": new Dat1.Dat1TextGenerationTask(),
 	},
 	"fal-ai": {
 		"text-to-image": new FalAI.FalAITextToImageTask(),

@@ -62,6 +62,7 @@ Currently, we support the following providers:
 - [Cohere](https://cohere.com)
 - [Cerebras](https://cerebras.ai/)
 - [Groq](https://groq.com)
+- [Dat1](https://dat1.co)
 
 To send requests to a third-party provider, you have to pass the `provider` parameter to the inference function. Make sure your request is authenticated with an access token.
 ```ts
@@ -91,6 +92,7 @@ Only a subset of models are supported when requesting third-party providers. You
 - [Together supported models](https://huggingface.co/api/partners/together/models)
 - [Cohere supported models](https://huggingface.co/api/partners/cohere/models)
 - [Cerebras supported models](https://huggingface.co/api/partners/cerebras/models)
+- [Dat1 supported models](https://huggingface.co/api/partners/dat1/models)
 - [Groq supported models](https://console.groq.com/docs/models)
 - [HF Inference API (serverless)](https://huggingface.co/models?inference=warm&sort=trending)
 
