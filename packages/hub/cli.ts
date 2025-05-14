@@ -539,15 +539,11 @@ function advParseArgs<TArgsDef extends readonly ArgDef[]>(
 				.map((arg) => {
 					const optionConfig = {
 						type: arg.boolean ? ("boolean" as const) : ("string" as const),
-						short: arg.short,
-						default: typeof arg.default === "function" ? arg.default() : arg.default,
+						...(arg.short && { short: arg.short }),
+						...(arg.default !== undefined && {
+							default: typeof arg.default === "function" ? arg.default() : arg.default,
+						}),
 					};
-					if (arg.short) {
-						optionConfig.short = arg.short;
-					}
-					if (arg.default !== undefined) {
-						optionConfig.default = typeof arg.default === "function" ? arg.default() : arg.default;
-					}
 					return [arg.name, optionConfig];
 				})
 		),
