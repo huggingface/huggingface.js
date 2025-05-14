@@ -413,9 +413,9 @@ async function run() {
 }
 run().catch((err) => {
 	console.error("\x1b[31mError:\x1b[0m", err.message);
-	if (process.env.DEBUG) {
-		console.error(err);
-	}
+	//if (process.env.DEBUG) {
+	console.error(err);
+	// }
 	process.exitCode = 1;
 });
 
