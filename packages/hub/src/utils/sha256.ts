@@ -106,7 +106,7 @@ export async function* sha256(
 					worker.removeEventListener("error", errorHandler);
 				};
 
-				return yield* eventToGenerator<number, string>((yieldCallback, returnCallback, rejectCallack) => {
+				return yield* eventToGenerator<number, string>((yieldCallback, returnCallback, rejectCallback) => {
 					messageHandler = (event: MessageEvent) => {
 						if (event.data.sha256) {
 							cleanup();
@@ -120,19 +120,19 @@ export async function* sha256(
 							} catch (err) {
 								cleanup();
 								destroyWorker(worker);
-								rejectCallack(err);
+								rejectCallback(err);
 							}
 						} else {
 							cleanup();
 							destroyWorker(worker);
-							rejectCallack(new Error(`Unexpected message from SHA256 worker: ${JSON.stringify(event.data)}`));
+							rejectCallback(new Error(`Unexpected message from SHA256 worker: ${JSON.stringify(event.data)}`));
 						}
 					};
 
 					errorHandler = (event: ErrorEvent) => {
 						cleanup();
 						destroyWorker(worker);
-						rejectCallack(event.error);
+						rejectCallback(event.error);
 					};
 
 					// Handle external abort signal if it aborts before any worker message
@@ -142,7 +142,7 @@ export async function* sha256(
 						} catch (err) {
 							cleanup();
 							destroyWorker(worker);
-							rejectCallack(opts.abortSignal.reason ?? new DOMException("Aborted", "AbortError"));
+							rejectCallback(opts.abortSignal.reason ?? new DOMException("Aborted", "AbortError"));
 							return;
 						}
 
@@ -150,7 +150,7 @@ export async function* sha256(
 							cleanup();
 							destroyWorker(worker);
 
-							rejectCallack(opts.abortSignal?.reason ?? new DOMException("Aborted", "AbortError"));
+							rejectCallback(opts.abortSignal?.reason ?? new DOMException("Aborted", "AbortError"));
 							opts.abortSignal?.removeEventListener("abort", abortListener);
 						};
 
