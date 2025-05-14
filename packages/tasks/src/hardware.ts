@@ -599,13 +599,13 @@ export const SKUS = {
 				tflops: 10.0,
 			},
 			"Ryzen Zen5 9000 (Ryzen 9)": {
-				tflops: 0.6,
+				tflops: 0.56,
 			},
 			"Ryzen Zen5 9000 (Ryzen 7)": {
-				tflops: 0.6,
+				tflops: 0.56,
 			},
 			"Ryzen Zen5 9000 (Ryzen 5)": {
-				tflops: 0.6,
+				tflops: 0.56,
 			},
 			"Ryzen Zen4 7000 (Ryzen 9)": {
 				tflops: 0.56,
