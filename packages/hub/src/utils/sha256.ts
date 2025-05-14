@@ -96,9 +96,20 @@ export async function* sha256(
 			try {
 				const poolSize = typeof opts?.useWebWorker === "object" ? opts.useWebWorker.poolSize : undefined;
 				const worker = await getWorker(poolSize);
-				return yield* eventToGenerator<number, string>((yieldCallback, returnCallback, rejectCallack) => {
-					worker.addEventListener("message", (event) => {
+
+				// Define handlers to allow removal
+				let messageHandler: (event: MessageEvent) => void;
+				let errorHandler: (event: ErrorEvent) => void;
+
+				const cleanup = () => {
+					worker.removeEventListener("message", messageHandler);
+					worker.removeEventListener("error", errorHandler);
+				};
+
+				return yield* eventToGenerator<number, string>((yieldCallback, returnCallback, rejectCallback) => {
+					messageHandler = (event: MessageEvent) => {
 						if (event.data.sha256) {
+							cleanup();
 							freeWorker(worker, poolSize);
 							returnCallback(event.data.sha256);
 						} else if (event.data.progress) {
@@ -107,18 +118,47 @@ export async function* sha256(
 							try {
 								opts.abortSignal?.throwIfAborted();
 							} catch (err) {
+								cleanup();
 								destroyWorker(worker);
-								rejectCallack(err);
+								rejectCallback(err);
 							}
 						} else {
+							cleanup();
 							destroyWorker(worker);
-							rejectCallack(event);
+							rejectCallback(event);
 						}
-					});
-					worker.addEventListener("error", (event) => {
+					};
+
+					errorHandler = (event: ErrorEvent) => {
+						cleanup();
 						destroyWorker(worker);
-						rejectCallack(event.error);
-					});
+						rejectCallback(event.error);
+					};
+
+					// Handle external abort signal if it aborts before any worker message
+					if (opts?.abortSignal) {
+						try {
+							opts.abortSignal?.throwIfAborted();
+						} catch (err) {
+							cleanup();
+							destroyWorker(worker);
+							rejectCallback(opts.abortSignal.reason ?? new DOMException("Aborted", "AbortError"));
+							return;
+						}
+
+						const abortListener = () => {
+							cleanup();
+							destroyWorker(worker);
+
+							rejectCallback(opts.abortSignal?.reason ?? new DOMException("Aborted", "AbortError"));
+							opts.abortSignal?.removeEventListener("abort", abortListener);
+						};
+
+						opts.abortSignal.addEventListener("abort", abortListener);
+					}
+
+					worker.addEventListener("message", messageHandler);
+					worker.addEventListener("error", errorHandler);
 					worker.postMessage({ file: buffer });
 				});
 			} catch (err) {
