@@ -228,7 +228,7 @@ export class FalAIAutomaticSpeechRecognitionTask extends FalAITask implements Au
 		return { text: res.text };
 	}
 
-	async prepareAsyncPayload(args: AutomaticSpeechRecognitionArgs): Promise<RequestArgs> {
+	async preparePayloadAsync(args: AutomaticSpeechRecognitionArgs): Promise<RequestArgs> {
 		const blob = "data" in args && args.data instanceof Blob ? args.data : "inputs" in args ? args.inputs : undefined;
 		const contentType = blob?.type;
 		if (!contentType) {

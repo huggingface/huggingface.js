@@ -13,7 +13,7 @@ export type ImageToImageArgs = BaseArgs & ImageToImageInput;
 export async function imageToImage(args: ImageToImageArgs, options?: Options): Promise<Blob> {
 	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "image-to-image");
-	const payload = await providerHelper.prepareAsyncPayload(args);
+	const payload = await providerHelper.preparePayloadAsync(args);
 	const { data: res } = await innerRequest<Blob>(payload, providerHelper, {
 		...options,
 		task: "image-to-image",

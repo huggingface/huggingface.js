@@ -144,7 +144,7 @@ export interface TextToVideoTaskHelper {
 export interface ImageToImageTaskHelper {
 	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<Blob>;
 	preparePayload(params: BodyParams<ImageToImageInput & BaseArgs>): Record<string, unknown>;
-	prepareAsyncPayload(args: ImageToImageArgs): Promise<RequestArgs>;
+	preparePayloadAsync(args: ImageToImageArgs): Promise<RequestArgs>;
 }
 
 export interface ImageSegmentationTaskHelper {
@@ -248,7 +248,7 @@ export interface AudioToAudioTaskHelper {
 export interface AutomaticSpeechRecognitionTaskHelper {
 	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<AutomaticSpeechRecognitionOutput>;
 	preparePayload(params: BodyParams<AutomaticSpeechRecognitionInput & BaseArgs>): Record<string, unknown> | BodyInit;
-	prepareAsyncPayload(args: AutomaticSpeechRecognitionArgs): Promise<RequestArgs>;
+	preparePayloadAsync(args: AutomaticSpeechRecognitionArgs): Promise<RequestArgs>;
 }
 
 export interface AudioClassificationTaskHelper {

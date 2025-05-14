@@ -17,7 +17,7 @@ export async function automaticSpeechRecognition(
 ): Promise<AutomaticSpeechRecognitionOutput> {
 	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "automatic-speech-recognition");
-	const payload = await providerHelper.prepareAsyncPayload(args);
+	const payload = await providerHelper.preparePayloadAsync(args);
 	const { data: res } = await innerRequest<AutomaticSpeechRecognitionOutput>(payload, providerHelper, {
 		...options,
 		task: "automatic-speech-recognition",

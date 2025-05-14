@@ -225,7 +225,7 @@ export class HFInferenceAutomaticSpeechRecognitionTask
 		return response;
 	}
 
-	async prepareAsyncPayload(args: AutomaticSpeechRecognitionArgs): Promise<RequestArgs> {
+	async preparePayloadAsync(args: AutomaticSpeechRecognitionArgs): Promise<RequestArgs> {
 		return "data" in args
 			? args
 			: {
@@ -333,7 +333,7 @@ export class HFInferenceImageToTextTask extends HFInferenceTask implements Image
 }
 
 export class HFInferenceImageToImageTask extends HFInferenceTask implements ImageToImageTaskHelper {
-	async prepareAsyncPayload(args: ImageToImageArgs): Promise<RequestArgs> {
+	async preparePayloadAsync(args: ImageToImageArgs): Promise<RequestArgs> {
 		if (!args.parameters) {
 			return {
 				...args,
