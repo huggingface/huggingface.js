@@ -125,7 +125,7 @@ export async function* sha256(
 						} else {
 							cleanup();
 							destroyWorker(worker);
-							rejectCallback(new Error(`Unexpected message from SHA256 worker: ${JSON.stringify(event.data)}`));
+							rejectCallback(event);
 						}
 					};
 
