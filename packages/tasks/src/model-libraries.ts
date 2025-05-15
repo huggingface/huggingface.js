@@ -408,6 +408,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://hezarai.github.io/hezar",
 		countDownloads: `path:"model_config.yaml" OR path:"embedding/embedding_config.yaml"`,
 	},
+	hfendpoints: {
+		prettyLabel: "Hugging Face Endpoints",
+		repoName: "hfendpoints",
+		repoUrl: "https://github.com/huggingface/hfendpoints",
+		countDownloads: `path:"handler.py"`,
+		filter: false,
+	},
 	htrflow: {
 		prettyLabel: "HTRflow",
 		repoName: "HTRflow",
