@@ -44,16 +44,16 @@ The agent will load available MCP tools (by default, connecting to a filesystem 
 
 ### Configuration (Environment Variables)
 
-*   `HF_TOKEN` (Required): Your Hugging Face API token.
+*   `HF_TOKEN` (Optional): Your Hugging Face API token. Required if you use an Inference Provider on HF.
 *   `MODEL_ID` (Optional): The model ID to use for the agent's inference. Defaults to `Qwen/Qwen2.5-72B-Instruct`.
 *   `PROVIDER` (Optional): The inference provider. Defaults to `together`. See `@huggingface/inference` for available providers.
-*   `EXPERIMENTAL_HF_MCP_SERVER` (Optional): Set to `true` to enable connection to an experimental Hugging Face MCP server (requires separate setup).
+*   `ENDPOINT_URL` or `BASE_URL` (Optional): A custom base URL (local for instance) to call.
 
 Example with custom model:
 
 ```bash
 export HF_TOKEN="hf_..."
-export MODEL_ID="mistralai/Mixtral-8x7B-Instruct-v0.1"
+export MODEL_ID="Qwen/Qwen2.5-72B-Instruct"
 pnpm agent
 ```
 
