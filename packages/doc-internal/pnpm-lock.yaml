@@ -20,10 +20,10 @@ importers:
         version: 18.14.5
       typedoc:
         specifier: ^0.25.12
-        version: 0.25.12(typescript@5.4.2)
+        version: 0.25.12(typescript@5.8.3)
       typedoc-plugin-markdown:
         specifier: ^3.17.1
-        version: 3.17.1(typedoc@0.25.12(typescript@5.4.2))
+        version: 3.17.1(typedoc@0.25.12(typescript@5.8.3))
 
 packages:
 
@@ -107,8 +107,8 @@ packages:
     peerDependencies:
       typescript: 4.6.x || 4.7.x || 4.8.x || 4.9.x || 5.0.x || 5.1.x || 5.2.x || 5.3.x || 5.4.x
 
-  typescript@5.4.2:
-    resolution: {integrity: sha512-+2/g0Fds1ERlP6JsakQQDXjZdZMM+rqpamFZJEKh4kwTIn3iDkgKtby0CeNd5ATNZ4Ry1ax15TMx0W2V+miizQ==}
+  typescript@5.8.3:
+    resolution: {integrity: sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -196,20 +196,20 @@ snapshots:
 
   source-map@0.6.1: {}
 
-  typedoc-plugin-markdown@3.17.1(typedoc@0.25.12(typescript@5.4.2)):
+  typedoc-plugin-markdown@3.17.1(typedoc@0.25.12(typescript@5.8.3)):
     dependencies:
       handlebars: 4.7.7
-      typedoc: 0.25.12(typescript@5.4.2)
+      typedoc: 0.25.12(typescript@5.8.3)
 
-  typedoc@0.25.12(typescript@5.4.2):
+  typedoc@0.25.12(typescript@5.8.3):
     dependencies:
       lunr: 2.3.9
       marked: 4.3.0
       minimatch: 9.0.3
       shiki: 0.14.7
-      typescript: 5.4.2
+      typescript: 5.8.3
 
-  typescript@5.4.2: {}
+  typescript@5.8.3: {}
 
   uglify-js@3.17.4:
     optional: true
