@@ -96,7 +96,6 @@ Only a subset of models are supported when requesting third-party providers. You
 - [Cohere supported models](https://huggingface.co/api/partners/cohere/models)
 - [Cerebras supported models](https://huggingface.co/api/partners/cerebras/models)
 - [Groq supported models](https://console.groq.com/docs/models)
-- [HF Inference API (serverless)](https://huggingface.co/models?inference=warm&sort=trending)
 - [Novita AI supported models](https://huggingface.co/api/partners/novita/models)
 
 ❗**Important note:** To be compatible, the third-party API must adhere to the "standard" shape API we expect on HF model pages for each pipeline task type.
