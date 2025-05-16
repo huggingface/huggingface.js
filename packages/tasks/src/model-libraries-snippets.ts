@@ -1353,30 +1353,66 @@ model = SwarmFormerModel.from_pretrained("${model.id}")
 ];
 
 const mlx_unknown = (model: ModelData): string[] => [
-	`pip install huggingface_hub hf_transfer
+	`# Download the model from the Hub
+pip install huggingface_hub hf_transfer
 
 export HF_HUB_ENABLE_HF_TRANSFER=1
 huggingface-cli download --local-dir ${nameWithoutNamespace(model.id)} ${model.id}`,
 ];
 
 const mlxlm = (model: ModelData): string[] => [
-	`pip install --upgrade mlx-lm
+	`# Make sure mlx-lm is installed
+pip install --upgrade mlx-lm
 
-mlx_lm.generate --model ${model.id} --prompt "Hello"`,
+# Generate text with mlx-lm
+from mlx_lm import load, generate
+
+model, tokenizer = load("${model.id}")
+
+prompt = "Once upon a time in"
+text = generate(model, tokenizer, prompt=prompt, verbose=True)`,
 ];
 
 const mlxchat = (model: ModelData): string[] => [
-	`pip install --upgrade mlx-lm
+	`# Make sure mlx-lm is installed
+pip install --upgrade mlx-lm
 
-mlx_lm.chat --model ${model.id}`,
+# Generate text with mlx-lm
+from mlx_lm import load, generate
+
+model, tokenizer = load("${model.id}")
+
+prompt = "Write a story about Einstein"
+messages = [{"role": "user", "content": prompt}]
+prompt = tokenizer.apply_chat_template(
+    messages, add_generation_prompt=True
+)
+
+text = generate(model, tokenizer, prompt=prompt, verbose=True)`,
 ];
 
 const mlxvlm = (model: ModelData): string[] => [
-	`pip install --upgrade mlx-vlm
+	`Make sure mlx-vlm is installed
+from mlx_vlm import load, generate
+from mlx_vlm.prompt_utils import apply_chat_template
+from mlx_vlm.utils import load_config
 
-mlx_vlm.generate --model ${model.id} \\
-	--prompt "Describe this image." \\
-	--image "https://huggingface.co/datasets/huggingface/documentation-images/resolve/0052a70beed5bf71b92610a43a52df6d286cd5f3/diffusers/rabbit.jpg"`,
+# Load the model
+model, processor = load("${model.id}")
+config = load_config("${model.id}")
+
+# Prepare input
+image = ["http://images.cocodataset.org/val2017/000000039769.jpg"]
+prompt = "Describe this image."
+
+# Apply chat template
+formatted_prompt = apply_chat_template(
+    processor, config, prompt, num_images=1
+)
+
+# Generate output
+output = generate(model, processor, formatted_prompt, image)
+print(output)`,
 ];
 
 export const mlxim = (model: ModelData): string[] => [
@@ -1386,11 +1422,11 @@ model = create_model(${model.id})`,
 ];
 
 export const mlx = (model: ModelData): string[] => {
-	if (model.tags.includes("image-text-to-text")) {
+	if (model.pipeline_tag === "image-text-to-text") {
 		return mlxvlm(model);
 	}
-	if (model.tags.includes("conversational")) {
-		if (model.config?.tokenizer_config?.chat_template) {
+	if (model.pipeline_tag === "text-generation") {
+		if (model.tags.includes("conversational")) {
 			return mlxchat(model);
 		} else {
 			return mlxlm(model);

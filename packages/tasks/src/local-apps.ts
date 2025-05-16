@@ -262,6 +262,41 @@ const snippetTgi = (model: ModelData): LocalAppSnippet[] => {
 	];
 };
 
+const snippetMlxLm = (model: ModelData): LocalAppSnippet[] => {
+	const openaiCurl = [
+		"# Calling the OpenAI-compatible server with curl",
+		`curl -X POST "http://localhost:8000/v1/chat/completions" \\`,
+		`   -H "Content-Type: application/json" \\`,
+		`   --data '{`,
+		`     "model": "${model.id}",`,
+		`     "messages": [`,
+		`       {"role": "user", "content": "Hello"}`,
+		`     ]`,
+		`   }'`,
+	];
+
+	return [
+		{
+			title: "Generate or start a chat session",
+			setup: ["# Install MLX LM", "uv tool install mlx-lm"].join("\n"),
+			content: [
+				...(model.tags.includes("conversational")
+					? ["# Interactive chat REPL", `mlx_lm.chat --model "${model.id}"`]
+					: ["# Generate some text", `mlx_lm.generate --model "${model.id}" --prompt "Once upon a time"`]),
+			].join("\n"),
+		},
+		...(model.tags.includes("conversational")
+			? [
+					{
+						title: "Run an OpenAI-compatible server",
+						setup: ["# Install MLX LM", "uv tool install mlx-lm"].join("\n"),
+						content: ["# Start the server", `mlx_lm.server --model "${model.id}"`, ...openaiCurl].join("\n"),
+					},
+			  ]
+			: []),
+	];
+};
+
 /**
  * Add your new local app here.
  *
@@ -301,6 +336,13 @@ export const LOCAL_APPS = {
 				isTransformersModel(model)) &&
 			(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text"),
 		snippet: snippetVllm,
+	},
+	"mlx-lm": {
+		prettyLabel: "MLX LM",
+		docsUrl: "https://github.com/ml-explore/mlx-lm",
+		mainTask: "text-generation",
+		displayOnModelPage: (model) => model.pipeline_tag === "text-generation" && isMlxModel(model),
+		snippet: snippetMlxLm,
 	},
 	tgi: {
 		prettyLabel: "TGI",
