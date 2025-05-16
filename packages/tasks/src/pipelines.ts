@@ -596,7 +596,7 @@ export const PIPELINE_DATA = {
 	},
 	"text-to-video": {
 		name: "Text-to-Video",
-		modality: "cv",
+		modality: "multimodal",
 		color: "green",
 	},
 	"image-text-to-text": {
