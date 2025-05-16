@@ -1,0 +1,12 @@
+{
+	"model": "Qwen/Qwen3-32B",
+	"provider": "novita",
+	"servers": [
+		{
+			"type": "sse",
+			"config": {
+				"url": "https://evalstate-flux1-schnell.hf.space/gradio_api/mcp/sse"
+			}
+		}
+	]
+}
