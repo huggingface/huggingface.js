@@ -1040,6 +1040,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"model_vae_fp16.pt"`,
 		snippets: snippets.threedtopia_xl,
 	},
+	acestep: {
+		prettyLabel: "ACE-Step",
+		repoName: "ACE-Step",
+		repoUrl: "https://github.com/ace-step/ACE-Step",
+		filter: false,
+		countDownloads: `path:"ace_step_transformer/diffusion_pytorch_model.safetensors"`,
+	},
+	
 } satisfies Record<string, LibraryUiElement>;
 
 export type ModelLibraryKey = keyof typeof MODEL_LIBRARIES_UI_ELEMENTS;
