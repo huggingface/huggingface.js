@@ -1,7 +1,9 @@
 import { InferenceOutputError } from "../lib/InferenceOutputError";
-import type { BodyParams, HeaderParams, UrlParams } from "../types";
+import { ImageToImageArgs } from "../tasks";
+import type { BodyParams, HeaderParams, RequestArgs, UrlParams } from "../types";
 import { delay } from "../utils/delay";
 import { omit } from "../utils/omit";
+import { base64FromBytes } from "../utils/base64FromBytes";
 import {
 	TaskProviderHelper,
 	TextToImageTaskHelper,
@@ -63,11 +65,21 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 		return `/api/v2/${params.model}`;
 	}
 	preparePayload(params: BodyParams): Record<string, unknown> {
-		return {
+		const payload: Record<string, unknown> = {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),
 			prompt: params.args.inputs,
 		};
+		// Add LoRA support if adapter is specified in the mapping
+		if (params.mapping?.adapter === "lora" && params.mapping.adapterWeightsPath) {
+			payload.loras = [
+				{
+					path: params.mapping.adapterWeightsPath,
+					scale: 1, // Default scale value
+				},
+			];
+		}
+		return payload;
 	}
 
 	override prepareHeaders(params: HeaderParams, isBinary: boolean): Record<string, string> {
@@ -152,6 +164,23 @@ export class WavespeedAITextToVideoTask extends WavespeedAITask implements TextT
 export class WavespeedAIImageToImageTask extends WavespeedAITask implements ImageToImageTaskHelper {
 	constructor() {
 		super(WAVESPEEDAI_API_BASE_URL);
+	}
+
+	async preparePayloadAsync(args: ImageToImageArgs): Promise<RequestArgs> {
+		if (!args.parameters) {
+			return {
+				...args,
+				model: args.model,
+				data: args.inputs,
+			};
+		} else {
+			return {
+				...args,
+				inputs: base64FromBytes(
+					new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await (args.inputs as Blob).arrayBuffer())
+				),
+			};
+		}
 	}
 
 	override preparePayload(params: BodyParams): Record<string, unknown> {

@@ -2053,11 +2053,48 @@ describe.skip("InferenceClient", () => {
 					status: "live",
 					task: "image-to-video",
 				},
+				"wavespeed-ai/flux-dev-lora": {
+					hfModelId: "wavespeed-ai/flux-dev-lora",
+					providerId: "wavespeed-ai/flux-dev-lora",
+					status: "live",
+					task: "text-to-image",
+					adapter: "lora",
+					adapterWeightsPath:
+						"https://d32s1zkpjdc4b1.cloudfront.net/predictions/599f3739f5354afc8a76a12042736bfd/1.safetensors",
+				},
+				"wavespeed-ai/flux-dev-lora-ultra-fast": {
+					hfModelId: "wavespeed-ai/flux-dev-lora-ultra-fast",
+					providerId: "wavespeed-ai/flux-dev-lora-ultra-fast",
+					status: "live",
+					task: "text-to-image",
+					adapter: "lora",
+					adapterWeightsPath: "linoyts/yarn_art_Flux_LoRA",
+				},
 			};
 
 			it(`textToImage - wavespeed-ai/flux-schnell`, async () => {
 				const res = await client.textToImage({
 					model: "wavespeed-ai/flux-schnell",
+					provider: "wavespeed-ai",
+					inputs:
+						"Cute boy with a hat, exploring nature, holding a telescope, backpack, surrounded by flowers, cartoon style, vibrant colors.",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it(`textToImage - wavespeed-ai/flux-dev-lora`, async () => {
+				const res = await client.textToImage({
+					model: "wavespeed-ai/flux-dev-lora",
+					provider: "wavespeed-ai",
+					inputs:
+						"Cute boy with a hat, exploring nature, holding a telescope, backpack, surrounded by flowers, cartoon style, vibrant colors.",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it(`textToImage - wavespeed-ai/flux-dev-lora-ultra-fast`, async () => {
+				const res = await client.textToImage({
+					model: "wavespeed-ai/flux-dev-lora-ultra-fast",
 					provider: "wavespeed-ai",
 					inputs:
 						"Cute boy with a hat, exploring nature, holding a telescope, backpack, surrounded by flowers, cartoon style, vibrant colors.",
