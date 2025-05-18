@@ -14,28 +14,16 @@
  *
  * Thanks!
  */
-import type { ChatCompletionOutput, TextGenerationOutput, TextGenerationOutputFinishReason } from "@huggingface/tasks";
 import { InferenceOutputError } from "../lib/InferenceOutputError";
 import type { BodyParams } from "../types";
 import { omit } from "../utils/omit";
 import {
 	BaseConversationalTask,
-	BaseTextGenerationTask,
 	TaskProviderHelper,
 	type TextToImageTaskHelper,
 } from "./providerHelper";
 
 const DAT1_API_BASE_URL = "https://api.dat1.co/api/v1/hf";
-
-interface Dat1TextCompletionOutput extends Omit<ChatCompletionOutput, "choices"> {
-	choices: Array<{
-		text: string;
-		finish_reason: TextGenerationOutputFinishReason;
-		seed: number;
-		logprobs: unknown;
-		index: number;
-	}>;
-}
 
 interface Dat1Base64ImageGeneration {
 	data: Array<{
@@ -47,34 +35,9 @@ export class Dat1ConversationalTask extends BaseConversationalTask {
 	constructor() {
 		super("dat1", DAT1_API_BASE_URL);
 	}
-}
 
-export class Dat1TextGenerationTask extends BaseTextGenerationTask {
-	constructor() {
-		super("dat1", DAT1_API_BASE_URL);
-	}
-
-	override preparePayload(params: BodyParams): Record<string, unknown> {
-		return {
-			model: params.model,
-			...params.args,
-			prompt: params.args.inputs,
-		};
-	}
-
-	override async getResponse(response: Dat1TextCompletionOutput): Promise<TextGenerationOutput> {
-		if (
-			typeof response === "object" &&
-			"choices" in response &&
-			Array.isArray(response?.choices) &&
-			typeof response?.model === "string"
-		) {
-			const completion = response.choices[0];
-			return {
-				generated_text: completion.text,
-			};
-		}
-		throw new InferenceOutputError("Expected Dat1 text generation response format");
+	override makeRoute(): string {
+		return "/chat/completions";
 	}
 }
 
@@ -83,8 +46,8 @@ export class Dat1TextToImageTask extends TaskProviderHelper implements TextToIma
 		super("dat1", DAT1_API_BASE_URL);
 	}
 
-	makeRoute(): string {
-		return "v1/images/generations";
+	override makeRoute(): string {
+		return "/images/generations";
 	}
 
 	preparePayload(params: BodyParams): Record<string, unknown> {

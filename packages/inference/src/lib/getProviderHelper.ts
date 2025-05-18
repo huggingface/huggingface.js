@@ -63,7 +63,6 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	dat1: {
 		"text-to-image": new Dat1.Dat1TextToImageTask(),
 		conversational: new Dat1.Dat1ConversationalTask(),
-		"text-generation": new Dat1.Dat1TextGenerationTask(),
 	},
 	"fal-ai": {
 		"text-to-image": new FalAI.FalAITextToImageTask(),
