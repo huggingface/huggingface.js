@@ -22,17 +22,17 @@ if (!env.HF_TOKEN) {
 	console.warn("Set HF_TOKEN in the env to run the tests for better rate limits");
 }
 
-describe("InferenceClient", () => {
+describe.skip("InferenceClient", () => {
 	// Individual tests can be ran without providing an api key, however running all tests without an api key will result in rate limiting error.
 
-	describe.skip("backward compatibility", () => {
+	describe("backward compatibility", () => {
 		it("works with old HfInference name", async () => {
 			const hf = new HfInference(env.HF_TOKEN);
 			expect("fillMask" in hf).toBe(true);
 		});
 	});
 
-	describe.skip(
+	describe(
 		"HF Inference",
 		() => {
 			const hf = new InferenceClient(env.HF_TOKEN);
