@@ -66,7 +66,7 @@ export class Agent extends McpClient {
 		  }
 	) & {
 		model: string;
-		apiKey: string;
+		apiKey?: string;
 		servers: (ServerConfig | StdioServerParameters)[];
 		prompt?: string;
 	}) {
