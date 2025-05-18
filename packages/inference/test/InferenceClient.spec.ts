@@ -32,7 +32,7 @@ describe.skip("InferenceClient", () => {
 		});
 	});
 
-	describe(
+	describe.concurrent(
 		"HF Inference",
 		() => {
 			const hf = new InferenceClient(env.HF_TOKEN);
