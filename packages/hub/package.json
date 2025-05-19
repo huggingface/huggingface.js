@@ -57,6 +57,9 @@
 		"hugging",
 		"face"
 	],
+	"bin": {
+		"hfjs": "./dist/cli.js"
+	},
 	"author": "Hugging Face",
 	"license": "MIT",
 	"dependencies": {
