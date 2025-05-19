@@ -50,7 +50,7 @@ export class McpClient {
 		  }
 	) & {
 		model: string;
-		apiKey: string;
+		apiKey?: string;
 	}) {
 		this.client = endpointUrl ? new InferenceClient(apiKey, { endpointUrl: endpointUrl }) : new InferenceClient(apiKey);
 		this.provider = provider;
