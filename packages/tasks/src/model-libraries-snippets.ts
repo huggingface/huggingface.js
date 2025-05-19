@@ -1357,6 +1357,7 @@ const mlx_unknown = (model: ModelData): string[] => [
 	`# Download the model from the Hub
 pip install huggingface_hub[hf_xet]
 
+export HF_XET_HIGH_PERFORMANCE=1
 huggingface-cli download --local-dir ${nameWithoutNamespace(model.id)} ${model.id}`,
 ];
 
