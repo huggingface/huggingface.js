@@ -53,7 +53,8 @@ export async function getDefaultTask(
 		taskCache.set(key, { task: modelTask, date: new Date() });
 
 		if (taskCache.size > MAX_CACHE_ITEMS) {
-			taskCache.delete(taskCache.keys().next().value);
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			taskCache.delete(taskCache.keys().next().value!);
 		}
 	}
 

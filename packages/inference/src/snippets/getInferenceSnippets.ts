@@ -144,8 +144,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		}
 		let providerHelper: ReturnType<typeof getProviderHelper>;
 		try {
-			/// For the "auto" provider policy we use hf-inference snippets
-			providerHelper = getProviderHelper(provider === "auto" ? "hf-inference" : provider, task);
+			providerHelper = getProviderHelper(provider, task);
 		} catch (e) {
 			console.error(`Failed to get provider helper for ${provider} (${task})`, e);
 			return [];
