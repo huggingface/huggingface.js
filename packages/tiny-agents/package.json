@@ -53,6 +53,7 @@
 	"dependencies": {
 		"@huggingface/inference": "workspace:^",
 		"@huggingface/mcp-client": "workspace:^",
+		"@huggingface/tasks": "workspace:^",
 		"@modelcontextprotocol/sdk": "^1.11.4",
 		"zod": "^3.25.7"
 	}

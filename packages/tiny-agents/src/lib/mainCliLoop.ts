@@ -1,7 +1,8 @@
 import * as readline from "node:readline/promises";
 import { stdin, stdout } from "node:process";
-import type { Agent } from "@huggingface/mcp-client";
 import { ANSI } from "./utils";
+import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
+import type { Agent } from "../index";
 
 /**
  * From mcp-client/cli.ts
@@ -51,7 +52,7 @@ export async function mainCliLoop(agent: Agent): Promise<void> {
 		const input = await waitForInput();
 		for await (const chunk of agent.run(input, { abortSignal: abortController.signal })) {
 			if ("choices" in chunk) {
-				const delta = chunk.choices[0]?.delta;
+				const delta = (chunk as ChatCompletionStreamOutput).choices[0]?.delta;
 				if (delta.content) {
 					stdout.write(delta.content);
 				}
