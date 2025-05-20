@@ -40,8 +40,8 @@ touch my-agent/agent.json
 
 ```json
 {
-	"model": "Qwen/Qwen2.5-72B-Instruct", // model id
-	"provider": "nebius", // or you can also use a local endpoint base url, see next example
+	"model": "Qwen/Qwen2.5-72B-Instruct",
+	"provider": "nebius",
 	"servers": [
 		{
 			"type": "stdio",
