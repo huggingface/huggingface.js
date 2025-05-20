@@ -1,13 +1,13 @@
 # @huggingface/tiny-agents
 
-A lightweight, composable agent framework for AI applications built on Hugging Face's JS stack.
+![meme](https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/blog/tiny-agents/legos.png)
+
+A squad of lightweight composable AI applications built on Hugging Face's Inference Client and MCP stack.
 
 ## Installation
 
 ```bash
 npm install @huggingface/tiny-agents
-# or
-yarn add @huggingface/tiny-agents
 # or
 pnpm add @huggingface/tiny-agents
 ```
@@ -30,8 +30,44 @@ Available Commands:
   serve       Run the Agent as an OpenAI-compatible HTTP server
 ```
 
+## Define your own agent
 
-## Programmatic Usage
+The simplest way to create your own agent is to create a folder containing an `agent.json` file:
+
+```bash
+mkdir my-agent
+touch my-agent/agent.json
+```
+
+```json
+{
+	"model": "Qwen/Qwen2.5-72B-Instruct", // model id
+	"provider": "nebius", // or you can also use a local endpoint base url with `endpointUrl`
+	"servers": [
+		{
+			"type": "stdio",
+			"config": {
+				"command": "npx",
+				"args": ["@playwright/mcp@latest"]
+			}
+		}
+	]
+}
+```
+
+`servers` is a list of MCP servers (we support Stdio, SSE, and HTTP servers).
+
+Optionally, you can add a `PROMPT.md` file to override the default Agent prompt.
+
+Then just point tiny-agents to your local folder:
+
+```bash
+npx @huggingface/tiny-agents run ./my-agent
+```
+
+Voilà! 🔥
+
+### Advanced: Programmatic Usage
 
 ```typescript
 import { Agent } from '@huggingface/tiny-agents';
