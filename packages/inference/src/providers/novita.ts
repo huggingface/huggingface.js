@@ -58,14 +58,11 @@ export class NovitaTextToVideoTask extends TaskProviderHelper implements TextToV
 	}
 
 	override makeRoute(params: UrlParams): string {
-		if (params.authMethod !== "provider-key") {
-			return `/v3/async/${params.model}?_subdomain=queue`;
-		}
 		return `/v3/async/${params.model}`;
 	}
 
 	override preparePayload(params: BodyParams): Record<string, unknown> {
-		const { num_inference_steps, ...restParameters } = params.args.parameters as Record<string, unknown>;
+		const { num_inference_steps, ...restParameters } = (params.args.parameters as Record<string, unknown>) ?? {};
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
 			...restParameters,
@@ -91,11 +88,10 @@ export class NovitaTextToVideoTask extends TaskProviderHelper implements TextToV
 		const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}${
 			parsedUrl.host === "router.huggingface.co" ? "/novita" : ""
 		}`;
-		const queryParams = parsedUrl.search;
-		const resultUrl = `${baseUrl}/v3/async/task-result${queryParams ? queryParams + '&' : '?'}task_id=${taskId}`;
+		const resultUrl = `${baseUrl}/v3/async/task-result?task_id=${taskId}`;
 
 		let status = '';
-		let taskResult = undefined;
+		let taskResult: unknown;
 
 		while (status !== 'TASK_STATUS_SUCCEED' && status !== 'TASK_STATUS_FAILED') {
 			await delay(500);
@@ -105,7 +101,19 @@ export class NovitaTextToVideoTask extends TaskProviderHelper implements TextToV
 			}
 			try {
 				taskResult = await resultResponse.json();
-				status = taskResult.task.status;
+				if (
+					taskResult &&
+					typeof taskResult === "object" &&
+					"task" in taskResult &&
+					taskResult.task &&
+					typeof taskResult.task === "object" &&
+					"status" in taskResult.task &&
+					typeof taskResult.task.status === "string"
+				) {
+					status = taskResult.task.status;
+				} else {
+					throw new InferenceOutputError("Failed to get task status");
+				}
 			} catch (error) {
 				throw new InferenceOutputError("Failed to parse task result");
 			}
@@ -115,8 +123,7 @@ export class NovitaTextToVideoTask extends TaskProviderHelper implements TextToV
 			throw new InferenceOutputError("Task failed");
 		}
 
-		// There will be at most one video in the response.
-		const isValidOutput =
+		if (
 			typeof taskResult === "object" &&
 			!!taskResult &&
 			"videos" in taskResult &&
@@ -126,13 +133,12 @@ export class NovitaTextToVideoTask extends TaskProviderHelper implements TextToV
 			taskResult.videos.length > 0 &&
 			"video_url" in taskResult.videos[0] &&
 			typeof taskResult.videos[0].video_url === "string" &&
-			isUrl(taskResult.videos[0].video_url);
-
-		if (!isValidOutput) {
+			isUrl(taskResult.videos[0].video_url)
+		) {
+			const urlResponse = await fetch(taskResult.videos[0].video_url);
+			return await urlResponse.blob();
+		} else {
 			throw new InferenceOutputError("Expected { videos: [{ video_url: string }] }");
 		}
-
-		const urlResponse = await fetch(taskResult.videos[0].video_url);
-		return await urlResponse.blob();
 	}
 }
