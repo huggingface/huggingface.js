@@ -16,7 +16,6 @@ pnpm add @huggingface/tiny-agents
 
 ```bash
 npx @huggingface/tiny-agents [command] "agent/id"
-
 ```
 
 ```
@@ -42,7 +41,7 @@ touch my-agent/agent.json
 ```json
 {
 	"model": "Qwen/Qwen2.5-72B-Instruct", // model id
-	"provider": "nebius", // or you can also use a local endpoint base url with `endpointUrl`
+	"provider": "nebius", // or you can also use a local endpoint base url, see next example
 	"servers": [
 		{
 			"type": "stdio",
@@ -53,6 +52,25 @@ touch my-agent/agent.json
 		}
 	]
 }
+```
+
+Or using a local or remote endpoint URL:
+
+```json
+{
+	"model": "Qwen/Qwen3-32B",
+	"endpointUrl": "http://localhost:1234/v1",
+	"servers": [
+		{
+			"type": "stdio",
+			"config": {
+				"command": "npx",
+				"args": ["@playwright/mcp@latest"]
+			}
+		}
+	]
+}
+
 ```
 
 Where `servers` is a list of MCP servers (we support Stdio, SSE, and HTTP servers).
