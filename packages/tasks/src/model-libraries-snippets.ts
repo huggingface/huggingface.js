@@ -1355,15 +1355,14 @@ model = SwarmFormerModel.from_pretrained("${model.id}")
 
 const mlx_unknown = (model: ModelData): string[] => [
 	`# Download the model from the Hub
-pip install huggingface_hub hf_transfer
+pip install huggingface_hub[hf_xet]
 
-export HF_HUB_ENABLE_HF_TRANSFER=1
 huggingface-cli download --local-dir ${nameWithoutNamespace(model.id)} ${model.id}`,
 ];
 
 const mlxlm = (model: ModelData): string[] => [
 	`# Make sure mlx-lm is installed
-pip install --upgrade mlx-lm
+# pip install --upgrade mlx-lm
 
 # Generate text with mlx-lm
 from mlx_lm import load, generate
@@ -1376,7 +1375,7 @@ text = generate(model, tokenizer, prompt=prompt, verbose=True)`,
 
 const mlxchat = (model: ModelData): string[] => [
 	`# Make sure mlx-lm is installed
-pip install --upgrade mlx-lm
+# pip install --upgrade mlx-lm
 
 # Generate text with mlx-lm
 from mlx_lm import load, generate
@@ -1393,7 +1392,9 @@ text = generate(model, tokenizer, prompt=prompt, verbose=True)`,
 ];
 
 const mlxvlm = (model: ModelData): string[] => [
-	`Make sure mlx-vlm is installed
+	`# Make sure mlx-vlm is installed
+# pip install --upgrade mlx-vlm
+
 from mlx_vlm import load, generate
 from mlx_vlm.prompt_utils import apply_chat_template
 from mlx_vlm.utils import load_config
