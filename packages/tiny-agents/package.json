@@ -1,0 +1,60 @@
+{
+	"name": "@huggingface/tiny-agents",
+	"packageManager": "pnpm@10.10.0",
+	"version": "0.2.2",
+	"description": "Lightweight, composable agents for AI applications",
+	"repository": "https://github.com/huggingface/huggingface.js.git",
+	"publishConfig": {
+		"access": "public"
+	},
+	"main": "./dist/index.js",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.ts",
+	"bin": {
+		"tiny-agents": "./dist/cli.js"
+	},
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"require": "./dist/index.js",
+			"import": "./dist/index.mjs"
+		}
+	},
+	"engines": {
+		"node": ">=18"
+	},
+	"source": "index.ts",
+	"scripts": {
+		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
+		"lint:check": "eslint --ext .cjs,.ts .",
+		"format": "prettier --write .",
+		"format:check": "prettier --check .",
+		"prepublishOnly": "pnpm run build",
+		"build": "tsup src/*.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
+		"prepare": "pnpm run build",
+		"test": "vitest run",
+		"check": "tsc",
+		"cli": "tsx src/cli.ts"
+	},
+	"files": [
+		"src",
+		"dist",
+		"tsconfig.json"
+	],
+	"keywords": [
+		"huggingface",
+		"agent",
+		"ai",
+		"llm",
+		"tiny-agent"
+	],
+	"author": "Hugging Face",
+	"license": "MIT",
+	"dependencies": {
+		"@huggingface/inference": "workspace:^",
+		"@huggingface/mcp-client": "workspace:^",
+		"@huggingface/tasks": "workspace:^",
+		"@modelcontextprotocol/sdk": "^1.11.4",
+		"zod": "^3.25.7"
+	}
+}

@@ -250,6 +250,39 @@ const TEST_CASES: {
 		},
 		providers: ["fal-ai"],
 	},
+	{
+		testName: "feature-extraction",
+		task: "feature-extraction",
+		model: {
+			id: "intfloat/multilingual-e5-large-instruct",
+			pipeline_tag: "feature-extraction",
+			tags: [],
+			inference: "",
+		},
+		providers: ["hf-inference"],
+	},
+	{
+		testName: "question-answering",
+		task: "question-answering",
+		model: {
+			id: "google-bert/bert-large-uncased-whole-word-masking-finetuned-squad",
+			pipeline_tag: "question-answering",
+			tags: [],
+			inference: "",
+		},
+		providers: ["hf-inference"],
+	},
+	{
+		testName: "table-question-answering",
+		task: "table-question-answering",
+		model: {
+			id: "google-bert/bert-large-uncased-whole-word-masking-finetuned-squad",
+			pipeline_tag: "table-question-answering",
+			tags: [],
+			inference: "",
+		},
+		providers: ["hf-inference"],
+	},
 ] as const;
 
 const rootDirFinder = (): string => {

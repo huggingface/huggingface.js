@@ -146,7 +146,7 @@ export interface ChatCompletionInputGrammarType {
 	value: unknown;
 	[property: string]: unknown;
 }
-export type ChatCompletionInputGrammarTypeType = "json" | "regex";
+export type ChatCompletionInputGrammarTypeType = "json" | "regex" | "json_schema";
 export interface ChatCompletionInputStreamOptions {
 	/**
 	 * If set, an additional chunk will be streamed before the data: [DONE] message. The usage

@@ -27,8 +27,8 @@ export async function makeRequestOptions(
 		task?: InferenceTask;
 	}
 ): Promise<{ url: string; info: RequestInit }> {
-	const { provider: maybeProvider, model: maybeModel } = args;
-	const provider = maybeProvider ?? "hf-inference";
+	const { model: maybeModel } = args;
+	const provider = providerHelper.provider;
 	const { task } = options ?? {};
 
 	// Validate inputs
@@ -113,8 +113,9 @@ export function makeRequestOptionsFromResolvedModel(
 ): { url: string; info: RequestInit } {
 	const { accessToken, endpointUrl, provider: maybeProvider, model, ...remainingArgs } = args;
 	void model;
+	void maybeProvider;
 
-	const provider = maybeProvider ?? "hf-inference";
+	const provider = providerHelper.provider;
 
 	const { includeCredentials, task, signal, billTo } = options ?? {};
 	const authMethod = (() => {

@@ -294,7 +294,7 @@ describe.skip("InferenceClient", () => {
 					await hf.tableQuestionAnswering({
 						model: "google/tapas-base-finetuned-wtq",
 						inputs: {
-							query: "How many stars does the transformers repository have?",
+							question: "How many stars does the transformers repository have?",
 							table: {
 								Repository: ["Transformers", "Datasets", "Tokenizers"],
 								Stars: ["36542", "4512", "3934"],
@@ -488,7 +488,8 @@ describe.skip("InferenceClient", () => {
 				expect(
 					await hf.translation({
 						model: "t5-base",
-						inputs: ["My name is Wolfgang and I live in Berlin", "I work as programmer"],
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						inputs: ["My name is Wolfgang and I live in Berlin", "I work as programmer"] as any,
 					})
 				).toMatchObject([
 					{
@@ -505,7 +506,8 @@ describe.skip("InferenceClient", () => {
 						model: "facebook/bart-large-mnli",
 						inputs: [
 							"Hi, I recently bought a device from your company but it is not working as advertised and I would like to get reimbursed!",
-						],
+							// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						] as any,
 						parameters: { candidate_labels: ["refund", "legal", "faq"] },
 					})
 				).toEqual(
@@ -843,9 +845,25 @@ describe.skip("InferenceClient", () => {
 			it("endpoint - makes request to specified endpoint", async () => {
 				const ep = hf.endpoint("https://router.huggingface.co/hf-inference/models/openai-community/gpt2");
 				const { generated_text } = await ep.textGeneration({
-					inputs: "one plus two equals",
+					inputs: "one plus one is equal to",
+					parameters: {
+						max_new_tokens: 1,
+					},
 				});
-				assert.include(generated_text, "three");
+				assert.include(generated_text, "two");
+			});
+
+			it("endpoint - makes request to specified endpoint - alternative syntax", async () => {
+				const epClient = new InferenceClient(env.HF_TOKEN, {
+					endpointUrl: "https://router.huggingface.co/hf-inference/models/openai-community/gpt2",
+				});
+				const { generated_text } = await epClient.textGeneration({
+					inputs: "one plus one is equal to",
+					parameters: {
+						max_new_tokens: 1,
+					},
+				});
+				assert.include(generated_text, "two");
 			});
 
 			it("chatCompletion modelId - OpenAI Specs", async () => {
@@ -1142,6 +1160,17 @@ describe.skip("InferenceClient", () => {
 				expect(res).toBeInstanceOf(Blob);
 			});
 
+			// Runs black-forest-labs/flux-dev-lora under the hood
+			// with fofr/flux-80s-cyberpunk as the LoRA weights
+			it("textToImage - all Flux LoRAs", async () => {
+				const res = await client.textToImage({
+					model: "fofr/flux-80s-cyberpunk",
+					provider: "replicate",
+					inputs: "style of 80s cyberpunk, a portrait photo",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
 			it("textToImage canonical - stabilityai/stable-diffusion-3.5-large-turbo", async () => {
 				const res = await client.textToImage({
 					model: "stabilityai/stable-diffusion-3.5-large-turbo",
@@ -1340,6 +1369,12 @@ describe.skip("InferenceClient", () => {
 					status: "live",
 					task: "text-to-image",
 				},
+				"BAAI/bge-multilingual-gemma2": {
+					providerId: "BAAI/bge-multilingual-gemma2",
+					hfModelId: "BAAI/bge-multilingual-gemma2",
+					status: "live",
+					task: "feature-extraction",
+				},
 			};
 
 			it("chatCompletion", async () => {
@@ -1376,6 +1411,16 @@ describe.skip("InferenceClient", () => {
 					inputs: "award winning high resolution photo of a giant tortoise",
 				});
 				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("featureExtraction", async () => {
+				const res = await client.featureExtraction({
+					model: "BAAI/bge-multilingual-gemma2",
+					inputs: "That is a happy person",
+				});
+
+				expect(res).toBeInstanceOf(Array);
+				expect(res[0]).toEqual(expect.arrayContaining([expect.any(Number)]));
 			});
 		},
 		TIMEOUT
@@ -1871,6 +1916,109 @@ describe.skip("InferenceClient", () => {
 				// Verify we got a meaningful response
 				expect(fullResponse).toBeTruthy();
 				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+		},
+		TIMEOUT
+	);
+	describe.concurrent(
+		"OVHcloud",
+		() => {
+			const client = new HfInference(env.HF_OVHCLOUD_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["ovhcloud"] = {
+				"meta-llama/llama-3.1-8b-instruct": {
+					hfModelId: "meta-llama/llama-3.1-8b-instruct",
+					providerId: "Llama-3.1-8B-Instruct",
+					status: "live",
+					task: "conversational",
+				},
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "meta-llama/llama-3.1-8b-instruct",
+					provider: "ovhcloud",
+					messages: [{ role: "user", content: "A, B, C, " }],
+					seed: 42,
+					temperature: 0,
+					top_p: 0.01,
+					max_tokens: 1,
+				});
+				expect(res.choices && res.choices.length > 0);
+				const completion = res.choices[0].message?.content;
+				expect(completion).toContain("D");
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "meta-llama/llama-3.1-8b-instruct",
+					provider: "ovhcloud",
+					messages: [{ role: "user", content: "A, B, C, " }],
+					stream: true,
+					seed: 42,
+					temperature: 0,
+					top_p: 0.01,
+					max_tokens: 1,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse).toContain("D");
+			});
+
+			it("textGeneration", async () => {
+				const res = await client.textGeneration({
+					model: "meta-llama/llama-3.1-8b-instruct",
+					provider: "ovhcloud",
+					inputs: "A B C ",
+					parameters: {
+						seed: 42,
+						temperature: 0,
+						top_p: 0.01,
+						max_new_tokens: 1,
+					},
+				});
+				expect(res.generated_text.length > 0);
+				expect(res.generated_text).toContain("D");
+			});
+
+			it("textGeneration stream", async () => {
+				const stream = client.textGenerationStream({
+					model: "meta-llama/llama-3.1-8b-instruct",
+					provider: "ovhcloud",
+					inputs: "A B C ",
+					stream: true,
+					parameters: {
+						seed: 42,
+						temperature: 0,
+						top_p: 0.01,
+						max_new_tokens: 1,
+					},
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].text;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse).toContain("D");
 			});
 		},
 		TIMEOUT

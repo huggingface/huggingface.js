@@ -1,4 +1,5 @@
 import type { ImageClassificationInput, ImageClassificationOutput } from "@huggingface/tasks";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping";
 import { getProviderHelper } from "../../lib/getProviderHelper";
 import type { BaseArgs, Options } from "../../types";
 import { innerRequest } from "../../utils/request";
@@ -14,7 +15,8 @@ export async function imageClassification(
 	args: ImageClassificationArgs,
 	options?: Options
 ): Promise<ImageClassificationOutput> {
-	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "image-classification");
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "image-classification");
 	const payload = preparePayload(args);
 	const { data: res } = await innerRequest<ImageClassificationOutput>(payload, providerHelper, {
 		...options,

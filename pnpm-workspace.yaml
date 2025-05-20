@@ -13,3 +13,4 @@ packages:
   - "packages/space-header"
   - "packages/ollama-utils"
   - "packages/mcp-client"
+  - "packages/tiny-agents"

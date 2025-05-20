@@ -14,10 +14,12 @@
  *
  * Thanks!
  */
+import { base64FromBytes } from "../utils/base64FromBytes";
+
 import type { AutomaticSpeechRecognitionOutput } from "@huggingface/tasks";
 import { InferenceOutputError } from "../lib/InferenceOutputError";
 import { isUrl } from "../lib/isUrl";
-import type { BodyParams, HeaderParams, ModelId, UrlParams } from "../types";
+import type { BodyParams, HeaderParams, ModelId, RequestArgs, UrlParams } from "../types";
 import { delay } from "../utils/delay";
 import { omit } from "../utils/omit";
 import {
@@ -27,6 +29,7 @@ import {
 	type TextToVideoTaskHelper,
 } from "./providerHelper";
 import { HF_HUB_URL } from "../config";
+import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition";
 
 export interface FalAiQueueOutput {
 	request_id: string;
@@ -223,6 +226,28 @@ export class FalAIAutomaticSpeechRecognitionTask extends FalAITask implements Au
 			);
 		}
 		return { text: res.text };
+	}
+
+	async preparePayloadAsync(args: AutomaticSpeechRecognitionArgs): Promise<RequestArgs> {
+		const blob = "data" in args && args.data instanceof Blob ? args.data : "inputs" in args ? args.inputs : undefined;
+		const contentType = blob?.type;
+		if (!contentType) {
+			throw new Error(
+				`Unable to determine the input's content-type. Make sure your are passing a Blob when using provider fal-ai.`
+			);
+		}
+		if (!FAL_AI_SUPPORTED_BLOB_TYPES.includes(contentType)) {
+			throw new Error(
+				`Provider fal-ai does not support blob type ${contentType} - supported content types are: ${FAL_AI_SUPPORTED_BLOB_TYPES.join(
+					", "
+				)}`
+			);
+		}
+		const base64audio = base64FromBytes(new Uint8Array(await blob.arrayBuffer()));
+		return {
+			...("data" in args ? omit(args, "data") : omit(args, "inputs")),
+			audio_url: `data:${contentType};base64,${base64audio}`,
+		};
 	}
 }
 
