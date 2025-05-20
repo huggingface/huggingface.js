@@ -62,8 +62,8 @@ async function main() {
 		process.exit(0);
 	}
 
-	if (!process.env.HF_TOKEN) {
-		console.error(`a valid HF_TOKEN must be present in the env`);
+	if (!ENDPOINT_URL && !process.env.HF_TOKEN) {
+		console.error(`To use a remote inference provider, a valid HF_TOKEN must be present in the env`);
 		process.exit(1);
 	}
 
