@@ -1,7 +1,7 @@
 {
 	"name": "@huggingface/tiny-agents",
 	"packageManager": "pnpm@10.10.0",
-	"version": "0.2.1",
+	"version": "0.2.2",
 	"description": "Lightweight, composable agents for AI applications",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {
@@ -11,7 +11,7 @@
 	"module": "./dist/index.mjs",
 	"types": "./dist/index.d.ts",
 	"bin": {
-		"tiny-agents": "./dist/src/cli.js"
+		"tiny-agents": "./dist/cli.js"
 	},
 	"exports": {
 		".": {
@@ -30,7 +30,7 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"prepublishOnly": "pnpm run build",
-		"build": "tsup src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
+		"build": "tsup src/*.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
 		"prepare": "pnpm run build",
 		"test": "vitest run",
 		"check": "tsc",
