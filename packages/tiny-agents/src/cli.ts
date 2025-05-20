@@ -114,12 +114,16 @@ async function main() {
 
 	const { configJson, prompt } = await loadConfigFrom(loadFrom);
 
-	const ConfigSchema = z.object({
-		model: z.string(),
-		provider: z.enum(PROVIDERS_OR_POLICIES).optional(),
-		endpointUrl: z.string().optional(),
-		servers: z.array(ServerConfigSchema),
-	});
+	const ConfigSchema = z
+		.object({
+			model: z.string(),
+			provider: z.enum(PROVIDERS_OR_POLICIES).optional(),
+			endpointUrl: z.string().optional(),
+			servers: z.array(ServerConfigSchema),
+		})
+		.refine((data) => data.provider !== undefined || data.endpointUrl !== undefined, {
+			message: "At least one of 'provider' or 'endpointUrl' is required",
+		});
 
 	let config: z.infer<typeof ConfigSchema>;
 	try {
@@ -130,14 +134,24 @@ async function main() {
 		process.exit(1);
 	}
 
-	const agent = new Agent({
-		provider: config.provider,
-		endpointUrl: config.endpointUrl,
-		model: config.model,
-		apiKey: process.env.HF_TOKEN,
-		servers: config.servers,
-		prompt,
-	});
+	const agent = new Agent(
+		config.endpointUrl
+			? {
+					endpointUrl: config.endpointUrl,
+					model: config.model,
+					apiKey: process.env.HF_TOKEN,
+					servers: config.servers,
+					prompt,
+			  }
+			: {
+					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+					provider: config.provider!,
+					model: config.model,
+					apiKey: process.env.HF_TOKEN,
+					servers: config.servers,
+					prompt,
+			  }
+	);
 
 	if (command === "serve") {
 		error(`Serve is not implemented yet, coming soon!`);
