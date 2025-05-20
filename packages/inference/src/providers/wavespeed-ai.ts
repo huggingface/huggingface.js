@@ -10,7 +10,6 @@ import {
 	TextToVideoTaskHelper,
 	ImageToImageTaskHelper,
 } from "./providerHelper";
-import { ar } from "vitest/dist/reporters-5f784f42";
 
 const WAVESPEEDAI_API_BASE_URL = "https://api.wavespeed.ai";
 
