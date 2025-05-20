@@ -1164,10 +1164,11 @@ export const transformers = (model: ModelData): string[] => {
 					].join("\n"),
 					"]"
 				);
+				pipelineSnippet.push("pipe(text=messages)");
 			} else {
 				pipelineSnippet.push("messages = [", '    {"role": "user", "content": "Who are you?"},', "]");
+				pipelineSnippet.push("pipe(messages)");
 			}
-			pipelineSnippet.push("pipe(messages)");
 		}
 
 		return [pipelineSnippet.join("\n"), autoSnippet];

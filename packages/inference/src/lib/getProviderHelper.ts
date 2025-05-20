@@ -48,7 +48,7 @@ import * as Replicate from "../providers/replicate";
 import * as Sambanova from "../providers/sambanova";
 import * as Together from "../providers/together";
 import * as WavesppedAI from "../providers/wavespeed-ai";
-import type { InferenceProvider, InferenceTask } from "../types";
+import type { InferenceProvider, InferenceProviderOrPolicy, InferenceTask } from "../types";
 
 export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, TaskProviderHelper>>> = {
 	"black-forest-labs": {
@@ -158,128 +158,132 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
  * Get provider helper instance by name and task
  */
 export function getProviderHelper(
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: "text-to-image"
 ): TextToImageTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: "conversational"
 ): ConversationalTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: "text-generation"
 ): TextGenerationTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: "text-to-speech"
 ): TextToSpeechTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: "text-to-audio"
 ): TextToAudioTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: "automatic-speech-recognition"
 ): AutomaticSpeechRecognitionTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: "text-to-video"
 ): TextToVideoTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: "text-classification"
 ): TextClassificationTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: "question-answering"
 ): QuestionAnsweringTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: "audio-classification"
 ): AudioClassificationTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: "audio-to-audio"
 ): AudioToAudioTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: "fill-mask"
 ): FillMaskTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: "feature-extraction"
 ): FeatureExtractionTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: "image-classification"
 ): ImageClassificationTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: "image-segmentation"
 ): ImageSegmentationTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: "document-question-answering"
 ): DocumentQuestionAnsweringTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: "image-to-text"
 ): ImageToTextTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: "object-detection"
 ): ObjectDetectionTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: "zero-shot-image-classification"
 ): ZeroShotImageClassificationTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: "zero-shot-classification"
 ): ZeroShotClassificationTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: "image-to-image"
 ): ImageToImageTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: "sentence-similarity"
 ): SentenceSimilarityTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: "table-question-answering"
 ): TableQuestionAnsweringTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: "tabular-classification"
 ): TabularClassificationTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: "tabular-regression"
 ): TabularRegressionTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: "token-classification"
 ): TokenClassificationTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: "translation"
 ): TranslationTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: "summarization"
 ): SummarizationTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
-	provider: InferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: "visual-question-answering"
 ): VisualQuestionAnsweringTaskHelper & TaskProviderHelper;
-export function getProviderHelper(provider: InferenceProvider, task: InferenceTask | undefined): TaskProviderHelper;
+export function getProviderHelper(
+	provider: InferenceProviderOrPolicy,
+	task: InferenceTask | undefined
+): TaskProviderHelper;
 
-export function getProviderHelper(provider: InferenceProvider, task: InferenceTask | undefined): TaskProviderHelper {
-	if (provider === "hf-inference") {
-		if (!task) {
-			return new HFInference.HFInferenceTask();
-		}
+export function getProviderHelper(
+	provider: InferenceProviderOrPolicy,
+	task: InferenceTask | undefined
+): TaskProviderHelper {
+	if ((provider === "hf-inference" && !task) || provider === "auto") {
+		return new HFInference.HFInferenceTask();
 	}
 	if (!task) {
 		throw new Error("you need to provide a task name when using an external provider, e.g. 'text-to-image'");
