@@ -119,6 +119,7 @@ async function main() {
 			model: z.string(),
 			provider: z.enum(PROVIDERS_OR_POLICIES).optional(),
 			endpointUrl: z.string().optional(),
+			apiKey: z.string().optional(),
 			servers: z.array(ServerConfigSchema),
 		})
 		.refine((data) => data.provider !== undefined || data.endpointUrl !== undefined, {
@@ -139,7 +140,7 @@ async function main() {
 			? {
 					endpointUrl: config.endpointUrl,
 					model: config.model,
-					apiKey: process.env.HF_TOKEN,
+					apiKey: config.apiKey ?? process.env.API_KEY ?? process.env.HF_TOKEN,
 					servers: config.servers,
 					prompt,
 			  }
@@ -147,7 +148,7 @@ async function main() {
 					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 					provider: config.provider!,
 					model: config.model,
-					apiKey: process.env.HF_TOKEN,
+					apiKey: config.apiKey ?? process.env.API_KEY ?? process.env.HF_TOKEN,
 					servers: config.servers,
 					prompt,
 			  }
