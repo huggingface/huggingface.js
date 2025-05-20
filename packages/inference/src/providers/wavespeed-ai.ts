@@ -125,11 +125,11 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 				case "completed": {
 					// Get the media data from the first output URL
 					if (!taskResult.outputs?.[0]) {
-						throw new InferenceOutputError("No media URL in completed response");
+						throw new InferenceOutputError("No output URL in completed response");
 					}
 					const mediaResponse = await fetch(taskResult.outputs[0]);
 					if (!mediaResponse.ok) {
-						throw new InferenceOutputError("Failed to fetch media data");
+						throw new InferenceOutputError("Failed to fetch output data");
 					}
 					return await mediaResponse.blob();
 				}
