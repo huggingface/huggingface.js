@@ -91,3 +91,4 @@ curl https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.2-11B-
 - [SmolVLM - small yet mighty Vision Language Model](https://huggingface.co/blog/smolvlm)
 - [Multimodal RAG using ColPali and Qwen2-VL](https://github.com/merveenoyan/smol-vision/blob/main/ColPali_%2B_Qwen2_VL.ipynb)
 - [Preference Optimization for Vision Language Models with TRL](https://huggingface.co/blog/dpo_vlm)
+- [Image-text-to-text task guide](https://huggingface.co/docs/transformers/tasks/image_text_to_text)
