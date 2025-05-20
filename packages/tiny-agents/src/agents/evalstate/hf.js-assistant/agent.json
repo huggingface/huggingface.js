@@ -5,7 +5,7 @@
 		{
 			"type": "http",
 			"config": {
-				"url": "https://huggingface.co/spaces/evalstate/hf-mcp-server/mcp"
+				"url": "https://evalstate-hf-mcp-server.hf.space/mcp"
 			}
 		}
 	]
