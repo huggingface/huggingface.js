@@ -1,5 +1,5 @@
 import { InferenceOutputError } from "../lib/InferenceOutputError";
-import { ImageToImageArgs } from "../tasks";
+import type { ImageToImageArgs } from "../tasks";
 import type { BodyParams, HeaderParams, RequestArgs, UrlParams } from "../types";
 import { delay } from "../utils/delay";
 import { omit } from "../utils/omit";
@@ -10,6 +10,7 @@ import {
 	TextToVideoTaskHelper,
 	ImageToImageTaskHelper,
 } from "./providerHelper";
+import { ar } from "vitest/dist/reporters-5f784f42";
 
 const WAVESPEEDAI_API_BASE_URL = "https://api.wavespeed.ai";
 
@@ -122,15 +123,15 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 
 			switch (taskResult.status) {
 				case "completed": {
-					// Get the video data from the first output URL
+					// Get the media data from the first output URL
 					if (!taskResult.outputs?.[0]) {
-						throw new InferenceOutputError("No video URL in completed response");
+						throw new InferenceOutputError("No media URL in completed response");
 					}
-					const videoResponse = await fetch(taskResult.outputs[0]);
-					if (!videoResponse.ok) {
-						throw new InferenceOutputError("Failed to fetch video data");
+					const mediaResponse = await fetch(taskResult.outputs[0]);
+					if (!mediaResponse.ok) {
+						throw new InferenceOutputError("Failed to fetch media data");
 					}
-					return await videoResponse.blob();
+					return await mediaResponse.blob();
 				}
 				case "failed": {
 					throw new InferenceOutputError(taskResult.error || "Task failed");
@@ -138,7 +139,7 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 				case "processing":
 				case "created":
 					// Wait before polling again
-					await delay(100);
+					await delay(500);
 					continue;
 
 				default: {
@@ -167,27 +168,12 @@ export class WavespeedAIImageToImageTask extends WavespeedAITask implements Imag
 	}
 
 	async preparePayloadAsync(args: ImageToImageArgs): Promise<RequestArgs> {
-		if (!args.parameters) {
-			return {
-				...args,
-				model: args.model,
-				data: args.inputs,
-			};
-		} else {
-			return {
-				...args,
-				inputs: base64FromBytes(
-					new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await (args.inputs as Blob).arrayBuffer())
-				),
-			};
-		}
-	}
-
-	override preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
-			...omit(params.args, ["inputs", "parameters"]),
-			...(params.args.parameters as Record<string, unknown>),
-			image: params.args.inputs,
+			...args,
+			inputs: args.parameters?.prompt,
+			image: base64FromBytes(
+				new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await (args.inputs as Blob).arrayBuffer())
+			),
 		};
 	}
 }

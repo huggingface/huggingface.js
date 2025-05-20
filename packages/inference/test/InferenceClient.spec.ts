@@ -2047,12 +2047,6 @@ describe.skip("InferenceClient", () => {
 					status: "live",
 					task: "image-to-image",
 				},
-				"wavespeed-ai/wan-2.1/i2v-480p": {
-					hfModelId: "wavespeed-ai/wan-2.1/i2v-480p",
-					providerId: "wavespeed-ai/wan-2.1/i2v-480p",
-					status: "live",
-					task: "image-to-video",
-				},
 				"wavespeed-ai/flux-dev-lora": {
 					hfModelId: "wavespeed-ai/flux-dev-lora",
 					providerId: "wavespeed-ai/flux-dev-lora",
