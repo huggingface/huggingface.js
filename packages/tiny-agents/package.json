@@ -11,7 +11,7 @@
 	"module": "./dist/index.mjs",
 	"types": "./dist/index.d.ts",
 	"bin": {
-		"tiny-agents": "./dist/src/cli.js"
+		"tiny-agents": "./dist/cli.js"
 	},
 	"exports": {
 		".": {
@@ -30,7 +30,7 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"prepublishOnly": "pnpm run build",
-		"build": "tsup src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
+		"build": "tsup src/*.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
 		"prepare": "pnpm run build",
 		"test": "vitest run",
 		"check": "tsc",
