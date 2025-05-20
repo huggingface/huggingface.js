@@ -221,6 +221,7 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"keypoint-detection": getData("keypoint-detection", keypointDetection),
 	"mask-generation": getData("mask-generation", maskGeneration),
 	"multiple-choice": undefined,
+	"molecules": undefined,
 	"object-detection": getData("object-detection", objectDetection),
 	"video-classification": getData("video-classification", videoClassification),
 	other: undefined,
