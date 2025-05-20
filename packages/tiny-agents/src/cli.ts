@@ -116,7 +116,8 @@ async function main() {
 
 	const ConfigSchema = z.object({
 		model: z.string(),
-		provider: z.enum(PROVIDERS_OR_POLICIES),
+		provider: z.enum(PROVIDERS_OR_POLICIES).optional(),
+		endpointUrl: z.string().optional(),
 		servers: z.array(ServerConfigSchema),
 	});
 
@@ -131,8 +132,9 @@ async function main() {
 
 	const agent = new Agent({
 		provider: config.provider,
+		endpointUrl: config.endpointUrl,
 		model: config.model,
-		apiKey: process.env.HF_TOKEN ?? "",
+		apiKey: process.env.HF_TOKEN,
 		servers: config.servers,
 		prompt,
 	});
