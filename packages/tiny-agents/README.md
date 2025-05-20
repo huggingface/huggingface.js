@@ -55,7 +55,7 @@ touch my-agent/agent.json
 }
 ```
 
-`servers` is a list of MCP servers (we support Stdio, SSE, and HTTP servers).
+Where `servers` is a list of MCP servers (we support Stdio, SSE, and HTTP servers).
 
 Optionally, you can add a `PROMPT.md` file to override the default Agent prompt.
 
@@ -66,6 +66,9 @@ npx @huggingface/tiny-agents run ./my-agent
 ```
 
 Voilà! 🔥
+
+> [!NOTE]
+> Note: you can open a PR in the huggingface.js repo to share your agent with the community, just upload it inside the `src/agents/` directory.
 
 ### Advanced: Programmatic Usage
 

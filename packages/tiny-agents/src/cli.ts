@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { dirname, join } from "node:path";
 import { parseArgs } from "node:util";
-import { readFile } from "node:fs/promises";
+import { lstat, readFile } from "node:fs/promises";
 import { z } from "zod";
 import { PROVIDERS_OR_POLICIES } from "@huggingface/inference";
 import { Agent } from "@huggingface/mcp-client";
@@ -36,11 +36,29 @@ const FILENAME_PROMPT = "PROMPT.md";
 
 async function loadConfigFrom(loadFrom: string): Promise<{ configJson: string; prompt?: string }> {
 	try {
-		/// First try it as a local directory path, then we will try as a path inside the repo itself
+		/// First try it as a local file path, then as a local directory, then we will try as a path inside the repo itself
 		return {
 			configJson: await readFile(loadFrom, { encoding: "utf8" }),
 		};
 	} catch {
+		if ((await lstat(loadFrom)).isDirectory()) {
+			/// local directory
+			try {
+				let prompt: string | undefined;
+				try {
+					prompt = await readFile(join(loadFrom, FILENAME_PROMPT), { encoding: "utf8" });
+				} catch {
+					debug(`PROMPT.md not found in ${loadFrom}, continuing without prompt template`);
+				}
+				return {
+					configJson: await readFile(join(loadFrom, FILENAME_CONFIG), { encoding: "utf8" }),
+					prompt,
+				};
+			} catch {
+				error(`Config file not found in specified local directory.`);
+				process.exit(1);
+			}
+		}
 		const srcDir = dirname(__filename);
 		const configDir = join(srcDir, "agents", loadFrom);
 		try {
@@ -55,7 +73,7 @@ async function loadConfigFrom(loadFrom: string): Promise<{ configJson: string; p
 				prompt,
 			};
 		} catch {
-			error(`Config file not found! Loading from the HF Hub is not implemented yet`);
+			error(`Config file not found in tiny-agents repo! Loading from the HF Hub is not implemented yet`);
 			process.exit(1);
 		}
 	}
