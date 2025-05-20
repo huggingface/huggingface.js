@@ -596,6 +596,7 @@ export const keras_hub = (model: ModelData): string[] => {
 export const kimi_audio = (model: ModelData): string[] => [
 	`# Example usage for KimiAudio
 # pip install git+https://github.com/MoonshotAI/Kimi-Audio.git
+
 from kimia_infer.api.kimia import KimiAudio
 
 model = KimiAudio(model_path="${model.id}", load_detokenizer=True)
