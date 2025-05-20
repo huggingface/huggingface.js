@@ -942,7 +942,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	torchgeo: {
 		prettyLabel: "TorchGeo",
-		repoName: "torchgeo",
+		repoName: "TorchGeo",
 		repoUrl: "https://github.com/microsoft/torchgeo",
 		docsUrl: "https://torchgeo.readthedocs.io/",
 		filter: false,
