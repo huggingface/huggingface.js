@@ -693,6 +693,12 @@ export const PIPELINE_DATA = {
 		color: "yellow",
 		hideInDatasets: true,
 	},
+	"video-to-video": {
+		name: "Video-to-Video",
+		modality: "cv",
+		color: "blue",
+		hideInDatasets: true,
+	},
 	other: {
 		name: "Other",
 		modality: "other",
