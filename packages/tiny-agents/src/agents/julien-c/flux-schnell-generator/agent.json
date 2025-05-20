@@ -1,6 +1,6 @@
 {
-	"model": "Qwen/Qwen3-32B",
-	"provider": "novita",
+	"model": "Qwen/Qwen2.5-72B-Instruct",
+	"provider": "nebius",
 	"servers": [
 		{
 			"type": "sse",
