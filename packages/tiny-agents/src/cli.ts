@@ -5,8 +5,8 @@ import { readFile } from "node:fs/promises";
 import { z } from "zod";
 import { PROVIDERS_OR_POLICIES } from "@huggingface/inference";
 import { Agent } from "@huggingface/mcp-client";
-import type { ServerConfig } from "@huggingface/mcp-client";
 import { version as packageVersion } from "../package.json";
+import { ServerConfigSchema } from "./lib/types";
 
 const USAGE_HELP = `
 Usage:
@@ -90,7 +90,7 @@ async function main() {
 		const ConfigSchema = z.object({
 			model: z.string(),
 			provider: z.enum(PROVIDERS_OR_POLICIES),
-			servers: z.array(z.custom<ServerConfig>()),
+			servers: z.array(ServerConfigSchema),
 		});
 
 		let config: z.infer<typeof ConfigSchema>;
