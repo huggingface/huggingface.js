@@ -593,6 +593,39 @@ export const keras_hub = (model: ModelData): string[] => {
 	return snippets;
 };
 
+export const kimi_audio = (model: ModelData): string[] => [
+	`# Example usage for KimiAudio
+# pip install git+https://github.com/MoonshotAI/Kimi-Audio.git
+
+from kimia_infer.api.kimia import KimiAudio
+
+model = KimiAudio(model_path="${model.id}", load_detokenizer=True)
+
+sampling_params = {
+    "audio_temperature": 0.8,
+    "audio_top_k": 10,
+    "text_temperature": 0.0,
+    "text_top_k": 5,
+}
+
+# For ASR
+asr_audio = "asr_example.wav"
+messages_asr = [
+    {"role": "user", "message_type": "text", "content": "Please transcribe the following audio:"},
+    {"role": "user", "message_type": "audio", "content": asr_audio}
+]
+_, text = model.generate(messages_asr, **sampling_params, output_type="text")
+print(text)
+
+# For Q&A
+qa_audio = "qa_example.wav"
+messages_conv = [{"role": "user", "message_type": "audio", "content": qa_audio}]
+wav, text = model.generate(messages_conv, **sampling_params, output_type="both")
+sf.write("output_audio.wav", wav.cpu().view(-1).numpy(), 24000)
+print(text)
+`,
+];
+
 export const lightning_ir = (model: ModelData): string[] => {
 	if (model.tags.includes("bi-encoder")) {
 		return [
@@ -1355,15 +1388,14 @@ model = SwarmFormerModel.from_pretrained("${model.id}")
 
 const mlx_unknown = (model: ModelData): string[] => [
 	`# Download the model from the Hub
-pip install huggingface_hub hf_transfer
+pip install huggingface_hub[hf_xet]
 
-export HF_HUB_ENABLE_HF_TRANSFER=1
 huggingface-cli download --local-dir ${nameWithoutNamespace(model.id)} ${model.id}`,
 ];
 
 const mlxlm = (model: ModelData): string[] => [
 	`# Make sure mlx-lm is installed
-pip install --upgrade mlx-lm
+# pip install --upgrade mlx-lm
 
 # Generate text with mlx-lm
 from mlx_lm import load, generate
@@ -1376,7 +1408,7 @@ text = generate(model, tokenizer, prompt=prompt, verbose=True)`,
 
 const mlxchat = (model: ModelData): string[] => [
 	`# Make sure mlx-lm is installed
-pip install --upgrade mlx-lm
+# pip install --upgrade mlx-lm
 
 # Generate text with mlx-lm
 from mlx_lm import load, generate
@@ -1393,7 +1425,9 @@ text = generate(model, tokenizer, prompt=prompt, verbose=True)`,
 ];
 
 const mlxvlm = (model: ModelData): string[] => [
-	`Make sure mlx-vlm is installed
+	`# Make sure mlx-vlm is installed
+# pip install --upgrade mlx-vlm
+
 from mlx_vlm import load, generate
 from mlx_vlm.prompt_utils import apply_chat_template
 from mlx_vlm.utils import load_config
