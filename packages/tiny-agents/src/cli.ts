@@ -7,6 +7,7 @@ import { PROVIDERS_OR_POLICIES } from "@huggingface/inference";
 import { Agent } from "@huggingface/mcp-client";
 import { version as packageVersion } from "../package.json";
 import { ServerConfigSchema } from "./lib/types";
+import { ANSI, debug, error } from "./lib/utils";
 
 const USAGE_HELP = `
 Usage:
@@ -32,17 +33,28 @@ const FILENAME_CONFIG = "agent.json";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const FILENAME_PROMPT = "PROMPT.md";
 
-async function loadConfigFrom(loadFrom: string): Promise<string> {
+async function loadConfigFrom(loadFrom: string): Promise<{ configJson: string; prompt?: string }> {
 	try {
 		/// First try it as a local directory path, then we will try as a path inside the repo itself
-		return await readFile(loadFrom, { encoding: "utf8" });
+		return {
+			configJson: await readFile(loadFrom, { encoding: "utf8" }),
+		};
 	} catch {
 		const srcDir = dirname(__filename);
-		const configPath = join(srcDir, "agents", loadFrom, FILENAME_CONFIG);
+		const configDir = join(srcDir, "agents", loadFrom);
 		try {
-			return await readFile(configPath, { encoding: "utf8" });
+			let prompt: string | undefined;
+			try {
+				prompt = await readFile(join(configDir, FILENAME_PROMPT), { encoding: "utf8" });
+			} catch {
+				debug(`PROMPT.md not found in ${configDir}, continuing without prompt template`);
+			}
+			return {
+				configJson: await readFile(join(configDir, FILENAME_CONFIG), { encoding: "utf8" }),
+				prompt,
+			};
 		} catch {
-			console.error(`Config file not found! Loading from the HF Hub is not implemented yet`);
+			error(`Config file not found! Loading from the HF Hub is not implemented yet`);
 			process.exit(1);
 		}
 	}
@@ -76,39 +88,41 @@ async function main() {
 		process.exit(0);
 	}
 	if (positionals.length !== 2 || !isValidCommand(command)) {
-		console.error(`You need to call run or serve, followed by an agent id (local path or Hub identifier).`);
+		error(`You need to call run or serve, followed by an agent id (local path or Hub identifier).`);
 		console.log(USAGE_HELP);
 		process.exit(1);
 	}
 
+	const { configJson, prompt } = await loadConfigFrom(loadFrom);
+
+	const ConfigSchema = z.object({
+		model: z.string(),
+		provider: z.enum(PROVIDERS_OR_POLICIES),
+		servers: z.array(ServerConfigSchema),
+	});
+
+	let config: z.infer<typeof ConfigSchema>;
+	try {
+		const parsedConfig = JSON.parse(configJson);
+		config = ConfigSchema.parse(parsedConfig);
+	} catch (err) {
+		error("Invalid configuration file:", err instanceof Error ? err.message : err);
+		process.exit(1);
+	}
+
+	const agent = new Agent({
+		provider: config.provider,
+		model: config.model,
+		apiKey: process.env.HF_TOKEN ?? "",
+		servers: config.servers,
+		prompt,
+	});
+
 	if (command === "serve") {
-		console.error(`Serve is not implemented yet, coming soon!`);
+		error(`Serve is not implemented yet, coming soon!`);
 		process.exit(1);
 	} else {
-		const configJson = await loadConfigFrom(loadFrom);
-
-		const ConfigSchema = z.object({
-			model: z.string(),
-			provider: z.enum(PROVIDERS_OR_POLICIES),
-			servers: z.array(ServerConfigSchema),
-		});
-
-		let config: z.infer<typeof ConfigSchema>;
-		try {
-			const parsedConfig = JSON.parse(configJson);
-			config = ConfigSchema.parse(parsedConfig);
-		} catch (error) {
-			console.error("Invalid configuration file:", error instanceof Error ? error.message : error);
-			process.exit(1);
-		}
-		const agent = new Agent({
-			provider: config.provider,
-			model: config.model,
-			apiKey: process.env.HF_TOKEN ?? "",
-			servers: config.servers,
-		});
-
-		console.log(agent);
+		console.debug(agent);
 
 		// TODO: hook main loop from mcp-client/cli.ts
 	}
