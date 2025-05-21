@@ -26,7 +26,7 @@ const taskData: TaskDataCustom = {
 				type: "img",
 			},
 			{
-				label: "Optional prompt",
+				label: "Optional Text Prompt",
 				content: "This penguin is dancing",
 				type: "text",
 			},
