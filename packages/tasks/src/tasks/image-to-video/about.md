@@ -20,7 +20,7 @@ Image-to-video models can have variants based on the specific type of transforma
 
 ### Controllable Motion
 
-Some models might allow users to specify the direction or intensity of motion, giving more fine-grained control over the generated animation.
+Image-to-video models can be used to specify the direction or intensity of motion, giving more fine-grained control over the generated animation.
 
 ### Loopable Videos
 
