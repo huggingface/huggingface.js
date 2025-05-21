@@ -23,10 +23,6 @@ export interface ImageToVideoInput {
  */
 export interface ImageToVideoParameters {
 	/**
-	 * The text prompt to guide the video generation.
-	 */
-	prompt?: string;
-	/**
 	 * For diffusion models. A higher guidance scale value encourages the model to generate
 	 * videos closely linked to the text prompt at the expense of lower image quality.
 	 */
@@ -36,25 +32,28 @@ export interface ImageToVideoParameters {
 	 */
 	negative_prompt?: string;
 	/**
+	 * The num_frames parameter determines how many video frames are generated.
+	 */
+	num_frames?: number;
+	/**
 	 * The number of denoising steps. More denoising steps usually lead to a higher quality
 	 * video at the expense of slower inference.
 	 */
 	num_inference_steps?: number;
 	/**
-	 * The num_frames parameter determines how many video frames are generated.
+	 * The text prompt to guide the video generation.
 	 */
-	num_frames?: number;
-	/**
-	 * The size in pixel of the output video frames.
-	 */
-	target_size?: TargetSize;
+	prompt?: string;
 	/**
 	 * Seed for the random number generator.
 	 */
 	seed?: number;
+	/**
+	 * The size in pixel of the output video frames.
+	 */
+	target_size?: TargetSize;
 	[property: string]: unknown;
 }
-
 /**
  * The size in pixel of the output video frames.
  */
@@ -63,7 +62,6 @@ export interface TargetSize {
 	width: number;
 	[property: string]: unknown;
 }
-
 /**
  * Outputs of inference for the Image To Video task
  */
