@@ -41,7 +41,7 @@ const FILENAME_CONFIG = "agent.json";
 const FILENAME_PROMPT = "PROMPT.md";
 
 const TINY_AGENTS_HUB_REPO: RepoDesignation = {
-	name: "huggingface/tiny-agents",
+	name: "tiny-agents/tiny-agents",
 	type: "dataset",
 };
 
@@ -101,7 +101,7 @@ async function tryLoadFromHub(agentId: string): Promise<TinyAgentConfig | undefi
 		prompt = await readFile(promptPath, { encoding: "utf8" });
 	} catch {
 		debug(
-			`PROMPT.md not found in https://huggingface.co/datasets/huggingface/tiny-agents/tree/main/${agentId}, continuing without prompt template`
+			`PROMPT.md not found in https://huggingface.co/datasets/tiny-agents/tiny-agents/tree/main/${agentId}, continuing without prompt template`
 		);
 	}
 
@@ -131,7 +131,7 @@ async function loadConfigFrom(loadFrom: string): Promise<TinyAgentConfig> {
 	}
 
 	error(
-		`Config file not found in tiny-agents! Please make sure it exists locally or in https://huggingface.co/datasets/huggingface/tiny-agents.`
+		`Config file not found in tiny-agents! Please make sure it exists locally or in https://huggingface.co/datasets/tiny-agents/tiny-agents.`
 	);
 	process.exit(1);
 }
