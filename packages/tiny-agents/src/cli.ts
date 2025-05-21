@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { dirname, join } from "node:path";
+import { join } from "node:path";
 import { parseArgs } from "node:util";
 import { lstat, readFile } from "node:fs/promises";
 import { z } from "zod";
