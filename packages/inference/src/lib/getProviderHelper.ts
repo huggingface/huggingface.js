@@ -24,7 +24,6 @@ import type {
 	ImageSegmentationTaskHelper,
 	ImageToImageTaskHelper,
 	ImageToTextTaskHelper,
-	ImageToVideoTaskHelper,
 	ObjectDetectionTaskHelper,
 	QuestionAnsweringTaskHelper,
 	SentenceSimilarityTaskHelper,
@@ -220,10 +219,6 @@ export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
 	task: "image-to-text"
 ): ImageToTextTaskHelper & TaskProviderHelper;
-export function getProviderHelper(
-	provider: InferenceProviderOrPolicy,
-	task: "image-to-video"
-): ImageToVideoTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
 	task: "object-detection"

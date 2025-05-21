@@ -16,7 +16,6 @@ export * from "./cv/imageToText";
 export * from "./cv/objectDetection";
 export * from "./cv/textToImage";
 export * from "./cv/textToVideo";
-export * from "./cv/imageToVideo";
 export * from "./cv/zeroShotImageClassification";
 
 // Natural Language Processing tasks
