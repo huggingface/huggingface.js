@@ -127,6 +127,7 @@ const taskData: TaskDataCustom = {
 			description: "A Diffusers version of the Wan2.1-I2V-14B-480P model for 480p image-to-video generation.",
 			id: "Wan-AI/Wan2.1-I2V-14B-480P-Diffusers",
 		},
+
 		{
 			description: "A video generation model based on LTX-Video-0.9, evaluated on the VACE benchmark.",
 			id: "ali-vilab/VACE-LTX-Video-0.9",
@@ -164,7 +165,7 @@ const taskData: TaskDataCustom = {
 	],
 	summary:
 		"Image-to-video models take a still image as input and generate a video. These models can be guided by text prompts to influence the content and style of the output video.",
-	widgetModels: [""],
+	widgetModels: [],
 	youtubeId: undefined,
 };
 
