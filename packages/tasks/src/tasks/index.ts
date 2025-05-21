@@ -70,7 +70,11 @@ export type {
 export type * from "./image-to-image/inference.js";
 export type { ImageToTextInput, ImageToTextOutput, ImageToTextParameters } from "./image-to-text/inference.js";
 export type * from "./image-segmentation/inference.js";
-export type * from "./image-to-video/inference.js";
+export type {
+	ImageToVideoInput,
+	ImageToVideoOutput,
+	ImageToVideoParameters
+} from "./image-to-video/inference.js";
 export type * from "./object-detection/inference.js";
 export type * from "./depth-estimation/inference.js";
 export type * from "./question-answering/inference.js";
