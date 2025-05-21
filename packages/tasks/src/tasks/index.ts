@@ -111,8 +111,6 @@ export type {
 } from "./zero-shot-object-detection/inference.js";
 
 import type { ModelLibraryKey } from "../model-libraries.js";
-import { get } from "http";
-
 /**
  * Model libraries compatible with each ML task
  */
