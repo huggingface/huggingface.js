@@ -143,7 +143,7 @@ const taskData: TaskDataCustom = {
 	],
 	spaces: [
 		{
-			description: "Generate videos fast withthe LTX-Video distilled model.",
+			description: "An application to generate videos fast.",
 			id: "Lightricks/ltx-video-distilled",
 		},
 		{
