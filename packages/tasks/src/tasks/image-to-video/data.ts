@@ -120,7 +120,7 @@ const taskData: TaskDataCustom = {
 		},
 		{
 			description:
-				"A 14B parameter model for frame-level feature to video (FLF2V) generation by Wan-AI, producing 720p videos (Diffusers version).",
+				"An image-to-video model that generates videos from frame-level features, producing 720p videos.",
 			id: "Wan-AI/Wan2.1-FLF2V-14B-720P-diffusers",
 		},
 		{
