@@ -34,6 +34,7 @@ import type {
 	TextToImageInput,
 	TextToSpeechInput,
 	TextToVideoInput,
+	ImageToVideoInput,
 	TokenClassificationInput,
 	TokenClassificationOutput,
 	TranslationInput,
@@ -145,6 +146,11 @@ export interface ImageToImageTaskHelper {
 	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<Blob>;
 	preparePayload(params: BodyParams<ImageToImageInput & BaseArgs>): Record<string, unknown>;
 	preparePayloadAsync(args: ImageToImageArgs): Promise<RequestArgs>;
+}
+
+export interface ImageToVideoTaskHelper {
+	getResponse(response: unknown, url?: string, headers?: Record<string, string>): Promise<Blob>;
+	preparePayload(params: BodyParams<ImageToVideoInput & BaseArgs>): Record<string, unknown>;
 }
 
 export interface ImageSegmentationTaskHelper {
