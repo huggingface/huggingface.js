@@ -32,4 +32,4 @@ Contribute an inference snippet for image-to-video here!
 
 ## Useful Resources
 
-In this area, you can insert useful resources about how to train or use a model for this task. 
+In this area, you can insert useful resources about how to train or use a model for this task.

@@ -73,4 +73,4 @@ export interface ImageToVideoOutput {
 	 */
 	video: unknown;
 	[property: string]: unknown;
-} 
+}

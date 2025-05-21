@@ -28,12 +28,14 @@ const taskData: TaskDataCustom = {
 	},
 	metrics: [
 		{
-			description: "Frechet Video Distance (FVD) is a common metric for evaluating the quality of generated videos, comparing them to real videos.",
+			description:
+				"Frechet Video Distance (FVD) is a common metric for evaluating the quality of generated videos, comparing them to real videos.",
 			id: "fvd",
 		},
 		{
-			description: "Inception Score (IS) can be adapted for videos to measure the diversity and quality of generated frames.",
-			id: "is_video", 
+			description:
+				"Inception Score (IS) can be adapted for videos to measure the diversity and quality of generated frames.",
+			id: "is_video",
 		},
 	],
 	models: [
@@ -54,4 +56,4 @@ const taskData: TaskDataCustom = {
 	youtubeId: undefined,
 };
 
-export default taskData; 
+export default taskData;
