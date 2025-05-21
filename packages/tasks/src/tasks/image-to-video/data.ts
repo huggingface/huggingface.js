@@ -15,7 +15,7 @@ const taskData: TaskDataCustom = {
 			id: "Rapidata/sora-video-generation-style-likert-scoring",
 		},
 		{
-			description: "A dataset for captioned videos ",
+			description: "A dataset with videos and captions throughout the videos.",
 			id: "BestWishYsh/ChronoMagic",
 		},
 	],
