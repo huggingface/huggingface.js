@@ -47,7 +47,7 @@ import type {
 import * as Replicate from "../providers/replicate";
 import * as Sambanova from "../providers/sambanova";
 import * as Together from "../providers/together";
-import * as WavesppedAI from "../providers/wavespeed-ai";
+import * as WavespeedAI from "../providers/wavespeed-ai";
 import type { InferenceProvider, InferenceProviderOrPolicy, InferenceTask } from "../types";
 
 export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, TaskProviderHelper>>> = {
