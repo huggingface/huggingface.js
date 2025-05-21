@@ -3,11 +3,7 @@ import type { TaskDataCustom } from "../index.js";
 const taskData: TaskDataCustom = {
 	datasets: [
 		{
-			description: "A dataset of images and short video clips for image-to-video generation research.",
-			id: "some/image-to-video-dataset",
-		},
-		{
-			description: "A benchmark dataset for reference-based video generation.",
+			description: "A benchmark dataset for reference image controlled video generation.",
 			id: "ali-vilab/VACE-Benchmark",
 		},
 		{
@@ -71,12 +67,8 @@ const taskData: TaskDataCustom = {
 			id: "Lightricks/LTX-Video-0.9.7-dev",
 		},
 		{
-			description: "A 1.3B parameter model for reference-based video generation",
-			id: "Wan-AI/Wan2.1-VACE-1.3B",
-		},
-		{
-			description: "An image-to-video generation model using FramePack methodology with Hunyuan-DiT architecture.",
-			id: "lllyasviel/FramePackI2V_HY",
+			description: "A 14B parameter model for reference image controlled video generation",
+			id: "Wan-AI/Wan2.1-VACE-14B",
 		},
 		{
 			description: "An image-to-video generation model using FramePack F1 methodology with Hunyuan-DiT architecture",
@@ -87,28 +79,12 @@ const taskData: TaskDataCustom = {
 			id: "Lightricks/LTX-Video-0.9.7-distilled",
 		},
 		{
-			description: "An image-to-video generation model by Skywork AI, 1.3B parameters, producing 540p videos.",
-			id: "Skywork/SkyReels-V2-I2V-1.3B-540P",
-		},
-		{
 			description: "An image-to-video generation model by Skywork AI, 14B parameters, producing 720p videos.",
 			id: "Skywork/SkyReels-V2-I2V-14B-720P",
 		},
 		{
-			description: "An image-to-video generation model by Skywork AI, 14B parameters, producing 540p videos.",
-			id: "Skywork/SkyReels-V2-I2V-14B-540P",
-		},
-		{
-			description: "Diffusers version of Hunyuan-DiT for image-to-video generation.",
-			id: "hunyuanvideo-community/HunyuanVideo-I2V",
-		},
-		{
-			description: "Tencent's Hunyuan-DiT model for image-to-video generation.",
+			description: "Image-to-video variant of Tencent's HunyuanVideo.",
 			id: "tencent/HunyuanVideo-I2V",
-		},
-		{
-			description: "A 14B parameter model for 480p image-to-video generation by Wan-AI.",
-			id: "Wan-AI/Wan2.1-I2V-14B-480P",
 		},
 		{
 			description: "A 14B parameter model for 720p image-to-video generation by Wan-AI.",
@@ -117,28 +93,6 @@ const taskData: TaskDataCustom = {
 		{
 			description: "A Diffusers version of the Wan2.1-I2V-14B-720P model for 720p image-to-video generation.",
 			id: "Wan-AI/Wan2.1-I2V-14B-720P-Diffusers",
-		},
-		{
-			description:
-				"An image-to-video model that generates videos from frame-level features, producing 720p videos.",
-			id: "Wan-AI/Wan2.1-FLF2V-14B-720P-diffusers",
-		},
-		{
-			description: "A Diffusers version of the Wan2.1-I2V-14B-480P model for 480p image-to-video generation.",
-			id: "Wan-AI/Wan2.1-I2V-14B-480P-Diffusers",
-		},
-
-		{
-			description: "A video generation model based on LTX-Video-0.9, evaluated on the VACE benchmark.",
-			id: "ali-vilab/VACE-LTX-Video-0.9",
-		},
-		{
-			description: "An image-to-video model by Stability AI for generating short videos from images.",
-			id: "stabilityai/stable-video-diffusion-img2vid",
-		},
-		{
-			description: "A 5 billion parameter model for image-to-video generation by THUDM.",
-			id: "THUDM/CogVideoX-5b-I2V",
 		},
 	],
 	spaces: [
