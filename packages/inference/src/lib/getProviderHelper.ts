@@ -148,9 +148,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-generation": new Together.TogetherTextGenerationTask(),
 	},
 	"wavespeed-ai": {
-		"text-to-image": new WavesppedAI.WavespeedAITextToImageTask(),
-		"text-to-video": new WavesppedAI.WavespeedAITextToVideoTask(),
-		"image-to-image": new WavesppedAI.WavespeedAIImageToImageTask(),
+		"text-to-image": new WavespeedAI.WavespeedAITextToImageTask(),
+		"text-to-video": new WavespeedAI.WavespeedAITextToVideoTask(),
+		"image-to-image": new WavespeedAI.WavespeedAIImageToImageTask(),
 	},
 };
 
