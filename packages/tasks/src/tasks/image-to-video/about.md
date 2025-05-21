@@ -24,7 +24,7 @@ Some models might allow users to specify the direction or intensity of motion, g
 
 ### Loopable Videos
 
-Models can be designed to create seamlessly looping videos, perfect for backgrounds or short, endlessly watchable clips.
+Models can be used to to create seamlessly looping videos, perfect for backgrounds or short, endlessly watchable clips.
 
 ## Inference
 
