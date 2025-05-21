@@ -8,14 +8,7 @@ import { stdout } from "node:process";
 import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
 
 const REQUEST_ID_HEADER = "X-Request-Id";
-// Generate a simple UUID v4 without dependencies
-const generateUUID = () => {
-	return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
-		const r = (Math.random() * 16) | 0;
-		const v = c === "x" ? r : (r & 0x3) | 0x8;
-		return v.toString(16);
-	});
-};
+
 const ChatCompletionInputSchema = z.object({
 	messages: z.array(
 		z.object({
@@ -48,7 +41,7 @@ class ServerResp extends ServerResponse {
 
 export function startServer(agent: Agent): void {
 	const server = createServer({ ServerResponse: ServerResp }, async (req, res) => {
-		res.setHeader(REQUEST_ID_HEADER, generateUUID());
+		res.setHeader(REQUEST_ID_HEADER, crypto.randomUUID());
 		res.setHeader("Content-Type", "application/json");
 		if (req.method === "POST" && req.url === "/v1/chat/completions") {
 			let body: unknown;
