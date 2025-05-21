@@ -97,7 +97,10 @@ export function startServer(agent: Agent): void {
 								delta: {
 									role: "assistant",
 									content:
-										"<tool_call>" + `Tool[${chunk.name}] ${chunk.tool_call_id}\n` + chunk.content + "</tool_call>",
+										"<tool_call_info>" +
+										`Tool[${chunk.name}] ${chunk.tool_call_id}\n` +
+										chunk.content +
+										"</tool_call_info>",
 								},
 							},
 						],
