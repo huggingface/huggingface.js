@@ -11,7 +11,7 @@ const taskData: TaskDataCustom = {
 			id: "ali-vilab/VACE-Benchmark",
 		},
 		{
-			description: "A dataset for scoring video generation styles.",
+			description: "A dataset of video generation style preferences.",
 			id: "Rapidata/sora-video-generation-style-likert-scoring",
 		},
 		{
