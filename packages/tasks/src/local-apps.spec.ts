@@ -26,7 +26,7 @@ llama-server -hf bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`);
 		const snippet = snippetFunc(model);
 
 		expect(snippet[0].content).toEqual(`# Load and run the model:
-llama-server -hf mlabonne/gemma-2b-GGUF:{{QUANT_TAG}}"`);
+llama-server -hf mlabonne/gemma-2b-GGUF:{{QUANT_TAG}}`);
 	});
 
 	it("vLLM conversational llm", async () => {
