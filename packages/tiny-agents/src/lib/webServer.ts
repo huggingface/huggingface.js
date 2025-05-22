@@ -49,7 +49,7 @@ export function startServer(agent: Agent): void {
 			try {
 				body = await getJsonBody(req);
 			} catch {
-				return res.error(404, "Invalid JSON");
+				return res.error(400, "Invalid JSON");
 			}
 			try {
 				requestBody = ChatCompletionInputSchema.parse(body);
