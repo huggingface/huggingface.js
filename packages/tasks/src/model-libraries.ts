@@ -940,6 +940,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"pytorch_model.bin" OR path:"model.safetensors"`,
 	},
+	torchgeo: {
+		prettyLabel: "TorchGeo",
+		repoName: "TorchGeo",
+		repoUrl: "https://github.com/microsoft/torchgeo",
+		docsUrl: "https://torchgeo.readthedocs.io/",
+		filter: false,
+		countDownloads: `path_extension:"pt" OR path_extension:"pth"`,
+	},
 	transformers: {
 		prettyLabel: "Transformers",
 		repoName: "🤗/transformers",
