@@ -117,7 +117,7 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 	};
 	return [
 		{
-			title: "Install from brew (MacOS)",
+			title: "Install from brew",
 			setup: "brew install llama.cpp",
 			content: command("llama-cli"),
 		},
