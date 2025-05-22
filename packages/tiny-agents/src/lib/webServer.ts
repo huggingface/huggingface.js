@@ -55,9 +55,9 @@ export function startServer(agent: Agent): void {
 				requestBody = ChatCompletionInputSchema.parse(body);
 			} catch (err) {
 				if (err instanceof z.ZodError) {
-					return res.error(404, "Invalid ChatCompletionInput body \n" + JSON.stringify(err));
+					return res.error(400, "Invalid ChatCompletionInput body \n" + JSON.stringify(err));
 				}
-				return res.error(404, "Invalid ChatCompletionInput body");
+				return res.error(400, "Invalid ChatCompletionInput body");
 			}
 			/// Ok, from now on we will send a SSE (Server-Sent Events) response.
 			res.setHeaders(
