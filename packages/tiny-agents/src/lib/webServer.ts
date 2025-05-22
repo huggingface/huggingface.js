@@ -82,18 +82,14 @@ export function startServer(agent: Agent): void {
 					res.write(`data: ${JSON.stringify(chunk)}\n\n`);
 				} else {
 					/// Tool call info
-					/// /!\ We format it as a regular chunk!
+					/// /!\ We format it as a regular chunk of role = "tool"
 					const chunkToolcallInfo = {
 						choices: [
 							{
 								index: 0,
 								delta: {
-									role: "assistant",
-									content:
-										"<tool_call_info>" +
-										`Tool[${chunk.name}] ${chunk.tool_call_id}\n` +
-										chunk.content +
-										"</tool_call_info>",
+									role: "tool",
+									content: `Tool[${chunk.name}] ${chunk.tool_call_id}\n` + chunk.content,
 								},
 							},
 						],
