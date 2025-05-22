@@ -1,0 +1,12 @@
+{
+	"model": "Qwen/Qwen2.5-72B-Instruct",
+	"provider": "nebius",
+	"servers": [
+		{
+			"type": "http",
+			"config": {
+				"url": "https://evalstate-hf-mcp-server.hf.space/mcp"
+			}
+		}
+	]
+}
