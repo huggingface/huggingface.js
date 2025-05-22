@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@huggingface/hub':
+        specifier: workspace:^
+        version: link:../hub
       '@huggingface/inference':
         specifier: workspace:^
         version: link:../inference
