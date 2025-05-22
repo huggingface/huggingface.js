@@ -108,7 +108,7 @@ function getQuantTag(filepath?: string): string {
 const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const command = (binary: string) => {
 		const snippet = ["# Load and run the model:", `${binary} -hf ${model.id}${getQuantTag(filepath)}`];
-		return snippet;
+		return snippet.join("\n");
 	};
 	return [
 		{
