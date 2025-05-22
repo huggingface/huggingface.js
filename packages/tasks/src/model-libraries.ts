@@ -116,7 +116,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pth"`,
 		snippets: snippets.audioseal,
 	},
-	bagel: {
+	"bagel-mot": {
 		prettyLabel: "Bagel",
 		repoName: "Bagel",
 		repoUrl: "https://github.com/ByteDance-Seed/Bagel/",
