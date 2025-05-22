@@ -108,11 +108,6 @@ function getQuantTag(filepath?: string): string {
 const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const command = (binary: string) => {
 		const snippet = ["# Load and run the model:", `${binary} -hf ${model.id}${getQuantTag(filepath)}`];
-		if (!model.tags.includes("conversational")) {
-			// for non-conversational models, add a prompt
-			snippet[snippet.length - 1] += " \\";
-			snippet.push('  -p "Once upon a time,"');
-		}
 		return snippet.join("\n");
 	};
 	return [
@@ -140,7 +135,7 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 			setup: [
 				"git clone https://github.com/ggerganov/llama.cpp.git",
 				"cd llama.cpp",
-				"cmake -B build -DLLAMA_CURL=ON",
+				"cmake -B build",
 				"cmake --build build -j --target llama-server",
 			].join("\n"),
 			content: command("./build/bin/llama-server"),
