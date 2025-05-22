@@ -10,7 +10,6 @@ import { ServerConfigSchema } from "./lib/types";
 import { debug, error } from "./lib/utils";
 import { mainCliLoop } from "./lib/mainCliLoop";
 import { startServer } from "./lib/webServer";
-import { stdout } from "node:process";
 
 const USAGE_HELP = `
 Usage:
