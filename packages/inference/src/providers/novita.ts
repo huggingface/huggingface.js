@@ -16,6 +16,7 @@
  */
 import { InferenceOutputError } from "../lib/InferenceOutputError";
 import { isUrl } from "../lib/isUrl";
+import type { TextToVideoArgs } from "../tasks/cv/textToVideo";
 import type { BodyParams, UrlParams } from "../types";
 import { delay } from "../utils/delay";
 import { omit } from "../utils/omit";
@@ -61,8 +62,8 @@ export class NovitaTextToVideoTask extends TaskProviderHelper implements TextToV
 		return `/v3/async/${params.model}`;
 	}
 
-	override preparePayload(params: BodyParams): Record<string, unknown> {
-		const { num_inference_steps, ...restParameters } = (params.args.parameters as Record<string, unknown>) ?? {};
+	override preparePayload(params: BodyParams<TextToVideoArgs>): Record<string, unknown> {
+		const { num_inference_steps, ...restParameters } = params.args.parameters ?? {};
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
 			...restParameters,
@@ -90,10 +91,10 @@ export class NovitaTextToVideoTask extends TaskProviderHelper implements TextToV
 		}`;
 		const resultUrl = `${baseUrl}/v3/async/task-result?task_id=${taskId}`;
 
-		let status = '';
+		let status = "";
 		let taskResult: unknown;
 
-		while (status !== 'TASK_STATUS_SUCCEED' && status !== 'TASK_STATUS_FAILED') {
+		while (status !== "TASK_STATUS_SUCCEED" && status !== "TASK_STATUS_FAILED") {
 			await delay(500);
 			const resultResponse = await fetch(resultUrl, { headers });
 			if (!resultResponse.ok) {
@@ -119,7 +120,7 @@ export class NovitaTextToVideoTask extends TaskProviderHelper implements TextToV
 			}
 		}
 
-		if (status === 'TASK_STATUS_FAILED') {
+		if (status === "TASK_STATUS_FAILED") {
 			throw new InferenceOutputError("Task failed");
 		}
 
