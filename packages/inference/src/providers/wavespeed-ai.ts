@@ -1,26 +1,18 @@
 import { InferenceOutputError } from "../lib/InferenceOutputError";
-import type { ImageToImageArgs } from "../tasks";
+import type { ImageToImageArgs, TextToImageArgs, TextToVideoArgs } from "../tasks";
 import type { BodyParams, HeaderParams, RequestArgs, UrlParams } from "../types";
 import { delay } from "../utils/delay";
 import { omit } from "../utils/omit";
 import { base64FromBytes } from "../utils/base64FromBytes";
-import {
-	TaskProviderHelper,
+import type {
 	TextToImageTaskHelper,
 	TextToVideoTaskHelper,
-	ImageToImageTaskHelper,
+	ImageToImageTaskHelper} from "./providerHelper";
+import {
+	TaskProviderHelper
 } from "./providerHelper";
 
 const WAVESPEEDAI_API_BASE_URL = "https://api.wavespeed.ai";
-
-/**
- * Common response structure for all WaveSpeed AI API responses
- */
-interface WaveSpeedAICommonResponse<T> {
-	code: number;
-	message: string;
-	data: T;
-}
 
 /**
  * Response structure for task status and results
@@ -52,7 +44,23 @@ interface WaveSpeedAISubmitResponse {
 	};
 }
 
-type WaveSpeedAIResponse<T = WaveSpeedAITaskResponse> = WaveSpeedAICommonResponse<T>;
+/**
+ * Response structure for WaveSpeed AI API
+ */
+interface WaveSpeedAIResponse {
+	code: number;
+	message: string;
+	data: WaveSpeedAITaskResponse;
+}
+
+/**
+ * Response structure for WaveSpeed AI API with submit response data
+ */
+interface WaveSpeedAISubmitTaskResponse {
+	code: number;
+	message: string;
+	data: WaveSpeedAISubmitResponse;
+}
 
 abstract class WavespeedAITask extends TaskProviderHelper {
 	private accessToken: string | undefined;
@@ -64,10 +72,11 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 	makeRoute(params: UrlParams): string {
 		return `/api/v2/${params.model}`;
 	}
-	preparePayload(params: BodyParams): Record<string, unknown> {
+
+	preparePayload(params: BodyParams<ImageToImageArgs | TextToImageArgs | TextToVideoArgs>): Record<string, unknown> {
 		const payload: Record<string, unknown> = {
 			...omit(params.args, ["inputs", "parameters"]),
-			...(params.args.parameters as Record<string, unknown>),
+			...params.args.parameters,
 			prompt: params.args.inputs,
 		};
 		// Add LoRA support if adapter is specified in the mapping
@@ -92,7 +101,7 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 	}
 
 	override async getResponse(
-		response: WaveSpeedAIResponse<WaveSpeedAISubmitResponse>,
+		response: WaveSpeedAISubmitTaskResponse,
 		url?: string,
 		headers?: Record<string, string>
 	): Promise<Blob> {
