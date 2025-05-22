@@ -38,8 +38,8 @@ export class FeatherlessAITextGenerationTask extends BaseTextGenerationTask {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters
 				? {
-					max_tokens: (params.args.parameters as Record<string, unknown>).max_new_tokens,
-					...omit(params.args.parameters as Record<string, unknown>, "max_new_tokens"),
+					max_tokens: params.args.parameters.max_new_tokens,
+					...omit(params.args.parameters, "max_new_tokens"),
 				}
 				: undefined),
 			prompt: params.args.inputs,
