@@ -119,12 +119,12 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 		{
 			title: "Install from brew",
 			setup: "brew install llama.cpp",
-			content: command("llama-cli"),
+			content: command("llama-server"),
 		},
 		{
 			title: "Install from WinGet (Windows)",
 			setup: "winget install llama.cpp",
-			content: command("llama-cli"),
+			content: command("llama-server"),
 		},
 		{
 			title: "Use pre-built binary",
@@ -133,7 +133,7 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 				"# Download pre-built binary from:",
 				"# https://github.com/ggerganov/llama.cpp/releases",
 			].join("\n"),
-			content: command("./llama-cli"),
+			content: command("./llama-server"),
 		},
 		{
 			title: "Build from source code",
@@ -141,9 +141,9 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 				"git clone https://github.com/ggerganov/llama.cpp.git",
 				"cd llama.cpp",
 				"cmake -B build -DLLAMA_CURL=ON",
-				"cmake --build build -j --target llama-cli",
+				"cmake --build build -j --target llama-server",
 			].join("\n"),
-			content: command("./build/bin/llama-cli"),
+			content: command("./build/bin/llama-server"),
 		},
 	];
 };
