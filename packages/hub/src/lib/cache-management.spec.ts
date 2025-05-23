@@ -8,7 +8,7 @@ import {
 	type CachedFileInfo,
 } from "./cache-management";
 import { stat, readdir, realpath, lstat } from "node:fs/promises";
-import type { Dirent, Stats } from "node:fs";
+import type { Stats } from "node:fs";
 import { join } from "node:path";
 
 // Mocks
@@ -86,7 +86,9 @@ describe("scanSnapshotDir", () => {
 	test("should scan a valid snapshot directory", async () => {
 		const cachedFiles: CachedFileInfo[] = [];
 		const blobStats = new Map<string, Stats>();
-		vi.mocked(readdir).mockResolvedValueOnce([{ name: "file1", isDirectory: () => false } as Dirent]);
+		vi.mocked(readdir).mockResolvedValueOnce([
+			{ name: "file1", isDirectory: () => false } as unknown as Awaited<ReturnType<typeof readdir>>[0],
+		]);
 
 		vi.mocked(realpath).mockResolvedValueOnce("/fake/realpath");
 		vi.mocked(lstat).mockResolvedValueOnce({ size: 1024, atimeMs: Date.now(), mtimeMs: Date.now() } as Stats);

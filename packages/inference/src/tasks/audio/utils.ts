@@ -1,5 +1,5 @@
-import type { BaseArgs, InferenceProvider, RequestArgs } from "../../types";
-import { omit } from "../../utils/omit";
+import type { BaseArgs, InferenceProvider, RequestArgs } from "../../types.js";
+import { omit } from "../../utils/omit.js";
 
 /**
  * @deprecated

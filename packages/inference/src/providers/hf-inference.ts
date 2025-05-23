@@ -33,11 +33,11 @@ import type {
 	ZeroShotClassificationOutput,
 	ZeroShotImageClassificationOutput,
 } from "@huggingface/tasks";
-import { HF_ROUTER_URL } from "../config";
-import { InferenceOutputError } from "../lib/InferenceOutputError";
-import type { TabularClassificationOutput } from "../tasks/tabular/tabularClassification";
-import type { BodyParams, RequestArgs, UrlParams } from "../types";
-import { toArray } from "../utils/toArray";
+import { HF_ROUTER_URL } from "../config.js";
+import { InferenceOutputError } from "../lib/InferenceOutputError.js";
+import type { TabularClassificationOutput } from "../tasks/tabular/tabularClassification.js";
+import type { BodyParams, RequestArgs, UrlParams } from "../types.js";
+import { toArray } from "../utils/toArray.js";
 import type {
 	AudioClassificationTaskHelper,
 	AudioToAudioTaskHelper,
@@ -67,13 +67,13 @@ import type {
 	VisualQuestionAnsweringTaskHelper,
 	ZeroShotClassificationTaskHelper,
 	ZeroShotImageClassificationTaskHelper,
-} from "./providerHelper";
+} from "./providerHelper.js";
 
-import { TaskProviderHelper } from "./providerHelper";
-import { base64FromBytes } from "../utils/base64FromBytes";
-import type { ImageToImageArgs } from "../tasks/cv/imageToImage";
-import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition";
-import { omit } from "../utils/omit";
+import { TaskProviderHelper } from "./providerHelper.js";
+import { base64FromBytes } from "../utils/base64FromBytes.js";
+import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
+import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
+import { omit } from "../utils/omit.js";
 interface Base64ImageGeneration {
 	data: Array<{
 		b64_json: string;
