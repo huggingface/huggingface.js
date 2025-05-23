@@ -512,7 +512,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "MAGI-1",
 		repoName: "MAGI-1",
 		repoUrl: "https://github.com/SandAI-org/MAGI-1",
-		countDownloads: `path_extension:"json"`,
+		countDownloads: `path:"ckpt/vae/config.json"`,
 	},
 	"mamba-ssm": {
 		prettyLabel: "MambaSSM",
