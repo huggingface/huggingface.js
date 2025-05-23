@@ -1,8 +1,8 @@
 import type { TextGenerationInput } from "@huggingface/tasks";
-import { resolveProvider } from "../../lib/getInferenceProviderMapping";
-import { getProviderHelper } from "../../lib/getProviderHelper";
-import type { BaseArgs, Options } from "../../types";
-import { innerStreamingRequest } from "../../utils/request";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options } from "../../types.js";
+import { innerStreamingRequest } from "../../utils/request.js";
 
 export interface TextGenerationStreamToken {
 	/** Token ID from the model tokenizer */

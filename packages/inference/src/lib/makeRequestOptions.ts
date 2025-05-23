@@ -1,10 +1,10 @@
-import { name as packageName, version as packageVersion } from "../../package.json";
-import { HF_HEADER_X_BILL_TO, HF_HUB_URL } from "../config";
-import type { InferenceTask, Options, RequestArgs } from "../types";
-import type { InferenceProviderModelMapping } from "./getInferenceProviderMapping";
-import { getInferenceProviderMapping } from "./getInferenceProviderMapping";
-import type { getProviderHelper } from "./getProviderHelper";
-import { isUrl } from "./isUrl";
+import { HF_HEADER_X_BILL_TO, HF_HUB_URL } from "../config.js";
+import { PACKAGE_NAME, PACKAGE_VERSION } from "../package.js";
+import type { InferenceTask, Options, RequestArgs } from "../types.js";
+import type { InferenceProviderModelMapping } from "./getInferenceProviderMapping.js";
+import { getInferenceProviderMapping } from "./getInferenceProviderMapping.js";
+import type { getProviderHelper } from "./getProviderHelper.js";
+import { isUrl } from "./isUrl.js";
 
 /**
  * Lazy-loaded from huggingface.co/api/tasks when needed
@@ -158,7 +158,7 @@ export function makeRequestOptionsFromResolvedModel(
 
 	// Add user-agent to headers
 	// e.g. @huggingface/inference/3.1.3
-	const ownUserAgent = `${packageName}/${packageVersion}`;
+	const ownUserAgent = `${PACKAGE_NAME}/${PACKAGE_VERSION}`;
 	const userAgent = [ownUserAgent, typeof navigator !== "undefined" ? navigator.userAgent : undefined]
 		.filter((x) => x !== undefined)
 		.join(" ");
