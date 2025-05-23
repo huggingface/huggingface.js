@@ -9,6 +9,7 @@ import { version as packageVersion } from "../package.json";
 import { ServerConfigSchema } from "./lib/types";
 import { debug, error } from "./lib/utils";
 import { mainCliLoop } from "./lib/mainCliLoop";
+import { startServer } from "./lib/webServer";
 
 const USAGE_HELP = `
 Usage:
@@ -154,13 +155,13 @@ async function main() {
 			  }
 	);
 
-	if (command === "serve") {
-		error(`Serve is not implemented yet, coming soon!`);
-		process.exit(1);
+	debug(agent);
+	await agent.loadTools();
+
+	if (command === "run") {
+		mainCliLoop(agent);
 	} else {
-		debug(agent);
-		// main loop from mcp-client/cli.ts
-		await mainCliLoop(agent);
+		startServer(agent);
 	}
 }
 

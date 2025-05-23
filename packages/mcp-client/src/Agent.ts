@@ -46,6 +46,7 @@ const exitLoopTools = [taskCompletionTool, askQuestionTool];
 
 export class Agent extends McpClient {
 	private readonly servers: (ServerConfig | StdioServerParameters)[];
+	public readonly prompt: string;
 	protected messages: ChatCompletionInputMessage[];
 
 	constructor({
@@ -73,10 +74,11 @@ export class Agent extends McpClient {
 		super(provider ? { provider, endpointUrl, model, apiKey } : { provider, endpointUrl, model, apiKey });
 		/// ^This shenanigan is just here to please an overzealous TS type-checker.
 		this.servers = servers;
+		this.prompt = prompt ?? DEFAULT_SYSTEM_PROMPT;
 		this.messages = [
 			{
 				role: "system",
-				content: prompt ?? DEFAULT_SYSTEM_PROMPT,
+				content: this.prompt,
 			},
 		];
 	}
@@ -86,19 +88,27 @@ export class Agent extends McpClient {
 	}
 
 	async *run(
-		input: string,
+		input: string | ChatCompletionInputMessage[],
 		opts: { abortSignal?: AbortSignal } = {}
 	): AsyncGenerator<ChatCompletionStreamOutput | ChatCompletionInputMessageTool> {
-		this.messages.push({
-			role: "user",
-			content: input,
-		});
+		let messages: ChatCompletionInputMessage[];
+		if (typeof input === "string") {
+			/// Use internal array of messages
+			this.messages.push({
+				role: "user",
+				content: input,
+			});
+			messages = this.messages;
+		} else {
+			/// Use the passed messages directly
+			messages = input;
+		}
 
 		let numOfTurns = 0;
 		let nextTurnShouldCallTools = true;
 		while (true) {
 			try {
-				yield* this.processSingleTurnWithTools(this.messages, {
+				yield* this.processSingleTurnWithTools(messages, {
 					exitLoopTools,
 					exitIfFirstChunkNoTool: numOfTurns > 0 && nextTurnShouldCallTools,
 					abortSignal: opts.abortSignal,
@@ -111,7 +121,7 @@ export class Agent extends McpClient {
 			}
 			numOfTurns++;
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			const currentLast = this.messages.at(-1)!;
+			const currentLast = messages.at(-1)!;
 			debug("current role", currentLast.role);
 			if (
 				currentLast.role === "tool" &&
