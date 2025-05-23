@@ -14,6 +14,7 @@ import imageToImage from "./image-to-image/data.js";
 import imageToText from "./image-to-text/data.js";
 import imageTextToText from "./image-text-to-text/data.js";
 import imageSegmentation from "./image-segmentation/data.js";
+import imageToVideo from "./image-to-video/data.js";
 import maskGeneration from "./mask-generation/data.js";
 import objectDetection from "./object-detection/data.js";
 import depthEstimation from "./depth-estimation/data.js";
@@ -70,6 +71,7 @@ export type {
 export type * from "./image-to-image/inference.js";
 export type { ImageToTextInput, ImageToTextOutput, ImageToTextParameters } from "./image-to-text/inference.js";
 export type * from "./image-segmentation/inference.js";
+export type { ImageToVideoInput, ImageToVideoOutput, ImageToVideoParameters } from "./image-to-video/inference.js";
 export type * from "./object-detection/inference.js";
 export type * from "./depth-estimation/inference.js";
 export type * from "./question-answering/inference.js";
@@ -218,7 +220,7 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"image-to-image": getData("image-to-image", imageToImage),
 	"image-text-to-text": getData("image-text-to-text", imageTextToText),
 	"image-to-text": getData("image-to-text", imageToText),
-	"image-to-video": undefined,
+	"image-to-video": getData("image-to-video", imageToVideo),
 	"keypoint-detection": getData("keypoint-detection", keypointDetection),
 	"mask-generation": getData("mask-generation", maskGeneration),
 	"multiple-choice": undefined,
