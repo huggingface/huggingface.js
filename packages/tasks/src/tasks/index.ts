@@ -44,6 +44,7 @@ import imageTo3D from "./image-to-3d/data.js";
 import textTo3D from "./text-to-3d/data.js";
 import keypointDetection from "./keypoint-detection/data.js";
 import videoTextToText from "./video-text-to-text/data.js";
+import audioTextToText from "./audio-text-to-text/data.js";
 
 export type * from "./audio-classification/inference.js";
 export type * from "./automatic-speech-recognition/inference.js";
@@ -119,7 +120,7 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	"audio-classification": ["speechbrain", "transformers", "transformers.js"],
 	"audio-to-audio": ["asteroid", "fairseq", "speechbrain"],
 	"automatic-speech-recognition": ["espnet", "nemo", "speechbrain", "transformers", "transformers.js"],
-	"audio-text-to-text": [],
+	"audio-text-to-text": ["transformers", "speechbrain", "espnet", "nemo"],
 	"depth-estimation": ["transformers", "transformers.js"],
 	"document-question-answering": ["transformers", "transformers.js"],
 	"feature-extraction": ["sentence-transformers", "transformers", "transformers.js"],
@@ -203,7 +204,7 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"any-to-any": getData("any-to-any", anyToAny),
 	"audio-classification": getData("audio-classification", audioClassification),
 	"audio-to-audio": getData("audio-to-audio", audioToAudio),
-	"audio-text-to-text": getData("audio-text-to-text", placeholder),
+	"audio-text-to-text": getData("audio-text-to-text", audioTextToText),
 	"automatic-speech-recognition": getData("automatic-speech-recognition", automaticSpeechRecognition),
 	"depth-estimation": getData("depth-estimation", depthEstimation),
 	"document-question-answering": getData("document-question-answering", documentQuestionAnswering),
