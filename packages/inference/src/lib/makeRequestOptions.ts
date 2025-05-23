@@ -1,7 +1,5 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore this works or not depending on commonjs/ESM - see https://github.com/microsoft/TypeScript/issues/51783
-import pkg from "../../package.json" with { type: "json" };
 import { HF_HEADER_X_BILL_TO, HF_HUB_URL } from "../config.js";
+import { PACKAGE_NAME, PACKAGE_VERSION } from "../package.js";
 import type { InferenceTask, Options, RequestArgs } from "../types.js";
 import type { InferenceProviderModelMapping } from "./getInferenceProviderMapping.js";
 import { getInferenceProviderMapping } from "./getInferenceProviderMapping.js";
@@ -160,7 +158,7 @@ export function makeRequestOptionsFromResolvedModel(
 
 	// Add user-agent to headers
 	// e.g. @huggingface/inference/3.1.3
-	const ownUserAgent = `${pkg.name}/${pkg.version}`;
+	const ownUserAgent = `${PACKAGE_NAME}/${PACKAGE_VERSION}`;
 	const userAgent = [ownUserAgent, typeof navigator !== "undefined" ? navigator.userAgent : undefined]
 		.filter((x) => x !== undefined)
 		.join(" ");

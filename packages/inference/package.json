@@ -41,8 +41,7 @@
 	},
 	"type": "module",
 	"scripts": {
-		"build": "pnpm run export-templates && tshy",
-		"dts": "tsx scripts/generate-dts.ts && tsc --noEmit dist/index.d.ts",
+		"build": "pnpm run export-templates && pnpm run package-to-ts && tshy",
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
 		"format": "prettier --write .",
@@ -53,7 +52,8 @@
 		"test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest.config.mts",
 		"check": "tsc",
 		"dev": "pnpm run export-templates && tsup src/index.ts --format cjs,esm --watch",
-		"export-templates": "tsx scripts/export-templates.ts"
+		"export-templates": "tsx scripts/export-templates.ts",
+		"package-to-ts": "tsx scripts/package-json-to-ts.ts"
 	},
 	"dependencies": {
 		"@huggingface/tasks": "workspace:^",
