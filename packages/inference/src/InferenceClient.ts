@@ -3,7 +3,6 @@ import type { Options } from "./types.js";
 import { omit } from "./utils/omit.js";
 import { typedEntries } from "./utils/typedEntries.js";
 
-/import\s+([^\s]+)\s+from\s+(['"])(\.{1,2}\/[^'"]+?)(?<!\.js)\2/g;
 /* eslint-disable @typescript-eslint/no-empty-interface */
 /* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
 
