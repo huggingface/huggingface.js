@@ -1,4 +1,4 @@
-import { BaseConversationalTask, BaseTextGenerationTask } from "./providerHelper";
+import { BaseConversationalTask, BaseTextGenerationTask } from "./providerHelper.js";
 
 /**
  * See the registered mapping of HF model ID => Groq model ID here:
