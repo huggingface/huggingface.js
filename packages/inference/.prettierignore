@@ -5,3 +5,4 @@ dist
 test/tapes.json
 src/vendor
 .tshy-build
+.tshy
