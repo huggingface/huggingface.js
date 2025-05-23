@@ -15,10 +15,10 @@
  * Thanks!
  */
 import type { TextToImageInput } from "@huggingface/tasks";
-import { InferenceOutputError } from "../lib/InferenceOutputError";
-import type { BodyParams } from "../types";
-import { omit } from "../utils/omit";
-import { BaseConversationalTask, TaskProviderHelper, type TextToImageTaskHelper } from "./providerHelper";
+import { InferenceOutputError } from "../lib/InferenceOutputError.js";
+import type { BodyParams } from "../types.js";
+import { omit } from "../utils/omit.js";
+import { BaseConversationalTask, TaskProviderHelper, type TextToImageTaskHelper } from "./providerHelper.js";
 
 const NSCALE_API_BASE_URL = "https://inference.api.nscale.com";
 

@@ -1,10 +1,10 @@
 import type { ImageToTextInput, ImageToTextOutput } from "@huggingface/tasks";
-import { resolveProvider } from "../../lib/getInferenceProviderMapping";
-import { getProviderHelper } from "../../lib/getProviderHelper";
-import type { BaseArgs, Options } from "../../types";
-import { innerRequest } from "../../utils/request";
-import type { LegacyImageInput } from "./utils";
-import { preparePayload } from "./utils";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options } from "../../types.js";
+import { innerRequest } from "../../utils/request.js";
+import type { LegacyImageInput } from "./utils.js";
+import { preparePayload } from "./utils.js";
 
 export type ImageToTextArgs = BaseArgs & (ImageToTextInput | LegacyImageInput);
 /**

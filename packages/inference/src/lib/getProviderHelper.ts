@@ -1,17 +1,17 @@
-import * as BlackForestLabs from "../providers/black-forest-labs";
-import * as Cerebras from "../providers/cerebras";
-import * as Cohere from "../providers/cohere";
-import * as FalAI from "../providers/fal-ai";
-import * as FeatherlessAI from "../providers/featherless-ai";
-import * as Fireworks from "../providers/fireworks-ai";
-import * as Groq from "../providers/groq";
-import * as HFInference from "../providers/hf-inference";
-import * as Hyperbolic from "../providers/hyperbolic";
-import * as Nebius from "../providers/nebius";
-import * as Novita from "../providers/novita";
-import * as Nscale from "../providers/nscale";
-import * as OpenAI from "../providers/openai";
-import * as OvhCloud from "../providers/ovhcloud";
+import * as BlackForestLabs from "../providers/black-forest-labs.js";
+import * as Cerebras from "../providers/cerebras.js";
+import * as Cohere from "../providers/cohere.js";
+import * as FalAI from "../providers/fal-ai.js";
+import * as FeatherlessAI from "../providers/featherless-ai.js";
+import * as Fireworks from "../providers/fireworks-ai.js";
+import * as Groq from "../providers/groq.js";
+import * as HFInference from "../providers/hf-inference.js";
+import * as Hyperbolic from "../providers/hyperbolic.js";
+import * as Nebius from "../providers/nebius.js";
+import * as Novita from "../providers/novita.js";
+import * as Nscale from "../providers/nscale.js";
+import * as OpenAI from "../providers/openai.js";
+import * as OvhCloud from "../providers/ovhcloud.js";
 import type {
 	AudioClassificationTaskHelper,
 	AudioToAudioTaskHelper,
@@ -43,12 +43,13 @@ import type {
 	VisualQuestionAnsweringTaskHelper,
 	ZeroShotClassificationTaskHelper,
 	ZeroShotImageClassificationTaskHelper,
-} from "../providers/providerHelper";
-import * as Replicate from "../providers/replicate";
-import * as Sambanova from "../providers/sambanova";
-import * as Together from "../providers/together";
+} from "../providers/providerHelper.js";
+import * as Replicate from "../providers/replicate.js";
+import * as Sambanova from "../providers/sambanova.js";
+import * as Together from "../providers/together.js";
 import * as Dat1 from "../providers/dat1";
-import type { InferenceProvider, InferenceProviderOrPolicy, InferenceTask } from "../types";
+import type { InferenceProvider, InferenceProviderOrPolicy, InferenceTask } from "../types.js";
+
 
 export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, TaskProviderHelper>>> = {
 	"black-forest-labs": {

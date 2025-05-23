@@ -1,5 +1,5 @@
-import { HF_HUB_URL } from "../config";
-import { isUrl } from "./isUrl";
+import { HF_HUB_URL } from "../config.js";
+import { isUrl } from "./isUrl.js";
 
 /**
  * We want to make calls to the huggingface hub the least possible, eg if
