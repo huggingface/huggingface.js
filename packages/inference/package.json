@@ -30,17 +30,18 @@
 		"!src/snippets/templates/**/*.jinja"
 	],
 	"source": "src/index.ts",
-	"types": "./dist/src/index.d.ts",
-	"main": "./dist/index.cjs",
-	"module": "./dist/index.js",
-	"exports": {
-		"types": "./dist/src/index.d.ts",
-		"require": "./dist/index.cjs",
-		"import": "./dist/index.js"
+	"types": "./dist/commonjs/index.d.ts",
+	"main": "./dist/commonjs/index.js",
+	"module": "./dist/esm/index.js",
+	"tshy": {
+		"exports": {
+			"./package.json": "./package.json",
+			".": "./src/index.ts"
+		}
 	},
 	"type": "module",
 	"scripts": {
-		"build": "pnpm run export-templates && tsup src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
+		"build": "pnpm run export-templates && tshy",
 		"dts": "tsx scripts/generate-dts.ts && tsc --noEmit dist/index.d.ts",
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
@@ -61,5 +62,18 @@
 	"devDependencies": {
 		"@types/node": "18.13.0"
 	},
-	"resolutions": {}
+	"resolutions": {},
+	"exports": {
+		"./package.json": "./package.json",
+		".": {
+			"import": {
+				"types": "./dist/esm/index.d.ts",
+				"default": "./dist/esm/index.js"
+			},
+			"require": {
+				"types": "./dist/commonjs/index.d.ts",
+				"default": "./dist/commonjs/index.js"
+			}
+		}
+	}
 }

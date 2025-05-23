@@ -14,16 +14,16 @@
  *
  * Thanks!
  */
-import { InferenceOutputError } from "../lib/InferenceOutputError";
-import { isUrl } from "../lib/isUrl";
-import type { BodyParams, UrlParams } from "../types";
-import { omit } from "../utils/omit";
+import { InferenceOutputError } from "../lib/InferenceOutputError.js";
+import { isUrl } from "../lib/isUrl.js";
+import type { BodyParams, UrlParams } from "../types.js";
+import { omit } from "../utils/omit.js";
 import {
 	BaseConversationalTask,
 	BaseTextGenerationTask,
 	TaskProviderHelper,
 	type TextToVideoTaskHelper,
-} from "./providerHelper";
+} from "./providerHelper.js";
 
 const NOVITA_API_BASE_URL = "https://api.novita.ai";
 export interface NovitaOutput {

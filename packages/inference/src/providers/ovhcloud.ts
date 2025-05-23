@@ -15,11 +15,11 @@
  * Thanks!
  */
 
-import { BaseConversationalTask, BaseTextGenerationTask } from "./providerHelper";
+import { BaseConversationalTask, BaseTextGenerationTask } from "./providerHelper.js";
 import type { ChatCompletionOutput, TextGenerationOutput, TextGenerationOutputFinishReason } from "@huggingface/tasks";
-import { InferenceOutputError } from "../lib/InferenceOutputError";
-import type { BodyParams } from "../types";
-import { omit } from "../utils/omit";
+import { InferenceOutputError } from "../lib/InferenceOutputError.js";
+import type { BodyParams } from "../types.js";
+import { omit } from "../utils/omit.js";
 import type { TextGenerationInput } from "@huggingface/tasks";
 
 const OVHCLOUD_API_BASE_URL = "https://oai.endpoints.kepler.ai.cloud.ovh.net";

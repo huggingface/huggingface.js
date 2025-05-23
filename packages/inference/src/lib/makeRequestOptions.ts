@@ -1,10 +1,12 @@
-import { name as packageName, version as packageVersion } from "../../package.json";
-import { HF_HEADER_X_BILL_TO, HF_HUB_URL } from "../config";
-import type { InferenceTask, Options, RequestArgs } from "../types";
-import type { InferenceProviderModelMapping } from "./getInferenceProviderMapping";
-import { getInferenceProviderMapping } from "./getInferenceProviderMapping";
-import type { getProviderHelper } from "./getProviderHelper";
-import { isUrl } from "./isUrl";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore this works or not depending on commonjs/ESM - see https://github.com/microsoft/TypeScript/issues/51783
+import pkg from "../../package.json" with { type: "json" };
+import { HF_HEADER_X_BILL_TO, HF_HUB_URL } from "../config.js";
+import type { InferenceTask, Options, RequestArgs } from "../types.js";
+import type { InferenceProviderModelMapping } from "./getInferenceProviderMapping.js";
+import { getInferenceProviderMapping } from "./getInferenceProviderMapping.js";
+import type { getProviderHelper } from "./getProviderHelper.js";
+import { isUrl } from "./isUrl.js";
 
 /**
  * Lazy-loaded from huggingface.co/api/tasks when needed
@@ -158,7 +160,7 @@ export function makeRequestOptionsFromResolvedModel(
 
 	// Add user-agent to headers
 	// e.g. @huggingface/inference/3.1.3
-	const ownUserAgent = `${packageName}/${packageVersion}`;
+	const ownUserAgent = `${pkg.name}/${pkg.version}`;
 	const userAgent = [ownUserAgent, typeof navigator !== "undefined" ? navigator.userAgent : undefined]
 		.filter((x) => x !== undefined)
 		.join(" ");

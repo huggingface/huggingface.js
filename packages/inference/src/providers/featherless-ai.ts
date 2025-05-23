@@ -4,9 +4,9 @@ import type {
 	TextGenerationOutput,
 	TextGenerationOutputFinishReason,
 } from "@huggingface/tasks";
-import { InferenceOutputError } from "../lib/InferenceOutputError";
-import type { BodyParams } from "../types";
-import { BaseConversationalTask, BaseTextGenerationTask } from "./providerHelper";
+import { InferenceOutputError } from "../lib/InferenceOutputError.js";
+import type { BodyParams } from "../types.js";
+import { BaseConversationalTask, BaseTextGenerationTask } from "./providerHelper.js";
 
 interface FeatherlessAITextCompletionOutput extends Omit<ChatCompletionOutput, "choices"> {
 	choices: Array<{

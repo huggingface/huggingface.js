@@ -2,7 +2,7 @@ import { assert, describe, expect, it } from "vitest";
 
 import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
 
-import type { TextToImageArgs } from "../src";
+import type { TextToImageArgs } from "../src.js";
 import {
 	chatCompletion,
 	chatCompletionStream,
@@ -11,9 +11,9 @@ import {
 	textGeneration,
 	textToImage,
 } from "../src";
-import { isUrl } from "../src/lib/isUrl";
-import { HARDCODED_MODEL_INFERENCE_MAPPING } from "../src/providers/consts";
-import { readTestFile } from "./test-files";
+import { isUrl } from "../src/lib/isUrl.js";
+import { HARDCODED_MODEL_INFERENCE_MAPPING } from "../src/providers/consts.js";
+import { readTestFile } from "./test-files.js";
 
 const TIMEOUT = 60000 * 3;
 const env = import.meta.env;
