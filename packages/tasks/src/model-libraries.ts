@@ -936,7 +936,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "timesfm",
 		repoUrl: "https://github.com/google-research/timesfm",
 		filter: false,
-		countDownloads: `path:"checkpoints/checkpoint_1100000/state/checkpoint"`,
+		countDownloads: `path:"checkpoints/checkpoint_1100000/state/checkpoint" OR path:"checkpoints/checkpoint_2150000/state/checkpoint" OR path_extension:"ckpt"`,
 	},
 	timm: {
 		prettyLabel: "timm",
