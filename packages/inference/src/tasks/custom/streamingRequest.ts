@@ -1,7 +1,7 @@
-import { resolveProvider } from "../../lib/getInferenceProviderMapping";
-import { getProviderHelper } from "../../lib/getProviderHelper";
-import type { InferenceTask, Options, RequestArgs } from "../../types";
-import { innerStreamingRequest } from "../../utils/request";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { InferenceTask, Options, RequestArgs } from "../../types.js";
+import { innerStreamingRequest } from "../../utils/request.js";
 
 /**
  * Primitive to make custom inference calls that expect server-sent events, and returns the response through a generator

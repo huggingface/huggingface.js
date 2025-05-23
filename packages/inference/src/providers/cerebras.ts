@@ -15,7 +15,7 @@
  * Thanks!
  */
 
-import { BaseConversationalTask } from "./providerHelper";
+import { BaseConversationalTask } from "./providerHelper.js";
 
 export class CerebrasConversationalTask extends BaseConversationalTask {
 	constructor() {

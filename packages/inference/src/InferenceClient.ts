@@ -1,7 +1,7 @@
-import * as tasks from "./tasks";
-import type { Options } from "./types";
-import { omit } from "./utils/omit";
-import { typedEntries } from "./utils/typedEntries";
+import * as tasks from "./tasks/index.js";
+import type { Options } from "./types.js";
+import { omit } from "./utils/omit.js";
+import { typedEntries } from "./utils/typedEntries.js";
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 /* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */

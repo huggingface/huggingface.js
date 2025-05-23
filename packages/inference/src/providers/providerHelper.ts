@@ -45,13 +45,13 @@ import type {
 	ZeroShotImageClassificationInput,
 	ZeroShotImageClassificationOutput,
 } from "@huggingface/tasks";
-import { HF_ROUTER_URL } from "../config";
-import { InferenceOutputError } from "../lib/InferenceOutputError";
-import type { AudioToAudioOutput } from "../tasks/audio/audioToAudio";
-import type { BaseArgs, BodyParams, HeaderParams, InferenceProvider, RequestArgs, UrlParams } from "../types";
-import { toArray } from "../utils/toArray";
-import type { ImageToImageArgs } from "../tasks/cv/imageToImage";
-import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition";
+import { HF_ROUTER_URL } from "../config.js";
+import { InferenceOutputError } from "../lib/InferenceOutputError.js";
+import type { AudioToAudioOutput } from "../tasks/audio/audioToAudio.js";
+import type { BaseArgs, BodyParams, HeaderParams, InferenceProvider, RequestArgs, UrlParams } from "../types.js";
+import { toArray } from "../utils/toArray.js";
+import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
+import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
 
 /**
  * Base class for task-specific provider helpers
