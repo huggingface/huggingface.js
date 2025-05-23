@@ -202,6 +202,18 @@ Remote resources and local files should be passed as `URL` whenever it's possibl
 
 Under the hood, `@huggingface/hub` uses a lazy blob implementation to load the file.
 
+## Constants
+
+The library exports the following constants that you can use in your application:
+
+- `HUB_URL`: The base URL for the Hugging Face Hub API (`https://huggingface.co`). This can be useful if you need to construct URLs or check against the default URL.
+
+```ts
+import { HUB_URL } from "@huggingface/hub";
+
+console.log(HUB_URL); // https://huggingface.co
+```
+
 ## Dependencies
 
 - `@huggingface/tasks` : Typings only
