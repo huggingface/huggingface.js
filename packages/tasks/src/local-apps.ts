@@ -108,23 +108,18 @@ function getQuantTag(filepath?: string): string {
 const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const command = (binary: string) => {
 		const snippet = ["# Load and run the model:", `${binary} -hf ${model.id}${getQuantTag(filepath)}`];
-		if (!model.tags.includes("conversational")) {
-			// for non-conversational models, add a prompt
-			snippet[snippet.length - 1] += " \\";
-			snippet.push('  -p "Once upon a time,"');
-		}
 		return snippet.join("\n");
 	};
 	return [
 		{
 			title: "Install from brew",
 			setup: "brew install llama.cpp",
-			content: command("llama-cli"),
+			content: command("llama-server"),
 		},
 		{
 			title: "Install from WinGet (Windows)",
 			setup: "winget install llama.cpp",
-			content: command("llama-cli"),
+			content: command("llama-server"),
 		},
 		{
 			title: "Use pre-built binary",
@@ -133,17 +128,17 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 				"# Download pre-built binary from:",
 				"# https://github.com/ggerganov/llama.cpp/releases",
 			].join("\n"),
-			content: command("./llama-cli"),
+			content: command("./llama-server"),
 		},
 		{
 			title: "Build from source code",
 			setup: [
 				"git clone https://github.com/ggerganov/llama.cpp.git",
 				"cd llama.cpp",
-				"cmake -B build -DLLAMA_CURL=ON",
-				"cmake --build build -j --target llama-cli",
+				"cmake -B build",
+				"cmake --build build -j --target llama-server",
 			].join("\n"),
-			content: command("./build/bin/llama-cli"),
+			content: command("./build/bin/llama-server"),
 		},
 	];
 };
