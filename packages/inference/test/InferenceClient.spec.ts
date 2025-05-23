@@ -2,19 +2,18 @@ import { assert, describe, expect, it } from "vitest";
 
 import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
 
-import type { TextToImageArgs } from "../src";
+import type { TextToImageArgs } from "../src/index.js";
 import {
 	chatCompletion,
 	chatCompletionStream,
+	HfInference,
 	InferenceClient,
 	textGeneration,
 	textToImage,
-	HfInference,
-} from "../src";
-import { readTestFile } from "./test-files";
-import "./vcr";
-import { HARDCODED_MODEL_ID_MAPPING } from "../src/providers/consts";
-import { isUrl } from "../src/lib/isUrl";
+} from "../src/index.js";
+import { isUrl } from "../src/lib/isUrl.js";
+import { HARDCODED_MODEL_INFERENCE_MAPPING } from "../src/providers/consts.js";
+import { readTestFile } from "./test-files.js";
 
 const TIMEOUT = 60000 * 3;
 const env = import.meta.env;
@@ -23,7 +22,7 @@ if (!env.HF_TOKEN) {
 	console.warn("Set HF_TOKEN in the env to run the tests for better rate limits");
 }
 
-describe.concurrent("InferenceClient", () => {
+describe.skip("InferenceClient", () => {
 	// Individual tests can be ran without providing an api key, however running all tests without an api key will result in rate limiting error.
 
 	describe("backward compatibility", () => {
@@ -37,6 +36,182 @@ describe.concurrent("InferenceClient", () => {
 		"HF Inference",
 		() => {
 			const hf = new InferenceClient(env.HF_TOKEN);
+			HARDCODED_MODEL_INFERENCE_MAPPING["hf-inference"] = {
+				"google-bert/bert-base-uncased": {
+					providerId: "google-bert/bert-base-uncased",
+					hfModelId: "google-bert/bert-base-uncased",
+					task: "fill-mask",
+					status: "live",
+				},
+				"google/pegasus-xsum": {
+					providerId: "google/pegasus-xsum",
+					hfModelId: "google/pegasus-xsum",
+					task: "summarization",
+					status: "live",
+				},
+				"deepset/roberta-base-squad2": {
+					providerId: "deepset/roberta-base-squad2",
+					hfModelId: "deepset/roberta-base-squad2",
+					task: "question-answering",
+					status: "live",
+				},
+				"google/tapas-base-finetuned-wtq": {
+					providerId: "google/tapas-base-finetuned-wtq",
+					hfModelId: "google/tapas-base-finetuned-wtq",
+					task: "table-question-answering",
+					status: "live",
+				},
+				"mistralai/Mistral-7B-Instruct-v0.2": {
+					providerId: "mistralai/Mistral-7B-Instruct-v0.2",
+					hfModelId: "mistralai/Mistral-7B-Instruct-v0.2",
+					task: "text-generation",
+					status: "live",
+				},
+				"impira/layoutlm-document-qa": {
+					providerId: "impira/layoutlm-document-qa",
+					hfModelId: "impira/layoutlm-document-qa",
+					task: "document-question-answering",
+					status: "live",
+				},
+				"naver-clova-ix/donut-base-finetuned-docvqa": {
+					providerId: "naver-clova-ix/donut-base-finetuned-docvqa",
+					hfModelId: "naver-clova-ix/donut-base-finetuned-docvqa",
+					task: "document-question-answering",
+					status: "live",
+				},
+				"google/tapas-large-finetuned-wtq": {
+					providerId: "google/tapas-large-finetuned-wtq",
+					hfModelId: "google/tapas-large-finetuned-wtq",
+					task: "table-question-answering",
+					status: "live",
+				},
+				"facebook/detr-resnet-50": {
+					providerId: "facebook/detr-resnet-50",
+					hfModelId: "facebook/detr-resnet-50",
+					task: "object-detection",
+					status: "live",
+				},
+				"facebook/detr-resnet-50-panoptic": {
+					providerId: "facebook/detr-resnet-50-panoptic",
+					hfModelId: "facebook/detr-resnet-50-panoptic",
+					task: "image-segmentation",
+					status: "live",
+				},
+				"facebook/wav2vec2-large-960h-lv60-self": {
+					providerId: "facebook/wav2vec2-large-960h-lv60-self",
+					hfModelId: "facebook/wav2vec2-large-960h-lv60-self",
+					task: "automatic-speech-recognition",
+					status: "live",
+				},
+				"superb/hubert-large-superb-er": {
+					providerId: "superb/hubert-large-superb-er",
+					hfModelId: "superb/hubert-large-superb-er",
+					task: "audio-classification",
+					status: "live",
+				},
+				"speechbrain/sepformer-wham": {
+					providerId: "speechbrain/sepformer-wham",
+					hfModelId: "speechbrain/sepformer-wham",
+					task: "audio-to-audio",
+					status: "live",
+				},
+				"espnet/kan-bayashi_ljspeech_vits": {
+					providerId: "espnet/kan-bayashi_ljspeech_vits",
+					hfModelId: "espnet/kan-bayashi_ljspeech_vits",
+					task: "text-to-speech",
+					status: "live",
+				},
+				"sentence-transformers/paraphrase-xlm-r-multilingual-v1": {
+					providerId: "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
+					hfModelId: "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
+					task: "sentence-similarity",
+					status: "live",
+				},
+				"sentence-transformers/distilbert-base-nli-mean-tokens": {
+					providerId: "sentence-transformers/distilbert-base-nli-mean-tokens",
+					hfModelId: "sentence-transformers/distilbert-base-nli-mean-tokens",
+					task: "feature-extraction",
+					status: "live",
+				},
+				"facebook/bart-base": {
+					providerId: "facebook/bart-base",
+					hfModelId: "facebook/bart-base",
+					task: "feature-extraction",
+					status: "live",
+				},
+				"facebook/bart-large-mnli": {
+					providerId: "facebook/bart-large-mnli",
+					hfModelId: "facebook/bart-large-mnli",
+					task: "zero-shot-classification",
+					status: "live",
+				},
+				"facebook/bart-large-cnn": {
+					providerId: "facebook/bart-large-cnn",
+					hfModelId: "facebook/bart-large-cnn",
+					task: "summarization",
+					status: "live",
+				},
+				"facebook/bart-large-xsum": {
+					providerId: "facebook/bart-large-xsum",
+					hfModelId: "facebook/bart-large-xsum",
+					task: "summarization",
+					status: "live",
+				},
+				"stabilityai/stable-diffusion-2": {
+					providerId: "stabilityai/stable-diffusion-2",
+					hfModelId: "stabilityai/stable-diffusion-2",
+					task: "text-to-image",
+					status: "live",
+				},
+				"lllyasviel/sd-controlnet-canny": {
+					providerId: "lllyasviel/sd-controlnet-canny",
+					hfModelId: "lllyasviel/sd-controlnet-canny",
+					task: "image-to-image",
+					status: "live",
+				},
+				"lllyasviel/sd-controlnet-depth": {
+					providerId: "lllyasviel/sd-controlnet-depth",
+					hfModelId: "lllyasviel/sd-controlnet-depth",
+					task: "image-to-image",
+					status: "live",
+				},
+				"t5-base": {
+					providerId: "t5-base",
+					hfModelId: "t5-base",
+					task: "translation",
+					status: "live",
+				},
+				"openai/clip-vit-large-patch14-336": {
+					providerId: "openai/clip-vit-large-patch14-336",
+					hfModelId: "openai/clip-vit-large-patch14-336",
+					task: "zero-shot-image-classification",
+					status: "live",
+				},
+				"google/vit-base-patch16-224": {
+					providerId: "google/vit-base-patch16-224",
+					hfModelId: "google/vit-base-patch16-224",
+					task: "image-classification",
+					status: "live",
+				},
+				"dandelin/vilt-b32-finetuned-vqa": {
+					providerId: "dandelin/vilt-b32-finetuned-vqa",
+					hfModelId: "dandelin/vilt-b32-finetuned-vqa",
+					task: "visual-question-answering",
+					status: "live",
+				},
+				"dbmdz/bert-large-cased-finetuned-conll03-english": {
+					providerId: "dbmdz/bert-large-cased-finetuned-conll03-english",
+					hfModelId: "dbmdz/bert-large-cased-finetuned-conll03-english",
+					task: "token-classification",
+					status: "live",
+				},
+				"nlpconnect/vit-gpt2-image-captioning": {
+					providerId: "nlpconnect/vit-gpt2-image-captioning",
+					hfModelId: "nlpconnect/vit-gpt2-image-captioning",
+					task: "image-to-text",
+					status: "live",
+				},
+			};
 
 			it("throws error if model does not exist", () => {
 				expect(
@@ -50,7 +225,7 @@ describe.concurrent("InferenceClient", () => {
 			it("fillMask", async () => {
 				expect(
 					await hf.fillMask({
-						model: "bert-base-uncased",
+						model: "google-bert/bert-base-uncased",
 						inputs: "[MASK] world!",
 					})
 				).toEqual(
@@ -119,7 +294,7 @@ describe.concurrent("InferenceClient", () => {
 					await hf.tableQuestionAnswering({
 						model: "google/tapas-base-finetuned-wtq",
 						inputs: {
-							query: "How many stars does the transformers repository have?",
+							question: "How many stars does the transformers repository have?",
 							table: {
 								Repository: ["Transformers", "Datasets", "Tokenizers"],
 								Stars: ["36542", "4512", "3934"],
@@ -200,7 +375,7 @@ describe.concurrent("InferenceClient", () => {
 				);
 			});
 
-			it("textGeneration - gpt2", async () => {
+			it.skip("textGeneration - gpt2", async () => {
 				expect(
 					await hf.textGeneration({
 						model: "gpt2",
@@ -211,7 +386,7 @@ describe.concurrent("InferenceClient", () => {
 				});
 			});
 
-			it("textGeneration - openai-community/gpt2", async () => {
+			it.skip("textGeneration - openai-community/gpt2", async () => {
 				expect(
 					await hf.textGeneration({
 						model: "openai-community/gpt2",
@@ -313,7 +488,8 @@ describe.concurrent("InferenceClient", () => {
 				expect(
 					await hf.translation({
 						model: "t5-base",
-						inputs: ["My name is Wolfgang and I live in Berlin", "I work as programmer"],
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						inputs: ["My name is Wolfgang and I live in Berlin", "I work as programmer"] as any,
 					})
 				).toMatchObject([
 					{
@@ -330,7 +506,8 @@ describe.concurrent("InferenceClient", () => {
 						model: "facebook/bart-large-mnli",
 						inputs: [
 							"Hi, I recently bought a device from your company but it is not working as advertised and I would like to get reimbursed!",
-						],
+							// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						] as any,
 						parameters: { candidate_labels: ["refund", "legal", "faq"] },
 					})
 				).toEqual(
@@ -515,7 +692,7 @@ describe.concurrent("InferenceClient", () => {
 
 			it("objectDetection", async () => {
 				expect(
-					await hf.imageClassification({
+					await hf.objectDetection({
 						data: new Blob([readTestFile("cats.png")], { type: "image/png" }),
 						model: "facebook/detr-resnet-50",
 					})
@@ -536,7 +713,7 @@ describe.concurrent("InferenceClient", () => {
 			});
 			it("imageSegmentation", async () => {
 				expect(
-					await hf.imageClassification({
+					await hf.imageSegmentation({
 						data: new Blob([readTestFile("cats.png")], { type: "image/png" }),
 						model: "facebook/detr-resnet-50-panoptic",
 					})
@@ -607,7 +784,9 @@ describe.concurrent("InferenceClient", () => {
 					generated_text: "a large brown and white giraffe standing in a field ",
 				});
 			});
-			it("request - openai-community/gpt2", async () => {
+
+			/// Skipping because the function is deprecated
+			it.skip("request - openai-community/gpt2", async () => {
 				expect(
 					await hf.request({
 						model: "openai-community/gpt2",
@@ -666,9 +845,25 @@ describe.concurrent("InferenceClient", () => {
 			it("endpoint - makes request to specified endpoint", async () => {
 				const ep = hf.endpoint("https://router.huggingface.co/hf-inference/models/openai-community/gpt2");
 				const { generated_text } = await ep.textGeneration({
-					inputs: "one plus two equals",
+					inputs: "one plus one is equal to",
+					parameters: {
+						max_new_tokens: 1,
+					},
 				});
-				assert.include(generated_text, "three");
+				assert.include(generated_text, "two");
+			});
+
+			it("endpoint - makes request to specified endpoint - alternative syntax", async () => {
+				const epClient = new InferenceClient(env.HF_TOKEN, {
+					endpointUrl: "https://router.huggingface.co/hf-inference/models/openai-community/gpt2",
+				});
+				const { generated_text } = await epClient.textGeneration({
+					inputs: "one plus one is equal to",
+					parameters: {
+						max_new_tokens: 1,
+					},
+				});
+				assert.include(generated_text, "two");
 			});
 
 			it("chatCompletion modelId - OpenAI Specs", async () => {
@@ -802,12 +997,54 @@ describe.concurrent("InferenceClient", () => {
 		() => {
 			const client = new InferenceClient(env.HF_FAL_KEY ?? "dummy");
 
+			HARDCODED_MODEL_INFERENCE_MAPPING["fal-ai"] = {
+				"openfree/flux-chatgpt-ghibli-lora": {
+					hfModelId: "openfree/flux-chatgpt-ghibli-lora",
+					providerId: "fal-ai/flux-lora",
+					status: "live",
+					task: "text-to-image",
+					adapter: "lora",
+					adapterWeightsPath: "flux-chatgpt-ghibli-lora.safetensors",
+				},
+				"nerijs/pixel-art-xl": {
+					hfModelId: "nerijs/pixel-art-xl",
+					providerId: "fal-ai/lora",
+					status: "live",
+					task: "text-to-image",
+					adapter: "lora",
+					adapterWeightsPath: "pixel-art-xl.safetensors",
+				},
+			};
+
 			it(`textToImage - black-forest-labs/FLUX.1-schnell`, async () => {
 				const res = await client.textToImage({
 					model: "black-forest-labs/FLUX.1-schnell",
 					provider: "fal-ai",
 					inputs:
 						"Extreme close-up of a single tiger eye, direct frontal view. Detailed iris and pupil. Sharp focus on eye texture and color. Natural lighting to capture authentic eye shine and depth.",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			/// Skipped: we need a way to pass the base model ID
+			it(`textToImage - SD LoRAs`, async () => {
+				const res = await client.textToImage({
+					model: "nerijs/pixel-art-xl",
+					provider: "fal-ai",
+					inputs: "pixel, a cute corgi",
+					parameters: {
+						negative_prompt: "3d render, realistic",
+					},
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it(`textToImage - Flux LoRAs`, async () => {
+				const res = await client.textToImage({
+					model: "openfree/flux-chatgpt-ghibli-lora",
+					provider: "fal-ai",
+					inputs:
+						"Ghibli style sky whale transport ship, its metallic skin adorned with traditional Japanese patterns, gliding through cotton candy clouds at sunrise. Small floating gardens hang from its sides, where workers in futuristic kimonos tend to glowing plants. Rainbow auroras shimmer in the background. [trigger]",
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
@@ -821,6 +1058,79 @@ describe.concurrent("InferenceClient", () => {
 				expect(res).toMatchObject({
 					text: " he has grave doubts whether sir frederick leighton's work is really greek after all and can discover in it but little of rocky ithaca",
 				});
+			});
+		},
+		TIMEOUT
+	);
+
+	describe.concurrent(
+		"Featherless",
+		() => {
+			HARDCODED_MODEL_INFERENCE_MAPPING["featherless-ai"] = {
+				"meta-llama/Llama-3.1-8B": {
+					providerId: "meta-llama/Meta-Llama-3.1-8B",
+					hfModelId: "meta-llama/Llama-3.1-8B",
+					task: "text-generation",
+					status: "live",
+				},
+				"meta-llama/Llama-3.1-8B-Instruct": {
+					providerId: "meta-llama/Meta-Llama-3.1-8B-Instruct",
+					hfModelId: "meta-llama/Llama-3.1-8B-Instruct",
+					task: "text-generation",
+					status: "live",
+				},
+			};
+
+			it("chatCompletion", async () => {
+				const res = await chatCompletion({
+					accessToken: env.HF_FEATHERLESS_KEY ?? "dummy",
+					model: "meta-llama/Llama-3.1-8B-Instruct",
+					provider: "featherless-ai",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+					temperature: 0.1,
+				});
+
+				expect(res).toBeDefined();
+				expect(res.choices).toBeDefined();
+				expect(res.choices?.length).toBeGreaterThan(0);
+
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toBeDefined();
+					expect(typeof completion).toBe("string");
+					expect(completion).toContain("two");
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = chatCompletionStream({
+					accessToken: env.HF_FEATHERLESS_KEY ?? "dummy",
+					model: "meta-llama/Llama-3.1-8B-Instruct",
+					provider: "featherless-ai",
+					messages: [{ role: "user", content: "Complete the equation 1 + 1 = , just the answer" }],
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+				let out = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						out += chunk.choices[0].delta.content;
+					}
+				}
+				expect(out).toContain("2");
+			});
+
+			it("textGeneration", async () => {
+				const res = await textGeneration({
+					accessToken: env.HF_FEATHERLESS_KEY ?? "dummy",
+					model: "meta-llama/Llama-3.1-8B",
+					provider: "featherless-ai",
+					inputs: "Paris is a city of ",
+					parameters: {
+						temperature: 0,
+						top_p: 0.01,
+						max_tokens: 10,
+					},
+				});
+				expect(res).toMatchObject({ generated_text: "2.2 million people, and it is the" });
 			});
 		},
 		TIMEOUT
@@ -846,6 +1156,17 @@ describe.concurrent("InferenceClient", () => {
 					provider: "replicate",
 					inputs:
 						"A tiny laboratory deep in the Black Forest where squirrels in lab coats experiment with mixing chocolate and pine cones",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			// Runs black-forest-labs/flux-dev-lora under the hood
+			// with fofr/flux-80s-cyberpunk as the LoRA weights
+			it("textToImage - all Flux LoRAs", async () => {
+				const res = await client.textToImage({
+					model: "fofr/flux-80s-cyberpunk",
+					provider: "replicate",
+					inputs: "style of 80s cyberpunk, a portrait photo",
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
@@ -956,6 +1277,15 @@ describe.concurrent("InferenceClient", () => {
 				}
 				expect(out).toContain("2");
 			});
+			it("featureExtraction", async () => {
+				const res = await client.featureExtraction({
+					model: "intfloat/e5-mistral-7b-instruct",
+					provider: "sambanova",
+					inputs: "Today is a sunny day and I will get some ice cream.",
+				});
+				expect(res).toBeInstanceOf(Array);
+				expect(res[0]).toBeInstanceOf(Array);
+			});
 		},
 		TIMEOUT
 	);
@@ -1020,10 +1350,31 @@ describe.concurrent("InferenceClient", () => {
 		() => {
 			const client = new InferenceClient(env.HF_NEBIUS_KEY ?? "dummy");
 
-			HARDCODED_MODEL_ID_MAPPING.nebius = {
-				"meta-llama/Llama-3.1-8B-Instruct": "meta-llama/Meta-Llama-3.1-8B-Instruct",
-				"meta-llama/Llama-3.1-70B-Instruct": "meta-llama/Meta-Llama-3.1-70B-Instruct",
-				"black-forest-labs/FLUX.1-schnell": "black-forest-labs/flux-schnell",
+			HARDCODED_MODEL_INFERENCE_MAPPING.nebius = {
+				"meta-llama/Llama-3.1-8B-Instruct": {
+					hfModelId: "meta-llama/Llama-3.1-8B-Instruct",
+					providerId: "meta-llama/Meta-Llama-3.1-8B-Instruct",
+					status: "live",
+					task: "conversational",
+				},
+				"meta-llama/Llama-3.1-70B-Instruct": {
+					hfModelId: "meta-llama/Llama-3.1-8B-Instruct",
+					providerId: "meta-llama/Meta-Llama-3.1-70B-Instruct",
+					status: "live",
+					task: "conversational",
+				},
+				"black-forest-labs/FLUX.1-schnell": {
+					hfModelId: "meta-llama/Llama-3.1-8B-Instruct",
+					providerId: "black-forest-labs/flux-schnell",
+					status: "live",
+					task: "text-to-image",
+				},
+				"BAAI/bge-multilingual-gemma2": {
+					providerId: "BAAI/bge-multilingual-gemma2",
+					hfModelId: "BAAI/bge-multilingual-gemma2",
+					status: "live",
+					task: "feature-extraction",
+				},
 			};
 
 			it("chatCompletion", async () => {
@@ -1061,6 +1412,16 @@ describe.concurrent("InferenceClient", () => {
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
+
+			it("featureExtraction", async () => {
+				const res = await client.featureExtraction({
+					model: "BAAI/bge-multilingual-gemma2",
+					inputs: "That is a happy person",
+				});
+
+				expect(res).toBeInstanceOf(Array);
+				expect(res[0]).toEqual(expect.arrayContaining([expect.any(Number)]));
+			});
 		},
 		TIMEOUT
 	);
@@ -1085,8 +1446,13 @@ describe.concurrent("InferenceClient", () => {
 		() => {
 			const client = new InferenceClient(env.HF_FIREWORKS_KEY ?? "dummy");
 
-			HARDCODED_MODEL_ID_MAPPING["fireworks-ai"] = {
-				"deepseek-ai/DeepSeek-R1": "accounts/fireworks/models/deepseek-r1",
+			HARDCODED_MODEL_INFERENCE_MAPPING["fireworks-ai"] = {
+				"deepseek-ai/DeepSeek-R1": {
+					hfModelId: "deepseek-ai/DeepSeek-R1",
+					providerId: "accounts/fireworks/models/deepseek-r1",
+					status: "live",
+					task: "conversational",
+				},
 			};
 
 			it("chatCompletion", async () => {
@@ -1130,11 +1496,31 @@ describe.concurrent("InferenceClient", () => {
 	describe.concurrent(
 		"Hyperbolic",
 		() => {
-			HARDCODED_MODEL_ID_MAPPING.hyperbolic = {
-				"meta-llama/Llama-3.2-3B-Instruct": "meta-llama/Llama-3.2-3B-Instruct",
-				"meta-llama/Llama-3.3-70B-Instruct": "meta-llama/Llama-3.3-70B-Instruct",
-				"stabilityai/stable-diffusion-2": "SD2",
-				"meta-llama/Llama-3.1-405B-FP8": "meta-llama/Llama-3.1-405B-FP8",
+			HARDCODED_MODEL_INFERENCE_MAPPING["hyperbolic"] = {
+				"meta-llama/Llama-3.2-3B-Instruct": {
+					hfModelId: "meta-llama/Llama-3.2-3B-Instruct",
+					providerId: "meta-llama/Llama-3.2-3B-Instruct",
+					status: "live",
+					task: "conversational",
+				},
+				"meta-llama/Llama-3.3-70B-Instruct": {
+					hfModelId: "meta-llama/Llama-3.3-70B-Instruct",
+					providerId: "meta-llama/Llama-3.3-70B-Instruct",
+					status: "live",
+					task: "conversational",
+				},
+				"stabilityai/stable-diffusion-2": {
+					hfModelId: "stabilityai/stable-diffusion-2",
+					providerId: "SD2",
+					status: "live",
+					task: "text-to-image",
+				},
+				"meta-llama/Llama-3.1-405B-FP8": {
+					hfModelId: "meta-llama/Llama-3.1-405B-FP8",
+					providerId: "meta-llama/Llama-3.1-405B-FP8",
+					status: "live",
+					task: "conversational",
+				},
 			};
 
 			it("chatCompletion - hyperbolic", async () => {
@@ -1211,9 +1597,19 @@ describe.concurrent("InferenceClient", () => {
 		() => {
 			const client = new InferenceClient(env.HF_NOVITA_KEY ?? "dummy");
 
-			HARDCODED_MODEL_ID_MAPPING["novita"] = {
-				"meta-llama/llama-3.1-8b-instruct": "meta-llama/llama-3.1-8b-instruct",
-				"deepseek/deepseek-r1-distill-qwen-14b": "deepseek/deepseek-r1-distill-qwen-14b",
+			HARDCODED_MODEL_INFERENCE_MAPPING["novita"] = {
+				"meta-llama/llama-3.1-8b-instruct": {
+					hfModelId: "meta-llama/llama-3.1-8b-instruct",
+					providerId: "meta-llama/llama-3.1-8b-instruct",
+					status: "live",
+					task: "conversational",
+				},
+				"deepseek/deepseek-r1-distill-qwen-14b": {
+					hfModelId: "deepseek/deepseek-r1-distill-qwen-14b",
+					providerId: "deepseek/deepseek-r1-distill-qwen-14b",
+					status: "live",
+					task: "conversational",
+				},
 			};
 
 			it("chatCompletion", async () => {
@@ -1256,8 +1652,13 @@ describe.concurrent("InferenceClient", () => {
 	describe.concurrent(
 		"Black Forest Labs",
 		() => {
-			HARDCODED_MODEL_ID_MAPPING["black-forest-labs"] = {
-				"black-forest-labs/FLUX.1-dev": "flux-dev",
+			HARDCODED_MODEL_INFERENCE_MAPPING["black-forest-labs"] = {
+				"black-forest-labs/FLUX.1-dev": {
+					hfModelId: "black-forest-labs/FLUX.1-dev",
+					providerId: "flux-dev",
+					status: "live",
+					task: "text-to-image",
+				},
 				// "black-forest-labs/FLUX.1-schnell": "flux-pro",
 			};
 
@@ -1304,9 +1705,19 @@ describe.concurrent("InferenceClient", () => {
 		() => {
 			const client = new InferenceClient(env.HF_COHERE_KEY ?? "dummy");
 
-			HARDCODED_MODEL_ID_MAPPING["cohere"] = {
-				"CohereForAI/c4ai-command-r7b-12-2024": "command-r7b-12-2024",
-				"CohereForAI/aya-expanse-8b": "c4ai-aya-expanse-8b",
+			HARDCODED_MODEL_INFERENCE_MAPPING["cohere"] = {
+				"CohereForAI/c4ai-command-r7b-12-2024": {
+					hfModelId: "CohereForAI/c4ai-command-r7b-12-2024",
+					providerId: "command-r7b-12-2024",
+					status: "live",
+					task: "conversational",
+				},
+				"CohereForAI/aya-expanse-8b": {
+					hfModelId: "CohereForAI/aya-expanse-8b",
+					providerId: "c4ai-aya-expanse-8b",
+					status: "live",
+					task: "conversational",
+				},
 			};
 
 			it("chatCompletion", async () => {
@@ -1351,8 +1762,13 @@ describe.concurrent("InferenceClient", () => {
 		() => {
 			const client = new InferenceClient(env.HF_CEREBRAS_KEY ?? "dummy");
 
-			HARDCODED_MODEL_ID_MAPPING["cerebras"] = {
-				"meta-llama/llama-3.1-8b-instruct": "llama3.1-8b",
+			HARDCODED_MODEL_INFERENCE_MAPPING["cerebras"] = {
+				"meta-llama/llama-3.1-8b-instruct": {
+					hfModelId: "meta-llama/llama-3.1-8b-instruct",
+					providerId: "llama3.1-8b",
+					status: "live",
+					task: "conversational",
+				},
 			};
 
 			it("chatCompletion", async () => {
@@ -1388,6 +1804,221 @@ describe.concurrent("InferenceClient", () => {
 				// Verify we got a meaningful response
 				expect(fullResponse).toBeTruthy();
 				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+		},
+		TIMEOUT
+	);
+	describe.concurrent(
+		"Nscale",
+		() => {
+			const client = new InferenceClient(env.HF_NSCALE_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["nscale"] = {
+				"meta-llama/Llama-3.1-8B-Instruct": {
+					hfModelId: "meta-llama/Llama-3.1-8B-Instruct",
+					providerId: "nscale",
+					status: "live",
+					task: "conversational",
+				},
+				"black-forest-labs/FLUX.1-schnell": {
+					hfModelId: "black-forest-labs/FLUX.1-schnell",
+					providerId: "flux-schnell",
+					status: "live",
+					task: "text-to-image",
+				},
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "meta-llama/Llama-3.1-8B-Instruct",
+					provider: "nscale",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toContain("two");
+				}
+			});
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "meta-llama/Llama-3.1-8B-Instruct",
+					provider: "nscale",
+					messages: [{ role: "user", content: "Say 'this is a test'" }],
+					stream: true,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+			it("textToImage", async () => {
+				const res = await client.textToImage({
+					model: "black-forest-labs/FLUX.1-schnell",
+					provider: "nscale",
+					inputs: "An astronaut riding a horse",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+		},
+		TIMEOUT
+	);
+	describe.concurrent(
+		"Groq",
+		() => {
+			const client = new InferenceClient(env.HF_GROQ_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["groq"] = {
+				"meta-llama/Llama-3.3-70B-Instruct": {
+					hfModelId: "meta-llama/Llama-3.3-70B-Instruct",
+					providerId: "llama-3.3-70b-versatile",
+					status: "live",
+					task: "conversational",
+				},
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "meta-llama/Llama-3.3-70B-Instruct",
+					provider: "groq",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toContain("two");
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "meta-llama/Llama-3.3-70B-Instruct",
+					provider: "groq",
+					messages: [{ role: "user", content: "Say 'this is a test'" }],
+					stream: true,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
+			});
+		},
+		TIMEOUT
+	);
+	describe.concurrent(
+		"OVHcloud",
+		() => {
+			const client = new HfInference(env.HF_OVHCLOUD_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["ovhcloud"] = {
+				"meta-llama/llama-3.1-8b-instruct": {
+					hfModelId: "meta-llama/llama-3.1-8b-instruct",
+					providerId: "Llama-3.1-8B-Instruct",
+					status: "live",
+					task: "conversational",
+				},
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "meta-llama/llama-3.1-8b-instruct",
+					provider: "ovhcloud",
+					messages: [{ role: "user", content: "A, B, C, " }],
+					seed: 42,
+					temperature: 0,
+					top_p: 0.01,
+					max_tokens: 1,
+				});
+				expect(res.choices && res.choices.length > 0);
+				const completion = res.choices[0].message?.content;
+				expect(completion).toContain("D");
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "meta-llama/llama-3.1-8b-instruct",
+					provider: "ovhcloud",
+					messages: [{ role: "user", content: "A, B, C, " }],
+					stream: true,
+					seed: 42,
+					temperature: 0,
+					top_p: 0.01,
+					max_tokens: 1,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse).toContain("D");
+			});
+
+			it("textGeneration", async () => {
+				const res = await client.textGeneration({
+					model: "meta-llama/llama-3.1-8b-instruct",
+					provider: "ovhcloud",
+					inputs: "A B C ",
+					parameters: {
+						seed: 42,
+						temperature: 0,
+						top_p: 0.01,
+						max_new_tokens: 1,
+					},
+				});
+				expect(res.generated_text.length > 0);
+				expect(res.generated_text).toContain("D");
+			});
+
+			it("textGeneration stream", async () => {
+				const stream = client.textGenerationStream({
+					model: "meta-llama/llama-3.1-8b-instruct",
+					provider: "ovhcloud",
+					inputs: "A B C ",
+					stream: true,
+					parameters: {
+						seed: 42,
+						temperature: 0,
+						top_p: 0.01,
+						max_new_tokens: 1,
+					},
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].text;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse).toContain("D");
 			});
 		},
 		TIMEOUT

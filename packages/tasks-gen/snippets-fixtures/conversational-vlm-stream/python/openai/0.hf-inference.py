@@ -2,7 +2,7 @@ from openai import OpenAI
 
 client = OpenAI(
     base_url="https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.2-11B-Vision-Instruct/v1",
-    api_key="api_token"
+    api_key="api_token",
 )
 
 stream = client.chat.completions.create(
@@ -24,7 +24,6 @@ stream = client.chat.completions.create(
             ]
         }
     ],
-    max_tokens=512,
     stream=True,
 )
 

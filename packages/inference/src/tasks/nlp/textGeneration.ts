@@ -1,8 +1,9 @@
 import type { TextGenerationInput, TextGenerationOutput } from "@huggingface/tasks";
-import { getProviderHelper } from "../../lib/getProviderHelper";
-import type { HyperbolicTextCompletionOutput } from "../../providers/hyperbolic";
-import type { BaseArgs, Options } from "../../types";
-import { innerRequest } from "../../utils/request";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { HyperbolicTextCompletionOutput } from "../../providers/hyperbolic.js";
+import type { BaseArgs, Options } from "../../types.js";
+import { innerRequest } from "../../utils/request.js";
 
 export type { TextGenerationInput, TextGenerationOutput };
 
@@ -13,11 +14,11 @@ export async function textGeneration(
 	args: BaseArgs & TextGenerationInput,
 	options?: Options
 ): Promise<TextGenerationOutput> {
-	const provider = args.provider ?? "hf-inference";
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "text-generation");
 	const { data: response } = await innerRequest<
 		HyperbolicTextCompletionOutput | TextGenerationOutput | TextGenerationOutput[]
-	>(args, {
+	>(args, providerHelper, {
 		...options,
 		task: "text-generation",
 	});

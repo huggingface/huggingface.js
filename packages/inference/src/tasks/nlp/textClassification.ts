@@ -1,7 +1,8 @@
 import type { TextClassificationInput, TextClassificationOutput } from "@huggingface/tasks";
-import { getProviderHelper } from "../../lib/getProviderHelper";
-import type { BaseArgs, Options } from "../../types";
-import { innerRequest } from "../../utils/request";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options } from "../../types.js";
+import { innerRequest } from "../../utils/request.js";
 
 export type TextClassificationArgs = BaseArgs & TextClassificationInput;
 
@@ -12,8 +13,9 @@ export async function textClassification(
 	args: TextClassificationArgs,
 	options?: Options
 ): Promise<TextClassificationOutput> {
-	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "text-classification");
-	const { data: res } = await innerRequest<TextClassificationOutput>(args, {
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "text-classification");
+	const { data: res } = await innerRequest<TextClassificationOutput>(args, providerHelper, {
 		...options,
 		task: "text-classification",
 	});

@@ -33,11 +33,11 @@ import type {
 	ZeroShotClassificationOutput,
 	ZeroShotImageClassificationOutput,
 } from "@huggingface/tasks";
-import { HF_ROUTER_URL } from "../config";
-import { InferenceOutputError } from "../lib/InferenceOutputError";
-import type { TabularClassificationOutput } from "../tasks/tabular/tabularClassification";
-import type { BodyParams, UrlParams } from "../types";
-import { toArray } from "../utils/toArray";
+import { HF_ROUTER_URL } from "../config.js";
+import { InferenceOutputError } from "../lib/InferenceOutputError.js";
+import type { TabularClassificationOutput } from "../tasks/tabular/tabularClassification.js";
+import type { BodyParams, RequestArgs, UrlParams } from "../types.js";
+import { toArray } from "../utils/toArray.js";
 import type {
 	AudioClassificationTaskHelper,
 	AudioToAudioTaskHelper,
@@ -67,10 +67,13 @@ import type {
 	VisualQuestionAnsweringTaskHelper,
 	ZeroShotClassificationTaskHelper,
 	ZeroShotImageClassificationTaskHelper,
-} from "./providerHelper";
+} from "./providerHelper.js";
 
-import { TaskProviderHelper } from "./providerHelper";
-
+import { TaskProviderHelper } from "./providerHelper.js";
+import { base64FromBytes } from "../utils/base64FromBytes.js";
+import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
+import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
+import { omit } from "../utils/omit.js";
 interface Base64ImageGeneration {
 	data: Array<{
 		b64_json: string;
@@ -86,6 +89,8 @@ interface AudioToAudioOutput {
 	"content-type": string;
 	label: string;
 }
+
+export const EQUIVALENT_SENTENCE_TRANSFORMERS_TASKS = ["feature-extraction", "sentence-similarity"] as const;
 
 export class HFInferenceTask extends TaskProviderHelper {
 	constructor() {
@@ -104,7 +109,7 @@ export class HFInferenceTask extends TaskProviderHelper {
 	makeRoute(params: UrlParams): string {
 		if (params.task && ["feature-extraction", "sentence-similarity"].includes(params.task)) {
 			// when deployed on hf-inference, those two tasks are automatically compatible with one another.
-			return `pipeline/${params.task}/${params.model}`;
+			return `models/${params.model}/pipeline/${params.task}`;
 		}
 		return `models/${params.model}`;
 	}
@@ -219,6 +224,15 @@ export class HFInferenceAutomaticSpeechRecognitionTask
 	override async getResponse(response: AutomaticSpeechRecognitionOutput): Promise<AutomaticSpeechRecognitionOutput> {
 		return response;
 	}
+
+	async preparePayloadAsync(args: AutomaticSpeechRecognitionArgs): Promise<RequestArgs> {
+		return "data" in args
+			? args
+			: {
+					...omit(args, "inputs"),
+					data: args.inputs,
+			  };
+	}
 }
 
 export class HFInferenceAudioToAudioTask extends HFInferenceTask implements AudioToAudioTaskHelper {
@@ -301,7 +315,12 @@ export class HFInferenceImageSegmentationTask extends HFInferenceTask implements
 	override async getResponse(response: ImageSegmentationOutput): Promise<ImageSegmentationOutput> {
 		if (
 			Array.isArray(response) &&
-			response.every((x) => typeof x.label === "string" && typeof x.mask === "string" && typeof x.score === "number")
+			response.every(
+				(x) =>
+					typeof x.label === "string" &&
+					typeof x.mask === "string" &&
+					(x.score === undefined || typeof x.score === "number")
+			)
 		) {
 			return response;
 		}
@@ -319,6 +338,23 @@ export class HFInferenceImageToTextTask extends HFInferenceTask implements Image
 }
 
 export class HFInferenceImageToImageTask extends HFInferenceTask implements ImageToImageTaskHelper {
+	async preparePayloadAsync(args: ImageToImageArgs): Promise<RequestArgs> {
+		if (!args.parameters) {
+			return {
+				...args,
+				model: args.model,
+				data: args.inputs,
+			};
+		} else {
+			return {
+				...args,
+				inputs: base64FromBytes(
+					new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await (args.inputs as Blob).arrayBuffer())
+				),
+			};
+		}
+	}
+
 	override async getResponse(response: Blob): Promise<Blob> {
 		if (response instanceof Blob) {
 			return response;
@@ -385,13 +421,13 @@ export class HFInferenceQuestionAnsweringTask extends HFInferenceTask implements
 							typeof elem.end === "number" &&
 							typeof elem.score === "number" &&
 							typeof elem.start === "number"
-					)
+				  )
 				: typeof response === "object" &&
-					!!response &&
-					typeof response.answer === "string" &&
-					typeof response.end === "number" &&
-					typeof response.score === "number" &&
-					typeof response.start === "number"
+				  !!response &&
+				  typeof response.answer === "string" &&
+				  typeof response.end === "number" &&
+				  typeof response.score === "number" &&
+				  typeof response.start === "number"
 		) {
 			return Array.isArray(response) ? response[0] : response;
 		}

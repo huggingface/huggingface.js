@@ -1,8 +1,9 @@
 import type { ImageSegmentationInput, ImageSegmentationOutput } from "@huggingface/tasks";
-import { getProviderHelper } from "../../lib/getProviderHelper";
-import type { BaseArgs, Options } from "../../types";
-import { innerRequest } from "../../utils/request";
-import { preparePayload, type LegacyImageInput } from "./utils";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options } from "../../types.js";
+import { innerRequest } from "../../utils/request.js";
+import { preparePayload, type LegacyImageInput } from "./utils.js";
 
 export type ImageSegmentationArgs = BaseArgs & (ImageSegmentationInput | LegacyImageInput);
 
@@ -14,9 +15,10 @@ export async function imageSegmentation(
 	args: ImageSegmentationArgs,
 	options?: Options
 ): Promise<ImageSegmentationOutput> {
-	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "image-segmentation");
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "image-segmentation");
 	const payload = preparePayload(args);
-	const { data: res } = await innerRequest<ImageSegmentationOutput>(payload, {
+	const { data: res } = await innerRequest<ImageSegmentationOutput>(payload, providerHelper, {
 		...options,
 		task: "image-segmentation",
 	});

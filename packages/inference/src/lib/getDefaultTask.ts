@@ -1,5 +1,5 @@
-import { HF_HUB_URL } from "../config";
-import { isUrl } from "./isUrl";
+import { HF_HUB_URL } from "../config.js";
+import { isUrl } from "./isUrl.js";
 
 /**
  * We want to make calls to the huggingface hub the least possible, eg if
@@ -53,7 +53,8 @@ export async function getDefaultTask(
 		taskCache.set(key, { task: modelTask, date: new Date() });
 
 		if (taskCache.size > MAX_CACHE_ITEMS) {
-			taskCache.delete(taskCache.keys().next().value);
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			taskCache.delete(taskCache.keys().next().value!);
 		}
 	}
 

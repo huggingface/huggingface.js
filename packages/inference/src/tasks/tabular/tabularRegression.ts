@@ -1,6 +1,7 @@
-import { getProviderHelper } from "../../lib/getProviderHelper";
-import type { BaseArgs, Options } from "../../types";
-import { innerRequest } from "../../utils/request";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options } from "../../types.js";
+import { innerRequest } from "../../utils/request.js";
 
 export type TabularRegressionArgs = BaseArgs & {
 	inputs: {
@@ -25,8 +26,9 @@ export async function tabularRegression(
 	args: TabularRegressionArgs,
 	options?: Options
 ): Promise<TabularRegressionOutput> {
-	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "tabular-regression");
-	const { data: res } = await innerRequest<TabularRegressionOutput>(args, {
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "tabular-regression");
+	const { data: res } = await innerRequest<TabularRegressionOutput>(args, providerHelper, {
 		...options,
 		task: "tabular-regression",
 	});

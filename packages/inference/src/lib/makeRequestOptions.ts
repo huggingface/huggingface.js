@@ -1,9 +1,10 @@
-import { name as packageName, version as packageVersion } from "../../package.json";
-import { HF_HEADER_X_BILL_TO, HF_HUB_URL } from "../config";
-import type { InferenceTask, Options, RequestArgs } from "../types";
-import { getProviderHelper } from "./getProviderHelper";
-import { getProviderModelId } from "./getProviderModelId";
-import { isUrl } from "./isUrl";
+import { HF_HEADER_X_BILL_TO, HF_HUB_URL } from "../config.js";
+import { PACKAGE_NAME, PACKAGE_VERSION } from "../package.js";
+import type { InferenceTask, Options, RequestArgs } from "../types.js";
+import type { InferenceProviderModelMapping } from "./getInferenceProviderMapping.js";
+import { getInferenceProviderMapping } from "./getInferenceProviderMapping.js";
+import type { getProviderHelper } from "./getProviderHelper.js";
+import { isUrl } from "./isUrl.js";
 
 /**
  * Lazy-loaded from huggingface.co/api/tasks when needed
@@ -20,14 +21,16 @@ export async function makeRequestOptions(
 		data?: Blob | ArrayBuffer;
 		stream?: boolean;
 	},
+	providerHelper: ReturnType<typeof getProviderHelper>,
 	options?: Options & {
 		/** In most cases (unless we pass a endpointUrl) we know the task */
 		task?: InferenceTask;
 	}
 ): Promise<{ url: string; info: RequestInit }> {
-	const { provider: maybeProvider, model: maybeModel } = args;
-	const provider = maybeProvider ?? "hf-inference";
+	const { model: maybeModel } = args;
+	const provider = providerHelper.provider;
 	const { task } = options ?? {};
+
 	// Validate inputs
 	if (args.endpointUrl && provider !== "hf-inference") {
 		throw new Error(`Cannot use endpointUrl with a third-party provider.`);
@@ -38,7 +41,13 @@ export async function makeRequestOptions(
 
 	if (args.endpointUrl) {
 		// No need to have maybeModel, or to load default model for a task
-		return makeRequestOptionsFromResolvedModel(maybeModel ?? args.endpointUrl, args, options);
+		return makeRequestOptionsFromResolvedModel(
+			maybeModel ?? args.endpointUrl,
+			providerHelper,
+			args,
+			undefined,
+			options
+		);
 	}
 
 	if (!maybeModel && !task) {
@@ -47,22 +56,43 @@ export async function makeRequestOptions(
 
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const hfModel = maybeModel ?? (await loadDefaultModel(task!));
-	const providerHelper = getProviderHelper(provider, task);
 
 	if (providerHelper.clientSideRoutingOnly && !maybeModel) {
 		throw new Error(`Provider ${provider} requires a model ID to be passed directly.`);
 	}
 
-	const resolvedModel = providerHelper.clientSideRoutingOnly
-		? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		  removeProviderPrefix(maybeModel!, provider)
-		: await getProviderModelId({ model: hfModel, provider }, args, {
-				task,
-				fetch: options?.fetch,
-		  });
+	const inferenceProviderMapping = providerHelper.clientSideRoutingOnly
+		? ({
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				providerId: removeProviderPrefix(maybeModel!, provider),
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				hfModelId: maybeModel!,
+				status: "live",
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				task: task!,
+		  } satisfies InferenceProviderModelMapping)
+		: await getInferenceProviderMapping(
+				{
+					modelId: hfModel,
+					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+					task: task!,
+					provider,
+					accessToken: args.accessToken,
+				},
+				{ fetch: options?.fetch }
+		  );
+	if (!inferenceProviderMapping) {
+		throw new Error(`We have not been able to find inference provider information for model ${hfModel}.`);
+	}
 
 	// Use the sync version with the resolved model
-	return makeRequestOptionsFromResolvedModel(resolvedModel, args, options);
+	return makeRequestOptionsFromResolvedModel(
+		inferenceProviderMapping.providerId,
+		providerHelper,
+		args,
+		inferenceProviderMapping,
+		options
+	);
 }
 
 /**
@@ -71,21 +101,23 @@ export async function makeRequestOptions(
  */
 export function makeRequestOptionsFromResolvedModel(
 	resolvedModel: string,
+	providerHelper: ReturnType<typeof getProviderHelper>,
 	args: RequestArgs & {
 		data?: Blob | ArrayBuffer;
 		stream?: boolean;
 	},
+	mapping: InferenceProviderModelMapping | undefined,
 	options?: Options & {
 		task?: InferenceTask;
 	}
 ): { url: string; info: RequestInit } {
 	const { accessToken, endpointUrl, provider: maybeProvider, model, ...remainingArgs } = args;
 	void model;
+	void maybeProvider;
 
-	const provider = maybeProvider ?? "hf-inference";
+	const provider = providerHelper.provider;
 
 	const { includeCredentials, task, signal, billTo } = options ?? {};
-	const providerHelper = getProviderHelper(provider, task);
 	const authMethod = (() => {
 		if (providerHelper.clientSideRoutingOnly) {
 			// Closed-source providers require an accessToken (cannot be routed).
@@ -126,7 +158,7 @@ export function makeRequestOptionsFromResolvedModel(
 
 	// Add user-agent to headers
 	// e.g. @huggingface/inference/3.1.3
-	const ownUserAgent = `${packageName}/${packageVersion}`;
+	const ownUserAgent = `${PACKAGE_NAME}/${PACKAGE_VERSION}`;
 	const userAgent = [ownUserAgent, typeof navigator !== "undefined" ? navigator.userAgent : undefined]
 		.filter((x) => x !== undefined)
 		.join(" ");
@@ -137,6 +169,7 @@ export function makeRequestOptionsFromResolvedModel(
 		args: remainingArgs as Record<string, unknown>,
 		model: resolvedModel,
 		task,
+		mapping,
 	});
 	/**
 	 * For edge runtimes, leave 'credentials' undefined, otherwise cloudflare workers will error

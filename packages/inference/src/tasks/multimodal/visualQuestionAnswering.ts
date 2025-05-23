@@ -3,10 +3,11 @@ import type {
 	VisualQuestionAnsweringInputData,
 	VisualQuestionAnsweringOutput,
 } from "@huggingface/tasks";
-import { getProviderHelper } from "../../lib/getProviderHelper";
-import type { BaseArgs, Options, RequestArgs } from "../../types";
-import { base64FromBytes } from "../../utils/base64FromBytes";
-import { innerRequest } from "../../utils/request";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options, RequestArgs } from "../../types.js";
+import { base64FromBytes } from "../../utils/base64FromBytes.js";
+import { innerRequest } from "../../utils/request.js";
 
 /// Override the type to properly set inputs.image as Blob
 export type VisualQuestionAnsweringArgs = BaseArgs &
@@ -19,7 +20,8 @@ export async function visualQuestionAnswering(
 	args: VisualQuestionAnsweringArgs,
 	options?: Options
 ): Promise<VisualQuestionAnsweringOutput[number]> {
-	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "visual-question-answering");
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "visual-question-answering");
 	const reqArgs: RequestArgs = {
 		...args,
 		inputs: {
@@ -29,7 +31,7 @@ export async function visualQuestionAnswering(
 		},
 	} as RequestArgs;
 
-	const { data: res } = await innerRequest<VisualQuestionAnsweringOutput>(reqArgs, {
+	const { data: res } = await innerRequest<VisualQuestionAnsweringOutput>(reqArgs, providerHelper, {
 		...options,
 		task: "visual-question-answering",
 	});

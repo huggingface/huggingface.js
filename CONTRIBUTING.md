@@ -20,9 +20,7 @@ It's not a hard requirement, but please consider using an icon from [Gitmoji](ht
 
 If you want to run only specific tests, you can do `pnpm test -- -t "test name"`.
 
-You can also do `npx vitest ./packages/hub/src/utils/XetBlob.spec.ts` to run a specific test file.
-
-Or `cd packages/hub && npx vitest --browser.name=chrome --browser.headless --config vitest-browser.config.mts ./src/utils/XetBlob.spec.ts` to run browser tests on a specific file
+You can also do `pnpm --filter hub test ./src/utils/XetBlob.spec.ts` to run a specific test file.
 
 ## Adding a package
 

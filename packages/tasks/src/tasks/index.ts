@@ -1,6 +1,7 @@
 import type { PipelineType } from "../pipelines.js";
 import { PIPELINE_DATA } from "../pipelines.js";
 
+import anyToAny from "./any-to-any/data.js";
 import audioClassification from "./audio-classification/data.js";
 import audioToAudio from "./audio-to-audio/data.js";
 import automaticSpeechRecognition from "./automatic-speech-recognition/data.js";
@@ -13,6 +14,7 @@ import imageToImage from "./image-to-image/data.js";
 import imageToText from "./image-to-text/data.js";
 import imageTextToText from "./image-text-to-text/data.js";
 import imageSegmentation from "./image-segmentation/data.js";
+import imageToVideo from "./image-to-video/data.js";
 import maskGeneration from "./mask-generation/data.js";
 import objectDetection from "./object-detection/data.js";
 import depthEstimation from "./depth-estimation/data.js";
@@ -34,6 +36,7 @@ import textRanking from "./text-ranking/data.js";
 import textToVideo from "./text-to-video/data.js";
 import unconditionalImageGeneration from "./unconditional-image-generation/data.js";
 import videoClassification from "./video-classification/data.js";
+import visualDocumentRetrieval from "./visual-document-retrieval/data.js";
 import visualQuestionAnswering from "./visual-question-answering/data.js";
 import zeroShotClassification from "./zero-shot-classification/data.js";
 import zeroShotImageClassification from "./zero-shot-image-classification/data.js";
@@ -67,6 +70,7 @@ export type {
 export type * from "./image-to-image/inference.js";
 export type { ImageToTextInput, ImageToTextOutput, ImageToTextParameters } from "./image-to-text/inference.js";
 export type * from "./image-segmentation/inference.js";
+export type { ImageToVideoInput, ImageToVideoOutput, ImageToVideoParameters } from "./image-to-video/inference.js";
 export type * from "./object-detection/inference.js";
 export type * from "./depth-estimation/inference.js";
 export type * from "./question-answering/inference.js";
@@ -182,7 +186,7 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 /**
  * Return the whole TaskData object for a certain task.
  * If the partialTaskData argument is left undefined,
- * the default placholder data will be used.
+ * the default placeholder data will be used.
  */
 function getData(type: PipelineType, partialTaskData: TaskDataCustom = placeholder): TaskData {
 	return {
@@ -198,14 +202,14 @@ function getData(type: PipelineType, partialTaskData: TaskDataCustom = placehold
 // Tasks that call getData() without the second argument will
 // have a "placeholder" page.
 export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
-	"any-to-any": getData("any-to-any", placeholder),
+	"any-to-any": getData("any-to-any", anyToAny),
 	"audio-classification": getData("audio-classification", audioClassification),
 	"audio-to-audio": getData("audio-to-audio", audioToAudio),
 	"audio-text-to-text": getData("audio-text-to-text", placeholder),
 	"automatic-speech-recognition": getData("automatic-speech-recognition", automaticSpeechRecognition),
 	"depth-estimation": getData("depth-estimation", depthEstimation),
 	"document-question-answering": getData("document-question-answering", documentQuestionAnswering),
-	"visual-document-retrieval": getData("visual-document-retrieval", placeholder),
+	"visual-document-retrieval": getData("visual-document-retrieval", visualDocumentRetrieval),
 	"feature-extraction": getData("feature-extraction", featureExtraction),
 	"fill-mask": getData("fill-mask", fillMask),
 	"graph-ml": undefined,
@@ -215,7 +219,7 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"image-to-image": getData("image-to-image", imageToImage),
 	"image-text-to-text": getData("image-text-to-text", imageTextToText),
 	"image-to-text": getData("image-to-text", imageToText),
-	"image-to-video": undefined,
+	"image-to-video": getData("image-to-video", imageToVideo),
 	"keypoint-detection": getData("keypoint-detection", keypointDetection),
 	"mask-generation": getData("mask-generation", maskGeneration),
 	"multiple-choice": undefined,

@@ -14,12 +14,11 @@
  *
  * Thanks!
  */
-import { InferenceOutputError } from "../lib/InferenceOutputError";
-import { isUrl } from "../lib/isUrl";
-import type { BodyParams, HeaderParams, UrlParams } from "../types";
-import { omit } from "../utils/omit";
-import { TaskProviderHelper, type TextToImageTaskHelper, type TextToVideoTaskHelper } from "./providerHelper";
-
+import { InferenceOutputError } from "../lib/InferenceOutputError.js";
+import { isUrl } from "../lib/isUrl.js";
+import type { BodyParams, HeaderParams, UrlParams } from "../types.js";
+import { omit } from "../utils/omit.js";
+import { TaskProviderHelper, type TextToImageTaskHelper, type TextToVideoTaskHelper } from "./providerHelper.js";
 export interface ReplicateOutput {
 	output?: string | string[];
 }
@@ -63,6 +62,21 @@ abstract class ReplicateTask extends TaskProviderHelper {
 }
 
 export class ReplicateTextToImageTask extends ReplicateTask implements TextToImageTaskHelper {
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		return {
+			input: {
+				...omit(params.args, ["inputs", "parameters"]),
+				...(params.args.parameters as Record<string, unknown>),
+				prompt: params.args.inputs,
+				lora_weights:
+					params.mapping?.adapter === "lora" && params.mapping.adapterWeightsPath
+						? `https://huggingface.co/${params.mapping.hfModelId}`
+						: undefined,
+			},
+			version: params.model.includes(":") ? params.model.split(":")[1] : undefined,
+		};
+	}
+
 	override async getResponse(
 		res: ReplicateOutput | Blob,
 		url?: string,

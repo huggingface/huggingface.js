@@ -4,8 +4,10 @@ async function query(data) {
 		{
 			headers: {
 				Authorization: "{{ authorizationHeader }}",
-				"Content-Type": "audio/flac"
-			},
+				"Content-Type": "audio/flac",
+{% if billTo %}
+				"X-HF-Bill-To": "{{ billTo }}",
+{% endif %}			},
 			method: "POST",
 			body: JSON.stringify(data),
 		}

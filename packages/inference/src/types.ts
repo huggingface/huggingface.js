@@ -1,4 +1,5 @@
 import type { ChatCompletionInput, PipelineType } from "@huggingface/tasks";
+import type { InferenceProviderModelMapping } from "./lib/getInferenceProviderMapping.js";
 
 /**
  * HF model id, like "meta-llama/Llama-3.3-70B-Instruct"
@@ -41,18 +42,26 @@ export const INFERENCE_PROVIDERS = [
 	"cerebras",
 	"cohere",
 	"fal-ai",
+	"featherless-ai",
 	"fireworks-ai",
+	"groq",
 	"hf-inference",
 	"hyperbolic",
 	"nebius",
 	"novita",
+	"nscale",
 	"openai",
+	"ovhcloud",
 	"replicate",
 	"sambanova",
 	"together",
 ] as const;
 
+export const PROVIDERS_OR_POLICIES = [...INFERENCE_PROVIDERS, "auto"] as const;
+
 export type InferenceProvider = (typeof INFERENCE_PROVIDERS)[number];
+
+export type InferenceProviderOrPolicy = (typeof PROVIDERS_OR_POLICIES)[number];
 
 export interface BaseArgs {
 	/**
@@ -75,18 +84,18 @@ export interface BaseArgs {
 	model?: ModelId;
 
 	/**
-	 * The URL of the endpoint to use. If not specified, will call huggingface.co/api/tasks to get the default endpoint for the task.
+	 * The URL of the endpoint to use.
 	 *
-	 * If specified, will use this URL instead of the default one.
+	 * If not specified, will call the default router.huggingface.co Inference Providers endpoint.
 	 */
 	endpointUrl?: string;
 
 	/**
 	 * Set an Inference provider to run this model on.
 	 *
-	 * Defaults to the first provider in your user settings that is compatible with this model.
+	 * Defaults to "auto" i.e. the first of the providers available for the model, sorted by the user's order in https://hf.co/settings/inference-providers.
 	 */
-	provider?: InferenceProvider;
+	provider?: InferenceProviderOrPolicy;
 }
 
 export type RequestArgs = BaseArgs &
@@ -117,5 +126,6 @@ export interface UrlParams {
 export interface BodyParams<T extends Record<string, unknown> = Record<string, unknown>> {
 	args: T;
 	model: string;
+	mapping?: InferenceProviderModelMapping | undefined;
 	task?: InferenceTask;
 }

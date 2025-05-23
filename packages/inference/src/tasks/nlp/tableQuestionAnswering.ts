@@ -1,7 +1,8 @@
 import type { TableQuestionAnsweringInput, TableQuestionAnsweringOutput } from "@huggingface/tasks";
-import { getProviderHelper } from "../../lib/getProviderHelper";
-import type { BaseArgs, Options } from "../../types";
-import { innerRequest } from "../../utils/request";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options } from "../../types.js";
+import { innerRequest } from "../../utils/request.js";
 
 export type TableQuestionAnsweringArgs = BaseArgs & TableQuestionAnsweringInput;
 
@@ -12,10 +13,15 @@ export async function tableQuestionAnswering(
 	args: TableQuestionAnsweringArgs,
 	options?: Options
 ): Promise<TableQuestionAnsweringOutput[number]> {
-	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "table-question-answering");
-	const { data: res } = await innerRequest<TableQuestionAnsweringOutput | TableQuestionAnsweringOutput[number]>(args, {
-		...options,
-		task: "table-question-answering",
-	});
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "table-question-answering");
+	const { data: res } = await innerRequest<TableQuestionAnsweringOutput | TableQuestionAnsweringOutput[number]>(
+		args,
+		providerHelper,
+		{
+			...options,
+			task: "table-question-answering",
+		}
+	);
 	return providerHelper.getResponse(res);
 }

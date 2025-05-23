@@ -1,5 +1,8 @@
-import type { InferenceTask, Options, RequestArgs } from "../../types";
-import { innerStreamingRequest } from "../../utils/request";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { InferenceTask, Options, RequestArgs } from "../../types.js";
+import { innerStreamingRequest } from "../../utils/request.js";
+
 /**
  * Primitive to make custom inference calls that expect server-sent events, and returns the response through a generator
  * @deprecated Use specific task functions instead. This function will be removed in a future version.
@@ -14,5 +17,7 @@ export async function* streamingRequest<T>(
 	console.warn(
 		"The streamingRequest method is deprecated and will be removed in a future version of huggingface.js. Use specific task functions instead."
 	);
-	yield* innerStreamingRequest(args, options);
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, options?.task);
+	yield* innerStreamingRequest(args, providerHelper, options);
 }

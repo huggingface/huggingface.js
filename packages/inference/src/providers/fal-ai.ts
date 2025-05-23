@@ -14,18 +14,22 @@
  *
  * Thanks!
  */
+import { base64FromBytes } from "../utils/base64FromBytes.js";
+
 import type { AutomaticSpeechRecognitionOutput } from "@huggingface/tasks";
-import { InferenceOutputError } from "../lib/InferenceOutputError";
-import { isUrl } from "../lib/isUrl";
-import type { BodyParams, HeaderParams, UrlParams } from "../types";
-import { delay } from "../utils/delay";
-import { omit } from "../utils/omit";
+import { InferenceOutputError } from "../lib/InferenceOutputError.js";
+import { isUrl } from "../lib/isUrl.js";
+import type { BodyParams, HeaderParams, ModelId, RequestArgs, UrlParams } from "../types.js";
+import { delay } from "../utils/delay.js";
+import { omit } from "../utils/omit.js";
 import {
 	type AutomaticSpeechRecognitionTaskHelper,
 	TaskProviderHelper,
 	type TextToImageTaskHelper,
 	type TextToVideoTaskHelper,
-} from "./providerHelper";
+} from "./providerHelper.js";
+import { HF_HUB_URL } from "../config.js";
+import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
 
 export interface FalAiQueueOutput {
 	request_id: string;
@@ -74,14 +78,32 @@ abstract class FalAITask extends TaskProviderHelper {
 	}
 }
 
+function buildLoraPath(modelId: ModelId, adapterWeightsPath: string): string {
+	return `${HF_HUB_URL}/${modelId}/resolve/main/${adapterWeightsPath}`;
+}
+
 export class FalAITextToImageTask extends FalAITask implements TextToImageTaskHelper {
 	override preparePayload(params: BodyParams): Record<string, unknown> {
-		return {
+		const payload: Record<string, unknown> = {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),
 			sync_mode: true,
 			prompt: params.args.inputs,
 		};
+
+		if (params.mapping?.adapter === "lora" && params.mapping.adapterWeightsPath) {
+			payload.loras = [
+				{
+					path: buildLoraPath(params.mapping.hfModelId, params.mapping.adapterWeightsPath),
+					scale: 1,
+				},
+			];
+			if (params.mapping.providerId === "fal-ai/lora") {
+				payload.model_name = "stabilityai/stable-diffusion-xl-base-1.0";
+			}
+		}
+
+		return payload;
 	}
 
 	override async getResponse(response: FalAITextToImageOutput, outputType?: "url" | "blob"): Promise<string | Blob> {
@@ -205,6 +227,28 @@ export class FalAIAutomaticSpeechRecognitionTask extends FalAITask implements Au
 		}
 		return { text: res.text };
 	}
+
+	async preparePayloadAsync(args: AutomaticSpeechRecognitionArgs): Promise<RequestArgs> {
+		const blob = "data" in args && args.data instanceof Blob ? args.data : "inputs" in args ? args.inputs : undefined;
+		const contentType = blob?.type;
+		if (!contentType) {
+			throw new Error(
+				`Unable to determine the input's content-type. Make sure your are passing a Blob when using provider fal-ai.`
+			);
+		}
+		if (!FAL_AI_SUPPORTED_BLOB_TYPES.includes(contentType)) {
+			throw new Error(
+				`Provider fal-ai does not support blob type ${contentType} - supported content types are: ${FAL_AI_SUPPORTED_BLOB_TYPES.join(
+					", "
+				)}`
+			);
+		}
+		const base64audio = base64FromBytes(new Uint8Array(await blob.arrayBuffer()));
+		return {
+			...("data" in args ? omit(args, "data") : omit(args, "inputs")),
+			audio_url: `data:${contentType};base64,${base64audio}`,
+		};
+	}
 }
 
 export class FalAITextToSpeechTask extends FalAITask {
@@ -212,7 +256,7 @@ export class FalAITextToSpeechTask extends FalAITask {
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),
-			lyrics: params.args.inputs,
+			text: params.args.inputs,
 		};
 	}
 

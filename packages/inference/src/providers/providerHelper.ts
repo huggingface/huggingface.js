@@ -45,18 +45,20 @@ import type {
 	ZeroShotImageClassificationInput,
 	ZeroShotImageClassificationOutput,
 } from "@huggingface/tasks";
-import { HF_ROUTER_URL } from "../config";
-import { InferenceOutputError } from "../lib/InferenceOutputError";
-import type { AudioToAudioOutput } from "../tasks/audio/audioToAudio";
-import type { BaseArgs, BodyParams, HeaderParams, InferenceProvider, UrlParams } from "../types";
-import { toArray } from "../utils/toArray";
+import { HF_ROUTER_URL } from "../config.js";
+import { InferenceOutputError } from "../lib/InferenceOutputError.js";
+import type { AudioToAudioOutput } from "../tasks/audio/audioToAudio.js";
+import type { BaseArgs, BodyParams, HeaderParams, InferenceProvider, RequestArgs, UrlParams } from "../types.js";
+import { toArray } from "../utils/toArray.js";
+import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
+import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
 
 /**
  * Base class for task-specific provider helpers
  */
 export abstract class TaskProviderHelper {
 	constructor(
-		private provider: InferenceProvider,
+		readonly provider: InferenceProvider,
 		private baseUrl: string,
 		readonly clientSideRoutingOnly: boolean = false
 	) {}
@@ -142,6 +144,7 @@ export interface TextToVideoTaskHelper {
 export interface ImageToImageTaskHelper {
 	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<Blob>;
 	preparePayload(params: BodyParams<ImageToImageInput & BaseArgs>): Record<string, unknown>;
+	preparePayloadAsync(args: ImageToImageArgs): Promise<RequestArgs>;
 }
 
 export interface ImageSegmentationTaskHelper {
@@ -245,6 +248,7 @@ export interface AudioToAudioTaskHelper {
 export interface AutomaticSpeechRecognitionTaskHelper {
 	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<AutomaticSpeechRecognitionOutput>;
 	preparePayload(params: BodyParams<AutomaticSpeechRecognitionInput & BaseArgs>): Record<string, unknown> | BodyInit;
+	preparePayloadAsync(args: AutomaticSpeechRecognitionArgs): Promise<RequestArgs>;
 }
 
 export interface AudioClassificationTaskHelper {

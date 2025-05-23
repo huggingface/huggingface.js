@@ -116,6 +116,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pth"`,
 		snippets: snippets.audioseal,
 	},
+	"bagel-mot": {
+		prettyLabel: "Bagel",
+		repoName: "Bagel",
+		repoUrl: "https://github.com/ByteDance-Seed/Bagel/",
+		filter: false,
+		countDownloads: `path:"llm_config.json"`,
+	},
 	ben2: {
 		prettyLabel: "BEN2",
 		repoName: "BEN2",
@@ -229,6 +236,20 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.derm_foundation,
 		filter: false,
 		countDownloads: `path:"scin_dataset_precomputed_embeddings.npz" OR path:"saved_model.pb"`,
+	},
+	"describe-anything": {
+		prettyLabel: "Describe Anything",
+		repoName: "Describe Anything",
+		repoUrl: "https://github.com/NVlabs/describe-anything",
+		snippets: snippets.describe_anything,
+		filter: false,
+	},
+	"dia-tts": {
+		prettyLabel: "Dia",
+		repoName: "Dia",
+		repoUrl: "https://github.com/nari-labs/dia",
+		snippets: snippets.dia,
+		filter: false,
 	},
 	diffree: {
 		prettyLabel: "Diffree",
@@ -419,6 +440,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/DigitalPhonetics/IMS-Toucan",
 		countDownloads: `path:"embedding_gan.pt" OR path:"Vocoder.pt" OR path:"ToucanTTS.pt"`,
 	},
+	"index-tts": {
+		prettyLabel: "IndexTTS",
+		repoName: "IndexTTS",
+		repoUrl: "https://github.com/index-tts/index-tts",
+		snippets: snippets.indextts,
+		filter: false,
+	},
 	"infinite-you": {
 		prettyLabel: "InfiniteYou",
 		repoName: "InfiniteYou",
@@ -451,6 +479,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://keras.io/keras_hub/",
 		snippets: snippets.keras_hub,
 		filter: true,
+	},
+	"kimi-audio": {
+		prettyLabel: "KimiAudio",
+		repoName: "KimiAudio",
+		repoUrl: "https://github.com/MoonshotAI/Kimi-Audio",
+		snippets: snippets.kimi_audio,
+		filter: false,
 	},
 	k2: {
 		prettyLabel: "K2",
@@ -616,6 +651,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"Open_Sora_v2.safetensors"`,
 	},
+	outetts: {
+		prettyLabel: "OuteTTS",
+		repoName: "OuteTTS",
+		repoUrl: "https://github.com/edwko/OuteTTS",
+		snippets: snippets.outetts,
+		filter: false,
+	},
 	paddlenlp: {
 		prettyLabel: "paddlenlp",
 		repoName: "PaddleNLP",
@@ -632,6 +674,22 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.peft,
 		filter: true,
 		countDownloads: `path:"adapter_config.json"`,
+	},
+	"perception-encoder": {
+		prettyLabel: "PerceptionEncoder",
+		repoName: "PerceptionModels",
+		repoUrl: "https://github.com/facebookresearch/perception_models",
+		filter: false,
+		snippets: snippets.perception_encoder,
+		countDownloads: `path_extension:"pt"`,
+	},
+	"phantom-wan": {
+		prettyLabel: "Phantom",
+		repoName: "Phantom",
+		repoUrl: "https://github.com/Phantom-video/Phantom",
+		snippets: snippets.phantom_wan,
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
 	},
 	pxia: {
 		prettyLabel: "pxia",
@@ -889,6 +947,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"pytorch_model.bin" OR path:"model.safetensors"`,
 	},
+	torchgeo: {
+		prettyLabel: "TorchGeo",
+		repoName: "TorchGeo",
+		repoUrl: "https://github.com/microsoft/torchgeo",
+		docsUrl: "https://torchgeo.readthedocs.io/",
+		filter: false,
+		countDownloads: `path_extension:"pt" OR path_extension:"pth"`,
+	},
 	transformers: {
 		prettyLabel: "Transformers",
 		repoName: "🤗/transformers",
@@ -979,6 +1045,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://github.com/THU-MIG/yolov10",
 		countDownloads: `path_extension:"pt" OR path_extension:"safetensors"`,
 		snippets: snippets.ultralytics,
+	},
+	zonos: {
+		prettyLabel: "Zonos",
+		repoName: "Zonos",
+		repoUrl: "https://github.com/Zyphra/Zonos",
+		docsUrl: "https://github.com/Zyphra/Zonos",
+		snippets: snippets.zonos,
+		filter: false,
 	},
 	"3dtopia-xl": {
 		prettyLabel: "3DTopia-XL",

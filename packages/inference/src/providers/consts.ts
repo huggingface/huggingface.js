@@ -1,7 +1,7 @@
-import type { InferenceProvider } from "../types";
-import { type ModelId } from "../types";
+import type { InferenceProviderModelMapping } from "../lib/getInferenceProviderMapping.js";
+import type { InferenceProvider } from "../types.js";
+import { type ModelId } from "../types.js";
 
-type ProviderId = string;
 /**
  * If you want to try to run inference for a new model locally before it's registered on huggingface.co
  * for a given Inference Provider,
@@ -9,7 +9,10 @@ type ProviderId = string;
  *
  * We also inject into this dictionary from tests.
  */
-export const HARDCODED_MODEL_ID_MAPPING: Record<InferenceProvider, Record<ModelId, ProviderId>> = {
+export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
+	InferenceProvider,
+	Record<ModelId, InferenceProviderModelMapping>
+> = {
 	/**
 	 * "HF model ID" => "Model ID on Inference Provider's side"
 	 *
@@ -20,12 +23,16 @@ export const HARDCODED_MODEL_ID_MAPPING: Record<InferenceProvider, Record<ModelI
 	cerebras: {},
 	cohere: {},
 	"fal-ai": {},
+	"featherless-ai": {},
 	"fireworks-ai": {},
+	groq: {},
 	"hf-inference": {},
 	hyperbolic: {},
 	nebius: {},
 	novita: {},
+	nscale: {},
 	openai: {},
+	ovhcloud: {},
 	replicate: {},
 	sambanova: {},
 	together: {},

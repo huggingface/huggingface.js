@@ -1,5 +1,7 @@
-import type { InferenceTask, Options, RequestArgs } from "../../types";
-import { innerRequest } from "../../utils/request";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { InferenceTask, Options, RequestArgs } from "../../types.js";
+import { innerRequest } from "../../utils/request.js";
 
 /**
  * Primitive to make custom calls to the inference provider
@@ -15,6 +17,8 @@ export async function request<T>(
 	console.warn(
 		"The request method is deprecated and will be removed in a future version of huggingface.js. Use specific task functions instead."
 	);
-	const result = await innerRequest<T>(args, options);
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, options?.task);
+	const result = await innerRequest<T>(args, providerHelper, options);
 	return result.data;
 }

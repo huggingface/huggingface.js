@@ -28,6 +28,7 @@ export async function* uploadFilesWithProgress(
 		isPullRequest?: CommitParams["isPullRequest"];
 		parentCommit?: CommitParams["parentCommit"];
 		abortSignal?: CommitParams["abortSignal"];
+		maxFolderDepth?: CommitParams["maxFolderDepth"];
 		/**
 		 * Set this to true in order to have progress events for hashing
 		 */

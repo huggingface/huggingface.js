@@ -2,7 +2,9 @@ import json
 import requests
 
 API_URL = "https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.2-11B-Vision-Instruct/v1/chat/completions"
-headers = {"Authorization": "Bearer api_token"}
+headers = {
+    "Authorization": "Bearer api_token",
+}
 
 def query(payload):
     response = requests.post(API_URL, headers=headers, json=payload, stream=True)
@@ -31,7 +33,6 @@ chunks = query({
             ]
         }
     ],
-    "max_tokens": 512,
     "model": "meta-llama/Llama-3.2-11B-Vision-Instruct",
     "stream": True,
 })

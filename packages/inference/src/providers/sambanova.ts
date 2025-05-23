@@ -14,10 +14,42 @@
  *
  * Thanks!
  */
-import { BaseConversationalTask } from "./providerHelper";
+import { InferenceOutputError } from "../lib/InferenceOutputError.js";
+
+import type { FeatureExtractionOutput } from "@huggingface/tasks";
+import type { BodyParams } from "../types.js";
+import type { FeatureExtractionTaskHelper } from "./providerHelper.js";
+import { BaseConversationalTask, TaskProviderHelper } from "./providerHelper.js";
 
 export class SambanovaConversationalTask extends BaseConversationalTask {
 	constructor() {
 		super("sambanova", "https://api.sambanova.ai");
+	}
+}
+
+export class SambanovaFeatureExtractionTask extends TaskProviderHelper implements FeatureExtractionTaskHelper {
+	constructor() {
+		super("sambanova", "https://api.sambanova.ai");
+	}
+
+	override makeRoute(): string {
+		return `/v1/embeddings`;
+	}
+
+	override async getResponse(response: FeatureExtractionOutput): Promise<FeatureExtractionOutput> {
+		if (typeof response === "object" && "data" in response && Array.isArray(response.data)) {
+			return response.data.map((item) => item.embedding);
+		}
+		throw new InferenceOutputError(
+			"Expected Sambanova feature-extraction (embeddings) response format to be {'data' : list of {'embedding' : number[]}}"
+		);
+	}
+
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		return {
+			model: params.model,
+			input: params.args.inputs,
+			...params.args,
+		};
 	}
 }

@@ -3,10 +3,11 @@ import type {
 	DocumentQuestionAnsweringInputData,
 	DocumentQuestionAnsweringOutput,
 } from "@huggingface/tasks";
-import { getProviderHelper } from "../../lib/getProviderHelper";
-import type { BaseArgs, Options, RequestArgs } from "../../types";
-import { base64FromBytes } from "../../utils/base64FromBytes";
-import { innerRequest } from "../../utils/request";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options, RequestArgs } from "../../types.js";
+import { base64FromBytes } from "../../utils/base64FromBytes.js";
+import { innerRequest } from "../../utils/request.js";
 
 /// Override the type to properly set inputs.image as Blob
 export type DocumentQuestionAnsweringArgs = BaseArgs &
@@ -19,7 +20,8 @@ export async function documentQuestionAnswering(
 	args: DocumentQuestionAnsweringArgs,
 	options?: Options
 ): Promise<DocumentQuestionAnsweringOutput[number]> {
-	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "document-question-answering");
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "document-question-answering");
 	const reqArgs: RequestArgs = {
 		...args,
 		inputs: {
@@ -30,6 +32,7 @@ export async function documentQuestionAnswering(
 	} as RequestArgs;
 	const { data: res } = await innerRequest<DocumentQuestionAnsweringOutput | DocumentQuestionAnsweringOutput[number]>(
 		reqArgs,
+		providerHelper,
 		{
 			...options,
 			task: "document-question-answering",

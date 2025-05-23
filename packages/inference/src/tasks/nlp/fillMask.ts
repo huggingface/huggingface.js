@@ -1,7 +1,8 @@
 import type { FillMaskInput, FillMaskOutput } from "@huggingface/tasks";
-import { getProviderHelper } from "../../lib/getProviderHelper";
-import type { BaseArgs, Options } from "../../types";
-import { innerRequest } from "../../utils/request";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options } from "../../types.js";
+import { innerRequest } from "../../utils/request.js";
 
 export type FillMaskArgs = BaseArgs & FillMaskInput;
 
@@ -9,8 +10,9 @@ export type FillMaskArgs = BaseArgs & FillMaskInput;
  * Tries to fill in a hole with a missing word (token to be precise). That’s the base task for BERT models.
  */
 export async function fillMask(args: FillMaskArgs, options?: Options): Promise<FillMaskOutput> {
-	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "fill-mask");
-	const { data: res } = await innerRequest<FillMaskOutput>(args, {
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "fill-mask");
+	const { data: res } = await innerRequest<FillMaskOutput>(args, providerHelper, {
 		...options,
 		task: "fill-mask",
 	});

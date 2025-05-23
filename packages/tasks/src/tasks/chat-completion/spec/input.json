@@ -275,9 +275,9 @@
 		},
 		"ChatCompletionInputFunctionDefinition": {
 			"type": "object",
-			"required": ["name", "arguments"],
+			"required": ["name", "parameters"],
 			"properties": {
-				"arguments": {},
+				"parameters": {},
 				"description": {
 					"type": "string",
 					"nullable": true
@@ -315,12 +315,40 @@
 							"type": "string"
 						}
 					}
+				},
+				{
+					"type": "object",
+					"required": ["type", "value"],
+					"properties": {
+						"type": {
+							"type": "string",
+							"enum": ["json_schema"]
+						},
+						"value": {
+							"$ref": "#/$defs/ChatCompletionInputJsonSchemaConfig"
+						}
+					}
 				}
 			],
 			"discriminator": {
 				"propertyName": "type"
 			},
 			"title": "ChatCompletionInputGrammarType"
+		},
+		"ChatCompletionInputJsonSchemaConfig": {
+			"type": "object",
+			"required": ["schema"],
+			"properties": {
+				"name": {
+					"type": "string",
+					"description": "Optional name identifier for the schema",
+					"nullable": true
+				},
+				"schema": {
+					"description": "The actual JSON schema definition"
+				}
+			},
+			"title": "ChatCompletionInputJsonSchemaConfig"
 		},
 		"ChatCompletionInputStreamOptions": {
 			"type": "object",

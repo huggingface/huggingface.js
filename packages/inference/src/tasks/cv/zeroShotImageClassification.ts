@@ -1,8 +1,9 @@
 import type { ZeroShotImageClassificationInput, ZeroShotImageClassificationOutput } from "@huggingface/tasks";
-import { getProviderHelper } from "../../lib/getProviderHelper";
-import type { BaseArgs, Options, RequestArgs } from "../../types";
-import { base64FromBytes } from "../../utils/base64FromBytes";
-import { innerRequest } from "../../utils/request";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options, RequestArgs } from "../../types.js";
+import { base64FromBytes } from "../../utils/base64FromBytes.js";
+import { innerRequest } from "../../utils/request.js";
 
 /**
  * @deprecated
@@ -44,9 +45,10 @@ export async function zeroShotImageClassification(
 	args: ZeroShotImageClassificationArgs,
 	options?: Options
 ): Promise<ZeroShotImageClassificationOutput> {
-	const providerHelper = getProviderHelper(args.provider ?? "hf-inference", "zero-shot-image-classification");
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
+	const providerHelper = getProviderHelper(provider, "zero-shot-image-classification");
 	const payload = await preparePayload(args);
-	const { data: res } = await innerRequest<ZeroShotImageClassificationOutput>(payload, {
+	const { data: res } = await innerRequest<ZeroShotImageClassificationOutput>(payload, providerHelper, {
 		...options,
 		task: "zero-shot-image-classification",
 	});

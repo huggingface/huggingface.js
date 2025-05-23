@@ -13,7 +13,7 @@ describe("local-apps", () => {
 		const snippet = snippetFunc(model);
 
 		expect(snippet[0].content).toEqual(`# Load and run the model:
-llama-cli -hf bartowski/Llama-3.2-3B-Instruct-GGUF`);
+llama-server -hf bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`);
 	});
 
 	it("llama.cpp non-conversational", async () => {
@@ -26,8 +26,7 @@ llama-cli -hf bartowski/Llama-3.2-3B-Instruct-GGUF`);
 		const snippet = snippetFunc(model);
 
 		expect(snippet[0].content).toEqual(`# Load and run the model:
-llama-cli -hf mlabonne/gemma-2b-GGUF \\
-  -p "Once upon a time,"`);
+llama-server -hf mlabonne/gemma-2b-GGUF:{{QUANT_TAG}}`);
 	});
 
 	it("vLLM conversational llm", async () => {

@@ -226,6 +226,31 @@ infer = loaded_model.signatures["serving_default"]
 print(infer(inputs=tf.constant([input_tensor])))`,
 ];
 
+export const dia = (model: ModelData): string[] => [
+	`import soundfile as sf
+from dia.model import Dia
+
+model = Dia.from_pretrained("${model.id}")
+text = "[S1] Dia is an open weights text to dialogue model. [S2] You get full control over scripts and voices. [S1] Wow. Amazing. (laughs) [S2] Try it now on Git hub or Hugging Face."
+output = model.generate(text)
+
+sf.write("simple.mp3", output, 44100)`,
+];
+
+export const describe_anything = (model: ModelData): string[] => [
+	`# pip install git+https://github.com/NVlabs/describe-anything
+from huggingface_hub import snapshot_download
+from dam import DescribeAnythingModel
+
+snapshot_download(${model.id}, local_dir="checkpoints")
+
+dam = DescribeAnythingModel(
+	model_path="checkpoints",
+	conv_mode="v1",
+	prompt_mode="focal_prompt",
+)`,
+];
+
 const diffusersDefaultPrompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
 
 const diffusers_default = (model: ModelData) => [
@@ -424,6 +449,24 @@ export const gliner = (model: ModelData): string[] => [
 model = GLiNER.from_pretrained("${model.id}")`,
 ];
 
+export const indextts = (model: ModelData): string[] => [
+	`# Download model
+from huggingface_hub import snapshot_download
+
+snapshot_download(${model.id}, local_dir="checkpoints")
+
+from indextts.infer import IndexTTS
+
+# Ensure config.yaml is present in the checkpoints directory
+tts = IndexTTS(model_dir="checkpoints", cfg_path="checkpoints/config.yaml")
+
+voice = "path/to/your/reference_voice.wav"  # Path to the voice reference audio file
+text = "Hello, how are you?"
+output_path = "output_index.wav"
+
+tts.infer(voice, text, output_path)`,
+];
+
 export const htrflow = (model: ModelData): string[] => [
 	`# CLI usage
 # see docs: https://ai-riksarkivet.github.io/htrflow/latest/getting_started/quick_start.html
@@ -549,6 +592,39 @@ export const keras_hub = (model: ModelData): string[] => {
 
 	return snippets;
 };
+
+export const kimi_audio = (model: ModelData): string[] => [
+	`# Example usage for KimiAudio
+# pip install git+https://github.com/MoonshotAI/Kimi-Audio.git
+
+from kimia_infer.api.kimia import KimiAudio
+
+model = KimiAudio(model_path="${model.id}", load_detokenizer=True)
+
+sampling_params = {
+    "audio_temperature": 0.8,
+    "audio_top_k": 10,
+    "text_temperature": 0.0,
+    "text_top_k": 5,
+}
+
+# For ASR
+asr_audio = "asr_example.wav"
+messages_asr = [
+    {"role": "user", "message_type": "text", "content": "Please transcribe the following audio:"},
+    {"role": "user", "message_type": "audio", "content": asr_audio}
+]
+_, text = model.generate(messages_asr, **sampling_params, output_type="text")
+print(text)
+
+# For Q&A
+qa_audio = "qa_example.wav"
+messages_conv = [{"role": "user", "message_type": "audio", "content": qa_audio}]
+wav, text = model.generate(messages_conv, **sampling_params, output_type="both")
+sf.write("output_audio.wav", wav.cpu().view(-1).numpy(), 24000)
+print(text)
+`,
+];
 
 export const lightning_ir = (model: ModelData): string[] => {
 	if (model.tags.includes("bi-encoder")) {
@@ -680,6 +756,35 @@ export const paddlenlp = (model: ModelData): string[] => {
 		];
 	}
 };
+
+export const perception_encoder = (model: ModelData): string[] => {
+	const clip_model = `# Use PE-Core models as CLIP models
+import core.vision_encoder.pe as pe
+
+model = pe.CLIP.from_config("${model.id}", pretrained=True)`;
+
+	const vision_encoder = `# Use any PE model as a vision encoder
+import core.vision_encoder.pe as pe
+
+model = pe.VisionTransformer.from_config("${model.id}", pretrained=True)`;
+
+	if (model.id.includes("Core")) {
+		return [clip_model, vision_encoder];
+	} else {
+		return [vision_encoder];
+	}
+};
+export const phantom_wan = (model: ModelData): string[] => [
+	`from huggingface_hub import snapshot_download
+from phantom_wan import WANI2V, configs
+
+checkpoint_dir = snapshot_download("${model.id}")
+wan_i2v = WanI2V(
+            config=configs.WAN_CONFIGS['i2v-14B'],
+            checkpoint_dir=checkpoint_dir,
+        )
+ video = wan_i2v.generate(text_prompt, image_prompt)`,
+];
 
 export const pyannote_audio_pipeline = (model: ModelData): string[] => [
 	`from pyannote.audio import Pipeline
@@ -1070,14 +1175,33 @@ export const transformers = (model: ModelData): string[] => {
 	}
 
 	if (model.pipeline_tag && LIBRARY_TASK_MAPPING.transformers?.includes(model.pipeline_tag)) {
-		const pipelineSnippet = ["# Use a pipeline as a high-level helper", "from transformers import pipeline", ""];
+		const pipelineSnippet = [
+			"# Use a pipeline as a high-level helper",
+			"from transformers import pipeline",
+			"",
+			`pipe = pipeline("${model.pipeline_tag}", model="${model.id}"` + remote_code_snippet + ")",
+		];
 
-		if (model.tags.includes("conversational") && model.config?.tokenizer_config?.chat_template) {
-			pipelineSnippet.push("messages = [", '    {"role": "user", "content": "Who are you?"},', "]");
-		}
-		pipelineSnippet.push(`pipe = pipeline("${model.pipeline_tag}", model="${model.id}"` + remote_code_snippet + ")");
-		if (model.tags.includes("conversational") && model.config?.tokenizer_config?.chat_template) {
-			pipelineSnippet.push("pipe(messages)");
+		if (model.tags.includes("conversational")) {
+			if (model.tags.includes("image-text-to-text")) {
+				pipelineSnippet.push(
+					"messages = [",
+					[
+						"    {",
+						'        "role": "user",',
+						'        "content": [',
+						'            {"type": "image", "url": "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/p-blog/candy.JPG"},',
+						'            {"type": "text", "text": "What animal is on the candy?"}',
+						"        ]",
+						"    },",
+					].join("\n"),
+					"]"
+				);
+				pipelineSnippet.push("pipe(text=messages)");
+			} else {
+				pipelineSnippet.push("messages = [", '    {"role": "user", "content": "Who are you?"},', "]");
+				pipelineSnippet.push("pipe(messages)");
+			}
 		}
 
 		return [pipelineSnippet.join("\n"), autoSnippet];
@@ -1262,11 +1386,68 @@ model = SwarmFormerModel.from_pretrained("${model.id}")
 `,
 ];
 
-export const mlx = (model: ModelData): string[] => [
-	`pip install huggingface_hub hf_transfer
+const mlx_unknown = (model: ModelData): string[] => [
+	`# Download the model from the Hub
+pip install huggingface_hub[hf_xet]
 
-export HF_HUB_ENABLE_HF_TRANSFER=1
 huggingface-cli download --local-dir ${nameWithoutNamespace(model.id)} ${model.id}`,
+];
+
+const mlxlm = (model: ModelData): string[] => [
+	`# Make sure mlx-lm is installed
+# pip install --upgrade mlx-lm
+
+# Generate text with mlx-lm
+from mlx_lm import load, generate
+
+model, tokenizer = load("${model.id}")
+
+prompt = "Once upon a time in"
+text = generate(model, tokenizer, prompt=prompt, verbose=True)`,
+];
+
+const mlxchat = (model: ModelData): string[] => [
+	`# Make sure mlx-lm is installed
+# pip install --upgrade mlx-lm
+
+# Generate text with mlx-lm
+from mlx_lm import load, generate
+
+model, tokenizer = load("${model.id}")
+
+prompt = "Write a story about Einstein"
+messages = [{"role": "user", "content": prompt}]
+prompt = tokenizer.apply_chat_template(
+    messages, add_generation_prompt=True
+)
+
+text = generate(model, tokenizer, prompt=prompt, verbose=True)`,
+];
+
+const mlxvlm = (model: ModelData): string[] => [
+	`# Make sure mlx-vlm is installed
+# pip install --upgrade mlx-vlm
+
+from mlx_vlm import load, generate
+from mlx_vlm.prompt_utils import apply_chat_template
+from mlx_vlm.utils import load_config
+
+# Load the model
+model, processor = load("${model.id}")
+config = load_config("${model.id}")
+
+# Prepare input
+image = ["http://images.cocodataset.org/val2017/000000039769.jpg"]
+prompt = "Describe this image."
+
+# Apply chat template
+formatted_prompt = apply_chat_template(
+    processor, config, prompt, num_images=1
+)
+
+# Generate output
+output = generate(model, processor, formatted_prompt, image)
+print(output)`,
 ];
 
 export const mlxim = (model: ModelData): string[] => [
@@ -1274,6 +1455,20 @@ export const mlxim = (model: ModelData): string[] => [
 
 model = create_model(${model.id})`,
 ];
+
+export const mlx = (model: ModelData): string[] => {
+	if (model.pipeline_tag === "image-text-to-text") {
+		return mlxvlm(model);
+	}
+	if (model.pipeline_tag === "text-generation") {
+		if (model.tags.includes("conversational")) {
+			return mlxchat(model);
+		} else {
+			return mlxlm(model);
+		}
+	}
+	return mlx_unknown(model);
+};
 
 export const model2vec = (model: ModelData): string[] => [
 	`from model2vec import StaticModel
@@ -1289,6 +1484,31 @@ export const nemo = (model: ModelData): string[] => {
 	}
 
 	return command ?? [`# tag did not correspond to a valid NeMo domain.`];
+};
+
+export const outetts = (model: ModelData): string[] => {
+	// Don’t show this block on GGUF / ONNX mirrors
+	const t = model.tags ?? [];
+	if (t.includes("gguf") || t.includes("onnx")) return [];
+
+	// v1.0 HF → minimal runnable snippet
+	return [
+		`
+  import outetts
+  
+  enum = outetts.Models("${model.id}".split("/", 1)[1])       # VERSION_1_0_SIZE_1B
+  cfg  = outetts.ModelConfig.auto_config(enum, outetts.Backend.HF)
+  tts  = outetts.Interface(cfg)
+  
+  speaker = tts.load_default_speaker("EN-FEMALE-1-NEUTRAL")
+  tts.generate(
+	  outetts.GenerationConfig(
+		  text="Hello there, how are you doing?",
+		  speaker=speaker,
+	  )
+  ).save("output.wav")
+  `,
+	];
 };
 
 export const pxia = (model: ModelData): string[] => [
@@ -1375,5 +1595,24 @@ export const hezar = (model: ModelData): string[] => [
 	`from hezar import Model
 
 model = Model.load("${model.id}")`,
+];
+
+export const zonos = (model: ModelData): string[] => [
+	`# pip install git+https://github.com/Zyphra/Zonos.git
+import torchaudio
+from zonos.model import Zonos
+from zonos.conditioning import make_cond_dict
+
+model = Zonos.from_pretrained("${model.id}", device="cuda")
+
+wav, sr = torchaudio.load("speaker.wav")           # 5-10s reference clip
+speaker = model.make_speaker_embedding(wav, sr)
+
+cond  = make_cond_dict(text="Hello, world!", speaker=speaker, language="en-us")
+codes = model.generate(model.prepare_conditioning(cond))
+
+audio = model.autoencoder.decode(codes)[0].cpu()
+torchaudio.save("sample.wav", audio, model.autoencoder.sampling_rate)
+`,
 ];
 //#endregion

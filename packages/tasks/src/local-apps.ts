@@ -57,7 +57,7 @@ export type LocalApp = {
 			/**
 			 * And if not (mostly llama.cpp), snippet to copy/paste in your terminal
 			 * Support the placeholder {{GGUF_FILE}} that will be replaced by the gguf file path or the list of available files.
-			 * Support the placeholder {{OLLAMA_TAG}} that will be replaced by the list of available quant tags or will be removed if there are no multiple quant files in a same repo.
+			 * Support the placeholder {{QUANT_TAG}} that will be replaced by the list of available quant tags or will be removed if there are no multiple quant files in a same repo.
 			 */
 			snippet: (model: ModelData, filepath?: string) => string | string[] | LocalAppSnippet | LocalAppSnippet[];
 	  }
@@ -94,26 +94,32 @@ function isMlxModel(model: ModelData) {
 	return model.tags.includes("mlx");
 }
 
-const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
-	let tagName = "";
-	if (filepath) {
-		const quantLabel = parseGGUFQuantLabel(filepath);
-		tagName = quantLabel ? `:${quantLabel}` : "";
+function getQuantTag(filepath?: string): string {
+	const defaultTag = ":{{QUANT_TAG}}";
+
+	if (!filepath) {
+		return defaultTag;
 	}
+
+	const quantLabel = parseGGUFQuantLabel(filepath);
+	return quantLabel ? `:${quantLabel}` : defaultTag;
+}
+
+const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const command = (binary: string) => {
-		const snippet = ["# Load and run the model:", `${binary} -hf ${model.id}${tagName}`];
-		if (!model.tags.includes("conversational")) {
-			// for non-conversational models, add a prompt
-			snippet[snippet.length - 1] += " \\";
-			snippet.push('  -p "Once upon a time,"');
-		}
+		const snippet = ["# Load and run the model:", `${binary} -hf ${model.id}${getQuantTag(filepath)}`];
 		return snippet.join("\n");
 	};
 	return [
 		{
 			title: "Install from brew",
 			setup: "brew install llama.cpp",
-			content: command("llama-cli"),
+			content: command("llama-server"),
+		},
+		{
+			title: "Install from WinGet (Windows)",
+			setup: "winget install llama.cpp",
+			content: command("llama-server"),
 		},
 		{
 			title: "Use pre-built binary",
@@ -122,29 +128,23 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 				"# Download pre-built binary from:",
 				"# https://github.com/ggerganov/llama.cpp/releases",
 			].join("\n"),
-			content: command("./llama-cli"),
+			content: command("./llama-server"),
 		},
 		{
 			title: "Build from source code",
 			setup: [
 				"git clone https://github.com/ggerganov/llama.cpp.git",
 				"cd llama.cpp",
-				"cmake -B build -DLLAMA_CURL=ON",
-				"cmake --build build -j --target llama-cli",
+				"cmake -B build",
+				"cmake --build build -j --target llama-server",
 			].join("\n"),
-			content: command("./build/bin/llama-cli"),
+			content: command("./build/bin/llama-server"),
 		},
 	];
 };
 
 const snippetNodeLlamaCppCli = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
-	let tagName = "{{OLLAMA_TAG}}";
-
-	if (filepath) {
-		const quantLabel = parseGGUFQuantLabel(filepath);
-		tagName = quantLabel ? `:${quantLabel}` : tagName;
-	}
-
+	const tagName = getQuantTag(filepath);
 	return [
 		{
 			title: "Chat with the model",
@@ -158,12 +158,7 @@ const snippetNodeLlamaCppCli = (model: ModelData, filepath?: string): LocalAppSn
 };
 
 const snippetOllama = (model: ModelData, filepath?: string): string => {
-	if (filepath) {
-		const quantLabel = parseGGUFQuantLabel(filepath);
-		const ollamatag = quantLabel ? `:${quantLabel}` : "";
-		return `ollama run hf.co/${model.id}${ollamatag}`;
-	}
-	return `ollama run hf.co/${model.id}{{OLLAMA_TAG}}`;
+	return `ollama run hf.co/${model.id}${getQuantTag(filepath)}`;
 };
 
 const snippetLocalAI = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
@@ -267,6 +262,41 @@ const snippetTgi = (model: ModelData): LocalAppSnippet[] => {
 	];
 };
 
+const snippetMlxLm = (model: ModelData): LocalAppSnippet[] => {
+	const openaiCurl = [
+		"# Calling the OpenAI-compatible server with curl",
+		`curl -X POST "http://localhost:8000/v1/chat/completions" \\`,
+		`   -H "Content-Type: application/json" \\`,
+		`   --data '{`,
+		`     "model": "${model.id}",`,
+		`     "messages": [`,
+		`       {"role": "user", "content": "Hello"}`,
+		`     ]`,
+		`   }'`,
+	];
+
+	return [
+		{
+			title: "Generate or start a chat session",
+			setup: ["# Install MLX LM", "uv tool install mlx-lm"].join("\n"),
+			content: [
+				...(model.tags.includes("conversational")
+					? ["# Interactive chat REPL", `mlx_lm.chat --model "${model.id}"`]
+					: ["# Generate some text", `mlx_lm.generate --model "${model.id}" --prompt "Once upon a time"`]),
+			].join("\n"),
+		},
+		...(model.tags.includes("conversational")
+			? [
+					{
+						title: "Run an OpenAI-compatible server",
+						setup: ["# Install MLX LM", "uv tool install mlx-lm"].join("\n"),
+						content: ["# Start the server", `mlx_lm.server --model "${model.id}"`, ...openaiCurl].join("\n"),
+					},
+			  ]
+			: []),
+	];
+};
+
 /**
  * Add your new local app here.
  *
@@ -306,6 +336,13 @@ export const LOCAL_APPS = {
 				isTransformersModel(model)) &&
 			(model.pipeline_tag === "text-generation" || model.pipeline_tag === "image-text-to-text"),
 		snippet: snippetVllm,
+	},
+	"mlx-lm": {
+		prettyLabel: "MLX LM",
+		docsUrl: "https://github.com/ml-explore/mlx-lm",
+		mainTask: "text-generation",
+		displayOnModelPage: (model) => model.pipeline_tag === "text-generation" && isMlxModel(model),
+		snippet: snippetMlxLm,
 	},
 	tgi: {
 		prettyLabel: "TGI",
