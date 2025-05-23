@@ -2,7 +2,7 @@
 
 import { parseArgs } from "node:util";
 import { typedEntries } from "./src/utils/typedEntries";
-import { createBranch, createRepo, deleteBranch, repoExists, uploadFilesWithProgress } from "./src";
+import { createBranch, createRepo, deleteBranch, deleteRepo, repoExists, uploadFilesWithProgress } from "./src";
 import { pathToFileURL } from "node:url";
 import { stat } from "node:fs/promises";
 import { basename, join } from "node:path";
@@ -78,7 +78,6 @@ const commands = {
 			{
 				name: "repo-type" as const,
 				enum: ["dataset", "model", "space"],
-				default: "model",
 				description:
 					"The type of repo to upload to. Defaults to model. You can also prefix the repo name with the type, e.g. datasets/username/repo-name",
 			},
@@ -126,7 +125,6 @@ const commands = {
 					{
 						name: "repo-type" as const,
 						enum: ["dataset", "model", "space"],
-						default: "model",
 						description:
 							"The type of repo to create. Defaults to model. You can also prefix the repo name with the type, e.g. datasets/username/repo-name",
 					},
@@ -173,9 +171,37 @@ const commands = {
 					{
 						name: "repo-type" as const,
 						enum: ["dataset", "model", "space"],
-						default: "model",
 						description:
 							"The type of repo to delete the branch from. Defaults to model. You can also prefix the repo name with the type, e.g. datasets/username/repo-name",
+					},
+					{
+						name: "token" as const,
+						description:
+							"The access token to use for authentication. If not provided, the HF_TOKEN environment variable will be used.",
+						default: process.env.HF_TOKEN,
+					},
+				] as const,
+			},
+		},
+	} satisfies CommandGroup,
+	repo: {
+		description: "Manage repositories on the Hub",
+		subcommands: {
+			delete: {
+				description: "Delete a repository from the Hub",
+				args: [
+					{
+						name: "repo-name" as const,
+						description:
+							"The full ID of the repo to delete (e.g., 'username/my-model', 'datasets/username/my-data', or 'spaces/username/my-space')",
+						positional: true,
+						required: true,
+					},
+					{
+						name: "repo-type" as const,
+						enum: ["dataset", "model", "space"],
+						description:
+							"The type of repo. If the repo-name is prefixed (e.g. 'datasets/my-dataset'), the type is inferred. This option can be used to override or specify the type if the name is not prefixed.",
 					},
 					{
 						name: "token" as const,
@@ -384,6 +410,54 @@ async function run() {
 					// Should be caught by the check above
 					console.error(`Error: Unknown subcommand '${currentSubCommandName}' for 'branch'.`);
 					console.log(listSubcommands("branch", branchCommandGroup));
+					process.exitCode = 1;
+					break;
+			}
+			break;
+		}
+		case "repo": {
+			const repoCommandGroup = commands.repo;
+			const currentSubCommandName = subCommandName as keyof typeof repoCommandGroup.subcommands | undefined;
+
+			if (cliArgs[0] === "--help" || cliArgs[0] === "-h") {
+				if (currentSubCommandName && repoCommandGroup.subcommands[currentSubCommandName]) {
+					console.log(detailedUsageForSubcommand("repo", currentSubCommandName));
+				} else {
+					console.log(listSubcommands("repo", repoCommandGroup));
+				}
+				break;
+			}
+
+			if (!currentSubCommandName || !repoCommandGroup.subcommands[currentSubCommandName]) {
+				console.error(`Error: Missing or invalid subcommand for 'repo'.`);
+				console.log(listSubcommands("repo", repoCommandGroup));
+				process.exitCode = 1;
+				break;
+			}
+
+			const subCmdDef = repoCommandGroup.subcommands[currentSubCommandName];
+
+			switch (currentSubCommandName) {
+				case "delete": {
+					const parsedArgs = advParseArgs(cliArgs, subCmdDef.args, `repo ${currentSubCommandName}`);
+					const { repoName, repoType, token } = parsedArgs;
+
+					const repoDesignation: Parameters<typeof deleteRepo>[0]["repo"] = repoType
+						? { type: repoType as "model" | "dataset" | "space", name: repoName }
+						: repoName;
+
+					await deleteRepo({
+						repo: repoDesignation,
+						accessToken: token,
+						hubUrl: process.env.HF_ENDPOINT ?? HUB_URL,
+					});
+					console.log(`Repository '${repoName}' deleted successfully.`);
+					break;
+				}
+				default:
+					// This case should ideally be caught by the check above
+					console.error(`Error: Unknown subcommand '${currentSubCommandName}' for 'repo'.`);
+					console.log(listSubcommands("repo", repoCommandGroup));
 					process.exitCode = 1;
 					break;
 			}
