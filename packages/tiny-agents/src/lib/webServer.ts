@@ -13,7 +13,23 @@ const ChatCompletionInputSchema = z.object({
 	messages: z.array(
 		z.object({
 			role: z.enum(["user", "assistant"]),
-			content: z.string(),
+			content: z.string().or(
+				z.array(
+					z
+						.object({
+							type: z.literal("text"),
+							text: z.string(),
+						})
+						.or(
+							z.object({
+								type: z.literal("image_url"),
+								image_url: z.object({
+									url: z.string(),
+								}),
+							})
+						)
+				)
+			),
 		})
 	),
 	/// Only allow stream: true
