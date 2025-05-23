@@ -87,7 +87,7 @@ describe("scanSnapshotDir", () => {
 		const cachedFiles: CachedFileInfo[] = [];
 		const blobStats = new Map<string, Stats>();
 		vi.mocked(readdir).mockResolvedValueOnce([
-			{ name: "file1", isDirectory: () => false } as Awaited<ReturnType<typeof readdir>>[0],
+			{ name: "file1", isDirectory: () => false } as unknown as Awaited<ReturnType<typeof readdir>>[0],
 		]);
 
 		vi.mocked(realpath).mockResolvedValueOnce("/fake/realpath");
