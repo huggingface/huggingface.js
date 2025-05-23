@@ -126,7 +126,7 @@ const commands = {
 						name: "repo-type" as const,
 						enum: ["dataset", "model", "space"],
 						description:
-							"The type of repo to create. Defaults to model. You can also prefix the repo name with the type, e.g. datasets/username/repo-name",
+							"The type of of the repo to create the branch into. Defaults to model. You can also prefix the repo name with the type, e.g. datasets/username/repo-name",
 					},
 					{
 						name: "revision" as const,
@@ -193,7 +193,7 @@ const commands = {
 					{
 						name: "repo-name" as const,
 						description:
-							"The full ID of the repo to delete (e.g., 'username/my-model', 'datasets/username/my-data', or 'spaces/username/my-space')",
+							"The name of the repo to delete. You can also prefix the repo name with the type, e.g. datasets/username/repo-name",
 						positional: true,
 						required: true,
 					},
@@ -201,7 +201,7 @@ const commands = {
 						name: "repo-type" as const,
 						enum: ["dataset", "model", "space"],
 						description:
-							"The type of repo. If the repo-name is prefixed (e.g. 'datasets/my-dataset'), the type is inferred. This option can be used to override or specify the type if the name is not prefixed.",
+							"The type of the repo to delete. Defaults to model. You can also prefix the repo name with the type, e.g. datasets/username/repo-name",
 					},
 					{
 						name: "token" as const,
