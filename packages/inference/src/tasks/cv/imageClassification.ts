@@ -1,9 +1,9 @@
 import type { ImageClassificationInput, ImageClassificationOutput } from "@huggingface/tasks";
-import { resolveProvider } from "../../lib/getInferenceProviderMapping";
-import { getProviderHelper } from "../../lib/getProviderHelper";
-import type { BaseArgs, Options } from "../../types";
-import { innerRequest } from "../../utils/request";
-import { preparePayload, type LegacyImageInput } from "./utils";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options } from "../../types.js";
+import { innerRequest } from "../../utils/request.js";
+import { preparePayload, type LegacyImageInput } from "./utils.js";
 
 export type ImageClassificationArgs = BaseArgs & (ImageClassificationInput | LegacyImageInput);
 

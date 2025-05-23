@@ -1,9 +1,9 @@
 import type { WidgetType } from "@huggingface/tasks";
-import { HF_HUB_URL } from "../config";
-import { HARDCODED_MODEL_INFERENCE_MAPPING } from "../providers/consts";
-import { EQUIVALENT_SENTENCE_TRANSFORMERS_TASKS } from "../providers/hf-inference";
-import type { InferenceProvider, InferenceProviderOrPolicy, ModelId } from "../types";
-import { typedInclude } from "../utils/typedInclude";
+import { HF_HUB_URL } from "../config.js";
+import { HARDCODED_MODEL_INFERENCE_MAPPING } from "../providers/consts.js";
+import { EQUIVALENT_SENTENCE_TRANSFORMERS_TASKS } from "../providers/hf-inference.js";
+import type { InferenceProvider, InferenceProviderOrPolicy, ModelId } from "../types.js";
+import { typedInclude } from "../utils/typedInclude.js";
 
 export const inferenceProviderMappingCache = new Map<ModelId, InferenceProviderMapping>();
 

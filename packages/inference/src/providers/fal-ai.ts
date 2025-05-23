@@ -14,22 +14,22 @@
  *
  * Thanks!
  */
-import { base64FromBytes } from "../utils/base64FromBytes";
+import { base64FromBytes } from "../utils/base64FromBytes.js";
 
 import type { AutomaticSpeechRecognitionOutput } from "@huggingface/tasks";
-import { InferenceOutputError } from "../lib/InferenceOutputError";
-import { isUrl } from "../lib/isUrl";
-import type { BodyParams, HeaderParams, ModelId, RequestArgs, UrlParams } from "../types";
-import { delay } from "../utils/delay";
-import { omit } from "../utils/omit";
+import { InferenceOutputError } from "../lib/InferenceOutputError.js";
+import { isUrl } from "../lib/isUrl.js";
+import type { BodyParams, HeaderParams, ModelId, RequestArgs, UrlParams } from "../types.js";
+import { delay } from "../utils/delay.js";
+import { omit } from "../utils/omit.js";
 import {
 	type AutomaticSpeechRecognitionTaskHelper,
 	TaskProviderHelper,
 	type TextToImageTaskHelper,
 	type TextToVideoTaskHelper,
-} from "./providerHelper";
-import { HF_HUB_URL } from "../config";
-import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition";
+} from "./providerHelper.js";
+import { HF_HUB_URL } from "../config.js";
+import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
 
 export interface FalAiQueueOutput {
 	request_id: string;

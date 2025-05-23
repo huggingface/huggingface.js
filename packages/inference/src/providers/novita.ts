@@ -14,18 +14,18 @@
  *
  * Thanks!
  */
-import { InferenceOutputError } from "../lib/InferenceOutputError";
-import { isUrl } from "../lib/isUrl";
-import type { TextToVideoArgs } from "../tasks/cv/textToVideo";
-import type { BodyParams, UrlParams } from "../types";
-import { delay } from "../utils/delay";
-import { omit } from "../utils/omit";
+import { InferenceOutputError } from "../lib/InferenceOutputError.js";
+import { isUrl } from "../lib/isUrl.js";
+import type { TextToVideoArgs } from "../tasks/index.js";
+import type { BodyParams, UrlParams } from "../types.js";
+import { delay } from "../utils/delay.js";
+import { omit } from "../utils/omit.js";
 import {
 	BaseConversationalTask,
 	BaseTextGenerationTask,
 	TaskProviderHelper,
 	type TextToVideoTaskHelper,
-} from "./providerHelper";
+} from "./providerHelper.js";
 
 const NOVITA_API_BASE_URL = "https://api.novita.ai";
 

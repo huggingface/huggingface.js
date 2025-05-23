@@ -14,12 +14,12 @@
  *
  * Thanks!
  */
-import { InferenceOutputError } from "../lib/InferenceOutputError";
+import { InferenceOutputError } from "../lib/InferenceOutputError.js";
 
 import type { FeatureExtractionOutput } from "@huggingface/tasks";
-import type { BodyParams } from "../types";
-import type { FeatureExtractionTaskHelper } from "./providerHelper";
-import { BaseConversationalTask, TaskProviderHelper } from "./providerHelper";
+import type { BodyParams } from "../types.js";
+import type { FeatureExtractionTaskHelper } from "./providerHelper.js";
+import { BaseConversationalTask, TaskProviderHelper } from "./providerHelper.js";
 
 export class SambanovaConversationalTask extends BaseConversationalTask {
 	constructor() {
