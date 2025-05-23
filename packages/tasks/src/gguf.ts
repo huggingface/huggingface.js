@@ -40,6 +40,15 @@ export enum GGMLFileQuantizationType {
 	Q4_0_8_8 = 35,
 	TQ1_0 = 36,
 	TQ2_0 = 37,
+
+	// custom quants used by unsloth
+	// they are not officially a scheme enum value in GGUF, but only here for naming
+	Q2_K_XL = 1000,
+	Q3_K_XL = 1001,
+	Q4_K_XL = 1002,
+	Q5_K_XL = 1003,
+	Q6_K_XL = 1004,
+	Q8_K_XL = 1005,
 }
 
 const ggufQuants = Object.values(GGMLFileQuantizationType).filter((v): v is string => typeof v === "string");
@@ -58,18 +67,22 @@ export const GGUF_QUANT_ORDER: GGMLFileQuantizationType[] = [
 	GGMLFileQuantizationType.F32,
 	GGMLFileQuantizationType.BF16,
 	GGMLFileQuantizationType.F16,
+	GGMLFileQuantizationType.Q8_K_XL,
 	GGMLFileQuantizationType.Q8_0,
 
 	// 6-bit quantizations
+	GGMLFileQuantizationType.Q6_K_XL,
 	GGMLFileQuantizationType.Q6_K,
 
 	// 5-bit quantizations
-	GGMLFileQuantizationType.Q5_0,
-	GGMLFileQuantizationType.Q5_1,
+	GGMLFileQuantizationType.Q5_K_XL,
 	GGMLFileQuantizationType.Q5_K_M,
 	GGMLFileQuantizationType.Q5_K_S,
+	GGMLFileQuantizationType.Q5_0,
+	GGMLFileQuantizationType.Q5_1,
 
 	// 4-bit quantizations
+	GGMLFileQuantizationType.Q4_K_XL,
 	GGMLFileQuantizationType.Q4_K_M,
 	GGMLFileQuantizationType.Q4_K_S,
 	GGMLFileQuantizationType.IQ4_NL,
@@ -77,13 +90,14 @@ export const GGUF_QUANT_ORDER: GGMLFileQuantizationType[] = [
 	GGMLFileQuantizationType.Q4_0_4_4,
 	GGMLFileQuantizationType.Q4_0_4_8,
 	GGMLFileQuantizationType.Q4_0_8_8,
-	GGMLFileQuantizationType.Q4_0,
 	GGMLFileQuantizationType.Q4_1_SOME_F16,
+	GGMLFileQuantizationType.Q4_0,
 	GGMLFileQuantizationType.Q4_1,
 	GGMLFileQuantizationType.Q4_2,
 	GGMLFileQuantizationType.Q4_3,
 
 	// 3-bit quantizations
+	GGMLFileQuantizationType.Q3_K_XL,
 	GGMLFileQuantizationType.Q3_K_L,
 	GGMLFileQuantizationType.Q3_K_M,
 	GGMLFileQuantizationType.Q3_K_S,
@@ -93,6 +107,7 @@ export const GGUF_QUANT_ORDER: GGMLFileQuantizationType[] = [
 	GGMLFileQuantizationType.IQ3_XXS,
 
 	// 2-bit quantizations
+	GGMLFileQuantizationType.Q2_K_XL,
 	GGMLFileQuantizationType.Q2_K,
 	GGMLFileQuantizationType.Q2_K_S,
 	GGMLFileQuantizationType.IQ2_M,

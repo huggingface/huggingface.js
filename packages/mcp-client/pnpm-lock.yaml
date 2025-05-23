@@ -15,13 +15,13 @@ importers:
         specifier: workspace:^
         version: link:../tasks
       '@modelcontextprotocol/sdk':
-        specifier: ^1.9.0
-        version: 1.10.1
+        specifier: ^1.11.2
+        version: 1.11.2
 
 packages:
 
-  '@modelcontextprotocol/sdk@1.10.1':
-    resolution: {integrity: sha512-xNYdFdkJqEfIaTVP1gPKoEvluACHZsHZegIoICX8DM1o6Qf3G5u2BQJHmgd0n4YgRPqqK/u1ujQvrgAxxSJT9w==}
+  '@modelcontextprotocol/sdk@1.11.2':
+    resolution: {integrity: sha512-H9vwztj5OAqHg9GockCQC06k1natgcxWQSRpQcPJf6i5+MWBzfKkRtxGbjQf0X2ihii0ffLZCRGbYV2f2bjNCQ==}
     engines: {node: '>=18'}
 
   accepts@2.0.0:
@@ -342,7 +342,7 @@ packages:
 
 snapshots:
 
-  '@modelcontextprotocol/sdk@1.10.1':
+  '@modelcontextprotocol/sdk@1.11.2':
     dependencies:
       content-type: 1.0.5
       cors: 2.8.5

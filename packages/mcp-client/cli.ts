@@ -4,21 +4,26 @@ import { stdin, stdout } from "node:process";
 import { join } from "node:path";
 import { homedir } from "node:os";
 import type { StdioServerParameters } from "@modelcontextprotocol/sdk/client/stdio.js";
-import type { InferenceProvider } from "@huggingface/inference";
-import { ANSI } from "./src/utils";
+import type { InferenceProviderOrPolicy } from "@huggingface/inference";
+import { ANSI, urlToServerConfig } from "./src/utils";
 import { Agent } from "./src";
 import { version as packageVersion } from "./package.json";
+import { parseArgs } from "node:util";
+import type { ServerConfig } from "./src/types";
 
 const MODEL_ID = process.env.MODEL_ID ?? "Qwen/Qwen2.5-72B-Instruct";
-const PROVIDER = (process.env.PROVIDER as InferenceProvider) ?? "nebius";
+const PROVIDER = (process.env.PROVIDER as InferenceProviderOrPolicy) ?? "nebius";
 const ENDPOINT_URL = process.env.ENDPOINT_URL ?? process.env.BASE_URL;
-const MCP_EXAMPLER_LOCAL_FOLDER = process.platform === "darwin" ? join(homedir(), "Desktop") : homedir();
 
-const SERVERS: StdioServerParameters[] = [
+const SERVERS: (ServerConfig | StdioServerParameters)[] = [
 	{
 		// Filesystem "official" mcp-server with access to your Desktop
 		command: "npx",
-		args: ["-y", "@modelcontextprotocol/server-filesystem", MCP_EXAMPLER_LOCAL_FOLDER],
+		args: [
+			"-y",
+			"@modelcontextprotocol/server-filesystem",
+			process.platform === "darwin" ? join(homedir(), "Desktop") : homedir(),
+		],
 	},
 	{
 		// Playwright MCP
@@ -27,17 +32,28 @@ const SERVERS: StdioServerParameters[] = [
 	},
 ];
 
-if (process.env.EXPERIMENTAL_HF_MCP_SERVER) {
-	SERVERS.push({
-		// Early version of a HF-MCP server
-		// you can download it from gist.github.com/julien-c/0500ba922e1b38f2dc30447fb81f7dc6
-		// and replace the local path below
-		command: "node",
-		args: ["--disable-warning=ExperimentalWarning", join(homedir(), "Desktop/hf-mcp/index.ts")],
-		env: {
-			HF_TOKEN: process.env.HF_TOKEN ?? "",
+// Handle --url parameters from command line: each URL will be parsed into a ServerConfig object
+const {
+	values: { url: urls },
+} = parseArgs({
+	options: {
+		url: {
+			type: "string",
+			multiple: true,
 		},
-	});
+	},
+});
+if (urls?.length) {
+	while (SERVERS.length) {
+		SERVERS.pop();
+	}
+	for (const url of urls) {
+		try {
+			SERVERS.push(urlToServerConfig(url, process.env.HF_TOKEN));
+		} catch (error) {
+			console.error(`Error adding server from URL "${url}": ${error.message}`);
+		}
+	}
 }
 
 async function main() {
@@ -46,8 +62,8 @@ async function main() {
 		process.exit(0);
 	}
 
-	if (!process.env.HF_TOKEN) {
-		console.error(`a valid HF_TOKEN must be present in the env`);
+	if (!ENDPOINT_URL && !process.env.HF_TOKEN) {
+		console.error(`To use a remote inference provider, a valid HF_TOKEN must be present in the env`);
 		process.exit(1);
 	}
 

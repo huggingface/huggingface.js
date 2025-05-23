@@ -116,6 +116,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pth"`,
 		snippets: snippets.audioseal,
 	},
+	"bagel-mot": {
+		prettyLabel: "Bagel",
+		repoName: "Bagel",
+		repoUrl: "https://github.com/ByteDance-Seed/Bagel/",
+		filter: false,
+		countDownloads: `path:"llm_config.json"`,
+	},
 	ben2: {
 		prettyLabel: "BEN2",
 		repoName: "BEN2",
@@ -472,6 +479,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://keras.io/keras_hub/",
 		snippets: snippets.keras_hub,
 		filter: true,
+	},
+	"kimi-audio": {
+		prettyLabel: "KimiAudio",
+		repoName: "KimiAudio",
+		repoUrl: "https://github.com/MoonshotAI/Kimi-Audio",
+		snippets: snippets.kimi_audio,
+		filter: false,
 	},
 	k2: {
 		prettyLabel: "K2",
@@ -932,6 +946,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.timm,
 		filter: true,
 		countDownloads: `path:"pytorch_model.bin" OR path:"model.safetensors"`,
+	},
+	torchgeo: {
+		prettyLabel: "TorchGeo",
+		repoName: "TorchGeo",
+		repoUrl: "https://github.com/microsoft/torchgeo",
+		docsUrl: "https://torchgeo.readthedocs.io/",
+		filter: false,
+		countDownloads: `path_extension:"pt" OR path_extension:"pth"`,
 	},
 	transformers: {
 		prettyLabel: "Transformers",

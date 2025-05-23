@@ -122,6 +122,11 @@ const snippetLlamacpp = (model: ModelData, filepath?: string): LocalAppSnippet[]
 			content: command("llama-cli"),
 		},
 		{
+			title: "Install from WinGet (Windows)",
+			setup: "winget install llama.cpp",
+			content: command("llama-cli"),
+		},
+		{
 			title: "Use pre-built binary",
 			setup: [
 				// prettier-ignore

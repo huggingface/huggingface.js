@@ -36,7 +36,7 @@ import type {
 import { HF_ROUTER_URL } from "../config";
 import { InferenceOutputError } from "../lib/InferenceOutputError";
 import type { TabularClassificationOutput } from "../tasks/tabular/tabularClassification";
-import type { BodyParams, UrlParams } from "../types";
+import type { BodyParams, RequestArgs, UrlParams } from "../types";
 import { toArray } from "../utils/toArray";
 import type {
 	AudioClassificationTaskHelper,
@@ -70,7 +70,10 @@ import type {
 } from "./providerHelper";
 
 import { TaskProviderHelper } from "./providerHelper";
-
+import { base64FromBytes } from "../utils/base64FromBytes";
+import type { ImageToImageArgs } from "../tasks/cv/imageToImage";
+import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition";
+import { omit } from "../utils/omit";
 interface Base64ImageGeneration {
 	data: Array<{
 		b64_json: string;
@@ -221,6 +224,15 @@ export class HFInferenceAutomaticSpeechRecognitionTask
 	override async getResponse(response: AutomaticSpeechRecognitionOutput): Promise<AutomaticSpeechRecognitionOutput> {
 		return response;
 	}
+
+	async preparePayloadAsync(args: AutomaticSpeechRecognitionArgs): Promise<RequestArgs> {
+		return "data" in args
+			? args
+			: {
+					...omit(args, "inputs"),
+					data: args.inputs,
+			  };
+	}
 }
 
 export class HFInferenceAudioToAudioTask extends HFInferenceTask implements AudioToAudioTaskHelper {
@@ -326,6 +338,23 @@ export class HFInferenceImageToTextTask extends HFInferenceTask implements Image
 }
 
 export class HFInferenceImageToImageTask extends HFInferenceTask implements ImageToImageTaskHelper {
+	async preparePayloadAsync(args: ImageToImageArgs): Promise<RequestArgs> {
+		if (!args.parameters) {
+			return {
+				...args,
+				model: args.model,
+				data: args.inputs,
+			};
+		} else {
+			return {
+				...args,
+				inputs: base64FromBytes(
+					new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await (args.inputs as Blob).arrayBuffer())
+				),
+			};
+		}
+	}
+
 	override async getResponse(response: Blob): Promise<Blob> {
 		if (response instanceof Blob) {
 			return response;
