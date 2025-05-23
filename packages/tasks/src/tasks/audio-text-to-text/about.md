@@ -120,4 +120,14 @@ async function transcribeRemoteAudio(audioUrl) {
 }
 
 // transcribeRemoteAudio("httpsS://huggingface.co/datasets/Narsil/asr_dummy/resolve/main/1.flac");
-```
+```Here are some useful resources:
+
+- [Ultravox, a fast multimodal large language model designed for real-time voice interactions-.](https://github.com/fixie-ai/ultravox)
+
+- [An open-source large-scale audio-language model by Alibaba Cloud, Qwen2-Audio, supporting voice chat and audio analysis in multiple languages.](https://github.com/QwenLM/Qwen2-Audio)
+
+- [A compact, open-source speech tokenizer, WhisperSpeech, enhancing multilingual performance with minimal impact on English capabilities.](https://github.com/janhq/WhisperSpeech)
+
+- [A guide to Microsoft's open-source Phi models, PhiCookBook, offering capable and cost-effective small language models.](https://github.com/microsoft/PhiCookBook) 
+
+- [Fast-RTC, turn any python function into a real-time audio and video stream over WebRTC or WebSockets.](https://huggingface.co/fastrtc)
