@@ -1,12 +1,12 @@
 import type { TextToVideoInput } from "@huggingface/tasks";
-import { resolveProvider } from "../../lib/getInferenceProviderMapping";
-import { getProviderHelper } from "../../lib/getProviderHelper";
-import { makeRequestOptions } from "../../lib/makeRequestOptions";
-import type { FalAiQueueOutput } from "../../providers/fal-ai";
-import type { NovitaOutput } from "../../providers/novita";
-import type { ReplicateOutput } from "../../providers/replicate";
-import type { BaseArgs, Options } from "../../types";
-import { innerRequest } from "../../utils/request";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import { makeRequestOptions } from "../../lib/makeRequestOptions.js";
+import type { FalAiQueueOutput } from "../../providers/fal-ai.js";
+import type { NovitaOutput } from "../../providers/novita.js";
+import type { ReplicateOutput } from "../../providers/replicate.js";
+import type { BaseArgs, Options } from "../../types.js";
+import { innerRequest } from "../../utils/request.js";
 
 export type TextToVideoArgs = BaseArgs & TextToVideoInput;
 

@@ -1,8 +1,8 @@
 import type { SentenceSimilarityInput, SentenceSimilarityOutput } from "@huggingface/tasks";
-import { resolveProvider } from "../../lib/getInferenceProviderMapping";
-import { getProviderHelper } from "../../lib/getProviderHelper";
-import type { BaseArgs, Options } from "../../types";
-import { innerRequest } from "../../utils/request";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options } from "../../types.js";
+import { innerRequest } from "../../utils/request.js";
 
 export type SentenceSimilarityArgs = BaseArgs & SentenceSimilarityInput;
 

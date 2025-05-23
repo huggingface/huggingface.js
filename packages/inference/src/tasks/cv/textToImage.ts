@@ -1,9 +1,9 @@
 import type { TextToImageInput } from "@huggingface/tasks";
-import { resolveProvider } from "../../lib/getInferenceProviderMapping";
-import { getProviderHelper } from "../../lib/getProviderHelper";
-import { makeRequestOptions } from "../../lib/makeRequestOptions";
-import type { BaseArgs, Options } from "../../types";
-import { innerRequest } from "../../utils/request";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import { makeRequestOptions } from "../../lib/makeRequestOptions.js";
+import type { BaseArgs, Options } from "../../types.js";
+import { innerRequest } from "../../utils/request.js";
 
 export type TextToImageArgs = BaseArgs & TextToImageInput;
 

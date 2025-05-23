@@ -15,15 +15,15 @@
  * Thanks!
  */
 import type { ChatCompletionOutput, TextGenerationOutput, TextGenerationOutputFinishReason } from "@huggingface/tasks";
-import { InferenceOutputError } from "../lib/InferenceOutputError";
-import type { BodyParams } from "../types";
-import { omit } from "../utils/omit";
+import { InferenceOutputError } from "../lib/InferenceOutputError.js";
+import type { BodyParams } from "../types.js";
+import { omit } from "../utils/omit.js";
 import {
 	BaseConversationalTask,
 	BaseTextGenerationTask,
 	TaskProviderHelper,
 	type TextToImageTaskHelper,
-} from "./providerHelper";
+} from "./providerHelper.js";
 
 const TOGETHER_API_BASE_URL = "https://api.together.xyz";
 
