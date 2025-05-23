@@ -100,6 +100,10 @@ export const SKUS = {
 				tflops: 38.7,
 				memory: [48],
 			},
+			"RTX A5000": {
+				tflops: 34.1,
+				memory: [24],
+			},
 			"RTX A4000": {
 				tflops: 19.2,
 				memory: [16],
