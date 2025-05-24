@@ -126,7 +126,7 @@ const commands = {
 						name: "repo-type" as const,
 						enum: ["dataset", "model", "space"],
 						description:
-							"The type of of the repo to create the branch into. Defaults to model. You can also prefix the repo name with the type, e.g. datasets/username/repo-name",
+							"The type of the repo to create the branch into. Defaults to model. You can also prefix the repo name with the type, e.g. datasets/username/repo-name",
 					},
 					{
 						name: "revision" as const,
