@@ -63,6 +63,7 @@ Currently, we support the following providers:
 - [Cohere](https://cohere.com)
 - [Cerebras](https://cerebras.ai/)
 - [Groq](https://groq.com)
+- [Wavespeed.ai](https://wavespeed.ai/)
 
 To send requests to a third-party provider, you have to pass the `provider` parameter to the inference function. The default value of the `provider` parameter is "auto", which will select the first of the providers available for the model, sorted by your preferred order in https://hf.co/settings/inference-providers.
 
@@ -96,6 +97,7 @@ Only a subset of models are supported when requesting third-party providers. You
 - [Cohere supported models](https://huggingface.co/api/partners/cohere/models)
 - [Cerebras supported models](https://huggingface.co/api/partners/cerebras/models)
 - [Groq supported models](https://console.groq.com/docs/models)
+- [Wavespeed.ai supported models](https://huggingface.co/api/partners/wavespeed-ai/models)
 
 ❗**Important note:** To be compatible, the third-party API must adhere to the "standard" shape API we expect on HF model pages for each pipeline task type.
 This is not an issue for LLMs as everyone converged on the OpenAI API anyways, but can be more tricky for other tasks like "text-to-image" or "automatic-speech-recognition" where there exists no standard API. Let us know if any help is needed or if we can make things easier for you!
