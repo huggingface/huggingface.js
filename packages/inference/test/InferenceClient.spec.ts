@@ -2047,17 +2047,16 @@ describe.skip("InferenceClient", () => {
 					status: "live",
 					task: "image-to-image",
 				},
-				"wavespeed-ai/flux-dev-lora": {
-					hfModelId: "wavespeed-ai/flux-dev-lora",
+				"openfree/flux-chatgpt-ghibli-lora": {
+					hfModelId: "openfree/flux-chatgpt-ghibli-lora",
 					providerId: "wavespeed-ai/flux-dev-lora",
 					status: "live",
 					task: "text-to-image",
 					adapter: "lora",
-					adapterWeightsPath:
-						"https://d32s1zkpjdc4b1.cloudfront.net/predictions/599f3739f5354afc8a76a12042736bfd/1.safetensors",
+					adapterWeightsPath: "openfree/flux-chatgpt-ghibli-lora",
 				},
-				"wavespeed-ai/flux-dev-lora-ultra-fast": {
-					hfModelId: "wavespeed-ai/flux-dev-lora-ultra-fast",
+				"linoyts/yarn_art_Flux_LoRA": {
+					hfModelId: "linoyts/yarn_art_Flux_LoRA",
 					providerId: "wavespeed-ai/flux-dev-lora-ultra-fast",
 					status: "live",
 					task: "text-to-image",
@@ -2076,9 +2075,9 @@ describe.skip("InferenceClient", () => {
 				expect(res).toBeInstanceOf(Blob);
 			});
 
-			it(`textToImage - wavespeed-ai/flux-dev-lora`, async () => {
+			it(`textToImage - openfree/flux-chatgpt-ghibli-lora`, async () => {
 				const res = await client.textToImage({
-					model: "wavespeed-ai/flux-dev-lora",
+					model: "openfree/flux-chatgpt-ghibli-lora",
 					provider: "wavespeed-ai",
 					inputs:
 						"Cute boy with a hat, exploring nature, holding a telescope, backpack, surrounded by flowers, cartoon style, vibrant colors.",
@@ -2086,9 +2085,9 @@ describe.skip("InferenceClient", () => {
 				expect(res).toBeInstanceOf(Blob);
 			});
 
-			it(`textToImage - wavespeed-ai/flux-dev-lora-ultra-fast`, async () => {
+			it(`textToImage - linoyts/yarn_art_Flux_LoRA`, async () => {
 				const res = await client.textToImage({
-					model: "wavespeed-ai/flux-dev-lora-ultra-fast",
+					model: "linoyts/yarn_art_Flux_LoRA",
 					provider: "wavespeed-ai",
 					inputs:
 						"Cute boy with a hat, exploring nature, holding a telescope, backpack, surrounded by flowers, cartoon style, vibrant colors.",

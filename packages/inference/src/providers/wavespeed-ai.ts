@@ -60,8 +60,6 @@ interface WaveSpeedAISubmitTaskResponse {
 }
 
 abstract class WavespeedAITask extends TaskProviderHelper {
-	private accessToken: string | undefined;
-
 	constructor(url?: string) {
 		super("wavespeed-ai", url || WAVESPEEDAI_API_BASE_URL);
 	}
@@ -77,10 +75,10 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 			prompt: params.args.inputs,
 		};
 		// Add LoRA support if adapter is specified in the mapping
-		if (params.mapping?.adapter === "lora" && params.mapping.adapterWeightsPath) {
+		if (params.mapping?.adapter === "lora") {
 			payload.loras = [
 				{
-					path: params.mapping.adapterWeightsPath,
+					path: params.mapping.hfModelId,
 					scale: 1, // Default scale value
 				},
 			];
@@ -88,23 +86,11 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 		return payload;
 	}
 
-	override prepareHeaders(params: HeaderParams, isBinary: boolean): Record<string, string> {
-		this.accessToken = params.accessToken;
-		const headers: Record<string, string> = { Authorization: `Bearer ${params.accessToken}` };
-		if (!isBinary) {
-			headers["Content-Type"] = "application/json";
-		}
-		return headers;
-	}
-
 	override async getResponse(
 		response: WaveSpeedAISubmitTaskResponse,
 		url?: string,
 		headers?: Record<string, string>
 	): Promise<Blob> {
-		if (!headers && this.accessToken) {
-			headers = { Authorization: `Bearer ${this.accessToken}` };
-		}
 		if (!headers) {
 			throw new InferenceOutputError("Headers are required for WaveSpeed AI API calls");
 		}
