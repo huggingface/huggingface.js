@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { repoExists } from "./repo-exists";
+import { repoExists } from './repo-exists.js';
 
 describe("repoExists", () => {
 	it("should check if a repo exists", async () => {

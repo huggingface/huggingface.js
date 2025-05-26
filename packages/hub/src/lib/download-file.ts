@@ -1,9 +1,9 @@
-import type { CredentialsParams, RepoDesignation } from "../types/public";
-import { checkCredentials } from "../utils/checkCredentials";
-import { WebBlob } from "../utils/WebBlob";
-import { XetBlob } from "../utils/XetBlob";
-import type { FileDownloadInfoOutput } from "./file-download-info";
-import { fileDownloadInfo } from "./file-download-info";
+import type { CredentialsParams, RepoDesignation } from '../types/public.js';
+import { checkCredentials } from '../utils/checkCredentials.js';
+import { WebBlob } from '../utils/WebBlob.js';
+import { XetBlob } from '../utils/XetBlob.js';
+import type { FileDownloadInfoOutput } from './file-download-info.js';
+import { fileDownloadInfo } from './file-download-info.js';
 
 /**
  * @returns null when the file doesn't exist

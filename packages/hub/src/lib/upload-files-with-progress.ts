@@ -1,7 +1,7 @@
-import type { CredentialsParams } from "../types/public";
-import { typedInclude } from "../utils/typedInclude";
-import type { CommitOutput, CommitParams, CommitProgressEvent, ContentSource } from "./commit";
-import { commitIter } from "./commit";
+import type { CredentialsParams } from '../types/public.js';
+import { typedInclude } from '../utils/typedInclude.js';
+import type { CommitOutput, CommitParams, CommitProgressEvent, ContentSource } from './commit.js';
+import { commitIter } from './commit.js';
 
 const multipartUploadTracking = new WeakMap<
 	(progress: number) => void,

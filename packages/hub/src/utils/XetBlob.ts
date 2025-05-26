@@ -1,8 +1,8 @@
-import { createApiError } from "../error";
-import type { CredentialsParams } from "../types/public";
-import { checkCredentials } from "./checkCredentials";
-import { decompress as lz4_decompress } from "../vendor/lz4js";
-import { RangeList } from "./RangeList";
+import { createApiError } from '../error.js';
+import type { CredentialsParams } from '../types/public.js';
+import { checkCredentials } from './checkCredentials.js';
+import { decompress as lz4_decompress } from '../vendor/lz4js/index.js';
+import { RangeList } from './RangeList.js';
 
 const JWT_SAFETY_PERIOD = 60_000;
 const JWT_CACHE_SIZE = 1_000;

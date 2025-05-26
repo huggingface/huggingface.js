@@ -1,6 +1,6 @@
 import { assert, it, describe } from "vitest";
-import { parseSafetensorsMetadata, parseSafetensorsShardFilename } from "./parse-safetensors-metadata";
-import { sum } from "../utils/sum";
+import { parseSafetensorsMetadata, parseSafetensorsShardFilename } from './parse-safetensors-metadata.js';
+import { sum } from '../utils/sum.js';
 
 describe("parseSafetensorsMetadata", () => {
 	it("fetch info for single-file (with the default conventional filename)", async () => {

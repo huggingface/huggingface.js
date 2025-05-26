@@ -1,5 +1,5 @@
-import type { Inputs, Tool } from "../types";
-import examples from "./examples";
+import type { Inputs, Tool } from '../types.js';
+import examples from './examples.js';
 
 function toolDescription(tool: Tool) {
 	let prompt = `name: ${tool.name} \ndescription: ${tool.description}`;

@@ -1,5 +1,5 @@
 import { assert, it, describe } from "vitest";
-import { fileExists } from "./file-exists";
+import { fileExists } from './file-exists.js';
 
 describe("fileExists", () => {
 	it("should return true for file that exists", async () => {

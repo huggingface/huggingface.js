@@ -1,11 +1,11 @@
-import type { CredentialsParams, RepoDesignation } from "../types/public";
-import { omit } from "../utils/omit";
-import { toRepoId } from "../utils/toRepoId";
-import { typedEntries } from "../utils/typedEntries";
-import { downloadFile } from "./download-file";
-import { fileExists } from "./file-exists";
-import { promisesQueue } from "../utils/promisesQueue";
-import type { SetRequired } from "../vendor/type-fest/set-required";
+import type { CredentialsParams, RepoDesignation } from '../types/public.js';
+import { omit } from '../utils/omit.js';
+import { toRepoId } from '../utils/toRepoId.js';
+import { typedEntries } from '../utils/typedEntries.js';
+import { downloadFile } from './download-file.js';
+import { fileExists } from './file-exists.js';
+import { promisesQueue } from '../utils/promisesQueue.js';
+import type { SetRequired } from '../vendor/type-fest/set-required.js';
 
 export const SAFETENSORS_FILE = "model.safetensors";
 export const SAFETENSORS_INDEX_FILE = "model.safetensors.index.json";

@@ -1,4 +1,4 @@
-import { checkFilename } from "./check-filename";
+import { checkFilename } from './check-filename.js';
 import { createBlob } from "@huggingface/blob";
 
 export interface DDUFFileEntry {

@@ -1,8 +1,8 @@
-import type { Space } from "../type";
+import type { Space } from '../type.js';
 
-import { Box } from "./components/box";
-import { Collapse } from "./components/collapse";
-import { Content } from "./components/content";
+import { Box } from './components/box.js';
+import { Collapse } from './components/collapse.js';
+import { Content } from './components/content.js';
 
 export const create = (space: Space): HTMLElement => {
 	const box = Box();

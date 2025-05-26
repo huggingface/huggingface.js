@@ -1,6 +1,6 @@
-import { LANGUAGES_ISO_639_1 } from "./languages_iso_639_1";
-import { LANGUAGES_ISO_639_3 } from "./languages_iso_639_3";
-import type { Language } from "./types";
+import { LANGUAGES_ISO_639_1 } from './languages_iso_639_1.js';
+import { LANGUAGES_ISO_639_3 } from './languages_iso_639_3.js';
+import type { Language } from './types.js';
 
 /**
  * Be careful importing this function in frontend code, as it will import all languages.

@@ -1,5 +1,5 @@
-import { HUB_URL } from "../consts";
-import { createApiError } from "../error";
+import { HUB_URL } from '../consts.js';
+import { createApiError } from '../error.js';
 
 export interface UserInfo {
 	/**

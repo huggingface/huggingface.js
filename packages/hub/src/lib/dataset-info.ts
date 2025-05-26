@@ -1,10 +1,10 @@
-import { HUB_URL } from "../consts";
-import { createApiError } from "../error";
-import type { ApiDatasetInfo } from "../types/api/api-dataset";
-import type { CredentialsParams } from "../types/public";
-import { checkCredentials } from "../utils/checkCredentials";
-import { pick } from "../utils/pick";
-import { type DATASET_EXPANDABLE_KEYS, DATASET_EXPAND_KEYS, type DatasetEntry } from "./list-datasets";
+import { HUB_URL } from '../consts.js';
+import { createApiError } from '../error.js';
+import type { ApiDatasetInfo } from '../types/api/api-dataset.js';
+import type { CredentialsParams } from '../types/public.js';
+import { checkCredentials } from '../utils/checkCredentials.js';
+import { pick } from '../utils/pick.js';
+import { type DATASET_EXPANDABLE_KEYS, DATASET_EXPAND_KEYS, type DatasetEntry } from './list-datasets.js';
 
 export async function datasetInfo<
 	const T extends Exclude<(typeof DATASET_EXPANDABLE_KEYS)[number], (typeof DATASET_EXPAND_KEYS)[number]> = never,

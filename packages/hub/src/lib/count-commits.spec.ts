@@ -1,5 +1,5 @@
 import { assert, it, describe } from "vitest";
-import { countCommits } from "./count-commits";
+import { countCommits } from './count-commits.js';
 
 describe("countCommits", () => {
 	it("should fetch paginated commits from the repo", async () => {

@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from "fs/promises";
 import { tmpdir } from "os";
 import { describe, expect, it } from "vitest";
-import { subPaths } from "./sub-paths";
+import { subPaths } from './sub-paths.js';
 import { pathToFileURL } from "url";
 
 describe("sub-paths", () => {

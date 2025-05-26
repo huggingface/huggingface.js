@@ -27,7 +27,7 @@ import type {
 	Ternary,
 	SpreadExpression,
 } from "./ast";
-import { range, replace, slice, strftime_now, titleCase } from "./utils";
+import { range, replace, slice, strftime_now, titleCase } from './utils.js';
 
 export type AnyRuntimeValue =
 	| IntegerValue

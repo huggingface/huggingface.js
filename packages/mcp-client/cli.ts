@@ -5,11 +5,11 @@ import { join } from "node:path";
 import { homedir } from "node:os";
 import type { StdioServerParameters } from "@modelcontextprotocol/sdk/client/stdio.js";
 import type { InferenceProviderOrPolicy } from "@huggingface/inference";
-import { ANSI, urlToServerConfig } from "./src/utils";
-import { Agent } from "./src";
+import { ANSI, urlToServerConfig } from './src/utils.js';
+import { Agent } from './src.js';
 import { version as packageVersion } from "./package.json";
 import { parseArgs } from "node:util";
-import type { ServerConfig } from "./src/types";
+import type { ServerConfig } from './src/types.js';
 
 const MODEL_ID = process.env.MODEL_ID ?? "Qwen/Qwen2.5-72B-Instruct";
 const PROVIDER = (process.env.PROVIDER as InferenceProviderOrPolicy) ?? "nebius";

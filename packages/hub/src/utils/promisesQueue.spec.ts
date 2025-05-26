@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { promisesQueue } from "./promisesQueue";
+import { promisesQueue } from './promisesQueue.js';
 
 describe("promisesQueue", () => {
 	it("should handle multiple errors without triggering an uncaughtException", async () => {

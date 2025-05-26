@@ -6,9 +6,9 @@ import { z } from "zod";
 import { PROVIDERS_OR_POLICIES } from "@huggingface/inference";
 import { Agent } from "@huggingface/mcp-client";
 import { version as packageVersion } from "../package.json";
-import { ServerConfigSchema } from "./lib/types";
-import { debug, error } from "./lib/utils";
-import { mainCliLoop } from "./lib/mainCliLoop";
+import { ServerConfigSchema } from './lib/types.js';
+import { debug, error } from './lib/utils.js';
+import { mainCliLoop } from './lib/mainCliLoop.js';
 
 const USAGE_HELP = `
 Usage:

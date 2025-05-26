@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { TEST_COOKIE, TEST_HUB_URL } from "../test/consts";
-import { oauthLoginUrl } from "./oauth-login-url";
-import { oauthHandleRedirect } from "./oauth-handle-redirect";
+import { TEST_COOKIE, TEST_HUB_URL } from '../test/consts.js';
+import { oauthLoginUrl } from './oauth-login-url.js';
+import { oauthHandleRedirect } from './oauth-handle-redirect.js';
 
 describe("oauthHandleRedirect", () => {
 	it("should work", async () => {

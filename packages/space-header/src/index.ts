@@ -1,11 +1,11 @@
-import type { Options, Space, Header } from "./type";
+import type { Options, Space, Header } from './type.js';
 
-import { inject_fonts } from "./inject_fonts";
+import { inject_fonts } from './inject_fonts.js';
 
-import { create } from "./header/create";
-import { check_avatar } from "./utils/check_avatar";
-import { get_space } from "./utils/get_space";
-import { inject } from "./inject";
+import { create } from './header/create.js';
+import { check_avatar } from './utils/check_avatar.js';
+import { get_space } from './utils/get_space.js';
+import { inject } from './inject.js';
 
 async function main(initialSpace: string | Space, options?: Options) {
 	if (window === undefined) return console.error("Please run this script in a browser environment");

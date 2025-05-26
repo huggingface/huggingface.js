@@ -1,12 +1,12 @@
 import { assert, it, describe } from "vitest";
 
-import { TEST_ACCESS_TOKEN, TEST_HUB_URL, TEST_USER } from "../test/consts";
-import type { RepoId } from "../types/public";
-import { insecureRandomString } from "../utils/insecureRandomString";
-import { createRepo } from "./create-repo";
-import { deleteRepo } from "./delete-repo";
-import { downloadFile } from "./download-file";
-import { uploadFiles } from "./upload-files";
+import { TEST_ACCESS_TOKEN, TEST_HUB_URL, TEST_USER } from '../test/consts.js';
+import type { RepoId } from '../types/public.js';
+import { insecureRandomString } from '../utils/insecureRandomString.js';
+import { createRepo } from './create-repo.js';
+import { deleteRepo } from './delete-repo.js';
+import { downloadFile } from './download-file.js';
+import { uploadFiles } from './upload-files.js';
 import { mkdir } from "fs/promises";
 import { writeFile } from "fs/promises";
 import { pathToFileURL } from "url";

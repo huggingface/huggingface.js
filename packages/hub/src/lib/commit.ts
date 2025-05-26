@@ -1,5 +1,5 @@
-import { HUB_URL } from "../consts";
-import { HubApiError, createApiError, InvalidApiResponseFormatError } from "../error";
+import { HUB_URL } from '../consts.js';
+import { HubApiError, createApiError, InvalidApiResponseFormatError } from '../error.js';
 import type {
 	ApiCommitHeader,
 	ApiCommitLfsFile,
@@ -10,18 +10,18 @@ import type {
 	ApiPreuploadRequest,
 	ApiPreuploadResponse,
 } from "../types/api/api-commit";
-import type { CredentialsParams, RepoDesignation } from "../types/public";
-import { checkCredentials } from "../utils/checkCredentials";
-import { chunk } from "../utils/chunk";
-import { promisesQueue } from "../utils/promisesQueue";
-import { promisesQueueStreaming } from "../utils/promisesQueueStreaming";
-import { sha256 } from "../utils/sha256";
-import { toRepoId } from "../utils/toRepoId";
-import { WebBlob } from "../utils/WebBlob";
-import { eventToGenerator } from "../utils/eventToGenerator";
-import { base64FromBytes } from "../utils/base64FromBytes";
-import { isFrontend } from "../utils/isFrontend";
-import { createBlobs } from "../utils/createBlobs";
+import type { CredentialsParams, RepoDesignation } from '../types/public.js';
+import { checkCredentials } from '../utils/checkCredentials.js';
+import { chunk } from '../utils/chunk.js';
+import { promisesQueue } from '../utils/promisesQueue.js';
+import { promisesQueueStreaming } from '../utils/promisesQueueStreaming.js';
+import { sha256 } from '../utils/sha256.js';
+import { toRepoId } from '../utils/toRepoId.js';
+import { WebBlob } from '../utils/WebBlob.js';
+import { eventToGenerator } from '../utils/eventToGenerator.js';
+import { base64FromBytes } from '../utils/base64FromBytes.js';
+import { isFrontend } from '../utils/isFrontend.js';
+import { createBlobs } from '../utils/createBlobs.js';
 
 const CONCURRENT_SHAS = 5;
 const CONCURRENT_LFS_UPLOADS = 5;

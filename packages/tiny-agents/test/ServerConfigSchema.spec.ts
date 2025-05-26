@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ServerConfigSchema } from "../src/lib/types";
+import { ServerConfigSchema } from '../src/lib/types.js';
 
 describe("ServerConfigSchema", () => {
 	it("You can parse a server config", async () => {

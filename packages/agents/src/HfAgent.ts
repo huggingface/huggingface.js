@@ -1,10 +1,10 @@
-import { evalBuilder } from "./lib/evalBuilder";
-import { generateCode } from "./lib/generateCode";
-import { defaultTools } from "./tools";
-import type { LLM, Tool, Update } from "./types";
-import { LLMFromHub } from "./llms/LLMHF";
-import { generatePrompt } from "./lib/promptGeneration";
-import { messageTool } from "./tools/message";
+import { evalBuilder } from './lib/evalBuilder.js';
+import { generateCode } from './lib/generateCode.js';
+import { defaultTools } from './tools.js';
+import type { LLM, Tool, Update } from './types.js';
+import { LLMFromHub } from './llms/LLMHF.js';
+import { generatePrompt } from './lib/promptGeneration.js';
+import { messageTool } from './tools/message.js';
 
 export class HfAgent {
 	private accessToken: string;

@@ -1,4 +1,4 @@
-import { GGMLQuantizationType } from "./types";
+import { GGMLQuantizationType } from './types.js';
 
 export const GGUF_QUANT_DESCRIPTIONS: Record<GGMLQuantizationType, { txt: string; src_url?: string }> = {
 	[GGMLQuantizationType.F32]: {

@@ -1,9 +1,9 @@
 import { expect, test, describe, assert } from "vitest";
-import { downloadFile } from "./download-file";
-import { deleteRepo } from "./delete-repo";
-import { createRepo } from "./create-repo";
-import { TEST_ACCESS_TOKEN, TEST_HUB_URL, TEST_USER } from "../test/consts";
-import { insecureRandomString } from "../utils/insecureRandomString";
+import { downloadFile } from './download-file.js';
+import { deleteRepo } from './delete-repo.js';
+import { createRepo } from './create-repo.js';
+import { TEST_ACCESS_TOKEN, TEST_HUB_URL, TEST_USER } from '../test/consts.js';
+import { insecureRandomString } from '../utils/insecureRandomString.js';
 
 describe("downloadFile", () => {
 	test("should download regular file", async () => {

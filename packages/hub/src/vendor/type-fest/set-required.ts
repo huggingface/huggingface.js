@@ -1,5 +1,5 @@
-import type { Except } from "./except";
-import type { Simplify } from "./simplify";
+import type { Except } from './except.js';
+import type { Simplify } from './simplify.js';
 
 /**
 Create a type that makes the given keys required. The remaining keys are kept as is. The sister of the `SetOptional` type.

@@ -1,8 +1,8 @@
 import * as readline from "node:readline/promises";
 import { stdin, stdout } from "node:process";
-import { ANSI } from "./utils";
+import { ANSI } from './utils.js';
 import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
-import type { Agent } from "../index";
+import type { Agent } from '../index.js';
 
 /**
  * From mcp-client/cli.ts

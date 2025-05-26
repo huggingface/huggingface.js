@@ -1,10 +1,10 @@
-import { HUB_URL } from "../consts";
-import { createApiError } from "../error";
-import type { ApiModelInfo } from "../types/api/api-model";
-import type { CredentialsParams } from "../types/public";
-import { checkCredentials } from "../utils/checkCredentials";
-import { pick } from "../utils/pick";
-import { MODEL_EXPAND_KEYS, type MODEL_EXPANDABLE_KEYS, type ModelEntry } from "./list-models";
+import { HUB_URL } from '../consts.js';
+import { createApiError } from '../error.js';
+import type { ApiModelInfo } from '../types/api/api-model.js';
+import type { CredentialsParams } from '../types/public.js';
+import { checkCredentials } from '../utils/checkCredentials.js';
+import { pick } from '../utils/pick.js';
+import { MODEL_EXPAND_KEYS, type MODEL_EXPANDABLE_KEYS, type ModelEntry } from './list-models.js';
 
 export async function modelInfo<
 	const T extends Exclude<(typeof MODEL_EXPANDABLE_KEYS)[number], (typeof MODEL_EXPAND_KEYS)[number]> = never,

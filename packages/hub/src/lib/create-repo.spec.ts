@@ -1,10 +1,10 @@
 import { assert, it, describe, expect } from "vitest";
 
-import { TEST_HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from "../test/consts";
-import { insecureRandomString } from "../utils/insecureRandomString";
-import { createRepo } from "./create-repo";
-import { deleteRepo } from "./delete-repo";
-import { downloadFile } from "./download-file";
+import { TEST_HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from '../test/consts.js';
+import { insecureRandomString } from '../utils/insecureRandomString.js';
+import { createRepo } from './create-repo.js';
+import { deleteRepo } from './delete-repo.js';
+import { downloadFile } from './download-file.js';
 
 describe("createRepo", () => {
 	it("should create a repo", async () => {

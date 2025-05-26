@@ -1,4 +1,4 @@
-import type { Language } from "./types";
+import type { Language } from './types.js';
 
 /**
  * Kudos github.com/lbourdois for the discussions

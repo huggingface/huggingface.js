@@ -1,4 +1,4 @@
-import type { AccessTokenRole, AuthType } from "../public";
+import type { AccessTokenRole, AuthType } from '../public.js';
 
 interface ApiWhoAmIBase {
 	/** Unique ID persistent across renames */

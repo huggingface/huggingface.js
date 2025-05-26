@@ -1,4 +1,4 @@
-import type { Tool } from "../types";
+import type { Tool } from '../types.js';
 
 export const messageTool: Tool = {
 	name: "message",

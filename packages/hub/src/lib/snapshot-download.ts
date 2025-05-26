@@ -1,13 +1,13 @@
-import type { CredentialsParams, RepoDesignation } from "../types/public";
-import { listFiles } from "./list-files";
-import { getHFHubCachePath, getRepoFolderName } from "./cache-management";
-import { spaceInfo } from "./space-info";
-import { datasetInfo } from "./dataset-info";
-import { modelInfo } from "./model-info";
-import { toRepoId } from "../utils/toRepoId";
+import type { CredentialsParams, RepoDesignation } from '../types/public.js';
+import { listFiles } from './list-files.js';
+import { getHFHubCachePath, getRepoFolderName } from './cache-management.js';
+import { spaceInfo } from './space-info.js';
+import { datasetInfo } from './dataset-info.js';
+import { modelInfo } from './model-info.js';
+import { toRepoId } from '../utils/toRepoId.js';
 import { join, dirname } from "node:path";
 import { mkdir, writeFile } from "node:fs/promises";
-import { downloadFileToCacheDir } from "./download-file-to-cache-dir";
+import { downloadFileToCacheDir } from './download-file-to-cache-dir.js';
 
 export const DEFAULT_REVISION = "main";
 

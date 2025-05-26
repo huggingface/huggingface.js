@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { RangeList } from "./RangeList";
+import { RangeList } from './RangeList.js';
 
 describe("RangeList", () => {
 	it("should add a single range", () => {

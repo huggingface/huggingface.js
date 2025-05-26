@@ -1,4 +1,4 @@
-import type { RepoDesignation, RepoId } from "../types/public";
+import type { RepoDesignation, RepoId } from '../types/public.js';
 
 export function toRepoId(repo: RepoDesignation): RepoId {
 	if (typeof repo !== "string") {

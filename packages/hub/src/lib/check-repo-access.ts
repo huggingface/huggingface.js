@@ -1,9 +1,9 @@
-import { HUB_URL } from "../consts";
+import { HUB_URL } from '../consts.js';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { createApiError, type HubApiError } from "../error";
-import type { CredentialsParams, RepoDesignation } from "../types/public";
-import { checkCredentials } from "../utils/checkCredentials";
-import { toRepoId } from "../utils/toRepoId";
+import { createApiError, type HubApiError } from '../error.js';
+import type { CredentialsParams, RepoDesignation } from '../types/public.js';
+import { checkCredentials } from '../utils/checkCredentials.js';
+import { toRepoId } from '../utils/toRepoId.js';
 
 /**
  * Check if we have read access to a repository.

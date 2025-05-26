@@ -3,8 +3,8 @@
  * The source data is taken from llama.cpp
  */
 
-import type { GGUFParseOutput } from "../../gguf/src/gguf";
-import { gguf } from "../../gguf/src/gguf";
+import type { GGUFParseOutput } from '../../gguf/src/gguf.js';
+import { gguf } from '../../gguf/src/gguf.js';
 import { appendFileSync, writeFileSync, existsSync } from "node:fs";
 import path from "node:path";
 
@@ -216,7 +216,7 @@ const getSpecialTokens = (tmpl: string): string[] => {
 // This file is auto generated, please do not modify manually
 // To update it, run "pnpm run build:automap"
 
-import type { OllamaChatTemplateMapEntry } from "./types";
+import type { OllamaChatTemplateMapEntry } from './types.js';
 
 /**
  * Skipped these models due to error:

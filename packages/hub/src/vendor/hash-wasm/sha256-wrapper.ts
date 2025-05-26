@@ -1,4 +1,4 @@
-import WasmModule from "./sha256";
+import WasmModule from './sha256.js';
 
 export async function createSHA256(isInsideWorker = false): Promise<{
 	init(): void;

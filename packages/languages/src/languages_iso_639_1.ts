@@ -1,4 +1,4 @@
-import type { Language } from "./types";
+import type { Language } from './types.js';
 
 export const LANGUAGES_ISO_639_1 = {
 	aa: {

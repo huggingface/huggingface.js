@@ -1,6 +1,6 @@
 // test/UrlConversion.spec.ts
 import { describe, expect, it } from "vitest";
-import { urlToServerConfig } from "../src/utils";
+import { urlToServerConfig } from '../src/utils.js';
 
 describe("urlToServerConfig", () => {
 	const TOKEN = "test-token";

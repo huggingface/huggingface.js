@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { language } from "./language";
+import { language } from './language.js';
 
 describe("language", () => {
 	it("should return an object for a 2-letter language code", () => {

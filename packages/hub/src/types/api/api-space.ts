@@ -1,4 +1,4 @@
-import type { License, SpaceRuntime, SpaceSdk } from "../public";
+import type { License, SpaceRuntime, SpaceSdk } from '../public.js';
 
 type Color = "red" | "yellow" | "green" | "blue" | "indigo" | "purple" | "pink" | "gray";
 

@@ -1,4 +1,4 @@
-import type { JsonObject } from "./vendor/type-fest/basic";
+import type { JsonObject } from './vendor/type-fest/basic.js';
 
 export async function createApiError(
 	response: Response,

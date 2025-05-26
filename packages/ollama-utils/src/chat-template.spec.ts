@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { convertGGUFTemplateToOllama } from "./chat-template";
+import { convertGGUFTemplateToOllama } from './chat-template.js';
 
 interface UnknownCase {
 	desc: string;

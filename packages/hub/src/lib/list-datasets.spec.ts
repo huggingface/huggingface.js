@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { DatasetEntry } from "./list-datasets";
-import { listDatasets } from "./list-datasets";
+import type { DatasetEntry } from './list-datasets.js';
+import { listDatasets } from './list-datasets.js';
 
 describe("listDatasets", () => {
 	it("should list datasets from hf-doc-builder", async () => {

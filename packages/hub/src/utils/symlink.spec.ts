@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-imports */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, expect, it, vi } from "vitest";
-import { createSymlink } from "./symlink";
+import { createSymlink } from './symlink.js';
 import { readFileSync, writeFileSync } from "node:fs";
 import { lstat, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";

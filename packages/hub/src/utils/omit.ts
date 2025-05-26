@@ -1,5 +1,5 @@
-import { pick } from "./pick";
-import { typedInclude } from "./typedInclude";
+import { pick } from './pick.js';
+import { typedInclude } from './typedInclude.js';
 
 /**
  * Return copy of object, omitting blacklisted array of props

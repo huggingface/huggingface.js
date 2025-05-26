@@ -2,7 +2,7 @@ import { homedir } from "node:os";
 import { join, basename } from "node:path";
 import { stat, readdir, readFile, realpath, lstat } from "node:fs/promises";
 import type { Stats } from "node:fs";
-import type { RepoType, RepoId } from "../types/public";
+import type { RepoType, RepoId } from '../types/public.js';
 
 function getDefaultHome(): string {
 	return join(homedir(), ".cache");

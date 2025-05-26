@@ -1,6 +1,6 @@
 import { assert, it, describe } from "vitest";
-import type { ListFileEntry } from "./list-files";
-import { listFiles } from "./list-files";
+import type { ListFileEntry } from './list-files.js';
+import { listFiles } from './list-files.js';
 
 describe("listFiles", () => {
 	it("should fetch the list of files from the repo", async () => {

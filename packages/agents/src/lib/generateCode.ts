@@ -1,7 +1,7 @@
-import type { Tool } from "../types";
+import type { Tool } from '../types.js';
 
-import { generatePrompt } from "./promptGeneration";
-import { messageTool } from "../tools/message";
+import { generatePrompt } from './promptGeneration.js';
+import { messageTool } from '../tools/message.js';
 
 export async function generateCode(
 	prompt: string,

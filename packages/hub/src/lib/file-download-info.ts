@@ -1,9 +1,9 @@
-import { HUB_URL } from "../consts";
-import { createApiError, InvalidApiResponseFormatError } from "../error";
-import type { CredentialsParams, RepoDesignation } from "../types/public";
-import { checkCredentials } from "../utils/checkCredentials";
-import { parseLinkHeader } from "../utils/parseLinkHeader";
-import { toRepoId } from "../utils/toRepoId";
+import { HUB_URL } from '../consts.js';
+import { createApiError, InvalidApiResponseFormatError } from '../error.js';
+import type { CredentialsParams, RepoDesignation } from '../types/public.js';
+import { checkCredentials } from '../utils/checkCredentials.js';
+import { parseLinkHeader } from '../utils/parseLinkHeader.js';
+import { toRepoId } from '../utils/toRepoId.js';
 
 export interface XetFileInfo {
 	hash: string;

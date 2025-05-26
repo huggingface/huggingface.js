@@ -1,6 +1,6 @@
-import { eventToGenerator } from "./eventToGenerator";
-import { hexFromBytes } from "./hexFromBytes";
-import { isFrontend } from "./isFrontend";
+import { eventToGenerator } from './eventToGenerator.js';
+import { hexFromBytes } from './hexFromBytes.js';
+import { isFrontend } from './isFrontend.js';
 
 async function getWebWorkerCode() {
 	const sha256Module = await import("../vendor/hash-wasm/sha256-wrapper");

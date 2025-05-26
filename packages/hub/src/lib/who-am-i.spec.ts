@@ -1,6 +1,6 @@
 import { assert, it, describe } from "vitest";
-import { TEST_ACCESS_TOKEN, TEST_HUB_URL } from "../test/consts";
-import { whoAmI } from "./who-am-i";
+import { TEST_ACCESS_TOKEN, TEST_HUB_URL } from '../test/consts.js';
+import { whoAmI } from './who-am-i.js';
 
 describe("whoAmI", () => {
 	it("should fetch identity info", async () => {

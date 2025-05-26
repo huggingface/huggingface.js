@@ -1,5 +1,5 @@
 import type { ModelLibraryKey, TransformersInfo, WidgetType } from "@huggingface/tasks";
-import type { License, PipelineType } from "../public";
+import type { License, PipelineType } from '../public.js';
 
 export interface ApiModelInfo {
 	_id: string;

@@ -1,7 +1,7 @@
 // This file is auto generated, please do not modify manually
 // To update it, run "pnpm run build:automap"
 
-import type { OllamaChatTemplateMapEntry } from "./types";
+import type { OllamaChatTemplateMapEntry } from './types.js';
 
 /**
  * Skipped these models due to error:

@@ -1,6 +1,6 @@
-import type { CredentialsParams } from "../types/public";
-import type { CommitOutput, CommitParams } from "./commit";
-import { commit } from "./commit";
+import type { CredentialsParams } from '../types/public.js';
+import type { CommitOutput, CommitParams } from './commit.js';
+import { commit } from './commit.js';
 
 export function deleteFiles(
 	params: {

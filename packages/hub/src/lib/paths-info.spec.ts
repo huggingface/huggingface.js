@@ -1,6 +1,6 @@
 import { expect, it, describe } from "vitest";
-import type { CommitInfo, PathInfo, SecurityFileStatus } from "./paths-info";
-import { pathsInfo } from "./paths-info";
+import type { CommitInfo, PathInfo, SecurityFileStatus } from './paths-info.js';
+import { pathsInfo } from './paths-info.js';
 
 describe("pathsInfo", () => {
 	it("should fetch LFS path info", async () => {

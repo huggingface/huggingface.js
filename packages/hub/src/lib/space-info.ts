@@ -1,11 +1,11 @@
-import { HUB_URL } from "../consts";
-import { createApiError } from "../error";
-import type { ApiSpaceInfo } from "../types/api/api-space";
-import type { CredentialsParams } from "../types/public";
-import { checkCredentials } from "../utils/checkCredentials";
-import { pick } from "../utils/pick";
-import type { SPACE_EXPANDABLE_KEYS, SpaceEntry } from "./list-spaces";
-import { SPACE_EXPAND_KEYS } from "./list-spaces";
+import { HUB_URL } from '../consts.js';
+import { createApiError } from '../error.js';
+import type { ApiSpaceInfo } from '../types/api/api-space.js';
+import type { CredentialsParams } from '../types/public.js';
+import { checkCredentials } from '../utils/checkCredentials.js';
+import { pick } from '../utils/pick.js';
+import type { SPACE_EXPANDABLE_KEYS, SpaceEntry } from './list-spaces.js';
+import { SPACE_EXPAND_KEYS } from './list-spaces.js';
 
 export async function spaceInfo<
 	const T extends Exclude<(typeof SPACE_EXPANDABLE_KEYS)[number], (typeof SPACE_EXPAND_KEYS)[number]> = never,

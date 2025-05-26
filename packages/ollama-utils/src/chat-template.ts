@@ -1,6 +1,6 @@
 import { Template as JinjaTemplate } from "@huggingface/jinja";
-import { OLLAMA_CHAT_TEMPLATE_MAPPING } from "./chat-template-automap";
-import type { GGUFParsedInfo, OllamaCustomMappedTemplate, OllamaChatTemplateMapEntry } from "./types";
+import { OLLAMA_CHAT_TEMPLATE_MAPPING } from './chat-template-automap.js';
+import type { GGUFParsedInfo, OllamaCustomMappedTemplate, OllamaChatTemplateMapEntry } from './types.js';
 
 // regex for finding special tokens inside chat template
 const RE_SPECIAL_TOKEN = /<[|_A-Za-z0-9]+>|\[[A-Z]+\]|<\uFF5C[\u2581A-Za-z]+\uFF5C>/g;

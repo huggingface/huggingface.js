@@ -1,5 +1,5 @@
-import type { Space } from "../../../type";
-import { ArrowCollapse } from "./arrow";
+import type { Space } from '../../../type.js';
+import { ArrowCollapse } from './arrow.js';
 
 export const Collapse = (space: Space, callback: () => void): HTMLDivElement | SVGElement => {
 	const box = document.createElement("div");

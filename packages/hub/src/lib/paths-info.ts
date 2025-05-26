@@ -1,8 +1,8 @@
-import type { CredentialsParams, RepoDesignation } from "../types/public";
-import { checkCredentials } from "../utils/checkCredentials";
-import { toRepoId } from "../utils/toRepoId";
-import { HUB_URL } from "../consts";
-import { createApiError } from "../error";
+import type { CredentialsParams, RepoDesignation } from '../types/public.js';
+import { checkCredentials } from '../utils/checkCredentials.js';
+import { toRepoId } from '../utils/toRepoId.js';
+import { HUB_URL } from '../consts.js';
+import { createApiError } from '../error.js';
 
 export interface LfsPathInfo {
 	oid: string;

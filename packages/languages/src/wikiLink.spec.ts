@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { wikiLink } from "./wikiLink";
+import { wikiLink } from './wikiLink.js';
 
 describe("wikiLink", () => {
 	it("should return the correct link", () => {
