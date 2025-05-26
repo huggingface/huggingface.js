@@ -1,15 +1,15 @@
 import { assert, it, describe } from "vitest";
 
-import { TEST_HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from '../test/consts.js';
-import type { RepoId } from '../types/public.js';
-import type { CommitFile } from './commit.js';
-import { commit } from './commit.js';
-import { createRepo } from './create-repo.js';
-import { deleteRepo } from './delete-repo.js';
-import { downloadFile } from './download-file.js';
-import { fileDownloadInfo } from './file-download-info.js';
-import { insecureRandomString } from '../utils/insecureRandomString.js';
-import { isFrontend } from '../utils/isFrontend.js';
+import { TEST_HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from "../test/consts.js";
+import type { RepoId } from "../types/public.js";
+import type { CommitFile } from "./commit.js";
+import { commit } from "./commit.js";
+import { createRepo } from "./create-repo.js";
+import { deleteRepo } from "./delete-repo.js";
+import { downloadFile } from "./download-file.js";
+import { fileDownloadInfo } from "./file-download-info.js";
+import { insecureRandomString } from "../utils/insecureRandomString.js";
+import { isFrontend } from "../utils/isFrontend.js";
 
 const lfsContent = "O123456789".repeat(100_000);
 

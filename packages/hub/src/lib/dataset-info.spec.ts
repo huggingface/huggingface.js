@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { datasetInfo } from './dataset-info.js';
-import type { DatasetEntry } from './list-datasets.js';
-import type { ApiDatasetInfo } from '../types/api/api-dataset.js';
+import { datasetInfo } from "./dataset-info.js";
+import type { DatasetEntry } from "./list-datasets.js";
+import type { ApiDatasetInfo } from "../types/api/api-dataset.js";
 
 describe("datasetInfo", () => {
 	it("should return the dataset info", async () => {

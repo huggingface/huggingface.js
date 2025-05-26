@@ -1,5 +1,5 @@
-import type { TransformerLLM } from './transformer-llm.js';
-import { LLM_ARCHITECTURES } from './transformer-llm.js';
+import type { TransformerLLM } from "./transformer-llm.js";
+import { LLM_ARCHITECTURES } from "./transformer-llm.js";
 import type { GGMLQuantizationType, GGMLFileQuantizationType } from "@huggingface/tasks";
 export { GGMLQuantizationType } from "@huggingface/tasks";
 

@@ -1,12 +1,12 @@
 #! /usr/bin/env node
 
 import { parseArgs } from "node:util";
-import { typedEntries } from './src/utils/typedEntries.js';
-import { createBranch, createRepo, deleteBranch, repoExists, uploadFilesWithProgress } from './index.js';
+import { typedEntries } from "./src/utils/typedEntries.js";
+import { createBranch, createRepo, deleteBranch, repoExists, uploadFilesWithProgress } from "./index.js";
 import { pathToFileURL } from "node:url";
 import { stat } from "node:fs/promises";
 import { basename, join } from "node:path";
-import { HUB_URL } from './src/consts.js';
+import { HUB_URL } from "./src/consts.js";
 import { version } from "./package.json";
 
 // Didn't find the import from "node:util", so duplicated it here

@@ -1,5 +1,5 @@
 import { inspect } from "util";
-import type { ServerConfig } from './types.js';
+import type { ServerConfig } from "./types.js";
 
 export function debug(...args: unknown[]): void {
 	if (process.env.DEBUG) {

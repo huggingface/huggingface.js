@@ -1,6 +1,6 @@
 import { describe, it } from "vitest";
-import type { gguf } from './gguf.js';
-import type { GGUFMetadata, GGUFParseOutput } from './types.js';
+import type { gguf } from "./gguf.js";
+import type { GGUFMetadata, GGUFParseOutput } from "./types.js";
 
 describe("gguf-types", () => {
 	it("gguf() type can be casted between STRICT and NON_STRICT (at compile time)", async () => {

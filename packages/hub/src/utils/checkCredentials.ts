@@ -1,4 +1,4 @@
-import type { CredentialsParams } from '../types/public.js';
+import type { CredentialsParams } from "../types/public.js";
 
 export function checkAccessToken(accessToken: string): void {
 	if (!accessToken.startsWith("hf_")) {

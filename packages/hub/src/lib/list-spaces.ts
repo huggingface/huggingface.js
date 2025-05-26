@@ -1,10 +1,10 @@
-import { HUB_URL } from '../consts.js';
-import { createApiError } from '../error.js';
-import type { ApiSpaceInfo } from '../types/api/api-space.js';
-import type { CredentialsParams, SpaceSdk } from '../types/public.js';
-import { checkCredentials } from '../utils/checkCredentials.js';
-import { parseLinkHeader } from '../utils/parseLinkHeader.js';
-import { pick } from '../utils/pick.js';
+import { HUB_URL } from "../consts.js";
+import { createApiError } from "../error.js";
+import type { ApiSpaceInfo } from "../types/api/api-space.js";
+import type { CredentialsParams, SpaceSdk } from "../types/public.js";
+import { checkCredentials } from "../utils/checkCredentials.js";
+import { parseLinkHeader } from "../utils/parseLinkHeader.js";
+import { pick } from "../utils/pick.js";
 
 export const SPACE_EXPAND_KEYS = [
 	"sdk",

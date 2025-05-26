@@ -1,6 +1,6 @@
 // test/CallToolResultFormatter.test.ts
 import { describe, expect, it } from "vitest";
-import { ResultFormatter } from '../src/ResultFormatter.js';
+import { ResultFormatter } from "../src/ResultFormatter.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types";
 
 describe("CallToolResultFormatter", () => {

@@ -1,10 +1,10 @@
-import { HUB_URL } from '../consts.js';
-import { createApiError } from '../error.js';
-import type { ApiModelInfo } from '../types/api/api-model.js';
-import type { CredentialsParams, PipelineType } from '../types/public.js';
-import { checkCredentials } from '../utils/checkCredentials.js';
-import { parseLinkHeader } from '../utils/parseLinkHeader.js';
-import { pick } from '../utils/pick.js';
+import { HUB_URL } from "../consts.js";
+import { createApiError } from "../error.js";
+import type { ApiModelInfo } from "../types/api/api-model.js";
+import type { CredentialsParams, PipelineType } from "../types/public.js";
+import { checkCredentials } from "../utils/checkCredentials.js";
+import { parseLinkHeader } from "../utils/parseLinkHeader.js";
+import { pick } from "../utils/pick.js";
 
 export const MODEL_EXPAND_KEYS = [
 	"pipeline_tag",

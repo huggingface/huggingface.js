@@ -1,7 +1,7 @@
-import type { MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from './types.js';
-import { GGUFValueType } from './types.js';
-import { isBackend } from './utils/isBackend.js';
-import { promisesQueue } from './utils/promisesQueue.js';
+import type { MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types.js";
+import { GGUFValueType } from "./types.js";
+import { isBackend } from "./utils/isBackend.js";
+import { promisesQueue } from "./utils/promisesQueue.js";
 
 export type { MetadataBaseValue, MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
 export { GGUFValueType, GGMLQuantizationType, Architecture } from "./types";

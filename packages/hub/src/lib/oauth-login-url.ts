@@ -1,6 +1,6 @@
-import { HUB_URL } from '../consts.js';
-import { createApiError } from '../error.js';
-import { base64FromBytes } from '../utils/base64FromBytes.js';
+import { HUB_URL } from "../consts.js";
+import { createApiError } from "../error.js";
+import { base64FromBytes } from "../utils/base64FromBytes.js";
 
 /**
  * Use "Sign in with Hub" to authenticate a user, and get oauth user info / access token.

@@ -1,10 +1,10 @@
-import { HUB_URL } from '../consts.js';
-import { createApiError } from '../error.js';
-import type { ApiCommitData } from '../types/api/api-commit.js';
-import type { CredentialsParams, RepoDesignation } from '../types/public.js';
-import { checkCredentials } from '../utils/checkCredentials.js';
-import { parseLinkHeader } from '../utils/parseLinkHeader.js';
-import { toRepoId } from '../utils/toRepoId.js';
+import { HUB_URL } from "../consts.js";
+import { createApiError } from "../error.js";
+import type { ApiCommitData } from "../types/api/api-commit.js";
+import type { CredentialsParams, RepoDesignation } from "../types/public.js";
+import { checkCredentials } from "../utils/checkCredentials.js";
+import { parseLinkHeader } from "../utils/parseLinkHeader.js";
+import { toRepoId } from "../utils/toRepoId.js";
 
 export interface CommitData {
 	oid: string;

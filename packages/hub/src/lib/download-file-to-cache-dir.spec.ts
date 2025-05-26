@@ -1,13 +1,13 @@
 import { expect, test, describe, vi, beforeEach } from "vitest";
-import type { RepoDesignation, RepoId } from '../types/public.js';
+import type { RepoDesignation, RepoId } from "../types/public.js";
 import { dirname, join } from "node:path";
 import { lstat, mkdir, stat, symlink, rename } from "node:fs/promises";
-import { pathsInfo } from './paths-info.js';
+import { pathsInfo } from "./paths-info.js";
 import { createWriteStream, type Stats } from "node:fs";
-import { getHFHubCachePath, getRepoFolderName } from './cache-management.js';
-import { toRepoId } from '../utils/toRepoId.js';
-import { downloadFileToCacheDir } from './download-file-to-cache-dir.js';
-import { createSymlink } from '../utils/symlink.js';
+import { getHFHubCachePath, getRepoFolderName } from "./cache-management.js";
+import { toRepoId } from "../utils/toRepoId.js";
+import { downloadFileToCacheDir } from "./download-file-to-cache-dir.js";
+import { createSymlink } from "../utils/symlink.js";
 
 vi.mock("node:fs/promises", () => ({
 	rename: vi.fn(),

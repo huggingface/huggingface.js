@@ -1,8 +1,8 @@
-import { HUB_URL } from '../consts.js';
-import { createApiError } from '../error.js';
-import type { ApiWhoAmIReponse } from '../types/api/api-who-am-i.js';
-import type { AccessTokenRole, AuthType, CredentialsParams } from '../types/public.js';
-import { checkCredentials } from '../utils/checkCredentials.js';
+import { HUB_URL } from "../consts.js";
+import { createApiError } from "../error.js";
+import type { ApiWhoAmIReponse } from "../types/api/api-who-am-i.js";
+import type { AccessTokenRole, AuthType, CredentialsParams } from "../types/public.js";
+import { checkCredentials } from "../utils/checkCredentials.js";
 
 export interface WhoAmIUser {
 	/** Unique ID persistent across renames */

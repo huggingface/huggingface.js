@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { ModelEntry } from './list-models.js';
-import { listModels } from './list-models.js';
+import type { ModelEntry } from "./list-models.js";
+import { listModels } from "./list-models.js";
 
 describe("listModels", () => {
 	it("should list models for depth estimation", async () => {

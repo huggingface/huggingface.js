@@ -1,10 +1,10 @@
-import { HUB_URL } from '../consts.js';
-import { createApiError } from '../error.js';
-import type { ApiDatasetInfo } from '../types/api/api-dataset.js';
-import type { CredentialsParams } from '../types/public.js';
-import { checkCredentials } from '../utils/checkCredentials.js';
-import { parseLinkHeader } from '../utils/parseLinkHeader.js';
-import { pick } from '../utils/pick.js';
+import { HUB_URL } from "../consts.js";
+import { createApiError } from "../error.js";
+import type { ApiDatasetInfo } from "../types/api/api-dataset.js";
+import type { CredentialsParams } from "../types/public.js";
+import { checkCredentials } from "../utils/checkCredentials.js";
+import { parseLinkHeader } from "../utils/parseLinkHeader.js";
+import { pick } from "../utils/pick.js";
 
 export const DATASET_EXPAND_KEYS = [
 	"private",

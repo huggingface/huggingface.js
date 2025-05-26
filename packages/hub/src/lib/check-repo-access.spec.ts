@@ -1,7 +1,7 @@
 import { assert, describe, expect, it } from "vitest";
-import { checkRepoAccess } from './check-repo-access.js';
-import { HubApiError } from '../error.js';
-import { TEST_ACCESS_TOKEN, TEST_HUB_URL } from '../test/consts.js';
+import { checkRepoAccess } from "./check-repo-access.js";
+import { HubApiError } from "../error.js";
+import { TEST_ACCESS_TOKEN, TEST_HUB_URL } from "../test/consts.js";
 
 describe("checkRepoAccess", () => {
 	it("should throw 401 when accessing unexisting repo unauthenticated", async () => {

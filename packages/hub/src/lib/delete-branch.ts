@@ -1,7 +1,7 @@
-import { HUB_URL } from '../consts.js';
-import { createApiError } from '../error.js';
-import type { AccessToken, RepoDesignation } from '../types/public.js';
-import { toRepoId } from '../utils/toRepoId.js';
+import { HUB_URL } from "../consts.js";
+import { createApiError } from "../error.js";
+import type { AccessToken, RepoDesignation } from "../types/public.js";
+import { toRepoId } from "../utils/toRepoId.js";
 
 export async function deleteBranch(params: {
 	repo: RepoDesignation;

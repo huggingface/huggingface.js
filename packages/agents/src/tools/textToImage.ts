@@ -1,4 +1,4 @@
-import type { Tool } from '../types.js';
+import type { Tool } from "../types.js";
 
 export const textToImageTool: Tool = {
 	name: "textToImage",

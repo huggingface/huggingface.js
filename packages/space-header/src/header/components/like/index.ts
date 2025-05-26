@@ -1,6 +1,6 @@
-import type { Space } from '../../../type.js';
-import { Count } from './count.js';
-import { Heart } from './heart.js';
+import type { Space } from "../../../type.js";
+import { Count } from "./count.js";
+import { Heart } from "./heart.js";
 
 export const Like = (space: Space): HTMLAnchorElement => {
 	const box = document.createElement("a");

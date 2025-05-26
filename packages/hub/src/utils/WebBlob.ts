@@ -2,7 +2,7 @@
  * WebBlob is a Blob implementation for web resources that supports range requests.
  */
 
-import { createApiError } from '../error.js';
+import { createApiError } from "../error.js";
 
 interface WebBlobCreateOptions {
 	/**

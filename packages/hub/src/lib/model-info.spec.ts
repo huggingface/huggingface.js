@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { modelInfo } from './model-info.js';
-import type { ModelEntry } from './list-models.js';
-import type { ApiModelInfo } from '../types/api/api-model.js';
+import { modelInfo } from "./model-info.js";
+import type { ModelEntry } from "./list-models.js";
+import type { ApiModelInfo } from "../types/api/api-model.js";
 
 describe("modelInfo", () => {
 	it("should return the model info", async () => {

@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-import type { GGUFParseOutput } from '..js';
-import { GGMLQuantizationType, ggufAllShards } from '..js';
-import { GGML_QUANT_SIZES } from './quant-descriptions.js';
+import type { GGUFParseOutput } from "..js";
+import { GGMLQuantizationType, ggufAllShards } from "..js";
+import { GGML_QUANT_SIZES } from "./quant-descriptions.js";
 
 interface PrintColumnHeader {
 	name: string;

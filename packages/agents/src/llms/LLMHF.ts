@@ -1,4 +1,4 @@
-import type { LLM } from '../types.js';
+import type { LLM } from "../types.js";
 import { InferenceClient } from "@huggingface/inference";
 
 export function LLMFromHub(accessToken?: string, model?: string): LLM {

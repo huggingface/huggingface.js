@@ -1,5 +1,5 @@
-import { WebBlob } from './WebBlob.js';
-import { isFrontend } from './isFrontend.js';
+import { WebBlob } from "./WebBlob.js";
+import { isFrontend } from "./isFrontend.js";
 
 /**
  * This function allow to retrieve either a FileBlob or a WebBlob from a URL.

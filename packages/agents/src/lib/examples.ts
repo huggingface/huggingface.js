@@ -1,4 +1,4 @@
-import type { Example } from '../types.js';
+import type { Example } from "../types.js";
 
 const examples: Example[] = [
 	{

@@ -1,6 +1,6 @@
 import { assert, it, describe } from "vitest";
-import type { CommitData } from './list-commits.js';
-import { listCommits } from './list-commits.js';
+import type { CommitData } from "./list-commits.js";
+import { listCommits } from "./list-commits.js";
 
 describe("listCommits", () => {
 	it("should fetch paginated commits from the repo", async () => {

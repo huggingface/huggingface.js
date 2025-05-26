@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import type { ReconstructionInfo } from './XetBlob.js';
-import { bg4_regoup_bytes, XetBlob } from './XetBlob.js';
-import { sum } from './sum.js';
+import type { ReconstructionInfo } from "./XetBlob.js";
+import { bg4_regoup_bytes, XetBlob } from "./XetBlob.js";
+import { sum } from "./sum.js";
 
 describe("XetBlob", () => {
 	it("should lazy load the first 22 bytes", async () => {

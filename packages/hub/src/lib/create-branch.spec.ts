@@ -1,12 +1,12 @@
 import { assert, it, describe } from "vitest";
-import { TEST_ACCESS_TOKEN, TEST_HUB_URL, TEST_USER } from '../test/consts.js';
-import type { RepoId } from '../types/public.js';
-import { insecureRandomString } from '../utils/insecureRandomString.js';
-import { createRepo } from './create-repo.js';
-import { deleteRepo } from './delete-repo.js';
-import { createBranch } from './create-branch.js';
-import { uploadFile } from './upload-file.js';
-import { downloadFile } from './download-file.js';
+import { TEST_ACCESS_TOKEN, TEST_HUB_URL, TEST_USER } from "../test/consts.js";
+import type { RepoId } from "../types/public.js";
+import { insecureRandomString } from "../utils/insecureRandomString.js";
+import { createRepo } from "./create-repo.js";
+import { deleteRepo } from "./delete-repo.js";
+import { createBranch } from "./create-branch.js";
+import { uploadFile } from "./upload-file.js";
+import { downloadFile } from "./download-file.js";
 
 describe("createBranch", () => {
 	it("should create a new branch from the default branch", async () => {

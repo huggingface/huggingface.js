@@ -1,4 +1,4 @@
-import type { ArrayEntry, MapEntry, ObjectEntry, SetEntry } from './entry.js';
+import type { ArrayEntry, MapEntry, ObjectEntry, SetEntry } from "./entry.js";
 
 type ArrayEntries<BaseType extends readonly unknown[]> = Array<ArrayEntry<BaseType>>;
 type MapEntries<BaseType> = Array<MapEntry<BaseType>>;

@@ -1,4 +1,4 @@
-import type { Options } from './type.js';
+import type { Options } from "./type.js";
 
 export const inject = (element: HTMLElement, options?: Options): void => {
 	if (options?.target) {

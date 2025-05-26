@@ -1,4 +1,4 @@
-import type { IsEqual } from './is-equal.js';
+import type { IsEqual } from "./is-equal.js";
 
 /**
 Filter out keys from an object.

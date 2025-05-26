@@ -1,6 +1,6 @@
-import type { CredentialsParams } from '../types/public.js';
-import type { CommitOutput, CommitParams, ContentSource } from './commit.js';
-import { commit } from './commit.js';
+import type { CredentialsParams } from "../types/public.js";
+import type { CommitOutput, CommitParams, ContentSource } from "./commit.js";
+import { commit } from "./commit.js";
 
 export function uploadFile(
 	params: {

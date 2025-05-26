@@ -1,5 +1,5 @@
 import { InferenceClient } from "@huggingface/inference";
-import type { Data, Tool } from '../types.js';
+import type { Data, Tool } from "../types.js";
 
 // this function passes the tools & files to the context before calling eval
 export async function evalBuilder(

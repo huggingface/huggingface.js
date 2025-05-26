@@ -1,13 +1,13 @@
 import { assert, it, describe } from "vitest";
 
-import { TEST_HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from '../test/consts.js';
-import type { RepoId } from '../types/public.js';
-import { insecureRandomString } from '../utils/insecureRandomString.js';
-import { createRepo } from './create-repo.js';
-import { deleteRepo } from './delete-repo.js';
-import { downloadFile } from './download-file.js';
-import { uploadFilesWithProgress } from './upload-files-with-progress.js';
-import type { CommitOutput, CommitProgressEvent } from './commit.js';
+import { TEST_HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from "../test/consts.js";
+import type { RepoId } from "../types/public.js";
+import { insecureRandomString } from "../utils/insecureRandomString.js";
+import { createRepo } from "./create-repo.js";
+import { deleteRepo } from "./delete-repo.js";
+import { downloadFile } from "./download-file.js";
+import { uploadFilesWithProgress } from "./upload-files-with-progress.js";
+import type { CommitOutput, CommitProgressEvent } from "./commit.js";
 
 describe("uploadFilesWithProgress", () => {
 	it("should upload files", async () => {

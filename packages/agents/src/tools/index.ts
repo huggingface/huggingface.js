@@ -1,8 +1,8 @@
-import { textToImageTool } from './textToImage.js';
-import { imageToTextTool } from './imageToText.js';
-import { textToSpeechTool } from './textToSpeech.js';
-import { speechToTextTool } from './speechToText.js';
-import type { Tool } from '../types.js';
+import { textToImageTool } from "./textToImage.js";
+import { imageToTextTool } from "./imageToText.js";
+import { textToSpeechTool } from "./textToSpeech.js";
+import { speechToTextTool } from "./speechToText.js";
+import type { Tool } from "../types.js";
 
 export const defaultTools: Array<Tool> = [textToImageTool, imageToTextTool, textToSpeechTool, speechToTextTool];
 

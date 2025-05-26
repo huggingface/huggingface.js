@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { McpClient } from '../src.js';
+import { McpClient } from "../src.js";
 
 if (!process.env.HF_TOKEN) {
 	console.warn("Set HF_TOKEN in the env to run the tests for better rate limits");

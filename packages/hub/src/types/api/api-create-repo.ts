@@ -1,6 +1,6 @@
-import type { SetRequired } from '../../vendor/type-fest/set-required.js';
-import type { RepoType, SpaceHardwareFlavor, SpaceSdk } from '../public.js';
-import type { ApiCommitFile } from './api-commit.js';
+import type { SetRequired } from "../../vendor/type-fest/set-required.js";
+import type { RepoType, SpaceHardwareFlavor, SpaceSdk } from "../public.js";
+import type { ApiCommitFile } from "./api-commit.js";
 
 export type ApiCreateRepoPayload = {
 	name: string;

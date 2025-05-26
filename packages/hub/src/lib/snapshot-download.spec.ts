@@ -1,20 +1,20 @@
 import { expect, test, describe, vi, beforeEach } from "vitest";
 import { dirname, join } from "node:path";
 import { mkdir, writeFile } from "node:fs/promises";
-import { getHFHubCachePath } from './cache-management.js';
-import { downloadFileToCacheDir } from './download-file-to-cache-dir.js';
-import { snapshotDownload } from './snapshot-download.js';
-import type { ListFileEntry } from './list-files.js';
-import { listFiles } from './list-files.js';
-import { modelInfo } from './model-info.js';
-import type { ModelEntry } from './list-models.js';
-import type { ApiModelInfo } from '../types/api/api-model.js';
-import { datasetInfo } from './dataset-info.js';
-import type { DatasetEntry } from './list-datasets.js';
-import type { ApiDatasetInfo } from '../types/api/api-dataset.js';
-import { spaceInfo } from './space-info.js';
-import type { SpaceEntry } from './list-spaces.js';
-import type { ApiSpaceInfo } from '../types/api/api-space.js';
+import { getHFHubCachePath } from "./cache-management.js";
+import { downloadFileToCacheDir } from "./download-file-to-cache-dir.js";
+import { snapshotDownload } from "./snapshot-download.js";
+import type { ListFileEntry } from "./list-files.js";
+import { listFiles } from "./list-files.js";
+import { modelInfo } from "./model-info.js";
+import type { ModelEntry } from "./list-models.js";
+import type { ApiModelInfo } from "../types/api/api-model.js";
+import { datasetInfo } from "./dataset-info.js";
+import type { DatasetEntry } from "./list-datasets.js";
+import type { ApiDatasetInfo } from "../types/api/api-dataset.js";
+import { spaceInfo } from "./space-info.js";
+import type { SpaceEntry } from "./list-spaces.js";
+import type { ApiSpaceInfo } from "../types/api/api-space.js";
 
 vi.mock("node:fs/promises", () => ({
 	writeFile: vi.fn(),

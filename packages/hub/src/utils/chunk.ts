@@ -1,4 +1,4 @@
-import { range } from './range.js';
+import { range } from "./range.js";
 
 /**
  * Chunk array into arrays of length at most `chunkSize`

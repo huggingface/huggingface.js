@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { SpaceEntry } from './list-spaces.js';
-import { listSpaces } from './list-spaces.js';
+import type { SpaceEntry } from "./list-spaces.js";
+import { listSpaces } from "./list-spaces.js";
 
 describe("listSpaces", () => {
 	it("should list spaces for Microsoft", async () => {

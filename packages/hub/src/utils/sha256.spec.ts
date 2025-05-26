@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { sha256 } from './sha256.js';
+import { sha256 } from "./sha256.js";
 
 const smallContent = "hello world";
 const smallContentSHA256 = "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9";

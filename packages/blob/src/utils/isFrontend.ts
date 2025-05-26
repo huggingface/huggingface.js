@@ -1,3 +1,3 @@
-import { isBackend } from './isBackend.js';
+import { isBackend } from "./isBackend.js";
 
 export const isFrontend = !isBackend;

@@ -1,4 +1,4 @@
-import type { Token } from './lexer.js';
+import type { Token } from "./lexer.js";
 
 /**
  * Statements do not result in a value at runtime. They contain one or more expressions internally.

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { checkDDUF, type DDUFFileEntry } from './check-dduf.js';
+import { checkDDUF, type DDUFFileEntry } from "./check-dduf.js";
 
 describe("check-dduf", () => {
 	it("should work", async () => {

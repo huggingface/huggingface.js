@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { eventToGenerator } from './eventToGenerator.js';
+import { eventToGenerator } from "./eventToGenerator.js";
 
 describe("eventToGenerator", () => {
 	it("should handle synchronous events", async () => {

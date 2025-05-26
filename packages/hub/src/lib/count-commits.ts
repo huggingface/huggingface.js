@@ -1,8 +1,8 @@
-import { HUB_URL } from '../consts.js';
-import { createApiError } from '../error.js';
-import type { CredentialsParams, RepoDesignation } from '../types/public.js';
-import { checkCredentials } from '../utils/checkCredentials.js';
-import { toRepoId } from '../utils/toRepoId.js';
+import { HUB_URL } from "../consts.js";
+import { createApiError } from "../error.js";
+import type { CredentialsParams, RepoDesignation } from "../types/public.js";
+import { checkCredentials } from "../utils/checkCredentials.js";
+import { toRepoId } from "../utils/toRepoId.js";
 
 export async function countCommits(
 	params: {

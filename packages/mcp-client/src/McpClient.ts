@@ -10,8 +10,8 @@ import type {
 	ChatCompletionStreamOutputDeltaToolCall,
 } from "@huggingface/tasks/src/tasks/chat-completion/inference";
 import { version as packageVersion } from "../package.json";
-import { debug } from './utils.js';
-import type { ServerConfig } from './types.js';
+import { debug } from "./utils.js";
+import type { ServerConfig } from "./types.js";
 import type { Transport } from "@modelcontextprotocol/sdk/shared/transport";
 import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";

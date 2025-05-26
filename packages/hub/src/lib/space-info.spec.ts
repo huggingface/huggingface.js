@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { spaceInfo } from './space-info.js';
-import type { SpaceEntry } from './list-spaces.js';
-import type { ApiSpaceInfo } from '../types/api/api-space.js';
+import { spaceInfo } from "./space-info.js";
+import type { SpaceEntry } from "./list-spaces.js";
+import type { ApiSpaceInfo } from "../types/api/api-space.js";
 
 describe("spaceInfo", () => {
 	it("should return the space info", async () => {

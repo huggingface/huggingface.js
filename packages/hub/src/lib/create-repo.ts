@@ -1,10 +1,10 @@
-import { HUB_URL } from '../consts.js';
-import { createApiError } from '../error.js';
-import type { ApiCreateRepoPayload } from '../types/api/api-create-repo.js';
-import type { CredentialsParams, RepoDesignation, SpaceSdk } from '../types/public.js';
-import { base64FromBytes } from '../utils/base64FromBytes.js';
-import { checkCredentials } from '../utils/checkCredentials.js';
-import { toRepoId } from '../utils/toRepoId.js';
+import { HUB_URL } from "../consts.js";
+import { createApiError } from "../error.js";
+import type { ApiCreateRepoPayload } from "../types/api/api-create-repo.js";
+import type { CredentialsParams, RepoDesignation, SpaceSdk } from "../types/public.js";
+import { base64FromBytes } from "../utils/base64FromBytes.js";
+import { checkCredentials } from "../utils/checkCredentials.js";
+import { toRepoId } from "../utils/toRepoId.js";
 
 export async function createRepo(
 	params: {

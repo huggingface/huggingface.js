@@ -10,12 +10,12 @@
  *
  * @module index
  */
-import { tokenize } from './lexer.js';
-import { parse } from './parser.js';
-import { Environment, Interpreter, setupGlobals } from './runtime.js';
-import type { Program } from './ast.js';
-import type { StringValue } from './runtime.js';
-import { format } from './format.js';
+import { tokenize } from "./lexer.js";
+import { parse } from "./parser.js";
+import { Environment, Interpreter, setupGlobals } from "./runtime.js";
+import type { Program } from "./ast.js";
+import type { StringValue } from "./runtime.js";
+import { format } from "./format.js";
 
 export class Template {
 	parsed: Program;

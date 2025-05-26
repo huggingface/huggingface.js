@@ -1,6 +1,6 @@
-import { Token, TOKEN_TYPES } from './lexer.js';
-import type { TokenType } from './lexer.js';
-import type { Statement } from './ast.js';
+import { Token, TOKEN_TYPES } from "./lexer.js";
+import type { TokenType } from "./lexer.js";
+import type { Statement } from "./ast.js";
 import {
 	Program,
 	If,

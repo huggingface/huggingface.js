@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from "vitest";
-import type { GGUFParseOutput } from './gguf.js';
+import type { GGUFParseOutput } from "./gguf.js";
 import {
 	GGMLFileQuantizationType,
 	GGMLQuantizationType,

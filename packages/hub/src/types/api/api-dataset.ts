@@ -1,4 +1,4 @@
-import type { License } from '../public.js';
+import type { License } from "../public.js";
 
 export interface ApiDatasetInfo {
 	_id: string;
