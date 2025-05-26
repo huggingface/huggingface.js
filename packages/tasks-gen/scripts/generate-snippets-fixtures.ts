@@ -19,6 +19,7 @@ import { existsSync as pathExists } from "node:fs";
 import * as fs from "node:fs/promises";
 import * as path from "node:path/posix";
 
+import type { InferenceProviderOrPolicy } from "@huggingface/inference";
 import { snippets } from "@huggingface/inference";
 import type { InferenceSnippet, ModelDataMinimal, SnippetInferenceProvider, WidgetType } from "@huggingface/tasks";
 import { inferenceSnippetLanguages } from "@huggingface/tasks";
@@ -31,7 +32,7 @@ const TEST_CASES: {
 	testName: string;
 	task: WidgetType;
 	model: ModelDataMinimal;
-	providers: SnippetInferenceProvider[];
+	providers: InferenceProviderOrPolicy[];
 	lora?: boolean;
 	opts?: snippets.InferenceSnippetOptions;
 }[] = [
@@ -306,7 +307,7 @@ function getFixtureFolder(testName: string): string {
 function generateInferenceSnippet(
 	model: ModelDataMinimal,
 	language: Language,
-	provider: SnippetInferenceProvider,
+	provider: InferenceProviderOrPolicy,
 	task: WidgetType,
 	lora: boolean = false,
 	opts?: Record<string, unknown>
