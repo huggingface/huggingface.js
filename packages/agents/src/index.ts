@@ -1,3 +1,3 @@
-export { HfAgent } from "./HfAgent";
-export * from "./tools";
-export * from "./llms";
+export { HfAgent } from "./HfAgent.js";
+export * from "./tools/index.js";
+export * from "./llms/LLMHF.js";

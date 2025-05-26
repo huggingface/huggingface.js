@@ -1,6 +1,6 @@
 import { evalBuilder } from './lib/evalBuilder.js';
 import { generateCode } from './lib/generateCode.js';
-import { defaultTools } from './tools.js';
+import { defaultTools } from './tools/index.js';
 import type { LLM, Tool, Update } from './types.js';
 import { LLMFromHub } from './llms/LLMHF.js';
 import { generatePrompt } from './lib/promptGeneration.js';
