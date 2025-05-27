@@ -100,6 +100,10 @@ export const SKUS = {
 				tflops: 38.7,
 				memory: [48],
 			},
+			"RTX A5000": {
+				tflops: 34.1,
+				memory: [24],
+			},
 			"RTX A4000": {
 				tflops: 19.2,
 				memory: [16],
@@ -532,6 +536,9 @@ export const SKUS = {
 			},
 			"Intel Core Ultra 7 265KF": {
 				tflops: 1.53,
+			},
+			"Intel Core 14th Generation (i7)": {
+				tflops: 0.8,
 			},
 			"Intel Core 13th Generation (i9)": {
 				tflops: 0.85,

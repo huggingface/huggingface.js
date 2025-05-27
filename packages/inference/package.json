@@ -1,6 +1,6 @@
 {
 	"name": "@huggingface/inference",
-	"version": "3.13.1",
+	"version": "3.15.0",
 	"packageManager": "pnpm@10.10.0",
 	"license": "MIT",
 	"author": "Hugging Face and Tim Mikeladze <tim.mikeladze@gmail.com>",
@@ -30,18 +30,18 @@
 		"!src/snippets/templates/**/*.jinja"
 	],
 	"source": "src/index.ts",
-	"types": "./dist/src/index.d.ts",
-	"main": "./dist/index.cjs",
-	"module": "./dist/index.js",
-	"exports": {
-		"types": "./dist/src/index.d.ts",
-		"require": "./dist/index.cjs",
-		"import": "./dist/index.js"
+	"types": "./dist/commonjs/index.d.ts",
+	"main": "./dist/commonjs/index.js",
+	"module": "./dist/esm/index.js",
+	"tshy": {
+		"exports": {
+			"./package.json": "./package.json",
+			".": "./src/index.ts"
+		}
 	},
 	"type": "module",
 	"scripts": {
-		"build": "pnpm run export-templates && tsup src/index.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
-		"dts": "tsx scripts/generate-dts.ts && tsc --noEmit dist/index.d.ts",
+		"build": "pnpm run export-templates && pnpm run package-to-ts && tshy",
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
 		"format": "prettier --write .",
@@ -52,7 +52,8 @@
 		"test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest.config.mts",
 		"check": "tsc",
 		"dev": "pnpm run export-templates && tsup src/index.ts --format cjs,esm --watch",
-		"export-templates": "tsx scripts/export-templates.ts"
+		"export-templates": "tsx scripts/export-templates.ts",
+		"package-to-ts": "tsx scripts/package-json-to-ts.ts"
 	},
 	"dependencies": {
 		"@huggingface/tasks": "workspace:^",
@@ -61,5 +62,18 @@
 	"devDependencies": {
 		"@types/node": "18.13.0"
 	},
-	"resolutions": {}
+	"resolutions": {},
+	"exports": {
+		"./package.json": "./package.json",
+		".": {
+			"import": {
+				"types": "./dist/esm/index.d.ts",
+				"default": "./dist/esm/index.js"
+			},
+			"require": {
+				"types": "./dist/commonjs/index.d.ts",
+				"default": "./dist/commonjs/index.js"
+			}
+		}
+	}
 }

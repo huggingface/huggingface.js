@@ -1,6 +1,6 @@
-import type { InferenceProviderModelMapping } from "../lib/getInferenceProviderMapping";
-import type { InferenceProvider } from "../types";
-import { type ModelId } from "../types";
+import type { InferenceProviderModelMapping } from "../lib/getInferenceProviderMapping.js";
+import type { InferenceProvider } from "../types.js";
+import { type ModelId } from "../types.js";
 
 /**
  * If you want to try to run inference for a new model locally before it's registered on huggingface.co

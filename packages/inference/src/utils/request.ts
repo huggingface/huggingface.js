@@ -1,8 +1,8 @@
-import type { getProviderHelper } from "../lib/getProviderHelper";
-import { makeRequestOptions } from "../lib/makeRequestOptions";
-import type { InferenceTask, Options, RequestArgs } from "../types";
-import type { EventSourceMessage } from "../vendor/fetch-event-source/parse";
-import { getLines, getMessages } from "../vendor/fetch-event-source/parse";
+import type { getProviderHelper } from "../lib/getProviderHelper.js";
+import { makeRequestOptions } from "../lib/makeRequestOptions.js";
+import type { InferenceTask, Options, RequestArgs } from "../types.js";
+import type { EventSourceMessage } from "../vendor/fetch-event-source/parse.js";
+import { getLines, getMessages } from "../vendor/fetch-event-source/parse.js";
 
 export interface ResponseWrapper<T> {
 	data: T;

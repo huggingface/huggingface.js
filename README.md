@@ -97,8 +97,8 @@ You can run our packages with vanilla JS, without any bundler, by using a CDN or
 
 ```html
 <script type="module">
-    import { InferenceClient } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@3.13.1/+esm';
-    import { createRepo, commit, deleteRepo, listFiles } from "https://cdn.jsdelivr.net/npm/@huggingface/hub@2.0.2/+esm";
+    import { InferenceClient } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@3.15.0/+esm';
+    import { createRepo, commit, deleteRepo, listFiles } from "https://cdn.jsdelivr.net/npm/@huggingface/hub@2.1.0/+esm";
 </script>
 ```
 
@@ -241,8 +241,8 @@ const agent = new Agent({
   ],
 });
 
-
 await agent.loadTools();
+
 for await (const chunk of agent.run("What are the top 5 trending models on Hugging Face?")) {
     if ("choices" in chunk) {
         const delta = chunk.choices[0]?.delta;

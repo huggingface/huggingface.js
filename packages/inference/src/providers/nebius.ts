@@ -15,16 +15,16 @@
  * Thanks!
  */
 import type { FeatureExtractionOutput } from "@huggingface/tasks";
-import { InferenceOutputError } from "../lib/InferenceOutputError";
-import type { BodyParams } from "../types";
-import { omit } from "../utils/omit";
+import { InferenceOutputError } from "../lib/InferenceOutputError.js";
+import type { BodyParams } from "../types.js";
+import { omit } from "../utils/omit.js";
 import {
 	BaseConversationalTask,
 	BaseTextGenerationTask,
 	TaskProviderHelper,
 	type FeatureExtractionTaskHelper,
 	type TextToImageTaskHelper,
-} from "./providerHelper";
+} from "./providerHelper.js";
 
 const NEBIUS_API_BASE_URL = "https://api.studio.nebius.ai";
 

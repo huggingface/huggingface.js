@@ -6,13 +6,13 @@ import {
 	getModelInputSnippet,
 	inferenceSnippetLanguages,
 } from "@huggingface/tasks";
-import type { PipelineType, WidgetType } from "@huggingface/tasks/src/pipelines.js";
-import type { ChatCompletionInputMessage, GenerationParameters } from "@huggingface/tasks/src/tasks/index.js";
-import type { InferenceProviderModelMapping } from "../lib/getInferenceProviderMapping";
-import { getProviderHelper } from "../lib/getProviderHelper";
-import { makeRequestOptionsFromResolvedModel } from "../lib/makeRequestOptions";
-import type { InferenceProviderOrPolicy, InferenceTask, RequestArgs } from "../types";
-import { templates } from "./templates.exported";
+import type { PipelineType, WidgetType } from "@huggingface/tasks";
+import type { ChatCompletionInputMessage, GenerationParameters } from "@huggingface/tasks";
+import type { InferenceProviderModelMapping } from "../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../lib/getProviderHelper.js";
+import { makeRequestOptionsFromResolvedModel } from "../lib/makeRequestOptions.js";
+import type { InferenceProviderOrPolicy, InferenceTask, RequestArgs } from "../types.js";
+import { templates } from "./templates.exported.js";
 
 export type InferenceSnippetOptions = { streaming?: boolean; billTo?: string } & Record<string, unknown>;
 
@@ -144,8 +144,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		}
 		let providerHelper: ReturnType<typeof getProviderHelper>;
 		try {
-			/// For the "auto" provider policy we use hf-inference snippets
-			providerHelper = getProviderHelper(provider === "auto" ? "hf-inference" : provider, task);
+			providerHelper = getProviderHelper(provider, task);
 		} catch (e) {
 			console.error(`Failed to get provider helper for ${provider} (${task})`, e);
 			return [];
