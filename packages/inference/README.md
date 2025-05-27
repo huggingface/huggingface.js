@@ -53,7 +53,7 @@ Currently, we support the following providers:
 - [HF Inference](https://huggingface.co/docs/inference-providers/providers/hf-inference)
 - [Hyperbolic](https://hyperbolic.xyz)
 - [Nebius](https://studio.nebius.ai)
-- [Novita](https://novita.ai/?utm_source=github_huggingface&utm_medium=github_readme&utm_campaign=link)
+- [Novita](https://novita.ai)
 - [Nscale](https://nscale.com)
 - [OVHcloud](https://endpoints.ai.cloud.ovh.net/)
 - [Replicate](https://replicate.com)
@@ -98,6 +98,7 @@ Only a subset of models are supported when requesting third-party providers. You
 - [Cerebras supported models](https://huggingface.co/api/partners/cerebras/models)
 - [Dat1 supported models](https://huggingface.co/api/partners/dat1/models)
 - [Groq supported models](https://console.groq.com/docs/models)
+- [Novita AI supported models](https://huggingface.co/api/partners/novita/models)
 
 ❗**Important note:** To be compatible, the third-party API must adhere to the "standard" shape API we expect on HF model pages for each pipeline task type.
 This is not an issue for LLMs as everyone converged on the OpenAI API anyways, but can be more tricky for other tasks like "text-to-image" or "automatic-speech-recognition" where there exists no standard API. Let us know if any help is needed or if we can make things easier for you!

@@ -1,6 +1,6 @@
 {
 	"name": "@huggingface/inference",
-	"version": "3.14.0",
+	"version": "3.15.0",
 	"packageManager": "pnpm@10.10.0",
 	"license": "MIT",
 	"author": "Hugging Face and Tim Mikeladze <tim.mikeladze@gmail.com>",
