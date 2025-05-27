@@ -3,11 +3,11 @@ import type {
 	DocumentQuestionAnsweringInputData,
 	DocumentQuestionAnsweringOutput,
 } from "@huggingface/tasks";
-import { resolveProvider } from "../../lib/getInferenceProviderMapping";
-import { getProviderHelper } from "../../lib/getProviderHelper";
-import type { BaseArgs, Options, RequestArgs } from "../../types";
-import { base64FromBytes } from "../../utils/base64FromBytes";
-import { innerRequest } from "../../utils/request";
+import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
+import { getProviderHelper } from "../../lib/getProviderHelper.js";
+import type { BaseArgs, Options, RequestArgs } from "../../types.js";
+import { base64FromBytes } from "../../utils/base64FromBytes.js";
+import { innerRequest } from "../../utils/request.js";
 
 /// Override the type to properly set inputs.image as Blob
 export type DocumentQuestionAnsweringArgs = BaseArgs &

@@ -14,11 +14,11 @@
  *
  * Thanks!
  */
-import { InferenceOutputError } from "../lib/InferenceOutputError";
-import type { BodyParams, HeaderParams, UrlParams } from "../types";
-import { delay } from "../utils/delay";
-import { omit } from "../utils/omit";
-import { TaskProviderHelper, type TextToImageTaskHelper } from "./providerHelper";
+import { InferenceOutputError } from "../lib/InferenceOutputError.js";
+import type { BodyParams, HeaderParams, UrlParams } from "../types.js";
+import { delay } from "../utils/delay.js";
+import { omit } from "../utils/omit.js";
+import { TaskProviderHelper, type TextToImageTaskHelper } from "./providerHelper.js";
 
 const BLACK_FOREST_LABS_AI_API_BASE_URL = "https://api.us1.bfl.ai";
 interface BlackForestLabsResponse {

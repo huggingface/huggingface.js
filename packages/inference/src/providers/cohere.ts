@@ -14,7 +14,7 @@
  *
  * Thanks!
  */
-import { BaseConversationalTask } from "./providerHelper";
+import { BaseConversationalTask } from "./providerHelper.js";
 
 export class CohereConversationalTask extends BaseConversationalTask {
 	constructor() {
