@@ -87,8 +87,11 @@ npx @huggingface/tiny-agents run ./my-agent
 
 Voilà! 🔥
 
-> [!NOTE]
-> Note: You can contribute your agent to the community by opening a Pull Request in the [tiny-agents](https://huggingface.co/datasets/tiny-agents/tiny-agents) Hugging Face dataset.
+<Tip>
+
+Note: You can contribute your agent to the community by opening a Pull Request in the [tiny-agents](https://huggingface.co/datasets/tiny-agents/tiny-agents) Hugging Face dataset.
+
+</Tip>
 
 ### Advanced: Programmatic Usage
 
