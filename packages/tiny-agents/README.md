@@ -96,11 +96,8 @@ Browse our curated collection of Tiny Agents at https://huggingface.co/datasets/
 npx @huggingface/tiny-agents run "julien-c/flux-schnell-generator"
 ```
 
-<Tip>
-
-Note: You can contribute your agent to the community by opening a Pull Request in the [tiny-agents](https://huggingface.co/datasets/tiny-agents/tiny-agents) Hugging Face dataset.
-
-</Tip>
+> [!NOTE]
+> Want to share your own agent with the community? Submit a PR to the [Tiny Agents](https://huggingface.co/datasets/tiny-agents/tiny-agents/discussions) repository on the Hub. Your submission must include an `agent.json` file, and you can optionally add a `PROMPT.md` file. To help others understand your agent's capabilities, consider including an `EXAMPLES.md` file with sample prompts and use cases.
 
 ## Advanced: Programmatic Usage
 
