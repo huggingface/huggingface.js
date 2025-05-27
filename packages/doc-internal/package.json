@@ -5,7 +5,7 @@
 	"description": "Package to generate doc for other @huggingface packages",
 	"private": true,
 	"scripts": {
-		"start": "pnpm run fix-cdn-versions && pnpm run doc-hub && pnpm run doc-inference && pnpm run doc-agents && pnpm run doc-space-header && pnpm run doc-gguf && pnpm run doc-mcp-client && cp ../../README.md ../../docs/index.md && pnpm run update-toc && pnpm run fix-md-links && pnpm run fix-md-headinghashlinks",
+		"start": "pnpm run fix-cdn-versions && pnpm run doc-hub && pnpm run doc-inference && pnpm run doc-agents && pnpm run doc-space-header && pnpm run doc-gguf && pnpm run doc-mcp-client && pnpm run doc-tiny-agents && cp ../../README.md ../../docs/index.md && pnpm run update-toc && pnpm run fix-md-links && pnpm run fix-md-headinghashlinks",
 		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
 		"lint:check": "eslint --ext .cjs,.ts .",
 		"format": "prettier --write .",
