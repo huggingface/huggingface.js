@@ -12,6 +12,7 @@ on:
       - "packages/hub/README.md"
       - "packages/inference/README.md"
       - "packages/agents/README.md"
+      - "packages/tiny-agents/README.md"
       - ".github/workflows/documentation.yml"
 
 jobs:
