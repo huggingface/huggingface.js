@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { HfAgent, defaultTools, LLMFromHub, LLMFromEndpoint } from "../src";
-import type { Data } from "../src/types";
+import { HfAgent } from "../src/HfAgent.js";
+import { defaultTools } from "../src/tools/index.js";
+import { LLMFromHub, LLMFromEndpoint } from "../src/llms/LLMHF.js";
+import type { Data } from "../src/types.js";
 import type { InferenceClient } from "@huggingface/inference";
 
 const env = import.meta.env;

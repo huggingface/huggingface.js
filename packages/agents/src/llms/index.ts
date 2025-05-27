@@ -1,1 +1,1 @@
-export { LLMFromHub, LLMFromEndpoint } from "./LLMHF";
+export { LLMFromHub, LLMFromEndpoint } from "./LLMHF.js";

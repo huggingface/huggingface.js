@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "noEmit": true
+  },
+  "references": [
+    { "path": "./packages/hub" },
+    { "path": "./packages/blob" },
+    { "path": "./packages/tasks" },
+    { "path": "./packages/inference" },
+    { "path": "./packages/agents" },
+    { "path": "./packages/gguf" },
+    { "path": "./packages/jinja" },
+    { "path": "./packages/languages" },
+    { "path": "./packages/mcp-client" },
+    { "path": "./packages/ollama-utils" },
+    { "path": "./packages/space-header" },
+    { "path": "./packages/tiny-agents" }
+  ]
+}
