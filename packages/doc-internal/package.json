@@ -15,6 +15,7 @@
 		"doc-agents": "typedoc --tsconfig ../agents/tsconfig.json --githubPages false --plugin typedoc-plugin-markdown --out ../../docs/agents --hideBreadcrumbs --hideInPageTOC --sourceLinkTemplate https://github.com/huggingface/huggingface.js/blob/main/{path}#L{line} ../agents/src/index.ts",
 		"doc-gguf": "mkdir -p ../../docs/gguf && cp ../../packages/gguf/README.md ../../docs/gguf/README.md",
 		"doc-mcp-client": "mkdir -p ../../docs/mcp-client && cp ../../packages/mcp-client/README.md ../../docs/mcp-client/README.md",
+		"doc-tiny-agents": "mkdir -p ../../docs/tiny-agents && cp ../../packages/tiny-agents/README.md ../../docs/tiny-agents/README.md",
 		"doc-space-header": "mkdir -p ../../docs/space-header && cp ../../packages/space-header/README.md ../../docs/space-header/README.md",
 		"update-toc": "tsx update-toc.ts",
 		"fix-cdn-versions": "tsx fix-cdn-versions.ts",
