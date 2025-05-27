@@ -87,13 +87,22 @@ npx @huggingface/tiny-agents run ./my-agent
 
 Voilà! 🔥
 
+
+## Tiny Agents collection
+
+Browse our curated collection of Tiny Agents at https://huggingface.co/datasets/tiny-agents/tiny-agents. Each agent is stored in its own subdirectory, following the structure outlined above. Running an agent from the Hub is as simple as using its `agent_id`. For example, to run the [`julien-c/flux-schnell-generator`](https://huggingface.co/datasets/tiny-agents/tiny-agents/tree/main/julien-c/flux-schnell-generator) agent:
+
+```bash
+npx @huggingface/tiny-agents run "julien-c/flux-schnell-generator"
+```
+
 <Tip>
 
 Note: You can contribute your agent to the community by opening a Pull Request in the [tiny-agents](https://huggingface.co/datasets/tiny-agents/tiny-agents) Hugging Face dataset.
 
 </Tip>
 
-### Advanced: Programmatic Usage
+## Advanced: Programmatic Usage
 
 ```typescript
 import { Agent } from '@huggingface/tiny-agents';
