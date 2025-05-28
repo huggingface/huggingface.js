@@ -14,3 +14,4 @@ packages:
   - "packages/ollama-utils"
   - "packages/mcp-client"
   - "packages/tiny-agents"
+  - "packages/gearhash"
