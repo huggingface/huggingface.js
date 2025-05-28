@@ -40,3 +40,12 @@ export const ServerConfigSchema = z.discriminatedUnion("type", [
 ]);
 
 export type ServerConfig = z.infer<typeof ServerConfigSchema>;
+
+export const InputConfigSchema = z.object({
+	id: z.string(),
+	description: z.string(),
+	type: z.string().optional(),
+	password: z.boolean().optional(),
+});
+
+export type InputConfig = z.infer<typeof InputConfigSchema>;
