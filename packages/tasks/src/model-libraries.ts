@@ -1045,7 +1045,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "ACE-Step",
 		repoUrl: "https://github.com/ace-step/ACE-Step",
 		filter: false,
-		countDownloads: `path:"ace_step_transformer/diffusion_pytorch_model.safetensors"`,
+		countDownloads: `path:"ace_step_transformer/config.json"`,
 	},
 	
 } satisfies Record<string, LibraryUiElement>;
