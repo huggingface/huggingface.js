@@ -947,6 +947,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"pytorch_model.bin" OR path:"model.safetensors"`,
 	},
+	tirex: {
+		prettyLabel: "TiRex",
+		repoName: "TiRex",
+		repoUrl: "https://github.com/NX-AI/tirex",
+		countDownloads: `path_extension:"ckpt"`,
+	},
 	torchgeo: {
 		prettyLabel: "TorchGeo",
 		repoName: "TorchGeo",
