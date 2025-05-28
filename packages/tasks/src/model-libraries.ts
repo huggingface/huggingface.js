@@ -58,6 +58,13 @@ export interface LibraryUiElement {
  */
 
 export const MODEL_LIBRARIES_UI_ELEMENTS = {
+	acestep: {
+		prettyLabel: "ACE-Step",
+		repoName: "ACE-Step",
+		repoUrl: "https://github.com/ace-step/ACE-Step",
+		filter: false,
+		countDownloads: `path:"ace_step_transformer/config.json"`,
+	},
 	"adapter-transformers": {
 		prettyLabel: "Adapters",
 		repoName: "adapters",
