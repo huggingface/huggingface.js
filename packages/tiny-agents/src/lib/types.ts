@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+export interface TinyAgentConfig {
+	configJson: string;
+	prompt?: string;
+}
+
 export const ServerConfigSchema = z.discriminatedUnion("type", [
 	z.object({
 		type: z.literal("stdio"),
