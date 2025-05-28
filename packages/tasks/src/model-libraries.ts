@@ -522,6 +522,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "mindspore",
 		repoUrl: "https://github.com/mindspore-ai/mindspore",
 	},
+	"magi-1": {
+		prettyLabel: "MAGI-1",
+		repoName: "MAGI-1",
+		repoUrl: "https://github.com/SandAI-org/MAGI-1",
+		countDownloads: `path:"ckpt/vae/config.json"`,
+	},
 	"mamba-ssm": {
 		prettyLabel: "MambaSSM",
 		repoName: "MambaSSM",
