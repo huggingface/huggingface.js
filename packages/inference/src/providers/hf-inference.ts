@@ -195,7 +195,7 @@ export class HFInferenceTextGenerationTask extends HFInferenceTask implements Te
 		if (Array.isArray(res) && res.every((x) => "generated_text" in x && typeof x?.generated_text === "string")) {
 			return (res as TextGenerationOutput[])?.[0];
 		}
-		throw new HfInferenceProviderOutputError("Received malformed response from HF-Inference text-to-speech API: expected Array<{generated_text: string}>");
+		throw new HfInferenceProviderOutputError("Received malformed response from HF-Inference text generation API: expected Array<{generated_text: string}>");
 	}
 }
 
