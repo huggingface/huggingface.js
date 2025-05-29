@@ -17,10 +17,12 @@ export interface ResponseWrapper<T> {
 function requestArgsToJson(args: RequestArgs): JsonObject {
 	// Convert the entire args object to a JSON-serializable format
 	const argsWithData = args as RequestArgs & { data?: Blob | ArrayBuffer };
-	return JSON.parse(JSON.stringify({
-		...argsWithData,
-		data: argsWithData.data ? "[Blob or ArrayBuffer]" : null
-	})) as JsonObject;
+	return JSON.parse(
+		JSON.stringify({
+			...argsWithData,
+			data: argsWithData.data ? "[Blob or ArrayBuffer]" : null,
+		})
+	) as JsonObject;
 }
 
 /**
@@ -51,29 +53,51 @@ export async function innerRequest<T>(
 			const output = await response.json();
 			if ([400, 422, 404, 500].includes(response.status) && options?.chatCompletion) {
 				throw new HfInferenceProviderApiError(
-					`Provider ${args.provider} does not seem to support chat completion for model ${args.model} . Error: ${JSON.stringify(output.error)}`,
-					{ url, method: info.method ?? "GET", headers: info.headers as Record<string, string>, body: requestArgsToJson(args) },
-					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output },
+					`Provider ${args.provider} does not seem to support chat completion for model ${
+						args.model
+					} . Error: ${JSON.stringify(output.error)}`,
+					{
+						url,
+						method: info.method ?? "GET",
+						headers: info.headers as Record<string, string>,
+						body: requestArgsToJson(args),
+					},
+					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output }
 				);
 			}
 			if (typeof output.error === "string" || typeof output.detail === "string") {
 				throw new HfInferenceProviderApiError(
 					`Failed to perform inference: ${output.error ?? output.detail}`,
-					{ url, method: info.method ?? "GET", headers: info.headers as Record<string, string>, body: requestArgsToJson(args) },
-					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output },
+					{
+						url,
+						method: info.method ?? "GET",
+						headers: info.headers as Record<string, string>,
+						body: requestArgsToJson(args),
+					},
+					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output }
 				);
 			} else {
 				throw new HfInferenceProviderApiError(
 					`Failed to perform inference: an HTTP error occurred when requesting the provider.`,
-					{ url, method: info.method ?? "GET", headers: info.headers as Record<string, string>, body: requestArgsToJson(args) },
-					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output },
+					{
+						url,
+						method: info.method ?? "GET",
+						headers: info.headers as Record<string, string>,
+						body: requestArgsToJson(args),
+					},
+					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output }
 				);
 			}
 		}
 		const message = contentType?.startsWith("text/plain;") ? await response.text() : undefined;
 		throw new HfInferenceProviderApiError(
 			`Failed to perform inference: ${message ?? "an HTTP error occurred when requesting the provider"}`,
-			{ url, method: info.method ?? "GET", headers: info.headers as Record<string, string>, body: requestArgsToJson(args) },
+			{
+				url,
+				method: info.method ?? "GET",
+				headers: info.headers as Record<string, string>,
+				body: requestArgsToJson(args),
+			},
 			{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: message ?? "" }
 		);
 	}
@@ -111,46 +135,79 @@ export async function* innerStreamingRequest<T>(
 			const output = await response.json();
 			if ([400, 422, 404, 500].includes(response.status) && options?.chatCompletion) {
 				throw new HfInferenceProviderApiError(
-					`Provider ${args.provider} does not seem to support chat completion for model ${args.model} . Error: ${JSON.stringify(output.error)}`,
-					{ url, method: info.method ?? "GET", headers: info.headers as Record<string, string>, body: requestArgsToJson(args) },
-					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output },
+					`Provider ${args.provider} does not seem to support chat completion for model ${
+						args.model
+					} . Error: ${JSON.stringify(output.error)}`,
+					{
+						url,
+						method: info.method ?? "GET",
+						headers: info.headers as Record<string, string>,
+						body: requestArgsToJson(args),
+					},
+					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output }
 				);
 			}
 			if (typeof output.error === "string") {
 				throw new HfInferenceProviderApiError(
 					`Failed to perform inference: ${output.error}`,
-					{ url, method: info.method ?? "GET", headers: info.headers as Record<string, string>, body: requestArgsToJson(args) },
-					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output },
+					{
+						url,
+						method: info.method ?? "GET",
+						headers: info.headers as Record<string, string>,
+						body: requestArgsToJson(args),
+					},
+					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output }
 				);
 			}
 			if (output.error && "message" in output.error && typeof output.error.message === "string") {
 				/// OpenAI errors
 				throw new HfInferenceProviderApiError(
 					`Failed to perform inference: ${output.error.message}`,
-					{ url, method: info.method ?? "GET", headers: info.headers as Record<string, string>, body: requestArgsToJson(args) },
-					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output },
+					{
+						url,
+						method: info.method ?? "GET",
+						headers: info.headers as Record<string, string>,
+						body: requestArgsToJson(args),
+					},
+					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output }
 				);
 			}
 			// Sambanova errors
 			if (typeof output.message === "string") {
 				throw new HfInferenceProviderApiError(
 					`Failed to perform inference: ${output.message}`,
-					{ url, method: info.method ?? "GET", headers: info.headers as Record<string, string>, body: requestArgsToJson(args) },
-					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output },
+					{
+						url,
+						method: info.method ?? "GET",
+						headers: info.headers as Record<string, string>,
+						body: requestArgsToJson(args),
+					},
+					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output }
 				);
 			}
 		}
 
 		throw new HfInferenceProviderApiError(
 			`Failed to perform inference: an HTTP error occurred when requesting the provider.`,
-			{ url, method: info.method ?? "GET", headers: info.headers as Record<string, string>, body: requestArgsToJson(args) },
+			{
+				url,
+				method: info.method ?? "GET",
+				headers: info.headers as Record<string, string>,
+				body: requestArgsToJson(args),
+			},
 			{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: "" }
 		);
 	}
 	if (!response.headers.get("content-type")?.startsWith("text/event-stream")) {
 		throw new HfInferenceProviderApiError(
-			`Failed to perform inference: server does not support event stream content type, it returned ` + response.headers.get("content-type"),
-			{ url, method: info.method ?? "GET", headers: info.headers as Record<string, string>, body: requestArgsToJson(args) },
+			`Failed to perform inference: server does not support event stream content type, it returned ` +
+				response.headers.get("content-type"),
+			{
+				url,
+				method: info.method ?? "GET",
+				headers: info.headers as Record<string, string>,
+				body: requestArgsToJson(args),
+			},
 			{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: "" }
 		);
 	}
@@ -169,8 +226,8 @@ export async function* innerStreamingRequest<T>(
 
 	const onChunk = getLines(
 		getMessages(
-			() => { },
-			() => { },
+			() => {},
+			() => {},
 			onEvent
 		)
 	);
@@ -193,15 +250,20 @@ export async function* innerStreamingRequest<T>(
 							typeof data.error === "string"
 								? data.error
 								: typeof data.error === "object" &&
-									data.error &&
-									"message" in data.error &&
-									typeof data.error.message === "string"
-									? data.error.message
-									: JSON.stringify(data.error);
+								    data.error &&
+								    "message" in data.error &&
+								    typeof data.error.message === "string"
+								  ? data.error.message
+								  : JSON.stringify(data.error);
 						throw new HfInferenceProviderApiError(
 							`Failed to perform inference: an occurred while streaming the response: ${errorStr}`,
-							{ url, method: info.method ?? "GET", headers: info.headers as Record<string, string>, body: requestArgsToJson(args) },
-							{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: data },
+							{
+								url,
+								method: info.method ?? "GET",
+								headers: info.headers as Record<string, string>,
+								body: requestArgsToJson(args),
+							},
+							{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: data }
 						);
 					}
 					yield data as T;

@@ -282,10 +282,14 @@ export function getProviderHelper(
 		return new HFInference.HFInferenceTask();
 	}
 	if (!task) {
-		throw new HfInferenceInputError("you need to provide a task name when using an external provider, e.g. 'text-to-image'");
+		throw new HfInferenceInputError(
+			"you need to provide a task name when using an external provider, e.g. 'text-to-image'"
+		);
 	}
 	if (!(provider in PROVIDERS)) {
-		throw new HfInferenceInputError(`Provider '${provider}' not supported. Available providers: ${Object.keys(PROVIDERS)}`);
+		throw new HfInferenceInputError(
+			`Provider '${provider}' not supported. Available providers: ${Object.keys(PROVIDERS)}`
+		);
 	}
 	const providerTasks = PROVIDERS[provider];
 	if (!providerTasks || !(task in providerTasks)) {

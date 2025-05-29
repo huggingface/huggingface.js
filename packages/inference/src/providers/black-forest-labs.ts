@@ -70,7 +70,8 @@ export class BlackForestLabsTextToImageTask extends TaskProviderHelper implement
 			urlObj.searchParams.set("attempt", step.toString(10));
 			const resp = await fetch(urlObj, { headers: { "Content-Type": "application/json" } });
 			if (!resp.ok) {
-				throw new HfInferenceProviderApiError("Failed to fetch result from black forest labs API",
+				throw new HfInferenceProviderApiError(
+					"Failed to fetch result from black forest labs API",
 					{ url: urlObj.toString(), method: "GET", headers: { "Content-Type": "application/json" } },
 					{ requestId: resp.headers.get("x-request-id") ?? "", status: resp.status, body: await resp.text() }
 				);
@@ -95,6 +96,8 @@ export class BlackForestLabsTextToImageTask extends TaskProviderHelper implement
 				return await image.blob();
 			}
 		}
-		throw new HfInferenceProviderOutputError(`Timed out while waiting for the result from black forest labs API - aborting after 5 attempts`);
+		throw new HfInferenceProviderOutputError(
+			`Timed out while waiting for the result from black forest labs API - aborting after 5 attempts`
+		);
 	}
 }

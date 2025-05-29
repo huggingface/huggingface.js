@@ -34,12 +34,9 @@ export async function fetchInferenceProviderMappingForModel(
 		inferenceProviderMapping = inferenceProviderMappingCache.get(modelId)!;
 	} else {
 		const url = `${HF_HUB_URL}/api/models/${modelId}?expand[]=inferenceProviderMapping`;
-		const resp = await (options?.fetch ?? fetch)(
-			url,
-			{
-				headers: accessToken?.startsWith("hf_") ? { Authorization: `Bearer ${accessToken}` } : {},
-			}
-		);
+		const resp = await (options?.fetch ?? fetch)(url, {
+			headers: accessToken?.startsWith("hf_") ? { Authorization: `Bearer ${accessToken}` } : {},
+		});
 		if (!resp.ok) {
 			if (resp.headers.get("Content-Type")?.startsWith("application/json")) {
 				const error = await resp.json();

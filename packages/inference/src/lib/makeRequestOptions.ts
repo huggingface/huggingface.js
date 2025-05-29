@@ -64,26 +64,28 @@ export async function makeRequestOptions(
 
 	const inferenceProviderMapping = providerHelper.clientSideRoutingOnly
 		? ({
-			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			providerId: removeProviderPrefix(maybeModel!, provider),
-			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			hfModelId: maybeModel!,
-			status: "live",
-			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			task: task!,
-		} satisfies InferenceProviderModelMapping)
-		: await getInferenceProviderMapping(
-			{
-				modelId: hfModel,
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				providerId: removeProviderPrefix(maybeModel!, provider),
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				hfModelId: maybeModel!,
+				status: "live",
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 				task: task!,
-				provider,
-				accessToken: args.accessToken,
-			},
-			{ fetch: options?.fetch }
-		);
+		  } satisfies InferenceProviderModelMapping)
+		: await getInferenceProviderMapping(
+				{
+					modelId: hfModel,
+					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+					task: task!,
+					provider,
+					accessToken: args.accessToken,
+				},
+				{ fetch: options?.fetch }
+		  );
 	if (!inferenceProviderMapping) {
-		throw new HfInferenceInputError(`We have not been able to find inference provider information for model ${hfModel}.`);
+		throw new HfInferenceInputError(
+			`We have not been able to find inference provider information for model ${hfModel}.`
+		);
 	}
 
 	// Use the sync version with the resolved model
@@ -210,7 +212,7 @@ async function loadTaskInfo(): Promise<Record<string, { models: { id: string }[]
 		throw new HfInferenceHubApiError(
 			"Failed to load tasks definitions from Hugging Face Hub.",
 			{ url, method: "GET" },
-			{ requestId: res.headers.get("x-request-id") ?? "", status: res.status, body: await res.text() },
+			{ requestId: res.headers.get("x-request-id") ?? "", status: res.status, body: await res.text() }
 		);
 	}
 	return await res.json();

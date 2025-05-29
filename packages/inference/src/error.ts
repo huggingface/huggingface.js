@@ -1,6 +1,6 @@
 import type { JsonObject } from "./vendor/type-fest/basic.js";
 
-/** 
+/**
  * Base class for all inference-related errors.
  */
 export abstract class HfInferenceError extends Error {
@@ -37,13 +37,15 @@ abstract class HfInferenceHttpRequestError extends HfInferenceError {
 		super(message);
 		this.httpRequest = {
 			...httpRequest,
-			...(httpRequest.headers ? {
-				headers: {
-					...httpRequest.headers,
-					...("Authorization" in httpRequest.headers ? { Authorization: `Bearer [redacted]` } : undefined),
-					/// redact authentication in the request headers
-				},
-			} : undefined)
+			...(httpRequest.headers
+				? {
+						headers: {
+							...httpRequest.headers,
+							...("Authorization" in httpRequest.headers ? { Authorization: `Bearer [redacted]` } : undefined),
+							/// redact authentication in the request headers
+						},
+				  }
+				: undefined),
 		};
 		this.httpResponse = httpResponse;
 	}
@@ -70,7 +72,7 @@ export class HfInferenceHubApiError extends HfInferenceHttpRequestError {
 }
 
 /**
- * Thrown when the inference output returned by the provider is invalid / does not match the expectations 
+ * Thrown when the inference output returned by the provider is invalid / does not match the expectations
  */
 export class HfInferenceProviderOutputError extends HfInferenceError {
 	constructor(message: string) {
@@ -78,4 +80,3 @@ export class HfInferenceProviderOutputError extends HfInferenceError {
 		this.name = "ProviderOutputError";
 	}
 }
-
