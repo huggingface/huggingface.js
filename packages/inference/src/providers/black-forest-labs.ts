@@ -14,7 +14,7 @@
  *
  * Thanks!
  */
-import { InferenceOutputError } from "../lib/InferenceOutputError.js";
+import { HfInferenceInputError, HfInferenceProviderApiError, HfInferenceProviderOutputError } from "../error.js";
 import type { BodyParams, HeaderParams, UrlParams } from "../types.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
@@ -52,7 +52,7 @@ export class BlackForestLabsTextToImageTask extends TaskProviderHelper implement
 
 	makeRoute(params: UrlParams): string {
 		if (!params) {
-			throw new Error("Params are required");
+			throw new HfInferenceInputError("Params are required");
 		}
 		return `/v1/${params.model}`;
 	}
@@ -70,7 +70,11 @@ export class BlackForestLabsTextToImageTask extends TaskProviderHelper implement
 			urlObj.searchParams.set("attempt", step.toString(10));
 			const resp = await fetch(urlObj, { headers: { "Content-Type": "application/json" } });
 			if (!resp.ok) {
-				throw new InferenceOutputError("Failed to fetch result from black forest labs API");
+				throw new HfInferenceProviderApiError(
+					"Failed to fetch result from black forest labs API",
+					{ url: urlObj.toString(), method: "GET", headers: { "Content-Type": "application/json" } },
+					{ requestId: resp.headers.get("x-request-id") ?? "", status: resp.status, body: await resp.text() }
+				);
 			}
 			const payload = await resp.json();
 			if (
@@ -92,6 +96,8 @@ export class BlackForestLabsTextToImageTask extends TaskProviderHelper implement
 				return await image.blob();
 			}
 		}
-		throw new InferenceOutputError("Failed to fetch result from black forest labs API");
+		throw new HfInferenceProviderOutputError(
+			`Timed out while waiting for the result from black forest labs API - aborting after 5 attempts`
+		);
 	}
 }
