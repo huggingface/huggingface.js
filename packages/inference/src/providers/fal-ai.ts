@@ -30,6 +30,7 @@ import {
 } from "./providerHelper.js";
 import { HF_HUB_URL } from "../config.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
+import { HfInferenceInputError, HfInferenceProviderApiError } from "../error.js";
 
 export interface FalAiQueueOutput {
 	request_id: string;
@@ -159,9 +160,8 @@ export class FalAITextToVideoTask extends FalAITask implements TextToVideoTaskHe
 		let status = response.status;
 
 		const parsedUrl = new URL(url);
-		const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}${
-			parsedUrl.host === "router.huggingface.co" ? "/fal-ai" : ""
-		}`;
+		const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}${parsedUrl.host === "router.huggingface.co" ? "/fal-ai" : ""
+			}`;
 
 		// extracting the provider model id for status and result urls
 		// from the response as it might be different from the mapped model in `url`
@@ -232,12 +232,12 @@ export class FalAIAutomaticSpeechRecognitionTask extends FalAITask implements Au
 		const blob = "data" in args && args.data instanceof Blob ? args.data : "inputs" in args ? args.inputs : undefined;
 		const contentType = blob?.type;
 		if (!contentType) {
-			throw new Error(
+			throw new HfInferenceInputError(
 				`Unable to determine the input's content-type. Make sure your are passing a Blob when using provider fal-ai.`
 			);
 		}
 		if (!FAL_AI_SUPPORTED_BLOB_TYPES.includes(contentType)) {
-			throw new Error(
+			throw new HfInferenceInputError(
 				`Provider fal-ai does not support blob type ${contentType} - supported content types are: ${FAL_AI_SUPPORTED_BLOB_TYPES.join(
 					", "
 				)}`
@@ -267,17 +267,19 @@ export class FalAITextToSpeechTask extends FalAITask {
 				`Expected { audio: { url: string } } format from Fal.ai Text-to-Speech, got: ${JSON.stringify(response)}`
 			);
 		}
+		const urlResponse = await fetch(res.audio.url);
+		if (!urlResponse.ok) {
+			throw new HfInferenceProviderApiError(`Failed to fetch audio from ${res.audio.url}: ${urlResponse.statusText}`,
+				{ url: res.audio.url, method: "GET", headers: { "Content-Type": "application/json" } },
+				{ requestId: urlResponse.headers.get("x-request-id") ?? "", status: urlResponse.status, body: await urlResponse.text() }
+			);
+		}
 		try {
-			const urlResponse = await fetch(res.audio.url);
-			if (!urlResponse.ok) {
-				throw new Error(`Failed to fetch audio from ${res.audio.url}: ${urlResponse.statusText}`);
-			}
 			return await urlResponse.blob();
 		} catch (error) {
-			throw new InferenceOutputError(
-				`Error fetching or processing audio from Fal.ai Text-to-Speech URL: ${res.audio.url}. ${
-					error instanceof Error ? error.message : String(error)
-				}`
+			throw new HfInferenceProviderApiError(`Failed to fetch audio from ${res.audio.url}: ${error instanceof Error ? error.message : String(error)}`,
+				{ url: res.audio.url, method: "GET", headers: { "Content-Type": "application/json" } },
+				{ requestId: urlResponse.headers.get("x-request-id") ?? "", status: urlResponse.status, body: await urlResponse.text() }
 			);
 		}
 	}

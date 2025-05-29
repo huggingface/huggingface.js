@@ -48,6 +48,7 @@ import * as Replicate from "../providers/replicate.js";
 import * as Sambanova from "../providers/sambanova.js";
 import * as Together from "../providers/together.js";
 import type { InferenceProvider, InferenceProviderOrPolicy, InferenceTask } from "../types.js";
+import { HfInferenceInputError } from "../error.js";
 
 export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, TaskProviderHelper>>> = {
 	"black-forest-labs": {
@@ -281,14 +282,14 @@ export function getProviderHelper(
 		return new HFInference.HFInferenceTask();
 	}
 	if (!task) {
-		throw new Error("you need to provide a task name when using an external provider, e.g. 'text-to-image'");
+		throw new HfInferenceInputError("you need to provide a task name when using an external provider, e.g. 'text-to-image'");
 	}
 	if (!(provider in PROVIDERS)) {
-		throw new Error(`Provider '${provider}' not supported. Available providers: ${Object.keys(PROVIDERS)}`);
+		throw new HfInferenceInputError(`Provider '${provider}' not supported. Available providers: ${Object.keys(PROVIDERS)}`);
 	}
 	const providerTasks = PROVIDERS[provider];
 	if (!providerTasks || !(task in providerTasks)) {
-		throw new Error(
+		throw new HfInferenceInputError(
 			`Task '${task}' not supported for provider '${provider}'. Available tasks: ${Object.keys(providerTasks ?? {})}`
 		);
 	}

@@ -14,6 +14,7 @@
  *
  * Thanks!
  */
+import { HfInferenceInputError } from "../error.js";
 import { InferenceOutputError } from "../lib/InferenceOutputError.js";
 import type { BodyParams, HeaderParams, UrlParams } from "../types.js";
 import { delay } from "../utils/delay.js";
@@ -52,7 +53,7 @@ export class BlackForestLabsTextToImageTask extends TaskProviderHelper implement
 
 	makeRoute(params: UrlParams): string {
 		if (!params) {
-			throw new Error("Params are required");
+			throw new HfInferenceInputError("Params are required");
 		}
 		return `/v1/${params.model}`;
 	}

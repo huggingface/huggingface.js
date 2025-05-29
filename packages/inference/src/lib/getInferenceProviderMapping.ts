@@ -4,6 +4,7 @@ import { HARDCODED_MODEL_INFERENCE_MAPPING } from "../providers/consts.js";
 import { EQUIVALENT_SENTENCE_TRANSFORMERS_TASKS } from "../providers/hf-inference.js";
 import type { InferenceProvider, InferenceProviderOrPolicy, ModelId } from "../types.js";
 import { typedInclude } from "../utils/typedInclude.js";
+import { HfInferenceHubApiError, HfInferenceInputError } from "../error.js";
 
 export const inferenceProviderMappingCache = new Map<ModelId, InferenceProviderMapping>();
 
@@ -32,27 +33,49 @@ export async function fetchInferenceProviderMappingForModel(
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		inferenceProviderMapping = inferenceProviderMappingCache.get(modelId)!;
 	} else {
+		const url = `${HF_HUB_URL}/api/models/${modelId}?expand[]=inferenceProviderMapping`;
 		const resp = await (options?.fetch ?? fetch)(
-			`${HF_HUB_URL}/api/models/${modelId}?expand[]=inferenceProviderMapping`,
+			url,
 			{
 				headers: accessToken?.startsWith("hf_") ? { Authorization: `Bearer ${accessToken}` } : {},
 			}
 		);
-		if (resp.status === 404) {
-			throw new Error(`Model ${modelId} does not exist`);
+		if (!resp.ok) {
+			if (resp.headers.get("Content-Type")?.startsWith("application/json")) {
+				const error = await resp.json();
+				if ("error" in error && typeof error.error === "string") {
+					throw new HfInferenceHubApiError(
+						`Failed to fetch inference provider mapping for model ${modelId}: ${error.error}`,
+						{ url, method: "GET" },
+						{ requestId: resp.headers.get("x-request-id") ?? "", status: resp.status, body: error }
+					);
+				}
+			} else {
+				throw new HfInferenceHubApiError(
+					`Failed to fetch inference provider mapping for model ${modelId}`,
+					{ url, method: "GET" },
+					{ requestId: resp.headers.get("x-request-id") ?? "", status: resp.status, body: await resp.text() }
+				);
+			}
 		}
-		inferenceProviderMapping = await resp
-			.json()
-			.then((json) => json.inferenceProviderMapping)
-			.catch(() => null);
-
-		if (inferenceProviderMapping) {
-			inferenceProviderMappingCache.set(modelId, inferenceProviderMapping);
+		let payload: { inferenceProviderMapping?: InferenceProviderMapping } | null = null;
+		try {
+			payload = await resp.json();
+		} catch {
+			throw new HfInferenceHubApiError(
+				`Failed to fetch inference provider mapping for model ${modelId}: malformed API response, invalid JSON`,
+				{ url, method: "GET" },
+				{ requestId: resp.headers.get("x-request-id") ?? "", status: resp.status, body: await resp.text() }
+			);
 		}
-	}
-
-	if (!inferenceProviderMapping) {
-		throw new Error(`We have not been able to find inference provider information for model ${modelId}.`);
+		if (!payload?.inferenceProviderMapping) {
+			throw new HfInferenceHubApiError(
+				`We have not been able to find inference provider information for model ${modelId}.`,
+				{ url, method: "GET" },
+				{ requestId: resp.headers.get("x-request-id") ?? "", status: resp.status, body: await resp.text() }
+			);
+		}
+		inferenceProviderMapping = payload.inferenceProviderMapping;
 	}
 	return inferenceProviderMapping;
 }
@@ -83,7 +106,7 @@ export async function getInferenceProviderMapping(
 				? EQUIVALENT_SENTENCE_TRANSFORMERS_TASKS
 				: [params.task];
 		if (!typedInclude(equivalentTasks, providerMapping.task)) {
-			throw new Error(
+			throw new HfInferenceInputError(
 				`Model ${params.modelId} is not supported for task ${params.task} and provider ${params.provider}. Supported task: ${providerMapping.task}.`
 			);
 		}
@@ -104,7 +127,7 @@ export async function resolveProvider(
 ): Promise<InferenceProvider> {
 	if (endpointUrl) {
 		if (provider) {
-			throw new Error("Specifying both endpointUrl and provider is not supported.");
+			throw new HfInferenceInputError("Specifying both endpointUrl and provider is not supported.");
 		}
 		/// Defaulting to hf-inference helpers / API
 		return "hf-inference";
@@ -117,13 +140,13 @@ export async function resolveProvider(
 	}
 	if (provider === "auto") {
 		if (!modelId) {
-			throw new Error("Specifying a model is required when provider is 'auto'");
+			throw new HfInferenceInputError("Specifying a model is required when provider is 'auto'");
 		}
 		const inferenceProviderMapping = await fetchInferenceProviderMappingForModel(modelId);
 		provider = Object.keys(inferenceProviderMapping)[0] as InferenceProvider | undefined;
 	}
 	if (!provider) {
-		throw new Error(`No Inference Provider available for model ${modelId}.`);
+		throw new HfInferenceInputError(`No Inference Provider available for model ${modelId}.`);
 	}
 	return provider;
 }
