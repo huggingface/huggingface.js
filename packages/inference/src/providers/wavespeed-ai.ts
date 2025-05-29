@@ -1,0 +1,170 @@
+import { InferenceOutputError } from "../lib/InferenceOutputError.js";
+import type { TextToImageArgs } from "../tasks/cv/textToImage.js";
+import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
+import type { TextToVideoArgs } from "../tasks/cv/textToVideo.js";
+import type { BodyParams, HeaderParams, RequestArgs, UrlParams } from "../types.js";
+import { delay } from "../utils/delay.js";
+import { omit } from "../utils/omit.js";
+import { base64FromBytes } from "../utils/base64FromBytes.js";
+import type { TextToImageTaskHelper, TextToVideoTaskHelper, ImageToImageTaskHelper } from "./providerHelper.js";
+import { TaskProviderHelper } from "./providerHelper.js";
+
+const WAVESPEEDAI_API_BASE_URL = "https://api.wavespeed.ai";
+
+/**
+ * Response structure for task status and results
+ */
+interface WaveSpeedAITaskResponse {
+	id: string;
+	model: string;
+	outputs: string[];
+	urls: {
+		get: string;
+	};
+	has_nsfw_contents: boolean[];
+	status: "created" | "processing" | "completed" | "failed";
+	created_at: string;
+	error: string;
+	executionTime: number;
+	timings: {
+		inference: number;
+	};
+}
+
+/**
+ * Response structure for initial task submission
+ */
+interface WaveSpeedAISubmitResponse {
+	id: string;
+	urls: {
+		get: string;
+	};
+}
+
+/**
+ * Response structure for WaveSpeed AI API
+ */
+interface WaveSpeedAIResponse {
+	code: number;
+	message: string;
+	data: WaveSpeedAITaskResponse;
+}
+
+/**
+ * Response structure for WaveSpeed AI API with submit response data
+ */
+interface WaveSpeedAISubmitTaskResponse {
+	code: number;
+	message: string;
+	data: WaveSpeedAISubmitResponse;
+}
+
+abstract class WavespeedAITask extends TaskProviderHelper {
+	constructor(url?: string) {
+		super("wavespeed-ai", url || WAVESPEEDAI_API_BASE_URL);
+	}
+
+	makeRoute(params: UrlParams): string {
+		return `/api/v2/${params.model}`;
+	}
+
+	preparePayload(params: BodyParams<ImageToImageArgs | TextToImageArgs | TextToVideoArgs>): Record<string, unknown> {
+		const payload: Record<string, unknown> = {
+			...omit(params.args, ["inputs", "parameters"]),
+			...params.args.parameters,
+			prompt: params.args.inputs,
+		};
+		// Add LoRA support if adapter is specified in the mapping
+		if (params.mapping?.adapter === "lora") {
+			payload.loras = [
+				{
+					path: params.mapping.hfModelId,
+					scale: 1, // Default scale value
+				},
+			];
+		}
+		return payload;
+	}
+
+	override async getResponse(
+		response: WaveSpeedAISubmitTaskResponse,
+		url?: string,
+		headers?: Record<string, string>
+	): Promise<Blob> {
+		if (!headers) {
+			throw new InferenceOutputError("Headers are required for WaveSpeed AI API calls");
+		}
+
+		const resultUrl = response.data.urls.get;
+
+		// Poll for results until completion
+		while (true) {
+			const resultResponse = await fetch(resultUrl, { headers });
+
+			if (!resultResponse.ok) {
+				throw new InferenceOutputError(`Failed to get result: ${resultResponse.statusText}`);
+			}
+
+			const result: WaveSpeedAIResponse = await resultResponse.json();
+			if (result.code !== 200) {
+				throw new InferenceOutputError(`API request failed with code ${result.code}: ${result.message}`);
+			}
+
+			const taskResult = result.data;
+
+			switch (taskResult.status) {
+				case "completed": {
+					// Get the media data from the first output URL
+					if (!taskResult.outputs?.[0]) {
+						throw new InferenceOutputError("No output URL in completed response");
+					}
+					const mediaResponse = await fetch(taskResult.outputs[0]);
+					if (!mediaResponse.ok) {
+						throw new InferenceOutputError("Failed to fetch output data");
+					}
+					return await mediaResponse.blob();
+				}
+				case "failed": {
+					throw new InferenceOutputError(taskResult.error || "Task failed");
+				}
+				case "processing":
+				case "created":
+					// Wait before polling again
+					await delay(500);
+					continue;
+
+				default: {
+					throw new InferenceOutputError(`Unknown status: ${taskResult.status}`);
+				}
+			}
+		}
+	}
+}
+
+export class WavespeedAITextToImageTask extends WavespeedAITask implements TextToImageTaskHelper {
+	constructor() {
+		super(WAVESPEEDAI_API_BASE_URL);
+	}
+}
+
+export class WavespeedAITextToVideoTask extends WavespeedAITask implements TextToVideoTaskHelper {
+	constructor() {
+		super(WAVESPEEDAI_API_BASE_URL);
+	}
+}
+
+export class WavespeedAIImageToImageTask extends WavespeedAITask implements ImageToImageTaskHelper {
+	constructor() {
+		super(WAVESPEEDAI_API_BASE_URL);
+	}
+
+	async preparePayloadAsync(args: ImageToImageArgs): Promise<RequestArgs> {
+		return {
+			...args,
+			inputs: args.parameters?.prompt,
+			image: base64FromBytes(
+				new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await (args.inputs as Blob).arrayBuffer())
+			),
+		};
+	}
+}
