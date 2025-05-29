@@ -15,10 +15,10 @@
  * Thanks!
  */
 import type { TextToImageInput } from "@huggingface/tasks";
-import { InferenceOutputError } from "../lib/InferenceOutputError.js";
 import type { BodyParams } from "../types.js";
 import { omit } from "../utils/omit.js";
 import { BaseConversationalTask, TaskProviderHelper, type TextToImageTaskHelper } from "./providerHelper.js";
+import { HfInferenceProviderOutputError } from "../error.js";
 
 const NSCALE_API_BASE_URL = "https://inference.api.nscale.com";
 
@@ -74,6 +74,6 @@ export class NscaleTextToImageTask extends TaskProviderHelper implements TextToI
 			return fetch(`data:image/jpeg;base64,${base64Data}`).then((res) => res.blob());
 		}
 
-		throw new InferenceOutputError("Expected Nscale text-to-image response format");
+		throw new HfInferenceProviderOutputError("Received malformed response from Nscale text-to-image API");
 	}
 }

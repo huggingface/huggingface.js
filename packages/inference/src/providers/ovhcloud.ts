@@ -17,10 +17,10 @@
 
 import { BaseConversationalTask, BaseTextGenerationTask } from "./providerHelper.js";
 import type { ChatCompletionOutput, TextGenerationOutput, TextGenerationOutputFinishReason } from "@huggingface/tasks";
-import { InferenceOutputError } from "../lib/InferenceOutputError.js";
 import type { BodyParams } from "../types.js";
 import { omit } from "../utils/omit.js";
 import type { TextGenerationInput } from "@huggingface/tasks";
+import { HfInferenceProviderOutputError } from "../error.js";
 
 const OVHCLOUD_API_BASE_URL = "https://oai.endpoints.kepler.ai.cloud.ovh.net";
 
@@ -50,9 +50,9 @@ export class OvhCloudTextGenerationTask extends BaseTextGenerationTask {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters
 				? {
-						max_tokens: (params.args.parameters as Record<string, unknown>).max_new_tokens,
-						...omit(params.args.parameters as Record<string, unknown>, "max_new_tokens"),
-				  }
+					max_tokens: (params.args.parameters as Record<string, unknown>).max_new_tokens,
+					...omit(params.args.parameters as Record<string, unknown>, "max_new_tokens"),
+				}
 				: undefined),
 			prompt: params.args.inputs,
 		};
@@ -70,6 +70,6 @@ export class OvhCloudTextGenerationTask extends BaseTextGenerationTask {
 				generated_text: completion.text,
 			};
 		}
-		throw new InferenceOutputError("Expected OVHcloud text generation response format");
+		throw new HfInferenceProviderOutputError("Received malformed response from OVHcloud text generation API");
 	}
 }

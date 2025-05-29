@@ -14,7 +14,6 @@
  *
  * Thanks!
  */
-import { InferenceOutputError } from "../lib/InferenceOutputError.js";
 import { isUrl } from "../lib/isUrl.js";
 import type { TextToVideoArgs } from "../tasks/index.js";
 import type { BodyParams, UrlParams } from "../types.js";
@@ -26,6 +25,7 @@ import {
 	TaskProviderHelper,
 	type TextToVideoTaskHelper,
 } from "./providerHelper.js";
+import { HfInferenceInputError, HfInferenceProviderApiError, HfInferenceProviderOutputError } from "../error.js";
 
 const NOVITA_API_BASE_URL = "https://api.novita.ai";
 
@@ -78,17 +78,16 @@ export class NovitaTextToVideoTask extends TaskProviderHelper implements TextToV
 		headers?: Record<string, string>
 	): Promise<Blob> {
 		if (!url || !headers) {
-			throw new InferenceOutputError("URL and headers are required for text-to-video task");
+			throw new HfInferenceInputError("URL and headers are required for text-to-video task");
 		}
 		const taskId = response.task_id;
 		if (!taskId) {
-			throw new InferenceOutputError("No task ID found in the response");
+			throw new HfInferenceProviderOutputError("Received malformed response from Novita text-to-video API: no task ID found in the response");
 		}
 
 		const parsedUrl = new URL(url);
-		const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}${
-			parsedUrl.host === "router.huggingface.co" ? "/novita" : ""
-		}`;
+		const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}${parsedUrl.host === "router.huggingface.co" ? "/novita" : ""
+			}`;
 		const resultUrl = `${baseUrl}/v3/async/task-result?task_id=${taskId}`;
 
 		let status = "";
@@ -98,7 +97,11 @@ export class NovitaTextToVideoTask extends TaskProviderHelper implements TextToV
 			await delay(500);
 			const resultResponse = await fetch(resultUrl, { headers });
 			if (!resultResponse.ok) {
-				throw new InferenceOutputError("Failed to fetch task result");
+				throw new HfInferenceProviderApiError(
+					"Failed to fetch task result",
+					{ url: resultUrl, method: "GET", headers },
+					{ requestId: resultResponse.headers.get("x-request-id") ?? "", status: resultResponse.status, body: await resultResponse.text() }
+				);
 			}
 			try {
 				taskResult = await resultResponse.json();
@@ -113,15 +116,15 @@ export class NovitaTextToVideoTask extends TaskProviderHelper implements TextToV
 				) {
 					status = taskResult.task.status;
 				} else {
-					throw new InferenceOutputError("Failed to get task status");
+					throw new HfInferenceProviderOutputError("Received malformed response from Novita text-to-video API: failed to get task status");
 				}
 			} catch (error) {
-				throw new InferenceOutputError("Failed to parse task result");
+				throw new HfInferenceProviderOutputError("Received malformed response from Novita text-to-video API: failed to parse task result");
 			}
 		}
 
 		if (status === "TASK_STATUS_FAILED") {
-			throw new InferenceOutputError("Task failed");
+			throw new HfInferenceProviderOutputError("Novita text-to-video task failed");
 		}
 
 		if (
@@ -139,7 +142,7 @@ export class NovitaTextToVideoTask extends TaskProviderHelper implements TextToV
 			const urlResponse = await fetch(taskResult.videos[0].video_url);
 			return await urlResponse.blob();
 		} else {
-			throw new InferenceOutputError("Expected { videos: [{ video_url: string }] }");
+			throw new HfInferenceProviderOutputError(`Received malformed response from Novita text-to-video API: expected { videos: [{ video_url: string }] } format, got instead: ${JSON.stringify(taskResult)}`);
 		}
 	}
 }

@@ -15,7 +15,6 @@
  * Thanks!
  */
 import type { ChatCompletionOutput, TextGenerationOutput } from "@huggingface/tasks";
-import { InferenceOutputError } from "../lib/InferenceOutputError.js";
 import type { BodyParams, UrlParams } from "../types.js";
 import { omit } from "../utils/omit.js";
 import {
@@ -24,7 +23,7 @@ import {
 	TaskProviderHelper,
 	type TextToImageTaskHelper,
 } from "./providerHelper.js";
-
+import { HfInferenceProviderOutputError } from "../error.js";
 const HYPERBOLIC_API_BASE_URL = "https://api.hyperbolic.xyz";
 
 export interface HyperbolicTextCompletionOutput extends Omit<ChatCompletionOutput, "choices"> {
@@ -57,9 +56,9 @@ export class HyperbolicTextGenerationTask extends BaseTextGenerationTask {
 			messages: [{ content: params.args.inputs, role: "user" }],
 			...(params.args.parameters
 				? {
-						max_tokens: (params.args.parameters as Record<string, unknown>).max_new_tokens,
-						...omit(params.args.parameters as Record<string, unknown>, "max_new_tokens"),
-				  }
+					max_tokens: (params.args.parameters as Record<string, unknown>).max_new_tokens,
+					...omit(params.args.parameters as Record<string, unknown>, "max_new_tokens"),
+				}
 				: undefined),
 			...omit(params.args, ["inputs", "parameters"]),
 			model: params.model,
@@ -79,7 +78,7 @@ export class HyperbolicTextGenerationTask extends BaseTextGenerationTask {
 			};
 		}
 
-		throw new InferenceOutputError("Expected Hyperbolic text generation response format");
+		throw new HfInferenceProviderOutputError("Received malformed response from Hyperbolic text generation API");
 	}
 }
 
@@ -121,6 +120,6 @@ export class HyperbolicTextToImageTask extends TaskProviderHelper implements Tex
 			return fetch(`data:image/jpeg;base64,${response.images[0].image}`).then((res) => res.blob());
 		}
 
-		throw new InferenceOutputError("Expected Hyperbolic text-to-image response format");
+		throw new HfInferenceProviderOutputError("Received malformed response from Hyperbolic text-to-image API");
 	}
 }

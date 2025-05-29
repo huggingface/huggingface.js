@@ -73,15 +73,9 @@ export class HfInferenceHubApiError extends HfInferenceHttpRequestError {
  * Thrown when the inference output returned by the provider is invalid / does not match the expectations 
  */
 export class HfInferenceProviderOutputError extends HfInferenceError {
-	httpRequest: HttpRequest;
-	httpResponse: HttpResponse;
-	error: string | JsonObject;
-	constructor(message: string, httpRequest: { url: string; method: string; headers: Record<string, string>; body: JsonObject }, httpResponse: { requestId: string; status: number; headers: Record<string, string>; body: JsonObject | string }, error: string | JsonObject) {
+	constructor(message: string) {
 		super(message);
 		this.name = "ProviderOutputError";
-		this.httpRequest = httpRequest;
-		this.httpResponse = httpResponse;
-		this.error = error;
 	}
 }
 
