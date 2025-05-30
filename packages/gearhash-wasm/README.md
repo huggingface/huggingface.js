@@ -13,10 +13,8 @@ const data = new Uint8Array(1000000); // Example: 1MB of data
 
 // Search for a pattern with a specific mask
 const mask = 0x0000d90003530000n; // Example mask as a BigInt
-const matchResult = nextMatch(data, mask);
-
-// matchIndex will be the position where the pattern was found
-// or -1 if no match was found
+const match = nextMatch(data, mask);
+const allMatches = nextMatches(data, mask).matches;
 ```
 
 The `nextMatch` function takes two parameters:
@@ -31,7 +29,7 @@ You can continuously feed data like this:
 let hash = 0n;
 const mask = 0x0000d90003530000n;
 
-let position = 0;
+let length = 0; // extra length not processed
 for await (const chunk of dataSource) {
   let index = 0;
   while (1) {
@@ -39,19 +37,48 @@ for await (const chunk of dataSource) {
 
     if (match.position !== -1) {
       console.log({
-        position: match.position + position,
+        length: match.position + length,
         hash: match.hash
       })
 
       index += match.position;
-      position = 0;
+      length = 0;
       hash = 0n;
     } else {
-      position += chunk.length - index;
+      length += chunk.length - index;
       break;
     }
   }
 }
 
-console.log(position, "bytes without a match, ending hash: ", hash);
+console.log(length, "bytes without a match, ending hash: ", hash);
 ```
+
+or, more performant with `nextMatches`:
+
+```javascript
+let hash = 0n;
+const mask = 0x0000d90003530000n;
+
+let length = 0;
+for await (const chunk of dataSource) {
+  const result = nextMatches(chunk, mask, hash);
+  let lastPosition = 0;
+  for (const match of result.matches) {
+    console.log({
+      length: match.position - lastPosition + length,
+      hash: match.hash
+    });
+
+    length = 0;
+    lastPosition = match.position;
+  }
+  length = result.remaining;
+  hash = result.hash;
+}
+
+console.log(length, "bytes without a match, ending hash: ", hash);
+```
+
+## Possible improvements
+
