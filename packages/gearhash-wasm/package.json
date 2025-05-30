@@ -1,5 +1,5 @@
 {
-	"name": "@huggingface/gearhash",
+	"name": "@huggingface/gearhash-wasms",
 	"version": "0.0.1",
 	"scripts": {
 		"build:debug": "asc assembly/index.ts --target debug",
