@@ -15,6 +15,9 @@ const random = seededRandom(seed);
 const randomData = new Uint8Array(1000000).map(() => Math.floor(random() * 256));
 
 // Test with a known mask
-assert.deepStrictEqual(nextMatch(randomData, 0xaf2900n), { position: 128, hash: 11757411513747408525n });
-assert.deepStrictEqual(nextMatch(randomData.subarray(128), 0xaf2900n), { position: 184, hash: 7438883163016807155n });
+assert.deepStrictEqual(nextMatch(randomData, 0x0000d90003530000n), { position: 459, hash: 9546224108073667431n });
+assert.deepStrictEqual(nextMatch(randomData.subarray(128), 0x0000d90003530000n), {
+	position: 331,
+	hash: 9546224108073667431n,
+});
 console.log("ok");
