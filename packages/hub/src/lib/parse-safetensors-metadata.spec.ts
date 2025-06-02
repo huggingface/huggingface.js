@@ -110,7 +110,7 @@ describe("parseSafetensorsMetadata", () => {
 		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 8_537_680_896);
 	});
 
-	it.only("fetch info for sharded, but get param count directly from metadata", async () => {
+	it("fetch info for sharded, but get param count directly from metadata", async () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "hf-internal-testing/sharded-model-metadata-num-parameters",
 			computeParametersCount: true,
