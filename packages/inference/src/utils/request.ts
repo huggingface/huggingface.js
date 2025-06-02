@@ -3,7 +3,7 @@ import { makeRequestOptions } from "../lib/makeRequestOptions.js";
 import type { InferenceTask, Options, RequestArgs } from "../types.js";
 import type { EventSourceMessage } from "../vendor/fetch-event-source/parse.js";
 import { getLines, getMessages } from "../vendor/fetch-event-source/parse.js";
-import { HfInferenceProviderApiError } from "../error.js";
+import { InferenceClientProviderApiError } from "../error.js";
 import type { JsonObject } from "../vendor/type-fest/basic.js";
 
 export interface ResponseWrapper<T> {
@@ -52,7 +52,7 @@ export async function innerRequest<T>(
 		if (["application/json", "application/problem+json"].some((ct) => contentType?.startsWith(ct))) {
 			const output = await response.json();
 			if ([400, 422, 404, 500].includes(response.status) && options?.chatCompletion) {
-				throw new HfInferenceProviderApiError(
+				throw new InferenceClientProviderApiError(
 					`Provider ${args.provider} does not seem to support chat completion for model ${
 						args.model
 					} . Error: ${JSON.stringify(output.error)}`,
@@ -66,7 +66,7 @@ export async function innerRequest<T>(
 				);
 			}
 			if (typeof output.error === "string" || typeof output.detail === "string") {
-				throw new HfInferenceProviderApiError(
+				throw new InferenceClientProviderApiError(
 					`Failed to perform inference: ${output.error ?? output.detail}`,
 					{
 						url,
@@ -77,7 +77,7 @@ export async function innerRequest<T>(
 					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output }
 				);
 			} else {
-				throw new HfInferenceProviderApiError(
+				throw new InferenceClientProviderApiError(
 					`Failed to perform inference: an HTTP error occurred when requesting the provider.`,
 					{
 						url,
@@ -90,7 +90,7 @@ export async function innerRequest<T>(
 			}
 		}
 		const message = contentType?.startsWith("text/plain;") ? await response.text() : undefined;
-		throw new HfInferenceProviderApiError(
+		throw new InferenceClientProviderApiError(
 			`Failed to perform inference: ${message ?? "an HTTP error occurred when requesting the provider"}`,
 			{
 				url,
@@ -134,7 +134,7 @@ export async function* innerStreamingRequest<T>(
 		if (response.headers.get("Content-Type")?.startsWith("application/json")) {
 			const output = await response.json();
 			if ([400, 422, 404, 500].includes(response.status) && options?.chatCompletion) {
-				throw new HfInferenceProviderApiError(
+				throw new InferenceClientProviderApiError(
 					`Provider ${args.provider} does not seem to support chat completion for model ${
 						args.model
 					} . Error: ${JSON.stringify(output.error)}`,
@@ -148,7 +148,7 @@ export async function* innerStreamingRequest<T>(
 				);
 			}
 			if (typeof output.error === "string") {
-				throw new HfInferenceProviderApiError(
+				throw new InferenceClientProviderApiError(
 					`Failed to perform inference: ${output.error}`,
 					{
 						url,
@@ -161,7 +161,7 @@ export async function* innerStreamingRequest<T>(
 			}
 			if (output.error && "message" in output.error && typeof output.error.message === "string") {
 				/// OpenAI errors
-				throw new HfInferenceProviderApiError(
+				throw new InferenceClientProviderApiError(
 					`Failed to perform inference: ${output.error.message}`,
 					{
 						url,
@@ -174,7 +174,7 @@ export async function* innerStreamingRequest<T>(
 			}
 			// Sambanova errors
 			if (typeof output.message === "string") {
-				throw new HfInferenceProviderApiError(
+				throw new InferenceClientProviderApiError(
 					`Failed to perform inference: ${output.message}`,
 					{
 						url,
@@ -187,7 +187,7 @@ export async function* innerStreamingRequest<T>(
 			}
 		}
 
-		throw new HfInferenceProviderApiError(
+		throw new InferenceClientProviderApiError(
 			`Failed to perform inference: an HTTP error occurred when requesting the provider.`,
 			{
 				url,
@@ -199,7 +199,7 @@ export async function* innerStreamingRequest<T>(
 		);
 	}
 	if (!response.headers.get("content-type")?.startsWith("text/event-stream")) {
-		throw new HfInferenceProviderApiError(
+		throw new InferenceClientProviderApiError(
 			`Failed to perform inference: server does not support event stream content type, it returned ` +
 				response.headers.get("content-type"),
 			{
@@ -255,7 +255,7 @@ export async function* innerStreamingRequest<T>(
 								    typeof data.error.message === "string"
 								  ? data.error.message
 								  : JSON.stringify(data.error);
-						throw new HfInferenceProviderApiError(
+						throw new InferenceClientProviderApiError(
 							`Failed to perform inference: an occurred while streaming the response: ${errorStr}`,
 							{
 								url,

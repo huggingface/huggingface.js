@@ -23,7 +23,7 @@ import {
 	TaskProviderHelper,
 	type TextToImageTaskHelper,
 } from "./providerHelper.js";
-import { HfInferenceProviderOutputError } from "../error.js";
+import { InferenceClientProviderOutputError } from "../error.js";
 
 const TOGETHER_API_BASE_URL = "https://api.together.xyz";
 
@@ -74,7 +74,7 @@ export class TogetherTextGenerationTask extends BaseTextGenerationTask {
 				generated_text: completion.text,
 			};
 		}
-		throw new HfInferenceProviderOutputError("Received malformed response from Together text generation API");
+		throw new InferenceClientProviderOutputError("Received malformed response from Together text generation API");
 	}
 }
 
@@ -113,6 +113,6 @@ export class TogetherTextToImageTask extends TaskProviderHelper implements TextT
 			return fetch(`data:image/jpeg;base64,${base64Data}`).then((res) => res.blob());
 		}
 
-		throw new HfInferenceProviderOutputError("Received malformed response from Together text-to-image API");
+		throw new InferenceClientProviderOutputError("Received malformed response from Together text-to-image API");
 	}
 }

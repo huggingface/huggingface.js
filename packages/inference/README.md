@@ -128,21 +128,21 @@ The inference package provides specific error types to help you handle different
 
 The package defines several error types that extend the base `Error` class:
 
-- `HfInferenceError`: Base error class for all Hugging Face Inference errors
-- `HfInferenceInputError`: Thrown when there are issues with input parameters
-- `HfInferenceProviderApiError`: Thrown when there are API-level errors from providers
-- `HfInferenceHubApiError`: Thrown when there are API-levels errors from the Hugging Face Hub
-- `HfInferenceProviderOutputError`: Thrown when there are issues with providers' API responses format
+- `InferenceClientError`: Base error class for all Hugging Face Inference errors
+- `InferenceClientInputError`: Thrown when there are issues with input parameters
+- `InferenceClientProviderApiError`: Thrown when there are API-level errors from providers
+- `InferenceClientHubApiError`: Thrown when there are API-levels errors from the Hugging Face Hub
+- `InferenceClientProviderOutputError`: Thrown when there are issues with providers' API responses format
 
 ### Example Usage
 
 ```typescript
 import { InferenceClient } from "@huggingface/inference";
 import {
-  HfInferenceError,
-  HfInferenceProviderApiError,
-  HfInferenceProviderOutputError,
-  HfInferenceHubApiError,
+  InferenceClientError,
+  InferenceClientProviderApiError,
+  InferenceClientProviderOutputError,
+  InferenceClientHubApiError,
 } from "@huggingface/inference";
 
 const hf = new HfInference();
@@ -153,20 +153,20 @@ try {
     inputs: "Hello, I'm a language model",
   });
 } catch (error) {
-  if (error instanceof HfInferenceProviderApiError) {
+  if (error instanceof InferenceClientProviderApiError) {
     // Handle API errors (e.g., rate limits, authentication issues)
     console.error("Provider API Error:", error.message);
     console.error("HTTP Request details:", error.request);
     console.error("HTTP Response details:", error.response);
-  if (error instanceof HfInferenceHubApiError) {
+  if (error instanceof InferenceClientHubApiError) {
     // Handle API errors (e.g., rate limits, authentication issues)
     console.error("Hub API Error:", error.message);
     console.error("HTTP Request details:", error.request);
     console.error("HTTP Response details:", error.response);
-  } else if (error instanceof HfInferenceProviderOutputError) {
+  } else if (error instanceof InferenceClientProviderOutputError) {
     // Handle malformed responses from providers
     console.error("Provider Output Error:", error.message);
-  } else if (error instanceof HfInferenceInputError) {
+  } else if (error instanceof InferenceClientInputError) {
     // Handle invalid input parameters
     console.error("Input Error:", error.message);
   } else {
@@ -182,7 +182,7 @@ try {
     inputs: "Hello, I'm a language model",
   });
 } catch (error) {
-  if (error instanceof HfInferenceError) {
+  if (error instanceof InferenceClientError) {
     // Handle errors from @huggingface/inference
     console.error("Error from InferenceClient:", error);
   } else {
@@ -194,7 +194,7 @@ try {
 
 ### Error Details
 
-#### HfInferenceProviderApiError
+#### InferenceClientProviderApiError
 
 This error occurs when there are issues with the API request when performing inference at the selected provider.
 
@@ -203,7 +203,7 @@ It has several properties:
 - `request`: Details about the failed request (URL, method, headers)
 - `response`: Response details including status code and body
 
-#### HfInferenceHubApiError
+#### InferenceClientHubApiError
 
 This error occurs when there are issues with the API request when requesting the Hugging Face Hub API.
 
@@ -213,11 +213,11 @@ It has several properties:
 - `response`: Response details including status code and body
 
 
-#### HfInferenceProviderOutputError
+#### InferenceClientProviderOutputError
 
 This error occurs when a provider returns a response in an unexpected format.
 
-#### HfInferenceInputError
+#### InferenceClientInputError
 
 This error occurs when input parameters are invalid or missing. The error message describes what's wrong with the input.
 

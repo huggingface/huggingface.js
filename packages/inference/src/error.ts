@@ -3,14 +3,14 @@ import type { JsonObject } from "./vendor/type-fest/basic.js";
 /**
  * Base class for all inference-related errors.
  */
-export abstract class HfInferenceError extends Error {
+export abstract class InferenceClientError extends Error {
 	constructor(message: string) {
 		super(message);
-		this.name = "HfInferenceError";
+		this.name = "InferenceClientError";
 	}
 }
 
-export class HfInferenceInputError extends HfInferenceError {
+export class InferenceClientInputError extends InferenceClientError {
 	constructor(message: string) {
 		super(message);
 		this.name = "InputError";
@@ -30,7 +30,7 @@ interface HttpResponse {
 	body: JsonObject | string;
 }
 
-abstract class HfInferenceHttpRequestError extends HfInferenceError {
+abstract class InferenceClientHttpRequestError extends InferenceClientError {
 	httpRequest: HttpRequest;
 	httpResponse: HttpResponse;
 	constructor(message: string, httpRequest: HttpRequest, httpResponse: HttpResponse) {
@@ -54,7 +54,7 @@ abstract class HfInferenceHttpRequestError extends HfInferenceError {
 /**
  * Thrown when the HTTP request to the provider fails, e.g. due to API issues or server errors.
  */
-export class HfInferenceProviderApiError extends HfInferenceHttpRequestError {
+export class InferenceClientProviderApiError extends InferenceClientHttpRequestError {
 	constructor(message: string, httpRequest: HttpRequest, httpResponse: HttpResponse) {
 		super(message, httpRequest, httpResponse);
 		this.name = "ProviderApiError";
@@ -64,7 +64,7 @@ export class HfInferenceProviderApiError extends HfInferenceHttpRequestError {
 /**
  * Thrown when the HTTP request to the hub fails, e.g. due to API issues or server errors.
  */
-export class HfInferenceHubApiError extends HfInferenceHttpRequestError {
+export class InferenceClientHubApiError extends InferenceClientHttpRequestError {
 	constructor(message: string, httpRequest: HttpRequest, httpResponse: HttpResponse) {
 		super(message, httpRequest, httpResponse);
 		this.name = "HubApiError";
@@ -74,7 +74,7 @@ export class HfInferenceHubApiError extends HfInferenceHttpRequestError {
 /**
  * Thrown when the inference output returned by the provider is invalid / does not match the expectations
  */
-export class HfInferenceProviderOutputError extends HfInferenceError {
+export class InferenceClientProviderOutputError extends InferenceClientError {
 	constructor(message: string) {
 		super(message);
 		this.name = "ProviderOutputError";

@@ -23,7 +23,7 @@ import {
 	TaskProviderHelper,
 	type TextToImageTaskHelper,
 } from "./providerHelper.js";
-import { HfInferenceProviderOutputError } from "../error.js";
+import { InferenceClientProviderOutputError } from "../error.js";
 const HYPERBOLIC_API_BASE_URL = "https://api.hyperbolic.xyz";
 
 export interface HyperbolicTextCompletionOutput extends Omit<ChatCompletionOutput, "choices"> {
@@ -78,7 +78,7 @@ export class HyperbolicTextGenerationTask extends BaseTextGenerationTask {
 			};
 		}
 
-		throw new HfInferenceProviderOutputError("Received malformed response from Hyperbolic text generation API");
+		throw new InferenceClientProviderOutputError("Received malformed response from Hyperbolic text generation API");
 	}
 }
 
@@ -120,6 +120,6 @@ export class HyperbolicTextToImageTask extends TaskProviderHelper implements Tex
 			return fetch(`data:image/jpeg;base64,${response.images[0].image}`).then((res) => res.blob());
 		}
 
-		throw new HfInferenceProviderOutputError("Received malformed response from Hyperbolic text-to-image API");
+		throw new InferenceClientProviderOutputError("Received malformed response from Hyperbolic text-to-image API");
 	}
 }

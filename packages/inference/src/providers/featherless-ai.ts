@@ -7,7 +7,7 @@ import type {
 import type { BodyParams } from "../types.js";
 import { BaseConversationalTask, BaseTextGenerationTask } from "./providerHelper.js";
 import { omit } from "../utils/omit.js";
-import { HfInferenceProviderOutputError } from "../error.js";
+import { InferenceClientProviderOutputError } from "../error.js";
 
 interface FeatherlessAITextCompletionOutput extends Omit<ChatCompletionOutput, "choices"> {
 	choices: Array<{
@@ -58,6 +58,6 @@ export class FeatherlessAITextGenerationTask extends BaseTextGenerationTask {
 				generated_text: completion.text,
 			};
 		}
-		throw new HfInferenceProviderOutputError("Received malformed response from Featherless AI text generation API");
+		throw new InferenceClientProviderOutputError("Received malformed response from Featherless AI text generation API");
 	}
 }

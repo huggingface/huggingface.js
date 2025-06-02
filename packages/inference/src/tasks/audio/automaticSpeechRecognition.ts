@@ -4,7 +4,7 @@ import { getProviderHelper } from "../../lib/getProviderHelper.js";
 import type { BaseArgs, Options } from "../../types.js";
 import { innerRequest } from "../../utils/request.js";
 import type { LegacyAudioInput } from "./utils.js";
-import { HfInferenceProviderOutputError } from "../../error.js";
+import { InferenceClientProviderOutputError } from "../../error.js";
 
 export type AutomaticSpeechRecognitionArgs = BaseArgs & (AutomaticSpeechRecognitionInput | LegacyAudioInput);
 /**
@@ -24,7 +24,7 @@ export async function automaticSpeechRecognition(
 	});
 	const isValidOutput = typeof res?.text === "string";
 	if (!isValidOutput) {
-		throw new HfInferenceProviderOutputError("Received malformed response from automatic-speech-recognition API");
+		throw new InferenceClientProviderOutputError("Received malformed response from automatic-speech-recognition API");
 	}
 	return providerHelper.getResponse(res);
 }

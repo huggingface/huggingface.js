@@ -18,7 +18,7 @@ import type { FeatureExtractionOutput } from "@huggingface/tasks";
 import type { BodyParams } from "../types.js";
 import type { FeatureExtractionTaskHelper } from "./providerHelper.js";
 import { BaseConversationalTask, TaskProviderHelper } from "./providerHelper.js";
-import { HfInferenceProviderOutputError } from "../error.js";
+import { InferenceClientProviderOutputError } from "../error.js";
 
 export class SambanovaConversationalTask extends BaseConversationalTask {
 	constructor() {
@@ -39,7 +39,7 @@ export class SambanovaFeatureExtractionTask extends TaskProviderHelper implement
 		if (typeof response === "object" && "data" in response && Array.isArray(response.data)) {
 			return response.data.map((item) => item.embedding);
 		}
-		throw new HfInferenceProviderOutputError(
+		throw new InferenceClientProviderOutputError(
 			"Received malformed response from Sambanova feature-extraction (embeddings) API"
 		);
 	}

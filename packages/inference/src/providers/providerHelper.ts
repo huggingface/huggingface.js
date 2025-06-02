@@ -46,7 +46,7 @@ import type {
 	ZeroShotImageClassificationOutput,
 } from "@huggingface/tasks";
 import { HF_ROUTER_URL } from "../config.js";
-import { HfInferenceProviderOutputError } from "../error.js";
+import { InferenceClientProviderOutputError } from "../error.js";
 import type { AudioToAudioOutput } from "../tasks/audio/audioToAudio.js";
 import type { BaseArgs, BodyParams, HeaderParams, InferenceProvider, RequestArgs, UrlParams } from "../types.js";
 import { toArray } from "../utils/toArray.js";
@@ -320,7 +320,7 @@ export class BaseConversationalTask extends TaskProviderHelper implements Conver
 			return response;
 		}
 
-		throw new HfInferenceProviderOutputError("Expected ChatCompletionOutput");
+		throw new InferenceClientProviderOutputError("Expected ChatCompletionOutput");
 	}
 }
 
@@ -353,6 +353,6 @@ export class BaseTextGenerationTask extends TaskProviderHelper implements TextGe
 			return res[0];
 		}
 
-		throw new HfInferenceProviderOutputError("Expected Array<{generated_text: string}>");
+		throw new InferenceClientProviderOutputError("Expected Array<{generated_text: string}>");
 	}
 }

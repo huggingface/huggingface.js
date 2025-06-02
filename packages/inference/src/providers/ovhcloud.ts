@@ -20,7 +20,7 @@ import type { ChatCompletionOutput, TextGenerationOutput, TextGenerationOutputFi
 import type { BodyParams } from "../types.js";
 import { omit } from "../utils/omit.js";
 import type { TextGenerationInput } from "@huggingface/tasks";
-import { HfInferenceProviderOutputError } from "../error.js";
+import { InferenceClientProviderOutputError } from "../error.js";
 
 const OVHCLOUD_API_BASE_URL = "https://oai.endpoints.kepler.ai.cloud.ovh.net";
 
@@ -70,6 +70,6 @@ export class OvhCloudTextGenerationTask extends BaseTextGenerationTask {
 				generated_text: completion.text,
 			};
 		}
-		throw new HfInferenceProviderOutputError("Received malformed response from OVHcloud text generation API");
+		throw new InferenceClientProviderOutputError("Received malformed response from OVHcloud text generation API");
 	}
 }

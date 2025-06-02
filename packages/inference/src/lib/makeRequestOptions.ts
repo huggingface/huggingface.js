@@ -5,7 +5,7 @@ import type { InferenceProviderModelMapping } from "./getInferenceProviderMappin
 import { getInferenceProviderMapping } from "./getInferenceProviderMapping.js";
 import type { getProviderHelper } from "./getProviderHelper.js";
 import { isUrl } from "./isUrl.js";
-import { HfInferenceHubApiError, HfInferenceInputError } from "../error.js";
+import { InferenceClientHubApiError, InferenceClientInputError } from "../error.js";
 
 /**
  * Lazy-loaded from huggingface.co/api/tasks when needed
@@ -34,10 +34,10 @@ export async function makeRequestOptions(
 
 	// Validate inputs
 	if (args.endpointUrl && provider !== "hf-inference") {
-		throw new HfInferenceInputError(`Cannot use endpointUrl with a third-party provider.`);
+		throw new InferenceClientInputError(`Cannot use endpointUrl with a third-party provider.`);
 	}
 	if (maybeModel && isUrl(maybeModel)) {
-		throw new HfInferenceInputError(`Model URLs are no longer supported. Use endpointUrl instead.`);
+		throw new InferenceClientInputError(`Model URLs are no longer supported. Use endpointUrl instead.`);
 	}
 
 	if (args.endpointUrl) {
@@ -52,14 +52,14 @@ export async function makeRequestOptions(
 	}
 
 	if (!maybeModel && !task) {
-		throw new HfInferenceInputError("No model provided, and no task has been specified.");
+		throw new InferenceClientInputError("No model provided, and no task has been specified.");
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const hfModel = maybeModel ?? (await loadDefaultModel(task!));
 
 	if (providerHelper.clientSideRoutingOnly && !maybeModel) {
-		throw new HfInferenceInputError(`Provider ${provider} requires a model ID to be passed directly.`);
+		throw new InferenceClientInputError(`Provider ${provider} requires a model ID to be passed directly.`);
 	}
 
 	const inferenceProviderMapping = providerHelper.clientSideRoutingOnly
@@ -83,7 +83,7 @@ export async function makeRequestOptions(
 				{ fetch: options?.fetch }
 		  );
 	if (!inferenceProviderMapping) {
-		throw new HfInferenceInputError(
+		throw new InferenceClientInputError(
 			`We have not been able to find inference provider information for model ${hfModel}.`
 		);
 	}
@@ -125,7 +125,7 @@ export function makeRequestOptionsFromResolvedModel(
 		if (providerHelper.clientSideRoutingOnly) {
 			// Closed-source providers require an accessToken (cannot be routed).
 			if (accessToken && accessToken.startsWith("hf_")) {
-				throw new HfInferenceInputError(`Provider ${provider} is closed-source and does not support HF tokens.`);
+				throw new InferenceClientInputError(`Provider ${provider} is closed-source and does not support HF tokens.`);
 			}
 		}
 		if (accessToken) {
@@ -199,7 +199,9 @@ async function loadDefaultModel(task: InferenceTask): Promise<string> {
 	}
 	const taskInfo = tasks[task];
 	if ((taskInfo?.models.length ?? 0) <= 0) {
-		throw new HfInferenceInputError(`No default model defined for task ${task}, please define the model explicitly.`);
+		throw new InferenceClientInputError(
+			`No default model defined for task ${task}, please define the model explicitly.`
+		);
 	}
 	return taskInfo.models[0].id;
 }
@@ -209,7 +211,7 @@ async function loadTaskInfo(): Promise<Record<string, { models: { id: string }[]
 	const res = await fetch(url);
 
 	if (!res.ok) {
-		throw new HfInferenceHubApiError(
+		throw new InferenceClientHubApiError(
 			"Failed to load tasks definitions from Hugging Face Hub.",
 			{ url, method: "GET" },
 			{ requestId: res.headers.get("x-request-id") ?? "", status: res.status, body: await res.text() }
@@ -220,7 +222,7 @@ async function loadTaskInfo(): Promise<Record<string, { models: { id: string }[]
 
 function removeProviderPrefix(model: string, provider: string): string {
 	if (!model.startsWith(`${provider}/`)) {
-		throw new HfInferenceInputError(`Models from ${provider} must be prefixed by "${provider}/". Got "${model}".`);
+		throw new InferenceClientInputError(`Models from ${provider} must be prefixed by "${provider}/". Got "${model}".`);
 	}
 	return model.slice(provider.length + 1);
 }
