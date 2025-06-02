@@ -65,13 +65,13 @@ export interface TensorInfo {
 }
 
 export type SafetensorsFileHeader = Record<TensorName, TensorInfo> & {
-	__metadata__: Record<string, string>;
+	__metadata__: { total_parameters?: string | number } & Record<string, string>;
 };
 
 export interface SafetensorsIndexJson {
 	dtype?: string;
 	/// ^there's sometimes a dtype but it looks inconsistent.
-	metadata?: Record<string, string>;
+	metadata?: { total_parameters?: string | number } & Record<string, string>;
 	/// ^ why the naming inconsistency?
 	weight_map: Record<TensorName, FileName>;
 }
@@ -256,13 +256,14 @@ export async function parseSafetensorsMetadata(
 		(await fileExists({ ...params, path: SAFETENSORS_INDEX_FILE }))
 	) {
 		const { index, headers } = await parseShardedIndex(params.path ?? SAFETENSORS_INDEX_FILE, params);
+
 		return {
 			sharded: true,
 			index,
 			headers,
 			...(params.computeParametersCount
 				? {
-						parameterCount: computeNumOfParamsByDtypeSharded(headers),
+						parameterCount: computeNumOfParamsByDtypeSharded(index, headers),
 				  }
 				: undefined),
 		};
@@ -272,6 +273,10 @@ export async function parseSafetensorsMetadata(
 }
 
 function computeNumOfParamsByDtypeSingleFile(header: SafetensorsFileHeader): Partial<Record<Dtype, number>> {
+	if (header.__metadata__.total_parameters) {
+		/// shortcut: get param count directly from metadata
+		return { UNK: parseInt(header.__metadata__.total_parameters.toString()) };
+	}
 	const counter: Partial<Record<Dtype, number>> = {};
 	const tensors = omit(header, "__metadata__");
 
@@ -284,7 +289,14 @@ function computeNumOfParamsByDtypeSingleFile(header: SafetensorsFileHeader): Par
 	return counter;
 }
 
-function computeNumOfParamsByDtypeSharded(shardedMap: SafetensorsShardedHeaders): Partial<Record<Dtype, number>> {
+function computeNumOfParamsByDtypeSharded(
+	index: SafetensorsIndexJson,
+	shardedMap: SafetensorsShardedHeaders
+): Partial<Record<Dtype, number>> {
+	if (index.metadata?.total_parameters) {
+		/// shortcut: get param count directly from metadata
+		return { UNK: parseInt(index.metadata.total_parameters.toString()) };
+	}
 	const counter: Partial<Record<Dtype, number>> = {};
 	for (const header of Object.values(shardedMap)) {
 		for (const [k, v] of typedEntries(computeNumOfParamsByDtypeSingleFile(header))) {
