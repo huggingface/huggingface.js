@@ -5,7 +5,7 @@ import { sum } from "../utils/sum";
 describe("parseSafetensorsMetadata", () => {
 	it("fetch info for single-file (with the default conventional filename)", async () => {
 		const parse = await parseSafetensorsMetadata({
-			repo: "bert-base-uncased",
+			repo: "google-bert/bert-base-uncased",
 			computeParametersCount: true,
 			revision: "86b5e0934494bd15c9632b12f734a8a67f723594",
 		});
