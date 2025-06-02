@@ -231,9 +231,11 @@ export async function parseSafetensorsMetadata(
 		return {
 			sharded: false,
 			header,
-			...(params.computeParametersCount && {
-				parameterCount: computeNumOfParamsByDtypeSingleFile(header),
-			}),
+			...(params.computeParametersCount
+				? {
+						parameterCount: computeNumOfParamsByDtypeSingleFile(header),
+				  }
+				: undefined),
 		};
 	} else if (
 		(params.path && RE_SAFETENSORS_INDEX_FILE.test(params.path)) ||
@@ -244,9 +246,11 @@ export async function parseSafetensorsMetadata(
 			sharded: true,
 			index,
 			headers,
-			...(params.computeParametersCount && {
-				parameterCount: computeNumOfParamsByDtypeSharded(headers),
-			}),
+			...(params.computeParametersCount
+				? {
+						parameterCount: computeNumOfParamsByDtypeSharded(headers),
+				  }
+				: undefined),
 		};
 	} else {
 		throw new Error("model id does not seem to contain safetensors weights");
