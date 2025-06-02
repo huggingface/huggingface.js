@@ -4,10 +4,10 @@ import type {
 	TextGenerationOutput,
 	TextGenerationOutputFinishReason,
 } from "@huggingface/tasks";
-import { InferenceOutputError } from "../lib/InferenceOutputError.js";
 import type { BodyParams } from "../types.js";
 import { BaseConversationalTask, BaseTextGenerationTask } from "./providerHelper.js";
 import { omit } from "../utils/omit.js";
+import { InferenceClientProviderOutputError } from "../errors.js";
 
 interface FeatherlessAITextCompletionOutput extends Omit<ChatCompletionOutput, "choices"> {
 	choices: Array<{
@@ -58,6 +58,6 @@ export class FeatherlessAITextGenerationTask extends BaseTextGenerationTask {
 				generated_text: completion.text,
 			};
 		}
-		throw new InferenceOutputError("Expected Featherless AI text generation response format");
+		throw new InferenceClientProviderOutputError("Received malformed response from Featherless AI text generation API");
 	}
 }
