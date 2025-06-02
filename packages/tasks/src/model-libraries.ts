@@ -177,7 +177,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "Chatterbox",
 		repoUrl: "https://github.com/resemble-ai/chatterbox",
 		snippets: snippets.chatterbox,
-		countDownloads: `path:"tokenizer.config"`,
+		countDownloads: `path:"tokenizer.json"`,
 		filter: false,
 	},
 	chat_tts: {
