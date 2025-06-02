@@ -145,7 +145,6 @@ export class McpClient {
 			if (opts.abortSignal?.aborted) {
 				throw new Error("AbortError");
 			}
-			yield chunk;
 			debug(chunk.choices[0]);
 			numOfChunks++;
 			const delta = chunk.choices[0]?.delta;
@@ -174,6 +173,7 @@ export class McpClient {
 				/// If no tool is present in chunk number 1 or 2, exit.
 				return;
 			}
+			yield chunk;
 		}
 
 		messages.push(message);
