@@ -43,8 +43,8 @@ export async function innerRequest<T>(
 					`Server ${args.model} does not seem to support chat completion. Error: ${JSON.stringify(output.error)}`
 				);
 			}
-			if (output.error || output.detail) {
-				throw new Error(JSON.stringify(output.error ?? output.detail));
+			if (output.error || output.detail || output.message) {
+				throw new Error(JSON.stringify(output.error ?? output.detail ?? output.message));
 			} else {
 				throw new Error(output);
 			}
