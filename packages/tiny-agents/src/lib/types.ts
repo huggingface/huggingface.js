@@ -22,6 +22,14 @@ export const ServerConfigSchema = z.discriminatedUnion("type", [
 			options: z
 				.object({
 					/**
+					 * Customizes HTTP requests to the server.
+					 */
+					requestInit: z
+						.object({
+							headers: z.record(z.string()).optional(),
+						})
+						.optional(),
+					/**
 					 * Session ID for the connection. This is used to identify the session on the server.
 					 * When not provided and connecting to a server that supports session IDs, the server will generate a new session ID.
 					 */
@@ -34,7 +42,18 @@ export const ServerConfigSchema = z.discriminatedUnion("type", [
 		type: z.literal("sse"),
 		config: z.object({
 			url: z.union([z.string(), z.string().url()]),
-			options: z.object({}).optional(),
+			options: z
+				.object({
+					/**
+					 * Customizes HTTP requests to the server.
+					 */
+					requestInit: z
+						.object({
+							headers: z.record(z.string()).optional(),
+						})
+						.optional(),
+				})
+				.optional(),
 		}),
 	}),
 ]);

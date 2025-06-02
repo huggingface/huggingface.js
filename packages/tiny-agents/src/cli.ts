@@ -113,6 +113,13 @@ async function main() {
 						}
 					}
 				}
+				if ((server.type === "http" || server.type === "sse") && server.config.options?.requestInit?.headers) {
+					for (const [key, value] of Object.entries(server.config.options.requestInit.headers)) {
+						if (value.includes(envSpecialValue)) {
+							inputVars.add(key);
+						}
+					}
+				}
 			}
 
 			if (inputVars.size === 0) {
@@ -141,6 +148,29 @@ async function main() {
 							} else {
 								const valueFromEnv = process.env[key] || "";
 								server.config.env[key] = valueFromEnv;
+								if (valueFromEnv) {
+									stdout.write(ANSI.GREEN);
+									stdout.write(`Value successfully loaded from '${key}'`);
+									stdout.write(ANSI.RESET);
+									stdout.write("\n");
+								} else {
+									stdout.write(ANSI.YELLOW);
+									stdout.write(`No value found for '${key}' in environment variables. Continuing.`);
+									stdout.write(ANSI.RESET);
+									stdout.write("\n");
+								}
+							}
+						}
+					}
+				}
+				if ((server.type === "http" || server.type === "sse") && server.config.options?.requestInit?.headers) {
+					for (const [key, value] of Object.entries(server.config.options.requestInit.headers)) {
+						if (value.includes(envSpecialValue)) {
+							if (userInput) {
+								server.config.options.requestInit.headers[key] = value.replace(envSpecialValue, userInput);
+							} else {
+								const valueFromEnv = process.env[key] || "";
+								server.config.options.requestInit.headers[key] = value.replace(envSpecialValue, valueFromEnv);
 								if (valueFromEnv) {
 									stdout.write(ANSI.GREEN);
 									stdout.write(`Value successfully loaded from '${key}'`);
