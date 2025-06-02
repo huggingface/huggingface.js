@@ -61,7 +61,7 @@ export abstract class TaskProviderHelper {
 		readonly provider: InferenceProvider,
 		private baseUrl: string,
 		readonly clientSideRoutingOnly: boolean = false
-	) { }
+	) {}
 
 	/**
 	 * Return the response in the expected format.

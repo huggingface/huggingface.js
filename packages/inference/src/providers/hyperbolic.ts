@@ -56,9 +56,9 @@ export class HyperbolicTextGenerationTask extends BaseTextGenerationTask {
 			messages: [{ content: params.args.inputs, role: "user" }],
 			...(params.args.parameters
 				? {
-					max_tokens: (params.args.parameters as Record<string, unknown>).max_new_tokens,
-					...omit(params.args.parameters as Record<string, unknown>, "max_new_tokens"),
-				}
+						max_tokens: (params.args.parameters as Record<string, unknown>).max_new_tokens,
+						...omit(params.args.parameters as Record<string, unknown>, "max_new_tokens"),
+				  }
 				: undefined),
 			...omit(params.args, ["inputs", "parameters"]),
 			model: params.model,

@@ -92,8 +92,9 @@ export class NovitaTextToVideoTask extends TaskProviderHelper implements TextToV
 		}
 
 		const parsedUrl = new URL(url);
-		const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}${parsedUrl.host === "router.huggingface.co" ? "/novita" : ""
-			}`;
+		const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}${
+			parsedUrl.host === "router.huggingface.co" ? "/novita" : ""
+		}`;
 		const resultUrl = `${baseUrl}/v3/async/task-result?task_id=${taskId}`;
 
 		let status = "";

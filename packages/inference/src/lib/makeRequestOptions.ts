@@ -64,24 +64,24 @@ export async function makeRequestOptions(
 
 	const inferenceProviderMapping = providerHelper.clientSideRoutingOnly
 		? ({
-			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			providerId: removeProviderPrefix(maybeModel!, provider),
-			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			hfModelId: maybeModel!,
-			status: "live",
-			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			task: task!,
-		} satisfies InferenceProviderModelMapping)
-		: await getInferenceProviderMapping(
-			{
-				modelId: hfModel,
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				providerId: removeProviderPrefix(maybeModel!, provider),
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				hfModelId: maybeModel!,
+				status: "live",
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 				task: task!,
-				provider,
-				accessToken: args.accessToken,
-			},
-			{ fetch: options?.fetch }
-		);
+		  } satisfies InferenceProviderModelMapping)
+		: await getInferenceProviderMapping(
+				{
+					modelId: hfModel,
+					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+					task: task!,
+					provider,
+					accessToken: args.accessToken,
+				},
+				{ fetch: options?.fetch }
+		  );
 	if (!inferenceProviderMapping) {
 		throw new InferenceClientInputError(
 			`We have not been able to find inference provider information for model ${hfModel}.`
