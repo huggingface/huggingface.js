@@ -4,7 +4,7 @@ import { HARDCODED_MODEL_INFERENCE_MAPPING } from "../providers/consts.js";
 import { EQUIVALENT_SENTENCE_TRANSFORMERS_TASKS } from "../providers/hf-inference.js";
 import type { InferenceProvider, InferenceProviderOrPolicy, ModelId } from "../types.js";
 import { typedInclude } from "../utils/typedInclude.js";
-import { InferenceClientHubApiError, InferenceClientInputError } from "../error.js";
+import { InferenceClientHubApiError, InferenceClientInputError } from "../errors.js";
 
 export const inferenceProviderMappingCache = new Map<ModelId, InferenceProviderMapping>();
 

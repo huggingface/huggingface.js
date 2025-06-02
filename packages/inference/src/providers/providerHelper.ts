@@ -46,7 +46,7 @@ import type {
 	ZeroShotImageClassificationOutput,
 } from "@huggingface/tasks";
 import { HF_ROUTER_URL } from "../config.js";
-import { InferenceClientProviderOutputError } from "../error.js";
+import { InferenceClientProviderOutputError } from "../errors.js";
 import type { AudioToAudioOutput } from "../tasks/audio/audioToAudio.js";
 import type { BaseArgs, BodyParams, HeaderParams, InferenceProvider, RequestArgs, UrlParams } from "../types.js";
 import { toArray } from "../utils/toArray.js";
@@ -61,7 +61,7 @@ export abstract class TaskProviderHelper {
 		readonly provider: InferenceProvider,
 		private baseUrl: string,
 		readonly clientSideRoutingOnly: boolean = false
-	) {}
+	) { }
 
 	/**
 	 * Return the response in the expected format.

@@ -23,7 +23,7 @@ import {
 	TaskProviderHelper,
 	type TextToImageTaskHelper,
 } from "./providerHelper.js";
-import { InferenceClientProviderOutputError } from "../error.js";
+import { InferenceClientProviderOutputError } from "../errors.js";
 const HYPERBOLIC_API_BASE_URL = "https://api.hyperbolic.xyz";
 
 export interface HyperbolicTextCompletionOutput extends Omit<ChatCompletionOutput, "choices"> {
@@ -56,9 +56,9 @@ export class HyperbolicTextGenerationTask extends BaseTextGenerationTask {
 			messages: [{ content: params.args.inputs, role: "user" }],
 			...(params.args.parameters
 				? {
-						max_tokens: (params.args.parameters as Record<string, unknown>).max_new_tokens,
-						...omit(params.args.parameters as Record<string, unknown>, "max_new_tokens"),
-				  }
+					max_tokens: (params.args.parameters as Record<string, unknown>).max_new_tokens,
+					...omit(params.args.parameters as Record<string, unknown>, "max_new_tokens"),
+				}
 				: undefined),
 			...omit(params.args, ["inputs", "parameters"]),
 			model: params.model,

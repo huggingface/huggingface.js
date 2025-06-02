@@ -18,7 +18,7 @@ import type { FeatureExtractionOutput } from "@huggingface/tasks";
 import type { BodyParams } from "../types.js";
 import type { FeatureExtractionTaskHelper } from "./providerHelper.js";
 import { BaseConversationalTask, TaskProviderHelper } from "./providerHelper.js";
-import { InferenceClientProviderOutputError } from "../error.js";
+import { InferenceClientProviderOutputError } from "../errors.js";
 
 export class SambanovaConversationalTask extends BaseConversationalTask {
 	constructor() {

@@ -18,7 +18,7 @@ import type { TextToImageInput } from "@huggingface/tasks";
 import type { BodyParams } from "../types.js";
 import { omit } from "../utils/omit.js";
 import { BaseConversationalTask, TaskProviderHelper, type TextToImageTaskHelper } from "./providerHelper.js";
-import { InferenceClientProviderOutputError } from "../error.js";
+import { InferenceClientProviderOutputError } from "../errors.js";
 
 const NSCALE_API_BASE_URL = "https://inference.api.nscale.com";
 

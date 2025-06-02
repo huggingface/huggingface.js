@@ -18,7 +18,7 @@ import {
 	InferenceClientInputError,
 	InferenceClientProviderApiError,
 	InferenceClientProviderOutputError,
-} from "../error.js";
+} from "../errors.js";
 import type { BodyParams, HeaderParams, UrlParams } from "../types.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";

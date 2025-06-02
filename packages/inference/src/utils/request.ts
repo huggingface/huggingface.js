@@ -3,7 +3,7 @@ import { makeRequestOptions } from "../lib/makeRequestOptions.js";
 import type { InferenceTask, Options, RequestArgs } from "../types.js";
 import type { EventSourceMessage } from "../vendor/fetch-event-source/parse.js";
 import { getLines, getMessages } from "../vendor/fetch-event-source/parse.js";
-import { InferenceClientProviderApiError } from "../error.js";
+import { InferenceClientProviderApiError } from "../errors.js";
 import type { JsonObject } from "../vendor/type-fest/basic.js";
 
 export interface ResponseWrapper<T> {
@@ -53,8 +53,7 @@ export async function innerRequest<T>(
 			const output = await response.json();
 			if ([400, 422, 404, 500].includes(response.status) && options?.chatCompletion) {
 				throw new InferenceClientProviderApiError(
-					`Provider ${args.provider} does not seem to support chat completion for model ${
-						args.model
+					`Provider ${args.provider} does not seem to support chat completion for model ${args.model
 					} . Error: ${JSON.stringify(output.error)}`,
 					{
 						url,
@@ -135,8 +134,7 @@ export async function* innerStreamingRequest<T>(
 			const output = await response.json();
 			if ([400, 422, 404, 500].includes(response.status) && options?.chatCompletion) {
 				throw new InferenceClientProviderApiError(
-					`Provider ${args.provider} does not seem to support chat completion for model ${
-						args.model
+					`Provider ${args.provider} does not seem to support chat completion for model ${args.model
 					} . Error: ${JSON.stringify(output.error)}`,
 					{
 						url,
@@ -201,7 +199,7 @@ export async function* innerStreamingRequest<T>(
 	if (!response.headers.get("content-type")?.startsWith("text/event-stream")) {
 		throw new InferenceClientProviderApiError(
 			`Failed to perform inference: server does not support event stream content type, it returned ` +
-				response.headers.get("content-type"),
+			response.headers.get("content-type"),
 			{
 				url,
 				method: info.method ?? "GET",
@@ -226,8 +224,8 @@ export async function* innerStreamingRequest<T>(
 
 	const onChunk = getLines(
 		getMessages(
-			() => {},
-			() => {},
+			() => { },
+			() => { },
 			onEvent
 		)
 	);
@@ -250,11 +248,11 @@ export async function* innerStreamingRequest<T>(
 							typeof data.error === "string"
 								? data.error
 								: typeof data.error === "object" &&
-								    data.error &&
-								    "message" in data.error &&
-								    typeof data.error.message === "string"
-								  ? data.error.message
-								  : JSON.stringify(data.error);
+									data.error &&
+									"message" in data.error &&
+									typeof data.error.message === "string"
+									? data.error.message
+									: JSON.stringify(data.error);
 						throw new InferenceClientProviderApiError(
 							`Failed to perform inference: an occurred while streaming the response: ${errorStr}`,
 							{

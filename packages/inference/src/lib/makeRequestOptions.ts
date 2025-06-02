@@ -5,7 +5,7 @@ import type { InferenceProviderModelMapping } from "./getInferenceProviderMappin
 import { getInferenceProviderMapping } from "./getInferenceProviderMapping.js";
 import type { getProviderHelper } from "./getProviderHelper.js";
 import { isUrl } from "./isUrl.js";
-import { InferenceClientHubApiError, InferenceClientInputError } from "../error.js";
+import { InferenceClientHubApiError, InferenceClientInputError } from "../errors.js";
 
 /**
  * Lazy-loaded from huggingface.co/api/tasks when needed
@@ -64,24 +64,24 @@ export async function makeRequestOptions(
 
 	const inferenceProviderMapping = providerHelper.clientSideRoutingOnly
 		? ({
-				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				providerId: removeProviderPrefix(maybeModel!, provider),
-				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				hfModelId: maybeModel!,
-				status: "live",
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			providerId: removeProviderPrefix(maybeModel!, provider),
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			hfModelId: maybeModel!,
+			status: "live",
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			task: task!,
+		} satisfies InferenceProviderModelMapping)
+		: await getInferenceProviderMapping(
+			{
+				modelId: hfModel,
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 				task: task!,
-		  } satisfies InferenceProviderModelMapping)
-		: await getInferenceProviderMapping(
-				{
-					modelId: hfModel,
-					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-					task: task!,
-					provider,
-					accessToken: args.accessToken,
-				},
-				{ fetch: options?.fetch }
-		  );
+				provider,
+				accessToken: args.accessToken,
+			},
+			{ fetch: options?.fetch }
+		);
 	if (!inferenceProviderMapping) {
 		throw new InferenceClientInputError(
 			`We have not been able to find inference provider information for model ${hfModel}.`

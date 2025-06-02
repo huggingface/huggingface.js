@@ -20,7 +20,7 @@ import type { ChatCompletionOutput, TextGenerationOutput, TextGenerationOutputFi
 import type { BodyParams } from "../types.js";
 import { omit } from "../utils/omit.js";
 import type { TextGenerationInput } from "@huggingface/tasks";
-import { InferenceClientProviderOutputError } from "../error.js";
+import { InferenceClientProviderOutputError } from "../errors.js";
 
 const OVHCLOUD_API_BASE_URL = "https://oai.endpoints.kepler.ai.cloud.ovh.net";
 
@@ -50,9 +50,9 @@ export class OvhCloudTextGenerationTask extends BaseTextGenerationTask {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters
 				? {
-						max_tokens: (params.args.parameters as Record<string, unknown>).max_new_tokens,
-						...omit(params.args.parameters as Record<string, unknown>, "max_new_tokens"),
-				  }
+					max_tokens: (params.args.parameters as Record<string, unknown>).max_new_tokens,
+					...omit(params.args.parameters as Record<string, unknown>, "max_new_tokens"),
+				}
 				: undefined),
 			prompt: params.args.inputs,
 		};

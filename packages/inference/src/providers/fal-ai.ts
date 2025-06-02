@@ -33,7 +33,7 @@ import {
 	InferenceClientInputError,
 	InferenceClientProviderApiError,
 	InferenceClientProviderOutputError,
-} from "../error.js";
+} from "../errors.js";
 
 export interface FalAiQueueOutput {
 	request_id: string;
@@ -165,9 +165,8 @@ export class FalAITextToVideoTask extends FalAITask implements TextToVideoTaskHe
 		let status = response.status;
 
 		const parsedUrl = new URL(url);
-		const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}${
-			parsedUrl.host === "router.huggingface.co" ? "/fal-ai" : ""
-		}`;
+		const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}${parsedUrl.host === "router.huggingface.co" ? "/fal-ai" : ""
+			}`;
 
 		// extracting the provider model id for status and result urls
 		// from the response as it might be different from the mapped model in `url`

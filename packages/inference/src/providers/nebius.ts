@@ -24,7 +24,7 @@ import {
 	type FeatureExtractionTaskHelper,
 	type TextToImageTaskHelper,
 } from "./providerHelper.js";
-import { InferenceClientProviderOutputError } from "../error.js";
+import { InferenceClientProviderOutputError } from "../errors.js";
 
 const NEBIUS_API_BASE_URL = "https://api.studio.nebius.ai";
 

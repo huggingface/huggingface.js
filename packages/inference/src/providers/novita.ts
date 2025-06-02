@@ -29,7 +29,7 @@ import {
 	InferenceClientInputError,
 	InferenceClientProviderApiError,
 	InferenceClientProviderOutputError,
-} from "../error.js";
+} from "../errors.js";
 
 const NOVITA_API_BASE_URL = "https://api.novita.ai";
 
@@ -92,9 +92,8 @@ export class NovitaTextToVideoTask extends TaskProviderHelper implements TextToV
 		}
 
 		const parsedUrl = new URL(url);
-		const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}${
-			parsedUrl.host === "router.huggingface.co" ? "/novita" : ""
-		}`;
+		const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}${parsedUrl.host === "router.huggingface.co" ? "/novita" : ""
+			}`;
 		const resultUrl = `${baseUrl}/v3/async/task-result?task_id=${taskId}`;
 
 		let status = "";

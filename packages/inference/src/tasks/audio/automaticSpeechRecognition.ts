@@ -4,7 +4,7 @@ import { getProviderHelper } from "../../lib/getProviderHelper.js";
 import type { BaseArgs, Options } from "../../types.js";
 import { innerRequest } from "../../utils/request.js";
 import type { LegacyAudioInput } from "./utils.js";
-import { InferenceClientProviderOutputError } from "../../error.js";
+import { InferenceClientProviderOutputError } from "../../errors.js";
 
 export type AutomaticSpeechRecognitionArgs = BaseArgs & (AutomaticSpeechRecognitionInput | LegacyAudioInput);
 /**

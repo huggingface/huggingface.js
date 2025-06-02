@@ -14,7 +14,7 @@
  *
  * Thanks!
  */
-import { InferenceClientProviderOutputError } from "../error.js";
+import { InferenceClientProviderOutputError } from "../errors.js";
 import { isUrl } from "../lib/isUrl.js";
 import type { BodyParams, HeaderParams, UrlParams } from "../types.js";
 import { omit } from "../utils/omit.js";

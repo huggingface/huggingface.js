@@ -7,7 +7,7 @@ import type {
 import type { BodyParams } from "../types.js";
 import { BaseConversationalTask, BaseTextGenerationTask } from "./providerHelper.js";
 import { omit } from "../utils/omit.js";
-import { InferenceClientProviderOutputError } from "../error.js";
+import { InferenceClientProviderOutputError } from "../errors.js";
 
 interface FeatherlessAITextCompletionOutput extends Omit<ChatCompletionOutput, "choices"> {
 	choices: Array<{
@@ -38,9 +38,9 @@ export class FeatherlessAITextGenerationTask extends BaseTextGenerationTask {
 			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters
 				? {
-						max_tokens: params.args.parameters.max_new_tokens,
-						...omit(params.args.parameters, "max_new_tokens"),
-				  }
+					max_tokens: params.args.parameters.max_new_tokens,
+					...omit(params.args.parameters, "max_new_tokens"),
+				}
 				: undefined),
 			prompt: params.args.inputs,
 		};
