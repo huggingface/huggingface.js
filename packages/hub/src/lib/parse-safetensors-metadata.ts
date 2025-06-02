@@ -189,12 +189,12 @@ export async function parseSafetensorsMetadata(
 	params: {
 		/** Only models are supported */
 		repo: RepoDesignation;
+		path?: string;
 		/**
 		 * Will include SafetensorsParseFromRepo["parameterCount"], an object containing the number of parameters for each DType
 		 *
 		 * @default false
 		 */
-		path?: string;
 		computeParametersCount?: boolean;
 		hubUrl?: string;
 		revision?: string;
@@ -223,7 +223,10 @@ export async function parseSafetensorsMetadata(
 		throw new TypeError("Only model repos should contain safetensors files.");
 	}
 
-	if (RE_SAFETENSORS_FILE.test(params.path ?? "") || (await fileExists({ ...params, path: SAFETENSORS_FILE }))) {
+	if (
+		(params.path && RE_SAFETENSORS_FILE.test(params.path)) ||
+		(await fileExists({ ...params, path: SAFETENSORS_FILE }))
+	) {
 		const header = await parseSingleFile(params.path ?? SAFETENSORS_FILE, params);
 		return {
 			sharded: false,
@@ -233,7 +236,7 @@ export async function parseSafetensorsMetadata(
 			}),
 		};
 	} else if (
-		RE_SAFETENSORS_INDEX_FILE.test(params.path ?? "") ||
+		(params.path && RE_SAFETENSORS_INDEX_FILE.test(params.path)) ||
 		(await fileExists({ ...params, path: SAFETENSORS_INDEX_FILE }))
 	) {
 		const { index, headers } = await parseShardedIndex(params.path ?? SAFETENSORS_INDEX_FILE, params);
