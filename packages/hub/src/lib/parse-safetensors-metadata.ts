@@ -42,7 +42,21 @@ class SafetensorParseError extends Error {}
 type FileName = string;
 
 export type TensorName = string;
-export type Dtype = "F64" | "F32" | "F16" | "BF16" | "I64" | "I32" | "I16" | "I8" | "U8" | "BOOL";
+export type Dtype =
+	| "F64"
+	| "F32"
+	| "F16"
+	| "F8_E4M3"
+	| "F8_E5M2"
+	| "BF16"
+	| "I64"
+	| "I32"
+	| "I16"
+	| "I8"
+	| "U16"
+	| "U8"
+	| "BOOL"
+	| "UNK"; /// when the total_parameters is stored directly in the header, we use this dummy dtype
 
 export interface TensorInfo {
 	dtype: Dtype;
