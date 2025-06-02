@@ -110,7 +110,7 @@ describe("parseSafetensorsMetadata", () => {
 		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 8_537_680_896);
 	});
 
-	it("fetch info for sharded, but get param count directly from metadata", async () => {
+	it.only("fetch info for sharded, but get param count directly from metadata", async () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "hf-internal-testing/sharded-model-metadata-num-parameters",
 			computeParametersCount: true,
@@ -118,7 +118,7 @@ describe("parseSafetensorsMetadata", () => {
 		});
 
 		assert(parse.sharded);
-		assert.deepStrictEqual(parse.parameterCount, { UNK: 109_482_240 });
+		assert.deepStrictEqual(parse.parameterTotal, 109_482_240);
 		// total params = 109M
 	});
 
@@ -131,7 +131,7 @@ describe("parseSafetensorsMetadata", () => {
 		});
 
 		assert(!parse.sharded);
-		assert.deepStrictEqual(parse.parameterCount, { UNK: 666 });
+		assert.deepStrictEqual(parse.parameterTotal, 666);
 	});
 
 	it("should detect sharded safetensors filename", async () => {

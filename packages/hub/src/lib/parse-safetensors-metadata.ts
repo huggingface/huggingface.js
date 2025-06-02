@@ -55,8 +55,7 @@ export type Dtype =
 	| "I8"
 	| "U16"
 	| "U8"
-	| "BOOL"
-	| "UNK"; /// when the total_parameters is stored directly in the header, we use this dummy dtype
+	| "BOOL";
 
 export interface TensorInfo {
 	dtype: Dtype;
@@ -83,12 +82,14 @@ export type SafetensorsParseFromRepo =
 			sharded: false;
 			header: SafetensorsFileHeader;
 			parameterCount?: Partial<Record<Dtype, number>>;
+			parameterTotal?: number;
 	  }
 	| {
 			sharded: true;
 			index: SafetensorsIndexJson;
 			headers: SafetensorsShardedHeaders;
 			parameterCount?: Partial<Record<Dtype, number>>;
+			parameterTotal?: number;
 	  };
 
 async function parseSingleFile(
@@ -205,7 +206,6 @@ export async function parseSafetensorsMetadata(
 		 * @default false
 		 */
 		computeParametersCount: true;
-		fetchAllHeaders?: boolean;
 		hubUrl?: string;
 		revision?: string;
 		/**
@@ -225,12 +225,6 @@ export async function parseSafetensorsMetadata(
 		 * @default false
 		 */
 		computeParametersCount?: boolean;
-		/**
-		 * Always fetch all headers (no shortcut)
-		 *
-		 * @default false
-		 */
-		fetchAllHeaders?: boolean;
 		hubUrl?: string;
 		revision?: string;
 		/**
@@ -244,7 +238,6 @@ export async function parseSafetensorsMetadata(
 		repo: RepoDesignation;
 		path?: string;
 		computeParametersCount?: boolean;
-		fetchAllHeaders?: boolean;
 		hubUrl?: string;
 		revision?: string;
 		/**
@@ -270,6 +263,11 @@ export async function parseSafetensorsMetadata(
 			...(params.computeParametersCount
 				? {
 						parameterCount: computeNumOfParamsByDtypeSingleFile(header),
+						parameterTotal:
+							/// shortcut: get param count directly from metadata
+							header.__metadata__.total_parameters
+								? parseInt(header.__metadata__.total_parameters.toString())
+								: undefined,
 				  }
 				: undefined),
 		};
@@ -279,21 +277,7 @@ export async function parseSafetensorsMetadata(
 	) {
 		const path = params.path ?? SAFETENSORS_INDEX_FILE;
 		const index = await parseShardedIndex(path, params);
-
-		const shardedMap =
-			params.fetchAllHeaders || (params.computeParametersCount && !index.metadata?.total_parameters)
-				? await fetchAllHeaders(path, index, params)
-				: {};
-
-		if (params.computeParametersCount && index.metadata?.total_parameters) {
-			/// shortcut: get param count directly from metadata
-			return {
-				sharded: true,
-				index,
-				headers: shardedMap,
-				parameterCount: { UNK: parseInt(index.metadata.total_parameters.toString()) },
-			};
-		}
+		const shardedMap = await fetchAllHeaders(path, index, params);
 
 		return {
 			sharded: true,
@@ -302,6 +286,9 @@ export async function parseSafetensorsMetadata(
 			...(params.computeParametersCount
 				? {
 						parameterCount: computeNumOfParamsByDtypeSharded(shardedMap),
+						parameterTotal:
+							/// shortcut: get param count directly from metadata
+							index.metadata?.total_parameters ? parseInt(index.metadata.total_parameters.toString()) : undefined,
 				  }
 				: undefined),
 		};
@@ -311,10 +298,6 @@ export async function parseSafetensorsMetadata(
 }
 
 function computeNumOfParamsByDtypeSingleFile(header: SafetensorsFileHeader): Partial<Record<Dtype, number>> {
-	if (header.__metadata__.total_parameters) {
-		/// shortcut: get param count directly from metadata
-		return { UNK: parseInt(header.__metadata__.total_parameters.toString()) };
-	}
 	const counter: Partial<Record<Dtype, number>> = {};
 	const tensors = omit(header, "__metadata__");
 
