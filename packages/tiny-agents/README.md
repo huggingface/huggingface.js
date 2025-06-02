@@ -29,6 +29,8 @@ Available Commands:
   serve       Run the Agent as an OpenAI-compatible HTTP server
 ```
 
+You can load agents directly from the Hugging Face Hub [tiny-agents](https://huggingface.co/datasets/tiny-agents/tiny-agents) Dataset, or specify a path to your own local agent configuration.
+
 ## Define your own agent
 
 The simplest way to create your own agent is to create a folder containing an `agent.json` file:
@@ -85,10 +87,19 @@ npx @huggingface/tiny-agents run ./my-agent
 
 Voilà! 🔥
 
-> [!NOTE]
-> Note: you can open a PR in the huggingface.js repo to share your agent with the community, just upload it inside the `src/agents/` directory.
 
-### Advanced: Programmatic Usage
+## Tiny Agents collection
+
+Browse our curated collection of Tiny Agents at https://huggingface.co/datasets/tiny-agents/tiny-agents. Each agent is stored in its own subdirectory, following the structure outlined above. Running an agent from the Hub is as simple as using its `agent_id`. For example, to run the [`julien-c/flux-schnell-generator`](https://huggingface.co/datasets/tiny-agents/tiny-agents/tree/main/julien-c/flux-schnell-generator) agent:
+
+```bash
+npx @huggingface/tiny-agents run "julien-c/flux-schnell-generator"
+```
+
+> [!NOTE]
+> Want to share your own agent with the community? Submit a PR to the [Tiny Agents](https://huggingface.co/datasets/tiny-agents/tiny-agents/discussions) repository on the Hub. Your submission must include an `agent.json` file, and you can optionally add a `PROMPT.md` file. To help others understand your agent's capabilities, consider including an `EXAMPLES.md` file with sample prompts and use cases.
+
+## Advanced: Programmatic Usage
 
 ```typescript
 import { Agent } from '@huggingface/tiny-agents';

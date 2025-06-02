@@ -58,6 +58,13 @@ export interface LibraryUiElement {
  */
 
 export const MODEL_LIBRARIES_UI_ELEMENTS = {
+	acestep: {
+		prettyLabel: "ACE-Step",
+		repoName: "ACE-Step",
+		repoUrl: "https://github.com/ace-step/ACE-Step",
+		filter: false,
+		countDownloads: `path:"ace_step_transformer/config.json"`,
+	},
 	"adapter-transformers": {
 		prettyLabel: "Adapters",
 		repoName: "adapters",
@@ -530,6 +537,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "mindspore",
 		repoUrl: "https://github.com/mindspore-ai/mindspore",
 	},
+	"magi-1": {
+		prettyLabel: "MAGI-1",
+		repoName: "MAGI-1",
+		repoUrl: "https://github.com/SandAI-org/MAGI-1",
+		countDownloads: `path:"ckpt/vae/config.json"`,
+	},
 	"mamba-ssm": {
 		prettyLabel: "MambaSSM",
 		repoName: "MambaSSM",
@@ -944,7 +957,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "timesfm",
 		repoUrl: "https://github.com/google-research/timesfm",
 		filter: false,
-		countDownloads: `path:"checkpoints/checkpoint_1100000/state/checkpoint"`,
+		countDownloads: `path:"checkpoints/checkpoint_1100000/state/checkpoint" OR path:"checkpoints/checkpoint_2150000/state/checkpoint" OR path_extension:"ckpt"`,
 	},
 	timm: {
 		prettyLabel: "timm",
@@ -954,6 +967,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.timm,
 		filter: true,
 		countDownloads: `path:"pytorch_model.bin" OR path:"model.safetensors"`,
+	},
+	tirex: {
+		prettyLabel: "TiRex",
+		repoName: "TiRex",
+		repoUrl: "https://github.com/NX-AI/tirex",
+		countDownloads: `path_extension:"ckpt"`,
 	},
 	torchgeo: {
 		prettyLabel: "TorchGeo",

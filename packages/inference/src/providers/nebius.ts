@@ -15,7 +15,6 @@
  * Thanks!
  */
 import type { FeatureExtractionOutput } from "@huggingface/tasks";
-import { InferenceOutputError } from "../lib/InferenceOutputError.js";
 import type { BodyParams } from "../types.js";
 import { omit } from "../utils/omit.js";
 import {
@@ -25,6 +24,7 @@ import {
 	type FeatureExtractionTaskHelper,
 	type TextToImageTaskHelper,
 } from "./providerHelper.js";
+import { InferenceClientProviderOutputError } from "../errors.js";
 
 const NEBIUS_API_BASE_URL = "https://api.studio.nebius.ai";
 
@@ -92,7 +92,7 @@ export class NebiusTextToImageTask extends TaskProviderHelper implements TextToI
 			return fetch(`data:image/jpeg;base64,${base64Data}`).then((res) => res.blob());
 		}
 
-		throw new InferenceOutputError("Expected Nebius text-to-image response format");
+		throw new InferenceClientProviderOutputError("Received malformed response from Nebius text-to-image API");
 	}
 }
 
