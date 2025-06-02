@@ -145,10 +145,10 @@ import {
   InferenceClientHubApiError,
 } from "@huggingface/inference";
 
-const hf = new HfInference();
+const client = new InferenceClient();
 
 try {
-  const result = await hf.textGeneration({
+  const result = await client.textGeneration({
     model: "gpt2",
     inputs: "Hello, I'm a language model",
   });
@@ -177,7 +177,7 @@ try {
 
 /// Catch all errors from @huggingface/inference
 try {
-  const result = await hf.textGeneration({
+  const result = await client.textGeneration({
     model: "gpt2",
     inputs: "Hello, I'm a language model",
   });
