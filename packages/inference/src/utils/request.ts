@@ -65,9 +65,9 @@ export async function innerRequest<T>(
 					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output }
 				);
 			}
-			if (typeof output.error === "string" || typeof output.detail === "string") {
+			if (typeof output.error === "string" || typeof output.detail === "string" || typeof output.message === "string") {
 				throw new InferenceClientProviderApiError(
-					`Failed to perform inference: ${output.error ?? output.detail}`,
+					`Failed to perform inference: ${output.error ?? output.detail ?? output.message}`,
 					{
 						url,
 						method: info.method ?? "GET",
