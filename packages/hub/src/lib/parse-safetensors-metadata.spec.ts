@@ -122,16 +122,15 @@ describe("parseSafetensorsMetadata", () => {
 		// total params = 109M
 	});
 
-	it.skip("fetch info for single-file, but get param count directly from metadata", async () => {
-		/// we don't have an example for this on the Hub yet... cc @LysandreJik
+	it("fetch info for single-file, but get param count directly from metadata", async () => {
 		const parse = await parseSafetensorsMetadata({
-			repo: "hf-internal-testing/non-sharded-model",
+			repo: "hf-internal-testing/single-file-model",
 			computeParametersCount: true,
-			revision: "ce6373360e61e6f70b4a1e0cfcc9407b008dea5b",
+			revision: "75fcd3fed0285ac7f1092897ff2aefdf24bf872e",
 		});
 
 		assert(!parse.sharded);
-		assert.deepStrictEqual(parse.parameterTotal, 666);
+		assert.deepStrictEqual(parse.parameterTotal, 109_482_240);
 	});
 
 	it("should detect sharded safetensors filename", async () => {
