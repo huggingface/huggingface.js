@@ -1,4 +1,8 @@
-import { InferenceOutputError } from "../lib/InferenceOutputError.js";
+import {
+	InferenceClientInputError,
+	InferenceClientProviderApiError,
+	InferenceClientProviderOutputError,
+} from "../errors.js";
 import type { TextToImageArgs } from "../tasks/cv/textToImage.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
 import type { TextToVideoArgs } from "../tasks/cv/textToVideo.js";
@@ -65,7 +69,7 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 	}
 
 	makeRoute(params: UrlParams): string {
-		return `/api/v2/${params.model}`;
+		return `/api/v3/${params.model}`;
 	}
 
 	preparePayload(params: BodyParams<ImageToImageArgs | TextToImageArgs | TextToVideoArgs>): Record<string, unknown> {
@@ -92,7 +96,7 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 		headers?: Record<string, string>
 	): Promise<Blob> {
 		if (!headers) {
-			throw new InferenceOutputError("Headers are required for WaveSpeed AI API calls");
+			throw new InferenceClientInputError("Headers are required for WaveSpeed AI API calls");
 		}
 
 		const resultUrl = response.data.urls.get;
@@ -102,12 +106,22 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 			const resultResponse = await fetch(resultUrl, { headers });
 
 			if (!resultResponse.ok) {
-				throw new InferenceOutputError(`Failed to get result: ${resultResponse.statusText}`);
+				throw new InferenceClientProviderApiError(
+					"Failed to fetch response status from WaveSpeed AI API",
+					{ url: resultUrl, method: "GET" },
+					{
+						requestId: resultResponse.headers.get("x-request-id") ?? "",
+						status: resultResponse.status,
+						body: await resultResponse.text(),
+					}
+				);
 			}
 
 			const result: WaveSpeedAIResponse = await resultResponse.json();
 			if (result.code !== 200) {
-				throw new InferenceOutputError(`API request failed with code ${result.code}: ${result.message}`);
+				throw new InferenceClientProviderOutputError(
+					`API request to WaveSpeed AI API failed with code ${result.code}: ${result.message}`
+				);
 			}
 
 			const taskResult = result.data;
@@ -116,25 +130,32 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 				case "completed": {
 					// Get the media data from the first output URL
 					if (!taskResult.outputs?.[0]) {
-						throw new InferenceOutputError("No output URL in completed response");
+						throw new InferenceClientProviderOutputError(
+							"Received malformed response from WaveSpeed AI API: No output URL in completed response"
+						);
 					}
 					const mediaResponse = await fetch(taskResult.outputs[0]);
 					if (!mediaResponse.ok) {
-						throw new InferenceOutputError("Failed to fetch output data");
+						throw new InferenceClientProviderApiError(
+							"Failed to fetch response status from WaveSpeed AI API",
+							{ url: taskResult.outputs[0], method: "GET" },
+							{
+								requestId: mediaResponse.headers.get("x-request-id") ?? "",
+								status: mediaResponse.status,
+								body: await mediaResponse.text(),
+							}
+						);
 					}
 					return await mediaResponse.blob();
 				}
 				case "failed": {
-					throw new InferenceOutputError(taskResult.error || "Task failed");
+					throw new InferenceClientProviderOutputError(taskResult.error || "Task failed");
 				}
-				case "processing":
-				case "created":
+
+				default: {
 					// Wait before polling again
 					await delay(500);
 					continue;
-
-				default: {
-					throw new InferenceOutputError(`Unknown status: ${taskResult.status}`);
 				}
 			}
 		}
