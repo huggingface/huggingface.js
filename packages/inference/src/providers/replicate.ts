@@ -14,7 +14,7 @@
  *
  * Thanks!
  */
-import { InferenceOutputError } from "../lib/InferenceOutputError.js";
+import { InferenceClientProviderOutputError } from "../errors.js";
 import { isUrl } from "../lib/isUrl.js";
 import type { BodyParams, HeaderParams, UrlParams } from "../types.js";
 import { omit } from "../utils/omit.js";
@@ -99,7 +99,7 @@ export class ReplicateTextToImageTask extends ReplicateTask implements TextToIma
 			return await urlResponse.blob();
 		}
 
-		throw new InferenceOutputError("Expected Replicate text-to-image response format");
+		throw new InferenceClientProviderOutputError("Received malformed response from Replicate text-to-image API");
 	}
 }
 
@@ -132,7 +132,7 @@ export class ReplicateTextToSpeechTask extends ReplicateTask {
 				}
 			}
 		}
-		throw new InferenceOutputError("Expected Blob or object with output");
+		throw new InferenceClientProviderOutputError("Received malformed response from Replicate text-to-speech API");
 	}
 }
 
@@ -149,6 +149,6 @@ export class ReplicateTextToVideoTask extends ReplicateTask implements TextToVid
 			return await urlResponse.blob();
 		}
 
-		throw new InferenceOutputError("Expected { output: string }");
+		throw new InferenceClientProviderOutputError("Received malformed response from Replicate text-to-video API");
 	}
 }

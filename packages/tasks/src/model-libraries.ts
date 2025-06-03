@@ -179,6 +179,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/fudan-generative-vision/champ",
 		countDownloads: `path:"champ/motion_module.pth"`,
 	},
+	chatterbox: {
+		prettyLabel: "Chatterbox",
+		repoName: "Chatterbox",
+		repoUrl: "https://github.com/resemble-ai/chatterbox",
+		snippets: snippets.chatterbox,
+		countDownloads: `path:"tokenizer.json"`,
+		filter: false,
+	},
 	chat_tts: {
 		prettyLabel: "ChatTTS",
 		repoName: "ChatTTS",
