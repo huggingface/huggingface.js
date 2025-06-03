@@ -34,7 +34,7 @@
 		"prepare": "pnpm run build",
 		"test": "vitest run",
 		"check": "tsc",
-		"agent": "tsx cli.ts"
+		"cli": "tsx cli.ts"
 	},
 	"files": [
 		"src",
