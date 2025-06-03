@@ -731,6 +731,9 @@ export const matanyone = (model: ModelData): string[] => [
 
 from matanyone.model.matanyone import MatAnyone
 model = MatAnyone.from_pretrained("${model.id}")`,
+	`
+from matanyone import InferenceCore
+processor = InferenceCore("${model.id}")`,
 ];
 
 export const mesh_anything = (): string[] => [
