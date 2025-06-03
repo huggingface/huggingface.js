@@ -6,7 +6,7 @@ describe("listFiles", () => {
 	it("should fetch the list of files from the repo", async () => {
 		const cursor = listFiles({
 			repo: {
-				name: "bert-base-uncased",
+				name: "google-bert/bert-base-uncased",
 				type: "model",
 			},
 			revision: "dd4bc8b21efa05ec961e3efc4ee5e3832a3679c7",
@@ -67,7 +67,7 @@ describe("listFiles", () => {
 	it("should fetch the list of files from the repo, including last commit", async () => {
 		const cursor = listFiles({
 			repo: {
-				name: "bert-base-uncased",
+				name: "google-bert/bert-base-uncased",
 				type: "model",
 			},
 			revision: "dd4bc8b21efa05ec961e3efc4ee5e3832a3679c7",
