@@ -1,4 +1,5 @@
 import * as BlackForestLabs from "../providers/black-forest-labs.js";
+import * as Burncloud from "../providers/burncloud.js";
 import * as Cerebras from "../providers/cerebras.js";
 import * as Cohere from "../providers/cohere.js";
 import * as FalAI from "../providers/fal-ai.js";
@@ -52,6 +53,9 @@ import type { InferenceProvider, InferenceProviderOrPolicy, InferenceTask } from
 export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, TaskProviderHelper>>> = {
 	"black-forest-labs": {
 		"text-to-image": new BlackForestLabs.BlackForestLabsTextToImageTask(),
+	},
+	burncloud: {
+		conversational: new Burncloud.BurncloudConversationalTask(),
 	},
 	cerebras: {
 		conversational: new Cerebras.CerebrasConversationalTask(),
