@@ -5,7 +5,7 @@ describe("fileDownloadInfo", () => {
 	it("should fetch LFS file info", async () => {
 		const info = await fileDownloadInfo({
 			repo: {
-				name: "bert-base-uncased",
+				name: "google-bert/bert-base-uncased",
 				type: "model",
 			},
 			path: "tf_model.h5",
@@ -19,7 +19,7 @@ describe("fileDownloadInfo", () => {
 	it("should fetch raw LFS pointer info", async () => {
 		const info = await fileDownloadInfo({
 			repo: {
-				name: "bert-base-uncased",
+				name: "google-bert/bert-base-uncased",
 				type: "model",
 			},
 			path: "tf_model.h5",
@@ -34,7 +34,7 @@ describe("fileDownloadInfo", () => {
 	it("should fetch non-LFS file info", async () => {
 		const info = await fileDownloadInfo({
 			repo: {
-				name: "bert-base-uncased",
+				name: "google-bert/bert-base-uncased",
 				type: "model",
 			},
 			path: "tokenizer_config.json",
