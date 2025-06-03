@@ -3,7 +3,7 @@ import requests
 
 API_URL = "https://router.huggingface.co/hf-inference/models/FacebookAI/xlm-roberta-large-finetuned-conll03-english"
 headers = {
-    "Authorization": f"Bearer {os.getenv('HF_TOKEN')}",
+    "Authorization": f"Bearer {os.environ['HF_TOKEN']}",
 }
 
 def query(payload):

@@ -456,15 +456,15 @@ function replaceAccessTokenPlaceholder(
 		snippet = "import os\n" + snippet;
 		snippet = snippet.replace(
 			`"${ACCESS_TOKEN_PLACEHOLDER}"`,
-			`os.getenv("${accessTokenEnvVar}")` // e.g. os.getenv("HF_TOKEN")
+			`os.environ["${accessTokenEnvVar}"]` // e.g. os.environ["HF_TOKEN")
 		);
 		snippet = snippet.replace(
 			`"Bearer <ACCESS_TOKEN>"`,
-			`f"Bearer {os.getenv('${accessTokenEnvVar}')}"` // e.g. f"Bearer {os.getenv('HF_TOKEN')}"
+			`f"Bearer {os.environ['${accessTokenEnvVar}']}"` // e.g. f"Bearer {os.environ['HF_TOKEN']}"
 		);
 		snippet = snippet.replace(
 			`"Key <ACCESS_TOKEN>"`,
-			`f"Key {os.getenv('${accessTokenEnvVar}')}"` // e.g. f"Key {os.getenv('FAL_AI_API_TOKEN')}"
+			`f"Key {os.environ['${accessTokenEnvVar}']}"` // e.g. f"Key {os.environ['FAL_AI_API_TOKEN']}"
 		);
 	} else if (language === "js") {
 		snippet = snippet.replace(

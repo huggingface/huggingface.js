@@ -3,7 +3,7 @@ from huggingface_hub import InferenceClient
 
 client = InferenceClient(
     provider="hf-inference",
-    api_key=os.getenv("HF_TOKEN"),
+    api_key=os.environ["HF_TOKEN"],
 )
 
 result = client.text_classification(

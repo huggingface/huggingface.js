@@ -4,7 +4,7 @@ import requests
 
 API_URL = "https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.2-11B-Vision-Instruct/v1/chat/completions"
 headers = {
-    "Authorization": f"Bearer {os.getenv('HF_TOKEN')}",
+    "Authorization": f"Bearer {os.environ['HF_TOKEN']}",
 }
 
 def query(payload):

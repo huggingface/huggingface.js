@@ -3,7 +3,7 @@ from openai import OpenAI
 
 client = OpenAI(
     base_url="https://api.together.xyz/v1",
-    api_key=os.getenv("TOGETHER_API_TOKEN"),
+    api_key=os.environ["TOGETHER_API_TOKEN"],
 )
 
 completion = client.chat.completions.create(
