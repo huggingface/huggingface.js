@@ -1,17 +1,17 @@
-import {
-	InferenceClientInputError,
-	InferenceClientProviderApiError,
-	InferenceClientProviderOutputError,
-} from "../errors.js";
 import type { TextToImageArgs } from "../tasks/cv/textToImage.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
 import type { TextToVideoArgs } from "../tasks/cv/textToVideo.js";
-import type { BodyParams, HeaderParams, RequestArgs, UrlParams } from "../types.js";
+import type { BodyParams, RequestArgs, UrlParams } from "../types.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
 import { base64FromBytes } from "../utils/base64FromBytes.js";
 import type { TextToImageTaskHelper, TextToVideoTaskHelper, ImageToImageTaskHelper } from "./providerHelper.js";
 import { TaskProviderHelper } from "./providerHelper.js";
+import {
+	InferenceClientInputError,
+	InferenceClientProviderApiError,
+	InferenceClientProviderOutputError,
+} from "../errors.js";
 
 const WAVESPEEDAI_API_BASE_URL = "https://api.wavespeed.ai";
 
