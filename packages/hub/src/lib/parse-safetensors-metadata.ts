@@ -266,7 +266,11 @@ export async function parseSafetensorsMetadata(
 						parameterTotal:
 							/// shortcut: get param count directly from metadata
 							header.__metadata__.total_parameters
-								? parseInt(header.__metadata__.total_parameters.toString())
+								? typeof header.__metadata__.total_parameters === "number"
+									? header.__metadata__.total_parameters
+									: typeof header.__metadata__.total_parameters === "string"
+									  ? parseInt(header.__metadata__.total_parameters)
+									  : undefined
 								: undefined,
 				  }
 				: undefined),
@@ -288,7 +292,13 @@ export async function parseSafetensorsMetadata(
 						parameterCount: computeNumOfParamsByDtypeSharded(shardedMap),
 						parameterTotal:
 							/// shortcut: get param count directly from metadata
-							index.metadata?.total_parameters ? parseInt(index.metadata.total_parameters.toString()) : undefined,
+							index.metadata?.total_parameters
+								? typeof index.metadata.total_parameters === "number"
+									? index.metadata.total_parameters
+									: typeof index.metadata.total_parameters === "string"
+									  ? parseInt(index.metadata.total_parameters)
+									  : undefined
+								: undefined,
 				  }
 				: undefined),
 		};
