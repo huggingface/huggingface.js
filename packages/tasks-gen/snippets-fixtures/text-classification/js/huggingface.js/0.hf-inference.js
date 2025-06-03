@@ -1,6 +1,6 @@
 import { InferenceClient } from "@huggingface/inference";
 
-const client = new InferenceClient("api_token");
+const client = new InferenceClient(process.env.HF_TOKEN);
 
 const output = await client.textClassification({
 	model: "distilbert/distilbert-base-uncased-finetuned-sst-2-english",

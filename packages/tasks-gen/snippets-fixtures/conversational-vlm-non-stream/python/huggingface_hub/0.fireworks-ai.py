@@ -1,8 +1,9 @@
+import os
 from huggingface_hub import InferenceClient
 
 client = InferenceClient(
     provider="fireworks-ai",
-    api_key="api_token",
+    api_key=os.getenv("FIREWORKS_AI_API_TOKEN"),
 )
 
 completion = client.chat.completions.create(

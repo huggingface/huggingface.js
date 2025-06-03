@@ -1,8 +1,9 @@
+import os
 from openai import OpenAI
 
 client = OpenAI(
     base_url="https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.1-8B-Instruct/v1",
-    api_key="api_token",
+    api_key=os.getenv("HF_TOKEN"),
     default_headers={
         "X-HF-Bill-To": "huggingface"
     }

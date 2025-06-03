@@ -1,9 +1,10 @@
+import os
 import base64
 import requests
 
 API_URL = "https://router.huggingface.co/hf-inference/models/openai/clip-vit-large-patch14"
 headers = {
-    "Authorization": "Bearer api_token",
+    "Authorization": f"Bearer {os.getenv('HF_TOKEN')}",
 }
 
 def query(data):

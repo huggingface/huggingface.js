@@ -1,8 +1,9 @@
+import os
 import requests
 
 API_URL = "https://router.huggingface.co/hf-inference/models/Falconsai/nsfw_image_detection"
 headers = {
-    "Authorization": "Bearer api_token",
+    "Authorization": f"Bearer {os.getenv('HF_TOKEN')}",
 }
 
 def query(filename):

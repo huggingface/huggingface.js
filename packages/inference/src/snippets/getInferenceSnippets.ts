@@ -121,6 +121,8 @@ const HF_JS_METHODS: Partial<Record<WidgetType, string>> = {
 	translation: "translation",
 };
 
+const ACCESS_TOKEN_PLACEHOLDER = "<ACCESS_TOKEN>"; // Placeholder to replace with env variable in snippets
+
 // Snippet generators
 const snippetGenerator = (templateName: string, inputPreparationFn?: InputPreparationFn) => {
 	return (
@@ -149,13 +151,15 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 			console.error(`Failed to get provider helper for ${provider} (${task})`, e);
 			return [];
 		}
+		const accessTokenOrPlaceholder = accessToken == "" ? ACCESS_TOKEN_PLACEHOLDER : accessToken;
+
 		/// Prepare inputs + make request
 		const inputs = inputPreparationFn ? inputPreparationFn(model, opts) : { inputs: getModelInputSnippet(model) };
 		const request = makeRequestOptionsFromResolvedModel(
 			providerModelId,
 			providerHelper,
 			{
-				accessToken,
+				accessToken: accessTokenOrPlaceholder,
 				provider,
 				...inputs,
 			} as RequestArgs,
@@ -180,7 +184,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 
 		/// Prepare template injection data
 		const params: TemplateParams = {
-			accessToken,
+			accessToken: accessTokenOrPlaceholder,
 			authorizationHeader: (request.info.headers as Record<string, string>)?.Authorization,
 			baseUrl: removeSuffix(request.url, "/chat/completions"),
 			fullUrl: request.url,
@@ -246,6 +250,11 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 								importJson: snippet.includes("json."),
 							});
 							snippet = `${importSection}\n\n${snippet}`;
+						}
+
+						/// Replace access token placeholder
+						if (snippet.includes(ACCESS_TOKEN_PLACEHOLDER)) {
+							snippet = replaceAccessTokenPlaceholder(snippet, language, provider);
 						}
 
 						/// Snippet is ready!
@@ -419,4 +428,49 @@ function indentString(str: string): string {
 
 function removeSuffix(str: string, suffix: string) {
 	return str.endsWith(suffix) ? str.slice(0, -suffix.length) : str;
+}
+
+function replaceAccessTokenPlaceholder(
+	snippet: string,
+	language: InferenceSnippetLanguage,
+	provider: InferenceProviderOrPolicy
+): string {
+	// If "accessToken" is empty, the snippets are generated with a placeholder.
+	// Once snippets are rendered, we replace the placeholder with code to fetch the access token from an environment variable.
+
+	// Determine if HF_TOKEN or specific provider token should be used
+	const accessTokenEnvVar =
+		!snippet.includes("https://") || // no URL provided => using a client => use $HF_TOKEN
+		snippet.includes("https://router.huggingface.co") || // explicit routed request => use $HF_TOKEN
+		provider == "hf-inference" // hf-inference provider => use $HF_TOKEN
+			? "HF_TOKEN"
+			: provider.toUpperCase().replace("-", "_") + "_API_TOKEN"; // e.g. "REPLICATE_API_TOKEN"
+
+	// Replace the placeholder with the env variable
+	if (language === "sh") {
+		snippet = snippet.replace(
+			`'Authorization: Bearer ${ACCESS_TOKEN_PLACEHOLDER}'`,
+			`"Authorization: Bearer $${accessTokenEnvVar}"` // e.g. "Authorization: Bearer $HF_TOKEN"
+		);
+	} else if (language === "python") {
+		snippet = "import os\n" + snippet;
+		snippet = snippet.replace(
+			`"${ACCESS_TOKEN_PLACEHOLDER}"`,
+			`os.getenv("${accessTokenEnvVar}")` // e.g. os.getenv("HF_TOKEN")
+		);
+		snippet = snippet.replace(
+			`"Bearer <ACCESS_TOKEN>"`,
+			`f"Bearer {os.getenv('${accessTokenEnvVar}')}"` // e.g. f"Bearer {os.getenv('HF_TOKEN')}"
+		);
+		snippet = snippet.replace(
+			`"Key <ACCESS_TOKEN>"`,
+			`f"Key {os.getenv('${accessTokenEnvVar}')}"` // e.g. f"Key {os.getenv('FAL_AI_API_TOKEN')}"
+		);
+	} else if (language === "js") {
+		snippet = snippet.replace(
+			`"${ACCESS_TOKEN_PLACEHOLDER}"`,
+			`process.env.${accessTokenEnvVar}` // e.g. process.env.HF_TOKEN
+		);
+	}
+	return snippet;
 }

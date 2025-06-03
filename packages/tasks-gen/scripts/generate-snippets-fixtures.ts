@@ -314,7 +314,7 @@ function generateInferenceSnippet(
 ): InferenceSnippet[] {
 	const allSnippets = snippets.getInferenceSnippets(
 		model,
-		"api_token",
+		"",
 		provider,
 		{
 			hfModelId: model.id,

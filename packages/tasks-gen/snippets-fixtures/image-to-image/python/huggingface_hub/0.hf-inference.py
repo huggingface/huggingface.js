@@ -1,8 +1,9 @@
+import os
 from huggingface_hub import InferenceClient
 
 client = InferenceClient(
     provider="hf-inference",
-    api_key="api_token",
+    api_key=os.getenv("HF_TOKEN"),
 )
 
 # output is a PIL.Image object

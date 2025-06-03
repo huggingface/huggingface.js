@@ -3,7 +3,7 @@ async function query(data) {
 		"https://router.huggingface.co/hf-inference/models/intfloat/multilingual-e5-large-instruct/pipeline/feature-extraction",
 		{
 			headers: {
-				Authorization: "Bearer api_token",
+				Authorization: "Bearer <ACCESS_TOKEN>",
 				"Content-Type": "application/json",
 			},
 			method: "POST",

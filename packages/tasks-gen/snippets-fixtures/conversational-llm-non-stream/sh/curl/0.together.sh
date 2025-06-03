@@ -1,5 +1,5 @@
 curl https://api.together.xyz/v1/chat/completions \
-    -H 'Authorization: Bearer api_token' \
+    -H "Authorization: Bearer $TOGETHER_API_TOKEN" \
     -H 'Content-Type: application/json' \
     -d '{
         "messages": [
