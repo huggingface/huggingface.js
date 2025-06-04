@@ -463,7 +463,7 @@ function replaceAccessTokenPlaceholder(
 			`f"Bearer {os.environ['${accessTokenEnvVar}']}"` // e.g. f"Bearer {os.environ['HF_TOKEN']}"
 		);
 		snippet = snippet.replace(
-			`"Key <ACCESS_TOKEN>"`,
+			`"Key ${ACCESS_TOKEN_PLACEHOLDER}"`,
 			`f"Key {os.environ['${accessTokenEnvVar}']}"` // e.g. f"Key {os.environ['FAL_AI_API_TOKEN']}"
 		);
 	} else if (language === "js") {
