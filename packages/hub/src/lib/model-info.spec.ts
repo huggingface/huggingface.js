@@ -68,8 +68,8 @@ describe("modelInfo", () => {
 		expect(info.inferenceProviderMapping?.length).toBeGreaterThan(0);
 		info.inferenceProviderMapping?.forEach((item) => {
 			expect(item).toHaveProperty("provider");
-			expect(item).toHaveProperty("hf_model_id", "deepseek-ai/DeepSeek-R1-0528");
-			expect(item).toHaveProperty("provider_id");
+			expect(item).toHaveProperty("hfModelId", "deepseek-ai/DeepSeek-R1-0528");
+			expect(item).toHaveProperty("providerId");
 		});
 	});
 });

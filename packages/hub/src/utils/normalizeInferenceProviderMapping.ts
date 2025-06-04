@@ -8,7 +8,7 @@ import type { ApiModelInferenceProviderMappingEntry } from "../types/api/api-mod
  * Right now, API returns a dict on model-info and a list on list-models. Let's harmonize to list.
  */
 export function normalizeInferenceProviderMapping(
-	hf_model_id: string,
+	hfModelId: string,
 	inferenceProviderMapping?:
 		| ApiModelInferenceProviderMappingEntry[]
 		| Record<string, { providerId: string; status: "live" | "staging"; task: WidgetType }>
@@ -21,15 +21,15 @@ export function normalizeInferenceProviderMapping(
 	if (Array.isArray(inferenceProviderMapping)) {
 		return inferenceProviderMapping.map((entry) => ({
 			...entry,
-			hf_model_id,
+			hfModelId,
 		}));
 	}
 
 	// Convert mapping to array format
 	return Object.entries(inferenceProviderMapping).map(([provider, mapping]) => ({
 		provider,
-		hf_model_id,
-		provider_id: mapping.providerId,
+		hfModelId,
+		providerId: mapping.providerId,
 		status: mapping.status,
 		task: mapping.task,
 	}));

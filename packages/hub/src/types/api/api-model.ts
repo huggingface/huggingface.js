@@ -272,11 +272,11 @@ export interface ApiModelMetadata {
 
 export interface ApiModelInferenceProviderMappingEntry {
 	provider: string; // Provider name
-	hf_model_id: string; // ID of the model on the Hugging Face Hub
-	provider_id: string; // ID of the model on the provider's side
+	hfModelId: string; // ID of the model on the Hugging Face Hub
+	providerId: string; // ID of the model on the provider's side
 	status: "live" | "staging";
 	task: WidgetType;
 	adapter?: string;
-	adapter_weights_path?: string;
+	adapterWeightsPath?: string;
 	type?: "single-file" | "tag-filter";
 }
