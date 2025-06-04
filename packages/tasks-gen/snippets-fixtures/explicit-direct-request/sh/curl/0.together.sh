@@ -1,5 +1,5 @@
-curl https://router.huggingface.co/together/v1/chat/completions \
-    -H "Authorization: Bearer $HF_TOKEN" \
+curl https://api.together.xyz/v1/chat/completions \
+    -H "Authorization: Bearer $TOGETHER_API_KEY" \
     -H 'Content-Type: application/json' \
     -d '{
         "messages": [
@@ -9,5 +9,5 @@ curl https://router.huggingface.co/together/v1/chat/completions \
             }
         ],
         "model": "<together alias for meta-llama/Llama-3.1-8B-Instruct>",
-        "stream": true
+        "stream": false
     }'

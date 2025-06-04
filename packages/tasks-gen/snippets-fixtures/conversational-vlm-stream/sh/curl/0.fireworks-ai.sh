@@ -1,5 +1,5 @@
-curl https://api.fireworks.ai/inference/v1/chat/completions \
-    -H "Authorization: Bearer $FIREWORKS_AI_API_KEY" \
+curl https://router.huggingface.co/fireworks-ai/inference/v1/chat/completions \
+    -H "Authorization: Bearer $HF_TOKEN" \
     -H 'Content-Type: application/json' \
     -d '{
         "messages": [

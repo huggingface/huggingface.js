@@ -1,8 +1,8 @@
 import { OpenAI } from "openai";
 
 const client = new OpenAI({
-	baseURL: "https://api.fireworks.ai/inference/v1",
-	apiKey: process.env.FIREWORKS_AI_API_KEY,
+	baseURL: "https://router.huggingface.co/fireworks-ai/inference/v1",
+	apiKey: process.env.HF_TOKEN,
 });
 
 const chatCompletion = await client.chat.completions.create({

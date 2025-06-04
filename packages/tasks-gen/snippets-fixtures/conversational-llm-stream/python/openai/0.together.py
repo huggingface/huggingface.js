@@ -2,8 +2,8 @@ import os
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.together.xyz/v1",
-    api_key=os.environ["TOGETHER_API_KEY"],
+    base_url="https://router.huggingface.co/together/v1",
+    api_key=os.environ["HF_TOKEN"],
 )
 
 stream = client.chat.completions.create(

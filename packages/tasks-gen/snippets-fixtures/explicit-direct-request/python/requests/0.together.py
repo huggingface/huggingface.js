@@ -1,9 +1,9 @@
 import os
 import requests
 
-API_URL = "https://router.huggingface.co/together/v1/chat/completions"
+API_URL = "https://api.together.xyz/v1/chat/completions"
 headers = {
-    "Authorization": f"Bearer {os.environ['HF_TOKEN']}",
+    "Authorization": f"Bearer {os.environ['TOGETHER_API_KEY']}",
 }
 
 def query(payload):
