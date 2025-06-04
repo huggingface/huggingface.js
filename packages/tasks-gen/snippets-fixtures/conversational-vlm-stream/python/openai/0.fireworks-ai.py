@@ -2,8 +2,8 @@ import os
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.fireworks.ai/inference/v1",
-    api_key=os.environ["FIREWORKS_AI_API_KEY"],
+    base_url="https://router.huggingface.co/fireworks-ai/inference/v1",
+    api_key=os.environ["HF_TOKEN"],
 )
 
 stream = client.chat.completions.create(
