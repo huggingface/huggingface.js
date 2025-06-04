@@ -133,38 +133,3 @@ function computeDataHash(data: Uint8Array): Uint8Array {
 	hasher.finalize(hash);
 	return hash;
 }
-
-// Helper function to find minimum of two numbers
-function min(a: usize, b: usize): usize {
-	return a < b ? a : b;
-}
-
-// Helper function to count leading zeros
-function clz(x: u64): u32 {
-	let n: u32 = 0;
-	if (x == 0) return 64;
-	if ((x & 0xffffffff00000000) == 0) {
-		n += 32;
-		x <<= 32;
-	}
-	if ((x & 0xffff000000000000) == 0) {
-		n += 16;
-		x <<= 16;
-	}
-	if ((x & 0xff00000000000000) == 0) {
-		n += 8;
-		x <<= 8;
-	}
-	if ((x & 0xf000000000000000) == 0) {
-		n += 4;
-		x <<= 4;
-	}
-	if ((x & 0xc000000000000000) == 0) {
-		n += 2;
-		x <<= 2;
-	}
-	if ((x & 0x8000000000000000) == 0) {
-		n += 1;
-	}
-	return n;
-}

@@ -351,7 +351,3 @@ function parent_cv(
 ): StaticArray<u32> {
 	return parent_output(left_child_cv, right_child_cv, key_words, flags).chaining_value();
 }
-
-function min(a: usize, b: usize): usize {
-	return a < b ? a : b;
-}
