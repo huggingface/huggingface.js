@@ -1,8 +1,9 @@
+import os
 import requests
 
 API_URL = "https://api.together.xyz/v1/chat/completions"
 headers = {
-    "Authorization": "Bearer api_token",
+    "Authorization": f"Bearer {os.environ['TOGETHER_API_KEY']}",
 }
 
 def query(payload):

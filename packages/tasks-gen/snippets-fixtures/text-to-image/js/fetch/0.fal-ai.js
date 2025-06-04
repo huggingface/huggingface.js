@@ -3,7 +3,7 @@ async function query(data) {
 		"https://fal.run/<fal-ai alias for black-forest-labs/FLUX.1-schnell>",
 		{
 			headers: {
-				Authorization: "Key api_token",
+				Authorization: `Key ${process.env.FAL_AI_API_KEY}`,
 				"Content-Type": "application/json",
 			},
 			method: "POST",

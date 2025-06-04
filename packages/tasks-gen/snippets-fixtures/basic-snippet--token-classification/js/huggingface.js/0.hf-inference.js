@@ -1,6 +1,6 @@
 import { InferenceClient } from "@huggingface/inference";
 
-const client = new InferenceClient("api_token");
+const client = new InferenceClient(process.env.HF_TOKEN);
 
 const output = await client.tokenClassification({
 	model: "FacebookAI/xlm-roberta-large-finetuned-conll03-english",
