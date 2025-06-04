@@ -8,7 +8,7 @@ import {
 } from "@huggingface/tasks";
 import type { PipelineType, WidgetType } from "@huggingface/tasks";
 import type { ChatCompletionInputMessage, GenerationParameters } from "@huggingface/tasks";
-import type { InferenceProviderModelMapping } from "../lib/getInferenceProviderMapping.js";
+import type { InferenceProviderMappingEntry } from "../lib/getInferenceProviderMapping.js";
 import { getProviderHelper } from "../lib/getProviderHelper.js";
 import { makeRequestOptionsFromResolvedModel } from "../lib/makeRequestOptions.js";
 import type { InferenceProviderOrPolicy, InferenceTask, RequestArgs } from "../types.js";
@@ -131,7 +131,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 	return (
 		model: ModelDataMinimal,
 		provider: InferenceProviderOrPolicy,
-		inferenceProviderMapping?: InferenceProviderModelMapping,
+		inferenceProviderMapping?: InferenceProviderMappingEntry,
 		opts?: InferenceSnippetOptions
 	): InferenceSnippet[] => {
 		const providerModelId = inferenceProviderMapping?.providerId ?? model.id;
@@ -311,7 +311,7 @@ const snippets: Partial<
 		(
 			model: ModelDataMinimal,
 			provider: InferenceProviderOrPolicy,
-			inferenceProviderMapping?: InferenceProviderModelMapping,
+			inferenceProviderMapping?: InferenceProviderMappingEntry,
 			opts?: InferenceSnippetOptions
 		) => InferenceSnippet[]
 	>
@@ -350,7 +350,7 @@ const snippets: Partial<
 export function getInferenceSnippets(
 	model: ModelDataMinimal,
 	provider: InferenceProviderOrPolicy,
-	inferenceProviderMapping?: InferenceProviderModelMapping,
+	inferenceProviderMapping?: InferenceProviderMappingEntry,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
 	return model.pipeline_tag && model.pipeline_tag in snippets
