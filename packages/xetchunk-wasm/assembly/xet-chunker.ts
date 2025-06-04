@@ -133,3 +133,7 @@ function computeDataHash(data: Uint8Array): Uint8Array {
 	hasher.finalize(hash);
 	return hash;
 }
+
+export function createXetChunker(targetChunkSize: usize = TARGET_CHUNK_SIZE): XetChunker {
+	return new XetChunker(targetChunkSize);
+}

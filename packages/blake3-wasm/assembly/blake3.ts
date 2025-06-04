@@ -351,3 +351,7 @@ function parent_cv(
 ): StaticArray<u32> {
 	return parent_output(left_child_cv, right_child_cv, key_words, flags).chaining_value();
 }
+
+export function createBlake3Hasher(): Blake3Hasher {
+	return new Blake3Hasher();
+}
