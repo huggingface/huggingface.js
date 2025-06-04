@@ -1,8 +1,9 @@
+import os
 from openai import OpenAI
 
 client = OpenAI(
     base_url="https://api.together.xyz/v1",
-    api_key="api_token",
+    api_key=os.environ["TOGETHER_API_KEY"],
 )
 
 completion = client.chat.completions.create(

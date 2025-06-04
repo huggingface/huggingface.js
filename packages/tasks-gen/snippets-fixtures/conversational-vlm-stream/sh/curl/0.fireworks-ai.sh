@@ -1,5 +1,5 @@
 curl https://api.fireworks.ai/inference/v1/chat/completions \
-    -H 'Authorization: Bearer api_token' \
+    -H "Authorization: Bearer $FIREWORKS_AI_API_KEY" \
     -H 'Content-Type: application/json' \
     -d '{
         "messages": [

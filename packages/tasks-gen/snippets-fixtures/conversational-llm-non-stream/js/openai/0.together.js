@@ -2,7 +2,7 @@ import { OpenAI } from "openai";
 
 const client = new OpenAI({
 	baseURL: "https://api.together.xyz/v1",
-	apiKey: "api_token",
+	apiKey: process.env.TOGETHER_API_KEY,
 });
 
 const chatCompletion = await client.chat.completions.create({
