@@ -241,6 +241,18 @@ const TEST_CASES: {
 		opts: { billTo: "huggingface" },
 	},
 	{
+		testName: "with-access-token",
+		task: "conversational",
+		model: {
+			id: "meta-llama/Llama-3.1-8B-Instruct",
+			pipeline_tag: "text-generation",
+			tags: ["conversational"],
+			inference: "",
+		},
+		providers: ["hf-inference"],
+		opts: { accessToken: "hf_xxx" },
+	},
+	{
 		testName: "text-to-speech",
 		task: "text-to-speech",
 		model: {

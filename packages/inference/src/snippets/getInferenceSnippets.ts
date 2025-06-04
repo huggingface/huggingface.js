@@ -14,7 +14,10 @@ import { makeRequestOptionsFromResolvedModel } from "../lib/makeRequestOptions.j
 import type { InferenceProviderOrPolicy, InferenceTask, RequestArgs } from "../types.js";
 import { templates } from "./templates.exported.js";
 
-export type InferenceSnippetOptions = { streaming?: boolean; billTo?: string } & Record<string, unknown>;
+export type InferenceSnippetOptions = { streaming?: boolean; billTo?: string; accessToken?: string } & Record<
+	string,
+	unknown
+>;
 
 const PYTHON_CLIENTS = ["huggingface_hub", "fal_client", "requests", "openai"] as const;
 const JS_CLIENTS = ["fetch", "huggingface.js", "openai"] as const;
@@ -150,6 +153,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 			console.error(`Failed to get provider helper for ${provider} (${task})`, e);
 			return [];
 		}
+		const accessTokenOrPlaceholder = opts?.accessToken ?? ACCESS_TOKEN_PLACEHOLDER;
 
 		/// Prepare inputs + make request
 		const inputs = inputPreparationFn ? inputPreparationFn(model, opts) : { inputs: getModelInputSnippet(model) };
@@ -157,7 +161,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 			providerModelId,
 			providerHelper,
 			{
-				accessToken: ACCESS_TOKEN_PLACEHOLDER,
+				accessToken: accessTokenOrPlaceholder,
 				provider,
 				...inputs,
 			} as RequestArgs,
@@ -182,7 +186,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 
 		/// Prepare template injection data
 		const params: TemplateParams = {
-			accessToken: ACCESS_TOKEN_PLACEHOLDER,
+			accessToken: accessTokenOrPlaceholder,
 			authorizationHeader: (request.info.headers as Record<string, string>)?.Authorization,
 			baseUrl: removeSuffix(request.url, "/chat/completions"),
 			fullUrl: request.url,
@@ -251,7 +255,9 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 						}
 
 						/// Replace access token placeholder
-						snippet = replaceAccessTokenPlaceholder(snippet, language, provider);
+						if (snippet.includes(ACCESS_TOKEN_PLACEHOLDER)) {
+							snippet = replaceAccessTokenPlaceholder(snippet, language, provider);
+						}
 
 						/// Snippet is ready!
 						return { language, client: client as string, content: snippet };
@@ -429,8 +435,8 @@ function replaceAccessTokenPlaceholder(
 	language: InferenceSnippetLanguage,
 	provider: InferenceProviderOrPolicy
 ): string {
-	// The snippets are generated with a placeholder in place of the access token.
-	// Once snippets are rendered, we replace the placeholder with correct code to fetch the access token from an environment variable.
+	// If "opts.accessToken" is not set, the snippets are generated with a placeholder.
+	// Once snippets are rendered, we replace the placeholder with code to fetch the access token from an environment variable.
 
 	// Determine if HF_TOKEN or specific provider token should be used
 	const accessTokenEnvVar =
@@ -447,9 +453,7 @@ function replaceAccessTokenPlaceholder(
 			`"Authorization: Bearer $${accessTokenEnvVar}"` // e.g. "Authorization: Bearer $HF_TOKEN"
 		);
 	} else if (language === "python") {
-		if (snippet.includes(ACCESS_TOKEN_PLACEHOLDER)) {
-			snippet = "import os\n" + snippet;
-		}
+		snippet = "import os\n" + snippet;
 		snippet = snippet.replace(
 			`"${ACCESS_TOKEN_PLACEHOLDER}"`,
 			`os.environ["${accessTokenEnvVar}"]` // e.g. os.environ["HF_TOKEN")
