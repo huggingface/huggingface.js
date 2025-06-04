@@ -459,7 +459,7 @@ function replaceAccessTokenPlaceholder(
 			`os.environ["${accessTokenEnvVar}"]` // e.g. os.environ["HF_TOKEN")
 		);
 		snippet = snippet.replace(
-			`"Bearer <ACCESS_TOKEN>"`,
+			`"Bearer ${ACCESS_TOKEN_PLACEHOLDER}"`,
 			`f"Bearer {os.environ['${accessTokenEnvVar}']}"` // e.g. f"Bearer {os.environ['HF_TOKEN']}"
 		);
 		snippet = snippet.replace(
