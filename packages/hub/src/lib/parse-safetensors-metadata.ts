@@ -42,7 +42,20 @@ class SafetensorParseError extends Error {}
 type FileName = string;
 
 export type TensorName = string;
-export type Dtype = "F64" | "F32" | "F16" | "BF16" | "I64" | "I32" | "I16" | "I8" | "U8" | "BOOL";
+export type Dtype =
+	| "F64"
+	| "F32"
+	| "F16"
+	| "F8_E4M3"
+	| "F8_E5M2"
+	| "BF16"
+	| "I64"
+	| "I32"
+	| "I16"
+	| "I8"
+	| "U16"
+	| "U8"
+	| "BOOL";
 
 export interface TensorInfo {
 	dtype: Dtype;
@@ -51,13 +64,13 @@ export interface TensorInfo {
 }
 
 export type SafetensorsFileHeader = Record<TensorName, TensorInfo> & {
-	__metadata__: Record<string, string>;
+	__metadata__: { total_parameters?: string | number } & Record<string, string>;
 };
 
 export interface SafetensorsIndexJson {
 	dtype?: string;
 	/// ^there's sometimes a dtype but it looks inconsistent.
-	metadata?: Record<string, string>;
+	metadata?: { total_parameters?: string | number } & Record<string, string>;
 	/// ^ why the naming inconsistency?
 	weight_map: Record<TensorName, FileName>;
 }
@@ -69,12 +82,14 @@ export type SafetensorsParseFromRepo =
 			sharded: false;
 			header: SafetensorsFileHeader;
 			parameterCount?: Partial<Record<Dtype, number>>;
+			parameterTotal?: number;
 	  }
 	| {
 			sharded: true;
 			index: SafetensorsIndexJson;
 			headers: SafetensorsShardedHeaders;
 			parameterCount?: Partial<Record<Dtype, number>>;
+			parameterTotal?: number;
 	  };
 
 async function parseSingleFile(
@@ -127,7 +142,7 @@ async function parseShardedIndex(
 		 */
 		fetch?: typeof fetch;
 	} & Partial<CredentialsParams>
-): Promise<{ index: SafetensorsIndexJson; headers: SafetensorsShardedHeaders }> {
+): Promise<SafetensorsIndexJson> {
 	const indexBlob = await downloadFile({
 		...params,
 		path,
@@ -137,14 +152,28 @@ async function parseShardedIndex(
 		throw new SafetensorParseError(`Failed to parse file ${path}: failed to fetch safetensors index.`);
 	}
 
-	// no validation for now, we assume it's a valid IndexJson.
-	let index: SafetensorsIndexJson;
 	try {
-		index = JSON.parse(await indexBlob.slice(0, 10_000_000).text());
+		// no validation for now, we assume it's a valid IndexJson.
+		const index = JSON.parse(await indexBlob.slice(0, 10_000_000).text());
+		return index;
 	} catch (error) {
 		throw new SafetensorParseError(`Failed to parse file ${path}: not a valid JSON.`);
 	}
+}
 
+async function fetchAllHeaders(
+	path: string,
+	index: SafetensorsIndexJson,
+	params: {
+		repo: RepoDesignation;
+		revision?: string;
+		hubUrl?: string;
+		/**
+		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
+		 */
+		fetch?: typeof fetch;
+	} & Partial<CredentialsParams>
+): Promise<SafetensorsShardedHeaders> {
 	const pathPrefix = path.slice(0, path.lastIndexOf("/") + 1);
 	const filenames = [...new Set(Object.values(index.weight_map))];
 	const shardedMap: SafetensorsShardedHeaders = Object.fromEntries(
@@ -156,7 +185,7 @@ async function parseShardedIndex(
 			PARALLEL_DOWNLOADS
 		)
 	);
-	return { index, headers: shardedMap };
+	return shardedMap;
 }
 
 /**
@@ -189,12 +218,12 @@ export async function parseSafetensorsMetadata(
 	params: {
 		/** Only models are supported */
 		repo: RepoDesignation;
+		path?: string;
 		/**
 		 * Will include SafetensorsParseFromRepo["parameterCount"], an object containing the number of parameters for each DType
 		 *
 		 * @default false
 		 */
-		path?: string;
 		computeParametersCount?: boolean;
 		hubUrl?: string;
 		revision?: string;
@@ -223,27 +252,55 @@ export async function parseSafetensorsMetadata(
 		throw new TypeError("Only model repos should contain safetensors files.");
 	}
 
-	if (RE_SAFETENSORS_FILE.test(params.path ?? "") || (await fileExists({ ...params, path: SAFETENSORS_FILE }))) {
+	if (
+		(params.path && RE_SAFETENSORS_FILE.test(params.path)) ||
+		(await fileExists({ ...params, path: SAFETENSORS_FILE }))
+	) {
 		const header = await parseSingleFile(params.path ?? SAFETENSORS_FILE, params);
 		return {
 			sharded: false,
 			header,
-			...(params.computeParametersCount && {
-				parameterCount: computeNumOfParamsByDtypeSingleFile(header),
-			}),
+			...(params.computeParametersCount
+				? {
+						parameterCount: computeNumOfParamsByDtypeSingleFile(header),
+						parameterTotal:
+							/// shortcut: get param count directly from metadata
+							header.__metadata__.total_parameters
+								? typeof header.__metadata__.total_parameters === "number"
+									? header.__metadata__.total_parameters
+									: typeof header.__metadata__.total_parameters === "string"
+									  ? parseInt(header.__metadata__.total_parameters)
+									  : undefined
+								: undefined,
+				  }
+				: undefined),
 		};
 	} else if (
-		RE_SAFETENSORS_INDEX_FILE.test(params.path ?? "") ||
+		(params.path && RE_SAFETENSORS_INDEX_FILE.test(params.path)) ||
 		(await fileExists({ ...params, path: SAFETENSORS_INDEX_FILE }))
 	) {
-		const { index, headers } = await parseShardedIndex(params.path ?? SAFETENSORS_INDEX_FILE, params);
+		const path = params.path ?? SAFETENSORS_INDEX_FILE;
+		const index = await parseShardedIndex(path, params);
+		const shardedMap = await fetchAllHeaders(path, index, params);
+
 		return {
 			sharded: true,
 			index,
-			headers,
-			...(params.computeParametersCount && {
-				parameterCount: computeNumOfParamsByDtypeSharded(headers),
-			}),
+			headers: shardedMap,
+			...(params.computeParametersCount
+				? {
+						parameterCount: computeNumOfParamsByDtypeSharded(shardedMap),
+						parameterTotal:
+							/// shortcut: get param count directly from metadata
+							index.metadata?.total_parameters
+								? typeof index.metadata.total_parameters === "number"
+									? index.metadata.total_parameters
+									: typeof index.metadata.total_parameters === "string"
+									  ? parseInt(index.metadata.total_parameters)
+									  : undefined
+								: undefined,
+				  }
+				: undefined),
 		};
 	} else {
 		throw new Error("model id does not seem to contain safetensors weights");
