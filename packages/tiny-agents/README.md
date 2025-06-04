@@ -29,6 +29,8 @@ Available Commands:
   serve       Run the Agent as an OpenAI-compatible HTTP server
 ```
 
+You can load agents directly from the Hugging Face Hub [tiny-agents](https://huggingface.co/datasets/tiny-agents/tiny-agents) Dataset, or specify a path to your own local agent configuration.
+
 ## Define your own agent
 
 The simplest way to create your own agent is to create a folder containing an `agent.json` file:

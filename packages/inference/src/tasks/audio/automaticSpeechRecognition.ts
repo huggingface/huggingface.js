@@ -1,10 +1,10 @@
 import type { AutomaticSpeechRecognitionInput, AutomaticSpeechRecognitionOutput } from "@huggingface/tasks";
 import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
 import { getProviderHelper } from "../../lib/getProviderHelper.js";
-import { InferenceOutputError } from "../../lib/InferenceOutputError.js";
 import type { BaseArgs, Options } from "../../types.js";
 import { innerRequest } from "../../utils/request.js";
 import type { LegacyAudioInput } from "./utils.js";
+import { InferenceClientProviderOutputError } from "../../errors.js";
 
 export type AutomaticSpeechRecognitionArgs = BaseArgs & (AutomaticSpeechRecognitionInput | LegacyAudioInput);
 /**
@@ -24,7 +24,7 @@ export async function automaticSpeechRecognition(
 	});
 	const isValidOutput = typeof res?.text === "string";
 	if (!isValidOutput) {
-		throw new InferenceOutputError("Expected {text: string}");
+		throw new InferenceClientProviderOutputError("Received malformed response from automatic-speech-recognition API");
 	}
 	return providerHelper.getResponse(res);
 }

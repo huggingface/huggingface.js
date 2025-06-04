@@ -58,6 +58,13 @@ export interface LibraryUiElement {
  */
 
 export const MODEL_LIBRARIES_UI_ELEMENTS = {
+	acestep: {
+		prettyLabel: "ACE-Step",
+		repoName: "ACE-Step",
+		repoUrl: "https://github.com/ace-step/ACE-Step",
+		filter: false,
+		countDownloads: `path:"ace_step_transformer/config.json"`,
+	},
 	"adapter-transformers": {
 		prettyLabel: "Adapters",
 		repoName: "adapters",
@@ -171,6 +178,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "Champ",
 		repoUrl: "https://github.com/fudan-generative-vision/champ",
 		countDownloads: `path:"champ/motion_module.pth"`,
+	},
+	chatterbox: {
+		prettyLabel: "Chatterbox",
+		repoName: "Chatterbox",
+		repoUrl: "https://github.com/resemble-ai/chatterbox",
+		snippets: snippets.chatterbox,
+		countDownloads: `path:"tokenizer.json"`,
+		filter: false,
 	},
 	chat_tts: {
 		prettyLabel: "ChatTTS",
@@ -521,6 +536,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "MindSpore",
 		repoName: "mindspore",
 		repoUrl: "https://github.com/mindspore-ai/mindspore",
+	},
+	"magi-1": {
+		prettyLabel: "MAGI-1",
+		repoName: "MAGI-1",
+		repoUrl: "https://github.com/SandAI-org/MAGI-1",
+		countDownloads: `path:"ckpt/vae/config.json"`,
 	},
 	"mamba-ssm": {
 		prettyLabel: "MambaSSM",
@@ -946,6 +967,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.timm,
 		filter: true,
 		countDownloads: `path:"pytorch_model.bin" OR path:"model.safetensors"`,
+	},
+	tirex: {
+		prettyLabel: "TiRex",
+		repoName: "TiRex",
+		repoUrl: "https://github.com/NX-AI/tirex",
+		countDownloads: `path_extension:"ckpt"`,
 	},
 	torchgeo: {
 		prettyLabel: "TorchGeo",
