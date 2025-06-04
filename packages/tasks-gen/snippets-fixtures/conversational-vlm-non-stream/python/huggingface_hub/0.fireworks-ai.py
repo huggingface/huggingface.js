@@ -3,7 +3,7 @@ from huggingface_hub import InferenceClient
 
 client = InferenceClient(
     provider="fireworks-ai",
-    api_key=os.environ["FIREWORKS_AI_API_TOKEN"],
+    api_key=os.environ["FIREWORKS_AI_API_KEY"],
 )
 
 completion = client.chat.completions.create(

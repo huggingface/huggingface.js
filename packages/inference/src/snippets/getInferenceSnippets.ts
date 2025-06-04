@@ -444,7 +444,7 @@ function replaceAccessTokenPlaceholder(
 		snippet.includes("https://router.huggingface.co") || // explicit routed request => use $HF_TOKEN
 		provider == "hf-inference" // hf-inference provider => use $HF_TOKEN
 			? "HF_TOKEN"
-			: provider.toUpperCase().replace("-", "_") + "_API_TOKEN"; // e.g. "REPLICATE_API_TOKEN"
+			: provider.toUpperCase().replace("-", "_") + "_API_KEY"; // e.g. "REPLICATE_API_KEY"
 
 	// Replace the placeholder with the env variable
 	if (language === "sh") {
@@ -464,7 +464,7 @@ function replaceAccessTokenPlaceholder(
 		);
 		snippet = snippet.replace(
 			`"Key ${ACCESS_TOKEN_PLACEHOLDER}"`,
-			`f"Key {os.environ['${accessTokenEnvVar}']}"` // e.g. f"Key {os.environ['FAL_AI_API_TOKEN']}"
+			`f"Key {os.environ['${accessTokenEnvVar}']}"` // e.g. f"Key {os.environ['FAL_AI_API_KEY']}"
 		);
 	} else if (language === "js") {
 		snippet = snippet.replace(
@@ -477,7 +477,7 @@ function replaceAccessTokenPlaceholder(
 		);
 		snippet = snippet.replace(
 			`Authorization: "Key ${ACCESS_TOKEN_PLACEHOLDER}",`,
-			`Authorization: \`Key $\{process.env.${accessTokenEnvVar}}\`,` // e.g. Authorization: `Key ${process.env.FAL_AI_API_TOKEN}`,
+			`Authorization: \`Key $\{process.env.${accessTokenEnvVar}}\`,` // e.g. Authorization: `Key ${process.env.FAL_AI_API_KEY}`,
 		);
 	}
 	return snippet;

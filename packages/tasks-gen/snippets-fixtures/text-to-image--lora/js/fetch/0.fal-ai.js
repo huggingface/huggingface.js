@@ -3,7 +3,7 @@ async function query(data) {
 		"https://fal.run/<fal-ai alias for openfree/flux-chatgpt-ghibli-lora>",
 		{
 			headers: {
-				Authorization: `Key ${process.env.FAL_AI_API_TOKEN}`,
+				Authorization: `Key ${process.env.FAL_AI_API_KEY}`,
 				"Content-Type": "application/json",
 			},
 			method: "POST",

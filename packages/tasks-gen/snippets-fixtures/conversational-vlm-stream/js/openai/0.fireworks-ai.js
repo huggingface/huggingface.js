@@ -2,7 +2,7 @@ import { OpenAI } from "openai";
 
 const client = new OpenAI({
 	baseURL: "https://api.fireworks.ai/inference/v1",
-	apiKey: process.env.FIREWORKS_AI_API_TOKEN,
+	apiKey: process.env.FIREWORKS_AI_API_KEY,
 });
 
 const stream = await client.chat.completions.create({

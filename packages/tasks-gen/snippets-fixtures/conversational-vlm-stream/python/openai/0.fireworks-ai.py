@@ -3,7 +3,7 @@ from openai import OpenAI
 
 client = OpenAI(
     base_url="https://api.fireworks.ai/inference/v1",
-    api_key=os.environ["FIREWORKS_AI_API_TOKEN"],
+    api_key=os.environ["FIREWORKS_AI_API_KEY"],
 )
 
 stream = client.chat.completions.create(

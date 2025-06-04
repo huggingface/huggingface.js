@@ -3,7 +3,7 @@ import requests
 
 API_URL = "https://fal.run/<fal-ai alias for nari-labs/Dia-1.6B>"
 headers = {
-    "Authorization": f"Key {os.environ['FAL_AI_API_TOKEN']}",
+    "Authorization": f"Key {os.environ['FAL_AI_API_KEY']}",
 }
 
 def query(payload):

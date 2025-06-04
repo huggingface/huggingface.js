@@ -4,7 +4,7 @@ import requests
 
 API_URL = "https://api.fireworks.ai/inference/v1/chat/completions"
 headers = {
-    "Authorization": f"Bearer {os.environ['FIREWORKS_AI_API_TOKEN']}",
+    "Authorization": f"Bearer {os.environ['FIREWORKS_AI_API_KEY']}",
 }
 
 def query(payload):
