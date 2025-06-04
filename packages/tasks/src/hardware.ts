@@ -278,7 +278,7 @@ export const SKUS = {
 			},
 			"RTX 2080 Ti": {
 				tflops: 26.9,
-				memory: [11, 22], //Modded 2080ti can be easily found in Taobao/Alibaba
+				memory: [11, 22], // 22GB: modded 2080ti
 			},
 			"RTX 2080": {
 				tflops: 20.14,
