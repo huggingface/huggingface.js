@@ -31,7 +31,9 @@ export interface HardwareSpec {
 	memory?: number[];
 }
 
-export const DEFAULT_MEMORY_OPTIONS = [8, 16, 24, 32, 40, 48, 64, 80, 96, 128, 192, 256, 384, 512, 768, 1024, 1536, 2048];
+export const DEFAULT_MEMORY_OPTIONS = [
+	8, 16, 24, 32, 40, 48, 64, 80, 96, 128, 192, 256, 384, 512, 768, 1024, 1536, 2048,
+];
 
 export const SKUS = {
 	GPU: {
@@ -542,7 +544,7 @@ export const SKUS = {
 				tflops: 0.25,
 			},
 			"Xeon E5v3 (Haswell)": {
-				tflops: 0.20,
+				tflops: 0.2,
 			},
 			"Xeon E5v2 (Ivy Bridge)": {
 				tflops: 0.15,
