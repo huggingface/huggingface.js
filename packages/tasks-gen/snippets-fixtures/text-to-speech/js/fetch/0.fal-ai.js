@@ -3,7 +3,7 @@ async function query(data) {
 		"https://fal.run/<fal-ai alias for nari-labs/Dia-1.6B>",
 		{
 			headers: {
-				Authorization: "Key <ACCESS_TOKEN>",
+				Authorization: `Key ${process.env.FAL_AI_API_TOKEN}`,
 				"Content-Type": "application/json",
 			},
 			method: "POST",

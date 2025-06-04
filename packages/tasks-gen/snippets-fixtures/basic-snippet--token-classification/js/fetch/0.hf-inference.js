@@ -3,7 +3,7 @@ async function query(data) {
 		"https://router.huggingface.co/hf-inference/models/FacebookAI/xlm-roberta-large-finetuned-conll03-english",
 		{
 			headers: {
-				Authorization: "Bearer <ACCESS_TOKEN>",
+				Authorization: `Bearer ${process.env.HF_TOKEN}`,
 				"Content-Type": "application/json",
 			},
 			method: "POST",

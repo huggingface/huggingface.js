@@ -471,6 +471,14 @@ function replaceAccessTokenPlaceholder(
 			`"${ACCESS_TOKEN_PLACEHOLDER}"`,
 			`process.env.${accessTokenEnvVar}` // e.g. process.env.HF_TOKEN
 		);
+		snippet = snippet.replace(
+			`Authorization: "Bearer ${ACCESS_TOKEN_PLACEHOLDER}",`,
+			`Authorization: \`Bearer $\{process.env.${accessTokenEnvVar}}\`,` // e.g. Authorization: `Bearer ${process.env.HF_TOKEN}`,
+		);
+		snippet = snippet.replace(
+			`Authorization: "Key ${ACCESS_TOKEN_PLACEHOLDER}",`,
+			`Authorization: \`Key $\{process.env.${accessTokenEnvVar}}\`,` // e.g. Authorization: `Key ${process.env.FAL_AI_API_TOKEN}`,
+		);
 	}
 	return snippet;
 }
