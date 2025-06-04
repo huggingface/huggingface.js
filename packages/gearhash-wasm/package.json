@@ -22,6 +22,9 @@
 		},
 		"./assembly": {
 			"import": "./assembly/index.ts"
+		},
+		"./wasm": {
+			"import": "./build/release.wasm"
 		}
 	},
 	"devDependencies": {
