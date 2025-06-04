@@ -1,7 +1,3 @@
-// Import AssemblyScript types
-import type { usize, u32, u8, u64 } from "assemblyscript";
-import { StaticArray } from "assemblyscript";
-
 // Constants from the reference implementation
 const OUT_LEN: usize = 32;
 // const KEY_LEN: usize = 32;

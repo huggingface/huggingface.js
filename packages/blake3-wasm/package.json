@@ -4,8 +4,9 @@
 	"scripts": {
 		"build:debug": "asc assembly/index.ts --target debug",
 		"build:release": "asc assembly/index.ts --target release",
-		"build": "npm run build:debug && npm run build:release",
-		"test": "node tests"
+		"build": "pnpm run build:debug && npm run build:release",
+		"test": "node tests",
+		"prepare": "pnpm run build"
 	},
 	"dependencies": {
 		"assemblyscript": "^0.27.36"
