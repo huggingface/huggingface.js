@@ -1,4 +1,5 @@
 import { nextMatch } from "./next-match";
+import { Blake3Hasher } from "@huggingface/blake3-wasm";
 
 // Constants
 const TARGET_CHUNK_SIZE: usize = 64 * 1024; // 64KB
@@ -125,14 +126,11 @@ export class XetChunker {
 	}
 }
 
-// Simple SHA-256 implementation for data hashing
 function computeDataHash(data: Uint8Array): Uint8Array {
-	// TODO: Replace with actual SHA-256 implementation
-	// For now, using a simple hash function for demonstration
+	const hasher = new Blake3Hasher();
+	hasher.update(data);
 	const hash = new Uint8Array(32);
-	for (let i = 0; i < data.length; i++) {
-		hash[i % 32] ^= data[i];
-	}
+	hasher.finalize(hash);
 	return hash;
 }
 

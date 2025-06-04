@@ -15,3 +15,5 @@ packages:
   - "packages/mcp-client"
   - "packages/tiny-agents"
   - "packages/gearhash-wasm"
+  - "packages/blake3-wasm"
+  - "packages/xetchunk-wasm"

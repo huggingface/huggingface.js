@@ -1,23 +1,15 @@
 {
-	"name": "@huggingface/gearhash-wasm",
+	"name": "@huggingface/blake3-wasm",
 	"version": "0.0.1",
 	"scripts": {
 		"build:debug": "asc assembly/index.ts --target debug",
 		"build:release": "asc assembly/index.ts --target release",
 		"build": "npm run build:debug && npm run build:release",
-		"test": "node tests",
-		"start": "npx serve ."
+		"test": "node tests"
 	},
 	"dependencies": {
-		"assemblyscript": "^0.27.36",
-		"@huggingface/blake3-wasm": "workspace:*",
-		"@huggingface/xetchunk-wasm": "workspace:*"
+		"assemblyscript": "^0.27.36"
 	},
-	"keywords": [
-		"gearhash",
-		"assemblyscript",
-		"wasm"
-	],
 	"type": "module",
 	"exports": {
 		".": {

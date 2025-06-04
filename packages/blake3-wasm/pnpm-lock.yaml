@@ -8,20 +8,14 @@ importers:
 
   .:
     dependencies:
-      '@huggingface/blake3-wasm':
-        specifier: workspace:*
-        version: link:../blake3-wasm
-      '@huggingface/xetchunk-wasm':
-        specifier: workspace:*
-        version: link:../xetchunk-wasm
       assemblyscript:
         specifier: ^0.27.36
-        version: 0.27.36
+        version: 0.27.37
 
 packages:
 
-  assemblyscript@0.27.36:
-    resolution: {integrity: sha512-1qX2zf6p7l/mNYv8r21jC/Yft7kX7XKR3xUHw41zvV4xad5lyC8w7jZiwZBGoy64VKZLc+bTDJDWi8Kb70YrHA==}
+  assemblyscript@0.27.37:
+    resolution: {integrity: sha512-YtY5k3PiV3SyUQ6gRlR2OCn8dcVRwkpiG/k2T5buoL2ymH/Z/YbaYWbk/f9mO2HTgEtGWjPiAQrIuvA7G/63Gg==}
     engines: {node: '>=18', npm: '>=10'}
     hasBin: true
 
@@ -34,7 +28,7 @@ packages:
 
 snapshots:
 
-  assemblyscript@0.27.36:
+  assemblyscript@0.27.37:
     dependencies:
       binaryen: 116.0.0-nightly.20240114
       long: 5.3.2
