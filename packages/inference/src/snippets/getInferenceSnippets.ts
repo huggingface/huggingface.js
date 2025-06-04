@@ -127,7 +127,6 @@ const ACCESS_TOKEN_PLACEHOLDER = "<ACCESS_TOKEN>"; // Placeholder to replace wit
 const snippetGenerator = (templateName: string, inputPreparationFn?: InputPreparationFn) => {
 	return (
 		model: ModelDataMinimal,
-		accessToken: string,
 		provider: InferenceProviderOrPolicy,
 		inferenceProviderMapping?: InferenceProviderModelMapping,
 		opts?: InferenceSnippetOptions
@@ -151,7 +150,6 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 			console.error(`Failed to get provider helper for ${provider} (${task})`, e);
 			return [];
 		}
-		const accessTokenOrPlaceholder = accessToken == "" ? ACCESS_TOKEN_PLACEHOLDER : accessToken;
 
 		/// Prepare inputs + make request
 		const inputs = inputPreparationFn ? inputPreparationFn(model, opts) : { inputs: getModelInputSnippet(model) };
@@ -159,7 +157,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 			providerModelId,
 			providerHelper,
 			{
-				accessToken: accessTokenOrPlaceholder,
+				accessToken: ACCESS_TOKEN_PLACEHOLDER,
 				provider,
 				...inputs,
 			} as RequestArgs,
@@ -184,7 +182,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 
 		/// Prepare template injection data
 		const params: TemplateParams = {
-			accessToken: accessTokenOrPlaceholder,
+			accessToken: ACCESS_TOKEN_PLACEHOLDER,
 			authorizationHeader: (request.info.headers as Record<string, string>)?.Authorization,
 			baseUrl: removeSuffix(request.url, "/chat/completions"),
 			fullUrl: request.url,
@@ -253,9 +251,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 						}
 
 						/// Replace access token placeholder
-						if (snippet.includes(ACCESS_TOKEN_PLACEHOLDER)) {
-							snippet = replaceAccessTokenPlaceholder(snippet, language, provider);
-						}
+						snippet = replaceAccessTokenPlaceholder(snippet, language, provider);
 
 						/// Snippet is ready!
 						return { language, client: client as string, content: snippet };
@@ -308,7 +304,6 @@ const snippets: Partial<
 		PipelineType,
 		(
 			model: ModelDataMinimal,
-			accessToken: string,
 			provider: InferenceProviderOrPolicy,
 			inferenceProviderMapping?: InferenceProviderModelMapping,
 			opts?: InferenceSnippetOptions
@@ -348,13 +343,12 @@ const snippets: Partial<
 
 export function getInferenceSnippets(
 	model: ModelDataMinimal,
-	accessToken: string,
 	provider: InferenceProviderOrPolicy,
 	inferenceProviderMapping?: InferenceProviderModelMapping,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
 	return model.pipeline_tag && model.pipeline_tag in snippets
-		? snippets[model.pipeline_tag]?.(model, accessToken, provider, inferenceProviderMapping, opts) ?? []
+		? snippets[model.pipeline_tag]?.(model, provider, inferenceProviderMapping, opts) ?? []
 		: [];
 }
 
@@ -435,8 +429,8 @@ function replaceAccessTokenPlaceholder(
 	language: InferenceSnippetLanguage,
 	provider: InferenceProviderOrPolicy
 ): string {
-	// If "accessToken" is empty, the snippets are generated with a placeholder.
-	// Once snippets are rendered, we replace the placeholder with code to fetch the access token from an environment variable.
+	// The snippets are generated with a placeholder in place of the access token.
+	// Once snippets are rendered, we replace the placeholder with correct code to fetch the access token from an environment variable.
 
 	// Determine if HF_TOKEN or specific provider token should be used
 	const accessTokenEnvVar =
@@ -453,7 +447,9 @@ function replaceAccessTokenPlaceholder(
 			`"Authorization: Bearer $${accessTokenEnvVar}"` // e.g. "Authorization: Bearer $HF_TOKEN"
 		);
 	} else if (language === "python") {
-		snippet = "import os\n" + snippet;
+		if (snippet.includes(ACCESS_TOKEN_PLACEHOLDER)) {
+			snippet = "import os\n" + snippet;
+		}
 		snippet = snippet.replace(
 			`"${ACCESS_TOKEN_PLACEHOLDER}"`,
 			`os.environ["${accessTokenEnvVar}"]` // e.g. os.environ["HF_TOKEN")

@@ -314,7 +314,6 @@ function generateInferenceSnippet(
 ): InferenceSnippet[] {
 	const allSnippets = snippets.getInferenceSnippets(
 		model,
-		"",
 		provider,
 		{
 			hfModelId: model.id,
