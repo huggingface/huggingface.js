@@ -1,5 +1,5 @@
-import { nextMatch } from "./next-match";
-import { Blake3Hasher } from "@huggingface/blake3-wasm";
+import { nextMatch } from "@huggingface/gearhash-wasm/assembly";
+import { Blake3Hasher } from "@huggingface/blake3-wasm/assembly";
 
 // Constants
 const TARGET_CHUNK_SIZE: usize = 64 * 1024; // 64KB

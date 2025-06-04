@@ -8,14 +8,26 @@
 		"test": "node tests",
 		"prepare": "pnpm run build"
 	},
+	"keywords": [
+		"xet",
+		"chunk",
+		"chunking",
+		"assemblyscript",
+		"assembly",
+		"wasm"
+	],
 	"dependencies": {
-		"@huggingface/blake3-wasm": "workspace:*"
+		"@huggingface/blake3-wasm": "workspace:*",
+		"@huggingface/gearhash-wasm": "workspace:*"
 	},
 	"type": "module",
 	"exports": {
 		".": {
 			"import": "./build/release.js",
 			"types": "./build/release.d.ts"
+		},
+		"./assembly": {
+			"import": "./assembly/index.ts"
 		}
 	},
 	"devDependencies": {

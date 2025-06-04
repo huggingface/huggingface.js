@@ -7,13 +7,7 @@ settings:
 importers:
 
   .:
-    dependencies:
-      '@huggingface/blake3-wasm':
-        specifier: workspace:*
-        version: link:../blake3-wasm
-      '@huggingface/xetchunk-wasm':
-        specifier: workspace:*
-        version: link:../xetchunk-wasm
+    devDependencies:
       assemblyscript:
         specifier: ^0.27.36
         version: 0.27.36

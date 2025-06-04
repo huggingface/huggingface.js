@@ -8,14 +8,10 @@
 		"test": "node tests",
 		"prepare": "pnpm run build"
 	},
-	"dependencies": {
-		"assemblyscript": "^0.27.36",
-		"@huggingface/blake3-wasm": "workspace:*",
-		"@huggingface/xetchunk-wasm": "workspace:*"
-	},
 	"keywords": [
 		"gearhash",
 		"assemblyscript",
+		"assembly",
 		"wasm"
 	],
 	"type": "module",
@@ -23,6 +19,9 @@
 		".": {
 			"import": "./build/release.js",
 			"types": "./build/release.d.ts"
+		},
+		"./assembly": {
+			"import": "./assembly/index.ts"
 		}
 	},
 	"devDependencies": {
