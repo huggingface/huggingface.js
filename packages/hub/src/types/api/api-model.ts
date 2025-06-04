@@ -18,9 +18,7 @@ export interface ApiModelInfo {
 	downloadsAllTime: number;
 	files: string[];
 	gitalyUid: string;
-	inferenceProviderMapping: Partial<
-		Record<string, { providerId: string; status: "live" | "staging"; task: WidgetType }>
-	>;
+	inferenceProviderMapping?: ApiModelInferenceProviderMappingEntry[];
 	lastAuthor: { email: string; user?: string };
 	lastModified: string; // convert to date
 	library_name?: ModelLibraryKey;
@@ -270,4 +268,15 @@ export interface ApiModelMetadata {
 	extra_gated_heading?: string;
 	extra_gated_description?: string;
 	extra_gated_button_content?: string;
+}
+
+export interface ApiModelInferenceProviderMappingEntry {
+	provider: string; // Provider name
+	hf_model_id: string; // ID of the model on the Hugging Face Hub
+	provider_id: string; // ID of the model on the provider's side
+	status: "live" | "staging";
+	task: WidgetType;
+	adapter?: string;
+	adapter_weights_path?: string;
+	type?: "single-file" | "tag-filter";
 }

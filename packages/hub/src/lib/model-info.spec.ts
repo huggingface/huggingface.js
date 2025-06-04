@@ -56,4 +56,20 @@ describe("modelInfo", () => {
 			sha: "f27b190eeac4c2302d24068eabf5e9d6044389ae",
 		});
 	});
+
+	it("should return model info deepseek-ai models with inference provider mapping", async () => {
+		const info = await modelInfo({
+			name: "deepseek-ai/DeepSeek-R1-0528",
+			additionalFields: ["inferenceProviderMapping"],
+		});
+
+		expect(info.inferenceProviderMapping).toBeDefined();
+		expect(info.inferenceProviderMapping).toBeInstanceOf(Array);
+		expect(info.inferenceProviderMapping?.length).toBeGreaterThan(0);
+		info.inferenceProviderMapping?.forEach((item) => {
+			expect(item).toHaveProperty("provider");
+			expect(item).toHaveProperty("hf_model_id", "deepseek-ai/DeepSeek-R1-0528");
+			expect(item).toHaveProperty("provider_id");
+		});
+	});
 });
