@@ -5,6 +5,7 @@ import type { CredentialsParams, PipelineType } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
 import { pick } from "../utils/pick";
+import { normalizeInferenceProviderMapping } from "../utils/normalizeInferenceProviderMapping";
 
 export const MODEL_EXPAND_KEYS = [
 	"pipeline_tag",
@@ -113,8 +114,20 @@ export async function* listModels<
 		const items: ApiModelInfo[] = await res.json();
 
 		for (const item of items) {
+			// Handle inferenceProviderMapping normalization
+			const normalizedItem = { ...item };
+			if (
+				(params?.additionalFields as string[])?.includes("inferenceProviderMapping") &&
+				item.inferenceProviderMapping
+			) {
+				normalizedItem.inferenceProviderMapping = normalizeInferenceProviderMapping(
+					item.id,
+					item.inferenceProviderMapping
+				);
+			}
+
 			yield {
-				...(params?.additionalFields && pick(item, params.additionalFields)),
+				...(params?.additionalFields && pick(normalizedItem, params.additionalFields)),
 				id: item._id,
 				name: item.id,
 				private: item.private,

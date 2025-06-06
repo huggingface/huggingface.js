@@ -1,7 +1,7 @@
 import { HF_HEADER_X_BILL_TO, HF_HUB_URL } from "../config.js";
 import { PACKAGE_NAME, PACKAGE_VERSION } from "../package.js";
 import type { InferenceTask, Options, RequestArgs } from "../types.js";
-import type { InferenceProviderModelMapping } from "./getInferenceProviderMapping.js";
+import type { InferenceProviderMappingEntry } from "./getInferenceProviderMapping.js";
 import { getInferenceProviderMapping } from "./getInferenceProviderMapping.js";
 import type { getProviderHelper } from "./getProviderHelper.js";
 import { isUrl } from "./isUrl.js";
@@ -64,6 +64,7 @@ export async function makeRequestOptions(
 
 	const inferenceProviderMapping = providerHelper.clientSideRoutingOnly
 		? ({
+				provider: provider,
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 				providerId: removeProviderPrefix(maybeModel!, provider),
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -71,7 +72,7 @@ export async function makeRequestOptions(
 				status: "live",
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 				task: task!,
-		  } satisfies InferenceProviderModelMapping)
+		  } satisfies InferenceProviderMappingEntry)
 		: await getInferenceProviderMapping(
 				{
 					modelId: hfModel,
@@ -109,7 +110,7 @@ export function makeRequestOptionsFromResolvedModel(
 		data?: Blob | ArrayBuffer;
 		stream?: boolean;
 	},
-	mapping: InferenceProviderModelMapping | undefined,
+	mapping: InferenceProviderMappingEntry | undefined,
 	options?: Options & {
 		task?: InferenceTask;
 	}

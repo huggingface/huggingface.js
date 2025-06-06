@@ -115,4 +115,23 @@ describe("listModels", () => {
 
 		expect(count).to.equal(10);
 	});
+
+	it("should list deepseek-ai models with inference provider mapping", async () => {
+		let count = 0;
+		for await (const entry of listModels({
+			search: { owner: "deepseek-ai" },
+			additionalFields: ["inferenceProviderMapping"],
+			limit: 1,
+		})) {
+			count++;
+			expect(entry.inferenceProviderMapping).to.be.an("array").that.is.not.empty;
+			for (const item of entry.inferenceProviderMapping ?? []) {
+				expect(item).to.have.property("provider").that.is.a("string").and.is.not.empty;
+				expect(item).to.have.property("hfModelId").that.is.a("string").and.is.not.empty;
+				expect(item).to.have.property("providerId").that.is.a("string").and.is.not.empty;
+			}
+		}
+
+		expect(count).to.equal(1);
+	});
 });
