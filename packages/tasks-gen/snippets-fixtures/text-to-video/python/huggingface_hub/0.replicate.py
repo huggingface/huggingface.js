@@ -1,8 +1,9 @@
+import os
 from huggingface_hub import InferenceClient
 
 client = InferenceClient(
     provider="replicate",
-    api_key="api_token",
+    api_key=os.environ["HF_TOKEN"],
 )
 
 video = client.text_to_video(
