@@ -3,7 +3,7 @@ async function query(data) {
 		"https://router.huggingface.co/hf-inference/models/facebook/musicgen-small",
 		{
 			headers: {
-				Authorization: "Bearer api_token",
+				Authorization: `Bearer ${process.env.HF_TOKEN}`,
 				"Content-Type": "application/json",
 			},
 			method: "POST",

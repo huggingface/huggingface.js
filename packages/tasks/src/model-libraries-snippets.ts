@@ -115,7 +115,7 @@ export const bm25s = (model: ModelData): string[] => [
 retriever = BM25HF.load_from_hub("${model.id}")`,
 ];
 
-export const chatterbox = (model: ModelData): string[] => [
+export const chatterbox = (): string[] => [
 	`# pip install chatterbox-tts
 import torchaudio as ta
 from chatterbox.tts import ChatterboxTTS

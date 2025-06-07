@@ -1,8 +1,9 @@
+import os
 import requests
 
 API_URL = "https://router.huggingface.co/hf-inference/models/openai/whisper-large-v3-turbo"
 headers = {
-    "Authorization": "Bearer api_token",
+    "Authorization": f"Bearer {os.environ['HF_TOKEN']}",
 }
 
 def query(filename):
