@@ -679,13 +679,9 @@ model.score("query", ["doc1", "doc2", "doc3"])`,
 export const llama_cpp_python = (model: ModelData): string[] => {
 	const snippets = [
 		`# !pip install llama-cpp-python
-		
+
 from llama_cpp import Llama
 
-# Download model from Hugging Face Hub
-model_path = "hf://${model.id}"
-
-# Load model
 llm = Llama.from_pretrained(
 	repo_id="${model.id}",
 	filename="{{GGUF_FILE}}",
