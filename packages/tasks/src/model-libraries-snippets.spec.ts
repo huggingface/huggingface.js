@@ -39,7 +39,9 @@ llm.create_chat_completion(
 		};
 		const snippet = llama_cpp_python(model);
 
-		expect(snippet.join("\n")).toEqual(`from llama_cpp import Llama
+		expect(snippet.join("\n")).toEqual(`# !pip install llama-cpp-python
+
+from llama_cpp import Llama
 
 llm = Llama.from_pretrained(
 	repo_id="mlabonne/gemma-2b-GGUF",
