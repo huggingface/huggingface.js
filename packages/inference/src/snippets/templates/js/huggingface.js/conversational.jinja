@@ -4,7 +4,7 @@ const client = new InferenceClient("{{ accessToken }}");
 
 const chatCompletion = await client.chatCompletion({
 {% if endpointUrl %}
-    endpointUrl: "{{ baseUrl }}",
+    endpointUrl: "{{ endpointUrl }}",
 {% endif %}
     provider: "{{ provider }}",
     model: "{{ model.id }}",

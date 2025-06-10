@@ -4,7 +4,7 @@ const client = new InferenceClient("{{ accessToken }}");
 
 const image = await client.textToImage({
 {% if endpointUrl %}
-    endpointUrl: "{{ baseUrl }}",
+    endpointUrl: "{{ endpointUrl }}",
 {% endif %}
     provider: "{{ provider }}",
     model: "{{ model.id }}",

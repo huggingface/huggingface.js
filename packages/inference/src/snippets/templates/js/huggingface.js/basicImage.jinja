@@ -6,7 +6,7 @@ const data = fs.readFileSync({{inputs.asObj.inputs}});
 
 const output = await client.{{ methodName }}({
 {% if endpointUrl %}
-    endpointUrl: "{{ baseUrl }}",
+    endpointUrl: "{{ endpointUrl }}",
 {% endif %}
 	data,
 	model: "{{ model.id }}",
