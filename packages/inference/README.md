@@ -651,9 +651,10 @@ You can use any Chat Completion API-compatible provider with the `chatCompletion
 ```typescript
 // Chat Completion Example
 const MISTRAL_KEY = process.env.MISTRAL_KEY;
-const hf = new InferenceClient(MISTRAL_KEY);
-const ep = hf.endpoint("https://api.mistral.ai");
-const stream = ep.chatCompletionStream({
+const hf = new InferenceClient(MISTRAL_KEY, {
+  endpointUrl: "https://api.mistral.ai",
+});
+const stream = hf.chatCompletionStream({
   model: "mistral-tiny",
   messages: [{ role: "user", content: "Complete the equation one + one = , just the answer" }],
 });
