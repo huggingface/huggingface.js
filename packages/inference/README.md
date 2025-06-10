@@ -62,6 +62,7 @@ Currently, we support the following providers:
 - [Blackforestlabs](https://blackforestlabs.ai)
 - [Cohere](https://cohere.com)
 - [Cerebras](https://cerebras.ai/)
+- [CentML](https://centml.ai)
 - [Groq](https://groq.com)
 
 To send requests to a third-party provider, you have to pass the `provider` parameter to the inference function. The default value of the `provider` parameter is "auto", which will select the first of the providers available for the model, sorted by your preferred order in https://hf.co/settings/inference-providers.
@@ -95,6 +96,7 @@ Only a subset of models are supported when requesting third-party providers. You
 - [Together supported models](https://huggingface.co/api/partners/together/models)
 - [Cohere supported models](https://huggingface.co/api/partners/cohere/models)
 - [Cerebras supported models](https://huggingface.co/api/partners/cerebras/models)
+- [CentML supported models](https://huggingface.co/api/partners/centml/models)
 - [Groq supported models](https://console.groq.com/docs/models)
 - [Novita AI supported models](https://huggingface.co/api/partners/novita/models)
 
