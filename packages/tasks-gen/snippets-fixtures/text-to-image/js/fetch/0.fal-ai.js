@@ -1,9 +1,9 @@
 async function query(data) {
 	const response = await fetch(
-		"https://fal.run/<fal-ai alias for black-forest-labs/FLUX.1-schnell>",
+		"https://router.huggingface.co/fal-ai/<fal-ai alias for black-forest-labs/FLUX.1-schnell>",
 		{
 			headers: {
-				Authorization: `Key ${process.env.FAL_AI_API_KEY}`,
+				Authorization: `Bearer ${process.env.HF_TOKEN}`,
 				"Content-Type": "application/json",
 			},
 			method: "POST",
