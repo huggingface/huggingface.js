@@ -352,6 +352,7 @@ function generateInferenceSnippet(
 		model,
 		provider,
 		{
+			provider: provider,
 			hfModelId: model.id,
 			providerId: provider === "hf-inference" ? model.id : `<${provider} alias for ${model.id}>`,
 			status: "live",
