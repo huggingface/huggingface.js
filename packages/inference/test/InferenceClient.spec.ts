@@ -38,174 +38,203 @@ describe.skip("InferenceClient", () => {
 			const hf = new InferenceClient(env.HF_TOKEN);
 			HARDCODED_MODEL_INFERENCE_MAPPING["hf-inference"] = {
 				"google-bert/bert-base-uncased": {
+					provider: "hf-inference",
 					providerId: "google-bert/bert-base-uncased",
 					hfModelId: "google-bert/bert-base-uncased",
 					task: "fill-mask",
 					status: "live",
 				},
 				"google/pegasus-xsum": {
+					provider: "hf-inference",
 					providerId: "google/pegasus-xsum",
 					hfModelId: "google/pegasus-xsum",
 					task: "summarization",
 					status: "live",
 				},
 				"deepset/roberta-base-squad2": {
+					provider: "hf-inference",
 					providerId: "deepset/roberta-base-squad2",
 					hfModelId: "deepset/roberta-base-squad2",
 					task: "question-answering",
 					status: "live",
 				},
 				"google/tapas-base-finetuned-wtq": {
+					provider: "hf-inference",
 					providerId: "google/tapas-base-finetuned-wtq",
 					hfModelId: "google/tapas-base-finetuned-wtq",
 					task: "table-question-answering",
 					status: "live",
 				},
 				"mistralai/Mistral-7B-Instruct-v0.2": {
+					provider: "hf-inference",
 					providerId: "mistralai/Mistral-7B-Instruct-v0.2",
 					hfModelId: "mistralai/Mistral-7B-Instruct-v0.2",
 					task: "text-generation",
 					status: "live",
 				},
 				"impira/layoutlm-document-qa": {
+					provider: "hf-inference",
 					providerId: "impira/layoutlm-document-qa",
 					hfModelId: "impira/layoutlm-document-qa",
 					task: "document-question-answering",
 					status: "live",
 				},
 				"naver-clova-ix/donut-base-finetuned-docvqa": {
+					provider: "hf-inference",
 					providerId: "naver-clova-ix/donut-base-finetuned-docvqa",
 					hfModelId: "naver-clova-ix/donut-base-finetuned-docvqa",
 					task: "document-question-answering",
 					status: "live",
 				},
 				"google/tapas-large-finetuned-wtq": {
+					provider: "hf-inference",
 					providerId: "google/tapas-large-finetuned-wtq",
 					hfModelId: "google/tapas-large-finetuned-wtq",
 					task: "table-question-answering",
 					status: "live",
 				},
 				"facebook/detr-resnet-50": {
+					provider: "hf-inference",
 					providerId: "facebook/detr-resnet-50",
 					hfModelId: "facebook/detr-resnet-50",
 					task: "object-detection",
 					status: "live",
 				},
 				"facebook/detr-resnet-50-panoptic": {
+					provider: "hf-inference",
 					providerId: "facebook/detr-resnet-50-panoptic",
 					hfModelId: "facebook/detr-resnet-50-panoptic",
 					task: "image-segmentation",
 					status: "live",
 				},
 				"facebook/wav2vec2-large-960h-lv60-self": {
+					provider: "hf-inference",
 					providerId: "facebook/wav2vec2-large-960h-lv60-self",
 					hfModelId: "facebook/wav2vec2-large-960h-lv60-self",
 					task: "automatic-speech-recognition",
 					status: "live",
 				},
 				"superb/hubert-large-superb-er": {
+					provider: "hf-inference",
 					providerId: "superb/hubert-large-superb-er",
 					hfModelId: "superb/hubert-large-superb-er",
 					task: "audio-classification",
 					status: "live",
 				},
 				"speechbrain/sepformer-wham": {
+					provider: "hf-inference",
 					providerId: "speechbrain/sepformer-wham",
 					hfModelId: "speechbrain/sepformer-wham",
 					task: "audio-to-audio",
 					status: "live",
 				},
 				"espnet/kan-bayashi_ljspeech_vits": {
+					provider: "hf-inference",
 					providerId: "espnet/kan-bayashi_ljspeech_vits",
 					hfModelId: "espnet/kan-bayashi_ljspeech_vits",
 					task: "text-to-speech",
 					status: "live",
 				},
 				"sentence-transformers/paraphrase-xlm-r-multilingual-v1": {
+					provider: "hf-inference",
 					providerId: "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
 					hfModelId: "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
 					task: "sentence-similarity",
 					status: "live",
 				},
 				"sentence-transformers/distilbert-base-nli-mean-tokens": {
+					provider: "hf-inference",
 					providerId: "sentence-transformers/distilbert-base-nli-mean-tokens",
 					hfModelId: "sentence-transformers/distilbert-base-nli-mean-tokens",
 					task: "feature-extraction",
 					status: "live",
 				},
 				"facebook/bart-base": {
+					provider: "hf-inference",
 					providerId: "facebook/bart-base",
 					hfModelId: "facebook/bart-base",
 					task: "feature-extraction",
 					status: "live",
 				},
 				"facebook/bart-large-mnli": {
+					provider: "hf-inference",
 					providerId: "facebook/bart-large-mnli",
 					hfModelId: "facebook/bart-large-mnli",
 					task: "zero-shot-classification",
 					status: "live",
 				},
 				"facebook/bart-large-cnn": {
+					provider: "hf-inference",
 					providerId: "facebook/bart-large-cnn",
 					hfModelId: "facebook/bart-large-cnn",
 					task: "summarization",
 					status: "live",
 				},
 				"facebook/bart-large-xsum": {
+					provider: "hf-inference",
 					providerId: "facebook/bart-large-xsum",
 					hfModelId: "facebook/bart-large-xsum",
 					task: "summarization",
 					status: "live",
 				},
 				"stabilityai/stable-diffusion-2": {
+					provider: "hf-inference",
 					providerId: "stabilityai/stable-diffusion-2",
 					hfModelId: "stabilityai/stable-diffusion-2",
 					task: "text-to-image",
 					status: "live",
 				},
 				"lllyasviel/sd-controlnet-canny": {
+					provider: "hf-inference",
 					providerId: "lllyasviel/sd-controlnet-canny",
 					hfModelId: "lllyasviel/sd-controlnet-canny",
 					task: "image-to-image",
 					status: "live",
 				},
 				"lllyasviel/sd-controlnet-depth": {
+					provider: "hf-inference",
 					providerId: "lllyasviel/sd-controlnet-depth",
 					hfModelId: "lllyasviel/sd-controlnet-depth",
 					task: "image-to-image",
 					status: "live",
 				},
 				"t5-base": {
+					provider: "hf-inference",
 					providerId: "t5-base",
 					hfModelId: "t5-base",
 					task: "translation",
 					status: "live",
 				},
 				"openai/clip-vit-large-patch14-336": {
+					provider: "hf-inference",
 					providerId: "openai/clip-vit-large-patch14-336",
 					hfModelId: "openai/clip-vit-large-patch14-336",
 					task: "zero-shot-image-classification",
 					status: "live",
 				},
 				"google/vit-base-patch16-224": {
+					provider: "hf-inference",
 					providerId: "google/vit-base-patch16-224",
 					hfModelId: "google/vit-base-patch16-224",
 					task: "image-classification",
 					status: "live",
 				},
 				"dandelin/vilt-b32-finetuned-vqa": {
+					provider: "hf-inference",
 					providerId: "dandelin/vilt-b32-finetuned-vqa",
 					hfModelId: "dandelin/vilt-b32-finetuned-vqa",
 					task: "visual-question-answering",
 					status: "live",
 				},
 				"dbmdz/bert-large-cased-finetuned-conll03-english": {
+					provider: "hf-inference",
 					providerId: "dbmdz/bert-large-cased-finetuned-conll03-english",
 					hfModelId: "dbmdz/bert-large-cased-finetuned-conll03-english",
 					task: "token-classification",
 					status: "live",
 				},
 				"nlpconnect/vit-gpt2-image-captioning": {
+					provider: "hf-inference",
 					providerId: "nlpconnect/vit-gpt2-image-captioning",
 					hfModelId: "nlpconnect/vit-gpt2-image-captioning",
 					task: "image-to-text",
@@ -1058,6 +1087,7 @@ describe.skip("InferenceClient", () => {
 
 			HARDCODED_MODEL_INFERENCE_MAPPING["fal-ai"] = {
 				"openfree/flux-chatgpt-ghibli-lora": {
+					provider: "fal-ai",
 					hfModelId: "openfree/flux-chatgpt-ghibli-lora",
 					providerId: "fal-ai/flux-lora",
 					status: "live",
@@ -1066,6 +1096,7 @@ describe.skip("InferenceClient", () => {
 					adapterWeightsPath: "flux-chatgpt-ghibli-lora.safetensors",
 				},
 				"nerijs/pixel-art-xl": {
+					provider: "fal-ai",
 					hfModelId: "nerijs/pixel-art-xl",
 					providerId: "fal-ai/lora",
 					status: "live",
@@ -1127,12 +1158,14 @@ describe.skip("InferenceClient", () => {
 		() => {
 			HARDCODED_MODEL_INFERENCE_MAPPING["featherless-ai"] = {
 				"meta-llama/Llama-3.1-8B": {
+					provider: "featherless-ai",
 					providerId: "meta-llama/Meta-Llama-3.1-8B",
 					hfModelId: "meta-llama/Llama-3.1-8B",
 					task: "text-generation",
 					status: "live",
 				},
 				"meta-llama/Llama-3.1-8B-Instruct": {
+					provider: "featherless-ai",
 					providerId: "meta-llama/Meta-Llama-3.1-8B-Instruct",
 					hfModelId: "meta-llama/Llama-3.1-8B-Instruct",
 					task: "text-generation",
@@ -1411,24 +1444,28 @@ describe.skip("InferenceClient", () => {
 
 			HARDCODED_MODEL_INFERENCE_MAPPING.nebius = {
 				"meta-llama/Llama-3.1-8B-Instruct": {
+					provider: "nebius",
 					hfModelId: "meta-llama/Llama-3.1-8B-Instruct",
 					providerId: "meta-llama/Meta-Llama-3.1-8B-Instruct",
 					status: "live",
 					task: "conversational",
 				},
 				"meta-llama/Llama-3.1-70B-Instruct": {
+					provider: "nebius",
 					hfModelId: "meta-llama/Llama-3.1-8B-Instruct",
 					providerId: "meta-llama/Meta-Llama-3.1-70B-Instruct",
 					status: "live",
 					task: "conversational",
 				},
 				"black-forest-labs/FLUX.1-schnell": {
+					provider: "nebius",
 					hfModelId: "meta-llama/Llama-3.1-8B-Instruct",
 					providerId: "black-forest-labs/flux-schnell",
 					status: "live",
 					task: "text-to-image",
 				},
 				"BAAI/bge-multilingual-gemma2": {
+					provider: "nebius",
 					providerId: "BAAI/bge-multilingual-gemma2",
 					hfModelId: "BAAI/bge-multilingual-gemma2",
 					status: "live",
@@ -1507,6 +1544,7 @@ describe.skip("InferenceClient", () => {
 
 			HARDCODED_MODEL_INFERENCE_MAPPING["fireworks-ai"] = {
 				"deepseek-ai/DeepSeek-R1": {
+					provider: "fireworks-ai",
 					hfModelId: "deepseek-ai/DeepSeek-R1",
 					providerId: "accounts/fireworks/models/deepseek-r1",
 					status: "live",
@@ -1557,24 +1595,28 @@ describe.skip("InferenceClient", () => {
 		() => {
 			HARDCODED_MODEL_INFERENCE_MAPPING["hyperbolic"] = {
 				"meta-llama/Llama-3.2-3B-Instruct": {
+					provider: "hyperbolic",
 					hfModelId: "meta-llama/Llama-3.2-3B-Instruct",
 					providerId: "meta-llama/Llama-3.2-3B-Instruct",
 					status: "live",
 					task: "conversational",
 				},
 				"meta-llama/Llama-3.3-70B-Instruct": {
+					provider: "hyperbolic",
 					hfModelId: "meta-llama/Llama-3.3-70B-Instruct",
 					providerId: "meta-llama/Llama-3.3-70B-Instruct",
 					status: "live",
 					task: "conversational",
 				},
 				"stabilityai/stable-diffusion-2": {
+					provider: "hyperbolic",
 					hfModelId: "stabilityai/stable-diffusion-2",
 					providerId: "SD2",
 					status: "live",
 					task: "text-to-image",
 				},
 				"meta-llama/Llama-3.1-405B-FP8": {
+					provider: "hyperbolic",
 					hfModelId: "meta-llama/Llama-3.1-405B-FP8",
 					providerId: "meta-llama/Llama-3.1-405B-FP8",
 					status: "live",
@@ -1658,12 +1700,14 @@ describe.skip("InferenceClient", () => {
 
 			HARDCODED_MODEL_INFERENCE_MAPPING["novita"] = {
 				"meta-llama/llama-3.1-8b-instruct": {
+					provider: "novita",
 					hfModelId: "meta-llama/llama-3.1-8b-instruct",
 					providerId: "meta-llama/llama-3.1-8b-instruct",
 					status: "live",
 					task: "conversational",
 				},
 				"deepseek/deepseek-r1-distill-qwen-14b": {
+					provider: "novita",
 					hfModelId: "deepseek/deepseek-r1-distill-qwen-14b",
 					providerId: "deepseek/deepseek-r1-distill-qwen-14b",
 					status: "live",
@@ -1713,6 +1757,7 @@ describe.skip("InferenceClient", () => {
 		() => {
 			HARDCODED_MODEL_INFERENCE_MAPPING["black-forest-labs"] = {
 				"black-forest-labs/FLUX.1-dev": {
+					provider: "black-forest-labs",
 					hfModelId: "black-forest-labs/FLUX.1-dev",
 					providerId: "flux-dev",
 					status: "live",
@@ -1766,12 +1811,14 @@ describe.skip("InferenceClient", () => {
 
 			HARDCODED_MODEL_INFERENCE_MAPPING["cohere"] = {
 				"CohereForAI/c4ai-command-r7b-12-2024": {
+					provider: "cohere",
 					hfModelId: "CohereForAI/c4ai-command-r7b-12-2024",
 					providerId: "command-r7b-12-2024",
 					status: "live",
 					task: "conversational",
 				},
 				"CohereForAI/aya-expanse-8b": {
+					provider: "cohere",
 					hfModelId: "CohereForAI/aya-expanse-8b",
 					providerId: "c4ai-aya-expanse-8b",
 					status: "live",
@@ -1823,6 +1870,7 @@ describe.skip("InferenceClient", () => {
 
 			HARDCODED_MODEL_INFERENCE_MAPPING["cerebras"] = {
 				"meta-llama/llama-3.1-8b-instruct": {
+					provider: "cerebras",
 					hfModelId: "meta-llama/llama-3.1-8b-instruct",
 					providerId: "llama3.1-8b",
 					status: "live",
@@ -1874,12 +1922,14 @@ describe.skip("InferenceClient", () => {
 
 			HARDCODED_MODEL_INFERENCE_MAPPING["nscale"] = {
 				"meta-llama/Llama-3.1-8B-Instruct": {
+					provider: "nscale",
 					hfModelId: "meta-llama/Llama-3.1-8B-Instruct",
 					providerId: "nscale",
 					status: "live",
 					task: "conversational",
 				},
 				"black-forest-labs/FLUX.1-schnell": {
+					provider: "nscale",
 					hfModelId: "black-forest-labs/FLUX.1-schnell",
 					providerId: "flux-schnell",
 					status: "live",
@@ -1935,6 +1985,7 @@ describe.skip("InferenceClient", () => {
 
 			HARDCODED_MODEL_INFERENCE_MAPPING["groq"] = {
 				"meta-llama/Llama-3.3-70B-Instruct": {
+					provider: "groq",
 					hfModelId: "meta-llama/Llama-3.3-70B-Instruct",
 					providerId: "llama-3.3-70b-versatile",
 					status: "live",
@@ -1986,6 +2037,7 @@ describe.skip("InferenceClient", () => {
 
 			HARDCODED_MODEL_INFERENCE_MAPPING["ovhcloud"] = {
 				"meta-llama/llama-3.1-8b-instruct": {
+					provider: "ovhcloud",
 					hfModelId: "meta-llama/llama-3.1-8b-instruct",
 					providerId: "Llama-3.1-8B-Instruct",
 					status: "live",
