@@ -1023,8 +1023,8 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.voicecraft,
 	},
 	vui: {
-		prettyLabel: "VUI",
-		repoName: "VUI",
+		prettyLabel: "Vui",
+		repoName: "Vui",
 		repoUrl: "https://github.com/vui-ai/vui",
 		countDownloads: `path_extension:"pt"`,
 		snippets: snippets.vui,
