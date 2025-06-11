@@ -130,6 +130,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"llm_config.json"`,
 	},
+	"seedvr-models": {
+		prettyLabel: "SeedVR",
+		repoName: "SeedVR",
+		repoUrl: "https://github.com/ByteDance-Seed/SeedVR/",
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
+	},
 	ben2: {
 		prettyLabel: "BEN2",
 		repoName: "BEN2",
