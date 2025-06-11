@@ -130,13 +130,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"llm_config.json"`,
 	},
-	"seedvr-models": {
-		prettyLabel: "SeedVR",
-		repoName: "SeedVR",
-		repoUrl: "https://github.com/ByteDance-Seed/SeedVR/",
-		filter: false,
-		countDownloads: `path_extension:"pth"`,
-	},
 	ben2: {
 		prettyLabel: "BEN2",
 		repoName: "BEN2",
@@ -812,6 +805,34 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/facebookresearch/sapiens",
 		filter: false,
 		countDownloads: `path_extension:"pt2" OR path_extension:"pth" OR path_extension:"onnx"`,
+	},
+	"seedvr-3b": {
+		prettyLabel: "SeedVR-3B",
+		repoName: "SeedVR-3B",
+		repoUrl: "https://github.com/ByteDance-Seed/SeedVR/",
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
+	},
+	"seedvr-7b": {
+		prettyLabel: "SeedVR-7B",
+		repoName: "SeedVR-7B",
+		repoUrl: "https://github.com/ByteDance-Seed/SeedVR/",
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
+	},
+	"seedvr2-3b": {
+		prettyLabel: "SeedVR2-3B",
+		repoName: "SeedVR2-3B",
+		repoUrl: "https://github.com/ByteDance-Seed/SeedVR/",
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
+	},
+	"seedvr2-7b": {
+		prettyLabel: "SeedVR2-7B",
+		repoName: "SeedVR2-7B",
+		repoUrl: "https://github.com/ByteDance-Seed/SeedVR/",
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
 	},
 	"sentence-transformers": {
 		prettyLabel: "sentence-transformers",
