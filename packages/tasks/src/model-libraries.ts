@@ -518,7 +518,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "LiteRT-LM",
 		repoUrl: "https://github.com/google-ai-edge/LiteRT-LM",
 		filter: false,
-		countDownloads: `path_extension:"litertlm"`
+		countDownloads: `path_extension:"litertlm"`,
 	},
 	liveportrait: {
 		prettyLabel: "LivePortrait",
