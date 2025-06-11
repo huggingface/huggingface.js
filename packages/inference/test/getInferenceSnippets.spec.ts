@@ -105,13 +105,13 @@ describe("getInferenceSnippets", () => {
 			// Should contain textGeneration method for JS client
 			const jsSnippets = snippets.filter((s) => s.language === "js");
 			expect(jsSnippets.length).toBeGreaterThan(0);
-			
+
 			// Verify content actually contains textGeneration method
-			const hasTextGenMethod = jsSnippets.some((snippet) => 
-				snippet.content.includes('textGeneration') || snippet.content.includes('text-generation')
+			const hasTextGenMethod = jsSnippets.some(
+				(snippet) => snippet.content.includes("textGeneration") || snippet.content.includes("text-generation")
 			);
 			expect(hasTextGenMethod).toBe(true);
-			
+
 			// Should include the model ID
 			const hasModelId = snippets.some((snippet) => snippet.content.includes(mockTextGenerationModel.id));
 			expect(hasModelId).toBe(true);
@@ -126,11 +126,11 @@ describe("getInferenceSnippets", () => {
 				(s) => s.content.includes("messages") || s.content.includes("chat") || s.content.includes("conversation")
 			);
 			expect(hasConversationalContent).toBe(true);
-			
+
 			// Should include the conversational model ID
 			const hasModelId = snippets.some((snippet) => snippet.content.includes(mockConversationalModel.id));
 			expect(hasModelId).toBe(true);
-			
+
 			// Should use conversational template rather than basic text-generation
 			const hasConversationalStructure = snippets.some((snippet) => {
 				const content = snippet.content;
@@ -147,16 +147,16 @@ describe("getInferenceSnippets", () => {
 			// Should contain image-related content
 			const hasImageContent = snippets.some((s) => s.content.includes("image") || s.content.includes("data"));
 			expect(hasImageContent).toBe(true);
-			
+
 			// Should include the model ID
 			const hasModelId = snippets.some((snippet) => snippet.content.includes(mockImageClassificationModel.id));
 			expect(hasModelId).toBe(true);
-			
+
 			// JS snippets should use imageClassification method
 			const jsSnippets = snippets.filter((s) => s.language === "js");
 			if (jsSnippets.length > 0) {
-				const hasImageClassificationMethod = jsSnippets.some((snippet) => 
-					snippet.content.includes('imageClassification')
+				const hasImageClassificationMethod = jsSnippets.some((snippet) =>
+					snippet.content.includes("imageClassification")
 				);
 				expect(hasImageClassificationMethod).toBe(true);
 			}
@@ -441,20 +441,22 @@ describe("getInferenceSnippets", () => {
 			});
 
 			expect(snippets.length).toBeGreaterThan(0);
-			
+
 			// Verify the actual content includes the messages and parameters
 			const hasMessagesContent = snippets.some((snippet) => {
 				const content = snippet.content;
-				return content.includes('"role": "user"') && 
-					   content.includes('"content": "Hello"') && 
-					   content.includes('"role": "assistant"') && 
-					   content.includes('"content": "Hi there!"');
+				return (
+					content.includes('"role": "user"') &&
+					content.includes('"content": "Hello"') &&
+					content.includes('"role": "assistant"') &&
+					content.includes('"content": "Hi there!"')
+				);
 			});
 			expect(hasMessagesContent).toBe(true);
-			
+
 			// Verify temperature and max_tokens are included
-			const hasTemperature = snippets.some((snippet) => snippet.content.includes('temperature'));
-			const hasMaxTokens = snippets.some((snippet) => snippet.content.includes('max_tokens'));
+			const hasTemperature = snippets.some((snippet) => snippet.content.includes("temperature"));
+			const hasMaxTokens = snippets.some((snippet) => snippet.content.includes("max_tokens"));
 			expect(hasTemperature).toBe(true);
 			expect(hasMaxTokens).toBe(true);
 		});
@@ -512,27 +514,19 @@ describe("getInferenceSnippets", () => {
 		});
 
 		it("should generate different snippets for streaming vs non-streaming", () => {
-			const streamingSnippets = getInferenceSnippets(
-				mockConversationalModel,
-				"auto",
-				undefined,
-				{ streaming: true }
-			);
-			
-			const nonStreamingSnippets = getInferenceSnippets(
-				mockConversationalModel,
-				"auto",
-				undefined,
-				{ streaming: false }
-			);
+			const streamingSnippets = getInferenceSnippets(mockConversationalModel, "auto", undefined, { streaming: true });
+
+			const nonStreamingSnippets = getInferenceSnippets(mockConversationalModel, "auto", undefined, {
+				streaming: false,
+			});
 
 			expect(streamingSnippets.length).toBeGreaterThan(0);
 			expect(nonStreamingSnippets.length).toBeGreaterThan(0);
 
 			// Content should actually be different for streaming vs non-streaming
-			const streamingContent = streamingSnippets.map(s => s.content).join('\n');
-			const nonStreamingContent = nonStreamingSnippets.map(s => s.content).join('\n');
-			
+			const streamingContent = streamingSnippets.map((s) => s.content).join("\n");
+			const nonStreamingContent = nonStreamingSnippets.map((s) => s.content).join("\n");
+
 			// Should not be identical (though this is a simple check)
 			expect(streamingContent).not.toBe(nonStreamingContent);
 		});
@@ -552,36 +546,33 @@ describe("getInferenceSnippets", () => {
 			// Should structure inputs with question and context parameters
 			const hasProperQAStructure = snippets.some((snippet) => {
 				// Check for either method parameters (question=, context=) or object properties ("question", "context")
-				return (snippet.content.includes('question=') && snippet.content.includes('context=')) ||
-					   (snippet.content.includes('"question"') && snippet.content.includes('"context"'));
+				return (
+					(snippet.content.includes("question=") && snippet.content.includes("context=")) ||
+					(snippet.content.includes('"question"') && snippet.content.includes('"context"'))
+				);
 			});
 			expect(hasProperQAStructure).toBe(true);
-			
+
 			// Should include model ID
 			const hasModelId = snippets.some((snippet) => snippet.content.includes(qaModel.id));
 			expect(hasModelId).toBe(true);
 		});
 
 		it("should include authentication patterns correctly", () => {
-			const snippets = getInferenceSnippets(
-				mockTextGenerationModel,
-				"hf-inference", 
-				undefined,
-				{ accessToken: "hf_explicit_token" }
-			);
+			const snippets = getInferenceSnippets(mockTextGenerationModel, "hf-inference", undefined, {
+				accessToken: "hf_explicit_token",
+			});
 
 			expect(snippets.length).toBeGreaterThan(0);
 
 			// Should use the explicit token when provided
-			const hasExplicitToken = snippets.some((snippet) => 
-				snippet.content.includes("hf_explicit_token")
-			);
+			const hasExplicitToken = snippets.some((snippet) => snippet.content.includes("hf_explicit_token"));
 			expect(hasExplicitToken).toBe(true);
 		});
 
 		it("should generate valid code that compiles/parses", () => {
 			const snippets = getInferenceSnippets(mockTextGenerationModel, "auto");
-			
+
 			snippets.forEach((snippet) => {
 				switch (snippet.language) {
 					case "js":
@@ -734,6 +725,164 @@ describe("getInferenceSnippets", () => {
 		});
 	});
 
+	describe("Response format support", () => {
+		it("should include response_format in conversational snippets", () => {
+			const responseFormat = {
+				type: "json_schema",
+				json_schema: {
+					schema: {
+						type: "object",
+						properties: {
+							sentiment: {
+								type: "string",
+							},
+						},
+						required: ["sentiment"],
+						additionalProperties: true,
+					},
+					strict: false,
+				},
+			};
+
+			const snippets = getInferenceSnippets(mockConversationalModel, "auto", undefined, {
+				response_format: responseFormat,
+				messages: [
+					{ role: "user", content: "Hello" },
+					{ role: "assistant", content: "Hi there!" },
+				],
+				temperature: 1.1,
+				top_p: 0.7,
+			});
+
+			expect(snippets.length).toBeGreaterThan(0);
+
+			// Should include response_format in the generated snippets
+			const hasResponseFormat = snippets.some(
+				(snippet) => snippet.content.includes("response_format") && snippet.content.includes("json_schema")
+			);
+			expect(hasResponseFormat).toBe(true);
+
+			// Should include other parameters too
+			const hasTemperature = snippets.some((snippet) => snippet.content.includes("1.1"));
+			const hasTopP = snippets.some((snippet) => snippet.content.includes("0.7"));
+			expect(hasTemperature).toBe(true);
+			expect(hasTopP).toBe(true);
+		});
+
+		it("should include response_format in text-generation snippets", () => {
+			const textGenerationModel: ModelDataMinimal = {
+				id: "gpt2",
+				pipeline_tag: "text-generation",
+				tags: [], // Not conversational
+				inference: "true",
+			};
+
+			const responseFormat = {
+				type: "json_schema",
+				json_schema: {
+					schema: {
+						type: "object",
+						properties: {
+							result: {
+								type: "string",
+							},
+						},
+						required: ["result"],
+					},
+				},
+			};
+
+			const snippets = getInferenceSnippets(textGenerationModel, "auto", undefined, {
+				response_format: responseFormat,
+				temperature: 0.8,
+			});
+
+			expect(snippets.length).toBeGreaterThan(0);
+
+			// Should include response_format in parameters
+			const hasResponseFormat = snippets.some(
+				(snippet) => snippet.content.includes("response_format") && snippet.content.includes("json_schema")
+			);
+			expect(hasResponseFormat).toBe(true);
+
+			// Should include temperature in parameters too
+			const hasTemperature = snippets.some((snippet) => snippet.content.includes("0.8"));
+			expect(hasTemperature).toBe(true);
+		});
+
+		it("should use Python boolean syntax in Python snippets", () => {
+			const responseFormat = {
+				type: "json_schema",
+				json_schema: {
+					schema: {
+						type: "object",
+						properties: {
+							valid: {
+								type: "boolean",
+							},
+						},
+						required: ["valid"],
+						additionalProperties: false,
+					},
+					strict: true,
+				},
+			};
+
+			const snippets = getInferenceSnippets(mockConversationalModel, "hf-inference", undefined, {
+				response_format: responseFormat,
+				messages: [{ role: "user", content: "Hello" }],
+			});
+
+			expect(snippets.length).toBeGreaterThan(0);
+			console.log(snippets);
+
+			// Python snippets should use True/False, not true/false
+			const pythonSnippets = snippets.filter((s) => s.language === "python");
+			expect(pythonSnippets.length).toBeGreaterThan(0);
+
+			const pythonClientSnippets = pythonSnippets.filter(
+				(snippet) => snippet.client === "huggingface_hub" || snippet.client === "openai"
+			);
+			expect(pythonClientSnippets.length).toBeGreaterThan(0);
+
+			pythonClientSnippets.forEach((snippet) => {
+				// Should use Python boolean syntax
+				expect(snippet.content).toContain('"additionalProperties": False');
+				expect(snippet.content).toContain('"strict": True');
+				// Should NOT contain JavaScript boolean syntax in Python client calls
+				expect(snippet.content).not.toMatch(/additionalProperties": false[^,}]/);
+				expect(snippet.content).not.toMatch(/strict": true[^,}]/);
+			});
+
+			// But requests client should still use JSON format (JavaScript booleans)
+			const requestsSnippets = pythonSnippets.filter((snippet) => snippet.client === "requests");
+			if (requestsSnippets.length > 0) {
+				requestsSnippets.forEach((snippet) => {
+					// Should use JSON boolean syntax for requests payload
+					expect(snippet.content).toContain('"additionalProperties": false');
+					expect(snippet.content).toContain('"strict": true');
+				});
+			}
+		});
+
+		it("should not include response_format when not provided", () => {
+			const snippets = getInferenceSnippets(mockConversationalModel, "auto", undefined, {
+				messages: [{ role: "user", content: "Hello" }],
+				temperature: 0.5,
+			});
+
+			expect(snippets.length).toBeGreaterThan(0);
+
+			// Should not include response_format
+			const hasResponseFormat = snippets.some((snippet) => snippet.content.includes("response_format"));
+			expect(hasResponseFormat).toBe(false);
+
+			// Should still include other parameters
+			const hasTemperature = snippets.some((snippet) => snippet.content.includes("0.5"));
+			expect(hasTemperature).toBe(true);
+		});
+	});
+
 	describe("Complex options combinations", () => {
 		it("should handle multiple options together", () => {
 			const snippets = getInferenceSnippets(mockConversationalModel, "auto", undefined, {
@@ -766,4 +915,3 @@ describe("getInferenceSnippets", () => {
 		});
 	});
 });
-
