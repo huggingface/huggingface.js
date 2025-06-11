@@ -8,7 +8,7 @@ import {
 } from "@huggingface/tasks";
 import type { PipelineType, WidgetType } from "@huggingface/tasks";
 import type { ChatCompletionInputMessage, GenerationParameters } from "@huggingface/tasks";
-import type { InferenceProviderModelMapping } from "../lib/getInferenceProviderMapping.js";
+import type { InferenceProviderMappingEntry } from "../lib/getInferenceProviderMapping.js";
 import { getProviderHelper } from "../lib/getProviderHelper.js";
 import { makeRequestOptionsFromResolvedModel } from "../lib/makeRequestOptions.js";
 import type { InferenceProviderOrPolicy, InferenceTask, RequestArgs } from "../types.js";
@@ -18,7 +18,8 @@ export type InferenceSnippetOptions = {
 	streaming?: boolean;
 	billTo?: string;
 	accessToken?: string;
-	directRequest?: boolean;
+	directRequest?: boolean; // to bypass HF routing and call the provider directly
+	endpointUrl?: string; // to call a local endpoint directly
 } & Record<string, unknown>;
 
 const PYTHON_CLIENTS = ["huggingface_hub", "fal_client", "requests", "openai"] as const;
@@ -53,6 +54,7 @@ interface TemplateParams {
 	methodName?: string; // specific to snippetBasic
 	importBase64?: boolean; // specific to snippetImportRequests
 	importJson?: boolean; // specific to snippetImportRequests
+	endpointUrl?: string;
 }
 
 // Helpers to find + load templates
@@ -136,7 +138,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 	return (
 		model: ModelDataMinimal,
 		provider: InferenceProviderOrPolicy,
-		inferenceProviderMapping?: InferenceProviderModelMapping,
+		inferenceProviderMapping?: InferenceProviderMappingEntry,
 		opts?: InferenceSnippetOptions
 	): InferenceSnippet[] => {
 		const providerModelId = inferenceProviderMapping?.providerId ?? model.id;
@@ -172,6 +174,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 			{
 				accessToken: accessTokenOrPlaceholder,
 				provider,
+				endpointUrl: opts?.endpointUrl,
 				...inputs,
 			} as RequestArgs,
 			inferenceProviderMapping,
@@ -217,6 +220,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 			provider,
 			providerModelId: providerModelId ?? model.id,
 			billTo: opts?.billTo,
+			endpointUrl: opts?.endpointUrl,
 		};
 
 		/// Iterate over clients => check if a snippet exists => generate
@@ -265,7 +269,14 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 
 						/// Replace access token placeholder
 						if (snippet.includes(placeholder)) {
-							snippet = replaceAccessTokenPlaceholder(opts?.directRequest, placeholder, snippet, language, provider);
+							snippet = replaceAccessTokenPlaceholder(
+								opts?.directRequest,
+								placeholder,
+								snippet,
+								language,
+								provider,
+								opts?.endpointUrl
+							);
 						}
 
 						/// Snippet is ready!
@@ -320,7 +331,7 @@ const snippets: Partial<
 		(
 			model: ModelDataMinimal,
 			provider: InferenceProviderOrPolicy,
-			inferenceProviderMapping?: InferenceProviderModelMapping,
+			inferenceProviderMapping?: InferenceProviderMappingEntry,
 			opts?: InferenceSnippetOptions
 		) => InferenceSnippet[]
 	>
@@ -359,7 +370,7 @@ const snippets: Partial<
 export function getInferenceSnippets(
 	model: ModelDataMinimal,
 	provider: InferenceProviderOrPolicy,
-	inferenceProviderMapping?: InferenceProviderModelMapping,
+	inferenceProviderMapping?: InferenceProviderMappingEntry,
 	opts?: Record<string, unknown>
 ): InferenceSnippet[] {
 	return model.pipeline_tag && model.pipeline_tag in snippets
@@ -444,21 +455,24 @@ function replaceAccessTokenPlaceholder(
 	placeholder: string,
 	snippet: string,
 	language: InferenceSnippetLanguage,
-	provider: InferenceProviderOrPolicy
+	provider: InferenceProviderOrPolicy,
+	endpointUrl?: string
 ): string {
 	// If "opts.accessToken" is not set, the snippets are generated with a placeholder.
 	// Once snippets are rendered, we replace the placeholder with code to fetch the access token from an environment variable.
 
 	// Determine if HF_TOKEN or specific provider token should be used
 	const useHfToken =
-		provider == "hf-inference" || // hf-inference provider => use $HF_TOKEN
-		(!directRequest && // if explicit directRequest => use provider-specific token
-			(!snippet.includes("https://") || // no URL provided => using a client => use $HF_TOKEN
-				snippet.includes("https://router.huggingface.co"))); // explicit routed request => use $HF_TOKEN
-
+		!endpointUrl && // custom endpointUrl => use a generic API_TOKEN
+		(provider == "hf-inference" || // hf-inference provider => use $HF_TOKEN
+			(!directRequest && // if explicit directRequest => use provider-specific token
+				(!snippet.includes("https://") || // no URL provided => using a client => use $HF_TOKEN
+					snippet.includes("https://router.huggingface.co")))); // explicit routed request => use $HF_TOKEN
 	const accessTokenEnvVar = useHfToken
 		? "HF_TOKEN" // e.g. routed request or hf-inference
-		: provider.toUpperCase().replace("-", "_") + "_API_KEY"; // e.g. "REPLICATE_API_KEY"
+		: endpointUrl
+		  ? "API_TOKEN"
+		  : provider.toUpperCase().replace("-", "_") + "_API_KEY"; // e.g. "REPLICATE_API_KEY"
 
 	// Replace the placeholder with the env variable
 	if (language === "sh") {
