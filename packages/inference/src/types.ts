@@ -41,6 +41,7 @@ export const INFERENCE_PROVIDERS = [
 	"black-forest-labs",
 	"cerebras",
 	"cohere",
+	"dat1",
 	"fal-ai",
 	"featherless-ai",
 	"fireworks-ai",
