@@ -1,4 +1,4 @@
-import type { InferenceProviderModelMapping } from "../lib/getInferenceProviderMapping.js";
+import type { InferenceProviderMappingEntry } from "../lib/getInferenceProviderMapping.js";
 import type { InferenceProvider } from "../types.js";
 import { type ModelId } from "../types.js";
 
@@ -11,7 +11,7 @@ import { type ModelId } from "../types.js";
  */
 export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	InferenceProvider,
-	Record<ModelId, InferenceProviderModelMapping>
+	Record<ModelId, InferenceProviderMappingEntry>
 > = {
 	/**
 	 * "HF model ID" => "Model ID on Inference Provider's side"

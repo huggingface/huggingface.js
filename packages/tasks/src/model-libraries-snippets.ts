@@ -115,7 +115,7 @@ export const bm25s = (model: ModelData): string[] => [
 retriever = BM25HF.load_from_hub("${model.id}")`,
 ];
 
-export const chatterbox = (model: ModelData): string[] => [
+export const chatterbox = (): string[] => [
 	`# pip install chatterbox-tts
 import torchaudio as ta
 from chatterbox.tts import ChatterboxTTS
@@ -678,7 +678,9 @@ model.score("query", ["doc1", "doc2", "doc3"])`,
 
 export const llama_cpp_python = (model: ModelData): string[] => {
 	const snippets = [
-		`from llama_cpp import Llama
+		`# !pip install llama-cpp-python
+
+from llama_cpp import Llama
 
 llm = Llama.from_pretrained(
 	repo_id="${model.id}",
