@@ -603,7 +603,6 @@ export const PIPELINE_DATA = {
 		name: "Image-Text-to-Text",
 		modality: "multimodal",
 		color: "red",
-		hideInDatasets: true,
 	},
 	"visual-question-answering": {
 		name: "Visual Question Answering",
@@ -685,13 +684,11 @@ export const PIPELINE_DATA = {
 		name: "Visual Document Retrieval",
 		modality: "multimodal",
 		color: "yellow",
-		hideInDatasets: true,
 	},
 	"any-to-any": {
 		name: "Any-to-Any",
 		modality: "multimodal",
 		color: "yellow",
-		hideInDatasets: true,
 	},
 	other: {
 		name: "Other",
