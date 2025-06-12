@@ -513,6 +513,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/webis-de/lightning-ir",
 		snippets: snippets.lightning_ir,
 	},
+	"litert-lm": {
+		prettyLabel: "LiteRT-LM",
+		repoName: "LiteRT-LM",
+		repoUrl: "https://github.com/google-ai-edge/LiteRT-LM",
+		filter: false,
+		countDownloads: `path_extension:"litertlm"`,
+	},
 	liveportrait: {
 		prettyLabel: "LivePortrait",
 		repoName: "LivePortrait",
@@ -798,6 +805,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/facebookresearch/sapiens",
 		filter: false,
 		countDownloads: `path_extension:"pt2" OR path_extension:"pth" OR path_extension:"onnx"`,
+	},
+	seedvr: {
+		prettyLabel: "SeedVR",
+		repoName: "SeedVR",
+		repoUrl: "https://github.com/ByteDance-Seed/SeedVR",
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
 	},
 	"sentence-transformers": {
 		prettyLabel: "sentence-transformers",
