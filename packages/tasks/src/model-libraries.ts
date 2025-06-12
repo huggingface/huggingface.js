@@ -806,6 +806,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pt2" OR path_extension:"pth" OR path_extension:"onnx"`,
 	},
+	seedvr: {
+		prettyLabel: "SeedVR",
+		repoName: "SeedVR",
+		repoUrl: "https://github.com/ByteDance-Seed/SeedVR",
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
+	},
 	"sentence-transformers": {
 		prettyLabel: "sentence-transformers",
 		repoName: "sentence-transformers",
