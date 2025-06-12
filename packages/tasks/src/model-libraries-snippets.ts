@@ -1408,6 +1408,17 @@ model = SwarmFormerModel.from_pretrained("${model.id}")
 `,
 ];
 
+export const univa = (model: ModelData): string[] => [
+	`from univa.models.qwen2p5vl.modeling_univa_qwen2p5vl import UnivaQwen2p5VLForConditionalGeneration
+
+model = UnivaQwen2p5VLForConditionalGeneration.from_pretrained(
+        ${model.id},
+        torch_dtype=torch.bfloat16,
+        attn_implementation="flash_attention_2",
+    ).to("cuda")
+`,
+];
+
 const mlx_unknown = (model: ModelData): string[] => [
 	`# Download the model from the Hub
 pip install huggingface_hub[hf_xet]
