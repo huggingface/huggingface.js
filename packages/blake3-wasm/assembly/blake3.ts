@@ -21,18 +21,13 @@ const MSG_PERMUTATION: StaticArray<i32> = [2, 6, 3, 10, 7, 0, 4, 13, 1, 11, 12, 
 // The mixing function, G, which mixes either a column or a diagonal.
 function g(state: StaticArray<u32>, a: i32, b: i32, c: i32, d: i32, mx: u32, my: u32): void {
 	state[a] = state[a] + state[b] + mx;
-	state[d] = rotl32(state[d] ^ state[a], 16);
+	state[d] = rotr(state[d] ^ state[a], 16);
 	state[c] = state[c] + state[d];
-	state[b] = rotl32(state[b] ^ state[c], 12);
+	state[b] = rotr(state[b] ^ state[c], 12);
 	state[a] = state[a] + state[b] + my;
-	state[d] = rotl32(state[d] ^ state[a], 8);
+	state[d] = rotr(state[d] ^ state[a], 8);
 	state[c] = state[c] + state[d];
-	state[b] = rotl32(state[b] ^ state[c], 7);
-}
-
-// Rotate left by n bits
-function rotl32(x: u32, n: u32): u32 {
-	return (x << n) | (x >>> (32 - n));
+	state[b] = rotr(state[b] ^ state[c], 7);
 }
 
 function round(state: StaticArray<u32>, m: StaticArray<u32>): void {
