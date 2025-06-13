@@ -76,15 +76,15 @@ const testCases = [
 	},
 	{
 		buf: buffer.slice(0, 1023),
-		expected: "10108970eeda3eb932baac1428c7a2163b0e924c9a9e25b35bba72b28f70bd1",
+		expected: "10108970eeda3eb932baac1428c7a2163b0e924c9a9e25b35bba72b28f70bd11",
 	},
 	{
 		buf: buffer.slice(0, 1024),
-		expected: "42214739f095a406f3fc83deb889744ac00df831c10daa55189b5d121c855af",
+		expected: "42214739f095a406f3fc83deb889744ac00df831c10daa55189b5d121c855af7",
 	},
 	{
 		buf: buffer.slice(0, 1025),
-		expected: "d00278ae47eb27b34faecf67b4fe263f82d5412916c1ffd97c8cb7fb814b844",
+		expected: "d00278ae47eb27b34faecf67b4fe263f82d5412916c1ffd97c8cb7fb814b8444",
 	},
 	{
 		buf: buffer.slice(0, 2048),
@@ -112,11 +112,11 @@ const testCases = [
 	},
 	{
 		buf: buffer.slice(0, 5120),
-		expected: "9cadc15fed8b5d854562b26a9536d9707cadeda9b143978f319ab34230535833a",
+		expected: "9cadc15fed8b5d854562b26a9536d9707cadeda9b143978f319ab34230535833",
 	},
 	{
 		buf: buffer.slice(0, 5121),
-		expected: "628bd2cb2004694adaab7bbd778a25df25c47b9d4155a55f8fbd79f2fe154cff9",
+		expected: "628bd2cb2004694adaab7bbd778a25df25c47b9d4155a55f8fbd79f2fe154cff",
 	},
 	{
 		buf: buffer.slice(0, 6144),
@@ -140,7 +140,7 @@ const testCases = [
 	},
 	{
 		buf: buffer.slice(0, 8193),
-		expected: "bab6c09cb8ce8cf459261398d2e7aef35700bf488116ceb94a36d0f5f1b7bc3bb",
+		expected: "bab6c09cb8ce8cf459261398d2e7aef35700bf488116ceb94a36d0f5f1b7bc3b",
 	},
 	{
 		buf: buffer.slice(0, 102400),

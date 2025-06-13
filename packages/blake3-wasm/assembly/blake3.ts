@@ -106,7 +106,11 @@ function compress(
 function words_from_little_endian_bytes(bytes: Uint8Array, words: StaticArray<u32>): void {
 	for (let i = 0; i < words.length; i++) {
 		const offset = i * 4;
-		words[i] = bytes[offset] | (bytes[offset + 1] << 8) | (bytes[offset + 2] << 16) | (bytes[offset + 3] << 24);
+		words[i] =
+			bytes[offset] |
+			((bytes[offset + 1] as u32) << 8) |
+			((bytes[offset + 2] as u32) << 16) |
+			((bytes[offset + 3] as u32) << 24);
 	}
 }
 
