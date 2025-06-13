@@ -18,6 +18,7 @@ export type {
 	SpaceStage,
 } from "./types/public";
 export { HubApiError, InvalidApiResponseFormatError } from "./error";
+export { HUB_URL } from "./consts";
 /**
  * Only exported for E2Es convenience
  */

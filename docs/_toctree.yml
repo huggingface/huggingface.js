@@ -18,14 +18,12 @@
   isExpanded: true
   sections:
     - local: mcp-client/README
-      title: Simple MCP Client and smol Agent built on top of Inference Client
-- title: "@huggingface/agent"
+      title: Simple MCP Client built on top of Inference Client
+- title: "@huggingface/tiny-agents"
   isExpanded: true
   sections:
-    - local: agents/README
-      title: Use Agents to run multi-modal workflows from a natural language API
-    - local: agents/modules
-      title: API Reference
+    - local: tiny-agents/README
+      title: A lightweight MCP-powered Agent built on top of Inference Client
 - title: "@huggingface/space-header"
   isExpanded: true
   sections:

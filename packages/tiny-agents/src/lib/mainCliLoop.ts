@@ -5,7 +5,8 @@ import type { ChatCompletionStreamOutput } from "@huggingface/tasks";
 import type { Agent } from "../index";
 
 /**
- * From mcp-client/cli.ts
+ * From mcp-client/cli.ts,
+ * minus the agent.loadTools() done upstream.
  */
 export async function mainCliLoop(agent: Agent): Promise<void> {
 	const rl = readline.createInterface({ input: stdin, output: stdout });
@@ -39,8 +40,6 @@ export async function mainCliLoop(agent: Agent): Promise<void> {
 		rl.close();
 		throw err;
 	});
-
-	await agent.loadTools();
 
 	stdout.write(ANSI.BLUE);
 	stdout.write(`Agent loaded with ${agent.availableTools.length} tools:\n`);

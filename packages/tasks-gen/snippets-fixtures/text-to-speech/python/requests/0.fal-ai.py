@@ -1,8 +1,9 @@
+import os
 import requests
 
-API_URL = "https://fal.run/<fal-ai alias for nari-labs/Dia-1.6B>"
+API_URL = "https://router.huggingface.co/fal-ai/<fal-ai alias for nari-labs/Dia-1.6B>"
 headers = {
-    "Authorization": "Key api_token",
+    "Authorization": f"Bearer {os.environ['HF_TOKEN']}",
 }
 
 def query(payload):

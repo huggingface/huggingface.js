@@ -1,8 +1,9 @@
+import os
 import requests
 
 API_URL = "https://router.huggingface.co/hf-inference/models/facebook/musicgen-small"
 headers = {
-    "Authorization": "Bearer api_token",
+    "Authorization": f"Bearer {os.environ['HF_TOKEN']}",
 }
 
 def query(payload):

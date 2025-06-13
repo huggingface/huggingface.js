@@ -1,10 +1,11 @@
 import { HF_HEADER_X_BILL_TO, HF_HUB_URL } from "../config.js";
 import { PACKAGE_NAME, PACKAGE_VERSION } from "../package.js";
 import type { InferenceTask, Options, RequestArgs } from "../types.js";
-import type { InferenceProviderModelMapping } from "./getInferenceProviderMapping.js";
+import type { InferenceProviderMappingEntry } from "./getInferenceProviderMapping.js";
 import { getInferenceProviderMapping } from "./getInferenceProviderMapping.js";
 import type { getProviderHelper } from "./getProviderHelper.js";
 import { isUrl } from "./isUrl.js";
+import { InferenceClientHubApiError, InferenceClientInputError } from "../errors.js";
 
 /**
  * Lazy-loaded from huggingface.co/api/tasks when needed
@@ -33,10 +34,10 @@ export async function makeRequestOptions(
 
 	// Validate inputs
 	if (args.endpointUrl && provider !== "hf-inference") {
-		throw new Error(`Cannot use endpointUrl with a third-party provider.`);
+		throw new InferenceClientInputError(`Cannot use endpointUrl with a third-party provider.`);
 	}
 	if (maybeModel && isUrl(maybeModel)) {
-		throw new Error(`Model URLs are no longer supported. Use endpointUrl instead.`);
+		throw new InferenceClientInputError(`Model URLs are no longer supported. Use endpointUrl instead.`);
 	}
 
 	if (args.endpointUrl) {
@@ -51,18 +52,19 @@ export async function makeRequestOptions(
 	}
 
 	if (!maybeModel && !task) {
-		throw new Error("No model provided, and no task has been specified.");
+		throw new InferenceClientInputError("No model provided, and no task has been specified.");
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const hfModel = maybeModel ?? (await loadDefaultModel(task!));
 
 	if (providerHelper.clientSideRoutingOnly && !maybeModel) {
-		throw new Error(`Provider ${provider} requires a model ID to be passed directly.`);
+		throw new InferenceClientInputError(`Provider ${provider} requires a model ID to be passed directly.`);
 	}
 
 	const inferenceProviderMapping = providerHelper.clientSideRoutingOnly
 		? ({
+				provider: provider,
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 				providerId: removeProviderPrefix(maybeModel!, provider),
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -70,7 +72,7 @@ export async function makeRequestOptions(
 				status: "live",
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 				task: task!,
-		  } satisfies InferenceProviderModelMapping)
+		  } satisfies InferenceProviderMappingEntry)
 		: await getInferenceProviderMapping(
 				{
 					modelId: hfModel,
@@ -82,7 +84,9 @@ export async function makeRequestOptions(
 				{ fetch: options?.fetch }
 		  );
 	if (!inferenceProviderMapping) {
-		throw new Error(`We have not been able to find inference provider information for model ${hfModel}.`);
+		throw new InferenceClientInputError(
+			`We have not been able to find inference provider information for model ${hfModel}.`
+		);
 	}
 
 	// Use the sync version with the resolved model
@@ -106,7 +110,7 @@ export function makeRequestOptionsFromResolvedModel(
 		data?: Blob | ArrayBuffer;
 		stream?: boolean;
 	},
-	mapping: InferenceProviderModelMapping | undefined,
+	mapping: InferenceProviderMappingEntry | undefined,
 	options?: Options & {
 		task?: InferenceTask;
 	}
@@ -122,9 +126,8 @@ export function makeRequestOptionsFromResolvedModel(
 		if (providerHelper.clientSideRoutingOnly) {
 			// Closed-source providers require an accessToken (cannot be routed).
 			if (accessToken && accessToken.startsWith("hf_")) {
-				throw new Error(`Provider ${provider} is closed-source and does not support HF tokens.`);
+				throw new InferenceClientInputError(`Provider ${provider} is closed-source and does not support HF tokens.`);
 			}
-			return "provider-key";
 		}
 		if (accessToken) {
 			return accessToken.startsWith("hf_") ? "hf-token" : "provider-key";
@@ -197,23 +200,30 @@ async function loadDefaultModel(task: InferenceTask): Promise<string> {
 	}
 	const taskInfo = tasks[task];
 	if ((taskInfo?.models.length ?? 0) <= 0) {
-		throw new Error(`No default model defined for task ${task}, please define the model explicitly.`);
+		throw new InferenceClientInputError(
+			`No default model defined for task ${task}, please define the model explicitly.`
+		);
 	}
 	return taskInfo.models[0].id;
 }
 
 async function loadTaskInfo(): Promise<Record<string, { models: { id: string }[] }>> {
-	const res = await fetch(`${HF_HUB_URL}/api/tasks`);
+	const url = `${HF_HUB_URL}/api/tasks`;
+	const res = await fetch(url);
 
 	if (!res.ok) {
-		throw new Error("Failed to load tasks definitions from Hugging Face Hub.");
+		throw new InferenceClientHubApiError(
+			"Failed to load tasks definitions from Hugging Face Hub.",
+			{ url, method: "GET" },
+			{ requestId: res.headers.get("x-request-id") ?? "", status: res.status, body: await res.text() }
+		);
 	}
 	return await res.json();
 }
 
 function removeProviderPrefix(model: string, provider: string): string {
 	if (!model.startsWith(`${provider}/`)) {
-		throw new Error(`Models from ${provider} must be prefixed by "${provider}/". Got "${model}".`);
+		throw new InferenceClientInputError(`Models from ${provider} must be prefixed by "${provider}/". Got "${model}".`);
 	}
 	return model.slice(provider.length + 1);
 }

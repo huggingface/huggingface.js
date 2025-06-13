@@ -145,7 +145,6 @@ export class McpClient {
 			if (opts.abortSignal?.aborted) {
 				throw new Error("AbortError");
 			}
-			yield chunk;
 			debug(chunk.choices[0]);
 			numOfChunks++;
 			const delta = chunk.choices[0]?.delta;
@@ -161,19 +160,25 @@ export class McpClient {
 			for (const toolCall of delta.tool_calls ?? []) {
 				// aggregating chunks into an encoded arguments JSON object
 				if (!finalToolCalls[toolCall.index]) {
+					/// first chunk of the tool call
 					finalToolCalls[toolCall.index] = toolCall;
-				}
-				if (finalToolCalls[toolCall.index].function.arguments === undefined) {
-					finalToolCalls[toolCall.index].function.arguments = "";
-				}
-				if (toolCall.function.arguments) {
-					finalToolCalls[toolCall.index].function.arguments += toolCall.function.arguments;
+
+					/// ensure .function.arguments is always a string
+					if (finalToolCalls[toolCall.index].function.arguments === undefined) {
+						finalToolCalls[toolCall.index].function.arguments = "";
+					}
+				} else {
+					/// any subsequent chunk to the same tool call
+					if (toolCall.function.arguments) {
+						finalToolCalls[toolCall.index].function.arguments += toolCall.function.arguments;
+					}
 				}
 			}
 			if (opts.exitIfFirstChunkNoTool && numOfChunks <= 2 && Object.keys(finalToolCalls).length === 0) {
 				/// If no tool is present in chunk number 1 or 2, exit.
 				return;
 			}
+			yield chunk;
 		}
 
 		messages.push(message);

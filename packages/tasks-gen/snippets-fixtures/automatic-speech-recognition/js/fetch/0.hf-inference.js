@@ -3,7 +3,7 @@ async function query(data) {
 		"https://router.huggingface.co/hf-inference/models/openai/whisper-large-v3-turbo",
 		{
 			headers: {
-				Authorization: "Bearer api_token",
+				Authorization: `Bearer ${process.env.HF_TOKEN}`,
 				"Content-Type": "audio/flac",
 			},
 			method: "POST",

@@ -58,6 +58,13 @@ export interface LibraryUiElement {
  */
 
 export const MODEL_LIBRARIES_UI_ELEMENTS = {
+	acestep: {
+		prettyLabel: "ACE-Step",
+		repoName: "ACE-Step",
+		repoUrl: "https://github.com/ace-step/ACE-Step",
+		filter: false,
+		countDownloads: `path:"ace_step_transformer/config.json"`,
+	},
 	"adapter-transformers": {
 		prettyLabel: "Adapters",
 		repoName: "adapters",
@@ -171,6 +178,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "Champ",
 		repoUrl: "https://github.com/fudan-generative-vision/champ",
 		countDownloads: `path:"champ/motion_module.pth"`,
+	},
+	chatterbox: {
+		prettyLabel: "Chatterbox",
+		repoName: "Chatterbox",
+		repoUrl: "https://github.com/resemble-ai/chatterbox",
+		snippets: snippets.chatterbox,
+		countDownloads: `path:"tokenizer.json"`,
+		filter: false,
 	},
 	chat_tts: {
 		prettyLabel: "ChatTTS",
@@ -498,6 +513,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/webis-de/lightning-ir",
 		snippets: snippets.lightning_ir,
 	},
+	"litert-lm": {
+		prettyLabel: "LiteRT-LM",
+		repoName: "LiteRT-LM",
+		repoUrl: "https://github.com/google-ai-edge/LiteRT-LM",
+		filter: false,
+		countDownloads: `path_extension:"litertlm"`,
+	},
 	liveportrait: {
 		prettyLabel: "LivePortrait",
 		repoName: "LivePortrait",
@@ -521,6 +543,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "MindSpore",
 		repoName: "mindspore",
 		repoUrl: "https://github.com/mindspore-ai/mindspore",
+	},
+	"magi-1": {
+		prettyLabel: "MAGI-1",
+		repoName: "MAGI-1",
+		repoUrl: "https://github.com/SandAI-org/MAGI-1",
+		countDownloads: `path:"ckpt/vae/config.json"`,
 	},
 	"mamba-ssm": {
 		prettyLabel: "MambaSSM",
@@ -778,6 +806,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pt2" OR path_extension:"pth" OR path_extension:"onnx"`,
 	},
+	seedvr: {
+		prettyLabel: "SeedVR",
+		repoName: "SeedVR",
+		repoUrl: "https://github.com/ByteDance-Seed/SeedVR",
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
+	},
 	"sentence-transformers": {
 		prettyLabel: "sentence-transformers",
 		repoName: "sentence-transformers",
@@ -936,7 +971,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "timesfm",
 		repoUrl: "https://github.com/google-research/timesfm",
 		filter: false,
-		countDownloads: `path:"checkpoints/checkpoint_1100000/state/checkpoint"`,
+		countDownloads: `path:"checkpoints/checkpoint_1100000/state/checkpoint" OR path:"checkpoints/checkpoint_2150000/state/checkpoint" OR path_extension:"ckpt"`,
 	},
 	timm: {
 		prettyLabel: "timm",
@@ -946,6 +981,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.timm,
 		filter: true,
 		countDownloads: `path:"pytorch_model.bin" OR path:"model.safetensors"`,
+	},
+	tirex: {
+		prettyLabel: "TiRex",
+		repoName: "TiRex",
+		repoUrl: "https://github.com/NX-AI/tirex",
+		countDownloads: `path_extension:"ckpt"`,
 	},
 	torchgeo: {
 		prettyLabel: "TorchGeo",
