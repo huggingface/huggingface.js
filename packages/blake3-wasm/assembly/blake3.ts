@@ -1,8 +1,8 @@
 // Constants from the reference implementation
-const OUT_LEN: usize = 32;
+const OUT_LEN: i32 = 32;
 // const KEY_LEN: usize = 32;
-const BLOCK_LEN: usize = 64;
-const CHUNK_LEN: usize = 1024;
+const BLOCK_LEN: i32 = 64;
+const CHUNK_LEN: i32 = 1024;
 
 const CHUNK_START: u32 = 1 << 0;
 const CHUNK_END: u32 = 1 << 1;
@@ -16,10 +16,10 @@ const IV: StaticArray<u32> = [
 	0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,
 ];
 
-const MSG_PERMUTATION: StaticArray<usize> = [2, 6, 3, 10, 7, 0, 4, 13, 1, 11, 12, 5, 9, 14, 15, 8];
+const MSG_PERMUTATION: StaticArray<i32> = [2, 6, 3, 10, 7, 0, 4, 13, 1, 11, 12, 5, 9, 14, 15, 8];
 
 // The mixing function, G, which mixes either a column or a diagonal.
-function g(state: StaticArray<u32>, a: usize, b: usize, c: usize, d: usize, mx: u32, my: u32): void {
+function g(state: StaticArray<u32>, a: i32, b: i32, c: i32, d: i32, mx: u32, my: u32): void {
 	state[a] = state[a] + state[b] + mx;
 	state[d] = rotl32(state[d] ^ state[a], 16);
 	state[c] = state[c] + state[d];
@@ -115,7 +115,7 @@ function words_from_little_endian_bytes(bytes: Uint8Array, words: StaticArray<u3
 	}
 }
 
-export class Blake3Hasher {
+class Blake3Hasher {
 	private chunk_state: ChunkState;
 	private key_words: StaticArray<u32>;
 	private cv_stack: StaticArray<StaticArray<u32>>;
@@ -123,17 +123,19 @@ export class Blake3Hasher {
 	private flags: u32;
 
 	constructor() {
-		this.key_words = new StaticArray<u32>(8);
+		const key_words = new StaticArray<u32>(8);
 		for (let i = 0; i < 8; i++) {
-			this.key_words[i] = IV[i];
+			key_words[i] = IV[i];
 		}
-		this.chunk_state = new ChunkState(this.key_words, 0, 0);
+		this.key_words = key_words;
+		this.chunk_state = new ChunkState(key_words, 0, 0);
 		this.cv_stack = new StaticArray<StaticArray<u32>>(54);
+		this.cv_stack_len = 0;
+		this.flags = 0;
+
 		for (let i = 0; i < 54; i++) {
 			this.cv_stack[i] = new StaticArray<u32>(8);
 		}
-		this.cv_stack_len = 0;
-		this.flags = 0;
 	}
 
 	update(input: Uint8Array): void {
@@ -205,17 +207,18 @@ class ChunkState {
 
 	constructor(key_words: StaticArray<u32>, chunk_counter: u64, flags: u32) {
 		this.chaining_value = new StaticArray<u32>(8);
-		for (let i = 0; i < 8; i++) {
-			this.chaining_value[i] = key_words[i];
-		}
 		this.chunk_counter = chunk_counter;
 		this.block = new Uint8Array(BLOCK_LEN);
 		this.block_len = 0;
 		this.blocks_compressed = 0;
 		this.flags = flags;
+
+		for (let i = 0; i < 8; i++) {
+			this.chaining_value[i] = key_words[i];
+		}
 	}
 
-	len(): usize {
+	len(): i32 {
 		return BLOCK_LEN * this.blocks_compressed + this.block_len;
 	}
 
@@ -249,7 +252,7 @@ class ChunkState {
 			for (let i = 0; i < take; i++) {
 				this.block[this.block_len + i] = input[inputPos + i];
 			}
-			this.block_len += take;
+			this.block_len += take as u8;
 			inputPos += take;
 		}
 	}
@@ -352,6 +355,20 @@ function parent_cv(
 	return parent_output(left_child_cv, right_child_cv, key_words, flags).chaining_value();
 }
 
-export function createBlake3Hasher(): Blake3Hasher {
-	return new Blake3Hasher();
+export function blake3(input: Uint8Array): Uint8Array {
+	const hasher = new Blake3Hasher();
+	hasher.update(input);
+	const output = new Uint8Array(32);
+	hasher.finalize(output);
+	return output;
+}
+
+export function blake3Hex(input: Uint8Array): string {
+	const hash = blake3(input);
+	const hex = new Array<string>(64);
+	for (let i = 0; i < 32; i++) {
+		hex[i * 2] = (hash[i] >> 4).toString(16);
+		hex[i * 2 + 1] = (hash[i] & 0x0f).toString(16);
+	}
+	return hex.join("");
 }
