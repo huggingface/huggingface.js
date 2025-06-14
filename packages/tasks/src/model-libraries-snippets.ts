@@ -1637,4 +1637,30 @@ audio = model.autoencoder.decode(codes)[0].cpu()
 torchaudio.save("sample.wav", audio, model.autoencoder.sampling_rate)
 `,
 ];
+
+export const smolvla = (model: ModelData): string[] => [
+`# Clone the LeRobot repository and create the environment
+git clone https://github.com/huggingface/lerobot.git
+cd lerobot
+conda create -y -n lerobot python=3.10
+conda activate lerobot
+
+# Install ffmpeg (required for video processing)
+conda install ffmpeg=7.1.1 -c conda-forge
+
+# Install LeRobot with the SmolVLA extra dependencies
+pip install -e ".[smolvla]"
+
+# Launch finetuning on your dataset
+cd lerobot && python lerobot/scripts/train.py \\
+  --policy.path=lerobot/smolvla_base \\
+  --dataset.repo_id=${model.id} \\
+  --batch_size=64 \\
+  --steps=20000 \\
+  --output_dir=outputs/train/my_smolvla \\
+  --job_name=my_smolvla_training \\
+  --policy.device=cuda \\
+  --wandb.enable=true`,
+];
+
 //#endregion
