@@ -1109,6 +1109,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/huggingface/lerobot/blob/main/lerobot/common/policies/smolvla",
 		docsUrl: "https://huggingface.co/docs/lerobot/smolvla",
 		filter: false,
+		snippets: snippets.smolvla, 
 	},
 } satisfies Record<string, LibraryUiElement>;
 
