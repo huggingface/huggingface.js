@@ -132,10 +132,10 @@ wav = model.generate(text, audio_prompt_path=AUDIO_PROMPT_PATH)
 ta.save("test-2.wav", wav, model.sr)`,
 ];
 
-export const contexttab = (): string[] => [
-	`# pip install git+https://github.com/SAP-samples/contexttab
+export const contexttab = (): string[] => {
+	const installSnippet = `pip install git+https://github.com/SAP-samples/contexttab`;
 
-# Run a classification task
+	const classificationSnippet = `# Run a classification task
 from sklearn.datasets import load_breast_cancer
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
@@ -155,9 +155,9 @@ clf.fit(X_train, y_train)
 prediction_probabilities = clf.predict_proba(X_test)
 # Predict labels
 predictions = clf.predict(X_test)
-print("Accuracy", accuracy_score(y_test, predictions))
+print("Accuracy", accuracy_score(y_test, predictions))`;
 
-# Run a regression task
+	const regressionsSnippet = `# Run a regression task
 from sklearn.datasets import fetch_openml
 from sklearn.metrics import r2_score
 from sklearn.model_selection import train_test_split
@@ -182,8 +182,9 @@ regressor.fit(X_train, y_train)
 predictions = regressor.predict(X_test)
 
 r2 = r2_score(y_test, predictions)
-print("R² Score:", r2)`,
-];
+print("R² Score:", r2)`;
+	return [installSnippet, classificationSnippet, regressionsSnippet];
+};
 
 
 export const cxr_foundation = (): string[] => [
