@@ -210,7 +210,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	contexttab: {
 		prettyLabel: "ConTextTab",
-		repoName: "contexttab",
+		repoName: "ConTextTab",
 		repoUrl: "https://github.com/SAP-samples/contexttab",
 		countDownloads: `path_extension:"pt"`,
 		snippets: snippets.contexttab,
