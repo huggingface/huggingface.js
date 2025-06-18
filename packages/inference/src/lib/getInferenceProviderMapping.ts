@@ -2,22 +2,11 @@ import type { WidgetType } from "@huggingface/tasks";
 import { HF_HUB_URL } from "../config.js";
 import { HARDCODED_MODEL_INFERENCE_MAPPING } from "../providers/consts.js";
 import { EQUIVALENT_SENTENCE_TRANSFORMERS_TASKS } from "../providers/hf-inference.js";
-import type { InferenceProvider, InferenceProviderOrPolicy, ModelId } from "../types.js";
+import type { InferenceProvider, InferenceProviderMappingEntry, InferenceProviderOrPolicy, ModelId } from "../types.js";
 import { typedInclude } from "../utils/typedInclude.js";
 import { InferenceClientHubApiError, InferenceClientInputError } from "../errors.js";
 
 export const inferenceProviderMappingCache = new Map<ModelId, InferenceProviderMappingEntry[]>();
-
-export interface InferenceProviderMappingEntry {
-	adapter?: string;
-	adapterWeightsPath?: string;
-	hfModelId: ModelId;
-	provider: string;
-	providerId: string;
-	status: "live" | "staging";
-	task: WidgetType;
-	type?: "single-model" | "tag-filter";
-}
 
 /**
  * Normalize inferenceProviderMapping to always return an array format.

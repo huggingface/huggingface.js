@@ -1411,7 +1411,7 @@ export const voicecraft = (model: ModelData): string[] => [
 model = VoiceCraft.from_pretrained("${model.id}")`,
 ];
 
-export const vui = (model: ModelData): string[] => [
+export const vui = (): string[] => [
 	`# !pip install git+https://github.com/fluxions-ai/vui
 
 import torchaudio

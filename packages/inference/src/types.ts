@@ -1,5 +1,4 @@
-import type { ChatCompletionInput, PipelineType } from "@huggingface/tasks";
-import type { InferenceProviderMappingEntry } from "./lib/getInferenceProviderMapping.js";
+import type { ChatCompletionInput, PipelineType, WidgetType } from "@huggingface/tasks";
 
 /**
  * HF model id, like "meta-llama/Llama-3.3-70B-Instruct"
@@ -62,6 +61,17 @@ export const PROVIDERS_OR_POLICIES = [...INFERENCE_PROVIDERS, "auto"] as const;
 export type InferenceProvider = (typeof INFERENCE_PROVIDERS)[number];
 
 export type InferenceProviderOrPolicy = (typeof PROVIDERS_OR_POLICIES)[number];
+
+export interface InferenceProviderMappingEntry {
+	adapter?: string;
+	adapterWeightsPath?: string;
+	hfModelId: ModelId;
+	provider: string;
+	providerId: string;
+	status: "live" | "staging";
+	task: WidgetType;
+	type?: "single-model" | "tag-filter";
+}
 
 export interface BaseArgs {
 	/**
