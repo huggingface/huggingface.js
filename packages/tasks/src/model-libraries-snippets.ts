@@ -188,7 +188,6 @@ print("R² Score:", r2)`;
 	return [installSnippet, classificationSnippet, regressionsSnippet];
 };
 
-
 export const cxr_foundation = (): string[] => [
 	`# pip install git+https://github.com/Google-Health/cxr-foundation.git#subdirectory=python
 
