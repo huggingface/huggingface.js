@@ -8,10 +8,9 @@ import {
 } from "@huggingface/tasks";
 import type { PipelineType, WidgetType } from "@huggingface/tasks";
 import type { ChatCompletionInputMessage, GenerationParameters } from "@huggingface/tasks";
-import type { InferenceProviderMappingEntry } from "../lib/getInferenceProviderMapping.js";
 import { getProviderHelper } from "../lib/getProviderHelper.js";
 import { makeRequestOptionsFromResolvedModel } from "../lib/makeRequestOptions.js";
-import type { InferenceProviderOrPolicy, InferenceTask, RequestArgs } from "../types.js";
+import type { InferenceProviderMappingEntry, InferenceProviderOrPolicy, InferenceTask, RequestArgs } from "../types.js";
 import { templates } from "./templates.exported.js";
 
 export type InferenceSnippetOptions = {
