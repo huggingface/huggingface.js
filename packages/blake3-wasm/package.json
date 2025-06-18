@@ -28,6 +28,6 @@
 		}
 	},
 	"devDependencies": {
-		"assemblyscript": "^0.27.36"
+		"assemblyscript": "0.27.36"
 	}
 }

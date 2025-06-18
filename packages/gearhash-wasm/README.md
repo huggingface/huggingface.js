@@ -11,15 +11,14 @@ import { nextMatch } from '@huggingface/gearhash-wasm';
 const data = new Uint8Array(1000000); // Example: 1MB of data
 // ... fill data with your content ...
 
-// Search for a pattern with a specific mask
-const mask = 0x0000d90003530000n; // Example mask as a BigInt
+const mask = 0x0000d90003530000n; // Example mask as a BigInt, more 0s => bigger chunks
 const match = nextMatch(data, mask);
 const allMatches = nextMatches(data, mask).matches;
 ```
 
 The `nextMatch` function takes two parameters:
 - `data`: A Uint8Array containing the data to search through
-- `mask`: A BigInt representing the pattern mask to search for
+- `mask`: A BigInt, the bigger it is the bigger the chunks are
 
 The function returns an object with the `position` (i32) and `hash` (u64) properties
 

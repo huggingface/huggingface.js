@@ -1,55 +1,53 @@
 import { nextMatch } from "@huggingface/gearhash-wasm/assembly";
-import { Blake3Hasher } from "@huggingface/blake3-wasm/assembly";
+import { blake3 } from "@huggingface/blake3-wasm/assembly";
 
 // Constants
-const TARGET_CHUNK_SIZE: usize = 64 * 1024; // 64KB
-const MINIMUM_CHUNK_DIVISOR: usize = 8;
-const MAXIMUM_CHUNK_MULTIPLIER: usize = 2;
-const HASH_WINDOW_SIZE: usize = 64;
+const TARGET_CHUNK_SIZE: i32 = 64 * 1024; // 64KB
+const MINIMUM_CHUNK_DIVISOR: i32 = 8;
+const MAXIMUM_CHUNK_MULTIPLIER: i32 = 2;
+const HASH_WINDOW_SIZE: i32 = 64;
 
 export class Chunk {
 	hash: Uint8Array;
 	data: Uint8Array;
-
-	constructor(hash: Uint8Array, data: Uint8Array) {
-		this.hash = hash;
-		this.data = data;
-	}
 }
 
 // Type for the next() method return value
-export class NextResult {
+class NextResult {
 	chunk: Chunk | null;
-	bytesConsumed: usize;
+	bytesConsumed: i32;
 
-	constructor(chunk: Chunk | null, bytesConsumed: usize) {
+	constructor(chunk: Chunk | null, bytesConsumed: i32) {
 		this.chunk = chunk;
 		this.bytesConsumed = bytesConsumed;
 	}
 }
 
-export class XetChunker {
-	private minimumChunk: usize;
-	private maximumChunk: usize;
+class XetChunker {
+	private minimumChunk: i32;
+	private maximumChunk: i32;
 	private mask: u64;
 	private chunkBuf: Uint8Array;
-	private curChunkLen: usize;
+	private curChunkLen: i32;
 	private hash: u64;
 
-	constructor(targetChunkSize: usize = TARGET_CHUNK_SIZE) {
+	constructor(targetChunkSize: i32 = TARGET_CHUNK_SIZE) {
 		// Validate target chunk size is a power of 2
+		assert(targetChunkSize > 0, "Target chunk size must be greater than 0");
 		assert((targetChunkSize & (targetChunkSize - 1)) == 0, "Target chunk size must be a power of 2");
 		assert(targetChunkSize > HASH_WINDOW_SIZE, "Target chunk size must be greater than hash window size");
-		assert(targetChunkSize < u32.MAX_VALUE, "Target chunk size must be less than u32.MAX_VALUE");
+		assert(targetChunkSize < i32.MAX_VALUE, "Target chunk size must be less than i32.MAX_VALUE");
 
 		let mask = (targetChunkSize - 1) as u64;
 		// Shift mask left by leading zeros count
 		mask = mask << (64 - clz(mask));
 
+		const maximumChunk = targetChunkSize * MAXIMUM_CHUNK_MULTIPLIER;
+
 		this.minimumChunk = targetChunkSize / MINIMUM_CHUNK_DIVISOR;
-		this.maximumChunk = targetChunkSize * MAXIMUM_CHUNK_MULTIPLIER;
+		this.maximumChunk = maximumChunk;
 		this.mask = mask;
-		this.chunkBuf = new Uint8Array(this.maximumChunk);
+		this.chunkBuf = new Uint8Array(maximumChunk);
 		this.curChunkLen = 0;
 		this.hash = 0;
 	}
@@ -57,7 +55,7 @@ export class XetChunker {
 	next(data: Uint8Array, isFinal: boolean): NextResult {
 		const nBytes = data.length;
 		let createChunk = false;
-		let consumeLen: usize = 0;
+		let consumeLen: i32 = 0;
 
 		if (nBytes != 0) {
 			// Skip minimum chunk size
@@ -70,7 +68,7 @@ export class XetChunker {
 			// Calculate read end
 			const readEnd = min(nBytes, consumeLen + this.maximumChunk - this.curChunkLen);
 
-			let bytesToNextBoundary: usize;
+			let bytesToNextBoundary: i32;
 			const matchResult = nextMatch(data.subarray(consumeLen, readEnd), this.mask, this.hash);
 
 			if (matchResult.position != -1) {
@@ -97,7 +95,10 @@ export class XetChunker {
 
 		if (createChunk || (isFinal && this.curChunkLen > 0)) {
 			const chunkData = this.chunkBuf.subarray(0, this.curChunkLen);
-			const chunk = new Chunk(computeDataHash(chunkData), chunkData);
+			const chunk: Chunk = {
+				data: chunkData,
+				hash: blake3(chunkData),
+			};
 			this.curChunkLen = 0;
 			this.hash = 0;
 			return new NextResult(chunk, consumeLen);
@@ -108,12 +109,12 @@ export class XetChunker {
 
 	nextBlock(data: Uint8Array, isFinal: boolean): Chunk[] {
 		const chunks: Chunk[] = [];
-		let pos: usize = 0;
+		let pos: i32 = 0;
 
 		while (pos < data.length) {
 			const result = this.next(data.subarray(pos), isFinal);
 			if (result.chunk) {
-				chunks.push(result.chunk);
+				chunks.push(result.chunk!);
 			}
 			pos += result.bytesConsumed;
 		}
@@ -126,14 +127,21 @@ export class XetChunker {
 	}
 }
 
-function computeDataHash(data: Uint8Array): Uint8Array {
-	const hasher = new Blake3Hasher();
-	hasher.update(data);
-	const hash = new Uint8Array(32);
-	hasher.finalize(hash);
-	return hash;
+export function createChunker(targetChunkSize: i32 = TARGET_CHUNK_SIZE): XetChunker {
+	const chunker = new XetChunker(targetChunkSize);
+
+	return chunker;
 }
 
-export function createXetChunker(targetChunkSize: usize = TARGET_CHUNK_SIZE): XetChunker {
-	return new XetChunker(targetChunkSize);
+export function nextBlock(chunker: XetChunker, data: Uint8Array): Chunk[] {
+	return chunker.nextBlock(data, false);
+}
+
+export function finalize(chunker: XetChunker): Chunk | null {
+	return chunker.finish();
+}
+
+export function getChunks(data: Uint8Array, targetChunkSize: i32 = TARGET_CHUNK_SIZE): Chunk[] {
+	const chunker = createChunker(targetChunkSize);
+	return chunker.nextBlock(data, true);
 }

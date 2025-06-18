@@ -371,3 +371,17 @@ export function blake3Hex(input: Uint8Array): string {
 	}
 	return hex.join("");
 }
+
+export function createHasher(): Blake3Hasher {
+	return new Blake3Hasher();
+}
+
+export function update(hasher: Blake3Hasher, input: Uint8Array): void {
+	hasher.update(input);
+}
+
+export function finalize(hasher: Blake3Hasher): Uint8Array {
+	const output = new Uint8Array(32);
+	hasher.finalize(output);
+	return output;
+}
