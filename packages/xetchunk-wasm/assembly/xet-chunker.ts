@@ -9,7 +9,7 @@ const HASH_WINDOW_SIZE: i32 = 64;
 
 export class Chunk {
 	hash: Uint8Array;
-	data: Uint8Array;
+	length: i32;
 }
 
 // Type for the next() method return value
@@ -96,7 +96,7 @@ class XetChunker {
 		if (createChunk || (isFinal && this.curChunkLen > 0)) {
 			const chunkData = this.chunkBuf.subarray(0, this.curChunkLen);
 			const chunk: Chunk = {
-				data: chunkData,
+				length: chunkData.length,
 				hash: blake3(chunkData),
 			};
 			this.curChunkLen = 0;
@@ -114,6 +114,7 @@ class XetChunker {
 		while (pos < data.length) {
 			const result = this.next(data.subarray(pos), isFinal);
 			if (result.chunk) {
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 				chunks.push(result.chunk!);
 			}
 			pos += result.bytesConsumed;
