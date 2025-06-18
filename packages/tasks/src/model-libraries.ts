@@ -208,6 +208,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/Unbabel/COMET/",
 		countDownloads: `path:"hparams.yaml"`,
 	},
+	contexttab: {
+		prettyLabel: "ConTextTab",
+		repoName: "ConTextTab",
+		repoUrl: "https://github.com/SAP-samples/contexttab",
+		countDownloads: `path_extension:"pt"`,
+		snippets: snippets.contexttab,
+	},
 	cosmos: {
 		prettyLabel: "Cosmos",
 		repoName: "Cosmos",
