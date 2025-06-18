@@ -1,31 +1,23 @@
 import { nextMatch, nextMatches } from "../build/debug.js";
 
-// Simple deterministic RNG for reproducible results (32-bit version)
+// Simple deterministic RNG for reproducible results (24-bit version)
 class SimpleRng {
 	constructor(seed) {
-		this.state = seed;
+		this.state = seed & 0xffffff; // Keep only 24 bits
 	}
 
-	nextU32() {
-		// Simple 32-bit xorshift algorithm (same as Rust version)
-		this.state ^= this.state << 13;
-		this.state ^= this.state >> 17;
-		this.state ^= this.state << 5;
+	nextU24() {
+		// Simple 24-bit linear congruential generator
+		// Using 24-bit arithmetic to avoid overflow
+		this.state = (this.state * 1111 + 12345) & 0xffffff;
 		return this.state;
 	}
 
-	nextU64() {
-		// Generate two 32-bit values and combine them
-		const low = this.nextU32();
-		const high = this.nextU32();
-		return (BigInt(high) << 32n) | BigInt(low);
-	}
-
 	fillBytes(dest) {
-		for (let i = 0; i < dest.length; i += 8) {
-			const value = this.nextU64();
-			for (let j = 0; j < 8 && i + j < dest.length; j++) {
-				dest[i + j] = Number((value >> BigInt(j * 8)) & 0xffn);
+		for (let i = 0; i < dest.length; i += 3) {
+			const value = this.nextU24();
+			for (let j = 0; j < 3 && i + j < dest.length; j++) {
+				dest[i + j] = (value >> (j * 8)) & 0xff;
 			}
 		}
 	}
@@ -61,7 +53,6 @@ function testGearhash() {
 	const matches = [...result.matches, { position: result.remaining, hash: result.hash }];
 
 	for (const match of matches) {
-		offset += match.position;
 		totalProcessed += match.position;
 		chunkCount += 1;
 		hash = match.hash;
@@ -71,6 +62,7 @@ function testGearhash() {
 				.toString()
 				.padStart(4)} | 0x${match.hash.toString(16).padStart(16, "0")}`
 		);
+		offset += match.position;
 	}
 
 	console.log("\nSummary:");
@@ -128,43 +120,53 @@ function parseExpectedResults(resultData) {
 	return results;
 }
 
-const resultData = `
-    1 |      0 | 5919 | 0x17c402cb182c5718
-    2 |   5919 |  265 | 0xe739063654888081
-    3 |   6184 | 4855 | 0x38a82261e80810f9
-    4 |  11039 | 1029 | 0x803f24c9ac20ddd5
-    5 |  12068 |  583 | 0xb4b724e26824ace3
-    6 |  12651 |  358 | 0x11bd22180c0c5ac5
-    7 |  13009 | 3078 | 0x810a04be24846ffc
-    8 |  16087 | 1207 | 0x5f940641d088dada
-    9 |  17294 |  251 | 0xf09502d5f4acfb4e
-   10 |  17545 | 3053 | 0xf0b120d014ace72d
-   11 |  20598 | 9120 | 0xa458064aa82403e5
-   12 |  29718 | 3288 | 0x9ccf04ecc000996b
-   13 |  33006 |  590 | 0xd4ba00dd9408b6b5
-   14 |  33596 | 1401 | 0xd42a2000a4a46d11
-   15 |  34997 | 2573 | 0xc914022f9c28e722
-   16 |  37570 | 1300 | 0xd63b0401a484c0bc
-   17 |  38870 |   98 | 0x996f0499402c1e96
-   18 |  38968 | 2802 | 0xf43406dfb42c9324
-   19 |  41770 | 3237 | 0x1bd026252c0ccbe3
-   20 |  45007 | 7368 | 0x7da400e8e0aca934
-   21 |  52375 |  439 | 0xcd9b208f38201fa7
-   22 |  52814 | 1477 | 0x9497226484a0a015
-   23 |  54291 | 7158 | 0x5a3100fa9888dfe5
-   24 |  61449 | 2168 | 0x21ed20bbf008a4ef
-   25 |  63617 | 2475 | 0x7b0522392480392d
-   26 |  66092 |   26 | 0xdfe6048a9c0c125f
-   27 |  66118 | 7548 | 0xf8a72278802c1523
-   28 |  73666 | 7826 | 0x5997242ba00cb3fd
-   29 |  81492 |  215 | 0x489e26bd7c08ec4c
-   30 |  81707 |  760 | 0x84d526f1542066b2
-   31 |  82467 | 1929 | 0x085d02a31024d324
-   32 |  84396 | 3947 | 0x8cc4240eb8a8b8e3
-   33 |  88343 | 1511 | 0x98b1204ccc001231
-   34 |  89854 | 2895 | 0x35402430a8a8d1f1
-   35 |  92749 | 7025 | 0x52bd0269e8084b97
-   36 |  99774 |  226 | 0xd86ff8f143fe10b4 `;
+const resultData = `Chunk | Offset | Size | Hash
+------|--------|------|------------------
+    1 |      0 | 3598 | 0x033220f080ac5f77
+    2 |   3598 | 3995 | 0xd06b22f324ac5f28
+    3 |   7593 | 4708 | 0xa3a324f81808429c
+    4 |  12301 |  484 | 0x12a5006aa4a4425b
+    5 |  12785 | 1484 | 0x0b240413a4a4d5a2
+    6 |  14269 |  563 | 0xc646022fbc848bc6
+    7 |  14832 | 6663 | 0x7c7a2296e4a4c325
+    8 |  21495 | 1220 | 0xbe1f2468f0841b68
+    9 |  22715 | 1175 | 0xf87e2299e00c57d9
+   10 |  23890 |  779 | 0x79ca2634d00cd6b9
+   11 |  24669 | 2069 | 0xcb7a063594081a74
+   12 |  26738 | 2623 | 0xdccc26b6c0acb733
+   13 |  29361 |  596 | 0x4fb6201a1c20143e
+   14 |  29957 |  622 | 0x81e726272020706f
+   15 |  30579 | 3834 | 0x630622fca084a60a
+   16 |  34413 | 2379 | 0x177b2240080810b1
+   17 |  36792 | 3527 | 0x663b261bbc2451ed
+   18 |  40319 | 1665 | 0xf94f06db94003e2f
+   19 |  41984 | 1240 | 0xc5ca208c0c24cefc
+   20 |  43224 | 1274 | 0x8139244f740cba39
+   21 |  44498 | 3680 | 0x4440044520045a9d
+   22 |  48178 | 1487 | 0xe00f2049a0a43a58
+   23 |  49665 | 4293 | 0x366a26940408279d
+   24 |  53958 | 1184 | 0x3a582683902cb3fe
+   25 |  55142 |  383 | 0x002d0499e080702e
+   26 |  55525 | 1206 | 0x34ba041aa4084fbd
+   27 |  56731 |  506 | 0x0c53045c00a0a228
+   28 |  57237 | 8019 | 0xf85b202d9c0813a5
+   29 |  65256 | 1070 | 0x1c862295ac8863ba
+   30 |  66326 | 3359 | 0x4e4804d7b82805c7
+   31 |  69685 | 1744 | 0x75b7224cc8209457
+   32 |  71429 |  152 | 0xb01e26b40c0cf7c0
+   33 |  71581 |   11 | 0xc66002b7f48c0472
+   34 |  71592 | 1209 | 0x0a33021dc4007363
+   35 |  72801 | 1795 | 0xd0cc22ea708c921f
+   36 |  74596 |  856 | 0x49e3007c9c2c5727
+   37 |  75452 |   97 | 0xe0b422e3c40c89dc
+   38 |  75549 | 1299 | 0xbd1806074024536a
+   39 |  76848 |  131 | 0xd61104147c28928d
+   40 |  76979 | 1987 | 0x31930627a080ebb0
+   41 |  78966 | 11254 | 0x4c4400e65c24beff
+   42 |  90220 |  868 | 0xa92400ca5ca02488
+   43 |  91088 | 6279 | 0x5a3d0443f0a0d81a
+   44 |  97367 |  969 | 0x7770042d140c7472
+   45 |  98336 | 1664 | 0xe508202f55c46d2d`;
 
 console.log("ok");
 
@@ -217,6 +219,7 @@ for (let i = 0; i < totalChunks; i++) {
 		console.log(`❌ Mismatch at chunk ${i + 1}:`);
 		console.log(`   Expected: offset=${expected.offset}, size=${expected.size}, hash=${expected.hash}`);
 		console.log(`   Actual:   offset=${actual.offset}, size=${actual.size}, hash=${actual.hash}`);
+		process.exitCode = 1;
 	}
 }
 
@@ -238,3 +241,12 @@ console.log(`Total bytes processed: ${testResults.totalProcessed}`);
 console.log(`Average chunk size: ${testResults.averageChunkSize.toFixed(1)} bytes`);
 console.log(`Matching chunks: ${matches}/${totalChunks}`);
 console.log(`Accuracy: ${((matches / totalChunks) * 100).toFixed(2)}%`);
+
+const input = generateTestInput().slice(0, 100);
+
+let output = "";
+for (let i = 0; i < input.length; i++) {
+	output += input[i].toString(16).padStart(2, "0") + " ";
+}
+
+console.log("First 100 bytes", output);

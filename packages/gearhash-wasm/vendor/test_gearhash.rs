@@ -1,35 +1,27 @@
 use gearhash::{Hasher, DEFAULT_TABLE};
 
-// Simple deterministic RNG for reproducible results (32-bit version)
+// Simple deterministic RNG for reproducible results (24-bit version)
 struct SimpleRng {
     state: u32,
 }
 
 impl SimpleRng {
     fn new(seed: u32) -> Self {
-        Self { state: seed }
+        Self { state: seed & 0xFFFFFF } // Keep only 24 bits
     }
     
-    fn next_u32(&mut self) -> u32 {
-        // Simple 32-bit xorshift algorithm
-        self.state ^= self.state << 13;
-        self.state ^= self.state >> 17;
-        self.state ^= self.state << 5;
+    fn next_u24(&mut self) -> u32 {
+        // Simple 24-bit linear congruential generator
+        // Using 24-bit arithmetic to avoid overflow
+        self.state = (self.state.wrapping_mul(1111) + 12345) & 0xFFFFFF;
         self.state
     }
     
-    fn next_u64(&mut self) -> u64 {
-        // Generate two 32-bit values and combine them
-        let low = self.next_u32() as u64;
-        let high = self.next_u32() as u64;
-        (high << 32) | low
-    }
-    
     fn fill_bytes(&mut self, dest: &mut [u8]) {
-        for chunk in dest.chunks_mut(8) {
-            let value = self.next_u64();
+        for chunk in dest.chunks_mut(3) {
+            let value = self.next_u24();
             for (i, byte) in chunk.iter_mut().enumerate() {
-                *byte = (value >> (i * 8)) as u8;
+                *byte = ((value >> (i * 8)) & 0xFF) as u8;
             }
         }
     }
@@ -111,4 +103,7 @@ fn test_gearhash() {
 
 fn main() {
     test_gearhash();
+
+    let input_buf = generate_test_input();
+    println!("First 100 bytes: {:02x?}", &input_buf[..100]);
 } 
