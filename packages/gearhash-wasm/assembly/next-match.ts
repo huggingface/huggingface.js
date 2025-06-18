@@ -12,9 +12,24 @@ export class MatchResult {
 export function nextMatch(buf: Uint8Array, mask: u64, hash: u64 = 0): MatchResult {
 	for (let i = 0; i < buf.length; i++) {
 		const b = buf[i];
-		hash = (hash << 1) + DEFAULT_TABLE[b];
+		// Use proper unsigned operations to match Rust's wrapping_add behavior
+		hash = ((hash << 1) as u64) + (DEFAULT_TABLE[b] as u64);
+
+		// console.log(
+		// 	"hash " +
+		// 		hash.toString(16) +
+		// 		" " +
+		// 		(hash << 1).toString(16) +
+		// 		" " +
+		// 		b.toString(16) +
+		// 		" " +
+		// 		(DEFAULT_TABLE[b] as u64).toString(16)
+		// );
+		// console.log("mask " + mask.toString(16));
+		// console.log("hash & mask " + (hash & mask).toString(16));
 
 		if ((hash & mask) == 0) {
+			// console.log("match found at position " + (i + 1).toString());
 			return { position: i + 1, hash };
 		}
 	}

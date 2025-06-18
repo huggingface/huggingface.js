@@ -1,21 +1,28 @@
 use gearhash::{Hasher, DEFAULT_TABLE};
 
-// Simple deterministic RNG for reproducible results
+// Simple deterministic RNG for reproducible results (32-bit version)
 struct SimpleRng {
-    state: u64,
+    state: u32,
 }
 
 impl SimpleRng {
-    fn new(seed: u64) -> Self {
+    fn new(seed: u32) -> Self {
         Self { state: seed }
     }
     
-    fn next_u64(&mut self) -> u64 {
-        // Simple xorshift algorithm
+    fn next_u32(&mut self) -> u32 {
+        // Simple 32-bit xorshift algorithm
         self.state ^= self.state << 13;
-        self.state ^= self.state >> 7;
-        self.state ^= self.state << 17;
+        self.state ^= self.state >> 17;
+        self.state ^= self.state << 5;
         self.state
+    }
+    
+    fn next_u64(&mut self) -> u64 {
+        // Generate two 32-bit values and combine them
+        let low = self.next_u32() as u64;
+        let high = self.next_u32() as u64;
+        (high << 32) | low
     }
     
     fn fill_bytes(&mut self, dest: &mut [u8]) {
@@ -28,7 +35,7 @@ impl SimpleRng {
     }
 }
 
-const BENCH_INPUT_SEED: u64 = 0xbecd17f;
+const BENCH_INPUT_SEED: u32 = 0xbecd17f;
 const BENCH_MASK: u64 = 0x0000d90003530000;
 const INPUT_SIZE: usize = 100_000;
 
@@ -64,10 +71,11 @@ fn test_gearhash() {
             
             println!("{:5} | {:6} | {:4} | 0x{:016x}", 
                 chunk_count, chunk_start, match_size, hasher.get_hash());
+
+            hasher.set_hash(0);
         } else {
             // No more matches, process remaining bytes
             let remaining = input_buf.len() - offset;
-            hasher.update(&input_buf[offset..]);
             total_processed += remaining;
             chunk_count += 1;
             

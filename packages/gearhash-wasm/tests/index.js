@@ -1,17 +1,24 @@
-import { nextMatch } from "../build/debug.js";
+import { nextMatch, nextMatches } from "../build/debug.js";
 
-// Simple deterministic RNG for reproducible results (same as Rust version)
+// Simple deterministic RNG for reproducible results (32-bit version)
 class SimpleRng {
 	constructor(seed) {
-		this.state = BigInt(seed);
+		this.state = seed;
+	}
+
+	nextU32() {
+		// Simple 32-bit xorshift algorithm (same as Rust version)
+		this.state ^= this.state << 13;
+		this.state ^= this.state >> 17;
+		this.state ^= this.state << 5;
+		return this.state;
 	}
 
 	nextU64() {
-		// Simple xorshift algorithm (same as Rust version)
-		this.state ^= this.state << 13n;
-		this.state ^= this.state >> 7n;
-		this.state ^= this.state << 17n;
-		return this.state;
+		// Generate two 32-bit values and combine them
+		const low = this.nextU32();
+		const high = this.nextU32();
+		return (BigInt(high) << 32n) | BigInt(low);
 	}
 
 	fillBytes(dest) {
@@ -50,38 +57,20 @@ function testGearhash() {
 	console.log("Chunk | Offset | Size | Hash");
 	console.log("------|--------|------|------------------");
 
-	while (offset < inputBuf.length) {
-		const chunkStart = offset;
+	const result = nextMatches(inputBuf, BENCH_MASK, 0);
+	const matches = [...result.matches, { position: result.remaining, hash: result.hash }];
 
-		const result = nextMatch(inputBuf.subarray(offset), BENCH_MASK, hash);
-		if (result.matchSize > 0) {
-			offset += result.matchSize;
-			totalProcessed += result.matchSize;
-			chunkCount += 1;
-			hash = result.hash;
+	for (const match of matches) {
+		offset += match.position;
+		totalProcessed += match.position;
+		chunkCount += 1;
+		hash = match.hash;
 
-			console.log(
-				`${chunkCount.toString().padStart(5)} | ${chunkStart.toString().padStart(6)} | ${result.matchSize
-					.toString()
-					.padStart(4)} | 0x${hash.toString(16).padStart(16, "0")}`
-			);
-		} else {
-			// No more matches, process remaining bytes
-			const remaining = inputBuf.length - offset;
-			// Update hash for remaining bytes
-			for (let i = 0; i < remaining; i++) {
-				hash = ((hash << 1n) + BigInt(inputBuf[offset + i])) & 0xffffffffffffffffn;
-			}
-			totalProcessed += remaining;
-			chunkCount += 1;
-
-			console.log(
-				`${chunkCount.toString().padStart(5)} | ${offset.toString().padStart(6)} | ${remaining
-					.toString()
-					.padStart(4)} | 0x${hash.toString(16).padStart(16, "0")} (final)`
-			);
-			break;
-		}
+		console.log(
+			`${chunkCount.toString().padStart(5)} | ${offset.toString().padStart(6)} | ${match.position
+				.toString()
+				.padStart(4)} | 0x${match.hash.toString(16).padStart(16, "0")}`
+		);
 	}
 
 	console.log("\nSummary:");
