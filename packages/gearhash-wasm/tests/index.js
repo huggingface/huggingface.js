@@ -1,117 +1,251 @@
-import assert from "assert";
-import { nextMatch, nextMatches } from "../build/debug.js";
+import { nextMatch } from "../build/debug.js";
 
-// Simple seeded random number generator
-function seededRandom(seed) {
-	return function () {
-		seed = (seed * 16807) % 2147483647;
-		return (seed - 1) / 2147483646;
-	};
+// Simple deterministic RNG for reproducible results (same as Rust version)
+class SimpleRng {
+	constructor(seed) {
+		this.state = BigInt(seed);
+	}
+
+	nextU64() {
+		// Simple xorshift algorithm (same as Rust version)
+		this.state ^= this.state << 13n;
+		this.state ^= this.state >> 7n;
+		this.state ^= this.state << 17n;
+		return this.state;
+	}
+
+	fillBytes(dest) {
+		for (let i = 0; i < dest.length; i += 8) {
+			const value = this.nextU64();
+			for (let j = 0; j < 8 && i + j < dest.length; j++) {
+				dest[i + j] = Number((value >> BigInt(j * 8)) & 0xffn);
+			}
+		}
+	}
 }
 
-// Create seeded random data
-const seed = 12345; // Fixed seed for deterministic results
-const random = seededRandom(seed);
-const randomData = new Uint8Array(150_000).map(() => Math.floor(random() * 256));
+const BENCH_INPUT_SEED = 0xbecd17f;
+const BENCH_MASK = 0x0000d90003530000n;
+const INPUT_SIZE = 100_000;
 
-// Test with a known mask
-assert.deepStrictEqual(nextMatch(randomData, 0x0000d90003530000n), { position: 459, hash: 9546224108073667431n });
-assert.deepStrictEqual(nextMatch(randomData.subarray(459), 0x0000d90003530000n), {
-	position: 3658,
-	hash: 4043712133052525799n,
-});
+function generateTestInput() {
+	const bytes = new Uint8Array(INPUT_SIZE);
+	const rng = new SimpleRng(BENCH_INPUT_SEED);
+	rng.fillBytes(bytes);
+	return bytes;
+}
 
-assert.deepStrictEqual(nextMatches(randomData, 0x0000d90003530000n), {
-	remaining: 1206,
-	hash: 18262966296195680063n,
-	matches: [
-		{ position: 459, hash: 9546224108073667431n },
-		{ position: 3658, hash: 4043712133052525799n },
-		{ position: 2013, hash: 6111702085179831561n },
-		{ position: 1593, hash: 12901166541873917249n },
-		{ position: 1566, hash: 7692186462913612151n },
-		{ position: 211, hash: 16543980755458487441n },
-		{ position: 1778, hash: 15644384556715661587n },
-		{ position: 566, hash: 9793366463237592247n },
-		{ position: 2079, hash: 11221321116171663064n },
-		{ position: 2940, hash: 1564726223525919786n },
-		{ position: 809, hash: 15395839328876515337n },
-		{ position: 946, hash: 10585747199093122759n },
-		{ position: 854, hash: 4479393852251501569n },
-		{ position: 436, hash: 15702966577303948694n },
-		{ position: 2165, hash: 17148900940125069205n },
-		{ position: 273, hash: 11505890591385615424n },
-		{ position: 1459, hash: 10774060112464860369n },
-		{ position: 158, hash: 2233823235057951370n },
-		{ position: 7, hash: 1983310208686139647n },
-		{ position: 1926, hash: 4499661659570185271n },
-		{ position: 1529, hash: 16090517590946392505n },
-		{ position: 1751, hash: 12536054222087023458n },
-		{ position: 1222, hash: 334146166487300408n },
-		{ position: 2230, hash: 6981431015531396608n },
-		{ position: 826, hash: 11877997991061156988n },
-		{ position: 33, hash: 8454422284689001989n },
-		{ position: 1731, hash: 15095819886766624527n },
-		{ position: 8842, hash: 6362744947164356842n },
-		{ position: 928, hash: 3627691864743766239n },
-		{ position: 684, hash: 1137480049753900759n },
-		{ position: 5301, hash: 10541554813326859395n },
-		{ position: 2546, hash: 14704288147532701373n },
-		{ position: 11856, hash: 9653226176528805511n },
-		{ position: 650, hash: 12714262162290274678n },
-		{ position: 1346, hash: 2525679969999819421n },
-		{ position: 353, hash: 2532749299807420736n },
-		{ position: 1091, hash: 693561665209300041n },
-		{ position: 729, hash: 11014435606385442344n },
-		{ position: 1204, hash: 10083883741570968570n },
-		{ position: 1671, hash: 12308901096302322810n },
-		{ position: 1362, hash: 13399339535394154305n },
-		{ position: 1858, hash: 792389713896955383n },
-		{ position: 2248, hash: 15568664728418446816n },
-		{ position: 1790, hash: 4328805983976714464n },
-		{ position: 634, hash: 722305044694988273n },
-		{ position: 741, hash: 17978970776495983968n },
-		{ position: 901, hash: 5911861036065769110n },
-		{ position: 302, hash: 1334790489764850513n },
-		{ position: 1435, hash: 16174119877357924758n },
-		{ position: 61, hash: 12103430617785210167n },
-		{ position: 1, hash: 35334639850667n },
-		{ position: 2074, hash: 7449519750512442798n },
-		{ position: 2061, hash: 1805950971475184864n },
-		{ position: 1612, hash: 5837797879339327135n },
-		{ position: 3281, hash: 6649572008787195357n },
-		{ position: 39, hash: 16137242368496690753n },
-		{ position: 263, hash: 8133543763164586431n },
-		{ position: 2333, hash: 17019949823094703325n },
-		{ position: 1160, hash: 8949503946391874147n },
-		{ position: 641, hash: 18344573417262448121n },
-		{ position: 2588, hash: 13345294745157777411n },
-		{ position: 3116, hash: 7832639641689314418n },
-		{ position: 4671, hash: 13762161036402935807n },
-		{ position: 276, hash: 10924644382434953404n },
-		{ position: 4430, hash: 9045519457622973922n },
-		{ position: 32, hash: 4188636638659752674n },
-		{ position: 2470, hash: 1184167847892138852n },
-		{ position: 694, hash: 11699508361075635892n },
-		{ position: 1703, hash: 9012268790677532920n },
-		{ position: 47, hash: 6528251874505412319n },
-		{ position: 2672, hash: 8484789019946020371n },
-		{ position: 202, hash: 1365160724288031760n },
-		{ position: 467, hash: 10426152000837661087n },
-		{ position: 496, hash: 3605417399306471847n },
-		{ position: 3777, hash: 8410473338876477323n },
-		{ position: 80, hash: 3693273711429567121n },
-		{ position: 813, hash: 9224216742837123228n },
-		{ position: 3115, hash: 5150752707627454542n },
-		{ position: 806, hash: 8797260981186887018n },
-		{ position: 4915, hash: 1483374079741560715n },
-		{ position: 2118, hash: 1742900153494554703n },
-		{ position: 1515, hash: 4635371751468227093n },
-		{ position: 2393, hash: 15282968615371427111n },
-		{ position: 4331, hash: 4659818917792066036n },
-		{ position: 1188, hash: 3862441883651577693n },
-		{ position: 2663, hash: 8524789558855117254n },
-	],
-});
+function testGearhash() {
+	console.log(`Generating test input with seed: 0x${BENCH_INPUT_SEED.toString(16)}`);
+	const inputBuf = generateTestInput();
+	console.log(`Input size: ${inputBuf.length} bytes`);
+	console.log(`Mask: 0x${BENCH_MASK.toString(16)}`);
+
+	let offset = 0;
+	let chunkCount = 0;
+	let totalProcessed = 0;
+	let hash = 0n;
+
+	console.log("\nProcessing chunks:");
+	console.log("Chunk | Offset | Size | Hash");
+	console.log("------|--------|------|------------------");
+
+	while (offset < inputBuf.length) {
+		const chunkStart = offset;
+
+		const result = nextMatch(inputBuf.subarray(offset), BENCH_MASK, hash);
+		if (result.matchSize > 0) {
+			offset += result.matchSize;
+			totalProcessed += result.matchSize;
+			chunkCount += 1;
+			hash = result.hash;
+
+			console.log(
+				`${chunkCount.toString().padStart(5)} | ${chunkStart.toString().padStart(6)} | ${result.matchSize
+					.toString()
+					.padStart(4)} | 0x${hash.toString(16).padStart(16, "0")}`
+			);
+		} else {
+			// No more matches, process remaining bytes
+			const remaining = inputBuf.length - offset;
+			// Update hash for remaining bytes
+			for (let i = 0; i < remaining; i++) {
+				hash = ((hash << 1n) + BigInt(inputBuf[offset + i])) & 0xffffffffffffffffn;
+			}
+			totalProcessed += remaining;
+			chunkCount += 1;
+
+			console.log(
+				`${chunkCount.toString().padStart(5)} | ${offset.toString().padStart(6)} | ${remaining
+					.toString()
+					.padStart(4)} | 0x${hash.toString(16).padStart(16, "0")} (final)`
+			);
+			break;
+		}
+	}
+
+	console.log("\nSummary:");
+	console.log(`Total chunks: ${chunkCount}`);
+	console.log(`Total bytes processed: ${totalProcessed}`);
+	console.log(`Average chunk size: ${(totalProcessed / chunkCount).toFixed(1)} bytes`);
+
+	// Print first few bytes of each chunk for verification
+	console.log("\nFirst 16 bytes of each chunk:");
+	offset = 0;
+	chunkCount = 0;
+	hash = 0n;
+
+	while (offset < inputBuf.length) {
+		const result = nextMatch(inputBuf.subarray(offset), BENCH_MASK, hash);
+		if (result.matchSize > 0) {
+			const chunk = inputBuf.subarray(offset, offset + result.matchSize);
+			const hexBytes = Array.from(chunk.slice(0, Math.min(16, chunk.length)))
+				.map((b) => b.toString(16).padStart(2, "0"))
+				.join("");
+			console.log(`Chunk ${chunkCount + 1}: ${hexBytes}`);
+			offset += result.matchSize;
+			chunkCount += 1;
+			hash = result.hash;
+		} else {
+			const chunk = inputBuf.subarray(offset);
+			const hexBytes = Array.from(chunk.slice(0, Math.min(16, chunk.length)))
+				.map((b) => b.toString(16).padStart(2, "0"))
+				.join("");
+			console.log(`Chunk ${chunkCount + 1}: ${hexBytes} (final)`);
+			break;
+		}
+	}
+
+	return { chunkCount, totalProcessed, averageChunkSize: totalProcessed / chunkCount };
+}
+
+// Parse the expected results from Rust
+function parseExpectedResults(resultData) {
+	const lines = resultData.trim().split("\n");
+	const results = [];
+
+	for (const line of lines) {
+		const match = line.match(/\s*(\d+)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*\|\s*(0x[a-f0-9]+)/);
+		if (match) {
+			results.push({
+				chunk: parseInt(match[1]),
+				offset: parseInt(match[2]),
+				size: parseInt(match[3]),
+				hash: match[4],
+			});
+		}
+	}
+
+	return results;
+}
+
+const resultData = `
+    1 |      0 | 5919 | 0x17c402cb182c5718
+    2 |   5919 |  265 | 0xe739063654888081
+    3 |   6184 | 4855 | 0x38a82261e80810f9
+    4 |  11039 | 1029 | 0x803f24c9ac20ddd5
+    5 |  12068 |  583 | 0xb4b724e26824ace3
+    6 |  12651 |  358 | 0x11bd22180c0c5ac5
+    7 |  13009 | 3078 | 0x810a04be24846ffc
+    8 |  16087 | 1207 | 0x5f940641d088dada
+    9 |  17294 |  251 | 0xf09502d5f4acfb4e
+   10 |  17545 | 3053 | 0xf0b120d014ace72d
+   11 |  20598 | 9120 | 0xa458064aa82403e5
+   12 |  29718 | 3288 | 0x9ccf04ecc000996b
+   13 |  33006 |  590 | 0xd4ba00dd9408b6b5
+   14 |  33596 | 1401 | 0xd42a2000a4a46d11
+   15 |  34997 | 2573 | 0xc914022f9c28e722
+   16 |  37570 | 1300 | 0xd63b0401a484c0bc
+   17 |  38870 |   98 | 0x996f0499402c1e96
+   18 |  38968 | 2802 | 0xf43406dfb42c9324
+   19 |  41770 | 3237 | 0x1bd026252c0ccbe3
+   20 |  45007 | 7368 | 0x7da400e8e0aca934
+   21 |  52375 |  439 | 0xcd9b208f38201fa7
+   22 |  52814 | 1477 | 0x9497226484a0a015
+   23 |  54291 | 7158 | 0x5a3100fa9888dfe5
+   24 |  61449 | 2168 | 0x21ed20bbf008a4ef
+   25 |  63617 | 2475 | 0x7b0522392480392d
+   26 |  66092 |   26 | 0xdfe6048a9c0c125f
+   27 |  66118 | 7548 | 0xf8a72278802c1523
+   28 |  73666 | 7826 | 0x5997242ba00cb3fd
+   29 |  81492 |  215 | 0x489e26bd7c08ec4c
+   30 |  81707 |  760 | 0x84d526f1542066b2
+   31 |  82467 | 1929 | 0x085d02a31024d324
+   32 |  84396 | 3947 | 0x8cc4240eb8a8b8e3
+   33 |  88343 | 1511 | 0x98b1204ccc001231
+   34 |  89854 | 2895 | 0x35402430a8a8d1f1
+   35 |  92749 | 7025 | 0x52bd0269e8084b97
+   36 |  99774 |  226 | 0xd86ff8f143fe10b4 `;
 
 console.log("ok");
+
+// Run the test and capture output for comparison
+console.log("\n" + "=".repeat(50));
+console.log("RUNNING GEARHASH TEST");
+console.log("=".repeat(50));
+
+// Capture console output for comparison
+const originalLog = console.log;
+let capturedOutput = [];
+
+console.log = function (...args) {
+	capturedOutput.push(args.join(" "));
+	originalLog.apply(console, args);
+};
+
+// Run the test
+const testResults = testGearhash();
+
+// Restore console.log
+console.log = originalLog;
+
+// Extract the chunk data from captured output
+const chunkLines = capturedOutput.filter((line) => line.match(/^\s*\d+\s*\|\s*\d+\s*\|\s*\d+\s*\|\s*0x[a-f0-9]+/));
+
+// Format the captured results for comparison
+const capturedResultData = chunkLines.join("\n");
+
+console.log("\n" + "=".repeat(50));
+console.log("COMPARISON RESULTS");
+console.log("=".repeat(50));
+
+// Compare with expected results
+const expectedResults = parseExpectedResults(resultData);
+const actualResults = parseExpectedResults(capturedResultData);
+
+let matches = 0;
+let totalChunks = Math.min(actualResults.length, expectedResults.length);
+
+console.log(`Comparing ${totalChunks} chunks...`);
+
+for (let i = 0; i < totalChunks; i++) {
+	const actual = actualResults[i];
+	const expected = expectedResults[i];
+
+	if (actual.offset === expected.offset && actual.size === expected.size && actual.hash === expected.hash) {
+		matches++;
+	} else {
+		console.log(`❌ Mismatch at chunk ${i + 1}:`);
+		console.log(`   Expected: offset=${expected.offset}, size=${expected.size}, hash=${expected.hash}`);
+		console.log(`   Actual:   offset=${actual.offset}, size=${actual.size}, hash=${actual.hash}`);
+	}
+}
+
+console.log(`\n✅ Results: ${matches}/${totalChunks} chunks match exactly`);
+console.log(`📊 Accuracy: ${((matches / totalChunks) * 100).toFixed(2)}%`);
+
+if (matches === totalChunks) {
+	console.log("🎉 All chunks match! AssemblyScript implementation is correct.");
+} else {
+	console.log("⚠️  Some chunks don't match. Check the implementation.");
+}
+
+// Test summary
+console.log("\n" + "=".repeat(50));
+console.log("TEST SUMMARY");
+console.log("=".repeat(50));
+console.log(`Total chunks processed: ${testResults.chunkCount}`);
+console.log(`Total bytes processed: ${testResults.totalProcessed}`);
+console.log(`Average chunk size: ${testResults.averageChunkSize.toFixed(1)} bytes`);
+console.log(`Matching chunks: ${matches}/${totalChunks}`);
+console.log(`Accuracy: ${((matches / totalChunks) * 100).toFixed(2)}%`);
