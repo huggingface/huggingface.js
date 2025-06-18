@@ -11,14 +11,15 @@ import { nextMatch } from '@huggingface/gearhash-wasm';
 const data = new Uint8Array(1000000); // Example: 1MB of data
 // ... fill data with your content ...
 
-const mask = 0x0000d90003530000n; // Example mask as a BigInt, more 0s => bigger chunks
+const mask = 0x0000d90003530000n; // Example mask as a BigInt, more 1s in binary repr => bigger chunks
+//^ it has 11 1s in binary, so chunks will be ~2048 long
 const match = nextMatch(data, mask);
 const allMatches = nextMatches(data, mask).matches;
 ```
 
 The `nextMatch` function takes two parameters:
 - `data`: A Uint8Array containing the data to search through
-- `mask`: A BigInt, the bigger it is the bigger the chunks are
+- `mask`: A BigInt, the more 1s it has in its binary representation, the bigger the chunk
 
 The function returns an object with the `position` (i32) and `hash` (u64) properties
 
@@ -81,3 +82,4 @@ console.log(length, "bytes without a match, ending hash: ", hash);
 
 ## Possible improvements
 
+SIMD
