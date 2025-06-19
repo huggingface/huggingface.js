@@ -900,6 +900,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"cvlm_llama2_tokenizer/tokenizer.model"`,
 		snippets: snippets.seed_story,
 	},
+	"song-generation": {
+		prettyLabel: "SongGeneration",
+		repoName: "songgeneration",
+		repoUrl: "https://github.com/tencent-ailab/songgeneration",
+		filter: false,
+		countDownloads: `path:"ckpt/songgeneration_base_zh/model.pt"`,
+	},
 	soloaudio: {
 		prettyLabel: "SoloAudio",
 		repoName: "SoloAudio",
