@@ -907,6 +907,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"soloaudio_v2.pt"`,
 	},
+	"song-generation": {
+		prettyLabel: "song-generation",
+		repoName: "song-generation",
+		repoUrl: "https://github.com/tencent-ailab/songgeneration",
+		docsUrl: "https://github.com/tencent-ailab/songgeneration",
+		filter: false,
+		countDownloads: `path:"ckpt/songgeneration_base/model.pt"`,
+	},
 	"stable-baselines3": {
 		prettyLabel: "stable-baselines3",
 		repoName: "stable-baselines3",
