@@ -20,6 +20,7 @@ export const HARDCODED_MODEL_INFERENCE_MAPPING: Record<
 	 */
 	"black-forest-labs": {},
 	cerebras: {},
+	centml: {},
 	cohere: {},
 	"fal-ai": {},
 	"featherless-ai": {},
