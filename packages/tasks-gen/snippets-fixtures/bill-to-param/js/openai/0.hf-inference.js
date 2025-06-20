@@ -2,7 +2,7 @@ import { OpenAI } from "openai";
 
 const client = new OpenAI({
 	baseURL: "https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.1-8B-Instruct/v1",
-	apiKey: "api_token",
+	apiKey: process.env.HF_TOKEN,
 	defaultHeaders: {
 		"X-HF-Bill-To": "huggingface" 
 	}

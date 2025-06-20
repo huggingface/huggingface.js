@@ -4337,7 +4337,7 @@ describe("Templates", () => {
 		// TODO add failure cases
 	});
 
-	describe("Parsing and intepretation", () => {
+	describe("Parsing and interpretation", () => {
 		describe("should interpret an AST", () => {
 			for (const [name, text] of Object.entries(TEST_PARSED)) {
 				const ast = parse(text);

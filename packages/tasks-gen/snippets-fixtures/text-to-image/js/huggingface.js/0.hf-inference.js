@@ -1,6 +1,6 @@
 import { InferenceClient } from "@huggingface/inference";
 
-const client = new InferenceClient("api_token");
+const client = new InferenceClient(process.env.HF_TOKEN);
 
 const image = await client.textToImage({
     provider: "hf-inference",

@@ -48,6 +48,7 @@ import * as Replicate from "../providers/replicate.js";
 import * as Sambanova from "../providers/sambanova.js";
 import * as Together from "../providers/together.js";
 import type { InferenceProvider, InferenceProviderOrPolicy, InferenceTask } from "../types.js";
+import { InferenceClientInputError } from "../errors.js";
 
 export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, TaskProviderHelper>>> = {
 	"black-forest-labs": {
@@ -120,6 +121,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	novita: {
 		conversational: new Novita.NovitaConversationalTask(),
 		"text-generation": new Novita.NovitaTextGenerationTask(),
+		"text-to-video": new Novita.NovitaTextToVideoTask(),
 	},
 	nscale: {
 		"text-to-image": new Nscale.NscaleTextToImageTask(),
@@ -280,14 +282,18 @@ export function getProviderHelper(
 		return new HFInference.HFInferenceTask();
 	}
 	if (!task) {
-		throw new Error("you need to provide a task name when using an external provider, e.g. 'text-to-image'");
+		throw new InferenceClientInputError(
+			"you need to provide a task name when using an external provider, e.g. 'text-to-image'"
+		);
 	}
 	if (!(provider in PROVIDERS)) {
-		throw new Error(`Provider '${provider}' not supported. Available providers: ${Object.keys(PROVIDERS)}`);
+		throw new InferenceClientInputError(
+			`Provider '${provider}' not supported. Available providers: ${Object.keys(PROVIDERS)}`
+		);
 	}
 	const providerTasks = PROVIDERS[provider];
 	if (!providerTasks || !(task in providerTasks)) {
-		throw new Error(
+		throw new InferenceClientInputError(
 			`Task '${task}' not supported for provider '${provider}'. Available tasks: ${Object.keys(providerTasks ?? {})}`
 		);
 	}

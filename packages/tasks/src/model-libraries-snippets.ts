@@ -115,6 +115,79 @@ export const bm25s = (model: ModelData): string[] => [
 retriever = BM25HF.load_from_hub("${model.id}")`,
 ];
 
+export const chatterbox = (): string[] => [
+	`# pip install chatterbox-tts
+import torchaudio as ta
+from chatterbox.tts import ChatterboxTTS
+
+model = ChatterboxTTS.from_pretrained(device="cuda")
+
+text = "Ezreal and Jinx teamed up with Ahri, Yasuo, and Teemo to take down the enemy's Nexus in an epic late-game pentakill."
+wav = model.generate(text)
+ta.save("test-1.wav", wav, model.sr)
+
+# If you want to synthesize with a different voice, specify the audio prompt
+AUDIO_PROMPT_PATH="YOUR_FILE.wav"
+wav = model.generate(text, audio_prompt_path=AUDIO_PROMPT_PATH)
+ta.save("test-2.wav", wav, model.sr)`,
+];
+
+export const contexttab = (): string[] => {
+	const installSnippet = `pip install git+https://github.com/SAP-samples/contexttab`;
+
+	const classificationSnippet = `# Run a classification task
+from sklearn.datasets import load_breast_cancer
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+
+from contexttab import ConTextTabClassifier
+
+# Load sample data
+X, y = load_breast_cancer(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
+
+# Initialize a classifier
+# You can omit checkpoint and checkpoint_revision to use the default model
+clf = ConTextTabClassifier(checkpoint="l2/base.pt", checkpoint_revision="v1.0.0", bagging=1, max_context_size=2048)
+
+clf.fit(X_train, y_train)
+
+# Predict probabilities
+prediction_probabilities = clf.predict_proba(X_test)
+# Predict labels
+predictions = clf.predict(X_test)
+print("Accuracy", accuracy_score(y_test, predictions))`;
+
+	const regressionsSnippet = `# Run a regression task
+from sklearn.datasets import fetch_openml
+from sklearn.metrics import r2_score
+from sklearn.model_selection import train_test_split
+
+from contexttab import ConTextTabRegressor
+
+
+# Load sample data
+df = fetch_openml(data_id=531, as_frame=True)
+X = df.data
+y = df.target.astype(float)
+
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
+
+# Initialize the regressor
+# You can omit checkpoint and checkpoint_revision to use the default model
+regressor = ConTextTabRegressor(checkpoint="l2/base.pt", checkpoint_revision="v1.0.0", bagging=1, max_context_size=2048)
+
+regressor.fit(X_train, y_train)
+
+# Predict on the test set
+predictions = regressor.predict(X_test)
+
+r2 = r2_score(y_test, predictions)
+print("R² Score:", r2)`;
+	return [installSnippet, classificationSnippet, regressionsSnippet];
+};
+
 export const cxr_foundation = (): string[] => [
 	`# pip install git+https://github.com/Google-Health/cxr-foundation.git#subdirectory=python
 
@@ -661,7 +734,9 @@ model.score("query", ["doc1", "doc2", "doc3"])`,
 
 export const llama_cpp_python = (model: ModelData): string[] => {
 	const snippets = [
-		`from llama_cpp import Llama
+		`# !pip install llama-cpp-python
+
+from llama_cpp import Llama
 
 llm = Llama.from_pretrained(
 	repo_id="${model.id}",
@@ -714,6 +789,9 @@ export const matanyone = (model: ModelData): string[] => [
 
 from matanyone.model.matanyone import MatAnyone
 model = MatAnyone.from_pretrained("${model.id}")`,
+	`
+from matanyone import InferenceCore
+processor = InferenceCore("${model.id}")`,
 ];
 
 export const mesh_anything = (): string[] => [
@@ -1330,6 +1408,24 @@ export const voicecraft = (model: ModelData): string[] => [
 	`from voicecraft import VoiceCraft
 
 model = VoiceCraft.from_pretrained("${model.id}")`,
+];
+
+export const vui = (): string[] => [
+	`# !pip install git+https://github.com/fluxions-ai/vui
+
+import torchaudio
+
+from vui.inference import render
+from vui.model import Vui,
+
+model = Vui.from_pretrained().cuda()
+waveform = render(
+    model,
+    "Hey, here is some random stuff, usually something quite long as the shorter the text the less likely the model can cope!",
+)
+print(waveform.shape)
+torchaudio.save("out.opus", waveform[0], 22050)
+`,
 ];
 
 export const chattts = (): string[] => [

@@ -5,7 +5,7 @@ import { sum } from "../utils/sum";
 describe("parseSafetensorsMetadata", () => {
 	it("fetch info for single-file (with the default conventional filename)", async () => {
 		const parse = await parseSafetensorsMetadata({
-			repo: "bert-base-uncased",
+			repo: "google-bert/bert-base-uncased",
 			computeParametersCount: true,
 			revision: "86b5e0934494bd15c9632b12f734a8a67f723594",
 		});
@@ -88,7 +88,7 @@ describe("parseSafetensorsMetadata", () => {
 		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 859_520_964);
 	});
 
-	it("fetch info for sharded (with the default conventional filename) with file path", async () => {
+	it("fetch info for sharded with file path", async () => {
 		const parse = await parseSafetensorsMetadata({
 			repo: "Alignment-Lab-AI/ALAI-gemma-7b",
 			computeParametersCount: true,
@@ -108,6 +108,29 @@ describe("parseSafetensorsMetadata", () => {
 
 		assert.deepStrictEqual(parse.parameterCount, { BF16: 8_537_680_896 });
 		assert.deepStrictEqual(sum(Object.values(parse.parameterCount)), 8_537_680_896);
+	});
+
+	it("fetch info for sharded, but get param count directly from metadata", async () => {
+		const parse = await parseSafetensorsMetadata({
+			repo: "hf-internal-testing/sharded-model-metadata-num-parameters",
+			computeParametersCount: true,
+			revision: "999395eb3db277f3d7a0393402b02486ca91cef8",
+		});
+
+		assert(parse.sharded);
+		assert.deepStrictEqual(parse.parameterTotal, 109_482_240);
+		// total params = 109M
+	});
+
+	it("fetch info for single-file, but get param count directly from metadata", async () => {
+		const parse = await parseSafetensorsMetadata({
+			repo: "hf-internal-testing/single-file-model",
+			computeParametersCount: true,
+			revision: "75fcd3fed0285ac7f1092897ff2aefdf24bf872e",
+		});
+
+		assert(!parse.sharded);
+		assert.deepStrictEqual(parse.parameterTotal, 109_482_240);
 	});
 
 	it("should detect sharded safetensors filename", async () => {

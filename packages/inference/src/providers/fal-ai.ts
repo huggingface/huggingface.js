@@ -17,7 +17,6 @@
 import { base64FromBytes } from "../utils/base64FromBytes.js";
 
 import type { AutomaticSpeechRecognitionOutput } from "@huggingface/tasks";
-import { InferenceOutputError } from "../lib/InferenceOutputError.js";
 import { isUrl } from "../lib/isUrl.js";
 import type { BodyParams, HeaderParams, ModelId, RequestArgs, UrlParams } from "../types.js";
 import { delay } from "../utils/delay.js";
@@ -30,6 +29,11 @@ import {
 } from "./providerHelper.js";
 import { HF_HUB_URL } from "../config.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
+import {
+	InferenceClientInputError,
+	InferenceClientProviderApiError,
+	InferenceClientProviderOutputError,
+} from "../errors.js";
 
 export interface FalAiQueueOutput {
 	request_id: string;
@@ -122,7 +126,7 @@ export class FalAITextToImageTask extends FalAITask implements TextToImageTaskHe
 			return await urlResponse.blob();
 		}
 
-		throw new InferenceOutputError("Expected Fal.ai text-to-image response format");
+		throw new InferenceClientProviderOutputError("Received malformed response from Fal.ai text-to-image API");
 	}
 }
 
@@ -150,11 +154,13 @@ export class FalAITextToVideoTask extends FalAITask implements TextToVideoTaskHe
 		headers?: Record<string, string>
 	): Promise<Blob> {
 		if (!url || !headers) {
-			throw new InferenceOutputError("URL and headers are required for text-to-video task");
+			throw new InferenceClientInputError("URL and headers are required for text-to-video task");
 		}
 		const requestId = response.request_id;
 		if (!requestId) {
-			throw new InferenceOutputError("No request ID found in the response");
+			throw new InferenceClientProviderOutputError(
+				"Received malformed response from Fal.ai text-to-video API: no request ID found in the response"
+			);
 		}
 		let status = response.status;
 
@@ -176,12 +182,22 @@ export class FalAITextToVideoTask extends FalAITask implements TextToVideoTaskHe
 			const statusResponse = await fetch(statusUrl, { headers });
 
 			if (!statusResponse.ok) {
-				throw new InferenceOutputError("Failed to fetch response status from fal-ai API");
+				throw new InferenceClientProviderApiError(
+					"Failed to fetch response status from fal-ai API",
+					{ url: statusUrl, method: "GET" },
+					{
+						requestId: statusResponse.headers.get("x-request-id") ?? "",
+						status: statusResponse.status,
+						body: await statusResponse.text(),
+					}
+				);
 			}
 			try {
 				status = (await statusResponse.json()).status;
 			} catch (error) {
-				throw new InferenceOutputError("Failed to parse status response from fal-ai API");
+				throw new InferenceClientProviderOutputError(
+					"Failed to parse status response from fal-ai API: received malformed response"
+				);
 			}
 		}
 
@@ -190,7 +206,9 @@ export class FalAITextToVideoTask extends FalAITask implements TextToVideoTaskHe
 		try {
 			result = await resultResponse.json();
 		} catch (error) {
-			throw new InferenceOutputError("Failed to parse result response from fal-ai API");
+			throw new InferenceClientProviderOutputError(
+				"Failed to parse result response from fal-ai API: received malformed response"
+			);
 		}
 		if (
 			typeof result === "object" &&
@@ -205,8 +223,10 @@ export class FalAITextToVideoTask extends FalAITask implements TextToVideoTaskHe
 			const urlResponse = await fetch(result.video.url);
 			return await urlResponse.blob();
 		} else {
-			throw new InferenceOutputError(
-				"Expected { video: { url: string } } result format, got instead: " + JSON.stringify(result)
+			throw new InferenceClientProviderOutputError(
+				`Received malformed response from Fal.ai text-to-video API: expected { video: { url: string } } result format, got instead: ${JSON.stringify(
+					result
+				)}`
 			);
 		}
 	}
@@ -221,8 +241,10 @@ export class FalAIAutomaticSpeechRecognitionTask extends FalAITask implements Au
 	override async getResponse(response: unknown): Promise<AutomaticSpeechRecognitionOutput> {
 		const res = response as FalAIAutomaticSpeechRecognitionOutput;
 		if (typeof res?.text !== "string") {
-			throw new InferenceOutputError(
-				`Expected { text: string } format from Fal.ai Automatic Speech Recognition, got: ${JSON.stringify(response)}`
+			throw new InferenceClientProviderOutputError(
+				`Received malformed response from Fal.ai Automatic Speech Recognition API: expected { text: string } format, got instead: ${JSON.stringify(
+					response
+				)}`
 			);
 		}
 		return { text: res.text };
@@ -232,12 +254,12 @@ export class FalAIAutomaticSpeechRecognitionTask extends FalAITask implements Au
 		const blob = "data" in args && args.data instanceof Blob ? args.data : "inputs" in args ? args.inputs : undefined;
 		const contentType = blob?.type;
 		if (!contentType) {
-			throw new Error(
+			throw new InferenceClientInputError(
 				`Unable to determine the input's content-type. Make sure your are passing a Blob when using provider fal-ai.`
 			);
 		}
 		if (!FAL_AI_SUPPORTED_BLOB_TYPES.includes(contentType)) {
-			throw new Error(
+			throw new InferenceClientInputError(
 				`Provider fal-ai does not support blob type ${contentType} - supported content types are: ${FAL_AI_SUPPORTED_BLOB_TYPES.join(
 					", "
 				)}`
@@ -263,21 +285,35 @@ export class FalAITextToSpeechTask extends FalAITask {
 	override async getResponse(response: unknown): Promise<Blob> {
 		const res = response as FalAITextToSpeechOutput;
 		if (typeof res?.audio?.url !== "string") {
-			throw new InferenceOutputError(
-				`Expected { audio: { url: string } } format from Fal.ai Text-to-Speech, got: ${JSON.stringify(response)}`
+			throw new InferenceClientProviderOutputError(
+				`Received malformed response from Fal.ai Text-to-Speech API: expected { audio: { url: string } } format, got instead: ${JSON.stringify(
+					response
+				)}`
+			);
+		}
+		const urlResponse = await fetch(res.audio.url);
+		if (!urlResponse.ok) {
+			throw new InferenceClientProviderApiError(
+				`Failed to fetch audio from ${res.audio.url}: ${urlResponse.statusText}`,
+				{ url: res.audio.url, method: "GET", headers: { "Content-Type": "application/json" } },
+				{
+					requestId: urlResponse.headers.get("x-request-id") ?? "",
+					status: urlResponse.status,
+					body: await urlResponse.text(),
+				}
 			);
 		}
 		try {
-			const urlResponse = await fetch(res.audio.url);
-			if (!urlResponse.ok) {
-				throw new Error(`Failed to fetch audio from ${res.audio.url}: ${urlResponse.statusText}`);
-			}
 			return await urlResponse.blob();
 		} catch (error) {
-			throw new InferenceOutputError(
-				`Error fetching or processing audio from Fal.ai Text-to-Speech URL: ${res.audio.url}. ${
-					error instanceof Error ? error.message : String(error)
-				}`
+			throw new InferenceClientProviderApiError(
+				`Failed to fetch audio from ${res.audio.url}: ${error instanceof Error ? error.message : String(error)}`,
+				{ url: res.audio.url, method: "GET", headers: { "Content-Type": "application/json" } },
+				{
+					requestId: urlResponse.headers.get("x-request-id") ?? "",
+					status: urlResponse.status,
+					body: await urlResponse.text(),
+				}
 			);
 		}
 	}
