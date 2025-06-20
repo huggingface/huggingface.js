@@ -1283,13 +1283,13 @@ export const transformers = (model: ModelData): string[] => {
 		} else if (model.pipeline_tag === "zero-shot-image-classification") {
 			pipelineSnippet.push(
 				"pipe(",
-				'    "https://huggingface.co/datasets/huggingface/documentation-images/raw/main/hub/parrots.png",',
+				'    "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/parrots.png",',
 				'    candidate_labels=["animals", "humans", "landscape"],',
 				")"
 			);
 		} else if (model.pipeline_tag === "image-classification") {
 			pipelineSnippet.push(
-				'pipe("https://huggingface.co/datasets/huggingface/documentation-images/raw/main/hub/parrots.png")'
+				'pipe("https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/parrots.png")'
 			);
 		}
 
