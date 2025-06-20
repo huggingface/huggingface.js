@@ -1,0 +1,12 @@
+[package]
+name = "blake3-example"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "reference_impl"
+path = "src/lib.rs"
+
+[[bin]]
+name = "blake3-example"
+path = "src/main.rs" 
