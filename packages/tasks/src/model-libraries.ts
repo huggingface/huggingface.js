@@ -1033,7 +1033,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/PKU-YuanGroup/UniWorld-V1",
 		snippets: snippets.univa,
 		filter: true,
-		countDownloads: `path_extension:"safetensors"`,
+		countDownloads: `path:"config.json"`,
 	},
 	"uni-3dar": {
 		prettyLabel: "Uni-3DAR",
