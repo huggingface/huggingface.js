@@ -1409,7 +1409,9 @@ model = SwarmFormerModel.from_pretrained("${model.id}")
 ];
 
 export const univa = (model: ModelData): string[] => [
-	`from univa.models.qwen2p5vl.modeling_univa_qwen2p5vl import UnivaQwen2p5VLForConditionalGeneration
+	`# Follow installation instructions at https://github.com/PKU-YuanGroup/UniWorld-V1
+
+from univa.models.qwen2p5vl.modeling_univa_qwen2p5vl import UnivaQwen2p5VLForConditionalGeneration
 	model = UnivaQwen2p5VLForConditionalGeneration.from_pretrained(
         "${model.id}",
         torch_dtype=torch.bfloat16,
