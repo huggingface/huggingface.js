@@ -1283,12 +1283,14 @@ export const transformers = (model: ModelData): string[] => {
 		} else if (model.pipeline_tag === "zero-shot-image-classification") {
 			pipelineSnippet.push(
 				"pipe(",
-				'    "https://huggingface.co/datasets/Narsil/image_dummy/raw/main/parrots.png",',
+				'    "https://huggingface.co/datasets/huggingface/documentation-images/raw/main/hub/parrots.png",',
 				'    candidate_labels=["animals", "humans", "landscape"],',
 				")"
 			);
 		} else if (model.pipeline_tag === "image-classification") {
-			pipelineSnippet.push('pipe("https://huggingface.co/datasets/Narsil/image_dummy/raw/main/parrots.png")');
+			pipelineSnippet.push(
+				'pipe("https://huggingface.co/datasets/huggingface/documentation-images/raw/main/hub/parrots.png")'
+			);
 		}
 
 		return [pipelineSnippet.join("\n"), autoSnippet];
