@@ -1027,7 +1027,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pt"`,
 		snippets: snippets.ultralytics,
 	},
-	"univa": {
+	univa: {
 		prettyLabel: "univa",
 		repoName: "univa",
 		repoUrl: "https://github.com/PKU-YuanGroup/UniWorld-V1",
