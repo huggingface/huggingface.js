@@ -31,11 +31,17 @@ export interface HardwareSpec {
 	memory?: number[];
 }
 
-export const DEFAULT_MEMORY_OPTIONS = [8, 16, 24, 32, 40, 48, 64, 80, 96, 128, 256, 512];
+export const DEFAULT_MEMORY_OPTIONS = [
+	8, 16, 24, 32, 40, 48, 64, 80, 96, 128, 192, 256, 384, 512, 768, 1024, 1536, 2048,
+];
 
 export const SKUS = {
 	GPU: {
 		NVIDIA: {
+			B200: {
+				tflops: 496.6,
+				memory: [192],
+			},
 			H200: {
 				tflops: 241.3,
 				memory: [141],
@@ -278,7 +284,7 @@ export const SKUS = {
 			},
 			"RTX 2080 Ti": {
 				tflops: 26.9,
-				memory: [11],
+				memory: [11, 22], // 22GB: modded 2080ti
 			},
 			"RTX 2080": {
 				tflops: 20.14,
@@ -338,6 +344,10 @@ export const SKUS = {
 			},
 			T4: {
 				tflops: 65.13,
+				memory: [16],
+			},
+			T10: {
+				tflops: 20.0,
 				memory: [16],
 			},
 			V100: {
@@ -533,6 +543,15 @@ export const SKUS = {
 			},
 			"Xeon 2th Generation (Cascade Lake)": {
 				tflops: 0.55,
+			},
+			"Xeon E5v4 (Broadwell)": {
+				tflops: 0.25,
+			},
+			"Xeon E5v3 (Haswell)": {
+				tflops: 0.2,
+			},
+			"Xeon E5v2 (Ivy Bridge)": {
+				tflops: 0.15,
 			},
 			"Intel Core Ultra 7 265KF": {
 				tflops: 1.53,

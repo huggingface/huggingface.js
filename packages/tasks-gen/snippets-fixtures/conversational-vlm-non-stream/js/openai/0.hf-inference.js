@@ -2,7 +2,7 @@ import { OpenAI } from "openai";
 
 const client = new OpenAI({
 	baseURL: "https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.2-11B-Vision-Instruct/v1",
-	apiKey: "api_token",
+	apiKey: process.env.HF_TOKEN,
 });
 
 const chatCompletion = await client.chat.completions.create({

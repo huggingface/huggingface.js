@@ -34,7 +34,8 @@
 		"prepare": "pnpm run build",
 		"test": "vitest run",
 		"check": "tsc",
-		"cli": "tsx src/cli.ts"
+		"cli": "tsx src/cli.ts",
+		"cli:watch": "tsx watch src/cli.ts"
 	},
 	"files": [
 		"src",
@@ -54,6 +55,7 @@
 		"@huggingface/inference": "workspace:^",
 		"@huggingface/mcp-client": "workspace:^",
 		"@huggingface/tasks": "workspace:^",
+		"@huggingface/hub": "workspace:^",
 		"@modelcontextprotocol/sdk": "^1.11.4",
 		"zod": "^3.25.7"
 	}

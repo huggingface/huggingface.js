@@ -3,7 +3,7 @@
  *
  * I want to build a class to manage ranges
  *
- * I can add ranges to it with a start& an end (both integer, end > start). It should store those ranges efficently.
+ * I can add ranges to it with a start& an end (both integer, end > start). It should store those ranges efficiently.
  *
  * When several ranges overlap, eg [1, 100] and [30, 50], I want the class to split the range into non-overlapping ranges, and add a "ref counter" to the ranges. For example,  [1, 30], [30, 50] * 2, [50, 100]
  *
@@ -15,7 +15,7 @@
  *
  * I want to be able to associate data to each range. And I want to be able to get the ranges inside boundaries. For example , with [1, 30], [30, 50] * 2, [50, 100] configuration
  *
- * - getting [30, 100] => I receive [30, 50] * 2, [50, 100], and I can get / modify the data assocaited to each range by accessing their data prop. Note the "*2" is just the ref counter, there is onlly one range object for the interval returned
+ * - getting [30, 100] => I receive [30, 50] * 2, [50, 100], and I can get / modify the data associated to each range by accessing their data prop. Note the "*2" is just the ref counter, there is onlly one range object for the interval returned
  * - getting [2, 50] => I get [30, 50] * 2
  *
  * ----
