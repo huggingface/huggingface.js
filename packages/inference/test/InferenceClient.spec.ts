@@ -2172,7 +2172,7 @@ describe.skip("InferenceClient", () => {
 
 			it(`imageToImage - HiDream-ai/HiDream-E1-Full`, async () => {
 				const res = await client.imageToImage({
-					model: "wavespeed-ai/hidream-e1-full",
+					model: "HiDream-ai/HiDream-E1-Full",
 					provider: "wavespeed-ai",
 					inputs: new Blob([readTestFile("cheetah.png")], { type: "image / png" }),
 					parameters: {
