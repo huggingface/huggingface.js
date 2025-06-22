@@ -118,12 +118,6 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 			}
 
 			const result: WaveSpeedAIResponse = await resultResponse.json();
-			if (result.code !== 200) {
-				throw new InferenceClientProviderOutputError(
-					`API request to WaveSpeed AI API failed with code ${result.code}: ${result.message}`
-				);
-			}
-
 			const taskResult = result.data;
 
 			switch (taskResult.status) {
@@ -137,7 +131,7 @@ abstract class WavespeedAITask extends TaskProviderHelper {
 					const mediaResponse = await fetch(taskResult.outputs[0]);
 					if (!mediaResponse.ok) {
 						throw new InferenceClientProviderApiError(
-							"Failed to fetch response status from WaveSpeed AI API",
+							"Failed to fetch generation output from WaveSpeed AI API",
 							{ url: taskResult.outputs[0], method: "GET" },
 							{
 								requestId: mediaResponse.headers.get("x-request-id") ?? "",

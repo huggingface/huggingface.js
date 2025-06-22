@@ -2081,25 +2081,29 @@ describe.skip("InferenceClient", () => {
 			const client = new InferenceClient(env.HF_WAVESPEED_KEY ?? "dummy");
 
 			HARDCODED_MODEL_INFERENCE_MAPPING["wavespeed-ai"] = {
-				"wavespeed-ai/flux-schnell": {
+				"black-forest-labs/FLUX.1-schnell": {
+					provider: "wavespeed-ai",
 					hfModelId: "wavespeed-ai/flux-schnell",
 					providerId: "wavespeed-ai/flux-schnell",
 					status: "live",
 					task: "text-to-image",
 				},
-				"wavespeed-ai/wan-2.1/t2v-480p": {
+				"Wan-AI/Wan2.1-T2V-14B": {
+					provider: "wavespeed-ai",
 					hfModelId: "wavespeed-ai/wan-2.1/t2v-480p",
 					providerId: "wavespeed-ai/wan-2.1/t2v-480p",
 					status: "live",
 					task: "text-to-video",
 				},
-				"wavespeed-ai/hidream-e1-full": {
+				"HiDream-ai/HiDream-E1-Full": {
+					provider: "wavespeed-ai",
 					hfModelId: "wavespeed-ai/hidream-e1-full",
 					providerId: "wavespeed-ai/hidream-e1-full",
 					status: "live",
 					task: "image-to-image",
 				},
 				"openfree/flux-chatgpt-ghibli-lora": {
+					provider: "wavespeed-ai",
 					hfModelId: "openfree/flux-chatgpt-ghibli-lora",
 					providerId: "wavespeed-ai/flux-dev-lora",
 					status: "live",
@@ -2108,6 +2112,7 @@ describe.skip("InferenceClient", () => {
 					adapterWeightsPath: "openfree/flux-chatgpt-ghibli-lora",
 				},
 				"linoyts/yarn_art_Flux_LoRA": {
+					provider: "wavespeed-ai",
 					hfModelId: "linoyts/yarn_art_Flux_LoRA",
 					providerId: "wavespeed-ai/flux-dev-lora-ultra-fast",
 					status: "live",
@@ -2116,10 +2121,9 @@ describe.skip("InferenceClient", () => {
 					adapterWeightsPath: "linoyts/yarn_art_Flux_LoRA",
 				},
 			};
-
-			it(`textToImage - wavespeed-ai/flux-schnell`, async () => {
+			it(`textToImage - black-forest-labs/FLUX.1-schnell`, async () => {
 				const res = await client.textToImage({
-					model: "wavespeed-ai/flux-schnell",
+					model: "black-forest-labs/FLUX.1-schnell",
 					provider: "wavespeed-ai",
 					inputs:
 						"Cute boy with a hat, exploring nature, holding a telescope, backpack, surrounded by flowers, cartoon style, vibrant colors.",
@@ -2147,9 +2151,9 @@ describe.skip("InferenceClient", () => {
 				expect(res).toBeInstanceOf(Blob);
 			});
 
-			it(`textToVideo - wavespeed-ai/wan-2.1/t2v-480p`, async () => {
+			it(`textToVideo - Wan-AI/Wan2.1-T2V-14B`, async () => {
 				const res = await client.textToVideo({
-					model: "wavespeed-ai/wan-2.1/t2v-480p",
+					model: "Wan-AI/Wan2.1-T2V-14B",
 					provider: "wavespeed-ai",
 					inputs:
 						"A cool street dancer, wearing a baggy hoodie and hip-hop pants, dancing in front of a graffiti wall, night neon background, quick camera cuts, urban trends.",
@@ -2166,7 +2170,7 @@ describe.skip("InferenceClient", () => {
 				expect(res).toBeInstanceOf(Blob);
 			});
 
-			it(`imageToImage - wavespeed-ai/hidream-e1-full`, async () => {
+			it(`imageToImage - HiDream-ai/HiDream-E1-Full`, async () => {
 				const res = await client.imageToImage({
 					model: "wavespeed-ai/hidream-e1-full",
 					provider: "wavespeed-ai",
