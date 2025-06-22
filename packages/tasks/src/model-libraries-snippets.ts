@@ -132,6 +132,62 @@ wav = model.generate(text, audio_prompt_path=AUDIO_PROMPT_PATH)
 ta.save("test-2.wav", wav, model.sr)`,
 ];
 
+export const contexttab = (): string[] => {
+	const installSnippet = `pip install git+https://github.com/SAP-samples/contexttab`;
+
+	const classificationSnippet = `# Run a classification task
+from sklearn.datasets import load_breast_cancer
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+
+from contexttab import ConTextTabClassifier
+
+# Load sample data
+X, y = load_breast_cancer(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
+
+# Initialize a classifier
+# You can omit checkpoint and checkpoint_revision to use the default model
+clf = ConTextTabClassifier(checkpoint="l2/base.pt", checkpoint_revision="v1.0.0", bagging=1, max_context_size=2048)
+
+clf.fit(X_train, y_train)
+
+# Predict probabilities
+prediction_probabilities = clf.predict_proba(X_test)
+# Predict labels
+predictions = clf.predict(X_test)
+print("Accuracy", accuracy_score(y_test, predictions))`;
+
+	const regressionsSnippet = `# Run a regression task
+from sklearn.datasets import fetch_openml
+from sklearn.metrics import r2_score
+from sklearn.model_selection import train_test_split
+
+from contexttab import ConTextTabRegressor
+
+
+# Load sample data
+df = fetch_openml(data_id=531, as_frame=True)
+X = df.data
+y = df.target.astype(float)
+
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
+
+# Initialize the regressor
+# You can omit checkpoint and checkpoint_revision to use the default model
+regressor = ConTextTabRegressor(checkpoint="l2/base.pt", checkpoint_revision="v1.0.0", bagging=1, max_context_size=2048)
+
+regressor.fit(X_train, y_train)
+
+# Predict on the test set
+predictions = regressor.predict(X_test)
+
+r2 = r2_score(y_test, predictions)
+print("R² Score:", r2)`;
+	return [installSnippet, classificationSnippet, regressionsSnippet];
+};
+
 export const cxr_foundation = (): string[] => [
 	`# pip install git+https://github.com/Google-Health/cxr-foundation.git#subdirectory=python
 
@@ -1224,6 +1280,17 @@ export const transformers = (model: ModelData): string[] => {
 				pipelineSnippet.push("messages = [", '    {"role": "user", "content": "Who are you?"},', "]");
 				pipelineSnippet.push("pipe(messages)");
 			}
+		} else if (model.pipeline_tag === "zero-shot-image-classification") {
+			pipelineSnippet.push(
+				"pipe(",
+				'    "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/parrots.png",',
+				'    candidate_labels=["animals", "humans", "landscape"],',
+				")"
+			);
+		} else if (model.pipeline_tag === "image-classification") {
+			pipelineSnippet.push(
+				'pipe("https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/parrots.png")'
+			);
 		}
 
 		return [pipelineSnippet.join("\n"), autoSnippet];
@@ -1354,7 +1421,7 @@ export const voicecraft = (model: ModelData): string[] => [
 model = VoiceCraft.from_pretrained("${model.id}")`,
 ];
 
-export const vui = (model: ModelData): string[] => [
+export const vui = (): string[] => [
 	`# !pip install git+https://github.com/fluxions-ai/vui
 
 import torchaudio

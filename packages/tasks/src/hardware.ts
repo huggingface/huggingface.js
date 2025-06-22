@@ -38,6 +38,10 @@ export const DEFAULT_MEMORY_OPTIONS = [
 export const SKUS = {
 	GPU: {
 		NVIDIA: {
+			B200: {
+				tflops: 496.6,
+				memory: [192],
+			},
 			H200: {
 				tflops: 241.3,
 				memory: [141],
