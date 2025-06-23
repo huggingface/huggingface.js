@@ -1105,7 +1105,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	smolvla: {
 		prettyLabel: "SmolVLA",
-		repoName: "🤗/lerobot",
+		repoName: "LeRobot",
 		repoUrl: "https://github.com/huggingface/lerobot",
 		docsUrl: "https://huggingface.co/docs/lerobot/smolvla",
 		filter: false,
