@@ -1280,6 +1280,17 @@ export const transformers = (model: ModelData): string[] => {
 				pipelineSnippet.push("messages = [", '    {"role": "user", "content": "Who are you?"},', "]");
 				pipelineSnippet.push("pipe(messages)");
 			}
+		} else if (model.pipeline_tag === "zero-shot-image-classification") {
+			pipelineSnippet.push(
+				"pipe(",
+				'    "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/parrots.png",',
+				'    candidate_labels=["animals", "humans", "landscape"],',
+				")"
+			);
+		} else if (model.pipeline_tag === "image-classification") {
+			pipelineSnippet.push(
+				'pipe("https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/parrots.png")'
+			);
 		}
 
 		return [pipelineSnippet.join("\n"), autoSnippet];

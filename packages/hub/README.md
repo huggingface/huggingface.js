@@ -110,7 +110,7 @@ npx @huggingface/hub --help
 npx @huggingface/hub upload --help
 ```
 
-You can also instal globally with `npm install -g @huggingface/hub`. Then you can do:
+You can also install globally with `npm install -g @huggingface/hub`. Then you can do:
 
 ```console
 hfjs upload coyotte508/test-model .

@@ -953,6 +953,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"vae_stats.json"`,
 	},
+	"tencent-song-generation": {
+		prettyLabel: "SongGeneration",
+		repoName: "songgeneration",
+		repoUrl: "https://github.com/tencent-ailab/songgeneration",
+		filter: false,
+		countDownloads: `path:"ckpt/songgeneration_base_zh/model.pt"`,
+	},
 	tensorflowtts: {
 		prettyLabel: "TensorFlowTTS",
 		repoName: "TensorFlowTTS",
