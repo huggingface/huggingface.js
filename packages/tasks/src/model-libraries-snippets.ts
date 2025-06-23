@@ -1648,7 +1648,7 @@ conda activate lerobot
 conda install ffmpeg=7.1.1 -c conda-forge
 
 # Install LeRobot with the SmolVLA extra dependencies
-pip install -e ".[${model.id}]"
+pip install -e ".[smolvla]"
 
 # Launch finetuning on your dataset
 cd lerobot && python lerobot/scripts/train.py \\
