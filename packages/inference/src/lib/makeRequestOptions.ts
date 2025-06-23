@@ -1,7 +1,6 @@
 import { HF_HEADER_X_BILL_TO, HF_HUB_URL } from "../config.js";
 import { PACKAGE_NAME, PACKAGE_VERSION } from "../package.js";
-import type { InferenceTask, Options, RequestArgs } from "../types.js";
-import type { InferenceProviderMappingEntry } from "./getInferenceProviderMapping.js";
+import type { InferenceTask, InferenceProviderMappingEntry, Options, RequestArgs } from "../types.js";
 import { getInferenceProviderMapping } from "./getInferenceProviderMapping.js";
 import type { getProviderHelper } from "./getProviderHelper.js";
 import { isUrl } from "./isUrl.js";

@@ -1,5 +1,4 @@
-import type { InferenceProviderMappingEntry } from "../lib/getInferenceProviderMapping.js";
-import type { InferenceProvider } from "../types.js";
+import type { InferenceProvider, InferenceProviderMappingEntry } from "../types.js";
 import { type ModelId } from "../types.js";
 
 /**
