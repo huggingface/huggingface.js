@@ -1103,7 +1103,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"model_vae_fp16.pt"`,
 		snippets: snippets.threedtopia_xl,
 	},
-	smolvla: {
+	lerobot: {
 		prettyLabel: "SmolVLA",
 		repoName: "LeRobot",
 		repoUrl: "https://github.com/huggingface/lerobot",
