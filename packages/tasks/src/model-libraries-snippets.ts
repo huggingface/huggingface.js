@@ -1652,7 +1652,7 @@ pip install -e ".[smolvla]"
 
 # Launch finetuning on your dataset
 cd lerobot && python lerobot/scripts/train.py \\
-  --policy.path=lerobot/smolvla_base \\
+  --policy.path=${model.id} \\
   --dataset.repo_id=lerobot/svla_so101_pickplace \\
   --batch_size=64 \\
   --steps=20000 \\
