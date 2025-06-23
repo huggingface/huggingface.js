@@ -208,6 +208,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/Unbabel/COMET/",
 		countDownloads: `path:"hparams.yaml"`,
 	},
+	contexttab: {
+		prettyLabel: "ConTextTab",
+		repoName: "ConTextTab",
+		repoUrl: "https://github.com/SAP-samples/contexttab",
+		countDownloads: `path_extension:"pt"`,
+		snippets: snippets.contexttab,
+	},
 	cosmos: {
 		prettyLabel: "Cosmos",
 		repoName: "Cosmos",
@@ -939,6 +946,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"vae_stats.json"`,
 	},
+	"tencent-song-generation": {
+		prettyLabel: "SongGeneration",
+		repoName: "songgeneration",
+		repoUrl: "https://github.com/tencent-ailab/songgeneration",
+		filter: false,
+		countDownloads: `path:"ckpt/songgeneration_base_zh/model.pt"`,
+	},
 	tensorflowtts: {
 		prettyLabel: "TensorFlowTTS",
 		repoName: "TensorFlowTTS",
@@ -1027,6 +1041,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pt"`,
 		snippets: snippets.ultralytics,
 	},
+	univa: {
+		prettyLabel: "univa",
+		repoName: "univa",
+		repoUrl: "https://github.com/PKU-YuanGroup/UniWorld-V1",
+		snippets: snippets.univa,
+		filter: true,
+		countDownloads: `path:"config.json"`,
+	},
 	"uni-3dar": {
 		prettyLabel: "Uni-3DAR",
 		repoName: "Uni-3DAR",
@@ -1062,6 +1084,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/jasonppy/VoiceCraft",
 		docsUrl: "https://github.com/jasonppy/VoiceCraft",
 		snippets: snippets.voicecraft,
+	},
+	vui: {
+		prettyLabel: "Vui",
+		repoName: "Vui",
+		repoUrl: "https://github.com/vui-ai/vui",
+		countDownloads: `path_extension:"pt"`,
+		snippets: snippets.vui,
 	},
 	wham: {
 		prettyLabel: "WHAM",

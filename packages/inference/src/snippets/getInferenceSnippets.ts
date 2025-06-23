@@ -8,10 +8,9 @@ import {
 } from "@huggingface/tasks";
 import type { PipelineType, WidgetType } from "@huggingface/tasks";
 import type { ChatCompletionInputMessage, GenerationParameters } from "@huggingface/tasks";
-import type { InferenceProviderMappingEntry } from "../lib/getInferenceProviderMapping.js";
 import { getProviderHelper } from "../lib/getProviderHelper.js";
 import { makeRequestOptionsFromResolvedModel } from "../lib/makeRequestOptions.js";
-import type { InferenceProviderOrPolicy, InferenceTask, RequestArgs } from "../types.js";
+import type { InferenceProviderMappingEntry, InferenceProviderOrPolicy, InferenceTask, RequestArgs } from "../types.js";
 import { templates } from "./templates.exported.js";
 
 export type InferenceSnippetOptions = {
@@ -466,7 +465,7 @@ function replaceAccessTokenPlaceholder(
 		!endpointUrl && // custom endpointUrl => use a generic API_TOKEN
 		(provider == "hf-inference" || // hf-inference provider => use $HF_TOKEN
 			(!directRequest && // if explicit directRequest => use provider-specific token
-				(!snippet.includes("https://") || // no URL provided => using a client => use $HF_TOKEN
+				(snippet.includes("InferenceClient") || // using a client => use $HF_TOKEN
 					snippet.includes("https://router.huggingface.co")))); // explicit routed request => use $HF_TOKEN
 	const accessTokenEnvVar = useHfToken
 		? "HF_TOKEN" // e.g. routed request or hf-inference
