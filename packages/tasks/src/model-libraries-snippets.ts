@@ -786,15 +786,15 @@ python lerobot/scripts/train.py \\
 			// Inference snippet (only if not base model)
 			smolvlaSnippets.push(
 				`# Run the policy using the record function	
-python -m lerobot.record \
-  --robot.type=so101_follower \
-  --robot.port=/dev/ttyACM0 \ # <- Use your port
-  --robot.id=my_blue_follower_arm \ # <- Use your robot id
-  --robot.cameras="{ front: {type: opencv, index_or_path: 8, width: 640, height: 480, fps: 30}}" \ # <- Use your cameras
-  --dataset.single_task="Grasp a lego block and put it in the bin." \ # <- Use the same task description you used in your dataset recording
-  --dataset.repo_id=HF_USER/dataset_name \  # <- This will be the dataset name on HF Hub
-  --dataset.episode_time_s=50 \
-  --dataset.num_episodes=10 \
+python -m lerobot.record \\
+  --robot.type=so101_follower \\
+  --robot.port=/dev/ttyACM0 \\ # <- Use your port
+  --robot.id=my_blue_follower_arm \\ # <- Use your robot id
+  --robot.cameras="{ front: {type: opencv, index_or_path: 8, width: 640, height: 480, fps: 30}}" \\ # <- Use your cameras
+  --dataset.single_task="Grasp a lego block and put it in the bin." \\ # <- Use the same task description you used in your dataset recording
+  --dataset.repo_id=HF_USER/dataset_name \\  # <- This will be the dataset name on HF Hub
+  --dataset.episode_time_s=50 \\
+  --dataset.num_episodes=10 \\
   --policy.path=${model.id}`
 			);
 		}
