@@ -1736,19 +1736,36 @@ torchaudio.save("sample.wav", audio, model.autoencoder.sampling_rate)
 `,
 ];
 
-export const smolvla = (model: ModelData): string[] => [
-	`# !pip install "git+https://github.com/huggingface/lerobot.git#egg=lerobot[smolvla]"
-
-# Launch finetuning on your dataset
-cd lerobot && python lerobot/scripts/train.py \\
-  --policy.path=${model.id} \\
-  --dataset.repo_id=lerobot/svla_so101_pickplace \\
-  --batch_size=64 \\
-  --steps=20000 \\
-  --output_dir=outputs/train/my_smolvla \\
-  --job_name=my_smolvla_training \\
-  --policy.device=cuda \\
-  --wandb.enable=true`,
-];
+export const lerobot = (model: ModelData): string[] => {
+	if (model.tags.includes("smolvla")) {
+		const smolvlaSnippets = [
+			// Installation snippet
+			`# Install LeRobot from source
+git clone https://github.com/huggingface/lerobot.git
+cd lerobot
+pip install -e .[smolvla]`,
+			// Finetune snippet
+			`# Launch finetuning on your dataset
+python lerobot/scripts/train.py \\
+--policy.path=${model.id} \\
+--dataset.repo_id=lerobot/svla_so101_pickplace \\
+--batch_size=64 \\
+--steps=20000 \\
+--output_dir=outputs/train/my_smolvla \\
+--job_name=my_smolvla_training \\
+--policy.device=cuda \\
+--wandb.enable=true`,
+		];
+		if (model.id !== "lerobot/smolvla_base") {
+			// Inference snippet (only if not base model)
+			smolvlaSnippets.push(
+				`# Run the policy
+<TODO add inference snippet here>`
+			);
+		}
+		return smolvlaSnippets;
+	}
+	return [];
+};
 
 //#endregion
