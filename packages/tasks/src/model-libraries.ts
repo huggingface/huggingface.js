@@ -527,6 +527,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"litertlm"`,
 	},
+	lerobot: {
+		prettyLabel: "SmolVLA",
+		repoName: "LeRobot",
+		repoUrl: "https://github.com/huggingface/lerobot",
+		docsUrl: "https://huggingface.co/docs/lerobot/smolvla",
+		filter: false,
+		snippets: snippets.smolvla,
+	},
 	liveportrait: {
 		prettyLabel: "LivePortrait",
 		repoName: "LivePortrait",
@@ -1131,14 +1139,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"model_vae_fp16.pt"`,
 		snippets: snippets.threedtopia_xl,
-	},
-	lerobot: {
-		prettyLabel: "SmolVLA",
-		repoName: "LeRobot",
-		repoUrl: "https://github.com/huggingface/lerobot",
-		docsUrl: "https://huggingface.co/docs/lerobot/smolvla",
-		filter: false,
-		snippets: snippets.smolvla,
 	},
 } satisfies Record<string, LibraryUiElement>;
 
