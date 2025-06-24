@@ -886,7 +886,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.stable_audio_tools,
 	},
 	"monkeyocr": {
-		prettyLabel: "monkeyocr",
+		prettyLabel: "MonkeyOCR",
 		repoName: "monkeyocr",
 		repoUrl: "https://github.com/Yuliang-Liu/MonkeyOCR",
 		filter: false,
