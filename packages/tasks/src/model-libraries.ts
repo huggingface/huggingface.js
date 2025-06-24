@@ -885,6 +885,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"model.safetensors"`,
 		snippets: snippets.stable_audio_tools,
 	},
+	monkeyocr: {
+		prettyLabel: "MonkeyOCR",
+		repoName: "monkeyocr",
+		repoUrl: "https://github.com/Yuliang-Liu/MonkeyOCR",
+		filter: false,
+		countDownloads: `path:"Recognition/config.json"`,
+	},
 	"diffusion-single-file": {
 		prettyLabel: "Diffusion Single File",
 		repoName: "diffusion-single-file",
