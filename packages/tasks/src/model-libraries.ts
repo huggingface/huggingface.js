@@ -885,7 +885,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"model.safetensors"`,
 		snippets: snippets.stable_audio_tools,
 	},
-	"monkeyocr": {
+	monkeyocr: {
 		prettyLabel: "MonkeyOCR",
 		repoName: "monkeyocr",
 		repoUrl: "https://github.com/Yuliang-Liu/MonkeyOCR",
