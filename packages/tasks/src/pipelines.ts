@@ -632,6 +632,11 @@ export const PIPELINE_DATA = {
 		name: "Any-to-Any",
 		modality: "multimodal",
 	},
+	"video-to-video": {
+		name: "Video-to-Video",
+		modality: "cv",
+		hideInDatasets: true,
+	},
 	other: {
 		name: "Other",
 		modality: "other",
