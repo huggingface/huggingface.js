@@ -101,7 +101,7 @@ Would you like to learn more about the topic? Awesome! Here you can find some cu
 
 - You can use [PEFT](https://github.com/huggingface/peft) to adapt large language models in efficient way.
 - [ChatUI](https://github.com/huggingface/chat-ui) is the open-source interface to conversate with Large Language Models.
-- [text-generation-inferface](https://github.com/huggingface/text-generation-inference)
+- [text-generation-inference](https://github.com/huggingface/text-generation-inference)
 - [HuggingChat](https://huggingface.co/chat/) is a chat interface powered by Hugging Face to chat with powerful models like Meta Llama 3 70B, Mixtral 8x7B, etc.
 
 ### Documentation
