@@ -528,7 +528,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"litertlm"`,
 	},
 	lerobot: {
-		prettyLabel: "SmolVLA",
+		prettyLabel: "LeRobot",
 		repoName: "LeRobot",
 		repoUrl: "https://github.com/huggingface/lerobot",
 		docsUrl: "https://huggingface.co/docs/lerobot",
