@@ -1639,7 +1639,7 @@ torchaudio.save("sample.wav", audio, model.autoencoder.sampling_rate)
 ];
 
 export const smolvla = (model: ModelData): string[] => [
-	`## !pip install "git+https://github.com/huggingface/lerobot.git#egg=lerobot[smolvla]"
+	`# !pip install "git+https://github.com/huggingface/lerobot.git#egg=lerobot[smolvla]"
 
 # Launch finetuning on your dataset
 cd lerobot && python lerobot/scripts/train.py \\
