@@ -533,7 +533,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/huggingface/lerobot",
 		docsUrl: "https://huggingface.co/docs/lerobot",
 		filter: false,
-		snippets: snippets.smolvla,
+		snippets: snippets.lerobot,
 	},
 	liveportrait: {
 		prettyLabel: "LivePortrait",
