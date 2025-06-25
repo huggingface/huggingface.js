@@ -766,7 +766,7 @@ export const lerobot = (model: ModelData): string[] => {
 	if (model.tags.includes("smolvla")) {
 		const smolvlaSnippets = [
 			// Installation snippet
-			`# Install LeRobot from source
+			`# See https://github.com/huggingface/lerobot?tab=readme-ov-file#installation for more details
 git clone https://github.com/huggingface/lerobot.git
 cd lerobot
 pip install -e .[smolvla]`,
