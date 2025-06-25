@@ -1712,9 +1712,9 @@ wav = model.generate(descriptions)  # generates 3 samples.`,
 ];
 export const anemoi = (model: ModelData): string[] => [
 	`from anemoi.inference.runners.default import DefaultRunner
-from anemoi.inference.config import Configuration
+from anemoi.inference.config.run import RunConfiguration
 # Create Configuration
-config = Configuration(checkpoint = {"huggingface":{"repo_id":"${model.id}"}})
+config = RunConfiguration(checkpoint = {"huggingface":"${model.id}"})
 # Load Runner
 runner = DefaultRunner(config)`,
 ];
