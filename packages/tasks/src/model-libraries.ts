@@ -955,10 +955,10 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	"tencent-song-generation": {
 		prettyLabel: "SongGeneration",
-		repoName: "songgeneration",
+		repoName: "SongGeneration",
 		repoUrl: "https://github.com/tencent-ailab/songgeneration",
 		filter: false,
-		countDownloads: `path:"ckpt/songgeneration_base_zh/model.pt"`,
+		countDownloads: `path:"ckpt/songgeneration_base/model.pt"`,
 	},
 	tensorflowtts: {
 		prettyLabel: "TensorFlowTTS",
