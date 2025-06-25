@@ -527,6 +527,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"litertlm"`,
 	},
+	lerobot: {
+		prettyLabel: "LeRobot",
+		repoName: "LeRobot",
+		repoUrl: "https://github.com/huggingface/lerobot",
+		docsUrl: "https://huggingface.co/docs/lerobot",
+		filter: false,
+		snippets: snippets.lerobot,
+	},
 	liveportrait: {
 		prettyLabel: "LivePortrait",
 		repoName: "LivePortrait",
