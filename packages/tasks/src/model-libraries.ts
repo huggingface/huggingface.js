@@ -1,6 +1,6 @@
-import * as snippets from "./model-libraries-snippets.js";
 import type { ModelData } from "./model-data.js";
 import type { ElasticSearchQuery } from "./model-libraries-downloads.js";
+import * as snippets from "./model-libraries-snippets.js";
 
 /**
  * Elements configurable by a model library.
@@ -388,6 +388,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.flair,
 		filter: true,
 		countDownloads: `path:"pytorch_model.bin"`,
+	},
+	fme: {
+		prettyLabel: "fme",
+		repoName: "fme",
+		repoUrl: "https://github.com/ai2cm/ace",
+		docsUrl: "https://ai2-climate-emulator.readthedocs.io/en/latest/",
+		filter: false,
+		countDownloads: `path_extension:"tar"`,
 	},
 	"gemma.cpp": {
 		prettyLabel: "gemma.cpp",
