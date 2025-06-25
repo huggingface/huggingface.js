@@ -1,6 +1,6 @@
+import * as snippets from "./model-libraries-snippets.js";
 import type { ModelData } from "./model-data.js";
 import type { ElasticSearchQuery } from "./model-libraries-downloads.js";
-import * as snippets from "./model-libraries-snippets.js";
 
 /**
  * Elements configurable by a model library.
