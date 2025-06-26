@@ -21,9 +21,7 @@ import { isUrl } from "../lib/isUrl.js";
 import type { BodyParams, HeaderParams, ModelId, RequestArgs, UrlParams } from "../types.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
-import type {
-	ImageToImageTaskHelper
-} from "./providerHelper.js";
+import type { ImageToImageTaskHelper } from "./providerHelper.js";
 import {
 	type AutomaticSpeechRecognitionTaskHelper,
 	TaskProviderHelper,
@@ -139,7 +137,6 @@ export class FalAIImageToImageTask extends FalAITask implements ImageToImageTask
 		super("https://queue.fal.run");
 	}
 
-
 	override makeRoute(params: UrlParams): string {
 		if (params.authMethod !== "provider-key") {
 			return `/${params.model}?_subdomain=queue`;
@@ -192,7 +189,6 @@ export class FalAIImageToImageTask extends FalAITask implements ImageToImageTask
 			const statusResponse = await fetch(statusUrl, { headers });
 
 			if (!statusResponse.ok) {
-				console
 				throw new InferenceClientProviderApiError(
 					"Failed to fetch response status from fal-ai API",
 					{ url: statusUrl, method: "GET" },
