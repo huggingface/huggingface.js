@@ -7,6 +7,7 @@ import {
 	chatCompletion,
 	chatCompletionStream,
 	HfInference,
+	imageToImage,
 	InferenceClient,
 	textGeneration,
 	textToImage,
@@ -1275,6 +1276,18 @@ describe.skip("InferenceClient", () => {
 					inputs: "Kokoro is a frontier TTS model for its size of 1 Billion parameters",
 				});
 
+				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("imageToImage - FLUX Kontext Dev", async () => {
+				const res = await client.imageToImage({
+					model: "black-forest-labs/flux-kontext-dev",
+					provider: "replicate",
+					inputs: new Blob([readTestFile("stormtrooper_depth.png")], { type: "image/png" }),
+					parameters: {
+						prompt: "Change the stormtrooper armor to golden color while keeping the same pose and helmet design",
+					},
+				});
 				expect(res).toBeInstanceOf(Blob);
 			});
 		},
