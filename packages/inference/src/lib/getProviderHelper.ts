@@ -1,5 +1,6 @@
 import * as BlackForestLabs from "../providers/black-forest-labs.js";
 import * as Cerebras from "../providers/cerebras.js";
+import * as CentML from "../providers/centml";
 import * as Cohere from "../providers/cohere.js";
 import * as FalAI from "../providers/fal-ai.js";
 import * as FeatherlessAI from "../providers/featherless-ai.js";
@@ -12,6 +13,7 @@ import * as Novita from "../providers/novita.js";
 import * as Nscale from "../providers/nscale.js";
 import * as OpenAI from "../providers/openai.js";
 import * as OvhCloud from "../providers/ovhcloud.js";
+
 import type {
 	AudioClassificationTaskHelper,
 	AudioToAudioTaskHelper,
@@ -56,6 +58,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	},
 	cerebras: {
 		conversational: new Cerebras.CerebrasConversationalTask(),
+	},
+	centml: {
+		conversational: new CentML.CentMLConversationalTask(),
 	},
 	cohere: {
 		conversational: new Cohere.CohereConversationalTask(),
