@@ -16,9 +16,14 @@
  */
 import { InferenceClientProviderOutputError } from "../errors.js";
 import { isUrl } from "../lib/isUrl.js";
-import type { BodyParams, HeaderParams, UrlParams } from "../types.js";
+import type { BodyParams, HeaderParams, RequestArgs, UrlParams } from "../types.js";
 import { omit } from "../utils/omit.js";
-import { TaskProviderHelper, type ImageToImageTaskHelper, type TextToImageTaskHelper, type TextToVideoTaskHelper } from "./providerHelper.js";
+import {
+	TaskProviderHelper,
+	type ImageToImageTaskHelper,
+	type TextToImageTaskHelper,
+	type TextToVideoTaskHelper,
+} from "./providerHelper.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
 import { base64FromBytes } from "../utils/base64FromBytes.js";
 export interface ReplicateOutput {
@@ -156,24 +161,20 @@ export class ReplicateTextToVideoTask extends ReplicateTask implements TextToVid
 }
 
 export class ReplicateImageToImageTask extends ReplicateTask implements ImageToImageTaskHelper {
-	override preparePayload(params: BodyParams): Record<string, unknown> {
-		const inputs = params.args.inputs as Blob;
-		const parameters = params.args.parameters as Record<string, unknown> | undefined;
-		
+	override preparePayload(params: BodyParams<ImageToImageArgs>): Record<string, unknown> {
 		return {
 			input: {
 				...omit(params.args, ["inputs", "parameters"]),
-				...(parameters || {}),
-				prompt: parameters?.prompt || "",
-				image: inputs, // This will be processed in preparePayloadAsync
+				...params.args.parameters,
+				input_image: params.args.inputs, // This will be processed in preparePayloadAsync
 			},
 			version: params.model.includes(":") ? params.model.split(":")[1] : undefined,
 		};
 	}
 
-	async preparePayloadAsync(args: ImageToImageArgs): Promise<import("../types.js").RequestArgs> {
-		const { inputs, parameters, ...restArgs } = args;
-		
+	async preparePayloadAsync(args: ImageToImageArgs): Promise<RequestArgs> {
+		const { inputs, ...restArgs } = args;
+
 		// Convert Blob to base64 data URL
 		const bytes = new Uint8Array(await inputs.arrayBuffer());
 		const base64 = base64FromBytes(bytes);
@@ -182,10 +183,6 @@ export class ReplicateImageToImageTask extends ReplicateTask implements ImageToI
 		return {
 			...restArgs,
 			inputs: imageInput,
-			parameters: {
-				...parameters,
-				image: imageInput,
-			},
 		};
 	}
 

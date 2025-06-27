@@ -7,7 +7,6 @@ import {
 	chatCompletion,
 	chatCompletionStream,
 	HfInference,
-	imageToImage,
 	InferenceClient,
 	textGeneration,
 	textToImage,
