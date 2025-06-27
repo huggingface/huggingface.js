@@ -113,4 +113,16 @@ curl -X POST "http://localhost:8000/v1/chat/completions" \\
 		]
 	}'`);
 	});
+
+	it("docker model runner", async () => {
+		const { snippet: snippetFunc } = LOCAL_APPS["docker-model-runner"];
+		const model: ModelData = {
+			id: "bartowski/Llama-3.2-3B-Instruct-GGUF",
+			tags: ["conversational"],
+			inference: "",
+		};
+		const snippet = snippetFunc(model);
+
+		expect(snippet).toEqual(`docker model run hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:{{QUANT_TAG}}`);
+	});
 });
