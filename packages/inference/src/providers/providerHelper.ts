@@ -117,8 +117,8 @@ export abstract class TaskProviderHelper {
 	prepareHeaders(params: HeaderParams, isBinary: boolean): Record<string, string> {
 		const headers: Record<string, string> = { };
 		if (params.authMethod !== "none") {
-	        	headers['Authorization'] = `Bearer ${params.accessToken}`;
-	        }
+			headers['Authorization'] = `Bearer ${params.accessToken}`;
+		}
 		if (!isBinary) {
 			headers["Content-Type"] = "application/json";
 		}
