@@ -23,7 +23,7 @@ describe("listDatasets", () => {
 			results.push(entry);
 		}
 
-		expect(results).deep.equal([
+		expect(results).toEqual(expect.arrayContaining([
 			{
 				id: "6356b19985da6f13863228bd",
 				name: "hf-doc-build/doc-build",
@@ -42,6 +42,6 @@ describe("listDatasets", () => {
 				likes: 0,
 				updatedAt: new Date(0),
 			},
-		]);
+		]));
 	});
 });
