@@ -8,7 +8,7 @@ import type { ApiCollectionInfo } from "../types/api/api-collection";
 export interface CollectionEntry {
 	slug: string;
 	title: string;
-	description: string;
+	description?: string;
 	gating: boolean;
 	lastUpdated: Date;
 	owner: string;
@@ -59,7 +59,7 @@ export async function* listCollections(
 		 */
 		sort?: "lastModified" | "trending" | "upvotes";
 		/**
-		 * Limit the number of collections to be retruned. Maximum is 100, default is 100.
+		 *  Set to limit the number of collections returned.
 		 */
 		limit?: number;
 		hubUrl?: string;

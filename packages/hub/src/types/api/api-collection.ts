@@ -1,7 +1,7 @@
 export interface ApiCollectionInfo {
 	slug: string;
 	title: string;
-	description: string;
+	description?: string;
 	gating: boolean;
 	lastUpdated: string;
 	owner: {

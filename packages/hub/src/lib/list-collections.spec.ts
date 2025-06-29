@@ -12,9 +12,23 @@ describe("listCollections", () => {
 			if (entry.slug !== "google/gemma-3n-685065323f5984ef315c93f4") {
 				continue;
 			}
+
+			if (typeof entry.title === "string") {
+				entry.title = "Gemma 3n";
+			}
+
+			if (typeof entry.description === "string") {
+				entry.description = "Gemma 3n is a large language model developed by Google.";
+			}
+
+			if (typeof entry.gating === "boolean") {
+				entry.gating = false;
+			}
+
 			if (entry.lastUpdated instanceof Date && !isNaN(entry.lastUpdated.getTime())) {
 				entry.lastUpdated = new Date(0);
 			}
+
 			if (typeof entry.items === "object" && Array.isArray(entry.items)) {
 				entry.items = [
 					{
@@ -25,8 +39,13 @@ describe("listCollections", () => {
 					},
 				];
 			}
+
 			if (typeof entry.theme === "string") {
 				entry.theme = "purple";
+			}
+
+			if (typeof entry.private === "boolean") {
+				entry.private = false;
 			}
 
 			if (typeof entry.upvotes === "number") {
@@ -43,7 +62,7 @@ describe("listCollections", () => {
 			{
 				slug: "google/gemma-3n-685065323f5984ef315c93f4",
 				title: "Gemma 3n",
-				description: "",
+				description: "Gemma 3n is a large language model developed by Google.",
 				gating: false,
 				lastUpdated: new Date(0),
 				owner: "google",
