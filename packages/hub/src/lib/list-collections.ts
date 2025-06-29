@@ -12,6 +12,10 @@ export interface CollectionEntry {
 	gating: boolean;
 	lastUpdated: Date;
 	owner: string;
+	/*
+	 * The items list per collection is truncated to 4 items maximum.
+	 * To retrieve all items from a collection, you need to make an additional call using its collection slug.
+	 */
 	items: {
 		/**
 		 * Unique ID of the item in the collection.

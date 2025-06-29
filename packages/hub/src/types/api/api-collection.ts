@@ -7,10 +7,6 @@ export interface ApiCollectionInfo {
 	owner: {
 		name: string;
 	};
-	/*
-	 * The items list per collection is truncated to 4 items maximum.
-	 * To retrieve all items from a collection, you need to make an additional call using its collection slug.
-	 */
 	items: ApiCollectionItemInfo[];
 	theme: string;
 	private: boolean;
