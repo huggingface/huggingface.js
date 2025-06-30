@@ -215,6 +215,22 @@ export class FalAIImageToImageTask extends FalAiQueueTask implements ImageToImag
 		return `/${params.model}`;
 	}
 
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		const payload = params.args;
+		if (params.mapping?.adapter === "lora" && params.mapping.adapterWeightsPath) {
+			payload.loras = [
+				{
+					path: buildLoraPath(params.mapping.hfModelId, params.mapping.adapterWeightsPath),
+					scale: 1,
+				},
+			];
+			if (params.mapping.providerId === "fal-ai/lora") {
+				payload.model_name = "stabilityai/stable-diffusion-xl-base-1.0";
+			}
+		}
+		return payload;
+	}
+
 	async preparePayloadAsync(args: ImageToImageArgs): Promise<RequestArgs> {
 		const mimeType = args.inputs instanceof Blob ? args.inputs.type : "image/png";
 		return {
