@@ -31,7 +31,7 @@ const CUSTOM_TEMPLATE_MAPPING: ((ggufTmpl: string) => OllamaCustomMappedTemplate
 			? {
 					// for some reason, gemma2 has weird variants
 					ollamaTmpl:
-						"<start_of_turn>user\n{{ if .System }}{{ .System }} {{ end }}{{ .Prompt }}<end_of_turn>\n<start_of_turn>model\n{{ .Response }}<end_of_turn>\n",
+						'{{- range $i, $_ := .Messages }}\n{{- $last := eq (len (slice $.Messages $i)) 1 }}\n{{- if or (eq .Role "user") (eq .Role "system") }}<start_of_turn>user\n{{ .Content }}<end_of_turn>\n{{ if $last }}<start_of_turn>model\n{{ end }}\n{{- else if eq .Role "assistant" }}<start_of_turn>model\n{{ .Content }}{{ if not $last }}<end_of_turn>\n{{ end }}\n{{- end }}\n{{- end }}',
 					stop: "<end_of_turn>",
 			  }
 			: undefined,
