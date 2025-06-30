@@ -326,9 +326,9 @@ dam = DescribeAnythingModel(
 
 const diffusersDefaultPrompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
 
-const diffusersImg2ImgDefaultPrompt = "Turn this cat into a dog"
+const diffusersImg2ImgDefaultPrompt = "Turn this cat into a dog";
 
-const diffusersVideoDefaultPrompt = "A man with short gray hair plays a red electric guitar."
+const diffusersVideoDefaultPrompt = "A man with short gray hair plays a red electric guitar.";
 
 const diffusers_default = (model: ModelData) => [
 	`from diffusers import DiffusionPipeline
