@@ -140,6 +140,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-to-speech": new Replicate.ReplicateTextToSpeechTask(),
 		"text-to-video": new Replicate.ReplicateTextToVideoTask(),
 		"image-to-image": new Replicate.ReplicateImageToImageTask(),
+		"image-to-video": new Replicate.ReplicateImageToVideoTask(),
 	},
 	sambanova: {
 		conversational: new Sambanova.SambanovaConversationalTask(),
