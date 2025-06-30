@@ -1452,15 +1452,15 @@ image = sana(
 
 export const videoprism = (model: ModelData): string[] => [
 	`# Install from https://github.com/google-deepmind/videoprism
- import jax
+import jax
 import jax.numpy as jnp
 from videoprism import models as vp
 
-# Models available: ['videoprism_public_v1_base', 'videoprism_public_v1_large']
-MODEL_NAME = 'videoprism_public_v1_base'
+# Models available: ['videoprism_public_v1_base_hf', 'videoprism_public_v1_large_hf']
+MODEL_NAME = 'videoprism_public_v1_base_hf'
 
 flax_model = vp.MODELS[MODEL_NAME]()
-loaded_state = vp.load_pretrained_weights_from_hf(MODEL_NAME)
+loaded_state = vp.load_pretrained_weights(MODEL_NAME)
 
 @jax.jit
 def forward_fn(inputs, train=False):
