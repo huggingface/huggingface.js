@@ -224,9 +224,6 @@ export class FalAIImageToImageTask extends FalAiQueueTask implements ImageToImag
 					scale: 1,
 				},
 			];
-			if (params.mapping.providerId === "fal-ai/lora") {
-				payload.model_name = "stabilityai/stable-diffusion-xl-base-1.0";
-			}
 		}
 		return payload;
 	}
