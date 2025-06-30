@@ -1,0 +1,60 @@
+{
+	"name": "@huggingface/responses-server",
+	"packageManager": "pnpm@10.10.0",
+	"version": "0.1.0",
+	"type": "module",
+	"description": "Server for handling AI responses",
+	"repository": "https://github.com/huggingface/huggingface.js.git",
+	"publishConfig": {
+		"access": "public"
+	},
+	"main": "./dist/index.js",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"require": "./dist/index.js",
+			"import": "./dist/index.mjs"
+		}
+	},
+	"engines": {
+		"node": ">=18"
+	},
+	"source": "index.ts",
+	"scripts": {
+		"build": "tsup src/*.ts --format cjs,esm --clean && tsc --emitDeclarationOnly --declaration",
+		"check": "tsc",
+		"dev": "tsx watch src/index.ts",
+		"dummy": "node scripts/dummy-call.js",
+		"format": "prettier --write .",
+		"format:check": "prettier --check .",
+		"lint": "eslint --quiet --fix --ext .cjs,.ts .",
+		"lint:check": "eslint --ext .cjs,.ts .",
+		"prepublishOnly": "pnpm run build",
+		"prepare": "pnpm run build",
+		"start": "node dist/index.js"
+	},
+	"files": [
+		"src",
+		"dist",
+		"tsconfig.json"
+	],
+	"keywords": [
+		"huggingface",
+		"ai",
+		"llm",
+		"responses-api",
+		"server"
+	],
+	"author": "Hugging Face",
+	"license": "MIT",
+	"dependencies": {
+		"express": "^4.18.2",
+		"zod": "^3.22.4"
+	},
+	"devDependencies": {
+		"@types/express": "^4.17.21",
+		"tsx": "^4.7.0"
+	}
+}
