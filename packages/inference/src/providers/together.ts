@@ -47,6 +47,22 @@ export class TogetherConversationalTask extends BaseConversationalTask {
 	constructor() {
 		super("together", TOGETHER_API_BASE_URL);
 	}
+
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		const payload = super.preparePayload(params);
+		const response_format = payload.response_format as
+			| { type: "json_schema"; json_schema: { schema: unknown } }
+			| undefined;
+
+		if (response_format?.type === "json_schema" && response_format?.json_schema?.schema) {
+			payload.response_format = {
+				type: "json_object",
+				schema: response_format.json_schema.schema,
+			};
+		}
+
+		return payload;
+	}
 }
 
 export class TogetherTextGenerationTask extends BaseTextGenerationTask {
