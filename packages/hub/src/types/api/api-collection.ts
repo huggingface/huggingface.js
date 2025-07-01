@@ -163,7 +163,7 @@ export interface ApiCollectionItemCollection extends ApiCollectionItemBase {
 	type: "collection";
 	slug: string;
 	title: string;
-	description: string;
+	description?: string;
 	lastUpdated: string;
 	numberItems: number;
 	owner: ApiCollectionOwner;
