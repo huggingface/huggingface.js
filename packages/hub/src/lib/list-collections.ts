@@ -5,42 +5,6 @@ import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
 import type { ApiCollectionInfo } from "../types/api/api-collection";
 
-export interface CollectionEntry {
-	slug: string;
-	title: string;
-	description?: string;
-	gating: boolean;
-	lastUpdated: Date;
-	owner: string;
-	/*
-	 * The items list per collection is truncated to 4 items maximum.
-	 * To retrieve all items from a collection, you need to make an additional call using its collection slug.
-	 */
-	items: {
-		/**
-		 * Unique ID of the item in the collection.
-		 */
-		item_object_id: string;
-		/*
-		 * ID of the underlying object on the Hub. Can be either a repo_id, a paper id or a collection slug.
-		 * e.g. `"jbilcke-hf/ai-comic-factory"`, `"2307.09288"`, `"celinah/cerebras-function-calling-682607169c35fbfa98b30b9a"`.
-		 */
-		item_id: string;
-		/**
-		 * Type of the underlying object.
-		 */
-		item_type: "model" | "dataset" | "space" | "paper" | "collection";
-		/**
-		 * Position of the item in the collection.
-		 */
-		position: number;
-	}[];
-	theme: string;
-	private: boolean;
-	upvotes: number;
-	isUpvotedByUser: boolean;
-}
-
 export async function* listCollections(
 	params?: {
 		search?: {
@@ -72,7 +36,7 @@ export async function* listCollections(
 		 */
 		fetch?: typeof fetch;
 	} & Partial<CredentialsParams>
-): AsyncGenerator<CollectionEntry> {
+): AsyncGenerator<ApiCollectionInfo> {
 	const accessToken = params && checkCredentials(params);
 
 	let totalToFetch = params?.limit ?? Infinity;
@@ -103,24 +67,7 @@ export async function* listCollections(
 		const collections: ApiCollectionInfo[] = await res.json();
 
 		for (const collection of collections) {
-			yield {
-				slug: collection.slug,
-				title: collection.title,
-				description: collection.description,
-				gating: collection.gating,
-				lastUpdated: new Date(collection.lastUpdated),
-				owner: collection.owner.name,
-				items: collection.items.map((collectionItem) => ({
-					item_object_id: collectionItem._id,
-					item_id: collectionItem.id,
-					item_type: collectionItem.type,
-					position: collectionItem.position,
-				})),
-				theme: collection.theme,
-				private: collection.private,
-				upvotes: collection.upvotes,
-				isUpvotedByUser: collection.isUpvotedByUser,
-			} as CollectionEntry;
+			yield collection;
 
 			totalToFetch--;
 

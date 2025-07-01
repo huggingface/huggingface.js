@@ -1,84 +1,209 @@
 import { describe, expect, it } from "vitest";
-import type { CollectionEntry } from "./list-collections";
 import { listCollections } from "./list-collections";
+import type { ApiCollectionInfo } from "../types/api/api-collection";
 
 describe("listCollections", () => {
-	it("should list collections for owner Google", async () => {
-		const results: CollectionEntry[] = [];
+	it("should list collections", async () => {
+		const results: ApiCollectionInfo[] = [];
 
 		for await (const entry of listCollections({
-			search: { owner: "google" },
+			search: { owner: "quanghuynt14" },
 		})) {
-			if (entry.slug !== "google/gemma-3n-685065323f5984ef315c93f4") {
+			if (entry.slug !== "quanghuynt14/test-6862f3b263a5cc509b9ee24a") {
 				continue;
 			}
 
-			if (typeof entry.title === "string") {
-				entry.title = "Gemma 3n";
-			}
-
-			if (typeof entry.description === "string") {
-				entry.description = "Gemma 3n is a large language model developed by Google.";
-			}
-
-			if (typeof entry.gating === "boolean") {
-				entry.gating = false;
-			}
-
-			if (entry.lastUpdated instanceof Date && !isNaN(entry.lastUpdated.getTime())) {
-				entry.lastUpdated = new Date(0);
-			}
-
-			if (typeof entry.items === "object" && Array.isArray(entry.items)) {
-				entry.items = [
-					{
-						item_object_id: "685d6bcd8499e1b23cd3a79e",
-						item_id: "google/gemma-3n-E4B-it",
-						item_type: "model",
-						position: 0,
-					},
-				];
-			}
-
-			if (typeof entry.theme === "string") {
-				entry.theme = "purple";
-			}
-
-			if (typeof entry.private === "boolean") {
-				entry.private = false;
+			if (typeof entry.lastUpdated === "string") {
+				entry.lastUpdated = "2025-07-21T00:36:29.000Z";
 			}
 
 			if (typeof entry.upvotes === "number") {
 				entry.upvotes = 0;
 			}
-			if (typeof entry.isUpvotedByUser === "boolean") {
-				entry.isUpvotedByUser = false;
+
+			if (typeof entry.owner.avatarUrl === "string") {
+				entry.owner.avatarUrl = "https://cdn-avatars.huggingface.co/user-avatar.jpeg";
+			}
+
+			if (entry.items && Array.isArray(entry.items)) {
+				entry.items.map((item) => {
+					if ("owner" in item && typeof item.owner.avatarUrl === "string") {
+						item.owner.avatarUrl = "https://cdn-avatars.huggingface.co/user-avatar.jpeg";
+					}
+					if ("authorData" in item && typeof item.authorData.avatarUrl === "string") {
+						item.authorData.avatarUrl = "https://cdn-avatars.huggingface.co/user-avatar.jpeg";
+					}
+					if ("authorData" in item && typeof item.authorData.followerCount === "number") {
+						item.authorData.followerCount = 0;
+					}
+					if ("downloads" in item && typeof item.downloads === "number") {
+						item.downloads = 0;
+					}
+					if ("likes" in item && typeof item.likes === "number") {
+						item.likes = 0;
+					}
+					if ("lastModified" in item && typeof item.lastModified === "string") {
+						item.lastModified = "2025-07-01T00:36:29.000Z";
+					}
+					if ("lastUpdated" in item && typeof item.lastUpdated === "string") {
+						item.lastUpdated = "2025-07-01T00:41:27.525Z";
+					}
+					if ("upvotes" in item && typeof item.upvotes === "number") {
+						item.upvotes = 0;
+					}
+				});
 			}
 
 			results.push(entry);
 		}
 
-		expect(results).deep.equal([
-			{
-				slug: "google/gemma-3n-685065323f5984ef315c93f4",
-				title: "Gemma 3n",
-				description: "Gemma 3n is a large language model developed by Google.",
-				gating: false,
-				lastUpdated: new Date(0),
-				owner: "google",
-				items: [
+		expect(results[0].slug).toBe("quanghuynt14/test-6862f3b263a5cc509b9ee24a");
+		expect(results[0].title).toBe("Test");
+		expect(results[0].description).toBe("this collection is only for test");
+		expect(results[0].gating).toBe(false);
+		expect(results[0].lastUpdated).toEqual("2025-07-21T00:36:29.000Z");
+		expect(results[0].owner).deep.equal({
+			_id: "6861a8be64cdb219ce188401",
+			avatarUrl: "https://cdn-avatars.huggingface.co/user-avatar.jpeg",
+			fullname: "Huy",
+			name: "quanghuynt14",
+			type: "user",
+			isPro: false,
+			isHf: false,
+			isHfAdmin: false,
+			isMod: false,
+		});
+		expect(results[0].theme).toBe("pink");
+		expect(results[0].private).toBe(false);
+		expect(results[0].upvotes).toBe(0);
+		expect(results[0].isUpvotedByUser).toBe(false);
+
+		// Check for model item
+		expect(results[0].items[0]).deep.equal({
+			_id: "68632ede07867696ac5d7ab1",
+			position: 0,
+			type: "model",
+			author: "quanghuynt14",
+			authorData: {
+				_id: "6861a8be64cdb219ce188401",
+				avatarUrl: "https://cdn-avatars.huggingface.co/user-avatar.jpeg",
+				fullname: "Huy",
+				name: "quanghuynt14",
+				type: "user",
+				isPro: false,
+				isHf: false,
+				isHfAdmin: false,
+				isMod: false,
+			},
+			downloads: 0,
+			gated: false,
+			id: "quanghuynt14/TestModel",
+			availableInferenceProviders: [],
+			lastModified: "2025-07-01T00:36:29.000Z",
+			likes: 0,
+			private: false,
+			repoType: "model",
+			isLikedByUser: false,
+		});
+
+		// Check for dataset item
+		expect(results[0].items[1]).deep.equal({
+			_id: "68632ee9c76d34d6031bab15",
+			position: 1,
+			type: "dataset",
+			author: "quanghuynt14",
+			downloads: 0,
+			gated: false,
+			id: "quanghuynt14/TestDataset",
+			lastModified: "2025-07-01T00:36:29.000Z",
+			private: false,
+			repoType: "dataset",
+			likes: 0,
+			isLikedByUser: false,
+		});
+
+		// Check for space item
+		expect(results[0].items[2]).deep.equal({
+			_id: "68632eeff8d2d420b6ad4b0d",
+			position: 2,
+			type: "space",
+			author: "quanghuynt14",
+			authorData: {
+				_id: "6861a8be64cdb219ce188401",
+				avatarUrl: "https://cdn-avatars.huggingface.co/user-avatar.jpeg",
+				fullname: "Huy",
+				name: "quanghuynt14",
+				type: "user",
+				isPro: false,
+				isHf: false,
+				isHfAdmin: false,
+				isMod: false,
+			},
+			colorFrom: "yellow",
+			colorTo: "purple",
+			createdAt: "2025-07-01T00:39:07.000Z",
+			emoji: "💬",
+			id: "quanghuynt14/TestSpace",
+			lastModified: "2025-07-01T00:36:29.000Z",
+			likes: 0,
+			pinned: false,
+			private: false,
+			sdk: "gradio",
+			repoType: "space",
+			runtime: {
+				stage: "RUNNING",
+				hardware: {
+					current: "cpu-basic",
+					requested: "cpu-basic",
+				},
+				storage: null,
+				gcTimeout: 172800,
+				replicas: {
+					current: 1,
+					requested: 1,
+				},
+				devMode: false,
+				domains: [
 					{
-						item_object_id: "685d6bcd8499e1b23cd3a79e",
-						item_id: "google/gemma-3n-E4B-it",
-						item_type: "model",
-						position: 0,
+						domain: "quanghuynt14-testspace.hf.space",
+						stage: "READY",
 					},
 				],
-				theme: "purple",
-				private: false,
-				upvotes: 0,
-				isUpvotedByUser: false,
+				sha: "dc1332681707e8c7cfda491bbaf17a9aba5ff6d9",
 			},
-		]);
+			shortDescription: "This is the space for test",
+			title: "TestSpace",
+			isLikedByUser: false,
+			trendingScore: 0,
+			tags: ["gradio", "region:us"],
+		});
+
+		// Check for collection item
+		expect(results[0].items[3]).deep.equal({
+			_id: "68632ef6b13e0dc3b640854a",
+			position: 3,
+			type: "collection",
+			id: "68632e8a911ddf966de476bc",
+			slug: "quanghuynt14/another-test-collection-68632e8a911ddf966de476bc",
+			title: "Another test collection",
+			description: "This collection is only for test",
+			lastUpdated: "2025-07-01T00:41:27.525Z",
+			numberItems: 1,
+			owner: {
+				_id: "6861a8be64cdb219ce188401",
+				avatarUrl: "https://cdn-avatars.huggingface.co/user-avatar.jpeg",
+				fullname: "Huy",
+				name: "quanghuynt14",
+				type: "user",
+				isPro: false,
+				isHf: false,
+				isHfAdmin: false,
+				isMod: false,
+			},
+			theme: "blue",
+			shareUrl: "https://huggingface.co/collections/quanghuynt14/another-test-collection-68632e8a911ddf966de476bc",
+			upvotes: 0,
+			isUpvotedByUser: false,
+		});
 	});
 });
