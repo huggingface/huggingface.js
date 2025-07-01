@@ -53,11 +53,11 @@
 		"@huggingface/inference": "workspace:^",
 		"@huggingface/tasks": "workspace:^",
 		"express": "^4.18.2",
+		"openai": "^5.8.2",
 		"zod": "^3.22.4"
 	},
 	"devDependencies": {
 		"@types/express": "^4.17.21",
-		"openai": "^5.8.2",
 		"tsx": "^4.7.0"
 	}
 }
