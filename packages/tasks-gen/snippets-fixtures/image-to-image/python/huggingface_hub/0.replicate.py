@@ -2,7 +2,7 @@ import os
 from huggingface_hub import InferenceClient
 
 client = InferenceClient(
-    provider="hf-inference",
+    provider="replicate",
     api_key=os.environ["HF_TOKEN"],
 )
 
