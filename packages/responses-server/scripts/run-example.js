@@ -1,4 +1,9 @@
 #!/usr/bin/env node
+/**
+ * AI-generated file using Cursor + Claude 4
+ *
+ * Run an example script
+ */
 import { spawnSync } from "child_process";
 import fs from "fs";
 import path from "path";
