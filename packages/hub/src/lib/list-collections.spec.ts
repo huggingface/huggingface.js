@@ -57,29 +57,37 @@ describe("listCollections", () => {
 			results.push(entry);
 		}
 
-		expect(results[0].slug).toBe("quanghuynt14/test-6862f3b263a5cc509b9ee24a");
-		expect(results[0].title).toBe("Test");
-		expect(results[0].description).toBe("this collection is only for test");
-		expect(results[0].gating).toBe(false);
-		expect(results[0].lastUpdated).toEqual("2025-07-21T00:36:29.000Z");
-		expect(results[0].owner).deep.equal({
-			_id: "6861a8be64cdb219ce188401",
-			avatarUrl: "https://cdn-avatars.huggingface.co/user-avatar.jpeg",
-			fullname: "Huy",
-			name: "quanghuynt14",
-			type: "user",
-			isPro: false,
-			isHf: false,
-			isHfAdmin: false,
-			isMod: false,
+		const collection = results[0];
+		const items = collection.items;
+		collection.items = [];
+
+		// Check all properties of the collection except items
+		expect(collection).deep.equal({
+			slug: "quanghuynt14/test-6862f3b263a5cc509b9ee24a",
+			title: "Test",
+			description: "this collection is only for test",
+			gating: false,
+			lastUpdated: "2025-07-21T00:36:29.000Z",
+			owner: {
+				_id: "6861a8be64cdb219ce188401",
+				avatarUrl: "https://cdn-avatars.huggingface.co/user-avatar.jpeg",
+				fullname: "Huy",
+				name: "quanghuynt14",
+				type: "user",
+				isPro: false,
+				isHf: false,
+				isHfAdmin: false,
+				isMod: false,
+			},
+			items: [],
+			theme: "pink",
+			private: false,
+			upvotes: 0,
+			isUpvotedByUser: false,
 		});
-		expect(results[0].theme).toBe("pink");
-		expect(results[0].private).toBe(false);
-		expect(results[0].upvotes).toBe(0);
-		expect(results[0].isUpvotedByUser).toBe(false);
 
 		// Check for model item
-		expect(results[0].items[0]).deep.equal({
+		expect(items[0]).deep.equal({
 			_id: "68632ede07867696ac5d7ab1",
 			position: 0,
 			type: "model",
@@ -107,7 +115,7 @@ describe("listCollections", () => {
 		});
 
 		// Check for dataset item
-		expect(results[0].items[1]).deep.equal({
+		expect(items[1]).deep.equal({
 			_id: "68632ee9c76d34d6031bab15",
 			position: 1,
 			type: "dataset",
@@ -123,10 +131,12 @@ describe("listCollections", () => {
 		});
 
 		// Check for space item
-		expect(results[0].items[2]).deep.equal({
+		expect(items[2]).deep.equal({
 			_id: "68632eeff8d2d420b6ad4b0d",
 			position: 2,
 			type: "space",
+			ai_category: "Chatbots",
+			ai_short_description: "Chat with an advanced virtual assistant",
 			author: "quanghuynt14",
 			authorData: {
 				_id: "6861a8be64cdb219ce188401",
@@ -179,7 +189,7 @@ describe("listCollections", () => {
 		});
 
 		// Check for collection item
-		expect(results[0].items[3]).deep.equal({
+		expect(items[3]).deep.equal({
 			_id: "68632ef6b13e0dc3b640854a",
 			position: 3,
 			type: "collection",
