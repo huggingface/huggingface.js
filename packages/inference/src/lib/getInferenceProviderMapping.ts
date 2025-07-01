@@ -2,7 +2,13 @@ import type { WidgetType } from "@huggingface/tasks";
 import { HF_HUB_URL } from "../config.js";
 import { HARDCODED_MODEL_INFERENCE_MAPPING } from "../providers/consts.js";
 import { EQUIVALENT_SENTENCE_TRANSFORMERS_TASKS } from "../providers/hf-inference.js";
-import type { InferenceProvider, InferenceProviderMappingEntry, InferenceProviderOrPolicy, ModelId } from "../types.js";
+import {
+	EQUIVALENT_TEXT_GENERATION_TASKS,
+	type InferenceProvider,
+	type InferenceProviderMappingEntry,
+	type InferenceProviderOrPolicy,
+	type ModelId,
+} from "../types.js";
 import { typedInclude } from "../utils/typedInclude.js";
 import { InferenceClientHubApiError, InferenceClientInputError } from "../errors.js";
 
@@ -118,9 +124,13 @@ export async function getInferenceProviderMapping(
 	const providerMapping = mappings.find((mapping) => mapping.provider === params.provider);
 	if (providerMapping) {
 		const equivalentTasks =
+			// hf-inference-specific equivalence
 			params.provider === "hf-inference" && typedInclude(EQUIVALENT_SENTENCE_TRANSFORMERS_TASKS, params.task)
 				? EQUIVALENT_SENTENCE_TRANSFORMERS_TASKS
-				: [params.task];
+				: // text-generation / text2text-generation equivalence
+				  typedInclude(EQUIVALENT_TEXT_GENERATION_TASKS, params.task)
+				  ? EQUIVALENT_TEXT_GENERATION_TASKS
+				  : [params.task];
 		if (!typedInclude(equivalentTasks, providerMapping.task)) {
 			throw new InferenceClientInputError(
 				`Model ${params.modelId} is not supported for task ${params.task} and provider ${params.provider}. Supported task: ${providerMapping.task}.`

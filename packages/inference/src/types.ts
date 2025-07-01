@@ -62,6 +62,7 @@ export type InferenceProvider = (typeof INFERENCE_PROVIDERS)[number];
 
 export type InferenceProviderOrPolicy = (typeof PROVIDERS_OR_POLICIES)[number];
 
+export const EQUIVALENT_TEXT_GENERATION_TASKS = ["text-generation", "text2text-generation"] as const;
 export interface InferenceProviderMappingEntry {
 	adapter?: string;
 	adapterWeightsPath?: string;
