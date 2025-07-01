@@ -1,12 +1,14 @@
 import { type Response as ExpressResponse } from "express";
 import { type ValidatedRequest } from "../middleware/validation.js";
-import { type CreateResponse, type Response } from "../schemas.js";
+import { type CreateResponseParams } from "../schemas.js";
 import { generateUniqueId } from "../lib/generateUniqueId.js";
 import { InferenceClient } from "@huggingface/inference";
 import type { ChatCompletionInputMessage, ChatCompletionInputMessageChunkType } from "@huggingface/tasks";
 
+import { type Response as OpenAIResponse } from "openai/resources/responses/responses";
+
 export const postCreateResponse = async (
-	req: ValidatedRequest<CreateResponse>,
+	req: ValidatedRequest<CreateResponseParams>,
 	res: ExpressResponse
 ): Promise<void> => {
 	const apiKey = req.headers.authorization?.split(" ")[1];
@@ -60,7 +62,10 @@ export const postCreateResponse = async (
 			top_p: req.body.top_p,
 		});
 
-		const responseObject: Response = {
+		const responseObject: Omit<
+			OpenAIResponse,
+			"incomplete_details" | "metadata" | "output_text" | "parallel_tool_calls" | "tool_choice" | "tools"
+		> = {
 			object: "response",
 			id: generateUniqueId("resp"),
 			status: "completed",
@@ -81,6 +86,7 @@ export const postCreateResponse = async (
 								{
 									type: "output_text",
 									text: chatCompletionResponse.choices[0].message.content,
+									annotations: [],
 								},
 							],
 						},

@@ -4,7 +4,7 @@ import { z } from "zod";
  * https://platform.openai.com/docs/api-reference/responses/create
  * commented out properties are not supported by the server
  */
-export const createResponseSchema = z.object({
+export const createResponseParamsSchema = z.object({
 	// background: z.boolean().default(false),
 	// include:
 	input: z.union([
@@ -22,15 +22,15 @@ export const createResponseSchema = z.object({
 							}),
 							z.object({
 								type: z.literal("input_image"),
-								// file_id: z.string().optional(),
+								// file_id: z.string().nullable(),
 								image_url: z.string(),
 								// detail: z.enum(["auto", "low", "high"]).default("auto"),
 							}),
 							// z.object({
 							// 	type: z.literal("input_file"),
-							// 	file_data: z.string().optional(),
-							// 	file_id: z.string().optional(),
-							// 	filename: z.string().optional(),
+							// 	file_data: z.string().nullable(),
+							// 	file_id: z.string().nullable(),
+							// 	filename: z.string().nullable(),
 							// }),
 						])
 					),
@@ -46,15 +46,15 @@ export const createResponseSchema = z.object({
 			// ])
 		),
 	]),
-	instructions: z.string().optional(),
-	// max_output_tokens: z.number().min(0).optional(),
-	// max_tool_calls: z.number().min(0).optional(),
-	// metadata: z.record(z.string().max(64), z.string().max(512)).optional(), // + 16 items max
+	instructions: z.string().nullable(),
+	// max_output_tokens: z.number().min(0).nullable(),
+	// max_tool_calls: z.number().min(0).nullable(),
+	// metadata: z.record(z.string().max(64), z.string().max(512)).nullable(), // + 16 items max
 	model: z.string(),
-	// previous_response_id: z.string().optional(),
+	// previous_response_id: z.string().nullable(),
 	// reasoning: z.object({
 	// 	effort: z.enum(["low", "medium", "high"]).default("medium"),
-	// 	summary: z.enum(["auto", "concise", "detailed"]).optional(),
+	// 	summary: z.enum(["auto", "concise", "detailed"]).nullable(),
 	// }),
 	// store: z.boolean().default(true),
 	// stream: z.boolean().default(false),
@@ -62,81 +62,10 @@ export const createResponseSchema = z.object({
 	// text:
 	// tool_choice:
 	// tools:
-	// top_logprobs: z.number().min(0).max(20).optional(),
+	// top_logprobs: z.number().min(0).max(20).nullable(),
 	top_p: z.number().min(0).max(1).default(1),
 	// truncation: z.enum(["auto", "disabled"]).default("disabled"),
 	// user
 });
 
-export type CreateResponse = z.infer<typeof createResponseSchema>;
-
-export const responseSchema = z.object({
-	object: z.literal("response"),
-	created_at: z.number(),
-	error: z
-		.object({
-			code: z.string(),
-			message: z.string(),
-		})
-		.nullable(),
-	id: z.string(),
-	status: z.enum(["completed", "failed", "in_progress", "cancelled", "queued", "incomplete"]),
-	// incomplete_details: z.object({ reason: z.string() }).optional(),
-	instructions: z.string().optional(),
-	// max_output_tokens: z.number().min(0).optional(),
-	// max_tool_calls: z.number().min(0).optional(),
-	// metadata: z.record(z.string().max(64), z.string().max(512)).optional(), // + 16 items max
-	model: z.string(),
-	output: z.array(
-		z.object({
-			type: z.enum(["message"]),
-			id: z.string(),
-			status: z.enum(["completed", "failed"]),
-			role: z.enum(["assistant"]),
-			content: z.array(
-				z.union([
-					z.object({
-						type: z.literal("output_text"),
-						text: z.string(),
-						// annotations:
-						// logprobs:
-					}),
-					z.object({
-						type: z.literal("refusal"),
-						refusal: z.string(),
-					}),
-				])
-			),
-		})
-		// in practice, should be a z.union of the following:
-		// File search tool call
-		// Function tool call
-		// Web search tool call
-		// Computer tool call
-		// Reasoning
-		// Image generation call
-		// Code interpreter tool call
-		// Local shell call
-		// MCP tool call
-		// MCP list tools
-		// MCP approval request
-	),
-	// parallel_tool_calls: z.boolean(),
-	// previous_response_id: z.string().optional(),
-	// reasoning: z.object({
-	// 	effort: z.enum(["low", "medium", "high"]).optional(),
-	// 	summary: z.enum(["auto", "concise", "detailed"]).optional(),
-	// }),
-	// store: z.boolean(),
-	temperature: z.number(),
-	// text:
-	// tool_choice:
-	// tools:
-	// top_logprobs: z.number().int().min(0).max(20).optional(),
-	top_p: z.number(),
-	// truncation: z.enum(["auto", "disabled"]).default("disabled"),
-	// usage: ...
-	// user
-});
-
-export type Response = z.infer<typeof responseSchema>;
+export type CreateResponseParams = z.infer<typeof createResponseParamsSchema>;

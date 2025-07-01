@@ -1,5 +1,5 @@
 import express, { type Express } from "express";
-import { createResponseSchema } from "./schemas.js";
+import { createResponseParamsSchema } from "./schemas.js";
 import { validateBody } from "./middleware/validation.js";
 import { requestLogger } from "./middleware/logging.js";
 import { postCreateResponse } from "./routes/index.js";
@@ -16,7 +16,7 @@ export const createApp = (): Express => {
 		res.send("hello world");
 	});
 
-	app.post("/v1/responses", validateBody(createResponseSchema), postCreateResponse);
+	app.post("/v1/responses", validateBody(createResponseParamsSchema), postCreateResponse);
 
 	return app;
 };
