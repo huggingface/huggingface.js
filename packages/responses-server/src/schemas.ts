@@ -22,15 +22,15 @@ export const createResponseParamsSchema = z.object({
 							}),
 							z.object({
 								type: z.literal("input_image"),
-								// file_id: z.string().nullable(),
+								// file_id: z.string().nullable().default(null),
 								image_url: z.string(),
 								// detail: z.enum(["auto", "low", "high"]).default("auto"),
 							}),
 							// z.object({
 							// 	type: z.literal("input_file"),
-							// 	file_data: z.string().nullable(),
-							// 	file_id: z.string().nullable(),
-							// 	filename: z.string().nullable(),
+							// 	file_data: z.string().nullable().default(null),
+							// 	file_id: z.string().nullable().default(null),
+							// 	filename: z.string().nullable().default(null),
 							// }),
 						])
 					),
@@ -46,23 +46,23 @@ export const createResponseParamsSchema = z.object({
 			// ])
 		),
 	]),
-	instructions: z.string().nullable(),
-	// max_output_tokens: z.number().min(0).nullable(),
-	// max_tool_calls: z.number().min(0).nullable(),
-	// metadata: z.record(z.string().max(64), z.string().max(512)).nullable(), // + 16 items max
+	instructions: z.string().nullable().default(null),
+	// max_output_tokens: z.number().min(0).nullable().default(null),
+	// max_tool_calls: z.number().min(0).nullable().default(null),
+	// metadata: z.record(z.string().max(64), z.string().max(512)).nullable().default(null), // + 16 items max
 	model: z.string(),
-	// previous_response_id: z.string().nullable(),
+	// previous_response_id: z.string().nullable().default(null),
 	// reasoning: z.object({
 	// 	effort: z.enum(["low", "medium", "high"]).default("medium"),
-	// 	summary: z.enum(["auto", "concise", "detailed"]).nullable(),
+	// 	summary: z.enum(["auto", "concise", "detailed"]).nullable().default(null),
 	// }),
 	// store: z.boolean().default(true),
-	// stream: z.boolean().default(false),
+	stream: z.boolean().default(false),
 	temperature: z.number().min(0).max(2).default(1),
 	// text:
 	// tool_choice:
 	// tools:
-	// top_logprobs: z.number().min(0).max(20).nullable(),
+	// top_logprobs: z.number().min(0).max(20).nullable().default(null),
 	top_p: z.number().min(0).max(1).default(1),
 	// truncation: z.enum(["auto", "disabled"]).default("disabled"),
 	// user
