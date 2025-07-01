@@ -7,7 +7,7 @@ describe("listDatasets", () => {
 		const results: DatasetEntry[] = [];
 
 		for await (const entry of listDatasets({ search: { owner: "hf-doc-build" } })) {
-			if (entry.name === "hf-doc-build/doc-build-dev-test") {
+			if (entry.name !== "hf-doc-build/doc-build" && entry.name !== "hf-doc-build/doc-build-dev") {
 				continue;
 			}
 			if (typeof entry.downloads === "number") {
@@ -23,7 +23,7 @@ describe("listDatasets", () => {
 			results.push(entry);
 		}
 
-		expect(results).deep.equal([
+		expect(results.sort((a, b) => a.id.localeCompare(b.id))).to.deep.equal([
 			{
 				id: "6356b19985da6f13863228bd",
 				name: "hf-doc-build/doc-build",

@@ -133,12 +133,12 @@ const TEST_CASES: {
 		testName: "image-to-image",
 		task: "image-to-image",
 		model: {
-			id: "stabilityai/stable-diffusion-xl-refiner-1.0",
+			id: "black-forest-labs/FLUX.1-Kontext-dev",
 			pipeline_tag: "image-to-image",
 			tags: [],
 			inference: "",
 		},
-		providers: ["hf-inference"],
+		providers: ["fal-ai", "replicate", "hf-inference"],
 	},
 	{
 		testName: "tabular",
