@@ -1,5 +1,6 @@
 import { randomBytes } from "crypto";
 
-export function generateUniqueId(): string {
-	return randomBytes(16).toString("hex");
+export function generateUniqueId(prefix?: string): string {
+	const id = randomBytes(24).toString("hex");
+	return prefix ? `${prefix}_${id}` : id;
 }

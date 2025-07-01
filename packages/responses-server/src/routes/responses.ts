@@ -62,8 +62,9 @@ export const postCreateResponse = async (
 
 		const responseObject: Response = {
 			object: "response",
-			id: chatCompletionResponse.id,
+			id: generateUniqueId("resp"),
 			status: "completed",
+			error: null,
 			instructions: req.body.instructions,
 			model: req.body.model,
 			temperature: req.body.temperature,
@@ -72,7 +73,7 @@ export const postCreateResponse = async (
 			output: chatCompletionResponse.choices[0].message.content
 				? [
 						{
-							id: "msg_" + generateUniqueId(),
+							id: generateUniqueId("msg"),
 							type: "message",
 							role: "assistant",
 							status: "completed",

@@ -78,7 +78,7 @@ export const responseSchema = z.object({
 			code: z.string(),
 			message: z.string(),
 		})
-		.optional(),
+		.nullable(),
 	id: z.string(),
 	status: z.enum(["completed", "failed", "in_progress", "cancelled", "queued", "incomplete"]),
 	// incomplete_details: z.object({ reason: z.string() }).optional(),
