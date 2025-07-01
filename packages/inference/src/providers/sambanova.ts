@@ -24,6 +24,30 @@ export class SambanovaConversationalTask extends BaseConversationalTask {
 	constructor() {
 		super("sambanova", "https://api.sambanova.ai");
 	}
+
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		const payload = super.preparePayload(params) as Record<string, unknown>;
+
+		const responseFormat = (params.args as Record<string, unknown>)["response_format"];
+		if (
+			responseFormat &&
+			typeof responseFormat === "object" &&
+			"type" in responseFormat &&
+			(responseFormat as { type?: unknown }).type === "json_schema"
+		) {
+			const jsonSchemaConfig = (responseFormat as Record<string, unknown>)["json_schema"] as
+				| Record<string, unknown>
+				| undefined;
+			if (jsonSchemaConfig && typeof jsonSchemaConfig === "object") {
+				const strict = jsonSchemaConfig["strict"];
+				if (strict === true || strict === undefined) {
+					jsonSchemaConfig["strict"] = false;
+				}
+			}
+		}
+
+		return payload;
+	}
 }
 
 export class SambanovaFeatureExtractionTask extends TaskProviderHelper implements FeatureExtractionTaskHelper {
