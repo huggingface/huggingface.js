@@ -28,20 +28,17 @@ pnpm install
 pnpm dev
 ```
 
-Run a simple POST request with 
+### Run examples
+
+Some example scripts are implemented in ./examples.
+
+You can run them using
 
 ```bash
-# Make dummy call
-pnpm dummy
+# Run ./examples/text_single.js
+pnpm run example text_single
+
+# Run ./examples/text_multi.js
+pnpm run example text_multi
 ```
 
-## 🛠️ Available Scripts
-
-- `pnpm dev` - Start development server with hot reload
-- `pnpm start` - Start production server
-- `pnpm build` - Build for production
-- `pnpm dummy` - Run test API call
-- `pnpm lint` - Run ESLint with auto-fix
-- `pnpm format` - Format code with Prettier
-- `pnpm test` - Run tests
-- `pnpm check` - Type check with TypeScript

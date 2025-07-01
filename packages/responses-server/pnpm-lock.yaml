@@ -8,6 +8,12 @@ importers:
 
   .:
     dependencies:
+      '@huggingface/inference':
+        specifier: workspace:^
+        version: link:../inference
+      '@huggingface/tasks':
+        specifier: workspace:^
+        version: link:../tasks
       express:
         specifier: ^4.18.2
         version: 4.21.2
@@ -18,6 +24,9 @@ importers:
       '@types/express':
         specifier: ^4.17.21
         version: 4.17.23
+      openai:
+        specifier: ^5.8.2
+        version: 5.8.2(zod@3.25.67)
       tsx:
         specifier: ^4.7.0
         version: 4.20.3
@@ -407,6 +416,18 @@ packages:
   on-finished@2.4.1:
     resolution: {integrity: sha512-oVlzkg3ENAhCk2zdv7IJwd/QUD4z2RxRwpkcGY8psCVcCYZNq4wYnVWALHM+brtuJjePWiYF/ClmuDr8Ch5+kg==}
     engines: {node: '>= 0.8'}
+
+  openai@5.8.2:
+    resolution: {integrity: sha512-8C+nzoHYgyYOXhHGN6r0fcb4SznuEn1R7YZMvlqDbnCuE0FM2mm3T1HiYW6WIcMS/F1Of2up/cSPjLPaWt0X9Q==}
+    hasBin: true
+    peerDependencies:
+      ws: ^8.18.0
+      zod: ^3.23.8
+    peerDependenciesMeta:
+      ws:
+        optional: true
+      zod:
+        optional: true
 
   parseurl@1.3.3:
     resolution: {integrity: sha512-CiyeOxFT/JZyN5m0z9PfXw4SCBJ6Sygz1Dpl0wqjlhDEGGBP1GnsUVEL0p63hoG1fcj3fHynXi9NYO4nWOL+qQ==}
@@ -861,6 +882,10 @@ snapshots:
   on-finished@2.4.1:
     dependencies:
       ee-first: 1.1.1
+
+  openai@5.8.2(zod@3.25.67):
+    optionalDependencies:
+      zod: 3.25.67
 
   parseurl@1.3.3: {}
 

@@ -1,40 +1,67 @@
 /**
  * AI-generated file using Cursor + Claude 4
+ *
+ * Middleware to log all HTTP requests with duration, status code, method, and route
  */
-
 import { type Request, type Response, type NextFunction } from "express";
+
+interface LogContext {
+	timestamp: string;
+	method: string;
+	url: string;
+	statusCode?: number;
+	duration?: number;
+}
+
+function formatLogMessage(context: LogContext): string {
+	const { timestamp, method, url, statusCode, duration } = context;
+
+	if (statusCode === undefined) {
+		return `[${timestamp}] 📥 ${method} ${url}`;
+	}
+
+	const statusEmoji =
+		statusCode >= 200 && statusCode < 300
+			? "✅"
+			: statusCode >= 400 && statusCode < 500
+			  ? "⚠️"
+			  : statusCode >= 500
+			    ? "❌"
+			    : "ℹ️";
+	return `[${timestamp}] ${statusEmoji} ${statusCode} ${method} ${url} (${duration}ms)`;
+}
 
 /**
  * Middleware to log all HTTP requests with duration, status code, method, and route
- * @returns Express middleware function
  */
 export function requestLogger() {
 	return (req: Request, res: Response, next: NextFunction): void => {
-		const start = Date.now();
+		const startTime = Date.now();
 		const { method, url } = req;
 
-		// Log request start
-		console.log(`[${new Date().toISOString()}] 📥 ${method} ${url}`);
+		// Log incoming request
+		console.log(
+			formatLogMessage({
+				timestamp: new Date().toISOString(),
+				method,
+				url,
+			})
+		);
 
-		// Override res.end to capture response details
-		const originalEnd = res.end;
-		res.end = function (chunk?: unknown, encoding?: BufferEncoding, cb?: () => void) {
-			const duration = Date.now() - start;
-			const statusCode = res.statusCode;
-			const statusEmoji =
-				statusCode >= 200 && statusCode < 300
-					? "✅"
-					: statusCode >= 400 && statusCode < 500
-					  ? "⚠️"
-					  : statusCode >= 500
-					    ? "❌"
-					    : "ℹ️";
+		// Listen for when the response finishes
+		res.on("finish", () => {
+			const duration = Date.now() - startTime;
 
-			console.log(`[${new Date().toISOString()}] ${statusEmoji} ${statusCode} ${method} ${url} (${duration}ms)`);
-
-			// Call the original end method with proper return type
-			return originalEnd.call(this, chunk, encoding, cb);
-		};
+			console.log(
+				formatLogMessage({
+					timestamp: new Date().toISOString(),
+					method,
+					url,
+					statusCode: res.statusCode,
+					duration,
+				})
+			);
+		});
 
 		next();
 	};

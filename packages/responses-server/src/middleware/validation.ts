@@ -18,9 +18,10 @@ export function validateBody<T extends z.ZodTypeAny>(schema: T) {
 			next();
 		} catch (error) {
 			if (error instanceof z.ZodError) {
+				console.log(req.body);
 				res.status(400).json({
 					success: false,
-					error: "Validation failed",
+					error: error.errors,
 					details: error.errors,
 				});
 			} else {
