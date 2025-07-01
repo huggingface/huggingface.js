@@ -66,6 +66,12 @@ export interface PipelineData {
 /// This will impact the default pipeline tag of a model when not
 /// specified.
 export const PIPELINE_DATA = {
+	"biology": {
+		name: "Biology",
+		modality: "multimodal",
+		color: "green",
+		hideInDatasets: true,
+	},
 	"text-classification": {
 		name: "Text Classification",
 		subtasks: [
