@@ -467,6 +467,13 @@ export const LOCAL_APPS = {
 		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetOllama,
 	},
+	ttsGenerationWebui: {
+		prettyLabel: "TTS Generation WebUI",
+		docsUrl: "https://github.com/rsxdalv/tts-generation-webui",
+		mainTask: "text-to-speech",
+		displayOnModelPage: (model) => false,
+		deeplink: (model) => new URL(`https://github.com/rsxdalv/tts-generation-webui`),
+	},
 } satisfies Record<string, LocalApp>;
 
 export type LocalAppKey = keyof typeof LOCAL_APPS;
