@@ -86,7 +86,7 @@ describe("listCollections", () => {
 			isUpvotedByUser: false,
 		});
 
-		// Check for model item
+		// Check for item type model
 		expect(items[0]).deep.equal({
 			_id: "68632ede07867696ac5d7ab1",
 			position: 0,
@@ -114,7 +114,7 @@ describe("listCollections", () => {
 			isLikedByUser: false,
 		});
 
-		// Check for dataset item
+		// Check for item type dataset
 		expect(items[1]).deep.equal({
 			_id: "68632ee9c76d34d6031bab15",
 			position: 1,
@@ -130,7 +130,7 @@ describe("listCollections", () => {
 			isLikedByUser: false,
 		});
 
-		// Check for space item
+		// Check for item type space
 		expect(items[2]).deep.equal({
 			_id: "68632eeff8d2d420b6ad4b0d",
 			position: 2,
@@ -188,7 +188,7 @@ describe("listCollections", () => {
 			tags: ["gradio", "region:us"],
 		});
 
-		// Check for collection item
+		// Check for item type collection
 		expect(items[3]).deep.equal({
 			_id: "68632ef6b13e0dc3b640854a",
 			position: 3,
