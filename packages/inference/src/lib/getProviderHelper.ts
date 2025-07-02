@@ -24,6 +24,7 @@ import type {
 	ImageSegmentationTaskHelper,
 	ImageToImageTaskHelper,
 	ImageToTextTaskHelper,
+	ImageToVideoTaskHelper,
 	ObjectDetectionTaskHelper,
 	QuestionAnsweringTaskHelper,
 	SentenceSimilarityTaskHelper,
@@ -64,6 +65,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-to-image": new FalAI.FalAITextToImageTask(),
 		"text-to-speech": new FalAI.FalAITextToSpeechTask(),
 		"text-to-video": new FalAI.FalAITextToVideoTask(),
+		"image-to-image": new FalAI.FalAIImageToImageTask(),
 		"automatic-speech-recognition": new FalAI.FalAIAutomaticSpeechRecognitionTask(),
 	},
 	"featherless-ai": {
@@ -138,6 +140,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-to-image": new Replicate.ReplicateTextToImageTask(),
 		"text-to-speech": new Replicate.ReplicateTextToSpeechTask(),
 		"text-to-video": new Replicate.ReplicateTextToVideoTask(),
+		"image-to-image": new Replicate.ReplicateImageToImageTask(),
 	},
 	sambanova: {
 		conversational: new Sambanova.SambanovaConversationalTask(),
@@ -239,6 +242,10 @@ export function getProviderHelper(
 ): ImageToImageTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
+	task: "image-to-video"
+): ImageToVideoTaskHelper & TaskProviderHelper;
+export function getProviderHelper(
+	provider: InferenceProviderOrPolicy,
 	task: "sentence-similarity"
 ): SentenceSimilarityTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
@@ -273,7 +280,6 @@ export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
 	task: InferenceTask | undefined
 ): TaskProviderHelper;
-
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
 	task: InferenceTask | undefined
