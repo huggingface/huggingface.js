@@ -75,7 +75,13 @@ export const createResponseParamsSchema = z.object({
 	instructions: z.string().nullable().default(null),
 	// max_output_tokens: z.number().min(0).nullable().default(null),
 	// max_tool_calls: z.number().min(0).nullable().default(null),
-	// metadata: z.record(z.string().max(64), z.string().max(512)).nullable().default(null), // + 16 items max
+	metadata: z
+		.record(z.string().max(64), z.string().max(512))
+		.refine((val) => Object.keys(val).length <= 16, {
+			message: "Must have at most 16 items",
+		})
+		.nullable()
+		.default(null),
 	model: z.string(),
 	// previous_response_id: z.string().nullable().default(null),
 	// reasoning: z.object({

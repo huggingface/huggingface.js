@@ -79,7 +79,7 @@ export const postCreateResponse = async (
 
 	const responseObject: Omit<
 		Response,
-		"incomplete_details" | "metadata" | "output_text" | "parallel_tool_calls" | "tool_choice" | "tools"
+		"incomplete_details" | "output_text" | "parallel_tool_calls" | "tool_choice" | "tools"
 	> = {
 		object: "response",
 		id: generateUniqueId("resp"),
@@ -91,6 +91,7 @@ export const postCreateResponse = async (
 		top_p: req.body.top_p,
 		created_at: new Date().getTime(),
 		output: [],
+		metadata: req.body.metadata,
 	};
 
 	if (req.body.stream) {
