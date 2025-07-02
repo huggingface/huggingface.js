@@ -83,6 +83,7 @@ export const createResponseParamsSchema = z.object({
 		.nullable()
 		.default(null),
 	model: z.string(),
+	provider: z.string().optional(),
 	// previous_response_id: z.string().nullable().default(null),
 	// reasoning: z.object({
 	// 	effort: z.enum(["low", "medium", "high"]).default("medium"),
@@ -91,7 +92,28 @@ export const createResponseParamsSchema = z.object({
 	// store: z.boolean().default(true),
 	stream: z.boolean().default(false),
 	temperature: z.number().min(0).max(2).default(1),
-	// text:
+	text: z
+		.object({
+			format: z.union([
+				z.object({
+					type: z.literal("text"),
+				}),
+				z.object({
+					type: z.literal("json_object"),
+				}),
+				z.object({
+					type: z.literal("json_schema"),
+					name: z
+						.string()
+						.max(64, "Must be at most 64 characters")
+						.regex(/^[a-zA-Z0-9_-]+$/, "Only letters, numbers, underscores, and dashes are allowed"),
+					description: z.string().optional(),
+					schema: z.record(z.any()),
+					strict: z.boolean().default(false),
+				}),
+			]),
+		})
+		.optional(),
 	// tool_choice:
 	// tools:
 	// top_logprobs: z.number().min(0).max(20).nullable().default(null),
