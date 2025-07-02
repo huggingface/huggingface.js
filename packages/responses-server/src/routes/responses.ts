@@ -12,8 +12,8 @@ import type {
 import type {
 	Response,
 	ResponseStreamEvent,
-	ResponseOutputItem,
 	ResponseContentPartAddedEvent,
+	ResponseOutputMessage,
 } from "openai/resources/responses/responses";
 
 export const postCreateResponse = async (
@@ -167,45 +167,62 @@ export const postCreateResponse = async (
 
 			const stream = client.chatCompletionStream(payload);
 
-			const outputObject: ResponseOutputItem = {
-				id: generateUniqueId("msg"),
-				type: "message",
-				role: "assistant",
-				status: "in_progress",
-				content: [],
-			};
-			responseObject.output = [outputObject];
-
-			// Response output item added event
-			emitEvent({
-				type: "response.output_item.added",
-				output_index: 0,
-				item: outputObject,
-				sequence_number: sequenceNumber++,
-			});
-
-			// Response content part added event
-			const contentPart: ResponseContentPartAddedEvent["part"] = {
-				type: "output_text",
-				text: "",
-				annotations: [],
-			};
-			outputObject.content.push(contentPart);
-
-			emitEvent({
-				type: "response.content_part.added",
-				item_id: outputObject.id,
-				output_index: 0,
-				content_index: 0,
-				part: contentPart,
-				sequence_number: sequenceNumber++,
-			});
-
 			for await (const chunk of stream) {
 				if (chunk.choices[0].delta.content) {
-					contentPart.text += chunk.choices[0].delta.content;
+					if (responseObject.output.length === 0) {
+						const outputObject: ResponseOutputMessage = {
+							id: generateUniqueId("msg"),
+							type: "message",
+							role: "assistant",
+							status: "in_progress",
+							content: [],
+						};
+						responseObject.output = [outputObject];
 
-					// Response output text delta event
+						// Response output item added event
+						emitEvent({
+							type: "response.output_item.added",
+							output_index: 0,
+							item: outputObject,
+							sequence_number: sequenceNumber++,
+						});
+					}
+
+					const outputObject = responseObject.output.at(-1);
+					if (!outputObject || outputObject.type !== "message") {
+						throw Error("Not implemented: can only support single output item type.");
+					}
+
+					if (outputObject.content.length === 0) {
+						// Response content part added event
+						const contentPart: ResponseContentPartAddedEvent["part"] = {
+							type: "output_text",
+							text: "",
+							annotations: [],
+						};
+						outputObject.content.push(contentPart);
+
+						emitEvent({
+							type: "response.content_part.added",
+							item_id: outputObject.id,
+							output_index: 0,
+							content_index: 0,
+							part: contentPart,
+							sequence_number: sequenceNumber++,
+						});
+					}
+
+					const contentPart = outputObject.content.at(-1);
+					if (!contentPart || contentPart.type !== "output_text") {
+						throw Error("Not implemented: only output_text is supported.");
+					}
+
+					if (contentPart.type !== "output_text") {
+						throw Error("Not implemented: only output_text is supported.");
+					}
+
+					// Add text delta
+					contentPart.text += chunk.choices[0].delta.content;
 					emitEvent({
 						type: "response.output_text.delta",
 						item_id: outputObject.id,
@@ -217,34 +234,45 @@ export const postCreateResponse = async (
 				}
 			}
 
-			// Response output text done event
-			emitEvent({
-				type: "response.output_text.done",
-				item_id: outputObject.id,
-				output_index: 0,
-				content_index: 0,
-				text: contentPart.text,
-				sequence_number: sequenceNumber++,
-			});
+			const lastOutputItem = responseObject.output.at(-1);
 
-			// Response content part done event
-			emitEvent({
-				type: "response.content_part.done",
-				item_id: outputObject.id,
-				output_index: 0,
-				content_index: 0,
-				part: contentPart,
-				sequence_number: sequenceNumber++,
-			});
+			if (lastOutputItem) {
+				if (lastOutputItem?.type === "message") {
+					const contentPart = lastOutputItem.content.at(-1);
+					if (contentPart?.type === "output_text") {
+						emitEvent({
+							type: "response.output_text.done",
+							item_id: lastOutputItem.id,
+							output_index: responseObject.output.length - 1,
+							content_index: lastOutputItem.content.length - 1,
+							text: contentPart.text,
+							sequence_number: sequenceNumber++,
+						});
 
-			// Response output item done event
-			outputObject.status = "completed";
-			emitEvent({
-				type: "response.output_item.done",
-				output_index: 0,
-				item: outputObject,
-				sequence_number: sequenceNumber++,
-			});
+						emitEvent({
+							type: "response.content_part.done",
+							item_id: lastOutputItem.id,
+							output_index: responseObject.output.length - 1,
+							content_index: lastOutputItem.content.length - 1,
+							part: contentPart,
+							sequence_number: sequenceNumber++,
+						});
+					} else {
+						throw Error("Not implemented: only output_text is supported.");
+					}
+
+					// Response output item done event
+					lastOutputItem.status = "completed";
+					emitEvent({
+						type: "response.output_item.done",
+						output_index: responseObject.output.length - 1,
+						item: lastOutputItem,
+						sequence_number: sequenceNumber++,
+					});
+				} else {
+					throw Error("Not implemented: only message output is supported.");
+				}
+			}
 
 			// Response completed event
 			responseObject.status = "completed";
