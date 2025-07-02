@@ -72,6 +72,7 @@ export const postCreateResponse = async (
 	const payload = {
 		model: req.body.model,
 		messages: messages,
+		max_tokens: req.body.max_output_tokens === null ? undefined : req.body.max_output_tokens,
 		temperature: req.body.temperature,
 		top_p: req.body.top_p,
 		stream: req.body.stream,
@@ -81,17 +82,18 @@ export const postCreateResponse = async (
 		Response,
 		"incomplete_details" | "output_text" | "parallel_tool_calls" | "tool_choice" | "tools"
 	> = {
-		object: "response",
-		id: generateUniqueId("resp"),
-		status: "in_progress",
+		created_at: new Date().getTime(),
 		error: null,
+		id: generateUniqueId("resp"),
 		instructions: req.body.instructions,
+		max_output_tokens: req.body.max_output_tokens,
+		metadata: req.body.metadata,
 		model: req.body.model,
+		object: "response",
+		output: [],
+		status: "in_progress",
 		temperature: req.body.temperature,
 		top_p: req.body.top_p,
-		created_at: new Date().getTime(),
-		output: [],
-		metadata: req.body.metadata,
 	};
 
 	if (req.body.stream) {
