@@ -48,16 +48,7 @@ import videoTextToText from "./video-text-to-text/data.js";
 
 export type * from "./audio-classification/inference.js";
 export type * from "./automatic-speech-recognition/inference.js";
-export type {
-	ChatCompletionInput,
-	ChatCompletionInputMessage,
-	ChatCompletionOutput,
-	ChatCompletionOutputComplete,
-	ChatCompletionOutputMessage,
-	ChatCompletionStreamOutput,
-	ChatCompletionStreamOutputChoice,
-	ChatCompletionStreamOutputDelta,
-} from "./chat-completion/inference.js";
+export type * from "./chat-completion/inference.js";
 export type * from "./document-question-answering/inference.js";
 export type * from "./feature-extraction/inference.js";
 export type * from "./fill-mask/inference.js";
