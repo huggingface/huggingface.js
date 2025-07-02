@@ -14,6 +14,7 @@ import type {
 	ResponseStreamEvent,
 	ResponseContentPartAddedEvent,
 	ResponseOutputMessage,
+	ResponseFunctionToolCall,
 } from "openai/resources/responses/responses";
 
 export const postCreateResponse = async (
@@ -190,7 +191,7 @@ export const postCreateResponse = async (
 
 					const outputObject = responseObject.output.at(-1);
 					if (!outputObject || outputObject.type !== "message") {
-						throw Error("Not implemented: can only support single output item type.");
+						throw Error("Not implemented: only single output item type is supported in streaming mode.");
 					}
 
 					if (outputObject.content.length === 0) {
@@ -214,11 +215,11 @@ export const postCreateResponse = async (
 
 					const contentPart = outputObject.content.at(-1);
 					if (!contentPart || contentPart.type !== "output_text") {
-						throw Error("Not implemented: only output_text is supported.");
+						throw Error("Not implemented: only output_text is supported in streaming mode.");
 					}
 
 					if (contentPart.type !== "output_text") {
-						throw Error("Not implemented: only output_text is supported.");
+						throw Error("Not implemented: only output_text is supported in streaming mode.");
 					}
 
 					// Add text delta
@@ -229,6 +230,47 @@ export const postCreateResponse = async (
 						output_index: 0,
 						content_index: 0,
 						delta: chunk.choices[0].delta.content,
+						sequence_number: sequenceNumber++,
+					});
+				} else if (chunk.choices[0].delta.tool_calls) {
+					if (chunk.choices[0].delta.tool_calls.length > 1) {
+						throw Error("Not implemented: only single tool call is supported in streaming mode.");
+					}
+
+					if (responseObject.output.length === 0) {
+						if (!chunk.choices[0].delta.tool_calls[0].function.name) {
+							throw Error("Tool call function name is required.");
+						}
+
+						const outputObject: ResponseFunctionToolCall = {
+							type: "function_call",
+							id: generateUniqueId("fc"),
+							call_id: chunk.choices[0].delta.tool_calls[0].id,
+							name: chunk.choices[0].delta.tool_calls[0].function.name,
+							arguments: "",
+						};
+						responseObject.output = [outputObject];
+
+						// Response output item added event
+						emitEvent({
+							type: "response.output_item.added",
+							output_index: 0,
+							item: outputObject,
+							sequence_number: sequenceNumber++,
+						});
+					}
+
+					const outputObject = responseObject.output.at(-1);
+					if (!outputObject || !outputObject.id || outputObject.type !== "function_call") {
+						throw Error("Not implemented: can only support single output item type in streaming mode.");
+					}
+
+					outputObject.arguments += chunk.choices[0].delta.tool_calls[0].function.arguments;
+					emitEvent({
+						type: "response.function_call_arguments.delta",
+						item_id: outputObject.id,
+						output_index: 0,
+						delta: chunk.choices[0].delta.tool_calls[0].function.arguments,
 						sequence_number: sequenceNumber++,
 					});
 				}
@@ -258,7 +300,7 @@ export const postCreateResponse = async (
 							sequence_number: sequenceNumber++,
 						});
 					} else {
-						throw Error("Not implemented: only output_text is supported.");
+						throw Error("Not implemented: only output_text is supported in streaming mode.");
 					}
 
 					// Response output item done event
@@ -269,8 +311,28 @@ export const postCreateResponse = async (
 						item: lastOutputItem,
 						sequence_number: sequenceNumber++,
 					});
+				} else if (lastOutputItem?.type === "function_call") {
+					if (!lastOutputItem.id) {
+						throw Error("Function call id is required.");
+					}
+
+					emitEvent({
+						type: "response.function_call_arguments.done",
+						item_id: lastOutputItem.id,
+						output_index: responseObject.output.length - 1,
+						arguments: lastOutputItem.arguments,
+						sequence_number: sequenceNumber++,
+					});
+
+					lastOutputItem.status = "completed";
+					emitEvent({
+						type: "response.output_item.done",
+						output_index: responseObject.output.length - 1,
+						item: lastOutputItem,
+						sequence_number: sequenceNumber++,
+					});
 				} else {
-					throw Error("Not implemented: only message output is supported.");
+					throw Error("Not implemented: only message output is supported in streaming mode.");
 				}
 			}
 
