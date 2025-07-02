@@ -74,13 +74,13 @@ export const postCreateResponse = async (
 	}
 
 	const payload: ChatCompletionInput = {
+		// main params
 		model: req.body.model,
 		provider: req.body.provider,
 		messages: messages,
-		max_tokens: req.body.max_output_tokens === null ? undefined : req.body.max_output_tokens,
-		temperature: req.body.temperature,
-		top_p: req.body.top_p,
 		stream: req.body.stream,
+		// options
+		max_tokens: req.body.max_output_tokens === null ? undefined : req.body.max_output_tokens,
 		response_format: req.body.text?.format
 			? {
 					type: req.body.text.format.type,
@@ -95,12 +95,33 @@ export const postCreateResponse = async (
 							: undefined,
 			  }
 			: undefined,
+		temperature: req.body.temperature,
+		tool_choice:
+			typeof req.body.tool_choice === "string"
+				? req.body.tool_choice
+				: req.body.tool_choice
+				  ? {
+							type: "function",
+							function: {
+								name: req.body.tool_choice.name,
+							},
+				    }
+				  : undefined,
+		tools: req.body.tools
+			? req.body.tools.map((tool) => ({
+					type: tool.type,
+					function: {
+						name: tool.name,
+						parameters: tool.parameters,
+						description: tool.description,
+						strict: tool.strict,
+					},
+			  }))
+			: undefined,
+		top_p: req.body.top_p,
 	};
 
-	const responseObject: Omit<
-		Response,
-		"incomplete_details" | "output_text" | "parallel_tool_calls" | "tool_choice" | "tools"
-	> = {
+	const responseObject: Omit<Response, "incomplete_details" | "output_text" | "parallel_tool_calls"> = {
 		created_at: new Date().getTime(),
 		error: null,
 		id: generateUniqueId("resp"),
@@ -110,7 +131,11 @@ export const postCreateResponse = async (
 		model: req.body.model,
 		object: "response",
 		output: [],
+		// parallel_tool_calls: req.body.parallel_tool_calls,
 		status: "in_progress",
+		text: req.body.text,
+		tool_choice: req.body.tool_choice ?? "auto",
+		tools: req.body.tools ?? [],
 		temperature: req.body.temperature,
 		top_p: req.body.top_p,
 	};
@@ -263,7 +288,16 @@ export const postCreateResponse = async (
 						],
 					},
 			  ]
-			: [];
+			: chatCompletionResponse.choices[0].message.tool_calls
+			  ? chatCompletionResponse.choices[0].message.tool_calls.map((toolCall) => ({
+						type: "function_call",
+						id: generateUniqueId("fc"),
+						call_id: toolCall.id,
+						name: toolCall.function.name,
+						arguments: toolCall.function.arguments,
+						status: "completed",
+			    }))
+			  : [];
 
 		res.json(responseObject);
 	} catch (error) {

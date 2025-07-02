@@ -83,6 +83,7 @@ export const createResponseParamsSchema = z.object({
 		.nullable()
 		.default(null),
 	model: z.string(),
+	// parallel_tool_calls: z.boolean().default(true), // TODO: how to handle this if chat completion doesn't?
 	provider: z.string().optional(),
 	// previous_response_id: z.string().nullable().default(null),
 	// reasoning: z.object({
@@ -114,8 +115,27 @@ export const createResponseParamsSchema = z.object({
 			]),
 		})
 		.optional(),
-	// tool_choice:
-	// tools:
+	tool_choice: z
+		.union([
+			z.enum(["auto", "none", "required"]),
+			z.object({
+				type: z.enum(["function"]),
+				name: z.string(),
+			}),
+			// TODO: also hosted tool and MCP tool
+		])
+		.optional(),
+	tools: z
+		.array(
+			z.object({
+				name: z.string(),
+				parameters: z.record(z.any()),
+				strict: z.boolean().default(true),
+				type: z.enum(["function"]),
+				description: z.string().optional(),
+			})
+		)
+		.optional(),
 	// top_logprobs: z.number().min(0).max(20).nullable().default(null),
 	top_p: z.number().min(0).max(1).default(1),
 	// truncation: z.enum(["auto", "disabled"]).default("disabled"),
