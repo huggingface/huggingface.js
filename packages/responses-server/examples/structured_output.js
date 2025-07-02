@@ -16,7 +16,7 @@ const MathReasoning = z.object({
 
 const response = await openai.responses.parse({
 	model: "Qwen/Qwen2.5-VL-72B-Instruct",
-	provider: "cerebras",
+	provider: "nebius",
 	input: [
 		{
 			role: "system",
