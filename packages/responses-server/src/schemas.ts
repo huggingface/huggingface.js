@@ -46,7 +46,7 @@ export const createResponseParamsSchema = z.object({
 				}),
 				z.object({
 					id: z.string().optional(),
-					role: z.enum(["assistant"]).optional(),
+					role: z.enum(["assistant"]),
 					status: z.enum(["in_progress", "completed", "incomplete"]).optional(),
 					type: z.enum(["message"]).default("message"),
 					content: z.array(
