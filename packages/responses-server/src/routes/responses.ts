@@ -17,6 +17,13 @@ import type {
 	ResponseFunctionToolCall,
 } from "openai/resources/responses/responses";
 
+class StreamingError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = "StreamingError";
+	}
+}
+
 export const postCreateResponse = async (
 	req: ValidatedRequest<CreateResponseParams>,
 	res: ExpressResponse
@@ -191,7 +198,7 @@ export const postCreateResponse = async (
 
 					const outputObject = responseObject.output.at(-1);
 					if (!outputObject || outputObject.type !== "message") {
-						throw Error("Not implemented: only single output item type is supported in streaming mode.");
+						throw new StreamingError("Not implemented: only single output item type is supported in streaming mode.");
 					}
 
 					if (outputObject.content.length === 0) {
@@ -215,11 +222,11 @@ export const postCreateResponse = async (
 
 					const contentPart = outputObject.content.at(-1);
 					if (!contentPart || contentPart.type !== "output_text") {
-						throw Error("Not implemented: only output_text is supported in streaming mode.");
+						throw new StreamingError("Not implemented: only output_text is supported in streaming mode.");
 					}
 
 					if (contentPart.type !== "output_text") {
-						throw Error("Not implemented: only output_text is supported in streaming mode.");
+						throw new StreamingError("Not implemented: only output_text is supported in streaming mode.");
 					}
 
 					// Add text delta
@@ -234,12 +241,12 @@ export const postCreateResponse = async (
 					});
 				} else if (chunk.choices[0].delta.tool_calls) {
 					if (chunk.choices[0].delta.tool_calls.length > 1) {
-						throw Error("Not implemented: only single tool call is supported in streaming mode.");
+						throw new StreamingError("Not implemented: only single tool call is supported in streaming mode.");
 					}
 
 					if (responseObject.output.length === 0) {
 						if (!chunk.choices[0].delta.tool_calls[0].function.name) {
-							throw Error("Tool call function name is required.");
+							throw new StreamingError("Tool call function name is required.");
 						}
 
 						const outputObject: ResponseFunctionToolCall = {
@@ -262,7 +269,7 @@ export const postCreateResponse = async (
 
 					const outputObject = responseObject.output.at(-1);
 					if (!outputObject || !outputObject.id || outputObject.type !== "function_call") {
-						throw Error("Not implemented: can only support single output item type in streaming mode.");
+						throw new StreamingError("Not implemented: can only support single output item type in streaming mode.");
 					}
 
 					outputObject.arguments += chunk.choices[0].delta.tool_calls[0].function.arguments;
@@ -300,7 +307,7 @@ export const postCreateResponse = async (
 							sequence_number: sequenceNumber++,
 						});
 					} else {
-						throw Error("Not implemented: only output_text is supported in streaming mode.");
+						throw new StreamingError("Not implemented: only output_text is supported in streaming mode.");
 					}
 
 					// Response output item done event
@@ -313,7 +320,7 @@ export const postCreateResponse = async (
 					});
 				} else if (lastOutputItem?.type === "function_call") {
 					if (!lastOutputItem.id) {
-						throw Error("Function call id is required.");
+						throw new StreamingError("Function call id is required.");
 					}
 
 					emitEvent({
@@ -332,7 +339,7 @@ export const postCreateResponse = async (
 						sequence_number: sequenceNumber++,
 					});
 				} else {
-					throw Error("Not implemented: only message output is supported in streaming mode.");
+					throw new StreamingError("Not implemented: only message output is supported in streaming mode.");
 				}
 			}
 
@@ -343,13 +350,25 @@ export const postCreateResponse = async (
 				response: responseObject as Response,
 				sequence_number: sequenceNumber++,
 			});
-		} catch (streamError: any) {
+		} catch (streamError) {
 			console.error("Error in streaming chat completion:", streamError);
+
+			let message = "An error occurred while streaming from inference server.";
+			if (streamError instanceof StreamingError) {
+				message = streamError.message;
+			} else if (
+				typeof streamError === "object" &&
+				streamError &&
+				"message" in streamError &&
+				typeof streamError.message === "string"
+			) {
+				message = streamError.message;
+			}
 
 			emitEvent({
 				type: "error",
 				code: null,
-				message: streamError.message || "An error occurred while streaming from inference server.",
+				message,
 				param: null,
 				sequence_number: sequenceNumber++,
 			});
