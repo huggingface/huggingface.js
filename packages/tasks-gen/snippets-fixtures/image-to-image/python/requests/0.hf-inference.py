@@ -2,10 +2,13 @@ import os
 import base64
 import requests
 
-API_URL = "https://router.huggingface.co/hf-inference/models/stabilityai/stable-diffusion-xl-refiner-1.0"
+API_URL = "https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-Kontext-dev"
 headers = {
     "Authorization": f"Bearer {os.environ['HF_TOKEN']}",
 }
+
+with open("cat.png", "rb") as image_file:
+    image_base_64 = base64.b64encode(image_file.read()).decode('utf-8')
 
 def query(payload):
     with open(payload["inputs"], "rb") as f:

@@ -113,7 +113,6 @@ export type {
 } from "./zero-shot-object-detection/inference.js";
 
 import type { ModelLibraryKey } from "../model-libraries.js";
-
 /**
  * Model libraries compatible with each ML task
  */
@@ -181,6 +180,7 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	"image-to-3d": ["diffusers"],
 	"any-to-any": ["transformers"],
 	"visual-document-retrieval": ["transformers"],
+	"video-to-video": ["diffusers"],
 };
 
 /**
@@ -250,6 +250,7 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	translation: getData("translation", translation),
 	"unconditional-image-generation": getData("unconditional-image-generation", unconditionalImageGeneration),
 	"video-text-to-text": getData("video-text-to-text", videoTextToText),
+	"video-to-video": getData("video-to-video", placeholder),
 	"visual-question-answering": getData("visual-question-answering", visualQuestionAnswering),
 	"voice-activity-detection": undefined,
 	"zero-shot-classification": getData("zero-shot-classification", zeroShotClassification),
