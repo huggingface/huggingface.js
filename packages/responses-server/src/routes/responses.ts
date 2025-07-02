@@ -38,21 +38,31 @@ export const postCreateResponse = async (
 				content:
 					typeof item.content === "string"
 						? item.content
-						: item.content.map((content) => {
-								if (content.type === "input_image") {
-									return {
-										type: "image_url" as ChatCompletionInputMessageChunkType,
-										image_url: {
-											url: content.image_url,
-										},
-									};
-								}
-								// content.type must be "input_text" at this point
-								return {
-									type: "text" as ChatCompletionInputMessageChunkType,
-									text: content.text,
-								};
-						  }),
+						: item.content
+								.map((content) => {
+									switch (content.type) {
+										case "input_image":
+											return {
+												type: "image_url" as ChatCompletionInputMessageChunkType,
+												image_url: {
+													url: content.image_url,
+												},
+											};
+										case "output_text":
+											return {
+												type: "text" as ChatCompletionInputMessageChunkType,
+												text: content.text,
+											};
+										case "refusal":
+											return undefined;
+										case "input_text":
+											return {
+												type: "text" as ChatCompletionInputMessageChunkType,
+												text: content.text,
+											};
+									}
+								})
+								.filter((item) => item !== undefined),
 			}))
 		);
 	} else {
