@@ -35,10 +35,10 @@ Some example scripts are implemented in ./examples.
 You can run them using
 
 ```bash
-# Run ./examples/text_single.js
-pnpm run example text_single
+# Run ./examples/text.js
+pnpm run example text
 
-# Run ./examples/text_multi.js
-pnpm run example text_multi
+# Run ./examples/multi_turn.js
+pnpm run example multi_turn
 ```
 
