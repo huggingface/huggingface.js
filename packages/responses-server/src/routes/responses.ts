@@ -3,7 +3,11 @@ import { type ValidatedRequest } from "../middleware/validation.js";
 import { type CreateResponseParams } from "../schemas.js";
 import { generateUniqueId } from "../lib/generateUniqueId.js";
 import { InferenceClient } from "@huggingface/inference";
-import type { ChatCompletionInputMessage, ChatCompletionInputMessageChunkType } from "@huggingface/tasks";
+import type {
+	ChatCompletionInputMessage,
+	ChatCompletionInputMessageChunkType,
+	ChatCompletionInput,
+} from "@huggingface/tasks";
 
 import type {
 	Response,
@@ -69,13 +73,28 @@ export const postCreateResponse = async (
 		messages.push({ role: "user", content: req.body.input });
 	}
 
-	const payload = {
+	const payload: ChatCompletionInput = {
 		model: req.body.model,
+		provider: req.body.provider,
 		messages: messages,
 		max_tokens: req.body.max_output_tokens === null ? undefined : req.body.max_output_tokens,
 		temperature: req.body.temperature,
 		top_p: req.body.top_p,
 		stream: req.body.stream,
+		response_format: req.body.text?.format
+			? {
+					type: req.body.text.format.type,
+					json_schema:
+						req.body.text.format.type === "json_schema"
+							? {
+									description: req.body.text.format.description,
+									name: req.body.text.format.name,
+									schema: req.body.text.format.schema,
+									strict: req.body.text.format.strict,
+							  }
+							: undefined,
+			  }
+			: undefined,
 	};
 
 	const responseObject: Omit<
@@ -225,12 +244,7 @@ export const postCreateResponse = async (
 	}
 
 	try {
-		const chatCompletionResponse = await client.chatCompletion({
-			model: req.body.model,
-			messages: messages,
-			temperature: req.body.temperature,
-			top_p: req.body.top_p,
-		});
+		const chatCompletionResponse = await client.chatCompletion(payload);
 
 		responseObject.status = "completed";
 		responseObject.output = chatCompletionResponse.choices[0].message.content
