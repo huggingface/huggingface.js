@@ -35,12 +35,7 @@ export const LIBRARY_TASK_MAPPING: Partial<Record<ModelLibraryKey, PipelineType[
 	sklearn: ["tabular-classification", "tabular-regression", "text-classification"],
 	spacy: ["token-classification", "text-classification", "sentence-similarity"],
 	"span-marker": ["token-classification"],
-	speechbrain: [
-		"audio-classification",
-		"audio-to-audio",
-		"automatic-speech-recognition",
-		"text-to-speech",
-	],
+	speechbrain: ["audio-classification", "audio-to-audio", "automatic-speech-recognition", "text-to-speech"],
 	stanza: ["token-classification"],
 	timm: ["image-classification", "image-feature-extraction"],
 	transformers: [
