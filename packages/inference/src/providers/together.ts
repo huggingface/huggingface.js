@@ -56,7 +56,7 @@ export class TogetherConversationalTask extends BaseConversationalTask {
 
 		if (response_format?.type === "json_schema" && response_format?.json_schema?.schema) {
 			payload.response_format = {
-				type: "json_object",
+				type: "json_schema",
 				schema: response_format.json_schema.schema,
 			};
 		}
