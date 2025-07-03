@@ -11,12 +11,12 @@ export async function* listCollections(
 			/**
 			 * Filter collections created by a specific user or organization.
 			 */
-			owner?: string;
+			owner?: string | string[];
 			/**
 			 * Filter collections containing a specific item. Value must be the item_type and item_id concatenated.
 			 * Example: "models/teknium/OpenHermes-2.5-Mistral-7B", "datasets/rajpurkar/squad" or "papers/2311.12983".
 			 */
-			item?: string;
+			item?: string | string[];
 			/**
 			 * Filter based on substrings for titles & descriptions.
 			 */
@@ -44,8 +44,8 @@ export async function* listCollections(
 	const search = new URLSearchParams([
 		...Object.entries({
 			limit: String(Math.min(totalToFetch, 100)),
-			...(params?.search?.owner ? { owner: params.search.owner } : undefined),
-			...(params?.search?.item ? { item: params.search.item } : undefined),
+			...(params?.search?.owner ? { owner: Array.isArray(params.search.owner) ? params.search.owner.join(",") : params.search.owner } : undefined),
+			...(params?.search?.item ? { item: Array.isArray(params.search.item) ? params.search.item.join(",") : params.search.item } : undefined),
 			...(params?.search?.q ? { q: params.search.q } : undefined),
 		}),
 	]).toString();
