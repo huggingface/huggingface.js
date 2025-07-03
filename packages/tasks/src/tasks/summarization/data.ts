@@ -1,6 +1,7 @@
 import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
+	canonicalId: "text-generation",
 	datasets: [
 		{
 			description:
