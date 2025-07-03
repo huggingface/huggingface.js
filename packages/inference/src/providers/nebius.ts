@@ -25,6 +25,7 @@ import {
 	type TextToImageTaskHelper,
 } from "./providerHelper.js";
 import { InferenceClientProviderOutputError } from "../errors.js";
+import type { ChatCompletionInput } from "../../../tasks/dist/commonjs/index.js";
 
 const NEBIUS_API_BASE_URL = "https://api.studio.nebius.ai";
 
@@ -45,24 +46,12 @@ export class NebiusConversationalTask extends BaseConversationalTask {
 		super("nebius", NEBIUS_API_BASE_URL);
 	}
 
-	override preparePayload(params: BodyParams): Record<string, unknown> {
+	override preparePayload(params: BodyParams<ChatCompletionInput>): Record<string, unknown> {
 		const payload = super.preparePayload(params) as Record<string, unknown>;
 
-		const responseFormat = (params.args as Record<string, unknown>)["response_format"];
-		if (
-			responseFormat &&
-			typeof responseFormat === "object" &&
-			"type" in responseFormat &&
-			(responseFormat as { type?: unknown }).type === "json_schema"
-		) {
-			const jsonSchemaDetails = (responseFormat as Record<string, unknown>)["json_schema"];
-			if (
-				jsonSchemaDetails &&
-				typeof jsonSchemaDetails === "object" &&
-				"schema" in (jsonSchemaDetails as Record<string, unknown>)
-			) {
-				payload["guided_json"] = (jsonSchemaDetails as Record<string, unknown>)["schema"];
-			}
+		const responseFormat = params.args.response_format;
+		if (responseFormat?.type === "json_schema" && responseFormat.json_schema?.schema) {
+			payload["guided_json"] = responseFormat.json_schema.schema;
 		}
 
 		return payload;
