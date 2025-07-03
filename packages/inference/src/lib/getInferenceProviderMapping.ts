@@ -160,6 +160,7 @@ export async function resolveProvider(
 		}
 		const mappings = await fetchInferenceProviderMappingForModel(modelId);
 		provider = mappings[0]?.provider as InferenceProvider | undefined;
+		console.log("Auto selected provider:", provider);
 	}
 	if (!provider) {
 		throw new InferenceClientInputError(`No Inference Provider available for model ${modelId}.`);
