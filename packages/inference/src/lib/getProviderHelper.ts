@@ -12,6 +12,7 @@ import * as Novita from "../providers/novita.js";
 import * as Nscale from "../providers/nscale.js";
 import * as OpenAI from "../providers/openai.js";
 import * as OvhCloud from "../providers/ovhcloud.js";
+import * as Swarmind from "../providers/swarmind.js"
 import type {
 	AudioClassificationTaskHelper,
 	AudioToAudioTaskHelper,
@@ -146,6 +147,10 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 	sambanova: {
 		conversational: new Sambanova.SambanovaConversationalTask(),
 		"feature-extraction": new Sambanova.SambanovaFeatureExtractionTask(),
+	},
+	swarmind: {
+		conversational: new Swarmind.SwarmindConversationalTask(),
+		"text-generation": new Swarmind.SwarmindTextGenerationTask(),
 	},
 	together: {
 		"text-to-image": new Together.TogetherTextToImageTask(),
