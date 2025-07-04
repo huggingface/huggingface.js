@@ -66,8 +66,6 @@ const inputsTextGeneration = (model: ModelDataMinimal): string | ChatCompletionI
 	return `"Can you please let us know more details about your "`;
 };
 
-const inputsText2TextGeneration = () => `"The answer to the universe is"`;
-
 const inputsFillMask = (model: ModelDataMinimal) => `"The answer to the universe is ${model.mask_token}."`;
 
 const inputsSentenceSimilarity = () =>
@@ -147,7 +145,6 @@ const modelInputSnippets: {
 	"text-to-video": inputsTextToVideo,
 	"text-to-speech": inputsTextToSpeech,
 	"text-to-audio": inputsTextToAudio,
-	"text2text-generation": inputsText2TextGeneration,
 	"token-classification": inputsTokenClassification,
 	translation: inputsTranslation,
 	"zero-shot-classification": inputsZeroShotClassification,

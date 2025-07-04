@@ -1,7 +1,7 @@
 import type { TaskDataCustom } from "../index.js";
 
 const taskData: TaskDataCustom = {
-	canonicalId: "text2text-generation",
+	canonicalId: "text-generation",
 	datasets: [
 		{
 			description: "A dataset of copyright-free books translated into 16 different languages.",

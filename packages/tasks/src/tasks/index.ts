@@ -158,7 +158,6 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	"text-to-speech": ["espnet", "tensorflowtts", "transformers", "transformers.js"],
 	"text-to-audio": ["transformers", "transformers.js"],
 	"text-to-video": ["diffusers"],
-	"text2text-generation": ["transformers", "transformers.js"],
 	"time-series-forecasting": [],
 	"token-classification": [
 		"adapter-transformers",
@@ -245,7 +244,6 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"text-to-speech": getData("text-to-speech", textToSpeech),
 	"text-to-audio": undefined,
 	"text-to-video": getData("text-to-video", textToVideo),
-	"text2text-generation": undefined,
 	"time-series-forecasting": undefined,
 	"token-classification": getData("token-classification", tokenClassification),
 	translation: getData("translation", translation),

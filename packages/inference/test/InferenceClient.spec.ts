@@ -1429,7 +1429,7 @@ describe.skip("InferenceClient", () => {
 					providerId: "mistralai/Devstral-Small-2505",
 					hfModelId: "mistralai/Devstral-Small-2505",
 					status: "live",
-					task: "text2text-generation",
+					task: "text-generation",
 				},
 			};
 
@@ -1479,7 +1479,7 @@ describe.skip("InferenceClient", () => {
 				expect(res[0]).toEqual(expect.arrayContaining([expect.any(Number)]));
 			});
 
-			it("text2textGeneration", async () => {
+			it("textGeneration", async () => {
 				const res = await client.textGeneration({
 					model: "mistralai/Devstral-Small-2505",
 					provider: "nebius",
