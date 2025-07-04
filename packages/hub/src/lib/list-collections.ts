@@ -40,32 +40,32 @@ export async function* listCollections(
 ): AsyncGenerator<ApiCollectionInfo> {
 	const accessToken = params && checkCredentials(params);
 
-	const queryParams = new URLSearchParams();
+	const searchParams = new URLSearchParams();
 
 	let totalToFetch = params?.limit ?? Infinity;
-	queryParams.append("limit", String(Math.min(totalToFetch, 100)));
+	searchParams.append("limit", String(Math.min(totalToFetch, 100)));
 
 	if (params?.sort) {
-		queryParams.append("sort", params.sort);
+		searchParams.append("sort", params.sort);
 	}
 
 	if (params?.search?.owner) {
 		for (const owner of params.search.owner) {
-			queryParams.append("owner", owner);
+			searchParams.append("owner", owner);
 		}
 	}
 
 	if (params?.search?.item) {
 		for (const item of params.search.item) {
-			queryParams.append("item", item);
+			searchParams.append("item", item);
 		}
 	}
 
 	if (params?.search?.q) {
-		queryParams.append("q", params.search.q);
+		searchParams.append("q", params.search.q);
 	}
 
-	let url: string | undefined = `${params?.hubUrl || HUB_URL}/api/collections?${queryParams}`;
+	let url: string | undefined = `${params?.hubUrl || HUB_URL}/api/collections?${searchParams}`;
 
 	while (url) {
 		const res: Response = await (params?.fetch ?? fetch)(url, {
