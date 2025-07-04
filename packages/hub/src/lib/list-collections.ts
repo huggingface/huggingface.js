@@ -9,14 +9,15 @@ export async function* listCollections(
 	params?: {
 		search?: {
 			/**
-			 * Filter collections created by a specific user or organization.
+			 * Filter collections created by specific owners (users or organizations).
 			 */
-			owner?: string | string[];
+			owner?: string[];
 			/**
-			 * Filter collections containing a specific item. Value must be the item_type and item_id concatenated.
+			 * Filter collections containing specific items.
+			 * Value must be the item_type and item_id concatenated.
 			 * Example: "models/teknium/OpenHermes-2.5-Mistral-7B", "datasets/rajpurkar/squad" or "papers/2311.12983".
 			 */
-			item?: string | string[];
+			item?: string[];
 			/**
 			 * Filter based on substrings for titles & descriptions.
 			 */
@@ -39,18 +40,32 @@ export async function* listCollections(
 ): AsyncGenerator<ApiCollectionInfo> {
 	const accessToken = params && checkCredentials(params);
 
+	const queryParams = new URLSearchParams();
+
 	let totalToFetch = params?.limit ?? Infinity;
+	queryParams.append("limit", String(Math.min(totalToFetch, 100)));
 
-	const search = new URLSearchParams([
-		...Object.entries({
-			limit: String(Math.min(totalToFetch, 100)),
-			...(params?.search?.owner ? { owner: Array.isArray(params.search.owner) ? params.search.owner.join(",") : params.search.owner } : undefined),
-			...(params?.search?.item ? { item: Array.isArray(params.search.item) ? params.search.item.join(",") : params.search.item } : undefined),
-			...(params?.search?.q ? { q: params.search.q } : undefined),
-		}),
-	]).toString();
+	if (params?.sort) {
+		queryParams.append("sort", params.sort);
+	}
 
-	let url: string | undefined = `${params?.hubUrl || HUB_URL}/api/collections?${search}`;
+	if (params?.search?.owner) {
+		for (const owner of params.search.owner) {
+			queryParams.append("owner", owner);
+		}
+	}
+
+	if (params?.search?.item) {
+		for (const item of params.search.item) {
+			queryParams.append("item", item);
+		}
+	}
+
+	if (params?.search?.q) {
+		queryParams.append("q", params.search.q);
+	}
+
+	let url: string | undefined = `${params?.hubUrl || HUB_URL}/api/collections?${queryParams}`;
 
 	while (url) {
 		const res: Response = await (params?.fetch ?? fetch)(url, {

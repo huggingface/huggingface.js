@@ -8,7 +8,7 @@ describe("listCollections", () => {
 		const results: ApiCollectionInfo[] = [];
 
 		for await (const entry of listCollections({
-			search: { owner: "quanghuynt14" },
+			search: { owner: ["quanghuynt14"] },
 			hubUrl: TEST_HUB_URL,
 		})) {
 			if (entry.slug !== "quanghuynt14/test-collection-6866ff686ca2d2e0a1931507") {
