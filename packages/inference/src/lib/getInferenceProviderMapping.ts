@@ -18,7 +18,16 @@ function normalizeInferenceProviderMapping(
 	modelId: ModelId,
 	inferenceProviderMapping?:
 		| InferenceProviderMappingEntry[]
-		| Record<string, { providerId: string; status: "live" | "staging"; task: WidgetType }>
+		| Record<
+				string,
+				{
+					providerId: string;
+					status: "live" | "staging";
+					task: WidgetType;
+					adapter?: string;
+					adapterWeightsPath?: string;
+				}
+		  >
 ): InferenceProviderMappingEntry[] {
 	if (!inferenceProviderMapping) {
 		return [];
@@ -36,6 +45,8 @@ function normalizeInferenceProviderMapping(
 		providerId: mapping.providerId,
 		status: mapping.status,
 		task: mapping.task,
+		adapter: mapping.adapter,
+		adapterWeightsPath: mapping.adapterWeightsPath,
 	}));
 }
 
