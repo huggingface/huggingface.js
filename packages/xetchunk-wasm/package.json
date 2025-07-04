@@ -1,0 +1,39 @@
+{
+	"name": "@huggingface/xetchunk-wasm",
+	"version": "0.0.1",
+	"scripts": {
+		"build:debug": "asc assembly/index.ts --target debug",
+		"build:release": "asc assembly/index.ts --target release",
+		"build": "pnpm run build:debug && npm run build:release",
+		"test": "node tests",
+		"prepare": "pnpm run build"
+	},
+	"keywords": [
+		"xet",
+		"chunk",
+		"chunking",
+		"assemblyscript",
+		"assembly",
+		"wasm"
+	],
+	"dependencies": {
+		"@huggingface/blake3-wasm": "workspace:*",
+		"@huggingface/gearhash-wasm": "workspace:*"
+	},
+	"type": "module",
+	"exports": {
+		".": {
+			"import": "./build/release.js",
+			"types": "./build/release.d.ts"
+		},
+		"./assembly": {
+			"import": "./assembly/index.ts"
+		},
+		"./wasm": {
+			"import": "./build/release.wasm"
+		}
+	},
+	"devDependencies": {
+		"assemblyscript": "0.27.36"
+	}
+}
