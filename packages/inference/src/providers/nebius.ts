@@ -25,6 +25,7 @@ import {
 	type TextToImageTaskHelper,
 } from "./providerHelper.js";
 import { InferenceClientProviderOutputError } from "../errors.js";
+import type { ChatCompletionInput } from "../../../tasks/dist/commonjs/index.js";
 
 const NEBIUS_API_BASE_URL = "https://api.studio.nebius.ai";
 
@@ -49,6 +50,17 @@ interface NebiusTextGenerationOutput extends Omit<TextGenerationOutput, "choices
 export class NebiusConversationalTask extends BaseConversationalTask {
 	constructor() {
 		super("nebius", NEBIUS_API_BASE_URL);
+	}
+
+	override preparePayload(params: BodyParams<ChatCompletionInput>): Record<string, unknown> {
+		const payload = super.preparePayload(params) as Record<string, unknown>;
+
+		const responseFormat = params.args.response_format;
+		if (responseFormat?.type === "json_schema" && responseFormat.json_schema?.schema) {
+			payload["guided_json"] = responseFormat.json_schema.schema;
+		}
+
+		return payload;
 	}
 }
 
