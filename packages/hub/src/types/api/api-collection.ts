@@ -1,49 +1,26 @@
+import type { ApiAuthor } from "./api-author";
+
 export interface ApiCollectionInfo {
 	slug: string;
 	title: string;
 	description?: string;
 	lastUpdated: string;
 	gating:
-	| true
-	| (
-		| false
-		| {
-			mode: "auto";
-		}
-		| {
-			mode: "manual";
-			notifications: {
-				mode: "bulk" | "real-time";
-				email?: string;
-			};
-		}
-	);
-	owner:
-	| {
-		avatarUrl: string;
-		fullname: string;
-		name: string;
-		isHf: boolean;
-		isHfAdmin: boolean;
-		isMod: boolean;
-		followerCount?: number;
-		type: "org";
-		isEnterprise: boolean;
-		isUserFollowing?: boolean;
-	}
-	| {
-		avatarUrl: string;
-		fullname: string;
-		name: string;
-		isHf: boolean;
-		isHfAdmin: boolean;
-		isMod: boolean;
-		followerCount?: number;
-		type: "user";
-		isPro: boolean;
-		_id: string;
-		isUserFollowing?: boolean;
-	};
+		| true
+		| (
+				| false
+				| {
+						mode: "auto";
+				  }
+				| {
+						mode: "manual";
+						notifications: {
+							mode: "bulk" | "real-time";
+							email?: string;
+						};
+				  }
+		  );
+	owner: ApiAuthor;
 	/*
 	 * The items list per collection is truncated to 4 items maximum.
 	 * To retrieve all items from a collection, you need to make an additional call using its collection slug.
@@ -54,7 +31,6 @@ export interface ApiCollectionInfo {
 	upvotes: number;
 	isUpvotedByUser: boolean;
 }
-
 
 interface ApiCollectionItemBase {
 	_id: string;
@@ -73,84 +49,84 @@ interface ApiCollectionItemModel extends ApiCollectionItemBase {
 	id: string;
 	availableInferenceProviders: {
 		provider:
-		| "black-forest-labs"
-		| "cerebras"
-		| "cohere"
-		| "fal-ai"
-		| "featherless-ai"
-		| "fireworks-ai"
-		| "groq"
-		| "hf-inference"
-		| "hyperbolic"
-		| "nebius"
-		| "novita"
-		| "nscale"
-		| "openai"
-		| "ovhcloud"
-		| "replicate"
-		| "sambanova"
-		| "together";
+			| "black-forest-labs"
+			| "cerebras"
+			| "cohere"
+			| "fal-ai"
+			| "featherless-ai"
+			| "fireworks-ai"
+			| "groq"
+			| "hf-inference"
+			| "hyperbolic"
+			| "nebius"
+			| "novita"
+			| "nscale"
+			| "openai"
+			| "ovhcloud"
+			| "replicate"
+			| "sambanova"
+			| "together";
 		providerStatus: "live" | "staging" | "error";
 		modelStatus: "live" | "staging" | "error";
 		providerId: string;
 		task:
-		| "text-classification"
-		| "token-classification"
-		| "table-question-answering"
-		| "question-answering"
-		| "zero-shot-classification"
-		| "translation"
-		| "summarization"
-		| "feature-extraction"
-		| "text-generation"
-		| "text2text-generation"
-		| "fill-mask"
-		| "sentence-similarity"
-		| "text-to-speech"
-		| "text-to-audio"
-		| "automatic-speech-recognition"
-		| "audio-to-audio"
-		| "audio-classification"
-		| "audio-text-to-text"
-		| "voice-activity-detection"
-		| "depth-estimation"
-		| "image-classification"
-		| "object-detection"
-		| "image-segmentation"
-		| "text-to-image"
-		| "image-to-text"
-		| "image-to-image"
-		| "image-to-video"
-		| "unconditional-image-generation"
-		| "video-classification"
-		| "reinforcement-learning"
-		| "robotics"
-		| "tabular-classification"
-		| "tabular-regression"
-		| "tabular-to-text"
-		| "table-to-text"
-		| "multiple-choice"
-		| "text-ranking"
-		| "text-retrieval"
-		| "time-series-forecasting"
-		| "text-to-video"
-		| "image-text-to-text"
-		| "visual-question-answering"
-		| "document-question-answering"
-		| "zero-shot-image-classification"
-		| "graph-ml"
-		| "mask-generation"
-		| "zero-shot-object-detection"
-		| "text-to-3d"
-		| "image-to-3d"
-		| "image-feature-extraction"
-		| "video-text-to-text"
-		| "keypoint-detection"
-		| "visual-document-retrieval"
-		| "any-to-any"
-		| "video-to-video"
-		| "other"
-		| "conversational";
+			| "text-classification"
+			| "token-classification"
+			| "table-question-answering"
+			| "question-answering"
+			| "zero-shot-classification"
+			| "translation"
+			| "summarization"
+			| "feature-extraction"
+			| "text-generation"
+			| "text2text-generation"
+			| "fill-mask"
+			| "sentence-similarity"
+			| "text-to-speech"
+			| "text-to-audio"
+			| "automatic-speech-recognition"
+			| "audio-to-audio"
+			| "audio-classification"
+			| "audio-text-to-text"
+			| "voice-activity-detection"
+			| "depth-estimation"
+			| "image-classification"
+			| "object-detection"
+			| "image-segmentation"
+			| "text-to-image"
+			| "image-to-text"
+			| "image-to-image"
+			| "image-to-video"
+			| "unconditional-image-generation"
+			| "video-classification"
+			| "reinforcement-learning"
+			| "robotics"
+			| "tabular-classification"
+			| "tabular-regression"
+			| "tabular-to-text"
+			| "table-to-text"
+			| "multiple-choice"
+			| "text-ranking"
+			| "text-retrieval"
+			| "time-series-forecasting"
+			| "text-to-video"
+			| "image-text-to-text"
+			| "visual-question-answering"
+			| "document-question-answering"
+			| "zero-shot-image-classification"
+			| "graph-ml"
+			| "mask-generation"
+			| "zero-shot-object-detection"
+			| "text-to-3d"
+			| "image-to-3d"
+			| "image-feature-extraction"
+			| "video-text-to-text"
+			| "keypoint-detection"
+			| "visual-document-retrieval"
+			| "any-to-any"
+			| "video-to-video"
+			| "other"
+			| "conversational";
 		adapterType?: "lora";
 		adapterWeightsPath?: string;
 	}[];
@@ -167,32 +143,7 @@ interface ApiCollectionItemModel extends ApiCollectionItemBase {
 		numUsers: number;
 	};
 	numParameters?: number;
-	authorData?:
-	| {
-		avatarUrl: string;
-		fullname: string;
-		name: string;
-		isHf: boolean;
-		isHfAdmin: boolean;
-		isMod: boolean;
-		followerCount?: number;
-		type: "org";
-		isEnterprise: boolean;
-		isUserFollowing?: boolean;
-	}
-	| {
-		avatarUrl: string;
-		fullname: string;
-		name: string;
-		isHf: boolean;
-		isHfAdmin: boolean;
-		isMod: boolean;
-		followerCount?: number;
-		type: "user";
-		isPro: boolean;
-		_id: string;
-		isUserFollowing?: boolean;
-	};
+	authorData?: ApiAuthor;
 	widgetOutputUrls?: string[];
 }
 
@@ -218,17 +169,7 @@ interface ApiCollectionItemDataset extends ApiCollectionItemBase {
 			| "duckdb"
 		)[];
 		formats: ("json" | "csv" | "parquet" | "imagefolder" | "audiofolder" | "webdataset" | "text" | "arrow")[];
-		modalities: (
-			| "3d"
-			| "audio"
-			| "document"
-			| "geospatial"
-			| "image"
-			| "tabular"
-			| "text"
-			| "timeseries"
-			| "video"
-		)[];
+		modalities: ("3d" | "audio" | "document" | "geospatial" | "image" | "tabular" | "text" | "timeseries" | "video")[];
 	};
 	private: boolean;
 	repoType: "dataset";
@@ -260,66 +201,66 @@ interface ApiCollectionItemSpace extends ApiCollectionItemBase {
 	sdk?: "gradio" | "docker" | "static" | "streamlit";
 	runtime: {
 		stage:
-		| "NO_APP_FILE"
-		| "CONFIG_ERROR"
-		| "BUILDING"
-		| "BUILD_ERROR"
-		| "APP_STARTING"
-		| "RUNNING"
-		| "RUNNING_BUILDING"
-		| "RUNNING_APP_STARTING"
-		| "RUNTIME_ERROR"
-		| "DELETING"
-		| "STOPPED"
-		| "PAUSED"
-		| "SLEEPING";
+			| "NO_APP_FILE"
+			| "CONFIG_ERROR"
+			| "BUILDING"
+			| "BUILD_ERROR"
+			| "APP_STARTING"
+			| "RUNNING"
+			| "RUNNING_BUILDING"
+			| "RUNNING_APP_STARTING"
+			| "RUNTIME_ERROR"
+			| "DELETING"
+			| "STOPPED"
+			| "PAUSED"
+			| "SLEEPING";
 		hardware: {
 			current:
-			| (
-				| "cpu-basic"
-				| "cpu-upgrade"
-				| "cpu-performance"
-				| "cpu-xl"
-				| "zero-a10g"
-				| "t4-small"
-				| "t4-medium"
-				| "l4x1"
-				| "l4x4"
-				| "l40sx1"
-				| "l40sx4"
-				| "l40sx8"
-				| "a10g-small"
-				| "a10g-large"
-				| "a10g-largex2"
-				| "a10g-largex4"
-				| "a100-large"
-				| "h100"
-				| "h100x8"
-			)
-			| null;
+				| (
+						| "cpu-basic"
+						| "cpu-upgrade"
+						| "cpu-performance"
+						| "cpu-xl"
+						| "zero-a10g"
+						| "t4-small"
+						| "t4-medium"
+						| "l4x1"
+						| "l4x4"
+						| "l40sx1"
+						| "l40sx4"
+						| "l40sx8"
+						| "a10g-small"
+						| "a10g-large"
+						| "a10g-largex2"
+						| "a10g-largex4"
+						| "a100-large"
+						| "h100"
+						| "h100x8"
+				  )
+				| null;
 			requested:
-			| (
-				| "cpu-basic"
-				| "cpu-upgrade"
-				| "cpu-performance"
-				| "cpu-xl"
-				| "zero-a10g"
-				| "t4-small"
-				| "t4-medium"
-				| "l4x1"
-				| "l4x4"
-				| "l40sx1"
-				| "l40sx4"
-				| "l40sx8"
-				| "a10g-small"
-				| "a10g-large"
-				| "a10g-largex2"
-				| "a10g-largex4"
-				| "a100-large"
-				| "h100"
-				| "h100x8"
-			)
-			| null;
+				| (
+						| "cpu-basic"
+						| "cpu-upgrade"
+						| "cpu-performance"
+						| "cpu-xl"
+						| "zero-a10g"
+						| "t4-small"
+						| "t4-medium"
+						| "l4x1"
+						| "l4x4"
+						| "l40sx1"
+						| "l40sx4"
+						| "l40sx8"
+						| "a10g-small"
+						| "a10g-large"
+						| "a10g-largex2"
+						| "a10g-largex4"
+						| "a100-large"
+						| "h100"
+						| "h100x8"
+				  )
+				| null;
 		};
 		storage: ("small" | "medium" | "large") | null;
 		errorMessage?: string;
@@ -337,32 +278,7 @@ interface ApiCollectionItemSpace extends ApiCollectionItemBase {
 		sha?: string;
 	};
 	originSpace?: {
-		author:
-		| {
-			avatarUrl: string;
-			fullname: string;
-			name: string;
-			isHf: boolean;
-			isHfAdmin: boolean;
-			isMod: boolean;
-			followerCount?: number;
-			type: "org";
-			isEnterprise: boolean;
-			isUserFollowing?: boolean;
-		}
-		| {
-			avatarUrl: string;
-			fullname: string;
-			name: string;
-			isHf: boolean;
-			isHfAdmin: boolean;
-			isMod: boolean;
-			followerCount?: number;
-			type: "user";
-			isPro: boolean;
-			_id: string;
-			isUserFollowing?: boolean;
-		};
+		author: ApiAuthor;
 		name: string;
 	};
 	ai_short_description?: string;
@@ -374,32 +290,7 @@ interface ApiCollectionItemSpace extends ApiCollectionItemBase {
 		numUsers: number;
 	};
 	tags: string[];
-	authorData?:
-	| {
-		avatarUrl: string;
-		fullname: string;
-		name: string;
-		isHf: boolean;
-		isHfAdmin: boolean;
-		isMod: boolean;
-		followerCount?: number;
-		type: "org";
-		isEnterprise: boolean;
-		isUserFollowing?: boolean;
-	}
-	| {
-		avatarUrl: string;
-		fullname: string;
-		name: string;
-		isHf: boolean;
-		isHfAdmin: boolean;
-		isMod: boolean;
-		followerCount?: number;
-		type: "user";
-		isPro: boolean;
-		_id: string;
-		isUserFollowing?: boolean;
-	};
+	authorData?: ApiAuthor;
 	shortDescription?: string;
 	semanticRelevancyScore?: number;
 }
@@ -419,32 +310,7 @@ interface ApiCollectionItemCollection extends ApiCollectionItemBase {
 	slug: string;
 	lastUpdated: string;
 	description?: string;
-	owner:
-	| {
-		avatarUrl: string;
-		fullname: string;
-		name: string;
-		isHf: boolean;
-		isHfAdmin: boolean;
-		isMod: boolean;
-		followerCount?: number;
-		type: "org";
-		isEnterprise: boolean;
-		isUserFollowing?: boolean;
-	}
-	| {
-		avatarUrl: string;
-		fullname: string;
-		name: string;
-		isHf: boolean;
-		isHfAdmin: boolean;
-		isMod: boolean;
-		followerCount?: number;
-		type: "user";
-		isPro: boolean;
-		_id: string;
-		isUserFollowing?: boolean;
-	};
+	owner: ApiAuthor;
 	title: string;
 	theme: "orange" | "blue" | "green" | "purple" | "pink" | "indigo";
 	upvotes: number;
