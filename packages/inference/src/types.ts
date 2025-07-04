@@ -37,6 +37,7 @@ export interface Options {
 export type InferenceTask = Exclude<PipelineType, "other"> | "conversational";
 
 export const INFERENCE_PROVIDERS = [
+	"bagelnet",
 	"black-forest-labs",
 	"cerebras",
 	"cohere",
