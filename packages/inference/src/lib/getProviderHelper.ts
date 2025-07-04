@@ -24,6 +24,7 @@ import type {
 	ImageSegmentationTaskHelper,
 	ImageToImageTaskHelper,
 	ImageToTextTaskHelper,
+	ImageToVideoTaskHelper,
 	ObjectDetectionTaskHelper,
 	QuestionAnsweringTaskHelper,
 	SentenceSimilarityTaskHelper,
@@ -241,6 +242,10 @@ export function getProviderHelper(
 ): ImageToImageTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
+	task: "image-to-video"
+): ImageToVideoTaskHelper & TaskProviderHelper;
+export function getProviderHelper(
+	provider: InferenceProviderOrPolicy,
 	task: "sentence-similarity"
 ): SentenceSimilarityTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
@@ -275,7 +280,6 @@ export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
 	task: InferenceTask | undefined
 ): TaskProviderHelper;
-
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
 	task: InferenceTask | undefined
