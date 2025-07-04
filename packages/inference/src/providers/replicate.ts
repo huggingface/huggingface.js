@@ -213,3 +213,50 @@ export class ReplicateImageToImageTask extends ReplicateTask implements ImageToI
 		throw new InferenceClientProviderOutputError("Received malformed response from Replicate image-to-image API");
 	}
 }
+
+export class ReplicateImageToVideoTask extends ReplicateTask {
+	// Synchronous: expects base64 string in args.inputs
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		const { args } = params;
+		const { inputs, parameters } = args;
+		return {
+			input: {
+				...omit(args, ["inputs", "parameters"]),
+				...(parameters as Record<string, unknown>),
+				inputs,
+			},
+			version: params.model.includes(":") ? params.model.split(":")[1] : undefined,
+		};
+	}
+
+	// Asynchronous: handles Blob to base64 conversion
+	async preparePayloadAsync(args: { inputs: Blob } & Record<string, unknown>): Promise<RequestArgs> {
+		const { inputs, ...restArgs } = args;
+		const bytes = new Uint8Array(await inputs.arrayBuffer());
+		const base64 = base64FromBytes(bytes);
+		const imageInput = `data:${inputs.type || "image/png"};base64,${base64}`;
+		return {
+			...restArgs,
+			inputs: imageInput,
+		};
+	}
+
+	// Handle the response from Replicate
+	override async getResponse(response: ReplicateOutput): Promise<Blob> {
+		if (
+			typeof response === "object" &&
+			!!response &&
+			"output" in response
+		) {
+			if (Array.isArray(response.output) && response.output.length > 0 && typeof response.output[0] === "string") {
+				const urlResponse = await fetch(response.output[0]);
+				return await urlResponse.blob();
+			}
+			if (typeof response.output === "string" && isUrl(response.output)) {
+				const urlResponse = await fetch(response.output);
+				return await urlResponse.blob();
+			}
+		}
+		throw new InferenceClientProviderOutputError("Received malformed response from Replicate image-to-video API");
+	}
+}
