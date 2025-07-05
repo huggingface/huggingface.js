@@ -5,6 +5,10 @@ import { checkCredentials } from "../utils/checkCredentials";
 import { parseLinkHeader } from "../utils/parseLinkHeader";
 import type { ApiCollectionInfo } from "../types/api/api-collection";
 
+/*
+ * When listing collections, the item list per collection is truncated to 4 items maximum.
+ * To retrieve all items from a collection, you need to make an additional call using its collection slug.
+ */
 export async function* listCollections(
 	params?: {
 		search?: {
