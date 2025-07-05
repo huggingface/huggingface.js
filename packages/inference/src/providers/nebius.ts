@@ -14,7 +14,7 @@
  *
  * Thanks!
  */
-import type { FeatureExtractionOutput } from "@huggingface/tasks";
+import type { FeatureExtractionOutput, TextGenerationOutput } from "@huggingface/tasks";
 import type { BodyParams } from "../types.js";
 import { omit } from "../utils/omit.js";
 import {
@@ -25,6 +25,7 @@ import {
 	type TextToImageTaskHelper,
 } from "./providerHelper.js";
 import { InferenceClientProviderOutputError } from "../errors.js";
+import type { ChatCompletionInput } from "../../../tasks/dist/commonjs/index.js";
 
 const NEBIUS_API_BASE_URL = "https://api.studio.nebius.ai";
 
@@ -40,15 +41,55 @@ interface NebiusEmbeddingsResponse {
 	}>;
 }
 
+interface NebiusTextGenerationOutput extends Omit<TextGenerationOutput, "choices"> {
+	choices: Array<{
+		text: string;
+	}>;
+}
+
 export class NebiusConversationalTask extends BaseConversationalTask {
 	constructor() {
 		super("nebius", NEBIUS_API_BASE_URL);
+	}
+
+	override preparePayload(params: BodyParams<ChatCompletionInput>): Record<string, unknown> {
+		const payload = super.preparePayload(params) as Record<string, unknown>;
+
+		const responseFormat = params.args.response_format;
+		if (responseFormat?.type === "json_schema" && responseFormat.json_schema?.schema) {
+			payload["guided_json"] = responseFormat.json_schema.schema;
+		}
+
+		return payload;
 	}
 }
 
 export class NebiusTextGenerationTask extends BaseTextGenerationTask {
 	constructor() {
 		super("nebius", NEBIUS_API_BASE_URL);
+	}
+
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		return {
+			...params.args,
+			model: params.model,
+			prompt: params.args.inputs,
+		};
+	}
+
+	override async getResponse(response: NebiusTextGenerationOutput): Promise<TextGenerationOutput> {
+		if (
+			typeof response === "object" &&
+			"choices" in response &&
+			Array.isArray(response?.choices) &&
+			response.choices.length > 0 &&
+			typeof response.choices[0]?.text === "string"
+		) {
+			return {
+				generated_text: response.choices[0].text,
+			};
+		}
+		throw new InferenceClientProviderOutputError("Received malformed response from Nebius text generation API");
 	}
 }
 

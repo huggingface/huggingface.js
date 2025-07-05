@@ -86,7 +86,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "AnemoI",
 		repoName: "AnemoI",
 		repoUrl: "https://github.com/ecmwf/anemoi-inference",
-		docsUrl: "https://anemoi-docs.readthedocs.io/en/latest/",
+		docsUrl: "https://anemoi.readthedocs.io/en/latest/",
 		filter: false,
 		countDownloads: `path_extension:"ckpt"`,
 		snippets: snippets.anemoi,
@@ -527,6 +527,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"litertlm"`,
 	},
+	lerobot: {
+		prettyLabel: "LeRobot",
+		repoName: "LeRobot",
+		repoUrl: "https://github.com/huggingface/lerobot",
+		docsUrl: "https://huggingface.co/docs/lerobot",
+		filter: false,
+		snippets: snippets.lerobot,
+	},
 	liveportrait: {
 		prettyLabel: "LivePortrait",
 		repoName: "LivePortrait",
@@ -885,6 +893,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"model.safetensors"`,
 		snippets: snippets.stable_audio_tools,
 	},
+	monkeyocr: {
+		prettyLabel: "MonkeyOCR",
+		repoName: "monkeyocr",
+		repoUrl: "https://github.com/Yuliang-Liu/MonkeyOCR",
+		filter: false,
+		countDownloads: `path:"Recognition/config.json"`,
+	},
 	"diffusion-single-file": {
 		prettyLabel: "Diffusion Single File",
 		repoName: "diffusion-single-file",
@@ -945,6 +960,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/genmoai/models",
 		filter: false,
 		countDownloads: `path:"vae_stats.json"`,
+	},
+	"tencent-song-generation": {
+		prettyLabel: "SongGeneration",
+		repoName: "SongGeneration",
+		repoUrl: "https://github.com/tencent-ailab/songgeneration",
+		filter: false,
+		countDownloads: `path:"ckpt/songgeneration_base/model.pt"`,
 	},
 	tensorflowtts: {
 		prettyLabel: "TensorFlowTTS",
@@ -1033,6 +1055,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"pt"`,
 		snippets: snippets.ultralytics,
+	},
+	univa: {
+		prettyLabel: "univa",
+		repoName: "univa",
+		repoUrl: "https://github.com/PKU-YuanGroup/UniWorld-V1",
+		snippets: snippets.univa,
+		filter: true,
+		countDownloads: `path:"config.json"`,
 	},
 	"uni-3dar": {
 		prettyLabel: "Uni-3DAR",

@@ -1277,6 +1277,18 @@ describe.skip("InferenceClient", () => {
 
 				expect(res).toBeInstanceOf(Blob);
 			});
+
+			it("imageToImage - FLUX Kontext Dev", async () => {
+				const res = await client.imageToImage({
+					model: "black-forest-labs/flux-kontext-dev",
+					provider: "replicate",
+					inputs: new Blob([readTestFile("stormtrooper_depth.png")], { type: "image/png" }),
+					parameters: {
+						prompt: "Change the stormtrooper armor to golden color while keeping the same pose and helmet design",
+					},
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
 		},
 		TIMEOUT
 	);
@@ -1412,6 +1424,13 @@ describe.skip("InferenceClient", () => {
 					status: "live",
 					task: "feature-extraction",
 				},
+				"mistralai/Devstral-Small-2505": {
+					provider: "nebius",
+					providerId: "mistralai/Devstral-Small-2505",
+					hfModelId: "mistralai/Devstral-Small-2505",
+					status: "live",
+					task: "text2text-generation",
+				},
 			};
 
 			it("chatCompletion", async () => {
@@ -1458,6 +1477,19 @@ describe.skip("InferenceClient", () => {
 
 				expect(res).toBeInstanceOf(Array);
 				expect(res[0]).toEqual(expect.arrayContaining([expect.any(Number)]));
+			});
+
+			it("text2textGeneration", async () => {
+				const res = await client.textGeneration({
+					model: "mistralai/Devstral-Small-2505",
+					provider: "nebius",
+					inputs: "Once upon a time,",
+					temperature: 0,
+					max_tokens: 19,
+				});
+				expect(res).toMatchObject({
+					generated_text: " in a land far, far away, there lived a king who was very fond of flowers.",
+				});
 			});
 		},
 		TIMEOUT

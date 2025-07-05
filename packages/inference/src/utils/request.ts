@@ -14,15 +14,21 @@ export interface ResponseWrapper<T> {
 	};
 }
 
-function requestArgsToJson(args: RequestArgs): JsonObject {
-	// Convert the entire args object to a JSON-serializable format
-	const argsWithData = args as RequestArgs & { data?: Blob | ArrayBuffer };
-	return JSON.parse(
-		JSON.stringify({
-			...argsWithData,
-			data: argsWithData.data ? "[Blob or ArrayBuffer]" : null,
-		})
-	) as JsonObject;
+function bodyToJson(body?: BodyInit | null): JsonObject {
+	let data = null;
+	if (body instanceof Blob || body instanceof ArrayBuffer) {
+		data = "[Blob or ArrayBuffer]";
+	} else if (typeof body === "string") {
+		try {
+			data = JSON.parse(body);
+		} catch {
+			data = body;
+		}
+	}
+	if (data.accessToken) {
+		data.accessToken = "[REDACTED]";
+	}
+	return data as JsonObject;
 }
 
 /**
@@ -60,7 +66,7 @@ export async function innerRequest<T>(
 						url,
 						method: info.method ?? "GET",
 						headers: info.headers as Record<string, string>,
-						body: requestArgsToJson(args),
+						body: bodyToJson(info.body),
 					},
 					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output }
 				);
@@ -72,7 +78,7 @@ export async function innerRequest<T>(
 						url,
 						method: info.method ?? "GET",
 						headers: info.headers as Record<string, string>,
-						body: requestArgsToJson(args),
+						body: bodyToJson(info.body),
 					},
 					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output }
 				);
@@ -83,7 +89,7 @@ export async function innerRequest<T>(
 						url,
 						method: info.method ?? "GET",
 						headers: info.headers as Record<string, string>,
-						body: requestArgsToJson(args),
+						body: bodyToJson(info.body),
 					},
 					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output }
 				);
@@ -96,7 +102,7 @@ export async function innerRequest<T>(
 				url,
 				method: info.method ?? "GET",
 				headers: info.headers as Record<string, string>,
-				body: requestArgsToJson(args),
+				body: bodyToJson(info.body),
 			},
 			{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: message ?? "" }
 		);
@@ -142,7 +148,7 @@ export async function* innerStreamingRequest<T>(
 						url,
 						method: info.method ?? "GET",
 						headers: info.headers as Record<string, string>,
-						body: requestArgsToJson(args),
+						body: bodyToJson(info.body),
 					},
 					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output }
 				);
@@ -154,7 +160,7 @@ export async function* innerStreamingRequest<T>(
 						url,
 						method: info.method ?? "GET",
 						headers: info.headers as Record<string, string>,
-						body: requestArgsToJson(args),
+						body: bodyToJson(info.body),
 					},
 					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output }
 				);
@@ -167,7 +173,7 @@ export async function* innerStreamingRequest<T>(
 						url,
 						method: info.method ?? "GET",
 						headers: info.headers as Record<string, string>,
-						body: requestArgsToJson(args),
+						body: bodyToJson(info.body),
 					},
 					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output }
 				);
@@ -180,7 +186,7 @@ export async function* innerStreamingRequest<T>(
 						url,
 						method: info.method ?? "GET",
 						headers: info.headers as Record<string, string>,
-						body: requestArgsToJson(args),
+						body: bodyToJson(info.body),
 					},
 					{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: output }
 				);
@@ -193,7 +199,7 @@ export async function* innerStreamingRequest<T>(
 				url,
 				method: info.method ?? "GET",
 				headers: info.headers as Record<string, string>,
-				body: requestArgsToJson(args),
+				body: bodyToJson(info.body),
 			},
 			{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: "" }
 		);
@@ -206,7 +212,7 @@ export async function* innerStreamingRequest<T>(
 				url,
 				method: info.method ?? "GET",
 				headers: info.headers as Record<string, string>,
-				body: requestArgsToJson(args),
+				body: bodyToJson(info.body),
 			},
 			{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: "" }
 		);
@@ -261,7 +267,7 @@ export async function* innerStreamingRequest<T>(
 								url,
 								method: info.method ?? "GET",
 								headers: info.headers as Record<string, string>,
-								body: requestArgsToJson(args),
+								body: bodyToJson(info.body),
 							},
 							{ requestId: response.headers.get("x-request-id") ?? "", status: response.status, body: data }
 						);

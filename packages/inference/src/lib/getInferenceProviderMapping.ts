@@ -18,7 +18,16 @@ function normalizeInferenceProviderMapping(
 	modelId: ModelId,
 	inferenceProviderMapping?:
 		| InferenceProviderMappingEntry[]
-		| Record<string, { providerId: string; status: "live" | "staging"; task: WidgetType }>
+		| Record<
+				string,
+				{
+					providerId: string;
+					status: "live" | "staging";
+					task: WidgetType;
+					adapter?: string;
+					adapterWeightsPath?: string;
+				}
+		  >
 ): InferenceProviderMappingEntry[] {
 	if (!inferenceProviderMapping) {
 		return [];
@@ -36,6 +45,8 @@ function normalizeInferenceProviderMapping(
 		providerId: mapping.providerId,
 		status: mapping.status,
 		task: mapping.task,
+		adapter: mapping.adapter,
+		adapterWeightsPath: mapping.adapterWeightsPath,
 	}));
 }
 
@@ -160,6 +171,7 @@ export async function resolveProvider(
 		}
 		const mappings = await fetchInferenceProviderMappingForModel(modelId);
 		provider = mappings[0]?.provider as InferenceProvider | undefined;
+		console.log("Auto selected provider:", provider);
 	}
 	if (!provider) {
 		throw new InferenceClientInputError(`No Inference Provider available for model ${modelId}.`);

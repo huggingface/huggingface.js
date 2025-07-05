@@ -1,4 +1,13 @@
-with open("{{inputs.asObj.inputs}}", "rb") as image_file:
+import os
+import base64
+import requests
+
+API_URL = "https://router.huggingface.co/fal-ai/<fal-ai alias for black-forest-labs/FLUX.1-Kontext-dev>?_subdomain=queue"
+headers = {
+    "Authorization": f"Bearer {os.environ['HF_TOKEN']}",
+}
+
+with open("cat.png", "rb") as image_file:
     image_base_64 = base64.b64encode(image_file.read()).decode('utf-8')
 
 def query(payload):
@@ -9,10 +18,13 @@ def query(payload):
     return response.content
 
 image_bytes = query({
-{{ providerInputs.asJsonString }}
+    "inputs": "cat.png",
+    "parameters": {
+        "prompt": "Turn the cat into a tiger."
+    }
 })
 
 # You can access the image with PIL.Image for example
 import io
 from PIL import Image
-image = Image.open(io.BytesIO(image_bytes)) 
+image = Image.open(io.BytesIO(image_bytes))

@@ -326,6 +326,10 @@ dam = DescribeAnythingModel(
 
 const diffusersDefaultPrompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
 
+const diffusersImg2ImgDefaultPrompt = "Turn this cat into a dog";
+
+const diffusersVideoDefaultPrompt = "A man with short gray hair plays a red electric guitar.";
+
 const diffusers_default = (model: ModelData) => [
 	`from diffusers import DiffusionPipeline
 
@@ -333,6 +337,35 @@ pipe = DiffusionPipeline.from_pretrained("${model.id}")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersDefaultPrompt}"
 image = pipe(prompt).images[0]`,
+];
+
+const diffusers_image_to_image = (model: ModelData) => [
+	`from diffusers import DiffusionPipeline
+from diffusers.utils import load_image
+
+pipe = DiffusionPipeline.from_pretrained("${model.id}")
+
+prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersImg2ImgDefaultPrompt}"
+input_image = load_image("https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/diffusers/cat.png")
+
+image = pipe(image=input_image, prompt=prompt).images[0]`,
+];
+
+const diffusers_image_to_video = (model: ModelData) => [
+	`import torch
+from diffusers import DiffusionPipeline
+from diffusers.utils import load_image, export_to_video
+
+pipe = DiffusionPipeline.from_pretrained("${model.id}", torch_dtype=torch.float16)
+pipe.to("cuda")
+
+prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersVideoDefaultPrompt}"
+image = load_image(
+    "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/diffusers/guitar-man.png"
+)
+
+output = pipe(image=image, prompt=prompt).frames[0]
+export_to_video(output, "output.mp4")`,
 ];
 
 const diffusers_controlnet = (model: ModelData) => [
@@ -354,6 +387,46 @@ prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersDefaultPrompt}"
 image = pipe(prompt).images[0]`,
 ];
 
+const diffusers_lora_image_to_image = (model: ModelData) => [
+	`from diffusers import DiffusionPipeline
+from diffusers.utils import load_image
+
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
+pipe.load_lora_weights("${model.id}")
+
+prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersImg2ImgDefaultPrompt}"
+input_image = load_image("https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/diffusers/cat.png")
+
+image = pipe(image=input_image, prompt=prompt).images[0]`,
+];
+
+const diffusers_lora_text_to_video = (model: ModelData) => [
+	`from diffusers import DiffusionPipeline
+from diffusers.utils import export_to_video
+
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
+pipe.load_lora_weights("${model.id}")
+
+prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersVideoDefaultPrompt}"
+
+output = pipe(prompt=prompt).frames[0]
+export_to_video(output, "output.mp4")`,
+];
+
+const diffusers_lora_image_to_video = (model: ModelData) => [
+	`from diffusers import DiffusionPipeline
+from diffusers.utils import load_image, export_to_video
+
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
+pipe.load_lora_weights("${model.id}")
+
+prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersVideoDefaultPrompt}"
+input_image = load_image("https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/diffusers/guitar-man.png")
+
+image = pipe(image=input_image, prompt=prompt).frames[0]
+export_to_video(output, "output.mp4")`,
+];
+
 const diffusers_textual_inversion = (model: ModelData) => [
 	`from diffusers import DiffusionPipeline
 
@@ -365,9 +438,21 @@ export const diffusers = (model: ModelData): string[] => {
 	if (model.tags.includes("controlnet")) {
 		return diffusers_controlnet(model);
 	} else if (model.tags.includes("lora")) {
-		return diffusers_lora(model);
+		if (model.pipeline_tag === "image-to-image") {
+			return diffusers_lora_image_to_image(model);
+		} else if (model.pipeline_tag === "image-to-video") {
+			return diffusers_lora_image_to_video(model);
+		} else if (model.pipeline_tag === "text-to-video") {
+			return diffusers_lora_text_to_video(model);
+		} else {
+			return diffusers_lora(model);
+		}
 	} else if (model.tags.includes("textual_inversion")) {
 		return diffusers_textual_inversion(model);
+	} else if (model.pipeline_tag === "image-to-video") {
+		return diffusers_image_to_video(model);
+	} else if (model.pipeline_tag === "image-to-image") {
+		return diffusers_image_to_image(model);
 	} else {
 		return diffusers_default(model);
 	}
@@ -760,6 +845,47 @@ print(output)`);
 	}
 
 	return snippets;
+};
+
+export const lerobot = (model: ModelData): string[] => {
+	if (model.tags.includes("smolvla")) {
+		const smolvlaSnippets = [
+			// Installation snippet
+			`# See https://github.com/huggingface/lerobot?tab=readme-ov-file#installation for more details
+git clone https://github.com/huggingface/lerobot.git
+cd lerobot
+pip install -e .[smolvla]`,
+			// Finetune snippet
+			`# Launch finetuning on your dataset
+python lerobot/scripts/train.py \\
+--policy.path=${model.id} \\
+--dataset.repo_id=lerobot/svla_so101_pickplace \\ 
+--batch_size=64 \\
+--steps=20000 \\
+--output_dir=outputs/train/my_smolvla \\
+--job_name=my_smolvla_training \\
+--policy.device=cuda \\
+--wandb.enable=true`,
+		];
+		if (model.id !== "lerobot/smolvla_base") {
+			// Inference snippet (only if not base model)
+			smolvlaSnippets.push(
+				`# Run the policy using the record function	
+python -m lerobot.record \\
+  --robot.type=so101_follower \\
+  --robot.port=/dev/ttyACM0 \\ # <- Use your port
+  --robot.id=my_blue_follower_arm \\ # <- Use your robot id
+  --robot.cameras="{ front: {type: opencv, index_or_path: 8, width: 640, height: 480, fps: 30}}" \\ # <- Use your cameras
+  --dataset.single_task="Grasp a lego block and put it in the bin." \\ # <- Use the same task description you used in your dataset recording
+  --dataset.repo_id=HF_USER/dataset_name \\  # <- This will be the dataset name on HF Hub
+  --dataset.episode_time_s=50 \\
+  --dataset.num_episodes=10 \\
+  --policy.path=${model.id}`
+			);
+		}
+		return smolvlaSnippets;
+	}
+	return [];
 };
 
 export const tf_keras = (model: ModelData): string[] => [
@@ -1493,6 +1619,19 @@ model = SwarmFormerModel.from_pretrained("${model.id}")
 `,
 ];
 
+export const univa = (model: ModelData): string[] => [
+	`# Follow installation instructions at https://github.com/PKU-YuanGroup/UniWorld-V1
+
+from univa.models.qwen2p5vl.modeling_univa_qwen2p5vl import UnivaQwen2p5VLForConditionalGeneration
+	model = UnivaQwen2p5VLForConditionalGeneration.from_pretrained(
+        "${model.id}",
+        torch_dtype=torch.bfloat16,
+        attn_implementation="flash_attention_2",
+    ).to("cuda")
+	processor = AutoProcessor.from_pretrained("${model.id}")
+`,
+];
+
 const mlx_unknown = (model: ModelData): string[] => [
 	`# Download the model from the Hub
 pip install huggingface_hub[hf_xet]
@@ -1658,9 +1797,9 @@ wav = model.generate(descriptions)  # generates 3 samples.`,
 ];
 export const anemoi = (model: ModelData): string[] => [
 	`from anemoi.inference.runners.default import DefaultRunner
-from anemoi.inference.config import Configuration
+from anemoi.inference.config.run import RunConfiguration
 # Create Configuration
-config = Configuration(checkpoint = {"huggingface":{"repo_id":"${model.id}"}})
+config = RunConfiguration(checkpoint = {"huggingface":"${model.id}"})
 # Load Runner
 runner = DefaultRunner(config)`,
 ];
