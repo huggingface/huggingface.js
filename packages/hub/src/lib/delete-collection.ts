@@ -18,15 +18,7 @@ export async function deleteCollection(
 ): Promise<void> {
 	const accessToken = checkCredentials(params);
 
-	const [namespace, slugId] = params.collectionSlug.split("/");
-
-	if (!namespace || !slugId) {
-		throw new TypeError(
-			`"${params.collectionSlug}" is not a fully qualified slug. It should be of the form "{namespace}/{slugId}".`
-		);
-	}
-
-	const res = await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/collections/${namespace}/${slugId}`, {
+	const res = await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/collections/${params.collectionSlug}`, {
 		method: "DELETE",
 		headers: {
 			Authorization: `Bearer ${accessToken}`,
