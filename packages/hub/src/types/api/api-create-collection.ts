@@ -16,4 +16,11 @@ export interface ApiCreateCollectionPayload {
 	 * @default false
 	 */
 	private?: boolean;
+	/**
+	 * First item to add to the collection upon creation.
+	 */
+	item?: {
+		type: "paper" | "collection" | "space" | "model" | "dataset";
+		id: string;
+	};
 }

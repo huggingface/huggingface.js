@@ -23,6 +23,7 @@ export async function createCollection(
 			namespace: params.namespace,
 			description: params.description,
 			private: params.private,
+			item: params.item,
 		} satisfies ApiCreateCollectionPayload),
 		headers: {
 			Authorization: `Bearer ${accessToken}`,
@@ -35,5 +36,6 @@ export async function createCollection(
 	}
 
 	const output = await res.json();
+
 	return { collectionSlug: output.slug };
 }
