@@ -6,25 +6,20 @@ import { checkCredentials } from "../utils/checkCredentials";
 
 export async function createCollection(
 	params: {
+		collection: ApiCreateCollectionPayload;
 		hubUrl?: string;
 		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} & ApiCreateCollectionPayload &
+	} &
 		Partial<CredentialsParams>
 ): Promise<{ collectionSlug: string }> {
 	const accessToken = checkCredentials(params);
 
 	const res = await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/collections`, {
 		method: "POST",
-		body: JSON.stringify({
-			title: params.title,
-			namespace: params.namespace,
-			description: params.description,
-			private: params.private,
-			item: params.item,
-		} satisfies ApiCreateCollectionPayload),
+		body: JSON.stringify(params.collection),
 		headers: {
 			Authorization: `Bearer ${accessToken}`,
 			"Content-Type": "application/json",

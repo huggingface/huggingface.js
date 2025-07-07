@@ -16,10 +16,12 @@ describe("createCollection", () => {
 			});
 
 			const result = await createCollection({
-				title: "Test Collection",
-				namespace: user.name,
-				description: "This is a test collection",
-				private: false,
+				collection: {
+					title: "Test Collection",
+					namespace: user.name,
+					description: "This is a test collection",
+					private: false,
+				},
 				accessToken: TEST_ACCESS_TOKEN,
 				hubUrl: TEST_HUB_URL,
 			});
