@@ -662,6 +662,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"tokenizer-e351c8d8-checkpoint125.safetensors"`,
 	},
+	mtvcraft: {
+		prettyLabel: "MTVCraft",
+		repoName: "MTVCraft",
+		repoUrl: "https://github.com/baaivision/MTVCraft",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
 	nemo: {
 		prettyLabel: "NeMo",
 		repoName: "NeMo",
