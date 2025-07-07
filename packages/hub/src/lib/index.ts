@@ -20,6 +20,7 @@ export * from "./list-datasets";
 export * from "./list-files";
 export * from "./list-models";
 export * from "./list-spaces";
+export * from "./list-collections";
 export * from "./model-info";
 export * from "./oauth-handle-redirect";
 export * from "./oauth-login-url";
