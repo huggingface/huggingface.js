@@ -86,7 +86,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "AnemoI",
 		repoName: "AnemoI",
 		repoUrl: "https://github.com/ecmwf/anemoi-inference",
-		docsUrl: "https://anemoi-docs.readthedocs.io/en/latest/",
+		docsUrl: "https://anemoi.readthedocs.io/en/latest/",
 		filter: false,
 		countDownloads: `path_extension:"ckpt"`,
 		snippets: snippets.anemoi,
@@ -179,6 +179,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/fudan-generative-vision/champ",
 		countDownloads: `path:"champ/motion_module.pth"`,
 	},
+	chatterbox: {
+		prettyLabel: "Chatterbox",
+		repoName: "Chatterbox",
+		repoUrl: "https://github.com/resemble-ai/chatterbox",
+		snippets: snippets.chatterbox,
+		countDownloads: `path:"tokenizer.json"`,
+		filter: false,
+	},
 	chat_tts: {
 		prettyLabel: "ChatTTS",
 		repoName: "ChatTTS",
@@ -199,6 +207,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "COMET",
 		repoUrl: "https://github.com/Unbabel/COMET/",
 		countDownloads: `path:"hparams.yaml"`,
+	},
+	contexttab: {
+		prettyLabel: "ConTextTab",
+		repoName: "ConTextTab",
+		repoUrl: "https://github.com/SAP-samples/contexttab",
+		countDownloads: `path_extension:"pt"`,
+		snippets: snippets.contexttab,
 	},
 	cosmos: {
 		prettyLabel: "Cosmos",
@@ -505,6 +520,21 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/webis-de/lightning-ir",
 		snippets: snippets.lightning_ir,
 	},
+	"litert-lm": {
+		prettyLabel: "LiteRT-LM",
+		repoName: "LiteRT-LM",
+		repoUrl: "https://github.com/google-ai-edge/LiteRT-LM",
+		filter: false,
+		countDownloads: `path_extension:"litertlm"`,
+	},
+	lerobot: {
+		prettyLabel: "LeRobot",
+		repoName: "LeRobot",
+		repoUrl: "https://github.com/huggingface/lerobot",
+		docsUrl: "https://huggingface.co/docs/lerobot",
+		filter: false,
+		snippets: snippets.lerobot,
+	},
 	liveportrait: {
 		prettyLabel: "LivePortrait",
 		repoName: "LivePortrait",
@@ -754,6 +784,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"model.safetensors"`,
 	},
+	renderformer: {
+		prettyLabel: "RenderFormer",
+		repoName: "RenderFormer",
+		repoUrl: "https://github.com/microsoft/renderformer",
+		snippets: snippets.renderformer,
+		filter: false,
+	},
 	reverb: {
 		prettyLabel: "Reverb",
 		repoName: "Reverb",
@@ -790,6 +827,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/facebookresearch/sapiens",
 		filter: false,
 		countDownloads: `path_extension:"pt2" OR path_extension:"pth" OR path_extension:"onnx"`,
+	},
+	seedvr: {
+		prettyLabel: "SeedVR",
+		repoName: "SeedVR",
+		repoUrl: "https://github.com/ByteDance-Seed/SeedVR",
+		filter: false,
+		countDownloads: `path_extension:"pth"`,
 	},
 	"sentence-transformers": {
 		prettyLabel: "sentence-transformers",
@@ -856,6 +900,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"model.safetensors"`,
 		snippets: snippets.stable_audio_tools,
 	},
+	monkeyocr: {
+		prettyLabel: "MonkeyOCR",
+		repoName: "monkeyocr",
+		repoUrl: "https://github.com/Yuliang-Liu/MonkeyOCR",
+		filter: false,
+		countDownloads: `path:"Recognition/config.json"`,
+	},
 	"diffusion-single-file": {
 		prettyLabel: "Diffusion Single File",
 		repoName: "diffusion-single-file",
@@ -917,6 +968,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"vae_stats.json"`,
 	},
+	"tencent-song-generation": {
+		prettyLabel: "SongGeneration",
+		repoName: "SongGeneration",
+		repoUrl: "https://github.com/tencent-ailab/songgeneration",
+		filter: false,
+		countDownloads: `path:"ckpt/songgeneration_base/model.pt"`,
+	},
 	tensorflowtts: {
 		prettyLabel: "TensorFlowTTS",
 		repoName: "TensorFlowTTS",
@@ -960,6 +1018,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"pytorch_model.bin" OR path:"model.safetensors"`,
 	},
+	tirex: {
+		prettyLabel: "TiRex",
+		repoName: "TiRex",
+		repoUrl: "https://github.com/NX-AI/tirex",
+		countDownloads: `path_extension:"ckpt"`,
+	},
 	torchgeo: {
 		prettyLabel: "TorchGeo",
 		repoName: "TorchGeo",
@@ -999,6 +1063,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pt"`,
 		snippets: snippets.ultralytics,
 	},
+	univa: {
+		prettyLabel: "univa",
+		repoName: "univa",
+		repoUrl: "https://github.com/PKU-YuanGroup/UniWorld-V1",
+		snippets: snippets.univa,
+		filter: true,
+		countDownloads: `path:"config.json"`,
+	},
 	"uni-3dar": {
 		prettyLabel: "Uni-3DAR",
 		repoName: "Uni-3DAR",
@@ -1034,6 +1106,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/jasonppy/VoiceCraft",
 		docsUrl: "https://github.com/jasonppy/VoiceCraft",
 		snippets: snippets.voicecraft,
+	},
+	vui: {
+		prettyLabel: "Vui",
+		repoName: "Vui",
+		repoUrl: "https://github.com/vui-ai/vui",
+		countDownloads: `path_extension:"pt"`,
+		snippets: snippets.vui,
 	},
 	wham: {
 		prettyLabel: "WHAM",

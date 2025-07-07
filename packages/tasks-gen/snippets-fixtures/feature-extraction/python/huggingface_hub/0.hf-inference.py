@@ -1,8 +1,9 @@
+import os
 from huggingface_hub import InferenceClient
 
 client = InferenceClient(
     provider="hf-inference",
-    api_key="api_token",
+    api_key=os.environ["HF_TOKEN"],
 )
 
 result = client.feature_extraction(

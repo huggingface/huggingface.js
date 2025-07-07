@@ -115,6 +115,79 @@ export const bm25s = (model: ModelData): string[] => [
 retriever = BM25HF.load_from_hub("${model.id}")`,
 ];
 
+export const chatterbox = (): string[] => [
+	`# pip install chatterbox-tts
+import torchaudio as ta
+from chatterbox.tts import ChatterboxTTS
+
+model = ChatterboxTTS.from_pretrained(device="cuda")
+
+text = "Ezreal and Jinx teamed up with Ahri, Yasuo, and Teemo to take down the enemy's Nexus in an epic late-game pentakill."
+wav = model.generate(text)
+ta.save("test-1.wav", wav, model.sr)
+
+# If you want to synthesize with a different voice, specify the audio prompt
+AUDIO_PROMPT_PATH="YOUR_FILE.wav"
+wav = model.generate(text, audio_prompt_path=AUDIO_PROMPT_PATH)
+ta.save("test-2.wav", wav, model.sr)`,
+];
+
+export const contexttab = (): string[] => {
+	const installSnippet = `pip install git+https://github.com/SAP-samples/contexttab`;
+
+	const classificationSnippet = `# Run a classification task
+from sklearn.datasets import load_breast_cancer
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+
+from contexttab import ConTextTabClassifier
+
+# Load sample data
+X, y = load_breast_cancer(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
+
+# Initialize a classifier
+# You can omit checkpoint and checkpoint_revision to use the default model
+clf = ConTextTabClassifier(checkpoint="l2/base.pt", checkpoint_revision="v1.0.0", bagging=1, max_context_size=2048)
+
+clf.fit(X_train, y_train)
+
+# Predict probabilities
+prediction_probabilities = clf.predict_proba(X_test)
+# Predict labels
+predictions = clf.predict(X_test)
+print("Accuracy", accuracy_score(y_test, predictions))`;
+
+	const regressionsSnippet = `# Run a regression task
+from sklearn.datasets import fetch_openml
+from sklearn.metrics import r2_score
+from sklearn.model_selection import train_test_split
+
+from contexttab import ConTextTabRegressor
+
+
+# Load sample data
+df = fetch_openml(data_id=531, as_frame=True)
+X = df.data
+y = df.target.astype(float)
+
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
+
+# Initialize the regressor
+# You can omit checkpoint and checkpoint_revision to use the default model
+regressor = ConTextTabRegressor(checkpoint="l2/base.pt", checkpoint_revision="v1.0.0", bagging=1, max_context_size=2048)
+
+regressor.fit(X_train, y_train)
+
+# Predict on the test set
+predictions = regressor.predict(X_test)
+
+r2 = r2_score(y_test, predictions)
+print("R² Score:", r2)`;
+	return [installSnippet, classificationSnippet, regressionsSnippet];
+};
+
 export const cxr_foundation = (): string[] => [
 	`# pip install git+https://github.com/Google-Health/cxr-foundation.git#subdirectory=python
 
@@ -253,6 +326,10 @@ dam = DescribeAnythingModel(
 
 const diffusersDefaultPrompt = "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k";
 
+const diffusersImg2ImgDefaultPrompt = "Turn this cat into a dog";
+
+const diffusersVideoDefaultPrompt = "A man with short gray hair plays a red electric guitar.";
+
 const diffusers_default = (model: ModelData) => [
 	`from diffusers import DiffusionPipeline
 
@@ -260,6 +337,35 @@ pipe = DiffusionPipeline.from_pretrained("${model.id}")
 
 prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersDefaultPrompt}"
 image = pipe(prompt).images[0]`,
+];
+
+const diffusers_image_to_image = (model: ModelData) => [
+	`from diffusers import DiffusionPipeline
+from diffusers.utils import load_image
+
+pipe = DiffusionPipeline.from_pretrained("${model.id}")
+
+prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersImg2ImgDefaultPrompt}"
+input_image = load_image("https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/diffusers/cat.png")
+
+image = pipe(image=input_image, prompt=prompt).images[0]`,
+];
+
+const diffusers_image_to_video = (model: ModelData) => [
+	`import torch
+from diffusers import DiffusionPipeline
+from diffusers.utils import load_image, export_to_video
+
+pipe = DiffusionPipeline.from_pretrained("${model.id}", torch_dtype=torch.float16)
+pipe.to("cuda")
+
+prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersVideoDefaultPrompt}"
+image = load_image(
+    "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/diffusers/guitar-man.png"
+)
+
+output = pipe(image=image, prompt=prompt).frames[0]
+export_to_video(output, "output.mp4")`,
 ];
 
 const diffusers_controlnet = (model: ModelData) => [
@@ -281,6 +387,46 @@ prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersDefaultPrompt}"
 image = pipe(prompt).images[0]`,
 ];
 
+const diffusers_lora_image_to_image = (model: ModelData) => [
+	`from diffusers import DiffusionPipeline
+from diffusers.utils import load_image
+
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
+pipe.load_lora_weights("${model.id}")
+
+prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersImg2ImgDefaultPrompt}"
+input_image = load_image("https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/diffusers/cat.png")
+
+image = pipe(image=input_image, prompt=prompt).images[0]`,
+];
+
+const diffusers_lora_text_to_video = (model: ModelData) => [
+	`from diffusers import DiffusionPipeline
+from diffusers.utils import export_to_video
+
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
+pipe.load_lora_weights("${model.id}")
+
+prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersVideoDefaultPrompt}"
+
+output = pipe(prompt=prompt).frames[0]
+export_to_video(output, "output.mp4")`,
+];
+
+const diffusers_lora_image_to_video = (model: ModelData) => [
+	`from diffusers import DiffusionPipeline
+from diffusers.utils import load_image, export_to_video
+
+pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
+pipe.load_lora_weights("${model.id}")
+
+prompt = "${get_prompt_from_diffusers_model(model) ?? diffusersVideoDefaultPrompt}"
+input_image = load_image("https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/diffusers/guitar-man.png")
+
+image = pipe(image=input_image, prompt=prompt).frames[0]
+export_to_video(output, "output.mp4")`,
+];
+
 const diffusers_textual_inversion = (model: ModelData) => [
 	`from diffusers import DiffusionPipeline
 
@@ -292,9 +438,21 @@ export const diffusers = (model: ModelData): string[] => {
 	if (model.tags.includes("controlnet")) {
 		return diffusers_controlnet(model);
 	} else if (model.tags.includes("lora")) {
-		return diffusers_lora(model);
+		if (model.pipeline_tag === "image-to-image") {
+			return diffusers_lora_image_to_image(model);
+		} else if (model.pipeline_tag === "image-to-video") {
+			return diffusers_lora_image_to_video(model);
+		} else if (model.pipeline_tag === "text-to-video") {
+			return diffusers_lora_text_to_video(model);
+		} else {
+			return diffusers_lora(model);
+		}
 	} else if (model.tags.includes("textual_inversion")) {
 		return diffusers_textual_inversion(model);
+	} else if (model.pipeline_tag === "image-to-video") {
+		return diffusers_image_to_video(model);
+	} else if (model.pipeline_tag === "image-to-image") {
+		return diffusers_image_to_image(model);
 	} else {
 		return diffusers_default(model);
 	}
@@ -661,7 +819,9 @@ model.score("query", ["doc1", "doc2", "doc3"])`,
 
 export const llama_cpp_python = (model: ModelData): string[] => {
 	const snippets = [
-		`from llama_cpp import Llama
+		`# !pip install llama-cpp-python
+
+from llama_cpp import Llama
 
 llm = Llama.from_pretrained(
 	repo_id="${model.id}",
@@ -685,6 +845,47 @@ print(output)`);
 	}
 
 	return snippets;
+};
+
+export const lerobot = (model: ModelData): string[] => {
+	if (model.tags.includes("smolvla")) {
+		const smolvlaSnippets = [
+			// Installation snippet
+			`# See https://github.com/huggingface/lerobot?tab=readme-ov-file#installation for more details
+git clone https://github.com/huggingface/lerobot.git
+cd lerobot
+pip install -e .[smolvla]`,
+			// Finetune snippet
+			`# Launch finetuning on your dataset
+python lerobot/scripts/train.py \\
+--policy.path=${model.id} \\
+--dataset.repo_id=lerobot/svla_so101_pickplace \\ 
+--batch_size=64 \\
+--steps=20000 \\
+--output_dir=outputs/train/my_smolvla \\
+--job_name=my_smolvla_training \\
+--policy.device=cuda \\
+--wandb.enable=true`,
+		];
+		if (model.id !== "lerobot/smolvla_base") {
+			// Inference snippet (only if not base model)
+			smolvlaSnippets.push(
+				`# Run the policy using the record function	
+python -m lerobot.record \\
+  --robot.type=so101_follower \\
+  --robot.port=/dev/ttyACM0 \\ # <- Use your port
+  --robot.id=my_blue_follower_arm \\ # <- Use your robot id
+  --robot.cameras="{ front: {type: opencv, index_or_path: 8, width: 640, height: 480, fps: 30}}" \\ # <- Use your cameras
+  --dataset.single_task="Grasp a lego block and put it in the bin." \\ # <- Use the same task description you used in your dataset recording
+  --dataset.repo_id=HF_USER/dataset_name \\  # <- This will be the dataset name on HF Hub
+  --dataset.episode_time_s=50 \\
+  --dataset.num_episodes=10 \\
+  --policy.path=${model.id}`
+			);
+		}
+		return smolvlaSnippets;
+	}
+	return [];
 };
 
 export const tf_keras = (model: ModelData): string[] => [
@@ -714,6 +915,9 @@ export const matanyone = (model: ModelData): string[] => [
 
 from matanyone.model.matanyone import MatAnyone
 model = MatAnyone.from_pretrained("${model.id}")`,
+	`
+from matanyone import InferenceCore
+processor = InferenceCore("${model.id}")`,
 ];
 
 export const mesh_anything = (): string[] => [
@@ -829,6 +1033,13 @@ export const relik = (model: ModelData): string[] => [
 	`from relik import Relik
  
 relik = Relik.from_pretrained("${model.id}")`,
+];
+
+export const renderformer = (model: ModelData): string[] => [
+	`# Install from https://github.com/microsoft/renderformer
+
+from renderformer import RenderFormerRenderingPipeline
+pipeline = RenderFormerRenderingPipeline.from_pretrained("${model.id}")`,
 ];
 
 const tensorflowttsTextToMel = (model: ModelData): string[] => [
@@ -1202,6 +1413,17 @@ export const transformers = (model: ModelData): string[] => {
 				pipelineSnippet.push("messages = [", '    {"role": "user", "content": "Who are you?"},', "]");
 				pipelineSnippet.push("pipe(messages)");
 			}
+		} else if (model.pipeline_tag === "zero-shot-image-classification") {
+			pipelineSnippet.push(
+				"pipe(",
+				'    "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/parrots.png",',
+				'    candidate_labels=["animals", "humans", "landscape"],',
+				")"
+			);
+		} else if (model.pipeline_tag === "image-classification") {
+			pipelineSnippet.push(
+				'pipe("https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/parrots.png")'
+			);
 		}
 
 		return [pipelineSnippet.join("\n"), autoSnippet];
@@ -1332,6 +1554,24 @@ export const voicecraft = (model: ModelData): string[] => [
 model = VoiceCraft.from_pretrained("${model.id}")`,
 ];
 
+export const vui = (): string[] => [
+	`# !pip install git+https://github.com/fluxions-ai/vui
+
+import torchaudio
+
+from vui.inference import render
+from vui.model import Vui,
+
+model = Vui.from_pretrained().cuda()
+waveform = render(
+    model,
+    "Hey, here is some random stuff, usually something quite long as the shorter the text the less likely the model can cope!",
+)
+print(waveform.shape)
+torchaudio.save("out.opus", waveform[0], 22050)
+`,
+];
+
 export const chattts = (): string[] => [
 	`import ChatTTS
 import torchaudio
@@ -1383,6 +1623,19 @@ export const swarmformer = (model: ModelData): string[] => [
 	`from swarmformer import SwarmFormerModel
 
 model = SwarmFormerModel.from_pretrained("${model.id}")
+`,
+];
+
+export const univa = (model: ModelData): string[] => [
+	`# Follow installation instructions at https://github.com/PKU-YuanGroup/UniWorld-V1
+
+from univa.models.qwen2p5vl.modeling_univa_qwen2p5vl import UnivaQwen2p5VLForConditionalGeneration
+	model = UnivaQwen2p5VLForConditionalGeneration.from_pretrained(
+        "${model.id}",
+        torch_dtype=torch.bfloat16,
+        attn_implementation="flash_attention_2",
+    ).to("cuda")
+	processor = AutoProcessor.from_pretrained("${model.id}")
 `,
 ];
 
@@ -1551,9 +1804,9 @@ wav = model.generate(descriptions)  # generates 3 samples.`,
 ];
 export const anemoi = (model: ModelData): string[] => [
 	`from anemoi.inference.runners.default import DefaultRunner
-from anemoi.inference.config import Configuration
+from anemoi.inference.config.run import RunConfiguration
 # Create Configuration
-config = Configuration(checkpoint = {"huggingface":{"repo_id":"${model.id}"}})
+config = RunConfiguration(checkpoint = {"huggingface":"${model.id}"})
 # Load Runner
 runner = DefaultRunner(config)`,
 ];

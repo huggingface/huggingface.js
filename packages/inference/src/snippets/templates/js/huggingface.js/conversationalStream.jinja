@@ -5,6 +5,9 @@ const client = new InferenceClient("{{ accessToken }}");
 let out = "";
 
 const stream = client.chatCompletionStream({
+{% if endpointUrl %}
+    endpointUrl: "{{ endpointUrl }}",
+{% endif %}
     provider: "{{ provider }}",
     model: "{{ model.id }}",
 {{ inputs.asTsString }}

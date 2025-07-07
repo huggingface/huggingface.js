@@ -14,11 +14,18 @@
  *
  * Thanks!
  */
-import { InferenceOutputError } from "../lib/InferenceOutputError.js";
+import { InferenceClientProviderOutputError } from "../errors.js";
 import { isUrl } from "../lib/isUrl.js";
-import type { BodyParams, HeaderParams, UrlParams } from "../types.js";
+import type { BodyParams, HeaderParams, RequestArgs, UrlParams } from "../types.js";
 import { omit } from "../utils/omit.js";
-import { TaskProviderHelper, type TextToImageTaskHelper, type TextToVideoTaskHelper } from "./providerHelper.js";
+import {
+	TaskProviderHelper,
+	type ImageToImageTaskHelper,
+	type TextToImageTaskHelper,
+	type TextToVideoTaskHelper,
+} from "./providerHelper.js";
+import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
+import { base64FromBytes } from "../utils/base64FromBytes.js";
 export interface ReplicateOutput {
 	output?: string | string[];
 }
@@ -99,7 +106,7 @@ export class ReplicateTextToImageTask extends ReplicateTask implements TextToIma
 			return await urlResponse.blob();
 		}
 
-		throw new InferenceOutputError("Expected Replicate text-to-image response format");
+		throw new InferenceClientProviderOutputError("Received malformed response from Replicate text-to-image API");
 	}
 }
 
@@ -132,7 +139,7 @@ export class ReplicateTextToSpeechTask extends ReplicateTask {
 				}
 			}
 		}
-		throw new InferenceOutputError("Expected Blob or object with output");
+		throw new InferenceClientProviderOutputError("Received malformed response from Replicate text-to-speech API");
 	}
 }
 
@@ -149,6 +156,60 @@ export class ReplicateTextToVideoTask extends ReplicateTask implements TextToVid
 			return await urlResponse.blob();
 		}
 
-		throw new InferenceOutputError("Expected { output: string }");
+		throw new InferenceClientProviderOutputError("Received malformed response from Replicate text-to-video API");
+	}
+}
+
+export class ReplicateImageToImageTask extends ReplicateTask implements ImageToImageTaskHelper {
+	override preparePayload(params: BodyParams<ImageToImageArgs>): Record<string, unknown> {
+		return {
+			input: {
+				...omit(params.args, ["inputs", "parameters"]),
+				...params.args.parameters,
+				input_image: params.args.inputs, // This will be processed in preparePayloadAsync
+			},
+			version: params.model.includes(":") ? params.model.split(":")[1] : undefined,
+		};
+	}
+
+	async preparePayloadAsync(args: ImageToImageArgs): Promise<RequestArgs> {
+		const { inputs, ...restArgs } = args;
+
+		// Convert Blob to base64 data URL
+		const bytes = new Uint8Array(await inputs.arrayBuffer());
+		const base64 = base64FromBytes(bytes);
+		const imageInput = `data:${inputs.type || "image/jpeg"};base64,${base64}`;
+
+		return {
+			...restArgs,
+			inputs: imageInput,
+		};
+	}
+
+	override async getResponse(response: ReplicateOutput): Promise<Blob> {
+		if (
+			typeof response === "object" &&
+			!!response &&
+			"output" in response &&
+			Array.isArray(response.output) &&
+			response.output.length > 0 &&
+			typeof response.output[0] === "string"
+		) {
+			const urlResponse = await fetch(response.output[0]);
+			return await urlResponse.blob();
+		}
+
+		if (
+			typeof response === "object" &&
+			!!response &&
+			"output" in response &&
+			typeof response.output === "string" &&
+			isUrl(response.output)
+		) {
+			const urlResponse = await fetch(response.output);
+			return await urlResponse.blob();
+		}
+
+		throw new InferenceClientProviderOutputError("Received malformed response from Replicate image-to-image API");
 	}
 }

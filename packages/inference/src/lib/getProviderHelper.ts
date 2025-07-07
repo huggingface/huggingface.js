@@ -24,6 +24,7 @@ import type {
 	ImageSegmentationTaskHelper,
 	ImageToImageTaskHelper,
 	ImageToTextTaskHelper,
+	ImageToVideoTaskHelper,
 	ObjectDetectionTaskHelper,
 	QuestionAnsweringTaskHelper,
 	SentenceSimilarityTaskHelper,
@@ -48,6 +49,7 @@ import * as Replicate from "../providers/replicate.js";
 import * as Sambanova from "../providers/sambanova.js";
 import * as Together from "../providers/together.js";
 import type { InferenceProvider, InferenceProviderOrPolicy, InferenceTask } from "../types.js";
+import { InferenceClientInputError } from "../errors.js";
 
 export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, TaskProviderHelper>>> = {
 	"black-forest-labs": {
@@ -63,6 +65,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-to-image": new FalAI.FalAITextToImageTask(),
 		"text-to-speech": new FalAI.FalAITextToSpeechTask(),
 		"text-to-video": new FalAI.FalAITextToVideoTask(),
+		"image-to-image": new FalAI.FalAIImageToImageTask(),
 		"automatic-speech-recognition": new FalAI.FalAIAutomaticSpeechRecognitionTask(),
 	},
 	"featherless-ai": {
@@ -137,6 +140,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-to-image": new Replicate.ReplicateTextToImageTask(),
 		"text-to-speech": new Replicate.ReplicateTextToSpeechTask(),
 		"text-to-video": new Replicate.ReplicateTextToVideoTask(),
+		"image-to-image": new Replicate.ReplicateImageToImageTask(),
 	},
 	sambanova: {
 		conversational: new Sambanova.SambanovaConversationalTask(),
@@ -238,6 +242,10 @@ export function getProviderHelper(
 ): ImageToImageTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
+	task: "image-to-video"
+): ImageToVideoTaskHelper & TaskProviderHelper;
+export function getProviderHelper(
+	provider: InferenceProviderOrPolicy,
 	task: "sentence-similarity"
 ): SentenceSimilarityTaskHelper & TaskProviderHelper;
 export function getProviderHelper(
@@ -272,7 +280,6 @@ export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
 	task: InferenceTask | undefined
 ): TaskProviderHelper;
-
 export function getProviderHelper(
 	provider: InferenceProviderOrPolicy,
 	task: InferenceTask | undefined
@@ -281,14 +288,18 @@ export function getProviderHelper(
 		return new HFInference.HFInferenceTask();
 	}
 	if (!task) {
-		throw new Error("you need to provide a task name when using an external provider, e.g. 'text-to-image'");
+		throw new InferenceClientInputError(
+			"you need to provide a task name when using an external provider, e.g. 'text-to-image'"
+		);
 	}
 	if (!(provider in PROVIDERS)) {
-		throw new Error(`Provider '${provider}' not supported. Available providers: ${Object.keys(PROVIDERS)}`);
+		throw new InferenceClientInputError(
+			`Provider '${provider}' not supported. Available providers: ${Object.keys(PROVIDERS)}`
+		);
 	}
 	const providerTasks = PROVIDERS[provider];
 	if (!providerTasks || !(task in providerTasks)) {
-		throw new Error(
+		throw new InferenceClientInputError(
 			`Task '${task}' not supported for provider '${provider}'. Available tasks: ${Object.keys(providerTasks ?? {})}`
 		);
 	}

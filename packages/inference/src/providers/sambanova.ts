@@ -14,16 +14,29 @@
  *
  * Thanks!
  */
-import { InferenceOutputError } from "../lib/InferenceOutputError.js";
-
 import type { FeatureExtractionOutput } from "@huggingface/tasks";
 import type { BodyParams } from "../types.js";
 import type { FeatureExtractionTaskHelper } from "./providerHelper.js";
 import { BaseConversationalTask, TaskProviderHelper } from "./providerHelper.js";
+import { InferenceClientProviderOutputError } from "../errors.js";
+import type { ChatCompletionInput } from "../../../tasks/dist/commonjs/index.js";
 
 export class SambanovaConversationalTask extends BaseConversationalTask {
 	constructor() {
 		super("sambanova", "https://api.sambanova.ai");
+	}
+
+	override preparePayload(params: BodyParams<ChatCompletionInput>): Record<string, unknown> {
+		const responseFormat = params.args.response_format;
+
+		if (responseFormat?.type === "json_schema" && responseFormat.json_schema) {
+			if (responseFormat.json_schema.strict ?? true) {
+				responseFormat.json_schema.strict = false;
+			}
+		}
+		const payload = super.preparePayload(params) as Record<string, unknown>;
+
+		return payload;
 	}
 }
 
@@ -40,8 +53,8 @@ export class SambanovaFeatureExtractionTask extends TaskProviderHelper implement
 		if (typeof response === "object" && "data" in response && Array.isArray(response.data)) {
 			return response.data.map((item) => item.embedding);
 		}
-		throw new InferenceOutputError(
-			"Expected Sambanova feature-extraction (embeddings) response format to be {'data' : list of {'embedding' : number[]}}"
+		throw new InferenceClientProviderOutputError(
+			"Received malformed response from Sambanova feature-extraction (embeddings) API"
 		);
 	}
 

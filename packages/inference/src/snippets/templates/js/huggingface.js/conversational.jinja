@@ -3,6 +3,9 @@ import { InferenceClient } from "@huggingface/inference";
 const client = new InferenceClient("{{ accessToken }}");
 
 const chatCompletion = await client.chatCompletion({
+{% if endpointUrl %}
+    endpointUrl: "{{ endpointUrl }}",
+{% endif %}
     provider: "{{ provider }}",
     model: "{{ model.id }}",
 {{ inputs.asTsString }}

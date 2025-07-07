@@ -4,6 +4,7 @@ import type { ApiModelInfo } from "../types/api/api-model";
 import type { CredentialsParams } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 import { pick } from "../utils/pick";
+import { normalizeInferenceProviderMapping } from "../utils/normalizeInferenceProviderMapping";
 import { MODEL_EXPAND_KEYS, type MODEL_EXPANDABLE_KEYS, type ModelEntry } from "./list-models";
 
 export async function modelInfo<
@@ -48,8 +49,14 @@ export async function modelInfo<
 
 	const data = await response.json();
 
+	// Handle inferenceProviderMapping normalization
+	const normalizedData = { ...data };
+	if ((params?.additionalFields as string[])?.includes("inferenceProviderMapping") && data.inferenceProviderMapping) {
+		normalizedData.inferenceProviderMapping = normalizeInferenceProviderMapping(data.id, data.inferenceProviderMapping);
+	}
+
 	return {
-		...(params?.additionalFields && pick(data, params.additionalFields)),
+		...(params?.additionalFields && pick(normalizedData, params.additionalFields)),
 		id: data._id,
 		name: data.id,
 		private: data.private,

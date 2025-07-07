@@ -6,7 +6,7 @@ describe("pathsInfo", () => {
 	it("should fetch LFS path info", async () => {
 		const result: PathInfo[] = await pathsInfo({
 			repo: {
-				name: "bert-base-uncased",
+				name: "google-bert/bert-base-uncased",
 				type: "model",
 			},
 			paths: ["tf_model.h5"],
@@ -35,7 +35,7 @@ describe("pathsInfo", () => {
 			securityFileStatus: SecurityFileStatus;
 		})[] = await pathsInfo({
 			repo: {
-				name: "bert-base-uncased",
+				name: "google-bert/bert-base-uncased",
 				type: "model",
 			},
 			paths: ["tf_model.h5"],
@@ -59,7 +59,7 @@ describe("pathsInfo", () => {
 	it("non-LFS pointer should have lfs undefined", async () => {
 		const result: PathInfo[] = await pathsInfo({
 			repo: {
-				name: "bert-base-uncased",
+				name: "google-bert/bert-base-uncased",
 				type: "model",
 			},
 			paths: ["config.json"],

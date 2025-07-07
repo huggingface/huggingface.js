@@ -17,11 +17,11 @@
 import { base64FromBytes } from "../utils/base64FromBytes.js";
 
 import type { AutomaticSpeechRecognitionOutput } from "@huggingface/tasks";
-import { InferenceOutputError } from "../lib/InferenceOutputError.js";
 import { isUrl } from "../lib/isUrl.js";
-import type { BodyParams, HeaderParams, ModelId, RequestArgs, UrlParams } from "../types.js";
+import type { BodyParams, HeaderParams, InferenceTask, ModelId, RequestArgs, UrlParams } from "../types.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
+import type { ImageToImageTaskHelper } from "./providerHelper.js";
 import {
 	type AutomaticSpeechRecognitionTaskHelper,
 	TaskProviderHelper,
@@ -30,6 +30,12 @@ import {
 } from "./providerHelper.js";
 import { HF_HUB_URL } from "../config.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
+import {
+	InferenceClientInputError,
+	InferenceClientProviderApiError,
+	InferenceClientProviderOutputError,
+} from "../errors.js";
+import type { ImageToImageArgs } from "../tasks/index.js";
 
 export interface FalAiQueueOutput {
 	request_id: string;
@@ -78,6 +84,75 @@ abstract class FalAITask extends TaskProviderHelper {
 	}
 }
 
+abstract class FalAiQueueTask extends FalAITask {
+	abstract task: InferenceTask;
+
+	async getResponseFromQueueApi(
+		response: FalAiQueueOutput,
+		url?: string,
+		headers?: Record<string, string>
+	): Promise<unknown> {
+		if (!url || !headers) {
+			throw new InferenceClientInputError(`URL and headers are required for ${this.task} task`);
+		}
+		const requestId = response.request_id;
+		if (!requestId) {
+			throw new InferenceClientProviderOutputError(
+				`Received malformed response from Fal.ai ${this.task} API: no request ID found in the response`
+			);
+		}
+		let status = response.status;
+
+		const parsedUrl = new URL(url);
+		const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}${
+			parsedUrl.host === "router.huggingface.co" ? "/fal-ai" : ""
+		}`;
+
+		// extracting the provider model id for status and result urls
+		// from the response as it might be different from the mapped model in `url`
+		const modelId = new URL(response.response_url).pathname;
+		const queryParams = parsedUrl.search;
+
+		const statusUrl = `${baseUrl}${modelId}/status${queryParams}`;
+		const resultUrl = `${baseUrl}${modelId}${queryParams}`;
+
+		while (status !== "COMPLETED") {
+			await delay(500);
+			const statusResponse = await fetch(statusUrl, { headers });
+
+			if (!statusResponse.ok) {
+				throw new InferenceClientProviderApiError(
+					"Failed to fetch response status from fal-ai API",
+					{ url: statusUrl, method: "GET" },
+					{
+						requestId: statusResponse.headers.get("x-request-id") ?? "",
+						status: statusResponse.status,
+						body: await statusResponse.text(),
+					}
+				);
+			}
+			try {
+				status = (await statusResponse.json()).status;
+			} catch (error) {
+				throw new InferenceClientProviderOutputError(
+					"Failed to parse status response from fal-ai API: received malformed response"
+				);
+			}
+		}
+
+		const resultResponse = await fetch(resultUrl, { headers });
+		let result: unknown;
+		try {
+			result = await resultResponse.json();
+		} catch (error) {
+			throw new InferenceClientProviderOutputError(
+				"Failed to parse result response from fal-ai API: received malformed response"
+			);
+		}
+		return result;
+	}
+}
+
 function buildLoraPath(modelId: ModelId, adapterWeightsPath: string): string {
 	return `${HF_HUB_URL}/${modelId}/resolve/main/${adapterWeightsPath}`;
 }
@@ -122,13 +197,85 @@ export class FalAITextToImageTask extends FalAITask implements TextToImageTaskHe
 			return await urlResponse.blob();
 		}
 
-		throw new InferenceOutputError("Expected Fal.ai text-to-image response format");
+		throw new InferenceClientProviderOutputError("Received malformed response from Fal.ai text-to-image API");
 	}
 }
 
-export class FalAITextToVideoTask extends FalAITask implements TextToVideoTaskHelper {
+export class FalAIImageToImageTask extends FalAiQueueTask implements ImageToImageTaskHelper {
+	task: InferenceTask;
 	constructor() {
 		super("https://queue.fal.run");
+		this.task = "image-to-image";
+	}
+
+	override makeRoute(params: UrlParams): string {
+		if (params.authMethod !== "provider-key") {
+			return `/${params.model}?_subdomain=queue`;
+		}
+		return `/${params.model}`;
+	}
+
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		const payload = params.args;
+		if (params.mapping?.adapter === "lora" && params.mapping.adapterWeightsPath) {
+			payload.loras = [
+				{
+					path: buildLoraPath(params.mapping.hfModelId, params.mapping.adapterWeightsPath),
+					scale: 1,
+				},
+			];
+		}
+		return payload;
+	}
+
+	async preparePayloadAsync(args: ImageToImageArgs): Promise<RequestArgs> {
+		const mimeType = args.inputs instanceof Blob ? args.inputs.type : "image/png";
+		return {
+			...omit(args, ["inputs", "parameters"]),
+			image_url: `data:${mimeType};base64,${base64FromBytes(
+				new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await (args.inputs as Blob).arrayBuffer())
+			)}`,
+			...args.parameters,
+			...args,
+		};
+	}
+
+	override async getResponse(
+		response: FalAiQueueOutput,
+		url?: string,
+		headers?: Record<string, string>
+	): Promise<Blob> {
+		const result = await this.getResponseFromQueueApi(response, url, headers);
+
+		if (
+			typeof result === "object" &&
+			!!result &&
+			"images" in result &&
+			Array.isArray(result.images) &&
+			result.images.length > 0 &&
+			typeof result.images[0] === "object" &&
+			!!result.images[0] &&
+			"url" in result.images[0] &&
+			typeof result.images[0].url === "string" &&
+			isUrl(result.images[0].url)
+		) {
+			const urlResponse = await fetch(result.images[0].url);
+			return await urlResponse.blob();
+		} else {
+			throw new InferenceClientProviderOutputError(
+				`Received malformed response from Fal.ai image-to-image API: expected { images: Array<{ url: string }> } result format, got instead: ${JSON.stringify(
+					result
+				)}`
+			);
+		}
+	}
+}
+
+export class FalAITextToVideoTask extends FalAiQueueTask implements TextToVideoTaskHelper {
+	task: InferenceTask;
+	constructor() {
+		super("https://queue.fal.run");
+		this.task = "text-to-video";
 	}
 	override makeRoute(params: UrlParams): string {
 		if (params.authMethod !== "provider-key") {
@@ -149,49 +296,8 @@ export class FalAITextToVideoTask extends FalAITask implements TextToVideoTaskHe
 		url?: string,
 		headers?: Record<string, string>
 	): Promise<Blob> {
-		if (!url || !headers) {
-			throw new InferenceOutputError("URL and headers are required for text-to-video task");
-		}
-		const requestId = response.request_id;
-		if (!requestId) {
-			throw new InferenceOutputError("No request ID found in the response");
-		}
-		let status = response.status;
+		const result = await this.getResponseFromQueueApi(response, url, headers);
 
-		const parsedUrl = new URL(url);
-		const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}${
-			parsedUrl.host === "router.huggingface.co" ? "/fal-ai" : ""
-		}`;
-
-		// extracting the provider model id for status and result urls
-		// from the response as it might be different from the mapped model in `url`
-		const modelId = new URL(response.response_url).pathname;
-		const queryParams = parsedUrl.search;
-
-		const statusUrl = `${baseUrl}${modelId}/status${queryParams}`;
-		const resultUrl = `${baseUrl}${modelId}${queryParams}`;
-
-		while (status !== "COMPLETED") {
-			await delay(500);
-			const statusResponse = await fetch(statusUrl, { headers });
-
-			if (!statusResponse.ok) {
-				throw new InferenceOutputError("Failed to fetch response status from fal-ai API");
-			}
-			try {
-				status = (await statusResponse.json()).status;
-			} catch (error) {
-				throw new InferenceOutputError("Failed to parse status response from fal-ai API");
-			}
-		}
-
-		const resultResponse = await fetch(resultUrl, { headers });
-		let result: unknown;
-		try {
-			result = await resultResponse.json();
-		} catch (error) {
-			throw new InferenceOutputError("Failed to parse result response from fal-ai API");
-		}
 		if (
 			typeof result === "object" &&
 			!!result &&
@@ -205,8 +311,10 @@ export class FalAITextToVideoTask extends FalAITask implements TextToVideoTaskHe
 			const urlResponse = await fetch(result.video.url);
 			return await urlResponse.blob();
 		} else {
-			throw new InferenceOutputError(
-				"Expected { video: { url: string } } result format, got instead: " + JSON.stringify(result)
+			throw new InferenceClientProviderOutputError(
+				`Received malformed response from Fal.ai text-to-video API: expected { video: { url: string } } result format, got instead: ${JSON.stringify(
+					result
+				)}`
 			);
 		}
 	}
@@ -221,8 +329,10 @@ export class FalAIAutomaticSpeechRecognitionTask extends FalAITask implements Au
 	override async getResponse(response: unknown): Promise<AutomaticSpeechRecognitionOutput> {
 		const res = response as FalAIAutomaticSpeechRecognitionOutput;
 		if (typeof res?.text !== "string") {
-			throw new InferenceOutputError(
-				`Expected { text: string } format from Fal.ai Automatic Speech Recognition, got: ${JSON.stringify(response)}`
+			throw new InferenceClientProviderOutputError(
+				`Received malformed response from Fal.ai Automatic Speech Recognition API: expected { text: string } format, got instead: ${JSON.stringify(
+					response
+				)}`
 			);
 		}
 		return { text: res.text };
@@ -232,12 +342,12 @@ export class FalAIAutomaticSpeechRecognitionTask extends FalAITask implements Au
 		const blob = "data" in args && args.data instanceof Blob ? args.data : "inputs" in args ? args.inputs : undefined;
 		const contentType = blob?.type;
 		if (!contentType) {
-			throw new Error(
+			throw new InferenceClientInputError(
 				`Unable to determine the input's content-type. Make sure your are passing a Blob when using provider fal-ai.`
 			);
 		}
 		if (!FAL_AI_SUPPORTED_BLOB_TYPES.includes(contentType)) {
-			throw new Error(
+			throw new InferenceClientInputError(
 				`Provider fal-ai does not support blob type ${contentType} - supported content types are: ${FAL_AI_SUPPORTED_BLOB_TYPES.join(
 					", "
 				)}`
@@ -263,21 +373,35 @@ export class FalAITextToSpeechTask extends FalAITask {
 	override async getResponse(response: unknown): Promise<Blob> {
 		const res = response as FalAITextToSpeechOutput;
 		if (typeof res?.audio?.url !== "string") {
-			throw new InferenceOutputError(
-				`Expected { audio: { url: string } } format from Fal.ai Text-to-Speech, got: ${JSON.stringify(response)}`
+			throw new InferenceClientProviderOutputError(
+				`Received malformed response from Fal.ai Text-to-Speech API: expected { audio: { url: string } } format, got instead: ${JSON.stringify(
+					response
+				)}`
+			);
+		}
+		const urlResponse = await fetch(res.audio.url);
+		if (!urlResponse.ok) {
+			throw new InferenceClientProviderApiError(
+				`Failed to fetch audio from ${res.audio.url}: ${urlResponse.statusText}`,
+				{ url: res.audio.url, method: "GET", headers: { "Content-Type": "application/json" } },
+				{
+					requestId: urlResponse.headers.get("x-request-id") ?? "",
+					status: urlResponse.status,
+					body: await urlResponse.text(),
+				}
 			);
 		}
 		try {
-			const urlResponse = await fetch(res.audio.url);
-			if (!urlResponse.ok) {
-				throw new Error(`Failed to fetch audio from ${res.audio.url}: ${urlResponse.statusText}`);
-			}
 			return await urlResponse.blob();
 		} catch (error) {
-			throw new InferenceOutputError(
-				`Error fetching or processing audio from Fal.ai Text-to-Speech URL: ${res.audio.url}. ${
-					error instanceof Error ? error.message : String(error)
-				}`
+			throw new InferenceClientProviderApiError(
+				`Failed to fetch audio from ${res.audio.url}: ${error instanceof Error ? error.message : String(error)}`,
+				{ url: res.audio.url, method: "GET", headers: { "Content-Type": "application/json" } },
+				{
+					requestId: urlResponse.headers.get("x-request-id") ?? "",
+					status: urlResponse.status,
+					body: await urlResponse.text(),
+				}
 			);
 		}
 	}
