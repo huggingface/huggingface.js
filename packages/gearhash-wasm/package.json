@@ -5,7 +5,7 @@
 		"build:debug": "asc assembly/index.ts --target debug",
 		"build:release": "asc assembly/index.ts --target release",
 		"build": "pnpm run build:debug && npm run build:release",
-		"test": "node tests",
+		"test": "node tests && node tests/xet-data.js",
 		"prepare": "pnpm run build"
 	},
 	"keywords": [
@@ -28,6 +28,7 @@
 		}
 	},
 	"devDependencies": {
-		"assemblyscript": "0.27.36"
+		"assemblyscript": "0.27.36",
+		"@huggingface/splitmix64-wasm": "workspace:*"
 	}
 }

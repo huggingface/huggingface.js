@@ -40,7 +40,7 @@ class XetChunker {
 
 		let mask = (targetChunkSize - 1) as u64;
 		// Shift mask left by leading zeros count
-		mask = mask << (64 - clz(mask));
+		mask = mask << clz(mask);
 
 		const maximumChunk = targetChunkSize * MAXIMUM_CHUNK_MULTIPLIER;
 
