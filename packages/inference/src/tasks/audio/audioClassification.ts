@@ -16,7 +16,7 @@ export async function audioClassification(
 	args: AudioClassificationArgs,
 	options?: Options
 ): Promise<AudioClassificationOutput> {
-	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl, options);
+	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "audio-classification");
 	const payload = preparePayload(args);
 	const { data: res } = await innerRequest<AudioClassificationOutput>(payload, providerHelper, {

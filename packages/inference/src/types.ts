@@ -40,11 +40,6 @@ export interface Options {
 	 * Requests can only be billed to an organization the user is a member of, and which has subscribed to Enterprise Hub.
 	 */
 	billTo?: string;
-
-	/**
-	 * Custom logger instance. Defaults to console.
-	 */
-	logger?: Logger;
 }
 
 export type InferenceTask = Exclude<PipelineType, "other"> | "conversational";

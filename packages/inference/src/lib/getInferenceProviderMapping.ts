@@ -2,13 +2,7 @@ import type { WidgetType } from "@huggingface/tasks";
 import { HF_HUB_URL } from "../config.js";
 import { HARDCODED_MODEL_INFERENCE_MAPPING } from "../providers/consts.js";
 import { EQUIVALENT_SENTENCE_TRANSFORMERS_TASKS } from "../providers/hf-inference.js";
-import type {
-	InferenceProvider,
-	InferenceProviderMappingEntry,
-	InferenceProviderOrPolicy,
-	ModelId,
-	Options,
-} from "../types.js";
+import type { InferenceProvider, InferenceProviderMappingEntry, InferenceProviderOrPolicy, ModelId } from "../types.js";
 import { typedInclude } from "../utils/typedInclude.js";
 import { InferenceClientHubApiError, InferenceClientInputError } from "../errors.js";
 import { getLogger } from "./logger.js";
@@ -60,7 +54,9 @@ function normalizeInferenceProviderMapping(
 export async function fetchInferenceProviderMappingForModel(
 	modelId: ModelId,
 	accessToken?: string,
-	options?: Pick<Options, "fetch">
+	options?: {
+		fetch?: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
+	}
 ): Promise<InferenceProviderMappingEntry[]> {
 	let inferenceProviderMapping: InferenceProviderMappingEntry[] | null;
 	if (inferenceProviderMappingCache.has(modelId)) {
