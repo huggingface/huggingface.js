@@ -47,10 +47,8 @@ touch my-agent/agent.json
 	"servers": [
 		{
 			"type": "stdio",
-			"config": {
-				"command": "npx",
-				"args": ["@playwright/mcp@latest"]
-			}
+			"command": "npx",
+			"args": ["@playwright/mcp@latest"]
 		}
 	]
 }
@@ -65,10 +63,8 @@ Or using a local or remote endpoint URL:
 	"servers": [
 		{
 			"type": "stdio",
-			"config": {
-				"command": "npx",
-				"args": ["@playwright/mcp@latest"]
-			}
+			"command": "npx",
+			"args": ["@playwright/mcp@latest"]
 		}
 	]
 }
