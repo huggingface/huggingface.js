@@ -143,6 +143,7 @@ export function finalize(chunker: XetChunker): Chunk | null {
 }
 
 export function getChunks(data: Uint8Array, targetChunkSize: i32 = TARGET_CHUNK_SIZE): Chunk[] {
+	// console.log(`getChunks: ${targetChunkSize} ${data.length}`);
 	const chunker = createChunker(targetChunkSize);
 	return chunker.nextBlock(data, true);
 }

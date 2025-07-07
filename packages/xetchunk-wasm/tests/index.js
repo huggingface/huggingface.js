@@ -13,7 +13,7 @@ function getChunkBoundaries(chunks) {
 }
 
 // Test 1: Basic functionality with 1MB random data
-function testCorrectness1mbRandomData() {
+async function testCorrectness1mbRandomData() {
 	console.log("Testing 1MB random data...");
 
 	// Create 1MB of random data with seed 0
@@ -24,6 +24,14 @@ function testCorrectness1mbRandomData() {
 	assert.strictEqual(data[0], 175);
 	assert.strictEqual(data[127], 132);
 	assert.strictEqual(data[111111], 118);
+
+	const referenceSha256 = "b3d0a1f7938cd4d8413a4dcffd4313e2e8ac0cb61cb1090eb140ea8e9154befb";
+	const sha256 = await crypto.subtle.digest("SHA-256", data);
+	const sha256Hex = Array.from(new Uint8Array(sha256))
+		.map((b) => b.toString(16).padStart(2, "0"))
+		.join("");
+	assert.strictEqual(sha256Hex, referenceSha256);
+	console.log("✓ 1MB random data sha256 test passed");
 
 	// Get chunks using the default chunker
 	const chunks = getChunks(data);
@@ -194,9 +202,9 @@ console.log("Running xetchunk-wasm tests...\n");
 try {
 	testChunkBoundaries();
 	testCorrectness1mbConstData();
-	testCorrectness1mbRandomData();
-	testTriggeringData();
 	testBasicChunkerFunctionality();
+	await testCorrectness1mbRandomData();
+	testTriggeringData();
 
 	console.log("\n🎉 All tests passed!");
 } catch (error) {
