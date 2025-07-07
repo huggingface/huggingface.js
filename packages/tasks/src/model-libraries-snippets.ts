@@ -1035,6 +1035,13 @@ export const relik = (model: ModelData): string[] => [
 relik = Relik.from_pretrained("${model.id}")`,
 ];
 
+export const renderformer = (model: ModelData): string[] => [
+	`# Install from https://github.com/microsoft/renderformer
+
+from renderformer import RenderFormerRenderingPipeline
+pipeline = RenderFormerRenderingPipeline.from_pretrained("${model.id}")`,
+];
+
 const tensorflowttsTextToMel = (model: ModelData): string[] => [
 	`from tensorflow_tts.inference import AutoProcessor, TFAutoModel
 
