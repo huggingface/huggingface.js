@@ -7,17 +7,7 @@ settings:
 importers:
 
   .:
-    dependencies:
-      '@huggingface/blake3-wasm':
-        specifier: workspace:*
-        version: link:../blake3-wasm
-      '@huggingface/gearhash-wasm':
-        specifier: workspace:*
-        version: link:../gearhash-wasm
     devDependencies:
-      '@huggingface/splitmix64-wasm':
-        specifier: workspace:*
-        version: link:../splitmix64-wasm
       assemblyscript:
         specifier: 0.27.36
         version: 0.27.36

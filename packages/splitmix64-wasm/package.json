@@ -1,5 +1,5 @@
 {
-	"name": "@huggingface/xetchunk-wasm",
+	"name": "@huggingface/splitmix64-wasm",
 	"version": "0.0.1",
 	"scripts": {
 		"build:debug": "asc assembly/index.ts --target debug",
@@ -9,17 +9,11 @@
 		"prepare": "pnpm run build"
 	},
 	"keywords": [
-		"xet",
-		"chunk",
-		"chunking",
+		"blake3",
 		"assemblyscript",
 		"assembly",
 		"wasm"
 	],
-	"dependencies": {
-		"@huggingface/blake3-wasm": "workspace:*",
-		"@huggingface/gearhash-wasm": "workspace:*"
-	},
 	"type": "module",
 	"exports": {
 		".": {
@@ -34,7 +28,6 @@
 		}
 	},
 	"devDependencies": {
-		"@huggingface/splitmix64-wasm": "workspace:*",
 		"assemblyscript": "0.27.36"
 	}
 }
