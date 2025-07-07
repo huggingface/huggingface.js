@@ -5,6 +5,14 @@ import type { ChatCompletionInput, PipelineType, WidgetType } from "@huggingface
  */
 export type ModelId = string;
 
+export interface Logger {
+	debug: (message: string, ...args: unknown[]) => void;
+	info: (message: string, ...args: unknown[]) => void;
+	warn: (message: string, ...args: unknown[]) => void;
+	error: (message: string, ...args: unknown[]) => void;
+	log: (message: string, ...args: unknown[]) => void;
+}
+
 export interface Options {
 	/**
 	 * (Default: true) Boolean. If a request 503s, the request will be retried with the same parameters.
@@ -32,6 +40,11 @@ export interface Options {
 	 * Requests can only be billed to an organization the user is a member of, and which has subscribed to Enterprise Hub.
 	 */
 	billTo?: string;
+
+	/**
+	 * Custom logger instance. Defaults to console.
+	 */
+	logger?: Logger;
 }
 
 export type InferenceTask = Exclude<PipelineType, "other"> | "conversational";

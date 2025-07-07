@@ -19,6 +19,7 @@ import {
 	InferenceClientProviderApiError,
 	InferenceClientProviderOutputError,
 } from "../errors.js";
+import { getLogger } from "../lib/logger.js";
 import type { BodyParams, HeaderParams, UrlParams } from "../types.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
@@ -67,10 +68,11 @@ export class BlackForestLabsTextToImageTask extends TaskProviderHelper implement
 		headers?: HeadersInit,
 		outputType?: "url" | "blob"
 	): Promise<string | Blob> {
+		const logger = getLogger();
 		const urlObj = new URL(response.polling_url);
 		for (let step = 0; step < 5; step++) {
 			await delay(1000);
-			console.debug(`Polling Black Forest Labs API for the result... ${step + 1}/5`);
+			logger.debug(`Polling Black Forest Labs API for the result... ${step + 1}/5`);
 			urlObj.searchParams.set("attempt", step.toString(10));
 			const resp = await fetch(urlObj, { headers: { "Content-Type": "application/json" } });
 			if (!resp.ok) {
