@@ -7,7 +7,7 @@ import { deleteCollection } from "./delete-collection";
 
 describe("createCollection", () => {
 	it("should create a collection", async () => {
-		let collectionSlug: string = "";
+		let slug: string = "";
 
 		try {
 			const user = await whoAmI({
@@ -26,12 +26,12 @@ describe("createCollection", () => {
 				hubUrl: TEST_HUB_URL,
 			});
 
-			expect(result.collectionSlug.startsWith(`${user.name}/test-collection`)).toBe(true);
+			expect(result.slug.startsWith(`${user.name}/test-collection`)).toBe(true);
 
-			collectionSlug = result.collectionSlug;
+			slug = result.slug;
 		} finally {
 			await deleteCollection({
-				collectionSlug,
+				slug,
 				accessToken: TEST_ACCESS_TOKEN,
 				hubUrl: TEST_HUB_URL,
 			});

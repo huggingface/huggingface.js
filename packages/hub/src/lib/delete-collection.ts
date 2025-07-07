@@ -8,7 +8,7 @@ export async function deleteCollection(
 		/**
 		 * The slug of the collection to delete.
 		 */
-		collectionSlug: string;
+		slug: string;
 		hubUrl?: string;
 		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
@@ -18,7 +18,7 @@ export async function deleteCollection(
 ): Promise<void> {
 	const accessToken = checkCredentials(params);
 
-	const res = await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/collections/${params.collectionSlug}`, {
+	const res = await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/collections/${params.slug}`, {
 		method: "DELETE",
 		headers: {
 			Authorization: `Bearer ${accessToken}`,

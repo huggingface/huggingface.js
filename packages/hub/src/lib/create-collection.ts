@@ -12,9 +12,8 @@ export async function createCollection(
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
 		 */
 		fetch?: typeof fetch;
-	} &
-		Partial<CredentialsParams>
-): Promise<{ collectionSlug: string }> {
+	} & Partial<CredentialsParams>
+): Promise<{ slug: string }> {
 	const accessToken = checkCredentials(params);
 
 	const res = await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/collections`, {
@@ -32,5 +31,5 @@ export async function createCollection(
 
 	const output = await res.json();
 
-	return { collectionSlug: output.slug };
+	return { slug: output.slug };
 }
