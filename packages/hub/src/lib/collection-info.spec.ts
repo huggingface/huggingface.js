@@ -5,7 +5,7 @@ import { collectionInfo } from "./collection-info";
 describe("collectionInfo", () => {
 	it("should return the collection info", async () => {
 		const collection = await collectionInfo({
-			collectionSlug: "quanghuynt14/test-collection-6866ff686ca2d2e0a1931507",
+			slug: "quanghuynt14/test-collection-6866ff686ca2d2e0a1931507",
 			hubUrl: TEST_HUB_URL,
 		});
 

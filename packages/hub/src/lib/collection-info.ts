@@ -9,7 +9,7 @@ export async function collectionInfo(
 		/**
 		 * The slug of the collection.
 		 */
-		collectionSlug: string;
+		slug: string;
 		hubUrl?: string;
 		/**
 		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
@@ -19,7 +19,7 @@ export async function collectionInfo(
 ): Promise<ApiCollectionInfo & { position: number; shareUrl: string }> {
 	const accessToken = checkCredentials(params);
 
-	const res = await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/collections/${params.collectionSlug}`, {
+	const res = await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/collections/${params.slug}`, {
 		headers: {
 			"Content-Type": "application/json",
 			...(accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined),
