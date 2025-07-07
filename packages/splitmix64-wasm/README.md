@@ -2,6 +2,8 @@ JS and WASM implementations of splitmix-64
 
 Using [AssemblyScript](https://www.assemblyscript.org/) to generate a lean WASM.
 
+The use of WASM is more for 64 bit arithmetic than for performance.
+
 Used internally to reproduce rust tests
 
 Let us know if you want us to expose more functions.

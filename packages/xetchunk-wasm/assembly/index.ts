@@ -1,1 +1,1 @@
-export { createChunker, finalize, nextBlock } from "./xet-chunker";
+export { createChunker, finalize, nextBlock, getChunks } from "./xet-chunker";

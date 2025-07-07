@@ -36,5 +36,5 @@ export function createRandomArray(size: u32, seed: u64): ArrayBuffer {
 		z = (z ^ (z >> 27)) * 0x94d049bb133111eb;
 		view.setUint64(i, z ^ (z >> 31), true);
 	}
-	return array;
+	return array.slice(0, size);
 }

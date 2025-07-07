@@ -18,6 +18,5 @@
 	},
 	"options": {
 		"bindings": "esm"
-	},
-	"entries": ["assembly/index.ts", "assembly/splitmix64.ts"]
+	}
 }
