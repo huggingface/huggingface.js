@@ -12,6 +12,7 @@ import { getProviderHelper } from "../lib/getProviderHelper.js";
 import { makeRequestOptionsFromResolvedModel } from "../lib/makeRequestOptions.js";
 import type { InferenceProviderMappingEntry, InferenceProviderOrPolicy, InferenceTask, RequestArgs } from "../types.js";
 import { templates } from "./templates.exported.js";
+import { getLogger } from "../lib/logger.js";
 
 export type InferenceSnippetOptions = {
 	streaming?: boolean;
@@ -140,6 +141,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		inferenceProviderMapping?: InferenceProviderMappingEntry,
 		opts?: InferenceSnippetOptions
 	): InferenceSnippet[] => {
+		const logger = getLogger();
 		const providerModelId = inferenceProviderMapping?.providerId ?? model.id;
 		/// Hacky: hard-code conversational templates here
 		let task = model.pipeline_tag as InferenceTask;
@@ -156,7 +158,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		try {
 			providerHelper = getProviderHelper(provider, task);
 		} catch (e) {
-			console.error(`Failed to get provider helper for ${provider} (${task})`, e);
+			logger.error(`Failed to get provider helper for ${provider} (${task})`, e);
 			return [];
 		}
 
@@ -191,7 +193,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 			try {
 				providerInputs = JSON.parse(bodyAsObj);
 			} catch (e) {
-				console.error("Failed to parse body as JSON", e);
+				logger.error("Failed to parse body as JSON", e);
 			}
 		}
 

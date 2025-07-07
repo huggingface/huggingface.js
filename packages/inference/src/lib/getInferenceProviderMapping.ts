@@ -5,6 +5,7 @@ import { EQUIVALENT_SENTENCE_TRANSFORMERS_TASKS } from "../providers/hf-inferenc
 import type { InferenceProvider, InferenceProviderMappingEntry, InferenceProviderOrPolicy, ModelId } from "../types.js";
 import { typedInclude } from "../utils/typedInclude.js";
 import { InferenceClientHubApiError, InferenceClientInputError } from "../errors.js";
+import { getLogger } from "./logger.js";
 
 export const inferenceProviderMappingCache = new Map<ModelId, InferenceProviderMappingEntry[]>();
 
@@ -122,6 +123,7 @@ export async function getInferenceProviderMapping(
 		fetch?: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
 	}
 ): Promise<InferenceProviderMappingEntry | null> {
+	const logger = getLogger();
 	if (HARDCODED_MODEL_INFERENCE_MAPPING[params.provider][params.modelId]) {
 		return HARDCODED_MODEL_INFERENCE_MAPPING[params.provider][params.modelId];
 	}
@@ -138,7 +140,7 @@ export async function getInferenceProviderMapping(
 			);
 		}
 		if (providerMapping.status === "staging") {
-			console.warn(
+			logger.warn(
 				`Model ${params.modelId} is in staging mode for provider ${params.provider}. Meant for test purposes only.`
 			);
 		}
@@ -152,6 +154,7 @@ export async function resolveProvider(
 	modelId?: string,
 	endpointUrl?: string
 ): Promise<InferenceProvider> {
+	const logger = getLogger();
 	if (endpointUrl) {
 		if (provider) {
 			throw new InferenceClientInputError("Specifying both endpointUrl and provider is not supported.");
@@ -160,7 +163,7 @@ export async function resolveProvider(
 		return "hf-inference";
 	}
 	if (!provider) {
-		console.log(
+		logger.log(
 			"Defaulting to 'auto' which will select the first provider available for the model, sorted by the user's order in https://hf.co/settings/inference-providers."
 		);
 		provider = "auto";
@@ -171,7 +174,7 @@ export async function resolveProvider(
 		}
 		const mappings = await fetchInferenceProviderMappingForModel(modelId);
 		provider = mappings[0]?.provider as InferenceProvider | undefined;
-		console.log("Auto selected provider:", provider);
+		logger.log("Auto selected provider:", provider);
 	}
 	if (!provider) {
 		throw new InferenceClientInputError(`No Inference Provider available for model ${modelId}.`);
