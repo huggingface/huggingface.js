@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createChunker, finalize, nextBlock, getChunks } from "../build/debug.js";
+import { createChunker, finalize, nextBlock, getChunks, hashToHex } from "../build/debug.js";
 import { createRandomArray } from "@huggingface/splitmix64-wasm";
 
 // Helper function to get chunk boundaries from chunks
@@ -65,13 +65,7 @@ describe("xetchunk-wasm", () => {
 			];
 
 			expect(chunkBoundaries).toEqual(expectedBoundaries);
-			expect(
-				chunks.map((chunk) =>
-					Array.from(chunk.hash)
-						.map((b) => b.toString(16).padStart(2, "0"))
-						.join("")
-				)
-			).toEqual(expectedChunkHashes);
+			expect(chunks.map((chunk) => hashToHex(chunk.hash))).toEqual(expectedChunkHashes);
 		});
 	});
 

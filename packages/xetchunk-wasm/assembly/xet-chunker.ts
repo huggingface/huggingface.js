@@ -156,3 +156,18 @@ export function getChunks(data: Uint8Array, targetChunkSize: i32 = TARGET_CHUNK_
 	const chunker = createChunker(targetChunkSize);
 	return chunker.nextBlock(data, true);
 }
+
+export function hashToHex(hash: Uint8Array): string {
+	const view = new DataView(hash.buffer);
+	const u64 = view.getUint64(0, true);
+	const u64_2 = view.getUint64(8, true);
+	const u64_3 = view.getUint64(16, true);
+	const u64_4 = view.getUint64(24, true);
+
+	const hex =
+		u64.toString(16).padStart(16, "0") +
+		u64_2.toString(16).padStart(16, "0") +
+		u64_3.toString(16).padStart(16, "0") +
+		u64_4.toString(16).padStart(16, "0");
+	return hex;
+}
