@@ -5,7 +5,7 @@
 		"build:debug": "asc assembly/index.ts --target debug",
 		"build:release": "asc assembly/index.ts --target release",
 		"build": "pnpm run build:debug && npm run build:release",
-		"test": "node tests && node tests/xet-data.js",
+		"test": "vitest run",
 		"prepare": "pnpm run build"
 	},
 	"keywords": [
