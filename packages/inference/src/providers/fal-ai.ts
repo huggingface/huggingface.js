@@ -21,7 +21,7 @@ import { isUrl } from "../lib/isUrl.js";
 import type { BodyParams, HeaderParams, InferenceTask, ModelId, RequestArgs, UrlParams } from "../types.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
-import type { ImageToImageTaskHelper } from "./providerHelper.js";
+import type { ImageSegmentationTaskHelper, ImageToImageTaskHelper } from "./providerHelper.js";
 import {
 	type AutomaticSpeechRecognitionTaskHelper,
 	TaskProviderHelper,
@@ -407,31 +407,30 @@ export class FalAITextToSpeechTask extends FalAITask {
 		}
 	}
 }
-export class FalAIImageSegmentationTask extends FalAITask {
+export class FalAIImageSegmentationTask extends FalAITask implements ImageSegmentationTaskHelper {
 	override preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
-			...omit(params.args, ["data", "parameters"]),
+			...omit(params.args, ["inputs", "parameters"]),
 			...(params.args.parameters as Record<string, unknown>),
 			sync_mode: true,
 		};
 	}
 
 	async preparePayloadAsync(args: ImageSegmentationArgs): Promise<RequestArgs> {
+    const blob = args.inputs;
+    const mimeType = blob instanceof Blob ? blob.type : "image/png";
+    const base64Image = base64FromBytes(
+        new Uint8Array(
+            blob instanceof ArrayBuffer ? blob : await (blob as Blob).arrayBuffer()
+        )
+    );
 
-		const blob = args.data;
-		const mimeType = blob instanceof Blob ? blob.type : "image/png";
-		const base64Image = base64FromBytes(
-			new Uint8Array(
-				blob instanceof ArrayBuffer ? blob : await (blob as Blob).arrayBuffer()
-			)
-		);
-
-		return {
-			...omit(args, ["data", "parameters"]),
-			...(args.parameters as Record<string, unknown>),
-			image_url: `data:${mimeType};base64,${base64Image}`,
-			sync_mode: true,
-		};
+    return {
+        ...omit(args, ["inputs", "parameters"]),
+        ...(args.parameters as Record<string, unknown>),
+        image_url: `data:${mimeType};base64,${base64Image}`,
+        sync_mode: true,
+    };
 	}
 
 	override async getResponse(response: unknown): Promise<ImageSegmentationOutput> {
