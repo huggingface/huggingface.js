@@ -24,6 +24,7 @@ import {
 	type TextToImageTaskHelper,
 } from "./providerHelper.js";
 import { InferenceClientProviderOutputError } from "../errors.js";
+import type { ChatCompletionInput } from "../../../tasks/dist/commonjs/index.js";
 
 const TOGETHER_API_BASE_URL = "https://api.together.xyz";
 
@@ -46,6 +47,22 @@ interface TogetherBase64ImageGeneration {
 export class TogetherConversationalTask extends BaseConversationalTask {
 	constructor() {
 		super("together", TOGETHER_API_BASE_URL);
+	}
+
+	override preparePayload(params: BodyParams<ChatCompletionInput>): Record<string, unknown> {
+		const payload = super.preparePayload(params);
+		const response_format = payload.response_format as
+			| { type: "json_schema"; json_schema: { schema: unknown } }
+			| undefined;
+
+		if (response_format?.type === "json_schema" && response_format?.json_schema?.schema) {
+			payload.response_format = {
+				type: "json_schema",
+				schema: response_format.json_schema.schema,
+			};
+		}
+
+		return payload;
 	}
 }
 

@@ -51,6 +51,7 @@ export type * from "./automatic-speech-recognition/inference.js";
 export type {
 	ChatCompletionInput,
 	ChatCompletionInputMessage,
+	ChatCompletionInputMessageChunkType,
 	ChatCompletionOutput,
 	ChatCompletionOutputComplete,
 	ChatCompletionOutputMessage,
