@@ -3,7 +3,7 @@ import { resolveProvider } from "../../lib/getInferenceProviderMapping.js";
 import { getProviderHelper } from "../../lib/getProviderHelper.js";
 import type { BaseArgs, Options } from "../../types.js";
 import { innerRequest } from "../../utils/request.js";
-import { preparePayload, type LegacyImageInput } from "./utils.js";
+import { makeRequestOptions } from "../../lib/makeRequestOptions.js";
 
 export type ImageSegmentationArgs = BaseArgs & ImageSegmentationInput;
 
@@ -22,5 +22,6 @@ export async function imageSegmentation(
 		...options,
 		task: "image-segmentation",
 	});
-	return providerHelper.getResponse(res);
+	const { url, info } = await makeRequestOptions(args, providerHelper, { ...options, task: "image-segmentation" });
+	return providerHelper.getResponse(res, url, info.headers as Record<string, string>);
 }

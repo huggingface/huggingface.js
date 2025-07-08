@@ -407,7 +407,20 @@ export class FalAITextToSpeechTask extends FalAITask {
 		}
 	}
 }
-export class FalAIImageSegmentationTask extends FalAITask implements ImageSegmentationTaskHelper {
+export class FalAIImageSegmentationTask extends FalAiQueueTask implements ImageSegmentationTaskHelper {
+	task: InferenceTask;
+	constructor() {
+		super("https://queue.fal.run");
+		this.task = "image-segmentation";
+	}
+
+	override makeRoute(params: UrlParams): string {
+		if (params.authMethod !== "provider-key") {
+			return `/${params.model}?_subdomain=queue`;
+		}
+		return `/${params.model}`;
+	}
+
 	override preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
 			...omit(params.args, ["inputs", "parameters"]),
@@ -431,21 +444,26 @@ export class FalAIImageSegmentationTask extends FalAITask implements ImageSegmen
 		};
 	}
 
-	override async getResponse(response: unknown): Promise<ImageSegmentationOutput> {
+	override async getResponse(
+		response: FalAiQueueOutput,
+		url?: string,
+		headers?: Record<string, string>
+	): Promise<ImageSegmentationOutput> {
+		const result = await this.getResponseFromQueueApi(response, url, headers);
 		if (
-			typeof response === "object" &&
-			response !== null &&
-			"image" in response &&
-			typeof response.image === "object" &&
-			response.image !== null &&
-			"url" in response.image &&
-			typeof response.image.url === "string"
+			typeof result === "object" &&
+			result !== null &&
+			"image" in result &&
+			typeof result.image === "object" &&
+			result.image !== null &&
+			"url" in result.image &&
+			typeof result.image.url === "string"
 		) {
-			const maskResponse = await fetch(response.image.url);
+			const maskResponse = await fetch(result.image.url);
 			if (!maskResponse.ok) {
 				throw new InferenceClientProviderApiError(
-					`Failed to fetch segmentation mask from ${response.image.url}`,
-					{ url: response.image.url, method: "GET" },
+					`Failed to fetch segmentation mask from ${result.image.url}`,
+					{ url: result.image.url, method: "GET" },
 					{
 						requestId: maskResponse.headers.get("x-request-id") ?? "",
 						status: maskResponse.status,
