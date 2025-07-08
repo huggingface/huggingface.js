@@ -103,7 +103,7 @@ function compress(
 	return state;
 }
 
-function words_from_little_endian_bytes(bytes: Uint8Array, words: StaticArray<u32>): void {
+function words_from_little_endian_bytes(bytes: StaticArray<u8>, words: StaticArray<u32>): void {
 	for (let i = 0; i < words.length; i++) {
 		const offset = i * 4;
 		words[i] =
@@ -199,7 +199,7 @@ class Blake3Hasher {
 class ChunkState {
 	chaining_value: StaticArray<u32>;
 	chunk_counter: u64;
-	block: Uint8Array;
+	block: StaticArray<u8>;
 	block_len: u8;
 	blocks_compressed: u8;
 	flags: u32;
@@ -207,7 +207,7 @@ class ChunkState {
 	constructor(key_words: StaticArray<u32>, chunk_counter: u64, flags: u32) {
 		this.chaining_value = new StaticArray<u32>(8);
 		this.chunk_counter = chunk_counter;
-		this.block = new Uint8Array(BLOCK_LEN);
+		this.block = new StaticArray<u8>(BLOCK_LEN);
 		this.block_len = 0;
 		this.blocks_compressed = 0;
 		this.flags = flags;
@@ -242,7 +242,7 @@ class ChunkState {
 					this.chaining_value[i] = compressed[i];
 				}
 				this.blocks_compressed++;
-				this.block = new Uint8Array(BLOCK_LEN);
+				this.block = new StaticArray<u8>(BLOCK_LEN);
 				this.block_len = 0;
 			}
 
