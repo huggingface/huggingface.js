@@ -1,13 +1,12 @@
 import { HUB_URL } from "../consts";
 import { createApiError } from "../error";
-import type { ApiCollectionInfo } from "../types/api/api-collection";
 import type { CredentialsParams } from "../types/public";
 import { checkCredentials } from "../utils/checkCredentials";
 
-export async function collectionInfo(
+export async function deleteCollection(
 	params: {
 		/**
-		 * The slug of the collection.
+		 * The slug of the collection to delete.
 		 */
 		slug: string;
 		hubUrl?: string;
@@ -16,19 +15,18 @@ export async function collectionInfo(
 		 */
 		fetch?: typeof fetch;
 	} & Partial<CredentialsParams>
-): Promise<ApiCollectionInfo & { position: number; shareUrl: string }> {
+): Promise<void> {
 	const accessToken = checkCredentials(params);
 
 	const res = await (params.fetch ?? fetch)(`${params.hubUrl ?? HUB_URL}/api/collections/${params.slug}`, {
+		method: "DELETE",
 		headers: {
+			Authorization: `Bearer ${accessToken}`,
 			"Content-Type": "application/json",
-			...(accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined),
 		},
 	});
 
 	if (!res.ok) {
 		throw await createApiError(res);
 	}
-
-	return await res.json();
 }
