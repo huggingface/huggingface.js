@@ -8,7 +8,7 @@ const CHUNK_START: u32 = 1 << 0;
 const CHUNK_END: u32 = 1 << 1;
 const PARENT: u32 = 1 << 2;
 const ROOT: u32 = 1 << 3;
-//const KEYED_HASH: u32 = 1 << 4;
+const KEYED_HASH: u32 = 1 << 4;
 //const DERIVE_KEY_CONTEXT: u32 = 1 << 5;
 // const DERIVE_KEY_MATERIAL: u32 = 1 << 6;
 
@@ -121,20 +121,36 @@ class Blake3Hasher {
 	private cv_stack_len: u8;
 	private flags: u32;
 
-	constructor() {
-		const key_words = new StaticArray<u32>(8);
-		for (let i = 0; i < 8; i++) {
-			key_words[i] = IV[i];
-		}
+	constructor(key_words: StaticArray<u32> = [IV[0], IV[1], IV[2], IV[3], IV[4], IV[5], IV[6], IV[7]], flags: u32 = 0) {
 		this.key_words = key_words;
-		this.chunk_state = new ChunkState(key_words, 0, 0);
+		this.chunk_state = new ChunkState(key_words, 0, flags);
 		this.cv_stack = new StaticArray<StaticArray<u32>>(54);
 		this.cv_stack_len = 0;
-		this.flags = 0;
+		this.flags = flags;
 
 		for (let i = 0; i < 54; i++) {
 			this.cv_stack[i] = new StaticArray<u32>(8);
 		}
+	}
+
+	// Constructor for keyed hash
+	static newKeyed(key: Uint8Array): Blake3Hasher {
+		if (key.length != 32) {
+			throw new Error("Key must be exactly 32 bytes");
+		}
+
+		const key_words = new StaticArray<u32>(8);
+		// const key_static = new StaticArray<u8>(32);
+		// for (let i = 0; i < 32; i++) {
+		// 	key_static[i] = key[i];
+		// }
+		// words_from_little_endian_bytes(key_static, key_words);
+		const dataView = new DataView(key.buffer);
+		for (let i = 0; i < 8; i++) {
+			key_words[i] = dataView.getUint32(i * 4, true);
+		}
+
+		return new Blake3Hasher(key_words, KEYED_HASH);
 	}
 
 	update(input: Uint8Array): void {
@@ -372,8 +388,30 @@ export function blake3Hex(input: Uint8Array): string {
 	return hex.join("");
 }
 
+export function blake3Keyed(input: Uint8Array, key: Uint8Array): Uint8Array {
+	const hasher = Blake3Hasher.newKeyed(key);
+	hasher.update(input);
+	const output = new Uint8Array(32);
+	hasher.finalize(output);
+	return output;
+}
+
+export function blake3KeyedHex(input: Uint8Array, key: Uint8Array): string {
+	const hash = blake3Keyed(input, key);
+	const hex = new Array<string>(64);
+	for (let i = 0; i < 32; i++) {
+		hex[i * 2] = (hash[i] >> 4).toString(16);
+		hex[i * 2 + 1] = (hash[i] & 0x0f).toString(16);
+	}
+	return hex.join("");
+}
+
 export function createHasher(): Blake3Hasher {
 	return new Blake3Hasher();
+}
+
+export function createKeyedHasher(key: Uint8Array): Blake3Hasher {
+	return Blake3Hasher.newKeyed(key);
 }
 
 export function update(hasher: Blake3Hasher, input: Uint8Array): void {

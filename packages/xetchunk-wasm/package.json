@@ -1,6 +1,6 @@
 {
 	"name": "@huggingface/xetchunk-wasm",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"scripts": {
 		"build:debug": "asc assembly/index.ts --target debug",
 		"build:release": "asc assembly/index.ts --target release",

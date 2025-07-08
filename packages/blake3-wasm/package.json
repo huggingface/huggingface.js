@@ -1,6 +1,6 @@
 {
 	"name": "@huggingface/blake3-wasm",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"scripts": {
 		"build:debug": "asc assembly/index.ts --target debug",
 		"build:release": "asc assembly/index.ts --target release",

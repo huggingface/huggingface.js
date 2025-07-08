@@ -1,11 +1,20 @@
 import { nextMatch } from "@huggingface/gearhash-wasm/assembly";
-import { blake3 } from "@huggingface/blake3-wasm/assembly";
+import { blake3Keyed } from "@huggingface/blake3-wasm/assembly";
 
 // Constants
 const TARGET_CHUNK_SIZE: i32 = 64 * 1024; // 64KB
 const MINIMUM_CHUNK_DIVISOR: i32 = 8;
 const MAXIMUM_CHUNK_MULTIPLIER: i32 = 2;
 const HASH_WINDOW_SIZE: i32 = 64;
+
+const BLAKE3_DATA_KEY = new Uint8Array(32);
+const STATIC_KEY: StaticArray<u8> = [
+	102, 151, 245, 119, 91, 149, 80, 222, 49, 53, 203, 172, 165, 151, 24, 28, 157, 228, 33, 16, 155, 235, 43, 88, 180,
+	208, 176, 75, 147, 173, 242, 41,
+];
+for (let i = 0; i < 32; i++) {
+	BLAKE3_DATA_KEY[i] = STATIC_KEY[i];
+}
 
 export class Chunk {
 	hash: Uint8Array;
@@ -97,7 +106,7 @@ class XetChunker {
 			const chunkData = this.chunkBuf.subarray(0, this.curChunkLen);
 			const chunk: Chunk = {
 				length: chunkData.length,
-				hash: blake3(chunkData),
+				hash: blake3Keyed(chunkData, BLAKE3_DATA_KEY),
 			};
 			this.curChunkLen = 0;
 			this.hash = 0;
