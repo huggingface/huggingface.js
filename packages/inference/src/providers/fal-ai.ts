@@ -417,24 +417,21 @@ export class FalAIImageSegmentationTask extends FalAITask implements ImageSegmen
 	}
 
 	async preparePayloadAsync(args: ImageSegmentationArgs): Promise<RequestArgs> {
-    const blob = args.inputs;
-    const mimeType = blob instanceof Blob ? blob.type : "image/png";
-    const base64Image = base64FromBytes(
-        new Uint8Array(
-            blob instanceof ArrayBuffer ? blob : await (blob as Blob).arrayBuffer()
-        )
-    );
-
-    return {
-        ...omit(args, ["inputs", "parameters"]),
-        ...(args.parameters as Record<string, unknown>),
-        image_url: `data:${mimeType};base64,${base64Image}`,
-        sync_mode: true,
-    };
+		const blob = "data" in args && args.data instanceof Blob ? args.data : "inputs" in args ? args.inputs : undefined;
+		const mimeType = blob instanceof Blob ? blob.type : "image/png";
+		const base64Image = base64FromBytes(
+			new Uint8Array(blob instanceof ArrayBuffer ? blob : await (blob as Blob).arrayBuffer())
+		);
+		return {
+			...omit(args, ["inputs", "parameters", "data"]),
+			...args.parameters,
+			...args,
+			image_url: `data:${mimeType};base64,${base64Image}`,
+			sync_mode: true,
+		};
 	}
 
 	override async getResponse(response: unknown): Promise<ImageSegmentationOutput> {
-
 		if (
 			typeof response === "object" &&
 			response !== null &&
@@ -444,7 +441,6 @@ export class FalAIImageSegmentationTask extends FalAITask implements ImageSegmen
 			"url" in response.image &&
 			typeof response.image.url === "string"
 		) {
-
 			const maskResponse = await fetch(response.image.url);
 			if (!maskResponse.ok) {
 				throw new InferenceClientProviderApiError(
@@ -461,11 +457,13 @@ export class FalAIImageSegmentationTask extends FalAITask implements ImageSegmen
 			const maskArrayBuffer = await maskBlob.arrayBuffer();
 			const maskBase64 = base64FromBytes(new Uint8Array(maskArrayBuffer));
 
-			return [{
-				label: "mask", // placeholder label, as Fal does not provide labels in the response(?)
-				score: 1.0, // placeholder score, as Fal does not provide scores in the response(?)
-				mask: maskBase64,
-			}];
+			return [
+				{
+					label: "mask", // placeholder label, as Fal does not provide labels in the response(?)
+					score: 1.0, // placeholder score, as Fal does not provide scores in the response(?)
+					mask: maskBase64,
+				},
+			];
 		}
 
 		throw new InferenceClientProviderOutputError(

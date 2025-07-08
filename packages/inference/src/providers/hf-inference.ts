@@ -74,6 +74,7 @@ import { base64FromBytes } from "../utils/base64FromBytes.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
 import { omit } from "../utils/omit.js";
+import { ImageSegmentationArgs } from "../tasks/cv/imageSegmentation.js";
 interface Base64ImageGeneration {
 	data: Array<{
 		b64_json: string;
@@ -342,6 +343,15 @@ export class HFInferenceImageSegmentationTask extends HFInferenceTask implements
 		throw new InferenceClientProviderOutputError(
 			"Received malformed response from HF-Inference image-segmentation API: expected Array<{label: string, mask: string, score: number}>"
 		);
+	}
+
+	async preparePayloadAsync(args: ImageSegmentationArgs): Promise<RequestArgs> {
+		return {
+			...args,
+			inputs: base64FromBytes(
+				new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await (args.inputs as Blob).arrayBuffer())
+			),
+		};
 	}
 }
 
