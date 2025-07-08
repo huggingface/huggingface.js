@@ -1,6 +1,8 @@
 // Adapted from https://github.com/mcmilk/BLAKE3-tests/blob/11a8abeceac93b5eba664eae3679efb4ffa5bc0a/blake3_test.c
 
+import { describe, expect } from "vitest";
 import { blake3Hex, blake3KeyedHex } from "../build/debug.js";
+import { it } from "vitest";
 
 const buffer = new Uint8Array(102400);
 let i = 0;
@@ -13,10 +15,23 @@ for (i = 0, j = 0; i < buffer.length; i++, j++) {
 	buffer[i] = j;
 }
 
-const key = new Uint8Array(32);
-for (let i = 0; i < 32; i++) {
-	key[i] = "whats the Elvish word for friend".charCodeAt(i);
+function uint8ArrayFromString(str: string) {
+	const arr = new Uint8Array(str.length);
+	for (let i = 0; i < str.length; i++) {
+		arr[i] = str.charCodeAt(i);
+	}
+	return arr;
 }
+
+function uint8ArrayFromBytes(bytes: number[]) {
+	const arr = new Uint8Array(bytes.length);
+	for (let i = 0; i < bytes.length; i++) {
+		arr[i] = bytes[i];
+	}
+	return arr;
+}
+
+const key = uint8ArrayFromString("whats the Elvish word for friend");
 
 const testCases = [
 	{
@@ -186,26 +201,88 @@ const testCases = [
 	},
 ];
 
-for (const testCase of testCases) {
-	const result = blake3Hex(testCase.buf);
-	console.log(result);
+describe("blake3", () => {
+	describe("BLAKE3_TESTS", () => {
+		for (const testCase of testCases) {
+			it(`should pass ${testCase.buf.length} bytes`, () => {
+				const result = blake3Hex(testCase.buf);
+				expect(result).toBe(testCase.expected);
 
-	if (result !== testCase.expected) {
-		console.error(`Test case failed: ${testCase.buf.length} bytes`);
-		console.error(`Expected: ${testCase.expected}`);
-		console.error(`Actual: ${result}`);
-		process.exit(1);
-	}
+				const resultKeyed = blake3KeyedHex(testCase.buf, key);
+				expect(resultKeyed).toBe(testCase.keyed);
+			});
+		}
+	});
 
-	const resultKeyed = blake3KeyedHex(testCase.buf, key);
-	console.log(resultKeyed);
+	describe("compute_data_hash with xet key", () => {
+		const DATA_KEY = new Uint8Array(32);
+		const arr = [
+			102, 151, 245, 119, 91, 149, 80, 222, 49, 53, 203, 172, 165, 151, 24, 28, 157, 228, 33, 16, 155, 235, 43, 88, 180,
+			208, 176, 75, 147, 173, 242, 41,
+		];
+		for (let i = 0; i < 32; i++) {
+			DATA_KEY[i] = arr[i];
+		}
+		it("should pass empty string", () => {
+			const result = blake3KeyedHex(uint8ArrayFromString(""), key);
+			expect(result).toBe("e0f2cf784e7e5f10c34f84af150e9a5ff9664216debad915364d741049870f67");
+		});
 
-	if (resultKeyed !== testCase.keyed) {
-		console.error(`Test case failed: ${testCase.buf.length} bytes (keyed)`);
-		console.error(`Expected: ${testCase.keyed}`);
-		console.error(`Actual: ${resultKeyed}`);
-		process.exit(1);
-	}
-}
+		it("should pass 'hello world'", () => {
+			const result = blake3KeyedHex(uint8ArrayFromString("hello world"), key);
+			expect(result).toBe("4e39378b9d359f118190557a1f44130219a54e5fcfa07bd96cf50b466fe651b1");
+		});
 
-console.log("All test cases passed");
+		it("should pass 'test'", () => {
+			const result = blake3KeyedHex(uint8ArrayFromString("test"), key);
+			expect(result).toBe("86858d1210748f161707a68afd4cc4c46097aac5c76d1091cfe5bab82bee2af6");
+		});
+
+		it("should pass '123456789'", () => {
+			const result = blake3KeyedHex(buffer, key);
+			expect(result).toBe("1b58809b9645a598741bf62b29f411d9212c3de9c8c3d0f08afaa7237c32fdd6");
+		});
+
+		it("should pass '!@#$%^&*()'", () => {
+			const result = blake3KeyedHex(uint8ArrayFromString("!@#$%^&*()"), key);
+			expect(result).toBe("b0085e856c550c11de350c6154c58f3c560fee691bc790b300fbf5e3fcb45ddb");
+		});
+
+		it("should pass a longer string", () => {
+			const result = blake3KeyedHex(
+				uint8ArrayFromString(
+					"This is a much longer string that will test how the hash function handles larger inputs. It contains multiple sentences and various characters."
+				),
+				key
+			);
+			expect(result).toBe("2324ec7d18249c682cfcc8a1262e51832592941a9f59adb5daeaa201e761f794");
+		});
+
+		it("should pass some binary data", () => {
+			const result = blake3KeyedHex(
+				uint8ArrayFromBytes([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 255, 254, 253, 252, 251, 250]),
+				key
+			);
+			expect(result).toBe("8d6d58c2e16d79eb8a6880728cbcf20bb8a67eedc6f9a5caa48b2225abdbf082");
+		});
+
+		it("should pass 32 zeros", () => {
+			const result = blake3KeyedHex(uint8ArrayFromBytes(new Array(32).fill(0)), key);
+			expect(result).toBe("db07bd1bc239b73a2320450d008594d74ded925a9fb25c250dca159923551511");
+		});
+
+		it("should pass 32 ones", () => {
+			const result = blake3KeyedHex(uint8ArrayFromBytes(new Array(32).fill(255)), key);
+			expect(result).toBe("7bdd5091548666844324a85f5383d110285b70a458fa0ba2f001a866a352cd48");
+		});
+
+		it("should pass sequence of 0-63", () => {
+			const uint8Array = new Uint8Array(64);
+			for (let i = 0; i < 64; i++) {
+				uint8Array[i] = i;
+			}
+			const result = blake3KeyedHex(uint8Array, key);
+			expect(result).toBe("82b0d040d5890fb35cfbbcb7f8e3f06ef86b2ece33d09463d9626536c4833a7e");
+		});
+	});
+});
