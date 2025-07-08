@@ -462,8 +462,8 @@ export class FalAIImageSegmentationTask extends FalAITask implements ImageSegmen
 			const maskBase64 = base64FromBytes(new Uint8Array(maskArrayBuffer));
 
 			return [{
-				label: "mask",
-				score: 1.0,
+				label: "mask", // placeholder label, as Fal does not provide labels in the response(?)
+				score: 1.0, // placeholder score, as Fal does not provide scores in the response(?)
 				mask: maskBase64,
 			}];
 		}
