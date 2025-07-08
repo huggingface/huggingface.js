@@ -9,7 +9,7 @@
 		"prepare": "pnpm run build"
 	},
 	"keywords": [
-		"blake3",
+		"splitmix64",
 		"assemblyscript",
 		"assembly",
 		"wasm"
@@ -27,7 +27,19 @@
 			"import": "./build/release.wasm"
 		}
 	},
+	"main": "./build/release.js",
+	"types": "./build/release.d.ts",
 	"devDependencies": {
 		"assemblyscript": "0.27.36"
-	}
+	},
+	"files": [
+		"build/release.js",
+		"build/release.d.ts",
+		"build/release.wasm",
+		"build/release.wat",
+		"build/release.wasm.map",
+		"README.md",
+		"asconfig.json",
+		"assembly"
+	]
 }

@@ -33,8 +33,20 @@
 			"import": "./build/release.wasm"
 		}
 	},
+	"main": "./build/release.js",
+	"types": "./build/release.d.ts",
 	"devDependencies": {
 		"@huggingface/splitmix64-wasm": "workspace:*",
 		"assemblyscript": "0.27.36"
-	}
+	},
+	"files": [
+		"build/release.js",
+		"build/release.d.ts",
+		"build/release.wasm",
+		"build/release.wat",
+		"build/release.wasm.map",
+		"README.md",
+		"asconfig.json",
+		"assembly"
+	]
 }
