@@ -1548,11 +1548,8 @@ import jax
 import jax.numpy as jnp
 from videoprism import models as vp
 
-# Models available: ['videoprism_public_v1_base_hf', 'videoprism_public_v1_large_hf']
-MODEL_NAME = 'videoprism_public_v1_base_hf'
-
-flax_model = vp.MODELS[MODEL_NAME]()
-loaded_state = vp.load_pretrained_weights(MODEL_NAME)
+flax_model = vp.MODELS["${model.id}"]()
+loaded_state = vp.load_pretrained_weights("${model.id}")
 
 @jax.jit
 def forward_fn(inputs, train=False):
