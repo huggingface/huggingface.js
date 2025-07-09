@@ -6,6 +6,7 @@
 		"build:release": "asc assembly/index.ts --target release",
 		"build": "pnpm run build:debug && npm run build:release",
 		"test": "vitest run",
+		"bench": "node tests/bench.js",
 		"prepare": "pnpm run build"
 	},
 	"keywords": [

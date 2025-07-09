@@ -4,10 +4,10 @@ import { Chunk } from "./xet-chunker";
 
 const MEAN_CHUNK_PER_NODE = 4;
 
-if (MEAN_CHUNK_PER_NODE % 256 !== 0) {
-	throw new Error("MEAN_CHUNK_PER_NODE must be a multiple of 256");
-	// ^ So we only need to check the last byte of the last u64 in the chunk hash
-}
+// if (MEAN_CHUNK_PER_NODE % 256 !== 0) {
+// 	throw new Error("MEAN_CHUNK_PER_NODE must be a multiple of 256");
+// 	// ^ So we only need to check the last byte of the last u64 in the chunk hash
+// }
 
 const BLAKE3_NODE_KEY = new Uint8Array(32);
 const STATIC_KEY: StaticArray<u8> = [

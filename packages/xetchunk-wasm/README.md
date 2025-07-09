@@ -26,3 +26,11 @@ for await (const data of source) {
 
 console.log("last chunk", finalize(chunker));
 ```
+
+## Beanchmarking chunking
+
+```shell
+pnpm install
+pnpm --filter xetchunk-wasm build
+pnpm --filter xetchunk-wasm bench path/to/a-big-file
+```
