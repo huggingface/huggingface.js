@@ -58,6 +58,17 @@ generator("Hello, I'm a language model", max_length = 30, num_return_sequences=3
 ##  {'generated_text': "Hello, I'm a language modeler. I write and maintain software in Python. I love to code, and that includes coding things that require writing"}, ...
 ```
 
+[Text-to-Text generation models](https://huggingface.co/models?other=text2text-generation&sort=downloads) have a separate pipeline called `text2text-generation`. This pipeline takes an input containing the sentence including the task and returns the output of the accomplished task.
+
+```python
+from transformers import pipeline
+
+text2text_generator = pipeline("text2text-generation")
+text2text_generator("question: What is 42 ? context: 42 is the answer to life, the universe and everything")
+[{'generated_text': 'the answer to life, the universe and everything'}]
+
+text2text_generator("translate from English to French: I'm very happy")
+[{'generated_text': 'Je suis très heureux'}]
 You can use [huggingface.js](https://github.com/huggingface/huggingface.js) to infer text classification models on Hugging Face Hub.
 
 ```javascript
