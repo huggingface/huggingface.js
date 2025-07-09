@@ -5,7 +5,7 @@ Using [AssemblyScript](https://www.assemblyscript.org/) to generate a lean WASM.
 ## Usage
 
 ```javascript
-import { createChunker, getChunks, nextBlock, finalize } from '@huggingface/xetchunk-wasm';
+import { createChunker, getChunks, nextBlock, finalize, xorbHash } from '@huggingface/xetchunk-wasm';
 
 const TARGET_CHUNK_SIZE = Math.pow(2, 12);
 
@@ -14,6 +14,7 @@ const data = new Uint8Array(1000000); // Example: 1MB of data
 // ... fill data with your content ...
 
 const chunks = getChunks(data, TARGET_CHUNK_SIZE);
+console.log("xorbHash", xorbHasht(chunks));
 
 // Alternative, in case your data is streaming
 const chunker = createChunker(TARGET_CHUNK_SIZE);
