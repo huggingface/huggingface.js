@@ -667,7 +667,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "MTVCraft",
 		repoUrl: "https://github.com/baaivision/MTVCraft",
 		filter: false,
-		countDownloads: `path_extension:"pt"`,
+		countDownloads: `path:"vae/3d-vae.pt"`,
 	},
 	nemo: {
 		prettyLabel: "NeMo",
