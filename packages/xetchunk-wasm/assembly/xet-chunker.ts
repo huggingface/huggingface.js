@@ -25,11 +25,6 @@ export class Chunk {
 class NextResult {
 	chunk: Chunk | null;
 	bytesConsumed: i32;
-
-	constructor(chunk: Chunk | null, bytesConsumed: i32) {
-		this.chunk = chunk;
-		this.bytesConsumed = bytesConsumed;
-	}
 }
 
 class XetChunker {
@@ -110,10 +105,16 @@ class XetChunker {
 			};
 			this.curChunkLen = 0;
 			this.hash = 0;
-			return new NextResult(chunk, consumeLen);
+			return {
+				chunk,
+				bytesConsumed: consumeLen,
+			};
 		}
 
-		return new NextResult(null, consumeLen);
+		return {
+			chunk: null,
+			bytesConsumed: consumeLen,
+		};
 	}
 
 	nextBlock(data: Uint8Array, isFinal: boolean): Chunk[] {
