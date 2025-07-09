@@ -1,4 +1,4 @@
-This task covers guides on [text-generation](https://huggingface.co/models?pipeline_tag=text-generation&sort=downloads) models. Popular large language models that are used for chats or following instructions are also covered in this task. You can find the list of selected open-source large language models [here](https://huggingface.co/spaces/open-llm-leaderboard/open_llm_leaderboard), ranked by their performance scores.
+This task covers guides on both [text-generation](https://huggingface.co/models?pipeline_tag=text-generation&sort=downloads) and [text-to-text generation](https://huggingface.co/models?other=text2text-generation&sort=downloads) models. Popular large language models that are used for chats or following instructions are also covered in this task. You can find the list of selected open-source large language models [here](https://huggingface.co/spaces/open-llm-leaderboard/open_llm_leaderboard), ranked by their performance scores.
 
 ## Use Cases
 
