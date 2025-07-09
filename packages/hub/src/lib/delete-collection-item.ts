@@ -10,7 +10,8 @@ export async function deleteCollectionItem(
      */
     slug: string;
     /**
-     * The unique ID of the item (this should be the _id property of the item object in the collection).
+     * The item object id which is different from the repo_id/paper_id provided when adding the item to the collection.
+     * This should be the _id property of the item object in the collection.
      */
     itemId: string;
     hubUrl?: string;
