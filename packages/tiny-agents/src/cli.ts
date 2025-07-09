@@ -4,6 +4,7 @@ import * as readline from "node:readline/promises";
 import { stdin, stdout } from "node:process";
 import { z } from "zod";
 import { PROVIDERS_OR_POLICIES } from "@huggingface/inference";
+import type { ServerConfig } from "@huggingface/mcp-client";
 import { Agent } from "@huggingface/mcp-client";
 import { version as packageVersion } from "../package.json";
 import { InputConfigSchema, ServerConfigSchema } from "./lib/types";
@@ -107,15 +108,15 @@ async function main() {
 			// Check env variables that will use this input
 			const inputVars = new Set<string>();
 			for (const server of config.servers) {
-				if (server.type === "stdio" && server.config.env) {
-					for (const [key, value] of Object.entries(server.config.env)) {
+				if (server.type === "stdio" && server.env) {
+					for (const [key, value] of Object.entries(server.env)) {
 						if (value === envSpecialValue) {
 							inputVars.add(key);
 						}
 					}
 				}
-				if ((server.type === "http" || server.type === "sse") && server.config.options?.requestInit?.headers) {
-					for (const [key, value] of Object.entries(server.config.options.requestInit.headers)) {
+				if ((server.type === "http" || server.type === "sse") && server.headers) {
+					for (const [key, value] of Object.entries(server.headers)) {
 						if (value.includes(envSpecialValue)) {
 							inputVars.add(key);
 						}
@@ -132,31 +133,33 @@ async function main() {
 			}
 
 			// Prompt user for input
+			const envVariableKey = inputId.replaceAll("-", "_").toUpperCase();
 			stdout.write(ANSI.BLUE);
 			stdout.write(` • ${inputId}`);
 			stdout.write(ANSI.RESET);
-			stdout.write(`: ${description}. (default: load from ${Array.from(inputVars).join(", ")}) `);
+			stdout.write(`: ${description}. (default: load from ${envVariableKey}) `);
+			stdout.write("\n");
 
 			const userInput = (await rl.question("")).trim();
 
 			// Inject user input (or env variable) into servers' env
 			for (const server of config.servers) {
-				if (server.type === "stdio" && server.config.env) {
-					for (const [key, value] of Object.entries(server.config.env)) {
+				if (server.type === "stdio" && server.env) {
+					for (const [key, value] of Object.entries(server.env)) {
 						if (value === envSpecialValue) {
 							if (userInput) {
-								server.config.env[key] = userInput;
+								server.env[key] = userInput;
 							} else {
-								const valueFromEnv = process.env[key] || "";
-								server.config.env[key] = valueFromEnv;
+								const valueFromEnv = process.env[envVariableKey] || "";
+								server.env[key] = valueFromEnv;
 								if (valueFromEnv) {
 									stdout.write(ANSI.GREEN);
-									stdout.write(`Value successfully loaded from '${key}'`);
+									stdout.write(`Value successfully loaded from '${envVariableKey}'`);
 									stdout.write(ANSI.RESET);
 									stdout.write("\n");
 								} else {
 									stdout.write(ANSI.YELLOW);
-									stdout.write(`No value found for '${key}' in environment variables. Continuing.`);
+									stdout.write(`No value found for '${envVariableKey}' in environment variables. Continuing.`);
 									stdout.write(ANSI.RESET);
 									stdout.write("\n");
 								}
@@ -164,22 +167,22 @@ async function main() {
 						}
 					}
 				}
-				if ((server.type === "http" || server.type === "sse") && server.config.options?.requestInit?.headers) {
-					for (const [key, value] of Object.entries(server.config.options.requestInit.headers)) {
+				if ((server.type === "http" || server.type === "sse") && server.headers) {
+					for (const [key, value] of Object.entries(server.headers)) {
 						if (value.includes(envSpecialValue)) {
 							if (userInput) {
-								server.config.options.requestInit.headers[key] = value.replace(envSpecialValue, userInput);
+								server.headers[key] = value.replace(envSpecialValue, userInput);
 							} else {
-								const valueFromEnv = process.env[key] || "";
-								server.config.options.requestInit.headers[key] = value.replace(envSpecialValue, valueFromEnv);
+								const valueFromEnv = process.env[envVariableKey] || "";
+								server.headers[key] = value.replace(envSpecialValue, valueFromEnv);
 								if (valueFromEnv) {
 									stdout.write(ANSI.GREEN);
-									stdout.write(`Value successfully loaded from '${key}'`);
+									stdout.write(`Value successfully loaded from '${envVariableKey}'`);
 									stdout.write(ANSI.RESET);
 									stdout.write("\n");
 								} else {
 									stdout.write(ANSI.YELLOW);
-									stdout.write(`No value found for '${key}' in environment variables. Continuing.`);
+									stdout.write(`No value found for '${envVariableKey}' in environment variables. Continuing.`);
 									stdout.write(ANSI.RESET);
 									stdout.write("\n");
 								}
@@ -194,13 +197,39 @@ async function main() {
 		rl.close();
 	}
 
+	const formattedServers: ServerConfig[] = config.servers.map((server) => {
+		switch (server.type) {
+			case "stdio":
+				return {
+					type: "stdio",
+					config: {
+						command: server.command,
+						args: server.args ?? [],
+						env: server.env ?? {},
+						cwd: server.cwd ?? process.cwd(),
+					},
+				};
+			case "http":
+			case "sse":
+				return {
+					type: server.type,
+					config: {
+						url: server.url,
+						requestInit: {
+							headers: server.headers,
+						},
+					},
+				};
+		}
+	});
+
 	const agent = new Agent(
 		config.endpointUrl
 			? {
 					endpointUrl: config.endpointUrl,
 					model: config.model,
 					apiKey: config.apiKey ?? process.env.API_KEY ?? process.env.HF_TOKEN,
-					servers: config.servers,
+					servers: formattedServers,
 					prompt,
 			  }
 			: {
@@ -208,7 +237,7 @@ async function main() {
 					provider: config.provider!,
 					model: config.model,
 					apiKey: config.apiKey ?? process.env.API_KEY ?? process.env.HF_TOKEN,
-					servers: config.servers,
+					servers: formattedServers,
 					prompt,
 			  }
 	);

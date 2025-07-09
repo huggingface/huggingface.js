@@ -784,6 +784,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"model.safetensors"`,
 	},
+	renderformer: {
+		prettyLabel: "RenderFormer",
+		repoName: "RenderFormer",
+		repoUrl: "https://github.com/microsoft/renderformer",
+		snippets: snippets.renderformer,
+		filter: false,
+	},
 	reverb: {
 		prettyLabel: "Reverb",
 		repoName: "Reverb",
