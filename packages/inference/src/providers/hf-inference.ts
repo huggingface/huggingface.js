@@ -521,7 +521,6 @@ export class HFInferenceZeroShotClassificationTask extends HFInferenceTask imple
 			"score" in elem &&
 			!!elem.label &&
 			typeof elem.label === "string" &&
-			!!elem.score &&
 			typeof elem.score === "number"
 		);
 	}
