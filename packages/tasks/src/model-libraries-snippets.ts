@@ -1542,6 +1542,20 @@ image = sana(
 ) `,
 ];
 
+export const videoprism = (model: ModelData): string[] => [
+	`# Install from https://github.com/google-deepmind/videoprism
+import jax
+import jax.numpy as jnp
+from videoprism import models as vp
+
+flax_model = vp.MODELS["${model.id}"]()
+loaded_state = vp.load_pretrained_weights("${model.id}")
+
+@jax.jit
+def forward_fn(inputs, train=False):
+  return flax_model.apply(loaded_state, inputs, train=train)`,
+];
+
 export const vfimamba = (model: ModelData): string[] => [
 	`from Trainer_finetune import Model
 

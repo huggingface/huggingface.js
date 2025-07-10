@@ -1093,6 +1093,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path_extension:"pth"`,
 		snippets: snippets.sana,
 	},
+	videoprism: {
+		prettyLabel: "VideoPrism",
+		repoName: "VideoPrism",
+		repoUrl: "https://github.com/google-deepmind/videoprism",
+		countDownloads: `path_extension:"npz"`,
+		snippets: snippets.videoprism,
+	},
 	"vfi-mamba": {
 		prettyLabel: "VFIMamba",
 		repoName: "VFIMamba",
