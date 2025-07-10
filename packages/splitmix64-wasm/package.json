@@ -1,0 +1,45 @@
+{
+	"name": "@huggingface/splitmix64-wasm",
+	"version": "0.0.1",
+	"scripts": {
+		"build:debug": "asc assembly/index.ts --target debug",
+		"build:release": "asc assembly/index.ts --target release",
+		"build": "pnpm run build:debug && npm run build:release",
+		"test": "node tests",
+		"prepare": "pnpm run build"
+	},
+	"keywords": [
+		"splitmix64",
+		"assemblyscript",
+		"assembly",
+		"wasm"
+	],
+	"type": "module",
+	"exports": {
+		".": {
+			"import": "./build/release.js",
+			"types": "./build/release.d.ts"
+		},
+		"./assembly": {
+			"import": "./assembly/index.ts"
+		},
+		"./wasm": {
+			"import": "./build/release.wasm"
+		}
+	},
+	"main": "./build/release.js",
+	"types": "./build/release.d.ts",
+	"devDependencies": {
+		"assemblyscript": "0.27.36"
+	},
+	"files": [
+		"build/release.js",
+		"build/release.d.ts",
+		"build/release.wasm",
+		"build/release.wat",
+		"build/release.wasm.map",
+		"README.md",
+		"asconfig.json",
+		"assembly"
+	]
+}
