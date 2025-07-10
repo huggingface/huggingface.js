@@ -2,8 +2,8 @@
 	"name": "@huggingface/blake3-wasm",
 	"version": "0.0.3",
 	"scripts": {
-		"build:debug": "asc assembly/index.ts --target debug",
-		"build:release": "asc assembly/index.ts --target release",
+		"build:debug": "asc assembly/index.ts --target debug --enable simd",
+		"build:release": "asc assembly/index.ts --target release --enable simd",
 		"build": "pnpm run build:debug && npm run build:release",
 		"test": "vitest run",
 		"bench": "node tests/bench.js",

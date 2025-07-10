@@ -1,7 +1,7 @@
 // Adapted from https://github.com/mcmilk/BLAKE3-tests/blob/11a8abeceac93b5eba664eae3679efb4ffa5bc0a/blake3_test.c
 
 import { describe, expect } from "vitest";
-import { blake3Hex, blake3KeyedHex } from "../build/debug.js";
+import { blake3SimdHex, blake3SimdKeyedHex } from "../build/debug.js";
 import { it } from "vitest";
 
 const buffer = new Uint8Array(102400);
@@ -197,10 +197,10 @@ describe("blake3", () => {
 	describe("BLAKE3_TESTS", () => {
 		for (const testCase of testCases) {
 			it(`should pass ${testCase.buf.length} bytes`, () => {
-				const result = blake3Hex(testCase.buf);
+				const result = blake3SimdHex(testCase.buf);
 				expect(result).toBe(testCase.expected);
 
-				const resultKeyed = blake3KeyedHex(testCase.buf, key);
+				const resultKeyed = blake3SimdKeyedHex(testCase.buf, key);
 				expect(resultKeyed).toBe(testCase.keyed);
 			});
 		}

@@ -1,5 +1,10 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import { blake3, createHasher, update, finalize } from "../build/release.js";
+import {
+	blake3Simd as blake3,
+	createSimdHasher as createHasher,
+	updateSimd as update,
+	finalizeSimd as finalize,
+} from "../build/release.js";
 
 // Generate random data of specified size
 function generateRandomData(size) {
