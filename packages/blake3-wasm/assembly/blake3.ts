@@ -16,7 +16,16 @@ const IV: StaticArray<u32> = [
 	0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,
 ];
 
-const MSG_PERMUTATION: StaticArray<i32> = [2, 6, 3, 10, 7, 0, 4, 13, 1, 11, 12, 5, 9, 14, 15, 8];
+// Message schedule for each round - this replaces the simple permutation
+const MSG_SCHEDULE: StaticArray<StaticArray<i32>> = [
+	[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+	[2, 6, 3, 10, 7, 0, 4, 13, 1, 11, 12, 5, 9, 14, 15, 8],
+	[3, 4, 10, 12, 13, 2, 7, 14, 6, 5, 9, 0, 11, 15, 8, 1],
+	[10, 7, 12, 9, 14, 3, 13, 15, 4, 0, 11, 2, 5, 8, 1, 6],
+	[12, 13, 9, 11, 15, 10, 14, 8, 7, 2, 5, 3, 0, 1, 6, 4],
+	[9, 14, 11, 5, 8, 12, 15, 1, 13, 3, 0, 10, 2, 6, 4, 7],
+	[11, 15, 5, 0, 1, 9, 8, 6, 14, 10, 2, 12, 3, 4, 7, 13],
+];
 
 // The mixing function, G, which mixes either a column or a diagonal.
 function g(state: StaticArray<u32>, a: i32, b: i32, c: i32, d: i32, mx: u32, my: u32): void {
@@ -30,81 +39,115 @@ function g(state: StaticArray<u32>, a: i32, b: i32, c: i32, d: i32, mx: u32, my:
 	state[b] = rotr(state[b] ^ state[c], 7);
 }
 
-function round(state: StaticArray<u32>, m: StaticArray<u32>): void {
+// Optimized round function using MSG_SCHEDULE
+function round(state: StaticArray<u32>, msg: StaticArray<u32>, round: i32): void {
+	// Select the message schedule based on the round.
+	const schedule = MSG_SCHEDULE[round];
+
 	// Mix the columns.
-	g(state, 0, 4, 8, 12, m[0], m[1]);
-	g(state, 1, 5, 9, 13, m[2], m[3]);
-	g(state, 2, 6, 10, 14, m[4], m[5]);
-	g(state, 3, 7, 11, 15, m[6], m[7]);
+	g(state, 0, 4, 8, 12, msg[schedule[0]], msg[schedule[1]]);
+	g(state, 1, 5, 9, 13, msg[schedule[2]], msg[schedule[3]]);
+	g(state, 2, 6, 10, 14, msg[schedule[4]], msg[schedule[5]]);
+	g(state, 3, 7, 11, 15, msg[schedule[6]], msg[schedule[7]]);
+
 	// Mix the diagonals.
-	g(state, 0, 5, 10, 15, m[8], m[9]);
-	g(state, 1, 6, 11, 12, m[10], m[11]);
-	g(state, 2, 7, 8, 13, m[12], m[13]);
-	g(state, 3, 4, 9, 14, m[14], m[15]);
+	g(state, 0, 5, 10, 15, msg[schedule[8]], msg[schedule[9]]);
+	g(state, 1, 6, 11, 12, msg[schedule[10]], msg[schedule[11]]);
+	g(state, 2, 7, 8, 13, msg[schedule[12]], msg[schedule[13]]);
+	g(state, 3, 4, 9, 14, msg[schedule[14]], msg[schedule[15]]);
 }
 
-function permute(m: StaticArray<u32>): void {
-	const permuted = new StaticArray<u32>(16);
-	for (let i = 0; i < 16; i++) {
-		permuted[i] = m[MSG_PERMUTATION[i]];
-	}
-	for (let i = 0; i < 16; i++) {
-		m[i] = permuted[i];
-	}
-}
-
-function compress(
-	chaining_value: StaticArray<u32>,
-	block_words: StaticArray<u32>,
+// Optimized compress function based on Rust portable implementation
+function compress_pre(
+	cv: StaticArray<u32>,
+	block: StaticArray<u8>,
+	block_len: u8,
 	counter: u64,
-	block_len: u32,
-	flags: u32
+	flags: u8
 ): StaticArray<u32> {
-	const counter_low = counter as u32;
-	const counter_high = (counter >> 32) as u32;
+	const block_words = words_from_le_bytes_64(block);
+
 	const state = new StaticArray<u32>(16);
+	// Initialize state more efficiently
+	state[0] = cv[0];
+	state[1] = cv[1];
+	state[2] = cv[2];
+	state[3] = cv[3];
+	state[4] = cv[4];
+	state[5] = cv[5];
+	state[6] = cv[6];
+	state[7] = cv[7];
+	state[8] = IV[0];
+	state[9] = IV[1];
+	state[10] = IV[2];
+	state[11] = IV[3];
+	state[12] = counter as u32;
+	state[13] = (counter >> 32) as u32;
+	state[14] = block_len as u32;
+	state[15] = flags as u32;
 
-	// Initialize state
-	for (let i = 0; i < 8; i++) {
-		state[i] = chaining_value[i];
-		state[i + 8] = IV[i];
-	}
-	state[12] = counter_low;
-	state[13] = counter_high;
-	state[14] = block_len;
-	state[15] = flags;
-
-	const block = new StaticArray<u32>(16);
-	for (let i = 0; i < 16; i++) {
-		block[i] = block_words[i];
-	}
-
-	// Apply rounds
-	round(state, block);
-	permute(block);
-	round(state, block);
-	permute(block);
-	round(state, block);
-	permute(block);
-	round(state, block);
-	permute(block);
-	round(state, block);
-	permute(block);
-	round(state, block);
-	permute(block);
-	round(state, block);
-
-	// Final mixing
-	for (let i = 0; i < 8; i++) {
-		state[i] ^= state[i + 8];
-		state[i + 8] ^= chaining_value[i];
-	}
+	// Apply 7 rounds using the optimized round function
+	round(state, block_words, 0);
+	round(state, block_words, 1);
+	round(state, block_words, 2);
+	round(state, block_words, 3);
+	round(state, block_words, 4);
+	round(state, block_words, 5);
+	round(state, block_words, 6);
 
 	return state;
 }
 
-function words_from_little_endian_bytes(bytes: StaticArray<u8>, words: StaticArray<u32>): void {
-	for (let i = 0; i < words.length; i++) {
+// Optimized compress function that modifies CV in place
+function compress_in_place(cv: StaticArray<u32>, block: StaticArray<u8>, block_len: u8, counter: u64, flags: u8): void {
+	const state = compress_pre(cv, block, block_len, counter, flags);
+
+	// Final mixing - XOR the halves
+	cv[0] = state[0] ^ state[8];
+	cv[1] = state[1] ^ state[9];
+	cv[2] = state[2] ^ state[10];
+	cv[3] = state[3] ^ state[11];
+	cv[4] = state[4] ^ state[12];
+	cv[5] = state[5] ^ state[13];
+	cv[6] = state[6] ^ state[14];
+	cv[7] = state[7] ^ state[15];
+}
+
+// Optimized compress function for XOF (extensible output function)
+function compress_xof(
+	cv: StaticArray<u32>,
+	block: StaticArray<u8>,
+	block_len: u8,
+	counter: u64,
+	flags: u8
+): StaticArray<u8> {
+	const mut_state = compress_pre(cv, block, block_len, counter, flags);
+
+	// XOR the halves
+	mut_state[0] ^= mut_state[8];
+	mut_state[1] ^= mut_state[9];
+	mut_state[2] ^= mut_state[10];
+	mut_state[3] ^= mut_state[11];
+	mut_state[4] ^= mut_state[12];
+	mut_state[5] ^= mut_state[13];
+	mut_state[6] ^= mut_state[14];
+	mut_state[7] ^= mut_state[15];
+	mut_state[8] ^= cv[0];
+	mut_state[9] ^= cv[1];
+	mut_state[10] ^= cv[2];
+	mut_state[11] ^= cv[3];
+	mut_state[12] ^= cv[4];
+	mut_state[13] ^= cv[5];
+	mut_state[14] ^= cv[6];
+	mut_state[15] ^= cv[7];
+
+	return le_bytes_from_words_64(mut_state);
+}
+
+// Optimized function to convert bytes to words (little-endian)
+function words_from_le_bytes_64(bytes: StaticArray<u8>): StaticArray<u32> {
+	const words = new StaticArray<u32>(16);
+	for (let i = 0; i < 16; i++) {
 		const offset = i * 4;
 		words[i] =
 			bytes[offset] |
@@ -112,6 +155,35 @@ function words_from_little_endian_bytes(bytes: StaticArray<u8>, words: StaticArr
 			((bytes[offset + 2] as u32) << 16) |
 			((bytes[offset + 3] as u32) << 24);
 	}
+	return words;
+}
+
+// Optimized function to convert words to bytes (little-endian)
+function le_bytes_from_words_64(words: StaticArray<u32>): StaticArray<u8> {
+	const bytes = new StaticArray<u8>(64);
+	for (let i = 0; i < 16; i++) {
+		const word = words[i];
+		const offset = i * 4;
+		bytes[offset] = word as u8;
+		bytes[offset + 1] = (word >> 8) as u8;
+		bytes[offset + 2] = (word >> 16) as u8;
+		bytes[offset + 3] = (word >> 24) as u8;
+	}
+	return bytes;
+}
+
+// Optimized function to convert words to bytes (32-bit, little-endian)
+function le_bytes_from_words_32(words: StaticArray<u32>): StaticArray<u8> {
+	const bytes = new StaticArray<u8>(32);
+	for (let i = 0; i < 8; i++) {
+		const word = words[i];
+		const offset = i * 4;
+		bytes[offset] = word as u8;
+		bytes[offset + 1] = (word >> 8) as u8;
+		bytes[offset + 2] = (word >> 16) as u8;
+		bytes[offset + 3] = (word >> 24) as u8;
+	}
+	return bytes;
 }
 
 class Blake3Hasher {
@@ -140,11 +212,6 @@ class Blake3Hasher {
 		}
 
 		const key_words = new StaticArray<u32>(8);
-		// const key_static = new StaticArray<u8>(32);
-		// for (let i = 0; i < 32; i++) {
-		// 	key_static[i] = key[i];
-		// }
-		// words_from_little_endian_bytes(key_static, key_words);
 		const dataView = new DataView(key.buffer);
 		for (let i = 0; i < 8; i++) {
 			key_words[i] = dataView.getUint32(i * 4, true);
@@ -245,18 +312,14 @@ class ChunkState {
 		let inputPos = 0;
 		while (inputPos < input.length) {
 			if (this.block_len == BLOCK_LEN) {
-				const block_words = new StaticArray<u32>(16);
-				words_from_little_endian_bytes(this.block, block_words);
-				const compressed = compress(
+				// Use optimized compress_in_place
+				compress_in_place(
 					this.chaining_value,
-					block_words,
+					this.block,
+					BLOCK_LEN as u8,
 					this.chunk_counter,
-					BLOCK_LEN,
-					this.flags | this.start_flag()
+					(this.flags | this.start_flag()) as u8
 				);
-				for (let i = 0; i < 8; i++) {
-					this.chaining_value[i] = compressed[i];
-				}
 				this.blocks_compressed++;
 				this.block = new StaticArray<u8>(BLOCK_LEN);
 				this.block_len = 0;
@@ -273,11 +336,9 @@ class ChunkState {
 	}
 
 	output(): Output {
-		const block_words = new StaticArray<u32>(16);
-		words_from_little_endian_bytes(this.block, block_words);
 		return new Output(
 			this.chaining_value,
-			block_words,
+			this.block,
 			this.chunk_counter,
 			this.block_len,
 			this.flags | this.start_flag() | CHUNK_END
@@ -287,60 +348,41 @@ class ChunkState {
 
 class Output {
 	input_chaining_value: StaticArray<u32>;
-	block_words: StaticArray<u32>;
+	block: StaticArray<u8>;
+	block_len: u8;
 	counter: u64;
-	block_len: u32;
 	flags: u32;
 
-	constructor(
-		input_chaining_value: StaticArray<u32>,
-		block_words: StaticArray<u32>,
-		counter: u64,
-		block_len: u32,
-		flags: u32
-	) {
+	constructor(input_chaining_value: StaticArray<u32>, block: StaticArray<u8>, counter: u64, block_len: u8, flags: u32) {
 		this.input_chaining_value = input_chaining_value;
-		this.block_words = block_words;
+		this.block = block;
 		this.counter = counter;
 		this.block_len = block_len;
 		this.flags = flags;
 	}
 
 	chaining_value(): StaticArray<u32> {
-		const compressed = compress(this.input_chaining_value, this.block_words, this.counter, this.block_len, this.flags);
-		const result = new StaticArray<u32>(8);
+		const cv_copy = new StaticArray<u32>(8);
 		for (let i = 0; i < 8; i++) {
-			result[i] = compressed[i];
+			cv_copy[i] = this.input_chaining_value[i];
 		}
-		return result;
+		compress_in_place(cv_copy, this.block, this.block_len, this.counter, this.flags as u8);
+		return cv_copy;
 	}
 
 	root_output_bytes(out: Uint8Array): void {
 		let output_block_counter: u64 = 0;
 		for (let i = 0; i < out.length; i += 2 * OUT_LEN) {
-			const words = compress(
+			const xof_output = compress_xof(
 				this.input_chaining_value,
-				this.block_words,
-				output_block_counter,
+				this.block,
 				this.block_len,
-				this.flags | ROOT
+				output_block_counter,
+				(this.flags | ROOT) as u8
 			);
 			const out_block = out.subarray(i, i + 2 * OUT_LEN);
-			for (let j = 0; j < words.length; j++) {
-				const word = words[j];
-				const offset = j * 4;
-				if (offset < out_block.length) {
-					out_block[offset] = word & 0xff;
-					if (offset + 1 < out_block.length) {
-						out_block[offset + 1] = (word >> 8) & 0xff;
-						if (offset + 2 < out_block.length) {
-							out_block[offset + 2] = (word >> 16) & 0xff;
-							if (offset + 3 < out_block.length) {
-								out_block[offset + 3] = (word >> 24) & 0xff;
-							}
-						}
-					}
-				}
+			for (let j = 0; j < out_block.length; j++) {
+				out_block[j] = xof_output[j];
 			}
 			output_block_counter++;
 		}
@@ -353,12 +395,20 @@ function parent_output(
 	key_words: StaticArray<u32>,
 	flags: u32
 ): Output {
-	const block_words = new StaticArray<u32>(16);
-	for (let i = 0; i < 8; i++) {
-		block_words[i] = left_child_cv[i];
-		block_words[i + 8] = right_child_cv[i];
+	const block = new StaticArray<u8>(BLOCK_LEN);
+	const left_bytes = le_bytes_from_words_32(left_child_cv);
+	const right_bytes = le_bytes_from_words_32(right_child_cv);
+
+	// Copy left child bytes
+	for (let i = 0; i < 32; i++) {
+		block[i] = left_bytes[i];
 	}
-	return new Output(key_words, block_words, 0, BLOCK_LEN, PARENT | flags);
+	// Copy right child bytes
+	for (let i = 0; i < 32; i++) {
+		block[32 + i] = right_bytes[i];
+	}
+
+	return new Output(key_words, block, 0, BLOCK_LEN as u8, PARENT | flags);
 }
 
 function parent_cv(
