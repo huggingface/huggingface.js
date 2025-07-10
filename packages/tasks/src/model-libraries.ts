@@ -662,6 +662,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"tokenizer-e351c8d8-checkpoint125.safetensors"`,
 	},
+	mtvcraft: {
+		prettyLabel: "MTVCraft",
+		repoName: "MTVCraft",
+		repoUrl: "https://github.com/baaivision/MTVCraft",
+		filter: false,
+		countDownloads: `path:"vae/3d-vae.pt"`,
+	},
 	nemo: {
 		prettyLabel: "NeMo",
 		repoName: "NeMo",
@@ -1092,6 +1099,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/NVlabs/Sana",
 		countDownloads: `path_extension:"pth"`,
 		snippets: snippets.sana,
+	},
+	videoprism: {
+		prettyLabel: "VideoPrism",
+		repoName: "VideoPrism",
+		repoUrl: "https://github.com/google-deepmind/videoprism",
+		countDownloads: `path_extension:"npz"`,
+		snippets: snippets.videoprism,
 	},
 	"vfi-mamba": {
 		prettyLabel: "VFIMamba",

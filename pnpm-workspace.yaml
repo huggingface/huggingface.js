@@ -14,3 +14,7 @@ packages:
   - "packages/ollama-utils"
   - "packages/mcp-client"
   - "packages/tiny-agents"
+  - "packages/gearhash-wasm"
+  - "packages/blake3-wasm"
+  - "packages/xetchunk-wasm"
+  - "packages/splitmix64-wasm"
