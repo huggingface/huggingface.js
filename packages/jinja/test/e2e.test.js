@@ -1045,7 +1045,7 @@ function format({ chat_template, target }) {
 
 describe("End-to-end tests", () => {
 	beforeEach(() => {
-		const mockDate = new Date('2025-07-10T12:00:00.000Z');
+		const mockDate = new Date("2025-07-10T12:00:00.000Z");
 		vi.setSystemTime(mockDate);
 	});
 
