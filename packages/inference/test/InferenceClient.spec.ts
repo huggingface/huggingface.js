@@ -22,7 +22,7 @@ if (!env.HF_TOKEN) {
 	console.warn("Set HF_TOKEN in the env to run the tests for better rate limits");
 }
 
-describe.skip("InferenceClient", () => {
+describe.only("InferenceClient", () => {
 	// Individual tests can be ran without providing an api key, however running all tests without an api key will result in rate limiting error.
 
 	describe("backward compatibility", () => {
@@ -2103,6 +2103,57 @@ describe.skip("InferenceClient", () => {
 				// Verify we got a meaningful response
 				expect(fullResponse).toBeTruthy();
 				expect(fullResponse).toContain("D");
+			});
+		},
+		TIMEOUT
+	);
+	describe.concurrent(
+		"Swarmind",
+		() => {
+			const client = new InferenceClient(env.HF_SWARMIND_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["swarmind"] = {
+				"TheDrummer/Tiger-Gemma-9B-v1": {
+					hfModelId: "TheDrummer/Tiger-Gemma-9B-v1",
+					providerId: "tiger-gemma-9b-v1-i1",
+					status: "live",
+					task: "conversational",
+				},
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "TheDrummer/Tiger-Gemma-9B-v1",
+					provider: "swarmind",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toContain("two");
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "TheDrummer/Tiger-Gemma-9B-v1",
+					provider: "swarmind",
+					messages: [{ role: "user", content: "Say 'this is a test'" }],
+					stream: true,
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+
+				let fullResponse = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						const content = chunk.choices[0].delta?.content;
+						if (content) {
+							fullResponse += content;
+						}
+					}
+				}
+
+				// Verify we got a meaningful response
+				expect(fullResponse).toBeTruthy();
+				expect(fullResponse.length).toBeGreaterThan(0);
 			});
 		},
 		TIMEOUT
