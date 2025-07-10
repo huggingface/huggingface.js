@@ -7,6 +7,7 @@ import * as Fireworks from "../providers/fireworks-ai.js";
 import * as Groq from "../providers/groq.js";
 import * as HFInference from "../providers/hf-inference.js";
 import * as Hyperbolic from "../providers/hyperbolic.js";
+import * as Hyperfusion from "../providers/hyperfusion.js"
 import * as Nebius from "../providers/nebius.js";
 import * as Novita from "../providers/novita.js";
 import * as Nscale from "../providers/nscale.js";
@@ -113,6 +114,9 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-to-image": new Hyperbolic.HyperbolicTextToImageTask(),
 		conversational: new Hyperbolic.HyperbolicConversationalTask(),
 		"text-generation": new Hyperbolic.HyperbolicTextGenerationTask(),
+	},
+	hyperfusion: {
+		conversational: new Hyperfusion.HyperfusionConversationalTask(),
 	},
 	nebius: {
 		"text-to-image": new Nebius.NebiusTextToImageTask(),
