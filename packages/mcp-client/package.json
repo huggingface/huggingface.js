@@ -1,7 +1,7 @@
 {
 	"name": "@huggingface/mcp-client",
 	"packageManager": "pnpm@10.10.0",
-	"version": "0.2.0",
+	"version": "0.2.2",
 	"description": "Client for the Model Context Protocol",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {

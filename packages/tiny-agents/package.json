@@ -1,7 +1,7 @@
 {
 	"name": "@huggingface/tiny-agents",
 	"packageManager": "pnpm@10.10.0",
-	"version": "0.2.3",
+	"version": "0.3.1",
 	"description": "Lightweight, composable agents for AI applications",
 	"repository": "https://github.com/huggingface/huggingface.js.git",
 	"publishConfig": {
