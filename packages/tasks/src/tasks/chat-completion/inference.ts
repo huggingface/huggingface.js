@@ -132,7 +132,7 @@ export interface ChatCompletionInputToolCall {
 export interface ChatCompletionInputFunctionDefinition {
 	description?: string;
 	name: string;
-	parameters: unknown;
+	parameters?: unknown;
 	[property: string]: unknown;
 }
 export interface ChatCompletionInputGrammarType {
