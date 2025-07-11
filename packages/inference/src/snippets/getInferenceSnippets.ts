@@ -167,7 +167,9 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		const accessTokenOrPlaceholder = opts?.accessToken ?? placeholder;
 
 		/// Prepare inputs + make request
-		const inputs = inputPreparationFn ? inputPreparationFn(model, opts) : { inputs: getModelInputSnippet(model) };
+		const inputs = inputPreparationFn
+			? inputPreparationFn(model, opts)
+			: { inputs: opts?.inputs ?? getModelInputSnippet(model) };
 		const request = makeRequestOptionsFromResolvedModel(
 			providerModelId,
 			providerHelper,
