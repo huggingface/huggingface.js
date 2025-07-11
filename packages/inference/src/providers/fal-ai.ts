@@ -16,12 +16,12 @@
  */
 import { base64FromBytes } from "../utils/base64FromBytes.js";
 
-import type { AutomaticSpeechRecognitionOutput } from "@huggingface/tasks";
+import type { AutomaticSpeechRecognitionOutput, ImageSegmentationOutput } from "@huggingface/tasks";
 import { isUrl } from "../lib/isUrl.js";
 import type { BodyParams, HeaderParams, InferenceTask, ModelId, RequestArgs, UrlParams } from "../types.js";
 import { delay } from "../utils/delay.js";
 import { omit } from "../utils/omit.js";
-import type { ImageToImageTaskHelper } from "./providerHelper.js";
+import type { ImageSegmentationTaskHelper, ImageToImageTaskHelper } from "./providerHelper.js";
 import {
 	type AutomaticSpeechRecognitionTaskHelper,
 	TaskProviderHelper,
@@ -36,6 +36,7 @@ import {
 	InferenceClientProviderOutputError,
 } from "../errors.js";
 import type { ImageToImageArgs } from "../tasks/index.js";
+import type { ImageSegmentationArgs } from "../tasks/cv/imageSegmentation.js";
 
 export interface FalAiQueueOutput {
 	request_id: string;
@@ -404,5 +405,89 @@ export class FalAITextToSpeechTask extends FalAITask {
 				}
 			);
 		}
+	}
+}
+export class FalAIImageSegmentationTask extends FalAiQueueTask implements ImageSegmentationTaskHelper {
+	task: InferenceTask;
+	constructor() {
+		super("https://queue.fal.run");
+		this.task = "image-segmentation";
+	}
+
+	override makeRoute(params: UrlParams): string {
+		if (params.authMethod !== "provider-key") {
+			return `/${params.model}?_subdomain=queue`;
+		}
+		return `/${params.model}`;
+	}
+
+	override preparePayload(params: BodyParams): Record<string, unknown> {
+		return {
+			...omit(params.args, ["inputs", "parameters"]),
+			...(params.args.parameters as Record<string, unknown>),
+			sync_mode: true,
+		};
+	}
+
+	async preparePayloadAsync(args: ImageSegmentationArgs): Promise<RequestArgs> {
+		const blob = "data" in args && args.data instanceof Blob ? args.data : "inputs" in args ? args.inputs : undefined;
+		const mimeType = blob instanceof Blob ? blob.type : "image/png";
+		const base64Image = base64FromBytes(
+			new Uint8Array(blob instanceof ArrayBuffer ? blob : await (blob as Blob).arrayBuffer())
+		);
+		return {
+			...omit(args, ["inputs", "parameters", "data"]),
+			...args.parameters,
+			...args,
+			image_url: `data:${mimeType};base64,${base64Image}`,
+			sync_mode: true,
+		};
+	}
+
+	override async getResponse(
+		response: FalAiQueueOutput,
+		url?: string,
+		headers?: Record<string, string>
+	): Promise<ImageSegmentationOutput> {
+		const result = await this.getResponseFromQueueApi(response, url, headers);
+		if (
+			typeof result === "object" &&
+			result !== null &&
+			"image" in result &&
+			typeof result.image === "object" &&
+			result.image !== null &&
+			"url" in result.image &&
+			typeof result.image.url === "string"
+		) {
+			const maskResponse = await fetch(result.image.url);
+			if (!maskResponse.ok) {
+				throw new InferenceClientProviderApiError(
+					`Failed to fetch segmentation mask from ${result.image.url}`,
+					{ url: result.image.url, method: "GET" },
+					{
+						requestId: maskResponse.headers.get("x-request-id") ?? "",
+						status: maskResponse.status,
+						body: await maskResponse.text(),
+					}
+				);
+			}
+			const maskBlob = await maskResponse.blob();
+			const maskArrayBuffer = await maskBlob.arrayBuffer();
+			const maskBase64 = base64FromBytes(new Uint8Array(maskArrayBuffer));
+
+			return [
+				{
+					label: "mask", // placeholder label, as Fal does not provide labels in the response(?)
+					score: 1.0, // placeholder score, as Fal does not provide scores in the response(?)
+					mask: maskBase64,
+				},
+			];
+		}
+
+		throw new InferenceClientProviderOutputError(
+			`Received malformed response from Fal.ai image-segmentation API: expected { image: { url: string } } format, got instead: ${JSON.stringify(
+				response
+			)}`
+		);
 	}
 }
