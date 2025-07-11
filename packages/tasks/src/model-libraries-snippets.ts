@@ -1381,13 +1381,13 @@ export const transformers = (model: ModelData): string[] => {
 				: info.processor === "AutoFeatureExtractor"
 				  ? "extractor"
 				  : "processor";
-		autoSnippet.push([
+		autoSnippet.push(
 			"# Load model directly",
 			`from transformers import ${info.processor}, ${info.auto_model}`,
 			"",
 			`${processorVarName} = ${info.processor}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
 			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
-		]);
+		);
 		if (model.tags.includes("conversational")) {
 			if (model.tags.includes("image-text-to-text")) {
 				autoSnippet.push(
@@ -1416,15 +1416,15 @@ export const transformers = (model: ModelData): string[] => {
 				").to(model.device)",
 				"",
 				"outputs = model.generate(**inputs, max_new_tokens=40)",
-				'print(${processorVarName}.decode(outputs[0][inputs["input_ids"].shape[-1]:]))',
+				'print(${processorVarName}.decode(outputs[0][inputs["input_ids"].shape[-1]:]))'
 			);
 		}
 	} else {
-		autoSnippet.push([
+		autoSnippet.push(
 			"# Load model directly",
 			`from transformers import ${info.auto_model}`,
-			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', torch_dtype="auto"),',
-		]);
+			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', torch_dtype="auto"),'
+		);
 	}
 
 	if (model.pipeline_tag && LIBRARY_TASK_MAPPING.transformers?.includes(model.pipeline_tag)) {
