@@ -1,8 +1,7 @@
 import { it, describe, expect } from "vitest";
 
-import { TEST_HUB_URL, TEST_ACCESS_TOKEN } from "../test/consts";
+import { TEST_HUB_URL, TEST_ACCESS_TOKEN, TEST_USER } from "../test/consts";
 import { createCollection } from "./create-collection";
-import { whoAmI } from "./who-am-i";
 import { deleteCollection } from "./delete-collection";
 
 describe("createCollection", () => {
@@ -10,15 +9,10 @@ describe("createCollection", () => {
 		let slug: string = "";
 
 		try {
-			const user = await whoAmI({
-				hubUrl: TEST_HUB_URL,
-				accessToken: TEST_ACCESS_TOKEN,
-			});
-
 			const result = await createCollection({
 				collection: {
 					title: "Test Collection",
-					namespace: user.name,
+					namespace: TEST_USER,
 					description: "This is a test collection",
 					private: false,
 				},
@@ -26,7 +20,7 @@ describe("createCollection", () => {
 				hubUrl: TEST_HUB_URL,
 			});
 
-			expect(result.slug.startsWith(`${user.name}/test-collection`)).toBe(true);
+			expect(result.slug.startsWith(`${TEST_USER}/test-collection`)).toBe(true);
 
 			slug = result.slug;
 		} finally {
