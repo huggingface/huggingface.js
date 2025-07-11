@@ -294,9 +294,9 @@ const prepareDocumentQuestionAnsweringInput = (model: ModelDataMinimal): object 
 	return JSON.parse(getModelInputSnippet(model) as string);
 };
 
-const prepareImageToImageInput = (model: ModelDataMinimal): object => {
+const prepareImageToImageInput = (model: ModelDataMinimal, opts?: { image?: string; prompt?: string }): object => {
 	const data = JSON.parse(getModelInputSnippet(model) as string);
-	return { inputs: data.image, parameters: { prompt: data.prompt } };
+	return { inputs: opts?.image ?? data.image, parameters: { prompt: opts?.prompt ?? data.prompt } };
 };
 
 const prepareConversationalInput = (
@@ -317,14 +317,20 @@ const prepareConversationalInput = (
 	};
 };
 
-const prepareQuestionAnsweringInput = (model: ModelDataMinimal): object => {
+const prepareQuestionAnsweringInput = (
+	model: ModelDataMinimal,
+	opts?: { question?: string; context?: string }
+): object => {
 	const data = JSON.parse(getModelInputSnippet(model) as string);
-	return { question: data.question, context: data.context };
+	return { question: opts?.question ?? data.question, context: opts?.context ?? data.context };
 };
 
-const prepareTableQuestionAnsweringInput = (model: ModelDataMinimal): object => {
+const prepareTableQuestionAnsweringInput = (
+	model: ModelDataMinimal,
+	opts?: { query?: string; table?: string }
+): object => {
 	const data = JSON.parse(getModelInputSnippet(model) as string);
-	return { query: data.query, table: JSON.stringify(data.table) };
+	return { query: opts?.query ?? data.query, table: opts?.table ?? JSON.stringify(data.table) };
 };
 
 const snippets: Partial<
