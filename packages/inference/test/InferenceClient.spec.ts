@@ -743,7 +743,7 @@ describe.skip("InferenceClient", () => {
 			it("imageSegmentation", async () => {
 				expect(
 					await hf.imageSegmentation({
-						data: new Blob([readTestFile("cats.png")], { type: "image/png" }),
+						inputs: new Blob([readTestFile("cats.png")], { type: "image/png" }),
 						model: "facebook/detr-resnet-50-panoptic",
 					})
 				).toEqual(

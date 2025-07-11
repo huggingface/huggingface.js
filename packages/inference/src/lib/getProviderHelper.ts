@@ -67,6 +67,7 @@ export const PROVIDERS: Record<InferenceProvider, Partial<Record<InferenceTask, 
 		"text-to-video": new FalAI.FalAITextToVideoTask(),
 		"image-to-image": new FalAI.FalAIImageToImageTask(),
 		"automatic-speech-recognition": new FalAI.FalAIAutomaticSpeechRecognitionTask(),
+		"image-segmentation": new FalAI.FalAIImageSegmentationTask(),
 	},
 	"featherless-ai": {
 		conversational: new FeatherlessAI.FeatherlessAIConversationalTask(),
