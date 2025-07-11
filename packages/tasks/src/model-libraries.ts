@@ -569,7 +569,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "magenta-realtime",
 		repoName: "Magenta RT",
 		repoUrl: "https://github.com/magenta/magenta-realtime",
-		countDownloads: `path:"checkpoints/llm_base_x4286_c1860k.tar" OR path:"checkpoints/llm_large_x3047_c1860k.tar" OR path:"checkpoints/llm_large_x3047_c1860k/state.param_states.decoder.decoder.depth_decoder.depth_layers_0.pre_mlp_layer_norm.scale.v/0"`,
+		countDownloads: `path:"checkpoints/llm_base_x4286_c1860k.tar" OR path:"checkpoints/llm_large_x3047_c1860k.tar" OR path:"checkpoints/llm_large_x3047_c1860k/checkpoint"`,
 	},
 	"mamba-ssm": {
 		prettyLabel: "MambaSSM",
