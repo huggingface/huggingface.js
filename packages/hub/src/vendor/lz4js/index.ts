@@ -519,7 +519,7 @@ export function decompress(src: Uint8Array, maxSize: number) {
 // Compresses a buffer to an Lz4 frame. maxSize is optional; if not provided,
 // a buffer will be created based on the theoretical worst output size for a
 // given input size. The buffer returned will always be perfectly-sized.
-export function compress(src: Uint8Array, maxSize: number) {
+export function compress(src: Uint8Array, maxSize?: number) {
 	let dst, size;
 
 	if (maxSize === undefined) {

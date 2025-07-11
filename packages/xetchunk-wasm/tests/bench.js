@@ -8,36 +8,38 @@ const { positionals } = parseArgs({
 	allowPositionals: true,
 });
 
-if (!positionals[0]) {
-	console.error("Usage: node tests/bench.js <filePathToChunk>");
-	process.exit(1);
-}
-
 const BYTES = 100_000_000;
 const CHUNK_SIZE = 10_000_000;
-
-console.log(`loading first ${BYTES.toLocaleString("en-US")} bytes of data in memory`);
 const data = new Uint8Array(BYTES);
 
-const stream = createReadStream(positionals[0]);
-let totalRead = 0;
-
-for await (const chunk of stream) {
-	data.set(chunk.slice(0, data.length - totalRead), totalRead);
-	totalRead += chunk.length;
-
-	if (totalRead >= data.length) {
-		stream.close();
-		break;
+if (!positionals[0]) {
+	// Fill the data with random bytes
+	for (let i = 0; i < data.length; i++) {
+		data[i] = Math.floor(Math.random() * 256);
 	}
-}
+} else {
+	console.log(`loading first ${BYTES.toLocaleString("en-US")} bytes of data in memory`);
 
-if (totalRead < data.length) {
-	console.log("not enough data, repeating in memory");
+	const stream = createReadStream(positionals[0]);
+	let totalRead = 0;
 
-	while (totalRead < data.length) {
-		data.set(data.slice(0, BYTES), totalRead);
-		totalRead += BYTES;
+	for await (const chunk of stream) {
+		data.set(chunk.slice(0, data.length - totalRead), totalRead);
+		totalRead += chunk.length;
+
+		if (totalRead >= data.length) {
+			stream.close();
+			break;
+		}
+	}
+
+	if (totalRead < data.length) {
+		console.log("not enough data, repeating in memory");
+
+		while (totalRead < data.length) {
+			data.set(data.slice(0, BYTES), totalRead);
+			totalRead += BYTES;
+		}
 	}
 }
 
@@ -48,6 +50,8 @@ console.log(
 );
 
 function testAssemblyChunker() {
+	console.log("testing assembly Chunker");
+
 	const start = performance.now();
 	const chunker = createChunker(64 * 1024);
 
@@ -87,9 +91,8 @@ function testAssemblyChunker() {
 
 testAssemblyChunker();
 
-console.log("testing rust Chunker");
-
 function testRustChunker() {
+	console.log("testing rust Chunker");
 	const start = performance.now();
 	const chunker = new Chunker(64 * 1024);
 
@@ -100,7 +103,7 @@ function testRustChunker() {
 	let chunks = [];
 	for (let i = 0; i < data.length; i += CHUNK_SIZE) {
 		chunks = chunker.add_data(data.subarray(i, i + CHUNK_SIZE));
-		console.log("chunks", chunks.length);
+		// console.log("chunks", chunks.length, chunks.slice(0, 10));
 		totalProcessed += CHUNK_SIZE;
 		totalChunks += chunks.length;
 
@@ -129,7 +132,5 @@ function testRustChunker() {
 }
 
 testRustChunker();
-
-console.log("testing assembly Chunker again");
 
 testAssemblyChunker();

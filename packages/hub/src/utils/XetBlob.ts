@@ -56,26 +56,26 @@ export interface ReconstructionInfo {
 	offset_into_first_range: number;
 }
 
-enum CompressionScheme {
+export enum XetChunkCompressionScheme {
 	None = 0,
 	LZ4 = 1,
 	ByteGroupingLZ4 = 2,
 }
 
-const compressionSchemeLabels: Record<CompressionScheme, string> = {
-	[CompressionScheme.None]: "None",
-	[CompressionScheme.LZ4]: "LZ4",
-	[CompressionScheme.ByteGroupingLZ4]: "ByteGroupingLZ4",
+const compressionSchemeLabels: Record<XetChunkCompressionScheme, string> = {
+	[XetChunkCompressionScheme.None]: "None",
+	[XetChunkCompressionScheme.LZ4]: "LZ4",
+	[XetChunkCompressionScheme.ByteGroupingLZ4]: "ByteGroupingLZ4",
 };
 
 interface ChunkHeader {
 	version: number; // u8, 1 byte
 	compressed_length: number; // 3 * u8, 3 bytes
-	compression_scheme: CompressionScheme; // u8, 1 byte
+	compression_scheme: XetChunkCompressionScheme; // u8, 1 byte
 	uncompressed_length: number; // 3 * u8, 3 bytes
 }
 
-const CHUNK_HEADER_BYTES = 8;
+export const XET_CHUNK_HEADER_BYTES = 8;
 
 /**
  * XetBlob is a blob implementation that fetches data directly from the Xet storage
@@ -338,7 +338,7 @@ export class XetBlob extends Blob {
 							continue fetchData;
 						}
 
-						const header = new DataView(result.value.buffer, result.value.byteOffset, CHUNK_HEADER_BYTES);
+						const header = new DataView(result.value.buffer, result.value.byteOffset, XET_CHUNK_HEADER_BYTES);
 						const chunkHeader: ChunkHeader = {
 							version: header.getUint8(0),
 							compressed_length: header.getUint8(1) | (header.getUint8(2) << 8) | (header.getUint8(3) << 16),
@@ -353,9 +353,9 @@ export class XetBlob extends Blob {
 						}
 
 						if (
-							chunkHeader.compression_scheme !== CompressionScheme.None &&
-							chunkHeader.compression_scheme !== CompressionScheme.LZ4 &&
-							chunkHeader.compression_scheme !== CompressionScheme.ByteGroupingLZ4
+							chunkHeader.compression_scheme !== XetChunkCompressionScheme.None &&
+							chunkHeader.compression_scheme !== XetChunkCompressionScheme.LZ4 &&
+							chunkHeader.compression_scheme !== XetChunkCompressionScheme.ByteGroupingLZ4
 						) {
 							throw new Error(
 								`Unsupported compression scheme ${
@@ -364,18 +364,18 @@ export class XetBlob extends Blob {
 							);
 						}
 
-						if (result.value.byteLength < chunkHeader.compressed_length + CHUNK_HEADER_BYTES) {
+						if (result.value.byteLength < chunkHeader.compressed_length + XET_CHUNK_HEADER_BYTES) {
 							// We need more data to read the full chunk
 							leftoverBytes = result.value;
 							continue fetchData;
 						}
 
-						result.value = result.value.slice(CHUNK_HEADER_BYTES);
+						result.value = result.value.slice(XET_CHUNK_HEADER_BYTES);
 
 						let uncompressed =
-							chunkHeader.compression_scheme === CompressionScheme.LZ4
+							chunkHeader.compression_scheme === XetChunkCompressionScheme.LZ4
 								? lz4_decompress(result.value.slice(0, chunkHeader.compressed_length), chunkHeader.uncompressed_length)
-								: chunkHeader.compression_scheme === CompressionScheme.ByteGroupingLZ4
+								: chunkHeader.compression_scheme === XetChunkCompressionScheme.ByteGroupingLZ4
 								  ? bg4_regoup_bytes(
 											lz4_decompress(
 												result.value.slice(0, chunkHeader.compressed_length),
