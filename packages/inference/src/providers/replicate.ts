@@ -88,8 +88,8 @@ export class ReplicateTextToImageTask extends ReplicateTask implements TextToIma
 		res: ReplicateOutput | Blob,
 		url?: string,
 		headers?: Record<string, string>,
-		outputType?: "url" | "blob"
-	): Promise<string | Blob> {
+		outputType?: "url" | "blob" | "json"
+	): Promise<string | Blob | Record<string, unknown>> {
 		void url;
 		void headers;
 		if (
@@ -99,6 +99,9 @@ export class ReplicateTextToImageTask extends ReplicateTask implements TextToIma
 			res.output.length > 0 &&
 			typeof res.output[0] === "string"
 		) {
+			if (outputType === "json") {
+				return { ...res };
+			}
 			if (outputType === "url") {
 				return res.output[0];
 			}

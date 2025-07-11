@@ -137,8 +137,8 @@ export interface TextToImageTaskHelper {
 		response: unknown,
 		url?: string,
 		headers?: HeadersInit,
-		outputType?: "url" | "blob"
-	): Promise<string | Blob>;
+		outputType?: "url" | "blob" | "json"
+	): Promise<string | Blob | Record<string, unknown>>;
 	preparePayload(params: BodyParams<TextToImageInput & BaseArgs>): Record<string, unknown>;
 }
 

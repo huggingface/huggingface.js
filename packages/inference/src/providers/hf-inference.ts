@@ -127,14 +127,17 @@ export class HFInferenceTextToImageTask extends HFInferenceTask implements TextT
 		response: Base64ImageGeneration | OutputUrlImageGeneration,
 		url?: string,
 		headers?: HeadersInit,
-		outputType?: "url" | "blob"
-	): Promise<string | Blob> {
+		outputType?: "url" | "blob" | "json"
+	): Promise<string | Blob | Record<string, unknown>> {
 		if (!response) {
 			throw new InferenceClientProviderOutputError(
 				"Received malformed response from HF-Inference text-to-image API: response is undefined"
 			);
 		}
 		if (typeof response == "object") {
+			if (outputType === "json") {
+				return { ...response };
+			}
 			if ("data" in response && Array.isArray(response.data) && response.data[0].b64_json) {
 				const base64Data = response.data[0].b64_json;
 				if (outputType === "url") {
@@ -153,9 +156,9 @@ export class HFInferenceTextToImageTask extends HFInferenceTask implements TextT
 			}
 		}
 		if (response instanceof Blob) {
-			if (outputType === "url") {
+			if (outputType === "url" || outputType === "json") {
 				const b64 = await response.arrayBuffer().then((buf) => Buffer.from(buf).toString("base64"));
-				return `data:image/jpeg;base64,${b64}`;
+				return outputType === "url" ? `data:image/jpeg;base64,${b64}` : { output: `data:image/jpeg;base64,${b64}` };
 			}
 			return response;
 		}

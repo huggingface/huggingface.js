@@ -105,8 +105,8 @@ export class HyperbolicTextToImageTask extends TaskProviderHelper implements Tex
 		response: HyperbolicTextToImageOutput,
 		url?: string,
 		headers?: HeadersInit,
-		outputType?: "url" | "blob"
-	): Promise<string | Blob> {
+		outputType?: "url" | "blob" | "json"
+	): Promise<string | Blob | Record<string, unknown>> {
 		if (
 			typeof response === "object" &&
 			"images" in response &&
@@ -114,6 +114,9 @@ export class HyperbolicTextToImageTask extends TaskProviderHelper implements Tex
 			response.images[0] &&
 			typeof response.images[0].image === "string"
 		) {
+			if (outputType === "json") {
+				return { ...response };
+			}
 			if (outputType === "url") {
 				return `data:image/jpeg;base64,${response.images[0].image}`;
 			}

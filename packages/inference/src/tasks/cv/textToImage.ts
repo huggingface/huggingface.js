@@ -8,7 +8,7 @@ import { innerRequest } from "../../utils/request.js";
 export type TextToImageArgs = BaseArgs & TextToImageInput;
 
 interface TextToImageOptions extends Options {
-	outputType?: "url" | "blob";
+	outputType?: "url" | "blob" | "json";
 }
 
 /**
@@ -23,7 +23,14 @@ export async function textToImage(
 	args: TextToImageArgs,
 	options?: TextToImageOptions & { outputType?: undefined | "blob" }
 ): Promise<Blob>;
-export async function textToImage(args: TextToImageArgs, options?: TextToImageOptions): Promise<Blob | string> {
+export async function textToImage(
+	args: TextToImageArgs,
+	options?: TextToImageOptions & { outputType?: undefined | "json" }
+): Promise<Record<string, unknown>>;
+export async function textToImage(
+	args: TextToImageArgs,
+	options?: TextToImageOptions
+): Promise<Blob | string | Record<string, unknown>> {
 	const provider = await resolveProvider(args.provider, args.model, args.endpointUrl);
 	const providerHelper = getProviderHelper(provider, "text-to-image");
 	const { data: res } = await innerRequest<Record<string, unknown>>(args, providerHelper, {
