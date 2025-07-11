@@ -565,6 +565,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/SandAI-org/MAGI-1",
 		countDownloads: `path:"ckpt/vae/config.json"`,
 	},
+	"magenta-": {
+		prettyLabel: "magenta_rt",
+		repoName: "Magena RT",
+		repoUrl: "https://github.com/magenta/magenta-realtime",
+		countDownloads: `path:"checkpoints/llm_base_x4286_c1860k.tar" OR path:"checkpoints/llm_large_x3047_c1860k.tar"`,
+	},
 	"mamba-ssm": {
 		prettyLabel: "MambaSSM",
 		repoName: "MambaSSM",
