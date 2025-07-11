@@ -1386,7 +1386,7 @@ export const transformers = (model: ModelData): string[] => {
 			`from transformers import ${info.processor}, ${info.auto_model}`,
 			"",
 			`${processorVarName} = ${info.processor}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
-			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
+			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ")"
 		);
 		if (model.tags.includes("conversational")) {
 			if (model.tags.includes("image-text-to-text")) {
