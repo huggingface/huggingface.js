@@ -76,7 +76,7 @@ import { base64FromBytes } from "../utils/base64FromBytes.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
 import { omit } from "../utils/omit.js";
-import { ImageSegmentationArgs } from "../tasks/cv/imageSegmentation.js";
+import type { ImageSegmentationArgs } from "../tasks/cv/imageSegmentation.js";
 interface Base64ImageGeneration {
 	data: Array<{
 		b64_json: string;
