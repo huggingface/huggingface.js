@@ -61,6 +61,7 @@ export const INFERENCE_PROVIDERS = [
 	"ovhcloud",
 	"replicate",
 	"sambanova",
+	"swarmind",
 	"together",
 ] as const;
 
