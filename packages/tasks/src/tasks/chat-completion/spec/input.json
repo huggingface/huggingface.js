@@ -275,7 +275,7 @@
 		},
 		"ChatCompletionInputFunctionDefinition": {
 			"type": "object",
-			"required": ["name"],
+			"required": ["name", "parameters"],
 			"properties": {
 				"parameters": {},
 				"description": {
@@ -291,75 +291,61 @@
 		"ChatCompletionInputGrammarType": {
 			"oneOf": [
 				{
-					"$ref": "#/$defs/ChatCompletionInputResponseFormatText"
+					"type": "object",
+					"required": ["type", "value"],
+					"properties": {
+						"type": {
+							"type": "string",
+							"enum": ["json"]
+						},
+						"value": {
+							"description": "A string that represents a [JSON Schema](https://json-schema.org/).\n\nJSON Schema is a declarative language that allows to annotate JSON documents\nwith types and descriptions."
+						}
+					}
 				},
 				{
-					"$ref": "#/$defs/ChatCompletionInputResponseFormatJSONSchema"
+					"type": "object",
+					"required": ["type", "value"],
+					"properties": {
+						"type": {
+							"type": "string",
+							"enum": ["regex"]
+						},
+						"value": {
+							"type": "string"
+						}
+					}
 				},
 				{
-					"$ref": "#/$defs/ChatCompletionInputResponseFormatJSONObject"
+					"type": "object",
+					"required": ["type", "value"],
+					"properties": {
+						"type": {
+							"type": "string",
+							"enum": ["json_schema"]
+						},
+						"value": {
+							"$ref": "#/$defs/ChatCompletionInputJsonSchemaConfig"
+						}
+					}
 				}
 			],
+			"discriminator": {
+				"propertyName": "type"
+			},
 			"title": "ChatCompletionInputGrammarType"
-		},
-		"ChatCompletionInputResponseFormatText": {
-			"type": "object",
-			"required": ["type"],
-			"properties": {
-				"type": {
-					"type": "string",
-					"enum": ["text"]
-				}
-			},
-			"title": "ChatCompletionInputResponseFormatText"
-		},
-		"ChatCompletionInputResponseFormatJSONSchema": {
-			"type": "object",
-			"required": ["type", "json_schema"],
-			"properties": {
-				"type": {
-					"type": "string",
-					"enum": ["json_schema"]
-				},
-				"json_schema": {
-					"$ref": "#/$defs/ChatCompletionInputJsonSchemaConfig"
-				}
-			},
-			"title": "ChatCompletionInputResponseFormatJSONSchema"
-		},
-		"ChatCompletionInputResponseFormatJSONObject": {
-			"type": "object",
-			"required": ["type"],
-			"properties": {
-				"type": {
-					"type": "string",
-					"enum": ["json_object"]
-				}
-			},
-			"title": "ChatCompletionInputResponseFormatJSONObject"
 		},
 		"ChatCompletionInputJsonSchemaConfig": {
 			"type": "object",
-			"required": ["name"],
+			"required": ["schema"],
 			"properties": {
 				"name": {
 					"type": "string",
-					"description": "The name of the response format."
-				},
-				"description": {
-					"type": "string",
-					"description": "A description of what the response format is for, used by the model to determine how to respond in the format.",
+					"description": "Optional name identifier for the schema",
 					"nullable": true
 				},
 				"schema": {
-					"type": "object",
-					"description": "The schema for the response format, described as a JSON Schema object. Learn how to build JSON schemas [here](https://json-schema.org/).",
-					"nullable": true
-				},
-				"strict": {
-					"type": "boolean",
-					"description": "Whether to enable strict schema adherence when generating the output. If set to true, the model will always follow the exact schema defined in the `schema` field.",
-					"nullable": true
+					"description": "The actual JSON schema definition"
 				}
 			},
 			"title": "ChatCompletionInputJsonSchemaConfig"
