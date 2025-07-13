@@ -6,9 +6,12 @@ client = InferenceClient(
     api_key=os.environ["HF_TOKEN"],
 )
 
+with open("cat.png", "rb") as image_file:
+   input_image = image_file.read()
+
 # output is a PIL.Image object
 image = client.image_to_image(
-    "cat.png",
+    input_image,
     prompt="Turn the cat into a tiger.",
-    model="stabilityai/stable-diffusion-xl-refiner-1.0",
+    model="black-forest-labs/FLUX.1-Kontext-dev",
 )

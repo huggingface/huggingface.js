@@ -19,10 +19,24 @@ import type { BodyParams } from "../types.js";
 import type { FeatureExtractionTaskHelper } from "./providerHelper.js";
 import { BaseConversationalTask, TaskProviderHelper } from "./providerHelper.js";
 import { InferenceClientProviderOutputError } from "../errors.js";
+import type { ChatCompletionInput } from "../../../tasks/dist/commonjs/index.js";
 
 export class SambanovaConversationalTask extends BaseConversationalTask {
 	constructor() {
 		super("sambanova", "https://api.sambanova.ai");
+	}
+
+	override preparePayload(params: BodyParams<ChatCompletionInput>): Record<string, unknown> {
+		const responseFormat = params.args.response_format;
+
+		if (responseFormat?.type === "json_schema" && responseFormat.json_schema) {
+			if (responseFormat.json_schema.strict ?? true) {
+				responseFormat.json_schema.strict = false;
+			}
+		}
+		const payload = super.preparePayload(params) as Record<string, unknown>;
+
+		return payload;
 	}
 }
 

@@ -297,6 +297,10 @@ const snippetMlxLm = (model: ModelData): LocalAppSnippet[] => {
 	];
 };
 
+const snippetDockerModelRunner = (model: ModelData, filepath?: string): string => {
+	return `docker model run hf.co/${model.id}${getQuantTag(filepath)}`;
+};
+
 /**
  * Add your new local app here.
  *
@@ -466,6 +470,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetOllama,
+	},
+	"docker-model-runner": {
+		prettyLabel: "Docker Model Runner",
+		docsUrl: "https://docs.docker.com/ai/model-runner/",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		snippet: snippetDockerModelRunner,
 	},
 } satisfies Record<string, LocalApp>;
 

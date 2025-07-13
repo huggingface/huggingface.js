@@ -22,6 +22,7 @@ import type {
 	ImageToTextOutput,
 	ObjectDetectionOutput,
 	QuestionAnsweringOutput,
+	QuestionAnsweringOutputElement,
 	SentenceSimilarityOutput,
 	SummarizationOutput,
 	TableQuestionAnsweringOutput,
@@ -31,6 +32,7 @@ import type {
 	TranslationOutput,
 	VisualQuestionAnsweringOutput,
 	ZeroShotClassificationOutput,
+	ZeroShotClassificationOutputElement,
 	ZeroShotImageClassificationOutput,
 } from "@huggingface/tasks";
 import { HF_ROUTER_URL } from "../config.js";
@@ -74,6 +76,7 @@ import { base64FromBytes } from "../utils/base64FromBytes.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
 import { omit } from "../utils/omit.js";
+import type { ImageSegmentationArgs } from "../tasks/cv/imageSegmentation.js";
 interface Base64ImageGeneration {
 	data: Array<{
 		b64_json: string;
@@ -343,6 +346,15 @@ export class HFInferenceImageSegmentationTask extends HFInferenceTask implements
 			"Received malformed response from HF-Inference image-segmentation API: expected Array<{label: string, mask: string, score: number}>"
 		);
 	}
+
+	async preparePayloadAsync(args: ImageSegmentationArgs): Promise<RequestArgs> {
+		return {
+			...args,
+			inputs: base64FromBytes(
+				new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await (args.inputs as Blob).arrayBuffer())
+			),
+		};
+	}
 }
 
 export class HFInferenceImageToTextTask extends HFInferenceTask implements ImageToTextTaskHelper {
@@ -435,7 +447,7 @@ export class HFInferenceTextClassificationTask extends HFInferenceTask implement
 export class HFInferenceQuestionAnsweringTask extends HFInferenceTask implements QuestionAnsweringTaskHelper {
 	override async getResponse(
 		response: QuestionAnsweringOutput | QuestionAnsweringOutput[number]
-	): Promise<QuestionAnsweringOutput[number]> {
+	): Promise<QuestionAnsweringOutputElement> {
 		if (
 			Array.isArray(response)
 				? response.every(
@@ -483,22 +495,42 @@ export class HFInferenceFillMaskTask extends HFInferenceTask implements FillMask
 }
 
 export class HFInferenceZeroShotClassificationTask extends HFInferenceTask implements ZeroShotClassificationTaskHelper {
-	override async getResponse(response: ZeroShotClassificationOutput): Promise<ZeroShotClassificationOutput> {
+	override async getResponse(response: unknown): Promise<ZeroShotClassificationOutput> {
+		/// Handle Legacy response format from Inference API
 		if (
-			Array.isArray(response) &&
-			response.every(
-				(x) =>
-					Array.isArray(x.labels) &&
-					x.labels.every((_label) => typeof _label === "string") &&
-					Array.isArray(x.scores) &&
-					x.scores.every((_score) => typeof _score === "number") &&
-					typeof x.sequence === "string"
-			)
+			typeof response === "object" &&
+			response !== null &&
+			"labels" in response &&
+			"scores" in response &&
+			Array.isArray(response.labels) &&
+			Array.isArray(response.scores) &&
+			response.labels.length === response.scores.length &&
+			response.labels.every((label: unknown): label is string => typeof label === "string") &&
+			response.scores.every((score: unknown): score is number => typeof score === "number")
 		) {
+			const scores = response.scores;
+			return response.labels.map((label: string, index: number) => ({
+				label,
+				score: scores[index],
+			}));
+		}
+
+		if (Array.isArray(response) && response.every(HFInferenceZeroShotClassificationTask.validateOutputElement)) {
 			return response;
 		}
 		throw new InferenceClientProviderOutputError(
-			"Received malformed response from HF-Inference zero-shot-classification API: expected Array<{labels: string[], scores: number[], sequence: string}>"
+			"Received malformed response from HF-Inference zero-shot-classification API: expected Array<{label: string, score: number}>"
+		);
+	}
+
+	private static validateOutputElement(elem: unknown): elem is ZeroShotClassificationOutputElement {
+		return (
+			typeof elem === "object" &&
+			!!elem &&
+			"label" in elem &&
+			"score" in elem &&
+			typeof elem.label === "string" &&
+			typeof elem.score === "number"
 		);
 	}
 }

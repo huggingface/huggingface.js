@@ -86,7 +86,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		prettyLabel: "AnemoI",
 		repoName: "AnemoI",
 		repoUrl: "https://github.com/ecmwf/anemoi-inference",
-		docsUrl: "https://anemoi-docs.readthedocs.io/en/latest/",
+		docsUrl: "https://anemoi.readthedocs.io/en/latest/",
 		filter: false,
 		countDownloads: `path_extension:"ckpt"`,
 		snippets: snippets.anemoi,
@@ -527,6 +527,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"litertlm"`,
 	},
+	lerobot: {
+		prettyLabel: "LeRobot",
+		repoName: "LeRobot",
+		repoUrl: "https://github.com/huggingface/lerobot",
+		docsUrl: "https://huggingface.co/docs/lerobot",
+		filter: false,
+		snippets: snippets.lerobot,
+	},
 	liveportrait: {
 		prettyLabel: "LivePortrait",
 		repoName: "LivePortrait",
@@ -654,6 +662,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"tokenizer-e351c8d8-checkpoint125.safetensors"`,
 	},
+	mtvcraft: {
+		prettyLabel: "MTVCraft",
+		repoName: "MTVCraft",
+		repoUrl: "https://github.com/baaivision/MTVCraft",
+		filter: false,
+		countDownloads: `path:"vae/3d-vae.pt"`,
+	},
 	nemo: {
 		prettyLabel: "NeMo",
 		repoName: "NeMo",
@@ -701,6 +716,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.paddlenlp,
 		filter: true,
 		countDownloads: `path:"model_config.json"`,
+	},
+	PaddleOCR: {
+		prettyLabel: "PaddleOCR",
+		repoName: "PaddleOCR",
+		repoUrl: "https://github.com/PaddlePaddle/PaddleOCR",
+		snippets: snippets.paddleocr,
+		filter: true,
 	},
 	peft: {
 		prettyLabel: "PEFT",
@@ -775,6 +797,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		docsUrl: "https://refine.rs/",
 		filter: false,
 		countDownloads: `path:"model.safetensors"`,
+	},
+	renderformer: {
+		prettyLabel: "RenderFormer",
+		repoName: "RenderFormer",
+		repoUrl: "https://github.com/microsoft/renderformer",
+		snippets: snippets.renderformer,
+		filter: false,
 	},
 	reverb: {
 		prettyLabel: "Reverb",
@@ -885,6 +914,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"model.safetensors"`,
 		snippets: snippets.stable_audio_tools,
 	},
+	monkeyocr: {
+		prettyLabel: "MonkeyOCR",
+		repoName: "monkeyocr",
+		repoUrl: "https://github.com/Yuliang-Liu/MonkeyOCR",
+		filter: false,
+		countDownloads: `path:"Recognition/config.json"`,
+	},
 	"diffusion-single-file": {
 		prettyLabel: "Diffusion Single File",
 		repoName: "diffusion-single-file",
@@ -948,10 +984,10 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 	},
 	"tencent-song-generation": {
 		prettyLabel: "SongGeneration",
-		repoName: "songgeneration",
+		repoName: "SongGeneration",
 		repoUrl: "https://github.com/tencent-ailab/songgeneration",
 		filter: false,
-		countDownloads: `path:"ckpt/songgeneration_base_zh/model.pt"`,
+		countDownloads: `path:"ckpt/songgeneration_base/model.pt"`,
 	},
 	tensorflowtts: {
 		prettyLabel: "TensorFlowTTS",
@@ -1070,6 +1106,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/NVlabs/Sana",
 		countDownloads: `path_extension:"pth"`,
 		snippets: snippets.sana,
+	},
+	videoprism: {
+		prettyLabel: "VideoPrism",
+		repoName: "VideoPrism",
+		repoUrl: "https://github.com/google-deepmind/videoprism",
+		countDownloads: `path_extension:"npz"`,
+		snippets: snippets.videoprism,
 	},
 	"vfi-mamba": {
 		prettyLabel: "VFIMamba",

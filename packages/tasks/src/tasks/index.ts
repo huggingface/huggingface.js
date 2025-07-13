@@ -51,6 +51,7 @@ export type * from "./automatic-speech-recognition/inference.js";
 export type {
 	ChatCompletionInput,
 	ChatCompletionInputMessage,
+	ChatCompletionInputMessageChunkType,
 	ChatCompletionOutput,
 	ChatCompletionOutputComplete,
 	ChatCompletionOutputMessage,
@@ -113,7 +114,6 @@ export type {
 } from "./zero-shot-object-detection/inference.js";
 
 import type { ModelLibraryKey } from "../model-libraries.js";
-
 /**
  * Model libraries compatible with each ML task
  */
@@ -158,7 +158,6 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	"text-to-speech": ["espnet", "tensorflowtts", "transformers", "transformers.js"],
 	"text-to-audio": ["transformers", "transformers.js"],
 	"text-to-video": ["diffusers"],
-	"text2text-generation": ["transformers", "transformers.js"],
 	"time-series-forecasting": [],
 	"token-classification": [
 		"adapter-transformers",
@@ -181,6 +180,7 @@ export const TASKS_MODEL_LIBRARIES: Record<PipelineType, ModelLibraryKey[]> = {
 	"image-to-3d": ["diffusers"],
 	"any-to-any": ["transformers"],
 	"visual-document-retrieval": ["transformers"],
+	"video-to-video": ["diffusers"],
 };
 
 /**
@@ -244,12 +244,12 @@ export const TASKS_DATA: Record<PipelineType, TaskData | undefined> = {
 	"text-to-speech": getData("text-to-speech", textToSpeech),
 	"text-to-audio": undefined,
 	"text-to-video": getData("text-to-video", textToVideo),
-	"text2text-generation": undefined,
 	"time-series-forecasting": undefined,
 	"token-classification": getData("token-classification", tokenClassification),
 	translation: getData("translation", translation),
 	"unconditional-image-generation": getData("unconditional-image-generation", unconditionalImageGeneration),
 	"video-text-to-text": getData("video-text-to-text", videoTextToText),
+	"video-to-video": getData("video-to-video", placeholder),
 	"visual-question-answering": getData("visual-question-answering", visualQuestionAnswering),
 	"voice-activity-detection": undefined,
 	"zero-shot-classification": getData("zero-shot-classification", zeroShotClassification),

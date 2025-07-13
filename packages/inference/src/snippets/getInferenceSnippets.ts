@@ -12,6 +12,7 @@ import { getProviderHelper } from "../lib/getProviderHelper.js";
 import { makeRequestOptionsFromResolvedModel } from "../lib/makeRequestOptions.js";
 import type { InferenceProviderMappingEntry, InferenceProviderOrPolicy, InferenceTask, RequestArgs } from "../types.js";
 import { templates } from "./templates.exported.js";
+import { getLogger } from "../lib/logger.js";
 
 export type InferenceSnippetOptions = {
 	streaming?: boolean;
@@ -121,7 +122,6 @@ const HF_JS_METHODS: Partial<Record<WidgetType, string>> = {
 	"table-question-answering": "tableQuestionAnswering",
 	"text-classification": "textClassification",
 	"text-generation": "textGeneration",
-	"text2text-generation": "textGeneration",
 	"token-classification": "tokenClassification",
 	"text-to-speech": "textToSpeech",
 	translation: "translation",
@@ -140,6 +140,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		inferenceProviderMapping?: InferenceProviderMappingEntry,
 		opts?: InferenceSnippetOptions
 	): InferenceSnippet[] => {
+		const logger = getLogger();
 		const providerModelId = inferenceProviderMapping?.providerId ?? model.id;
 		/// Hacky: hard-code conversational templates here
 		let task = model.pipeline_tag as InferenceTask;
@@ -156,7 +157,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		try {
 			providerHelper = getProviderHelper(provider, task);
 		} catch (e) {
-			console.error(`Failed to get provider helper for ${provider} (${task})`, e);
+			logger.error(`Failed to get provider helper for ${provider} (${task})`, e);
 			return [];
 		}
 
@@ -191,7 +192,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 			try {
 				providerInputs = JSON.parse(bodyAsObj);
 			} catch (e) {
-				console.error("Failed to parse body as JSON", e);
+				logger.error("Failed to parse body as JSON", e);
 			}
 		}
 
@@ -359,7 +360,6 @@ const snippets: Partial<
 	"text-to-image": snippetGenerator("textToImage"),
 	"text-to-speech": snippetGenerator("textToSpeech"),
 	"text-to-video": snippetGenerator("textToVideo"),
-	"text2text-generation": snippetGenerator("basic"),
 	"token-classification": snippetGenerator("basic"),
 	translation: snippetGenerator("basic"),
 	"zero-shot-classification": snippetGenerator("zeroShotClassification"),

@@ -145,7 +145,7 @@ function preprocess(template: string, options: PreprocessOptions = {}): string {
 
 			// Handle the custom transformers-specific `generation` tag.
 			// See https://github.com/huggingface/transformers/pull/30650 for more information.
-			.replace(/{%\s*generation\s*%}.+?{%\s*endgeneration\s*%}/gs, "")
+			.replace(/{%\s*(end)?generation\s*%}/gs, "")
 	);
 }
 

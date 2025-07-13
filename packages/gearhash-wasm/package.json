@@ -1,0 +1,46 @@
+{
+	"name": "@huggingface/gearhash-wasm",
+	"version": "0.0.1",
+	"scripts": {
+		"build:debug": "asc assembly/index.ts --target debug",
+		"build:release": "asc assembly/index.ts --target release",
+		"build": "pnpm run build:debug && npm run build:release",
+		"test": "vitest run",
+		"prepare": "pnpm run build"
+	},
+	"keywords": [
+		"gearhash",
+		"assemblyscript",
+		"assembly",
+		"wasm"
+	],
+	"type": "module",
+	"main": "./build/release.js",
+	"types": "./build/release.d.ts",
+	"exports": {
+		".": {
+			"import": "./build/release.js",
+			"types": "./build/release.d.ts"
+		},
+		"./assembly": {
+			"import": "./assembly/index.ts"
+		},
+		"./wasm": {
+			"import": "./build/release.wasm"
+		}
+	},
+	"devDependencies": {
+		"assemblyscript": "0.27.36",
+		"@huggingface/splitmix64-wasm": "workspace:*"
+	},
+	"files": [
+		"build/release.js",
+		"build/release.d.ts",
+		"build/release.wasm",
+		"build/release.wat",
+		"build/release.wasm.map",
+		"README.md",
+		"asconfig.json",
+		"assembly"
+	]
+}
