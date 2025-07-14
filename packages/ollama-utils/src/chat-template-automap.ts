@@ -5,14 +5,17 @@ import type { OllamaChatTemplateMapEntry } from "./types";
 
 /**
  * Skipped these models due to error:
- * - library/llama4:16x17b
- * - library/llama3.3:latest
- * - library/dolphin3:8b
- * - library/qwen2-math:latest
- * - library/qwen2-math:1.5b
- * - library/marco-o1:latest
- * - library/bespoke-minicheck:7b
- * - library/falcon2:11b
+ * - library/gemma3n:latest
+ * - library/dolphin3:latest
+ * - library/llama3:8b
+ * - library/mistral-small:latest
+ * - library/aya:8b
+ * - library/glm4:latest
+ * - library/command-r-plus:104b
+ * - library/athene-v2:latest
+ * - library/r1-1776:70b
+ * - library/command-a:latest
+ * - library/command-a:111b
  */
 
 export const OLLAMA_CHAT_TEMPLATE_MAPPING: OllamaChatTemplateMapEntry[] = [
