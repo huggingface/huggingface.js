@@ -565,7 +565,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/SandAI-org/MAGI-1",
 		countDownloads: `path:"ckpt/vae/config.json"`,
 	},
-	"magenta-rt": {
+	"magenta-realtime": {
 		prettyLabel: "magenta-realtime",
 		repoName: "Magenta RT",
 		repoUrl: "https://github.com/magenta/magenta-realtime",
