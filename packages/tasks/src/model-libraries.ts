@@ -1175,6 +1175,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"model_vae_fp16.pt"`,
 		snippets: snippets.threedtopia_xl,
 	},
+	hermes: {
+		prettyLabel: "HERMES",
+		repoName: "HERMES",
+		repoUrl: "https://github.com/LMD0311/HERMES",
+		filter: false,
+		countDownloads: `path:"ckpt/hermes_final.pth" OR path_extension:"pth" OR path_prefix:"ckpt/" OR path_prefix:"data/"`,
+	},
 } satisfies Record<string, LibraryUiElement>;
 
 export type ModelLibraryKey = keyof typeof MODEL_LIBRARIES_UI_ELEMENTS;
