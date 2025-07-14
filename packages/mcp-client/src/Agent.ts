@@ -25,6 +25,15 @@ const taskCompletionTool: ChatCompletionInputTool = {
 	function: {
 		name: "task_complete",
 		description: "Call this tool when the task given by the user is complete",
+		parameters: {
+			type: "object",
+			properties: {
+				trigger: {
+					type: "boolean",
+					description: "Set to true to trigger this function",
+				},
+			},
+		},
 	},
 };
 const askQuestionTool: ChatCompletionInputTool = {
@@ -32,6 +41,15 @@ const askQuestionTool: ChatCompletionInputTool = {
 	function: {
 		name: "ask_question",
 		description: "Ask a question to the user to get more info required to solve or clarify their problem.",
+		parameters: {
+			type: "object",
+			properties: {
+				trigger: {
+					type: "boolean",
+					description: "Set to true to trigger this function",
+				},
+			},
+		},
 	},
 };
 const exitLoopTools = [taskCompletionTool, askQuestionTool];
