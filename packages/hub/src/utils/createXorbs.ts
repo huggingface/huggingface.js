@@ -1,5 +1,5 @@
 /**
- * Todo: add dedup: we actually need to remember chunks already written, and not add themm to the xorb, and also
+ * Todo: add dedup: we actually need to remember chunks already written, and not add them to the xorb, and also
  *  take that into account for file reconstruction
  * Todo: byte grouping?
  */
