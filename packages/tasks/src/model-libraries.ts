@@ -1180,7 +1180,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "HERMES",
 		repoUrl: "https://github.com/LMD0311/HERMES",
 		filter: false,
-		countDownloads: `path:"ckpt/hermes_final.pth" OR path_extension:"pth" OR path_prefix:"ckpt/" OR path_prefix:"data/"`,
+		countDownloads: `path:"ckpt/hermes_final.pth"`,
 	},
 } satisfies Record<string, LibraryUiElement>;
 
