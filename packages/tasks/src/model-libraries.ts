@@ -430,6 +430,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/fudan-generative-vision/hallo",
 		countDownloads: `path:"hallo/net.pth"`,
 	},
+	hermes: {
+		prettyLabel: "HERMES",
+		repoName: "HERMES",
+		repoUrl: "https://github.com/LMD0311/HERMES",
+		filter: false,
+		countDownloads: `path:"ckpt/hermes_final.pth"`,
+	},
 	hezar: {
 		prettyLabel: "Hezar",
 		repoName: "Hezar",
@@ -1174,13 +1181,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"model_vae_fp16.pt"`,
 		snippets: snippets.threedtopia_xl,
-	},
-	hermes: {
-		prettyLabel: "HERMES",
-		repoName: "HERMES",
-		repoUrl: "https://github.com/LMD0311/HERMES",
-		filter: false,
-		countDownloads: `path:"ckpt/hermes_final.pth"`,
 	},
 } satisfies Record<string, LibraryUiElement>;
 
