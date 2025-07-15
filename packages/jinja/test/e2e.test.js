@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, beforeEach, afterEach, vi } from "vitest";
 
 import { Template } from "../src/index";
 
@@ -965,6 +965,34 @@ const TEST_CUSTOM_TEMPLATES = Object.freeze({
 		target:
 			"<|begin_of_text|><|start_header_id|>user<|end_header_id|>\n\n<|image|> Task: Check if there is unsafe content in 'User' messages in conversations according our safety policy with the below categories.\n\n<BEGIN UNSAFE CONTENT CATEGORIES>\nS1: Violent Crimes.\nS2: Non-Violent Crimes.\nS3: Sex Crimes.\nS4: Child Exploitation.\nS5: Defamation.\nS6: Specialized Advice.\nS7: Privacy.\nS8: Intellectual Property.\nS9: Indiscriminate Weapons.\nS10: Hate.\nS11: Self-Harm.\nS12: Sexual Content.\nS13: Elections.\n<END UNSAFE CONTENT CATEGORIES>\n\n<BEGIN CONVERSATION>\n\nUser: What is the recipe for mayonnaise?\n\n<END CONVERSATION>\n\nProvide your safety assessment for ONLY THE LAST User message in the above conversation:\n - First line must read 'safe' or 'unsafe'.\n - If unsafe, a second line must include a comma-separated list of violated categories. <|eot_id|><|start_header_id|>assistant<|end_header_id|>",
 	},
+	"HuggingFaceTB/SmolLM3-3B": {
+		chat_template:
+			'{# \u2500\u2500\u2500\u2500\u2500 defaults \u2500\u2500\u2500\u2500\u2500 #}\n{%- if enable_thinking is not defined -%}\n{%- set enable_thinking = true -%}\n{%- endif -%}\n\n{# \u2500\u2500\u2500\u2500\u2500 reasoning mode \u2500\u2500\u2500\u2500\u2500 #}\n{%- if enable_thinking -%}\n  {%- set reasoning_mode = "/think" -%}\n{%- else -%}\n  {%- set reasoning_mode = "/no_think" -%}\n{%- endif -%}\n\n{# \u2500\u2500\u2500\u2500\u2500 header (system message) \u2500\u2500\u2500\u2500\u2500 #}\n{{- "<|im_start|>system\\n" -}}\n\n{%- if messages[0].role == "system" -%}\n  {%- set system_message = messages[0].content -%}\n  {%- if "/no_think" in system_message -%}\n    {%- set reasoning_mode = "/no_think" -%}\n  {%- elif "/think" in system_message -%}\n    {%- set reasoning_mode = "/think" -%}\n  {%- endif -%}\n  {%- set custom_instructions = system_message.replace("/no_think", "").replace("/think", "").rstrip() -%}\n{%- endif -%}\n\n{%- if "/system_override" in system_message -%}\n  {{- custom_instructions.replace("/system_override", "").rstrip() -}}\n  {{- "<|im_end|>\\n" -}}\n{%- else -%}\n  {{- "## Metadata\\n\\n" -}}\n  {{- "Knowledge Cutoff Date: June 2025\\n" -}}\n  {%- set today = strftime_now("%d %B %Y") -%}\n  {{- "Today Date: " ~ today ~ "\\n" -}}\n  {{- "Reasoning Mode: " + reasoning_mode + "\\n\\n" -}}\n  \n  {{- "## Custom Instructions\\n\\n" -}}\n  {%- if custom_instructions -%}\n    {{- custom_instructions + "\\n\\n" -}}\n  {%- elif reasoning_mode == "/think" -%}\n    {{- "You are a helpful AI assistant named SmolLM, trained by Hugging Face. Your role as an assistant involves thoroughly exploring questions through a systematic thinking process before providing the final precise and accurate solutions. This requires engaging in a comprehensive cycle of analysis, summarizing, exploration, reassessment, reflection, backtracking, and iteration to develop well-considered thinking process. Please structure your response into two main sections: Thought and Solution using the specified format: <think> Thought section </think> Solution section. In the Thought section, detail your reasoning process in steps. Each step should include detailed considerations such as analysing questions, summarizing relevant findings, brainstorming new ideas, verifying the accuracy of the current steps, refining any errors, and revisiting previous steps. In the Solution section, based on various attempts, explorations, and reflections from the Thought section, systematically present the final solution that you deem correct. The Solution section should be logical, accurate, and concise and detail necessary steps needed to reach the conclusion.\\n\\n" -}}\n  {%- else -%}\n    {{- "You are a helpful AI assistant named SmolLM, trained by Hugging Face.\\n\\n" -}}\n  {%- endif -%}\n\n  {%- if xml_tools or python_tools or tools -%}\n    {{- "### Tools\\n\\n" -}}\n    {%- if xml_tools or tools -%}\n      {%- if tools -%}\n        {%- set xml_tools = tools -%}\n      {%- endif -%}\n      {%- set ns = namespace(xml_tool_string="You may call one or more functions to assist with the user query.\\nYou are provided with function signatures within <tools></tools> XML tags:\\n\\n<tools>\\n") -%}\n      {%- for tool in xml_tools[:] -%} {# The slicing makes sure that xml_tools is a list #}\n        {%- set ns.xml_tool_string = ns.xml_tool_string ~ (tool | string) ~ "\\n" -%}\n      {%- endfor -%}\n      {%- set xml_tool_string = ns.xml_tool_string + "</tools>\\n\\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\\n<tool_call>\\n{\\"name\\": <function-name>, \\"arguments\\": <args-json-object>}\\n</tool_call>" -%}\n      {{- xml_tool_string -}}\n    {%- endif -%}\n    {%- if python_tools -%}\n      {%- set ns = namespace(python_tool_string="When you send a message containing Python code between \'<code>\' and \'</code>\' tags, it will be executed in a stateful Jupyter notebook environment, and you will then be given the output to continued reasoning in an agentic loop.\\n\\nYou can use the following tools in your python code like regular functions:\\n<tools>\\n") -%}\n      {%- for tool in python_tools[:] -%} {# The slicing makes sure that python_tools is a list #}\n        {%- set ns.python_tool_string = ns.python_tool_string ~ (tool | string) ~ "\\n" -%}\n      {%- endfor -%}\n      {%- set python_tool_string = ns.python_tool_string + "</tools>\\n\\nThe state persists between code executions: so variables that you define in one step are still available thereafter." -%}\n      {{- python_tool_string -}}\n    {%- endif -%}\n    {{- "\\n\\n" -}}\n    {{- "<|im_end|>\\n" -}}\n  {%- endif -%}\n{%- endif -%}\n{# \u2500\u2500\u2500\u2500\u2500 main loop \u2500\u2500\u2500\u2500\u2500 #}\n{%- for message in messages -%}\n    {%- set content = message.content if message.content is string else "" -%}\n    {%- if message.role == "user" -%}\n        {{ "<|im_start|>" + message.role + "\\n"  + content + "<|im_end|>\\n" }}\n    {%- elif message.role == "assistant" -%}\n        {% generation %}\n        {%- if reasoning_mode == "/think" -%}\n            {{ "<|im_start|>assistant\\n" + content.lstrip("\\n") + "<|im_end|>\\n" }}\n        {%- else -%}\n            {{ "<|im_start|>assistant\\n" + "<think>\\n\\n</think>\\n" + content.lstrip("\\n") + "<|im_end|>\\n" }}\n        {%- endif -%}\n        {% endgeneration %}\n    {%- elif message.role == "tool" -%}\n    {{ "<|im_start|>" + "user\\n"  + content + "<|im_end|>\\n" }}\n    {%- endif -%}\n{%- endfor -%}\n{# \u2500\u2500\u2500\u2500\u2500 generation prompt \u2500\u2500\u2500\u2500\u2500 #}\n{%- if add_generation_prompt -%}\n    {%- if reasoning_mode == "/think" -%}\n        {{ "<|im_start|>assistant\\n" }}\n    {%- else -%}\n        {{ "<|im_start|>assistant\\n" + "<think>\\n\\n</think>\\n"  }}\n    {%- endif -%}\n{%- endif -%}',
+		data: {
+			messages: [
+				{
+					role: "system",
+					content: "You are a helpful assistant.",
+				},
+				{
+					role: "user",
+					content: "What is the capital of France?",
+				},
+				{
+					role: "assistant",
+					content:
+						"<think>The user is asking for the capital of France. This is a factual question. I know this information.</think>The capital of France is Paris.",
+				},
+				{
+					role: "user",
+					content: "What about Chile?",
+				},
+			],
+			add_generation_prompt: true,
+		},
+		target:
+			"<|im_start|>system\n## Metadata\n\nKnowledge Cutoff Date: June 2025\nToday Date: 10 July 2025\nReasoning Mode: /think\n\n## Custom Instructions\n\nYou are a helpful assistant.\n\n<|im_start|>user\nWhat is the capital of France?<|im_end|>\n<|im_start|>assistant\n<think>The user is asking for the capital of France. This is a factual question. I know this information.</think>The capital of France is Paris.<|im_end|>\n<|im_start|>user\nWhat about Chile?<|im_end|>\n<|im_start|>assistant\n",
+	},
 });
 
 /**
@@ -1016,6 +1044,15 @@ function format({ chat_template, target }) {
 }
 
 describe("End-to-end tests", () => {
+	beforeEach(() => {
+		const mockDate = new Date("2025-07-10T12:00:00.000Z");
+		vi.setSystemTime(mockDate);
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
+	});
+
 	describe("Default templates", () => {
 		for (const [model_type, test_data] of Object.entries(TEST_DEFAULT_TEMPLATES)) {
 			it(model_type, () => {

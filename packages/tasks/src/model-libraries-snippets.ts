@@ -961,6 +961,17 @@ export const paddlenlp = (model: ModelData): string[] => {
 	}
 };
 
+export const paddleocr = (model: ModelData): string[] => [
+	`# pip install paddleocr
+from paddleocr import TextDetection
+model = TextDetection(model_name="${model.id}")
+output = model.predict(input="path/to/image.png", batch_size=1)
+for res in output:
+    res.print()
+    res.save_to_img(save_path="./output/")
+    res.save_to_json(save_path="./output/res.json")`,
+];
+
 export const perception_encoder = (model: ModelData): string[] => {
 	const clip_model = `# Use PE-Core models as CLIP models
 import core.vision_encoder.pe as pe

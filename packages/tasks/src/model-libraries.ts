@@ -717,6 +717,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"model_config.json"`,
 	},
+	PaddleOCR: {
+		prettyLabel: "PaddleOCR",
+		repoName: "PaddleOCR",
+		repoUrl: "https://github.com/PaddlePaddle/PaddleOCR",
+		snippets: snippets.paddleocr,
+		filter: true,
+	},
 	peft: {
 		prettyLabel: "PEFT",
 		repoName: "PEFT",
