@@ -66,8 +66,8 @@ export class BlackForestLabsTextToImageTask extends TaskProviderHelper implement
 		response: BlackForestLabsResponse,
 		url?: string,
 		headers?: HeadersInit,
-		outputType?: "url" | "blob"
-	): Promise<string | Blob> {
+		outputType?: "url" | "blob" | "json"
+	): Promise<string | Blob | Record<string, unknown>> {
 		const logger = getLogger();
 		const urlObj = new URL(response.polling_url);
 		for (let step = 0; step < 5; step++) {
@@ -95,6 +95,9 @@ export class BlackForestLabsTextToImageTask extends TaskProviderHelper implement
 				"sample" in payload.result &&
 				typeof payload.result.sample === "string"
 			) {
+				if (outputType === "json") {
+					return payload.result;
+				}
 				if (outputType === "url") {
 					return payload.result.sample;
 				}
