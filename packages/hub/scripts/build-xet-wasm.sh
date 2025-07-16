@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Regenerate xet-chunk wasm files directly from xet-core codebase
+
 set -euo pipefail
 
 # Configuration
