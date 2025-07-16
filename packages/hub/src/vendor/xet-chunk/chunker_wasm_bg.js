@@ -346,7 +346,7 @@ export function __wbg_length_e2d2a49132c1b256(arg0) {
     return ret;
 };
 
-export function __wbg_log_31c4454272417045(arg0, arg1) {
+export function __wbg_log_c5d1a8dc098212af(arg0, arg1) {
     console.log(getStringFromWasm0(arg0, arg1));
 };
 
