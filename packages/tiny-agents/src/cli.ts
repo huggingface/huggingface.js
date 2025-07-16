@@ -135,16 +135,15 @@ async function main() {
 				stdout.write("\n");
 				continue;
 			}
-
+			const envVariableKey = inputId.replaceAll("-", "_").toUpperCase();
 			// Prompt user for input
 			stdout.write(ANSI.BLUE);
 			stdout.write(` • ${inputId}`);
 			stdout.write(ANSI.RESET);
-			stdout.write(`: ${description}. (default: load from ${inputId.replaceAll("-", "_").toUpperCase()}) `);
+			stdout.write(`: ${description}. (default: load from ${envVariableKey}) `);
 			stdout.write("\n");
 
 			const userInput = (await rl.question("")).trim();
-			const envVariableKey = inputId.replaceAll("-", "_").toUpperCase();
 			const valueFromEnv = process.env[envVariableKey] || "";
 			const finalValue = userInput || valueFromEnv;
 
