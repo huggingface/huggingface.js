@@ -4,7 +4,7 @@
  * Todo: byte grouping?
  */
 
-import { XET_CHUNK_HEADER_BYTES, XetChunkCompressionScheme } from "./XetBlob";
+import { bg4_split_bytes, XET_CHUNK_HEADER_BYTES, XetChunkCompressionScheme } from "./XetBlob";
 import { compress as lz4_compress } from "../vendor/lz4js";
 
 const TARGET_CHUNK_SIZE = 64 * 1024;
@@ -99,7 +99,10 @@ export async function* createXorbs(
  * Todo: add bg4 compression maybe?
  */
 function writeChunk(xorb: Uint8Array, offset: number, chunk: Uint8Array): number {
-	const compressedChunk = lz4_compress(chunk);
+	const regularCompressedChunk = lz4_compress(chunk);
+	const bgCompressedChunk = lz4_compress(bg4_split_bytes(chunk));
+	const compressedChunk =
+		regularCompressedChunk.length < bgCompressedChunk.length ? regularCompressedChunk : bgCompressedChunk;
 	const chunkToWrite = compressedChunk.length < chunk.length ? compressedChunk : chunk;
 
 	if (offset + XET_CHUNK_HEADER_BYTES + chunkToWrite.length > XORB_SIZE) {
@@ -111,7 +114,11 @@ function writeChunk(xorb: Uint8Array, offset: number, chunk: Uint8Array): number
 	xorb[offset + 2] = (chunkToWrite.length >> 8) & 0xff;
 	xorb[offset + 3] = (chunkToWrite.length >> 16) & 0xff;
 	xorb[offset + 4] =
-		chunkToWrite.length < chunk.length ? XetChunkCompressionScheme.LZ4 : XetChunkCompressionScheme.None;
+		chunkToWrite.length < chunk.length
+			? bgCompressedChunk.length < chunk.length
+				? XetChunkCompressionScheme.ByteGroupingLZ4
+				: XetChunkCompressionScheme.LZ4
+			: XetChunkCompressionScheme.None;
 	xorb[offset + 5] = chunk.length & 0xff;
 	xorb[offset + 6] = (chunk.length >> 8) & 0xff;
 	xorb[offset + 7] = (chunk.length >> 16) & 0xff;

@@ -376,7 +376,7 @@ export class XetBlob extends Blob {
 							chunkHeader.compression_scheme === XetChunkCompressionScheme.LZ4
 								? lz4_decompress(result.value.slice(0, chunkHeader.compressed_length), chunkHeader.uncompressed_length)
 								: chunkHeader.compression_scheme === XetChunkCompressionScheme.ByteGroupingLZ4
-								  ? bg4_regoup_bytes(
+								  ? bg4_regroup_bytes(
 											lz4_decompress(
 												result.value.slice(0, chunkHeader.compressed_length),
 												chunkHeader.uncompressed_length
@@ -529,7 +529,7 @@ function cacheKey(params: { refreshUrl: string; initialAccessToken: string | und
 }
 
 // exported for testing purposes
-export function bg4_regoup_bytes(bytes: Uint8Array): Uint8Array {
+export function bg4_regroup_bytes(bytes: Uint8Array): Uint8Array {
 	// python code
 
 	// split = len(x) // 4
@@ -588,6 +588,40 @@ export function bg4_regoup_bytes(bytes: Uint8Array): Uint8Array {
 	// 	ret[bytes.byteLength - 2] = bytes[g2_pos - 1];
 	// 	ret[bytes.byteLength - 1] = bytes[g3_pos - 1];
 	// }
+}
+
+export function bg4_split_bytes(bytes: Uint8Array): Uint8Array {
+	// This function does the opposite of bg4_regroup_bytes
+	// It takes interleaved bytes and groups them by 4
+
+	const ret = new Uint8Array(bytes.byteLength);
+	const split = Math.floor(bytes.byteLength / 4);
+	const rem = bytes.byteLength % 4;
+
+	// Calculate group positions in the output array
+	const g1_pos = split + (rem >= 1 ? 1 : 0);
+	const g2_pos = g1_pos + split + (rem >= 2 ? 1 : 0);
+	const g3_pos = g2_pos + split + (rem == 3 ? 1 : 0);
+
+	// Extract every 4th byte starting from position 0, 1, 2, 3
+	// and place them in their respective groups
+	for (let i = 0, j = 0; i < bytes.byteLength; i += 4, j++) {
+		ret[j] = bytes[i];
+	}
+
+	for (let i = 1, j = g1_pos; i < bytes.byteLength; i += 4, j++) {
+		ret[j] = bytes[i];
+	}
+
+	for (let i = 2, j = g2_pos; i < bytes.byteLength; i += 4, j++) {
+		ret[j] = bytes[i];
+	}
+
+	for (let i = 3, j = g3_pos; i < bytes.byteLength; i += 4, j++) {
+		ret[j] = bytes[i];
+	}
+
+	return ret;
 }
 
 async function getAccessToken(
