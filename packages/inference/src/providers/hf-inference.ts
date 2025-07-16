@@ -76,6 +76,7 @@ import { base64FromBytes } from "../utils/base64FromBytes.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
 import { omit } from "../utils/omit.js";
+import type { ImageSegmentationArgs } from "../tasks/cv/imageSegmentation.js";
 interface Base64ImageGeneration {
 	data: Array<{
 		b64_json: string;
@@ -126,14 +127,17 @@ export class HFInferenceTextToImageTask extends HFInferenceTask implements TextT
 		response: Base64ImageGeneration | OutputUrlImageGeneration,
 		url?: string,
 		headers?: HeadersInit,
-		outputType?: "url" | "blob"
-	): Promise<string | Blob> {
+		outputType?: "url" | "blob" | "json"
+	): Promise<string | Blob | Record<string, unknown>> {
 		if (!response) {
 			throw new InferenceClientProviderOutputError(
 				"Received malformed response from HF-Inference text-to-image API: response is undefined"
 			);
 		}
 		if (typeof response == "object") {
+			if (outputType === "json") {
+				return { ...response };
+			}
 			if ("data" in response && Array.isArray(response.data) && response.data[0].b64_json) {
 				const base64Data = response.data[0].b64_json;
 				if (outputType === "url") {
@@ -152,9 +156,9 @@ export class HFInferenceTextToImageTask extends HFInferenceTask implements TextT
 			}
 		}
 		if (response instanceof Blob) {
-			if (outputType === "url") {
+			if (outputType === "url" || outputType === "json") {
 				const b64 = await response.arrayBuffer().then((buf) => Buffer.from(buf).toString("base64"));
-				return `data:image/jpeg;base64,${b64}`;
+				return outputType === "url" ? `data:image/jpeg;base64,${b64}` : { output: `data:image/jpeg;base64,${b64}` };
 			}
 			return response;
 		}
@@ -344,6 +348,15 @@ export class HFInferenceImageSegmentationTask extends HFInferenceTask implements
 		throw new InferenceClientProviderOutputError(
 			"Received malformed response from HF-Inference image-segmentation API: expected Array<{label: string, mask: string, score: number}>"
 		);
+	}
+
+	async preparePayloadAsync(args: ImageSegmentationArgs): Promise<RequestArgs> {
+		return {
+			...args,
+			inputs: base64FromBytes(
+				new Uint8Array(args.inputs instanceof ArrayBuffer ? args.inputs : await (args.inputs as Blob).arrayBuffer())
+			),
+		};
 	}
 }
 

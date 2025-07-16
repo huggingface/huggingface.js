@@ -743,7 +743,7 @@ describe.skip("InferenceClient", () => {
 			it("imageSegmentation", async () => {
 				expect(
 					await hf.imageSegmentation({
-						data: new Blob([readTestFile("cats.png")], { type: "image/png" }),
+						inputs: new Blob([readTestFile("cats.png")], { type: "image/png" }),
 						model: "facebook/detr-resnet-50-panoptic",
 					})
 				).toEqual(
@@ -802,6 +802,16 @@ describe.skip("InferenceClient", () => {
 					},
 				});
 				expect(res).toBeInstanceOf(Blob);
+			});
+			it("textToImage with json output", async () => {
+				const res = await hf.textToImage({
+					inputs: "a giant tortoise",
+					model: "stabilityai/stable-diffusion-2",
+					outputType: "json",
+				});
+				expect(res).toMatchObject({
+					output: expect.any(String),
+				});
 			});
 			it("imageToText", async () => {
 				expect(

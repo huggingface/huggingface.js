@@ -54,6 +54,7 @@ import { toArray } from "../utils/toArray.js";
 import type { ImageToImageArgs } from "../tasks/cv/imageToImage.js";
 import type { AutomaticSpeechRecognitionArgs } from "../tasks/audio/automaticSpeechRecognition.js";
 import type { ImageToVideoArgs } from "../tasks/cv/imageToVideo.js";
+import type { ImageSegmentationArgs } from "../tasks/cv/imageSegmentation.js";
 
 /**
  * Base class for task-specific provider helpers
@@ -136,8 +137,8 @@ export interface TextToImageTaskHelper {
 		response: unknown,
 		url?: string,
 		headers?: HeadersInit,
-		outputType?: "url" | "blob"
-	): Promise<string | Blob>;
+		outputType?: "url" | "blob" | "json"
+	): Promise<string | Blob | Record<string, unknown>>;
 	preparePayload(params: BodyParams<TextToImageInput & BaseArgs>): Record<string, unknown>;
 }
 
@@ -161,6 +162,7 @@ export interface ImageToVideoTaskHelper {
 export interface ImageSegmentationTaskHelper {
 	getResponse(response: unknown, url?: string, headers?: HeadersInit): Promise<ImageSegmentationOutput>;
 	preparePayload(params: BodyParams<ImageSegmentationInput & BaseArgs>): Record<string, unknown> | BodyInit;
+	preparePayloadAsync(args: ImageSegmentationArgs): Promise<RequestArgs>;
 }
 
 export interface ImageClassificationTaskHelper {
