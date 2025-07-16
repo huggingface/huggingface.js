@@ -13,6 +13,7 @@ import { makeRequestOptionsFromResolvedModel } from "../lib/makeRequestOptions.j
 import type { InferenceProviderMappingEntry, InferenceProviderOrPolicy, InferenceTask, RequestArgs } from "../types.js";
 import { templates } from "./templates.exported.js";
 import { getLogger } from "../lib/logger.js";
+import { HF_ROUTER_AUTO_ENDPOINT } from "../config.js";
 
 export type InferenceSnippetOptions = {
 	streaming?: boolean;
@@ -20,6 +21,7 @@ export type InferenceSnippetOptions = {
 	accessToken?: string;
 	directRequest?: boolean; // to bypass HF routing and call the provider directly
 	endpointUrl?: string; // to call a local endpoint directly
+	inputs?: Record<string, unknown>; // overrides the default snippet's inputs
 } & Record<string, unknown>;
 
 const PYTHON_CLIENTS = ["huggingface_hub", "fal_client", "requests", "openai"] as const;
@@ -36,7 +38,7 @@ const CLIENTS: Record<InferenceSnippetLanguage, Client[]> = {
 
 const CLIENTS_AUTO_POLICY: Partial<Record<InferenceSnippetLanguage, Client[]>> = {
 	js: ["huggingface.js"],
-	python: ["huggingface_hub"],
+	python: ["huggingface_hub", "openai"],
 };
 
 type InputPreparationFn = (model: ModelDataMinimal, opts?: Record<string, unknown>) => object;
@@ -167,14 +169,18 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		const accessTokenOrPlaceholder = opts?.accessToken ?? placeholder;
 
 		/// Prepare inputs + make request
-		const inputs = inputPreparationFn ? inputPreparationFn(model, opts) : { inputs: getModelInputSnippet(model) };
+		const inputs = opts?.inputs
+			? { inputs: opts.inputs }
+			: inputPreparationFn
+			  ? inputPreparationFn(model, opts)
+			  : { inputs: getModelInputSnippet(model) };
 		const request = makeRequestOptionsFromResolvedModel(
 			providerModelId,
 			providerHelper,
 			{
 				accessToken: accessTokenOrPlaceholder,
 				provider,
-				endpointUrl: opts?.endpointUrl,
+				endpointUrl: opts?.endpointUrl ?? (provider === "auto" ? HF_ROUTER_AUTO_ENDPOINT : undefined),
 				...inputs,
 			} as RequestArgs,
 			inferenceProviderMapping,
