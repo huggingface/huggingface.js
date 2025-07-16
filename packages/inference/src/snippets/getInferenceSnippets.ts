@@ -13,6 +13,7 @@ import { makeRequestOptionsFromResolvedModel } from "../lib/makeRequestOptions.j
 import type { InferenceProviderMappingEntry, InferenceProviderOrPolicy, InferenceTask, RequestArgs } from "../types.js";
 import { templates } from "./templates.exported.js";
 import { getLogger } from "../lib/logger.js";
+import { HF_ROUTER_AUTO_ENDPOINT } from "../config.js";
 
 export type InferenceSnippetOptions = {
 	streaming?: boolean;
@@ -37,7 +38,7 @@ const CLIENTS: Record<InferenceSnippetLanguage, Client[]> = {
 
 const CLIENTS_AUTO_POLICY: Partial<Record<InferenceSnippetLanguage, Client[]>> = {
 	js: ["huggingface.js"],
-	python: ["huggingface_hub"],
+	python: ["huggingface_hub", "openai"],
 };
 
 type InputPreparationFn = (model: ModelDataMinimal, opts?: Record<string, unknown>) => object;
@@ -179,7 +180,7 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 			{
 				accessToken: accessTokenOrPlaceholder,
 				provider,
-				endpointUrl: opts?.endpointUrl,
+				endpointUrl: opts?.endpointUrl ?? (provider === "auto" ? HF_ROUTER_AUTO_ENDPOINT : undefined),
 				...inputs,
 			} as RequestArgs,
 			inferenceProviderMapping,
