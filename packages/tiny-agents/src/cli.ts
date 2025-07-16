@@ -110,7 +110,7 @@ async function main() {
 			for (const server of config.servers) {
 				if (server.type === "stdio" && server.env) {
 					for (const [key, value] of Object.entries(server.env)) {
-						if (value === envSpecialValue) {
+						if (value.includes(envSpecialValue)) {
 							inputVars.add(key);
 						}
 					}
@@ -124,72 +124,64 @@ async function main() {
 				}
 			}
 
+			if (config.apiKey?.includes(envSpecialValue)) {
+				inputVars.add("apiKey");
+			}
+
 			if (inputVars.size === 0) {
 				stdout.write(ANSI.YELLOW);
-				stdout.write(`Input ${inputId} defined in config but not used by any server.`);
+				stdout.write(`Input ${inputId} defined in config but not used by any server or as an API key. Skipping.`);
 				stdout.write(ANSI.RESET);
 				stdout.write("\n");
 				continue;
 			}
 
 			// Prompt user for input
-			const envVariableKey = inputId.replaceAll("-", "_").toUpperCase();
 			stdout.write(ANSI.BLUE);
 			stdout.write(` • ${inputId}`);
 			stdout.write(ANSI.RESET);
-			stdout.write(`: ${description}. (default: load from ${envVariableKey}) `);
+			stdout.write(`: ${description}. (default: load from ${inputId.replaceAll("-", "_").toUpperCase()}) `);
 			stdout.write("\n");
 
 			const userInput = (await rl.question("")).trim();
+			const envVariableKey = inputId.replaceAll("-", "_").toUpperCase();
+			const valueFromEnv = process.env[envVariableKey] || "";
+			const finalValue = userInput || valueFromEnv;
+
+			if (!userInput) {
+				if (valueFromEnv) {
+					stdout.write(ANSI.GREEN);
+					stdout.write(`Value successfully loaded from '${envVariableKey}'`);
+					stdout.write(ANSI.RESET);
+					stdout.write("\n");
+				} else {
+					stdout.write(ANSI.YELLOW);
+					stdout.write(`No value found for '${envVariableKey}' in environment variables. Continuing.`);
+					stdout.write(ANSI.RESET);
+					stdout.write("\n");
+				}
+			}
 
 			// Inject user input (or env variable) into servers' env
 			for (const server of config.servers) {
 				if (server.type === "stdio" && server.env) {
 					for (const [key, value] of Object.entries(server.env)) {
-						if (value === envSpecialValue) {
-							if (userInput) {
-								server.env[key] = userInput;
-							} else {
-								const valueFromEnv = process.env[envVariableKey] || "";
-								server.env[key] = valueFromEnv;
-								if (valueFromEnv) {
-									stdout.write(ANSI.GREEN);
-									stdout.write(`Value successfully loaded from '${envVariableKey}'`);
-									stdout.write(ANSI.RESET);
-									stdout.write("\n");
-								} else {
-									stdout.write(ANSI.YELLOW);
-									stdout.write(`No value found for '${envVariableKey}' in environment variables. Continuing.`);
-									stdout.write(ANSI.RESET);
-									stdout.write("\n");
-								}
-							}
+						if (value.includes(envSpecialValue)) {
+							server.env[key] = value.replace(envSpecialValue, finalValue);
 						}
 					}
 				}
 				if ((server.type === "http" || server.type === "sse") && server.headers) {
 					for (const [key, value] of Object.entries(server.headers)) {
 						if (value.includes(envSpecialValue)) {
-							if (userInput) {
-								server.headers[key] = value.replace(envSpecialValue, userInput);
-							} else {
-								const valueFromEnv = process.env[envVariableKey] || "";
-								server.headers[key] = value.replace(envSpecialValue, valueFromEnv);
-								if (valueFromEnv) {
-									stdout.write(ANSI.GREEN);
-									stdout.write(`Value successfully loaded from '${envVariableKey}'`);
-									stdout.write(ANSI.RESET);
-									stdout.write("\n");
-								} else {
-									stdout.write(ANSI.YELLOW);
-									stdout.write(`No value found for '${envVariableKey}' in environment variables. Continuing.`);
-									stdout.write(ANSI.RESET);
-									stdout.write("\n");
-								}
-							}
+							server.headers[key] = value.replace(envSpecialValue, finalValue);
 						}
 					}
 				}
+			}
+
+			if (config.apiKey?.includes(envSpecialValue)) {
+				config.apiKey = config.apiKey.replace(envSpecialValue, finalValue);
 			}
 		}
 
