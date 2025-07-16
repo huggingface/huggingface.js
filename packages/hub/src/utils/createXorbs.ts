@@ -14,13 +14,25 @@ const XORB_SIZE = 64 * 1024 * 1024;
 const MAX_XORB_CHUNKS = 8 * 1024;
 
 export async function* createXorbs(fileSources: AsyncGenerator<Blob>): AsyncGenerator<
-	| { type: "xorb"; xorb: Uint8Array; hash: string; id: number }
+	| {
+			type: "xorb";
+			xorb: Uint8Array;
+			hash: string;
+			id: number;
+			chunks: Array<{ hash: string; length: number; offset: number }>;
+	  }
 	| {
 			type: "file";
 			hash: string;
-			chunkHashes: string[];
+			verificationHash: string;
 			sha256: string;
-			representation: Array<{ xorbId: number; offset: number; length: number }>;
+			representation: Array<{
+				xorbId: number;
+				offset: number;
+				endOffset: number;
+				/** Unpacked length */
+				length: number;
+			}>;
 	  },
 	void,
 	undefined
@@ -34,7 +46,7 @@ export async function* createXorbs(fileSources: AsyncGenerator<Blob>): AsyncGene
 
 	let xorb = new Uint8Array(XORB_SIZE);
 	let xorbOffset = 0;
-	let xorbChunks = Array<{ hash: string; length: number }>();
+	let xorbChunks = Array<{ hash: string; length: number; offset: number }>();
 
 	try {
 		for await (const fileSource of fileSources) {
@@ -43,13 +55,14 @@ export async function* createXorbs(fileSources: AsyncGenerator<Blob>): AsyncGene
 
 			const reader = fileSource.stream().getReader();
 			const fileChunks: Array<{ hash: string; length: number }> = [];
-			const fileRepresentation: Array<{ xorbId: number; offset: number; length: number }> = [];
+			const fileRepresentation: Array<{ xorbId: number; offset: number; endOffset: number; length: number }> = [];
 
 			const sha256 = await sha256Module.createSHA256();
 			sha256.init();
 
 			const addChunks = function* (chunks: Array<{ hash: string; length: number }>) {
 				for (const chunk of chunks) {
+					let chunkOffset = xorbOffset;
 					fileChunks.push({ hash: chunk.hash, length: chunk.length });
 					let chunkToCopy: Uint8Array;
 					if (chunk.length === sourceChunks[0].length) {
@@ -76,10 +89,12 @@ export async function* createXorbs(fileSources: AsyncGenerator<Blob>): AsyncGene
 							type: "xorb" as const,
 							xorb: xorb.subarray(0, xorbOffset),
 							hash: chunkModule.compute_xorb_hash(xorbChunks),
+							chunks: [...xorbChunks],
 							id: xorbId,
 						};
 						xorbId++;
 						xorb = new Uint8Array(XORB_SIZE);
+						chunkOffset = 0;
 						xorbOffset = writeChunk(xorb, 0, chunkToCopy);
 
 						if (xorbOffset === 0) {
@@ -89,20 +104,27 @@ export async function* createXorbs(fileSources: AsyncGenerator<Blob>): AsyncGene
 					const lastRep = fileRepresentation.at(-1);
 
 					if (!lastRep) {
-						fileRepresentation.push({ xorbId, offset: initialXorbOffset, length: xorbOffset - initialXorbOffset });
+						fileRepresentation.push({
+							xorbId,
+							offset: initialXorbOffset,
+							endOffset: xorbOffset - initialXorbOffset,
+							length: chunk.length,
+						});
 					} else {
 						if (lastRep.xorbId === xorbId) {
-							lastRep.length = xorbOffset - lastRep.offset;
+							lastRep.endOffset = xorbOffset - lastRep.offset;
+							lastRep.length += chunk.length;
 						} else {
-							fileRepresentation.push({ xorbId, offset: 0, length: xorbOffset });
+							fileRepresentation.push({ xorbId, offset: 0, endOffset: xorbOffset, length: chunk.length });
 						}
 					}
-					xorbChunks.push(chunk);
+					xorbChunks.push({ hash: chunk.hash, length: chunk.length, offset: chunkOffset });
 					if (xorbChunks.length >= MAX_XORB_CHUNKS) {
 						yield {
 							type: "xorb" as const,
 							xorb: xorb.subarray(0, xorbOffset),
 							hash: chunkModule.compute_xorb_hash(xorbChunks),
+							chunks: [...xorbChunks],
 							id: xorbId,
 						};
 						xorbId++;
@@ -127,7 +149,7 @@ export async function* createXorbs(fileSources: AsyncGenerator<Blob>): AsyncGene
 			yield {
 				type: "file" as const,
 				hash: chunkModule.compute_file_hash(fileChunks),
-				chunkHashes: fileChunks.map((x) => x.hash),
+				verificationHash: chunkModule.compute_range_verification_hash(fileChunks.map((x) => x.hash)),
 				sha256: sha256.digest("hex"),
 				representation: fileRepresentation,
 			};
