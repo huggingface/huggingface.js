@@ -8,6 +8,8 @@ import { bg4_split_bytes, XET_CHUNK_HEADER_BYTES, XetChunkCompressionScheme } fr
 import { compress as lz4_compress } from "../vendor/lz4js";
 
 const TARGET_CHUNK_SIZE = 64 * 1024;
+/* eslint-disable @typescript-eslint/no-unused-vars */
+const MAX_CHUNK_SIZE = 2 * TARGET_CHUNK_SIZE;
 const XORB_SIZE = 64 * 1024 * 1024;
 const MAX_XORB_CHUNKS = 8 * 1024;
 
