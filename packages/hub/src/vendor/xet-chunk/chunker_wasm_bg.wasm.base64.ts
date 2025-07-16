@@ -1683,7 +1683,9 @@ eQMFcnVzdGMdMS44Ny4wICgxNzA2N2U5YWMgMjAyNS0wNS0wOSkGd2FscnVzBjAuMjMuMwx3YXNt
 LWJpbmRnZW4HMC4yLjEwMABrD3RhcmdldF9mZWF0dXJlcwYrD211dGFibGUtZ2xvYmFscysTbm9u
 dHJhcHBpbmctZnB0b2ludCsLYnVsay1tZW1vcnkrCHNpZ24tZXh0Kw9yZWZlcmVuY2UtdHlwZXMr
 Cm11bHRpdmFsdWU=
-`).trim().replaceAll("\n", "");
+`)
+    .trim()
+    .replaceAll("\n", "");
 const wasmBinary = new Uint8Array(wasmBase64.length);
 for (let i = 0; i < wasmBase64.length; i++) {
 	wasmBinary[i] = wasmBase64.charCodeAt(i);
