@@ -248,7 +248,7 @@ export async function uploadShards(source: AsyncGenerator<Blob>): Promise<string
 		shardOffset += 8;
 
 		// Shard key expiration
-		shardView.setBigUint64(shardOffset, BigInt(Math.floor(Date.now() / 1000)), true);
+		shardView.setBigUint64(shardOffset, 0n, true);
 		shardOffset += 8;
 
 		// Reserved space (48 bytes)
