@@ -13,10 +13,22 @@ const MAX_CHUNK_SIZE = 2 * TARGET_CHUNK_SIZE;
 const XORB_SIZE = 64 * 1024 * 1024;
 const MAX_XORB_CHUNKS = 8 * 1024;
 
-export async function* createXorbs(
-	fileSource: Blob
-): AsyncGenerator<{ xorb: Uint8Array; hash: string }, void, undefined> {
+export async function* createXorbs(fileSource: Blob): AsyncGenerator<
+	| { type: "xorb"; xorb: Uint8Array; hash: string; id: number }
+	| {
+			type: "file";
+			hash: string;
+			chunkHashes: string[];
+			sha256: string;
+			representation: Array<{ xorbId: number; offset: number; length: number }>;
+	  },
+	void,
+	undefined
+> {
 	const chunkModule = await import("../vendor/xet-chunk/chunker_wasm");
+	const sha256Module = await import("../vendor/hash-wasm/sha256-wrapper");
+	let xorbId = 0;
+
 	await chunkModule.init();
 	const chunker = new chunkModule.Chunker(TARGET_CHUNK_SIZE);
 
@@ -27,9 +39,15 @@ export async function* createXorbs(
 		const reader = fileSource.stream().getReader();
 		let xorbOffset = 0;
 		let xorbChunks = Array<{ hash: string; length: number }>();
+		const fileChunks: Array<{ hash: string; length: number }> = [];
+		const fileRepresentation: Array<{ xorbId: number; offset: number; length: number }> = [];
+
+		const sha256 = await sha256Module.createSHA256();
+		sha256.init();
 
 		const addChunks = function* (chunks: Array<{ hash: string; length: number }>) {
 			for (const chunk of chunks) {
+				fileChunks.push({ hash: chunk.hash, length: chunk.length });
 				let chunkToCopy: Uint8Array;
 				if (chunk.length === sourceChunks[0].length) {
 					chunkToCopy = sourceChunks[0];
@@ -51,7 +69,13 @@ export async function* createXorbs(
 				xorbOffset = writeChunk(xorb, xorbOffset, chunkToCopy);
 				if (xorbOffset === 0) {
 					// Failure to write chunk, maybe because it went over xorb size limit
-					yield { xorb: xorb.subarray(0, xorbOffset), hash: "" };
+					yield {
+						type: "xorb" as const,
+						xorb: xorb.subarray(0, xorbOffset),
+						hash: chunkModule.compute_xorb_hash(xorbChunks),
+						id: xorbId,
+					};
+					xorbId++;
 					xorb = new Uint8Array(XORB_SIZE);
 					xorbOffset = writeChunk(xorb, 0, chunkToCopy);
 
@@ -59,9 +83,26 @@ export async function* createXorbs(
 						throw new Error("Failed to write chunk into xorb");
 					}
 				}
+				const lastRep = fileRepresentation.at(-1);
+
+				if (!lastRep) {
+					fileRepresentation.push({ xorbId, offset: 0, length: xorbOffset });
+				} else {
+					if (lastRep.xorbId === xorbId) {
+						lastRep.length = xorbOffset - lastRep.offset;
+					} else {
+						fileRepresentation.push({ xorbId, offset: 0, length: xorbOffset });
+					}
+				}
 				xorbChunks.push(chunk);
 				if (xorbChunks.length >= MAX_XORB_CHUNKS) {
-					yield { xorb: xorb.subarray(0, xorbOffset), hash: chunkModule.compute_xorb_hash(xorbChunks) };
+					yield {
+						type: "xorb" as const,
+						xorb: xorb.subarray(0, xorbOffset),
+						hash: chunkModule.compute_xorb_hash(xorbChunks),
+						id: xorbId,
+					};
+					xorbId++;
 					xorbOffset = 0;
 					xorbChunks = [];
 					xorb = new Uint8Array(XORB_SIZE);
@@ -76,8 +117,17 @@ export async function* createXorbs(
 				break;
 			}
 			sourceChunks.push(value);
+			sha256.update(value);
 			yield* addChunks(chunker.add_data(value));
 		}
+
+		yield {
+			type: "file" as const,
+			hash: chunkModule.compute_file_hash(fileChunks),
+			chunkHashes: fileChunks.map((x) => x.hash),
+			sha256: sha256.digest("hex"),
+			representation: fileRepresentation,
+		};
 	} finally {
 		chunker.free();
 		// ^ is this really needed ?

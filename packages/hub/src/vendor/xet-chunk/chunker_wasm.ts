@@ -55,7 +55,7 @@ init();
 
 export { init };
 
-export { compute_xorb_hash, Chunker } from "./chunker_wasm_bg.js";
+export { compute_xorb_hash, compute_file_hash, Chunker } from "./chunker_wasm_bg.js";
 
 // const exports = WebAssembly.Module.exports(wasmModule).map((item) => item.name);
 
