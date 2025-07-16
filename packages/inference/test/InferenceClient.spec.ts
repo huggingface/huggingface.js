@@ -803,6 +803,16 @@ describe.skip("InferenceClient", () => {
 				});
 				expect(res).toBeInstanceOf(Blob);
 			});
+			it("textToImage with json output", async () => {
+				const res = await hf.textToImage({
+					inputs: "a giant tortoise",
+					model: "stabilityai/stable-diffusion-2",
+					outputType: "json",
+				});
+				expect(res).toMatchObject({
+					output: expect.any(String),
+				});
+			});
 			it("imageToText", async () => {
 				expect(
 					await hf.imageToText({

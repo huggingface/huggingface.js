@@ -182,7 +182,12 @@ export class FalAITextToImageTask extends FalAITask implements TextToImageTaskHe
 		return payload;
 	}
 
-	override async getResponse(response: FalAITextToImageOutput, outputType?: "url" | "blob"): Promise<string | Blob> {
+	override async getResponse(
+		response: FalAITextToImageOutput,
+		url?: string,
+		headers?: HeadersInit,
+		outputType?: "url" | "blob" | "json"
+	): Promise<string | Blob | Record<string, unknown>> {
 		if (
 			typeof response === "object" &&
 			"images" in response &&
@@ -191,6 +196,9 @@ export class FalAITextToImageTask extends FalAITask implements TextToImageTaskHe
 			"url" in response.images[0] &&
 			typeof response.images[0].url === "string"
 		) {
+			if (outputType === "json") {
+				return { ...response };
+			}
 			if (outputType === "url") {
 				return response.images[0].url;
 			}
