@@ -430,6 +430,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/fudan-generative-vision/hallo",
 		countDownloads: `path:"hallo/net.pth"`,
 	},
+	hermes: {
+		prettyLabel: "HERMES",
+		repoName: "HERMES",
+		repoUrl: "https://github.com/LMD0311/HERMES",
+		filter: false,
+		countDownloads: `path:"ckpt/hermes_final.pth"`,
+	},
 	hezar: {
 		prettyLabel: "Hezar",
 		repoName: "Hezar",
