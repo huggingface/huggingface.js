@@ -13,7 +13,40 @@ const SHARD_FOOTER_VERSION = 1n;
 const MDB_FILE_FLAG_WITH_VERIFICATION = 0x80000000; // Cannot define as 1 << 31 because it becomes a negative number
 const MDB_FILE_FLAG_WITH_METADATA_EXT = 0x40000000;
 
-const SHARD_MAGIC_TAG = new Uint8Array(32);
+const SHARD_MAGIC_TAG = new Uint8Array([
+	"H".charCodeAt(0),
+	"F".charCodeAt(0),
+	"R".charCodeAt(0),
+	"e".charCodeAt(0),
+	"p".charCodeAt(0),
+	"o".charCodeAt(0),
+	"M".charCodeAt(0),
+	"e".charCodeAt(0),
+	"t".charCodeAt(0),
+	"a".charCodeAt(0),
+	"D".charCodeAt(0),
+	"a".charCodeAt(0),
+	"t".charCodeAt(0),
+	"a".charCodeAt(0),
+	0,
+	85,
+	105,
+	103,
+	69,
+	106,
+	123,
+	129,
+	87,
+	131,
+	165,
+	189,
+	217,
+	92,
+	205,
+	209,
+	74,
+	169,
+]);
 
 writeHashToArray("0".repeat(64), SHARD_MAGIC_TAG, 0);
 
