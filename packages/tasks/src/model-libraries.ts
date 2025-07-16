@@ -566,7 +566,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"ckpt/vae/config.json"`,
 	},
 	"magenta-realtime": {
-		prettyLabel: "magenta-realtime",
+		prettyLabel: "Magenta RT",
 		repoName: "Magenta RT",
 		repoUrl: "https://github.com/magenta/magenta-realtime",
 		countDownloads: `path:"checkpoints/llm_base_x4286_c1860k.tar" OR path:"checkpoints/llm_large_x3047_c1860k.tar" OR path:"checkpoints/llm_large_x3047_c1860k/checkpoint"`,
