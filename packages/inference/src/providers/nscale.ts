@@ -57,8 +57,8 @@ export class NscaleTextToImageTask extends TaskProviderHelper implements TextToI
 		response: NscaleCloudBase64ImageGeneration,
 		url?: string,
 		headers?: HeadersInit,
-		outputType?: "url" | "blob"
-	): Promise<string | Blob> {
+		outputType?: "url" | "blob" | "json"
+	): Promise<string | Blob | Record<string, unknown>> {
 		if (
 			typeof response === "object" &&
 			"data" in response &&
@@ -67,6 +67,9 @@ export class NscaleTextToImageTask extends TaskProviderHelper implements TextToI
 			"b64_json" in response.data[0] &&
 			typeof response.data[0].b64_json === "string"
 		) {
+			if (outputType === "json") {
+				return { ...response };
+			}
 			const base64Data = response.data[0].b64_json;
 			if (outputType === "url") {
 				return `data:image/jpeg;base64,${base64Data}`;
