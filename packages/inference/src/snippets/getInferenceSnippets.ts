@@ -20,6 +20,7 @@ export type InferenceSnippetOptions = {
 	accessToken?: string;
 	directRequest?: boolean; // to bypass HF routing and call the provider directly
 	endpointUrl?: string; // to call a local endpoint directly
+	inputs?: Record<string, unknown>; // overrides the default snippet's inputs
 } & Record<string, unknown>;
 
 const PYTHON_CLIENTS = ["huggingface_hub", "fal_client", "requests", "openai"] as const;
