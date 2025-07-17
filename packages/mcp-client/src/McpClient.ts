@@ -125,14 +125,18 @@ export class McpClient {
 	): AsyncGenerator<ChatCompletionStreamOutput | ChatCompletionInputMessageTool> {
 		debug("start of single turn");
 
-		const stream = this.client.chatCompletionStream({
-			provider: this.provider,
-			model: this.model,
-			messages,
-			tools: opts.exitLoopTools ? [...opts.exitLoopTools, ...this.availableTools] : this.availableTools,
-			tool_choice: "auto",
-			signal: opts.abortSignal,
-		});
+		const stream = this.client.chatCompletionStream(
+			{
+				provider: this.provider,
+				model: this.model,
+				messages,
+				tools: opts.exitLoopTools ? [...opts.exitLoopTools, ...this.availableTools] : this.availableTools,
+				tool_choice: "auto",
+			},
+			{
+				signal: opts.abortSignal,
+			}
+		);
 
 		const message = {
 			role: "unknown",
@@ -181,9 +185,26 @@ export class McpClient {
 			yield chunk;
 		}
 
-		messages.push(message);
+		const assistantMessage: ChatCompletionInputMessage = {
+			role: "assistant",
+			content: message.content,
+		};
 
-		for (const toolCall of Object.values(finalToolCalls)) {
+		const finalToolCallValues = Object.values(finalToolCalls);
+
+		if (finalToolCallValues.length > 0) {
+			assistantMessage.tool_calls = finalToolCallValues.map((toolCall) => ({
+				id: toolCall.id,
+				type: "function",
+				function: {
+					name: toolCall.function.name ?? "unknown",
+					arguments: toolCall.function.arguments,
+				},
+			}));
+		}
+		messages.push(assistantMessage);
+
+		for (const toolCall of finalToolCallValues) {
 			const toolName = toolCall.function.name ?? "unknown";
 			/// TODO(Fix upstream type so this is always a string)^
 			const toolMessage: ChatCompletionInputMessageTool = {

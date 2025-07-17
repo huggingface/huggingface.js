@@ -1,7 +1,7 @@
 import os
 import requests
 
-API_URL = "https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.2-11B-Vision-Instruct/v1/chat/completions"
+API_URL = "https://router.huggingface.co/v1/chat/completions"
 headers = {
     "Authorization": f"Bearer {os.environ['HF_TOKEN']}",
 }
@@ -28,7 +28,7 @@ response = query({
             ]
         }
     ],
-    "model": "meta-llama/Llama-3.2-11B-Vision-Instruct"
+    "model": "meta-llama/Llama-3.2-11B-Vision-Instruct:hf-inference"
 })
 
 print(response["choices"][0]["message"])
