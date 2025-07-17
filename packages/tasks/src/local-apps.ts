@@ -301,6 +301,24 @@ const snippetDockerModelRunner = (model: ModelData, filepath?: string): string =
 	return `docker model run hf.co/${model.id}${getQuantTag(filepath)}`;
 };
 
+const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
+	const tagName = getQuantTag(filepath);
+	return [
+		{
+			title: "Run and chat with the model",
+			content: `lemonade-server run ${model.id}${tagName}`,
+		},
+		{
+			title: "Install the model ahead of time",
+			content: `lemonade-server pull ${model.id}${tagName}`,
+		},
+		{
+			title: "List all available models",
+			content: "lemonade-server list",
+		},
+	];
+};
+
 /**
  * Add your new local app here.
  *
@@ -477,6 +495,13 @@ export const LOCAL_APPS = {
 		mainTask: "text-generation",
 		displayOnModelPage: isLlamaCppGgufModel,
 		snippet: snippetDockerModelRunner,
+	},
+	lemonade: {
+		prettyLabel: "Lemonade",
+		docsUrl: "https://lemonade-server.ai",
+		mainTask: "text-generation",
+		displayOnModelPage: isLlamaCppGgufModel,
+		snippet: snippetLemonade,
 	},
 } satisfies Record<string, LocalApp>;
 
