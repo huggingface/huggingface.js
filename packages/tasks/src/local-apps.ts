@@ -306,7 +306,11 @@ const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[]
 	return [
 		{
 			title: "Run and chat with the model",
-			content: `lemonade-server run ${model.id}${tagName}`,
+			setup: "# Download Lemonade from https://lemonade-server.ai/",
+			content: [
+				`lemonade-server run ${model.id}${tagName}`,
+				"# Note: If you installed from source, use the lemonade-server-dev command instead."
+			],
 		},
 		{
 			title: "Install the model ahead of time",
