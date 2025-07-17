@@ -2,7 +2,7 @@ import os
 import json
 import requests
 
-API_URL = "https://router.huggingface.co/fireworks-ai/inference/v1/chat/completions"
+API_URL = "https://router.huggingface.co/v1/chat/completions"
 headers = {
     "Authorization": f"Bearer {os.environ['HF_TOKEN']}",
 }
@@ -34,7 +34,7 @@ chunks = query({
             ]
         }
     ],
-    "model": "<fireworks-ai alias for meta-llama/Llama-3.2-11B-Vision-Instruct>",
+    "model": "meta-llama/Llama-3.2-11B-Vision-Instruct:fireworks-ai",
     "stream": True,
 })
 

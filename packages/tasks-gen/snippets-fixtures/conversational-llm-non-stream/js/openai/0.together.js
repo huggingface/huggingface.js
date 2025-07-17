@@ -1,12 +1,12 @@
 import { OpenAI } from "openai";
 
 const client = new OpenAI({
-	baseURL: "https://router.huggingface.co/together/v1",
+	baseURL: "https://router.huggingface.co/v1",
 	apiKey: process.env.HF_TOKEN,
 });
 
 const chatCompletion = await client.chat.completions.create({
-	model: "<together alias for meta-llama/Llama-3.1-8B-Instruct>",
+	model: "meta-llama/Llama-3.1-8B-Instruct:together",
     messages: [
         {
             role: "user",
