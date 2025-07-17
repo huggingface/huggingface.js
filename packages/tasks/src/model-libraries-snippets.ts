@@ -1893,4 +1893,26 @@ audio = model.autoencoder.decode(codes)[0].cpu()
 torchaudio.save("sample.wav", audio, model.autoencoder.sampling_rate)
 `,
 ];
+
+export const vllm = (model: ModelData): string[] => [
+	`pip install --upgrade vllm
+	
+# If serving Mistral AI models, make sure to update mistral-common:
+# pip install mistral-common --upgrade
+
+# serve the model with an OpenAI-compatible API
+vllm serve ${model.id}
+
+# for Mistral AI models, use:
+# vllm serve ${model.id} --tokenizer_mode mistral --config_format mistral --load_format mistral --tool-call-parser mistral --enable-auto-tool-choice
+
+# query the model with curl in a separate terminal
+curl http://localhost:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "${model.id}",
+    "messages": [{"role": "user", "content": "What is the capital of France?"}]
+  }'`,
+];
+
 //#endregion

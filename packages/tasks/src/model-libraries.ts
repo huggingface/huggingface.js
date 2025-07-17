@@ -1196,6 +1196,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"model_vae_fp16.pt"`,
 		snippets: snippets.threedtopia_xl,
 	},
+	vllm: {
+		prettyLabel: "vLLM",
+		repoName: "vllm",
+		repoUrl: "https://github.com/vllm-project/vllm",
+		docsUrl: "https://docs.vllm.ai/en/stable/",
+		snippets: snippets.vllm,
+		countDownloads: `path:"config.json" OR path:"params.json"`,
+	},
 } satisfies Record<string, LibraryUiElement>;
 
 export type ModelLibraryKey = keyof typeof MODEL_LIBRARIES_UI_ELEMENTS;
