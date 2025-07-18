@@ -1,3 +1,5 @@
+import { createApiError } from "../error";
+import type { RepoId } from "../types/public";
 import { createXorbs } from "./createXorbs";
 import { sum } from "./sum";
 
@@ -50,10 +52,18 @@ const SHARD_MAGIC_TAG = new Uint8Array([
 
 writeHashToArray("0".repeat(64), SHARD_MAGIC_TAG, 0);
 
+interface UploadShardsParams {
+	accessToken: string | undefined;
+	hubUrl: string;
+	customFetch: typeof fetch;
+	repo: RepoId;
+	rev: string;
+}
+
 /**
  * Outputs the file sha256 after their xorbs/shards have been uploaded.
  */
-export async function uploadShards(source: AsyncGenerator<Blob>): Promise<string[]> {
+export async function uploadShards(source: AsyncGenerator<Blob>, params: UploadShardsParams): Promise<string[]> {
 	const xorbHashes: Array<string> = [];
 
 	const fileInfoSection = new Uint8Array(Math.floor(SHARD_MAX_SIZE - SHARD_HEADER_SIZE - SHARD_FOOTER_SIZE) / 2);
@@ -99,7 +109,7 @@ export async function uploadShards(source: AsyncGenerator<Blob>): Promise<string
 					xorbViewOffset += 8;
 				}
 
-				await uploadXorb(output);
+				await uploadXorb(output, params);
 				//^ Todo: queue it and do not await it
 				break;
 			}
@@ -279,7 +289,7 @@ export async function uploadShards(source: AsyncGenerator<Blob>): Promise<string
 
 	// If un-uploaded data remains, upload it
 	if (xorbViewOffset || fileViewOffset) {
-		await uploadShard(createShard());
+		await uploadShard(createShard(), params);
 	}
 
 	return fileShas;
@@ -293,12 +303,122 @@ function writeHashToArray(hash: string, array: Uint8Array, offset: number) {
 	}
 }
 
-async function uploadXorb(xorb: { hash: string; xorb: Uint8Array }) {
-	void xorb;
-	// todo
+async function uploadXorb(xorb: { hash: string; xorb: Uint8Array }, params: UploadShardsParams) {
+	const token = await getAccessToken(params);
+
+	const resp = await params.customFetch(`${token.casUrl}/xorb/default/${xorb.hash}`, {
+		method: "PUT",
+		body: xorb.xorb,
+		headers: {
+			Authorization: `Bearer ${token.accessToken}`,
+		},
+	});
+
+	if (!resp.ok) {
+		throw await createApiError(resp);
+	}
 }
 
-async function uploadShard(shard: Uint8Array) {
-	void shard;
-	// todo
+async function uploadShard(shard: Uint8Array, params: UploadShardsParams) {
+	const token = await getAccessToken(params);
+	const shardHash = "0".repeat(64);
+
+	const resp = await params.customFetch(`${token.casUrl}/shard/default/${shardHash}`, {
+		method: "PUT",
+		body: shard,
+		headers: {
+			Authorization: `Bearer ${token.accessToken}`,
+		},
+	});
+
+	if (!resp.ok) {
+		throw await createApiError(resp);
+	}
+}
+
+const JWT_SAFETY_PERIOD = 60_000;
+const JWT_CACHE_SIZE = 1_000;
+
+function cacheKey(params: Omit<UploadShardsParams, "customFetch">): string {
+	return JSON.stringify([params.hubUrl, params.repo, params.rev, params.accessToken]);
+}
+
+const jwtPromises: Map<string, Promise<{ accessToken: string; casUrl: string }>> = new Map();
+/**
+ * Cache to store JWTs, to avoid making many auth requests when downloading multiple files from the same repo
+ */
+const jwts: Map<
+	string,
+	{
+		accessToken: string;
+		expiresAt: Date;
+		casUrl: string;
+	}
+> = new Map();
+
+async function getAccessToken(params: UploadShardsParams): Promise<{ accessToken: string; casUrl: string }> {
+	const key = cacheKey(params);
+
+	const jwt = jwts.get(key);
+
+	if (jwt && jwt.expiresAt > new Date(Date.now() + JWT_SAFETY_PERIOD)) {
+		return { accessToken: jwt.accessToken, casUrl: jwt.casUrl };
+	}
+
+	// If we already have a promise for this repo, return it
+	const existingPromise = jwtPromises.get(key);
+	if (existingPromise) {
+		return existingPromise;
+	}
+
+	const promise = (async () => {
+		const resp = await params.customFetch(
+			`${params.hubUrl}/api/${params.repo.type}s/${params.repo.name}/xet-write-token/${params.rev}`,
+			{
+				method: "POST",
+				headers: params.accessToken
+					? {
+							Authorization: `Bearer ${params.accessToken}`,
+					  }
+					: {},
+			}
+		);
+
+		if (!resp.ok) {
+			throw await createApiError(resp);
+		}
+
+		const json: { accessToken: string; casUrl: string; exp: number } = await resp.json();
+		const jwt = {
+			accessToken: json.accessToken,
+			expiresAt: new Date(json.exp * 1000),
+			casUrl: json.casUrl,
+		};
+
+		jwtPromises.delete(key);
+
+		for (const [key, value] of jwts.entries()) {
+			if (value.expiresAt < new Date(Date.now() + JWT_SAFETY_PERIOD)) {
+				jwts.delete(key);
+			} else {
+				break;
+			}
+		}
+		if (jwts.size >= JWT_CACHE_SIZE) {
+			const keyToDelete = jwts.keys().next().value;
+			if (keyToDelete) {
+				jwts.delete(keyToDelete);
+			}
+		}
+		jwts.set(key, jwt);
+
+		return {
+			accessToken: json.accessToken,
+			casUrl: json.casUrl,
+		};
+	})();
+
+	jwtPromises.set(key, promise);
+
+	return promise;
 }
