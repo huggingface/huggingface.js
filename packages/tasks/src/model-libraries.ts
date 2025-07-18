@@ -529,6 +529,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "KRONOS",
 		repoUrl: "https://github.com/mahmoodlab/KRONOS",
 		filter: false,
+		countDownloads: `path_extension:"pt"`,
 	},
 	k2: {
 		prettyLabel: "K2",
