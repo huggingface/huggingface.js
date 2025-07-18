@@ -389,6 +389,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"pytorch_model.bin"`,
 	},
+	fme: {
+		prettyLabel: "Full Model Emulation",
+		repoName: "Full Model Emulation",
+		repoUrl: "https://github.com/ai2cm/ace",
+		docsUrl: "https://ai2-climate-emulator.readthedocs.io/en/latest/",
+		filter: false,
+		countDownloads: `path_extension:"tar"`,
+	},
 	"gemma.cpp": {
 		prettyLabel: "gemma.cpp",
 		repoName: "gemma.cpp",
@@ -429,6 +437,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "Hallo",
 		repoUrl: "https://github.com/fudan-generative-vision/hallo",
 		countDownloads: `path:"hallo/net.pth"`,
+	},
+	hermes: {
+		prettyLabel: "HERMES",
+		repoName: "HERMES",
+		repoUrl: "https://github.com/LMD0311/HERMES",
+		filter: false,
+		countDownloads: `path:"ckpt/hermes_final.pth"`,
 	},
 	hezar: {
 		prettyLabel: "Hezar",
@@ -509,6 +524,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.kimi_audio,
 		filter: false,
 	},
+	kronos: {
+		prettyLabel: "KRONOS",
+		repoName: "KRONOS",
+		repoUrl: "https://github.com/mahmoodlab/KRONOS",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
 	k2: {
 		prettyLabel: "K2",
 		repoName: "k2",
@@ -564,6 +586,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "MAGI-1",
 		repoUrl: "https://github.com/SandAI-org/MAGI-1",
 		countDownloads: `path:"ckpt/vae/config.json"`,
+	},
+	"magenta-realtime": {
+		prettyLabel: "Magenta RT",
+		repoName: "Magenta RT",
+		repoUrl: "https://github.com/magenta/magenta-realtime",
+		countDownloads: `path:"checkpoints/llm_base_x4286_c1860k.tar" OR path:"checkpoints/llm_large_x3047_c1860k.tar" OR path:"checkpoints/llm_large_x3047_c1860k/checkpoint"`,
 	},
 	"mamba-ssm": {
 		prettyLabel: "MambaSSM",
