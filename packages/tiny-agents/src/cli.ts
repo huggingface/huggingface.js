@@ -110,14 +110,14 @@ async function main() {
 			for (const server of config.servers) {
 				if (server.type === "stdio" && server.env) {
 					for (const [key, value] of Object.entries(server.env)) {
-						if (value.includes(envSpecialValue)) {
+						if (value === envSpecialValue) {
 							inputVars.add(key);
 						}
 					}
 				}
 				if ((server.type === "http" || server.type === "sse") && server.headers) {
 					for (const [key, value] of Object.entries(server.headers)) {
-						if (value.includes(envSpecialValue)) {
+						if (value === envSpecialValue) {
 							inputVars.add(key);
 						}
 					}
@@ -165,14 +165,14 @@ async function main() {
 			for (const server of config.servers) {
 				if (server.type === "stdio" && server.env) {
 					for (const [key, value] of Object.entries(server.env)) {
-						if (value.includes(envSpecialValue)) {
+						if (value === envSpecialValue) {
 							server.env[key] = value.replace(envSpecialValue, finalValue);
 						}
 					}
 				}
 				if ((server.type === "http" || server.type === "sse") && server.headers) {
 					for (const [key, value] of Object.entries(server.headers)) {
-						if (value.includes(envSpecialValue)) {
+						if (value === envSpecialValue) {
 							server.headers[key] = value.replace(envSpecialValue, finalValue);
 						}
 					}
