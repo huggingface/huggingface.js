@@ -303,18 +303,19 @@ const snippetDockerModelRunner = (model: ModelData, filepath?: string): string =
 
 const snippetLemonade = (model: ModelData, filepath?: string): LocalAppSnippet[] => {
 	const tagName = getQuantTag(filepath);
+	const modelName = model.id.split('/')[1];
 	return [
 		{
-			title: "Run and chat with the model",
+			title: "Pull the model",
 			setup: "# Download Lemonade from https://lemonade-server.ai/",
 			content: [
-				`lemonade-server run ${model.id}${tagName}`,
-				"# Note: If you installed from source, use the lemonade-server-dev command instead."
-			],
+				`lemonade-server pull user.${modelName} --checkpoint ${model.id}${tagName} --recipe llamacpp`,
+				"# Note: If you installed from source, use the lemonade-server-dev command instead.",
+			].join("\n"),
 		},
 		{
-			title: "Install the model ahead of time",
-			content: `lemonade-server pull ${model.id}${tagName}`,
+			title: "Run and chat with the model",
+			content: `lemonade-server run user.${modelName}`,
 		},
 		{
 			title: "List all available models",
