@@ -434,8 +434,285 @@ pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
 pipe.load_textual_inversion("${model.id}")`,
 ];
 
+const diffusers_flux_fill = (model: ModelData) => [
+	`import torch
+from diffusers import FluxFillPipeline
+from diffusers.utils import load_image
+
+image = load_image("https://huggingface.co/datasets/diffusers/diffusers-images-docs/resolve/main/cup.png")
+mask = load_image("https://huggingface.co/datasets/diffusers/diffusers-images-docs/resolve/main/cup_mask.png")
+
+pipe = FluxFillPipeline.from_pretrained("${model.id}", torch_dtype=torch.bfloat16).to("cuda")
+image = pipe(
+    prompt="a white paper cup",
+    image=image,
+    mask_image=mask,
+    height=1632,
+    width=1232,
+    guidance_scale=30,
+    num_inference_steps=50,
+    max_sequence_length=512,
+    generator=torch.Generator("cpu").manual_seed(0)
+).images[0]
+image.save(f"flux-fill-dev.png")`,
+];
+
+const diffusers_controlnet_union = (model: ModelData) => [
+	`# Clone the repository first:
+# git clone https://github.com/xinsir6/ControlNetPlus.git
+# cd ControlNetPlus
+
+import os
+import cv2
+import torch
+import random
+import numpy as np
+from PIL import Image
+from diffusers import AutoencoderKL
+from diffusers import EulerAncestralDiscreteScheduler
+from models.controlnet_union import ControlNetModel_Union
+from pipeline.pipeline_controlnet_union_sd_xl import StableDiffusionXLControlNetUnionPipeline
+
+
+def HWC3(x):
+    assert x.dtype == np.uint8
+    if x.ndim == 2:
+        x = x[:, :, None]
+    assert x.ndim == 3
+    H, W, C = x.shape
+    assert C == 1 or C == 3 or C == 4
+    if C == 3:
+        return x
+    if C == 1:
+        return np.concatenate([x, x, x], axis=2)
+    if C == 4:
+        color = x[:, :, 0:3].astype(np.float32)
+        alpha = x[:, :, 3:4].astype(np.float32) / 255.0
+        y = color * alpha + 255.0 * (1.0 - alpha)
+        y = y.clip(0, 255).astype(np.uint8)
+        return y
+
+
+device=torch.device('cuda:0')
+
+eulera_scheduler = EulerAncestralDiscreteScheduler.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", subfolder="scheduler")
+
+# when test with other base model, you need to change the vae also.
+vae = AutoencoderKL.from_pretrained("madebyollin/sdxl-vae-fp16-fix", torch_dtype=torch.float16)
+
+controlnet_model = ControlNetModel_Union.from_pretrained("${model.id}", torch_dtype=torch.float16, use_safetensors=True)
+
+pipe = StableDiffusionXLControlNetUnionPipeline.from_pretrained(
+    "stabilityai/stable-diffusion-xl-base-1.0", controlnet=controlnet_model, 
+    vae=vae,
+    torch_dtype=torch.float16,
+    scheduler=eulera_scheduler,
+)
+
+pipe = pipe.to(device)
+
+
+prompt = "your prompt, the longer the better, you can describe it as detail as possible"
+negative_prompt = 'longbody, lowres, bad anatomy, bad hands, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality'
+
+
+controlnet_img = cv2.imread("your image path")
+height, width, _  = controlnet_img.shape
+ratio = np.sqrt(1024. * 1024. / (width * height))
+new_width, new_height = int(width * ratio), int(height * ratio)
+controlnet_img = cv2.resize(controlnet_img, (new_width, new_height))
+
+controlnet_img = cv2.Canny(controlnet_img, 100, 200)
+controlnet_img = HWC3(controlnet_img)
+controlnet_img = Image.fromarray(controlnet_img)
+
+
+seed = random.randint(0, 2147483647)
+generator = torch.Generator('cuda').manual_seed(seed)
+
+
+# 0 -- openpose
+# 1 -- depth
+# 2 -- hed/pidi/scribble/ted
+# 3 -- canny/lineart/anime_lineart/mlsd
+# 4 -- normal
+# 5 -- segment
+images = pipe(prompt=[prompt]*1,
+            image_list=[0, 0, 0, controlnet_img, 0, 0], 
+            negative_prompt=[negative_prompt]*1,
+            generator=generator,
+            width=new_width, 
+            height=new_height,
+            num_inference_steps=30,
+            union_control=True,
+            union_control_type=torch.Tensor([0, 0, 0, 1, 0, 0]),
+            ).images
+
+images[0].save(f"image.png")`,
+];
+
+const diffusers_ip_adapter_faceid = (model: ModelData) => [
+	`# pip install diffusers transformers accelerate insightface onnxruntime-gpu opencv-python
+import torch
+import cv2
+import numpy as np
+from diffusers import StableDiffusionPipeline, DDIMScheduler
+from diffusers.utils import load_image
+from transformers import CLIPVisionModelWithProjection
+from insightface.app import FaceAnalysis
+
+# Load CLIP image encoder
+image_encoder = CLIPVisionModelWithProjection.from_pretrained(
+    "laion/CLIP-ViT-H-14-laion2B-s32B-b79K",
+    torch_dtype=torch.float16,
+)
+
+# Initialize pipeline with image encoder
+pipeline = StableDiffusionPipeline.from_pretrained(
+    "stable-diffusion-v1-5/stable-diffusion-v1-5",
+    image_encoder=image_encoder,
+    torch_dtype=torch.float16
+).to("cuda")
+
+# Set scheduler
+pipeline.scheduler = DDIMScheduler.from_config(pipeline.scheduler.config)
+
+# Load IP-Adapter FaceID Plus
+pipeline.load_ip_adapter(
+    "${model.id}",
+    subfolder=None,
+    weight_name="ip-adapter-faceid-plus_sd15.bin"
+)
+
+# Set adapter scale
+pipeline.set_ip_adapter_scale(0.7)
+
+# Load face image
+face_image = load_image("https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/diffusers/ip_mask_girl1.png")
+
+# Initialize FaceAnalysis
+app = FaceAnalysis(name="buffalo_l", providers=['CUDAExecutionProvider', 'CPUExecutionProvider'])
+app.prepare(ctx_id=0, det_size=(640, 640))
+
+# Extract face embeddings
+image_cv2 = cv2.cvtColor(np.asarray(face_image), cv2.COLOR_BGR2RGB)
+faces = app.get(image_cv2)
+
+# Prepare face embeddings
+if len(faces) > 0:
+    ref_images_embeds = []
+    face_embed = torch.from_numpy(faces[0].normed_embedding)
+    ref_images_embeds.append(face_embed.unsqueeze(0))
+    
+    ref_images_embeds = torch.stack(ref_images_embeds, dim=0).unsqueeze(0)
+    neg_ref_images_embeds = torch.zeros_like(ref_images_embeds)
+    id_embeds = torch.cat([neg_ref_images_embeds, ref_images_embeds]).to(dtype=torch.float16, device="cuda")
+    
+    # Also prepare the face image for CLIP encoding
+    # FaceID Plus uses both face embeddings AND the original image
+    clip_embeds = pipeline.prepare_ip_adapter_image_embeds(
+        ip_adapter_image=[face_image],
+        ip_adapter_image_embeds=None,
+        device="cuda",
+        num_images_per_prompt=1,
+        do_classifier_free_guidance=True,
+    )
+    
+    # Generate image with both embeddings
+    generated_image = pipeline(
+        prompt="A professional portrait photo of a woman, studio lighting, high quality",
+        ip_adapter_image_embeds=[id_embeds, clip_embeds],
+        negative_prompt="monochrome, lowres, bad anatomy, worst quality, low quality, blurry",
+        num_inference_steps=30,
+        guidance_scale=7.5,
+    ).images[0]
+    
+    # Save the image
+    generated_image.save("faceid_plus_output.png")
+else:
+    print("No face detected in the image")`,
+];
+
+const diffusers_inpainting = (model: ModelData) => [
+	`import torch
+from diffusers import AutoPipelineForInpainting
+from diffusers.utils import load_image
+
+pipe = AutoPipelineForInpainting.from_pretrained("${model.id}", torch_dtype=torch.float16, variant="fp16").to("cuda")
+
+img_url = "https://raw.githubusercontent.com/CompVis/latent-diffusion/main/data/inpainting_examples/overture-creations-5sI6fQgYIuo.png"
+mask_url = "https://raw.githubusercontent.com/CompVis/latent-diffusion/main/data/inpainting_examples/overture-creations-5sI6fQgYIuo_mask.png"
+
+image = load_image(img_url).resize((1024, 1024))
+mask_image = load_image(mask_url).resize((1024, 1024))
+
+prompt = "a tiger sitting on a park bench"
+generator = torch.Generator(device="cuda").manual_seed(0)
+
+image = pipe(
+  prompt=prompt,
+  image=image,
+  mask_image=mask_image,
+  guidance_scale=8.0,
+  num_inference_steps=20,  # steps between 15 and 30 work well for us
+  strength=0.99,  # make sure to use \`strength\` below 1.0
+  generator=generator,
+).images[0]`,
+];
+
+const diffusers_omnigen2 = (model: ModelData) => [
+	`# 1. Clone the repository from GitHub and navigate into the directory
+# git clone https://github.com/VectorSpaceLab/OmniGen2.git
+# cd OmniGen2
+
+# 2. Install the core dependencies
+# pip install torch torchvision
+# pip install diffusers transformers accelerate peft gradio python-dotenv omegaconf einops
+
+# 3. (Optional) For significantly improved performance, install flash-attention.
+# Please check the flash-attn repository for hardware and CUDA version compatibility.
+# pip install flash-attn --no-build-isolation
+
+import torch
+from omnigen2.pipelines.omnigen2.pipeline_omnigen2 import OmniGen2Pipeline
+
+# 1. Load the pre-trained OmniGen2 pipeline onto a CUDA-enabled GPU.
+#    Using bfloat16 is recommended for better performance and memory efficiency.
+print("Loading model...")
+pipe = OmniGen2Pipeline.from_pretrained(
+    "${model.id}", 
+    torch_dtype=torch.bfloat16
+)
+pipe.to("cuda")
+
+# 2. Define the generation prompt and set a seed for reproducibility.
+prompt = "A photorealistic image of a cat wearing a wizard hat, detailed, high quality."
+
+print(f"Generating image for prompt: '{prompt}'")
+result = pipe(
+    prompt=prompt,
+    num_inference_steps=50,
+)
+image = result.images[0]
+
+output_path = "wizard_cat.png"
+image.save(output_path)
+print(f"Image successfully saved to {output_path}")`,
+];
+
 export const diffusers = (model: ModelData): string[] => {
-	if (model.tags.includes("controlnet")) {
+	if (model.id === "xinsir/controlnet-union-sdxl-1.0") {
+		return diffusers_controlnet_union(model);
+	} else if (model.id === "h94/IP-Adapter-FaceID") {
+		return diffusers_ip_adapter_faceid(model);
+	} else if (
+		model.tags.includes("StableDiffusionInpaintPipeline") ||
+		model.tags.includes("StableDiffusionXLInpaintPipeline")
+	) {
+		return diffusers_inpainting(model);
+	} else if (model.tags.includes("OmniGen2Pipeline")) {
+		return diffusers_omnigen2(model);
+	} else if (model.tags.includes("controlnet")) {
 		return diffusers_controlnet(model);
 	} else if (model.tags.includes("lora")) {
 		if (model.pipeline_tag === "image-to-image") {
@@ -449,6 +726,8 @@ export const diffusers = (model: ModelData): string[] => {
 		}
 	} else if (model.tags.includes("textual_inversion")) {
 		return diffusers_textual_inversion(model);
+	} else if (model.tags.includes("FluxFillPipeline")) {
+		return diffusers_flux_fill(model);
 	} else if (model.pipeline_tag === "image-to-video") {
 		return diffusers_image_to_video(model);
 	} else if (model.pipeline_tag === "image-to-image") {
@@ -640,6 +919,59 @@ pipeline = Pipeline(
             ModelClass, {"model": "${model.id}"}, {}
         ),
     ])`,
+];
+
+export const hunyuan3d_2 = (model: ModelData): string[] => [
+	`# In order to use this model, the Hunyuan3D-2 repo must be installed.
+# git clone https://github.com/Tencent-Hunyuan/Hunyuan3D-2.git
+# cd Hunyuan3D-2
+# pip install -r requirements.txt
+# pip install -e .
+# Install custom CUDA kernels for texture generation
+# python hy3dgen/texgen/custom_rasterizer/setup.py install
+# python hy3dgen/texgen/differentiable_renderer/setup.py install
+# cd ..
+
+# Note: This model requires a GPU with at least 16GB of VRAM.
+
+import torch
+from hy3dgen.shapegen import Hunyuan3DDiTFlowMatchingPipeline
+from hy3dgen.texgen import Hunyuan3DPaintPipeline
+from PIL import Image
+import requests
+from io import BytesIO
+
+# Ensure you're on a GPU runtime
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
+# Load a sample image
+image_url = f"https://raw.githubusercontent.com/Tencent-Hunyuan/Hunyuan3D-2.1/refs/heads/main/assets/example_images/004.png"
+response = requests.get(image_url)
+image = Image.open(BytesIO(response.content)).convert("RGB")
+
+# 1. Generate the 3D shape from the image
+# Use torch.float16 for lower VRAM usage.
+shape_pipeline = Hunyuan3DDiTFlowMatchingPipeline.from_pretrained(
+    "${model.id}",
+    torch_dtype=torch.float16
+)
+shape_pipeline.to(device)
+mesh = shape_pipeline(image=image)[0]
+
+# 2. Generate the texture for the mesh
+texture_pipeline = Hunyuan3DPaintPipeline.from_pretrained(
+    "${model.id}",
+    torch_dtype=torch.float16
+)
+texture_pipeline.to(device)
+textured_mesh = texture_pipeline(mesh, image=image)
+
+# 3. Save the final textured mesh
+output_path = "textured_mesh.glb"
+textured_mesh.export(output_path)
+
+print(f"Textured mesh saved to {output_path}")
+`,
 ];
 
 export const keras = (model: ModelData): string[] => [

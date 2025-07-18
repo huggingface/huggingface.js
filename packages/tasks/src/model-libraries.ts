@@ -470,6 +470,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "Hunyuan3D-2",
 		repoUrl: "https://github.com/Tencent/Hunyuan3D-2",
 		countDownloads: `path_filename:"model_index" OR path_filename:"config"`,
+		snippets: snippets.hunyuan3d_2,
 	},
 	imstoucan: {
 		prettyLabel: "IMS Toucan",
