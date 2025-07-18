@@ -207,10 +207,28 @@ curl -X POST "http://localhost:8000/v1/completions" \\
 		"temperature": 0.5
 	}'`;
 	const runCommand = model.tags.includes("conversational") ? runCommandInstruct : runCommandNonInstruct;
+
+	let setup;
+	let dockerCommand;
+	
+	if (model.tags.includes("mistral-common")) {
+		setup = [
+			"# Install vLLM from pip:",
+			"pip install vllm",
+			"# Make sure you have the latest version of mistral-common installed:",
+			"pip install --upgrade mistral-common"
+		].join("");
+		dockerCommand = `# Load and run the model:\ndocker exec -it my_vllm_container bash -c "vllm serve ${model.id} --tokenizer_mode mistral --config_format mistral --load_format mistral --tool-call-parser mistral --enable-auto-tool-choice"`;
+	}
+	else {
+		setup = ["# Install vLLM from pip:", "pip install vllm"].join("");
+		dockerCommand = `# Load and run the model:\ndocker exec -it my_vllm_container bash -c "vllm serve ${model.id}"`;
+	}
+
 	return [
 		{
 			title: "Install from pip",
-			setup: ["# Install vLLM from pip:", "pip install vllm"].join("\n"),
+			setup: setup,
 			content: [`# Load and run the model:\nvllm serve "${model.id}"`, runCommand],
 		},
 		{
@@ -227,7 +245,7 @@ curl -X POST "http://localhost:8000/v1/completions" \\
 				`	--model ${model.id}`,
 			].join("\n"),
 			content: [
-				`# Load and run the model:\ndocker exec -it my_vllm_container bash -c "vllm serve ${model.id}"`,
+				dockerCommand,
 				runCommand,
 			],
 		},
