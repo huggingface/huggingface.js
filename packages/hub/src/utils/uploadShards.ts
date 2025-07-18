@@ -323,7 +323,7 @@ async function uploadShard(shard: Uint8Array, params: UploadShardsParams) {
 	const token = await getAccessToken(params);
 	const shardHash = "0".repeat(64);
 
-	const resp = await params.customFetch(`${token.casUrl}/shard/default/${shardHash}`, {
+	const resp = await params.customFetch(`${token.casUrl}/shard/default-merkledb/${shardHash}`, {
 		method: "PUT",
 		body: shard,
 		headers: {
