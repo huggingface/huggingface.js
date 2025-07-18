@@ -630,6 +630,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path_extension:"ckpt"`,
 	},
+	mistral_common: {
+		prettyLabel: "mistral-common",
+		repoName: "mistral-common",
+		repoUrl: "https://github.com/mistralai/mistral-common",
+		docsUrl: "https://mistralai.github.io/mistral-common/",
+		snippets: snippets.mistral_common,
+		countDownloads: `path:"config.json" OR path:"params.json"`,
+	},
 	mitie: {
 		prettyLabel: "MITIE",
 		repoName: "MITIE",
@@ -1195,14 +1203,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"model_vae_fp16.pt"`,
 		snippets: snippets.threedtopia_xl,
-	},
-	vllm: {
-		prettyLabel: "vLLM",
-		repoName: "vllm",
-		repoUrl: "https://github.com/vllm-project/vllm",
-		docsUrl: "https://docs.vllm.ai/en/stable/",
-		snippets: snippets.vllm,
-		countDownloads: `path:"config.json" OR path:"params.json"`,
 	},
 } satisfies Record<string, LibraryUiElement>;
 

@@ -1894,19 +1894,17 @@ torchaudio.save("sample.wav", audio, model.autoencoder.sampling_rate)
 `,
 ];
 
-export const vllm = (model: ModelData): string[] => [
-	`pip install --upgrade vllm
-	
-# If serving Mistral AI models, make sure to update mistral-common:
-# pip install mistral-common --upgrade
+export const mistral_common = (model: ModelData): string[] => [
+	`# We recommend to use vLLM to serve Mistral AI models.
+pip install vllm
 
-# serve the model with an OpenAI-compatible API
-vllm serve ${model.id}
+# Make sure to have installed the latest version of mistral-common.
+pip install --upgrade mistral-common[image,audio]
 
-# for Mistral AI models, use:
-# vllm serve ${model.id} --tokenizer_mode mistral --config_format mistral --load_format mistral --tool-call-parser mistral --enable-auto-tool-choice
+# Serve the model with an OpenAI-compatible API.
+vllm serve ${model.id} --tokenizer_mode mistral --config_format mistral --load_format mistral --tool-call-parser mistral --enable-auto-tool-choice
 
-# query the model with curl in a separate terminal
+# Query the model with curl in a separate terminal.
 curl http://localhost:8000/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
