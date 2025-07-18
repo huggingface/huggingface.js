@@ -434,8 +434,63 @@ pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
 pipe.load_textual_inversion("${model.id}")`,
 ];
 
+const diffusers_flux_fill = (model: ModelData) => [
+	`import torch
+from diffusers import FluxFillPipeline
+from diffusers.utils import load_image
+
+image = load_image("https://huggingface.co/datasets/diffusers/diffusers-images-docs/resolve/main/cup.png")
+mask = load_image("https://huggingface.co/datasets/diffusers/diffusers-images-docs/resolve/main/cup_mask.png")
+
+pipe = FluxFillPipeline.from_pretrained("${model.id}", torch_dtype=torch.bfloat16).to("cuda")
+image = pipe(
+    prompt="a white paper cup",
+    image=image,
+    mask_image=mask,
+    height=1632,
+    width=1232,
+    guidance_scale=30,
+    num_inference_steps=50,
+    max_sequence_length=512,
+    generator=torch.Generator("cpu").manual_seed(0)
+).images[0]
+image.save(f"flux-fill-dev.png")`,
+];
+
+const diffusers_inpainting = (model: ModelData) => [
+	`import torch
+from diffusers import AutoPipelineForInpainting
+from diffusers.utils import load_image
+
+pipe = AutoPipelineForInpainting.from_pretrained("${model.id}", torch_dtype=torch.float16, variant="fp16").to("cuda")
+
+img_url = "https://raw.githubusercontent.com/CompVis/latent-diffusion/main/data/inpainting_examples/overture-creations-5sI6fQgYIuo.png"
+mask_url = "https://raw.githubusercontent.com/CompVis/latent-diffusion/main/data/inpainting_examples/overture-creations-5sI6fQgYIuo_mask.png"
+
+image = load_image(img_url).resize((1024, 1024))
+mask_image = load_image(mask_url).resize((1024, 1024))
+
+prompt = "a tiger sitting on a park bench"
+generator = torch.Generator(device="cuda").manual_seed(0)
+
+image = pipe(
+  prompt=prompt,
+  image=image,
+  mask_image=mask_image,
+  guidance_scale=8.0,
+  num_inference_steps=20,  # steps between 15 and 30 work well for us
+  strength=0.99,  # make sure to use \`strength\` below 1.0
+  generator=generator,
+).images[0]`,
+];
+
 export const diffusers = (model: ModelData): string[] => {
-	if (model.tags.includes("controlnet")) {
+	if (
+		model.tags.includes("StableDiffusionInpaintPipeline") ||
+		model.tags.includes("StableDiffusionXLInpaintPipeline")
+	) {
+		return diffusers_inpainting(model);
+	} else if (model.tags.includes("controlnet")) {
 		return diffusers_controlnet(model);
 	} else if (model.tags.includes("lora")) {
 		if (model.pipeline_tag === "image-to-image") {
@@ -449,6 +504,8 @@ export const diffusers = (model: ModelData): string[] => {
 		}
 	} else if (model.tags.includes("textual_inversion")) {
 		return diffusers_textual_inversion(model);
+	} else if (model.tags.includes("FluxFillPipeline")) {
+		return diffusers_flux_fill(model);
 	} else if (model.pipeline_tag === "image-to-video") {
 		return diffusers_image_to_video(model);
 	} else if (model.pipeline_tag === "image-to-image") {
@@ -640,6 +697,59 @@ pipeline = Pipeline(
             ModelClass, {"model": "${model.id}"}, {}
         ),
     ])`,
+];
+
+export const hunyuan3d_2 = (model: ModelData): string[] => [
+	`# In order to use this model, the Hunyuan3D-2 repo must be installed.
+# git clone https://github.com/Tencent-Hunyuan/Hunyuan3D-2.git
+# cd Hunyuan3D-2
+# pip install -r requirements.txt
+# pip install -e .
+# Install custom CUDA kernels for texture generation
+# python hy3dgen/texgen/custom_rasterizer/setup.py install
+# python hy3dgen/texgen/differentiable_renderer/setup.py install
+# cd ..
+
+# Note: This model requires a GPU with at least 16GB of VRAM.
+
+import torch
+from hy3dgen.shapegen import Hunyuan3DDiTFlowMatchingPipeline
+from hy3dgen.texgen import Hunyuan3DPaintPipeline
+from PIL import Image
+import requests
+from io import BytesIO
+
+# Ensure you're on a GPU runtime
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
+# Load a sample image
+image_url = f"https://raw.githubusercontent.com/Tencent-Hunyuan/Hunyuan3D-2.1/refs/heads/main/assets/example_images/004.png"
+response = requests.get(image_url)
+image = Image.open(BytesIO(response.content)).convert("RGB")
+
+# 1. Generate the 3D shape from the image
+# Use torch.float16 for lower VRAM usage.
+shape_pipeline = Hunyuan3DDiTFlowMatchingPipeline.from_pretrained(
+    "${model.id}",
+    torch_dtype=torch.float16
+)
+shape_pipeline.to(device)
+mesh = shape_pipeline(image=image)[0]
+
+# 2. Generate the texture for the mesh
+texture_pipeline = Hunyuan3DPaintPipeline.from_pretrained(
+    "${model.id}",
+    torch_dtype=torch.float16
+)
+texture_pipeline.to(device)
+textured_mesh = texture_pipeline(mesh, image=image)
+
+# 3. Save the final textured mesh
+output_path = "textured_mesh.glb"
+textured_mesh.export(output_path)
+
+print(f"Textured mesh saved to {output_path}")
+`,
 ];
 
 export const keras = (model: ModelData): string[] => [
