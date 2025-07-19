@@ -132,39 +132,21 @@ export interface ChatCompletionInputToolCall {
 export interface ChatCompletionInputFunctionDefinition {
 	description?: string;
 	name: string;
-	parameters?: unknown;
+	parameters: unknown;
 	[property: string]: unknown;
 }
 export interface ChatCompletionInputGrammarType {
-	json_schema?: ChatCompletionInputJSONSchemaConfig;
 	type: ChatCompletionInputGrammarTypeType;
+	/**
+	 * A string that represents a [JSON Schema](https://json-schema.org/).
+	 *
+	 * JSON Schema is a declarative language that allows to annotate JSON documents
+	 * with types and descriptions.
+	 */
+	value: unknown;
 	[property: string]: unknown;
 }
-export interface ChatCompletionInputJSONSchemaConfig {
-	/**
-	 * A description of what the response format is for, used by the model to determine how to
-	 * respond in the format.
-	 */
-	description?: string;
-	/**
-	 * The name of the response format.
-	 */
-	name: string;
-	/**
-	 * The schema for the response format, described as a JSON Schema object. Learn how to build
-	 * JSON schemas [here](https://json-schema.org/).
-	 */
-	schema?: {
-		[key: string]: unknown;
-	};
-	/**
-	 * Whether to enable strict schema adherence when generating the output. If set to true, the
-	 * model will always follow the exact schema defined in the `schema` field.
-	 */
-	strict?: boolean;
-	[property: string]: unknown;
-}
-export type ChatCompletionInputGrammarTypeType = "text" | "json_schema" | "json_object";
+export type ChatCompletionInputGrammarTypeType = "json" | "regex" | "json_schema";
 export interface ChatCompletionInputStreamOptions {
 	/**
 	 * If set, an additional chunk will be streamed before the data: [DONE] message. The usage
