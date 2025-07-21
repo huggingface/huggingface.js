@@ -24,7 +24,6 @@ export async function* createXorbs(fileSources: AsyncGenerator<Blob>): AsyncGene
 	| {
 			type: "file";
 			hash: string;
-			verificationHash: string;
 			sha256: string;
 			representation: Array<{
 				xorbId: number;
@@ -32,6 +31,7 @@ export async function* createXorbs(fileSources: AsyncGenerator<Blob>): AsyncGene
 				endOffset: number;
 				/** Unpacked length */
 				length: number;
+				rangeHash: string;
 			}>;
 	  },
 	void,
@@ -55,7 +55,14 @@ export async function* createXorbs(fileSources: AsyncGenerator<Blob>): AsyncGene
 
 			const reader = fileSource.stream().getReader();
 			const fileChunks: Array<{ hash: string; length: number }> = [];
-			const fileRepresentation: Array<{ xorbId: number; offset: number; endOffset: number; length: number }> = [];
+			let currentChunkRangeBeginning = 0;
+			const fileRepresentation: Array<{
+				xorbId: number;
+				offset: number;
+				endOffset: number;
+				length: number;
+				rangeHash: string;
+			}> = [];
 
 			const sha256 = await sha256Module.createSHA256();
 			sha256.init();
@@ -109,13 +116,25 @@ export async function* createXorbs(fileSources: AsyncGenerator<Blob>): AsyncGene
 							offset: initialXorbOffset,
 							endOffset: xorbOffset - initialXorbOffset,
 							length: chunk.length,
+							rangeHash: "",
 						});
+						currentChunkRangeBeginning = fileChunks.length - 1;
 					} else {
 						if (lastRep.xorbId === xorbId) {
 							lastRep.endOffset = xorbOffset - lastRep.offset;
 							lastRep.length += chunk.length;
 						} else {
-							fileRepresentation.push({ xorbId, offset: 0, endOffset: xorbOffset, length: chunk.length });
+							lastRep.rangeHash = chunkModule.compute_range_verification_hash(
+								fileChunks.slice(currentChunkRangeBeginning, -1).map((x) => x.hash, -1)
+							);
+							fileRepresentation.push({
+								xorbId,
+								offset: 0,
+								endOffset: xorbOffset,
+								length: chunk.length,
+								rangeHash: "",
+							});
+							currentChunkRangeBeginning = fileChunks.length - 1;
 						}
 					}
 					xorbChunks.push({ hash: chunk.hash, length: chunk.length, offset: chunkOffset });
@@ -146,10 +165,16 @@ export async function* createXorbs(fileSources: AsyncGenerator<Blob>): AsyncGene
 				yield* addChunks(chunker.add_data(value));
 			}
 
+			const lastRep = fileRepresentation.at(-1);
+			if (lastRep) {
+				lastRep.rangeHash = chunkModule.compute_range_verification_hash(
+					fileChunks.slice(currentChunkRangeBeginning).map((x) => x.hash)
+				);
+			}
+
 			yield {
 				type: "file" as const,
 				hash: chunkModule.compute_file_hash(fileChunks),
-				verificationHash: chunkModule.compute_range_verification_hash(fileChunks.map((x) => x.hash)),
 				sha256: sha256.digest("hex"),
 				representation: fileRepresentation,
 			};

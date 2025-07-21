@@ -128,28 +128,29 @@ export async function uploadShards(source: AsyncGenerator<Blob>, params: UploadS
 				fileInfoView.setBigUint64(fileViewOffset, 0n, true); // reserved
 				fileViewOffset += 8;
 
-				for (const chunk of output.representation) {
-					writeHashToArray(xorbHashes[chunk.xorbId], fileInfoSection, fileViewOffset);
+				for (const repItem of output.representation) {
+					writeHashToArray(xorbHashes[repItem.xorbId], fileInfoSection, fileViewOffset);
 					fileViewOffset += HASH_LENGTH;
 					fileInfoView.setUint32(fileViewOffset, 0, true); // Xorb flags
 					fileViewOffset += 4;
-					fileInfoView.setUint32(fileViewOffset, chunk.length, true);
+					fileInfoView.setUint32(fileViewOffset, repItem.length, true);
 					fileViewOffset += 4;
-					fileInfoView.setUint32(fileViewOffset, chunk.offset, true);
+					fileInfoView.setUint32(fileViewOffset, repItem.offset, true);
 					fileViewOffset += 4;
-					fileInfoView.setUint32(fileViewOffset, chunk.endOffset, true);
+					fileInfoView.setUint32(fileViewOffset, repItem.endOffset, true);
 					fileViewOffset += 4;
 				}
 
 				// File verification data
-				writeHashToArray(output.verificationHash, fileInfoSection, fileViewOffset);
-				fileViewOffset += HASH_LENGTH;
-
-				// reserved in file verification data
-				for (let i = 0; i < 16; i++) {
-					fileInfoSection[i] = 0;
+				for (const repItem of output.representation) {
+					writeHashToArray(repItem.rangeHash, fileInfoSection, fileViewOffset);
+					fileViewOffset += HASH_LENGTH;
+					// reserved in file verification data
+					for (let i = 0; i < 16; i++) {
+						fileInfoSection[i] = 0;
+					}
+					fileViewOffset += 16;
 				}
-				fileViewOffset += 16;
 
 				// File metadata ext
 				writeHashToArray(output.sha256, fileInfoSection, fileViewOffset);
