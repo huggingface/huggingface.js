@@ -518,6 +518,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		snippets: snippets.kimi_audio,
 		filter: false,
 	},
+	kronos: {
+		prettyLabel: "KRONOS",
+		repoName: "KRONOS",
+		repoUrl: "https://github.com/mahmoodlab/KRONOS",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
 	k2: {
 		prettyLabel: "K2",
 		repoName: "k2",
