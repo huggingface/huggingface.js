@@ -124,7 +124,7 @@ export async function* createXorbs(fileSources: AsyncGenerator<Blob>): AsyncGene
 							lastRep.endOffset = xorbOffset - lastRep.offset;
 							lastRep.length += chunk.length;
 						} else {
-							lastRep.rangeHash = chunkModule.compute_range_verification_hash(
+							lastRep.rangeHash = chunkModule.compute_verification_hash(
 								fileChunks.slice(currentChunkRangeBeginning, -1).map((x) => x.hash, -1)
 							);
 							fileRepresentation.push({
@@ -167,7 +167,7 @@ export async function* createXorbs(fileSources: AsyncGenerator<Blob>): AsyncGene
 
 			const lastRep = fileRepresentation.at(-1);
 			if (lastRep) {
-				lastRep.rangeHash = chunkModule.compute_range_verification_hash(
+				lastRep.rangeHash = chunkModule.compute_verification_hash(
 					fileChunks.slice(currentChunkRangeBeginning).map((x) => x.hash)
 				);
 			}
