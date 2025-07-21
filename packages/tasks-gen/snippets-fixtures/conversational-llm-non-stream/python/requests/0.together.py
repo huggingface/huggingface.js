@@ -1,7 +1,7 @@
 import os
 import requests
 
-API_URL = "https://router.huggingface.co/together/v1/chat/completions"
+API_URL = "https://router.huggingface.co/v1/chat/completions"
 headers = {
     "Authorization": f"Bearer {os.environ['HF_TOKEN']}",
 }
@@ -17,7 +17,7 @@ response = query({
             "content": "What is the capital of France?"
         }
     ],
-    "model": "<together alias for meta-llama/Llama-3.1-8B-Instruct>"
+    "model": "meta-llama/Llama-3.1-8B-Instruct:together"
 })
 
 print(response["choices"][0]["message"])

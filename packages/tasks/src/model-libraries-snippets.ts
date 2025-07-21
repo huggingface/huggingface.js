@@ -434,8 +434,63 @@ pipe = DiffusionPipeline.from_pretrained("${get_base_diffusers_model(model)}")
 pipe.load_textual_inversion("${model.id}")`,
 ];
 
+const diffusers_flux_fill = (model: ModelData) => [
+	`import torch
+from diffusers import FluxFillPipeline
+from diffusers.utils import load_image
+
+image = load_image("https://huggingface.co/datasets/diffusers/diffusers-images-docs/resolve/main/cup.png")
+mask = load_image("https://huggingface.co/datasets/diffusers/diffusers-images-docs/resolve/main/cup_mask.png")
+
+pipe = FluxFillPipeline.from_pretrained("${model.id}", torch_dtype=torch.bfloat16).to("cuda")
+image = pipe(
+    prompt="a white paper cup",
+    image=image,
+    mask_image=mask,
+    height=1632,
+    width=1232,
+    guidance_scale=30,
+    num_inference_steps=50,
+    max_sequence_length=512,
+    generator=torch.Generator("cpu").manual_seed(0)
+).images[0]
+image.save(f"flux-fill-dev.png")`,
+];
+
+const diffusers_inpainting = (model: ModelData) => [
+	`import torch
+from diffusers import AutoPipelineForInpainting
+from diffusers.utils import load_image
+
+pipe = AutoPipelineForInpainting.from_pretrained("${model.id}", torch_dtype=torch.float16, variant="fp16").to("cuda")
+
+img_url = "https://raw.githubusercontent.com/CompVis/latent-diffusion/main/data/inpainting_examples/overture-creations-5sI6fQgYIuo.png"
+mask_url = "https://raw.githubusercontent.com/CompVis/latent-diffusion/main/data/inpainting_examples/overture-creations-5sI6fQgYIuo_mask.png"
+
+image = load_image(img_url).resize((1024, 1024))
+mask_image = load_image(mask_url).resize((1024, 1024))
+
+prompt = "a tiger sitting on a park bench"
+generator = torch.Generator(device="cuda").manual_seed(0)
+
+image = pipe(
+  prompt=prompt,
+  image=image,
+  mask_image=mask_image,
+  guidance_scale=8.0,
+  num_inference_steps=20,  # steps between 15 and 30 work well for us
+  strength=0.99,  # make sure to use \`strength\` below 1.0
+  generator=generator,
+).images[0]`,
+];
+
 export const diffusers = (model: ModelData): string[] => {
-	if (model.tags.includes("controlnet")) {
+	if (
+		model.tags.includes("StableDiffusionInpaintPipeline") ||
+		model.tags.includes("StableDiffusionXLInpaintPipeline")
+	) {
+		return diffusers_inpainting(model);
+	} else if (model.tags.includes("controlnet")) {
 		return diffusers_controlnet(model);
 	} else if (model.tags.includes("lora")) {
 		if (model.pipeline_tag === "image-to-image") {
@@ -449,6 +504,8 @@ export const diffusers = (model: ModelData): string[] => {
 		}
 	} else if (model.tags.includes("textual_inversion")) {
 		return diffusers_textual_inversion(model);
+	} else if (model.tags.includes("FluxFillPipeline")) {
+		return diffusers_flux_fill(model);
 	} else if (model.pipeline_tag === "image-to-video") {
 		return diffusers_image_to_video(model);
 	} else if (model.pipeline_tag === "image-to-image") {
@@ -1373,27 +1430,58 @@ export const transformers = (model: ModelData): string[] => {
 	}
 	const remote_code_snippet = model.tags.includes(TAG_CUSTOM_CODE) ? ", trust_remote_code=True" : "";
 
-	let autoSnippet: string;
+	const autoSnippet = [];
 	if (info.processor) {
-		const varName =
+		const processorVarName =
 			info.processor === "AutoTokenizer"
 				? "tokenizer"
 				: info.processor === "AutoFeatureExtractor"
 				  ? "extractor"
 				  : "processor";
-		autoSnippet = [
+		autoSnippet.push(
 			"# Load model directly",
 			`from transformers import ${info.processor}, ${info.auto_model}`,
 			"",
-			`${varName} = ${info.processor}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
-			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
-		].join("\n");
+			`${processorVarName} = ${info.processor}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
+			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ")"
+		);
+		if (model.tags.includes("conversational")) {
+			if (model.tags.includes("image-text-to-text")) {
+				autoSnippet.push(
+					"messages = [",
+					[
+						"    {",
+						'        "role": "user",',
+						'        "content": [',
+						'            {"type": "image", "url": "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/p-blog/candy.JPG"},',
+						'            {"type": "text", "text": "What animal is on the candy?"}',
+						"        ]",
+						"    },",
+					].join("\n"),
+					"]"
+				);
+			} else {
+				autoSnippet.push("messages = [", '    {"role": "user", "content": "Who are you?"},', "]");
+			}
+			autoSnippet.push(
+				"inputs = ${processorVarName}.apply_chat_template(",
+				"	messages,",
+				"	add_generation_prompt=True,",
+				"	tokenize=True,",
+				"	return_dict=True,",
+				'	return_tensors="pt",',
+				").to(model.device)",
+				"",
+				"outputs = model.generate(**inputs, max_new_tokens=40)",
+				'print(${processorVarName}.decode(outputs[0][inputs["input_ids"].shape[-1]:]))'
+			);
+		}
 	} else {
-		autoSnippet = [
+		autoSnippet.push(
 			"# Load model directly",
 			`from transformers import ${info.auto_model}`,
-			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ")",
-		].join("\n");
+			`model = ${info.auto_model}.from_pretrained("${model.id}"` + remote_code_snippet + ', torch_dtype="auto"),'
+		);
 	}
 
 	if (model.pipeline_tag && LIBRARY_TASK_MAPPING.transformers?.includes(model.pipeline_tag)) {
@@ -1437,9 +1525,9 @@ export const transformers = (model: ModelData): string[] => {
 			);
 		}
 
-		return [pipelineSnippet.join("\n"), autoSnippet];
+		return [pipelineSnippet.join("\n"), autoSnippet.join("\n")];
 	}
-	return [autoSnippet];
+	return [autoSnippet.join("\n")];
 };
 
 export const transformersJS = (model: ModelData): string[] => {
@@ -1556,10 +1644,9 @@ image = sana(
 export const videoprism = (model: ModelData): string[] => [
 	`# Install from https://github.com/google-deepmind/videoprism
 import jax
-import jax.numpy as jnp
 from videoprism import models as vp
 
-flax_model = vp.MODELS["${model.id}"]()
+flax_model = vp.get_model("${model.id}")
 loaded_state = vp.load_pretrained_weights("${model.id}")
 
 @jax.jit
