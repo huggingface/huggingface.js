@@ -188,6 +188,8 @@ function takeFromExternrefTable0(idx) {
     return value;
 }
 /**
+ * takes an Array of Objects of the form { "hash": string, "length": number }
+ * and returns a string of a hash
  * @param {any} chunks_array
  * @returns {string}
  */
@@ -207,6 +209,66 @@ export function compute_xorb_hash(chunks_array) {
         return getStringFromWasm0(ptr1, len1);
     } finally {
         wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
+    }
+}
+
+/**
+ * takes an Array of Objects of the form { "hash": string, "length": number }
+ * and returns a string of a hash
+ * @param {any} chunks_array
+ * @returns {string}
+ */
+export function compute_file_hash(chunks_array) {
+    let deferred2_0;
+    let deferred2_1;
+    try {
+        const ret = wasm.compute_file_hash(chunks_array);
+        var ptr1 = ret[0];
+        var len1 = ret[1];
+        if (ret[3]) {
+            ptr1 = 0; len1 = 0;
+            throw takeFromExternrefTable0(ret[2]);
+        }
+        deferred2_0 = ptr1;
+        deferred2_1 = len1;
+        return getStringFromWasm0(ptr1, len1);
+    } finally {
+        wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
+    }
+}
+
+function passArrayJsValueToWasm0(array, malloc) {
+    const ptr = malloc(array.length * 4, 4) >>> 0;
+    for (let i = 0; i < array.length; i++) {
+        const add = addToExternrefTable0(array[i]);
+        getDataViewMemory0().setUint32(ptr + 4 * i, add, true);
+    }
+    WASM_VECTOR_LEN = array.length;
+    return ptr;
+}
+/**
+ * takes an Array of hashes as strings and returns the verification hash for that range of chunk hashes
+ * @param {string[]} chunk_hashes
+ * @returns {string}
+ */
+export function compute_verification_hash(chunk_hashes) {
+    let deferred3_0;
+    let deferred3_1;
+    try {
+        const ptr0 = passArrayJsValueToWasm0(chunk_hashes, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.compute_verification_hash(ptr0, len0);
+        var ptr2 = ret[0];
+        var len2 = ret[1];
+        if (ret[3]) {
+            ptr2 = 0; len2 = 0;
+            throw takeFromExternrefTable0(ret[2]);
+        }
+        deferred3_0 = ptr2;
+        deferred3_1 = len2;
+        return getStringFromWasm0(ptr2, len2);
+    } finally {
+        wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
     }
 }
 
