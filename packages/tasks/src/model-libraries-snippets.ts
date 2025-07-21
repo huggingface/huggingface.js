@@ -699,59 +699,6 @@ pipeline = Pipeline(
     ])`,
 ];
 
-export const hunyuan3d_2 = (model: ModelData): string[] => [
-	`# In order to use this model, the Hunyuan3D-2 repo must be installed.
-# git clone https://github.com/Tencent-Hunyuan/Hunyuan3D-2.git
-# cd Hunyuan3D-2
-# pip install -r requirements.txt
-# pip install -e .
-# Install custom CUDA kernels for texture generation
-# python hy3dgen/texgen/custom_rasterizer/setup.py install
-# python hy3dgen/texgen/differentiable_renderer/setup.py install
-# cd ..
-
-# Note: This model requires a GPU with at least 16GB of VRAM.
-
-import torch
-from hy3dgen.shapegen import Hunyuan3DDiTFlowMatchingPipeline
-from hy3dgen.texgen import Hunyuan3DPaintPipeline
-from PIL import Image
-import requests
-from io import BytesIO
-
-# Ensure you're on a GPU runtime
-device = "cuda" if torch.cuda.is_available() else "cpu"
-
-# Load a sample image
-image_url = f"https://raw.githubusercontent.com/Tencent-Hunyuan/Hunyuan3D-2.1/refs/heads/main/assets/example_images/004.png"
-response = requests.get(image_url)
-image = Image.open(BytesIO(response.content)).convert("RGB")
-
-# 1. Generate the 3D shape from the image
-# Use torch.float16 for lower VRAM usage.
-shape_pipeline = Hunyuan3DDiTFlowMatchingPipeline.from_pretrained(
-    "${model.id}",
-    torch_dtype=torch.float16
-)
-shape_pipeline.to(device)
-mesh = shape_pipeline(image=image)[0]
-
-# 2. Generate the texture for the mesh
-texture_pipeline = Hunyuan3DPaintPipeline.from_pretrained(
-    "${model.id}",
-    torch_dtype=torch.float16
-)
-texture_pipeline.to(device)
-textured_mesh = texture_pipeline(mesh, image=image)
-
-# 3. Save the final textured mesh
-output_path = "textured_mesh.glb"
-textured_mesh.export(output_path)
-
-print(f"Textured mesh saved to {output_path}")
-`,
-];
-
 export const keras = (model: ModelData): string[] => [
 	`# Available backend options are: "jax", "torch", "tensorflow".
 import os
