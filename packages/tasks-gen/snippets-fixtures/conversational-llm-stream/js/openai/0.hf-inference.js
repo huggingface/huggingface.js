@@ -1,12 +1,12 @@
 import { OpenAI } from "openai";
 
 const client = new OpenAI({
-	baseURL: "https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.1-8B-Instruct/v1",
+	baseURL: "https://router.huggingface.co/v1",
 	apiKey: process.env.HF_TOKEN,
 });
 
 const stream = await client.chat.completions.create({
-    model: "meta-llama/Llama-3.1-8B-Instruct",
+    model: "meta-llama/Llama-3.1-8B-Instruct:hf-inference",
     messages: [
         {
             role: "user",

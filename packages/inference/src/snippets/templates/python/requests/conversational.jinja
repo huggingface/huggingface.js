@@ -3,7 +3,7 @@ def query(payload):
     return response.json()
 
 response = query({
-{{ providerInputs.asJsonString }}
+{{ autoInputs.asJsonString }}
 })
 
 print(response["choices"][0]["message"])

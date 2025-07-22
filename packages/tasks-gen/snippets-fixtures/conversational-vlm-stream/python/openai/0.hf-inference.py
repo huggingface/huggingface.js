@@ -2,12 +2,12 @@ import os
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.2-11B-Vision-Instruct/v1",
+    base_url="https://router.huggingface.co/v1",
     api_key=os.environ["HF_TOKEN"],
 )
 
 stream = client.chat.completions.create(
-    model="meta-llama/Llama-3.2-11B-Vision-Instruct",
+    model="meta-llama/Llama-3.2-11B-Vision-Instruct:hf-inference",
     messages=[
         {
             "role": "user",
