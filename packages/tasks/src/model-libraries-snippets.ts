@@ -1644,10 +1644,9 @@ image = sana(
 export const videoprism = (model: ModelData): string[] => [
 	`# Install from https://github.com/google-deepmind/videoprism
 import jax
-import jax.numpy as jnp
 from videoprism import models as vp
 
-flax_model = vp.MODELS["${model.id}"]()
+flax_model = vp.get_model("${model.id}")
 loaded_state = vp.load_pretrained_weights("${model.id}")
 
 @jax.jit
