@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ReconstructionInfo } from "./XetBlob";
-import { bg4_regoup_bytes, XetBlob } from "./XetBlob";
+import { bg4_regroup_bytes, bg4_split_bytes, XetBlob } from "./XetBlob";
 import { sum } from "./sum";
 
 describe("XetBlob", () => {
@@ -173,27 +173,69 @@ describe("XetBlob", () => {
 
 	describe("bg4_regoup_bytes", () => {
 		it("should regroup bytes when the array is %4 length", () => {
-			expect(bg4_regoup_bytes(new Uint8Array([1, 5, 2, 6, 3, 7, 4, 8]))).toEqual(
+			expect(bg4_regroup_bytes(new Uint8Array([1, 5, 2, 6, 3, 7, 4, 8]))).toEqual(
 				new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])
 			);
 		});
 
 		it("should regroup bytes when the array is %4 + 1 length", () => {
-			expect(bg4_regoup_bytes(new Uint8Array([1, 5, 9, 2, 6, 3, 7, 4, 8]))).toEqual(
+			expect(bg4_regroup_bytes(new Uint8Array([1, 5, 9, 2, 6, 3, 7, 4, 8]))).toEqual(
 				new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9])
 			);
 		});
 
 		it("should regroup bytes when the array is %4 + 2 length", () => {
-			expect(bg4_regoup_bytes(new Uint8Array([1, 5, 9, 2, 6, 10, 3, 7, 4, 8]))).toEqual(
+			expect(bg4_regroup_bytes(new Uint8Array([1, 5, 9, 2, 6, 10, 3, 7, 4, 8]))).toEqual(
 				new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 			);
 		});
 
 		it("should regroup bytes when the array is %4 + 3 length", () => {
-			expect(bg4_regoup_bytes(new Uint8Array([1, 5, 9, 2, 6, 10, 3, 7, 11, 4, 8]))).toEqual(
+			expect(bg4_regroup_bytes(new Uint8Array([1, 5, 9, 2, 6, 10, 3, 7, 11, 4, 8]))).toEqual(
 				new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
 			);
+		});
+	});
+
+	describe("bg4_split_bytes", () => {
+		it("should split bytes when the array is %4 length", () => {
+			expect(bg4_split_bytes(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]))).toEqual(
+				new Uint8Array([1, 5, 2, 6, 3, 7, 4, 8])
+			);
+		});
+
+		it("should split bytes when the array is %4 + 1 length", () => {
+			expect(bg4_split_bytes(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9]))).toEqual(
+				new Uint8Array([1, 5, 9, 2, 6, 3, 7, 4, 8])
+			);
+		});
+
+		it("should split bytes when the array is %4 + 2 length", () => {
+			expect(bg4_split_bytes(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))).toEqual(
+				new Uint8Array([1, 5, 9, 2, 6, 10, 3, 7, 4, 8])
+			);
+		});
+
+		it("should split bytes when the array is %4 + 3 length", () => {
+			expect(bg4_split_bytes(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]))).toEqual(
+				new Uint8Array([1, 5, 9, 2, 6, 10, 3, 7, 11, 4, 8])
+			);
+		});
+
+		it("should be the inverse of bg4_regroup_bytes", () => {
+			const testArrays = [
+				new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]),
+				new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9]),
+				new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
+				new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]),
+				new Uint8Array([42]),
+				new Uint8Array([1, 2]),
+				new Uint8Array([1, 2, 3]),
+			];
+
+			testArrays.forEach((arr) => {
+				expect(bg4_regroup_bytes(bg4_split_bytes(arr))).toEqual(arr);
+			});
 		});
 	});
 

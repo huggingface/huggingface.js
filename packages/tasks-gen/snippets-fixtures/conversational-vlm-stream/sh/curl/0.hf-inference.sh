@@ -1,4 +1,4 @@
-curl https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.2-11B-Vision-Instruct/v1/chat/completions \
+curl https://router.huggingface.co/v1/chat/completions \
     -H "Authorization: Bearer $HF_TOKEN" \
     -H 'Content-Type: application/json' \
     -d '{
@@ -19,6 +19,6 @@ curl https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.2-11B-
                 ]
             }
         ],
-        "model": "meta-llama/Llama-3.2-11B-Vision-Instruct",
+        "model": "meta-llama/Llama-3.2-11B-Vision-Instruct:hf-inference",
         "stream": true
     }'

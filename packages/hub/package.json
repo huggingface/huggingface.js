@@ -41,7 +41,8 @@
 		"prepare": "pnpm run build",
 		"test": "vitest run",
 		"test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest-browser.config.mts",
-		"check": "tsc"
+		"check": "tsc",
+		"build:xet-wasm": "./scripts/build-xet-wasm.sh -t bundler -c -b hoytak/250714-eliminate-mdb-v1"
 	},
 	"files": [
 		"src",

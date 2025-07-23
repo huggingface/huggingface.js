@@ -2,7 +2,7 @@ import os
 import json
 import requests
 
-API_URL = "https://router.huggingface.co/hf-inference/models/meta-llama/Llama-3.1-8B-Instruct/v1/chat/completions"
+API_URL = "https://router.huggingface.co/v1/chat/completions"
 headers = {
     "Authorization": f"Bearer {os.environ['HF_TOKEN']}",
 }
@@ -23,7 +23,7 @@ chunks = query({
             "content": "What is the capital of France?"
         }
     ],
-    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct:hf-inference",
     "stream": True,
 })
 
