@@ -217,7 +217,7 @@ curl -X POST "http://localhost:8000/v1/completions" \\
 			"pip install vllm",
 			"# Make sure you have the latest version of mistral-common installed:",
 			"pip install --upgrade mistral-common"
-		].join("");
+		].join("\n");
 		dockerCommand = `# Load and run the model:\ndocker exec -it my_vllm_container bash -c "vllm serve ${model.id} --tokenizer_mode mistral --config_format mistral --load_format mistral --tool-call-parser mistral --enable-auto-tool-choice"`;
 	}
 	else {
