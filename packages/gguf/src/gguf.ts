@@ -3,7 +3,15 @@ import { GGUFValueType } from "./types";
 import { isBackend } from "./utils/isBackend";
 import { promisesQueue } from "./utils/promisesQueue";
 
-export type { MetadataBaseValue, MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
+export type {
+	MetadataBaseValue,
+	MetadataValue,
+	Version,
+	GGUFMetadata,
+	GGUFTensorInfo,
+	GGUFParseOutput,
+	GGUFMetadataOptions,
+} from "./types";
 export { GGUFValueType, GGMLQuantizationType, Architecture } from "./types";
 export { GGUF_QUANT_DESCRIPTIONS } from "./quant-descriptions";
 export {
