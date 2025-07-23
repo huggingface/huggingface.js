@@ -103,6 +103,32 @@ export type GGUFMetadata<Options extends GGUFMetadataOptions = { strict: true }>
 } & GGUFModelKV &
 	(Options extends { strict: true } ? unknown : Record<string, MetadataValue>);
 
+export type GGUFTypedMetadata = {
+	version: {
+		value: Version;
+		type: GGUFValueType.UINT32;
+	};
+	tensor_count: {
+		value: bigint;
+		type: GGUFValueType.UINT32 | GGUFValueType.UINT64;
+	};
+	kv_count: {
+		value: bigint;
+		type: GGUFValueType.UINT32 | GGUFValueType.UINT64;
+	};
+} & {
+	[K in keyof GGUFModelKV]?: {
+		value: GGUFModelKV[K];
+		type: GGUFValueType;
+	};
+} & Record<
+		string,
+		{
+			value: MetadataValue;
+			type: GGUFValueType;
+		}
+	>;
+
 export type GGUFModelKV = (NoModelMetadata | ModelMetadata) & (NoTokenizer | Tokenizer);
 
 export interface GGUFTensorInfo {
