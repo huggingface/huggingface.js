@@ -68,6 +68,36 @@ const { metadata, tensorInfos } = await gguf(
 );
 ```
 
+### Typed metadata
+
+You can get metadata with type information by setting `typedMetadata: true`. This provides both the original value and its GGUF data type:
+
+```ts
+import { GGMLQuantizationType, GGUFValueType, gguf } from "@huggingface/gguf";
+
+const URL_LLAMA = "https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/191239b/llama-2-7b-chat.Q2_K.gguf";
+
+const { metadata, typedMetadata } = await gguf(URL_LLAMA, { typedMetadata: true });
+
+console.log(typedMetadata);
+// {
+//     version: { value: 2, type: GGUFValueType.UINT32 },
+//     tensor_count: { value: 291n, type: GGUFValueType.UINT64 },
+//     kv_count: { value: 19n, type: GGUFValueType.UINT64 },
+//     "general.architecture": { value: "llama", type: GGUFValueType.STRING },
+//     "general.file_type": { value: 10, type: GGUFValueType.UINT32 },
+//     "general.name": { value: "LLaMA v2", type: GGUFValueType.STRING },
+//     "llama.attention.head_count": { value: 32, type: GGUFValueType.UINT32 },
+//     "llama.attention.layer_norm_rms_epsilon": { value: 9.999999974752427e-7, type: GGUFValueType.FLOAT32 },
+//     "tokenizer.ggml.tokens": { value: ["<unk>", "<s>", "</s>", ...], type: GGUFValueType.ARRAY },
+//     ...
+// }
+
+// Access both value and type information
+console.log(typedMetadata["general.architecture"].value); // "llama"
+console.log(typedMetadata["general.architecture"].type);  // GGUFValueType.STRING (8)
+```
+
 ### Strictly typed
 
 By default, known fields in `metadata` are typed. This includes various fields found in [llama.cpp](https://github.com/ggerganov/llama.cpp), [whisper.cpp](https://github.com/ggerganov/whisper.cpp) and [ggml](https://github.com/ggerganov/ggml).
