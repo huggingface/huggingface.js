@@ -221,7 +221,7 @@ curl -X POST "http://localhost:8000/v1/completions" \\
 		dockerCommand = `# Load and run the model:\ndocker exec -it my_vllm_container bash -c "vllm serve ${model.id} --tokenizer_mode mistral --config_format mistral --load_format mistral --tool-call-parser mistral --enable-auto-tool-choice"`;
 	}
 	else {
-		setup = ["# Install vLLM from pip:", "pip install vllm"].join("");
+		setup = ["# Install vLLM from pip:", "pip install vllm"].join("\n");
 		dockerCommand = `# Load and run the model:\ndocker exec -it my_vllm_container bash -c "vllm serve ${model.id}"`;
 	}
 
