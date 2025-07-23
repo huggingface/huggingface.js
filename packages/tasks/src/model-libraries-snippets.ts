@@ -1507,7 +1507,7 @@ export const transformers = (model: ModelData): string[] => {
 				autoSnippet.push("messages = [", '    {"role": "user", "content": "Who are you?"},', "]");
 			}
 			autoSnippet.push(
-				"inputs = ${processorVarName}.apply_chat_template(",
+				`inputs = ${processorVarName}.apply_chat_template(`,
 				"	messages,",
 				"	add_generation_prompt=True,",
 				"	tokenize=True,",
@@ -1516,7 +1516,7 @@ export const transformers = (model: ModelData): string[] => {
 				").to(model.device)",
 				"",
 				"outputs = model.generate(**inputs, max_new_tokens=40)",
-				'print(${processorVarName}.decode(outputs[0][inputs["input_ids"].shape[-1]:]))'
+				`print(${processorVarName}.decode(outputs[0][inputs["input_ids"].shape[-1]:]))`
 			);
 		}
 	} else {
