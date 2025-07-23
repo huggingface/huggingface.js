@@ -1507,7 +1507,7 @@ export const transformers = (model: ModelData): string[] => {
 				autoSnippet.push("messages = [", '    {"role": "user", "content": "Who are you?"},', "]");
 			}
 			autoSnippet.push(
-				`inputs = ${processorVarName}.apply_chat_template("`,
+				`inputs = ${processorVarName}.apply_chat_template(`,
 				"	messages,",
 				"	add_generation_prompt=True,",
 				"	tokenize=True,",
