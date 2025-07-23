@@ -210,17 +210,16 @@ curl -X POST "http://localhost:8000/v1/completions" \\
 
 	let setup;
 	let dockerCommand;
-	
+
 	if (model.tags.includes("mistral-common")) {
 		setup = [
 			"# Install vLLM from pip:",
 			"pip install vllm",
 			"# Make sure you have the latest version of mistral-common installed:",
-			"pip install --upgrade mistral-common"
+			"pip install --upgrade mistral-common",
 		].join("\n");
 		dockerCommand = `# Load and run the model:\ndocker exec -it my_vllm_container bash -c "vllm serve ${model.id} --tokenizer_mode mistral --config_format mistral --load_format mistral --tool-call-parser mistral --enable-auto-tool-choice"`;
-	}
-	else {
+	} else {
 		setup = ["# Install vLLM from pip:", "pip install vllm"].join("\n");
 		dockerCommand = `# Load and run the model:\ndocker exec -it my_vllm_container bash -c "vllm serve ${model.id}"`;
 	}
@@ -244,10 +243,7 @@ curl -X POST "http://localhost:8000/v1/completions" \\
 				`	vllm/vllm-openai:latest \\`,
 				`	--model ${model.id}`,
 			].join("\n"),
-			content: [
-				dockerCommand,
-				runCommand,
-			],
+			content: [dockerCommand, runCommand],
 		},
 	];
 };
