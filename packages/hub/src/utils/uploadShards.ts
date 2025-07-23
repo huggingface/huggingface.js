@@ -322,9 +322,8 @@ async function uploadXorb(xorb: { hash: string; xorb: Uint8Array }, params: Uplo
 
 async function uploadShard(shard: Uint8Array, params: UploadShardsParams) {
 	const token = await getAccessToken(params);
-	const shardHash = "0".repeat(64);
 
-	const resp = await params.customFetch(`${token.casUrl}/shard/default-merkledb/${shardHash}`, {
+	const resp = await params.customFetch(`${token.casUrl}/v1/shard/default-merkledb`, {
 		method: "PUT",
 		body: shard,
 		headers: {
