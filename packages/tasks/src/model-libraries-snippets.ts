@@ -1018,16 +1018,59 @@ export const paddlenlp = (model: ModelData): string[] => {
 	}
 };
 
-export const paddleocr = (model: ModelData): string[] => [
-	`# pip install paddleocr
-from paddleocr import TextDetection
-model = TextDetection(model_name="${model.id}")
+export const paddleocr = (model: ModelData): string[] => {
+	const mapping: Record<string, { className: string }> = {
+		textline_detection: { className: "TextDetection" },
+		textline_recognition: { className: "TextRecognition" },
+		seal_text_detection: { className: "SealTextDetection" },
+		doc_img_unwarping: { className: "TextImageUnwarping" },
+		doc_img_orientation_classification: { className: "DocImgOrientationClassification" },
+		textline_orientation_classification: { className: "TextLineOrientationClassification" },
+		chart_parsing: { className: "ChartParsing" },
+		formula_recognition: { className: "FormulaRecognition" },
+		layout_detection: { className: "LayoutDetection" },
+		table_cells_detection: { className: "TableCellsDetection" },
+		wired_table_classification: { className: "TableClassification" },
+		table_structure_recognition: { className: "TableStructureRecognition" },
+	};
+
+	if (model.tags.includes("doc_vlm")) {
+		return [
+			`# pip install paddleocr
+from paddleocr import DocVLM
+model = DocVLM(model_name="${model.id}")
+output = model.predict(
+    input={"image": "path/to/image.png", "query": "Parsing this image and output the content in Markdown format."},
+    batch_size=1
+)
+for res in output:
+    res.print()
+    res.save_to_img(save_path="./output/")
+    res.save_to_json(save_path="./output/res.json")`,
+		];
+	}
+
+	for (const tag of model.tags) {
+		if (tag in mapping) {
+			const { className } = mapping[tag];
+			return [
+				`# pip install paddleocr
+from paddleocr import ${className}
+model = ${className}(model_name="${model.id}")
 output = model.predict(input="path/to/image.png", batch_size=1)
 for res in output:
     res.print()
     res.save_to_img(save_path="./output/")
     res.save_to_json(save_path="./output/res.json")`,
-];
+			];
+		}
+	}
+
+	return [
+		`# Please refer to the document for information on how to use the model. 
+# https://paddlepaddle.github.io/PaddleOCR/latest/en/version3.x/module_usage/module_overview.html`,
+	];
+};
 
 export const perception_encoder = (model: ModelData): string[] => {
 	const clip_model = `# Use PE-Core models as CLIP models
@@ -1464,7 +1507,7 @@ export const transformers = (model: ModelData): string[] => {
 				autoSnippet.push("messages = [", '    {"role": "user", "content": "Who are you?"},', "]");
 			}
 			autoSnippet.push(
-				"inputs = ${processorVarName}.apply_chat_template(",
+				`inputs = ${processorVarName}.apply_chat_template(`,
 				"	messages,",
 				"	add_generation_prompt=True,",
 				"	tokenize=True,",
@@ -1473,7 +1516,7 @@ export const transformers = (model: ModelData): string[] => {
 				").to(model.device)",
 				"",
 				"outputs = model.generate(**inputs, max_new_tokens=40)",
-				'print(${processorVarName}.decode(outputs[0][inputs["input_ids"].shape[-1]:]))'
+				`print(${processorVarName}.decode(outputs[0][inputs["input_ids"].shape[-1]:]))`
 			);
 		}
 	} else {
@@ -1980,4 +2023,24 @@ audio = model.autoencoder.decode(codes)[0].cpu()
 torchaudio.save("sample.wav", audio, model.autoencoder.sampling_rate)
 `,
 ];
+
+export const mistral_common = (model: ModelData): string[] => [
+	`# We recommend to use vLLM to serve Mistral AI models.
+pip install vllm
+
+# Make sure to have installed the latest version of mistral-common.
+pip install --upgrade mistral-common[image,audio]
+
+# Serve the model with an OpenAI-compatible API.
+vllm serve ${model.id} --tokenizer_mode mistral --config_format mistral --load_format mistral --tool-call-parser mistral --enable-auto-tool-choice
+
+# Query the model with curl in a separate terminal.
+curl http://localhost:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "${model.id}",
+    "messages": [{"role": "user", "content": "What is the capital of France?"}]
+  }'`,
+];
+
 //#endregion
