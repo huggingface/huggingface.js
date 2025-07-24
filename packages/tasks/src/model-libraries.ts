@@ -32,7 +32,7 @@ export interface LibraryUiElement {
 	 * Elastic query used to count this library's model downloads
 	 *
 	 * By default, those files are counted:
-	 * "config.json", "config.yaml", "hyperparams.yaml", "meta.yaml"
+	 * "config.json", "config.yaml", "hyperparams.yaml", "params.json", "meta.yaml"
 	 */
 	countDownloads?: ElasticSearchQuery;
 	/**
