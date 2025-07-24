@@ -307,7 +307,7 @@ function writeHashToArray(hash: string, array: Uint8Array, offset: number) {
 async function uploadXorb(xorb: { hash: string; xorb: Uint8Array }, params: UploadShardsParams) {
 	const token = await getAccessToken(params);
 
-	const resp = await params.customFetch(`${token.casUrl}/xorb/default/${xorb.hash}`, {
+	const resp = await params.customFetch(`${token.casUrl}/v1/xorb/default/${xorb.hash}`, {
 		method: "PUT",
 		body: xorb.xorb,
 		headers: {
