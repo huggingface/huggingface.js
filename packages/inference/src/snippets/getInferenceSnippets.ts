@@ -36,9 +36,11 @@ const CLIENTS: Record<InferenceSnippetLanguage, Client[]> = {
 	sh: [...SH_CLIENTS],
 };
 
-const CLIENTS_AUTO_POLICY: Partial<Record<InferenceSnippetLanguage, Client[]>> = {
+// The "auto"-provider policy is only available through the HF SDKs (huggingface.js / huggingface_hub)
+// except for conversational tasks for which we have https://router.huggingface.co/v1/chat/completions
+const CLIENTS_NON_CONVERSATIONAL_AUTO_POLICY: Partial<Record<InferenceSnippetLanguage, Client[]>> = {
 	js: ["huggingface.js"],
-	python: ["huggingface_hub", "openai"],
+	python: ["huggingface_hub"],
 };
 
 type InputPreparationFn = (model: ModelDataMinimal, opts?: Record<string, unknown>) => object;
@@ -49,6 +51,7 @@ interface TemplateParams {
 	fullUrl?: string;
 	inputs?: object;
 	providerInputs?: object;
+	autoInputs?: object;
 	model?: ModelDataMinimal;
 	provider?: InferenceProviderOrPolicy;
 	providerModelId?: string;
@@ -202,12 +205,33 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 			}
 		}
 
+		// Inputs for the "auto" route is strictly the same as "inputs", except the model includes the provider
+		// If not "auto" route, use the providerInputs
+		const autoInputs =
+			!opts?.endpointUrl && !opts?.directRequest
+				? provider !== "auto"
+					? {
+							...inputs,
+							model: `${model.id}:${provider}`,
+					  }
+					: {
+							...inputs,
+							model: `${model.id}`, // if no :provider => auto
+					  }
+				: providerInputs;
+
 		/// Prepare template injection data
 		const params: TemplateParams = {
 			accessToken: accessTokenOrPlaceholder,
 			authorizationHeader: (request.info.headers as Record<string, string>)?.Authorization,
-			baseUrl: removeSuffix(request.url, "/chat/completions"),
-			fullUrl: request.url,
+			baseUrl:
+				task === "conversational" && !opts?.endpointUrl && !opts?.directRequest
+					? HF_ROUTER_AUTO_ENDPOINT
+					: removeSuffix(request.url, "/chat/completions"),
+			fullUrl:
+				task === "conversational" && !opts?.endpointUrl && !opts?.directRequest
+					? HF_ROUTER_AUTO_ENDPOINT + "/chat/completions"
+					: request.url,
 			inputs: {
 				asObj: inputs,
 				asCurlString: formatBody(inputs, "curl"),
@@ -222,15 +246,27 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 				asPythonString: formatBody(providerInputs, "python"),
 				asTsString: formatBody(providerInputs, "ts"),
 			},
+			autoInputs: {
+				asObj: autoInputs,
+				asCurlString: formatBody(autoInputs, "curl"),
+				asJsonString: formatBody(autoInputs, "json"),
+				asPythonString: formatBody(autoInputs, "python"),
+				asTsString: formatBody(autoInputs, "ts"),
+			},
 			model,
 			provider,
-			providerModelId: providerModelId ?? model.id,
+			providerModelId:
+				task === "conversational" && !opts?.endpointUrl && !opts?.directRequest
+					? provider !== "auto"
+						? `${model.id}:${provider}` // e.g. "moonshotai/Kimi-K2-Instruct:groq"
+						: model.id
+					: providerModelId ?? model.id,
 			billTo: opts?.billTo,
 			endpointUrl: opts?.endpointUrl,
 		};
 
 		/// Iterate over clients => check if a snippet exists => generate
-		const clients = provider === "auto" ? CLIENTS_AUTO_POLICY : CLIENTS;
+		const clients = provider === "auto" && task !== "conversational" ? CLIENTS_NON_CONVERSATIONAL_AUTO_POLICY : CLIENTS;
 		return inferenceSnippetLanguages
 			.map((language) => {
 				const langClients = clients[language] ?? [];

@@ -389,6 +389,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: true,
 		countDownloads: `path:"pytorch_model.bin"`,
 	},
+	fme: {
+		prettyLabel: "Full Model Emulation",
+		repoName: "Full Model Emulation",
+		repoUrl: "https://github.com/ai2cm/ace",
+		docsUrl: "https://ai2-climate-emulator.readthedocs.io/en/latest/",
+		filter: false,
+		countDownloads: `path_extension:"tar"`,
+	},
 	"gemma.cpp": {
 		prettyLabel: "gemma.cpp",
 		repoName: "gemma.cpp",
@@ -457,12 +465,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/Tencent/HunyuanDiT",
 		countDownloads: `path:"pytorch_model_ema.pt" OR path:"pytorch_model_distill.pt"`,
 	},
-	"hunyuan3d-2": {
-		prettyLabel: "Hunyuan3D-2",
-		repoName: "Hunyuan3D-2",
-		repoUrl: "https://github.com/Tencent/Hunyuan3D-2",
-		countDownloads: `path_filename:"model_index" OR path_filename:"config"`,
-	},
 	imstoucan: {
 		prettyLabel: "IMS Toucan",
 		repoName: "IMS-Toucan",
@@ -515,6 +517,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/MoonshotAI/Kimi-Audio",
 		snippets: snippets.kimi_audio,
 		filter: false,
+	},
+	kronos: {
+		prettyLabel: "KRONOS",
+		repoName: "KRONOS",
+		repoUrl: "https://github.com/mahmoodlab/KRONOS",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
 	},
 	k2: {
 		prettyLabel: "K2",
@@ -621,6 +630,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/StanfordMIMI/MedVAE",
 		filter: false,
 		countDownloads: `path_extension:"ckpt"`,
+	},
+	mistral_common: {
+		prettyLabel: "mistral-common",
+		repoName: "mistral-common",
+		repoUrl: "https://github.com/mistralai/mistral-common",
+		docsUrl: "https://mistralai.github.io/mistral-common/",
+		snippets: snippets.mistral_common,
+		countDownloads: `path:"config.json" OR path:"params.json"`,
 	},
 	mitie: {
 		prettyLabel: "MITIE",

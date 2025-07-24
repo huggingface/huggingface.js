@@ -1,12 +1,12 @@
 import { OpenAI } from "openai";
 
 const client = new OpenAI({
-	baseURL: "https://router.huggingface.co/fireworks-ai/inference/v1",
+	baseURL: "https://router.huggingface.co/v1",
 	apiKey: process.env.HF_TOKEN,
 });
 
 const stream = await client.chat.completions.create({
-    model: "<fireworks-ai alias for meta-llama/Llama-3.2-11B-Vision-Instruct>",
+    model: "meta-llama/Llama-3.2-11B-Vision-Instruct:fireworks-ai",
     messages: [
         {
             role: "user",
