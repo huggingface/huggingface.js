@@ -13,6 +13,15 @@ const MAX_CHUNK_SIZE = 2 * TARGET_CHUNK_SIZE;
 const XORB_SIZE = 64 * 1024 * 1024;
 const MAX_XORB_CHUNKS = 8 * 1024;
 
+interface ChunkCache {
+	xorbIndex: number; // uint16
+	chunkPosition: number; // uint32
+}
+
+const CHUNK_CACHE_INITIAL_SIZE = 10_000;
+const CHUNK_CACHE_GROW_FACTOR = 1.5;
+const CHUNK_CACHE_MAX_SIZE = 1_000_000;
+
 export async function* createXorbs(
 	fileSources: AsyncGenerator<{ content: Blob; path: string; sha256: string }>
 ): AsyncGenerator<
@@ -50,6 +59,45 @@ export async function* createXorbs(
 	await chunkModule.init();
 	const chunker = new chunkModule.Chunker(TARGET_CHUNK_SIZE);
 
+	let chunkCacheIndex = 0;
+	let chunkCacheXorbIndices = new Uint16Array(CHUNK_CACHE_INITIAL_SIZE);
+	let chunkCacheChunkOffsets = new Uint32Array(CHUNK_CACHE_INITIAL_SIZE);
+	let chunkCacheChunkEndOffsets = new Uint32Array(CHUNK_CACHE_INITIAL_SIZE);
+	const chunkCacheMap = new Map<string, number>(); // hash -> chunkCacheIndex. Less overhead that way, empty object is 60+B and empty array is 40+B
+
+	function addChunkToCache(hash: string, xorbIndex: number, chunkPosition: number, chunkLength: number) {
+		chunkCacheMap.set(hash, chunkCacheIndex);
+
+		if (chunkCacheIndex >= chunkCacheXorbIndices.length) {
+			// todo: switch to resize() with modern browsers
+			const oldXorbIndices = chunkCacheXorbIndices;
+			const oldChunkPositions = chunkCacheChunkOffsets;
+			const oldChunkLengths = chunkCacheChunkEndOffsets;
+			chunkCacheXorbIndices = new Uint16Array(
+				Math.min(chunkCacheXorbIndices.length * CHUNK_CACHE_GROW_FACTOR, CHUNK_CACHE_MAX_SIZE)
+			);
+			chunkCacheChunkOffsets = new Uint32Array(
+				Math.min(chunkCacheChunkOffsets.length * CHUNK_CACHE_GROW_FACTOR, CHUNK_CACHE_MAX_SIZE)
+			);
+			chunkCacheChunkEndOffsets = new Uint32Array(
+				Math.min(chunkCacheChunkEndOffsets.length * CHUNK_CACHE_GROW_FACTOR, CHUNK_CACHE_MAX_SIZE)
+			);
+			chunkCacheXorbIndices.set(oldXorbIndices);
+			chunkCacheChunkOffsets.set(oldChunkPositions);
+			chunkCacheChunkEndOffsets.set(oldChunkLengths);
+		}
+
+		chunkCacheXorbIndices[chunkCacheIndex] = xorbIndex;
+		chunkCacheChunkOffsets[chunkCacheIndex] = chunkPosition;
+		chunkCacheChunkEndOffsets[chunkCacheIndex] = chunkLength;
+		chunkCacheIndex = (chunkCacheIndex + 1) % CHUNK_CACHE_MAX_SIZE;
+
+		while (chunkCacheMap.size > CHUNK_CACHE_MAX_SIZE) {
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			chunkCacheMap.delete(chunkCacheMap.keys().next().value!);
+		}
+	}
+
 	let xorb = new Uint8Array(XORB_SIZE);
 	let xorbOffset = 0;
 	let xorbChunks = Array<{ hash: string; length: number; offset: number }>();
@@ -75,7 +123,11 @@ export async function* createXorbs(
 			const addChunks = function* (chunks: Array<{ hash: string; length: number }>) {
 				for (const chunk of chunks) {
 					let chunkOffset = xorbOffset;
+					let chunkEndOffset;
+					let chunkXorbId = xorbId;
 					fileChunks.push({ hash: chunk.hash, length: chunk.length });
+
+					// Remove chunks from source data
 					let chunkToCopy: Uint8Array;
 					if (chunk.length === sourceChunks[0].length) {
 						chunkToCopy = sourceChunks[0];
@@ -94,50 +146,65 @@ export async function* createXorbs(
 						}
 						sourceChunks.splice(0, index);
 					}
-					xorbOffset = writeChunk(xorb, xorbOffset, chunkToCopy);
-					if (xorbOffset === 0) {
-						// Failure to write chunk, maybe because it went over xorb size limit
-						yield {
-							event: "xorb" as const,
-							xorb: xorb.subarray(0, xorbOffset),
-							hash: chunkModule.compute_xorb_hash(xorbChunks),
-							chunks: [...xorbChunks],
-							id: xorbId,
-							files: Object.entries(xorbFiles).map(([path, progress]) => ({ path, progress })),
-						};
-						xorbId++;
-						xorb = new Uint8Array(XORB_SIZE);
-						chunkOffset = 0;
-						xorbOffset = writeChunk(xorb, 0, chunkToCopy);
-						xorbFiles = {};
+
+					const cacheIndex = chunkCacheMap.get(chunk.hash);
+					if (cacheIndex === undefined) {
+						xorbOffset = writeChunk(xorb, xorbOffset, chunkToCopy);
 
 						if (xorbOffset === 0) {
-							throw new Error("Failed to write chunk into xorb");
+							// Failure to write chunk, maybe because it went over xorb size limit
+							yield {
+								event: "xorb" as const,
+								xorb: xorb.subarray(0, xorbOffset),
+								hash: chunkModule.compute_xorb_hash(xorbChunks),
+								chunks: [...xorbChunks],
+								id: xorbId,
+								files: Object.entries(xorbFiles).map(([path, progress]) => ({ path, progress })),
+							};
+							xorbId++;
+							xorb = new Uint8Array(XORB_SIZE);
+							chunkOffset = 0;
+							chunkXorbId = xorbId;
+							xorbOffset = writeChunk(xorb, 0, chunkToCopy);
+							xorbFiles = {};
+
+							if (xorbOffset === 0) {
+								throw new Error("Failed to write chunk into xorb");
+							}
 						}
+
+						chunkEndOffset = xorbOffset;
+
+						addChunkToCache(chunk.hash, xorbId, chunkOffset, chunkEndOffset);
+					} else {
+						chunkXorbId = chunkCacheXorbIndices[cacheIndex];
+						chunkOffset = chunkCacheChunkOffsets[cacheIndex];
+						chunkEndOffset = chunkCacheChunkEndOffsets[cacheIndex];
 					}
+
 					const lastRep = fileRepresentation.at(-1);
 
 					if (!lastRep) {
 						fileRepresentation.push({
-							xorbId,
-							offset: initialXorbOffset,
-							endOffset: xorbOffset - initialXorbOffset,
+							xorbId: chunkXorbId,
+							offset: chunkOffset,
+							endOffset: chunkEndOffset,
 							length: chunk.length,
 							rangeHash: "",
 						});
 						currentChunkRangeBeginning = fileChunks.length - 1;
 					} else {
-						if (lastRep.xorbId === xorbId) {
-							lastRep.endOffset = xorbOffset - lastRep.offset;
+						if (lastRep.xorbId === chunkXorbId && lastRep.endOffset === chunkOffset) {
+							lastRep.endOffset = chunkEndOffset;
 							lastRep.length += chunk.length;
 						} else {
 							lastRep.rangeHash = chunkModule.compute_verification_hash(
 								fileChunks.slice(currentChunkRangeBeginning, -1).map((x) => x.hash, -1)
 							);
 							fileRepresentation.push({
-								xorbId,
-								offset: 0,
-								endOffset: xorbOffset,
+								xorbId: chunkXorbId,
+								offset: chunkOffset,
+								endOffset: chunkEndOffset,
 								length: chunk.length,
 								rangeHash: "",
 							});
