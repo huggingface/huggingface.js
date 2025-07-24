@@ -1,4 +1,4 @@
-import type { MetadataValue, Version, GGUFMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
+import type { MetadataValue, Version, GGUFMetadata, GGUFTypedMetadata, GGUFTensorInfo, GGUFParseOutput } from "./types";
 import { GGUFValueType } from "./types";
 import { isBackend } from "./utils/isBackend";
 import { promisesQueue } from "./utils/promisesQueue";
@@ -8,6 +8,7 @@ export type {
 	MetadataValue,
 	Version,
 	GGUFMetadata,
+	GGUFTypedMetadata,
 	GGUFTensorInfo,
 	GGUFParseOutput,
 	GGUFMetadataOptions,
@@ -245,9 +246,25 @@ function readMetadataValue(
 export async function gguf(
 	uri: string,
 	params: {
-		/**
-		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
-		 */
+		fetch?: typeof fetch;
+		additionalFetchHeaders?: Record<string, string>;
+		typedMetadata: true;
+		allowLocalFile?: boolean;
+	}
+): Promise<GGUFParseOutput & { typedMetadata: GGUFTypedMetadata }>;
+export async function gguf(
+	uri: string,
+	params: {
+		fetch?: typeof fetch;
+		additionalFetchHeaders?: Record<string, string>;
+		typedMetadata: true;
+		computeParametersCount: true;
+		allowLocalFile?: boolean;
+	}
+): Promise<GGUFParseOutput & { parameterCount: number; typedMetadata: GGUFTypedMetadata }>;
+export async function gguf(
+	uri: string,
+	params: {
 		fetch?: typeof fetch;
 		additionalFetchHeaders?: Record<string, string>;
 		computeParametersCount: true;
@@ -257,9 +274,6 @@ export async function gguf(
 export async function gguf(
 	uri: string,
 	params?: {
-		/**
-		 * Custom fetch function to use instead of the default one, for example to use a proxy or edit headers.
-		 */
 		fetch?: typeof fetch;
 		additionalFetchHeaders?: Record<string, string>;
 		allowLocalFile?: boolean;
@@ -273,10 +287,11 @@ export async function gguf(
 		 */
 		fetch?: typeof fetch;
 		additionalFetchHeaders?: Record<string, string>;
+		typedMetadata?: boolean;
 		computeParametersCount?: boolean;
 		allowLocalFile?: boolean;
 	}
-): Promise<GGUFParseOutput & { parameterCount?: number }> {
+): Promise<GGUFParseOutput & { parameterCount?: number; typedMetadata?: GGUFTypedMetadata }> {
 	let r: RangeView;
 	if (isBackend) {
 		/// On backend, we switch between remote/local file based on protocol
@@ -336,6 +351,21 @@ export async function gguf(
 		kv_count: numKv.value,
 	};
 
+	let typedMetadata: GGUFTypedMetadata | undefined;
+	if (params?.typedMetadata) {
+		typedMetadata = {
+			version: { value: version, type: GGUFValueType.UINT32 },
+			tensor_count: {
+				value: tensorCount.value,
+				type: version === 1 ? GGUFValueType.UINT32 : GGUFValueType.UINT64,
+			},
+			kv_count: {
+				value: numKv.value,
+				type: version === 1 ? GGUFValueType.UINT32 : GGUFValueType.UINT64,
+			},
+		};
+	}
+
 	for (let i = 0; i < numKv.value; i++) {
 		await r.fetchChunkIfNeeded(offset);
 
@@ -366,6 +396,29 @@ export async function gguf(
 		}
 		offset += valueResult.length;
 		metadata[keyResult.value] = valueResult.value;
+		if (typedMetadata) {
+			const typedEntry: {
+				value: MetadataValue;
+				type: GGUFValueType;
+				subType?: GGUFValueType;
+			} = {
+				value: valueResult.value,
+				type: valueType,
+			};
+
+			// For arrays, read the subType (element type)
+			if (valueType === GGUFValueType.ARRAY) {
+				// Array type is stored at the beginning of the value data
+				// We need to read it from the original offset (before reading the value)
+				const arrayTypeOffset = offset - valueResult.length;
+				const arraySubType = r.view.getUint32(arrayTypeOffset, littleEndian);
+				if (isGGUFValueType(arraySubType)) {
+					typedEntry.subType = arraySubType;
+				}
+			}
+
+			typedMetadata[keyResult.value] = typedEntry;
+		}
 	}
 
 	const tensorInfos: GGUFTensorInfo[] = [];
@@ -405,14 +458,38 @@ export async function gguf(
 	const alignment: number = Number(metadata["general.alignment"] ?? GGUF_DEFAULT_ALIGNMENT);
 	const tensorDataOffset = BigInt(GGML_PAD(offset, alignment));
 
-	if (params?.computeParametersCount) {
+	if (params?.computeParametersCount && params?.typedMetadata) {
 		const parameterCount = tensorInfos
 			.map(({ shape }) => shape.reduce((acc, val) => acc * Number(val), 1))
 			.reduce((acc, val) => acc + val, 0);
 
-		return { metadata, tensorInfos, tensorDataOffset, parameterCount };
+		return {
+			metadata,
+			tensorInfos,
+			tensorDataOffset,
+			parameterCount,
+			typedMetadata: typedMetadata as GGUFTypedMetadata,
+		} as GGUFParseOutput & { parameterCount: number; typedMetadata: GGUFTypedMetadata };
+	} else if (params?.computeParametersCount) {
+		const parameterCount = tensorInfos
+			.map(({ shape }) => shape.reduce((acc, val) => acc * Number(val), 1))
+			.reduce((acc, val) => acc + val, 0);
+
+		return {
+			metadata,
+			tensorInfos,
+			tensorDataOffset,
+			parameterCount,
+		} as GGUFParseOutput & { parameterCount: number };
+	} else if (params?.typedMetadata) {
+		return {
+			metadata,
+			tensorInfos,
+			tensorDataOffset,
+			typedMetadata: typedMetadata as GGUFTypedMetadata,
+		} as GGUFParseOutput & { typedMetadata: GGUFTypedMetadata };
 	} else {
-		return { metadata, tensorInfos, tensorDataOffset };
+		return { metadata, tensorInfos, tensorDataOffset } as GGUFParseOutput;
 	}
 }
 
