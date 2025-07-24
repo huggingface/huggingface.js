@@ -89,13 +89,18 @@ console.log(typedMetadata);
 //     "general.name": { value: "LLaMA v2", type: GGUFValueType.STRING },
 //     "llama.attention.head_count": { value: 32, type: GGUFValueType.UINT32 },
 //     "llama.attention.layer_norm_rms_epsilon": { value: 9.999999974752427e-7, type: GGUFValueType.FLOAT32 },
-//     "tokenizer.ggml.tokens": { value: ["<unk>", "<s>", "</s>", ...], type: GGUFValueType.ARRAY },
+//     "tokenizer.ggml.tokens": { value: ["<unk>", "<s>", "</s>", ...], type: GGUFValueType.ARRAY, subType: GGUFValueType.STRING },
+//     "tokenizer.ggml.scores": { value: [0.0, -1000.0, -1000.0, ...], type: GGUFValueType.ARRAY, subType: GGUFValueType.FLOAT32 },
 //     ...
 // }
 
 // Access both value and type information
 console.log(typedMetadata["general.architecture"].value); // "llama"
 console.log(typedMetadata["general.architecture"].type);  // GGUFValueType.STRING (8)
+
+// For arrays, subType indicates the type of array elements
+console.log(typedMetadata["tokenizer.ggml.tokens"].type);    // GGUFValueType.ARRAY (9)  
+console.log(typedMetadata["tokenizer.ggml.tokens"].subType); // GGUFValueType.STRING (8)
 ```
 
 ### Strictly typed

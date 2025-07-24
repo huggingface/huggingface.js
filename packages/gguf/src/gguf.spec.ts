@@ -440,13 +440,22 @@ describe("gguf", () => {
 		// Check if tokens array is properly handled
 		if (typedMetadata["tokenizer.ggml.tokens"]) {
 			expect(typedMetadata["tokenizer.ggml.tokens"].type).toEqual(GGUFValueType.ARRAY);
+			expect(typedMetadata["tokenizer.ggml.tokens"].subType).toEqual(GGUFValueType.STRING);
 			expect(Array.isArray(typedMetadata["tokenizer.ggml.tokens"].value)).toBe(true);
 		}
 
 		// Check if scores array is properly handled
 		if (typedMetadata["tokenizer.ggml.scores"]) {
 			expect(typedMetadata["tokenizer.ggml.scores"].type).toEqual(GGUFValueType.ARRAY);
+			expect(typedMetadata["tokenizer.ggml.scores"].subType).toEqual(GGUFValueType.FLOAT32);
 			expect(Array.isArray(typedMetadata["tokenizer.ggml.scores"].value)).toBe(true);
+		}
+
+		// Check if token_type array is properly handled
+		if (typedMetadata["tokenizer.ggml.token_type"]) {
+			expect(typedMetadata["tokenizer.ggml.token_type"].type).toEqual(GGUFValueType.ARRAY);
+			expect(typedMetadata["tokenizer.ggml.token_type"].subType).toEqual(GGUFValueType.INT32);
+			expect(Array.isArray(typedMetadata["tokenizer.ggml.token_type"].value)).toBe(true);
 		}
 	});
 

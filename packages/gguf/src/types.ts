@@ -120,12 +120,14 @@ export type GGUFTypedMetadata = {
 	[K in keyof GGUFModelKV]?: {
 		value: GGUFModelKV[K];
 		type: GGUFValueType;
+		subType?: GGUFValueType;
 	};
 } & Record<
 		string,
 		{
 			value: MetadataValue;
 			type: GGUFValueType;
+			subType?: GGUFValueType;
 		}
 	>;
 

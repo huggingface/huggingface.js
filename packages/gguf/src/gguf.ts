@@ -397,10 +397,27 @@ export async function gguf(
 		offset += valueResult.length;
 		metadata[keyResult.value] = valueResult.value;
 		if (typedMetadata) {
-			typedMetadata[keyResult.value] = {
+			const typedEntry: {
+				value: MetadataValue;
+				type: GGUFValueType;
+				subType?: GGUFValueType;
+			} = {
 				value: valueResult.value,
 				type: valueType,
 			};
+
+			// For arrays, read the subType (element type)
+			if (valueType === GGUFValueType.ARRAY) {
+				// Array type is stored at the beginning of the value data
+				// We need to read it from the original offset (before reading the value)
+				const arrayTypeOffset = offset - valueResult.length;
+				const arraySubType = r.view.getUint32(arrayTypeOffset, littleEndian);
+				if (isGGUFValueType(arraySubType)) {
+					typedEntry.subType = arraySubType;
+				}
+			}
+
+			typedMetadata[keyResult.value] = typedEntry;
 		}
 	}
 
