@@ -17,7 +17,7 @@ export async function* createXorbs(
 	fileSources: AsyncGenerator<{ content: Blob; path: string; sha256: string }>
 ): AsyncGenerator<
 	| {
-			type: "xorb";
+			event: "xorb";
 			xorb: Uint8Array;
 			hash: string;
 			id: number;
@@ -28,7 +28,7 @@ export async function* createXorbs(
 			}>;
 	  }
 	| {
-			type: "file";
+			event: "file";
 			path: string;
 			hash: string;
 			sha256: string;
@@ -98,7 +98,7 @@ export async function* createXorbs(
 					if (xorbOffset === 0) {
 						// Failure to write chunk, maybe because it went over xorb size limit
 						yield {
-							type: "xorb" as const,
+							event: "xorb" as const,
 							xorb: xorb.subarray(0, xorbOffset),
 							hash: chunkModule.compute_xorb_hash(xorbChunks),
 							chunks: [...xorbChunks],
@@ -148,7 +148,7 @@ export async function* createXorbs(
 					xorbFiles[fileSource.path] = processedBytes / fileSource.content.size;
 					if (xorbChunks.length >= MAX_XORB_CHUNKS) {
 						yield {
-							type: "xorb" as const,
+							event: "xorb" as const,
 							xorb: xorb.subarray(0, xorbOffset),
 							hash: chunkModule.compute_xorb_hash(xorbChunks),
 							chunks: [...xorbChunks],
@@ -183,7 +183,7 @@ export async function* createXorbs(
 			}
 
 			yield {
-				type: "file" as const,
+				event: "file" as const,
 				path: fileSource.path,
 				hash: chunkModule.compute_file_hash(fileChunks),
 				representation: fileRepresentation,
@@ -193,7 +193,7 @@ export async function* createXorbs(
 
 		if (xorbOffset > 0) {
 			yield {
-				type: "xorb" as const,
+				event: "xorb" as const,
 				xorb: xorb.subarray(0, xorbOffset),
 				hash: chunkModule.compute_xorb_hash(xorbChunks),
 				chunks: [...xorbChunks],

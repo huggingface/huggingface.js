@@ -67,7 +67,7 @@ export async function* uploadShards(
 	source: AsyncGenerator<{ content: Blob; path: string; sha256: string }>,
 	params: UploadShardsParams
 ): AsyncGenerator<
-	{ type: "file"; path: string; sha256: string } | { type: "fileProgress"; path: string; progress: number }
+	{ event: "file"; path: string; sha256: string } | { event: "fileProgress"; path: string; progress: number }
 > {
 	const xorbHashes: Array<string> = [];
 
@@ -83,7 +83,7 @@ export async function* uploadShards(
 	let xorbTotalUnpackedSize = 0n;
 
 	for await (const output of createXorbs(source)) {
-		switch (output.type) {
+		switch (output.event) {
 			case "xorb": {
 				xorbHashes.push(output.hash);
 
@@ -117,12 +117,12 @@ export async function* uploadShards(
 				//^ Todo: queue it and do not await it
 
 				for (const file of output.files) {
-					yield { type: "fileProgress", path: file.path, progress: file.progress };
+					yield { event: "fileProgress", path: file.path, progress: file.progress };
 				}
 				break;
 			}
 			case "file": {
-				yield { type: "file", path: output.path, sha256: output.sha256 }; // Maybe wait until shard is uploaded before yielding.
+				yield { event: "file", path: output.path, sha256: output.sha256 }; // Maybe wait until shard is uploaded before yielding.
 
 				// todo: handle out of bounds
 
