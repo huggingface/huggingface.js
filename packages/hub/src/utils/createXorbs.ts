@@ -190,6 +190,17 @@ export async function* createXorbs(
 				sha256: fileSource.sha256,
 			};
 		}
+
+		if (xorbOffset > 0) {
+			yield {
+				type: "xorb" as const,
+				xorb: xorb.subarray(0, xorbOffset),
+				hash: chunkModule.compute_xorb_hash(xorbChunks),
+				chunks: [...xorbChunks],
+				id: xorbId,
+				files: Object.entries(xorbFiles).map(([path, progress]) => ({ path, progress })),
+			};
+		}
 	} finally {
 		chunker.free();
 		// ^ is this really needed ?
