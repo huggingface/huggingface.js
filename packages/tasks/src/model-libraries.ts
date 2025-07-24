@@ -32,7 +32,7 @@ export interface LibraryUiElement {
 	 * Elastic query used to count this library's model downloads
 	 *
 	 * By default, those files are counted:
-	 * "config.json", "config.yaml", "hyperparams.yaml", "meta.yaml"
+	 * "config.json", "config.yaml", "hyperparams.yaml", "params.json", "meta.yaml"
 	 */
 	countDownloads?: ElasticSearchQuery;
 	/**
@@ -630,14 +630,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/StanfordMIMI/MedVAE",
 		filter: false,
 		countDownloads: `path_extension:"ckpt"`,
-	},
-	mistral_common: {
-		prettyLabel: "mistral-common",
-		repoName: "mistral-common",
-		repoUrl: "https://github.com/mistralai/mistral-common",
-		docsUrl: "https://mistralai.github.io/mistral-common/",
-		snippets: snippets.mistral_common,
-		countDownloads: `path:"config.json" OR path:"params.json"`,
 	},
 	mitie: {
 		prettyLabel: "MITIE",
