@@ -63,7 +63,12 @@ interface UploadShardsParams {
 /**
  * Outputs the file sha256 after their xorbs/shards have been uploaded.
  */
-export async function uploadShards(source: AsyncGenerator<Blob>, params: UploadShardsParams): Promise<string[]> {
+export async function* uploadShards(
+	source: AsyncGenerator<{ content: Blob; path: string; sha256: string }>,
+	params: UploadShardsParams
+): AsyncGenerator<
+	{ type: "file"; path: string; sha256: string } | { type: "fileProgress"; path: string; progress: number }
+> {
 	const xorbHashes: Array<string> = [];
 
 	const fileInfoSection = new Uint8Array(Math.floor(SHARD_MAX_SIZE - SHARD_HEADER_SIZE - SHARD_FOOTER_SIZE) / 2);
@@ -76,7 +81,6 @@ export async function uploadShards(source: AsyncGenerator<Blob>, params: UploadS
 	let xorbTotalSize = 0n;
 	let fileTotalSize = 0n;
 	let xorbTotalUnpackedSize = 0n;
-	const fileShas: Array<string> = [];
 
 	for await (const output of createXorbs(source)) {
 		switch (output.type) {
@@ -111,10 +115,14 @@ export async function uploadShards(source: AsyncGenerator<Blob>, params: UploadS
 
 				await uploadXorb(output, params);
 				//^ Todo: queue it and do not await it
+
+				for (const file of output.files) {
+					yield { type: "fileProgress", path: file.path, progress: file.progress };
+				}
 				break;
 			}
 			case "file": {
-				fileShas.push(output.sha256); // note: if yielding instead, maybe wait until shard is uploaded.
+				yield { type: "file", path: output.path, sha256: output.sha256 }; // Maybe wait until shard is uploaded before yielding.
 
 				// todo: handle out of bounds
 
@@ -292,8 +300,6 @@ export async function uploadShards(source: AsyncGenerator<Blob>, params: UploadS
 	if (xorbViewOffset || fileViewOffset) {
 		await uploadShard(createShard(), params);
 	}
-
-	return fileShas;
 }
 
 // Todo: switch from hex to non-hex when WASM switches. For now consider hash is hex

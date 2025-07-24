@@ -13,16 +13,23 @@ const MAX_CHUNK_SIZE = 2 * TARGET_CHUNK_SIZE;
 const XORB_SIZE = 64 * 1024 * 1024;
 const MAX_XORB_CHUNKS = 8 * 1024;
 
-export async function* createXorbs(fileSources: AsyncGenerator<Blob>): AsyncGenerator<
+export async function* createXorbs(
+	fileSources: AsyncGenerator<{ content: Blob; path: string; sha256: string }>
+): AsyncGenerator<
 	| {
 			type: "xorb";
 			xorb: Uint8Array;
 			hash: string;
 			id: number;
 			chunks: Array<{ hash: string; length: number; offset: number }>;
+			files: Array<{
+				path: string;
+				progress: number;
+			}>;
 	  }
 	| {
 			type: "file";
+			path: string;
 			hash: string;
 			sha256: string;
 			representation: Array<{
@@ -38,7 +45,6 @@ export async function* createXorbs(fileSources: AsyncGenerator<Blob>): AsyncGene
 	undefined
 > {
 	const chunkModule = await import("../vendor/xet-chunk/chunker_wasm");
-	const sha256Module = await import("../vendor/hash-wasm/sha256-wrapper");
 	let xorbId = 0;
 
 	await chunkModule.init();
@@ -47,13 +53,15 @@ export async function* createXorbs(fileSources: AsyncGenerator<Blob>): AsyncGene
 	let xorb = new Uint8Array(XORB_SIZE);
 	let xorbOffset = 0;
 	let xorbChunks = Array<{ hash: string; length: number; offset: number }>();
+	let xorbFiles: Record<string, number> = {};
 
 	try {
 		for await (const fileSource of fileSources) {
 			const initialXorbOffset = xorbOffset;
 			const sourceChunks: Array<Uint8Array> = [];
 
-			const reader = fileSource.stream().getReader();
+			const reader = fileSource.content.stream().getReader();
+			let processedBytes = 0;
 			const fileChunks: Array<{ hash: string; length: number }> = [];
 			let currentChunkRangeBeginning = 0;
 			const fileRepresentation: Array<{
@@ -63,9 +71,6 @@ export async function* createXorbs(fileSources: AsyncGenerator<Blob>): AsyncGene
 				length: number;
 				rangeHash: string;
 			}> = [];
-
-			const sha256 = await sha256Module.createSHA256();
-			sha256.init();
 
 			const addChunks = function* (chunks: Array<{ hash: string; length: number }>) {
 				for (const chunk of chunks) {
@@ -98,11 +103,13 @@ export async function* createXorbs(fileSources: AsyncGenerator<Blob>): AsyncGene
 							hash: chunkModule.compute_xorb_hash(xorbChunks),
 							chunks: [...xorbChunks],
 							id: xorbId,
+							files: Object.entries(xorbFiles).map(([path, progress]) => ({ path, progress })),
 						};
 						xorbId++;
 						xorb = new Uint8Array(XORB_SIZE);
 						chunkOffset = 0;
 						xorbOffset = writeChunk(xorb, 0, chunkToCopy);
+						xorbFiles = {};
 
 						if (xorbOffset === 0) {
 							throw new Error("Failed to write chunk into xorb");
@@ -138,6 +145,7 @@ export async function* createXorbs(fileSources: AsyncGenerator<Blob>): AsyncGene
 						}
 					}
 					xorbChunks.push({ hash: chunk.hash, length: chunk.length, offset: chunkOffset });
+					xorbFiles[fileSource.path] = processedBytes / fileSource.content.size;
 					if (xorbChunks.length >= MAX_XORB_CHUNKS) {
 						yield {
 							type: "xorb" as const,
@@ -145,10 +153,12 @@ export async function* createXorbs(fileSources: AsyncGenerator<Blob>): AsyncGene
 							hash: chunkModule.compute_xorb_hash(xorbChunks),
 							chunks: [...xorbChunks],
 							id: xorbId,
+							files: Object.entries(xorbFiles).map(([path, progress]) => ({ path, progress })),
 						};
 						xorbId++;
 						xorbOffset = 0;
 						xorbChunks = [];
+						xorbFiles = {};
 						xorb = new Uint8Array(XORB_SIZE);
 					}
 				}
@@ -160,8 +170,8 @@ export async function* createXorbs(fileSources: AsyncGenerator<Blob>): AsyncGene
 					yield* addChunks(chunker.finish());
 					break;
 				}
+				processedBytes += value.length;
 				sourceChunks.push(value);
-				sha256.update(value);
 				yield* addChunks(chunker.add_data(value));
 			}
 
@@ -174,9 +184,10 @@ export async function* createXorbs(fileSources: AsyncGenerator<Blob>): AsyncGene
 
 			yield {
 				type: "file" as const,
+				path: fileSource.path,
 				hash: chunkModule.compute_file_hash(fileChunks),
-				sha256: sha256.digest("hex"),
 				representation: fileRepresentation,
+				sha256: fileSource.sha256,
 			};
 		}
 	} finally {
