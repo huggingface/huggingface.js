@@ -6,21 +6,13 @@
 
 import { bg4_split_bytes, XET_CHUNK_HEADER_BYTES, XetChunkCompressionScheme } from "./XetBlob";
 import { compress as lz4_compress } from "../vendor/lz4js";
+import { ChunkCache } from "./ChunkCache";
 
 const TARGET_CHUNK_SIZE = 64 * 1024;
 /* eslint-disable @typescript-eslint/no-unused-vars */
 const MAX_CHUNK_SIZE = 2 * TARGET_CHUNK_SIZE;
 const XORB_SIZE = 64 * 1024 * 1024;
 const MAX_XORB_CHUNKS = 8 * 1024;
-
-interface ChunkCache {
-	xorbIndex: number; // uint16
-	chunkPosition: number; // uint32
-}
-
-const CHUNK_CACHE_INITIAL_SIZE = 10_000;
-const CHUNK_CACHE_GROW_FACTOR = 1.5;
-const CHUNK_CACHE_MAX_SIZE = 1_000_000;
 
 export async function* createXorbs(
 	fileSources: AsyncGenerator<{ content: Blob; path: string; sha256: string }>
@@ -42,7 +34,7 @@ export async function* createXorbs(
 			hash: string;
 			sha256: string;
 			representation: Array<{
-				xorbId: number;
+				xorbId: number | string; // either xorb id (for local xorbs) or xorb hash (for remote xorbs)
 				offset: number;
 				endOffset: number;
 				/** Unpacked length */
@@ -58,46 +50,7 @@ export async function* createXorbs(
 
 	await chunkModule.init();
 	const chunker = new chunkModule.Chunker(TARGET_CHUNK_SIZE);
-
-	let chunkCacheIndex = 0;
-	let chunkCacheXorbIndices = new Uint16Array(CHUNK_CACHE_INITIAL_SIZE);
-	let chunkCacheChunkOffsets = new Uint32Array(CHUNK_CACHE_INITIAL_SIZE);
-	let chunkCacheChunkEndOffsets = new Uint32Array(CHUNK_CACHE_INITIAL_SIZE);
-	const chunkCacheMap = new Map<string, number>(); // hash -> chunkCacheIndex. Less overhead that way, empty object is 60+B and empty array is 40+B
-
-	function addChunkToCache(hash: string, xorbIndex: number, chunkPosition: number, chunkLength: number) {
-		chunkCacheMap.set(hash, chunkCacheIndex);
-
-		if (chunkCacheIndex >= chunkCacheXorbIndices.length) {
-			// todo: switch to resize() with modern browsers
-			const oldXorbIndices = chunkCacheXorbIndices;
-			const oldChunkPositions = chunkCacheChunkOffsets;
-			const oldChunkLengths = chunkCacheChunkEndOffsets;
-			chunkCacheXorbIndices = new Uint16Array(
-				Math.min(chunkCacheXorbIndices.length * CHUNK_CACHE_GROW_FACTOR, CHUNK_CACHE_MAX_SIZE)
-			);
-			chunkCacheChunkOffsets = new Uint32Array(
-				Math.min(chunkCacheChunkOffsets.length * CHUNK_CACHE_GROW_FACTOR, CHUNK_CACHE_MAX_SIZE)
-			);
-			chunkCacheChunkEndOffsets = new Uint32Array(
-				Math.min(chunkCacheChunkEndOffsets.length * CHUNK_CACHE_GROW_FACTOR, CHUNK_CACHE_MAX_SIZE)
-			);
-			chunkCacheXorbIndices.set(oldXorbIndices);
-			chunkCacheChunkOffsets.set(oldChunkPositions);
-			chunkCacheChunkEndOffsets.set(oldChunkLengths);
-		}
-
-		chunkCacheXorbIndices[chunkCacheIndex] = xorbIndex;
-		chunkCacheChunkOffsets[chunkCacheIndex] = chunkPosition;
-		chunkCacheChunkEndOffsets[chunkCacheIndex] = chunkLength;
-		chunkCacheIndex = (chunkCacheIndex + 1) % CHUNK_CACHE_MAX_SIZE;
-
-		while (chunkCacheMap.size > CHUNK_CACHE_MAX_SIZE) {
-			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			chunkCacheMap.delete(chunkCacheMap.keys().next().value!);
-		}
-	}
-
+	const chunkCache = new ChunkCache();
 	let xorb = new Uint8Array(XORB_SIZE);
 	let xorbOffset = 0;
 	let xorbChunks = Array<{ hash: string; length: number; offset: number }>();
@@ -105,7 +58,6 @@ export async function* createXorbs(
 
 	try {
 		for await (const fileSource of fileSources) {
-			const initialXorbOffset = xorbOffset;
 			const sourceChunks: Array<Uint8Array> = [];
 
 			const reader = fileSource.content.stream().getReader();
@@ -147,8 +99,8 @@ export async function* createXorbs(
 						sourceChunks.splice(0, index);
 					}
 
-					const cacheIndex = chunkCacheMap.get(chunk.hash);
-					if (cacheIndex === undefined) {
+					const cacheData = chunkCache.getChunk(chunk.hash);
+					if (cacheData === undefined) {
 						xorbOffset = writeChunk(xorb, xorbOffset, chunkToCopy);
 
 						if (xorbOffset === 0) {
@@ -175,11 +127,11 @@ export async function* createXorbs(
 
 						chunkEndOffset = xorbOffset;
 
-						addChunkToCache(chunk.hash, xorbId, chunkOffset, chunkEndOffset);
+						chunkCache.addChunkToCache(chunk.hash, xorbId, chunkOffset, chunkEndOffset);
 					} else {
-						chunkXorbId = chunkCacheXorbIndices[cacheIndex];
-						chunkOffset = chunkCacheChunkOffsets[cacheIndex];
-						chunkEndOffset = chunkCacheChunkEndOffsets[cacheIndex];
+						chunkXorbId = cacheData.xorbIndex;
+						chunkOffset = cacheData.offset;
+						chunkEndOffset = cacheData.endOffset;
 					}
 
 					const lastRep = fileRepresentation.at(-1);

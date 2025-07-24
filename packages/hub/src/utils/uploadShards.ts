@@ -137,7 +137,11 @@ export async function* uploadShards(
 				fileViewOffset += 8;
 
 				for (const repItem of output.representation) {
-					writeHashToArray(xorbHashes[repItem.xorbId], fileInfoSection, fileViewOffset);
+					writeHashToArray(
+						typeof repItem.xorbId === "number" ? xorbHashes[repItem.xorbId] : repItem.xorbId,
+						fileInfoSection,
+						fileViewOffset
+					);
 					fileViewOffset += HASH_LENGTH;
 					fileInfoView.setUint32(fileViewOffset, 0, true); // Xorb flags
 					fileViewOffset += 4;
