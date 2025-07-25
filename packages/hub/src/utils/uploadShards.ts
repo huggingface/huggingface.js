@@ -71,8 +71,8 @@ export async function* uploadShards(
 > {
 	const xorbHashes: Array<string> = [];
 
-	const fileInfoSection = new Uint8Array(Math.floor(SHARD_MAX_SIZE - SHARD_HEADER_SIZE - SHARD_FOOTER_SIZE) / 2);
-	const xorbInfoSection = new Uint8Array(Math.floor(SHARD_MAX_SIZE - SHARD_HEADER_SIZE - SHARD_FOOTER_SIZE) / 2);
+	const fileInfoSection = new Uint8Array(Math.floor(SHARD_MAX_SIZE - SHARD_HEADER_SIZE - SHARD_FOOTER_SIZE) * 0.25);
+	const xorbInfoSection = new Uint8Array(Math.floor(SHARD_MAX_SIZE - SHARD_HEADER_SIZE - SHARD_FOOTER_SIZE) * 0.75);
 
 	const xorbView = new DataView(xorbInfoSection.buffer);
 	let xorbViewOffset = 0;
@@ -86,6 +86,19 @@ export async function* uploadShards(
 		switch (output.event) {
 			case "xorb": {
 				xorbHashes.push(output.hash);
+
+				// Calculate space needed for this xorb entry
+				const xorbEntrySize = HASH_LENGTH + 4 + 4 + 4 + 4; // hash + flags + count + unpacked + packed
+				const chunksSize = output.chunks.length * (HASH_LENGTH + 4 + 4 + 8); // per chunk: hash + length + offset + reserved
+				const totalXorbSize = xorbEntrySize + chunksSize;
+
+				// Check if adding this xorb would exceed buffer capacity
+				if (xorbViewOffset + totalXorbSize > xorbInfoSection.length) {
+					// Upload current shard and reset buffers
+					if (xorbViewOffset > 0 || fileViewOffset > 0) {
+						await uploadShard(createShard(), params);
+					}
+				}
 
 				// todo: handle when going out of bounds
 				writeHashToArray(output.hash, xorbInfoSection, xorbViewOffset);
@@ -124,7 +137,20 @@ export async function* uploadShards(
 			case "file": {
 				yield { event: "file", path: output.path, sha256: output.sha256 }; // Maybe wait until shard is uploaded before yielding.
 
-				// todo: handle out of bounds
+				// Calculate space needed for this file entry
+				const fileHeaderSize = HASH_LENGTH + 4 + 4 + 8; // hash + flags + rep length + reserved
+				const representationSize = output.representation.length * (HASH_LENGTH + 4 + 4 + 4 + 4); // per rep: xorb hash + flags + length + offset + endOffset
+				const verificationSize = output.representation.length * (HASH_LENGTH + 16); // per rep: range hash + reserved
+				const metadataSize = HASH_LENGTH + 16; // sha256 + reserved
+				const totalFileSize = fileHeaderSize + representationSize + verificationSize + metadataSize;
+
+				// Check if adding this file would exceed buffer capacity
+				if (fileViewOffset + totalFileSize > fileInfoSection.length) {
+					// Upload current shard and reset buffers
+					if (xorbViewOffset > 0 || fileViewOffset > 0) {
+						await uploadShard(createShard(), params);
+					}
+				}
 
 				writeHashToArray(output.hash, fileInfoSection, fileViewOffset);
 				fileViewOffset += HASH_LENGTH;
