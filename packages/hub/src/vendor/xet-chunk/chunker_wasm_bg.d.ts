@@ -1,6 +1,8 @@
 /* tslint:disable */
 /* eslint-disable */
-export function compute_xorb_hash(chunks_array: any): string;
+export function compute_xorb_hash(chunks_array: Array<{ hash: string; length: number }>): string;
+export function compute_verification_hash(chunkHashes: string[]): string;
+export function compute_file_hash(chunks_array: Array<{ hash: string; length: number }>): string;
 export class Chunker {
 	free(): void;
 	constructor(target_chunk_size: number);

@@ -6,6 +6,7 @@
 
 import { bg4_split_bytes, XET_CHUNK_HEADER_BYTES, XetChunkCompressionScheme } from "./XetBlob";
 import { compress as lz4_compress } from "../vendor/lz4js";
+import { ChunkCache } from "./ChunkCache";
 
 const TARGET_CHUNK_SIZE = 64 * 1024;
 /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -14,69 +15,210 @@ const XORB_SIZE = 64 * 1024 * 1024;
 const MAX_XORB_CHUNKS = 8 * 1024;
 
 export async function* createXorbs(
-	fileSource: Blob
-): AsyncGenerator<{ xorb: Uint8Array; hash: string }, void, undefined> {
+	fileSources: AsyncGenerator<{ content: Blob; path: string; sha256: string }>
+): AsyncGenerator<
+	| {
+			event: "xorb";
+			xorb: Uint8Array;
+			hash: string;
+			id: number;
+			chunks: Array<{ hash: string; length: number; offset: number }>;
+			files: Array<{
+				path: string;
+				progress: number;
+			}>;
+	  }
+	| {
+			event: "file";
+			path: string;
+			hash: string;
+			sha256: string;
+			representation: Array<{
+				xorbId: number | string; // either xorb id (for local xorbs) or xorb hash (for remote xorbs)
+				offset: number;
+				endOffset: number;
+				/** Unpacked length */
+				length: number;
+				rangeHash: string;
+			}>;
+	  },
+	void,
+	undefined
+> {
 	const chunkModule = await import("../vendor/xet-chunk/chunker_wasm");
+	let xorbId = 0;
+
 	await chunkModule.init();
 	const chunker = new chunkModule.Chunker(TARGET_CHUNK_SIZE);
-
+	const chunkCache = new ChunkCache();
 	let xorb = new Uint8Array(XORB_SIZE);
-	const sourceChunks: Array<Uint8Array> = [];
+	let xorbOffset = 0;
+	let xorbChunks = Array<{ hash: string; length: number; offset: number }>();
+	let xorbFiles: Record<string, number> = {};
 
 	try {
-		const reader = fileSource.stream().getReader();
-		let xorbOffset = 0;
-		let xorbChunks = Array<{ hash: string; length: number }>();
+		for await (const fileSource of fileSources) {
+			const sourceChunks: Array<Uint8Array> = [];
 
-		const addChunks = function* (chunks: Array<{ hash: string; length: number }>) {
-			for (const chunk of chunks) {
-				let chunkToCopy: Uint8Array;
-				if (chunk.length === sourceChunks[0].length) {
-					chunkToCopy = sourceChunks[0];
-					sourceChunks.shift();
-				} else if (chunk.length < sourceChunks[0].length) {
-					chunkToCopy = sourceChunks[0].subarray(0, chunk.length);
-					sourceChunks[0] = sourceChunks[0].subarray(chunk.length);
-				} else {
-					chunkToCopy = new Uint8Array(chunk.length);
-					let copyOffset = 0;
-					let index = 0;
-					while (copyOffset < chunk.length) {
-						chunkToCopy.set(sourceChunks[index].subarray(0, chunk.length - copyOffset), copyOffset);
-						copyOffset += sourceChunks[index].length;
-						index++;
+			const reader = fileSource.content.stream().getReader();
+			let processedBytes = 0;
+			const fileChunks: Array<{ hash: string; length: number }> = [];
+			let currentChunkRangeBeginning = 0;
+			const fileRepresentation: Array<{
+				xorbId: number;
+				offset: number;
+				endOffset: number;
+				length: number;
+				rangeHash: string;
+			}> = [];
+
+			const addChunks = function* (chunks: Array<{ hash: string; length: number }>) {
+				for (const chunk of chunks) {
+					let chunkOffset = xorbOffset;
+					let chunkEndOffset;
+					let chunkXorbId = xorbId;
+					fileChunks.push({ hash: chunk.hash, length: chunk.length });
+
+					// Remove chunks from source data
+					let chunkToCopy: Uint8Array;
+					if (chunk.length === sourceChunks[0].length) {
+						chunkToCopy = sourceChunks[0];
+						sourceChunks.shift();
+					} else if (chunk.length < sourceChunks[0].length) {
+						chunkToCopy = sourceChunks[0].subarray(0, chunk.length);
+						sourceChunks[0] = sourceChunks[0].subarray(chunk.length);
+					} else {
+						chunkToCopy = new Uint8Array(chunk.length);
+						let copyOffset = 0;
+						let index = 0;
+						while (copyOffset < chunk.length) {
+							chunkToCopy.set(sourceChunks[index].subarray(0, chunk.length - copyOffset), copyOffset);
+							copyOffset += sourceChunks[index].length;
+							index++;
+						}
+						sourceChunks.splice(0, index);
 					}
-					sourceChunks.splice(0, index);
-				}
-				xorbOffset = writeChunk(xorb, xorbOffset, chunkToCopy);
-				if (xorbOffset === 0) {
-					// Failure to write chunk, maybe because it went over xorb size limit
-					yield { xorb: xorb.subarray(0, xorbOffset), hash: "" };
-					xorb = new Uint8Array(XORB_SIZE);
-					xorbOffset = writeChunk(xorb, 0, chunkToCopy);
 
-					if (xorbOffset === 0) {
-						throw new Error("Failed to write chunk into xorb");
+					const cacheData = chunkCache.getChunk(chunk.hash);
+					if (cacheData === undefined) {
+						xorbOffset = writeChunk(xorb, xorbOffset, chunkToCopy);
+
+						if (xorbOffset === 0) {
+							// Failure to write chunk, maybe because it went over xorb size limit
+							yield {
+								event: "xorb" as const,
+								xorb: xorb.subarray(0, xorbOffset),
+								hash: chunkModule.compute_xorb_hash(xorbChunks),
+								chunks: [...xorbChunks],
+								id: xorbId,
+								files: Object.entries(xorbFiles).map(([path, progress]) => ({ path, progress })),
+							};
+							xorbId++;
+							xorb = new Uint8Array(XORB_SIZE);
+							chunkOffset = 0;
+							chunkXorbId = xorbId;
+							xorbOffset = writeChunk(xorb, 0, chunkToCopy);
+							xorbFiles = {};
+
+							if (xorbOffset === 0) {
+								throw new Error("Failed to write chunk into xorb");
+							}
+						}
+
+						chunkEndOffset = xorbOffset;
+
+						chunkCache.addChunkToCache(chunk.hash, xorbId, chunkOffset, chunkEndOffset);
+					} else {
+						chunkXorbId = cacheData.xorbIndex;
+						chunkOffset = cacheData.offset;
+						chunkEndOffset = cacheData.endOffset;
+					}
+
+					const lastRep = fileRepresentation.at(-1);
+
+					if (!lastRep) {
+						fileRepresentation.push({
+							xorbId: chunkXorbId,
+							offset: chunkOffset,
+							endOffset: chunkEndOffset,
+							length: chunk.length,
+							rangeHash: "",
+						});
+						currentChunkRangeBeginning = fileChunks.length - 1;
+					} else {
+						if (lastRep.xorbId === chunkXorbId && lastRep.endOffset === chunkOffset) {
+							lastRep.endOffset = chunkEndOffset;
+							lastRep.length += chunk.length;
+						} else {
+							lastRep.rangeHash = chunkModule.compute_verification_hash(
+								fileChunks.slice(currentChunkRangeBeginning, -1).map((x) => x.hash, -1)
+							);
+							fileRepresentation.push({
+								xorbId: chunkXorbId,
+								offset: chunkOffset,
+								endOffset: chunkEndOffset,
+								length: chunk.length,
+								rangeHash: "",
+							});
+							currentChunkRangeBeginning = fileChunks.length - 1;
+						}
+					}
+					xorbChunks.push({ hash: chunk.hash, length: chunk.length, offset: chunkOffset });
+					xorbFiles[fileSource.path] = processedBytes / fileSource.content.size;
+					if (xorbChunks.length >= MAX_XORB_CHUNKS) {
+						yield {
+							event: "xorb" as const,
+							xorb: xorb.subarray(0, xorbOffset),
+							hash: chunkModule.compute_xorb_hash(xorbChunks),
+							chunks: [...xorbChunks],
+							id: xorbId,
+							files: Object.entries(xorbFiles).map(([path, progress]) => ({ path, progress })),
+						};
+						xorbId++;
+						xorbOffset = 0;
+						xorbChunks = [];
+						xorbFiles = {};
+						xorb = new Uint8Array(XORB_SIZE);
 					}
 				}
-				xorbChunks.push(chunk);
-				if (xorbChunks.length >= MAX_XORB_CHUNKS) {
-					yield { xorb: xorb.subarray(0, xorbOffset), hash: chunkModule.compute_xorb_hash(xorbChunks) };
-					xorbOffset = 0;
-					xorbChunks = [];
-					xorb = new Uint8Array(XORB_SIZE);
-				}
-			}
-		};
+			};
 
-		while (true) {
-			const { done, value } = await reader.read();
-			if (done) {
-				yield* addChunks(chunker.finish());
-				break;
+			while (true) {
+				const { done, value } = await reader.read();
+				if (done) {
+					yield* addChunks(chunker.finish());
+					break;
+				}
+				processedBytes += value.length;
+				sourceChunks.push(value);
+				yield* addChunks(chunker.add_data(value));
 			}
-			sourceChunks.push(value);
-			yield* addChunks(chunker.add_data(value));
+
+			const lastRep = fileRepresentation.at(-1);
+			if (lastRep) {
+				lastRep.rangeHash = chunkModule.compute_verification_hash(
+					fileChunks.slice(currentChunkRangeBeginning).map((x) => x.hash)
+				);
+			}
+
+			yield {
+				event: "file" as const,
+				path: fileSource.path,
+				hash: chunkModule.compute_file_hash(fileChunks),
+				representation: fileRepresentation,
+				sha256: fileSource.sha256,
+			};
+		}
+
+		if (xorbOffset > 0) {
+			yield {
+				event: "xorb" as const,
+				xorb: xorb.subarray(0, xorbOffset),
+				hash: chunkModule.compute_xorb_hash(xorbChunks),
+				chunks: [...xorbChunks],
+				id: xorbId,
+				files: Object.entries(xorbFiles).map(([path, progress]) => ({ path, progress })),
+			};
 		}
 	} finally {
 		chunker.free();
