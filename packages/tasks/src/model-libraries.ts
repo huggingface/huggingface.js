@@ -32,7 +32,7 @@ export interface LibraryUiElement {
 	 * Elastic query used to count this library's model downloads
 	 *
 	 * By default, those files are counted:
-	 * "config.json", "config.yaml", "hyperparams.yaml", "meta.yaml"
+	 * "config.json", "config.yaml", "hyperparams.yaml", "params.json", "meta.yaml"
 	 */
 	countDownloads?: ElasticSearchQuery;
 	/**
@@ -464,12 +464,6 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "HunyuanDiT",
 		repoUrl: "https://github.com/Tencent/HunyuanDiT",
 		countDownloads: `path:"pytorch_model_ema.pt" OR path:"pytorch_model_distill.pt"`,
-	},
-	"hunyuan3d-2": {
-		prettyLabel: "Hunyuan3D-2",
-		repoName: "Hunyuan3D-2",
-		repoUrl: "https://github.com/Tencent/Hunyuan3D-2",
-		countDownloads: `path_filename:"model_index" OR path_filename:"config"`,
 	},
 	imstoucan: {
 		prettyLabel: "IMS Toucan",
