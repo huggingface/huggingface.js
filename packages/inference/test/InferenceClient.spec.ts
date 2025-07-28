@@ -1102,15 +1102,15 @@ describe.skip("InferenceClient", () => {
 			});
 			it("imageToVideo - fal-ai", async () => {
 				const res = await client.imageToVideo({
-				  model: "fal-ai/ltxv-13b-098-distilled/image-to-video",
-				  provider: "fal-ai",
-				  inputs: new Blob([readTestFile("cats.png")], { type: "image/png" }),
-				  parameters: {
-					prompt: "The cats are jumping around in a playful manner"
-				  }
+					model: "fal-ai/ltxv-13b-098-distilled/image-to-video",
+					provider: "fal-ai",
+					inputs: new Blob([readTestFile("cats.png")], { type: "image/png" }),
+					parameters: {
+						prompt: "The cats are jumping around in a playful manner",
+					},
 				});
 				expect(res).toBeInstanceOf(Blob);
-			  });
+			});
 		},
 		TIMEOUT
 	);
