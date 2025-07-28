@@ -1152,7 +1152,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoName: "SongBloom",
 		repoUrl: "https://github.com/Cypress-Yang/SongBloom",
 		filter: false,
-		countDownloads: `path_extension:"ckpt" OR path_extension:"pt"`,	
+		countDownloads: `path_extension:"pt"`,	
 	},
 } satisfies Record<string, LibraryUiElement>;
 
