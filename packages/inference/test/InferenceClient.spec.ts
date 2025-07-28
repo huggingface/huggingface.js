@@ -1100,6 +1100,17 @@ describe.skip("InferenceClient", () => {
 					text: " he has grave doubts whether sir frederick leighton's work is really greek after all and can discover in it but little of rocky ithaca",
 				});
 			});
+			it("imageToVideo - fal-ai", async () => {
+				const res = await client.imageToVideo({
+				  model: "fal-ai/ltxv-13b-098-distilled/image-to-video",
+				  provider: "fal-ai",
+				  inputs: new Blob([readTestFile("cats.png")], { type: "image/png" }),
+				  parameters: {
+					prompt: "The cats are jumping around in a playful manner"
+				  }
+				});
+				expect(res).toBeInstanceOf(Blob);
+			  });
 		},
 		TIMEOUT
 	);
