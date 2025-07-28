@@ -170,6 +170,10 @@ export class ReplicateImageToImageTask extends ReplicateTask implements ImageToI
 				...omit(params.args, ["inputs", "parameters"]),
 				...params.args.parameters,
 				input_image: params.args.inputs, // This will be processed in preparePayloadAsync
+				lora_weights:
+					params.mapping?.adapter === "lora" && params.mapping.adapterWeightsPath
+						? `https://huggingface.co/${params.mapping.hfModelId}`
+						: undefined,
 			},
 			version: params.model.includes(":") ? params.model.split(":")[1] : undefined,
 		};
