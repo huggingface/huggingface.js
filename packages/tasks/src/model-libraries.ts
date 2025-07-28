@@ -965,6 +965,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		filter: false,
 		countDownloads: `path:"soloaudio_v2.pt"`,
 	},
+	songbloom: {
+		prettyLabel: "SongBloom",
+		repoName: "SongBloom",
+		repoUrl: "https://github.com/Cypress-Yang/SongBloom",
+		filter: false,
+		countDownloads: `path_extension:"pt"`,
+	},
 	"stable-baselines3": {
 		prettyLabel: "stable-baselines3",
 		repoName: "stable-baselines3",
