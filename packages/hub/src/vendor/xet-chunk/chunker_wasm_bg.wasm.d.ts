@@ -8,6 +8,7 @@ export const chunker_finish: (a: number) => [number, number, number];
 export const compute_xorb_hash: (a: any) => [number, number, number, number];
 export const compute_file_hash: (a: any) => [number, number, number, number];
 export const compute_verification_hash: (a: number, b: number) => [number, number, number, number];
+export const compute_hmac: (a: number, b: number, c: number, d: number) => [number, number, number, number];
 export const __wbindgen_malloc: (a: number, b: number) => number;
 export const __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
 export const __wbindgen_exn_store: (a: number) => void;

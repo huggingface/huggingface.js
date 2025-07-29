@@ -135,7 +135,7 @@ export async function* createXorbs(
 						sourceChunks.splice(0, index);
 					}
 
-					let cacheData = chunkCache.getChunk(chunk.hash);
+					let cacheData = chunkCache.getChunk(chunk.hash, chunkModule.compute_hmac);
 					if (cacheData === undefined && chunk.dedup && bytesSinceRemoteDedup >= INTERVAL_BETWEEN_REMOTE_DEDUP) {
 						const token = await xetWriteToken(params);
 						bytesSinceRemoteDedup = 0;
@@ -160,8 +160,8 @@ export async function* createXorbs(
 									);
 								}
 							}
+							cacheData = chunkCache.getChunk(chunk.hash, chunkModule.compute_hmac);
 						}
-						cacheData = chunkCache.getChunk(chunk.hash);
 					}
 					if (cacheData === undefined) {
 						xorbOffset = writeChunk(xorb, xorbOffset, chunkToCopy);

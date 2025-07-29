@@ -53,7 +53,10 @@ export class ChunkCache {
 		}
 	}
 
-	getChunk(hash: string):
+	getChunk(
+		hash: string,
+		hmacFunction: (hash: string, key: string) => string
+	):
 		| {
 				xorbIndex: number;
 				offset: number;
@@ -63,7 +66,7 @@ export class ChunkCache {
 		let index = this.map.get(hash);
 		if (index === undefined) {
 			for (const hmac of this.hmacs) {
-				index = this.map.get(hashHash(hash, hmac));
+				index = this.map.get(hmacFunction(hash, hmac));
 				if (index !== undefined) {
 					break;
 				}
@@ -78,9 +81,4 @@ export class ChunkCache {
 			endOffset: this.chunkEndOffsets[index],
 		};
 	}
-}
-
-// Todo: use wasm to hash
-function hashHash(hash: string, hmac: string): string {
-	return hash + hmac;
 }

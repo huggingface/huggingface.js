@@ -42,7 +42,7 @@
 		"test": "vitest run",
 		"test:browser": "vitest run --browser.name=chrome --browser.headless --config vitest-browser.config.mts",
 		"check": "tsc",
-		"build:xet-wasm": "./scripts/build-xet-wasm.sh -t bundler --clean"
+		"build:xet-wasm": "./scripts/build-xet-wasm.sh -t bundler --clean -b hmac-wasm"
 	},
 	"files": [
 		"src",
