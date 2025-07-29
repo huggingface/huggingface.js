@@ -18,7 +18,7 @@ const MAX_XORB_CHUNKS = 8 * 1024;
 const INTERVAL_BETWEEN_REMOTE_DEDUP = 4_000_000; // 4MB
 
 export async function* createXorbs(
-	fileSources: AsyncGenerator<{ content: Blob; path: string; sha256: string }>,
+	fileSources: AsyncGenerator<{ content: Blob; path: string }>,
 	params: XetWriteTokenParams
 ): AsyncGenerator<
 	| {
@@ -36,7 +36,6 @@ export async function* createXorbs(
 			event: "file";
 			path: string;
 			hash: string;
-			sha256: string;
 			representation: Array<{
 				xorbId: number | string; // either xorb id (for local xorbs) or xorb hash (for remote xorbs)
 				offset: number;
@@ -59,9 +58,30 @@ export async function* createXorbs(
 	let xorbOffset = 0;
 	let xorbChunks = Array<{ hash: string; length: number; offset: number }>();
 	/**
-	 * path => 0..1 mapping
+	 * path => 0..1 mapping of the current xorb
+	 *
+	 * eg
+	 *
+	 * A => 1
+	 * B => 1
+	 * C => 0.345
+	 *
+	 * If the xorb contains the end of file A, B, and up to 34.5% of file C
 	 */
-	let fileProgress: Record<string, number> = {};
+	let xorbFileProgress: Record<string, number> = {};
+
+	const pendingFileEvents: Array<{
+		event: "file";
+		path: string;
+		hash: string;
+		representation: Array<{
+			xorbId: number | string;
+			offset: number;
+			endOffset: number;
+			length: number;
+			rangeHash: string;
+		}>;
+	}> = [];
 
 	const remoteXorbHashes: string[] = [""]; // starts at index 1 (to simplify implem a bit)
 	let bytesSinceRemoteDedup = Infinity;
@@ -148,14 +168,20 @@ export async function* createXorbs(
 								hash: chunkModule.compute_xorb_hash(xorbChunks),
 								chunks: [...xorbChunks],
 								id: xorbId,
-								files: Object.entries(fileProgress).map(([path, progress]) => ({ path, progress })),
+								files: Object.entries(xorbFileProgress).map(([path, progress]) => ({ path, progress })),
 							};
 							xorbId++;
 							xorb = new Uint8Array(XORB_SIZE);
 							chunkOffset = 0;
 							chunkXorbId = xorbId;
+							xorbFileProgress = {};
+
+							for (const event of pendingFileEvents) {
+								yield event;
+							}
+							pendingFileEvents.length = 0;
+
 							xorbOffset = writeChunk(xorb, 0, chunkToCopy);
-							fileProgress = {};
 
 							if (xorbOffset === 0) {
 								throw new Error("Failed to write chunk into xorb");
@@ -202,7 +228,7 @@ export async function* createXorbs(
 						}
 					}
 					xorbChunks.push({ hash: chunk.hash, length: chunk.length, offset: chunkOffset });
-					fileProgress[fileSource.path] = processedBytes / fileSource.content.size;
+					xorbFileProgress[fileSource.path] = processedBytes / fileSource.content.size;
 					if (xorbChunks.length >= MAX_XORB_CHUNKS) {
 						yield {
 							event: "xorb" as const,
@@ -210,13 +236,18 @@ export async function* createXorbs(
 							hash: chunkModule.compute_xorb_hash(xorbChunks),
 							chunks: [...xorbChunks],
 							id: xorbId,
-							files: Object.entries(fileProgress).map(([path, progress]) => ({ path, progress })),
+							files: Object.entries(xorbFileProgress).map(([path, progress]) => ({ path, progress })),
 						};
 						xorbId++;
 						xorbOffset = 0;
 						xorbChunks = [];
-						fileProgress = {};
+						xorbFileProgress = {};
 						xorb = new Uint8Array(XORB_SIZE);
+
+						for (const event of pendingFileEvents) {
+							yield event;
+						}
+						pendingFileEvents.length = 0;
 					}
 				}
 			};
@@ -239,13 +270,12 @@ export async function* createXorbs(
 				);
 			}
 
-			yield {
+			pendingFileEvents.push({
 				event: "file" as const,
 				path: fileSource.path,
 				hash: chunkModule.compute_file_hash(fileChunks),
 				representation: fileRepresentation,
-				sha256: fileSource.sha256,
-			};
+			});
 		}
 
 		if (xorbOffset > 0) {
@@ -255,8 +285,12 @@ export async function* createXorbs(
 				hash: chunkModule.compute_xorb_hash(xorbChunks),
 				chunks: [...xorbChunks],
 				id: xorbId,
-				files: Object.entries(fileProgress).map(([path, progress]) => ({ path, progress })),
+				files: Object.entries(xorbFileProgress).map(([path, progress]) => ({ path, progress })),
 			};
+		}
+
+		for (const event of pendingFileEvents) {
+			yield event;
 		}
 	} finally {
 		chunker.free();
