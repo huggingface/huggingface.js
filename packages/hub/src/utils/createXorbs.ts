@@ -36,6 +36,8 @@ export async function* createXorbs(
 			event: "file";
 			path: string;
 			hash: string;
+			/** Percentage of file bytes that were deduplicated (0-1) */
+			dedupRatio: number;
 			representation: Array<{
 				xorbId: number | string; // either xorb id (for local xorbs) or xorb hash (for remote xorbs)
 				offset: number;
@@ -74,6 +76,7 @@ export async function* createXorbs(
 		event: "file";
 		path: string;
 		hash: string;
+		dedupRatio: number;
 		representation: Array<{
 			xorbId: number | string;
 			offset: number;
@@ -84,14 +87,15 @@ export async function* createXorbs(
 	}> = [];
 
 	const remoteXorbHashes: string[] = [""]; // starts at index 1 (to simplify implem a bit)
-	let bytesSinceRemoteDedup = Infinity;
 
 	try {
 		for await (const fileSource of fileSources) {
+			let bytesSinceRemoteDedup = Infinity;
 			const sourceChunks: Array<Uint8Array> = [];
 
 			const reader = fileSource.content.stream().getReader();
 			let processedBytes = 0;
+			let dedupedBytes = 0; // Track bytes that were deduplicated
 			const fileChunks: Array<{ hash: string; length: number }> = [];
 			let currentChunkRangeBeginning = 0;
 			const fileRepresentation: Array<{
@@ -195,6 +199,7 @@ export async function* createXorbs(
 						chunkXorbId = cacheData.xorbIndex;
 						chunkOffset = cacheData.offset;
 						chunkEndOffset = cacheData.endOffset;
+						dedupedBytes += chunk.length; // Track deduplicated bytes
 					}
 					bytesSinceRemoteDedup += chunk.length;
 
@@ -270,10 +275,13 @@ export async function* createXorbs(
 				);
 			}
 
+			const dedupRatio = fileSource.content.size > 0 ? dedupedBytes / fileSource.content.size : 0;
+
 			pendingFileEvents.push({
 				event: "file" as const,
 				path: fileSource.path,
 				hash: chunkModule.compute_file_hash(fileChunks),
+				dedupRatio,
 				representation: fileRepresentation,
 			});
 		}
