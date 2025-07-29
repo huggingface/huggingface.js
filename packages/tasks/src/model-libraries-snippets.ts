@@ -1804,6 +1804,7 @@ huggingface-cli download --local-dir ${nameWithoutNamespace(model.id)} ${model.i
 const mlxlm = (model: ModelData): string[] => [
 	`# Make sure mlx-lm is installed
 # pip install --upgrade mlx-lm
+# if on a CUDA device, also pip install mlx[cuda]
 
 # Generate text with mlx-lm
 from mlx_lm import load, generate
