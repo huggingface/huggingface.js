@@ -68,7 +68,8 @@ export async function* uploadShards(
 	source: AsyncGenerator<{ content: Blob; path: string; sha256: string }>,
 	params: UploadShardsParams
 ): AsyncGenerator<
-	{ event: "file"; path: string; sha256: string } | { event: "fileProgress"; path: string; progress: number }
+	| { event: "file"; path: string; sha256: string; dedupRatio: number }
+	| { event: "fileProgress"; path: string; progress: number }
 > {
 	const xorbHashes: Array<string> = [];
 
@@ -136,7 +137,7 @@ export async function* uploadShards(
 				break;
 			}
 			case "file": {
-				yield { event: "file", path: output.path, sha256: output.sha256 }; // Maybe wait until shard is uploaded before yielding.
+				yield { event: "file", path: output.path, sha256: output.sha256, dedupRatio: output.dedupRatio }; // Maybe wait until shard is uploaded before yielding.
 
 				// Calculate space needed for this file entry
 				const fileHeaderSize = HASH_LENGTH + 4 + 4 + 8; // hash + flags + rep length + reserved

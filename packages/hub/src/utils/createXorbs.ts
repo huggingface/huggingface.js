@@ -18,7 +18,7 @@ const MAX_XORB_CHUNKS = 8 * 1024;
 const INTERVAL_BETWEEN_REMOTE_DEDUP = 4_000_000; // 4MB
 
 export async function* createXorbs(
-	fileSources: AsyncGenerator<{ content: Blob; path: string }>,
+	fileSources: AsyncGenerator<{ content: Blob; path: string; sha256: string }>,
 	params: XetWriteTokenParams
 ): AsyncGenerator<
 	| {
@@ -36,6 +36,7 @@ export async function* createXorbs(
 			event: "file";
 			path: string;
 			hash: string;
+			sha256: string;
 			/** Percentage of file bytes that were deduplicated (0-1) */
 			dedupRatio: number;
 			representation: Array<{
@@ -77,6 +78,7 @@ export async function* createXorbs(
 		path: string;
 		hash: string;
 		dedupRatio: number;
+		sha256: string;
 		representation: Array<{
 			xorbId: number | string;
 			offset: number;
@@ -281,6 +283,7 @@ export async function* createXorbs(
 				event: "file" as const,
 				path: fileSource.path,
 				hash: chunkModule.compute_file_hash(fileChunks),
+				sha256: fileSource.sha256,
 				dedupRatio,
 				representation: fileRepresentation,
 			});
