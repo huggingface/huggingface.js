@@ -7,15 +7,19 @@
 import { bg4_split_bytes, XET_CHUNK_HEADER_BYTES, XetChunkCompressionScheme } from "./XetBlob";
 import { compress as lz4_compress } from "../vendor/lz4js";
 import { ChunkCache } from "./ChunkCache";
+import { xetWriteToken, type XetWriteTokenParams } from "./xetWriteToken";
+import { parseShardData } from "./shardParser";
 
 const TARGET_CHUNK_SIZE = 64 * 1024;
 /* eslint-disable @typescript-eslint/no-unused-vars */
 const MAX_CHUNK_SIZE = 2 * TARGET_CHUNK_SIZE;
 const XORB_SIZE = 64 * 1024 * 1024;
 const MAX_XORB_CHUNKS = 8 * 1024;
+const INTERVAL_BETWEEN_REMOTE_DEDUP = 4_000_000; // 4MB
 
 export async function* createXorbs(
-	fileSources: AsyncGenerator<{ content: Blob; path: string; sha256: string }>
+	fileSources: AsyncGenerator<{ content: Blob; path: string; sha256: string }>,
+	params: XetWriteTokenParams
 ): AsyncGenerator<
 	| {
 			event: "xorb";
@@ -54,7 +58,13 @@ export async function* createXorbs(
 	let xorb = new Uint8Array(XORB_SIZE);
 	let xorbOffset = 0;
 	let xorbChunks = Array<{ hash: string; length: number; offset: number }>();
-	let xorbFiles: Record<string, number> = {};
+	/**
+	 * path => 0..1 mapping
+	 */
+	let fileProgress: Record<string, number> = {};
+
+	const remoteXorbHashes: string[] = [""]; // starts at index 1 (to simplify implem a bit)
+	let bytesSinceRemoteDedup = Infinity;
 
 	try {
 		for await (const fileSource of fileSources) {
@@ -65,14 +75,14 @@ export async function* createXorbs(
 			const fileChunks: Array<{ hash: string; length: number }> = [];
 			let currentChunkRangeBeginning = 0;
 			const fileRepresentation: Array<{
-				xorbId: number;
+				xorbId: number | string;
 				offset: number;
 				endOffset: number;
 				length: number;
 				rangeHash: string;
 			}> = [];
 
-			const addChunks = function* (chunks: Array<{ hash: string; length: number }>) {
+			const addChunks = async function* (chunks: Array<{ hash: string; length: number; dedup: boolean }>) {
 				for (const chunk of chunks) {
 					let chunkOffset = xorbOffset;
 					let chunkEndOffset;
@@ -99,7 +109,34 @@ export async function* createXorbs(
 						sourceChunks.splice(0, index);
 					}
 
-					const cacheData = chunkCache.getChunk(chunk.hash);
+					let cacheData = chunkCache.getChunk(chunk.hash);
+					if (cacheData === undefined && chunk.dedup && bytesSinceRemoteDedup >= INTERVAL_BETWEEN_REMOTE_DEDUP) {
+						const token = await xetWriteToken(params);
+						bytesSinceRemoteDedup = 0;
+
+						const shardResp = await fetch(token.casUrl + "/v1/chunk/" + chunk.hash);
+
+						// todo: handle non-404 non-429 errors, eg throw error
+						if (shardResp.ok) {
+							const shard = await shardResp.blob();
+							const shardData = await parseShardData(shard);
+
+							for (const xorb of shardData.xorbs) {
+								const remoteXorbId = -remoteXorbHashes.length;
+								remoteXorbHashes.push(xorb.hash);
+								for (const chunk of xorb.chunks) {
+									chunkCache.addChunkToCache(
+										chunk.hash,
+										remoteXorbId,
+										chunk.startOffset,
+										chunk.endOffset,
+										shardData.hmacKey
+									);
+								}
+							}
+						}
+						cacheData = chunkCache.getChunk(chunk.hash);
+					}
 					if (cacheData === undefined) {
 						xorbOffset = writeChunk(xorb, xorbOffset, chunkToCopy);
 
@@ -111,14 +148,14 @@ export async function* createXorbs(
 								hash: chunkModule.compute_xorb_hash(xorbChunks),
 								chunks: [...xorbChunks],
 								id: xorbId,
-								files: Object.entries(xorbFiles).map(([path, progress]) => ({ path, progress })),
+								files: Object.entries(fileProgress).map(([path, progress]) => ({ path, progress })),
 							};
 							xorbId++;
 							xorb = new Uint8Array(XORB_SIZE);
 							chunkOffset = 0;
 							chunkXorbId = xorbId;
 							xorbOffset = writeChunk(xorb, 0, chunkToCopy);
-							xorbFiles = {};
+							fileProgress = {};
 
 							if (xorbOffset === 0) {
 								throw new Error("Failed to write chunk into xorb");
@@ -127,18 +164,19 @@ export async function* createXorbs(
 
 						chunkEndOffset = xorbOffset;
 
-						chunkCache.addChunkToCache(chunk.hash, xorbId, chunkOffset, chunkEndOffset);
+						chunkCache.addChunkToCache(chunk.hash, xorbId, chunkOffset, chunkEndOffset, null);
 					} else {
 						chunkXorbId = cacheData.xorbIndex;
 						chunkOffset = cacheData.offset;
 						chunkEndOffset = cacheData.endOffset;
 					}
+					bytesSinceRemoteDedup += chunk.length;
 
 					const lastRep = fileRepresentation.at(-1);
 
 					if (!lastRep) {
 						fileRepresentation.push({
-							xorbId: chunkXorbId,
+							xorbId: chunkXorbId >= 0 ? chunkXorbId : remoteXorbHashes[-chunkXorbId],
 							offset: chunkOffset,
 							endOffset: chunkEndOffset,
 							length: chunk.length,
@@ -164,7 +202,7 @@ export async function* createXorbs(
 						}
 					}
 					xorbChunks.push({ hash: chunk.hash, length: chunk.length, offset: chunkOffset });
-					xorbFiles[fileSource.path] = processedBytes / fileSource.content.size;
+					fileProgress[fileSource.path] = processedBytes / fileSource.content.size;
 					if (xorbChunks.length >= MAX_XORB_CHUNKS) {
 						yield {
 							event: "xorb" as const,
@@ -172,12 +210,12 @@ export async function* createXorbs(
 							hash: chunkModule.compute_xorb_hash(xorbChunks),
 							chunks: [...xorbChunks],
 							id: xorbId,
-							files: Object.entries(xorbFiles).map(([path, progress]) => ({ path, progress })),
+							files: Object.entries(fileProgress).map(([path, progress]) => ({ path, progress })),
 						};
 						xorbId++;
 						xorbOffset = 0;
 						xorbChunks = [];
-						xorbFiles = {};
+						fileProgress = {};
 						xorb = new Uint8Array(XORB_SIZE);
 					}
 				}
@@ -217,7 +255,7 @@ export async function* createXorbs(
 				hash: chunkModule.compute_xorb_hash(xorbChunks),
 				chunks: [...xorbChunks],
 				id: xorbId,
-				files: Object.entries(xorbFiles).map(([path, progress]) => ({ path, progress })),
+				files: Object.entries(fileProgress).map(([path, progress]) => ({ path, progress })),
 			};
 		}
 	} finally {

@@ -9,9 +9,19 @@ export class ChunkCache {
 	chunkOffsets = new Uint32Array(CHUNK_CACHE_INITIAL_SIZE);
 	chunkEndOffsets = new Uint32Array(CHUNK_CACHE_INITIAL_SIZE);
 	map = new Map<string, number>(); // hash -> chunkCacheIndex. Less overhead that way, empty object is 60+B and empty array is 40+B
+	hmacs = new Set<string>(); // todo : remove old hmacs
 
-	addChunkToCache(hash: string, xorbIndex: number, chunkOffset: number, chunkEndOffset: number): void {
+	addChunkToCache(
+		hash: string,
+		xorbIndex: number,
+		chunkOffset: number,
+		chunkEndOffset: number,
+		hmac: string | null
+	): void {
 		this.map.set(hash, this.index);
+		if (hmac !== null) {
+			this.hmacs.add(hmac);
+		}
 
 		if (this.index >= this.xorbIndices.length) {
 			// todo: switch to resize() with modern browsers
@@ -50,7 +60,15 @@ export class ChunkCache {
 				endOffset: number;
 		  }
 		| undefined {
-		const index = this.map.get(hash);
+		let index = this.map.get(hash);
+		if (index === undefined) {
+			for (const hmac of this.hmacs) {
+				index = this.map.get(hashHash(hash, hmac));
+				if (index !== undefined) {
+					break;
+				}
+			}
+		}
 		if (index === undefined) {
 			return undefined;
 		}
@@ -60,4 +78,9 @@ export class ChunkCache {
 			endOffset: this.chunkEndOffsets[index],
 		};
 	}
+}
+
+// Todo: use wasm to hash
+function hashHash(hash: string, hmac: string): string {
+	return hash + hmac;
 }
