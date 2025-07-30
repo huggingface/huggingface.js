@@ -1028,6 +1028,65 @@ describe.skip("InferenceClient", () => {
 		TIMEOUT
 	);
 
+	describe.concurrent(
+		"dat1",
+		() => {
+			const client = new InferenceClient(env.DAT1_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING["dat1"] = {
+				"unsloth/Llama-3.2-3B-Instruct-GGUF": {
+					hfModelId: "unsloth/Llama-3.2-3B-Instruct-GGUF",
+					providerId: "unsloth-Llama-32-3B-Instruct-GGUF",
+					status: "live",
+					task: "conversational",
+				},
+				"Kwai-Kolors/Kolors": {
+					hfModelId: "Kwai-Kolors/Kolors",
+					providerId: "Kwai-Kolors-Kolors",
+					status: "live",
+					task: "text-to-image",
+				},
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "unsloth/Llama-3.2-3B-Instruct-GGUF",
+					provider: "dat1",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toContain("two");
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "unsloth/Llama-3.2-3B-Instruct-GGUF",
+					provider: "dat1",
+					messages: [{ role: "user", content: "Complete the equation 1 + 1 = , just the answer" }],
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+				let out = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						out += chunk.choices[0].delta.content;
+					}
+				}
+				expect(out).toContain("2");
+			});
+
+			it("textToImage", async () => {
+				const res = await client.textToImage({
+					model: "Kwai-Kolors/Kolors",
+					provider: "dat1",
+					inputs: "award winning high resolution photo of a giant tortoise",
+				});
+				expect(res).toBeInstanceOf(Blob);
+			});
+		},
+		TIMEOUT
+	)
+
 	/**
 	 * Compatibility with third-party Inference Providers
 	 */
