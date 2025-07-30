@@ -1038,7 +1038,7 @@ export const paddleocr = (model: ModelData): string[] => {
 		return [
 			`# pip install paddleocr
 from paddleocr import DocVLM
-model = DocVLM(model_name="${model.id}")
+model = DocVLM(model_name="${nameWithoutNamespace(model.id)}")
 output = model.predict(
     input={"image": "path/to/image.png", "query": "Parsing this image and output the content in Markdown format."},
     batch_size=1
@@ -1056,7 +1056,7 @@ for res in output:
 			return [
 				`# pip install paddleocr
 from paddleocr import ${className}
-model = ${className}(model_name="${model.id}")
+model = ${className}(model_name="${nameWithoutNamespace(model.id)}")
 output = model.predict(input="path/to/image.png", batch_size=1)
 for res in output:
     res.print()
@@ -1804,6 +1804,7 @@ huggingface-cli download --local-dir ${nameWithoutNamespace(model.id)} ${model.i
 const mlxlm = (model: ModelData): string[] => [
 	`# Make sure mlx-lm is installed
 # pip install --upgrade mlx-lm
+# if on a CUDA device, also pip install mlx[cuda]
 
 # Generate text with mlx-lm
 from mlx_lm import load, generate
