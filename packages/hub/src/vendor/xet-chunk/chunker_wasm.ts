@@ -33,7 +33,7 @@ async function init(): Promise<void> {
 			)
 		).map(([from, names]) => ({ from, names }));
 		const wasm = await WebAssembly.instantiate(wasmModule, {
-			"./chunker_wasm_bg.js": Object.fromEntries(
+			"./hf_xet_thin_wasm_bg.js": Object.fromEntries(
 				// @ts-expect-error ok for any type
 				(imports[0].names as string[]).map((name) => [name, __glue_imports[name]])
 			),
