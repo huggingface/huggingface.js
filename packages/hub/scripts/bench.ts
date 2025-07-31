@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { writeFile, readFile, stat, mkdir } from "node:fs/promises";
 import type { RepoId } from "../src/types/public.js";
+import { toRepoId } from "../src/utils/toRepoId.js";
 
 const FILES_TO_DOWNLOAD = [
 	{
@@ -141,10 +142,7 @@ async function main() {
 	// Parse repo
 	const repoName = args.repo;
 
-	const repo: RepoId = {
-		type: "model",
-		name: repoName,
-	};
+	const repo: RepoId = toRepoId(repoName);
 
 	// Create mock fetch
 	const mockFetch = createMockFetch();

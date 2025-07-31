@@ -48,7 +48,6 @@ export async function xetWriteToken(params: XetWriteTokenParams): Promise<{ acce
 		const resp = await params.customFetch(
 			`${params.hubUrl}/api/${params.repo.type}s/${params.repo.name}/xet-write-token/${params.rev}`,
 			{
-				method: "POST",
 				headers: params.accessToken
 					? {
 							Authorization: `Bearer ${params.accessToken}`,
