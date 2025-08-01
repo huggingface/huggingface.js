@@ -3,10 +3,19 @@ import { SHARD_FOOTER_VERSION, SHARD_HEADER_VERSION, SHARD_MAGIC_TAG } from "./u
 const HASH_LENGTH = 32;
 const XORB_HASH_BOOKEND = "ff".repeat(HASH_LENGTH);
 
+// Read 4 uint64 in little endian and convert to hex
 function readHashFromArray(array: Uint8Array, offset: number): string {
 	let hash = "";
-	for (let i = 0; i < HASH_LENGTH; i++) {
-		hash += array[offset + i].toString(16).padStart(2, "0");
+	for (let i = 0; i < HASH_LENGTH; i += 8) {
+		hash += `${array[offset + i + 7].toString(16).padStart(2, "0")}${array[offset + i + 6]
+			.toString(16)
+			.padStart(2, "0")}${array[offset + i + 5].toString(16).padStart(2, "0")}${array[offset + i + 4]
+			.toString(16)
+			.padStart(2, "0")}${array[offset + i + 3].toString(16).padStart(2, "0")}${array[offset + i + 2]
+			.toString(16)
+			.padStart(2, "0")}${array[offset + i + 1].toString(16).padStart(2, "0")}${array[offset + i]
+			.toString(16)
+			.padStart(2, "0")}`;
 	}
 	return hash;
 }

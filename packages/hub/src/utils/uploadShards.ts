@@ -355,9 +355,16 @@ export async function* uploadShards(
 
 // Todo: switch from hex to non-hex when WASM switches. For now consider hash is hex
 function writeHashToArray(hash: string, array: Uint8Array, offset: number) {
-	for (let i = 0; i < hash.length; i += 2) {
-		const byte = parseInt(hash.substring(i, i + 2), 16);
-		array[offset + i / 2] = byte;
+	for (let i = 0; i < hash.length; i += 16) {
+		// Write a uint64 in little endian
+		array[offset + i / 2] = parseInt(hash.substring(i + 2 * 7, i + 2 * 8), 16);
+		array[offset + i / 2 + 1] = parseInt(hash.substring(i + 2 * 6, i + 2 * 7), 16);
+		array[offset + i / 2 + 2] = parseInt(hash.substring(i + 2 * 5, i + 2 * 6), 16);
+		array[offset + i / 2 + 3] = parseInt(hash.substring(i + 2 * 4, i + 2 * 5), 16);
+		array[offset + i / 2 + 4] = parseInt(hash.substring(i + 2 * 3, i + 2 * 4), 16);
+		array[offset + i / 2 + 5] = parseInt(hash.substring(i + 2 * 2, i + 2 * 3), 16);
+		array[offset + i / 2 + 6] = parseInt(hash.substring(i + 2 * 1, i + 2 * 2), 16);
+		array[offset + i / 2 + 7] = parseInt(hash.substring(i + 2 * 0, i + 2 * 1), 16);
 	}
 }
 

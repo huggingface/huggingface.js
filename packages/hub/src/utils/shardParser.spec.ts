@@ -6,18 +6,17 @@ import { init, compute_hmac } from "../vendor/xet-chunk/chunker_wasm";
 describe("shardParser", () => {
 	it("should parse a shard", async () => {
 		const shard = await parseShardData(new Blob([await readFile("tests/gpt2-64-8bits.tflite.shard")]));
-		// console.log(inspect(shard, { depth: null }));
-		expect(shard.xorbs.length).toBeGreaterThan(2);
+		const expectedJson = JSON.parse(await readFile("tests/gpt2-64-8bits.tflite.shard.json", "utf-8"));
 
-		console.log("xorbs", shard.xorbs.length);
-
-		// const firstXorb = shard.xorbs[0];
-		// const secondXorb = shard.xorbs[1];
-
-		// console.log(firstXorb.chunks.slice(0, 10));
-		// console.log(secondXorb.chunks.slice(0, 10));
-
-		expect(shard.hmacKey).toBe("16af3a84044b83d6be998a42e20399f2cc5650eaf99950639f50418aece7954e");
+		expect(shard.hmacKey).toBe(expectedJson.hmac_key);
+		expect(shard.xorbs.length).toEqual(expectedJson.xorbs.length);
+		for (let i = 0; i < shard.xorbs.length; i++) {
+			expect(shard.xorbs[i].hash).toEqual(expectedJson.xorbs[i].hash);
+			expect(shard.xorbs[i].chunks.length).toEqual(expectedJson.xorbs[i].chunk_hashes.length);
+			for (let j = 0; j < shard.xorbs[i].chunks.length; j++) {
+				expect(shard.xorbs[i].chunks[j].hash).toEqual(expectedJson.xorbs[i].chunk_hashes[j]);
+			}
+		}
 
 		await init();
 
