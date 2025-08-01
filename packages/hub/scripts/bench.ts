@@ -6,6 +6,8 @@ import { join } from "node:path";
 import { writeFile, readFile, stat, mkdir } from "node:fs/promises";
 import type { RepoId } from "../src/types/public.js";
 import { toRepoId } from "../src/utils/toRepoId.js";
+import { commitIter } from "../src/index.js";
+import { pathToFileURL } from "node:url";
 
 /**
  * This script downloads the files from openai-community/gpt2 and simulates an upload to a xet repo.
@@ -14,6 +16,7 @@ import { toRepoId } from "../src/utils/toRepoId.js";
  * Usage:
  *
  * pnpm --filter hub bench -t <write token> -r <xet repo>
+ * pnpm --filter hub bench -t <write token> -r <xet repo> --commit # Actually upload files
  */
 
 const FILES_TO_DOWNLOAD = [
@@ -150,12 +153,17 @@ async function main() {
 				type: "string",
 				short: "r",
 			},
+			commit: {
+				type: "boolean",
+				short: "c",
+				default: false,
+			},
 		},
 	});
 
 	if (!args.token || !args.repo) {
-		console.error("Usage: node bench.ts --token <token> --repo <repo>");
-		console.error("Example: node bench.ts --token hf_... --repo myuser/myrepo");
+		console.error("Usage: pnpm --filter hub bench -t <write token> -r <xet repo>");
+		console.error("Example: pnpm --filter hub bench -t hf_... -r myuser/myrepo");
 		process.exit(1);
 	}
 
@@ -259,6 +267,30 @@ async function main() {
 	console.log(`Total xorb bytes: ${uploadStats.xorbBytes.toLocaleString("fr")} bytes`);
 	console.log(`Total shard bytes: ${uploadStats.shardBytes.toLocaleString("fr")} bytes`);
 	console.log(`Average deduplication: ${(avgDedup * 100).toFixed(2)}%`);
+
+	if (args.commit) {
+		console.log("\n=== Committing files ===");
+		const iterator = commitIter({
+			repo,
+			operations: files.map((file) => ({
+				operation: "addOrUpdate",
+				content: pathToFileURL(file.filepath),
+				path: file.filename,
+			})),
+			accessToken: args.token,
+			title: "Upload xet files with JS lib",
+			xet: true,
+		});
+		for await (const event of iterator) {
+			if (event.event === "fileProgress" && event.state === "hashing") {
+				// We don't care about the hashing progress
+			} else {
+				console.log(event);
+			}
+		}
+
+		console.log("Done committing");
+	}
 }
 
 main().catch((error) => {
