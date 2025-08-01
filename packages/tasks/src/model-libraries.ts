@@ -465,6 +465,12 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/Tencent/HunyuanDiT",
 		countDownloads: `path:"pytorch_model_ema.pt" OR path:"pytorch_model_distill.pt"`,
 	},
+	"hunyuan3d-2": {
+		prettyLabel: "Hunyuan3D-2",
+		repoName: "Hunyuan3D-2",
+		repoUrl: "https://github.com/Tencent/Hunyuan3D-2",
+		countDownloads: `path_filename:"model_index" OR path_filename:"config"`,
+	},
 	imstoucan: {
 		prettyLabel: "IMS Toucan",
 		repoName: "IMS-Toucan",
@@ -697,7 +703,7 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/NVIDIA/NeMo",
 		snippets: snippets.nemo,
 		filter: true,
-		countDownloads: `path_extension:"nemo" OR path:"model_config.yaml"`,
+		countDownloads: `path_extension:"nemo" OR path:"model_config.yaml" OR path_extension:"json"`,
 	},
 	"open-oasis": {
 		prettyLabel: "open-oasis",
