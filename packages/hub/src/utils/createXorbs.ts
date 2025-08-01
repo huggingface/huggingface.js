@@ -207,6 +207,7 @@ export async function* createXorbs(
 						}
 
 						chunkCache.addChunkToCache(chunk.hash, xorbId, chunkIndex, null);
+						xorbChunks.push({ hash: chunk.hash, length: chunk.length });
 					} else {
 						chunkXorbId = cacheData.xorbIndex;
 						chunkIndex = cacheData.chunkIndex;
@@ -243,7 +244,6 @@ export async function* createXorbs(
 							currentChunkRangeBeginning = fileChunks.length - 1;
 						}
 					}
-					xorbChunks.push({ hash: chunk.hash, length: chunk.length });
 					xorbFileProgress[fileSource.path] = processedBytes / fileSource.content.size;
 					if (xorbChunks.length >= MAX_XORB_CHUNKS) {
 						yield {
