@@ -10,13 +10,13 @@ const SHARD_FOOTER_SIZE = 192;
 const HASH_LENGTH = 32;
 const XORB_FOOTER_LENGTH = 48;
 const FILE_FOOTER_LENGTH = 48;
-const SHARD_HEADER_VERSION = 2n;
-const SHARD_FOOTER_VERSION = 1n;
+export const SHARD_HEADER_VERSION = 2n;
+export const SHARD_FOOTER_VERSION = 1n;
 
 const MDB_FILE_FLAG_WITH_VERIFICATION = 0x80000000; // Cannot define as 1 << 31 because it becomes a negative number
 const MDB_FILE_FLAG_WITH_METADATA_EXT = 0x40000000;
 
-const SHARD_MAGIC_TAG = new Uint8Array([
+export const SHARD_MAGIC_TAG = new Uint8Array([
 	"H".charCodeAt(0),
 	"F".charCodeAt(0),
 	"R".charCodeAt(0),
@@ -50,8 +50,6 @@ const SHARD_MAGIC_TAG = new Uint8Array([
 	74,
 	169,
 ]);
-
-writeHashToArray("0".repeat(64), SHARD_MAGIC_TAG, 0);
 
 interface UploadShardsParams {
 	accessToken: string | undefined;
@@ -120,9 +118,9 @@ export async function* uploadShards(
 				for (const chunk of output.chunks) {
 					writeHashToArray(chunk.hash, xorbInfoSection, xorbViewOffset);
 					xorbViewOffset += HASH_LENGTH;
-					xorbView.setUint32(xorbViewOffset, chunk.length, true);
-					xorbViewOffset += 4;
 					xorbView.setUint32(xorbViewOffset, chunk.offset, true);
+					xorbViewOffset += 4;
+					xorbView.setUint32(xorbViewOffset, chunk.length, true);
 					xorbViewOffset += 4;
 					xorbView.setBigUint64(xorbViewOffset, 0n, true); // reserved
 					xorbViewOffset += 8;
@@ -254,9 +252,29 @@ export async function* uploadShards(
 		shardOffset += 16;
 
 		// Footer
+		const footerOffset = shardOffset;
+
+		// version: u64,                    // Footer version (must be 1)
+		// file_info_offset: u64,           // Offset to file info section
+		// cas_info_offset: u64,            // Offset to CAS info section
+		// file_lookup_offset: u64,         // Offset to file lookup table
+		// file_lookup_num_entry: u64,      // Number of file lookup entries
+		// cas_lookup_offset: u64,          // Offset to CAS lookup table
+		// cas_lookup_num_entry: u64,       // Number of CAS lookup entries
+		// chunk_lookup_offset: u64,        // Offset to chunk lookup table
+		// chunk_lookup_num_entry: u64,     // Number of chunk lookup entries
+		// chunk_hash_hmac_key: [u64; 4],   // HMAC key for chunk hashes (32 bytes)
+		// shard_creation_timestamp: u64,   // Creation time (seconds since epoch)
+		// shard_key_expiry: u64,           // Expiry time (seconds since epoch)
+		// _buffer: [u64; 6],               // Reserved space (48 bytes)
+		// stored_bytes_on_disk: u64,       // Total bytes stored on disk
+		// materialized_bytes: u64,         // Total materialized bytes
+		// stored_bytes: u64,               // Total stored bytes
+		// footer_offset: u64,
+
 		shardView.setBigUint64(shardOffset, SHARD_FOOTER_VERSION, true);
 		shardOffset += 8;
-		shardView.setBigUint64(shardOffset, BigInt(SHARD_HEADER_SIZE), true); // begging of fileinfo section
+		shardView.setBigUint64(shardOffset, BigInt(SHARD_HEADER_SIZE), true); // beginning of fileinfo section
 		shardOffset += 8;
 		shardView.setBigUint64(shardOffset, BigInt(SHARD_FOOTER_SIZE + fileInfoSection.byteLength), true); // beginning of xorbinfo section
 		shardOffset += 8;
@@ -279,7 +297,6 @@ export async function* uploadShards(
 		shardOffset += 8;
 
 		// Footer
-		const footerOffset = shardOffset;
 		shardView.setBigUint64(
 			shardOffset,
 			BigInt(SHARD_FOOTER_SIZE + fileInfoSection.byteLength + xorbInfoSection.byteLength + 16),

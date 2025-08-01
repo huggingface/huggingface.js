@@ -1,6 +1,7 @@
-const SHARD_FOOTER_SIZE = 192;
+import { SHARD_FOOTER_VERSION, SHARD_HEADER_VERSION, SHARD_MAGIC_TAG } from "./uploadShards";
+
 const HASH_LENGTH = 32;
-const XORB_FOOTER_LENGTH = 48;
+const XORB_HASH_BOOKEND = "ff".repeat(HASH_LENGTH);
 
 function readHashFromArray(array: Uint8Array, offset: number): string {
 	let hash = "";
@@ -17,8 +18,7 @@ export interface ShardData {
 		chunks: Array<{
 			hash: string;
 			startOffset: number;
-			endOffset: number;
-			length: number;
+			unpackedLength: number;
 		}>;
 	}>;
 }
@@ -27,53 +27,95 @@ export async function parseShardData(shardBlob: Blob): Promise<ShardData> {
 	const shard = new Uint8Array(await shardBlob.arrayBuffer());
 	const shardView = new DataView(shard.buffer);
 
+	const magicTag = shard.slice(0, SHARD_MAGIC_TAG.length);
+	if (!magicTag.every((byte, i) => byte === SHARD_MAGIC_TAG[i])) {
+		throw new Error("Invalid shard magic tag");
+	}
+
+	const version = shardView.getBigUint64(SHARD_MAGIC_TAG.length, true);
+	if (version !== SHARD_HEADER_VERSION) {
+		throw new Error(`Invalid shard version: ${version}`);
+	}
+
+	const footerSize = Number(shardView.getBigUint64(SHARD_MAGIC_TAG.length + 8, true));
+
 	// Read footer to get section offsets
-	const footerStart = shard.length - SHARD_FOOTER_SIZE;
+	const footerStart = shard.length - footerSize;
+	const footerVersion = shardView.getBigUint64(footerStart, true);
+	if (footerVersion !== SHARD_FOOTER_VERSION) {
+		throw new Error(`Invalid shard footer version: ${footerVersion}`);
+	}
+
+	// version: u64,                    // Footer version (must be 1)
+	// file_info_offset: u64,           // Offset to file info section
+	// cas_info_offset: u64,            // Offset to CAS info section
+	// file_lookup_offset: u64,         // Offset to file lookup table
+	// file_lookup_num_entry: u64,      // Number of file lookup entries
+	// cas_lookup_offset: u64,          // Offset to CAS lookup table
+	// cas_lookup_num_entry: u64,       // Number of CAS lookup entries
+	// chunk_lookup_offset: u64,        // Offset to chunk lookup table
+	// chunk_lookup_num_entry: u64,     // Number of chunk lookup entries
+	// chunk_hash_hmac_key: [u64; 4],   // HMAC key for chunk hashes (32 bytes)
+	// shard_creation_timestamp: u64,   // Creation time (seconds since epoch)
+	// shard_key_expiry: u64,           // Expiry time (seconds since epoch)
+	// _buffer: [u64; 6],               // Reserved space (48 bytes)
+	// stored_bytes_on_disk: u64,       // Total bytes stored on disk
+	// materialized_bytes: u64,         // Total materialized bytes
+	// stored_bytes: u64,               // Total stored bytes
+	// footer_offset: u64,
+
+	//	const fileInfoStart = Number(shardView.getBigUint64(footerStart + 8, true));
 	const xorbInfoStart = Number(shardView.getBigUint64(footerStart + 16, true));
 	const fileLookupStart = Number(shardView.getBigUint64(footerStart + 24, true));
-
-	// Extract HMAC from footer (32 bytes starting at offset 112 from footer start)
-	const hmacKey = readHashFromArray(shard, footerStart + 112);
+	// const numFileLookups = Number(shardView.getBigUint64(footerStart + 32, true));
+	// const xorbLookupStart = Number(shardView.getBigUint64(footerStart + 40, true));
+	// const numXorbLookups = Number(shardView.getBigUint64(footerStart + 48, true));
+	// const chunkLookupStart = Number(shardView.getBigUint64(footerStart + 56, true));
+	// const numChunkLookups = Number(shardView.getBigUint64(footerStart + 64, true));
+	const hmacKey = readHashFromArray(shard, footerStart + 72);
+	// const shardCreationTimestamp = Number(shardView.getBigUint64(footerStart + 104, true));
+	// const shardKeyExpiry = Number(shardView.getBigUint64(footerStart + 112, true));
+	// const storedBytesOnDisk = Number(shardView.getBigUint64(footerStart + 168, true));
+	// const materializedBytes = Number(shardView.getBigUint64(footerStart + 176, true));
+	// const storedBytes = Number(shardView.getBigUint64(footerStart + 184, true));
+	// const footerOffset = Number(shardView.getBigUint64(footerStart + 192, true));
 
 	// Parse XORB Info Section
 	const xorbs: ShardData["xorbs"] = [];
 	let offset = xorbInfoStart;
 
-	while (offset < fileLookupStart - XORB_FOOTER_LENGTH) {
-		// Check if we've hit the xorb info bookend (32 bytes of 0xff)
-		if (shard[offset] === 0xff) {
-			break;
-		}
-
+	while (offset < fileLookupStart) {
 		// Read xorb entry
 		const xorbHash = readHashFromArray(shard, offset);
 		offset += HASH_LENGTH;
 
-		// Skip flags (4 bytes)
+		if (xorbHash === XORB_HASH_BOOKEND) {
+			break;
+		}
+
+		// const flags = shardView.getUint32(offset, true);
 		offset += 4;
 
 		const chunkCount = shardView.getUint32(offset, true);
 		offset += 4;
 
-		// Skip unpackedSize (4 bytes)
+		// const numBytesInXorb = shardView.getUint32(offset, true);
 		offset += 4;
 
-		// Skip packedSize (4 bytes)
+		// const numBytesUnpacked = shardView.getUint32(offset, true);
 		offset += 4;
 
 		// Read chunks for this xorb
-		const chunks: ShardData["xorbs"][0]["chunks"] = [];
+		const chunks: ShardData["xorbs"][number]["chunks"] = [];
 		for (let i = 0; i < chunkCount; i++) {
 			const chunkHash = readHashFromArray(shard, offset);
 			offset += HASH_LENGTH;
 
-			const length = shardView.getUint32(offset, true);
-			offset += 4;
-
 			const startOffset = shardView.getUint32(offset, true);
 			offset += 4;
 
-			const endOffset = startOffset + length;
+			const length = shardView.getUint32(offset, true);
+			offset += 4;
 
 			// Skip reserved 8 bytes
 			offset += 8;
@@ -81,8 +123,7 @@ export async function parseShardData(shardBlob: Blob): Promise<ShardData> {
 			chunks.push({
 				hash: chunkHash,
 				startOffset,
-				endOffset,
-				length,
+				unpackedLength: length,
 			});
 		}
 
