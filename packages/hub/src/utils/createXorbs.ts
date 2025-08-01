@@ -126,12 +126,22 @@ export async function* createXorbs(
 						chunkToCopy = new Uint8Array(chunk.length);
 						let copyOffset = 0;
 						let index = 0;
+						let toSlice = -1;
 						while (copyOffset < chunk.length) {
-							chunkToCopy.set(sourceChunks[index].subarray(0, chunk.length - copyOffset), copyOffset);
-							copyOffset += sourceChunks[index].length;
-							index++;
+							const nToCopy = Math.min(sourceChunks[index].length, chunk.length - copyOffset);
+							chunkToCopy.set(sourceChunks[index].subarray(0, nToCopy), copyOffset);
+							copyOffset += nToCopy;
+
+							if (nToCopy === sourceChunks[index].length) {
+								index++;
+							} else {
+								toSlice = nToCopy;
+							}
 						}
 						sourceChunks.splice(0, index);
+						if (toSlice !== -1) {
+							sourceChunks[0] = sourceChunks[0].subarray(toSlice);
+						}
 					}
 
 					let cacheData = chunkCache.getChunk(chunk.hash, chunkModule.compute_hmac);
