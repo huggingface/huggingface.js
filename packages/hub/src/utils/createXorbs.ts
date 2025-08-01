@@ -26,7 +26,7 @@ export async function* createXorbs(
 			xorb: Uint8Array;
 			hash: string;
 			id: number;
-			chunks: Array<{ hash: string; length: number; offset: number }>;
+			chunks: Array<{ hash: string; length: number }>;
 			files: Array<{
 				path: string;
 				progress: number;
@@ -41,8 +41,8 @@ export async function* createXorbs(
 			dedupRatio: number;
 			representation: Array<{
 				xorbId: number | string; // either xorb id (for local xorbs) or xorb hash (for remote xorbs)
-				offset: number;
-				endOffset: number;
+				indexStart: number;
+				indexEnd: number;
 				/** Unpacked length */
 				length: number;
 				rangeHash: string;
@@ -59,7 +59,7 @@ export async function* createXorbs(
 	const chunkCache = new ChunkCache();
 	let xorb = new Uint8Array(XORB_SIZE);
 	let xorbOffset = 0;
-	let xorbChunks = Array<{ hash: string; length: number; offset: number }>();
+	let xorbChunks = Array<{ hash: string; length: number }>();
 	/**
 	 * path => 0..1 mapping of the current xorb
 	 *
@@ -81,8 +81,8 @@ export async function* createXorbs(
 		sha256: string;
 		representation: Array<{
 			xorbId: number | string;
-			offset: number;
-			endOffset: number;
+			indexStart: number;
+			indexEnd: number;
 			length: number;
 			rangeHash: string;
 		}>;
@@ -102,16 +102,15 @@ export async function* createXorbs(
 			let currentChunkRangeBeginning = 0;
 			const fileRepresentation: Array<{
 				xorbId: number | string;
-				offset: number;
-				endOffset: number;
+				indexStart: number;
+				indexEnd: number;
 				length: number;
 				rangeHash: string;
 			}> = [];
 
 			const addChunks = async function* (chunks: Array<{ hash: string; length: number; dedup: boolean }>) {
 				for (const chunk of chunks) {
-					let chunkOffset = xorbOffset;
-					let chunkEndOffset;
+					let chunkIndex = xorbChunks.length;
 					let chunkXorbId = xorbId;
 					fileChunks.push({ hash: chunk.hash, length: chunk.length });
 
@@ -154,14 +153,9 @@ export async function* createXorbs(
 							for (const xorb of shardData.xorbs) {
 								const remoteXorbId = -remoteXorbHashes.length;
 								remoteXorbHashes.push(xorb.hash);
+								let i = 0;
 								for (const chunk of xorb.chunks) {
-									chunkCache.addChunkToCache(
-										chunk.hash,
-										remoteXorbId,
-										chunk.startOffset,
-										chunk.endOffset,
-										shardData.hmacKey
-									);
+									chunkCache.addChunkToCache(chunk.hash, remoteXorbId, i++, shardData.hmacKey);
 								}
 							}
 							cacheData = chunkCache.getChunk(chunk.hash, chunkModule.compute_hmac);
@@ -182,7 +176,7 @@ export async function* createXorbs(
 							};
 							xorbId++;
 							xorb = new Uint8Array(XORB_SIZE);
-							chunkOffset = 0;
+							chunkIndex = 0;
 							chunkXorbId = xorbId;
 							xorbFileProgress = {};
 
@@ -198,13 +192,10 @@ export async function* createXorbs(
 							}
 						}
 
-						chunkEndOffset = xorbOffset;
-
-						chunkCache.addChunkToCache(chunk.hash, xorbId, chunkOffset, chunkEndOffset, null);
+						chunkCache.addChunkToCache(chunk.hash, xorbId, chunkIndex, null);
 					} else {
 						chunkXorbId = cacheData.xorbIndex;
-						chunkOffset = cacheData.offset;
-						chunkEndOffset = cacheData.endOffset;
+						chunkIndex = cacheData.chunkIndex;
 						dedupedBytes += chunk.length; // Track deduplicated bytes
 					}
 					bytesSinceRemoteDedup += chunk.length;
@@ -214,15 +205,15 @@ export async function* createXorbs(
 					if (!lastRep) {
 						fileRepresentation.push({
 							xorbId: chunkXorbId >= 0 ? chunkXorbId : remoteXorbHashes[-chunkXorbId],
-							offset: chunkOffset,
-							endOffset: chunkEndOffset,
+							indexStart: chunkIndex,
+							indexEnd: chunkIndex + 1,
 							length: chunk.length,
 							rangeHash: "",
 						});
 						currentChunkRangeBeginning = fileChunks.length - 1;
 					} else {
-						if (lastRep.xorbId === chunkXorbId && lastRep.endOffset === chunkOffset) {
-							lastRep.endOffset = chunkEndOffset;
+						if (lastRep.xorbId === chunkXorbId && lastRep.indexEnd === chunkIndex) {
+							lastRep.indexEnd = chunkIndex + 1;
 							lastRep.length += chunk.length;
 						} else {
 							lastRep.rangeHash = chunkModule.compute_verification_hash(
@@ -230,15 +221,15 @@ export async function* createXorbs(
 							);
 							fileRepresentation.push({
 								xorbId: chunkXorbId,
-								offset: chunkOffset,
-								endOffset: chunkEndOffset,
+								indexStart: chunkIndex,
+								indexEnd: chunkIndex + 1,
 								length: chunk.length,
 								rangeHash: "",
 							});
 							currentChunkRangeBeginning = fileChunks.length - 1;
 						}
 					}
-					xorbChunks.push({ hash: chunk.hash, length: chunk.length, offset: chunkOffset });
+					xorbChunks.push({ hash: chunk.hash, length: chunk.length });
 					xorbFileProgress[fileSource.path] = processedBytes / fileSource.content.size;
 					if (xorbChunks.length >= MAX_XORB_CHUNKS) {
 						yield {

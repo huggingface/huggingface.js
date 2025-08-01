@@ -6,18 +6,12 @@ export class ChunkCache {
 	index = 0;
 	// Index >= 0 means local xorb, < 0 means remote xorb
 	xorbIndices = new Int32Array(CHUNK_CACHE_INITIAL_SIZE);
-	chunkOffsets = new Uint32Array(CHUNK_CACHE_INITIAL_SIZE);
-	chunkEndOffsets = new Uint32Array(CHUNK_CACHE_INITIAL_SIZE);
+	// Max 8K chunks per xorb, less than 64K uint16_t
+	chunkIndices = new Uint16Array(CHUNK_CACHE_INITIAL_SIZE);
 	map = new Map<string, number>(); // hash -> chunkCacheIndex. Less overhead that way, empty object is 60+B and empty array is 40+B
 	hmacs = new Set<string>(); // todo : remove old hmacs
 
-	addChunkToCache(
-		hash: string,
-		xorbIndex: number,
-		chunkOffset: number,
-		chunkEndOffset: number,
-		hmac: string | null
-	): void {
+	addChunkToCache(hash: string, xorbIndex: number, chunkIndex: number, hmac: string | null): void {
 		this.map.set(hash, this.index);
 		if (hmac !== null) {
 			this.hmacs.add(hmac);
@@ -26,25 +20,19 @@ export class ChunkCache {
 		if (this.index >= this.xorbIndices.length) {
 			// todo: switch to resize() with modern browsers
 			const oldXorbIndices = this.xorbIndices;
-			const oldChunkOffsets = this.chunkOffsets;
-			const oldChunkLengths = this.chunkEndOffsets;
+			const oldChunkIndices = this.chunkIndices;
 			this.xorbIndices = new Int32Array(
 				Math.min(this.xorbIndices.length * CHUNK_CACHE_GROW_FACTOR, CHUNK_CACHE_MAX_SIZE)
 			);
-			this.chunkOffsets = new Uint32Array(
-				Math.min(this.chunkOffsets.length * CHUNK_CACHE_GROW_FACTOR, CHUNK_CACHE_MAX_SIZE)
-			);
-			this.chunkEndOffsets = new Uint32Array(
-				Math.min(this.chunkEndOffsets.length * CHUNK_CACHE_GROW_FACTOR, CHUNK_CACHE_MAX_SIZE)
+			this.chunkIndices = new Uint16Array(
+				Math.min(this.chunkIndices.length * CHUNK_CACHE_GROW_FACTOR, CHUNK_CACHE_MAX_SIZE)
 			);
 			this.xorbIndices.set(oldXorbIndices);
-			this.chunkOffsets.set(oldChunkOffsets);
-			this.chunkEndOffsets.set(oldChunkLengths);
+			this.chunkIndices.set(oldChunkIndices);
 		}
 
 		this.xorbIndices[this.index] = xorbIndex;
-		this.chunkOffsets[this.index] = chunkOffset;
-		this.chunkEndOffsets[this.index] = chunkEndOffset;
+		this.chunkIndices[this.index] = chunkIndex;
 		this.index = (this.index + 1) % CHUNK_CACHE_MAX_SIZE;
 
 		while (this.map.size > CHUNK_CACHE_MAX_SIZE) {
@@ -59,8 +47,7 @@ export class ChunkCache {
 	):
 		| {
 				xorbIndex: number;
-				offset: number;
-				endOffset: number;
+				chunkIndex: number;
 		  }
 		| undefined {
 		let index = this.map.get(hash);
@@ -77,8 +64,7 @@ export class ChunkCache {
 		}
 		return {
 			xorbIndex: this.xorbIndices[index],
-			offset: this.chunkOffsets[index],
-			endOffset: this.chunkEndOffsets[index],
+			chunkIndex: this.chunkIndices[index],
 		};
 	}
 }

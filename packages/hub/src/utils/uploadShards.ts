@@ -115,15 +115,17 @@ export async function* uploadShards(
 				xorbView.setUint32(xorbViewOffset, output.xorb.byteLength, true);
 				xorbViewOffset += 4;
 
+				let chunkBytes = 0;
 				for (const chunk of output.chunks) {
 					writeHashToArray(chunk.hash, xorbInfoSection, xorbViewOffset);
 					xorbViewOffset += HASH_LENGTH;
-					xorbView.setUint32(xorbViewOffset, chunk.offset, true);
+					xorbView.setUint32(xorbViewOffset, chunkBytes, true);
 					xorbViewOffset += 4;
-					xorbView.setUint32(xorbViewOffset, chunk.length, true);
+					xorbView.setUint32(xorbViewOffset, chunkBytes + chunk.length, true);
 					xorbViewOffset += 4;
 					xorbView.setBigUint64(xorbViewOffset, 0n, true); // reserved
 					xorbViewOffset += 8;
+					chunkBytes += chunk.length;
 				}
 
 				await uploadXorb(output, params);
@@ -173,9 +175,9 @@ export async function* uploadShards(
 					fileViewOffset += 4;
 					fileInfoView.setUint32(fileViewOffset, repItem.length, true);
 					fileViewOffset += 4;
-					fileInfoView.setUint32(fileViewOffset, repItem.offset, true);
+					fileInfoView.setUint32(fileViewOffset, repItem.indexStart, true);
 					fileViewOffset += 4;
-					fileInfoView.setUint32(fileViewOffset, repItem.endOffset, true);
+					fileInfoView.setUint32(fileViewOffset, repItem.indexEnd, true);
 					fileViewOffset += 4;
 				}
 
