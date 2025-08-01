@@ -140,7 +140,11 @@ export async function* createXorbs(
 						const token = await xetWriteToken(params);
 						bytesSinceRemoteDedup = 0;
 
-						const shardResp = await params.customFetch(token.casUrl + "/v1/chunk/" + chunk.hash);
+						const shardResp = await params.customFetch(token.casUrl + "/v1/chunk/default/" + chunk.hash, {
+							headers: {
+								Authorization: `Bearer ${token.accessToken}`,
+							},
+						});
 
 						// todo: handle non-404 non-429 errors, eg throw error
 						if (shardResp.ok) {
