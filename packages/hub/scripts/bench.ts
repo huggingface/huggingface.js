@@ -7,6 +7,15 @@ import { writeFile, readFile, stat, mkdir } from "node:fs/promises";
 import type { RepoId } from "../src/types/public.js";
 import { toRepoId } from "../src/utils/toRepoId.js";
 
+/**
+ * This script downloads the files from openai-community/gpt2 and simulates an upload to a xet repo.
+ * It prints the dedup % and the statistics
+ *
+ * Usage:
+ *
+ * pnpm --filter hub bench -t <write token> -r <xet repo>
+ */
+
 const FILES_TO_DOWNLOAD = [
 	{
 		url: "https://huggingface.co/openai-community/gpt2/resolve/main/64-8bits.tflite?download=true",
