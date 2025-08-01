@@ -181,6 +181,10 @@ export async function* createXorbs(
 							xorbFileProgress = {};
 
 							for (const event of pendingFileEvents) {
+								event.representation = event.representation.map((rep) => ({
+									...rep,
+									xorbId: (rep.xorbId as number) >= 0 ? rep.xorbId : remoteXorbHashes[-rep.xorbId],
+								}));
 								yield event;
 							}
 							pendingFileEvents.length = 0;
@@ -204,7 +208,7 @@ export async function* createXorbs(
 
 					if (!lastRep) {
 						fileRepresentation.push({
-							xorbId: chunkXorbId >= 0 ? chunkXorbId : remoteXorbHashes[-chunkXorbId],
+							xorbId: chunkXorbId,
 							indexStart: chunkIndex,
 							indexEnd: chunkIndex + 1,
 							length: chunk.length,
@@ -247,6 +251,10 @@ export async function* createXorbs(
 						xorb = new Uint8Array(XORB_SIZE);
 
 						for (const event of pendingFileEvents) {
+							event.representation = event.representation.map((rep) => ({
+								...rep,
+								xorbId: (rep.xorbId as number) >= 0 ? rep.xorbId : remoteXorbHashes[-rep.xorbId],
+							}));
 							yield event;
 						}
 						pendingFileEvents.length = 0;
@@ -296,6 +304,10 @@ export async function* createXorbs(
 		}
 
 		for (const event of pendingFileEvents) {
+			event.representation = event.representation.map((rep) => ({
+				...rep,
+				xorbId: (rep.xorbId as number) >= 0 ? rep.xorbId : remoteXorbHashes[-rep.xorbId],
+			}));
 			yield event;
 		}
 	} finally {

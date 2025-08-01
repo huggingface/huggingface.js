@@ -226,8 +226,8 @@ export async function* uploadShards(
 		shardOffset += 8;
 
 		// File Info Section
-		shard.set(fileInfoSection, shardOffset);
-		shardOffset += fileInfoSection.length;
+		shard.set(fileInfoSection.slice(0, fileViewOffset), shardOffset);
+		shardOffset += fileViewOffset;
 
 		// File info bookend
 		for (let i = 0; i < 32; i++) {
@@ -240,8 +240,8 @@ export async function* uploadShards(
 		shardOffset += 16;
 
 		// XORB Info Section
-		shard.set(xorbInfoSection, shardOffset);
-		shardOffset += xorbInfoSection.length;
+		shard.set(xorbInfoSection.slice(0, xorbViewOffset), shardOffset);
+		shardOffset += xorbViewOffset;
 
 		// Xorb info bookend
 		for (let i = 0; i < 32; i++) {
