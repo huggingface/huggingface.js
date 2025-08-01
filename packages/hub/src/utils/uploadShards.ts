@@ -372,7 +372,7 @@ async function uploadXorb(xorb: { hash: string; xorb: Uint8Array }, params: Uplo
 	const token = await xetWriteToken(params);
 
 	const resp = await params.customFetch(`${token.casUrl}/v1/xorb/default/${xorb.hash}`, {
-		method: "PUT",
+		method: "POST",
 		body: xorb.xorb,
 		headers: {
 			Authorization: `Bearer ${token.accessToken}`,
@@ -388,7 +388,7 @@ async function uploadShard(shard: Uint8Array, params: UploadShardsParams) {
 	const token = await xetWriteToken(params);
 
 	const resp = await params.customFetch(`${token.casUrl}/v1/shard/default-merkledb`, {
-		method: "PUT",
+		method: "POST",
 		body: shard,
 		headers: {
 			Authorization: `Bearer ${token.accessToken}`,
