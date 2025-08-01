@@ -99,7 +99,10 @@ function createMockFetch(): typeof fetch {
 		}
 
 		// For other requests, use real fetch
-		return fetch(input, init);
+		return fetch(input, init).then((res) => {
+			console.log(`[real] ${res.status} ${res.statusText} ${url} ${res.headers.get("content-length")}`);
+			return res;
+		});
 	};
 }
 
