@@ -89,17 +89,36 @@ function getBodySize(body: RequestInit["body"]): string {
 	return "unknown size";
 }
 
-function createMockFetch(): typeof fetch {
-	let uploadCount = 0;
+function createMockFetch(): {
+	fetch: typeof fetch;
+	getStats: () => { xorbCount: number; shardCount: number; xorbBytes: number; shardBytes: number };
+} {
+	let xorbCount = 0;
+	let shardCount = 0;
+	let xorbBytes = 0;
+	let shardBytes = 0;
 
-	return async function mockFetch(input: string | URL | Request, init?: RequestInit): Promise<Response> {
+	const mockFetch = async function (input: string | URL | Request, init?: RequestInit): Promise<Response> {
 		const url = typeof input === "string" ? input : input.toString();
 
 		// Mock successful responses for xorb and shard uploads
-		if (url.includes("/xorb/") || url.includes("/shard/")) {
-			uploadCount++;
+		if (url.includes("/xorb/")) {
+			xorbCount++;
 			const bodySize = getBodySize(init?.body);
-			console.log(`[MOCK] Upload ${uploadCount}: ${init?.method || "GET"} ${url} (${bodySize})`);
+			xorbBytes += parseInt(bodySize);
+			console.log(`[MOCK] Xorb upload ${xorbCount}: ${init?.method || "GET"} ${url} (${bodySize})`);
+
+			return new Response(null, {
+				status: 200,
+				statusText: "OK",
+			});
+		}
+
+		if (url.includes("/shard/")) {
+			shardCount++;
+			const bodySize = getBodySize(init?.body);
+			shardBytes += parseInt(bodySize);
+			console.log(`[MOCK] Shard upload ${shardCount}: ${init?.method || "GET"} ${url} (${bodySize})`);
 
 			return new Response(null, {
 				status: 200,
@@ -112,6 +131,11 @@ function createMockFetch(): typeof fetch {
 			console.log(`[real] ${res.status} ${res.statusText} ${url} ${res.headers.get("content-length")}`);
 			return res;
 		});
+	};
+
+	return {
+		fetch: mockFetch,
+		getStats: () => ({ xorbCount, shardCount, xorbBytes, shardBytes }),
 	};
 }
 
@@ -157,13 +181,13 @@ async function main() {
 	const repo: RepoId = toRepoId(repoName);
 
 	// Create mock fetch
-	const mockFetch = createMockFetch();
+	const mockFetchObj = createMockFetch();
 
 	// Setup upload parameters
 	const uploadParams = {
 		accessToken: args.token,
 		hubUrl: "https://huggingface.co",
-		customFetch: mockFetch,
+		customFetch: mockFetchObj.fetch,
 		repo,
 		rev: "main",
 	};
@@ -172,8 +196,6 @@ async function main() {
 	const stats: Array<{
 		filename: string;
 		size: number;
-		xorbCount: number;
-		shardCount: number;
 		dedupRatio: number;
 	}> = [];
 
@@ -197,8 +219,6 @@ async function main() {
 					stats.push({
 						filename: event.path,
 						size: fileStats.size,
-						xorbCount: 0, // Will be updated later
-						shardCount: 0, // Will be updated later
 						dedupRatio: event.dedupRatio,
 					});
 				}
@@ -213,13 +233,9 @@ async function main() {
 		}
 	}
 
-	// Note: xorb and shard counts are tracked internally by uploadShards
-	// For this demo, we'll make reasonable estimates based on file sizes
-	for (const stat of stats) {
-		// Rough estimates - in real usage these would come from the upload process
-		stat.xorbCount = Math.ceil(stat.size / (64 * 1024 * 1024)); // 64MB xorbs
-		stat.shardCount = Math.max(1, Math.ceil(stat.xorbCount / 100)); // Rough shard estimation
-	}
+	// Get actual upload counts from the mock fetch
+	const uploadStats = mockFetchObj.getStats();
+	console.log(`\n📊 Actual upload counts: ${uploadStats.xorbCount} xorbs, ${uploadStats.shardCount} shards`);
 
 	// Output final statistics
 	console.log("\n=== BENCHMARK RESULTS ===");
@@ -229,21 +245,19 @@ async function main() {
 	for (const stat of stats) {
 		console.log(`\n📄 ${stat.filename}:`);
 		console.log(`   Size: ${(stat.size / 1024 / 1024).toFixed(2)} MB`);
-		console.log(`   Xorbs: ${stat.xorbCount}`);
-		console.log(`   Shards: ${stat.shardCount}`);
 		console.log(`   Deduplication: ${(stat.dedupRatio * 100).toFixed(2)}%`);
 	}
 
 	console.log("\n=== SUMMARY ===");
 	const totalSize = stats.reduce((sum, s) => sum + s.size, 0);
-	const totalXorbs = stats.reduce((sum, s) => sum + s.xorbCount, 0);
-	const totalShards = stats.reduce((sum, s) => sum + s.shardCount, 0);
 	const avgDedup = stats.reduce((sum, s) => sum + s.dedupRatio, 0) / stats.length;
 
 	console.log(`Total files: ${stats.length}`);
 	console.log(`Total size: ${(totalSize / 1024 / 1024).toFixed(2)} MB`);
-	console.log(`Total xorbs: ${totalXorbs}`);
-	console.log(`Total shards: ${totalShards}`);
+	console.log(`Total xorbs: ${uploadStats.xorbCount}`);
+	console.log(`Total shards: ${uploadStats.shardCount}`);
+	console.log(`Total xorb bytes: ${uploadStats.xorbBytes.toLocaleString("fr")} bytes`);
+	console.log(`Total shard bytes: ${uploadStats.shardBytes.toLocaleString("fr")} bytes`);
 	console.log(`Average deduplication: ${(avgDedup * 100).toFixed(2)}%`);
 }
 
