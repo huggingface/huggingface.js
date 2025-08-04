@@ -22,7 +22,7 @@ if (!env.HF_TOKEN) {
 	console.warn("Set HF_TOKEN in the env to run the tests for better rate limits");
 }
 
-describe.skip("InferenceClient", () => {
+describe("InferenceClient", () => {
 	// Individual tests can be ran without providing an api key, however running all tests without an api key will result in rate limiting error.
 
 	describe("backward compatibility", () => {
@@ -1918,14 +1918,21 @@ describe.skip("InferenceClient", () => {
 				"meta-llama/Llama-3.1-8B-Instruct": {
 					provider: "nscale",
 					hfModelId: "meta-llama/Llama-3.1-8B-Instruct",
-					providerId: "nscale",
+					providerId: "meta-llama/Llama-3.1-8B-Instruct",
 					status: "live",
 					task: "conversational",
+				},
+				"mistralai/Devstral-Small-2505": {
+					provider: "nscale",
+					hfModelId: "mistralai/Devstral-Small-2505",
+					providerId: "mistralai/Devstral-Small-2505",
+					status: "staging",
+					task: "text-generation",
 				},
 				"black-forest-labs/FLUX.1-schnell": {
 					provider: "nscale",
 					hfModelId: "black-forest-labs/FLUX.1-schnell",
-					providerId: "flux-schnell",
+					providerId: "black-forest-labs/FLUX.1-schnell",
 					status: "live",
 					task: "text-to-image",
 				},
@@ -1968,6 +1975,21 @@ describe.skip("InferenceClient", () => {
 					inputs: "An astronaut riding a horse",
 				});
 				expect(res).toBeInstanceOf(Blob);
+			});
+
+			it("textGeneration", async () => {
+				const res = await client.textGeneration({
+					model: "mistralai/Devstral-Small-2505",
+					provider: "nscale",
+					inputs: "1+1=",
+					parameters: {
+						temperature: 0,
+						max_tokens: 1,
+					},
+				});
+
+				expect(res.generated_text.length > 0);
+				expect(res.generated_text).toContain("2");
 			});
 		},
 		TIMEOUT
