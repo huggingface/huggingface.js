@@ -327,8 +327,11 @@ export class XetBlob extends Blob {
 					totalFetchBytes += result.value.byteLength;
 
 					if (leftoverBytes) {
-						result.value = new Uint8Array([...leftoverBytes, ...result.value]);
-						leftoverBytes = undefined;
+						const leftoverBytesLength: number = leftoverBytes.length;
+						const combinedBytes = new Uint8Array(leftoverBytesLength + result.value.length);
+						combinedBytes.set(leftoverBytes);
+						combinedBytes.set(result.value, leftoverBytesLength);
+						result.value = combinedBytes;
 					}
 
 					while (totalBytesRead < maxBytes && result.value.byteLength) {
