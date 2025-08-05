@@ -1516,6 +1516,114 @@ describe.skip("InferenceClient", () => {
 		TIMEOUT
 	);
 
+	describe.concurrent(
+		"Scaleway",
+		() => {
+			const client = new InferenceClient(env.HF_SCALEWAY_KEY ?? "dummy");
+
+			HARDCODED_MODEL_INFERENCE_MAPPING.scaleway = {
+				"meta-llama/Llama-3.1-8B-Instruct": {
+					provider: "scaleway",
+					hfModelId: "meta-llama/Llama-3.1-8B-Instruct",
+					providerId: "llama-3.1-8b-instruct",
+					status: "live",
+					task: "conversational",
+				},
+				"BAAI/bge-multilingual-gemma2": {
+					provider: "scaleway",
+					hfModelId: "BAAI/bge-multilingual-gemma2",
+					providerId: "bge-multilingual-gemma2",
+					task: "feature-extraction",
+					status: "live",
+				},
+				"google/gemma-3-27b-it": {
+					provider: "scaleway",
+					hfModelId: "google/gemma-3-27b-it",
+					providerId: "gemma-3-27b-it",
+					task: "conversational",
+					status: "live",
+				},
+			};
+
+			it("chatCompletion", async () => {
+				const res = await client.chatCompletion({
+					model: "meta-llama/Llama-3.1-8B-Instruct",
+					provider: "scaleway",
+					messages: [{ role: "user", content: "Complete this sentence with words, one plus one is equal " }],
+				});
+				if (res.choices && res.choices.length > 0) {
+					const completion = res.choices[0].message?.content;
+					expect(completion).toMatch(/(to )?(two|2)/i);
+				}
+			});
+
+			it("chatCompletion stream", async () => {
+				const stream = client.chatCompletionStream({
+					model: "meta-llama/Llama-3.1-8B-Instruct",
+					provider: "scaleway",
+					messages: [{ role: "system", content: "Complete the equation 1 + 1 = , just the answer" }],
+				}) as AsyncGenerator<ChatCompletionStreamOutput>;
+				let out = "";
+				for await (const chunk of stream) {
+					if (chunk.choices && chunk.choices.length > 0) {
+						out += chunk.choices[0].delta.content;
+					}
+				}
+				expect(out).toMatch(/(two|2)/i);
+			});
+
+			it("imageToText", async () => {
+				const res = await client.chatCompletion({
+					model: "google/gemma-3-27b-it",
+					provider: "scaleway",
+					messages: [
+						{
+							role: "user",
+							content: [
+								{
+									type: "image_url",
+									image_url: {
+										url: "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg",
+									},
+								},
+							],
+						},
+					],
+				});
+				expect(res.choices).toBeDefined();
+				expect(res.choices?.length).toBeGreaterThan(0);
+				expect(res.choices?.[0].message?.content).toContain("Statue of Liberty");
+			});
+
+			it("textGeneration", async () => {
+				const res = await client.textGeneration({
+					model: "meta-llama/Llama-3.1-8B-Instruct",
+					provider: "scaleway",
+					inputs: "Once upon a time,",
+					temperature: 0,
+					max_tokens: 19,
+				});
+
+				expect(res).toMatchObject({
+					generated_text:
+						" in a small village nestled in the rolling hills of the countryside, there lived a young girl named",
+				});
+			});
+
+			it("featureExtraction", async () => {
+				const res = await client.featureExtraction({
+					model: "BAAI/bge-multilingual-gemma2",
+					provider: "scaleway",
+					inputs: "That is a happy person",
+				});
+
+				expect(res).toBeInstanceOf(Array);
+				expect(res[0]).toEqual(expect.arrayContaining([expect.any(Number)]));
+			});
+		},
+		TIMEOUT
+	);
+
 	describe.concurrent("3rd party providers", () => {
 		it("chatCompletion - fails with unsupported model", async () => {
 			expect(
