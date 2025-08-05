@@ -208,6 +208,13 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		repoUrl: "https://github.com/Unbabel/COMET/",
 		countDownloads: `path:"hparams.yaml"`,
 	},
+	comfyui: {
+		prettyLabel: "ComfyUI",
+		repoName: "ComfyUI",
+		repoUrl: "https://github.com/comfyanonymous/ComfyUI",
+		filter: false,
+		countDownloads: `path_extension:"safetensors" AND path_prefix:"split_files/diffusion_models/"`,
+	},
 	contexttab: {
 		prettyLabel: "ConTextTab",
 		repoName: "ConTextTab",
