@@ -187,6 +187,14 @@ export const MODEL_LIBRARIES_UI_ELEMENTS = {
 		countDownloads: `path:"tokenizer.json"`,
 		filter: false,
 	},
+	chatterbox-tts-no: {
+		prettyLabel: "Chatterbox Norwegian",
+		repoName: "chatterbox-tts-norwegian",
+		repoUrl: "https://github.com/vaaale/chatterbox-streaming",
+		snippets: snippets.chatterbox,
+		countDownloads: `path:"tokenizer.json"`,
+		filter: false,
+	},
 	chat_tts: {
 		prettyLabel: "ChatTTS",
 		repoName: "ChatTTS",
