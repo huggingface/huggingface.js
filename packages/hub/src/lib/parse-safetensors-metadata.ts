@@ -48,6 +48,11 @@ export type Dtype =
 	| "F16"
 	| "F8_E4M3"
 	| "F8_E5M2"
+	| "E8M0"
+	| "F6_E3M2"
+	| "F6_E2M3"
+	| "F4"
+	| "FP4"
 	| "BF16"
 	| "I64"
 	| "I32"
@@ -55,6 +60,7 @@ export type Dtype =
 	| "I8"
 	| "U16"
 	| "U8"
+	| "UE8"
 	| "BOOL";
 
 export interface TensorInfo {
@@ -91,6 +97,35 @@ export type SafetensorsParseFromRepo =
 			parameterCount?: Partial<Record<Dtype, number>>;
 			parameterTotal?: number;
 	  };
+
+/**
+ * Fetches and parses model config.json
+ */
+async function fetchModelConfig(
+	params: {
+		repo: RepoDesignation;
+		revision?: string;
+		hubUrl?: string;
+		fetch?: typeof fetch;
+	} & Partial<CredentialsParams>
+): Promise<ModelConfig | null> {
+	try {
+		const configBlob = await downloadFile({
+			...params,
+			path: "config.json",
+		});
+
+		if (!configBlob) {
+			return null;
+		}
+
+		const config = JSON.parse(await configBlob.text());
+		return config as ModelConfig;
+	} catch (error) {
+		// Config file might not exist or be inaccessible
+		return null;
+	}
+}
 
 async function parseSingleFile(
 	path: string,
@@ -252,6 +287,10 @@ export async function parseSafetensorsMetadata(
 		throw new TypeError("Only model repos should contain safetensors files.");
 	}
 
+	// Fetch model config for quantization information
+	const modelConfig = params.computeParametersCount ? await fetchModelConfig(params) : null;
+	const quantConfig = modelConfig?.quantization_config;
+
 	if (
 		(params.path && RE_SAFETENSORS_FILE.test(params.path)) ||
 		(await fileExists({ ...params, path: SAFETENSORS_FILE }))
@@ -262,7 +301,7 @@ export async function parseSafetensorsMetadata(
 			header,
 			...(params.computeParametersCount
 				? {
-						parameterCount: computeNumOfParamsByDtypeSingleFile(header),
+						parameterCount: computeNumOfParamsByDtypeSingleFile(header, quantConfig),
 						parameterTotal:
 							/// shortcut: get param count directly from metadata
 							header.__metadata__.total_parameters
@@ -289,7 +328,7 @@ export async function parseSafetensorsMetadata(
 			headers: shardedMap,
 			...(params.computeParametersCount
 				? {
-						parameterCount: computeNumOfParamsByDtypeSharded(shardedMap),
+						parameterCount: computeNumOfParamsByDtypeSharded(shardedMap, quantConfig),
 						parameterTotal:
 							/// shortcut: get param count directly from metadata
 							index.metadata?.total_parameters
@@ -307,23 +346,108 @@ export async function parseSafetensorsMetadata(
 	}
 }
 
-function computeNumOfParamsByDtypeSingleFile(header: SafetensorsFileHeader): Partial<Record<Dtype, number>> {
+export interface QuantizationConfig {
+	quant_method?: string;
+	modules_to_not_convert?: string[];
+	bits?: number;
+	load_in_4bit?: boolean;
+	load_in_8bit?: boolean;
+}
+
+export interface ModelConfig {
+	quantization_config?: QuantizationConfig;
+}
+
+/**
+ * Determines if a tensor is quantized based on quantization config and tensor name
+ */
+function isQuantizedTensor(tensorName: string, quantConfig?: QuantizationConfig): boolean {
+	if (!quantConfig || !quantConfig.modules_to_not_convert) {
+		return false;
+	}
+
+	for (const pattern of quantConfig.modules_to_not_convert) {
+		const regexPattern = pattern.replace(/\*/g, ".*");
+		const regex = new RegExp(regexPattern);
+		if (regex.test(tensorName)) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+/**
+ * Gets the parameter multiplier for a quantized tensor based on quantization method
+ */
+function getQuantizationMultiplier(tensorName: string, dtype: Dtype, quantConfig?: QuantizationConfig): number {
+	if (!quantConfig || !isQuantizedTensor(tensorName, quantConfig)) {
+		return 1;
+	}
+
+	switch (quantConfig.quant_method) {
+		case "mxfp4":
+			if (dtype === "U8" && tensorName.includes("_blocks")) {
+				return 2;
+			}
+			return 1;
+
+		case "gptq":
+		case "awq":
+			if (quantConfig.bits === 4 && dtype === "U8") {
+				return 2;
+			}
+			if (quantConfig.bits === 2 && dtype === "U8") {
+				return 4;
+			}
+			return 1;
+
+		case "bitsandbytes":
+			if (quantConfig.load_in_4bit && dtype === "U8") {
+				return 2;
+			}
+			if (quantConfig.load_in_8bit) {
+				return 1;
+			}
+			return 1;
+
+		default:
+			if (quantConfig.load_in_4bit && dtype === "U8") {
+				return 2;
+			}
+			if (quantConfig.bits === 4 && dtype === "U8") {
+				return 2;
+			}
+			return 1;
+	}
+}
+
+function computeNumOfParamsByDtypeSingleFile(
+	header: SafetensorsFileHeader,
+	quantConfig?: QuantizationConfig
+): Partial<Record<Dtype, number>> {
 	const counter: Partial<Record<Dtype, number>> = {};
 	const tensors = omit(header, "__metadata__");
 
-	for (const [, v] of typedEntries(tensors)) {
+	for (const [tensorName, v] of typedEntries(tensors)) {
 		if (v.shape.length === 0) {
 			continue;
 		}
-		counter[v.dtype] = (counter[v.dtype] ?? 0) + v.shape.reduce((a, b) => a * b);
+
+		const elements = v.shape.reduce((a, b) => a * b);
+		const multiplier = quantConfig ? getQuantizationMultiplier(tensorName, v.dtype, quantConfig) : 1;
+		counter[v.dtype] = (counter[v.dtype] ?? 0) + elements * multiplier;
 	}
 	return counter;
 }
 
-function computeNumOfParamsByDtypeSharded(shardedMap: SafetensorsShardedHeaders): Partial<Record<Dtype, number>> {
+function computeNumOfParamsByDtypeSharded(
+	shardedMap: SafetensorsShardedHeaders,
+	quantConfig?: QuantizationConfig
+): Partial<Record<Dtype, number>> {
 	const counter: Partial<Record<Dtype, number>> = {};
 	for (const header of Object.values(shardedMap)) {
-		for (const [k, v] of typedEntries(computeNumOfParamsByDtypeSingleFile(header))) {
+		for (const [k, v] of typedEntries(computeNumOfParamsByDtypeSingleFile(header, quantConfig))) {
 			counter[k] = (counter[k] ?? 0) + (v ?? 0);
 		}
 	}
