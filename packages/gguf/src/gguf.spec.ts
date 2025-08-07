@@ -294,8 +294,8 @@ describe("gguf", () => {
 
 	// Quantization handler
 
-	it("should have GGUF_QUANT_ORDER in sync with GGMLQuantizationType enum", () => {
-		const enumValues = Object.values(GGMLQuantizationType).filter((value) => typeof value === "number") as number[];
+	it("should have GGUF_QUANT_ORDER in sync with GGMLFileQuantizationType enum", () => {
+		const enumValues = Object.values(GGMLFileQuantizationType).filter((value) => typeof value === "number") as number[];
 		const checkValues = new Set(GGUF_QUANT_ORDER);
 		for (const value of enumValues) {
 			expect(checkValues).toContain(value);
