@@ -198,10 +198,6 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		let providerInputs = inputs;
 		const bodyAsObj = request.info.body;
 		if (typeof bodyAsObj === "string") {
-			if (task === "image-to-video") {
-				logger.info(`Parsing request body as JSON: ${bodyAsObj}`);
-
-			}
 			try {
 				providerInputs = JSON.parse(bodyAsObj);
 			} catch (e) {
