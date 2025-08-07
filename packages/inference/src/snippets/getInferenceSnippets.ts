@@ -175,8 +175,8 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		const inputs = opts?.inputs
 			? { inputs: opts.inputs }
 			: inputPreparationFn
-			  ? inputPreparationFn(model, opts)
-			  : { inputs: getModelInputSnippet(model) };
+				? inputPreparationFn(model, opts)
+				: { inputs: getModelInputSnippet(model) };
 		const request = makeRequestOptionsFromResolvedModel(
 			providerModelId,
 			providerHelper,
@@ -198,6 +198,10 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 		let providerInputs = inputs;
 		const bodyAsObj = request.info.body;
 		if (typeof bodyAsObj === "string") {
+			if (task === "image-to-video") {
+				logger.info(`Parsing request body as JSON: ${bodyAsObj}`);
+
+			}
 			try {
 				providerInputs = JSON.parse(bodyAsObj);
 			} catch (e) {
@@ -211,13 +215,13 @@ const snippetGenerator = (templateName: string, inputPreparationFn?: InputPrepar
 			!opts?.endpointUrl && !opts?.directRequest
 				? provider !== "auto"
 					? {
-							...inputs,
-							model: `${model.id}:${provider}`,
-					  }
+						...inputs,
+						model: `${model.id}:${provider}`,
+					}
 					: {
-							...inputs,
-							model: `${model.id}`, // if no :provider => auto
-					  }
+						...inputs,
+						model: `${model.id}`, // if no :provider => auto
+					}
 				: providerInputs;
 
 		/// Prepare template injection data
@@ -389,6 +393,7 @@ const snippets: Partial<
 	"image-text-to-text": snippetGenerator("conversational"),
 	"image-to-image": snippetGenerator("imageToImage", prepareImageToImageInput),
 	"image-to-text": snippetGenerator("basicImage"),
+	"image-to-video": snippetGenerator("imageToVideo", prepareImageToImageInput),
 	"object-detection": snippetGenerator("basicImage"),
 	"question-answering": snippetGenerator("questionAnswering", prepareQuestionAnsweringInput),
 	"sentence-similarity": snippetGenerator("basic"),
@@ -512,8 +517,8 @@ function replaceAccessTokenPlaceholder(
 	const accessTokenEnvVar = useHfToken
 		? "HF_TOKEN" // e.g. routed request or hf-inference
 		: endpointUrl
-		  ? "API_TOKEN"
-		  : provider.toUpperCase().replace("-", "_") + "_API_KEY"; // e.g. "REPLICATE_API_KEY"
+			? "API_TOKEN"
+			: provider.toUpperCase().replace("-", "_") + "_API_KEY"; // e.g. "REPLICATE_API_KEY"
 
 	// Replace the placeholder with the env variable
 	if (language === "sh") {
