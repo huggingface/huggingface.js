@@ -166,7 +166,10 @@ export class ReplicateTextToVideoTask extends ReplicateTask implements TextToVid
 	}
 }
 
-export class ReplicateAutomaticSpeechRecognitionTask extends ReplicateTask implements AutomaticSpeechRecognitionTaskHelper {
+export class ReplicateAutomaticSpeechRecognitionTask
+	extends ReplicateTask
+	implements AutomaticSpeechRecognitionTaskHelper
+{
 	override preparePayload(params: BodyParams): Record<string, unknown> {
 		return {
 			input: {
@@ -180,7 +183,7 @@ export class ReplicateAutomaticSpeechRecognitionTask extends ReplicateTask imple
 
 	async preparePayloadAsync(args: AutomaticSpeechRecognitionArgs): Promise<RequestArgs> {
 		const blob = "data" in args && args.data instanceof Blob ? args.data : "inputs" in args ? args.inputs : undefined;
-		
+
 		if (!blob || !(blob instanceof Blob)) {
 			throw new Error("Audio input must be a Blob");
 		}
@@ -197,12 +200,7 @@ export class ReplicateAutomaticSpeechRecognitionTask extends ReplicateTask imple
 	}
 
 	override async getResponse(response: ReplicateOutput): Promise<AutomaticSpeechRecognitionOutput> {
-		if (
-			typeof response === "object" &&
-			!!response &&
-			"output" in response &&
-			typeof response.output === "string"
-		) {
+		if (typeof response === "object" && !!response && "output" in response && typeof response.output === "string") {
 			return { text: response.output };
 		}
 
@@ -217,7 +215,9 @@ export class ReplicateAutomaticSpeechRecognitionTask extends ReplicateTask imple
 			return { text: response.output[0] };
 		}
 
-		throw new InferenceClientProviderOutputError("Received malformed response from Replicate automatic-speech-recognition API");
+		throw new InferenceClientProviderOutputError(
+			"Received malformed response from Replicate automatic-speech-recognition API"
+		);
 	}
 }
 
